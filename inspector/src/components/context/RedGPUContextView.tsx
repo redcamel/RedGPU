@@ -64,23 +64,35 @@ const RedGPUContextView = () => {
 
             <Section title="GPU Features">
                 {(() => {
-                    const trackedFeatures = [
-                        "shader-f16",
-                        "timestamp-query",
-                        "texture-compression-astc",
-                        "texture-compression-bc",
-                        "texture-compression-etc2",
+                    const allKnownFeatures = [
+                        "core-features-and-limits",
                         "depth-clip-control",
+                        "depth32float-stencil8",
+                        "texture-compression-bc",
+                        "texture-compression-bc-sliced-3d",
+                        "texture-compression-etc2",
+                        "texture-compression-astc",
+                        "texture-compression-astc-sliced-3d",
+                        "timestamp-query",
                         "indirect-first-instance",
+                        "shader-f16",
                         "rg11b10ufloat-renderable",
                         "bgra8unorm-storage",
-                        "float32-filterable"
+                        "float32-filterable",
+                        "float32-blendable",
+                        "clip-distances",
+                        "dual-source-blending",
+                        "subgroups",
+                        "texture-formats-tier1",
+                        "texture-formats-tier2",
+                        "primitive-index",
+                        "texture-component-swizzle"
                     ];
 
                     const allSupported = Array.from(detector.supportedFeatures || []);
-                    const extraFeatures = allSupported.filter(f => !trackedFeatures.includes(f));
+                    const extraFeatures = allSupported.filter(f => !allKnownFeatures.includes(f));
                     
-                    const finalFeatureList = [...trackedFeatures, ...extraFeatures.sort()];
+                    const finalFeatureList = [...allKnownFeatures, ...extraFeatures.sort()];
 
                     return finalFeatureList.map(feature => (
                         <FeatureItem 
@@ -94,30 +106,61 @@ const RedGPUContextView = () => {
             </Section>
 
             <Section title="GPU Limits">
-                {(() => {
-                    const limits = detector.limits;
-                    if (!limits) return <div style={labelStyle}>Limits not available</div>;
-                    
-                    const keys: string[] = [];
-                    // [KO] GPUSupportedLimits의 속성들은 보통 enumerable하지 않으므로 프로토타입에서 가져옵니다.
-                    // [EN] Since properties of GPUSupportedLimits are usually non-enumerable, get them from the prototype.
-                    const proto = Object.getPrototypeOf(limits);
-                    const allKeys = Object.getOwnPropertyNames(proto);
-                    
-                    return allKeys
-                        .filter(key => typeof (limits as any)[key] === 'number')
-                        .sort()
-                        .map(key => {
-                            const value = (limits as any)[key];
-                            const formattedValue = formatNumber(value, 0);
-                            const displayValue = key.toLowerCase().endsWith('size') 
-                                ? `${formattedValue} (${formatBytes(value)})` 
-                                : formattedValue;
-                            return (
-                                <StatItem key={key} label={key} value={displayValue} />
-                            );
-                        });
-                })()}
+                <table style={tableStyle}>
+                    <thead>
+                    <tr>
+                        <th style={{...thStyle, width: '45%'}}>Name</th>
+                        <th style={{...thStyle, textAlign: 'right', width: '27.5%'}}>Active</th>
+                        <th style={{...thStyle, textAlign: 'right', width: '27.5%'}}>Max</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {(() => {
+                        const sLimits = detector.supportedLimits;
+                        const aLimits = detector.activeLimits;
+                        if (!sLimits) return <tr><td colSpan={3} style={tdStyle}>Limits not available</td></tr>;
+
+                        const proto = Object.getPrototypeOf(sLimits);
+                        const allKeys = Object.getOwnPropertyNames(proto);
+
+                        return allKeys
+                            .filter(key => typeof (sLimits as any)[key] === 'number')
+                            .sort()
+                            .map(key => {
+                                const sVal = (sLimits as any)[key];
+                                const aVal = aLimits ? (aLimits as any)[key] : null;
+                                const isSize = key.toLowerCase().endsWith('size');
+
+                                const format = (val: number | null) => {
+                                    if (val === null) return 'N/A';
+                                    const formatted = formatNumber(val, 0);
+                                    return isSize ? (
+                                        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end'}}>
+                                            <span>{formatted}</span>
+                                            <span style={{fontSize: '9px', opacity: 0.6}}>{formatBytes(val)}</span>
+                                        </div>
+                                    ) : <span>{formatted}</span>;
+                                };
+
+                                return (
+                                    <tr key={key}>
+                                        <td style={{
+                                            ...tdStyle,
+                                            color: '#aaa',
+                                            whiteSpace: 'nowrap',
+                                        }} title={key}>{key}</td>
+                                        <td style={{...tdStyle, textAlign: 'right', color: '#eee', fontWeight: 'bold'}}>
+                                            {format(aVal)}
+                                        </td>
+                                        <td style={{...tdStyle, textAlign: 'right', color: '#666', fontStyle: 'italic'}}>
+                                            {format(sVal)}
+                                        </td>
+                                    </tr>
+                                );
+                            });
+                    })()}
+                    </tbody>
+                </table>
             </Section>
         </div>
     );
@@ -140,6 +183,30 @@ const userAgentValueStyle: React.CSSProperties = {
     marginTop: '4px',
     lineHeight: '1.4',
     wordBreak: 'break-all'
+};
+
+const tableStyle: React.CSSProperties = {
+    width: '100%',
+    borderCollapse: 'collapse',
+    fontSize: '10px',
+    marginTop: '4px',
+};
+
+const thStyle: React.CSSProperties = {
+    textAlign: 'left',
+    padding: '4px 2px',
+    color: '#888',
+    borderBottom: '1px solid rgba(255,255,255,0.1)',
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    fontSize: '9px'
+};
+
+const tdStyle: React.CSSProperties = {
+    padding: '6px 2px',
+    borderBottom: '1px solid rgba(255,255,255,0.05)',
+    verticalAlign: 'top',
+    lineHeight: '1.2'
 };
 
 /**

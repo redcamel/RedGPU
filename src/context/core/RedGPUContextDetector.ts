@@ -8,7 +8,8 @@ import {keepLog} from "../../utils";
 class RedGPUContextDetector {
     #gpuAdapter: GPUAdapter;
     #adapterInfo: GPUAdapterInfo;
-    #limits: GPUSupportedLimits;
+    #supportedLimits: GPUSupportedLimits;
+    #activeLimits: GPUSupportedLimits;
     #supportedFeatures: GPUSupportedFeatures;
     #activeFeatures: GPUSupportedFeatures;
     #isFallbackAdapter: boolean;
@@ -56,11 +57,12 @@ class RedGPUContextDetector {
             this.#adapterInfo = info;
             this.#supportedFeatures = features;
             this.#isFallbackAdapter = info.isFallbackAdapter;
-            this.#limits = limits;
+            this.#supportedLimits = limits;
         }
 
         if (gpuDevice) {
             this.#activeFeatures = gpuDevice.features;
+            this.#activeLimits = gpuDevice.limits;
         }
 
         keepLog(this);
@@ -69,9 +71,10 @@ class RedGPUContextDetector {
     // Getters
     get supportedFeatures(): GPUSupportedFeatures { return this.#supportedFeatures; }
     get activeFeatures(): GPUSupportedFeatures { return this.#activeFeatures; }
+    get supportedLimits(): GPUSupportedLimits { return this.#supportedLimits; }
+    get activeLimits(): GPUSupportedLimits { return this.#activeLimits; }
     get gpuAdapter(): GPUAdapter { return this.#gpuAdapter; }
     get adapterInfo(): GPUAdapterInfo { return this.#adapterInfo; }
-    get limits(): GPUSupportedLimits { return this.#limits; }
     get isFallbackAdapter(): boolean { return this.#isFallbackAdapter; }
     get userAgent(): string { return this.#userAgent; }
 
@@ -115,9 +118,21 @@ class RedGPUContextDetector {
                 description: this.#adapterInfo?.description,
                 isFallback: this.#isFallbackAdapter,
                 supportedFeatures: Array.from(this.#supportedFeatures || []),
-                activeFeatures: Array.from(this.#activeFeatures || [])
+                activeFeatures: Array.from(this.#activeFeatures || []),
+                supportedLimits: this.#supportedLimits ? this.#serializeLimits(this.#supportedLimits) : null,
+                activeLimits: this.#activeLimits ? this.#serializeLimits(this.#activeLimits) : null
             }
         };
+    }
+
+    #serializeLimits(limits: GPUSupportedLimits) {
+        const result: Record<string, number> = {};
+        const proto = Object.getPrototypeOf(limits);
+        Object.getOwnPropertyNames(proto).forEach(key => {
+            const value = (limits as any)[key];
+            if (typeof value === 'number') result[key] = value;
+        });
+        return result;
     }
 }
 

@@ -104,24 +104,24 @@ const init = async (
         });
         const requiredLimits: Record<string, number> = {};
         const limitKeys = [
-            'maxBufferSize',
-            'maxStorageBufferBindingSize',
-            'maxSampledTexturesPerShaderStage',
-            'maxSamplersPerShaderStage',
-            'maxStorageBuffersPerShaderStage',
-            'maxStorageTexturesPerShaderStage',
-            'maxUniformBuffersPerShaderStage',
-            'maxUniformBufferBindingSize',
-            'maxBindGroups',
-            'maxVertexAttributes',
-            'maxVertexBuffers',
-            'maxInterStageShaderComponents',
-            'maxComputeWorkgroupStorageSize',
-            'maxComputeInvocationsPerWorkgroup',
-            'maxComputeWorkgroupSizeX',
-            'maxComputeWorkgroupSizeY',
-            'maxComputeWorkgroupSizeZ',
-            'maxComputeWorkgroupsPerDimension'
+            // 'maxBufferSize',
+            // 'maxStorageBufferBindingSize',
+            // 'maxSampledTexturesPerShaderStage',
+            // 'maxSamplersPerShaderStage',
+            // 'maxStorageBuffersPerShaderStage',
+            // 'maxStorageTexturesPerShaderStage',
+            // 'maxUniformBuffersPerShaderStage',
+            // 'maxUniformBufferBindingSize',
+            // 'maxBindGroups',
+            // 'maxVertexAttributes',
+            // 'maxVertexBuffers',
+            // 'maxInterStageShaderComponents',
+            // 'maxComputeWorkgroupStorageSize',
+            // 'maxComputeInvocationsPerWorkgroup',
+            // 'maxComputeWorkgroupSizeX',
+            // 'maxComputeWorkgroupSizeY',
+            // 'maxComputeWorkgroupSizeZ',
+            // 'maxComputeWorkgroupsPerDimension'
         ];
         limitKeys.forEach(key => {
             if (adapter.limits[key]) requiredLimits[key] = adapter.limits[key];
