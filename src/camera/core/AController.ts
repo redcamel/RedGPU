@@ -41,7 +41,7 @@ abstract class AController extends RedGPUObject {
 
     // ==================== 인스턴스 정보 ====================
 
-    #camera: PerspectiveCamera | OrthographicCamera
+    readonly #camera: PerspectiveCamera | OrthographicCamera
     #initInfo: controllerInit;
 
     // ==================== 프레임 관리 ====================
@@ -55,7 +55,7 @@ abstract class AController extends RedGPUObject {
     #isDragging: boolean = false
 
     // ==================== 입력 이벤트 관련 ====================
-    #eventTypeKeys: { moveKey: string; upKey: string; downKey: string };
+    readonly #eventTypeKeys: { moveKey: string; upKey: string; downKey: string };
     #dragStartX: number = 0;
     #dragStartY: number = 0;
     #pinchStartDistance: number = 0;
