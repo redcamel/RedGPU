@@ -1,4 +1,5 @@
 import RedGPUContext from "../RedGPUContext";
+import {keepLog} from "../../utils";
 
 /**
  * [KO] GPU 어댑터 및 브라우저 환경을 감지하고 분석하는 클래스입니다.
@@ -22,12 +23,14 @@ import RedGPUContext from "../RedGPUContext";
  * @category Context
  */
 class RedGPUContextDetector {
+    #gpuAdapter: GPUAdapter;
     /* [KO] Adapter 관련 정보 (예: 이름, 벤더 등) */
     /* [EN] Adapter information (e.g., name, vendor) */
     #adapterInfo: GPUAdapterInfo;
     /* [KO] GPU가 지원하는 한계값 */
     /* [EN] Limits supported by the GPU */
     #limits: GPUSupportedLimits;
+    #features: GPUSupportedFeatures;
     /* [KO] Fallback Adapter 사용 여부 */
     /* [EN] Whether Fallback Adapter is used */
     #isFallbackAdapter: boolean;
@@ -43,8 +46,27 @@ class RedGPUContextDetector {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        this.#init(redGPUContext.gpuAdapter);
-        console.log(this); // 디버그용
+        this.#userAgent = navigator.userAgent;
+        const {gpuAdapter} = redGPUContext
+        this.#gpuAdapter = gpuAdapter;
+        if (gpuAdapter) {
+            const {limits, info,features} = gpuAdapter;
+            const {isFallbackAdapter} = info;
+            this.#adapterInfo = info;
+            this.#features = features;
+            this.#isFallbackAdapter = isFallbackAdapter;
+            this.#limits = limits;
+        }
+        keepLog(this); // 디버그용
+    }
+
+
+    get features(): GPUSupportedFeatures {
+        return this.#features;
+    }
+
+    get gpuAdapter(): GPUAdapter {
+        return this.#gpuAdapter;
     }
 
     /**
@@ -88,31 +110,7 @@ class RedGPUContextDetector {
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone|Kindle|Silk|PlayBook/i.test(navigator.userAgent);
     }
 
-    /* -------------------------------------------------------------------------- */
 
-    /* 내부 유틸리티 메서드 */
-    /**
-     * [KO] 초기화 메서드 (내부용)
-     * [EN] Initialization method (Internal use)
-     */
-    #init(gpuAdapter: GPUAdapter) {
-        this.#userAgent = navigator.userAgent;
-        this.#parseAdapter(gpuAdapter);
-    }
-
-    /**
-     * [KO] 어댑터 정보를 파싱합니다. (내부용)
-     * [EN] Parses adapter information. (Internal use)
-     */
-    #parseAdapter(gpuAdapter: GPUAdapter) {
-        if (gpuAdapter) {
-            const {limits, info} = gpuAdapter;
-            const {isFallbackAdapter} = info;
-            this.#adapterInfo = info;
-            this.#isFallbackAdapter = isFallbackAdapter;
-            this.#limits = limits;
-        }
-    }
 
 }
 

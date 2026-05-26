@@ -11,7 +11,7 @@ import defineVector2, {IDefineVector2} from "./funcs/vector/defineVector2";
 import defineVector3, {IDefineVector3} from "./funcs/vector/defineVector3";
 import defineVector4, {IDefineVector4} from "./funcs/vector/defineVector4";
 
-export {
+export type {
     IDefineBoolean,
     IColorRGB,
     IColorRGBA,
