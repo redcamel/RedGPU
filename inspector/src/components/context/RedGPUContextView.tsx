@@ -66,9 +66,9 @@ const RedGPUContextView = () => {
                 <table style={tableStyle}>
                     <thead>
                     <tr>
-                        <th style={{...thStyle, width: '34%'}}>Feature Name</th>
-                        <th style={{...thStyle, textAlign: 'right', width: '33%'}}>Supported</th>
-                        <th style={{...thStyle, textAlign: 'right', width: '33%'}}>Active</th>
+                        <th style={{...thStyle, width: '100%'}}>Feature Name</th>
+                        <th style={{...thStyle, textAlign: 'right',width:'66px'}}>Supported</th>
+                        <th style={{...thStyle, textAlign: 'right',width:'70px'}}>Active</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -94,24 +94,25 @@ const RedGPUContextView = () => {
                             return (
                                 <tr key={feature}>
                                     <td style={{...tdStyle, color: supported ? '#aaa' : '#555', whiteSpace: 'nowrap'}}>{feature}</td>
-                                    <td style={{...tdStyle, textAlign: 'right'}}>
-                                        <span style={{
+                                    <td style={{...tdStyle,  textAlign: 'center',}}>
+                                        <div style={{
                                             ...badgeBaseStyle,
                                             backgroundColor: supported ? '#008000' : '#cc0000',
                                             opacity: supported ? 1 : 0.5
                                         }}>
                                             {supported ? 'YES' : 'NO'}
-                                        </span>
+                                        </div>
                                     </td>
-                                    <td style={{...tdStyle, textAlign: 'right'}}>
+                                    <td style={{...tdStyle,  textAlign: 'center',}}>
                                         {supported ? (
-                                            <span style={{
+                                            <div style={{
                                                 ...badgeBaseStyle,
+
                                                 backgroundColor: active ? '#75e24a' : '#444',
                                                 color: active ? '#000' : '#888'
                                             }}>
-                                                {active ? 'ACTIVE' : 'INACTIVE'}
-                                            </span>
+                                                {active ? 'YES' : 'NO'}
+                                            </div>
                                         ) : <span style={{color: '#444', fontSize: '9px'}}>-</span>}
                                     </td>
                                 </tr>
@@ -126,9 +127,9 @@ const RedGPUContextView = () => {
                 <table style={tableStyle}>
                     <thead>
                     <tr>
-                        <th style={{...thStyle, width: '34%'}}>Name</th>
-                        <th style={{...thStyle, textAlign: 'right', width: '33%'}}>Max</th>
-                        <th style={{...thStyle, textAlign: 'right', width: '33%'}}>Active</th>
+                        <th style={{...thStyle, width: '100%'}}>Name</th>
+                        <th style={{...thStyle, textAlign: 'right'}}>Max</th>
+                        <th style={{...thStyle, textAlign: 'right'}}>Active</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -242,12 +243,16 @@ const tdStyle: React.CSSProperties = {
 
 const badgeBaseStyle: React.CSSProperties = {
     color: 'white',
-    padding: '2px 6px',
+    height: '18px',
+    width:'30px',
     borderRadius: '4px',
-    fontSize: '9px',
+    fontSize: '10px',
     fontWeight: 'bold',
-    lineHeight: 1,
-    textTransform: 'uppercase'
+    textTransform: 'uppercase',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxSizing: 'border-box'
 };
 
 const placeholderStyle: React.CSSProperties = {
