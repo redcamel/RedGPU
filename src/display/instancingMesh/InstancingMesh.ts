@@ -194,8 +194,8 @@ class InstancingMesh extends Mesh {
     static getLimitSize(redGPUContext:RedGPUContext): number {
         const headSize = (16 + 16 + 1 + 1 + 2) * 4; // mat4x4 + mat4x4 + u32 + f32 + padding(vec2) = 144 bytes
         const perInstanceSize = (16 + 16 + 1) * 4; // mat4x4 + mat4x4 + f32(opacity) = 132 bytes
-        const maxStorageBufferBindingSize = Math.min(redGPUContext.gpuDevice.limits.maxStorageBufferBindingSize, 134217728);
-        // const maxStorageBufferBindingSize = redGPUContext.gpuDevice.limits.maxStorageBufferBindingSize
+        const maxStorageBufferBindingSize = Math.min(redGPUContext.detector.activeLimits.maxStorageBufferBindingSize, 134217728);
+        // const maxStorageBufferBindingSize = redGPUContext.detector.activeLimits.maxStorageBufferBindingSize
 
         return Math.floor((maxStorageBufferBindingSize - headSize) / perInstanceSize);
     }

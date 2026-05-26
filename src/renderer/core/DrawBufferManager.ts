@@ -211,7 +211,7 @@ class DrawBufferManager extends RedGPUObject {
      * 디바이스의 실제 버퍼 크기 제한을 계산합니다.
      */
     #calculateDeviceLimits(): void {
-        const limits = this.gpuDevice.limits;
+        const limits = this.redGPUContext.detector.activeLimits;
         
         // [KO] 디바이스의 실제 한계치를 반영하되, 너무 비대해지지 않도록 최대 128MB로 제한합니다.
         // [EN] Reflect the actual limits of the device, but cap it at 128MB to prevent excessive size.
