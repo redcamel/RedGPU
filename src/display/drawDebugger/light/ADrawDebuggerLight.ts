@@ -8,6 +8,8 @@ import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexI
 import Mesh from "../../mesh/Mesh";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import convertRgbToHex from "../../../color/convertRgbToHex";
+import ABaseLight from "../../../light/core/ABaseLight";
+import TextField3D from "../../textFields/textField3D/TextField3D";
 
 /**
  * [KO] 조명 객체를 시각화하는 디버거의 추상 베이스 클래스입니다.
@@ -19,25 +21,39 @@ import convertRgbToHex from "../../../color/convertRgbToHex";
  * :::
  * @category Debugger
  */
-abstract class ADrawDebuggerLight {
-    #lightMaterial: ColorMaterial;
-    #lightDebugMesh: Mesh;
+abstract class ADrawDebuggerLight<T extends ABaseLight> {
+	#lightMaterial: ColorMaterial;
+	#lightDebugMesh: Mesh;
+	#target: T;
+	#label: TextField3D;
 
-    protected constructor(redGPUContext: RedGPUContext, color: [number, number, number], maxLines: number = 32) {
+	protected constructor(redGPUContext: RedGPUContext, target: T, labelIcon: string, color: [number, number, number], maxLines: number = 32) {
+		this.#target = target;
+		const lightGeometry = this.#createLightDebugGeometry(redGPUContext, maxLines);
+		this.#lightMaterial = new ColorMaterial(redGPUContext, convertRgbToHex(color[0], color[1], color[2]));
+		this.#lightDebugMesh = new Mesh(redGPUContext, lightGeometry, this.#lightMaterial);
+		const {primitiveState} = this.#lightDebugMesh
+		primitiveState.cullMode = 'none';
+		primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
 
-        const lightGeometry = this.createLightDebugGeometry(redGPUContext, maxLines);
-        this.#lightMaterial = new ColorMaterial(redGPUContext, convertRgbToHex(color[0], color[1], color[2]));
-        this.#lightDebugMesh = new Mesh(redGPUContext, lightGeometry, this.#lightMaterial);
-        const {primitiveState} = this.#lightDebugMesh
-        primitiveState.cullMode = 'none';
-        primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
+		this.#label = new TextField3D(redGPUContext)
+		this.#label.usePixelSize = true
+		this.#label.fontSize = 40
+		this.#label.text = labelIcon
+		this.#lightDebugMesh.addChild(this.#label)
+	}
 
-    }
+	get target(): T {
+		return this.#target;
+	}
 
+	get label(): TextField3D {
+		return this.#label;
+	}
 
-    get lightDebugMesh(): Mesh {
-        return this.#lightDebugMesh;
-    }
+	get lightDebugMesh(): Mesh {
+		return this.#lightDebugMesh;
+	}
 
     updateVertexBuffer(lines: number[][][], vertexBuffer: VertexBuffer) {
         const vertexData = vertexBuffer.data;
@@ -79,7 +95,7 @@ abstract class ADrawDebuggerLight {
 
     abstract render(renderViewStateData: RenderViewStateData): void;
 
-    private createLightDebugGeometry(redGPUContext: RedGPUContext, maxLines: number): Geometry {
+    #createLightDebugGeometry(redGPUContext: RedGPUContext, maxLines: number): Geometry {
         const vertices = new Float32Array(maxLines * 2 * 12); // maxLines * 2개 점 * 12개 데이터 (pos:3, normal:3, uv:2, tangent:4)
         const interleavedStruct = new VertexInterleavedStruct(
             {

@@ -18,7 +18,7 @@ abstract class ABaseLight {
      * [KO] 외부에서 설정되며, 광원의 위치나 방향을 시각적으로 표시할 수 있습니다.
      * [EN] Set externally, it can visually display the position or direction of the light.
      */
-    drawDebugger: ADrawDebuggerLight;
+    drawDebugger: ADrawDebuggerLight<ABaseLight>;
     /**
      * [KO] 광원의 색상 정보입니다.
      * [EN] Color information of the light.

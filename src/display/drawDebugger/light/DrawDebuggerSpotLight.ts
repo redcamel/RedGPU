@@ -1,7 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import SpotLight from "../../../light/lights/SpotLight";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
-import TextField3D from "../../textFields/textField3D/TextField3D";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import ADrawDebuggerLight from "./ADrawDebuggerLight";
 
@@ -10,30 +9,23 @@ import ADrawDebuggerLight from "./ADrawDebuggerLight";
  * [EN] Debugger class that visualizes the position, direction, and cone range of SpotLight.
  * @category Debugger
  */
-class DrawDebuggerSpotLight extends ADrawDebuggerLight {
-    #target: SpotLight;
-    #label: TextField3D
+class DrawDebuggerSpotLight extends ADrawDebuggerLight<SpotLight> {
 
     constructor(redGPUContext: RedGPUContext, target: SpotLight) {
-        super(redGPUContext, [255, 255, 0], 80); // 노란색, 80개 라인 (원뿔 + 방향선 + 십자가)
-        this.#target = target;
-        this.#label = new TextField3D(redGPUContext)
-        this.#label.usePixelSize = true
-        this.#label.fontSize = 40
-        this.#label.text = '🔦'
-        this.lightDebugMesh.addChild(this.#label)
+        super(redGPUContext, target, '🔦', [255, 255, 0], 80); // 노란색, 80개 라인 (원뿔 + 방향선 + 십자가)
     }
 
     render(renderViewStateData: RenderViewStateData): void {
+        const {lightDebugMesh, label, target} = this
         if (!renderViewStateData.view.systemUniform_Vertex_UniformBindGroup) return
-        if (!this.#target.enableDebugger) return;
-        const {lightDebugMesh} = this
-        this.#updateVertexDataFromSpotLight(this.#target, lightDebugMesh.geometry.vertexBuffer);
+        if (!target.enableDebugger) return;
+        this.#updateVertexDataFromTargetLight(target, lightDebugMesh.geometry.vertexBuffer);
+
         lightDebugMesh.render(renderViewStateData);
-        this.#label.setPosition(...this.#target.position)
+        label.setPosition(...target.position)
     }
 
-    #updateVertexDataFromSpotLight(light: SpotLight, vertexBuffer: VertexBuffer) {
+    #updateVertexDataFromTargetLight(light: SpotLight, vertexBuffer: VertexBuffer) {
         const position = light.position || [0, 0, 0];
         const direction = light.direction || [0, -1, 0];
         const radius = light.radius || 5.0;

@@ -1,7 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import DirectionalLight from "../../../light/lights/DirectionalLight";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
-import TextField3D from "../../textFields/textField3D/TextField3D";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import ADrawDebuggerLight from "./ADrawDebuggerLight";
 
@@ -10,28 +9,21 @@ import ADrawDebuggerLight from "./ADrawDebuggerLight";
  * [EN] Debugger class that visualizes the direction and position of DirectionalLight.
  * @category Debugger
  */
-class DrawDebuggerDirectionalLight extends ADrawDebuggerLight {
-    #target: DirectionalLight;
-    #label: TextField3D
+class DrawDebuggerDirectionalLight extends ADrawDebuggerLight<DirectionalLight> {
     #visualPosition: [number, number, number] = [0, 10, 0];
 
     constructor(redGPUContext: RedGPUContext, target: DirectionalLight) {
-        super(redGPUContext, [255, 255, 0], 8); // 노란색, 8개 라인
-        this.#target = target;
-        this.#label = new TextField3D(redGPUContext)
-        this.#label.usePixelSize = true
-        this.#label.fontSize = 40
-        this.#label.text = '☀️'
-        this.lightDebugMesh.addChild(this.#label)
+        super(redGPUContext, target, '☀️', [255, 255, 0], 8); // 노란색, 8개 라인
     }
 
     render(renderViewStateData: RenderViewStateData): void {
+        const {lightDebugMesh, label, target} = this
         if (!renderViewStateData.view.systemUniform_Vertex_UniformBindGroup) return
-        if (!this.#target.enableDebugger) return;
-        this.#updateVertexDataFromDirectionalLight(this.#target, this.lightDebugMesh.geometry.vertexBuffer);
-        this.lightDebugMesh.render(renderViewStateData);
+        if (!target.enableDebugger) return;
+        this.#updateVertexDataFromTargetLight(target, lightDebugMesh.geometry.vertexBuffer);
+        lightDebugMesh.render(renderViewStateData);
         // 빛이 오는 방향 (화살표 반대편)에 레이블 배치
-        const direction = this.#target.direction;
+        const {direction} = target;
         const visualPosition = this.#visualPosition;
         const labelDistance = 0;
         // 방향 벡터 정규화
@@ -42,14 +34,14 @@ class DrawDebuggerDirectionalLight extends ADrawDebuggerLight {
             direction[2] / dirLength
         ];
         // 빛이 오는 방향 (화살표 반대편)에 레이블 배치
-        this.#label.setPosition(
+        label.setPosition(
             visualPosition[0] - normalizedDir[0] * labelDistance,
             visualPosition[1] - normalizedDir[1] * labelDistance,
             visualPosition[2] - normalizedDir[2] * labelDistance
         );
     }
 
-    #updateVertexDataFromDirectionalLight(light: DirectionalLight, vertexBuffer: VertexBuffer) {
+    #updateVertexDataFromTargetLight(light: DirectionalLight, vertexBuffer: VertexBuffer) {
         const visualPosition = this.#visualPosition
         const direction = light.direction || [0, -1, 0];
         const length = 3.0;

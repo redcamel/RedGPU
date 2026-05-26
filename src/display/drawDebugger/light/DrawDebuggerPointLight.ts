@@ -1,7 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import PointLight from "../../../light/lights/PointLight";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
-import TextField3D from "../../textFields/textField3D/TextField3D";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import ADrawDebuggerLight from "./ADrawDebuggerLight";
 
@@ -10,29 +9,23 @@ import ADrawDebuggerLight from "./ADrawDebuggerLight";
  * [EN] Debugger class that visualizes the position and influence radius of PointLight.
  * @category Debugger
  */
-class DrawDebuggerPointLight extends ADrawDebuggerLight {
-    #target: PointLight;
-    #label: TextField3D
+class DrawDebuggerPointLight extends ADrawDebuggerLight<PointLight> {
 
     constructor(redGPUContext: RedGPUContext, target: PointLight) {
-        super(redGPUContext, [0, 255, 255], 51); // 청록색, 51개 라인 (16*3 + 3)
-        this.#target = target;
-        this.#label = new TextField3D(redGPUContext)
-        this.#label.usePixelSize = true
-        this.#label.fontSize = 40
-        this.#label.text = '💡'
-        this.lightDebugMesh.addChild(this.#label)
+        super(redGPUContext, target, '💡', [0, 255, 255], 51); // 청록색, 51개 라인 (16*3 + 3)
     }
 
     render(renderViewStateData: RenderViewStateData): void {
+        const {lightDebugMesh, label, target} = this
         if (!renderViewStateData.view.systemUniform_Vertex_UniformBindGroup) return
-        if (!this.#target.enableDebugger) return;
-        this.#updateVertexDataFromPointLight(this.#target, this.lightDebugMesh.geometry.vertexBuffer);
-        this.lightDebugMesh.render(renderViewStateData);
-        this.#label.setPosition(...this.#target.position)
+        if (!target.enableDebugger) return;
+        this.#updateVertexDataFromTargetLight(target, lightDebugMesh.geometry.vertexBuffer);
+
+        lightDebugMesh.render(renderViewStateData);
+        label.setPosition(...target.position)
     }
 
-    #updateVertexDataFromPointLight(light: PointLight, vertexBuffer: VertexBuffer) {
+    #updateVertexDataFromTargetLight(light: PointLight, vertexBuffer: VertexBuffer) {
         const position = light.position || [0, 0, 0];
         const radius = light.radius || 1.0;
         const segments = 16;
