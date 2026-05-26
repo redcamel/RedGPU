@@ -96,6 +96,9 @@ function loadModel(view, config) {
                 mesh.y = y;
                 mesh.z = z;
             }
+        },
+        (info) => {
+            RedGPUExampleHelper.loadingProgressInfoHandler(info);
         }
     );
 }

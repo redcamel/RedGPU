@@ -85,7 +85,7 @@ function loadGLTFGrid(view, urls, gridSize = 4, spacing = 3) {
                 }
 
                 if (loadedNum === urls.length) {
-                    view.camera.fitMeshToScreenCenter(container, view)
+                    RedGPUExampleHelper.fitMeshToScreenCenter(container, view)
                 }
             },
             (info) => {

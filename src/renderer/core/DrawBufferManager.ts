@@ -165,7 +165,7 @@ class DrawBufferManager extends RedGPUObject {
         // 	// keepLog('⚡ 드로우 커맨드 변경사항없음')
         // 	return
         // }
-        const startTime = performance.now()
+        // const startTime = performance.now()
         let totalUploaded = 0
         for (const bufferIndex of this.#usedBufferIndices) {
             const buffer = this.#bufferPool[bufferIndex]

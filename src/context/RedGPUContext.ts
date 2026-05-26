@@ -104,6 +104,11 @@ class RedGPUContext extends RedGPUContextViewContainer {
      */
     readonly #commandEncoderManager: CommandEncoderManager
     /**
+     * [KO] 안티앨리어싱 매니저
+     * [EN] Antialiasing manager
+     */
+    readonly #antialiasingManager: AntialiasingManager
+    /**
      * [KO] 배경색
      * [EN] Background color
      */
@@ -113,11 +118,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Keyboard input buffer
      */
     #keyboardKeyBuffer: { [key: string]: boolean } = {}
-    /**
-     * [KO] 안티앨리어싱 매니저
-     * [EN] Antialiasing manager
-     */
-    #antialiasingManager: AntialiasingManager
+
 
     #boundingClientRect: DOMRect
 
