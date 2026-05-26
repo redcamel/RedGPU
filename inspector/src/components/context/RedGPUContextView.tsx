@@ -63,11 +63,34 @@ const RedGPUContextView = () => {
             </Section>
 
             <Section title="GPU Features">
-                <StatBoolItem label="Shader F16" value={detector.hasShaderF16}/>
-                <StatBoolItem label="Timestamp Query" value={detector.hasTimestampQuery}/>
-                <StatBoolItem label="ASTC Texture" value={detector.hasASTC}/>
-                <StatBoolItem label="BC Texture" value={detector.hasBC}/>
-                <StatBoolItem label="ETC2 Texture" value={detector.hasETC2}/>
+                {(() => {
+                    const trackedFeatures = [
+                        "shader-f16",
+                        "timestamp-query",
+                        "texture-compression-astc",
+                        "texture-compression-bc",
+                        "texture-compression-etc2",
+                        "depth-clip-control",
+                        "indirect-first-instance",
+                        "rg11b10ufloat-renderable",
+                        "bgra8unorm-storage",
+                        "float32-filterable"
+                    ];
+
+                    const allSupported = Array.from(detector.supportedFeatures || []);
+                    const extraFeatures = allSupported.filter(f => !trackedFeatures.includes(f));
+                    
+                    const finalFeatureList = [...trackedFeatures, ...extraFeatures.sort()];
+
+                    return finalFeatureList.map(feature => (
+                        <FeatureItem 
+                            key={feature} 
+                            label={feature} 
+                            supported={detector.supportedFeatures.has(feature)} 
+                            active={detector.activeFeatures.has(feature)} 
+                        />
+                    ));
+                })()}
             </Section>
 
             <Section title="GPU Limits">
@@ -117,6 +140,61 @@ const userAgentValueStyle: React.CSSProperties = {
     marginTop: '4px',
     lineHeight: '1.4',
     wordBreak: 'break-all'
+};
+
+/**
+ * [KO] GPU 기능의 지원 여부와 활성화 상태를 함께 표시하는 컴포넌트입니다.
+ */
+const FeatureItem = ({label, supported, active}: { label: string, supported: boolean, active: boolean }) => {
+    return (
+        <div style={featureItemStyle}>
+            <span style={featureLabelStyle}>{label}</span>
+            <div style={statusWrapperStyle}>
+                <span style={{
+                    ...badgeBaseStyle,
+                    backgroundColor: supported ? '#008000' : '#cc0000',
+                }}>
+                    {supported ? 'Supported' : 'Not Supported'}
+                </span>
+                {supported && (
+                    <span style={{
+                        ...badgeBaseStyle,
+                        backgroundColor: active ? '#4a90e2' : '#666',
+                        marginLeft: '4px'
+                    }}>
+                        {active ? 'Active' : 'Inactive'}
+                    </span>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const featureItemStyle: React.CSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '6px'
+};
+
+const featureLabelStyle: React.CSSProperties = {
+    color: '#888',
+    fontSize: '11px'
+};
+
+const statusWrapperStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center'
+};
+
+const badgeBaseStyle: React.CSSProperties = {
+    color: 'white',
+    padding: '2px 6px',
+    borderRadius: '4px',
+    fontSize: '9px',
+    fontWeight: 'bold',
+    lineHeight: 1,
+    textTransform: 'uppercase'
 };
 
 const placeholderStyle: React.CSSProperties = {

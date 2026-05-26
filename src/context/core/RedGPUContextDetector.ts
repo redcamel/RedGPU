@@ -9,7 +9,8 @@ class RedGPUContextDetector {
     #gpuAdapter: GPUAdapter;
     #adapterInfo: GPUAdapterInfo;
     #limits: GPUSupportedLimits;
-    #features: GPUSupportedFeatures;
+    #supportedFeatures: GPUSupportedFeatures;
+    #activeFeatures: GPUSupportedFeatures;
     #isFallbackAdapter: boolean;
     #userAgent: string;
 
@@ -24,13 +25,6 @@ class RedGPUContextDetector {
     // Hardware Resources
     #hardwareConcurrency: number;
     #deviceMemory: number;
-
-    // GPU Feature Helpers
-    #hasASTC: boolean = false;
-    #hasBC: boolean = false;
-    #hasETC2: boolean = false;
-    #hasShaderF16: boolean = false;
-    #hasTimestampQuery: boolean = false;
 
     /**
      * [KO] RedGPUContextDetector 생성자
@@ -54,29 +48,27 @@ class RedGPUContextDetector {
         this.#hardwareConcurrency = navigator.hardwareConcurrency || 4;
         this.#deviceMemory = (navigator as any).deviceMemory || 4;
 
-        const {gpuAdapter} = redGPUContext;
+        const {gpuAdapter, gpuDevice} = redGPUContext;
         this.#gpuAdapter = gpuAdapter;
 
         if (gpuAdapter) {
             const {limits, info, features} = gpuAdapter;
             this.#adapterInfo = info;
-            this.#features = features;
+            this.#supportedFeatures = features;
             this.#isFallbackAdapter = info.isFallbackAdapter;
             this.#limits = limits;
+        }
 
-            // GPU Feature Shortcuts
-            this.#hasASTC = features.has('texture-compression-astc');
-            this.#hasBC = features.has('texture-compression-bc');
-            this.#hasETC2 = features.has('texture-compression-etc2');
-            this.#hasShaderF16 = features.has('shader-f16');
-            this.#hasTimestampQuery = features.has('timestamp-query');
+        if (gpuDevice) {
+            this.#activeFeatures = gpuDevice.features;
         }
 
         keepLog(this);
     }
 
     // Getters
-    get features(): GPUSupportedFeatures { return this.#features; }
+    get supportedFeatures(): GPUSupportedFeatures { return this.#supportedFeatures; }
+    get activeFeatures(): GPUSupportedFeatures { return this.#activeFeatures; }
     get gpuAdapter(): GPUAdapter { return this.#gpuAdapter; }
     get adapterInfo(): GPUAdapterInfo { return this.#adapterInfo; }
     get limits(): GPUSupportedLimits { return this.#limits; }
@@ -94,13 +86,6 @@ class RedGPUContextDetector {
     // Hardware Getters
     get hardwareConcurrency(): number { return this.#hardwareConcurrency; }
     get deviceMemory(): number { return this.#deviceMemory; }
-
-    // GPU Feature Helpers
-    get hasASTC(): boolean { return this.#hasASTC; }
-    get hasBC(): boolean { return this.#hasBC; }
-    get hasETC2(): boolean { return this.#hasETC2; }
-    get hasShaderF16(): boolean { return this.#hasShaderF16; }
-    get hasTimestampQuery(): boolean { return this.#hasTimestampQuery; }
 
     /**
      * [KO] 모든 탐지된 정보를 리포트 객체로 반환합니다.
@@ -129,13 +114,8 @@ class RedGPUContextDetector {
                 device: this.#adapterInfo?.device,
                 description: this.#adapterInfo?.description,
                 isFallback: this.#isFallbackAdapter,
-                features: {
-                    hasASTC: this.#hasASTC,
-                    hasBC: this.#hasBC,
-                    hasETC2: this.#hasETC2,
-                    hasShaderF16: this.#hasShaderF16,
-                    hasTimestampQuery: this.#hasTimestampQuery
-                }
+                supportedFeatures: Array.from(this.#supportedFeatures || []),
+                activeFeatures: Array.from(this.#activeFeatures || [])
             }
         };
     }
