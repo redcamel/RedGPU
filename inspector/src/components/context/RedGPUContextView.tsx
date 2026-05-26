@@ -84,9 +84,9 @@ const RedGPUContextView = () => {
                 <table style={tableStyle}>
                     <thead>
                     <tr>
-                        <th style={{...thStyle, width: '45%'}}>Name</th>
-                        <th style={{...thStyle, textAlign: 'right', width: '27.5%'}}>Active</th>
-                        <th style={{...thStyle, textAlign: 'right', width: '27.5%'}}>Max</th>
+                        <th style={{...thStyle, width: '34%'}}>Name</th>
+                        <th style={{...thStyle, textAlign: 'right', width: '33%'}}>Max</th>
+                        <th style={{...thStyle, textAlign: 'right', width: '33%'}}>Active</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -110,12 +110,14 @@ const RedGPUContextView = () => {
                                     if (val === null) return 'N/A';
                                     const formatted = formatNumber(val, 0);
                                     return isSize ? (
-                                        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end'}}>
-                                            <span>{formatted}</span>
-                                            <span style={{fontSize: '9px', opacity: 0.6}}>{formatBytes(val)}</span>
+                                        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end',lineHeight:1.2}}>
+                                            <span style={{opacity:0.8}}>{formatted}</span>
+                                            <span style={{fontSize: '12px'}}>{formatBytes(val)}</span>
                                         </div>
                                     ) : <span>{formatted}</span>;
                                 };
+
+                                const isRestricted = aVal !== null && aVal < sVal;
 
                                 return (
                                     <tr key={key}>
@@ -124,11 +126,22 @@ const RedGPUContextView = () => {
                                             color: '#aaa',
                                             whiteSpace: 'nowrap',
                                         }} title={key}>{key}</td>
-                                        <td style={{...tdStyle, textAlign: 'right', color: '#eee', fontWeight: 'bold'}}>
-                                            {format(aVal)}
-                                        </td>
-                                        <td style={{...tdStyle, textAlign: 'right', color: '#666', fontStyle: 'italic'}}>
+                                        <td style={{
+                                            ...tdStyle, 
+                                            textAlign: 'right', 
+                                            color: isRestricted ? '#fdb48d' : '#eee', 
+                                            fontStyle: 'italic',
+                                            fontWeight: isRestricted ? 'bold' : 'normal'
+                                        }}>
                                             {format(sVal)}
+                                        </td>
+                                        <td style={{
+                                            ...tdStyle, 
+                                            textAlign: 'right',
+                                            color: isRestricted ? '#75e24a' : '#eee', 
+                                            fontWeight: isRestricted ? 'bold' : 'normal'
+                                        }}>
+                                            {format(aVal)}
                                         </td>
                                     </tr>
                                 );
@@ -163,7 +176,7 @@ const userAgentValueStyle: React.CSSProperties = {
 const tableStyle: React.CSSProperties = {
     width: '100%',
     borderCollapse: 'collapse',
-    fontSize: '10px',
+    fontSize: '11px',
     marginTop: '4px',
 };
 
@@ -174,14 +187,15 @@ const thStyle: React.CSSProperties = {
     borderBottom: '1px solid rgba(255,255,255,0.1)',
     fontWeight: 'bold',
     textTransform: 'uppercase',
-    fontSize: '9px'
+    fontSize: '10px'
 };
 
 const tdStyle: React.CSSProperties = {
     padding: '6px 2px',
     borderBottom: '1px solid rgba(255,255,255,0.05)',
     verticalAlign: 'top',
-    lineHeight: '1.2'
+    lineHeight: '1.2',
+    fontSize: '11px'
 };
 
 /**
@@ -221,7 +235,7 @@ const featureItemStyle: React.CSSProperties = {
 
 const featureLabelStyle: React.CSSProperties = {
     color: '#888',
-    fontSize: '11px'
+    fontSize: '12px'
 };
 
 const statusWrapperStyle: React.CSSProperties = {
@@ -233,7 +247,7 @@ const badgeBaseStyle: React.CSSProperties = {
     color: 'white',
     padding: '2px 6px',
     borderRadius: '4px',
-    fontSize: '9px',
+    fontSize: '10px',
     fontWeight: 'bold',
     lineHeight: 1,
     textTransform: 'uppercase'
