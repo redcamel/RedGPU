@@ -10,8 +10,8 @@ class RedGPUContextDetector {
     #adapterInfo: GPUAdapterInfo;
     #supportedLimits: GPUSupportedLimits;
     #activeLimits: GPUSupportedLimits;
-    #supportedFeatures: GPUSupportedFeatures;
-    #activeFeatures: GPUSupportedFeatures;
+    #supportedFeatures: Record<string, boolean> = {};
+    #activeFeatures: Record<string, boolean> = {};
     #isFallbackAdapter: boolean;
     #userAgent: string;
 
@@ -35,58 +35,88 @@ class RedGPUContextDetector {
         const ua = navigator.userAgent;
         this.#userAgent = ua;
 
-        // Platform Detection
+        // Platform Detection (Cached)
         this.#isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone|Kindle|Silk|PlayBook/i.test(ua);
         this.#isIOS = /iPhone|iPad|iPod/i.test(ua);
         this.#isAndroid = /Android/i.test(ua);
-
-        // Browser Engine Detection
         this.#isChromium = /Chrome|Chromium|Edg|Opr/i.test(ua) && !/Edge/i.test(ua);
         this.#isSafari = /Safari/i.test(ua) && !/Chrome|Chromium|Edg|Opr/i.test(ua);
         this.#isFirefox = /Firefox/i.test(ua);
 
-        // Hardware Context
         this.#hardwareConcurrency = navigator.hardwareConcurrency || 4;
         this.#deviceMemory = (navigator as any).deviceMemory || 4;
 
         const {gpuAdapter, gpuDevice} = redGPUContext;
         this.#gpuAdapter = gpuAdapter;
 
+        // [KO] 추적할 주요 기능 목록
+        const allKnownFeatures = [
+            "core-features-and-limits",
+            "depth-clip-control",
+            "depth32float-stencil8",
+            "texture-compression-bc",
+            "texture-compression-bc-sliced-3d",
+            "texture-compression-etc2",
+            "texture-compression-astc",
+            "texture-compression-astc-sliced-3d",
+            "timestamp-query",
+            "indirect-first-instance",
+            "shader-f16",
+            "rg11b10ufloat-renderable",
+            "bgra8unorm-storage",
+            "float32-filterable",
+            "float32-blendable",
+            "clip-distances",
+            "dual-source-blending",
+            "subgroups",
+            "texture-formats-tier1",
+            "texture-formats-tier2",
+            "primitive-index",
+            "texture-component-swizzle"
+        ];
+
+        // [KO] 1. 하드웨어 지원 정보 수집 (Adapter)
         if (gpuAdapter) {
-            const {limits, info, features} = gpuAdapter;
-            this.#adapterInfo = info;
-            this.#supportedFeatures = features;
-            this.#isFallbackAdapter = info.isFallbackAdapter;
-            this.#supportedLimits = limits;
+            this.#adapterInfo = gpuAdapter.info;
+            this.#isFallbackAdapter = gpuAdapter.info.isFallbackAdapter;
+            this.#supportedLimits = gpuAdapter.limits;
+
+            const actualSupported = Array.from(gpuAdapter.features);
+            const finalFeatureList = Array.from(new Set([...allKnownFeatures, ...actualSupported])).sort();
+
+            this.#supportedFeatures = {};
+            for (const k of finalFeatureList) {
+                this.#supportedFeatures[k] = gpuAdapter.features.has(k);
+            }
         }
 
+        // [KO] 2. 실제 장치 활성화 정보 수집 (Device)
         if (gpuDevice) {
-            this.#activeFeatures = gpuDevice.features;
             this.#activeLimits = gpuDevice.limits;
+            this.#activeFeatures = {};
+            for (const k in this.#supportedFeatures) {
+                this.#activeFeatures[k] = gpuDevice.features.has(k);
+            }
         }
 
         keepLog(this);
     }
 
     // Getters
-    get supportedFeatures(): GPUSupportedFeatures { return this.#supportedFeatures; }
-    get activeFeatures(): GPUSupportedFeatures { return this.#activeFeatures; }
+    get supportedFeatures(): Record<string, boolean> { return this.#supportedFeatures; }
+    get activeFeatures(): Record<string, boolean> { return this.#activeFeatures; }
     get supportedLimits(): GPUSupportedLimits { return this.#supportedLimits; }
     get activeLimits(): GPUSupportedLimits { return this.#activeLimits; }
     get gpuAdapter(): GPUAdapter { return this.#gpuAdapter; }
     get adapterInfo(): GPUAdapterInfo { return this.#adapterInfo; }
     get isFallbackAdapter(): boolean { return this.#isFallbackAdapter; }
     get userAgent(): string { return this.#userAgent; }
-
-    // Platform Getters
     get isMobile(): boolean { return this.#isMobile; }
     get isIOS(): boolean { return this.#isIOS; }
     get isAndroid(): boolean { return this.#isAndroid; }
     get isChromium(): boolean { return this.#isChromium; }
     get isSafari(): boolean { return this.#isSafari; }
     get isFirefox(): boolean { return this.#isFirefox; }
-
-    // Hardware Getters
     get hardwareConcurrency(): number { return this.#hardwareConcurrency; }
     get deviceMemory(): number { return this.#deviceMemory; }
 
@@ -117,8 +147,8 @@ class RedGPUContextDetector {
                 device: this.#adapterInfo?.device,
                 description: this.#adapterInfo?.description,
                 isFallback: this.#isFallbackAdapter,
-                supportedFeatures: Array.from(this.#supportedFeatures || []),
-                activeFeatures: Array.from(this.#activeFeatures || []),
+                supportedFeatures: {...this.#supportedFeatures},
+                activeFeatures: {...this.#activeFeatures},
                 supportedLimits: this.#supportedLimits ? this.#serializeLimits(this.#supportedLimits) : null,
                 activeLimits: this.#activeLimits ? this.#serializeLimits(this.#activeLimits) : null
             }
