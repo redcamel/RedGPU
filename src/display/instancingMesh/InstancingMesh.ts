@@ -23,6 +23,7 @@ import vertexModuleSourceOutputPbr from "./shader/instanceMeshVertex_output_Pbr.
 import vertexModuleSourceShadow from "./shader/instanceMeshVertex_shadow.wgsl";
 import PBRMaterial from "../../material/pbrMaterial/PBRMaterial";
 import {ABaseMaterial} from "../../material/core";
+import {keepLog} from "../../utils";
 
 const VERTEX_SHADER_MODULE_NAME = "VERTEX_MODULE_INSTANCING";
 const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = "VERTEX_BIND_GROUP_DESCRIPTOR_INSTANCING";
@@ -174,7 +175,7 @@ class InstancingMesh extends Mesh {
 
     set maxInstanceCount(count: number) {
         validateUintRange(count);
-        const limitNum = InstancingMesh.getLimitSize();
+        const limitNum = InstancingMesh.getLimitSize(this.#redGPUContext);
         count = Math.min(count, limitNum);
         this.#maxInstanceCount = count;
         if (this.#instanceCount > this.#maxInstanceCount) {
@@ -185,11 +186,16 @@ class InstancingMesh extends Mesh {
     get instanceChildren(): InstancingMeshObject3D[] {
         return this.#instanceChildren;
     }
-
-    static getLimitSize(): number {
-        const headSize = (16 + 16 + 1 + 1 + 2) * 4; // mat4x2 + u32 + f32 + padding(vec2) = 144 bytes
-        const perInstanceSize = (16 + 16 + 1) * 4; // mat4x2 + f32(opacity) = 132 bytes
-        const maxStorageBufferBindingSize = Math.floor(Math.min(268435456, 134217728));
+/*
+ TODO - getLimitSize 를 내부 속성으로 사용하고
+  ableMaxLimitSize
+  currentLimitSize
+ */
+    static getLimitSize(redGPUContext:RedGPUContext): number {
+        const headSize = (16 + 16 + 1 + 1 + 2) * 4; // mat4x4 + mat4x4 + u32 + f32 + padding(vec2) = 144 bytes
+        const perInstanceSize = (16 + 16 + 1) * 4; // mat4x4 + mat4x4 + f32(opacity) = 132 bytes
+        const maxStorageBufferBindingSize = Math.min(redGPUContext.gpuDevice.limits.maxStorageBufferBindingSize, 134217728);
+        // const maxStorageBufferBindingSize = redGPUContext.gpuDevice.limits.maxStorageBufferBindingSize
 
         return Math.floor((maxStorageBufferBindingSize - headSize) / perInstanceSize);
     }
