@@ -207,26 +207,26 @@ class DrawBufferManager extends RedGPUObject {
         // })
     }
 
-    // /**
-    //  * 모든 사용된 버퍼의 데이터를 GPU로 업로드합니다.
     /**
      * 디바이스의 실제 버퍼 크기 제한을 계산합니다.
      */
     #calculateDeviceLimits(): void {
-        const limits = this.gpuDevice.limits
-        // 안전한 최대 크기 계산 (실제 제한의 90% 사용)
+        const limits = this.gpuDevice.limits;
+        
+        // [KO] 디바이스의 실제 한계치를 반영하되, 너무 비대해지지 않도록 최대 128MB로 제한합니다.
+        // [EN] Reflect the actual limits of the device, but cap it at 128MB to prevent excessive size.
+        const SAFE_MAX_SIZE = 134217728; // 128MB
+        
         this.#deviceMaxBufferSize = Math.floor(
-            Math.min(
-                // limits.maxBufferSize || 268435456,           // 256MB
-                // limits.maxStorageBufferBindingSize || 134217728  // 128MB
-                268435456,           // 256MB
-                134217728  // 128MB
-            ) * 0.9
-        )
+            Math.min(limits.maxBufferSize, SAFE_MAX_SIZE) * 0.9
+        );
+
         // 버퍼당 최대 커맨드 수 (가장 큰 커맨드 크기 기준)
         this.#maxCommandsPerBuffer = Math.floor(
             this.#deviceMaxBufferSize / (DrawBufferManager.#INDEXED_COMMAND_SIZE * 4)
-        )
+        );
+
+        console.log(`🚀 DrawBufferManager: Device Max Buffer Size: ${formatBytes(this.#deviceMaxBufferSize)}, Max Commands Per Buffer: ${this.#maxCommandsPerBuffer.toLocaleString()}`);
     }
 
     // /**
