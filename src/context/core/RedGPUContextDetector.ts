@@ -4,114 +4,141 @@ import {keepLog} from "../../utils";
 /**
  * [KO] GPU 어댑터 및 브라우저 환경을 감지하고 분석하는 클래스입니다.
  * [EN] Class that detects and analyzes the GPU adapter and browser environment.
- *
- * [KO] Adapter 정보, 제한값(Limits), Fallback 여부, 모바일 환경 여부 등을 제공합니다.
- * [EN] Provides adapter information, limits, fallback status, mobile environment status, etc.
- *
- * ::: warning
- * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
- * :::
- *
- * * ### Example
- * ```typescript
- * const detector = redGPUContext.detector;
- * console.log('Is mobile:', detector.isMobile);
- * console.log('GPU Limits:', detector.limits);
- * ```
- *
- * @category Context
  */
 class RedGPUContextDetector {
     #gpuAdapter: GPUAdapter;
-    /* [KO] Adapter 관련 정보 (예: 이름, 벤더 등) */
-    /* [EN] Adapter information (e.g., name, vendor) */
     #adapterInfo: GPUAdapterInfo;
-    /* [KO] GPU가 지원하는 한계값 */
-    /* [EN] Limits supported by the GPU */
     #limits: GPUSupportedLimits;
     #features: GPUSupportedFeatures;
-    /* [KO] Fallback Adapter 사용 여부 */
-    /* [EN] Whether Fallback Adapter is used */
     #isFallbackAdapter: boolean;
-    /* [KO] 브라우저 User-Agent 문자열 */
-    /* [EN] Browser User-Agent string */
     #userAgent: string;
+
+    // Platform & Environment (Cached)
+    #isMobile: boolean;
+    #isIOS: boolean;
+    #isAndroid: boolean;
+    #isChromium: boolean;
+    #isSafari: boolean;
+    #isFirefox: boolean;
+
+    // Hardware Resources
+    #hardwareConcurrency: number;
+    #deviceMemory: number;
+
+    // GPU Feature Helpers
+    #hasASTC: boolean = false;
+    #hasBC: boolean = false;
+    #hasETC2: boolean = false;
+    #hasShaderF16: boolean = false;
+    #hasTimestampQuery: boolean = false;
 
     /**
      * [KO] RedGPUContextDetector 생성자
      * [EN] RedGPUContextDetector constructor
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        this.#userAgent = navigator.userAgent;
-        const {gpuAdapter} = redGPUContext
+        const ua = navigator.userAgent;
+        this.#userAgent = ua;
+
+        // Platform Detection
+        this.#isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone|Kindle|Silk|PlayBook/i.test(ua);
+        this.#isIOS = /iPhone|iPad|iPod/i.test(ua);
+        this.#isAndroid = /Android/i.test(ua);
+
+        // Browser Engine Detection
+        this.#isChromium = /Chrome|Chromium|Edg|Opr/i.test(ua) && !/Edge/i.test(ua);
+        this.#isSafari = /Safari/i.test(ua) && !/Chrome|Chromium|Edg|Opr/i.test(ua);
+        this.#isFirefox = /Firefox/i.test(ua);
+
+        // Hardware Context
+        this.#hardwareConcurrency = navigator.hardwareConcurrency || 4;
+        this.#deviceMemory = (navigator as any).deviceMemory || 4;
+
+        const {gpuAdapter} = redGPUContext;
         this.#gpuAdapter = gpuAdapter;
+
         if (gpuAdapter) {
-            const {limits, info,features} = gpuAdapter;
-            const {isFallbackAdapter} = info;
+            const {limits, info, features} = gpuAdapter;
             this.#adapterInfo = info;
             this.#features = features;
-            this.#isFallbackAdapter = isFallbackAdapter;
+            this.#isFallbackAdapter = info.isFallbackAdapter;
             this.#limits = limits;
+
+            // GPU Feature Shortcuts
+            this.#hasASTC = features.has('texture-compression-astc');
+            this.#hasBC = features.has('texture-compression-bc');
+            this.#hasETC2 = features.has('texture-compression-etc2');
+            this.#hasShaderF16 = features.has('shader-f16');
+            this.#hasTimestampQuery = features.has('timestamp-query');
         }
-        keepLog(this); // 디버그용
+
+        keepLog(this);
     }
 
+    // Getters
+    get features(): GPUSupportedFeatures { return this.#features; }
+    get gpuAdapter(): GPUAdapter { return this.#gpuAdapter; }
+    get adapterInfo(): GPUAdapterInfo { return this.#adapterInfo; }
+    get limits(): GPUSupportedLimits { return this.#limits; }
+    get isFallbackAdapter(): boolean { return this.#isFallbackAdapter; }
+    get userAgent(): string { return this.#userAgent; }
 
-    get features(): GPUSupportedFeatures {
-        return this.#features;
-    }
+    // Platform Getters
+    get isMobile(): boolean { return this.#isMobile; }
+    get isIOS(): boolean { return this.#isIOS; }
+    get isAndroid(): boolean { return this.#isAndroid; }
+    get isChromium(): boolean { return this.#isChromium; }
+    get isSafari(): boolean { return this.#isSafari; }
+    get isFirefox(): boolean { return this.#isFirefox; }
 
-    get gpuAdapter(): GPUAdapter {
-        return this.#gpuAdapter;
-    }
+    // Hardware Getters
+    get hardwareConcurrency(): number { return this.#hardwareConcurrency; }
+    get deviceMemory(): number { return this.#deviceMemory; }
+
+    // GPU Feature Helpers
+    get hasASTC(): boolean { return this.#hasASTC; }
+    get hasBC(): boolean { return this.#hasBC; }
+    get hasETC2(): boolean { return this.#hasETC2; }
+    get hasShaderF16(): boolean { return this.#hasShaderF16; }
+    get hasTimestampQuery(): boolean { return this.#hasTimestampQuery; }
 
     /**
-     * [KO] 현재 사용중인 GPUAdapter의 정보를 반환합니다.
-     * [EN] Returns information about the currently used GPUAdapter.
+     * [KO] 모든 탐지된 정보를 리포트 객체로 반환합니다.
+     * [EN] Returns all detected information as a report object.
      */
-    get adapterInfo(): GPUAdapterInfo {
-        return this.#adapterInfo;
+    toReport() {
+        return {
+            platform: {
+                isMobile: this.#isMobile,
+                isIOS: this.#isIOS,
+                isAndroid: this.#isAndroid,
+                userAgent: this.#userAgent
+            },
+            browser: {
+                isChromium: this.#isChromium,
+                isSafari: this.#isSafari,
+                isFirefox: this.#isFirefox
+            },
+            hardware: {
+                hardwareConcurrency: this.#hardwareConcurrency,
+                deviceMemory: this.#deviceMemory
+            },
+            gpu: {
+                vendor: this.#adapterInfo?.vendor,
+                architecture: this.#adapterInfo?.architecture,
+                device: this.#adapterInfo?.device,
+                description: this.#adapterInfo?.description,
+                isFallback: this.#isFallbackAdapter,
+                features: {
+                    hasASTC: this.#hasASTC,
+                    hasBC: this.#hasBC,
+                    hasETC2: this.#hasETC2,
+                    hasShaderF16: this.#hasShaderF16,
+                    hasTimestampQuery: this.#hasTimestampQuery
+                }
+            }
+        };
     }
-
-    /**
-     * [KO] 현재 사용 중인 GPU의 한계값을 반환합니다.
-     * [EN] Returns the supported limits of the currently used GPU.
-     */
-    get limits(): GPUSupportedLimits {
-        return this.#limits;
-    }
-
-    /**
-     * [KO] 현재 어댑터가 Fallback 어댑터인지 여부를 반환합니다.
-     * [EN] Returns whether the current adapter is a fallback adapter.
-     */
-    get isFallbackAdapter(): boolean {
-        return this.#isFallbackAdapter;
-    }
-
-
-    /**
-     * [KO] 브라우저의 User-Agent 문자열을 반환합니다.
-     * [EN] Returns the browser's User-Agent string.
-     */
-    get userAgent(): string {
-        return this.#userAgent;
-    }
-
-    /**
-     * [KO] 모바일 디바이스인지 여부를 반환합니다.
-     * [EN] Returns whether it is a mobile device.
-     */
-    get isMobile(): boolean {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone|Kindle|Silk|PlayBook/i.test(navigator.userAgent);
-    }
-
-
-
 }
 
 export default RedGPUContextDetector;

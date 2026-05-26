@@ -42,14 +42,18 @@ const RedGPUContextView = () => {
                 <StatBoolItem label="useFXAA" value={antialiasingManager.useFXAA}/>
                 <StatBoolItem label="useTAA" value={antialiasingManager.useTAA}/>
             </Section>
+
             <Section title="Environment">
-                <StatItem label="devicePixelRatio" value={formatNumber(devicePixelRatio)}/>
-                <StatBoolItem label="Mobile" value={detector.isMobile} trueLabel="Yes" falseLabel="No"/>
+                <StatItem label="Platform" value={detector.isIOS ? 'iOS' : detector.isAndroid ? 'Android' : detector.isMobile ? 'Mobile' : 'Desktop'}/>
+                <StatItem label="Browser" value={detector.isChromium ? 'Chromium' : detector.isSafari ? 'Safari' : detector.isFirefox ? 'Firefox' : 'Unknown'}/>
+                <StatItem label="CPU Cores" value={detector.hardwareConcurrency}/>
+                <StatItem label="Device Memory" value={`~${detector.deviceMemory}GB`}/>
                 <div style={userAgentStyle}>
                     <div style={labelStyle}>User Agent</div>
                     <div style={userAgentValueStyle}>{detector.userAgent}</div>
                 </div>
             </Section>
+
             <Section title="Adapter Info">
                 <StatItem label="Vendor" value={adapterInfo.vendor}/>
                 <StatItem label="Architecture" value={adapterInfo.architecture}/>
@@ -57,6 +61,15 @@ const RedGPUContextView = () => {
                 <StatItem label="Description" value={adapterInfo.description}/>
                 <StatBoolItem label="Fallback" value={detector.isFallbackAdapter} trueLabel="Yes" falseLabel="No"/>
             </Section>
+
+            <Section title="GPU Features">
+                <StatBoolItem label="Shader F16" value={detector.hasShaderF16}/>
+                <StatBoolItem label="Timestamp Query" value={detector.hasTimestampQuery}/>
+                <StatBoolItem label="ASTC Texture" value={detector.hasASTC}/>
+                <StatBoolItem label="BC Texture" value={detector.hasBC}/>
+                <StatBoolItem label="ETC2 Texture" value={detector.hasETC2}/>
+            </Section>
+
             <Section title="GPU Limits">
                 {(() => {
                     const limits = detector.limits;
