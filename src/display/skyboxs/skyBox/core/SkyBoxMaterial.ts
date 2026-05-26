@@ -41,7 +41,7 @@ interface SkyBoxMaterial {
  * @category SkyBox
  */
 class SkyBoxMaterial extends ABitmapBaseMaterial {
-    dirtyPipeline: boolean = false
+
 
     constructor(redGPUContext: RedGPUContext, texture: CubeTexture | DirectCubeTexture) {
         super(redGPUContext, 'SKYBOX_MATERIAL', SHADER_INFO, 2)

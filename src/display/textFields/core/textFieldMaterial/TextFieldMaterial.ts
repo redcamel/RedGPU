@@ -24,11 +24,6 @@ interface TextFieldMaterial {
  *
  */
 class TextFieldMaterial extends ABitmapBaseMaterial {
-    /**
-     * 파이프라인 재생성 여부를 나타냅니다.
-     * 머티리얼 설정이 변경되었을 때 true로 설정되어야 합니다.
-     */
-    dirtyPipeline: boolean = false
 
     /**
      * `TextFieldMaterial` 인스턴스를 생성합니다.

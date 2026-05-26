@@ -44,11 +44,7 @@ interface BitmapMaterial {
  * @category Material
  */
 class BitmapMaterial extends AUVTransformBaseMaterial {
-    /**
-     * [KO] 파이프라인 dirty 상태 플래그
-     * [EN] Pipeline dirty status flag
-     */
-    dirtyPipeline: boolean = false
+
 
     /**
      * [KO] BitmapMaterial 생성자
