@@ -63,21 +63,63 @@ const RedGPUContextView = () => {
             </Section>
 
             <Section title="GPU Features">
-                {(() => {
+                <table style={tableStyle}>
+                    <thead>
+                    <tr>
+                        <th style={{...thStyle, width: '34%'}}>Feature Name</th>
+                        <th style={{...thStyle, textAlign: 'right', width: '33%'}}>Supported</th>
+                        <th style={{...thStyle, textAlign: 'right', width: '33%'}}>Active</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {(() => {
+                        const allKnownFeatures = [
+                            "core-features-and-limits", "depth-clip-control", "depth32float-stencil8",
+                            "texture-compression-bc", "texture-compression-bc-sliced-3d", "texture-compression-etc2",
+                            "texture-compression-astc", "texture-compression-astc-sliced-3d", "timestamp-query",
+                            "indirect-first-instance", "shader-f16", "rg11b10ufloat-renderable",
+                            "bgra8unorm-storage", "float32-filterable", "float32-blendable", "clip-distances",
+                            "dual-source-blending", "subgroups", "texture-formats-tier1", "texture-formats-tier2",
+                            "primitive-index", "texture-component-swizzle"
+                        ];
 
+                        const allSupportedKeys = Object.keys(detector.supportedFeatures);
+                        const extraFeatures = allSupportedKeys.filter(f => !allKnownFeatures.includes(f));
+                        const finalFeatureList = [...allKnownFeatures, ...extraFeatures.sort()];
 
-                    const allSupported = Object.keys(detector.supportedFeatures);
+                        return finalFeatureList.map(feature => {
+                            const supported = !!detector.supportedFeatures[feature];
+                            const active = !!detector.activeFeatures[feature];
 
-
-                    return allSupported.map(feature => (
-                        <FeatureItem 
-                            key={feature} 
-                            label={feature} 
-                            supported={!!detector.supportedFeatures[feature]} 
-                            active={!!detector.activeFeatures[feature]} 
-                        />
-                    ));
-                })()}
+                            return (
+                                <tr key={feature}>
+                                    <td style={{...tdStyle, color: supported ? '#aaa' : '#555', whiteSpace: 'nowrap'}}>{feature}</td>
+                                    <td style={{...tdStyle, textAlign: 'right'}}>
+                                        <span style={{
+                                            ...badgeBaseStyle,
+                                            backgroundColor: supported ? '#008000' : '#cc0000',
+                                            opacity: supported ? 1 : 0.5
+                                        }}>
+                                            {supported ? 'YES' : 'NO'}
+                                        </span>
+                                    </td>
+                                    <td style={{...tdStyle, textAlign: 'right'}}>
+                                        {supported ? (
+                                            <span style={{
+                                                ...badgeBaseStyle,
+                                                backgroundColor: active ? '#75e24a' : '#444',
+                                                color: active ? '#000' : '#888'
+                                            }}>
+                                                {active ? 'ACTIVE' : 'INACTIVE'}
+                                            </span>
+                                        ) : <span style={{color: '#444', fontSize: '9px'}}>-</span>}
+                                    </td>
+                                </tr>
+                            );
+                        });
+                    })()}
+                    </tbody>
+                </table>
             </Section>
 
             <Section title="GPU Limits">
@@ -198,56 +240,11 @@ const tdStyle: React.CSSProperties = {
     fontSize: '11px'
 };
 
-/**
- * [KO] GPU 기능의 지원 여부와 활성화 상태를 함께 표시하는 컴포넌트입니다.
- */
-const FeatureItem = ({label, supported, active}: { label: string, supported: boolean, active: boolean }) => {
-    return (
-        <div style={featureItemStyle}>
-            <span style={featureLabelStyle}>{label}</span>
-            <div style={statusWrapperStyle}>
-                <span style={{
-                    ...badgeBaseStyle,
-                    backgroundColor: supported ? '#008000' : '#cc0000',
-                }}>
-                    {supported ? 'Supported' : 'Not Supported'}
-                </span>
-                {supported && (
-                    <span style={{
-                        ...badgeBaseStyle,
-                        backgroundColor: active ? '#4a90e2' : '#666',
-                        marginLeft: '4px'
-                    }}>
-                        {active ? 'Active' : 'Inactive'}
-                    </span>
-                )}
-            </div>
-        </div>
-    );
-};
-
-const featureItemStyle: React.CSSProperties = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '6px'
-};
-
-const featureLabelStyle: React.CSSProperties = {
-    color: '#888',
-    fontSize: '12px'
-};
-
-const statusWrapperStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center'
-};
-
 const badgeBaseStyle: React.CSSProperties = {
     color: 'white',
     padding: '2px 6px',
     borderRadius: '4px',
-    fontSize: '10px',
+    fontSize: '9px',
     fontWeight: 'bold',
     lineHeight: 1,
     textTransform: 'uppercase'

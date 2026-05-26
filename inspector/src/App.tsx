@@ -43,7 +43,7 @@ const panelStyle: React.CSSProperties = {
     position: 'fixed',
     left: 0,
     top: 0,
-    width: '400px',
+    width: '410px',
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
