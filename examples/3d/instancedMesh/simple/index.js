@@ -125,7 +125,8 @@ async function createTest(redGPUContext, scene, material) {
         gui: (pane) => {
             pane.addBinding(mesh, 'instanceCount', {min: 100, max: maxInstanceCount, step: 1})
                 .on('change', initializeInstances);
-            pane.addBinding({maxInstanceCount: maxInstanceCount}, 'maxInstanceCount', {
+            pane.addBinding(mesh, 'maxInstanceCount', {readonly: true,  format: (v) => `${Math.floor(v).toLocaleString()}`})
+            pane.addBinding({limitSize: RedGPU.Display.InstancingMesh.getLimitSize(redGPUContext)}, 'limitSize', {
                 readonly: true,
                 format: (v) => `${Math.floor(v).toLocaleString()}`
             });

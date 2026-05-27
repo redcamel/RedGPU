@@ -139,9 +139,15 @@ class InstancingMesh extends Mesh {
     ) {
         super(redGPUContext, geometry, material);
         this.#redGPUContext = redGPUContext;
+
+        const limitNum = InstancingMesh.getLimitSize(this.#redGPUContext);
+        this.#maxInstanceCount = Math.min(maxInstanceCount, limitNum);
+        this.#instanceCount = Math.min(instanceCount, this.#maxInstanceCount);
+
         this.#init();
-        this.maxInstanceCount = maxInstanceCount;
-        this.instanceCount = instanceCount;
+        this.gpuRenderInfo.vertexUniformInfo = parseWGSL(`INSTANCING_MESH_VERTEX_${this.#maxInstanceCount}`, this.#getVertexModuleSource(this.geometry, this.material)).storage.instanceUniforms;
+        this.#rebuildInstanceUniformBuffer();
+        this.instanceCount = this.#instanceCount;
     }
 
     // ========== Public Getters/Setters ==========
@@ -153,8 +159,6 @@ class InstancingMesh extends Mesh {
     set instanceCount(count: number) {
         validateUintRange(count);
         this.#instanceCount = Math.min(count, this.#maxInstanceCount);
-        this.gpuRenderInfo.vertexUniformInfo = parseWGSL('INSTANCING_MESH_VERTEX', this.#getVertexModuleSource(this.geometry, this.material)).storage.instanceUniforms;
-        this.#rebuildInstanceUniformBuffer();
         if (this.#instanceChildren.length > this.#instanceCount) {
             this.#instanceChildren.length = this.#instanceCount;
         }
@@ -173,16 +177,6 @@ class InstancingMesh extends Mesh {
         return this.#maxInstanceCount;
     }
 
-    set maxInstanceCount(count: number) {
-        validateUintRange(count);
-        const limitNum = InstancingMesh.getLimitSize(this.#redGPUContext);
-        count = Math.min(count, limitNum);
-        this.#maxInstanceCount = count;
-        if (this.#instanceCount > this.#maxInstanceCount) {
-            this.instanceCount = this.#maxInstanceCount;
-        }
-    }
-
     get instanceChildren(): InstancingMeshObject3D[] {
         return this.#instanceChildren;
     }
@@ -192,10 +186,28 @@ class InstancingMesh extends Mesh {
   currentLimitSize
  */
     static getLimitSize(redGPUContext:RedGPUContext): number {
-        const headSize = (16 + 16 + 1 + 1 + 2) * 4; // mat4x4 + mat4x4 + u32 + f32 + padding(vec2) = 144 bytes
-        const perInstanceSize = (16 + 16 + 1) * 4; // mat4x4 + mat4x4 + f32(opacity) = 132 bytes
-        const maxStorageBufferBindingSize = Math.min(redGPUContext.detector.activeLimits.maxStorageBufferBindingSize, 134217728);
-        // const maxStorageBufferBindingSize = redGPUContext.detector.activeLimits.maxStorageBufferBindingSize
+        /**
+         * InstanceUniforms struct (WGSL):
+         * instanceGroupModelMatrix: mat4x4<f32> (16 floats)
+         * instanceGroupNormalModelMatrix: mat4x4<f32> (16 floats)
+         * useDisplacementTexture: u32 (1 float size)
+         * displacementScale: f32 (1 float size)
+         * padding: vec2<f32> (2 floats)
+         * Total headSize = 36 * 4 = 144 bytes
+         */
+        const headSize = (16 + 16 + 1 + 1 + 2) * 4;
+
+        /**
+         * Per-instance data in InstanceUniforms struct (WGSL):
+         * instanceModelMatrixs: array<mat4x4<f32>, N> (16 floats per instance)
+         * instanceNormalModelMatrix: array<mat4x4<f32>, N> (16 floats per instance)
+         * instanceOpacity: array<f32, N> (1 float per instance)
+         * Total perInstanceSize = 33 * 4 = 132 bytes
+         */
+        const perInstanceSize = (16 + 16 + 1) * 4;
+
+        const SAFE_MAX_SIZE = 134217728;
+        const maxStorageBufferBindingSize = Math.min(redGPUContext.detector.activeLimits.maxStorageBufferBindingSize, SAFE_MAX_SIZE);
 
         return Math.floor((maxStorageBufferBindingSize - headSize) / perInstanceSize);
     }
@@ -698,7 +710,11 @@ class InstancingMesh extends Mesh {
         );
         const prevBuffer = this.gpuRenderInfo.vertexUniformBuffer;
         if (prevBuffer?.gpuBuffer) {
-            newBuffer.dataViewF32.set(prevBuffer.dataViewF32, 0);
+            if (prevBuffer.dataViewF32.length > newBuffer.dataViewF32.length) {
+                newBuffer.dataViewF32.set(prevBuffer.dataViewF32.subarray(0, newBuffer.dataViewF32.length), 0);
+            } else {
+                newBuffer.dataViewF32.set(prevBuffer.dataViewF32, 0);
+            }
             prevBuffer.destroy();
         }
         this.gpuRenderInfo.vertexUniformBuffer = newBuffer;
