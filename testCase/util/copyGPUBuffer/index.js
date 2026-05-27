@@ -19,9 +19,9 @@ redUnit.testGroup(
                     run(true);
                 } catch (e) {
                     redGPUContext.destroy();
-                    run(false);
+                    run(false, e);
                 }
-            }, (error) => run(error));
+            }, (error) => run(false, error));
         }, false);
     }
 );
@@ -68,9 +68,9 @@ redUnit.testGroup(
                     run(actual);
                 } catch (e) {
                     redGPUContext.destroy();
-                    run(e);
+                    run(null, e);
                 }
-            }, (error) => run(error));
+            }, (error) => run(null, error));
         }, 1);
     }
 );

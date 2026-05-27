@@ -7,7 +7,7 @@ redUnit.testGroup(
     'RedGPU.Util.getMipLevelCount',
     (runner) => {
         runner.defineTest('Success: 1024x1024 level check', (run) => {
-            try { run(RedGPU.Util.getMipLevelCount(1024, 1024)); } catch (e) { run(e); }
+            try { run(RedGPU.Util.getMipLevelCount(1024, 1024)); } catch (e) { run(null, e); }
         }, 11);
     }
 );
@@ -29,10 +29,10 @@ redUnit.testGroup(
                     run(actual);
                 } catch (e) {
                     redGPUContext.destroy();
-                    run(e);
+                    run(null, e);
                 }
-            }, (error) => run(error));
-        }, 16); // 2 * 2 * 1 * 4 = 16
+            }, (error) => run(null, error));
+        }, 16);
     }
 );
 
@@ -49,9 +49,9 @@ redUnit.testGroup(
                     run(actual);
                 } catch (e) {
                     redGPUContext.destroy();
-                    run(e);
+                    run(null, e);
                 }
-            }, (error) => run(error));
+            }, (error) => run(null, error));
         }, 512);
     }
 );

@@ -21,9 +21,9 @@ redUnit.testGroup(
                     run(actual);
                 } catch (e) {
                     redGPUContext.destroy();
-                    run(e);
+                    run(null, e);
                 }
-            }, (error) => run(error));
+            }, (error) => run(null, error));
         }, 1);
 
         runner.defineTest('Success: Initial activeCount check', (run) => {
@@ -41,9 +41,9 @@ redUnit.testGroup(
                     run(actual);
                 } catch (e) {
                     redGPUContext.destroy();
-                    run(e);
+                    run(null, e);
                 }
-            }, (error) => run(error));
+            }, (error) => run(null, error));
         }, 1);
     }
 );
@@ -67,9 +67,9 @@ redUnit.testGroup(
                     run(actual);
                 } catch (e) {
                     redGPUContext.destroy();
-                    run(e);
+                    run(null, e);
                 }
-            }, (error) => run(error));
+            }, (error) => run(null, error));
         }, 1);
 
         runner.defineTest('Success: activeCount check after release', (run) => {
@@ -88,9 +88,9 @@ redUnit.testGroup(
                     run(actual);
                 } catch (e) {
                     redGPUContext.destroy();
-                    run(e);
+                    run(null, e);
                 }
-            }, (error) => run(error));
+            }, (error) => run(null, error));
         }, 0);
 
         runner.defineTest('Success: allocationCount should not increase on reuse', (run) => {
@@ -111,9 +111,9 @@ redUnit.testGroup(
                     run(actual);
                 } catch (e) {
                     redGPUContext.destroy();
-                    run(e);
+                    run(null, e);
                 }
-            }, (error) => run(error));
+            }, (error) => run(null, error));
         }, 1);
     }
 );
@@ -139,9 +139,9 @@ redUnit.testGroup(
                     run(actual);
                 } catch (e) {
                     redGPUContext.destroy();
-                    run(e);
+                    run(null, e);
                 }
-            }, (error) => run(error));
+            }, (error) => run(null, error));
         }, 0);
 
         runner.defineTest('Success: clear() results in 0 videoMemorySize', (run) => {
@@ -161,9 +161,9 @@ redUnit.testGroup(
                     run(actual);
                 } catch (e) {
                     redGPUContext.destroy();
-                    run(e);
+                    run(null, e);
                 }
-            }, (error) => run(error));
+            }, (error) => run(null, error));
         }, 0);
     }
 );
@@ -190,9 +190,9 @@ redUnit.testGroup(
                     run(actual);
                 } catch (e) {
                     redGPUContext.destroy();
-                    run(e);
+                    run(null, e);
                 }
-            }, (error) => run(error));
+            }, (error) => run(null, error));
         }, 0.3333);
 
         runner.defineTest('Success: peakActiveCount check', (run) => {
@@ -214,9 +214,9 @@ redUnit.testGroup(
                     run(actual);
                 } catch (e) {
                     redGPUContext.destroy();
-                    run(e);
+                    run(null, e);
                 }
-            }, (error) => run(error));
+            }, (error) => run(null, error));
         }, 2);
     }
 );

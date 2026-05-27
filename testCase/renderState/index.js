@@ -11,7 +11,7 @@ redUnit.testGroup(
                 const mockMaterial = { dirtyPipeline: false };
                 const blendState = new RedGPU.RenderState.BlendState(mockMaterial);
                 run(blendState.srcFactor);
-            } catch (e) { run(e); }
+            } catch (e) { run(null, e); }
         }, RedGPU.GPU_BLEND_FACTOR.SRC_ALPHA);
 
         runner.defineTest('Success: Initial dstFactor check', (run) => {
@@ -19,7 +19,7 @@ redUnit.testGroup(
                 const mockMaterial = { dirtyPipeline: false };
                 const blendState = new RedGPU.RenderState.BlendState(mockMaterial);
                 run(blendState.dstFactor);
-            } catch (e) { run(e); }
+            } catch (e) { run(null, e); }
         }, RedGPU.GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA);
 
         runner.defineTest('Success: Property Update trigger dirtyPipeline', (run) => {
@@ -28,7 +28,7 @@ redUnit.testGroup(
                 const blendState = new RedGPU.RenderState.BlendState(mockMaterial);
                 blendState.operation = RedGPU.GPU_BLEND_OPERATION.SUBTRACT;
                 run(mockMaterial.dirtyPipeline);
-            } catch (e) { run(e); }
+            } catch (e) { run(false, e); }
         }, true);
 
         runner.defineTest('Failure: invalid operation', (run) => {
@@ -37,7 +37,7 @@ redUnit.testGroup(
                 const blendState = new RedGPU.RenderState.BlendState(mockMaterial);
                 blendState.operation = 'invalid-op';
                 run(true);
-            } catch (e) { run(false); }
+            } catch (e) { run(false, e); }
         }, false);
     }
 );
@@ -50,7 +50,7 @@ redUnit.testGroup(
                 const mockMesh = { dirtyPipeline: false };
                 const primitiveState = new RedGPU.RenderState.PrimitiveState(mockMesh);
                 run(primitiveState.topology);
-            } catch (e) { run(e); }
+            } catch (e) { run(null, e); }
         }, RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST);
 
         runner.defineTest('Success: Set topology and check dirty', (run) => {
@@ -59,7 +59,7 @@ redUnit.testGroup(
                 const primitiveState = new RedGPU.RenderState.PrimitiveState(mockMesh);
                 primitiveState.topology = RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_STRIP;
                 run(mockMesh.dirtyPipeline);
-            } catch (e) { run(e); }
+            } catch (e) { run(false, e); }
         }, true);
 
         runner.defineTest('Failure: invalid topology', (run) => {
@@ -68,7 +68,7 @@ redUnit.testGroup(
                 const primitiveState = new RedGPU.RenderState.PrimitiveState(mockMesh);
                 primitiveState.topology = 'invalid-topology';
                 run(true);
-            } catch (e) { run(false); }
+            } catch (e) { run(false, e); }
         }, false);
     }
 );
@@ -81,7 +81,7 @@ redUnit.testGroup(
                 const mockMesh = { dirtyPipeline: false };
                 const dsState = new RedGPU.RenderState.DepthStencilState(mockMesh);
                 run(dsState.format);
-            } catch (e) { run(e); }
+            } catch (e) { run(null, e); }
         }, 'depth32float');
 
         runner.defineTest('Success: Initial depthCompare check', (run) => {
@@ -89,7 +89,7 @@ redUnit.testGroup(
                 const mockMesh = { dirtyPipeline: false };
                 const dsState = new RedGPU.RenderState.DepthStencilState(mockMesh);
                 run(dsState.depthCompare);
-            } catch (e) { run(e); }
+            } catch (e) { run(null, e); }
         }, RedGPU.GPU_COMPARE_FUNCTION.LESS_EQUAL);
 
         runner.defineTest('Success: depthBias conditions - Line (should be null)', (run) => {
@@ -98,7 +98,7 @@ redUnit.testGroup(
                 const dsStateLine = new RedGPU.RenderState.DepthStencilState(mockMeshLine);
                 dsStateLine.depthBias = 2;
                 run(dsStateLine.state.depthBias);
-            } catch (e) { run(e); }
+            } catch (e) { run(undefined, e); }
         }, null);
 
         runner.defineTest('Success: depthBias conditions - Triangle (should be 2)', (run) => {
@@ -107,7 +107,7 @@ redUnit.testGroup(
                 const dsStateTriangle = new RedGPU.RenderState.DepthStencilState(mockMeshTriangle);
                 dsStateTriangle.depthBias = 2;
                 run(dsStateTriangle.state.depthBias);
-            } catch (e) { run(e); }
+            } catch (e) { run(null, e); }
         }, 2);
 
         runner.defineTest('Failure: invalid format', (run) => {
@@ -116,7 +116,7 @@ redUnit.testGroup(
                 const dsState = new RedGPU.RenderState.DepthStencilState(mockMesh);
                 dsState.format = 'invalid-format';
                 run(true);
-            } catch (e) { run(false); }
+            } catch (e) { run(false, e); }
         }, false);
     }
 );

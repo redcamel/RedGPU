@@ -10,19 +10,19 @@ redUnit.testGroup(
             try {
                 const manager = new RedGPU.Shadow.DirectionalShadowManager();
                 run(manager.shadowDepthTextureSize);
-            } catch (e) { run(e); }
+            } catch (e) { run(null, e); }
         }, 2048);
         runner.defineTest('Success: Default bias', (run) => {
             try {
                 const manager = new RedGPU.Shadow.DirectionalShadowManager();
                 run(manager.bias);
-            } catch (e) { run(e); }
+            } catch (e) { run(null, e); }
         }, 0.005);
         runner.defineTest('Success: Initial castingList length', (run) => {
             try {
                 const manager = new RedGPU.Shadow.DirectionalShadowManager();
                 run(manager.castingList.length);
-            } catch (e) { run(e); }
+            } catch (e) { run(null, e); }
         }, 0);
     }
 );
@@ -35,14 +35,14 @@ redUnit.testGroup(
                 const manager = new RedGPU.Shadow.DirectionalShadowManager();
                 manager.bias = -0.1;
                 run(true);
-            } catch (e) { run(false); }
+            } catch (e) { run(false, e); }
         }, false);
         runner.defineTest('Failure: bias is NaN', (run) => {
             try {
                 const manager = new RedGPU.Shadow.DirectionalShadowManager();
                 manager.bias = NaN;
                 run(true);
-            } catch (e) { run(false); }
+            } catch (e) { run(false, e); }
         }, false);
     }
 );
@@ -63,9 +63,9 @@ redUnit.testGroup(
                     run(actual);
                 } catch (e) {
                     redGPUContext.destroy();
-                    run(e);
+                    run(null, e);
                 }
-            }, (error) => run(error));
+            }, (error) => run(null, error));
         }, 1024 * 1024 * 4);
     }
 );

@@ -10,11 +10,11 @@ redUnit.testGroup(
             try {
                 const url = 'https://example.com/assets/textures/diffuse.png';
                 run(RedGPU.Util.getFilePath(url));
-            } catch (e) { run(e); }
+            } catch (e) { run(null, e); }
         }, 'https://example.com/assets/textures/');
 
         runner.defineTest('Failure: Empty string URL', (run) => {
-            try { RedGPU.Util.getFilePath(''); run(true); } catch (e) { run(false); }
+            try { RedGPU.Util.getFilePath(''); run(true); } catch (e) { run(false, e); }
         }, false);
     }
 );
@@ -23,7 +23,7 @@ redUnit.testGroup(
     'RedGPU.Util.getFileName',
     (runner) => {
         runner.defineTest('Success: With extension check', (run) => {
-            try { run(RedGPU.Util.getFileName('path/to/image.png')); } catch (e) { run(e); }
+            try { run(RedGPU.Util.getFileName('path/to/image.png')); } catch (e) { run(null, e); }
         }, 'image.png');
     }
 );
@@ -32,7 +32,7 @@ redUnit.testGroup(
     'RedGPU.Util.getFileExtension',
     (runner) => {
         runner.defineTest('Success: lower-case extension check', (run) => {
-            try { run(RedGPU.Util.getFileExtension('IMAGE.PNG')); } catch (e) { run(e); }
+            try { run(RedGPU.Util.getFileExtension('IMAGE.PNG')); } catch (e) { run(null, e); }
         }, 'png');
     }
 );
@@ -45,7 +45,7 @@ redUnit.testGroup(
                 const base = 'https://example.com/path/';
                 const relative = 'image.png';
                 run(RedGPU.Util.getAbsoluteURL(base, relative));
-            } catch (e) { run(e); }
+            } catch (e) { run(null, e); }
         }, 'https://example.com/path/image.png');
     }
 );

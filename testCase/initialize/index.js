@@ -16,11 +16,11 @@ redUnit.testGroup(
                         redGPUContext.destroy();
                         run(isInstanceOf);
                     } catch (e) {
-                        redGPUContext.destroy();
-                        run(e);
+                        if (redGPUContext) redGPUContext.destroy();
+                        run(false, e);
                     }
                 },
-                (error) => run(error)
+                (error) => run(false, error)
             );
         }, true);
 
@@ -34,11 +34,11 @@ redUnit.testGroup(
                         redGPUContext.destroy();
                         run(hasManager);
                     } catch (e) {
-                        redGPUContext.destroy();
-                        run(e);
+                        if (redGPUContext) redGPUContext.destroy();
+                        run(false, e);
                     }
                 },
-                (error) => run(error)
+                (error) => run(false, error)
             );
         }, true);
 
@@ -52,11 +52,11 @@ redUnit.testGroup(
                         redGPUContext.destroy();
                         run(mode);
                     } catch (e) {
-                        redGPUContext.destroy();
-                        run(e);
+                        if (redGPUContext) redGPUContext.destroy();
+                        run(null, e);
                     }
                 },
-                (error) => run(error),
+                (error) => run(null, error),
                 undefined,
                 'premultiplied'
             );
@@ -69,18 +69,18 @@ redUnit.testGroup(
     (runner) => {
         runner.defineTest('Failure: null canvas', (run) => {
             try {
-                RedGPU.init(null, () => run(true), (e) => run(false,e));
+                RedGPU.init(null, () => run(true), (e) => run(false, e));
             } catch (e) {
-                run(false);
+                run(false, e);
             }
         }, false);
         
         runner.defineTest('Failure: invalid alphaMode', (run) => {
             const canvas = document.createElement('canvas');
             try {
-                RedGPU.init(canvas, () => run(true), (e) => run(false,e), undefined, 'invalid-mode');
+                RedGPU.init(canvas, () => run(true), (e) => run(false, e), undefined, 'invalid-mode');
             } catch (e) {
-                run(false);
+                run(false, e);
             }
         }, false);
     }

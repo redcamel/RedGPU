@@ -11,7 +11,7 @@ redUnit.testGroup(
                 const set = new Set();
                 for (let i = 0; i < 100; i++) set.add(RedGPU.Util.createUUID());
                 run(set.size);
-            } catch (e) { run(e); }
+            } catch (e) { run(null, e); }
         }, 100);
     }
 );
@@ -24,7 +24,7 @@ redUnit.testGroup(
                 class UniqueType {}
                 RedGPU.Util.InstanceIdGenerator.getNextId(UniqueType);
                 run(RedGPU.Util.InstanceIdGenerator.getNextId(UniqueType));
-            } catch (e) { run(e); }
+            } catch (e) { run(null, e); }
         }, 1);
     }
 );
@@ -36,7 +36,7 @@ redUnit.testGroup(
             try {
                 const uuid = '123e4567-e89b-12d3-a456-426614174000';
                 run(RedGPU.Util.uuidToUint(uuid));
-            } catch (e) { run(e); }
+            } catch (e) { run(null, e); }
         }, parseInt('123e4567', 16));
     }
 );

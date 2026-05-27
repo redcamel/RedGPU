@@ -9,20 +9,18 @@ redUnit.testGroup(
         runner.defineTest('Success: Constructor: check useTAA logic', (run) => {
             try {
                 const manager = new RedGPU.Antialiasing.AntialiasingManager();
-                const expectedTAA = window.devicePixelRatio > 1.0;
                 run(manager.useTAA);
             } catch (e) {
-                run(e);
+                run(null, e);
             }
         }, window.devicePixelRatio > 1.0);
 
         runner.defineTest('Success: Constructor: check useMSAA logic', (run) => {
             try {
                 const manager = new RedGPU.Antialiasing.AntialiasingManager();
-                const expectedMSAA = window.devicePixelRatio <= 1.0;
                 run(manager.useMSAA);
             } catch (e) {
-                run(e);
+                run(null, e);
             }
         }, window.devicePixelRatio <= 1.0);
     }
@@ -37,7 +35,7 @@ redUnit.testGroup(
                 manager.useTAA = true;
                 run(manager.useTAA);
             } catch (e) {
-                run(e);
+                run(false, e);
             }
         }, true);
         runner.defineTest('Success: Set useTAA = false', (run) => {
@@ -47,7 +45,7 @@ redUnit.testGroup(
                 manager.useTAA = false;
                 run(manager.useTAA);
             } catch (e) {
-                run(e);
+                run(true, e);
             }
         }, false);
     }
@@ -62,7 +60,7 @@ redUnit.testGroup(
                 manager.useMSAA = true;
                 run(manager.useMSAA);
             } catch (e) {
-                run(e);
+                run(false, e);
             }
         }, true);
         runner.defineTest('Success: msaaID uniqueness check', (run) => {
@@ -72,7 +70,7 @@ redUnit.testGroup(
                 manager.useMSAA = !manager.useMSAA;
                 run(manager.msaaID !== oldID);
             } catch (e) {
-                run(e);
+                run(false, e);
             }
         }, true);
     }
@@ -87,7 +85,7 @@ redUnit.testGroup(
                 manager.useFXAA = true;
                 run(manager.useFXAA);
             } catch (e) {
-                run(e);
+                run(false, e);
             }
         }, true);
     }
@@ -103,7 +101,7 @@ redUnit.testGroup(
                 manager.useMSAA = true;
                 run(manager.useTAA);
             } catch (e) {
-                run(e);
+                run(true, e);
             }
         }, false);
         runner.defineTest('Success: Switching MSAA -> FXAA clears MSAA', (run) => {
@@ -113,7 +111,7 @@ redUnit.testGroup(
                 manager.useFXAA = true;
                 run(manager.useMSAA);
             } catch (e) {
-                run(e);
+                run(true, e);
             }
         }, false);
     }
