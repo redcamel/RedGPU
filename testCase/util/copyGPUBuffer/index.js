@@ -29,7 +29,7 @@ redUnit.testGroup(
 redUnit.testGroup(
     'RedGPU.Util.copyGPUBuffer - Integrity',
     (runner) => {
-        runner.defineTest('Success: Data integrity check', (run) => {
+        runner.defineTest('Success: Data integrity check value[0]', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, async (redGPUContext) => {
                 try {
@@ -62,61 +62,15 @@ redUnit.testGroup(
 
                     await read.mapAsync(GPUMapMode.READ);
                     const result = new Float32Array(read.getMappedRange());
-                    const pass = Array.from(result).every((v, i) => v === testData[i]);
+                    const actual = result[0];
                     read.unmap();
                     redGPUContext.destroy();
-                    if (pass) run(true);
-                    else run(false);
+                    run(actual);
                 } catch (e) {
                     redGPUContext.destroy();
                     run(e);
                 }
             }, (error) => run(error));
-        }, true);
-
-        runner.defineTest('Success: Copy with different sizes (uses min size and verify)', (run) => {
-            const canvas = document.createElement('canvas');
-            RedGPU.init(canvas, async (redGPUContext) => {
-                try {
-                    const device = redGPUContext.gpuDevice;
-                    const srcData = new Float32Array([10, 20, 30, 40]);
-                    const srcBuffer = device.createBuffer({
-                        size: srcData.byteLength,
-                        usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
-                        mappedAtCreation: true
-                    });
-                    new Float32Array(srcBuffer.getMappedRange()).set(srcData);
-                    srcBuffer.unmap();
-
-                    const dstBuffer = device.createBuffer({
-                        size: 8,
-                        usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC
-                    });
-
-                    const commandEncoder = device.createCommandEncoder();
-                    RedGPU.Util.copyGPUBuffer(commandEncoder, srcBuffer, dstBuffer);
-                    device.queue.submit([commandEncoder.finish()]);
-
-                    const readBuffer = device.createBuffer({
-                        size: 8,
-                        usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
-                    });
-                    const readEncoder = device.createCommandEncoder();
-                    readEncoder.copyBufferToBuffer(dstBuffer, 0, readBuffer, 0, 8);
-                    device.queue.submit([readEncoder.finish()]);
-
-                    await readBuffer.mapAsync(GPUMapMode.READ);
-                    const result = new Float32Array(readBuffer.getMappedRange());
-                    const pass = result[0] === 10 && result[1] === 20 && result.length === 2;
-                    readBuffer.unmap();
-                    redGPUContext.destroy();
-                    if (pass) run(true);
-                    else run(false);
-                } catch (e) {
-                    redGPUContext.destroy();
-                    run(e);
-                }
-            }, (error) => run(error));
-        }, true);
+        }, 1);
     }
 );

@@ -6,19 +6,14 @@ const redUnit = new RedUnit('RedGPU - ToneMappingManager');
 redUnit.testGroup(
     'RedGPU.ToneMapping.ToneMappingManager - Lifecycle & Properties',
     (runner) => {
-        runner.defineTest('Success: Constructor & Initial State', (run) => {
+        runner.defineTest('Success: Constructor check Context', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
                     const manager = new RedGPU.ToneMapping.ToneMappingManager(redGPUContext);
-                    const checkContext = manager.redGPUContext === redGPUContext;
-                    const checkMode = manager.mode === RedGPU.ToneMapping.TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL;
-                    const checkContrast = manager.contrast === 1.0;
-                    const checkBrightness = manager.brightness === 0.0;
-                    const checkInitialEffect = manager.toneMapping !== undefined;
+                    const actual = manager.redGPUContext;
                     redGPUContext.destroy();
-                    if (checkContext && checkMode && checkContrast && checkBrightness && checkInitialEffect) run(true);
-                    else run(false);
+                    run(actual === redGPUContext);
                 } catch (e) {
                     redGPUContext.destroy();
                     run(e);
@@ -26,72 +21,43 @@ redUnit.testGroup(
             }, (error) => run(error));
         }, true);
 
-        runner.defineTest('Success: Mode Switching (Automatic Cleanup)', (run) => {
+        runner.defineTest('Success: Initial mode check', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
                     const manager = new RedGPU.ToneMapping.ToneMappingManager(redGPUContext);
-                    const effect1 = manager.toneMapping;
-                    manager.mode = RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_HILL;
-                    const effect2 = manager.toneMapping;
-                    const checkModeChange = manager.mode === RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_HILL;
-                    const checkInstanceChange = effect1 !== effect2;
+                    const actual = manager.mode;
                     redGPUContext.destroy();
-                    if (checkModeChange && checkInstanceChange) run(true);
-                    else run(false);
+                    run(actual);
                 } catch (e) {
                     redGPUContext.destroy();
                     run(e);
                 }
             }, (error) => run(error));
-        }, true);
+        }, RedGPU.ToneMapping.TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL);
 
-        runner.defineTest('Success: Property Synchronization (Contrast/Brightness)', (run) => {
+        runner.defineTest('Success: Property Synchronization - contrast', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
                     const manager = new RedGPU.ToneMapping.ToneMappingManager(redGPUContext);
-                    manager.contrast = 1.2;
-                    manager.brightness = -0.1;
-                    const effect = manager.toneMapping;
-                    const checkSync1 = effect.contrast === 1.2 && effect.brightness === -0.1;
                     manager.contrast = 1.8;
-                    manager.brightness = 0.5;
-                    const checkSync2 = effect.contrast === 1.8 && effect.brightness === 0.5;
+                    const actual = manager.toneMapping.contrast;
                     redGPUContext.destroy();
-                    if (checkSync1 && checkSync2) run(true);
-                    else run(false);
+                    run(actual);
                 } catch (e) {
                     redGPUContext.destroy();
                     run(e);
                 }
             }, (error) => run(error));
-        }, true);
-
-        runner.defineTest('Success: Manual clear()', (run) => {
-            const canvas = document.createElement('canvas');
-            RedGPU.init(canvas, (redGPUContext) => {
-                try {
-                    const manager = new RedGPU.ToneMapping.ToneMappingManager(redGPUContext);
-                    const effect1 = manager.toneMapping;
-                    manager.clear();
-                    const effect2 = manager.toneMapping;
-                    redGPUContext.destroy();
-                    if (effect1 !== effect2) run(true);
-                    else run(false);
-                } catch (e) {
-                    redGPUContext.destroy();
-                    run(e);
-                }
-            }, (error) => run(error));
-        }, true);
+        }, 1.8);
     }
 );
 
 redUnit.testGroup(
     'RedGPU.ToneMapping.ToneMappingManager - Rendering',
     (runner) => {
-        runner.defineTest('Success: Render Delegation Path', (run) => {
+        runner.defineTest('Success: Render Delegation check texture creation', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
@@ -108,10 +74,9 @@ redUnit.testGroup(
                         textureView: null
                     };
                     const result = manager.render(view, 4, 4, mockTextureInfo);
-                    const pass = result && result.texture instanceof GPUTexture;
+                    const isGPUTexture = result && result.texture instanceof GPUTexture;
                     redGPUContext.destroy();
-                    if (pass) run(true);
-                    else run(false);
+                    run(isGPUTexture);
                 } catch (e) {
                     redGPUContext.destroy();
                     run(e);

@@ -6,7 +6,7 @@ const redUnit = new RedUnit('RedGPU - PostEffectTexturePool');
 redUnit.testGroup(
     'RedGPU.PostEffect.PostEffectTexturePool - Allocation',
     (runner) => {
-        runner.defineTest('Success: Initial allocation increases allocationCount', (run) => {
+        runner.defineTest('Success: Initial allocationCount check', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
@@ -26,7 +26,7 @@ redUnit.testGroup(
             }, (error) => run(error));
         }, 1);
 
-        runner.defineTest('Success: Allocation increases activeCount', (run) => {
+        runner.defineTest('Success: Initial activeCount check', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
@@ -51,7 +51,7 @@ redUnit.testGroup(
 redUnit.testGroup(
     'RedGPU.PostEffect.PostEffectTexturePool - Reusability',
     (runner) => {
-        runner.defineTest('Success: Releasing increases idleCount', (run) => {
+        runner.defineTest('Success: idleCount check after release', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
@@ -72,7 +72,7 @@ redUnit.testGroup(
             }, (error) => run(error));
         }, 1);
 
-        runner.defineTest('Success: Releasing decreases activeCount', (run) => {
+        runner.defineTest('Success: activeCount check after release', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
@@ -93,7 +93,7 @@ redUnit.testGroup(
             }, (error) => run(error));
         }, 0);
 
-        runner.defineTest('Success: Reallocating same params reuses texture (allocationCount check)', (run) => {
+        runner.defineTest('Success: allocationCount should not increase on reuse', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
@@ -121,7 +121,7 @@ redUnit.testGroup(
 redUnit.testGroup(
     'RedGPU.PostEffect.PostEffectTexturePool - Bulk Operations',
     (runner) => {
-        runner.defineTest('Success: releaseAll() idleCount check', (run) => {
+        runner.defineTest('Success: releaseAll() results in 0 active textures', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
@@ -134,7 +134,7 @@ redUnit.testGroup(
                     pool.allocResult(256, 256);
                     pool.releaseAll();
                     
-                    const actual = pool.idleCount;
+                    const actual = pool.activeCount;
                     redGPUContext.destroy();
                     run(actual);
                 } catch (e) {
@@ -142,9 +142,9 @@ redUnit.testGroup(
                     run(e);
                 }
             }, (error) => run(error));
-        }, 2);
+        }, 0);
 
-        runner.defineTest('Success: clear() resets videoMemorySize', (run) => {
+        runner.defineTest('Success: clear() results in 0 videoMemorySize', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
@@ -171,7 +171,7 @@ redUnit.testGroup(
 redUnit.testGroup(
     'RedGPU.PostEffect.PostEffectTexturePool - Statistics',
     (runner) => {
-        runner.defineTest('Success: hitRate calculation', (run) => {
+        runner.defineTest('Success: hitRate precision check', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
@@ -185,12 +185,9 @@ redUnit.testGroup(
                     pool.allocResult(64, 64); // Hit
                     pool.allocResult(128, 128); // Miss
                     
-                    // 3 requests, 2 allocations -> (3-2)/3 = 0.3333333333333333
-                    const actual = pool.hitRate;
+                    const actual = parseFloat(pool.hitRate.toFixed(4));
                     redGPUContext.destroy();
-                    // Use a small epsilon for floating point comparison in actual run logic if needed,
-                    // but RedUnit usually does simple equality. For hitRate, let's round or check.
-                    run(parseFloat(actual.toFixed(4)));
+                    run(actual);
                 } catch (e) {
                     redGPUContext.destroy();
                     run(e);
@@ -198,7 +195,7 @@ redUnit.testGroup(
             }, (error) => run(error));
         }, 0.3333);
 
-        runner.defineTest('Success: peakActiveCount tracking', (run) => {
+        runner.defineTest('Success: peakActiveCount check', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
