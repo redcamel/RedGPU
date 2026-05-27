@@ -33,11 +33,13 @@ import Vignetting from "./effects/lens/vignetting/Vignetting";
 import OldBloom from "./effects/oldBloom/OldBloom";
 import Sharpen from "./effects/Sharpen";
 import PostEffectManager from "./PostEffectManager";
+import PostEffectTexturePool from "./PostEffectTexturePool";
 
 export * as Core from './core'
 
 export {
     PostEffectManager,
+    PostEffectTexturePool,
     // Color Adjustments
     BrightnessContrast,
     ColorBalance,

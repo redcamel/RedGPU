@@ -7,6 +7,8 @@ RedUnit.pageLoader('RedGPU', [
 	{title: 'runtimeChecker', src: './runtimeChecker'},
 	{title: 'shadow', src: './shadow'},
 	{title: 'toneMappingManager', src: './toneMapping/toneMappingManager'},
+	{title: 'postEffectManager', src: './postEffect/postEffectManager'},
+	{title: 'postEffectCore', src: './postEffect/core'},
 	{title: 'postEffectTexturePool', src: './postEffect/postEffectTexturePool'},
 	{title: 'formatBytes', src: './util/formatBytes'},
 	{title: 'copyGPUBuffer', src: './util/copyGPUBuffer'},
