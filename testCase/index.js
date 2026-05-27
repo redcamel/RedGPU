@@ -3,6 +3,7 @@ import RedUnit from 'https://redcamel.github.io/RedUnit/dist/index.js'
 RedUnit.pageLoader('RedGPU', [
 	{title: 'initialize', src: './initialize'},
 	{title: 'antialiasingManager', src: './antialiasing/antialiasingManager'},
+	{title: 'primitive', src: './primitive'},
 	{title: 'renderState', src: './renderState'},
 	{title: 'runtimeChecker', src: './runtimeChecker'},
 	{title: 'shadow', src: './shadow'},
