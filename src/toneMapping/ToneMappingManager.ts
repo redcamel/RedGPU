@@ -9,8 +9,8 @@ import ToneACESFilmicHill from "./ACESFilmicHill/ToneACESFilmicHill";
 import {IPostEffectResult} from "../postEffect/core/types";
 
 /**
- * [KO] 톤 매핑, 대비, 밝기 및 노출 설정을 통합 관리하는 클래스입니다.
- * [EN] Class that integrates and manages tone mapping, contrast, brightness, and exposure settings.
+ * [KO] 톤 매핑, 대비, 밝기 설정을 통합 관리하는 클래스입니다.
+ * [EN] Class that integrates and manages tone mapping, contrast, and brightness settings.
  *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -19,14 +19,15 @@ import {IPostEffectResult} from "../postEffect/core/types";
  *
  * * ### Example
  * ```typescript
- * // View3D를 통해 접근합니다. (Access through View3D)
+ * // View3D를 통해 접근합니다.
+ * // Access through View3D.
  * const toneMappingManager = view.toneMappingManager;
- * toneMappingManager.mode = RedGPU.TONE_MAPPING_MODE.ACES_FILMIC_HILL;
+ * toneMappingManager.mode = RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_HILL;
  * ```
  * @category ToneMapping
  */
-class ToneMappingManager extends AToneMappingEffect {
-
+class ToneMappingManager {
+    #redGPUContext: RedGPUContext;
     #toneMapping?: AToneMappingEffect;
     #mode: TONE_MAPPING_MODE = TONE_MAPPING_MODE.KHRONOS_PBR_NEUTRAL;
 
@@ -36,10 +37,15 @@ class ToneMappingManager extends AToneMappingEffect {
     /**
      * [KO] ToneMappingManager 인스턴스를 생성합니다. (내부 시스템 전용)
      * [EN] Creates a ToneMappingManager instance. (Internal system only)
-
+     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
+        this.#redGPUContext = redGPUContext;
+    }
+
+    /** [KO] RedGPUContext 인스턴스를 반환합니다. [EN] Returns the RedGPUContext instance. */
+    get redGPUContext(): RedGPUContext {
+        return this.#redGPUContext;
     }
 
     /** [KO] 현재 활성화된 톤 매핑 이펙트 인스턴스를 반환합니다. [EN] Returns the currently active tone mapping effect instance. */
@@ -57,10 +63,7 @@ class ToneMappingManager extends AToneMappingEffect {
     set mode(value: TONE_MAPPING_MODE) {
         if (this.#mode === value) return;
         this.#mode = value;
-        if (this.#toneMapping) {
-            this.#toneMapping.clear();
-            this.#toneMapping = undefined;
-        }
+        this.clear();
     }
 
     /** [KO] 명암 대비(Contrast)를 반환합니다. [EN] Returns the contrast. */
@@ -86,8 +89,20 @@ class ToneMappingManager extends AToneMappingEffect {
     }
 
     /**
+     * [KO] 톤 매핑 리소스를 해제합니다.
+     * [EN] Clears tone mapping resources.
+     */
+    clear() {
+        if (this.#toneMapping) {
+            this.#toneMapping.clear();
+            this.#toneMapping = undefined;
+        }
+    }
+
+    /**
      * [KO] 톤 매핑을 렌더링합니다.
      * [EN] Renders tone mapping.
+     * @param view - [KO] View3D 인스턴스 [EN] View3D instance
      * @param width - [KO] 너비 [EN] Width
      * @param height - [KO] 높이 [EN] Height
      * @param currentTextureView - [KO] 현재 텍스처 뷰 정보 [EN] Current texture view information
@@ -130,4 +145,5 @@ class ToneMappingManager extends AToneMappingEffect {
     }
 }
 
+Object.freeze(ToneMappingManager);
 export default ToneMappingManager;
