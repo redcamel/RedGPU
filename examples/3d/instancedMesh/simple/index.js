@@ -84,7 +84,7 @@ RedGPU.init(
  * @param {RedGPU.Material.PhongMaterial} material
  */
 async function createTest(redGPUContext, scene, material) {
-    const maxInstanceCount = redGPUContext.detector.isMobile ? 100000 : RedGPU.Display.InstancingMesh.getLimitSize(redGPUContext);
+    const maxInstanceCount = redGPUContext.detector.isMobile ? 100000 : Math.min(RedGPU.Display.InstancingMesh.getLimitSize(redGPUContext),1000000);
     const instanceCount = redGPUContext.detector.isMobile ? 20000 : 200000;
     const mesh = new RedGPU.Display.InstancingMesh(
         redGPUContext,
