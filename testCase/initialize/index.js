@@ -6,42 +6,60 @@ const redUnit = new RedUnit('RedGPU - Initialize');
 redUnit.testGroup(
     'RedGPU.init - Success Cases',
     (runner) => {
-        runner.defineTest('Initialize and check instance', (run) => {
+        runner.defineTest('Success: Initialize and check instance', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(
                 canvas,
                 (redGPUContext) => {
-                    const isInstanceOf = redGPUContext instanceof RedGPU.Context.RedGPUContext;
-                    redGPUContext.destroy();
-                    run(isInstanceOf);
+                    try {
+                        const isInstanceOf = redGPUContext instanceof RedGPU.Context.RedGPUContext;
+                        redGPUContext.destroy();
+                        if (isInstanceOf) run(true);
+                        else run(false);
+                    } catch (e) {
+                        redGPUContext.destroy();
+                        run(e);
+                    }
                 },
-                (error) => run(false, error)
+                (error) => run(error)
             );
         }, true);
 
-        runner.defineTest('Check antialiasingManager existence', (run) => {
+        runner.defineTest('Success: Check antialiasingManager existence', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(
                 canvas,
                 (redGPUContext) => {
-                    const hasManager = redGPUContext.antialiasingManager instanceof RedGPU.Antialiasing.AntialiasingManager;
-                    redGPUContext.destroy();
-                    run(hasManager);
+                    try {
+                        const hasManager = redGPUContext.antialiasingManager instanceof RedGPU.Antialiasing.AntialiasingManager;
+                        redGPUContext.destroy();
+                        if (hasManager) run(true);
+                        else run(false);
+                    } catch (e) {
+                        redGPUContext.destroy();
+                        run(e);
+                    }
                 },
-                (error) => run(false, error)
+                (error) => run(error)
             );
         }, true);
 
-        runner.defineTest('Check alphaMode: premultiplied', (run) => {
+        runner.defineTest('Success: Check alphaMode: premultiplied', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(
                 canvas,
                 (redGPUContext) => {
-                    const pass = redGPUContext.alphaMode === 'premultiplied';
-                    redGPUContext.destroy();
-                    run(pass);
+                    try {
+                        const pass = redGPUContext.alphaMode === 'premultiplied';
+                        redGPUContext.destroy();
+                        if (pass) run(true);
+                        else run(false);
+                    } catch (e) {
+                        redGPUContext.destroy();
+                        run(e);
+                    }
                 },
-                (error) => run(false, error),
+                (error) => run(error),
                 undefined,
                 'premultiplied'
             );

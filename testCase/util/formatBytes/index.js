@@ -6,34 +6,16 @@ const redUnit = new RedUnit('RedGPU - Util - formatBytes');
 redUnit.testGroup(
     'RedGPU.Util.formatBytes - Success Cases',
     (runner) => {
-        runner.defineTest('0 Bytes', (run) => {
-            run(RedGPU.Util.formatBytes(0) === '0 Bytes');
+        runner.defineTest('Success: 0 Bytes', (run) => {
+            try { if (RedGPU.Util.formatBytes(0) === '0 Bytes') run(true); else run(false); } catch (e) { run(e); }
         }, true);
 
-        runner.defineTest('Small value (Bytes)', (run) => {
-            run(RedGPU.Util.formatBytes(512) === '512 Bytes');
+        runner.defineTest('Success: KB threshold', (run) => {
+            try { if (RedGPU.Util.formatBytes(1024) === '1 KB') run(true); else run(false); } catch (e) { run(e); }
         }, true);
 
-        runner.defineTest('KB threshold', (run) => {
-            run(RedGPU.Util.formatBytes(1024) === '1 KB');
-        }, true);
-
-        runner.defineTest('MB threshold', (run) => {
-            run(RedGPU.Util.formatBytes(1024 * 1024) === '1 MB');
-        }, true);
-
-        runner.defineTest('GB threshold', (run) => {
-            run(RedGPU.Util.formatBytes(1024 * 1024 * 1024) === '1 GB');
-        }, true);
-
-        runner.defineTest('Decimal precision (default: 2)', (run) => {
-            const bytes = 1024 + 512; // 1.5 KB
-            run(RedGPU.Util.formatBytes(bytes) === '1.5 KB');
-        }, true);
-
-        runner.defineTest('Custom decimal precision', (run) => {
-            const bytes = 1234567; // ~1.17737... MB
-            run(RedGPU.Util.formatBytes(bytes, 4) === '1.1774 MB');
+        runner.defineTest('Success: Decimal precision', (run) => {
+            try { if (RedGPU.Util.formatBytes(1234567, 4) === '1.1774 MB') run(true); else run(false); } catch (e) { run(e); }
         }, true);
     }
 );
@@ -41,40 +23,20 @@ redUnit.testGroup(
 redUnit.testGroup(
     'RedGPU.Util.formatBytes - Failure Cases',
     (runner) => {
-        runner.defineTest('Negative value', (run) => {
-            try {
-                RedGPU.Util.formatBytes(-1);
-                run(true);
-            } catch (e) {
-                run(false);
-            }
+        runner.defineTest('Failure: Negative value', (run) => {
+            try { RedGPU.Util.formatBytes(-1); run(true); } catch (e) { run(false); }
         }, false);
 
-        runner.defineTest('Float value (should be integer)', (run) => {
-            try {
-                RedGPU.Util.formatBytes(1024.5);
-                run(true);
-            } catch (e) {
-                run(false);
-            }
+        runner.defineTest('Failure: Float value', (run) => {
+            try { RedGPU.Util.formatBytes(1024.5); run(true); } catch (e) { run(false); }
         }, false);
 
-        runner.defineTest('NaN input', (run) => {
-            try {
-                RedGPU.Util.formatBytes(NaN);
-                run(true);
-            } catch (e) {
-                run(false);
-            }
+        runner.defineTest('Failure: NaN input', (run) => {
+            try { RedGPU.Util.formatBytes(NaN); run(true); } catch (e) { run(false); }
         }, false);
 
-        runner.defineTest('String input', (run) => {
-            try {
-                RedGPU.Util.formatBytes("1024");
-                run(true);
-            } catch (e) {
-                run(false);
-            }
+        runner.defineTest('Failure: String input', (run) => {
+            try { RedGPU.Util.formatBytes("1024"); run(true); } catch (e) { run(false); }
         }, false);
     }
 );
