@@ -30,9 +30,9 @@ import consoleAndThrowError from "../../utils/consoleAndThrowError";
  * @category Validation
  */
 const validateNumberRange = (value: number, minRange: number = -Number.MAX_VALUE, maxRange: number = Number.MAX_VALUE): boolean => {
-    if (typeof value !== 'number') consoleAndThrowError('Only numbers allowed.');
-    if (typeof minRange !== 'number') consoleAndThrowError('Only numbers allowed.');
-    if (typeof maxRange !== 'number') consoleAndThrowError('Only numbers allowed.');
+    if (typeof value !== 'number' || Number.isNaN(value)) consoleAndThrowError('Only numbers allowed.');
+    if (typeof minRange !== 'number' || Number.isNaN(minRange)) consoleAndThrowError('Only numbers allowed.');
+    if (typeof maxRange !== 'number' || Number.isNaN(maxRange)) consoleAndThrowError('Only numbers allowed.');
     if (value < minRange || value > maxRange) consoleAndThrowError(`Only numbers within the range of [${minRange}, ${maxRange}] are allowed. input : ${value}`);
     return true
 }

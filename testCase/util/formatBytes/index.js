@@ -71,7 +71,6 @@ redUnit.testGroup(
 
         runner.defineTest('String input', (run) => {
             try {
-                // @ts-ignore
                 RedGPU.Util.formatBytes("1024");
                 run(false);
             } catch (e) {

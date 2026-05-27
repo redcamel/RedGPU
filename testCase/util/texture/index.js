@@ -73,7 +73,7 @@ redUnit.testGroup(
                     try {
                         const texture = redGPUContext.gpuDevice.createTexture({
                             size: [2, 2, 1],
-                            format: format ,
+                            format: format,
                             usage: usage
                         });
                         const size = RedGPU.Util.calculateTextureByteSize(texture);

@@ -24,7 +24,7 @@ import consoleAndThrowError from "../../utils/consoleAndThrowError";
  * @category Validation
  */
 const validateNumber = (value: number): boolean => {
-    if (typeof value !== 'number') {
+    if (typeof value !== 'number' || Number.isNaN(value)) {
         consoleAndThrowError('Only numbers allowed.')
         return false
     }
