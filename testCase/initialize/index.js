@@ -3,23 +3,15 @@ import * as RedGPU from "../../dist/index.js";
 
 const redUnit = new RedUnit('RedGPU - Initialize');
 
-// API 구조 확인 로그
-console.log('--- RedGPU API Check ---');
-console.log('RedGPU.Context:', RedGPU.Context);
-console.log('RedGPU.Context.RedGPUContext (Class):', RedGPU.Context.RedGPUContext);
-
 redUnit.testGroup(
     'RedGPU.init - Success Cases',
     (runner) => {
-        runner.defineTest('Check Instance via instanceof (Namespace)', (run) => {
+        runner.defineTest('Initialize and check instance', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(
                 canvas,
                 (redGPUContext) => {
-                    // export * as Context 에 의해 RedGPU.Context.RedGPUContext 가 클래스를 가리킵니다.
                     const isInstanceOf = redGPUContext instanceof RedGPU.Context.RedGPUContext;
-                    console.log('redGPUContext instance check:', isInstanceOf);
-                    
                     redGPUContext.destroy();
                     run(isInstanceOf);
                 },
@@ -27,20 +19,20 @@ redUnit.testGroup(
             );
         }, true);
 
-        runner.defineTest('antialiasingManager property check', (run) => {
+        runner.defineTest('Check antialiasingManager existence', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(
                 canvas,
                 (redGPUContext) => {
-                    const isInstanceOf = redGPUContext.antialiasingManager instanceof RedGPU.Antialiasing.AntialiasingManager;
+                    const hasManager = redGPUContext.antialiasingManager instanceof RedGPU.Antialiasing.AntialiasingManager;
                     redGPUContext.destroy();
-                    run(isInstanceOf);
+                    run(hasManager);
                 },
                 (error) => run(false, error)
             );
         }, true);
 
-        runner.defineTest('alphaMode property check', (run) => {
+        runner.defineTest('Check alphaMode: premultiplied', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(
                 canvas,
@@ -60,14 +52,21 @@ redUnit.testGroup(
 redUnit.testGroup(
     'RedGPU.init - Failure Cases',
     (runner) => {
-        runner.defineTest('null canvas failure', (run) => {
-            RedGPU.init(null, () => run(false), () => run(true));
-        }, true);
+        runner.defineTest('Failure: null canvas', (run) => {
+            try {
+                RedGPU.init(null, () => run(true), () => run(false));
+            } catch (e) {
+                run(false);
+            }
+        }, false);
         
-        runner.defineTest('invalid alphaMode failure', (run) => {
+        runner.defineTest('Failure: invalid alphaMode', (run) => {
             const canvas = document.createElement('canvas');
-            // @ts-ignore
-            RedGPU.init(canvas, () => run(false), () => run(true), undefined, 'invalid-mode');
-        }, true);
+            try {
+                RedGPU.init(canvas, () => run(true), () => run(false), undefined, 'invalid-mode');
+            } catch (e) {
+                run(false);
+            }
+        }, false);
     }
 );

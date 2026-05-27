@@ -24,11 +24,11 @@ redUnit.testGroup(
         runner.defineTest('Empty string failure', (run) => {
             try {
                 RedGPU.Util.getFilePath('');
-                run(false);
-            } catch (e) {
                 run(true);
+            } catch (e) {
+                run(false);
             }
-        }, true);
+        }, false);
     }
 );
 
@@ -83,11 +83,11 @@ redUnit.testGroup(
         runner.defineTest('Empty string failure', (run) => {
             try {
                 RedGPU.Util.getFileExtension('');
-                run(false);
-            } catch (e) {
                 run(true);
+            } catch (e) {
+                run(false);
             }
-        }, true);
+        }, false);
     }
 );
 

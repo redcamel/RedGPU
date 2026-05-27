@@ -33,7 +33,6 @@ redUnit.testGroup(
 
         runner.defineTest('Custom decimal precision', (run) => {
             const bytes = 1234567; // ~1.17737... MB
-            // 1234567 / 1024 / 1024 = 1.1773748397827148
             run(RedGPU.Util.formatBytes(bytes, 4) === '1.1774 MB');
         }, true);
     }
@@ -45,37 +44,37 @@ redUnit.testGroup(
         runner.defineTest('Negative value', (run) => {
             try {
                 RedGPU.Util.formatBytes(-1);
-                run(false);
-            } catch (e) {
                 run(true);
+            } catch (e) {
+                run(false);
             }
-        }, true);
+        }, false);
 
         runner.defineTest('Float value (should be integer)', (run) => {
             try {
                 RedGPU.Util.formatBytes(1024.5);
-                run(false);
-            } catch (e) {
                 run(true);
+            } catch (e) {
+                run(false);
             }
-        }, true);
+        }, false);
 
         runner.defineTest('NaN input', (run) => {
             try {
                 RedGPU.Util.formatBytes(NaN);
-                run(false);
-            } catch (e) {
                 run(true);
+            } catch (e) {
+                run(false);
             }
-        }, true);
+        }, false);
 
         runner.defineTest('String input', (run) => {
             try {
                 RedGPU.Util.formatBytes("1024");
-                run(false);
-            } catch (e) {
                 run(true);
+            } catch (e) {
+                run(false);
             }
-        }, true);
+        }, false);
     }
 );

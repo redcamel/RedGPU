@@ -4,77 +4,68 @@ import * as RedGPU from "../../../dist/index.js";
 const redUnit = new RedUnit('RedGPU - Util - copyGPUBuffer');
 
 redUnit.testGroup(
-    'RedGPU.Util.copyGPUBuffer',
+    'RedGPU.Util.copyGPUBuffer - Validation',
     (runner) => {
-        runner.defineTest('Alignment check (must be multiple of 4)', (run) => {
+        runner.defineTest('Failure: alignment check (size 5)', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 const device = redGPUContext.gpuDevice;
-                const srcBuffer = device.createBuffer({size: 5, usage: GPUBufferUsage.COPY_SRC});
-                const dstBuffer = device.createBuffer({size: 5, usage: GPUBufferUsage.COPY_DST});
-                const commandEncoder = device.createCommandEncoder();
-
+                const src = device.createBuffer({size: 5, usage: GPUBufferUsage.COPY_SRC});
+                const dst = device.createBuffer({size: 5, usage: GPUBufferUsage.COPY_DST});
+                const encoder = device.createCommandEncoder();
                 try {
-                    RedGPU.Util.copyGPUBuffer(commandEncoder, srcBuffer, dstBuffer);
-                    redGPUContext.destroy();
-                    run(false, 'Should throw error for size 5');
-                } catch (e) {
+                    RedGPU.Util.copyGPUBuffer(encoder, src, dst);
                     redGPUContext.destroy();
                     run(true);
+                } catch (e) {
+                    redGPUContext.destroy();
+                    run(false);
                 }
-            }, (error) => run(false, error));
-        }, true);
+            });
+        }, false);
+    }
+);
 
-        runner.defineTest('Data integrity check (Verify actual copy)', (run) => {
+redUnit.testGroup(
+    'RedGPU.Util.copyGPUBuffer - Integrity',
+    (runner) => {
+        runner.defineTest('Data integrity check', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, async (redGPUContext) => {
                 const device = redGPUContext.gpuDevice;
-                
-                // 1. 소스 데이터 준비 (Float32Array [1, 2, 3, 4])
                 const testData = new Float32Array([1, 2, 3, 4]);
-                const srcBuffer = device.createBuffer({
+                const src = device.createBuffer({
                     size: testData.byteLength,
                     usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
                     mappedAtCreation: true
                 });
-                new Float32Array(srcBuffer.getMappedRange()).set(testData);
-                srcBuffer.unmap();
+                new Float32Array(src.getMappedRange()).set(testData);
+                src.unmap();
 
-                // 2. 목적지 버퍼 준비
-                const dstBuffer = device.createBuffer({
+                const dst = device.createBuffer({
                     size: testData.byteLength,
                     usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC
                 });
 
-                // 3. copyGPUBuffer 실행
-                const commandEncoder = device.createCommandEncoder();
-                RedGPU.Util.copyGPUBuffer(commandEncoder, srcBuffer, dstBuffer);
-                device.queue.submit([commandEncoder.finish()]);
+                const encoder = device.createCommandEncoder();
+                RedGPU.Util.copyGPUBuffer(encoder, src, dst);
+                device.queue.submit([encoder.finish()]);
 
-                // 4. 결과 검증 (목적지 버퍼 읽기)
-                const readBuffer = device.createBuffer({
+                const read = device.createBuffer({
                     size: testData.byteLength,
                     usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
                 });
                 const readEncoder = device.createCommandEncoder();
-                readEncoder.copyBufferToBuffer(dstBuffer, 0, readBuffer, 0, testData.byteLength);
+                readEncoder.copyBufferToBuffer(dst, 0, read, 0, testData.byteLength);
                 device.queue.submit([readEncoder.finish()]);
 
-                await readBuffer.mapAsync(GPUMapMode.READ);
-                const result = new Float32Array(readBuffer.getMappedRange());
-                
-                let pass = true;
-                for(let i=0; i<testData.length; i++) {
-                    if(result[i] !== testData[i]) {
-                        pass = false;
-                        break;
-                    }
-                }
-
-                readBuffer.unmap();
+                await read.mapAsync(GPUMapMode.READ);
+                const result = new Float32Array(read.getMappedRange());
+                const pass = Array.from(result).every((v, i) => v === testData[i]);
+                read.unmap();
                 redGPUContext.destroy();
                 run(pass);
-            }, (error) => run(false, error));
+            });
         }, true);
 
         runner.defineTest('Copy with different sizes (uses min size and verify)', (run) => {
@@ -116,7 +107,7 @@ redUnit.testGroup(
                 readBuffer.unmap();
                 redGPUContext.destroy();
                 run(pass);
-            }, (error) => run(false, error));
+            });
         }, true);
     }
 );

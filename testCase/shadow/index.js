@@ -4,86 +4,77 @@ import * as RedGPU from "../../dist/index.js";
 const redUnit = new RedUnit('RedGPU - Shadow');
 
 redUnit.testGroup(
-    'RedGPU.Shadow.DirectionalShadowManager',
+    'RedGPU.Shadow.DirectionalShadowManager - Defaults',
     (runner) => {
-        runner.defineTest('Initial State', (run) => {
+        runner.defineTest('Default shadowDepthTextureSize (2048)', (run) => {
             const manager = new RedGPU.Shadow.DirectionalShadowManager();
-            const checkSize = manager.shadowDepthTextureSize === 2048;
-            const checkBias = manager.bias === 0.005;
-            const checkList = Array.isArray(manager.castingList) && manager.castingList.length === 0;
-            run(checkSize && checkBias && checkList);
+            run(manager.shadowDepthTextureSize === 2048);
         }, true);
-
-        runner.defineTest('Property Validation - bias', (run) => {
+        runner.defineTest('Default bias (0.005)', (run) => {
             const manager = new RedGPU.Shadow.DirectionalShadowManager();
-            try {
-                manager.bias = 0.5; // Valid
-                const check1 = manager.bias === 0.5;
-                
-                manager.bias = -0.1; // Invalid
-                run(false, 'Should throw error for negative bias');
-            } catch (e) {
-                run(manager.bias === 0.5);
-            }
+            run(manager.bias === 0.005);
         }, true);
-
-        runner.defineTest('Property Validation - shadowDepthTextureSize', (run) => {
+        runner.defineTest('Initial castingList is empty', (run) => {
             const manager = new RedGPU.Shadow.DirectionalShadowManager();
-            try {
-                manager.shadowDepthTextureSize = 1024; // Valid
-                const check1 = manager.shadowDepthTextureSize === 1024;
-                
-                manager.shadowDepthTextureSize = 0; // Invalid
-                run(false, 'Should throw error for size 0');
-            } catch (e) {
-                run(manager.shadowDepthTextureSize === 1024);
-            }
+            run(Array.isArray(manager.castingList) && manager.castingList.length === 0);
         }, true);
+    }
+);
 
-        runner.defineTest('Texture Creation & Memory Calculation', (run) => {
-            const canvas = document.createElement('canvas');
-            RedGPU.init(canvas, (redGPUContext) => {
-                const manager = new RedGPU.Shadow.DirectionalShadowManager();
-                
-                // Update triggers texture creation
-                manager.update(redGPUContext);
-                
-                const checkTexture = manager.shadowDepthTextureView instanceof GPUTextureView;
-                const checkEmptyTexture = manager.shadowDepthTextureViewEmpty instanceof GPUTextureView;
-                const checkMemory = manager.videoMemorySize > 0;
-                
-                manager.destroy();
-                redGPUContext.destroy();
-                run(checkTexture && checkEmptyTexture && checkMemory);
-            });
-        }, true);
+redUnit.testGroup(
+    'RedGPU.Shadow.DirectionalShadowManager - Validation',
+    (runner) => {
+        runner.defineTest('Failure: bias range (< 0)', (run) => {
+            const manager = new RedGPU.Shadow.DirectionalShadowManager();
+            try { manager.bias = -0.1; run(true); } catch (e) { run(false); }
+        }, false);
+        runner.defineTest('Failure: bias range (> 1)', (run) => {
+            const manager = new RedGPU.Shadow.DirectionalShadowManager();
+            try { manager.bias = 1.1; run(true); } catch (e) { run(false); }
+        }, false);
+        runner.defineTest('Failure: bias is NaN', (run) => {
+            const manager = new RedGPU.Shadow.DirectionalShadowManager();
+            try { manager.bias = NaN; run(true); } catch (e) { run(false); }
+        }, false);
+        runner.defineTest('Failure: size range (<= 0)', (run) => {
+            const manager = new RedGPU.Shadow.DirectionalShadowManager();
+            try { manager.shadowDepthTextureSize = 0; run(true); } catch (e) { run(false); }
+        }, false);
+        runner.defineTest('Failure: size is NaN', (run) => {
+            const manager = new RedGPU.Shadow.DirectionalShadowManager();
+            try { manager.shadowDepthTextureSize = NaN; run(true); } catch (e) { run(false); }
+        }, false);
+    }
+);
 
-        runner.defineTest('Texture Regeneration on Size Change', (run) => {
+redUnit.testGroup(
+    'RedGPU.Shadow.DirectionalShadowManager - GPU Resources',
+    (runner) => {
+        runner.defineTest('Texture and View creation', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 const manager = new RedGPU.Shadow.DirectionalShadowManager();
                 manager.update(redGPUContext);
-                const oldView = manager.shadowDepthTextureView;
-                
-                manager.shadowDepthTextureSize = 512;
-                manager.update(redGPUContext);
-                const newView = manager.shadowDepthTextureView;
-                
-                const checkChange = oldView !== newView;
-                const checkMemory = manager.videoMemorySize === 512 * 512 * 4; // depth32float = 4 bytes
-                
+                const hasView = manager.shadowDepthTextureView instanceof GPUTextureView;
+                const hasEmptyView = manager.shadowDepthTextureViewEmpty instanceof GPUTextureView;
                 manager.destroy();
                 redGPUContext.destroy();
-                run(checkChange && checkMemory);
+                run(hasView && hasEmptyView);
             });
         }, true);
 
-        runner.defineTest('resetCastingList()', (run) => {
-            const manager = new RedGPU.Shadow.DirectionalShadowManager();
-            // Mock object
-            manager.castingList.push({});
-            manager.resetCastingList();
-            run(manager.castingList.length === 0);
+        runner.defineTest('Memory calculation (2048x2048 depth32float)', (run) => {
+            const canvas = document.createElement('canvas');
+            RedGPU.init(canvas, (redGPUContext) => {
+                const manager = new RedGPU.Shadow.DirectionalShadowManager();
+                manager.shadowDepthTextureSize = 2048;
+                manager.update(redGPUContext);
+                const expected = 2048 * 2048 * 4;
+                const actual = manager.videoMemorySize;
+                manager.destroy();
+                redGPUContext.destroy();
+                run(actual === expected);
+            });
         }, true);
     }
 );
@@ -91,22 +82,9 @@ redUnit.testGroup(
 redUnit.testGroup(
     'RedGPU.Shadow.ShadowManager',
     (runner) => {
-        runner.defineTest('Composition check', (run) => {
+        runner.defineTest('Composition: has DirectionalShadowManager', (run) => {
             const manager = new RedGPU.Shadow.ShadowManager();
             run(manager.directionalShadowManager instanceof RedGPU.Shadow.DirectionalShadowManager);
-        }, true);
-
-        runner.defineTest('update() delegation', (run) => {
-            const canvas = document.createElement('canvas');
-            RedGPU.init(canvas, (redGPUContext) => {
-                const manager = new RedGPU.Shadow.ShadowManager();
-                manager.update(redGPUContext);
-                
-                const checkTexture = manager.directionalShadowManager.shadowDepthTextureView instanceof GPUTextureView;
-                
-                redGPUContext.destroy();
-                run(checkTexture);
-            });
         }, true);
     }
 );

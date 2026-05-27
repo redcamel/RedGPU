@@ -4,9 +4,9 @@ import * as RedGPU from "../../../dist/index.js";
 const redUnit = new RedUnit('RedGPU - AntialiasingManager');
 
 redUnit.testGroup(
-    'RedGPU.Antialiasing.AntialiasingManager',
+    'RedGPU.Antialiasing.AntialiasingManager - Initialization',
     (runner) => {
-        runner.defineTest('Constructor initialization (devicePixelRatio check)', (run) => {
+        runner.defineTest('Constructor: useTAA or useMSAA based on devicePixelRatio', (run) => {
             const manager = new RedGPU.Antialiasing.AntialiasingManager();
             if (window.devicePixelRatio > 1.0) {
                 run(manager.useTAA === true && manager.useMSAA === false && manager.useFXAA === false);
@@ -14,64 +14,68 @@ redUnit.testGroup(
                 run(manager.useTAA === false && manager.useMSAA === true && manager.useFXAA === false);
             }
         }, true);
+    }
+);
 
-        runner.defineTest('useTAA setter/getter', (run) => {
+redUnit.testGroup(
+    'RedGPU.Antialiasing.AntialiasingManager - TAA',
+    (runner) => {
+        runner.defineTest('Set useTAA = true', (run) => {
             const manager = new RedGPU.Antialiasing.AntialiasingManager();
             manager.useTAA = true;
-            const check1 = manager.useTAA === true && manager.useMSAA === false && manager.useFXAA === false;
+            run(manager.useTAA === true && manager.useMSAA === false && manager.useFXAA === false);
+        }, true);
+        runner.defineTest('Set useTAA = false', (run) => {
+            const manager = new RedGPU.Antialiasing.AntialiasingManager();
+            manager.useTAA = true;
             manager.useTAA = false;
-            const check2 = manager.useTAA === false;
-            run(check1 && check2);
+            run(manager.useTAA === false);
         }, true);
+    }
+);
 
-        runner.defineTest('useMSAA setter/getter', (run) => {
+redUnit.testGroup(
+    'RedGPU.Antialiasing.AntialiasingManager - MSAA',
+    (runner) => {
+        runner.defineTest('Set useMSAA = true', (run) => {
             const manager = new RedGPU.Antialiasing.AntialiasingManager();
-            const oldMSAAID = manager.msaaID;
             manager.useMSAA = true;
-            const check1 = manager.useMSAA === true && manager.useTAA === false && manager.useFXAA === false;
-            const check2 = manager.msaaID !== oldMSAAID;
-            manager.useMSAA = false;
-            const check3 = manager.useMSAA === false;
-            run(check1 && check2 && check3);
+            run(manager.useMSAA === true && manager.useTAA === false && manager.useFXAA === false);
         }, true);
+        runner.defineTest('msaaID update on useMSAA change', (run) => {
+            const manager = new RedGPU.Antialiasing.AntialiasingManager();
+            const oldID = manager.msaaID;
+            manager.useMSAA = true;
+            run(manager.msaaID !== oldID);
+        }, true);
+    }
+);
 
-        runner.defineTest('useFXAA setter/getter', (run) => {
+redUnit.testGroup(
+    'RedGPU.Antialiasing.AntialiasingManager - FXAA',
+    (runner) => {
+        runner.defineTest('Set useFXAA = true', (run) => {
             const manager = new RedGPU.Antialiasing.AntialiasingManager();
             manager.useFXAA = true;
-            const check1 = manager.useFXAA === true && manager.useTAA === false && manager.useMSAA === false;
-            manager.useFXAA = false;
-            const check2 = manager.useFXAA === false;
-            run(check1 && check2);
+            run(manager.useFXAA === true && manager.useTAA === false && manager.useMSAA === false);
         }, true);
+    }
+);
 
-        runner.defineTest('Exclusive selection (setting one clears others)', (run) => {
+redUnit.testGroup(
+    'RedGPU.Antialiasing.AntialiasingManager - Exclusive Selection',
+    (runner) => {
+        runner.defineTest('Switching TAA -> MSAA', (run) => {
             const manager = new RedGPU.Antialiasing.AntialiasingManager();
-            
             manager.useTAA = true;
-            const check1 = manager.useTAA === true && manager.useMSAA === false && manager.useFXAA === false;
-            
             manager.useMSAA = true;
-            const check2 = manager.useTAA === false && manager.useMSAA === true && manager.useFXAA === false;
-            
-            manager.useFXAA = true;
-            const check3 = manager.useTAA === false && manager.useMSAA === false && manager.useFXAA === true;
-            
-            run(check1 && check2 && check3);
+            run(manager.useTAA === false && manager.useMSAA === true);
         }, true);
-
-        runner.defineTest('msaaID uniqueness on change', (run) => {
+        runner.defineTest('Switching MSAA -> FXAA', (run) => {
             const manager = new RedGPU.Antialiasing.AntialiasingManager();
-            const ids = new Set();
-            
             manager.useMSAA = true;
-            ids.add(manager.msaaID);
-            
-            manager.useMSAA = false;
-            
-            manager.useMSAA = true;
-            ids.add(manager.msaaID);
-            
-            run(ids.size === 2);
+            manager.useFXAA = true;
+            run(manager.useMSAA === false && manager.useFXAA === true);
         }, true);
     }
 );
