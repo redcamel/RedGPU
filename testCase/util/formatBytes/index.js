@@ -1,62 +1,82 @@
-import RedUnit from 'https://redcamel.github.io/RedUnit/dist/index.js'
+import RedUnit from 'https://redcamel.github.io/RedUnit/dist/index.js';
 import * as RedGPU from "../../../dist/index.js";
 
-const redUnit = new RedUnit('RedGPU - formatBytes')
+const redUnit = new RedUnit('RedGPU - Util - formatBytes');
 
 redUnit.testGroup(
-	'JavaScript FormatBytes Function Test Group',
-	(runner) => {
-		runner.defineTest('Test 0 bytes', function (run) {
-			run(RedGPU.Util.formatBytes(0));
-		}, "0 Bytes");
+    'RedGPU.Util.formatBytes - Success Cases',
+    (runner) => {
+        runner.defineTest('0 Bytes', (run) => {
+            run(RedGPU.Util.formatBytes(0) === '0 Bytes');
+        }, true);
 
-		runner.defineTest('Test 1024 bytes', function (run) {
-			run(RedGPU.Util.formatBytes(1024));
-		}, "1 KB");
+        runner.defineTest('Small value (Bytes)', (run) => {
+            run(RedGPU.Util.formatBytes(512) === '512 Bytes');
+        }, true);
 
-		runner.defineTest('Test 1048576 bytes', function (run) {
-			run(RedGPU.Util.formatBytes(1048576));
-		}, "1 MB");
+        runner.defineTest('KB threshold', (run) => {
+            run(RedGPU.Util.formatBytes(1024) === '1 KB');
+        }, true);
 
-		runner.defineTest('Test 1073741824 bytes', function (run) {
-			run(RedGPU.Util.formatBytes(1073741824));
-		}, "1 GB");
+        runner.defineTest('MB threshold', (run) => {
+            run(RedGPU.Util.formatBytes(1024 * 1024) === '1 MB');
+        }, true);
 
-		runner.defineTest('Test negative input', function (run) {
-			let negativeTest;
-			try {
-				RedGPU.Util.formatBytes(-1024);
-				negativeTest = true;
-				run(negativeTest);
-			} catch (e) {
-				negativeTest = false;
-				run(negativeTest, e);
-			}
+        runner.defineTest('GB threshold', (run) => {
+            run(RedGPU.Util.formatBytes(1024 * 1024 * 1024) === '1 GB');
+        }, true);
 
-		}, false);
-		runner.defineTest('Test floating point input', function (run) {
-			let negativeTest;
-			try {
-				RedGPU.Util.formatBytes(1024.1);
-				negativeTest = true;
-				run(negativeTest);
-			} catch (e) {
-				negativeTest = false;
-				run(negativeTest, e);
-			}
+        runner.defineTest('Decimal precision (default: 2)', (run) => {
+            const bytes = 1024 + 512; // 1.5 KB
+            run(RedGPU.Util.formatBytes(bytes) === '1.5 KB');
+        }, true);
 
-		}, false);
-		runner.defineTest('Test string input', function (run) {
-			let stringTest;
-			try {
-				RedGPU.Util.formatBytes("1024");
-				stringTest = true;
-				run(stringTest);
-			} catch (e) {
-				stringTest = false;
-				run(stringTest, e);
-			}
+        runner.defineTest('Custom decimal precision', (run) => {
+            const bytes = 1234567; // ~1.17737... MB
+            // 1234567 / 1024 / 1024 = 1.1773748397827148
+            run(RedGPU.Util.formatBytes(bytes, 4) === '1.1774 MB');
+        }, true);
+    }
+);
 
-		}, false);
-	}
+redUnit.testGroup(
+    'RedGPU.Util.formatBytes - Failure Cases',
+    (runner) => {
+        runner.defineTest('Negative value', (run) => {
+            try {
+                RedGPU.Util.formatBytes(-1);
+                run(false);
+            } catch (e) {
+                run(true);
+            }
+        }, true);
+
+        runner.defineTest('Float value (should be integer)', (run) => {
+            try {
+                RedGPU.Util.formatBytes(1024.5);
+                run(false);
+            } catch (e) {
+                run(true);
+            }
+        }, true);
+
+        runner.defineTest('NaN input', (run) => {
+            try {
+                RedGPU.Util.formatBytes(NaN);
+                run(false);
+            } catch (e) {
+                run(true);
+            }
+        }, true);
+
+        runner.defineTest('String input', (run) => {
+            try {
+                // @ts-ignore
+                RedGPU.Util.formatBytes("1024");
+                run(false);
+            } catch (e) {
+                run(true);
+            }
+        }, true);
+    }
 );

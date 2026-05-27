@@ -27,6 +27,19 @@ redUnit.testGroup(
             );
         }, true);
 
+        runner.defineTest('antialiasingManager property check', (run) => {
+            const canvas = document.createElement('canvas');
+            RedGPU.init(
+                canvas,
+                (redGPUContext) => {
+                    const isInstanceOf = redGPUContext.antialiasingManager instanceof RedGPU.Antialiasing.AntialiasingManager;
+                    redGPUContext.destroy();
+                    run(isInstanceOf);
+                },
+                (error) => run(false, error)
+            );
+        }, true);
+
         runner.defineTest('alphaMode property check', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(
