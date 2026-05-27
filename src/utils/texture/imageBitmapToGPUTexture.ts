@@ -30,6 +30,10 @@ const imageBitmapToGPUTexture = (
     textureDescriptor: GPUTextureDescriptor,
     usePremultiplyAlpha: boolean = true
 ) => {
+    // [KO] copyExternalImageToTexture를 사용하려면 목적지 텍스처에 COPY_DST와 RENDER_ATTACHMENT 권한이 반드시 필요합니다.
+    // [EN] To use copyExternalImageToTexture, the destination texture must have COPY_DST and RENDER_ATTACHMENT usage.
+    textureDescriptor.usage |= GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT;
+
     const newGPUTexture = gpuDevice.createTexture(textureDescriptor);
     //
     for (let i = 0; i < imageBitmaps.length; i++) {

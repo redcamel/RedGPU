@@ -5,6 +5,7 @@ RedUnit.pageLoader('RedGPU', [
 	{title: 'antialiasingManager', src: './antialiasing/antialiasingManager'},
 	{title: 'formatBytes', src: './util/formatBytes'},
 	{title: 'copyGPUBuffer', src: './util/copyGPUBuffer'},
+	{title: 'textureUtils', src: './util/texture'},
 	// util
 	{title: 'file', src: './util/file'},
 	{title: 'uuid', src: './util/uuid'},
