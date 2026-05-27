@@ -147,6 +147,8 @@ class InstancingMesh extends Mesh {
         this.#init();
         this.gpuRenderInfo.vertexUniformInfo = parseWGSL(`INSTANCING_MESH_VERTEX_${this.#maxInstanceCount}`, this.#getVertexModuleSource(this.geometry, this.material)).storage.instanceUniforms;
         this.#rebuildInstanceUniformBuffer();
+        this.#updateVisibilityStride();
+        this.#initGPURenderInfos(this.#redGPUContext);
         this.instanceCount = this.#instanceCount;
     }
 
@@ -168,8 +170,6 @@ class InstancingMesh extends Mesh {
                 this.#instanceChildren[i] = new InstancingMeshObject3D(this.#redGPUContext, i, this);
             }
         }
-        this.#updateVisibilityStride();
-        this.#initGPURenderInfos(this.#redGPUContext);
         this.dirtyInstanceNum = true;
     }
 
@@ -695,7 +695,7 @@ class InstancingMesh extends Mesh {
     // ========== Utility 메서드 ==========
 
     #updateVisibilityStride(): void {
-        const rawStride = this.#instanceCount * 4;
+        const rawStride = this.#maxInstanceCount * 4;
         this.#visibilityStrideBytes = Math.ceil(rawStride / 256) * 256;
         this.#visibilityStrideU32 = this.#visibilityStrideBytes / 4;
     }
