@@ -84,7 +84,8 @@ RedGPU.init(
  * @param {RedGPU.Material.PhongMaterial} material
  */
 async function createTest(redGPUContext, scene, material) {
-    const maxInstanceCount = redGPUContext.detector.isMobile ? 100000 : RedGPU.Display.InstancingMesh.getLimitSize(redGPUContext);
+    const maxInstanceCount = redGPUContext.detector.isMobile ? 100000 : Math.min(RedGPU.Display.InstancingMesh.getLimitSize(redGPUContext),1000000);
+
     const instanceCount = redGPUContext.detector.isMobile ? 20000 : 200000;
     const mesh = new RedGPU.Display.InstancingMesh(
         redGPUContext,
@@ -125,7 +126,8 @@ async function createTest(redGPUContext, scene, material) {
         gui: (pane) => {
             pane.addBinding(mesh, 'instanceCount', {min: 100, max: maxInstanceCount, step: 1})
                 .on('change', initializeInstances);
-            pane.addBinding({maxInstanceCount: maxInstanceCount}, 'maxInstanceCount', {
+            pane.addBinding(mesh, 'maxInstanceCount', {readonly: true,  format: (v) => `${Math.floor(v).toLocaleString()}`})
+            pane.addBinding({limitSize: RedGPU.Display.InstancingMesh.getLimitSize(redGPUContext)}, 'limitSize', {
                 readonly: true,
                 format: (v) => `${Math.floor(v).toLocaleString()}`
             });

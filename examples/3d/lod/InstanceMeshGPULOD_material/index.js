@@ -201,6 +201,10 @@ async function createTest(redGPUContext, scene, material) {
                     readonly: true,
                     format: (v) => `${Math.floor(v).toLocaleString()}`
                 });
+                pane.addBinding({limitSize: RedGPU.Display.InstancingMesh.getLimitSize(redGPUContext)}, 'limitSize', {
+                    readonly: true,
+                    format: (v) => `${Math.floor(v).toLocaleString()}`
+                });
             }
         });
     });
