@@ -272,7 +272,7 @@ class CommandEncoderManager extends RedGPUObject {
         if (len > 0) {
             let i = 0;
             for (i; i < len; i++) {
-                keepLog(this.#deferredDestroyList[i])
+                // keepLog(this.#deferredDestroyList[i])
                 this.#deferredDestroyList[i].destroy();
             }
             this.#deferredDestroyList.length = 0;
