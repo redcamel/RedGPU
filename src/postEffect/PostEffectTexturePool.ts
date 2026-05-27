@@ -9,6 +9,18 @@ import RedGPUObject from "../base/RedGPUObject";
  *
  * [KO] 후처리 과정에서 발생하는 임시 텍스처들을 재사용하여 비디오 메모리 점유율과 생성/파괴 오버헤드를 줄입니다.
  * [EN] Reduces video memory occupancy and creation/destruction overhead by reusing temporary textures generated during post-processing.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
+ * * ### Example
+ * ```typescript
+ * // View3D의 postEffectManager를 통해 접근합니다.
+ * // Access through the postEffectManager of View3D.
+ * const texturePool = view.postEffectManager.texturePool;
+ * ```
  */
 class PostEffectTexturePool extends RedGPUObject {
 

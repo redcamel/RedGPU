@@ -99,7 +99,7 @@ class RedGPUContextDetector {
             }
         }
 
-        keepLog(this);
+        // keepLog(this);
     }
 
     // Getters
