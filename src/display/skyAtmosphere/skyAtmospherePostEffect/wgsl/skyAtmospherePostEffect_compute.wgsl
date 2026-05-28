@@ -68,7 +68,10 @@ let sunShadow = getPlanetShadowMask(camPos, sunDir, groundRadius, uniforms);
 
 // 대기 투과율을 적용한 Glow 및 Sun 계산
 let mieGlow = getMieGlowAmountUnit(viewSunCos, mappingH, uniforms, transmittanceLUT, basicSampler, vec3<f32>(atmosphereTrans), 0.0);
-let sunDisk = select(vec3<f32>(0.0), getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, vec3<f32>(atmosphereTrans), 0.01, uniforms), rawDepth >= 1.0);
+
+let hitsVirtualGround = groundRadius > 0.0 && getRaySphereIntersection(camPos, viewDir, groundRadius) > 0.0;
+let drawSunDisk = (rawDepth >= 1.0) && !hitsVirtualGround;
+let sunDisk = select(vec3<f32>(0.0), getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, vec3<f32>(atmosphereTrans), 0.01, uniforms), drawSunDisk);
 
 // 3. 최종 산란광 합산 및 장면 합성 (Unified Formula)
 let totalScattering = (baseScattering + (mieGlow + sunDisk) * sunShadow) * uniforms.sunIntensity * systemUniforms.preExposure;
