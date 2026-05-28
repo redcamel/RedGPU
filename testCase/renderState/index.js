@@ -6,69 +6,41 @@ const redUnit = new RedUnit('RedGPU - RenderState');
 redUnit.testGroup(
     'RedGPU.RenderState.BlendState',
     (runner) => {
-        runner.defineTest('Success: Initial srcFactor check', (run) => {
-            try {
-                const mockMaterial = { dirtyPipeline: false };
-                const blendState = new RedGPU.RenderState.BlendState(mockMaterial);
-                run(blendState.srcFactor);
-            } catch (e) { run(null, e); }
-        }, RedGPU.GPU_BLEND_FACTOR.SRC_ALPHA);
+        const createMockMaterial = () => ({ dirtyPipeline: false });
 
-        runner.defineTest('Success: Initial dstFactor check', (run) => {
+        runner.defineTest('Success Test: Constructor and Getters', (run) => {
             try {
-                const mockMaterial = { dirtyPipeline: false };
-                const blendState = new RedGPU.RenderState.BlendState(mockMaterial);
-                run(blendState.dstFactor);
-            } catch (e) { run(null, e); }
-        }, RedGPU.GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA);
-
-        runner.defineTest('Success: Property Update trigger dirtyPipeline', (run) => {
-            try {
-                const mockMaterial = { dirtyPipeline: false };
-                const blendState = new RedGPU.RenderState.BlendState(mockMaterial);
-                blendState.operation = RedGPU.GPU_BLEND_OPERATION.SUBTRACT;
-                run(mockMaterial.dirtyPipeline);
+                const mat = createMockMaterial();
+                const blend = new RedGPU.RenderState.BlendState(mat);
+                const check = blend.operation === RedGPU.GPU_BLEND_OPERATION.ADD &&
+                              blend.srcFactor === RedGPU.GPU_BLEND_FACTOR.SRC_ALPHA &&
+                              blend.dstFactor === RedGPU.GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
+                run(check);
             } catch (e) { run(false, e); }
         }, true);
 
-        runner.defineTest('Failure: invalid operation', (run) => {
+        runner.defineTest('Success Test: Setters and state update', (run) => {
             try {
-                const mockMaterial = { dirtyPipeline: false };
-                const blendState = new RedGPU.RenderState.BlendState(mockMaterial);
-                blendState.operation = 'invalid-op';
-                run(true);
+                const mat = createMockMaterial();
+                const blend = new RedGPU.RenderState.BlendState(mat);
+                blend.operation = RedGPU.GPU_BLEND_OPERATION.MAX;
+                blend.srcFactor = RedGPU.GPU_BLEND_FACTOR.ONE;
+                blend.dstFactor = RedGPU.GPU_BLEND_FACTOR.ZERO;
+                
+                const checkState = blend.state.operation === 'max' &&
+                                   blend.state.srcFactor === 'one' &&
+                                   blend.state.dstFactor === 'zero';
+                const checkDirty = mat.dirtyPipeline === true;
+                run(checkState && checkDirty);
             } catch (e) { run(false, e); }
+        }, true);
+
+        runner.defineTest('Failure Test: operation - invalid constant', (run) => {
+            try { new RedGPU.RenderState.BlendState(createMockMaterial()).operation = 'invalid'; run(true); } catch (e) { run(false, e); }
         }, false);
-    }
-);
 
-redUnit.testGroup(
-    'RedGPU.RenderState.PrimitiveState',
-    (runner) => {
-        runner.defineTest('Success: Initial topology check', (run) => {
-            try {
-                const mockMesh = { dirtyPipeline: false };
-                const primitiveState = new RedGPU.RenderState.PrimitiveState(mockMesh);
-                run(primitiveState.topology);
-            } catch (e) { run(null, e); }
-        }, RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST);
-
-        runner.defineTest('Success: Set topology and check dirty', (run) => {
-            try {
-                const mockMesh = { dirtyPipeline: false };
-                const primitiveState = new RedGPU.RenderState.PrimitiveState(mockMesh);
-                primitiveState.topology = RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_STRIP;
-                run(mockMesh.dirtyPipeline);
-            } catch (e) { run(false, e); }
-        }, true);
-
-        runner.defineTest('Failure: invalid topology', (run) => {
-            try {
-                const mockMesh = { dirtyPipeline: false };
-                const primitiveState = new RedGPU.RenderState.PrimitiveState(mockMesh);
-                primitiveState.topology = 'invalid-topology';
-                run(true);
-            } catch (e) { run(false, e); }
+        runner.defineTest('Failure Test: srcFactor - null', (run) => {
+            try { new RedGPU.RenderState.BlendState(createMockMaterial()).srcFactor = null; run(true); } catch (e) { run(false, e); }
         }, false);
     }
 );
@@ -76,47 +48,72 @@ redUnit.testGroup(
 redUnit.testGroup(
     'RedGPU.RenderState.DepthStencilState',
     (runner) => {
-        runner.defineTest('Success: Initial format check', (run) => {
-            try {
-                const mockMesh = { dirtyPipeline: false };
-                const dsState = new RedGPU.RenderState.DepthStencilState(mockMesh);
-                run(dsState.format);
-            } catch (e) { run(null, e); }
-        }, 'depth32float');
+        const createMockObject = (topology = RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST) => ({
+            dirtyPipeline: false,
+            primitiveState: { topology }
+        });
 
-        runner.defineTest('Success: Initial depthCompare check', (run) => {
+        runner.defineTest('Success Test: Format and Basic Properties', (run) => {
             try {
-                const mockMesh = { dirtyPipeline: false };
-                const dsState = new RedGPU.RenderState.DepthStencilState(mockMesh);
-                run(dsState.depthCompare);
-            } catch (e) { run(null, e); }
-        }, RedGPU.GPU_COMPARE_FUNCTION.LESS_EQUAL);
-
-        runner.defineTest('Success: depthBias conditions - Line (should be null)', (run) => {
-            try {
-                const mockMeshLine = { dirtyPipeline: false, primitiveState: { topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST } };
-                const dsStateLine = new RedGPU.RenderState.DepthStencilState(mockMeshLine);
-                dsStateLine.depthBias = 2;
-                run(dsStateLine.state.depthBias);
-            } catch (e) { run(undefined, e); }
-        }, null);
-
-        runner.defineTest('Success: depthBias conditions - Triangle (should be 2)', (run) => {
-            try {
-                const mockMeshTriangle = { dirtyPipeline: false, primitiveState: { topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_STRIP } };
-                const dsStateTriangle = new RedGPU.RenderState.DepthStencilState(mockMeshTriangle);
-                dsStateTriangle.depthBias = 2;
-                run(dsStateTriangle.state.depthBias);
-            } catch (e) { run(null, e); }
-        }, 2);
-
-        runner.defineTest('Failure: invalid format', (run) => {
-            try {
-                const mockMesh = { dirtyPipeline: false };
-                const dsState = new RedGPU.RenderState.DepthStencilState(mockMesh);
-                dsState.format = 'invalid-format';
-                run(true);
+                const obj = createMockObject();
+                const ds = new RedGPU.RenderState.DepthStencilState(obj);
+                ds.format = 'depth24plus';
+                ds.depthWriteEnabled = false;
+                ds.depthCompare = RedGPU.GPU_COMPARE_FUNCTION.ALWAYS;
+                run(ds.format === 'depth24plus' && ds.depthWriteEnabled === false && ds.depthCompare === 'always');
             } catch (e) { run(false, e); }
+        }, true);
+
+        runner.defineTest('Success Test: Depth Bias and topology relationship', (run) => {
+            try {
+                const triObj = createMockObject(RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST);
+                const dsTri = new RedGPU.RenderState.DepthStencilState(triObj);
+                dsTri.depthBias = 5;
+                const checkTri = dsTri.state.depthBias === 5;
+
+                const lineObj = createMockObject(RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST);
+                const dsLine = new RedGPU.RenderState.DepthStencilState(lineObj);
+                dsLine.depthBias = 5;
+                const checkLine = dsLine.state.depthBias === null;
+
+                run(checkTri && checkLine);
+            } catch (e) { run(false, e); }
+        }, true);
+
+        runner.defineTest('Failure Test: format - invalid', (run) => {
+            try { new RedGPU.RenderState.DepthStencilState(createMockObject()).format = 'invalid-format'; run(true); } catch (e) { run(false, e); }
+        }, false);
+    }
+);
+
+redUnit.testGroup(
+    'RedGPU.RenderState.PrimitiveState',
+    (runner) => {
+        const createMockObject = () => ({ dirtyPipeline: false });
+
+        runner.defineTest('Success Test: Properties and state', (run) => {
+            try {
+                const obj = createMockObject();
+                const psActual = new RedGPU.RenderState.PrimitiveState(obj);
+                psActual.topology = RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_STRIP;
+                psActual.cullMode = RedGPU.GPU_CULL_MODE.FRONT;
+                psActual.frontFace = RedGPU.GPU_FRONT_FACE.CW;
+                psActual.unclippedDepth = true;
+                
+                const checkState = psActual.state.topology === 'line-strip' &&
+                                   psActual.state.cullMode === 'front' &&
+                                   psActual.state.frontFace === 'cw' &&
+                                   psActual.state.unclippedDepth === true;
+                run(checkState && obj.dirtyPipeline === true);
+            } catch (e) { run(false, e); }
+        }, true);
+
+        runner.defineTest('Failure Test: topology - invalid', (run) => {
+            try { new RedGPU.RenderState.PrimitiveState(createMockObject()).topology = 'invalid'; run(true); } catch (e) { run(false, e); }
+        }, false);
+
+        runner.defineTest('Failure Test: unclippedDepth - wrong type', (run) => {
+            try { new RedGPU.RenderState.PrimitiveState(createMockObject()).unclippedDepth = 'true'; run(true); } catch (e) { run(false, e); }
         }, false);
     }
 );

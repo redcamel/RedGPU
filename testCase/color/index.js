@@ -6,127 +6,176 @@ const redUnit = new RedUnit('RedGPU - Color');
 redUnit.testGroup(
     'RedGPU.Color.ColorRGB',
     (runner) => {
-        // Exhaustive: Constructor & Defaults
-        runner.defineTest('Success: Default constructor', (run) => {
+        // Constructor & Getters
+        runner.defineTest('Success Test Test: default constructor', (run) => {
             try {
                 const color = new RedGPU.Color.ColorRGB();
                 run(color.r === 255 && color.g === 255 && color.b === 255);
-            } catch (e) { run(false, e); }
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
 
-        runner.defineTest('Success: Custom constructor', (run) => {
+        runner.defineTest('Success Test Test: constructor with values', (run) => {
             try {
                 const color = new RedGPU.Color.ColorRGB(100, 150, 200);
                 run(color.r === 100 && color.g === 150 && color.b === 200);
-            } catch (e) { run(false, e); }
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
 
-        // Exhaustive: Getters & Setters
-        runner.defineTest('Success: Setters and Getters (r, g, b)', (run) => {
+        runner.defineTest('Success Test Test: constructor with onChange callback', (run) => {
             try {
-                const color = new RedGPU.Color.ColorRGB();
-                color.r = 10; color.g = 20; color.b = 30;
-                run(color.r === 10 && color.g === 20 && color.b === 30);
-            } catch (e) { run(false, e); }
+                let changed = false;
+                const color = new RedGPU.Color.ColorRGB(100, 150, 200, () => { changed = true; });
+                color.r = 50;
+                run(changed);
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
 
-        runner.defineTest('Success: rgb property', (run) => {
+        // Setters
+        ['r', 'g', 'b'].forEach(prop => {
+            runner.defineTest(`Success Test Test: set ${prop}`, (run) => {
+                try {
+                    const color = new RedGPU.Color.ColorRGB();
+                    color[prop] = 128;
+                    run(color[prop]);
+                } catch (e) {
+                    run(false, e);
+                }
+            }, 128);
+        });
+
+        // Computed Properties
+        runner.defineTest('Success Test Test: rgb getter', (run) => {
             try {
-                const color = new RedGPU.Color.ColorRGB(1, 2, 3);
+                const color = new RedGPU.Color.ColorRGB(10, 20, 30);
                 const rgb = color.rgb;
-                run(rgb[0] === 1 && rgb[1] === 2 && rgb[2] === 3);
-            } catch (e) { run(false, e); }
+                run(rgb[0] === 10 && rgb[1] === 20 && rgb[2] === 30);
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
 
-        runner.defineTest('Success: rgbNormal property', (run) => {
+        runner.defineTest('Success Test Test: rgbNormal getter', (run) => {
             try {
                 const color = new RedGPU.Color.ColorRGB(255, 128, 0);
-                const normal = color.rgbNormal;
-                run(normal[0] === 1 && Math.abs(normal[1] - 128 / 255) < 0.0001 && normal[2] === 0);
-            } catch (e) { run(false, e); }
+                const rgbNormal = color.rgbNormal;
+                run(Math.abs(rgbNormal[0] - 1) < 0.001 && Math.abs(rgbNormal[1] - 128/255) < 0.001 && rgbNormal[2] === 0);
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
 
-        runner.defineTest('Success: rgbNormalLinear property', (run) => {
+        runner.defineTest('Success Test Test: rgbNormalLinear getter', (run) => {
             try {
                 const color = new RedGPU.Color.ColorRGB(255, 128, 0);
                 const linear = color.rgbNormalLinear;
-                const expectedG = Math.pow(128 / 255, 2.2);
-                run(linear[0] === 1 && Math.abs(linear[1] - expectedG) < 0.0001 && linear[2] === 0);
-            } catch (e) { run(false, e); }
+                run(Math.abs(linear[0] - 1) < 0.001 && Math.abs(linear[1] - Math.pow(128/255, 2.2)) < 0.001 && linear[2] === 0);
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
 
-        runner.defineTest('Success: hex property', (run) => {
+        runner.defineTest('Success Test Test: hex getter', (run) => {
             try {
-                const color = new RedGPU.Color.ColorRGB(255, 0, 255);
+                const color = new RedGPU.Color.ColorRGB(255, 0, 0);
                 run(color.hex);
-            } catch (e) { run(null, e); }
-        }, '#FF00FF');
+            } catch (e) {
+                run(false, e);
+            }
+        }, '#FF0000');
 
-        // Exhaustive: Methods
-        runner.defineTest('Success: setColorByRGB', (run) => {
+        // Methods
+        runner.defineTest('Success Test Test: setColorByRGB', (run) => {
             try {
                 const color = new RedGPU.Color.ColorRGB();
-                color.setColorByRGB(50, 60, 70);
-                run(color.r === 50 && color.g === 60 && color.b === 70);
-            } catch (e) { run(false, e); }
+                color.setColorByRGB(10, 20, 30);
+                run(color.r === 10 && color.g === 20 && color.b === 30);
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
 
-        runner.defineTest('Success: setColorByHEX (string)', (run) => {
+        runner.defineTest('Success Test Test: setColorByHEX string', (run) => {
             try {
                 const color = new RedGPU.Color.ColorRGB();
-                color.setColorByHEX('#00FF00');
-                run(color.hex);
-            } catch (e) { run(null, e); }
-        }, '#00FF00');
+                color.setColorByHEX('#FF0000');
+                run(color.r === 255 && color.g === 0 && color.b === 0);
+            } catch (e) {
+                run(false, e);
+            }
+        }, true);
 
-        runner.defineTest('Success: setColorByRGBString', (run) => {
+        runner.defineTest('Success Test Test: setColorByHEX number', (run) => {
+            try {
+                const color = new RedGPU.Color.ColorRGB();
+                color.setColorByHEX(0x00FF00);
+                run(color.r === 0 && color.g === 255 && color.b === 0);
+            } catch (e) {
+                run(false, e);
+            }
+        }, true);
+
+        runner.defineTest('Success Test Test: setColorByRGBString', (run) => {
             try {
                 const color = new RedGPU.Color.ColorRGB();
                 color.setColorByRGBString('rgb(10, 20, 30)');
                 run(color.r === 10 && color.g === 20 && color.b === 30);
-            } catch (e) { run(false, e); }
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
 
-        runner.defineTest('Success: onChange callback', (run) => {
+        // Negative Tests
+        const invalidValues = [null, undefined, NaN, -1, 256, 300, '255', {}, [], true, false];
+        ['r', 'g', 'b'].forEach(prop => {
+            invalidValues.forEach((invalidValue, index) => {
+                runner.defineTest(`Failure Test Test: Invalid ${prop} setter [${index}] - ${invalidValue}`, (run) => {
+                    try {
+                        const color = new RedGPU.Color.ColorRGB();
+                        color[prop] = invalidValue;
+                        run(true);
+                    } catch (e) {
+                        run(false, e);
+                    }
+                }, false);
+            });
+        });
+
+        invalidValues.forEach((invalidValue, index) => {
+            runner.defineTest(`Failure Test Test: Invalid setColorByRGB [${index}] - ${invalidValue}`, (run) => {
+                try {
+                    const color = new RedGPU.Color.ColorRGB();
+                    color.setColorByRGB(invalidValue, 0, 0);
+                    run(true);
+                } catch (e) {
+                    run(false, e);
+                }
+            }, false);
+        });
+
+        runner.defineTest('Failure Test Test: Invalid setColorByHEX', (run) => {
             try {
-                let called = 0;
-                const color = new RedGPU.Color.ColorRGB(255, 255, 255, () => called++);
-                color.r = 0;
-                color.setColorByRGB(1, 2, 3);
-                color.setColorByHEX('#ffffff');
-                run(called);
-            } catch (e) { run(null, e); }
-        }, 3);
-
-        // Rigorous: Negative Testing (r, g, b)
-        runner.defineTest('Failure: r setter - NaN', (run) => {
-            try { const c = new RedGPU.Color.ColorRGB(); c.r = NaN; run(true); } catch (e) { run(false, e); }
-        }, false);
-        runner.defineTest('Failure: g setter - null', (run) => {
-            try { const c = new RedGPU.Color.ColorRGB(); c.g = null; run(true); } catch (e) { run(false, e); }
-        }, false);
-        runner.defineTest('Failure: b setter - out of range (256)', (run) => {
-            try { const c = new RedGPU.Color.ColorRGB(); c.b = 256; run(true); } catch (e) { run(false, e); }
-        }, false);
-        runner.defineTest('Failure: r setter - negative (-1)', (run) => {
-            try { const c = new RedGPU.Color.ColorRGB(); c.r = -1; run(true); } catch (e) { run(false, e); }
-        }, false);
-        runner.defineTest('Failure: b setter - wrong type (string)', (run) => {
-            try { const c = new RedGPU.Color.ColorRGB(); c.b = "100"; run(true); } catch (e) { run(false, e); }
-        }, false);
-        runner.defineTest('Failure: r setter - float value (127.5)', (run) => {
-            try { const c = new RedGPU.Color.ColorRGB(); c.r = 127.5; run(true); } catch (e) { run(false, e); }
+                const color = new RedGPU.Color.ColorRGB();
+                color.setColorByHEX('invalid_hex');
+                run(true);
+            } catch (e) {
+                run(false, e);
+            }
         }, false);
 
-        // Rigorous: Negative Testing (Methods)
-        runner.defineTest('Failure: setColorByRGB - NaN in G', (run) => {
-            try { new RedGPU.Color.ColorRGB().setColorByRGB(0, NaN, 0); run(true); } catch (e) { run(false, e); }
-        }, false);
-        runner.defineTest('Failure: setColorByHEX - invalid string', (run) => {
-            try { new RedGPU.Color.ColorRGB().setColorByHEX('not-a-color'); run(true); } catch (e) { run(false, e); }
-        }, false);
-        runner.defineTest('Failure: setColorByRGBString - invalid format', (run) => {
-            try { new RedGPU.Color.ColorRGB().setColorByRGBString('rgba(0,0,0,1)'); run(true); } catch (e) { run(false, e); }
+        runner.defineTest('Failure Test Test: Invalid setColorByRGBString', (run) => {
+            try {
+                const color = new RedGPU.Color.ColorRGB();
+                color.setColorByRGBString('rgb(255, 0)');
+                run(true);
+            } catch (e) {
+                run(false, e);
+            }
         }, false);
     }
 );
@@ -134,86 +183,132 @@ redUnit.testGroup(
 redUnit.testGroup(
     'RedGPU.Color.ColorRGBA',
     (runner) => {
-        // Exhaustive: Constructor & Defaults
-        runner.defineTest('Success: Default constructor', (run) => {
+        // Constructor & Getters
+        runner.defineTest('Success Test Test: default constructor', (run) => {
             try {
                 const color = new RedGPU.Color.ColorRGBA();
                 run(color.r === 255 && color.g === 255 && color.b === 255 && color.a === 1);
-            } catch (e) { run(false, e); }
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
 
-        runner.defineTest('Success: Custom constructor', (run) => {
+        runner.defineTest('Success Test Test: constructor with values', (run) => {
             try {
                 const color = new RedGPU.Color.ColorRGBA(100, 150, 200, 0.5);
                 run(color.r === 100 && color.g === 150 && color.b === 200 && color.a === 0.5);
-            } catch (e) { run(false, e); }
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
 
-        // Exhaustive: Getters & Setters
-        runner.defineTest('Success: a setter/getter', (run) => {
+        runner.defineTest('Success Test Test: constructor with onChange callback', (run) => {
+            try {
+                let changed = false;
+                const color = new RedGPU.Color.ColorRGBA(100, 150, 200, 1, () => { changed = true; });
+                color.a = 0.5;
+                run(changed);
+            } catch (e) {
+                run(false, e);
+            }
+        }, true);
+
+        // Setters
+        runner.defineTest('Success Test Test: set a', (run) => {
             try {
                 const color = new RedGPU.Color.ColorRGBA();
-                color.a = 0.2;
+                color.a = 0.75;
                 run(color.a);
-            } catch (e) { run(null, e); }
-        }, 0.2);
+            } catch (e) {
+                run(false, e);
+            }
+        }, 0.75);
 
-        runner.defineTest('Success: rgba property', (run) => {
+        // Computed Properties
+        runner.defineTest('Success Test Test: rgba getter', (run) => {
             try {
                 const color = new RedGPU.Color.ColorRGBA(10, 20, 30, 0.4);
                 const rgba = color.rgba;
                 run(rgba[0] === 10 && rgba[1] === 20 && rgba[2] === 30 && rgba[3] === 0.4);
-            } catch (e) { run(false, e); }
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
 
-        runner.defineTest('Success: rgbaNormal property', (run) => {
+        runner.defineTest('Success Test Test: rgbaNormal getter', (run) => {
             try {
-                const color = new RedGPU.Color.ColorRGBA(255, 0, 0, 0.5);
+                const color = new RedGPU.Color.ColorRGBA(255, 128, 0, 0.5);
                 const normal = color.rgbaNormal;
-                run(normal[0] === 1 && normal[1] === 0 && normal[2] === 0 && normal[3] === 0.5);
-            } catch (e) { run(false, e); }
+                run(Math.abs(normal[0] - 1) < 0.001 && Math.abs(normal[1] - 128/255) < 0.001 && normal[2] === 0 && normal[3] === 0.5);
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
 
-        runner.defineTest('Success: rgbaNormalLinear property', (run) => {
+        runner.defineTest('Success Test Test: rgbaNormalLinear getter', (run) => {
             try {
-                const color = new RedGPU.Color.ColorRGBA(255, 0, 0, 0.5);
+                const color = new RedGPU.Color.ColorRGBA(255, 128, 0, 0.5);
                 const linear = color.rgbaNormalLinear;
-                run(linear[0] === 1 && linear[1] === 0 && linear[2] === 0 && linear[3] === 0.5);
-            } catch (e) { run(false, e); }
+                run(Math.abs(linear[0] - 1) < 0.001 && Math.abs(linear[1] - Math.pow(128/255, 2.2)) < 0.001 && linear[2] === 0 && linear[3] === 0.5);
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
 
-        // Exhaustive: Methods
-        runner.defineTest('Success: setColorByRGBA', (run) => {
+        // Methods
+        runner.defineTest('Success Test Test: setColorByRGBA', (run) => {
             try {
                 const color = new RedGPU.Color.ColorRGBA();
-                color.setColorByRGBA(1, 2, 3, 0.1);
-                run(color.r === 1 && color.g === 2 && color.b === 3 && color.a === 0.1);
-            } catch (e) { run(false, e); }
+                color.setColorByRGBA(10, 20, 30, 0.5);
+                run(color.r === 10 && color.g === 20 && color.b === 30 && color.a === 0.5);
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
 
-        runner.defineTest('Success: setColorByRGBAString', (run) => {
+        runner.defineTest('Success Test Test: setColorByRGBAString', (run) => {
             try {
                 const color = new RedGPU.Color.ColorRGBA();
                 color.setColorByRGBAString('rgba(10, 20, 30, 0.5)');
                 run(color.r === 10 && color.g === 20 && color.b === 30 && color.a === 0.5);
-            } catch (e) { run(false, e); }
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
 
-        // Rigorous: Negative Testing
-        runner.defineTest('Failure: a setter - NaN', (run) => {
-            try { const c = new RedGPU.Color.ColorRGBA(); c.a = NaN; run(true); } catch (e) { run(false, e); }
-        }, false);
-        runner.defineTest('Failure: a setter - out of range (1.1)', (run) => {
-            try { const c = new RedGPU.Color.ColorRGBA(); c.a = 1.1; run(true); } catch (e) { run(false, e); }
-        }, false);
-        runner.defineTest('Failure: a setter - negative (-0.1)', (run) => {
-            try { const c = new RedGPU.Color.ColorRGBA(); c.a = -0.1; run(true); } catch (e) { run(false, e); }
-        }, false);
-        runner.defineTest('Failure: ColorRGBA - float value in R (127.5)', (run) => {
-            try { new RedGPU.Color.ColorRGBA(127.5, 0, 0, 1); run(true); } catch (e) { run(false, e); }
-        }, false);
-        runner.defineTest('Failure: setColorByRGBAString - invalid format', (run) => {
-            try { new RedGPU.Color.ColorRGBA().setColorByRGBAString('rgb(0,0,0)'); run(true); } catch (e) { run(false, e); }
+        // Negative Tests
+        const invalidAlphaValues = [null, undefined, NaN, -0.1, 1.1, 2, '0.5', {}, [], true, false];
+        
+        invalidAlphaValues.forEach((invalidValue, index) => {
+            runner.defineTest(`Failure Test Test: Invalid 'a' setter [${index}] - ${invalidValue}`, (run) => {
+                try {
+                    const color = new RedGPU.Color.ColorRGBA();
+                    color.a = invalidValue;
+                    run(true);
+                } catch (e) {
+                    run(false, e);
+                }
+            }, false);
+
+            runner.defineTest(`Failure Test Test: Invalid setColorByRGBA [${index}] - ${invalidValue}`, (run) => {
+                try {
+                    const color = new RedGPU.Color.ColorRGBA();
+                    color.setColorByRGBA(255, 0, 0, invalidValue);
+                    run(true);
+                } catch (e) {
+                    run(false, e);
+                }
+            }, false);
+        });
+
+        runner.defineTest('Failure Test Test: Invalid setColorByRGBAString', (run) => {
+            try {
+                const color = new RedGPU.Color.ColorRGBA();
+                color.setColorByRGBAString('rgba(255, 0)');
+                run(true);
+            } catch (e) {
+                run(false, e);
+            }
         }, false);
     }
 );

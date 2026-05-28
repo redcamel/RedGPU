@@ -1,8 +1,11 @@
 import RedUnit from 'https://redcamel.github.io/RedUnit/dist/index.js'
 
 RedUnit.pageLoader('RedGPU', [
+	{title: 'ACamera', src: './camera/ACamera'},
+	{title: 'AController', src: './camera/AController'},
 	{title: 'antialiasingManager', src: './antialiasing/antialiasingManager'},
 	{title: 'baseObject', src: './base'},
+	{title: 'Camera2D', src: './camera/Camera2D'},
 	{title: 'color', src: './color'},
 	{title: 'convertHexToRgb', src: './color/convertHexToRgb'},
 	{title: 'convertRgbToHex', src: './color/convertRgbToHex'},
@@ -11,6 +14,8 @@ RedUnit.pageLoader('RedGPU', [
 	{title: 'formatBytes', src: './util/formatBytes'},
 	{title: 'initialize', src: './initialize'},
 	{title: 'light', src: './light'},
+	{title: 'OrthographicCamera', src: './camera/OrthographicCamera'},
+	{title: 'PerspectiveCamera', src: './camera/PerspectiveCamera'},
 	{title: 'postEffectCore', src: './postEffect/core'},
 	{title: 'postEffectManager', src: './postEffect/postEffectManager'},
 	{title: 'postEffectTexturePool', src: './postEffect/postEffectTexturePool'},

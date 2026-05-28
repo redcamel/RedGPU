@@ -4,219 +4,99 @@ import * as RedGPU from "../../../dist/index.js";
 const redUnit = new RedUnit('RedGPU - PostEffectTexturePool');
 
 redUnit.testGroup(
-    'RedGPU.PostEffect.PostEffectTexturePool - Allocation',
+    'RedGPU.PostEffect.PostEffectTexturePool',
     (runner) => {
-        runner.defineTest('Success: Initial allocationCount check', (run) => {
+        const setup = (callback) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
-                    const scene = new RedGPU.Display.Scene();
-                    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
-                    const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
-                    const pool = view.postEffectManager.texturePool;
-
-                    pool.allocResult(256, 256);
-                    const actual = pool.allocationCount;
+                    const pool = new RedGPU.PostEffect.PostEffectTexturePool(redGPUContext);
+                    callback(redGPUContext, pool);
                     redGPUContext.destroy();
-                    run(actual);
                 } catch (e) {
                     redGPUContext.destroy();
-                    run(null, e);
+                    throw e;
                 }
-            }, (error) => run(null, error));
-        }, 1);
+            }, (error) => { throw error; });
+        };
 
-        runner.defineTest('Success: Initial activeCount check', (run) => {
-            const canvas = document.createElement('canvas');
-            RedGPU.init(canvas, (redGPUContext) => {
+        runner.defineTest('Success Test: Initial state and Getters', (run) => {
+            setup((ctx, pool) => {
+                const checkInitial = pool.videoMemorySize === 0 &&
+                                    pool.activeCount === 0 &&
+                                    pool.idleCount === 0 &&
+                                    pool.totalCount === 0 &&
+                                    pool.allocationCount === 0 &&
+                                    pool.peakActiveCount === 0 &&
+                                    pool.hitRate === 0;
+                run(checkInitial);
+            });
+        }, true);
+
+        runner.defineTest('Success Test: Allocation and Release', (run) => {
+            setup((ctx, pool) => {
+                const res1 = pool.allocResult(256, 256);
+                const checkAlloc = pool.activeCount === 1 && pool.allocationCount === 1;
+                
+                pool.release(res1.texture);
+                const checkRelease = pool.activeCount === 0 && pool.idleCount === 1;
+                
+                const res2 = pool.allocResult(256, 256);
+                const checkReuse = pool.activeCount === 1 && pool.idleCount === 0 && pool.allocationCount === 1;
+                
+                run(checkAlloc && checkRelease && checkReuse);
+            });
+        }, true);
+
+        runner.defineTest('Success Test: hitRate and peakActiveCount', (run) => {
+            setup((ctx, pool) => {
+                pool.allocResult(64, 64); // Request 1, Alloc 1
+                const res = pool.allocResult(64, 64); // Request 2, Alloc 2
+                pool.release(res.texture);
+                pool.allocResult(64, 64); // Request 3, Alloc 2 (Reuse)
+                
+                const checkHitRate = Math.abs(pool.hitRate - (3-2)/3) < 0.0001;
+                const checkPeak = pool.peakActiveCount === 2;
+                run(checkHitRate && checkPeak);
+            });
+        }, true);
+
+        runner.defineTest('Success Test: releaseAll()', (run) => {
+            setup((ctx, pool) => {
+                pool.allocResult(128, 128);
+                pool.allocResult(128, 128);
+                pool.releaseAll();
+                run(pool.activeCount === 0 && pool.idleCount === 2);
+            });
+        }, true);
+
+        runner.defineTest('Success Test: clear()', (run) => {
+            setup((ctx, pool) => {
+                pool.allocResult(128, 128);
+                pool.clear();
+                const check = pool.videoMemorySize === 0 &&
+                              pool.activeCount === 0 &&
+                              pool.idleCount === 0 &&
+                              pool.allocationCount === 0;
+                run(check);
+            });
+        }, true);
+
+        runner.defineTest('Success Test: getDetails()', (run) => {
+            setup((ctx, pool) => {
+                pool.allocResult(100, 100, 'rgba8unorm');
+                const details = pool.getDetails();
+                run(Array.isArray(details) && details.length === 1 && details[0].key === '100x100_rgba8unorm');
+            });
+        }, true);
+
+        runner.defineTest('Failure Test: allocResult - negative dimensions', (run) => {
+            setup((ctx, pool) => {
                 try {
-                    const scene = new RedGPU.Display.Scene();
-                    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
-                    const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
-                    const pool = view.postEffectManager.texturePool;
-
-                    pool.allocResult(256, 256);
-                    const actual = pool.activeCount;
-                    redGPUContext.destroy();
-                    run(actual);
-                } catch (e) {
-                    redGPUContext.destroy();
-                    run(null, e);
-                }
-            }, (error) => run(null, error));
-        }, 1);
-    }
-);
-
-redUnit.testGroup(
-    'RedGPU.PostEffect.PostEffectTexturePool - Reusability',
-    (runner) => {
-        runner.defineTest('Success: idleCount check after release', (run) => {
-            const canvas = document.createElement('canvas');
-            RedGPU.init(canvas, (redGPUContext) => {
-                try {
-                    const scene = new RedGPU.Display.Scene();
-                    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
-                    const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
-                    const pool = view.postEffectManager.texturePool;
-
-                    const res = pool.allocResult(256, 256);
-                    pool.release(res.texture);
-                    const actual = pool.idleCount;
-                    redGPUContext.destroy();
-                    run(actual);
-                } catch (e) {
-                    redGPUContext.destroy();
-                    run(null, e);
-                }
-            }, (error) => run(null, error));
-        }, 1);
-
-        runner.defineTest('Success: activeCount check after release', (run) => {
-            const canvas = document.createElement('canvas');
-            RedGPU.init(canvas, (redGPUContext) => {
-                try {
-                    const scene = new RedGPU.Display.Scene();
-                    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
-                    const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
-                    const pool = view.postEffectManager.texturePool;
-
-                    const res = pool.allocResult(256, 256);
-                    pool.release(res.texture);
-                    const actual = pool.activeCount;
-                    redGPUContext.destroy();
-                    run(actual);
-                } catch (e) {
-                    redGPUContext.destroy();
-                    run(null, e);
-                }
-            }, (error) => run(null, error));
-        }, 0);
-
-        runner.defineTest('Success: allocationCount should not increase on reuse', (run) => {
-            const canvas = document.createElement('canvas');
-            RedGPU.init(canvas, (redGPUContext) => {
-                try {
-                    const scene = new RedGPU.Display.Scene();
-                    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
-                    const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
-                    const pool = view.postEffectManager.texturePool;
-
-                    const res1 = pool.allocResult(256, 256);
-                    pool.release(res1.texture);
-                    pool.allocResult(256, 256);
-                    
-                    const actual = pool.allocationCount;
-                    redGPUContext.destroy();
-                    run(actual);
-                } catch (e) {
-                    redGPUContext.destroy();
-                    run(null, e);
-                }
-            }, (error) => run(null, error));
-        }, 1);
-    }
-);
-
-redUnit.testGroup(
-    'RedGPU.PostEffect.PostEffectTexturePool - Bulk Operations',
-    (runner) => {
-        runner.defineTest('Success: releaseAll() results in 0 active textures', (run) => {
-            const canvas = document.createElement('canvas');
-            RedGPU.init(canvas, (redGPUContext) => {
-                try {
-                    const scene = new RedGPU.Display.Scene();
-                    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
-                    const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
-                    const pool = view.postEffectManager.texturePool;
-
-                    pool.allocResult(128, 128);
-                    pool.allocResult(256, 256);
-                    pool.releaseAll();
-                    
-                    const actual = pool.activeCount;
-                    redGPUContext.destroy();
-                    run(actual);
-                } catch (e) {
-                    redGPUContext.destroy();
-                    run(null, e);
-                }
-            }, (error) => run(null, error));
-        }, 0);
-
-        runner.defineTest('Success: clear() results in 0 videoMemorySize', (run) => {
-            const canvas = document.createElement('canvas');
-            RedGPU.init(canvas, (redGPUContext) => {
-                try {
-                    const scene = new RedGPU.Display.Scene();
-                    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
-                    const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
-                    const pool = view.postEffectManager.texturePool;
-
-                    pool.allocResult(128, 128);
-                    pool.clear();
-                    
-                    const actual = pool.videoMemorySize;
-                    redGPUContext.destroy();
-                    run(actual);
-                } catch (e) {
-                    redGPUContext.destroy();
-                    run(null, e);
-                }
-            }, (error) => run(null, error));
-        }, 0);
-    }
-);
-
-redUnit.testGroup(
-    'RedGPU.PostEffect.PostEffectTexturePool - Statistics',
-    (runner) => {
-        runner.defineTest('Success: hitRate precision check', (run) => {
-            const canvas = document.createElement('canvas');
-            RedGPU.init(canvas, (redGPUContext) => {
-                try {
-                    const scene = new RedGPU.Display.Scene();
-                    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
-                    const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
-                    const pool = view.postEffectManager.texturePool;
-
-                    const res1 = pool.allocResult(64, 64);
-                    pool.release(res1.texture);
-                    pool.allocResult(64, 64); // Hit
-                    pool.allocResult(128, 128); // Miss
-                    
-                    const actual = parseFloat(pool.hitRate.toFixed(4));
-                    redGPUContext.destroy();
-                    run(actual);
-                } catch (e) {
-                    redGPUContext.destroy();
-                    run(null, e);
-                }
-            }, (error) => run(null, error));
-        }, 0.3333);
-
-        runner.defineTest('Success: peakActiveCount check', (run) => {
-            const canvas = document.createElement('canvas');
-            RedGPU.init(canvas, (redGPUContext) => {
-                try {
-                    const scene = new RedGPU.Display.Scene();
-                    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
-                    const view = new RedGPU.Display.View3D(redGPUContext, scene, camera);
-                    const pool = view.postEffectManager.texturePool;
-
-                    const res1 = pool.allocResult(64, 64);
-                    const res2 = pool.allocResult(64, 64);
-                    pool.release(res1.texture);
-                    pool.release(res2.texture);
-                    
-                    const actual = pool.peakActiveCount;
-                    redGPUContext.destroy();
-                    run(actual);
-                } catch (e) {
-                    redGPUContext.destroy();
-                    run(null, e);
-                }
-            }, (error) => run(null, error));
-        }, 2);
+                    pool.allocResult(-1, 100);
+                    run(true);
+                } catch (e) { run(false, e); }
+            });
+        }, false);
     }
 );

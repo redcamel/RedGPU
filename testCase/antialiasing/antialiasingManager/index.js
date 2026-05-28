@@ -6,30 +6,34 @@ const redUnit = new RedUnit('RedGPU - AntialiasingManager');
 redUnit.testGroup(
     'RedGPU.Antialiasing.AntialiasingManager - Initialization',
     (runner) => {
-        runner.defineTest('Success: Constructor: check useTAA logic', (run) => {
+        runner.defineTest('Success Test: Default values based on devicePixelRatio', (run) => {
             try {
                 const manager = new RedGPU.Antialiasing.AntialiasingManager();
-                run(manager.useTAA);
+                if (window.devicePixelRatio > 1.0) {
+                    run(manager.useTAA === true && manager.useMSAA === false && manager.useFXAA === false);
+                } else {
+                    run(manager.useTAA === false && manager.useMSAA === true && manager.useFXAA === false);
+                }
             } catch (e) {
-                run(null, e);
+                run(false, e);
             }
-        }, window.devicePixelRatio > 1.0);
+        }, true);
 
-        runner.defineTest('Success: Constructor: check useMSAA logic', (run) => {
+        runner.defineTest('Success Test: msaaID is a valid UUID string', (run) => {
             try {
                 const manager = new RedGPU.Antialiasing.AntialiasingManager();
-                run(manager.useMSAA);
+                run(typeof manager.msaaID === 'string' && manager.msaaID.length > 0);
             } catch (e) {
-                run(null, e);
+                run(false, e);
             }
-        }, window.devicePixelRatio <= 1.0);
+        }, true);
     }
 );
 
 redUnit.testGroup(
-    'RedGPU.Antialiasing.AntialiasingManager - TAA',
+    'RedGPU.Antialiasing.AntialiasingManager - useTAA',
     (runner) => {
-        runner.defineTest('Success: Set useTAA = true', (run) => {
+        runner.defineTest('Success Test: Set useTAA = true', (run) => {
             try {
                 const manager = new RedGPU.Antialiasing.AntialiasingManager();
                 manager.useTAA = true;
@@ -38,23 +42,35 @@ redUnit.testGroup(
                 run(false, e);
             }
         }, true);
-        runner.defineTest('Success: Set useTAA = false', (run) => {
+
+        runner.defineTest('Success Test: Set useTAA = false', (run) => {
             try {
                 const manager = new RedGPU.Antialiasing.AntialiasingManager();
                 manager.useTAA = true;
                 manager.useTAA = false;
                 run(manager.useTAA);
             } catch (e) {
-                run(true, e);
+                run(false, e);
             }
         }, false);
+
+        runner.defineTest('Success Test: useTAA is exclusive (clears MSAA, FXAA)', (run) => {
+            try {
+                const manager = new RedGPU.Antialiasing.AntialiasingManager();
+                manager.useMSAA = true;
+                manager.useTAA = true;
+                run(manager.useTAA === true && manager.useMSAA === false && manager.useFXAA === false);
+            } catch (e) {
+                run(false, e);
+            }
+        }, true);
     }
 );
 
 redUnit.testGroup(
-    'RedGPU.Antialiasing.AntialiasingManager - MSAA',
+    'RedGPU.Antialiasing.AntialiasingManager - useMSAA',
     (runner) => {
-        runner.defineTest('Success: Set useMSAA = true', (run) => {
+        runner.defineTest('Success Test: Set useMSAA = true', (run) => {
             try {
                 const manager = new RedGPU.Antialiasing.AntialiasingManager();
                 manager.useMSAA = true;
@@ -63,12 +79,35 @@ redUnit.testGroup(
                 run(false, e);
             }
         }, true);
-        runner.defineTest('Success: msaaID uniqueness check', (run) => {
+
+        runner.defineTest('Success Test: Set useMSAA = false', (run) => {
             try {
                 const manager = new RedGPU.Antialiasing.AntialiasingManager();
-                const oldID = manager.msaaID;
+                manager.useMSAA = true;
+                manager.useMSAA = false;
+                run(manager.useMSAA);
+            } catch (e) {
+                run(false, e);
+            }
+        }, false);
+
+        runner.defineTest('Success Test: useMSAA is exclusive (clears TAA, FXAA)', (run) => {
+            try {
+                const manager = new RedGPU.Antialiasing.AntialiasingManager();
+                manager.useTAA = true;
+                manager.useMSAA = true;
+                run(manager.useMSAA === true && manager.useTAA === false && manager.useFXAA === false);
+            } catch (e) {
+                run(false, e);
+            }
+        }, true);
+
+        runner.defineTest('Success Test: msaaID changes when useMSAA is set to a different value', (run) => {
+            try {
+                const manager = new RedGPU.Antialiasing.AntialiasingManager();
+                const initialID = manager.msaaID;
                 manager.useMSAA = !manager.useMSAA;
-                run(manager.msaaID !== oldID);
+                run(manager.msaaID !== initialID);
             } catch (e) {
                 run(false, e);
             }
@@ -77,9 +116,9 @@ redUnit.testGroup(
 );
 
 redUnit.testGroup(
-    'RedGPU.Antialiasing.AntialiasingManager - FXAA',
+    'RedGPU.Antialiasing.AntialiasingManager - useFXAA',
     (runner) => {
-        runner.defineTest('Success: Set useFXAA = true', (run) => {
+        runner.defineTest('Success Test: Set useFXAA = true', (run) => {
             try {
                 const manager = new RedGPU.Antialiasing.AntialiasingManager();
                 manager.useFXAA = true;
@@ -88,31 +127,27 @@ redUnit.testGroup(
                 run(false, e);
             }
         }, true);
-    }
-);
 
-redUnit.testGroup(
-    'RedGPU.Antialiasing.AntialiasingManager - Exclusive Selection',
-    (runner) => {
-        runner.defineTest('Success: Switching TAA -> MSAA clears TAA', (run) => {
+        runner.defineTest('Success Test: Set useFXAA = false', (run) => {
+            try {
+                const manager = new RedGPU.Antialiasing.AntialiasingManager();
+                manager.useFXAA = true;
+                manager.useFXAA = false;
+                run(manager.useFXAA);
+            } catch (e) {
+                run(false, e);
+            }
+        }, false);
+
+        runner.defineTest('Success Test: useFXAA is exclusive (clears TAA, MSAA)', (run) => {
             try {
                 const manager = new RedGPU.Antialiasing.AntialiasingManager();
                 manager.useTAA = true;
-                manager.useMSAA = true;
-                run(manager.useTAA);
-            } catch (e) {
-                run(true, e);
-            }
-        }, false);
-        runner.defineTest('Success: Switching MSAA -> FXAA clears MSAA', (run) => {
-            try {
-                const manager = new RedGPU.Antialiasing.AntialiasingManager();
-                manager.useMSAA = true;
                 manager.useFXAA = true;
-                run(manager.useMSAA);
+                run(manager.useFXAA === true && manager.useTAA === false && manager.useMSAA === false);
             } catch (e) {
-                run(true, e);
+                run(false, e);
             }
-        }, false);
+        }, true);
     }
 );

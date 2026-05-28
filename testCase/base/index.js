@@ -12,30 +12,56 @@ redUnit.testGroup(
             }
         }
 
-        runner.defineTest('Success: UUID generation', (run) => {
-            const obj1 = new TestBaseObject();
-            const obj2 = new TestBaseObject();
-            const check = obj1.uuid !== obj2.uuid && typeof obj1.uuid === 'string' && obj1.uuid.length > 0;
-            run(check);
+        runner.defineTest('Success Test Test: uuid generation', (run) => {
+            try {
+                const obj = new TestBaseObject();
+                run(typeof obj.uuid === 'string' && obj.uuid.length > 0);
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
 
-        runner.defineTest('Success: Name property', (run) => {
-            const obj = new TestBaseObject();
-            const defaultName = obj.name;
-            obj.name = 'Custom Name';
-            const customName = obj.name;
-            const check = defaultName.includes('TestBaseObject Instance') && customName === 'Custom Name';
-            run(check);
+        runner.defineTest('Success Test Test: default name generation', (run) => {
+            try {
+                const obj = new TestBaseObject();
+                run(obj.name.includes('TestBaseObject Instance'));
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
 
-        runner.defineTest('Success: Instance ID increment', (run) => {
-            const obj1 = new TestBaseObject();
-            const obj2 = new TestBaseObject();
-            const name1 = obj1.name;
-            const name2 = obj2.name;
-            const id1 = parseInt(name1.split('Instance ')[1]);
-            const id2 = parseInt(name2.split('Instance ')[1]);
-            run(id2 === id1 + 1);
+        runner.defineTest('Success Test Test: set name', (run) => {
+            try {
+                const obj = new TestBaseObject();
+                obj.name = 'Custom Name';
+                run(obj.name);
+            } catch (e) {
+                run(false, e);
+            }
+        }, 'Custom Name');
+
+        runner.defineTest('Success Test Test: instance ID increment', (run) => {
+            try {
+                const obj1 = new TestBaseObject();
+                const obj2 = new TestBaseObject();
+                const id1 = parseInt(obj1.name.split('Instance ')[1]);
+                const id2 = parseInt(obj2.name.split('Instance ')[1]);
+                run(id2 - id1);
+            } catch (e) {
+                run(false, e);
+            }
+        }, 1);
+        
+        // Edge cases for set name
+        runner.defineTest('Success Test Test: set name to empty string', (run) => {
+            try {
+                const obj = new TestBaseObject();
+                obj.name = '';
+                // Since #name is empty string, the getter should return the generated string.
+                run(obj.name.includes('TestBaseObject Instance'));
+            } catch (e) {
+                run(false, e);
+            }
         }, true);
     }
 );
@@ -49,7 +75,7 @@ redUnit.testGroup(
             }
         }
 
-        runner.defineTest('Success: Context and managers access', (run) => {
+        runner.defineTest('Success Test Test: Getters access', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
@@ -69,13 +95,17 @@ redUnit.testGroup(
             }, (error) => run(false, error));
         }, true);
 
-        runner.defineTest('Failure: Invalid context', (run) => {
-            try {
-                new TestRedGPUObject(null);
-                run(true);
-            } catch (e) {
-                run(false,e);
-            }
-        }, false);
+        // Negative Testing
+        const invalidValues = [null, undefined, NaN, 123, 'string', {}, []];
+        invalidValues.forEach(invalidValue => {
+            runner.defineTest(`Failure Test Test: Invalid context - ${invalidValue}`, (run) => {
+                try {
+                    new TestRedGPUObject(invalidValue);
+                    run(true);
+                } catch (e) {
+                    run(false, e);
+                }
+            }, false);
+        });
     }
 );

@@ -6,43 +6,34 @@ const redUnit = new RedUnit('RedGPU - PostEffect Core');
 redUnit.testGroup(
     'RedGPU.PostEffect.Core.createBasicPostEffectCode',
     (runner) => {
-        runner.defineTest('Success: Returns msaa and nonMsaa codes', (run) => {
-            try {
-                // Mock object that satisfies the interface used by createBasicPostEffectCode
-                const mockEffect = { WORK_SIZE_X: 16, WORK_SIZE_Y: 16, WORK_SIZE_Z: 1 };
-                const codes = RedGPU.PostEffect.Core.createBasicPostEffectCode(mockEffect, 'return;');
-                const hasMSAA = typeof codes.msaa === 'string';
-                const hasNonMSAA = typeof codes.nonMsaa === 'string';
-                run(hasMSAA && hasNonMSAA);
-            } catch (e) {
-                run(false, e);
-            }
-        }, true);
-
-        runner.defineTest('Success: Code contains workgroup size', (run) => {
-            try {
-                const mockEffect = { WORK_SIZE_X: 8, WORK_SIZE_Y: 8, WORK_SIZE_Z: 2 };
-                const codes = RedGPU.PostEffect.Core.createBasicPostEffectCode(mockEffect, 'return;');
-                const pass = codes.msaa.includes('@workgroup_size(8, 8, 2)');
-                run(pass);
-            } catch (e) {
-                run(false, e);
-            }
-        }, true);
-
-        runner.defineTest('Success: Handles custom source texture configs', (run) => {
+        runner.defineTest('Success Test: Basic code generation', (run) => {
             try {
                 const mockEffect = { WORK_SIZE_X: 16, WORK_SIZE_Y: 16, WORK_SIZE_Z: 1 };
-                const codes = RedGPU.PostEffect.Core.createBasicPostEffectCode(mockEffect, 'return;', '', [
-                    { name: 'customTex1', isSampled: true },
-                    { name: 'customTex2', isSampled: false }
-                ]);
-                const hasTex1 = codes.nonMsaa.includes('var customTex1 : texture_2d<f32>;');
-                const hasTex2 = codes.nonMsaa.includes('var customTex2 : texture_storage_2d<rgba16float, read>;');
+                const codes = RedGPU.PostEffect.Core.createBasicPostEffectCode(mockEffect, 'return;');
+                run(typeof codes.msaa === 'string' && typeof codes.nonMsaa === 'string');
+            } catch (e) { run(false, e); }
+        }, true);
+
+        runner.defineTest('Success Test: Workgroup size reflection', (run) => {
+            try {
+                const mockEffect = { WORK_SIZE_X: 8, WORK_SIZE_Y: 4, WORK_SIZE_Z: 2 };
+                const codes = RedGPU.PostEffect.Core.createBasicPostEffectCode(mockEffect, 'return;');
+                run(codes.msaa.includes('@workgroup_size(8, 4, 2)'));
+            } catch (e) { run(false, e); }
+        }, true);
+
+        runner.defineTest('Success Test: Custom texture configs', (run) => {
+            try {
+                const mockEffect = { WORK_SIZE_X: 16, WORK_SIZE_Y: 16, WORK_SIZE_Z: 1 };
+                const configs = [
+                    { name: 'tex1', isSampled: true },
+                    { name: 'tex2', isSampled: false }
+                ];
+                const codes = RedGPU.PostEffect.Core.createBasicPostEffectCode(mockEffect, 'return;', '', configs);
+                const hasTex1 = codes.nonMsaa.includes('var tex1 : texture_2d<f32>;');
+                const hasTex2 = codes.nonMsaa.includes('var tex2 : texture_storage_2d<rgba16float, read>;');
                 run(hasTex1 && hasTex2);
-            } catch (e) {
-                run(false, e);
-            }
+            } catch (e) { run(false, e); }
         }, true);
     }
 );
@@ -50,63 +41,54 @@ redUnit.testGroup(
 redUnit.testGroup(
     'RedGPU.PostEffect.Core.ASinglePassPostEffect',
     (runner) => {
-        runner.defineTest('Success: WORK_SIZE defaults', (run) => {
+        class MockSinglePass extends RedGPU.PostEffect.Core.ASinglePassPostEffect {
+            constructor(ctx, workSize) { super(ctx, workSize); }
+        }
+
+        runner.defineTest('Success Test: WORK_SIZE defaults', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
-                    class TestEffect extends RedGPU.PostEffect.Core.ASinglePassPostEffect {
-                        constructor(ctx) { super(ctx); }
-                    }
-                    const effect = new TestEffect(redGPUContext);
-                    const checkX = effect.WORK_SIZE_X === 16;
-                    const checkY = effect.WORK_SIZE_Y === 16;
-                    const checkZ = effect.WORK_SIZE_Z === 1;
-                    const checkInstance = effect.isInstanceofPostEffect === true;
+                    const effect = new MockSinglePass(redGPUContext);
+                    const check = effect.WORK_SIZE_X === 16 && effect.WORK_SIZE_Y === 16 && effect.WORK_SIZE_Z === 1;
                     redGPUContext.destroy();
-                    run(checkX && checkY && checkZ && checkInstance);
-                } catch (e) {
-                    redGPUContext.destroy();
-                    run(false, e);
-                }
+                    run(check);
+                } catch (e) { redGPUContext.destroy(); run(false, e); }
             }, (error) => run(false, error));
         }, true);
 
-        runner.defineTest('Success: Custom WORK_SIZE', (run) => {
+        runner.defineTest('Success Test: Custom WORK_SIZE', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
-                    class TestEffect extends RedGPU.PostEffect.Core.ASinglePassPostEffect {
-                        constructor(ctx) { super(ctx, {x: 8, y: 4, z: 2}); }
-                    }
-                    const effect = new TestEffect(redGPUContext);
-                    const checkX = effect.WORK_SIZE_X === 8;
-                    const checkY = effect.WORK_SIZE_Y === 4;
-                    const checkZ = effect.WORK_SIZE_Z === 2;
+                    const effect = new MockSinglePass(redGPUContext, {x: 8, y: 4, z: 2});
+                    const check = effect.WORK_SIZE_X === 8 && effect.WORK_SIZE_Y === 4 && effect.WORK_SIZE_Z === 2;
                     redGPUContext.destroy();
-                    run(checkX && checkY && checkZ);
-                } catch (e) {
-                    redGPUContext.destroy();
-                    run(false, e);
-                }
+                    run(check);
+                } catch (e) { redGPUContext.destroy(); run(false, e); }
             }, (error) => run(false, error));
         }, true);
 
-        runner.defineTest('Success: videoMemorySize default (0)', (run) => {
+        runner.defineTest('Success Test: videoMemorySize initial check', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
-                    class TestEffect extends RedGPU.PostEffect.Core.ASinglePassPostEffect {
-                        constructor(ctx) { super(ctx); }
-                    }
-                    const effect = new TestEffect(redGPUContext);
-                    const mem = effect.videoMemorySize === 0;
+                    const effect = new MockSinglePass(redGPUContext);
+                    run(effect.videoMemorySize);
                     redGPUContext.destroy();
-                    run(mem);
-                } catch (e) {
+                } catch (e) { redGPUContext.destroy(); run(null, e); }
+            }, (error) => run(null, error));
+        }, 0);
+
+        runner.defineTest('Success Test: isInstanceofPostEffect property', (run) => {
+            const canvas = document.createElement('canvas');
+            RedGPU.init(canvas, (redGPUContext) => {
+                try {
+                    const effect = new MockSinglePass(redGPUContext);
+                    run(effect.isInstanceofPostEffect);
                     redGPUContext.destroy();
-                    run(false, e);
-                }
-            }, (error) => run(false, error));
+                } catch (e) { redGPUContext.destroy(); run(null, e); }
+            }, (error) => run(null, error));
         }, true);
     }
 );
@@ -114,60 +96,35 @@ redUnit.testGroup(
 redUnit.testGroup(
     'RedGPU.PostEffect.Core.AMultiPassPostEffect',
     (runner) => {
-        runner.defineTest('Success: passList management', (run) => {
+        class Single extends RedGPU.PostEffect.Core.ASinglePassPostEffect {
+            constructor(ctx) { super(ctx); }
+        }
+        class Multi extends RedGPU.PostEffect.Core.AMultiPassPostEffect {
+            constructor(ctx, passes) { super(ctx, passes); }
+        }
+
+        runner.defineTest('Success Test: Chaining passes', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
-                    class SinglePass extends RedGPU.PostEffect.Core.ASinglePassPostEffect {
-                        constructor(ctx) { super(ctx); }
-                    }
-                    class MultiPass extends RedGPU.PostEffect.Core.AMultiPassPostEffect {
-                        constructor(ctx) {
-                            super(ctx, [
-                                new SinglePass(ctx),
-                                new SinglePass(ctx)
-                            ]);
-                        }
-                    }
-
-                    const multi = new MultiPass(redGPUContext);
-
-                    const checkLength = multi.passList.length === 2;
-                    const checkInstance = multi.isInstanceofPostEffect === true;
-
+                    const p1 = new Single(redGPUContext);
+                    const p2 = new Single(redGPUContext);
+                    const multi = new Multi(redGPUContext, [p1, p2]);
+                    run(multi.passList.length === 2 && multi.passList[0] === p1 && multi.passList[1] === p2);
                     redGPUContext.destroy();
-                    run(checkLength && checkInstance);
-                } catch (e) {
-                    redGPUContext.destroy();
-                    run(false, e);
-                }
+                } catch (e) { redGPUContext.destroy(); run(false, e); }
             }, (error) => run(false, error));
         }, true);
 
-        runner.defineTest('Success: videoMemorySize reflects passes', (run) => {
+        runner.defineTest('Failure Test: constructor - null passList', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
-                    class SinglePass extends RedGPU.PostEffect.Core.ASinglePassPostEffect {
-                        constructor(ctx) { super(ctx); }
-                    }
-                    class MultiPass extends RedGPU.PostEffect.Core.AMultiPassPostEffect {
-                        constructor(ctx) {
-                            super(ctx, [new SinglePass(ctx)]);
-                        }
-                    }
-
-                    const multi = new MultiPass(redGPUContext);
-
-                    // Initially memory should be 0 because p1's memory is 0
-                    const mem = multi.videoMemorySize === 0;
+                    new Multi(redGPUContext, null);
                     redGPUContext.destroy();
-                    run(mem);
-                } catch (e) {
-                    redGPUContext.destroy();
-                    run(false, e);
-                }
+                    run(true);
+                } catch (e) { redGPUContext.destroy(); run(false, e); }
             }, (error) => run(false, error));
-        }, true);
+        }, false);
     }
 );

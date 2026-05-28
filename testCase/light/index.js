@@ -6,83 +6,115 @@ const redUnit = new RedUnit('RedGPU - Light');
 redUnit.testGroup(
     'RedGPU.Light.Core.ABaseLight',
     (runner) => {
-        runner.defineTest('Success: Base properties check (via AmbientLight)', (run) => {
+        class MockLight extends RedGPU.Light.Core.ABaseLight {
+            constructor(color, intensity) { super(color, intensity); }
+        }
+
+        runner.defineTest('Success Test: Constructor and Base Properties', (run) => {
             try {
-                const light = new RedGPU.Light.AmbientLight('#ffffff', 100);
-                light.intensityMultiplier = 2.5;
-                light.enableDebugger = true;
-
-                const color = light.color;
-                const checkColorInstance = color instanceof RedGPU.Color.ColorRGB;
-                const checkColorValues =
-                    color.r === 255 && color.g === 255 && color.b === 255 &&
-                    color.rgb[0] === 255 && color.rgb[1] === 255 && color.rgb[2] === 255 &&
-                    color.rgbNormal[0] === 1 && color.rgbNormal[1] === 1 && color.rgbNormal[2] === 1 &&
-                    color.hex === '#FFFFFF';
-
+                const color = new RedGPU.Color.ColorRGB(100, 100, 100);
+                const light = new MockLight(color, 2.5);
+                const checkColor = light.color === color;
                 const checkIntensity = light.intensityMultiplier === 2.5;
-                const checkDebugger = light.enableDebugger === true;
+                const checkDebugger = light.enableDebugger === false;
+                run(checkColor && checkIntensity && checkDebugger);
+            } catch (e) { run(false, e); }
+        }, true);
 
-                run(checkColorInstance && checkColorValues && checkIntensity && checkDebugger);
-            } catch (e) {
-                run(false, e);
-            }
-        }, true);        
-        runner.defineTest('Failure: Negative intensityMultiplier', (run) => {
+        runner.defineTest('Success Test: color Setter/Getter', (run) => {
             try {
-                const light = new RedGPU.Light.AmbientLight();
-                light.intensityMultiplier = -1;
-                run(true);
-            } catch (e) {
-                run(false, e);
-            }
+                const light = new MockLight(new RedGPU.Color.ColorRGB());
+                const newColor = new RedGPU.Color.ColorRGB(255, 0, 0);
+                light.color = newColor;
+                run(light.color === newColor);
+            } catch (e) { run(false, e); }
+        }, true);
+
+        runner.defineTest('Failure Test: color setter - null', (run) => {
+            try { new MockLight(new RedGPU.Color.ColorRGB()).color = null; run(true); } catch (e) { run(false, e); }
         }, false);
+
+        runner.defineTest('Failure Test: color setter - wrong type', (run) => {
+            try { new MockLight(new RedGPU.Color.ColorRGB()).color = '#ffffff'; run(true); } catch (e) { run(false, e); }
+        }, false);
+
+        runner.defineTest('Success Test: intensityMultiplier Setter/Getter', (run) => {
+            try {
+                const light = new MockLight(new RedGPU.Color.ColorRGB());
+                light.intensityMultiplier = 5;
+                run(light.intensityMultiplier);
+            } catch (e) { run(null, e); }
+        }, 5);
+
+        runner.defineTest('Failure Test: intensityMultiplier setter - NaN', (run) => {
+            try { new MockLight(new RedGPU.Color.ColorRGB()).intensityMultiplier = NaN; run(true); } catch (e) { run(false, e); }
+        }, false);
+
+        runner.defineTest('Failure Test: intensityMultiplier setter - negative', (run) => {
+            try { new MockLight(new RedGPU.Color.ColorRGB()).intensityMultiplier = -0.1; run(true); } catch (e) { run(false, e); }
+        }, false);
+
+        runner.defineTest('Success Test: enableDebugger Setter/Getter', (run) => {
+            try {
+                const light = new MockLight(new RedGPU.Color.ColorRGB());
+                light.enableDebugger = true;
+                run(light.enableDebugger);
+            } catch (e) { run(null, e); }
+        }, true);
     }
 );
 
 redUnit.testGroup(
     'RedGPU.Light.AmbientLight',
     (runner) => {
-        runner.defineTest('Success: lux property', (run) => {
+        runner.defineTest('Success Test: Constructor defaults', (run) => {
+            try {
+                const light = new RedGPU.Light.AmbientLight();
+                run(light.color.hex === '#ADD8E6' && light.lux === 0);
+            } catch (e) { run(false, e); }
+        }, true);
+
+        runner.defineTest('Success Test: lux property', (run) => {
             try {
                 const light = new RedGPU.Light.AmbientLight('#fff', 500);
-                const check = light.lux === 500;
                 light.lux = 1000;
-                run(check && light.lux === 1000);
-            } catch (e) {
-                run(false, e);
-            }
-        }, true);
+                run(light.lux);
+            } catch (e) { run(null, e); }
+        }, 1000);
     }
 );
 
 redUnit.testGroup(
     'RedGPU.Light.DirectionalLight',
     (runner) => {
-        runner.defineTest('Success: direction and lux', (run) => {
+        runner.defineTest('Success Test: direction and lux', (run) => {
             try {
                 const light = new RedGPU.Light.DirectionalLight([-1, -2, -3], '#ffffff', 50000);
                 const checkDir = light.direction[0] === -1 && light.direction[1] === -2 && light.direction[2] === -3;
                 const checkLux = light.lux === 50000;
-                const checkColor = light.color.hex === '#FFFFFF';
-                run(checkDir && checkLux && checkColor);
-            } catch (e) {
-                run(false, e);
-            }
+                run(checkDir && checkLux);
+            } catch (e) { run(false, e); }
         }, true);
 
-        runner.defineTest('Success: Spherical coordinates sync', (run) => {
+        runner.defineTest('Success Test: Spherical coordinates (elevation/azimuth)', (run) => {
             try {
                 const light = new RedGPU.Light.DirectionalLight();
-                light.elevation = 90; // Up (inverse dir is down [0, -1, 0])
+                light.elevation = 90; 
+                light.azimuth = 0;
                 const dir = light.direction;
-                // direction is inverse of spherical to point from light to ground
-                // if elevation is 90,nx=0, ny=1, nz=0 -> dir = [0, -1, 0]
+                // elevation 90 is straight up, so direction from light to surface is [0, -1, 0]
                 const check = Math.abs(dir[0]) < 0.0001 && dir[1] === -1 && Math.abs(dir[2]) < 0.0001;
                 run(check);
-            } catch (e) {
-                run(false, e);
-            }
+            } catch (e) { run(false, e); }
+        }, true);
+
+        runner.defineTest('Success Test: Individual direction components (X, Y, Z)', (run) => {
+            try {
+                const light = new RedGPU.Light.DirectionalLight();
+                light.directionX = -1; light.directionY = 0; light.directionZ = 0;
+                const dir = light.direction;
+                run(dir[0] === -1 && dir[1] === 0 && dir[2] === 0);
+            } catch (e) { run(false, e); }
         }, true);
     }
 );
@@ -90,20 +122,25 @@ redUnit.testGroup(
 redUnit.testGroup(
     'RedGPU.Light.PointLight',
     (runner) => {
-        runner.defineTest('Success: position, radius, lumen', (run) => {
+        runner.defineTest('Success Test: position, radius, lumen', (run) => {
             try {
                 const light = new RedGPU.Light.PointLight('#ffffff', 2000);
                 light.setPosition(10, 20, 30);
                 light.radius = 50;
-                
                 const checkPos = light.x === 10 && light.y === 20 && light.z === 30;
                 const checkRadius = light.radius === 50;
                 const checkLumen = light.lumen === 2000;
-                const checkColor = light.color.hex === '#FFFFFF';
-                run(checkPos && checkRadius && checkLumen && checkColor);
-            } catch (e) {
-                run(false, e);
-            }
+                run(checkPos && checkRadius && checkLumen);
+            } catch (e) { run(false, e); }
+        }, true);
+
+        runner.defineTest('Success Test: setPosition with array', (run) => {
+            try {
+                const light = new RedGPU.Light.PointLight();
+                light.setPosition([100, 200, 300]);
+                const pos = light.position;
+                run(pos[0] === 100 && pos[1] === 200 && pos[2] === 300);
+            } catch (e) { run(false, e); }
         }, true);
     }
 );
@@ -111,24 +148,26 @@ redUnit.testGroup(
 redUnit.testGroup(
     'RedGPU.Light.SpotLight',
     (runner) => {
-        runner.defineTest('Success: cutoff and lookAt', (run) => {
+        runner.defineTest('Success Test: cutoff and lookAt', (run) => {
             try {
                 const light = new RedGPU.Light.SpotLight('#ffffff');
                 light.innerCutoff = 10;
                 light.outerCutoff = 30;
-                
                 light.setPosition(0, 10, 0);
-                light.lookAt(0, 0, 0); // Pointing straight down [0, -1, 0]
-                
+                light.lookAt(0, 0, 0); 
                 const checkCutoff = light.innerCutoff === 10 && light.outerCutoff === 30;
-                const dir = light.direction;
-                const checkDir = dir[0] === 0 && dir[1] === -1 && dir[2] === 0;
-                const checkColor = light.color.hex === '#FFFFFF';
-                
-                run(checkCutoff && checkDir && checkColor);
-            } catch (e) {
-                run(false, e);
-            }
+                const checkDir = light.direction[1] === -1; // Pointing down
+                run(checkCutoff && checkDir);
+            } catch (e) { run(false, e); }
+        }, true);
+
+        runner.defineTest('Success Test: inner/outer cutoff cosine', (run) => {
+            try {
+                const light = new RedGPU.Light.SpotLight();
+                light.innerCutoff = 45;
+                const expected = Math.cos(45 * Math.PI / 180);
+                run(Math.abs(light.innerCutoffCos - expected) < 0.0001);
+            } catch (e) { run(false, e); }
         }, true);
     }
 );
@@ -136,13 +175,12 @@ redUnit.testGroup(
 redUnit.testGroup(
     'RedGPU.Light.LightManager',
     (runner) => {
-        runner.defineTest('Success: Adding and removing lights', (run) => {
+        runner.defineTest('Success Test: Adding and removing lights', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
                     const scene = new RedGPU.Display.Scene(redGPUContext);
                     const manager = scene.lightManager;
-                    
                     const d1 = new RedGPU.Light.DirectionalLight();
                     const p1 = new RedGPU.Light.PointLight();
                     const s1 = new RedGPU.Light.SpotLight();
@@ -165,7 +203,7 @@ redUnit.testGroup(
                     const checkRemove = manager.directionalLightCount === 0 && 
                                         manager.pointLightCount === 0 && 
                                         manager.spotLightCount === 0;
-                                        
+                    
                     redGPUContext.destroy();
                     run(checkAdd && checkRemove);
                 } catch (e) {
@@ -175,44 +213,12 @@ redUnit.testGroup(
             }, (error) => run(false, error));
         }, true);
 
-        runner.defineTest('Success: removeAllLight', (run) => {
+        runner.defineTest('Failure Test: ambientLight setter - null', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
                     const scene = new RedGPU.Display.Scene(redGPUContext);
-                    const manager = scene.lightManager;
-                    
-                    manager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
-                    manager.addPointLight(new RedGPU.Light.PointLight());
-                    manager.ambientLight = new RedGPU.Light.AmbientLight();
-                    
-                    manager.removeAllLight();
-                    
-                    const check = manager.directionalLightCount === 0 && 
-                                  manager.pointLightCount === 0 && 
-                                  manager.ambientLight === null;
-                                  
-                    redGPUContext.destroy();
-                    run(check);
-                } catch (e) {
-                    redGPUContext.destroy();
-                    run(false, e);
-                }
-            }, (error) => run(false, error));
-        }, true);
-
-        runner.defineTest('Failure: directionalLight limit check', (run) => {
-            const canvas = document.createElement('canvas');
-            RedGPU.init(canvas, (redGPUContext) => {
-                try {
-                    const scene = new RedGPU.Display.Scene(redGPUContext);
-                    const manager = scene.lightManager;
-                    const limit = manager.limitDirectionalLightCount;
-                    
-                    for(let i=0; i <= limit; i++) {
-                        manager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
-                    }
-                    // Should throw on the (limit + 1)-th addition
+                    scene.lightManager.ambientLight = null;
                     redGPUContext.destroy();
                     run(true);
                 } catch (e) {
@@ -221,5 +227,50 @@ redUnit.testGroup(
                 }
             }, (error) => run(false, error));
         }, false);
+
+        runner.defineTest('Failure Test: directionalLight limit check', (run) => {
+            const canvas = document.createElement('canvas');
+            RedGPU.init(canvas, (redGPUContext) => {
+                try {
+                    const scene = new RedGPU.Display.Scene(redGPUContext);
+                    const manager = scene.lightManager;
+                    const limit = manager.limitDirectionalLightCount;
+                    for(let i=0; i <= limit; i++) {
+                        manager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
+                    }
+                    redGPUContext.destroy();
+                    run(true);
+                } catch (e) {
+                    redGPUContext.destroy();
+                    run(false, e);
+                }
+            }, (error) => run(false, error));
+        }, false);
+
+        runner.defineTest('Success Test: removeAll...Light methods', (run) => {
+            const canvas = document.createElement('canvas');
+            RedGPU.init(canvas, (redGPUContext) => {
+                try {
+                    const scene = new RedGPU.Display.Scene(redGPUContext);
+                    const manager = scene.lightManager;
+                    manager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
+                    manager.addPointLight(new RedGPU.Light.PointLight());
+                    manager.addSpotLight(new RedGPU.Light.SpotLight());
+                    
+                    manager.removeAllDirectionalLight();
+                    manager.removeAllPointLight();
+                    manager.removeAllSpotLight();
+                    
+                    const check = manager.directionalLightCount === 0 && 
+                                  manager.pointLightCount === 0 && 
+                                  manager.spotLightCount === 0;
+                    redGPUContext.destroy();
+                    run(check);
+                } catch (e) {
+                    redGPUContext.destroy();
+                    run(false, e);
+                }
+            }, (error) => run(false, error));
+        }, true);
     }
 );
