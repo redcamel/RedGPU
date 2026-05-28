@@ -52,6 +52,6 @@ redUnit.testGroup(
                     run(null, e);
                 }
             }, (error) => run(null, error));
-        }, 512);
+        }, 1024);
     }
 );
