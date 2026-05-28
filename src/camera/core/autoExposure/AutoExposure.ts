@@ -339,9 +339,13 @@ class AutoExposure extends RedGPUObject {
     #initResources() {
         const {gpuDevice, redGPUContext} = this;
 
-        // [KO] 초기 EV100 값 설정 (기본적으로 1.0으로 시작하거나 이전 프레임의 적응 값을 유지합니다)
-        // [EN] Set initial EV100 value (starts at 1.0 by default or maintains the adapted value from the previous frame)
-        const initialData = new Float32Array([1.0]);
+        // [KO] 초기 EV100 값 설정 (기본적으로 카메라의 물리적 EV100으로 시작하여 급격한 노출 변화를 방지합니다)
+        // [EN] Set initial EV100 value (starts with the camera's physical EV100 by default to prevent sudden exposure changes)
+        this.#view.rawCamera.updateExposure();
+        const initialEV100 = Math.max(this.#minEV100, Math.min(this.#maxEV100, this.#view.rawCamera.ev100));
+        this.#currentAdaptedEV100 = initialEV100;
+
+        const initialData = new Float32Array([initialEV100]);
         this.#adaptedEV100Buffer = new StorageBuffer(redGPUContext, initialData.buffer, 'AutoExposure_AdaptedEV100');
 
         // [KO] 히스토그램 버퍼 (256 bins) [EN] Histogram buffer (256 bins)
