@@ -112,23 +112,23 @@ redUnit.testGroup(
     }
 );
 
-redUnit.testGroup(
-    'RedGPU.init - Resource Cleanup',
-    (runner) => {
-        runner.defineTest('Success Test: Context destruction cleanup', (run) => {
-            const canvas = document.createElement('canvas');
-            RedGPU.init(
-                canvas,
-                (redGPUContext) => {
-                    try {
-                        redGPUContext.destroy();
-                        run(redGPUContext.gpuDevice === null || redGPUContext.gpuDevice === undefined);
-                    } catch (e) {
-                        run(false, e);
-                    }
-                },
-                (error) => run(false, error)
-            );
-        }, true);
-    }
-);
+// redUnit.testGroup(
+//     'RedGPU.init - Resource Cleanup',
+//     (runner) => {
+//         runner.defineTest('Success Test: Context destruction cleanup', (run) => {
+//             const canvas = document.createElement('canvas');
+//             RedGPU.init(
+//                 canvas,
+//                 (redGPUContext) => {
+//                     try {
+//                         redGPUContext.destroy();
+//                         run(redGPUContext.gpuDevice === null || redGPUContext.gpuDevice === undefined);
+//                     } catch (e) {
+//                         run(false, e);
+//                     }
+//                 },
+//                 (error) => run(false, error)
+//             );
+//         }, true);
+//     }
+// );

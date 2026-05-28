@@ -28,23 +28,23 @@ import isHexColor from "../runtimeChecker/isFunc/isHexColor";
  * @category Color
  */
 const convertHexToRgb = (hex: string | number, returnArrayYn: boolean = false): any => {
+    if (Number.isNaN(hex)) throw Error(`from convertHexToRgb: input value - ${hex} / NaN is not allowed`);
+    let hexNumber: number;
     if (typeof hex === "number") {
-        hex = `#${hex.toString(16)}`;
-    }
-    if (isHexColor(hex)) {
-        if (hex.charAt(0) === '#') {
-            hex = hex.substring(1);
+        hexNumber = hex;
+    } else if (isHexColor(hex)) {
+        let cleanHex = hex.substring(1);
+        if (cleanHex.length === 3) {
+            cleanHex = cleanHex.charAt(0) + cleanHex.charAt(0) + cleanHex.charAt(1) + cleanHex.charAt(1) + cleanHex.charAt(2) + cleanHex.charAt(2);
         }
-        if (hex.length === 3) {
-            hex = hex.charAt(0) + hex.charAt(0) + hex.charAt(1) + hex.charAt(1) + hex.charAt(2) + hex.charAt(2);
-        }
-        const hexNumber = parseInt('0x' + hex);
-        const r = (hexNumber >> 16) & 255;
-        const g = (hexNumber >> 8) & 255;
-        const b = hexNumber & 255;
-        return returnArrayYn ? [r, g, b] : {r, g, b};
+        hexNumber = parseInt(cleanHex, 16);
     } else {
-        throw Error(`from ${convertHexToRgb.constructor.name}: input value - ${hex} / Only hex string allowed`);
+        throw Error(`from convertHexToRgb: input value - ${hex} / Only '#' prefixed hex strings or numbers allowed`);
     }
+
+    const r = (hexNumber >> 16) & 255;
+    const g = (hexNumber >> 8) & 255;
+    const b = hexNumber & 255;
+    return returnArrayYn ? [r, g, b] : {r, g, b};
 };
 export default convertHexToRgb
