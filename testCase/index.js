@@ -3,6 +3,9 @@ import RedUnit from 'https://redcamel.github.io/RedUnit/dist/index.js'
 RedUnit.pageLoader('RedGPU', [
 	{title: 'antialiasingManager', src: './antialiasing/antialiasingManager'},
 	{title: 'baseObject', src: './base'},
+	{title: 'color', src: './color'},
+	{title: 'convertHexToRgb', src: './color/convertHexToRgb'},
+	{title: 'convertRgbToHex', src: './color/convertRgbToHex'},
 	{title: 'copyGPUBuffer', src: './util/copyGPUBuffer'},
 	{title: 'file', src: './util/file'},
 	{title: 'formatBytes', src: './util/formatBytes'},
