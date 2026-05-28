@@ -230,5 +230,5 @@ class ColorRGBA extends ColorRGB {
         validatePositiveNumberRange(a, 0, 1);
     }
 }
-
+Object.freeze(ColorRGBA)
 export default ColorRGBA

@@ -519,5 +519,5 @@ class OrbitController extends AController {
         this.camera.lookAt(this.#centerX, this.#centerY, this.#centerZ);
     }
 }
-
+Object.freeze(OrbitController)
 export default OrbitController;

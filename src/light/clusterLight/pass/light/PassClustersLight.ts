@@ -116,5 +116,5 @@ class PassClustersLight extends RedGPUObject {
         });
     }
 }
-
+Object.freeze(PassClustersLight)
 export default PassClustersLight;

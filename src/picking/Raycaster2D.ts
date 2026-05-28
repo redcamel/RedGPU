@@ -19,7 +19,7 @@ import {RayIntersectResult} from "./Raycaster3D";
  * ```
  * @category Picking
  */
-export default class Raycaster2D {
+class Raycaster2D {
     /**
      * [KO] 내부적으로 관리되는 광선 객체
      * [EN] Internally managed ray object
@@ -185,3 +185,5 @@ export default class Raycaster2D {
         }
     }
 }
+Object.freeze(Raycaster2D);
+export default Raycaster2D

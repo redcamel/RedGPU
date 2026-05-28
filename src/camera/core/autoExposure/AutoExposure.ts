@@ -442,5 +442,5 @@ class AutoExposure extends RedGPUObject {
         return layout;
     }
 }
-
+Object.freeze(AutoExposure)
 export default AutoExposure;

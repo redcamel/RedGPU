@@ -14,7 +14,7 @@ import AABB from "../bound/AABB";
  * ```
  * @category Math
  */
-export default class Ray {
+class Ray {
     /**
      * [KO] 광선의 시작점
      * [EN] Origin of the ray
@@ -280,3 +280,5 @@ export default class Ray {
         return null;
     }
 }
+Object.freeze(Ray)
+export default Ray

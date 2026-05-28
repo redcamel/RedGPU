@@ -113,5 +113,5 @@ class PassClusterLightBound extends RedGPUObject {
         });
     }
 }
-
+Object.freeze(PassClusterLightBound)
 export default PassClusterLightBound;

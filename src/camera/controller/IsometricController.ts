@@ -349,5 +349,5 @@ class IsometricController extends AController {
         return true;
     }
 }
-
+Object.freeze(IsometricController)
 export default IsometricController;

@@ -226,5 +226,5 @@ class PostEffectTexturePool extends RedGPUObject {
         return texture;
     }
 }
-
+Object.freeze(PostEffectTexturePool);
 export default PostEffectTexturePool;

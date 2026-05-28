@@ -43,4 +43,5 @@ const PICKING_EVENT_TYPE = {
      */
     CLICK: 'click',
 } as const;
+Object.freeze(PICKING_EVENT_TYPE);
 export default PICKING_EVENT_TYPE;

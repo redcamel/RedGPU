@@ -19,7 +19,7 @@ import {keepLog} from "../utils";
  * ```
  * @category Picking
  */
-export default class Raycaster3D {
+class Raycaster3D {
     /**
      * [KO] 내부적으로 관리되는 광원 객체
      * [EN] Internally managed ray object
@@ -344,6 +344,8 @@ export default class Raycaster3D {
     }
 }
 
+Object.freeze(Raycaster3D);
+export default Raycaster3D
 /**
  * [KO] 레이캐스팅 교차 결과 인터페이스입니다.
  * [EN] Raycasting intersection result interface.
