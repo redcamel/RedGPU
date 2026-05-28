@@ -19,32 +19,6 @@ struct FragmentOutput {
 @group(1) @binding(2) var bg_skyViewLUT : texture_2d<f32>;
 @group(1) @binding(3) var bg_skyAtmosphereSampler : sampler;
 
-// [KO] 절차적 노이즈 함수들 [EN] Procedural noise functions
-fn hash(p: vec2<f32>) -> f32 {
-    return fract(sin(dot(p, vec2<f32>(127.1, 311.7))) * 43758.5453123);
-}
-
-fn noise(p: vec2<f32>) -> f32 {
-    let i = floor(p);
-    let f = fract(p);
-    let u = f * f * (3.0 - 2.0 * f);
-    return mix(mix(hash(i + vec2<f32>(0.0, 0.0)), hash(i + vec2<f32>(1.0, 0.0)), u.x),
-               mix(hash(i + vec2<f32>(0.0, 1.0)), hash(i + vec2<f32>(1.0, 1.0)), u.x), u.y);
-}
-
-fn fbm(p: vec2<f32>) -> f32 {
-    var v = 0.0;
-    var a = 0.5;
-    var shift = vec2<f32>(100.0);
-    var p_mut = p;
-    for (var i = 0; i < 5; i = i + 1) {
-        v += a * noise(p_mut);
-        p_mut = p_mut * 2.0 + shift;
-        a *= 0.5;
-    }
-    return v;
-}
-
 @fragment
 fn main(input : VertexOutput) -> FragmentOutput {
     let uniforms = systemUniforms.skyAtmosphere;
@@ -96,24 +70,14 @@ fn main(input : VertexOutput) -> FragmentOutput {
         
         if (tCloud > 0.0) {
             let hitP = camPos + viewDir * tCloud;
-            // [KO] UV 매핑 스케일 조정 (더 큰 구름을 위해 0.2 -> 0.05)
-            let cloudUV = hitP.xz * 0.05 + vec2<f32>(uniforms.cloudTime * 0.02);
-            
-            // FBM 노이즈를 이용한 구름 밀도 계산
-            let density = fbm(cloudUV);
-            let coverage = uniforms.cloudCoverage;
-            // [KO] 구름 대비(Contrast) 강화
-            let cloudMask = smoothstep(1.0 - coverage, 1.0 - coverage + 0.15, density);
+            let cloudMask = getCloudDensity(hitP, uniforms);
             
             if (cloudMask > 0.0) {
                 let sunDir = normalize(uniforms.sunDirection);
                 let sunT = getTransmittance(bg_transmittanceLUT, bg_skyAtmosphereSampler, uniforms.cloudHeight, sunDir.y, atmosphereHeight);
                 
                 // 가짜 조명 (Pseudo-Lighting)
-                let eps = 0.2;
-                let dIdx = (fbm(cloudUV + vec2<f32>(eps, 0.0)) - density) / eps;
-                let dIdy = (fbm(cloudUV + vec2<f32>(0.0, eps)) - density) / eps;
-                let cloudNormal = normalize(vec3<f32>(-dIdx, 2.0, -dIdy)); // Y축 가중치 증가로 평평함 완화
+                let cloudNormal = getCloudNormal(hitP, uniforms);
                 let cloudShadow = saturate(dot(cloudNormal, sunDir) * 0.5 + 0.5);
                 
                 // [KO] 구름 색상 결정: 태양광 투과율 반영 및 기본 밝기 확보

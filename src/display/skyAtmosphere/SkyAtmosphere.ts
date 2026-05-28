@@ -67,9 +67,9 @@ class SkyAtmosphere extends RedGPUObject {
         sunLimbDarkening: 0.5,
         cameraHeight: 0.001,
         cloudTime: 0.0,
-        cloudCoverage: 0.5,
-        cloudDensity: 0.5,
-        cloudHeight: 3.0
+        cloudCoverage: 0.4,
+        cloudDensity: 0.7,
+        cloudHeight: 5.0
     };
 
     #activeSunSource: DirectionalLight = null;

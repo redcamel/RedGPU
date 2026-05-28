@@ -80,6 +80,12 @@ const renderTestPane = (targetView, skyAtmosphere, sunSource) => {
             f_atmo.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01});
             f_atmo.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01});
 
+            // Clouds
+            const f_clouds = f_atmo.addFolder({title: 'Clouds', expanded: true});
+            f_clouds.addBinding(skyAtmosphere, 'cloudCoverage', {min: 0, max: 1, step: 0.01});
+            f_clouds.addBinding(skyAtmosphere, 'cloudDensity', {min: 0, max: 1, step: 0.01});
+            f_clouds.addBinding(skyAtmosphere, 'cloudHeight', {min: 0.1, max: 20, step: 0.1});
+
             // Scattering Details
             const f_scattering = f_atmo.addFolder({title: 'Scattering & Physics (Unified Control via Sun Lux)', expanded: false});
             

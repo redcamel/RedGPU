@@ -437,3 +437,46 @@ fn getFrustumRayDirection(uv: vec2<f32>, invP: mat4x4<f32>, invV: mat4x4<f32>) -
     let worldRotation = mat3x3<f32>(invV[0].xyz, invV[1].xyz, invV[2].xyz);
     return normalize(worldRotation * viewSpaceDir);
 }
+
+// [KO] 절차적 노이즈 함수들 [EN] Procedural noise functions
+fn cloud_hash(p: vec2<f32>) -> f32 {
+    return fract(sin(dot(p, vec2<f32>(127.1, 311.7))) * 43758.5453123);
+}
+
+fn cloud_noise(p: vec2<f32>) -> f32 {
+    let i = floor(p);
+    let f = fract(p);
+    let u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(cloud_hash(i + vec2<f32>(0.0, 0.0)), cloud_hash(i + vec2<f32>(1.0, 0.0)), u.x),
+               mix(cloud_hash(i + vec2<f32>(0.0, 1.0)), cloud_hash(i + vec2<f32>(1.0, 1.0)), u.x), u.y);
+}
+
+fn cloud_fbm(p: vec2<f32>) -> f32 {
+    var v = 0.0;
+    var a = 0.5;
+    var shift = vec2<f32>(100.0);
+    var p_mut = p;
+    for (var i = 0; i < 5; i = i + 1) {
+        v += a * cloud_noise(p_mut);
+        p_mut = p_mut * 2.0 + shift;
+        a *= 0.5;
+    }
+    return v;
+}
+
+fn getCloudDensity(hitP: vec3<f32>, params: SkyAtmosphere) -> f32 {
+    let cloudUV = hitP.xz * 0.05 + vec2<f32>(params.cloudTime * 0.02);
+    let density = cloud_fbm(cloudUV);
+    let coverage = params.cloudCoverage;
+    let softness = (1.0 - params.cloudDensity) * 0.5 + 0.01;
+    return smoothstep(1.0 - coverage, 1.0 - coverage + softness, density);
+}
+
+fn getCloudNormal(hitP: vec3<f32>, params: SkyAtmosphere) -> vec3<f32> {
+    let cloudUV = hitP.xz * 0.05 + vec2<f32>(params.cloudTime * 0.02);
+    let density = cloud_fbm(cloudUV);
+    let eps = 0.2;
+    let dIdx = (cloud_fbm(cloudUV + vec2<f32>(eps, 0.0)) - density) / eps;
+    let dIdy = (cloud_fbm(cloudUV + vec2<f32>(0.0, eps)) - density) / eps;
+    return normalize(vec3<f32>(-dIdx, 2.0, -dIdy));
+}

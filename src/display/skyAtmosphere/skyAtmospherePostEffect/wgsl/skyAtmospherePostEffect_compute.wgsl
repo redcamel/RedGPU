@@ -73,8 +73,20 @@ let hitsVirtualGround = groundRadius > 0.0 && getRaySphereIntersection(camPos, v
 let drawSunDisk = (rawDepth >= 1.0) && !hitsVirtualGround;
 let sunDisk = select(vec3<f32>(0.0), getSunDiskRadianceUnit(viewSunCos, uniforms.sunSize, uniforms.sunLimbDarkening, vec3<f32>(atmosphereTrans), 0.01, uniforms), drawSunDisk);
 
+// [KO] 구름에 의한 태양 및 글로우 가림 처리 (Cloud Masking)
+var finalCloudMask: f32 = 0.0;
+if (drawSunDisk) {
+    let cloudR = groundRadius + uniforms.cloudHeight;
+    let tCloud = getRaySphereIntersection(camPos, viewDir, cloudR);
+    if (tCloud > 0.0) {
+        let hitP = camPos + viewDir * tCloud;
+        finalCloudMask = getCloudDensity(hitP, uniforms);
+    }
+}
+
 // 3. 최종 산란광 합산 및 장면 합성 (Unified Formula)
-let totalScattering = (baseScattering + (mieGlow + sunDisk) * sunShadow) * uniforms.sunIntensity * systemUniforms.preExposure;
+let addedRadiance = (mieGlow + sunDisk) * sunShadow * (1.0 - finalCloudMask);
+let totalScattering = (baseScattering * uniforms.sunIntensity + addedRadiance * uniforms.sunIntensity) * systemUniforms.preExposure;
 let finalColor = sceneColor * saturate(sceneBlendingTrans) + totalScattering;
 
 textureStore(outputTexture, id, vec4<f32>(finalColor, 1.0));
