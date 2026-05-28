@@ -66,7 +66,6 @@ class SkyAtmosphere extends RedGPUObject {
         sunSize: 0.533,
         sunLimbDarkening: 0.5,
         cameraHeight: 0.001,
-        intensity: 1.0,
         cloudTime: 0.0,
         cloudCoverage: 0.5,
         cloudDensity: 0.5,
@@ -113,14 +112,6 @@ class SkyAtmosphere extends RedGPUObject {
 
     get params() {
         return this.#params;
-    }
-
-    get intensity(): number {
-        return this.#params.intensity;
-    }
-
-    set intensity(v: number) {
-        this.#setParam('intensity', v, false, false, true, (v) => validatePositiveNumberRange(v, 0, 10));
     }
 
     get cloudCoverage(): number {

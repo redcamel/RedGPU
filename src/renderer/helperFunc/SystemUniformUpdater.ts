@@ -192,7 +192,6 @@ class SystemUniformUpdater {
                 {key: 'sunSize', value: params?.sunSize || 0},
                 {key: 'sunLimbDarkening', value: params?.sunLimbDarkening || 0.0},
                 {key: 'cameraHeight', value: params?.cameraHeight || 0},
-                {key: 'intensity', value: params?.intensity || 0},
                 {key: 'cloudTime', value: params?.cloudTime || 0},
                 {key: 'cloudCoverage', value: params?.cloudCoverage || 0},
                 {key: 'cloudDensity', value: params?.cloudDensity || 0},
