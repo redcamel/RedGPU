@@ -215,7 +215,7 @@ class LightManager {
      */
     addSpotLight(value: SpotLight) {
         if (!(value instanceof SpotLight)) consoleAndThrowError('allow only SpotLight instance')
-        const isOverLimit = this.#spotLights.length + this.#pointLights.length > this.#limitClusterLightCount;
+        const isOverLimit = this.#spotLights.length + this.#pointLights.length >= this.#limitClusterLightCount;
         if (isOverLimit) {
             consoleAndThrowError('Cannot add more cluster lights. The limit has been reached.');
         }
@@ -240,7 +240,7 @@ class LightManager {
      */
     addPointLight(value: PointLight) {
         if (!(value instanceof PointLight)) consoleAndThrowError('allow only PointLight instance')
-        const isOverLimit = this.#spotLights.length + this.#pointLights.length > this.#limitClusterLightCount;
+        const isOverLimit = this.#spotLights.length + this.#pointLights.length >= this.#limitClusterLightCount;
         if (isOverLimit) {
             consoleAndThrowError('Cannot add more cluster lights. The limit has been reached.');
         }
@@ -265,7 +265,7 @@ class LightManager {
      */
     addDirectionalLight(value: DirectionalLight) {
         if (!(value instanceof DirectionalLight)) consoleAndThrowError('allow only DirectionalLight instance')
-        const isOverLimit = this.#directionalLights.length > this.#limitDirectionalLightCount;
+        const isOverLimit = this.#directionalLights.length >= this.#limitDirectionalLightCount;
         if (isOverLimit) {
             consoleAndThrowError('Cannot add more directional lights. The limit has been reached.');
         }
