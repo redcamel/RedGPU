@@ -464,19 +464,30 @@ fn cloud_fbm(p: vec2<f32>) -> f32 {
     return v;
 }
 
+fn getCloudWarpedUV(hitP: vec3<f32>, params: SkyAtmosphere) -> vec2<f32> {
+    let baseUV = hitP.xz * 0.05 + vec2<f32>(params.cloudTime * 0.02);
+    // [KO] 도메인 워핑: UV를 노이즈로 살짝 비틀어 유기적인 형태 생성
+    // [EN] Domain Warping: Distort UVs with noise to create organic shapes
+    let warp = vec2<f32>(
+        cloud_noise(baseUV * 1.2 + vec2<f32>(params.cloudTime * 0.01)),
+        cloud_noise(baseUV * 1.2 + vec2<f32>(5.7, 1.3) + vec2<f32>(params.cloudTime * 0.012))
+    );
+    return baseUV + warp * 0.2;
+}
+
 fn getCloudDensity(hitP: vec3<f32>, params: SkyAtmosphere) -> f32 {
-    let cloudUV = hitP.xz * 0.05 + vec2<f32>(params.cloudTime * 0.02);
-    let density = cloud_fbm(cloudUV);
+    let warpedUV = getCloudWarpedUV(hitP, params);
+    let density = cloud_fbm(warpedUV);
     let coverage = params.cloudCoverage;
     let softness = (1.0 - params.cloudDensity) * 0.5 + 0.01;
     return smoothstep(1.0 - coverage, 1.0 - coverage + softness, density);
 }
 
 fn getCloudNormal(hitP: vec3<f32>, params: SkyAtmosphere) -> vec3<f32> {
-    let cloudUV = hitP.xz * 0.05 + vec2<f32>(params.cloudTime * 0.02);
-    let density = cloud_fbm(cloudUV);
+    let warpedUV = getCloudWarpedUV(hitP, params);
+    let density = cloud_fbm(warpedUV);
     let eps = 0.2;
-    let dIdx = (cloud_fbm(cloudUV + vec2<f32>(eps, 0.0)) - density) / eps;
-    let dIdy = (cloud_fbm(cloudUV + vec2<f32>(0.0, eps)) - density) / eps;
+    let dIdx = (cloud_fbm(warpedUV + vec2<f32>(eps, 0.0)) - density) / eps;
+    let dIdy = (cloud_fbm(warpedUV + vec2<f32>(0.0, eps)) - density) / eps;
     return normalize(vec3<f32>(-dIdx, 2.0, -dIdy));
 }

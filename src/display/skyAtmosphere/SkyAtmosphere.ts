@@ -67,6 +67,7 @@ class SkyAtmosphere extends RedGPUObject {
         sunLimbDarkening: 0.5,
         cameraHeight: 0.001,
         cloudTime: 0.0,
+        cloudTimeMultiplier: 0.0,
         cloudCoverage: 0.4,
         cloudDensity: 0.7,
         cloudHeight: 5.0
@@ -112,6 +113,14 @@ class SkyAtmosphere extends RedGPUObject {
 
     get params() {
         return this.#params;
+    }
+
+    get cloudTimeMultiplier(): number {
+        return this.#params.cloudTimeMultiplier;
+    }
+
+    set cloudTimeMultiplier(v: number) {
+        this.#setParam('cloudTimeMultiplier', v, false, false, false, (v) => validateNumberRange(v, ));
     }
 
     get cloudCoverage(): number {
@@ -350,8 +359,8 @@ class SkyAtmosphere extends RedGPUObject {
         if (this.#lastUpdateFrame === currentFrame) return;
         this.#lastUpdateFrame = currentFrame;
 
-        // [KO] 구름 애니메이션 시간 업데이트 [EN] Update cloud animation time
-        this.#params.cloudTime += view.renderViewStateData.deltaTime * 0.001;
+        // [KO] 구름 애니메이션 시간 업데이트 (절대 시간 및 배율 사용) [EN] Update cloud animation time (using absolute time and multiplier)
+        this.#params.cloudTime = view.renderViewStateData.time * 0.001 * this.#params.cloudTimeMultiplier;
         this.#dirtyUniformBuffer = true;
 
         this.#updateSunInfo(view);
