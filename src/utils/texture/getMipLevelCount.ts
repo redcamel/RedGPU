@@ -1,4 +1,3 @@
-import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRange";
 
 /**
@@ -16,8 +15,8 @@ import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRan
  * @category Texture
  */
 const getMipLevelCount = (width: number, height: number): number => {
-  validateUintRange(width)
-  validateUintRange(height)
+    validateUintRange(width)
+    validateUintRange(height)
     return Math.floor(Math.log2(Math.max(width, height))) + 1;
 }
 export default getMipLevelCount

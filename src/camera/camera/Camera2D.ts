@@ -168,5 +168,6 @@ class Camera2D extends ACamera {
         [this.#viewMatrix[12], this.#viewMatrix[13], this.#viewMatrix[14]] = [this.#x, this.#y, 0];
     }
 }
+
 Object.freeze(Camera2D);
 export default Camera2D;

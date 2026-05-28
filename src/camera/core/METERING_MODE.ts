@@ -19,5 +19,6 @@ enum METERING_MODE {
      */
     SPOT = 2
 }
+
 Object.freeze(METERING_MODE)
 export default METERING_MODE;

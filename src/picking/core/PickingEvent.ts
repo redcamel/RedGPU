@@ -184,5 +184,6 @@ class PickingEvent {
         }
     }
 }
+
 Object.freeze(PickingEvent);
 export default PickingEvent;

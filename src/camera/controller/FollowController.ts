@@ -698,5 +698,6 @@ class FollowController extends AController {
     }
 
 }
+
 Object.freeze(FollowController)
 export default FollowController;

@@ -1,6 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "./COMMAND_ENCODER_TYPE";
-import {keepLog} from "../../utils";
 import RedGPUObject from "../../base/RedGPUObject";
 
 /**

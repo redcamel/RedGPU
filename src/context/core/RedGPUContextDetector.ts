@@ -1,5 +1,4 @@
 import RedGPUContext from "../RedGPUContext";
-import {keepLog} from "../../utils";
 
 /**
  * [KO] GPU 어댑터 및 브라우저 환경을 감지하고 분석하는 클래스입니다.
@@ -103,22 +102,69 @@ class RedGPUContextDetector {
     }
 
     // Getters
-    get supportedFeatures(): Record<string, boolean> { return this.#supportedFeatures; }
-    get activeFeatures(): Record<string, boolean> { return this.#activeFeatures; }
-    get supportedLimits(): GPUSupportedLimits { return this.#supportedLimits; }
-    get activeLimits(): GPUSupportedLimits { return this.#activeLimits; }
-    get gpuAdapter(): GPUAdapter { return this.#gpuAdapter; }
-    get adapterInfo(): GPUAdapterInfo { return this.#adapterInfo; }
-    get isFallbackAdapter(): boolean { return this.#isFallbackAdapter; }
-    get userAgent(): string { return this.#userAgent; }
-    get isMobile(): boolean { return this.#isMobile; }
-    get isIOS(): boolean { return this.#isIOS; }
-    get isAndroid(): boolean { return this.#isAndroid; }
-    get isChromium(): boolean { return this.#isChromium; }
-    get isSafari(): boolean { return this.#isSafari; }
-    get isFirefox(): boolean { return this.#isFirefox; }
-    get hardwareConcurrency(): number { return this.#hardwareConcurrency; }
-    get deviceMemory(): number { return this.#deviceMemory; }
+    get supportedFeatures(): Record<string, boolean> {
+        return this.#supportedFeatures;
+    }
+
+    get activeFeatures(): Record<string, boolean> {
+        return this.#activeFeatures;
+    }
+
+    get supportedLimits(): GPUSupportedLimits {
+        return this.#supportedLimits;
+    }
+
+    get activeLimits(): GPUSupportedLimits {
+        return this.#activeLimits;
+    }
+
+    get gpuAdapter(): GPUAdapter {
+        return this.#gpuAdapter;
+    }
+
+    get adapterInfo(): GPUAdapterInfo {
+        return this.#adapterInfo;
+    }
+
+    get isFallbackAdapter(): boolean {
+        return this.#isFallbackAdapter;
+    }
+
+    get userAgent(): string {
+        return this.#userAgent;
+    }
+
+    get isMobile(): boolean {
+        return this.#isMobile;
+    }
+
+    get isIOS(): boolean {
+        return this.#isIOS;
+    }
+
+    get isAndroid(): boolean {
+        return this.#isAndroid;
+    }
+
+    get isChromium(): boolean {
+        return this.#isChromium;
+    }
+
+    get isSafari(): boolean {
+        return this.#isSafari;
+    }
+
+    get isFirefox(): boolean {
+        return this.#isFirefox;
+    }
+
+    get hardwareConcurrency(): number {
+        return this.#hardwareConcurrency;
+    }
+
+    get deviceMemory(): number {
+        return this.#deviceMemory;
+    }
 
     /**
      * [KO] 모든 탐지된 정보를 리포트 객체로 반환합니다.

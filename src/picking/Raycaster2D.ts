@@ -185,5 +185,6 @@ class Raycaster2D {
         }
     }
 }
+
 Object.freeze(Raycaster2D);
 export default Raycaster2D

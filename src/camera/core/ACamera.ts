@@ -173,5 +173,6 @@ abstract class ACamera extends BaseObject {
         this.#exposureDirty = false;
     }
 }
+
 Object.freeze(ACamera)
 export default ACamera;

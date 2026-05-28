@@ -190,5 +190,6 @@ export class AABB {
         return new AABB(this.minX, this.maxX, this.minY, this.maxY, this.minZ, this.maxZ);
     }
 }
+
 Object.freeze(AABB);
 export default AABB;

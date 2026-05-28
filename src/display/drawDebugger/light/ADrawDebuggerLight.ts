@@ -22,38 +22,38 @@ import TextField3D from "../../textFields/textField3D/TextField3D";
  * @category Debugger
  */
 abstract class ADrawDebuggerLight<T extends ABaseLight> {
-	#lightMaterial: ColorMaterial;
-	#lightDebugMesh: Mesh;
-	#target: T;
-	#label: TextField3D;
+    #lightMaterial: ColorMaterial;
+    #lightDebugMesh: Mesh;
+    #target: T;
+    #label: TextField3D;
 
-	protected constructor(redGPUContext: RedGPUContext, target: T, labelIcon: string, color: [number, number, number], maxLines: number = 32) {
-		this.#target = target;
-		const lightGeometry = this.#createLightDebugGeometry(redGPUContext, maxLines);
-		this.#lightMaterial = new ColorMaterial(redGPUContext, convertRgbToHex(color[0], color[1], color[2]));
-		this.#lightDebugMesh = new Mesh(redGPUContext, lightGeometry, this.#lightMaterial);
-		const {primitiveState} = this.#lightDebugMesh
-		primitiveState.cullMode = 'none';
-		primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
+    protected constructor(redGPUContext: RedGPUContext, target: T, labelIcon: string, color: [number, number, number], maxLines: number = 32) {
+        this.#target = target;
+        const lightGeometry = this.#createLightDebugGeometry(redGPUContext, maxLines);
+        this.#lightMaterial = new ColorMaterial(redGPUContext, convertRgbToHex(color[0], color[1], color[2]));
+        this.#lightDebugMesh = new Mesh(redGPUContext, lightGeometry, this.#lightMaterial);
+        const {primitiveState} = this.#lightDebugMesh
+        primitiveState.cullMode = 'none';
+        primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
 
-		this.#label = new TextField3D(redGPUContext)
-		this.#label.usePixelSize = true
-		this.#label.fontSize = 40
-		this.#label.text = labelIcon
-		this.#lightDebugMesh.addChild(this.#label)
-	}
+        this.#label = new TextField3D(redGPUContext)
+        this.#label.usePixelSize = true
+        this.#label.fontSize = 40
+        this.#label.text = labelIcon
+        this.#lightDebugMesh.addChild(this.#label)
+    }
 
-	get target(): T {
-		return this.#target;
-	}
+    get target(): T {
+        return this.#target;
+    }
 
-	get label(): TextField3D {
-		return this.#label;
-	}
+    get label(): TextField3D {
+        return this.#label;
+    }
 
-	get lightDebugMesh(): Mesh {
-		return this.#lightDebugMesh;
-	}
+    get lightDebugMesh(): Mesh {
+        return this.#lightDebugMesh;
+    }
 
     updateVertexBuffer(lines: number[][][], vertexBuffer: VertexBuffer) {
         const vertexData = vertexBuffer.data;

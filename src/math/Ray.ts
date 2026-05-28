@@ -280,5 +280,6 @@ class Ray {
         return null;
     }
 }
+
 Object.freeze(Ray)
 export default Ray

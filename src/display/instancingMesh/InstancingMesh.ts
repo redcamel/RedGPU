@@ -23,7 +23,6 @@ import vertexModuleSourceOutputPbr from "./shader/instanceMeshVertex_output_Pbr.
 import vertexModuleSourceShadow from "./shader/instanceMeshVertex_shadow.wgsl";
 import PBRMaterial from "../../material/pbrMaterial/PBRMaterial";
 import {ABaseMaterial} from "../../material/core";
-import {keepLog} from "../../utils";
 
 const VERTEX_SHADER_MODULE_NAME = "VERTEX_MODULE_INSTANCING";
 const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = "VERTEX_BIND_GROUP_DESCRIPTOR_INSTANCING";
@@ -180,12 +179,13 @@ class InstancingMesh extends Mesh {
     get instanceChildren(): InstancingMeshObject3D[] {
         return this.#instanceChildren;
     }
-/*
- TODO - getLimitSize 를 내부 속성으로 사용하고
-  ableMaxLimitSize
-  currentLimitSize
- */
-    static getLimitSize(redGPUContext:RedGPUContext): number {
+
+    /*
+     TODO - getLimitSize 를 내부 속성으로 사용하고
+      ableMaxLimitSize
+      currentLimitSize
+     */
+    static getLimitSize(redGPUContext: RedGPUContext): number {
         /**
          * InstanceUniforms struct (WGSL):
          * instanceGroupModelMatrix: mat4x4<f32> (16 floats)
