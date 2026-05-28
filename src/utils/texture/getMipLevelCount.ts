@@ -1,3 +1,6 @@
+import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
+import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRange";
+
 /**
  * [KO] 주어진 해상도에 대해 생성 가능한 최대 Mipmap 레벨 수를 계산합니다.
  * [EN] Calculates the maximum number of Mipmap levels for a given resolution.
@@ -13,6 +16,8 @@
  * @category Texture
  */
 const getMipLevelCount = (width: number, height: number): number => {
+  validateUintRange(width)
+  validateUintRange(height)
     return Math.floor(Math.log2(Math.max(width, height))) + 1;
 }
 export default getMipLevelCount
