@@ -10,17 +10,16 @@
  * const absURL = RedGPU.Util.getAbsoluteURL('https://example.com/path/', '../image.png');
  * ```
  *
- * @param base - [KO] 기준 URL [EN] Base URL
+ * @param base - [KO] 기준 URL (문자열 또는 URL 객체) [EN] Base URL (string or URL object)
  * @param relative - [KO] 상대 경로 또는 URL [EN] Relative path or URL
  * @returns [KO] 절대 URL [EN] Absolute URL
  * @category File
  */
-function getAbsoluteURL(base: string, relative: string): string {
-    try {
-        return new URL(relative, base).href;
-    } catch (e) {
-        return relative;
-    }
+function getAbsoluteURL(base: string | URL, relative: string): string {
+    if (typeof relative !== 'string' || !relative) throw new Error('relative must be a non-empty string');
+    if (typeof base !== 'string' && !(base instanceof URL)) throw new Error('base must be a string or URL instance');
+    if (typeof base === 'string' && !base) throw new Error('base must be a non-empty string');
+    return new URL(relative, base).href;
 }
 
 export default getAbsoluteURL
