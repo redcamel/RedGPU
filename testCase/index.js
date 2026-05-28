@@ -1,20 +1,20 @@
 import RedUnit from 'https://redcamel.github.io/RedUnit/dist/index.js'
 
 RedUnit.pageLoader('RedGPU', [
-	{title: 'initialize', src: './initialize'},
 	{title: 'antialiasingManager', src: './antialiasing/antialiasingManager'},
+	{title: 'baseObject', src: './base'},
+	{title: 'copyGPUBuffer', src: './util/copyGPUBuffer'},
+	{title: 'file', src: './util/file'},
+	{title: 'formatBytes', src: './util/formatBytes'},
+	{title: 'initialize', src: './initialize'},
+	{title: 'light', src: './light'},
+	{title: 'postEffectCore', src: './postEffect/core'},
+	{title: 'postEffectManager', src: './postEffect/postEffectManager'},
+	{title: 'postEffectTexturePool', src: './postEffect/postEffectTexturePool'},
 	{title: 'renderState', src: './renderState'},
 	{title: 'runtimeChecker', src: './runtimeChecker'},
 	{title: 'shadow', src: './shadow'},
-	{title: 'toneMappingManager', src: './toneMapping/toneMappingManager'},
-	{title: 'light', src: './light'},
-	{title: 'postEffectManager', src: './postEffect/postEffectManager'},
-	{title: 'postEffectCore', src: './postEffect/core'},
-	{title: 'postEffectTexturePool', src: './postEffect/postEffectTexturePool'},
-	{title: 'formatBytes', src: './util/formatBytes'},
-	{title: 'copyGPUBuffer', src: './util/copyGPUBuffer'},
 	{title: 'textureUtils', src: './util/texture'},
-	// util
-	{title: 'file', src: './util/file'},
+	{title: 'toneMappingManager', src: './toneMapping/toneMappingManager'},
 	{title: 'uuid', src: './util/uuid'},
 ])
