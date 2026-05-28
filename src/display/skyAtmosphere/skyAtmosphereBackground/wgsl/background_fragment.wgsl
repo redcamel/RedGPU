@@ -19,6 +19,32 @@ struct FragmentOutput {
 @group(1) @binding(2) var bg_skyViewLUT : texture_2d<f32>;
 @group(1) @binding(3) var bg_skyAtmosphereSampler : sampler;
 
+// [KO] 절차적 노이즈 함수들 [EN] Procedural noise functions
+fn hash(p: vec2<f32>) -> f32 {
+    return fract(sin(dot(p, vec2<f32>(127.1, 311.7))) * 43758.5453123);
+}
+
+fn noise(p: vec2<f32>) -> f32 {
+    let i = floor(p);
+    let f = fract(p);
+    let u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash(i + vec2<f32>(0.0, 0.0)), hash(i + vec2<f32>(1.0, 0.0)), u.x),
+               mix(hash(i + vec2<f32>(0.0, 1.0)), hash(i + vec2<f32>(1.0, 1.0)), u.x), u.y);
+}
+
+fn fbm(p: vec2<f32>) -> f32 {
+    var v = 0.0;
+    var a = 0.5;
+    var shift = vec2<f32>(100.0);
+    var p_mut = p;
+    for (var i = 0; i < 5; i = i + 1) {
+        v += a * noise(p_mut);
+        p_mut = p_mut * 2.0 + shift;
+        a *= 0.5;
+    }
+    return v;
+}
+
 @fragment
 fn main(input : VertexOutput) -> FragmentOutput {
     let uniforms = systemUniforms.skyAtmosphere;
@@ -33,6 +59,7 @@ fn main(input : VertexOutput) -> FragmentOutput {
     let isGroundHit = groundRadius > 0.0 && tEarth > 0.0;
 
     var baseRadiance: vec3<f32>;
+    var skyTransmittance: f32 = 1.0;
 
     if (isGroundHit) {
         // [Ground Hit] 지면의 물리적 반사광 계산
@@ -50,15 +77,53 @@ fn main(input : VertexOutput) -> FragmentOutput {
 
         // 지면 휘도 평가 (Direct + Indirect)
         baseRadiance = evaluateGroundRadiance(localCosSun, sunT, msEnergy, uniforms.groundAlbedo);
+        skyTransmittance = 0.0; // 지면 아래는 투과율 없음
     } else {
         // [Sky] SkyViewLUT에서 대기 산란 기초 광량 가져오기
         let skyUV = getSkyViewUV(viewDir, viewHeight, groundRadius, atmosphereHeight);
         let skySample = textureSampleLevel(bg_skyViewLUT, bg_skyAtmosphereSampler, skyUV, 0.0);
         baseRadiance = skySample.rgb;
+        skyTransmittance = skySample.a;
     }
 
-    // 기초 광량에 태양 강도와 노출 적용
-    let finalRadiance = baseRadiance * uniforms.sunIntensity * systemUniforms.preExposure;
+    // 1. 기초 광량에 태양 강도와 노출 적용
+    var finalRadiance = baseRadiance * uniforms.sunIntensity * systemUniforms.preExposure;
+
+    // 2. 심플 절차적 구름 레이어 추가 (Simple Procedural Clouds)
+    if (!isGroundHit && viewDir.y > 0.0) {
+        let cloudR = groundRadius + uniforms.cloudHeight;
+        let tCloud = getRaySphereIntersection(camPos, viewDir, cloudR);
+        
+        if (tCloud > 0.0) {
+            let hitP = camPos + viewDir * tCloud;
+            // [KO] UV 매핑 스케일 조정 (더 큰 구름을 위해 0.2 -> 0.05)
+            let cloudUV = hitP.xz * 0.05 + vec2<f32>(uniforms.cloudTime * 0.02);
+            
+            // FBM 노이즈를 이용한 구름 밀도 계산
+            let density = fbm(cloudUV);
+            let coverage = uniforms.cloudCoverage;
+            // [KO] 구름 대비(Contrast) 강화
+            let cloudMask = smoothstep(1.0 - coverage, 1.0 - coverage + 0.15, density);
+            
+            if (cloudMask > 0.0) {
+                let sunDir = normalize(uniforms.sunDirection);
+                let sunT = getTransmittance(bg_transmittanceLUT, bg_skyAtmosphereSampler, uniforms.cloudHeight, sunDir.y, atmosphereHeight);
+                
+                // 가짜 조명 (Pseudo-Lighting)
+                let eps = 0.2;
+                let dIdx = (fbm(cloudUV + vec2<f32>(eps, 0.0)) - density) / eps;
+                let dIdy = (fbm(cloudUV + vec2<f32>(0.0, eps)) - density) / eps;
+                let cloudNormal = normalize(vec3<f32>(-dIdx, 2.0, -dIdy)); // Y축 가중치 증가로 평평함 완화
+                let cloudShadow = saturate(dot(cloudNormal, sunDir) * 0.5 + 0.5);
+                
+                // [KO] 구름 색상 결정: 태양광 투과율 반영 및 기본 밝기 확보
+                let cloudColor = (sunT * uniforms.sunIntensity * 0.5 + baseRadiance * 0.5) * cloudShadow * systemUniforms.preExposure;
+                
+                // [KO] 최종 합성: 하늘 색상과 구름 색상을 마스크에 따라 블렌딩
+                finalRadiance = mix(finalRadiance, cloudColor, cloudMask * skyTransmittance);
+            }
+        }
+    }
 
     var output : FragmentOutput;
     output.color = vec4<f32>(finalRadiance, 1.0);

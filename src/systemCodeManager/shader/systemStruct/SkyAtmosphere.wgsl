@@ -20,5 +20,10 @@ struct SkyAtmosphere {
 	sunIntensity: f32,
 	sunSize: f32,
 	sunLimbDarkening: f32,
-	cameraHeight: f32
+	cameraHeight: f32,
+	intensity: f32,
+	cloudTime: f32,
+	cloudCoverage: f32,
+	cloudDensity: f32,
+	cloudHeight: f32
 };

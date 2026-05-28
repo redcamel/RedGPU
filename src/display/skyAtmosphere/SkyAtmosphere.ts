@@ -65,7 +65,12 @@ class SkyAtmosphere extends RedGPUObject {
         sunIntensity: 100000.0,
         sunSize: 0.533,
         sunLimbDarkening: 0.5,
-        cameraHeight: 0.001
+        cameraHeight: 0.001,
+        intensity: 1.0,
+        cloudTime: 0.0,
+        cloudCoverage: 0.5,
+        cloudDensity: 0.5,
+        cloudHeight: 3.0
     };
 
     #activeSunSource: DirectionalLight = null;
@@ -108,6 +113,38 @@ class SkyAtmosphere extends RedGPUObject {
 
     get params() {
         return this.#params;
+    }
+
+    get intensity(): number {
+        return this.#params.intensity;
+    }
+
+    set intensity(v: number) {
+        this.#setParam('intensity', v, false, false, true, (v) => validatePositiveNumberRange(v, 0, 10));
+    }
+
+    get cloudCoverage(): number {
+        return this.#params.cloudCoverage;
+    }
+
+    set cloudCoverage(v: number) {
+        this.#setParam('cloudCoverage', v, false, false, false, (v) => validateNumberRange(v, 0, 1.0));
+    }
+
+    get cloudDensity(): number {
+        return this.#params.cloudDensity;
+    }
+
+    set cloudDensity(v: number) {
+        this.#setParam('cloudDensity', v, false, false, false, (v) => validateNumberRange(v, 0, 1.0));
+    }
+
+    get cloudHeight(): number {
+        return this.#params.cloudHeight;
+    }
+
+    set cloudHeight(v: number) {
+        this.#setParam('cloudHeight', v, false, false, false, (v) => validatePositiveNumberRange(v, 0.1, 20.0));
     }
 
     get aerialPerspectiveDistanceScale(): number {
@@ -321,6 +358,10 @@ class SkyAtmosphere extends RedGPUObject {
         const currentFrame = view.renderViewStateData.frameIndex;
         if (this.#lastUpdateFrame === currentFrame) return;
         this.#lastUpdateFrame = currentFrame;
+
+        // [KO] 구름 애니메이션 시간 업데이트 [EN] Update cloud animation time
+        this.#params.cloudTime += view.renderViewStateData.deltaTime * 0.001;
+        this.#dirtyUniformBuffer = true;
 
         this.#updateSunInfo(view);
         this.#updateLUTs(view);
