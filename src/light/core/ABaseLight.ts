@@ -1,6 +1,7 @@
 import ColorRGB from "../../color/ColorRGB";
 import ADrawDebuggerLight from "../../display/drawDebugger/light/ADrawDebuggerLight";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
+import consoleAndThrowError from "../../utils/consoleAndThrowError";
 
 /**
  * [KO] 모든 광원 클래스의 기본이 되는 추상 클래스입니다.
@@ -92,6 +93,9 @@ abstract class ABaseLight {
      * [EN] ColorRGB object
      */
     set color(value: ColorRGB) {
+        if (!(value instanceof ColorRGB)) {
+            consoleAndThrowError('Only ColorRGB instances are allowed.');
+        }
         this.#color = value;
     }
 

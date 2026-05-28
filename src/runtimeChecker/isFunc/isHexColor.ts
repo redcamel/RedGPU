@@ -18,7 +18,8 @@
  * [EN] True if it is a valid hex color, otherwise false
  * @category Checker
  */
-const isHexColor = (hex: string): boolean => {
+const isHexColor = (hex: any): boolean => {
+    if (typeof hex !== 'string') return false;
     const regex = /^([A-Fa-f0-9]{3}){1,2}$/;
     if (hex.startsWith('#')) {
         return regex.test(hex.substring(1));
