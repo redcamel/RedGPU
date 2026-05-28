@@ -13,6 +13,7 @@ RedUnit.pageLoader('RedGPU', [
 	{title: 'convertRgbToHex', src: './color/convertRgbToHex'},
 	{title: 'initialize', src: './initialize'},
 	{title: 'light', src: './light'},
+	{title: 'math', src: './math'},
 	{title: 'postEffectCore', src: './postEffect/core'},
 	{title: 'postEffectManager', src: './postEffect/postEffectManager'},
 	{title: 'postEffectTexturePool', src: './postEffect/postEffectTexturePool'},
