@@ -9,8 +9,8 @@ export const ExampleList: ExampleListType = [
                 name: 'Hello RedGPU',
                 path: '3d/helloWorld',
                 description: {
-                    ko: `RedGPU의 기본 초기화 방법을 보여주는 샘플입니다. 초기화 성공 시 제공되는 RedGPUContext 객체의 기본 옵션들을 실시간으로 테스트할 수 있습니다.`,
-                    en: `This example is a sample of the basic initialization of RedGPU. 
+                    ko: `RedGPU의 기본 초기화 방법을 보여주는 샘플입니다.<br/>초기화 성공 시 제공되는 RedGPUContext 객체의 기본 옵션들을 실시간으로 테스트할 수 있습니다.`,
+                    en: `This example is a sample of the basic initialization of RedGPU.<br/>
                 It also provides a live test of the basic options provided to the RedGPUContext object provided upon successful initialization.`
 
                 },
@@ -24,7 +24,7 @@ export const ExampleList: ExampleListType = [
 
                         description: {
                             ko: `RedGPU의 View 객체에 대한 샘플입니다. View 객체에 제공되는 기본 옵션들을 실시간으로 테스트할 수 있습니다.`,
-                            en: `This example is a sample for a View object in RedGPU.
+                            en: `This example is a sample for a View object in RedGPU.<br/>
                 It provides real-time testing of the basic options provided to a View object.`
 
                         },
@@ -1298,11 +1298,11 @@ export const ExampleList: ExampleListType = [
                                 name: 'Morph target load Test',
                                 path: 'gltf/animation/performance/highMorphTarget',
                                 description: {
-                                    ko: `수백 개의 MorphStressTest 모델을 인스턴스화하여 모프 스트레스 테스트를 수행합니다.
-실시간 모프 타겟 스키닝 성능을 극한까지 벤치마킹합니다. 세 가지 애니메이션 중 가장 무거운 모프 타겟 애니메이션의 성능을 테스트합니다.
+                                    ko: `수백 개의 MorphStressTest 모델을 인스턴스화하여 모프 스트레스 테스트를 수행합니다.<br/>
+실시간 모프 타겟 스키닝 성능을 극한까지 벤치마킹합니다. 세 가지 애니메이션 중 가장 무거운 모프 타겟 애니메이션의 성능을 테스트합니다.<br/>
 각 장치의 성능 한계를 확인하세요.`,
-                                    en: `Perform morph stress tests by instantiating hundreds of MorphStressTest models.
-Benchmark real-time morph target skinning performance to the limit. Test the performance of the heaviest of the three animations, the morph target animation.
+                                    en: `Perform morph stress tests by instantiating hundreds of MorphStressTest models.<br/>
+Benchmark real-time morph target skinning performance to the limit. Test the performance of the heaviest of the three animations, the morph target animation.<br/>
 Check performance limits on each device.`
                                 },
                             },
