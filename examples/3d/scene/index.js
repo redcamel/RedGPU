@@ -74,9 +74,8 @@ RedGPU.init(
  * [EN] Renders a GUI panel for testing.
  * @param {RedGPU.RedGPUContext} redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU Context
  */
-const renderTestPane = async (redGPUContext) => {
+const renderTestPane =  (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext, {
-
         scene: true
     });
 };
