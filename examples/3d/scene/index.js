@@ -72,7 +72,9 @@ RedGPU.init(
 /**
  * [KO] 테스트를 위한 GUI 패널을 렌더링합니다.
  * [EN] Renders a GUI panel for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU Context
+ * @param {RedGPU.RedGPUContext} redGPUContext 
+ * [KO] RedGPU 컨텍스트 
+ * [EN] RedGPU Context
  */
 const renderTestPane =  (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext, {

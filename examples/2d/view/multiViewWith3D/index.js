@@ -73,6 +73,8 @@ RedGPU.init(
         renderTestPane(redGPUContext);
     },
     (failReason) => {
+        // [KO] 초기화 실패 시 에러 처리
+        // [EN] Error handling on initialization failure
         console.error("Initialization failed:", failReason);
         const errorMessage = document.createElement("div");
         errorMessage.innerHTML = failReason;

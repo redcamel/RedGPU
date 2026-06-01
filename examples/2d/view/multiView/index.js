@@ -41,7 +41,7 @@ RedGPU.init(
         sprite2D_2.setSize(100, 100);
         sprite2D_2.x = view2.screenRectObject.width / 2;
         sprite2D_2.y = view2.screenRectObject.height / 2;
-        scene2.addChild(sprite2D_2);
+        scene.addChild(sprite2D_2);
 
         /**
          * [KO] 뷰 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
@@ -73,6 +73,8 @@ RedGPU.init(
         renderTestPane(redGPUContext);
     },
     (failReason) => {
+        // [KO] 초기화 실패 시 에러 처리
+        // [EN] Error handling on initialization failure
         console.error('Initialization failed:', failReason);
         const errorMessage = document.createElement('div');
         errorMessage.innerHTML = failReason;

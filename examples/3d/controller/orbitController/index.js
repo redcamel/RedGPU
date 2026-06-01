@@ -23,8 +23,10 @@ RedGPU.init(
         // [EN] Create OrbitController (rotate around target using mouse/touch drag)
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
 
-        // [KO] 환경 맵(IBL) 로드 및 하늘 상자(SkyBox) 생성 (HDR 이미지의 밝기에 맞춰 루미넌스 값을 25000으로 설정)
-        // [EN] Load environment map (IBL) and create SkyBox (set luminance to 25000 to match the brightness of the HDR image)
+        // [KO] 환경 맵(IBL) 로드 및 하늘 상자(SkyBox) 생성 
+        // [KO] HDR 이미지의 밝기에 맞춰 루미넌스 값을 25000으로 설정
+        // [EN] Load environment map (IBL) and create SkyBox
+        // [EN] Set luminance to 25000 to match the brightness of the HDR image
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
         const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, 25000);
         
@@ -37,9 +39,18 @@ RedGPU.init(
         // [KO] 뷰(View3D) 생성 및 설정
         // [EN] Create and configure View3D
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view.axis = true; // [KO] 축 표시 [EN] Show axis
-        view.grid = true; // [KO] 그리드 표시 [EN] Show grid
-        view.skybox = skybox; // [KO] 하늘 상자 표시 [EN] Show skybox
+        
+        // [KO] 축 표시
+        // [EN] Show axis
+        view.axis = true; 
+        
+        // [KO] 그리드 표시
+        // [EN] Show grid
+        view.grid = true; 
+        
+        // [KO] 하늘 상자 표시
+        // [EN] Show skybox
+        view.skybox = skybox; 
         redGPUContext.addView(view);
 
         // [KO] 씬에 여러 메쉬 추가하는 헬퍼 함수

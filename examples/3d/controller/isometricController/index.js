@@ -70,7 +70,10 @@ RedGPU.init(
 
             // [KO] 격자(Grid) 기반 위치 계산 (겹침 방지)
             // [EN] Calculate grid-based positions (to prevent overlap)
-            const step = 2; // [KO] 박스 크기(1)보다 큰 간격을 설정 [EN] Set interval larger than box size (1)
+            const step = 2; 
+            
+            // [KO] 박스 크기(1)보다 큰 간격을 설정
+            // [EN] Set interval larger than box size (1)
             const range = 300;
             const positions = [];
             for (let x = -range / 2; x < range / 2; x += step) {
@@ -253,7 +256,7 @@ const renderTestPane = (redGPUContext, controller) => {
             zoomFolder.addBinding(controller, 'zoomInterpolation', {
                 min: 0.0001,
                 max: 1,
-                step: 0.0001,
+                step: 0.0001
             });
             zoomFolder.addBinding(controller, 'speedZoom', {
                 min: 0.01,
@@ -284,7 +287,7 @@ const renderTestPane = (redGPUContext, controller) => {
             viewFolder.addBinding(controller, 'viewHeightInterpolation', {
                 min: 0.0001,
                 max: 1,
-                step: 0.0001,
+                step: 0.0001
             });
 
             // [KO] 타겟 위치 (읽기 전용)

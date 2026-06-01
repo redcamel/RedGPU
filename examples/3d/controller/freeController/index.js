@@ -24,8 +24,10 @@ RedGPU.init(canvas, (redGPUContext) => {
     controller.y = 10;
     controller.tilt = -45;
 
-    // [KO] 환경 맵(IBL) 로드 및 하늘 상자(SkyBox) 생성 (HDR 이미지의 밝기에 맞춰 루미넌스 값을 25000으로 설정)
-    // [EN] Load environment map (IBL) and create SkyBox (set luminance to 25000 to match the brightness of the HDR image)
+    // [KO] 환경 맵(IBL) 로드 및 하늘 상자(SkyBox) 생성
+    // [KO] HDR 이미지의 밝기에 맞춰 루미넌스 값을 25000으로 설정
+    // [EN] Load environment map (IBL) and create SkyBox
+    // [EN] Set luminance to 25000 to match the brightness of the HDR image
     const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
     const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, 25000);
     
@@ -38,9 +40,18 @@ RedGPU.init(canvas, (redGPUContext) => {
     // [KO] 뷰(View3D) 생성 및 설정
     // [EN] Create and configure View3D
     const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-    view.axis = true; // [KO] 축 표시 [EN] Show axis
-    view.grid = true; // [KO] 그리드 표시 [EN] Show grid
-    view.skybox = skybox; // [KO] 하늘 상자 적용 [EN] Apply skybox
+    
+    // [KO] 축 표시
+    // [EN] Show axis
+    view.axis = true; 
+    
+    // [KO] 그리드 표시
+    // [EN] Show grid
+    view.grid = true; 
+    
+    // [KO] 하늘 상자 적용
+    // [EN] Apply skybox
+    view.skybox = skybox; 
     redGPUContext.addView(view);
 
     // [KO] 장면에 여러 개의 구형 메쉬를 추가하는 헬퍼 함수
@@ -61,6 +72,7 @@ RedGPU.init(canvas, (redGPUContext) => {
         for (let i = 0; i < count; i++) {
             const randomMaterial = materialPool[Math.floor(Math.random() * materialPool.length)];
             const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, randomMaterial);
+            
             // [KO] 무작위 위치에 메쉬 배치
             // [EN] Place mesh at random position
             mesh.setPosition(

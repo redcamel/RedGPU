@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17789220
  * [KO] Mesh Hierarchy 예제
  * [EN] Mesh Hierarchy example
  *
- * [KO] 메시 간의 부모-자식 계층 구조와 변환 상속을 보여줍니다.
- * [EN] Demonstrates parent-child hierarchy and transformation inheritance between meshes.
+ * [KO] 메시 간의 부모-자식 계층 구조와 그에 따른 변환(위치, 회전, 크기) 상속을 시연합니다.
+ * [EN] Demonstrates parent-child hierarchy and transformation inheritance (position, rotation, scale) between meshes.
  */
 
 const canvas = document.createElement('canvas');
@@ -15,25 +15,35 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. [KO] 카메라 컨트롤러 설정
+        // [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.speedDistance = 0.3;
         controller.distance = 20;
 
+        // 2. [KO] 씬 및 뷰 구성
+        // [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-
         view.grid = true;
         redGPUContext.addView(view);
 
+        // 3. [KO] 계층 구조 객체 생성
+        // [EN] Create Hierarchical Objects
         const parentMesh = createParentMesh(redGPUContext, scene);
         const childMesh = createChildMesh(redGPUContext, parentMesh);
 
+        // 4. [KO] 렌더러 생성 및 루프 시작
+        // [EN] Create Renderer and Start Loop
         const renderer = new RedGPU.Renderer();
         const render = () => {
-            // 매 프레임 로직
+            // [KO] 매 프레임 실행될 로직
+            // [EN] Logic per frame
         };
         renderer.start(redGPUContext, render);
 
+        // 5. [KO] 테스트용 GUI 렌더링
+        // [EN] Render Test GUI
         renderTestPane(redGPUContext, parentMesh, childMesh);
     },
     (failReason) => {
@@ -66,8 +76,8 @@ const createParentMesh = (redGPUContext, scene) => {
 };
 
 /**
- * [KO] 자식 메시를 생성합니다.
- * [EN] Creates a child mesh.
+ * [KO] 자식 메시를 생성하여 부모에 추가합니다.
+ * [EN] Creates a child mesh and adds it to the parent.
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.Mesh} parentMesh
  * @returns {RedGPU.Display.Mesh}
@@ -77,6 +87,8 @@ const createChildMesh = (redGPUContext, parentMesh) => {
     const geometry = new RedGPU.Primitive.Box(redGPUContext, 1, 1, 1);
     const childMesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 
+    // [KO] 부모의 로컬 좌표계를 기준으로 위치 설정
+    // [EN] Set position relative to parent's local coordinate system
     childMesh.setPosition(3, 3, 0);
     parentMesh.addChild(childMesh);
 
@@ -84,74 +96,59 @@ const createChildMesh = (redGPUContext, parentMesh) => {
 };
 
 /**
- * [KO] 테스트를 위한 GUI 패널을 렌더링합니다.
- * [EN] Renders a GUI panel for testing.
+ * [KO] 부모와 자식의 개별 제어를 위한 GUI를 구성합니다.
+ * [EN] Configures GUI for individual control of parent and child.
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.Mesh} parentMesh
  * @param {RedGPU.Display.Mesh} childMesh
  */
-const renderTestPane = async (redGPUContext, parentMesh, childMesh) => {
+const renderTestPane = (redGPUContext, parentMesh, childMesh) => {
     const parentConfig = {
-        x: parentMesh.x,
-        y: parentMesh.y,
-        z: parentMesh.z,
-        rotationX: parentMesh.rotationX,
-        rotationY: parentMesh.rotationY,
-        rotationZ: parentMesh.rotationZ,
-        scaleX: parentMesh.scaleX,
-        scaleY: parentMesh.scaleY,
-        scaleZ: parentMesh.scaleZ,
+        x: parentMesh.x, y: parentMesh.y, z: parentMesh.z,
+        rotationX: parentMesh.rotationX, rotationY: parentMesh.rotationY, rotationZ: parentMesh.rotationZ,
+        scaleX: parentMesh.scaleX, scaleY: parentMesh.scaleY, scaleZ: parentMesh.scaleZ,
     };
 
     const childConfig = {
-        x: childMesh.x,
-        y: childMesh.y,
-        z: childMesh.z,
-        rotationX: childMesh.rotationX,
-        rotationY: childMesh.rotationY,
-        rotationZ: childMesh.rotationZ,
-        scaleX: childMesh.scaleX,
-        scaleY: childMesh.scaleY,
-        scaleZ: childMesh.scaleZ,
+        x: childMesh.x, y: childMesh.y, z: childMesh.z,
+        rotationX: childMesh.rotationX, rotationY: childMesh.rotationY, rotationZ: childMesh.rotationZ,
+        scaleX: childMesh.scaleX, scaleY: childMesh.scaleY, scaleZ: childMesh.scaleZ,
     };
 
+    /**
+     * [KO] 메시 제어 항목을 생성합니다.
+     * [EN] Creates mesh control items.
+     */
     const createMeshControls = (folder, config, mesh) => {
-        folder.addBinding(config, 'x', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
-            mesh.setPosition(evt.value, config.y, config.z);
+        // [KO] 위치
+        // [EN] Position
+        const pos = folder.addFolder({title: 'Position'});
+        ['x', 'y', 'z'].forEach(axis => {
+            pos.addBinding(config, axis, {min: -10, max: 10, step: 0.1}).on('change', () => mesh.setPosition(config.x, config.y, config.z));
         });
-        folder.addBinding(config, 'y', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
-            mesh.setPosition(config.x, evt.value, config.z);
+
+        // [KO] 회전
+        // [EN] Rotation
+        const rot = folder.addFolder({title: 'Rotation'});
+        ['rotationX', 'rotationY', 'rotationZ'].forEach(axis => {
+            rot.addBinding(config, axis, {min: 0, max: 360, step: 0.1}).on('change', () => mesh.setRotation(config.rotationX, config.rotationY, config.rotationZ));
         });
-        folder.addBinding(config, 'z', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
-            mesh.setPosition(config.x, config.y, evt.value);
-        });
-        folder.addBinding(config, 'rotationX', {min: 0, max: 360, step: 0.01}).on('change', (evt) => {
-            mesh.setRotation(evt.value, config.rotationY, config.rotationZ);
-        });
-        folder.addBinding(config, 'rotationY', {min: 0, max: 360, step: 0.01}).on('change', (evt) => {
-            mesh.setRotation(config.rotationX, evt.value, config.rotationZ);
-        });
-        folder.addBinding(config, 'rotationZ', {min: 0, max: 360, step: 0.01}).on('change', (evt) => {
-            mesh.setRotation(config.rotationX, config.rotationY, evt.value);
-        });
-        folder.addBinding(config, 'scaleX', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
-            mesh.setScale(evt.value, config.scaleY, config.scaleZ);
-        });
-        folder.addBinding(config, 'scaleY', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
-            mesh.setScale(config.scaleX, evt.value, config.scaleZ);
-        });
-        folder.addBinding(config, 'scaleZ', {min: 0.1, max: 5, step: 0.1}).on('change', (evt) => {
-            mesh.setScale(config.scaleX, config.scaleY, evt.value);
+
+        // [KO] 크기
+        // [EN] Scale
+        const sca = folder.addFolder({title: 'Scale'});
+        ['scaleX', 'scaleY', 'scaleZ'].forEach(axis => {
+            sca.addBinding(config, axis, {min: 0.1, max: 5, step: 0.1}).on('change', () => mesh.setScale(config.scaleX, config.scaleY, config.scaleZ));
         });
     };
 
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            const parentFolder = pane.addFolder({title: 'Parent Mesh', expanded: true});
-            createMeshControls(parentFolder, parentConfig, parentMesh);
+            const pFolder = pane.addFolder({title: 'Parent Mesh', expanded: true});
+            createMeshControls(pFolder, parentConfig, parentMesh);
 
-            const childFolder = pane.addFolder({title: 'Child Mesh', expanded: true});
-            createMeshControls(childFolder, childConfig, childMesh);
+            const cFolder = pane.addFolder({title: 'Child Mesh', expanded: true});
+            createMeshControls(cFolder, childConfig, childMesh);
         }
     });
 };

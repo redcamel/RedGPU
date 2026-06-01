@@ -30,7 +30,10 @@ RedGPU.init(
         const targetMesh2 = new RedGPU.Display.Mesh(redGPUContext);
         targetMesh2.material = new RedGPU.Material.PhongMaterial(redGPUContext, '#00ff00');
         targetMesh2.geometry = new RedGPU.Primitive.Box(redGPUContext);
-        targetMesh2.z = -2; // [KO] 타겟의 앞쪽에 배치 [EN] Placed in front of the target
+        
+        // [KO] 타겟의 앞쪽에 배치
+        // [EN] Placed in front of the target
+        targetMesh2.z = -2; 
         targetMesh2.setScale(0.5);
         targetMesh.addChild(targetMesh2);
 
@@ -39,8 +42,10 @@ RedGPU.init(
         const controller = new RedGPU.Camera.FollowController(redGPUContext, targetMesh);
         const controller2 = new RedGPU.Camera.FollowController(redGPUContext, targetMesh2);
 
-        // [KO] 환경 맵(IBL) 로드 및 하늘 상자(SkyBox) 생성 (HDR 이미지의 밝기에 맞춰 루미넌스 값을 25000으로 설정)
-        // [EN] Load environment map (IBL) and create SkyBox (set luminance to 25000 to match the brightness of the HDR image)
+        // [KO] 환경 맵(IBL) 로드 및 하늘 상자(SkyBox) 생성 
+        // [KO] HDR 이미지의 밝기에 맞춰 루미넌스 값을 25000으로 설정
+        // [EN] Load environment map (IBL) and create SkyBox 
+        // [EN] Set luminance to 25000 to match the brightness of the HDR image
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
         const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, 25000);
         
@@ -70,17 +75,31 @@ RedGPU.init(
         // [KO] 모바일 여부에 따라 뷰 화면 분할 설정
         // [EN] Set view screen split based on whether it is mobile
         if (redGPUContext.detector.isMobile) {
-            // [KO] 모바일: 위아래 분할 [EN] Mobile: Top/Bottom split
+            // [KO] 모바일: 위아래 분할
+            // [EN] Mobile: Top/Bottom split
             view.setSize('100%', '50%');
-            view.setPosition(0, 0);         // [KO] 상단 [EN] Top
+            
+            // [KO] 상단
+            // [EN] Top
+            view.setPosition(0, 0);         
             view2.setSize('100%', '50%');
-            view2.setPosition(0, '50%');     // [KO] 하단 [EN] Bottom
+            
+            // [KO] 하단
+            // [EN] Bottom
+            view2.setPosition(0, '50%');     
         } else {
-            // [KO] 데스크톱: 좌우 분할 [EN] Desktop: Left/Right split
+            // [KO] 데스크톱: 좌우 분할
+            // [EN] Desktop: Left/Right split
             view.setSize('50%', '100%');
-            view.setPosition(0, 0);         // [KO] 좌측 [EN] Left
+            
+            // [KO] 좌측
+            // [EN] Left
+            view.setPosition(0, 0);         
             view2.setSize('50%', '100%');
-            view2.setPosition('50%', 0);     // [KO] 우측 [EN] Right
+            
+            // [KO] 우측
+            // [EN] Right
+            view2.setPosition('50%', 0);     
         }
 
         // [KO] 배경 메시 추가 (환경 표시용 헬퍼 함수)
