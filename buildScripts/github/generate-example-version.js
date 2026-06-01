@@ -49,6 +49,7 @@ if (fs.existsSync(listPath)) {
 
 function getAllFiles(dir, fileList = []) {
     if (!fs.existsSync(dir)) return fileList;
+    if (dir.includes('node_modules')) return fileList;
     const files = fs.readdirSync(dir);
     files.forEach(file => {
         const filePath = path.join(dir, file);
@@ -129,7 +130,7 @@ try {
                 content = content.replace(/<script\s+[^>]*src="index\.js[^>]*><\/script>/gi, '');
                 content = content.replace(/<script\s+type="application\/ld\+json">[\s\S]*?<\/script>/gi, '');
                 content = content.replace(/<!--[\s\S]*?-->/gi, '');
-                content = content.replace(/<h1>[\s\S]*?<\/h1>/gi, '');
+                content = content.replace(/<h1[\s\S]*?>[\s\S]*?<\/h1>/gi, '');
 
                 // 1. Generate JSON-LD
                 const jsonLd = {
@@ -195,8 +196,8 @@ try {
         }
 
         const updated = content.replace(
-          /(['"])(.+?\.(js|css))(\?[^'"]*)?(\1)/g,
-          (match, quote, pathOnly, oldQuery) => {
+          /(['"])(\.{1,2}\/.+?\.(js|css))(\?[^'"]*)?(\1)/g,
+          (match, quote, pathOnly, extension, oldQuery) => {
               return `${quote}${pathOnly}?t=${timestamp}${quote}`;
           }
         );
