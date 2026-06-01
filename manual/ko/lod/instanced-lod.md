@@ -111,7 +111,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     redGPUContext.addView(view);
 
     // 5. 렌더링
-    const renderer = new RedGPU.Renderer(redGPUContext);
+    const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext, () => {
         // 전체 회전
         mesh.rotationY += 0.002;

@@ -91,7 +91,7 @@ RedGPU.init(
         infoLabel.color = '#999';
         scene.addChild(infoLabel);
         
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext);
 
         renderTestPane(view, skyAtmosphere);

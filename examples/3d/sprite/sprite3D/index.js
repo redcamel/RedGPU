@@ -78,7 +78,7 @@ RedGPU.init(
 
         // [KO] 렌더러 생성 및 시작
         // [EN] Create and start renderer
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext);
 
         // [KO] 테스트용 GUI 설정

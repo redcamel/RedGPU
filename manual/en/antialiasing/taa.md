@@ -118,7 +118,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     };
     document.body.appendChild(btn);
 
-    const renderer = new RedGPU.Renderer(redGPUContext);
+    const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext, () => {
         sphere.rotationY += 0.01;
         box.rotationY += 0.01;

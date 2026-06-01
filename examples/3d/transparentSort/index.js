@@ -32,7 +32,7 @@ RedGPU.init(
 
         addRandomMeshes(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
             redGPUContext.viewList.forEach(view => {
                 const {scene} = view;

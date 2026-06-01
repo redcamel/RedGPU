@@ -39,7 +39,7 @@ RedGPU.init(canvas, (redGPUContext) => {
         centerY = height / 2;
     };
 
-    const renderer = new RedGPU.Renderer(redGPUContext);
+    const renderer = new RedGPU.Renderer();
     const render = () => {
         const radius = 250;
         const numChildren = view.scene.children.length;

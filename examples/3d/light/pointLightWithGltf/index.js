@@ -60,7 +60,7 @@ RedGPU.init(
             }
         }
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext);
 
         renderTestPane(redGPUContext, view, light);

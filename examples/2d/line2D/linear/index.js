@@ -59,7 +59,7 @@ RedGPU.init(
          */
         redGPUContext.onResize = updateCenterLines; // 화면 크기 변경 시 갱신
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext);
 
         // 디버그 패널 설정

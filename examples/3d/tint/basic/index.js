@@ -49,7 +49,7 @@ RedGPU.init(
         renderTestPane(redGPUContext, base);
 
         // 애니메이션 설정 (회전)
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = () => {
             base.rotation.y += 1; // Y축 회전
             base.rotation.z += 0.5; // Z축 회전

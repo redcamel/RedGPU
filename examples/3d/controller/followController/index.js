@@ -85,7 +85,7 @@ RedGPU.init(
 
         addMeshesToScene(scene, 100);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
             // 타겟 메시를 원형 경로로 이동하고 중앙을 바라봄
             const t = time * 0.001;

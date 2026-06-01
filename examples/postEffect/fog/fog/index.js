@@ -44,7 +44,7 @@ RedGPU.init(
 
         createTestScene(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext);
 
         // [KO] RedGPUExampleHelper 초기화

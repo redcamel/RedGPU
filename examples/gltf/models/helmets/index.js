@@ -32,7 +32,7 @@ RedGPU.init(
 
         // Create a renderer and start rendering
         // 렌더러 생성 후 렌더링 시작
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = () => {
 
         };

@@ -71,7 +71,7 @@ RedGPU.init(
          * [KO] 렌더러 생성 및 루프 시작
          * [EN] Create renderer and start loop
          */
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
             sprite2D.rotation += 1;
         };

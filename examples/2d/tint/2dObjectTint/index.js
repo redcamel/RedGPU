@@ -70,7 +70,7 @@ RedGPU.init(
 
         renderTestPane(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = () => {
             // base.rotation += 1;
         };

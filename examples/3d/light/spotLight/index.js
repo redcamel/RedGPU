@@ -31,7 +31,7 @@ RedGPU.init(
         createMaterialStudio(redGPUContext, scene);
         createStudioEnvironment(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = () => {
         };
         renderer.start(redGPUContext, render);

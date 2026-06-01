@@ -182,7 +182,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     redGPUContext.addView(view);
 
     // 5. 렌더링 시작
-    const renderer = new RedGPU.Renderer(redGPUContext);
+    const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext);
 });
 </pre>

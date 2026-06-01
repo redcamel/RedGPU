@@ -105,7 +105,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     redGPUContext.addView(view);
 
     // 6. 렌더링 루프
-    const renderer = new RedGPU.Renderer(redGPUContext);
+    const renderer = new RedGPU.Renderer();
     const render = () => {
         // 거리 계산 및 UI 업데이트 (시각적 확인용)
         const dist = Math.sqrt(

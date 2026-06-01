@@ -27,7 +27,7 @@ RedGPU.init(
         const parentMesh = createParentMesh(redGPUContext, rootGroup);
         const childMesh = createChildMesh(redGPUContext, parentMesh);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = () => {
         };
         renderer.start(redGPUContext, render);

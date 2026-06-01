@@ -40,7 +40,7 @@ RedGPU.init(
         // view.ibl = ibl;
         // view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext);
 
         // [KO] RedGPUExampleHelper 초기화

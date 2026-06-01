@@ -117,7 +117,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     };
     document.body.appendChild(btn);
 
-    const renderer = new RedGPU.Renderer(redGPUContext);
+    const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext, () => {
         // 천천히 회전하며 텍스처 블러링 관찰
         scene.children.forEach(mesh => {

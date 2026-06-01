@@ -22,7 +22,7 @@ RedGPU.init(
         loadGLTF(view, MODEL_URL);
 
         // Start renderer
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
             // Add additional per-frame logic here if needed
         });

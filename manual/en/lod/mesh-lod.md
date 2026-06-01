@@ -105,7 +105,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     redGPUContext.addView(view);
 
     // 6. Render Loop
-    const renderer = new RedGPU.Renderer(redGPUContext);
+    const renderer = new RedGPU.Renderer();
     const render = () => {
         // Calculate distance and update UI (for visual confirmation)
         const dist = Math.sqrt(

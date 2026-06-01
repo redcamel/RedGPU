@@ -27,7 +27,7 @@ RedGPU.init(
         const lights = createSpotLight(scene);
         const mesh = createSampleMeshes(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         let time = 0;
         const render = () => {
             time += 0.016;

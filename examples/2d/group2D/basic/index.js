@@ -38,7 +38,7 @@ RedGPU.init(
             pixelRectObject: redGPUContext.pixelRectObject
         });
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = () => {
         };
         renderer.start(redGPUContext, render);

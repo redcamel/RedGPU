@@ -50,7 +50,7 @@
             const ibl = new RedGPU.Resource.IBL(view.redGPUContext, "../assets/hdr/Cannon_Exterior.hdr");
 
             view.ibl = ibl;
-            const renderer = new RedGPU.Renderer(redGPUContext)
+            const renderer = new RedGPU.Renderer()
 
             const render = (time) => {
                 if (scene.numChildren) {

@@ -66,7 +66,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 
     // 5. 애니메이션 및 렌더링 시작
     let time = 0;
-    const renderer = new RedGPU.Renderer(redGPUContext);
+    const renderer = new RedGPU.Renderer();
 
     renderer.start(redGPUContext, () => {
         time += 0.01;

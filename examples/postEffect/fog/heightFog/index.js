@@ -44,7 +44,7 @@ RedGPU.init(
         createGroundLevelScene(redGPUContext, scene);
 
         const autoRotateState = {enabled: true};
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
             scene.children.forEach((child, index) => {
                 if (child.userData) {

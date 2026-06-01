@@ -40,7 +40,7 @@ RedGPU.init(
         createSampleLine3D("custom pointColor", view, 3, gap * 2, 0, "#ffffff", true);
 
         // 2-4. 렌더링 시작 (애니메이션 없음)
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
         });
         renderTestPane(redGPUContext);

@@ -28,7 +28,7 @@ RedGPU.init(
         const {lights, initialPositions} = createPointLights(scene, 500);
         createSphereMeshes(redGPUContext, scene, 500);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = () => {
             animateLights(lights, initialPositions);
         };
