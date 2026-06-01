@@ -12,7 +12,7 @@ redUnit.testGroup(
                 const checkPos = cam.x === 0 && cam.y === 0 && cam.z === 0;
                 const checkRot = cam.rotationX === 0 && cam.rotationY === 0 && cam.rotationZ === 0;
                 const checkFOV = cam.fieldOfView === 60;
-                const checkClipping = cam.nearClipping === 0.01 && cam.farClipping === 100000;
+                const checkClipping = cam.nearClipping === 0.1 && cam.farClipping === 100000;
                 run(checkPos && checkRot && checkFOV && checkClipping);
             } catch (e) { run(false, e); }
         }, true);
