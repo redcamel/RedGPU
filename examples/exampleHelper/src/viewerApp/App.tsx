@@ -11,6 +11,7 @@ import GuiCompareLabelHelper from "./gui/GuiCompareLabelHelper";
 import LoadingUI from './components/LoadingUI';
 import RenderingSettingsGroup from './components/RenderingSettingsGroup';
 import Title from './components/Title';
+import {keepLog} from "@redgpu/src/utils";
 
 const LazyGuiPanel = React.lazy(() => import('./gui/GuiPanel'));
 
@@ -23,6 +24,21 @@ const App = () => {
     const showSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.showSettingsPanel);
     const isNarrow = useExampleHelperStore((state: ExampleHelperState) => state.isNarrow);
     const setShowSourceModal = useExampleHelperStore((state: ExampleHelperState) => state.setShowSourceModal);
+    const setShowSettingsPanel = useExampleHelperStore((state: ExampleHelperState) => state.setShowSettingsPanel);
+
+    // [KO] 모바일 환경(isNarrow)에서 진입 시 설정 패널을 1초 후 자동으로 닫음 (사용자 경험 개선)
+    // [EN] Automatically close the settings panel after 1 second on mobile (isNarrow) for better UX
+    const autoCloseTriggered = React.useRef(false);
+    React.useEffect(() => {
+        if (isNarrow && showSettingsPanel && !autoCloseTriggered.current) {
+            autoCloseTriggered.current = true;
+            const timer = setTimeout(() => {
+                setShowSettingsPanel(false);
+                keepLog('Auto close settings panel');
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, []);
 
     // [KO] 뷰포트 상태 동기화
     useViewportSync();
@@ -33,10 +49,13 @@ const App = () => {
     // [KO] 인스펙터 초기화
     useInspectorInit(redGPUContext, setDebugActive);
 
-    const dynamicPanelStyle = {
+    const dynamicPanelStyle: React.CSSProperties = {
         ...panelStyle,
         maxHeight: isNarrow ? 'calc(100vh - 160px)' : 'calc(100vh - 103px)',
-        display: showSettingsPanel ? 'flex' : 'none'
+        transform: showSettingsPanel ? 'translateX(0)' : 'translateX(calc(100% + 10px))',
+        opacity: showSettingsPanel ? 1 : 0,
+        pointerEvents: showSettingsPanel ? 'auto' : 'none',
+        transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
     };
 
     return (
@@ -47,7 +66,7 @@ const App = () => {
             <div style={dynamicPanelStyle}>
                 <div style={contentStyle}>
                     <React.Suspense fallback={null}>
-                        {showSettingsPanel && <LazyGuiPanel/>}
+                        <LazyGuiPanel/>
                     </React.Suspense>
                 </div>
             </div>
