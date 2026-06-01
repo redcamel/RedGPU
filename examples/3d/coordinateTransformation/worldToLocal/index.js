@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17789220
  * [KO] World To Local 예제
  * [EN] World To Local example
  *
- * [KO] 월드 좌표계와 로컬 좌표계 간의 변환을 시연합니다.
- * [EN] Demonstrates transformation between world coordinate system and local coordinate system.
+ * [KO] 월드 좌표계와 로컬 좌표계 간의 변환(worldToLocal, localToWorld)을 시연합니다.
+ * [EN] Demonstrates transformation between world and local coordinate systems (worldToLocal, localToWorld).
  */
 
 const canvas = document.createElement('canvas');
@@ -15,34 +15,48 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. [KO] 카메라 컨트롤러 설정
+        // [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 15;
         controller.tilt = -45;
 
+        // 2. [KO] 씬 및 뷰 구성
+        // [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.grid = true;
         redGPUContext.addView(view);
 
-        // 명확한 메시 이름으로 변경
+        // 3. [KO] 테스트용 메시 생성 (부모-자식 구조)
+        // [EN] Create Test Meshes (Parent-Child Hierarchy)
         const {parentMesh, localToWorldMesh, worldToLocalMesh} = createTestMeshes(redGPUContext, scene);
 
-        // 명확한 오버레이 박스 이름으로 변경
+        // 4. [KO] 정보 표시용 오버레이 박스 생성
+        // [EN] Create Info Overlay Boxes
         const overlayBoxes = createOverlayBoxes();
 
-        // 라이팅 설정
+        // 5. [KO] 조명 설정
+        // [EN] Setup Lighting
         setupLighting(scene);
 
+        // 6. [KO] 렌더러 생성 및 루프 시작
+        // [EN] Create Renderer and Start Loop
         const renderer = new RedGPU.Renderer();
         const render = (time) => {
-            // 부모 메시만 회전
+            // [KO] 부모 메시 회전 (상속된 변환 효과 확인용)
+            // [EN] Rotate parent mesh (to observe inherited transformation)
             parentMesh.rotationX += 1.2;
 
-            // 좌표 변환 Test 및 화면 표시
+            // [KO] 좌표 변환 수행 및 UI 업데이트
+            // [EN] Perform coordinate transformations and update UI
             updateCoordinateTests(parentMesh, localToWorldMesh, worldToLocalMesh, view, overlayBoxes);
         };
 
         renderer.start(redGPUContext, render);
+
+        // 7. [KO] 테스트용 GUI 렌더링
+        // [EN] Render Test GUI
         renderTestPane(redGPUContext);
     },
     (failReason) => {
@@ -52,35 +66,30 @@ RedGPU.init(
 );
 
 /**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
+ * [KO] 테스트용 GUI를 구성합니다.
+ * [EN] Configures GUI for testing.
  * @param {RedGPU.RedGPUContext} redGPUContext
  */
-const renderTestPane = async (redGPUContext) => {
-    new RedGPUExampleHelper(redGPUContext, {
-        gui: (pane) => {
-            // [KO] 필요한 경우 여기에 추가 컨트롤을 구현할 수 있습니다.
-            // [EN] Additional controls can be implemented here if needed.
-        }
-    });
+const renderTestPane = (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext);
 };
 
 /**
- * [KO] 테스트용 메시들을 생성합니다.
- * [EN] Creates test meshes.
+ * [KO] 계층 구조를 가진 테스트용 메시들을 생성합니다.
+ * [EN] Creates hierarchical test meshes.
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.Scene} scene
  * @returns {object} Created meshes
  */
 function createTestMeshes(redGPUContext, scene) {
-    // 텍스처 머티리얼
     const textureMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
     textureMaterial.diffuseTexture = new RedGPU.Resource.BitmapTexture(
         redGPUContext,
         '../../../assets/UV_Grid_Sm.jpg'
     );
 
-    // 🔴 부모 메시 (화면 좌표 Test용)
+    // [KO] 🔴 부모 메시
+    // [EN] 🔴 Parent Mesh
     const parentMesh = new RedGPU.Display.Mesh(
         redGPUContext,
         new RedGPU.Primitive.Sphere(redGPUContext),
@@ -88,7 +97,8 @@ function createTestMeshes(redGPUContext, scene) {
     );
     scene.addChild(parentMesh);
 
-    // 🟢 localToWorld Test용 메시
+    // [KO] 🟢 localToWorld 테스트용 자식 메시
+    // [EN] 🟢 Child mesh for localToWorld test
     const localToWorldMesh = new RedGPU.Display.Mesh(
         redGPUContext,
         new RedGPU.Primitive.Sphere(redGPUContext),
@@ -98,7 +108,8 @@ function createTestMeshes(redGPUContext, scene) {
     localToWorldMesh.setPosition(-6, 2, 2);
     parentMesh.addChild(localToWorldMesh);
 
-    // 🔵 worldToLocal Test용 메시
+    // [KO] 🔵 worldToLocal 테스트용 자식 메시
+    // [EN] 🔵 Child mesh for worldToLocal test
     const worldToLocalMesh = new RedGPU.Display.Mesh(
         redGPUContext,
         new RedGPU.Primitive.Sphere(redGPUContext),
@@ -111,6 +122,11 @@ function createTestMeshes(redGPUContext, scene) {
     return {parentMesh, localToWorldMesh, worldToLocalMesh};
 }
 
+/**
+ * [KO] 화면 오버레이 정보 박스들을 생성합니다.
+ * [EN] Creates on-screen info overlay boxes.
+ * @returns {object} Overlay box elements
+ */
 function createOverlayBoxes() {
     const boxStyle = {
         position: 'absolute',
@@ -124,7 +140,8 @@ function createOverlayBoxes() {
         zIndex: 1000
     };
 
-    // 🔴 부모 메시 정보 박스
+    // [KO] 부모 메시 정보 박스
+    // [EN] Parent Mesh Info Box
     const parentMeshInfoBox = document.createElement('div');
     Object.assign(parentMeshInfoBox.style, boxStyle, {
         background: 'rgba(255,107,107,0.9)',
@@ -132,7 +149,8 @@ function createOverlayBoxes() {
     });
     document.body.appendChild(parentMeshInfoBox);
 
-    // 🟢 localToWorld Test 박스
+    // [KO] localToWorld 테스트 박스
+    // [EN] localToWorld Test Box
     const localToWorldTestBox = document.createElement('div');
     Object.assign(localToWorldTestBox.style, boxStyle, {
         background: 'rgba(78,205,196,0.9)',
@@ -140,7 +158,8 @@ function createOverlayBoxes() {
     });
     document.body.appendChild(localToWorldTestBox);
 
-    // 🔵 worldToLocal Test 박스
+    // [KO] worldToLocal 테스트 박스
+    // [EN] worldToLocal Test Box
     const worldToLocalTestBox = document.createElement('div');
     Object.assign(worldToLocalTestBox.style, boxStyle, {
         background: 'rgba(0,136,255,0.9)',
@@ -155,20 +174,28 @@ function createOverlayBoxes() {
     };
 }
 
+/**
+ * [KO] 장면에 조명을 설정합니다.
+ * [EN] Sets up lighting in the scene.
+ * @param {RedGPU.Display.Scene} scene
+ */
 function setupLighting(scene) {
-    // 방향성 라이트
     const directionalLight = new RedGPU.Light.DirectionalLight();
     scene.lightManager.addDirectionalLight(directionalLight);
 
-    // 앰비언트 라이트
     const ambientLight = new RedGPU.Light.AmbientLight('#404040', 0.4);
     scene.lightManager.ambientLight = ambientLight;
 }
 
+/**
+ * [KO] 실시간으로 좌표 변환을 테스트하고 UI를 업데이트합니다.
+ * [EN] Tests coordinate transformations and updates UI in real-time.
+ */
 function updateCoordinateTests(parentMesh, localToWorldMesh, worldToLocalMesh, view, overlayBoxes) {
     const {parentMeshInfoBox, localToWorldTestBox, worldToLocalTestBox} = overlayBoxes;
 
-    // 🔴 부모 메시 정보 표시
+    // 1. [KO] 부모 메시 정보 표시
+    // [EN] Display Parent Mesh Info
     const parentScreenPoint = parentMesh.getScreenPoint(view);
     parentMeshInfoBox.style.top = parentScreenPoint[1] + 'px';
     parentMeshInfoBox.style.left = parentScreenPoint[0] + 'px';
@@ -179,18 +206,14 @@ function updateCoordinateTests(parentMesh, localToWorldMesh, worldToLocalMesh, v
         Rotation: (${parentMesh.rotationX.toFixed(0)}°, ${parentMesh.rotationY.toFixed(0)}°, ${parentMesh.rotationZ.toFixed(0)}°)
     `;
 
-    // 🟢 localToWorld Test
-    const localCoords = [-1, 1, 0]; // 입력할 로컬 좌표
+    // 2. [KO] localToWorld 테스트
+    // [EN] localToWorld Test
+    const localCoords = [-1, 1, 0]; 
     const convertedWorldCoords = localToWorldMesh.localToWorld(localCoords[0], localCoords[1], localCoords[2]);
 
-    // localToWorld 정확성 검증
     const localToWorldAccuracy = validateLocalToWorldAccuracy(localToWorldMesh, localCoords, convertedWorldCoords);
 
-    // UI 색상 설정
-    const localToWorldIcon = localToWorldAccuracy.isAccurate ? '✅' : '⚠️';
     const localToWorldColor = localToWorldAccuracy.isAccurate ? '#4CAF50' : '#FF9800';
-    const localToWorldBgColor = 'rgba(0,0,0,0.6)';
-
     const localToWorldScreenPoint = localToWorldMesh.getScreenPoint(view);
     localToWorldTestBox.style.top = localToWorldScreenPoint[1] + 'px';
     localToWorldTestBox.style.left = localToWorldScreenPoint[0] + 'px';
@@ -202,9 +225,9 @@ function updateCoordinateTests(parentMesh, localToWorldMesh, worldToLocalMesh, v
         Result World: (${convertedWorldCoords[0].toFixed(3)}, ${convertedWorldCoords[1].toFixed(3)}, ${convertedWorldCoords[2].toFixed(3)})<br>
         Screen: (${localToWorldScreenPoint[0].toFixed(1)}, ${localToWorldScreenPoint[1].toFixed(1)})<br>
         <br>
-        <div style="background: ${localToWorldBgColor}; padding: 4px; border-radius: 4px; margin-top: 4px; border-left: 3px solid ${localToWorldColor};">
+        <div style="background: rgba(0,0,0,0.6); padding: 4px; border-radius: 4px; border-left: 3px solid ${localToWorldColor};">
             <div style="font-size: 11px; font-weight: bold; color: ${localToWorldColor};">
-                ${localToWorldIcon} 변환 정확도
+                ${localToWorldAccuracy.isAccurate ? '✅' : '⚠️'} 변환 정확도
             </div>
             <div style="font-size: 10px; margin-top: 2px;">
                 상대 오차율: ${localToWorldAccuracy.relativeErrorPercentage.toFixed(4)}%
@@ -212,18 +235,14 @@ function updateCoordinateTests(parentMesh, localToWorldMesh, worldToLocalMesh, v
         </div>
     `;
 
-    // 🔵 worldToLocal Test
-    const worldCoords = [3, 0, 1]; // 입력할 월드 좌표
+    // 3. [KO] worldToLocal 테스트
+    // [EN] worldToLocal Test
+    const worldCoords = [3, 0, 1]; 
     const convertedLocalCoords = worldToLocalMesh.worldToLocal(worldCoords[0], worldCoords[1], worldCoords[2]);
 
-    // worldToLocal 정확성 검증
     const worldToLocalAccuracy = validateWorldToLocalAccuracy(worldToLocalMesh, worldCoords, convertedLocalCoords);
 
-    // UI 색상 설정
-    const worldToLocalIcon = worldToLocalAccuracy.isAccurate ? '✅' : '⚠️';
     const worldToLocalColor = worldToLocalAccuracy.isAccurate ? '#4CAF50' : '#FF9800';
-    const worldToLocalBgColor = 'rgba(0,0,0,0.6)';
-
     const worldToLocalScreenPoint = worldToLocalMesh.getScreenPoint(view);
     worldToLocalTestBox.style.top = worldToLocalScreenPoint[1] + 'px';
     worldToLocalTestBox.style.left = worldToLocalScreenPoint[0] + 'px';
@@ -235,9 +254,9 @@ function updateCoordinateTests(parentMesh, localToWorldMesh, worldToLocalMesh, v
         Result Local: (${convertedLocalCoords[0].toFixed(3)}, ${convertedLocalCoords[1].toFixed(3)}, ${convertedLocalCoords[2].toFixed(3)})<br>
         Screen: (${worldToLocalScreenPoint[0].toFixed(1)}, ${worldToLocalScreenPoint[1].toFixed(1)})<br>
         <br>
-        <div style="background: ${worldToLocalBgColor}; padding: 4px; border-radius: 4px; margin-top: 4px; border-left: 3px solid ${worldToLocalColor};">
+        <div style="background: rgba(0,0,0,0.6); padding: 4px; border-radius: 4px; border-left: 3px solid ${worldToLocalColor};">
             <div style="font-size: 11px; font-weight: bold; color: ${worldToLocalColor};">
-                ${worldToLocalIcon} 변환 정확도
+                ${worldToLocalAccuracy.isAccurate ? '✅' : '⚠️'} 변환 정확도
             </div>
             <div style="font-size: 10px; margin-top: 2px;">
                 상대 오차율: ${worldToLocalAccuracy.relativeErrorPercentage.toFixed(4)}%
@@ -246,64 +265,42 @@ function updateCoordinateTests(parentMesh, localToWorldMesh, worldToLocalMesh, v
     `;
 }
 
-// 🟢 localToWorld 정확성 검증 함수
+/**
+ * [KO] localToWorld 정확성을 역변환으로 검증합니다.
+ * [EN] Validates localToWorld accuracy using reverse transformation.
+ */
 function validateLocalToWorldAccuracy(targetMesh, inputLocalCoords, outputWorldCoords) {
-    // localToWorld → worldToLocal 역변환으로 정확성 검증
     const backToLocalCoords = targetMesh.worldToLocal(outputWorldCoords[0], outputWorldCoords[1], outputWorldCoords[2]);
-
-    // 절대 오차 계산
     const absoluteError = Math.sqrt(
         Math.pow(backToLocalCoords[0] - inputLocalCoords[0], 2) +
         Math.pow(backToLocalCoords[1] - inputLocalCoords[1], 2) +
         Math.pow(backToLocalCoords[2] - inputLocalCoords[2], 2)
     );
-
-    // 상대 오차율 계산
     const originalMagnitude = Math.sqrt(
         Math.pow(inputLocalCoords[0], 2) +
         Math.pow(inputLocalCoords[1], 2) +
         Math.pow(inputLocalCoords[2], 2)
     );
-
     const relativeErrorPercentage = originalMagnitude > 0 ? (absoluteError / originalMagnitude) * 100 : 0;
-
-    // 콘솔 로그
-    const status = absoluteError < 0.001 ? '✅ localToWorld 정확함' : '⚠️ localToWorld 오차 발생';
-    console.log(`${status} - 상대오차: ${relativeErrorPercentage.toFixed(4)}%`);
-
-    return {
-        relativeErrorPercentage,
-        isAccurate: absoluteError < 0.001
-    };
+    return { relativeErrorPercentage, isAccurate: absoluteError < 0.001 };
 }
 
-// 🔵 worldToLocal 정확성 검증 함수
+/**
+ * [KO] worldToLocal 정확성을 역변환으로 검증합니다.
+ * [EN] Validates worldToLocal accuracy using reverse transformation.
+ */
 function validateWorldToLocalAccuracy(targetMesh, inputWorldCoords, outputLocalCoords) {
-    // worldToLocal → localToWorld 역변환으로 정확성 검증
     const backToWorldCoords = targetMesh.localToWorld(outputLocalCoords[0], outputLocalCoords[1], outputLocalCoords[2]);
-
-    // 절대 오차 계산
     const absoluteError = Math.sqrt(
         Math.pow(backToWorldCoords[0] - inputWorldCoords[0], 2) +
         Math.pow(backToWorldCoords[1] - inputWorldCoords[1], 2) +
         Math.pow(backToWorldCoords[2] - inputWorldCoords[2], 2)
     );
-
-    // 상대 오차율 계산
     const originalMagnitude = Math.sqrt(
         Math.pow(inputWorldCoords[0], 2) +
         Math.pow(inputWorldCoords[1], 2) +
         Math.pow(inputWorldCoords[2], 2)
     );
-
     const relativeErrorPercentage = originalMagnitude > 0 ? (absoluteError / originalMagnitude) * 100 : 0;
-
-    // 콘솔 로그
-    const status = absoluteError < 0.001 ? '✅ worldToLocal 정확함' : '⚠️ worldToLocal 오차 발생';
-    console.log(`${status} - 상대오차: ${relativeErrorPercentage.toFixed(4)}%`);
-
-    return {
-        relativeErrorPercentage,
-        isAccurate: absoluteError < 0.001
-    };
+    return { relativeErrorPercentage, isAccurate: absoluteError < 0.001 };
 }
