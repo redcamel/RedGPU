@@ -121,12 +121,13 @@ try {
 
                 const cssPath = path.join(targetFolder, 'assets/css/example.css');
                 const cssRelPath = path.relative(dirPath, cssPath).replace(/\\/g, '/');
-                const canonicalUrl = baseUrl + fileRelPath;
+                const canonicalUrl = (baseUrl + fileRelPath).replace(/\/index\.html$/, '/');
 
                 // Cleanup existing SEO elements
                 content = content.replace(/<meta[\s\S]*?>/gi, '');
                 content = content.replace(/<title>[\s\S]*?<\/title>/gi, '');
                 content = content.replace(/<link\s+[^>]*rel="(canonical|stylesheet|preload|modulepreload)"[\s\S]*?>/gi, '');
+                content = content.replace(/<script\s+[^>]*src="index\.js[^>]*><\/script>/gi, '');
                 content = content.replace(/<script\s+[^>]*src="index\.js[^>]*><\/script>/gi, '');
                 content = content.replace(/<script\s+type="application\/ld\+json">[\s\S]*?<\/script>/gi, '');
                 content = content.replace(/<!--[\s\S]*?-->/gi, '');
