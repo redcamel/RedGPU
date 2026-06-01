@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17789220
  * [KO] Multi View 예제
  * [EN] Multi View example
  *
- * [KO] 하나의 씬을 여러 개의 뷰로 렌더링하는 방법을 보여줍니다.
- * [EN] Demonstrates how to render a single scene with multiple views.
+ * [KO] 여러 개의 뷰(View2D)를 분할하여 구성하고, 각각 다른 씬(Scene)을 렌더링하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to divide the screen into multiple views (View2D) and render different scenes in each.
  */
 
 const canvas = document.createElement('canvas');
@@ -63,7 +63,7 @@ RedGPU.init(
             sprite2D_2.y = height / 2;
         };
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
             sprite2D.rotation += 1;
             sprite2D_2.setScale(Math.sin(time / 500) + Math.PI);

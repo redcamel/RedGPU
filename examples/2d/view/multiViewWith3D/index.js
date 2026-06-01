@@ -64,7 +64,7 @@ RedGPU.init(
         redGPUContext.onResize = onResizeRedGPUContext;
         onResizeRedGPUContext();
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
             sprite2D.rotation += 1;
         };
