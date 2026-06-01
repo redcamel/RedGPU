@@ -9,69 +9,98 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17789220
  * [EN] Demonstrates how to use a camera controller (FollowController) that follows a specific target.
  */
 
+// [KO] 캔버스 생성 및 문서에 추가
+// [EN] Create canvas and append to document
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
+// [KO] RedGPU 초기화
+// [EN] Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 타겟 메시 생성 (빨간색 박스)
+        // [KO] 타겟 메시 생성 (빨간색 박스)
+        // [EN] Create target mesh (red box)
         const targetMesh = new RedGPU.Display.Mesh(redGPUContext);
         targetMesh.material = new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000');
         targetMesh.geometry = new RedGPU.Primitive.Box(redGPUContext);
 
-        // 타겟의 자식 메시 (녹색 박스) - 타겟의 앞쪽을 표시
+        // [KO] 타겟의 자식 메시 (녹색 박스) - 타겟의 앞쪽 방향을 표시
+        // [EN] Child mesh of target (green box) - indicates the front direction of the target
         const targetMesh2 = new RedGPU.Display.Mesh(redGPUContext);
         targetMesh2.material = new RedGPU.Material.PhongMaterial(redGPUContext, '#00ff00');
         targetMesh2.geometry = new RedGPU.Primitive.Box(redGPUContext);
-        targetMesh2.z = -2; // 타겟의 앞쪽에 배치
+        targetMesh2.z = -2; // [KO] 타겟의 앞쪽에 배치 [EN] Placed in front of the target
         targetMesh2.setScale(0.5);
         targetMesh.addChild(targetMesh2);
 
-        // FollowController 생성
+        // [KO] FollowController 생성 (각각 다른 타겟을 추적하도록 2개 생성)
+        // [EN] Create FollowController (Create 2 to track different targets respectively)
         const controller = new RedGPU.Camera.FollowController(redGPUContext, targetMesh);
         const controller2 = new RedGPU.Camera.FollowController(redGPUContext, targetMesh2);
 
+        // [KO] 환경 맵(IBL) 로드 및 하늘 상자(SkyBox) 생성 (HDR 이미지의 밝기에 맞춰 루미넌스 값을 25000으로 설정)
+        // [EN] Load environment map (IBL) and create SkyBox (set luminance to 25000 to match the brightness of the HDR image)
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
-        const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture, 25000);
+        
+        // [KO] 씬(Scene) 생성 및 조명, 타겟 추가
+        // [EN] Create scene and add light, target
         const scene = new RedGPU.Display.Scene();
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
         scene.addChild(targetMesh);
 
+        // [KO] 첫 번째 뷰(View3D) 생성 및 설정 (controller 연결)
+        // [EN] Create and configure the first view (linked with controller)
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.axis = true;
         view.grid = true;
         view.skybox = skybox;
         redGPUContext.addView(view);
 
+        // [KO] 두 번째 뷰(View3D) 생성 및 설정 (controller2 연결)
+        // [EN] Create and configure the second view (linked with controller2)
         const view2 = new RedGPU.Display.View3D(redGPUContext, scene, controller2);
         view2.axis = true;
         view2.grid = true;
         view2.skybox = skybox;
         redGPUContext.addView(view2);
 
+        // [KO] 모바일 여부에 따라 뷰 화면 분할 설정
+        // [EN] Set view screen split based on whether it is mobile
         if (redGPUContext.detector.isMobile) {
-            // 모바일: 위아래 분할
+            // [KO] 모바일: 위아래 분할 [EN] Mobile: Top/Bottom split
             view.setSize('100%', '50%');
-            view.setPosition(0, 0);         // 상단
+            view.setPosition(0, 0);         // [KO] 상단 [EN] Top
             view2.setSize('100%', '50%');
-            view2.setPosition(0, '50%');     // 하단
+            view2.setPosition(0, '50%');     // [KO] 하단 [EN] Bottom
         } else {
-            // 데스크톱: 좌우 분할
+            // [KO] 데스크톱: 좌우 분할 [EN] Desktop: Left/Right split
             view.setSize('50%', '100%');
-            view.setPosition(0, 0);         // 좌측
+            view.setPosition(0, 0);         // [KO] 좌측 [EN] Left
             view2.setSize('50%', '100%');
-            view2.setPosition('50%', 0);     // 우측
+            view2.setPosition('50%', 0);     // [KO] 우측 [EN] Right
         }
 
-        // 배경 메시 추가 (환경 표시용)
+        // [KO] 배경 메시 추가 (환경 표시용 헬퍼 함수)
+        // [EN] Add background meshes (Helper function for environment display)
         const addMeshesToScene = (scene, count = 100) => {
-            const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
-            const material = new RedGPU.Material.ColorMaterial(redGPUContext);
+            // [KO] 구의 반경을 3으로 설정하여 메쉬 크기 증가
+            // [EN] Increase mesh size by setting sphere radius to 3
+            const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 3);
+            
+            // [KO] 성능 최적화를 위해 다채로운 색상의 재사용 가능한 매질(Material) 풀 생성
+            // [EN] Create a reusable material pool with diverse colors for performance optimization
+            const materialPool = Array.from({ length: 20 }).map(() => {
+                const mat = new RedGPU.Material.ColorMaterial(redGPUContext);
+                mat.color.setColorByRGB(Math.floor(Math.random() * 256), Math.floor(Math.random() * 256), Math.floor(Math.random() * 256));
+                return mat;
+            });
 
             for (let i = 0; i < count; i++) {
-                const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+                const randomMaterial = materialPool[Math.floor(Math.random() * materialPool.length)];
+                const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, randomMaterial);
 
                 mesh.setPosition(
                     Math.random() * 100 - 50,
@@ -85,23 +114,31 @@ RedGPU.init(
 
         addMeshesToScene(scene, 100);
 
+        // [KO] 렌더러 생성 및 루프 시작
+        // [EN] Create renderer and start loop
         const renderer = new RedGPU.Renderer();
         const render = (time) => {
-            // 타겟 메시를 원형 경로로 이동하고 중앙을 바라봄
+            // [KO] 타겟 메시를 원형 경로로 이동시키고 Y축으로 살짝 진동시킴
+            // [EN] Move target mesh in a circular path and slightly vibrate on the Y-axis
             const t = time * 0.001;
             const radius = 20;
             targetMesh.x = Math.sin(t * 0.5) * radius;
             targetMesh.z = Math.cos(t * 0.5) * radius;
             targetMesh.y = Math.sin(t * 0.5) * 5;
 
-            // 타겟이 원점을 바라봄
+            // [KO] 타겟이 항상 원점(0, 0, 0)을 바라보게 설정
+            // [EN] Target always looks at the origin (0, 0, 0)
             targetMesh.lookAt(0, 0, 0);
         };
         renderer.start(redGPUContext, render);
 
+        // [KO] 테스트용 GUI 렌더링
+        // [EN] Render GUI for testing
         renderTestPane(redGPUContext, controller);
     },
     (failReason) => {
+        // [KO] 초기화 실패 시 에러 처리
+        // [EN] Error handling on initialization failure
         console.error('초기화 실패:', failReason);
         const errorMessage = document.createElement('div');
         errorMessage.innerHTML = failReason;
@@ -118,13 +155,15 @@ RedGPU.init(
 const renderTestPane = (redGPUContext, controller) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // FollowController 설정
+            // [KO] FollowController 설정 폴더
+            // [EN] FollowController settings folder
             const followFolder = pane.addFolder({
                 title: 'Follow Controller',
                 expanded: true,
             });
 
-            // 거리 및 높이
+            // [KO] 타겟과의 거리 및 보간(관성) 속도
+            // [EN] Distance from target and interpolation (inertia) speed
             followFolder.addBinding(controller, 'distance', {
                 min: 1,
                 max: 50,
@@ -136,6 +175,8 @@ const renderTestPane = (redGPUContext, controller) => {
                 step: 0.01,
             });
 
+            // [KO] 카메라 높이 및 보간 속도
+            // [EN] Camera height and interpolation speed
             followFolder.addBinding(controller, 'height', {
                 min: -10,
                 max: 20,
@@ -152,7 +193,8 @@ const renderTestPane = (redGPUContext, controller) => {
                 step: 0.01,
             });
 
-            // 회전 각도
+            // [KO] 카메라 회전 각도 설정 폴더
+            // [EN] Camera rotation angle settings folder
             const rotationFolder = pane.addFolder({
                 title: 'Camera Rotation',
                 expanded: true,
@@ -180,11 +222,14 @@ const renderTestPane = (redGPUContext, controller) => {
                 step: 0.01,
             });
 
+            // [KO] 타겟의 회전(Rotation)을 따라갈지 여부
+            // [EN] Whether to follow the target's rotation
             rotationFolder.addBinding(controller, 'followTargetRotation', {
                 label: 'Follow Target Rotation',
             });
 
-            // 타겟 오프셋
+            // [KO] 타겟 오프셋(바라보는 중심점 이동) 설정 폴더
+            // [EN] Target offset (move center of looking) settings folder
             const offsetFolder = pane.addFolder({
                 title: 'Target Look At Offset',
                 expanded: true,
@@ -218,7 +263,8 @@ const renderTestPane = (redGPUContext, controller) => {
                 pane.refresh();
             });
 
-            // 프리셋 버튼
+            // [KO] 프리셋 설정 폴더
+            // [EN] Presets setup folder
             const presetFolder = pane.addFolder({
                 title: 'Presets',
             });
