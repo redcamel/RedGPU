@@ -58,9 +58,5 @@ fn getDirectionalShadowVisibility(
 
     visibility /= 9.0;
 
-    // 거리에 따른 최소 가시성 보정 (Legacy logic preserved)
-    let depthFactor = shadowDepth;
-    let minVisibility = 0.2 + depthFactor * 0.6;
-
-    return max(visibility, minVisibility);
+    return visibility;
 }

@@ -277,7 +277,15 @@ fn main(inputData:InputData) -> OutputFragment {
     }
 
     // [KO] 간접 조명 (Ambient) [EN] Indirect lighting (Ambient)
-    let ambientContribution = albedo * u_ambientLight.color * u_ambientLight.intensity * INV_PI;
+    var ambientContribution = albedo * u_ambientLight.color * u_ambientLight.intensity * INV_PI;
+
+    if (systemUniforms.useSkyAtmosphere == 1u) {
+        let u_atmo = systemUniforms.skyAtmosphere;
+        let skyIntensity = u_atmo.sunIntensity;
+        let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, N.y, u_atmo.atmosphereHeight);
+        let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity;
+        ambientContribution = (ambientContribution * diffTrans) + (albedo * skyIrradiance * INV_PI);
+    }
     
     // [KO] 조명 합산 [EN] Lighting summation
     var mixColor = totalDirectLighting + ambientContribution;
