@@ -36,15 +36,15 @@ RedGPU.init(
         // 3. [KO] 비교 테스트를 위한 객체 배치
         // [EN] Arrange objects for comparison test
 
-        // [KO] A. 월드 사이즈 모드 (왼쪽): 거리에 따라 크기가 변함
-        // [EN] A. World Size Mode (Left): Size changes with distance
+        // [KO] A. 월드 사이즈 모드 (왼쪽): 실제 3D 오브젝트처럼 거리에 따라 크기가 변함
+        // [EN] A. World Size Mode (Left): Size changes with distance like an actual 3D object
         const spriteWorld = new RedGPU.Display.Sprite3D(redGPUContext, material);
         spriteWorld.worldSize = 2.0;
         spriteWorld.x = -5;
         scene.addChild(spriteWorld);
 
-        // [KO] B. 기준점: 일반 3D 메쉬 (중앙)
-        // [EN] B. Reference: Standard 3D Mesh (Center)
+        // [KO] B. 기준점: 일반 3D 메쉬 (중앙): 비교를 위한 표준 박스 객체
+        // [EN] B. Reference: Standard 3D Mesh (Center): Standard box object for comparison
         const refBox = new RedGPU.Display.Mesh(
             redGPUContext,
             new RedGPU.Primitive.Box(redGPUContext),
@@ -53,8 +53,8 @@ RedGPU.init(
         refBox.setScale(2);
         scene.addChild(refBox);
 
-        // [KO] C. 픽셀 사이즈 모드 (오른쪽): 거리에 상관없이 화면상 크기 고정
-        // [EN] C. Pixel Size Mode (Right): Fixed size on screen regardless of distance
+        // [KO] C. 픽셀 사이즈 모드 (오른쪽): UI나 아이콘처럼 거리에 상관없이 화면상 크기가 고정됨
+        // [EN] C. Pixel Size Mode (Right): Fixed size on screen regardless of distance, like UI or icons
         const spritePixel = new RedGPU.Display.Sprite3D(redGPUContext, material);
         spritePixel.usePixelSize = true;
         spritePixel.pixelSize = 128;
@@ -89,7 +89,7 @@ function createComparisonLabels(redGPUContext, scene) {
         
         const mainLabel = new RedGPU.Display.TextField3D(redGPUContext, text);
         mainLabel.color = '#ffffff';
-        mainLabel.fontSize = 36;
+        mainLabel.fontSize = 24;
         mainLabel.background = color;
         mainLabel.padding = 10;
         mainLabel.useBillboard = true;
@@ -97,7 +97,7 @@ function createComparisonLabels(redGPUContext, scene) {
         const subLabel = new RedGPU.Display.TextField3D(redGPUContext, subText);
         subLabel.y = -1.2;
         subLabel.color = '#cccccc';
-        subLabel.fontSize = 36;
+        subLabel.fontSize = 16;
         subLabel.useBillboard = true;
         
         group.setPosition(x, 3.5, 0);

@@ -45,11 +45,10 @@ RedGPU.init(
             new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/texture/v_test.jpg')
         );
 
-        // [KO] 중앙 메인 스프라이트
-        // [EN] Center main sprite
+        // [KO] 중앙 메인 스프라이트 생성
+        // [EN] Create center main sprite
         const mainSprite = new RedGPU.Display.Sprite3D(redGPUContext, materialGrid);
         scene.addChild(mainSprite);
-
 
         // [KO] 가로/세로 비율 테스트용 스프라이트 배치
         // [EN] Arrange sprites for aspect ratio testing
@@ -80,7 +79,11 @@ RedGPU.init(
         // 4. [KO] 렌더러 생성 및 루프 시작
         // [EN] Create Renderer and Start Loop
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
+        const render = (time) => {
+            // [KO] 매 프레임 로직
+            // [EN] Logic per frame
+        };
+        renderer.start(redGPUContext, render);
 
         // 5. [KO] 테스트용 GUI 렌더링
         // [EN] Render Test GUI
