@@ -45,7 +45,7 @@ RedGPU.init(
         const viewLowRes = new RedGPU.Display.View3D(redGPUContext, sceneLowRes, controller);
         const iblLowRes = new RedGPU.Resource.IBL(
             redGPUContext, '../../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr',
-            1024, 16 // [KO] diffuseSize: 1024, specularSize: 16 [EN] diffuseSize: 1024, specularSize: 16
+            25000, 1024, 16 // [KO] diffuseSize: 1024, specularSize: 16 [EN] diffuseSize: 1024, specularSize: 16
         )
         viewLowRes.ibl = iblLowRes;
         viewLowRes.skybox = new RedGPU.Display.SkyBox(redGPUContext, iblLowRes.environmentTexture);
