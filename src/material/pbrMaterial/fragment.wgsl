@@ -587,8 +587,11 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_if useCutOff
         if (resultAlpha <= u_cutOff) { discard; }
     #redgpu_endIf
-    
-    output.color = finalColor;
+    #redgpu_if useTint
+        output.color = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
+    #redgpu_else
+        output.color = finalColor;
+    #redgpu_endIf
     {
         let smoothness = 1.0 - roughnessParameter;
         let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
