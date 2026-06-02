@@ -38,7 +38,7 @@ class IBL extends RedGPUObject {
     constructor(
         redGPUContext: RedGPUContext,
         srcInfo: string | [string, string, string, string, string, string],
-        luminance: number = 20000,
+        luminance: number = 25000,
         environmentSize: number = 1024,
         prefilterSize: number = 512,
         irradianceSize: number = 64

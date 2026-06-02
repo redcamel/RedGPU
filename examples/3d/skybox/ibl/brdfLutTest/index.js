@@ -18,6 +18,7 @@ RedGPU.init(
         // 1. [KO] 카메라 컨트롤러 설정
         // [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.tilt = 0;
 
         // 2. [KO] 씬 및 뷰 구성
         // [EN] Configure Scene and View

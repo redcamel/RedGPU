@@ -55,7 +55,7 @@ class SkyBox extends RedGPUObject {
     #transitionDuration: number = 0
     #transitionElapsed: number = 0
     #prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
-    #luminance: number = 10000.0;
+    #luminance: number = 25000.0;
     #lastUpdateMSAAID: string
 
     /**
@@ -66,7 +66,7 @@ class SkyBox extends RedGPUObject {
      * @param texture - [KO] 사용할 큐브 텍스처 [EN] Cube texture to use
      * @param luminance - [KO] 물리적 휘도 (Nit) [EN] Physical luminance (Nit)
      */
-    constructor(redGPUContext: RedGPUContext, texture: CubeTexture | DirectCubeTexture, luminance: number = 10000) {
+    constructor(redGPUContext: RedGPUContext, texture: CubeTexture | DirectCubeTexture, luminance: number = 25000) {
         super(redGPUContext)
         this.#geometry = new Box(redGPUContext)
         this.#texture = texture
