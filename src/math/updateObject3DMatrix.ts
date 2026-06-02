@@ -40,8 +40,8 @@ const updateObject3DMatrix = (targetMesh: Mesh | Group3D, view: View3D) => {
         targetMesh.z,
     ]);
     // Rotation 설정 (rotate)
-    mat4.rotateX(tLocalMatrix, tLocalMatrix, targetMesh.rotationX * CONVERT_RADIAN); // X축 회전
     mat4.rotateY(tLocalMatrix, tLocalMatrix, targetMesh.rotationY * CONVERT_RADIAN); // Y축 회전
+    mat4.rotateX(tLocalMatrix, tLocalMatrix, targetMesh.rotationX * CONVERT_RADIAN); // X축 회전
     mat4.rotateZ(tLocalMatrix, tLocalMatrix, targetMesh.rotationZ * CONVERT_RADIAN); // Z축 회전
     // Scale 설정 (scale)
     let scaleVec = [targetMesh.scaleX, targetMesh.scaleY, targetMesh.scaleZ];
