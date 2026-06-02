@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17789220
  * [KO] Skybox 예제
  * [EN] Skybox example
  *
- * [KO] 큐브 텍스처를 사용하여 기본 스카이박스를 생성하는 방법을 보여줍니다.
- * [EN] Demonstrates how to create a basic skybox using a cube texture.
+ * [KO] 6개의 이미지를 사용하는 큐브 텍스처(CubeTexture)를 통해 배경 스카이박스를 생성하고 제어하는 방법을 시연합니다.
+ * [EN] Demonstrates how to create and control a background skybox using a CubeTexture with 6 images.
  */
 
 const canvas = document.createElement('canvas');
@@ -15,21 +15,33 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. [KO] 카메라 컨트롤러 설정
+        // [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.tilt = 0;
 
+        // 2. [KO] 씬 및 뷰 구성
+        // [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        // [KO] 스카이박스 생성
+        // 3. [KO] 스카이박스 생성 및 적용
+        // [EN] Create and Apply Skybox
         const skybox = createSkybox(redGPUContext);
         view.skybox = skybox;
 
+        // 4. [KO] 렌더러 생성 및 루프 시작
+        // [EN] Create Renderer and Start Loop
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext, () => {
-        });
+        const render = (time) => {
+            // [KO] 매 프레임 로직
+            // [EN] Logic per frame
+        };
+        renderer.start(redGPUContext, render);
 
+        // 5. [KO] 테스트용 GUI 렌더링
+        // [EN] Render Test GUI
         renderTestPane(redGPUContext, view);
     },
     (failReason) => {
@@ -41,8 +53,8 @@ RedGPU.init(
 );
 
 /**
- * [KO] 스카이박스를 생성합니다.
- * [EN] Creates a skybox.
+ * [KO] 6개의 자산을 사용하여 스카이박스를 생성합니다.
+ * [EN] Creates a skybox using 6 assets.
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @returns {RedGPU.Display.SkyBox}
  */
@@ -56,19 +68,23 @@ const createSkybox = (redGPUContext) => {
         "../../../assets/skybox/nz.jpg",
     ];
 
+    // [KO] 소스 이미지 미리보기 UI 생성
+    // [EN] Create source image preview UI
     createImagePreview(skyboxImagePaths);
 
+    // [KO] 큐브 텍스처 생성 및 스카이박스 초기화
+    // [EN] Create CubeTexture and initialize SkyBox
     const cubeTexture = new RedGPU.Resource.CubeTexture(redGPUContext, skyboxImagePaths);
-    return new RedGPU.Display.SkyBox(redGPUContext, cubeTexture, 10000);
+    return new RedGPU.Display.SkyBox(redGPUContext, cubeTexture, 25000);
 };
 
 /**
- * [KO] 테스트를 위한 GUI 패널을 렌더링합니다.
- * [EN] Renders a GUI panel for testing.
+ * [KO] 실시간 속성 제어를 위한 GUI를 구성합니다.
+ * [EN] Configures GUI for real-time property control.
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.View3D} view
  */
-const renderTestPane = async (redGPUContext, view) => {
+const renderTestPane = (redGPUContext, view) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
             const skybox = view.skybox;
@@ -76,17 +92,28 @@ const renderTestPane = async (redGPUContext, view) => {
 
             const folder = pane.addFolder({title: 'SkyBox Control', expanded: true});
 
+            // [KO] 블러 효과 조절
+            // [EN] Blur Control
             folder.addBinding(skybox, 'blur', {min: 0, max: 1, step: 0.01});
+            
+            // [KO] 강도 배율 조절
+            // [EN] Intensity Multiplier Control
             folder.addBinding(skybox, 'intensityMultiplier', {min: 0, max: 5, step: 0.1});
+            
+            // [KO] 투명도 조절
+            // [EN] Opacity Control
             folder.addBinding(skybox, 'opacity', {min: 0, max: 1, step: 0.01});
+            
+            // [KO] 루미넌스(밝기) 조절
+            // [EN] Luminance Control
             folder.addBinding(skybox, 'luminance', {min: 0, max: 100000, step: 100});
         }
     });
 };
 
 /**
- * [KO] 이미지 미리보기를 생성합니다.
- * [EN] Creates image previews.
+ * [KO] 사용된 소스 이미지들을 화면 중앙 하단에 미리보기로 표시합니다.
+ * [EN] Displays the source images used as previews at the bottom center of the screen.
  * @param {string[]} imagePaths
  */
 const createImagePreview = (imagePaths) => {
