@@ -28,7 +28,7 @@ export interface ExamplesState {
     saveState: () => void;
 }
 
-const STORAGE_KEY = 'redgpu_examples_app_state';
+export const STORAGE_KEY = 'redgpu_examples_app_state';
 
 export const useExamplesStore = create<ExamplesState>((set, get) => ({
     activeTab: '3D',
@@ -60,12 +60,12 @@ export const useExamplesStore = create<ExamplesState>((set, get) => ({
     setIsNarrow: (isNarrow) => set({isNarrow}),
 
     saveState: () => {
-        const {activeTab, searchQuery, viewMode, language} = get();
-        const stateToSave = {activeTab, searchQuery, viewMode, language};
+        const {activeTab, searchQuery, viewMode, language, scrollPosition} = get();
+        const stateToSave = {activeTab, searchQuery, viewMode, language, scrollPosition};
         sessionStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
 
-        // [KO] URL 쿼리 파라미터 업데이트
-        // [EN] Update URL query parameters
+        // [KO] URL 쿼리 파라미터 업데이트 (스크롤 위치는 제외)
+        // [EN] Update URL query parameters (excluding scroll position)
         const url = new URL(window.location.href);
         url.searchParams.set('tab', activeTab);
         if (searchQuery) url.searchParams.set('q', searchQuery);
@@ -83,18 +83,27 @@ export const useExamplesStore = create<ExamplesState>((set, get) => ({
         if (tabParam) set({activeTab: tabParam});
         if (qParam) set({searchQuery: qParam});
 
-        if (tabParam || qParam) return;
-
-        // [KO] 2. 없으면 세션 스토리지에서 복원
-        // [EN] 2. If not, restore from session storage
+        // [KO] 2. 세션 스토리지에서 복원 (URL 파라미터가 없거나 스크롤 위치 등 추가 정보 복원을 위해)
+        // [EN] 2. Restore from session storage (even if URL params exist, for scroll position and other info)
         const saved = sessionStorage.getItem(STORAGE_KEY);
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
-                set(parsed);
+                
+                // URL 파라미터가 있었다면 그것을 우선시하되, 나머지는 저장된 값 사용
+                set((state) => ({
+                    ...parsed,
+                    activeTab: tabParam || parsed.activeTab || state.activeTab,
+                    searchQuery: qParam || parsed.searchQuery || state.searchQuery,
+                    scrollPosition: Number(parsed.scrollPosition) || 0,
+                }));
             } catch (e) {
                 console.error('Failed to restore examples state:', e);
             }
         }
     }
 }));
+
+// [KO] 스토어 생성 즉시 상태 복원 시도
+// [EN] Attempt to restore state immediately after store creation
+useExamplesStore.getState().restoreState();

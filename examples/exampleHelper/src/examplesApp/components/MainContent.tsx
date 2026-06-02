@@ -1,5 +1,5 @@
-import React from 'react';
-import {useExamplesStore} from '../store/useExamplesStore';
+import React, {useEffect, useRef} from 'react';
+import {useExamplesStore, STORAGE_KEY} from '../store/useExamplesStore';
 import ExampleGrid from './ExampleGrid';
 import ViewControls from './ViewControls';
 
@@ -9,6 +9,71 @@ const MainContent: React.FC = () => {
     const setSidebarOpen = useExamplesStore(state => state.setSidebarOpen);
     const isNarrow = useExamplesStore(state => state.isNarrow);
     const searchQuery = useExamplesStore(state => state.searchQuery);
+    const scrollPosition = useExamplesStore(state => state.scrollPosition);
+    const setScrollPosition = useExamplesStore(state => state.setScrollPosition);
+    const saveState = useExamplesStore(state => state.saveState);
+
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+    const isInitialMount = useRef(true);
+// [KO] 스크롤 위치 복원
+// [EN] Restore scroll position
+useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'manual';
+    }
+
+    // [KO] 약간의 지연을 주어 레이아웃이 완료된 후 스크롤 이동
+    // [EN] Apply scroll with a small delay to ensure layout completion
+    const timer = setTimeout(() => {
+        if (scrollAreaRef.current && scrollPosition > 0) {
+            scrollAreaRef.current.scrollTop = scrollPosition;
+        }
+    }, 50);
+
+    return () => clearTimeout(timer);
+}, []);
+
+// [KO] 탭이나 검색어가 변경될 때 스크롤을 상단으로 이동
+// [EN] Reset scroll to top when tab or search query changes
+useEffect(() => {
+    if (isInitialMount.current) {
+        isInitialMount.current = false;
+        return;
+    }
+    if (scrollAreaRef.current) {
+        scrollAreaRef.current.scrollTop = 0;
+        setScrollPosition(0);
+
+        // [KO] 세션 스토리지 즉시 업데이트
+        // [EN] Update session storage immediately
+        const saved = sessionStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                parsed.scrollPosition = 0;
+                sessionStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+            } catch (e) {}
+        }
+    }
+}, [activeTab, searchQuery]);
+
+const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const newPos = e.currentTarget.scrollTop;
+
+    // [KO] 매 스크롤마다 스토어와 세션 스토리지 업데이트
+    // [EN] Update store and session storage on every scroll
+    setScrollPosition(newPos);
+
+    const saved = sessionStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        try {
+            const parsed = JSON.parse(saved);
+            parsed.scrollPosition = newPos;
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+        } catch (e) {}
+    }
+};
 
     return (
         <main style={mainStyle}>
@@ -35,10 +100,14 @@ const MainContent: React.FC = () => {
                 <ViewControls />
             </div>
             
-            <div style={{
-                ...scrollArea, 
-                padding: isNarrow ? '20px 15px 100px 15px' : '40px 40px 100px 40px'
-            }}>
+            <div 
+                ref={scrollAreaRef}
+                onScroll={handleScroll}
+                style={{
+                    ...scrollArea, 
+                    padding: isNarrow ? '20px 15px 100px 15px' : '40px 40px 100px 40px'
+                }}
+            >
                 <ExampleGrid />
             </div>
         </main>

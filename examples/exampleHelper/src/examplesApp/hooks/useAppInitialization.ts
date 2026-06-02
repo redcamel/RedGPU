@@ -43,10 +43,8 @@ export const useAppInitialization = () => {
     }, [activeTab, searchQuery]);
 
     useEffect(() => {
-        // [KO] 세션 스토리지/URL에서 상태 복원
-        // [EN] Restore state from session storage or URL
-        restoreState();
-
+        // [KO] 뷰포트 크기 변화 관리
+        // [EN] Manage viewport resize events
         const handleResize = () => {
             const width = window.innerWidth;
             const narrow = width <= 768;
