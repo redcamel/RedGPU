@@ -20,7 +20,7 @@ import ABaseLight from "../core/ABaseLight";
  *
  * * ### Example
  * ```typescript
- * const ambient = new RedGPU.Light.AmbientLight('#ADD8E6', 50); // 50 Lux
+ * const ambient = new RedGPU.Light.AmbientLight('#fff', 50); // 50 Lux
  * scene.lightManager.ambientLight = ambient;
  * ```
  * @category Light
@@ -32,13 +32,13 @@ class AmbientLight extends ABaseLight {
      * [KO] 새로운 AmbientLight 인스턴스를 생성합니다.
      * [EN] Creates a new AmbientLight instance.
      * @param color -
-     * [KO] 광원의 색상 (기본값: 연한 하늘색 #ADD8E6)
-     * [EN] Color of the light (default: light sky blue #ADD8E6)
+     * [KO] 광원의 색상 (기본값: 연한 하늘색 #fff)
+     * [EN] Color of the light (default: light sky blue #fff)
      * @param lux -
-     * [KO] 광원의 조도 (단위: Lux, 기본값: 0)
-     * [EN] Illuminance of the light (unit: Lux, default: 0)
+     * [KO] 광원의 조도 (단위: Lux, 기본값: 50)
+     * [EN] Illuminance of the light (unit: Lux, default: 50)
      */
-    constructor(color: string = '#ADD8E6', lux: number = 0) {
+    constructor(color: string = '#fff', lux: number = 50) {
         super(new ColorRGB(...convertHexToRgb(color, true)));
         this.#lux = lux
     }

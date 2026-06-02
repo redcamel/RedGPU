@@ -2,8 +2,11 @@ import * as RedGPU from "../../../../dist/index.js?t=1778922031603";
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
 
 /**
- * [KO] Spot Light Lighting Studio 예제 (UE5 스타일)
- * [EN] Spot Light Lighting Studio Example (UE5 Style)
+ * [KO] SpotLight 예제 (Lighting Studio)
+ * [EN] SpotLight Example (Lighting Studio)
+ *
+ * [KO] 촘촘하게 배치된 구체 그리드를 통해 SpotLight의 원뿔 형태 빛과 감쇄 효과를 시연합니다.
+ * [EN] Demonstrates the cone of light and attenuation effect of SpotLight through a dense grid of spheres.
  */
 
 const canvas = document.createElement('canvas');
@@ -12,147 +15,126 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. [KO] 카메라 컨트롤러 설정
+        // [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 35;
+        controller.distance = 50;
+        controller.tilt = -35;
         controller.speedDistance = 0.5;
 
+        // 2. [KO] 씬 및 뷰 구성
+        // [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.grid = true;
-        view.axis = true;
-        
-        // [KO] 자동 노출 활성화 (UE5 방식)
-        // [EN] Enable Auto Exposure (UE5 style)
-        controller.camera.useAutoExposure = true;
-        
         redGPUContext.addView(view);
 
+        // 3. [KO] 라이트 및 환경 구성
+        // [EN] Configure Light and Environment
         const light = createSpotLight(scene);
-        createMaterialStudio(redGPUContext, scene);
         createStudioEnvironment(redGPUContext, scene);
+        createMaterialGrid(redGPUContext, scene);
 
+        // 4. [KO] 렌더러 생성 및 루프 시작
+        // [EN] Create Renderer and Start Loop
         const renderer = new RedGPU.Renderer();
-        const render = () => {
-        };
-        renderer.start(redGPUContext, render);
+        renderer.start(redGPUContext);
 
-        renderTestPaneWithLightControl(redGPUContext, light, view);
+        // 5. [KO] 테스트용 GUI 렌더링
+        // [EN] Render Test GUI
+        renderTestPane(redGPUContext, light);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
-        const errorMessage = document.createElement('div');
-        errorMessage.innerHTML = failReason;
-        document.body.appendChild(errorMessage);
     }
 );
 
 const createSpotLight = (scene) => {
-    // [KO] UE5 표준 전구 밝기인 1000 Lumen으로 시작
-    // [EN] Start with 1000 Lumens, the UE5 standard bulb brightness
-    const light = new RedGPU.Light.SpotLight('#fff', 1000); 
-    light.x = 0;
-    light.y = 15;
-    light.z = 10;
-    light.radius = 30;
+    const light = new RedGPU.Light.SpotLight('#ffffff', 15000); 
+    light.setPosition(0, 20, 0);
     light.lookAt(0, 0, 0);
+    light.radius = 60;
+    light.innerCutoff = 15;
+    light.outerCutoff = 45;
     light.enableDebugger = true;
     scene.lightManager.addSpotLight(light);
     return light;
 };
 
 const createStudioEnvironment = (redGPUContext, scene) => {
-    const studioMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#888');
-    studioMaterial.specularStrength = 0.2;
-    studioMaterial.shininess = 32;
-
-    // Floor
-    const floorGeo = new RedGPU.Primitive.Plane(redGPUContext, 100, 100);
-    const floor = new RedGPU.Display.Mesh(redGPUContext, floorGeo, studioMaterial);
+    const studioMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+    studioMaterial.baseColorFactor = [0.1, 0.1, 0.1, 1.0];
+    studioMaterial.roughnessFactor = 0.5;
+    const floor = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Plane(redGPUContext, 200, 200), studioMaterial);
     floor.rotationX = -90;
-    floor.y = -6;
+    floor.y = -2;
     scene.addChild(floor);
-
-    // Back Wall
-    const wallGeo = new RedGPU.Primitive.Plane(redGPUContext, 100, 60);
-    const wall = new RedGPU.Display.Mesh(redGPUContext, wallGeo, studioMaterial);
-    wall.z = -25;
-    wall.y = 24;
-    scene.addChild(wall);
 };
 
-const createMaterialStudio = (redGPUContext, scene) => {
-    const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 2.5, 32, 32, 32);
-    const rows = 2;
-    const cols = 5;
-    const spacing = 8;
+const createMaterialGrid = (redGPUContext, scene) => {
+    const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 1.2, 16, 16, 16);
+    const matNonMetal = new RedGPU.Material.PBRMaterial(redGPUContext);
+    matNonMetal.baseColorFactor = [1.0, 0.2, 0.2, 1.0];
+    matNonMetal.metallicFactor = 0.0;
+    matNonMetal.roughnessFactor = 0.4;
+    const matMetal = new RedGPU.Material.PBRMaterial(redGPUContext);
+    matMetal.baseColorFactor = [1.0, 1.0, 1.0, 1.0];
+    matMetal.metallicFactor = 1.0;
+    matMetal.roughnessFactor = 0.2;
 
-    for (let row = 0; row < rows; row++) {
-        for (let col = 0; col < cols; col++) {
-            const metallic = row === 1 ? 1.0 : 0.0;
-            const roughness = col / (cols - 1);
-            
-            const material = new RedGPU.Material.PhongMaterial(redGPUContext, metallic === 1.0 ? '#fff' : '#ff4444');
-            material.metallic = metallic;
-            material.roughness = roughness;
-            material.shininess = Math.pow(2, (1.0 - roughness) * 10 + 2);
-
-            const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-            const x = col * spacing - ((cols - 1) * spacing) / 2;
-            const y = row * spacing - ((rows - 1) * spacing) / 2;
-            
-            mesh.setPosition(x, y + 2, 0);
+    const size = 20;
+    const spacing = 4.5;
+    for (let x = 0; x < size; x++) {
+        for (let z = 0; z < size; z++) {
+            const isMetal = (x + z) % 2 === 0;
+            const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, isMetal ? matMetal : matNonMetal);
+            mesh.x = (x - (size - 1) / 2) * spacing;
+            mesh.z = (z - (size - 1) / 2) * spacing;
             scene.addChild(mesh);
         }
     }
 };
 
-const renderTestPaneWithLightControl = (redGPUContext, light, view) => {
+const renderTestPane = (redGPUContext, light) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            // 1. Light Folder (UE5 Style)
-            const lightConfig = {
-                lumen: light.lumen,
-                radius: light.radius,
-                innerCutoff: light.innerCutoff,
-                outerCutoff: light.outerCutoff,
-                color: {r: light.color.r, g: light.color.g, b: light.color.b},
-                x: light.x,
-                y: light.y,
-                z: light.z,
-                directionX: light.directionX,
-                directionY: light.directionY,
-                directionZ: light.directionZ,
+            const config = { 
+                color: {r: light.color.r, g: light.color.g, b: light.color.b}
             };
 
-            const lightFolder = pane.addFolder({title: 'Light: Spot Light', expanded: true});
-            
-            const lightPropFolder = lightFolder.addFolder({title: 'Lumen & Color', expanded: true});
-            lightPropFolder.addBinding(lightConfig, 'lumen', {
-                label: 'Lumen',
-                min: 0, 
-                max: 50000, 
-                step: 10
-            }).on('change', (evt) => { light.lumen = evt.value; });
-            
-            lightPropFolder.addBinding(lightConfig, 'color', {picker: 'inline', view: 'color'}).on('change', (evt) => {
+            const folder = pane.addFolder({title: 'SpotLight Control', expanded: true});
+
+            // [KO] 스포트 라이트 설정
+            // [EN] Spot Light Settings
+            const propFolder = folder.addFolder({title: 'Properties', expanded: true});
+            propFolder.addBinding(config, 'color', {view: 'color', label: 'color'}).on('change', (evt) => {
                 const {r, g, b} = evt.value;
                 light.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
             });
+            propFolder.addBinding(light, 'lumen', {min: 0, max: 200000, step: 100});
+            propFolder.addBinding(light, 'radius', {min: 0, max: 200, step: 1});
 
-            const lightShapeFolder = lightFolder.addFolder({title: 'Beam Shape', expanded: true});
-            lightShapeFolder.addBinding(lightConfig, 'innerCutoff', {min: 0, max: 89, step: 0.1, label: 'Inner Cone'}).on('change', (evt) => { light.innerCutoff = evt.value; });
-            lightShapeFolder.addBinding(lightConfig, 'outerCutoff', {min: 0, max: 89, step: 0.1, label: 'Outer Cone'}).on('change', (evt) => { light.outerCutoff = evt.value; });
-            lightShapeFolder.addBinding(lightConfig, 'radius', {min: 0, max: 100, step: 1, label: 'Attenuation Radius'}).on('change', (evt) => { light.radius = evt.value; });
+            const coneFolder = folder.addFolder({title: 'Cone Settings', expanded: true});
+            coneFolder.addBinding(light, 'innerCutoff', {min: 0, max: 90, step: 0.1}).on('change', () => {
+                if (light.innerCutoff > light.outerCutoff) light.outerCutoff = light.innerCutoff;
+                pane.refresh();
+            });
+            coneFolder.addBinding(light, 'outerCutoff', {min: 0, max: 90, step: 0.1}).on('change', () => {
+                if (light.outerCutoff < light.innerCutoff) light.innerCutoff = light.outerCutoff;
+                pane.refresh();
+            });
 
-            const lightPosFolder = lightFolder.addFolder({title: 'Transform & Direction', expanded: false});
-            lightPosFolder.addBinding(lightConfig, 'x', {min: -30, max: 30, step: 0.1}).on('change', (evt) => { light.x = evt.value; });
-            lightPosFolder.addBinding(lightConfig, 'y', {min: -10, max: 30, step: 0.1}).on('change', (evt) => { light.y = evt.value; });
-            lightPosFolder.addBinding(lightConfig, 'z', {min: -30, max: 30, step: 0.1}).on('change', (evt) => { light.z = evt.value; });
-            lightPosFolder.addBinding(lightConfig, 'directionX', {min: -1, max: 1, step: 0.01, label: 'Dir X'}).on('change', (evt) => { light.directionX = evt.value; });
-            lightPosFolder.addBinding(lightConfig, 'directionY', {min: -1, max: 1, step: 0.01, label: 'Dir Y'}).on('change', (evt) => { light.directionY = evt.value; });
-            lightPosFolder.addBinding(lightConfig, 'directionZ', {min: -1, max: 1, step: 0.01, label: 'Dir Z'}).on('change', (evt) => { light.directionZ = evt.value; });
+            const transformFolder = folder.addFolder({title: 'Transform', expanded: true});
+            transformFolder.addBinding(light, 'x', {min: -100, max: 100, step: 0.1}).on('change', () => pane.refresh());
+            transformFolder.addBinding(light, 'y', {min: -20, max: 60, step: 0.1}).on('change', () => pane.refresh());
+            transformFolder.addBinding(light, 'z', {min: -100, max: 100, step: 0.1}).on('change', () => pane.refresh());
             
-            lightFolder.addBinding(light, 'enableDebugger', {label: 'Show Debugger'});
+            const dirFolder = folder.addFolder({title: 'Direction Vector', expanded: false});
+            dirFolder.addBinding(light, 'directionX', {min: -1, max: 1, step: 0.01}).on('change', () => pane.refresh());
+            dirFolder.addBinding(light, 'directionY', {min: -1, max: 1, step: 0.01}).on('change', () => pane.refresh());
+            dirFolder.addBinding(light, 'directionZ', {min: -1, max: 1, step: 0.01}).on('change', () => pane.refresh());
+            
+            folder.addBinding(light, 'enableDebugger', {label: 'Show Light Debugger'});
         }
     });
 };
