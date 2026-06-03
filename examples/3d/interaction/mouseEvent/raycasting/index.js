@@ -1,5 +1,6 @@
 import * as RedGPU from "../../../../../dist/index.js?t=1778922031603";
 import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1778922031603";
+import {createEventInfoBox, updateEventInfoBoxStyle, updateEventInfo} from "../eventInfoBox.js";
 
 /**
  * [KO] Raycasting 예제
@@ -15,6 +16,10 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        const {detector} = redGPUContext;
+        const isMobile = detector.isMobile;
+
+        // 1. 카메라 및 뷰 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 15;
 
@@ -23,15 +28,16 @@ RedGPU.init(
         view.grid = true;
         redGPUContext.addView(view);
 
-        // [KO] 조명 설정
-        // [EN] Set up lighting
+        // 2. 조명 설정
         const ambientLight = new RedGPU.Light.AmbientLight();
         ambientLight.lux = 1000;
         scene.lightManager.ambientLight = ambientLight;
         scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
 
-        // [KO] 공통 재질 및 마커 생성
-        // [EN] Create common material and marker
+        // 3. UI 요소 (이벤트 정보 표시 박스) 생성
+        const infoBox = createEventInfoBox(isMobile);
+
+        // 공통 재질 및 마커 생성
         const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../../assets/UV_Grid_Sm.jpg');
         const createMaterial = () => {
             const material = new RedGPU.Material.PhongMaterial(redGPUContext);
@@ -45,31 +51,10 @@ RedGPU.init(
             new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000')
         );
 
-        // [KO] 정보 표시용 HTML 요소 및 이벤트 설정
-        // [EN] Set up HTML element for info display and events
-        const infoBox = document.createElement('div');
-        Object.assign(infoBox.style, {
-            position: 'absolute',
-            bottom: '70px',
-            left: '20px',
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            color: '#fff',
-            padding: '6px 12px',
-            borderRadius: '12px',
-            fontSize: '11px',
-            lineHeight: '1.6',
-            pointerEvents: 'none',
-            whiteSpace: 'pre-wrap',
-            display: 'none',
-            zIndex: '100'
-        });
-        document.body.appendChild(infoBox);
-
         /**
          * [KO] 메시의 마우스 이벤트를 설정합니다.
          * [EN] Sets up mouse events for a mesh.
+         * @param {import("../../../../../dist/index.js").Mesh} mesh
          */
         const setupEvents = (mesh) => {
             mesh.addListener('over', (e) => {
@@ -79,7 +64,7 @@ RedGPU.init(
             });
             mesh.addListener('move', (e) => {
                 marker.setPosition(e.point[0], e.point[1], e.point[2]);
-                infoBox.innerHTML = `[Hit Info]\nObject: ${e.target.name}\nDistance: ${e.distance.toFixed(4)}\nWorld Point: [${e.point[0].toFixed(2)}, ${e.point[1].toFixed(2)}, ${e.point[2].toFixed(2)}]\nLocal Point: [${e.localPoint[0].toFixed(2)}, ${e.localPoint[1].toFixed(2)}, ${e.localPoint[2].toFixed(2)}]\nMouse Position: [${e.mouseX.toFixed(2)}, ${e.mouseY.toFixed(2)}]\nFace Index: ${e.faceIndex}\nUV: [${e.uv[0].toFixed(3)}, ${e.uv[1].toFixed(3)}]`;
+                updateEventInfo(infoBox, 'move', e);
             });
             mesh.addListener('out', (e) => {
                 e.target.material.color.setColorByHEX('#ffffff');
@@ -88,8 +73,7 @@ RedGPU.init(
             });
         };
 
-        // [KO] 객체 생성 및 이벤트 등록
-        // [EN] Create objects and register events
+        // 4. 객체 생성 및 이벤트 등록
         const primitives = [
             {
                 name: 'TorusKnot',
@@ -117,6 +101,18 @@ RedGPU.init(
             setupEvents(mesh);
         });
 
+        // 5. 리사이즈 핸들러 설정
+        /**
+         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the screen size changes.
+         * @param {import("../../../../../dist/index.js").RedResizeEvent} resizeEvent
+         */
+        redGPUContext.onResize = (resizeEvent) => {
+            const isMobile = detector.isMobile;
+            updateEventInfoBoxStyle(infoBox, isMobile);
+        };
+
+        // 6. 렌더링 시작
         new RedGPU.Renderer().start(redGPUContext);
         renderTestPane(redGPUContext);
     },

@@ -1,5 +1,6 @@
 import * as RedGPU from "../../../../../dist/index.js?t=1778922031603";
 import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1778922031603";
+import {createEventInfoBox, updateEventInfoBoxStyle, updateEventInfo} from "../eventInfoBox.js";
 
 /**
  * [KO] TextField3D Mouse Event 예제
@@ -15,7 +16,10 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        const isMobile = redGPUContext.detector.isMobile;
+        const {detector} = redGPUContext;
+        const isMobile = detector.isMobile;
+
+        // 1. 카메라 및 뷰 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.tilt = -15;
         controller.speedDistance = 0.1;
@@ -25,66 +29,39 @@ RedGPU.init(
         view.grid = true;
         redGPUContext.addView(view);
 
-        // [KO] 정보 표시용 HTML 요소 생성
-        // [EN] Create HTML element for displaying information
-        const infoBox = document.createElement('div');
-        const updateInfoBoxStyle = () => {
-            const isMobile = redGPUContext.detector.isMobile;
-            Object.assign(infoBox.style, {
-                position: 'absolute',
-                bottom: isMobile ? '100px' : '70px',
-                left: '12px',
-                width: isMobile ? 'calc(100% - 64px)' : 'auto',
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                color: '#fff',
-                padding: '6px 12px',
-                borderRadius: '12px',
-                fontSize: isMobile ? '12px' : '11px',
-                lineHeight: '1.6',
-                pointerEvents: 'none',
-                textAlign: 'left',
-                whiteSpace: 'pre-wrap',
-                display: 'none',
-                userSelect: 'none',
-                zIndex: '100',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
-            });
-        };
-        updateInfoBoxStyle();
-        document.body.appendChild(infoBox);
+        // 2. UI 요소 (이벤트 정보 표시 박스) 생성
+        const infoBox = createEventInfoBox(isMobile);
 
-        const updateInfo = (eventName, e) => {
-            infoBox.style.display = 'block';
-            infoBox.innerHTML = `[Event Info]
-Object: ${e.target.name || 'TextField3D'}
-Event: ${eventName}
-Distance: ${e.distance ? e.distance.toFixed(4) : 'N/A'}
-World Point: [${e.point[0].toFixed(2)}, ${e.point[1].toFixed(2)}, ${e.point[2].toFixed(2)}]
-Local Point: [${e.localPoint[0].toFixed(2)}, ${e.localPoint[1].toFixed(2)}, ${e.localPoint[2].toFixed(2)}]
-Mouse Position: [${e.mouseX.toFixed(2)}, ${e.mouseY.toFixed(2)}]
-Face Index: ${e.faceIndex}
-UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]`;
-        };
+        // 3. 샘플 TextField3D 생성 및 배치
+        const {updateLayout} = createSampleTextField3D(redGPUContext, scene, infoBox);
 
-        const {updateLayout} = createSampleTextField3D(redGPUContext, scene, infoBox, updateInfo);
-
+        // 4. 리사이즈 핸들러 설정
+        /**
+         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the screen size changes.
+         */
         redGPUContext.onResize = (resizeEvent) => {
             const {width, height} = resizeEvent.pixelRectObject;
             const aspect = width / height;
-            const isMobile = redGPUContext.detector.isMobile;
+            const isMobile = detector.isMobile;
             const baseDistance = isMobile ? 7.5 : 9.5;
+
+            // 화면 비율에 맞춰 카메라 거리 자동 조절
             controller.distance = aspect < 1 ? baseDistance / aspect : baseDistance;
-            updateInfoBoxStyle();
+
+            // UI 스타일 및 배치 업데이트
+            updateEventInfoBoxStyle(infoBox, isMobile);
             updateLayout();
         };
+
+        // 초기 리사이즈 실행
         redGPUContext.onResize({
             target: redGPUContext,
             screenRectObject: redGPUContext.screenRectObject,
             pixelRectObject: redGPUContext.pixelRectObject
         });
 
+        // 5. 렌더링 시작
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext);
 
@@ -101,13 +78,12 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
 /**
  * [KO] 테스트용 TextField3D 객체들을 생성합니다.
  * [EN] Creates TextField3D objects for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
+ * @param {import("../../../../../dist/index.js").RedGPUContext} redGPUContext
+ * @param {import("../../../../../dist/index.js").Scene} scene
  * @param {HTMLElement} infoBox
- * @param {function} updateInfo
- * @returns {{textFields: Array<RedGPU.Display.TextField3D>, updateLayout: function}}
+ * @returns {{textFields: Array<import("../../../../../dist/index.js").TextField3D>, updateLayout: Function}}
  */
-const createSampleTextField3D = (redGPUContext, scene, infoBox, updateInfo) => {
+const createSampleTextField3D = (redGPUContext, scene, infoBox) => {
     const textFields = [];
 
     Object.values(RedGPU.Picking.PICKING_EVENT_TYPE).forEach((eventName, index, array) => {
@@ -116,15 +92,15 @@ const createSampleTextField3D = (redGPUContext, scene, infoBox, updateInfo) => {
         textField.text = eventName; // [KO] 텍스트 자체에 이벤트 명 표시 [EN] Set event name directly on text
         textField.background = 'blue';
         textField.color = 'white';
-        textField.fontSize = 20; // [KO] 가독성을 위해 크기 약간 확대 [EN] Slightly increased size for readability
+        textField.fontSize = 32;
         textField.padding = 10;
         textField.borderRadius = 10;
         textField.primitiveState.cullMode = 'none';
-        textField.worldSize = 1.0;
+        textField.worldSize = 0.5;
 
         scene.addChild(textField);
         textField.addListener(eventName, (e) => {
-            updateInfo(eventName, e);
+            updateEventInfo(infoBox, eventName, e);
             e.target.background = getRandomHexValue();
         });
 
@@ -163,8 +139,8 @@ function getRandomHexValue() {
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
+ * @param {import("../../../../../dist/index.js").RedGPUContext} redGPUContext
+ * @param {import("../../../../../dist/index.js").Scene} scene
  */
 const renderTestPane = async (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {
