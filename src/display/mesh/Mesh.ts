@@ -28,6 +28,7 @@ import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
 import DefineGPUProperty from "../../defineProperty/DefineGPUProperty";
+import {keepLog} from "../../utils";
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -1396,8 +1397,8 @@ class Mesh extends MeshBase {
                 }
                 if (vertexUniformInfoMembers.uvTransform && (currentMaterial.dirtyTextureTransform || dirtyVertexUniformFromMaterial[currentMaterialUUID])) {
                     const material = currentMaterial as any;
-                    const offset = material.textureOffset;
-                    const scale = material.textureScale;
+                    const offset = material.textureOffset || [0,0];
+                    const scale = material.textureScale|| [1,1];
 
                     if (offset) {
 
