@@ -517,36 +517,36 @@ export const ExampleList: ExampleListType = [
                         name: 'SkyAtmosphere',
                         list: [
                             {
-                                name: 'SkyAtmosphere',
+                                name: 'SkyAtmosphere Basic',
                                 path: '3d/skyAtmosphere/skyAtmosphere',
                                 description: {
-                                    ko: `SkyAtmosphere 시스템과 PBR 재질의 실시간 동기화를 테스트하는 예제입니다.`,
-                                    en: `Example testing real-time synchronization between SkyAtmosphere system and PBR materials.`
+                                    ko: `물리 기반 대기 산란 시스템인 SkyAtmosphere의 기본적인 설정과 실시간 태양 광원 연동을 시연합니다.`,
+                                    en: `Demonstrates basic configuration and real-time sun light synchronization of the SkyAtmosphere, a physics-based atmospheric scattering system.`
                                 },
                             },
                             {
-                                name: 'SkyAtmosphere Material Scattering Test',
+                                name: 'Material Scattering (Aerial Perspective)',
                                 path: '3d/skyAtmosphere/scatteringTest',
                                 description: {
-                                    ko: `물리 기반 대기 산란(Atmospheric Scattering)을 시뮬레이션하는 SkyAtmosphere의 기본 사용법을 보여줍니다.`,
-                                    en: `Shows the basic usage of SkyAtmosphere, which simulates physics-based atmospheric scattering.`
+                                    ko: `거리에 따른 대기 산란(공중 투시) 효과가 다양한 재질(Color, Phong, PBR 등)에 어떻게 적용되는지 활주로 레이아웃을 통해 직관적으로 비교합니다.`,
+                                    en: `Provides an intuitive comparison of how atmospheric scattering (Aerial Perspective) affects various materials (Color, Phong, PBR, etc.) along a distance runway.`
                                 },
                             },
                             {
-                                name: 'SkyAtmosphere with glTF',
+                                name: 'Atmosphere & IBL Harmony',
                                 path: '3d/skyAtmosphere/gltf',
                                 description: {
-                                    ko: `SkyAtmosphere 시스템과 대량의 glTF 모델(PBR) 간의 물리적 조명 동기화 및 공중 투시 효과를 보여줍니다.`,
-                                    en: `Shows physical lighting synchronization and aerial perspective effects between the SkyAtmosphere system and a large number of glTF models (PBR).`
+                                    ko: `대기 산란, IBL 환경광, 스카이박스 배경이 유기적으로 조화되어 glTF PBR 모델에 물리적 사실감을 부여하는 통합 환경 시뮬레이션입니다.`,
+                                    en: `An integrated simulation showing how atmospheric scattering, IBL, and skybox work in harmony to provide physical realism to a glTF PBR model.`
                                 },
                             },
 
                             {
-                                name: 'SkyAtmosphere Generator (LUT)',
+                                name: 'SkyAtmosphere LUT Generator',
                                 path: '3d/skyAtmosphere/generator',
                                 description: {
-                                    ko: `SkyAtmosphere 시스템 내부에서 실시간으로 생성되는 LUT(Look-Up Table) 텍스처들을 Sprite3D를 통해 시각화합니다.`,
-                                    en: `Visualizes LUT (Look-Up Table) textures generated in real-time within the SkyAtmosphere system using Sprite3D.`
+                                    ko: `대기 산란 계산을 위해 내부적으로 생성되는 투과율, 하늘 뷰 등 다양한 LUT(Look-Up Table) 데이터를 시각화하여 분석합니다.`,
+                                    en: `Visualizes and analyzes various internal LUT (Look-Up Table) data such as Transmittance and SkyView generated for atmospheric scattering calculations.`
                                 },
                             }
                         ]
