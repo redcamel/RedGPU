@@ -517,16 +517,16 @@ export const ExampleList: ExampleListType = [
                         name: 'SkyAtmosphere',
                         list: [
                             {
-                                name: 'SkyAtmosphere Test',
-                                path: '3d/skyAtmosphere/skyAtmosphereTest',
+                                name: 'SkyAtmosphere',
+                                path: '3d/skyAtmosphere/skyAtmosphere',
                                 description: {
                                     ko: `SkyAtmosphere 시스템과 PBR 재질의 실시간 동기화를 테스트하는 예제입니다.`,
                                     en: `Example testing real-time synchronization between SkyAtmosphere system and PBR materials.`
                                 },
                             },
                             {
-                                name: 'SkyAtmosphere Basic',
-                                path: '3d/skyAtmosphere/basic',
+                                name: 'SkyAtmosphere Material Scattering Test',
+                                path: '3d/skyAtmosphere/scatteringTest',
                                 description: {
                                     ko: `물리 기반 대기 산란(Atmospheric Scattering)을 시뮬레이션하는 SkyAtmosphere의 기본 사용법을 보여줍니다.`,
                                     en: `Shows the basic usage of SkyAtmosphere, which simulates physics-based atmospheric scattering.`
