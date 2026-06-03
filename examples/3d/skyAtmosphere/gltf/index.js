@@ -11,160 +11,172 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
 
-        scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight())
+        const sunLight = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(sunLight);
+
         // 1. SkyAtmosphere 초기화
         const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
-        skyAtmosphere.sunElevation = 5;
-        skyAtmosphere.sunAzimuth = 0;
+        sunLight.elevation = 35;
+        sunLight.azimuth = 0;
+
 
         // IBL 초기화
-        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/Cannon_Exterior.hdr');
         const skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
         // View 속성에 직접 설정
         view.skyAtmosphere = skyAtmosphere;
         view.ibl = ibl;
         view.skybox = skybox;
-        view.toneMappingManager.exposure = 1.5;
+
 
         // 2. 카메라 설정
-        view.rawCamera.nearClipping = 1;
         view.rawCamera.farClipping = 2000000;
         controller.pan = -90; 
         controller.tilt = -10;
-        controller.distance = 1500;
-        controller.speedDistance = 100;
+        controller.distance = 500;
+        controller.speedDistance = 10;
 
         // 이동 제한
         controller.minTilt = -88;
-        controller.maxTilt = 0;
+        controller.maxTilt = 88;
         controller.minDistance = 10;
         controller.maxDistance = 1000000;
 
         redGPUContext.addView(view);
 
         // 3. 테스트 환경 구성
-        const FIXED_Y = 100;
-        const GRID_X = 5;
-        const GRID_Z = 50;
-        const STEP_X = 1000;
-        const STEP_Z = 2000;
+        const FIXED_Y = 0;
 
         const url = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb'
-        
-        for (let i = 0; i < GRID_X; i++) {
-            for (let j = 0; j < GRID_Z; j++) {
-                new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
-                        let helmet = result.resultMesh;
-                        helmet.x = j * STEP_Z;
-                        helmet.z = (i - Math.floor(GRID_X / 2)) * STEP_X;
-                        helmet.y = FIXED_Y;
-                        helmet.scaleX = helmet.scaleY = helmet.scaleZ = 150;
-                        scene.addChild(helmet);
-                    },
-                    RedGPUExampleHelper.loadingProgressInfoHandler
-                );
-            }
-        }
+
+        new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
+                let helmet = result.resultMesh;
+                helmet.setPosition(0, FIXED_Y, 0);
+                helmet.setScale(150);
+                scene.addChild(helmet);
+            },
+            RedGPUExampleHelper.loadingProgressInfoHandler
+        );
 
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext);
 
-        renderTestPane(view, skyAtmosphere, ibl, skybox);
+        renderTestPane(view, skyAtmosphere, sunLight);
     },
     (failReason) => {
         console.error("Initialization failed:", failReason);
     }
 );
 
-const renderTestPane = (targetView, skyAtmosphere, ibl, skybox) => {
+const renderTestPane = (targetView, skyAtmosphere, sunLight) => {
+    const hdrImages = [
+        {name: 'Cannon_Exterior', path: '../../../assets/hdr/Cannon_Exterior.hdr', nit: 25000},
+        {name: '2K - the sky is on fire', path: '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr', nit: 25000},
+        {name: 'field', path: '../../../assets/hdr/field.hdr', nit: 30000},
+        {name: 'neutral.37290948', path: '../../../assets/hdr/neutral.37290948.hdr', nit: 20000},
+        {name: 'pisa', path: '../../../assets/hdr/pisa.hdr', nit: 25000}
+    ];
+
+    let currentIBL = targetView.ibl;
+    let currentSkybox = targetView.skybox;
+    const currentSkyAtmosphere = skyAtmosphere;
+
+    const state = {
+        iblTexture: hdrImages[0].name,
+        skyboxTexture: hdrImages[0].name,
+        useIBL: !!targetView.ibl,
+        useSkybox: !!targetView.skybox,
+        useSkyAtmosphere: !!targetView.skyAtmosphere
+    };
+
     new RedGPUExampleHelper(targetView.redGPUContext, {
+        RedGPU,
         gui: (pane) => {
+            pane.addBinding(state, 'useSkyAtmosphere', {label: 'useSkyAtmosphere'}).on('change', (ev) => {
+                targetView.skyAtmosphere = ev.value ? currentSkyAtmosphere : null;
+            });
+
             const f_sun = pane.addFolder({title: 'Sun Configuration', expanded: true});
-            f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.0001, label: 'sunElevation'});
-            f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.0001, label: 'sunAzimuth'});
-            f_sun.addBinding(skyAtmosphere, 'sunIntensity', {min: 0, max: 200000, step: 1, label: 'sunIntensity (Lux)'});
-            f_sun.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01, label: 'sunSize'});
-            f_sun.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01, label: 'sunLimbDarkening'});
+            f_sun.addBinding(sunLight, 'elevation', {min: -90, max: 90, step: 0.0001, label: 'Sun Elevation'});
+            f_sun.addBinding(sunLight, 'azimuth', {min: -360, max: 360, step: 0.0001, label: 'Sun Azimuth'});
+            f_sun.addBinding(sunLight, 'lux', {min: 0, max: 200000, step: 1, label: 'Sun Intensity (Lux)'});
 
-            const f_planet = pane.addFolder({title: 'Planet', expanded: false});
-            f_planet.addBinding(skyAtmosphere, 'bottomRadius', {min: 1000, max: 10000, step: 1, label: 'bottomRadius (km)'});
-            f_planet.addBinding(skyAtmosphere, 'atmosphereHeight', {min: 1, max: 200, step: 1, label: 'atmosphereHeight (km)'});
-            f_planet.addBinding(skyAtmosphere, 'seaLevel', {min: -10, max: 10, step: 0.01, label: 'seaLevel (km)'});
-            f_planet.addBinding(skyAtmosphere, 'cameraHeight', {readonly: true, interval: 100, label: 'cameraHeight (km)'});
-            f_planet.addBinding(skyAtmosphere, 'groundAmbient', {min: 0, max: 10, step: 0.01, label: 'groundAmbient'});
-            
-            const groundState = {
-                albedo: {
-                    r: skyAtmosphere.groundAlbedo[0],
-                    g: skyAtmosphere.groundAlbedo[1],
-                    b: skyAtmosphere.groundAlbedo[2]
+            const f_ibl = pane.addFolder({title: 'IBL Configuration', expanded: true});
+            f_ibl.addBinding(state, 'useIBL', {label: 'useIBL'}).on('change', (ev) => {
+                targetView.ibl = ev.value ? currentIBL : null;
+            });
+            f_ibl.addBinding(state, 'iblTexture', {
+                options: hdrImages.reduce((acc, item) => ({...acc, [item.name]: item.name}), {}),
+                label: 'texture'
+            }).on('change', (ev) => {
+                const imageInfo = hdrImages.find(item => item.name === ev.value);
+                if (imageInfo) {
+                    currentIBL = new RedGPU.Resource.IBL(targetView.redGPUContext, imageInfo.path, imageInfo.nit);
+                    if (state.useIBL) targetView.ibl = currentIBL;
                 }
-            };
-            f_planet.addBinding(groundState, 'albedo', {color: {type: 'float'}, label: 'groundAlbedo'}).on('change', (ev) => {
-                skyAtmosphere.groundAlbedo = [ev.value.r, ev.value.g, ev.value.b];
             });
-            f_planet.addBinding(skyAtmosphere, 'showGround', {label: 'showGround'});
-            f_planet.addBinding(skyAtmosphere, 'useGround', {label: 'useGround (physics)'});
 
-            const f_rayleigh = pane.addFolder({title: 'Rayleigh', expanded: false});
-            const rayleighState = {
-                scat: {
-                    r: skyAtmosphere.rayleighScattering[0],
-                    g: skyAtmosphere.rayleighScattering[1],
-                    b: skyAtmosphere.rayleighScattering[2]
+            f_ibl.addBinding({
+                get intensityMultiplier() {
+                    return currentIBL.intensityMultiplier;
+                },
+                set intensityMultiplier(v) {
+                    currentIBL.intensityMultiplier = v;
                 }
-            };
-            f_rayleigh.addBinding(rayleighState, 'scat', {color: {type: 'float'}, label: 'rayleighScattering'}).on('change', (ev) => {
-                skyAtmosphere.rayleighScattering = [ev.value.r, ev.value.g, ev.value.b];
-            });
-            f_rayleigh.addBinding(skyAtmosphere, 'rayleighExponentialDistribution', {min: 0.1, max: 100, step: 0.1, label: 'rayleighExponentialDistribution (km)'});
+            }, 'intensityMultiplier', {min: 0, max: 10, step: 0.01});
 
-            const f_mie = pane.addFolder({title: 'Mie', expanded: false});
-            f_mie.addBinding(skyAtmosphere, 'mieScattering', {min: 0, max: 1.0, step: 0.0001, label: 'mieScattering'});
-            f_mie.addBinding(skyAtmosphere, 'mieAbsorption', {min: 0, max: 1.0, step: 0.0001, label: 'mieAbsorption'});
-            f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', {min: 0, max: 0.999, step: 0.001, label: 'mieAnisotropy (g)'});
-            f_mie.addBinding(skyAtmosphere, 'mieExponentialDistribution', {min: 0.1, max: 100, step: 0.1, label: 'mieExponentialDistribution (km)'});
-            f_mie.addBinding(skyAtmosphere, 'mieGlow', {min: 0, max: 0.999, step: 0.01, label: 'mieGlow'});
-            f_mie.addBinding(skyAtmosphere, 'mieHalo', {min: 0, max: 0.999, step: 0.001, label: 'mieHalo (g)'});
-
-            const f_absorption = pane.addFolder({title: 'Absorption (Ozone)', expanded: false});
-            const absorptionState = {
-                coeff: {
-                    r: skyAtmosphere.absorptionCoefficient[0],
-                    g: skyAtmosphere.absorptionCoefficient[1],
-                    b: skyAtmosphere.absorptionCoefficient[2]
+            f_ibl.addBinding({
+                get luminance() {
+                    return currentIBL.luminance;
+                },
+                set luminance(v) {
+                    currentIBL.luminance = v;
                 }
-            };
-            f_absorption.addBinding(absorptionState, 'coeff', {color: {type: 'float'}, label: 'absorptionCoefficient'}).on('change', (ev) => {
-                skyAtmosphere.absorptionCoefficient = [ev.value.r, ev.value.g, ev.value.b];
-            });
-            f_absorption.addBinding(skyAtmosphere, 'absorptionTipAltitude', {min: 0, max: 100, step: 0.1, label: 'absorptionTipAltitude (km)'});
-            f_absorption.addBinding(skyAtmosphere, 'absorptionTentWidth', {min: 1, max: 50, step: 0.1, label: 'absorptionTentWidth (km)'});
+            }, 'luminance', {min: 0, max: 100000, step: 1});
 
-            const f_artistic = pane.addFolder({title: 'Artistic Controls', expanded: true});
-            f_artistic.addBinding(skyAtmosphere, 'skyLuminanceFactor', {min: 0, max: 100, step: 0.1, label: 'skyLuminanceFactor'});
-            f_artistic.addBinding(skyAtmosphere, 'aerialPerspectiveDistanceScale', {min: 1, max: 1000, step: 1, label: 'aerialPerspectiveDistanceScale (km)'});
-
-            const f_fog = pane.addFolder({title: 'Height Fog', expanded: false});
-            f_fog.addBinding(skyAtmosphere, 'heightFogDensity', {min: 0, max: 10, step: 0.001, label: 'heightFogDensity'});
-            f_fog.addBinding(skyAtmosphere, 'heightFogFalloff', {min: 0.001, max: 10, step: 0.001, label: 'heightFogFalloff'});
-            f_fog.addBinding(skyAtmosphere, 'heightFogAnisotropy', {min: 0, max: 0.999, step: 0.001, label: 'heightFogAnisotropy (g)'});
-
-            const state = {
-                enabled: true,
-                useIBL: true,
-                useSkyBox: true
-            };
-            pane.addBinding(state, 'enabled', {label: 'Enable Atmosphere'}).on('change', (v) => {
-                targetView.skyAtmosphere = v.value ? skyAtmosphere : null;
+            const f_skybox = pane.addFolder({title: 'SkyBox Configuration', expanded: true});
+            f_skybox.addBinding(state, 'useSkybox', {label: 'useSkybox'}).on('change', (ev) => {
+                targetView.skybox = ev.value ? currentSkybox : null;
             });
-            pane.addBinding(state, 'useIBL', {label: 'Use IBL (Reflection)'}).on('change', (v) => {
-                targetView.ibl = v.value ? ibl : null;
+            f_skybox.addBinding(state, 'skyboxTexture', {
+                options: hdrImages.reduce((acc, item) => ({...acc, [item.name]: item.name}), {}),
+                label: 'texture'
+            }).on('change', (ev) => {
+                const imageInfo = hdrImages.find(item => item.name === ev.value);
+                if (imageInfo) {
+                    const isHDR = typeof imageInfo.path === 'string' && imageInfo.path.toLowerCase().endsWith('.hdr');
+                    const newTexture = isHDR
+                        ? new RedGPU.Resource.IBL(targetView.redGPUContext, imageInfo.path, imageInfo.nit).environmentTexture
+                        : new RedGPU.Resource.CubeTexture(targetView.redGPUContext, imageInfo.path, true);
+                    currentSkybox.texture = newTexture;
+                    currentSkybox.luminance = imageInfo.nit;
+                }
             });
-            pane.addBinding(state, 'useSkyBox', {label: 'Use SkyBox (Background)'}).on('change', (v) => {
-                targetView.skybox = v.value ? skybox : null;
-            });
+            f_skybox.addBinding({
+                get opacity() {
+                    return currentSkybox.opacity;
+                },
+                set opacity(v) {
+                    currentSkybox.opacity = v;
+                }
+            }, 'opacity', {min: 0, max: 1, step: 0.01});
+            f_skybox.addBinding({
+                get blur() {
+                    return currentSkybox.blur;
+                },
+                set blur(v) {
+                    currentSkybox.blur = v;
+                }
+            }, 'blur', {min: 0, max: 1, step: 0.01});
+            f_skybox.addBinding({
+                get intensityMultiplier() {
+                    return currentSkybox.intensityMultiplier;
+                },
+                set intensityMultiplier(v) {
+                    currentSkybox.intensityMultiplier = v;
+                }
+            }, 'intensityMultiplier', {min: 0, max: 10, step: 0.01});
         }
     });
 };
