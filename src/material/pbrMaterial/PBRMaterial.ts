@@ -10,6 +10,7 @@ import DefineGPUProperty, {
     IDefineVector3,
     IDefineVector4
 } from "../../defineProperty/DefineGPUProperty";
+import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
 
 const EXTENSION_LIST: {
     textureList?: string[],
@@ -686,7 +687,7 @@ interface PBRMaterial {
  * [EN] Inherits from ABitmapBaseMaterial to create a material for PBR rendering.
  * @category Material
  */
-class PBRMaterial extends ABitmapBaseMaterial {
+class PBRMaterial extends AUVTransformBaseMaterial {
     #packedORMTexture: PackedTexture
     // #packedKHR_clearcoatTexture: PackedTexture
     // #packedKHR_transmission: PackedTexture

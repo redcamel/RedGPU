@@ -44,7 +44,7 @@ RedGPU.init(
         // 4. [KO] 각 머티리얼별 테스트 메시 생성 (순서: Color, Bitmap, Phong, PBR)
         // [EN] Create Test Meshes for each Material Type (Order: Color, Bitmap, Phong, PBR)
         // const geometry = new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2);
-        const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
+        const geometry = new RedGPU.Primitive.Sphere(redGPUContext,1,32,32);
         const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
         const spacing = 5;
         const startX = -7.5;
