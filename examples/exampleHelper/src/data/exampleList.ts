@@ -517,6 +517,14 @@ export const ExampleList: ExampleListType = [
                         name: 'SkyAtmosphere',
                         list: [
                             {
+                                name: 'SkyAtmosphere Test',
+                                path: '3d/skyAtmosphere/skyAtmosphereTest',
+                                description: {
+                                    ko: `SkyAtmosphere 시스템과 PBR 재질의 실시간 동기화를 테스트하는 예제입니다.`,
+                                    en: `Example testing real-time synchronization between SkyAtmosphere system and PBR materials.`
+                                },
+                            },
+                            {
                                 name: 'SkyAtmosphere Basic',
                                 path: '3d/skyAtmosphere/basic',
                                 description: {
@@ -532,14 +540,7 @@ export const ExampleList: ExampleListType = [
                                     en: `Shows physical lighting synchronization and aerial perspective effects between the SkyAtmosphere system and a large number of glTF models (PBR).`
                                 },
                             },
-                            {
-                                name: 'SkyAtmosphere Test',
-                                path: '3d/skyAtmosphere/skyAtmosphereTest',
-                                description: {
-                                    ko: `SkyAtmosphere 시스템과 PBR 재질의 실시간 동기화를 테스트하는 예제입니다.`,
-                                    en: `Example testing real-time synchronization between SkyAtmosphere system and PBR materials.`
-                                },
-                            },
+
                             {
                                 name: 'SkyAtmosphere Generator (LUT)',
                                 path: '3d/skyAtmosphere/generator',
