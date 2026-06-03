@@ -1,203 +1,178 @@
 import * as RedGPU from "../../../../dist/index.js?t=1778922031603";
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
 
-// 1. Create and append a canvas
-// 1. 캔버스를 생성하고 문서에 추가
+/**
+ * [KO] 파티클 기본 예제
+ * [EN] Particle basic example
+ *
+ * [KO] 기본적인 파티클 이미터를 생성하고 다양한 속성(수명, 위치, 회전, 크기 등)을 제어하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to create a basic particle emitter and control various properties (life, position, rotation, scale, etc.).
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-/**
- * [KO] Particle Basic 예제
- * [EN] Particle Basic example
- *
- * [KO] 기본적인 파티클 이미터를 생성하고 속성을 제어하는 방법을 보여줍니다.
- * [EN] Demonstrates how to create a basic particle emitter and control its properties.
- */
-
-// 2. Initialize RedGPU
-// 2. RedGPU 초기화
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        const controllerTest = new RedGPU.Camera.OrbitController(redGPUContext);
-        controllerTest.distance = 50
+        // 1. 카메라 및 뷰 설정
+        const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.distance = 50;
+
         const scene = new RedGPU.Display.Scene();
-        const view = new RedGPU.Display.View3D(redGPUContext, scene, controllerTest);
-
+        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
-        const cubeTexture =
-            new RedGPU.Resource.CubeTexture(redGPUContext, [
-                "../../../assets/skybox/px.jpg", // Positive X
-                "../../../assets/skybox/nx.jpg", // Negative X
-                "../../../assets/skybox/py.jpg", // Positive Y
-                "../../../assets/skybox/ny.jpg", // Negative Y
-                "../../../assets/skybox/pz.jpg", // Positive Z
-                "../../../assets/skybox/nz.jpg", // Negative Z
-            ])
-        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture)
-        const texture_particle2 = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/particle/particle2.png');
-        const testParticleWrap = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Sphere(redGPUContext),
-            new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000')
-        )
-        scene.addChild(testParticleWrap)
-        const testParticle = new RedGPU.Display.ParticleEmitter(redGPUContext)
-        testParticleWrap.addChild(testParticle)
-        testParticle.material.diffuseTexture = texture_particle2
-        testParticle.material.blendColorState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE
 
-        const renderer = new RedGPU.Renderer()
+        // 2. IBL 및 스카이박스 설정
+        const ibl = new RedGPU.Resource.IBL(
+            redGPUContext,
+            '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
+        );
+        view.ibl = ibl;
 
-        const render = (time) => {
-            testParticleWrap.x += Math.sin(time / 500) * 0.5
-            testParticleWrap.y += Math.cos(time / 500) * 0.5
-            testParticleWrap.z += Math.sin(time / 500) * 0.5
-        }
-        renderer.start(redGPUContext, render)
-        
-        new RedGPUExampleHelper(redGPUContext, {
-            gui: (pane) => {
-                {
-                    const folder = pane.addFolder({
-                        title: 'particle',
-                        expanded: true
-                    })
-                    folder.addBinding(testParticle, 'particleNum', {min: 0, max: 50000, step: 1})
-                }
-                {
-                    const folder = pane.addFolder({
-                        title: 'geometry material',
-                        expanded: true
-                    })
-                    pane.addBlade({view: 'separator'});
-                    folder.addBinding(testParticle, 'useBillboard')
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        view.grid = true;
 
-                    folder.addBinding({texture: '../../../assets/particle/particle2.png'}, 'texture', {
-                        options: {
-                            texture0: '../../../assets/particle/particle2.png',
-                            texture1: '../../../assets/particle/particle.png',
-                        }
-                    }).on('change', e => {
-                        testParticle.material.diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, e.value);
-                    })
-                    folder.addBinding({geometry: 'Plane'}, 'geometry', {
-                        options: {
-                            Plane: 'Plane',
-                            Box: 'Box',
-                            Sphere: 'Sphere',
-                        }
-                    }).on('change', e => {
-                        testParticle.geometry = new RedGPU.Primitive[e.value](redGPUContext);
-                    })
-                }
-                {
-                    const folder = pane.addFolder({
-                        title: 'life',
-                        expanded: true
-                    })
-                    pane.addBlade({view: 'separator'});
-                    folder.addBinding(testParticle, 'minLife', {min: 0, max: 10000, step: 1})
-                    folder.addBinding(testParticle, 'maxLife', {min: 0, max: 10000, step: 1})
-                }
+        // 3. 파티클 설정
+        const {particleEmitter, particleContainer} = createParticleTest(redGPUContext, scene);
 
-                {
-                    const folder = pane.addFolder({
-                        title: 'position',
-                        expanded: true
-                    })
-                    pane.addBlade({view: 'separator'});
-                    folder.addBinding(testParticle, 'minStartX', {min: -20, max: 20})
-                    folder.addBinding(testParticle, 'maxStartX', {min: -20, max: 20})
-                    folder.addBinding(testParticle, 'minEndX', {min: -20, max: 20})
-                    folder.addBinding(testParticle, 'maxEndX', {min: -20, max: 20})
-                    folder.addBinding(testParticle, 'easeX', {
-                        options: RedGPU.Display.PARTICLE_EASE
-                    })
-                    pane.addBlade({view: 'separator'});
-                    folder.addBinding(testParticle, 'minStartY', {min: -20, max: 20})
-                    folder.addBinding(testParticle, 'maxStartY', {min: -20, max: 20})
-                    folder.addBinding(testParticle, 'minEndY', {min: -20, max: 20})
-                    folder.addBinding(testParticle, 'maxEndY', {min: -20, max: 20})
-                    folder.addBinding(testParticle, 'easeY', {
-                        options: RedGPU.Display.PARTICLE_EASE
-                    })
-                    pane.addBlade({view: 'separator'});
-                    folder.addBinding(testParticle, 'minStartZ', {min: -20, max: 20})
-                    folder.addBinding(testParticle, 'maxStartZ', {min: -20, max: 20})
-                    folder.addBinding(testParticle, 'minEndY', {min: -20, max: 20})
-                    folder.addBinding(testParticle, 'maxEndY', {min: -20, max: 20})
-                    folder.addBinding(testParticle, 'easeZ', {
-                        options: RedGPU.Display.PARTICLE_EASE
-                    })
-                }
-
-                {
-                    const folder = pane.addFolder({
-                        title: 'rotation',
-                        expanded: false
-                    })
-                    pane.addBlade({view: 'separator'});
-                    folder.addBinding(testParticle, 'minStartRotationX', {min: 0, max: 360})
-                    folder.addBinding(testParticle, 'maxStartRotationX', {min: 0, max: 360})
-                    folder.addBinding(testParticle, 'minEndRotationX', {min: 0, max: 360})
-                    folder.addBinding(testParticle, 'maxEndRotationX', {min: 0, max: 360})
-                    folder.addBinding(testParticle, 'easeRotationX', {
-                        options: RedGPU.Display.PARTICLE_EASE
-                    })
-                    pane.addBlade({view: 'separator'});
-                    folder.addBinding(testParticle, 'minStartRotationY', {min: 0, max: 360})
-                    folder.addBinding(testParticle, 'maxStartRotationY', {min: 0, max: 360})
-                    folder.addBinding(testParticle, 'minEndRotationY', {min: 0, max: 360})
-                    folder.addBinding(testParticle, 'maxEndRotationY', {min: 0, max: 360})
-                    folder.addBinding(testParticle, 'easeRotationY', {
-                        options: RedGPU.Display.PARTICLE_EASE
-                    })
-                    pane.addBlade({view: 'separator'});
-                    folder.addBinding(testParticle, 'minStartRotationZ', {min: 0, max: 360})
-                    folder.addBinding(testParticle, 'maxStartRotationZ', {min: 0, max: 360})
-                    folder.addBinding(testParticle, 'minEndRotationZ', {min: 0, max: 360})
-                    folder.addBinding(testParticle, 'maxEndRotationZ', {min: 0, max: 360})
-                    folder.addBinding(testParticle, 'easeRotationZ', {
-                        options: RedGPU.Display.PARTICLE_EASE
-                    })
-                }
-
-                {
-                    const folder = pane.addFolder({
-                        title: 'scale',
-                        expanded: true
-                    })
-                    pane.addBlade({view: 'separator'});
-                    folder.addBinding(testParticle, 'minStartScale', {min: 0, max: 5})
-                    folder.addBinding(testParticle, 'maxStartScale', {min: 0, max: 5})
-                    folder.addBinding(testParticle, 'minEndScale', {min: 0, max: 5})
-                    folder.addBinding(testParticle, 'maxEndScale', {min: 0, max: 5})
-                    folder.addBinding(testParticle, 'easeScale', {
-                        options: RedGPU.Display.PARTICLE_EASE
-                    })
-                }
-
-                {
-                    const folder = pane.addFolder({
-                        title: 'alpha',
-                        expanded: false
-                    })
-                    pane.addBlade({view: 'separator'});
-                    folder.addBinding(testParticle, 'minStartAlpha', {min: 0, max: 1})
-                    folder.addBinding(testParticle, 'maxStartAlpha', {min: 0, max: 1})
-                    folder.addBinding(testParticle, 'minEndAlpha', {min: 0, max: 1})
-                    folder.addBinding(testParticle, 'maxEndAlpha', {min: 0, max: 1})
-                    folder.addBinding(testParticle, 'easeAlpha', {
-                        options: RedGPU.Display.PARTICLE_EASE
-                    })
-                }
-            }
+        // 4. 애니메이션 렌더 루프 및 시작
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext, (time) => {
+            // 이미터 컨테이너를 사인파 궤적으로 이동시킵니다.
+            particleContainer.x = Math.sin(time / 500) * 5;
+            particleContainer.y = Math.cos(time / 500) * 5;
+            particleContainer.z = Math.sin(time / 500) * 5;
         });
+
+        // 5. 테스트 GUI 설정
+        renderTestPane(redGPUContext, particleEmitter);
     },
     (failReason) => {
-        // Handle initialization failure
-        console.error('Initialization failed:', failReason); // 초기화 실패 로그 출력
-        const errorMessage = document.createElement('div');
-        errorMessage.innerHTML = failReason; // 실패 원인 메시지를 표시
+        console.error("Initialization failed:", failReason);
+        const errorMessage = document.createElement("div");
+        errorMessage.innerHTML = failReason;
         document.body.appendChild(errorMessage);
     }
 );
+
+/**
+ * [KO] 테스트를 위한 파티클 이미터와 컨테이너를 생성합니다.
+ * [EN] Creates a particle emitter and container for testing.
+ */
+const createParticleTest = (redGPUContext, scene) => {
+    // 파티클의 중심점을 시각화하기 위한 빨간색 구체 컨테이너
+    const particleContainer = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Sphere(redGPUContext),
+        new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000')
+    );
+    scene.addChild(particleContainer);
+
+    // 파티클 이미터 생성
+    const particleEmitter = new RedGPU.Display.ParticleEmitter(redGPUContext);
+    particleContainer.addChild(particleEmitter);
+
+    // 기본 텍스처 및 블렌딩 설정
+    const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/particle/particle2.png');
+    particleEmitter.material.diffuseTexture = texture;
+    particleEmitter.material.blendColorState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE;
+
+    return {particleEmitter, particleContainer};
+};
+
+/**
+ * [KO] 테스트용 GUI를 렌더링하고 파티클 속성을 제어합니다.
+ * [EN] Renders the GUI for testing and controls particle properties.
+ */
+const renderTestPane = (redGPUContext, particleEmitter) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        gui: (pane) => {
+            // particle 폴더
+            const particleFolder = pane.addFolder({title: 'particle', expanded: true});
+            particleFolder.addBinding(particleEmitter, 'particleNum', {min: 0, max: 50000, step: 1});
+
+            // geometry material 폴더
+            const assetFolder = pane.addFolder({title: 'geometry material', expanded: true});
+            assetFolder.addBinding(particleEmitter, 'useBillboard');
+            assetFolder.addBinding({texture: '../../../assets/particle/particle2.png'}, 'texture', {
+                options: {
+                    texture0: '../../../assets/particle/particle2.png',
+                    texture1: '../../../assets/particle/particle.png',
+                }
+            }).on('change', ev => {
+                particleEmitter.material.diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, ev.value);
+            });
+            assetFolder.addBinding({geometry: 'Plane'}, 'geometry', {
+                options: {Plane: 'Plane', Box: 'Box', Sphere: 'Sphere'}
+            }).on('change', ev => {
+                particleEmitter.geometry = new RedGPU.Primitive[ev.value](redGPUContext);
+            });
+
+            // life 폴더
+            const lifeFolder = pane.addFolder({title: 'life', expanded: true});
+            lifeFolder.addBinding(particleEmitter, 'minLife', {min: 0, max: 10000, step: 1});
+            lifeFolder.addBinding(particleEmitter, 'maxLife', {min: 0, max: 10000, step: 1});
+
+            // position 폴더
+            const posFolder = pane.addFolder({title: 'position', expanded: true});
+            posFolder.addBlade({view: 'separator'});
+            posFolder.addBinding(particleEmitter, 'minStartX', {min: -20, max: 20});
+            posFolder.addBinding(particleEmitter, 'maxStartX', {min: -20, max: 20});
+            posFolder.addBinding(particleEmitter, 'minEndX', {min: -20, max: 20});
+            posFolder.addBinding(particleEmitter, 'maxEndX', {min: -20, max: 20});
+            posFolder.addBinding(particleEmitter, 'easeX', {options: RedGPU.Display.PARTICLE_EASE});
+            posFolder.addBlade({view: 'separator'});
+            posFolder.addBinding(particleEmitter, 'minStartY', {min: -20, max: 20});
+            posFolder.addBinding(particleEmitter, 'maxStartY', {min: -20, max: 20});
+            posFolder.addBinding(particleEmitter, 'minEndY', {min: -20, max: 20});
+            posFolder.addBinding(particleEmitter, 'maxEndY', {min: -20, max: 20});
+            posFolder.addBinding(particleEmitter, 'easeY', {options: RedGPU.Display.PARTICLE_EASE});
+            posFolder.addBlade({view: 'separator'});
+            posFolder.addBinding(particleEmitter, 'minStartZ', {min: -20, max: 20});
+            posFolder.addBinding(particleEmitter, 'maxStartZ', {min: -20, max: 20});
+            posFolder.addBinding(particleEmitter, 'minEndZ', {min: -20, max: 20});
+            posFolder.addBinding(particleEmitter, 'maxEndZ', {min: -20, max: 20});
+            posFolder.addBinding(particleEmitter, 'easeZ', {options: RedGPU.Display.PARTICLE_EASE});
+
+            // rotation 폴더
+            const rotFolder = pane.addFolder({title: 'rotation', expanded: true});
+            rotFolder.addBlade({view: 'separator'});
+            rotFolder.addBinding(particleEmitter, 'minStartRotationX', {min: 0, max: 360});
+            rotFolder.addBinding(particleEmitter, 'maxStartRotationX', {min: 0, max: 360});
+            rotFolder.addBinding(particleEmitter, 'minEndRotationX', {min: 0, max: 360});
+            rotFolder.addBinding(particleEmitter, 'maxEndRotationX', {min: 0, max: 360});
+            rotFolder.addBinding(particleEmitter, 'easeRotationX', {options: RedGPU.Display.PARTICLE_EASE});
+            rotFolder.addBlade({view: 'separator'});
+            rotFolder.addBinding(particleEmitter, 'minStartRotationY', {min: 0, max: 360});
+            rotFolder.addBinding(particleEmitter, 'maxStartRotationY', {min: 0, max: 360});
+            rotFolder.addBinding(particleEmitter, 'minEndRotationY', {min: 0, max: 360});
+            rotFolder.addBinding(particleEmitter, 'maxEndRotationY', {min: 0, max: 360});
+            rotFolder.addBinding(particleEmitter, 'easeRotationY', {options: RedGPU.Display.PARTICLE_EASE});
+            rotFolder.addBlade({view: 'separator'});
+            rotFolder.addBinding(particleEmitter, 'minStartRotationZ', {min: 0, max: 360});
+            rotFolder.addBinding(particleEmitter, 'maxStartRotationZ', {min: 0, max: 360});
+            rotFolder.addBinding(particleEmitter, 'minEndRotationZ', {min: 0, max: 360});
+            rotFolder.addBinding(particleEmitter, 'maxEndRotationZ', {min: 0, max: 360});
+            rotFolder.addBinding(particleEmitter, 'easeRotationZ', {options: RedGPU.Display.PARTICLE_EASE});
+
+            // scale 폴더
+            const scaleFolder = pane.addFolder({title: 'scale', expanded: true});
+            scaleFolder.addBlade({view: 'separator'});
+            scaleFolder.addBinding(particleEmitter, 'minStartScale', {min: 0, max: 5});
+            scaleFolder.addBinding(particleEmitter, 'maxStartScale', {min: 0, max: 5});
+            scaleFolder.addBinding(particleEmitter, 'minEndScale', {min: 0, max: 5});
+            scaleFolder.addBinding(particleEmitter, 'maxEndScale', {min: 0, max: 5});
+            scaleFolder.addBinding(particleEmitter, 'easeScale', {options: RedGPU.Display.PARTICLE_EASE});
+
+            // alpha 폴더
+            const alphaFolder = pane.addFolder({title: 'alpha', expanded: true});
+            alphaFolder.addBlade({view: 'separator'});
+            alphaFolder.addBinding(particleEmitter, 'minStartAlpha', {min: 0, max: 1});
+            alphaFolder.addBinding(particleEmitter, 'maxStartAlpha', {min: 0, max: 1});
+            alphaFolder.addBinding(particleEmitter, 'minEndAlpha', {min: 0, max: 1});
+            alphaFolder.addBinding(particleEmitter, 'maxEndAlpha', {min: 0, max: 1});
+            alphaFolder.addBinding(particleEmitter, 'easeAlpha', {options: RedGPU.Display.PARTICLE_EASE});
+        }
+    });
+};
