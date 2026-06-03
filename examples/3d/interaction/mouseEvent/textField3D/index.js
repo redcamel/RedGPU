@@ -139,8 +139,8 @@ function getRandomHexValue() {
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param {import("../../../../../dist/index.js").RedGPUContext} redGPUContext
- * @param {import("../../../../../dist/index.js").Scene} scene
+ * @param redGPUContext
+ * @param scene
  */
 const renderTestPane = async (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {

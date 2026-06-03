@@ -44,9 +44,9 @@ export const createEventInfoBox = (isMobile) => {
 /**
  * [KO] 발생한 이벤트의 상세 정보를 UI에 업데이트합니다.
  * [EN] Update the UI with detailed information of the occurred event.
- * @param {HTMLElement} infoBox
- * @param {string} eventName
- * @param {import("../../../../dist/index.js").PickingEvent} e
+ * @param infoBox
+ * @param eventName
+ * @param e
  */
 export const updateEventInfo = (infoBox, eventName, e) => {
     infoBox.style.display = 'block';

@@ -137,8 +137,8 @@ RedGPU.init(
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param {import("../../../../dist/index.js").RedGPUContext} redGPUContext
- * @param {Object} activeKeysState
+ * @param redGPUContext
+ * @param activeKeysState
  */
 const renderTestPane = async (redGPUContext, activeKeysState) => {
     new RedGPUExampleHelper(redGPUContext, {

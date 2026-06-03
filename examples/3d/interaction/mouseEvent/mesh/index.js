@@ -152,7 +152,7 @@ const createSampleMeshes = (redGPUContext, scene, infoBox) => {
 /**
  * [KO] 예제 도우미 패널을 렌더링합니다.
  * [EN] Renders the example helper panel.
- * @param {import("../../../../../dist/index.js").RedGPUContext} redGPUContext
+ * @param redGPUContext
  */
 const renderTestPane = async (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext);
