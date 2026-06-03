@@ -15,12 +15,15 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. [KO] 카메라 및 컨트롤러 설정
+        // [EN] Setup Camera and Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 55;
         controller.speedDistance = 2;
 
+        // 2. [KO] 씬 및 조명 구성
+        // [EN] Configure Scene and Lighting
         const scene = new RedGPU.Display.Scene();
-
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.intensity = 2;
         scene.lightManager.addDirectionalLight(directionalLight);
@@ -28,27 +31,35 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
+        // 3. [KO] 보로노이 노이즈 텍스처가 적용된 지면 메시 생성
+        // [EN] Create Ground Mesh with Voronoi Noise Texture applied
         const geometry = new RedGPU.Primitive.Ground(redGPUContext, 50, 50, 1000, 1000);
         const material = new RedGPU.Material.PhongMaterial(redGPUContext);
         material.diffuseTexture = new RedGPU.Resource.VoronoiTexture(redGPUContext);
 
         const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-
         mesh.setPosition(0, 0, 0);
         scene.addChild(mesh);
 
         const testData = {useAnimation: true};
 
+        // 4. [KO] 렌더러 시작 및 애니메이션 루프 정의
+        // [EN] Start Renderer and Define Animation Loop
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
-            if (testData.useAnimation) {
-                if (material.diffuseTexture) material.diffuseTexture.time = time;
+            if (testData.useAnimation && material.diffuseTexture) {
+                material.diffuseTexture.time = time;
             }
         });
 
+        // 5. [KO] 테스트 GUI 구성
+        // [EN] Configure Test GUI
         new RedGPUExampleHelper(redGPUContext, {
             gui: (pane) => {
                 const targetNoiseTexture = material.diffuseTexture;
+
+                // [KO] 보로노이 프리셋 데이터 정의 (값 및 메서드 호출)
+                // [EN] Define Voronoi Preset Data (Values and Method Calls)
                 const PRESETS = [
                     {
                         title: '🔲 Classic Cells',
@@ -112,10 +123,10 @@ RedGPU.init(
                             persistence: 0.5,
                             lacunarity: 2.0,
                             seed: 777,
-                            cellIdColorIntensity: 1.0
+                            cellIdColorIntensity: 1.0,
+                            jitter: 0.3
                         },
-                        calls: ['setManhattanDistance', 'setCellIdColorOutput'],
-                        jitter: 0.3
+                        calls: ['setManhattanDistance', 'setCellIdColorOutput']
                     },
                     {
                         title: '🏺 Ceramic Tiles',
@@ -197,6 +208,8 @@ RedGPU.init(
                     },
                 ];
 
+                // [KO] 프리셋 버튼 동적 생성
+                // [EN] Dynamic Generation of Preset Buttons
                 const f_presets = pane.addFolder({title: 'Voronoi Presets', expanded: true});
                 PRESETS.forEach(item => {
                     f_presets.addButton({title: item.title}).on('click', () => {
@@ -206,6 +219,8 @@ RedGPU.init(
                     });
                 });
 
+                // [KO] 기본 노이즈 파라미터 제어
+                // [EN] Noise Basic Parameter Controls
                 const f_basic = pane.addFolder({title: 'Basic Parameters', expanded: true});
                 f_basic.addBinding(targetNoiseTexture, 'frequency', {min: 0.1, max: 50, step: 0.1});
                 f_basic.addBinding(targetNoiseTexture, 'distanceScale', {min: 0.1, max: 5, step: 0.01});
@@ -214,6 +229,8 @@ RedGPU.init(
                 f_basic.addBinding(targetNoiseTexture, 'lacunarity', {min: 1, max: 5, step: 0.01});
                 f_basic.addBinding(targetNoiseTexture, 'seed', {min: 0, max: 1000, step: 1});
 
+                // [KO] 보로노이 특화 파라미터 설정
+                // [EN] Voronoi Specific Parameter Settings
                 const f_voronoi = pane.addFolder({title: 'Voronoi Specific', expanded: true});
                 f_voronoi.addBinding(targetNoiseTexture, 'distanceType', {
                     options: {
@@ -240,6 +257,8 @@ RedGPU.init(
                     label: 'Color Intensity'
                 });
 
+                // [KO] 유틸리티 및 퀵 액션 설정
+                // [EN] Utilities and Quick Actions Setup
                 const f_utils = pane.addFolder({title: 'Quick Actions'});
                 const f_dist = f_utils.addFolder({title: 'Distance Types'});
                 f_dist.addButton({title: '🔵 Euclidean'}).on('click', () => {
@@ -250,7 +269,7 @@ RedGPU.init(
                     targetNoiseTexture.setManhattanDistance();
                     pane.refresh();
                 });
-                f_dist.addButton({title: '🔲 Chebyshev'}).on('click', () => {
+                f_dist.addButton({title: '🪲 Chebyshev'}).on('click', () => {
                     targetNoiseTexture.setChebyshevDistance();
                     pane.refresh();
                 });
@@ -274,6 +293,8 @@ RedGPU.init(
                     pane.refresh();
                 });
 
+                // [KO] 애니메이션 설정
+                // [EN] Animation Settings
                 const f_animation = pane.addFolder({title: 'Animation', expanded: true});
                 f_animation.addBinding(testData, 'useAnimation');
                 f_animation.addBinding(targetNoiseTexture, 'animationSpeed', {min: 0, max: 1, step: 0.001});
