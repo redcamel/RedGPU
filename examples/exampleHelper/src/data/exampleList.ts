@@ -931,14 +931,6 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
-                        name: 'Mesh CPU LOD',
-                        path: '3d/lod/MeshCPULOD',
-                        description: {
-                            ko: `이 데모는 메쉬에 대한 CPU LOD 성능 테스트를 보여줍니다.`,
-                            en: `This demo demonstrates CPU LOD performance testing for meshes.`
-                        },
-                    },
-                    {
                         name: 'Multi Material GPU LOD',
                         path: '3d/lod/InstanceMeshGPULOD_material',
                         description: {
@@ -946,6 +938,15 @@ export const ExampleList: ExampleListType = [
                             en: `This demo demonstrates testing utilizing different materials in GPU LOD.`
                         },
                     },
+                    {
+                        name: 'Mesh CPU LOD',
+                        path: '3d/lod/MeshCPULOD',
+                        description: {
+                            ko: `이 데모는 메쉬에 대한 CPU LOD 성능 테스트를 보여줍니다.`,
+                            en: `This demo demonstrates CPU LOD performance testing for meshes.`
+                        },
+                    },
+
                     {
                         name: 'Multi Material CPU LOD',
                         path: '3d/lod/MeshCPULOD_material',
