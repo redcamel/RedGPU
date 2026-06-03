@@ -247,7 +247,7 @@ DefineGPUProperty.definePositiveNumber(
         {key: 'aoStrength', value: 1},
         {key: 'specularStrength', value: 1},
         {key: 'emissiveStrength', value: 1},
-        {key: 'shininess', value: 1},
+        {key: 'shininess', value: 32},
         {key: 'normalScale', value: 1}
     ]
 )

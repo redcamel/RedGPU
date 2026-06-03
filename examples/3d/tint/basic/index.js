@@ -28,14 +28,23 @@ RedGPU.init(
         view.grid = true;
         redGPUContext.addView(view);
 
-        // [KO] 기본 라이트 추가 (Phong/PBR 반사를 위해 필요)
-        // [EN] Add Basic Light (Needed for Phong/PBR reflections)
+        // 3. [KO] 환경 및 라이트 설정
+        // [EN] Configure Environment and Light
+        
+        // [KO] IBL 및 스카이박스 추가 (PBR 및 Phong 재질 시각화 강화)
+        // [EN] Add IBL and Skybox (Enhance visualization for PBR and Phong materials)
+        const iblUrl = '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr';
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, iblUrl, 10000);
+        view.ibl = ibl;
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+
         const light = new RedGPU.Light.DirectionalLight([-1, -1, -1], '#ffffff');
         scene.lightManager.addDirectionalLight(light);
 
-        // 3. [KO] 각 머티리얼별 테스트 메시 생성 (순서: Color, Bitmap, Phong, PBR)
+        // 4. [KO] 각 머티리얼별 테스트 메시 생성 (순서: Color, Bitmap, Phong, PBR)
         // [EN] Create Test Meshes for each Material Type (Order: Color, Bitmap, Phong, PBR)
-        const geometry = new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2);
+        // const geometry = new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2);
+        const geometry = new RedGPU.Primitive.Sphere(redGPUContext);
         const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
         const spacing = 5;
         const startX = -7.5;
@@ -58,6 +67,7 @@ RedGPU.init(
         // [EN] C. PhongMaterial Mesh
         const materialPhong = new RedGPU.Material.PhongMaterial(redGPUContext, '#ffffff');
         materialPhong.diffuseTexture = texture;
+
         const meshPhong = new RedGPU.Display.Mesh(redGPUContext, geometry, materialPhong);
         meshPhong.x = startX + spacing * 2;
         scene.addChild(meshPhong);
@@ -71,8 +81,9 @@ RedGPU.init(
         const meshPBR = new RedGPU.Display.Mesh(redGPUContext, geometry, materialPBR);
         meshPBR.x = startX + spacing * 3;
         scene.addChild(meshPBR);
+        console.log(materialPBR)
 
-        // 4. [KO] 초기 틴트 설정
+        // 5. [KO] 초기 틴트 설정
         // [EN] Initial Tint Setup
         const meshes = [meshColor, meshBitmap, meshPhong, meshPBR];
         meshes.forEach(mesh => {
@@ -80,7 +91,7 @@ RedGPU.init(
             mesh.material.tint.setColorByRGBA(255, 128, 0, 1);
         });
 
-        // 5. [KO] 렌더러 생성 및 애니메이션 루프 시작
+        // 6. [KO] 렌더러 생성 및 애니메이션 루프 시작
         // [EN] Create Renderer and Start Animation Loop
         const renderer = new RedGPU.Renderer();
         const render = () => {
@@ -93,7 +104,7 @@ RedGPU.init(
         };
         renderer.start(redGPUContext, render);
 
-        // 6. [KO] 테스트용 GUI 렌더링
+        // 7. [KO] 테스트용 GUI 렌더링
         // [EN] Render Test GUI
         renderTestPane(redGPUContext, meshes);
     },
@@ -125,7 +136,6 @@ const renderTestPane = (redGPUContext, meshes) => {
                 tintBlendMode: RedGPU.Material.TINT_BLEND_MODE[firstMat.tintBlendMode]
             };
 
-            console.log(firstMat.tintBlendMode)
             // [KO] 모든 머티리얼에 일괄 적용되는 틴트 설정
             // [EN] Tint settings applied globally to all materials
 

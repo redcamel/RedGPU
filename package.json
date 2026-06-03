@@ -20,7 +20,7 @@
     "vitePress:build": "npm run gen:api-all && vitepress build manual && node buildScripts/github/deploy-manual.js"
   },
   "author": "RedCamel",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@dimforge/rapier3d-compat": "^0.19.3",
     "@rollup/plugin-json": "^6.1.0",
