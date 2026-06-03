@@ -923,36 +923,36 @@ export const ExampleList: ExampleListType = [
                 name: 'LOD',
                 list: [
                     {
-                        name: 'InstanceMesh GPU LOD',
+                        name: 'InstancedMesh GPU LOD',
                         path: '3d/lod/InstanceMeshGPULOD',
                         description: {
-                            ko: `이 데모는 인스턴스 메쉬에 대한 GPU LOD 성능 테스트를 보여줍니다. `,
-                            en: `This demo demonstrates GPU LOD performance testing for instanced meshes. `
+                            ko: `InstancedMesh에 GPU 기반 LOD를 적용하여 수만 개의 객체를 효율적으로 최적화하는 성능을 시연합니다.`,
+                            en: `Demonstrates efficient optimization of tens of thousands of objects by applying GPU-based LOD to InstancedMesh.`
                         },
                     },
                     {
-                        name: 'Multi Material GPU LOD',
+                        name: 'InstancedMesh Multi-Material GPU LOD',
                         path: '3d/lod/InstanceMeshGPULOD_material',
                         description: {
-                            ko: `이 데모는 GPU LOD에서 다양한 재질을 활용하는 테스트를 보여줍니다.`,
-                            en: `This demo demonstrates testing utilizing different materials in GPU LOD.`
+                            ko: `인스턴싱 메시에서 거리에 따라 지오메트리와 머티리얼을 동시에 변경하는 GPU 기반 LOD 기능을 보여줍니다.`,
+                            en: `Shows GPU-based LOD functionality that simultaneously changes geometry and materials by distance in instanced meshes.`
                         },
                     },
                     {
                         name: 'Mesh CPU LOD',
                         path: '3d/lod/MeshCPULOD',
                         description: {
-                            ko: `이 데모는 메쉬에 대한 CPU LOD 성능 테스트를 보여줍니다.`,
-                            en: `This demo demonstrates CPU LOD performance testing for meshes.`
+                            ko: `수천 개의 개별 Mesh 객체들에 CPU 기반 LOD를 적용하여 거리별 최적화 성능을 테스트합니다.`,
+                            en: `Tests distance-based optimization performance by applying CPU-based LOD to thousands of individual Mesh objects.`
                         },
                     },
 
                     {
-                        name: 'Multi Material CPU LOD',
+                        name: 'Mesh Multi-Material CPU LOD',
                         path: '3d/lod/MeshCPULOD_material',
                         description: {
-                            ko: `이 데모는 CPU LOD에서 다양한 재질을 활용하는 테스트를 보여줍니다.`,
-                            en: `This demo demonstrates testing utilizing different materials in CPU LOD.`
+                            ko: `개별 메시 객체들에 대해 거리에 따라 지오메트리와 머티리얼이 함께 변화하는 CPU 기반 LOD를 시연합니다.`,
+                            en: `Demonstrates CPU-based LOD where both geometry and materials change together by distance for individual mesh objects.`
                         },
                     },
                 ]
