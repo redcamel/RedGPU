@@ -1,91 +1,73 @@
 import * as RedGPU from "../../../../dist/index.js?t=1778922031603";
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
 
-// 1. Create and append a canvas
+/**
+ * [KO] InstancedMesh 기본 예제
+ * [EN] InstancedMesh simple example
+ *
+ * [KO] InstancedMesh를 사용하여 수많은 객체를 효율적으로 렌더링하는 방법을 보여줍니다.
+ * [EN] Demonstrates how to efficiently render a large number of objects using InstancedMesh.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-/**
- * [KO] Instanced Mesh (Simple) 예제
- * [EN] Instanced Mesh (Simple) example
- *
- * [KO] 기본적인 인스턴싱 메시 생성 및 렌더링 방법을 보여줍니다.
- * [EN] Demonstrates basic instanced mesh creation and rendering.
- */
-
-// 2. Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. 카메라 및 뷰 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.speedDistance = 10;
+
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        const light = new RedGPU.Light.DirectionalLight()
-        scene.lightManager.addDirectionalLight(light)
+        // 2. 조명 설정
+        const light = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(light);
 
-        const texture = new RedGPU.Resource.BitmapTexture(
+        // 3. IBL 및 스카이박스 설정
+        const ibl = new RedGPU.Resource.IBL(
             redGPUContext,
-            '../../../assets/UV_Grid_Sm.jpg'
+            '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
         );
+        view.ibl = ibl;
+
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        view.grid = true;
+
+        // 4. 머티리얼 설정
+        const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
         const material = new RedGPU.Material.PhongMaterial(redGPUContext);
         material.diffuseTexture = texture;
 
-        const skyboxTexture = new RedGPU.Resource.CubeTexture(
-            redGPUContext,
-            [
-                "../../../assets/skybox/px.jpg", // Positive X
-                "../../../assets/skybox/nx.jpg", // Negative X
-                "../../../assets/skybox/py.jpg", // Positive Y
-                "../../../assets/skybox/ny.jpg", // Negative Y
-                "../../../assets/skybox/pz.jpg", // Positive Z
-                "../../../assets/skybox/nz.jpg", // Negative Z
-            ]
-        );
-        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, skyboxTexture);
-        view.grid = true
+        // 5. 인스턴싱 테스트 생성
+        const {mesh, initializeInstances} = createInstancedTest(redGPUContext, scene, material);
 
-        createTest(redGPUContext, scene, material);
-
+        // 6. 렌더링 시작
         const renderer = new RedGPU.Renderer();
-        const render = (time) => {
-            // Logic for every frame goes here
-            // 매 프레임마다 실행될 로직 추가
-            if (scene.children[0]) {
-                // scene.children[0].rotationY += 0.001;
-            }
-        };
-        renderer.start(redGPUContext, render);
+        renderer.start(redGPUContext);
 
+        // 7. 테스트 GUI 설정
+        renderTestPane(redGPUContext, mesh, initializeInstances);
     },
     (failReason) => {
-        // Show the error if initialization fails
-        // 초기화 실패 시 에러 표시
-        console.error('초기화 실패:', failReason);
-
-        // Create an element for the error message
-        // 에러 메시지 표시용 요소 생성
-        const errorMessage = document.createElement('div');
+        console.error("Initialization failed:", failReason);
+        const errorMessage = document.createElement("div");
         errorMessage.innerHTML = failReason;
-
-        // Append the error message to the document body
-        // 문서 본문에 에러 메시지 추가
         document.body.appendChild(errorMessage);
     }
 );
 
 /**
- * [KO] 테스트 씬을 생성하고 GUI를 설정합니다.
- * [EN] Creates the test scene and sets up the GUI.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @param {RedGPU.Material.PhongMaterial} material
+ * [KO] 인스턴싱 테스트를 위한 메시를 생성합니다.
+ * [EN] Creates meshes for instancing test.
  */
-async function createTest(redGPUContext, scene, material) {
-    const maxInstanceCount = redGPUContext.detector.isMobile ? 100000 : Math.min(RedGPU.Display.InstancingMesh.getLimitSize(redGPUContext),1000000);
+const createInstancedTest = (redGPUContext, scene, material) => {
+    const maxInstanceCount = redGPUContext.detector.isMobile ? 100000 : Math.min(RedGPU.Display.InstancingMesh.getLimitSize(redGPUContext), 1000000);
     const instanceCount = redGPUContext.detector.isMobile ? 20000 : 200000;
+
     const mesh = new RedGPU.Display.InstancingMesh(
         redGPUContext,
         maxInstanceCount,
@@ -93,43 +75,52 @@ async function createTest(redGPUContext, scene, material) {
         new RedGPU.Primitive.Plane(redGPUContext),
         material
     );
-
-    // mesh.primitiveState.cullMode = 'none';
-
     scene.addChild(mesh);
 
     const initializeInstances = () => {
         for (let i = 0; i < mesh.instanceCount; i++) {
-            if (mesh.instanceChildren[i].x === 0) {
-                mesh.instanceChildren[i].setPosition(
+            const child = mesh.instanceChildren[i];
+            if (child.x === 0) {
+                child.setPosition(
                     Math.random() * 900 - 450,
                     Math.random() * 900 - 450,
                     Math.random() * 900 - 450
                 );
-                mesh.instanceChildren[i].setScale(Math.random() * 2 + 1);
-                mesh.instanceChildren[i].setRotation(
+                child.setScale(Math.random() * 2 + 1);
+                child.setRotation(
                     Math.random() * 360,
                     Math.random() * 360,
                     Math.random() * 360
                 );
             }
-
-            // mesh.instanceChildren[i].opacity = Math.random();
-
         }
     };
 
     initializeInstances();
 
+    return {mesh, initializeInstances};
+};
+
+/**
+ * [KO] 테스트용 GUI를 렌더링합니다.
+ * [EN] Renders the GUI for testing.
+ */
+const renderTestPane = (redGPUContext, mesh, initializeInstances) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            pane.addBinding(mesh, 'instanceCount', {min: 100, max: maxInstanceCount, step: 1})
+            const folder = pane.addFolder({title: 'Instancing Options', expanded: true});
+            folder.addBinding(mesh, 'instanceCount', {min: 100, max: mesh.maxInstanceCount, step: 1})
                 .on('change', initializeInstances);
-            pane.addBinding(mesh, 'maxInstanceCount', {readonly: true,  format: (v) => `${Math.floor(v).toLocaleString()}`})
-            pane.addBinding({limitSize: RedGPU.Display.InstancingMesh.getLimitSize(redGPUContext)}, 'limitSize', {
+            folder.addBinding(mesh, 'maxInstanceCount', {
                 readonly: true,
-                format: (v) => `${Math.floor(v).toLocaleString()}`
+                format: (v) => `${Math.floor(v).toLocaleString()}`,
+                label: 'Max Instances'
+            });
+            folder.addBinding({limitSize: RedGPU.Display.InstancingMesh.getLimitSize(redGPUContext)}, 'limitSize', {
+                readonly: true,
+                format: (v) => `${Math.floor(v).toLocaleString()}`,
+                label: 'Hardware Limit'
             });
         }
     });
-}
+};

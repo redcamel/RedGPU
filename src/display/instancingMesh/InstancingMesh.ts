@@ -139,6 +139,9 @@ class InstancingMesh extends Mesh {
         super(redGPUContext, geometry, material);
         this.#redGPUContext = redGPUContext;
 
+        /*
+        TODO - maxInstanceCount, instanceCount 를 반드시 입력하도록 해야것음
+         */
         const limitNum = InstancingMesh.getLimitSize(this.#redGPUContext);
         this.#maxInstanceCount = Math.min(maxInstanceCount, limitNum);
         this.#instanceCount = Math.min(instanceCount, this.#maxInstanceCount);
