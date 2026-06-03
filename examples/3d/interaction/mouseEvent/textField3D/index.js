@@ -78,10 +78,6 @@ RedGPU.init(
 /**
  * [KO] 테스트용 TextField3D 객체들을 생성합니다.
  * [EN] Creates TextField3D objects for testing.
- * @param {import("../../../../../dist/index.js").RedGPUContext} redGPUContext
- * @param {import("../../../../../dist/index.js").Scene} scene
- * @param {HTMLElement} infoBox
- * @returns {{textFields: Array<import("../../../../../dist/index.js").TextField3D>, updateLayout: Function}}
  */
 const createSampleTextField3D = (redGPUContext, scene, infoBox) => {
     const textFields = [];
@@ -125,7 +121,6 @@ const createSampleTextField3D = (redGPUContext, scene, infoBox) => {
 /**
  * [KO] 무작위 16진수 색상 값을 반환합니다.
  * [EN] Returns a random hex color value.
- * @returns {string}
  */
 function getRandomHexValue() {
     var result = '';
@@ -139,8 +134,6 @@ function getRandomHexValue() {
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param redGPUContext
- * @param scene
  */
 const renderTestPane = async (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {

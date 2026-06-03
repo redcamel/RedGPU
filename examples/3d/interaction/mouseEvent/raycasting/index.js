@@ -54,7 +54,6 @@ RedGPU.init(
         /**
          * [KO] 메시의 마우스 이벤트를 설정합니다.
          * [EN] Sets up mouse events for a mesh.
-         * @param {import("../../../../../dist/index.js").Mesh} mesh
          */
         const setupEvents = (mesh) => {
             mesh.addListener('over', (e) => {
@@ -105,7 +104,6 @@ RedGPU.init(
         /**
          * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
          * [EN] Event handler called when the screen size changes.
-         * @param {import("../../../../../dist/index.js").RedResizeEvent} resizeEvent
          */
         redGPUContext.onResize = (resizeEvent) => {
             const isMobile = detector.isMobile;
@@ -122,7 +120,6 @@ RedGPU.init(
 /**
  * [KO] 테스트를 위한 Tweakpane GUI를 초기화합니다.
  * [EN] Initializes the Tweakpane GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
  */
 const renderTestPane = async (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext, {

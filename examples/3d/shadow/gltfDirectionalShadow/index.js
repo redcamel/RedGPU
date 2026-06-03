@@ -61,11 +61,6 @@ RedGPU.init(
 /**
  * [KO] GLTF 모델을 로드하고 그림자 설정을 적용합니다.
  * [EN] Loads a GLTF model and applies shadow settings.
- * @param redGPUContext
- * @param scene
- * @param url
- * @param xPosition
- * @param yPosition
  */
 const loadGLTF = (redGPUContext, scene, url, xPosition, yPosition) => {
     new RedGPU.GLTFLoader(
@@ -89,8 +84,6 @@ const loadGLTF = (redGPUContext, scene, url, xPosition, yPosition) => {
 /**
  * [KO] 그림자를 수신할 바닥 메시를 추가합니다.
  * [EN] Adds a ground mesh to receive shadows.
- * @param redGPUContext
- * @param scene
  */
 const addGround = (redGPUContext, scene) => {
     const ground = new RedGPU.Display.Mesh(
@@ -106,8 +99,6 @@ const addGround = (redGPUContext, scene) => {
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param redGPUContext
- * @param scene
  */
 const renderTestPane = (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {

@@ -65,7 +65,6 @@ RedGPU.init(
 /**
  * [KO] 스카이박스를 생성합니다.
  * [EN] Creates a skybox.
- * @param redGPUContext
  */
 const createSkybox = (redGPUContext) => {
     const skyboxImagePaths = [
@@ -84,8 +83,6 @@ const createSkybox = (redGPUContext) => {
 /**
  * [KO] 무작위 메시들을 씬에 추가합니다.
  * [EN] Adds random meshes to the scene.
- * @param redGPUContext
- * @param scene
  */
 const addRandomMeshes = (redGPUContext, scene) => {
     const geometries = [
@@ -132,7 +129,6 @@ const addRandomMeshes = (redGPUContext, scene) => {
 /**
  * [KO] 무작위 16진수 색상 값을 반환합니다.
  * [EN] Returns a random hex color value.
- * @returns {string}
  */
 const getRandomHexValue = () => {
     const randomColor = Math.floor(Math.random() * 0xffffff);
@@ -142,8 +138,6 @@ const getRandomHexValue = () => {
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param redGPUContext
- * @param scene
  */
 const renderTestPane = (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {

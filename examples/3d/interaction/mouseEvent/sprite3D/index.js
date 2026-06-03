@@ -77,10 +77,6 @@ RedGPU.init(
 /**
  * [KO] 샘플 Sprite3D를 생성합니다.
  * [EN] Creates sample Sprite3D.
- * @param {import("../../../../../dist/index.js").RedGPUContext} redGPUContext
- * @param {import("../../../../../dist/index.js").Scene} scene
- * @param {HTMLElement} infoBox
- * @returns {{sprites: Array<import("../../../../../dist/index.js").Sprite3D>, updateLayout: Function}}
  */
 const createSampleSprite3D = (redGPUContext, scene, infoBox) => {
     const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../../assets/UV_Grid_Sm.jpg');
@@ -141,8 +137,6 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox) => {
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param redGPUContext
- * @param scene
  */
 const renderTestPane = async (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {

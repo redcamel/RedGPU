@@ -77,10 +77,6 @@ RedGPU.init(
 /**
  * [KO] 샘플 SpriteSheet3D를 생성합니다.
  * [EN] Creates sample SpriteSheet3D.
- * @param {import("../../../../../dist/index.js").RedGPUContext} redGPUContext
- * @param {import("../../../../../dist/index.js").Scene} scene
- * @param {HTMLElement} infoBox
- * @returns {{sprites: Array<import("../../../../../dist/index.js").SpriteSheet3D>, updateLayout: Function}}
  */
 const createSampleSprite3D = (redGPUContext, scene, infoBox) => {
     const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
@@ -146,8 +142,6 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox) => {
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param redGPUContext
- * @param scene
  */
 const renderTestPane = async (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {

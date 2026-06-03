@@ -77,10 +77,6 @@ RedGPU.init(
 /**
  * [KO] 인터랙션 테스트를 위한 샘플 메시들을 생성합니다.
  * [EN] Creates sample meshes for interaction testing.
- * @param {import("../../../../../dist/index.js").RedGPUContext} redGPUContext
- * @param {import("../../../../../dist/index.js").Scene} scene
- * @param {HTMLElement} infoBox
- * @returns {{meshes: Array<import("../../../../../dist/index.js").Mesh>, updateLayout: Function}}
  */
 const createSampleMeshes = (redGPUContext, scene, infoBox) => {
     const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../../assets/UV_Grid_Sm.jpg');
@@ -152,7 +148,6 @@ const createSampleMeshes = (redGPUContext, scene, infoBox) => {
 /**
  * [KO] 예제 도우미 패널을 렌더링합니다.
  * [EN] Renders the example helper panel.
- * @param redGPUContext
  */
 const renderTestPane = async (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext);

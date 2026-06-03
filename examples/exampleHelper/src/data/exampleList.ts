@@ -905,16 +905,16 @@ export const ExampleList: ExampleListType = [
                         name: 'InstancedMesh Simple',
                         path: '3d/instancedMesh/simple',
                         description: {
-                            ko: `이 데모는 간단한 Plane을 사용한 인스턴스 성능 테스트를 보여줍니다. WebGPU의 최소 안전 메모리인 128MB 버퍼(100만 인스턴스)를 최대한 활용합니다.`,
-                            en: `This demo demonstrates instance performance testing using a simple Plane. This demo maximizes the WebGPU's minimum safe memory of 128 MB buffer (1 million instances).`
+                            ko: `이 데모는 간단한 Plane을 사용한 인스턴스 성능 테스트를 보여줍니다. `,
+                            en: `This demo demonstrates instance performance testing using a simple Plane. `
                         },
                     },
                     {
                         name: 'InstancedMesh Sphere',
                         path: '3d/instancedMesh/sphere',
                         description: {
-                            ko: `이 데모는 Sphere를 사용한 인스턴스 성능 테스트를 보여줍니다. WebGPU의 최소 안전 메모리인 128MB 버퍼(100만 인스턴스)를 최대한 활용합니다.`,
-                            en: `This demo demonstrates instance performance testing using Sphere. This demo maximizes the WebGPU's minimum safe memory of 128 MB buffer (1 million instances).`
+                            ko: `이 데모는 Sphere를 사용한 인스턴스 성능 테스트를 보여줍니다. `,
+                            en: `This demo demonstrates instance performance testing using Sphere. `
                         },
                     },
                 ]
@@ -926,8 +926,8 @@ export const ExampleList: ExampleListType = [
                         name: 'InstanceMesh GPU LOD',
                         path: '3d/lod/InstanceMeshGPULOD',
                         description: {
-                            ko: `이 데모는 인스턴스 메쉬에 대한 GPU LOD 성능 테스트를 보여줍니다. WebGPU의 최소 안전 메모리인 128MB 버퍼(100만 인스턴스)를 최대한 활용합니다.`,
-                            en: `This demo demonstrates GPU LOD performance testing for instanced meshes. It fully utilizes WebGPU's minimum safe memory of 128MB buffer (1 million instances).`
+                            ko: `이 데모는 인스턴스 메쉬에 대한 GPU LOD 성능 테스트를 보여줍니다. `,
+                            en: `This demo demonstrates GPU LOD performance testing for instanced meshes. `
                         },
                     },
                     {
