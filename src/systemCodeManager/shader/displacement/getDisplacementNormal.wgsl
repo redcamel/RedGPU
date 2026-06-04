@@ -34,13 +34,12 @@ fn getDisplacementNormal(
     input_uv: vec2<f32>,
     mipLevel: f32
 ) -> vec3<f32> {
-    // [KO] 현재 밉레벨에 해당하는 텍스처 크기를 가져옵니다.
-    // [EN] Get the texture size corresponding to the current mip level.
-    let textureDimensions = vec2<f32>(textureDimensions(displacementTexture, i32(mipLevel)));
+    // [KO] 텍스처 크기는 베이스 해상도(Mip 0)를 기준으로 하여 노멀의 선명도를 유지합니다.
+    // [EN] Texture dimensions based on base resolution (Mip 0) to maintain normal sharpness.
+    let textureDimensions = vec2<f32>(textureDimensions(displacementTexture, 0));
     let invTexSize = 1.0 / textureDimensions;
     
-    // [KO] 노멀 계산을 위한 샘플링 간격 (격자 현상 완화를 위해 1.5 ~ 2.0 텍셀 정도로 설정)
-    // [EN] Sampling interval for normal calculation (set to about 1.5 to 2.0 texels to alleviate grid artifacts)
+    // [KO] 노멀 계산을 위한 샘플링 간격
     let step = invTexSize * 1.5;
 
     let h_u0 = sampleBicubic(input_uv + vec2<f32>(-step.x, 0.0), displacementTexture, displacementTextureSampler, textureDimensions, invTexSize, mipLevel);
@@ -48,12 +47,9 @@ fn getDisplacementNormal(
     let h_v0 = sampleBicubic(input_uv + vec2<f32>(0.0, -step.y), displacementTexture, displacementTextureSampler, textureDimensions, invTexSize, mipLevel);
     let h_v1 = sampleBicubic(input_uv + vec2<f32>(0.0,  step.y), displacementTexture, displacementTextureSampler, textureDimensions, invTexSize, mipLevel);
 
-    // [KO] UV 단위당 높이 변화율(Derivative)을 계산합니다. (해상도 독립적 방식)
-    // [EN] Calculate height derivatives per UV unit. (Resolution-independent method)
+    // [KO] UV 단위당 높이 변화율(Derivative) 계산
     let ddu = (h_u1 - h_u0) * displacementScale / (step.x * 2.0);
     let ddv = (h_v1 - h_v0) * displacementScale / (step.y * 2.0);
 
-    // [KO] 탄젠트 공간 법선 벡터 반환
-    // [EN] Return tangent space normal vector
     return normalize(vec3<f32>(-ddu, -ddv, 1.0));
 }

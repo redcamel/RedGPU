@@ -71,9 +71,9 @@ fn main(inputData: InputData) -> VertexOutput {
         let dist = distance(tempPosition.xyz, u_cameraPosition);
         let maxMip = f32(textureNumLevels(displacementTexture)) - 1.0;
         
-        // [KO] 거리에 따른 밉레벨 계산 (+1.0 바이어스를 통해 8비트 격자 무늬를 부드럽게 완화합니다)
-        // [EN] Mip level calculation based on distance (smoothing 8-bit grid patterns through +1.0 bias)
-        let targetMipLevel = clamp((dist / maxDistance) * maxMip + 1.0, 0.0, maxMip);
+        // [KO] 거리에 따른 밉레벨 계산 (바이어스 제거)
+        // [EN] Mip level calculation based on distance (remove bias)
+        let targetMipLevel = clamp((dist / maxDistance) * maxMip, 0.0, maxMip);
 
         // [KO] 트랜스폼된 UV를 사용하여 위치 이동 계산
         let displacedPosition = getDisplacementPosition(
