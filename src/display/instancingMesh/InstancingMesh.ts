@@ -650,8 +650,8 @@ class InstancingMesh extends Mesh {
         const {resourceManager} = this.#redGPUContext;
         const {vertexUniformBuffer} = this.gpuRenderInfo;
         const {material} = this;
-        const {basicSampler, emptyBitmapTextureView} = resourceManager;
-        const {gpuSampler: basicGPUSampler} = basicSampler;
+        const {basicSampler, basicDisplacementSampler, emptyBitmapTextureView} = resourceManager;
+        const {gpuSampler: basicGPUSampler,} = basicSampler;
         const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
             ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing,
         );
@@ -676,7 +676,8 @@ class InstancingMesh extends Mesh {
                 },
                 {
                     binding: 1,
-                    resource: material?.displacementTextureSampler?.gpuSampler || basicGPUSampler,
+                    // resource: material?.displacementTextureSampler?.gpuSampler || basicGPUSampler,
+                    resource: basicDisplacementSampler.gpuSampler
                 },
                 {
                     binding: 2,
