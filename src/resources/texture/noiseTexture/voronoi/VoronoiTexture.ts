@@ -85,44 +85,48 @@ class VoronoiTexture extends ANoiseTexture {
      * @param width - [KO] 텍스처 가로 크기 [EN] Texture width
      * @param height - [KO] 텍스처 세로 크기 [EN] Texture height
      * @param define - [KO] 노이즈 정의 객체 (선택) [EN] Noise definition object (optional)
+     * @param useMipmap - [KO] 밉맵 사용 여부 (기본값: true) [EN] Whether to use mipmaps (default: true)
      */
     constructor(
         redGPUContext: RedGPUContext,
         width: number = 1024,
         height: number = 1024,
-        define?: NoiseDefine
+        define?: NoiseDefine,
+        useMipmap: boolean = true
     ) {
         super(redGPUContext, width, height, {
             ...define,
             mainLogic: define?.mainLogic || `
-				let uv = vec2<f32>(
-					(base_uv.x + uniforms.time * (uniforms.animationX * uniforms.animationSpeed)),
-					(base_uv.y + uniforms.time * (uniforms.animationY * uniforms.animationSpeed))
-				);
-				var finalColor: vec4<f32>;
-				if (uniforms.outputType == 5) {
-					let colorNoise = getVoronoiColorNoise(uv, uniforms);
-					finalColor = vec4<f32>(colorNoise, 1.0);
-				} else {
-					let noise = getVoronoiNoise(uv, uniforms);
-					finalColor = vec4<f32>(noise, noise, noise, 1.0);
-				}
-			`,
+    let uv = vec2<f32>(
+    (base_uv.x + uniforms.time * (uniforms.animationX * uniforms.animationSpeed)),
+    (base_uv.y + uniforms.time * (uniforms.animationY * uniforms.animationSpeed))
+    );
+    var finalColor: vec4<f32>;
+    if (uniforms.outputType == 5) {
+    let colorNoise = getVoronoiColorNoise(uv, uniforms);
+    finalColor = vec4<f32>(colorNoise, 1.0);
+    } else {
+    let noise = getVoronoiNoise(uv, uniforms);
+    finalColor = vec4<f32>(noise, noise, noise, 1.0);
+    }
+    `,
             uniformStruct: mergerNoiseUniformStruct(`
-				frequency: f32,
-				distanceScale: f32,
-				octaves: i32,
-				persistence: f32,
-				lacunarity: f32,
-				seed: f32,
-				distanceType: i32,
-				outputType: i32,
-				jitter: f32,
-				cellIdColorIntensity: f32,
-			`, define?.uniformStruct),
+    frequency: f32,
+    distanceScale: f32,
+    octaves: i32,
+    persistence: f32,
+    lacunarity: f32,
+    seed: f32,
+    distanceType: i32,
+    outputType: i32,
+    jitter: f32,
+    cellIdColorIntensity: f32,
+    `,
+                define?.uniformStruct
+            ),
             uniformDefaults: mergerNoiseUniformDefault(BASIC_OPTIONS, define?.uniformDefaults),
             helperFunctions: mergerNoiseHelperFunctions(voronoiComputeFunctions, define?.helperFunctions),
-        });
+        }, useMipmap);
     }
 
     /** [KO] 주파수를 반환합니다. [EN] Returns the frequency. */
