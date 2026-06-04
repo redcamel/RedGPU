@@ -1,5 +1,4 @@
 import React from 'react';
-import {ExampleHelperState, useExampleHelperStore} from '../../store';
 import LabelButton from '../../common/components/basic/LabelButton';
 
 /**
@@ -75,7 +74,7 @@ const mobileSelectContainerStyle: React.CSSProperties = {
 };
 
 const footerStyle: React.CSSProperties = {
-    height: '50px',
+    height: '51px',
     backgroundColor: '#111112',
     borderTop: '1px solid #333',
     display: 'flex',
