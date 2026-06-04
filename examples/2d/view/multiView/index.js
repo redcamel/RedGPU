@@ -15,11 +15,15 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. [KO] 첫 번째 Scene 및 View 생성 (좌측 50% 배치)
+        // [EN] Create first Scene and View (Positioned at left 50%)
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View2D(redGPUContext, scene);
         view.setSize('50%', '100%');
         redGPUContext.addView(view);
 
+        // 2. [KO] 두 번째 Scene 및 View 생성 (우측 50% 배치, 배경색 적용)
+        // [EN] Create second Scene and View (Positioned at right 50%, with background color)
         const scene2 = new RedGPU.Display.Scene();
         const view2 = new RedGPU.Display.View2D(redGPUContext, scene2);
         view2.setSize('50%', '100%');
@@ -28,41 +32,43 @@ RedGPU.init(
         scene2.backgroundColor.setColorByHEX('#471010');
         redGPUContext.addView(view2);
 
+        // 3. [KO] 공유 텍스처 및 재질 생성
+        // [EN] Create shared texture and material
         const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
         const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
 
+        // 4. [KO] 첫 번째 Scene에 Sprite2D 추가 및 위치 설정
+        // [EN] Add Sprite2D to the first Scene and set position
         const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, material);
         sprite2D.setSize(100, 100);
         sprite2D.x = view.screenRectObject.width / 2;
         sprite2D.y = view.screenRectObject.height / 2;
         scene.addChild(sprite2D);
 
+        // 5. [KO] 두 번째 Scene에 Sprite2D 추가 및 위치 설정
+        // [EN] Add Sprite2D to the second Scene and set position
         const sprite2D_2 = new RedGPU.Display.Sprite2D(redGPUContext, material);
         sprite2D_2.setSize(100, 100);
         sprite2D_2.x = view2.screenRectObject.width / 2;
         sprite2D_2.y = view2.screenRectObject.height / 2;
-        scene.addChild(sprite2D_2);
+        scene2.addChild(sprite2D_2);
 
-        /**
-         * [KO] 뷰 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
-         * [EN] Event handler called when the view size changes.
-         */
+        // 6. [KO] 각 뷰의 리사이즈 이벤트 설정 (중앙 정렬 유지)
+        // [EN] Setup resize events for each view (Maintain center alignment)
         view.onResize = (resizeEvent) => {
             const {width, height} = resizeEvent.screenRectObject;
             sprite2D.x = width / 2;
             sprite2D.y = height / 2;
         };
 
-        /**
-         * [KO] 뷰 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
-         * [EN] Event handler called when the view size changes.
-         */
         view2.onResize = (resizeEvent) => {
             const {width, height} = resizeEvent.screenRectObject;
             sprite2D_2.x = width / 2;
             sprite2D_2.y = height / 2;
         };
 
+        // 7. [KO] 렌더러 시작 및 애니메이션 루프 정의
+        // [EN] Start renderer and define animation loop
         const renderer = new RedGPU.Renderer();
         const render = (time) => {
             sprite2D.rotation += 1;
@@ -70,22 +76,20 @@ RedGPU.init(
         };
         renderer.start(redGPUContext, render);
 
+        // 8. [KO] 테스트 GUI 구성
+        // [EN] Configure test GUI
         renderTestPane(redGPUContext);
     },
     (failReason) => {
         // [KO] 초기화 실패 시 에러 처리
         // [EN] Error handling on initialization failure
         console.error('Initialization failed:', failReason);
-        const errorMessage = document.createElement('div');
-        errorMessage.innerHTML = failReason;
-        document.body.appendChild(errorMessage);
     }
 );
 
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
  */
 const renderTestPane = (redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext, {
