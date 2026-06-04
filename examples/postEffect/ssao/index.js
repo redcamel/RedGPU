@@ -27,7 +27,6 @@ RedGPU.init(
         redGPUContext.addView(view);
 
         view.postEffectManager.useSSAO = true;
-        view.postEffectManager.useSSR = true;
 
         redGPUContext.antialiasingManager.useTAA = true;
 
