@@ -33,7 +33,7 @@ RedGPU.init(
 
         // 3. [KO] 커스텀 심플렉스 노이즈 디스플레이스먼트 맵 설정
         // [EN] Configure Custom Simplex Noise Displacement Map
-        const geometry = new RedGPU.Primitive.Ground(redGPUContext, 50, 50, 1000, 1000);
+        const geometry = new RedGPU.Primitive.Ground(redGPUContext, 50, 50, 512, 512);
         const material = new RedGPU.Material.PhongMaterial(redGPUContext);
 
         material.displacementTexture = new RedGPU.Resource.SimplexTexture(redGPUContext, 1024, 1024, {

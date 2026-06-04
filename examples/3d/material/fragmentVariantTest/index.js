@@ -101,13 +101,13 @@ RedGPU.init(
         // 3. [KO] 조명 설정
         // [EN] Setup Lighting
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.intensity = 1.5;
         scene.lightManager.addDirectionalLight(directionalLight);
 
         // 4. [KO] 테스트용 메시 생성
         // [EN] Create Test Mesh
         const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32);
-        const material = new RedGPU.Material.PhongMaterial(redGPUContext);
+        const material = new RedGPU.Material.PhongMaterial(redGPUContext, '#ff0000');
+
         const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
         mesh.primitiveState.cullMode = RedGPU.GPU_CULL_MODE.NONE;
         scene.addChild(mesh);

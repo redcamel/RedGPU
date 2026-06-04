@@ -20,16 +20,14 @@ fn getDisplacementPosition(
     input_uv: vec2<f32>,
     mipLevel: f32
 ) -> vec3<f32> {
-    // [KO] 디스플레이스먼트 텍스처에서 높이 값 샘플링 (R 채널 사용)
-    // [EN] Sample the height value from the displacement texture (using the R channel)
-    let displacementSample = textureSampleLevel(displacementTexture, displacementTextureSampler, input_uv, mipLevel).r;
+    // [KO] 하드웨어의 Bilinear 필터링을 사용하여 높이 값을 부드럽게 샘플링합니다.
+    // [EN] Smoothly sample the height value using hardware Bilinear filtering.
+    let h = textureSampleLevel(displacementTexture, displacementTextureSampler, input_uv, mipLevel).r;
 
-    // [KO] 0.5를 기준으로 높이를 스케일링 (0.5는 변위 없음, 1.0은 확장, 0.0은 수축)
-    // [EN] Scale the height based on 0.5 (0.5 means no displacement, 1.0 expansion, 0.0 contraction)
-    let scaledDisplacement = (displacementSample - 0.5) * displacementScale;
+    // [KO] 0.5(미드레벨)를 기준으로 높이를 스케일링 (언리얼 표준 방식)
+    let scaledDisplacement = (h - 0.5) * displacementScale;
 
     // [KO] 정점 법선 방향으로 위치 이동
-    // [EN] Move the position in the direction of the vertex normal
     let displacedPosition = input_position + normalize(input_vertexNormal) * scaledDisplacement;
 
     return displacedPosition;

@@ -58,48 +58,65 @@ fn main(inputData: InputData) -> VertexOutput {
     let input_vertexNormal = inputData.vertexNormal;
     let input_uv = inputData.uv;
 
+    // [KO] 트랜스폼이 적용된 UV 계산
+    let transformedUV = input_uv * vertexUniforms.uvTransform.zw + vertexUniforms.uvTransform.xy;
+
     // Position and normal calculation
     var position: vec4<f32>;
     var normalPosition: vec4<f32>;
 
 
     #redgpu_if useDisplacementTexture
-        let tempPosition = u_modelMatrix * input_position_vec4;
-        let distance = distance(tempPosition.xyz, u_cameraPosition);
-        let mipLevel = (distance / maxDistance) * maxMipLevel;
+        // [KO] 최고의 디테일을 위해 밉맵을 사용하지 않고 원본 해상도(0.0)로 샘플링합니다.
+        // [EN] Sample at original resolution (0.0) without using mipmaps for maximum detail.
+        let targetMipLevel = 0.0;
 
+        // [KO] 트랜스폼된 UV를 사용하여 위치 이동 계산
         let displacedPosition = getDisplacementPosition(
             input_position,
             input_vertexNormal,
             displacementTexture,
             displacementTextureSampler,
             u_displacementScale,
-            input_uv,
-            mipLevel
+            transformedUV,
+            targetMipLevel
         );
 
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
 
-        let worldUV = input_uv;
-        let displacedNormal = getDisplacementNormal(
-            normalize((u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz),
+        // [KO] 로컬 공간 기저(TBN) 구축 - 수치 안정성을 위해 재정규화 수행
+        let localNormal = normalize(input_vertexNormal);
+        let localTangent = normalize(inputData.vertexTangent.xyz);
+        let localBitangent = normalize(cross(localNormal, localTangent) * inputData.vertexTangent.w);
+        let tbn = mat3x3<f32>(localTangent, localBitangent, localNormal);
+
+        // [KO] 탄젠트 공간에서 계산된 노멀을 가져옴
+        let tangentDisplacedNormal = getDisplacementNormal(
             displacementTexture,
             displacementTextureSampler,
             u_displacementScale,
-            worldUV,
-            mipLevel
+            transformedUV,
+            targetMipLevel
         );
-        normalPosition = vec4<f32>(displacedNormal, 0.0);
+
+        // [KO] TBN 행렬을 통해 탄젠트 공간 노멀 -> 로컬 공간 노멀로 변환
+        let localDisplacedNormal = tbn * tangentDisplacedNormal;
+
+        // [KO] 최종 로컬 노멀을 월드 공간으로 변환 (W=0.0 사용)
+        let worldDisplacedNormal = normalize((u_normalModelMatrix * vec4<f32>(localDisplacedNormal, 0.0)).xyz);
+        normalPosition = vec4<f32>(worldDisplacedNormal, 0.0);
     #redgpu_else
         position = u_modelMatrix * input_position_vec4;
-        normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
+        // [KO] 방향 벡터 변환이므로 W=0.0 사용 및 정규화
+        let worldNormal = normalize((u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz);
+        normalPosition = vec4<f32>(worldNormal, 0.0);
     #redgpu_endIf
 
     // Basic output assignments
     output.position = u_projectionViewMatrix * position;
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition.xyz;
-    output.uv = input_uv * vertexUniforms.uvTransform.zw + vertexUniforms.uvTransform.xy;
+    output.uv = transformedUV;
 
     let transformedTangentXYZ = (u_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
     output.vertexTangent = vec4<f32>(normalize(transformedTangentXYZ), inputData.vertexTangent.w);
