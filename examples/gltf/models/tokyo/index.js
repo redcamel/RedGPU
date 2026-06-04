@@ -1,5 +1,6 @@
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
 import * as RedGPU from "../../../../dist/index.js?t=1778922031603";
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -10,7 +11,6 @@ RedGPU.init(
         // Setup camera or controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.tilt = 0;
-        controller.camera.nearClipping = 1
 
         // Create scene and view
         const scene = new RedGPU.Display.Scene();
