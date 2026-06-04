@@ -58,7 +58,6 @@ class ViewTransform extends RedGPUObject {
      * @type {number | string}
      */
     #y: number | string = 0
-    //TODO rotationX,rotationY,rotationZ를 가질수 있도록 할수 있는가?
     /**
      * 뷰의 너비 값(픽셀 또는 퍼센트 문자열).
      * @private
