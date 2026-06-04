@@ -30,32 +30,49 @@ jobs:
       - name: Build
         run: npm run build
 
-      # 5. 예제 버전 생성 (캐시 버스팅을 위해 파일명 등에 해시 추가)
+      # 5. Inspector 빌드
+      - name: Build Inspector
+        run: |
+          cd inspector
+          npm ci
+          npm run build
+
+      # 6. Example Helper 빌드
+      - name: Build Example Helper
+        run: |
+          cd examples/exampleHelper
+          npm ci
+          npm run build
+
+      # 7. 예제 버전 생성 (캐시 버스팅을 위해 파일명 등에 해시 추가)
       - name: Generate example version (Cache Bursting)
         run: node buildScripts/github/generate-example-version.js
 
-      # 6. 빌드된 파일 및 변경 사항 검증 (로그 확인용)
+      # 8. 빌드된 파일 및 변경 사항 검증 (로그 확인용)
       - name: Verify changes
         run: |
           echo "--- Check dist folder ---"
           ls -la dist/
+          echo "--- Check inspector dist folder ---"
+          ls -la inspector/dist/
           echo "--- Check examples folder ---"
           ls -la examples/
           git status # 어떤 파일이 변했는지 로그에서 확인 가능
 
-      # 7. 빌드 결과물(dist, examples)을 master 브랜치에 커밋 및 푸시
+      # 9. 빌드 결과물(dist, inspector/dist, examples)을 master 브랜치에 커밋 및 푸시
       - name: Commit and push changes
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           
-          # 빌드 결과물이 포함된 dist와 examples 폴더를 스테이징에 추가
+          # 빌드 결과물이 포함된 dist, inspector/dist, examples 폴더를 스테이징에 추가
           git add dist/ -f
+          git add inspector/dist/ -f
           git add examples/ -f
           
           # 변경사항이 있는 경우에만 커밋 및 푸시 진행
           if ! git diff --staged --quiet; then
-            git commit -m "chore: update build and examples"
+            git commit -m "chore: update build, inspector and examples"
             git push
           else
             echo "No changes to commit"
