@@ -1,15 +1,5 @@
 /**
- * [KO] 디스플레이스먼트 텍스처를 기반으로 변형된 정점 위치를 계산합니다.
- * [EN] Calculates the modified vertex position based on the displacement texture.
- *
- * @param input_position - [KO] 정점의 로컬 위치 [EN] Local position of the vertex
- * @param input_vertexNormal - [KO] 정점의 로컬 법선 벡터 [EN] Local normal vector of the vertex
- * @param displacementTexture - [KO] 디스플레이스먼트 텍스처 [EN] Displacement texture
- * @param displacementTextureSampler - [KO] 디스플레이스먼트 텍스처 샘플러 [EN] Displacement texture sampler
- * @param displacementScale - [KO] 디스플레이스먼트 강도 [EN] Displacement scale
- * @param input_uv - [KO] UV 좌표 [EN] UV coordinates
- * @param mipLevel - [KO] 샘플링할 MIP 레벨 [EN] MIP level to sample
- * @returns [KO] 변형된 로컬 공간 정점 위치 [EN] Modified local space vertex position
+ * [KO] 디스플레이스먼트 텍스처를 바이큐빅 필터링으로 샘플링하여 변형된 정점 위치를 계산합니다.
  */
 fn getDisplacementPosition(
     input_position: vec3<f32>,
@@ -20,14 +10,31 @@ fn getDisplacementPosition(
     input_uv: vec2<f32>,
     mipLevel: f32
 ) -> vec3<f32> {
-    // [KO] 하드웨어의 Bilinear 필터링을 사용하여 높이 값을 부드럽게 샘플링합니다.
-    // [EN] Smoothly sample the height value using hardware Bilinear filtering.
-    let h = textureSampleLevel(displacementTexture, displacementTextureSampler, input_uv, mipLevel).r;
+    let textureDimensions = vec2<f32>(textureDimensions(displacementTexture, 0));
+    let invTexSize = 1.0 / textureDimensions;
 
-    // [KO] 0.5(미드레벨)를 기준으로 높이를 스케일링 (언리얼 표준 방식)
-    let scaledDisplacement = (h - 0.5) * displacementScale;
+    let uv = input_uv * textureDimensions;
+    let iuv = floor(uv - 0.5);
+    let fuv = fract(uv - 0.5);
 
-    // [KO] 정점 법선 방향으로 위치 이동
+    let w0 = (1.0 - fuv) * (1.0 - fuv) * (1.0 - fuv) / 6.0;
+    let w1 = (4.0 - 6.0 * fuv * fuv + 3.0 * fuv * fuv * fuv) / 6.0;
+    let w2 = (1.0 + 3.0 * fuv + 3.0 * fuv * fuv - 3.0 * fuv * fuv * fuv) / 6.0;
+    let w3 = fuv * fuv * fuv / 6.0;
+
+    let g0 = w0 + w1;
+    let g1 = w2 + w3;
+    let h0 = (w1 / g0) - 1.0 + iuv;
+    let h1 = (w3 / g1) + 1.0 + iuv;
+
+    let res0 = textureSampleLevel(displacementTexture, displacementTextureSampler, (vec2<f32>(h0.x, h0.y) + 0.5) * invTexSize, mipLevel).r * g0.x * g0.y;
+    let res1 = textureSampleLevel(displacementTexture, displacementTextureSampler, (vec2<f32>(h1.x, h0.y) + 0.5) * invTexSize, mipLevel).r * g1.x * g0.y;
+    let res2 = textureSampleLevel(displacementTexture, displacementTextureSampler, (vec2<f32>(h0.x, h1.y) + 0.5) * invTexSize, mipLevel).r * g0.x * g1.y;
+    let res3 = textureSampleLevel(displacementTexture, displacementTextureSampler, (vec2<f32>(h1.x, h1.y) + 0.5) * invTexSize, mipLevel).r * g1.x * g1.y;
+
+    let h_bicubic = res0 + res1 + res2 + res3;
+
+    let scaledDisplacement = (h_bicubic - 0.5) * displacementScale;
     let displacedPosition = input_position + normalize(input_vertexNormal) * scaledDisplacement;
 
     return displacedPosition;

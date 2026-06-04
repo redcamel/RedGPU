@@ -67,9 +67,15 @@ fn main(inputData: InputData) -> VertexOutput {
 
 
     #redgpu_if useDisplacementTexture
-        // [KO] 최고의 디테일을 위해 밉맵을 사용하지 않고 원본 해상도(0.0)로 샘플링합니다.
-        // [EN] Sample at original resolution (0.0) without using mipmaps for maximum detail.
-        let targetMipLevel = 0.0;
+        // [KO] 실제 텍스처의 최대 밉레벨을 가져와서 거리에 비례한 샘플링 레벨을 결정합니다.
+        // [EN] Get the actual maximum mip level of the texture and determine the sampling level proportional to the distance.
+        let tempPosition = u_modelMatrix * input_position_vec4;
+        let dist = distance(tempPosition.xyz, u_cameraPosition);
+        let maxMip = f32(textureNumLevels(displacementTexture)) - 1.0;
+        
+        // [KO] 거리에 따른 밉레벨 계산 (+1.0 바이어스를 통해 8비트 격자 무늬를 부드럽게 완화합니다)
+        // [EN] Mip level calculation based on distance (smoothing 8-bit grid patterns through +1.0 bias)
+        let targetMipLevel = clamp((dist / maxDistance) * maxMip + 1.0, 0.0, maxMip);
 
         // [KO] 트랜스폼된 UV를 사용하여 위치 이동 계산
         let displacedPosition = getDisplacementPosition(
@@ -84,11 +90,12 @@ fn main(inputData: InputData) -> VertexOutput {
 
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
 
-        // [KO] 로컬 공간 기저(TBN) 구축 - 수치 안정성을 위해 재정규화 수행
-        let localNormal = normalize(input_vertexNormal);
-        let localTangent = normalize(inputData.vertexTangent.xyz);
-        let localBitangent = normalize(cross(localNormal, localTangent) * inputData.vertexTangent.w);
-        let tbn = mat3x3<f32>(localTangent, localBitangent, localNormal);
+        // [KO] 로컬 공간 기저(TBN) 구축 - Gram-Schmidt 과정을 통한 완벽한 직교화
+        // [EN] Construct local space basis (TBN) - Perfect orthogonalization via Gram-Schmidt process
+        let N = normalize(input_vertexNormal);
+        let T = normalize(inputData.vertexTangent.xyz - N * dot(inputData.vertexTangent.xyz, N));
+        let B = cross(N, T) * inputData.vertexTangent.w;
+        let tbn = mat3x3<f32>(T, B, N);
 
         // [KO] 탄젠트 공간에서 계산된 노멀을 가져옴
         let tangentDisplacedNormal = getDisplacementNormal(
