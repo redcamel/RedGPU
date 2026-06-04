@@ -1,12 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1778922031603";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
+import * as RedGPU from "../../../../dist/index.js";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 /**
  * [KO] 2D Keyboard Interaction 예제
- * [EN] 2D Keyboard Interaction example
+ * [EN] 2D Keyboard Interaction Example
  *
  * [KO] keyboardKeyBuffer를 사용하여 2D 환경에서 객체를 제어하는 방법을 보여줍니다.
  * [EN] Demonstrates how to control an object in a 2D environment using keyboardKeyBuffer.
@@ -26,13 +26,18 @@ RedGPU.init(
 		sprite.setSize(100, 100);
 		scene.addChild(sprite);
 
-		// 화면 중앙에 배치
+		// [KO] 화면 중앙에 배치
+		// [EN] Position in the center of the screen
 		sprite.x = redGPUContext.screenRectObject.width / 2;
 		sprite.y = redGPUContext.screenRectObject.height / 2;
 
 		const speed = 5;
 
-		const render = (time) => {
+		/**
+		 * [KO] 렌더 루프
+		 * [EN] Render loop
+		 */
+		const render = () => {
 			const { keyboardKeyBuffer } = redGPUContext;
 
 			// [KO] keyboardKeyBuffer를 통한 실시간 키 상태 체크
@@ -71,11 +76,19 @@ RedGPU.init(
 		const renderer = new RedGPU.Renderer();
 		renderer.start(redGPUContext, render);
 
+		// [KO] 테스트용 GUI 헬퍼 초기화
+		// [EN] Initialize GUI helper for testing
 		renderTestPane(redGPUContext, redGPUContext.keyboardKeyBuffer);
 	},
-	(failReason) => { console.error(failReason); }
+	(failReason) => {
+		console.error('Initialization failed:', failReason);
+	}
 );
 
+/**
+ * [KO] 테스트용 GUI 렌더링
+ * [EN] Render GUI for testing
+ */
 const renderTestPane = (redGPUContext, keyboardKeyBuffer) => {
 	new RedGPUExampleHelper(redGPUContext, {
 		gui: (pane) => {
