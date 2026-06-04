@@ -119,6 +119,8 @@ interface PhongMaterial {
      * [EN] Whether to use SSR (Screen Space Reflection)
      */
     useSSR: number;
+    displacementScale: number;
+    displacementTexture: BitmapTexture
 }
 
 /**
@@ -144,16 +146,7 @@ interface PhongMaterial {
  * @category Material
  */
 class PhongMaterial extends AUVTransformBaseMaterial {
-    /**
-     * [KO] 디스플레이스먼트(변위) 텍스처
-     * [EN] Displacement texture
-     */
-    #displacementTexture: BitmapTexture
-    /**
-     * [KO] 디스플레이스먼트(변위) 스케일 (기본값: 1)
-     * [EN] Displacement scale (default: 1)
-     */
-    #displacementScale: number = 1
+
 
     /**
      * [KO] PhongMaterial 생성자
@@ -182,52 +175,7 @@ class PhongMaterial extends AUVTransformBaseMaterial {
         this.specularColor.setColorByHEX(this.specularColor.hex)
     }
 
-    /**
-     * [KO] 디스플레이스먼트(변위) 스케일을 반환합니다.
-     * [EN] Returns the displacement scale.
-     * @returns
-     * [KO] 스케일 값
-     * [EN] Scale value
-     */
-    get displacementScale(): number {
-        return this.#displacementScale;
-    }
 
-    /**
-     * [KO] 디스플레이스먼트(변위) 스케일을 설정합니다.
-     * [EN] Sets the displacement scale.
-     * @param value -
-     * [KO] 스케일 값
-     * [EN] Scale value
-     */
-    set displacementScale(value: number) {
-        this.#displacementScale = value;
-    }
-
-    /**
-     * [KO] 디스플레이스먼트(변위) 텍스처를 반환합니다.
-     * [EN] Returns the displacement texture.
-     * @returns
-     * [KO] BitmapTexture
-     * [EN] BitmapTexture
-     */
-    get displacementTexture(): BitmapTexture {
-        return this.#displacementTexture;
-    }
-
-    /**
-     * [KO] 디스플레이스먼트(변위) 텍스처를 설정하고 파이프라인을 갱신합니다.
-     * [EN] Sets the displacement texture and updates the pipeline.
-     * @param value -
-     * [KO] BitmapTexture
-     * [EN] BitmapTexture
-     */
-    set displacementTexture(value: BitmapTexture) {
-        const prevTexture: BitmapTexture = this.#displacementTexture
-        this.#displacementTexture = value;
-        this.updateTexture(prevTexture, value)
-        this.dirtyPipeline = true
-    }
 }
 
 DefineGPUProperty.defineSampler(
@@ -248,7 +196,8 @@ DefineGPUProperty.definePositiveNumber(
         {key: 'specularStrength', value: 1},
         {key: 'emissiveStrength', value: 1},
         {key: 'shininess', value: 32},
-        {key: 'normalScale', value: 1}
+        {key: 'normalScale', value: 1},
+        {key: 'displacementScale', value: 1}
     ]
 )
 DefineGPUProperty.defineColorRGB(PhongMaterial, [
@@ -264,6 +213,7 @@ DefineGPUProperty.defineTexture(PhongMaterial, [
     {key: 'environmentTexture'},
     {key: 'normalTexture'},
     {key: 'specularTexture'},
+    {key: 'displacementTexture'},
 ])
 DefineGPUProperty.defineBoolean(PhongMaterial, [
     {key: 'useSSR', value: false}
