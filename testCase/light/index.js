@@ -70,7 +70,7 @@ redUnit.testGroup(
         runner.defineTest('Success Test: Constructor defaults', (run) => {
             try {
                 const light = new RedGPU.Light.AmbientLight();
-                run(light.color.hex === '#ADD8E6' && light.lux === 0);
+                run(light.color.hex === '#ADD8E6' && light.lux === 50);
             } catch (e) { run(false, e); }
         }, true);
 

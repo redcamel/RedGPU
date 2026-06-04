@@ -6,6 +6,7 @@ import updateSystemUniformData from "./updateSystemUniformData";
 import DirectionalLight from "../../light/lights/DirectionalLight";
 import AmbientLight from "../../light/lights/AmbientLight";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
+import SkyAtmosphere from "../../display/skyAtmosphere/SkyAtmosphere";
 
 let temp3 = mat4.create()
 
@@ -152,7 +153,7 @@ class SystemUniformUpdater {
      * [EN] Target Uint32Array buffer
      */
     static updateSkyAtmosphere(
-        skyAtmosphere: any, // TODO: SkyAtmosphere 타입 정의 필요
+        skyAtmosphere: SkyAtmosphere,
         systemMembers: any,
         uniformDataF32: Float32Array,
         uniformDataU32: Uint32Array

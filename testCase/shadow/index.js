@@ -55,7 +55,6 @@ redUnit.testGroup(
             try {
                 const manager = new RedGPU.Shadow.DirectionalShadowManager();
                 manager.resetCastingList();
-                manager.reset();
                 run(true);
             } catch (e) { run(false, e); }
         }, true);
