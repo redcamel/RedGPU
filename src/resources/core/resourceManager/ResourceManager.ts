@@ -84,6 +84,7 @@ class ResourceManager extends RedGPUObject {
     readonly #prefilterGenerator: PrefilterGenerator
     readonly #equirectangularToCubeGenerator: EquirectangularToCubeGenerator
     #basicSampler: Sampler
+    #basicDisplacementSampler: Sampler
     #bitmapTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
     #cubeTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
 
@@ -115,6 +116,9 @@ class ResourceManager extends RedGPUObject {
         return this.#basicSampler;
     }
 
+    get basicDisplacementSampler(): Sampler {
+        return this.#basicDisplacementSampler
+    }
     /**
      * [KO] BRDF 생성기를 반환합니다.
      * [EN] Returns the BRDF generator.
@@ -627,6 +631,14 @@ class ResourceManager extends RedGPUObject {
             this.#emptyDepthTextureView = emptyDepthTexture.createView({label: emptyDepthTexture.label});
 
             this.#basicSampler = new Sampler(this.redGPUContext)
+            this.#basicDisplacementSampler = new Sampler(this.redGPUContext, {
+                magFilter: 'linear',
+                minFilter: 'linear',
+                mipmapFilter: 'linear',
+                addressModeU: 'repeat',
+                addressModeV: 'repeat',
+                addressModeW: 'repeat',
+            })
         }
         {
             this.createBindGroupLayout(
