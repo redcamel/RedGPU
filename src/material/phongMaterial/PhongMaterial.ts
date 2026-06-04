@@ -173,6 +173,14 @@ class PhongMaterial extends AUVTransformBaseMaterial {
         this.color.setColorByHEX(color)
         this.emissiveColor.setColorByHEX(this.emissiveColor.hex)
         this.specularColor.setColorByHEX(this.specularColor.hex)
+        this.diffuseTextureSampler = new Sampler(this.redGPUContext, {
+            magFilter: 'linear',
+            minFilter: 'linear',
+            mipmapFilter: 'linear',
+            addressModeU: 'repeat',
+            addressModeV: 'repeat',
+            addressModeW: 'repeat',
+        })
     }
 
 
@@ -187,7 +195,8 @@ DefineGPUProperty.defineSampler(
         {key: 'emissiveTextureSampler'},
         {key: 'environmentTextureSampler'},
         {key: 'normalTextureSampler'},
-        {key: 'specularTextureSampler'}
+        {key: 'specularTextureSampler'},
+        {key: 'displacementTextureSampler'}
     ])
 DefineGPUProperty.definePositiveNumber(
     PhongMaterial,

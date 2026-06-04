@@ -3,7 +3,6 @@
 #redgpu_include entryPoint.mesh.entryPointShadowVertex;
 #redgpu_include entryPoint.mesh.entryPointPickingVertex;
 #redgpu_include displacement.getDisplacementPosition;
-#redgpu_include displacement.getDisplacementNormal;
 
 #redgpu_include systemStruct.meshVertexBasicUniform;
 
@@ -63,7 +62,6 @@ fn main(inputData: InputData) -> VertexOutput {
 
     // Position and normal calculation
     var position: vec4<f32>;
-    var normalPosition: vec4<f32>;
 
 
     #redgpu_if useDisplacementTexture
@@ -89,35 +87,13 @@ fn main(inputData: InputData) -> VertexOutput {
         );
 
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
-
-        // [KO] 로컬 공간 기저(TBN) 구축 - Gram-Schmidt 과정을 통한 완벽한 직교화
-        // [EN] Construct local space basis (TBN) - Perfect orthogonalization via Gram-Schmidt process
-        let N = normalize(input_vertexNormal);
-        let T = normalize(inputData.vertexTangent.xyz - N * dot(inputData.vertexTangent.xyz, N));
-        let B = cross(N, T) * inputData.vertexTangent.w;
-        let tbn = mat3x3<f32>(T, B, N);
-
-        // [KO] 탄젠트 공간에서 계산된 노멀을 가져옴
-        let tangentDisplacedNormal = getDisplacementNormal(
-            displacementTexture,
-            displacementTextureSampler,
-            u_displacementScale,
-            transformedUV,
-            targetMipLevel
-        );
-
-        // [KO] TBN 행렬을 통해 탄젠트 공간 노멀 -> 로컬 공간 노멀로 변환
-        let localDisplacedNormal = tbn * tangentDisplacedNormal;
-
-        // [KO] 최종 로컬 노멀을 월드 공간으로 변환 (W=0.0 사용)
-        let worldDisplacedNormal = normalize((u_normalModelMatrix * vec4<f32>(localDisplacedNormal, 0.0)).xyz);
-        normalPosition = vec4<f32>(worldDisplacedNormal, 0.0);
     #redgpu_else
         position = u_modelMatrix * input_position_vec4;
-        // [KO] 방향 벡터 변환이므로 W=0.0 사용 및 정규화
-        let worldNormal = normalize((u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz);
-        normalPosition = vec4<f32>(worldNormal, 0.0);
     #redgpu_endIf
+
+    // [KO] 방향 벡터 변환이므로 W=0.0 사용 및 정규화
+    let worldNormal = normalize((u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz);
+    let normalPosition = vec4<f32>(worldNormal, 0.0);
 
     // Basic output assignments
     output.position = u_projectionViewMatrix * position;

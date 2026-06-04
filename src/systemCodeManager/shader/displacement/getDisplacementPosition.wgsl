@@ -10,7 +10,9 @@ fn getDisplacementPosition(
     input_uv: vec2<f32>,
     mipLevel: f32
 ) -> vec3<f32> {
-    let textureDimensions = vec2<f32>(textureDimensions(displacementTexture, 0));
+    // [KO] 현재 밉레벨에 해당하는 텍스처 크기를 가져옵니다.
+    // [EN] Get the texture size corresponding to the current mip level.
+    let textureDimensions = vec2<f32>(textureDimensions(displacementTexture, i32(mipLevel)));
     let invTexSize = 1.0 / textureDimensions;
 
     let uv = input_uv * textureDimensions;

@@ -3,6 +3,7 @@
 #redgpu_include shadow.getDirectionalShadowVisibility;
 #redgpu_include math.tnb.getTBNFromVertexTangent
 #redgpu_include math.tnb.getNormalFromNormalMap
+#redgpu_include displacement.getDisplacementNormal;
 #redgpu_include entryPoint.mesh.entryPointPickingFragment;
 #redgpu_include systemStruct.OutputFragment;
 #redgpu_include math.getMotionVector;
@@ -11,6 +12,8 @@
 
 
 #redgpu_include skyAtmosphere.skyAtmosphereFn
+
+const maxDistance: f32 = 10000.0;
 
 struct Uniforms {
     color: vec3<f32>,
@@ -25,6 +28,7 @@ struct Uniforms {
     aoStrength:f32,
     //
     normalScale:f32,
+    displacementScale:f32,
     //
     opacity: f32,
     useTint:u32,
@@ -72,6 +76,8 @@ struct InputData {
 @group(2) @binding(10) var aoTexture: texture_2d<f32>;
 @group(2) @binding(11) var normalTextureSampler: sampler;
 @group(2) @binding(12) var normalTexture: texture_2d<f32>;
+@group(2) @binding(13) var displacementTextureSampler: sampler;
+@group(2) @binding(14) var displacementTexture: texture_2d<f32>;
 
 
 #redgpu_include math.PI
@@ -181,6 +187,28 @@ fn main(inputData:InputData) -> OutputFragment {
 
     // Vertex Normal
     var N = normalize(input_vertexNormal) ;
+    #redgpu_if displacementTexture
+        {
+            let dist = distance(input_vertexPosition, u_cameraPosition);
+            let maxMip = f32(textureNumLevels(displacementTexture)) - 1.0;
+            // [KO] 거리에 따른 밉레벨 계산 (+1.0 바이어스를 통해 8비트 격자 무늬를 부드럽게 완화합니다)
+            // [EN] Mip level calculation based on distance (smoothing 8-bit grid patterns through +1.0 bias)
+            let targetMipLevel = clamp((dist / maxDistance) * maxMip + 1.0, 0.0, maxMip);
+
+            // [KO] 탄젠트 공간에서 계산된 노멀을 가져옴
+            let tangentDisplacedNormal = getDisplacementNormal(
+                displacementTexture,
+                displacementTextureSampler,
+                uniforms.displacementScale,
+                inputData.uv,
+                targetMipLevel
+            );
+
+            // [KO] 로컬 공간 기저(TBN) 구축
+            let tbn = getTBNFromVertexTangent(N, inputData.vertexTangent);
+            N = normalize(tbn * tangentDisplacedNormal);
+        }
+    #redgpu_endIf
     #redgpu_if normalTexture
         let normalSamplerColor = textureSample(normalTexture, normalTextureSampler, inputData.uv).rgb;
         let tbn = getTBNFromVertexTangent(N, inputData.vertexTangent);
