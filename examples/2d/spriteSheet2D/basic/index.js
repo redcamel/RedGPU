@@ -12,62 +12,69 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=17789220
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-RedGPU.init(canvas, (redGPUContext) => {
-    
+RedGPU.init(
+    canvas,
+    (redGPUContext) => {
+        // 1. [KO] Scene 생성
+        // [EN] Create Scene
+        const scene = new RedGPU.Display.Scene();
 
-    const scene = new RedGPU.Display.Scene();
-    const view = new RedGPU.Display.View2D(redGPUContext, scene);
-    redGPUContext.addView(view);
+        // 2. [KO] 2D View 생성 및 등록
+        // [EN] Create and register 2D View
+        const view = new RedGPU.Display.View2D(redGPUContext, scene);
+        redGPUContext.addView(view);
 
-    const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
-    const spriteCount = 4;
-    for (let i = 0; i < spriteCount; i++) {
-        const spriteSheet = new RedGPU.Display.SpriteSheet2D(redGPUContext, spriteSheetInfo);
-        scene.addChild(spriteSheet);
-    }
+        // 3. [KO] SpriteSheetInfo 및 SpriteSheet2D 생성
+        // [EN] Create SpriteSheetInfo and SpriteSheet2D
+        const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
+        const spriteCount = 4;
+        for (let i = 0; i < spriteCount; i++) {
+            const spriteSheet = new RedGPU.Display.SpriteSheet2D(redGPUContext, spriteSheetInfo);
+            scene.addChild(spriteSheet);
+        }
 
-    let centerX = redGPUContext.screenRectObject.width / 2;
-    let centerY = redGPUContext.screenRectObject.height / 2;
+        let centerX = redGPUContext.screenRectObject.width / 2;
+        let centerY = view.screenRectObject.height / 2;
 
-    /**
-     * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
-     * [EN] Event handler called when the screen size changes.
-     */
-    redGPUContext.onResize = (resizeEvent) => {
-        const {width, height} = resizeEvent.screenRectObject;
-        centerX = width / 2;
-        centerY = height / 2;
-    };
+        // 4. [KO] 리사이즈 이벤트 처리
+        // [EN] Handle resize event
+        redGPUContext.onResize = (resizeEvent) => {
+            const {width, height} = resizeEvent.screenRectObject;
+            centerX = width / 2;
+            centerY = height / 2;
+        };
 
-    const renderer = new RedGPU.Renderer();
-    const render = () => {
-        const radius = 250;
-        const numChildren = view.scene.children.length;
+        // 5. [KO] 렌더러 시작 및 루프 정의
+        // [EN] Start renderer and define loop
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext, () => {
+            const radius = 250;
+            const numChildren = view.scene.children.length;
 
-        view.scene.children.forEach((spriteSheet2D, index) => {
-            const angle = (index / numChildren) * Math.PI * 2;
-            const endX = centerX + Math.cos(angle) * radius;
-            const endY = centerY + Math.sin(angle) * radius;
+            view.scene.children.forEach((spriteSheet2D, index) => {
+                const angle = (index / numChildren) * Math.PI * 2;
+                const endX = centerX + Math.cos(angle) * radius;
+                const endY = centerY + Math.sin(angle) * radius;
 
-            spriteSheet2D.x += (endX - spriteSheet2D.x) * 0.3;
-            spriteSheet2D.y += (endY - spriteSheet2D.y) * 0.3;
+                spriteSheet2D.x += (endX - spriteSheet2D.x) * 0.3;
+                spriteSheet2D.y += (endY - spriteSheet2D.y) * 0.3;
+            });
         });
-    };
-    renderer.start(redGPUContext, render);
 
-    renderTestPane(scene, redGPUContext);
-}, (failReason) => {
-    console.error('Initialization failed:', failReason);
-    const errorMessage = document.createElement('div');
-    errorMessage.innerHTML = failReason;
-    document.body.appendChild(errorMessage);
-});
+        // 6. [KO] 테스트 GUI 구성
+        // [EN] Configure test GUI
+        renderTestPane(scene, redGPUContext);
+    },
+    (failReason) => {
+        // [KO] 초기화 실패 시 처리
+        // [EN] Handle initialization failure
+        console.error('Initialization failed:', failReason);
+    }
+);
 
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param {RedGPU.Display.Scene} scene
- * @param {RedGPU.RedGPUContext} redGPUContext
  */
 const renderTestPane = (scene, redGPUContext) => {
     new RedGPUExampleHelper(redGPUContext, {

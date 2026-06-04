@@ -15,59 +15,58 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        
-
+        // 1. [KO] Scene 생성
+        // [EN] Create Scene
         const scene = new RedGPU.Display.Scene();
+
+        // 2. [KO] 2D View 생성 및 등록
+        // [EN] Create and register 2D View
         const view = new RedGPU.Display.View2D(redGPUContext, scene);
         redGPUContext.addView(view);
 
-        const parentSprite2D = createParentSprite2D(redGPUContext, scene);
-        const childSprite2D = createChildSprite2D(redGPUContext, parentSprite2D);
+        // 3. [KO] 부모 Sprite2D 생성
+        // [EN] Create parent Sprite2D
+        const parentSprite = createParentSprite2D(redGPUContext, scene);
+        parentSprite.setPosition(view.screenRectObject.width / 2, view.screenRectObject.height / 2);
 
-        /**
-         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
-         * [EN] Event handler called when the screen size changes.
-         */
-        redGPUContext.onResize = (resizeEvent) => {
+        // 4. [KO] 자식 Sprite2D 생성
+        // [EN] Create child Sprite2D
+        const childSprite = createChildSprite2D(redGPUContext, parentSprite);
+
+        // 5. [KO] 리사이즈 이벤트 처리
+        // [EN] Handle resize event
+        view.onResize = (resizeEvent) => {
             const {width, height} = resizeEvent.screenRectObject;
-            parentSprite2D.x = width / 2;
-            parentSprite2D.y = height / 2;
+            parentSprite.x = width / 2;
+            parentSprite.y = height / 2;
         };
-        redGPUContext.onResize({
-            target: redGPUContext,
-            screenRectObject: redGPUContext.screenRectObject,
-            pixelRectObject: redGPUContext.pixelRectObject
-        });
 
+        // 6. [KO] 렌더러 시작
+        // [EN] Start renderer
         const renderer = new RedGPU.Renderer();
-        const render = () => {
+        renderer.start(redGPUContext);
 
-        };
-        renderer.start(redGPUContext, render);
-
-        renderTestPane(redGPUContext, parentSprite2D, childSprite2D);
+        // 7. [KO] 테스트 GUI 구성
+        // [EN] Configure test GUI
+        renderTestPane(redGPUContext, parentSprite, childSprite);
     },
     (failReason) => {
+        // [KO] 초기화 실패 시 처리
+        // [EN] Handle initialization failure
         console.error('Initialization failed:', failReason);
-        const errorMessage = document.createElement('div');
-        errorMessage.innerHTML = failReason;
-        document.body.appendChild(errorMessage);
     }
 );
 
 /**
  * [KO] 부모 Sprite2D를 생성합니다.
  * [EN] Creates a parent Sprite2D.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @returns {RedGPU.Display.Sprite2D}
  */
 const createParentSprite2D = (redGPUContext, scene) => {
-    const material = new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg'));
+    const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
+    const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
     const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, material);
-    sprite2D.setSize(100, 100);
-    sprite2D.x = redGPUContext.screenRectObject.width / 2;
-    sprite2D.y = redGPUContext.screenRectObject.height / 2;
+    const size = redGPUContext.detector.isMobile ? 100 : 200;
+    sprite2D.setSize(size, size);
     scene.addChild(sprite2D);
 
     return sprite2D;
@@ -76,16 +75,13 @@ const createParentSprite2D = (redGPUContext, scene) => {
 /**
  * [KO] 자식 Sprite2D를 생성합니다.
  * [EN] Creates a child Sprite2D.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Sprite2D} parent
- * @returns {RedGPU.Display.Sprite2D}
  */
 const createChildSprite2D = (redGPUContext, parent) => {
     const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
     const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, material);
-    sprite2D.setSize(100, 100);
-    sprite2D.x = 100;
-    sprite2D.y = 100;
+    const size = 100
+    sprite2D.setSize(size, size);
+    sprite2D.setPosition(parent.width / 2 + size / 2, parent.height / 2 + size / 2);
     parent.addChild(sprite2D);
 
     return sprite2D;
@@ -94,123 +90,29 @@ const createChildSprite2D = (redGPUContext, parent) => {
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Sprite2D} parent
- * @param {RedGPU.Display.Sprite2D} child
  */
 const renderTestPane = (redGPUContext, parent, child) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            const maxW = redGPUContext.screenRectObject.width;
-            const maxH = redGPUContext.screenRectObject.height;
+            const parentFolder = pane.addFolder({title: 'Parent Sprite2D'});
+            parentFolder.addBinding(parent, 'x', {min: 0, max: 1000, step: 0.1});
+            parentFolder.addBinding(parent, 'y', {min: 0, max: 1000, step: 0.1});
+            parentFolder.addBinding(parent, 'width', {min: 0, max: 500, step: 0.1});
+            parentFolder.addBinding(parent, 'height', {min: 0, max: 500, step: 0.1});
+            parentFolder.addBinding(parent, 'rotation', {min: 0, max: 360, step: 0.01});
+            parentFolder.addBinding(parent, 'scaleX', {min: 0, max: 5, step: 0.1});
+            parentFolder.addBinding(parent, 'scaleY', {min: 0, max: 5, step: 0.1});
+            parentFolder.addBinding(parent, 'opacity', {min: 0, max: 1, step: 0.01});
 
-            const parentConfig = {
-                x: parent.x,
-                y: parent.y,
-                width: parent.width,
-                height: parent.height,
-                rotation: parent.rotation,
-                scaleX: parent.scaleX,
-                scaleY: parent.scaleY,
-                opacity: parent.opacity,
-            };
-
-            const childConfig = {
-                x: child.x,
-                y: child.y,
-                width: child.width,
-                height: child.height,
-                rotation: child.rotation,
-                scaleX: child.scaleX,
-                scaleY: child.scaleY,
-                opacity: child.scaleY,
-            };
-
-            const parentFolder = pane.addFolder({title: 'Parent Sprite2D', expanded: true});
-            parentFolder.addBinding(parentConfig, 'x', {
-                min: 0,
-                max: maxW,
-                step: 0.1
-            }).on('change', (evt) => parent.x = evt.value);
-            parentFolder.addBinding(parentConfig, 'y', {
-                min: 0,
-                max: maxH,
-                step: 0.1
-            }).on('change', (evt) => parent.y = evt.value);
-            parentFolder.addBinding(parentConfig, 'width', {
-                min: 0,
-                max: parentConfig.width * 2,
-                step: 0.1
-            }).on('change', (evt) => parent.width = evt.value);
-            parentFolder.addBinding(parentConfig, 'height', {
-                min: 0,
-                max: parentConfig.height * 2,
-                step: 0.1
-            }).on('change', (evt) => parent.height = evt.value);
-            parentFolder.addBinding(parentConfig, 'rotation', {
-                min: 0,
-                max: 360,
-                step: 0.01
-            }).on('change', (evt) => parent.rotation = evt.value);
-
-            parentFolder.addBinding(parentConfig, 'scaleX', {
-                min: 0,
-                max: 5,
-                step: 0.1
-            }).on('change', (evt) => parent.scaleX = evt.value);
-            parentFolder.addBinding(parentConfig, 'scaleY', {
-                min: 0,
-                max: 5,
-                step: 0.1
-            }).on('change', (evt) => parent.scaleY = evt.value);
-            parentFolder.addBinding(parentConfig, 'opacity', {
-                min: 0,
-                max: 1,
-                step: 0.01
-            }).on('change', (evt) => parent.opacity = evt.value);
-
-            const childFolder = pane.addFolder({title: 'Child Sprite2D', expanded: true});
-            childFolder.addBinding(childConfig, 'x', {
-                min: -100,
-                max: 100,
-                step: 0.1
-            }).on('change', (evt) => child.x = evt.value);
-            childFolder.addBinding(childConfig, 'y', {
-                min: -100,
-                max: 100,
-                step: 0.1
-            }).on('change', (evt) => child.y = evt.value);
-            childFolder.addBinding(childConfig, 'width', {
-                min: 0,
-                max: childConfig.width * 2,
-                step: 0.1
-            }).on('change', (evt) => child.width = evt.value);
-            childFolder.addBinding(childConfig, 'height', {
-                min: 0,
-                max: childConfig.height * 2,
-                step: 0.1
-            }).on('change', (evt) => child.height = evt.value);
-            childFolder.addBinding(childConfig, 'rotation', {
-                min: 0,
-                max: 360,
-                step: 0.01
-            }).on('change', (evt) => child.rotation = evt.value);
-
-            childFolder.addBinding(childConfig, 'scaleX', {
-                min: 0,
-                max: 5,
-                step: 0.1
-            }).on('change', (evt) => child.scaleX = evt.value);
-            childFolder.addBinding(childConfig, 'scaleY', {
-                min: 0,
-                max: 5,
-                step: 0.1
-            }).on('change', (evt) => child.scaleY = evt.value);
-            childFolder.addBinding(child, 'opacity', {
-                min: 0,
-                max: 1,
-                step: 0.01
-            }).on('change', (evt) => child.opacity = evt.value);
+            const childFolder = pane.addFolder({title: 'Child Sprite2D'});
+            childFolder.addBinding(child, 'x', {min: -200, max: 200, step: 0.1});
+            childFolder.addBinding(child, 'y', {min: -200, max: 200, step: 0.1});
+            childFolder.addBinding(child, 'width', {min: 0, max: 500, step: 0.1});
+            childFolder.addBinding(child, 'height', {min: 0, max: 500, step: 0.1});
+            childFolder.addBinding(child, 'rotation', {min: 0, max: 360, step: 0.01});
+            childFolder.addBinding(child, 'scaleX', {min: 0, max: 5, step: 0.1});
+            childFolder.addBinding(child, 'scaleY', {min: 0, max: 5, step: 0.1});
+            childFolder.addBinding(child, 'opacity', {min: 0, max: 1, step: 0.01});
         }
     });
 };

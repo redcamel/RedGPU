@@ -15,54 +15,54 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        
-
+        // 1. [KO] Scene 생성
+        // [EN] Create Scene
         const scene = new RedGPU.Display.Scene();
+
+        // 2. [KO] 2D View 생성 및 등록
+        // [EN] Create and register 2D View
         const view = new RedGPU.Display.View2D(redGPUContext, scene);
         redGPUContext.addView(view);
 
+        // 3. [KO] 부모 및 자식 Sprite2D 생성
+        // [EN] Create parent and child Sprite2D
         const parentSprite2D = createParentSprite2D(redGPUContext, scene);
+        parentSprite2D.setPosition(view.screenRectObject.width / 2, view.screenRectObject.height / 2);
         const childSprite2D = createChildSprite2D(redGPUContext, parentSprite2D);
 
-        /**
-         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
-         * [EN] Event handler called when the screen size changes.
-         */
+        // 4. [KO] 리사이즈 이벤트 처리
+        // [EN] Handle resize event
         redGPUContext.onResize = (resizeEvent) => {
             const {width, height} = resizeEvent.screenRectObject;
             parentSprite2D.x = width / 2;
             parentSprite2D.y = height / 2;
         };
-        redGPUContext.onResize({
-            target: redGPUContext,
-            screenRectObject: redGPUContext.screenRectObject,
-            pixelRectObject: redGPUContext.pixelRectObject
+
+
+        // 5. [KO] 렌더러 시작
+        // [EN] Start renderer
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext, () => {
         });
 
-        const renderer = new RedGPU.Renderer();
-        const render = () => {
-        };
-        renderer.start(redGPUContext, render);
-
+        // 6. [KO] 테스트 GUI 구성
+        // [EN] Configure test GUI
         renderTestPane(redGPUContext, parentSprite2D, childSprite2D);
     },
     (failReason) => {
+        // [KO] 초기화 실패 시 처리
+        // [EN] Handle initialization failure
         console.error('Initialization failed:', failReason);
-        const errorMessage = document.createElement('div');
-        errorMessage.innerHTML = failReason;
-        document.body.appendChild(errorMessage);
     }
 );
 
 /**
  * [KO] 부모 Sprite2D를 생성하고 피벗 포인트를 시각화합니다.
  * [EN] Creates a parent Sprite2D and visualizes the pivot point.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @returns {RedGPU.Display.Sprite2D}
  */
 const createParentSprite2D = (redGPUContext, scene) => {
-    const material = new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg'));
+    const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
+    const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
     const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, material);
     sprite2D.setSize(100, 100);
     sprite2D.x = redGPUContext.screenRectObject.width / 2;
@@ -78,9 +78,6 @@ const createParentSprite2D = (redGPUContext, scene) => {
 /**
  * [KO] 자식 Sprite2D를 생성하고 피벗 포인트를 시각화합니다.
  * [EN] Creates a child Sprite2D and visualizes the pivot point.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Sprite2D} parent
- * @returns {RedGPU.Display.Sprite2D}
  */
 const createChildSprite2D = (redGPUContext, parent) => {
     const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
@@ -89,6 +86,7 @@ const createChildSprite2D = (redGPUContext, parent) => {
     sprite2D.x = 100;
     sprite2D.y = 100;
     parent.addChild(sprite2D);
+
     const pivotPoint = new RedGPU.Display.Sprite2D(redGPUContext, new RedGPU.Material.ColorMaterial(redGPUContext, '#0000ff'));
     pivotPoint.setSize(10, 10);
     sprite2D.addChild(pivotPoint);
@@ -98,9 +96,6 @@ const createChildSprite2D = (redGPUContext, parent) => {
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Sprite2D} parent
- * @param {RedGPU.Display.Sprite2D} child
  */
 const renderTestPane = (redGPUContext, parent, child) => {
     new RedGPUExampleHelper(redGPUContext, {
@@ -109,19 +104,11 @@ const renderTestPane = (redGPUContext, parent, child) => {
             const maxH = redGPUContext.screenRectObject.height;
 
             const parentFolder = pane.addFolder({title: 'Parent Sprite2D', expanded: true});
-            parentFolder.addBinding(parent, 'pivotX', {
-                min: -50,
-                max: 50,
-                step: 0.1
-            }).on('change', (evt) => {
+            parentFolder.addBinding(parent, 'pivotX', {min: -50, max: 50, step: 0.1}).on('change', (evt) => {
                 parent.pivotX = evt.value;
                 parent.getChildAt(0).x = parent.pivotX;
             });
-            parentFolder.addBinding(parent, 'pivotY', {
-                min: -50,
-                max: 50,
-                step: 0.1
-            }).on('change', (evt) => {
+            parentFolder.addBinding(parent, 'pivotY', {min: -50, max: 50, step: 0.1}).on('change', (evt) => {
                 parent.pivotY = evt.value;
                 parent.getChildAt(0).y = parent.pivotY;
             });
@@ -150,7 +137,6 @@ const renderTestPane = (redGPUContext, parent, child) => {
                 max: 360,
                 step: 0.01
             }).on('change', (evt) => parent.rotation = evt.value);
-
             parentFolder.addBinding(parent, 'scaleX', {
                 min: 0,
                 max: 5,
@@ -163,19 +149,11 @@ const renderTestPane = (redGPUContext, parent, child) => {
             }).on('change', (evt) => parent.scaleY = evt.value);
 
             const childFolder = pane.addFolder({title: 'Child Sprite2D', expanded: true});
-            childFolder.addBinding(child, 'pivotX', {
-                min: -50,
-                max: 50,
-                step: 0.1
-            }).on('change', (evt) => {
+            childFolder.addBinding(child, 'pivotX', {min: -50, max: 50, step: 0.1}).on('change', (evt) => {
                 child.pivotX = evt.value;
                 child.getChildAt(0).x = child.pivotX;
             });
-            childFolder.addBinding(child, 'pivotY', {
-                min: -50,
-                max: 50,
-                step: 0.1
-            }).on('change', (evt) => {
+            childFolder.addBinding(child, 'pivotY', {min: -50, max: 50, step: 0.1}).on('change', (evt) => {
                 child.pivotY = evt.value;
                 child.getChildAt(0).y = child.pivotY;
             });
@@ -204,7 +182,6 @@ const renderTestPane = (redGPUContext, parent, child) => {
                 max: 360,
                 step: 0.01
             }).on('change', (evt) => child.rotation = evt.value);
-
             childFolder.addBinding(child, 'scaleX', {
                 min: 0,
                 max: 5,

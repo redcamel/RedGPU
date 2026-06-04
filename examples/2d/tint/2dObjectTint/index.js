@@ -15,42 +15,51 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. [KO] Scene 생성
+        // [EN] Create Scene
         const scene = new RedGPU.Display.Scene();
+
+        // 2. [KO] 2D View 생성 및 등록
+        // [EN] Create and register 2D View
         const view = new RedGPU.Display.View2D(redGPUContext, scene);
         redGPUContext.addView(view);
 
-        const texture_blendTest_base = new RedGPU.Resource.BitmapTexture(
-            redGPUContext,
-            '../../../assets/UV_Grid_Sm.jpg'
-        );
+        // 3. [KO] 텍스처 생성
+        // [EN] Create texture
+        const texture_blendTest_base = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
 
+        // 4. [KO] Sprite2D (ColorMaterial) 생성 및 틴트 적용
+        // [EN] Create Sprite2D (ColorMaterial) and apply tint
         const sprite2D_color = new RedGPU.Display.Sprite2D(redGPUContext, new RedGPU.Material.ColorMaterial(redGPUContext, '#cf8989'));
         sprite2D_color.setSize(200, 200);
         sprite2D_color.material.tint.setColorByRGBA(255, 128, 0, 1);
         scene.addChild(sprite2D_color);
 
+        // 5. [KO] Sprite2D (BitmapMaterial) 생성 및 틴트 적용
+        // [EN] Create Sprite2D (BitmapMaterial) and apply tint
         const sprite2D_bitmap = new RedGPU.Display.Sprite2D(redGPUContext, new RedGPU.Material.BitmapMaterial(redGPUContext, texture_blendTest_base));
         sprite2D_bitmap.setSize(200, 200);
         sprite2D_bitmap.material.tint.setColorByRGBA(255, 128, 0, 1);
         scene.addChild(sprite2D_bitmap);
 
+        // 6. [KO] SpriteSheet2D 생성 및 틴트 적용
+        // [EN] Create SpriteSheet2D and apply tint
         const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
         const spriteSheet2D = new RedGPU.Display.SpriteSheet2D(redGPUContext, spriteSheetInfo);
         spriteSheet2D.material.tint.setColorByRGBA(255, 128, 0, 1);
         scene.addChild(spriteSheet2D);
 
+        // 7. [KO] TextField2D 생성 및 틴트 적용
+        // [EN] Create TextField2D and apply tint
         const textField2D = new RedGPU.Display.TextField2D(redGPUContext);
         textField2D.text = 'RedGPU';
         textField2D.material.tint.setColorByRGBA(255, 128, 0, 1);
         scene.addChild(textField2D);
 
-        /**
-         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
-         * [EN] Event handler called when the screen size changes.
-         */
+        // 8. [KO] 리사이즈 이벤트 처리
+        // [EN] Handle resize event
         redGPUContext.onResize = (resizeEvent) => {
             const {width, height} = resizeEvent.screenRectObject;
-
             const gap = 220;
             const totalChildren = scene.children.length;
             const rowWidth = (totalChildren - 1) * gap;
@@ -68,27 +77,25 @@ RedGPU.init(
             pixelRectObject: redGPUContext.pixelRectObject
         });
 
-        renderTestPane(redGPUContext, scene);
-
+        // 9. [KO] 렌더러 시작
+        // [EN] Start renderer
         const renderer = new RedGPU.Renderer();
-        const render = () => {
-            // base.rotation += 1;
-        };
-        renderer.start(redGPUContext, render);
+        renderer.start(redGPUContext);
+
+        // 10. [KO] 테스트 GUI 구성
+        // [EN] Configure test GUI
+        renderTestPane(redGPUContext, scene);
     },
     (failReason) => {
+        // [KO] 초기화 실패 시 처리
+        // [EN] Handle initialization failure
         console.error('Initialization failed:', failReason);
-        const errorMessage = document.createElement('div');
-        errorMessage.innerHTML = failReason;
-        document.body.appendChild(errorMessage);
     }
 );
 
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
  */
 const renderTestPane = (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {

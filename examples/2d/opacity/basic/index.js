@@ -15,60 +15,56 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        
-
+        // 1. [KO] Scene 생성
+        // [EN] Create Scene
         const scene = new RedGPU.Display.Scene();
+
+        // 2. [KO] 2D View 생성 및 등록
+        // [EN] Create and register 2D View
         const view = new RedGPU.Display.View2D(redGPUContext, scene);
         redGPUContext.addView(view);
 
-        const parentSprite2D = createParentSprite2D(redGPUContext, scene);
-        const childSprite2D = createChildSprite2D(redGPUContext, parentSprite2D);
-        const childTextField2D = createChildTextField2D(redGPUContext, parentSprite2D);
-        const childSpriteSheet2D = createChildSpriteSheet2D(redGPUContext, parentSprite2D);
+        // 3. [KO] 부모 및 자식 객체들 생성
+        // [EN] Create parent and child objects
+        const parentSprite = createParentSprite2D(redGPUContext, scene);
+        parentSprite.x = redGPUContext.screenRectObject.width / 2;
+        parentSprite.y = view.screenRectObject.height / 2;
+        const childSprite = createChildSprite2D(redGPUContext, parentSprite);
+        const childTextField = createChildTextField2D(redGPUContext, parentSprite);
+        const childSpriteSheet = createChildSpriteSheet2D(redGPUContext, parentSprite);
 
-        /**
-         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
-         * [EN] Event handler called when the screen size changes.
-         */
-        redGPUContext.onResize = (resizeEvent) => {
+        // 4. [KO] 리사이즈 이벤트 처리
+        // [EN] Handle resize event
+        view.onResize = (resizeEvent) => {
             const {width, height} = resizeEvent.screenRectObject;
-            parentSprite2D.x = width / 2;
-            parentSprite2D.y = height / 2;
+            parentSprite.x = width / 2;
+            parentSprite.y = height / 2;
         };
-        redGPUContext.onResize({
-            target: redGPUContext,
-            screenRectObject: redGPUContext.screenRectObject,
-            pixelRectObject: redGPUContext.pixelRectObject
-        });
 
+        // 5. [KO] 렌더러 시작
+        // [EN] Start renderer
         const renderer = new RedGPU.Renderer();
-        const render = () => {
-        };
-        renderer.start(redGPUContext, render);
+        renderer.start(redGPUContext);
 
-        renderTestPane(redGPUContext, parentSprite2D, [childSprite2D, childTextField2D, childSpriteSheet2D]);
+        // 6. [KO] 테스트 GUI 구성
+        // [EN] Configure test GUI
+        renderTestPane(redGPUContext, parentSprite, [childSprite, childTextField, childSpriteSheet]);
     },
     (failReason) => {
+        // [KO] 초기화 실패 시 처리
+        // [EN] Handle initialization failure
         console.error('Initialization failed:', failReason);
-        const errorMessage = document.createElement('div');
-        errorMessage.innerHTML = failReason;
-        document.body.appendChild(errorMessage);
     }
 );
 
 /**
  * [KO] 부모 Sprite2D를 생성합니다.
  * [EN] Creates a parent Sprite2D.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @returns {RedGPU.Display.Sprite2D}
  */
 const createParentSprite2D = (redGPUContext, scene) => {
     const material = new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg'));
     const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, material);
     sprite2D.setSize(100, 100);
-    sprite2D.x = redGPUContext.screenRectObject.width / 2;
-    sprite2D.y = redGPUContext.screenRectObject.height / 2;
     scene.addChild(sprite2D);
 
     const title = new RedGPU.Display.TextField2D(redGPUContext);
@@ -83,9 +79,6 @@ const createParentSprite2D = (redGPUContext, scene) => {
 /**
  * [KO] 자식 Sprite2D를 생성합니다.
  * [EN] Creates a child Sprite2D.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Sprite2D} parent
- * @returns {RedGPU.Display.Sprite2D}
  */
 const createChildSprite2D = (redGPUContext, parent) => {
     const material = new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000');
@@ -106,9 +99,6 @@ const createChildSprite2D = (redGPUContext, parent) => {
 /**
  * [KO] 자식 SpriteSheet2D를 생성합니다.
  * [EN] Creates a child SpriteSheet2D.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Sprite2D} parent
- * @returns {RedGPU.Display.SpriteSheet2D}
  */
 const createChildSpriteSheet2D = (redGPUContext, parent) => {
     const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
@@ -128,9 +118,6 @@ const createChildSpriteSheet2D = (redGPUContext, parent) => {
 /**
  * [KO] 자식 TextField2D를 생성합니다.
  * [EN] Creates a child TextField2D.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Sprite2D} parent
- * @returns {RedGPU.Display.TextField2D}
  */
 const createChildTextField2D = (redGPUContext, parent) => {
     const textField2D = new RedGPU.Display.TextField2D(redGPUContext);
@@ -144,81 +131,31 @@ const createChildTextField2D = (redGPUContext, parent) => {
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Sprite2D} parent
- * @param {Array<RedGPU.Display.DisplayObject2D>} children
  */
 const renderTestPane = (redGPUContext, parent, children) => {
     new RedGPUExampleHelper(redGPUContext, {
         gui: (pane) => {
-            const parentConfig = {
-                x: parent.x,
-                y: parent.y,
-                width: parent.width,
-                height: parent.height,
-                rotation: parent.rotation,
-                scaleX: parent.scaleX,
-                scaleY: parent.scaleY,
-                opacity: parent.opacity,
+            const updateText = (obj) => {
+                if (obj instanceof RedGPU.Display.TextField2D) {
+                    obj.text = `TextField2D<br/>Opacity ${obj.opacity.toFixed(2)}<br/>combinedOpacity ${obj.getCombinedOpacity().toFixed(2)}`;
+                } else {
+                    const title = obj.children?.find(c => c instanceof RedGPU.Display.TextField2D);
+                    if (title) {
+                        title.text = `${obj.constructor.name}<br/>Opacity ${obj.opacity.toFixed(2)}<br/>combinedOpacity ${obj.getCombinedOpacity().toFixed(2)}`;
+                    }
+                }
             };
 
-            const parentFolder = pane.addFolder({title: 'Parent Sprite2D', expanded: true});
-            parentFolder.addBinding(parentConfig, 'opacity', {
-                min: 0,
-                max: 1,
-                step: 0.01
-            }).on('change', (evt) => {
-                parent.opacity = evt.value;
-
-                const parentTitle = parent.children.find(child => child instanceof RedGPU.Display.TextField2D);
-                if (parentTitle) {
-                    parentTitle.text = `Opacity ${parent.opacity.toFixed(2)}<br/>combinedOpacity ${parent.getCombinedOpacity().toFixed(2)}`;
-                }
-
-                children.forEach((child) => {
-                    if (child instanceof RedGPU.Display.TextField2D) {
-                        child.text = `TextField2D<br/>Opacity ${child.opacity.toFixed(2)}<br/>combinedOpacity ${child.getCombinedOpacity().toFixed(2)}`;
-                    } else {
-                        const childTitle = child.children?.find(
-                            (child) => child instanceof RedGPU.Display.TextField2D
-                        );
-                        if (childTitle) {
-                            childTitle.text = `Sprite2D<br/>Opacity ${child.opacity.toFixed(2)}<br/>combinedOpacity ${child.getCombinedOpacity().toFixed(2)}`;
-                        }
-                    }
-                });
+            const parentFolder = pane.addFolder({title: 'Parent Sprite2D'});
+            parentFolder.addBinding(parent, 'opacity', {min: 0, max: 1, step: 0.01}).on('change', () => {
+                updateText(parent);
+                children.forEach(updateText);
             });
 
-            children.forEach((child, index) => {
-                const childConfig = {
-                    x: child.x,
-                    y: child.y,
-                    width: child.width,
-                    height: child.height,
-                    rotation: child.rotation,
-                    scaleX: child.scaleX,
-                    scaleY: child.scaleY,
-                    opacity: child.opacity,
-                };
-
-                const childFolder = pane.addFolder({title: `Child ${child.constructor.name}`, expanded: true});
-                childFolder.addBinding(childConfig, 'opacity', {
-                    min: 0,
-                    max: 1,
-                    step: 0.01,
-                }).on('change', (evt) => {
-                    child.opacity = evt.value;
-
-                    if (child instanceof RedGPU.Display.TextField2D) {
-                        child.text = `TextField2D<br/>Opacity ${child.opacity.toFixed(2)}<br/>combinedOpacity ${child.getCombinedOpacity().toFixed(2)}`;
-                    } else {
-                        const childTitle = child.children?.find(
-                            (child) => child instanceof RedGPU.Display.TextField2D
-                        );
-                        if (childTitle) {
-                            childTitle.text = `Sprite2D<br/>Opacity ${child.opacity.toFixed(2)}<br/>combinedOpacity ${child.getCombinedOpacity().toFixed(2)}`;
-                        }
-                    }
+            children.forEach((child) => {
+                const childFolder = pane.addFolder({title: `Child ${child.constructor.name}`});
+                childFolder.addBinding(child, 'opacity', {min: 0, max: 1, step: 0.01}).on('change', () => {
+                    updateText(child);
                 });
             });
         }

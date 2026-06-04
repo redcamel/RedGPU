@@ -15,65 +15,67 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. [KO] Scene 생성
+        // [EN] Create Scene
         const scene = new RedGPU.Display.Scene();
+
+        // 2. [KO] 2D View 생성 및 등록
+        // [EN] Create and register 2D View
         const view = new RedGPU.Display.View2D(redGPUContext, scene);
         redGPUContext.addView(view);
 
-        const texture_blendTest_base = new RedGPU.Resource.BitmapTexture(
-            redGPUContext,
-            '../../../assets/UV_Grid_Sm.jpg'
-        );
+        // 3. [KO] 텍스처 및 재질 생성
+        // [EN] Create texture and material
+        const texture_blendTest_base = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
         const material_base = new RedGPU.Material.BitmapMaterial(redGPUContext, texture_blendTest_base);
 
+        // 4. [KO] 부모 Sprite2D 생성 및 틴트 적용
+        // [EN] Create parent Sprite2D and apply tint
         const base = new RedGPU.Display.Sprite2D(redGPUContext, material_base);
         base.setSize(200, 200);
         base.material.tint.setColorByRGBA(255, 128, 0, 1);
         scene.addChild(base);
 
+        // 5. [KO] 자식 Sprite2D 생성
+        // [EN] Create child Sprite2D
         const material_subChild = new RedGPU.Material.BitmapMaterial(redGPUContext, texture_blendTest_base);
-
         const subChild = new RedGPU.Display.Sprite2D(redGPUContext, material_subChild);
         subChild.setSize(100, 100);
         subChild.setPosition(150, 150);
         base.addChild(subChild);
 
-        /**
-         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
-         * [EN] Event handler called when the screen size changes.
-         */
+        // 6. [KO] 리사이즈 이벤트 처리
+        // [EN] Handle resize event
         redGPUContext.onResize = (resizeEvent) => {
             const {width, height} = resizeEvent.screenRectObject;
             base.x = width / 2;
             base.y = height / 2;
         };
-
         redGPUContext.onResize({
             target: redGPUContext,
             screenRectObject: redGPUContext.screenRectObject,
             pixelRectObject: redGPUContext.pixelRectObject
         });
 
-        renderTestPane(redGPUContext, base);
-
+        // 7. [KO] 렌더러 시작
+        // [EN] Start renderer
         const renderer = new RedGPU.Renderer();
-        const render = () => {
-            // base.rotation += 1;
-        };
-        renderer.start(redGPUContext, render);
+        renderer.start(redGPUContext);
+
+        // 8. [KO] 테스트 GUI 구성
+        // [EN] Configure test GUI
+        renderTestPane(redGPUContext, base);
     },
     (failReason) => {
+        // [KO] 초기화 실패 시 처리
+        // [EN] Handle initialization failure
         console.error('Initialization failed:', failReason);
-        const errorMessage = document.createElement('div');
-        errorMessage.innerHTML = failReason;
-        document.body.appendChild(errorMessage);
     }
 );
 
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Sprite2D} sprite
  */
 const renderTestPane = (redGPUContext, sprite) => {
     new RedGPUExampleHelper(redGPUContext, {
