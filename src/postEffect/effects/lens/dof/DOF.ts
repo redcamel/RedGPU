@@ -5,22 +5,27 @@ import {IPostEffectResult} from "../../../core/types";
 import DOFCoC from "./DOFCoC/DOFCoC";
 import DOFUnified from "./DOFUnified/DOFUnified";
 
+
 /**
  * [KO] 피사계 심도(DOF, Depth of Field) 후처리 이펙트입니다.
  * [EN] Depth of Field (DOF) post-processing effect.
  *
- * [KO] CoC(혼란 원) 계산과 블러를 결합해 사실적인 심도 효과를 제공합니다.
- * [EN] Provides realistic depth effects by combining CoC (Circle of Confusion) calculation and blur.
+ * [KO] 실제 카메라 렌즈의 특성을 시뮬레이션하여, 초점이 맞는 영역은 선명하게 하고 그 외의 영역은 거리에 따라 부드럽게 블러 처리합니다.
+ * [EN] Simulates real camera lens characteristics by keeping focused areas sharp while smoothly blurring other areas based on distance.
  *
- * [KO] 다양한 사진/영상 스타일 프리셋 메서드를 지원합니다.
- * [EN] Supports various photo/video style preset methods.
+ * [KO] CoC(Circle of Confusion) 모델을 기반으로 물리적으로 정확한 심도 표현을 제공하며, 고품질 하드웨어 샘플링을 통해 매끄러운 보케(Bokeh) 질감을 구현합니다.
+ * [EN] Provides physically accurate depth representation based on the CoC (Circle of Confusion) model and implements smooth bokeh textures through high-quality hardware sampling.
+ *
+ * [KO] 이 효과는 HDR 공간에서 동작하여 밝은 광원의 보케 형태를 아름답게 보존합니다.
+ * [EN] This effect operates in HDR space, beautifully preserving the bokeh shapes of bright light sources.
+ *
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.DOF(redGPUContext);
  * effect.focusDistance = 10;
- * effect.aperture = 2.0;
- * effect.maxCoC = 30;
- * effect.setCinematic(); // 시네마틱 프리셋 적용
+ * effect.aperture = 1.4;
+ * effect.nearBlurSize = 20;
+ * effect.farBlurSize = 25;
  * view.postEffectManager.addEffect(effect);
  * ```
  *

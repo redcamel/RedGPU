@@ -97,6 +97,8 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
                 focusDistance: effect.focusDistance,
                 aperture: effect.aperture,
                 maxCoC: effect.maxCoC,
+                nearPlane: effect.nearPlane,
+                farPlane: effect.farPlane,
                 nearBlurSize: effect.nearBlurSize,
                 farBlurSize: effect.farBlurSize,
                 nearStrength: effect.nearStrength,
@@ -115,11 +117,13 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
             });
 
             const controls = [
-                folder.addBinding(TEST_STATE, 'focusDistance', {min: 5, max: 50}),
-                folder.addBinding(TEST_STATE, 'aperture', {min: 1.0, max: 8.0}),
-                folder.addBinding(TEST_STATE, 'maxCoC', {min: 10, max: 100}),
-                folder.addBinding(TEST_STATE, 'nearBlurSize', {min: 5, max: 50}),
-                folder.addBinding(TEST_STATE, 'farBlurSize', {min: 5, max: 50}),
+                folder.addBinding(TEST_STATE, 'focusDistance', {min: 0, max: 100}),
+                folder.addBinding(TEST_STATE, 'aperture', {min: 0.1, max: 22.0}),
+                folder.addBinding(TEST_STATE, 'maxCoC', {min: 0, max: 100}),
+                folder.addBinding(TEST_STATE, 'nearPlane', {min: 0, max: 10}),
+                folder.addBinding(TEST_STATE, 'farPlane', {min: 10, max: 2000}),
+                folder.addBinding(TEST_STATE, 'nearBlurSize', {min: 0, max: 100}),
+                folder.addBinding(TEST_STATE, 'farBlurSize', {min: 0, max: 100}),
                 folder.addBinding(TEST_STATE, 'nearStrength', {min: 0, max: 3.0}),
                 folder.addBinding(TEST_STATE, 'farStrength', {min: 0, max: 3.0}),
             ];
@@ -132,26 +136,31 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
             });
 
             const presetFolder = folder.addFolder({title: 'Presets', expanded: false});
-            presetFolder.addButton({title: 'Game Default'}).on('click', () => {
-                const currentEffect = targetView.postEffectManager.getEffectAt(0);
-                if (currentEffect) {
-                    currentEffect.setGameDefault();
-                    updateUI(currentEffect);
-                }
-            });
-            presetFolder.addButton({title: 'Cinematic'}).on('click', () => {
-                const currentEffect = targetView.postEffectManager.getEffectAt(0);
-                if (currentEffect) {
-                    currentEffect.setCinematic();
-                    updateUI(currentEffect);
-                }
-            });
+            const addPresetButton = (title, method) => {
+                presetFolder.addButton({title}).on('click', () => {
+                    const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                    if (currentEffect) {
+                        currentEffect[method]();
+                        updateUI(currentEffect);
+                    }
+                });
+            };
+
+            addPresetButton('Game Default', 'setGameDefault');
+            addPresetButton('Cinematic', 'setCinematic');
+            addPresetButton('Portrait', 'setPortrait');
+            addPresetButton('Landscape', 'setLandscape');
+            addPresetButton('Macro', 'setMacro');
+            addPresetButton('Sports', 'setSports');
+            addPresetButton('Night Mode', 'setNightMode');
 
             function updateUI(effect) {
                 Object.assign(TEST_STATE, {
                     focusDistance: effect.focusDistance,
                     aperture: effect.aperture,
                     maxCoC: effect.maxCoC,
+                    nearPlane: effect.nearPlane,
+                    farPlane: effect.farPlane,
                     nearBlurSize: effect.nearBlurSize,
                     farBlurSize: effect.farBlurSize,
                     nearStrength: effect.nearStrength,

@@ -117,11 +117,11 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
                 const currentEffect = targetView.postEffectManager.getEffectAt(0);
                 if (currentEffect) currentEffect.falloff = v.value
             }));
-            controls.push(folder.addBinding(TEST_STATE, 'centerX', {min: 0, max: 1}).on('change', (v) => {
+            controls.push(folder.addBinding(TEST_STATE, 'centerX', {min: -500, max: 500}).on('change', (v) => {
                 const currentEffect = targetView.postEffectManager.getEffectAt(0);
                 if (currentEffect) currentEffect.centerX = v.value
             }));
-            controls.push(folder.addBinding(TEST_STATE, 'centerY', {min: 0, max: 1}).on('change', (v) => {
+            controls.push(folder.addBinding(TEST_STATE, 'centerY', {min: -500, max: 500}).on('change', (v) => {
                 const currentEffect = targetView.postEffectManager.getEffectAt(0);
                 if (currentEffect) currentEffect.centerY = v.value
             }));

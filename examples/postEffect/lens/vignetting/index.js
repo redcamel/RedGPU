@@ -86,6 +86,8 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
                 Vignetting: true,
                 smoothness: effect.smoothness,
                 size: effect.size,
+                centerX: effect.centerX,
+                centerY: effect.centerY,
             }
             const folder = pane.addFolder({title: 'PostEffect', expanded: true})
 
@@ -94,6 +96,8 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
                     const newEffect = new RedGPU.PostEffect.Vignetting(redGPUContext);
                     newEffect.smoothness = TEST_STATE.smoothness;
                     newEffect.size = TEST_STATE.size;
+                    newEffect.centerX = TEST_STATE.centerX;
+                    newEffect.centerY = TEST_STATE.centerY;
                     targetView.postEffectManager.addEffect(newEffect);
                 } else {
                     targetView.postEffectManager.removeAllEffect();
@@ -104,6 +108,8 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
             const controls = [
                 folder.addBinding(TEST_STATE, 'smoothness', {min: 0, max: 1}),
                 folder.addBinding(TEST_STATE, 'size', {min: 0, max: 1}),
+                folder.addBinding(TEST_STATE, 'centerX', {min: -500, max: 500, step: 1}),
+                folder.addBinding(TEST_STATE, 'centerY', {min: -500, max: 500, step: 1}),
             ];
 
             pane.on('change', () => {
@@ -111,6 +117,8 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
                 if (currentEffect) {
                     currentEffect.smoothness = TEST_STATE.smoothness;
                     currentEffect.size = TEST_STATE.size;
+                    currentEffect.centerX = TEST_STATE.centerX;
+                    currentEffect.centerY = TEST_STATE.centerY;
                 }
             });
         }
