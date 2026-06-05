@@ -5,6 +5,13 @@ import DirectTexture from "../../../../resources/texture/DirectTexture";
 import DirectCubeTexture from "../../../../resources/texture/DirectCubeTexture";
 import RedGPUObject from "../../../../base/RedGPUObject";
 
+/**
+ * [KO] ASkyAtmosphereLUTGenerator는 대기 산란용 LUT(Look Up Table) 생성을 위한 추상 베이스 클래스입니다.
+ * [EN] ASkyAtmosphereLUTGenerator is an abstract base class for creating atmospheric scattering LUTs (Look Up Tables).
+ *
+ * [KO] 컴퓨트 셰이더를 사용하여 물리 연산 결과를 텍스처에 베이킹하는 공통 로직을 제공합니다.
+ * [EN] Provides common logic for baking physical calculation results into textures using compute shaders.
+ */
 abstract class ASkyAtmosphereLUTGenerator extends RedGPUObject {
     #sharedUniformBuffer: UniformBuffer;
     #sampler: Sampler;

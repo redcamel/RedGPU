@@ -12,6 +12,13 @@ import {COMMAND_ENCODER_TYPE} from "../../../../renderer/commandEncoder/COMMAND_
 
 const IRRADIANCE_SHADER_INFO = parseWGSL('SkyLight_Irradiance_Generator', irradianceShaderCode_wgsl);
 
+/**
+ * [KO] SkyLightIrradianceGenerator는 대기 산란 기반의 간접 디퓨즈 조명(Irradiance)을 생성합니다.
+ * [EN] SkyLightIrradianceGenerator generates indirect diffuse lighting (Irradiance) based on atmospheric scattering.
+ *
+ * [KO] 하늘의 모든 방향에 대한 기초 산란광을 큐브맵에 베이킹하고, 이를 다시 디퓨즈 조명용으로 가공합니다.
+ * [EN] Bakes base scattered light from all directions of the sky into a cubemap and processes it for diffuse lighting.
+ */
 class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
     #sourceCubeTexture: GPUTexture;
     #sourceCubeTextureView: GPUTextureView;

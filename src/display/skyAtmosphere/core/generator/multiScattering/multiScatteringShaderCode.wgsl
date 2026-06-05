@@ -8,6 +8,8 @@
 
 @compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
+    // [KO] 1. 인덱스 및 정규화된 좌표 계산
+    // [EN] 1. Index and normalized coordinate calculation
     let size = textureDimensions(multiScatLUT);
     if (global_id.x >= size.x || global_id.y >= size.y) { return; }
 
@@ -22,8 +24,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var lumTotal = vec3<f32>(0.0);
     var fmsTotal = vec3<f32>(0.0);
 
+    // [KO] 2. 다중 산란 근사를 위한 수치 적분 루프
+    // [EN] 2. Numerical integration loop for multi-scattering approximation
     for (var i = 0u; i < MULTI_SCAT_SAMPLES; i = i + 1u) {
         let step = f32(i) + 0.5;
+        // 구형 샘플링을 통한 대기 전체 방향 기여도 합산
         let theta = acos(clamp(1.0 - 2.0 * step / f32(MULTI_SCAT_SAMPLES), -1.0, 1.0));
         let phi = (sqrt(5.0) + 1.0) * PI * step;
         let rayDir = vec3<f32>(sin(theta) * cos(phi), cos(theta), sin(theta) * sin(phi));
@@ -36,16 +41,20 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         var TPath = vec3<f32>(1.0);
 
         if (groundRadius > 0.0 && tEarth > 0.0) {
+            // 지면 충돌 시 적분
             integrateMultiScatSegment(rayOrigin, rayDir, 0.0, tEarth, MULTI_SCAT_STEPS, sunDir, &L1, &f1, &TPath);
-            
+
             let hitP = rayOrigin + rayDir * tEarth;
             let up = normalize(hitP);
             let localCosSun = dot(up, sunDir);
+            // [KO] 하드웨어 선형 샘플링을 통해 투과율 조회
+            // [EN] Retrieve transmittance via hardware linear sampling
             let sunT = getTransmittance(transmittanceLUT, skyAtmosphereSampler, 0.0, localCosSun, params.atmosphereHeight);
-            
+
             L1 += TPath * sunT * max(0.0, localCosSun) * params.groundAlbedo * INV_PI;
             f1 += TPath * params.groundAlbedo;
         } else if (tMax > 0.0) {
+            // 대기권 탈출 시 적분
             integrateMultiScatSegment(rayOrigin, rayDir, 0.0, tMax, MULTI_SCAT_STEPS, sunDir, &L1, &f1, &TPath);
         }
 
@@ -53,6 +62,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         fmsTotal += f1 / f32(MULTI_SCAT_SAMPLES);
     }
 
+    // [KO] 3. 무한 등비급수 원리를 이용한 최종 다중 산란 강도 산출
+    // [EN] 3. Calculate final multi-scattering intensity using infinite geometric series principle
     let output = (lumTotal / f32(MULTI_SCAT_SAMPLES)) / (1.0 - min(fmsTotal, vec3<f32>(0.999)));
     textureStore(multiScatLUT, global_id.xy, vec4<f32>(output, 1.0));
 }

@@ -12,6 +12,13 @@ import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
 
 const SPECULAR_SHADER_INFO = parseWGSL('SkyLight_Reflection_Generator', specularShaderCode_wgsl);
 
+/**
+ * [KO] SkyLightReflectionGenerator는 대기 산란 기반의 간접 스펙큘러 조명(Reflection)을 생성합니다.
+ * [EN] SkyLightReflectionGenerator generates indirect specular lighting (Reflection) based on atmospheric scattering.
+ *
+ * [KO] 정밀한 대기색 큐브맵을 베이킹하고 밉맵을 생성하여, 머티리얼의 거칠기(Roughness)에 따른 반사를 구현합니다.
+ * [EN] Bakes a precise atmospheric color cubemap and generates mipmaps to implement reflections according to material roughness.
+ */
 class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     #sourceCubeTexture: GPUTexture;
     #sourceCubeTextureView: GPUTextureView;

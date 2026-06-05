@@ -27,49 +27,94 @@ const SHADER_INFO = parseWGSL('SkyAtmosphere_Core', transmittanceShaderCode_wgsl
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
 /**
- * [KO] SkyAtmosphere 클래스는 대기 산란 물리 시뮬레이션의 핵심 시스템입니다.
- * [EN] The SkyAtmosphere class is the core system of atmospheric scattering physical simulation.
+ * [KO] SkyAtmosphere 클래스는 물리 기반 대기 산란(Atmospheric Scattering) 시뮬레이션 시스템입니다.
+ * [EN] The SkyAtmosphere class is a physics-based atmospheric scattering simulation system.
+ *
+ * [KO] 레일리 산란(Rayleigh Scattering), 미 산란(Mie Scattering), 오존 흡수(Ozone Absorption) 등을 시뮬레이션하여 사실적인 하늘과 노을, Aerial Perspective 효과를 생성합니다.
+ * [EN] Simulates Rayleigh scattering, Mie scattering, and Ozone absorption to create realistic sky, sunset, and aerial perspective effects.
+ *
+ * [KO] 이 시스템은 전산량이 많은 물리 연산을 실시간으로 처리하기 위해 여러 단계의 LUT(Look Up Table) 생성 패스를 거칩니다.
+ * [EN] This system utilizes multiple LUT (Look Up Table) generation passes to process computationally intensive physical calculations in real-time.
+ *
+ * @category Display
  */
 class SkyAtmosphere extends RedGPUObject {
 
+    /** [KO] 투과율 LUT 생성기 [EN] Transmittance LUT generator */
     #transmittanceGenerator: TransmittanceGenerator;
+    /** [KO] 다중 산란 LUT 생성기 [EN] Multi-scattering LUT generator */
     #multiScatteringGenerator: MultiScatteringGenerator;
+    /** [KO] 스카이 뷰 LUT 생성기 [EN] Sky View LUT generator */
     #skyViewGenerator: SkyViewGenerator;
+    /** [KO] Aerial Perspective LUT 생성기 [EN] Aerial Perspective LUT generator */
     #aerialPerspectiveGenerator: AerialPerspectiveGenerator;
+    /** [KO] 대기 산란 전용 선형 샘플러 [EN] Linear sampler for atmospheric scattering */
     #sampler: Sampler;
+    /** [KO] 물리 파라미터 공유 유니폼 버퍼 [EN] Shared uniform buffer for physical parameters */
     #sharedUniformBuffer: UniformBuffer;
+    /** [KO] 대기 데이터를 기반으로 한 IBL 시스템 [EN] IBL system based on atmospheric data */
     #skyLight: SkyLight;
 
+    /** [KO] 무한 거리 배경 렌더러 [EN] Infinite distance background renderer */
     #backgroundRenderer: SkyAtmosphereBackground;
+    /** [KO] 대기 투과 포스트 이펙트 [EN] Atmospheric transmittance post-effect */
     #postEffect: SkyAtmospherePostEffect;
 
+    /** [KO] 물리 시뮬레이션 파라미터 [EN] Physical simulation parameters */
     #params = {
+        /** [KO] 레일리 산란 계수 [EN] Rayleigh scattering coefficient */
         rayleighScattering: [0.005802, 0.013558, 0.033100],
+        /** [KO] 레일리 분포 고도 (km) [EN] Rayleigh exponential distribution altitude (km) */
         rayleighExponentialDistribution: 8.0,
+        /** [KO] 미 산란 계수 [EN] Mie scattering coefficient */
         mieScattering: [0.003996, 0.003996, 0.003996],
+        /** [KO] 미 비등방성 계수 [EN] Mie anisotropy coefficient (G-factor) */
         mieAnisotropy: 0.8,
+        /** [KO] 미 흡수 계수 [EN] Mie absorption coefficient */
         mieAbsorption: [0.000444, 0.000444, 0.000444],
+        /** [KO] 미 분포 고도 (km) [EN] Mie exponential distribution altitude (km) */
         mieExponentialDistribution: 1.2,
+        /** [KO] 오존 흡수 계수 [EN] Ozone absorption coefficient */
         absorptionCoefficient: [0.000650, 0.001881, 0.000085],
+        /** [KO] 오존 최대 밀도 고도 (km) [EN] Ozone peak density altitude (km) */
         absorptionTipAltitude: 25.0,
+        /** [KO] 지표면 반사율 [EN] Ground albedo */
         groundAlbedo: [0.4, 0.4, 0.4],
+        /** [KO] 오존 분포 두께 [EN] Ozone distribution width */
         absorptionTentWidth: 15.0,
+        /** [KO] 하늘 전체 휘도 배수 [EN] Overall sky luminance factor */
         skyLuminanceFactor: [1.0, 1.0, 1.0],
+        /** [KO] 다중 산란 보정 계수 [EN] Multi-scattering correction factor */
         multiScatteringFactor: 1.0,
+        /** [KO] 태양 방향 벡터 [EN] Sun direction vector */
         sunDirection: new Float32Array([0, 1, 0]),
+        /** [KO] 투과율 계산 최소 고도각 [EN] Minimum light elevation angle for transmittance */
         transmittanceMinLightElevationAngle: -90.0,
+        /** [KO] 행성 반경 (km) [EN] Planet ground radius (km) */
         groundRadius: 6360.0,
+        /** [KO] 대기권 높이 (km) [EN] Atmosphere height (km) */
         atmosphereHeight: 60.0,
+        /** [KO] Aerial Perspective 거리 스케일 [EN] Aerial Perspective distance scale */
         aerialPerspectiveDistanceScale: 100.0,
+        /** [KO] Aerial Perspective 시작 깊이 [EN] Aerial Perspective start depth */
         aerialPerspectiveStartDepth: 0.0,
+        /** [KO] 태양 광도 [EN] Sun intensity (lux) */
         sunIntensity: 100000.0,
+        /** [KO] 태양 시각적 크기 [EN] Visual size of the sun */
         sunSize: 0.533,
+        /** [KO] 태양 주변 감쇠 강도 [EN] Sun limb darkening intensity */
         sunLimbDarkening: 0.5,
+        /** [KO] 카메라 현재 고도 (km) [EN] Current camera height (km) */
         cameraHeight: 0.001,
+        /** [KO] 구름 시간 축 정보 [EN] Cloud animation time */
         cloudTime: 0.0,
+        /** [KO] 구름 속도 배수 [EN] Cloud time multiplier */
         cloudTimeMultiplier: 0.0,
+        /** [KO] 구름 커버리지 (0 ~ 1) [EN] Cloud coverage (0 to 1) */
         cloudCoverage: 0.4,
+        /** [KO] 구름 밀도 (0 ~ 1) [EN] Cloud density (0 to 1) */
         cloudDensity: 0.7,
+        /** [KO] 구름 고도 (km) [EN] Cloud height (km) */
         cloudHeight: 5.0
     };
 

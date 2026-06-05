@@ -87,11 +87,19 @@ fn getSkyViewUV(viewDir: vec3<f32>, viewHeight: f32, groundRadius: f32, atmosphe
     return vec2<f32>(u, clamp(v, 0.001, 0.999));
 }
 
+/**
+ * [KO] 특정 고도와 각도에서의 대기 투과율(Transmittance)을 조회합니다.
+ * [EN] Retrieves atmospheric transmittance at a specific altitude and angle.
+ */
 fn getTransmittance(transmittanceLUT: texture_2d<f32>, skyAtmosphereSampler: sampler, viewHeight: f32, cosTheta: f32, atmosphereHeight: f32) -> vec3<f32> {
     let uv = getTransmittanceUV(viewHeight, cosTheta, atmosphereHeight);
+    // [KO] 하드웨어 선형 샘플링을 통해 LUT 사이의 값을 부드럽게 보간합니다.
+    // [EN] Smoothly interpolate between LUT entries via hardware linear sampling.
     var transmittance = textureSampleLevel(transmittanceLUT, skyAtmosphereSampler, uv, 0.0).rgb;
     let mu = clamp(cosTheta, -1.0, 1.0);
     if (mu < 0.0) {
+        // [KO] 지평선 아래로 내려갈 때 지면에 의한 차폐를 부드럽게 적용합니다.
+        // [EN] Smoothly apply ground occlusion when below the horizon.
         let groundMask = smoothstep(-0.015, 0.0, mu); 
         transmittance *= groundMask;
     }
@@ -263,6 +271,10 @@ fn getMieGlowAmountUnit(
                         * (diffPhase) * (1.0 - transToEdge) * MIE_GLOW_SUPPRESS * params.skyLuminanceFactor;
 }
 
+/**
+ * [KO] 지정된 구간에 대해 대기 산란 적분을 수행합니다. (LUT 및 물리 파라미터 활용)
+ * [EN] Performs atmospheric scattering integration over a specified segment (Using LUTs and physical parameters).
+ */
 fn integrateScatSegment(
     origin: vec3<f32>, dir: vec3<f32>, 
     tMin: f32, tMax: f32, steps: u32, 
@@ -279,8 +291,10 @@ fn integrateScatSegment(
     let stepSize = (tMax - tMin) / f32(steps);
     let sunDir = params.sunDirection;
     let viewSunCos = dot(dir, sunDir);
-    let phaseR = phaseRayleigh(viewSunCos);
     
+    // [KO] 위상 함수 계산 (레일리/미 산란 특성 반영)
+    // [EN] Calculate Phase Functions (Reflecting Rayleigh/Mie scattering characteristics)
+    let phaseR = phaseRayleigh(viewSunCos);
     let phaseM = select(phaseMie(viewSunCos, params.mieAnisotropy), phaseMieStable(viewSunCos, params.mieAnisotropy), useLUT);
 
     for (var i = 0u; i < steps; i = i + 1u) {
@@ -296,8 +310,12 @@ fn integrateScatSegment(
         
         var sunTrans: vec3<f32>;
         if (useLUT) {
+            // [KO] 미리 계산된 투과율 LUT 샘플링
+            // [EN] Sample precomputed transmittance LUT
             sunTrans = getTransmittance(transmittanceLUT, skyAtmosphereSampler, viewHeight, cosSun, params.atmosphereHeight);
         } else {
+            // [KO] 실시간 수치 적분 수행 (LUT 생성 시 사용)
+            // [EN] Perform real-time numerical integration (Used during LUT generation)
             sunTrans = getSunTransmittanceManual(p, sunDir, params);
         }
         
@@ -317,6 +335,8 @@ fn integrateScatSegment(
         let scatTotal_luminous = scatR_luminous + scatM_luminous;
         let msUV = vec2<f32>(clamp(cosSun * 0.5 + 0.5, 0.001, 0.999), clamp(1.0 - viewHeight / params.atmosphereHeight, 0.001, 0.999));
         
+        // [KO] 다중 산란 기여분 합산 (하드웨어 선형 샘플링 필수)
+        // [EN] Add multi-scattering contribution (Hardware linear sampling mandatory)
         let msScat = textureSampleLevel(multiScatLUT, skyAtmosphereSampler, msUV, 0.0).rgb * scatTotal_luminous * shadowMask * params.multiScatteringFactor;
 
         *radiance += *transmittance * (stepScat + msScat) * stepSize;

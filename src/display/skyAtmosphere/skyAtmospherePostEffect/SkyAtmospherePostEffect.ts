@@ -7,8 +7,11 @@ import ShaderLibrary from "../../../systemCodeManager/ShaderLibrary";
 import skyAtmospherePostEffect_compute_wgsl from "./wgsl/skyAtmospherePostEffect_compute.wgsl";
 
 /**
- * [KO] SkyAtmospherePostEffect 클래스는 씬 내의 오브젝트들에 대해 대기 투과(Transmittance) 및 산란(Scattering)을 적용합니다.
- * [EN] The SkyAtmospherePostEffect class applies atmospheric transmittance and scattering to objects in the scene.
+ * [KO] SkyAtmospherePostEffect 클래스는 씬 내의 불투명 오브젝트들에 대기 효과를 적용합니다.
+ * [EN] The SkyAtmospherePostEffect class applies atmospheric effects to opaque objects in the scene.
+ *
+ * [KO] Aerial Perspective 3D LUT를 참조하여 물체의 깊이에 따른 대기 산란광과 투과율 감쇠를 적용함으로써, 멀리 있는 물체가 대기색에 묻히는 효과를 시뮬레이션합니다.
+ * [EN] Simulates the effect of distant objects being obscured by atmospheric color by referencing the Aerial Perspective 3D LUT and applying scattered light and transmittance attenuation based on depth.
  */
 class SkyAtmospherePostEffect extends ASinglePassPostEffect {
     #skyAtmosphere: SkyAtmosphere;

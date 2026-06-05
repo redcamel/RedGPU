@@ -9,8 +9,11 @@ import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer
 import RedGPUObject from "../../../base/RedGPUObject";
 
 /**
- * [KO] SkyLight 클래스는 SkyAtmosphere의 대기 산란 데이터를 기반으로 씬의 간접 조명(IBL)을 생성하고 관리합니다.
- * [EN] The SkyLight class generates and manages indirect lighting (IBL) for the scene based on SkyAtmosphere's atmospheric scattering data.
+ * [KO] SkyLight 클래스는 SkyAtmosphere의 대기 산란 데이터를 실시간으로 분석하여 씬의 간접 조명(IBL)을 생성합니다.
+ * [EN] The SkyLight class analyzes SkyAtmosphere's atmospheric scattering data in real-time to generate indirect lighting (IBL) for the scene.
+ *
+ * [KO] 대기색에 기반한 디퓨즈(Irradiance) 및 스펙큘러(Reflection) 큐브맵을 베이킹하여, 물체들이 하늘색과 태양 위치에 따라 실시간으로 반응하도록 합니다.
+ * [EN] Bakes diffuse (Irradiance) and specular (Reflection) cubemaps based on atmospheric color, allowing objects to react in real-time to the sky color and sun position.
  */
 class SkyLight extends RedGPUObject {
     /**
