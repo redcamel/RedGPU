@@ -81,6 +81,11 @@ fn calculateWorldReflectionRay(worldPos: vec3<f32>, worldNormal: vec3<f32>, came
 /**
  * [KO] 월드 공간 레이 마칭을 수행하여 반사 지점을 찾습니다.
  * [EN] Performs world space ray marching to find reflection points.
+ *
+ * @param startWorldPos - [KO] 시작 지점 (월드 좌표) [EN] Starting point (World coords)
+ * @param rayDir - [KO] 레이 방향 (정규화된 벡터) [EN] Ray direction (Normalized vector)
+ * @param screenCoord - [KO] 노이즈 지터링을 위한 스크린 좌표 [EN] Screen coordinates for noise jittering
+ * @returns [KO] 반사된 컬러와 감쇠 계수(Alpha) [EN] Reflected color and falloff factor (Alpha)
  */
 fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>, screenCoord: vec2<i32>) -> vec4<f32> {
     let cameraWorldPos = systemUniforms.camera.inverseViewMatrix[3].xyz;
@@ -88,6 +93,8 @@ fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>, screenCo
 
     // [KO] 거리에 따른 적응형 단계 크기 및 최대 단계 수 조절
     // [EN] Adjust adaptive step size and max steps based on distance
+    // [KO] 원거리 물체일수록 더 성긴 단계로 추적하여 연산 성능 최적화
+    // [EN] Optimize performance by using sparser steps for distant objects
     let distanceScale = 1.0 + cameraDistance * 0.1;
     let adaptiveStepSize = uniforms.stepSize * min(distanceScale, 4.0);
 
@@ -100,8 +107,10 @@ fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>, screenCo
     let maxRefinementLevels = 4u;
     let invMaxSteps = 1.0 / f32(adaptiveMaxSteps);
 
-    // [KO] IGN을 사용하여 레이 마칭 지터링 적용 (계단 현상 완화)
-    // [EN] Apply ray marching jittering using IGN (Reduces banding)
+    // [KO] IGN(Interleaved Gradient Noise)을 사용하여 레이 마칭 지터링 적용
+    // [EN] Apply ray marching jittering using IGN (Interleaved Gradient Noise)
+    // [KO] 샘플링 단계 사이의 계단 현상(Banding)을 노이즈로 분산시켜 시각적 품질 향상
+    // [EN] Distribute banding artifacts between sampling steps using noise to improve visual quality
     let jitter = getInterleavedGradientNoise(vec2<f32>(screenCoord));
     var currentWorldPos = startWorldPos + rayDir * (adaptiveStepSize * jitter);
     
@@ -111,12 +120,14 @@ fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>, screenCo
     for (var i = 0u; i < adaptiveMaxSteps; i++) {
         currentWorldPos += rayDir * currentStepSize;
 
+        // 최대 추적 거리 초과 시 종료
         let travelVec = currentWorldPos - startWorldPos;
         let travelDistanceSq = dot(travelVec, travelVec);
         if (travelDistanceSq > maxDistanceSq) {
             break;
         }
 
+        // 화면 경계를 벗어나면 종료
         let currentScreenUV = worldToScreen(currentWorldPos);
         if (any(currentScreenUV < vec2<f32>(0.0)) || any(currentScreenUV > vec2<f32>(1.0))) {
             break;
@@ -129,17 +140,19 @@ fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>, screenCo
             continue;
         }
 
+        // [KO] 교차 판정 로직
+        // [EN] Intersection detection logic
         let sampledWorldPos = reconstructWorldPosition(currentScreenUV, sampledDepth);
         let rayDistanceFromCamera = length(currentWorldPos - cameraWorldPos);
         let surfaceDistanceFromCamera = length(sampledWorldPos - cameraWorldPos);
         let distanceDiff = rayDistanceFromCamera - surfaceDistanceFromCamera;
 
-        // [KO] 교차 판정 임계값 (거리에 따라 적응형으로 설정)
-        // [EN] Intersection threshold (set adaptively based on distance)
+        // [KO] 교차 판정 임계값 (거리에 따라 적응형으로 설정하여 정밀도 유지)
+        // [EN] Intersection threshold (set adaptively based on distance to maintain precision)
         let intersectionThreshold = currentStepSize * (4.0 + cameraDistance * 0.033);
 
         if (distanceDiff > 0.0 && distanceDiff < intersectionThreshold) {
-            // [KO] 이진 탐색 기법을 사용한 교차 지점 정밀화
+            // [KO] 이진 탐색 기법(Binary Search)을 사용한 교차 지점 정밀화
             // [EN] Binary search refinement for intersection point
             if (refinementLevel < maxRefinementLevels) {
                 currentWorldPos -= rayDir * currentStepSize;
@@ -148,7 +161,12 @@ fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>, screenCo
                 continue;
             }
 
+            // [KO] 하드웨어 선형 샘플링을 통한 고품질 반사 컬러 로드
+            // [EN] Load high-quality reflection color via hardware linear sampling
             let reflectionColor = textureSampleLevel(sourceTexture, basicSampler, currentScreenUV, 0.0);
+            
+            // [KO] 각종 감쇠 계수 계산 (거리, 경계면, 단계)
+            // [EN] Calculate various falloff factors (distance, edge, step)
             let travelDistance = sqrt(travelDistanceSq);
             let distanceFade = 1.0 - smoothstep(0.0, uniforms.fadeDistance, travelDistance);
             let edgeFade = calculateEdgeFade(currentScreenUV);

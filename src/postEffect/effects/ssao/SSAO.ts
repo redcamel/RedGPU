@@ -9,6 +9,13 @@ import SSAOBlend from "./ssao_blend/SSAOBlend";
 /**
  * [KO] SSAO(Screen Space Ambient Occlusion) 후처리 이펙트입니다.
  * [EN] SSAO (Screen Space Ambient Occlusion) post-processing effect.
+ *
+ * [KO] 깊이(Depth)와 법선(Normal) 정보를 분석하여 물체 간의 근접도를 계산하고, 구석진 곳이나 틈새에 부드러운 그림자를 생성하여 공간감을 극대화합니다.
+ * [EN] Analyzes depth and normal information to calculate proximity between objects and generates soft shadows in corners or crevices to maximize the sense of space.
+ *
+ * [KO] AO 계산(SSAO_AO), 노이즈 제거(GaussianBlur), 원본 합성(SSAOBlend)의 3단계 패스로 구성되어 고품질의 폐쇄 음영을 제공합니다.
+ * [EN] Consists of a three-pass process: AO calculation (SSAO_AO), denoising (GaussianBlur), and original composition (SSAOBlend) to provide high-quality ambient occlusion.
+ *
  * @category PostEffect
  */
 class SSAO extends AMultiPassPostEffect {
