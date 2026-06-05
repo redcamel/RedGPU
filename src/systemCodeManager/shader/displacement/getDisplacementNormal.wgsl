@@ -39,8 +39,9 @@ fn getDisplacementNormal(
     let textureDimensions = vec2<f32>(textureDimensions(displacementTexture, 0));
     let invTexSize = 1.0 / textureDimensions;
     
-    // [KO] 노멀 계산을 위한 샘플링 간격
-    let step = invTexSize * 1.5;
+    // [KO] 노멀 계산을 위한 샘플링 간격 (밉레벨에 따라 조절)
+    // [EN] Sampling interval for normal calculation (adjusted by mip level)
+    let step = invTexSize * exp2(mipLevel);
 
     let h_u0 = sampleBicubic(input_uv + vec2<f32>(-step.x, 0.0), displacementTexture, displacementTextureSampler, textureDimensions, invTexSize, mipLevel);
     let h_u1 = sampleBicubic(input_uv + vec2<f32>( step.x, 0.0), displacementTexture, displacementTextureSampler, textureDimensions, invTexSize, mipLevel);

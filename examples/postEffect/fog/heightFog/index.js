@@ -217,10 +217,10 @@ function renderTestPane(redGPUContext, heightFog, autoRotateState) {
  * @param {RedGPU.Display.Scene} scene
  */
 function createGroundLevelScene(redGPUContext, scene) {
-    const terrain = new RedGPU.Primitive.Ground(redGPUContext, 200, 200, 1000, 1000);
+    const terrain = new RedGPU.Primitive.Ground(redGPUContext, 200, 200, 1024, 1024);
     const terrainMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#2d4a2d');
 
-    const terrainNoise = new RedGPU.Resource.SimplexTexture(redGPUContext, 1024, 1024, {
+    const terrainNoise = new RedGPU.Resource.SimplexTexture(redGPUContext, 512, 512, {
         mainLogic: `
 		let noise1 = getSimplexNoiseByDimension(base_uv * 2.0, uniforms);
 		let noise2 = getSimplexNoiseByDimension(base_uv * 4.0, uniforms) * 0.5;
