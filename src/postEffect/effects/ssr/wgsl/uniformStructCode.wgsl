@@ -148,7 +148,7 @@ fn performWorldRayMarching(startWorldPos: vec3<f32>, rayDir: vec3<f32>, screenCo
                 continue;
             }
 
-            let reflectionColor = textureLoad(sourceTexture, coord, 0);
+            let reflectionColor = textureSampleLevel(sourceTexture, basicSampler, currentScreenUV, 0.0);
             let travelDistance = sqrt(travelDistanceSq);
             let distanceFade = 1.0 - smoothstep(0.0, uniforms.fadeDistance, travelDistance);
             let edgeFade = calculateEdgeFade(currentScreenUV);
