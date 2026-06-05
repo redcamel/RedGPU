@@ -156,6 +156,7 @@ class RenderViewStateData {
             pickingManager,
             viewRenderTextureManager
         } = view;
+        this.swapBufferIndex = this.swapBufferIndex ? 0 : 1
         const gBufferColorTexture = viewRenderTextureManager.getGBufferTexture(GBUFFER_TYPE.COLOR);
         const depthTexture = viewRenderTextureManager.depthTexture;
         const {shadowManager} = scene;
@@ -188,7 +189,7 @@ class RenderViewStateData {
         //
         this.isScene2DMode = view.camera instanceof Camera2D;
         this.viewIndex = view.redGPUContext.getViewIndex(view);
-        this.swapBufferIndex = this.swapBufferIndex ? 0 : 1
+
         this.viewportSize = {
             x: view.x,
             y: view.y,

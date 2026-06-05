@@ -53,7 +53,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     // [B] 바닥 (거울처럼 반사되는 평면)
     const groundGeometry = new RedGPU.Primitive.Ground(redGPUContext, 100, 100);
     const groundMaterial = new RedGPU.Material.PhongMaterial(redGPUContext);
-    groundMaterial.color.setColorByHEX('#333');
+    groundMaterial.color.setColorByHEX('#7a5d4a');
     groundMaterial.useSSR = true;
     groundMaterial.metallic = 0.5;
 

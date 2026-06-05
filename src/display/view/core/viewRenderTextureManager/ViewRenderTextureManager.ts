@@ -134,6 +134,15 @@ class ViewRenderTextureManager extends RedGPUObject {
         return this.#view.renderViewStateData.swapBufferIndex ? this.#gBuffers.get(DEPTH0)?.textureView : this.#gBuffers.get(DEPTH1)?.textureView;
     }
 
+    get depthTexture0View(): GPUTextureView {
+        this.#update();
+        return this.#gBuffers.get(DEPTH0)?.textureView
+    }
+
+    get depthTexture1View(): GPUTextureView {
+        this.#update();
+        return this.#gBuffers.get(DEPTH1)?.textureView
+    }
     /**
      * 렌더 패스1 결과 텍스처 뷰를 반환합니다.
      * @returns {GPUTextureView}
@@ -204,7 +213,7 @@ class ViewRenderTextureManager extends RedGPUObject {
     #update() {
         const {antialiasingManager} = this;
         const {msaaID} = antialiasingManager;
-        const {pixelRectObject} = this.#view;
+        const {pixelRectObject, renderViewStateData} = this.#view;
         this.#targetTextureSize = {
             width: Math.max(pixelRectObject.width, 1),
             height: Math.max(pixelRectObject.height, 1),
@@ -218,6 +227,7 @@ class ViewRenderTextureManager extends RedGPUObject {
 
         if (changedSize || dirtyMSAA || !renderPath1ResultTexture) {
             this.#lastUpdateMSAAID = msaaID;
+            renderViewStateData.swapBufferIndex = 0
 
             // 1. 기존 리소스 일괄 정리 (선택 사항이나 명시적 관리를 위해 유지)
             // 2. 새로운 리소스 일괄 생성
