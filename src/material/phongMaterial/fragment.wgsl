@@ -13,7 +13,7 @@
 
 #redgpu_include skyAtmosphere.skyAtmosphereFn
 
-const maxDistance: f32 = 10000.0;
+const maxDistance: f32 = 1000.0;
 
 struct Uniforms {
     color: vec3<f32>,
