@@ -6,7 +6,9 @@ if (f32(index.x) >= dimensions.x || f32(index.y) >= dimensions.y) { return; }
 
 let invSize = 1.0 / dimensions;
 let centerUV = (vec2<f32>(index) + 0.5) * invSize;
-let blurSize = uniforms.size;
+// [KO] DPR을 반영하여 물리적 해상도에 맞는 블러 크기 계산
+// [EN] Scale blur size by DPR to match physical resolution
+let blurSize = uniforms.size * systemUniforms.devicePixelRatio;
 
 var sum: vec4<f32> = vec4<f32>(0.0);
 var totalWeight: f32 = 0.0;

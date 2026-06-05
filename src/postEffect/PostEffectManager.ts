@@ -652,9 +652,10 @@ class PostEffectManager {
         // Update SkyAtmosphere
         SystemUniformUpdater.updateSkyAtmosphere(skyAtmosphere, members, this.#uniformDataF32, this.#uniformDataU32);
 
-        // Update Exposure
+        // Update Exposure and DPR
         updateSystemUniformData(members, this.#uniformDataF32, this.#uniformDataU32, [
-            {key: 'preExposure', value: this.autoExposure.preExposure}
+            {key: 'preExposure', value: this.autoExposure.preExposure},
+            {key: 'devicePixelRatio', value: devicePixelRatio}
         ]);
 
         gpuDevice.queue.writeBuffer(gpuBuffer, 0, this.#uniformData);

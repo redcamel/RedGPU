@@ -8,7 +8,6 @@ struct Uniforms {
     filmGrainScale: f32,
     coloredGrain: f32,
     grainSaturation: f32,
-    devicePixelRatio: f32
 };
 
 /**

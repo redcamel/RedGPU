@@ -8,7 +8,9 @@ let centerUV = (vec2<f32>(index) + 0.5) * invSize;
 let direction = vec2<f32>(uniforms.directionX, uniforms.directionY);
 let dirLength = length(direction);
 let normalizedDir = select(vec2<f32>(0.0), direction / dirLength, dirLength > 0.0);
-let dir = normalizedDir * uniforms.amount * invSize;
+// [KO] DPR을 반영하여 물리적 해상도에 맞는 블러 거리 계산
+// [EN] Scale blur amount by DPR to match physical resolution
+let dir = normalizedDir * (uniforms.amount * systemUniforms.devicePixelRatio) * invSize;
 
 var sum = vec4<f32>(0.0);
 var totalWeight = 0.0;

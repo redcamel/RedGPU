@@ -6,7 +6,10 @@ if (f32(index.x) >= dimensions.x || f32(index.y) >= dimensions.y) { return; }
 
 let invSize = 1.0 / dimensions;
 let centerUV = (vec2<f32>(index) + 0.5) * invSize;
-let center = vec2<f32>(0.5) + vec2<f32>(uniforms.centerX, uniforms.centerY) * 0.5;
+
+// [KO] 화면 중앙(0.5)을 기준으로 픽셀 오프셋(DPR 반영)을 더해 최종 중심점 계산
+// [EN] Calculate final center point by adding pixel offset (DPR reflected) to screen center (0.5)
+let center = vec2<f32>(0.5) + vec2<f32>(uniforms.centerX, uniforms.centerY) * systemUniforms.devicePixelRatio * invSize;
 
 let toPixel = centerUV - center;
 let distance = length(toPixel);

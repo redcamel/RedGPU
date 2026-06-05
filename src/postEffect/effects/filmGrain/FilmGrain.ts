@@ -105,7 +105,6 @@ class FilmGrain extends ASinglePassPostEffect {
             'POST_EFFECT_FILM_GRAIN',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
-        this.updateUniform('devicePixelRatio', this.#devicePixelRatio);
     }
 
     /**
