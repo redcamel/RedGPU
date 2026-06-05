@@ -8,7 +8,7 @@ let uv = vec2<f32>(f32(index.x) / dimW, f32(index.y) / dimH);
 let smoothness = uniforms.smoothness;
 let size = uniforms.size;
 
-var color : vec4<f32> = textureLoad(sourceTexture, index);
+var color : vec4<f32> = textureLoad(sourceTexture, index, 0);
 var diff = size - distance(uv, vec2<f32>(0.5));
 
 let vignette = smoothstep(-smoothness, smoothness, diff);

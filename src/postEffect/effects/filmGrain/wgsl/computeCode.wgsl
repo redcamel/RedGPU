@@ -1,6 +1,6 @@
 let index = vec2<i32>(global_id.xy);
 let dimensions: vec2<u32> = textureDimensions(sourceTexture);
-let originalColor = textureLoad(sourceTexture, index);
+let originalColor = textureLoad(sourceTexture, index, 0);
 
 let filmGrainIntensity_value: f32 = uniforms.filmGrainIntensity;
 let filmGrainResponse_value: f32 = uniforms.filmGrainResponse;

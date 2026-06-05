@@ -2,8 +2,8 @@ let index = vec2<u32>(global_id.xy);
 let dimensions: vec2<u32> = textureDimensions(sourceTexture0);
 if (index.x >= dimensions.x || index.y >= dimensions.y) { return; }
 
-let diffuseSample = textureLoad(sourceTexture0, index);
-let blurSample = textureLoad(sourceTexture1, index);
+let diffuseSample = textureLoad(sourceTexture0, index, 0);
+let blurSample = textureLoad(sourceTexture1, index, 0);
 
 let diffuseRGB = diffuseSample.rgb;
 let blurRGB = blurSample.rgb * uniforms.bloomStrength;

@@ -1,6 +1,6 @@
 {
     let index = vec2<i32>(global_id.xy);
-    let inputColor = textureLoad(sourceTexture, index);
+    let inputColor = textureLoad(sourceTexture, index, 0);
 
     let toneMappedColor = khronosPBRNeutralToneMapping(inputColor.rgb);
 

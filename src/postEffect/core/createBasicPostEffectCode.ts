@@ -27,7 +27,7 @@ const createCode = (
     const items = Array.isArray(sourceTextureConfigs) ? sourceTextureConfigs : [sourceTextureConfigs];
     items.forEach((item, i) => {
         let name: string;
-        let isSampled: boolean = false;
+        let isSampled: boolean = true;
 
         name = item.name;
         if (item.isSampled !== undefined) isSampled = item.isSampled;

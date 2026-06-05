@@ -1,5 +1,5 @@
 let index = vec2<u32>(global_id.xy);
-var color: vec4<f32> = textureLoad(sourceTexture, index);
+var color: vec4<f32> = textureLoad(sourceTexture, index, 0);
 
 let originalColor = color;
 let luminance = getLuminance(color.rgb);

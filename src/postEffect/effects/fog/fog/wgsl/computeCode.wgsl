@@ -1,7 +1,7 @@
 let id = global_id.xy;
 let coord = vec2<i32>(id);
 
-var sceneColor = textureLoad(sourceTexture, coord);
+var sceneColor = textureLoad(sourceTexture, coord, 0);
 let depth = textureLoad(depthTexture, coord, 0);
 
 // 1. 표준 깊이 복구

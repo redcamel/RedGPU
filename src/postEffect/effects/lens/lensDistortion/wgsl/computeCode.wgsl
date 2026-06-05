@@ -24,6 +24,6 @@ if (distortedUV.x < 0.0 || distortedUV.x > 1.0 ||
         i32(clamp(distortedUV.y * dimH, 0.0, dimH - 1.0))
     );
 
-    let sampledColor = textureLoad(sourceTexture, sampleCoord).xyzw;
+    let sampledColor = textureLoad(sourceTexture, sampleCoord, 0).xyzw;
     textureStore(outputTexture, vec2<i32>(global_id.xy), sampledColor);
 }

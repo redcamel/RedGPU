@@ -14,7 +14,7 @@ if (dimensions.x > u32(global_id.x) && dimensions.y > u32(global_id.y)) {
 
 let fogFactor = calculateHeightFogFactor(screenCoord, depth);
 
-let originalColor = textureLoad(sourceTexture, vec2<i32>(global_id.xy)).rgb;
+let originalColor = textureLoad(sourceTexture, vec2<i32>(global_id.xy), 0).rgb;
 let foggedColor = mix(uniforms.fogColor, originalColor, fogFactor);
 
 textureStore(outputTexture, vec2<i32>(global_id.xy), vec4<f32>(foggedColor, 1.0));

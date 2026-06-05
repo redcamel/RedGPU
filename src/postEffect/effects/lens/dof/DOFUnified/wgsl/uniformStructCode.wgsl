@@ -18,7 +18,7 @@ fn calculateBlur(center: vec2<u32>, intensity: f32, maxBlurSize: f32, isNear: bo
 
     /* 최소 블러 반경 조정 */
     if (blurRadius < 0.3) {
-        return textureLoad(sourceTexture, center);
+        return textureLoad(sourceTexture, center, 0);
     }
 
     var sum: vec3<f32> = vec3<f32>(0.0);
@@ -30,7 +30,7 @@ fn calculateBlur(center: vec2<u32>, intensity: f32, maxBlurSize: f32, isNear: bo
     let samples = select(8, 16, isNear); /* near=16, far=8 */
     let angleStep = PI2 / f32(samples);
 
-    let originalSample = textureLoad(sourceTexture, center);
+    let originalSample = textureLoad(sourceTexture, center, 0);
     let originalColor = originalSample.rgb;
     let originalAlpha = originalSample.a;
     /* Near blur에 더 강한 중앙 가중치 */
@@ -50,7 +50,7 @@ fn calculateBlur(center: vec2<u32>, intensity: f32, maxBlurSize: f32, isNear: bo
                 clamp(i32(f32(center.y) + offset.y), 0, i32(dimensions.y) - 1)
             );
 
-            let sampleData = textureLoad(sourceTexture, vec2<u32>(samplePos));
+            let sampleData = textureLoad(sourceTexture, vec2<u32>(samplePos), 0);
             let sampleColor = sampleData.rgb;
             let sampleAlpha = sampleData.a;
             let sampleEncodedCoC = textureLoad(cocTexture, vec2<u32>(samplePos)).a;
@@ -93,7 +93,7 @@ fn calculateBlur(center: vec2<u32>, intensity: f32, maxBlurSize: f32, isNear: bo
                 clamp(i32(f32(center.y) + offset.y), 0, i32(dimensions.y) - 1)
             );
 
-            let sampleData = textureLoad(sourceTexture, vec2<u32>(samplePos));
+            let sampleData = textureLoad(sourceTexture, vec2<u32>(samplePos), 0);
             let sampleColor = sampleData.rgb;
             let sampleAlpha = sampleData.a;
             let weight = 0.8;

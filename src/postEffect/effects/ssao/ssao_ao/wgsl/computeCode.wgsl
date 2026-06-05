@@ -10,7 +10,7 @@
     // [KO] 화면 경계 검사 및 배경(깊이 없음) 처리 [EN] Screen boundary check and background (no depth) handling
     if (screenCoord.x >= texSize.x || screenCoord.y >= texSize.y) { return; }
 
-    let originalColor = textureLoad(sourceTexture, screenCoord);
+    let originalColor = textureLoad(sourceTexture, screenCoord, 0);
     let depth         = textureLoad(depthTexture, screenCoord, 0);
 
     // [KO] 블러 사용 여부에 따른 실패 시 기본 색상 설정 [EN] Set default fail color based on blur usage

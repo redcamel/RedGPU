@@ -1,33 +1,25 @@
-let dimensions = textureDimensions(sourceTexture);
-let dimW = f32(dimensions.x);
-let dimH = f32(dimensions.y);
+let index = vec2<u32>(global_id.xy);
+let dimensions = vec2<f32>(textureDimensions(sourceTexture));
+if (f32(index.x) >= dimensions.x || f32(index.y) >= dimensions.y) { return; }
+
+let invSize = 1.0 / dimensions;
+let centerUV = (vec2<f32>(index) + 0.5) * invSize;
 
 let direction = vec2<f32>(uniforms.directionX, uniforms.directionY);
 let dirLength = length(direction);
 let normalizedDir = select(vec2<f32>(0.0), direction / dirLength, dirLength > 0.0);
+let dir = normalizedDir * uniforms.amount * invSize;
 
-let dir = normalizedDir * uniforms.amount;
+var sum = vec4<f32>(0.0);
+var totalWeight = 0.0;
+const steps = 30.0;
 
-const loopSize = 30.0;
-let offset = getHash1D_vec2(vec2<f32>(global_id.xy));
-
-let global_id_vec = vec2<f32>(f32(global_id.x), f32(global_id.y));
-
-var sum = vec4<f32>(0.0, 0.0, 0.0, 0.0);
-var total = 0.0;
-
-for (var t = -loopSize; t <= loopSize; t = t + 1.0) {
-    var percent = 1.0 - (t + offset - 0.5) / loopSize;
-    var weight = 3.0 * (percent - percent * percent);
-    let deltaPercent = dir * percent;
-
-    let delta = vec2<i32>(
-        i32(clamp(global_id_vec.x + deltaPercent.x, 0.0, dimW - 1.0)),
-        i32(clamp(global_id_vec.y + deltaPercent.y, 0.0, dimH - 1.0))
-    );
-
-    sum += textureLoad(sourceTexture, delta).xyzw * weight;
-    total += weight;
+for (var i = -steps; i <= steps; i += 1.0) {
+    let t = i / steps;
+    let weight = exp(-0.5 * pow(t * 2.0, 2.0));
+    let sampleUV = centerUV + dir * t;
+    sum += textureSampleLevel(sourceTexture, basicSampler, sampleUV, 0.0) * weight;
+    totalWeight += weight;
 }
 
-textureStore(outputTexture, vec2<i32>(global_id.xy), sum / total);
+textureStore(outputTexture, index, sum / totalWeight);

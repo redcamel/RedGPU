@@ -3,7 +3,7 @@ let size = textureDimensions(outputTexture);
 if (id.x >= size.x || id.y >= size.y) { return; }
 
 let uv = (vec2<f32>(id) + 0.5) / vec2<f32>(size);
-let sceneSample = textureLoad(sourceTexture, id);
+let sceneSample = textureLoad(sourceTexture, id, 0);
 var sceneColor = sceneSample.rgb;
 
 let rawDepth = fetchDepth(id);

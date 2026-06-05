@@ -1,5 +1,5 @@
 let index = vec2<u32>(global_id.xy );
-var color:vec4<f32> = textureLoad( sourceTexture, index );
+var color:vec4<f32> = textureLoad( sourceTexture, index, 0 );
 
 let brightness_value : f32 = uniforms.brightness / 255.0;
 let contrast_value : f32 = uniforms.contrast / 255.0;

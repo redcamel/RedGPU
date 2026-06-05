@@ -7,7 +7,7 @@ if (screenCoord.x >= texSize.x || screenCoord.y >= texSize.y) {
     return;
 }
 
-let originalColor = textureLoad(sourceTexture, screenCoord);
+let originalColor = textureLoad(sourceTexture, screenCoord, 0);
 let depth = textureLoad(depthTexture, screenCoord, 0);
 
 // 원거리 픽셀은 반사 스킵

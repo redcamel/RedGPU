@@ -3,7 +3,7 @@ let dims = textureDimensions(sourceTexture);
 let i_index = vec2<i32>(index);
 
 // 1. 현재 픽셀 및 주변 4방향 루마(Luma) 및 알파 샘플링
-let colorM4 = textureLoad(sourceTexture, index);
+let colorM4 = textureLoad(sourceTexture, index, 0);
 let colorM = colorM4.rgb;
 let lumaM = getLuminance(colorM);
 

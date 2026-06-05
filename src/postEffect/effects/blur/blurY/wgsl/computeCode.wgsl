@@ -1,22 +1,24 @@
 let index = vec2<u32>(global_id.xy);
-let dimensions = textureDimensions(sourceTexture);
-let dimH = f32(dimensions.y);
-let size_value: f32 = uniforms.size;
-var sum: vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+let dimensions = vec2<f32>(textureDimensions(sourceTexture));
+if (f32(index.x) >= dimensions.x || f32(index.y) >= dimensions.y) { return; }
 
-var offset = getHash1D_vec2(vec2<f32>(global_id.xy));
-var total = 0.0;
-let loopSize = 10.0;
+let invSize = 1.0 / dimensions;
+let centerUV = (vec2<f32>(index) + 0.5) * invSize;
+let blurSize = uniforms.size;
 
-for (var t = -loopSize; t <= loopSize; t = t + 1.0) {
-    var percent = (t + offset - 0.5) / loopSize;
-    var weight = 1.0 - abs(percent);
-    var iy = clamp((f32(global_id.y) + f32(size_value * percent)), 0.0, dimH - 1.0);
-    let delta = vec2<i32>(i32(global_id.x), i32(iy));
-    sum += textureLoad(sourceTexture, delta).xyzw * weight;
-    total += weight;
+var sum: vec4<f32> = vec4<f32>(0.0);
+var totalWeight: f32 = 0.0;
+
+// [KO] 가우시안 블러 최적화 (선형 샘플링 활용)
+// [EN] Optimized Gaussian Blur (Using linear sampling)
+let steps = 10.0; 
+for (var i = -steps; i <= steps; i += 1.0) {
+    let offsetPixels = (i / steps) * blurSize;
+    let weight = exp(-0.5 * pow(i / (steps * 0.6), 2.0)); // Gaussian curve
+    
+    let sampleUV = centerUV + vec2<f32>(0.0, offsetPixels * invSize.y);
+    sum += textureSampleLevel(sourceTexture, basicSampler, sampleUV, 0.0) * weight;
+    totalWeight += weight;
 }
 
-sum /= total;
-
-textureStore(outputTexture, vec2<i32>(global_id.xy), sum);
+textureStore(outputTexture, index, sum / totalWeight);

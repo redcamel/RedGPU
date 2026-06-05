@@ -5,7 +5,7 @@ if (index.x >= dimensions.x || index.y >= dimensions.y) {
     return;
 }
 
-let originalSample = textureLoad(sourceTexture, index);
+let originalSample = textureLoad(sourceTexture, index, 0);
 let originalColor = originalSample.rgb;
 let originalAlpha = originalSample.a;
 let encodedCoC = textureLoad(cocTexture, index).a;

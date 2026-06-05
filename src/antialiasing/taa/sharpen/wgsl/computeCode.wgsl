@@ -1,15 +1,16 @@
 let index = vec2<u32>(global_id.xy);
 let dimensions: vec2<u32> = textureDimensions(sourceTexture);
 
-if (any(index >= dimensions)) {
-    return;
-}
+if (index.x >= dimensions.x || index.y >= dimensions.y) { return; }
 
-let centerRGBA = textureLoad(sourceTexture, index);
-let leftRGBA   = textureLoad(sourceTexture, index - vec2<u32>(select(0u, 1u, index.x > 0u), 0u));
-let rightRGBA  = textureLoad(sourceTexture, min(index + vec2<u32>(1u, 0u), dimensions - 1u));
-let upRGBA     = textureLoad(sourceTexture, index - vec2<u32>(0u, select(0u, 1u, index.y > 0u)));
-let downRGBA   = textureLoad(sourceTexture, min(index + vec2<u32>(0u, 1u), dimensions - 1u));
+let centerRGBA = textureLoad(sourceTexture, index, 0);
+let leftRGBA   = textureLoad(sourceTexture, index - vec2<u32>(select(0u, 1u, index.x > 0u), 0u), 0);
+let rightRGBA  = textureLoad(sourceTexture, min(index + vec2<u32>(1u, 0u), dimensions - 1u), 0);
+let upRGBA     = textureLoad(sourceTexture, index - vec2<u32>(0u, select(0u, 1u, index.y > 0u)), 0);
+let downRGBA   = textureLoad(sourceTexture, min(index + vec2<u32>(0u, 1u), dimensions - 1u), 0);
+
+let center = centerRGBA.rgb;
+
 
 let lCenter = getLuminance(centerRGBA.rgb);
 let lLeft   = getLuminance(leftRGBA.rgb);

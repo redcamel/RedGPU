@@ -21,14 +21,14 @@ if (redOffset.x >= 0.0 && redOffset.x <= 1.0 &&
         i32(clamp(redOffset.x * dimW, 0.0, dimW - 1.0)),
         i32(clamp(redOffset.y * dimH, 0.0, dimH - 1.0))
     );
-    finalColor.r = textureLoad(sourceTexture, redCoord).r;
+    finalColor.r = textureLoad(sourceTexture, redCoord, 0).r;
 }
 
 let greenCoord = vec2<i32>(
     i32(clamp(greenOffset.x * dimW, 0.0, dimW - 1.0)),
     i32(clamp(greenOffset.y * dimH, 0.0, dimH - 1.0))
 );
-finalColor.g = textureLoad(sourceTexture, greenCoord).g;
+finalColor.g = textureLoad(sourceTexture, greenCoord, 0).g;
 
 if (blueOffset.x >= 0.0 && blueOffset.x <= 1.0 &&
     blueOffset.y >= 0.0 && blueOffset.y <= 1.0) {
@@ -36,8 +36,8 @@ if (blueOffset.x >= 0.0 && blueOffset.x <= 1.0 &&
         i32(clamp(blueOffset.x * dimW, 0.0, dimW - 1.0)),
         i32(clamp(blueOffset.y * dimH, 0.0, dimH - 1.0))
     );
-    finalColor.b = textureLoad(sourceTexture, blueCoord).b;
+    finalColor.b = textureLoad(sourceTexture, blueCoord, 0).b;
 }
 
-let originalAlpha = textureLoad(sourceTexture, vec2<i32>(global_id.xy)).a;
+let originalAlpha = textureLoad(sourceTexture, vec2<i32>(global_id.xy), 0).a;
 textureStore(outputTexture, vec2<i32>(global_id.xy), vec4<f32>(finalColor, originalAlpha));
