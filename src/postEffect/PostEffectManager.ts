@@ -372,7 +372,8 @@ class PostEffectManager {
 
         let currentTextureView = this.#renderToStorageTexture(this.#view);
 
-        // SkyAtmosphere 전용 처리 (톤 매핑 전 HDR 공간에서 실행)
+        // [KO] 1. HDR 단계: SkyAtmosphere, SSAO, SSR (장면 구성 요소)
+        // [EN] 1. HDR Phase: SkyAtmosphere, SSAO, SSR (Scene components)
         if (this.#view.skyAtmosphere) {
             currentTextureView = this.#applyEffect(currentTextureView, () => this.#view.skyAtmosphere.render(
                 this.#view,
@@ -381,16 +382,6 @@ class PostEffectManager {
                 currentTextureView
             ));
         }
-
-
-        this.#postEffects.forEach(effect => {
-            currentTextureView = this.#applyEffect(currentTextureView, () => effect.render(
-                this.#view,
-                width,
-                height,
-                currentTextureView,
-            ));
-        });
 
         if (this.#useSSAO) {
             currentTextureView = this.#applyEffect(currentTextureView, () => this.ssao.render(
@@ -409,12 +400,37 @@ class PostEffectManager {
             ));
         }
 
-        // Auto Exposure 처리 (HDR 공간에서 수행)
+        // [KO] 2. 노출 및 사용자 이펙트 단계 (Smart Tone Mapping Transition)
+        // [EN] 2. Exposure and User Effects Phase (Smart Tone Mapping Transition)
         if (useAutoExposure) {
             this.autoExposure.render(currentTextureView);
         }
 
-        {
+        let toneMapped = false;
+        this.#postEffects.forEach(effect => {
+            // [KO] 처음으로 LDR 이펙트를 만나면 그 즉시 톤매핑 수행
+            // [EN] Perform tone mapping immediately upon encountering the first LDR effect
+            if (effect.isLdr && !toneMapped) {
+                currentTextureView = this.#applyEffect(currentTextureView, () => this.#view.toneMappingManager.render(
+                    this.#view,
+                    width,
+                    height,
+                    currentTextureView
+                ));
+                toneMapped = true;
+            }
+
+            currentTextureView = this.#applyEffect(currentTextureView, () => effect.render(
+                this.#view,
+                width,
+                height,
+                currentTextureView,
+            ));
+        });
+
+        // [KO] 루프가 끝날 때까지 톤매핑이 수행되지 않았다면 마지막에 수행
+        // [EN] If tone mapping hasn't been performed by the end of the loop, perform it at the end
+        if (!toneMapped) {
             currentTextureView = this.#applyEffect(currentTextureView, () => this.#view.toneMappingManager.render(
                 this.#view,
                 width,
@@ -424,6 +440,8 @@ class PostEffectManager {
         }
 
 
+        // [KO] 3. LDR 단계: AA (FXAA / TAA)
+        // [EN] 3. LDR Phase: AA (FXAA / TAA)
         if (useFXAA) {
             currentTextureView = this.#applyEffect(currentTextureView, () => fxaa.render(
                 this.#view,

@@ -33,6 +33,7 @@ class Grayscale extends ASinglePassPostEffect {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
+        this.isLdr = true;
         this.init(
             redGPUContext,
             'POST_EFFECT_GRAYSCALE',

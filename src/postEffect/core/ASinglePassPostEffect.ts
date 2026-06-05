@@ -61,6 +61,12 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     #prevMSAA: boolean
     #prevMSAAID: string
 
+    /**
+     * [KO] 이펙트가 LDR(Low Dynamic Range) 공간에서 동작하는지 여부
+     * [EN] Whether the effect operates in LDR (Low Dynamic Range) space
+     */
+    isLdr: boolean = false
+
     // 바인드 그룹 캐시
     #bindGroupCache0 = new Map<string, GPUBindGroup>();
     #bindGroupCache1: GPUBindGroup;

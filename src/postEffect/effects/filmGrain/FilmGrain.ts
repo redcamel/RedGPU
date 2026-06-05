@@ -62,6 +62,7 @@ class FilmGrain extends ASinglePassPostEffect {
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
+        this.isLdr = true;
         this.#devicePixelRatio = window?.devicePixelRatio || 1.0;
         this.init(
             redGPUContext,
