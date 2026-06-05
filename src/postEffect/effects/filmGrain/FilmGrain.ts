@@ -88,8 +88,6 @@ class FilmGrain extends ASinglePassPostEffect {
     /** [KO] 고전 영화 스타일 프리셋 [EN] Vintage cinematic preset */
     static VINTAGE = VINTAGE;
 
-    #devicePixelRatio: number = 1.0;
-
     /**
      * [KO] FilmGrain 인스턴스를 생성합니다.
      * [EN] Creates a FilmGrain instance.
@@ -99,14 +97,12 @@ class FilmGrain extends ASinglePassPostEffect {
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
         this.isLdr = true;
-        this.#devicePixelRatio = window?.devicePixelRatio || 1.0;
         this.init(
             redGPUContext,
             'POST_EFFECT_FILM_GRAIN',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
     }
-
     /**
      * [KO] 정의된 프리셋 수치를 이펙트에 즉시 적용합니다.
      * [EN] Immediately applies defined preset values to the effect.

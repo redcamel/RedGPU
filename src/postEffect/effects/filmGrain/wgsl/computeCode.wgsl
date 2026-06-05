@@ -18,7 +18,9 @@ if (filmGrainIntensity_value <= 0.0) {
 
 // [KO] 2. 입자 좌표계 계산 (픽셀 단위 정밀 보정 및 스케일링)
 // [EN] 2. Particle coordinate calculation (Pixel-level precision correction and scaling)
-let baseScale = max(filmGrainScale_value, 0.1);
+// [KO] DPR을 반영하여 고해상도 모니터에서도 일관된 입자 크기를 유지합니다.
+// [EN] Reflect DPR to maintain consistent particle size even on high-resolution monitors.
+let baseScale = max(filmGrainScale_value, 0.1) * systemUniforms.devicePixelRatio;
 let grainCoord = floor(vec2<f32>(global_id.xy) / baseScale);
 
 // [KO] 3. 시네마틱 입자 생성 ( -1.0 ~ 1.0 범위의 동적 노이즈)
