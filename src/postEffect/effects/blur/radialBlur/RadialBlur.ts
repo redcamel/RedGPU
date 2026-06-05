@@ -61,7 +61,7 @@ DefineGPUProperty.defineNumber(RadialBlur, [
     {key: 'centerY', value: 0},
 ])
 DefineGPUProperty.defineUint(RadialBlur, [
-    {key: 'sampleCount', value: 16, min: 4},
+    {key: 'sampleCount', value: 16, min: 2, max: 100},
 ])
 Object.freeze(RadialBlur)
 export default RadialBlur
