@@ -94,6 +94,7 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
                 amount: effect.amount,
                 centerX: effect.centerX,
                 centerY: effect.centerY,
+                sampleCount: effect.sampleCount,
             }
             const folder = pane.addFolder({title: 'PostEffect', expanded: true})
 
@@ -123,6 +124,14 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
                 const currentEffect = targetView.postEffectManager.getEffectAt(0);
                 if (currentEffect) currentEffect.centerY = v.value
             }));
+            controls.push(folder.addBinding(TEST_STATE, 'sampleCount', {
+                min: 1,
+                max: 100,
+                step: 1
+            }).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.sampleCount = v.value
+            }))
         }
     });
 

@@ -121,7 +121,11 @@ const renderTestPane = async (redGPUContext, targetView, container) => {
                 const currentEffect = targetView.postEffectManager.getEffectAt(0);
                 if (currentEffect) currentEffect.centerY = v.value
             }));
-            controls.push(folder.addBinding(TEST_STATE, 'sampleCount', {min: 4, max: 32, step: 1}).on('change', (v) => {
+            controls.push(folder.addBinding(TEST_STATE, 'sampleCount', {
+                min: 2,
+                max: 100,
+                step: 1
+            }).on('change', (v) => {
                 const currentEffect = targetView.postEffectManager.getEffectAt(0);
                 if (currentEffect) currentEffect.sampleCount = v.value
             }));
