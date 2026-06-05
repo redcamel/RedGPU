@@ -6,8 +6,11 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import {DefineGPUProperty} from "../../../../defineProperty";
 
 interface LensDistortion {
+    /** [KO] 왜곡 강도. 양수일 때 배럴 왜곡(볼록), 음수일 때 핀쿠션 왜곡(오목)이 발생합니다. [EN] Distortion strength. Positive for barrel distortion (convex), negative for pincushion distortion (concave). */
     distortion: number
+    /** [KO] 왜곡의 중심점 X 오프셋 (픽셀 단위, 0은 화면 중앙). [EN] Distortion center X offset (in pixels, 0 is screen center). */
     centerX: number
+    /** [KO] 왜곡의 중심점 Y 오프셋 (픽셀 단위, 0은 화면 중앙). [EN] Distortion center Y offset (in pixels, 0 is screen center). */
     centerY: number
 }
 
@@ -15,14 +18,17 @@ interface LensDistortion {
  * [KO] 렌즈 왜곡(Lens Distortion) 후처리 이펙트입니다.
  * [EN] Lens Distortion post-processing effect.
  *
- * [KO] 왜곡 강도와 중심 위치를 조절할 수 있습니다. (양수: 배럴 왜곡, 음수: 핀쿠션 왜곡)
- * [EN] Can adjust distortion strength and center position. (Positive: Barrel, Negative: Pincushion)
+ * [KO] 광각 렌즈나 어안 렌즈에서 발생하는 기하학적 왜곡을 시뮬레이션합니다. 화면의 특정 지점(0,0은 정중앙)을 기준으로 이미지를 볼록하게 하거나 오목하게 변형시킵니다.
+ * [EN] Simulates geometric distortion found in wide-angle or fisheye lenses. It warps the image to be convex or concave relative to a specific point (0,0 is exact center).
+ *
+ * [KO] 하드웨어 선형 샘플러를 사용하여 왜곡된 이미지의 계단 현상을 제거하고 매끄러운 화질을 유지합니다.
+ * [EN] Uses a hardware linear sampler to eliminate aliasing in the warped image and maintain smooth image quality.
+ *
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.LensDistortion(redGPUContext);
- * effect.distortion = 0.2;      // 왜곡 강도 (양수: 배럴, 음수: 핀쿠션)
- * effect.centerX = 0.5;         // 왜곡 중심 X
- * effect.centerY = 0.5;         // 왜곡 중심 Y
+ * effect.distortion = 0.2;  // 배럴 왜곡 적용
+ * effect.centerX = 100;     // 중심을 오른쪽으로 100픽셀 이동
  * view.postEffectManager.addEffect(effect);
  * ```
  *
@@ -51,8 +57,8 @@ class LensDistortion extends ASinglePassPostEffect {
 
 DefineGPUProperty.defineNumber(LensDistortion, [
     {key: 'distortion', value: 0.1,},
-    {key: 'centerX', value: 0.5, min: 0, max: 1},
-    {key: 'centerY', value: 0.5, min: 0, max: 1},
+    {key: 'centerX', value: 0,},
+    {key: 'centerY', value: 0,},
 ])
 Object.freeze(LensDistortion)
 export default LensDistortion
