@@ -6,6 +6,11 @@ import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import {DefineGPUProperty} from "../../../../defineProperty";
 
+interface DirectionalBlur {
+    amount: number,
+    sampleCount: number
+}
+
 /**
  * [KO] 방향성 블러(Directional Blur) 후처리 이펙트입니다.
  * [EN] Directional Blur post-processing effect.
@@ -15,8 +20,9 @@ import {DefineGPUProperty} from "../../../../defineProperty";
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.DirectionalBlur(redGPUContext);
- * effect.angle = 45;   // 45도 방향 블러
- * effect.amount = 30;  // 블러 강도
+ * effect.angle = 45;         // 45도 방향 블러
+ * effect.amount = 30;        // 블러 강도
+ * effect.sampleCount = 40;   // 샘플링 횟수 조절 (품질 향상)
  * view.postEffectManager.addEffect(effect);
  * ```
  *
@@ -84,6 +90,9 @@ class DirectionalBlur extends ASinglePassPostEffect {
 
 DefineGPUProperty.definePositiveNumber(DirectionalBlur, [
     {key: 'amount', value: 15}
+])
+DefineGPUProperty.defineUint(DirectionalBlur, [
+    {key: 'sampleCount', value: 30, min: 1, max: 100}
 ])
 Object.freeze(DirectionalBlur)
 export default DirectionalBlur

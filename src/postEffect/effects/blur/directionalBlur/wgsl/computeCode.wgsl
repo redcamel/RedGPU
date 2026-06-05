@@ -12,7 +12,7 @@ let dir = normalizedDir * uniforms.amount * invSize;
 
 var sum = vec4<f32>(0.0);
 var totalWeight = 0.0;
-const steps = 30.0;
+let steps = uniforms.sampleCount;
 
 for (var i = -steps; i <= steps; i += 1.0) {
     let t = i / steps;
