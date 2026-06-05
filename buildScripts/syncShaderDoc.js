@@ -14,18 +14,20 @@ function syncShaderDoc() {
 
     const tsContent = fs.readFileSync(SYSTEM_CODE_MANAGER_PATH, 'utf8');
     const tsLines = tsContent.split(/\r?\n/);
-    
+
+    // gather all WGSL imports using a multi-line regex
     const shaderMap = {};
-    tsLines.forEach(line => {
-        const match = line.match(/import\s+(\w+)\s+from\s+'(.+\.wgsl)';/);
-        if (match) {
-            const [_, varName, relativePath] = match;
-            const fullPath = path.resolve(BASE_DIR, relativePath);
-            if (fs.existsSync(fullPath)) {
-                shaderMap[varName] = fs.readFileSync(fullPath, 'utf8').trim();
-            }
+    const fullContent = tsLines.join('\n');
+    const importRegex = /import\s+(\w+)\s+from\s+'([^']+\.wgsl)';/gs;
+    let match;
+    while ((match = importRegex.exec(fullContent)) !== null) {
+        const [_, varName, relativePath] = match;
+        const cleanPath = relativePath.replace(/\s+/g, '');
+        const fullPath = path.resolve(BASE_DIR, cleanPath);
+        if (fs.existsSync(fullPath)) {
+            shaderMap[varName] = fs.readFileSync(fullPath, 'utf8').trim();
         }
-    });
+    }
 
     const newLines = [];
     let updatedCount = 0;
@@ -37,10 +39,11 @@ function syncShaderDoc() {
         if (exportMatch && shaderMap[exportMatch[3]]) {
             const indent = exportMatch[1];
             const shaderSource = shaderMap[exportMatch[3]];
-            
+
+            // remove existing preceding comments and empty lines
             while (newLines.length > 0) {
                 const prevLine = newLines[newLines.length - 1].trim();
-                if (prevLine.endsWith('*/') || prevLine.startsWith('*') || prevLine.startsWith('/**')) {
+                if (prevLine === '' || prevLine.startsWith('//') || prevLine.startsWith('/*') || prevLine.startsWith('*') || prevLine.endsWith('*/')) {
                     newLines.pop();
                 } else {
                     break;
@@ -51,12 +54,37 @@ function syncShaderDoc() {
             const description = [];
             const codeLines = [];
             let isCodeStarted = false;
+            let inBlockComment = false;
 
             sourceLines.forEach(sLine => {
-                if (!isCodeStarted && sLine.trim().startsWith('//')) {
-                    description.push(sLine.trim().replace(/^\/\/\s*/, ''));
+                const trimmed = sLine.trim();
+                if (!isCodeStarted) {
+                    if (trimmed.startsWith('//')) {
+                        description.push(trimmed.replace(/^\/\/\s*/, ''));
+                    } else if (trimmed.startsWith('/**') || trimmed.startsWith('/*')) {
+                        inBlockComment = true;
+                        let content = trimmed.replace(/^\/\*\*?\s*/, '').replace(/\s*\*\/$/, '');
+                        if (content) description.push(content);
+                        if (trimmed.endsWith('*/')) inBlockComment = false;
+                    } else if (inBlockComment) {
+                        if (trimmed.endsWith('*/')) {
+                            inBlockComment = false;
+                            let content = trimmed.replace(/\s*\*\/$/, '').replace(/^\s*\*\s?/, '');
+                            if (content) description.push(content);
+                        } else {
+                            let content = trimmed.replace(/^\s*\*\s?/, '');
+                            description.push(content);
+                        }
+                    } else if (trimmed === '') {
+                        // skip leading empty lines
+                    } else if (trimmed.startsWith('#redgpu_include')) {
+                        codeLines.push(sLine);
+                        // stay in !isCodeStarted to catch more comments
+                    } else {
+                        isCodeStarted = true;
+                        codeLines.push(sLine);
+                    }
                 } else {
-                    isCodeStarted = true;
                     codeLines.push(sLine);
                 }
             });
@@ -65,7 +93,11 @@ function syncShaderDoc() {
             description.forEach(desc => newLines.push(`${indent} * ${desc}`));
             if (description.length > 0) newLines.push(`${indent} *`);
             newLines.push(`${indent} * \`\`\`wgsl`);
-            codeLines.forEach(cLine => newLines.push(`${indent} * ${cLine}`));
+            codeLines.forEach(cLine => {
+                // Escape */ to avoid breaking JSDoc
+                const escapedLine = cLine.replace(/\*\//g, '* /');
+                newLines.push(`${indent} * ${escapedLine}`);
+            });
             newLines.push(`${indent} * \`\`\``);
             newLines.push(`${indent} */`);
             newLines.push(line);
