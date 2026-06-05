@@ -103,6 +103,7 @@ class FilmGrain extends ASinglePassPostEffect {
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
     }
+
     /**
      * [KO] 정의된 프리셋 수치를 이펙트에 즉시 적용합니다.
      * [EN] Immediately applies defined preset values to the effect.

@@ -143,6 +143,7 @@ class ViewRenderTextureManager extends RedGPUObject {
         this.#update();
         return this.#gBuffers.get(DEPTH1)?.textureView
     }
+
     /**
      * 렌더 패스1 결과 텍스처 뷰를 반환합니다.
      * @returns {GPUTextureView}

@@ -120,7 +120,7 @@ class DirectionalShadowManager {
      * [EN] Releases GPU resources in use.
      */
     destroy() {
-       const {commandEncoderManager} = this.#redGPUContext
+        const {commandEncoderManager} = this.#redGPUContext
         if (this.#shadowDepthTexture) {
             commandEncoderManager.addDeferredDestroy(this.#shadowDepthTexture)
             this.#shadowDepthTexture = null

@@ -67,12 +67,12 @@ fn main(inputData: InputData) -> VertexOutput {
         // [KO] 실제 텍스처의 최대 밉레벨을 가져와서 거리에 비례한 샘플링 레벨을 결정합니다.
         // [EN] Get the actual maximum mip level of the texture and determine the sampling level proportional to the distance.
         let tempPosition = u_modelMatrix * input_position_vec4;
-        let dist = distance(tempPosition.xyz, u_cameraPosition);
-        let maxMip = f32(textureNumLevels(displacementTexture)) - 1.0;
+        let distance = distance(tempPosition.xyz, u_cameraPosition);
+        let maxMipLevel = f32(textureNumLevels(displacementTexture)) - 1.0;
         
         // [KO] 거리에 따른 밉레벨 계산 (바이어스 제거)
         // [EN] Mip level calculation based on distance (remove bias)
-        let targetMipLevel = clamp((dist / maxDistance) * maxMip, 0.0, maxMip);
+        let targetMipLevel = clamp((distance / maxDistance) * maxMipLevel, 0.0, maxMipLevel);
 
         // [KO] 트랜스폼된 UV를 사용하여 위치 이동 계산
         let displacedPosition = getDisplacementPosition(

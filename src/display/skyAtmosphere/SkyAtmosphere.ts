@@ -165,7 +165,7 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     set cloudTimeMultiplier(v: number) {
-        this.#setParam('cloudTimeMultiplier', v, false, false, false, (v) => validateNumberRange(v, ));
+        this.#setParam('cloudTimeMultiplier', v, false, false, false, (v) => validateNumberRange(v,));
     }
 
     get cloudCoverage(): number {

@@ -32,7 +32,8 @@ fn main(inputData: InputData) -> VertexOutput {
     if (u_useDisplacementTexture) {
         let worldPosForDisplacement = (u_instanceGroupModelMatrix * position).xyz;
         let distance = distance(worldPosForDisplacement, u_cameraPosition);
-        let mipLevel = (distance / maxDistance) * maxMipLevel;
+        let maxMipLevel = f32(textureNumLevels(displacementTexture)) - 1.0;
+        let targetMipLevel = clamp((distance / maxDistance) * maxMipLevel, 0.0, maxMipLevel);
         let displacedPosition = getDisplacementPosition(
             input_position,
             input_vertexNormal,
@@ -40,7 +41,7 @@ fn main(inputData: InputData) -> VertexOutput {
             displacementTextureSampler,
             u_displacementScale,
             input_uv,
-            mipLevel
+            targetMipLevel
         );
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
     }

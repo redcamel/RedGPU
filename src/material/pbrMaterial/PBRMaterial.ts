@@ -3,7 +3,6 @@ import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
-import ABitmapBaseMaterial from "../core/ABitmapBaseMaterial";
 import fragmentModuleSource from './fragment.wgsl';
 import DefineGPUProperty, {
     IDefinePositiveNumber,

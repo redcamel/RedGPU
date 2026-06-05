@@ -119,6 +119,7 @@ class ResourceManager extends RedGPUObject {
     get basicDisplacementSampler(): Sampler {
         return this.#basicDisplacementSampler
     }
+
     /**
      * [KO] BRDF 생성기를 반환합니다.
      * [EN] Returns the BRDF generator.

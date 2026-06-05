@@ -23,6 +23,11 @@ interface ASinglePassPostEffect {
  * @category Core
  */
 abstract class ASinglePassPostEffect extends RedGPUObject {
+    /**
+     * [KO] 이펙트가 LDR(Low Dynamic Range) 공간에서 동작하는지 여부
+     * [EN] Whether the effect operates in LDR (Low Dynamic Range) space
+     */
+    isLdr: boolean = false
     // 컴퓨트 셰이더 및 파이프라인 관련 리소스
     #computeShaderMSAA: GPUShaderModule
     #computeShaderNonMSAA: GPUShaderModule
@@ -40,7 +45,6 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     #computePipeline: GPUComputePipeline
     #computePipelineMSAA: GPUComputePipeline
     #computePipelineNonMSAA: GPUComputePipeline
-
     // 유니폼 및 셰이더 구조 정보
     #uniformBuffer: UniformBuffer
     #uniformsInfo
@@ -50,7 +54,6 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     #SHADER_INFO_MSAA
     #SHADER_INFO_NON_MSAA
     #prevInfo: { width: number, height: number }
-
     // 출력 텍스처 및 설정
     #outputTexture: GPUTexture
     #outputTextureView: GPUTextureView
@@ -60,13 +63,6 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     #videoMemorySize: number = 0
     #prevMSAA: boolean
     #prevMSAAID: string
-
-    /**
-     * [KO] 이펙트가 LDR(Low Dynamic Range) 공간에서 동작하는지 여부
-     * [EN] Whether the effect operates in LDR (Low Dynamic Range) space
-     */
-    isLdr: boolean = false
-
     // 바인드 그룹 캐시
     #bindGroupCache0 = new Map<string, GPUBindGroup>();
     #bindGroupCache1: GPUBindGroup;
