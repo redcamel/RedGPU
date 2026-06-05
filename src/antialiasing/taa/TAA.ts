@@ -13,8 +13,11 @@ import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSi
  * [KO] TAA(Temporal Anti-Aliasing) 후처리 이펙트입니다.
  * [EN] TAA (Temporal Anti-Aliasing) post-processing effect.
  *
- * [KO] 이전 프레임들의 정보를 누적하여 현재 프레임의 계단 현상을 제거하는 고품질 안티앨리어싱 기법입니다.
- * [EN] A high-quality anti-aliasing technique that removes aliasing in the current frame by accumulating information from previous frames.
+ * [KO] 이전 프레임들의 정보를 현재 프레임에 누적하여 계단 현상을 제거하는 고품질 안티앨리어싱 기법입니다. 화면이 정지해 있을 때도 부드러운 외곽선을 유지하며, MSAA보다 적은 비용으로 우수한 품질을 제공합니다.
+ * [EN] A high-quality anti-aliasing technique that removes aliasing by accumulating information from previous frames into the current frame. It maintains smooth edges even when the screen is static and provides superior quality at a lower cost than MSAA.
+ *
+ * [KO] 이 효과는 지터링(Jittering)된 투영 행렬과 모션 벡터(Motion Vector)를 활용하여 프레임 간의 픽셀 대응점을 추적합니다.
+ * [EN] This effect utilizes jittered projection matrices and motion vectors to track pixel correspondences between frames.
  *
  * ::: warning
  * [KO] 이 클래스는 AntialiasingManager에 의해 관리됩니다.<br/>직접 인스턴스를 생성하지 마십시오.
@@ -26,7 +29,9 @@ import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSi
 class TAA extends ASinglePassPostEffect {
     #historyTexture: GPUTexture
     #historyTextureView: GPUTextureView
+    /** [KO] 현재 프레임 누적 인덱스 [EN] Current frame accumulation index */
     #frameIndex: number = 0
+    /** [KO] 지터링 강도 [EN] Jitter strength */
     #jitterStrength: number = 0.5;
     #prevJitterOffset: [number, number] = [0, 0]
     #prevNoneJitterProjectionViewMatrix: mat4 = mat4.create();
@@ -41,7 +46,7 @@ class TAA extends ASinglePassPostEffect {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, {x: 8, y: 8, z: 1});
-
+        this.isLdr = true;
         this.init(
             redGPUContext,
             'POST_EFFECT_TAA',
@@ -50,8 +55,8 @@ class TAA extends ASinglePassPostEffect {
                 computeCode,
                 uniformStructCode,
                 [
-                    {name: 'sourceTexture', isSampled: true},
-                    {name: 'historyTexture', isSampled: true}
+                    {name: 'sourceTexture'},
+                    {name: 'historyTexture'}
                 ]
             )
         );
