@@ -4,9 +4,6 @@
 #redgpu_include entryPoint.mesh.entryPointPickingVertex;
 #redgpu_include systemStruct.meshVertexBasicUniform;
 
-const maxDistance: f32 = 1000.0;
-const maxMipLevel: f32 = 10.0;
-
 @group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
 @group(1) @binding(1) var displacementTextureSampler: sampler;
 @group(1) @binding(2) var displacementTexture: texture_2d<f32>;

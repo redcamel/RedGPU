@@ -20,4 +20,3 @@ struct InstanceUniforms {
 
 
 const maxDistance: f32 = 1000.0;
-const maxMipLevel: f32 = 10.0;

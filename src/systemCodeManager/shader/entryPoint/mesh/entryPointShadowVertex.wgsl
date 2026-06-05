@@ -27,7 +27,8 @@ fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
     #redgpu_if useDisplacementTexture
     {
         let distance = distance(position.xyz, u_cameraPosition);
-        let mipLevel = (distance / maxDistance) * maxMipLevel;
+        let maxMip = f32(textureNumLevels(displacementTexture)) - 1.0;
+        let mipLevel = clamp((distance / maxDistance) * maxMip, 0.0, maxMip);
         let displacedPosition = getDisplacementPosition(
             input_position,
             input_vertexNormal,
