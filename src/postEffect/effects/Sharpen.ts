@@ -8,8 +8,12 @@ import Convolution from "./convolution/Convolution";
  * [KO] 샤픈(Sharpen) 후처리 이펙트입니다.
  * [EN] Sharpen post-processing effect.
  *
- * [KO] 컨볼루션 커널을 이용해 이미지의 경계와 디테일을 강조합니다.
- * [EN] Emphasizes image edges and details using a convolution kernel.
+ * [KO] 컨볼루션 커널(Convolution Kernel)을 사용하여 이미지의 인접 픽셀 간 대비를 높임으로써 경계와 디테일을 선명하게 강조합니다.
+ * [EN] Enhances edges and details by increasing the contrast between adjacent pixels using a convolution kernel.
+ *
+ * [KO] 이 효과는 LDR 공간에서 동작할 때 가장 선명하고 깨끗한 결과를 제공합니다.
+ * [EN] This effect provides the sharpest and cleanest results when operating in LDR space.
+ *
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.Sharpen(redGPUContext);
@@ -20,15 +24,17 @@ import Convolution from "./convolution/Convolution";
  * @category PostEffect
  */
 class Sharpen extends AMultiPassPostEffect {
-    #effect_convolution: Convolution
+    /**
+     * [KO] 내부적으로 사용하는 컨볼루션 이펙트 인스턴스
+     * [EN] Internal convolution effect instance
+     */
+    #effect_convolution: Convolution;
 
     /**
      * [KO] Sharpen 인스턴스를 생성합니다.
      * [EN] Creates a Sharpen instance.
      *
-     * @param redGPUContext
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext) {
         super(
@@ -37,34 +43,25 @@ class Sharpen extends AMultiPassPostEffect {
                 new Convolution(redGPUContext),
             ],
         );
-        this.#effect_convolution = this.passList[0] as Convolution
-        this.#effect_convolution.kernel = Convolution.SHARPEN
+        this.isLdr = true;
+        this.#effect_convolution = this.passList[0] as Convolution;
+        this.#effect_convolution.kernel = Convolution.SHARPEN;
     }
 
     /**
      * [KO] 샤픈 효과를 렌더링합니다.
      * [EN] Renders the sharpen effect.
      *
-     * @param view
-     * [KO] View3D 인스턴스
-     * [EN] View3D instance
-     * @param width
-     * [KO] 너비
-     * [EN] Width
-     * @param height
-     * [KO] 높이
-     * [EN] Height
-     * @param sourceTextureInfo
-     * [KO] 소스 텍스처 정보
-     * [EN] Source texture info
-     * @returns
-     * [KO] 샤픈 처리된 텍스처 결과
-     * [EN] Sharpened texture result
+     * @param view - [KO] View3D 인스턴스 [EN] View3D instance
+     * @param width - [KO] 너비 [EN] Width
+     * @param height - [KO] 높이 [EN] Height
+     * @param sourceTextureInfo - [KO] 소스 텍스처 정보 [EN] Source texture info
+     * @returns [KO] 샤픈 처리된 텍스처 결과 [EN] Sharpened texture result
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult) {
         return this.#effect_convolution.render(
             view, width, height, sourceTextureInfo
-        )
+        );
     }
 }
 
