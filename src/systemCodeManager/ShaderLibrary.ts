@@ -455,10 +455,10 @@ export namespace MathLibrary {
      * /**
      *  * [KO] vec3 벡터의 모든 채널이 유한(Finite)한지 체크합니다.
      *  * [EN] Checks if all channels of a vec3 vector are finite.
-     *  *
+     *  * 
      *  * @param v [KO] 입력 vec3 벡터 [EN] Input vec3 vector
      *  * @returns [KO] 채널별 유한 여부 (vec3<bool>) [EN] Whether each channel is finite (vec3<bool>)
-     *  *
+     *  * 
      *  *\/
      * fn getIsFiniteVec3(v: vec3<f32>) -> vec3<bool> {
      *     return vec3<bool>(
@@ -522,7 +522,7 @@ export namespace MathLibrary {
          * /**
          *  * [KO] 빌보드 및 픽셀 크기 모드를 지원하는 공통 정점 변환 결과 데이터를 리턴합니다.
          *  * [EN] Returns common vertex transformation result data supporting billboard and pixel size modes.
-         *  *
+         *  * 
          *  * @param input_position [KO] 입력 정점 위치 [EN] Input vertex position
          *  * @param input_normal [KO] 입력 정점 법선 [EN] Input vertex normal
          *  * @param modelMatrix [KO] 모델 행렬 [EN] Model matrix
@@ -535,7 +535,7 @@ export namespace MathLibrary {
          *  * @param renderRatioX [KO] 렌더링 가로 비율 [EN] Rendering horizontal ratio
          *  * @param renderRatioY [KO] 렌더링 세로 비율 [EN] Rendering vertical ratio
          *  * @returns [KO] 빌보드 계산 결과 데이터 [EN] Billboard calculation result data
-         *  *
+         *  * 
          *  *\/
          * fn getBillboardResult(
          *     input_position: vec3<f32>,
@@ -1170,10 +1170,10 @@ export namespace ColorLibrary {
      * /**
      *  * [KO] HSL 색상을 RGB 색상 공간으로 변환합니다.
      *  * [EN] Converts HSL color to RGB color space.
-     *  *
+     *  * 
      *  * @param hsl [KO] 입력 HSL 색상 [EN] Input HSL color
      *  * @returns [KO] 변환된 RGB 색상 [EN] Converted RGB color
-     *  *
+     *  * 
      *  *\/
      * fn hslToRgb(hsl: vec3<f32>) -> vec3<f32> {
      *     let h = hsl.x; // Hue: 0.0 ~ 1.0
@@ -1243,12 +1243,12 @@ export namespace ColorLibrary {
      * /**
      *  * [KO] 베이스 색상에 틴트(Tint) 색상을 지정된 블렌딩 모드로 합성합니다.
      *  * [EN] Blends the base color with a tint color using the specified blending mode.
-     *  *
+     *  * 
      *  * @param baseColor [KO] 원본 색상 (RGBA) [EN] Base color (RGBA)
      *  * @param tintBlendMode [KO] 블렌딩 모드 인덱스 (0: NORMAL, 1: MULTIPLY, ... 22: NEGATION) [EN] Blending mode index (0: NORMAL, 1: MULTIPLY, ... 22: NEGATION)
      *  * @param tint [KO] 합성할 틴트 색상 (RGBA) [EN] Tint color to blend (RGBA)
      *  * @returns [KO] 합성된 최종 색상 (RGBA) [EN] Final blended color (RGBA)
-     *  *
+     *  * 
      *  *\/
      * fn getTintBlendMode(baseColor: vec4<f32>, tintBlendMode: u32, tint: vec4<f32>) -> vec4<f32> {
      *     var tintedColor: vec3<f32>;
@@ -1739,7 +1739,7 @@ export namespace SkyAtmosphereLibrary {
      * /**
      *  * [KO] 지정된 구간에 대해 대기 산란 적분을 수행합니다. (LUT 및 물리 파라미터 활용)
      *  * [EN] Performs atmospheric scattering integration over a specified segment (Using LUTs and physical parameters).
-     *  *
+     *  * 
      *  *\/
      * fn integrateScatSegment(
      *     origin: vec3<f32>, dir: vec3<f32>, 
@@ -2531,14 +2531,14 @@ export namespace DisplacementLibrary {
      * /**
      *  * [KO] 디스플레이스먼트 텍스처를 바이큐빅 필터링으로 샘플링하여 변형된 법선 벡터를 계산합니다.
      *  * [EN] Calculates the modified normal vector by sampling the displacement texture with bicubic filtering.
-     *  *
+     *  * 
      *  * @param displacementTexture [KO] 디스플레이스먼트 텍스처 [EN] Displacement texture
      *  * @param displacementTextureSampler [KO] 샘플러 [EN] Sampler
      *  * @param displacementScale [KO] 변위 강도 [EN] Displacement scale
      *  * @param input_uv [KO] 입력 UV 좌표 [EN] Input UV coordinates
      *  * @param mipLevel [KO] 밉맵 레벨 [EN] Mipmap level
      *  * @returns [KO] 변형된 법선 벡터 [EN] Modified normal vector
-     *  *
+     *  * 
      *  *\/
      * fn getDisplacementNormal(
      *     displacementTexture: texture_2d<f32>,
@@ -2639,7 +2639,7 @@ export namespace ShaderLibrary {
      * /**
      *  * [KO] 클러스터 조명 격자의 한 칸(박스) 정보를 나타내는 구조체입니다.
      *  * [EN] Structure representing a single cell (box) in the cluster light grid.
-     *  *
+     *  * 
      *  *\/
      * struct ClusterLightCell {
      *     offset : u32,
@@ -2649,18 +2649,18 @@ export namespace ShaderLibrary {
      * /**
      *  * [KO] 클러스터 조명 데이터를 통합 관리하는 격자(Grid) 구조체입니다.
      *  * [EN] Grid structure that integrally manages cluster light data.
-     *  *
+     *  * 
      *  *\/
      * struct ClusterLightGrid {
      *     offset : atomic<u32>,
      *     cells : array<ClusterLightCell , REDGPU_DEFINE_TOTAL_TILES>,
      *     indices : array<u32, clusterLight_indicesLength>
      * };
-     *
+     * 
      * /**
      *  * [KO] 클러스터 조명(포인트/스폿 라이트) 데이터 구조체입니다.
      *  * [EN] Cluster light (Point/Spot light) data structure.
-     *  *
+     *  * 
      *  *\/
      * struct ClusterLight {
      *     position : vec3<f32>, radius : f32,
@@ -2668,11 +2668,11 @@ export namespace ShaderLibrary {
      *     isSpotLight:f32,    directionX:f32,    directionY:f32,    directionZ:f32,
      *     outerCutoff:f32,    innerCutoff:f32,
      * };
-     *
+     * 
      * /**
      *  * [KO] 클러스터 조명 리스트 구조체입니다.
      *  * [EN] Cluster light list structure.
-     *  *
+     *  * 
      *  *\/
      * struct ClusterLightList {
      *     count:vec4<f32>,
@@ -2680,14 +2680,14 @@ export namespace ShaderLibrary {
      * };
      * @group(0) @binding(5) var<storage> clusterLightList : ClusterLightList;
      * @group(0) @binding(6) var<storage, read_write> clusterLightGrid : ClusterLightGrid;
-     *
+     * 
      * /**
      *  * [KO] 프래그먼트 좌표를 사용하여 해당 클러스터의 인덱스를 계산합니다.
      *  * [EN] Calculates the index of the cluster using fragment coordinates.
-     *  *
+     *  * 
      *  * @param fragCoord [KO] 프래그먼트 좌표 [EN] Fragment coordinates
      *  * @returns [KO] 클러스터 인덱스 [EN] Cluster index
-     *  *
+     *  * 
      *  *\/
      * fn getClusterLightClusterIndex(fragCoord : vec4<f32>) -> u32 {
      *     let tile = getClusterLightTile(fragCoord);
@@ -2696,14 +2696,14 @@ export namespace ShaderLibrary {
      *            tile.z * clusterLight_tileCount.x * clusterLight_tileCount.y;
      * 
      * }
-     *
+     * 
      * /**
      *  * [KO] 프래그먼트 좌표를 사용하여 해당 클러스터의 타일(XYZ) 좌표를 계산합니다.
      *  * [EN] Calculates the tile (XYZ) coordinates of the cluster using fragment coordinates.
-     *  *
+     *  * 
      *  * @param fragCoord [KO] 프래그먼트 좌표 [EN] Fragment coordinates
      *  * @returns [KO] 클러스터 타일 좌표 [EN] Cluster tile coordinates
-     *  *
+     *  * 
      *  *\/
      * fn getClusterLightTile(fragCoord : vec4<f32>) -> vec3<u32> {
      *     let near = systemUniforms.camera.nearClipping;

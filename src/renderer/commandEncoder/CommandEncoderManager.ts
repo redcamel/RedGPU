@@ -39,10 +39,13 @@ export type ComputePassDescriptorInput = string | GPUComputePassDescriptor;
  * [KO] GPU 커맨드 인코더 및 패스의 생명주기를 지능적으로 관리하는 클래스입니다.
  * [EN] Class that intelligently manages the lifecycle of GPU command encoders and passes.
  *
- * [KO] 기본적으로 단계별로 하나의 인코더를 공유하여 효율을 높이지만,
- *      패스가 열려있는 상태에서 중첩 호출이 발생하면 자동으로 새로운 인코더를 생성하여 안전성을 보장합니다.
- * [EN] Basically increases efficiency by sharing one encoder per phase,
- *      but automatically creates a new encoder when nested calls occur while a pass is open to ensure safety.
+ * [KO] 기본적으로 단계별로 하나의 인코더를 공유하여 효율을 높이지만, 패스가 열려있는 상태에서 중첩 호출이 발생하면 자동으로 새로운 인코더를 생성하여 안전성을 보장합니다.
+ * [EN] Basically increases efficiency by sharing one encoder per phase, but automatically creates a new encoder when nested calls occur while a pass is open to ensure safety.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  *
  * @category Renderer
  */
