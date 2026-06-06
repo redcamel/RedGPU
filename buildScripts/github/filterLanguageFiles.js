@@ -11,38 +11,73 @@ const filterLanguageFiles = (dir, currentLang) => {
         } else if (file.endsWith('.md')) {
             let content = fs.readFileSync(fullPath, 'utf8');
             const lines = content.split('\n');
+            let currentBlock = 'none'; // 'none', 'ko', 'en'
+            const processedLines = [];
 
-            const processed = lines
-                .map(line => {
-                    let tempLine = line;
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                let tempLine = line;
+                const trimmed = tempLine.trim();
 
-                    if (currentLang === 'ko') {
-                        // [KO] 모드: [EN] 태그가 보이면 그 지점부터 줄 끝까지 삭제
-                        if (tempLine.includes('[EN]')) {
-                            tempLine = tempLine.split('[EN]')[0].trimEnd();
-                        }
-                        // [KO] 태그 자체와 그 뒤의 공백 하나를 제거
+                // 마크다운 구조 기호나 빈 줄을 만나면 블록 상태 초기화
+                if (trimmed === '' ||
+                    trimmed.startsWith('#') ||
+                    trimmed.startsWith(':::') ||
+                    trimmed.startsWith('|') ||
+                    trimmed.startsWith('---') ||
+                    trimmed.startsWith('***') ||
+                    trimmed.startsWith('>') ||
+                    trimmed.startsWith('`')) {
+                    currentBlock = 'none';
+                }
+
+                if (currentLang === 'ko') {
+                    // [KO] 모드
+                    if (tempLine.includes('[KO]') && tempLine.includes('[EN]')) {
+                        // 한 줄에 모두 있는 인라인 케이스
+                        tempLine = tempLine.split('[EN]')[0].trimEnd();
                         tempLine = tempLine.replace('[KO] ', '').replace('[KO]', '');
+                        currentBlock = 'none';
+                    } else if (tempLine.includes('[KO]')) {
+                        // [KO] 시작 블록
+                        currentBlock = 'ko';
+                        tempLine = tempLine.replace('[KO] ', '').replace('[KO]', '');
+                    } else if (tempLine.includes('[EN]')) {
+                        // [EN] 시작 블록
+                        currentBlock = 'en';
+                        tempLine = tempLine.split('[EN]')[0].trimEnd();
                     } else {
-                        // [EN] 모드:
-                        // 1. [KO]와 [EN]이 한 줄에 모두 있는 경우 (예: @param)
-                        if (tempLine.includes('[KO]') && tempLine.includes('[EN]')) {
-                            // [KO]부터 [EN] 태그(및 뒤의 공백)까지를 통째로 삭제
-                            tempLine = tempLine.replace(/\[KO\].*?\[EN\]\s?/, '');
-                        }
-                        // 2. [KO]만 있는 줄은 한글 전용 설명이므로 줄 자체를 삭제
-                        else if (tempLine.includes('[KO]')) {
+                        // 태그가 없는 줄
+                        if (currentBlock === 'en') {
                             tempLine = '';
                         }
-
-                        // 남아있는 [EN] 태그 자체와 그 뒤의 공백 하나를 제거
-                        tempLine = tempLine.replace('[EN] ', '').replace('[EN]', '');
                     }
+                } else {
+                    // [EN] 모드
+                    if (tempLine.includes('[KO]') && tempLine.includes('[EN]')) {
+                        // 한 줄에 모두 있는 인라인 케이스
+                        tempLine = tempLine.replace(/\[KO\].*?\[EN\]\s?/, '');
+                        currentBlock = 'none';
+                    } else if (tempLine.includes('[KO]')) {
+                        // [KO] 시작 블록
+                        currentBlock = 'ko';
+                        tempLine = '';
+                    } else if (tempLine.includes('[EN]')) {
+                        // [EN] 시작 블록
+                        currentBlock = 'en';
+                        tempLine = tempLine.replace('[EN] ', '').replace('[EN]', '');
+                    } else {
+                        // 태그가 없는 줄
+                        if (currentBlock === 'ko') {
+                            tempLine = '';
+                        }
+                    }
+                }
 
-                    // 줄 끝의 공백만 제거하여 반환 (빈 줄 유지)
-                    return tempLine.trimEnd();
-                })
-                .join('\n')
+                processedLines.push(tempLine.trimEnd());
+            }
+
+            const processed = processedLines.join('\n')
                 // 외부 링크(http)가 아니면서 /RedGPU/로 시작하는 경로만 절대 경로로 변환
                 // (앞에 (, ", ' 가 오고 바로 뒤에 /RedGPU/가 붙는 경우만 매칭)
                 .replace(/([\(\"\'])\/RedGPU\//g, '$1https://redcamel.github.io/RedGPU/');
