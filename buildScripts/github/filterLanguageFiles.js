@@ -51,6 +51,8 @@ const filterLanguageFiles = (dir, currentLang) => {
                     }
                 }
 
+                let isSkipped = false;
+
                 if (currentLang === 'ko') {
                     // [KO] 모드
                     if (tempLine.includes('[KO]') && tempLine.includes('[EN]')) {
@@ -71,17 +73,11 @@ const filterLanguageFiles = (dir, currentLang) => {
                     } else if (tempLine.includes('[EN]')) {
                         // [EN] 시작 블록
                         currentBlock = 'en';
-                        const prefix = tempLine.split('[EN]')[0];
-                        const trimmedPrefix = prefix.trim();
-                        if (trimmedPrefix === '//' || trimmedPrefix === '/*' || trimmedPrefix === '*' || trimmedPrefix === '#') {
-                            tempLine = '';
-                        } else {
-                            tempLine = prefix.trimEnd();
-                        }
+                        isSkipped = true;
                     } else {
                         // 태그가 없는 줄
                         if (currentBlock === 'en') {
-                            tempLine = '';
+                            isSkipped = true;
                         }
                     }
                 } else {
@@ -94,7 +90,7 @@ const filterLanguageFiles = (dir, currentLang) => {
                     } else if (tempLine.includes('[KO]')) {
                         // [KO] 시작 블록
                         currentBlock = 'ko';
-                        tempLine = '';
+                        isSkipped = true;
                     } else if (tempLine.includes('[EN]')) {
                         // [EN] 시작 블록
                         currentBlock = 'en';
@@ -108,12 +104,14 @@ const filterLanguageFiles = (dir, currentLang) => {
                     } else {
                         // 태그가 없는 줄
                         if (currentBlock === 'ko') {
-                            tempLine = '';
+                            isSkipped = true;
                         }
                     }
                 }
 
-                processedLines.push(tempLine.trimEnd());
+                if (!isSkipped) {
+                    processedLines.push(tempLine.trimEnd());
+                }
             }
 
             const processed = processedLines.join('\n')
