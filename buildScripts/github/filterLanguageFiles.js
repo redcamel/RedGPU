@@ -12,6 +12,7 @@ const filterLanguageFiles = (dir, currentLang) => {
             let content = fs.readFileSync(fullPath, 'utf8');
             const lines = content.split('\n');
             let currentBlock = 'none'; // 'none', 'ko', 'en'
+            let isInCodeBlock = false;
             const processedLines = [];
 
             for (let i = 0; i < lines.length; i++) {
@@ -19,16 +20,35 @@ const filterLanguageFiles = (dir, currentLang) => {
                 let tempLine = line;
                 const trimmed = tempLine.trim();
 
-                // 마크다운 구조 기호나 빈 줄을 만나면 블록 상태 초기화
+                // 코드 블록 진입/탈출 감지
+                if (trimmed.startsWith('```')) {
+                    isInCodeBlock = !isInCodeBlock;
+                    currentBlock = 'none';
+                }
+
+                // 마크다운 구조 기호, 빈 줄, 또는 주석 닫는 기호를 만나면 블록 상태 초기화
                 if (trimmed === '' ||
+                    trimmed.includes('*/') ||
+                    trimmed.includes('*\\/') ||
                     trimmed.startsWith('#') ||
                     trimmed.startsWith(':::') ||
                     trimmed.startsWith('|') ||
-                    trimmed.startsWith('---') ||
+                    trimmed.startsWith('---') || 
                     trimmed.startsWith('***') ||
                     trimmed.startsWith('>') ||
                     trimmed.startsWith('`')) {
                     currentBlock = 'none';
+                }
+
+                // 코드 블록 내부에서 주석 기호로 시작하지 않는 실제 코드 라인은 블록 상태 초기화
+                if (isInCodeBlock) {
+                    const isCommentLine = trimmed.startsWith('//') ||
+                        trimmed.startsWith('*') ||
+                        trimmed.startsWith('/*') ||
+                        trimmed.startsWith('#');
+                    if (!isCommentLine) {
+                        currentBlock = 'none';
+                    }
                 }
 
                 if (currentLang === 'ko') {
@@ -41,11 +61,23 @@ const filterLanguageFiles = (dir, currentLang) => {
                     } else if (tempLine.includes('[KO]')) {
                         // [KO] 시작 블록
                         currentBlock = 'ko';
-                        tempLine = tempLine.replace('[KO] ', '').replace('[KO]', '');
+                        if (isInCodeBlock) {
+                            // 코드 블록 내부에서는 주석 기호(*, //)를 보존하고 태그만 지움
+                            tempLine = tempLine.replace('[KO] ', '').replace('[KO]', '');
+                        } else {
+                            // 코드 블록 외부에서는 주석 기호를 함께 지움
+                            tempLine = tempLine.replace(/(?:\/\/|\*|#)?\s*\[KO\]\s?/, '');
+                        }
                     } else if (tempLine.includes('[EN]')) {
                         // [EN] 시작 블록
                         currentBlock = 'en';
-                        tempLine = tempLine.split('[EN]')[0].trimEnd();
+                        const prefix = tempLine.split('[EN]')[0];
+                        const trimmedPrefix = prefix.trim();
+                        if (trimmedPrefix === '//' || trimmedPrefix === '/*' || trimmedPrefix === '*' || trimmedPrefix === '#') {
+                            tempLine = '';
+                        } else {
+                            tempLine = prefix.trimEnd();
+                        }
                     } else {
                         // 태그가 없는 줄
                         if (currentBlock === 'en') {
@@ -57,6 +89,7 @@ const filterLanguageFiles = (dir, currentLang) => {
                     if (tempLine.includes('[KO]') && tempLine.includes('[EN]')) {
                         // 한 줄에 모두 있는 인라인 케이스
                         tempLine = tempLine.replace(/\[KO\].*?\[EN\]\s?/, '');
+                        tempLine = tempLine.replace('[EN] ', '').replace('[EN]', '');
                         currentBlock = 'none';
                     } else if (tempLine.includes('[KO]')) {
                         // [KO] 시작 블록
@@ -65,7 +98,13 @@ const filterLanguageFiles = (dir, currentLang) => {
                     } else if (tempLine.includes('[EN]')) {
                         // [EN] 시작 블록
                         currentBlock = 'en';
-                        tempLine = tempLine.replace('[EN] ', '').replace('[EN]', '');
+                        if (isInCodeBlock) {
+                            // 코드 블록 내부에서는 주석 기호를 보존하고 태그만 지움
+                            tempLine = tempLine.replace('[EN] ', '').replace('[EN]', '');
+                        } else {
+                            // 코드 블록 외부에서는 주석 기호를 함께 지움
+                            tempLine = tempLine.replace(/(?:\/\/|\*|#)?\s*\[EN\]\s?/, '');
+                        }
                     } else {
                         // 태그가 없는 줄
                         if (currentBlock === 'ko') {
