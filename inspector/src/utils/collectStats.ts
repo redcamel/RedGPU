@@ -1,6 +1,6 @@
 import RedGPUContext from "@redgpu/src/context/RedGPUContext";
 import {HierarchyNode, InspectorState} from "../store";
-import {CommandBatchStats} from "@redgpu/src/renderer/commandEncoder/CommandEncoderManager";
+import {CommandBatchStats} from "@redgpu/src/commandEncoderManager/CommandEncoderManager";
 import View3D from "@redgpu/src/display/view/View3D";
 import RenderViewStateData from "@redgpu/src/display/view/core/RenderViewStateData";
 import {Object3DContainer} from "@redgpu/src/display/mesh/core";

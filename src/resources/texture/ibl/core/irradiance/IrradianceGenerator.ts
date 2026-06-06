@@ -6,7 +6,7 @@ import createUUID from "../../../../../utils/uuid/createUUID";
 import Sampler from "../../../../sampler/Sampler";
 import DirectCubeTexture from "../../../DirectCubeTexture";
 import irradianceShaderCode from "./irradianceShaderCode.wgsl";
-import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "../../../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
+import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "../../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import RedGPUObject from "../../../../../base/RedGPUObject";
 
 /**

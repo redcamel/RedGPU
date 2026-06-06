@@ -4,7 +4,7 @@ import Plane from "../../primitive/Plane";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import copyGPUBuffer from "../../utils/copyGPUBuffer";
 import Mesh from "../mesh/Mesh";
-import {COMMAND_ENCODER_TYPE} from "../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
+import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import RenderViewStateData from "../view/core/RenderViewStateData";
 import PARTICLE_EASE from "./PARTICLE_EASE";
 import computeModuleSource from "./shader/compute.wgsl";

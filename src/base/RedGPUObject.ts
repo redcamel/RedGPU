@@ -1,7 +1,7 @@
 import RedGPUContext from "../context/RedGPUContext";
 import ResourceManager from "../resources/core/resourceManager/ResourceManager";
 import AntialiasingManager from "../antialiasing/AntialiasingManager";
-import CommandEncoderManager from "../renderer/commandEncoder/CommandEncoderManager";
+import CommandEncoderManager from "../commandEncoderManager/CommandEncoderManager";
 import validateRedGPUContext from "../runtimeChecker/validateFunc/validateRedGPUContext";
 import BaseObject from "./BaseObject";
 

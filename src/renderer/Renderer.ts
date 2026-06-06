@@ -5,7 +5,7 @@ import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnimationLooperManager";
 import DrawBufferManager from "./core/DrawBufferManager";
 import FinalRender from "./finalRender/FinalRender";
-import {COMMAND_ENCODER_TYPE} from "./commandEncoder/COMMAND_ENCODER_TYPE";
+import {COMMAND_ENCODER_TYPE} from "../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
 import processAnimationsAndSkinning from "./helperFunc/processAnimationsAndSkinning";

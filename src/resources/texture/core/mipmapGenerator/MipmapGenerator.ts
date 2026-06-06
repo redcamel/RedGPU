@@ -3,7 +3,7 @@ import GPU_LOAD_OP from "../../../../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../../../../gpuConst/GPU_STORE_OP";
 import Sampler from "../../../sampler/Sampler";
 import shaderSource from "./shader.wgsl";
-import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "../../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
+import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import RedGPUObject from "../../../../base/RedGPUObject";
 
 class MipmapGenerator extends RedGPUObject {

@@ -20,6 +20,7 @@ export * as BaseObject from "./base";
 export * as Camera from "./camera/";
 export * as Context from "./context";
 export * as Color from "./color";
+export * as CommandEncoderManager from "./commandEncoderManager";
 export * from "./geometry";
 export * as Util from "./utils";
 export * as Display from "./display";

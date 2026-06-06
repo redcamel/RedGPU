@@ -6,7 +6,7 @@ import downsampleLogLuminanceCode from "./wgsl/downsampleLogLuminance.wgsl";
 import adaptationCode from "./wgsl/adaptation.wgsl";
 import ACamera from "../ACamera";
 import METERING_MODE from "../METERING_MODE";
-import {COMMAND_ENCODER_TYPE} from "../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
+import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import copyGPUBuffer from "../../../utils/copyGPUBuffer";
 import GBUFFER_TYPE from "../../../display/view/core/GBUFFER_TYPE";
 import RedGPUObject from "../../../base/RedGPUObject";

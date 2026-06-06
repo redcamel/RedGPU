@@ -6,7 +6,7 @@ import {IPostEffectResult} from "../../postEffect/core/types";
 import createBasicPostEffectCode from "../../postEffect/core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import {COMMAND_ENCODER_TYPE} from "../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
+import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 
 /**

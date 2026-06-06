@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import Sampler from "../../../../resources/sampler/Sampler";
-import {COMMAND_ENCODER_TYPE} from "../../../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
+import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import specularShaderCode_wgsl from "./skyLightReflectionShaderCode.wgsl";
 import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../resources/buffer/uniformBuffer/UniformBuffer";

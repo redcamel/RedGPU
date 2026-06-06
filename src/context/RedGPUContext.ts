@@ -7,7 +7,7 @@ import AntialiasingManager from "../antialiasing/AntialiasingManager";
 import RedGPUContextDetector from "./core/RedGPUContextDetector";
 import RedGPUContextSizeManager, {IRedGPURectObject, RedResizeEvent} from "./core/RedGPUContextSizeManager";
 import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
-import CommandEncoderManager from "../renderer/commandEncoder/CommandEncoderManager";
+import CommandEncoderManager from "../commandEncoderManager/CommandEncoderManager";
 import RedGPUContextObserver from "./core/RedGPUContextObserver";
 
 /**

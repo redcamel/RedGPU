@@ -7,7 +7,7 @@ import PickingEvent from "./PickingEvent";
 import PICKING_EVENT_TYPE from "../PICKING_EVENT_TYPE";
 import Raycaster3D from "../Raycaster3D";
 import Raycaster2D from "../Raycaster2D";
-import {COMMAND_ENCODER_TYPE} from "../../renderer/commandEncoder/COMMAND_ENCODER_TYPE";
+import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import GPU_LOAD_OP from "../../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../../gpuConst/GPU_STORE_OP";
 import View3D from "../../display/view/View3D";
