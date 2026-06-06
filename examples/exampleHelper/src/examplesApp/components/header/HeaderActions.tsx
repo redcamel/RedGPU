@@ -5,6 +5,7 @@ import IconButton from '../../../common/components/basic/IconButton';
 
 const HeaderActions: React.FC = () => {
     const isNarrow = useExamplesStore(state => state.isNarrow);
+    const language = useExamplesStore(state => state.language);
 
     const openLink = (url: string) => window.open(url, '_blank');
 
@@ -17,9 +18,15 @@ const HeaderActions: React.FC = () => {
                 title="GitHub Repository"
             />
             {!isNarrow && (
-                <button style={manualButtonStyle} onClick={() => openLink('/RedGPU/manual/')}>
-                    MANUAL
-                </button>
+                <>
+                    <button style={manualButtonStyle} onClick={() => openLink('/RedGPU/manual/')}>
+                        MANUAL
+                    </button>
+                    <button style={manualButtonStyle}
+                            onClick={() => openLink(`/RedGPU/manual/${language}/api/RedGPU-API/namespaces/RedGPU/README.html`)}>
+                        API
+                    </button>
+                </>
             )}
         </div>
     );
