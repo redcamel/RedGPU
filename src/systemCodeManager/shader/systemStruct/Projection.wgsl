@@ -1,5 +1,7 @@
-// [KO] 투영(Projection) 관련 행렬 구조체 정의입니다.
-// [EN] Definition of the Projection-related matrices structure.
+/**
+ * [KO] 투영(Projection) 관련 행렬 구조체 정의입니다.
+ * [EN] Definition of the Projection-related matrices structure.
+ */
 struct Projection {
     projectionMatrix: mat4x4<f32>,
     projectionViewMatrix: mat4x4<f32>,

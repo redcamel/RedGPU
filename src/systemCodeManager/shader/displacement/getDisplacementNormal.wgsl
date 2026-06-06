@@ -1,5 +1,14 @@
 /**
  * [KO] 바이큐빅 필터링 헬퍼 (B-Spline 기반 고정밀 버전)
+ * [EN] Bicubic filtering helper (High-precision version based on B-Spline)
+ *
+ * @param uv [KO] 샘플링할 UV 좌표 [EN] UV coordinates to sample
+ * @param tex [KO] 샘플링할 텍스처 [EN] Texture to sample
+ * @param smp [KO] 샘플러 [EN] Sampler
+ * @param dims [KO] 텍스처 크기 [EN] Texture dimensions
+ * @param invSize [KO] 텍스처 크기의 역수 [EN] Inverse of texture dimensions
+ * @param mip [KO] 밉맵 레벨 [EN] Mipmap level
+ * @returns [KO] 샘플링된 값 [EN] Sampled value
  */
 fn sampleBicubic(uv: vec2<f32>, tex: texture_2d<f32>, smp: sampler, dims: vec2<f32>, invSize: vec2<f32>, mip: f32) -> f32 {
     let res_uv = uv * dims;
@@ -26,6 +35,14 @@ fn sampleBicubic(uv: vec2<f32>, tex: texture_2d<f32>, smp: sampler, dims: vec2<f
 
 /**
  * [KO] 디스플레이스먼트 텍스처를 바이큐빅 필터링으로 샘플링하여 변형된 법선 벡터를 계산합니다.
+ * [EN] Calculates the modified normal vector by sampling the displacement texture with bicubic filtering.
+ *
+ * @param displacementTexture [KO] 디스플레이스먼트 텍스처 [EN] Displacement texture
+ * @param displacementTextureSampler [KO] 샘플러 [EN] Sampler
+ * @param displacementScale [KO] 변위 강도 [EN] Displacement scale
+ * @param input_uv [KO] 입력 UV 좌표 [EN] Input UV coordinates
+ * @param mipLevel [KO] 밉맵 레벨 [EN] Mipmap level
+ * @returns [KO] 변형된 법선 벡터 [EN] Modified normal vector
  */
 fn getDisplacementNormal(
     displacementTexture: texture_2d<f32>,

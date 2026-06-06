@@ -1,5 +1,3 @@
-// [KO] 엔진의 표준 시스템 유니폼 및 전역 바인딩 구조체 정의입니다.
-// [EN] Definitions of the engine's standard system uniforms and global binding structures.
 #redgpu_include systemStruct.DirectionalLight
 #redgpu_include systemStruct.AmbientLight
 
@@ -9,6 +7,10 @@
 #redgpu_include systemStruct.Shadow
 #redgpu_include systemStruct.SkyAtmosphere
 
+/**
+ * [KO] 엔진의 표준 시스템 유니폼 및 전역 바인딩 구조체 정의입니다.
+ * [EN] Definitions of the engine's standard system uniforms and global binding structures.
+ */
 struct SystemUniform {
 	  projection: Projection,
 	  time: Time,
@@ -75,12 +77,22 @@ struct ClusterLightGrid {
     cells : array<ClusterLightCell , REDGPU_DEFINE_TOTAL_TILES>,
     indices : array<u32, clusterLight_indicesLength>
 };
+
+/**
+ * [KO] 클러스터 조명(포인트/스폿 라이트) 데이터 구조체입니다.
+ * [EN] Cluster light (Point/Spot light) data structure.
+ */
 struct ClusterLight {
     position : vec3<f32>, radius : f32,
     color : vec3<f32>,    intensity : f32,
     isSpotLight:f32,    directionX:f32,    directionY:f32,    directionZ:f32,
     outerCutoff:f32,    innerCutoff:f32,
 };
+
+/**
+ * [KO] 클러스터 조명 리스트 구조체입니다.
+ * [EN] Cluster light list structure.
+ */
 struct ClusterLightList {
     count:vec4<f32>,
     lights : array<ClusterLight>
@@ -88,6 +100,13 @@ struct ClusterLightList {
 @group(0) @binding(5) var<storage> clusterLightList : ClusterLightList;
 @group(0) @binding(6) var<storage, read_write> clusterLightGrid : ClusterLightGrid;
 
+/**
+ * [KO] 프래그먼트 좌표를 사용하여 해당 클러스터의 인덱스를 계산합니다.
+ * [EN] Calculates the index of the cluster using fragment coordinates.
+ *
+ * @param fragCoord [KO] 프래그먼트 좌표 [EN] Fragment coordinates
+ * @returns [KO] 클러스터 인덱스 [EN] Cluster index
+ */
 fn getClusterLightClusterIndex(fragCoord : vec4<f32>) -> u32 {
     let tile = getClusterLightTile(fragCoord);
     return tile.x +
@@ -95,6 +114,14 @@ fn getClusterLightClusterIndex(fragCoord : vec4<f32>) -> u32 {
            tile.z * clusterLight_tileCount.x * clusterLight_tileCount.y;
 
 }
+
+/**
+ * [KO] 프래그먼트 좌표를 사용하여 해당 클러스터의 타일(XYZ) 좌표를 계산합니다.
+ * [EN] Calculates the tile (XYZ) coordinates of the cluster using fragment coordinates.
+ *
+ * @param fragCoord [KO] 프래그먼트 좌표 [EN] Fragment coordinates
+ * @returns [KO] 클러스터 타일 좌표 [EN] Cluster tile coordinates
+ */
 fn getClusterLightTile(fragCoord : vec4<f32>) -> vec3<u32> {
     let near = systemUniforms.camera.nearClipping;
     let far = systemUniforms.camera.farClipping;

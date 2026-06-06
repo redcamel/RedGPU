@@ -1,9 +1,11 @@
 #redgpu_include math.EPSILON
 
 /**
- * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] RGB 색상을 HSL 색상 공간으로 변환합니다.
  * [EN] Converts RGB color to HSL color space.
+ *
+ * @param rgb [KO] 입력 RGB 색상 [EN] Input RGB color
+ * @returns [KO] 변환된 HSL 색상 [EN] Converted HSL color
  */
 fn rgbToHsl(rgb: vec3<f32>) -> vec3<f32> {
     let maxVal: f32 = max(max(rgb.r, rgb.g), rgb.b);
@@ -43,9 +45,11 @@ fn rgbToHsl(rgb: vec3<f32>) -> vec3<f32> {
 }
 
 /**
- * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] HSL 색상을 RGB 색상 공간으로 변환합니다.
  * [EN] Converts HSL color to RGB color space.
+ *
+ * @param hsl [KO] 입력 HSL 색상 [EN] Input HSL color
+ * @returns [KO] 변환된 RGB 색상 [EN] Converted RGB color
  */
 fn hslToRgb(hsl: vec3<f32>) -> vec3<f32> {
     let h = hsl.x; // Hue: 0.0 ~ 1.0
@@ -113,22 +117,13 @@ fn hslToRgb(hsl: vec3<f32>) -> vec3<f32> {
 }
 
 /**
- * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] 베이스 색상에 틴트(Tint) 색상을 지정된 블렌딩 모드로 합성합니다.
  * [EN] Blends the base color with a tint color using the specified blending mode.
  *
- * @param baseColor -
- * [KO] 원본 색상 (RGBA)
- * [EN] Base color (RGBA)
- * @param tintBlendMode -
- * [KO] 블렌딩 모드 인덱스 (0: NORMAL, 1: MULTIPLY, ... 22: NEGATION)
- * [EN] Blending mode index (0: NORMAL, 1: MULTIPLY, ... 22: NEGATION)
- * @param tint -
- * [KO] 합성할 틴트 색상 (RGBA)
- * [EN] Tint color to blend (RGBA)
- * @returns
- * [KO] 합성된 최종 색상 (RGBA)
- * [EN] Final blended color (RGBA)
+ * @param baseColor [KO] 원본 색상 (RGBA) [EN] Base color (RGBA)
+ * @param tintBlendMode [KO] 블렌딩 모드 인덱스 (0: NORMAL, 1: MULTIPLY, ... 22: NEGATION) [EN] Blending mode index (0: NORMAL, 1: MULTIPLY, ... 22: NEGATION)
+ * @param tint [KO] 합성할 틴트 색상 (RGBA) [EN] Tint color to blend (RGBA)
+ * @returns [KO] 합성된 최종 색상 (RGBA) [EN] Final blended color (RGBA)
  */
 fn getTintBlendMode(baseColor: vec4<f32>, tintBlendMode: u32, tint: vec4<f32>) -> vec4<f32> {
     var tintedColor: vec3<f32>;

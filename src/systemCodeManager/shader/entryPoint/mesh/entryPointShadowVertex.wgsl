@@ -1,6 +1,13 @@
 #redgpu_include shadow.getShadowClipPosition
 #redgpu_include systemStruct.OutputShadowData;
 
+/**
+ * [KO] 그림자 맵 생성을 위한 버텍스 셰이더 엔트리 포인트입니다.
+ * [EN] Vertex shader entry point for shadow map generation.
+ *
+ * @param inputData [KO] 버텍스 입력 데이터 [EN] Vertex input data
+ * @returns [KO] 그림자 맵 출력을 위한 데이터 [EN] Data for shadow map output
+ */
 @vertex
 fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
     var output: OutputShadowData;

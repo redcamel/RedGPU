@@ -6,7 +6,7 @@ const BASE_DIR = path.dirname(SYSTEM_CODE_MANAGER_PATH);
 
 function syncShaderDoc() {
     console.log('🚀 Syncing WGSL to ShaderLibrary (Full Auto JSDoc Mode)...');
-    
+
     if (!fs.existsSync(SYSTEM_CODE_MANAGER_PATH)) {
         console.error('❌ ShaderLibrary.ts not found');
         return;
@@ -35,7 +35,7 @@ function syncShaderDoc() {
     for (let i = 0; i < tsLines.length; i++) {
         let line = tsLines[i];
         const exportMatch = line.match(/^(\s*)(?:export\s+)?(?:const|import)\s+(\w+)\s*=\s*(\w+);/);
-        
+
         if (exportMatch && shaderMap[exportMatch[3]]) {
             const indent = exportMatch[1];
             const shaderSource = shaderMap[exportMatch[3]];
@@ -58,44 +58,64 @@ function syncShaderDoc() {
 
             sourceLines.forEach(sLine => {
                 const trimmed = sLine.trim();
+
+                // Block comment state management
+                if (inBlockComment) {
+                    if (trimmed.endsWith('*/')) {
+                        inBlockComment = false;
+                        let content = trimmed.replace(/\s*\*\/$/, '').replace(/^\s*\*\s?/, '');
+                        description.push(content);
+                    } else {
+                        let content = trimmed.replace(/^\s*\*\s?/, '');
+                        description.push(content);
+                    }
+                    return;
+                }
+
                 if (!isCodeStarted) {
-                    if (trimmed.startsWith('//')) {
-                        description.push(trimmed.replace(/^\/\/\s*/, ''));
-                    } else if (trimmed.startsWith('/**') || trimmed.startsWith('/*')) {
+                    if (trimmed.startsWith('/**') || trimmed.startsWith('/*')) {
                         inBlockComment = true;
                         let content = trimmed.replace(/^\/\*\*?\s*/, '').replace(/\s*\*\/$/, '');
                         if (content) description.push(content);
                         if (trimmed.endsWith('*/')) inBlockComment = false;
-                    } else if (inBlockComment) {
-                        if (trimmed.endsWith('*/')) {
-                            inBlockComment = false;
-                            let content = trimmed.replace(/\s*\*\/$/, '').replace(/^\s*\*\s?/, '');
-                            if (content) description.push(content);
-                        } else {
-                            let content = trimmed.replace(/^\s*\*\s?/, '');
-                            description.push(content);
-                        }
-                    } else if (trimmed === '') {
-                        // skip leading empty lines
-                    } else if (trimmed.startsWith('#redgpu_include')) {
-                        codeLines.push(sLine);
-                        // stay in !isCodeStarted to catch more comments
-                    } else {
-                        isCodeStarted = true;
-                        codeLines.push(sLine);
+                        return;
                     }
+
+                    if (trimmed.startsWith('//')) {
+                        description.push(trimmed.replace(/^\/\/\s*/, ''));
+                        return;
+                    }
+
+                    if (trimmed === '') {
+                        // Preserve empty lines in codeLines only if we've already hit some includes/code
+                        if (codeLines.length > 0) codeLines.push(sLine);
+                        return;
+                    }
+
+                    if (trimmed.startsWith('#redgpu_include')) {
+                        codeLines.push(sLine);
+                        return;
+                    }
+
+                    // Any other non-empty line starts the actual code block
+                    isCodeStarted = true;
+                    codeLines.push(sLine);
                 } else {
+                    // Already in code block mode
                     codeLines.push(sLine);
                 }
             });
 
             newLines.push(`${indent}/**`);
-            description.forEach(desc => newLines.push(`${indent} * ${desc}`));
+            description.forEach(desc => {
+                if (desc.trim() === '') newLines.push(`${indent} *`);
+                else newLines.push(`${indent} * ${desc}`);
+            });
             if (description.length > 0) newLines.push(`${indent} *`);
             newLines.push(`${indent} * \`\`\`wgsl`);
             codeLines.forEach(cLine => {
-                // Escape */ to avoid breaking JSDoc
-                const escapedLine = cLine.replace(/\*\//g, '* /');
+                // Escape */ and /* to avoid breaking JSDoc and confusing the highlighter
+                let escapedLine = cLine.replace(/\*\//g, '* /').replace(/\/\*/g, '/ *');
                 newLines.push(`${indent} * ${escapedLine}`);
             });
             newLines.push(`${indent} * \`\`\``);

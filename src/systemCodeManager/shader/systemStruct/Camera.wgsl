@@ -1,3 +1,7 @@
+/**
+ * [KO] 카메라(Camera) 구조체 정의입니다.
+ * [EN] Definition of the Camera structure.
+ */
 struct Camera {
     viewMatrix: mat4x4<f32>,
     inverseViewMatrix: mat4x4<f32>,

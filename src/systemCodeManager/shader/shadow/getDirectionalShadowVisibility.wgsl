@@ -1,26 +1,13 @@
 /**
- * [Stage: Fragment Only (or Compute with textureSampleCompare)]
  * [KO] 방향성 광원의 그림자 가시성(Visibility)을 계산합니다.
  * [EN] Calculates the shadow visibility for a directional light.
  *
- * @param directionalShadowMap -
- * [KO] 방향성 광원용 깊이 텍스처
- * [EN] Depth texture for directional light
- * @param directionalShadowMapSampler -
- * [KO] 비교 샘플러
- * [EN] Comparison sampler
- * @param shadowDepthTextureSize -
- * [KO] 그림자 텍스처의 크기
- * [EN] Size of the shadow texture
- * @param bias -
- * [KO] 그림자 바이어스
- * [EN] Shadow bias
- * @param shadowCoord -
- * [KO] [0, 1] 범위로 변환된 그림자 좌표 (shadow.getShadowCoord 결과값)
- * [EN] Shadow coordinates transformed to [0, 1] range (result of shadow.getShadowCoord)
- * @returns
- * [KO] 가시성 계수 (0.0 ~ 1.0)
- * [EN] Visibility factor (0.0 ~ 1.0)
+ * @param directionalShadowMap [KO] 방향성 광원용 깊이 텍스처 [EN] Depth texture for directional light
+ * @param directionalShadowMapSampler [KO] 비교 샘플러 [EN] Comparison sampler
+ * @param shadowDepthTextureSize [KO] 그림자 텍스처의 크기 [EN] Size of the shadow texture
+ * @param bias [KO] 그림자 바이어스 [EN] Shadow bias
+ * @param shadowCoord [KO] [0, 1] 범위로 변환된 그림자 좌표 (shadow.getShadowCoord 결과값) [EN] Shadow coordinates transformed to [0, 1] range (result of shadow.getShadowCoord)
+ * @returns [KO] 가시성 계수 (0.0 ~ 1.0) [EN] Visibility factor (0.0 ~ 1.0)
  */
 fn getDirectionalShadowVisibility(
    directionalShadowMap: texture_depth_2d,

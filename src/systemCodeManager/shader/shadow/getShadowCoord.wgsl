@@ -1,17 +1,10 @@
 /**
- * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] 월드 좌표를 빛의 클립 공간 좌표(UV + Depth)로 변환합니다.
  * [EN] Converts world coordinates to light's clip space coordinates (UV + Depth).
  *
- * @param worldPosition -
- * [KO] 월드 공간 상의 위치
- * [EN] Position in world space
- * @param lightViewProjectionMatrix -
- * [KO] 빛의 View-Projection 행렬
- * [EN] Light's View-Projection matrix
- * @returns
- * [KO] 그림자 맵 샘플링을 위한 vec3 좌표 (x, y: UV, z: Depth)
- * [EN] vec3 coordinates for shadow map sampling (x, y: UV, z: Depth)
+ * @param worldPosition [KO] 월드 공간 상의 위치 [EN] Position in world space
+ * @param lightViewProjectionMatrix [KO] 빛의 View-Projection 행렬 [EN] Light's View-Projection matrix
+ * @returns [KO] 그림자 맵 샘플링을 위한 vec3 좌표 (x, y: UV, z: Depth) [EN] vec3 coordinates for shadow map sampling (x, y: UV, z: Depth)
  */
 fn getShadowCoord(worldPosition: vec3<f32>, lightViewProjectionMatrix: mat4x4<f32>) -> vec3<f32> {
     // 1. 빛의 공간으로 변환 (Convert to light space)

@@ -1,28 +1,17 @@
 #redgpu_include math.EPSILON
 
 /**
- * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] 스폿라이트의 각도(원뿔)에 따른 감쇄 계수를 계산합니다.
  * [EN] Calculates the attenuation factor according to the angle (cone) of the spotlight.
  *
  * [KO] 내부 원뿔(Inner Cone)과 외부 원뿔(Outer Cone) 사이의 영역에서 부드러운 페이드 효과를 생성합니다.
  * [EN] Creates a smooth fade effect in the area between the inner cone and the outer cone.
  *
- * @param lightToVertexDirection - 
- * [KO] 광원에서 픽셀(버텍스)을 향하는 정규화된 방향 벡터
- * [EN] Normalized direction vector from the light source to the pixel (vertex)
- * @param lightDirection - 
- * [KO] 스폿라이트가 비추는 정규화된 중심 방향 벡터
- * [EN] Normalized center direction vector that the spotlight shines in
- * @param innerCutoff - 
- * [KO] 내부 원뿔 컷오프 각도 (Degree)
- * [EN] Inner cone cutoff angle (Degree)
- * @param outerCutoff - 
- * [KO] 외부 원뿔 컷오프 각도 (Degree)
- * [EN] Outer cone cutoff angle (Degree)
- * @returns 
- * [KO] 계산된 각도 감쇄 계수 (0.0 ~ 1.0)
- * [EN] Calculated angle attenuation factor (0.0 to 1.0)
+ * @param lightToVertexDirection [KO] 광원에서 픽셀(버텍스)을 향하는 정규화된 방향 벡터 [EN] Normalized direction vector from the light source to the pixel (vertex)
+ * @param lightDirection [KO] 스폿라이트가 비추는 정규화된 중심 방향 벡터 [EN] Normalized center direction vector that the spotlight shines in
+ * @param innerCutoff [KO] 내부 원뿔 컷오프 각도 (Degree) [EN] Inner cone cutoff angle (Degree)
+ * @param outerCutoff [KO] 외부 원뿔 컷오프 각도 (Degree) [EN] Outer cone cutoff angle (Degree)
+ * @returns [KO] 계산된 각도 감쇄 계수 (0.0 ~ 1.0) [EN] Calculated angle attenuation factor (0.0 to 1.0)
  */
 fn getLightAngleAttenuation(
     lightToVertexDirection: vec3<f32>, 

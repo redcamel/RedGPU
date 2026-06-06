@@ -1,3 +1,7 @@
+/**
+ * [KO] 대기 산란(SkyAtmosphere) 파라미터 구조체 정의입니다.
+ * [EN] Definition of the SkyAtmosphere parameters structure.
+ */
 struct SkyAtmosphere {
 	rayleighScattering: vec3<f32>,
 	rayleighExponentialDistribution: f32,
@@ -26,4 +30,4 @@ struct SkyAtmosphere {
 	cloudCoverage: f32,
 	cloudDensity: f32,
 	cloudHeight: f32
-	};
+};

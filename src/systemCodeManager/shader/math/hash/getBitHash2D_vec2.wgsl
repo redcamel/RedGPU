@@ -1,5 +1,10 @@
-// [KO] 2D 벡터의 비트 구조를 보존하여 2D 난수 벡터를 생성합니다. (초정밀)
-// [EN] Generates a 2D random vector by preserving the bit structure of a 2D vector. (Ultra-precise)
+/**
+ * [KO] 2D 벡터의 비트 구조를 보존하여 2D 난수 벡터를 생성합니다. (초정밀)
+ * [EN] Generates a 2D random vector by preserving the bit structure of a 2D vector. (Ultra-precise)
+ *
+ * @param coord [KO] 입력 2D 좌표 [EN] Input 2D coordinates
+ * @returns [KO] 생성된 2D 난수 벡터 [EN] Generated 2D random vector
+ */
 fn getBitHash2D_vec2(coord: vec2<f32>) -> vec2<f32> {
     var q = bitcast<vec2<u32>>(coord);
     // [KO] 소수 곱셈을 이용한 정밀 비트 혼합

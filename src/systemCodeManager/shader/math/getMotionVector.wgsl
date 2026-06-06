@@ -1,19 +1,12 @@
 #redgpu_include math.EPSILON
 
 /**
- * [Stage: Common (Vertex, Fragment, Compute)]
  * [KO] 현재 프레임과 이전 프레임의 클립 공간 좌표를 비교하여 모션 벡터(UV 단위)를 계산합니다.
  * [EN] Calculates the motion vector (in UV units) by comparing current and previous clip space coordinates.
  *
- * @param currentClipPos -
- * [KO] 현재 프레임의 Clip Space 위치
- * [EN] Current frame's clip space position
- * @param prevClipPos -
- * [KO] 이전 프레임의 Clip Space 위치
- * [EN] Previous frame's clip space position
- * @returns
- * [KO] UV 공간 상의 모션 벡터 (vec2)
- * [EN] Motion vector in UV space (vec2)
+ * @param currentClipPos [KO] 현재 프레임의 Clip Space 위치 [EN] Current frame's clip space position
+ * @param prevClipPos [KO] 이전 프레임의 Clip Space 위치 [EN] Previous frame's clip space position
+ * @returns [KO] UV 공간 상의 모션 벡터 (vec2) [EN] Motion vector in UV space (vec2)
  */
 fn getMotionVector(
     currentClipPos: vec4<f32>,
