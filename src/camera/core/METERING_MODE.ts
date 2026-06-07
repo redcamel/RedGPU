@@ -1,6 +1,8 @@
 /**
  * [KO] 자동 노출을 위한 측광 모드 열거형입니다.
  * [EN] Metering mode enum for auto-exposure.
+ *
+ * @category Core
  */
 enum METERING_MODE {
     /**
