@@ -15,6 +15,11 @@ const emptyArray = new Uint32Array([0, 0, 0, 0]);
  *
  * [KO] 포인트 조명 및 스포트 조명과 클러스터(타일) 간의 교차 검사를 수행하여 각 클러스터에 포함되는 조명 인덱스를 기록합니다.
  * [EN] Performs intersection tests between point lights/spot lights and clusters (tiles) to record light indices included in each cluster.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  * @category Light
  */
 class PassClustersLight extends RedGPUObject {

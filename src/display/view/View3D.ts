@@ -24,7 +24,7 @@ import ViewRenderTextureManager from "./core/viewRenderTextureManager/ViewRender
 import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 import SystemUniformUpdater from "../../renderer/helperFunc/SystemUniformUpdater";
 import updateSystemUniformData from "../../renderer/helperFunc/updateSystemUniformData";
-import ClusterLightManager from "../../light/clusterLight/ClusterLightManager";
+import ClusterLightManager from "../../light/core/ClusterLightManager";
 
 const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
