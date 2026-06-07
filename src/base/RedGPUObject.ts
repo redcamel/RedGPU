@@ -15,33 +15,76 @@ import BaseObject from "./BaseObject";
 abstract class RedGPUObject extends BaseObject {
     readonly #redGPUContext: RedGPUContext;
 
+    /**
+     * [KO] RedGPUObject 생성자입니다. (추상 클래스로 직접 인스턴스 생성은 불가합니다)
+     * [EN] RedGPUObject constructor. (Abstract class, cannot be instantiated directly)
+     *
+     * @param redGPUContext -
+     * [KO] 사용할 RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance to use
+     */
     protected constructor(redGPUContext: RedGPUContext) {
         super()
         validateRedGPUContext(redGPUContext);
         this.#redGPUContext = redGPUContext;
     }
 
-    /** [KO] RedGPUContext 인스턴스를 반환합니다. */
+    /**
+     * [KO] RedGPUContext 인스턴스를 반환합니다.
+     * [EN] Returns the RedGPUContext instance.
+     *
+     * @returns
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     */
     get redGPUContext(): RedGPUContext {
         return this.#redGPUContext;
     }
 
-    /** [KO] WebGPU 디바이스 객체를 반환합니다. (단축 경로) */
+    /**
+     * [KO] WebGPU 디바이스 객체를 반환합니다. (단축 경로)
+     * [EN] Returns the WebGPU device object. (Short-cut path)
+     *
+     * @returns
+     * [KO] GPUDevice 인스턴스
+     * [EN] GPUDevice instance
+     */
     get gpuDevice(): GPUDevice {
         return this.#redGPUContext.gpuDevice;
     }
 
-    /** [KO] 리소스 매니저 인스턴스를 반환합니다. (단축 경로) */
+    /**
+     * [KO] 리소스 매니저 인스턴스를 반환합니다. (단축 경로)
+     * [EN] Returns the ResourceManager instance. (Short-cut path)
+     *
+     * @returns
+     * [KO] ResourceManager 인스턴스
+     * [EN] ResourceManager instance
+     */
     get resourceManager(): ResourceManager {
         return this.#redGPUContext.resourceManager;
     }
 
-    /** [KO] 안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로) */
+    /**
+     * [KO] 안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
+     * [EN] Returns the AntialiasingManager instance. (Short-cut path)
+     *
+     * @returns
+     * [KO] AntialiasingManager 인스턴스
+     * [EN] AntialiasingManager instance
+     */
     get antialiasingManager(): AntialiasingManager {
         return this.#redGPUContext.antialiasingManager;
     }
 
-    /** [KO] 커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로) */
+    /**
+     * [KO] 커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
+     * [EN] Returns the CommandEncoderManager instance. (Short-cut path)
+     *
+     * @returns
+     * [KO] CommandEncoderManager 인스턴스
+     * [EN] CommandEncoderManager instance
+     */
     get commandEncoderManager(): CommandEncoderManager {
         return this.#redGPUContext.commandEncoderManager;
     }
