@@ -39,6 +39,11 @@ interface ABaseMaterial {
  *
  * [KO] 머티리얼별로 GPU 파이프라인의 셰이더, 바인드 그룹, 블렌딩, 컬러/알파, 틴트, 투명도 등 다양한 렌더링 속성을 일관성 있게 제어할 수 있습니다.
  * [EN] It allows consistent control of various rendering attributes such as shader, bind group, blending, color/alpha, tint, and transparency of the GPU pipeline for each material.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class and cannot be instantiated directly.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  * @category Material
  */
 abstract class ABaseMaterial extends ResourceBase {
