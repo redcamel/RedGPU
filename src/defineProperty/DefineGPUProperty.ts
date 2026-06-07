@@ -14,10 +14,9 @@ import defineVector4 from "./funcs/vector/defineVector4";
 
 /**
  * [KO] RedGPU의 통합 속성 정의 시스템입니다.
+ * 정의된 자바스크립트 속성의 값이 변경되면 관련 GPU 유니폼 버퍼 및 렌더 파이프라인 데이터와 자동으로 연동되어 GPU 측에 즉각적으로 반영됩니다.
  * [EN] Integrated property definition system for RedGPU.
- *
- * [KO] 기존의 DefineForFragment, DefineForVertex를 대체하며, 셰이더 단계에 의존하지 않는 범용적인 속성 정의 기능을 제공합니다.
- * [EN] Replaces the existing DefineForFragment and DefineForVertex, providing general-purpose property definition features independent of shader stages.
+ * When the defined JavaScript property value changes, it automatically links and synchronizes with the GPU uniform buffer and render pipeline data to immediately reflect changes on the GPU side.
  *
  * @namespace DefineGPUProperty
  */

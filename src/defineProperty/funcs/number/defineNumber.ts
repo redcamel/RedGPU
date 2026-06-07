@@ -57,8 +57,8 @@ function defineNumber_func(
  * @example
  * ```typescript
  * // 설정 객체 방식 (IDefineNumber)
- * DefineGPUProperty.defineNumber(MyMaterial, { key: 'myValue', value: 0, min: -100, max: 100 });
- * DefineGPUProperty.defineNumber(MyMaterial, [{ key: 'myValue', value: 0, min: -100, max: 100 }]);
+ * RedGPU.DefineGPUProperty.defineNumber(MyMaterial, { key: 'myValue', value: 0, min: -100, max: 100 });
+ * RedGPU.DefineGPUProperty.defineNumber(MyMaterial, [{ key: 'myValue', value: 0, min: -100, max: 100 }]);
  * ```
  */
 const defineNumber = (target: any, defineInfo: IDefineNumber | IDefineNumber[]) => applyProperties(target, defineInfo, defineNumber_func);

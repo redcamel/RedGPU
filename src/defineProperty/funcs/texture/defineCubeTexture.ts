@@ -45,8 +45,8 @@ function defineCubeTexture_func(propertyInfo: IDefineCubeTexture) {
  * @example
  * ```typescript
  * // 설정 객체 방식 (IDefineCubeTexture)
- * DefineGPUProperty.defineCubeTexture(MyMaterial, { key: 'envTexture' });
- * DefineGPUProperty.defineCubeTexture(MyMaterial, [{ key: 'envTexture' }]);
+ * RedGPU.DefineGPUProperty.defineCubeTexture(MyMaterial, { key: 'envTexture' });
+ * RedGPU.DefineGPUProperty.defineCubeTexture(MyMaterial, [{ key: 'envTexture' }]);
  * ```
  */
 const defineCubeTexture = (target: any, defineInfo: IDefineCubeTexture | IDefineCubeTexture[]) => applyProperties(target, defineInfo, defineCubeTexture_func);

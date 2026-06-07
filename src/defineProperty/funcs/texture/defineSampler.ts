@@ -32,8 +32,8 @@ function defineSampler_func(propertyInfo: IDefineSampler) {
  * @example
  * ```typescript
  * // 설정 객체 방식 (IDefineSampler)
- * DefineGPUProperty.defineSampler(MyMaterial, { key: 'diffuseSampler' });
- * DefineGPUProperty.defineSampler(MyMaterial, [{ key: 'diffuseSampler' }]);
+ * RedGPU.DefineGPUProperty.defineSampler(MyMaterial, { key: 'diffuseSampler' });
+ * RedGPU.DefineGPUProperty.defineSampler(MyMaterial, [{ key: 'diffuseSampler' }]);
  * ```
  */
 const defineSampler = (target: any, defineInfo: IDefineSampler | IDefineSampler[]) => applyProperties(target, defineInfo, defineSampler_func);

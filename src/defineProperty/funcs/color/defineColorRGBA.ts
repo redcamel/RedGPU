@@ -66,8 +66,8 @@ function defineColorRGBA_func(
  * @example
  * ```typescript
  * // 설정 객체 방식 (IColorRGBA)
- * DefineGPUProperty.defineColorRGBA(MyMaterial, { key: 'color', value: '#00ff00' });
- * DefineGPUProperty.defineColorRGBA(MyMaterial, [{ key: 'color', value: '#00ff00' }]);
+ * RedGPU.DefineGPUProperty.defineColorRGBA(MyMaterial, { key: 'color', value: '#00ff00' });
+ * RedGPU.DefineGPUProperty.defineColorRGBA(MyMaterial, [{ key: 'color', value: '#00ff00' }]);
  * ```
  */
 const defineColorRGBA = (target: any, defineInfo: IColorRGBA | IColorRGBA[]) => applyProperties(target, defineInfo, defineColorRGBA_func);
