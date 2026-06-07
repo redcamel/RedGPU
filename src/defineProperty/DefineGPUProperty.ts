@@ -10,7 +10,7 @@ import defineUint from "./funcs/number/defineUint";
 import defineVector2 from "./funcs/vector/defineVector2";
 import defineVector3 from "./funcs/vector/defineVector3";
 import defineVector4 from "./funcs/vector/defineVector4";
-
+import * as Core from "./core";
 
 /**
  * [KO] RedGPU의 통합 속성 정의 시스템입니다.
@@ -33,6 +33,7 @@ const DefineGPUProperty = {
     defineVector2,
     defineVector3,
     defineVector4,
+    Core
 }
 
 
