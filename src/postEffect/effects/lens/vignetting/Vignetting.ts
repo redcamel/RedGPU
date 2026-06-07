@@ -3,7 +3,8 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import {DefineGPUProperty} from "../../../../defineProperty";
+import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+
 
 interface Vignetting {
     /** [KO] 비네팅의 크기 (0 ~ 1). 값이 작을수록 중앙의 밝은 영역이 좁아집니다. [EN] Size of the vignette (0 to 1). Lower values narrow the central bright area. */

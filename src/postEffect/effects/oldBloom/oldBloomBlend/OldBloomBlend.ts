@@ -5,7 +5,8 @@ import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import {IPostEffectResult} from "../../../core/types";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
-import {DefineGPUProperty} from "../../../../defineProperty";
+import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+
 
 interface OldBloomBlend {
     bloomStrength: number

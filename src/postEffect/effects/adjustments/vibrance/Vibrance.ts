@@ -3,7 +3,8 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import {DefineGPUProperty} from "../../../../defineProperty";
+import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+
 
 interface Vibrance {
     /** [KO] 바이브런스 조절 값 (-100 ~ 100). 채도가 낮은 영역 위주로 지능적 강화를 수행합니다. [EN] Vibrance adjustment value (-100 to 100). Performs intelligent enhancement primarily on low-saturation areas. */

@@ -3,7 +3,8 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import {DefineGPUProperty} from "../../../../defineProperty";
+import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+
 
 interface LensDistortion {
     /** [KO] 왜곡 강도. 양수일 때 배럴 왜곡(볼록), 음수일 때 핀쿠션 왜곡(오목)이 발생합니다. [EN] Distortion strength. Positive for barrel distortion (convex), negative for pincushion distortion (concave). */

@@ -4,7 +4,8 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import {DefineGPUProperty} from "../../../../defineProperty";
+import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+
 
 interface DirectionalBlur {
     amount: number,

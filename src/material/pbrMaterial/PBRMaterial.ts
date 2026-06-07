@@ -4,12 +4,12 @@ import BitmapTexture from "../../resources/texture/BitmapTexture";
 import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl';
-import DefineGPUProperty, {
-    IDefinePositiveNumber,
-    IDefineVector3,
-    IDefineVector4
-} from "../../defineProperty/DefineGPUProperty";
+
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
+import {IDefinePositiveNumber} from "../../defineProperty/funcs/number/definePositiveNumber";
+import {IDefineVector3} from "../../defineProperty/funcs/vector/defineVector3";
+import {IDefineVector4} from "../../defineProperty/funcs/vector/defineVector4";
+import DefineGPUProperty from "../../defineProperty/DefineGPUProperty";
 
 const EXTENSION_LIST: {
     textureList?: string[],

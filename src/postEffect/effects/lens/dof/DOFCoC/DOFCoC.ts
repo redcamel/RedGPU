@@ -3,7 +3,8 @@ import ASinglePassPostEffect from "../../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import {DefineGPUProperty} from "../../../../../defineProperty";
+import DefineGPUProperty from "../../../../../defineProperty/DefineGPUProperty";
+
 
 /**
  * [KO] DOFCoC의 속성 인터페이스입니다.

@@ -3,7 +3,8 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import {DefineGPUProperty} from "../../../../defineProperty";
+import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+
 
 interface SSAO_AO {
     /** [KO] 블러 사용 여부. true 시 AO 노이즈를 억제하기 위한 가우시안 블러가 수행됩니다. [EN] Whether to use blur. If true, Gaussian blur is performed to suppress AO noise. */
