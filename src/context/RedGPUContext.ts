@@ -53,7 +53,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Current time (frame based, ms)
      */
     currentTime: number
-    /**
+    /**ㄹ
      * [KO] GPU 캔버스 구성 정보 (WebGPU 설정용)
      * [EN] GPU canvas configuration info (for WebGPU setup)
      */
@@ -168,10 +168,18 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#initialize()
     }
 
+    /**
+     * [KO] 커맨드 인코더 매니저를 반환합니다.
+     * [EN] Returns the command encoder manager.
+     */
     get commandEncoderManager(): CommandEncoderManager {
         return this.#commandEncoderManager;
     }
 
+    /**
+     * [KO] HTML 캔버스의 BoundingClientRect 정보를 반환합니다.
+     * [EN] Returns the BoundingClientRect info of the HTML canvas.
+     */
     get boundingClientRect(): DOMRect {
         return this.#boundingClientRect
     }
@@ -276,16 +284,16 @@ class RedGPUContext extends RedGPUContextViewContainer {
     }
 
     /**
-     * [KO] 키보드 입력 버퍼를 반환합니다.
-     * [EN] Returns the keyboard input buffer.
+     * [KO] 키보드 입력 상태 버퍼를 반환합니다.
+     * [EN] Returns the keyboard input state buffer.
      */
     get keyboardKeyBuffer(): { [p: string]: boolean } {
         return this.#keyboardKeyBuffer;
     }
 
     /**
-     * [KO] 키보드 입력 버퍼를 설정합니다.
-     * [EN] Sets the keyboard input buffer.
+     * [KO] 키보드 입력 상태 버퍼를 설정합니다.
+     * [EN] Sets the keyboard input state buffer.
      * @param value -
      * [KO] 키보드 상태 객체
      * [EN] Keyboard state object

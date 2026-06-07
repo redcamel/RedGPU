@@ -4,21 +4,54 @@ import RedGPUObject from "../../base/RedGPUObject";
 /**
  * [KO] RedGPUContext의 캔버스 환경 변화(부모 변경, 크기/위치 변화)를 감지하는 클래스입니다.
  * [EN] Class that detects changes in the RedGPUContext's canvas environment (parent changes, size/position changes).
+ *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  */
 export default class RedGPUContextObserver extends RedGPUObject {
 
+    /**
+     * [KO] 관찰 대상 HTML 캔버스 엘리먼트
+     * [EN] Target HTML canvas element to observe
+     */
     readonly #htmlCanvas: HTMLCanvasElement;
+    /**
+     * [KO] 레이아웃 변화 시 실행될 콜백 함수
+     * [EN] Callback function to execute when layout changes
+     */
     readonly #updateCallback: () => void;
+    /**
+     * [KO] 현재 캔버스의 부모 엘리먼트
+     * [EN] Current parent element of the canvas
+     */
     #currentParent: HTMLElement | null = null;
+    /**
+     * [KO] 부모 엘리먼트 크기 감지용 ResizeObserver
+     * [EN] ResizeObserver for detecting parent element size changes
+     */
     #resizeObserver: ResizeObserver | null = null;
+    /**
+     * [KO] DOM 변화 감지용 MutationObserver
+     * [EN] MutationObserver for detecting DOM structure changes
+     */
     #mutationObserver: MutationObserver | null = null;
+    /**
+     * [KO] 위치/화면 노출 여부 감지용 IntersectionObserver
+     * [EN] IntersectionObserver for detecting position and screen visibility changes
+     */
     #intersectionObserver: IntersectionObserver | null = null;
 
     /**
      * [KO] RedGPUContextObserver 생성자
      * [EN] RedGPUContextObserver constructor
-     * @param redGPUContext - [KO] 관찰할 RedGPUContext 인스턴스 [EN] RedGPUContext instance to observe
-     * @param updateCallback - [KO] 레이아웃 변화 시 호출할 콜백 [EN] Callback to call when layout changes
+     * @param redGPUContext -
+     * [KO] 관찰할 RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance to observe
+     * @param updateCallback -
+     * [KO] 레이아웃 변화 시 호출할 콜백
+     * [EN] Callback to call when layout changes
      */
     constructor(redGPUContext: RedGPUContext, updateCallback: () => void) {
         super(redGPUContext);

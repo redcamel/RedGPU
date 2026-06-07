@@ -10,9 +10,25 @@ import RedGPUObject from "../../base/RedGPUObject";
  * [EN] Interface representing rectangular area information.
  */
 export interface IRedGPURectObject {
+    /**
+     * [KO] X 좌표 (픽셀 단위)
+     * [EN] X coordinate (in pixels)
+     */
     x: number;
+    /**
+     * [KO] Y 좌표 (픽셀 단위)
+     * [EN] Y coordinate (in pixels)
+     */
     y: number;
+    /**
+     * [KO] 가로 크기 (픽셀 단위)
+     * [EN] Width (in pixels)
+     */
     width: number;
+    /**
+     * [KO] 세로 크기 (픽셀 단위)
+     * [EN] Height (in pixels)
+     */
     height: number;
 }
 
@@ -21,8 +37,20 @@ export interface IRedGPURectObject {
  * [EN] Resize event object interface
  */
 export interface RedResizeEvent<T = any> {
+    /**
+     * [KO] 이벤트가 발생한 대상 객체
+     * [EN] The target object that triggered the event
+     */
     target: T;
+    /**
+     * [KO] CSS 픽셀 단위의 크기 및 위치 정보
+     * [EN] Dimension and position information in CSS pixels
+     */
     screenRectObject: IRedGPURectObject;
+    /**
+     * [KO] 물리 픽셀 단위의 크기 및 위치 정보
+     * [EN] Dimension and position information in physical pixels
+     */
     pixelRectObject: IRedGPURectObject;
 }
 
@@ -55,10 +83,30 @@ type ParentRect = {
  * @category Context
  */
 class RedGPUContextSizeManager extends RedGPUObject {
+    /**
+     * [KO] 설정된 가로 크기 값 (숫자 또는 px/% 단위 문자열)
+     * [EN] Set width value (number or string in px/%)
+     */
     #width: number | string
+    /**
+     * [KO] 설정된 세로 크기 값 (숫자 또는 px/% 단위 문자열)
+     * [EN] Set height value (number or string in px/%)
+     */
     #height: number | string
+    /**
+     * [KO] 실제 픽셀 단위 Rect 배열 [x, y, w, h]
+     * [EN] Actual pixel Rect array [x, y, w, h]
+     */
     #pixelRectArray: [number, number, number, number] = [0, 0, 0, 0]
+    /**
+     * [KO] HTML 캔버스 요소
+     * [EN] HTML Canvas element
+     */
     readonly #htmlCanvas: HTMLCanvasElement
+    /**
+     * [KO] 렌더링 스케일 배율
+     * [EN] Rendering scale factor
+     */
     #renderScale: number = 1
 
     /**
@@ -194,6 +242,10 @@ class RedGPUContextSizeManager extends RedGPUObject {
         };
     }
 
+    /**
+     * [KO] CSS 픽셀 단위 화면 크기 정보를 반환합니다.
+     * [EN] Returns the screen size information in CSS pixels.
+     */
     get screenRectObject(): IRedGPURectObject {
         return {
             x: this.#pixelRectArray[0] / devicePixelRatio,
