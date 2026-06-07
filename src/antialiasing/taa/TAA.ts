@@ -24,6 +24,13 @@ import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSi
  * [EN] This class is managed by AntialiasingManager.<br/>Do not create an instance directly.
  * :::
  *
+ * * ### Example
+ * ```typescript
+ * // [KO] AntialiasingManager를 통해 TAA를 활성화합니다.
+ * // [EN] Enable TAA via AntialiasingManager.
+ * redGPUContext.antialiasingManager.useTAA = true;
+ * ```
+ *
  * @category PostEffect
  */
 class TAA extends ASinglePassPostEffect {
@@ -63,27 +70,62 @@ class TAA extends ASinglePassPostEffect {
         this.jitterStrength = this.#jitterStrength;
     }
 
-    /** [KO] 이전 프레임의 지터링 없는 프로젝션 카메라 행렬을 반환합니다. [EN] Returns the non-jittered projection camera matrix of the previous frame. */
+    /**
+     * [KO] 이전 프레임의 지터링 없는 투영 뷰(Projection-View) 행렬을 반환합니다.
+     * [EN] Returns the non-jittered projection-view matrix of the previous frame.
+     *
+     * @returns
+     * [KO] 이전 프레임의 투영 뷰 행렬
+     * [EN] Non-jittered projection-view matrix of the previous frame
+     */
     get prevNoneJitterProjectionViewMatrix(): mat4 {
         return this.#prevNoneJitterProjectionViewMatrix;
     }
 
-    /** [KO] 프레임 인덱스를 반환합니다. [EN] Returns the frame index. */
+    /**
+     * [KO] 프레임 인덱스를 반환합니다.
+     * [EN] Returns the frame index.
+     *
+     * @returns
+     * [KO] 프레임 인덱스
+     * [EN] Frame index
+     */
     get frameIndex(): number {
         return this.#frameIndex;
     }
 
-    /** [KO] 비디오 메모리 사용량을 반환합니다. [EN] Returns the video memory usage. */
+    /**
+     * [KO] 비디오 메모리 사용량을 반환합니다.
+     * [EN] Returns the video memory usage.
+     *
+     * @returns
+     * [KO] 비디오 메모리 바이트 수
+     * [EN] Video memory size in bytes
+     */
     get videoMemorySize(): number {
         return this.#videoMemorySize
     }
 
-    /** [KO] 지터링 강도를 반환합니다. [EN] Returns the jitter strength. */
+    /**
+     * [KO] 지터링 강도를 반환합니다.
+     * [EN] Returns the jitter strength.
+     *
+     * @returns
+     * [KO] 지터링 강도 (기본값: 0.5)
+     * [EN] Jitter strength (default: 0.5)
+     */
     get jitterStrength(): number {
         return this.#jitterStrength;
     }
 
-    /** [KO] 지터링 강도를 설정합니다. [EN] Sets the jitter strength. */
+    /**
+     * [KO] 지터링 강도를 설정합니다.
+     * [EN] Sets the jitter strength.
+     *
+     * @param value -
+     * [KO] 지터링 강도
+     * [EN] Jitter strength to set
+     */
     set jitterStrength(value: number) {
         this.#jitterStrength = value;
     }
@@ -91,6 +133,22 @@ class TAA extends ASinglePassPostEffect {
     /**
      * [KO] TAA 이펙트를 렌더링합니다.
      * [EN] Renders the TAA effect.
+     *
+     * @param view -
+     * [KO] View3D 인스턴스
+     * [EN] View3D instance
+     * @param width -
+     * [KO] 렌더링 너비
+     * [EN] Rendering width
+     * @param height -
+     * [KO] 렌더링 높이
+     * [EN] Rendering height
+     * @param sourceTextureInfo -
+     * [KO] 입력으로 사용될 소스 텍스처 정보
+     * [EN] Source texture information to be used as input
+     * @returns
+     * [KO] 렌더링 결과 (텍스처 및 뷰)
+     * [EN] Rendering result (texture and view)
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult {
         const {redGPUContext} = this;
@@ -132,7 +190,10 @@ class TAA extends ASinglePassPostEffect {
         return result;
     }
 
-    /** [KO] TAA 리소스를 해제합니다. [EN] Clears TAA resources. */
+    /**
+     * [KO] TAA 리소스를 해제합니다.
+     * [EN] Clears TAA resources.
+     */
     clear() {
         super.clear();
         if (this.#historyTexture) {
@@ -143,6 +204,17 @@ class TAA extends ASinglePassPostEffect {
         this.#prevInfo = null;
     }
 
+    /**
+     * [KO] 히스토리 텍스처를 업데이트합니다.
+     * [EN] Updates the history texture.
+     *
+     * @param width -
+     * [KO] 텍스처 너비
+     * [EN] Texture width
+     * @param height -
+     * [KO] 텍스처 높이
+     * [EN] Texture height
+     */
     #updateHistoryTexture(width: number, height: number) {
         if (this.#prevInfo?.width !== width || this.#prevInfo?.height !== height || !this.#historyTexture) {
             if (this.#historyTexture) this.#historyTexture.destroy();
@@ -165,6 +237,10 @@ class TAA extends ASinglePassPostEffect {
         }
     }
 
+    /**
+     * [KO] TAA에 사용되는 비디오 메모리 사용량을 계산합니다.
+     * [EN] Calculates the video memory usage for TAA.
+     */
     #calcTAAVideoMemory() {
         this.#videoMemorySize = this.uniformBuffer ? this.uniformBuffer.size : 0;
         if (this.#historyTexture) {

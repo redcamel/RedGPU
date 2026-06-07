@@ -6,6 +6,10 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
 import DefineGPUProperty from "../../../defineProperty/DefineGPUProperty";
 
 interface TAASharpen {
+    /**
+     * [KO] TAA 샤프닝 강도 (0 ~ 1). 값이 클수록 이미지가 더 선명해지고 경계선이 뚜렷해집니다.
+     * [EN] TAA sharpening intensity (0 - 1). Higher values make the image sharper and edge boundaries more distinct.
+     */
     sharpness: number
 }
 
@@ -43,8 +47,6 @@ class TAASharpen extends ASinglePassPostEffect {
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
     }
-
-
 }
 
 DefineGPUProperty.definePositiveNumber(TAASharpen, [

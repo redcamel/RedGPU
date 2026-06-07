@@ -29,6 +29,13 @@ interface FXAA {
  * [EN] This class is managed by AntialiasingManager.<br/>Do not create an instance directly.
  * :::
  *
+ * * ### Example
+ * ```typescript
+ * // [KO] AntialiasingManager를 통해 FXAA를 활성화합니다.
+ * // [EN] Enable FXAA via AntialiasingManager.
+ * redGPUContext.antialiasingManager.useFXAA = true;
+ * ```
+ *
  * @category PostEffect
  */
 class FXAA extends ASinglePassPostEffect {
