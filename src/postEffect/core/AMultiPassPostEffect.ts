@@ -44,6 +44,10 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
     /**
      * [KO] 모든 내부 패스의 비디오 메모리 사용량을 합산하여 반환합니다.
      * [EN] Returns the sum of video memory usage of all internal passes.
+     *
+     * @returns
+     * [KO] 비디오 메모리 사용량 (Bytes)
+     * [EN] Video memory usage in bytes
      */
     get videoMemorySize(): number {
         this.#calcVideoMemory();
@@ -53,6 +57,10 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
     /**
      * [KO] 등록된 내부 패스 리스트를 반환합니다.
      * [EN] Returns the list of registered internal passes.
+     *
+     * @returns
+     * [KO] 내부 단일 패스 이펙트 배열
+     * [EN] Array of internal single-pass post effects
      */
     get passList(): ASinglePassPostEffect[] {
         return this.#passList;

@@ -77,6 +77,14 @@ interface FilmGrain {
  * [KO] 하이라이트 영역보다 어두운 영역에서 입자가 더 도드라지는 물리적 특성을 반영하며, 시간(프레임)에 따라 변하는 동적 질감을 제공합니다.
  * [EN] Reflects the physical characteristic where particles are more prominent in darker areas than highlights, and provides dynamic texture that changes over time (frames).
  *
+ * * ### Example
+ * ```typescript
+ * const effect = new RedGPU.PostEffect.FilmGrain(redGPUContext);
+ * effect.applyPreset(RedGPU.PostEffect.FilmGrain.MEDIUM);
+ * view.postEffectManager.addEffect(effect);
+ * ```
+ *
+ * <iframe src="/RedGPU/examples/postEffect/filmGrain/"></iframe>
  * @category Visual Effects
  */
 class FilmGrain extends ASinglePassPostEffect {

@@ -30,6 +30,17 @@ interface SSR {
  * [KO] 이 효과는 HDR 공간에서 동작하여 주변의 밝은 광원을 반사할 때 물리적으로 정확하고 아름다운 광채를 표현합니다.
  * [EN] This effect operates in HDR space, representing physically accurate and beautiful glows when reflecting surrounding bright light sources.
  *
+ * * ### Example
+ * ```typescript
+ * // View3D의 postEffectManager를 통해 사용 여부를 제어합니다.
+ * // Controlled through the useSSR property of View3D's postEffectManager.
+ * view.postEffectManager.useSSR = true;
+ * const ssrEffect = view.postEffectManager.ssr;
+ * ssrEffect.maxSteps = 128;
+ * ssrEffect.reflectionIntensity = 0.8;
+ * ```
+ *
+ * <iframe src="/RedGPU/examples/postEffect/ssr/"></iframe>
  * @category PostEffect
  */
 class SSR extends ASinglePassPostEffect {

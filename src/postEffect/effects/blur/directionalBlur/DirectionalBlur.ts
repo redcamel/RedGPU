@@ -60,6 +60,10 @@ class DirectionalBlur extends ASinglePassPostEffect {
     /**
      * [KO] 블러 각도를 반환합니다.
      * [EN] Returns the blur angle.
+     *
+     * @returns
+     * [KO] 블러 각도
+     * [EN] Blur angle
      */
     get angle(): number {
         return this.#angle;
@@ -69,7 +73,7 @@ class DirectionalBlur extends ASinglePassPostEffect {
      * [KO] 블러 각도를 설정합니다. (0 = 오른쪽, 360도로 정규화됨)
      * [EN] Sets the blur angle. (0 = Right, Normalized to 360 degrees)
      *
-     * @param value
+     * @param value -
      * [KO] 각도
      * [EN] Angle
      */

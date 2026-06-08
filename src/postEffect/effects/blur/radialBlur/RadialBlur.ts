@@ -29,6 +29,15 @@ interface RadialBlur {
  * [KO] 하드웨어 선형 샘플러를 사용하여 회전 궤적의 계단 현상을 최소화하고 매끄러운 결과물을 제공합니다.
  * [EN] Minimizes aliasing in the rotation trajectory and provides smooth results using a hardware linear sampler.
  *
+ * * ### Example
+ * ```typescript
+ * const effect = new RedGPU.PostEffect.RadialBlur(redGPUContext);
+ * effect.amount = 50;
+ * effect.sampleCount = 16;
+ * view.postEffectManager.addEffect(effect);
+ * ```
+ *
+ * <iframe src="/RedGPU/examples/postEffect/blur/radialBlur/"></iframe>
  * @category Blur
  */
 class RadialBlur extends ASinglePassPostEffect {

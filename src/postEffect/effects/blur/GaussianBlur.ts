@@ -53,6 +53,10 @@ class GaussianBlur extends AMultiPassPostEffect {
     /**
      * [KO] 현재 설정된 블러 강도를 반환합니다.
      * [EN] Returns the currently set blur strength.
+     *
+     * @returns
+     * [KO] 블러 강도
+     * [EN] Blur strength
      */
     get size(): number {
         return this.#size;
@@ -61,16 +65,36 @@ class GaussianBlur extends AMultiPassPostEffect {
     /**
      * [KO] 블러 강도를 설정합니다.
      * [EN] Sets the blur strength.
+     *
+     * @param value -
+     * [KO] 설정할 블러 강도
+     * [EN] Blur strength to set
      */
     set size(value: number) {
         this.#size = value;
         this.passList.forEach((v: BlurX | BlurY) => v.size = value)
     }
 
+    /**
+     * [KO] 현재 샘플 수를 반환합니다.
+     * [EN] Returns the current sample count.
+     *
+     * @returns
+     * [KO] 샘플 수
+     * [EN] Sample count
+     */
     get sampleCount(): number {
         return this.#sampleCount;
     }
 
+    /**
+     * [KO] 샘플 수를 설정합니다.
+     * [EN] Sets the sample count.
+     *
+     * @param value -
+     * [KO] 설정할 샘플 수
+     * [EN] Sample count to set
+     */
     set sampleCount(value: number) {
         this.#sampleCount = value;
         this.passList.forEach((v: BlurX | BlurY) => v.sampleCount = value)

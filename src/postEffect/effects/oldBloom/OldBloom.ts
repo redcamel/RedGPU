@@ -82,45 +82,101 @@ class OldBloom extends AMultiPassPostEffect {
         this.#effect_oldBloomBlend.bloomStrength = this.#bloomStrength;
     }
 
-    /** [KO] 임계값 반환 [EN] Returns the threshold */
+    /**
+     * [KO] 임계값을 반환합니다.
+     * [EN] Returns the threshold.
+     *
+     * @returns
+     * [KO] 최소 밝기 기준값
+     * [EN] Minimum brightness threshold
+     */
     get threshold(): number {
         return this.#threshold;
     }
 
-    /** [KO] 임계값 설정 [EN] Sets the threshold */
+    /**
+     * [KO] 임계값을 설정합니다.
+     * [EN] Sets the threshold.
+     *
+     * @param value -
+     * [KO] 최소 밝기 기준값
+     * [EN] Minimum brightness threshold
+     */
     set threshold(value: number) {
         this.#threshold = value;
         this.#effect_threshold.threshold = value;
     }
 
-    /** [KO] 가우시안 블러 크기 반환 [EN] Returns the Gaussian blur size */
+    /**
+     * [KO] 가우시안 블러 크기를 반환합니다.
+     * [EN] Returns the Gaussian blur size.
+     *
+     * @returns
+     * [KO] 블러 크기 (반경)
+     * [EN] Blur size (radius)
+     */
     get gaussianBlurSize(): number {
         return this.#gaussianBlurSize;
     }
 
-    /** [KO] 가우시안 블러 크기 설정 [EN] Sets the Gaussian blur size */
+    /**
+     * [KO] 가우시안 블러 크기를 설정합니다.
+     * [EN] Sets the Gaussian blur size.
+     *
+     * @param value -
+     * [KO] 블러 크기 (반경)
+     * [EN] Blur size (radius)
+     */
     set gaussianBlurSize(value: number) {
         this.#gaussianBlurSize = value;
         this.#effect_gaussianBlur.size = value;
     }
 
-    /** [KO] 노출값 반환 [EN] Returns the exposure value */
+    /**
+     * [KO] 노출값을 반환합니다.
+     * [EN] Returns the exposure value.
+     *
+     * @returns
+     * [KO] 노출 보정값
+     * [EN] Exposure compensation value
+     */
     get exposure(): number {
         return this.#exposure;
     }
 
-    /** [KO] 노출값 설정 [EN] Sets the exposure value */
+    /**
+     * [KO] 노출값을 설정합니다.
+     * [EN] Sets the exposure value.
+     *
+     * @param value -
+     * [KO] 노출 보정값
+     * [EN] Exposure compensation value
+     */
     set exposure(value: number) {
         this.#exposure = value;
         this.#effect_oldBloomBlend.exposure = value;
     }
 
-    /** [KO] 블룸 강도 반환 [EN] Returns the bloom strength */
+    /**
+     * [KO] 블룸 강도를 반환합니다.
+     * [EN] Returns the bloom strength.
+     *
+     * @returns
+     * [KO] 블룸 강도
+     * [EN] Bloom strength
+     */
     get bloomStrength(): number {
         return this.#bloomStrength;
     }
 
-    /** [KO] 블룸 강도 설정 [EN] Sets the bloom strength */
+    /**
+     * [KO] 블룸 강도를 설정합니다.
+     * [EN] Sets the bloom strength.
+     *
+     * @param value -
+     * [KO] 블룸 강도
+     * [EN] Bloom strength
+     */
     set bloomStrength(value: number) {
         this.#bloomStrength = value;
         this.#effect_oldBloomBlend.bloomStrength = value;

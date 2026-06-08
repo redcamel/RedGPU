@@ -103,6 +103,10 @@ class Convolution extends ASinglePassPostEffect {
     /**
      * [KO] 현재 설정된 커널 데이터를 반환합니다.
      * [EN] Returns the currently set kernel data.
+     *
+     * @returns
+     * [KO] 커널 데이터 배열
+     * [EN] Kernel data array
      */
     get kernel(): number[] {
         return this.#kernel;
@@ -114,6 +118,10 @@ class Convolution extends ASinglePassPostEffect {
      *
      * [KO] 12개의 숫자 배열(mat3x3 정렬 데이터)을 입력받으며, 가중치(Weight)를 자동으로 계산하여 적용합니다.
      * [EN] Receives an array of 12 numbers (mat3x3 aligned data) and automatically calculates and applies the weight.
+     *
+     * @param value -
+     * [KO] 12개의 숫자 배열로 이루어진 커널 데이터
+     * [EN] Kernel data array consisting of 12 numbers
      */
     set kernel(value: number[]) {
         this.#kernel = value;

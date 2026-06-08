@@ -91,6 +91,10 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     /**
      * [KO] 비디오 메모리 사용량(Bytes)을 반환합니다.
      * [EN] Returns the video memory usage in bytes.
+     *
+     * @returns
+     * [KO] 비디오 메모리 사용량 (Bytes)
+     * [EN] Video memory usage in bytes
      */
     get videoMemorySize(): number {
         return this.#videoMemorySize
@@ -100,6 +104,10 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     /**
      * [KO] 셰이더의 스토리지 구조 정보를 반환합니다.
      * [EN] Returns storage info from the shader.
+     *
+     * @returns
+     * [KO] 스토리지 구조 정보
+     * [EN] Storage structure information
      */
     get storageInfo() {
         return this.#storageInfo
@@ -108,6 +116,10 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     /**
      * [KO] 현재 MSAA 상태에 따른 셰이더 정보를 반환합니다.
      * [EN] Returns shader information based on the current MSAA state.
+     *
+     * @returns
+     * [KO] WGSL 셰이더 분석 정보
+     * [EN] WGSL shader analysis info
      */
     get shaderInfo() {
         return this.antialiasingManager.useMSAA ? this.#SHADER_INFO_MSAA : this.#SHADER_INFO_NON_MSAA;
@@ -116,6 +128,10 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     /**
      * [KO] 이펙트 전용 유니폼 버퍼를 반환합니다.
      * [EN] Returns the effect-specific uniform buffer.
+     *
+     * @returns
+     * [KO] 유니폼 버퍼 인스턴스
+     * [EN] Uniform buffer instance
      */
     get uniformBuffer(): UniformBuffer {
         return this.#uniformBuffer;
@@ -124,6 +140,10 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     /**
      * [KO] 이펙트 전용 유니폼 구조 정보를 반환합니다.
      * [EN] Returns the effect-specific uniform struct information.
+     *
+     * @returns
+     * [KO] 유니폼 구조 정보
+     * [EN] Uniform structure info
      */
     get uniformsInfo() {
         return this.#uniformsInfo
@@ -132,6 +152,10 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     /**
      * [KO] 시스템 공용 유니폼 구조 정보를 반환합니다.
      * [EN] Returns the system common uniform struct information.
+     *
+     * @returns
+     * [KO] 시스템 유니폼 구조 정보
+     * [EN] System uniform structure info
      */
     get systemUniformsInfo() {
         return this.#systemUniformsInfo
@@ -140,6 +164,10 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     /**
      * [KO] 워크그룹 사이즈 X를 반환합니다.
      * [EN] Returns the workgroup size X.
+     *
+     * @returns
+     * [KO] 워크그룹 사이즈 X
+     * [EN] Workgroup size X
      */
     get WORK_SIZE_X(): number {
         return this.#WORK_SIZE_X;
@@ -148,6 +176,10 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     /**
      * [KO] 워크그룹 사이즈 Y를 반환합니다.
      * [EN] Returns the workgroup size Y.
+     *
+     * @returns
+     * [KO] 워크그룹 사이즈 Y
+     * [EN] Workgroup size Y
      */
     get WORK_SIZE_Y(): number {
         return this.#WORK_SIZE_Y;
@@ -156,6 +188,10 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     /**
      * [KO] 워크그룹 사이즈 Z를 반환합니다.
      * [EN] Returns the workgroup size Z.
+     *
+     * @returns
+     * [KO] 워크그룹 사이즈 Z
+     * [EN] Workgroup size Z
      */
     get WORK_SIZE_Z(): number {
         return this.#WORK_SIZE_Z;
@@ -164,6 +200,10 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     /**
      * [KO] 현재 할당된 출력 텍스처 뷰를 반환합니다.
      * [EN] Returns the currently allocated output texture view.
+     *
+     * @returns
+     * [KO] 출력 GPUTextureView
+     * [EN] Output GPUTextureView
      */
     get outputTextureView(): GPUTextureView {
         return this.#outputTextureView;

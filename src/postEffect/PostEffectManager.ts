@@ -12,7 +12,7 @@ import SystemUniformUpdater from "../renderer/helperFunc/SystemUniformUpdater";
 import updateSystemUniformData from "../renderer/helperFunc/updateSystemUniformData";
 import AutoExposure from "../camera/core/autoExposure/AutoExposure";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
-import PostEffectTexturePool from "./PostEffectTexturePool";
+import PostEffectTexturePool from "./core/PostEffectTexturePool";
 import {IPostEffectResult} from "./core/types";
 
 
@@ -106,6 +106,10 @@ class PostEffectManager {
     /**
      * [KO] 현재 MSAA 상태에 맞는 표준 G-Buffer 바인드 그룹 레이아웃을 반환합니다.
      * [EN] Returns the standard G-Buffer bind group layout for the current MSAA state.
+     *
+     * @returns
+     * [KO] G-Buffer 바인드 그룹 레이아웃
+     * [EN] G-Buffer bind group layout
      */
     get gbufferBindGroupLayout(): GPUBindGroupLayout {
         return this.#view.redGPUContext.antialiasingManager.useMSAA ? this.#gbufferBindGroupLayoutMSAA : this.#gbufferBindGroupLayoutNonMSAA;
@@ -114,6 +118,10 @@ class PostEffectManager {
     /**
      * [KO] 현재 스왑 인덱스에 맞는 공유 G-Buffer 바인드 그룹을 반환합니다.
      * [EN] Returns the shared G-Buffer bind group for the current swap index.
+     *
+     * @returns
+     * [KO] 공유 G-Buffer 바인드 그룹
+     * [EN] Shared G-Buffer bind group
      */
     get gbufferBindGroup(): GPUBindGroup {
         return this.#view.renderViewStateData.swapBufferIndex ? this.#gbufferBindGroup_swap1 : this.#gbufferBindGroup_swap0;
@@ -122,6 +130,10 @@ class PostEffectManager {
     /**
      * [KO] 텍스처 풀 인스턴스를 반환합니다.
      * [EN] Returns the texture pool instance.
+     *
+     * @returns
+     * [KO] 포스트 이펙트 텍스처 풀 인스턴스
+     * [EN] Post-effect texture pool instance
      */
     get texturePool(): PostEffectTexturePool {
         return this.#texturePool;
@@ -130,6 +142,10 @@ class PostEffectManager {
     /**
      * [KO] 자동 노출(Auto Exposure) 인스턴스를 반환합니다.
      * [EN] Returns the Auto Exposure instance.
+     *
+     * @returns
+     * [KO] 자동 노출 인스턴스
+     * [EN] Auto Exposure instance
      */
     get autoExposure(): AutoExposure {
         if (!this.#autoExposure) {

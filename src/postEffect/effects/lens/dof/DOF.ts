@@ -135,6 +135,10 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] 초점 거리를 반환합니다.
      * [EN] Returns the focus distance.
+     *
+     * @returns
+     * [KO] 초점 거리
+     * [EN] Focus distance
      */
     get focusDistance(): number {
         return this.#focusDistance;
@@ -143,6 +147,10 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] 초점 거리를 설정합니다.
      * [EN] Sets the focus distance.
+     *
+     * @param value -
+     * [KO] 초점 거리
+     * [EN] Focus distance
      */
     set focusDistance(value: number) {
         this.#focusDistance = value;
@@ -152,6 +160,10 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] 조리개 값을 반환합니다.
      * [EN] Returns the aperture value.
+     *
+     * @returns
+     * [KO] 조리개 값 (F값)
+     * [EN] Aperture value (F-number)
      */
     get aperture(): number {
         return this.#aperture;
@@ -160,6 +172,10 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] 조리개 값을 설정합니다.
      * [EN] Sets the aperture value.
+     *
+     * @param value -
+     * [KO] 조리개 값 (F값)
+     * [EN] Aperture value (F-number)
      */
     set aperture(value: number) {
         this.#aperture = value;
@@ -169,6 +185,10 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] 최대 CoC 값을 반환합니다.
      * [EN] Returns the max CoC value.
+     *
+     * @returns
+     * [KO] 최대 CoC 값
+     * [EN] Max CoC value
      */
     get maxCoC(): number {
         return this.#maxCoC;
@@ -177,6 +197,10 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] 최대 CoC 값을 설정합니다.
      * [EN] Sets the max CoC value.
+     *
+     * @param value -
+     * [KO] 최대 CoC 값
+     * [EN] Max CoC value
      */
     set maxCoC(value: number) {
         this.#maxCoC = value;
@@ -186,6 +210,10 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] 근평면 값을 반환합니다.
      * [EN] Returns the near plane value.
+     *
+     * @returns
+     * [KO] 근평면 거리
+     * [EN] Near plane distance
      */
     get nearPlane(): number {
         return this.#nearPlane;
@@ -194,6 +222,10 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] 근평면 값을 설정합니다.
      * [EN] Sets the near plane value.
+     *
+     * @param value -
+     * [KO] 근평면 거리
+     * [EN] Near plane distance
      */
     set nearPlane(value: number) {
         this.#nearPlane = value;
@@ -203,6 +235,10 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] 원평면 값을 반환합니다.
      * [EN] Returns the far plane value.
+     *
+     * @returns
+     * [KO] 원평면 거리
+     * [EN] Far plane distance
      */
     get farPlane(): number {
         return this.#farPlane;
@@ -211,6 +247,10 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] 원평면 값을 설정합니다.
      * [EN] Sets the far plane value.
+     *
+     * @param value -
+     * [KO] 원평면 거리
+     * [EN] Far plane distance
      */
     set farPlane(value: number) {
         this.#farPlane = value;
@@ -221,6 +261,10 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] 근거리 블러 크기를 반환합니다.
      * [EN] Returns the near blur size.
+     *
+     * @returns
+     * [KO] 근거리 블러 크기 (픽셀 단위)
+     * [EN] Near blur size in pixels
      */
     get nearBlurSize(): number {
         return this.#nearBlurSize;
@@ -229,6 +273,10 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] 근거리 블러 크기를 설정합니다.
      * [EN] Sets the near blur size.
+     *
+     * @param value -
+     * [KO] 근거리 블러 크기 (픽셀 단위)
+     * [EN] Near blur size in pixels
      */
     set nearBlurSize(value: number) {
         this.#nearBlurSize = value;
@@ -238,6 +286,10 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] 원거리 블러 크기를 반환합니다.
      * [EN] Returns the far blur size.
+     *
+     * @returns
+     * [KO] 원거리 블러 크기 (픽셀 단위)
+     * [EN] Far blur size in pixels
      */
     get farBlurSize(): number {
         return this.#farBlurSize;
@@ -246,6 +298,10 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] 원거리 블러 크기를 설정합니다.
      * [EN] Sets the far blur size.
+     *
+     * @param value -
+     * [KO] 원거리 블러 크기 (픽셀 단위)
+     * [EN] Far blur size in pixels
      */
     set farBlurSize(value: number) {
         this.#farBlurSize = value;
@@ -255,6 +311,10 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] 근거리 블러 강도를 반환합니다.
      * [EN] Returns the near blur strength.
+     *
+     * @returns
+     * [KO] 근거리 블러 강도
+     * [EN] Near blur strength
      */
     get nearStrength(): number {
         return this.#nearStrength;
@@ -263,6 +323,10 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] 근거리 블러 강도를 설정합니다.
      * [EN] Sets the near blur strength.
+     *
+     * @param value -
+     * [KO] 근거리 블러 강도
+     * [EN] Near blur strength
      */
     set nearStrength(value: number) {
         this.#nearStrength = value;
@@ -272,6 +336,10 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] 원거리 블러 강도를 반환합니다.
      * [EN] Returns the far blur strength.
+     *
+     * @returns
+     * [KO] 원거리 블러 강도
+     * [EN] Far blur strength
      */
     get farStrength(): number {
         return this.#farStrength;
@@ -280,6 +348,10 @@ class DOF extends AMultiPassPostEffect {
     /**
      * [KO] 원거리 블러 강도를 설정합니다.
      * [EN] Sets the far blur strength.
+     *
+     * @param value -
+     * [KO] 원거리 블러 강도
+     * [EN] Far blur strength
      */
     set farStrength(value: number) {
         this.#farStrength = value;

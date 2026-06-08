@@ -1,7 +1,7 @@
-import RedGPUContext from "../context/RedGPUContext";
-import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
-import {IPostEffectResult} from "./core/types";
-import RedGPUObject from "../base/RedGPUObject";
+import RedGPUContext from "../../context/RedGPUContext";
+import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
+import {IPostEffectResult} from "./types";
+import RedGPUObject from "../../base/RedGPUObject";
 
 /**
  * [KO] 후처리용 텍스처 풀링 클래스입니다.
@@ -48,6 +48,10 @@ class PostEffectTexturePool extends RedGPUObject {
     /**
      * [KO] 풀 내의 전체 비디오 메모리 사용량(bytes)을 반환합니다.
      * [EN] Returns the total video memory usage (bytes) in the pool.
+     *
+     * @returns
+     * [KO] 비디오 메모리 사용량 (Bytes)
+     * [EN] Video memory usage in bytes
      */
     get videoMemorySize(): number {
         return this.#videoMemorySize;
@@ -56,6 +60,10 @@ class PostEffectTexturePool extends RedGPUObject {
     /**
      * [KO] 풀 내의 전체 텍스처 개수(활성 + 유휴)를 반환합니다.
      * [EN] Returns the total number of textures in the pool (active + idle).
+     *
+     * @returns
+     * [KO] 전체 텍스처 수
+     * [EN] Total texture count
      */
     get totalCount(): number {
         return this.activeCount + this.idleCount;
@@ -64,6 +72,10 @@ class PostEffectTexturePool extends RedGPUObject {
     /**
      * [KO] 현재 사용 중인 활성 텍스처 개수를 반환합니다.
      * [EN] Returns the number of currently active textures.
+     *
+     * @returns
+     * [KO] 활성 텍스처 수
+     * [EN] Active texture count
      */
     get activeCount(): number {
         return this.#activeTextures.size;
@@ -72,6 +84,10 @@ class PostEffectTexturePool extends RedGPUObject {
     /**
      * [KO] 풀에서 대기 중인 유휴 텍스처 개수를 반환합니다.
      * [EN] Returns the number of idle textures waiting in the pool.
+     *
+     * @returns
+     * [KO] 유휴 텍스처 수
+     * [EN] Idle texture count
      */
     get idleCount(): number {
         let count = 0;
@@ -82,6 +98,10 @@ class PostEffectTexturePool extends RedGPUObject {
     /**
      * [KO] 역대 최대 동시 활성 텍스처 수를 반환합니다.
      * [EN] Returns the historical peak number of concurrently active textures.
+     *
+     * @returns
+     * [KO] 최대 활성 텍스처 수
+     * [EN] Peak active texture count
      */
     get peakActiveCount(): number {
         return this.#peakActiveCount;
@@ -90,6 +110,10 @@ class PostEffectTexturePool extends RedGPUObject {
     /**
      * [KO] 신규로 생성된 총 텍스처 횟수를 반환합니다.
      * [EN] Returns the total number of newly created textures.
+     *
+     * @returns
+     * [KO] 총 생성 횟수
+     * [EN] Total allocation count
      */
     get allocationCount(): number {
         return this.#allocationCount;
@@ -98,6 +122,10 @@ class PostEffectTexturePool extends RedGPUObject {
     /**
      * [KO] 재사용 적중률(Hit Rate)을 반환합니다. (0~1)
      * [EN] Returns the reuse hit rate. (0~1)
+     *
+     * @returns
+     * [KO] 적중률 (0에서 1 사이)
+     * [EN] Hit rate (between 0 and 1)
      */
     get hitRate(): number {
         if (this.#requestCount === 0) return 0;
@@ -107,6 +135,10 @@ class PostEffectTexturePool extends RedGPUObject {
     /**
      * [KO] 풀에 담긴 상세 내역을 반환합니다.
      * [EN] Returns the detailed breakdown of the pool.
+     *
+     * @returns
+     * [KO] 풀의 상세 상태 객체 배열
+     * [EN] Array of detailed pool status objects
      */
     getDetails() {
         const details = [];
@@ -125,6 +157,19 @@ class PostEffectTexturePool extends RedGPUObject {
     /**
      * [KO] 적절한 텍스처를 풀에서 가져오거나 새로 생성하여 IPostEffectResult 형식으로 반환합니다.
      * [EN] Gets a suitable texture from the pool or creates a new one, returning it as IPostEffectResult.
+     *
+     * @param width -
+     * [KO] 텍스처 가로 크기
+     * [EN] Texture width
+     * @param height -
+     * [KO] 텍스처 세로 크기
+     * [EN] Texture height
+     * @param format -
+     * [KO] 텍스처 포맷 (기본값: 'rgba16float')
+     * [EN] Texture format (Default: 'rgba16float')
+     * @returns
+     * [KO] 할당된 텍스처 및 뷰 정보 객체
+     * [EN] Allocated texture and view information object
      */
     allocResult(width: number, height: number, format: GPUTextureFormat = 'rgba16float'): IPostEffectResult {
         const texture = this.#alloc(width, height, format);
@@ -137,7 +182,10 @@ class PostEffectTexturePool extends RedGPUObject {
     /**
      * [KO] 특정 텍스처를 풀로 반환합니다.
      * [EN] Returns a specific texture to the pool.
-     * @param texture - 반환할 GPUTexture
+     *
+     * @param texture -
+     * [KO] 반환할 GPUTexture
+     * [EN] GPUTexture to return
      */
     release(texture: GPUTexture): void {
         if (this.#activeTextures.has(texture)) {
