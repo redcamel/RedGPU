@@ -17,8 +17,8 @@ import RedGPUObject from "../../../base/RedGPUObject";
  * [EN] Class that performs auto-exposure and eye adaptation.
  *
  * ::: warning
- * [KO] 이 클래스는 시스템 내부적으로 생성되며 관리됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is created and managed internally by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * @category Core

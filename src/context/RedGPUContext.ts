@@ -22,8 +22,8 @@ import RedGPUContextObserver from "./core/RedGPUContextObserver";
  * [EN] It provides various features such as resizing, background color, debug panel, anti-aliasing, and resource management.
  *
  * ::: warning
- * [KO] 이 클래스는 RedGPU.init()에 의해 내부적으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is created internally by RedGPU.init().<br/>Do not create an instance directly using the 'new' keyword.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * * ### Example

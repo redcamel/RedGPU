@@ -13,7 +13,7 @@ import ABitmapBaseMaterial from "./ABitmapBaseMaterial";
  *
  * ::: warning
  * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is an abstract class and cannot be instantiated directly.<br/>Do not create an instance directly using the 'new' keyword.
+ * [EN] This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * ### Example

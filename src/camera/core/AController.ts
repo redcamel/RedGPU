@@ -20,8 +20,8 @@ export type controllerInit = {
  * [EN] Provides a common interface for controlling various camera types such as PerspectiveCamera and OrthographicCamera.
  *
  * ::: warning
- * [KO] 이 클래스는 시스템 내부적으로 사용되는 추상 클래스입니다.<br/>직접적인 인스턴스 생성은 불가능하며, 필요한 경우 이를 상속받아 구현하십시오.
- * [EN] This class is an abstract class used internally by the system.<br/>Direct instantiation is not possible; inherit and implement if necessary.
+ * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * @category Core
