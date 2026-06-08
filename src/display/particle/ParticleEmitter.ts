@@ -11,27 +11,40 @@ import computeModuleSource from "./shader/compute.wgsl";
 import vertexModuleSource from "./shader/particleVertex.wgsl";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 
-
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_PARTICLE_EMITTER'
 const SHADER_INFO = parseWGSL('PARTICLE_EMITTER_VERTEX', vertexModuleSource);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 
 interface ParticleEmitter {
+    /**
+     * [KO] 파티클을 카메라를 항상 마주보도록 할지 여부
+     * [EN] Whether to make particles always face the camera
+     */
     useBillboard: boolean;
+    /**
+     * [KO] ParticleEmitter 인스턴스인지 판별하는 식별자
+     * [EN] Identifier to determine if it is a ParticleEmitter instance
+     */
     isInstanceofParticle: boolean
 }
 
 /**
- * [KO] GPU 기반 파티클 시스템을 위한 이미터(Emitter) 클래스입니다.
- * [EN] Emitter class for a GPU-based particle system.
+ * [KO] GPU 연산(Compute Shader) 기반의 고성능 파티클 시스템을 생성 및 관리하는 클래스입니다.
+ * [EN] Class that creates and manages a high-performance particle system based on GPU computation (Compute Shader).
  *
- * [KO] 다양한 파티클 속성(수명, 위치, 스케일, 회전, 알파, 이징 등)과 GPU 연산 기반의 대량 파티클 처리를 지원합니다. 파티클의 초기값/최종값 범위, 이징, 버퍼 구조, 컴퓨트 파이프라인 등 파티클 시뮬레이션에 필요한 모든 기능을 제공합니다.
- * [EN] Supports various particle properties (life, position, scale, rotation, alpha, easing, etc.) and mass particle processing based on GPU computation. Provides all features necessary for particle simulation, including range of initial/final values, easing, buffer structures, and compute pipelines.
+ * [KO] 수천에서 수십만 개의 파티클을 GPU에서 시뮬레이션하고 병렬로 렌더링합니다. 수명, 크기, 시작/종료 트랜스폼(위치, 회전, 스케일), 알파값의 변화와 이를 보간하는 다양한 이징(Easing) 함수를 실시간으로 제어할 수 있습니다.
+ * [EN] Simulates and renders thousands to hundreds of thousands of particles in parallel on the GPU. Allows real-time control over life, size, starting/ending transforms (position, rotation, scale), alpha values, and various easing functions for interpolation.
  *
  * * ### Example
  * ```typescript
  * const emitter = new RedGPU.Display.ParticleEmitter(redGPUContext);
  * emitter.particleNum = 5000;
+ *
+ * // [KO] 파티클에 텍스처 적용 예시 (기본 제공되는 BitmapMaterial의 diffuseTexture 속성을 설정합니다)
+ * // [EN] Example of applying texture to particles (sets the diffuseTexture property of the default BitmapMaterial)
+ * const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, 'path/to/particle.png');
+ * emitter.material.diffuseTexture = texture;
+ *
  * scene.addChild(emitter);
  * ```
  *
@@ -47,138 +60,82 @@ interface ParticleEmitter {
  * @category Particle
  */
 class ParticleEmitter extends Mesh {
-    /**
-     * [KO] 파티클의 최소 수명 (ms)
-     * [EN] Minimum life of the particle (ms)
-     */
     #minLife: number = 1000
-    /**
-     * [KO] 파티클의 최대 수명 (ms)
-     * [EN] Maximum life of the particle (ms)
-     */
     #maxLife: number = 5000
-    //
-    /** [KO] 최소 시작 X 좌표 [EN] Minimum start X coordinate */
+
     #minStartX: number = 0
-    /** [KO] 최소 시작 Y 좌표 [EN] Minimum start Y coordinate */
     #minStartY: number = 0
-    /** [KO] 최소 시작 Z 좌표 [EN] Minimum start Z coordinate */
     #minStartZ: number = 0
-    //
-    /** [KO] 최대 시작 X 좌표 [EN] Maximum start X coordinate */
+
     #maxStartX: number = 0
-    /** [KO] 최대 시작 Y 좌표 [EN] Maximum start Y coordinate */
     #maxStartY: number = 0
-    /** [KO] 최대 시작 Z 좌표 [EN] Maximum start Z coordinate */
     #maxStartZ: number = 0
-    //
-    /** [KO] 최소 종료 X 좌표 [EN] Minimum end X coordinate */
+
     #minEndX: number = -5
-    /** [KO] 최소 종료 Y 좌표 [EN] Minimum end Y coordinate */
     #minEndY: number = -5
-    /** [KO] 최소 종료 Z 좌표 [EN] Minimum end Z coordinate */
     #minEndZ: number = -5
-    //
-    /** [KO] 최대 종료 X 좌표 [EN] Maximum end X coordinate */
+
     #maxEndX: number = 5
-    /** [KO] 최대 종료 Y 좌표 [EN] Maximum end Y coordinate */
     #maxEndY: number = 5
-    /** [KO] 최대 종료 Z 좌표 [EN] Maximum end Z coordinate */
     #maxEndZ: number = 5
-    //
-    /** [KO] 최소 시작 알파 [EN] Minimum start alpha */
+
     #minStartAlpha: number = 1
-    /** [KO] 최대 시작 알파 [EN] Maximum start alpha */
     #maxStartAlpha: number = 1
-    /** [KO] 최소 종료 알파 [EN] Minimum end alpha */
     #minEndAlpha: number = 1
-    /** [KO] 최대 종료 알파 [EN] Maximum end alpha */
     #maxEndAlpha: number = 1
-    //
-    /** [KO] 최소 시작 스케일 [EN] Minimum start scale */
+
     #minStartScale: number = 0
-    /** [KO] 최대 시작 스케일 [EN] Maximum start scale */
     #maxStartScale: number = 1
-    /** [KO] 최소 종료 스케일 [EN] Minimum end scale */
     #minEndScale: number = 0
-    /** [KO] 최대 종료 스케일 [EN] Maximum end scale */
     #maxEndScale: number = 0
-    //
-    /** [KO] 최소 시작 X 회전 [EN] Minimum start X rotation */
+
     #minStartRotationX: number = -360
-    /** [KO] 최소 시작 Y 회전 [EN] Minimum start Y rotation */
     #minStartRotationY: number = -360
-    /** [KO] 최소 시작 Z 회전 [EN] Minimum start Z rotation */
     #minStartRotationZ: number = -360
-    /** [KO] 최대 시작 X 회전 [EN] Maximum start X rotation */
     #maxStartRotationX: number = 360
-    /** [KO] 최대 시작 Y 회전 [EN] Maximum start Y rotation */
     #maxStartRotationY: number = 360
-    /** [KO] 최대 시작 Z 회전 [EN] Maximum start Z rotation */
     #maxStartRotationZ: number = 360
-    /** [KO] 최소 종료 X 회전 [EN] Minimum end X rotation */
     #minEndRotationX: number = -360
-    /** [KO] 최소 종료 Y 회전 [EN] Minimum end Y rotation */
     #minEndRotationY: number = -360
-    /** [KO] 최소 종료 Z 회전 [EN] Minimum end Z rotation */
     #minEndRotationZ: number = -360
-    /** [KO] 최대 종료 X 회전 [EN] Maximum end X rotation */
     #maxEndRotationX: number = 360
-    /** [KO] 최대 종료 Y 회전 [EN] Maximum end Y rotation */
     #maxEndRotationY: number = 360
-    /** [KO] 최대 종료 Z 회전 [EN] Maximum end Z rotation */
     #maxEndRotationZ: number = 360
-    //
-    /** [KO] X축 이동 이징 [EN] X-axis movement easing */
+
     #easeX: number = PARTICLE_EASE.CubicOut
-    /** [KO] Y축 이동 이징 [EN] Y-axis movement easing */
     #easeY: number = PARTICLE_EASE.CubicOut
-    /** [KO] Z축 이동 이징 [EN] Z-axis movement easing */
     #easeZ: number = PARTICLE_EASE.CubicOut
-    /** [KO] 알파 변화 이징 [EN] Alpha change easing */
     #easeAlpha: number = PARTICLE_EASE.Linear
-    /** [KO] 스케일 변화 이징 [EN] Scale change easing */
     #easeScale: number = PARTICLE_EASE.Linear
-    /** [KO] X축 회전 이징 [EN] X-axis rotation easing */
     #easeRotationX: number = PARTICLE_EASE.CubicOut
-    /** [KO] Y축 회전 이징 [EN] Y-axis rotation easing */
     #easeRotationY: number = PARTICLE_EASE.CubicOut
-    /** [KO] Z축 회전 이징 [EN] Z-axis rotation easing */
     #easeRotationZ: number = PARTICLE_EASE.CubicOut
-    //
+
     #simParamBuffer: GPUBuffer
     #particleBuffers: GPUBuffer[]
     #simParamData: Float32Array
     #computePipeline: GPUComputePipeline
     #computeBindGroup: GPUBindGroup
-    /**
-     * [KO] 파티클 개수
-     * [EN] Number of particles
-     */
     #particleNum: number = 2000
 
     /**
-     * [KO] ParticleEmitter 인스턴스를 생성합니다.
-     * [EN] Creates an instance of ParticleEmitter.
+     * [KO] ParticleEmitter 인스턴스를 생성합니다. 기본 지오메트리로 Plane, 기본 재질로 BitmapMaterial이 내부적으로 지정됩니다.
+     * [EN] Creates an instance of ParticleEmitter. Internally initializes Plane as the default geometry and BitmapMaterial as the default material.
      * @param redGPUContext -
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * [KO] RedGPU 컨텍스트 객체
+     * [EN] RedGPU context object
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-        // this.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST
-        // this.geometry = new Box(redGPUContext)
-        // this.geometry = new Sphere(redGPUContext,)
         this.geometry = new Plane(redGPUContext)
-        // this.primitiveState.cullMode = GPU_CULL_MODE.NONE
-        // this.geometry = new TorusKnot(redGPUContext)
-        // this.material = new PhongMaterial(redGPUContext,)
         this.material = new BitmapMaterial(redGPUContext)
-        // this.material = new ColorMaterial(redGPUContext,)
         this.ignoreFrustumCulling = true
-        // this.material.transparent = true
     }
 
+    /**
+     * [KO] 파티클 개별 렌더링에 사용되는 인스턴스 기반 GPU 버텍스 버퍼 레이아웃 정보를 가져옵니다.
+     * [EN] Gets the instance-based GPU vertex buffer layout details used for rendering individual particles.
+     */
     get vertexStateBuffers(): GPUVertexBufferLayout[] {
         const primitiveBuffer = this.geometry.gpuRenderInfo.buffers[0];
         const vertexAttributeCount = Array.from(primitiveBuffer.attributes).length;
@@ -210,25 +167,13 @@ class ParticleEmitter extends Mesh {
     }
 
     /**
-     * [KO] 파티클 개수를 반환합니다. (최대 500,000, 최소 1)
-     * [EN] Returns the number of particles. (Max 500,000, Min 1)
-     *
-     * @returns
-     * [KO] 파티클 개수
-     * [EN] Number of particles
+     * [KO] 시뮬레이션할 총 파티클 개수를 조회하거나 설정합니다. 설정 가능한 값의 범위는 1부터 최대 500,000개까지이며, 변경 시 GPU 시뮬레이션 버퍼가 재구축됩니다.
+     * [EN] Gets or sets the total number of particles to simulate. The value ranges from 1 to a maximum of 500,000, and modifying this will rebuild the GPU simulation buffers.
      */
     get particleNum(): number {
         return this.#particleNum;
     }
 
-    /**
-     * [KO] 파티클 개수를 설정합니다. 설정 시 시뮬레이션 버퍼가 재구성됩니다.
-     * [EN] Sets the number of particles. Setting this reconstructs the simulation buffer.
-     *
-     * @param value -
-     * [KO] 파티클 개수 (1 ~ 500,000)
-     * [EN] Number of particles (1 ~ 500,000)
-     */
     set particleNum(value: number) {
         this.#particleNum = Math.max(Math.min(value, 500000), 1);
         if (!this.#simParamBuffer) this.#init()
@@ -236,743 +181,523 @@ class ParticleEmitter extends Mesh {
     }
 
     /**
-     * [KO] 파티클의 최소 수명을 반환합니다. (ms)
-     * [EN] Returns the minimum life of the particle. (ms)
-     *
-     * @returns
-     * [KO] 최소 수명
-     * [EN] Minimum life
+     * [KO] 파티클 수명의 최소값(ms)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum life value (in ms) of particles.
      */
     get minLife(): number {
         return this.#minLife;
     }
 
-    /**
-     * [KO] 파티클의 최소 수명을 설정합니다. (ms)
-     * [EN] Sets the minimum life of the particle. (ms)
-     *
-     * @param value -
-     * [KO] 최소 수명
-     * [EN] Minimum life
-     */
     set minLife(value: number) {
         this.#minLife = value;
     }
 
     /**
-     * [KO] 파티클의 최대 수명을 반환합니다. (ms)
-     * [EN] Returns the maximum life of the particle. (ms)
-     *
-     * @returns
-     * [KO] 최대 수명
-     * [EN] Maximum life
+     * [KO] 파티클 수명의 최대값(ms)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum life value (in ms) of particles.
      */
     get maxLife(): number {
         return this.#maxLife;
     }
 
-    /**
-     * [KO] 파티클의 최대 수명을 설정합니다. (ms)
-     * [EN] Sets the maximum life of the particle. (ms)
-     *
-     * @param value -
-     * [KO] 최대 수명
-     * [EN] Maximum life
-     */
     set maxLife(value: number) {
         this.#maxLife = value;
     }
 
     /**
-     * [KO] 최소 시작 X 좌표를 반환합니다.
-     * [EN] Returns the minimum start X coordinate.
+     * [KO] 파티클이 처음 생성될 때 가질 수 있는 최소 X 좌표 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum start X coordinate position particles can have upon generation.
      */
     get minStartX(): number {
         return this.#minStartX;
     }
 
-    /**
-     * [KO] 최소 시작 X 좌표를 설정합니다.
-     * [EN] Sets the minimum start X coordinate.
-     * @param value - [KO] 값 [EN] Value
-     */
     set minStartX(value: number) {
         this.#minStartX = value;
     }
 
     /**
-     * [KO] 최소 시작 Y 좌표를 반환합니다.
-     * [EN] Returns the minimum start Y coordinate.
+     * [KO] 파티클이 처음 생성될 때 가질 수 있는 최소 Y 좌표 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum start Y coordinate position particles can have upon generation.
      */
     get minStartY(): number {
         return this.#minStartY;
     }
 
-    /**
-     * [KO] 최소 시작 Y 좌표를 설정합니다.
-     * [EN] Sets the minimum start Y coordinate.
-     * @param value - [KO] 값 [EN] Value
-     */
     set minStartY(value: number) {
         this.#minStartY = value;
     }
 
     /**
-     * [KO] 최소 시작 Z 좌표를 반환합니다.
-     * [EN] Returns the minimum start Z coordinate.
+     * [KO] 파티클이 처음 생성될 때 가질 수 있는 최소 Z 좌표 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum start Z coordinate position particles can have upon generation.
      */
     get minStartZ(): number {
         return this.#minStartZ;
     }
 
-    /**
-     * [KO] 최소 시작 Z 좌표를 설정합니다.
-     * [EN] Sets the minimum start Z coordinate.
-     * @param value - [KO] 값 [EN] Value
-     */
     set minStartZ(value: number) {
         this.#minStartZ = value;
     }
 
     /**
-     * [KO] 최대 시작 X 좌표를 반환합니다.
-     * [EN] Returns the maximum start X coordinate.
+     * [KO] 파티클이 처음 생성될 때 가질 수 있는 최대 X 좌표 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum start X coordinate position particles can have upon generation.
      */
     get maxStartX(): number {
         return this.#maxStartX;
     }
 
-    /**
-     * [KO] 최대 시작 X 좌표를 설정합니다.
-     * [EN] Sets the maximum start X coordinate.
-     * @param value - [KO] 값 [EN] Value
-     */
     set maxStartX(value: number) {
         this.#maxStartX = value;
     }
 
     /**
-     * [KO] 최대 시작 Y 좌표를 반환합니다.
-     * [EN] Returns the maximum start Y coordinate.
+     * [KO] 파티클이 처음 생성될 때 가질 수 있는 최대 Y 좌표 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum start Y coordinate position particles can have upon generation.
      */
     get maxStartY(): number {
         return this.#maxStartY;
     }
 
-    /**
-     * [KO] 최대 시작 Y 좌표를 설정합니다.
-     * [EN] Sets the maximum start Y coordinate.
-     * @param value - [KO] 값 [EN] Value
-     */
     set maxStartY(value: number) {
         this.#maxStartY = value;
     }
 
     /**
-     * [KO] 최대 시작 Z 좌표를 반환합니다.
-     * [EN] Returns the maximum start Z coordinate.
+     * [KO] 파티클이 처음 생성될 때 가질 수 있는 최대 Z 좌표 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum start Z coordinate position particles can have upon generation.
      */
     get maxStartZ(): number {
         return this.#maxStartZ;
     }
 
-    /**
-     * [KO] 최대 시작 Z 좌표를 설정합니다.
-     * [EN] Sets the maximum start Z coordinate.
-     * @param value - [KO] 값 [EN] Value
-     */
     set maxStartZ(value: number) {
         this.#maxStartZ = value;
     }
 
     /**
-     * [KO] 최소 종료 X 좌표를 반환합니다.
-     * [EN] Returns the minimum end X coordinate.
+     * [KO] 파티클이 사라지기 전에 도달할 수 있는 최소 X 좌표 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum end X coordinate position particles can reach before dying.
      */
     get minEndX(): number {
         return this.#minEndX;
     }
 
-    /**
-     * [KO] 최소 종료 X 좌표를 설정합니다.
-     * [EN] Sets the minimum end X coordinate.
-     * @param value - [KO] 값 [EN] Value
-     */
     set minEndX(value: number) {
         this.#minEndX = value;
     }
 
     /**
-     * [KO] 최소 종료 Y 좌표를 반환합니다.
-     * [EN] Returns the minimum end Y coordinate.
+     * [KO] 파티클이 사라지기 전에 도달할 수 있는 최소 Y 좌표 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum end Y coordinate position particles can reach before dying.
      */
     get minEndY(): number {
         return this.#minEndY;
     }
 
-    /**
-     * [KO] 최소 종료 Y 좌표를 설정합니다.
-     * [EN] Sets the minimum end Y coordinate.
-     * @param value - [KO] 값 [EN] Value
-     */
     set minEndY(value: number) {
         this.#minEndY = value;
     }
 
     /**
-     * [KO] 최소 종료 Z 좌표를 반환합니다.
-     * [EN] Returns the minimum end Z coordinate.
+     * [KO] 파티클이 사라지기 전에 도달할 수 있는 최소 Z 좌표 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum end Z coordinate position particles can reach before dying.
      */
     get minEndZ(): number {
         return this.#minEndZ;
     }
 
-    /**
-     * [KO] 최소 종료 Z 좌표를 설정합니다.
-     * [EN] Sets the minimum end Z coordinate.
-     * @param value - [KO] 값 [EN] Value
-     */
     set minEndZ(value: number) {
         this.#minEndZ = value;
     }
 
     /**
-     * [KO] 최대 종료 X 좌표를 반환합니다.
-     * [EN] Returns the maximum end X coordinate.
+     * [KO] 파티클이 사라지기 전에 도달할 수 있는 최대 X 좌표 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum end X coordinate position particles can reach before dying.
      */
     get maxEndX(): number {
         return this.#maxEndX;
     }
 
-    /**
-     * [KO] 최대 종료 X 좌표를 설정합니다.
-     * [EN] Sets the maximum end X coordinate.
-     * @param value - [KO] 값 [EN] Value
-     */
     set maxEndX(value: number) {
         this.#maxEndX = value;
     }
 
     /**
-     * [KO] 최대 종료 Y 좌표를 반환합니다.
-     * [EN] Returns the maximum end Y coordinate.
+     * [KO] 파티클이 사라지기 전에 도달할 수 있는 최대 Y 좌표 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum end Y coordinate position particles can reach before dying.
      */
     get maxEndY(): number {
         return this.#maxEndY;
     }
 
-    /**
-     * [KO] 최대 종료 Y 좌표를 설정합니다.
-     * [EN] Sets the maximum end Y coordinate.
-     * @param value - [KO] 값 [EN] Value
-     */
     set maxEndY(value: number) {
         this.#maxEndY = value;
     }
 
     /**
-     * [KO] 최대 종료 Z 좌표를 반환합니다.
-     * [EN] Returns the maximum end Z coordinate.
+     * [KO] 파티클이 사라지기 전에 도달할 수 있는 최대 Z 좌표 위치를 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum end Z coordinate position particles can reach before dying.
      */
     get maxEndZ(): number {
         return this.#maxEndZ;
     }
 
-    /**
-     * [KO] 최대 종료 Z 좌표를 설정합니다.
-     * [EN] Sets the maximum end Z coordinate.
-     * @param value - [KO] 값 [EN] Value
-     */
     set maxEndZ(value: number) {
         this.#maxEndZ = value;
     }
 
     /**
-     * [KO] 최소 시작 알파를 반환합니다.
-     * [EN] Returns the minimum start alpha.
+     * [KO] 파티클의 최소 시작 불투명도(Opacity)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum starting opacity of particles.
      */
     get minStartAlpha(): number {
         return this.#minStartAlpha;
     }
 
-    /**
-     * [KO] 최소 시작 알파를 설정합니다.
-     * [EN] Sets the minimum start alpha.
-     * @param value - [KO] 값 [EN] Value
-     */
     set minStartAlpha(value: number) {
         this.#minStartAlpha = value;
     }
 
     /**
-     * [KO] 최대 시작 알파를 반환합니다.
-     * [EN] Returns the maximum start alpha.
+     * [KO] 파티클의 최대 시작 불투명도(Opacity)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum starting opacity of particles.
      */
     get maxStartAlpha(): number {
         return this.#maxStartAlpha;
     }
 
-    /**
-     * [KO] 최대 시작 알파를 설정합니다.
-     * [EN] Sets the maximum start alpha.
-     * @param value - [KO] 값 [EN] Value
-     */
     set maxStartAlpha(value: number) {
         this.#maxStartAlpha = value;
     }
 
     /**
-     * [KO] 최소 종료 알파를 반환합니다.
-     * [EN] Returns the minimum end alpha.
+     * [KO] 파티클의 최소 종료 불투명도(Opacity)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum ending opacity of particles.
      */
     get minEndAlpha(): number {
         return this.#minEndAlpha;
     }
 
-    /**
-     * [KO] 최소 종료 알파를 설정합니다.
-     * [EN] Sets the minimum end alpha.
-     * @param value - [KO] 값 [EN] Value
-     */
     set minEndAlpha(value: number) {
         this.#minEndAlpha = value;
     }
 
     /**
-     * [KO] 최대 종료 알파를 반환합니다.
-     * [EN] Returns the maximum end alpha.
+     * [KO] 파티클의 최대 종료 불투명도(Opacity)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum ending opacity of particles.
      */
     get maxEndAlpha(): number {
         return this.#maxEndAlpha;
     }
 
-    /**
-     * [KO] 최대 종료 알파를 설정합니다.
-     * [EN] Sets the maximum end alpha.
-     * @param value - [KO] 값 [EN] Value
-     */
     set maxEndAlpha(value: number) {
         this.#maxEndAlpha = value;
     }
 
     /**
-     * [KO] 최소 시작 스케일을 반환합니다.
-     * [EN] Returns the minimum start scale.
+     * [KO] 파티클의 최소 시작 스케일을 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum starting scale of particles.
      */
     get minStartScale(): number {
         return this.#minStartScale;
     }
 
-    /**
-     * [KO] 최소 시작 스케일을 설정합니다.
-     * [EN] Sets the minimum start scale.
-     * @param value - [KO] 값 [EN] Value
-     */
     set minStartScale(value: number) {
         this.#minStartScale = value;
     }
 
     /**
-     * [KO] 최대 시작 스케일을 반환합니다.
-     * [EN] Returns the maximum start scale.
+     * [KO] 파티클의 최대 시작 스케일을 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum starting scale of particles.
      */
     get maxStartScale(): number {
         return this.#maxStartScale;
     }
 
-    /**
-     * [KO] 최대 시작 스케일을 설정합니다.
-     * [EN] Sets the maximum start scale.
-     * @param value - [KO] 값 [EN] Value
-     */
     set maxStartScale(value: number) {
         this.#maxStartScale = value;
     }
 
     /**
-     * [KO] 최소 종료 스케일을 반환합니다.
-     * [EN] Returns the minimum end scale.
+     * [KO] 파티클의 최소 종료 스케일을 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum ending scale of particles.
      */
     get minEndScale(): number {
         return this.#minEndScale;
     }
 
-    /**
-     * [KO] 최소 종료 스케일을 설정합니다.
-     * [EN] Sets the minimum end scale.
-     * @param value - [KO] 값 [EN] Value
-     */
     set minEndScale(value: number) {
         this.#minEndScale = value;
     }
 
     /**
-     * [KO] 최대 종료 스케일을 반환합니다.
-     * [EN] Returns the maximum end scale.
+     * [KO] 파티클의 최대 종료 스케일을 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum ending scale of particles.
      */
     get maxEndScale(): number {
         return this.#maxEndScale;
     }
 
-    /**
-     * [KO] 최대 종료 스케일을 설정합니다.
-     * [EN] Sets the maximum end scale.
-     * @param value - [KO] 값 [EN] Value
-     */
     set maxEndScale(value: number) {
         this.#maxEndScale = value;
     }
 
     /**
-     * [KO] 최소 시작 X 회전을 반환합니다. (도)
-     * [EN] Returns the minimum start X rotation. (degrees)
+     * [KO] 파티클의 최소 시작 X축 회전각(도)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum starting X-axis rotation angle (in degrees) of particles.
      */
     get minStartRotationX(): number {
         return this.#minStartRotationX;
     }
 
-    /**
-     * [KO] 최소 시작 X 회전을 설정합니다. (도)
-     * [EN] Sets the minimum start X rotation. (degrees)
-     * @param value - [KO] 값 [EN] Value
-     */
     set minStartRotationX(value: number) {
         this.#minStartRotationX = value;
     }
 
     /**
-     * [KO] 최소 시작 Y 회전을 반환합니다. (도)
-     * [EN] Returns the minimum start Y rotation. (degrees)
+     * [KO] 파티클의 최소 시작 Y축 회전각(도)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum starting Y-axis rotation angle (in degrees) of particles.
      */
     get minStartRotationY(): number {
         return this.#minStartRotationY;
     }
 
-    /**
-     * [KO] 최소 시작 Y 회전을 설정합니다. (도)
-     * [EN] Sets the minimum start Y rotation. (degrees)
-     * @param value - [KO] 값 [EN] Value
-     */
     set minStartRotationY(value: number) {
         this.#minStartRotationY = value;
     }
 
     /**
-     * [KO] 최소 시작 Z 회전을 반환합니다. (도)
-     * [EN] Returns the minimum start Z rotation. (degrees)
+     * [KO] 파티클의 최소 시작 Z축 회전각(도)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum starting Z-axis rotation angle (in degrees) of particles.
      */
     get minStartRotationZ(): number {
         return this.#minStartRotationZ;
     }
 
-    /**
-     * [KO] 최소 시작 Z 회전을 설정합니다. (도)
-     * [EN] Sets the minimum start Z rotation. (degrees)
-     * @param value - [KO] 값 [EN] Value
-     */
     set minStartRotationZ(value: number) {
         this.#minStartRotationZ = value;
     }
 
     /**
-     * [KO] 최대 시작 X 회전을 반환합니다. (도)
-     * [EN] Returns the maximum start X rotation. (degrees)
+     * [KO] 파티클의 최대 시작 X축 회전각(도)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum starting X-axis rotation angle (in degrees) of particles.
      */
     get maxStartRotationX(): number {
         return this.#maxStartRotationX;
     }
 
-    /**
-     * [KO] 최대 시작 X 회전을 설정합니다. (도)
-     * [EN] Sets the maximum start X rotation. (degrees)
-     * @param value - [KO] 값 [EN] Value
-     */
     set maxStartRotationX(value: number) {
         this.#maxStartRotationX = value;
     }
 
     /**
-     * [KO] 최대 시작 Y 회전을 반환합니다. (도)
-     * [EN] Returns the maximum start Y rotation. (degrees)
+     * [KO] 파티클의 최대 시작 Y축 회전각(도)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum starting Y-axis rotation angle (in degrees) of particles.
      */
     get maxStartRotationY(): number {
         return this.#maxStartRotationY;
     }
 
-    /**
-     * [KO] 최대 시작 Y 회전을 설정합니다. (도)
-     * [EN] Sets the maximum start Y rotation. (degrees)
-     * @param value - [KO] 값 [EN] Value
-     */
     set maxStartRotationY(value: number) {
         this.#maxStartRotationY = value;
     }
 
     /**
-     * [KO] 최대 시작 Z 회전을 반환합니다. (도)
-     * [EN] Returns the maximum start Z rotation. (degrees)
+     * [KO] 파티클의 최대 시작 Z축 회전각(도)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum starting Z-axis rotation angle (in degrees) of particles.
      */
     get maxStartRotationZ(): number {
         return this.#maxStartRotationZ;
     }
 
-    /**
-     * [KO] 최대 시작 Z 회전을 설정합니다. (도)
-     * [EN] Sets the maximum start Z rotation. (degrees)
-     * @param value - [KO] 값 [EN] Value
-     */
     set maxStartRotationZ(value: number) {
         this.#maxStartRotationZ = value;
     }
 
     /**
-     * [KO] 최소 종료 X 회전을 반환합니다. (도)
-     * [EN] Returns the minimum end X rotation. (degrees)
+     * [KO] 파티클의 최소 종료 X축 회전각(도)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum ending X-axis rotation angle (in degrees) of particles.
      */
     get minEndRotationX(): number {
         return this.#minEndRotationX;
     }
 
-    /**
-     * [KO] 최소 종료 X 회전을 설정합니다. (도)
-     * [EN] Sets the minimum end X rotation. (degrees)
-     * @param value - [KO] 값 [EN] Value
-     */
     set minEndRotationX(value: number) {
         this.#minEndRotationX = value;
     }
 
     /**
-     * [KO] 최소 종료 Y 회전을 반환합니다. (도)
-     * [EN] Returns the minimum end Y rotation. (degrees)
+     * [KO] 파티클의 최소 종료 Y축 회전각(도)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum ending Y-axis rotation angle (in degrees) of particles.
      */
     get minEndRotationY(): number {
         return this.#minEndRotationY;
     }
 
-    /**
-     * [KO] 최소 종료 Y 회전을 설정합니다. (도)
-     * [EN] Sets the minimum end Y rotation. (degrees)
-     * @param value - [KO] 값 [EN] Value
-     */
     set minEndRotationY(value: number) {
         this.#minEndRotationY = value;
     }
 
     /**
-     * [KO] 최소 종료 Z 회전을 반환합니다. (도)
-     * [EN] Returns the minimum end Z rotation. (degrees)
+     * [KO] 파티클의 최소 종료 Z축 회전각(도)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the minimum ending Z-axis rotation angle (in degrees) of particles.
      */
     get minEndRotationZ(): number {
         return this.#minEndRotationZ;
     }
 
-    /**
-     * [KO] 최소 종료 Z 회전을 설정합니다. (도)
-     * [EN] Sets the minimum end Z rotation. (degrees)
-     * @param value - [KO] 값 [EN] Value
-     */
     set minEndRotationZ(value: number) {
         this.#minEndRotationZ = value;
     }
 
     /**
-     * [KO] 최대 종료 X 회전을 반환합니다. (도)
-     * [EN] Returns the maximum end X rotation. (degrees)
+     * [KO] 파티클의 최대 종료 X축 회전각(도)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum ending X-axis rotation angle (in degrees) of particles.
      */
     get maxEndRotationX(): number {
         return this.#maxEndRotationX;
     }
 
-    /**
-     * [KO] 최대 종료 X 회전을 설정합니다. (도)
-     * [EN] Sets the maximum end X rotation. (degrees)
-     * @param value - [KO] 값 [EN] Value
-     */
     set maxEndRotationX(value: number) {
         this.#maxEndRotationX = value;
     }
 
     /**
-     * [KO] 최대 종료 Y 회전을 반환합니다. (도)
-     * [EN] Returns the maximum end Y rotation. (degrees)
+     * [KO] 파티클의 최대 종료 Y축 회전각(도)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum ending Y-axis rotation angle (in degrees) of particles.
      */
     get maxEndRotationY(): number {
         return this.#maxEndRotationY;
     }
 
-    /**
-     * [KO] 최대 종료 Y 회전을 설정합니다. (도)
-     * [EN] Sets the maximum end Y rotation. (degrees)
-     * @param value - [KO] 값 [EN] Value
-     */
     set maxEndRotationY(value: number) {
         this.#maxEndRotationY = value;
     }
 
     /**
-     * [KO] 최대 종료 Z 회전을 반환합니다. (도)
-     * [EN] Returns the maximum end Z rotation. (degrees)
+     * [KO] 파티클의 최대 종료 Z축 회전각(도)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the maximum ending Z-axis rotation angle (in degrees) of particles.
      */
     get maxEndRotationZ(): number {
         return this.#maxEndRotationZ;
     }
 
-    /**
-     * [KO] 최대 종료 Z 회전을 설정합니다. (도)
-     * [EN] Sets the maximum end Z rotation. (degrees)
-     * @param value - [KO] 값 [EN] Value
-     */
     set maxEndRotationZ(value: number) {
         this.#maxEndRotationZ = value;
     }
 
     /**
-     * [KO] X축 이동에 적용할 이징 타입을 반환합니다.
-     * [EN] Returns the easing type for X-axis movement.
+     * [KO] X축 방향 변화에 적용될 이징(Easing) 함수(PARTICLE_EASE 상수 값)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the easing function (PARTICLE_EASE constant value) applied to the X-axis coordinate change.
      */
     get easeX(): number {
         return this.#easeX;
     }
 
-    /**
-     * [KO] X축 이동에 적용할 이징 타입을 설정합니다.
-     * [EN] Sets the easing type for X-axis movement.
-     * @param value - [KO] PARTICLE_EASE 값 [EN] PARTICLE_EASE value
-     */
     set easeX(value: number) {
         this.#easeX = value;
     }
 
     /**
-     * [KO] Y축 이동에 적용할 이징 타입을 반환합니다.
-     * [EN] Returns the easing type for Y-axis movement.
+     * [KO] Y축 방향 변화에 적용될 이징(Easing) 함수(PARTICLE_EASE 상수 값)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the easing function (PARTICLE_EASE constant value) applied to the Y-axis coordinate change.
      */
     get easeY(): number {
         return this.#easeY;
     }
 
-    /**
-     * [KO] Y축 이동에 적용할 이징 타입을 설정합니다.
-     * [EN] Sets the easing type for Y-axis movement.
-     * @param value - [KO] PARTICLE_EASE 값 [EN] PARTICLE_EASE value
-     */
     set easeY(value: number) {
         this.#easeY = value;
     }
 
     /**
-     * [KO] Z축 이동에 적용할 이징 타입을 반환합니다.
-     * [EN] Returns the easing type for Z-axis movement.
+     * [KO] Z축 방향 변화에 적용될 이징(Easing) 함수(PARTICLE_EASE 상수 값)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the easing function (PARTICLE_EASE constant value) applied to the Z-axis coordinate change.
      */
     get easeZ(): number {
         return this.#easeZ;
     }
 
-    /**
-     * [KO] Z축 이동에 적용할 이징 타입을 설정합니다.
-     * [EN] Sets the easing type for Z-axis movement.
-     * @param value - [KO] PARTICLE_EASE 값 [EN] PARTICLE_EASE value
-     */
     set easeZ(value: number) {
         this.#easeZ = value;
     }
 
     /**
-     * [KO] 알파 변화에 적용할 이징 타입을 반환합니다.
-     * [EN] Returns the easing type for alpha change.
+     * [KO] 알파(투명도) 수치 변화에 적용될 이징(Easing) 함수(PARTICLE_EASE 상수 값)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the easing function (PARTICLE_EASE constant value) applied to the alpha (opacity) change.
      */
     get easeAlpha(): number {
         return this.#easeAlpha;
     }
 
-    /**
-     * [KO] 알파 변화에 적용할 이징 타입을 설정합니다.
-     * [EN] Sets the easing type for alpha change.
-     * @param value - [KO] PARTICLE_EASE 값 [EN] PARTICLE_EASE value
-     */
     set easeAlpha(value: number) {
         this.#easeAlpha = value;
     }
 
     /**
-     * [KO] 스케일 변화에 적용할 이징 타입을 반환합니다.
-     * [EN] Returns the easing type for scale change.
+     * [KO] 스케일 크기 변화에 적용될 이징(Easing) 함수(PARTICLE_EASE 상수 값)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the easing function (PARTICLE_EASE constant value) applied to the scale change.
      */
     get easeScale(): number {
         return this.#easeScale;
     }
 
-    /**
-     * [KO] 스케일 변화에 적용할 이징 타입을 설정합니다.
-     * [EN] Sets the easing type for scale change.
-     * @param value - [KO] PARTICLE_EASE 값 [EN] PARTICLE_EASE value
-     */
     set easeScale(value: number) {
         this.#easeScale = value;
     }
 
     /**
-     * [KO] X축 회전에 적용할 이징 타입을 반환합니다.
-     * [EN] Returns the easing type for X-axis rotation.
+     * [KO] X축 회전 변화에 적용될 이징(Easing) 함수(PARTICLE_EASE 상수 값)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the easing function (PARTICLE_EASE constant value) applied to the X-axis rotation change.
      */
     get easeRotationX(): number {
         return this.#easeRotationX;
     }
 
-    /**
-     * [KO] X축 회전에 적용할 이징 타입을 설정합니다.
-     * [EN] Sets the easing type for X-axis rotation.
-     * @param value - [KO] PARTICLE_EASE 값 [EN] PARTICLE_EASE value
-     */
     set easeRotationX(value: number) {
         this.#easeRotationX = value;
     }
 
     /**
-     * [KO] Y축 회전에 적용할 이징 타입을 반환합니다.
-     * [EN] Returns the easing type for Y-axis rotation.
+     * [KO] Y축 회전 변화에 적용될 이징(Easing) 함수(PARTICLE_EASE 상수 값)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the easing function (PARTICLE_EASE constant value) applied to the Y-axis rotation change.
      */
     get easeRotationY(): number {
         return this.#easeRotationY;
     }
 
-    /**
-     * [KO] Y축 회전에 적용할 이징 타입을 설정합니다.
-     * [EN] Sets the easing type for Y-axis rotation.
-     * @param value - [KO] PARTICLE_EASE 값 [EN] PARTICLE_EASE value
-     */
     set easeRotationY(value: number) {
         this.#easeRotationY = value;
     }
 
     /**
-     * [KO] Z축 회전에 적용할 이징 타입을 반환합니다.
-     * [EN] Returns the easing type for Z-axis rotation.
+     * [KO] Z축 회전 변화에 적용될 이징(Easing) 함수(PARTICLE_EASE 상수 값)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the easing function (PARTICLE_EASE constant value) applied to the Z-axis rotation change.
      */
     get easeRotationZ(): number {
         return this.#easeRotationZ;
     }
 
-    /**
-     * [KO] Z축 회전에 적용할 이징 타입을 설정합니다.
-     * [EN] Sets the easing type for Z-axis rotation.
-     * @param value - [KO] PARTICLE_EASE 값 [EN] PARTICLE_EASE value
-     */
     set easeRotationZ(value: number) {
         this.#easeRotationZ = value;
     }
 
     /**
-     * 파티클 버퍼(GPUBuffer) 배열 반환
+     * [KO] 파티클 데이터 및 속성을 저장하는 GPUBuffer들의 배열을 가져옵니다.
+     * [EN] Gets the array of GPUBuffers storing particle data and attributes.
      */
     get particleBuffers(): GPUBuffer[] {
         return this.#particleBuffers;
     }
 
     /**
-     * 파티클 렌더링 및 시뮬레이션을 수행합니다.
-     * @param renderViewStateData 렌더 상태 데이터
+     * [KO] 파티클 이미터를 렌더링 프레임 단위로 갱신 및 시뮬레이션합니다. 매 프레임마다 GPU 컴퓨트 패스(Compute Pass)를 수행하여 위치 정보를 재계산합니다.
+     * [EN] Updates and simulates the particle emitter on a per-frame basis. Triggers the GPU Compute Pass each frame to recalculate position and transform states.
+     * @param renderViewStateData -
+     * [KO] 렌더 뷰 상태 데이터 객체
+     * [EN] Render view state data object
      */
     render(renderViewStateData: RenderViewStateData) {
         if (!this.#simParamBuffer) this.#init()
@@ -981,18 +706,16 @@ class ParticleEmitter extends Mesh {
     }
 
     /**
-     * 커스텀 버텍스 셰이더 모듈을 생성합니다.
-     *
-     * @returns 생성된 셰이더 모듈
+     * [KO] 파티클용 커스텀 버텍스 셰이더 모듈을 컴파일하고 반환합니다.
+     * [EN] Compiles and returns a custom vertex shader module for particles.
+     * @returns
+     * [KO] 컴파일 완료된 GPUShaderModule
+     * [EN] Compiled GPUShaderModule
      */
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
         return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
     }
 
-    /**
-     * 파티클 버퍼 및 파이프라인을 초기화합니다.
-     * @private
-     */
     #init() {
         this.#simParamData = new Float32Array(46);
         let bufferDescriptor = {
@@ -1007,10 +730,6 @@ class ParticleEmitter extends Mesh {
         this.depthStencilState.depthWriteEnabled = false
     }
 
-    /**
-     * 파티클 데이터(GPUBuffer) 생성 및 갱신
-     * @private
-     */
     #setParticleData() {
         this.dirtyPipeline = true
         let redGPUContext = this.redGPUContext;
@@ -1030,62 +749,49 @@ class ParticleEmitter extends Mesh {
             const startRX = Math.random() * (this.#maxStartRotationX - this.#minStartRotationX) + this.#minStartRotationX
             const startRY = Math.random() * (this.#maxStartRotationY - this.#minStartRotationY) + this.#minStartRotationY
             const startRZ = Math.random() * (this.#maxStartRotationZ - this.#minStartRotationZ) + this.#minStartRotationZ
-            // const startScale = Math.random() * (this.#maxStartScale - this.#minStartScale) + this.#minStartScale
-            // const startAlpha = Math.random() * (this.#maxStartAlpha - this.#minStartAlpha) + this.#minStartAlpha
             initialParticleData[12 * i] = currentTime - age; // start time
             initialParticleData[12 * i + 1] = life; // life
-            // position
             initialParticleData[12 * i + 4] = startX; // x
             initialParticleData[12 * i + 5] = startY; // y
             initialParticleData[12 * i + 6] = startZ; // z
-            initialParticleData[12 * i + 7] = 0// alpha;
-            // rotation
+            initialParticleData[12 * i + 7] = 0
             initialParticleData[12 * i + 8] = startRX; // rotationX
             initialParticleData[12 * i + 9] = startRY;  // rotationY
             initialParticleData[12 * i + 10] = startRZ; // rotationZ
-            initialParticleData[12 * i + 11] = 0 // scale
-            // x
+            initialParticleData[12 * i + 11] = 0
             initialParticleInfoPosition[4 * i] = startX; // startValue
             initialParticleInfoPosition[4 * i + 1] = Math.random() * (this.#maxEndX - this.#minEndX) + this.#minEndX; // endValue
-            initialParticleInfoPosition[4 * i + 2] = this.#easeX; // #ease
+            initialParticleInfoPosition[4 * i + 2] = this.#easeX; // ease
             initialParticleInfoPosition[4 * i + 3] = worldPosition[0]; // startPosition
-            // y
             initialParticleInfoPosition[4 * i + 4] = startY; // startValue
             initialParticleInfoPosition[4 * i + 5] = Math.random() * (this.#maxEndY - this.#minEndY) + this.#minEndY; // endValue
-            initialParticleInfoPosition[4 * i + 6] = this.#easeY; // #ease
+            initialParticleInfoPosition[4 * i + 6] = this.#easeY; // ease
             initialParticleInfoPosition[4 * i + 7] = worldPosition[1]; // startPosition
-            // z
             initialParticleInfoPosition[4 * i + 8] = startZ; // startValue
             initialParticleInfoPosition[4 * i + 9] = Math.random() * (this.#maxEndZ - this.#minEndZ) + this.#minEndZ; // endValue
-            initialParticleInfoPosition[4 * i + 10] = this.#easeZ; // #ease
+            initialParticleInfoPosition[4 * i + 10] = this.#easeZ; // ease
             initialParticleInfoPosition[4 * i + 11] = worldPosition[2]; // startPosition
-            // rotationX
             initialParticleInfoRotation[4 * i] = startRX; // startValue
             initialParticleInfoRotation[4 * i + 1] = Math.random() * (this.#maxEndRotationX - this.#minEndRotationX) + this.#minEndRotationX; // endValue
-            initialParticleInfoRotation[4 * i + 2] = this.#easeRotationX; // #ease
-            initialParticleInfoRotation[4 * i + 3] = 0; //
-            // rotationY
+            initialParticleInfoRotation[4 * i + 2] = this.#easeRotationX; // ease
+            initialParticleInfoRotation[4 * i + 3] = 0;
             initialParticleInfoRotation[4 * i + 4] = startRY; // startValue
             initialParticleInfoRotation[4 * i + 5] = Math.random() * (this.#maxEndRotationY - this.#minEndRotationY) + this.#minEndRotationY; // endValue
-            initialParticleInfoRotation[4 * i + 6] = this.#easeRotationY; // #ease
-            initialParticleInfoRotation[4 * i + 7] = 0; //
-            // rotationZ
+            initialParticleInfoRotation[4 * i + 6] = this.#easeRotationY; // ease
+            initialParticleInfoRotation[4 * i + 7] = 0;
             initialParticleInfoRotation[4 * i + 8] = startRZ; // startValue
             initialParticleInfoRotation[4 * i + 9] = Math.random() * (this.#maxEndRotationZ - this.#minEndRotationZ) + this.#minEndRotationZ; // endValue
-            initialParticleInfoRotation[4 * i + 10] = this.#easeRotationZ; // #ease
-            initialParticleInfoRotation[4 * i + 11] = 0; //
-            // scale
+            initialParticleInfoRotation[4 * i + 10] = this.#easeRotationZ; // ease
+            initialParticleInfoRotation[4 * i + 11] = 0;
             initialParticleInfoScale[4 * i] = 0; // startValue
             initialParticleInfoScale[4 * i + 1] = Math.random() * (this.#maxEndScale - this.#minEndScale) + this.#minEndScale; // endValue
-            initialParticleInfoScale[4 * i + 2] = this.#easeScale; // #ease
-            initialParticleInfoScale[4 * i + 3] = 0; //
-            // alpha
+            initialParticleInfoScale[4 * i + 2] = this.#easeScale; // ease
+            initialParticleInfoScale[4 * i + 3] = 0;
             initialParticleInfoAlpha[4 * i] = 0;
             initialParticleInfoAlpha[4 * i + 1] = Math.random() * (this.#maxEndAlpha - this.#minEndAlpha) + this.#minEndAlpha; // endValue
-            initialParticleInfoAlpha[4 * i + 2] = this.#easeAlpha; // #ease
-            initialParticleInfoAlpha[4 * i + 3] = 0; //
+            initialParticleInfoAlpha[4 * i + 2] = this.#easeAlpha; // ease
+            initialParticleInfoAlpha[4 * i + 3] = 0;
         }
-        // console.log('initialParticleData', initialParticleData)
         const prevBuffer = this.#particleBuffers
         this.#particleBuffers = [];
         const dataList = [
@@ -1112,7 +818,6 @@ class ParticleEmitter extends Mesh {
         if (prevBuffer) {
             prevBuffer.forEach(v => commandEncoderManager.addDeferredDestroy(v));
         }
-        //
         let computeSource = computeModuleSource;
         let shaderModuleDescriptor = {
             code: computeSource,
@@ -1172,40 +877,26 @@ class ParticleEmitter extends Mesh {
         });
     }
 
-    /**
-     * GPU 컴퓨트 파이프라인을 통해 파티클 시뮬레이션을 수행합니다.
-     * @param time 현재 시간(ms)
-     * @private
-     */
     #renderComputePass(time: number) {
         const worldPosition = this.localToWorld(this.x, this.y, this.z)
         this.#simParamData.set(
             [
-                // startTime time
                 time,
-                // position
                 ...worldPosition,
-                // lifeRange
                 this.#minLife, this.#maxLife,
-                // x,y,z Range
                 this.#minStartX, this.#maxStartX, this.#minEndX, this.#maxEndX, this.#easeX,
                 this.#minStartY, this.#maxStartY, this.#minEndY, this.#maxEndY, this.#easeY,
                 this.#minStartZ, this.#maxStartZ, this.#minEndZ, this.#maxEndZ, this.#easeZ,
-                // alphaRange
                 this.#minStartAlpha, this.#maxStartAlpha, this.#minEndAlpha, this.#maxEndAlpha, this.#easeAlpha,
-                // scaleRange
                 this.#minStartScale, this.#maxStartScale, this.#minEndScale, this.#maxEndScale, this.#easeScale,
-                // x,y,z Range
                 this.#minStartRotationX, this.#maxStartRotationX, this.#minEndRotationX, this.#maxEndRotationX, this.#easeRotationX,
                 this.#minStartRotationY, this.#maxStartRotationY, this.#minEndRotationY, this.#maxEndRotationY, this.#easeRotationY,
                 this.#minStartRotationZ, this.#maxStartRotationZ, this.#minEndRotationZ, this.#maxEndRotationZ, this.#easeRotationZ
             ],
             0
         );
-        //
         const {commandEncoderManager} = this.redGPUContext
         this.redGPUContext.gpuDevice.queue.writeBuffer(this.#simParamBuffer, 0, this.#simParamData as BufferSource);
-        //
         commandEncoderManager.addPreProcessComputePass('PARTICLE_EMITTER_COMPUTE_PASS', (computePass) => {
             computePass.setPipeline(this.#computePipeline);
             computePass.setBindGroup(0, this.#computeBindGroup);
@@ -1221,6 +912,5 @@ Object.defineProperty(ParticleEmitter.prototype, 'isInstanceofParticle', {
 defineBoolean(ParticleEmitter, [
     {key: 'useBillboard', value: true},
 ])
-//
 Object.freeze(ParticleEmitter)
 export default ParticleEmitter
