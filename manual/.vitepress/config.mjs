@@ -198,6 +198,33 @@ export default withMermaid(defineConfig({
                 }
                 return defaultRender(tokens, idx, options, env, self);
             };
+
+            // 링크 규칙 커스터마이징 (외부 링크나 특정 경로에 대해 target 설정)
+            const defaultLinkRender = md.renderer.rules.link_open || ((tokens, idx, options, env, self) => {
+                return self.renderToken(tokens, idx, options);
+            });
+            md.renderer.rules.link_open = (tokens, idx, options, env, self) => {
+                const aIndex = tokens[idx].attrIndex('href');
+                if (aIndex >= 0) {
+                    const href = tokens[idx].attrs[aIndex][1];
+                    // 만약 링크가 /RedGPU/examples/ 로 시작한다면 target="_blank"를 지정하여 SPA 라우터를 우회
+                    if (href.startsWith('/RedGPU/examples/') || href.startsWith('/RedGPU/dist/')) {
+                        const targetIndex = tokens[idx].attrIndex('target');
+                        if (targetIndex >= 0) {
+                            tokens[idx].attrs[targetIndex][1] = '_blank';
+                        } else {
+                            tokens[idx].attrs.push(['target', '_blank']);
+                        }
+                        const relIndex = tokens[idx].attrIndex('rel');
+                        if (relIndex >= 0) {
+                            tokens[idx].attrs[relIndex][1] = 'noopener noreferrer';
+                        } else {
+                            tokens[idx].attrs.push(['rel', 'noopener noreferrer']);
+                        }
+                    }
+                }
+                return defaultLinkRender(tokens, idx, options, env, self);
+            };
         }
     },
     async transformPageData(pageData) {
