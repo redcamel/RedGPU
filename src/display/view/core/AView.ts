@@ -243,6 +243,9 @@ abstract class AView extends ViewTransform {
     /**
      * [KO] FXAA 후처리 효과 객체를 반환합니다.
      * [EN] Returns the FXAA post-effect object.
+     * @returns
+     * [KO] FXAA 인스턴스
+     * [EN] FXAA instance
      */
     get fxaa(): FXAA {
         if (!this.#fxaa) {
@@ -254,6 +257,9 @@ abstract class AView extends ViewTransform {
     /**
      * [KO] TAA 후처리 효과 객체를 반환합니다.
      * [EN] Returns the TAA post-effect object.
+     * @returns
+     * [KO] TAA 인스턴스
+     * [EN] TAA instance
      */
     get taa(): TAA {
         if (!this.#taa) {
@@ -272,8 +278,8 @@ abstract class AView extends ViewTransform {
      * [KO] 화면 Y 좌표
      * [EN] Screen Y coordinate
      * @returns
-     * [KO] 변환된 월드 좌표
-     * [EN] Converted world coordinates
+     * [KO] 변환된 월드 좌표 (3D 벡터 배열)
+     * [EN] Converted world coordinates (3D vector array)
      */
     screenToWorld(
         screenX: number,
@@ -283,11 +289,11 @@ abstract class AView extends ViewTransform {
     }
 
     /**
-     * [KO] 마우스가 현재 뷰의 픽셀 영역 내에 있는지 확인합니다.
-     * [EN] Checks if the mouse is within the pixel area of the current view.
+     * [KO] 마우스 포인터가 현재 뷰의 픽셀 영역 내에 있는지 확인합니다.
+     * [EN] Checks if the mouse pointer is within the pixel area of the current view.
      * @returns
-     * [KO] 포함 여부
-     * [EN] Whether it is contained
+     * [KO] 마우스가 뷰 영역 안에 있으면 true, 그렇지 않으면 false
+     * [EN] True if the mouse is inside the view bounds, otherwise false
      */
     checkMouseInViewBounds(): boolean {
         const {pixelRectObject, pickingManager} = this;

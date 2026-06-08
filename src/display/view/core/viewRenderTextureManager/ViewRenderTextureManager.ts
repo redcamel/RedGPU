@@ -9,17 +9,48 @@ const DEPTH0: GBUFFER_INNER_TYPE = 'depthTexture0'
 const DEPTH1: GBUFFER_INNER_TYPE = 'depthTexture1'
 
 type GBUFFER_INNER_TYPE = 'depthTexture0' | 'depthTexture1';
+
+/**
+ * [KO] G-Buffer 텍스처 및 관련 뷰 정보를 정의하는 타입
+ * [EN] Type defining G-Buffer texture and related view information
+ */
 type GBufferInfo = {
+    /**
+     * [KO] GPU 텍스처 객체
+     * [EN] GPU texture object
+     */
     texture: GPUTexture,
+    /**
+     * [KO] GPU 텍스처 뷰 객체
+     * [EN] GPU texture view object
+     */
     textureView: GPUTextureView,
+    /**
+     * [KO] GPU 텍스처 디스크립터
+     * [EN] GPU texture descriptor
+     */
     textureDescriptor: GPUTextureDescriptor,
+    /**
+     * [KO] MSAA용 Resolve 대상 GPU 텍스처 객체 (선택 사항)
+     * [EN] Resolve target GPU texture object for MSAA (optional)
+     */
     resolveTexture?: GPUTexture,
+    /**
+     * [KO] MSAA용 Resolve 대상 GPU 텍스처 뷰 객체 (선택 사항)
+     * [EN] Resolve target GPU texture view object for MSAA (optional)
+     */
     resolveTextureView?: GPUTextureView,
+    /**
+     * [KO] MSAA용 Resolve 대상 GPU 텍스처 디스크립터 (선택 사항)
+     * [EN] Resolve target GPU texture descriptor for MSAA (optional)
+     */
     resolveTextureDescriptor?: GPUTextureDescriptor,
 }
 const BASIC_USAGE = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC
+
 /**
- * G-Buffer 타입별 포맷 및 사용 용도 정의
+ * [KO] G-Buffer 타입별 포맷 및 사용 용도 정의
+ * [EN] Define formats and usages by G-Buffer type
  */
 const GBUFFER_FORMATS: Record<GBUFFER_TYPE, {
     format?: GPUTextureFormat,
@@ -56,64 +87,67 @@ const GBUFFER_FORMATS: Record<GBUFFER_TYPE, {
  */
 class ViewRenderTextureManager extends RedGPUObject {
     /**
-     * 관리 중인 텍스처들의 총 비디오 메모리 사용량(바이트)
-     * @private
-     * @type {number}
+     * [KO] 관리 중인 텍스처들의 총 비디오 메모리 사용량 (바이트 단위)
+     * [EN] Total video memory usage of managed textures (in bytes)
      */
     #videoMemorySize: number = 0
     /**
-     * 소유 View3D 인스턴스
-     * @private
-     * @type {View3D}
+     * [KO] 소유하고 있는 View3D 인스턴스
+     * [EN] Owned View3D instance
      */
     #view: View3D
     /**
-     * G-Buffer 맵: key -> { texture, textureView, resolveTexture, resolveTextureView }
-     * @private
-     * @type {Map<string, GBufferInfo>}
+     * [KO] G-Buffer 맵
+     * [EN] G-Buffer map
      */
     #gBuffers: Map<string, GBufferInfo> = new Map()
     /**
-     * 마지막으로 업데이트된 MSAA 고유 ID
-     * @private
-     * @type {string}
+     * [KO] 마지막으로 업데이트된 MSAA 고유 ID
+     * [EN] Last updated MSAA unique ID
      */
     #lastUpdateMSAAID: string
     #targetTextureSize: GPUExtent3DDict
     #targetTextureSizeString: string
 
     /**
-     * 생성자
-     * @param {View3D} view - 이 매니저가 관리할 View3D 인스턴스
+     * [KO] ViewRenderTextureManager 인스턴스를 생성합니다.
+     * [EN] Creates a new ViewRenderTextureManager instance.
+     * @param view -
+     * [KO] 이 매니저가 관리할 View3D 인스턴스
+     * [EN] View3D instance this manager will manage
      */
     constructor(view: View3D) {
         super(view.redGPUContext)
         this.#view = view
     }
 
+    /**
+     * [KO] G-Buffer 맵을 반환합니다.
+     * [EN] Returns the G-Buffer map.
+     */
     get gBuffers(): Map<string, GBufferInfo> {
         return this.#gBuffers;
     }
 
     /**
-     * 현재 계산된 비디오 메모리 사용량(바이트)을 반환합니다.
-     * @returns {number}
+     * [KO] 현재 계산된 비디오 메모리 사용량 (바이트 단위)을 반환합니다.
+     * [EN] Returns the currently calculated video memory usage (in bytes).
      */
     get videoMemorySize(): number {
         return this.#videoMemorySize;
     }
 
     /**
-     * 렌더 패스1 결과 텍스처 생성에 사용된 디스크립터를 반환합니다.
-     * @returns {GPUTextureDescriptor}
+     * [KO] 렌더 패스 1단계 결과 텍스처 생성에 사용된 디스크립터를 반환합니다.
+     * [EN] Returns the descriptor used to create the render path 1 stage result texture.
      */
     get renderPath1ResultTextureDescriptor(): GPUTextureDescriptor {
         return this.#gBuffers.get(GBUFFER_TYPE.RENDER_PATH1_RESULT)?.textureDescriptor;
     }
 
     /**
-     * 깊이 텍스처를 반환합니다.
-     * @returns {GPUTexture}
+     * [KO] 깊이(depth) 텍스처를 반환합니다. (스왑 버퍼링 반영)
+     * [EN] Returns the depth texture. (reflects swap buffering)
      */
     get depthTexture(): GPUTexture {
         this.#update();
@@ -121,40 +155,52 @@ class ViewRenderTextureManager extends RedGPUObject {
     }
 
     /**
-     * 깊이 텍스처 뷰를 반환합니다.
-     * @returns {GPUTextureView}
+     * [KO] 깊이(depth) 텍스처 뷰를 반환합니다. (스왑 버퍼링 반영)
+     * [EN] Returns the depth texture view. (reflects swap buffering)
      */
     get depthTextureView(): GPUTextureView {
         this.#update();
         return this.#view.renderViewStateData.swapBufferIndex ? this.#gBuffers.get(DEPTH1)?.textureView : this.#gBuffers.get(DEPTH0)?.textureView;
     }
 
+    /**
+     * [KO] 이전 프레임의 깊이(depth) 텍스처 뷰를 반환합니다. (스왑 버퍼링 반영)
+     * [EN] Returns the depth texture view of the previous frame. (reflects swap buffering)
+     */
     get prevDepthTextureView(): GPUTextureView {
         this.#update();
         return this.#view.renderViewStateData.swapBufferIndex ? this.#gBuffers.get(DEPTH0)?.textureView : this.#gBuffers.get(DEPTH1)?.textureView;
     }
 
+    /**
+     * [KO] 첫 번째 깊이(depth) 텍스처 뷰를 반환합니다.
+     * [EN] Returns the first depth texture view.
+     */
     get depthTexture0View(): GPUTextureView {
         this.#update();
         return this.#gBuffers.get(DEPTH0)?.textureView
     }
 
+    /**
+     * [KO] 두 번째 깊이(depth) 텍스처 뷰를 반환합니다.
+     * [EN] Returns the second depth texture view.
+     */
     get depthTexture1View(): GPUTextureView {
         this.#update();
         return this.#gBuffers.get(DEPTH1)?.textureView
     }
 
     /**
-     * 렌더 패스1 결과 텍스처 뷰를 반환합니다.
-     * @returns {GPUTextureView}
+     * [KO] 렌더 패스 1단계 결과 텍스처 뷰를 반환합니다.
+     * [EN] Returns the render path 1 stage result texture view.
      */
     get renderPath1ResultTextureView(): GPUTextureView {
         return this.getGBufferTextureView(GBUFFER_TYPE.RENDER_PATH1_RESULT);
     }
 
     /**
-     * 렌더 패스1 결과 텍스처를 반환합니다.
-     * @returns {GPUTexture}
+     * [KO] 렌더 패스 1단계 결과 텍스처를 반환합니다.
+     * [EN] Returns the render path 1 stage result texture.
      */
     get renderPath1ResultTexture(): GPUTexture {
         return this.getGBufferTexture(GBUFFER_TYPE.RENDER_PATH1_RESULT);
@@ -164,9 +210,11 @@ class ViewRenderTextureManager extends RedGPUObject {
      * G-Buffer 공통 접근 메서드
      * ---------------------------------------- */
     /**
-     * 지정된 타입의 G-Buffer 텍스처를 반환합니다.
-     * @param {GBUFFER_TYPE} type - G-Buffer 타입 (GBUFFER_TYPE 상수 사용)
-     * @returns {GPUTexture}
+     * [KO] 지정된 타입의 G-Buffer 텍스처를 반환합니다.
+     * [EN] Returns the G-Buffer texture of the specified type.
+     * @param type -
+     * [KO] G-Buffer 타입 상수
+     * [EN] G-Buffer type constant
      */
     getGBufferTexture(type: GBUFFER_TYPE): GPUTexture {
         this.#update();
@@ -174,9 +222,11 @@ class ViewRenderTextureManager extends RedGPUObject {
     }
 
     /**
-     * 지정된 타입의 G-Buffer resolve 텍스처를 반환합니다.
-     * @param {GBUFFER_TYPE} type - G-Buffer 타입 (GBUFFER_TYPE 상수 사용)
-     * @returns {GPUTexture}
+     * [KO] 지정된 타입의 G-Buffer Resolve 텍스처를 반환합니다. (MSAA 해제 시 대상)
+     * [EN] Returns the G-Buffer resolve texture of the specified type.
+     * @param type -
+     * [KO] G-Buffer 타입 상수
+     * [EN] G-Buffer type constant
      */
     getGBufferResolveTexture(type: GBUFFER_TYPE): GPUTexture {
         this.#update();
@@ -184,9 +234,11 @@ class ViewRenderTextureManager extends RedGPUObject {
     }
 
     /**
-     * 지정된 타입의 G-Buffer 텍스처 뷰를 반환합니다.
-     * @param {GBUFFER_TYPE} type - G-Buffer 타입 (GBUFFER_TYPE 상수 사용)
-     * @returns {GPUTextureView}
+     * [KO] 지정된 타입의 G-Buffer 텍스처 뷰를 반환합니다.
+     * [EN] Returns the G-Buffer texture view of the specified type.
+     * @param type -
+     * [KO] G-Buffer 타입 상수
+     * [EN] G-Buffer type constant
      */
     getGBufferTextureView(type: GBUFFER_TYPE): GPUTextureView {
         this.#update();
@@ -194,9 +246,11 @@ class ViewRenderTextureManager extends RedGPUObject {
     }
 
     /**
-     * 지정된 타입의 G-Buffer resolve 텍스처 뷰를 반환합니다.
-     * @param {GBUFFER_TYPE} type - G-Buffer 타입 (GBUFFER_TYPE 상수 사용)
-     * @returns {GPUTextureView}
+     * [KO] 지정된 타입의 G-Buffer Resolve 텍스처 뷰를 반환합니다. (MSAA 해제 시 대상 뷰)
+     * [EN] Returns the G-Buffer resolve texture view of the specified type.
+     * @param type -
+     * [KO] G-Buffer 타입 상수
+     * [EN] G-Buffer type constant
      */
     getGBufferResolveTextureView(type: GBUFFER_TYPE): GPUTextureView {
         this.#update();

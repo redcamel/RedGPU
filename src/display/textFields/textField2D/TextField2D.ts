@@ -36,7 +36,8 @@ const BaseTextField2D = mixInMesh2D(ATextField);
  *
  * [KO] 아래는 TextField2D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * [EN] Below is a list of additional sample examples to help understand the structure and operation of TextField2D.
- * @see [TextField2D MouseEvent example](/RedGPU/examples/2d/interaction/mouseEvent/textField2D/)
+ * @see [TextField2D Basic Example](/RedGPU/examples/2d/textField2D/basic/)
+ * @see [TextField2D MouseEvent Example](/RedGPU/examples/2d/interaction/mouseEvent/textField2D/)
  *
  * @category TextField
  */
@@ -59,7 +60,7 @@ class TextField2D extends BaseTextField2D {
 
     /**
      * [KO] TextField2D 인스턴스를 생성합니다.
-     * [EN] Creates a TextField2D instance.
+     * [EN] Creates a new TextField2D instance.
      * @param redGPUContext -
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
@@ -111,16 +112,16 @@ class TextField2D extends BaseTextField2D {
     }
 
     /**
-     * [KO] 텍스트 렌더링 결과의 너비를 반환합니다.
-     * [EN] Returns the width of the text rendering result.
+     * [KO] 텍스트 렌더링 결과의 너비를 반환합니다. (픽셀 단위)
+     * [EN] Returns the width of the text rendering result (in pixels).
      */
     get width(): number {
         return this.#width;
     }
 
     /**
-     * [KO] 텍스트 렌더링 결과의 높이를 반환합니다.
-     * [EN] Returns the height of the text rendering result.
+     * [KO] 텍스트 렌더링 결과의 높이를 반환합니다. (픽셀 단위)
+     * [EN] Returns the height of the text rendering result (in pixels).
      */
     get height(): number {
         return this.#height;

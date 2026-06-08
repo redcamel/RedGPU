@@ -25,74 +25,67 @@ import RedGPUObject from "../../../base/RedGPUObject";
  */
 class ViewTransform extends RedGPUObject {
     /**
-     * 뷰 크기 변경 시 호출되는 콜백입니다.
-     * @type {((event: RedResizeEvent<ViewTransform>) => void) | null}
+     * [KO] 뷰 크기 변경 시 호출되는 콜백 함수
+     * [EN] Callback function called when the view size changes
      */
     onResize: ((event: RedResizeEvent<ViewTransform>) => void) | null = null;
     /**
-     * 현재 적용된(지터 포함) 프로젝션 행렬 캐시입니다.
-     * @private
-     * @type {mat4}
+     * [KO] 현재 적용된(지터 포함) 프로젝션 행렬 캐시
+     * [EN] Cached current projection matrix (including jitter)
      */
     #projectionMatrix = mat4.create()
     /**
-     * 지터가 적용되지 않은 원본 프로젝션 행렬 캐시입니다.
-     * @private
-     * @type {mat4}
+     * [KO] 지터가 적용되지 않은 원본 프로젝션 행렬 캐시
+     * [EN] Cached original projection matrix without jitter
      */
     #noneJitterProjectionMatrix = mat4.create()
     /**
-     * 이 뷰에 연결된 카메라 인스턴스(Perspective | Orthographic | AController | Camera2D).
-     * @private
+     * [KO] 이 뷰에 연결된 카메라 인스턴스
+     * [EN] Camera instance connected to this view
      */
     #camera: PerspectiveCamera | OrthographicCamera | AController | Camera2D
     /**
-     * 뷰의 X 위치 값(픽셀 또는 퍼센트 문자열).
-     * @private
-     * @type {number | string}
+     * [KO] 뷰의 X 위치 값 (픽셀 수 또는 백분율 문자열)
+     * [EN] X position of the view (pixels or percentage string)
      */
     #x: number | string = 0
     /**
-     * 뷰의 Y 위치 값(픽셀 또는 퍼센트 문자열).
-     * @private
-     * @type {number | string}
+     * [KO] 뷰의 Y 위치 값 (픽셀 수 또는 백분율 문자열)
+     * [EN] Y position of the view (pixels or percentage string)
      */
     #y: number | string = 0
     /**
-     * 뷰의 너비 값(픽셀 또는 퍼센트 문자열).
-     * @private
-     * @type {number | string}
+     * [KO] 뷰의 너비 값 (픽셀 수 또는 백분율 문자열)
+     * [EN] Width of the view (pixels or percentage string)
      */
     #width: number | string
     /**
-     * 뷰의 높이 값(픽셀 또는 퍼센트 문자열).
-     * @private
-     * @type {number | string}
+     * [KO] 뷰의 높이 값 (픽셀 수 또는 백분율 문자열)
+     * [EN] Height of the view (pixels or percentage string)
      */
     #height: number | string
     /**
-     * 픽셀 단위 사각형 [x, y, width, height] (device pixel 단위).
-     * @private
-     * @type {[number, number, number, number]}
+     * [KO] 픽셀 단위 사각형 [x, y, width, height] (device pixel 단위)
+     * [EN] Pixel rectangle [x, y, width, height] (in device pixels)
      */
     #pixelRectArray: [number, number, number, number] = [0, 0, 0, 0]
-    // TAA 지터 관련 속성 추가
     /**
-     * 현재 적용된 지터 오프셋 X 값 (정규화된 값).
-     * @private
-     * @type {number}
+     * [KO] 현재 적용된 지터 오프셋 X 값 (정규화된 값)
+     * [EN] Currently applied jitter offset X value (normalized value)
      */
     #jitterOffsetX: number = 0;
     /**
-     * 현재 적용된 지터 오프셋 Y 값 (정규화된 값).
-     * @private
-     * @type {number}
+     * [KO] 현재 적용된 지터 오프셋 Y 값 (정규화된 값)
+     * [EN] Currently applied jitter offset Y value (normalized value)
      */
     #jitterOffsetY: number = 0;
 
     /**
-     * ViewTransform 생성자.
-     * @param {RedGPUContext} redGPUContext - 유효한 RedGPUContext 인스턴스
+     * [KO] ViewTransform 인스턴스를 생성합니다.
+     * [EN] Creates a new ViewTransform instance.
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
@@ -100,17 +93,22 @@ class ViewTransform extends RedGPUObject {
     }
 
     /**
-     * 현재 연결된 카메라를 반환합니다.
-     * @returns {PerspectiveCamera | OrthographicCamera | AController | Camera2D}
+     * [KO] 현재 연결된 카메라를 반환합니다.
+     * [EN] Returns the currently connected camera.
      */
     get camera(): PerspectiveCamera | OrthographicCamera | AController | Camera2D {
         return this.#camera;
     }
 
     /**
-     * 카메라를 설정합니다. 허용되는 타입은 PerspectiveCamera, OrthographicCamera, AController, Camera2D 입니다.
-     * 잘못된 타입이 들어오면 오류를 발생시킵니다.
-     * @param {PerspectiveCamera | OrthographicCamera | AController | Camera2D} value
+     * [KO] 카메라를 설정합니다. PerspectiveCamera, OrthographicCamera, AController, Camera2D 중 하나여야 합니다.
+     * [EN] Sets the camera. Must be one of PerspectiveCamera, OrthographicCamera, AController, or Camera2D.
+     * @param value -
+     * [KO] 연결할 카메라 인스턴스
+     * [EN] Camera instance to connect
+     * @throws
+     * [KO] 지원하지 않는 카메라 타입일 경우 에러 발생
+     * [EN] Throws error if camera type is not supported
      */
     set camera(value: PerspectiveCamera | OrthographicCamera | AController | Camera2D) {
         if (!(value instanceof PerspectiveCamera) && !(value instanceof Camera2D) && !(value instanceof OrthographicCamera) && !(value instanceof AController)) consoleAndThrowError('allow PerspectiveCamera or OrthographicCamera or AController instance')
@@ -118,80 +116,92 @@ class ViewTransform extends RedGPUObject {
     }
 
     /**
-     * 뷰의 X 위치 값을 반환합니다 (픽셀 또는 퍼센트 문자열).
-     * @returns {number | string}
+     * [KO] 뷰의 X 위치 값을 반환합니다. (픽셀 또는 퍼센트 문자열)
+     * [EN] Returns the X position value of the view. (Pixels or percentage string)
      */
     get x(): number | string {
         return this.#x;
     }
 
     /**
-     * 뷰의 X 위치를 설정합니다. 내부적으로 setPosition을 호출합니다.
-     * @param {number | string} value
+     * [KO] 뷰의 X 위치를 설정합니다.
+     * [EN] Sets the X position of the view.
+     * @param value -
+     * [KO] 설정할 X 위치 값
+     * [EN] X position value to set
      */
     set x(value: number | string) {
         this.setPosition(value, this.y)
     }
 
     /**
-     * 뷰의 Y 위치 값을 반환합니다 (픽셀 또는 퍼센트 문자열).
-     * @returns {number | string}
+     * [KO] 뷰의 Y 위치 값을 반환합니다. (픽셀 또는 퍼센트 문자열)
+     * [EN] Returns the Y position value of the view. (Pixels or percentage string)
      */
     get y(): number | string {
         return this.#y;
     }
 
     /**
-     * 뷰의 Y 위치를 설정합니다. 내부적으로 setPosition을 호출합니다.
-     * @param {number | string} value
+     * [KO] 뷰의 Y 위치를 설정합니다.
+     * [EN] Sets the Y position of the view.
+     * @param value -
+     * [KO] 설정할 Y 위치 값
+     * [EN] Y position value to set
      */
     set y(value: number | string) {
         this.setPosition(this.x, value)
     }
 
     /**
-     * 뷰의 너비 값을 반환합니다 (픽셀 또는 퍼센트 문자열).
-     * @returns {number | string}
+     * [KO] 뷰의 너비 값을 반환합니다. (픽셀 또는 퍼센트 문자열)
+     * [EN] Returns the width value of the view. (Pixels or percentage string)
      */
     get width(): number | string {
         return this.#width;
     }
 
     /**
-     * 뷰의 너비를 설정합니다. 내부적으로 setSize를 호출합니다.
-     * @param {number | string} value
+     * [KO] 뷰의 너비를 설정합니다.
+     * [EN] Sets the width of the view.
+     * @param value -
+     * [KO] 설정할 너비 값
+     * [EN] Width value to set
      */
     set width(value: number | string) {
         this.setSize(value, this.#height)
     }
 
     /**
-     * 뷰의 높이 값을 반환합니다 (픽셀 또는 퍼센트 문자열).
-     * @returns {number | string}
+     * [KO] 뷰의 높이 값을 반환합니다. (픽셀 또는 퍼센트 문자열)
+     * [EN] Returns the height value of the view. (Pixels or percentage string)
      */
     get height(): number | string {
         return this.#height;
     }
 
     /**
-     * 뷰의 높이를 설정합니다. 내부적으로 setSize를 호출합니다.
-     * @param {number | string} value
+     * [KO] 뷰의 높이를 설정합니다.
+     * [EN] Sets the height of the view.
+     * @param value -
+     * [KO] 설정할 높이 값
+     * [EN] Height value to set
      */
     set height(value: number | string) {
         this.setSize(this.#width, value)
     }
 
     /**
-     * 픽셀 단위 사각형 배열을 반환합니다. [x, y, width, height]
-     * @returns {[number, number, number, number]}
+     * [KO] 픽셀 단위의 사각형 배열을 반환합니다. ([x, y, width, height])
+     * [EN] Returns the rectangle array in pixels. ([x, y, width, height])
      */
     get pixelRectArray() {
         return this.#pixelRectArray;
     }
 
     /**
-     * 픽셀 단위 사각형을 객체 형태로 반환합니다.
-     * @returns {{x:number,y:number,width:number,height:number}}
+     * [KO] 픽셀 단위의 사각형을 객체 형태로 반환합니다. ({ x, y, width, height })
+     * [EN] Returns the pixel rectangle in object form. ({ x, y, width, height })
      */
     get pixelRectObject() {
         return {
@@ -202,12 +212,9 @@ class ViewTransform extends RedGPUObject {
         }
     }
 
-    // Returns an object representing the screen rectangle
-    // The x, y, width, and height values are calculated by dividing the pixel rectangle values
-    // by the device's pixel ratio for proper scaling on high-DPI screens.
     /**
-     * 스크린 기준 사각형을 반환합니다 (devicePixelRatio로 나눔).
-     * @returns {{x:number,y:number,width:number,height:number}}
+     * [KO] 스크린 해상도(DPI)가 고려된 스크린 기준 사각형 객체를 반환합니다. (devicePixelRatio로 나눈 값)
+     * [EN] Returns the screen-relative rectangle object scaled by dividing by devicePixelRatio.
      */
     get screenRectObject() {
         return {
@@ -219,17 +226,19 @@ class ViewTransform extends RedGPUObject {
     }
 
     /**
-     * 현재 뷰의 종횡비(가로/세로)를 반환합니다.
-     * @returns {number}
+     * [KO] 현재 뷰의 가로세로 비율(Aspect Ratio)을 반환합니다.
+     * [EN] Returns the aspect ratio (width/height) of the current view.
      */
     get aspect(): number {
         return this.#pixelRectArray[2] / this.#pixelRectArray[3]
     }
 
     /**
-     * 현재 프로젝션 및 카메라 모델 행렬을 기반으로 뷰 프러스텀 평면을 계산하여 반환합니다.
-     * AController 인스턴스 사용 시 내부 카메라의 modelMatrix를 사용합니다.
-     * @returns {Float32Array[]} 프러스텀 평면 배열
+     * [KO] 현재 투영(projection) 및 카메라 뷰(view) 행렬을 기반으로 뷰 프러스텀 평면을 계산하여 반환합니다.
+     * [EN] Calculates and returns the view frustum planes based on the current projection and camera view matrices.
+     * @returns
+     * [KO] 프러스텀 평면 배열
+     * [EN] Frustum planes array
      */
     get frustumPlanes() {
         if (this.#camera instanceof AController) {
@@ -240,19 +249,16 @@ class ViewTransform extends RedGPUObject {
     }
 
     /**
-     * 내부에 연결된 실제 카메라 인스턴스(PerspectiveCamera 또는 Camera2D)를 반환합니다.
-     * AController가 연결된 경우 내부 camera를 반환합니다.
-     * @returns {PerspectiveCamera | Camera2D}
+     * [KO] 내부적으로 참조하는 실제 카메라 인스턴스를 반환합니다. (AController가 연동된 경우 제어 대상 내부 카메라 반환)
+     * [EN] Returns the raw camera instance referenced internally. (Returns internal camera if AController is linked)
      */
     get rawCamera(): PerspectiveCamera | Camera2D | OrthographicCamera {
         return this.#camera instanceof AController ? this.#camera.camera : this.#camera
     }
 
-
     /**
-     * 지터가 적용되지 않은 원본 프로젝션 행렬을 계산하여 반환합니다.
-     * Orthographic, Camera2D, Perspective 각각의 방식으로 행렬을 구성합니다.
-     * @returns {mat4}
+     * [KO] 지터(Jitter)가 배제된 상태의 원본 프로젝션 행렬을 반환합니다.
+     * [EN] Returns the original projection matrix with jitter excluded.
      */
     get noneJitterProjectionMatrix(): mat4 {
         const {pixelRectObject, redGPUContext} = this
@@ -296,21 +302,17 @@ class ViewTransform extends RedGPUObject {
     }
 
     /**
-     * 현재 프로젝션 행렬(지터 적용 여부를 반영)을 반환합니다.
-     * TAA 사용 시 PerspectiveCamera에 한해 지터 오프셋을 적용합니다.
-     * @returns {mat4}
+     * [KO] 지터 오프셋이 반영된 최종 프로젝션 행렬을 반환합니다. (TAA 기동 시 PerspectiveCamera에 한해 적용됨)
+     * [EN] Returns the final projection matrix reflecting the jitter offset. (Applied only to PerspectiveCamera when TAA is enabled)
      */
     get projectionMatrix(): mat4 {
         const {redGPUContext} = this
         const {antialiasingManager} = redGPUContext
         this.#projectionMatrix = mat4.clone(this.noneJitterProjectionMatrix)
-        // TAA 지터 오프셋 적용 (PerspectiveCamera에만 적용)
         const needJitter = this.constructor.name === 'View3D' && (this.camera.constructor.name !== 'IsometricController') && antialiasingManager.useTAA
 
         if (needJitter) {
             if (this.rawCamera instanceof PerspectiveCamera && (this.#jitterOffsetX !== 0 || this.#jitterOffsetY !== 0)) {
-                // NDC 좌표계는 -1.0 ~ 1.0 (폭 2.0)입니다.
-                // 픽셀 오프셋을 NDC 비율로 변환하기 위해 2.0을 곱합니다.
                 const ndcJitterX = (this.#jitterOffsetX / this.pixelRectObject.width) * 2.0;
                 const ndcJitterY = (this.#jitterOffsetY / this.pixelRectObject.height) * 2.0;
 
@@ -322,25 +324,30 @@ class ViewTransform extends RedGPUObject {
     }
 
     /**
-     * 현재 프로젝션 행렬의 역행렬을 반환합니다.
-     * @returns {mat4 | null} 역행렬 (계산 실패 시 null)
+     * [KO] 프로젝션 행렬의 역행렬을 계산하여 반환합니다.
+     * [EN] Computes and returns the inverse projection matrix.
      */
     get inverseProjectionMatrix(): mat4 {
         return mat4.invert(mat4.create(), this.#projectionMatrix);
     }
 
     /**
-     * 현재 적용된 지터 오프셋 [offsetX, offsetY]를 반환합니다.
-     * @returns {[number, number]}
+     * [KO] 현재 설정된 지터 오프셋 [offsetX, offsetY]을 반환합니다.
+     * [EN] Returns the currently configured jitter offset [offsetX, offsetY].
      */
     get jitterOffset(): [number, number] {
         return [this.#jitterOffsetX, this.#jitterOffsetY];
     }
 
     /**
-     * TAA 적용을 위한 지터 오프셋을 설정합니다.
-     * @param {number} offsetX - X축 지터 오프셋 (정규화된 값)
-     * @param {number} offsetY - Y축 지터 오프셋 (정규화된 값)
+     * [KO] TAA 계산을 위한 렌더 픽셀 지터 오프셋을 설정합니다.
+     * [EN] Sets the render pixel jitter offset for TAA calculations.
+     * @param offsetX -
+     * [KO] X축 지터 오프셋 값
+     * [EN] X-axis jitter offset value
+     * @param offsetY -
+     * [KO] Y축 지터 오프셋 값
+     * [EN] Y-axis jitter offset value
      */
     setJitterOffset(offsetX: number, offsetY: number) {
         this.#jitterOffsetX = offsetX;
@@ -348,7 +355,8 @@ class ViewTransform extends RedGPUObject {
     }
 
     /**
-     * 지터 오프셋을 초기화합니다.
+     * [KO] 지터 오프셋을 0으로 지우고 초기화합니다.
+     * [EN] Clears and resets the jitter offset to 0.
      */
     clearJitterOffset() {
         this.#jitterOffsetX = 0;
@@ -356,10 +364,14 @@ class ViewTransform extends RedGPUObject {
     }
 
     /**
-     * 뷰의 위치를 설정하고 내부 픽셀 사각형을 업데이트합니다.
-     * 입력 값은 픽셀 또는 퍼센트 문자열을 허용합니다.
-     * @param {string | number} [x=this.#x] - X 위치 (픽셀 또는 퍼센트)
-     * @param {string | number} [y=this.#y] - Y 위치 (픽셀 또는 퍼센트)
+     * [KO] 뷰의 위치(X, Y)를 지정하고 스크린 해상도를 고려해 물리 픽셀 사각형 정보를 갱신합니다.
+     * [EN] Sets the position (X, Y) of the view and updates physical pixel rectangle values considering DPI.
+     * @param x -
+     * [KO] 설정할 X 위치 (픽셀 단위 수 또는 백분율 문자열, 기본값: 현재 X 위치)
+     * [EN] X position to set (pixel number or percentage string, default: current X)
+     * @param y -
+     * [KO] 설정할 Y 위치 (픽셀 단위 수 또는 백분율 문자열, 기본값: 현재 Y 위치)
+     * [EN] Y position to set (pixel number or percentage string, default: current Y)
      */
     setPosition(x: string | number = this.#x, y: string | number = this.#y) {
         const {sizeManager} = this.redGPUContext
@@ -375,11 +387,14 @@ class ViewTransform extends RedGPUObject {
     }
 
     /**
-     * 뷰의 크기를 설정하고 내부 픽셀 사각형을 업데이트합니다.
-     * 입력 값은 픽셀 또는 퍼센트 문자열을 허용합니다.
-     * onResize 콜백이 설정되어 있으면 호출합니다.
-     * @param {string | number} [w=this.#width] - 너비 (픽셀 또는 퍼센트)
-     * @param {string | number} [h=this.#height] - 높이 (픽셀 또는 퍼센트)
+     * [KO] 뷰의 크기(너비, 높이)를 지정하고 내부 물리 픽셀 사각형 정보를 갱신합니다. onResize 콜백이 지정되어 있다면 호출합니다.
+     * [EN] Sets the size (width, height) of the view and updates internal physical pixel rectangle values. Triggers onResize callback if registered.
+     * @param w -
+     * [KO] 설정할 너비 (픽셀 단위 수 또는 백분율 문자열, 기본값: 현재 너비)
+     * [EN] Width to set (pixel number or percentage string, default: current width)
+     * @param h -
+     * [KO] 설정할 높이 (픽셀 단위 수 또는 백분율 문자열, 기본값: 현재 높이)
+     * [EN] Height to set (pixel number or percentage string, default: current height)
      */
     setSize(w: string | number = this.#width, h: string | number = this.#height) {
         const {sizeManager} = this.redGPUContext

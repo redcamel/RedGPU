@@ -10,10 +10,30 @@ import definePositiveNumber from "../../../defineProperty/funcs/number/definePos
 import defineBoolean from "../../../defineProperty/funcs/defineBoolean";
 
 
+/**
+ * [KO] TextField3D의 빌보드 및 렌더링 속성을 정의하는 인터페이스
+ * [EN] Interface defining the billboard and rendering properties of TextField3D
+ */
 interface TextField3D {
+    /**
+     * [KO] 빌보드 모드 사용 여부 (true일 경우 항상 카메라를 향함)
+     * [EN] Whether to use billboard mode (if true, always faces the camera)
+     */
     useBillboard: boolean;
+    /**
+     * [KO] 글자 크기 (픽셀 단위 또는 CSS 단위)
+     * [EN] Font size (in pixels or CSS units)
+     */
     fontSize: number;
+    /**
+     * [KO] X축 렌더링 비율
+     * [EN] X-axis rendering ratio
+     */
     _renderRatioX: number;
+    /**
+     * [KO] Y축 렌더링 비율
+     * [EN] Y-axis rendering ratio
+     */
     _renderRatioY: number;
 }
 
@@ -44,14 +64,23 @@ const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
  * <iframe src="/RedGPU/examples/3d/textField/textField3DCompare/"></iframe>
  *
  * [KO] 아래는 TextField3D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
- * [EN] Below is a list of additional sample examples to help understand the structure and and operation of TextField3D.
+ * [EN] Below is a list of additional sample examples to help understand the structure and operation of TextField3D.
+ * @see [TextField3D Basic Example](/RedGPU/examples/3d/textField/textField3D/)
  * @see [TextField3D Comparison (World vs Pixel)](/RedGPU/examples/3d/textField/textField3DCompare/)
- * @see [TextField3D MouseEvent example](/RedGPU/examples/3d/mouseEvent/textField3D/)
+ * @see [TextField3D MouseEvent Example](/RedGPU/examples/3d/interaction/mouseEvent/textField3D/)
  *
  * @category TextField
  */
 class TextField3D extends ATextField {
+    /**
+     * [KO] 텍스처 세그먼트의 실제 가로 너비 (픽셀 단위)
+     * [EN] Actual physical width of the texture segment (in pixels)
+     */
     #nativeWidth: number = 1
+    /**
+     * [KO] 텍스처 세그먼트의 실제 세로 높이 (픽셀 단위)
+     * [EN] Actual physical height of the texture segment (in pixels)
+     */
     #nativeHeight: number = 1
     #worldSize: number = 1
     #usePixelSize: boolean = false
@@ -122,8 +151,8 @@ class TextField3D extends ATextField {
     }
 
     /**
-     * [KO] 고정 픽셀 크기(Pixel Size) 모드 사용 여부를 설정합니다. true일 경우 거리에 상관없이 렌더링된 물리 픽셀 크기로 표시됩니다.
-     * [EN] Sets whether to use fixed pixel size mode. If true, it is displayed at the rendered physical pixel size regardless of distance.
+     * [KO] 고정 픽셀 크기(Pixel Size) 모드 사용 여부를 설정합니다. true일 경우 거리에 상관없이 렌더링된 물리 픽셀 크기(pixelSize)로 표시됩니다.
+     * [EN] Sets whether to use fixed pixel size mode. If true, it is displayed at the rendered physical pixel size (pixelSize) regardless of distance.
      * @param value -
      * [KO] 사용 여부
      * [EN] Whether to use
@@ -150,8 +179,8 @@ class TextField3D extends ATextField {
     }
 
     /**
-     * [KO] 실제 렌더링된 물리 픽셀 크기(높이)를 반환합니다.
-     * [EN] Returns the actual rendered physical pixel size (height).
+     * [KO] 실제 렌더링된 물리 픽셀 크기(높이)를 반환합니다. (px 단위)
+     * [EN] Returns the actual rendered physical pixel size (height) in px.
      */
     get pixelSize(): number {
         return this.#nativeHeight;
@@ -169,8 +198,8 @@ class TextField3D extends ATextField {
     }
 
     /**
-     * [KO] geometry는 외부에서 변경할 수 없습니다.
-     * [EN] geometry cannot be changed externally.
+     * [KO] TextField3D는 지오메트리를 변경할 수 없습니다.
+     * [EN] TextField3D cannot change geometry.
      * @param value -
      * [KO] 설정하려는 지오메트리
      * [EN] Geometry to set
@@ -191,8 +220,8 @@ class TextField3D extends ATextField {
     }
 
     /**
-     * [KO] material은 외부에서 변경할 수 없습니다.
-     * [EN] material cannot be changed externally.
+     * [KO] TextField3D는 머티리얼을 변경할 수 없습니다.
+     * [EN] TextField3D cannot change material.
      * @param value -
      * [KO] 설정하려는 머티리얼
      * [EN] Material to set
