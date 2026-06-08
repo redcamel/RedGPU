@@ -125,8 +125,8 @@ class SpriteSheet2D extends BaseSpriteSheet2D {
      * [KO] 설정하려는 지오메트리
      * [EN] Geometry to set
      * @throws
-     * [KO] 지오메트리 변경 시도 시 Error 발생
-     * [EN] Throws Error when attempting to change geometry
+     * [KO] 지오메트리 변경 시도 시 에러가 발생합니다.
+     * [EN] Throws an error when attempting to change geometry.
      */
     set geometry(value: Geometry | Primitive) {
         consoleAndThrowError('SpriteSheet2D can not change geometry')
@@ -150,8 +150,8 @@ class SpriteSheet2D extends BaseSpriteSheet2D {
      * [KO] 설정하려는 머티리얼
      * [EN] Material to set
      * @throws
-     * [KO] 머티리얼 변경 시도 시 Error 발생
-     * [EN] Throws Error when attempting to change material
+     * [KO] 머티리얼 변경 시도 시 에러가 발생합니다.
+     * [EN] Throws an error when attempting to change material.
      */
     set material(value) {
         consoleAndThrowError('SpriteSheet2D can not change material')

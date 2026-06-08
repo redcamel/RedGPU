@@ -21,14 +21,24 @@ const SHADER_INFO = parseWGSL('SPRITE_SHEET_3D_VERTEX', vertexModuleSource);
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 
 /**
- * 3D 스프라이트 시트의 빌보드 및 렌더링 속성을 정의하는 인터페이스
+ * [KO] 3D 스프라이트 시트의 빌보드 및 렌더링 속성을 정의하는 인터페이스
+ * [EN] Interface defining the billboard and rendering properties of 3D sprite sheets
  */
 interface SpriteSheet3D extends ASpriteSheet {
-    /** 빌보드 모드 사용 여부 */
+    /**
+     * [KO] 빌보드 모드 사용 여부 (true일 경우 항상 카메라를 향함)
+     * [EN] Whether to use billboard mode (if true, always faces the camera)
+     */
     useBillboard: boolean;
-    /** X축 렌더링 비율 */
+    /**
+     * [KO] X축 렌더링 비율
+     * [EN] X-axis rendering ratio
+     */
     _renderRatioX: number;
-    /** Y축 렌더링 비율 */
+    /**
+     * [KO] Y축 렌더링 비율
+     * [EN] Y-axis rendering ratio
+     */
     _renderRatioY: number;
 }
 
@@ -48,15 +58,9 @@ interface SpriteSheet3D extends ASpriteSheet {
  *
  * <iframe src="/RedGPU/examples/3d/sprite/spriteSheet3D/"></iframe>
  *
- * [KO] 월드 사이즈와 픽셀 사이즈 모드를 비교하는 예제입니다.
- * [EN] An example comparing World Size and Pixel Size modes.
- * <iframe src="/RedGPU/examples/3d/sprite/spriteSheet3DCompare/"></iframe>
- *
- * @see
- * [KO] 아래는 SpriteSheet3D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
- * [EN] Below is a list of additional sample examples to help understand the structure and operation of SpriteSheet3D.
+ * @see [SpriteSheet3D Basic Example](/RedGPU/examples/3d/sprite/spriteSheet3D/)
  * @see [SpriteSheet3D Comparison (World vs Pixel)](/RedGPU/examples/3d/sprite/spriteSheet3DCompare/)
- * @see [SpriteSheet3D MouseEvent example](/RedGPU/examples/3d/mouseEvent/spriteSheet3D/)
+ * @see [SpriteSheet3D MouseEvent Example](/RedGPU/examples/3d/interaction/mouseEvent/spriteSheet3D/)
  * @category SpriteSheet
  */
 class SpriteSheet3D extends ASpriteSheet {
@@ -207,8 +211,8 @@ class SpriteSheet3D extends ASpriteSheet {
      * [KO] 설정하려는 지오메트리
      * [EN] Geometry to set
      * @throws
-     * [KO] 지오메트리 변경 시도 시 에러 발생
-     * [EN] Throws error when attempting to change geometry
+     * [KO] 지오메트리 변경 시도 시 에러가 발생합니다.
+     * [EN] Throws an error when attempting to change geometry.
      */
     set geometry(value: Geometry | Primitive) {
         consoleAndThrowError('SpriteSheet3D can not change geometry')
@@ -232,8 +236,8 @@ class SpriteSheet3D extends ASpriteSheet {
      * [KO] 설정하려는 머티리얼
      * [EN] Material to set
      * @throws
-     * [KO] 머티리얼 변경 시도 시 에러 발생
-     * [EN] Throws error when attempting to change material
+     * [KO] 머티리얼 변경 시도 시 에러가 발생합니다.
+     * [EN] Throws an error when attempting to change material.
      */
     set material(value) {
         consoleAndThrowError('SpriteSheet3D can not change material')
