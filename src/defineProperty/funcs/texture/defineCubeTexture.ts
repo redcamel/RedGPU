@@ -4,7 +4,14 @@ import CubeTexture from "../../../resources/texture/CubeTexture";
 import DirectCubeTexture from "../../../resources/texture/DirectCubeTexture";
 import updateTargetUniform from "../../core/updateTargetUniform";
 
+/**
+ * `defineCubeTexture` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
+ */
 export interface IDefineCubeTexture {
+    /**
+     * [KO] 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
+     * [EN] Key name of the property. Defined on the target object's prototype under this name.
+     */
     key: string;
 }
 

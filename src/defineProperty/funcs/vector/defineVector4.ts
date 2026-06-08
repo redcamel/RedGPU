@@ -1,8 +1,19 @@
 import applyProperties from "../../core/applyProperties";
 import defineVector from "../../core/defineVector";
 
+/**
+ * `defineVector4` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
+ */
 export interface IDefineVector4 {
+    /**
+     * [KO] 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
+     * [EN] Key name of the property. Defined on the target object's prototype under this name.
+     */
     key: string;
+    /**
+     * [KO] 속성의 초기 4차원 숫자 배열 값 (튜플 형태). 기본값은 `[0, 0, 0, 0]`입니다.
+     * [EN] Initial 4-dimensional numeric array value (tuple). Defaults to `[0, 0, 0, 0]`.
+     */
     value?: [number, number, number, number];
 }
 

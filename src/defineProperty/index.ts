@@ -28,18 +28,18 @@
  *
  */
 
-import defineBoolean from "./funcs/defineBoolean";
-import defineColorRGB from "./funcs/color/defineColorRGB";
-import defineColorRGBA from "./funcs/color/defineColorRGBA";
-import defineCubeTexture from "./funcs/texture/defineCubeTexture";
-import defineNumber from "./funcs/number/defineNumber";
-import definePositiveNumber from "./funcs/number/definePositiveNumber";
-import defineSampler from "./funcs/texture/defineSampler";
-import defineTexture from "./funcs/texture/defineTexture";
-import defineUint from "./funcs/number/defineUint";
-import defineVector2 from "./funcs/vector/defineVector2";
-import defineVector3 from "./funcs/vector/defineVector3";
-import defineVector4 from "./funcs/vector/defineVector4";
+import defineBoolean, {IDefineBoolean} from "./funcs/defineBoolean";
+import defineColorRGB, {IColorRGB} from "./funcs/color/defineColorRGB";
+import defineColorRGBA, {IColorRGBA} from "./funcs/color/defineColorRGBA";
+import defineCubeTexture, {IDefineCubeTexture} from "./funcs/texture/defineCubeTexture";
+import defineNumber, {IDefineNumber} from "./funcs/number/defineNumber";
+import definePositiveNumber, {IDefinePositiveNumber} from "./funcs/number/definePositiveNumber";
+import defineSampler, {IDefineSampler} from "./funcs/texture/defineSampler";
+import defineTexture, {IDefineTexture} from "./funcs/texture/defineTexture";
+import defineUint, {IDefineUint} from "./funcs/number/defineUint";
+import defineVector2, {IDefineVector2} from "./funcs/vector/defineVector2";
+import defineVector3, {IDefineVector3} from "./funcs/vector/defineVector3";
+import defineVector4, {IDefineVector4} from "./funcs/vector/defineVector4";
 
 export {
     defineBoolean,
@@ -54,5 +54,18 @@ export {
     defineVector2,
     defineVector3,
     defineVector4,
+
+    IDefineBoolean,
+    IColorRGB,
+    IColorRGBA,
+    IDefineNumber,
+    IDefinePositiveNumber,
+    IDefineUint,
+    IDefineCubeTexture,
+    IDefineSampler,
+    IDefineTexture,
+    IDefineVector2,
+    IDefineVector3,
+    IDefineVector4,
 }
 

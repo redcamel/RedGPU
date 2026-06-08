@@ -5,8 +5,19 @@ import applyProperties from "../../core/applyProperties";
 import updateTargetUniform from "../../core/updateTargetUniform";
 import defineProperty_SETTING from "../../core/defineProperty_SETTING";
 
+/**
+ * `defineColorRGBA` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
+ */
 export interface IColorRGBA {
+    /**
+     * [KO] 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
+     * [EN] Key name of the property. Defined on the target object's prototype under this name.
+     */
     key: string;
+    /**
+     * [KO] 초기 16진수 색상 코드값 (예: `#ff0000`). 지정하지 않을 경우 기본값은 `#fff`입니다.
+     * [EN] Initial hex color code (e.g., `#ff0000`). If not specified, defaults to `#fff`.
+     */
     value?: string;
 }
 

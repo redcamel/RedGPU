@@ -3,10 +3,29 @@ import applyProperties from "../../core/applyProperties";
 import updateTargetUniform from "../../core/updateTargetUniform";
 import defineProperty_SETTING from "../../core/defineProperty_SETTING";
 
+/**
+ * `definePositiveNumber` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
+ */
 export interface IDefinePositiveNumber {
+    /**
+     * [KO] 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
+     * [EN] Key name of the property. Defined on the target object's prototype under this name.
+     */
     key: string;
+    /**
+     * [KO] 속성의 초기 양수값.
+     * [EN] Initial positive numeric value of the property.
+     */
     value: number;
+    /**
+     * [KO] 허용할 최소값 (옵션, 기본값 0). 설정 범위 미만의 값이 setter에 할당되면 경고를 내고 이 값으로 고정됩니다.
+     * [EN] Optional minimum allowed value (defaults to 0). Assigning a value below this limit will log a warning and clamp it.
+     */
     min?: number;
+    /**
+     * [KO] 허용할 최대값 (옵션). 설정 범위 초과의 값이 setter에 할당되면 경고를 내고 이 값으로 고정됩니다.
+     * [EN] Optional maximum allowed value. Assigning a value above this limit will log a warning and clamp it.
+     */
     max?: number;
 }
 
