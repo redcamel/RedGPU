@@ -17,9 +17,9 @@ import DirectTexture from "../../resources/texture/DirectTexture";
 import {mat4} from "gl-matrix";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import DirectionalLight from "../../light/lights/DirectionalLight";
-import SkyLight from "./skyLight/SkyLight";
-import SkyAtmosphereBackground from "./skyAtmosphereBackground/SkyAtmosphereBackground";
-import SkyAtmospherePostEffect from "./skyAtmospherePostEffect/SkyAtmospherePostEffect";
+import SkyLight from "./core/skyLight/SkyLight";
+import SkyAtmosphereBackground from "./core/skyAtmosphereBackground/SkyAtmosphereBackground";
+import SkyAtmospherePostEffect from "./core/skyAtmospherePostEffect/SkyAtmospherePostEffect";
 import {IPostEffectResult} from "../../postEffect/core/types";
 import RedGPUObject from "../../base/RedGPUObject";
 

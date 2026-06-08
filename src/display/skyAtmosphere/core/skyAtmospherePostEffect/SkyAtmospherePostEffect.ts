@@ -1,9 +1,9 @@
-import RedGPUContext from "../../../context/RedGPUContext";
-import View3D from "../../../display/view/View3D";
-import ASinglePassPostEffect from "../../../postEffect/core/ASinglePassPostEffect";
-import {IPostEffectResult} from "../../../postEffect/core/types";
-import SkyAtmosphere from "../SkyAtmosphere";
-import ShaderLibrary from "../../../systemCodeManager/ShaderLibrary";
+import RedGPUContext from "../../../../context/RedGPUContext";
+import View3D from "../../../../display/view/View3D";
+import ASinglePassPostEffect from "../../../../postEffect/core/ASinglePassPostEffect";
+import {IPostEffectResult} from "../../../../postEffect/core/types";
+import SkyAtmosphere from "../../SkyAtmosphere";
+import ShaderLibrary from "../../../../systemCodeManager/ShaderLibrary";
 import skyAtmospherePostEffect_compute_wgsl from "./wgsl/skyAtmospherePostEffect_compute.wgsl";
 
 /**

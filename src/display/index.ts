@@ -16,11 +16,10 @@
  * @packageDocumentation
  */
 import Scene from "./scene/Scene";
-import SkyAtmosphere from "./skyAtmosphere/SkyAtmosphere";
-import SkyAtmospherePostEffect from "./skyAtmosphere/skyAtmospherePostEffect/SkyAtmospherePostEffect";
-import SkyLight from "./skyAtmosphere/skyLight/SkyLight";
+
 
 export * from "./skyboxs/skyBox";
+export * from "./skyAtmosphere";
 export * from './mesh'
 export * from "./view";
 export * from "./group";
@@ -35,7 +34,4 @@ export * from "./view/core/GBUFFER_TYPE";
 
 export {
     Scene,
-    SkyAtmosphere,
-    SkyAtmospherePostEffect,
-    SkyLight
 }

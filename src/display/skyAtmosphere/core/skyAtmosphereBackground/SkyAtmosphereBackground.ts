@@ -1,11 +1,11 @@
-import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUContext from "../../../../context/RedGPUContext";
 import backgroundVertexShaderCode_wgsl from "./wgsl/background_vertex.wgsl";
 import backgroundFragmentShaderCode_wgsl from "./wgsl/background_fragment.wgsl";
-import ResourceManager from "../../../resources/core/resourceManager/ResourceManager";
-import RenderViewStateData from "../../view/core/RenderViewStateData";
-import Sampler from "../../../resources/sampler/Sampler";
-import DirectTexture from "../../../resources/texture/DirectTexture";
-import RedGPUObject from "../../../base/RedGPUObject";
+import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
+import RenderViewStateData from "../../../view/core/RenderViewStateData";
+import Sampler from "../../../../resources/sampler/Sampler";
+import DirectTexture from "../../../../resources/texture/DirectTexture";
+import RedGPUObject from "../../../../base/RedGPUObject";
 
 /**
  * [KO] SkyAtmosphereBackground 클래스는 무한 거리에 위치한 하늘 배경을 렌더링합니다.

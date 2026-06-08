@@ -1,25 +1,25 @@
-import RedGPUContext from "../../../../context/RedGPUContext";
-import Sampler from "../../../../resources/sampler/Sampler";
-import irradianceShaderCode_wgsl from "./skyLightIrradianceShaderCode.wgsl";
-import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
-import UniformBuffer from "../../../../resources/buffer/uniformBuffer/UniformBuffer";
-import DirectCubeTexture from "../../../../resources/texture/DirectCubeTexture";
-import DirectTexture from "../../../../resources/texture/DirectTexture";
-import createUUID from "../../../../utils/uuid/createUUID";
-import ASkyAtmosphereLUTGenerator from "../../core/generator/ASkyAtmosphereLUTGenerator";
-import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
-import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import RedGPUContext from "../../../../../context/RedGPUContext";
+import Sampler from "../../../../../resources/sampler/Sampler";
+import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import specularShaderCode_wgsl from "./skyLightReflectionShaderCode.wgsl";
+import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
+import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
+import DirectCubeTexture from "../../../../../resources/texture/DirectCubeTexture";
+import DirectTexture from "../../../../../resources/texture/DirectTexture";
+import createUUID from "../../../../../utils/uuid/createUUID";
+import ASkyAtmosphereLUTGenerator from "../../generator/ASkyAtmosphereLUTGenerator";
+import getMipLevelCount from "../../../../../utils/texture/getMipLevelCount";
 
-const IRRADIANCE_SHADER_INFO = parseWGSL('SkyLight_Irradiance_Generator', irradianceShaderCode_wgsl);
+const SPECULAR_SHADER_INFO = parseWGSL('SkyLight_Reflection_Generator', specularShaderCode_wgsl);
 
 /**
- * [KO] SkyLightIrradianceGenerator는 대기 산란 기반의 간접 디퓨즈 조명(Irradiance)을 생성합니다.
- * [EN] SkyLightIrradianceGenerator generates indirect diffuse lighting (Irradiance) based on atmospheric scattering.
+ * [KO] SkyLightReflectionGenerator는 대기 산란 기반의 간접 스펙큘러 조명(Reflection)을 생성합니다.
+ * [EN] SkyLightReflectionGenerator generates indirect specular lighting (Reflection) based on atmospheric scattering.
  *
- * [KO] 하늘의 모든 방향에 대한 기초 산란광을 큐브맵에 베이킹하고, 이를 다시 디퓨즈 조명용으로 가공합니다.
- * [EN] Bakes base scattered light from all directions of the sky into a cubemap and processes it for diffuse lighting.
+ * [KO] 정밀한 대기색 큐브맵을 베이킹하고 밉맵을 생성하여, 머티리얼의 거칠기(Roughness)에 따른 반사를 구현합니다.
+ * [EN] Bakes a precise atmospheric color cubemap and generates mipmaps to implement reflections according to material roughness.
  */
-class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
+class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     #sourceCubeTexture: GPUTexture;
     #sourceCubeTextureView: GPUTextureView;
     #prefilteredTexture: DirectCubeTexture;
@@ -27,7 +27,7 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
     #bindGroup: GPUBindGroup;
 
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {
-        super(redGPUContext, sharedUniformBuffer, sampler, 'SkyLight_Irradiance_Gen', 256, 256, 6);
+        super(redGPUContext, sharedUniformBuffer, sampler, 'SkyLight_Reflection_Gen', 256, 256, 6);
         this.#init();
     }
 
@@ -52,7 +52,7 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     #createBindGroup(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): GPUBindGroup {
-        return this.createBindGroup(`SkyLight_Irradiance_BindGroup_${createUUID()}`, this.#pipeline, [
+        return this.createBindGroup(`SkyLight_Reflection_BindGroup_${createUUID()}`, this.#pipeline, [
             {binding: 0, resource: this.#sourceCubeTextureView},
             {binding: 1, resource: multiScat.gpuTextureView},
             {binding: 2, resource: this.sampler.gpuSampler},
@@ -80,7 +80,7 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
         const mipLevelCount = getMipLevelCount(this.width, this.height);
 
         this.#sourceCubeTexture = gpuDevice.createTexture({
-            label: 'SkyLight_Irradiance_Source_CubeTexture',
+            label: 'SkyLight_Reflection_Source_CubeTexture',
             size: [this.width, this.height, 6],
             format: 'rgba16float',
             usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
@@ -92,8 +92,8 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
             mipLevelCount: 1
         });
 
-        this.#prefilteredTexture = new DirectCubeTexture(this.redGPUContext, `SkyLight_Irradiance_LUTTexture_${createUUID()}`);
-        this.#pipeline = this.createComputePipeline('Base', IRRADIANCE_SHADER_INFO.defaultSource);
+        this.#prefilteredTexture = new DirectCubeTexture(this.redGPUContext, `SkyLight_Reflection_LUTTexture_${createUUID()}`);
+        this.#pipeline = this.createComputePipeline('Base', SPECULAR_SHADER_INFO.defaultSource);
     }
 
     #computeRender(
@@ -117,5 +117,5 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
     }
 }
 
-Object.freeze(SkyLightIrradianceGenerator);
-export default SkyLightIrradianceGenerator;
+Object.freeze(SkyLightReflectionGenerator);
+export default SkyLightReflectionGenerator;

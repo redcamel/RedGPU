@@ -1,12 +1,12 @@
-import RedGPUContext from "../../../context/RedGPUContext";
-import SkyAtmosphere from "../SkyAtmosphere";
+import RedGPUContext from "../../../../context/RedGPUContext";
+import SkyAtmosphere from "../../SkyAtmosphere";
 import SkyLightReflectionGenerator from "./core/SkyLightReflectionGenerator";
 import SkyLightIrradianceGenerator from "./core/SkyLightIrradianceGenerator";
-import DirectCubeTexture from "../../../resources/texture/DirectCubeTexture";
-import createUUID from "../../../utils/uuid/createUUID";
-import Sampler from "../../../resources/sampler/Sampler";
-import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
-import RedGPUObject from "../../../base/RedGPUObject";
+import DirectCubeTexture from "../../../../resources/texture/DirectCubeTexture";
+import createUUID from "../../../../utils/uuid/createUUID";
+import Sampler from "../../../../resources/sampler/Sampler";
+import UniformBuffer from "../../../../resources/buffer/uniformBuffer/UniformBuffer";
+import RedGPUObject from "../../../../base/RedGPUObject";
 
 /**
  * [KO] SkyLight 클래스는 SkyAtmosphere의 대기 산란 데이터를 실시간으로 분석하여 씬의 간접 조명(IBL)을 생성합니다.
