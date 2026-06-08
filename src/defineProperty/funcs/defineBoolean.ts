@@ -42,17 +42,32 @@ function defineBoolean_func(
 }
 
 /**
- * [KO] 지정된 클래스에 부울(Boolean) 속성들을 정의합니다.
- * [EN] Defines boolean properties on the specified class.
+ * 지정된 클래스의 프로토타입에 GPU와 연동되는 사용자 정의 불리언(Boolean) 속성을 정의합니다.
+ *
+ * @remarks
+ * **[KO]**
+ * - GPU 버퍼는 불리언을 지원하지 않으므로, setter는 `true` → `1`, `false` → `0`으로 변환하여 {@link updateTargetUniform}에 전달합니다.
+ * - 속성에 `boolean`이 아닌 값을 할당하면 `console.warn`으로 경고합니다.
+ * - 값 변경 시 `dirtyPipeline = true`로 설정하여 렌더 파이프라인 재빌드를 트리거합니다.
+ *
+ * **[EN]**
+ * - Since GPU buffers do not support booleans, the setter converts `true` → `1` and `false` → `0` before calling {@link updateTargetUniform}.
+ * - Assigning a non-boolean value emits a `console.warn`.
+ * - Sets `dirtyPipeline = true` on change to trigger render pipeline rebuild.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param defineInfo - [KO] 정의할 속성 설정(IDefineBoolean) 또는 설정 배열 [EN] Configuration (IDefineBoolean) or array of configurations
+ * @param defineInfo - [KO] 단일 {@link IDefineBoolean} 설정 또는 그 배열 [EN] A single {@link IDefineBoolean} configuration or an array of configurations
  *
  * @example
  * ```typescript
- * // 설정 객체 방식 (IDefineBoolean)
+ * // 단일 설정
  * RedGPU.DefineGPUProperty.defineBoolean(MyMaterial, { key: 'useAlphaTest', value: true });
- * RedGPU.DefineGPUProperty.defineBoolean(MyMaterial, [{ key: 'useAlphaTest', value: true }]);
+ *
+ * // 여러 속성 일괄 정의
+ * RedGPU.DefineGPUProperty.defineBoolean(MyMaterial, [
+ *   { key: 'useAlphaTest', value: true },
+ *   { key: 'useNormalMap', value: false },
+ * ]);
  * ```
  */
 const defineBoolean = (target: any, defineInfo: IDefineBoolean | IDefineBoolean[]) => applyProperties(target, defineInfo, defineBoolean_func);

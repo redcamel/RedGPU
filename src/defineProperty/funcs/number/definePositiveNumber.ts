@@ -48,17 +48,32 @@ function definePositiveNumberRange_func(
 }
 
 /**
- * [KO] 지정된 클래스에 양수 범위(Positive Number Range) 속성들을 정의합니다.
- * [EN] Defines positive number range properties on the specified class.
+ * 지정된 클래스의 프로토타입에 GPU와 연동되는 양수(Positive Number) 범위 속성을 정의합니다.
+ *
+ * @remarks
+ * **[KO]**
+ * - 값 설정 시 {@link validatePositiveNumberRange}를 통해 0 이상의 양수인지 검사합니다.
+ * - 최소값 `min`은 0 이상이어야 하며 기본값은 0입니다. `max`가 제공된 경우 최대값을 넘지 못하도록 클램핑(Clamping)합니다.
+ * - 범위 외의 값이 할당되면 `console.warn` 경고를 출력한 후 최소/최대값 한계치로 조정하여 저장하고 GPU 버퍼에 반영합니다.
+ *
+ * **[EN]**
+ * - Validates that the input is a positive number (>= 0) via {@link validatePositiveNumberRange}.
+ * - The minimum value `min` defaults to 0. Clamps the value if it exceeds `max` (if provided).
+ * - Values outside the range print a `console.warn` and are clamped before writing to the GPU buffer.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param defineInfo - [KO] 정의할 속성 설정(IDefinePositiveNumber) 또는 설정 배열 [EN] Configuration (IDefinePositiveNumber) or array of configurations
+ * @param defineInfo - [KO] 단일 {@link IDefinePositiveNumber} 설정 또는 그 배열 [EN] A single {@link IDefinePositiveNumber} configuration or an array of configurations
  *
  * @example
  * ```typescript
- * // 설정 객체 방식 (IDefinePositiveNumber)
+ * // 단일 설정
  * RedGPU.DefineGPUProperty.definePositiveNumber(MyMaterial, { key: 'shininess', value: 30, min: 0, max: 100 });
- * RedGPU.DefineGPUProperty.definePositiveNumber(MyMaterial, [{ key: 'shininess', value: 30, min: 0, max: 100 }]);
+ *
+ * // 여러 속성 일괄 정의
+ * RedGPU.DefineGPUProperty.definePositiveNumber(MyMaterial, [
+ *   { key: 'fogDensity', value: 0.01, min: 0 },
+ *   { key: 'roughness', value: 0.5, min: 0, max: 1 }
+ * ]);
  * ```
  */
 const definePositiveNumber = (target: any, defineInfo: IDefinePositiveNumber | IDefinePositiveNumber[]) => applyProperties(target, defineInfo, definePositiveNumberRange_func);

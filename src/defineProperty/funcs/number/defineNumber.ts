@@ -48,17 +48,32 @@ function defineNumber_func(
 }
 
 /**
- * [KO] 지정된 클래스에 숫자(Number) 속성들을 정의합니다.
- * [EN] Defines number properties on the specified class.
+ * 지정된 클래스의 프로토타입에 GPU와 연동되는 일반 숫자(Number) 속성을 정의합니다.
+ *
+ * @remarks
+ * **[KO]**
+ * - 값 설정 시 {@link validateNumber}를 통해 런타임 타입 검사가 수행됩니다.
+ * - `min`과 `max` 값이 설정된 경우, 범위 외의 값이 들어오면 `console.warn` 경고를 출력한 후 해당 최소/최대값으로 값을 조절하여 설정합니다.
+ * - 값이 바뀌면 감지하여 자동으로 GPU의 유니폼 버퍼를 업데이트합니다.
+ *
+ * **[EN]**
+ * - Performs runtime type check via {@link validateNumber} upon setting value.
+ * - If `min` and `max` are set, values out of bounds trigger `console.warn` and are clamped to the boundaries.
+ * - Automatically updates the GPU uniform buffer on value change.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param defineInfo - [KO] 정의할 속성 설정(IDefineNumber) 또는 설정 배열 [EN] Configuration (IDefineNumber) or array of configurations
+ * @param defineInfo - [KO] 단일 {@link IDefineNumber} 설정 또는 그 배열 [EN] A single {@link IDefineNumber} configuration or an array of configurations
  *
  * @example
  * ```typescript
- * // 설정 객체 방식 (IDefineNumber)
- * RedGPU.DefineGPUProperty.defineNumber(MyMaterial, { key: 'myValue', value: 0, min: -100, max: 100 });
- * RedGPU.DefineGPUProperty.defineNumber(MyMaterial, [{ key: 'myValue', value: 0, min: -100, max: 100 }]);
+ * // 단일 설정 (범위 제한 포함)
+ * RedGPU.DefineGPUProperty.defineNumber(MyMaterial, { key: 'roughness', value: 0.5, min: 0, max: 1 });
+ *
+ * // 여러 속성 일괄 정의
+ * RedGPU.DefineGPUProperty.defineNumber(MyMaterial, [
+ *   { key: 'opacity', value: 1.0, min: 0, max: 1 },
+ *   { key: 'shininess', value: 30 }
+ * ]);
  * ```
  */
 const defineNumber = (target: any, defineInfo: IDefineNumber | IDefineNumber[]) => applyProperties(target, defineInfo, defineNumber_func);
