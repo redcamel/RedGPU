@@ -114,10 +114,12 @@ const filterLanguageFiles = (dir, currentLang) => {
                 }
             }
 
-            let processed = processedLines.join('\n')
-                // 외부 링크(http)가 아니면서 /RedGPU/로 시작하는 경로만 절대 경로로 변환
-                // (앞에 (, ", ' 가 오고 바로 뒤에 /RedGPU/가 붙는 경우만 매칭)
-                .replace(/([\(\"\'])\/RedGPU\//g, '$1https://redcamel.github.io/RedGPU/');
+            let processed = processedLines.join('\n');
+
+            // 프로덕션 빌드 환경(배포)에서만 GitHub Pages 외부 도메인 경로로 치환합니다.
+            if (process.env.NODE_ENV === 'production') {
+                processed = processed.replace(/([\(\"\'])\/RedGPU\//g, '$1https://redcamel.github.io/RedGPU/');
+            }
 
             // 상속된 속성/메서드를 따로 추출하여 맨 아래 details(드롭다운)로 묶는 로직
             if (processed.includes('\n### ')) {

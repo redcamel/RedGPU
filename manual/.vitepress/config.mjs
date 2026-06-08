@@ -1,6 +1,8 @@
-import { defineConfig } from 'vitepress'
-import { generateSidebar } from 'vitepress-sidebar';
-import { withMermaid } from 'vitepress-plugin-mermaid';
+import {defineConfig} from 'vitepress'
+import {generateSidebar} from 'vitepress-sidebar';
+import {withMermaid} from 'vitepress-plugin-mermaid';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * 1. Sidebar Sorting Utility
@@ -88,9 +90,62 @@ const finalSidebar = sortSidebar(rawSidebarConfig);
 export default withMermaid(defineConfig({
     title: 'RedGPU',
     description: 'RedGPU - WebGPU based 3D Graphics Engine',
-    base: '/RedGPU/manual/',
+    base: process.env.NODE_ENV === 'production' ? '/RedGPU/manual/' : '/',
     ignoreDeadLinks: true,
     lastUpdated: true,
+
+    // 로컬 개발 서버 환경에서 /RedGPU/examples/ 요청을 실제 examples 폴더로 라우팅하는 설정
+    vite: {
+        server: {
+            fs: {
+                // 프로젝트 루트 상위 디렉토리 파일 접근 허용 (보안 해제)
+                allow: ['..']
+            }
+        },
+        plugins: [
+            {
+                name: 'serve-examples',
+                configureServer(server) {
+                    server.middlewares.use((req, res, next) => {
+                        let targetFile = null;
+                        if (req.url.startsWith('/RedGPU/examples/')) {
+                            const relativePath = req.url.replace('/RedGPU/examples/', '').split('?')[0];
+                            const filePath = path.resolve(process.cwd(), 'examples', relativePath);
+                            targetFile = filePath;
+                            if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+                                targetFile = path.join(filePath, 'index.html');
+                            }
+                        } else if (req.url.startsWith('/RedGPU/dist/')) {
+                            const relativePath = req.url.replace('/RedGPU/dist/', '').split('?')[0];
+                            const filePath = path.resolve(process.cwd(), 'dist', relativePath);
+                            targetFile = filePath;
+                            if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+                                targetFile = path.join(filePath, 'index.html');
+                            }
+                        }
+
+                        if (targetFile && fs.existsSync(targetFile) && fs.statSync(targetFile).isFile()) {
+                            const ext = path.extname(targetFile);
+                            let contentType = 'text/plain';
+                            if (ext === '.html') contentType = 'text/html';
+                            else if (ext === '.js' || ext === '.mjs') contentType = 'application/javascript';
+                            else if (ext === '.css') contentType = 'text/css';
+                            else if (ext === '.png') contentType = 'image/png';
+                            else if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
+                            else if (ext === '.svg') contentType = 'image/svg+xml';
+                            else if (ext === '.json') contentType = 'application/json';
+                            else if (ext === '.wasm') contentType = 'application/wasm';
+
+                            res.setHeader('Content-Type', contentType);
+                            res.end(fs.readFileSync(targetFile));
+                            return;
+                        }
+                        next();
+                    });
+                }
+            }
+        ]
+    },
 
     // SEO Configuration
     sitemap: {
