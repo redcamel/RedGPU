@@ -6,7 +6,7 @@ import computeShaderCode from "./computeShader.wgsl";
 import RedGPUObject from "../../../base/RedGPUObject";
 
 /** [KO] 컴포넌트 매핑 타입 정의 [EN] Component mapping type definition */
-type ComponentMapping = {
+export type ComponentMapping = {
     r?: 'r' | 'g' | 'b' | 'a';
     g?: 'r' | 'g' | 'b' | 'a';
     b?: 'r' | 'g' | 'b' | 'a';
@@ -62,12 +62,26 @@ class PackedTexture extends RedGPUObject {
         this.#sampler = this.#createSampler();
     }
 
-    /** [KO] 패킹 결과 GPUTexture 객체 [EN] Packed result GPUTexture object */
+    /**
+     * [KO] 패킹 결과 GPUTexture 객체를 반환합니다.
+     * [EN] Returns the packed result GPUTexture object.
+     *
+     * @returns
+     * [KO] GPUTexture 인스턴스
+     * [EN] GPUTexture instance
+     */
     get gpuTexture(): GPUTexture {
         return this.#gpuTexture;
     }
 
-    /** [KO] 패킹 텍스처 캐시 맵을 반환합니다. [EN] Returns the packed texture cache map. */
+    /**
+     * [KO] 패킹 텍스처 캐시 맵을 반환합니다.
+     * [EN] Returns the packed texture cache map.
+     *
+     * @returns
+     * [KO] 캐시 맵 객체
+     * [EN] Cache map object
+     */
     static getCacheMap() {
         return cacheMap;
     }

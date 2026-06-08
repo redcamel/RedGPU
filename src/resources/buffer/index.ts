@@ -3,7 +3,7 @@
  * [EN] Provides various buffer resources such as `IndexBuffer`, `StorageBuffer`, `UniformBuffer`, and `VertexBuffer`.
  * @packageDocumentation
  */
-import IndexBuffer from "./indexBuffer/IndexBuffer";
+import IndexBuffer, {NumberArray} from "./indexBuffer/IndexBuffer";
 import StorageBuffer from "./storageBuffer/StorageBuffer";
 import UniformBuffer from "./uniformBuffer/UniformBuffer";
 
@@ -11,6 +11,7 @@ export * as CoreBuffer from './core'
 export * from './vertexBuffer'
 export {
     IndexBuffer,
+    NumberArray,
     StorageBuffer,
     UniformBuffer
 }

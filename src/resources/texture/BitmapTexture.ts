@@ -8,7 +8,11 @@ import ManagementResourceBase from "../core/ManagementResourceBase";
 import ResourceStateBitmapTexture from "../core/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 
 const MANAGED_STATE_KEY = 'managedBitmapTextureState'
-type SrcInfo = string | { src: string, cacheKey: string }
+/**
+ * [KO] 텍스처 소스 정보 타입입니다. 이미지 URL 문자열이거나 src와 cacheKey를 가진 객체일 수 있습니다.
+ * [EN] Texture source information type. Can be an image URL string or an object with src and cacheKey.
+ */
+export type BitmapSrcInfo = string | { src: string, cacheKey: string }
 
 /**
  * [KO] 비트맵 이미지를 사용하는 텍스처 클래스입니다.
@@ -70,7 +74,7 @@ class BitmapTexture extends ManagementResourceBase {
      */
     constructor(
         redGPUContext: RedGPUContext,
-        src?: SrcInfo,
+        src?: BitmapSrcInfo,
         useMipMap: boolean = true,
         onLoad?: (textureInstance?: BitmapTexture) => void,
         onError?: (error: Error) => void,
@@ -99,54 +103,124 @@ class BitmapTexture extends ManagementResourceBase {
         }
     }
 
-    /** [KO] 텍스처 가로 크기 [EN] Texture width */
+    /**
+     * [KO] 텍스처 가로 크기를 반환합니다.
+     * [EN] Returns the texture width.
+     *
+     * @returns
+     * [KO] 가로 크기 (픽셀)
+     * [EN] Width in pixels
+     */
     get width(): number {
         return this.#imgBitmap?.width || 0
     }
 
-    /** [KO] 텍스처 세로 크기 [EN] Texture height */
+    /**
+     * [KO] 텍스처 세로 크기를 반환합니다.
+     * [EN] Returns the texture height.
+     *
+     * @returns
+     * [KO] 세로 크기 (픽셀)
+     * [EN] Height in pixels
+     */
     get height(): number {
         return this.#imgBitmap?.height || 0
     }
 
-    /** [KO] 프리멀티플 알파 사용 여부를 반환합니다. [EN] Returns whether premultiplied alpha is used. */
+    /**
+     * [KO] 프리멀티플 알파 사용 여부를 반환합니다.
+     * [EN] Returns whether premultiplied alpha is used.
+     *
+     * @returns
+     * [KO] 프리멀티플 알파 사용 여부
+     * [EN] Whether premultiplied alpha is used
+     */
     get usePremultiplyAlpha(): boolean {
         return this.#usePremultiplyAlpha;
     }
 
-    /** [KO] 비디오 메모리 사용량(byte)을 반환합니다. [EN] Returns the video memory usage in bytes. */
+    /**
+     * [KO] 비디오 메모리 사용량(byte)을 반환합니다.
+     * [EN] Returns the video memory usage in bytes.
+     *
+     * @returns
+     * [KO] 비디오 메모리 사용량 (Bytes)
+     * [EN] Video memory usage in bytes
+     */
     get videoMemorySize(): number {
         return this.#videoMemorySize;
     }
 
-    /** [KO] GPUTexture 객체를 반환합니다. [EN] Returns the GPUTexture object. */
+    /**
+     * [KO] GPUTexture 객체를 반환합니다.
+     * [EN] Returns the GPUTexture object.
+     *
+     * @returns
+     * [KO] GPUTexture 인스턴스
+     * [EN] GPUTexture instance
+     */
     get gpuTexture(): GPUTexture {
         return this.#gpuTexture;
     }
 
-    /** [KO] 밉맵 레벨 개수를 반환합니다. [EN] Returns the number of mipmap levels. */
+    /**
+     * [KO] 밉맵 레벨 개수를 반환합니다.
+     * [EN] Returns the number of mipmap levels.
+     *
+     * @returns
+     * [KO] 밉맵 레벨 개수
+     * [EN] Number of mipmap levels
+     */
     get mipLevelCount(): number {
         return this.#mipLevelCount;
     }
 
-    /** [KO] 텍스처 소스 경로를 반환합니다. [EN] Returns the texture source path. */
+    /**
+     * [KO] 텍스처 소스 경로를 반환합니다.
+     * [EN] Returns the texture source path.
+     *
+     * @returns
+     * [KO] 소스 경로 문자열
+     * [EN] Source path string
+     */
     get src(): string {
         return this.#src;
     }
 
-    /** [KO] 텍스처 소스 경로 설정 및 로드를 시작합니다. [EN] Sets the texture source path and starts loading. */
-    set src(value: SrcInfo) {
+    /**
+     * [KO] 텍스처 소스 경로 설정 및 로드를 시작합니다.
+     * [EN] Sets the texture source path and starts loading.
+     *
+     * @param value -
+     * [KO] 텍스처 소스 정보
+     * [EN] Texture source info
+     */
+    set src(value: BitmapSrcInfo) {
         this.#src = this.#getParsedSrc(value);
         this.cacheKey = this.#getCacheKey(value);
         if (this.#src) this.#loadBitmapTexture(this.#src);
     }
 
-    /** [KO] 밉맵 사용 여부를 반환합니다. [EN] Returns whether mipmaps are used. */
+    /**
+     * [KO] 밉맵 사용 여부를 반환합니다.
+     * [EN] Returns whether mipmaps are used.
+     *
+     * @returns
+     * [KO] 밉맵 사용 여부
+     * [EN] Whether mipmaps are used
+     */
     get useMipmap(): boolean {
         return this.#useMipmap;
     }
 
-    /** [KO] 밉맵 사용 여부를 설정하고 텍스처를 재생성합니다. [EN] Sets whether to use mipmaps and recreates the texture. */
+    /**
+     * [KO] 밉맵 사용 여부를 설정하고 텍스처를 재생성합니다.
+     * [EN] Sets whether to use mipmaps and recreates the texture.
+     *
+     * @param value -
+     * [KO] 밉맵 사용 여부
+     * [EN] Whether to use mipmaps
+     */
     set useMipmap(value: boolean) {
         this.#useMipmap = value;
         this.#createGPUTexture()
@@ -166,10 +240,10 @@ class BitmapTexture extends ManagementResourceBase {
     }
 
     /**
-     * [KO] SrcInfo로부터 캐시 키를 생성합니다.
-     * [EN] Creates a cache key from SrcInfo.
+     * [KO] BitmapSrcInfo로부터 캐시 키를 생성합니다.
+     * [EN] Creates a cache key from BitmapSrcInfo.
      */
-    #getCacheKey(srcInfo?: SrcInfo): string {
+    #getCacheKey(srcInfo?: BitmapSrcInfo): string {
         if (!srcInfo) {
             return this.uuid;
         }
@@ -181,10 +255,10 @@ class BitmapTexture extends ManagementResourceBase {
     }
 
     /**
-     * [KO] SrcInfo로부터 src 문자열을 추출합니다.
-     * [EN] Extracts the src string from SrcInfo.
+     * [KO] BitmapSrcInfo로부터 src 문자열을 추출합니다.
+     * [EN] Extracts the src string from BitmapSrcInfo.
      */
-    #getParsedSrc(srcInfo?: SrcInfo): string {
+    #getParsedSrc(srcInfo?: BitmapSrcInfo): string {
         return typeof srcInfo === 'string' ? srcInfo : srcInfo.src
     }
 

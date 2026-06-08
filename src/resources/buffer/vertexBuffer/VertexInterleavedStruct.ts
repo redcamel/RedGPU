@@ -40,6 +40,7 @@ export default class VertexInterleavedStruct {
     /**
      * [KO] 구조의 레이블(이름)을 반환합니다.
      * [EN] Returns the label (name) of the structure.
+     * @returns - [KO] 구조 레이블 [EN] Structure label
      */
     get label(): string {
         return this.#name;
@@ -48,6 +49,7 @@ export default class VertexInterleavedStruct {
     /**
      * [KO] GPU 정점 속성 배열을 반환합니다.
      * [EN] Returns the array of GPU vertex attributes.
+     * @returns - [KO] 정점 속성 배열 [EN] Vertex attributes array
      */
     get attributes() {
         return this.#attributes;
@@ -56,6 +58,7 @@ export default class VertexInterleavedStruct {
     /**
      * [KO] 전체 stride(바이트 크기)를 반환합니다.
      * [EN] Returns the total stride (byte size).
+     * @returns - [KO] 전체 stride 크기 [EN] Total stride size
      */
     get arrayStride(): number {
         return this.#arrayStride;
@@ -64,6 +67,7 @@ export default class VertexInterleavedStruct {
     /**
      * [KO] 내부 속성 정의 맵을 반환합니다.
      * [EN] Returns the internal attribute definition map.
+     * @returns - [KO] 속성 정의 맵 복사본 [EN] Copy of attribute definition map
      */
     get define(): Record<string, VertexInterleavedStructElement> {
         return {...this.#define};

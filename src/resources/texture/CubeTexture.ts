@@ -7,7 +7,11 @@ import ManagementResourceBase from "../core/ManagementResourceBase";
 import ResourceStateCubeTexture from "../core/resourceManager/resourceState/texture/ResourceStateCubeTexture";
 
 const MANAGED_STATE_KEY = 'managedCubeTextureState'
-type SrcInfo = string[] | { srcList: string[], cacheKey: string }
+/**
+ * [KO] 큐브 텍스처 소스 정보 타입입니다. 이미지 URL 배열이거나 srcList와 cacheKey를 가진 객체일 수 있습니다.
+ * [EN] Cube texture source information type. Can be an array of image URLs or an object with srcList and cacheKey.
+ */
+export type CubeSrcInfo = string[] | { srcList: string[], cacheKey: string }
 
 /**
  * [KO] 6개의 이미지를 사용하는 큐브 텍스처 클래스입니다.
@@ -77,7 +81,7 @@ class CubeTexture extends ManagementResourceBase {
      */
     constructor(
         redGPUContext: RedGPUContext,
-        srcList: SrcInfo,
+        srcList: CubeSrcInfo,
         useMipMap: boolean = true,
         onLoad?: (cubeTextureInstance?: CubeTexture) => void,
         onError?: (error: Error) => void,
@@ -104,7 +108,14 @@ class CubeTexture extends ManagementResourceBase {
         }
     }
 
-    /** [KO] 뷰 디스크립터를 반환합니다. [EN] Returns the view descriptor. */
+    /**
+     * [KO] 뷰 디스크립터를 반환합니다.
+     * [EN] Returns the view descriptor.
+     *
+     * @returns
+     * [KO] GPUTextureViewDescriptor 객체
+     * [EN] GPUTextureViewDescriptor object
+     */
     get viewDescriptor() {
         return {
             ...CubeTexture.defaultViewDescriptor,
@@ -112,39 +123,88 @@ class CubeTexture extends ManagementResourceBase {
         }
     }
 
-    /** [KO] 비디오 메모리 사용량(byte)을 반환합니다. [EN] Returns the video memory usage in bytes. */
+    /**
+     * [KO] 픽셀 포맷 등 비디오 메모리 사용량(byte)을 반환합니다.
+     * [EN] Returns the video memory usage in bytes.
+     *
+     * @returns
+     * [KO] 비디오 메모리 사용량 (Bytes)
+     * [EN] Video memory usage in bytes
+     */
     get videoMemorySize(): number {
         return this.#videoMemorySize;
     }
 
-    /** [KO] GPUTexture 객체를 반환합니다. [EN] Returns the GPUTexture object. */
+    /**
+     * [KO] GPUTexture 객체를 반환합니다.
+     * [EN] Returns the GPUTexture object.
+     *
+     * @returns
+     * [KO] GPUTexture 인스턴스
+     * [EN] GPUTexture instance
+     */
     get gpuTexture(): GPUTexture {
         return this.#gpuTexture;
     }
 
-    /** [KO] 밉맵 레벨 개수를 반환합니다. [EN] Returns the number of mipmap levels. */
+    /**
+     * [KO] 밉맵 레벨 개수를 반환합니다.
+     * [EN] Returns the number of mipmap levels.
+     *
+     * @returns
+     * [KO] 밉맵 레벨 개수
+     * [EN] Number of mipmap levels
+     */
     get mipLevelCount(): number {
         return this.#mipLevelCount;
     }
 
-    /** [KO] 텍스처 소스 경로 리스트를 반환합니다. [EN] Returns the list of texture source paths. */
+    /**
+     * [KO] 텍스처 소스 경로 리스트를 반환합니다.
+     * [EN] Returns the list of texture source paths.
+     *
+     * @returns
+     * [KO] 소스 경로 리스트
+     * [EN] List of source paths
+     */
     get srcList(): string[] {
         return this.#srcList;
     }
 
-    /** [KO] 텍스처 소스 경로 리스트를 설정하고 로드를 시작합니다. [EN] Sets the list of texture source paths and starts loading. */
-    set srcList(value: SrcInfo) {
+    /**
+     * [KO] 텍스처 소스 경로 리스트를 설정하고 로드를 시작합니다.
+     * [EN] Sets the list of texture source paths and starts loading.
+     *
+     * @param value -
+     * [KO] 큐브 텍스처 소스 정보
+     * [EN] Cube texture source info
+     */
+    set srcList(value: CubeSrcInfo) {
         this.#srcList = this.#getParsedSrc(value);
         this.cacheKey = this.#getCacheKey(value);
         if (this.#srcList?.length) this.#loadBitmapTexture(this.#srcList);
     }
 
-    /** [KO] 밉맵 사용 여부를 반환합니다. [EN] Returns whether mipmaps are used. */
+    /**
+     * [KO] 밉맵 사용 여부를 반환합니다.
+     * [EN] Returns whether mipmaps are used.
+     *
+     * @returns
+     * [KO] 밉맵 사용 여부
+     * [EN] Whether mipmaps are used
+     */
     get useMipmap(): boolean {
         return this.#useMipmap;
     }
 
-    /** [KO] 밉맵 사용 여부를 설정하고 텍스처를 재생성합니다. [EN] Sets whether to use mipmaps and recreates the texture. */
+    /**
+     * [KO] 밉맵 사용 여부를 설정하고 텍스처를 재생성합니다.
+     * [EN] Sets whether to use mipmaps and recreates the texture.
+     *
+     * @param value -
+     * [KO] 밉맵 사용 여부
+     * [EN] Whether to use mipmaps
+     */
     set useMipmap(value: boolean) {
         this.#useMipmap = value;
         this.#createGPUTexture()
@@ -195,10 +255,10 @@ class CubeTexture extends ManagementResourceBase {
     }
 
     /**
-     * [KO] SrcInfo로부터 캐시 키를 생성합니다.
-     * [EN] Creates a cache key from SrcInfo.
+     * [KO] CubeSrcInfo로부터 캐시 키를 생성합니다.
+     * [EN] Creates a cache key from CubeSrcInfo.
      */
-    #getCacheKey(srcInfo?: SrcInfo): string {
+    #getCacheKey(srcInfo?: CubeSrcInfo): string {
         if (!srcInfo) return this.uuid;
         if (srcInfo instanceof Array) {
             if (!srcInfo.length) return this.uuid
@@ -209,10 +269,10 @@ class CubeTexture extends ManagementResourceBase {
     }
 
     /**
-     * [KO] SrcInfo로부터 srcList 배열을 추출합니다.
-     * [EN] Extracts the srcList array from SrcInfo.
+     * [KO] CubeSrcInfo로부터 srcList 배열을 추출합니다.
+     * [EN] Extracts the srcList array from CubeSrcInfo.
      */
-    #getParsedSrc(srcInfo?: SrcInfo): string[] {
+    #getParsedSrc(srcInfo?: CubeSrcInfo): string[] {
         return srcInfo instanceof Array ? srcInfo : srcInfo?.srcList
     }
 

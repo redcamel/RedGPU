@@ -3,20 +3,28 @@
  * [EN] Provides various texture resources such as `BitmapTexture`, `CubeTexture`, `HDRTexture`, `DirectTexture`, and `DirectCubeTexture`.
  * @packageDocumentation
  */
-import BitmapTexture from "./BitmapTexture";
-import CubeTexture from "./CubeTexture";
+import BitmapTexture, {BitmapSrcInfo} from "./BitmapTexture";
+import CubeTexture, {CubeSrcInfo} from "./CubeTexture";
 import DirectCubeTexture from "./DirectCubeTexture";
 import DirectTexture from "./DirectTexture";
-import HDRTexture from "./hdr/HDRTexture";
-import PackedTexture from "./packedTexture/PackedTexture";
+import HDRTexture, {HDRSrcInfo} from "./hdr/HDRTexture";
+import PackedTexture, {ComponentMapping} from "./packedTexture/PackedTexture";
+import DownSampleCubeMapGenerator from "./core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
+import MipmapGenerator from "./core/mipmapGenerator/MipmapGenerator";
 
 export * from "./noiseTexture";
 export * from "./ibl";
 export {
     BitmapTexture,
+    BitmapSrcInfo,
     CubeTexture,
+    CubeSrcInfo,
     HDRTexture,
+    HDRSrcInfo,
     PackedTexture,
+    ComponentMapping,
     DirectTexture,
-    DirectCubeTexture
+    DirectCubeTexture,
+    DownSampleCubeMapGenerator,
+    MipmapGenerator
 }

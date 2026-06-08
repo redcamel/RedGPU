@@ -1,6 +1,7 @@
-import ANoiseTexture from "./ANoiseTexture";
+import ANoiseTexture, {NoiseDefine} from "./ANoiseTexture";
 
 export * from "./noiseDefineMerges"
 export {
-    ANoiseTexture
+    ANoiseTexture,
+    NoiseDefine
 }

@@ -40,7 +40,11 @@ class DirectCubeTexture extends ADirectTexture {
         this.registerResource();
     }
 
-    /** [KO] 뷰 디스크립터를 반환합니다. [EN] Returns the view descriptor. */
+    /**
+     * [KO] 뷰 디스크립터를 반환합니다.
+     * [EN] Returns the view descriptor.
+     * @returns - [KO] GPUTextureViewDescriptor 객체 [EN] GPUTextureViewDescriptor object
+     */
     get viewDescriptor(): GPUTextureViewDescriptor {
         const is3D = this.#dimension === '3d';
         return {

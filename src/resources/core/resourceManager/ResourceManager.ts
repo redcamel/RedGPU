@@ -29,7 +29,17 @@ enum ResourceType {
     GPUBuffer = 'GPUBuffer',
 }
 
-type ResourceState = ResourceStateVertexBuffer
+export type {
+    ResourceStateIndexBuffer,
+    ResourceStateStorageBuffer,
+    ResourceStateUniformBuffer,
+    ResourceStateVertexBuffer,
+    ResourceStateBitmapTexture,
+    ResourceStateCubeTexture,
+    ResourceStateHDRTexture
+};
+
+export type ResourceState = ResourceStateVertexBuffer
     | ResourceStateIndexBuffer
     | ResourceStateUniformBuffer
     | ResourceStateStorageBuffer
@@ -111,11 +121,23 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] 기본 샘플러를 반환합니다.
      * [EN] Returns the basic sampler.
+     *
+     * @returns
+     * [KO] 기본 Sampler 인스턴스
+     * [EN] Basic Sampler instance
      */
     get basicSampler(): Sampler {
         return this.#basicSampler;
     }
 
+    /**
+     * [KO] 기본 디스플레이스먼트 맵용 샘플러를 반환합니다.
+     * [EN] Returns the basic displacement sampler.
+     *
+     * @returns
+     * [KO] displacement Sampler 인스턴스
+     * [EN] Displacement Sampler instance
+     */
     get basicDisplacementSampler(): Sampler {
         return this.#basicDisplacementSampler
     }
@@ -123,6 +145,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] BRDF 생성기를 반환합니다.
      * [EN] Returns the BRDF generator.
+     *
+     * @returns
+     * [KO] BRDFGenerator 인스턴스
+     * [EN] BRDFGenerator instance
      */
     get brdfGenerator(): BRDFGenerator {
         return this.#brdfGenerator;
@@ -131,6 +157,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] Irradiance 생성기를 반환합니다.
      * [EN] Returns the Irradiance generator.
+     *
+     * @returns
+     * [KO] IrradianceGenerator 인스턴스
+     * [EN] IrradianceGenerator instance
      */
     get irradianceGenerator(): IrradianceGenerator {
         return this.#irradianceGenerator;
@@ -139,6 +169,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] Prefilter 생성기를 반환합니다.
      * [EN] Returns the Prefilter generator.
+     *
+     * @returns
+     * [KO] PrefilterGenerator 인스턴스
+     * [EN] PrefilterGenerator instance
      */
     get prefilterGenerator(): PrefilterGenerator {
         return this.#prefilterGenerator;
@@ -147,6 +181,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] Equirectangular(2D)를 CubeMap으로 변환하는 생성기를 반환합니다.
      * [EN] Returns the generator that converts Equirectangular (2D) to CubeMap.
+     *
+     * @returns
+     * [KO] EquirectangularToCubeGenerator 인스턴스
+     * [EN] EquirectangularToCubeGenerator instance
      */
     get equirectangularToCubeGenerator(): EquirectangularToCubeGenerator {
         return this.#equirectangularToCubeGenerator;
@@ -155,6 +193,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] 밉맵 생성기를 반환합니다.
      * [EN] Returns the mipmap generator.
+     *
+     * @returns
+     * [KO] MipmapGenerator 인스턴스
+     * [EN] MipmapGenerator instance
      */
     get mipmapGenerator(): MipmapGenerator {
         return this.#mipmapGenerator;
@@ -163,6 +205,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] 큐브맵 다운샘플링 생성기를 반환합니다.
      * [EN] Returns the down-sample cube map generator.
+     *
+     * @returns
+     * [KO] DownSampleCubeMapGenerator 인스턴스
+     * [EN] DownSampleCubeMapGenerator instance
      */
     get downSampleCubeMapGenerator(): DownSampleCubeMapGenerator {
         return this.#downSampleCubeMapGenerator
@@ -171,6 +217,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] 캐시된 버퍼 상태를 반환합니다.
      * [EN] Returns the cached buffer state.
+     *
+     * @returns
+     * [KO] 캐시된 버퍼 상태 객체
+     * [EN] Cached buffer state object
      */
     get cachedBufferState(): any {
         return this.#cachedBufferState;
@@ -179,6 +229,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] 빈 비트맵 텍스처 뷰를 반환합니다.
      * [EN] Returns the empty bitmap texture view.
+     *
+     * @returns
+     * [KO] 빈 비트맵 GPUTextureView
+     * [EN] Empty bitmap GPUTextureView
      */
     get emptyBitmapTextureView(): GPUTextureView {
         return this.#emptyBitmapTextureView;
@@ -187,6 +241,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] 빈 큐브 텍스처 뷰를 반환합니다.
      * [EN] Returns the empty cube texture view.
+     *
+     * @returns
+     * [KO] 빈 큐브 GPUTextureView
+     * [EN] Empty cube GPUTextureView
      */
     get emptyCubeTextureView(): GPUTextureView {
         return this.#emptyCubeTextureView;
@@ -195,6 +253,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] 빈 3D 텍스처 뷰를 반환합니다.
      * [EN] Returns the empty 3D texture view.
+     *
+     * @returns
+     * [KO] 빈 3D GPUTextureView
+     * [EN] Empty 3D GPUTextureView
      */
     get emptyTexture3DView(): GPUTextureView {
         return this.#emptyTexture3DView;
@@ -203,6 +265,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] 빈 깊이 텍스처 뷰를 반환합니다.
      * [EN] Returns the empty depth texture view.
+     *
+     * @returns
+     * [KO] 빈 깊이 GPUTextureView
+     * [EN] Empty depth GPUTextureView
      */
     get emptyDepthTextureView(): GPUTextureView {
         return this.#emptyDepthTextureView;
@@ -211,6 +277,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] 비트맵 텍스처 관리 상태를 반환합니다.
      * [EN] Returns the managed bitmap texture state.
+     *
+     * @returns
+     * [KO] 비트맵 텍스처 관리 상태 정보 객체
+     * [EN] Managed bitmap texture status info object
      */
     get managedBitmapTextureState(): ResourceStatusInfo {
         return this.#managedBitmapTextureState;
@@ -219,6 +289,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] 큐브 텍스처 관리 상태를 반환합니다.
      * [EN] Returns the managed cube texture state.
+     *
+     * @returns
+     * [KO] 큐브 텍스처 관리 상태 정보 객체
+     * [EN] Managed cube texture status info object
      */
     get managedCubeTextureState(): ResourceStatusInfo {
         return this.#managedCubeTextureState;
@@ -227,6 +301,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] HDR 텍스처 관리 상태를 반환합니다.
      * [EN] Returns the managed HDR texture state.
+     *
+     * @returns
+     * [KO] HDR 텍스처 관리 상태 정보 객체
+     * [EN] Managed HDR texture status info object
      */
     get managedHDRTextureState(): ResourceStatusInfo {
         return this.#managedHDRTextureState;
@@ -235,6 +313,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] 유니폼 버퍼 관리 상태를 반환합니다.
      * [EN] Returns the managed uniform buffer state.
+     *
+     * @returns
+     * [KO] 유니폼 버퍼 관리 상태 정보 객체
+     * [EN] Managed uniform buffer status info object
      */
     get managedUniformBufferState(): ResourceStatusInfo {
         return this.#managedUniformBufferState;
@@ -243,6 +325,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] 버텍스 버퍼 관리 상태를 반환합니다.
      * [EN] Returns the managed vertex buffer state.
+     *
+     * @returns
+     * [KO] 버텍스 버퍼 관리 상태 정보 객체
+     * [EN] Managed vertex buffer status info object
      */
     get managedVertexBufferState(): ResourceStatusInfo {
         return this.#managedVertexBufferState;
@@ -251,6 +337,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] 인덱스 버퍼 관리 상태를 반환합니다.
      * [EN] Returns the managed index buffer state.
+     *
+     * @returns
+     * [KO] 인덱스 버퍼 관리 상태 정보 객체
+     * [EN] Managed index buffer status info object
      */
     get managedIndexBufferState(): ResourceStatusInfo {
         return this.#managedIndexBufferState;
@@ -259,6 +349,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] Storage 버퍼 관리 상태를 반환합니다.
      * [EN] Returns the managed storage buffer state.
+     *
+     * @returns
+     * [KO] 스토리지 버퍼 관리 상태 정보 객체
+     * [EN] Managed storage buffer status info object
      */
     get managedStorageBufferState(): ResourceStatusInfo {
         return this.#managedStorageBufferState;
@@ -267,6 +361,10 @@ class ResourceManager extends RedGPUObject {
     /**
      * [KO] 내부 리소스 맵을 반환합니다.
      * [EN] Returns the internal resource map.
+     *
+     * @returns
+     * [KO] ImmutableKeyMap 기반 리소스 맵
+     * [EN] ImmutableKeyMap based resource map
      */
     get resources(): ImmutableKeyMap {
         return this.#resources;
@@ -766,7 +864,7 @@ class ResourceManager extends RedGPUObject {
 Object.freeze(ResourceManager)
 export default ResourceManager
 
-class ImmutableKeyMap extends Map {
+export class ImmutableKeyMap extends Map {
     constructor(initValues: [any, any][] = []) {
         super();
         initValues?.forEach(([key, value]) => super.set(key, value));
