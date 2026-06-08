@@ -6,362 +6,287 @@ import updateObject3DMatrix from "../../math/updateObject3DMatrix";
 interface Group3D {
 }
 
-
 /**
- * [KO] 그룹의 기본 동작과 변환(위치, 회전, 스케일, 피벗 등)을 제공하는 3D/2D 공통 추상 클래스입니다.
- * [EN] Abstract base class providing common group behavior and transformations (position, rotation, scale, pivot, etc.) for both 3D and 2D.
+ * [KO] 3D 공간 상에서 객체들을 구조적으로 그룹화하기 위한 컨테이너 클래스입니다.
+ * [EN] Container class for structurally grouping objects in 3D space.
  *
- * ::: warning
- * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
- * :::
+ * [KO] 자체적인 geometry나 material을 갖지 않고, 여러 개의 자식 3D 객체(Mesh, Sprite3D 등)들을 자식으로 포함하여 이들에게 일괄적인 트랜스폼(위치, 회전, 스케일, 피벗)을 적용하는 씬 그래프 노드의 역할을 수행합니다.
+ * [EN] Does not have its own geometry or material, but acts as a scene graph node containing multiple child 3D objects (Mesh, Sprite3D, etc.) to apply collective transformations (position, rotation, scale, pivot) to them.
  *
- * @category Core
+ * * ### Example
+ * ```typescript
+ * const group = new RedGPU.Display.Group3D();
+ * group.addChild(mesh1);
+ * group.addChild(mesh2);
+ * group.setPosition(0, 5, 0);
+ * scene.addChild(group);
+ * ```
+ *
+ * <iframe src="/RedGPU/examples/3d/group3D/basic/" ></iframe>
+ * @category Group
  */
-abstract class Group3D extends Object3DContainer {
+class Group3D extends Object3DContainer {
     /**
-     * [KO] 모델 변환 행렬
-     * [EN] Model transformation matrix
+     * [KO] 그룹의 최종 전역 모델 변환 행렬
+     * [EN] Final global model transformation matrix of the group
      */
     modelMatrix = mat4.create()
     /**
-     * [KO] 로컬 변환 행렬
-     * [EN] Local transformation matrix
+     * [KO] 그룹의 로컬 변환 행렬
+     * [EN] Local transformation matrix of the group
      */
     localMatrix = mat4.create()
-    /**
-     * [KO] 부모 객체
-     * [EN] Parent object
-     */
+
     #parent: Object3DContainer
-    /**
-     * [KO] X 좌표
-     * [EN] X coordinate
-     */
     #x: number = 0
-    /**
-     * [KO] Z 좌표
-     * [EN] Z coordinate
-     */
     #z: number = 0
-    /**
-     * [KO] Y 좌표
-     * [EN] Y coordinate
-     */
     #y: number = 0
-    /**
-     * [KO] 위치 배열 [x, y, z]
-     * [EN] Position array [x, y, z]
-     */
     #positionArray: [number, number, number] = [0, 0, 0]
-    /**
-     * [KO] 피벗 X
-     * [EN] Pivot X
-     */
+
     #pivotX: number = 0
-    /**
-     * [KO] 피벗 Y
-     * [EN] Pivot Y
-     */
     #pivotY: number = 0
-    /**
-     * [KO] 피벗 Z
-     * [EN] Pivot Z
-     */
     #pivotZ: number = 0
-    /**
-     * [KO] X 스케일
-     * [EN] X scale
-     */
+
     #scaleX: number = 1
-    /**
-     * [KO] Y 스케일
-     * [EN] Y scale
-     */
     #scaleY: number = 1
-    /**
-     * [KO] Z 스케일
-     * [EN] Z scale
-     */
     #scaleZ: number = 1
-    /**
-     * [KO] 스케일 배열 [x, y, z]
-     * [EN] Scale array [x, y, z]
-     */
     #scaleArray: number[] = [1, 1, 1]
-    /**
-     * [KO] X축 회전 (deg)
-     * [EN] X-axis rotation (deg)
-     */
+
     #rotationX: number = 0
-    /**
-     * [KO] Y축 회전 (deg)
-     * [EN] Y-axis rotation (deg)
-     */
     #rotationY: number = 0
-    /**
-     * [KO] Z축 회전 (deg)
-     * [EN] Z-axis rotation (deg)
-     */
     #rotationZ: number = 0
-    /**
-     * [KO] 회전 배열 [x, y, z] (deg)
-     * [EN] Rotation array [x, y, z] (deg)
-     */
     #rotationArray: number[] = [0, 0, 0]
-    /**
-     * [KO] 변환 행렬 갱신 필요 여부
-     * [EN] Whether transform matrix needs update
-     */
+
     #dirtyTransform: boolean = true
 
     /**
-     * [KO] Group3D 생성자
-     * [EN] Group3D constructor
+     * [KO] Group3D 인스턴스를 생성합니다.
+     * [EN] Creates an instance of Group3D.
      * @param name -
-     * [KO] 그룹 이름(선택)
-     * [EN] Group name (optional)
+     * [KO] 그룹의 식별 이름 (선택)
+     * [EN] Identification name of the group (optional)
      */
-    protected constructor(name?: string) {
+    constructor(name?: string) {
         super()
         if (name) this.name = name
     }
 
     /**
-     * 변환 행렬 갱신 필요 여부 반환
+     * [KO] 변환 행렬의 갱신이 필요한 상태(Dirty)인지 여부를 설정하거나 가져옵니다.
+     * [EN] Sets or gets whether the transformation matrix is in a state requiring update (dirty).
      */
     get dirtyTransform(): boolean {
         return this.#dirtyTransform;
     }
 
-    /**
-     * 변환 행렬 갱신 필요 여부 설정
-     */
     set dirtyTransform(value: boolean) {
         this.#dirtyTransform = value;
     }
 
     /**
-     * 설정된 부모 객체 반환
+     * [KO] 이 그룹 객체가 포함된 부모 컨테이너(Object3DContainer)를 설정하거나 가져옵니다.
+     * [EN] Sets or gets the parent container (Object3DContainer) containing this group object.
      */
     get parent(): Object3DContainer {
         return this.#parent;
     }
 
-    /**
-     * 부모 객체 설정
-     * @param value 부모 객체
-     */
     set parent(value: Object3DContainer) {
         this.#parent = value;
     }
 
     /**
-     * 피벗 X 반환
+     * [KO] X축 피벗(중심점) 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the X-axis pivot (center point) coordinate.
      */
     get pivotX(): number {
         return this.#pivotX;
     }
 
-    /**
-     * 피벗 X 설정
-     */
     set pivotX(value: number) {
         this.#pivotX = value;
         this.dirtyTransform = true
     }
 
     /**
-     * 피벗 Y 반환
+     * [KO] Y축 피벗(중심점) 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the Y-axis pivot (center point) coordinate.
      */
     get pivotY(): number {
         return this.#pivotY;
     }
 
-    /**
-     * 피벗 Y 설정
-     */
     set pivotY(value: number) {
         this.#pivotY = value;
         this.dirtyTransform = true
     }
 
     /**
-     * 피벗 Z 반환
+     * [KO] Z축 피벗(중심점) 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the Z-axis pivot (center point) coordinate.
      */
     get pivotZ(): number {
         return this.#pivotZ;
     }
 
-    /**
-     * 피벗 Z 설정
-     */
     set pivotZ(value: number) {
         this.#pivotZ = value;
         this.dirtyTransform = true
     }
 
     /**
-     * X 좌표 반환
+     * [KO] 그룹의 X축 위치 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the X-axis position coordinate of the group.
      */
     get x(): number {
         return this.#x;
     }
 
-    /**
-     * X 좌표 설정
-     */
     set x(value: number) {
         this.#x = this.#positionArray[0] = value;
         this.dirtyTransform = true
     }
 
     /**
-     * Y 좌표 반환
+     * [KO] 그룹의 Y축 위치 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the Y-axis position coordinate of the group.
      */
     get y(): number {
         return this.#y;
     }
 
-    /**
-     * Y 좌표 설정
-     */
     set y(value: number) {
         this.#y = this.#positionArray[1] = value;
         this.dirtyTransform = true
     }
 
     /**
-     * Z 좌표 반환
+     * [KO] 그룹의 Z축 위치 좌표를 가져오거나 설정합니다.
+     * [EN] Gets or sets the Z-axis position coordinate of the group.
      */
     get z(): number {
         return this.#z;
     }
 
-    /**
-     * Z 좌표 설정
-     */
     set z(value: number) {
         this.#z = this.#positionArray[2] = value;
         this.dirtyTransform = true
     }
 
     /**
-     * 위치 배열 반환 [x, y, z]
+     * [KO] 그룹의 X, Y, Z 위치 좌표 배열 [x, y, z]을 가져옵니다.
+     * [EN] Gets the position coordinate array [x, y, z] of the group.
      */
     get position(): [number, number, number] {
         return this.#positionArray;
     }
 
     /**
-     * X 스케일 반환
+     * [KO] X축 스케일 배율을 가져오거나 설정합니다.
+     * [EN] Gets or sets the scale factor along the X-axis.
      */
     get scaleX(): number {
         return this.#scaleX;
     }
 
-    /**
-     * X 스케일 설정
-     */
     set scaleX(value: number) {
         this.#scaleX = this.#scaleArray[0] = value;
         this.dirtyTransform = true
     }
 
     /**
-     * Y 스케일 반환
+     * [KO] Y축 스케일 배율을 가져오거나 설정합니다.
+     * [EN] Gets or sets the scale factor along the Y-axis.
      */
     get scaleY(): number {
         return this.#scaleY;
     }
 
-    /**
-     * Y 스케일 설정
-     */
     set scaleY(value: number) {
         this.#scaleY = this.#scaleArray[1] = value;
         this.dirtyTransform = true
     }
 
     /**
-     * Z 스케일 반환
+     * [KO] Z축 스케일 배율을 가져오거나 설정합니다.
+     * [EN] Gets or sets the scale factor along the Z-axis.
      */
     get scaleZ(): number {
         return this.#scaleZ;
     }
 
-    /**
-     * Z 스케일 설정
-     */
     set scaleZ(value: number) {
         this.#scaleZ = this.#scaleArray[2] = value;
         this.dirtyTransform = true
     }
 
     /**
-     * 스케일 배열 반환 [x, y, z]
+     * [KO] 그룹의 X, Y, Z 스케일 배율 배열 [scaleX, scaleY, scaleZ]을 가져옵니다.
+     * [EN] Gets the scale factor array [scaleX, scaleY, scaleZ] of the group.
      */
     get scale(): number[] {
-        return this.#positionArray;
+        return this.#scaleArray;
     }
 
     /**
-     * X축 회전 반환 (deg)
+     * [KO] X축 회전각(Degree)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the rotation angle (in degrees) around the X-axis.
      */
     get rotationX(): number {
         return this.#rotationX;
     }
 
-    /**
-     * X축 회전 설정 (deg)
-     */
     set rotationX(value: number) {
         this.#rotationX = this.#rotationArray[0] = value;
         this.dirtyTransform = true
     }
 
     /**
-     * Y축 회전 반환 (deg)
+     * [KO] Y축 회전각(Degree)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the rotation angle (in degrees) around the Y-axis.
      */
     get rotationY(): number {
         return this.#rotationY;
     }
 
-    /**
-     * Y축 회전 설정 (deg)
-     */
     set rotationY(value: number) {
         this.#rotationY = this.#rotationArray[1] = value;
         this.dirtyTransform = true
     }
 
     /**
-     * Z축 회전 반환 (deg)
+     * [KO] Z축 회전각(Degree)을 가져오거나 설정합니다.
+     * [EN] Gets or sets the rotation angle (in degrees) around the Z-axis.
      */
     get rotationZ(): number {
         return this.#rotationZ;
     }
 
-    /**
-     * Z축 회전 설정 (deg)
-     */
     set rotationZ(value: number) {
         this.#rotationZ = this.#rotationArray[2] = value;
         this.dirtyTransform = true
     }
 
     /**
-     * 회전 배열 반환 [x, y, z] (deg)
+     * [KO] 그룹의 회전각 [rotationX, rotationY, rotationZ] 배열(Degree)을 가져옵니다.
+     * [EN] Gets the rotation angle array [rotationX, rotationY, rotationZ] of the group in degrees.
      */
     get rotation(): number[] {
         return this.#rotationArray;
     }
 
     /**
-     * 스케일을 설정합니다.
-     * @param x X 스케일
-     * @param y Y 스케일(생략 시 x와 동일)
-     * @param z Z 스케일(생략 시 x와 동일)
+     * [KO] 그룹의 X, Y, Z축 스케일을 설정합니다. Y와 Z를 입력하지 않은 경우, X값과 동일하게 통일되어 적용됩니다.
+     * [EN] Sets the scale factor along the X, Y, and Z axes. If Y and Z are omitted, they default to the value of X (uniform scaling).
+     * @param x -
+     * [KO] X축 스케일 배율
+     * [EN] Scale factor along the X-axis
+     * @param y -
+     * [KO] Y축 스케일 배율 (선택, 기본값: x)
+     * [EN] Scale factor along the Y-axis (optional, default: x)
+     * @param z -
+     * [KO] Z축 스케일 배율 (선택, 기본값: x)
+     * [EN] Scale factor along the Z-axis (optional, default: x)
      */
     setScale(x: number, y?: number, z?: number) {
         y = y ?? x;
@@ -374,10 +299,17 @@ abstract class Group3D extends Object3DContainer {
     }
 
     /**
-     * 위치를 설정합니다.
-     * @param x X 좌표
-     * @param y Y 좌표(생략 시 x와 동일)
-     * @param z Z 좌표(생략 시 x와 동일)
+     * [KO] 그룹의 X, Y, Z축 위치를 설정합니다. Y와 Z를 입력하지 않은 경우, X값과 동일하게 설정됩니다.
+     * [EN] Sets the position of the group along the X, Y, and Z axes. If Y and Z are omitted, they default to the value of X.
+     * @param x -
+     * [KO] X축 위치 좌표
+     * [EN] X coordinate of the position
+     * @param y -
+     * [KO] Y축 위치 좌표 (선택, 기본값: x)
+     * [EN] Y coordinate of the position (optional, default: x)
+     * @param z -
+     * [KO] Z축 위치 좌표 (선택, 기본값: x)
+     * [EN] Z coordinate of the position (optional, default: x)
      */
     setPosition(x: number, y?: number, z?: number) {
         y = y ?? x;
@@ -390,10 +322,17 @@ abstract class Group3D extends Object3DContainer {
     }
 
     /**
-     * 회전을 설정합니다.
-     * @param rotationX X축 회전(도)
-     * @param rotationY Y축 회전(도, 생략 시 rotationX와 동일)
-     * @param rotationZ Z축 회전(도, 생략 시 rotationX와 동일)
+     * [KO] 그룹의 X, Y, Z축 회전각(Degree)을 설정합니다. Y와 Z를 입력하지 않은 경우, X값과 동일하게 설정됩니다.
+     * [EN] Sets the rotation of the group around the X, Y, and Z axes in degrees. If Y and Z are omitted, they default to the value of X.
+     * @param rotationX -
+     * [KO] X축 회전각 (Degree)
+     * [EN] Rotation angle around the X-axis (in degrees)
+     * @param rotationY -
+     * [KO] Y축 회전각 (Degree, 선택, 기본값: rotationX)
+     * [EN] Rotation angle around the Y-axis (in degrees, optional, default: rotationX)
+     * @param rotationZ -
+     * [KO] Z축 회전각 (Degree, 선택, 기본값: rotationX)
+     * [EN] Rotation angle around the Z-axis (in degrees, optional, default: rotationX)
      */
     setRotation(rotationX: number, rotationY?: number, rotationZ?: number) {
         rotationY = rotationY ?? rotationX;
@@ -406,8 +345,11 @@ abstract class Group3D extends Object3DContainer {
     }
 
     /**
-     * 렌더링 및 변환 행렬 계산을 수행합니다.
-     * @param renderViewStateData 렌더 상태 데이터
+     * [KO] 이 그룹 노드 및 하위 자식 노드들의 트랜스폼 행렬 갱신을 실행하고 렌더링에 필요한 처리를 갱신합니다.
+     * [EN] Executes transform matrix updates for this group node and its child nodes, updating processes required for rendering.
+     * @param renderViewStateData -
+     * [KO] 렌더링 상태 뷰 데이터
+     * [EN] Rendering state view data
      */
     render(renderViewStateData: RenderViewStateData) {
         const {} = this
