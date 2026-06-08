@@ -114,10 +114,51 @@ const filterLanguageFiles = (dir, currentLang) => {
                 }
             }
 
-            const processed = processedLines.join('\n')
+            let processed = processedLines.join('\n')
                 // 외부 링크(http)가 아니면서 /RedGPU/로 시작하는 경로만 절대 경로로 변환
                 // (앞에 (, ", ' 가 오고 바로 뒤에 /RedGPU/가 붙는 경우만 매칭)
                 .replace(/([\(\"\'])\/RedGPU\//g, '$1https://redcamel.github.io/RedGPU/');
+
+            // 상속된 속성/메서드를 따로 추출하여 맨 아래 details(드롭다운)로 묶는 로직
+            if (processed.includes('\n### ')) {
+                const parts = processed.split('\n### ');
+                const mainParts = [];
+                const inheritedParts = [];
+                mainParts.push(parts[0]); // 첫 번째 클래스 헤더 정보 파트는 무조건 보존
+
+                for (let i = 1; i < parts.length; i++) {
+                    const part = parts[i];
+                    const trimmedPart = part.trim();
+
+                    // "Inherited from" 또는 "#### Inherited from"이 명시되어 있는 상속받은 멤버인 경우
+                    if (part.includes('Inherited from') || part.includes('#### Inherited from')) {
+                        // 생성자(Constructor) 정보는 지우지 않고 무조건 메인 본문에 보존
+                        if (trimmedPart.startsWith('Constructor')) {
+                            mainParts.push('### ' + part);
+                        } else {
+                            // 그 외의 상속 프로퍼티 및 메서드는 따로 모아둡니다.
+                            inheritedParts.push('### ' + part);
+                        }
+                    } else {
+                        mainParts.push('### ' + part);
+                    }
+                }
+
+                let finalContent = mainParts.join('\n');
+
+                // 모아둔 상속 멤버가 있다면 본문 맨 아래에 접고 펼칠 수 있는 details 태그로 묶어서 추가
+                if (inheritedParts.length > 0) {
+                    const isKo = currentLang === 'ko';
+                    const sectionTitle = isKo ? '상속받은 멤버' : 'Inherited Members';
+                    const summaryText = isKo
+                        ? '상속받은 속성 및 메서드 보기 (클릭하여 확장)'
+                        : 'View inherited properties and methods (Click to expand)';
+
+                    finalContent += `\n\n***\n\n## ${sectionTitle}\n\n<details>\n<summary>${summaryText}</summary>\n\n${inheritedParts.join('\n')}\n\n</details>\n`;
+                }
+
+                processed = finalContent;
+            }
 
             fs.writeFileSync(fullPath, processed);
         }
