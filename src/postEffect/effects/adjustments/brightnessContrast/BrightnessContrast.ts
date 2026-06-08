@@ -3,7 +3,8 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
+
 
 interface BrightnessContrast {
     /** [KO] 밝기 조절 값 (-150 ~ 150) [EN] Brightness adjustment value (-150 ~ 150) */
@@ -51,7 +52,7 @@ class BrightnessContrast extends ASinglePassPostEffect {
     }
 }
 
-DefineGPUProperty.defineNumber(BrightnessContrast,
+defineNumber(BrightnessContrast,
     [
         {key: 'brightness', value: 0, min: -150, max: 150},
         {key: 'contrast', value: 0, min: -50, max: 100}

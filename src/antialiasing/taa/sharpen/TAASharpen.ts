@@ -3,7 +3,8 @@ import ASinglePassPostEffect from "../../../postEffect/core/ASinglePassPostEffec
 import createBasicPostEffectCode from "../../../postEffect/core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineGPUProperty from "../../../defineProperty/DefineGPUProperty";
+import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
+
 
 interface TAASharpen {
     /**
@@ -49,7 +50,7 @@ class TAASharpen extends ASinglePassPostEffect {
     }
 }
 
-DefineGPUProperty.definePositiveNumber(TAASharpen, [
+definePositiveNumber(TAASharpen, [
     {key: 'sharpness', value: 0.5, min: 0, max: 1},
 ])
 Object.freeze(TAASharpen)

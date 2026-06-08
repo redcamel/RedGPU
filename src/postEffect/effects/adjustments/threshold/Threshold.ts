@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
 
 
 interface Threshold {
@@ -54,7 +54,7 @@ class Threshold extends ASinglePassPostEffect {
 
 }
 
-DefineGPUProperty.definePositiveNumber(Threshold, [
+definePositiveNumber(Threshold, [
     {key: 'threshold', value: 128, min: 1, max: 255}
 ])
 

@@ -3,7 +3,8 @@ import RedGPUContext from "../../context/RedGPUContext";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import ABaseMaterial from "../core/ABaseMaterial";
 import fragmentModuleSource from './fragment.wgsl'
-import DefineGPUProperty from "../../defineProperty/DefineGPUProperty";
+import defineColorRGB from "../../defineProperty/funcs/color/defineColorRGB";
+
 
 const SHADER_INFO = parseWGSL('COLOR_MATERIAL', fragmentModuleSource)
 
@@ -53,7 +54,7 @@ class ColorMaterial extends ABaseMaterial {
     }
 }
 
-DefineGPUProperty.defineColorRGB(ColorMaterial, [
+defineColorRGB(ColorMaterial, [
     {key: 'color'},
 ])
 Object.freeze(ColorMaterial)

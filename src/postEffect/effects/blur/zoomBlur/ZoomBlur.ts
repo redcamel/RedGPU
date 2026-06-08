@@ -3,7 +3,10 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
+import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
+import defineUint from "../../../../defineProperty/funcs/number/defineUint";
+
 
 interface ZoomBlur {
     /** [KO] 블러 강도. 값이 클수록 줌 번짐이 강해집니다. [EN] Blur strength. Higher values increase zoom bleeding. */
@@ -58,14 +61,14 @@ class ZoomBlur extends ASinglePassPostEffect {
 
 }
 
-DefineGPUProperty.definePositiveNumber(ZoomBlur, [
+definePositiveNumber(ZoomBlur, [
     {key: 'amount', value: 10}
 ])
-DefineGPUProperty.defineNumber(ZoomBlur, [
+defineNumber(ZoomBlur, [
     {key: 'centerX', value: 0},
     {key: 'centerY', value: 0},
 ])
-DefineGPUProperty.defineUint(ZoomBlur, [
+defineUint(ZoomBlur, [
     {key: 'sampleCount', value: 30, min: 1, max: 100}
 ])
 Object.freeze(ZoomBlur)

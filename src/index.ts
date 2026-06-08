@@ -37,7 +37,7 @@ export * as Picking from "./picking";
 export * as RenderState from "./renderState";
 export * as ToneMapping from "./toneMapping";
 export * as Shadow from "./shadow";
-export * from "./defineProperty"
+export * as DefineGPUProperty from "./defineProperty"
 export * as Antialiasing from "./antialiasing"
 export * as Physics from "./physics"
 

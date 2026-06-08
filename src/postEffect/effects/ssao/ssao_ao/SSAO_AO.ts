@@ -3,7 +3,8 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+import defineBoolean from "../../../../defineProperty/funcs/defineBoolean";
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
 
 
 interface SSAO_AO {
@@ -50,10 +51,10 @@ class SSAO_AO extends ASinglePassPostEffect {
 
 }
 
-DefineGPUProperty.defineBoolean(SSAO_AO, [
+defineBoolean(SSAO_AO, [
     {key: 'useBlur', value: true}
 ])
-DefineGPUProperty.definePositiveNumber(SSAO_AO, [
+definePositiveNumber(SSAO_AO, [
     {key: 'contrast', value: 1.5, min: 0.5, max: 4.0},
     {key: 'radius', value: 0.253, min: 0.01, max: 5.0},
     {key: 'intensity', value: 1, min: 0, max: 10},

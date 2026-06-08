@@ -3,7 +3,8 @@ import ASinglePassPostEffect from "../../postEffect/core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../postEffect/core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl";
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl";
-import DefineGPUProperty from "../../defineProperty/DefineGPUProperty";
+import definePositiveNumber from "../../defineProperty/funcs/number/definePositiveNumber";
+
 
 interface FXAA {
     /** [KO] 서브픽셀 필터링 강도. 값이 클수록 미세한 지터링과 계단 현상이 더 부드럽게 제거됩니다. [EN] Subpixel filtering intensity. Higher values remove fine jitter and aliasing more smoothly. */
@@ -56,7 +57,7 @@ class FXAA extends ASinglePassPostEffect {
     }
 }
 
-DefineGPUProperty.definePositiveNumber(FXAA, [
+definePositiveNumber(FXAA, [
     {key: 'edgeThresholdMin', value: 0.0625, min: 0.00001, max: 0.1},
     {key: 'edgeThreshold', value: 0.125, min: 0.0001, max: 0.25},
     {key: 'subpix', value: 0.75, min: 0.0, max: 1},

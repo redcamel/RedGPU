@@ -3,7 +3,9 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
+
 
 interface ColorTemperatureTint {
     /** [KO] 효과 적용 강도 (0 ~ 1) [EN] Effect application intensity (0 ~ 1) */
@@ -125,7 +127,7 @@ class ColorTemperatureTint extends ASinglePassPostEffect {
     }
 }
 
-DefineGPUProperty.definePositiveNumber(ColorTemperatureTint, [
+definePositiveNumber(ColorTemperatureTint, [
     /**
      * [KO] 색온도(K) (1000 ~ 20000)
      * [EN] Color Temperature (K) (1000 ~ 20000)
@@ -139,7 +141,7 @@ DefineGPUProperty.definePositiveNumber(ColorTemperatureTint, [
      */
     {key: 'amount', value: 1, min: 0, max: 1},
 ])
-DefineGPUProperty.defineNumber(ColorTemperatureTint, [
+defineNumber(ColorTemperatureTint, [
     /**
      * [KO] 틴트 (-100 ~ 100)
      * [EN] Tint (-100 ~ 100)

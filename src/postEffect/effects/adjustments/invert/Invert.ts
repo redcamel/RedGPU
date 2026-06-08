@@ -3,7 +3,8 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
+
 
 interface Invert {
     amount: number
@@ -47,7 +48,7 @@ class Invert extends ASinglePassPostEffect {
     }
 }
 
-DefineGPUProperty.definePositiveNumber(Invert, [
+definePositiveNumber(Invert, [
     {key: 'amount', value: 1, min: 0, max: 1}
 ])
 Object.freeze(Invert)

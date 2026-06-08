@@ -3,7 +3,9 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
+import defineUint from "../../../../defineProperty/funcs/number/defineUint";
+
 
 interface BlurX {
     size: number,
@@ -47,10 +49,10 @@ class BlurX extends ASinglePassPostEffect {
 
 }
 
-DefineGPUProperty.definePositiveNumber(BlurX, [
+definePositiveNumber(BlurX, [
     {key: 'size', value: 32, min: 0, max: 512}
 ])
-DefineGPUProperty.defineUint(BlurX, [
+defineUint(BlurX, [
     {key: 'sampleCount', value: 10, min: 1, max: 100}
 ])
 Object.freeze(BlurX)

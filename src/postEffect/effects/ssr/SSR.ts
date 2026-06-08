@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineGPUProperty from "../../../defineProperty/DefineGPUProperty";
+import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
 
 interface SSR {
     /** [KO] 최대 레이 마칭 단계 수. 값이 클수록 정밀한 반사가 가능하지만 성능 소모가 큽니다. [EN] Maximum number of ray marching steps. Higher values allow more precise reflections but increase performance cost. */
@@ -52,7 +52,7 @@ class SSR extends ASinglePassPostEffect {
     }
 }
 
-DefineGPUProperty.definePositiveNumber(SSR, [
+definePositiveNumber(SSR, [
     {key: 'maxSteps', value: 64, min: 1, max: 512},
     {key: 'maxDistance', value: 15.0, min: 1.0, max: 200.0},
     {key: 'stepSize', value: 0.02, min: 0.001, max: 5.0},

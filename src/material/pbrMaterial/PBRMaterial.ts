@@ -6,10 +6,15 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl';
 
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
-import {IDefinePositiveNumber} from "../../defineProperty/funcs/number/definePositiveNumber";
-import {IDefineVector3} from "../../defineProperty/funcs/vector/defineVector3";
-import {IDefineVector4} from "../../defineProperty/funcs/vector/defineVector4";
-import DefineGPUProperty from "../../defineProperty/DefineGPUProperty";
+import definePositiveNumber, {IDefinePositiveNumber} from "../../defineProperty/funcs/number/definePositiveNumber";
+import defineVector3, {IDefineVector3} from "../../defineProperty/funcs/vector/defineVector3";
+import defineVector4, {IDefineVector4} from "../../defineProperty/funcs/vector/defineVector4";
+import defineBoolean from "../../defineProperty/funcs/defineBoolean";
+import defineUint from "../../defineProperty/funcs/number/defineUint";
+import defineVector2 from "../../defineProperty/funcs/vector/defineVector2";
+import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
+import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
+
 
 const EXTENSION_LIST: {
     textureList?: string[],
@@ -985,37 +990,37 @@ class PBRMaterial extends AUVTransformBaseMaterial {
     }
 }
 
-DefineGPUProperty.definePositiveNumber(PBRMaterial,
+definePositiveNumber(PBRMaterial,
     [
         {key: 'emissiveStrength', value: 1},
         {key: 'normalScale', value: 1}
     ]
 )
-const defineTexture = (textureList: string[], useSampler: boolean) => {
+const defineTexturePropertys = (textureList: string[], useSampler: boolean) => {
     textureList?.forEach(key => {
-        DefineGPUProperty.defineBoolean(PBRMaterial, [
+        defineBoolean(PBRMaterial, [
             {key: `use${key.charAt(0).toUpperCase()}${key.substring(1)}`, value: false}
         ])
-        DefineGPUProperty.definePositiveNumber(PBRMaterial, [
+        definePositiveNumber(PBRMaterial, [
             {key: `${key}_KHR_texture_transform_rotation`, value: 0},
         ]);
-        DefineGPUProperty.defineBoolean(PBRMaterial, [
+        defineBoolean(PBRMaterial, [
             {key: `use_${key}_KHR_texture_transform`, value: false},
         ])
-        DefineGPUProperty.defineVector2(PBRMaterial, [
+        defineVector2(PBRMaterial, [
             {key: `${key}_KHR_texture_transform_offset`},
             {key: `${key}_KHR_texture_transform_scale`, value: [1, 1]},
         ])
         //
-        DefineGPUProperty.defineUint(PBRMaterial, [
+        defineUint(PBRMaterial, [
             {key: `${key}_texCoord_index`, value: 0}
         ])
         //
-        DefineGPUProperty.defineTexture(PBRMaterial, [
+        defineTexture(PBRMaterial, [
             {key: key}
         ])
         if (useSampler) {
-            DefineGPUProperty.defineSampler(PBRMaterial, [
+            defineSampler(PBRMaterial, [
                 {key: `${key}Sampler`},
             ])
         }
@@ -1025,38 +1030,38 @@ const extensionDefine = (defineList) => {
     defineList.forEach(v => {
         const {extensionName, textureList, useSampler} = v;
         const {positiveNumberList, vec3List, vec4List} = v;
-        if (extensionName) DefineGPUProperty.defineBoolean(PBRMaterial, [{
+        if (extensionName) defineBoolean(PBRMaterial, [{
             key: `use${extensionName}`,
             value: false
         }])
-        defineTexture(textureList, !useSampler)
+        defineTexturePropertys(textureList, !useSampler)
         positiveNumberList?.forEach(v => {
-            DefineGPUProperty.definePositiveNumber(PBRMaterial, [
+            definePositiveNumber(PBRMaterial, [
                 v
             ])
         })
         vec3List?.forEach(v => {
-            DefineGPUProperty.defineVector3(PBRMaterial, [
+            defineVector3(PBRMaterial, [
                 v
             ])
         })
         vec4List?.forEach(v => {
-            DefineGPUProperty.defineVector4(PBRMaterial, [
+            defineVector4(PBRMaterial, [
                 v
             ])
         })
     })
 }
 extensionDefine(EXTENSION_LIST)
-DefineGPUProperty.definePositiveNumber(PBRMaterial, [
+definePositiveNumber(PBRMaterial, [
     {key: 'cutOff', value: 0},
     {key: 'KHR_materials_ior', value: 1.5},
     {key: 'KHR_dispersion', value: 0},
 ]);
-DefineGPUProperty.defineUint(PBRMaterial, [
+defineUint(PBRMaterial, [
     {key: 'alphaBlend', value: 0},
 ])
-DefineGPUProperty.defineBoolean(PBRMaterial, [
+defineBoolean(PBRMaterial, [
     {key: 'doubleSided', value: false},
     {key: 'useCutOff', value: false},
     {key: 'useVertexColor', value: false},

@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
 
 
 interface ChromaticAberration {
@@ -61,7 +61,7 @@ class ChromaticAberration extends ASinglePassPostEffect {
 
 }
 
-DefineGPUProperty.defineNumber(ChromaticAberration, [
+defineNumber(ChromaticAberration, [
     {key: 'strength', value: 0.015, min: 0},
     {key: 'centerX', value: 0},
     {key: 'centerY', value: 0},

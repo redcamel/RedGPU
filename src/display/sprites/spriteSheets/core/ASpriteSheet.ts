@@ -8,7 +8,7 @@ import consoleAndThrowError from "../../../../utils/consoleAndThrowError";
 import Mesh from "../../../mesh/Mesh";
 import RenderViewStateData from "../../../view/core/RenderViewStateData";
 import SpriteSheetInfo from "../SpriteSheetInfo";
-import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
 
 /**
  * 스프라이트 시트의 기본 속성을 정의하는 인터페이스
@@ -274,7 +274,7 @@ class ASpriteSheet extends Mesh {
 /**
  * ASpriteSheet 클래스에 스프라이트 시트 관련 속성들을 정의합니다.
  */
-DefineGPUProperty.definePositiveNumber(ASpriteSheet, [
+definePositiveNumber(ASpriteSheet, [
     {key: 'segmentW', value: 5},
     {key: 'segmentH', value: 3},
     {key: 'totalFrame', value: 15},

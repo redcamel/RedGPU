@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
 
 
 interface Vibrance {
@@ -54,7 +54,7 @@ class Vibrance extends ASinglePassPostEffect {
 
 }
 
-DefineGPUProperty.defineNumber(Vibrance, [
+defineNumber(Vibrance, [
     {key: 'vibrance', value: 0, min: -100, max: 100},
     {key: 'saturation', value: 0, min: -100, max: 100}
 ])

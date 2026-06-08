@@ -5,7 +5,12 @@ import BitmapTexture from "../../resources/texture/BitmapTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl'
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
-import DefineGPUProperty from "../../defineProperty/DefineGPUProperty";
+import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
+import defineBoolean from "../../defineProperty/funcs/defineBoolean";
+import definePositiveNumber from "../../defineProperty/funcs/number/definePositiveNumber";
+import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
+import defineColorRGB from "../../defineProperty/funcs/color/defineColorRGB";
+
 
 const SHADER_INFO = parseWGSL('PHONG_MATERIAL', fragmentModuleSource)
 
@@ -186,7 +191,7 @@ class PhongMaterial extends AUVTransformBaseMaterial {
 
 }
 
-DefineGPUProperty.defineSampler(
+defineSampler(
     PhongMaterial,
     [
         {key: 'alphaTextureSampler'},
@@ -198,7 +203,7 @@ DefineGPUProperty.defineSampler(
         {key: 'specularTextureSampler'},
         {key: 'displacementTextureSampler'}
     ])
-DefineGPUProperty.definePositiveNumber(
+definePositiveNumber(
     PhongMaterial,
     [
         {key: 'aoStrength', value: 1},
@@ -209,12 +214,12 @@ DefineGPUProperty.definePositiveNumber(
         {key: 'displacementScale', value: 1}
     ]
 )
-DefineGPUProperty.defineColorRGB(PhongMaterial, [
+defineColorRGB(PhongMaterial, [
     {key: 'color'},
     {key: 'emissiveColor', value: '#000000'},
     {key: 'specularColor', value: '#ffffff'}
 ])
-DefineGPUProperty.defineTexture(PhongMaterial, [
+defineTexture(PhongMaterial, [
     {key: 'alphaTexture'},
     {key: 'aoTexture'},
     {key: 'diffuseTexture'},
@@ -224,10 +229,10 @@ DefineGPUProperty.defineTexture(PhongMaterial, [
     {key: 'specularTexture'},
     {key: 'displacementTexture'},
 ])
-DefineGPUProperty.defineBoolean(PhongMaterial, [
+defineBoolean(PhongMaterial, [
     {key: 'useSSR', value: false}
 ])
-DefineGPUProperty.definePositiveNumber(PhongMaterial, [
+definePositiveNumber(PhongMaterial, [
     {key: 'metallic', value: 0, min: 0, max: 1},
     {key: 'roughness', value: 0, min: 0, max: 1}
 ])

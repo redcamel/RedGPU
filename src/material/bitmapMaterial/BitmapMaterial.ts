@@ -4,7 +4,9 @@ import BitmapTexture from "../../resources/texture/BitmapTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl';
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
-import DefineGPUProperty from "../../defineProperty/DefineGPUProperty";
+import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
+import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
+
 
 const SHADER_INFO = parseWGSL('BITMAP_MATERIAL', fragmentModuleSource)
 
@@ -73,10 +75,10 @@ class BitmapMaterial extends AUVTransformBaseMaterial {
     }
 }
 
-DefineGPUProperty.defineSampler(BitmapMaterial, [
+defineSampler(BitmapMaterial, [
     {key: 'diffuseTextureSampler'}
 ])
-DefineGPUProperty.defineTexture(BitmapMaterial, [
+defineTexture(BitmapMaterial, [
     {key: 'diffuseTexture'}
 ])
 

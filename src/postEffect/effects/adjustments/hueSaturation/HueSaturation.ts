@@ -3,7 +3,8 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
+
 
 interface HueSaturation {
     /** [KO] 색상 회전 값 (-180 ~ 180 도) [EN] Hue rotation value (-180 ~ 180 degrees) */
@@ -56,7 +57,7 @@ class HueSaturation extends ASinglePassPostEffect {
 
 }
 
-DefineGPUProperty.defineNumber(HueSaturation, [
+defineNumber(HueSaturation, [
     {key: 'hue', value: 0, min: -180, max: 180},
     {key: 'saturation', value: 0, min: -100, max: 100}
 ])

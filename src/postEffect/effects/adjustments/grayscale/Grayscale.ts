@@ -2,8 +2,9 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
-import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
 
 interface Grayscale {
     amount: number
@@ -47,7 +48,7 @@ class Grayscale extends ASinglePassPostEffect {
     }
 }
 
-DefineGPUProperty.definePositiveNumber(Grayscale, [
+definePositiveNumber(Grayscale, [
     {key: 'amount', value: 1, min: 0, max: 1}
 ])
 Object.freeze(Grayscale)

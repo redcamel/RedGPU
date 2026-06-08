@@ -9,7 +9,8 @@ import RenderViewStateData from "../view/core/RenderViewStateData";
 import PARTICLE_EASE from "./PARTICLE_EASE";
 import computeModuleSource from "./shader/compute.wgsl";
 import vertexModuleSource from "./shader/particleVertex.wgsl";
-import DefineGPUProperty from "../../defineProperty/DefineGPUProperty";
+import defineBoolean from "../../defineProperty/funcs/defineBoolean";
+
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_PARTICLE_EMITTER'
 const SHADER_INFO = parseWGSL('PARTICLE_EMITTER_VERTEX', vertexModuleSource);
@@ -1217,7 +1218,7 @@ Object.defineProperty(ParticleEmitter.prototype, 'isInstanceofParticle', {
     value: true,
     writable: false
 });
-DefineGPUProperty.defineBoolean(ParticleEmitter, [
+defineBoolean(ParticleEmitter, [
     {key: 'useBillboard', value: true},
 ])
 //

@@ -9,7 +9,9 @@ import ASpriteSheet from "../core/ASpriteSheet";
 import SpriteSheetInfo from "../SpriteSheetInfo";
 import RenderViewStateData from "../../../view/core/RenderViewStateData";
 import vertexModuleSource from "./shader/spriteSheet3DVertex.wgsl";
-import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
+import defineBoolean from "../../../../defineProperty/funcs/defineBoolean";
+
 
 /** SpriteSheet3D 전용 버텍스 셰이더 모듈 이름 */
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_SHEET_3D'
@@ -290,11 +292,11 @@ class SpriteSheet3D extends ASpriteSheet {
 /**
  * SpriteSheet3D 클래스에 렌더링 비율 속성들을 정의합니다.
  */
-DefineGPUProperty.definePositiveNumber(SpriteSheet3D, [
+definePositiveNumber(SpriteSheet3D, [
     {key: '_renderRatioX', value: 1},
     {key: '_renderRatioY', value: 1},
 ])
-DefineGPUProperty.defineBoolean(SpriteSheet3D, [
+defineBoolean(SpriteSheet3D, [
     {key: 'useBillboard', value: true},
 ])
 /**

@@ -3,7 +3,7 @@ import ASinglePassPostEffect from "../../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineGPUProperty from "../../../../../defineProperty/DefineGPUProperty";
+import definePositiveNumber from "../../../../../defineProperty/funcs/number/definePositiveNumber";
 
 
 /**
@@ -67,7 +67,7 @@ class DOFCoC extends ASinglePassPostEffect {
     }
 }
 
-DefineGPUProperty.definePositiveNumber(DOFCoC, [
+definePositiveNumber(DOFCoC, [
     {key: 'focusDistance', value: 15},
     {key: 'aperture', value: 1.4},
     {key: 'maxCoC', value: 32, min: 0, max: 100},

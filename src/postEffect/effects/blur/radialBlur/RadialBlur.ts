@@ -3,7 +3,10 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
+import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
+import defineUint from "../../../../defineProperty/funcs/number/defineUint";
+
 
 interface RadialBlur {
     /** [KO] 블러 강도. 값이 클수록 회전 번짐이 강해집니다. [EN] Blur strength. Higher values increase rotational bleeding. */
@@ -50,14 +53,14 @@ class RadialBlur extends ASinglePassPostEffect {
 
 }
 
-DefineGPUProperty.definePositiveNumber(RadialBlur, [
+definePositiveNumber(RadialBlur, [
     {key: 'amount', value: 50}
 ])
-DefineGPUProperty.defineNumber(RadialBlur, [
+defineNumber(RadialBlur, [
     {key: 'centerX', value: 0},
     {key: 'centerY', value: 0},
 ])
-DefineGPUProperty.defineUint(RadialBlur, [
+defineUint(RadialBlur, [
     {key: 'sampleCount', value: 16, min: 2, max: 100},
 ])
 Object.freeze(RadialBlur)

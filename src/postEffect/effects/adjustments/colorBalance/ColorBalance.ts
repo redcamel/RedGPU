@@ -3,7 +3,9 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+import defineBoolean from "../../../../defineProperty/funcs/defineBoolean";
+import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
+
 
 interface ColorBalance {
     /** [KO] 하이라이트 영역의 노랑-파랑 밸런스 (-100 ~ 100) [EN] Yellow-Blue balance in highlight areas (-100 ~ 100) */
@@ -76,10 +78,10 @@ class ColorBalance extends ASinglePassPostEffect {
     }
 }
 
-DefineGPUProperty.defineBoolean(ColorBalance, [
+defineBoolean(ColorBalance, [
     {key: 'preserveLuminosity', value: true}
 ])
-DefineGPUProperty.defineNumber(ColorBalance, [
+defineNumber(ColorBalance, [
     {key: 'highlightYellowBlue', value: 0, min: -100, max: 100},
     {key: 'highlightMagentaGreen', value: 0, min: -100, max: 100},
     {key: 'highlightCyanRed', value: 0, min: -100, max: 100},

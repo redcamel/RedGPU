@@ -27,7 +27,8 @@ import createBasePipeline from "./core/pipeline/createBasePipeline";
 import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
-import DefineGPUProperty from "../../defineProperty/DefineGPUProperty";
+import defineBoolean from "../../defineProperty/funcs/defineBoolean";
+
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -1921,7 +1922,7 @@ Object.defineProperty(Mesh.prototype, 'isInstanceofMesh', {
     value: true,
     writable: false
 });
-DefineGPUProperty.defineBoolean(Mesh, [
+defineBoolean(Mesh, [
     {key: 'receiveShadow', value: false},
     {key: 'useDisplacementTexture', value: false},
     {key: 'disableJitter', value: false},

@@ -4,7 +4,8 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
-import DefineGPUProperty from "../../../../defineProperty/DefineGPUProperty";
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
+import defineUint from "../../../../defineProperty/funcs/number/defineUint";
 
 
 interface DirectionalBlur {
@@ -89,10 +90,10 @@ class DirectionalBlur extends ASinglePassPostEffect {
     }
 }
 
-DefineGPUProperty.definePositiveNumber(DirectionalBlur, [
+definePositiveNumber(DirectionalBlur, [
     {key: 'amount', value: 15}
 ])
-DefineGPUProperty.defineUint(DirectionalBlur, [
+defineUint(DirectionalBlur, [
     {key: 'sampleCount', value: 30, min: 1, max: 100}
 ])
 Object.freeze(DirectionalBlur)
