@@ -28,18 +28,18 @@
  *
  */
 
-import defineBoolean, {IDefineBoolean} from "./funcs/defineBoolean";
-import defineColorRGB, {IColorRGB} from "./funcs/color/defineColorRGB";
-import defineColorRGBA, {IColorRGBA} from "./funcs/color/defineColorRGBA";
-import defineCubeTexture, {IDefineCubeTexture} from "./funcs/texture/defineCubeTexture";
-import defineNumber, {IDefineNumber} from "./funcs/number/defineNumber";
-import definePositiveNumber, {IDefinePositiveNumber} from "./funcs/number/definePositiveNumber";
-import defineSampler, {IDefineSampler} from "./funcs/texture/defineSampler";
-import defineTexture, {IDefineTexture} from "./funcs/texture/defineTexture";
-import defineUint, {IDefineUint} from "./funcs/number/defineUint";
-import defineVector2, {IDefineVector2} from "./funcs/vector/defineVector2";
-import defineVector3, {IDefineVector3} from "./funcs/vector/defineVector3";
-import defineVector4, {IDefineVector4} from "./funcs/vector/defineVector4";
+import defineBoolean, {DefineBooleanInfo} from "./funcs/defineBoolean";
+import defineColorRGB, {DefineColorRGBInfo} from "./funcs/color/defineColorRGB";
+import defineColorRGBA, {DefineColorRGBAInfo} from "./funcs/color/defineColorRGBA";
+import defineCubeTexture, {DefineCubeTextureInfo} from "./funcs/texture/defineCubeTexture";
+import defineNumber, {DefineNumberInfo} from "./funcs/number/defineNumber";
+import definePositiveNumber, {DefinePositiveNumberInfo} from "./funcs/number/definePositiveNumber";
+import defineSampler, {DefineSamplerInfo} from "./funcs/texture/defineSampler";
+import defineTexture, {DefineTextureInfo} from "./funcs/texture/defineTexture";
+import defineUint, {DefineUintInfo} from "./funcs/number/defineUint";
+import defineVector2, {DefineVector2Info} from "./funcs/vector/defineVector2";
+import defineVector3, {DefineVector3Info} from "./funcs/vector/defineVector3";
+import defineVector4, {DefineVector4Info} from "./funcs/vector/defineVector4";
 
 export {
     defineBoolean,
@@ -55,17 +55,17 @@ export {
     defineVector3,
     defineVector4,
 
-    IDefineBoolean,
-    IColorRGB,
-    IColorRGBA,
-    IDefineNumber,
-    IDefinePositiveNumber,
-    IDefineUint,
-    IDefineCubeTexture,
-    IDefineSampler,
-    IDefineTexture,
-    IDefineVector2,
-    IDefineVector3,
-    IDefineVector4,
+    DefineBooleanInfo,
+    DefineColorRGBInfo,
+    DefineColorRGBAInfo,
+    DefineNumberInfo,
+    DefinePositiveNumberInfo,
+    DefineUintInfo,
+    DefineCubeTextureInfo,
+    DefineSamplerInfo,
+    DefineTextureInfo,
+    DefineVector2Info,
+    DefineVector3Info,
+    DefineVector4Info,
 }
 

@@ -4,7 +4,7 @@ import defineVector from "../../core/defineVector";
 /**
  * `defineVector4` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
  */
-export interface IDefineVector4 {
+export interface DefineVector4Info {
     /**
      * [KO] 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
      * [EN] Key name of the property. Defined on the target object's prototype under this name.
@@ -17,7 +17,7 @@ export interface IDefineVector4 {
     value?: [number, number, number, number];
 }
 
-function defineVector4_func(propertyInfo: IDefineVector4) {
+function defineVector4_func(propertyInfo: DefineVector4Info) {
     return defineVector(propertyInfo.key, propertyInfo.value ?? [0, 0, 0, 0]);
 }
 
@@ -34,7 +34,7 @@ function defineVector4_func(propertyInfo: IDefineVector4) {
  * - Automatically updates the GPU uniform buffer on value change.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param defineInfo - [KO] 단일 {@link IDefineVector4} 설정 또는 그 배열 [EN] A single {@link IDefineVector4} configuration or an array of configurations
+ * @param defineInfo - [KO] 단일 {@link DefineVector4Info} 설정 또는 그 배열 [EN] A single {@link DefineVector4Info} configuration or an array of configurations
  *
  * @example
  * ```typescript
@@ -48,7 +48,7 @@ function defineVector4_func(propertyInfo: IDefineVector4) {
  * ]);
  * ```
  */
-const defineVector4 = (target: any, defineInfo: IDefineVector4 | IDefineVector4[]) => applyProperties(target, defineInfo, defineVector4_func);
+const defineVector4 = (target: any, defineInfo: DefineVector4Info | DefineVector4Info[]) => applyProperties(target, defineInfo, defineVector4_func);
 
 Object.freeze(defineVector4)
 export default defineVector4;

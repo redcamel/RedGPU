@@ -8,7 +8,7 @@ import defineProperty_SETTING from "../../core/defineProperty_SETTING";
 /**
  * `defineColorRGB` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
  */
-export interface IColorRGB {
+export interface DefineColorRGBInfo {
     /**
      * [KO] 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
      * [EN] Key name of the property. Defined on the target object's prototype under this name.
@@ -35,7 +35,7 @@ function createColorRGB(instance: any, propertyKey: string, symbol: symbol, hexV
 }
 
 function defineColorRGB_func(
-    propertyInfo: IColorRGB
+    propertyInfo: DefineColorRGBInfo
 ) {
     const key = propertyInfo.key;
     const value = propertyInfo.value ?? '#fff';
@@ -82,7 +82,7 @@ function defineColorRGB_func(
  * - When the value changes, it automatically normalizes and writes to the GPU uniform buffer as linear RGB values (rgbNormalLinear).
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param defineInfo - [KO] 단일 {@link IColorRGB} 설정 또는 그 배열 [EN] A single {@link IColorRGB} configuration or an array of configurations
+ * @param defineInfo - [KO] 단일 {@link DefineColorRGBInfo} 설정 또는 그 배열 [EN] A single {@link DefineColorRGBInfo} configuration or an array of configurations
  *
  * @example
  * ```typescript
@@ -96,7 +96,7 @@ function defineColorRGB_func(
  * ]);
  * ```
  */
-const defineColorRGB = (target: any, defineInfo: IColorRGB | IColorRGB[]) => applyProperties(target, defineInfo, defineColorRGB_func);
+const defineColorRGB = (target: any, defineInfo: DefineColorRGBInfo | DefineColorRGBInfo[]) => applyProperties(target, defineInfo, defineColorRGB_func);
 
 Object.freeze(defineColorRGB);
 export default defineColorRGB;

@@ -8,7 +8,7 @@ import defineProperty_SETTING from "../../core/defineProperty_SETTING";
 /**
  * `defineColorRGBA` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
  */
-export interface IColorRGBA {
+export interface DefineColorRGBAInfo {
     /**
      * [KO] 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
      * [EN] Key name of the property. Defined on the target object's prototype under this name.
@@ -35,7 +35,7 @@ function createColorRGBA(instance: any, propertyKey: string, symbol: symbol, hex
 }
 
 function defineColorRGBA_func(
-    propertyInfo: IColorRGBA
+    propertyInfo: DefineColorRGBAInfo
 ) {
     const key = propertyInfo.key;
     const value = propertyInfo.value ?? '#fff';
@@ -82,7 +82,7 @@ function defineColorRGBA_func(
  * - When the value changes, it automatically normalizes and writes to the GPU uniform buffer as linear RGBA values (rgbaNormalLinear).
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param defineInfo - [KO] 단일 {@link IColorRGBA} 설정 또는 그 배열 [EN] A single {@link IColorRGBA} configuration or an array of configurations
+ * @param defineInfo - [KO] 단일 {@link DefineColorRGBAInfo} 설정 또는 그 배열 [EN] A single {@link DefineColorRGBAInfo} configuration or an array of configurations
  *
  * @example
  * ```typescript
@@ -96,7 +96,7 @@ function defineColorRGBA_func(
  * ]);
  * ```
  */
-const defineColorRGBA = (target: any, defineInfo: IColorRGBA | IColorRGBA[]) => applyProperties(target, defineInfo, defineColorRGBA_func);
+const defineColorRGBA = (target: any, defineInfo: DefineColorRGBAInfo | DefineColorRGBAInfo[]) => applyProperties(target, defineInfo, defineColorRGBA_func);
 
 Object.freeze(defineColorRGBA);
 export default defineColorRGBA;

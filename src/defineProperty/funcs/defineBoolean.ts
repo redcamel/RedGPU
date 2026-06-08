@@ -9,7 +9,7 @@ import defineProperty_SETTING from "../core/defineProperty_SETTING";
  * [KO] GPU는 불리언(Boolean)을 직접 지원하지 않으므로, 유니폼 버퍼에 기록 시 정수 0 또는 1로 변환됩니다.
  * [EN] Since GPUs do not natively support booleans, they are converted to 0 or 1 integers when written to the uniform buffer.
  */
-export interface IDefineBoolean {
+export interface DefineBooleanInfo {
     /**
      * [KO] 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
      * [EN] Key name of the property. Defined on the target object's prototype under this name.
@@ -42,7 +42,7 @@ function createSetter(
 }
 
 function defineBoolean_func(
-    propertyInfo: IDefineBoolean
+    propertyInfo: DefineBooleanInfo
 ) {
     const {key, value = false} = propertyInfo;
     const symbol = Symbol(key);
@@ -71,7 +71,7 @@ function defineBoolean_func(
  * - Sets `dirtyPipeline = true` on change to trigger render pipeline rebuild.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param defineInfo - [KO] 단일 {@link IDefineBoolean} 설정 또는 그 배열 [EN] A single {@link IDefineBoolean} configuration or an array of configurations
+ * @param defineInfo - [KO] 단일 {@link DefineBooleanInfo} 설정 또는 그 배열 [EN] A single {@link DefineBooleanInfo} configuration or an array of configurations
  *
  * @example
  * ```typescript
@@ -85,7 +85,7 @@ function defineBoolean_func(
  * ]);
  * ```
  */
-const defineBoolean = (target: any, defineInfo: IDefineBoolean | IDefineBoolean[]) => applyProperties(target, defineInfo, defineBoolean_func);
+const defineBoolean = (target: any, defineInfo: DefineBooleanInfo | DefineBooleanInfo[]) => applyProperties(target, defineInfo, defineBoolean_func);
 
 Object.freeze(defineBoolean);
 export default defineBoolean;

@@ -7,16 +7,52 @@ import RedGPUObject from "../base/RedGPUObject";
  * [EN] Detailed statistics per phase
  */
 export interface CommandPhaseStats {
+    /**
+     * [KO] 인코더의 단계(Phase) 타입
+     * [EN] Phase type of the encoder
+     */
     'Phase'?: CommandEncoderType;
+    /**
+     * [KO] 제출된 커맨드 버퍼의 개수
+     * [EN] Number of command buffers submitted
+     */
     'Command Buffers': number;
+    /**
+     * [KO] 렌더 패스 정보
+     * [EN] Render pass information
+     */
     'Render Passes': {
+        /**
+         * [KO] 실행된 렌더 패스의 총 개수
+         * [EN] Total number of executed render passes
+         */
         count: number;
+        /**
+         * [KO] 실행된 렌더 패스들의 레이블 리스트
+         * [EN] List of labels for executed render passes
+         */
         list: string[];
     };
+    /**
+     * [KO] 컴퓨트 패스 정보
+     * [EN] Compute pass information
+     */
     'Compute Passes': {
+        /**
+         * [KO] 실행된 컴퓨트 패스의 총 개수
+         * [EN] Total number of executed compute passes
+         */
         count: number;
+        /**
+         * [KO] 실행된 컴퓨트 패스들의 레이블 리스트
+         * [EN] List of labels for executed compute passes
+         */
         list: string[];
     };
+    /**
+     * [KO] 인코더를 직접 참조하여 기록한 수 (예: useEncoder 사용 횟수)
+     * [EN] Number of raw encoder usages (e.g., useEncoder call count)
+     */
     'Raw Usages': number;
 }
 
@@ -25,7 +61,15 @@ export interface CommandPhaseStats {
  * [EN] Batch submission statistics
  */
 export interface CommandBatchStats {
+    /**
+     * [KO] 각 단계(Phase)별 상세 통계 정보 레코드
+     * [EN] Detailed statistics record per phase
+     */
     phases: Record<string, CommandPhaseStats>;
+    /**
+     * [KO] 이번 제출 완료 후 지연 파괴(Deferred Destroy)된 리소스의 개수
+     * [EN] Number of resources deferred destroyed after this submission
+     */
     deferredDestroyCount: number;
 }
 
@@ -53,19 +97,37 @@ export type ComputePassDescriptorInput = string | GPUComputePassDescriptor;
  */
 class CommandEncoderManager extends RedGPUObject {
 
-    /** [KO] 타입별 활성화된 인코더 리스트 [EN] List of active encoders per type */
+    /**
+     * [KO] 타입별 활성화된 인코더 리스트
+     * [EN] List of active encoders per type
+     */
     readonly #encoderMap: Map<CommandEncoderType, GPUCommandEncoder[]> = new Map();
-    /** [KO] 타입별 현재 패스 활성화 여부 [EN] Whether a pass is currently active per type */
+    /**
+     * [KO] 타입별 현재 패스 활성화 여부
+     * [EN] Whether a pass is currently active per type
+     */
     readonly #isPassActive: Partial<Record<CommandEncoderType, boolean>> = {};
-    /** [KO] 타입별 통계 데이터 [EN] Statistics per type */
+    /**
+     * [KO] 타입별 통계 데이터
+     * [EN] Statistics per type
+     */
     readonly #stats: Map<CommandEncoderType, {
         renderPasses: string[],
         computePasses: string[],
         rawUsages: number
     }> = new Map();
-    /** [KO] 지연 파괴될 리소스 리스트 [EN] List of resources to be destroyed lazily */
+    /**
+     * [KO] 지연 파괴될 리소스 리스트
+     * [EN] List of resources to be destroyed lazily
+     */
     readonly #deferredDestroyList: { destroy(): void }[] = [];
 
+    /**
+     * [KO] CommandEncoderManager 인스턴스를 생성합니다.
+     * [EN] Creates a CommandEncoderManager instance.
+     *
+     * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU Context
+     */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
     }
@@ -548,6 +610,14 @@ class CommandEncoderManager extends RedGPUObject {
         return len;
     }
 
+    /**
+     * [KO] 즉각적인 명령 실행을 처리하고 완료될 때까지 대기하는 내부 유틸리티 메서드입니다.
+     * [EN] Internal utility method that processes immediate command execution and awaits completion.
+     *
+     * @param label - [KO] 커맨드 인코더 레이블 [EN] Command encoder label
+     * @param executor - [KO] 실행할 콜백 함수 [EN] Callback function to execute
+     * @param logTag - [KO] 콘솔 로그 식별 태그 [EN] Console log identification tag
+     */
     async #submitImmediate(label: string, executor: (encoder: GPUCommandEncoder) => void, logTag: string): Promise<void> {
         const {gpuDevice} = this
         const encoder = gpuDevice.createCommandEncoder({label});
@@ -560,6 +630,10 @@ class CommandEncoderManager extends RedGPUObject {
 
     /**
      * [KO] 사용 가능한 인코더를 반환합니다. 필요한 경우 자동으로 추가 생성합니다.
+     * [EN] Returns an available encoder. Automatically creates a new one if necessary.
+     *
+     * @param type - [KO] 커맨드 인코더 타입 [EN] Command encoder type
+     * @returns [KO] GPU 커맨드 인코더 [EN] GPU Command Encoder
      */
     #getEncoder(type: CommandEncoderType): GPUCommandEncoder {
         if (!this.#encoderMap.has(type)) {
@@ -582,7 +656,12 @@ class CommandEncoderManager extends RedGPUObject {
     }
 
     /**
-     * [KO] Render 패스를 추가하고 실행하는 내부 공통 메서드
+     * [KO] Render 패스를 추가하고 실행하는 내부 공통 메서드입니다.
+     * [EN] Internal common method to add and execute a Render pass.
+     *
+     * @param type - [KO] 커맨드 인코더 타입 [EN] Command encoder type
+     * @param descriptor - [KO] Render 패스 디스크립터 [EN] Render pass descriptor
+     * @param executor - [KO] 실행할 콜백 함수 [EN] Callback function to execute
      */
     #addRenderPass(
         type: CommandEncoderType,
@@ -602,7 +681,12 @@ class CommandEncoderManager extends RedGPUObject {
     }
 
     /**
-     * [KO] Compute 패스를 추가하고 실행하는 내부 공통 메서드
+     * [KO] Compute 패스를 추가하고 실행하는 내부 공통 메서드입니다.
+     * [EN] Internal common method to add and execute a Compute pass.
+     *
+     * @param type - [KO] 커맨드 인코더 타입 [EN] Command encoder type
+     * @param labelOrDescriptor - [KO] Compute 패스 입력 디스크립터 [EN] Compute pass input descriptor
+     * @param executor - [KO] 실행할 콜백 함수 [EN] Callback function to execute
      */
     #addComputePass(
         type: CommandEncoderType,
@@ -622,10 +706,25 @@ class CommandEncoderManager extends RedGPUObject {
         }
     }
 
+    /**
+     * [KO] Compute 패스 디스크립터 입력을 검증하여 적절한 GPUComputePassDescriptor 객체를 반환합니다.
+     * [EN] Validates the compute pass descriptor input and returns an appropriate GPUComputePassDescriptor object.
+     *
+     * @param labelOrDescriptor - [KO] 검증할 입력값 [EN] Input value to validate
+     * @returns [KO] GPU 컴퓨트 패스 디스크립터 [EN] GPU Compute Pass Descriptor
+     */
     #checkDescriptor = (labelOrDescriptor: ComputePassDescriptorInput): GPUComputePassDescriptor => {
         return typeof labelOrDescriptor === 'string' ? {label: labelOrDescriptor} : labelOrDescriptor
     }
 
+    /**
+     * [KO] 특정 단계의 현재 통계 객체를 생성합니다.
+     * [EN] Creates the current statistics object for a specific phase.
+     *
+     * @param type - [KO] 커맨드 인코더 타입 [EN] Command encoder type
+     * @param buffersLength - [KO] 생성된 커맨드 버퍼의 수 [EN] Number of generated command buffers
+     * @returns [KO] 단계별 통계 상세 정보 [EN] Phase statistics details
+     */
     #createPhaseStats(type: CommandEncoderType, buffersLength: number): CommandPhaseStats {
         const stat = this.#stats.get(type) || {renderPasses: [], computePasses: [], rawUsages: 0};
         return {
@@ -643,6 +742,14 @@ class CommandEncoderManager extends RedGPUObject {
         };
     }
 
+    /**
+     * [KO] 특정 단계의 통계 수치를 증가시킵니다.
+     * [EN] Increments the statistics count for a specific phase.
+     *
+     * @param type - [KO] 커맨드 인코더 타입 [EN] Command encoder type
+     * @param key - [KO] 누적할 통계 키 [EN] Statistics key to accumulate
+     * @param label - [KO] 패스 레이블 [EN] Pass label
+     */
     #incrementStat(type: CommandEncoderType, key: 'renderPasses' | 'computePasses' | 'rawUsages', label?: string) {
         if (!this.#stats.has(type)) {
             this.#stats.set(type, {renderPasses: [], computePasses: [], rawUsages: 0});
@@ -655,12 +762,22 @@ class CommandEncoderManager extends RedGPUObject {
         }
     }
 
+    /**
+     * [KO] 특정 단계의 통계 데이터를 초기화합니다.
+     * [EN] Resets the statistics data for a specific phase.
+     *
+     * @param type - [KO] 커맨드 인코더 타입 [EN] Command encoder type
+     */
     #resetStat(type: CommandEncoderType) {
         this.#stats.set(type, {renderPasses: [], computePasses: [], rawUsages: 0});
     }
 
     /**
-     * [KO] 특정 타입의 모든 인코더 종료 및 커맨드 버퍼 배열 반환
+     * [KO] 특정 타입의 모든 인코더를 종료하고 커맨드 버퍼 배열을 반환합니다.
+     * [EN] Finishes all encoders of a specific type and returns an array of command buffers.
+     *
+     * @param type - [KO] 커맨드 인코더 타입 [EN] Command encoder type
+     * @returns [KO] GPU 커맨드 버퍼 배열 [EN] Array of GPU command buffers
      */
     #finish(type: CommandEncoderType): GPUCommandBuffer[] {
         const list = this.#encoderMap.get(type);

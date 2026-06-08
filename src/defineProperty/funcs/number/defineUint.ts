@@ -6,7 +6,7 @@ import defineProperty_SETTING from "../../core/defineProperty_SETTING";
 /**
  * `defineUint` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
  */
-export interface IDefineUint {
+export interface DefineUintInfo {
     /**
      * [KO] 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
      * [EN] Key name of the property. Defined on the target object's prototype under this name.
@@ -52,7 +52,7 @@ function createSetter(
 }
 
 function defineUintRange_func(
-    propertyInfo: IDefineUint
+    propertyInfo: DefineUintInfo
 ) {
     const {key, value = 0, min: minVal = 0, max: maxVal} = propertyInfo;
     const symbol = Symbol(key);
@@ -79,7 +79,7 @@ function defineUintRange_func(
  * - Values outside the range print a `console.warn` and are clamped/adjusted before writing to the GPU buffer.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param defineInfo - [KO] 단일 {@link IDefineUint} 설정 또는 그 배열 [EN] A single {@link IDefineUint} configuration or an array of configurations
+ * @param defineInfo - [KO] 단일 {@link DefineUintInfo} 설정 또는 그 배열 [EN] A single {@link DefineUintInfo} configuration or an array of configurations
  *
  * @example
  * ```typescript
@@ -93,7 +93,7 @@ function defineUintRange_func(
  * ]);
  * ```
  */
-const defineUint = (target: any, defineInfo: IDefineUint | IDefineUint[]) => applyProperties(target, defineInfo, defineUintRange_func);
+const defineUint = (target: any, defineInfo: DefineUintInfo | DefineUintInfo[]) => applyProperties(target, defineInfo, defineUintRange_func);
 
 Object.freeze(defineUint);
 export default defineUint;

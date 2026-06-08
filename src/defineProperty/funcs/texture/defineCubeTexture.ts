@@ -7,7 +7,7 @@ import updateTargetUniform from "../../core/updateTargetUniform";
 /**
  * `defineCubeTexture` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
  */
-export interface IDefineCubeTexture {
+export interface DefineCubeTextureInfo {
     /**
      * [KO] 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
      * [EN] Key name of the property. Defined on the target object's prototype under this name.
@@ -30,7 +30,7 @@ function createSetter(propertyKey: string, symbol: symbol) {
     };
 }
 
-function defineCubeTexture_func(propertyInfo: IDefineCubeTexture) {
+function defineCubeTexture_func(propertyInfo: DefineCubeTextureInfo) {
     const {key} = propertyInfo;
     const symbol = Symbol(key);
     return {
@@ -57,7 +57,7 @@ function defineCubeTexture_func(propertyInfo: IDefineCubeTexture) {
  * - If a corresponding `use{Key}` property (e.g. `useEnvMap`) exists on the target, it automatically synchronizes its boolean state and GPU uniform value (1 or 0) based on texture presence.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param defineInfo - [KO] 단일 {@link IDefineCubeTexture} 설정 또는 그 배열 [EN] A single {@link IDefineCubeTexture} configuration or an array of configurations
+ * @param defineInfo - [KO] 단일 {@link DefineCubeTextureInfo} 설정 또는 그 배열 [EN] A single {@link DefineCubeTextureInfo} configuration or an array of configurations
  *
  * @example
  * ```typescript
@@ -71,7 +71,7 @@ function defineCubeTexture_func(propertyInfo: IDefineCubeTexture) {
  * ]);
  * ```
  */
-const defineCubeTexture = (target: any, defineInfo: IDefineCubeTexture | IDefineCubeTexture[]) => applyProperties(target, defineInfo, defineCubeTexture_func);
+const defineCubeTexture = (target: any, defineInfo: DefineCubeTextureInfo | DefineCubeTextureInfo[]) => applyProperties(target, defineInfo, defineCubeTexture_func);
 
 Object.freeze(defineCubeTexture);
 export default defineCubeTexture;

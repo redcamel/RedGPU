@@ -8,7 +8,7 @@ import updateTargetUniform from "../../core/updateTargetUniform";
 /**
  * `defineTexture` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
  */
-export interface IDefineTexture {
+export interface DefineTextureInfo {
     /**
      * [KO] 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
      * [EN] Key name of the property. Defined on the target object's prototype under this name.
@@ -30,7 +30,7 @@ function createSetter(propertyKey: string, symbol: symbol) {
     };
 }
 
-function defineTexture_func(propertyInfo: IDefineTexture) {
+function defineTexture_func(propertyInfo: DefineTextureInfo) {
     const {key} = propertyInfo;
     const symbol = Symbol(key);
     return {
@@ -57,7 +57,7 @@ function defineTexture_func(propertyInfo: IDefineTexture) {
  * - If a corresponding `use{Key}` property (e.g. `useDiffuseTexture`) exists on the target, it automatically synchronizes its boolean state and GPU uniform value (1 or 0) based on texture presence.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
- * @param defineInfo - [KO] 단일 {@link IDefineTexture} 설정 또는 그 배열 [EN] A single {@link IDefineTexture} configuration or an array of configurations
+ * @param defineInfo - [KO] 단일 {@link DefineTextureInfo} 설정 또는 그 배열 [EN] A single {@link DefineTextureInfo} configuration or an array of configurations
  *
  * @example
  * ```typescript
@@ -72,7 +72,7 @@ function defineTexture_func(propertyInfo: IDefineTexture) {
  * ]);
  * ```
  */
-const defineTexture = (target: any, defineInfo: IDefineTexture | IDefineTexture[]) => applyProperties(target, defineInfo, defineTexture_func);
+const defineTexture = (target: any, defineInfo: DefineTextureInfo | DefineTextureInfo[]) => applyProperties(target, defineInfo, defineTexture_func);
 
 Object.freeze(defineTexture);
 export default defineTexture;

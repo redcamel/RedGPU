@@ -6,9 +6,9 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl';
 
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
-import definePositiveNumber, {IDefinePositiveNumber} from "../../defineProperty/funcs/number/definePositiveNumber";
-import defineVector3, {IDefineVector3} from "../../defineProperty/funcs/vector/defineVector3";
-import defineVector4, {IDefineVector4} from "../../defineProperty/funcs/vector/defineVector4";
+import definePositiveNumber, {DefinePositiveNumberInfo} from "../../defineProperty/funcs/number/definePositiveNumber";
+import defineVector3, {DefineVector3Info} from "../../defineProperty/funcs/vector/defineVector3";
+import defineVector4, {DefineVector4Info} from "../../defineProperty/funcs/vector/defineVector4";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import defineUint from "../../defineProperty/funcs/number/defineUint";
 import defineVector2 from "../../defineProperty/funcs/vector/defineVector2";
@@ -18,9 +18,9 @@ import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
 
 const EXTENSION_LIST: {
     textureList?: string[],
-    vec4List?: IDefineVector4[],
-    vec3List?: IDefineVector3[],
-    positiveNumberList?: IDefinePositiveNumber[],
+    vec4List?: DefineVector4Info[],
+    vec3List?: DefineVector3Info[],
+    positiveNumberList?: DefinePositiveNumberInfo[],
     extensionName?: string,
 }[] = [
     {
