@@ -11,10 +11,13 @@ const contextLifeCycle = `
         Callback -->|인스턴스 획득| Setup["씬 및 뷰 설정"]
         Setup -->|루프 시작| Render["Renderer.start()"]
         
-        %% 커스텀 클래스 적용
-        class Init,Render mermaid-system;
-        class Callback mermaid-main;
+        %% 회색조 스타일 적용
+        style Init fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:1px
+        style Callback fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
+        style Setup fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
+        style Render fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:1px
 `
+
 </script>
 
 # RedGPUContext

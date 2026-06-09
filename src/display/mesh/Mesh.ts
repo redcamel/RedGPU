@@ -7,7 +7,6 @@ import {ABaseMaterial} from "../../material/core";
 import Primitive from "../../primitive/core/Primitive";
 import DrawBufferManager, {DrawCommandSlot} from "../../renderer/core/DrawBufferManager";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
-import BitmapTexture from "../../resources/texture/BitmapTexture";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import AABB from "../../bound/AABB";
 import calculateMeshAABB from "../../bound/math/calculateMeshAABB";
@@ -79,11 +78,7 @@ interface LODGPURenderInfo {
  * @category Mesh
  */
 class Mesh extends MeshBase {
-    /**
-     * [KO] 메시의 디스플레이스먼트 텍스처
-     * [EN] Displacement texture of the mesh
-     */
-    displacementTexture: BitmapTexture;
+
     /**
      * [KO] 그림자 캐스팅 여부
      * [EN] Whether to cast shadows

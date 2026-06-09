@@ -18,19 +18,12 @@ const viewSystemGraph = `
         Controller -->|Updates| Camera
         View -.->|Holds| Controller
         
-        %% 커스텀 클래스 적용
-        class Context mermaid-system;
-        class View mermaid-main;
-`
-
-const viewGraph = `
-    Renderer["RedGPU.Renderer"] -->|Executes Loop| View["RedGPU.Display.View3D"]
-    View -->|References| Scene["RedGPU.Display.Scene"]
-    View -->|References| Camera["RedGPU.Camera"]
-    
-    %% 커스텀 클래스 적용
-    class Renderer mermaid-system;
-    class View mermaid-main;
+        %% 회색조 스타일 적용
+        style Context fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+        style View fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style Scene fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style Camera fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+        style Controller fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
 `
 
 const multiViewGraph = `
@@ -51,10 +44,15 @@ const multiViewGraph = `
         View2 -->|Shared Reference| SceneA
         View2 --> CameraY
 
-        %% 커스텀 클래스 적용
-        class Context mermaid-system;
-        class View1,View2 mermaid-main;
+        %% 회색조 스타일 적용
+        style Context fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+        style View1 fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style View2 fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style SceneA fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style CameraX fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+        style CameraY fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
 `
+
 </script>
 
 # View3D
@@ -169,17 +167,30 @@ view.setPosition('10px', '10%');
 
 `redGPUContext.onResize`가 전체 캔버스의 크기 변화를 감지한다면, 개별 **View3D** 객체의 `onResize` 콜백은 해당 뷰의 크기가 변경될 때마다 호출됩니다. 
 
-뷰의 크기를 퍼센트(`%`) 단위로 설정했을 때 부모인 캔버스 크기가 변하거나, `setSize()`를 통해 직접 크기를 변경할 때 유용하게 사용할 수 있습니다.
+뷰의 크기를 퍼센트(`%`) 단위로 설정했을 때 부모인 캔버스 크기가 변하거나, `setSize()`를 통해 직접 크기를 변경할 때 유용하게 사용할 수 있습니다. 이 콜백은 `RedResizeEvent` 인터페이스
+형식의 이벤트를 인자로 받습니다.
 
-```javascript
+#### RedResizeEvent 인터페이스 구조
+
+| 속성명                    | 타입                  | 설명                                                              |
+|:-----------------------|:--------------------|:----------------------------------------------------------------|
+| **`target`**           | `T` (예: `View3D`)   | 이벤트가 발생한 대상 뷰 인스턴스                                              |
+| **`screenRectObject`** | `IRedGPURectObject` | CSS 픽셀 단위의 크기 및 위치 정보 (`{ x, y, width, height }`)               |
+| **`pixelRectObject`**  | `IRedGPURectObject` | `devicePixelRatio`가 적용된 물리 픽셀 단위 정보 (`{ x, y, width, height }`) |
+
+```typescript
+import {RedResizeEvent, View3D} from "RedGPU";
+
 // 개별 뷰의 크기 변경 시 호출될 콜백 정의
-view.onResize = (event) => {
-    const { width, height } = event.screenRectObject;
-    console.log(`뷰 영역 변경: ${width}x${height}`);
+view.onResize = (event: RedResizeEvent<View3D>) => {
+    const {target, screenRectObject, pixelRectObject} = event;
+    const {width, height} = screenRectObject;
+    console.log(`뷰 영역 변경: ${width}x${height} (물리 해상도: ${pixelRectObject.width}x${pixelRectObject.height})`);
     
     // 해당 뷰 내의 특정 UI 요소를 재배치하거나 카메라 설정을 조정합니다.
 };
 ```
+
 
 ## 4. 디버깅 도구
 
@@ -295,13 +306,40 @@ RedGPU.init(
   </CodePen>
 </ClientOnly>
 
-## 6. 렌더링 흐름
+## 6. 주요 API 속성 및 메서드
 
-**Renderer** 가 매 프레임 컨텍스트에 등록된 뷰 목록을 순회하며 수행하는 작업 흐름입니다.
+`View3D` 클래스는 3D 렌더링의 퀄리티 조절, 성능 최적화 및 유틸리티를 위한 다양한 API를 제공합니다.
 
-<ClientOnly>
-  <MermaidResponsive :definition="viewGraph" />
-</ClientOnly>
+### 6.1 환경 및 조명 설정
+
+* **`skybox`** (`SkyBox`): 뷰에 배경으로 그려질 스카이박스 인스턴스를 설정하거나 가져옵니다.
+* **`skyAtmosphere`** (`SkyAtmosphere`): 대기 산란 효과를 연출하기 위한 스카이 대기를 설정하거나 가져옵니다.
+* **`ibl`** (`IBL`): 이미지 기반 조명(Image-Based Lighting) 효과를 위한 IBL 데이터를 연결하거나 가져옵니다.
+
+### 6.2 후처리 및 톤 매핑 매니저
+
+* **`postEffectManager`** (`PostEffectManager`): 블러, 블룸 등 해당 뷰 영역 전체에 최종 적용할 후처리 필터들을 추가하고 관리하는 매니저입니다.
+* **`toneMappingManager`** (`ToneMappingManager`): 고대비(HDR)로 계산된 해당 뷰의 렌더링 결과물을 모니터 표준 범위(SDR)로 변환해주는 톤 매핑 정책을 관리합니다.
+
+### 6.3 렌더링 최적화 (Culling)
+
+* **`useFrustumCulling`** (`boolean`, 기본값: `true`): 카메라 시야각(절두체)을 벗어난 메쉬들의 드로우 콜을 자동으로 생략하여 프레임 레이트를 높입니다.
+* **`useDistanceCulling`** (`boolean`, 기본값: `false`): 카메라와 메쉬 간의 거리를 기준으로 특정 거리 이상 멀어진 물체의 렌더링을 차단합니다.
+* **`distanceCulling`** (`number`, 기본값: `50`): 거리 기반 컬링을 수행할 한계 거리 수치입니다.
+
+### 6.4 유틸리티 및 디버그 상태 데이터
+
+* **`renderViewStateData`** (`RenderViewStateData`, 읽기 전용): 이 뷰의 실시간 렌더링 통계 정보가 축적되는 읽기 전용 객체입니다. 개발 시 성능 프로파일링 및 최적화 상태
+  디버깅에 유용합니다.
+    * `renderResults.numDrawCalls`: 현재 뷰에서 발생한 총 드로우 콜(Draw Call) 횟수
+    * `renderResults.numTriangles`: 현재 뷰에서 최종 렌더링된 총 폴리곤(삼각형) 개수
+    * `renderResults.num3DObjects`: 씬 그래프 내에서 컬링을 통과해 실제 렌더링된 3D 객체 수
+    * `renderResults.numInstances`: 인스턴스 렌더링 기법이 적용된 총 인스턴스 개수
+    * `renderResults.numDirtyPipelines`: 재컴파일되거나 갱신된 파이프라인 개수
+* **`screenToWorld(screenX, screenY)`**: 2D 캔버스 화면의 마우스나 터치 좌표를 3D 공간상의 월드 좌표(`[x, y, z]`)로 역계산하여 반환합니다.
+* **`checkMouseInViewBounds()`**: 마우스 포인터가 현재 이 뷰의 픽셀 영역 내부 영역에 위치하는지 여부를 검사해 `boolean`으로 반환합니다.
+
+---
 
 ## 다음 단계
 

@@ -9,7 +9,15 @@ const sceneGraph = `
     ParentMesh --> ChildMesh1["자식 메시 A (Child)"]
     ParentMesh --> ChildMesh2["자식 메시 B (Child)"]
     ChildMesh2 --> GrandChild["손자 메시 (Grandchild)"]
+
+    %% 회색조 스타일 적용
+    style Scene fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+    style ParentMesh fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style ChildMesh1 fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style ChildMesh2 fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style GrandChild fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
 `
+
 </script>
 
 # Scene Graph
@@ -175,6 +183,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 다음 학습 추천
 
-빛에 반응하여 입체감을 만들어내는 핵심 재질인 PhongMaterial에 대해 알아봅니다.
+재질에 이미지를 매핑하거나 정교한 질감을 표현하기 위한 텍스처 시스템에 대해 알아봅니다.
 
-- **[Phong Material](../lighting-and-shadow/phong-material.md)**
+- **[Texture](./texture.md)**

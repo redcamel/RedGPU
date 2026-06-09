@@ -3,9 +3,27 @@ title: Texture
 order: 3
 ---
 
+<script setup>
+const textureGraph = `
+    Img["Image URL/File"] -->|Load| Texture["BitmapTexture (Resource)"]
+    Texture -->|Reference| Material["BitmapMaterial (Material)"]
+    Material -->|Apply| Mesh["Mesh (Display Object)"]
+
+    %% Grayscale styles applied
+    style Img fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Texture fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Material fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Mesh fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+`
+</script>
+
 # Texture
 
 By applying real photos or illustrations to an object's surface instead of simple colors, you can create much more realistic 3D objects. In RedGPU, image files are loaded as **BitmapTexture** and applied to objects using **BitmapMaterial**.
+
+<ClientOnly>
+  <MermaidResponsive :definition="textureGraph" />
+</ClientOnly>
 
 ## 1. Loading Images: BitmapTexture
 
@@ -18,6 +36,37 @@ const texture = new RedGPU.Resource.BitmapTexture(
     'https://redcamel.github.io/RedGPU/examples/assets/UV_Grid_Sm.jpg'
 );
 ```
+
+### BitmapTexture Constructor Parameter Options
+
+```typescript
+constructor(
+    redGPUContext
+:
+RedGPUContext,
+    src ? : string | {src: string, cacheKey: string},
+    useMipMap
+:
+boolean = true,
+    onLoad ? : (textureInstance?: BitmapTexture) => void,
+    onError ? : (error: Error) => void,
+    format ? : GPUTextureFormat,
+    usePremultiplyAlpha
+:
+boolean = false
+)
+```
+
+| Parameter                 | Type                                | Description                                                                                     |
+|:--------------------------|:------------------------------------|:------------------------------------------------------------------------------------------------|
+| **`redGPUContext`**       | `RedGPUContext`                     | Engine context instance (Required)                                                              |
+| **`src`**                 | `string` or `{ src, cacheKey }`     | URL path of the image to load, or a source object with a defined cache key                      |
+| **`useMipMap`**           | `boolean` (Default: `true`)         | Whether to enable multi-level mipmap generation to prevent distance distortion                  |
+| **`onLoad`**              | `(texture?: BitmapTexture) => void` | Callback function when the image resource loading and GPU texture conversion are fully complete |
+| **`onError`**             | `(error: Error) => void`            | Callback function when an exception occurs, such as image network load failure                  |
+| **`usePremultiplyAlpha`** | `boolean` (Default: `false`)        | Whether to use premultiplied alpha format with alpha channel values pre-multiplied              |
+
+---
 
 ## 2. Applying to Material: BitmapMaterial
 
@@ -33,7 +82,8 @@ const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
 
 ## 3. Understanding Asynchronous Loading
 
-Image files take time to load because they are downloaded over the network. RedGPU remains in a default state (usually black) while the image is loading and **automatically displays the texture on the screen as soon as loading is complete**.
+Image files take time to load because they are downloaded over the network. RedGPU remains in a default state while the
+image is loading and **automatically displays the texture on the screen as soon as loading is complete**.
 
 This is highly convenient because the engine manages the state internally, so developers don't have to write separate logic to check for loading completion.
 
@@ -133,6 +183,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## Next Steps
 
-Learn how to add depth to space by adding light, moving beyond simple images.
+Learn how to add depth to space by adding light and shadows, moving beyond simple images.
 
-- **[조명](./light.md)**
+- **[Lighting and Shadow](../lighting-and-shadow/index.md)**

@@ -8,12 +8,14 @@ order: 2
 const contextLifeCycle = `
     graph LR
         Init["Call RedGPU.init()"] -->|Async| Callback["onSuccess Callback"]
-        Callback -->|Obtain Instance| Setup["Scene and View Setup"]
+        Callback -->|Get Instance| Setup["Scene & View Setup"]
         Setup -->|Start Loop| Render["Renderer.start()"]
         
-        %% Apply custom classes
-        class Init,Render mermaid-system;
-        class Callback mermaid-main;
+        %% Grayscale styles applied
+        style Init fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:1px
+        style Callback fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
+        style Setup fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
+        style Render fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:1px
 `
 </script>
 

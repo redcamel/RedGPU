@@ -10,10 +10,14 @@ const systemGraph = `
     Scene -->|Contains| Mesh["RedGPU.Display.Mesh"]
     Mesh -->|Combines| Geo["Geometry"] & Mat["Material"]
 
-    %% 커스텀 클래스 적용
-    class Renderer mermaid-system;
-    class View mermaid-main;
-    class Geo,Mat mermaid-component;
+    %% 회색조 스타일 적용
+    style Renderer fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+    style View fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Scene fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Camera fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Mesh fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Geo fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Mat fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
 `
 
 const flowGraph = `
@@ -25,6 +29,16 @@ const flowGraph = `
     StartLoop -->|Loop| Update["프레임 업데이트"]
     Update --> Render["화면 렌더링"]
     Render --> Update
+
+    %% 회색조 스타일 적용
+    style Start fill:#fafafa,stroke:#d4d4d8,color:#52525b,stroke-width:1px
+    style Init fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Context fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Create fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style SetupView fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style StartLoop fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+    style Update fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Render fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
 `
 </script>
 

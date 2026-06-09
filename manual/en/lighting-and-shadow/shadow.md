@@ -3,9 +3,25 @@ title: Shadow System
 order: 3
 ---
 
+<script setup>
+const shadowGraph = `
+    Light["Light (DirectionalLight)"] -->|Shine| Caster["Caster (castShadow = true)"]
+    Caster -->|Project| Receiver["Receiver (receiveShadow = true)"]
+
+    %% Grayscale styles applied
+    style Light fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Caster fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Receiver fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+`
+</script>
+
 # Shadow System
 
 In 3D space, shadows are a key element in determining an object's three-dimensionality and its spatial relationship with other objects. RedGPU provides a physically based shadow system, allowing you to express realistic shadows with simple configuration.
+
+<ClientOnly>
+  <MermaidResponsive :definition="shadowGraph" />
+</ClientOnly>
 
 ## 1. 3 Elements of Shadow Generation
 

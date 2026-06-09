@@ -12,9 +12,13 @@ const skyboxGraph = `
 
     Skybox -->|view.skybox| View3D["RedGPU.Display.View3D"]
 
-    %% Apply custom classes
-    class View3D,Skybox mermaid-main;
-    class IBL,CubeTex mermaid-component;
+    %% Grayscale styles applied
+    style HDRSource fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
+    style Images fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
+    style IBL fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style CubeTex fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Skybox fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+    style View3D fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:1px
 `
 </script>
 

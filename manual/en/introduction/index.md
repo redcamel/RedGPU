@@ -10,10 +10,14 @@ const systemGraph = `
     Scene -->|Contains| Mesh["RedGPU.Display.Mesh"]
     Mesh -->|Combines| Geo["Geometry"] & Mat["Material"]
 
-    %% Apply custom classes
-    class Renderer mermaid-system;
-    class View mermaid-main;
-    class Geo,Mat mermaid-component;
+    %% Grayscale styles applied
+    style Renderer fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+    style View fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Scene fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Camera fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Mesh fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Geo fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Mat fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
 `
 
 const flowGraph = `
@@ -25,6 +29,16 @@ const flowGraph = `
     StartLoop -->|Loop| Update["Frame Update"]
     Update --> Render["Render Screen"]
     Render --> Update
+
+    %% Grayscale styles applied
+    style Start fill:#fafafa,stroke:#d4d4d8,color:#52525b,stroke-width:1px
+    style Init fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Context fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Create fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style SetupView fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style StartLoop fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+    style Update fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Render fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
 `
 </script>
 

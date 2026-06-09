@@ -1,6 +1,6 @@
 ---
 title: Light
-order: 2
+order: 1
 ---
 <script setup>
 const lightGraph = `
@@ -18,9 +18,13 @@ const lightGraph = `
         LightMgr -->|Manages| PointLight
         LightMgr -->|Manages| SpotLight
         
-        %% Apply custom classes
-        class Scene mermaid-main;
-        class LightMgr mermaid-system;
+        %% Grayscale styles applied
+        style Scene fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+        style LightMgr fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style Ambient fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+        style DirLight fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+        style PointLight fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+        style SpotLight fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
 `
 </script>
 
@@ -38,8 +42,18 @@ Creating a light alone does not affect the screen. It must be registered in the 
 </ClientOnly>
 
 ::: tip [Default Lighting State]
-If no light is set, the scene will be in total darkness. However, adding **AmbientLight** at a very low intensity allows you to at least see the outline of shadow areas where direct light does not reach.
+For materials that require a light source (such as PhongMaterial, PBRMaterial, etc.), nothing will be visible on the
+screen if no lights are configured.
 :::
+
+::: info [Light Registration Limits]
+To optimize shader and buffer calculations, RedGPU restricts the maximum number of lights that can be registered.
+Attempting to exceed these limits will throw an error:
+
+- **DirectionalLight**: Maximum of **3**
+- **PointLight + SpotLight (Cluster Lights)**: Combined maximum of **1,024**
+- **AmbientLight**: Maximum of **1** per Scene (assigned directly to the property)
+  :::
 
 ```javascript
 // Add directional light (Multiple allowed)
@@ -53,28 +67,31 @@ scene.lightManager.addPointLight(pointLight);
 
 RedGPU provides four types of light sources with different physical characteristics. It is important to understand the characteristics of each light and combine them appropriately.
 
-| Type | Features | Main Usage | Analogy |
-| :--- | :--- | :--- | :--- |
-| **AmbientLight** | Shines uniformly from all directions | Softening shadows, overall brightness correction | Fill light |
-| **DirectionalLight** | Parallel light (Sunlight) | Global lighting, shadow generation | The Sun |
-| **PointLight** | Spreads from a single point | Emphasizing specific areas, distance-based attenuation | Light bulb |
-| **SpotLight** | Concentrated cone-shaped light | Highlight lighting, theatrical stage effects | Flashlight |
+| Type                 | Features                             | Main Usage                                             | Analogy    |
+|:---------------------|:-------------------------------------|:-------------------------------------------------------|:-----------|
+| **DirectionalLight** | Parallel light (Sunlight)            | Global lighting, shadow generation                     | The Sun    |
+| **PointLight**       | Spreads from a single point          | Emphasizing specific areas, distance-based attenuation | Light bulb |
+| **SpotLight**        | Concentrated cone-shaped light       | Highlight lighting, theatrical stage effects           | Flashlight |
+| **AmbientLight**     | Shines uniformly from all directions | Softening shadows, overall brightness correction       | Fill light |
 
-### 2.1 AmbientLight
-Light that shines uniformly from all directions onto objects.
-- **Features**: Has no position or direction, and creates no shadows. It is used for correction to slightly brighten dark areas where light does not reach.
-
-### 2.2 DirectionalLight
+### 2.1 DirectionalLight
 Light that shines in parallel from an infinitely distant source in a specific direction, like the sun.
 - **Features**: Direction is constant regardless of position, and it is the most representative light source capable of creating shadows.
 
-### 2.3 PointLight
+### 2.2 PointLight
 Light that radiates in all directions from a point in space.
 - **Features**: **Attenuation** occurs, where brightness decreases in proportion to the square of the distance. The `radius` property determines the range the light reaches.
 
-### 2.4 SpotLight
+### 2.3 SpotLight
 A light source that shines a cone-shaped light in a specific direction from a specific point.
 - **Features**: Creates concentrated lighting effects by adjusting the light's `angle` and outer softness (`exponent`).
+
+### 2.4 AmbientLight
+
+Light that shines uniformly from all directions onto objects.
+
+- **Features**: Has no position or direction, and creates no shadows. It is used for correction to slightly brighten
+  dark areas where light does not reach.
 
 ::: warning [Material Note]
 **ColorMaterial** is not affected by light and outputs only a single color. To see lighting effects, you must use a glossy or textured material such as **PhongMaterial** or **PBRMaterial**.
@@ -220,6 +237,7 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## Next Learning Recommendation
 
-Where there is light, there is shadow. Learn about the shadow system that completes a realistic sense of space.
+Learn about Phong Material, a sophisticated material that expresses detailed surface texture and three-dimensionality by
+receiving light.
 
-- **[Shadow](./shadow.md)**
+- **[Phong Material](./phong-material.md)**

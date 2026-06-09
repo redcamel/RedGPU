@@ -15,24 +15,71 @@ RedGPU's **View System** is the core architecture of the engine and performs the
 
 ## Core Components
 
-The four core modules that make up RedGPU's rendering pipeline are as follows. Each module performs an independent role and is organically combined.
+The four core modules that make up RedGPU's rendering pipeline are as follows:
 
-| Component | Class Name | Role and Function |
-| :--- | :--- | :--- |
-| **View3D** | `RedGPU.Display.View3D` | Specifies the screen output area (Viewport/Scissor), applies skyboxes and post-effects, and manages debugging tools. |
-| **Scene** | `RedGPU.Display.Scene` | Manages the hierarchical structure of objects to be rendered, as well as lighting data and the scene background color. |
-| **Camera** | `RedGPU.Camera.*` | Calculates the projection and view matrices that convert 3D space to a 2D screen, and provides frustum information. |
-| **Controller** | `RedGPU.Camera.*Controller` | Detects mouse, touch, and keyboard input, and updates the camera transform in real-time. |
+* **View3D** (`RedGPU.Display.View3D`)
+    * **Role**: Specifies the screen output area (Viewport/Scissor)
+    * **Features**: Applies skyboxes and post-effects, and manages debugging tools
+* **Scene** (`RedGPU.Display.Scene`)
+    * **Role**: Manages the hierarchical structure of objects to be rendered
+    * **Features**: Manages lighting data and the scene background color
+* **Camera** (`RedGPU.Camera.*`)
+    * **Role**: Converts 3D space to a 2D screen
+    * **Features**: Calculates projection and view matrices, and provides frustum information
+* **Controller** (`RedGPU.Camera.*Controller`)
+    * **Role**: Detects user input and links with the camera
+    * **Features**: Updates camera transform in real-time through mouse, touch, and keyboard inputs
+
+---
 
 ## Understanding Relationships
 
 Before learning more, it's important to understand how these elements are connected to each other.
+
+```mermaid
+graph TD
+    Context[RedGPUContext]
+    
+    subgraph MainView [View3D: Main View]
+        View1[View3D Instance]
+        Camera1[Camera: Main Camera]
+        View1 -->|Owns (view.camera)| Camera1
+    end
+    
+    subgraph MiniView [View3D: Minimap View]
+        View2[View3D Instance]
+        Camera2[Camera: Top-down Camera]
+        View2 -->|Owns (view.camera)| Camera2
+    end
+    
+    Scene[Scene: 3D Stage]
+    
+    Context -->|Owns & Renders| View1
+    Context -->|Owns & Renders| View2
+    
+    View1 -->|Owns/References (view.scene)| Scene
+    View2 -->|Owns/References (view.scene)| Scene
+    
+    Controller1[Controller] -->|Controls Camera| Camera1
+    Controller2[Controller] -->|Controls Camera| Camera2
+    
+    Scene --> Meshes[Mesh 3D / Lights]
+
+    style Context fill:#4a154b,stroke:#fff,stroke-width:2px,color:#fff
+    style View1 fill:#0f4c81,stroke:#fff,stroke-width:2px,color:#fff
+    style View2 fill:#0f4c81,stroke:#fff,stroke-width:2px,color:#fff
+    style Scene fill:#1f6f43,stroke:#fff,stroke-width:2px,color:#fff
+    style Camera1 fill:#d9534f,stroke:#fff,stroke-width:2px,color:#fff
+    style Camera2 fill:#d9534f,stroke:#fff,stroke-width:2px,color:#fff
+```
 
 1.  **RedGPUContext** has one or more **View3D** instances (e.g., a game screen and a minimap).
 2.  Each **View3D** links what to show (**Scene**) and where to see it from (**Camera**).
 3.  A **Controller** receives user input and moves the **Camera**.
 
 Thanks to this structure, a single **Scene** can be observed from different angles simultaneously through multiple windows (**View3D**).
+
+
 
 ---
 

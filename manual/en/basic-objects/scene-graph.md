@@ -5,10 +5,17 @@ order: 2
 
 <script setup>
 const sceneGraph = `
-    Scene["Scene (Root)"] --> ParentMesh["Parent Mesh"]
-    ParentMesh --> ChildMesh1["Child Mesh A"]
-    ParentMesh --> ChildMesh2["Child Mesh B"]
-    ChildMesh2 --> GrandChild["Grandchild Mesh"]
+    Scene["Scene (Root)"] --> ParentMesh["Parent Mesh (Parent)"]
+    ParentMesh --> ChildMesh1["Child Mesh A (Child)"]
+    ParentMesh --> ChildMesh2["Child Mesh B (Child)"]
+    ChildMesh2 --> GrandChild["Grandchild Mesh (Grandchild)"]
+
+    %% Grayscale styles applied
+    style Scene fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+    style ParentMesh fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style ChildMesh1 fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style ChildMesh2 fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style GrandChild fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
 `
 </script>
 
@@ -175,6 +182,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## Next Steps
 
-Learn about PhongMaterial, a key material that creates three-dimensionality by reacting to light.
+Learn about the texture system used to map images to materials and express detailed textures.
 
-- **[Phong Material](../lighting-and-shadow/phong-material.md)**
+- **[Texture](./texture.md)**

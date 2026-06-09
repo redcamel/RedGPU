@@ -1,11 +1,29 @@
 ---
 title: Phong Material
-order: 1
+order: 2
 ---
+
+<script setup>
+const phongGraph = `
+    Ambient["Ambient (환경광)"] --> Phong["Phong Reflection (퐁 재질)"]
+    Diffuse["Diffuse (난반사)"] --> Phong
+    Specular["Specular (정반사)"] --> Phong
+
+    %% 회색조 스타일 적용
+    style Ambient fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Diffuse fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Specular fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Phong fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+`
+</script>
 
 # Phong Material
 
 **Phong Material** 은 3D 그래픽스에서 가장 널리 사용되는 라이팅 모델 중 하나인 **퐁 리플렉션 모델**(Phong Reflection Model) 을 구현한 재질입니다. 단순히 색상을 칠하는 것을 넘어, 다양한 **텍스처 맵** 을 활용하여 물체의 질감을 사실적으로 조절할 수 있습니다.
+
+<ClientOnly>
+  <MermaidResponsive :definition="phongGraph" />
+</ClientOnly>
 
 ## 1. 텍스처 맵을 통한 질감 구현
 
@@ -49,11 +67,15 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
-    
-    // 1. 재질 생성
+
+    // 1. 조명 설정 (PhongMaterial은 빛이 있어야 보입니다)
+    const light = new RedGPU.Light.DirectionalLight();
+    scene.lightManager.addDirectionalLight(light);
+
+    // 2. 재질 생성
     const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-    
-    // 2. 다양한 텍스처 맵 적용
+
+    // 3. 다양한 텍스처 맵 적용
     const assetPath = 'https://redcamel.github.io/RedGPU/examples/assets/phongMaterial/';
     
     material.diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_diffuseMap.jpg');
@@ -146,6 +168,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 다음 단계
 
-재질을 비추어 입체감을 만들어내는 다양한 광원들에 대해 알아봅니다.
+빛이 가려져 생기는 그림자를 구현하고 씬에 사실적인 공간감을 부여하는 방법에 대해 알아봅니다.
 
-- **[조명](./light.md)**
+- **[그림자](./shadow.md)**

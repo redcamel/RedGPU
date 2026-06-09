@@ -17,9 +17,15 @@ const iblGraph = `
     Specular -->|Reflection| PBR
     Environment -->|Background| Skybox["RedGPU.Display.SkyBox"]
 
-    %% 커스텀 클래스 적용
-    class IBL,Skybox mermaid-main;
-    class Irradiance,Specular,Environment,PBR mermaid-component;
+    %% 회색조 스타일 적용
+    style HDR fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
+    style Cube fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
+    style IBL fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+    style Irradiance fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Specular fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Environment fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style PBR fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:1px
+    style Skybox fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
 `
 </script>
 
