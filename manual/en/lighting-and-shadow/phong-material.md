@@ -50,7 +50,7 @@ material.color.setColorByHEX('#00CC99');
 material.alpha = 1.0;
 
 // 2. Highlight (Specular) control
-material.specularPower = 32;    // Sharpness of the highlight (Shininess)
+material.shininess = 32;    // Sharpness of the highlight (Shininess)
 material.specularStrength = 1.0; // Intensity of the highlight
 
 // 3. Advanced properties

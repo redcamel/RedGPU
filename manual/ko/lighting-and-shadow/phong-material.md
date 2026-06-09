@@ -50,7 +50,7 @@ material.color.setColorByHEX('#00CC99');
 material.alpha = 1.0;
 
 // 2. 하이라이트(Specular) 제어
-material.specularPower = 32;    // 하이라이트의 날카로운 정도 (Shininess)
+material.shininess = 32;    // 하이라이트의 날카로운 정도 (Shininess)
 material.specularStrength = 1.0; // 하이라이트의 강도
 
 // 3. 고급 속성
