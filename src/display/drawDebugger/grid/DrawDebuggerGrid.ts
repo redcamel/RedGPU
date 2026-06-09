@@ -24,6 +24,7 @@ const SHADER_MODULE_NAME = 'VERTEX_MODULE_GRID'
 const FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME = 'FRAGMENT_BIND_GROUP_DESCRIPTOR_GRID'
 const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_GRID'
 
+//TODO - autoExposure시 이놈떄문에 문제가 생김
 /**
  * 3D 씬(Scene)의 기준 바닥면을 바둑판 형태의 격자로 렌더링하여 구조와 위치를 가늠하게 돕는 디버깅용 그리드 클래스입니다.
  *
