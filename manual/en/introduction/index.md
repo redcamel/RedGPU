@@ -218,8 +218,8 @@ This diagram illustrates the relationships between major classes and the applica
 Now that you've learned basic screen composition, explore the more powerful features of RedGPU through these topics:
 
 - **[RedGPU Context](../context/index.md)**: A detailed guide to engine context settings and advanced options.
+- **[Inspector](../inspector/index.md)**: A developer tool for performance profiling and real-time scene debugging.
 - **[Mesh](../basic-objects/mesh.md)**: How to create and control objects by combining geometry and material.
 - **[Lighting & Shadow](../lighting-and-shadow/phong-material.md)**: Realistic texture and shadow expression reacting to light.
 - **[Environment](../environment/skybox.md)**: How to set up Skybox and IBL.
-- **[Extended Objects](../assets/model-loading/index.md)**: How to use external 3D models and sprites.
-- **[API Reference](../../api/RedGPU-API/namespaces/RedGPU/README.md)**: Full class specifications and technical documentation.
+- **[Extended Objects](../assets/model-loading/index.md)**: How to use external 3D models and sprites.

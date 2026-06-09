@@ -1,5 +1,6 @@
 import * as RedGPU from "../../../../dist/index.js?t=1778922031603";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
+import {Inspector} from "../../../../inspector/dist/index.js?t=1778922031603";
+// import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
 
 /**
  * [KO] Blend Mode 예제
@@ -101,6 +102,8 @@ RedGPU.init(
         renderer.start(redGPUContext, render);
 
         renderTestPane(redGPUContext, base, shape);
+        const test = new Inspector(redGPUContext)
+        test.useDebugPanel = true
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -209,19 +212,19 @@ function createSourceView(redGPUContext, scene, texture_blendTest_base, texture_
  * @param {RedGPU.Display.Sprite2D} shape
  */
 const renderTestPane = (redGPUContext, base, shape) => {
-    new RedGPUExampleHelper(redGPUContext, {
-        gui: (pane) => {
-            const tintSettings = {
-                blendMode: RedGPU.Material.BLEND_MODE[shape.blendMode],
-            };
-            const folder = pane.addFolder({title: '2D Object BlendMode'});
-
-            folder.addBinding(tintSettings, 'blendMode', {
-                label: 'Blend Mode',
-                options: RedGPU.Material.BLEND_MODE,
-            }).on('change', (ev) => {
-                shape.blendMode = ev.value;
-            });
-        }
-    });
+    // new RedGPUExampleHelper(redGPUContext, {
+    //     gui: (pane) => {
+    //         const tintSettings = {
+    //             blendMode: RedGPU.Material.BLEND_MODE[shape.blendMode],
+    //         };
+    //         const folder = pane.addFolder({title: '2D Object BlendMode'});
+    //
+    //         folder.addBinding(tintSettings, 'blendMode', {
+    //             label: 'Blend Mode',
+    //             options: RedGPU.Material.BLEND_MODE,
+    //         }).on('change', (ev) => {
+    //             shape.blendMode = ev.value;
+    //         });
+    //     }
+    // });
 };

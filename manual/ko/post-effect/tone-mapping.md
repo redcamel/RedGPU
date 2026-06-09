@@ -1,5 +1,5 @@
 ---
-title: 톤 매핑 (Tone Mapping)
+title: Tone Mapping
 order: 3
 ---
 

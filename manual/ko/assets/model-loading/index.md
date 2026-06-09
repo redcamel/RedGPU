@@ -1,5 +1,5 @@
 ---
-title: GLTF Loader (모델 로딩)
+title: GLTF Loader
 order: 1
 ---
 

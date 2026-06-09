@@ -1,5 +1,5 @@
 ---
-title: Post-Effect 개요
+title: Post-Effect
 order: 9
 ---
 
