@@ -180,7 +180,7 @@ export default withMermaid(defineConfig({
                     nav: [
                         { text: 'Getting Started', link: lang.entry },
                         { text: 'API Reference', link: `/${lang.code}/api/RedGPU-API/namespaces/RedGPU/README` },
-                        { text: 'Examples', link: 'https://redcamel.github.io/RedGPU/examples/' },
+                        {text: 'Examples', link: '/RedGPU/examples/', target: '_blank'},
                     ],
                 }
             }
