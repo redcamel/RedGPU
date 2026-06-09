@@ -3,10 +3,31 @@ title: GLTF Loader
 order: 1
 ---
 
+<script setup>
+const loaderGraph = `
+    GLTF[".gltf / .glb File"] -->|Async Load & Parse| Loader["GLTFLoader (Loader)"]
+    Loader -->|Create PBRMaterial| Mat["Material (Surface)"]
+    Loader -->|Parse Geometry| Geo["Geometry (Skeleton)"]
+    Mat --> Mesh["resultMesh (Final Mesh)"]
+    Geo --> Mesh
+
+    %% Grayscale styles applied
+    style GLTF fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
+    style Loader fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
+    style Mat fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Geo fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Mesh fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+`
+</script>
+
 # GLTF Loader
 
 While you can create basic shapes with **Primitives**, high-quality assets such as detailed characters or buildings need to be created in external 3D tools (Blender, Maya, etc.) and then imported.
 RedGPU provides the **GLTFLoader**, which supports loading the web 3D standard format **glTF** (GL Transmission Format) 2.0.
+
+<ClientOnly>
+  <MermaidResponsive :definition="loaderGraph" />
+</ClientOnly>
 
 ## 1. Loading a Model
 

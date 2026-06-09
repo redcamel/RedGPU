@@ -23,7 +23,9 @@ scene.addChild(textField);
 
 ### Billboard Setup
 
-- **`useBillboard`**: When activated, the text always faces the front even if the camera rotates.
+| Property Name      | Description                                                                 | Default Value |
+|:-------------------|:----------------------------------------------------------------------------|:--------------|
+| **`useBillboard`** | When activated, the text always faces the front even if the camera rotates. | `true`        |
 
 ### Size and Rendering Mode
 

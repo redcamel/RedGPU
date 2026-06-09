@@ -47,6 +47,12 @@ Key properties controlling the playback state and the size of the sprite.
 - **`gotoAndPlay(frameIndex)`**: Moves to the specified frame and plays immediately.
 - **`gotoAndStop(frameIndex)`**: Moves to the specified frame and stops.
 
+### Billboard Settings
+
+| Property Name      | Description                       | Default Value |
+|:-------------------|:----------------------------------|:--------------|
+| **`useBillboard`** | Whether to always face the camera | `true`        |
+
 ### Size and Rendering Mode
 
 `SpriteSheet3D` provides the same size setting options as `Sprite3D`.
@@ -147,3 +153,11 @@ RedGPU.init(canvas, (redGPUContext) => {
 - **SpriteSheetInfo**: Defines image source, sheet grid structure (Segments), animation speed (FPS), etc.
 - **Animation Control**: Control visual flow through methods like `play`, `stop`, `gotoAndPlay`.
 - **Efficiency**: Beneficial in terms of network overhead and GPU memory management by using a single sheet file instead of loading multiple images individually.
+
+---
+
+## Next Steps
+
+Learn how to construct and place three-dimensional text labels within 3D space.
+
+- **[TextField3D](../text-field/textfield3d.md)**
