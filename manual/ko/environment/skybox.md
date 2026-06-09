@@ -181,10 +181,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 - **SkyBox** 는 뷰(**View3D**)에 설정하여 배경을 렌더링합니다.
 - 사실적인 조명이 필요하다면 **IBL** 을 통해 생성된 환경 텍스처를 사용하는 것이 가장 좋습니다.
-- 단순 배경이 목적이라면 **HDRTexture** 나 **CubeTexture** 를 사용합니다.
+- 단순 배경이 목적이라면 **CubeTexture** 를 사용합니다.
 
 ## 다음 학습 추천
 
-
-
-- **[IBL](./ibl)**
+- **[IBL](./ibl.md)**

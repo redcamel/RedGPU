@@ -121,6 +121,6 @@ Detailed models created externally mostly use PBR (Physically Based Rendering) m
 
 ## Next Steps
 
-Based on the objects and environment settings learned so far, let's explore more deeply how to load and control models in actual projects.
+Learn how to add dynamic sky effects to a scene through real-time physically based atmospheric scattering simulation.
 
-- **[GLTF Loader](../assets/model-loading/index.md)**
+- **[SkyAtmosphere](./skyatmosphere.md)**

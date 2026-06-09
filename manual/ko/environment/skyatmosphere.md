@@ -1,11 +1,28 @@
 ---
+title: SkyAtmosphere
 order: 3
 ---
+
+<script setup>
+const skyAtmosphereGraph = `
+    Sun["Sun (DirectionalLight)"] -->|빛의 방향 제공| Atmosphere["SkyAtmosphere (대기 산란 계산)"]
+    Atmosphere -->|배경 렌더링| View["View3D (배경 및 포스트 이펙트 적용)"]
+
+    %% 회색조 스타일 적용
+    style Sun fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Atmosphere fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+    style View fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+`
+</script>
 
 # SkyAtmosphere
 
 **SkyAtmosphere**는 물리 기반 대기 산란(Atmospheric Scattering) 시뮬레이션 시스템입니다. 레일리 산란(Rayleigh Scattering), 미 산란(Mie Scattering),
 오존 흡수(Ozone Absorption) 등을 실시간으로 계산하여 사실적인 하늘, 저녁 노을, 그리고 고도와 거리에 따른 공중 원근법(Aerial Perspective) 효과를 제공합니다.
+
+<ClientOnly>
+  <MermaidResponsive :definition="skyAtmosphereGraph" />
+</ClientOnly>
 
 ## 1. 주요 특징
 
@@ -19,7 +36,8 @@ order: 3
 
 ## 2. 기본 사용법
 
-SkyAtmosphere는 복잡한 수동 설정 필요 없이 **View3D**의 `skyAtmosphere` 속성에 할당하는 것만으로 전체 파이프라인이 자동 적용됩니다.
+SkyAtmosphere는 씬(Scene)에 추가된 **첫 번째 방향성 광원(DirectionalLight)** 을 태양 광원으로 사용하여 대기 산란을 실시간 연산합니다.
+복잡한 수동 설정 필요 없이 **View3D**의 `skyAtmosphere` 속성에 할당하는 것만으로 전체 파이프라인이 자동 적용됩니다.
 
 ```javascript
 // 1. SkyAtmosphere 인스턴스 생성
@@ -31,50 +49,28 @@ view.skyAtmosphere = skyAtmosphere;
 
 ---
 
-## 3. 상세 파라미터 설정
+## 3. 태양의 각도 제어 (DirectionalLight 연동)
 
-`SkyAtmosphere` 인스턴스의 `params` 구조체나 개별 setter를 통해 물리 속성 및 태양, 구름 파라미터를 세밀하게 조정할 수 있습니다.
+태양의 위치는 씬에 추가된 첫 번째 `DirectionalLight` 인스턴스의 각도 속성을 제어하여 직관적으로 변경할 수 있습니다. 벡터 데이터를 직접 변경하는 대신, 각도(Degree) 속성을 사용하여 하루의
+시간 변화를 손쉽게 시뮬레이션할 수 있습니다.
 
-### 3.1 대기 산란 및 흡수 파라미터
+* **`elevation` (고도)**: 태양의 수직 높이 각도(도, `-90` ~ `90`)를 조절합니다.
+  * `90`: 태양이 머리 위에 있는 정오 상태를 나타내며, 푸른 하늘이 연출됩니다.
+  * `0` ~ `10`: 태양이 지평선에 걸친 일출/일몰 상태로, 붉은 노을이 표현됩니다.
+  * 음수 값 (예: `-10`): 태양이 지평선 아래로 내려간 밤 상태가 표현됩니다.
+* **`azimuth` (방위각)**: 태양이 동쪽에서 서쪽으로 지나가는 수평 회전 각도(도, `0` ~ `360`)를 조절합니다.
 
-* **`rayleighScattering`** (Vector3)
-    * 레일리 산란 계수입니다. 질소, 산소 등 미세한 분자에 의한 산란을 결정하며 하늘의 푸른빛을 형성하는 주원인입니다.
-* **`rayleighExponentialDistribution`** (Number)
-    * 레일리 밀도가 고도에 따라 감소하는 고도 상수(km)입니다. 기본값은 `8.0`입니다.
-* **`mieScattering`** (Vector3)
-    * 미 산란 계수입니다. 먼지, 에어로졸 등 비교적 큰 입자에 의한 산란을 결정합니다.
-* **`mieAnisotropy`** (Number)
-    * 미 산란의 비등방성 계수(G-Factor, `0` ~ `0.999`)입니다. 태양 주변의 눈부심 범위(Mie Glow)를 결정합니다. 기본값은 `0.8`입니다.
-* **`mieExponentialDistribution`** (Number)
-    * 미 밀도가 고도에 따라 감소하는 고도 상수(km)입니다. 기본값은 `1.2`입니다.
-* **`absorptionCoefficient`** (Vector3)
-    * 대기 흡수 계수(예: 오존층)입니다. 하늘의 붉은 노을이 깊어질 때의 색감을 빚어냅니다.
+```javascript
+// 고도와 방위각을 직접 변경하여 태양 위치 조정
+sunLight.elevation = 5;  // 붉은 노을 연출
+sunLight.azimuth = 180;
+```
 
-### 3.2 태양 및 지표면 설정
-
-* **`sunIntensity`** (Number)
-    * 태양 광의 밝기(Lux 단위)입니다. 기본값은 `100,000`입니다.
-* **`sunSize`** (Number)
-    * 태양의 시각적 크기 각도입니다. 기본값은 `0.533`입니다.
-* **`groundRadius`** (Number)
-    * 행성의 반경(km)입니다. 지구 기준 기본값은 `6360.0`입니다.
-* **`atmosphereHeight`** (Number)
-    * 대기권의 전체 높이(km)입니다. 기본값은 `60.0`입니다.
-* **`groundAlbedo`** (Vector3)
-    * 지표면의 반사율(Albedo)입니다. 지표면에서 반사되어 다시 대기로 산란되는 다중 산란에 영향을 미칩니다.
-
-### 3.3 구름 시뮬레이션 설정
-
-대기 중에 흐르는 가벼운 권운 형태의 구름층을 조절할 수 있습니다.
-
-* **`cloudCoverage`** (Number, `0` ~ `1.0`)
-    * 구름이 하늘을 덮는 비율(커버리지)입니다.
-* **`cloudDensity`** (Number, `0` ~ `1.0`)
-    * 구름의 밀도와 두께감입니다.
-* **`cloudHeight`** (Number, `0.1` ~ `20.0`)
-    * 구름층이 형성되는 고도(km)입니다.
-* **`cloudTimeMultiplier`** (Number)
-    * 구름이 흘러가는 시간 변화율 속도 배수입니다.
+::: tip [기타 물리 파라미터 제어]
+Rayleigh/Mie 산란 계수, 오존 흡수율, 지표면 반경, 구름 밀도 등 더 세밀한 대기 시뮬레이션 물리 파라미터는 `skyAtmosphere.params` 속성을 통해 조정할 수 있습니다.
+자세한 파라미터 종류와 설정
+방법은 [SkyAtmosphere API 레퍼런스](../api/RedGPU-API/namespaces/RedGPU/namespaces/Display/classes/SkyAtmosphere.md)를 참고하십시오.
+:::
 
 ---
 
@@ -129,3 +125,11 @@ RedGPU.init(canvas, (redGPUContext) => {
 | **태양 반응성** | X (배경 이미지 고정)         | O (태양 방향에 따라 실시간 색상 변화)     |
 | **공중 원근법** | X                     | O (오브젝트 거리에 따라 대기 효과 차등 적용) |
 | **적합한 용도** | 우주 공간, 실내, 특정 고정 배경   | 광활한 오픈월드 야외 씬, 실시간 시간대 변화 씬 |
+
+---
+
+## 다음 학습 추천
+
+지금까지 배운 객체와 환경 설정을 바탕으로, 실제 프로젝트에서 어떻게 모델을 불러오고 제어하는지 더 깊이 알아봅시다.
+
+- **[모델 로딩](../assets/model-loading/index.md)**

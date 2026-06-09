@@ -181,8 +181,8 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 - A **SkyBox** is set on a view (**View3D**) to render the background.
 - If realistic lighting is required, it is best to use an environment texture created via **IBL**.
-- Use **HDRTexture** or **CubeTexture** for a simple background.
+- Use **CubeTexture** for a simple background.
 
 ## Next Steps
 
-- **[IBL](./ibl)**
+- **[IBL](./ibl.md)**
