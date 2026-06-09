@@ -8,6 +8,7 @@
       :data-slug-hash="slugHash"
       data-editable="true"
       data-user="redcamel"
+      data-preview="true"
       :data-prefill="prefillJson"
       style="width: 100%; margin-top: 20px;"
     >
@@ -17,7 +18,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, nextTick } from 'vue'
+import {computed, nextTick, onMounted, ref} from 'vue'
 
 const props = defineProps({
   title: { type: String, default: 'RedGPU Example' },
