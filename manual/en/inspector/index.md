@@ -1,9 +1,14 @@
 ---
 title: Inspector
-order: 1
+order: 12
 ---
 
 # Inspector
+
+> [!WARNING]
+> **The Inspector is currently in development (Work In Progress).**
+> Some metrics are still experimental and may not be accurate. In particular, **total memory (Video Memory) tracking**
+> and **draw call count** are not yet stable—please treat them as reference values only.
 
 `RedGPUInspector` is a developer tool package for **performance profiling and real-time scene debugging** of RedGPU
 applications.
@@ -16,8 +21,6 @@ hierarchy, and more in real time—helping you quickly identify and debug perfor
 The Inspector is designed as a **separate package** from the RedGPU core engine. This ensures that Inspector code is not
 included in the production bundle, minimizing the final file size.
 
-Therefore, the Inspector must always be loaded using **Dynamic Import**.
-
 ```
 RedGPU Core (dist/index.js)
     ↕ Separate independent package
@@ -26,37 +29,25 @@ RedGPUInspector (inspector/dist/index.js)
 
 ## How to Use
 
-### Basic Usage (CDN)
+### CDN
+
+You can load the Inspector upfront using a static `import` statement and use it immediately. This is the simplest
+approach in environments that support ESM (ES Modules).
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
+import RedGPUInspector from "https://redcamel.github.io/RedGPU/inspector/dist/index.js";
 
 const canvas = document.getElementById('redgpu-canvas');
 
 RedGPU.init(canvas, (redGPUContext) => {
     // ... set up scene, camera, mesh ...
 
-    // Load the Inspector via dynamic import.
-    import("https://redcamel.github.io/RedGPU/inspector/dist/index.js")
-        .then(({ default: RedGPUInspector }) => {
-            const inspector = new RedGPUInspector(redGPUContext);
+    const inspector = new RedGPUInspector(redGPUContext);
 
-            // Setting useDebugPanel to true activates the GUI panel.
-            inspector.useDebugPanel = true;
-        });
+    // Setting useDebugPanel to true activates the GUI panel.
+    inspector.useDebugPanel = true;
 });
-```
-
-### Relative Path Import (Local Files)
-
-If you have downloaded RedGPU files locally, specify the path relative to the current file's URL.
-
-```javascript
-import("https://redcamel.github.io/RedGPU/inspector/dist/index.js")
-    .then(({ default: RedGPUInspector }) => {
-        const inspector = new RedGPUInspector(redGPUContext);
-        inspector.useDebugPanel = true;
-    });
 ```
 
 ## API Reference
@@ -104,15 +95,15 @@ Collects real-time FPS and frame time data and displays it as a graph.
 
 Displays GPU workload information for the current rendering frame.
 
-| Metric           | Description                                        |
-|:-----------------|:---------------------------------------------------|
-| **Draw Calls**   | Total draw call count for the current frame        |
-| **Triangles**    | Total number of triangles rendered                 |
-| **Points**       | Total number of points rendered                    |
-| **3D Objects**   | Total number of 3D objects registered in the scene |
-| **3D Groups**    | Total number of 3D groups registered in the scene  |
-| **Instances**    | Total instance count                               |
-| **Video Memory** | Total video memory currently used by the GPU (MB)  |
+| Metric           | Description                                                                       |
+|:-----------------|:----------------------------------------------------------------------------------|
+| **Draw Calls**   | Total draw call count for the current frame ⚠️ *(unstable, reference only)*       |
+| **Triangles**    | Total number of triangles rendered                                                |
+| **Points**       | Total number of points rendered                                                   |
+| **3D Objects**   | Total number of 3D objects registered in the scene                                |
+| **3D Groups**    | Total number of 3D groups registered in the scene                                 |
+| **Instances**    | Total instance count                                                              |
+| **Video Memory** | Total video memory currently used by the GPU (MB) ⚠️ *(unstable, reference only)* |
 
 ### GPU Memory Resources (Resources)
 
@@ -148,13 +139,3 @@ Useful for diagnosing and optimizing GPU rendering pass efficiency.
 > [!TIP]
 > **Memory Leak Detection**: In the Resources tab, if the `count` of resources keeps increasing after actions like scene
 > transitions, resources may not be getting properly disposed.
-
-> [!NOTE]
-> The Inspector is intended for **development use only**. When deploying to production, it is recommended to remove the
-`inspector.useDebugPanel = true;` line or the entire dynamic import block.
-
-## Next Steps
-
-- **[RedGPU Context](../context/index.md)** : Advanced settings and resource management for the engine context.
-- **[Post Effects](../post-effect/index.md)** : Post-processing effects to enhance visual quality.
-- **[LOD](../lod/index.md)** : Automatic mesh quality adjustment based on distance for performance optimization.
