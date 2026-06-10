@@ -134,5 +134,5 @@ body.applyImpulse([0, 10, 0]);
 
 ## 핵심 요약
 1. `RapierPhysics`를 별도로 임포트하고 **비동기 초기화**가 필요합니다.
-2. `scene.physicsEngine` 등록 후 렌더 루프에서 `step(dt)`을 호출해야 시뮬레이션이 동작합니다.
+2. `scene.physicsEngine`에 물리 엔진 인스턴스를 등록하면 렌더러가 내부 루프에서 `step`을 자동으로 호출하여 시뮬레이션을 수행합니다.
 3. `createBody`는 메쉬의 계층 구조를 자동으로 물리 월드에 반영합니다.

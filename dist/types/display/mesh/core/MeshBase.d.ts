@@ -40,12 +40,6 @@ declare class MeshBase extends Object3DContainer {
     localMatrix: mat4;
     normalModelMatrix: mat4;
     constructor(redGPUContext: RedGPUContext);
-    /**
-     * Retrieves the UUID of the object.
-     *
-     * @returns {string} The UUID of the object.
-     */
-    get uuid(): string;
     get currentShaderModuleName(): string;
     set currentShaderModuleName(value: string);
     get primitiveState(): PrimitiveState;
@@ -64,11 +58,5 @@ declare class MeshBase extends Object3DContainer {
     worldToLocal(x: number, y: number, z: number): [number, number, number];
     localToWorld(x: number, y: number, z: number): [number, number, number];
     getScreenPoint(view: View3D): [number, number];
-    /**
-     * Fires the dirty listeners list.
-     *
-     * @param {boolean} [resetList=false] - Indicates whether to reset the dirty listeners list after firing.
-     */
-    __fireListenerList(resetList?: boolean): void;
 }
 export default MeshBase;

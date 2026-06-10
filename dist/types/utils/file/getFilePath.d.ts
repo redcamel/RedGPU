@@ -1,24 +1,17 @@
 /**
- * [KO] 주어진 URL에서 파일 경로(디렉터리 경로)를 추출합니다.
- * [EN] Extracts the file path (directory path) from a given URL.
+ * [KO] URL 또는 경로에서 파일이 포함된 디렉토리 경로를 추출합니다.
+ * [EN] Extracts the directory path containing the file from a URL or path.
  *
- * [KO] URL에서 마지막 '/'까지의 부분을 반환합니다.
- * [EN] Returns the part of the URL up to the last '/'.
+ * [KO] 마지막 '/'를 포함한 전체 경로의 앞부분을 반환합니다.
+ * [EN] Returns the leading part of the path, including the last '/'.
  *
  * * ### Example
  * ```typescript
- * const path = RedGPU.Util.getFilePath('https://example.com/assets/textures/diffuse.png');
+ * const path = RedGPU.Util.getFilePath('assets/textures/diffuse.png'); // 'assets/textures/'
  * ```
  *
- * @param url -
- * [KO] 파일 경로를 추출할 대상 URL
- * [EN] Target URL to extract the file path from
- * @returns
- * [KO] 추출된 파일 경로
- * [EN] Extracted file path
- * @throws
- * [KO] URL이 비어 있거나 유효하지 않을 경우 Error 발생
- * [EN] Throws Error if the URL is empty or invalid
+ * @param url - [KO] 대상 URL 또는 경로 [EN] Target URL or path
+ * @returns [KO] 디렉토리 경로 [EN] Directory path
  * @category File
  */
 declare const getFilePath: (url: string) => string;

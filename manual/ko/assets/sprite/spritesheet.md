@@ -47,6 +47,12 @@ scene.addChild(spriteSheet);
 - **`gotoAndPlay(frameIndex)`**: 지정한 프레임으로 이동한 즉시 재생합니다.
 - **`gotoAndStop(frameIndex)`**: 지정한 프레임으로 이동한 후 정지합니다.
 
+### 빌보드 설정
+
+| 속성명                | 설명                | 기본값    |
+|:-------------------|:------------------|:-------|
+| **`useBillboard`** | 카메라를 항상 향하게 할지 여부 | `true` |
+
 ### 크기 및 렌더링 모드
 
 `SpriteSheet3D`는 `Sprite3D`와 동일한 크기 설정 옵션을 제공합니다.
@@ -147,3 +153,11 @@ RedGPU.init(canvas, (redGPUContext) => {
 - **SpriteSheetInfo** : 이미지 소스와 시트의 격자 구조(Segments), 애니메이션 속도(FPS) 등을 정의합니다.
 - **애니메이션 제어**: `play`, `stop`, `gotoAndPlay` 등의 메서드를 통해 시각적 흐름을 제어합니다.
 - **효율성**: 여러 장의 이미지를 각각 불러오는 대신 하나의 시트 파일을 사용하므로 네트워크 오버헤드와 GPU 메모리 관리 측면에서 유리합니다.
+
+---
+
+## 다음 학습 추천
+
+3D 공간 내에 입체적인 텍스트 레이블을 구성하고 배치하는 방법에 대해 알아봅니다.
+
+- **[TextField3D](../text-field/textfield3d.md)**

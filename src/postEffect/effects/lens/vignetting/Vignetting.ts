@@ -1,24 +1,39 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
+import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
+
+
+interface Vignetting {
+    /** [KO] 비네팅의 크기 (0 ~ 1). 값이 작을수록 중앙의 밝은 영역이 좁아집니다. [EN] Size of the vignette (0 to 1). Lower values narrow the central bright area. */
+    size: number;
+    /** [KO] 경계면의 부드러움 (0 ~ 1). [EN] Smoothness of the edges (0 to 1). */
+    smoothness: number;
+    /** [KO] 효과의 중심점 X 오프셋 (픽셀 단위, 0은 화면 중앙). [EN] Effect center X offset (in pixels, 0 is screen center). */
+    centerX: number;
+    /** [KO] 효과의 중심점 Y 오프셋 (픽셀 단위, 0은 화면 중앙). [EN] Effect center Y offset (in pixels, 0 is screen center). */
+    centerY: number;
+}
 
 /**
  * [KO] 비네팅(Vignetting) 후처리 이펙트입니다.
  * [EN] Vignetting post-processing effect.
  *
- * [KO] 화면 가장자리를 어둡게 하여 집중도를 높이는 효과를 만듭니다.
- * [EN] Creates an effect that darkens the edges of the screen to increase focus.
+ * [KO] 화면의 특정 지점(0,0은 정중앙)을 기준으로 가장자리를 어둡게 처리하여 시선을 집중시키고 시네마틱한 깊이감을 부여합니다.
+ * [EN] Darkens the edges relative to a specific point (0,0 is exact center) to focus attention and provide a cinematic sense of depth.
  *
- * [KO] size(범위), smoothness(부드러움)를 조절할 수 있습니다.
- * [EN] Can adjust size (range) and smoothness.
+ * [KO] 픽셀 단위의 정밀한 중심점 오프셋 조절을 지원합니다.
+ * [EN] Supports precise per-pixel center offset adjustment.
+ *
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.Vignetting(redGPUContext);
- * effect.size = 0.6;        // 비네팅 범위
- * effect.smoothness = 0.3;  // 경계 부드러움
+ * effect.size = 0.7;
+ * effect.smoothness = 0.3;
+ * effect.centerX = 100; // 중심을 오른쪽으로 100픽셀 이동
  * view.postEffectManager.addEffect(effect);
  * ```
  *
@@ -26,74 +41,34 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * @category Lens
  */
 class Vignetting extends ASinglePassPostEffect {
-    /**
-     * [KO] 비네팅 부드러움 (0 ~ 1)
-     * [EN] Vignetting smoothness (0 ~ 1)
-     * @defaultValue 0.2
-     */
-    #smoothness: number = 0.2
-    /**
-     * [KO] 비네팅 범위 (최소 0)
-     * [EN] Vignetting size (Minimum 0)
-     * @defaultValue 0.5
-     */
-    #size: number = 0.5
+
 
     /**
      * [KO] Vignetting 인스턴스를 생성합니다.
      * [EN] Creates a Vignetting instance.
      *
-     * @param redGPUContext
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
+        this.isLdr = true;
         this.init(
             redGPUContext,
             'POST_EFFECT_VIGNETTING',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode),
+            createBasicPostEffectCode(this, computeCode, uniformStructCode)
         )
-        this.smoothness = this.#smoothness
-        this.size = this.#size
     }
 
-    /**
-     * [KO] 비네팅 범위를 반환합니다.
-     * [EN] Returns the vignetting size.
-     */
-    get size(): number {
-        return this.#size;
-    }
 
-    /**
-     * [KO] 비네팅 범위를 설정합니다. (최소 0)
-     * [EN] Sets the vignetting size. (Minimum 0)
-     */
-    set size(value: number) {
-        validateNumberRange(value, 0,)
-        this.#size = value;
-        this.updateUniform('size', value)
-    }
-
-    /**
-     * [KO] 비네팅 부드러움을 반환합니다.
-     * [EN] Returns the vignetting smoothness.
-     */
-    get smoothness(): number {
-        return this.#smoothness;
-    }
-
-    /**
-     * [KO] 비네팅 부드러움을 설정합니다. (0 ~ 1)
-     * [EN] Sets the vignetting smoothness. (0 ~ 1)
-     */
-    set smoothness(value: number) {
-        validateNumberRange(value, 0, 1)
-        this.#smoothness = value;
-        this.updateUniform('smoothness', value)
-    }
 }
 
+definePositiveNumber(Vignetting, [
+    {key: 'size', value: 0.5, max: 1},
+    {key: 'smoothness', value: 0.2, max: 1},
+])
+defineNumber(Vignetting, [
+    {key: 'centerX', value: 0},
+    {key: 'centerY', value: 0},
+])
 Object.freeze(Vignetting)
 export default Vignetting

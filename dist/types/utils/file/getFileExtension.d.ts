@@ -1,24 +1,17 @@
 /**
- * [KO] 주어진 URL에서 파일 확장자를 추출합니다.
- * [EN] Extracts the file extension from a given URL.
+ * [KO] URL 또는 경로에서 파일 확장자를 추출합니다.
+ * [EN] Extracts the file extension from a URL or path.
  *
- * [KO] URL에서 파일 확장자를 소문자로 반환하며, 없으면 빈 문자열을 반환합니다.
- * [EN] Returns the file extension in lowercase, or an empty string if none exists.
+ * [KO] 확장자를 소문자로 반환하며, 없는 경우 빈 문자열을 반환합니다.
+ * [EN] Returns the extension in lowercase, or an empty string if it doesn't exist.
  *
  * * ### Example
  * ```typescript
- * const ext = RedGPU.Util.getFileExtension('https://example.com/assets/model.gltf'); // 'gltf'
+ * const ext = RedGPU.Util.getFileExtension('assets/model.gltf'); // 'gltf'
  * ```
  *
- * @param url -
- * [KO] 파일 확장자를 추출할 대상 URL
- * [EN] Target URL to extract the file extension from
- * @returns
- * [KO] 추출된 파일 확장자 (소문자)
- * [EN] Extracted file extension (lowercase)
- * @throws
- * [KO] URL이 비어 있거나 유효하지 않을 경우 Error 발생
- * [EN] Throws Error if the URL is empty or invalid
+ * @param url - [KO] 대상 URL 또는 경로 [EN] Target URL or path
+ * @returns [KO] 파일 확장자 [EN] File extension
  * @category File
  */
 declare const getFileExtension: (url: string) => string;

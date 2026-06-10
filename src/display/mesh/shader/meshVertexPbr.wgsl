@@ -1,11 +1,8 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include drawDirectionalShadowDepth;
-#redgpu_include picking;
-
-#redgpu_include meshVertexBasicUniform;
-
-const maxDistance: f32 = 1000.0;
-const maxMipLevel: f32 = 10.0;
+#redgpu_include shadow.getShadowCoord;
+#redgpu_include entryPoint.mesh.entryPointShadowVertex;
+#redgpu_include entryPoint.mesh.entryPointPickingVertex;
+#redgpu_include systemStruct.meshVertexBasicUniform;
 
 @group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
 @group(1) @binding(1) var displacementTextureSampler: sampler;
@@ -13,8 +10,8 @@ const maxMipLevel: f32 = 10.0;
 
 
 @vertex
-fn main(inputData: InputData) -> OutputData {
-    var output: OutputData;
+fn main(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
 
     // Input data
     let input_position = inputData.position;
@@ -22,13 +19,13 @@ fn main(inputData: InputData) -> OutputData {
     let input_vertexNormal = inputData.vertexNormal;
 
     // System uniforms
-    let u_projectionMatrix = systemUniforms.projectionMatrix;
-    let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
-    let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
-    let u_prevNoneJitterProjectionCameraMatrix = systemUniforms.prevNoneJitterProjectionCameraMatrix;
+    let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
+    let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
+    let u_noneJitterProjectionViewMatrix = systemUniforms.projection.noneJitterProjectionViewMatrix;
+    let u_prevNoneJitterProjectionViewMatrix = systemUniforms.projection.prevNoneJitterProjectionViewMatrix;
     let u_resolution = systemUniforms.resolution;
     let u_camera = systemUniforms.camera;
-    let u_cameraMatrix = u_camera.cameraMatrix;
+    let u_viewMatrix = u_camera.viewMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
 
     // Vertex uniforms
@@ -52,7 +49,7 @@ fn main(inputData: InputData) -> OutputData {
     normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0);
 
     // Basic output assignments
-    output.position = u_projectionCameraMatrix * position;
+    output.position = u_projectionViewMatrix * position;
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalize(normalPosition.xyz);
     output.uv = inputData.uv;
@@ -67,16 +64,15 @@ fn main(inputData: InputData) -> OutputData {
     // Shadow calculation
     #redgpu_if receiveShadow
     {
-        let posFromLight = u_directionalLightProjectionViewMatrix * vec4(position.xyz, 1.0);
-        output.shadowPos = vec3(posFromLight.xy * vec2(0.5, -0.5) + vec2(0.5), posFromLight.z);
+        output.shadowCoord = getShadowCoord(position.xyz, u_directionalLightProjectionViewMatrix);
         output.receiveShadow = vertexUniforms.receiveShadow;
     }
     #redgpu_endIf
 
     // Motion vector calculation
     {
-        output.currentClipPos = u_noneJitterProjectionCameraMatrix * position;
-        output.prevClipPos = u_prevNoneJitterProjectionCameraMatrix * u_prevModelMatrix * input_position_vec4;
+        output.currentClipPos = u_noneJitterProjectionViewMatrix * position;
+        output.prevClipPos = u_prevNoneJitterProjectionViewMatrix * u_prevModelMatrix * input_position_vec4;
 
     }
 
@@ -96,3 +92,4 @@ fn main(inputData: InputData) -> OutputData {
 
     return output;
 }
+

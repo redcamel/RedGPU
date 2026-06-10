@@ -1,8 +1,9 @@
-#redgpu_include SYSTEM_UNIFORM;
-#redgpu_include calcTintBlendMode;
-#redgpu_include drawPicking;
-#redgpu_include FragmentOutput;
-#redgpu_include calculateMotionVector;
+#redgpu_include SYSTEM_UNIFORM
+#redgpu_include color.getTintBlendMode
+#redgpu_include entryPoint.mesh.entryPointPickingFragment
+#redgpu_include systemStruct.OutputFragment
+#redgpu_include math.getMotionVector
+
 struct Uniforms {
     opacity: f32,
     useTint:u32,
@@ -26,13 +27,13 @@ struct InputData {
     @location(11) combinedOpacity: f32,
     //
     @location(12) motionVector: vec3<f32>,
-    @location(13) shadowPos: vec3<f32>,
+    @location(13) shadowCoord: vec3<f32>,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
 @fragment
-fn main(inputData: InputData) -> FragmentOutput {
-  var output:FragmentOutput;
+fn main(inputData: InputData) -> OutputFragment {
+  var output:OutputFragment;
   // 텍스처 색상 샘플링
   var finalColor: vec4<f32> = vec4<f32>(0.0);
   #redgpu_if diffuseTexture
@@ -42,15 +43,15 @@ fn main(inputData: InputData) -> FragmentOutput {
   let alpha2D = select(finalColor.a, 1.0, systemUniforms.isView3D == 1u);
   finalColor = vec4<f32>(finalColor.rgb * alpha2D, finalColor.a * uniforms.opacity * inputData.combinedOpacity);
 
-  #redgpu_if useTint
-      finalColor = calcTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
-  #redgpu_endIf
-
+      #redgpu_if useTint
+        finalColor = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
+      #redgpu_endIf
   // alpha 값이 0일 경우 discard
   if (systemUniforms.isView3D == 1 && finalColor.a == 0.0) {
       discard;
   }
-  output.color = finalColor;
-  output.gBufferMotionVector = vec4<f32>(calculateMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
+
+  output.color = vec4<f32>(finalColor.rgb , finalColor.a);
+  output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
   return output;
 };

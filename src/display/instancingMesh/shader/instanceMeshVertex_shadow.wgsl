@@ -1,15 +1,17 @@
 
-struct OutputShadowData {
-    @builtin(position) position: vec4<f32>,
-};
+#redgpu_include shadow.getShadowClipPosition
+#redgpu_include systemStruct.OutputShadowData;
+
 @vertex
-fn drawDirectionalShadowDepth(inputData: InputData) -> OutputShadowData {
+fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
     var output: OutputShadowData;
+
 
     let input_instanceIdx: u32 = visibilityBuffer[inputData.instanceIdx];
 
     let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
     let u_modelMatrix = instanceUniforms.instanceModelMatrixs[input_instanceIdx];
+    let u_instanceGroupModelMatrix = instanceUniforms.instanceGroupModelMatrix;
     let u_useDisplacementTexture = instanceUniforms.useDisplacementTexture == 1u;
     let u_displacementScale = instanceUniforms.displacementScale;
 
@@ -21,20 +23,22 @@ fn drawDirectionalShadowDepth(inputData: InputData) -> OutputShadowData {
 
     // Displacement 처리
     if (u_useDisplacementTexture) {
-        let distance = distance(position.xyz, u_directionalLightProjectionViewMatrix[3].xyz);
-        let mipLevel = (distance / maxDistance) * maxMipLevel;
-        let displacedPosition = calcDisplacementPosition(
+        let worldPos = (u_instanceGroupModelMatrix * position).xyz;
+        let distance = distance(worldPos, u_directionalLightProjectionViewMatrix[3].xyz);
+        let maxMipLevel = f32(textureNumLevels(displacementTexture)) - 1.0;
+        let targetMipLevel = clamp((distance / maxDistance) * maxMipLevel, 0.0, maxMipLevel);
+        let displacedPosition = getDisplacementPosition(
             input_position,
             input_vertexNormal,
             displacementTexture,
             displacementTextureSampler,
             u_displacementScale,
             input_uv,
-            mipLevel
+            targetMipLevel
         );
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
     }
 
-    output.position = u_directionalLightProjectionViewMatrix * position;
+    output.position = getShadowClipPosition((u_instanceGroupModelMatrix * position).xyz, u_directionalLightProjectionViewMatrix);
     return output;
 }

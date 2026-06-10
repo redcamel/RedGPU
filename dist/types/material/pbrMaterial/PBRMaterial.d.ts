@@ -2,7 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
-import ABitmapBaseMaterial from "../core/ABitmapBaseMaterial";
+import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
 /**
  * [KO] PBRMaterial 속성 인터페이스
  * [EN] PBRMaterial property interface
@@ -420,12 +420,12 @@ interface PBRMaterial {
     emissiveTexture_texCoord_index: number;
     /**
      * [KO] 발광 팩터
-     * [EN] Emissive factor
+     * [EN] emissive factor
      */
     emissiveFactor: number[];
     /**
      * [KO] 발광 강도
-     * [EN] Emissive strength
+     * [EN] emissive strength
      */
     emissiveStrength: number[];
     /**
@@ -492,7 +492,7 @@ interface PBRMaterial {
  * [EN] Inherits from ABitmapBaseMaterial to create a material for PBR rendering.
  * @category Material
  */
-declare class PBRMaterial extends ABitmapBaseMaterial {
+declare class PBRMaterial extends AUVTransformBaseMaterial {
     #private;
     /**
      * [KO] PBRMaterial 생성자

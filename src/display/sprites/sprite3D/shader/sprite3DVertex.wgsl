@@ -1,8 +1,8 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include getBillboardMatrix;
-#redgpu_include calcBillboard;
-#redgpu_include billboardPicking;
-#redgpu_include billboardShadow;
+#redgpu_include math.billboard.getBillboardMatrix;
+#redgpu_include math.billboard.getBillboardResult;
+#redgpu_include entryPoint.billboard.entryPointPickingVertex;
+#redgpu_include entryPoint.empty.entryPointShadowVertex;
 
 struct MatrixList{
     modelMatrix: mat4x4<f32>,
@@ -27,7 +27,7 @@ struct InputData {
     @location(2) uv: vec2<f32>,
 };
 
-struct OutputData {
+struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
@@ -35,24 +35,26 @@ struct OutputData {
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
+
     @location(11) combinedOpacity: f32,
     //
     @location(12) motionVector: vec3<f32>,
-    @location(13) shadowPos: vec3<f32>,
+    @location(13) shadowCoord: vec3<f32>,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
 
-@vertex
-fn main(inputData: InputData) -> OutputData {
-    var output: OutputData;
 
-    let billboardResult = calcBillboard(
+@vertex
+fn main(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
+
+    let billboardResult = getBillboardResult(
         inputData.position,
         inputData.vertexNormal,
         vertexUniforms.matrixList.modelMatrix,
-        systemUniforms.camera.cameraMatrix,
-        systemUniforms.projectionMatrix,
+        systemUniforms.camera.viewMatrix,
+        systemUniforms.projection.projectionMatrix,
         systemUniforms.resolution,
         vertexUniforms.useBillboard,
         vertexUniforms.usePixelSize,
@@ -68,3 +70,4 @@ fn main(inputData: InputData) -> OutputData {
     output.combinedOpacity = vertexUniforms.combinedOpacity;
     return output;
 }
+

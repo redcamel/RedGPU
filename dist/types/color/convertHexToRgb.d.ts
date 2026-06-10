@@ -18,12 +18,22 @@
  * [KO] RGB 값을 배열 형태로 반환할지 여부 (기본값: false)
  * [EN] Whether to return RGB values in an array format (Default: false)
  * @returns
- * [KO] 변환된 RGB 색상 데이터
- * [EN] Converted RGB color data
+ * [KO] 변환된 RGB 색상 데이터. returnArrayYn이 true이면 [r, g, b] 배열을, false이면 {r, g, b} 객체를 반환합니다.
+ * [EN] Converted RGB color data. Returns an [r, g, b] array if returnArrayYn is true, otherwise an {r, g, b} object.
  * @throws
  * [KO] 입력값이 유효한 16진수 색상 형식이 아닐 경우 Error 발생
  * [EN] Throws Error if the input value is not a valid hexadecimal color format
  * @category Color
  */
-declare const convertHexToRgb: (hex: string | number, returnArrayYn?: boolean) => any;
+declare function convertHexToRgb(hex: string | number, returnArrayYn: true): [number, number, number];
+declare function convertHexToRgb(hex: string | number, returnArrayYn?: false): {
+    r: number;
+    g: number;
+    b: number;
+};
+declare function convertHexToRgb(hex: string | number, returnArrayYn?: boolean): [number, number, number] | {
+    r: number;
+    g: number;
+    b: number;
+};
 export default convertHexToRgb;

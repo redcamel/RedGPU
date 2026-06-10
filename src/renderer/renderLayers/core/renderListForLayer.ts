@@ -1,5 +1,3 @@
-import createBasePipeline from "../../../display/mesh/core/pipeline/createBasePipeline";
-import PIPELINE_TYPE from "../../../display/mesh/core/pipeline/PIPELINE_TYPE";
 import RenderViewStateData from "../../../display/view/core/RenderViewStateData";
 
 const renderListForLayer = (list, renderViewStateData: RenderViewStateData, pipelineKey: string = 'pipeline') => {
@@ -7,7 +5,9 @@ const renderListForLayer = (list, renderViewStateData: RenderViewStateData, pipe
     const len = list.length;
     const {
         currentRenderPassEncoder,
+        renderResults
     } = renderViewStateData
+    //TODO - 렌더번들기반으로 이것도 옮겨야함
     currentRenderPassEncoder.setBindGroup(0, renderViewStateData.view.systemUniform_Vertex_UniformBindGroup)
     for (i; i < len; i++) {
         const target = list[i]
@@ -15,52 +15,37 @@ const renderListForLayer = (list, renderViewStateData: RenderViewStateData, pipe
             const currentGeometry = target._geometry
             const currentMaterial = target._material
             // render
-            if (currentGeometry) renderViewStateData.num3DObjects++
-            else renderViewStateData.num3DGroups++
+            if (currentGeometry) renderResults.num3DObjects++
+            else renderResults.num3DGroups++
             const {gpuRenderInfo} = target
             const {vertexUniformBindGroup} = gpuRenderInfo
-            if (!gpuRenderInfo[pipelineKey]) {
-                if (pipelineKey === 'shadowPipeline') {
-                    gpuRenderInfo.shadowPipeline = target.gpuRenderInfo.vertexStructInfo.vertexEntries.includes('drawDirectionalShadowDepth') ? createBasePipeline(target, target.gpuRenderInfo.vertexShaderModule, target.gpuRenderInfo.vertexBindGroupLayout, PIPELINE_TYPE.SHADOW) : null
-                } else if (pipelineKey === 'pickingPipeline') {
-                    gpuRenderInfo.pickingPipeline = target.gpuRenderInfo.vertexStructInfo.vertexEntries.includes('picking') ? createBasePipeline(target, target.gpuRenderInfo.vertexShaderModule, target.gpuRenderInfo.vertexBindGroupLayout, PIPELINE_TYPE.PICKING) : null
-                }
-            }
+
             if (currentGeometry && gpuRenderInfo[pipelineKey]) {
                 currentRenderPassEncoder.setPipeline(gpuRenderInfo[pipelineKey])
                 const {gpuBuffer} = currentGeometry.vertexBuffer
                 const {fragmentUniformBindGroup} = currentMaterial.gpuRenderInfo
-                if (renderViewStateData.prevVertexGpuBuffer !== gpuBuffer) {
-                    currentRenderPassEncoder.setVertexBuffer(0, gpuBuffer)
-                    renderViewStateData.prevVertexGpuBuffer = gpuBuffer
-                }
+                currentRenderPassEncoder.setVertexBuffer(0, gpuBuffer)
                 currentRenderPassEncoder.setBindGroup(1, vertexUniformBindGroup);
-                if (renderViewStateData.prevFragmentUniformBindGroup !== fragmentUniformBindGroup) {
-                    currentRenderPassEncoder.setBindGroup(2, fragmentUniformBindGroup)
-                    renderViewStateData.prevFragmentUniformBindGroup = fragmentUniformBindGroup
-                }
+                currentRenderPassEncoder.setBindGroup(2, fragmentUniformBindGroup)
                 //
-                renderViewStateData.numDrawCalls++
+                renderResults.numDrawCalls++
                 //
                 if (currentGeometry.indexBuffer) {
                     const {indexBuffer} = currentGeometry
                     const {indexCount, triangleCount, gpuBuffer: indexGPUBuffer, format} = indexBuffer
                     currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, format)
                     currentRenderPassEncoder.drawIndexed(indexCount, 1, 0, 0, 0);
-                    renderViewStateData.numTriangles += triangleCount
-                    renderViewStateData.numPoints += indexCount
+                    renderResults.numTriangles += triangleCount
+                    renderResults.numPoints += indexCount
                 } else {
                     const {vertexBuffer} = currentGeometry
                     const {vertexCount, triangleCount} = vertexBuffer
                     currentRenderPassEncoder.draw(vertexCount, 1, 0, 0);
-                    renderViewStateData.numTriangles += triangleCount;
-                    renderViewStateData.numPoints += vertexCount
+                    renderResults.numTriangles += triangleCount;
+                    renderResults.numPoints += vertexCount
                 }
             }
         }
     }
-    renderViewStateData.prevVertexGpuBuffer = null
-    renderViewStateData.prevFragmentUniformBindGroup = null
-    renderViewStateData.prevVertexGpuBuffer = null
 }
 export default renderListForLayer

@@ -2,7 +2,6 @@ import { Function } from "wgsl_reflect";
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
 import Primitive from "../../primitive/core/Primitive";
-import BitmapTexture from "../../resources/texture/BitmapTexture";
 import AABB from "../../bound/AABB";
 import OBB from "../../bound/OBB";
 import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
@@ -13,8 +12,8 @@ import Object3DContainer from "./core/Object3DContainer";
 interface Mesh {
     receiveShadow: boolean;
     disableJitter: boolean;
-    meshType: string;
     useDisplacementTexture: boolean;
+    isInstanceofMesh: boolean;
 }
 /**
  * [KO] geometry와 material을 바탕으로 3D/2D 객체의 위치, 회전, 스케일, 피벗, 계층 구조, 렌더링, 그림자, 디버깅 등 다양한 기능을 제공하는 기본 메시 클래스입니다.
@@ -46,11 +45,6 @@ interface Mesh {
  */
 declare class Mesh extends MeshBase {
     #private;
-    /**
-     * [KO] 메시의 디스플레이스먼트 텍스처
-     * [EN] Displacement texture of the mesh
-     */
-    displacementTexture: BitmapTexture;
     /**
      * [KO] 그림자 캐스팅 여부
      * [EN] Whether to cast shadows
@@ -178,19 +172,6 @@ declare class Mesh extends MeshBase {
      * [EN] Returns the registered events.
      */
     get events(): any;
-    /**
-     * [KO] 메시의 이름을 반환합니다.
-     * [EN] Returns the name of the mesh.
-     */
-    get name(): string;
-    /**
-     * [KO] 메시의 이름을 설정합니다.
-     * [EN] Sets the name of the mesh.
-     * @param value -
-     * [KO] 메시 이름
-     * [EN] Mesh name
-     */
-    set name(value: string);
     /**
      * [KO] 버텍스 상태 버퍼 레이아웃을 반환합니다.
      * [EN] Returns the vertex state buffer layouts.

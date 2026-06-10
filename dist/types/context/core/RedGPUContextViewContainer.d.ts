@@ -6,6 +6,11 @@ import View3D from "../../display/view/View3D";
  * [KO] 뷰의 추가, 제거, 순서 변경 및 조회를 담당합니다.
  * [EN] Handles adding, removing, reordering, and retrieving views.
  *
+ * ::: warning
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
+ *
  * * ### Example
  * ```typescript
  * // RedGPUContext extends RedGPUContextViewContainer
@@ -49,6 +54,9 @@ declare class RedGPUContextViewContainer {
      * @param view -
      * [KO] 추가할 View3D 객체
      * [EN] View3D object to add
+     * @throws
+     * [KO] view가 View3D 인스턴스가 아닐 경우 에러 발생
+     * [EN] Throws error if view is not an instance of View3D
      */
     addView(view: View3D): void;
     /**
@@ -60,6 +68,9 @@ declare class RedGPUContextViewContainer {
      * @param index -
      * [KO] 삽입할 인덱스
      * [EN] Index to insert at
+     * @throws
+     * [KO] view가 View3D 인스턴스가 아니거나 index가 올바른 uint 범위가 아닐 경우 에러 발생
+     * [EN] Throws error if view is not an instance of View3D or index is not a valid uint
      */
     addViewAt(view: View3D, index: number): void;
     /**
@@ -68,6 +79,12 @@ declare class RedGPUContextViewContainer {
      * @param index -
      * [KO] 조회할 뷰의 인덱스
      * [EN] Index of the view to retrieve
+     * @returns
+     * [KO] 해당 인덱스의 View3D 객체
+     * [EN] View3D object at the specified index
+     * @throws
+     * [KO] index가 올바른 uint 범위가 아닐 경우 에러 발생
+     * [EN] Throws error if index is not a valid uint
      */
     getViewAt(index: number): View3D;
     /**
@@ -76,6 +93,12 @@ declare class RedGPUContextViewContainer {
      * @param view -
      * [KO] 검색할 View3D 객체
      * [EN] View3D object to search for
+     * @returns
+     * [KO] 뷰의 인덱스 (찾지 못하면 -1)
+     * [EN] Index of the view (or -1 if not found)
+     * @throws
+     * [KO] view가 View3D 인스턴스가 아닐 경우 에러 발생
+     * [EN] Throws error if view is not an instance of View3D
      */
     getViewIndex(view: View3D): number;
     /**
@@ -115,6 +138,9 @@ declare class RedGPUContextViewContainer {
      * @param index2 -
      * [KO] 두 번째 인덱스
      * [EN] Second index
+     * @throws
+     * [KO] 인덱스가 범위를 벗어나거나 두 인덱스가 같은 경우 에러 발생
+     * [EN] Throws error if indices are out of bounds or identical
      */
     swapViewsAt(index1: number, index2: number): void;
     /**
@@ -123,6 +149,9 @@ declare class RedGPUContextViewContainer {
      * @param view -
      * [KO] 제거할 View3D 객체
      * [EN] View3D object to remove
+     * @throws
+     * [KO] 뷰가 등록되어 있지 않은 경우 에러 발생
+     * [EN] Throws error if view is not found in the view list
      */
     removeView(view: View3D): void;
     /**
@@ -131,6 +160,9 @@ declare class RedGPUContextViewContainer {
      * @param index -
      * [KO] 제거할 뷰의 인덱스
      * [EN] Index of the view to remove
+     * @throws
+     * [KO] 인덱스가 범위를 벗어난 경우 에러 발생
+     * [EN] Throws error if index is out of range
      */
     removeViewAt(index: number): void;
     /**

@@ -1,11 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js?t=1781131404967";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1781131404967";
 
 /**
- * [KO] Point Light 예제
- * [EN] Point Light example
+ * [KO] PointLight 예제 (Lighting Studio)
+ * [EN] PointLight Example (Lighting Studio)
  *
- * [KO] Point Light의 사용법과 속성 제어 방법을 보여줍니다.
- * [EN] Demonstrates the usage and property control of Point Light.
+ * [KO] 촘촘하게 배치된 구체 그리드를 통해 PointLight의 부드러운 감쇄 효과를 시연합니다.
+ * [EN] Demonstrates the smooth attenuation effect of PointLight through a dense grid of spheres.
  */
 
 const canvas = document.createElement('canvas');
@@ -14,124 +15,107 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. [KO] 카메라 컨트롤러 설정
+        // [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 25;
-        controller.speedDistance = 0.5;
+        controller.distance = 50;
+        controller.tilt = -35;
 
+        // 2. [KO] 씬 및 뷰 구성
+        // [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.grid = true;
-        view.axis = true;
         redGPUContext.addView(view);
 
+        // 3. [KO] 라이트 및 환경 구성
+        // [EN] Configure Light and Environment
         const light = createPointLight(scene);
-        const mesh = createSampleMeshes(redGPUContext, scene);
+        createStudioEnvironment(redGPUContext, scene);
+        createMaterialGrid(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
-        const render = () => {
-        };
-        renderer.start(redGPUContext, render);
+        // 4. [KO] 렌더러 생성 및 루프 시작
+        // [EN] Create Renderer and Start Loop
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext);
 
-        renderTestPaneWithLightControl(redGPUContext, light);
+        // 5. [KO] 테스트용 GUI 렌더링
+        // [EN] Render Test GUI
+        renderTestPane(redGPUContext, light);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
-        const errorMessage = document.createElement('div');
-        errorMessage.innerHTML = failReason;
-        document.body.appendChild(errorMessage);
     }
 );
 
-/**
- * [KO] Point Light를 생성합니다.
- * [EN] Creates a Point Light.
- * @param {RedGPU.Display.Scene} scene
- * @returns {RedGPU.Light.PointLight}
- */
 const createPointLight = (scene) => {
-    const intensity = 1;
-    const light = new RedGPU.Light.PointLight('#fff', intensity);
-    light.intensity = intensity;
-    light.x = 4;
-    light.y = 4;
-    light.radius = 10;
+    const light = new RedGPU.Light.PointLight('#ffffff', 8000); 
+    light.setPosition(0, 10, 0);
+    light.radius = 40;
     light.enableDebugger = true;
     scene.lightManager.addPointLight(light);
-
     return light;
 };
 
-/**
- * [KO] 샘플 메시들을 생성합니다.
- * [EN] Creates sample meshes.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- */
-const createSampleMeshes = (redGPUContext, scene) => {
-    const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-    material.diffuseTexture = new RedGPU.Resource.BitmapTexture(
-        redGPUContext,
-        '../../../assets/UV_Grid_Sm.jpg'
-    );
+const createStudioEnvironment = (redGPUContext, scene) => {
+    const studioMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+    studioMaterial.baseColorFactor = [0.1, 0.1, 0.1, 1.0];
+    studioMaterial.roughnessFactor = 0.5;
+    const floor = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Plane(redGPUContext, 200, 200), studioMaterial);
+    floor.rotationX = -90;
+    floor.y = -2;
+    scene.addChild(floor);
+};
 
-    const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32, 32);
-    const gridSize = 4;
-    const spacing = 5;
+const createMaterialGrid = (redGPUContext, scene) => {
+    const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 1.2, 16, 16, 16);
+    const matNonMetal = new RedGPU.Material.PBRMaterial(redGPUContext);
+    matNonMetal.baseColorFactor = [1.0, 0.2, 0.2, 1.0];
+    matNonMetal.metallicFactor = 0.0;
+    matNonMetal.roughnessFactor = 0.4;
+    const matMetal = new RedGPU.Material.PBRMaterial(redGPUContext);
+    matMetal.baseColorFactor = [1.0, 1.0, 1.0, 1.0];
+    matMetal.metallicFactor = 1.0;
+    matMetal.roughnessFactor = 0.2;
 
-    for (let row = 0; row < gridSize; row++) {
-        for (let col = 0; col < gridSize; col++) {
-            const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-            const x = col * spacing - ((gridSize - 1) * spacing) / 2;
-            const z = row * spacing - ((gridSize - 1) * spacing) / 2;
-            const y = 0;
-
-            mesh.setPosition(x, y, z);
+    const size = 20;
+    const spacing = 4.5;
+    for (let x = 0; x < size; x++) {
+        for (let z = 0; z < size; z++) {
+            const isMetal = (x + z) % 2 === 0;
+            const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, isMetal ? matMetal : matNonMetal);
+            mesh.x = (x - (size - 1) / 2) * spacing;
+            mesh.z = (z - (size - 1) / 2) * spacing;
             scene.addChild(mesh);
         }
     }
 };
 
-/**
- * [KO] 조명 제어용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for light control.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Light.PointLight} light
- */
-const renderTestPaneWithLightControl = async (redGPUContext, light) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const lightConfig = {
-        x: light.position[0],
-        y: light.position[1],
-        z: light.position[2],
-        radius: light.radius,
-        intensity: light.intensity,
-        color: {r: light.color.r, g: light.color.g, b: light.color.b},
-    };
+const renderTestPane = (redGPUContext, light) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        gui: (pane) => {
+            const config = { 
+                color: {r: light.color.r, g: light.color.g, b: light.color.b}
+            };
 
-    const lightFolder = pane.addFolder({title: 'Point Light', expanded: true});
-    lightFolder.addBinding(lightConfig, 'x', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
-        light.x = evt.value;
+            const folder = pane.addFolder({title: 'PointLight Control', expanded: true});
+
+            // [KO] 포인트 라이트 설정
+            // [EN] Point Light Settings
+            const propFolder = folder.addFolder({title: 'Properties', expanded: true});
+            propFolder.addBinding(config, 'color', {view: 'color', label: 'color'}).on('change', (evt) => {
+                const {r, g, b} = evt.value;
+                light.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
+            });
+            propFolder.addBinding(light, 'lumen', {min: 0, max: 200000, step: 100});
+            propFolder.addBinding(light, 'radius', {min: 0, max: 200, step: 1});
+
+            const transformFolder = folder.addFolder({title: 'Transform', expanded: true});
+            transformFolder.addBinding(light, 'x', {min: -60, max: 60, step: 0.1});
+            transformFolder.addBinding(light, 'y', {min: -10, max: 60, step: 0.1});
+            transformFolder.addBinding(light, 'z', {min: -60, max: 60, step: 0.1});
+            
+            folder.addBinding(light, 'enableDebugger', {label: 'Show Light Debugger'});
+        }
     });
-    lightFolder.addBinding(lightConfig, 'y', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
-        light.y = evt.value;
-    });
-    lightFolder.addBinding(lightConfig, 'z', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
-        light.z = evt.value;
-    });
-    lightFolder.addBinding(lightConfig, 'intensity', {min: 0, max: 5, step: 0.1}).on('change', (evt) => {
-        light.intensity = evt.value;
-    });
-    lightFolder.addBinding(lightConfig, 'radius', {min: 0, max: 20, step: 0.1}).on('change', (evt) => {
-        light.radius = evt.value;
-    });
-    lightFolder.addBinding(light, 'enableDebugger');
-    lightFolder
-        .addBinding(lightConfig, 'color', {picker: 'inline', view: 'color', expanded: true})
-        .on('change', (evt) => {
-            const {r, g, b} = evt.value;
-            light.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
-        });
 };

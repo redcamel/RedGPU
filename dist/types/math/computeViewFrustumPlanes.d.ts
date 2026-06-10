@@ -14,7 +14,7 @@ import { mat4 } from "gl-matrix";
  * @param projectionMatrix -
  * [KO] 프로젝션 행렬
  * [EN] Projection matrix
- * @param cameraMatrix -
+ * @param viewMatrix -
  * [KO] 카메라 행렬
  * [EN] Camera matrix
  * @returns
@@ -22,5 +22,5 @@ import { mat4 } from "gl-matrix";
  * [EN] Array of [A, B, C, D] for 6 planes
  * @category Math
  */
-declare const computeViewFrustumPlanes: (projectionMatrix: mat4, cameraMatrix: mat4) => number[][];
+declare const computeViewFrustumPlanes: (projectionMatrix: mat4, viewMatrix: mat4) => number[][];
 export default computeViewFrustumPlanes;

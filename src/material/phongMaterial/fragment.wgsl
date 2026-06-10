@@ -1,10 +1,20 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include calcTintBlendMode;
-#redgpu_include calcDirectionalShadowVisibility;
-#redgpu_include normalFunctions;
-#redgpu_include drawPicking;
-#redgpu_include FragmentOutput;
-#redgpu_include calculateMotionVector;
+#redgpu_include color.getTintBlendMode;
+#redgpu_include shadow.getDirectionalShadowVisibility;
+#redgpu_include math.tnb.getTBNFromVertexTangent
+#redgpu_include math.tnb.getNormalFromNormalMap
+#redgpu_include displacement.getDisplacementNormal;
+#redgpu_include entryPoint.mesh.entryPointPickingFragment;
+#redgpu_include systemStruct.OutputFragment;
+#redgpu_include math.getMotionVector;
+#redgpu_include lighting.getLightDistanceAttenuation;
+#redgpu_include lighting.getLightAngleAttenuation;
+
+
+#redgpu_include skyAtmosphere.skyAtmosphereFn
+
+const maxDistance: f32 = 1000.0;
+
 struct Uniforms {
     color: vec3<f32>,
     //
@@ -18,6 +28,7 @@ struct Uniforms {
     aoStrength:f32,
     //
     normalScale:f32,
+    displacementScale:f32,
     //
     opacity: f32,
     useTint:u32,
@@ -39,13 +50,15 @@ struct InputData {
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
 
+    @location(3) vertexTangent: vec4<f32>,
+
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
 
     @location(11) combinedOpacity: f32,
     //
     @location(12) motionVector: vec3<f32>,
-    @location(13) shadowPos: vec3<f32>,
+    @location(13) shadowCoord: vec3<f32>,
     @location(14) @interpolate(flat) receiveShadow: f32,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 }
@@ -63,28 +76,99 @@ struct InputData {
 @group(2) @binding(10) var aoTexture: texture_2d<f32>;
 @group(2) @binding(11) var normalTextureSampler: sampler;
 @group(2) @binding(12) var normalTexture: texture_2d<f32>;
+@group(2) @binding(13) var displacementTextureSampler: sampler;
+@group(2) @binding(14) var displacementTexture: texture_2d<f32>;
 
+
+#redgpu_include math.PI
+#redgpu_include math.INV_PI
+#redgpu_include math.EPSILON
+#redgpu_include math.direction.getViewDirection
+
+fn getDiffuseBRDFDisney(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albedo: vec3<f32>) -> vec3<f32> {
+    if (NdotL <= 0.0) { return vec3<f32>(0.0); }
+
+    // Disney diffuse term
+    let energyBias = mix(0.0, 0.5, roughness);
+    let energyFactor = mix(1.0, 1.0 / 1.51, roughness);
+    let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
+    let f0 = 1.0;
+    let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
+    let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
+
+    return albedo * NdotL * lightScatter * viewScatter * energyFactor * INV_PI;
+}
+
+fn getFresnelSchlick(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
+    return F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+fn getDistributionGGX(NdotH: f32, roughness: f32) -> f32 {
+    let alpha = roughness * roughness;
+    let alpha2 = alpha * alpha;
+    let NdotH2 = NdotH * NdotH;
+
+    let nom = alpha2;
+    let denom = (NdotH2 * (alpha2 - 1.0) + 1.0);
+    let denomSquared = denom * denom;
+
+    return nom / max(EPSILON, denomSquared * PI);
+}
+
+fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
+    let alpha = roughness * roughness;
+    let alpha2 = alpha * alpha;
+
+    // [KO] grazing angle에서의 수치적 발산을 방지하기 위해 최소값 제한
+    let safeNdotV = max(NdotV, 1e-4);
+    let safeNdotL = max(NdotL, 1e-4);
+
+    let GGXV = safeNdotL * sqrt(safeNdotV * safeNdotV * (1.0 - alpha2) + alpha2);
+    let GGXL = safeNdotV * sqrt(safeNdotL * safeNdotL * (1.0 - alpha2) + alpha2);
+
+    return 0.5 / max(GGXV + GGXL, EPSILON);
+}
+
+fn getSpecularBRDF(
+    F0: vec3<f32>,
+    roughness: f32,
+    NdotH: f32,
+    NdotV: f32,
+    NdotL: f32,
+    LdotH: f32
+) -> vec3<f32> {
+    // 1. Distribution (D)
+    let D = getDistributionGGX(NdotH, roughness);
+
+    // 2. Visibility (V) - Includes Geometry term and 1/(4*NoL*NoV)
+    let V = getSpecularVisibility(NdotV, NdotL, roughness);
+
+    // 3. Fresnel (F)
+    let F = getFresnelSchlick(LdotH, F0);
+
+    return D * V * F;
+}
 
 @fragment
-fn main(inputData:InputData) -> FragmentOutput {
-    var output: FragmentOutput;
+fn main(inputData:InputData) -> OutputFragment {
+    var output: OutputFragment;
+
+    // [KO] 입력 데이터 추출 [EN] Extract input data
+    let input_vertexNormal = inputData.vertexNormal.xyz;
+    let input_vertexPosition = inputData.vertexPosition.xyz;
+
     // AmbientLight
     let u_ambientLight = systemUniforms.ambientLight;
-    let u_ambientLightColor = u_ambientLight.color;
-    let u_ambientLightIntensity = u_ambientLight.intensity;
 
     // DirectionalLight
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
-    let u_shadowDepthTextureSize = systemUniforms.shadowDepthTextureSize;
-    let u_bias = systemUniforms.bias;
-
+    let u_directionalShadowDepthTextureSize = systemUniforms.shadow.directionalShadowDepthTextureSize;
+    let u_directionalShadowBias = systemUniforms.shadow.directionalShadowBias;
 
     // Camera
     let u_camera = systemUniforms.camera;
-    let u_cameraMatrix = u_camera.cameraMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
-
 
     // Uniforms
     let u_color = uniforms.color;
@@ -96,190 +180,196 @@ fn main(inputData:InputData) -> FragmentOutput {
     let u_specularStrength = uniforms.specularStrength;
     let u_shininess = uniforms.shininess;
     let u_opacity = uniforms.opacity;
-    let E = normalize(u_cameraPosition - inputData.vertexPosition);
+    let V = getViewDirection(input_vertexPosition, u_cameraPosition);
 
     // Shadow
     let receiveShadowYn = inputData.receiveShadow != .0;
 
-
-    //
-
     // Vertex Normal
-    var N = normalize(inputData.vertexNormal) ;
-    #redgpu_if normalTexture
-        let normalSamplerColor = textureSample(normalTexture, normalTextureSampler, inputData.uv).rgb;
-        N = perturb_normal( N, inputData.vertexPosition, inputData.uv, normalSamplerColor, u_normalScale ) ;
-    #redgpu_endIf
-    //
-    var finalColor:vec4<f32>;
-    var resultAlpha:f32 = u_opacity * inputData.combinedOpacity;
-    var diffuseColor:vec3<f32> = u_color;
+    var N = normalize(input_vertexNormal) ;
+    #redgpu_if displacementTexture
+        {
+            let dist = distance(input_vertexPosition, u_cameraPosition);
+            let maxMip = f32(textureNumLevels(displacementTexture)) - 1.0;
+            let targetMipLevel = clamp((dist / maxDistance) * maxMip, 0.0, maxMip);
 
-    #redgpu_if diffuseTexture
-        let diffuseSampleColor = textureSample(diffuseTexture,diffuseTextureSampler, inputData.uv);
-        diffuseColor = diffuseSampleColor.rgb;
-        resultAlpha = resultAlpha * diffuseSampleColor.a;
-    #redgpu_endIf
-
-    var specularSamplerValue:f32 = 1;
-    #redgpu_if specularTexture
-        specularSamplerValue = textureSample(specularTexture,specularTextureSampler, inputData.uv).r ;
-    #redgpu_endIf
-    var mixColor:vec3<f32>;
-
-    // 암비안트 라이트 처리 추가
-    let ambientContribution = u_ambientLightColor * u_ambientLightIntensity;
-    let ambientDiffuse = diffuseColor * ambientContribution;
-    mixColor += ambientDiffuse;
-
-    var visibility:f32 = 1.0;
-     visibility = calcDirectionalShadowVisibility(
-                directionalShadowMap,
-                directionalShadowMapSampler,
-                u_shadowDepthTextureSize,
-                u_bias,
-                inputData.shadowPos,
-
+            // [KO] 탄젠트 공간에서 계산된 노멀을 가져옴
+            let tangentDisplacedNormal = getDisplacementNormal(
+                displacementTexture,
+                displacementTextureSampler,
+                uniforms.displacementScale,
+                inputData.uv,
+                targetMipLevel
             );
 
-    if(!receiveShadowYn){
-       visibility = 1.0;
-    }
+            // [KO] 로컬 공간 기저(TBN) 구축
+            let tbn = getTBNFromVertexTangent(N, inputData.vertexTangent);
+            N = normalize(tbn * tangentDisplacedNormal);
+        }
+    #redgpu_endIf
+    #redgpu_if normalTexture
+        let normalSamplerColor = textureSample(normalTexture, normalTextureSampler, inputData.uv).rgb;
+        let tbn = getTBNFromVertexTangent(N, inputData.vertexTangent);
+        N = getNormalFromNormalMap(normalSamplerColor, tbn, u_normalScale);
+    #redgpu_endIf
+    N = normalize(N);
 
-    for (var i = 0u; i < u_directionalLightCount; i = i + 1) {
-        let u_directionalLightDirection = u_directionalLights[i].direction;
-        let u_directionalLightColor = u_directionalLights[i].color;
-        let u_directionalLightIntensity = u_directionalLights[i].intensity;
+    let NdotV = max(dot(N, V), 1e-6);
 
-        let L = normalize(u_directionalLightDirection);
-        let R = reflect(L, N);
-        let lambertTerm = max(dot(N, -L), 0.0);
-        let specular = pow(max(dot(R, E), 0.0), u_shininess) * specularSamplerValue;
-
-        // 디렉셔널 라이트 기여도 (쉐도우 적용)
-        let lightContribution = u_directionalLightColor * u_directionalLightIntensity * visibility;
-        let ld = diffuseColor * lightContribution * lambertTerm;
-        let ls = u_specularColor * u_specularStrength * lightContribution * specular;
-
-        mixColor += ld + ls;
-
-    }
-
-    // PointLight
-    let clusterIndex = getClusterLightClusterIndex(inputData.position);
-    let lightOffset  = clusterLightGroup.lights[clusterIndex].offset;
-    let lightCount:u32   = clusterLightGroup.lights[clusterIndex].count;
-
-    for (var lightIndex = 0u; lightIndex < lightCount; lightIndex = lightIndex + 1u) {
-         let i = clusterLightGroup.indices[lightOffset + lightIndex];
-         let u_clusterLightPosition = clusterLightList.lights[i].position;
-         let u_clusterLightColor = clusterLightList.lights[i].color;
-         let u_clusterLightIntensity = clusterLightList.lights[i].intensity;
-         let u_clusterLightRadius = clusterLightList.lights[i].radius;
-         let u_isSpotLight = clusterLightList.lights[i].isSpotLight;
-
-         let lightDir = u_clusterLightPosition - inputData.vertexPosition;
-         let lightDistance = length(lightDir);
-
-         // 거리 범위 체크
-         if (lightDistance > u_clusterLightRadius) {
-             continue;
-         }
-
-         let L = normalize(lightDir);
-//         let attenuation = clamp(0.0, 1.0, 1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius));
-//         let attenuation = clamp(1.0 - (lightDistance * lightDistance) / (u_clusterLightRadius * u_clusterLightRadius), 0.0, 1.0);
-
-        let dist2 = max(dot(lightDir, lightDir), 0.0001);
-        let d = sqrt(dist2);
-        let rangePart = pow(clamp(1.0 - d / u_clusterLightRadius, 0.0, 1.0), 2.0);
-        // 반경 정규화로 중심부 과도한 밝기 방지 (radius^2 스케일)
-        let invSquare = (u_clusterLightRadius * u_clusterLightRadius) / dist2;
-        let attenuation = rangePart * invSquare;
-
-         var finalAttenuation = attenuation;
-
-         // 스폿라이트 처리
-         if (u_isSpotLight > 0.0) {
-             let u_clusterLightDirection = normalize(vec3<f32>(
-                 clusterLightList.lights[i].directionX,
-                 clusterLightList.lights[i].directionY,
-                 clusterLightList.lights[i].directionZ
-             ));
-             let u_clusterLightInnerAngle = clusterLightList.lights[i].innerCutoff;
-             let u_clusterLightOuterCutoff = clusterLightList.lights[i].outerCutoff;
-
-             // 라이트에서 버텍스로의 방향
-             let lightToVertex = normalize(-lightDir);
-             let cosTheta = dot(lightToVertex, u_clusterLightDirection);
-
-             let cosOuter = cos(radians(u_clusterLightOuterCutoff));
-             let cosInner = cos(radians(u_clusterLightInnerAngle));
-
-             // 스폿라이트 외곽 범위를 벗어나면 스킵
-             if (cosTheta < cosOuter) {
-                 continue;
-             }
-
-             // 스폿라이트 강도 계산 (부드러운 페이드)
-             let epsilon = cosInner - cosOuter;
-             let spotIntensity = clamp((cosTheta - cosOuter) / epsilon, 0.0, 1.0);
-
-             finalAttenuation *= spotIntensity;
-         }
-
-         let R = reflect(-L, N);
-         let diffuse = diffuseColor * max(dot(N, L), 0.0);
-         let specular = pow(max(dot(R, E), 0.0), u_shininess) * specularSamplerValue;
-
-         let diffuseAttenuation = finalAttenuation;
-         let specularAttenuation = finalAttenuation * finalAttenuation;
-
-         let ld = u_clusterLightColor * diffuse * diffuseAttenuation * u_clusterLightIntensity;
-         let ls = u_specularColor * u_specularStrength * specular * specularAttenuation * u_clusterLightIntensity;
-
-         mixColor += ld + ls;
-    }
-
-
+    // Alpha Map
+    var resultAlpha:f32 = u_opacity * inputData.combinedOpacity;
     #redgpu_if alphaTexture
         let alphaMapValue:f32 = textureSample(alphaTexture, alphaTextureSampler, inputData.uv).r;
         resultAlpha = alphaMapValue * resultAlpha;
-        if(resultAlpha == 0){ discard ; }
+        if(resultAlpha == 0.0){ discard ; }
     #redgpu_endIf
-    //
-    var emissiveColor = u_emissiveColor  * u_emissiveStrength;
-    #redgpu_if emissiveTexture
-        emissiveColor = textureSample(emissiveTexture, emissiveTextureSampler, inputData.uv).rgb  * u_emissiveStrength;
+
+    // Base Color (Albedo)
+    var baseColor:vec3<f32> = u_color;
+    #redgpu_if diffuseTexture
+        let diffuseSampleColor = textureSample(diffuseTexture,diffuseTextureSampler, inputData.uv);
+        baseColor = diffuseSampleColor.rgb;
+        resultAlpha = resultAlpha * diffuseSampleColor.a;
     #redgpu_endIf
-    //
+
+    // [KO] PBR 파라미터 매핑 [EN] Mapping PBR parameters
+    let metallicParameter = uniforms.metallic;
+    
+    // [KO] shininess로부터 roughness 유도 (또는 직접 설정값 사용)
+    // [EN] Derive roughness from shininess (or use explicitly set value)
+    var roughnessParameter = select(sqrt(2.0 / (u_shininess + 2.0)), uniforms.roughness, uniforms.roughness > 0.0);
+    roughnessParameter = clamp(roughnessParameter, 0.045, 1.0);
+
+    var specularSamplerValue:f32 = 1.0;
+    #redgpu_if specularTexture
+        specularSamplerValue = textureSample(specularTexture, specularTextureSampler, inputData.uv).r;
+    #redgpu_endIf
+
+    // [KO] 기본 F0 계산: specularColor와 strength를 반영하여 dielectric F0 결정
+    // [EN] Base F0 calculation: determine dielectric F0 by reflecting specularColor and strength
+    let F0_dielectric = vec3<f32>(0.04) * u_specularColor * u_specularStrength * specularSamplerValue;
+    let F0 = mix(F0_dielectric, baseColor, metallicParameter);
+    let albedo = baseColor * (1.0 - metallicParameter);
+
+    // Shadow Visibility
+    var visibility:f32 = 1.0;
+    visibility = getDirectionalShadowVisibility(
+        directionalShadowMap,
+        directionalShadowMapSampler,
+        u_directionalShadowDepthTextureSize,
+        u_directionalShadowBias,
+        inputData.shadowCoord
+    );
+    if(!receiveShadowYn){ visibility = 1.0; }
+
+    var totalDirectLighting = vec3<f32>(0.0);
+
+    // [KO] 직접 조명 계산 루프 (PBR) [EN] Direct lighting calculation loop (PBR)
+    for (var i = 0u; i < u_directionalLightCount; i = i + 1) {
+        let L = -normalize(u_directionalLights[i].direction);
+        let lightIntensity = u_directionalLights[i].intensity;
+        var finalLightColor = u_directionalLights[i].color * lightIntensity * visibility;
+
+        if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
+            let u_atmo = systemUniforms.skyAtmosphere;
+            let surfaceHeightKm = max(0.0, input_vertexPosition.y / 1000.0);
+            let atmosphereTransmittance = getTransmittance(transmittanceTexture, atmosphereSampler, surfaceHeightKm, L.y, u_atmo.atmosphereHeight);
+            finalLightColor *= atmosphereTransmittance;
+        }
+
+        totalDirectLighting += calcPbrLight(finalLightColor, N, V, L, NdotV, roughnessParameter, metallicParameter, albedo, F0);
+    }
+
+    // PointLight / SpotLight Loop (Clustered)
+    let clusterIndex = getClusterLightClusterIndex(inputData.position);
+    let cell = clusterLightGrid.cells[clusterIndex];
+    for (var lightIndex = 0u; lightIndex < cell.count; lightIndex = lightIndex + 1u) {
+         let i = clusterLightGrid.indices[cell.offset + lightIndex];
+         let tLight = clusterLightList.lights[i];
+         let lightDir = tLight.position - input_vertexPosition;
+         let lightDistance = length(lightDir);
+         if (lightDistance > tLight.radius) { continue; }
+
+         let L = normalize(lightDir);
+         var attenuation = getLightDistanceAttenuation(lightDistance, tLight.radius);
+         if (tLight.isSpotLight > 0.0) {
+             let spotDir = normalize(vec3<f32>(tLight.directionX, tLight.directionY, tLight.directionZ));
+             attenuation *= getLightAngleAttenuation(normalize(-L), spotDir, tLight.innerCutoff, tLight.outerCutoff);
+         }
+         if (attenuation <= 0.0) { continue; }
+
+         let finalLightColor = tLight.color * tLight.intensity * attenuation;
+         totalDirectLighting += calcPbrLight(finalLightColor, N, V, L, NdotV, roughnessParameter, metallicParameter, albedo, F0);
+    }
+
+    // [KO] 간접 조명 (Ambient) [EN] Indirect lighting (Ambient)
+    var ambientContribution = albedo * u_ambientLight.color * u_ambientLight.intensity * INV_PI;
+
+    if (systemUniforms.useSkyAtmosphere == 1u) {
+        let u_atmo = systemUniforms.skyAtmosphere;
+        let skyIntensity = u_atmo.sunIntensity;
+        let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, N.y, u_atmo.atmosphereHeight);
+        let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity;
+        ambientContribution = (ambientContribution * diffTrans) + (albedo * skyIrradiance * INV_PI);
+    }
+    
+    // [KO] 조명 합산 [EN] Lighting summation
+    var mixColor = totalDirectLighting + ambientContribution;
+
+    // [KO] AO 및 오클루전 처리 [EN] AO and Occlusion processing
     #redgpu_if aoTexture
-        mixColor = mixColor * textureSample(aoTexture, aoTextureSampler, inputData.uv).rgb * u_aoStrength;
+        mixColor *= textureSample(aoTexture, aoTextureSampler, inputData.uv).rgb * u_aoStrength;
     #redgpu_endIf
-    //
-    finalColor = vec4<f32>(mixColor + emissiveColor, resultAlpha);
+
+    // [KO] 에미시브 처리 [EN] Emissive processing
+    var emissiveColor = u_emissiveColor * u_emissiveStrength ;
+    #redgpu_if emissiveTexture
+        emissiveColor = textureSample(emissiveTexture, emissiveTextureSampler, inputData.uv).rgb * u_emissiveStrength;
+    #redgpu_endIf
+
+    // [KO] 최종 색상 (Pre-Exposure 적용)
+    let finalColor = vec4<f32>((mixColor * systemUniforms.preExposure) + emissiveColor, resultAlpha);
+    
     #redgpu_if useTint
-        finalColor = calcTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
+        output.color = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
+    #redgpu_else
+        output.color = finalColor;
     #redgpu_endIf
-    // alpha 값이 0일 경우 discard
-    if (systemUniforms.isView3D == 1 && finalColor.a == 0.0) {
-      discard;
-    }
-    output.color = finalColor;
 
-    {
-        let metallic = uniforms.metallic;
-        let roughness = uniforms.roughness;
-        let smoothness = 1.0 - roughness;
-        let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
+    if (systemUniforms.isView3D == 1 && output.color.a == 0.0) { discard; }
 
-        let metallicWeight = metallic * metallic;
-        let baseReflection = 0.04 + 0.96 * metallicWeight;
-
-        let baseReflectionStrength = smoothnessCurved * baseReflection;
-        output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
-    }
-
-    output.gBufferMotionVector = vec4<f32>(calculateMotionVector(inputData.currentClipPos, inputData.prevClipPos),0.0, 1.0 );
+    // G-Buffer
+    let smoothness = 1.0 - roughnessParameter;
+    let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
+    output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, smoothnessCurved * (0.04 + 0.96 * metallicParameter * metallicParameter));
+    output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
+    
     return output;
+}
+
+// [KO] 물리 기반 조명 계산 함수 (Simplified PBR)
+// [EN] Physically-based lighting calculation function (Simplified PBR)
+fn calcPbrLight(lightColor: vec3<f32>, N: vec3<f32>, V: vec3<f32>, L: vec3<f32>, NdotV: f32, roughness: f32, metallic: f32, albedo: vec3<f32>, F0: vec3<f32>) -> vec3<f32> {
+    let NdotL = max(dot(N, L), 0.0);
+    if (NdotL <= 0.0) { return vec3<f32>(0.0); }
+
+    let H = normalize(L + V);
+    let NdotH = max(dot(N, H), 0.0);
+    let LdotH = max(dot(L, H), 0.0);
+    let VdotH = max(dot(V, H), 0.0);
+
+    // Specular BRDF (GGX)
+    let F = getFresnelSchlick(VdotH, F0);
+    let D = getDistributionGGX(NdotH, roughness);
+    let Vis = getSpecularVisibility(NdotV, NdotL, roughness);
+    let spec = D * Vis * F;
+
+    // Diffuse BRDF (Disney)
+    let diff = getDiffuseBRDFDisney(NdotL, NdotV, LdotH, roughness, albedo);
+
+    // Energy Conservation
+    let kS = F;
+    let kD = (vec3<f32>(1.0) - kS) * (1.0 - metallic);
+
+    return (kD * diff + spec) * lightColor * NdotL;
 }

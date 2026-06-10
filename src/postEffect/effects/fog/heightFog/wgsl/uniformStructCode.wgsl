@@ -1,9 +1,12 @@
+#redgpu_include math.EPSILON
+#redgpu_include math.reconstruct.getWorldPositionFromDepth
+#redgpu_include math.direction.getRayDirection
 struct Uniforms {
     fogType: u32,
     density: f32,
     baseHeight: f32,
+    thickness: f32,
     falloff: f32,
-    maxHeight: f32,
     fogColor: vec3<f32>,
     padding1: f32,
     padding2: f32,
@@ -18,27 +21,8 @@ fn isFiniteVec3(v: vec3<f32>) -> bool {
 }
 
 fn reconstructWorldPositionUltraPrecise(screenCoord: vec2<f32>, depth: f32) -> vec3<f32> {
-    let ndcX = fma(screenCoord.x, 2.0, -1.0);
-    let ndcY = fma(-screenCoord.y, 2.0, 1.0);
-
-    let safeDepth = clamp(depth, 1e-7, 1.0 - 1e-7);
-    let ndc = vec3<f32>(ndcX, ndcY, safeDepth);
-
-    let clipPos = vec4<f32>(ndc, 1.0);
-    let worldPos4 = systemUniforms.inverseProjectionCameraMatrix * clipPos;
-
-    let epsilon = 1e-6;
-    let w = select(worldPos4.w, epsilon, abs(worldPos4.w) < epsilon);
-    let worldPos = worldPos4.xyz / w;
-
-    let maxCoord = 1e6;
-    let stabilizedX = clamp(worldPos.x, -maxCoord, maxCoord);
-    let stabilizedY = clamp(worldPos.y, -maxCoord, maxCoord);
-    let stabilizedZ = clamp(worldPos.z, -maxCoord, maxCoord);
-
-    let finalPos = vec3<f32>(stabilizedX, stabilizedY, stabilizedZ);
-
-    return select(vec3<f32>(0.0, 0.0, 0.0), finalPos, isFiniteVec3(finalPos));
+    let worldPos = getWorldPositionFromDepth(screenCoord, depth, systemUniforms.projection.inverseProjectionViewMatrix);
+    return select(vec3<f32>(0.0), worldPos, isFiniteVec3(worldPos));
 }
 
 fn calculateHeightFogFactor(screenCoord: vec2<f32>, depth: f32) -> f32 {
@@ -60,7 +44,7 @@ fn calculateHeightFogFactor(screenCoord: vec2<f32>, depth: f32) -> f32 {
 
 fn getSkyboxHeightMaxPrecision(rayDirection: vec3<f32>) -> f32 {
     let u_baseHeight = uniforms.baseHeight;
-    let u_maxHeight = uniforms.maxHeight;
+    let u_maxHeight = u_baseHeight + uniforms.thickness;
 
     let rayY = clamp(rayDirection.y, -0.999, 0.999);
 
@@ -68,7 +52,7 @@ fn getSkyboxHeightMaxPrecision(rayDirection: vec3<f32>) -> f32 {
     let downThreshold = -0.015;
     let transitionRange = upThreshold - downThreshold;
 
-    let safeTransitionRange = max(transitionRange, 1e-6);
+    let safeTransitionRange = max(transitionRange, EPSILON);
 
     if (rayY > upThreshold) {
         return u_maxHeight + 25.0;
@@ -88,7 +72,7 @@ fn getSkyboxHeightMaxPrecision(rayDirection: vec3<f32>) -> f32 {
 
 fn calculateAbsoluteHeightFogMaxPrecision(worldHeight: f32) -> f32 {
     let u_baseHeight = uniforms.baseHeight;
-    let u_maxHeight = uniforms.maxHeight;
+    let u_maxHeight = u_baseHeight + uniforms.thickness;
     let u_density = uniforms.density;
     let u_falloff = uniforms.falloff;
     let u_fogType = uniforms.fogType;
@@ -150,45 +134,7 @@ fn calculateAbsoluteHeightFogMaxPrecision(worldHeight: f32) -> f32 {
 }
 
 fn getRayDirectionMaxPrecision(screenCoord: vec2<f32>) -> vec3<f32> {
-    let centeredX = fma(screenCoord.x, 1.0, -0.5);
-    let centeredY = fma(screenCoord.y, 1.0, -0.5);
-
-    let ndcX = centeredX * 2.0;
-    let ndcY = -(centeredY * 2.0);
-    let ndc = vec3<f32>(ndcX, ndcY, 1.0);
-
-    let clipPos = vec4<f32>(ndc, 1.0);
-    let worldPos4 = systemUniforms.inverseProjectionCameraMatrix * clipPos;
-
-    let epsilon = 1e-6;
-    let w = select(worldPos4.w, epsilon, abs(worldPos4.w) < epsilon);
-    let worldPos = worldPos4.xyz / w;
-
-    let cameraPos = systemUniforms.camera.cameraPosition;
-    let rayDir = worldPos - cameraPos;
-
-    let rayLength = length(rayDir);
-    let minLength = 1e-6;
-
-    if (rayLength < minLength) {
-        return vec3<f32>(0.0, 0.0, 1.0);
-    }
-
-    let normalizedRay = rayDir / rayLength;
-
-    let safeRayX = clamp(normalizedRay.x, -0.999, 0.999);
-    let safeRayY = clamp(normalizedRay.y, -0.999, 0.999);
-    let safeRayZ = clamp(normalizedRay.z, -0.999, 0.999);
-
-    let safeRay = vec3<f32>(safeRayX, safeRayY, safeRayZ);
-
-    let finalRayLength = length(safeRay);
-    let isValidRay = finalRayLength > 1e-6 && isFiniteValue(finalRayLength);
-
-    if (isValidRay) {
-        let finalRay = safeRay / finalRayLength;
-        return select(vec3<f32>(0.0, 0.0, 1.0), finalRay, isFiniteVec3(finalRay));
-    }
-
-    return vec3<f32>(0.0, 0.0, 1.0);
+    let worldPos = getWorldPositionFromDepth(screenCoord, 1.0, systemUniforms.projection.inverseProjectionViewMatrix);
+    let rayDir = getRayDirection(worldPos, systemUniforms.camera.cameraPosition);
+    return select(vec3<f32>(0.0, 0.0, 1.0), rayDir, isFiniteVec3(rayDir));
 }

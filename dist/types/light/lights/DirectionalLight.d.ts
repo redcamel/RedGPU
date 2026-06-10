@@ -24,73 +24,65 @@ declare class DirectionalLight extends ABaseLight {
      * @param color -
      * [KO] 광원의 색상 (hex 문자열, 예: '#ffcc00')
      * [EN] Color of the light (hex string, e.g., '#ffcc00')
-     * @param intensity -
-     * [KO] 광원의 세기 (기본값: 1)
-     * [EN] Intensity of the light (default: 1)
+     * @param lux -
+     * [KO] 광원의 조도 (Lux, lx, 기본값: 100,000)
+     * [EN] Illuminance of the light (Lux, lx, default: 100,000)
      */
-    constructor(direction?: [number, number, number], color?: string, intensity?: number);
+    constructor(direction?: [number, number, number], color?: string, lux?: number);
     /**
-     * [KO] 광원의 X 방향 벡터 값을 반환합니다.
-     * [EN] Returns the X direction vector value of the light.
+     * [KO] 광원의 조도(Lux, lx)를 반환합니다.
+     * [EN] Returns the illuminance (Lux, lx) of the light source.
      * @returns
-     * [KO] X 방향 벡터 값
-     * [EN] X direction vector value
+     * [KO] 조도 값
+     * [EN] Illuminance value
+     */
+    get lux(): number;
+    /**
+     * [KO] 광원의 조도(Lux, lx)를 설정합니다.
+     * [EN] Sets the illuminance (Lux, lx) of the light source.
+     * @param value -
+     * [KO] 조도 값 (예: 100,000)
+     * [EN] Illuminance value (e.g., 100,000)
+     */
+    set lux(value: number);
+    /**
+     * [KO] 광원의 고도(Elevation, 도)입니다.
+     * [EN] Elevation of the light source (degrees).
+     */
+    get elevation(): number;
+    set elevation(value: number);
+    /**
+     * [KO] 광원의 방위각(Azimuth, 도)입니다.
+     * [EN] Azimuth of the light source (degrees).
+     */
+    get azimuth(): number;
+    set azimuth(value: number);
+    /**
+     * [KO] 광원의 X 방향 벡터 값입니다.
+     * [EN] X direction vector value of the light.
      */
     get directionX(): number;
-    /**
-     * [KO] 광원의 X 방향 벡터 값을 설정합니다.
-     * [EN] Sets the X direction vector value of the light.
-     * @param value -
-     * [KO] X 방향 벡터 값
-     * [EN] X direction vector value
-     */
     set directionX(value: number);
     /**
-     * [KO] 광원의 Y 방향 벡터 값을 반환합니다.
-     * [EN] Returns the Y direction vector value of the light.
-     * @returns
-     * [KO] Y 방향 벡터 값
-     * [EN] Y direction vector value
+     * [KO] 광원의 Y 방향 벡터 값입니다.
+     * [EN] Y direction vector value of the light.
      */
     get directionY(): number;
-    /**
-     * [KO] 광원의 Y 방향 벡터 값을 설정합니다.
-     * [EN] Sets the Y direction vector value of the light.
-     * @param value -
-     * [KO] Y 방향 벡터 값
-     * [EN] Y direction vector value
-     */
     set directionY(value: number);
     /**
-     * [KO] 광원의 Z 방향 벡터 값을 반환합니다.
-     * [EN] Returns the Z direction vector value of the light.
-     * @returns
-     * [KO] Z 방향 벡터 값
-     * [EN] Z direction vector value
+     * [KO] 광원의 Z 방향 벡터 값입니다.
+     * [EN] Z direction vector value of the light.
      */
     get directionZ(): number;
-    /**
-     * [KO] 광원의 Z 방향 벡터 값을 설정합니다.
-     * [EN] Sets the Z direction vector value of the light.
-     * @param value -
-     * [KO] Z 방향 벡터 값
-     * [EN] Z direction vector value
-     */
     set directionZ(value: number);
     /**
      * [KO] 광원의 전체 방향 벡터를 반환합니다.
      * [EN] Returns the full direction vector of the light.
-     * @returns
-     * [KO] 방향 벡터 [x, y, z]
-     * [EN] Direction vector [x, y, z]
      */
     get direction(): [number, number, number];
     /**
      * [KO] 광원의 전체 방향 벡터를 설정합니다.
      * [EN] Sets the full direction vector of the light.
-     * @param value -
-     * [KO] 방향 벡터 [x, y, z]
-     * [EN] Direction vector [x, y, z]
      */
     set direction(value: [number, number, number]);
 }

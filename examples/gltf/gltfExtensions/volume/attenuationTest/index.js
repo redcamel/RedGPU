@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770713934910";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1781131404967";
+import * as RedGPU from "../../../../../dist/index.js?t=1781131404967";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -15,7 +16,7 @@ RedGPU.init(
 
         loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/AttenuationTest/glTF-Binary/AttenuationTest.glb');
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = () => {
         };
         renderer.start(redGPUContext, render);
@@ -35,17 +36,14 @@ function loadGLTF(view, url) {
     new RedGPU.GLTFLoader(redGPUContext, url, (result) => {
         const mesh = result.resultMesh
         scene.addChild(mesh)
-        view.camera.fitMeshToScreenCenter(mesh, view)
+        RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view)
     });
 }
 
-const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {
-        createIblHelper,
-        setDebugButtons
-    } = await import('../../../../exampleHelper/createExample/panes/index.js?t=1770713934910');
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
-    createIblHelper(pane, targetView, RedGPU, {useLight: false});
+const renderTestPane = (redGPUContext, targetView) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        RedGPU: RedGPU,
+        ibl: true,
+        skybox: true,
+    });
 };

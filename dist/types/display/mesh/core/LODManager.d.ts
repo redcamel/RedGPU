@@ -52,7 +52,7 @@ declare class LODManager {
      *
      * @param callback LOD 목록이 변경될 때마다 호출되는 콜백 함수
      */
-    constructor(ownner: any, callback: () => void);
+    constructor(owner: any, callback: () => void);
     /**
      * 현재 등록된 모든 LOD 레벨 목록을 반환합니다.
      *

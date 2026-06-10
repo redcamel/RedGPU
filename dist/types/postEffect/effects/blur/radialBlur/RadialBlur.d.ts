@@ -1,18 +1,30 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
+interface RadialBlur {
+    /** [KO] 블러 강도. 값이 클수록 회전 번짐이 강해집니다. [EN] Blur strength. Higher values increase rotational bleeding. */
+    amount: number;
+    /** [KO] 블러의 중심점 X 오프셋 (픽셀 단위, 0은 화면 중앙). [EN] Blur center X offset (in pixels, 0 is screen center). */
+    centerX: number;
+    /** [KO] 블러의 중심점 Y 오프셋 (픽셀 단위, 0은 화면 중앙). [EN] Blur center Y offset (in pixels, 0 is screen center). */
+    centerY: number;
+    /** [KO] 샘플링 횟수 (2 ~ 100). 값이 클수록 부드럽지만 성능 소모가 늘어납니다. [EN] Number of samples (2 to 100). Higher values are smoother but increase performance cost. */
+    sampleCount: number;
+}
 /**
- * [KO] 방사형 블러(Radial Blur) 후처리 이펙트입니다.
+ * [KO] 방사형 회전 블러(Radial Blur) 후처리 이펙트입니다.
  * [EN] Radial Blur post-processing effect.
  *
- * [KO] 중심점, 강도, 샘플 수를 조절해 원형으로 퍼지는 블러 효과를 만듭니다.
- * [EN] Creates a circular spreading blur effect by adjusting the center point, strength, and sample count.
+ * [KO] 화면의 특정 지점을 기준으로 이미지를 회전시키며 블러 처리를 하여, 역동적인 회전감이나 집중 효과를 만듭니다. (0,0)은 화면의 정중앙을 의미합니다.
+ * [EN] Applies blur by rotating the image around a specific point, creating a dynamic sense of rotation or focus. (0,0) refers to the exact center of the screen.
+ *
+ * [KO] 하드웨어 선형 샘플러를 사용하여 회전 궤적의 계단 현상을 최소화하고 매끄러운 결과물을 제공합니다.
+ * [EN] Minimizes aliasing in the rotation trajectory and provides smooth results using a hardware linear sampler.
+ *
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.RadialBlur(redGPUContext);
- * effect.amount = 80;      // 블러 강도
- * effect.centerX = 0.5;    // 중심 X (0~1)
- * effect.centerY = 0.5;    // 중심 Y (0~1)
- * effect.sampleCount = 32; // 샘플 수
+ * effect.amount = 50;
+ * effect.sampleCount = 16;
  * view.postEffectManager.addEffect(effect);
  * ```
  *
@@ -20,7 +32,6 @@ import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
  * @category Blur
  */
 declare class RadialBlur extends ASinglePassPostEffect {
-    #private;
     /**
      * [KO] RadialBlur 인스턴스를 생성합니다.
      * [EN] Creates a RadialBlur instance.
@@ -30,45 +41,5 @@ declare class RadialBlur extends ASinglePassPostEffect {
      * [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext);
-    /**
-     * [KO] 중심 X 좌표를 반환합니다.
-     * [EN] Returns the center X coordinate.
-     */
-    get centerX(): number;
-    /**
-     * [KO] 중심 X 좌표를 설정합니다.
-     * [EN] Sets the center X coordinate.
-     */
-    set centerX(value: number);
-    /**
-     * [KO] 중심 Y 좌표를 반환합니다.
-     * [EN] Returns the center Y coordinate.
-     */
-    get centerY(): number;
-    /**
-     * [KO] 중심 Y 좌표를 설정합니다.
-     * [EN] Sets the center Y coordinate.
-     */
-    set centerY(value: number);
-    /**
-     * [KO] 블러 강도를 반환합니다.
-     * [EN] Returns the blur strength.
-     */
-    get amount(): number;
-    /**
-     * [KO] 블러 강도를 설정합니다. (최소 0)
-     * [EN] Sets the blur strength. (Minimum 0)
-     */
-    set amount(value: number);
-    /**
-     * [KO] 샘플 수를 반환합니다.
-     * [EN] Returns the sample count.
-     */
-    get sampleCount(): number;
-    /**
-     * [KO] 샘플 수를 설정합니다. (최소 4)
-     * [EN] Sets the sample count. (Minimum 4)
-     */
-    set sampleCount(value: number);
 }
 export default RadialBlur;

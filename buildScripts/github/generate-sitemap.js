@@ -6,7 +6,7 @@ const baseUrl = 'https://redcamel.github.io/RedGPU/examples';
 // 대상 디렉토리 경로
 const examplesDir = path.join(__dirname, '../../examples');
 // 탐색할 카테고리
-const categories = ['2d', '3d', 'gltf'];
+const categories = ['2d', '3d', 'gltf', 'physics', 'postEffect'];
 
 // 현재 날짜 가져오기 (lastmod용)
 const today = new Date().toISOString().split('T')[0];

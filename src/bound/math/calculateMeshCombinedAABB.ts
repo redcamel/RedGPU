@@ -48,7 +48,7 @@ const collectRecursive = (mesh: Mesh, aabbs: AABB[]) => {
     if (mesh.children) {
         for (let i = 0; i < mesh.children.length; i++) {
             const child = mesh.children[i];
-            if (child instanceof Mesh) {
+            if (child.isInstanceofMesh) {
                 collectRecursive(child, aabbs);
             }
         }

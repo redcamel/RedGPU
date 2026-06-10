@@ -4,6 +4,7 @@ import AntialiasingManager from "../antialiasing/AntialiasingManager";
 import RedGPUContextDetector from "./core/RedGPUContextDetector";
 import RedGPUContextSizeManager, { IRedGPURectObject, RedResizeEvent } from "./core/RedGPUContextSizeManager";
 import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
+import CommandEncoderManager from "../commandEncoderManager/CommandEncoderManager";
 /**
  * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
  * [EN] The RedGPUContext class is the top-level context object provided after WebGPU initialization.
@@ -16,8 +17,8 @@ import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
  * [EN] It provides various features such as resizing, background color, debug panel, anti-aliasing, and resource management.
  *
  * ::: warning
- * [KO] 이 클래스는 RedGPU.init()에 의해 내부적으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is created internally by RedGPU.init().<br/>Do not create an instance directly using the 'new' keyword.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * * ### Example
@@ -68,25 +69,21 @@ declare class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Canvas alpha mode
      */
     constructor(htmlCanvas: HTMLCanvasElement, gpuAdapter: GPUAdapter, gpuDevice: GPUDevice, gpuContext: GPUCanvasContext, alphaMode: GPUCanvasAlphaMode);
+    /**
+     * [KO] 커맨드 인코더 매니저를 반환합니다.
+     * [EN] Returns the command encoder manager.
+     */
+    get commandEncoderManager(): CommandEncoderManager;
+    /**
+     * [KO] HTML 캔버스의 BoundingClientRect 정보를 반환합니다.
+     * [EN] Returns the BoundingClientRect info of the HTML canvas.
+     */
     get boundingClientRect(): DOMRect;
     /**
      * [KO] 안티앨리어싱 매니저를 반환합니다.
      * [EN] Returns the antialiasing manager.
      */
     get antialiasingManager(): AntialiasingManager;
-    /**
-     * [KO] 디버그 패널 사용 여부를 반환합니다.
-     * [EN] Returns whether the debug panel is used.
-     */
-    get useDebugPanel(): boolean;
-    /**
-     * [KO] 디버그 패널 사용 여부를 설정합니다.
-     * [EN] Sets whether to use the debug panel.
-     * @param value -
-     * [KO] 사용 여부
-     * [EN] Usage status
-     */
-    set useDebugPanel(value: boolean);
     /**
      * [KO] 배경색을 반환합니다.
      * [EN] Returns the background color.
@@ -147,15 +144,15 @@ declare class RedGPUContext extends RedGPUContextViewContainer {
      */
     get htmlCanvas(): HTMLCanvasElement;
     /**
-     * [KO] 키보드 입력 버퍼를 반환합니다.
-     * [EN] Returns the keyboard input buffer.
+     * [KO] 키보드 입력 상태 버퍼를 반환합니다.
+     * [EN] Returns the keyboard input state buffer.
      */
     get keyboardKeyBuffer(): {
         [p: string]: boolean;
     };
     /**
-     * [KO] 키보드 입력 버퍼를 설정합니다.
-     * [EN] Sets the keyboard input buffer.
+     * [KO] 키보드 입력 상태 버퍼를 설정합니다.
+     * [EN] Sets the keyboard input state buffer.
      * @param value -
      * [KO] 키보드 상태 객체
      * [EN] Keyboard state object

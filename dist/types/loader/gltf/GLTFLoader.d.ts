@@ -2,6 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import Mesh from "../../display/mesh/Mesh";
 import { GLTF } from "./GLTF";
 import { GLTFParsedSingleClip } from "./parsers/animation/parseAnimations";
+import RedGPUObject from "../../base/RedGPUObject";
 /**
  * [KO] GLTF 파일 파싱 결과 정보를 담고 있는 타입입니다.
  * [EN] Represents the result of parsing a GLTF file.
@@ -102,7 +103,7 @@ export type GLTFLoadingProgressInfo = {
  *
  * @category Loader
  */
-declare class GLTFLoader {
+declare class GLTFLoader extends RedGPUObject {
     #private;
     /**
      * [KO] GLTF 파싱 결과 데이터
@@ -153,11 +154,6 @@ declare class GLTFLoader {
      * [EN] Loading progress info object
      */
     get loadingProgressInfo(): GLTFLoadingProgressInfo;
-    /**
-     * [KO] RedGPUContext 인스턴스를 반환합니다.
-     * [EN] Returns the RedGPUContext instance.
-     */
-    get redGPUContext(): RedGPUContext;
     /**
      * [KO] 파일 경로를 반환합니다.
      * [EN] Returns the file path.

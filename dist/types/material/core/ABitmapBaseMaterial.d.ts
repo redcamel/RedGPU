@@ -11,6 +11,11 @@ import ABaseMaterial from "./ABaseMaterial";
  *
  * [KO] 텍스처/샘플러의 변경 감지 및 파이프라인 갱신, 텍스처 리스너 관리 등 텍스처 기반 머티리얼의 핵심 로직을 구현합니다.
  * [EN] It implements core logic for texture-based materials such as detecting texture/sampler changes, updating pipelines, and managing texture listeners.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  * @category Material
  */
 declare abstract class ABitmapBaseMaterial extends ABaseMaterial {
@@ -36,7 +41,7 @@ declare abstract class ABitmapBaseMaterial extends ABaseMaterial {
      * [KO] 바인드 그룹 인덱스
      * [EN] Bind group index
      */
-    constructor(redGPUContext: RedGPUContext, moduleName: string, SHADER_INFO: any, targetGroupIndex: number);
+    protected constructor(redGPUContext: RedGPUContext, moduleName: string, SHADER_INFO: any, targetGroupIndex: number);
     /**
      * [KO] 텍스처 객체 변경 및 DirtyPipeline 리스너를 관리합니다.
      * [EN] Manages texture object changes and DirtyPipeline listeners.

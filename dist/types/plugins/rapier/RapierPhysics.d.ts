@@ -52,6 +52,27 @@ export declare class RapierPhysics implements IPhysicsEngine {
      */
     get bodies(): RapierBody[];
     /**
+     * [KO] 물리 월드의 중력 가속도를 설정하거나 반환합니다.
+     * [EN] Sets or returns the gravity acceleration of the physics world.
+     *
+     * * ### Example
+     * ```typescript
+     * // [KO] 중력 설정
+     * // [EN] Set gravity
+     * physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
+     * ```
+     */
+    get gravity(): {
+        x: number;
+        y: number;
+        z: number;
+    };
+    set gravity(value: {
+        x: number;
+        y: number;
+        z: number;
+    });
+    /**
      * [KO] 콜라이더 핸들을 통해 관리 중인 RapierBody를 찾아서 반환합니다.
      * [EN] Finds and returns the managed RapierBody using its collider handle.
      *
@@ -140,27 +161,6 @@ export declare class RapierPhysics implements IPhysicsEngine {
      * [EN] RapierBody instance to remove
      */
     removeBody(body: RapierBody): void;
-    /**
-     * [KO] 물리 월드의 중력 가속도를 설정하거나 반환합니다.
-     * [EN] Sets or returns the gravity acceleration of the physics world.
-     *
-     * * ### Example
-     * ```typescript
-     * // [KO] 중력 설정
-     * // [EN] Set gravity
-     * physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
-     * ```
-     */
-    get gravity(): {
-        x: number;
-        y: number;
-        z: number;
-    };
-    set gravity(value: {
-        x: number;
-        y: number;
-        z: number;
-    });
     /**
      * [KO] 캐릭터 컨트롤러를 생성하여 반환합니다.
      * [EN] Creates and returns a character controller.

@@ -59,4 +59,5 @@ ssr.maxSteps = 64;             // 반사 계산 정밀도 (스텝 수)
 - `useSSAO`, `useSSR` 속성을 통해 개별적으로 제어할 수 있습니다.
 
 ## 다음 학습 추천
-- **[텍스트 필드](../assets/text-field/index.md)**
+
+- **[LOD](../lod/index.md)**

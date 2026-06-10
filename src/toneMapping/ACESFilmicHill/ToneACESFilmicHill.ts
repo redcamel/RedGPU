@@ -22,7 +22,6 @@ class ToneACESFilmicHill extends AToneMappingEffect {
             'POST_EFFECT_TONE_MAPPING_ACES_FILMIC_HILL',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
-        this.updateUniforms();
     }
 }
 

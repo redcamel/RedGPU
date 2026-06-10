@@ -1,4 +1,4 @@
-import { vec3, vec2 } from "gl-matrix";
+import { vec2, vec3 } from "gl-matrix";
 import Ray from "../math/Ray";
 import View3D from "../display/view/View3D";
 import Mesh from "../display/mesh/Mesh";
@@ -17,7 +17,7 @@ import Mesh from "../display/mesh/Mesh";
  * ```
  * @category Picking
  */
-export default class Raycaster3D {
+declare class Raycaster3D {
     #private;
     /**
      * [KO] 내부적으로 관리되는 광원 객체
@@ -102,6 +102,7 @@ export default class Raycaster3D {
      */
     intersectObjects(meshes: Mesh[], recursive?: boolean): RayIntersectResult[];
 }
+export default Raycaster3D;
 /**
  * [KO] 레이캐스팅 교차 결과 인터페이스입니다.
  * [EN] Raycasting intersection result interface.

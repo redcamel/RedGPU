@@ -6,4 +6,5 @@
 import RedGPUContextDetector from "./RedGPUContextDetector";
 import RedGPUContextSizeManager from "./RedGPUContextSizeManager";
 import RedGPUContextViewContainer from "./RedGPUContextViewContainer";
-export { RedGPUContextDetector, RedGPUContextSizeManager, RedGPUContextViewContainer, };
+import RedGPUContextObserver from "./RedGPUContextObserver";
+export { RedGPUContextDetector, RedGPUContextSizeManager, RedGPUContextViewContainer, RedGPUContextObserver };

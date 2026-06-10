@@ -1,18 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control">
-    <meta content="no-cache" http-equiv="Pragma">
-    <meta content="0" http-equiv="Expires">
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <link href="exampleHelper/exampleList/index.css" rel="stylesheet"/>
-    <script src="./index.js?t=1770713934910" type="module"></script>
-    <script src="exampleHelper/exampleList/createExampleList.js?t=1770713934910" type="module"></script>
     <title>RedGPU Examples</title>
+    <meta name="description" content="Explore high-performance WebGPU examples in RedGPU.">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/">
+    <meta property="og:title" content="RedGPU Examples">
+    <meta property="og:description" content="Explore high-performance WebGPU examples in RedGPU.">
+    <meta property="og:image"
+          content="https://repository-images.githubusercontent.com/223094122/24f03a80-cdcb-11ea-8297-408bf897ad1e">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/">
+    <meta property="twitter:title" content="RedGPU Examples">
+    <meta property="twitter:description" content="Explore high-performance WebGPU examples in RedGPU.">
+    <meta property="twitter:image"
+          content="https://repository-images.githubusercontent.com/223094122/24f03a80-cdcb-11ea-8297-408bf897ad1e">
+
     <link href="https://redcamel.github.io/RedGPU/examples/" rel="canonical">
 
+
+    <!-- LCP Image Preloading (Default '3D' Tab) -->
+    <link rel="preload" as="image" href="./3d/helloWorld/thumb.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="./3d/view/singleView/thumb.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="./3d/view/multiView/thumb.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="./3d/scene/thumb.webp" fetchpriority="high">
+
+    <!-- JS Module Preloading (Resolve Critical Request Chain) -->
+    <link rel="modulepreload" href="./exampleHelper/dist/IconButton-D8-442jY.js?t=1781131404967">
+    <link rel="modulepreload" href="./exampleHelper/dist/exampleList-B00YxcCV.js?t=1781131404967">
+    <link rel="modulepreload" href="./exampleHelper/dist/rolldown-runtime-BztV3taV.js?t=1781131404967">
+    <link rel="modulepreload" href="./exampleHelper/dist/store-2JcZHIgY.js?t=1781131404967">
+    <link rel="modulepreload" href="./exampleHelper/dist/vendor-react-BwJpJ84T.js?t=1781131404967">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+    </style>
 </head>
 <body>
+<canvas id="bg-canvas"></canvas>
+<script type="module">
+    import * as RedGPU from '../dist/index.js?t=1781131404967';
+    import RedGPUExamples from './exampleHelper/dist/examples.js?t=1781131404967';
+
+    new RedGPUExamples()
+    const canvas = document.getElementById('bg-canvas');
+    RedGPU.init(
+        canvas,
+        redGPUContext => {
+            // redGPUContext.useMSAA=false
+            const controllerTest = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+
+            // controllerTest.tilt = -10
+            const scene = new RedGPU.Display.Scene();
+            const view = new RedGPU.Display.View3D(redGPUContext, scene, controllerTest);
+
+            redGPUContext.addView(view);
+
+            const ibl = new RedGPU.Resource.IBL(redGPUContext, './assets/hdr/2k/the_sky_is_on_fire_2k.hdr');
+            view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture)
+            view.ibl = ibl
+            const renderer = new RedGPU.Renderer()
+
+            //
+            let model;
+
+            function loadGLTF(url) {
+                new RedGPU.GLTFLoader(
+                    redGPUContext,
+                    url,
+                    (v) => {
+                        console.log('GLTFLoader ', v)
+                        console.log('GLTFLoader parsingResult', v.parsingResult)
+                        scene.addChild(model = v['resultMesh'])
+                        model.setScale(redGPUContext.detector.isMobile ? 0.5 : 10)
+                        console.log(model)
+                    }
+                )
+            }
+
+            const modelURL = redGPUContext.detector.isMobile ? 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb' : 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF-Binary/MosquitoInAmber.glb'
+            loadGLTF(modelURL);
+
+            const render = (time) => {
+                if (model) {
+                    model.rotationY += 0.5
+                }
+                controllerTest.x = Math.sin(time / 2000) * 3
+                controllerTest.y = Math.cos(time / 2500) * 2 + 1.5
+                controllerTest.z = Math.cos(time / 1500) * 2
+                controllerTest.lookAt(0, 0, 0)
+
+            }
+            renderer.start(redGPUContext, render)
+        }
+    )
+</script>
 </body>
 </html>

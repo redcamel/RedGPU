@@ -1,44 +1,24 @@
+#redgpu_include color.linearToSrgbVec3
+
 struct Uniforms {
-    exposure: f32,
     contrast: f32,
     brightness: f32,
     _pad: f32,
+    _pad2: f32,
 };
 
-/// 선형 RGB → sRGB 감마 보정
-fn linearToSRGB(linearColor: vec3<f32>) -> vec3<f32> {
-    // sRGB 표준 변환 공식
-    let a = 0.055;
-    let cutoff = 0.0031308;
-    let gamma = 2.4;
-
-    var srgb: vec3<f32>;
-
-    // 각 채널별로 처리
-    for (var i = 0; i < 3; i++) {
-        let c = linearColor[i];
-        if (c <= cutoff) {
-            srgb[i] = 12.92 * c;
-        } else {
-            srgb[i] = (1.0 + a) * pow(c, 1.0 / gamma) - a;
-        }
-    }
-
-    return srgb;
-}
-fn linearToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
-    let exposed = color * exposure;
-    return exposed;
+fn linearToneMapping(color: vec3<f32>) -> vec3<f32> {
+    return color;
 }
 
 // Khronos PBR Neutral Tonemapping - WGSL
 // https://github.com/KhronosGroup/ToneMapping
 
-fn khronosPBRNeutralToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
+fn khronosPBRNeutralToneMapping(color: vec3<f32>) -> vec3<f32> {
     let startCompression: f32 = 0.8 - 0.04;
     let desaturation: f32 = 0.15;
 
-    var col = color * exposure;
+    var col = color;
     let x = min(col.r, min(col.g, col.b));
     var offset: f32;
     if (x < 0.08) {
@@ -62,8 +42,8 @@ fn khronosPBRNeutralToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
 }
 
 // ACES Filmic Tone Mapping (Narkowicz)
-fn acesFilmicNarkowiczToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
-    let x = color * exposure;
+fn acesFilmicNarkowiczToneMapping(color: vec3<f32>) -> vec3<f32> {
+    let x = color;
     let a = 2.51;
     let b = 0.03;
     let c = 2.43;
@@ -73,8 +53,8 @@ fn acesFilmicNarkowiczToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> 
 }
 
 // ACES Filmic Tone Mapping (Hill)
-fn acesFilmicHillToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
-    let v = color * exposure;
+fn acesFilmicHillToneMapping(color: vec3<f32>) -> vec3<f32> {
+    let v = color;
     let a1 = v.r * 0.59719 + v.g * 0.35458 + v.b * 0.04823;
     let a2 = v.r * 0.07600 + v.g * 0.90834 + v.b * 0.01566;
     let a3 = v.r * 0.02840 + v.g * 0.13383 + v.b * 0.83777;
@@ -88,9 +68,9 @@ fn acesFilmicHillToneMapping(color: vec3<f32>, exposure: f32) -> vec3<f32> {
 
 
 fn getFinalSRGB(toneMappedColor:vec3<f32>, contrast: f32, brightness: f32) -> vec3<f32> {
-    let contrastRGB = applyContrast(toneMappedColor, uniforms.contrast);
-    let finalLinearRGB = applyBrightness(contrastRGB, uniforms.brightness);
-    let finalSRGB = clamp(linearToSRGB(finalLinearRGB), vec3<f32>(0.0), vec3<f32>(1.0));
+    let contrastRGB = applyContrast(toneMappedColor, contrast);
+    let finalLinearRGB = applyBrightness(contrastRGB, brightness);
+    let finalSRGB = clamp(linearToSrgbVec3(finalLinearRGB), vec3<f32>(0.0), vec3<f32>(1.0));
     return finalSRGB;
 }
 /// 명암 조절

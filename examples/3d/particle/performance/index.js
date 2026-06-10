@@ -1,108 +1,106 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js?t=1781131404967";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1781131404967";
 
-// 1. Create and append a canvas
-// 1. 캔버스를 생성하고 문서에 추가
+/**
+ * [KO] 파티클 성능 테스트 예제
+ * [EN] Particle performance test example
+ *
+ * [KO] 100개의 파티클 이미터를 동시에 렌더링하여 대량의 파티클 처리 성능을 테스트합니다.
+ * [EN] Tests the performance of mass particle processing by rendering 100 particle emitters simultaneously.
+ */
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-/**
- * [KO] Particle Performance 예제
- * [EN] Particle Performance example
- *
- * [KO] 다수의 파티클 이미터를 사용하여 성능을 테스트하는 예제입니다.
- * [EN] Example testing performance using multiple particle emitters.
- */
-
-// 2. Initialize RedGPU
-// 2. RedGPU 초기화
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        const controllerTest = new RedGPU.Camera.OrbitController(redGPUContext);
+        // 1. 카메라 및 뷰 설정
+        const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.distance = 100;
+        controller.tilt = -15;
+        controller.distanceInterpolation = 0.7;
+
         const scene = new RedGPU.Display.Scene();
-        const view = new RedGPU.Display.View3D(redGPUContext, scene, controllerTest);
-        const directionalLightTest = new RedGPU.Light.DirectionalLight()
-        directionalLightTest.color.r = 255
-        directionalLightTest.color.g = 255
-        directionalLightTest.color.b = 255
-        directionalLightTest.intensity = 1
-        controllerTest.distance = 100
-        controllerTest.tilt = -15
-        // controllerTest.speedDistance =0.2
-        controllerTest.distanceInterpolation = 0.7
-
-        scene.lightManager.addDirectionalLight(directionalLightTest)
-        view.axis = null
-        view.grid = null
+        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        view.axis = null;
+        view.grid = null;
         redGPUContext.addView(view);
-        const cubeTexture =
-            new RedGPU.Resource.CubeTexture(redGPUContext, [
-                "../../../assets/skybox/px.jpg", // Positive X
-                "../../../assets/skybox/nx.jpg", // Negative X
-                "../../../assets/skybox/py.jpg", // Positive Y
-                "../../../assets/skybox/ny.jpg", // Negative Y
-                "../../../assets/skybox/pz.jpg", // Positive Z
-                "../../../assets/skybox/nz.jpg", // Negative Z
-            ])
-        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture)
-        const texture_particle1 = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/particle/particle.png');
-        const texture_particle2 = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/particle/particle2.png');
-        const testParticleWrap = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Sphere(redGPUContext),
-            new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000')
-        )
-        scene.addChild(testParticleWrap)
-        const testParticle = new RedGPU.Display.ParticleEmitter(redGPUContext)
-        testParticleWrap.addChild(testParticle)
-        testParticle.material.diffuseTexture = texture_particle2
 
-        {
-            let i = 100
-            while (i--) {
-                const testParticle2 = new RedGPU.Display.ParticleEmitter(redGPUContext)
-                scene.addChild(testParticle2)
-                testParticle2.x = Math.random() * 50 - 25
-                testParticle2.y = Math.random() * 50 - 25
-                testParticle2.z = Math.random() * 50 - 25
-                testParticle2.material.diffuseTexture = [texture_particle1, texture_particle2][Math.floor(Math.random() * 2)]
-                testParticle2.material.blendColorState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE
-            }
-        }
+        // 2. IBL 및 스카이박스 설정
+        const ibl = new RedGPU.Resource.IBL(
+            redGPUContext,
+            '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
+        );
+        view.ibl = ibl;
 
-        const renderer = new RedGPU.Renderer(redGPUContext)
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
-        let test = 0
-        const render = (time) => {
-            directionalLightTest.direction[0] = Math.sin(time / 1500)
-            directionalLightTest.direction[1] = -1
-            directionalLightTest.direction[2] = Math.cos(time / 1500)
-            redGPUContext.viewList.forEach(view => {
+        // 3. 파티클 성능 테스트 생성
+        const {particleWrap} = createParticlePerformanceTest(redGPUContext, scene);
 
-            })
-            //
-            testParticleWrap.x += Math.sin(time / 500)
-            testParticleWrap.y += Math.cos(time / 500)
-            testParticleWrap.z += Math.sin(time / 500)
+        // 4. 애니메이션 렌더 루프 및 시작
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext, (time) => {
+            // 메인 파티클 컨테이너 애니메이션
+            particleWrap.x += Math.sin(time / 500);
+            particleWrap.y += Math.cos(time / 500);
+            particleWrap.z += Math.sin(time / 500);
+        });
 
-        }
-        renderer.start(redGPUContext, render)
-        renderTestPane(redGPUContext)
+        // 5. 테스트 GUI 설정
+        renderTestPane(redGPUContext);
     },
     (failReason) => {
-        // Handle initialization failure
-        console.error('Initialization failed:', failReason); // 초기화 실패 로그 출력
-        const errorMessage = document.createElement('div');
-        errorMessage.innerHTML = failReason; // 실패 원인 메시지를 표시
+        console.error("Initialization failed:", failReason);
+        const errorMessage = document.createElement("div");
+        errorMessage.innerHTML = failReason;
         document.body.appendChild(errorMessage);
     }
 );
 
 /**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
+ * [KO] 성능 테스트를 위한 대량의 파티클 이미터들을 생성합니다.
+ * [EN] Creates a large number of particle emitters for performance testing.
  */
-const renderTestPane = async (redGPUContext) => {
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
+const createParticlePerformanceTest = (redGPUContext, scene) => {
+    const texture1 = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/particle/particle.png');
+    const texture2 = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/particle/particle2.png');
 
+    // 메인 파티클 래퍼 (중심점 표시용 구체)
+    const particleWrap = new RedGPU.Display.Mesh(
+        redGPUContext,
+        new RedGPU.Primitive.Sphere(redGPUContext),
+        new RedGPU.Material.ColorMaterial(redGPUContext, '#ff0000')
+    );
+    scene.addChild(particleWrap);
+
+    // 메인 이미터 추가
+    const mainEmitter = new RedGPU.Display.ParticleEmitter(redGPUContext);
+    mainEmitter.material.diffuseTexture = texture2;
+    particleWrap.addChild(mainEmitter);
+
+    // 추가 100개의 이미터 생성
+    let i = 100;
+    while (i--) {
+        const emitter = new RedGPU.Display.ParticleEmitter(redGPUContext);
+        emitter.setPosition(
+            Math.random() * 50 - 25,
+            Math.random() * 50 - 25,
+            Math.random() * 50 - 25
+        );
+        emitter.material.diffuseTexture = Math.random() > 0.5 ? texture1 : texture2;
+        emitter.material.blendColorState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE;
+        scene.addChild(emitter);
+    }
+
+    return {particleWrap};
+};
+
+/**
+ * [KO] 예제 도우미 패널을 렌더링합니다.
+ * [EN] Renders the example helper panel.
+ */
+const renderTestPane = (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext);
 };

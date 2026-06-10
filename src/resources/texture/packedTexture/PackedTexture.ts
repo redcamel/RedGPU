@@ -3,9 +3,10 @@ import getMipLevelCount from "../../../utils/texture/getMipLevelCount";
 import createUUID from "../../../utils/uuid/createUUID";
 import Sampler from "../../sampler/Sampler";
 import computeShaderCode from "./computeShader.wgsl";
+import RedGPUObject from "../../../base/RedGPUObject";
 
 /** [KO] 컴포넌트 매핑 타입 정의 [EN] Component mapping type definition */
-type ComponentMapping = {
+export type ComponentMapping = {
     r?: 'r' | 'g' | 'b' | 'a';
     g?: 'r' | 'g' | 'b' | 'a';
     b?: 'r' | 'g' | 'b' | 'a';
@@ -35,17 +36,14 @@ let mappingBuffer: GPUBuffer;
  * ```
  * @category Texture
  */
-class PackedTexture {
-    /** [KO] 인스턴스 고유 식별자 [EN] Instance unique identifier */
-    #uuid: string = createUUID();
-    /** [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance */
-    #redGPUContext: RedGPUContext;
+class PackedTexture extends RedGPUObject {
+
+
     /** [KO] 샘플러 객체 [EN] Sampler object */
     #sampler: GPUSampler;
     /** [KO] 패킹 결과 GPUTexture 객체 [EN] Packed result GPUTexture object */
     #gpuTexture: GPUTexture;
-    /** [KO] GPU 디바이스 객체 [EN] GPU device object */
-    #gpuDevice: GPUDevice;
+
     /** [KO] 바인드 그룹 객체 [EN] Bind group object */
     #bindGroup: GPUBindGroup;
     /** [KO] 임시 바인드 그룹 캐시 [EN] Temporary bind group cache */
@@ -59,23 +57,31 @@ class PackedTexture {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
-        this.#gpuDevice = redGPUContext.gpuDevice;
+        super(redGPUContext)
         this.#initializeGlobals();
         this.#sampler = this.#createSampler();
     }
 
-    /** [KO] 인스턴스 고유 식별자 [EN] Instance unique identifier */
-    get uuid(): string {
-        return this.#uuid;
-    }
-
-    /** [KO] 패킹 결과 GPUTexture 객체 [EN] Packed result GPUTexture object */
+    /**
+     * [KO] 패킹 결과 GPUTexture 객체를 반환합니다.
+     * [EN] Returns the packed result GPUTexture object.
+     *
+     * @returns
+     * [KO] GPUTexture 인스턴스
+     * [EN] GPUTexture instance
+     */
     get gpuTexture(): GPUTexture {
         return this.#gpuTexture;
     }
 
-    /** [KO] 패킹 텍스처 캐시 맵을 반환합니다. [EN] Returns the packed texture cache map. */
+    /**
+     * [KO] 패킹 텍스처 캐시 맵을 반환합니다.
+     * [EN] Returns the packed texture cache map.
+     *
+     * @returns
+     * [KO] 캐시 맵 객체
+     * [EN] Cache map object
+     */
     static getCacheMap() {
         return cacheMap;
     }
@@ -98,13 +104,15 @@ class PackedTexture {
      * @param componentMapping -
      * [KO] 컴포넌트 매핑 정보 (선택)
      * [EN] Component mapping info (optional)
+     * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
      */
     async packing(
         textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture },
         width: number,
         height: number,
         label?: string,
-        componentMapping?: ComponentMapping
+        componentMapping?: ComponentMapping,
+        commandEncoder?: GPUCommandEncoder
     ) {
         const mapping = {
             r: 'r',
@@ -123,7 +131,7 @@ class PackedTexture {
         if (currEntry) {
             return;
         }
-        await this.#createPackedTexture(textures, width, height, label, mapping, mappingKey);
+        await this.#createPackedTexture(textures, width, height, label, mapping, mappingKey, commandEncoder);
     }
 
     /** [KO] 인스턴스를 파괴하고 캐시를 관리합니다. [EN] Destroys the instance and manages the cache. */
@@ -144,12 +152,13 @@ class PackedTexture {
 
     /** [KO] 전역 리소스를 초기화합니다. [EN] Initializes global resources. */
     #initializeGlobals() {
-        mappingBuffer = this.#redGPUContext.resourceManager.createGPUBuffer('PACK_TEXTURE_MAPPING_BUFFER', {
+        const {resourceManager} = this;
+        mappingBuffer = resourceManager.createGPUBuffer('PACK_TEXTURE_MAPPING_BUFFER', {
             size: 16,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
         if (!globalBindGroupLayout) {
-            globalBindGroupLayout = this.#redGPUContext.resourceManager.createBindGroupLayout(
+            globalBindGroupLayout = resourceManager.createBindGroupLayout(
                 'PACK_TEXTURE_BIND_GROUP_LAYOUT',
                 {
                     entries: [
@@ -171,7 +180,7 @@ class PackedTexture {
     /** [KO] 바인드 그룹을 업데이트합니다. [EN] Updates the bind group. */
     #updateBindGroup(textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture }) {
         const textureKey = `${textures.r?.label || 'empty'}_${textures.g?.label || 'empty'}_${textures.b?.label || 'empty'}_${textures.a?.label || 'empty'}`;
-        const {resourceManager} = this.#redGPUContext
+        const {resourceManager, gpuDevice} = this
         if (!this.#tempBindGroupCache.has(textureKey)) {
             const bindGroupEntries = [
                 {
@@ -193,7 +202,7 @@ class PackedTexture {
                 {binding: 4, resource: this.#sampler},
                 {binding: 5, resource: {buffer: mappingBuffer}}
             ];
-            const bindGroup = this.#gpuDevice.createBindGroup({
+            const bindGroup = gpuDevice.createBindGroup({
                 label: `PACK_TEXTURE_BIND_GROUP_${textureKey}`,
                 layout: globalBindGroupLayout,
                 entries: bindGroupEntries,
@@ -231,7 +240,8 @@ class PackedTexture {
         height: number,
         label: string | undefined,
         mapping: any,
-        mappingKey: string
+        mappingKey: string,
+        commandEncoder?: GPUCommandEncoder
     ) {
         const textureDescriptor: GPUTextureDescriptor = {
             size: [width, height, 1],
@@ -243,18 +253,19 @@ class PackedTexture {
         if (this.#gpuTexture) {
             this.#gpuTexture = null;
         }
-        const packedTexture = this.#redGPUContext.resourceManager.createManagedTexture(textureDescriptor);
+        const {resourceManager, gpuDevice, uuid} = this
+        const packedTexture = resourceManager.createManagedTexture(textureDescriptor);
         const mappingData = new Uint32Array([
             ['r', 'g', 'b', 'a'].indexOf(mapping.r),
             ['r', 'g', 'b', 'a'].indexOf(mapping.g),
             ['r', 'g', 'b', 'a'].indexOf(mapping.b),
             ['r', 'g', 'b', 'a'].indexOf(mapping.a),
         ]);
-        this.#gpuDevice.queue.writeBuffer(mappingBuffer, 0, mappingData);
+        gpuDevice.queue.writeBuffer(mappingBuffer, 0, mappingData);
         this.#updateBindGroup(textures);
-        this.#executeRenderPass(packedTexture);
+        this.#executeRenderPass(packedTexture, commandEncoder);
         if (textureDescriptor.mipLevelCount > 1) {
-            this.#gpuTexture = this.#redGPUContext.resourceManager.mipmapGenerator.generateMipmap(packedTexture, textureDescriptor);
+            this.#gpuTexture = resourceManager.mipmapGenerator.generateMipmap(packedTexture, textureDescriptor, true,);
         } else {
             this.#gpuTexture = packedTexture;
         }
@@ -262,18 +273,18 @@ class PackedTexture {
             gpuTexture: this.#gpuTexture,
             useNum: 1,
             mappingKey,
-            uuid: this.#uuid
+            uuid
         });
         this.#bindGroup = null;
     }
 
     /** [KO] 렌더 패스를 실행하여 패킹을 수행합니다. [EN] Executes the render pass to perform packing. */
-    #executeRenderPass(packedTexture: GPUTexture) {
-        const {resourceManager} = this.#redGPUContext;
-        const commandEncoder = this.#gpuDevice.createCommandEncoder({
+    #executeRenderPass(packedTexture: GPUTexture, commandEncoder?: GPUCommandEncoder) {
+        const {resourceManager, gpuDevice} = this;
+        const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({
             label: 'PackedTexture_CommandEncoder'
         });
-        const passEncoder = commandEncoder.beginRenderPass({
+        const passEncoder = internalEncoder.beginRenderPass({
             colorAttachments: [
                 {
                     view: resourceManager.getGPUResourceBitmapTextureView(packedTexture, {
@@ -292,18 +303,18 @@ class PackedTexture {
         passEncoder.setBindGroup(0, this.#bindGroup);
         passEncoder.draw(6, 1, 0, 0);
         passEncoder.end();
-        this.#gpuDevice.queue.submit([commandEncoder.finish()]);
+        if (!commandEncoder) gpuDevice.queue.submit([internalEncoder.finish()]);
     }
 
     /** [KO] 패킹용 파이프라인을 생성합니다. [EN] Creates a pipeline for packing. */
     #createPipeline(): GPURenderPipeline {
         const shaderCode = computeShaderCode;
-        const {resourceManager} = this.#redGPUContext;
-        const pipelineLayout = this.#gpuDevice.createPipelineLayout({
+        const {resourceManager, gpuDevice} = this;
+        const pipelineLayout = gpuDevice.createPipelineLayout({
             label: 'PACK_TEXTURE_PIPELINE_LAYOUT',
             bindGroupLayouts: [globalBindGroupLayout]
         });
-        return this.#gpuDevice.createRenderPipeline({
+        return gpuDevice.createRenderPipeline({
             label: 'PACK_TEXTURE_PIPELINE',
             layout: pipelineLayout,
             vertex: {
@@ -321,7 +332,7 @@ class PackedTexture {
 
     /** [KO] 샘플러를 생성합니다. [EN] Creates a sampler. */
     #createSampler(): GPUSampler {
-        return new Sampler(this.#redGPUContext).gpuSampler;
+        return new Sampler(this.redGPUContext).gpuSampler;
     }
 }
 

@@ -16,38 +16,22 @@ import Primitive from "./core/Primitive";
  * @category Primitive
  */
 declare class Torus extends Primitive {
-    #private;
     /**
      * [KO] Torus 인스턴스를 생성합니다.
      * [EN] Creates an instance of Torus.
      *
-     * ### Example
-     * ```typescript
-     * const torus = new RedGPU.Torus(redGPUContext, 1, 0.5, 16, 16, 0, Math.PI * 2);
-     * ```
-     *
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
-     * @param radius -
-     * [KO] 중심 원 반지름 (기본값 1)
-     * [EN] Major radius (default 1)
-     * @param thickness -
-     * [KO] 단면(튜브) 반지름 (기본값 0.5)
-     * [EN] Minor radius/thickness (default 0.5)
-     * @param radialSubdivisions -
-     * [KO] 둘레 세그먼트 수 (기본값 16, 최소 3)
-     * [EN] Radial segments (default 16, min 3)
-     * @param bodySubdivisions -
-     * [KO] 단면 세그먼트 수 (기본값 16, 최소 3)
-     * [EN] Tubular segments (default 16, min 3)
-     * @param startAngle -
-     * [KO] 시작 각도 (라디안, 기본값 0)
-     * [EN] Starting angle (radians, default 0)
-     * @param endAngle -
-     * [KO] 끝 각도 (라디안, 기본값 2*PI)
-     * [EN] Ending angle (radians, default 2*PI)
+     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
+     * @param radius - [KO] 중심 원 반지름 [EN] Major radius
+     * @param thickness - [KO] 단면(튜브) 반지름 [EN] Minor radius/thickness
+     * @param radialSegments - [KO] 둘레 세그먼트 수 [EN] Radial segments
+     * @param tubularSegments - [KO] 단면 세그먼트 수 [EN] Tubular segments
+     * @param thetaStart - [KO] 시작 각도 [EN] Starting angle
+     * @param thetaLength - [KO] 원호 각도 [EN] Arc angle
+     * @param capStart - [KO] 시작 지점 단면을 닫을지 여부 (기본값 false) [EN] Whether to close the start cap (default false)
+     * @param capEnd - [KO] 끝 지점 단면을 닫을지 여부 (기본값 false) [EN] Whether to close the end cap (default false)
+     * @param isRadialCapStart - [KO] 시작 단면의 방사형 UV 여부 (기본값 false) [EN] Whether start cap uses radial UV (default false)
+     * @param isRadialCapEnd - [KO] 끝 단면의 방사형 UV 여부 (기본값 false) [EN] Whether end cap uses radial UV (default false)
      */
-    constructor(redGPUContext: RedGPUContext, radius?: number, thickness?: number, radialSubdivisions?: number, bodySubdivisions?: number, startAngle?: number, endAngle?: number);
+    constructor(redGPUContext: RedGPUContext, radius?: number, thickness?: number, radialSegments?: number, tubularSegments?: number, thetaStart?: number, thetaLength?: number, capStart?: boolean, capEnd?: boolean, isRadialCapStart?: boolean, isRadialCapEnd?: boolean);
 }
 export default Torus;

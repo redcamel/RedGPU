@@ -1,5 +1,5 @@
 ---
-title: Post-Effect 개요
+title: Post-Effect
 order: 9
 ---
 
@@ -9,24 +9,43 @@ order: 9
 
 <script setup>
 const postEffectGraph = `
-    subgraph Control ["Control Interface (API)"]
-        direction LR
-        TMM["view.toneMappingManager"]
-        PEM["view.postEffectManager"]
-    end
+    graph TB
+        subgraph Control ["Control Interface (API)"]
+            direction TB
+            TMM["view.toneMappingManager"]:::controlNode
+            PEM["view.postEffectManager"]:::controlNode
+        end
 
-    subgraph Pipeline ["Execution Pipeline (GPU)"]
-        direction TB
-        TM["1. Tone Mapping"]
-        CE["2. General Effects (Chained)"]
-        SE["3. Screen Space Effects (Built-in)"]
-        AA["4. Antialiasing"]
-        
-        TM --> CE --> SE --> AA
-    end
+        subgraph HDR ["1. HDR Phase (Scene Components)"]
+            direction TB
+            SA["SkyAtmosphere"]:::pipelineNode
+            SSAO["SSAO (Built-in)"]:::pipelineNode
+            SSR["SSR (Built-in)"]:::pipelineNode
+            SA --> SSAO --> SSR
+        end
+
+        subgraph Transition ["2. Transition Phase (Exposure & User Effects)"]
+            direction TB
+            AE["AutoExposure"]:::pipelineNode
+            GE["User General Effects (Loop)"]:::pipelineNode
+            TM["Tone Mapping"]:::pipelineNode
+            AE --> GE --> TM
+        end
+
+        AA["3. LDR Phase (FXAA / TAA)"]:::pipelineNode
 
     TMM -.->|Inject Settings| TM
-    PEM -.->|Manage & Execute| Pipeline
+    PEM -.->|Manage & Execute| Transition
+    Control --> HDR
+    HDR --> Transition
+    Transition --> AA
+
+    classDef controlNode fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px;
+    classDef pipelineNode fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px;
+    
+    style Control fill:#f4f4f5,stroke:#e4e4e7,stroke-width:1px,color:#27272a;
+    style HDR fill:#e4e4e7,stroke:#d4d4d8,stroke-width:1px,color:#18181b;
+    style Transition fill:#e4e4e7,stroke:#d4d4d8,stroke-width:1px,color:#18181b;
 `
 </script>
 
@@ -45,13 +64,15 @@ const postEffectGraph = `
 
 모든 효과는 아래 순서에 따라 처리됩니다. 이 순서는 그래픽스 최적화와 시각적 결과의 일관성을 위해 고정되어 있습니다.
 
-1.  **Tone Mapping**: HDR 데이터를 디스플레이 범위로 변환하는 첫 번째 관문입니다.
-2.  **General Effects**: `addEffect()` 로 추가된 효과들이 등록된 순서대로 체인처럼 연결되어 실행됩니다.
-3.  **Screen Space Effects**: SSAO, SSR 등 씬의 깊이 정보를 활용하는 고성능 빌트인 효과가 적용됩니다.
-4.  **Antialiasing**: 계단 현상을 제거하는 최종 보정 단계입니다.
+1. **HDR Phase (장면 구성 요소)**: `SkyAtmosphere`, `SSAO`(SSAO), `SSR`(실시간 반사) 등 물리적인 씬 정보를 조립하는 단계입니다.
+2. **Exposure & Transition (노출 및 톤매핑 전환)**:
+    * `AutoExposure`(자동 노출) 연산이 수행됩니다.
+    * 사용자가 `addEffect()`로 등록한 **일반 이펙트** 루프를 실행합니다.
+    * 루프 도중 첫 번째 LDR(Low Dynamic Range) 이펙트를 만나는 시점에 즉시 **Tone Mapping**을 수행하며, 만약 루프가 끝날 때까지 수행되지 않았다면 루프 종료 시점에 수행합니다.
+3. **LDR Phase (안티앨리어싱)**: 최종 이미지를 보정하는 마지막 단계로, 활성화 상태에 따라 `FXAA` 또는 `TAA` (및 `TAASharpen`) 연산이 수행됩니다.
 
 ::: tip [라이브 데모]
-[RedGPU 공식 예제 페이지](https://redcamel.github.io/RedGPU/examples/#postEffect)에서 모든 효과의 실시간 작동 모습을 확인할 수 있습니다.
+[RedGPU 공식 예제 페이지](https://redcamel.github.io/RedGPU/examples/index.html?tab=PostEffect)에서 모든 효과의 실시간 작동 모습을 확인할 수 있습니다.
 :::
 
 ## 3. 학습 가이드
@@ -59,4 +80,4 @@ const postEffectGraph = `
 *   **[일반 이펙트](./general-effects.md)** : 블룸, 블러, 흑백 등 다양한 효과 추가하기
 *   **[톤 매핑](./tone-mapping.md)** : 씬의 기본 색감과 노출 설정하기
 *   **[빌트인 이펙트](./builtin-effects.md)** : SSAO, SSR 등 고성능 효과 활성화하기
-*   **[텍스트 필드](../assets/text-field/index.md)** : 3D 공간에 텍스트 UI 추가하기
+* **[안티앨리어싱](../antialiasing/index.md)** : 화면 외곽선 정리하기

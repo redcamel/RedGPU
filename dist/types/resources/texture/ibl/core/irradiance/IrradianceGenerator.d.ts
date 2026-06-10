@@ -1,5 +1,7 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
-import IBLCubeTexture from "../IBLCubeTexture";
+import DirectCubeTexture from "../../../DirectCubeTexture";
+import { CommandEncoderType } from "../../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import RedGPUObject from "../../../../../base/RedGPUObject";
 /**
  * [KO] Irradiance 맵을 생성하는 클래스입니다.
  * [EN] Class that generates an Irradiance map.
@@ -9,7 +11,7 @@ import IBLCubeTexture from "../IBLCubeTexture";
  *
  * @category IBL
  */
-declare class IrradianceGenerator {
+declare class IrradianceGenerator extends RedGPUObject {
     #private;
     /**
      * [KO] IrradianceGenerator 인스턴스를 생성합니다.
@@ -35,10 +37,28 @@ declare class IrradianceGenerator {
      * @param size -
      * [KO] 생성될 Irradiance 맵의 크기 (기본값: 32)
      * [EN] Size of the generated Irradiance map (default: 32)
+     * @param phase -
+     * [KO] 커맨드 인코더 단계 (기본값: PRE_PROCESS)
+     * [EN] Command encoder phase (default: PRE_PROCESS)
      * @returns
-     * [KO] 생성된 Irradiance IBLCubeTexture
-     * [EN] Generated Irradiance IBLCubeTexture
+     * [KO] 생성된 Irradiance DirectCubeTexture
+     * [EN] Generated Irradiance DirectCubeTexture
      */
-    generate(sourceCubeTexture: GPUTexture, size?: number): Promise<IBLCubeTexture>;
+    generate(sourceCubeTexture: GPUTexture, size?: number, phase?: CommandEncoderType): Promise<DirectCubeTexture>;
+    /**
+     * [KO] 소스 큐브 텍스처로부터 Irradiance를 계산하여 대상 GPUTexture에 렌더링합니다.
+     * [EN] Calculates Irradiance from the source cube texture and renders it to the target GPUTexture.
+     *
+     * @param sourceCubeTexture -
+     * [KO] 소스 환경맵 (큐브)
+     * [EN] Source environment map (Cube)
+     * @param targetTexture -
+     * [KO] 대상 GPUTexture (2D Array, 6 layers)
+     * [EN] Target GPUTexture (2D Array, 6 layers)
+     * @param phase -
+     * [KO] 커맨드 인코더 단계 (기본값: RESOURCE)
+     * [EN] Command encoder phase (default: RESOURCE)
+     */
+    render(sourceCubeTexture: GPUTexture, targetTexture: GPUTexture, phase?: CommandEncoderType): Promise<void>;
 }
 export default IrradianceGenerator;

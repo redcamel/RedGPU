@@ -1,4 +1,5 @@
 import { mat4 } from "gl-matrix";
+import ACamera from "../core/ACamera";
 /**
  * [KO] 원근 투영을 사용하는 카메라입니다.
  * [EN] Camera that uses perspective projection.
@@ -17,7 +18,7 @@ import { mat4 } from "gl-matrix";
  * ```
  * @category Camera
  */
-declare class PerspectiveCamera {
+declare class PerspectiveCamera extends ACamera {
     #private;
     /**
      * [KO] PerspectiveCamera 인스턴스를 생성합니다.
@@ -58,7 +59,7 @@ declare class PerspectiveCamera {
     get rotationY(): number;
     /**
      * [KO] Y축 회전값을 설정합니다. (라디안)
-     * [EN] Sets the Y rotation value. (radians)
+     * [EN] Sets the X rotation value. (radians)
      *
      * @param value -
      * [KO] 설정할 회전값
@@ -76,7 +77,7 @@ declare class PerspectiveCamera {
     get rotationZ(): number;
     /**
      * [KO] Z축 회전값을 설정합니다. (라디안)
-     * [EN] Sets the Z rotation value. (radians)
+     * [EN] Sets the X rotation value. (radians)
      *
      * @param value -
      * [KO] 설정할 회전값
@@ -138,24 +139,6 @@ declare class PerspectiveCamera {
      */
     set farClipping(value: number);
     /**
-     * [KO] 카메라 이름을 반환합니다.
-     * [EN] Returns the camera name.
-     *
-     * @returns
-     * [KO] 카메라 이름
-     * [EN] Camera name
-     */
-    get name(): string;
-    /**
-     * [KO] 카메라 이름을 설정합니다.
-     * [EN] Sets the camera name.
-     *
-     * @param value -
-     * [KO] 설정할 이름
-     * [EN] Name to set
-     */
-    set name(value: string);
-    /**
      * [KO] 모델 행렬을 반환합니다.
      * [EN] Returns the model matrix.
      *
@@ -163,7 +146,7 @@ declare class PerspectiveCamera {
      * [KO] 모델 행렬
      * [EN] Model matrix
      */
-    get modelMatrix(): mat4;
+    get viewMatrix(): mat4;
     /**
      * [KO] X 좌표를 반환합니다.
      * [EN] Returns the X coordinate.

@@ -1,11 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js?t=1781131404967";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1781131404967";
 
 /**
- * [KO] Tint Basic (3D) 예제
- * [EN] Tint Basic (3D) example
+ * [KO] Tint Basic 예제
+ * [EN] Tint Basic example
  *
- * [KO] 3D 메시 및 머티리얼에 틴트(Tint)를 적용하는 기본적인 방법을 보여줍니다.
- * [EN] Demonstrates the basic method of applying tint to 3D meshes and materials.
+ * [KO] 다양한 머티리얼(Color, Bitmap, Phong, PBR)에 틴트(Tint) 색상을 일괄 적용하고 제어하는 방법을 시연합니다.
+ * [EN] Demonstrates how to batch apply and control tint colors on various materials (Color, Bitmap, Phong, PBR).
  */
 
 const canvas = document.createElement('canvas');
@@ -14,142 +15,177 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. [KO] 카메라 및 컨트롤러 설정
+        // [EN] Setup Camera and Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.distance = 18;
         controller.speedDistance = 0.3;
+
+        // 2. [KO] 씬 및 뷰 구성
+        // [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
-        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller); // 3D View로 변경
+        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        view.grid = true;
         redGPUContext.addView(view);
 
-        // Texture와 Material 준비
-        const texture_base = new RedGPU.Resource.BitmapTexture(
-            redGPUContext,
-            '../../../assets/UV_Grid_Sm.jpg'
-        );
-        const material_base = new RedGPU.Material.BitmapMaterial(redGPUContext, texture_base); // 3D Material 사용
+        // 3. [KO] 환경 및 라이트 설정
+        // [EN] Configure Environment and Light
+        
+        // [KO] IBL 및 스카이박스 추가 (PBR 및 Phong 재질 시각화 강화)
+        // [EN] Add IBL and Skybox (Enhance visualization for PBR and Phong materials)
+        const iblUrl = '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr';
+        const ibl = new RedGPU.Resource.IBL(redGPUContext, iblUrl, 10000);
+        view.ibl = ibl;
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
 
-        // 중앙 Mesh 생성 (Box 예: 사각형 메쉬)
-        const base = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2), material_base);
+        const light = new RedGPU.Light.DirectionalLight([-1, -1, -1], '#ffffff');
+        scene.lightManager.addDirectionalLight(light);
 
-        scene.addChild(base); // Mesh를 Scene에 추가
+        // 4. [KO] 각 머티리얼별 테스트 메시 생성 (순서: Color, Bitmap, Phong, PBR)
+        // [EN] Create Test Meshes for each Material Type (Order: Color, Bitmap, Phong, PBR)
+        // const geometry = new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2);
+        const geometry = new RedGPU.Primitive.Sphere(redGPUContext,1,32,32);
+        const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
+        const spacing = 5;
+        const startX = -7.5;
 
-        // Material Tint 설정 (색상 적용)
-        base.material.tint.setColorByRGBA(255, 128, 0, 1);
+        // [KO] A. ColorMaterial 메시
+        // [EN] A. ColorMaterial Mesh
+        const materialColor = new RedGPU.Material.ColorMaterial(redGPUContext, '#ffffff');
+        const meshColor = new RedGPU.Display.Mesh(redGPUContext, geometry, materialColor);
+        meshColor.x = startX;
+        scene.addChild(meshColor);
 
-        // 하위 Mesh 생성 (작은 Box)
-        const material_subChild = new RedGPU.Material.BitmapMaterial(redGPUContext, texture_base);
-        material_subChild.baseTexture = texture_base;
+        // [KO] B. BitmapMaterial 메시
+        // [EN] B. BitmapMaterial Mesh
+        const materialBitmap = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
+        const meshBitmap = new RedGPU.Display.Mesh(redGPUContext, geometry, materialBitmap);
+        meshBitmap.x = startX + spacing;
+        scene.addChild(meshBitmap);
 
-        const subChild = new RedGPU.Display.Mesh(redGPUContext, new RedGPU.Primitive.Box(redGPUContext), material_subChild);
+        // [KO] C. PhongMaterial 메시
+        // [EN] C. PhongMaterial Mesh
+        const materialPhong = new RedGPU.Material.PhongMaterial(redGPUContext, '#ffffff');
+        materialPhong.diffuseTexture = texture;
 
-        subChild.setPosition(1.5, 1.5, 0);
-        base.addChild(subChild); // 자식 Mesh 추가
+        const meshPhong = new RedGPU.Display.Mesh(redGPUContext, geometry, materialPhong);
+        meshPhong.x = startX + spacing * 2;
+        scene.addChild(meshPhong);
 
-        // Tint 테스트용 Tweakpane 설정
-        renderTestPane(redGPUContext, base);
+        // [KO] D. PBRMaterial 메시
+        // [EN] D. PBRMaterial Mesh
+        const materialPBR = new RedGPU.Material.PBRMaterial(redGPUContext);
+        materialPBR.baseColorTexture = texture;
+        materialPBR.roughnessFactor = 0.2;
+        materialPBR.metallicFactor = 0.5;
+        const meshPBR = new RedGPU.Display.Mesh(redGPUContext, geometry, materialPBR);
+        meshPBR.x = startX + spacing * 3;
+        scene.addChild(meshPBR);
+        console.log(materialPBR)
 
-        // 애니메이션 설정 (회전)
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        // 5. [KO] 초기 틴트 설정
+        // [EN] Initial Tint Setup
+        const meshes = [meshColor, meshBitmap, meshPhong, meshPBR];
+        meshes.forEach(mesh => {
+            mesh.material.useTint = true;
+            mesh.material.tint.setColorByRGBA(255, 128, 0, 1);
+        });
+
+        // 6. [KO] 렌더러 생성 및 애니메이션 루프 시작
+        // [EN] Create Renderer and Start Animation Loop
+        const renderer = new RedGPU.Renderer();
         const render = () => {
-            base.rotation.y += 1; // Y축 회전
-            base.rotation.z += 0.5; // Z축 회전
+            // [KO] 모든 메시 회전
+            // [EN] Rotate all meshes
+            meshes.forEach(mesh => {
+                mesh.rotationX += 0.5;
+                mesh.rotationY += 0.5;
+            });
         };
         renderer.start(redGPUContext, render);
+
+        // 7. [KO] 테스트용 GUI 렌더링
+        // [EN] Render Test GUI
+        renderTestPane(redGPUContext, meshes);
     },
     (failReason) => {
         console.error("Initialization failed:", failReason);
-        const errorMessage = document.createElement("div");
-        errorMessage.innerHTML = failReason;
-        document.body.appendChild(errorMessage);
     }
 );
 
 /**
- * [KO] 틴트 조작용 Tweakpane GUI를 구성합니다.
- * [EN] Configures the Tweakpane GUI for tint manipulation.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Mesh} mesh
+ * [KO] 틴트 제어를 위한 GUI를 구성합니다.
+ * [EN] Configures GUI for tint control.
  */
-const renderTestPane = async (redGPUContext, mesh) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
-    const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    // Tint 테스트 추가
-    const folder = pane.addFolder({title: "Material Tint Test"});
-    const targetTint = mesh.material.tint;
-    const tintSettings = {
-        tintR: targetTint.r,
-        tintG: targetTint.g,
-        tintB: targetTint.b,
-        tintA: targetTint.a,
-        tint: {r: targetTint.r, g: targetTint.g, b: targetTint.b, a: targetTint.a},
-        useTint: mesh.material.useTint,
-        tintBlendMode: RedGPU.Material.TINT_BLEND_MODE[mesh.material.tintBlendMode] // Default TINT_BLEND_MODE index
-    };
+const renderTestPane = (redGPUContext, meshes) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        gui: (pane) => {
+            const folder = pane.addFolder({title: "Global Tint Control", expanded: true});
+            
+            const materials = meshes.map(m => m.material);
+            const firstMat = materials[0];
 
-    const refresh = () => {
-        tintSettings.tintR = targetTint.r;
-        tintSettings.tintG = targetTint.g;
-        tintSettings.tintB = targetTint.b;
-        tintSettings.tintA = targetTint.a;
-        tintSettings.tint.r = targetTint.r;
-        tintSettings.tint.g = targetTint.g;
-        tintSettings.tint.b = targetTint.b;
-        tintSettings.tint.a = targetTint.a;
-        pane.refresh();
-    };
+            const tintConfig = {
+                color: { 
+                    r: firstMat.tint.r, 
+                    g: firstMat.tint.g, 
+                    b: firstMat.tint.b, 
+                    a: firstMat.tint.a 
+                },
+                useTint: firstMat.useTint,
+                tintBlendMode: RedGPU.Material.TINT_BLEND_MODE[firstMat.tintBlendMode]
+            };
 
-    // useTint 토글
-    folder.addBinding(tintSettings, "useTint", {label: "Use Tint"}).on("change", (ev) => {
-        mesh.material.useTint = ev.value; // 사용 여부 반영
-    });
-    folder.addBinding(tintSettings, 'tintBlendMode', {
-        label: 'tintBlendMode',
-        options: RedGPU.Material.TINT_BLEND_MODE,
-    }).on('change', (ev) => {
-        // Find the key that corresponds to the selected value
-        const selectedKey = Object.keys(RedGPU.Material.TINT_BLEND_MODE).find(
-            (key) => RedGPU.Material.TINT_BLEND_MODE[key] === ev.value
-        );
-        console.log(`Selected Tint Mode: ${selectedKey}`); // Log the key name
+            // [KO] 모든 머티리얼에 일괄 적용되는 틴트 설정
+            // [EN] Tint settings applied globally to all materials
 
-        // Apply the value to the material
-        mesh.material.tintBlendMode = ev.value; // TINT_BLEND_MODE 값 반영
-        refresh();
-    });
-    // Tint 컬러 슬라이더 구성
-    folder.addBinding(tintSettings, "tintR", {label: "Tint R", min: 0, max: 255, step: 1}).on("change", (ev) => {
-        mesh.material.tint.r = ev.value;
-        refresh();
-    });
-    folder.addBinding(tintSettings, "tintG", {label: "Tint G", min: 0, max: 255, step: 1}).on("change", (ev) => {
-        mesh.material.tint.g = ev.value;
-        refresh();
-    });
-    folder.addBinding(tintSettings, "tintB", {label: "Tint B", min: 0, max: 255, step: 1}).on("change", (ev) => {
-        mesh.material.tint.b = ev.value;
-        refresh();
-    });
-    folder.addBinding(tintSettings, "tintA", {
-        label: "Tint A (Alpha)",
-        min: 0,
-        max: 1,
-        step: 0.01
-    }).on("change", (ev) => {
-        mesh.material.tint.a = ev.value;
-        refresh();
-    });
-    folder.addBinding(tintSettings, "tint", {
-        picker: "inline",
-        view: "color",
-        expanded: true
-    }).on("change", (ev) => {
-        const r = Math.floor(ev.value.r);
-        const g = Math.floor(ev.value.g);
-        const b = Math.floor(ev.value.b);
-        const a = ev.value.a;
-        mesh.material.tint.setColorByRGBA(r, g, b, a);
-        refresh();
-    });
+            // [KO] 틴트 사용 여부
+            // [EN] Toggle Tint
+            folder.addBinding(tintConfig, 'useTint', {label: 'useTint'}).on('change', (ev) => {
+                materials.forEach(mat => mat.useTint = ev.value);
+            });
 
+            // [KO] 틴트 블렌드 모드
+            // [EN] Tint Blend Mode
+            folder.addBinding(tintConfig, 'tintBlendMode', {
+                label: 'tintBlendMode',
+                options: RedGPU.Material.TINT_BLEND_MODE
+            }).on('change', (ev) => {
+                materials.forEach(mat => mat.tintBlendMode = ev.value);
+            });
+
+            folder.addBlade({view: 'separator'});
+
+            // [KO] 틴트 색상 제어
+            // [EN] Tint Color Control
+            folder.addBinding(tintConfig, 'color', {
+                picker: 'inline',
+                view: 'color',
+                expanded: true,
+                label: 'Tint Color'
+            }).on('change', (ev) => {
+                const {r, g, b, a} = ev.value;
+                const ir = Math.floor(r), ig = Math.floor(g), ib = Math.floor(b);
+                materials.forEach(mat => {
+                    mat.tint.setColorByRGBA(ir, ig, ib, a);
+                });
+                pane.refresh();
+            });
+
+            // [KO] 개별 채널 제어
+            // [EN] Individual Channel Control
+            const channels = folder.addFolder({title: 'Individual Channels', expanded: false});
+            ['r', 'g', 'b'].forEach(key => {
+                channels.addBinding(tintConfig.color, key, {min: 0, max: 255, step: 1}).on('change', () => {
+                    const val = Math.floor(tintConfig.color[key]);
+                    materials.forEach(mat => mat.tint[key] = val);
+                    pane.refresh();
+                });
+            });
+            channels.addBinding(tintConfig.color, 'a', {min: 0, max: 1, step: 0.01, label: 'alpha'}).on('change', () => {
+                materials.forEach(mat => mat.tint.a = tintConfig.color.a);
+                pane.refresh();
+            });
+        }
+    });
 };

@@ -72,13 +72,12 @@ declare class Renderer {
      * @param view -
      * [KO] 렌더링할 View3D 인스턴스
      * [EN] View3D instance to render
-     * @param time -
-     * [KO] 현재 시간 (ms)
-     * [EN] Current time (ms)
      * @returns
      * [KO] 생성된 렌더 패스 디스크립터
      * [EN] Generated render pass descriptor
      */
-    renderView(view: View3D, time: number): GPURenderPassDescriptor;
+    renderView(view: View3D): {
+        renderPassDescriptor: GPURenderPassDescriptor;
+    };
 }
 export default Renderer;

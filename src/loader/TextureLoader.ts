@@ -1,6 +1,7 @@
 import RedGPUContext from "../context/RedGPUContext";
 import BitmapTexture from "../resources/texture/BitmapTexture";
 import CubeTexture from "../resources/texture/CubeTexture";
+import RedGPUObject from "../base/RedGPUObject";
 
 export class TextureLoaderData {
     src: any;
@@ -20,16 +21,15 @@ export class TextureLoaderData {
     }
 }
 
-export default class TextureLoader {
+export default class TextureLoader extends RedGPUObject {
     textures = [];
     #loaded = 0;
-    readonly #redGPUContext: RedGPUContext;
     readonly #srcInfoList;
     readonly #callback;
     readonly #progressCallback;
 
     constructor(redGPUContext: RedGPUContext, srcInfoList = [], callback: Function, progressCallback?: Function) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
         this.#srcInfoList = srcInfoList;
         this.#callback = callback;
         this.#progressCallback = progressCallback;
@@ -46,6 +46,7 @@ export default class TextureLoader {
     }
 
     #loadTexture(srcInfo, index: number): void {
+        const {redGPUContext} = this;
         let targetTexture, srcTarget;
         let targetClass: any = BitmapTexture;
         if (srcInfo.hasOwnProperty('src')) {
@@ -71,12 +72,12 @@ export default class TextureLoader {
         };
         // console.log('srcInfo',srcInfo)
         if (targetClass === BitmapTexture) {
-            targetTexture.texture = new targetClass(this.#redGPUContext, {
+            targetTexture.texture = new targetClass(redGPUContext, {
                 src: srcInfo.src,
                 cacheKey: srcInfo.cacheKey
             }, srcInfo.useMipmap, onLoadHandler, onErrorHandler, srcInfo.format, false);
         } else {
-            targetTexture.texture = new targetClass(this.#redGPUContext, {
+            targetTexture.texture = new targetClass(redGPUContext, {
                 src: srcInfo.src,
                 cacheKey: srcInfo.cacheKey
             }, srcInfo.useMipmap, onLoadHandler, onErrorHandler, srcInfo.format);

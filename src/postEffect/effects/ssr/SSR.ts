@@ -1,69 +1,49 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import validateNumberRange from "../../../runtimeChecker/validateFunc/validateNumberRange";
-import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
+
+interface SSR {
+    /** [KO] 최대 레이 마칭 단계 수. 값이 클수록 정밀한 반사가 가능하지만 성능 소모가 큽니다. [EN] Maximum number of ray marching steps. Higher values allow more precise reflections but increase performance cost. */
+    maxSteps: number;
+    /** [KO] 최대 반사 추적 거리 (월드 단위). [EN] Maximum reflection tracking distance (in world units). */
+    maxDistance: number;
+    /** [KO] 레이 마칭 시 한 단계의 기본 크기. [EN] Base size of a single step during ray marching. */
+    stepSize: number;
+    /** [KO] 반사 효과의 전체적인 강도. [EN] Overall intensity of the reflection effect. */
+    reflectionIntensity: number;
+    /** [KO] 거리에 따른 반사 감쇠 시작 거리. [EN] Distance where reflection attenuation starts based on distance. */
+    fadeDistance: number;
+    /** [KO] 화면 가장자리에서의 반사 페이드 영역 크기. [EN] Reflection fade area size at the screen edges. */
+    edgeFade: number;
+}
 
 /**
  * [KO] SSR(Screen Space Reflection) 후처리 이펙트입니다.
  * [EN] SSR (Screen Space Reflection) post-processing effect.
  *
- * [KO] 화면 공간 반사 효과를 구현합니다. 최대 스텝, 거리, 스텝 크기, 반사 강도, 페이드 거리, 에지 페이드 등 다양한 파라미터를 지원합니다.
- * [EN] Implements screen space reflection effects. Supports various parameters such as max steps, distance, step size, reflection intensity, fade distance, and edge fade.
+ * [KO] 화면상의 깊이(Depth)와 법선(Normal) 정보를 활용하여 실시간 반사 효과를 구현합니다. 레이 마칭(Ray Marching) 기법을 통해 지형 간의 교차점을 찾아내어 정교한 거울 반사 질감을 제공합니다.
+ * [EN] Implements real-time reflection effects using screen-space depth and normal information. It finds intersection points between terrains via Ray Marching to provide sophisticated mirror reflection textures.
+ *
+ * [KO] 이 효과는 HDR 공간에서 동작하여 주변의 밝은 광원을 반사할 때 물리적으로 정확하고 아름다운 광채를 표현합니다.
+ * [EN] This effect operates in HDR space, representing physically accurate and beautiful glows when reflecting surrounding bright light sources.
+ *
  * * ### Example
  * ```typescript
- * const effect = new RedGPU.PostEffect.SSR(redGPUContext);
- * effect.maxSteps = 128;            // 최대 스텝 수
- * effect.maxDistance = 20.0;        // 최대 반사 거리
- * effect.stepSize = 0.05;           // 스텝 크기
- * effect.reflectionIntensity = 1.2; // 반사 강도
- * effect.fadeDistance = 15.0;       // 페이드 거리
- * effect.edgeFade = 0.2;            // 에지 페이드
- * view.postEffectManager.addEffect(effect);
+ * // View3D의 postEffectManager를 통해 사용 여부를 제어합니다.
+ * // Controlled through the useSSR property of View3D's postEffectManager.
+ * view.postEffectManager.useSSR = true;
+ * const ssrEffect = view.postEffectManager.ssr;
+ * ssrEffect.maxSteps = 128;
+ * ssrEffect.reflectionIntensity = 0.8;
  * ```
  *
- * <iframe src="/RedGPU/examples/postEffect/ssr/ssr/"></iframe>
+ * <iframe src="/RedGPU/examples/postEffect/ssr/"></iframe>
  * @category PostEffect
  */
 class SSR extends ASinglePassPostEffect {
-    /**
-     * [KO] 최대 스텝 수 (1 ~ 512)
-     * [EN] Max steps (1 ~ 512)
-     * @defaultValue 64
-     */
-    #maxSteps: number = 64;
-    /**
-     * [KO] 최대 반사 거리 (1.0 ~ 200.0)
-     * [EN] Max reflection distance (1.0 ~ 200.0)
-     * @defaultValue 15.0
-     */
-    #maxDistance: number = 15.0;
-    /**
-     * [KO] 스텝 크기 (0.001 ~ 5.0)
-     * [EN] Step size (0.001 ~ 5.0)
-     * @defaultValue 0.02
-     */
-    #stepSize: number = 0.02;
-    /**
-     * [KO] 반사 강도 (0.0 ~ 5.0)
-     * [EN] Reflection intensity (0.0 ~ 5.0)
-     * @defaultValue 1
-     */
-    #reflectionIntensity: number = 1;
-    /**
-     * [KO] 페이드 거리 (1.0 ~ 100.0)
-     * [EN] Fade distance (1.0 ~ 100.0)
-     * @defaultValue 12.0
-     */
-    #fadeDistance: number = 12.0;
-    /**
-     * [KO] 에지 페이드 (0.0 ~ 0.5)
-     * [EN] Edge fade (0.0 ~ 0.5)
-     * @defaultValue 0.15
-     */
-    #edgeFade: number = 0.15;
 
     /**
      * [KO] SSR 인스턴스를 생성합니다.
@@ -74,136 +54,22 @@ class SSR extends ASinglePassPostEffect {
      * [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
-        this.WORK_SIZE_X = 8;
-        this.WORK_SIZE_Y = 8;
-        this.WORK_SIZE_Z = 1;
-        this.useDepthTexture = true;
-        this.useGBufferNormalTexture = true;
+        super(redGPUContext, {x: 8, y: 8, z: 1});
         this.init(
             redGPUContext,
             'POST_EFFECT_SSR',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
-        // 초기값 설정
-        this.maxSteps = this.#maxSteps;
-        this.maxDistance = this.#maxDistance;
-        this.stepSize = this.#stepSize;
-        this.reflectionIntensity = this.#reflectionIntensity;
-        this.fadeDistance = this.#fadeDistance;
-        this.edgeFade = this.#edgeFade;
     }
-
-    /**
-     * [KO] 최대 스텝 수를 반환합니다.
-     * [EN] Returns the max steps.
-     */
-    get maxSteps(): number {
-        return this.#maxSteps;
-    }
-
-    /**
-     * [KO] 최대 스텝 수를 설정합니다. (1 ~ 512)
-     * [EN] Sets the max steps. (1 ~ 512)
-     */
-    set maxSteps(value: number) {
-        validateNumberRange(value, 1, 512);
-        this.#maxSteps = value;
-        this.updateUniform('maxSteps', value);
-    }
-
-    /**
-     * [KO] 최대 반사 거리를 반환합니다.
-     * [EN] Returns the max reflection distance.
-     */
-    get maxDistance(): number {
-        return this.#maxDistance;
-    }
-
-    /**
-     * [KO] 최대 반사 거리를 설정합니다. (1.0 ~ 200.0)
-     * [EN] Sets the max reflection distance. (1.0 ~ 200.0)
-     */
-    set maxDistance(value: number) {
-        validatePositiveNumberRange(value, 1.0, 200.0);
-        this.#maxDistance = value;
-        this.updateUniform('maxDistance', value);
-    }
-
-    /**
-     * [KO] 스텝 크기를 반환합니다.
-     * [EN] Returns the step size.
-     */
-    get stepSize(): number {
-        return this.#stepSize;
-    }
-
-    /**
-     * [KO] 스텝 크기를 설정합니다. (0.001 ~ 5.0)
-     * [EN] Sets the step size. (0.001 ~ 5.0)
-     */
-    set stepSize(value: number) {
-        validatePositiveNumberRange(value, 0.001, 5.0);
-        this.#stepSize = value;
-        this.updateUniform('stepSize', value);
-    }
-
-    /**
-     * [KO] 반사 강도를 반환합니다.
-     * [EN] Returns the reflection intensity.
-     */
-    get reflectionIntensity(): number {
-        return this.#reflectionIntensity;
-    }
-
-    /**
-     * [KO] 반사 강도를 설정합니다. (0.0 ~ 5.0)
-     * [EN] Sets the reflection intensity. (0.0 ~ 5.0)
-     */
-    set reflectionIntensity(value: number) {
-        validateNumberRange(value, 0.0, 5.0);
-        this.#reflectionIntensity = value;
-        this.updateUniform('reflectionIntensity', value);
-    }
-
-    /**
-     * [KO] 페이드 거리를 반환합니다.
-     * [EN] Returns the fade distance.
-     */
-    get fadeDistance(): number {
-        return this.#fadeDistance;
-    }
-
-    /**
-     * [KO] 페이드 거리를 설정합니다. (1.0 ~ 100.0)
-     * [EN] Sets the fade distance. (1.0 ~ 100.0)
-     */
-    set fadeDistance(value: number) {
-        validatePositiveNumberRange(value, 1.0, 100.0);
-        this.#fadeDistance = value;
-        this.updateUniform('fadeDistance', value);
-    }
-
-    /**
-     * [KO] 에지 페이드를 반환합니다.
-     * [EN] Returns the edge fade.
-     */
-    get edgeFade(): number {
-        return this.#edgeFade;
-    }
-
-    /**
-     * [KO] 에지 페이드를 설정합니다. (0.0 ~ 0.5)
-     * [EN] Sets the edge fade. (0.0 ~ 0.5)
-     */
-    set edgeFade(value: number) {
-        validateNumberRange(value, 0.0, 0.5);
-        this.#edgeFade = value;
-        this.updateUniform('edgeFade', value);
-    }
-
-
 }
 
+definePositiveNumber(SSR, [
+    {key: 'maxSteps', value: 64, min: 1, max: 512},
+    {key: 'maxDistance', value: 15.0, min: 1.0, max: 200.0},
+    {key: 'stepSize', value: 0.02, min: 0.001, max: 5.0},
+    {key: 'reflectionIntensity', value: 1, min: 0.0, max: 10},
+    {key: 'fadeDistance', value: 12.0, min: 1.0, max: 100.0},
+    {key: 'edgeFade', value: 0.15, min: 0.0, max: 0.5}
+])
 Object.freeze(SSR);
 export default SSR;

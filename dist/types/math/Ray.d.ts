@@ -13,7 +13,7 @@ import AABB from "../bound/AABB";
  * ```
  * @category Math
  */
-export default class Ray {
+declare class Ray {
     /**
      * [KO] 광선의 시작점
      * [EN] Origin of the ray
@@ -159,3 +159,4 @@ export default class Ray {
         v: number;
     } | null;
 }
+export default Ray;

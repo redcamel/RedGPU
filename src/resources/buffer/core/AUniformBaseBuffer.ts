@@ -11,8 +11,8 @@ import ABaseBuffer, {
  * [EN] Abstract base class for uniform buffer resources.
  *
  * ::: warning
- * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>상속을 통해 사용하십시오.
- * [EN] This class is an abstract class and cannot be instantiated directly.<br/>Use it through inheritance.
+ * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * @category Buffer
@@ -66,6 +66,10 @@ abstract class AUniformBaseBuffer extends ABaseBuffer {
         this[GPU_BUFFER_DATA_SYMBOL_U32] = new Uint32Array(data);
     }
 
+    get label() {
+        return this.#uniformBufferDescriptor.label
+    }
+
     /**
      * [KO] 버퍼 데이터(`ArrayBuffer`)를 반환합니다.
      * [EN] Returns the buffer data (`ArrayBuffer`).
@@ -117,6 +121,9 @@ abstract class AUniformBaseBuffer extends ABaseBuffer {
      * [EN] Value to write
      */
     writeOnlyBuffer(target: any, value: any) {
+        if (typeof value === "boolean") {
+            value = value ? 1 : 0
+        }
         this.redGPUContext.gpuDevice.queue.writeBuffer(
             this.gpuBuffer,
             target.uniformOffset,

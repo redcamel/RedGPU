@@ -1,12 +1,29 @@
 import RedGPUContext from "../RedGPUContext";
+import RedGPUObject from "../../base/RedGPUObject";
 /**
  * [KO] 사각형 영역 정보를 나타내는 인터페이스입니다.
  * [EN] Interface representing rectangular area information.
  */
 export interface IRedGPURectObject {
+    /**
+     * [KO] X 좌표 (픽셀 단위)
+     * [EN] X coordinate (in pixels)
+     */
     x: number;
+    /**
+     * [KO] Y 좌표 (픽셀 단위)
+     * [EN] Y coordinate (in pixels)
+     */
     y: number;
+    /**
+     * [KO] 가로 크기 (픽셀 단위)
+     * [EN] Width (in pixels)
+     */
     width: number;
+    /**
+     * [KO] 세로 크기 (픽셀 단위)
+     * [EN] Height (in pixels)
+     */
     height: number;
 }
 /**
@@ -14,8 +31,20 @@ export interface IRedGPURectObject {
  * [EN] Resize event object interface
  */
 export interface RedResizeEvent<T = any> {
+    /**
+     * [KO] 이벤트가 발생한 대상 객체
+     * [EN] The target object that triggered the event
+     */
     target: T;
+    /**
+     * [KO] CSS 픽셀 단위의 크기 및 위치 정보
+     * [EN] Dimension and position information in CSS pixels
+     */
     screenRectObject: IRedGPURectObject;
+    /**
+     * [KO] 물리 픽셀 단위의 크기 및 위치 정보
+     * [EN] Dimension and position information in physical pixels
+     */
     pixelRectObject: IRedGPURectObject;
 }
 type ParentRect = {
@@ -45,7 +74,7 @@ type ParentRect = {
  *
  * @category Context
  */
-declare class RedGPUContextSizeManager {
+declare class RedGPUContextSizeManager extends RedGPUObject {
     #private;
     /**
      * [KO] RedGPUContextSizeManager 생성자
@@ -114,7 +143,11 @@ declare class RedGPUContextSizeManager {
      * [KO] 캔버스의 부모 DOM 요소의 크기 정보를 반환합니다.
      * [EN] Returns the dimension information of the canvas's parent DOM element.
      */
-    get parentDomRect(): DOMRect;
+    get parentDomRect(): ParentRect;
+    /**
+     * [KO] CSS 픽셀 단위 화면 크기 정보를 반환합니다.
+     * [EN] Returns the screen size information in CSS pixels.
+     */
     get screenRectObject(): IRedGPURectObject;
     /**
      * [KO] 입력값이 유효한 사이즈 값인지 검증합니다. (양수, px, %)

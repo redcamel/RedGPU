@@ -1,9 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
-
-// 1. Create and append a canvas
-// 1. 캔버스를 생성하고 문서에 추가
-const canvas = document.createElement('canvas');
-document.querySelector('#example-container').appendChild(canvas);
+import * as RedGPU from "../../../../dist/index.js?t=1781131404967";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1781131404967";
 
 /**
  * [KO] Grayscale 예제
@@ -13,133 +9,109 @@ document.querySelector('#example-container').appendChild(canvas);
  * [EN] Demonstrates how to convert the screen to grayscale using post effects.
  */
 
+// 1. Create and append a container and canvas
+const container = document.createElement('div');
+document.body.appendChild(container);
+
+const canvas = document.createElement('canvas');
+container.appendChild(canvas);
+
 // 2. Initialize RedGPU
-// 2. RedGPU 초기화
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // ============================================
-        // 기본 설정
-        // ============================================
-
-        // 궤도형 카메라 컨트롤러 생성
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 3;
         controller.speedDistance = 0.1;
         controller.tilt = 0;
 
-        // 씬 생성
         const scene = new RedGPU.Display.Scene();
 
-        // ============================================
-        // 뷰 생성 및 설정
-        // ============================================
-
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr')
-        // 일반 뷰 생성
+        
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
-        // 이펙트 뷰 생성
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         viewEffect.postEffectManager.addEffect(new RedGPU.PostEffect.Grayscale(redGPUContext));
         redGPUContext.addView(viewEffect);
 
-        // ============================================
-        // 씬 설정
-        // ============================================
-
-        // 조명 추가
         const directionalLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 3D 모델 로드
         loadGLTF(redGPUContext, scene, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/DamagedHelmet/glTF-Binary/DamagedHelmet.glb');
 
-        // ============================================
-        // 레이아웃 설정
-        // ============================================
-
-        if (redGPUContext.detector.isMobile) {
-            // 모바일: 위아래 분할
-            viewNormal.setSize('100%', '50%');
-            viewNormal.setPosition(0, 0);         // 상단
-            viewEffect.setSize('100%', '50%');
-            viewEffect.setPosition(0, '50%');     // 하단
-        } else {
-            // 데스크톱: 좌우 분할
-            viewNormal.setSize('50%', '100%');
-            viewNormal.setPosition(0, 0);         // 좌측
-            viewEffect.setSize('50%', '100%');
-            viewEffect.setPosition('50%', 0);     // 우측
-        }
-
-        // ============================================
-        // 렌더링 시작
-        // ============================================
-
-        // 렌더러 생성 및 시작
-        const renderer = new RedGPU.Renderer(redGPUContext);
-        const render = () => {
-            // 추가 렌더링 로직이 필요하면 여기에 작성
+        const updateLayout = () => {
+            const isNarrow = window.innerWidth <= 768;
+            if (isNarrow) {
+                viewNormal.setSize('100%', '50%');
+                viewNormal.setPosition(0, 0);
+                viewEffect.setSize('100%', '50%');
+                viewEffect.setPosition(0, '50%');
+            } else {
+                viewNormal.setSize('50%', '100%');
+                viewNormal.setPosition(0, 0);
+                viewEffect.setSize('50%', '100%');
+                viewEffect.setPosition('50%', 0);
+            }
         };
-        renderer.start(redGPUContext, render);
+        updateLayout();
+        window.addEventListener('resize', updateLayout);
 
-        // 컨트롤 패널 생성
-        renderTestPane(redGPUContext, viewEffect);
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext);
+
+        renderTestPane(redGPUContext, viewEffect, container);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
-        const errorMessage = document.createElement('div');
-        errorMessage.innerHTML = failReason;
-        document.body.appendChild(errorMessage);
     }
 );
 
-/**
- * [KO] GLTF 모델을 로드합니다.
- * [EN] Loads a GLTF model.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @param {string} url
- */
 function loadGLTF(redGPUContext, scene, url) {
-
-    let mesh
-    new RedGPU.GLTFLoader(
-        redGPUContext,
-        url,
-        (v) => {
-            mesh = scene.addChild(v['resultMesh'])
-        }
-    )
+    new RedGPU.GLTFLoader(redGPUContext, url, (v) => scene.addChild(v['resultMesh']));
 }
 
-/**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.View3D} viewEffect
- */
-const renderTestPane = async (redGPUContext, viewEffect) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {createPostEffectLabel} = await import('../../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js?t=1770713934910');
-    createPostEffectLabel('Grayscale', redGPUContext.detector.isMobile)
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
-    const view = viewEffect
-    const TEST_STATE = {
-        Grayscale: true,
-    }
-    const folder = pane.addFolder({title: 'PostEffect', expanded: true})
-    folder.addBinding(TEST_STATE, 'Grayscale').on('change', (v) => {
-        if (v.value) view.postEffectManager.addEffect(new RedGPU.PostEffect.Grayscale(redGPUContext))
-        else view.postEffectManager.removeAllEffect()
-    })
+const renderTestPane = async (redGPUContext, targetView, container) => {
+
+    new RedGPUExampleHelper(redGPUContext, {
+        compareLabel: {
+            title: 'PostEffect Applied',
+            normalTitle: 'Original',
+            targetContainer: container
+        },
+        gui: (pane) => {
+            const effect = targetView.postEffectManager.getEffectAt(0);
+            const TEST_STATE = {
+                Grayscale: true,
+                amount: effect.amount,
+            }
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true})
+            folder.addBinding(TEST_STATE, 'Grayscale').on('change', (v) => {
+                if (v.value) {
+                    const newEffect = new RedGPU.PostEffect.Grayscale(redGPUContext);
+                    newEffect.amount = TEST_STATE.amount;
+                    targetView.postEffectManager.addEffect(newEffect)
+                } else {
+                    targetView.postEffectManager.removeAllEffect()
+                }
+                amountControl.disabled = !v.value;
+            })
+
+            const amountControl = folder.addBinding(TEST_STATE, 'amount', {
+                min: 0,
+                max: 1,
+                step: 0.01
+            }).on('change', (v) => {
+                const currentEffect = targetView.postEffectManager.getEffectAt(0);
+                if (currentEffect) currentEffect.amount = v.value
+            })
+        }
+    });
+
 
 };

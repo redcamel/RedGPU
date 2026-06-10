@@ -16,7 +16,7 @@ const tempMTX = mat4.create();
  * @param projectionMatrix -
  * [KO] 프로젝션 행렬
  * [EN] Projection matrix
- * @param cameraMatrix -
+ * @param viewMatrix -
  * [KO] 카메라 행렬
  * [EN] Camera matrix
  * @returns
@@ -24,8 +24,8 @@ const tempMTX = mat4.create();
  * [EN] Array of [A, B, C, D] for 6 planes
  * @category Math
  */
-const computeViewFrustumPlanes = (projectionMatrix: mat4, cameraMatrix: mat4): number[][] => {
-    mat4.multiply(tempMTX, projectionMatrix, cameraMatrix);
+const computeViewFrustumPlanes = (projectionMatrix: mat4, viewMatrix: mat4): number[][] => {
+    mat4.multiply(tempMTX, projectionMatrix, viewMatrix);
     const planes = [
         [tempMTX[3] - tempMTX[0], tempMTX[7] - tempMTX[4], tempMTX[11] - tempMTX[8], tempMTX[15] - tempMTX[12]],
         [tempMTX[3] + tempMTX[0], tempMTX[7] + tempMTX[4], tempMTX[11] + tempMTX[8], tempMTX[15] + tempMTX[12]],

@@ -1,6 +1,10 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import ManagementResourceBase from "../../core/ManagementResourceBase";
-type SrcInfo = string | {
+/**
+ * [KO] HDR 텍스처 소스 정보 타입입니다. 이미지 URL 문자열이거나 src와 cacheKey를 가진 객체일 수 있습니다.
+ * [EN] HDR texture source information type. Can be an image URL string or an object with src and cacheKey.
+ */
+export type HDRSrcInfo = string | {
     src: string;
     cacheKey: string;
 };
@@ -43,16 +47,51 @@ declare class HDRTexture extends ManagementResourceBase {
      * [KO] 에러 콜백
      * [EN] Error callback
      */
-    constructor(redGPUContext: RedGPUContext, src: SrcInfo, onLoad?: (textureInstance?: HDRTexture) => void, onError?: (error: Error) => void);
-    /** [KO] 텍스처 가로 크기 [EN] Texture width */
+    constructor(redGPUContext: RedGPUContext, src: HDRSrcInfo, onLoad?: (textureInstance?: HDRTexture) => void, onError?: (error: Error) => void);
+    /**
+     * [KO] 텍스처 가로 크기를 반환합니다.
+     * [EN] Returns the texture width.
+     *
+     * @returns
+     * [KO] 가로 크기 (픽셀)
+     * [EN] Width in pixels
+     */
     get width(): number;
-    /** [KO] 텍스처 세로 크기 [EN] Texture height */
+    /**
+     * [KO] 텍스처 세로 크기를 반환합니다.
+     * [EN] Returns the texture height.
+     *
+     * @returns
+     * [KO] 세로 크기 (픽셀)
+     * [EN] Height in pixels
+     */
     get height(): number;
-    /** [KO] 비디오 메모리 사용량(byte) [EN] Video memory usage in bytes */
+    /**
+     * [KO] 비디오 메모리 사용량(byte)을 반환합니다.
+     * [EN] Returns the video memory usage in bytes.
+     *
+     * @returns
+     * [KO] 비디오 메모리 사용량 (Bytes)
+     * [EN] Video memory usage in bytes
+     */
     get videoMemorySize(): number;
-    /** [KO] GPUTexture 객체 [EN] GPUTexture object */
+    /**
+     * [KO] GPUTexture 객체를 반환합니다.
+     * [EN] Returns the GPUTexture object.
+     *
+     * @returns
+     * [KO] GPUTexture 인스턴스
+     * [EN] GPUTexture instance
+     */
     get gpuTexture(): GPUTexture;
-    /** [KO] 텍스처 소스 경로 [EN] Texture source path */
+    /**
+     * [KO] 텍스처 소스 경로를 반환합니다.
+     * [EN] Returns the texture source path.
+     *
+     * @returns
+     * [KO] 소스 경로
+     * [EN] Source path
+     */
     get src(): string;
     /**
      * [KO] 텍스처 소스 경로 설정 및 로드를 시작합니다.
@@ -62,7 +101,7 @@ declare class HDRTexture extends ManagementResourceBase {
      * [KO] 설정할 소스 정보
      * [EN] Source info to set
      */
-    set src(value: SrcInfo);
+    set src(value: HDRSrcInfo);
     /** [KO] 리소스를 파괴합니다. [EN] Destroys the texture resource. */
     destroy(): void;
 }

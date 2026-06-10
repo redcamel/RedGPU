@@ -1,0 +1,24 @@
+{
+  "name": "@redgpu/example-helper",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc && vite build",
+    "watch": "vite build --watch"
+  },
+  "devDependencies": {
+    "@tweakpane/plugin-essentials": "^0.2.1",
+    "@types/node": "^25.7.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "tweakpane": "^4.0.5",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.12",
+    "vite-plugin-css-injected-by-js": "^5.0.1",
+    "zustand": "^5.0.13"
+  }
+}

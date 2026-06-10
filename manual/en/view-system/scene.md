@@ -6,20 +6,29 @@ order: 3
 const sceneGraph = `
     graph TD
         Scene["RedGPU.Display.Scene (Root Node)"]
-        LightMgr["LightManager (Uniform Buffer)"]
+        LightMgr["LightManager"]
+        ShadowMgr["ShadowManager"]
+        PhysicsEngine["PhysicsEngine"]
         Children["Child Nodes (Mesh, Group)"]
         Ambient["AmbientLight"]
         DirLight["DirectionalLight"]
 
         Scene -->|Owns| LightMgr
+        Scene -->|Owns| ShadowMgr
+        Scene -->|Owns| PhysicsEngine
         Scene -->|Contains| Children
         
         LightMgr -->|Manages| Ambient
         LightMgr -->|Manages| DirLight
         
-        %% Apply custom classes
-        class Scene mermaid-main;
-        class LightMgr mermaid-system;
+        %% Grayscale styles applied to all nodes
+        style Scene fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+        style LightMgr fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style ShadowMgr fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style PhysicsEngine fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style Children fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style Ambient fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+        style DirLight fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
 `
 </script>
 
@@ -167,7 +176,37 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## 5. Shared Model
+## 5. Key API Properties and Methods
+
+The `Scene` class provides various APIs for background clearing, light/shadow management, physics engine binding, and
+hierarchical child management.
+
+### 5.1 Background Color Configuration
+
+* **`backgroundColor`** (`ColorRGBA`): The background color filled when clearing the scene. Must be assigned a valid
+  `ColorRGBA` instance.
+* **`useBackgroundColor`** (`boolean`, default: `false`): If set to `true`, background clearing with the specified
+  `backgroundColor` is enabled.
+
+### 5.2 Engine & Manager Integration
+
+* **`lightManager`** (`LightManager`, Read-only): A manager that integrates and controls various light sources (Ambient,
+  Directional, etc.) placed inside the scene.
+* **`shadowManager`** (`ShadowManager`, Read-only): A manager that controls shadow map generation, resources, and
+  computation pipelines.
+* **`physicsEngine`** (`IPhysicsEngine`): Binds a physics engine plugin to run real-time physics simulations inside the
+  scene.
+
+### 5.3 Child Node Management (Inherited from Object3DContainer)
+
+* **`addChild(child)`**: Registers a 3D object (Mesh) or a group (Group) as a child in the scene space. Only registered
+  objects participate in the rendering cycle.
+* **`removeChild(child)`**: Removes a specific child object from the scene graph, preventing it from being rendered.
+* **`children`** (`any[]`, Read-only): Gets a list of all child nodes currently registered in the scene.
+
+---
+
+## 6. Shared Model
 
 A **Scene** is a model that contains the data and state to be rendered. Multiple **View3D** instances can refer to a single **Scene** instance simultaneously.
 

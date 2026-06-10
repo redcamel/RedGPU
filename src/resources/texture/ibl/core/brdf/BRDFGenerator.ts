@@ -1,5 +1,6 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import brdfShaderCode from "./brdfShaderCode.wgsl";
+import RedGPUObject from "../../../../../base/RedGPUObject";
 
 /**
  * [KO] BRDF LUT(Look-Up Table)를 생성하는 클래스입니다.
@@ -10,8 +11,7 @@ import brdfShaderCode from "./brdfShaderCode.wgsl";
  *
  * @category IBL
  */
-class BRDFGenerator {
-    readonly #redGPUContext: RedGPUContext;
+class BRDFGenerator extends RedGPUObject {
     #brdfShaderModule: GPUShaderModule;
     #pipeline: GPURenderPipeline;
     #brdfLUTTexture: GPUTexture;
@@ -25,31 +25,31 @@ class BRDFGenerator {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext);
     }
 
-	/**
-	 * [KO] BRDF LUT 텍스처를 반환합니다.
-	 * [EN] Returns the BRDF LUT texture.
+    /**
+     * [KO] BRDF LUT 텍스처를 반환합니다.
+     * [EN] Returns the BRDF LUT texture.
      *
      * ### Example
      * ```typescript
      * const brdfLUT = redGPUContext.resourceManager.brdfGenerator.brdfLUTTexture;
      * ```
-	 */
-	get brdfLUTTexture(): GPUTexture {
-		if (!this.#brdfLUTTexture) {
-			this.#generateBRDFLUT();
-		}
-		return this.#brdfLUTTexture;
-	}
+     */
+    get brdfLUTTexture(): GPUTexture {
+        if (!this.#brdfLUTTexture) {
+            this.#generateBRDFLUT();
+        }
+        return this.#brdfLUTTexture;
+    }
 
     /**
      * [KO] BRDF LUT를 생성합니다.
      * [EN] Generates the BRDF LUT.
      */
-	async #generateBRDFLUT() {
-        const {gpuDevice, resourceManager} = this.#redGPUContext;
+    #generateBRDFLUT() {
+        const {gpuDevice, resourceManager, commandEncoderManager} = this;
         const size = 128;
         const format: GPUTextureFormat = 'rg16float';
 
@@ -79,7 +79,7 @@ class BRDFGenerator {
                 fragment: {
                     module: this.#brdfShaderModule,
                     entryPoint: 'fs_main',
-                    targets: [{ format }]
+                    targets: [{format}]
                 },
                 primitive: {
                     topology: 'triangle-list',
@@ -87,28 +87,23 @@ class BRDFGenerator {
             });
         }
 
-        const commandEncoder = gpuDevice.createCommandEncoder({
-            label: 'BRDF_GENERATOR_COMMAND_ENCODER'
-        });
-
-        const passEncoder = commandEncoder.beginRenderPass({
-            label: 'BRDF_GENERATOR_RENDER_PASS',
-            colorAttachments: [
-                {
-                    view: this.#brdfLUTTexture.createView(),
-                    loadOp: 'clear',
-                    clearValue: { r: 0, g: 0, b: 0, a: 1 },
-                    storeOp: 'store'
-                }
-            ]
-        });
-
-        passEncoder.setPipeline(this.#pipeline);
-        passEncoder.draw(3);
-        passEncoder.end();
-
-        gpuDevice.queue.submit([commandEncoder.finish()]);
-        await gpuDevice.queue.onSubmittedWorkDone();
+        commandEncoderManager.addResourceRenderPass(
+            {
+                label: 'BRDF_GENERATOR_RENDER_PASS',
+                colorAttachments: [
+                    {
+                        view: this.#brdfLUTTexture.createView(),
+                        loadOp: 'clear',
+                        clearValue: {r: 0, g: 0, b: 0, a: 1},
+                        storeOp: 'store'
+                    }
+                ]
+            },
+            (passEncoder) => {
+                passEncoder.setPipeline(this.#pipeline);
+                passEncoder.draw(3);
+            }
+        );
     }
 }
 

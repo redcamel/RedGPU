@@ -17,12 +17,13 @@ const viewSystemGraph = `
         View -->|References| Camera
         Controller -->|Updates| Camera
         View -.->|Holds| Controller
-`
 
-const viewGraph = `
-    Renderer["RedGPU.Renderer"] -->|Executes Loop| View["RedGPU.Display.View3D"]
-    View -->|References| Scene["RedGPU.Display.Scene"]
-    View -->|References| Camera["RedGPU.Camera"]
+        %% Grayscale styles applied
+        style Context fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+        style View fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style Scene fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style Camera fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+        style Controller fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
 `
 
 const multiViewGraph = `
@@ -42,7 +43,16 @@ const multiViewGraph = `
         
         View2 -->|Shared Reference| SceneA
         View2 --> CameraY
+
+        %% Grayscale styles applied
+        style Context fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+        style View1 fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style View2 fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style SceneA fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style CameraX fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+        style CameraY fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
 `
+
 </script>
 
 # View3D
@@ -156,17 +166,31 @@ Two coordinate objects are provided for High-DPI (Retina) display support:
 
 While `redGPUContext.onResize` detects size changes of the entire canvas, the `onResize` callback of an individual **View3D** object is called whenever the size of that specific view changes.
 
-This is particularly useful when the view's size is set in percentages (`%`) and the parent canvas size changes, or when you explicitly change the size using `setSize()`.
+This is particularly useful when the view's size is set in percentages (`%`) and the parent canvas size changes, or when
+you explicitly change the size using `setSize()`. This callback receives an event argument of the `RedResizeEvent`
+interface type.
 
-```javascript
+#### RedResizeEvent Interface Structure
+
+| Property               | Type                 | Description                                                                            |
+|:-----------------------|:---------------------|:---------------------------------------------------------------------------------------|
+| **`target`**           | `T` (e.g., `View3D`) | The target view instance where the event occurred                                      |
+| **`screenRectObject`** | `IRedGPURectObject`  | Dimension and position information in CSS pixels (`{ x, y, width, height }`)           |
+| **`pixelRectObject`**  | `IRedGPURectObject`  | Physical pixel information with `devicePixelRatio` applied (`{ x, y, width, height }`) |
+
+```typescript
+import {RedResizeEvent, View3D} from "RedGPU";
+
 // Define callback to be called when an individual view's size changes
-view.onResize = (event) => {
-    const { width, height } = event.screenRectObject;
-    console.log(`View area changed: ${width}x${height}`);
+view.onResize = (event: RedResizeEvent<View3D>) => {
+    const {target, screenRectObject, pixelRectObject} = event;
+    const {width, height} = screenRectObject;
+    console.log(`View area changed: ${width}x${height} (Physical: ${pixelRectObject.width}x${pixelRectObject.height})`);
     
     // Reposition specific UI elements within that view or adjust camera settings.
 };
 ```
+
 
 ## 4. Debugging Tools
 
@@ -201,7 +225,7 @@ mainView.setSize('100%', '100%');
 redGPUContext.addView(mainView);
 
 // 2. Setup Minimap View (Fixed top-right)
-const miniMapCamera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+const miniMapCamera = new RedGPU.Camera.PerspectiveCamera();
 miniMapCamera.y = 50;
 miniMapCamera.lookAt(0, 0, 0);
 
@@ -245,7 +269,7 @@ RedGPU.init(
 
         // Minimap view setup
         const miniMapSize = 200;
-        const miniMapCamera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+        const miniMapCamera = new RedGPU.Camera.PerspectiveCamera();
         miniMapCamera.y = 50;
         miniMapCamera.lookAt(0, 0, 0.1);
 
@@ -282,13 +306,47 @@ RedGPU.init(
   </CodePen>
 </ClientOnly>
 
-## 6. Rendering Flow
+## 6. Key API Properties and Methods
 
-Work flow performed by **Renderer** as it iterates through the list of views registered in the context every frame.
+The `View3D` class provides various APIs for adjusting 3D rendering quality, performance optimization, and utilities.
 
-<ClientOnly>
-  <MermaidResponsive :definition="viewGraph" />
-</ClientOnly>
+### 6.1 Environment and Lighting Settings
+
+* **`skybox`** (`SkyBox`): Sets or gets the skybox instance to be drawn as the background of the view.
+* **`skyAtmosphere`** (`SkyAtmosphere`): Sets or gets the sky atmosphere instance for rendering atmospheric scattering
+  effects.
+* **`ibl`** (`IBL`): Binds or gets the IBL data for image-based lighting effects.
+
+### 6.2 Post-Processing and Tone-Mapping Managers
+
+* **`postEffectManager`** (`PostEffectManager`): A manager to add and manage post-processing filters (such as blur,
+  bloom, etc.) to be applied to this view area.
+* **`toneMappingManager`** (`ToneMappingManager`): Manages the tone mapping policy that maps the high dynamic range (
+  HDR) rendering results of this view to the standard monitor output range (SDR).
+
+### 6.3 Rendering Optimization (Culling)
+
+* **`useFrustumCulling`** (`boolean`, default: `true`): Automatically skips draw calls for meshes outside the camera's
+  viewing frustum to improve frame rates.
+* **`useDistanceCulling`** (`boolean`, default: `false`): Restricts rendering of objects that are further away than a
+  specific distance from the camera.
+* **`distanceCulling`** (`number`, default: `50`): The threshold distance used for distance-based culling.
+
+### 6.4 Utility and Debug State Data
+
+* **`renderViewStateData`** (`RenderViewStateData`, Read-only): A read-only object accumulating real-time rendering
+  statistics of this view. Highly useful for performance profiling and culling debugging.
+    * `renderResults.numDrawCalls`: Total number of Draw Calls triggered in the current view
+    * `renderResults.numTriangles`: Total number of polygons (triangles) rendered in the current view
+    * `renderResults.num3DObjects`: Number of 3D objects that passed culling and were actually rendered
+    * `renderResults.numInstances`: Total number of instances processed via GPU instancing
+    * `renderResults.numDirtyPipelines`: Count of compiled or updated pipelines
+* **`screenToWorld(screenX, screenY)`**: Back-calculates 2D canvas screen coordinates (from mouse or touch) into 3D
+  world space coordinates, returning a 3D vector array (`[x, y, z]`).
+* **`checkMouseInViewBounds()`**: Checks if the mouse pointer is currently within the pixel bounds of this view,
+  returning a `boolean`.
+
+---
 
 ## Next Steps
 
@@ -297,3 +355,4 @@ We've prepared the 'frame' to draw the scene through **View3D**. Now it's time t
 Learn about the role and composition method of **Scene**, the space where meshes and lights are placed.
 
 - **[Scene](./scene.md)**
+

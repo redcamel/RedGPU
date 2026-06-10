@@ -1,56 +1,49 @@
+// [KO] 1. 기초 데이터 로드 및 조기 종료 조건 확인
+// [EN] 1. Load basic data and check early exit conditions
 let index = vec2<i32>(global_id.xy);
 let dimensions: vec2<u32> = textureDimensions(sourceTexture);
-let dimW = f32(dimensions.x);
-let dimH = f32(dimensions.y);
-let uv = vec2<f32>(f32(index.x) / dimW, f32(index.y) / dimH);
-
-let originalColor = textureLoad(sourceTexture, index);
+let originalColor = textureLoad(sourceTexture, index, 0);
 
 let filmGrainIntensity_value: f32 = uniforms.filmGrainIntensity;
 let filmGrainResponse_value: f32 = uniforms.filmGrainResponse;
 let filmGrainScale_value: f32 = uniforms.filmGrainScale;
 let coloredGrain_value: f32 = uniforms.coloredGrain;
 let grainSaturation_value: f32 = uniforms.grainSaturation;
-let time_value: f32 = uniforms.time;
-let devicePixelRatio_value: f32 = uniforms.devicePixelRatio;
+let frameIndex_value: u32 = systemUniforms.time.frameIndex;
 
 if (filmGrainIntensity_value <= 0.0) {
     textureStore(outputTexture, index, originalColor);
     return;
 }
 
-let baseScale = max(filmGrainScale_value, 0.1);
-let scaledUV = uv * vec2<f32>(dimW, dimH) * devicePixelRatio_value / baseScale;
+// [KO] 2. 입자 좌표계 계산 (픽셀 단위 정밀 보정 및 스케일링)
+// [EN] 2. Particle coordinate calculation (Pixel-level precision correction and scaling)
+// [KO] DPR을 반영하여 고해상도 모니터에서도 일관된 입자 크기를 유지합니다.
+// [EN] Reflect DPR to maintain consistent particle size even on high-resolution monitors.
+let baseScale = max(filmGrainScale_value, 0.1) * systemUniforms.devicePixelRatio;
+let grainCoord = floor(vec2<f32>(global_id.xy) / baseScale);
 
-let timeOffset = vec2<f32>(
-    fract(time_value * 0.0317) * 100.0,
-    fract(time_value * 0.0271) * 100.0
-);
-let grainCoord = scaledUV + timeOffset;
+// [KO] 3. 시네마틱 입자 생성 ( -1.0 ~ 1.0 범위의 동적 노이즈)
+// [EN] 3. Cinematic particle generation (Dynamic noise in range -1.0 ~ 1.0)
+var grain = getFilmicGrain(grainCoord, frameIndex_value, coloredGrain_value);
 
-let sampleOffset = 1.0 / baseScale;
-let noiseR = (filmGrainNoise(grainCoord) +
-             filmGrainNoise(grainCoord + vec2<f32>(sampleOffset, 0.0)) +
-             filmGrainNoise(grainCoord + vec2<f32>(0.0, sampleOffset))) / 3.0;
-let noiseG = filmGrainNoise(grainCoord + vec2<f32>(127.1, 311.7));
-let noiseB = filmGrainNoise(grainCoord + vec2<f32>(269.5, 183.3));
+// [KO] 4. 입자 채도 및 컬러 제어
+// [EN] 4. Particle saturation and color control
+let grainLum = getLuminance(grain);
+grain = mix(vec3<f32>(grainLum), grain, grainSaturation_value);
 
-let monoGrain = (noiseR + noiseG + noiseB) / 3.0;
-let colorGrain = vec3<f32>(noiseR, noiseG, noiseB);
+// [KO] 5. 휘도 마스킹 (어두운 영역에서 입자가 더 잘 보이도록 물리적 반응 시뮬레이션)
+// [EN] 5. Luminance Masking (Simulating physical response where grain is more visible in dark areas)
+let sceneLuminance = getLuminance(originalColor.rgb);
+let responseMask = pow(1.0 - sceneLuminance, filmGrainResponse_value);
+let finalMask = responseMask * smoothstep(0.0, 0.1, sceneLuminance);
 
-var grainColor = mix(vec3<f32>(monoGrain), colorGrain, coloredGrain_value);
+// [KO] 6. 입자 강도 적용 및 최종 합성
+// [EN] 6. Apply grain intensity and final composition
+let intensity = filmGrainIntensity_value * max(0.05, finalMask);
+let finalColor = originalColor.rgb + grain * intensity;
 
-let grainLuminance = dot(grainColor, vec3<f32>(0.299, 0.587, 0.114));
-grainColor = mix(vec3<f32>(grainLuminance), grainColor, grainSaturation_value);
-
-let luminance = dot(originalColor.rgb, vec3<f32>(0.299, 0.587, 0.114));
-let luminanceWeight = pow(max(luminance, 0.01), filmGrainResponse_value);
-
-let grainIntensity = filmGrainIntensity_value * luminanceWeight;
-let grain = grainColor * grainIntensity;
-
-let finalColor = originalColor.rgb + grain;
-
-let outputColor = vec4<f32>(clamp(finalColor, vec3<f32>(0.0), vec3<f32>(1.0)), originalColor.a);
-
+// [KO] 7. 결과 출력 (Saturate를 통한 안전한 색상 범위 보장)
+// [EN] 7. Result output (Ensuring safe color range via saturate)
+let outputColor = vec4<f32>(saturate(finalColor), originalColor.a);
 textureStore(outputTexture, index, outputColor);

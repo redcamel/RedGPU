@@ -1,5 +1,6 @@
 import { mat4 } from "gl-matrix";
 import Mesh from "../Mesh";
+import BaseObject from "../../../base/BaseObject";
 /**
  * [KO] Mesh 객체들을 담는 시각적 컨테이너 클래스입니다.
  * [EN] Visual container class for Mesh objects.
@@ -14,7 +15,7 @@ import Mesh from "../Mesh";
  *
  * @category Core
  */
-declare class Object3DContainer {
+declare class Object3DContainer extends BaseObject {
     #private;
     /**
      * 이 객체의 모델 행렬입니다. 위치, 회전, 스케일 변환에 사용됩니다.

@@ -1,4 +1,3 @@
-import RedGPUContext from "../context/RedGPUContext";
 /**
  * [KO] 안티앨리어싱(Anti-aliasing) 설정을 관리하는 클래스입니다.
  * [EN] Class that manages anti-aliasing settings.
@@ -10,8 +9,8 @@ import RedGPUContext from "../context/RedGPUContext";
  *
  * * ### Example
  * ```typescript
- * // RedGPUContext 또는 View를 통해 접근합니다.
- * // Access via RedGPUContext or View.
+ * // [KO] RedGPUContext, View 또는 RedGPUObject 상속 객체를 통해 접근합니다.
+ * // [EN] Access via RedGPUContext, View, or RedGPUObject inherited objects.
  * const antialiasingManager = redGPUContext.antialiasingManager;
  * ```
  *
@@ -21,13 +20,15 @@ declare class AntialiasingManager {
     #private;
     /**
      * [KO] AntialiasingManager 생성자입니다.
+     * `window.devicePixelRatio` 값에 따라 초기 안티앨리어싱 모드가 결정됩니다:
+     * - `devicePixelRatio > 1.0` (고해상도 화면): TAA가 활성화됩니다.
+     * - `devicePixelRatio <= 1.0` (일반 해상도 화면): MSAA가 활성화됩니다.
      * [EN] AntialiasingManager constructor.
-     *
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
+     * The initial anti-aliasing mode is determined based on the `window.devicePixelRatio` value:
+     * - `devicePixelRatio > 1.0` (High-DPI screen): TAA is enabled.
+     * - `devicePixelRatio <= 1.0` (Standard resolution screen): MSAA is enabled.
      */
-    constructor(redGPUContext: RedGPUContext);
+    constructor();
     /**
      * [KO] TAA(Temporal Anti-Aliasing) 사용 여부를 반환합니다.
      * [EN] Returns whether TAA (Temporal Anti-Aliasing) is used.
@@ -112,26 +113,6 @@ declare class AntialiasingManager {
      * [EN] Whether to use FXAA
      */
     set useFXAA(value: boolean);
-    /**
-     * [KO] MSAA 설정 변경 여부를 반환합니다.
-     * [EN] Returns whether the MSAA setting has changed.
-     *
-     * @returns
-     * [KO] MSAA 변경 여부
-     * [EN] Whether MSAA has changed
-     * @internal
-     */
-    get changedMSAA(): boolean;
-    /**
-     * [KO] MSAA 설정 변경 여부를 설정합니다.
-     * [EN] Sets whether the MSAA setting has changed.
-     *
-     * @param value -
-     * [KO] MSAA 변경 여부
-     * [EN] Whether MSAA has changed
-     * @internal
-     */
-    set changedMSAA(value: boolean);
     /**
      * [KO] 현재 MSAA의 고유 ID를 반환합니다.
      * [EN] Returns the unique ID of the current MSAA.

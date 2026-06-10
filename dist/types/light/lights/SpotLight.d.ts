@@ -17,6 +17,7 @@ import ABaseLight from "../core/ABaseLight";
  * [KO] 아래는 SpotLight 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * [EN] Below is a list of additional sample examples to help understand the structure and behavior of SpotLight.
  * @see [SpotLight Cluster Performance example](/RedGPU/examples/3d/light/spotLightPerformance/)
+ * @see [SpotLight with glTF example](/RedGPU/examples/3d/light/spotLightWithGltf/)
  * @category Light
  */
 declare class SpotLight extends ABaseLight {
@@ -27,11 +28,27 @@ declare class SpotLight extends ABaseLight {
      * @param color -
      * [KO] 광원의 색상 (hex 문자열, 예: '#ffffff')
      * [EN] Color of the light (hex string, e.g., '#ffffff')
-     * @param intensity -
-     * [KO] 광원의 세기 (기본값: 1)
-     * [EN] Intensity of the light (default: 1)
+     * @param lumen -
+     * [KO] 광원의 광선속 (Lumen, lm, 기본값: 1,000)
+     * [EN] Luminous flux of the light (Lumen, lm, default: 1,000)
      */
-    constructor(color?: string, intensity?: number);
+    constructor(color?: string, lumen?: number);
+    /**
+     * [KO] 광원의 광선속(Lumen, lm)을 반환합니다.
+     * [EN] Returns the luminous flux (Lumen, lm) of the light source.
+     * @returns
+     * [KO] 광선속 값
+     * [EN] Luminous flux value
+     */
+    get lumen(): number;
+    /**
+     * [KO] 광원의 광선속(Lumen, lm)을 설정합니다.
+     * [EN] Sets the luminous flux (Lumen, lm) of the light source.
+     * @param value -
+     * [KO] 광선속 값 (예: 1,000)
+     * [EN] Luminous flux value (e.g., 1,000)
+     */
+    set lumen(value: number);
     /**
      * [KO] X 좌표를 반환합니다.
      * [EN] Returns the X coordinate.

@@ -113,6 +113,8 @@ interface PhongMaterial {
      * [EN] Whether to use SSR (Screen Space Reflection)
      */
     useSSR: number;
+    displacementScale: number;
+    displacementTexture: BitmapTexture;
 }
 /**
  * [KO] Phong 라이팅 기반의 다양한 텍스처/파라미터를 지원하는 머티리얼 클래스입니다.
@@ -137,7 +139,6 @@ interface PhongMaterial {
  * @category Material
  */
 declare class PhongMaterial extends AUVTransformBaseMaterial {
-    #private;
     /**
      * [KO] PhongMaterial 생성자
      * [EN] PhongMaterial constructor
@@ -152,37 +153,5 @@ declare class PhongMaterial extends AUVTransformBaseMaterial {
      * [EN] Material name (optional)
      */
     constructor(redGPUContext: RedGPUContext, color?: string, name?: string);
-    /**
-     * [KO] 디스플레이스먼트(변위) 스케일을 반환합니다.
-     * [EN] Returns the displacement scale.
-     * @returns
-     * [KO] 스케일 값
-     * [EN] Scale value
-     */
-    get displacementScale(): number;
-    /**
-     * [KO] 디스플레이스먼트(변위) 스케일을 설정합니다.
-     * [EN] Sets the displacement scale.
-     * @param value -
-     * [KO] 스케일 값
-     * [EN] Scale value
-     */
-    set displacementScale(value: number);
-    /**
-     * [KO] 디스플레이스먼트(변위) 텍스처를 반환합니다.
-     * [EN] Returns the displacement texture.
-     * @returns
-     * [KO] BitmapTexture
-     * [EN] BitmapTexture
-     */
-    get displacementTexture(): BitmapTexture;
-    /**
-     * [KO] 디스플레이스먼트(변위) 텍스처를 설정하고 파이프라인을 갱신합니다.
-     * [EN] Sets the displacement texture and updates the pipeline.
-     * @param value -
-     * [KO] BitmapTexture
-     * [EN] BitmapTexture
-     */
-    set displacementTexture(value: BitmapTexture);
 }
 export default PhongMaterial;

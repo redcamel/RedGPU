@@ -1,9 +1,6 @@
-import {vec3} from "gl-matrix";
 import Mesh from "../../display/mesh/Mesh";
 import AABB from "../AABB";
 
-const tempLocalVertex = vec3.create();
-const tempWorldVertex = vec3.create();
 /**
  * [KO] 메시의 로컬 AABB를 월드 공간 AABB로 변환하여 계산합니다.
  * [EN] Calculates mesh world-space AABB from its local AABB.
@@ -29,9 +26,9 @@ const calculateMeshAABB = (mesh: Mesh): AABB => {
     if (!mesh || !mesh._geometry) {
         // 모델 매트릭스에서 월드 위치 추출
         const m = mesh.modelMatrix;
-        const worldX = m[12];
-        const worldY = m[13];
-        const worldZ = m[14];
+        // const worldX = m[12];
+        // const worldY = m[13];
+        // const worldZ = m[14];
 
         // 점 AABB 반환 (크기가 0인 박스)
         return new AABB(0, 0, 0, 0, 0, 0);

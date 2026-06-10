@@ -63,7 +63,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     scene.lightManager.addDirectionalLight(light);
 
     const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.intensity = 0.5;
+    ambientLight.intensityMultiplier = 0.5;
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. Setup Material and Texture
@@ -105,7 +105,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     redGPUContext.addView(view);
 
     // 6. Render Loop
-    const renderer = new RedGPU.Renderer(redGPUContext);
+    const renderer = new RedGPU.Renderer();
     const render = () => {
         // Calculate distance and update UI (for visual confirmation)
         const dist = Math.sqrt(

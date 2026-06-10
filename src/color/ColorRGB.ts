@@ -286,7 +286,7 @@ class ColorRGB {
      * [EN] Throws an error if the hexadecimal color code is invalid.
      */
     setColorByHEX(hexColor: string | number) {
-        const {r, g, b} = convertHexToRgb(hexColor) //TODO 0x000000 되는지 확인해야함
+        const {r, g, b} = convertHexToRgb(hexColor)
         this.#setRGB(r, g, b)
     }
 

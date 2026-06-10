@@ -5,7 +5,11 @@ const renderAlphaLayer = (view: View3D, viewRenderPassEncoder: GPURenderPassEnco
     const {renderViewStateData, rawCamera,} = view
     renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
     // renderAlphaLayer
-    const {bundleListAlphaLayer, bundleListTransparentLayer, bundleListParticleLayer} = renderViewStateData
+    const {
+        bundleListAlphaLayer,
+        bundleListTransparentLayer,
+        bundleListParticleLayer
+    } = renderViewStateData.renderBundleResults
     if (bundleListAlphaLayer.length) {
         viewRenderPassEncoder.executeBundles(bundleListAlphaLayer);
     }

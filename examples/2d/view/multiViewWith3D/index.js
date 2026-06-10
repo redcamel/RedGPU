@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js?t=1781131404967";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1781131404967";
 
 /**
  * [KO] Multi View with 3D 예제
@@ -14,14 +15,17 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. [KO] 3D Scene 및 View 생성
+        // [EN] Create 3D Scene and View
         const controller3D = new RedGPU.Camera.OrbitController(redGPUContext);
-
         const sceneFor3D = new RedGPU.Display.Scene();
         const viewFor3D = new RedGPU.Display.View3D(redGPUContext, sceneFor3D, controller3D);
         viewFor3D.grid = true;
         viewFor3D.axis = true;
         redGPUContext.addView(viewFor3D);
 
+        // 2. [KO] 2D Scene 및 View 생성 (UI 오버레이용)
+        // [EN] Create 2D Scene and View (for UI overlay)
         const sceneFor2D = new RedGPU.Display.Scene();
         const viewFor2D = new RedGPU.Display.View2D(redGPUContext, sceneFor2D);
         viewFor2D.setSize("100%", 200);
@@ -30,22 +34,21 @@ RedGPU.init(
         sceneFor2D.backgroundColor.a = 0.5;
         redGPUContext.addView(viewFor2D);
 
-        const texture = new RedGPU.Resource.BitmapTexture(
-            redGPUContext,
-            '../../../assets/UV_Grid_Sm.jpg'
-        );
+        // 3. [KO] 텍스처 및 재질 생성
+        // [EN] Create texture and material
+        const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
         const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
 
+        // 4. [KO] 2D Scene에 Sprite2D 추가 및 위치 설정
+        // [EN] Add Sprite2D to the 2D Scene and set position
         const sprite2D = new RedGPU.Display.Sprite2D(redGPUContext, material);
         sprite2D.setSize(100, 100);
         sprite2D.x = viewFor2D.screenRectObject.width / 2;
         sprite2D.y = viewFor2D.screenRectObject.height / 2;
         sceneFor2D.addChild(sprite2D);
 
-        /**
-         * [KO] 뷰 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
-         * [EN] Event handler called when the view size changes.
-         */
+        // 5. [KO] 리사이즈 이벤트 설정 (반응형 배치)
+        // [EN] Setup resize events (Responsive layout)
         viewFor2D.onResize = (resizeEvent) => {
             const {width, height} = resizeEvent.screenRectObject;
             sprite2D.x = width / 2;
@@ -54,45 +57,36 @@ RedGPU.init(
 
         const onResizeRedGPUContext = (resizeEvent) => {
             const screenRect = resizeEvent ? resizeEvent.screenRectObject : redGPUContext.screenRectObject;
-            viewFor2D.y = screenRect.height - 200;
+            viewFor2D.y = screenRect.height - 250;
         };
-        /**
-         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
-         * [EN] Event handler called when the screen size changes.
-         */
         redGPUContext.onResize = onResizeRedGPUContext;
         onResizeRedGPUContext();
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        // 6. [KO] 렌더러 시작 및 애니메이션 루프 정의
+        // [EN] Start renderer and define animation loop
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
             sprite2D.rotation += 1;
         };
         renderer.start(redGPUContext, render);
 
+        // 7. [KO] 테스트 GUI 구성
+        // [EN] Configure test GUI
         renderTestPane(redGPUContext);
     },
     (failReason) => {
+        // [KO] 초기화 실패 시 에러 처리
+        // [EN] Error handling on initialization failure
         console.error("Initialization failed:", failReason);
-        const errorMessage = document.createElement("div");
-        errorMessage.innerHTML = failReason;
-        document.body.appendChild(errorMessage);
     }
 );
 
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
  */
-const renderTestPane = async (redGPUContext) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
-    const {
-        setDebugButtons,
-        setRedGPUTest_pane,
-        setViewListTest
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
-    setRedGPUTest_pane(pane, redGPUContext, false);
-    setViewListTest(pane, redGPUContext.viewList, true, true);
+const renderTestPane = (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        viewList: true
+    });
 };

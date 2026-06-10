@@ -18,10 +18,10 @@
  * [EN] Bind group layout descriptor
  */
 const getBindGroupLayoutDescriptorFromShaderInfo = (
-	SHADER_INFO,
-	targetGroupIndex: number,
-	visibility: GPUFlagsConstant,
-	useMSAA: boolean = true
+    SHADER_INFO,
+    targetGroupIndex: number,
+    visibility: GPUFlagsConstant,
+    useMSAA: boolean = true
 ) => {
     const {textures, samplers, uniforms, storage} = SHADER_INFO
     const entries: GPUBindGroupLayoutEntry[] = []
@@ -68,9 +68,11 @@ const getBindGroupLayoutDescriptorFromShaderInfo = (
                     texture: textureType === "texture_depth_2d" || textureType === "texture_depth_multisampled_2d" ? {
                         viewDimension: '2d',
                         sampleType: 'depth',
-                        multisampled: useMSAA
+                        multisampled: textureType === "texture_depth_multisampled_2d"
                     } : textureType === "texture_cube" ? {
                         viewDimension: 'cube'
+                    } : textureType === "texture_3d" ? {
+                        viewDimension: '3d'
                     } : textureType === "texture_2d_array" ? {
                         viewDimension: '2d-array',
                         sampleType: 'float',

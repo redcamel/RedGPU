@@ -3,6 +3,7 @@ import validateNumber from "../../../../runtimeChecker/validateFunc/validateNumb
 import validatePositiveNumberRange from "../../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateUintRange from "../../../../runtimeChecker/validateFunc/validateUintRange";
 import calculateTextureByteSize from "../../../../utils/texture/calculateTextureByteSize";
+import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
 import UniformBuffer from "../../../buffer/uniformBuffer/UniformBuffer";
 import ManagementResourceBase from "../../../core/ManagementResourceBase";
 import ResourceStateBitmapTexture from "../../../core/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
@@ -35,9 +36,9 @@ const BASIC_OPTIONS = {
  * @category NoiseTexture
  */
 abstract class ANoiseTexture extends ManagementResourceBase {
-    mipLevelCount;
-    useMipmap;
-    src;
+    mipLevelCount: number = 1;
+    useMipmap: boolean = true;
+    src: string;
     #gpuTexture: GPUTexture;
     #COMPUTE_WORKGROUP_SIZE_X = 8;
     #COMPUTE_WORKGROUP_SIZE_Y = 8;
@@ -46,6 +47,7 @@ abstract class ANoiseTexture extends ManagementResourceBase {
     #textureComputeBindGroup: GPUBindGroup;
     #textureComputeBindGroupLayout: GPUBindGroupLayout;
     #textureComputePipeline: GPUComputePipeline;
+    #textureDescriptor: GPUTextureDescriptor;
     #uniformBuffer: UniformBuffer;
     #uniformInfo: any;
     #width: number;
@@ -65,11 +67,12 @@ abstract class ANoiseTexture extends ManagementResourceBase {
      * @param height - [KO] 텍스처 높이 [EN] Texture height
      * @param define - [KO] 노이즈 정의 객체 [EN] Noise definition object
      */
-    constructor(
+    protected constructor(
         redGPUContext: RedGPUContext,
         width: number = 1024,
         height: number = 1024,
-        define: NoiseDefine
+        define: NoiseDefine,
+        useMipmap: boolean = true
     ) {
         super(redGPUContext, MANAGED_STATE_KEY);
         validateUintRange(width, 2, 2048);
@@ -77,6 +80,7 @@ abstract class ANoiseTexture extends ManagementResourceBase {
         this.#width = width;
         this.#height = height;
         this.#currentEffect = define;
+        this.useMipmap = useMipmap;
         this.#init(redGPUContext);
         this.cacheKey = `NoiseTexture_${width}x${height}_${Date.now()}`
         this.#gpuTexture = this.#createStorageTexture(redGPUContext, width, height);
@@ -176,13 +180,12 @@ abstract class ANoiseTexture extends ManagementResourceBase {
     /** [KO] 지정된 시간으로 노이즈를 렌더링합니다. [EN] Renders noise at the specified time. */
     render(time: number) {
         this.updateUniform('time', time);
-        this.#executeComputePass();
     }
 
     /** [KO] 리소스를 파괴합니다. [EN] Destroys the resource. */
     destroy() {
         const temp = this.#gpuTexture
-        this.__fireListenerList(true)
+        this.notifyUpdate(true)
         this.#unregisterResource()
         if (temp) temp.destroy()
         this.src = null
@@ -204,7 +207,7 @@ abstract class ANoiseTexture extends ManagementResourceBase {
             this.#textureComputeShaderModule,
             this.#textureComputeBindGroupLayout
         );
-        const SHADER_INFO = parseWGSL(textureComputeShader);
+        const SHADER_INFO = parseWGSL('ANoiseTexture', textureComputeShader);
         this.#uniformInfo = SHADER_INFO.uniforms.uniforms;
         const uniformData = new ArrayBuffer(this.#uniformInfo.arrayBufferByteLength);
         this.#uniformBuffer = new UniformBuffer(
@@ -235,7 +238,7 @@ abstract class ANoiseTexture extends ManagementResourceBase {
         return `
             ${baseUniforms}
             @group(0) @binding(0) var<uniform> uniforms : Uniforms;
-            @group(0) @binding(1) var outputTexture : texture_storage_2d<rgba8unorm, write>;
+            @group(0) @binding(1) var outputTexture : texture_storage_2d<rgba16float, write>;
             
             ${helperFunctions}
             @compute @workgroup_size(${this.#COMPUTE_WORKGROUP_SIZE_X},${this.#COMPUTE_WORKGROUP_SIZE_Y},${this.#COMPUTE_WORKGROUP_SIZE_Z})
@@ -262,16 +265,22 @@ abstract class ANoiseTexture extends ManagementResourceBase {
     /** [KO] 컴퓨트 패스를 실행합니다. [EN] Executes the compute pass. */
     #executeComputePass() {
         if (!this.#textureComputeBindGroup) return
-        const commandEncoder = this.redGPUContext.gpuDevice.createCommandEncoder();
-        const computePassEncoder = commandEncoder.beginComputePass();
-        computePassEncoder.setPipeline(this.#textureComputePipeline);
-        computePassEncoder.setBindGroup(0, this.#textureComputeBindGroup);
-        computePassEncoder.dispatchWorkgroups(
-            Math.ceil(this.#width / this.#COMPUTE_WORKGROUP_SIZE_X),
-            Math.ceil(this.#height / this.#COMPUTE_WORKGROUP_SIZE_Y)
-        );
-        computePassEncoder.end();
-        this.redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()]);
+        const {redGPUContext} = this;
+        const {commandEncoderManager, resourceManager} = redGPUContext;
+        const passDescriptor = {
+            label: `NoiseTexture_${this.uuid}_ComputePass`
+        };
+        commandEncoderManager.addResourceComputePass(passDescriptor, (computePassEncoder: GPUComputePassEncoder) => {
+            computePassEncoder.setPipeline(this.#textureComputePipeline);
+            computePassEncoder.setBindGroup(0, this.#textureComputeBindGroup);
+            computePassEncoder.dispatchWorkgroups(
+                Math.ceil(this.#width / this.#COMPUTE_WORKGROUP_SIZE_X),
+                Math.ceil(this.#height / this.#COMPUTE_WORKGROUP_SIZE_Y)
+            );
+        });
+        if (this.useMipmap) {
+            resourceManager.mipmapGenerator.generateMipmap(this.#gpuTexture, this.#textureDescriptor);
+        }
     }
 
     /** [KO] 컴퓨트 바인드 그룹 레이아웃을 생성합니다. [EN] Creates the compute bind group layout. */
@@ -279,20 +288,26 @@ abstract class ANoiseTexture extends ManagementResourceBase {
         return redGPUContext.resourceManager.createBindGroupLayout('NoiseTextureBindGroupLayout', {
             entries: [
                 {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
-                {binding: 1, visibility: GPUShaderStage.COMPUTE, storageTexture: {format: 'rgba8unorm'}},
+                {binding: 1, visibility: GPUShaderStage.COMPUTE, storageTexture: {format: 'rgba16float'}},
             ]
         });
     }
 
     /** [KO] 스토리지 텍스처를 생성합니다. [EN] Creates the storage texture. */
     #createStorageTexture(redGPUContext: RedGPUContext, width: number, height: number) {
-        const storageTexture = redGPUContext.gpuDevice.createTexture({
+        this.mipLevelCount = this.useMipmap ? getMipLevelCount(width, height) : 1;
+        this.#textureDescriptor = {
             size: {width: width, height: height},
-            format: 'rgba8unorm',
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
+            format: 'rgba16float',
+            mipLevelCount: this.mipLevelCount,
+            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_DST,
             label: this.cacheKey,
+        };
+        const storageTexture = redGPUContext.gpuDevice.createTexture(this.#textureDescriptor);
+        const storageTextureView = storageTexture.createView({
+            baseMipLevel: 0,
+            mipLevelCount: 1
         });
-        const storageTextureView = storageTexture.createView();
         this.#textureComputeBindGroup = this.#createTextureBindGroup(
             redGPUContext,
             this.#textureComputeBindGroupLayout,

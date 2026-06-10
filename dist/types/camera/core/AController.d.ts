@@ -2,6 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import OrthographicCamera from "../camera/OrthographicCamera";
 import PerspectiveCamera from "../camera/PerspectiveCamera";
+import RedGPUObject from "../../base/RedGPUObject";
 export type controllerInit = {
     HD_Move?: (deltaX: number, deltaY: number) => void;
     HD_Wheel?: (e: WheelEvent) => void;
@@ -17,13 +18,13 @@ export type controllerInit = {
  * [EN] Provides a common interface for controlling various camera types such as PerspectiveCamera and OrthographicCamera.
  *
  * ::: warning
- * [KO] 이 클래스는 시스템 내부적으로 사용되는 추상 클래스입니다.<br/>직접적인 인스턴스 생성은 불가능하며, 필요한 경우 이를 상속받아 구현하십시오.
- * [EN] This class is an abstract class used internally by the system.<br/>Direct instantiation is not possible; inherit and implement if necessary.
+ * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * @category Core
  */
-declare abstract class AController {
+declare abstract class AController extends RedGPUObject {
     #private;
     /**
      * [KO] AController 인스턴스를 생성합니다.
@@ -36,34 +37,7 @@ declare abstract class AController {
      * [KO] 컨트롤러 초기화 정보
      * [EN] Controller initialization info
      */
-    constructor(redGPUContext: RedGPUContext, initInfo: controllerInit);
-    /**
-     * [KO] 컨트롤러의 이름을 반환합니다.
-     * [EN] Returns the name of the controller.
-     *
-     * @returns
-     * [KO] 컨트롤러 이름
-     * [EN] Controller name
-     */
-    get name(): string;
-    /**
-     * [KO] 컨트롤러의 이름을 설정합니다.
-     * [EN] Sets the name of the controller.
-     *
-     * @param value -
-     * [KO] 설정할 이름
-     * [EN] Name to set
-     */
-    set name(value: string);
-    /**
-     * [KO] RedGPU 컨텍스트를 반환합니다.
-     * [EN] Returns the RedGPU context.
-     *
-     * @returns
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU context
-     */
-    get redGPUContext(): RedGPUContext;
+    protected constructor(redGPUContext: RedGPUContext, initInfo: controllerInit);
     /**
      * [KO] 이 컨트롤러가 제어하는 카메라를 반환합니다.
      * [EN] Returns the camera controlled by this controller.

@@ -4,14 +4,24 @@ import Primitive from "../../../primitive/core/Primitive";
 import Mesh from "../../mesh/Mesh";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 /**
- * Sprite3D의 빌보드 관련 속성을 정의하는 인터페이스
+ * [KO] Sprite3D의 빌보드 관련 속성을 정의하는 인터페이스
+ * [EN] Interface defining the billboard-related properties of Sprite3D
  */
 interface Sprite3D {
-    /** 빌보드 모드 사용 여부 */
+    /**
+     * [KO] 빌보드 모드 사용 여부 (true일 경우 항상 카메라를 향함)
+     * [EN] Whether to use billboard mode (if true, always faces the camera)
+     */
     useBillboard: boolean;
-    /** X축 렌더링 비율 */
+    /**
+     * [KO] X축 렌더링 비율
+     * [EN] X-axis rendering ratio
+     */
     _renderRatioX: number;
-    /** Y축 렌더링 비율 */
+    /**
+     * [KO] Y축 렌더링 비율
+     * [EN] Y-axis rendering ratio
+     */
     _renderRatioY: number;
 }
 /**
@@ -29,15 +39,12 @@ interface Sprite3D {
  *
  * <iframe src="/RedGPU/examples/3d/sprite/sprite3D/"></iframe>
  *
- * [KO] 월드 사이즈와 픽셀 사이즈 모드를 비교하는 예제입니다.
- * [EN] An example comparing World Size and Pixel Size modes.
- * <iframe src="/RedGPU/examples/3d/sprite/sprite3DCompare/"></iframe>
  *
- * @see
  * [KO] 아래는 Sprite3D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * [EN] Below is a list of additional sample examples to help understand the structure and operation of Sprite3D.
+ * @see [Sprite3D Basic example](/RedGPU/examples/3d/sprite/sprite3D/)
  * @see [Sprite3D Comparison (World vs Pixel)](/RedGPU/examples/3d/sprite/sprite3DCompare/)
- * @see [Sprite3D MouseEvent example](/RedGPU/examples/3d/mouseEvent/sprite3D/)
+ * @see [Sprite3D MouseEvent example](/RedGPU/examples/3d/interaction/mouseEvent/sprite3D/)
  *
  * @category Sprite
  */

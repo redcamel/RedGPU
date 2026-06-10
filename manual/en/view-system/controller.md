@@ -22,7 +22,45 @@ RedGPU provides standard controllers that respond to various interaction scenari
 All **Controller** classes internally create and own a dedicated **Camera** instance. Therefore, you don't need to create a separate camera when creating a **Controller**; just pass the controller into the camera argument when creating `View3D`, and it will be linked automatically.
 :::
 
-## 2. Experience Controller Samples
+## 2. Key APIs and Configuration
+
+Each controller provides its own unique properties to finely tune rotation speeds, range limits, zoom boundaries, etc.
+The key properties of the most widely used `OrbitController` are as follows.
+
+### Key Properties of OrbitController
+
+* **`centerX`, `centerY`, `centerZ`** (`number`, default: `0`):
+  * The center target coordinate around which the camera orbits.
+* **`distance`** (`number`, default: `15`):
+  * The distance (zoom distance) of the camera from the center target.
+* **`minDistance`, `maxDistance`** (`number`):
+  * The minimum and maximum zoom limits that can be pulled in or pushed out via mouse wheel or pinch-to-zoom.
+* **`pan`, `tilt`** (`number`):
+  * Angle values for the camera's horizontal rotation (`pan`) and vertical rotation (`tilt`).
+* **`minTilt`, `maxTilt`** (`number`, default: `-90` to `90`):
+  * The minimum and maximum limit angles for vertical (up/down) rotation.
+* **`speedRotation`, `speedDistance`** (`number`):
+  * Sensitivity speed coefficients for drag rotation and scroll wheel zoom.
+
+```javascript
+const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+
+// Adjust center target up along the Y-axis and bring the camera distance closer
+controller.centerY = 2;
+controller.distance = 10;
+
+// Fix range so that the camera does not zoom too close or too far
+controller.minDistance = 2;
+controller.maxDistance = 30;
+
+// Restrict vertical rotation to prevent flipping upside down
+controller.minTilt = -60;
+controller.maxTilt = 60;
+```
+
+---
+
+## 3. Experience Controller Samples
 
 Please experience the actual behavior of each controller directly through the previews below.
 

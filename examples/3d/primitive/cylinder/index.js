@@ -1,11 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js?t=1781131404967";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1781131404967";
 
 /**
  * [KO] Cylinder Primitive 예제
  * [EN] Cylinder Primitive example
  *
- * [KO] Cylinder 프리미티브 생성 및 다양한 속성(반지름, 높이, 세그먼트 등)을 실시간으로 제어하는 방법을 보여줍니다.
- * [EN] Demonstrates how to create a Cylinder primitive and control various properties (radius, height, segments, etc.) in real-time.
+ * [KO] Cylinder 프리미티브 생성 및 속성을 실시간으로 제어하는 방법을 시연합니다.
+ * [EN] Demonstrates creating a Cylinder primitive and controlling its properties in real-time.
  */
 
 const canvas = document.createElement('canvas');
@@ -14,28 +15,32 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. [KO] 카메라 컨트롤러 설정 [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 10;
         controller.tilt = 0;
         controller.speedDistance = 0.3;
 
+        // 2. [KO] 씬 및 뷰 구성 [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
+        // 3. [KO] 프리미티브 생성 및 추가 [EN] Create and Add Primitives
         createPrimitive(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        // 4. [KO] 렌더러 생성 및 루프 시작 [EN] Create Renderer and Start Loop
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
-            // [KO] 매 프레임 실행될 로직
-            // [EN] Logic per frame
+            // [KO] 매 프레임 실행될 로직 [EN] Logic per frame
         };
         renderer.start(redGPUContext, render);
 
+        // 5. [KO] 테스트용 GUI 렌더링 [EN] Render Test GUI
         renderTestPane(redGPUContext);
     },
     (failReason) => {
-        console.error("Initialization failed:", failReason);
+        console.error('Initialization failed:', failReason);
         const errorMessage = document.createElement('div');
         errorMessage.innerHTML = failReason;
         document.body.appendChild(errorMessage);
@@ -43,136 +48,122 @@ RedGPU.init(
 );
 
 /**
- * [KO] Cylinder 프리미티브들을 생성하고 정돈된 레이아웃으로 씬에 배치합니다.
- * [EN] Creates Cylinder primitives and places them in the scene with an organized layout.
- *
- * @param {RedGPU.RedGPUContext} redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
- * @param {RedGPU.Display.Scene} scene - [KO] 프리미티브가 추가될 씬 [EN] Scene where primitives will be added
+ * [KO] 다양한 토폴로지의 Cylinder 메시와 라벨을 생성합니다.
+ * [EN] Creates Cylinder meshes with various topologies and labels.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
  */
 const createPrimitive = (redGPUContext, scene) => {
-    const materials = {
-        solid: new RedGPU.Material.BitmapMaterial(
-            redGPUContext,
-            new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
-        ),
-        wireframe: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ff00'),
-        point: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ffff'),
+    // [KO] 재질 정의 [EN] Define Materials
+    const MAT = {
+        grid:    new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')),
+        radial:  new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/texture/h_test.jpg')),
+        line:    new RedGPU.Material.ColorMaterial(redGPUContext, '#00ff00'),
+        point:   new RedGPU.Material.ColorMaterial(redGPUContext, '#00ffff'),
     };
 
-    const defaultOptions = {
-        radiusTop: 1,
-        radiusBottom: 1.0,
-        height: 1.0,
-        radialSegments: 8,
-        heightSegments: 8,
-        openEnded: false,
-        thetaStart: 0,
-        thetaLength: Math.PI * 2,
-    };
+    // [KO] 공유 지오메트리 생성 [EN] Create Shared Geometry
+    const cylinderGeometry = new RedGPU.Primitive.Cylinder(redGPUContext, 1, 1, 1, 32, 8, true, true, 0, Math.PI * 2, false, false);
 
-    const cylinderGeometry = new RedGPU.Primitive.Cylinder(
-        redGPUContext,
-        defaultOptions.radiusTop,
-        defaultOptions.radiusBottom,
-        defaultOptions.height,
-        defaultOptions.radialSegments,
-        defaultOptions.heightSegments,
-        defaultOptions.openEnded,
-        defaultOptions.thetaStart,
-        defaultOptions.thetaLength
-    );
-
-    const gap = 4.0;
-    const objects = [
-        {material: materials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST},
-        {material: materials.solid, position: [0, 0, 0]},
-        {material: materials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST},
+    const GAP = 3.5;
+    const MESH_ITEMS = [
+        {material: MAT.line,    x: -GAP * 1.5, topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST,  label: 'Line List<br/>(Planar)'},
+        {material: MAT.grid,    x: -GAP * 0.5,                                                     label: 'Triangle List<br/>(Grid)', isRadialTop: false, isRadialBottom: false},
+        {material: MAT.radial,  x:  GAP * 0.5,                                                     label: 'Triangle List<br/>(Radial)', isRadialTop: true, isRadialBottom: true},
+        {material: MAT.point,   x:  GAP * 1.5, topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST, label: 'Point List'},
     ];
 
-    objects.forEach(({material, position, topology}) => {
+    MESH_ITEMS.forEach(({material, x, topology, label, isRadialTop, isRadialBottom}) => {
+        // [KO] 메시 생성 및 설정 [EN] Create and configure Mesh
         const mesh = new RedGPU.Display.Mesh(redGPUContext, cylinderGeometry, material);
+        if (!mesh.userData) mesh.userData = {};
+        mesh.userData.isRadialTop = isRadialTop || false;
+        mesh.userData.isRadialBottom = isRadialBottom || false;
         if (topology) mesh.primitiveState.topology = topology;
-        mesh.setPosition(...position);
+        mesh.setPosition(x, 0, 0);
         scene.addChild(mesh);
 
-        // [KO] 토폴로지 이름 라벨 생성
-        // [EN] Create topology name label
-        const label = new RedGPU.Display.TextField3D(redGPUContext);
-        label.setPosition(position[0], 1.5, position[2]);
-        label.text = topology || RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
-        label.color = '#ffffff';
-        label.fontSize = 14;
-        label.worldSize = 0.7;
-        scene.addChild(label);
+        // [KO] 3D 라벨 생성 [EN] Create 3D Label
+        const text = new RedGPU.Display.TextField3D(redGPUContext);
+        text.setPosition(x, 1.8, 0);
+        text.text      = label;
+        text.color     = '#ffffff';
+        text.fontSize  = 32;
+        text.worldSize = label.includes('<br/>') ? 1.0 : 0.5;
+        scene.addChild(text);
     });
 
-    // [KO] 타이틀 라벨 생성
-    // [EN] Create title label
-    const titleText = new RedGPU.Display.TextField3D(redGPUContext);
-    titleText.setPosition(0, -1.8, 0);
-    titleText.text = 'Customizable Cylinder Primitive';
-    titleText.color = '#ffffff';
-    titleText.fontSize = 48;
-    titleText.fontWeight = 500;
-    titleText.worldSize = 1.3;
-    scene.addChild(titleText);
+    // [KO] 타이틀 텍스트 추가 [EN] Add Title Text
+    const title = new RedGPU.Display.TextField3D(redGPUContext);
+    title.setPosition(0, -2.3, 0);
+    title.text       = 'Customizable Cylinder Primitive';
+    title.color      = '#ffffff';
+    title.fontSize   = 96;
+    title.fontWeight = 500;
+    title.worldSize  = 1.3;
+    scene.addChild(title);
 };
 
 /**
- * [KO] 테스트를 위한 Tweakpane GUI를 초기화합니다.
- * [EN] Initializes the Tweakpane GUI for testing.
- *
- * @param {RedGPU.RedGPUContext} redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
+ * [KO] 실시간 속성 제어를 위한 GUI를 구성합니다.
+ * [EN] Configures GUI for real-time property control.
+ * @param {RedGPU.RedGPUContext} redGPUContext
  */
-const renderTestPane = async (redGPUContext) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext)
-    const pane = new Pane();
-
+const renderTestPane = (redGPUContext) => {
     const config = {
         radiusTop: 1,
-        radiusBottom: 1.0,
-        height: 1.0,
-        radialSegments: 8,
+        radiusBottom: 1,
+        height: 1,
+        radialSegments: 32,
         heightSegments: 8,
-        openEnded: false,
-        thetaStart: 0,
-        thetaLength: Math.PI * 2,
+        capTop: true,
+        capBottom: true,
+        cullMode: RedGPU.GPU_CULL_MODE.BACK,
     };
 
-    /**
-     * [KO] 설정값 변경 시 Cylinder 지오메트리를 재생성하여 업데이트합니다.
-     * [EN] Recreates and updates the Cylinder geometry when configuration values change.
-     */
-    const updateGeometry = () => {
-        const meshList = redGPUContext.viewList[0].scene.children;
-        const newGeometry = new RedGPU.Primitive.Cylinder(
-            redGPUContext,
-            config.radiusTop,
-            config.radiusBottom,
-            config.height,
-            config.radialSegments,
-            config.heightSegments,
-            config.openEnded,
-            config.thetaStart,
-            config.thetaLength
+    const getMeshes = () =>
+        redGPUContext.viewList[0].scene.children.filter(
+            obj => obj instanceof RedGPU.Display.Mesh && !(obj instanceof RedGPU.Display.TextField3D)
         );
 
-        meshList.forEach(mesh => {
-            if (mesh instanceof RedGPU.Display.Mesh && !(mesh instanceof RedGPU.Display.TextField3D)) {
-                mesh.geometry = newGeometry;
-            }
+    const updateGeometry = () => {
+        getMeshes().forEach(mesh => {
+            const isRadialTop = mesh.userData && mesh.userData.isRadialTop ? mesh.userData.isRadialTop : false;
+            const isRadialBottom = mesh.userData && mesh.userData.isRadialBottom ? mesh.userData.isRadialBottom : false;
+            mesh.geometry = new RedGPU.Primitive.Cylinder(
+                redGPUContext,
+                config.radiusTop, config.radiusBottom, config.height,
+                config.radialSegments, config.heightSegments,
+                config.capTop, config.capBottom,
+                0, Math.PI * 2,
+                isRadialTop, isRadialBottom
+            );
         });
     };
 
-    const folder = pane.addFolder({title: 'Cylinder Properties', expanded: true});
-    folder.addBinding(config, 'radiusTop', {min: 0.1, max: 2, step: 0.1}).on('change', updateGeometry);
-    folder.addBinding(config, 'radiusBottom', {min: 0.1, max: 2, step: 0.1}).on('change', updateGeometry);
-    folder.addBinding(config, 'height', {min: 0.5, max: 5, step: 0.1}).on('change', updateGeometry);
-    folder.addBinding(config, 'radialSegments', {min: 3, max: 128, step: 1}).on('change', updateGeometry);
-    folder.addBinding(config, 'heightSegments', {min: 1, max: 64, step: 1}).on('change', updateGeometry);
-    folder.addBinding(config, 'openEnded').on('change', updateGeometry);
-    folder.addBinding(config, 'thetaStart', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
-    folder.addBinding(config, 'thetaLength', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
+    const updateCullMode = () => {
+        getMeshes().forEach(mesh => mesh.primitiveState.cullMode = config.cullMode);
+    };
+
+    new RedGPUExampleHelper(redGPUContext, {
+        gui: (pane) => {
+            const geoFolder = pane.addFolder({title: 'Geometry', expanded: true});
+            geoFolder.addBinding(config, 'radiusTop', {min: 0, max: 2, step: 0.1}).on('change', updateGeometry);
+            geoFolder.addBinding(config, 'radiusBottom', {min: 0, max: 2, step: 0.1}).on('change', updateGeometry);
+            geoFolder.addBinding(config, 'height', {min: 0.5, max: 5, step: 0.1}).on('change', updateGeometry);
+            geoFolder.addBinding(config, 'radialSegments', {min: 3, max: 128, step: 1}).on('change', updateGeometry);
+            geoFolder.addBinding(config, 'heightSegments', {min: 1, max: 64, step: 1}).on('change', updateGeometry);
+            geoFolder.addBinding(config, 'capTop').on('change', updateGeometry);
+            geoFolder.addBinding(config, 'capBottom').on('change', updateGeometry);
+
+            const matFolder = pane.addFolder({title: 'CullMode', expanded: true});
+            matFolder.addBinding(config, 'cullMode', {
+                options: {
+                    NONE:  RedGPU.GPU_CULL_MODE.NONE,
+                    BACK:  RedGPU.GPU_CULL_MODE.BACK,
+                    FRONT: RedGPU.GPU_CULL_MODE.FRONT,
+                }
+            }).on('change', updateCullMode);
+        }
+    });
 };

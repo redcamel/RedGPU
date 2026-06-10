@@ -19,9 +19,9 @@ export interface NoiseDefine {
  */
 declare abstract class ANoiseTexture extends ManagementResourceBase {
     #private;
-    mipLevelCount: any;
-    useMipmap: any;
-    src: any;
+    mipLevelCount: number;
+    useMipmap: boolean;
+    src: string;
     /**
      * [KO] ANoiseTexture 인스턴스를 생성합니다.
      * [EN] Creates an ANoiseTexture instance.
@@ -30,7 +30,7 @@ declare abstract class ANoiseTexture extends ManagementResourceBase {
      * @param height - [KO] 텍스처 높이 [EN] Texture height
      * @param define - [KO] 노이즈 정의 객체 [EN] Noise definition object
      */
-    constructor(redGPUContext: RedGPUContext, width: number, height: number, define: NoiseDefine);
+    protected constructor(redGPUContext: RedGPUContext, width: number, height: number, define: NoiseDefine, useMipmap?: boolean);
     /** [KO] 비디오 메모리 사용량(byte) [EN] Video memory usage in bytes */
     get videoMemorySize(): number;
     /** [KO] 리소스 매니저 키 [EN] Resource manager key */

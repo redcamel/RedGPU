@@ -3,5 +3,8 @@
  * [EN] Provides core base classes and common interfaces for the camera system.
  * @packageDocumentation
  */
+import ACamera from "./ACamera";
 import AController from "./AController";
-export { AController };
+import AutoExposure from "./autoExposure/AutoExposure";
+import METERING_MODE from "./METERING_MODE";
+export { ACamera, AController, AutoExposure, METERING_MODE };

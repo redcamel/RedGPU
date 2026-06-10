@@ -1,5 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770713934910";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1781131404967";
+import * as RedGPU from "../../../dist/index.js?t=1781131404967";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1781131404967";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -37,10 +38,6 @@ RedGPU.init(
 
 		// [KO] 조명 설정: 환경광과 방향광
 		// [EN] Lighting setup: Ambient and Directional lights
-		const ambientLight = new RedGPU.Light.AmbientLight();
-		ambientLight.intensity = 0.5;
-		scene.lightManager.ambientLight = ambientLight;
-
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
@@ -148,9 +145,10 @@ RedGPU.init(
  * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, resetScene) => {
-	const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-	const {setDebugButtons} = await import("../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
-	pane.addButton({title: 'Reset Scene'}).on('click', () => resetScene());
+	
+	new RedGPUExampleHelper(redGPUContext, {
+		gui: (pane) => {
+			pane.addButton({title: 'Reset Scene'}).on('click', () => resetScene());
+		}
+	});
 };

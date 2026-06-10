@@ -1,22 +1,54 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import ASinglePassPostEffect from "../../../../core/ASinglePassPostEffect";
 /**
- * [KO] DOF CoC(Circle of Confusion) 계산 이펙트입니다.
- * [EN] DOF CoC (Circle of Confusion) calculation effect.
+ * [KO] DOFCoC의 속성 인터페이스입니다.
+ * [EN] Property interface for DOFCoC.
+ */
+interface DOFCoC {
+    /**
+     * [KO] 초점 거리입니다. (값이 클수록 먼 곳에 초점이 맞습니다)
+     * [EN] Focus distance. (Higher values focus on more distant objects)
+     */
+    focusDistance: number;
+    /**
+     * [KO] 조리개 값입니다. (값이 작을수록 심도가 얕아져 블러가 강해집니다)
+     * [EN] Aperture value. (Lower values result in shallower depth of field and stronger blur)
+     */
+    aperture: number;
+    /**
+     * [KO] 최대 착란원(CoC) 크기입니다. (최대 블러 반경)
+     * [EN] Maximum Circle of Confusion (CoC) size. (Maximum blur radius)
+     */
+    maxCoC: number;
+    /**
+     * [KO] 니어 평면 거리입니다.
+     * [EN] Near plane distance.
+     */
+    nearPlane: number;
+    /**
+     * [KO] 파 평면 거리입니다.
+     * [EN] Far plane distance.
+     */
+    farPlane: number;
+}
+/**
+ * [KO] 피사체 심도(Depth of Field, DOF)의 착란원(Circle of Confusion, CoC) 값을 계산하는 후처리 이펙트입니다.
+ * [EN] A post-processing effect that calculates the Circle of Confusion (CoC) value for Depth of Field (DOF).
+ *
+ * [KO] 깊이 텍스처를 기반으로 각 픽셀의 초점 상태에 따른 블러 정도를 계산하여 출력합니다.
+ * [EN] Calculates and outputs the blur amount for each pixel based on its focus state using the depth texture.
+ *
  * @category Lens
  */
 declare class DOFCoC extends ASinglePassPostEffect {
-    #private;
+    /**
+     * [KO] DOFCoC 인스턴스를 생성합니다.
+     * [EN] Creates a DOFCoC instance.
+     *
+     * @param redGPUContext
+     * [KO] RedGPU 컨텍스트
+     * [EN] RedGPU Context
+     */
     constructor(redGPUContext: RedGPUContext);
-    get focusDistance(): number;
-    set focusDistance(value: number);
-    get aperture(): number;
-    set aperture(value: number);
-    get maxCoC(): number;
-    set maxCoC(value: number);
-    get nearPlane(): number;
-    set nearPlane(value: number);
-    get farPlane(): number;
-    set farPlane(value: number);
 }
 export default DOFCoC;

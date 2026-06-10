@@ -10,7 +10,6 @@ import createBasePipeline from "../mesh/core/pipeline/createBasePipeline";
 import PIPELINE_TYPE from "../mesh/core/pipeline/PIPELINE_TYPE";
 import VertexGPURenderInfo from "../mesh/core/VertexGPURenderInfo";
 import Mesh from "../mesh/Mesh";
-import MESH_TYPE from "../MESH_TYPE";
 import RenderViewStateData from "../view/core/RenderViewStateData";
 import InstancingMeshObject3D from "./core/InstancingMeshObject3D";
 import cullingComputeSource from "./shader/instanceCullingCompute.wgsl";
@@ -31,19 +30,28 @@ const CULLING_COMPUTE_MODULE_NAME = "CULLING_COMPUTE_MODULE_INSTANCING";
 const INDIRECT_ARGS_SIZE = 20;
 
 /**
- * LOD별 GPU 렌더링 리소스
+ * [KO] LOD별 GPU 렌더링 리소스 정보를 정의하는 인터페이스입니다.
+ * [EN] Interface defining GPU rendering resource details for each LOD.
  */
 interface LODGPURenderInfo {
+    /**
+     * [KO] 버텍스 셰이더용 유니폼 바인드 그룹
+     * [EN] Bind group for vertex shader uniforms
+     */
     vertexUniformBindGroup: GPUBindGroup;
+    /**
+     * [KO] 렌더 파이프라인
+     * [EN] Render pipeline
+     */
     pipeline: GPURenderPipeline;
 }
 
 /**
- * [KO] GPU 인스턴싱 기반의 메시 클래스입니다.
- * [EN] Mesh class based on GPU instancing.
+ * [KO] GPU 인스턴싱 기반의 고성능 메시 클래스입니다.
+ * [EN] High-performance mesh class based on GPU instancing.
  *
- * [KO] 하나의 geometry와 material을 여러 인스턴스(Instance)로 효율적으로 렌더링할 수 있습니다. 각 인스턴스는 transform(위치, 회전, 스케일)만 다르고 geometry/vertex 데이터와 머티리얼은 공유합니다.
- * [EN] Efficiently renders a single geometry and material as multiple instances. Each instance differs only in its transform (position, rotation, scale) while sharing geometry/vertex data and material.
+ * [KO] 단일 Geometry와 Material을 공유하는 대량의 메시를 단 하나의 드로우 콜로 화면에 그릴 수 있게 해줍니다. 각 인스턴스(InstancingMeshObject3D)는 개별적인 위치, 회전, 스케일 및 불투명도(Opacity) 속성을 가지며, 프러스텀 컬링(Frustum Culling) 및 LOD(Level of Detail) 기능을 GPU 연산을 통해 효율적으로 처리합니다.
+ * [EN] Enables rendering a large number of meshes that share a single Geometry and Material using a single draw call. Each instance (InstancingMeshObject3D) has independent position, rotation, scale, and opacity properties, with frustum culling and Level of Detail (LOD) processed efficiently via GPU compute operations.
  *
  * * ### Example
  * ```typescript
@@ -53,39 +61,43 @@ interface LODGPURenderInfo {
  *
  * <iframe src="/RedGPU/examples/3d/instancedMesh/simple/"></iframe>
  *
- * [KO] 아래는 instancedMesh의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
- * [EN] Below is a list of additional sample examples to help understand the structure and operation of instancedMesh.
- * @see [instancedMesh GPU LOD](/RedGPU/examples/3d/lod/InstanceMeshGPULOD/)
- *
+ * [KO] 아래는 InstancingMesh의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [EN] Below is a list of additional sample examples to help understand the structure and operation of InstancingMesh.
+ * @see [InstancingMesh Simple example](/RedGPU/examples/3d/instancedMesh/simple/)
+ * @see [InstancingMesh Sphere example](/RedGPU/examples/3d/instancedMesh/sphere/)
+ * @see [InstancingMesh GPU LOD example](/RedGPU/examples/3d/lod/InstanceMeshGPULOD/)
+ * @see [InstancingMesh GPU LOD Material example](/RedGPU/examples/3d/lod/InstanceMeshGPULOD_material/)
  * @category Mesh
  */
 class InstancingMesh extends Mesh {
     /**
-     * [KO] 인스턴스 메시 오브젝트의 dirty 상태 여부
-     * [EN] Whether the instance mesh object is dirty
+     * [KO] 개별 인스턴스 정보가 수정되어 GPU 버퍼 데이터를 업데이트해야 하는지 여부입니다.
+     * [EN] Whether individual instance data is dirty and the GPU buffer needs to be updated.
      */
     dirtyInstanceMeshObject3D: boolean = true;
     /**
-     * [KO] 인스턴스 개수의 dirty 상태 여부
-     * [EN] Whether the instance count is dirty
+     * [KO] 현재 활성화된 인스턴스 개수 정보가 수정되었는지 여부입니다.
+     * [EN] Whether the active instance count information has been modified.
      */
     dirtyInstanceNum: boolean = true;
+
+    #lastUpdateMSAAID: string;
 
     // ========== 기본 설정 ==========
     readonly #redGPUContext: RedGPUContext;
     /**
-     * [KO] 현재 인스턴스 개수
-     * [EN] Current instance count
+     * [KO] 현재 렌더링에 사용되는 활성 인스턴스 개수
+     * [EN] The number of active instances used for rendering
      */
     #instanceCount: number = 1;
     /**
-     * [KO] 최대 인스턴스 개수
-     * [EN] Maximum instance count
+     * [KO] 허용 가능한 최대 인스턴스 개수
+     * [EN] The maximum allowed instance count
      */
     #maxInstanceCount: number = 1;
     /**
-     * [KO] 인스턴스 자식 객체 배열
-     * [EN] Array of instance child objects
+     * [KO] 인스턴스들의 자식 객체 배열
+     * [EN] Array of child instance objects
      */
     #instanceChildren: InstancingMeshObject3D[] = [];
 
@@ -116,17 +128,17 @@ class InstancingMesh extends Mesh {
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      * @param maxInstanceCount -
-     * [KO] 허용할 최대 인스턴스 개수
-     * [EN] Maximum allowed instance count
+     * [KO] 최대로 생성 및 업로드 가능한 인스턴스 한도
+     * [EN] The maximum limit of instances that can be created and uploaded
      * @param instanceCount -
-     * [KO] 초기 인스턴스 개수
-     * [EN] Initial instance count
+     * [KO] 초기 활성화할 인스턴스 개수
+     * [EN] Initial active instance count
      * @param geometry -
-     * [KO] geometry 또는 primitive 객체(선택)
-     * [EN] geometry or primitive object (optional)
+     * [KO] 지오메트리 또는 프리미티브 객체 (선택)
+     * [EN] Geometry or primitive object (optional)
      * @param material -
-     * [KO] 머티리얼(선택)
-     * [EN] Material (optional)
+     * [KO] 적용할 머티리얼 (선택)
+     * [EN] Material to apply (optional)
      */
     constructor(
         redGPUContext: RedGPUContext,
@@ -137,13 +149,28 @@ class InstancingMesh extends Mesh {
     ) {
         super(redGPUContext, geometry, material);
         this.#redGPUContext = redGPUContext;
+
+        /*
+        TODO - maxInstanceCount, instanceCount 를 반드시 입력하도록 해야것음
+         */
+        const limitNum = InstancingMesh.getLimitSize(this.#redGPUContext);
+        this.#maxInstanceCount = Math.min(maxInstanceCount, limitNum);
+        this.#instanceCount = Math.min(instanceCount, this.#maxInstanceCount);
+
         this.#init();
-        this.maxInstanceCount = maxInstanceCount;
-        this.instanceCount = instanceCount;
+        this.gpuRenderInfo.vertexUniformInfo = parseWGSL(`INSTANCING_MESH_VERTEX_${this.#maxInstanceCount}`, this.#getVertexModuleSource(this.geometry, this.material)).storage.instanceUniforms;
+        this.#rebuildInstanceUniformBuffer();
+        this.#updateVisibilityStride();
+        this.#initGPURenderInfos(this.#redGPUContext);
+        this.instanceCount = this.#instanceCount;
     }
 
     // ========== Public Getters/Setters ==========
 
+    /**
+     * [KO] 현재 활성화하여 렌더링할 인스턴스 개수를 조회하거나 설정합니다. 설정된 개수에 따라 내부적으로 개별 인스턴스 관리 객체(InstancingMeshObject3D)들이 자동 생성 및 갱신됩니다.
+     * [EN] Gets or sets the number of active instances to render. Individual instance controllers (InstancingMeshObject3D) are automatically created and updated internally based on the value.
+     */
     get instanceCount(): number {
         return this.#instanceCount;
     }
@@ -151,8 +178,6 @@ class InstancingMesh extends Mesh {
     set instanceCount(count: number) {
         validateUintRange(count);
         this.#instanceCount = Math.min(count, this.#maxInstanceCount);
-        this.gpuRenderInfo.vertexUniformInfo = parseWGSL(this.#getVertexModuleSource(this.geometry, this.material)).storage.instanceUniforms;
-        this.#rebuildInstanceUniformBuffer();
         if (this.#instanceChildren.length > this.#instanceCount) {
             this.#instanceChildren.length = this.#instanceCount;
         }
@@ -162,39 +187,74 @@ class InstancingMesh extends Mesh {
                 this.#instanceChildren[i] = new InstancingMeshObject3D(this.#redGPUContext, i, this);
             }
         }
-        this.#updateVisibilityStride();
-        this.#initGPURenderInfos(this.#redGPUContext);
         this.dirtyInstanceNum = true;
     }
 
+    /**
+     * [KO] 해당 인스턴싱 메시에서 지원 가능한 최대 인스턴스 개수를 조회합니다.
+     * [EN] Gets the maximum allowed instance count for this instanced mesh.
+     */
     get maxInstanceCount(): number {
         return this.#maxInstanceCount;
     }
 
-    set maxInstanceCount(count: number) {
-        validateUintRange(count);
-        const limitNum = InstancingMesh.getLimitSize();
-        count = Math.min(count, limitNum);
-        this.#maxInstanceCount = count;
-        if (this.#instanceCount > this.#maxInstanceCount) {
-            this.instanceCount = this.#maxInstanceCount;
-        }
-    }
-
+    /**
+     * [KO] 각 개별 인스턴스의 개별 트랜스폼 정보를 제어할 수 있는 자식 객체들의 목록을 가져옵니다.
+     * [EN] Gets the array of child objects (InstancingMeshObject3D) to control the transform details of each instance.
+     */
     get instanceChildren(): InstancingMeshObject3D[] {
         return this.#instanceChildren;
     }
 
-    static getLimitSize(): number {
-        const headSize = (16 + 1 + 1 + 2) * 4;
+    /**
+     * [KO] 현재 GPU Context의 하드웨어 한계 한도(maxStorageBufferBindingSize)를 계산하여, 업로드 가능한 이론적인 최대 인스턴스 개수를 가져옵니다.
+     * [EN] Computes the maximum theoretical instance count that can be uploaded based on the current GPU Context's limits (maxStorageBufferBindingSize).
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @returns
+     * [KO] 하드웨어적으로 허용 가능한 최대 인스턴스 개수
+     * [EN] Hardware-constrained maximum instance count
+     */
+    static getLimitSize(redGPUContext: RedGPUContext): number {
+        /**
+         * InstanceUniforms struct (WGSL):
+         * instanceGroupModelMatrix: mat4x4<f32> (16 floats)
+         * instanceGroupNormalModelMatrix: mat4x4<f32> (16 floats)
+         * useDisplacementTexture: u32 (1 float size)
+         * displacementScale: f32 (1 float size)
+         * padding: vec2<f32> (2 floats)
+         * Total headSize = 36 * 4 = 144 bytes
+         */
+        const headSize = (16 + 16 + 1 + 1 + 2) * 4;
+
+        /**
+         * Per-instance data in InstanceUniforms struct (WGSL):
+         * instanceModelMatrixs: array<mat4x4<f32>, N> (16 floats per instance)
+         * instanceNormalModelMatrix: array<mat4x4<f32>, N> (16 floats per instance)
+         * instanceOpacity: array<f32, N> (1 float per instance)
+         * Total perInstanceSize = 33 * 4 = 132 bytes
+         */
         const perInstanceSize = (16 + 16 + 1) * 4;
-        const maxStorageBufferBindingSize = Math.floor(Math.min(268435456, 134217728));
-        const limitNum = Math.floor((maxStorageBufferBindingSize - headSize) / perInstanceSize);
-        return limitNum;
+
+        const SAFE_MAX_SIZE = 134217728 * 4;
+        const maxStorageBufferBindingSize = Math.min(redGPUContext.detector.activeLimits.maxStorageBufferBindingSize, SAFE_MAX_SIZE);
+
+        return Math.floor((maxStorageBufferBindingSize - headSize) / perInstanceSize);
     }
 
     // ========== 메인 렌더링 ==========
 
+    /**
+     * [KO] 인스턴싱 메시를 렌더링 큐에 기록합니다. LOD 변경 시 리소스를 재구성하며, 섀도우 렌더링 모드가 아닐 때는 GPU 연산 셰이더를 통해 프러스텀 컬링(Frustum Culling)을 우선 수행합니다.
+     * [EN] Records the instanced mesh into the rendering queue. Rebuilds resources when LOD is dirty, and performs frustum culling via GPU compute shaders if not in shadow rendering mode.
+     * @param renderViewStateData -
+     * [KO] 렌더 뷰 상태 데이터
+     * [EN] Render view state data
+     * @param shadowRender -
+     * [KO] 그림자 맵 생성용 패스인지 여부 (기본값: false)
+     * [EN] Whether it is for the shadow map generation pass (default: false)
+     */
     render(renderViewStateData: RenderViewStateData, shadowRender: boolean = false): void {
         if (this.dirtyLOD) {
             this.#updateVisibilityStride();
@@ -203,7 +263,7 @@ class InstancingMesh extends Mesh {
             this.dirtyLOD = false;
             return;
         }
-        const {view, currentRenderPassEncoder} = renderViewStateData;
+        const {view, currentRenderPassEncoder, renderResults} = renderViewStateData;
         const {scene} = view;
         const {shadowManager} = scene;
         const {directionalShadowManager} = shadowManager;
@@ -212,15 +272,16 @@ class InstancingMesh extends Mesh {
             this.#updateTransformMatrix();
         }
         if (this.geometry) {
-            renderViewStateData.num3DObjects++;
+            renderResults.num3DObjects++;
         } else {
-            renderViewStateData.num3DGroups++;
+            renderResults.num3DGroups++;
         }
         const redGPUContext = this.#redGPUContext;
         if (this.geometry) {
             const {antialiasingManager} = redGPUContext;
-            if (antialiasingManager.changedMSAA) {
+            if (this.#lastUpdateMSAAID !== antialiasingManager.msaaID) {
                 this.dirtyPipeline = true;
+                this.#lastUpdateMSAAID = antialiasingManager.msaaID;
             }
             if (!this.gpuRenderInfo) {
                 this.#initGPURenderInfos(redGPUContext);
@@ -255,7 +316,7 @@ class InstancingMesh extends Mesh {
         mat4.scale(this.localMatrix, this.localMatrix, [this.scaleX, this.scaleY, this.scaleZ]);
         const parent = this.parent;
         if (parent?.modelMatrix) {
-            mat4.multiply(this.modelMatrix, this.localMatrix, parent.modelMatrix);
+            mat4.multiply(this.modelMatrix, parent.modelMatrix, this.localMatrix);
         } else {
             this.modelMatrix = mat4.clone(this.localMatrix);
         }
@@ -269,7 +330,7 @@ class InstancingMesh extends Mesh {
         this.#updatePipelines();
         this.material.dirtyPipeline = false;
         this.dirtyPipeline = false;
-        renderViewStateData.numDirtyPipelines++;
+        renderViewStateData.renderResults.numDirtyPipelines++;
     }
 
     // ========== 지오메트리 렌더링 ==========
@@ -281,11 +342,11 @@ class InstancingMesh extends Mesh {
     ): void {
         const {gpuRenderInfo} = this;
         const {pipeline, shadowPipeline} = gpuRenderInfo;
-
+        const {view, renderResults} = renderViewStateData
         this.#updateDisplacementUniforms();
         this.#updateInstanceUniforms();
         const {fragmentUniformBindGroup} = this.material.gpuRenderInfo;
-        renderPassEncoder.setBindGroup(0, renderViewStateData.view.systemUniform_Vertex_UniformBindGroup);
+        renderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
         renderPassEncoder.setBindGroup(2, fragmentUniformBindGroup);
         renderPassEncoder.setPipeline(shadowRender ? shadowPipeline : pipeline);
 
@@ -315,8 +376,8 @@ class InstancingMesh extends Mesh {
             );
         });
 
-        renderViewStateData.numDrawCalls++;
-        renderViewStateData.numInstances++;
+        renderResults.numDrawCalls++;
+        renderResults.numInstances++;
     }
 
     #renderGeometryWithBuffer(
@@ -370,10 +431,26 @@ class InstancingMesh extends Mesh {
                 this.modelMatrix,
                 members.instanceGroupModelMatrix.uniformOffset / 4,
             );
+
+            // [KO] 그룹 노말 행렬 계산 및 업로드
+            // [EN] Calculate and upload group normal matrix
+            const groupNormalMatrix = mat4.create();
+            mat4.invert(groupNormalMatrix, this.modelMatrix);
+            mat4.transpose(groupNormalMatrix, groupNormalMatrix);
+            vertexUniformBuffer.dataViewF32.set(
+                groupNormalMatrix,
+                members.instanceGroupNormalModelMatrix.uniformOffset / 4,
+            );
+
             gpuDevice.queue.writeBuffer(
                 vertexUniformBuffer.gpuBuffer,
                 members.instanceGroupModelMatrix.uniformOffset,
                 new members.instanceGroupModelMatrix.View(this.modelMatrix),
+            );
+            gpuDevice.queue.writeBuffer(
+                vertexUniformBuffer.gpuBuffer,
+                members.instanceGroupNormalModelMatrix.uniformOffset,
+                new members.instanceGroupNormalModelMatrix.View(groupNormalMatrix),
             );
         }
         if (this.dirtyInstanceMeshObject3D || this.dirtyInstanceNum) {
@@ -513,11 +590,12 @@ class InstancingMesh extends Mesh {
     }
 
     #performGPUCulling(renderViewStateData: RenderViewStateData): void {
-        const {gpuDevice} = this.#redGPUContext;
+        const {gpuDevice, commandEncoderManager} = this.#redGPUContext;
+        const {indexBuffer, vertexBuffer} = this.geometry
         this.#updateCullingUniforms(renderViewStateData);
-        const indexCount = this.geometry.indexBuffer
-            ? this.geometry.indexBuffer.indexCount
-            : this.geometry.vertexBuffer.vertexCount;
+        const indexCount = indexBuffer
+            ? indexBuffer.indexCount
+            : vertexBuffer.vertexCount;
 
         // LOD 0 초기화
         const indirectDrawData = new Uint32Array([indexCount, 0, 0, 0, 0]);
@@ -532,15 +610,13 @@ class InstancingMesh extends Mesh {
         });
 
         // Compute Pass 실행
-        const commandEncoder = gpuDevice.createCommandEncoder();
-        const computePass = commandEncoder.beginComputePass();
-        computePass.setPipeline(this.#cullingComputePipeline);
-        computePass.setBindGroup(0, this.#cullingBindGroup);
-        const workgroupSize = 64;
-        const workgroupCount = Math.ceil(this.#instanceCount / workgroupSize);
-        computePass.dispatchWorkgroups(workgroupCount);
-        computePass.end();
-        gpuDevice.queue.submit([commandEncoder.finish()]);
+        commandEncoderManager.addPreProcessComputePass('InstancingMesh_GPUCulling_ComputePass', (computePass) => {
+            computePass.setPipeline(this.#cullingComputePipeline);
+            computePass.setBindGroup(0, this.#cullingBindGroup);
+            const workgroupSize = 64;
+            const workgroupCount = Math.ceil(this.#instanceCount / workgroupSize);
+            computePass.dispatchWorkgroups(workgroupCount);
+        });
     }
 
     // ========== 파이프라인 설정 ==========
@@ -612,8 +688,8 @@ class InstancingMesh extends Mesh {
         const {resourceManager} = this.#redGPUContext;
         const {vertexUniformBuffer} = this.gpuRenderInfo;
         const {material} = this;
-        const {basicSampler, emptyBitmapTextureView} = resourceManager;
-        const {gpuSampler: basicGPUSampler} = basicSampler;
+        const {basicSampler, basicDisplacementSampler, emptyBitmapTextureView} = resourceManager;
+        const {gpuSampler: basicGPUSampler,} = basicSampler;
         const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
             ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing,
         );
@@ -638,7 +714,8 @@ class InstancingMesh extends Mesh {
                 },
                 {
                     binding: 1,
-                    resource: material?.displacementTextureSampler?.gpuSampler || basicGPUSampler,
+                    // resource: material?.displacementTextureSampler?.gpuSampler || basicGPUSampler,
+                    resource: basicDisplacementSampler.gpuSampler
                 },
                 {
                     binding: 2,
@@ -660,7 +737,7 @@ class InstancingMesh extends Mesh {
     // ========== Utility 메서드 ==========
 
     #updateVisibilityStride(): void {
-        const rawStride = this.#instanceCount * 4;
+        const rawStride = this.#maxInstanceCount * 4;
         this.#visibilityStrideBytes = Math.ceil(rawStride / 256) * 256;
         this.#visibilityStrideU32 = this.#visibilityStrideBytes / 4;
     }
@@ -675,9 +752,11 @@ class InstancingMesh extends Mesh {
         );
         const prevBuffer = this.gpuRenderInfo.vertexUniformBuffer;
         if (prevBuffer?.gpuBuffer) {
-            newBuffer.dataViewF32.set(prevBuffer.dataViewF32, 0);
-            newBuffer.dataViewU32.set([prevBuffer.dataViewU32[0]], 0);
-            newBuffer.dataViewU32.set([prevBuffer.dataViewU32[1]], 4);
+            if (prevBuffer.dataViewF32.length > newBuffer.dataViewF32.length) {
+                newBuffer.dataViewF32.set(prevBuffer.dataViewF32.subarray(0, newBuffer.dataViewF32.length), 0);
+            } else {
+                newBuffer.dataViewF32.set(prevBuffer.dataViewF32, 0);
+            }
             prevBuffer.destroy();
         }
         this.gpuRenderInfo.vertexUniformBuffer = newBuffer;
@@ -698,10 +777,10 @@ class InstancingMesh extends Mesh {
         const isPbrMaterial = material instanceof PBRMaterial;
 
         const isPBR = label === 'PBR' && isPbrMaterial;
-        const isPBROnyFragment = label !== 'PBR' && isPbrMaterial;
+        const isPBROnlyFragment = label !== 'PBR' && isPbrMaterial;
 
         const input = isPBR ? vertexModuleSourceInputPbr : vertexModuleSourceInputBasic;
-        const output = isPBROnyFragment ? vertexModuleSourceOutputPbr :
+        const output = isPBROnlyFragment ? vertexModuleSourceOutputPbr :
             isPBR ? vertexModuleSourceOutputPbr :
                 vertexModuleSourceOutputBasic;
 
@@ -714,14 +793,9 @@ class InstancingMesh extends Mesh {
         );
     }
 
-
     #getCullingComputeSource(): string {
         return this.#injectInstanceCount(cullingComputeSource);
     }
 }
 
-Object.defineProperty(InstancingMesh.prototype, "meshType", {
-    value: MESH_TYPE.INSTANCED_MESH,
-    writable: false,
-});
 export default InstancingMesh;

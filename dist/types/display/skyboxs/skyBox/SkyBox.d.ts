@@ -1,178 +1,115 @@
 import { mat4 } from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
 import CubeTexture from "../../../resources/texture/CubeTexture";
-import { IBLCubeTexture } from "../../../resources/texture/ibl/core";
+import DirectCubeTexture from "../../../resources/texture/DirectCubeTexture";
 import ANoiseTexture from "../../../resources/texture/noiseTexture/core/ANoiseTexture";
 import VertexGPURenderInfo from "../../mesh/core/VertexGPURenderInfo";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
+import RedGPUObject from "../../../base/RedGPUObject";
 /**
- * [KO] 3D 씬의 배경으로 사용되는 스카이박스 클래스입니다.
- * [EN] Skybox class used as the background for 3D scenes.
+ * [KO] 3D 씬의 원경 및 환경 맵 정보로 사용되는 스카이박스(Skybox) 클래스입니다.
+ * [EN] Skybox class used as the distant view and environment map information for 3D scenes.
  *
- * [KO] 큐브 텍스처를 사용하여 360도 환경을 렌더링하며, 텍스처 간 부드러운 전환 효과와 블러, 노출, 투명도 조절 기능을 제공합니다.
- * [EN] Renders a 360-degree environment using cube textures, providing smooth transitions between textures, blur, exposure, and transparency control.
- *
- * [KO] 일반적인 6장 이미지 큐브맵(`CubeTexture`)과 HDR 파일로부터 변환된 IBL 큐브맵(`IBLCubeTexture`)을 모두 지원합니다.
- * [EN] Supports both regular 6-image cubemaps (`CubeTexture`) and IBL cubemaps (`IBLCubeTexture`) converted from HDR files.
- *
- * ::: info
- * [KO] HDR(.hdr) 파일을 사용하려는 경우, `RedGPU.Resource.IBL`을 통해 큐브맵으로 변환된 `environmentTexture`를 전달해야 합니다.
- * [EN] To use an HDR (.hdr) file, you must pass the `environmentTexture` converted to a cubemap via `RedGPU.Resource.IBL`.
- * :::
+ * [KO] 큐브 맵 텍스처를 이용하여 무한한 공간 배경을 렌더링합니다. 물리 기반 렌더링에 적합한 물리적 휘도(Luminance) 설정, 아티스트용 강도 배율, 실시간 전환 효과(Transition) 및 블러(Blur)와 불투명도 조절 기능을 지원합니다.
+ * [EN] Renders an infinite background space using a cube map texture. It supports physical luminance configuration suitable for PBR, artistic intensity multipliers, real-time transition effects, and control over blur and opacity.
  *
  * ### Example
  * ```typescript
- * // 1. 일반 큐브 텍스처 사용 (Using regular CubeTexture)
  * const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
- *
- * // 2. HDR 파일을 IBL을 통해 사용 (Using HDR file via IBL)
- * const ibl = new RedGPU.Resource.IBL(redGPUContext, 'assets/env.hdr');
- * const skyboxHDR = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
- *
  * view.skybox = skybox;
  * ```
  *
- * <iframe src="/RedGPU/examples/3d/skybox/skybox/"></iframe>
+ * <iframe src="/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/" ></iframe>
  *
- * @see
- * [KO] 아래는 Skybox의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
- * [EN] Below is a list of additional sample examples to help understand the structure and operation of Skybox.
- * @see [Skybox using HDRTexture](/RedGPU/examples/3d/skybox/skyboxWithHDRTexture/)
- * @see [Skybox using IBL](/RedGPU/examples/3d/skybox/skyboxWithIbl/)
+ * [KO] 아래는 SkyBox의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ * [EN] Below is a list of additional sample examples to help understand the structure and operation of SkyBox.
+ * @see [SkyBox basic example](/RedGPU/examples/3d/skybox/skybox/)
+ * @see [SkyBox transition example](/RedGPU/examples/3d/skybox/transition/skyboxTransition/)
+ * @see [SkyBox transition example2](/RedGPU/examples/3d/skybox/transition/skyboxTransitionWithNoiseTexture/)
  *
  * @category SkyBox
  */
-declare class SkyBox {
+declare class SkyBox extends RedGPUObject {
     #private;
     /**
-     * [KO] 모델 변환 행렬 (4x4 매트릭스)
-     * [EN] Model transformation matrix (4x4 matrix)
+     * [KO] 스카이박스 메쉬 모델 변환 행렬
+     * [EN] Skybox mesh model transformation matrix
      */
     modelMatrix: mat4;
     /**
-     * [KO] GPU 렌더링 정보 객체
-     * [EN] GPU rendering information object
+     * [KO] GPU 렌더링 및 유니폼 정보 객체
+     * [EN] GPU rendering and uniform information object
      */
     gpuRenderInfo: VertexGPURenderInfo;
     /**
-     * [KO] 새로운 SkyBox 인스턴스를 생성합니다.
-     * [EN] Creates a new SkyBox instance.
-     *
+     * [KO] SkyBox 인스턴스를 생성합니다.
+     * [EN] Creates an instance of SkyBox.
      * @param redGPUContext -
-     * [KO] RedGPU 렌더링 컨텍스트
-     * [EN] RedGPU rendering context
-     * @param cubeTexture -
-     * [KO] 스카이박스에 사용할 큐브 텍스처 (일반 또는 IBL)
-     * [EN] Cube texture to use for the skybox (Regular or IBL)
-     *
-     * @throws
-     * [KO] redGPUContext가 유효하지 않은 경우 Error 발생
-     * [EN] Throws Error if redGPUContext is invalid
-     *
+     * [KO] RedGPU 컨텍스트 인스턴스
+     * [EN] RedGPU context instance
+     * @param texture -
+     * [KO] 배경으로 사용할 큐브 텍스처 객체
+     * [EN] Cube texture object to use as the background
+     * @param luminance -
+     * [KO] 물리적 휘도 (단위: cd/m² 또는 Nit, 기본값: 25000 Nit)
+     * [EN] Physical luminance (unit: cd/m² or Nit, default: 25000 Nit)
      */
-    constructor(redGPUContext: RedGPUContext, cubeTexture: CubeTexture | IBLCubeTexture);
+    constructor(redGPUContext: RedGPUContext, texture: CubeTexture | DirectCubeTexture, luminance?: number);
     /**
-     * [KO] 전환 지속 시간을 반환합니다. (ms)
-     * [EN] Returns the transition duration (in ms).
+     * [KO] 스카이박스 배경으로 적용된 현재 큐브 텍스처를 가져오거나 설정합니다.
+     * [EN] Gets or sets the current cube texture applied as the skybox background.
      */
-    get transitionDuration(): number;
+    get texture(): CubeTexture | DirectCubeTexture;
+    set texture(texture: CubeTexture | DirectCubeTexture);
     /**
-     * [KO] 전환 경과 시간을 반환합니다. (ms)
-     * [EN] Returns the transition elapsed time (in ms).
+     * [KO] 물리 기반 광학 시뮬레이션용 휘도(Nit) 값을 가져오거나 설정합니다.
+     * [EN] Gets or sets the luminance value (Nit) for physical optics simulation.
      */
-    get transitionElapsed(): number;
+    get luminance(): number;
+    set luminance(value: number);
     /**
-     * [KO] 현재 진행 중인 전환 진행률을 반환합니다. (0.0 ~ 1.0)
-     * [EN] Returns the progress of the transition currently in progress (0.0 to 1.0).
+     * [KO] 시각적인 라이팅 강도를 조절하기 위한 강도 배율을 가져오거나 설정합니다.
+     * [EN] Gets or sets the intensity multiplier to adjust visual lighting strength.
      */
-    get transitionProgress(): number;
+    get intensityMultiplier(): number;
+    set intensityMultiplier(value: number);
     /**
-     * [KO] 스카이박스 블러 정도를 반환합니다.
-     * [EN] Returns the skybox blur amount.
+     * [KO] 배경 텍스처의 블러 세기(0.0 ~ 1.0)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the blur strength (0.0 to 1.0) of the background texture.
      */
     get blur(): number;
-    /**
-     * [KO] 스카이박스 블러 정도를 설정합니다.
-     * [EN] Sets the skybox blur amount.
-     * @param value -
-     * [KO] 0.0에서 1.0 사이의 블러 값
-     * [EN] Blur value between 0.0 and 1.0
-     * @throws
-     * [KO] 값이 범위를 벗어나는 경우 Error 발생
-     * [EN] Throws Error if value is out of range
-     */
     set blur(value: number);
     /**
-     * [KO] 스카이박스의 불투명도를 반환합니다.
-     * [EN] Returns the skybox opacity.
+     * [KO] 스카이박스 배경의 최종 불투명도(0.0 ~ 1.0)를 가져오거나 설정합니다.
+     * [EN] Gets or sets the final opacity (0.0 to 1.0) of the skybox background.
      */
     get opacity(): number;
-    /**
-     * [KO] 스카이박스의 불투명도를 설정합니다.
-     * [EN] Sets the skybox opacity.
-     * @param value -
-     * [KO] 0.0에서 1.0 사이의 불투명도 값
-     * [EN] Opacity value between 0.0 and 1.0
-     * @throws
-     * [KO] 값이 범위를 벗어나는 경우 Error 발생
-     * [EN] Throws Error if value is out of range
-     */
     set opacity(value: number);
     /**
-     * [KO] 현재 스카이박스 텍스처를 반환합니다.
-     * [EN] Returns the current skybox texture.
+     * [KO] 텍스처 전환 애니메이션 도중의 목표가 되는 텍스처를 가져옵니다.
+     * [EN] Gets the target texture during a texture transition animation.
      */
-    get skyboxTexture(): CubeTexture | IBLCubeTexture;
+    get transitionTexture(): CubeTexture | DirectCubeTexture;
     /**
-     * [KO] 스카이박스 텍스처를 설정합니다.
-     * [EN] Sets the skybox texture.
-     * @param texture -
-     * [KO] 새로운 큐브 텍스처 (일반 또는 IBL)
-     * [EN] New cube texture (Regular or IBL)
-     * @throws
-     * [KO] 텍스처가 유효하지 않은 경우 Error 발생
-     * [EN] Throws Error if texture is invalid
-     */
-    set skyboxTexture(texture: CubeTexture | IBLCubeTexture);
-    /**
-     * [KO] 전환 대상 텍스처를 반환합니다.
-     * [EN] Returns the transition target texture.
-     */
-    get transitionTexture(): CubeTexture | IBLCubeTexture;
-    /**
-     * [KO] 다른 텍스처로의 부드러운 전환을 시작합니다.
-     * [EN] Starts a smooth transition to another texture.
-     *
-     * ### Example
-     * ```typescript
-     * // 1초 동안 새 텍스처로 전환
-     * skybox.transition(newTexture, 1000, noiseTexture);
-     * ```
-     * @param transitionTexture -
-     * [KO] 전환할 대상 큐브 텍스처 (일반 또는 IBL)
-     * [EN] Target cube texture to transition to (Regular or IBL)
+     * [KO] 지정된 다른 큐브 텍스처로 부드럽게 배경을 전환하는 마스킹 애니메이션을 기동합니다.
+     * [EN] Starts a masking animation to smoothly transition the background to the specified target cube texture.
+     * @param targetTexture -
+     * [KO] 새롭게 전환할 대상 큐브 텍스처
+     * [EN] The new target cube texture to transition to
      * @param duration -
-     * [KO] 전환 지속 시간 (밀리초, 기본값: 300)
-     * [EN] Transition duration (ms, Default: 300)
-     * @param transitionAlphaTexture -
-     * [KO] 전환 효과에 사용할 알파 노이즈 텍스처
-     * [EN] Alpha noise texture to use for the transition effect
+     * [KO] 전환에 걸리는 지속 시간 (ms, 기본값: 300)
+     * [EN] The duration of the transition (in ms, default: 300)
+     * @param mask -
+     * [KO] 전환 효과에 적용할 노이즈 마스크 텍스처
+     * [EN] Noise mask texture to apply to the transition effect
      */
-    transition(transitionTexture: CubeTexture | IBLCubeTexture, duration: number, transitionAlphaTexture: ANoiseTexture): void;
+    transition(targetTexture: CubeTexture | DirectCubeTexture, duration: number, mask: ANoiseTexture): void;
     /**
-     * [KO] 스카이박스를 렌더링합니다.
-     * [EN] Renders the skybox.
-     *
-     * [KO] 이 메서드는 매 프레임마다 호출되어야 하며, MSAA 상태, 텍스처 전환 진행 상황 업데이트 및 실제 렌더링 명령 실행을 수행합니다.
-     * [EN] This method should be called every frame, performing MSAA state check, texture transition updates, and executing actual rendering commands.
-     *
-     * ### Example
-     * ```typescript
-     * skybox.render(renderViewState);
-     * ```
+     * [KO] 스카이박스를 화면 배경에 드로우합니다. 텍스처 전환이 진행 중이면 경과 시간을 기준으로 진척도를 계산해 업로드합니다.
+     * [EN] Draws the skybox on the screen background. If a texture transition is in progress, computes and uploads progress based on elapsed time.
      * @param renderViewStateData -
-     * [KO] 렌더링 상태 및 디버그 정보
-     * [EN] Rendering state and debug info
+     * [KO] 현재 뷰 및 렌더 상태 데이터
+     * [EN] Current view and render state data
      */
     render(renderViewStateData: RenderViewStateData): void;
 }

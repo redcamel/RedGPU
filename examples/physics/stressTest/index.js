@@ -1,5 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770713934910";
+import * as RedGPU from "../../../dist/index.js?t=1781131404967";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1781131404967";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1781131404967";
 
 const canvas = document.body.appendChild(document.createElement('canvas'));
 
@@ -35,8 +36,6 @@ RedGPU.init(
 
 		// [KO] 조명 설정: 입체감을 강조하기 위해 방향광 추가
 		// [EN] Lighting setup: Add directional light to emphasize depth and dimensionality
-		scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight();
-		scene.lightManager.ambientLight.intensity = 0.5;
 		scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
 
 		// [KO] 1. 대형 바닥 생성: 구체들이 넓게 퍼질 수 있도록 100m x 100m 스케일 적용
@@ -131,36 +130,35 @@ RedGPU.init(
  * @param {function} resetScene
  * @param {Array<object>} activeObjects
  */
-const renderTestPane = async (redGPUContext, createBall, resetScene, activeObjects) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
-	
-	const params = {
-		spawnRate: 5,    // [KO] 초당 생성 주기 [EN] Spawn interval per second
-		autoSpawn: true, // [KO] 자동 생성 활성화 [EN] Enable auto-spawn
-		objectCount: 0   // [KO] 현재 객체 수 [EN] Current object count
-	};
+const renderTestPane = (redGPUContext, createBall, resetScene, activeObjects) => {
+	new RedGPUExampleHelper(redGPUContext, {
+		gui: (pane) => {
+			const params = {
+				spawnRate: 5,    // [KO] 초당 생성 주기 [EN] Spawn interval per second
+				autoSpawn: true, // [KO] 자동 생성 활성화 [EN] Enable auto-spawn
+				objectCount: 0   // [KO] 현재 객체 수 [EN] Current object count
+			};
 
-	pane.addBinding(params, 'spawnRate', { min: 1, max: 50, step: 1 });
-	pane.addBinding(params, 'autoSpawn');
-	pane.addBinding(params, 'objectCount', { readonly: true, interval: 100 });
-	
-	pane.addButton({ title: 'Spawn 100 Varied Balls' }).on('click', () => {
-		for (let i = 0; i < 100; i++) createBall();
-	});
-	
-	pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
+			pane.addBinding(params, 'spawnRate', { min: 1, max: 50, step: 1 });
+			pane.addBinding(params, 'autoSpawn');
+			pane.addBinding(params, 'objectCount', { readonly: true, interval: 100 });
 
-	// [KO] 실시간 객체 관리 루프: 최대 2000개까지 구체 추가
-	// [EN] Real-time object management loop: Adds spheres up to a maximum of 2000
-	setInterval(() => {
-		if (params.autoSpawn && activeObjects.length < 2000) {
-			for (let i = 0; i < params.spawnRate; i++) {
-				createBall();
-			}
+			pane.addButton({ title: 'Spawn 100 Varied Balls' }).on('click', () => {
+				for (let i = 0; i < 100; i++) createBall();
+			});
+
+			pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
+
+			// [KO] 실시간 객체 관리 루프: 최대 2000개까지 구체 추가
+			// [EN] Real-time object management loop: Adds spheres up to a maximum of 2000
+			setInterval(() => {
+				if (params.autoSpawn && activeObjects.length < 2000) {
+					for (let i = 0; i < params.spawnRate; i++) {
+						createBall();
+					}
+				}
+				params.objectCount = activeObjects.length;
+			}, 100);
 		}
-		params.objectCount = activeObjects.length;
-	}, 100);
+	});
 };

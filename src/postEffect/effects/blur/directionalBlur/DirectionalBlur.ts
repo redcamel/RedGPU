@@ -1,10 +1,17 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import validateNumber from "../../../../runtimeChecker/validateFunc/validateNumber";
-import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
+import defineUint from "../../../../defineProperty/funcs/number/defineUint";
+
+
+interface DirectionalBlur {
+    amount: number,
+    sampleCount: number
+}
 
 /**
  * [KO] 방향성 블러(Directional Blur) 후처리 이펙트입니다.
@@ -15,8 +22,9 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.DirectionalBlur(redGPUContext);
- * effect.angle = 45;   // 45도 방향 블러
- * effect.amount = 30;  // 블러 강도
+ * effect.angle = 45;         // 45도 방향 블러
+ * effect.amount = 30;        // 블러 강도
+ * effect.sampleCount = 40;   // 샘플링 횟수 조절 (품질 향상)
  * view.postEffectManager.addEffect(effect);
  * ```
  *
@@ -24,12 +32,7 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * @category Blur
  */
 class DirectionalBlur extends ASinglePassPostEffect {
-    /**
-     * [KO] 블러 강도 (최소 0)
-     * [EN] Blur strength (Minimum 0)
-     * @defaultValue 15
-     */
-    #amount: number = 15
+
     /**
      * [KO] 블러 각도 (0 = 오른쪽)
      * [EN] Blur angle (0 = Right)
@@ -51,14 +54,16 @@ class DirectionalBlur extends ASinglePassPostEffect {
             redGPUContext,
             'POST_EFFECT_DIRECTIONAL_BLUR',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
-        this.amount = this.#amount
-        this.angle = this.#angle
+        );
     }
 
     /**
      * [KO] 블러 각도를 반환합니다.
      * [EN] Returns the blur angle.
+     *
+     * @returns
+     * [KO] 블러 각도
+     * [EN] Blur angle
      */
     get angle(): number {
         return this.#angle;
@@ -68,7 +73,7 @@ class DirectionalBlur extends ASinglePassPostEffect {
      * [KO] 블러 각도를 설정합니다. (0 = 오른쪽, 360도로 정규화됨)
      * [EN] Sets the blur angle. (0 = Right, Normalized to 360 degrees)
      *
-     * @param value
+     * @param value -
      * [KO] 각도
      * [EN] Angle
      */
@@ -78,27 +83,6 @@ class DirectionalBlur extends ASinglePassPostEffect {
         this.#updateDirection();
     }
 
-    /**
-     * [KO] 블러 강도를 반환합니다.
-     * [EN] Returns the blur strength.
-     */
-    get amount(): number {
-        return this.#amount;
-    }
-
-    /**
-     * [KO] 블러 강도를 설정합니다. (최소 0)
-     * [EN] Sets the blur strength. (Minimum 0)
-     *
-     * @param value
-     * [KO] 강도
-     * [EN] Strength
-     */
-    set amount(value: number) {
-        validateNumberRange(value, 0)
-        this.#amount = value;
-        this.updateUniform('amount', value)
-    }
 
     // 내부 메서드: 각도를 방향 벡터로 변환
     #updateDirection() {
@@ -110,5 +94,11 @@ class DirectionalBlur extends ASinglePassPostEffect {
     }
 }
 
+definePositiveNumber(DirectionalBlur, [
+    {key: 'amount', value: 15}
+])
+defineUint(DirectionalBlur, [
+    {key: 'sampleCount', value: 30, min: 1, max: 100}
+])
 Object.freeze(DirectionalBlur)
 export default DirectionalBlur

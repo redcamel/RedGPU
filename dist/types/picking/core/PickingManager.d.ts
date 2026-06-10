@@ -1,5 +1,8 @@
 import InstancingMesh from "../../display/instancingMesh/InstancingMesh";
 import Mesh from "../../display/mesh/Mesh";
+import View3D from "../../display/view/View3D";
+import RedGPUObject from "../../base/RedGPUObject";
+import AView from "../../display/view/core/AView";
 /**
  * [KO] 마우스 이벤트를 처리하고 객체와의 상호작용을 관리하는 클래스입니다.
  * [EN] Class that handles mouse events and manages interaction with objects.
@@ -19,10 +22,11 @@ import Mesh from "../../display/mesh/Mesh";
  * ```
  * @category Picking
  */
-declare class PickingManager {
+declare class PickingManager extends RedGPUObject {
     #private;
     lastMouseEvent: MouseEvent;
     lastMouseClickEvent: MouseEvent;
+    constructor(view: AView);
     /**
      * [KO] 비디오 메모리 사용량을 반환합니다.
      * [EN] Returns the video memory usage.
@@ -60,6 +64,8 @@ declare class PickingManager {
      * [EN] Returns the depth texture view for picking.
      */
     get pickingDepthGPUTextureView(): GPUTextureView;
+    get pickingPassDescriptor(): GPURenderPassDescriptor;
+    render(view: View3D): void;
     /**
      * [KO] 캐스팅 리스트를 초기화합니다.
      * [EN] Resets the casting list.
@@ -71,15 +77,6 @@ declare class PickingManager {
      */
     destroy(): void;
     /**
-     * [KO] 텍스처 크기를 확인하고 필요시 재생성합니다.
-     * [EN] Checks the texture size and recreates it if necessary.
-     *
-     * @param view -
-     * [KO] View3D 인스턴스
-     * [EN] View3D instance
-     */
-    checkTexture(view: any): void;
-    /**
      * [KO] 이벤트를 확인하고 처리합니다.
      * [EN] Checks and processes events.
      *
@@ -90,6 +87,6 @@ declare class PickingManager {
      * [KO] 시간
      * [EN] Time
      */
-    checkEvents(view: any, time: number): void;
+    checkEvents(view: any, time: number): Promise<void>;
 }
 export default PickingManager;

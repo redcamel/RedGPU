@@ -1,11 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js?t=1781131404967";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1781131404967";
 
 /**
  * [KO] Box Primitive 예제
  * [EN] Box Primitive example
  *
- * [KO] Box 프리미티브 생성 및 치수(width, height, depth)와 세그먼트 속성을 실시간으로 제어하는 방법을 보여줍니다.
- * [EN] Demonstrates how to create a Box primitive and control its dimensions (width, height, depth) and segment properties in real-time.
+ * [KO] Box 프리미티브 생성 및 속성을 실시간으로 제어하는 방법을 시연합니다.
+ * [EN] Demonstrates creating a Box primitive and controlling its properties in real-time.
  */
 
 const canvas = document.createElement('canvas');
@@ -14,24 +15,28 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. [KO] 카메라 컨트롤러 설정 [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 10;
         controller.tilt = 0;
         controller.speedDistance = 0.3;
 
+        // 2. [KO] 씬 및 뷰 구성 [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
+        // 3. [KO] 프리미티브 생성 및 추가 [EN] Create and Add Primitives
         createPrimitive(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        // 4. [KO] 렌더러 생성 및 루프 시작 [EN] Create Renderer and Start Loop
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
-            // [KO] 매 프레임 실행될 로직
-            // [EN] Logic per frame
+            // [KO] 매 프레임 실행될 로직 [EN] Logic per frame
         };
         renderer.start(redGPUContext, render);
 
+        // 5. [KO] 테스트용 GUI 렌더링 [EN] Render Test GUI
         renderTestPane(redGPUContext);
     },
     (failReason) => {
@@ -43,111 +48,107 @@ RedGPU.init(
 );
 
 /**
- * [KO] Box 프리미티브들을 생성하고 정돈된 레이아웃으로 씬에 배치합니다.
- * [EN] Creates Box primitives and places them in the scene with an organized layout.
- *
- * @param {RedGPU.RedGPUContext} redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
- * @param {RedGPU.Display.Scene} scene - [KO] 프리미티브가 추가될 씬 [EN] Scene where primitives will be added
+ * [KO] 다양한 토폴로지의 Box 메시와 라벨을 생성합니다.
+ * [EN] Creates Box meshes with various topologies and labels.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
  */
 const createPrimitive = (redGPUContext, scene) => {
-    const boxMaterials = {
-        solid: new RedGPU.Material.BitmapMaterial(
-            redGPUContext,
-            new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
-        ),
-        wireframe: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ff00'),
-        point: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ffff'),
+    // [KO] 재질 정의 [EN] Define Materials
+    const MAT = {
+        grid:    new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')),
+        diffuse: new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/texture/crate.png')),
+        line:    new RedGPU.Material.ColorMaterial(redGPUContext, '#00ff00'),
+        point:   new RedGPU.Material.ColorMaterial(redGPUContext, '#00ffff'),
     };
 
+    // [KO] 공유 지오메트리 생성 [EN] Create Shared Geometry
     const boxGeometry = new RedGPU.Primitive.Box(redGPUContext, 1, 1, 1, 2, 2, 2);
 
-    const gap = 3.5;
-    const boxes = [
-        {material: boxMaterials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST},
-        {material: boxMaterials.solid, position: [0, 0, 0]},
-        {material: boxMaterials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST},
+    const GAP = 3.5;
+    const MESH_ITEMS = [
+        {material: MAT.line,    x: -GAP * 1.5, topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST,  label: 'Line List'},
+        {material: MAT.grid,    x: -GAP * 0.5,                                                     label: 'Triangle List<br/>(Grid)'},
+        {material: MAT.diffuse, x:  GAP * 0.5,                                                     label: 'Triangle List<br/>(Diffuse)'},
+        {material: MAT.point,   x:  GAP * 1.5, topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST, label: 'Point List'},
     ];
 
-    boxes.forEach(({material, position, topology}) => {
-        const box = new RedGPU.Display.Mesh(redGPUContext, boxGeometry, material);
-        if (topology) box.primitiveState.topology = topology;
-        box.setPosition(...position);
-        scene.addChild(box);
+    MESH_ITEMS.forEach(({material, x, topology, label}) => {
+        // [KO] 메시 생성 및 설정 [EN] Create and configure Mesh
+        const mesh = new RedGPU.Display.Mesh(redGPUContext, boxGeometry, material);
+        if (topology) mesh.primitiveState.topology = topology;
+        mesh.setPosition(x, 0, 0);
+        scene.addChild(mesh);
 
-        // [KO] 토폴로지 이름 라벨 생성
-        // [EN] Create topology name label
-        const topologyName = new RedGPU.Display.TextField3D(redGPUContext);
-        topologyName.setPosition(position[0], 1.5, position[2]);
-        topologyName.text = topology || RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
-        topologyName.color = '#ffffff';
-        topologyName.fontSize = 14;
-        topologyName.worldSize = 0.7;
-        scene.addChild(topologyName);
+        // [KO] 3D 라벨 생성 [EN] Create 3D Label
+        const text = new RedGPU.Display.TextField3D(redGPUContext);
+        text.setPosition(x, 1.5, 0);
+        text.text      = label;
+        text.color     = '#ffffff';
+        text.fontSize  = 32;
+        text.worldSize = label.includes('<br/>') ? 1.0 : 0.5;
+        scene.addChild(text);
     });
 
-    // [KO] 타이틀 라벨 생성
-    // [EN] Create title label
-    const titleText = new RedGPU.Display.TextField3D(redGPUContext);
-    titleText.setPosition(0, -1.8, 0);
-    titleText.text = 'Customizable Box Primitive';
-    titleText.color = '#ffffff';
-    titleText.fontSize = 48; 
-    titleText.fontWeight = 500;
-    titleText.worldSize = 1.3;
-    scene.addChild(titleText);
+    // [KO] 타이틀 텍스트 추가 [EN] Add Title Text
+    const title = new RedGPU.Display.TextField3D(redGPUContext);
+    title.setPosition(0, -2.0, 0);
+    title.text       = 'Customizable Box Primitive';
+    title.color      = '#ffffff';
+    title.fontSize   = 96;
+    title.fontWeight = 500;
+    title.worldSize  = 1.3;
+    scene.addChild(title);
 };
 
 /**
- * [KO] 테스트를 위한 Tweakpane GUI를 초기화합니다.
- * [EN] Initializes the Tweakpane GUI for testing.
- *
- * @param {RedGPU.RedGPUContext} redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
+ * [KO] 실시간 속성 제어를 위한 GUI를 구성합니다.
+ * [EN] Configures GUI for real-time property control.
+ * @param {RedGPU.RedGPUContext} redGPUContext
  */
-const renderTestPane = async (redGPUContext) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext)
-    const pane = new Pane();
-
+const renderTestPane = (redGPUContext) => {
     const config = {
-        width: 1,
-        height: 1,
-        depth: 1,
-        segmentX: 2,
-        segmentY: 2,
-        segmentZ: 2,
+        width: 1, height: 1, depth: 1,
+        widthSegments: 2, heightSegments: 2, depthSegments: 2,
+        cullMode: RedGPU.GPU_CULL_MODE.BACK,
     };
 
-    /**
-     * [KO] 설정값 변경 시 Box 지오메트리를 재생성하여 업데이트합니다.
-     * [EN] Recreates and updates the Box geometry when configuration values change.
-     */
-    const updateBoxGeometry = () => {
-        const meshList = redGPUContext.viewList[0].scene.children;
-        const newGeometry = new RedGPU.Primitive.Box(
-            redGPUContext,
-            config.width,
-            config.height,
-            config.depth,
-            config.segmentX,
-            config.segmentY,
-            config.segmentZ
+    const getMeshes = () =>
+        redGPUContext.viewList[0].scene.children.filter(
+            obj => obj instanceof RedGPU.Display.Mesh && !(obj instanceof RedGPU.Display.TextField3D)
         );
 
-        meshList.forEach((mesh) => {
-            if (mesh instanceof RedGPU.Display.Mesh && !(mesh instanceof RedGPU.Display.TextField3D)) {
-                mesh.geometry = newGeometry;
-            }
-        });
+    const updateGeometry = () => {
+        const newGeometry = new RedGPU.Primitive.Box(
+            redGPUContext,
+            config.width, config.height, config.depth,
+            config.widthSegments, config.heightSegments, config.depthSegments
+        );
+        getMeshes().forEach(mesh => mesh.geometry = newGeometry);
     };
 
-    const boxFolder = pane.addFolder({title: 'Box Dimensions', expanded: true});
-    
-    ['width', 'height', 'depth'].forEach(prop => {
-        boxFolder.addBinding(config, prop, {min: 0.1, max: 5, step: 0.1}).on('change', updateBoxGeometry);
-    });
+    const updateCullMode = () => {
+        getMeshes().forEach(mesh => mesh.primitiveState.cullMode = config.cullMode);
+    };
 
-    ['segmentX', 'segmentY', 'segmentZ'].forEach(prop => {
-        boxFolder.addBinding(config, prop, {min: 1, max: 15, step: 1}).on('change', updateBoxGeometry);
+    new RedGPUExampleHelper(redGPUContext, {
+        gui: (pane) => {
+            const geoFolder = pane.addFolder({title: 'Geometry', expanded: true});
+            ['width', 'height', 'depth'].forEach(prop => {
+                geoFolder.addBinding(config, prop, {min: 0.1, max: 5, step: 0.1}).on('change', updateGeometry);
+            });
+            ['widthSegments', 'heightSegments', 'depthSegments'].forEach(prop => {
+                geoFolder.addBinding(config, prop, {min: 1, max: 15, step: 1}).on('change', updateGeometry);
+            });
+
+            const matFolder = pane.addFolder({title: 'CullMode', expanded: true});
+            matFolder.addBinding(config, 'cullMode', {
+                options: {
+                    NONE:  RedGPU.GPU_CULL_MODE.NONE,
+                    BACK:  RedGPU.GPU_CULL_MODE.BACK,
+                    FRONT: RedGPU.GPU_CULL_MODE.FRONT,
+                }
+            }).on('change', updateCullMode);
+        }
     });
 };

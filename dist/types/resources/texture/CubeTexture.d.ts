@@ -1,6 +1,10 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import ManagementResourceBase from "../core/ManagementResourceBase";
-type SrcInfo = string[] | {
+/**
+ * [KO] 큐브 텍스처 소스 정보 타입입니다. 이미지 URL 배열이거나 srcList와 cacheKey를 가진 객체일 수 있습니다.
+ * [EN] Cube texture source information type. Can be an array of image URLs or an object with srcList and cacheKey.
+ */
+export type CubeSrcInfo = string[] | {
     srcList: string[];
     cacheKey: string;
 };
@@ -45,8 +49,15 @@ declare class CubeTexture extends ManagementResourceBase {
      * [KO] 텍스처 포맷 (선택)
      * [EN] Texture format (optional)
      */
-    constructor(redGPUContext: RedGPUContext, srcList: SrcInfo, useMipMap?: boolean, onLoad?: (cubeTextureInstance?: CubeTexture) => void, onError?: (error: Error) => void, format?: GPUTextureFormat);
-    /** [KO] 뷰 디스크립터를 반환합니다. [EN] Returns the view descriptor. */
+    constructor(redGPUContext: RedGPUContext, srcList: CubeSrcInfo, useMipMap?: boolean, onLoad?: (cubeTextureInstance?: CubeTexture) => void, onError?: (error: Error) => void, format?: GPUTextureFormat);
+    /**
+     * [KO] 뷰 디스크립터를 반환합니다.
+     * [EN] Returns the view descriptor.
+     *
+     * @returns
+     * [KO] GPUTextureViewDescriptor 객체
+     * [EN] GPUTextureViewDescriptor object
+     */
     get viewDescriptor(): {
         mipLevelCount: number;
         format?: GPUTextureFormat;
@@ -59,19 +70,68 @@ declare class CubeTexture extends ManagementResourceBase {
         swizzle?: string;
         label?: string;
     };
-    /** [KO] 비디오 메모리 사용량(byte)을 반환합니다. [EN] Returns the video memory usage in bytes. */
+    /**
+     * [KO] 픽셀 포맷 등 비디오 메모리 사용량(byte)을 반환합니다.
+     * [EN] Returns the video memory usage in bytes.
+     *
+     * @returns
+     * [KO] 비디오 메모리 사용량 (Bytes)
+     * [EN] Video memory usage in bytes
+     */
     get videoMemorySize(): number;
-    /** [KO] GPUTexture 객체를 반환합니다. [EN] Returns the GPUTexture object. */
+    /**
+     * [KO] GPUTexture 객체를 반환합니다.
+     * [EN] Returns the GPUTexture object.
+     *
+     * @returns
+     * [KO] GPUTexture 인스턴스
+     * [EN] GPUTexture instance
+     */
     get gpuTexture(): GPUTexture;
-    /** [KO] 밉맵 레벨 개수를 반환합니다. [EN] Returns the number of mipmap levels. */
+    /**
+     * [KO] 밉맵 레벨 개수를 반환합니다.
+     * [EN] Returns the number of mipmap levels.
+     *
+     * @returns
+     * [KO] 밉맵 레벨 개수
+     * [EN] Number of mipmap levels
+     */
     get mipLevelCount(): number;
-    /** [KO] 텍스처 소스 경로 리스트를 반환합니다. [EN] Returns the list of texture source paths. */
+    /**
+     * [KO] 텍스처 소스 경로 리스트를 반환합니다.
+     * [EN] Returns the list of texture source paths.
+     *
+     * @returns
+     * [KO] 소스 경로 리스트
+     * [EN] List of source paths
+     */
     get srcList(): string[];
-    /** [KO] 텍스처 소스 경로 리스트를 설정하고 로드를 시작합니다. [EN] Sets the list of texture source paths and starts loading. */
-    set srcList(value: SrcInfo);
-    /** [KO] 밉맵 사용 여부를 반환합니다. [EN] Returns whether mipmaps are used. */
+    /**
+     * [KO] 텍스처 소스 경로 리스트를 설정하고 로드를 시작합니다.
+     * [EN] Sets the list of texture source paths and starts loading.
+     *
+     * @param value -
+     * [KO] 큐브 텍스처 소스 정보
+     * [EN] Cube texture source info
+     */
+    set srcList(value: CubeSrcInfo);
+    /**
+     * [KO] 밉맵 사용 여부를 반환합니다.
+     * [EN] Returns whether mipmaps are used.
+     *
+     * @returns
+     * [KO] 밉맵 사용 여부
+     * [EN] Whether mipmaps are used
+     */
     get useMipmap(): boolean;
-    /** [KO] 밉맵 사용 여부를 설정하고 텍스처를 재생성합니다. [EN] Sets whether to use mipmaps and recreates the texture. */
+    /**
+     * [KO] 밉맵 사용 여부를 설정하고 텍스처를 재생성합니다.
+     * [EN] Sets whether to use mipmaps and recreates the texture.
+     *
+     * @param value -
+     * [KO] 밉맵 사용 여부
+     * [EN] Whether to use mipmaps
+     */
     set useMipmap(value: boolean);
     /** [KO] 텍스처 리소스를 파괴합니다. [EN] Destroys the texture resource. */
     destroy(): void;

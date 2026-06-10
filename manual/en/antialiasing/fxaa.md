@@ -49,7 +49,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     scene.lightManager.addDirectionalLight(light);
     
     const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.intensity = 0.3;
+    ambientLight.intensityMultiplier = 0.3;
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. Fine grid floor (To check pattern aliasing)
@@ -117,7 +117,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     };
     document.body.appendChild(btn);
 
-    const renderer = new RedGPU.Renderer(redGPUContext);
+    const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext, () => {
         // Slowly rotate to observe texture blurring
         scene.children.forEach(mesh => {

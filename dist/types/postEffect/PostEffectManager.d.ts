@@ -4,13 +4,16 @@ import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import SSAO from "./effects/ssao/SSAO";
 import SSR from "./effects/ssr/SSR";
+import AutoExposure from "../camera/core/autoExposure/AutoExposure";
+import PostEffectTexturePool from "./core/PostEffectTexturePool";
+import { IPostEffectResult } from "./core/types";
 /**
  * [KO] 후처리 이펙트(PostEffect) 관리 클래스입니다.
  * [EN] Class for managing post-processing effects.
  *
  * ::: warning
- * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다. <br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is automatically created by the system. <br/> Do not create an instance directly using the 'new' keyword.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * * ### Example
@@ -33,6 +36,42 @@ declare class PostEffectManager {
      * [EN] View3D instance
      */
     constructor(view: View3D);
+    /**
+     * [KO] 현재 MSAA 상태에 맞는 표준 G-Buffer 바인드 그룹 레이아웃을 반환합니다.
+     * [EN] Returns the standard G-Buffer bind group layout for the current MSAA state.
+     *
+     * @returns
+     * [KO] G-Buffer 바인드 그룹 레이아웃
+     * [EN] G-Buffer bind group layout
+     */
+    get gbufferBindGroupLayout(): GPUBindGroupLayout;
+    /**
+     * [KO] 현재 스왑 인덱스에 맞는 공유 G-Buffer 바인드 그룹을 반환합니다.
+     * [EN] Returns the shared G-Buffer bind group for the current swap index.
+     *
+     * @returns
+     * [KO] 공유 G-Buffer 바인드 그룹
+     * [EN] Shared G-Buffer bind group
+     */
+    get gbufferBindGroup(): GPUBindGroup;
+    /**
+     * [KO] 텍스처 풀 인스턴스를 반환합니다.
+     * [EN] Returns the texture pool instance.
+     *
+     * @returns
+     * [KO] 포스트 이펙트 텍스처 풀 인스턴스
+     * [EN] Post-effect texture pool instance
+     */
+    get texturePool(): PostEffectTexturePool;
+    /**
+     * [KO] 자동 노출(Auto Exposure) 인스턴스를 반환합니다.
+     * [EN] Returns the Auto Exposure instance.
+     *
+     * @returns
+     * [KO] 자동 노출 인스턴스
+     * [EN] Auto Exposure instance
+     */
+    get autoExposure(): AutoExposure;
     /**
      * [KO] SSAO 사용 여부를 반환합니다.
      * [EN] Returns whether SSAO is used.
@@ -150,6 +189,24 @@ declare class PostEffectManager {
      */
     getEffectAt(index: number): ASinglePassPostEffect | AMultiPassPostEffect;
     /**
+     * [KO] 특정 이펙트를 제거합니다.
+     * [EN] Removes a specific effect.
+     *
+     * @param v -
+     * [KO] 제거할 이펙트
+     * [EN] Effect to remove
+     */
+    removeEffect(v: ASinglePassPostEffect | AMultiPassPostEffect): void;
+    /**
+     * [KO] 특정 인덱스의 이펙트를 제거합니다.
+     * [EN] Removes the effect at a specific index.
+     *
+     * @param index -
+     * [KO] 인덱스
+     * [EN] Index
+     */
+    removeEffectAt(index: number): void;
+    /**
      * [KO] 모든 이펙트를 제거합니다.
      * [EN] Removes all effects.
      */
@@ -162,10 +219,7 @@ declare class PostEffectManager {
      * [KO] 렌더링 결과 텍스처 정보
      * [EN] Rendering result texture information
      */
-    render(): {
-        texture: GPUTexture;
-        textureView: GPUTextureView;
-    };
+    render(): IPostEffectResult;
     /**
      * [KO] 모든 이펙트 리소스를 정리합니다.
      * [EN] Clears all effect resources.

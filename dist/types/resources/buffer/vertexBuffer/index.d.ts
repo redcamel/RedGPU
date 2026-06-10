@@ -5,6 +5,6 @@
  */
 import VertexBuffer from "./VertexBuffer";
 import VertexInterleavedStruct from "./VertexInterleavedStruct";
-import VertexInterleaveType from "./VertexInterleaveType";
+import VertexInterleaveType, { TypeInterleave } from "./VertexInterleaveType";
 export * as CoreVertexBuffer from './core/';
-export { VertexBuffer, VertexInterleavedStruct, VertexInterleaveType };
+export { VertexBuffer, VertexInterleavedStruct, VertexInterleaveType, TypeInterleave };

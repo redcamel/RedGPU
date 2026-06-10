@@ -17,9 +17,15 @@ const iblGraph = `
     Specular -->|Reflection| PBR
     Environment -->|Background| Skybox["RedGPU.Display.SkyBox"]
 
-    %% 커스텀 클래스 적용
-    class IBL,Skybox mermaid-main;
-    class Irradiance,Specular,Environment,PBR mermaid-component;
+    %% 회색조 스타일 적용
+    style HDR fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
+    style Cube fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
+    style IBL fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+    style Irradiance fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Specular fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Environment fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style PBR fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:1px
+    style Skybox fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
 `
 </script>
 
@@ -115,6 +121,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## 다음 학습 추천
 
-지금까지 배운 객체와 환경 설정을 바탕으로, 실제 프로젝트에서 어떻게 모델을 불러오고 제어하는지 더 깊이 알아봅시다.
+실시간 물리 기반 대기 산란 시뮬레이션을 통해 동적인 하늘 효과를 씬에 부여하는 방법에 대해 알아봅니다.
 
-- **[모델 로딩](../assets/model-loading/index.md)**
+- **[스카이 대기 (SkyAtmosphere)](./skyatmosphere.md)**

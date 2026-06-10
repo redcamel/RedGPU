@@ -1,22 +1,23 @@
 /**
- * [KO] 주어진 문자열이 유효한 16진수(Hex) 색상 형식인지 검사합니다.
- * [EN] Checks if the given string is a valid hexadecimal (Hex) color format.
+ * [KO] 주어진 값이 유효한 16진수(Hex) 색상 형식인지 검사합니다.
+ * [EN] Checks if the given value is a valid hexadecimal (Hex) color format.
  *
- * [KO] '#', '0x' 접두사가 붙은 3자리 또는 6자리 16진수 색상 문자열을 지원합니다.
- * [EN] Supports 3-digit or 6-digit hex color strings with '#' or '0x' prefixes.
+ * [KO] '#' 접두사가 붙은 3자리 또는 6자리 16진수 색상 문자열 또는 0에서 0xFFFFFF 사이의 정수를 지원합니다.
+ * [EN] Supports 3-digit or 6-digit hex color strings with '#' prefix or integers between 0 and 0xFFFFFF.
  *
  * * ### Example
  * ```typescript
- * const isValid = RedGPU.RuntimeChecker.isHexColor('#FF0000');
+ * const isValidStr = RedGPU.RuntimeChecker.isHexColor('#FF0000');
+ * const isValidNum = RedGPU.RuntimeChecker.isHexColor(0xFF0000);
  * ```
  *
  * @param hex -
- * [KO] 검사할 문자열
- * [EN] String to check
+ * [KO] 검사할 값 (문자열 또는 숫자)
+ * [EN] Value to check (string or number)
  * @returns
  * [KO] 유효한 Hex 색상이면 true, 아니면 false
  * [EN] True if it is a valid hex color, otherwise false
  * @category Checker
  */
-declare const isHexColor: (hex: string) => boolean;
+declare const isHexColor: (hex: any) => boolean;
 export default isHexColor;

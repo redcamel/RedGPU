@@ -1,5 +1,4 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import DefineForVertex from "../../../defineProperty/DefineForVertex";
 import Geometry from "../../../geometry/Geometry";
 import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
 import BitmapMaterial from "../../../material/bitmapMaterial/BitmapMaterial";
@@ -9,23 +8,36 @@ import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import Mesh from "../../mesh/Mesh";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import vertexModuleSource from "./shader/sprite3DVertex.wgsl";
+import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
+import defineBoolean from "../../../defineProperty/funcs/defineBoolean";
+
 
 /** Sprite3D 전용 버텍스 셰이더 모듈 이름 */
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_3D'
 /** 파싱된 WGSL 셰이더 정보 */
-const SHADER_INFO = parseWGSL(vertexModuleSource);
+const SHADER_INFO = parseWGSL('SPRITE3D_VERTEX', vertexModuleSource);
 /** 버텍스 유니폼 구조체 정보 */
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 
 /**
- * Sprite3D의 빌보드 관련 속성을 정의하는 인터페이스
+ * [KO] Sprite3D의 빌보드 관련 속성을 정의하는 인터페이스
+ * [EN] Interface defining the billboard-related properties of Sprite3D
  */
 interface Sprite3D {
-    /** 빌보드 모드 사용 여부 */
+    /**
+     * [KO] 빌보드 모드 사용 여부 (true일 경우 항상 카메라를 향함)
+     * [EN] Whether to use billboard mode (if true, always faces the camera)
+     */
     useBillboard: boolean;
-    /** X축 렌더링 비율 */
+    /**
+     * [KO] X축 렌더링 비율
+     * [EN] X-axis rendering ratio
+     */
     _renderRatioX: number;
-    /** Y축 렌더링 비율 */
+    /**
+     * [KO] Y축 렌더링 비율
+     * [EN] Y-axis rendering ratio
+     */
     _renderRatioY: number;
 }
 
@@ -44,15 +56,12 @@ interface Sprite3D {
  *
  * <iframe src="/RedGPU/examples/3d/sprite/sprite3D/"></iframe>
  *
- * [KO] 월드 사이즈와 픽셀 사이즈 모드를 비교하는 예제입니다.
- * [EN] An example comparing World Size and Pixel Size modes.
- * <iframe src="/RedGPU/examples/3d/sprite/sprite3DCompare/"></iframe>
  *
- * @see
  * [KO] 아래는 Sprite3D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * [EN] Below is a list of additional sample examples to help understand the structure and operation of Sprite3D.
+ * @see [Sprite3D Basic example](/RedGPU/examples/3d/sprite/sprite3D/)
  * @see [Sprite3D Comparison (World vs Pixel)](/RedGPU/examples/3d/sprite/sprite3DCompare/)
- * @see [Sprite3D MouseEvent example](/RedGPU/examples/3d/mouseEvent/sprite3D/)
+ * @see [Sprite3D MouseEvent example](/RedGPU/examples/3d/interaction/mouseEvent/sprite3D/)
  *
  * @category Sprite
  */
@@ -165,29 +174,6 @@ class Sprite3D extends Mesh {
     }
 
     /**
-     * [KO] 텍스처 비율과 설정값에 따라 내부 렌더링 비율을 업데이트합니다.
-     * [EN] Updates internal rendering ratios based on texture ratio and settings.
-     */
-    #updateRatios() {
-        if (this.#nativeHeight) {
-            const prevX = this._renderRatioX;
-            const prevY = this._renderRatioY;
-
-            if (this.usePixelSize) {
-                this._renderRatioY = 1;
-                this._renderRatioX = this.#nativeWidth / this.#nativeHeight;
-            } else {
-                this._renderRatioY = this.#worldSize;
-                this._renderRatioX = (this.#nativeWidth / this.#nativeHeight) * this.#worldSize;
-            }
-
-            if (prevX !== this._renderRatioX || prevY !== this._renderRatioY) {
-                this.dirtyTransform = true;
-            }
-        }
-    }
-
-    /**
      * [KO] 프레임마다 스프라이트를 렌더링합니다. 텍스처 로드 완료 시 원본 해상도를 자동으로 동기화합니다.
      * [EN] Renders the sprite every frame. Automatically syncs physical resolution when texture loading is complete.
      * @param renderViewStateData -
@@ -203,7 +189,7 @@ class Sprite3D extends Mesh {
                 if (tW !== this.#nativeWidth || tH !== this.#nativeHeight) {
                     this.#nativeWidth = tW
                     this.#nativeHeight = tH
-                    
+
                     const prevPixelSize = this.pixelSize;
                     this.pixelSize = this.pixelSize || tH;
                     this.#updateRatios();
@@ -231,20 +217,40 @@ class Sprite3D extends Mesh {
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
         return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
     }
+
+    /**
+     * [KO] 텍스처 비율과 설정값에 따라 내부 렌더링 비율을 업데이트합니다.
+     * [EN] Updates internal rendering ratios based on texture ratio and settings.
+     */
+    #updateRatios() {
+        if (this.#nativeHeight) {
+            const prevX = this._renderRatioX;
+            const prevY = this._renderRatioY;
+
+            if (this.usePixelSize) {
+                this._renderRatioY = 1;
+                this._renderRatioX = this.#nativeWidth / this.#nativeHeight;
+            } else {
+                this._renderRatioY = this.#worldSize;
+                this._renderRatioX = (this.#nativeWidth / this.#nativeHeight) * this.#worldSize;
+            }
+
+            if (prevX !== this._renderRatioX || prevY !== this._renderRatioY) {
+                this.dirtyTransform = true;
+            }
+        }
+    }
 }
 
 /**
  * Sprite3D 클래스에 렌더링 비율 속성들을 정의합니다.
  */
-DefineForVertex.definePositiveNumber(Sprite3D, [
-    ['_renderRatioX', 1],
-    ['_renderRatioY', 1],
+definePositiveNumber(Sprite3D, [
+    {key: '_renderRatioX', value: 1},
+    {key: '_renderRatioY', value: 1},
 ])
-/**
- * Sprite3D 클래스에 빌보드 관련 속성들을 정의합니다.
- */
-DefineForVertex.defineByPreset(Sprite3D, [
-    [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
+defineBoolean(Sprite3D, [
+    {key: 'useBillboard', value: true},
 ])
 Object.freeze(Sprite3D)
 export default Sprite3D

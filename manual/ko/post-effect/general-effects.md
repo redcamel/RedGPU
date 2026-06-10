@@ -150,12 +150,12 @@ RedGPU가 제공하는 모든 일반 이펙트 목록입니다. 모든 이펙트
 | | `Convolution` | 커널 기반 필터 (Sharpen, Edge, Emboss 등 지원) |
 
 ::: info [라이브 확인]
-위의 모든 이펙트들은 [RedGPU 공식 예제 페이지](https://redcamel.github.io/RedGPU/examples/#postEffect)의 **PostEffect** 카테고리에서 실시간 데모로 확인하실 수 있습니다.
+위의 모든 이펙트들은 [RedGPU 공식 예제 페이지](https://redcamel.github.io/RedGPU/examples/index.html?tab=PostEffect)의 **PostEffect**
+카테고리에서 실시간 데모로 확인하실 수 있습니다.
 :::
 
 ## 핵심 요약
 - `addEffect()` 를 사용해 원하는 순서대로 효과를 중첩할 수 있습니다.
-- 모든 이펙트 객체는 생성 시 `redGPUContext` 가 필요합니다.
 - 실제 렌더링은 톤 매핑 직후 단계에서 수행됩니다.
 
 ## 다음 학습 추천

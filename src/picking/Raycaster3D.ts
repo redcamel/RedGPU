@@ -1,4 +1,4 @@
-import {mat4, vec3, vec2, vec4} from "gl-matrix";
+import {mat4, vec2, vec3, vec4} from "gl-matrix";
 import Ray from "../math/Ray";
 import View3D from "../display/view/View3D";
 import Mesh from "../display/mesh/Mesh";
@@ -19,7 +19,7 @@ import {keepLog} from "../utils";
  * ```
  * @category Picking
  */
-export default class Raycaster3D {
+class Raycaster3D {
     /**
      * [KO] 내부적으로 관리되는 광원 객체
      * [EN] Internally managed ray object
@@ -44,7 +44,6 @@ export default class Raycaster3D {
     #tempMat4_2 = mat4.create();
     #tempMat4_3 = mat4.create();
     #tempVec3 = vec3.create();
-    #tempVec3_2 = vec3.create();
     #view: View3D;
     #screenPoint: vec2 = vec2.create();
 
@@ -76,7 +75,7 @@ export default class Raycaster3D {
      * [EN] Target View3D instance
      */
     setFromCamera(screenX: number, screenY: number, view: View3D): void {
-        const {rawCamera} = view;
+        const {rawCamera, redGPUContext} = view;
         const origin = vec3.fromValues(rawCamera.x, rawCamera.y, rawCamera.z);
         const targetPoint = view.screenToWorld(screenX, screenY);
         const direction = vec3.create();
@@ -88,8 +87,16 @@ export default class Raycaster3D {
 
         this.#view = view;
         const {pixelRectObject} = view;
-        const ndcX = ((screenX * devicePixelRatio) / pixelRectObject.width) * 2 - 1;
-        const ndcY = -((screenY * devicePixelRatio) / pixelRectObject.height) * 2 + 1;
+        const dpr = window.devicePixelRatio;
+        const renderScale = redGPUContext.renderScale;
+
+        // [KO] 논리 좌표(CSS)를 물리 픽셀 좌표로 변환하여 NDC 계산
+        // [EN] Convert logical coordinates (CSS) to physical pixel coordinates and calculate NDC
+        const physicalX = screenX * dpr * renderScale;
+        const physicalY = screenY * dpr * renderScale;
+
+        const ndcX = (physicalX / pixelRectObject.width) * 2 - 1;
+        const ndcY = -(physicalY / pixelRectObject.height) * 2 + 1;
         vec2.set(this.#screenPoint, ndcX, ndcY);
 
         if ('nearClipping' in rawCamera) this.near = (rawCamera as any).nearClipping;
@@ -187,7 +194,7 @@ export default class Raycaster3D {
     #intersectPixelBillboard(mesh: Mesh, intersects: RayIntersectResult[]) {
         const view = this.#view;
         const m = mesh.modelMatrix;
-        const pixelSize = (mesh as any).pixelSize  ;
+        const pixelSize = (mesh as any).pixelSize;
         keepLog((mesh as any).fontSize)
         const rx = (mesh as any)._renderRatioX || 1;
         const ry = (mesh as any)._renderRatioY || 1;
@@ -196,7 +203,7 @@ export default class Raycaster3D {
 
         // 1. Pivot NDC 계산
         const centerWorld = vec3.fromValues(m[12], m[13], m[14]);
-        const centerView = vec3.transformMat4(this.#tempVec3, centerWorld, rawCamera.modelMatrix);
+        const centerView = vec3.transformMat4(this.#tempVec3, centerWorld, rawCamera.viewMatrix);
         const centerClip = vec4.transformMat4(this.#tempMat4, vec4.fromValues(centerView[0], centerView[1], centerView[2], 1.0), projectionMatrix);
 
         if (centerClip[3] <= 0) return;
@@ -243,7 +250,7 @@ export default class Raycaster3D {
         const ry = (mesh as any)._renderRatioY || 1;
 
         // 1. 빌보드 월드 행렬 생성
-        const invView = mat4.invert(this.#tempMat4_2, view.rawCamera.modelMatrix);
+        const invView = mat4.invert(this.#tempMat4_2, view.rawCamera.viewMatrix);
         const billboardWorldMatrix = this.#tempMat4_3;
         mat4.copy(billboardWorldMatrix, invView);
 
@@ -312,7 +319,7 @@ export default class Raycaster3D {
             const distance = vec3.distance(this.ray.origin, worldIntersectPoint);
             if (distance >= this.near && distance <= this.far) {
                 // UV Interpolation
-                // Assuming standard interleaved layout: [Px, Py, Pz, Nx, Ny, Nz, U, V] (Stride 8)
+                // [교정] 인터리브 레이아웃: [Px, Py, Pz, Nx, Ny, Nz, U, V, Tx, Ty, Tz, Tw] (Stride 12)
                 const uv0 = vec2.fromValues(data[i0 * stride + 6], data[i0 * stride + 7]);
                 const uv1 = vec2.fromValues(data[i1 * stride + 6], data[i1 * stride + 7]);
                 const uv2 = vec2.fromValues(data[i2 * stride + 6], data[i2 * stride + 7]);
@@ -336,6 +343,9 @@ export default class Raycaster3D {
         }
     }
 }
+
+Object.freeze(Raycaster3D);
+export default Raycaster3D
 
 /**
  * [KO] 레이캐스팅 교차 결과 인터페이스입니다.

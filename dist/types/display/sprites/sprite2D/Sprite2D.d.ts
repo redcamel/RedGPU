@@ -34,6 +34,7 @@ declare const BaseSprite2D: {
  *
  * [KO] 아래는 Sprite2D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * [EN] Below is a list of additional sample examples to help understand the structure and operation of Sprite2D.
+ * @see [Sprite2D Basic example](/RedGPU/examples/2d/sprite2D/basic/)
  * @see [Sprite2D Hierarchy example](/RedGPU/examples/2d/sprite2D/hierarchy/)
  * @see [Sprite2D Pivot example](/RedGPU/examples/2d/sprite2D/pivot/)
  * @see [Sprite2D Child Methods example](/RedGPU/examples/2d/sprite2D/childMethod/)
@@ -56,39 +57,39 @@ declare class Sprite2D extends BaseSprite2D {
      */
     constructor(redGPUContext: RedGPUContext, material?: any);
     /**
-     * [KO] 스프라이트의 너비를 반환합니다.
-     * [EN] Returns the width of the sprite.
+     * [KO] 스프라이트의 너비를 반환합니다. (픽셀 단위)
+     * [EN] Returns the width of the sprite (in pixels).
      */
     get width(): number;
     /**
-     * [KO] 스프라이트의 너비를 설정합니다.
-     * [EN] Sets the width of the sprite.
+     * [KO] 스프라이트의 너비를 설정합니다. (픽셀 단위)
+     * [EN] Sets the width of the sprite (in pixels).
      * @param value -
      * [KO] 설정할 너비 값 (양수)
      * [EN] Width value to set (positive)
      * @throws
-     * [KO] 값이 양수가 아닌 경우 Error 발생
-     * [EN] Throws Error if value is not positive
+     * [KO] 값이 양수가 아닌 경우 에러가 발생합니다.
+     * [EN] Throws an error if the value is not positive.
      */
     set width(value: number);
     /**
-     * [KO] 스프라이트의 높이를 반환합니다.
-     * [EN] Returns the height of the sprite.
+     * [KO] 스프라이트의 높이를 반환합니다. (픽셀 단위)
+     * [EN] Returns the height of the sprite (in pixels).
      */
     get height(): number;
     /**
-     * [KO] 스프라이트의 높이를 설정합니다.
-     * [EN] Sets the height of the sprite.
+     * [KO] 스프라이트의 높이를 설정합니다. (픽셀 단위)
+     * [EN] Sets the height of the sprite (in pixels).
      * @param value -
      * [KO] 설정할 높이 값 (양수)
      * [EN] Height value to set (positive)
      * @throws
-     * [KO] 값이 양수가 아닌 경우 Error 발생
-     * [EN] Throws Error if value is not positive
+     * [KO] 값이 양수가 아닌 경우 에러가 발생합니다.
+     * [EN] Throws an error if the value is not positive.
      */
     set height(value: number);
     /**
-     * [KO] 스프라이트의 크기를 설정합니다.
+     * [KO] 스프라이트의 크기를 일괄 설정합니다.
      * [EN] Sets the size of the sprite.
      *
      * @param width -

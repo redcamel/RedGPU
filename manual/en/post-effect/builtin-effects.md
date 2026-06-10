@@ -57,4 +57,5 @@ ssr.maxSteps = 64;             // Reflection calculation precision (number of st
 - They can be controlled individually via the `useSSAO` and `useSSR` properties.
 
 ## Next Learning Recommendation
-- **[Text Field](../assets/text-field/index.md)**
+
+- **[LOD](../lod/index.md)**

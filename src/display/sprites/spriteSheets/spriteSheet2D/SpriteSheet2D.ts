@@ -14,7 +14,7 @@ import vertexModuleSource from "./shader/spriteSheet2DVertex.wgsl";
 /** SpriteSheet2D 전용 버텍스 셰이더 모듈 이름 */
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_SHEET_2D'
 /** 파싱된 WGSL 셰이더 정보 */
-const SHADER_INFO = parseWGSL(vertexModuleSource);
+const SHADER_INFO = parseWGSL('SPRITE_SHEET_2D_VERTEX', vertexModuleSource);
 /** 버텍스 유니폼 구조체 정보 */
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 /** 2D 메시 기능이 믹스인된 베이스 스프라이트 시트 클래스 */
@@ -81,7 +81,7 @@ class SpriteSheet2D extends BaseSpriteSheet2D {
                 this.#height = 1
             }
         });
-        this._geometry = new Plane(redGPUContext, 1, 1, 1, 1, 1, true);
+        this._geometry = new Plane(redGPUContext, 1, 1, 1, 1, true);
         this.primitiveState.cullMode = GPU_CULL_MODE.FRONT
     }
 
@@ -125,8 +125,8 @@ class SpriteSheet2D extends BaseSpriteSheet2D {
      * [KO] 설정하려는 지오메트리
      * [EN] Geometry to set
      * @throws
-     * [KO] 지오메트리 변경 시도 시 Error 발생
-     * [EN] Throws Error when attempting to change geometry
+     * [KO] 지오메트리 변경 시도 시 에러가 발생합니다.
+     * [EN] Throws an error when attempting to change geometry.
      */
     set geometry(value: Geometry | Primitive) {
         consoleAndThrowError('SpriteSheet2D can not change geometry')
@@ -150,8 +150,8 @@ class SpriteSheet2D extends BaseSpriteSheet2D {
      * [KO] 설정하려는 머티리얼
      * [EN] Material to set
      * @throws
-     * [KO] 머티리얼 변경 시도 시 Error 발생
-     * [EN] Throws Error when attempting to change material
+     * [KO] 머티리얼 변경 시도 시 에러가 발생합니다.
+     * [EN] Throws an error when attempting to change material.
      */
     set material(value) {
         consoleAndThrowError('SpriteSheet2D can not change material')

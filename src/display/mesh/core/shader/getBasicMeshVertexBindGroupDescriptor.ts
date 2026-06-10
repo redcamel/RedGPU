@@ -5,7 +5,7 @@ const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false
     const {redGPUContext, gpuRenderInfo, material} = mesh
     const {resourceManager} = redGPUContext
     const {vertexUniformBuffer, vertexBindGroupLayout} = gpuRenderInfo
-    const {basicSampler, emptyBitmapTextureView, emptyCubeTextureView} = resourceManager
+    const {basicSampler, emptyBitmapTextureView, basicDisplacementSampler} = resourceManager
     const {gpuSampler: basicGPUSampler} = basicSampler
 
     return {
@@ -22,7 +22,8 @@ const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false
             },
             {
                 binding: 1,
-                resource: getGPUResourceSampler(material?.displacementTextureSampler) || basicGPUSampler
+                // resource: getGPUResourceSampler(material?.displacementTextureSampler) || basicGPUSampler
+                resource: basicDisplacementSampler.gpuSampler
             },
             {
                 binding: 2,
@@ -55,7 +56,8 @@ const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false
             },
             {
                 binding: 1,
-                resource: getGPUResourceSampler(material?.displacementTextureSampler) || basicGPUSampler
+                // resource: getGPUResourceSampler(material?.displacementTextureSampler) || basicGPUSampler
+                resource: basicDisplacementSampler.gpuSampler
             },
             {
                 binding: 2,

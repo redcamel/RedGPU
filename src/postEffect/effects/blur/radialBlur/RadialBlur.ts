@@ -1,24 +1,39 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import validateNumber from "../../../../runtimeChecker/validateFunc/validateNumber";
-import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
+import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
+import defineUint from "../../../../defineProperty/funcs/number/defineUint";
+
+
+interface RadialBlur {
+    /** [KO] 블러 강도. 값이 클수록 회전 번짐이 강해집니다. [EN] Blur strength. Higher values increase rotational bleeding. */
+    amount: number
+    /** [KO] 블러의 중심점 X 오프셋 (픽셀 단위, 0은 화면 중앙). [EN] Blur center X offset (in pixels, 0 is screen center). */
+    centerX: number
+    /** [KO] 블러의 중심점 Y 오프셋 (픽셀 단위, 0은 화면 중앙). [EN] Blur center Y offset (in pixels, 0 is screen center). */
+    centerY: number
+    /** [KO] 샘플링 횟수 (2 ~ 100). 값이 클수록 부드럽지만 성능 소모가 늘어납니다. [EN] Number of samples (2 to 100). Higher values are smoother but increase performance cost. */
+    sampleCount: number
+}
 
 /**
- * [KO] 방사형 블러(Radial Blur) 후처리 이펙트입니다.
+ * [KO] 방사형 회전 블러(Radial Blur) 후처리 이펙트입니다.
  * [EN] Radial Blur post-processing effect.
  *
- * [KO] 중심점, 강도, 샘플 수를 조절해 원형으로 퍼지는 블러 효과를 만듭니다.
- * [EN] Creates a circular spreading blur effect by adjusting the center point, strength, and sample count.
+ * [KO] 화면의 특정 지점을 기준으로 이미지를 회전시키며 블러 처리를 하여, 역동적인 회전감이나 집중 효과를 만듭니다. (0,0)은 화면의 정중앙을 의미합니다.
+ * [EN] Applies blur by rotating the image around a specific point, creating a dynamic sense of rotation or focus. (0,0) refers to the exact center of the screen.
+ *
+ * [KO] 하드웨어 선형 샘플러를 사용하여 회전 궤적의 계단 현상을 최소화하고 매끄러운 결과물을 제공합니다.
+ * [EN] Minimizes aliasing in the rotation trajectory and provides smooth results using a hardware linear sampler.
+ *
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.RadialBlur(redGPUContext);
- * effect.amount = 80;      // 블러 강도
- * effect.centerX = 0.5;    // 중심 X (0~1)
- * effect.centerY = 0.5;    // 중심 Y (0~1)
- * effect.sampleCount = 32; // 샘플 수
+ * effect.amount = 50;
+ * effect.sampleCount = 16;
  * view.postEffectManager.addEffect(effect);
  * ```
  *
@@ -26,30 +41,6 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * @category Blur
  */
 class RadialBlur extends ASinglePassPostEffect {
-    /**
-     * [KO] 블러 강도 (최소 0)
-     * [EN] Blur strength (Minimum 0)
-     * @defaultValue 50
-     */
-    #amount: number = 50
-    /**
-     * [KO] 중심 X (0~1)
-     * [EN] Center X (0~1)
-     * @defaultValue 0
-     */
-    #centerX: number = 0
-    /**
-     * [KO] 중심 Y (0~1)
-     * [EN] Center Y (0~1)
-     * @defaultValue 0
-     */
-    #centerY: number = 0
-    /**
-     * [KO] 샘플 수 (최소 4)
-     * [EN] Sample count (Minimum 4)
-     * @defaultValue 16
-     */
-    #sampleCount: number = 16
 
     /**
      * [KO] RadialBlur 인스턴스를 생성합니다.
@@ -65,83 +56,21 @@ class RadialBlur extends ASinglePassPostEffect {
             redGPUContext,
             'POST_EFFECT_RADIAL_BLUR',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
-        this.amount = this.#amount
-        this.sampleCount = this.#sampleCount
+        );
     }
 
-    /**
-     * [KO] 중심 X 좌표를 반환합니다.
-     * [EN] Returns the center X coordinate.
-     */
-    get centerX(): number {
-        return this.#centerX;
-    }
 
-    /**
-     * [KO] 중심 X 좌표를 설정합니다.
-     * [EN] Sets the center X coordinate.
-     */
-    set centerX(value: number) {
-        validateNumber(value)
-        this.#centerX = value;
-        this.updateUniform('centerX', value)
-    }
-
-    /**
-     * [KO] 중심 Y 좌표를 반환합니다.
-     * [EN] Returns the center Y coordinate.
-     */
-    get centerY(): number {
-        return this.#centerY;
-    }
-
-    /**
-     * [KO] 중심 Y 좌표를 설정합니다.
-     * [EN] Sets the center Y coordinate.
-     */
-    set centerY(value: number) {
-        validateNumber(value)
-        this.#centerY = value;
-        this.updateUniform('centerY', value)
-    }
-
-    /**
-     * [KO] 블러 강도를 반환합니다.
-     * [EN] Returns the blur strength.
-     */
-    get amount(): number {
-        return this.#amount;
-    }
-
-    /**
-     * [KO] 블러 강도를 설정합니다. (최소 0)
-     * [EN] Sets the blur strength. (Minimum 0)
-     */
-    set amount(value: number) {
-        validateNumberRange(value, 0)
-        this.#amount = value;
-        this.updateUniform('amount', value)
-    }
-
-    /**
-     * [KO] 샘플 수를 반환합니다.
-     * [EN] Returns the sample count.
-     */
-    get sampleCount(): number {
-        return this.#sampleCount;
-    }
-
-    /**
-     * [KO] 샘플 수를 설정합니다. (최소 4)
-     * [EN] Sets the sample count. (Minimum 4)
-     */
-    set sampleCount(value: number) {
-        validateNumberRange(value, 4)
-        this.#sampleCount = value;
-        this.updateUniform('sampleCount', value)
-    }
 }
 
+definePositiveNumber(RadialBlur, [
+    {key: 'amount', value: 50}
+])
+defineNumber(RadialBlur, [
+    {key: 'centerX', value: 0},
+    {key: 'centerY', value: 0},
+])
+defineUint(RadialBlur, [
+    {key: 'sampleCount', value: 16, min: 2, max: 100},
+])
 Object.freeze(RadialBlur)
 export default RadialBlur

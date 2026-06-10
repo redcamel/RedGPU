@@ -63,7 +63,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     scene.lightManager.addDirectionalLight(light);
 
     const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.intensity = 0.5;
+    ambientLight.intensityMultiplier = 0.5;
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. 재질 및 텍스처 설정
@@ -105,7 +105,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     redGPUContext.addView(view);
 
     // 6. 렌더링 루프
-    const renderer = new RedGPU.Renderer(redGPUContext);
+    const renderer = new RedGPU.Renderer();
     const render = () => {
         // 거리 계산 및 UI 업데이트 (시각적 확인용)
         const dist = Math.sqrt(

@@ -5,8 +5,8 @@ import ABaseBuffer, { GPU_BUFFER_DATA_SYMBOL } from "./ABaseBuffer";
  * [EN] Abstract base class for uniform buffer resources.
  *
  * ::: warning
- * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>상속을 통해 사용하십시오.
- * [EN] This class is an abstract class and cannot be instantiated directly.<br/>Use it through inheritance.
+ * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * @category Buffer
@@ -34,6 +34,7 @@ declare abstract class AUniformBaseBuffer extends ABaseBuffer {
      * [EN] Label for debugging (optional)
      */
     protected constructor(redGPUContext: RedGPUContext, MANAGED_STATE_KEY: string, usage: GPUBufferUsageFlags, data: ArrayBuffer, label?: string);
+    get label(): string;
     /**
      * [KO] 버퍼 데이터(`ArrayBuffer`)를 반환합니다.
      * [EN] Returns the buffer data (`ArrayBuffer`).

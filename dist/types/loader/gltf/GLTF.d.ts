@@ -274,7 +274,8 @@ export interface CameraPerspective {
     /**
      * The floating-point vertical field of view in radians. This value **SHOULD** be less than π.
      */
-    "yfieldOfView": number;
+    "yfieldOfView"?: number;
+    "yfov"?: number;
     /**
      * The floating-point distance to the far clipping plane.
      */

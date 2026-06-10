@@ -1,12 +1,33 @@
 ---
-title: GLTF Loader (모델 로딩)
+title: GLTF Loader
 order: 1
 ---
+
+<script setup>
+const loaderGraph = `
+    GLTF[".gltf / .glb 파일"] -->|비동기 로드 및 파싱| Loader["GLTFLoader (로더)"]
+    Loader -->|PBRMaterial 생성| Mat["Material (재질)"]
+    Loader -->|Geometry 파싱| Geo["Geometry (지오메트리)"]
+    Mat --> Mesh["resultMesh (최종 메시)"]
+    Geo --> Mesh
+
+    %% 회색조 스타일 적용
+    style GLTF fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
+    style Loader fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
+    style Mat fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Geo fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Mesh fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+`
+</script>
 
 # GLTF Loader
 
 **Primitive** 로 기본적인 형태를 만들 수 있지만, 정교한 캐릭터나 건물 같은 고품질 에셋은 외부 3D 툴(Blender, Maya 등)에서 제작하여 가져와야 합니다.
 RedGPU는 웹 3D 표준 포맷인 **glTF**(GL Transmission Format) 2.0 로딩을 지원하는 **GLTFLoader** 를 제공합니다.
+
+<ClientOnly>
+  <MermaidResponsive :definition="loaderGraph" />
+</ClientOnly>
 
 ## 1. 모델 불러오기
 

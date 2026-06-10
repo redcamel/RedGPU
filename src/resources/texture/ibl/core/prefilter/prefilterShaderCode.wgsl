@@ -11,21 +11,12 @@ struct PrefilterUniforms {
 }
 @group(0) @binding(3) var<uniform> uniforms: PrefilterUniforms;
 
-const PI: f32 = 3.14159265359;
+#redgpu_include math.PI
+#redgpu_include math.PI2
+#redgpu_include math.tnb.getTBN
+#redgpu_include math.hash.getHammersley
 
-fn radicalInverse_VdC(bits_in: u32) -> f32 {
-    var bits = bits_in;
-    bits = (bits << 16u) | (bits >> 16u);
-    bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
-    bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
-    bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
-    bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
-    return f32(bits) * 2.3283064365386963e-10;
-}
 
-fn hammersley(i: u32, n: u32) -> vec2<f32> {
-    return vec2<f32>(f32(i) / f32(n), radicalInverse_VdC(i));
-}
 
 fn distribution_ggx(NdotH: f32, roughness: f32) -> f32 {
     let a = roughness * roughness;
@@ -37,17 +28,18 @@ fn distribution_ggx(NdotH: f32, roughness: f32) -> f32 {
 
 fn importanceSampleGGX(xi: vec2<f32>, N: vec3<f32>, roughness: f32) -> vec3<f32> {
     let a = roughness * roughness;
-    let phi = 2.0 * PI * xi.x;
+    let phi = PI2 * xi.x;
     let cosTheta = sqrt((1.0 - xi.y) / (1.0 + (a * a - 1.0) * xi.y));
     let sinTheta = sqrt(max(0.0, 1.0 - cosTheta * cosTheta));
 
-    let H = vec3<f32>(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+    let H_local = vec3<f32>(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
 
+    // [KO] 공통 라이브러리 math.getTBN을 사용하여 일관된 기저 생성
+    // [EN] Create consistent basis using common library math.getTBN
     let up = select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(0.0, 0.0, 1.0), abs(N.z) < 0.999);
-    let tangent = normalize(cross(up, N));
-    let bitangent = cross(N, tangent);
+    let tbn = getTBN(N, up);
 
-    return normalize(tangent * H.x + bitangent * H.y + N * H.z);
+    return normalize(tbn * H_local);
 }
 
 @compute @workgroup_size(8, 8, 1)
@@ -62,7 +54,12 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let face = global_id.z;
     let roughness = uniforms.roughness;
 
-    // UV를 로컬 좌표 (-1.0 ~ 1.0)로 변환 (중앙 샘플링 보정)
+    // [KO] UV를 로컬 좌표 (-1.0 ~ 1.0)로 변환 (중앙 샘플링 보정)
+    // [KO] WebGPU 큐브맵 스펙 (v = -y)에 따라 y = -1인 지점이 텍스처의 상단(uv.y = 0)이 되며,
+    // [KO] 결과적으로 월드의 '위(Up)' 방향이 텍스처 상단에 저장되는 정방향 로직입니다.
+    // [EN] Convert UV to local coordinates (-1.0 ~ 1.0) (center sampling correction)
+    // [EN] According to the WebGPU cubemap spec (v = -y), the point y = -1 becomes the top of the texture (uv.y = 0),
+    // [EN] resulting in a forward logic where the world's 'Up' direction is stored at the top of the texture.
     let uv = (vec2<f32>(global_id.xy) + 0.5) / size;
     let x = uv.x * 2.0 - 1.0;
     let y = uv.y * 2.0 - 1.0;
@@ -87,7 +84,7 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let saTexel = 4.0 * PI / (6.0 * envSize * envSize);
 
     for (var i = 0u; i < numSamples; i++) {
-        let xi = hammersley(i, numSamples);
+        let xi = getHammersley(i, numSamples);
         let H = importanceSampleGGX(xi, N, roughness);
         let L = normalize(2.0 * dot(V, H) * H - V);
 
@@ -100,7 +97,7 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let pdf = (D * NdotH / (4.0 * VdotH)) + 0.0001;
             
             let saSample = 1.0 / (f32(numSamples) * pdf + 0.0001);
-            let mipLevel = max(0.25 * log2(saSample / saTexel), 0.0);
+            let mipLevel = max(0.5 * log2(saSample / saTexel), 0.0);
 
             prefilteredColor += textureSampleLevel(environmentTexture, textureSampler, L, mipLevel).rgb * NdotL;
             totalWeight += NdotL;

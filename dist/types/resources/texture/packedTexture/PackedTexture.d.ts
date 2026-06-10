@@ -1,6 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import RedGPUObject from "../../../base/RedGPUObject";
 /** [KO] 컴포넌트 매핑 타입 정의 [EN] Component mapping type definition */
-type ComponentMapping = {
+export type ComponentMapping = {
     r?: 'r' | 'g' | 'b' | 'a';
     g?: 'r' | 'g' | 'b' | 'a';
     b?: 'r' | 'g' | 'b' | 'a';
@@ -23,7 +24,7 @@ type ComponentMapping = {
  * ```
  * @category Texture
  */
-declare class PackedTexture {
+declare class PackedTexture extends RedGPUObject {
     #private;
     /**
      * [KO] PackedTexture 인스턴스를 생성합니다.
@@ -33,11 +34,23 @@ declare class PackedTexture {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext);
-    /** [KO] 인스턴스 고유 식별자 [EN] Instance unique identifier */
-    get uuid(): string;
-    /** [KO] 패킹 결과 GPUTexture 객체 [EN] Packed result GPUTexture object */
+    /**
+     * [KO] 패킹 결과 GPUTexture 객체를 반환합니다.
+     * [EN] Returns the packed result GPUTexture object.
+     *
+     * @returns
+     * [KO] GPUTexture 인스턴스
+     * [EN] GPUTexture instance
+     */
     get gpuTexture(): GPUTexture;
-    /** [KO] 패킹 텍스처 캐시 맵을 반환합니다. [EN] Returns the packed texture cache map. */
+    /**
+     * [KO] 패킹 텍스처 캐시 맵을 반환합니다.
+     * [EN] Returns the packed texture cache map.
+     *
+     * @returns
+     * [KO] 캐시 맵 객체
+     * [EN] Cache map object
+     */
     static getCacheMap(): Map<string, {
         gpuTexture: GPUTexture;
         useNum: number;
@@ -62,13 +75,14 @@ declare class PackedTexture {
      * @param componentMapping -
      * [KO] 컴포넌트 매핑 정보 (선택)
      * [EN] Component mapping info (optional)
+     * @param commandEncoder - [KO] 커맨드 인코더 [EN] Command Encoder
      */
     packing(textures: {
         r?: GPUTexture;
         g?: GPUTexture;
         b?: GPUTexture;
         a?: GPUTexture;
-    }, width: number, height: number, label?: string, componentMapping?: ComponentMapping): Promise<void>;
+    }, width: number, height: number, label?: string, componentMapping?: ComponentMapping, commandEncoder?: GPUCommandEncoder): Promise<void>;
     /** [KO] 인스턴스를 파괴하고 캐시를 관리합니다. [EN] Destroys the instance and manages the cache. */
     destroy(): void;
 }

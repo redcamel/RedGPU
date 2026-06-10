@@ -3,9 +3,25 @@ title: Shadow System
 order: 3
 ---
 
+<script setup>
+const shadowGraph = `
+    Light["Light (광원: DirectionalLight)"] -->|빛 방사| Caster["Caster (그림자 생성 물체: castShadow = true)"]
+    Caster -->|그림자 투사| Receiver["Receiver (그림자 받는 물체: receiveShadow = true)"]
+
+    %% 회색조 스타일 적용
+    style Light fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Caster fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Receiver fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+`
+</script>
+
 # 그림자 시스템
 
 3D 공간에서 그림자는 물체의 입체감과 공간 내 위치 관계를 결정짓는 핵심 요소입니다. RedGPU는 물리 기반의 그림자 시스템을 제공하며, 간단한 설정만으로 사실적인 그림자를 표현할 수 있습니다.
+
+<ClientOnly>
+  <MermaidResponsive :definition="shadowGraph" />
+</ClientOnly>
 
 ## 1. 그림자 생성의 3요소
 

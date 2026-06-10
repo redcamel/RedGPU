@@ -43,73 +43,94 @@ declare class Sampler extends ResourceBase {
      * [EN] GPUSamplerDescriptor options object
      */
     constructor(redGPUContext: RedGPUContext, options?: GPUSamplerDescriptor);
-    /** [KO] U축 어드레스 모드 [EN] Address mode for U coordinate */
+    /**
+     * [KO] U축 어드레스 모드를 반환합니다.
+     * [EN] Returns the address mode for the U coordinate.
+     * @returns - [KO] 어드레스 모드 [EN] Address mode
+     */
     get addressModeU(): GPUAddressMode;
-    /** [KO] U축 어드레스 모드 설정 [EN] Sets the address mode for U coordinate */
+    /**
+     * [KO] U축 어드레스 모드를 설정합니다.
+     * [EN] Sets the address mode for the U coordinate.
+     * @param value - [KO] 설정할 어드레스 모드 [EN] Address mode to set
+     */
     set addressModeU(value: GPUAddressMode);
-    /** [KO] V축 어드레스 모드 [EN] Address mode for V coordinate */
+    /**
+     * [KO] V축 어드레스 모드를 반환합니다.
+     * [EN] Returns the address mode for the V coordinate.
+     * @returns - [KO] 어드레스 모드 [EN] Address mode
+     */
     get addressModeV(): GPUAddressMode;
-    /** [KO] V축 어드레스 모드 설정 [EN] Sets the address mode for V coordinate */
+    /**
+     * [KO] V축 어드레스 모드를 설정합니다.
+     * [EN] Sets the address mode for the V coordinate.
+     * @param value - [KO] 설정할 어드레스 모드 [EN] Address mode to set
+     */
     set addressModeV(value: GPUAddressMode);
-    /** [KO] W축 어드레스 모드 [EN] Address mode for W coordinate */
+    /**
+     * [KO] W축 어드레스 모드를 반환합니다.
+     * [EN] Returns the address mode for the W coordinate.
+     * @returns - [KO] 어드레스 모드 [EN] Address mode
+     */
     get addressModeW(): GPUAddressMode;
-    /** [KO] W축 어드레스 모드 설정 [EN] Sets the address mode for W coordinate */
+    /**
+     * [KO] W축 어드레스 모드를 설정합니다.
+     * [EN] Sets the address mode for the W coordinate.
+     * @param value - [KO] 설정할 어드레스 모드 [EN] Address mode to set
+     */
     set addressModeW(value: GPUAddressMode);
     /**
      * [KO] 밉맵 필터 모드를 반환합니다.
      * [EN] Returns the mipmap filter mode.
+     * @returns - [KO] 밉맵 필터 모드 [EN] Mipmap filter mode
      */
     get mipmapFilter(): GPUMipmapFilterMode;
     /**
      * [KO] 밉맵 필터 모드를 설정합니다.
      * [EN] Sets the mipmap filter mode.
-     * @param value -
-     * [KO] 필터 모드
-     * [EN] Filter mode
+     * @param value - [KO] 설정할 밉맵 필터 모드 [EN] Mipmap filter mode to set
      */
     set mipmapFilter(value: GPUMipmapFilterMode);
     /**
      * [KO] GPU 샘플러 객체를 반환합니다.
      * [EN] Returns the GPU sampler object.
+     * @returns - [KO] WebGPU GPU 샘플러 객체 [EN] WebGPU GPU sampler object
      */
     get gpuSampler(): GPUSampler;
     /**
      * [KO] 확대 필터 모드를 반환합니다.
      * [EN] Returns the magnification filter mode.
+     * @returns - [KO] 확대 필터 모드 [EN] Magnification filter mode
      */
     get magFilter(): GPUFilterMode;
     /**
      * [KO] 확대 필터 모드를 설정합니다.
      * [EN] Sets the magnification filter mode.
-     * @param value -
-     * [KO] 필터 모드
-     * [EN] Filter mode
+     * @param value - [KO] 설정할 확대 필터 모드 [EN] Magnification filter mode to set
      */
     set magFilter(value: GPUFilterMode);
     /**
      * [KO] 축소 필터 모드를 반환합니다.
      * [EN] Returns the minification filter mode.
+     * @returns - [KO] 축소 필터 모드 [EN] Minification filter mode
      */
     get minFilter(): GPUFilterMode;
     /**
      * [KO] 축소 필터 모드를 설정합니다.
      * [EN] Sets the minification filter mode.
-     * @param value -
-     * [KO] 필터 모드
-     * [EN] Filter mode
+     * @param value - [KO] 설정할 축소 필터 모드 [EN] Minification filter mode to set
      */
     set minFilter(value: GPUFilterMode);
     /**
      * [KO] 최대 애니소트로피 값을 반환합니다.
      * [EN] Returns the maximum anisotropy value.
+     * @returns - [KO] 최대 애니소트로피 값 [EN] Maximum anisotropy value
      */
     get maxAnisotropy(): number;
     /**
      * [KO] 최대 애니소트로피 값을 설정합니다. (1~16 사이)
      * [EN] Sets the maximum anisotropy value. (Between 1 and 16)
-     * @param value -
-     * [KO] 애니소트로피 값
-     * [EN] Anisotropy value
+     * @param value - [KO] 애니소트로피 값 [EN] Anisotropy value
      * @throws
      * [KO] 1 미만 또는 16 초과 시 RangeError 발생
      * [EN] Throws RangeError if value is less than 1 or greater than 16
@@ -118,6 +139,7 @@ declare class Sampler extends ResourceBase {
     /**
      * [KO] 애니소트로피 설정이 유효한지 확인합니다. (모든 필터가 'linear'여야 함)
      * [EN] Checks if the anisotropy setting is valid. (All filters must be 'linear')
+     * @returns - [KO] 유효 여부 [EN] Whether it is valid
      */
     get isAnisotropyValid(): boolean;
 }

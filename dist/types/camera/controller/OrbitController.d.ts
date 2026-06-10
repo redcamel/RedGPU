@@ -1,5 +1,4 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import Mesh from "../../display/mesh/Mesh";
 import View3D from "../../display/view/View3D";
 import AController from "../core/AController";
 /**
@@ -290,23 +289,6 @@ declare class OrbitController extends AController {
      * [EN] Maximum tilt angle (-90 ~ 90)
      */
     set maxTilt(value: number);
-    /**
-     * [KO] 메쉬가 화면 중앙에 꽉 차도록 카메라 거리를 자동으로 조절합니다.
-     * [EN] Automatically adjusts the camera distance so that the mesh fills the screen center.
-     *
-     * ### Example
-     * ```typescript
-     * controller.fitMeshToScreenCenter(mesh, view);
-     * ```
-     *
-     * @param mesh -
-     * [KO] 화면에 맞출 대상 메쉬
-     * [EN] Target mesh to fit to the screen
-     * @param view -
-     * [KO] 현재 뷰 인스턴스
-     * [EN] Current view instance
-     */
-    fitMeshToScreenCenter(mesh: Mesh, view: View3D): void;
     /**
      * [KO] 매 프레임마다 오빗 카메라를 업데이트합니다.
      * [EN] Updates the orbit camera every frame.

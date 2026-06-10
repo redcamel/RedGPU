@@ -17,9 +17,15 @@ const iblGraph = `
     Specular -->|Reflection| PBR
     Environment -->|Background| Skybox["RedGPU.Display.SkyBox"]
 
-    %% Apply custom classes
-    class IBL,Skybox mermaid-main;
-    class Irradiance,Specular,Environment,PBR mermaid-component;
+    %% Grayscale styles applied
+    style HDR fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
+    style Cube fill:#fafafa,stroke:#e4e4e7,color:#27272a,stroke-width:1px
+    style IBL fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+    style Irradiance fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Specular fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Environment fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style PBR fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:1px
+    style Skybox fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
 `
 </script>
 
@@ -115,6 +121,6 @@ Detailed models created externally mostly use PBR (Physically Based Rendering) m
 
 ## Next Steps
 
-Based on the objects and environment settings learned so far, let's explore more deeply how to load and control models in actual projects.
+Learn how to add dynamic sky effects to a scene through real-time physically based atmospheric scattering simulation.
 
-- **[GLTF Loader](../assets/model-loading/index.md)**
+- **[SkyAtmosphere](./skyatmosphere.md)**

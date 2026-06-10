@@ -38,8 +38,8 @@ class VertexBuffer extends ABaseBuffer {
      */
     #interleavedStruct: VertexInterleavedStruct
     /**
-     * [KO] 삼각형 개수입니다.
-     * [EN] Number of triangles.
+     * [KO] 삼각형 개수입니다. (인덱스 버퍼를 사용하지 않는 경우를 가정한 값)
+     * [EN] Number of triangles. (Assumed value when not using an index buffer)
      */
     #triangleCount: number = 0
 
@@ -97,6 +97,7 @@ class VertexBuffer extends ABaseBuffer {
     /**
      * [KO] 버텍스 데이터를 반환합니다.
      * [EN] Returns the vertex data.
+     * @returns - [KO] Float32Array 형식의 버텍스 데이터 [EN] Vertex data as Float32Array
      */
     get data(): Float32Array {
         return this[GPU_BUFFER_DATA_SYMBOL];
@@ -105,6 +106,7 @@ class VertexBuffer extends ABaseBuffer {
     /**
      * [KO] stride(버텍스 당 바이트 수)를 반환합니다.
      * [EN] Returns the stride (number of bytes per vertex).
+     * @returns - [KO] stride 바이트 크기 [EN] Stride byte size
      */
     get stride(): number {
         return this.#stride;
@@ -113,14 +115,16 @@ class VertexBuffer extends ABaseBuffer {
     /**
      * [KO] 버텍스 데이터 구조를 반환합니다.
      * [EN] Returns the vertex data structure.
+     * @returns - [KO] 버텍스 인터리브 구조 객체 [EN] Vertex interleaved structure object
      */
-    get interleavedStruct() {
+    get interleavedStruct(): VertexInterleavedStruct {
         return this.#interleavedStruct
     }
 
     /**
      * [KO] 버텍스 개수를 반환합니다.
      * [EN] Returns the number of vertices.
+     * @returns - [KO] 버텍스 수 [EN] Number of vertices
      */
     get vertexCount(): number {
         return this.#vertexCount;
@@ -129,6 +133,7 @@ class VertexBuffer extends ABaseBuffer {
     /**
      * [KO] 삼각형 개수를 반환합니다.
      * [EN] Returns the number of triangles.
+     * @returns - [KO] 삼각형 수 [EN] Number of triangles
      */
     get triangleCount(): number {
         return this.#triangleCount;
@@ -174,7 +179,7 @@ class VertexBuffer extends ABaseBuffer {
         };
         this[GPU_BUFFER_SYMBOL] = gpuDevice.createBuffer(bufferDescriptor);
         this.targetResourceManagedState.videoMemory += this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
-        this.#triangleCount = this[GPU_BUFFER_DATA_SYMBOL].length / this.#stride;
+        this.#triangleCount = (this[GPU_BUFFER_DATA_SYMBOL].length / this.#stride) / 3;
         gpuDevice.queue.writeBuffer(this[GPU_BUFFER_SYMBOL], 0, this[GPU_BUFFER_DATA_SYMBOL] as BufferSource);
     }
 

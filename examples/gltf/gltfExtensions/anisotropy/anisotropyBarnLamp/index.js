@@ -1,8 +1,5 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770713934910";
-import {
-    loadingProgressInfoHandler
-} from '../../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1770713934910'
-
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1781131404967";
+import * as RedGPU from "../../../../../dist/index.js?t=1781131404967";
 /**
  * [KO] Anisotropy Barn Lamp 예제
  * [EN] Anisotropy Barn Lamp example
@@ -32,7 +29,7 @@ RedGPU.init(
         loadGLTF(view, MODEL_URL);
 
         // Start renderer
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (time) => {
             // Add additional per-frame logic here if needed
         });
@@ -55,7 +52,7 @@ RedGPU.init(
  * @param {RedGPU.Display.View3D} view
  * @param {string} url
  */
-const loadGLTF = async (view, url) => {
+const loadGLTF = (view, url) => {
     const {redGPUContext, scene} = view;
     new RedGPU.GLTFLoader(
         redGPUContext,
@@ -63,10 +60,10 @@ const loadGLTF = async (view, url) => {
         (result) => {
             const mesh = result.resultMesh
             scene.addChild(mesh)
-            view.camera.fitMeshToScreenCenter(mesh, view)
+            RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view)
 
         },
-        loadingProgressInfoHandler
+        RedGPUExampleHelper.loadingProgressInfoHandler
     );
 }
 
@@ -76,13 +73,10 @@ const loadGLTF = async (view, url) => {
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.View3D} targetView
  */
-const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {
-        createIblHelper,
-        setDebugButtons
-    } = await import('../../../../exampleHelper/createExample/panes/index.js?t=1770713934910');
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
-    createIblHelper(pane, targetView, RedGPU);
+const renderTestPane = (redGPUContext, targetView) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        RedGPU: RedGPU,
+        ibl: true,
+        skybox: true,
+    });
 };

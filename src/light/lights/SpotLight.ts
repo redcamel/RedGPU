@@ -20,15 +20,16 @@ import ABaseLight from "../core/ABaseLight";
  * [KO] 아래는 SpotLight 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
  * [EN] Below is a list of additional sample examples to help understand the structure and behavior of SpotLight.
  * @see [SpotLight Cluster Performance example](/RedGPU/examples/3d/light/spotLightPerformance/)
+ * @see [SpotLight with glTF example](/RedGPU/examples/3d/light/spotLightWithGltf/)
  * @category Light
  */
 class SpotLight extends ABaseLight {
     /**
      * [KO] 광원의 영향을 미치는 반경입니다.
      * [EN] Radius affected by the light.
-     * @defaultValue 1
+     * @defaultValue 10
      */
-    #radius: number = 1;
+    #radius: number = 10;
     /**
      * [KO] 광원의 X 좌표입니다.
      * [EN] X coordinate of the light.
@@ -68,15 +69,17 @@ class SpotLight extends ABaseLight {
     /**
      * [KO] 내부 컷오프 각도 (degree)입니다.
      * [EN] Inner cutoff angle (degrees).
-     * @defaultValue 15.0
+     * @defaultValue 0.0
      */
-    #innerCutoff: number = 15.0;
+    #innerCutoff: number = 0.0;
     /**
      * [KO] 외부 컷오프 각도 (degree)입니다.
      * [EN] Outer cutoff angle (degrees).
-     * @defaultValue 22.5
+     * @defaultValue 44.0
      */
-    #outerCutoff: number = 22.5;
+    #outerCutoff: number = 44.0;
+
+    #lumen: number = 1000;
 
     /**
      * [KO] 새로운 SpotLight 인스턴스를 생성합니다.
@@ -84,12 +87,35 @@ class SpotLight extends ABaseLight {
      * @param color -
      * [KO] 광원의 색상 (hex 문자열, 예: '#ffffff')
      * [EN] Color of the light (hex string, e.g., '#ffffff')
-     * @param intensity -
-     * [KO] 광원의 세기 (기본값: 1)
-     * [EN] Intensity of the light (default: 1)
+     * @param lumen -
+     * [KO] 광원의 광선속 (Lumen, lm, 기본값: 1,000)
+     * [EN] Luminous flux of the light (Lumen, lm, default: 1,000)
      */
-    constructor(color: string = '#fff', intensity: number = 1) {
-        super(new ColorRGB(...convertHexToRgb(color, true)), intensity);
+    constructor(color: string = '#fff', lumen: number = 1000) {
+        super(new ColorRGB(...convertHexToRgb(color, true)));
+        this.#lumen = lumen;
+    }
+
+    /**
+     * [KO] 광원의 광선속(Lumen, lm)을 반환합니다.
+     * [EN] Returns the luminous flux (Lumen, lm) of the light source.
+     * @returns
+     * [KO] 광선속 값
+     * [EN] Luminous flux value
+     */
+    get lumen(): number {
+        return this.#lumen;
+    }
+
+    /**
+     * [KO] 광원의 광선속(Lumen, lm)을 설정합니다.
+     * [EN] Sets the luminous flux (Lumen, lm) of the light source.
+     * @param value -
+     * [KO] 광선속 값 (예: 1,000)
+     * [EN] Luminous flux value (e.g., 1,000)
+     */
+    set lumen(value: number) {
+        this.#lumen = value;
     }
 
     /**

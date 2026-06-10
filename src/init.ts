@@ -83,11 +83,25 @@ const init = async (
         }
     }
     const validateAndRequestDevice = async (adapter: GPUAdapter) => {
-        const requiredFeatures = []
-        if (adapter?.features.has("texture-compression-astc")) {
-            //TODO - 확장확인
-            requiredFeatures.push("texture-compression-astc");
-        }
+        const requiredFeatures: GPUFeatureName[] = [];
+        const featuresToRequest: GPUFeatureName[] = [
+            // "texture-compression-astc",
+            // "texture-compression-bc",
+            // "texture-compression-etc2",
+            // "shader-f16",
+            // "timestamp-query",
+            // "depth-clip-control",
+            // "indirect-first-instance",
+            // "rg11b10ufloat-renderable",
+            // "bgra8unorm-storage",
+            // "float32-filterable"
+        ];
+
+        featuresToRequest.forEach(feature => {
+            if (adapter?.features.has(feature)) {
+                requiredFeatures.push(feature);
+            }
+        });
         const requiredLimits: Record<string, number> = {};
         const limitKeys = [
             'maxBufferSize',
@@ -136,8 +150,7 @@ const init = async (
                 const originalCreateShaderModule = device.createShaderModule.bind(device);
                 device.createShaderModule = function (descriptor) {
                     descriptor.code = ensureVertexIndexBuiltin(descriptor.code)
-                    const result = originalCreateShaderModule(descriptor);
-                    return result
+                    return originalCreateShaderModule(descriptor)
                 };
             }
             const redGPUContext: RedGPUContext = new RedGPUContext(canvas, adapter, device, context, alphaMode)

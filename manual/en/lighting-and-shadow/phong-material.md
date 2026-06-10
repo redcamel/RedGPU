@@ -1,11 +1,29 @@
 ---
 title: Phong Material
-order: 1
+order: 2
 ---
+
+<script setup>
+const phongGraph = `
+    Ambient["Ambient Light"] --> Phong["Phong Reflection"]
+    Diffuse["Diffuse Reflection"] --> Phong
+    Specular["Specular Reflection"] --> Phong
+
+    %% Grayscale styles applied
+    style Ambient fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Diffuse fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Specular fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Phong fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+`
+</script>
 
 # Phong Material
 
 **Phong Material** is a material that implements the **Phong Reflection Model**, one of the most widely used lighting models in 3D graphics. Beyond simply painting colors, you can realistically adjust the texture of an object using various **Texture Maps**.
+
+<ClientOnly>
+  <MermaidResponsive :definition="phongGraph" />
+</ClientOnly>
 
 ## 1. Implementing Texture via Texture Maps
 
@@ -32,7 +50,7 @@ material.color.setColorByHEX('#00CC99');
 material.alpha = 1.0;
 
 // 2. Highlight (Specular) control
-material.specularPower = 32;    // Sharpness of the highlight (Shininess)
+material.shininess = 32;    // Sharpness of the highlight (Shininess)
 material.specularStrength = 1.0; // Intensity of the highlight
 
 // 3. Advanced properties
@@ -50,10 +68,14 @@ import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
     
-    // 1. Create a material
+    // 1. Lighting Setup (PhongMaterial requires light to be visible)
+    const light = new RedGPU.Light.DirectionalLight();
+    scene.lightManager.addDirectionalLight(light);
+
+    // 2. Create a material
     const material = new RedGPU.Material.PhongMaterial(redGPUContext);
     
-    // 2. Apply various texture maps
+    // 3. Apply various texture maps
     const assetPath = 'https://redcamel.github.io/RedGPU/examples/assets/phongMaterial/';
     
     material.diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_diffuseMap.jpg');
@@ -114,7 +136,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     material.displacementTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_displacementMap.jpg');
     
     material.displacementScale = 0.5;
-    material.specularPower = 32;
+    material.shininess = 32;
 
     const mesh = new RedGPU.Display.Mesh(
         redGPUContext, 
@@ -146,6 +168,6 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 ## Next Steps
 
-Learn about the various light sources that illuminate materials to create three-dimensionality.
+Learn how to implement shadows that are cast when light is blocked and add a realistic sense of space to the scene.
 
-- **[Light](./light.md)**
+- **[Shadow](./shadow.md)**

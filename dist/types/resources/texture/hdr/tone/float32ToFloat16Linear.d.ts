@@ -15,26 +15,16 @@ export interface Float16ConversionOptions {
      */
     height: number;
     /**
-     * [KO] 컴퓨트 워크그룹 크기 (기본값: [8, 8])
-     * [EN] Compute workgroup size (default: [8, 8])
+     * [KO] 결과가 복사될 대상 텍스처
+     * [EN] Target texture to copy the result to
      */
-    workgroupSize?: [number, number];
-    /**
-     * [KO] 최대 밝기 제한값 (기본값: 1000.0)
-     * [EN] Maximum brightness limit value (default: 1000.0)
-     */
-    maxValue?: number;
+    targetTexture: GPUTexture;
 }
 /**
  * [KO] Float16 변환 결과 인터페이스입니다.
  * [EN] Interface for Float16 conversion results.
  */
 export interface Float16ConversionResult {
-    /**
-     * [KO] 변환된 `Uint16Array` 데이터
-     * [EN] Converted `Uint16Array` data
-     */
-    data: Uint16Array;
     /**
      * [KO] 처리된 총 픽셀 수
      * [EN] Total number of processed pixels
@@ -47,17 +37,18 @@ export interface Float16ConversionResult {
     executionTime: number;
 }
 /**
- * [KO] Float32 데이터를 Float16(Half-float)으로 변환합니다.
- * [EN] Converts Float32 data to Float16 (Half-float).
+ * [KO] Float32 데이터를 Float16(Half-float)으로 변환하여 대상 텍스처에 업로드합니다.
+ * [EN] Converts Float32 data to Float16 (Half-float) and uploads it to the target texture.
  *
- * [KO] GPU 컴퓨트 셰이더를 사용하여 선형 색공간을 유지하며 고속으로 변환을 수행합니다.
- * [EN] Performs high-speed conversion using GPU compute shaders while maintaining linear color space.
+ * [KO] GPU 컴퓨트 셰이더를 사용하여 선형 색공간을 유지하며 고속으로 변환을 수행하고, 결과를 직접 텍스처로 복사합니다.
+ * [EN] Performs high-speed conversion using GPU compute shaders while maintaining linear color space, and copies the result directly to the texture.
  *
  * ### Example
  * ```typescript
- * const result = await float32ToFloat16Linear(redGPUContext, rawFloat32Data, {
+ * await float32ToFloat16Linear(redGPUContext, rawFloat32Data, {
  *     width: 1024,
- *     height: 1024
+ *     height: 1024,
+ *     targetTexture: myTexture
  * });
  * ```
  *
@@ -71,8 +62,8 @@ export interface Float16ConversionResult {
  * [KO] 변환 옵션
  * [EN] Conversion options
  * @returns
- * [KO] 변환 결과 (Uint16Array 데이터 및 실행 정보 포함)
- * [EN] Conversion result (including Uint16Array data and execution info)
+ * [KO] 변환 결과 (실행 정보 포함)
+ * [EN] Conversion result (including execution info)
  * @category IBL
  */
 export declare function float32ToFloat16Linear(redGPUContext: RedGPUContext, float32Data: Float32Array, options: Float16ConversionOptions): Promise<Float16ConversionResult>;

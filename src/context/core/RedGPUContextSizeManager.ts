@@ -3,16 +3,33 @@ import validateNumber from "../../runtimeChecker/validateFunc/validateNumber";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import RedGPUContext from "../RedGPUContext";
+import RedGPUObject from "../../base/RedGPUObject";
 
 /**
  * [KO] 사각형 영역 정보를 나타내는 인터페이스입니다.
  * [EN] Interface representing rectangular area information.
  */
 export interface IRedGPURectObject {
-	x: number;
-	y: number;
-	width: number;
-	height: number;
+    /**
+     * [KO] X 좌표 (픽셀 단위)
+     * [EN] X coordinate (in pixels)
+     */
+    x: number;
+    /**
+     * [KO] Y 좌표 (픽셀 단위)
+     * [EN] Y coordinate (in pixels)
+     */
+    y: number;
+    /**
+     * [KO] 가로 크기 (픽셀 단위)
+     * [EN] Width (in pixels)
+     */
+    width: number;
+    /**
+     * [KO] 세로 크기 (픽셀 단위)
+     * [EN] Height (in pixels)
+     */
+    height: number;
 }
 
 /**
@@ -20,8 +37,20 @@ export interface IRedGPURectObject {
  * [EN] Resize event object interface
  */
 export interface RedResizeEvent<T = any> {
+    /**
+     * [KO] 이벤트가 발생한 대상 객체
+     * [EN] The target object that triggered the event
+     */
     target: T;
+    /**
+     * [KO] CSS 픽셀 단위의 크기 및 위치 정보
+     * [EN] Dimension and position information in CSS pixels
+     */
     screenRectObject: IRedGPURectObject;
+    /**
+     * [KO] 물리 픽셀 단위의 크기 및 위치 정보
+     * [EN] Dimension and position information in physical pixels
+     */
     pixelRectObject: IRedGPURectObject;
 }
 
@@ -53,12 +82,31 @@ type ParentRect = {
  *
  * @category Context
  */
-class RedGPUContextSizeManager {
+class RedGPUContextSizeManager extends RedGPUObject {
+    /**
+     * [KO] 설정된 가로 크기 값 (숫자 또는 px/% 단위 문자열)
+     * [EN] Set width value (number or string in px/%)
+     */
     #width: number | string
+    /**
+     * [KO] 설정된 세로 크기 값 (숫자 또는 px/% 단위 문자열)
+     * [EN] Set height value (number or string in px/%)
+     */
     #height: number | string
-    #redGPUContext: RedGPUContext
+    /**
+     * [KO] 실제 픽셀 단위 Rect 배열 [x, y, w, h]
+     * [EN] Actual pixel Rect array [x, y, w, h]
+     */
     #pixelRectArray: [number, number, number, number] = [0, 0, 0, 0]
+    /**
+     * [KO] HTML 캔버스 요소
+     * [EN] HTML Canvas element
+     */
     readonly #htmlCanvas: HTMLCanvasElement
+    /**
+     * [KO] 렌더링 스케일 배율
+     * [EN] Rendering scale factor
+     */
     #renderScale: number = 1
 
     /**
@@ -75,9 +123,11 @@ class RedGPUContextSizeManager {
      * [EN] Initial height (default: '100%')
      */
     constructor(redGPUContext: RedGPUContext, width: number | string = '100%', height: number | string = '100%') {
-        this.#redGPUContext = redGPUContext
+        super(redGPUContext);
         this.#htmlCanvas = redGPUContext.htmlCanvas
         this.#htmlCanvas.style.boxSizing = 'border-box'
+        // this.#htmlCanvas.style.display = 'block'
+        this.#htmlCanvas.style.verticalAlign = 'top'
         this.#width = width
         this.#height = height
     }
@@ -167,10 +217,35 @@ class RedGPUContextSizeManager {
      * [KO] 캔버스의 부모 DOM 요소의 크기 정보를 반환합니다.
      * [EN] Returns the dimension information of the canvas's parent DOM element.
      */
-    get parentDomRect(): DOMRect {
-        return (this.#htmlCanvas.parentNode || document.body)['getBoundingClientRect']()
+    get parentDomRect(): ParentRect {
+        const parent = this.#htmlCanvas.parentElement;
+
+        // [KO] 부모가 없거나 body/html인 경우 뷰포트 크기를 반환합니다.
+        // [EN] Returns viewport size if parent is missing or body/html.
+        if (!parent || parent === document.body || parent === document.documentElement) {
+            return {
+                x: 0,
+                y: 0,
+                width: window.innerWidth,
+                height: window.innerHeight
+            };
+        }
+
+        // [KO] 일반 요소의 경우 스크롤바를 제외한 실제 가용 영역(clientWidth)을 우선 참조합니다.
+        // [EN] For normal elements, priority is given to the actual available area (clientWidth) excluding scrollbars.
+        const rect = parent.getBoundingClientRect();
+        return {
+            x: rect.x,
+            y: rect.y,
+            width: parent.clientWidth || rect.width,
+            height: parent.clientHeight || rect.height
+        };
     }
 
+    /**
+     * [KO] CSS 픽셀 단위 화면 크기 정보를 반환합니다.
+     * [EN] Returns the screen size information in CSS pixels.
+     */
     get screenRectObject(): IRedGPURectObject {
         return {
             x: this.#pixelRectArray[0] / devicePixelRatio,
@@ -261,7 +336,7 @@ class RedGPUContextSizeManager {
         height: number
     }, key: string, value: string) {
         if (value.includes('%')) {
-            return Math.floor(rect[key] * (+value.replace('%', '')) / 100)
+            return Math.round(rect[key] * (+value.replace('%', '')) / 100)
         } else {
             return +value.replace('px', '')
         }
@@ -282,19 +357,29 @@ class RedGPUContextSizeManager {
         RedGPUContextSizeManager.validateSizeValue(h)
         this.#width = w;
         this.#height = h;
-        const tW = RedGPUContextSizeManager.getPixelDimension(this.parentDomRect, 'width', w)
-        const tH = RedGPUContextSizeManager.getPixelDimension(this.parentDomRect, 'height', h)
+
+        const parentRect = this.parentDomRect;
+        const tW = RedGPUContextSizeManager.getPixelDimension(parentRect, 'width', w)
+        const tH = RedGPUContextSizeManager.getPixelDimension(parentRect, 'height', h)
+
+        const dpr = window.devicePixelRatio;
+        const targetPixelW = Math.max(1, Math.floor(tW * this.#renderScale * dpr));
+        const targetPixelH = Math.max(1, Math.floor(tH * this.#renderScale * dpr));
+
+        // [KO] 이전 크기와 동일하다면 업데이트를 중단하여 무한 루프를 방지합니다.
+        // [EN] Prevent infinite loop by stopping update if size is the same as before.
+        // [KO] 소수점 오차 및 스크롤바 간섭을 방지하기 위해 픽셀 및 스타일 값을 정밀하게 비교합니다.
+        // [EN] Precisely compare pixel and style values to prevent decimal errors and scrollbar interference.
+        if (
+            this.#pixelRectArray[2] === targetPixelW &&
+            this.#pixelRectArray[3] === targetPixelH &&
+            Math.abs(parseFloat(this.#htmlCanvas.style.width) - tW) < 0.1 &&
+            Math.abs(parseFloat(this.#htmlCanvas.style.height) - tH) < 0.1
+        ) return;
+
         this.#changeCanvasStyles(tW, tH);
         this.#updatePixelRect(tW, tH)
         this.#updateViewsSize()
-        // console.log(this.parentDomRect)
-        console.log(
-            `${this.constructor.name}.setSize - input : ${w},${h} | output : ${tW}, ${tH}`,
-            {
-                width: this.#width,
-                height: this.#height,
-                pixelRectArray: this.#pixelRectArray
-            });
     }
 
     /**
@@ -311,14 +396,15 @@ class RedGPUContextSizeManager {
      * [EN] Updates the size of all registered View3Ds. (Internal use)
      */
     #updateViewsSize() {
-        if (this.#redGPUContext.onResize) {
-            this.#redGPUContext.onResize({
-                target: this.#redGPUContext,
+        const {redGPUContext} = this
+        if (redGPUContext.onResize) {
+            redGPUContext.onResize({
+                target: redGPUContext,
                 screenRectObject: this.screenRectObject,
                 pixelRectObject: this.pixelRectObject
             });
         }
-        this.#redGPUContext.viewList.forEach((view: View3D) => {
+        redGPUContext.viewList.forEach((view: View3D) => {
             view.setSize()
             view.setPosition()
         });

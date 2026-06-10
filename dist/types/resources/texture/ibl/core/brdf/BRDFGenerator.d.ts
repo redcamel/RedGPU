@@ -1,4 +1,5 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
+import RedGPUObject from "../../../../../base/RedGPUObject";
 /**
  * [KO] BRDF LUT(Look-Up Table)를 생성하는 클래스입니다.
  * [EN] Class that generates BRDF LUT (Look-Up Table).
@@ -8,7 +9,7 @@ import RedGPUContext from "../../../../../context/RedGPUContext";
  *
  * @category IBL
  */
-declare class BRDFGenerator {
+declare class BRDFGenerator extends RedGPUObject {
     #private;
     /**
      * [KO] BRDFGenerator 인스턴스를 생성합니다.

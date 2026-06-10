@@ -1,5 +1,7 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
-import IBLCubeTexture from "../IBLCubeTexture";
+import DirectCubeTexture from "../../../DirectCubeTexture";
+import { CommandEncoderType } from "../../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import RedGPUObject from "../../../../../base/RedGPUObject";
 /**
  * [KO] Prefilter 맵을 생성하는 클래스입니다.
  * [EN] Class that generates a Prefilter map.
@@ -9,7 +11,7 @@ import IBLCubeTexture from "../IBLCubeTexture";
  *
  * @category IBL
  */
-declare class PrefilterGenerator {
+declare class PrefilterGenerator extends RedGPUObject {
     #private;
     /**
      * [KO] PrefilterGenerator 인스턴스를 생성합니다.
@@ -35,10 +37,16 @@ declare class PrefilterGenerator {
      * @param size -
      * [KO] 생성될 큐브맵의 한 면 크기 (기본값: 512)
      * [EN] Size of one side of the generated cubemap (default: 512)
+     * @param destinationTexture -
+     * [KO] 결과물을 저장할 대상 텍스처 (선택)
+     * [EN] Target texture to store the result (optional)
+     * @param phase -
+     * [KO] 커맨드 인코더 단계 (기본값: PRE_PROCESS)
+     * [EN] Command encoder phase (default: PRE_PROCESS)
      * @returns
-     * [KO] 생성된 Prefilter IBLCubeTexture
-     * [EN] Generated Prefilter IBLCubeTexture
+     * [KO] 생성된 또는 업데이트된 Prefilter DirectCubeTexture
+     * [EN] Generated or updated Prefilter DirectCubeTexture
      */
-    generate(sourceCubeTexture: GPUTexture, size?: number): Promise<IBLCubeTexture>;
+    generate(sourceCubeTexture: GPUTexture, size?: number, destinationTexture?: GPUTexture | DirectCubeTexture, phase?: CommandEncoderType): Promise<DirectCubeTexture>;
 }
 export default PrefilterGenerator;

@@ -23,8 +23,9 @@ declare class SimplexTexture extends ANoiseTexture {
      * @param width - [KO] 텍스처 가로 크기 [EN] Texture width
      * @param height - [KO] 텍스처 세로 크기 [EN] Texture height
      * @param define - [KO] 노이즈 정의 객체 (선택) [EN] Noise definition object (optional)
+     * @param useMipmap - [KO] 밉맵 사용 여부 (기본값: true) [EN] Whether to use mipmaps (default: true)
      */
-    constructor(redGPUContext: RedGPUContext, width: number, height: number, define: NoiseDefine);
+    constructor(redGPUContext: RedGPUContext, width: number, height: number, define: NoiseDefine, useMipmap?: boolean);
     /** [KO] 노이즈 차원을 반환합니다. [EN] Returns the noise dimension. */
     get noiseDimension(): number;
     /** [KO] 노이즈 차원을 설정합니다. [EN] Sets the noise dimension. */

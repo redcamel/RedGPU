@@ -3,8 +3,6 @@ import Mesh from "../../../display/mesh/Mesh";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 
-let temp0 = new Float32Array(16)
-let temp1 = new Float32Array(16)
 
 /**
  * GLTF 형식에서 파싱된 스킨 정보를 나타내는 클래스입니다.

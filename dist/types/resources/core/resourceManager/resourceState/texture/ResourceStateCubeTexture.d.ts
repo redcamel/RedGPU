@@ -1,11 +1,11 @@
 import CubeTexture from "../../../../texture/CubeTexture";
-import IBLCubeTexture from "../../../../texture/ibl/core/IBLCubeTexture";
+import DirectCubeTexture from "../../../../texture/DirectCubeTexture";
 declare class ResourceStateCubeTexture {
-    texture: CubeTexture | IBLCubeTexture;
+    texture: CubeTexture | DirectCubeTexture;
     srcList: string[];
     cacheKey: string;
     useNum: number;
     uuid: string | number;
-    constructor(cubeTexture: CubeTexture | IBLCubeTexture);
+    constructor(cubeTexture: CubeTexture | DirectCubeTexture);
 }
 export default ResourceStateCubeTexture;

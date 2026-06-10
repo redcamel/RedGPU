@@ -6,20 +6,29 @@ order: 3
 const sceneGraph = `
     graph TD
         Scene["RedGPU.Display.Scene (Root Node)"]
-        LightMgr["LightManager (Uniform Buffer)"]
+        LightMgr["LightManager"]
+        ShadowMgr["ShadowManager"]
+        PhysicsEngine["PhysicsEngine"]
         Children["Child Nodes (Mesh, Group)"]
         Ambient["AmbientLight"]
         DirLight["DirectionalLight"]
 
         Scene -->|Owns| LightMgr
+        Scene -->|Owns| ShadowMgr
+        Scene -->|Owns| PhysicsEngine
         Scene -->|Contains| Children
         
         LightMgr -->|Manages| Ambient
         LightMgr -->|Manages| DirLight
         
-        %% 커스텀 클래스 적용
-        class Scene mermaid-main;
-        class LightMgr mermaid-system;
+        %% 회색조 스타일 일괄 적용
+        style Scene fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+        style LightMgr fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style ShadowMgr fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style PhysicsEngine fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style Children fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+        style Ambient fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+        style DirLight fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
 `
 </script>
 
@@ -170,7 +179,30 @@ RedGPU.init(canvas, (redGPUContext) => {
 </CodePen>
 </ClientOnly>
 
-## 5. 장면 공유 (Shared Model)
+## 5. 주요 API 속성 및 메서드
+
+`Scene` 클래스는 배경 처리, 조명 및 그림자, 물리 시뮬레이션, 그리고 자식 객체들을 계층적으로 관리하는 다양한 API를 제공합니다.
+
+### 5.1 배경색 설정
+
+* **`backgroundColor`** (`ColorRGBA`): 씬의 배경을 지울(Clear) 때 사용되는 배경색입니다. `ColorRGBA` 인스턴스를 대입해야 합니다.
+* **`useBackgroundColor`** (`boolean`, 기본값: `false`): 이 값을 `true`로 설정하면 지정된 `backgroundColor` 수치로 배경 채우기가 활성화됩니다.
+
+### 5.2 엔진 및 매니저 연동
+
+* **`lightManager`** (`LightManager`, 읽기 전용): 씬 내부에 배치되는 다양한 광원(Ambient, Directional 등)을 통합적으로 관리하고 통제하는 매니저입니다.
+* **`shadowManager`** (`ShadowManager`, 읽기 전용): 광원에 대한 그림자 맵 생성 및 관련 자원, 연산 파이프라인을 제어하는 매니저입니다.
+* **`physicsEngine`** (`IPhysicsEngine`): 씬 내부에서 작동할 물리 엔진 플러그인을 바인딩하여 실시간 시뮬레이션을 가능하게 합니다.
+
+### 5.3 자식 노드 관리 (Object3DContainer 상속)
+
+* **`addChild(child)`**: 씬 공간에 3D 물체(Mesh)나 그룹(Group)을 자식 노드로 등록합니다. 추가된 객체들만 렌더링 주기에 참여합니다.
+* **`removeChild(child)`**: 씬 그래프 상에서 특정 자식 객체를 제거하여 더 이상 렌더링되지 않도록 합니다.
+* **`children`** (`any[]`, 읽기 전용): 씬에 현재 등록된 모든 자식 노드들의 목록을 가져옵니다.
+
+---
+
+## 6. 장면 공유 (Shared Model)
 
 **Scene** 은 렌더링될 데이터와 상태를 가진 모델(Model) 입니다. 하나의 **Scene** 인스턴스를 여러 개의 **View3D** 가 동시에 참조할 수 있습니다. 
 

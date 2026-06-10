@@ -17,7 +17,7 @@ import { RayIntersectResult } from "./Raycaster3D";
  * ```
  * @category Picking
  */
-export default class Raycaster2D {
+declare class Raycaster2D {
     #private;
     /**
      * [KO] 내부적으로 관리되는 광선 객체
@@ -93,3 +93,4 @@ export default class Raycaster2D {
      */
     intersectObjects(meshes: Mesh[], recursive?: boolean): RayIntersectResult[];
 }
+export default Raycaster2D;

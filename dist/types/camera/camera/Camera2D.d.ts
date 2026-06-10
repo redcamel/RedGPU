@@ -1,4 +1,5 @@
 import { mat4 } from "gl-matrix";
+import ACamera from "../core/ACamera";
 /**
  * [KO] 2D 환경에서 객체를 관찰하는 카메라입니다.
  * [EN] Camera for observing objects in a 2D environment.
@@ -15,7 +16,7 @@ import { mat4 } from "gl-matrix";
  * ```
  * @category Camera
  */
-declare class Camera2D {
+declare class Camera2D extends ACamera {
     #private;
     /**
      * [KO] Camera2D 인스턴스를 생성합니다.
@@ -28,24 +29,6 @@ declare class Camera2D {
      */
     constructor();
     /**
-     * [KO] 카메라 이름을 반환합니다.
-     * [EN] Returns the camera name.
-     *
-     * @returns
-     * [KO] 카메라 이름
-     * [EN] Camera name
-     */
-    get name(): string;
-    /**
-     * [KO] 카메라 이름을 설정합니다.
-     * [EN] Sets the camera name.
-     *
-     * @param value -
-     * [KO] 설정할 이름
-     * [EN] Name to set
-     */
-    set name(value: string);
-    /**
      * [KO] 모델 행렬을 반환합니다.
      * [EN] Returns the model matrix.
      *
@@ -53,7 +36,7 @@ declare class Camera2D {
      * [KO] 모델 행렬
      * [EN] Model matrix
      */
-    get modelMatrix(): mat4;
+    get viewMatrix(): mat4;
     /**
      * [KO] Z 좌표를 반환합니다. (미사용)
      * [EN] Returns the Z coordinate. (Unused)

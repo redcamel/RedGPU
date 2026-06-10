@@ -4,7 +4,11 @@ import ResourceStateIndexBuffer from "../../core/resourceManager/resourceState/R
 import ABaseBuffer, {GPU_BUFFER_CACHE_KEY, GPU_BUFFER_DATA_SYMBOL, GPU_BUFFER_SYMBOL} from "../core/ABaseBuffer";
 
 const MANAGED_STATE_KEY = 'managedIndexBufferState'
-type NumberArray = Array<number> | Uint32Array;
+/**
+ * [KO] 인덱스 버퍼 데이터 타입입니다.
+ * [EN] Index buffer data type.
+ */
+export type NumberArray = Array<number> | Uint32Array;
 
 /**
  * [KO] 인덱스 버퍼를 관리하는 클래스입니다.
@@ -80,6 +84,10 @@ class IndexBuffer extends ABaseBuffer {
     /**
      * [KO] GPU 인덱스 형식을 반환합니다.
      * [EN] Returns the GPU index format.
+     *
+     * @returns
+     * [KO] GPUIndexFormat (기본값: 'uint32')
+     * [EN] GPUIndexFormat (Default: 'uint32')
      */
     get format(): GPUIndexFormat {
         return this.#format;
@@ -88,6 +96,10 @@ class IndexBuffer extends ABaseBuffer {
     /**
      * [KO] 삼각형 개수를 반환합니다.
      * [EN] Returns the number of triangles.
+     *
+     * @returns
+     * [KO] 삼각형 개수
+     * [EN] Number of triangles
      */
     get triangleCount(): number {
         return this.#triangleCount;
@@ -96,6 +108,10 @@ class IndexBuffer extends ABaseBuffer {
     /**
      * [KO] 인덱스 개수를 반환합니다.
      * [EN] Returns the number of indices.
+     *
+     * @returns
+     * [KO] 인덱스 개수
+     * [EN] Number of indices
      */
     get indexCount(): number {
         return this.#indexCount;
@@ -104,6 +120,10 @@ class IndexBuffer extends ABaseBuffer {
     /**
      * [KO] 인덱스 데이터를 반환합니다.
      * [EN] Returns the index data.
+     *
+     * @returns
+     * [KO] 인덱스 데이터
+     * [EN] Index data
      */
     get data(): NumberArray {
         return this[GPU_BUFFER_DATA_SYMBOL];
@@ -129,10 +149,7 @@ class IndexBuffer extends ABaseBuffer {
         }
         if (this[GPU_BUFFER_SYMBOL]) {
             this.targetResourceManagedState.videoMemory -= this[GPU_BUFFER_DATA_SYMBOL].byteLength || 0;
-            let temp = this[GPU_BUFFER_SYMBOL]
-            requestAnimationFrame(() => {
-                temp.destroy();
-            })
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this[GPU_BUFFER_SYMBOL]);
             this[GPU_BUFFER_SYMBOL] = null;
         }
         this[GPU_BUFFER_DATA_SYMBOL] = data;
