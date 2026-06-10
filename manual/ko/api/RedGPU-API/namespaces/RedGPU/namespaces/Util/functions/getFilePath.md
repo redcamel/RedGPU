@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,33 +8,25 @@
 
 > **getFilePath**(`url`): `string`
 
-Defined in: [src/utils/file/getFilePath.ts:24](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/file/getFilePath.ts#L24)
+Defined in: [src/utils/file/getFilePath.ts:17](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/file/getFilePath.ts#L17)
 
-주어진 URL에서 파일 경로(디렉터리 경로)를 추출합니다.
+URL 또는 경로에서 파일이 포함된 디렉토리 경로를 추출합니다.
 
-
-URL에서 마지막 '/'까지의 부분을 반환합니다.
-
+마지막 '/'를 포함한 전체 경로의 앞부분을 반환합니다.
 
 * ### Example
 ```typescript
-const path = RedGPU.Util.getFilePath('https://example.com/assets/textures/diffuse.png');
+const path = RedGPU.Util.getFilePath('assets/textures/diffuse.png'); // 'assets/textures/'
 ```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `url` | `string` | 파일 경로를 추출할 대상 URL
+| `url` | `string` | 대상 URL 또는 경로
 
 ## Returns
 
 `string`
 
-추출된 파일 경로
-
-
-## Throws
-
-URL이 비어 있거나 유효하지 않을 경우 Error 발생
-
+디렉토리 경로

@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,64 +6,59 @@
 
 # Interface: BodyParams
 
-Defined in: [src/physics/IPhysicsEngine.ts:10](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L10)
+Defined in: [src/physics/IPhysicsEngine.ts:10](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L10)
 
 **`Experimental`**
 
 물리 바디 생성을 위한 파라미터 인터페이스입니다.
 
-
 ## Properties
 
 ### angularDamping?
 
-> `optional` **angularDamping**: `number`
+> `optional` **angularDamping?**: `number`
 
-Defined in: [src/physics/IPhysicsEngine.ts:45](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L45)
+Defined in: [src/physics/IPhysicsEngine.ts:45](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L45)
 
 **`Experimental`**
 
 각감쇠
 
-
 ***
 
 ### enableCCD?
 
-> `optional` **enableCCD**: `boolean`
+> `optional` **enableCCD?**: `boolean`
 
-Defined in: [src/physics/IPhysicsEngine.ts:55](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L55)
+Defined in: [src/physics/IPhysicsEngine.ts:55](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L55)
 
 **`Experimental`**
 
 연속 충돌 감지(CCD) 활성화 여부
 
-
 ***
 
 ### friction?
 
-> `optional` **friction**: `number`
+> `optional` **friction?**: `number`
 
-Defined in: [src/physics/IPhysicsEngine.ts:30](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L30)
+Defined in: [src/physics/IPhysicsEngine.ts:30](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L30)
 
 **`Experimental`**
 
 마찰 계수
 
-
 ***
 
 ### heightData?
 
-> `optional` **heightData**: `object`
+> `optional` **heightData?**: `object`
 
-Defined in: [src/physics/IPhysicsEngine.ts:60](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L60)
+Defined in: [src/physics/IPhysicsEngine.ts:60](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L60)
 
 **`Experimental`**
 
 높이맵 데이터 (shape가 HEIGHTFIELD일 경우 필수)
-
 
 #### heights
 
@@ -71,13 +66,11 @@ Defined in: [src/physics/IPhysicsEngine.ts:60](https://github.com/redcamel/RedGP
 
 높이 데이터 배열
 
-
 #### ncols
 
 > **ncols**: `number`
 
 가로(X축) 세그먼트 수
-
 
 #### nrows
 
@@ -85,13 +78,11 @@ Defined in: [src/physics/IPhysicsEngine.ts:60](https://github.com/redcamel/RedGP
 
 세로(Z축) 세그먼트 수
 
-
 #### scale
 
 > **scale**: `object`
 
 충돌체의 전체 스케일
-
 
 ##### scale.x
 
@@ -109,76 +100,70 @@ Defined in: [src/physics/IPhysicsEngine.ts:60](https://github.com/redcamel/RedGP
 
 ### isSensor?
 
-> `optional` **isSensor**: `boolean`
+> `optional` **isSensor?**: `boolean`
 
-Defined in: [src/physics/IPhysicsEngine.ts:50](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L50)
+Defined in: [src/physics/IPhysicsEngine.ts:50](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L50)
 
 **`Experimental`**
 
 센서 여부 (충돌 반응 없이 이벤트만 발생)
 
-
 ***
 
 ### linearDamping?
 
-> `optional` **linearDamping**: `number`
+> `optional` **linearDamping?**: `number`
 
-Defined in: [src/physics/IPhysicsEngine.ts:40](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L40)
+Defined in: [src/physics/IPhysicsEngine.ts:40](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L40)
 
 **`Experimental`**
 
 선형 감쇠
 
-
 ***
 
 ### mass?
 
-> `optional` **mass**: `number`
+> `optional` **mass?**: `number`
 
-Defined in: [src/physics/IPhysicsEngine.ts:25](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L25)
+Defined in: [src/physics/IPhysicsEngine.ts:25](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L25)
 
 **`Experimental`**
 
 질량
 
-
 ***
 
 ### restitution?
 
-> `optional` **restitution**: `number`
+> `optional` **restitution?**: `number`
 
-Defined in: [src/physics/IPhysicsEngine.ts:35](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L35)
+Defined in: [src/physics/IPhysicsEngine.ts:35](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L35)
 
 **`Experimental`**
 
 탄성 계수
 
-
 ***
 
 ### shape?
 
-> `optional` **shape**: [`PhysicsShape`](../type-aliases/PhysicsShape.md)
+> `optional` **shape?**: [`PhysicsShape`](../type-aliases/PhysicsShape.md)
 
-Defined in: [src/physics/IPhysicsEngine.ts:20](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L20)
+Defined in: [src/physics/IPhysicsEngine.ts:20](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L20)
 
 **`Experimental`**
 
 충돌체의 형상
 
-
 ***
 
 ### type?
 
-> `optional` **type**: [`PhysicsBodyType`](../type-aliases/PhysicsBodyType.md)
+> `optional` **type?**: [`PhysicsBodyType`](../type-aliases/PhysicsBodyType.md)
 
-Defined in: [src/physics/IPhysicsEngine.ts:15](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L15)
+Defined in: [src/physics/IPhysicsEngine.ts:15](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L15)
 
 **`Experimental`**
 
 물리 바디의 타입 (정적, 동적, 키네마틱)
-

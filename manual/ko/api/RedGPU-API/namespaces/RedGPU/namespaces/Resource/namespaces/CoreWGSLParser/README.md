@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -8,6 +8,12 @@
 
 WGSL 파서의 핵심 기능(전처리, 변형 생성, 타입 정의 등)을 제공합니다.
 
+## Other
+
+- [ConditionalBlock](interfaces/ConditionalBlock.md)
+- [PreprocessedWGSLResult](interfaces/PreprocessedWGSLResult.md)
+- [TypedArrayConstructor](type-aliases/TypedArrayConstructor.md)
+- [TypeUniform](type-aliases/TypeUniform.md)
 
 ## WGSL
 

@@ -1,11 +1,10 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../README.md)
 
 ***
 
 [RedGPU API](../../../../../README.md) / [RedGPU](../../README.md) / Math
 
 # Math
-
 
 Provides various mathematical functions, geometric utilities, and coordinate transformation features required for 3D operations.
 

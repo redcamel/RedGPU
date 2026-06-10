@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,21 +6,16 @@
 
 # Class: RedGPUContext
 
-Defined in: [src/context/RedGPUContext.ts:37](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L37)
+Defined in: [src/context/RedGPUContext.ts:39](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L39)
 
 RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
 
-
 GPU, 캔버스, 디바이스, 어댑터 등 WebGPU의 핵심 정보를 속성으로 가집니다.
-
 View3D 객체를 소유하며, 실제 최상위 컨테이너 역할을 합니다.
-
 리사이즈, 배경색, 디버그 패널, 안티앨리어싱, 리소스 관리 등 다양한 기능을 제공합니다.
 
-
 ::: warning
-이 클래스는 RedGPU.init()에 의해 내부적으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
-
+이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
 :::
 
 * ### Example
@@ -41,10 +36,9 @@ RedGPU.init(canvas, (redGPUContext) => {
 
 > **new RedGPUContext**(`htmlCanvas`, `gpuAdapter`, `gpuDevice`, `gpuContext`, `alphaMode`): `RedGPUContext`
 
-Defined in: [src/context/RedGPUContext.ts:141](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L141)
+Defined in: [src/context/RedGPUContext.ts:150](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L150)
 
 RedGPUContext 생성자
-
 
 #### Parameters
 
@@ -70,10 +64,9 @@ RedGPUContext 생성자
 
 > **currentRequestAnimationFrame**: `number`
 
-Defined in: [src/context/RedGPUContext.ts:42](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L42)
+Defined in: [src/context/RedGPUContext.ts:44](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L44)
 
 현재 requestAnimationFrame ID (프레임 루프 관리용)
-
 
 ***
 
@@ -81,21 +74,19 @@ Defined in: [src/context/RedGPUContext.ts:42](https://github.com/redcamel/RedGPU
 
 > **currentTime**: `number`
 
-Defined in: [src/context/RedGPUContext.ts:53](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L53)
+Defined in: [src/context/RedGPUContext.ts:55](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L55)
 
 현재 시간(프레임 기준, ms)
 
-
 ***
 
-### onResize()
+### onResize
 
 > **onResize**: (`event`) => `void` = `null`
 
-Defined in: [src/context/RedGPUContext.ts:48](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L48)
+Defined in: [src/context/RedGPUContext.ts:50](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L50)
 
 리사이즈 이벤트 핸들러 (캔버스 크기 변경 시 호출)
-
 
 #### Parameters
 
@@ -115,10 +106,9 @@ Defined in: [src/context/RedGPUContext.ts:48](https://github.com/redcamel/RedGPU
 
 > **get** **alphaMode**(): `GPUCanvasAlphaMode`
 
-Defined in: [src/context/RedGPUContext.ts:243](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L243)
+Defined in: [src/context/RedGPUContext.ts:246](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L246)
 
 캔버스의 알파 모드를 반환합니다.
-
 
 ##### Returns
 
@@ -128,10 +118,9 @@ Defined in: [src/context/RedGPUContext.ts:243](https://github.com/redcamel/RedGP
 
 > **set** **alphaMode**(`value`): `void`
 
-Defined in: [src/context/RedGPUContext.ts:254](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L254)
+Defined in: [src/context/RedGPUContext.ts:257](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L257)
 
 캔버스의 알파 모드를 설정합니다.
-
 
 ##### Parameters
 
@@ -151,10 +140,9 @@ Defined in: [src/context/RedGPUContext.ts:254](https://github.com/redcamel/RedGP
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/context/RedGPUContext.ts:169](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L169)
+Defined in: [src/context/RedGPUContext.ts:191](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L191)
 
 안티앨리어싱 매니저를 반환합니다.
-
 
 ##### Returns
 
@@ -168,10 +156,9 @@ Defined in: [src/context/RedGPUContext.ts:169](https://github.com/redcamel/RedGP
 
 > **get** **backgroundColor**(): [`ColorRGBA`](../../Color/classes/ColorRGBA.md)
 
-Defined in: [src/context/RedGPUContext.ts:196](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L196)
+Defined in: [src/context/RedGPUContext.ts:199](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L199)
 
 배경색을 반환합니다.
-
 
 ##### Returns
 
@@ -181,15 +168,13 @@ Defined in: [src/context/RedGPUContext.ts:196](https://github.com/redcamel/RedGP
 
 > **set** **backgroundColor**(`value`): `void`
 
-Defined in: [src/context/RedGPUContext.ts:210](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L210)
+Defined in: [src/context/RedGPUContext.ts:213](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L213)
 
 배경색을 설정합니다.
-
 
 ##### Throws
 
 value가 ColorRGBA 인스턴스가 아닐 경우 에러 발생
-
 
 ##### Parameters
 
@@ -209,11 +194,29 @@ value가 ColorRGBA 인스턴스가 아닐 경우 에러 발생
 
 > **get** **boundingClientRect**(): `DOMRect`
 
-Defined in: [src/context/RedGPUContext.ts:161](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L161)
+Defined in: [src/context/RedGPUContext.ts:183](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L183)
+
+HTML 캔버스의 BoundingClientRect 정보를 반환합니다.
 
 ##### Returns
 
 `DOMRect`
+
+***
+
+### commandEncoderManager
+
+#### Get Signature
+
+> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+Defined in: [src/context/RedGPUContext.ts:175](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L175)
+
+커맨드 인코더 매니저를 반환합니다.
+
+##### Returns
+
+[`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
 ***
 
@@ -223,10 +226,9 @@ Defined in: [src/context/RedGPUContext.ts:161](https://github.com/redcamel/RedGP
 
 > **get** **configurationDescription**(): `GPUCanvasConfiguration`
 
-Defined in: [src/context/RedGPUContext.ts:227](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L227)
+Defined in: [src/context/RedGPUContext.ts:230](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L230)
 
 GPU 캔버스 구성 정보를 반환합니다.
-
 
 ##### Returns
 
@@ -240,10 +242,9 @@ GPU 캔버스 구성 정보를 반환합니다.
 
 > **get** **detector**(): [`RedGPUContextDetector`](../namespaces/Core/classes/RedGPUContextDetector.md)
 
-Defined in: [src/context/RedGPUContext.ts:219](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L219)
+Defined in: [src/context/RedGPUContext.ts:222](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L222)
 
 RedGPUContextDetector 인스턴스를 반환합니다.
-
 
 ##### Returns
 
@@ -257,10 +258,9 @@ RedGPUContextDetector 인스턴스를 반환합니다.
 
 > **get** **gpuAdapter**(): `GPUAdapter`
 
-Defined in: [src/context/RedGPUContext.ts:235](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L235)
+Defined in: [src/context/RedGPUContext.ts:238](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L238)
 
 GPU 어댑터를 반환합니다.
-
 
 ##### Returns
 
@@ -274,10 +274,9 @@ GPU 어댑터를 반환합니다.
 
 > **get** **gpuContext**(): `GPUCanvasContext`
 
-Defined in: [src/context/RedGPUContext.ts:263](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L263)
+Defined in: [src/context/RedGPUContext.ts:266](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L266)
 
 GPU 캔버스 컨텍스트를 반환합니다.
-
 
 ##### Returns
 
@@ -291,10 +290,9 @@ GPU 캔버스 컨텍스트를 반환합니다.
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/context/RedGPUContext.ts:271](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L271)
+Defined in: [src/context/RedGPUContext.ts:274](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L274)
 
 GPU 디바이스를 반환합니다.
-
 
 ##### Returns
 
@@ -308,10 +306,9 @@ GPU 디바이스를 반환합니다.
 
 > **get** **height**(): `string` \| `number`
 
-Defined in: [src/context/RedGPUContext.ts:341](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L341)
+Defined in: [src/context/RedGPUContext.ts:344](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L344)
 
 높이를 반환합니다.
-
 
 ##### Returns
 
@@ -321,10 +318,9 @@ Defined in: [src/context/RedGPUContext.ts:341](https://github.com/redcamel/RedGP
 
 > **set** **height**(`value`): `void`
 
-Defined in: [src/context/RedGPUContext.ts:352](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L352)
+Defined in: [src/context/RedGPUContext.ts:355](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L355)
 
 높이를 설정합니다.
-
 
 ##### Parameters
 
@@ -344,10 +340,9 @@ Defined in: [src/context/RedGPUContext.ts:352](https://github.com/redcamel/RedGP
 
 > **get** **htmlCanvas**(): `HTMLCanvasElement`
 
-Defined in: [src/context/RedGPUContext.ts:279](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L279)
+Defined in: [src/context/RedGPUContext.ts:282](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L282)
 
 HTML 캔버스 요소를 반환합니다.
-
 
 ##### Returns
 
@@ -361,10 +356,9 @@ HTML 캔버스 요소를 반환합니다.
 
 > **get** **keyboardKeyBuffer**(): `object`
 
-Defined in: [src/context/RedGPUContext.ts:287](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L287)
+Defined in: [src/context/RedGPUContext.ts:290](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L290)
 
-키보드 입력 버퍼를 반환합니다.
-
+키보드 입력 상태 버퍼를 반환합니다.
 
 ##### Returns
 
@@ -374,10 +368,9 @@ Defined in: [src/context/RedGPUContext.ts:287](https://github.com/redcamel/RedGP
 
 > **set** **keyboardKeyBuffer**(`value`): `void`
 
-Defined in: [src/context/RedGPUContext.ts:298](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L298)
+Defined in: [src/context/RedGPUContext.ts:301](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L301)
 
-키보드 입력 버퍼를 설정합니다.
-
+키보드 입력 상태 버퍼를 설정합니다.
 
 ##### Parameters
 
@@ -391,37 +384,15 @@ Defined in: [src/context/RedGPUContext.ts:298](https://github.com/redcamel/RedGP
 
 ***
 
-### numViews
-
-#### Get Signature
-
-> **get** **numViews**(): `number`
-
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:47](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L47)
-
-소유한 View3D 객체의 개수를 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Inherited from
-
-[`RedGPUContextViewContainer`](../namespaces/Core/classes/RedGPUContextViewContainer.md).[`numViews`](../namespaces/Core/classes/RedGPUContextViewContainer.md#numviews)
-
-***
-
 ### pixelRectObject
 
 #### Get Signature
 
 > **get** **pixelRectObject**(): `IRedGPURectObject`
 
-Defined in: [src/context/RedGPUContext.ts:368](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L368)
+Defined in: [src/context/RedGPUContext.ts:371](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L371)
 
 픽셀 단위 화면 크기 정보(Pixel)를 반환합니다. (물리 픽셀 단위)
-
 
 ##### Returns
 
@@ -435,10 +406,9 @@ Defined in: [src/context/RedGPUContext.ts:368](https://github.com/redcamel/RedGP
 
 > **get** **renderScale**(): `number`
 
-Defined in: [src/context/RedGPUContext.ts:376](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L376)
+Defined in: [src/context/RedGPUContext.ts:379](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L379)
 
 렌더 스케일을 반환합니다.
-
 
 ##### Returns
 
@@ -448,10 +418,9 @@ Defined in: [src/context/RedGPUContext.ts:376](https://github.com/redcamel/RedGP
 
 > **set** **renderScale**(`value`): `void`
 
-Defined in: [src/context/RedGPUContext.ts:387](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L387)
+Defined in: [src/context/RedGPUContext.ts:390](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L390)
 
 렌더 스케일을 설정합니다.
-
 
 ##### Parameters
 
@@ -471,10 +440,9 @@ Defined in: [src/context/RedGPUContext.ts:387](https://github.com/redcamel/RedGP
 
 > **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/context/RedGPUContext.ts:306](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L306)
+Defined in: [src/context/RedGPUContext.ts:309](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L309)
 
 리소스 매니저를 반환합니다.
-
 
 ##### Returns
 
@@ -488,10 +456,9 @@ Defined in: [src/context/RedGPUContext.ts:306](https://github.com/redcamel/RedGP
 
 > **get** **screenRectObject**(): `IRedGPURectObject`
 
-Defined in: [src/context/RedGPUContext.ts:360](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L360)
+Defined in: [src/context/RedGPUContext.ts:363](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L363)
 
 화면 크기 정보(Screen)를 반환합니다. (CSS 픽셀 단위)
-
 
 ##### Returns
 
@@ -505,71 +472,13 @@ Defined in: [src/context/RedGPUContext.ts:360](https://github.com/redcamel/RedGP
 
 > **get** **sizeManager**(): [`RedGPUContextSizeManager`](../namespaces/Core/classes/RedGPUContextSizeManager.md)
 
-Defined in: [src/context/RedGPUContext.ts:314](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L314)
+Defined in: [src/context/RedGPUContext.ts:317](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L317)
 
 RedGPUContextSizeManager 인스턴스를 반환합니다.
-
 
 ##### Returns
 
 [`RedGPUContextSizeManager`](../namespaces/Core/classes/RedGPUContextSizeManager.md)
-
-***
-
-### useDebugPanel
-
-#### Get Signature
-
-> **get** **useDebugPanel**(): `boolean`
-
-Defined in: [src/context/RedGPUContext.ts:177](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L177)
-
-디버그 패널 사용 여부를 반환합니다.
-
-
-##### Returns
-
-`boolean`
-
-#### Set Signature
-
-> **set** **useDebugPanel**(`value`): `void`
-
-Defined in: [src/context/RedGPUContext.ts:188](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L188)
-
-디버그 패널 사용 여부를 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `boolean` | 사용 여부
-
-##### Returns
-
-`void`
-
-***
-
-### viewList
-
-#### Get Signature
-
-> **get** **viewList**(): [`View3D`](../../Display/classes/View3D.md)[]
-
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:39](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L39)
-
-이 인스턴스가 소유한 View3D 목록을 반환합니다.
-
-
-##### Returns
-
-[`View3D`](../../Display/classes/View3D.md)[]
-
-#### Inherited from
-
-[`RedGPUContextViewContainer`](../namespaces/Core/classes/RedGPUContextViewContainer.md).[`viewList`](../namespaces/Core/classes/RedGPUContextViewContainer.md#viewlist)
 
 ***
 
@@ -579,10 +488,9 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:39](https://github.c
 
 > **get** **width**(): `string` \| `number`
 
-Defined in: [src/context/RedGPUContext.ts:322](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L322)
+Defined in: [src/context/RedGPUContext.ts:325](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L325)
 
 너비를 반환합니다.
-
 
 ##### Returns
 
@@ -592,10 +500,9 @@ Defined in: [src/context/RedGPUContext.ts:322](https://github.com/redcamel/RedGP
 
 > **set** **width**(`value`): `void`
 
-Defined in: [src/context/RedGPUContext.ts:333](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L333)
+Defined in: [src/context/RedGPUContext.ts:336](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L336)
 
 너비를 설정합니다.
-
 
 ##### Parameters
 
@@ -609,14 +516,96 @@ Defined in: [src/context/RedGPUContext.ts:333](https://github.com/redcamel/RedGP
 
 ## Methods
 
+### destroy()
+
+> **destroy**(): `void`
+
+Defined in: [src/context/RedGPUContext.ts:402](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L402)
+
+GPU 디바이스를 파기하고 리소스를 해제합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### setSize()
+
+> **setSize**(`w?`, `h?`): `void`
+
+Defined in: [src/context/RedGPUContext.ts:417](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/RedGPUContext.ts#L417)
+
+컨텍스트의 크기를 설정합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `w` | `string` \| `number` | 너비 (기본값: 현재 width)
+| `h` | `string` \| `number` | 높이 (기본값: 현재 height)
+
+#### Returns
+
+`void`
+
+***
+
+
+***
+
+## 상속받은 멤버
+
+<details>
+<summary>상속받은 속성 및 메서드 보기 (클릭하여 확장)</summary>
+
+### numViews
+
+#### Get Signature
+
+> **get** **numViews**(): `number`
+
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:52](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L52)
+
+소유한 View3D 객체의 개수를 반환합니다.
+
+##### Returns
+
+`number`
+
+#### Inherited from
+
+[`RedGPUContextViewContainer`](../namespaces/Core/classes/RedGPUContextViewContainer.md).[`numViews`](../namespaces/Core/classes/RedGPUContextViewContainer.md#numviews)
+
+***
+
+### viewList
+
+#### Get Signature
+
+> **get** **viewList**(): [`View3D`](../../Display/classes/View3D.md)[]
+
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:44](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L44)
+
+이 인스턴스가 소유한 View3D 목록을 반환합니다.
+
+##### Returns
+
+[`View3D`](../../Display/classes/View3D.md)[]
+
+#### Inherited from
+
+[`RedGPUContextViewContainer`](../namespaces/Core/classes/RedGPUContextViewContainer.md).[`viewList`](../namespaces/Core/classes/RedGPUContextViewContainer.md#viewlist)
+
+***
+
 ### addView()
 
 > **addView**(`view`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:72](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L72)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:80](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L80)
 
 뷰 리스트에 뷰를 추가합니다.
-
 
 #### Parameters
 
@@ -628,6 +617,10 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:72](https://github.c
 
 `void`
 
+#### Throws
+
+view가 View3D 인스턴스가 아닐 경우 에러 발생
+
 #### Inherited from
 
 [`RedGPUContextViewContainer`](../namespaces/Core/classes/RedGPUContextViewContainer.md).[`addView`](../namespaces/Core/classes/RedGPUContextViewContainer.md#addview)
@@ -638,10 +631,9 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:72](https://github.c
 
 > **addViewAt**(`view`, `index`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:87](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L87)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:98](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L98)
 
 뷰 리스트의 지정된 인덱스에 뷰를 추가합니다.
-
 
 #### Parameters
 
@@ -654,6 +646,10 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:87](https://github.c
 
 `void`
 
+#### Throws
+
+view가 View3D 인스턴스가 아니거나 index가 올바른 uint 범위가 아닐 경우 에러 발생
+
 #### Inherited from
 
 [`RedGPUContextViewContainer`](../namespaces/Core/classes/RedGPUContextViewContainer.md).[`addViewAt`](../namespaces/Core/classes/RedGPUContextViewContainer.md#addviewat)
@@ -664,10 +660,9 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:87](https://github.c
 
 > **contains**(`child`): `boolean`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:61](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L61)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:66](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L66)
 
 주어진 자식 View3D가 현재 컨테이너에 포함되어 있는지 확인합니다.
-
 
 #### Parameters
 
@@ -681,25 +676,9 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:61](https://github.c
 
 포함 여부
 
-
 #### Inherited from
 
 [`RedGPUContextViewContainer`](../namespaces/Core/classes/RedGPUContextViewContainer.md).[`contains`](../namespaces/Core/classes/RedGPUContextViewContainer.md#contains)
-
-***
-
-### destroy()
-
-> **destroy**(): `void`
-
-Defined in: [src/context/RedGPUContext.ts:399](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L399)
-
-GPU 디바이스를 파기하고 리소스를 해제합니다.
-
-
-#### Returns
-
-`void`
 
 ***
 
@@ -707,10 +686,9 @@ GPU 디바이스를 파기하고 리소스를 해제합니다.
 
 > **getViewAt**(`index`): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:103](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L103)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:120](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L120)
 
 지정된 인덱스의 뷰를 반환합니다.
-
 
 #### Parameters
 
@@ -722,6 +700,12 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:103](https://github.
 
 [`View3D`](../../Display/classes/View3D.md)
 
+해당 인덱스의 View3D 객체
+
+#### Throws
+
+index가 올바른 uint 범위가 아닐 경우 에러 발생
+
 #### Inherited from
 
 [`RedGPUContextViewContainer`](../namespaces/Core/classes/RedGPUContextViewContainer.md).[`getViewAt`](../namespaces/Core/classes/RedGPUContextViewContainer.md#getviewat)
@@ -732,10 +716,9 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:103](https://github.
 
 > **getViewIndex**(`view`): `number`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:115](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L115)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:138](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L138)
 
 지정된 뷰의 인덱스를 반환합니다.
-
 
 #### Parameters
 
@@ -747,6 +730,12 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:115](https://github.
 
 `number`
 
+뷰의 인덱스 (찾지 못하면 -1)
+
+#### Throws
+
+view가 View3D 인스턴스가 아닐 경우 에러 발생
+
 #### Inherited from
 
 [`RedGPUContextViewContainer`](../namespaces/Core/classes/RedGPUContextViewContainer.md).[`getViewIndex`](../namespaces/Core/classes/RedGPUContextViewContainer.md#getviewindex)
@@ -757,10 +746,9 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:115](https://github.
 
 > **removeAllViews**(): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:225](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L225)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:257](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L257)
 
 뷰 리스트의 모든 뷰를 제거합니다.
-
 
 #### Returns
 
@@ -776,10 +764,9 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:225](https://github.
 
 > **removeView**(`view`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:197](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L197)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:226](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L226)
 
 뷰 리스트에서 지정된 뷰를 제거합니다.
-
 
 #### Parameters
 
@@ -791,6 +778,10 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:197](https://github.
 
 `void`
 
+#### Throws
+
+뷰가 등록되어 있지 않은 경우 에러 발생
+
 #### Inherited from
 
 [`RedGPUContextViewContainer`](../namespaces/Core/classes/RedGPUContextViewContainer.md).[`removeView`](../namespaces/Core/classes/RedGPUContextViewContainer.md#removeview)
@@ -801,10 +792,9 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:197](https://github.
 
 > **removeViewAt**(`index`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:211](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L211)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:243](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L243)
 
 뷰 리스트에서 지정된 인덱스의 뷰를 제거합니다.
-
 
 #### Parameters
 
@@ -816,31 +806,13 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:211](https://github.
 
 `void`
 
+#### Throws
+
+인덱스가 범위를 벗어난 경우 에러 발생
+
 #### Inherited from
 
 [`RedGPUContextViewContainer`](../namespaces/Core/classes/RedGPUContextViewContainer.md).[`removeViewAt`](../namespaces/Core/classes/RedGPUContextViewContainer.md#removeviewat)
-
-***
-
-### setSize()
-
-> **setSize**(`w?`, `h?`): `void`
-
-Defined in: [src/context/RedGPUContext.ts:413](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/RedGPUContext.ts#L413)
-
-컨텍스트의 크기를 설정합니다.
-
-
-#### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `w` | `string` \| `number` | 너비 (기본값: 현재 width)
-| `h` | `string` \| `number` | 높이 (기본값: 현재 height)
-
-#### Returns
-
-`void`
 
 ***
 
@@ -848,10 +820,9 @@ Defined in: [src/context/RedGPUContext.ts:413](https://github.com/redcamel/RedGP
 
 > **setViewIndex**(`view`, `index`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:133](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L133)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:156](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L156)
 
 지정된 뷰를 뷰 리스트의 특정 인덱스로 이동시킵니다.
-
 
 #### Parameters
 
@@ -868,7 +839,6 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:133](https://github.
 
 뷰가 등록되지 않았거나 인덱스가 범위를 벗어난 경우 에러 발생
 
-
 #### Inherited from
 
 [`RedGPUContextViewContainer`](../namespaces/Core/classes/RedGPUContextViewContainer.md).[`setViewIndex`](../namespaces/Core/classes/RedGPUContextViewContainer.md#setviewindex)
@@ -879,10 +849,9 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:133](https://github.
 
 > **swapViews**(`view1`, `view2`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:160](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L160)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:183](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L183)
 
 뷰 리스트에서 두 뷰의 위치를 교환합니다.
-
 
 #### Parameters
 
@@ -899,7 +868,6 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:160](https://github.
 
 뷰가 이 컨텍스트의 자식이 아닐 경우 에러 발생
 
-
 #### Inherited from
 
 [`RedGPUContextViewContainer`](../namespaces/Core/classes/RedGPUContextViewContainer.md).[`swapViews`](../namespaces/Core/classes/RedGPUContextViewContainer.md#swapviews)
@@ -910,10 +878,9 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:160](https://github.
 
 > **swapViewsAt**(`index1`, `index2`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:179](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L179)
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:205](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L205)
 
 지정된 인덱스에 있는 두 뷰의 위치를 교환합니다.
-
 
 #### Parameters
 
@@ -926,6 +893,13 @@ Defined in: [src/context/core/RedGPUContextViewContainer.ts:179](https://github.
 
 `void`
 
+#### Throws
+
+인덱스가 범위를 벗어나거나 두 인덱스가 같은 경우 에러 발생
+
 #### Inherited from
 
 [`RedGPUContextViewContainer`](../namespaces/Core/classes/RedGPUContextViewContainer.md).[`swapViewsAt`](../namespaces/Core/classes/RedGPUContextViewContainer.md#swapviewsat)
+
+
+</details>

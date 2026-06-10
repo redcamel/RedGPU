@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,11 +6,9 @@
 
 # Class: Ray
 
-Defined in: [src/math/Ray.ts:17](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/Ray.ts#L17)
-
+Defined in: [src/math/Ray.ts:17](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/Ray.ts#L17)
 
 Class representing a ray with an origin and direction in 3D space.
-
 
 This class provides mathematical operations (box, triangle, etc.) for intersection tests.
 
@@ -25,8 +23,7 @@ const ray = new RedGPU.math.Ray([0, 0, 0], [0, 0, -1]);
 
 > **new Ray**(`origin?`, `direction?`): `Ray`
 
-Defined in: [src/math/Ray.ts:45](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/Ray.ts#L45)
-
+Defined in: [src/math/Ray.ts:45](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/Ray.ts#L45)
 
 Creates a Ray instance.
 
@@ -52,8 +49,7 @@ const ray = new RedGPU.math.Ray([0, 0, 0], [0, 0, 1]);
 
 > **direction**: [`vec3`](../type-aliases/vec3.md)
 
-Defined in: [src/math/Ray.ts:27](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/Ray.ts#L27)
-
+Defined in: [src/math/Ray.ts:27](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/Ray.ts#L27)
 
 Direction vector of the ray (normalization recommended)
 
@@ -63,8 +59,7 @@ Direction vector of the ray (normalization recommended)
 
 > **origin**: [`vec3`](../type-aliases/vec3.md)
 
-Defined in: [src/math/Ray.ts:22](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/Ray.ts#L22)
-
+Defined in: [src/math/Ray.ts:22](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/Ray.ts#L22)
 
 Origin of the ray
 
@@ -74,13 +69,11 @@ Origin of the ray
 
 > **applyMatrix4**(`matrix`): `Ray`
 
-Defined in: [src/math/Ray.ts:92](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/Ray.ts#L92)
-
+Defined in: [src/math/Ray.ts:92](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/Ray.ts#L92)
 
 Transforms the ray using a matrix.
 
 ::: warning
-
 This method modifies the instance directly (in-place). If you need to preserve the original ray state, use it with `.clone()`.
 :::
 
@@ -103,7 +96,6 @@ const transformedRay = ray.clone().applyMatrix4(matrix);
 
 `Ray`
 
-
 The transformed self
 
 ***
@@ -112,8 +104,7 @@ The transformed self
 
 > **clone**(): `Ray`
 
-Defined in: [src/math/Ray.ts:63](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/Ray.ts#L63)
-
+Defined in: [src/math/Ray.ts:63](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/Ray.ts#L63)
 
 Clones the current Ray instance.
 
@@ -126,7 +117,6 @@ const clonedRay = ray.clone();
 
 `Ray`
 
-
 Cloned Ray instance
 
 ***
@@ -135,8 +125,7 @@ Cloned Ray instance
 
 > **intersectBox**(`aabb`): `boolean`
 
-Defined in: [src/math/Ray.ts:120](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/Ray.ts#L120)
-
+Defined in: [src/math/Ray.ts:120](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/Ray.ts#L120)
 
 Determines intersection with an AABB box (Slabs algorithm).
 
@@ -155,7 +144,6 @@ const intersects = ray.intersectBox(aabb);
 
 `boolean`
 
-
 Whether it intersects
 
 ***
@@ -164,8 +152,7 @@ Whether it intersects
 
 > **intersectTriangle**(`v0`, `v1`, `v2`, `backfaceCulling?`): [`vec3`](../type-aliases/vec3.md)
 
-Defined in: [src/math/Ray.ts:170](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/Ray.ts#L170)
-
+Defined in: [src/math/Ray.ts:170](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/Ray.ts#L170)
 
 Calculates the intersection point with a triangle (Möller-Trumbore algorithm).
 
@@ -187,7 +174,6 @@ const point = ray.intersectTriangle(v0, v1, v2);
 
 [`vec3`](../type-aliases/vec3.md)
 
-
 Intersection point (vec3) or null
 
 ***
@@ -196,8 +182,7 @@ Intersection point (vec3) or null
 
 > **intersectTriangleBarycentric**(`v0`, `v1`, `v2`, `backfaceCulling?`): `object`
 
-Defined in: [src/math/Ray.ts:238](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/Ray.ts#L238)
-
+Defined in: [src/math/Ray.ts:238](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/Ray.ts#L238)
 
 Calculates the intersection point and barycentric coordinates with a triangle.
 
@@ -222,12 +207,11 @@ if (result) {
 
 `object`
 
-
 Intersection info ({point, t, u, v}) or null
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `point` | [`vec3`](../type-aliases/vec3.md) | [src/math/Ray.ts:238](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/Ray.ts#L238) |
-| `t` | `number` | [src/math/Ray.ts:238](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/Ray.ts#L238) |
-| `u` | `number` | [src/math/Ray.ts:238](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/Ray.ts#L238) |
-| `v` | `number` | [src/math/Ray.ts:238](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/Ray.ts#L238) |
+| `point` | [`vec3`](../type-aliases/vec3.md) | [src/math/Ray.ts:239](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/Ray.ts#L239) |
+| `t` | `number` | [src/math/Ray.ts:240](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/Ray.ts#L240) |
+| `u` | `number` | [src/math/Ray.ts:241](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/Ray.ts#L241) |
+| `v` | `number` | [src/math/Ray.ts:242](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/Ray.ts#L242) |

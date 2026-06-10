@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,10 +8,11 @@
 
 > **calculateTextureByteSize**(`texture`): `number`
 
-Defined in: [src/utils/texture/calculateTextureByteSize.ts:18](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/texture/calculateTextureByteSize.ts#L18)
+Defined in: [src/utils/texture/calculateTextureByteSize.ts:17](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/texture/calculateTextureByteSize.ts#L17)
 
-GPUTexture의 바이트 크기를 계산합니다.
+GPUTexture의 전체 바이트 크기를 계산합니다.
 
+가로, 세로, 레이어(또는 깊이) 수와 샘플 수를 기반으로 텍스처가 사용하는 실제 메모리 크기를 계산합니다.
 
 * ### Example
 ```typescript
@@ -22,11 +23,10 @@ const byteSize = RedGPU.Util.calculateTextureByteSize(gpuTexture);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `texture` | `GPUTexture` | 바이트 크기를 계산할 GPUTexture 객체
+| `texture` | `GPUTexture` | 대상 GPUTexture 객체
 
 ## Returns
 
 `number`
 
 계산된 전체 바이트 크기
-

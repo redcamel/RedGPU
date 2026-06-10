@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,69 +6,57 @@
 
 # Class: SkyBox
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:71](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/SkyBox.ts#L71)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:57](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/SkyBox.ts#L57)
 
-3D 씬의 배경으로 사용되는 스카이박스 클래스입니다.
+3D 씬의 원경 및 환경 맵 정보로 사용되는 스카이박스(Skybox) 클래스입니다.
 
-
-큐브 텍스처를 사용하여 360도 환경을 렌더링하며, 텍스처 간 부드러운 전환 효과와 블러, 노출, 투명도 조절 기능을 제공합니다.
-
-
-일반적인 6장 이미지 큐브맵(`CubeTexture`)과 HDR 파일로부터 변환된 IBL 큐브맵(`IBLCubeTexture`)을 모두 지원합니다.
-
-
-::: info
-HDR(.hdr) 파일을 사용하려는 경우, `RedGPU.Resource.IBL`을 통해 큐브맵으로 변환된 `environmentTexture`를 전달해야 합니다.
-
-:::
+큐브 맵 텍스처를 이용하여 무한한 공간 배경을 렌더링합니다. 물리 기반 렌더링에 적합한 물리적 휘도(Luminance) 설정, 아티스트용 강도 배율, 실시간 전환 효과(Transition) 및 블러(Blur)와 불투명도 조절 기능을 지원합니다.
 
 ### Example
 ```typescript
-// 1. 일반 큐브 텍스처 사용 (Using regular CubeTexture)
 const skybox = new RedGPU.Display.SkyBox(redGPUContext, cubeTexture);
-
-// 2. HDR 파일을 IBL을 통해 사용 (Using HDR file via IBL)
-const ibl = new RedGPU.Resource.IBL(redGPUContext, 'assets/env.hdr');
-const skyboxHDR = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
-
 view.skybox = skybox;
 ```
 
-<iframe src="https://redcamel.github.io/RedGPU/examples/3d/skybox/skybox/"></iframe>
+<iframe src="https://redcamel.github.io/RedGPU/examples/3d/skybox/ibl/skyboxWithIbl/" ></iframe>
+
+아래는 SkyBox의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
 
 ## See
 
- - 아래는 Skybox의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
+ - [SkyBox basic example](https://redcamel.github.io/RedGPU/examples/3d/skybox/skybox/)
+ - [SkyBox transition example](https://redcamel.github.io/RedGPU/examples/3d/skybox/transition/skyboxTransition/)
+ - [SkyBox transition example2](https://redcamel.github.io/RedGPU/examples/3d/skybox/transition/skyboxTransitionWithNoiseTexture/)
 
- - [Skybox using HDRTexture](https://redcamel.github.io/RedGPU/examples/3d/skybox/skyboxWithHDRTexture/)
- - [Skybox using IBL](https://redcamel.github.io/RedGPU/examples/3d/skybox/skyboxWithIbl/)
+## Extends
+
+- [`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md)
 
 ## Constructors
 
 ### Constructor
 
-> **new SkyBox**(`redGPUContext`, `cubeTexture`): `SkyBox`
+> **new SkyBox**(`redGPUContext`, `texture`, `luminance?`): `SkyBox`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:156](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/SkyBox.ts#L156)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:97](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/SkyBox.ts#L97)
 
-새로운 SkyBox 인스턴스를 생성합니다.
-
+SkyBox 인스턴스를 생성합니다.
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPU 렌더링 컨텍스트
-| `cubeTexture` | [`IBLCubeTexture`](../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md) | 스카이박스에 사용할 큐브 텍스처 (일반 또는 IBL)
+| Parameter | Type | Default value | Description |
+| ------ | ------ | ------ | ------ |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `undefined` | RedGPU 컨텍스트 인스턴스
+| `texture` | [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md) | `undefined` | 배경으로 사용할 큐브 텍스처 객체
+| `luminance` | `number` | `25000` | 물리적 휘도 (단위: cd/m² 또는 Nit, 기본값: 25000 Nit)
 
 #### Returns
 
 `SkyBox`
 
-#### Throws
+#### Overrides
 
-redGPUContext가 유효하지 않은 경우 Error 발생
-
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`constructor`](../../BaseObject/classes/RedGPUObject.md#constructor)
 
 ## Properties
 
@@ -76,10 +64,9 @@ redGPUContext가 유효하지 않은 경우 Error 발생
 
 > **gpuRenderInfo**: [`VertexGPURenderInfo`](../namespaces/CoreMesh/classes/VertexGPURenderInfo.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:81](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/SkyBox.ts#L81)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:67](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/SkyBox.ts#L67)
 
-GPU 렌더링 정보 객체
-
+GPU 렌더링 및 유니폼 정보 객체
 
 ***
 
@@ -87,10 +74,9 @@ GPU 렌더링 정보 객체
 
 > **modelMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:76](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/SkyBox.ts#L76)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:62](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/SkyBox.ts#L62)
 
-모델 변환 행렬 (4x4 매트릭스)
-
+스카이박스 메쉬 모델 변환 행렬
 
 ## Accessors
 
@@ -100,10 +86,9 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:76](https://github.com/redcame
 
 > **get** **blur**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:196](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/SkyBox.ts#L196)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:151](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/SkyBox.ts#L151)
 
-스카이박스 블러 정도를 반환합니다.
-
+배경 텍스처의 블러 세기(0.0 ~ 1.0)를 가져오거나 설정합니다.
 
 ##### Returns
 
@@ -113,21 +98,77 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:196](https://github.com/redcam
 
 > **set** **blur**(`value`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:210](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/SkyBox.ts#L210)
-
-스카이박스 블러 정도를 설정합니다.
-
-
-##### Throws
-
-값이 범위를 벗어나는 경우 Error 발생
-
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:155](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/SkyBox.ts#L155)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 0.0에서 1.0 사이의 블러 값
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### intensityMultiplier
+
+#### Get Signature
+
+> **get** **intensityMultiplier**(): `number`
+
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:139](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/SkyBox.ts#L139)
+
+시각적인 라이팅 강도를 조절하기 위한 강도 배율을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **intensityMultiplier**(`value`): `void`
+
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:143](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/SkyBox.ts#L143)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### luminance
+
+#### Get Signature
+
+> **get** **luminance**(): `number`
+
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:126](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/SkyBox.ts#L126)
+
+물리 기반 광학 시뮬레이션용 휘도(Nit) 값을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **luminance**(`value`): `void`
+
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:130](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/SkyBox.ts#L130)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -141,10 +182,9 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:210](https://github.com/redcam
 
 > **get** **opacity**(): `number`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:220](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/SkyBox.ts#L220)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:164](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/SkyBox.ts#L164)
 
-스카이박스의 불투명도를 반환합니다.
-
+스카이박스 배경의 최종 불투명도(0.0 ~ 1.0)를 가져오거나 설정합니다.
 
 ##### Returns
 
@@ -154,21 +194,13 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:220](https://github.com/redcam
 
 > **set** **opacity**(`value`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:234](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/SkyBox.ts#L234)
-
-스카이박스의 불투명도를 설정합니다.
-
-
-##### Throws
-
-값이 범위를 벗어나는 경우 Error 발생
-
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:168](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/SkyBox.ts#L168)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 0.0에서 1.0 사이의 불투명도 값
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
 
 ##### Returns
 
@@ -176,95 +208,35 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:234](https://github.com/redcam
 
 ***
 
-### skyboxTexture
+### texture
 
 #### Get Signature
 
-> **get** **skyboxTexture**(): [`IBLCubeTexture`](../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md)
+> **get** **texture**(): [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:243](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/SkyBox.ts#L243)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:112](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/SkyBox.ts#L112)
 
-현재 스카이박스 텍스처를 반환합니다.
-
+스카이박스 배경으로 적용된 현재 큐브 텍스처를 가져오거나 설정합니다.
 
 ##### Returns
 
-[`IBLCubeTexture`](../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md)
+[`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
 
 #### Set Signature
 
-> **set** **skyboxTexture**(`texture`): `void`
+> **set** **texture**(`texture`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:257](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/SkyBox.ts#L257)
-
-스카이박스 텍스처를 설정합니다.
-
-
-##### Throws
-
-텍스처가 유효하지 않은 경우 Error 발생
-
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:116](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/SkyBox.ts#L116)
 
 ##### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `texture` | [`IBLCubeTexture`](../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md) | 새로운 큐브 텍스처 (일반 또는 IBL)
+| Parameter | Type |
+| ------ | ------ |
+| `texture` | [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md) |
 
 ##### Returns
 
 `void`
-
-***
-
-### transitionDuration
-
-#### Get Signature
-
-> **get** **transitionDuration**(): `number`
-
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:172](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/SkyBox.ts#L172)
-
-전환 지속 시간을 반환합니다. (ms)
-
-
-##### Returns
-
-`number`
-
-***
-
-### transitionElapsed
-
-#### Get Signature
-
-> **get** **transitionElapsed**(): `number`
-
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:180](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/SkyBox.ts#L180)
-
-전환 경과 시간을 반환합니다. (ms)
-
-
-##### Returns
-
-`number`
-
-***
-
-### transitionProgress
-
-#### Get Signature
-
-> **get** **transitionProgress**(): `number`
-
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:188](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/SkyBox.ts#L188)
-
-현재 진행 중인 전환 진행률을 반환합니다. (0.0 ~ 1.0)
-
-
-##### Returns
-
-`number`
 
 ***
 
@@ -272,41 +244,31 @@ Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:188](https://github.com/redcam
 
 #### Get Signature
 
-> **get** **transitionTexture**(): [`IBLCubeTexture`](../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md)
+> **get** **transitionTexture**(): [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:270](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/SkyBox.ts#L270)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:177](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/SkyBox.ts#L177)
 
-전환 대상 텍스처를 반환합니다.
-
+텍스처 전환 애니메이션 도중의 목표가 되는 텍스처를 가져옵니다.
 
 ##### Returns
 
-[`IBLCubeTexture`](../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md)
+[`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md)
 
-## Methods
+***
 
 ### render()
 
 > **render**(`renderViewStateData`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:316](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/SkyBox.ts#L316)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:209](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/SkyBox.ts#L209)
 
-스카이박스를 렌더링합니다.
-
-
-이 메서드는 매 프레임마다 호출되어야 하며, MSAA 상태, 텍스처 전환 진행 상황 업데이트 및 실제 렌더링 명령 실행을 수행합니다.
-
-
-### Example
-```typescript
-skybox.render(renderViewState);
-```
+스카이박스를 화면 배경에 드로우합니다. 텍스처 전환이 진행 중이면 경과 시간을 기준으로 진척도를 계산해 업로드합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `renderViewStateData` | [`RenderViewStateData`](../namespaces/CoreView/classes/RenderViewStateData.md) | 렌더링 상태 및 디버그 정보
+| `renderViewStateData` | [`RenderViewStateData`](../namespaces/CoreView/classes/RenderViewStateData.md) | 현재 뷰 및 렌더 상태 데이터
 
 #### Returns
 
@@ -316,27 +278,203 @@ skybox.render(renderViewState);
 
 ### transition()
 
-> **transition**(`transitionTexture`, `duration?`, `transitionAlphaTexture`): `void`
+> **transition**(`targetTexture`, `duration?`, `mask`): `void`
 
-Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:293](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/SkyBox.ts#L293)
+Defined in: [src/display/skyboxs/skyBox/SkyBox.ts:194](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/SkyBox.ts#L194)
 
-다른 텍스처로의 부드러운 전환을 시작합니다.
-
-
-### Example
-```typescript
-// 1초 동안 새 텍스처로 전환
-skybox.transition(newTexture, 1000, noiseTexture);
-```
+지정된 다른 큐브 텍스처로 부드럽게 배경을 전환하는 마스킹 애니메이션을 기동합니다.
 
 #### Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `transitionTexture` | [`IBLCubeTexture`](../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../Resource/classes/CubeTexture.md) | `undefined` | 전환할 대상 큐브 텍스처 (일반 또는 IBL)
-| `duration` | `number` | `300` | 전환 지속 시간 (밀리초, 기본값: 300)
-| `transitionAlphaTexture` | [`ANoiseTexture`](../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) | `undefined` | 전환 효과에 사용할 알파 노이즈 텍스처
+| `targetTexture` | [`CubeTexture`](../../Resource/classes/CubeTexture.md) \| [`DirectCubeTexture`](../../Resource/classes/DirectCubeTexture.md) | `undefined` | 새롭게 전환할 대상 큐브 텍스처
+| `duration` | `number` | `300` | 전환에 걸리는 지속 시간 (ms, 기본값: 300)
+| `mask` | [`ANoiseTexture`](../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) | `undefined` | 전환 효과에 적용할 노이즈 마스크 텍스처
 
 #### Returns
 
 `void`
+
+
+***
+
+## 상속받은 멤버
+
+<details>
+<summary>상속받은 속성 및 메서드 보기 (클릭하여 확장)</summary>
+
+### antialiasingManager
+
+#### Get Signature
+
+> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L76)
+
+안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
+
+##### Returns
+
+[`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+
+AntialiasingManager 인스턴스
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`antialiasingManager`](../../BaseObject/classes/RedGPUObject.md#antialiasingmanager)
+
+***
+
+### commandEncoderManager
+
+#### Get Signature
+
+> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L88)
+
+커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
+
+##### Returns
+
+[`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+CommandEncoderManager 인스턴스
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`commandEncoderManager`](../../BaseObject/classes/RedGPUObject.md#commandencodermanager)
+
+***
+
+### gpuDevice
+
+#### Get Signature
+
+> **get** **gpuDevice**(): `GPUDevice`
+
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L52)
+
+WebGPU 디바이스 객체를 반환합니다. (단축 경로)
+
+##### Returns
+
+`GPUDevice`
+
+GPUDevice 인스턴스
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`gpuDevice`](../../BaseObject/classes/RedGPUObject.md#gpudevice)
+
+***
+
+### name
+
+#### Get Signature
+
+> **get** **name**(): `string`
+
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L58)
+
+객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
+
+##### Returns
+
+`string`
+
+객체 이름
+
+#### Set Signature
+
+> **set** **name**(`value`): `void`
+
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L71)
+
+객체의 이름을 설정합니다.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | 설정할 객체 이름
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`name`](../../BaseObject/classes/RedGPUObject.md#name)
+
+***
+
+### redGPUContext
+
+#### Get Signature
+
+> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L40)
+
+RedGPUContext 인스턴스를 반환합니다.
+
+##### Returns
+
+[`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+
+RedGPUContext 인스턴스
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`redGPUContext`](../../BaseObject/classes/RedGPUObject.md#redgpucontext)
+
+***
+
+### resourceManager
+
+#### Get Signature
+
+> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L64)
+
+리소스 매니저 인스턴스를 반환합니다. (단축 경로)
+
+##### Returns
+
+[`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
+
+ResourceManager 인스턴스
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`resourceManager`](../../BaseObject/classes/RedGPUObject.md#resourcemanager)
+
+***
+
+### uuid
+
+#### Get Signature
+
+> **get** **uuid**(): `string`
+
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L46)
+
+객체의 고유 식별자(UUID)를 반환합니다.
+
+##### Returns
+
+`string`
+
+UUID 문자열
+
+#### Inherited from
+
+[`RedGPUObject`](../../BaseObject/classes/RedGPUObject.md).[`uuid`](../../BaseObject/classes/RedGPUObject.md#uuid)
+
+## Methods
+
+
+</details>

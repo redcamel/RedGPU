@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,14 +6,12 @@
 
 # CoreIBL
 
-
 Provides core classes and generators for IBL generation.
 
 ## IBL
 
 - [BRDFGenerator](classes/BRDFGenerator.md)
 - [EquirectangularToCubeGenerator](classes/EquirectangularToCubeGenerator.md)
-- [IBLCubeTexture](classes/IBLCubeTexture.md)
 - [IrradianceGenerator](classes/IrradianceGenerator.md)
 - [PrefilterGenerator](classes/PrefilterGenerator.md)
 

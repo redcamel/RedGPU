@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,11 @@
 
 # Class: instancingMeshObject3D
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:45](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L45)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:31](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L31)
 
+Class for controlling individual instances of an instanced mesh.
 
-Class representing an individual instance of an instanced mesh.
-
-
-Manages individual transform information such as position, rotation, and scale for each instance within an InstancingMesh.
+Manages the individual transform states, such as position, rotation, scale, and opacity of a single instance within an InstancingMesh, updating and writing its model matrix dynamically to the GPU Storage Buffer.
 
 ## Constructors
 
@@ -20,15 +18,17 @@ Manages individual transform information such as position, rotation, and scale f
 
 > **new instancingMeshObject3D**(`redGPUContext`, `location`, `instancingMesh`): `InstancingMeshObject3D`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:77](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L77)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:81](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L81)
+
+Creates an instance of InstancingMeshObject3D.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md) | The RedGPUContext of the instance. |
-| `location` | `number` | The location of the instance. |
-| `instancingMesh` | [`InstancingMesh`](../../../classes/InstancingMesh.md) | The InstancingMesh of the instance. |
+| `redGPUContext` | [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md) | RedGPUContext instance |
+| `location` | `number` | Index location within the instanced mesh |
+| `instancingMesh` | [`InstancingMesh`](../../../classes/InstancingMesh.md) | Parent InstancingMesh object |
 
 #### Returns
 
@@ -40,7 +40,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:77](https
 
 > **localMatrix**: [`mat4`](../../../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:47](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L47)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:41](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L41)
+
+Local matrix of the instance
 
 ***
 
@@ -48,7 +50,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:47](https
 
 > **modelMatrix**: [`mat4`](../../../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:46](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L46)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:36](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L36)
+
+Model matrix of the instance
 
 ***
 
@@ -56,7 +60,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:46](https
 
 > **normalModelMatrix**: [`mat4`](../../../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:48](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L48)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:46](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L46)
+
+Normal model matrix of the instance
 
 ## Accessors
 
@@ -66,7 +72,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:48](https
 
 > **get** **opacity**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:85](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L85)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:93](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L93)
+
+Gets or sets the opacity of the instance. The allowed range is from 0.0 to 1.0.
 
 ##### Returns
 
@@ -76,7 +84,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:85](https
 
 > **set** **opacity**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:89](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L89)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:97](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L97)
 
 ##### Parameters
 
@@ -96,7 +104,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:89](https
 
 > **get** **position**(): `number`[]
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:122](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L122)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:146](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L146)
+
+Gets the position array [x, y, z] of the instance, or sets the position on all axes to the same single value.
 
 ##### Returns
 
@@ -106,7 +116,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:122](http
 
 > **set** **position**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:126](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L126)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:150](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L150)
 
 ##### Parameters
 
@@ -126,7 +136,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:126](http
 
 > **get** **rotation**(): `number`[]
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:198](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L198)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:254](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L254)
+
+Gets the rotation array [rotationX, rotationY, rotationZ] of the instance, or sets the rotation on all axes to the same single value.
 
 ##### Returns
 
@@ -136,7 +148,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:198](http
 
 > **set** **rotation**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:202](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L202)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:258](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L258)
 
 ##### Parameters
 
@@ -156,7 +168,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:202](http
 
 > **get** **rotationX**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:171](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L171)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:215](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L215)
+
+Gets or sets the rotation angle (in degrees) around the X-axis of the instance.
 
 ##### Returns
 
@@ -166,7 +180,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:171](http
 
 > **set** **rotationX**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:175](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L175)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:219](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L219)
 
 ##### Parameters
 
@@ -186,7 +200,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:175](http
 
 > **get** **rotationY**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:180](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L180)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:228](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L228)
+
+Gets or sets the rotation angle (in degrees) around the Y-axis of the instance.
 
 ##### Returns
 
@@ -196,7 +212,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:180](http
 
 > **set** **rotationY**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:184](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L184)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:232](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L232)
 
 ##### Parameters
 
@@ -216,7 +232,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:184](http
 
 > **get** **rotationZ**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:189](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L189)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:241](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L241)
+
+Gets or sets the rotation angle (in degrees) around the Z-axis of the instance.
 
 ##### Returns
 
@@ -226,7 +244,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:189](http
 
 > **set** **rotationZ**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:193](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L193)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:245](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L245)
 
 ##### Parameters
 
@@ -246,7 +264,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:193](http
 
 > **get** **scale**(): `number`[]
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:160](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L160)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:200](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L200)
+
+Gets the scale array [scaleX, scaleY, scaleZ] of the instance, or sets the scale on all axes to the same single value.
 
 ##### Returns
 
@@ -256,7 +276,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:160](http
 
 > **set** **scale**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:164](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L164)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:204](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L204)
 
 ##### Parameters
 
@@ -276,7 +296,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:164](http
 
 > **get** **scaleX**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:133](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L133)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:161](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L161)
+
+Gets or sets the X-axis scale of the instance.
 
 ##### Returns
 
@@ -286,7 +308,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:133](http
 
 > **set** **scaleX**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:137](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L137)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:165](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L165)
 
 ##### Parameters
 
@@ -306,7 +328,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:137](http
 
 > **get** **scaleY**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:142](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L142)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:174](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L174)
+
+Gets or sets the Y-axis scale of the instance.
 
 ##### Returns
 
@@ -316,7 +340,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:142](http
 
 > **set** **scaleY**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:146](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L146)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:178](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L178)
 
 ##### Parameters
 
@@ -336,7 +360,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:146](http
 
 > **get** **scaleZ**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:151](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L151)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:187](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L187)
+
+Gets or sets the Z-axis scale of the instance.
 
 ##### Returns
 
@@ -346,7 +372,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:151](http
 
 > **set** **scaleZ**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:155](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L155)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:191](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L191)
 
 ##### Parameters
 
@@ -366,7 +392,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:155](http
 
 > **get** **x**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:95](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L95)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:107](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L107)
+
+Gets or sets the X-axis position of the instance.
 
 ##### Returns
 
@@ -376,7 +404,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:95](https
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:99](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L99)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:111](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L111)
 
 ##### Parameters
 
@@ -396,7 +424,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:99](https
 
 > **get** **y**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:104](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L104)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:120](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L120)
+
+Gets or sets the Y-axis position of the instance.
 
 ##### Returns
 
@@ -406,7 +436,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:104](http
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:108](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L108)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:124](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L124)
 
 ##### Parameters
 
@@ -426,7 +456,9 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:108](http
 
 > **get** **z**(): `number`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:113](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L113)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:133](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L133)
+
+Gets or sets the Z-axis position of the instance.
 
 ##### Returns
 
@@ -436,7 +468,7 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:113](http
 
 > **set** **z**(`value`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:117](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L117)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:137](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L137)
 
 ##### Parameters
 
@@ -454,17 +486,17 @@ Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:117](http
 
 > **setPosition**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:236](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L236)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:301](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L301)
 
-Sets the position of the object.
+Sets the position of the object along the X, Y, and Z axes. If Y and Z are omitted, they default to the value of X.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `x` | `number` | The x coordinate of the position. |
-| `y?` | `number` | The y coordinate of the position, defaults to x if not provided. |
-| `z?` | `number` | The z coordinate of the position, defaults to x if not provided. |
+| `x` | `number` | X coordinate of the position |
+| `y?` | `number` | Y coordinate of the position (optional, default: x) |
+| `z?` | `number` | Z coordinate of the position (optional, default: x) |
 
 #### Returns
 
@@ -476,17 +508,17 @@ Sets the position of the object.
 
 > **setRotation**(`rotationX`, `rotationY?`, `rotationZ?`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:253](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L253)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:324](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L324)
 
-Sets the rotation of an object in three-dimensional space.
+Sets the rotation of the object around the X, Y, and Z axes in degrees. If Y and Z are omitted, they default to the value of X.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `rotationX` | `number` | The rotation around the x-axis, in degrees. |
-| `rotationY?` | `number` | The rotation around the y-axis, in degrees. Defaults to rotationX if not provided. |
-| `rotationZ?` | `number` | The rotation around the z-axis, in degrees. Defaults to rotationX if not provided. |
+| `rotationX` | `number` | Rotation angle around the X-axis (in degrees) |
+| `rotationY?` | `number` | Rotation angle around the Y-axis (in degrees, optional, default: rotationX) |
+| `rotationZ?` | `number` | Rotation angle around the Z-axis (in degrees, optional, default: rotationX) |
 
 #### Returns
 
@@ -498,18 +530,17 @@ Sets the rotation of an object in three-dimensional space.
 
 > **setScale**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:217](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L217)
+Defined in: [src/display/instancingMesh/core/InstancingMeshObject3D.ts:278](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/instancingMesh/core/InstancingMeshObject3D.ts#L278)
 
-Set the scale of the object along the x, y, and z axes.
-If only the x parameter is provided, the object is uniformly scaled along all axes.
+Sets the scale of the object along the X, Y, and Z axes. If Y and Z are omitted, they default to the value of X (uniform scaling).
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `x` | `number` | The scale factor along the x-axis. |
-| `y?` | `number` | The scale factor along the y-axis. Defaults to the value of x. |
-| `z?` | `number` | The scale factor along the z-axis. Defaults to the value of x. |
+| `x` | `number` | Scale factor along the X-axis |
+| `y?` | `number` | Scale factor along the Y-axis (optional, default: x) |
+| `z?` | `number` | Scale factor along the Z-axis (optional, default: x) |
 
 #### Returns
 

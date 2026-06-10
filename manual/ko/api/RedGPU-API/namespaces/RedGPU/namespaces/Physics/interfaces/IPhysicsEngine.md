@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,16 +6,14 @@
 
 # Interface: IPhysicsEngine
 
-Defined in: [src/physics/IPhysicsEngine.ts:96](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L96)
+Defined in: [src/physics/IPhysicsEngine.ts:96](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L96)
 
 **`Experimental`**
 
 물리 엔진 플러그인이 구현해야 할 인터페이스입니다.
 
-
 ::: warning
 이 기능은 현재 실험적(Experimental) 단계입니다. 향후 API가 변경될 수 있습니다.
-
 :::
 
 ## Properties
@@ -24,12 +22,11 @@ Defined in: [src/physics/IPhysicsEngine.ts:96](https://github.com/redcamel/RedGP
 
 > `readonly` **bodies**: [`IPhysicsBody`](IPhysicsBody.md)[]
 
-Defined in: [src/physics/IPhysicsEngine.ts:111](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L111)
+Defined in: [src/physics/IPhysicsEngine.ts:111](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L111)
 
 **`Experimental`**
 
 엔진에서 관리 중인 모든 물리 바디 리스트
-
 
 ***
 
@@ -37,12 +34,11 @@ Defined in: [src/physics/IPhysicsEngine.ts:111](https://github.com/redcamel/RedG
 
 > **gravity**: `object`
 
-Defined in: [src/physics/IPhysicsEngine.ts:177](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L177)
+Defined in: [src/physics/IPhysicsEngine.ts:133](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L133)
 
 **`Experimental`**
 
 중력을 설정하거나 가져옵니다.
-
 
 ### Example
 ```typescript
@@ -67,25 +63,23 @@ physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
 
 > `readonly` **nativeWorld**: `any`
 
-Defined in: [src/physics/IPhysicsEngine.ts:101](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L101)
+Defined in: [src/physics/IPhysicsEngine.ts:101](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L101)
 
 **`Experimental`**
 
 물리 엔진의 원본 월드 인스턴스 (Escape Hatch)
 
-
 ***
 
-### onCollisionStarted()
+### onCollisionStarted
 
 > **onCollisionStarted**: (`handle1`, `handle2`) => `void`
 
-Defined in: [src/physics/IPhysicsEngine.ts:123](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L123)
+Defined in: [src/physics/IPhysicsEngine.ts:123](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L123)
 
 **`Experimental`**
 
 물리 엔진에서 충돌이 시작될 때 호출되는 콜백입니다.
-
 
 #### Parameters
 
@@ -104,12 +98,11 @@ Defined in: [src/physics/IPhysicsEngine.ts:123](https://github.com/redcamel/RedG
 
 > `readonly` **RAPIER**: `any`
 
-Defined in: [src/physics/IPhysicsEngine.ts:106](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L106)
+Defined in: [src/physics/IPhysicsEngine.ts:106](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L106)
 
 **`Experimental`**
 
 물리 엔진 라이브러리 네임스페이스 (Escape Hatch)
-
 
 ## Methods
 
@@ -117,12 +110,11 @@ Defined in: [src/physics/IPhysicsEngine.ts:106](https://github.com/redcamel/RedG
 
 > **createBody**(`mesh`, `params`): [`IPhysicsBody`](IPhysicsBody.md)
 
-Defined in: [src/physics/IPhysicsEngine.ts:157](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L157)
+Defined in: [src/physics/IPhysicsEngine.ts:167](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L167)
 
 **`Experimental`**
 
 메쉬에 물리 바디를 생성하고 연결합니다.
-
 
 #### Parameters
 
@@ -137,19 +129,17 @@ Defined in: [src/physics/IPhysicsEngine.ts:157](https://github.com/redcamel/RedG
 
 생성된 물리 바디
 
-
 ***
 
 ### createCharacterController()
 
 > **createCharacterController**(`offset`): `any`
 
-Defined in: [src/physics/IPhysicsEngine.ts:190](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L190)
+Defined in: [src/physics/IPhysicsEngine.ts:189](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L189)
 
 **`Experimental`**
 
 캐릭터 컨트롤러를 생성합니다.
-
 
 #### Parameters
 
@@ -163,19 +153,17 @@ Defined in: [src/physics/IPhysicsEngine.ts:190](https://github.com/redcamel/RedG
 
 캐릭터 컨트롤러 인스턴스
 
-
 ***
 
 ### init()
 
 > **init**(): `Promise`\<`void`\>
 
-Defined in: [src/physics/IPhysicsEngine.ts:133](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L133)
+Defined in: [src/physics/IPhysicsEngine.ts:143](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L143)
 
 **`Experimental`**
 
 물리 엔진을 초기화합니다. (WASM 로딩 등)
-
 
 #### Returns
 
@@ -183,19 +171,17 @@ Defined in: [src/physics/IPhysicsEngine.ts:133](https://github.com/redcamel/RedG
 
 초기화 완료를 보장하는 Promise
 
-
 ***
 
 ### removeBody()
 
 > **removeBody**(`body`): `void`
 
-Defined in: [src/physics/IPhysicsEngine.ts:166](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L166)
+Defined in: [src/physics/IPhysicsEngine.ts:176](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L176)
 
 **`Experimental`**
 
 물리 바디를 제거합니다.
-
 
 #### Parameters
 
@@ -213,12 +199,11 @@ Defined in: [src/physics/IPhysicsEngine.ts:166](https://github.com/redcamel/RedG
 
 > **step**(`deltaTime`): `void`
 
-Defined in: [src/physics/IPhysicsEngine.ts:142](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/IPhysicsEngine.ts#L142)
+Defined in: [src/physics/IPhysicsEngine.ts:152](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/IPhysicsEngine.ts#L152)
 
 **`Experimental`**
 
 물리 시뮬레이션을 한 단계 진행합니다.
-
 
 #### Parameters
 

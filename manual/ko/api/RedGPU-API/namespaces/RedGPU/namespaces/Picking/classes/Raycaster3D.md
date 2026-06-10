@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,11 @@
 
 # Class: Raycaster3D
 
-Defined in: [src/picking/Raycaster3D.ts:22](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/picking/Raycaster3D.ts#L22)
+Defined in: [src/picking/Raycaster3D.ts:22](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/picking/Raycaster3D.ts#L22)
 
 3D 공간에서 광선(Ray)을 투사하여 객체와의 교차를 검사하는 클래스입니다.
 
-
 마우스 좌표와 카메라 정보를 기반으로 광선을 생성하고, 메시의 정밀한 삼각형 단위 충돌 검사를 수행합니다.
-
 
 ### Example
 ```typescript
@@ -27,10 +25,9 @@ const intersects = raycaster.intersectObjects(scene.children);
 
 > **new Raycaster3D**(): `Raycaster3D`
 
-Defined in: [src/picking/Raycaster3D.ts:55](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/picking/Raycaster3D.ts#L55)
+Defined in: [src/picking/Raycaster3D.ts:54](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/picking/Raycaster3D.ts#L54)
 
 Raycaster3D 인스턴스를 생성합니다.
-
 
 #### Returns
 
@@ -42,10 +39,9 @@ Raycaster3D 인스턴스를 생성합니다.
 
 > **far**: `number` = `Infinity`
 
-Defined in: [src/picking/Raycaster3D.ts:41](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/picking/Raycaster3D.ts#L41)
+Defined in: [src/picking/Raycaster3D.ts:41](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/picking/Raycaster3D.ts#L41)
 
 교차 검사 시 고려할 최대 거리 (카메라로부터)
-
 
 #### Default Value
 
@@ -59,10 +55,9 @@ Infinity
 
 > **near**: `number` = `0`
 
-Defined in: [src/picking/Raycaster3D.ts:34](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/picking/Raycaster3D.ts#L34)
+Defined in: [src/picking/Raycaster3D.ts:34](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/picking/Raycaster3D.ts#L34)
 
 교차 검사 시 고려할 최소 거리 (카메라로부터)
-
 
 #### Default Value
 
@@ -76,10 +71,9 @@ Defined in: [src/picking/Raycaster3D.ts:34](https://github.com/redcamel/RedGPU/b
 
 > `readonly` **ray**: [`Ray`](../../Math/classes/Ray.md)
 
-Defined in: [src/picking/Raycaster3D.ts:27](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/picking/Raycaster3D.ts#L27)
+Defined in: [src/picking/Raycaster3D.ts:27](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/picking/Raycaster3D.ts#L27)
 
 내부적으로 관리되는 광원 객체
-
 
 ## Methods
 
@@ -87,10 +81,9 @@ Defined in: [src/picking/Raycaster3D.ts:27](https://github.com/redcamel/RedGPU/b
 
 > **intersectObject**(`mesh`, `recursive?`): `RayIntersectResult`[]
 
-Defined in: [src/picking/Raycaster3D.ts:118](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/picking/Raycaster3D.ts#L118)
+Defined in: [src/picking/Raycaster3D.ts:125](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/picking/Raycaster3D.ts#L125)
 
 단일 객체와의 교차 여부를 검사합니다.
-
 
 ### Example
 ```typescript
@@ -110,17 +103,15 @@ const result = raycaster.intersectObject(mesh);
 
 교차 정보 배열 (`RayIntersectResult[]`)
 
-
 ***
 
 ### intersectObjects()
 
 > **intersectObjects**(`meshes`, `recursive?`): `RayIntersectResult`[]
 
-Defined in: [src/picking/Raycaster3D.ts:143](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/picking/Raycaster3D.ts#L143)
+Defined in: [src/picking/Raycaster3D.ts:150](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/picking/Raycaster3D.ts#L150)
 
 여러 객체와의 교차 여부를 검사합니다.
-
 
 ### Example
 ```typescript
@@ -140,17 +131,15 @@ const results = raycaster.intersectObjects(scene.children);
 
 교차 정보 배열 (`RayIntersectResult[]`)
 
-
 ***
 
 ### setFromCamera()
 
 > **setFromCamera**(`screenX`, `screenY`, `view`): `void`
 
-Defined in: [src/picking/Raycaster3D.ts:78](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/picking/Raycaster3D.ts#L78)
+Defined in: [src/picking/Raycaster3D.ts:77](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/picking/Raycaster3D.ts#L77)
 
 화면 좌표와 카메라 정보를 기반으로 광선을 설정합니다.
-
 
 ### Example
 ```typescript

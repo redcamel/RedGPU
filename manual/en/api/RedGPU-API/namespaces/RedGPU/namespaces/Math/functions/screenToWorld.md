@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,11 +8,9 @@
 
 > **screenToWorld**(`screenX`, `screenY`, `view`): `number`[]
 
-Defined in: [src/math/coordinates/screenToWorld.ts:36](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/coordinates/screenToWorld.ts#L36)
-
+Defined in: [src/math/coordinates/screenToWorld.ts:36](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/coordinates/screenToWorld.ts#L36)
 
 Converts 2D screen pixel coordinates to 3D world coordinates.
-
 
 Calculates a position in 3D space based on View3D's camera and projection.
 
@@ -32,6 +30,5 @@ const worldPos = RedGPU.math.screenToWorld(mouseX, mouseY, view);
 ## Returns
 
 `number`[]
-
 
 Converted 3D world coordinates [x, y, z]

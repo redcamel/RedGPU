@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > **updateObject3DMatrix**(`targetMesh`, `view`): `void`
 
-Defined in: [src/math/updateObject3DMatrix.ts:28](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/updateObject3DMatrix.ts#L28)
+Defined in: [src/math/updateObject3DMatrix.ts:29](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/updateObject3DMatrix.ts#L29)
 
-Object3D(Mesh, AGroupBase)의 로컬 행렬과 모델 행렬을 업데이트합니다.
-
+Object3D(Mesh, Group3D)의 로컬 행렬과 모델 행렬을 업데이트합니다.
 
 이 함수는 객체의 위치, 회전, 크기, 피벗 정보를 바탕으로 로컬 행렬을 계산하고, 부모의 모델 행렬이 있을 경우 이를 합성하여 최종 모델 행렬을 구합니다.
-
 
 * ### Example
 ```typescript
@@ -26,7 +24,7 @@ RedGPU.math.updateObject3DMatrix(mesh, view);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `targetMesh` | [`Mesh`](../../Display/classes/Mesh.md) \| [`AGroupBase`](../../Display/namespaces/CoreGroup/classes/AGroupBase.md) | 행렬을 업데이트할 대상 객체 (Mesh 또는 AGroupBase)
+| `targetMesh` | [`Mesh`](../../Display/classes/Mesh.md) \| [`Group3D`](../../Display/classes/Group3D.md) | 행렬을 업데이트할 대상 객체 (Mesh 또는 Group3D)
 | `view` | [`View3D`](../../Display/classes/View3D.md) | 현재 렌더링 중인 View3D 인스턴스 (크기 계산 등에 사용)
 
 ## Returns

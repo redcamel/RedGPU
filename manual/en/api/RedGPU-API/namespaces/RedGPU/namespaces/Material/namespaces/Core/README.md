@@ -1,11 +1,10 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../README.md)
 
 ***
 
 [RedGPU API](../../../../../../../README.md) / [RedGPU](../../../../README.md) / [Material](../../README.md) / Core
 
 # Core
-
 
 Provides core base classes and utilities for the material system.
 

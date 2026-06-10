@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,8 +8,7 @@
 
 > **createPrimitiveGeometry**(`redGPUContext`, `interleaveData`, `indexData`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/createPrimitiveGeometry.ts:33](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/createPrimitiveGeometry.ts#L33)
-
+Defined in: [src/primitive/core/createPrimitiveGeometry.ts:33](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/createPrimitiveGeometry.ts#L33)
 
 Creates primitive geometry based on vertex and index data.
 
@@ -30,6 +29,5 @@ const geometry = RedGPU.Core.createPrimitiveGeometry(redGPUContext, interleaveDa
 ## Returns
 
 [`Geometry`](../../../../../classes/Geometry.md)
-
 
 Created Geometry instance

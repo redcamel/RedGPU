@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,33 +8,25 @@
 
 > **getFileExtension**(`url`): `string`
 
-Defined in: [src/utils/file/getFileExtension.ts:24](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/file/getFileExtension.ts#L24)
+Defined in: [src/utils/file/getFileExtension.ts:17](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/file/getFileExtension.ts#L17)
 
+Extracts the file extension from a URL or path.
 
-Extracts the file extension from a given URL.
-
-
-Returns the file extension in lowercase, or an empty string if none exists.
+Returns the extension in lowercase, or an empty string if it doesn't exist.
 
 * ### Example
 ```typescript
-const ext = RedGPU.Util.getFileExtension('https://example.com/assets/model.gltf'); // 'gltf'
+const ext = RedGPU.Util.getFileExtension('assets/model.gltf'); // 'gltf'
 ```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `url` | `string` | Target URL to extract the file extension from |
+| `url` | `string` | Target URL or path |
 
 ## Returns
 
 `string`
 
-
-Extracted file extension (lowercase)
-
-## Throws
-
-
-Throws Error if the URL is empty or invalid
+File extension

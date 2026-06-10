@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > `const` **GPU\_LOAD\_OP**: `object`
 
-Defined in: [src/gpuConst/GPU\_LOAD\_OP.ts:10](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/gpuConst/GPU_LOAD_OP.ts#L10)
+Defined in: [src/gpuConst/GPU\_LOAD\_OP.ts:10](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/gpuConst/GPU_LOAD_OP.ts#L10)
 
 렌더 패스 시작 시 어태치먼트를 로드하는 방식을 정의하는 상수군입니다.
 
-
 새로운 렌더링 작업을 시작하기 전 기존 데이터를 어떻게 처리할지 결정합니다.
-
 
 ## Type Declaration
 

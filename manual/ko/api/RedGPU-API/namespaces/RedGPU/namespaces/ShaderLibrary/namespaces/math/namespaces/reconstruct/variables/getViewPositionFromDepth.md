@@ -1,0 +1,48 @@
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../../../README.md)
+
+***
+
+[RedGPU API](../../../../../../../../../../README.md) / [RedGPU](../../../../../../../README.md) / [ShaderLibrary](../../../../../README.md) / [math](../../../README.md) / [reconstruct](../README.md) / getViewPositionFromDepth
+
+# Variable: getViewPositionFromDepth
+
+> `const` **getViewPositionFromDepth**: `string` = `getViewPositionFromDepth_wgsl`
+
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:729](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/systemCodeManager/ShaderLibrary.ts#L729)
+
+깊이 정보를 바탕으로 뷰(카메라) 공간의 좌표를 복구합니다.
+
+//
+
+## Param
+
+스크린 UV (0~1)
+//
+
+## Param
+
+깊이 값 (0~1)
+//
+
+## Param
+
+역투영 행렬
+//
+
+## Returns
+
+복구된 뷰 공간 좌표
+
+```wgsl
+#redgpu_include math.reconstruct.getNDCFromDepth
+
+fn getViewPositionFromDepth(
+    uv: vec2<f32>,
+    depth: f32,
+    inverseProjectionMatrix: mat4x4<f32>
+) -> vec3<f32> {
+    let ndc = getNDCFromDepth(uv, depth);
+    let viewPos4 = inverseProjectionMatrix * vec4<f32>(ndc, 1.0);
+    return viewPos4.xyz / viewPos4.w;
+}
+```

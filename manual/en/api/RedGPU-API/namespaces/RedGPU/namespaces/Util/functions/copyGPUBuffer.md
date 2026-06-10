@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,28 +6,26 @@
 
 # Function: copyGPUBuffer()
 
-> **copyGPUBuffer**(`gpuDevice`, `srcBuffer`, `dstBuffer`): `void`
+> **copyGPUBuffer**(`commandEncoder`, `srcBuffer`, `dstBuffer`): `void`
 
-Defined in: [src/utils/copyGPUBuffer.ts:24](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/copyGPUBuffer.ts#L24)
-
+Defined in: [src/utils/copyGPUBuffer.ts:18](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/copyGPUBuffer.ts#L18)
 
 Copies data between GPUBuffers.
 
-
-Copies data from srcBuffer to dstBuffer. Size is determined by the smaller buffer.
+Copies data from the source buffer to the destination buffer, using the smaller of the two buffer sizes.
 
 * ### Example
 ```typescript
-RedGPU.Util.copyGPUBuffer(device, sourceBuffer, destinationBuffer);
+RedGPU.Util.copyGPUBuffer(commandEncoder, sourceBuffer, destinationBuffer);
 ```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `gpuDevice` | `GPUDevice` | GPU device to use for the copy operation |
-| `srcBuffer` | `GPUBuffer` | Source buffer to copy from |
-| `dstBuffer` | `GPUBuffer` | Destination buffer to copy to |
+| `commandEncoder` | `GPUCommandEncoder` | Command Encoder |
+| `srcBuffer` | `GPUBuffer` | Source GPUBuffer |
+| `dstBuffer` | `GPUBuffer` | Destination GPUBuffer |
 
 ## Returns
 

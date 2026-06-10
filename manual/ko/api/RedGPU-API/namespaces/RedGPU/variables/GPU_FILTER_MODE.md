@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > `const` **GPU\_FILTER\_MODE**: `object`
 
-Defined in: [src/gpuConst/GPU\_FILTER\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/gpuConst/GPU_FILTER_MODE.ts#L10)
+Defined in: [src/gpuConst/GPU\_FILTER\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/gpuConst/GPU_FILTER_MODE.ts#L10)
 
 텍스처 샘플링 시의 필터링 모드 옵션을 정의하는 상수군입니다.
 
-
 텍스처 확대 및 축소 시 픽셀 간 보간 방식을 결정합니다.
-
 
 ## Type Declaration
 

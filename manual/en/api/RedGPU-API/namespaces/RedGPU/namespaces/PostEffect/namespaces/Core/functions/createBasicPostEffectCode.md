@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,41 +6,36 @@
 
 # Function: createBasicPostEffectCode()
 
-> **createBasicPostEffectCode**(`effect`, `code`, `uniformStruct?`): `object`
+> **createBasicPostEffectCode**(`effect`, `code`, `uniformStruct?`, `sourceTextureConfigs?`): `object`
 
-Defined in: [src/postEffect/core/createBasicPostEffectCode.ts:54](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/createBasicPostEffectCode.ts#L54)
+Defined in: [src/postEffect/core/createBasicPostEffectCode.ts:92](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/createBasicPostEffectCode.ts#L92)
 
-
-Helper function to create basic post-effect WGSL code.
-
-
-Automatically generates WGSL code based on options such as MSAA/Non-MSAA, uniform structure, depth texture, etc.
+High-level helper function to generate WGSL code for basic post-processing effects.
 
 
-Internally automatically includes system uniforms, source/output textures, workgroup sizes, etc.
+This function automates repetitive boilerplate code and performs the following:
+1. Automatically generates separate code for MSAA and Non-MSAA.
+2. Automates binding of input source textures (Group 0).
+3. Automatically includes effect-specific uniforms (Group 1) and system common resources (Group 2: G-Buffer, Depth, etc.).
+4. Defines the storage texture for output (Group 3).
+5. Reflects the workgroup size defined in the class.
 
 ## Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `effect` | [`ASinglePassPostEffect`](../classes/ASinglePassPostEffect.md) | `undefined` | ASinglePassPostEffect instance |
-| `code` | `string` | `undefined` | WGSL main code (inside main function) |
-| `uniformStruct` | `string` | `''` | Uniform structure WGSL code (optional) |
+| `effect` | [`ASinglePassPostEffect`](../classes/ASinglePassPostEffect.md) | `undefined` | Effect instance inheriting ASinglePassPostEffect |
+| `code` | `string` | `undefined` | WGSL logic to be inserted inside the main function |
+| `uniformStruct` | `string` | `''` | (Optional) Uniforms struct definition for the effect |
+| `sourceTextureConfigs` | [`IPostEffectSourceConfig`](../interfaces/IPostEffectSourceConfig.md) \| [`IPostEffectSourceConfig`](../interfaces/IPostEffectSourceConfig.md)[] | `...` | (Optional) Configurations for input sources (Default: {name: 'sourceTexture'}) |
 
 ## Returns
 
 `object`
 
-
-{ msaa: string, nonMsaa: string } - WGSL code for MSAA/Non-MSAA
-
-* ### Example
-```typescript
-const shader = createBasicPostEffectCode(effect, '...main code...', 'struct Uniforms {...};');
-// shader.msaa, shader.nonMsaa 사용
-```
+WGSL code objects generated for MSAA and Non-MSAA respectively
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `msaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:56](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/createBasicPostEffectCode.ts#L56) |
-| `nonMsaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:57](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/createBasicPostEffectCode.ts#L57) |
+| `msaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:99](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/createBasicPostEffectCode.ts#L99) |
+| `nonMsaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:100](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/createBasicPostEffectCode.ts#L100) |

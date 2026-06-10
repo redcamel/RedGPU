@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,8 +6,7 @@
 
 # Class: UniformBuffer
 
-Defined in: [src/resources/buffer/uniformBuffer/UniformBuffer.ts:18](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/buffer/uniformBuffer/UniformBuffer.ts#L18)
-
+Defined in: [src/resources/buffer/uniformBuffer/UniformBuffer.ts:18](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/uniformBuffer/UniformBuffer.ts#L18)
 
 Class that manages uniform buffers.
 
@@ -26,8 +25,7 @@ const uniformBuffer = new RedGPU.Resource.UniformBuffer(redGPUContext, data);
 
 > **new UniformBuffer**(`redGPUContext`, `uniformData`, `label?`, `cacheKey?`): `UniformBuffer`
 
-Defined in: [src/resources/buffer/uniformBuffer/UniformBuffer.ts:41](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/buffer/uniformBuffer/UniformBuffer.ts#L41)
-
+Defined in: [src/resources/buffer/uniformBuffer/UniformBuffer.ts:41](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/uniformBuffer/UniformBuffer.ts#L41)
 
 Creates a UniformBuffer instance.
 
@@ -55,11 +53,19 @@ const uniformBuffer = new RedGPU.Resource.UniformBuffer(redGPUContext, data, 'My
 
 ## Properties
 
+
+***
+
+## Inherited Members
+
+<details>
+<summary>View inherited properties and methods (Click to expand)</summary>
+
 ### \[GPU\_BUFFER\_CACHE\_KEY\]
 
 > **\[GPU\_BUFFER\_CACHE\_KEY\]**: `string`
 
-Defined in: [src/resources/buffer/core/ABaseBuffer.ts:23](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/buffer/core/ABaseBuffer.ts#L23)
+Defined in: [src/resources/buffer/core/ABaseBuffer.ts:23](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/core/ABaseBuffer.ts#L23)
 
 #### Inherited from
 
@@ -71,7 +77,7 @@ Defined in: [src/resources/buffer/core/ABaseBuffer.ts:23](https://github.com/red
 
 > **\[GPU\_BUFFER\_DATA\_SYMBOL\]**: `ArrayBuffer`
 
-Defined in: [src/resources/buffer/core/AUniformBaseBuffer.ts:21](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/buffer/core/AUniformBaseBuffer.ts#L21)
+Defined in: [src/resources/buffer/core/AUniformBaseBuffer.ts:21](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/core/AUniformBaseBuffer.ts#L21)
 
 #### Inherited from
 
@@ -83,7 +89,7 @@ Defined in: [src/resources/buffer/core/AUniformBaseBuffer.ts:21](https://github.
 
 > **\[GPU\_BUFFER\_SYMBOL\]**: `GPUBuffer`
 
-Defined in: [src/resources/buffer/core/ABaseBuffer.ts:22](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/buffer/core/ABaseBuffer.ts#L22)
+Defined in: [src/resources/buffer/core/ABaseBuffer.ts:22](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/core/ABaseBuffer.ts#L22)
 
 #### Inherited from
 
@@ -91,14 +97,35 @@ Defined in: [src/resources/buffer/core/ABaseBuffer.ts:22](https://github.com/red
 
 ## Accessors
 
+### antialiasingManager
+
+#### Get Signature
+
+> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L76)
+
+Returns the AntialiasingManager instance. (Short-cut path)
+
+##### Returns
+
+[`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+
+AntialiasingManager instance
+
+#### Inherited from
+
+[`AUniformBaseBuffer`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md).[`antialiasingManager`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md#antialiasingmanager)
+
+***
+
 ### cacheKey
 
 #### Get Signature
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/buffer/core/ABaseBuffer.ts:52](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/buffer/core/ABaseBuffer.ts#L52)
-
+Defined in: [src/resources/buffer/core/ABaseBuffer.ts:52](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/core/ABaseBuffer.ts#L52)
 
 Returns the cache key.
 
@@ -112,14 +139,35 @@ Returns the cache key.
 
 ***
 
+### commandEncoderManager
+
+#### Get Signature
+
+> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L88)
+
+Returns the CommandEncoderManager instance. (Short-cut path)
+
+##### Returns
+
+[`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+CommandEncoderManager instance
+
+#### Inherited from
+
+[`AUniformBaseBuffer`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md).[`commandEncoderManager`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md#commandencodermanager)
+
+***
+
 ### data
 
 #### Get Signature
 
 > **get** **data**(): `ArrayBuffer`
 
-Defined in: [src/resources/buffer/core/AUniformBaseBuffer.ts:73](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/buffer/core/AUniformBaseBuffer.ts#L73)
-
+Defined in: [src/resources/buffer/core/AUniformBaseBuffer.ts:77](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/core/AUniformBaseBuffer.ts#L77)
 
 Returns the buffer data (`ArrayBuffer`).
 
@@ -139,8 +187,7 @@ Returns the buffer data (`ArrayBuffer`).
 
 > **get** **dataViewF32**(): `Float32Array`
 
-Defined in: [src/resources/buffer/core/AUniformBaseBuffer.ts:81](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/buffer/core/AUniformBaseBuffer.ts#L81)
-
+Defined in: [src/resources/buffer/core/AUniformBaseBuffer.ts:85](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/core/AUniformBaseBuffer.ts#L85)
 
 Returns the buffer data as a `Float32Array` view.
 
@@ -160,8 +207,7 @@ Returns the buffer data as a `Float32Array` view.
 
 > **get** **dataViewU32**(): `Uint32Array`
 
-Defined in: [src/resources/buffer/core/AUniformBaseBuffer.ts:89](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/buffer/core/AUniformBaseBuffer.ts#L89)
-
+Defined in: [src/resources/buffer/core/AUniformBaseBuffer.ts:93](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/core/AUniformBaseBuffer.ts#L93)
 
 Returns the buffer data as a `Uint32Array` view.
 
@@ -181,8 +227,7 @@ Returns the buffer data as a `Uint32Array` view.
 
 > **get** **gpuBuffer**(): `GPUBuffer`
 
-Defined in: [src/resources/buffer/core/ABaseBuffer.ts:60](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/buffer/core/ABaseBuffer.ts#L60)
-
+Defined in: [src/resources/buffer/core/ABaseBuffer.ts:60](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/core/ABaseBuffer.ts#L60)
 
 Returns the GPUBuffer object.
 
@@ -202,8 +247,7 @@ Returns the GPUBuffer object.
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L106)
-
+Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L77)
 
 Returns the associated GPU device.
 
@@ -217,35 +261,53 @@ Returns the associated GPU device.
 
 ***
 
+### label
+
+#### Get Signature
+
+> **get** **label**(): `string`
+
+Defined in: [src/resources/buffer/core/AUniformBaseBuffer.ts:69](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/core/AUniformBaseBuffer.ts#L69)
+
+##### Returns
+
+`string`
+
+#### Inherited from
+
+[`AUniformBaseBuffer`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md).[`label`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md#label)
+
+***
+
 ### name
 
 #### Get Signature
 
 > **get** **name**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L81)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L58)
 
-
-Returns the name of the instance. If no name exists, it is generated using the class name and ID.
+Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
 
 ##### Returns
 
 `string`
 
+Name of the object
+
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L90)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L71)
 
-
-Sets the name of the instance.
+Sets the name of the object.
 
 ##### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | Name of the object to set |
 
 ##### Returns
 
@@ -253,7 +315,7 @@ Sets the name of the instance.
 
 #### Inherited from
 
-[`BRDFLUTTexture`](../namespaces/CoreIBL/classes/BRDFLUTTexture.md).[`name`](../namespaces/CoreIBL/classes/BRDFLUTTexture.md#name)
+[`AUniformBaseBuffer`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md).[`name`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md#name)
 
 ***
 
@@ -263,8 +325,7 @@ Sets the name of the instance.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L114)
-
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L40)
 
 Returns the RedGPUContext instance.
 
@@ -272,9 +333,33 @@ Returns the RedGPUContext instance.
 
 [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
+RedGPUContext instance
+
 #### Inherited from
 
 [`AUniformBaseBuffer`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md).[`redGPUContext`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md#redgpucontext)
+
+***
+
+### resourceManager
+
+#### Get Signature
+
+> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L64)
+
+Returns the ResourceManager instance. (Short-cut path)
+
+##### Returns
+
+[`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
+
+ResourceManager instance
+
+#### Inherited from
+
+[`AUniformBaseBuffer`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md).[`resourceManager`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md#resourcemanager)
 
 ***
 
@@ -284,8 +369,7 @@ Returns the RedGPUContext instance.
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L73)
-
+Defined in: [src/resources/core/ResourceBase.ts:69](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L69)
 
 Returns the resource manager key.
 
@@ -299,14 +383,33 @@ Returns the resource manager key.
 
 ***
 
+### revision
+
+#### Get Signature
+
+> **get** **revision**(): `number`
+
+Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L45)
+
+Returns the revision (update count) of the resource.
+
+##### Returns
+
+`number`
+
+#### Inherited from
+
+[`AUniformBaseBuffer`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md).[`revision`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md#revision)
+
+***
+
 ### size
 
 #### Get Signature
 
 > **get** **size**(): `number`
 
-Defined in: [src/resources/buffer/core/AUniformBaseBuffer.ts:97](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/buffer/core/AUniformBaseBuffer.ts#L97)
-
+Defined in: [src/resources/buffer/core/AUniformBaseBuffer.ts:101](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/core/AUniformBaseBuffer.ts#L101)
 
 Returns the buffer size.
 
@@ -326,8 +429,7 @@ Returns the buffer size.
 
 > **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ManagementResourceBase.ts#L45)
-
+Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ManagementResourceBase.ts#L45)
 
 Returns the managed state information of the resource.
 
@@ -347,8 +449,7 @@ Returns the managed state information of the resource.
 
 > **get** **uniformBufferDescriptor**(): `GPUBufferDescriptor`
 
-Defined in: [src/resources/buffer/core/AUniformBaseBuffer.ts:105](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/buffer/core/AUniformBaseBuffer.ts#L105)
-
+Defined in: [src/resources/buffer/core/AUniformBaseBuffer.ts:109](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/core/AUniformBaseBuffer.ts#L109)
 
 Returns the `GPUBufferDescriptor`.
 
@@ -368,8 +469,7 @@ Returns the `GPUBufferDescriptor`.
 
 > **get** **usage**(): `number`
 
-Defined in: [src/resources/buffer/core/ABaseBuffer.ts:68](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/buffer/core/ABaseBuffer.ts#L68)
-
+Defined in: [src/resources/buffer/core/ABaseBuffer.ts:68](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/core/ABaseBuffer.ts#L68)
 
 Returns the GPUBufferUsageFlags.
 
@@ -389,14 +489,15 @@ Returns the GPUBufferUsageFlags.
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L98)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L46)
 
-
-Returns the UUID.
+Returns the universally unique identifier (UUID) of the object.
 
 ##### Returns
 
 `string`
+
+UUID string
 
 #### Inherited from
 
@@ -410,8 +511,7 @@ Returns the UUID.
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/resources/buffer/core/ABaseBuffer.ts:84](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/buffer/core/ABaseBuffer.ts#L84)
-
+Defined in: [src/resources/buffer/core/ABaseBuffer.ts:84](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/core/ABaseBuffer.ts#L84)
 
 Returns the video memory usage in bytes.
 
@@ -429,8 +529,7 @@ Returns the video memory usage in bytes.
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L125)
-
+Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L89)
 
 Adds a listener function to be called when the pipeline becomes dirty.
 
@@ -450,39 +549,13 @@ Adds a listener function to be called when the pipeline becomes dirty.
 
 ***
 
-### \_\_fireListenerList()
-
-> **\_\_fireListenerList**(`resetList?`): `void`
-
-Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L152)
-
-
-Fires the registered dirty listeners.
-
-#### Parameters
-
-| Parameter | Type | Default value | Description |
-| ------ | ------ | ------ | ------ |
-| `resetList` | `boolean` | `false` | Whether to reset the listener list after firing (default: false) |
-
-#### Returns
-
-`void`
-
-#### Inherited from
-
-[`AUniformBaseBuffer`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md).[`__fireListenerList`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md#__firelistenerlist)
-
-***
-
 ### \_\_removeDirtyPipelineListener()
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L137)
+Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L101)
 
-
-Removes a dirty pipeline listener.
+Removes a resource update listener.
 
 #### Parameters
 
@@ -504,8 +577,7 @@ Removes a dirty pipeline listener.
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/buffer/core/ABaseBuffer.ts:92](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/buffer/core/ABaseBuffer.ts#L92)
-
+Defined in: [src/resources/buffer/core/ABaseBuffer.ts:92](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/core/ABaseBuffer.ts#L92)
 
 Destroys the resource.
 
@@ -519,12 +591,35 @@ Destroys the resource.
 
 ***
 
+### notifyUpdate()
+
+> **notifyUpdate**(`resetList?`): `void`
+
+Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L116)
+
+Notifies registered listeners that the resource has been updated.
+
+#### Parameters
+
+| Parameter | Type | Default value | Description |
+| ------ | ------ | ------ | ------ |
+| `resetList` | `boolean` | `false` | Whether to reset the listener list after firing (default: false) |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`AUniformBaseBuffer`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md).[`notifyUpdate`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md#notifyupdate)
+
+***
+
 ### writeOnlyBuffer()
 
 > **writeOnlyBuffer**(`target`, `value`): `void`
 
-Defined in: [src/resources/buffer/core/AUniformBaseBuffer.ts:119](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/buffer/core/AUniformBaseBuffer.ts#L119)
-
+Defined in: [src/resources/buffer/core/AUniformBaseBuffer.ts:123](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/core/AUniformBaseBuffer.ts#L123)
 
 Writes data to the uniform buffer.
 
@@ -542,3 +637,6 @@ Writes data to the uniform buffer.
 #### Inherited from
 
 [`AUniformBaseBuffer`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md).[`writeOnlyBuffer`](../namespaces/CoreBuffer/classes/AUniformBaseBuffer.md#writeonlybuffer)
+
+
+</details>

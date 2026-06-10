@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,11 +8,9 @@
 
 > **init**(`canvas`, `onWebGPUInitialized`, `onFailInitialized?`, `onDestroy?`, `alphaMode?`, `requestAdapterOptions?`): `Promise`\<`void`\>
 
-Defined in: [src/init.ts:49](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/init.ts#L49)
-
+Defined in: [src/init.ts:49](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/init.ts#L49)
 
 Asynchronously initializes WebGPU and creates a RedGPUContext.
-
 
 Checks for WebGPU support in the browser, requests a GPU adapter and device, and finally creates a RedGPUContext instance, passing it through a callback.
 
@@ -44,6 +42,5 @@ await RedGPU.init(
 ## Returns
 
 `Promise`\<`void`\>
-
 
 Promise representing the completion of the initialization process

@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,10 +6,9 @@
 
 # Class: VertexGPURenderInfo
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:10](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/VertexGPURenderInfo.ts#L10)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:10](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/VertexGPURenderInfo.ts#L10)
 
 GPU 버텍스 렌더링 작업에 대한 정보를 나타내는 클래스입니다.
-
 
 ## Constructors
 
@@ -17,7 +16,7 @@ GPU 버텍스 렌더링 작업에 대한 정보를 나타내는 클래스입니�
 
 > **new VertexGPURenderInfo**(`vertexShaderModule`, `vertexShaderSourceVariant`, `vertexShaderVariantConditionalBlocks`, `vertexUniformInfo`, `vertexBindGroupLayout`, `vertexUniformBuffer`, `vertexUniformBindGroup`, `pipeline`, `shadowPipeline?`, `pickingPipeline?`): `VertexGPURenderInfo`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:23](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/VertexGPURenderInfo.ts#L23)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:23](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/VertexGPURenderInfo.ts#L23)
 
 #### Parameters
 
@@ -28,7 +27,7 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:23](https://github.com
 | `vertexShaderVariantConditionalBlocks` | `string`[] |
 | `vertexUniformInfo` | `any` |
 | `vertexBindGroupLayout` | `GPUBindGroupLayout` |
-| `vertexUniformBuffer` | [`UniformBuffer`](../../../../Resource/classes/UniformBuffer.md) \| [`StorageBuffer`](../../../../Resource/classes/StorageBuffer.md) |
+| `vertexUniformBuffer` | [`StorageBuffer`](../../../../Resource/classes/StorageBuffer.md) \| [`UniformBuffer`](../../../../Resource/classes/UniformBuffer.md) |
 | `vertexUniformBindGroup` | `GPUBindGroup` |
 | `pipeline` | `GPURenderPipeline` |
 | `shadowPipeline?` | `GPURenderPipeline` |
@@ -44,7 +43,7 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:23](https://github.com
 
 > **pickingPipeline**: `GPURenderPipeline`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:21](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/VertexGPURenderInfo.ts#L21)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:21](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/VertexGPURenderInfo.ts#L21)
 
 ***
 
@@ -52,7 +51,7 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:21](https://github.com
 
 > **pipeline**: `GPURenderPipeline`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:19](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/VertexGPURenderInfo.ts#L19)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:19](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/VertexGPURenderInfo.ts#L19)
 
 ***
 
@@ -60,7 +59,7 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:19](https://github.com
 
 > **shadowPipeline**: `GPURenderPipeline`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:20](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/VertexGPURenderInfo.ts#L20)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:20](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/VertexGPURenderInfo.ts#L20)
 
 ***
 
@@ -68,7 +67,7 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:20](https://github.com
 
 > **vertexBindGroupLayout**: `GPUBindGroupLayout`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:16](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/VertexGPURenderInfo.ts#L16)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:16](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/VertexGPURenderInfo.ts#L16)
 
 ***
 
@@ -76,7 +75,7 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:16](https://github.com
 
 > **vertexShaderModule**: `GPUShaderModule`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:11](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/VertexGPURenderInfo.ts#L11)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:11](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/VertexGPURenderInfo.ts#L11)
 
 ***
 
@@ -84,7 +83,7 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:11](https://github.com
 
 > **vertexShaderSourceVariant**: [`ShaderVariantGenerator`](../../../../Resource/namespaces/CoreWGSLParser/classes/ShaderVariantGenerator.md)
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:12](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/VertexGPURenderInfo.ts#L12)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:12](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/VertexGPURenderInfo.ts#L12)
 
 ***
 
@@ -92,7 +91,7 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:12](https://github.com
 
 > **vertexShaderVariantConditionalBlocks**: `string`[]
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:13](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/VertexGPURenderInfo.ts#L13)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:13](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/VertexGPURenderInfo.ts#L13)
 
 ***
 
@@ -100,7 +99,7 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:13](https://github.com
 
 > **vertexStructInfo**: `any`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:14](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/VertexGPURenderInfo.ts#L14)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:14](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/VertexGPURenderInfo.ts#L14)
 
 ***
 
@@ -108,15 +107,15 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:14](https://github.com
 
 > **vertexUniformBindGroup**: `GPUBindGroup`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:17](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/VertexGPURenderInfo.ts#L17)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:17](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/VertexGPURenderInfo.ts#L17)
 
 ***
 
 ### vertexUniformBuffer
 
-> **vertexUniformBuffer**: [`UniformBuffer`](../../../../Resource/classes/UniformBuffer.md) \| [`StorageBuffer`](../../../../Resource/classes/StorageBuffer.md)
+> **vertexUniformBuffer**: [`StorageBuffer`](../../../../Resource/classes/StorageBuffer.md) \| [`UniformBuffer`](../../../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:18](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/VertexGPURenderInfo.ts#L18)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:18](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/VertexGPURenderInfo.ts#L18)
 
 ***
 
@@ -124,4 +123,4 @@ Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:18](https://github.com
 
 > **vertexUniformInfo**: `any`
 
-Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:15](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/VertexGPURenderInfo.ts#L15)
+Defined in: [src/display/mesh/core/VertexGPURenderInfo.ts:15](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/VertexGPURenderInfo.ts#L15)

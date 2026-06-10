@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,14 +6,9 @@
 
 # CoreBuffer
 
-
 Provides abstract base classes and utility functions for buffer resources.
 
 ## Buffer
 
 - [ABaseBuffer](classes/ABaseBuffer.md)
 - [AUniformBaseBuffer](classes/AUniformBaseBuffer.md)
-
-## Other
-
-- [getUniformOffsetByRoundUp](functions/getUniformOffsetByRoundUp.md)

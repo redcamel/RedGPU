@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,11 +8,9 @@
 
 > **ensureVertexIndexBuiltin**(`shaderSource`): `string`
 
-Defined in: [src/resources/wgslParser/core/ensureVertexIndexBuiltin.ts:16](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/wgslParser/core/ensureVertexIndexBuiltin.ts#L16)
-
+Defined in: [src/resources/wgslParser/core/ensureVertexIndexBuiltin.ts:16](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/ensureVertexIndexBuiltin.ts#L16)
 
 Checks if the `vertex_index` builtin argument is included in the WGSL shader code, and automatically injects it if not.
-
 
 This utility automatically adds the argument in case `vertex_index` is needed in the vertex shader function.
 
@@ -25,6 +23,5 @@ This utility automatically adds the argument in case `vertex_index` is needed in
 ## Returns
 
 `string`
-
 
 Shader source code with guaranteed `vertex_index`

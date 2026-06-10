@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,6 +6,9 @@
 
 # Core
 
+Provides core interfaces and abstract classes for the RedGPU Light module.
+
 ## Light
 
 - [ABaseLight](classes/ABaseLight.md)
+- [LightManager](classes/LightManager.md)

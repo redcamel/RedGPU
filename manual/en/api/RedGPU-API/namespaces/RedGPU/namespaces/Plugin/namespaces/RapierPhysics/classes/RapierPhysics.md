@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,25 +6,21 @@
 
 # Class: RapierPhysics
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:26](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/plugins/rapier/RapierPhysics.ts#L26)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:26](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/plugins/rapier/RapierPhysics.ts#L26)
 
 **`Experimental`**
 
-
 RedGPU physics plugin implementation using the Rapier physics engine.
-
 
 This class integrates the WASM-based Rapier engine into the RedGPU environment and manages a high-performance physics simulation world. It provides core physics features such as rigid body creation, collision detection, character controllers, and gravity settings.
 
 ::: warning
-
 This feature is currently in the experimental stage. The API may change in the future.
 :::
 
 ## See
 
-
- - [Physics Plugin Manual](https://redcamel.github.io/RedGPU/manual/en/plugins/physics)
+ -[Physics Plugin Manual](https://redcamel.github.io/RedGPU/manual/en/plugins/physics)
 
 ## Implements
 
@@ -44,14 +40,13 @@ This feature is currently in the experimental stage. The API may change in the f
 
 ## Properties
 
-### onCollisionStarted()
+### onCollisionStarted
 
 > **onCollisionStarted**: (`handle1`, `handle2`) => `void`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:42](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/plugins/rapier/RapierPhysics.ts#L42)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:38](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/plugins/rapier/RapierPhysics.ts#L38)
 
 **`Experimental`**
-
 
 Callback called when a collision starts in the physics engine.
 
@@ -78,10 +73,9 @@ Callback called when a collision starts in the physics engine.
 
 > **get** **bodies**(): [`RapierBody`](RapierBody.md)[]
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:63](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/plugins/rapier/RapierPhysics.ts#L63)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:66](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/plugins/rapier/RapierPhysics.ts#L66)
 
 **`Experimental`**
-
 
 Returns a list of all RapierBody instances managed by the engine.
 
@@ -101,16 +95,14 @@ Returns a list of all RapierBody instances managed by the engine.
 
 > **get** **gravity**(): `object`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:268](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/plugins/rapier/RapierPhysics.ts#L268)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:81](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/plugins/rapier/RapierPhysics.ts#L81)
 
 **`Experimental`**
-
 
 Sets or returns the gravity acceleration of the physics world.
 
 * ### Example
 ```typescript
-
 // Set gravity
 physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
 ```
@@ -121,18 +113,17 @@ physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `x` | `number` | [src/plugins/rapier/RapierPhysics.ts:268](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/plugins/rapier/RapierPhysics.ts#L268) |
-| `y` | `number` | [src/plugins/rapier/RapierPhysics.ts:268](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/plugins/rapier/RapierPhysics.ts#L268) |
-| `z` | `number` | [src/plugins/rapier/RapierPhysics.ts:268](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/plugins/rapier/RapierPhysics.ts#L268) |
+| `x` | `number` | [src/plugins/rapier/RapierPhysics.ts:81](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/plugins/rapier/RapierPhysics.ts#L81) |
+| `y` | `number` | [src/plugins/rapier/RapierPhysics.ts:81](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/plugins/rapier/RapierPhysics.ts#L81) |
+| `z` | `number` | [src/plugins/rapier/RapierPhysics.ts:81](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/plugins/rapier/RapierPhysics.ts#L81) |
 
 #### Set Signature
 
 > **set** **gravity**(`value`): `void`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:272](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/plugins/rapier/RapierPhysics.ts#L272)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:85](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/plugins/rapier/RapierPhysics.ts#L85)
 
 **`Experimental`**
-
 
 Sets or gets the gravity.
 
@@ -166,10 +157,9 @@ physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
 
 > **get** **nativeWorld**(): `World`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:49](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/plugins/rapier/RapierPhysics.ts#L49)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:48](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/plugins/rapier/RapierPhysics.ts#L48)
 
 **`Experimental`**
-
 
 Returns the native World object of the physics engine.
 
@@ -189,10 +179,9 @@ Returns the native World object of the physics engine.
 
 > **get** **RAPIER**(): `__module`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:56](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/plugins/rapier/RapierPhysics.ts#L56)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:57](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/plugins/rapier/RapierPhysics.ts#L57)
 
 **`Experimental`**
-
 
 Returns the Rapier library namespace.
 
@@ -210,10 +199,9 @@ Returns the Rapier library namespace.
 
 > **createBody**(`mesh`, `params`): [`RapierBody`](RapierBody.md)
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:157](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/plugins/rapier/RapierPhysics.ts#L157)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:181](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/plugins/rapier/RapierPhysics.ts#L181)
 
 **`Experimental`**
-
 
 Creates a physics body for a specific mesh and registers it with the engine.
 
@@ -237,7 +225,6 @@ const body = physicsEngine.createBody(mesh, {
 
 [`RapierBody`](RapierBody.md)
 
-
 Created RapierBody instance
 
 #### Implementation of
@@ -250,10 +237,9 @@ Created RapierBody instance
 
 > **createCharacterController**(`offset`): `KinematicCharacterController`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:292](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/plugins/rapier/RapierPhysics.ts#L292)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:236](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/plugins/rapier/RapierPhysics.ts#L236)
 
 **`Experimental`**
-
 
 Creates and returns a character controller.
 
@@ -272,7 +258,6 @@ const controller = physicsEngine.createCharacterController(0.1);
 
 `KinematicCharacterController`
 
-
 Rapier character controller instance
 
 #### Implementation of
@@ -285,10 +270,9 @@ Rapier character controller instance
 
 > **getBodyByColliderHandle**(`handle`): [`RapierBody`](RapierBody.md)
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:81](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/plugins/rapier/RapierPhysics.ts#L81)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:105](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/plugins/rapier/RapierPhysics.ts#L105)
 
 **`Experimental`**
-
 
 Finds and returns the managed RapierBody using its collider handle.
 
@@ -307,7 +291,6 @@ const body = physicsEngine.getBodyByColliderHandle(handle);
 
 [`RapierBody`](RapierBody.md)
 
-
 The found RapierBody (undefined if not found)
 
 ***
@@ -316,10 +299,9 @@ The found RapierBody (undefined if not found)
 
 > **init**(): `Promise`\<`void`\>
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:98](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/plugins/rapier/RapierPhysics.ts#L98)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:122](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/plugins/rapier/RapierPhysics.ts#L122)
 
 **`Experimental`**
-
 
 Initializes the Rapier engine and creates the physics world.
 
@@ -331,7 +313,6 @@ await physicsEngine.init();
 #### Returns
 
 `Promise`\<`void`\>
-
 
 Promise that guarantees initialization completion
 
@@ -345,16 +326,14 @@ Promise that guarantees initialization completion
 
 > **removeBody**(`body`): `void`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:252](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/plugins/rapier/RapierPhysics.ts#L252)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:215](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/plugins/rapier/RapierPhysics.ts#L215)
 
 **`Experimental`**
-
 
 Removes a physics body from the engine.
 
 * ### Example
 ```typescript
-
 // Remove physics body
 physicsEngine.removeBody(body);
 ```
@@ -379,16 +358,14 @@ physicsEngine.removeBody(body);
 
 > **step**(`deltaTime`): `void`
 
-Defined in: [src/plugins/rapier/RapierPhysics.ts:121](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/plugins/rapier/RapierPhysics.ts#L121)
+Defined in: [src/plugins/rapier/RapierPhysics.ts:145](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/plugins/rapier/RapierPhysics.ts#L145)
 
 **`Experimental`**
-
 
 Steps the physics simulation and synchronizes mesh transforms.
 
 * ### Example
 ```typescript
-
 // Step physics simulation in rendering loop
 renderer.start(redGPUContext, (time, deltaTime) => {
     physicsEngine.step(deltaTime / 1000);

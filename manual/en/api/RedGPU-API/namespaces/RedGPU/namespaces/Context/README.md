@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,9 +6,7 @@
 
 # Context
 
-
 Provides WebGPU initialization and context management features.
-
 
 Includes core infrastructure such as the system's top-level object RedGPUContext, device detection, size management, and view containers.
 

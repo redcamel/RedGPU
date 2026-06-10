@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,32 +6,29 @@
 
 # Class: ToneMappingManager
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:31](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/toneMapping/ToneMappingManager.ts#L31)
+Defined in: [src/toneMapping/ToneMappingManager.ts:29](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/toneMapping/ToneMappingManager.ts#L29)
 
-
-Class that integrates and manages tone mapping, exposure, contrast, and brightness.
+Class that integrates and manages tone mapping, contrast, and brightness settings.
 
 ::: warning
-
 This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
 :::
 
 * ### Example
 ```typescript
-// View3D를 통해 접근합니다. (Access through View3D)
+// View3D를 통해 접근합니다.
+// Access through View3D.
 const toneMappingManager = view.toneMappingManager;
-toneMappingManager.mode = RedGPU.TONE_MAPPING_MODE.ACES_FILMIC_HILL;
-toneMappingManager.exposure = 1.2;
+toneMappingManager.mode = RedGPU.ToneMapping.TONE_MAPPING_MODE.ACES_FILMIC_HILL;
 ```
 
 ## Constructors
 
 ### Constructor
 
-> **new ToneMappingManager**(`view`): `ToneMappingManager`
+> **new ToneMappingManager**(`redGPUContext`): `ToneMappingManager`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:46](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/toneMapping/ToneMappingManager.ts#L46)
-
+Defined in: [src/toneMapping/ToneMappingManager.ts:42](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/toneMapping/ToneMappingManager.ts#L42)
 
 Creates a ToneMappingManager instance. (Internal system only)
 
@@ -39,7 +36,7 @@ Creates a ToneMappingManager instance. (Internal system only)
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `view` | [`View3D`](../../Display/classes/View3D.md) | View3D instance |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext instance |
 
 #### Returns
 
@@ -53,7 +50,7 @@ Creates a ToneMappingManager instance. (Internal system only)
 
 > **get** **brightness**(): `number`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:97](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/toneMapping/ToneMappingManager.ts#L97)
+Defined in: [src/toneMapping/ToneMappingManager.ts:81](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/toneMapping/ToneMappingManager.ts#L81)
 
 Returns the brightness.
 
@@ -65,7 +62,7 @@ Returns the brightness.
 
 > **set** **brightness**(`value`): `void`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:102](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/toneMapping/ToneMappingManager.ts#L102)
+Defined in: [src/toneMapping/ToneMappingManager.ts:86](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/toneMapping/ToneMappingManager.ts#L86)
 
 Sets the brightness. (-1.0 to 1.0, Default: 0.0)
 
@@ -87,7 +84,7 @@ Sets the brightness. (-1.0 to 1.0, Default: 0.0)
 
 > **get** **contrast**(): `number`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:85](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/toneMapping/ToneMappingManager.ts#L85)
+Defined in: [src/toneMapping/ToneMappingManager.ts:70](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/toneMapping/ToneMappingManager.ts#L70)
 
 Returns the contrast.
 
@@ -99,43 +96,9 @@ Returns the contrast.
 
 > **set** **contrast**(`value`): `void`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:90](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/toneMapping/ToneMappingManager.ts#L90)
+Defined in: [src/toneMapping/ToneMappingManager.ts:75](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/toneMapping/ToneMappingManager.ts#L75)
 
 Sets the contrast. (0.0 to 2.0, Default: 1.0)
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
-
-***
-
-### exposure
-
-#### Get Signature
-
-> **get** **exposure**(): `number`
-
-Defined in: [src/toneMapping/ToneMappingManager.ts:73](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/toneMapping/ToneMappingManager.ts#L73)
-
-Returns the exposure value.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **exposure**(`value`): `void`
-
-Defined in: [src/toneMapping/ToneMappingManager.ts:78](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/toneMapping/ToneMappingManager.ts#L78)
-
-Sets the exposure value. (Default: 1.0)
 
 ##### Parameters
 
@@ -155,7 +118,7 @@ Sets the exposure value. (Default: 1.0)
 
 > **get** **mode**(): [`TONE_MAPPING_MODE`](../type-aliases/TONE_MAPPING_MODE.md)
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:58](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/toneMapping/ToneMappingManager.ts#L58)
+Defined in: [src/toneMapping/ToneMappingManager.ts:58](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/toneMapping/ToneMappingManager.ts#L58)
 
 Returns the currently applied tone mapping mode.
 
@@ -167,7 +130,7 @@ Returns the currently applied tone mapping mode.
 
 > **set** **mode**(`value`): `void`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:63](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/toneMapping/ToneMappingManager.ts#L63)
+Defined in: [src/toneMapping/ToneMappingManager.ts:63](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/toneMapping/ToneMappingManager.ts#L63)
 
 Sets the tone mapping mode.
 
@@ -183,13 +146,29 @@ Sets the tone mapping mode.
 
 ***
 
+### redGPUContext
+
+#### Get Signature
+
+> **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+
+Defined in: [src/toneMapping/ToneMappingManager.ts:47](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/toneMapping/ToneMappingManager.ts#L47)
+
+Returns the RedGPUContext instance.
+
+##### Returns
+
+[`RedGPUContext`](../../Context/classes/RedGPUContext.md)
+
+***
+
 ### toneMapping
 
 #### Get Signature
 
 > **get** **toneMapping**(): `AToneMappingEffect`
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:52](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/toneMapping/ToneMappingManager.ts#L52)
+Defined in: [src/toneMapping/ToneMappingManager.ts:52](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/toneMapping/ToneMappingManager.ts#L52)
 
 Returns the currently active tone mapping effect instance.
 
@@ -199,12 +178,25 @@ Returns the currently active tone mapping effect instance.
 
 ## Methods
 
+### clear()
+
+> **clear**(): `void`
+
+Defined in: [src/toneMapping/ToneMappingManager.ts:95](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/toneMapping/ToneMappingManager.ts#L95)
+
+Clears tone mapping resources.
+
+#### Returns
+
+`void`
+
+***
+
 ### render()
 
-> **render**(`width`, `height`, `currentTextureView`): `ASinglePassPostEffectResult`
+> **render**(`view`, `width`, `height`, `currentTextureView`): [`IPostEffectResult`](../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md)
 
-Defined in: [src/toneMapping/ToneMappingManager.ts:116](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/toneMapping/ToneMappingManager.ts#L116)
-
+Defined in: [src/toneMapping/ToneMappingManager.ts:111](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/toneMapping/ToneMappingManager.ts#L111)
 
 Renders tone mapping.
 
@@ -212,12 +204,13 @@ Renders tone mapping.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
+| `view` | [`View3D`](../../Display/classes/View3D.md) | View3D instance |
 | `width` | `number` | Width |
 | `height` | `number` | Height |
-| `currentTextureView` | `ASinglePassPostEffectResult` | Current texture view information |
+| `currentTextureView` | [`IPostEffectResult`](../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md) | Current texture view information |
 
 #### Returns
 
-`ASinglePassPostEffectResult`
+[`IPostEffectResult`](../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md)
 
 Rendering result

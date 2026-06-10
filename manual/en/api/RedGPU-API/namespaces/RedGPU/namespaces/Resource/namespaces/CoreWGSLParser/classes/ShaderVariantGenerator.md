@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,17 +6,14 @@
 
 # Class: ShaderVariantGenerator
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:17](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L17)
-
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:17](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L17)
 
 Utility class that generates various variant codes for WGSL shaders based on conditional blocks and define strings.
-
 
 Processes conditional blocks according to the variant key (variantKey), dynamically generating and caching different shader sources.
 
 ::: warning
-
-This class is automatically created by the system.<br/>Do not create an instance directly.
+This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
 :::
 
 ## Constructors
@@ -25,8 +22,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new ShaderVariantGenerator**(`defines`, `conditionalBlocks`): `ShaderVariantGenerator`
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:36](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L36)
-
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:36](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L36)
 
 Creates a ShaderVariantGenerator instance. (Internal system only)
 
@@ -35,7 +31,7 @@ Creates a ShaderVariantGenerator instance. (Internal system only)
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `defines` | `string` | Define string of WGSL shader (base source) |
-| `conditionalBlocks` | `ConditionalBlock`[] | Array of conditional block information |
+| `conditionalBlocks` | [`ConditionalBlock`](../interfaces/ConditionalBlock.md)[] | Array of conditional block information |
 
 #### Returns
 
@@ -47,8 +43,7 @@ Creates a ShaderVariantGenerator instance. (Internal system only)
 
 > **addConditionalInfo**(`uniformName`, `textures`, `samplers`): `void`
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:72](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L72)
-
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:72](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L72)
 
 Adds texture and sampler information associated with a specific uniform key.
 
@@ -70,15 +65,13 @@ Adds texture and sampler information associated with a specific uniform key.
 
 > **getCachedVariants**(): `string`[]
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:186](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L186)
-
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:186](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L186)
 
 Returns the list of currently cached variant keys.
 
 #### Returns
 
 `string`[]
-
 
 Cached variant keys array
 
@@ -88,15 +81,13 @@ Cached variant keys array
 
 > **getUnionSamplers**(): `any`[]
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:149](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L149)
-
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:149](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L149)
 
 Returns the list of all possible samplers (union).
 
 #### Returns
 
 `any`[]
-
 
 All samplers array
 
@@ -106,15 +97,13 @@ All samplers array
 
 > **getUnionTextures**(): `any`[]
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:132](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L132)
-
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:132](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L132)
 
 Returns the list of all possible textures (union).
 
 #### Returns
 
 `any`[]
-
 
 All textures array
 
@@ -124,8 +113,7 @@ All textures array
 
 > **getVariant**(`variantKey`): `string`
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:169](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L169)
-
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:169](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L169)
 
 Lazy-generates shader code for a specific variant key.
 
@@ -139,7 +127,6 @@ Lazy-generates shader code for a specific variant key.
 
 `string`
 
-
 Variant WGSL shader code string
 
 ***
@@ -148,8 +135,7 @@ Variant WGSL shader code string
 
 > **getVariantSamplers**(`variantKey`): `any`[]
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:111](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L111)
-
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:111](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L111)
 
 Returns the list of samplers activated for a specific variant key.
 
@@ -163,7 +149,6 @@ Returns the list of samplers activated for a specific variant key.
 
 `any`[]
 
-
 Activated samplers array
 
 ***
@@ -172,8 +157,7 @@ Activated samplers array
 
 > **getVariantTextures**(`variantKey`): `any`[]
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:87](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L87)
-
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:87](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L87)
 
 Returns the list of textures activated for a specific variant key.
 
@@ -187,7 +171,6 @@ Returns the list of textures activated for a specific variant key.
 
 `any`[]
 
-
 Activated textures array
 
 ***
@@ -196,8 +179,7 @@ Activated textures array
 
 > **setBaseInfo**(`textures`, `samplers`): `void`
 
-Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:54](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L54)
-
+Defined in: [src/resources/wgslParser/core/ShaderVariantGenerator.ts:54](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/ShaderVariantGenerator.ts#L54)
 
 Sets the base texture and sampler information.
 

@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,8 +8,7 @@
 
 > **worldToLocal**(`targetMatrix`, `x`, `y`, `z`): \[`number`, `number`, `number`\]
 
-Defined in: [src/math/coordinates/worldToLocal.ts:35](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/coordinates/worldToLocal.ts#L35)
-
+Defined in: [src/math/coordinates/worldToLocal.ts:35](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/coordinates/worldToLocal.ts#L35)
 
 Converts world coordinates to local coordinates.
 
@@ -31,10 +30,8 @@ const localPos = RedGPU.math.worldToLocal(mesh.modelMatrix, 10, 5, 0);
 
 \[`number`, `number`, `number`\]
 
-
 Converted local coordinates [x, y, z]
 
 ## Throws
-
 
 Throws Error if coordinates are not numbers

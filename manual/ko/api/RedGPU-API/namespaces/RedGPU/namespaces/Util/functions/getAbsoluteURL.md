@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > **getAbsoluteURL**(`base`, `relative`): `string`
 
-Defined in: [src/utils/file/getAbsoluteURL.ts:24](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/file/getAbsoluteURL.ts#L24)
+Defined in: [src/utils/file/getAbsoluteURL.ts:18](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/file/getAbsoluteURL.ts#L18)
 
 상대 경로를 절대 URL로 변환합니다.
 
-
-base와 relative를 조합하여 절대 URL을 반환하며, 실패 시 relative를 그대로 반환합니다.
-
+기준(base) URL과 상대(relative) 경로를 결합하여 절대 URL을 생성합니다. 실패 시 상대 경로를 그대로 반환합니다.
 
 * ### Example
 ```typescript
@@ -25,12 +23,11 @@ const absURL = RedGPU.Util.getAbsoluteURL('https://example.com/path/', '../image
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `base` | `string` | 기준이 되는 base URL
-| `relative` | `string` | 변환할 상대 경로 또는 URL
+| `base` | `string` \| `URL` | 기준 URL (문자열 또는 URL 객체)
+| `relative` | `string` | 상대 경로 또는 URL
 
 ## Returns
 
 `string`
 
-변환된 절대 URL, 실패 시 relative 반환
-
+절대 URL

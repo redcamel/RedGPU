@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -8,9 +8,7 @@
 
 씬 구성을 위한 다양한 3D 기본 도형(Primitive)들을 제공합니다.
 
-
 Box, Sphere, Plane, Torus 등 표준 기하 도형들을 손쉽게 생성하고 Mesh의 지오메트리로 사용할 수 있습니다.
-
 
 <iframe src="https://redcamel.github.io/RedGPU/examples/3d/primitive/primitives/"></iframe>
 
@@ -23,9 +21,12 @@ Box, Sphere, Plane, Torus 등 표준 기하 도형들을 손쉽게 생성하고 
 - [Box](classes/Box.md)
 - [Capsule](classes/Capsule.md)
 - [Circle](classes/Circle.md)
+- [Cone](classes/Cone.md)
 - [Cylinder](classes/Cylinder.md)
 - [Ground](classes/Ground.md)
 - [Plane](classes/Plane.md)
+- [Ring](classes/Ring.md)
+- [RoundedBox](classes/RoundedBox.md)
 - [Sphere](classes/Sphere.md)
 - [Torus](classes/Torus.md)
 - [TorusKnot](classes/TorusKnot.md)

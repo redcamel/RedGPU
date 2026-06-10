@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,11 +6,9 @@
 
 # Class: Torus
 
-Defined in: [src/primitive/Torus.ts:20](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/Torus.ts#L20)
-
+Defined in: [src/primitive/Torus.ts:20](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/Torus.ts#L20)
 
 Torus primitive geometry class.
-
 
 Generates and manages 3D torus data based on radius, thickness, segments, etc.
 
@@ -29,29 +27,27 @@ const torus = new RedGPU.Torus(redGPUContext, 2, 0.5);
 
 ### Constructor
 
-> **new Torus**(`redGPUContext`, `radius?`, `thickness?`, `radialSubdivisions?`, `bodySubdivisions?`, `startAngle?`, `endAngle?`): `Torus`
+> **new Torus**(`redGPUContext`, `radius?`, `thickness?`, `radialSegments?`, `tubularSegments?`, `thetaStart?`, `thetaLength?`, `capStart?`, `capEnd?`, `isRadialCapStart?`, `isRadialCapEnd?`): `Torus`
 
-Defined in: [src/primitive/Torus.ts:106](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/Torus.ts#L106)
-
+Defined in: [src/primitive/Torus.ts:37](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/Torus.ts#L37)
 
 Creates an instance of Torus.
-
-### Example
-```typescript
-const torus = new RedGPU.Torus(redGPUContext, 1, 0.5, 16, 16, 0, Math.PI * 2);
-```
 
 #### Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
 | `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `undefined` | RedGPUContext instance |
-| `radius` | `number` | `1` | Major radius (default 1) |
-| `thickness` | `number` | `0.5` | Minor radius/thickness (default 0.5) |
-| `radialSubdivisions` | `number` | `16` | Radial segments (default 16, min 3) |
-| `bodySubdivisions` | `number` | `16` | Tubular segments (default 16, min 3) |
-| `startAngle` | `number` | `0` | Starting angle (radians, default 0) |
-| `endAngle` | `number` | `...` | Ending angle (radians, default 2*PI) |
+| `radius` | `number` | `1` | Major radius |
+| `thickness` | `number` | `0.5` | Minor radius/thickness |
+| `radialSegments` | `number` | `16` | Radial segments |
+| `tubularSegments` | `number` | `16` | Tubular segments |
+| `thetaStart` | `number` | `0` | Starting angle |
+| `thetaLength` | `number` | `...` | Arc angle |
+| `capStart` | `boolean` | `false` | Whether to close the start cap (default false) |
+| `capEnd` | `boolean` | `false` | Whether to close the end cap (default false) |
+| `isRadialCapStart` | `boolean` | `false` | Whether start cap uses radial UV (default false) |
+| `isRadialCapEnd` | `boolean` | `false` | Whether end cap uses radial UV (default false) |
 
 #### Returns
 
@@ -63,27 +59,29 @@ const torus = new RedGPU.Torus(redGPUContext, 1, 0.5, 16, 16, 0, Math.PI * 2);
 
 ## Accessors
 
+
+***
+
+## Inherited Members
+
+<details>
+<summary>View inherited properties and methods (Click to expand)</summary>
+
 ### gpuRenderInfo
 
 #### Get Signature
 
 > **get** **gpuRenderInfo**(): `object`
 
-Defined in: [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L86)
-
-
-Returns the GPU render information.
+Defined in: [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L51)
 
 ##### Returns
 
 `object`
 
-
-Object containing buffer layouts array
-
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L86) |
+| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L51) |
 
 #### Inherited from
 
@@ -97,17 +95,11 @@ Object containing buffer layouts array
 
 > **get** **indexBuffer**(): [`IndexBuffer`](../../Resource/classes/IndexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:110](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L110)
-
-
-Returns the current index buffer.
+Defined in: [src/primitive/core/Primitive.ts:59](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L59)
 
 ##### Returns
 
 [`IndexBuffer`](../../Resource/classes/IndexBuffer.md)
-
-
-IndexBuffer instance
 
 #### Inherited from
 
@@ -121,17 +113,11 @@ IndexBuffer instance
 
 > **get** **vertexBuffer**(): [`VertexBuffer`](../../Resource/classes/VertexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:98](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L98)
-
-
-Returns the current vertex buffer.
+Defined in: [src/primitive/core/Primitive.ts:55](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L55)
 
 ##### Returns
 
 [`VertexBuffer`](../../Resource/classes/VertexBuffer.md)
-
-
-VertexBuffer instance
 
 #### Inherited from
 
@@ -145,17 +131,11 @@ VertexBuffer instance
 
 > **get** **volume**(): [`AABB`](../../Bound/classes/AABB.md)
 
-Defined in: [src/primitive/core/Primitive.ts:122](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L122)
-
-
-Returns the AABB bounding volume of the geometry.
+Defined in: [src/primitive/core/Primitive.ts:63](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L63)
 
 ##### Returns
 
 [`AABB`](../../Bound/classes/AABB.md)
-
-
-AABB instance
 
 #### Inherited from
 
@@ -169,17 +149,12 @@ AABB instance
 
 > **get** `static` **primitiveInterleaveStruct**(): [`VertexInterleavedStruct`](../../Resource/classes/VertexInterleavedStruct.md)
 
-Defined in: [src/primitive/core/Primitive.ts:67](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L67)
+Defined in: [src/primitive/core/Primitive.ts:47](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L47)
 
-
-Returns the default vertex layout structure (Position, Normal, UV).
 
 ##### Returns
 
 [`VertexInterleavedStruct`](../../Resource/classes/VertexInterleavedStruct.md)
-
-
-Vertex interleaved struct object
 
 #### Inherited from
 
@@ -187,27 +162,26 @@ Vertex interleaved struct object
 
 ## Methods
 
-### \_setData()
+### generateUniqueKey()
 
-> **\_setData**(`geometry`): `void`
+> `static` **generateUniqueKey**(`name`, `params`): `string`
 
-Defined in: [src/primitive/core/Primitive.ts:138](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L138)
-
-**`Internal`**
-
-
-Sets internal buffers and render information using geometry data.
+Defined in: [src/primitive/core/Primitive.ts:68](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L68)
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `geometry` | [`Geometry`](../../../classes/Geometry.md) | Geometry instance to set |
+| Parameter | Type |
+| ------ | ------ |
+| `name` | `string` |
+| `params` | `Record`\<`string`, `any`\> |
 
 #### Returns
 
-`void`
+`string`
 
 #### Inherited from
 
-[`Primitive`](../namespaces/Core/classes/Primitive.md).[`_setData`](../namespaces/Core/classes/Primitive.md#_setdata)
+[`Primitive`](../namespaces/Core/classes/Primitive.md).[`generateUniqueKey`](../namespaces/Core/classes/Primitive.md#generateuniquekey)
+
+
+</details>

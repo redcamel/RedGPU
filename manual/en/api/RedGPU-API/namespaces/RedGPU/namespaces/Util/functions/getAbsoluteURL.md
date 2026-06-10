@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > **getAbsoluteURL**(`base`, `relative`): `string`
 
-Defined in: [src/utils/file/getAbsoluteURL.ts:24](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/file/getAbsoluteURL.ts#L24)
-
+Defined in: [src/utils/file/getAbsoluteURL.ts:18](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/file/getAbsoluteURL.ts#L18)
 
 Converts a relative path to an absolute URL.
 
-
-Combines base and relative to return an absolute URL, returning relative if it fails.
+Combines a base URL and a relative path to create an absolute URL. Returns the relative path as is if conversion fails.
 
 * ### Example
 ```typescript
@@ -25,12 +23,11 @@ const absURL = RedGPU.Util.getAbsoluteURL('https://example.com/path/', '../image
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `base` | `string` | Base URL to use as a reference |
-| `relative` | `string` | Relative path or URL to convert |
+| `base` | `string` \| `URL` | Base URL (string or URL object) |
+| `relative` | `string` | Relative path or URL |
 
 ## Returns
 
 `string`
 
-
-Converted absolute URL, or relative if conversion fails
+Absolute URL

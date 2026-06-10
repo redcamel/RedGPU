@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > **validateRedGPUContext**(`value`): `boolean`
 
-Defined in: [src/runtimeChecker/validateFunc/validateRedGPUContext.ts:26](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/runtimeChecker/validateFunc/validateRedGPUContext.ts#L26)
+Defined in: [src/runtimeChecker/validateFunc/validateRedGPUContext.ts:26](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/runtimeChecker/validateFunc/validateRedGPUContext.ts#L26)
 
 주어진 값이 RedGPUContext 인스턴스인지 검증합니다.
 
-
 값의 생성자 이름이 'RedGPUContext'가 아니면 예외를 발생시킵니다.
-
 
 * ### Example
 ```typescript
@@ -33,8 +31,6 @@ RedGPU.RuntimeChecker.validateRedGPUContext(redGPUContext);
 
 RedGPUContext 인스턴스이면 true
 
-
 ## Throws
 
 RedGPUContext 인스턴스가 아닐 경우 Error 발생
-

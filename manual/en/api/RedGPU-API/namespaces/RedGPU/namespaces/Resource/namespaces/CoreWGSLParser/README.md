@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,8 +6,14 @@
 
 # CoreWGSLParser
 
-
 Provides core functionalities of the WGSL parser (preprocessing, variant generation, type definitions, etc.).
+
+## Other
+
+- [ConditionalBlock](interfaces/ConditionalBlock.md)
+- [PreprocessedWGSLResult](interfaces/PreprocessedWGSLResult.md)
+- [TypedArrayConstructor](type-aliases/TypedArrayConstructor.md)
+- [TypeUniform](type-aliases/TypeUniform.md)
 
 ## WGSL
 

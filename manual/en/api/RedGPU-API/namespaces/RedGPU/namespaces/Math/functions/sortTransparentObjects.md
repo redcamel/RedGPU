@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,8 +8,7 @@
 
 > **sortTransparentObjects**(`cameraPos`, `objects`): `GPURenderBundle`[]
 
-Defined in: [src/math/sortTransparentObjects.ts:21](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/sortTransparentObjects.ts#L21)
-
+Defined in: [src/math/sortTransparentObjects.ts:21](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/sortTransparentObjects.ts#L21)
 
 Sorts transparent objects by distance from camera (descending).
 
@@ -31,6 +30,5 @@ const sorted = RedGPU.math.sortTransparentObjects(camera.position, transparentOb
 ## Returns
 
 `GPURenderBundle`[]
-
 
 Sorted `GPURenderBundle` array

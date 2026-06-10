@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,25 +6,24 @@
 
 # Function: preprocessWGSL()
 
-> **preprocessWGSL**(`code`): `PreprocessedWGSLResult`
+> **preprocessWGSL**(`sourceName`, `code`, `injectLibrary?`): [`PreprocessedWGSLResult`](../interfaces/PreprocessedWGSLResult.md)
 
-Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:209](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/wgslParser/core/preprocessWGSL.ts#L209)
+Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:262](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/preprocessWGSL.ts#L262)
 
 WGSL 셰이더 코드를 전처리합니다.
 
-
 이 함수는 #redgpu_include, REDGPU_DEFINE_*, #redgpu_if 등 RedGPU 전용 매크로를 처리하고, 셰이더 변형(variant) 생성을 위한 정보를 추출합니다.
-
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
+| `sourceName` | `string` | 셰이더 소스 식별 이름 (경고 출력용)
 | `code` | `string` | 전처리할 WGSL 소스 코드
+| `injectLibrary?` | `Record`\<`string`, `string`\> | 주입된 로컬 라이브러리 객체 (선택)
 
 ## Returns
 
-`PreprocessedWGSLResult`
+[`PreprocessedWGSLResult`](../interfaces/PreprocessedWGSLResult.md)
 
 전처리 결과 객체 (캐시 키, 기본 소스, 변형 생성기 등 포함)
-

@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,18 +6,21 @@
 
 # Class: ParticleEmitter
 
-Defined in: [src/display/paticle/ParticleEmitter.ts:18](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L18)
+Defined in: [src/display/particle/ParticleEmitter.ts:18](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L18)
 
-GPU 기반 파티클 시스템을 위한 이미터(Emitter) 클래스입니다.
+GPU 연산(Compute Shader) 기반의 고성능 파티클 시스템을 생성 및 관리하는 클래스입니다.
 
-
-다양한 파티클 속성(수명, 위치, 스케일, 회전, 알파, 이징 등)과 GPU 연산 기반의 대량 파티클 처리를 지원합니다. 파티클의 초기값/최종값 범위, 이징, 버퍼 구조, 컴퓨트 파이프라인 등 파티클 시뮬레이션에 필요한 모든 기능을 제공합니다.
-
+수천에서 수십만 개의 파티클을 GPU에서 시뮬레이션하고 병렬로 렌더링합니다. 수명, 크기, 시작/종료 트랜스폼(위치, 회전, 스케일), 알파값의 변화와 이를 보간하는 다양한 이징(Easing) 함수를 실시간으로 제어할 수 있습니다.
 
 * ### Example
 ```typescript
 const emitter = new RedGPU.Display.ParticleEmitter(redGPUContext);
 emitter.particleNum = 5000;
+
+// 파티클에 텍스처 적용 예시 (기본 제공되는 BitmapMaterial의 diffuseTexture 속성을 설정합니다)
+const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, 'path/to/particle.png');
+emitter.material.diffuseTexture = texture;
+
 scene.addChild(emitter);
 ```
 
@@ -25,14 +28,12 @@ scene.addChild(emitter);
 
 아래는 ParticleEmitter의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
 
-
 ## See
 
 [ParticleEmitter Performance](https://redcamel.github.io/RedGPU/examples/3d/particle/performance/)
 
 ## Roadmap
-- **다양한 파티클 이미터 타입 지원**
-- **
+- *다양한 파티클 이미터 타입 지원**
 
 ## Extends
 
@@ -44,16 +45,15 @@ scene.addChild(emitter);
 
 > **new ParticleEmitter**(`redGPUContext`): `ParticleEmitter`
 
-Defined in: [src/display/paticle/ParticleEmitter.ts:165](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L165)
+Defined in: [src/display/particle/ParticleEmitter.ts:128](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L128)
 
-ParticleEmitter 인스턴스를 생성합니다.
-
+ParticleEmitter 인스턴스를 생성합니다. 기본 지오메트리로 Plane, 기본 재질로 BitmapMaterial이 내부적으로 지정됩니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPU 컨텍스트
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPU 컨텍스트 객체
 
 #### Returns
 
@@ -65,11 +65,1447 @@ ParticleEmitter 인스턴스를 생성합니다.
 
 ## Properties
 
+### isInstanceofParticle
+
+> **isInstanceofParticle**: `boolean`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:28](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L28)
+
+ParticleEmitter 인스턴스인지 판별하는 식별자
+
+***
+
+### useBillboard
+
+> **useBillboard**: `boolean`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:23](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L23)
+
+파티클을 카메라를 항상 마주보도록 할지 여부
+
+***
+
+### easeAlpha
+
+#### Get Signature
+
+> **get** **easeAlpha**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:631](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L631)
+
+알파(투명도) 수치 변화에 적용될 이징(Easing) 함수(PARTICLE_EASE 상수 값)를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **easeAlpha**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:635](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L635)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### easeRotationX
+
+#### Get Signature
+
+> **get** **easeRotationX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:655](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L655)
+
+X축 회전 변화에 적용될 이징(Easing) 함수(PARTICLE_EASE 상수 값)를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **easeRotationX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:659](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L659)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### easeRotationY
+
+#### Get Signature
+
+> **get** **easeRotationY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:667](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L667)
+
+Y축 회전 변화에 적용될 이징(Easing) 함수(PARTICLE_EASE 상수 값)를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **easeRotationY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:671](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L671)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### easeRotationZ
+
+#### Get Signature
+
+> **get** **easeRotationZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:679](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L679)
+
+Z축 회전 변화에 적용될 이징(Easing) 함수(PARTICLE_EASE 상수 값)를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **easeRotationZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:683](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L683)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### easeScale
+
+#### Get Signature
+
+> **get** **easeScale**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:643](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L643)
+
+스케일 크기 변화에 적용될 이징(Easing) 함수(PARTICLE_EASE 상수 값)를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **easeScale**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:647](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L647)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### easeX
+
+#### Get Signature
+
+> **get** **easeX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:595](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L595)
+
+X축 방향 변화에 적용될 이징(Easing) 함수(PARTICLE_EASE 상수 값)를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **easeX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:599](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L599)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### easeY
+
+#### Get Signature
+
+> **get** **easeY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:607](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L607)
+
+Y축 방향 변화에 적용될 이징(Easing) 함수(PARTICLE_EASE 상수 값)를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **easeY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:611](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L611)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### easeZ
+
+#### Get Signature
+
+> **get** **easeZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:619](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L619)
+
+Z축 방향 변화에 적용될 이징(Easing) 함수(PARTICLE_EASE 상수 값)를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **easeZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:623](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L623)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxEndAlpha
+
+#### Get Signature
+
+> **get** **maxEndAlpha**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:391](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L391)
+
+파티클의 최대 종료 불투명도(Opacity)를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxEndAlpha**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:395](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L395)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxEndRotationX
+
+#### Get Signature
+
+> **get** **maxEndRotationX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:559](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L559)
+
+파티클의 최대 종료 X축 회전각(도)을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxEndRotationX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:563](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L563)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxEndRotationY
+
+#### Get Signature
+
+> **get** **maxEndRotationY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:571](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L571)
+
+파티클의 최대 종료 Y축 회전각(도)을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxEndRotationY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:575](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L575)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxEndRotationZ
+
+#### Get Signature
+
+> **get** **maxEndRotationZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:583](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L583)
+
+파티클의 최대 종료 Z축 회전각(도)을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxEndRotationZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:587](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L587)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxEndScale
+
+#### Get Signature
+
+> **get** **maxEndScale**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:439](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L439)
+
+파티클의 최대 종료 스케일을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxEndScale**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:443](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L443)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxEndX
+
+#### Get Signature
+
+> **get** **maxEndX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:319](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L319)
+
+파티클이 사라지기 전에 도달할 수 있는 최대 X 좌표 위치를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxEndX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:323](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L323)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxEndY
+
+#### Get Signature
+
+> **get** **maxEndY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:331](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L331)
+
+파티클이 사라지기 전에 도달할 수 있는 최대 Y 좌표 위치를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxEndY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:335](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L335)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxEndZ
+
+#### Get Signature
+
+> **get** **maxEndZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:343](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L343)
+
+파티클이 사라지기 전에 도달할 수 있는 최대 Z 좌표 위치를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxEndZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:347](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L347)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxLife
+
+#### Get Signature
+
+> **get** **maxLife**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:199](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L199)
+
+파티클 수명의 최대값(ms)을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxLife**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:203](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L203)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxStartAlpha
+
+#### Get Signature
+
+> **get** **maxStartAlpha**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:367](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L367)
+
+파티클의 최대 시작 불투명도(Opacity)를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxStartAlpha**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:371](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L371)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxStartRotationX
+
+#### Get Signature
+
+> **get** **maxStartRotationX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:487](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L487)
+
+파티클의 최대 시작 X축 회전각(도)을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxStartRotationX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:491](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L491)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxStartRotationY
+
+#### Get Signature
+
+> **get** **maxStartRotationY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:499](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L499)
+
+파티클의 최대 시작 Y축 회전각(도)을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxStartRotationY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:503](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L503)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxStartRotationZ
+
+#### Get Signature
+
+> **get** **maxStartRotationZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:511](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L511)
+
+파티클의 최대 시작 Z축 회전각(도)을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxStartRotationZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:515](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L515)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxStartScale
+
+#### Get Signature
+
+> **get** **maxStartScale**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:415](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L415)
+
+파티클의 최대 시작 스케일을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxStartScale**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:419](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L419)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxStartX
+
+#### Get Signature
+
+> **get** **maxStartX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:247](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L247)
+
+파티클이 처음 생성될 때 가질 수 있는 최대 X 좌표 위치를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxStartX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:251](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L251)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxStartY
+
+#### Get Signature
+
+> **get** **maxStartY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:259](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L259)
+
+파티클이 처음 생성될 때 가질 수 있는 최대 Y 좌표 위치를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxStartY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:263](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L263)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxStartZ
+
+#### Get Signature
+
+> **get** **maxStartZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:271](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L271)
+
+파티클이 처음 생성될 때 가질 수 있는 최대 Z 좌표 위치를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxStartZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:275](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L275)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minEndAlpha
+
+#### Get Signature
+
+> **get** **minEndAlpha**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:379](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L379)
+
+파티클의 최소 종료 불투명도(Opacity)를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minEndAlpha**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:383](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L383)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minEndRotationX
+
+#### Get Signature
+
+> **get** **minEndRotationX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:523](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L523)
+
+파티클의 최소 종료 X축 회전각(도)을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minEndRotationX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:527](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L527)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minEndRotationY
+
+#### Get Signature
+
+> **get** **minEndRotationY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:535](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L535)
+
+파티클의 최소 종료 Y축 회전각(도)을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minEndRotationY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:539](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L539)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minEndRotationZ
+
+#### Get Signature
+
+> **get** **minEndRotationZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:547](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L547)
+
+파티클의 최소 종료 Z축 회전각(도)을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minEndRotationZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:551](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L551)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minEndScale
+
+#### Get Signature
+
+> **get** **minEndScale**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:427](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L427)
+
+파티클의 최소 종료 스케일을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minEndScale**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:431](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L431)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minEndX
+
+#### Get Signature
+
+> **get** **minEndX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:283](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L283)
+
+파티클이 사라지기 전에 도달할 수 있는 최소 X 좌표 위치를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minEndX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:287](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L287)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minEndY
+
+#### Get Signature
+
+> **get** **minEndY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:295](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L295)
+
+파티클이 사라지기 전에 도달할 수 있는 최소 Y 좌표 위치를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minEndY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:299](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L299)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minEndZ
+
+#### Get Signature
+
+> **get** **minEndZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:307](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L307)
+
+파티클이 사라지기 전에 도달할 수 있는 최소 Z 좌표 위치를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minEndZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:311](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L311)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minLife
+
+#### Get Signature
+
+> **get** **minLife**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:187](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L187)
+
+파티클 수명의 최소값(ms)을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minLife**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:191](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L191)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minStartAlpha
+
+#### Get Signature
+
+> **get** **minStartAlpha**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:355](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L355)
+
+파티클의 최소 시작 불투명도(Opacity)를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minStartAlpha**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:359](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L359)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minStartRotationX
+
+#### Get Signature
+
+> **get** **minStartRotationX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:451](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L451)
+
+파티클의 최소 시작 X축 회전각(도)을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minStartRotationX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:455](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L455)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minStartRotationY
+
+#### Get Signature
+
+> **get** **minStartRotationY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:463](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L463)
+
+파티클의 최소 시작 Y축 회전각(도)을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minStartRotationY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:467](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L467)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minStartRotationZ
+
+#### Get Signature
+
+> **get** **minStartRotationZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:475](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L475)
+
+파티클의 최소 시작 Z축 회전각(도)을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minStartRotationZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:479](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L479)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minStartScale
+
+#### Get Signature
+
+> **get** **minStartScale**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:403](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L403)
+
+파티클의 최소 시작 스케일을 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minStartScale**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:407](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L407)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minStartX
+
+#### Get Signature
+
+> **get** **minStartX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:211](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L211)
+
+파티클이 처음 생성될 때 가질 수 있는 최소 X 좌표 위치를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minStartX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:215](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L215)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minStartY
+
+#### Get Signature
+
+> **get** **minStartY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:223](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L223)
+
+파티클이 처음 생성될 때 가질 수 있는 최소 Y 좌표 위치를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minStartY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:227](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L227)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minStartZ
+
+#### Get Signature
+
+> **get** **minStartZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:235](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L235)
+
+파티클이 처음 생성될 때 가질 수 있는 최소 Z 좌표 위치를 가져오거나 설정합니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minStartZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:239](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L239)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### particleBuffers
+
+#### Get Signature
+
+> **get** **particleBuffers**(): `GPUBuffer`[]
+
+Defined in: [src/display/particle/ParticleEmitter.ts:691](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L691)
+
+파티클 데이터 및 속성을 저장하는 GPUBuffer들의 배열을 가져옵니다.
+
+##### Returns
+
+`GPUBuffer`[]
+
+***
+
+### particleNum
+
+#### Get Signature
+
+> **get** **particleNum**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:173](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L173)
+
+시뮬레이션할 총 파티클 개수를 조회하거나 설정합니다. 설정 가능한 값의 범위는 1부터 최대 500,000개까지이며, 변경 시 GPU 시뮬레이션 버퍼가 재구축됩니다.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **particleNum**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:177](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L177)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### createCustomMeshVertexShaderModule()
+
+> **createCustomMeshVertexShaderModule**(): `GPUShaderModule`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:715](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L715)
+
+파티클용 커스텀 버텍스 셰이더 모듈을 컴파일하고 반환합니다.
+
+#### Returns
+
+`GPUShaderModule`
+
+컴파일 완료된 GPUShaderModule
+
+***
+
+
+***
+
+## 상속받은 멤버
+
+<details>
+<summary>상속받은 속성 및 메서드 보기 (클릭하여 확장)</summary>
+
 ### \_geometry
 
 > **\_geometry**: [`Geometry`](../../../classes/Geometry.md) \| [`Primitive`](../../Primitive/namespaces/Core/classes/Primitive.md)
 
-Defined in: [src/display/mesh/Mesh.ts:374](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L374)
+Defined in: [src/display/mesh/Mesh.ts:361](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L361)
 
 #### Inherited from
 
@@ -81,7 +1517,7 @@ Defined in: [src/display/mesh/Mesh.ts:374](https://github.com/redcamel/RedGPU/bl
 
 > **\_material**: `any`
 
-Defined in: [src/display/mesh/Mesh.ts:349](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L349)
+Defined in: [src/display/mesh/Mesh.ts:335](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L335)
 
 #### Inherited from
 
@@ -93,7 +1529,7 @@ Defined in: [src/display/mesh/Mesh.ts:349](https://github.com/redcamel/RedGPU/bl
 
 > **animationInfo**: `object`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:33](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L33)
+Defined in: [src/display/mesh/core/MeshBase.ts:32](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L32)
 
 #### animationsList
 
@@ -125,10 +1561,9 @@ Defined in: [src/display/mesh/core/MeshBase.ts:33](https://github.com/redcamel/R
 
 > **castShadow**: `boolean` = `false`
 
-Defined in: [src/display/mesh/Mesh.ts:93](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L93)
+Defined in: [src/display/mesh/Mesh.ts:86](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L86)
 
 그림자 캐스팅 여부
-
 
 #### Inherited from
 
@@ -140,10 +1575,9 @@ Defined in: [src/display/mesh/Mesh.ts:93](https://github.com/redcamel/RedGPU/blo
 
 > **dirtyLOD**: `boolean` = `false`
 
-Defined in: [src/display/mesh/Mesh.ts:98](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L98)
+Defined in: [src/display/mesh/Mesh.ts:91](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L91)
 
 LOD 정보 변경 필요 여부
-
 
 #### Inherited from
 
@@ -155,7 +1589,7 @@ LOD 정보 변경 필요 여부
 
 > **dirtyOpacity**: `boolean` = `true`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:49](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L49)
+Defined in: [src/display/mesh/core/MeshBase.ts:48](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L48)
 
 #### Inherited from
 
@@ -167,7 +1601,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:49](https://github.com/redcamel/R
 
 > **dirtyPipeline**: `boolean` = `true`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:47](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L47)
+Defined in: [src/display/mesh/core/MeshBase.ts:46](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L46)
 
 #### Inherited from
 
@@ -179,7 +1613,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:47](https://github.com/redcamel/R
 
 > **dirtyTransform**: `boolean` = `true`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:48](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L48)
+Defined in: [src/display/mesh/core/MeshBase.ts:47](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L47)
 
 #### Inherited from
 
@@ -191,7 +1625,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:48](https://github.com/redcamel/R
 
 > **disableJitter**: `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:45](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L45)
+Defined in: [src/display/mesh/Mesh.ts:42](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L42)
 
 #### Inherited from
 
@@ -199,26 +1633,11 @@ Defined in: [src/display/mesh/Mesh.ts:45](https://github.com/redcamel/RedGPU/blo
 
 ***
 
-### displacementTexture
-
-> **displacementTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
-
-Defined in: [src/display/mesh/Mesh.ts:88](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L88)
-
-메시의 디스플레이스먼트 텍스처
-
-
-#### Inherited from
-
-[`Mesh`](Mesh.md).[`displacementTexture`](Mesh.md#displacementtexture)
-
-***
-
 ### gltfLoaderInfo
 
 > **gltfLoaderInfo**: [`GLTFLoader`](../../../classes/GLTFLoader.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:46](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L46)
+Defined in: [src/display/mesh/core/MeshBase.ts:45](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L45)
 
 #### Inherited from
 
@@ -230,7 +1649,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:46](https://github.com/redcamel/R
 
 > **gpuRenderInfo**: [`VertexGPURenderInfo`](../namespaces/CoreMesh/classes/VertexGPURenderInfo.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:32](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L32)
+Defined in: [src/display/mesh/core/MeshBase.ts:31](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L31)
 
 #### Inherited from
 
@@ -238,11 +1657,23 @@ Defined in: [src/display/mesh/core/MeshBase.ts:32](https://github.com/redcamel/R
 
 ***
 
+### isInstanceofMesh
+
+> **isInstanceofMesh**: `boolean`
+
+Defined in: [src/display/mesh/Mesh.ts:44](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L44)
+
+#### Inherited from
+
+[`Mesh`](Mesh.md).[`isInstanceofMesh`](Mesh.md#isinstanceofmesh)
+
+***
+
 ### localMatrix
 
 > **localMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:51](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L51)
+Defined in: [src/display/mesh/core/MeshBase.ts:50](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L50)
 
 #### Inherited from
 
@@ -250,23 +1681,11 @@ Defined in: [src/display/mesh/core/MeshBase.ts:51](https://github.com/redcamel/R
 
 ***
 
-### meshType
-
-> **meshType**: `string`
-
-Defined in: [src/display/mesh/Mesh.ts:46](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L46)
-
-#### Inherited from
-
-[`Mesh`](Mesh.md).[`meshType`](Mesh.md#meshtype)
-
-***
-
 ### modelMatrix
 
 > **modelMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:50](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L50)
+Defined in: [src/display/mesh/core/MeshBase.ts:49](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L49)
 
 이 객체의 모델 행렬입니다. 위치, 회전, 스케일 변환에 사용됩니다.
 
@@ -280,7 +1699,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:50](https://github.com/redcamel/R
 
 > **normalModelMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:52](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L52)
+Defined in: [src/display/mesh/core/MeshBase.ts:51](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L51)
 
 #### Inherited from
 
@@ -292,10 +1711,9 @@ Defined in: [src/display/mesh/core/MeshBase.ts:52](https://github.com/redcamel/R
 
 > **passFrustumCulling**: `boolean` = `true`
 
-Defined in: [src/display/mesh/Mesh.ts:103](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L103)
+Defined in: [src/display/mesh/Mesh.ts:96](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L96)
 
 프러스텀 컬링 통과 여부
-
 
 #### Inherited from
 
@@ -307,7 +1725,7 @@ Defined in: [src/display/mesh/Mesh.ts:103](https://github.com/redcamel/RedGPU/bl
 
 > **receiveShadow**: `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:44](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L44)
+Defined in: [src/display/mesh/Mesh.ts:41](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L41)
 
 #### Inherited from
 
@@ -315,19 +1733,11 @@ Defined in: [src/display/mesh/Mesh.ts:44](https://github.com/redcamel/RedGPU/blo
 
 ***
 
-### useBillboard
-
-> **useBillboard**: `boolean`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:19](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L19)
-
-***
-
 ### useDisplacementTexture
 
 > **useDisplacementTexture**: `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:47](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L47)
+Defined in: [src/display/mesh/Mesh.ts:43](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L43)
 
 #### Inherited from
 
@@ -341,10 +1751,9 @@ Defined in: [src/display/mesh/Mesh.ts:47](https://github.com/redcamel/RedGPU/blo
 
 > **get** **boundingAABB**(): [`AABB`](../../Bound/classes/AABB.md)
 
-Defined in: [src/display/mesh/Mesh.ts:783](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L783)
+Defined in: [src/display/mesh/Mesh.ts:750](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L750)
 
 AABB(Axis-Aligned Bounding Box) 정보를 반환합니다.
-
 
 ##### Returns
 
@@ -362,10 +1771,9 @@ AABB(Axis-Aligned Bounding Box) 정보를 반환합니다.
 
 > **get** **boundingOBB**(): [`OBB`](../../Bound/classes/OBB.md)
 
-Defined in: [src/display/mesh/Mesh.ts:770](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L770)
+Defined in: [src/display/mesh/Mesh.ts:737](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L737)
 
 OBB(Oriented Bounding Box) 정보를 반환합니다.
-
 
 ##### Returns
 
@@ -383,7 +1791,7 @@ OBB(Oriented Bounding Box) 정보를 반환합니다.
 
 > **get** **children**(): [`Mesh`](Mesh.md)[]
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:42](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L42)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:44](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L44)
 
 현재 컨테이너에 포함된 자식 Mesh 배열을 반환합니다.
 
@@ -405,10 +1813,9 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:42](https://github.com/r
 
 > **get** **combinedBoundingAABB**(): [`AABB`](../../Bound/classes/AABB.md)
 
-Defined in: [src/display/mesh/Mesh.ts:796](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L796)
+Defined in: [src/display/mesh/Mesh.ts:763](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L763)
 
 자식 객체들을 포함한 통합 AABB 정보를 반환합니다.
-
 
 ##### Returns
 
@@ -426,7 +1833,7 @@ Defined in: [src/display/mesh/Mesh.ts:796](https://github.com/redcamel/RedGPU/bl
 
 > **get** **currentShaderModuleName**(): `string`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:79](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L79)
+Defined in: [src/display/mesh/core/MeshBase.ts:67](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L67)
 
 ##### Returns
 
@@ -436,7 +1843,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:79](https://github.com/redcamel/R
 
 > **set** **currentShaderModuleName**(`value`): `void`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:83](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L83)
+Defined in: [src/display/mesh/core/MeshBase.ts:71](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L71)
 
 ##### Parameters
 
@@ -460,7 +1867,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:83](https://github.com/redcamel/R
 
 > **get** **depthStencilState**(): [`DepthStencilState`](../../RenderState/classes/DepthStencilState.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:92](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L92)
+Defined in: [src/display/mesh/core/MeshBase.ts:80](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L80)
 
 ##### Returns
 
@@ -476,308 +1883,19 @@ Defined in: [src/display/mesh/core/MeshBase.ts:92](https://github.com/redcamel/R
 
 #### Get Signature
 
-> **get** **drawDebugger**(): `DrawDebuggerMesh`
+> **get** **drawDebugger**(): [`DrawDebuggerMesh`](../namespaces/drawDebugger/classes/DrawDebuggerMesh.md)
 
-Defined in: [src/display/mesh/Mesh.ts:345](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L345)
+Defined in: [src/display/mesh/Mesh.ts:331](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L331)
 
 디버그 메시 객체를 반환합니다.
 
-
 ##### Returns
 
-`DrawDebuggerMesh`
+[`DrawDebuggerMesh`](../namespaces/drawDebugger/classes/DrawDebuggerMesh.md)
 
 #### Inherited from
 
 [`Mesh`](Mesh.md).[`drawDebugger`](Mesh.md#drawdebugger)
-
-***
-
-### easeAlpha
-
-#### Get Signature
-
-> **get** **easeAlpha**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:908](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L908)
-
-알파 변화에 적용할 이징 타입을 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **easeAlpha**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:917](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L917)
-
-알파 변화에 적용할 이징 타입을 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | PARTICLE_EASE 값
-
-##### Returns
-
-`void`
-
-***
-
-### easeRotationX
-
-#### Get Signature
-
-> **get** **easeRotationX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:942](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L942)
-
-X축 회전에 적용할 이징 타입을 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **easeRotationX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:951](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L951)
-
-X축 회전에 적용할 이징 타입을 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | PARTICLE_EASE 값
-
-##### Returns
-
-`void`
-
-***
-
-### easeRotationY
-
-#### Get Signature
-
-> **get** **easeRotationY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:959](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L959)
-
-Y축 회전에 적용할 이징 타입을 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **easeRotationY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:968](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L968)
-
-Y축 회전에 적용할 이징 타입을 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | PARTICLE_EASE 값
-
-##### Returns
-
-`void`
-
-***
-
-### easeRotationZ
-
-#### Get Signature
-
-> **get** **easeRotationZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:976](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L976)
-
-Z축 회전에 적용할 이징 타입을 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **easeRotationZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:985](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L985)
-
-Z축 회전에 적용할 이징 타입을 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | PARTICLE_EASE 값
-
-##### Returns
-
-`void`
-
-***
-
-### easeScale
-
-#### Get Signature
-
-> **get** **easeScale**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:925](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L925)
-
-스케일 변화에 적용할 이징 타입을 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **easeScale**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:934](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L934)
-
-스케일 변화에 적용할 이징 타입을 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | PARTICLE_EASE 값
-
-##### Returns
-
-`void`
-
-***
-
-### easeX
-
-#### Get Signature
-
-> **get** **easeX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:857](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L857)
-
-X축 이동에 적용할 이징 타입을 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **easeX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:866](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L866)
-
-X축 이동에 적용할 이징 타입을 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | PARTICLE_EASE 값
-
-##### Returns
-
-`void`
-
-***
-
-### easeY
-
-#### Get Signature
-
-> **get** **easeY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:874](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L874)
-
-Y축 이동에 적용할 이징 타입을 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **easeY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:883](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L883)
-
-Y축 이동에 적용할 이징 타입을 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | PARTICLE_EASE 값
-
-##### Returns
-
-`void`
-
-***
-
-### easeZ
-
-#### Get Signature
-
-> **get** **easeZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:891](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L891)
-
-Z축 이동에 적용할 이징 타입을 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **easeZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:900](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L900)
-
-Z축 이동에 적용할 이징 타입을 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | PARTICLE_EASE 값
-
-##### Returns
-
-`void`
 
 ***
 
@@ -787,10 +1905,9 @@ Z축 이동에 적용할 이징 타입을 설정합니다.
 
 > **get** **enableDebugger**(): `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:325](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L325)
+Defined in: [src/display/mesh/Mesh.ts:311](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L311)
 
 디버거 활성화 여부를 반환합니다.
-
 
 ##### Returns
 
@@ -800,10 +1917,9 @@ Defined in: [src/display/mesh/Mesh.ts:325](https://github.com/redcamel/RedGPU/bl
 
 > **set** **enableDebugger**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:336](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L336)
+Defined in: [src/display/mesh/Mesh.ts:322](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L322)
 
 디버거 활성화 여부를 설정합니다.
-
 
 ##### Parameters
 
@@ -827,10 +1943,9 @@ Defined in: [src/display/mesh/Mesh.ts:336](https://github.com/redcamel/RedGPU/bl
 
 > **get** **events**(): `any`
 
-Defined in: [src/display/mesh/Mesh.ts:448](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L448)
+Defined in: [src/display/mesh/Mesh.ts:435](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L435)
 
 등록된 이벤트들을 반환합니다.
-
 
 ##### Returns
 
@@ -848,10 +1963,9 @@ Defined in: [src/display/mesh/Mesh.ts:448](https://github.com/redcamel/RedGPU/bl
 
 > **get** **geometry**(): [`Geometry`](../../../classes/Geometry.md) \| [`Primitive`](../../Primitive/namespaces/Core/classes/Primitive.md)
 
-Defined in: [src/display/mesh/Mesh.ts:379](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L379)
+Defined in: [src/display/mesh/Mesh.ts:366](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L366)
 
 지오메트리를 반환합니다.
-
 
 ##### Returns
 
@@ -861,10 +1975,9 @@ Defined in: [src/display/mesh/Mesh.ts:379](https://github.com/redcamel/RedGPU/bl
 
 > **set** **geometry**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:390](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L390)
+Defined in: [src/display/mesh/Mesh.ts:377](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L377)
 
 지오메트리를 설정합니다.
-
 
 ##### Parameters
 
@@ -888,7 +2001,7 @@ Defined in: [src/display/mesh/Mesh.ts:390](https://github.com/redcamel/RedGPU/bl
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:100](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L100)
+Defined in: [src/display/mesh/core/MeshBase.ts:88](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L88)
 
 Retrieves the GPU device associated with the current instance.
 
@@ -910,10 +2023,9 @@ The GPU device.
 
 > **get** **ignoreFrustumCulling**(): `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:421](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L421)
+Defined in: [src/display/mesh/Mesh.ts:408](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L408)
 
 프러스텀 컬링 무시 여부를 반환합니다.
-
 
 ##### Returns
 
@@ -923,10 +2035,9 @@ Defined in: [src/display/mesh/Mesh.ts:421](https://github.com/redcamel/RedGPU/bl
 
 > **set** **ignoreFrustumCulling**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:432](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L432)
+Defined in: [src/display/mesh/Mesh.ts:419](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L419)
 
 프러스텀 컬링 무시 여부를 설정합니다.
-
 
 ##### Parameters
 
@@ -950,17 +2061,15 @@ Defined in: [src/display/mesh/Mesh.ts:432](https://github.com/redcamel/RedGPU/bl
 
 > **get** **LODManager**(): [`LODManager`](../namespaces/CoreMesh/classes/LODManager.md)
 
-Defined in: [src/display/mesh/Mesh.ts:317](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L317)
+Defined in: [src/display/mesh/Mesh.ts:303](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L303)
 
 LOD(Level of Detail) 매니저를 반환합니다.
-
 
 ##### Returns
 
 [`LODManager`](../namespaces/CoreMesh/classes/LODManager.md)
 
 LODManager 인스턴스
-
 
 #### Inherited from
 
@@ -974,10 +2083,9 @@ LODManager 인스턴스
 
 > **get** **material**(): `any`
 
-Defined in: [src/display/mesh/Mesh.ts:354](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L354)
+Defined in: [src/display/mesh/Mesh.ts:340](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L340)
 
 머티리얼을 반환합니다.
-
 
 ##### Returns
 
@@ -987,10 +2095,9 @@ Defined in: [src/display/mesh/Mesh.ts:354](https://github.com/redcamel/RedGPU/bl
 
 > **set** **material**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:365](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L365)
+Defined in: [src/display/mesh/Mesh.ts:351](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L351)
 
 머티리얼을 설정합니다.
-
 
 ##### Parameters
 
@@ -1008,1265 +2115,35 @@ Defined in: [src/display/mesh/Mesh.ts:365](https://github.com/redcamel/RedGPU/bl
 
 ***
 
-### maxEndAlpha
-
-#### Get Signature
-
-> **get** **maxEndAlpha**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:568](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L568)
-
-최대 종료 알파를 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxEndAlpha**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:577](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L577)
-
-최대 종료 알파를 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### maxEndRotationX
-
-#### Get Signature
-
-> **get** **maxEndRotationX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:806](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L806)
-
-최대 종료 X 회전을 반환합니다. (도)
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxEndRotationX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:815](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L815)
-
-최대 종료 X 회전을 설정합니다. (도)
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### maxEndRotationY
-
-#### Get Signature
-
-> **get** **maxEndRotationY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:823](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L823)
-
-최대 종료 Y 회전을 반환합니다. (도)
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxEndRotationY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:832](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L832)
-
-최대 종료 Y 회전을 설정합니다. (도)
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### maxEndRotationZ
-
-#### Get Signature
-
-> **get** **maxEndRotationZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:840](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L840)
-
-최대 종료 Z 회전을 반환합니다. (도)
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxEndRotationZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:849](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L849)
-
-최대 종료 Z 회전을 설정합니다. (도)
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### maxEndScale
-
-#### Get Signature
-
-> **get** **maxEndScale**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:636](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L636)
-
-최대 종료 스케일을 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxEndScale**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:645](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L645)
-
-최대 종료 스케일을 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### maxEndX
-
-#### Get Signature
-
-> **get** **maxEndX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:466](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L466)
-
-최대 종료 X 좌표를 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxEndX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:475](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L475)
-
-최대 종료 X 좌표를 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### maxEndY
-
-#### Get Signature
-
-> **get** **maxEndY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:483](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L483)
-
-최대 종료 Y 좌표를 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxEndY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:492](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L492)
-
-최대 종료 Y 좌표를 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### maxEndZ
-
-#### Get Signature
-
-> **get** **maxEndZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:500](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L500)
-
-최대 종료 Z 좌표를 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxEndZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:509](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L509)
-
-최대 종료 Z 좌표를 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### maxLife
-
-#### Get Signature
-
-> **get** **maxLife**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:293](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L293)
-
-파티클의 최대 수명을 반환합니다. (ms)
-
-
-##### Returns
-
-`number`
-
-최대 수명
-
-
-#### Set Signature
-
-> **set** **maxLife**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:305](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L305)
-
-파티클의 최대 수명을 설정합니다. (ms)
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 최대 수명
-
-##### Returns
-
-`void`
-
-***
-
-### maxStartAlpha
-
-#### Get Signature
-
-> **get** **maxStartAlpha**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:534](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L534)
-
-최대 시작 알파를 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxStartAlpha**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:543](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L543)
-
-최대 시작 알파를 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### maxStartRotationX
-
-#### Get Signature
-
-> **get** **maxStartRotationX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:704](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L704)
-
-최대 시작 X 회전을 반환합니다. (도)
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxStartRotationX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:713](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L713)
-
-최대 시작 X 회전을 설정합니다. (도)
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### maxStartRotationY
-
-#### Get Signature
-
-> **get** **maxStartRotationY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:721](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L721)
-
-최대 시작 Y 회전을 반환합니다. (도)
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxStartRotationY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:730](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L730)
-
-최대 시작 Y 회전을 설정합니다. (도)
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### maxStartRotationZ
-
-#### Get Signature
-
-> **get** **maxStartRotationZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:738](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L738)
-
-최대 시작 Z 회전을 반환합니다. (도)
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxStartRotationZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:747](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L747)
-
-최대 시작 Z 회전을 설정합니다. (도)
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### maxStartScale
-
-#### Get Signature
-
-> **get** **maxStartScale**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:602](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L602)
-
-최대 시작 스케일을 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxStartScale**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:611](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L611)
-
-최대 시작 스케일을 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### maxStartX
-
-#### Get Signature
-
-> **get** **maxStartX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:364](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L364)
-
-최대 시작 X 좌표를 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxStartX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:373](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L373)
-
-최대 시작 X 좌표를 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### maxStartY
-
-#### Get Signature
-
-> **get** **maxStartY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:381](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L381)
-
-최대 시작 Y 좌표를 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxStartY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:390](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L390)
-
-최대 시작 Y 좌표를 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### maxStartZ
-
-#### Get Signature
-
-> **get** **maxStartZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:398](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L398)
-
-최대 시작 Z 좌표를 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxStartZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:407](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L407)
-
-최대 시작 Z 좌표를 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### minEndAlpha
-
-#### Get Signature
-
-> **get** **minEndAlpha**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:551](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L551)
-
-최소 종료 알파를 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minEndAlpha**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:560](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L560)
-
-최소 종료 알파를 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### minEndRotationX
-
-#### Get Signature
-
-> **get** **minEndRotationX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:755](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L755)
-
-최소 종료 X 회전을 반환합니다. (도)
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minEndRotationX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:764](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L764)
-
-최소 종료 X 회전을 설정합니다. (도)
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### minEndRotationY
-
-#### Get Signature
-
-> **get** **minEndRotationY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:772](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L772)
-
-최소 종료 Y 회전을 반환합니다. (도)
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minEndRotationY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:781](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L781)
-
-최소 종료 Y 회전을 설정합니다. (도)
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### minEndRotationZ
-
-#### Get Signature
-
-> **get** **minEndRotationZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:789](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L789)
-
-최소 종료 Z 회전을 반환합니다. (도)
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minEndRotationZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:798](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L798)
-
-최소 종료 Z 회전을 설정합니다. (도)
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### minEndScale
-
-#### Get Signature
-
-> **get** **minEndScale**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:619](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L619)
-
-최소 종료 스케일을 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minEndScale**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:628](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L628)
-
-최소 종료 스케일을 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### minEndX
-
-#### Get Signature
-
-> **get** **minEndX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:415](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L415)
-
-최소 종료 X 좌표를 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minEndX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:424](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L424)
-
-최소 종료 X 좌표를 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### minEndY
-
-#### Get Signature
-
-> **get** **minEndY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:432](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L432)
-
-최소 종료 Y 좌표를 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minEndY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:441](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L441)
-
-최소 종료 Y 좌표를 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### minEndZ
-
-#### Get Signature
-
-> **get** **minEndZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:449](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L449)
-
-최소 종료 Z 좌표를 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minEndZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:458](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L458)
-
-최소 종료 Z 좌표를 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### minLife
-
-#### Get Signature
-
-> **get** **minLife**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:269](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L269)
-
-파티클의 최소 수명을 반환합니다. (ms)
-
-
-##### Returns
-
-`number`
-
-최소 수명
-
-
-#### Set Signature
-
-> **set** **minLife**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:281](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L281)
-
-파티클의 최소 수명을 설정합니다. (ms)
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 최소 수명
-
-##### Returns
-
-`void`
-
-***
-
-### minStartAlpha
-
-#### Get Signature
-
-> **get** **minStartAlpha**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:517](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L517)
-
-최소 시작 알파를 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minStartAlpha**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:526](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L526)
-
-최소 시작 알파를 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### minStartRotationX
-
-#### Get Signature
-
-> **get** **minStartRotationX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:653](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L653)
-
-최소 시작 X 회전을 반환합니다. (도)
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minStartRotationX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:662](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L662)
-
-최소 시작 X 회전을 설정합니다. (도)
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### minStartRotationY
-
-#### Get Signature
-
-> **get** **minStartRotationY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:670](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L670)
-
-최소 시작 Y 회전을 반환합니다. (도)
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minStartRotationY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:679](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L679)
-
-최소 시작 Y 회전을 설정합니다. (도)
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### minStartRotationZ
-
-#### Get Signature
-
-> **get** **minStartRotationZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:687](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L687)
-
-최소 시작 Z 회전을 반환합니다. (도)
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minStartRotationZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:696](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L696)
-
-최소 시작 Z 회전을 설정합니다. (도)
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### minStartScale
-
-#### Get Signature
-
-> **get** **minStartScale**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:585](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L585)
-
-최소 시작 스케일을 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minStartScale**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:594](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L594)
-
-최소 시작 스케일을 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### minStartX
-
-#### Get Signature
-
-> **get** **minStartX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:313](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L313)
-
-최소 시작 X 좌표를 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minStartX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:322](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L322)
-
-최소 시작 X 좌표를 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### minStartY
-
-#### Get Signature
-
-> **get** **minStartY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:330](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L330)
-
-최소 시작 Y 좌표를 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minStartY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:339](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L339)
-
-최소 시작 Y 좌표를 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
-### minStartZ
-
-#### Get Signature
-
-> **get** **minStartZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:347](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L347)
-
-최소 시작 Z 좌표를 반환합니다.
-
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minStartZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:356](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L356)
-
-최소 시작 Z 좌표를 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 값
-
-##### Returns
-
-`void`
-
-***
-
 ### name
 
 #### Get Signature
 
 > **get** **name**(): `string`
 
-Defined in: [src/display/mesh/Mesh.ts:456](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L456)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L58)
 
-메시의 이름을 반환합니다.
-
+객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
 
 ##### Returns
 
 `string`
 
+객체 이름
+
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:468](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L468)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L71)
 
-메시의 이름을 설정합니다.
-
+객체의 이름을 설정합니다.
 
 ##### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `value` | `string` | 메시 이름
+| `value` | `string` | 설정할 객체 이름
 
 ##### Returns
 
@@ -2284,7 +2161,7 @@ Defined in: [src/display/mesh/Mesh.ts:468](https://github.com/redcamel/RedGPU/bl
 
 > **get** **numChildren**(): `number`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:50](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L50)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:52](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L52)
 
 자식 객체의 개수를 반환합니다.
 
@@ -2306,10 +2183,9 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:50](https://github.com/r
 
 > **get** **opacity**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:400](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L400)
+Defined in: [src/display/mesh/Mesh.ts:387](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L387)
 
 메시의 투명도를 반환합니다. (0~1)
-
 
 ##### Returns
 
@@ -2319,10 +2195,9 @@ Defined in: [src/display/mesh/Mesh.ts:400](https://github.com/redcamel/RedGPU/bl
 
 > **set** **opacity**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:411](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L411)
+Defined in: [src/display/mesh/Mesh.ts:398](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L398)
 
 메시의 투명도를 설정합니다. (0~1)
-
 
 ##### Parameters
 
@@ -2346,10 +2221,9 @@ Defined in: [src/display/mesh/Mesh.ts:411](https://github.com/redcamel/RedGPU/bl
 
 > **get** **parent**(): [`Object3DContainer`](../namespaces/CoreMesh/classes/Object3DContainer.md)
 
-Defined in: [src/display/mesh/Mesh.ts:484](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L484)
+Defined in: [src/display/mesh/Mesh.ts:451](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L451)
 
 설정된 부모 객체를 반환합니다.
-
 
 ##### Returns
 
@@ -2359,10 +2233,9 @@ Defined in: [src/display/mesh/Mesh.ts:484](https://github.com/redcamel/RedGPU/bl
 
 > **set** **parent**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:495](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L495)
+Defined in: [src/display/mesh/Mesh.ts:462](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L462)
 
 부모 객체를 설정합니다.
-
 
 ##### Parameters
 
@@ -2380,71 +2253,15 @@ Defined in: [src/display/mesh/Mesh.ts:495](https://github.com/redcamel/RedGPU/bl
 
 ***
 
-### particleBuffers
-
-#### Get Signature
-
-> **get** **particleBuffers**(): `GPUBuffer`[]
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:992](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L992)
-
-파티클 버퍼(GPUBuffer) 배열 반환
-
-##### Returns
-
-`GPUBuffer`[]
-
-***
-
-### particleNum
-
-#### Get Signature
-
-> **get** **particleNum**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:243](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L243)
-
-파티클 개수를 반환합니다. (최대 500,000, 최소 1)
-
-
-##### Returns
-
-`number`
-
-파티클 개수
-
-
-#### Set Signature
-
-> **set** **particleNum**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:255](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L255)
-
-파티클 개수를 설정합니다. 설정 시 시뮬레이션 버퍼가 재구성됩니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | 파티클 개수 (1 ~ 500,000)
-
-##### Returns
-
-`void`
-
-***
-
 ### pickingId
 
 #### Get Signature
 
 > **get** **pickingId**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:440](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L440)
+Defined in: [src/display/mesh/Mesh.ts:427](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L427)
 
 피킹 ID를 반환합니다.
-
 
 ##### Returns
 
@@ -2462,10 +2279,9 @@ Defined in: [src/display/mesh/Mesh.ts:440](https://github.com/redcamel/RedGPU/bl
 
 > **get** **pivotX**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:503](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L503)
+Defined in: [src/display/mesh/Mesh.ts:470](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L470)
 
 피벗 X 좌표를 반환합니다.
-
 
 ##### Returns
 
@@ -2475,10 +2291,9 @@ Defined in: [src/display/mesh/Mesh.ts:503](https://github.com/redcamel/RedGPU/bl
 
 > **set** **pivotX**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:514](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L514)
+Defined in: [src/display/mesh/Mesh.ts:481](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L481)
 
 피벗 X 좌표를 설정합니다.
-
 
 ##### Parameters
 
@@ -2502,10 +2317,9 @@ Defined in: [src/display/mesh/Mesh.ts:514](https://github.com/redcamel/RedGPU/bl
 
 > **get** **pivotY**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:523](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L523)
+Defined in: [src/display/mesh/Mesh.ts:490](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L490)
 
 피벗 Y 좌표를 반환합니다.
-
 
 ##### Returns
 
@@ -2515,10 +2329,9 @@ Defined in: [src/display/mesh/Mesh.ts:523](https://github.com/redcamel/RedGPU/bl
 
 > **set** **pivotY**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:534](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L534)
+Defined in: [src/display/mesh/Mesh.ts:501](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L501)
 
 피벗 Y 좌표를 설정합니다.
-
 
 ##### Parameters
 
@@ -2542,10 +2355,9 @@ Defined in: [src/display/mesh/Mesh.ts:534](https://github.com/redcamel/RedGPU/bl
 
 > **get** **pivotZ**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:543](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L543)
+Defined in: [src/display/mesh/Mesh.ts:510](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L510)
 
 피벗 Z 좌표를 반환합니다.
-
 
 ##### Returns
 
@@ -2555,10 +2367,9 @@ Defined in: [src/display/mesh/Mesh.ts:543](https://github.com/redcamel/RedGPU/bl
 
 > **set** **pivotZ**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:554](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L554)
+Defined in: [src/display/mesh/Mesh.ts:521](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L521)
 
 피벗 Z 좌표를 설정합니다.
-
 
 ##### Parameters
 
@@ -2582,17 +2393,15 @@ Defined in: [src/display/mesh/Mesh.ts:554](https://github.com/redcamel/RedGPU/bl
 
 > **get** **position**(): `Float32Array`
 
-Defined in: [src/display/mesh/Mesh.ts:626](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L626)
+Defined in: [src/display/mesh/Mesh.ts:593](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L593)
 
 현재 위치를 반환합니다. [x, y, z]
-
 
 ##### Returns
 
 `Float32Array`
 
 위치 배열
-
 
 #### Inherited from
 
@@ -2606,7 +2415,7 @@ Defined in: [src/display/mesh/Mesh.ts:626](https://github.com/redcamel/RedGPU/bl
 
 > **get** **primitiveState**(): [`PrimitiveState`](../../RenderState/classes/PrimitiveState.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:88](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L88)
+Defined in: [src/display/mesh/core/MeshBase.ts:76](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L76)
 
 ##### Returns
 
@@ -2624,7 +2433,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:88](https://github.com/redcamel/R
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:109](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L109)
+Defined in: [src/display/mesh/core/MeshBase.ts:97](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L97)
 
 Retrieves the RedGPUContext instance.
 
@@ -2646,10 +2455,9 @@ The RedGPUContext instance.
 
 > **get** **rotation**(): `Float32Array`
 
-Defined in: [src/display/mesh/Mesh.ts:762](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L762)
+Defined in: [src/display/mesh/Mesh.ts:729](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L729)
 
 현재 회전값을 반환합니다. [x, y, z] (도)
-
 
 ##### Returns
 
@@ -2667,10 +2475,9 @@ Defined in: [src/display/mesh/Mesh.ts:762](https://github.com/redcamel/RedGPU/bl
 
 > **get** **rotationX**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:702](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L702)
+Defined in: [src/display/mesh/Mesh.ts:669](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L669)
 
 X축 회전값을 반환합니다. (도)
-
 
 ##### Returns
 
@@ -2680,10 +2487,9 @@ X축 회전값을 반환합니다. (도)
 
 > **set** **rotationX**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:713](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L713)
+Defined in: [src/display/mesh/Mesh.ts:680](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L680)
 
 X축 회전값을 설정합니다. (도)
-
 
 ##### Parameters
 
@@ -2707,10 +2513,9 @@ X축 회전값을 설정합니다. (도)
 
 > **get** **rotationY**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:722](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L722)
+Defined in: [src/display/mesh/Mesh.ts:689](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L689)
 
 Y축 회전값을 반환합니다. (도)
-
 
 ##### Returns
 
@@ -2720,10 +2525,9 @@ Y축 회전값을 반환합니다. (도)
 
 > **set** **rotationY**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:733](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L733)
+Defined in: [src/display/mesh/Mesh.ts:700](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L700)
 
 Y축 회전값을 설정합니다. (도)
-
 
 ##### Parameters
 
@@ -2747,10 +2551,9 @@ Y축 회전값을 설정합니다. (도)
 
 > **get** **rotationZ**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:742](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L742)
+Defined in: [src/display/mesh/Mesh.ts:709](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L709)
 
 Z축 회전값을 반환합니다. (도)
-
 
 ##### Returns
 
@@ -2760,10 +2563,9 @@ Z축 회전값을 반환합니다. (도)
 
 > **set** **rotationZ**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:753](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L753)
+Defined in: [src/display/mesh/Mesh.ts:720](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L720)
 
 Z축 회전값을 설정합니다. (도)
-
 
 ##### Parameters
 
@@ -2787,10 +2589,9 @@ Z축 회전값을 설정합니다. (도)
 
 > **get** **scale**(): `Float32Array`
 
-Defined in: [src/display/mesh/Mesh.ts:694](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L694)
+Defined in: [src/display/mesh/Mesh.ts:661](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L661)
 
 현재 스케일을 반환합니다. [x, y, z]
-
 
 ##### Returns
 
@@ -2808,10 +2609,9 @@ Defined in: [src/display/mesh/Mesh.ts:694](https://github.com/redcamel/RedGPU/bl
 
 > **get** **scaleX**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:634](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L634)
+Defined in: [src/display/mesh/Mesh.ts:601](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L601)
 
 X축 스케일을 반환합니다.
-
 
 ##### Returns
 
@@ -2821,10 +2621,9 @@ X축 스케일을 반환합니다.
 
 > **set** **scaleX**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:645](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L645)
+Defined in: [src/display/mesh/Mesh.ts:612](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L612)
 
 X축 스케일을 설정합니다.
-
 
 ##### Parameters
 
@@ -2848,10 +2647,9 @@ X축 스케일을 설정합니다.
 
 > **get** **scaleY**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:654](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L654)
+Defined in: [src/display/mesh/Mesh.ts:621](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L621)
 
 Y축 스케일을 반환합니다.
-
 
 ##### Returns
 
@@ -2861,10 +2659,9 @@ Y축 스케일을 반환합니다.
 
 > **set** **scaleY**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:665](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L665)
+Defined in: [src/display/mesh/Mesh.ts:632](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L632)
 
 Y축 스케일을 설정합니다.
-
 
 ##### Parameters
 
@@ -2888,10 +2685,9 @@ Y축 스케일을 설정합니다.
 
 > **get** **scaleZ**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:674](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L674)
+Defined in: [src/display/mesh/Mesh.ts:641](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L641)
 
 Z축 스케일을 반환합니다.
-
 
 ##### Returns
 
@@ -2901,10 +2697,9 @@ Z축 스케일을 반환합니다.
 
 > **set** **scaleZ**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:685](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L685)
+Defined in: [src/display/mesh/Mesh.ts:652](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L652)
 
 Z축 스케일을 설정합니다.
-
 
 ##### Parameters
 
@@ -2928,15 +2723,15 @@ Z축 스케일을 설정합니다.
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:75](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L75)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L46)
 
-Retrieves the UUID of the object.
+객체의 고유 식별자(UUID)를 반환합니다.
 
 ##### Returns
 
 `string`
 
-The UUID of the object.
+UUID 문자열
 
 #### Inherited from
 
@@ -2950,10 +2745,9 @@ The UUID of the object.
 
 > **get** **vertexStateBuffers**(): `GPUVertexBufferLayout`[]
 
-Defined in: [src/display/paticle/ParticleEmitter.ts:181](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L181)
+Defined in: [src/display/particle/ParticleEmitter.ts:139](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L139)
 
-버텍스 상태 버퍼 레이아웃을 반환합니다.
-
+파티클 개별 렌더링에 사용되는 인스턴스 기반 GPU 버텍스 버퍼 레이아웃 정보를 가져옵니다.
 
 ##### Returns
 
@@ -2971,10 +2765,9 @@ Defined in: [src/display/paticle/ParticleEmitter.ts:181](https://github.com/redc
 
 > **get** **x**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:563](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L563)
+Defined in: [src/display/mesh/Mesh.ts:530](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L530)
 
 X 위치 좌표를 반환합니다.
-
 
 ##### Returns
 
@@ -2984,10 +2777,9 @@ X 위치 좌표를 반환합니다.
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:574](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L574)
+Defined in: [src/display/mesh/Mesh.ts:541](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L541)
 
 X 위치 좌표를 설정합니다.
-
 
 ##### Parameters
 
@@ -3011,10 +2803,9 @@ X 위치 좌표를 설정합니다.
 
 > **get** **y**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:583](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L583)
+Defined in: [src/display/mesh/Mesh.ts:550](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L550)
 
 Y 위치 좌표를 반환합니다.
-
 
 ##### Returns
 
@@ -3024,10 +2815,9 @@ Y 위치 좌표를 반환합니다.
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:594](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L594)
+Defined in: [src/display/mesh/Mesh.ts:561](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L561)
 
 Y 위치 좌표를 설정합니다.
-
 
 ##### Parameters
 
@@ -3051,10 +2841,9 @@ Y 위치 좌표를 설정합니다.
 
 > **get** **z**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:603](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L603)
+Defined in: [src/display/mesh/Mesh.ts:570](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L570)
 
 Z 위치 좌표를 반환합니다.
-
 
 ##### Returns
 
@@ -3064,10 +2853,9 @@ Z 위치 좌표를 반환합니다.
 
 > **set** **z**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:614](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L614)
+Defined in: [src/display/mesh/Mesh.ts:581](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L581)
 
 Z 위치 좌표를 설정합니다.
-
 
 ##### Parameters
 
@@ -3085,35 +2873,11 @@ Z 위치 좌표를 설정합니다.
 
 ## Methods
 
-### \_\_fireListenerList()
-
-> **\_\_fireListenerList**(`resetList?`): `void`
-
-Defined in: [src/display/mesh/core/MeshBase.ts:130](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L130)
-
-Fires the dirty listeners list.
-
-#### Parameters
-
-| Parameter | Type | Default value | Description |
-| ------ | ------ | ------ | ------ |
-| `resetList?` | `boolean` | `false` | Indicates whether to reset the dirty listeners list after firing. |
-
-#### Returns
-
-`void`
-
-#### Inherited from
-
-[`Mesh`](Mesh.md).[`__fireListenerList`](Mesh.md#__firelistenerlist)
-
-***
-
 ### addChild()
 
 > **addChild**(`child`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:69](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L69)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:71](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L71)
 
 자식 Mesh를 컨테이너에 추가합니다.
 
@@ -3139,7 +2903,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:69](https://github.com/r
 
 > **addChildAt**(`child`, `index`): `ParticleEmitter`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:87](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L87)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L89)
 
 자식 Mesh를 특정 인덱스에 추가합니다.
 
@@ -3166,10 +2930,9 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:87](https://github.com/r
 
 > **addListener**(`eventName`, `callback`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:897](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L897)
+Defined in: [src/display/mesh/Mesh.ts:864](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L864)
 
 이벤트 리스너를 추가합니다.
-
 
 #### Parameters
 
@@ -3192,19 +2955,17 @@ Defined in: [src/display/mesh/Mesh.ts:897](https://github.com/redcamel/RedGPU/bl
 
 > **clone**(): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/Mesh.ts:1007](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L1007)
+Defined in: [src/display/mesh/Mesh.ts:974](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L974)
 
 **`Experimental`**
 
 메시를 복제합니다.
-
 
 #### Returns
 
 [`Mesh`](Mesh.md)
 
 복제된 Mesh 인스턴스
-
 
 #### Inherited from
 
@@ -3216,7 +2977,7 @@ Defined in: [src/display/mesh/Mesh.ts:1007](https://github.com/redcamel/RedGPU/b
 
 > **contains**(`child`): `boolean`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:59](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L59)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:61](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L61)
 
 특정 Mesh가 현재 컨테이너에 포함되어 있는지 확인합니다.
 
@@ -3238,27 +2999,11 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:59](https://github.com/r
 
 ***
 
-### createCustomMeshVertexShaderModule()
-
-> **createCustomMeshVertexShaderModule**(): `GPUShaderModule`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:1011](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L1011)
-
-커스텀 버텍스 셰이더 모듈을 생성합니다.
-
-#### Returns
-
-`GPUShaderModule`
-
-생성된 셰이더 모듈
-
-***
-
 ### createMeshVertexShaderModuleBASIC()
 
 > **createMeshVertexShaderModuleBASIC**(`VERTEX_SHADER_MODULE_NAME`, `SHADER_INFO`, `UNIFORM_STRUCT_BASIC`, `vertexModuleSource`): `GPUShaderModule`
 
-Defined in: [src/display/mesh/Mesh.ts:1711](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L1711)
+Defined in: [src/display/mesh/Mesh.ts:1681](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L1681)
 
 #### Parameters
 
@@ -3283,7 +3028,7 @@ Defined in: [src/display/mesh/Mesh.ts:1711](https://github.com/redcamel/RedGPU/b
 
 > **getChildAt**(`index`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:109](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L109)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:111](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L111)
 
 지정된 인덱스의 자식 Mesh를 반환합니다.
 
@@ -3309,7 +3054,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:109](https://github.com/
 
 > **getChildIndex**(`child`): `number`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:123](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L123)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:125](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L125)
 
 특정 자식 객체의 인덱스를 반환합니다.
 
@@ -3335,17 +3080,15 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:123](https://github.com/
 
 > **getCombinedOpacity**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:879](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L879)
+Defined in: [src/display/mesh/Mesh.ts:846](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L846)
 
 부모 계층을 고려한 통합 투명도를 계산하여 반환합니다.
-
 
 #### Returns
 
 `number`
 
 통합 투명도 값
-
 
 #### Inherited from
 
@@ -3357,7 +3100,7 @@ Defined in: [src/display/mesh/Mesh.ts:879](https://github.com/redcamel/RedGPU/bl
 
 > **getScreenPoint**(`view`): \[`number`, `number`\]
 
-Defined in: [src/display/mesh/core/MeshBase.ts:121](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L121)
+Defined in: [src/display/mesh/core/MeshBase.ts:109](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L109)
 
 #### Parameters
 
@@ -3379,7 +3122,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:121](https://github.com/redcamel/
 
 > **initGPURenderInfos**(): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:1697](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L1697)
+Defined in: [src/display/mesh/Mesh.ts:1667](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L1667)
 
 #### Returns
 
@@ -3395,7 +3138,7 @@ Defined in: [src/display/mesh/Mesh.ts:1697](https://github.com/redcamel/RedGPU/b
 
 > **localToWorld**(`x`, `y`, `z`): \[`number`, `number`, `number`\]
 
-Defined in: [src/display/mesh/core/MeshBase.ts:117](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L117)
+Defined in: [src/display/mesh/core/MeshBase.ts:105](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L105)
 
 #### Parameters
 
@@ -3419,10 +3162,9 @@ Defined in: [src/display/mesh/core/MeshBase.ts:117](https://github.com/redcamel/
 
 > **lookAt**(`targetX`, `targetY?`, `targetZ?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:915](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L915)
+Defined in: [src/display/mesh/Mesh.ts:882](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L882)
 
 메시가 특정 좌표를 바라보도록 회전시킵니다.
-
 
 #### Parameters
 
@@ -3446,7 +3188,7 @@ Defined in: [src/display/mesh/Mesh.ts:915](https://github.com/redcamel/RedGPU/bl
 
 > **removeAllChildren**(): `ParticleEmitter`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:232](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L232)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:234](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L234)
 
 모든 자식 객체를 제거합니다.
 
@@ -3466,7 +3208,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:232](https://github.com/
 
 > **removeChild**(`child`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:201](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L201)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:203](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L203)
 
 특정 자식 객체를 제거합니다.
 
@@ -3492,7 +3234,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:201](https://github.com/
 
 > **removeChildAt**(`index`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:217](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L217)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:219](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L219)
 
 지정된 인덱스의 자식 객체를 제거합니다.
 
@@ -3518,15 +3260,15 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:217](https://github.com/
 
 > **render**(`renderViewStateData`): `void`
 
-Defined in: [src/display/paticle/ParticleEmitter.ts:1000](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L1000)
+Defined in: [src/display/particle/ParticleEmitter.ts:702](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L702)
 
-파티클 렌더링 및 시뮬레이션을 수행합니다.
+파티클 이미터를 렌더링 프레임 단위로 갱신 및 시뮬레이션합니다. 매 프레임마다 GPU 컴퓨트 패스(Compute Pass)를 수행하여 위치 정보를 재계산합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `renderViewStateData` | [`RenderViewStateData`](../namespaces/CoreView/classes/RenderViewStateData.md) | 렌더 상태 데이터 |
+| `renderViewStateData` | [`RenderViewStateData`](../namespaces/CoreView/classes/RenderViewStateData.md) | 렌더 뷰 상태 데이터 객체
 
 #### Returns
 
@@ -3542,10 +3284,9 @@ Defined in: [src/display/paticle/ParticleEmitter.ts:1000](https://github.com/red
 
 > **setCastShadowRecursively**(`value?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:825](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L825)
+Defined in: [src/display/mesh/Mesh.ts:792](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L792)
 
 하위 계층의 모든 객체에 그림자 캐스팅 여부를 설정합니다.
-
 
 #### Parameters
 
@@ -3567,7 +3308,7 @@ Defined in: [src/display/mesh/Mesh.ts:825](https://github.com/redcamel/RedGPU/bl
 
 > **setChildIndex**(`child`, `index`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:138](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L138)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:140](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L140)
 
 자식 객체의 위치를 변경합니다.
 
@@ -3592,10 +3333,9 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:138](https://github.com/
 
 > **setEnableDebuggerRecursively**(`enableDebugger?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:807](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L807)
+Defined in: [src/display/mesh/Mesh.ts:774](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L774)
 
 하위 계층의 모든 객체에 디버거 활성화 여부를 설정합니다.
-
 
 #### Parameters
 
@@ -3617,10 +3357,9 @@ Defined in: [src/display/mesh/Mesh.ts:807](https://github.com/redcamel/RedGPU/bl
 
 > **setIgnoreFrustumCullingRecursively**(`value?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:861](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L861)
+Defined in: [src/display/mesh/Mesh.ts:828](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L828)
 
 하위 계층의 모든 객체에 프러스텀 컬링 무시 여부를 설정합니다.
-
 
 #### Parameters
 
@@ -3642,10 +3381,9 @@ Defined in: [src/display/mesh/Mesh.ts:861](https://github.com/redcamel/RedGPU/bl
 
 > **setPosition**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:966](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L966)
+Defined in: [src/display/mesh/Mesh.ts:933](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L933)
 
 위치를 설정합니다.
-
 
 #### Parameters
 
@@ -3669,10 +3407,9 @@ Defined in: [src/display/mesh/Mesh.ts:966](https://github.com/redcamel/RedGPU/bl
 
 > **setReceiveShadowRecursively**(`value?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:843](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L843)
+Defined in: [src/display/mesh/Mesh.ts:810](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L810)
 
 하위 계층의 모든 객체에 그림자 수신 여부를 설정합니다.
-
 
 #### Parameters
 
@@ -3694,10 +3431,9 @@ Defined in: [src/display/mesh/Mesh.ts:843](https://github.com/redcamel/RedGPU/bl
 
 > **setRotation**(`rotationX`, `rotationY?`, `rotationZ?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:989](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L989)
+Defined in: [src/display/mesh/Mesh.ts:956](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L956)
 
 회전값을 설정합니다. (도)
-
 
 #### Parameters
 
@@ -3721,10 +3457,9 @@ Defined in: [src/display/mesh/Mesh.ts:989](https://github.com/redcamel/RedGPU/bl
 
 > **setScale**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:943](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L943)
+Defined in: [src/display/mesh/Mesh.ts:910](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L910)
 
 스케일을 설정합니다.
-
 
 #### Parameters
 
@@ -3748,7 +3483,7 @@ Defined in: [src/display/mesh/Mesh.ts:943](https://github.com/redcamel/RedGPU/bl
 
 > **swapChildren**(`child1`, `child2`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:161](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L161)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L163)
 
 두 자식 객체의 위치를 서로 바꿉니다.
 
@@ -3773,7 +3508,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:161](https://github.com/
 
 > **swapChildrenAt**(`index1`, `index2`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:181](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L181)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:183](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L183)
 
 두 인덱스의 자식 객체 위치를 서로 바꿉니다.
 
@@ -3798,7 +3533,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:181](https://github.com/
 
 > **worldToLocal**(`x`, `y`, `z`): \[`number`, `number`, `number`\]
 
-Defined in: [src/display/mesh/core/MeshBase.ts:113](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L113)
+Defined in: [src/display/mesh/core/MeshBase.ts:101](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L101)
 
 #### Parameters
 
@@ -3815,3 +3550,6 @@ Defined in: [src/display/mesh/core/MeshBase.ts:113](https://github.com/redcamel/
 #### Inherited from
 
 [`Mesh`](Mesh.md).[`worldToLocal`](Mesh.md#worldtolocal)
+
+
+</details>

@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,15 +6,13 @@
 
 # Function: computeViewFrustumPlanes()
 
-> **computeViewFrustumPlanes**(`projectionMatrix`, `cameraMatrix`): `number`[][]
+> **computeViewFrustumPlanes**(`projectionMatrix`, `viewMatrix`): `number`[][]
 
-Defined in: [src/math/computeViewFrustumPlanes.ts:27](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/computeViewFrustumPlanes.ts#L27)
+Defined in: [src/math/computeViewFrustumPlanes.ts:27](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/computeViewFrustumPlanes.ts#L27)
 
 프로젝션 및 카메라 행렬로부터 6개의 뷰 프러스텀 평면을 계산합니다.
 
-
 각 평면의 방정식을 [A, B, C, D] 형태로 정규화하여 반환합니다.
-
 
 ### Example
 ```typescript
@@ -26,11 +24,10 @@ const planes = RedGPU.math.computeViewFrustumPlanes(projectionMTX, cameraMTX);
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `projectionMatrix` | [`mat4`](../type-aliases/mat4.md) | 프로젝션 행렬
-| `cameraMatrix` | [`mat4`](../type-aliases/mat4.md) | 카메라 행렬
+| `viewMatrix` | [`mat4`](../type-aliases/mat4.md) | 카메라 행렬
 
 ## Returns
 
 `number`[][]
 
 6개 평면의 [A, B, C, D] 배열
-

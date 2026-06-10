@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -8,9 +8,7 @@
 
 다양한 리소스 객체와 유틸리티(버퍼, 텍스처, 샘플러, 리소스 매니저, WGSL 파서 등)를 제공합니다.
 
-
 각 리소스 및 유틸리티를 통해 GPU 메모리 관리, 데이터 버퍼링, 텍스처 처리, 샘플링, WGSL 파싱 등 렌더링에 필요한 다양한 리소스 관리 기능을 손쉽게 사용할 수 있습니다.
-
 
 ## Buffer
 
@@ -41,6 +39,15 @@
 - [CoreNoiseTexture](namespaces/CoreNoiseTexture/README.md)
 - [CoreVertexBuffer](namespaces/CoreVertexBuffer/README.md)
 - [CoreWGSLParser](namespaces/CoreWGSLParser/README.md)
+- [DownSampleCubeMapGenerator](classes/DownSampleCubeMapGenerator.md)
+- [MipmapGenerator](classes/MipmapGenerator.md)
+- [VoronoiSettings](interfaces/VoronoiSettings.md)
+- [BitmapSrcInfo](type-aliases/BitmapSrcInfo.md)
+- [ComponentMapping](type-aliases/ComponentMapping.md)
+- [CubeSrcInfo](type-aliases/CubeSrcInfo.md)
+- [HDRSrcInfo](type-aliases/HDRSrcInfo.md)
+- [NumberArray](type-aliases/NumberArray.md)
+- [TypeInterleave](type-aliases/TypeInterleave.md)
 
 ## Sampler
 
@@ -50,6 +57,8 @@
 
 - [BitmapTexture](classes/BitmapTexture.md)
 - [CubeTexture](classes/CubeTexture.md)
+- [DirectCubeTexture](classes/DirectCubeTexture.md)
+- [DirectTexture](classes/DirectTexture.md)
 - [HDRTexture](classes/HDRTexture.md)
 - [PackedTexture](classes/PackedTexture.md)
 

@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,10 +8,11 @@
 
 > **imageBitmapToGPUTexture**(`gpuDevice`, `imageBitmaps`, `textureDescriptor`, `usePremultiplyAlpha?`): `GPUTexture`
 
-Defined in: [src/utils/texture/imageBitmapToGPUTexture.ts:27](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/texture/imageBitmapToGPUTexture.ts#L27)
+Defined in: [src/utils/texture/imageBitmapToGPUTexture.ts:20](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/texture/imageBitmapToGPUTexture.ts#L20)
 
+Creates a GPUTexture using an array of ImageBitmaps.
 
-Creates a GPUTexture from an array of ImageBitmaps.
+Internally uses copyExternalImageToTexture and automatically adds necessary Usage flags.
 
 * ### Example
 ```typescript
@@ -23,13 +24,12 @@ const texture = RedGPU.Util.imageBitmapToGPUTexture(device, [bitmap], descriptor
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
 | `gpuDevice` | `GPUDevice` | `undefined` | GPUDevice instance |
-| `imageBitmaps` | `ImageBitmap`[] | `undefined` | Array of ImageBitmaps to copy |
-| `textureDescriptor` | `GPUTextureDescriptor` | `undefined` | GPUTexture descriptor |
+| `imageBitmaps` | `ImageBitmap`[] | `undefined` | Array of source ImageBitmaps |
+| `textureDescriptor` | `GPUTextureDescriptor` | `undefined` | Texture descriptor to create |
 | `usePremultiplyAlpha` | `boolean` | `true` | Whether to use premultiplied alpha (Default: true) |
 
 ## Returns
 
 `GPUTexture`
 
-
-Created GPUTexture object
+Created GPUTexture

@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,11 +6,9 @@
 
 # Class: HDRTexture
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:25](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/hdr/HDRTexture.ts#L25)
-
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:29](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/hdr/HDRTexture.ts#L29)
 
 2D texture class that uses Radiance HDR (.hdr) files.
-
 
 Loads .hdr files to create a 2D GPUTexture in rgba16float format. Used as source data for lightmaps, projected textures, or IBL.
 
@@ -29,8 +27,7 @@ const texture = new RedGPU.Resource.HDRTexture(redGPUContext, 'path/to/image.hdr
 
 > **new HDRTexture**(`redGPUContext`, `src`, `onLoad?`, `onError?`): `HDRTexture`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:60](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/hdr/HDRTexture.ts#L60)
-
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:64](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/hdr/HDRTexture.ts#L64)
 
 Creates an HDRTexture instance.
 
@@ -46,7 +43,7 @@ const texture = new RedGPU.Resource.HDRTexture(redGPUContext, 'assets/hdr/sky.hd
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext instance |
-| `src` | `SrcInfo` | HDR file path or information |
+| `src` | [`HDRSrcInfo`](../type-aliases/HDRSrcInfo.md) | HDR file path or information |
 | `onLoad?` | (`textureInstance?`) => `void` | Load complete callback |
 | `onError?` | (`error`) => `void` | Error callback |
 
@@ -60,14 +57,165 @@ const texture = new RedGPU.Resource.HDRTexture(redGPUContext, 'assets/hdr/sky.hd
 
 ## Accessors
 
+### gpuTexture
+
+#### Get Signature
+
+> **get** **gpuTexture**(): `GPUTexture`
+
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:136](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/hdr/HDRTexture.ts#L136)
+
+Returns the GPUTexture object.
+
+##### Returns
+
+`GPUTexture`
+
+GPUTexture instance
+
+***
+
+### height
+
+#### Get Signature
+
+> **get** **height**(): `number`
+
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:112](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/hdr/HDRTexture.ts#L112)
+
+Returns the texture height.
+
+##### Returns
+
+`number`
+
+Height in pixels
+
+***
+
+### src
+
+#### Get Signature
+
+> **get** **src**(): `string`
+
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:148](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/hdr/HDRTexture.ts#L148)
+
+Returns the texture source path.
+
+##### Returns
+
+`string`
+
+Source path
+
+#### Set Signature
+
+> **set** **src**(`value`): `void`
+
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:160](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/hdr/HDRTexture.ts#L160)
+
+Sets the texture source path and starts loading.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | [`HDRSrcInfo`](../type-aliases/HDRSrcInfo.md) | Source info to set |
+
+##### Returns
+
+`void`
+
+***
+
+### videoMemorySize
+
+#### Get Signature
+
+> **get** **videoMemorySize**(): `number`
+
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:124](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/hdr/HDRTexture.ts#L124)
+
+Returns the video memory usage in bytes.
+
+##### Returns
+
+`number`
+
+Video memory usage in bytes
+
+***
+
+### width
+
+#### Get Signature
+
+> **get** **width**(): `number`
+
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:100](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/hdr/HDRTexture.ts#L100)
+
+Returns the texture width.
+
+##### Returns
+
+`number`
+
+Width in pixels
+
+## Methods
+
+### destroy()
+
+> **destroy**(): `void`
+
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:169](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/hdr/HDRTexture.ts#L169)
+
+Destroys the texture resource.
+
+#### Returns
+
+`void`
+
+***
+
+
+***
+
+## Inherited Members
+
+<details>
+<summary>View inherited properties and methods (Click to expand)</summary>
+
+### antialiasingManager
+
+#### Get Signature
+
+> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L76)
+
+Returns the AntialiasingManager instance. (Short-cut path)
+
+##### Returns
+
+[`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+
+AntialiasingManager instance
+
+#### Inherited from
+
+[`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`antialiasingManager`](../namespaces/Core/classes/ManagementResourceBase.md#antialiasingmanager)
+
+***
+
 ### cacheKey
 
 #### Get Signature
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L57)
-
+Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L53)
 
 Returns the cache key.
 
@@ -79,8 +227,7 @@ Returns the cache key.
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L65)
-
+Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L61)
 
 Sets the cache key.
 
@@ -100,14 +247,35 @@ Sets the cache key.
 
 ***
 
+### commandEncoderManager
+
+#### Get Signature
+
+> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L88)
+
+Returns the CommandEncoderManager instance. (Short-cut path)
+
+##### Returns
+
+[`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+CommandEncoderManager instance
+
+#### Inherited from
+
+[`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`commandEncoderManager`](../namespaces/Core/classes/ManagementResourceBase.md#commandencodermanager)
+
+***
+
 ### gpuDevice
 
 #### Get Signature
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L106)
-
+Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L77)
 
 Returns the associated GPU device.
 
@@ -121,67 +289,35 @@ Returns the associated GPU device.
 
 ***
 
-### gpuTexture
-
-#### Get Signature
-
-> **get** **gpuTexture**(): `GPUTexture`
-
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:95](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/hdr/HDRTexture.ts#L95)
-
-GPUTexture object
-
-##### Returns
-
-`GPUTexture`
-
-***
-
-### height
-
-#### Get Signature
-
-> **get** **height**(): `number`
-
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:91](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/hdr/HDRTexture.ts#L91)
-
-Texture height
-
-##### Returns
-
-`number`
-
-***
-
 ### name
 
 #### Get Signature
 
 > **get** **name**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L81)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L58)
 
-
-Returns the name of the instance. If no name exists, it is generated using the class name and ID.
+Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
 
 ##### Returns
 
 `string`
 
+Name of the object
+
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L90)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L71)
 
-
-Sets the name of the instance.
+Sets the name of the object.
 
 ##### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | Name of the object to set |
 
 ##### Returns
 
@@ -199,8 +335,7 @@ Sets the name of the instance.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L114)
-
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L40)
 
 Returns the RedGPUContext instance.
 
@@ -208,9 +343,33 @@ Returns the RedGPUContext instance.
 
 [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
+RedGPUContext instance
+
 #### Inherited from
 
 [`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`redGPUContext`](../namespaces/Core/classes/ManagementResourceBase.md#redgpucontext)
+
+***
+
+### resourceManager
+
+#### Get Signature
+
+> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L64)
+
+Returns the ResourceManager instance. (Short-cut path)
+
+##### Returns
+
+[`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
+
+ResourceManager instance
+
+#### Inherited from
+
+[`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`resourceManager`](../namespaces/Core/classes/ManagementResourceBase.md#resourcemanager)
 
 ***
 
@@ -220,8 +379,7 @@ Returns the RedGPUContext instance.
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L73)
-
+Defined in: [src/resources/core/ResourceBase.ts:69](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L69)
 
 Returns the resource manager key.
 
@@ -235,38 +393,23 @@ Returns the resource manager key.
 
 ***
 
-### src
+### revision
 
 #### Get Signature
 
-> **get** **src**(): `string`
+> **get** **revision**(): `number`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:97](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/hdr/HDRTexture.ts#L97)
+Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L45)
 
-Texture source path
-
-##### Returns
-
-`string`
-
-#### Set Signature
-
-> **set** **src**(`value`): `void`
-
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:107](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/hdr/HDRTexture.ts#L107)
-
-
-Sets the texture source path and starts loading.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `SrcInfo` | Source info to set |
+Returns the revision (update count) of the resource.
 
 ##### Returns
 
-`void`
+`number`
+
+#### Inherited from
+
+[`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`revision`](../namespaces/Core/classes/ManagementResourceBase.md#revision)
 
 ***
 
@@ -276,8 +419,7 @@ Sets the texture source path and starts loading.
 
 > **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ManagementResourceBase.ts#L45)
-
+Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ManagementResourceBase.ts#L45)
 
 Returns the managed state information of the resource.
 
@@ -297,14 +439,15 @@ Returns the managed state information of the resource.
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L98)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L46)
 
-
-Returns the UUID.
+Returns the universally unique identifier (UUID) of the object.
 
 ##### Returns
 
 `string`
+
+UUID string
 
 #### Inherited from
 
@@ -312,44 +455,11 @@ Returns the UUID.
 
 ***
 
-### videoMemorySize
-
-#### Get Signature
-
-> **get** **videoMemorySize**(): `number`
-
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:93](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/hdr/HDRTexture.ts#L93)
-
-Video memory usage in bytes
-
-##### Returns
-
-`number`
-
-***
-
-### width
-
-#### Get Signature
-
-> **get** **width**(): `number`
-
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:89](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/hdr/HDRTexture.ts#L89)
-
-Texture width
-
-##### Returns
-
-`number`
-
-## Methods
-
 ### \_\_addDirtyPipelineListener()
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L125)
-
+Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L89)
 
 Adds a listener function to be called when the pipeline becomes dirty.
 
@@ -369,39 +479,13 @@ Adds a listener function to be called when the pipeline becomes dirty.
 
 ***
 
-### \_\_fireListenerList()
-
-> **\_\_fireListenerList**(`resetList?`): `void`
-
-Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L152)
-
-
-Fires the registered dirty listeners.
-
-#### Parameters
-
-| Parameter | Type | Default value | Description |
-| ------ | ------ | ------ | ------ |
-| `resetList` | `boolean` | `false` | Whether to reset the listener list after firing (default: false) |
-
-#### Returns
-
-`void`
-
-#### Inherited from
-
-[`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`__fireListenerList`](../namespaces/Core/classes/ManagementResourceBase.md#__firelistenerlist)
-
-***
-
 ### \_\_removeDirtyPipelineListener()
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L137)
+Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L101)
 
-
-Removes a dirty pipeline listener.
+Removes a resource update listener.
 
 #### Parameters
 
@@ -419,14 +503,27 @@ Removes a dirty pipeline listener.
 
 ***
 
-### destroy()
+### notifyUpdate()
 
-> **destroy**(): `void`
+> **notifyUpdate**(`resetList?`): `void`
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:116](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/hdr/HDRTexture.ts#L116)
+Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L116)
 
-Destroys the texture resource.
+Notifies registered listeners that the resource has been updated.
+
+#### Parameters
+
+| Parameter | Type | Default value | Description |
+| ------ | ------ | ------ | ------ |
+| `resetList` | `boolean` | `false` | Whether to reset the listener list after firing (default: false) |
 
 #### Returns
 
 `void`
+
+#### Inherited from
+
+[`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`notifyUpdate`](../namespaces/Core/classes/ManagementResourceBase.md#notifyupdate)
+
+
+</details>

@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,11 +6,9 @@
 
 # Class: Capsule
 
-Defined in: [src/primitive/Capsule.ts:21](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/Capsule.ts#L21)
-
+Defined in: [src/primitive/Capsule.ts:20](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/Capsule.ts#L20)
 
 Capsule primitive geometry class.
-
 
 Generates and manages vertex and index data for a capsule based on radius, cylinder height, etc.
 
@@ -29,10 +27,9 @@ const capsule = new RedGPU.Capsule(redGPUContext, 0.5, 1, 32, 1, 12);
 
 ### Constructor
 
-> **new Capsule**(`redGPUContext`, `radius?`, `cylinderHeight?`, `radialSegments?`, `heightSegments?`, `capSegments?`): `Capsule`
+> **new Capsule**(`redGPUContext`, `radius?`, `height?`, `radialSegments?`, `heightSegments?`, `capSegments?`): `Capsule`
 
-Defined in: [src/primitive/Capsule.ts:143](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/Capsule.ts#L143)
-
+Defined in: [src/primitive/Capsule.ts:37](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/Capsule.ts#L37)
 
 Creates an instance of Capsule.
 
@@ -47,7 +44,7 @@ const capsule = new RedGPU.Capsule(redGPUContext, 0.5, 1.0, 32, 1, 12);
 | ------ | ------ | ------ | ------ |
 | `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `undefined` | RedGPUContext instance |
 | `radius` | `number` | `0.5` | Radius (default 0.5) |
-| `cylinderHeight` | `number` | `1.0` | Cylinder part height (default 1.0) |
+| `height` | `number` | `1.0` | Cylinder part height (default 1.0) |
 | `radialSegments` | `number` | `32` | Radial segments (default 32) |
 | `heightSegments` | `number` | `1` | Height segments for cylinder part (default 1) |
 | `capSegments` | `number` | `12` | Cap segments for hemispheres (default 12) |
@@ -62,27 +59,29 @@ const capsule = new RedGPU.Capsule(redGPUContext, 0.5, 1.0, 32, 1, 12);
 
 ## Accessors
 
+
+***
+
+## Inherited Members
+
+<details>
+<summary>View inherited properties and methods (Click to expand)</summary>
+
 ### gpuRenderInfo
 
 #### Get Signature
 
 > **get** **gpuRenderInfo**(): `object`
 
-Defined in: [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L86)
-
-
-Returns the GPU render information.
+Defined in: [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L51)
 
 ##### Returns
 
 `object`
 
-
-Object containing buffer layouts array
-
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L86) |
+| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L51) |
 
 #### Inherited from
 
@@ -96,17 +95,11 @@ Object containing buffer layouts array
 
 > **get** **indexBuffer**(): [`IndexBuffer`](../../Resource/classes/IndexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:110](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L110)
-
-
-Returns the current index buffer.
+Defined in: [src/primitive/core/Primitive.ts:59](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L59)
 
 ##### Returns
 
 [`IndexBuffer`](../../Resource/classes/IndexBuffer.md)
-
-
-IndexBuffer instance
 
 #### Inherited from
 
@@ -120,17 +113,11 @@ IndexBuffer instance
 
 > **get** **vertexBuffer**(): [`VertexBuffer`](../../Resource/classes/VertexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:98](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L98)
-
-
-Returns the current vertex buffer.
+Defined in: [src/primitive/core/Primitive.ts:55](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L55)
 
 ##### Returns
 
 [`VertexBuffer`](../../Resource/classes/VertexBuffer.md)
-
-
-VertexBuffer instance
 
 #### Inherited from
 
@@ -144,17 +131,11 @@ VertexBuffer instance
 
 > **get** **volume**(): [`AABB`](../../Bound/classes/AABB.md)
 
-Defined in: [src/primitive/core/Primitive.ts:122](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L122)
-
-
-Returns the AABB bounding volume of the geometry.
+Defined in: [src/primitive/core/Primitive.ts:63](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L63)
 
 ##### Returns
 
 [`AABB`](../../Bound/classes/AABB.md)
-
-
-AABB instance
 
 #### Inherited from
 
@@ -168,17 +149,12 @@ AABB instance
 
 > **get** `static` **primitiveInterleaveStruct**(): [`VertexInterleavedStruct`](../../Resource/classes/VertexInterleavedStruct.md)
 
-Defined in: [src/primitive/core/Primitive.ts:67](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L67)
+Defined in: [src/primitive/core/Primitive.ts:47](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L47)
 
-
-Returns the default vertex layout structure (Position, Normal, UV).
 
 ##### Returns
 
 [`VertexInterleavedStruct`](../../Resource/classes/VertexInterleavedStruct.md)
-
-
-Vertex interleaved struct object
 
 #### Inherited from
 
@@ -186,27 +162,26 @@ Vertex interleaved struct object
 
 ## Methods
 
-### \_setData()
+### generateUniqueKey()
 
-> **\_setData**(`geometry`): `void`
+> `static` **generateUniqueKey**(`name`, `params`): `string`
 
-Defined in: [src/primitive/core/Primitive.ts:138](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L138)
-
-**`Internal`**
-
-
-Sets internal buffers and render information using geometry data.
+Defined in: [src/primitive/core/Primitive.ts:68](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L68)
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `geometry` | [`Geometry`](../../../classes/Geometry.md) | Geometry instance to set |
+| Parameter | Type |
+| ------ | ------ |
+| `name` | `string` |
+| `params` | `Record`\<`string`, `any`\> |
 
 #### Returns
 
-`void`
+`string`
 
 #### Inherited from
 
-[`Primitive`](../namespaces/Core/classes/Primitive.md).[`_setData`](../namespaces/Core/classes/Primitive.md#_setdata)
+[`Primitive`](../namespaces/Core/classes/Primitive.md).[`generateUniqueKey`](../namespaces/Core/classes/Primitive.md#generateuniquekey)
+
+
+</details>

@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,11 +8,9 @@
 
 > **calculateMeshOBB**(`mesh`): [`OBB`](../classes/OBB.md)
 
-Defined in: [src/bound/math/calculateMeshOBB.ts:25](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/bound/math/calculateMeshOBB.ts#L25)
-
+Defined in: [src/bound/math/calculateMeshOBB.ts:25](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/bound/math/calculateMeshOBB.ts#L25)
 
 Calculates world-space OBB by applying mesh modelMatrix.
-
 
 Returns an OBB with center, half-extents, and orientation based on geometry volume.
 
@@ -30,6 +28,5 @@ const meshOBB = RedGPU.Bound.calculateMeshOBB(mesh);
 ## Returns
 
 [`OBB`](../classes/OBB.md)
-
 
 Calculated world-space OBB instance

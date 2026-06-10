@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,13 @@
 
 # Class: DirectionalShadowManager
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:8](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/shadow/DirectionalShadowManager.ts#L8)
+Defined in: [src/shadow/DirectionalShadowManager.ts:19](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/shadow/DirectionalShadowManager.ts#L19)
+
+Class that manages shadow depth textures and related settings for directional lights.
+
+::: warning
+This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+:::
 
 ## Constructors
 
@@ -26,23 +32,29 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:8](https://github.com/redcam
 
 > **get** **bias**(): `number`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:33](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/shadow/DirectionalShadowManager.ts#L33)
+Defined in: [src/shadow/DirectionalShadowManager.ts:86](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/shadow/DirectionalShadowManager.ts#L86)
+
+Returns the shadow bias value.
 
 ##### Returns
 
 `number`
 
+Bias value
+
 #### Set Signature
 
 > **set** **bias**(`value`): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:37](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/shadow/DirectionalShadowManager.ts#L37)
+Defined in: [src/shadow/DirectionalShadowManager.ts:98](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/shadow/DirectionalShadowManager.ts#L98)
+
+Sets the shadow bias value. (0.0 to 1.0)
 
 ##### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `number` | Bias value |
 
 ##### Returns
 
@@ -56,11 +68,15 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:37](https://github.com/redca
 
 > **get** **castingList**(): ([`Mesh`](../../Display/classes/Mesh.md) \| [`InstancingMesh`](../../Display/classes/InstancingMesh.md))[]
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:21](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/shadow/DirectionalShadowManager.ts#L21)
+Defined in: [src/shadow/DirectionalShadowManager.ts:50](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/shadow/DirectionalShadowManager.ts#L50)
+
+Returns the list of objects that will cast shadows.
 
 ##### Returns
 
 ([`Mesh`](../../Display/classes/Mesh.md) \| [`InstancingMesh`](../../Display/classes/InstancingMesh.md))[]
+
+Array of shadow casting objects
 
 ***
 
@@ -70,23 +86,29 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:21](https://github.com/redca
 
 > **get** **shadowDepthTextureSize**(): `number`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:42](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/shadow/DirectionalShadowManager.ts#L42)
+Defined in: [src/shadow/DirectionalShadowManager.ts:111](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/shadow/DirectionalShadowManager.ts#L111)
+
+Returns the size (resolution) of the shadow depth texture.
 
 ##### Returns
 
 `number`
 
+Resolution value
+
 #### Set Signature
 
 > **set** **shadowDepthTextureSize**(`value`): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:46](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/shadow/DirectionalShadowManager.ts#L46)
+Defined in: [src/shadow/DirectionalShadowManager.ts:123](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/shadow/DirectionalShadowManager.ts#L123)
+
+Sets the size (resolution) of the shadow depth texture. (Integer)
 
 ##### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `number` | Resolution value |
 
 ##### Returns
 
@@ -100,11 +122,15 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:46](https://github.com/redca
 
 > **get** **shadowDepthTextureView**(): `GPUTextureView`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:25](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/shadow/DirectionalShadowManager.ts#L25)
+Defined in: [src/shadow/DirectionalShadowManager.ts:62](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/shadow/DirectionalShadowManager.ts#L62)
+
+Returns the shadow depth texture view.
 
 ##### Returns
 
 `GPUTextureView`
+
+Shadow depth GPUTextureView
 
 ***
 
@@ -114,11 +140,15 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:25](https://github.com/redca
 
 > **get** **shadowDepthTextureViewEmpty**(): `GPUTextureView`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:29](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/shadow/DirectionalShadowManager.ts#L29)
+Defined in: [src/shadow/DirectionalShadowManager.ts:74](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/shadow/DirectionalShadowManager.ts#L74)
+
+Returns an empty (1x1) depth texture view for non-shadow states.
 
 ##### Returns
 
 `GPUTextureView`
+
+Empty depth GPUTextureView
 
 ***
 
@@ -128,11 +158,15 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:29](https://github.com/redca
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:17](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/shadow/DirectionalShadowManager.ts#L17)
+Defined in: [src/shadow/DirectionalShadowManager.ts:38](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/shadow/DirectionalShadowManager.ts#L38)
+
+Returns the video memory size (Bytes) used by the current shadow map.
 
 ##### Returns
 
 `number`
+
+Video memory usage in bytes
 
 ## Methods
 
@@ -140,7 +174,9 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:17](https://github.com/redca
 
 > **destroy**(): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:64](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/shadow/DirectionalShadowManager.ts#L64)
+Defined in: [src/shadow/DirectionalShadowManager.ts:161](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/shadow/DirectionalShadowManager.ts#L161)
+
+Releases GPU resources in use.
 
 #### Returns
 
@@ -152,7 +188,9 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:64](https://github.com/redca
 
 > **reset**(): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:51](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/shadow/DirectionalShadowManager.ts#L51)
+Defined in: [src/shadow/DirectionalShadowManager.ts:132](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/shadow/DirectionalShadowManager.ts#L132)
+
+Resets the manager and destroys resources.
 
 #### Returns
 
@@ -164,7 +202,9 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:51](https://github.com/redca
 
 > **resetCastingList**(): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:55](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/shadow/DirectionalShadowManager.ts#L55)
+Defined in: [src/shadow/DirectionalShadowManager.ts:140](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/shadow/DirectionalShadowManager.ts#L140)
+
+Resets the list of shadow casting objects.
 
 #### Returns
 
@@ -176,13 +216,15 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:55](https://github.com/redca
 
 > **update**(`redGPUContext`): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:59](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/shadow/DirectionalShadowManager.ts#L59)
+Defined in: [src/shadow/DirectionalShadowManager.ts:152](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/shadow/DirectionalShadowManager.ts#L152)
+
+Updates internal state. (Mainly checks for resolution changes)
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext instance |
 
 #### Returns
 

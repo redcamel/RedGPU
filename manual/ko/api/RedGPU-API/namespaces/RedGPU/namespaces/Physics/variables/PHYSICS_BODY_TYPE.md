@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,16 +8,14 @@
 
 > `const` **PHYSICS\_BODY\_TYPE**: `object`
 
-Defined in: [src/physics/PhysicsBodyType.ts:13](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/physics/PhysicsBodyType.ts#L13)
+Defined in: [src/physics/PhysicsBodyType.ts:13](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/physics/PhysicsBodyType.ts#L13)
 
 **`Experimental`**
 
 물리 바디의 시뮬레이션 타입을 정의합니다.
 
-
 ::: warning
 이 기능은 현재 실험적(Experimental) 단계입니다. 향후 API가 변경될 수 있습니다.
-
 :::
 
 ## Type Declaration

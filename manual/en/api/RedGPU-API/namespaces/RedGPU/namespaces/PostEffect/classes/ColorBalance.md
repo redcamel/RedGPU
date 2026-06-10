@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,22 +6,22 @@
 
 # Class: ColorBalance
 
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:29](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L29)
-
+Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:10](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L10)
 
 Color Balance post-processing effect.
 
+Precisely adjusts the balance of RGB channels for each brightness range (Shadow, Midtone, Highlight) of the image.
 
-Adjusts the color balance of shadows, midtones, and highlights for Cyan-Red, Magenta-Green, and Yellow-Blue.
+You can change the overall tone and mood by adjusting the Cyan-Red, Magenta-Green, and Yellow-Blue axes of each area.
 
+This effect provides the most predictable results when operating in LDR space.
 
-Also supports luminosity preservation option.
 * ### Example
 ```typescript
 const effect = new RedGPU.PostEffect.ColorBalance(redGPUContext);
-effect.shadowCyanRed = 50;
-effect.midtoneYellowBlue = -30;
-effect.preserveLuminosity = true;
+effect.shadowCyanRed = 50;         // 그림자 영역에 레드 추가
+effect.midtoneYellowBlue = -30;    // 미드톤 영역에 옐로우 추가
+effect.preserveLuminosity = true;   // 밝기 변화 억제
 view.postEffectManager.addEffect(effect);
 ```
 
@@ -37,8 +37,7 @@ view.postEffectManager.addEffect(effect);
 
 > **new ColorBalance**(`redGPUContext`): `ColorBalance`
 
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:99](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L99)
-
+Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:70](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L70)
 
 Creates a ColorBalance instance.
 
@@ -52,225 +51,249 @@ Creates a ColorBalance instance.
 
 `ColorBalance`
 
-#### Overrides
+#### Inherited from
 
 [`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`constructor`](../namespaces/Core/classes/ASinglePassPostEffect.md#constructor)
 
-## Accessors
+## Properties
 
 ### highlightCyanRed
 
-#### Get Signature
+> **highlightCyanRed**: `number`
 
-> **get** **highlightCyanRed**(): `number`
+Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:16](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L16)
 
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:220](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L220)
-
-
-Returns the highlight Cyan-Red value.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **highlightCyanRed**(`value`): `void`
-
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:228](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L228)
-
-
-Sets the highlight Cyan-Red value. (-100 ~ 100)
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
+Cyan-Red balance in highlight areas (-100 ~ 100)
 
 ***
 
 ### highlightMagentaGreen
 
-#### Get Signature
+> **highlightMagentaGreen**: `number`
 
-> **get** **highlightMagentaGreen**(): `number`
+Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:14](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L14)
 
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:238](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L238)
-
-
-Returns the highlight Magenta-Green value.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **highlightMagentaGreen**(`value`): `void`
-
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:246](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L246)
-
-
-Sets the highlight Magenta-Green value. (-100 ~ 100)
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
+Magenta-Green balance in highlight areas (-100 ~ 100)
 
 ***
 
 ### highlightYellowBlue
 
-#### Get Signature
+> **highlightYellowBlue**: `number`
 
-> **get** **highlightYellowBlue**(): `number`
+Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:12](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L12)
 
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:256](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L256)
-
-
-Returns the highlight Yellow-Blue value.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **highlightYellowBlue**(`value`): `void`
-
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:264](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L264)
-
-
-Sets the highlight Yellow-Blue value. (-100 ~ 100)
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
+Yellow-Blue balance in highlight areas (-100 ~ 100)
 
 ***
 
 ### midtoneCyanRed
 
-#### Get Signature
+> **midtoneCyanRed**: `number`
 
-> **get** **midtoneCyanRed**(): `number`
+Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:23](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L23)
 
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:166](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L166)
-
-
-Returns the midtone Cyan-Red value.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **midtoneCyanRed**(`value`): `void`
-
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:174](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L174)
-
-
-Sets the midtone Cyan-Red value. (-100 ~ 100)
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
+Cyan-Red balance in midtone areas (-100 ~ 100)
 
 ***
 
 ### midtoneMagentaGreen
 
-#### Get Signature
+> **midtoneMagentaGreen**: `number`
 
-> **get** **midtoneMagentaGreen**(): `number`
+Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:21](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L21)
 
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:184](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L184)
-
-
-Returns the midtone Magenta-Green value.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **midtoneMagentaGreen**(`value`): `void`
-
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:192](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L192)
-
-
-Sets the midtone Magenta-Green value. (-100 ~ 100)
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
+Magenta-Green balance in midtone areas (-100 ~ 100)
 
 ***
 
 ### midtoneYellowBlue
 
+> **midtoneYellowBlue**: `number`
+
+Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:19](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L19)
+
+Yellow-Blue balance in midtone areas (-100 ~ 100)
+
+***
+
+### preserveLuminosity
+
+> **preserveLuminosity**: `boolean`
+
+Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:33](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L33)
+
+Whether to preserve luminosity (maintains constant luminance after color changes if true)
+
+***
+
+### shadowCyanRed
+
+> **shadowCyanRed**: `number`
+
+Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:30](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L30)
+
+Cyan-Red balance in shadow areas (-100 ~ 100)
+
+***
+
+### shadowMagentaGreen
+
+> **shadowMagentaGreen**: `number`
+
+Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:28](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L28)
+
+Magenta-Green balance in shadow areas (-100 ~ 100)
+
+***
+
+### shadowYellowBlue
+
+> **shadowYellowBlue**: `number`
+
+Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:26](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L26)
+
+Yellow-Blue balance in shadow areas (-100 ~ 100)
+
+## Accessors
+
+
+***
+
+## Inherited Members
+
+<details>
+<summary>View inherited properties and methods (Click to expand)</summary>
+
+### isInstanceofPostEffect
+
+> **isInstanceofPostEffect**: `boolean`
+
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:13](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/ASinglePassPostEffect.ts#L13)
+
+#### Inherited from
+
+[`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`isInstanceofPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md#isinstanceofposteffect)
+
+***
+
+### isLdr
+
+> **isLdr**: `boolean` = `false`
+
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:30](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/ASinglePassPostEffect.ts#L30)
+
+Whether the effect operates in LDR (Low Dynamic Range) space
+
+#### Inherited from
+
+[`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`isLdr`](../namespaces/Core/classes/ASinglePassPostEffect.md#isldr)
+
+***
+
+### antialiasingManager
+
 #### Get Signature
 
-> **get** **midtoneYellowBlue**(): `number`
+> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:202](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L202)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L76)
 
-
-Returns the midtone Yellow-Blue value.
+Returns the AntialiasingManager instance. (Short-cut path)
 
 ##### Returns
 
-`number`
+[`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+
+AntialiasingManager instance
+
+#### Inherited from
+
+[`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`antialiasingManager`](../namespaces/Core/classes/ASinglePassPostEffect.md#antialiasingmanager)
+
+***
+
+### commandEncoderManager
+
+#### Get Signature
+
+> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L88)
+
+Returns the CommandEncoderManager instance. (Short-cut path)
+
+##### Returns
+
+[`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+CommandEncoderManager instance
+
+#### Inherited from
+
+[`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`commandEncoderManager`](../namespaces/Core/classes/ASinglePassPostEffect.md#commandencodermanager)
+
+***
+
+### gpuDevice
+
+#### Get Signature
+
+> **get** **gpuDevice**(): `GPUDevice`
+
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L52)
+
+Returns the WebGPU device object. (Short-cut path)
+
+##### Returns
+
+`GPUDevice`
+
+GPUDevice instance
+
+#### Inherited from
+
+[`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`gpuDevice`](../namespaces/Core/classes/ASinglePassPostEffect.md#gpudevice)
+
+***
+
+### name
+
+#### Get Signature
+
+> **get** **name**(): `string`
+
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L58)
+
+Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
+
+##### Returns
+
+`string`
+
+Name of the object
 
 #### Set Signature
 
-> **set** **midtoneYellowBlue**(`value`): `void`
+> **set** **name**(`value`): `void`
 
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:210](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L210)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L71)
 
-
-Sets the midtone Yellow-Blue value. (-100 ~ 100)
+Sets the name of the object.
 
 ##### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | Name of the object to set |
 
 ##### Returns
 
 `void`
+
+#### Inherited from
+
+[`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`name`](../namespaces/Core/classes/ASinglePassPostEffect.md#name)
 
 ***
 
@@ -280,54 +303,19 @@ Sets the midtone Yellow-Blue value. (-100 ~ 100)
 
 > **get** **outputTextureView**(): `GPUTextureView`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:203](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L203)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:208](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/ASinglePassPostEffect.ts#L208)
 
-
-Returns the output texture view.
+Returns the currently allocated output texture view.
 
 ##### Returns
 
 `GPUTextureView`
 
+Output GPUTextureView
+
 #### Inherited from
 
 [`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`outputTextureView`](../namespaces/Core/classes/ASinglePassPostEffect.md#outputtextureview)
-
-***
-
-### preserveLuminosity
-
-#### Get Signature
-
-> **get** **preserveLuminosity**(): `boolean`
-
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:274](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L274)
-
-
-Returns whether luminosity is preserved.
-
-##### Returns
-
-`boolean`
-
-#### Set Signature
-
-> **set** **preserveLuminosity**(`value`): `void`
-
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:282](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L282)
-
-
-Sets whether luminosity is preserved.
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `boolean` |
-
-##### Returns
-
-`void`
 
 ***
 
@@ -337,18 +325,41 @@ Sets whether luminosity is preserved.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:117](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L117)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L40)
 
-
-Returns the RedGPU context.
+Returns the RedGPUContext instance.
 
 ##### Returns
 
 [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
+RedGPUContext instance
+
 #### Inherited from
 
 [`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`redGPUContext`](../namespaces/Core/classes/ASinglePassPostEffect.md#redgpucontext)
+
+***
+
+### resourceManager
+
+#### Get Signature
+
+> **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L64)
+
+Returns the ResourceManager instance. (Short-cut path)
+
+##### Returns
+
+[`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
+
+ResourceManager instance
+
+#### Inherited from
+
+[`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`resourceManager`](../namespaces/Core/classes/ASinglePassPostEffect.md#resourcemanager)
 
 ***
 
@@ -358,126 +369,19 @@ Returns the RedGPU context.
 
 > **get** **shaderInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:133](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L133)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:124](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/ASinglePassPostEffect.ts#L124)
 
-
-Returns shader information. (Depends on MSAA state)
+Returns shader information based on the current MSAA state.
 
 ##### Returns
 
 `any`
 
+WGSL shader analysis info
+
 #### Inherited from
 
 [`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`shaderInfo`](../namespaces/Core/classes/ASinglePassPostEffect.md#shaderinfo)
-
-***
-
-### shadowCyanRed
-
-#### Get Signature
-
-> **get** **shadowCyanRed**(): `number`
-
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:112](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L112)
-
-
-Returns the shadow Cyan-Red value.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **shadowCyanRed**(`value`): `void`
-
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:120](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L120)
-
-
-Sets the shadow Cyan-Red value. (-100 ~ 100)
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
-
-***
-
-### shadowMagentaGreen
-
-#### Get Signature
-
-> **get** **shadowMagentaGreen**(): `number`
-
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:130](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L130)
-
-
-Returns the shadow Magenta-Green value.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **shadowMagentaGreen**(`value`): `void`
-
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:138](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L138)
-
-
-Sets the shadow Magenta-Green value. (-100 ~ 100)
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
-
-***
-
-### shadowYellowBlue
-
-#### Get Signature
-
-> **get** **shadowYellowBlue**(): `number`
-
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:148](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L148)
-
-
-Returns the shadow Yellow-Blue value.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **shadowYellowBlue**(`value`): `void`
-
-Defined in: [src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts:156](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/effects/adjustments/colorBalance/ColorBalance.ts#L156)
-
-
-Sets the shadow Yellow-Blue value. (-100 ~ 100)
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
 
 ***
 
@@ -487,14 +391,15 @@ Sets the shadow Yellow-Blue value. (-100 ~ 100)
 
 > **get** **storageInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:125](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L125)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:112](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/ASinglePassPostEffect.ts#L112)
 
-
-Returns storage information.
+Returns storage info from the shader.
 
 ##### Returns
 
 `any`
+
+Storage structure information
 
 #### Inherited from
 
@@ -502,24 +407,25 @@ Returns storage information.
 
 ***
 
-### systemUuniformsInfo
+### systemUniformsInfo
 
 #### Get Signature
 
-> **get** **systemUuniformsInfo**(): `any`
+> **get** **systemUniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:159](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L159)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:160](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/ASinglePassPostEffect.ts#L160)
 
-
-Returns system uniform information.
+Returns the system common uniform struct information.
 
 ##### Returns
 
 `any`
 
+System uniform structure info
+
 #### Inherited from
 
-[`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`systemUuniformsInfo`](../namespaces/Core/classes/ASinglePassPostEffect.md#systemuuniformsinfo)
+[`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`systemUniformsInfo`](../namespaces/Core/classes/ASinglePassPostEffect.md#systemuniformsinfo)
 
 ***
 
@@ -529,14 +435,15 @@ Returns system uniform information.
 
 > **get** **uniformBuffer**(): [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:143](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L143)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:136](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/ASinglePassPostEffect.ts#L136)
 
-
-Returns the uniform buffer.
+Returns the effect-specific uniform buffer.
 
 ##### Returns
 
 [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
+
+Uniform buffer instance
 
 #### Inherited from
 
@@ -550,14 +457,15 @@ Returns the uniform buffer.
 
 > **get** **uniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:151](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L151)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:148](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/ASinglePassPostEffect.ts#L148)
 
-
-Returns uniform information.
+Returns the effect-specific uniform struct information.
 
 ##### Returns
 
 `any`
+
+Uniform structure info
 
 #### Inherited from
 
@@ -565,83 +473,25 @@ Returns uniform information.
 
 ***
 
-### useDepthTexture
+### uuid
 
 #### Get Signature
 
-> **get** **useDepthTexture**(): `boolean`
+> **get** **uuid**(): `string`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:101](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L101)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L46)
 
-
-Returns whether depth texture is used.
-
-##### Returns
-
-`boolean`
-
-#### Set Signature
-
-> **set** **useDepthTexture**(`value`): `void`
-
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:109](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L109)
-
-
-Sets whether depth texture is used.
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `boolean` |
+Returns the universally unique identifier (UUID) of the object.
 
 ##### Returns
 
-`void`
+`string`
+
+UUID string
 
 #### Inherited from
 
-[`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`useDepthTexture`](../namespaces/Core/classes/ASinglePassPostEffect.md#usedepthtexture)
-
-***
-
-### useGBufferNormalTexture
-
-#### Get Signature
-
-> **get** **useGBufferNormalTexture**(): `boolean`
-
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:77](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L77)
-
-
-Returns whether G-Buffer Normal texture is used.
-
-##### Returns
-
-`boolean`
-
-#### Set Signature
-
-> **set** **useGBufferNormalTexture**(`value`): `void`
-
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:85](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L85)
-
-
-Sets whether G-Buffer Normal texture is used.
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `boolean` |
-
-##### Returns
-
-`void`
-
-#### Inherited from
-
-[`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`useGBufferNormalTexture`](../namespaces/Core/classes/ASinglePassPostEffect.md#usegbuffernormaltexture)
+[`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`uuid`](../namespaces/Core/classes/ASinglePassPostEffect.md#uuid)
 
 ***
 
@@ -651,14 +501,15 @@ Sets whether G-Buffer Normal texture is used.
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:93](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L93)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:99](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/ASinglePassPostEffect.ts#L99)
 
-
-Returns the video memory usage.
+Returns the video memory usage in bytes.
 
 ##### Returns
 
 `number`
+
+Video memory usage in bytes
 
 #### Inherited from
 
@@ -672,30 +523,15 @@ Returns the video memory usage.
 
 > **get** **WORK\_SIZE\_X**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:167](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L167)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:172](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/ASinglePassPostEffect.ts#L172)
 
-
-Workgroup Size X
+Returns the workgroup size X.
 
 ##### Returns
 
 `number`
 
-#### Set Signature
-
-> **set** **WORK\_SIZE\_X**(`value`): `void`
-
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:171](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L171)
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
+Workgroup size X
 
 #### Inherited from
 
@@ -709,30 +545,15 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:171](https://github.co
 
 > **get** **WORK\_SIZE\_Y**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:179](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L179)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:184](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/ASinglePassPostEffect.ts#L184)
 
-
-Workgroup Size Y
+Returns the workgroup size Y.
 
 ##### Returns
 
 `number`
 
-#### Set Signature
-
-> **set** **WORK\_SIZE\_Y**(`value`): `void`
-
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:183](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L183)
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
+Workgroup size Y
 
 #### Inherited from
 
@@ -746,30 +567,15 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:183](https://github.co
 
 > **get** **WORK\_SIZE\_Z**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:191](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L191)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:196](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/ASinglePassPostEffect.ts#L196)
 
-
-Workgroup Size Z
+Returns the workgroup size Z.
 
 ##### Returns
 
 `number`
 
-#### Set Signature
-
-> **set** **WORK\_SIZE\_Z**(`value`): `void`
-
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:195](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L195)
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
+Workgroup size Z
 
 #### Inherited from
 
@@ -781,10 +587,9 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:195](https://github.co
 
 > **clear**(): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:211](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L211)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:216](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/ASinglePassPostEffect.ts#L216)
 
-
-Clears the effect.
+Clears the resources used by the effect.
 
 #### Returns
 
@@ -796,42 +601,13 @@ Clears the effect.
 
 ***
 
-### execute()
-
-> **execute**(`view`, `gpuDevice`, `width`, `height`): `void`
-
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:289](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L289)
-
-
-Executes the effect.
-
-#### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `view` | [`View3D`](../../Display/classes/View3D.md) | View3D instance |
-| `gpuDevice` | `GPUDevice` | GPU Device |
-| `width` | `number` | Width |
-| `height` | `number` | Height |
-
-#### Returns
-
-`void`
-
-#### Inherited from
-
-[`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`execute`](../namespaces/Core/classes/ASinglePassPostEffect.md#execute)
-
-***
-
 ### init()
 
-> **init**(`redGPUContext`, `name`, `computeCodes`, `bindGroupLayout?`): `void`
+> **init**(`redGPUContext`, `name`, `computeCodes`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:236](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L236)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:238](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/ASinglePassPostEffect.ts#L238)
 
-
-Initializes the effect.
+Initializes the effect. Creates compute shaders and uniform buffers.
 
 #### Parameters
 
@@ -839,10 +615,9 @@ Initializes the effect.
 | ------ | ------ | ------ |
 | `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPU Context |
 | `name` | `string` | Effect name |
-| `computeCodes` | \{ `msaa`: `string`; `nonMsaa`: `string`; \} | Compute shader codes for MSAA and Non-MSAA |
+| `computeCodes` | \{ `msaa`: `string`; `nonMsaa`: `string`; \} | Compute shader source codes for MSAA and Non-MSAA |
 | `computeCodes.msaa` | `string` | - |
-| `computeCodes.nonMsaa?` | `string` | - |
-| `bindGroupLayout?` | `GPUBindGroupLayout` | Bind group layout (optional) |
+| `computeCodes.nonMsaa` | `string` | - |
 
 #### Returns
 
@@ -856,26 +631,24 @@ Initializes the effect.
 
 ### render()
 
-> **render**(`view`, `width`, `height`, ...`sourceTextureInfo`): `ASinglePassPostEffectResult`
+> **render**(`view`, `width`, `height`, ...`sourceTextureInfo`): [`IPostEffectResult`](../namespaces/Core/interfaces/IPostEffectResult.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:322](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L322)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:296](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/ASinglePassPostEffect.ts#L296)
 
-
-Renders the effect.
+Renders the effect and returns the result. Updates bind groups if necessary.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `view` | [`View3D`](../../Display/classes/View3D.md) | View3D instance |
-| `width` | `number` | Width |
-| `height` | `number` | Height |
-| ...`sourceTextureInfo` | `ASinglePassPostEffectResult`[] | Source texture info list |
+| `width` | `number` | Rendering width |
+| `height` | `number` | Rendering height |
+| ...`sourceTextureInfo` | [`IPostEffectResult`](../namespaces/Core/interfaces/IPostEffectResult.md)[] | List of source texture information to be used as input |
 
 #### Returns
 
-`ASinglePassPostEffectResult`
-
+[`IPostEffectResult`](../namespaces/Core/interfaces/IPostEffectResult.md)
 
 Rendering result (texture and view)
 
@@ -885,46 +658,20 @@ Rendering result (texture and view)
 
 ***
 
-### update()
-
-> **update**(`deltaTime`): `void`
-
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:352](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L352)
-
-
-Updates the effect state.
-
-#### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `deltaTime` | `number` | Delta time |
-
-#### Returns
-
-`void`
-
-#### Inherited from
-
-[`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`update`](../namespaces/Core/classes/ASinglePassPostEffect.md#update)
-
-***
-
 ### updateUniform()
 
 > **updateUniform**(`key`, `value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:366](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/ASinglePassPostEffect.ts#L366)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:349](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/ASinglePassPostEffect.ts#L349)
 
-
-Updates a uniform value.
+Updates a specific uniform value.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `key` | `string` | Uniform key |
-| `value` | `number` \| `boolean` \| `number`[] | Uniform value |
+| `key` | `string` | Uniform key name |
+| `value` | `number` \| `boolean` \| `number`[] | Value to set |
 
 #### Returns
 
@@ -933,3 +680,6 @@ Updates a uniform value.
 #### Inherited from
 
 [`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md).[`updateUniform`](../namespaces/Core/classes/ASinglePassPostEffect.md#updateuniform)
+
+
+</details>

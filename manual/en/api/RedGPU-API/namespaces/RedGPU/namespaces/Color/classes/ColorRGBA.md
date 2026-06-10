@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,31 +6,24 @@
 
 # Class: ColorRGBA
 
-Defined in: [src/color/ColorRGBA.ts:35](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGBA.ts#L35)
-
+Defined in: [src/color/ColorRGBA.ts:35](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGBA.ts#L35)
 
 Class representing a color with red, green, blue, and alpha (transparency) values.
-
 
 Inherits from the ColorRGB class and adds transparency functionality. This class provides methods to create, manipulate, and convert RGBA color values, allowing transparency handling via the alpha channel.
 * ### Example
 ```typescript
-
 // Create opaque white
 const white = new RedGPU.Color.ColorRGBA();
-
 
 // Create semi-transparent red
 const semiTransparentRed = new RedGPU.Color.ColorRGBA(255, 0, 0, 0.5);
 
-
 // Create with change callback
 const color = new RedGPU.Color.ColorRGBA(100, 150, 200, 0.8, () => console.log('Color changed'));
 
-
 // Set color by RGBA string
 color.setColorByRGBAString('rgba(255, 87, 51, 0.7)');
-
 
 // Get normalized values
 const normalized = color.rgbaNormal; // [1, 0.34, 0.2, 0.7]
@@ -46,8 +39,7 @@ const normalized = color.rgbaNormal; // [1, 0.34, 0.2, 0.7]
 
 > **new ColorRGBA**(`r?`, `g?`, `b?`, `a?`, `onChange?`): `ColorRGBA`
 
-Defined in: [src/color/ColorRGBA.ts:66](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGBA.ts#L66)
-
+Defined in: [src/color/ColorRGBA.ts:66](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGBA.ts#L66)
 
 Creates a new instance of the ColorRGBA class.
 * ### Example
@@ -71,7 +63,6 @@ const color = new RedGPU.Color.ColorRGBA(255, 128, 0, 0.75);
 
 #### Throws
 
-
 Throws an error if RGB values are out of the 0-255 range or alpha value is out of the 0-1 range.
 
 #### Overrides
@@ -86,8 +77,7 @@ Throws an error if RGB values are out of the 0-255 range or alpha value is out o
 
 > **get** **a**(): `number`
 
-Defined in: [src/color/ColorRGBA.ts:84](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGBA.ts#L84)
-
+Defined in: [src/color/ColorRGBA.ts:84](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGBA.ts#L84)
 
 Gets the alpha (transparency) component.
 * ### Example
@@ -99,15 +89,13 @@ const a = color.a;
 
 `number`
 
-
 Alpha value between 0 (fully transparent) and 1 (fully opaque)
 
 #### Set Signature
 
 > **set** **a**(`value`): `void`
 
-Defined in: [src/color/ColorRGBA.ts:102](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGBA.ts#L102)
-
+Defined in: [src/color/ColorRGBA.ts:102](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGBA.ts#L102)
 
 Sets the alpha (transparency) component.
 * ### Example
@@ -116,7 +104,6 @@ color.a = 0.5;
 ```
 
 ##### Throws
-
 
 Throws an error if the value is out of the 0-1 range.
 
@@ -132,14 +119,155 @@ Throws an error if the value is out of the 0-1 range.
 
 ***
 
+### rgba
+
+#### Get Signature
+
+> **get** **rgba**(): `number`[]
+
+Defined in: [src/color/ColorRGBA.ts:120](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGBA.ts#L120)
+
+Returns an array containing the RGBA values of the color.
+* ### Example
+```typescript
+const color = new RedGPU.Color.ColorRGBA(255, 128, 0, 0.8);
+console.log(color.rgba); // [255, 128, 0, 0.8]
+```
+
+##### Returns
+
+`number`[]
+
+Array of numbers representing RGBA values in [r, g, b, a] format
+
+***
+
+### rgbaNormal
+
+#### Get Signature
+
+> **get** **rgbaNormal**(): `number`[]
+
+Defined in: [src/color/ColorRGBA.ts:139](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGBA.ts#L139)
+
+Returns normalized RGBA values as an array.
+
+RGB values are normalized between 0 and 1, and the alpha value is already normalized.
+* ### Example
+```typescript
+const color = new RedGPU.Color.ColorRGBA(255, 128, 0, 0.8);
+console.log(color.rgbaNormal); // [1, 0.501, 0, 0.8]
+```
+
+##### Returns
+
+`number`[]
+
+Array containing normalized RGBA values [r/255, g/255, b/255, a]
+
+***
+
+### rgbaNormalLinear
+
+#### Get Signature
+
+> **get** **rgbaNormalLinear**(): `number`[]
+
+Defined in: [src/color/ColorRGBA.ts:155](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGBA.ts#L155)
+
+Returns gamma-corrected (Linear) normalized RGBA values as an array.
+* ### Example
+```typescript
+const color = new RedGPU.Color.ColorRGBA(255, 128, 0, 0.8);
+console.log(color.rgbaNormalLinear);
+```
+
+##### Returns
+
+`number`[]
+
+Array containing gamma-corrected (2.2) normalized RGBA values
+
+***
+
+### setColorByRGBA()
+
+> **setColorByRGBA**(`r`, `g`, `b`, `a`): `void`
+
+Defined in: [src/color/ColorRGBA.ts:188](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGBA.ts#L188)
+
+Sets the color of the object using RGBA values.
+* ### Example
+```typescript
+const color = new RedGPU.Color.ColorRGBA();
+color.setColorByRGBA(255, 128, 0, 0.6);
+```
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `r` | `number` | Red component of the color. Must be a value between 0 and 255. |
+| `g` | `number` | Green component of the color. Must be a value between 0 and 255. |
+| `b` | `number` | Blue component of the color. Must be a value between 0 and 255. |
+| `a` | `number` | Alpha (transparency) component of the color. Must be a value between 0 and 1. |
+
+#### Returns
+
+`void`
+
+#### Throws
+
+Throws an error if RGBA color values are invalid.
+
+***
+
+### setColorByRGBAString()
+
+> **setColorByRGBAString**(`rgbaString`): `void`
+
+Defined in: [src/color/ColorRGBA.ts:214](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGBA.ts#L214)
+
+Sets the color of the object using an RGBA string.
+* ### Example
+```typescript
+const color = new RedGPU.Color.ColorRGBA();
+color.setColorByRGBAString('rgba(255, 128, 0, 0.75)');
+color.setColorByRGBAString('rgba( 255 , 128 , 0 , 0.75 )');
+color.setColorByRGBAString('rgba(255, 128, 0, .5)');
+```
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `rgbaString` | `string` | String representing RGBA color values in "rgba(r, g, b, a)" format |
+
+#### Returns
+
+`void`
+
+#### Throws
+
+Throws an error if the provided rgbaString is not a valid RGBA color value.
+
+***
+
+
+***
+
+## Inherited Members
+
+<details>
+<summary>View inherited properties and methods (Click to expand)</summary>
+
 ### b
 
 #### Get Signature
 
 > **get** **b**(): `number`
 
-Defined in: [src/color/ColorRGB.ts:154](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGB.ts#L154)
-
+Defined in: [src/color/ColorRGB.ts:154](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGB.ts#L154)
 
 Gets the blue component.
 * ### Example
@@ -151,15 +279,13 @@ const b = color.b;
 
 `number`
 
-
 Blue value between 0 and 255
 
 #### Set Signature
 
 > **set** **b**(`value`): `void`
 
-Defined in: [src/color/ColorRGB.ts:172](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGB.ts#L172)
-
+Defined in: [src/color/ColorRGB.ts:172](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGB.ts#L172)
 
 Sets the blue component.
 * ### Example
@@ -168,7 +294,6 @@ color.b = 255;
 ```
 
 ##### Throws
-
 
 Throws an error if the value is out of the 0-255 range.
 
@@ -194,8 +319,7 @@ Throws an error if the value is out of the 0-255 range.
 
 > **get** **g**(): `number`
 
-Defined in: [src/color/ColorRGB.ts:119](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGB.ts#L119)
-
+Defined in: [src/color/ColorRGB.ts:119](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGB.ts#L119)
 
 Gets the green component.
 * ### Example
@@ -207,15 +331,13 @@ const g = color.g;
 
 `number`
 
-
 Green value between 0 and 255
 
 #### Set Signature
 
 > **set** **g**(`value`): `void`
 
-Defined in: [src/color/ColorRGB.ts:137](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGB.ts#L137)
-
+Defined in: [src/color/ColorRGB.ts:137](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGB.ts#L137)
 
 Sets the green component.
 * ### Example
@@ -224,7 +346,6 @@ color.g = 255;
 ```
 
 ##### Throws
-
 
 Throws an error if the value is out of the 0-255 range.
 
@@ -250,8 +371,7 @@ Throws an error if the value is out of the 0-255 range.
 
 > **get** **hex**(): `string`
 
-Defined in: [src/color/ColorRGB.ts:242](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGB.ts#L242)
-
+Defined in: [src/color/ColorRGB.ts:242](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGB.ts#L242)
 
 Returns the hexadecimal representation of the RGB color.
 * ### Example
@@ -263,7 +383,6 @@ console.log(color.hex); // "#FF8000"
 ##### Returns
 
 `string`
-
 
 Hexadecimal color value (e.g., "#FF8000")
 
@@ -279,8 +398,7 @@ Hexadecimal color value (e.g., "#FF8000")
 
 > **get** **r**(): `number`
 
-Defined in: [src/color/ColorRGB.ts:84](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGB.ts#L84)
-
+Defined in: [src/color/ColorRGB.ts:84](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGB.ts#L84)
 
 Gets the red component.
 * ### Example
@@ -292,15 +410,13 @@ const r = color.r;
 
 `number`
 
-
 Red value between 0 and 255
 
 #### Set Signature
 
 > **set** **r**(`value`): `void`
 
-Defined in: [src/color/ColorRGB.ts:102](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGB.ts#L102)
-
+Defined in: [src/color/ColorRGB.ts:102](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGB.ts#L102)
 
 Sets the red component.
 * ### Example
@@ -309,7 +425,6 @@ color.r = 255;
 ```
 
 ##### Throws
-
 
 Throws an error if the value is out of the 0-255 range.
 
@@ -335,8 +450,7 @@ Throws an error if the value is out of the 0-255 range.
 
 > **get** **rgb**(): `number`[]
 
-Defined in: [src/color/ColorRGB.ts:190](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGB.ts#L190)
-
+Defined in: [src/color/ColorRGB.ts:190](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGB.ts#L190)
 
 Returns an array containing the RGB values of the color.
 * ### Example
@@ -349,90 +463,11 @@ console.log(color.rgb); // [255, 128, 0]
 
 `number`[]
 
-
 Array of numbers representing RGB values in [r, g, b] format
 
 #### Inherited from
 
 [`ColorRGB`](ColorRGB.md).[`rgb`](ColorRGB.md#rgb)
-
-***
-
-### rgba
-
-#### Get Signature
-
-> **get** **rgba**(): `number`[]
-
-Defined in: [src/color/ColorRGBA.ts:120](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGBA.ts#L120)
-
-
-Returns an array containing the RGBA values of the color.
-* ### Example
-```typescript
-const color = new RedGPU.Color.ColorRGBA(255, 128, 0, 0.8);
-console.log(color.rgba); // [255, 128, 0, 0.8]
-```
-
-##### Returns
-
-`number`[]
-
-
-Array of numbers representing RGBA values in [r, g, b, a] format
-
-***
-
-### rgbaNormal
-
-#### Get Signature
-
-> **get** **rgbaNormal**(): `number`[]
-
-Defined in: [src/color/ColorRGBA.ts:139](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGBA.ts#L139)
-
-
-Returns normalized RGBA values as an array.
-
-
-RGB values are normalized between 0 and 1, and the alpha value is already normalized.
-* ### Example
-```typescript
-const color = new RedGPU.Color.ColorRGBA(255, 128, 0, 0.8);
-console.log(color.rgbaNormal); // [1, 0.501, 0, 0.8]
-```
-
-##### Returns
-
-`number`[]
-
-
-Array containing normalized RGBA values [r/255, g/255, b/255, a]
-
-***
-
-### rgbaNormalLinear
-
-#### Get Signature
-
-> **get** **rgbaNormalLinear**(): `number`[]
-
-Defined in: [src/color/ColorRGBA.ts:155](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGBA.ts#L155)
-
-
-Returns gamma-corrected (Linear) normalized RGBA values as an array.
-* ### Example
-```typescript
-const color = new RedGPU.Color.ColorRGBA(255, 128, 0, 0.8);
-console.log(color.rgbaNormalLinear);
-```
-
-##### Returns
-
-`number`[]
-
-
-Array containing gamma-corrected (2.2) normalized RGBA values
 
 ***
 
@@ -442,8 +477,7 @@ Array containing gamma-corrected (2.2) normalized RGBA values
 
 > **get** **rgbNormal**(): `number`[]
 
-Defined in: [src/color/ColorRGB.ts:206](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGB.ts#L206)
-
+Defined in: [src/color/ColorRGB.ts:206](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGB.ts#L206)
 
 Returns normalized RGB values as an array. Each value is normalized between 0 and 1.
 * ### Example
@@ -455,7 +489,6 @@ console.log(color.rgbNormal); // [1, 0.501, 0]
 ##### Returns
 
 `number`[]
-
 
 Array containing normalized RGB values [r/255, g/255, b/255]
 
@@ -471,8 +504,7 @@ Array containing normalized RGB values [r/255, g/255, b/255]
 
 > **get** **rgbNormalLinear**(): `number`[]
 
-Defined in: [src/color/ColorRGB.ts:222](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGB.ts#L222)
-
+Defined in: [src/color/ColorRGB.ts:222](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGB.ts#L222)
 
 Returns gamma-corrected (Linear) normalized RGB values as an array.
 * ### Example
@@ -484,7 +516,6 @@ console.log(color.rgbNormalLinear);
 ##### Returns
 
 `number`[]
-
 
 Array containing gamma-corrected (2.2) normalized RGB values
 
@@ -498,8 +529,7 @@ Array containing gamma-corrected (2.2) normalized RGB values
 
 > **setColorByHEX**(`hexColor`): `void`
 
-Defined in: [src/color/ColorRGB.ts:288](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGB.ts#L288)
-
+Defined in: [src/color/ColorRGB.ts:288](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGB.ts#L288)
 
 Sets the color of the object using a hexadecimal color code.
 * ### Example
@@ -521,7 +551,6 @@ color.setColorByHEX(0xFF8000);
 
 #### Throws
 
-
 Throws an error if the hexadecimal color code is invalid.
 
 #### Inherited from
@@ -534,8 +563,7 @@ Throws an error if the hexadecimal color code is invalid.
 
 > **setColorByRGB**(`r`, `g`, `b`): `void`
 
-Defined in: [src/color/ColorRGB.ts:267](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGB.ts#L267)
-
+Defined in: [src/color/ColorRGB.ts:267](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGB.ts#L267)
 
 Sets the color of the object based on the provided RGB values.
 * ### Example
@@ -558,7 +586,6 @@ color.setColorByRGB(255, 128, 0);
 
 #### Throws
 
-
 Throws an error if RGB values are out of the 0-255 range.
 
 #### Inherited from
@@ -567,79 +594,11 @@ Throws an error if RGB values are out of the 0-255 range.
 
 ***
 
-### setColorByRGBA()
-
-> **setColorByRGBA**(`r`, `g`, `b`, `a`): `void`
-
-Defined in: [src/color/ColorRGBA.ts:188](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGBA.ts#L188)
-
-
-Sets the color of the object using RGBA values.
-* ### Example
-```typescript
-const color = new RedGPU.Color.ColorRGBA();
-color.setColorByRGBA(255, 128, 0, 0.6);
-```
-
-#### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `r` | `number` | Red component of the color. Must be a value between 0 and 255. |
-| `g` | `number` | Green component of the color. Must be a value between 0 and 255. |
-| `b` | `number` | Blue component of the color. Must be a value between 0 and 255. |
-| `a` | `number` | Alpha (transparency) component of the color. Must be a value between 0 and 1. |
-
-#### Returns
-
-`void`
-
-#### Throws
-
-
-Throws an error if RGBA color values are invalid.
-
-***
-
-### setColorByRGBAString()
-
-> **setColorByRGBAString**(`rgbaString`): `void`
-
-Defined in: [src/color/ColorRGBA.ts:214](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGBA.ts#L214)
-
-
-Sets the color of the object using an RGBA string.
-* ### Example
-```typescript
-const color = new RedGPU.Color.ColorRGBA();
-color.setColorByRGBAString('rgba(255, 128, 0, 0.75)');
-color.setColorByRGBAString('rgba( 255 , 128 , 0 , 0.75 )');
-color.setColorByRGBAString('rgba(255, 128, 0, .5)');
-```
-
-#### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `rgbaString` | `string` | String representing RGBA color values in "rgba(r, g, b, a)" format |
-
-#### Returns
-
-`void`
-
-#### Throws
-
-
-Throws an error if the provided rgbaString is not a valid RGBA color value.
-
-***
-
 ### setColorByRGBString()
 
 > **setColorByRGBString**(`rgbString`): `void`
 
-Defined in: [src/color/ColorRGB.ts:309](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/color/ColorRGB.ts#L309)
-
+Defined in: [src/color/ColorRGB.ts:309](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/ColorRGB.ts#L309)
 
 Parses a string representing an RGB color value and sets the object's color.
 * ### Example
@@ -661,9 +620,11 @@ color.setColorByRGBString('rgb( 255 , 128 , 0 )');
 
 #### Throws
 
-
 Throws an error if the provided rgbString is not a valid RGB color value.
 
 #### Inherited from
 
 [`ColorRGB`](ColorRGB.md).[`setColorByRGBString`](ColorRGB.md#setcolorbyrgbstring)
+
+
+</details>

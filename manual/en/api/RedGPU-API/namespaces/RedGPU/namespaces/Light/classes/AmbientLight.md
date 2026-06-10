@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,16 +6,17 @@
 
 # Class: AmbientLight
 
-Defined in: [src/light/lights/AmbientLight.ts:18](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/lights/AmbientLight.ts#L18)
-
+Defined in: [src/light/lights/AmbientLight.ts:28](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/AmbientLight.ts#L28)
 
 Class that defines AmbientLight.
 
+Basic lighting that spreads uniformly across the scene, providing the same brightness to all objects without shadows or directionality.
+Uses **Lux (lx)** as the light unit and works with the Auto-Exposure system.
 
-Basic lighting that spreads uniformly across the scene, providing the same brightness to all objects without shadows or directionality. Mainly used for adjusting the overall atmosphere or as base lighting.
+
 * ### Example
 ```typescript
-const ambient = new RedGPU.Light.AmbientLight();
+const ambient = new RedGPU.Light.AmbientLight('#ADD8E6', 50); // 50 Lux
 scene.lightManager.ambientLight = ambient;
 ```
 
@@ -27,10 +28,9 @@ scene.lightManager.ambientLight = ambient;
 
 ### Constructor
 
-> **new AmbientLight**(`color?`, `intensity?`): `AmbientLight`
+> **new AmbientLight**(`color?`, `lux?`): `AmbientLight`
 
-Defined in: [src/light/lights/AmbientLight.ts:29](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/lights/AmbientLight.ts#L29)
-
+Defined in: [src/light/lights/AmbientLight.ts:41](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/AmbientLight.ts#L41)
 
 Creates a new AmbientLight instance.
 
@@ -39,7 +39,7 @@ Creates a new AmbientLight instance.
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
 | `color` | `string` | `'#ADD8E6'` | Color of the light (default: light sky blue #ADD8E6) |
-| `intensity` | `number` | `0.1` | Intensity of the light (default: 0.1) |
+| `lux` | `number` | `50` | Illuminance of the light (unit: Lux, default: 50) |
 
 #### Returns
 
@@ -51,15 +51,51 @@ Creates a new AmbientLight instance.
 
 ## Properties
 
+### lux
+
+#### Get Signature
+
+> **get** **lux**(): `number`
+
+Defined in: [src/light/lights/AmbientLight.ts:50](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/AmbientLight.ts#L50)
+
+Returns or sets the illuminance (Lux) of the light.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **lux**(`value`): `void`
+
+Defined in: [src/light/lights/AmbientLight.ts:54](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/AmbientLight.ts#L54)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+
+***
+
+## Inherited Members
+
+<details>
+<summary>View inherited properties and methods (Click to expand)</summary>
+
 ### drawDebugger
 
-> **drawDebugger**: `ADrawDebuggerLight`
+> **drawDebugger**: [`ADrawDebuggerLight`](../../Display/namespaces/drawDebugger/classes/ADrawDebuggerLight.md)\<[`ABaseLight`](../namespaces/Core/classes/ABaseLight.md)\>
 
-Defined in: [src/light/core/ABaseLight.ts:20](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/core/ABaseLight.ts#L20)
-
+Defined in: [src/light/core/ABaseLight.ts:22](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/core/ABaseLight.ts#L22)
 
 Helper object for debugging visualization of the light.
-
 
 Set externally, it can visually display the position or direction of the light.
 
@@ -75,8 +111,7 @@ Set externally, it can visually display the position or direction of the light.
 
 > **get** **color**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/light/core/ABaseLight.ts:82](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/core/ABaseLight.ts#L82)
-
+Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/core/ABaseLight.ts#L84)
 
 Returns the color of the light.
 
@@ -84,15 +119,13 @@ Returns the color of the light.
 
 [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-
 ColorRGB object
 
 #### Set Signature
 
 > **set** **color**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:93](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/core/ABaseLight.ts#L93)
-
+Defined in: [src/light/core/ABaseLight.ts:95](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/core/ABaseLight.ts#L95)
 
 Sets the color of the light.
 
@@ -118,8 +151,7 @@ Sets the color of the light.
 
 > **get** **enableDebugger**(): `boolean`
 
-Defined in: [src/light/core/ABaseLight.ts:60](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/core/ABaseLight.ts#L60)
-
+Defined in: [src/light/core/ABaseLight.ts:62](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/core/ABaseLight.ts#L62)
 
 Returns whether the debugging visualization feature is enabled.
 
@@ -127,15 +159,13 @@ Returns whether the debugging visualization feature is enabled.
 
 `boolean`
 
-
 Whether enabled
 
 #### Set Signature
 
 > **set** **enableDebugger**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:71](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/core/ABaseLight.ts#L71)
-
+Defined in: [src/light/core/ABaseLight.ts:73](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/core/ABaseLight.ts#L73)
 
 Enables or disables the debugging visualization feature.
 
@@ -155,32 +185,29 @@ Enables or disables the debugging visualization feature.
 
 ***
 
-### intensity
+### intensityMultiplier
 
 #### Get Signature
 
-> **get** **intensity**(): `number`
+> **get** **intensityMultiplier**(): `number`
 
-Defined in: [src/light/core/ABaseLight.ts:104](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/core/ABaseLight.ts#L104)
+Defined in: [src/light/core/ABaseLight.ts:109](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/core/ABaseLight.ts#L109)
 
-
-Returns the intensity of the light.
+Returns the intensity multiplier of the light.
 
 ##### Returns
 
 `number`
 
-
-Intensity value
+Multiplier value
 
 #### Set Signature
 
-> **set** **intensity**(`value`): `void`
+> **set** **intensityMultiplier**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:115](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/light/core/ABaseLight.ts#L115)
+Defined in: [src/light/core/ABaseLight.ts:120](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/core/ABaseLight.ts#L120)
 
-
-Sets the intensity of the light.
+Sets the intensity multiplier of the light.
 
 ##### Parameters
 
@@ -194,4 +221,9 @@ Sets the intensity of the light.
 
 #### Inherited from
 
-[`ABaseLight`](../namespaces/Core/classes/ABaseLight.md).[`intensity`](../namespaces/Core/classes/ABaseLight.md#intensity)
+[`ABaseLight`](../namespaces/Core/classes/ABaseLight.md).[`intensityMultiplier`](../namespaces/Core/classes/ABaseLight.md#intensitymultiplier)
+
+***
+
+
+</details>

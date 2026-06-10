@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,28 +6,26 @@
 
 # Function: copyGPUBuffer()
 
-> **copyGPUBuffer**(`gpuDevice`, `srcBuffer`, `dstBuffer`): `void`
+> **copyGPUBuffer**(`commandEncoder`, `srcBuffer`, `dstBuffer`): `void`
 
-Defined in: [src/utils/copyGPUBuffer.ts:24](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/copyGPUBuffer.ts#L24)
+Defined in: [src/utils/copyGPUBuffer.ts:18](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/copyGPUBuffer.ts#L18)
 
 GPUBuffer 간 데이터를 복사합니다.
 
-
-srcBuffer의 데이터를 dstBuffer로 복사합니다. 크기는 두 버퍼 중 작은 쪽을 따릅니다.
-
+소스 버퍼의 데이터를 대상 버퍼로 복사하며, 복사 크기는 두 버퍼 중 작은 쪽을 기준으로 합니다.
 
 * ### Example
 ```typescript
-RedGPU.Util.copyGPUBuffer(device, sourceBuffer, destinationBuffer);
+RedGPU.Util.copyGPUBuffer(commandEncoder, sourceBuffer, destinationBuffer);
 ```
 
 ## Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `gpuDevice` | `GPUDevice` | 복사 작업에 사용할 GPU 디바이스
-| `srcBuffer` | `GPUBuffer` | 복사할 소스 버퍼
-| `dstBuffer` | `GPUBuffer` | 복사 대상 버퍼
+| `commandEncoder` | `GPUCommandEncoder` | 커맨드 인코더
+| `srcBuffer` | `GPUBuffer` | 소스 GPUBuffer
+| `dstBuffer` | `GPUBuffer` | 대상 GPUBuffer
 
 ## Returns
 

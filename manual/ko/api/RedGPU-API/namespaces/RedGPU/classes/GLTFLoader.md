@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -6,13 +6,11 @@
 
 # Class: GLTFLoader
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:115](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/loader/gltf/GLTFLoader.ts#L115)
+Defined in: [src/loader/gltf/GLTFLoader.ts:115](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/loader/gltf/GLTFLoader.ts#L115)
 
 GLTF 2.0 포맷의 3D 모델 파일을 로드하고 파싱하는 로더입니다.
 
-
 .gltf (JSON) 및 .glb (Binary) 형식을 모두 지원하며, 메쉬, 재질, 텍스처, 애니메이션, 스킨 등을 자동으로 파싱하여 RedGPU 객체로 변환합니다.
-
 
 * ### Example
 ```typescript
@@ -37,16 +35,19 @@ const loader = new RedGPU.GLTFLoader(
 );
 ```
 
+## Extends
+
+- [`RedGPUObject`](../namespaces/BaseObject/classes/RedGPUObject.md)
+
 ## Constructors
 
 ### Constructor
 
 > **new GLTFLoader**(`redGPUContext`, `url`, `onLoad`, `onProgress`, `onError`): `GLTFLoader`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:169](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/loader/gltf/GLTFLoader.ts#L169)
+Defined in: [src/loader/gltf/GLTFLoader.ts:168](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/loader/gltf/GLTFLoader.ts#L168)
 
 GLTFLoader 인스턴스를 생성하고 파일 로딩을 시작합니다.
-
 
 #### Parameters
 
@@ -62,16 +63,19 @@ GLTFLoader 인스턴스를 생성하고 파일 로딩을 시작합니다.
 
 `GLTFLoader`
 
+#### Overrides
+
+[`RedGPUObject`](../namespaces/BaseObject/classes/RedGPUObject.md).[`constructor`](../namespaces/BaseObject/classes/RedGPUObject.md#constructor)
+
 ## Properties
 
 ### activeAnimations
 
 > **activeAnimations**: `any`[] = `[]`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:134](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/loader/gltf/GLTFLoader.ts#L134)
+Defined in: [src/loader/gltf/GLTFLoader.ts:134](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/loader/gltf/GLTFLoader.ts#L134)
 
 현재 재생 중인 애니메이션 정보 목록
-
 
 ***
 
@@ -79,7 +83,7 @@ Defined in: [src/loader/gltf/GLTFLoader.ts:134](https://github.com/redcamel/RedG
 
 > **parsingOption**: `any`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:129](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/loader/gltf/GLTFLoader.ts#L129)
+Defined in: [src/loader/gltf/GLTFLoader.ts:129](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/loader/gltf/GLTFLoader.ts#L129)
 
 **`Internal`**
 
@@ -89,10 +93,9 @@ Defined in: [src/loader/gltf/GLTFLoader.ts:129](https://github.com/redcamel/RedG
 
 > **parsingResult**: `GLTFParsingResult`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:120](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/loader/gltf/GLTFLoader.ts#L120)
+Defined in: [src/loader/gltf/GLTFLoader.ts:120](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/loader/gltf/GLTFLoader.ts#L120)
 
 GLTF 파싱 결과 데이터
-
 
 ***
 
@@ -100,10 +103,9 @@ GLTF 파싱 결과 데이터
 
 > **resultMesh**: [`Mesh`](../namespaces/Display/classes/Mesh.md)
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:125](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/loader/gltf/GLTFLoader.ts#L125)
+Defined in: [src/loader/gltf/GLTFLoader.ts:125](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/loader/gltf/GLTFLoader.ts#L125)
 
 파싱된 결과가 포함된 루트 메쉬 컨테이너
-
 
 ## Accessors
 
@@ -113,10 +115,9 @@ Defined in: [src/loader/gltf/GLTFLoader.ts:125](https://github.com/redcamel/RedG
 
 > **get** **fileName**(): `string`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:246](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/loader/gltf/GLTFLoader.ts#L246)
+Defined in: [src/loader/gltf/GLTFLoader.ts:237](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/loader/gltf/GLTFLoader.ts#L237)
 
 파일 이름을 반환합니다.
-
 
 ##### Returns
 
@@ -130,10 +131,9 @@ Defined in: [src/loader/gltf/GLTFLoader.ts:246](https://github.com/redcamel/RedG
 
 > **get** **filePath**(): `string`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:221](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/loader/gltf/GLTFLoader.ts#L221)
+Defined in: [src/loader/gltf/GLTFLoader.ts:212](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/loader/gltf/GLTFLoader.ts#L212)
 
 파일 경로를 반환합니다.
-
 
 ##### Returns
 
@@ -147,10 +147,9 @@ Defined in: [src/loader/gltf/GLTFLoader.ts:221](https://github.com/redcamel/RedG
 
 > **get** **gltfData**(): `GLTF`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:229](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/loader/gltf/GLTFLoader.ts#L229)
+Defined in: [src/loader/gltf/GLTFLoader.ts:220](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/loader/gltf/GLTFLoader.ts#L220)
 
 원본 GLTF 데이터를 반환합니다.
-
 
 ##### Returns
 
@@ -160,12 +159,11 @@ Defined in: [src/loader/gltf/GLTFLoader.ts:229](https://github.com/redcamel/RedG
 
 > **set** **gltfData**(`value`): `void`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:238](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/loader/gltf/GLTFLoader.ts#L238)
+Defined in: [src/loader/gltf/GLTFLoader.ts:229](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/loader/gltf/GLTFLoader.ts#L229)
 
 **`Internal`**
 
 원본 GLTF 데이터를 설정합니다.
-
 
 ##### Parameters
 
@@ -185,34 +183,15 @@ Defined in: [src/loader/gltf/GLTFLoader.ts:238](https://github.com/redcamel/RedG
 
 > **get** **loadingProgressInfo**(): `GLTFLoadingProgressInfo`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:205](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/loader/gltf/GLTFLoader.ts#L205)
+Defined in: [src/loader/gltf/GLTFLoader.ts:203](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/loader/gltf/GLTFLoader.ts#L203)
 
 현재 로딩 진행 정보를 반환합니다.
-
 
 ##### Returns
 
 `GLTFLoadingProgressInfo`
 
 로딩 진행 정보 객체
-
-
-***
-
-### redGPUContext
-
-#### Get Signature
-
-> **get** **redGPUContext**(): [`RedGPUContext`](../namespaces/Context/classes/RedGPUContext.md)
-
-Defined in: [src/loader/gltf/GLTFLoader.ts:213](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/loader/gltf/GLTFLoader.ts#L213)
-
-RedGPUContext 인스턴스를 반환합니다.
-
-
-##### Returns
-
-[`RedGPUContext`](../namespaces/Context/classes/RedGPUContext.md)
 
 ***
 
@@ -222,25 +201,23 @@ RedGPUContext 인스턴스를 반환합니다.
 
 > **get** **url**(): `string`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:254](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/loader/gltf/GLTFLoader.ts#L254)
+Defined in: [src/loader/gltf/GLTFLoader.ts:245](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/loader/gltf/GLTFLoader.ts#L245)
 
 파일 URL을 반환합니다.
-
 
 ##### Returns
 
 `string`
 
-## Methods
+***
 
 ### playAnimation()
 
 > **playAnimation**(`parsedSingleClip`): `void`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:293](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/loader/gltf/GLTFLoader.ts#L293)
+Defined in: [src/loader/gltf/GLTFLoader.ts:284](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/loader/gltf/GLTFLoader.ts#L284)
 
 특정 애니메이션 클립을 재생합니다.
-
 
 * ### Example
 ```typescript
@@ -264,10 +241,9 @@ loader.playAnimation(clip);
 
 > **stopAnimation**(): `void`
 
-Defined in: [src/loader/gltf/GLTFLoader.ts:275](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/loader/gltf/GLTFLoader.ts#L275)
+Defined in: [src/loader/gltf/GLTFLoader.ts:266](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/loader/gltf/GLTFLoader.ts#L266)
 
 모든 활성화된 애니메이션을 중지합니다.
-
 
 * ### Example
 ```typescript
@@ -277,3 +253,186 @@ loader.stopAnimation();
 #### Returns
 
 `void`
+
+
+***
+
+## 상속받은 멤버
+
+<details>
+<summary>상속받은 속성 및 메서드 보기 (클릭하여 확장)</summary>
+
+### antialiasingManager
+
+#### Get Signature
+
+> **get** **antialiasingManager**(): [`AntialiasingManager`](../namespaces/Antialiasing/classes/AntialiasingManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L76)
+
+안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
+
+##### Returns
+
+[`AntialiasingManager`](../namespaces/Antialiasing/classes/AntialiasingManager.md)
+
+AntialiasingManager 인스턴스
+
+#### Inherited from
+
+[`RedGPUObject`](../namespaces/BaseObject/classes/RedGPUObject.md).[`antialiasingManager`](../namespaces/BaseObject/classes/RedGPUObject.md#antialiasingmanager)
+
+***
+
+### commandEncoderManager
+
+#### Get Signature
+
+> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../namespaces/CommandEncoderManager/classes/CommandEncoderManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L88)
+
+커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
+
+##### Returns
+
+[`CommandEncoderManager`](../namespaces/CommandEncoderManager/classes/CommandEncoderManager.md)
+
+CommandEncoderManager 인스턴스
+
+#### Inherited from
+
+[`RedGPUObject`](../namespaces/BaseObject/classes/RedGPUObject.md).[`commandEncoderManager`](../namespaces/BaseObject/classes/RedGPUObject.md#commandencodermanager)
+
+***
+
+### gpuDevice
+
+#### Get Signature
+
+> **get** **gpuDevice**(): `GPUDevice`
+
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L52)
+
+WebGPU 디바이스 객체를 반환합니다. (단축 경로)
+
+##### Returns
+
+`GPUDevice`
+
+GPUDevice 인스턴스
+
+#### Inherited from
+
+[`RedGPUObject`](../namespaces/BaseObject/classes/RedGPUObject.md).[`gpuDevice`](../namespaces/BaseObject/classes/RedGPUObject.md#gpudevice)
+
+***
+
+### name
+
+#### Get Signature
+
+> **get** **name**(): `string`
+
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L58)
+
+객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
+
+##### Returns
+
+`string`
+
+객체 이름
+
+#### Set Signature
+
+> **set** **name**(`value`): `void`
+
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L71)
+
+객체의 이름을 설정합니다.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | 설정할 객체 이름
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`RedGPUObject`](../namespaces/BaseObject/classes/RedGPUObject.md).[`name`](../namespaces/BaseObject/classes/RedGPUObject.md#name)
+
+***
+
+### redGPUContext
+
+#### Get Signature
+
+> **get** **redGPUContext**(): [`RedGPUContext`](../namespaces/Context/classes/RedGPUContext.md)
+
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L40)
+
+RedGPUContext 인스턴스를 반환합니다.
+
+##### Returns
+
+[`RedGPUContext`](../namespaces/Context/classes/RedGPUContext.md)
+
+RedGPUContext 인스턴스
+
+#### Inherited from
+
+[`RedGPUObject`](../namespaces/BaseObject/classes/RedGPUObject.md).[`redGPUContext`](../namespaces/BaseObject/classes/RedGPUObject.md#redgpucontext)
+
+***
+
+### resourceManager
+
+#### Get Signature
+
+> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Resource/namespaces/Core/classes/ResourceManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L64)
+
+리소스 매니저 인스턴스를 반환합니다. (단축 경로)
+
+##### Returns
+
+[`ResourceManager`](../namespaces/Resource/namespaces/Core/classes/ResourceManager.md)
+
+ResourceManager 인스턴스
+
+#### Inherited from
+
+[`RedGPUObject`](../namespaces/BaseObject/classes/RedGPUObject.md).[`resourceManager`](../namespaces/BaseObject/classes/RedGPUObject.md#resourcemanager)
+
+***
+
+### uuid
+
+#### Get Signature
+
+> **get** **uuid**(): `string`
+
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L46)
+
+객체의 고유 식별자(UUID)를 반환합니다.
+
+##### Returns
+
+`string`
+
+UUID 문자열
+
+#### Inherited from
+
+[`RedGPUObject`](../namespaces/BaseObject/classes/RedGPUObject.md).[`uuid`](../namespaces/BaseObject/classes/RedGPUObject.md#uuid)
+
+## Methods
+
+
+</details>

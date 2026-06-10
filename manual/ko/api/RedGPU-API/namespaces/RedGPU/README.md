@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../README.md)
 
 ***
 
@@ -36,12 +36,13 @@
 ## Other
 
 - [Antialiasing](namespaces/Antialiasing/README.md)
+- [BaseObject](namespaces/BaseObject/README.md)
 - [Bound](namespaces/Bound/README.md)
 - [Camera](namespaces/Camera/README.md)
 - [Color](namespaces/Color/README.md)
+- [CommandEncoderManager](namespaces/CommandEncoderManager/README.md)
 - [Context](namespaces/Context/README.md)
-- [DefineForFragment](namespaces/DefineForFragment/README.md)
-- [DefineForVertex](namespaces/DefineForVertex/README.md)
+- [DefineGPUProperty](namespaces/DefineGPUProperty/README.md)
 - [Display](namespaces/Display/README.md)
 - [Light](namespaces/Light/README.md)
 - [Material](namespaces/Material/README.md)
@@ -54,11 +55,12 @@
 - [RenderState](namespaces/RenderState/README.md)
 - [Resource](namespaces/Resource/README.md)
 - [RuntimeChecker](namespaces/RuntimeChecker/README.md)
+- [ShaderLibrary](namespaces/ShaderLibrary/README.md)
 - [Shadow](namespaces/Shadow/README.md)
 - [ToneMapping](namespaces/ToneMapping/README.md)
 - [Util](namespaces/Util/README.md)
-- [SystemCode](variables/SystemCode.md)
 
 ## Renderer
 
 - [Renderer](classes/Renderer.md)
+- [SystemUniformUpdater](classes/SystemUniformUpdater.md)

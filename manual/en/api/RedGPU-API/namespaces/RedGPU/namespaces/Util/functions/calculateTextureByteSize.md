@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,10 +8,11 @@
 
 > **calculateTextureByteSize**(`texture`): `number`
 
-Defined in: [src/utils/texture/calculateTextureByteSize.ts:18](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/texture/calculateTextureByteSize.ts#L18)
+Defined in: [src/utils/texture/calculateTextureByteSize.ts:17](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/texture/calculateTextureByteSize.ts#L17)
 
+Calculates the total byte size of a GPUTexture.
 
-Calculates the byte size of a GPUTexture.
+Calculates the actual memory size used by the texture based on its width, height, layers (or depth), and sample count.
 
 * ### Example
 ```typescript
@@ -22,11 +23,10 @@ const byteSize = RedGPU.Util.calculateTextureByteSize(gpuTexture);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `texture` | `GPUTexture` | GPUTexture object to calculate byte size for |
+| `texture` | `GPUTexture` | Target GPUTexture object |
 
 ## Returns
 
 `number`
-
 
 Calculated total byte size

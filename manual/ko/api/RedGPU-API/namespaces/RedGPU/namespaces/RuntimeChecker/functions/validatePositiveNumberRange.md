@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > **validatePositiveNumberRange**(`value`, `minRange?`, `maxRange?`): `boolean`
 
-Defined in: [src/runtimeChecker/validateFunc/validatePositiveNumberRange.ts:32](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/runtimeChecker/validateFunc/validatePositiveNumberRange.ts#L32)
+Defined in: [src/runtimeChecker/validateFunc/validatePositiveNumberRange.ts:32](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/runtimeChecker/validateFunc/validatePositiveNumberRange.ts#L32)
 
 주어진 값이 0 이상의 양수이며 지정된 범위 내에 있는지 검증합니다.
 
-
 값이 0 미만이거나 지정된 범위를 벗어날 경우 예외를 발생시킵니다.
-
 
 * ### Example
 ```typescript
@@ -35,8 +33,6 @@ RedGPU.RuntimeChecker.validatePositiveNumberRange(10, 0, 100);
 
 범위 내의 양수이면 true
 
-
 ## Throws
 
 입력값이 숫자가 아니거나, 0 미만이거나, 범위를 벗어날 경우 Error 발생
-

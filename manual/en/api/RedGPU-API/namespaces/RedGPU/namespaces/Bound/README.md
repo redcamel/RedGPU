@@ -1,10 +1,12 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../README.md)
 
 ***
 
 [RedGPU API](../../../../../README.md) / [RedGPU](../../README.md) / Bound
 
 # Bound
+
+Provides classes and utility functions to calculate and manage bounding volumes of objects, such as AABB and OBB.
 
 ## Bound
 

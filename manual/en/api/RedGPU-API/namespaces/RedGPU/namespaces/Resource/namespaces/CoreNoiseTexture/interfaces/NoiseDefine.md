@@ -1,0 +1,43 @@
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+
+***
+
+[RedGPU API](../../../../../../../../README.md) / [RedGPU](../../../../../README.md) / [Resource](../../../README.md) / [CoreNoiseTexture](../README.md) / NoiseDefine
+
+# Interface: NoiseDefine
+
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:15](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L15)
+
+Noise definition interface
+
+## Properties
+
+### helperFunctions?
+
+> `optional` **helperFunctions?**: `string`
+
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:19](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L19)
+
+***
+
+### mainLogic
+
+> **mainLogic**: `string`
+
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:16](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L16)
+
+***
+
+### uniformDefaults
+
+> **uniformDefaults**: `object`
+
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:18](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L18)
+
+***
+
+### uniformStruct
+
+> **uniformStruct**: `string`
+
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:17](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L17)

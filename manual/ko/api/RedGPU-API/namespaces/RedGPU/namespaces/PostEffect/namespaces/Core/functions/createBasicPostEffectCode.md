@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,41 +6,36 @@
 
 # Function: createBasicPostEffectCode()
 
-> **createBasicPostEffectCode**(`effect`, `code`, `uniformStruct?`): `object`
+> **createBasicPostEffectCode**(`effect`, `code`, `uniformStruct?`, `sourceTextureConfigs?`): `object`
 
-Defined in: [src/postEffect/core/createBasicPostEffectCode.ts:54](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/createBasicPostEffectCode.ts#L54)
+Defined in: [src/postEffect/core/createBasicPostEffectCode.ts:92](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/createBasicPostEffectCode.ts#L92)
 
-기본 후처리 이펙트 WGSL 코드를 생성하는 헬퍼 함수입니다.
+기본 후처리 이펙트용 WGSL 코드를 생성하는 고수준 헬퍼 함수입니다.
 
-
-MSAA/Non-MSAA, 유니폼 구조, 딥스 텍스처 등 옵션에 따라 WGSL 코드를 자동 생성합니다.
-
-
-내부적으로 시스템 유니폼, 소스/출력 텍스처, 워크그룹 크기 등을 자동으로 포함합니다.
+이 함수는 반복적인 보일러플레이트 코드를 자동화하며 다음 기능을 수행합니다:
+1. MSAA/Non-MSAA 대응 소스 자동 분기 생성.
+2. 입력 소스 텍스처(Group 0) 바인딩 자동화.
+3. 이펙트 전용 유니폼(Group 1) 및 시스템 공용 리소스(Group 2: G-Buffer, Depth 등) 자동 포함.
+4. 출력용 스토리지 텍스처(Group 3) 정의.
+5. 클래스에 정의된 워크그룹 사이즈 반영.
 
 
 ## Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `effect` | [`ASinglePassPostEffect`](../classes/ASinglePassPostEffect.md) | `undefined` | ASinglePassPostEffect 인스턴스
-| `code` | `string` | `undefined` | WGSL 메인 코드 (main 함수 내부)
-| `uniformStruct` | `string` | `''` | 유니폼 구조 WGSL 코드 (선택)
+| `effect` | [`ASinglePassPostEffect`](../classes/ASinglePassPostEffect.md) | `undefined` | ASinglePassPostEffect를 상속받은 이펙트 인스턴스
+| `code` | `string` | `undefined` | main 함수 내부에 삽입될 WGSL 로직
+| `uniformStruct` | `string` | `''` | (선택) 이펙트에서 사용할 Uniforms 구조체 정의
+| `sourceTextureConfigs` | [`IPostEffectSourceConfig`](../interfaces/IPostEffectSourceConfig.md) \| [`IPostEffectSourceConfig`](../interfaces/IPostEffectSourceConfig.md)[] | `...` | (선택) 입력 소스들에 대한 설정 (기본값: {name: 'sourceTexture'})
 
 ## Returns
 
 `object`
 
-{ msaa: string, nonMsaa: string } - MSAA/Non-MSAA용 WGSL 코드
-
-
-* ### Example
-```typescript
-const shader = createBasicPostEffectCode(effect, '...main code...', 'struct Uniforms {...};');
-// shader.msaa, shader.nonMsaa 사용
-```
+MSAA와 Non-MSAA용으로 각각 생성된 WGSL 코드 객체
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `msaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:56](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/createBasicPostEffectCode.ts#L56) |
-| `nonMsaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:57](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/postEffect/core/createBasicPostEffectCode.ts#L57) |
+| `msaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:99](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/createBasicPostEffectCode.ts#L99) |
+| `nonMsaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:100](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/createBasicPostEffectCode.ts#L100) |

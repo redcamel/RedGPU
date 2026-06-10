@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,11 @@
 
 # Function: preprocessWGSL()
 
-> **preprocessWGSL**(`code`): `PreprocessedWGSLResult`
+> **preprocessWGSL**(`sourceName`, `code`, `injectLibrary?`): [`PreprocessedWGSLResult`](../interfaces/PreprocessedWGSLResult.md)
 
-Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:209](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/wgslParser/core/preprocessWGSL.ts#L209)
-
+Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:262](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/preprocessWGSL.ts#L262)
 
 Preprocesses WGSL shader code.
-
 
 This function processes RedGPU-specific macros such as #redgpu_include, REDGPU_DEFINE_*, and #redgpu_if, and extracts information for generating shader variants.
 
@@ -20,11 +18,12 @@ This function processes RedGPU-specific macros such as #redgpu_include, REDGPU_D
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
+| `sourceName` | `string` | Shader source identifier name (for warnings) |
 | `code` | `string` | WGSL source code to preprocess |
+| `injectLibrary?` | `Record`\<`string`, `string`\> | Injected local library object (optional) |
 
 ## Returns
 
-`PreprocessedWGSLResult`
-
+[`PreprocessedWGSLResult`](../interfaces/PreprocessedWGSLResult.md)
 
 Preprocessing result object (including cache key, default source, and variant generator)

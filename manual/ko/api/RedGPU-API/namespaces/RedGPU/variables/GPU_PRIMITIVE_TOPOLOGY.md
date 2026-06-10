@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > `const` **GPU\_PRIMITIVE\_TOPOLOGY**: `object`
 
-Defined in: [src/gpuConst/GPU\_PRIMITIVE\_TOPOLOGY.ts:10](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/gpuConst/GPU_PRIMITIVE_TOPOLOGY.ts#L10)
+Defined in: [src/gpuConst/GPU\_PRIMITIVE\_TOPOLOGY.ts:10](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/gpuConst/GPU_PRIMITIVE_TOPOLOGY.ts#L10)
 
 정점 데이터를 기하학적 도형으로 해석하는 방식을 정의하는 상수군입니다.
 
-
 정점들이 어떤 규칙으로 연결되어 그려질지 결정합니다.
-
 
 ## Type Declaration
 

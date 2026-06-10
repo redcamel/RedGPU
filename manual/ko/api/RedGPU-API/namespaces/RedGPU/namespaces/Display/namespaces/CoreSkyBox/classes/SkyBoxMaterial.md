@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,15 +6,9 @@
 
 # Class: SkyBoxMaterial
 
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:14](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L14)
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:17](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L17)
 
-SkyBox 렌더링에 사용되는 전용 머티리얼 클래스입니다.
-
-
-::: warning
-이 클래스는 시스템 내부적으로 사용되는 머티리얼 클래스입니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
-
-:::
+SkyBox 렌더링에 특화된 전용 셰이더 및 바인딩 처리를 제공하는 머티리얼 클래스입니다.
 
 ## Extends
 
@@ -24,19 +18,18 @@ SkyBox 렌더링에 사용되는 전용 머티리얼 클래스입니다.
 
 ### Constructor
 
-> **new SkyBoxMaterial**(`redGPUContext`, `cubeTexture`): `SkyBoxMaterial`
+> **new SkyBoxMaterial**(`redGPUContext`, `texture`): `SkyBoxMaterial`
 
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:59](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L59)
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:87](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L87)
 
-SkyBoxMaterial 인스턴스를 생성합니다. (내부 시스템 전용)
-
+SkyBoxMaterial 인스턴스를 생성합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `redGPUContext` | [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md) | RedGPUContext 인스턴스
-| `cubeTexture` | [`IBLCubeTexture`](../../../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../../../Resource/classes/CubeTexture.md) | 스카이박스에 사용할 큐브 텍스처 (일반 또는 IBL)
+| `texture` | [`CubeTexture`](../../../../Resource/classes/CubeTexture.md) \| [`DirectCubeTexture`](../../../../Resource/classes/DirectCubeTexture.md) | 초기 큐브 텍스처 객체
 
 #### Returns
 
@@ -48,18 +41,13 @@ SkyBoxMaterial 인스턴스를 생성합니다. (내부 시스템 전용)
 
 ## Properties
 
-### \_\_packingList
+### averageLuminance
 
-> **\_\_packingList**: `any`[]
+> **averageLuminance**: `number`
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:22](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABitmapBaseMaterial.ts#L22)
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:57](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L57)
 
-파이프라인 갱신 시 호출되는 콜백 리스트
-
-
-#### Inherited from
-
-[`ABitmapBaseMaterial`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md).[`__packingList`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md#__packinglist)
+분석 완료된 HDR 텍스처의 평균 휘도
 
 ***
 
@@ -67,9 +55,101 @@ Defined in: [src/material/core/ABitmapBaseMaterial.ts:22](https://github.com/red
 
 > **blur**: `number`
 
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:24](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L24)
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:42](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L42)
 
-블러 강도
+스카이박스 이미지의 블러 가우시안 필터 강도 (0.0 ~ 1.0)
+
+***
+
+### intensityMultiplier
+
+> **intensityMultiplier**: `number`
+
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:47](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L47)
+
+아티스트 시각 제어용 최종 라이팅 밝기 강도 배율
+
+***
+
+### luminance
+
+> **luminance**: `number`
+
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:52](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L52)
+
+물리 기반 광학 시뮬레이션용 휘도값 (Nit, 기본값: 10000 Nit)
+
+***
+
+### sampler0
+
+> **sampler0**: [`Sampler`](../../../../Resource/classes/Sampler.md)
+
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:37](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L37)
+
+스카이박스 텍스처 샘플링 필터링 설정을 제어하는 Sampler 인스턴스
+
+***
+
+### texture0
+
+> **texture0**: [`CubeTexture`](../../../../Resource/classes/CubeTexture.md) \| [`DirectCubeTexture`](../../../../Resource/classes/DirectCubeTexture.md)
+
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:22](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L22)
+
+스카이박스 렌더링에 적용할 현재 큐브 텍스처
+
+***
+
+### transitionMask
+
+> **transitionMask**: [`BitmapTexture`](../../../../Resource/classes/BitmapTexture.md) \| [`ANoiseTexture`](../../../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md)
+
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:32](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L32)
+
+전환 애니메이션에 적용할 지형/노이즈 마스크 텍스처
+
+***
+
+### transitionProgress
+
+> **transitionProgress**: `number`
+
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:67](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L67)
+
+두 텍스처 간의 보간 전환 진행률 (0.0 ~ 1.0)
+
+***
+
+### transitionTexture
+
+> **transitionTexture**: [`CubeTexture`](../../../../Resource/classes/CubeTexture.md) \| [`DirectCubeTexture`](../../../../Resource/classes/DirectCubeTexture.md)
+
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:27](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L27)
+
+부드러운 전환 효과 진행 시 대상이 되는 목표 큐브 텍스처
+
+***
+
+
+***
+
+## 상속받은 멤버
+
+<details>
+<summary>상속받은 속성 및 메서드 보기 (클릭하여 확장)</summary>
+
+### \_\_packingList
+
+> **\_\_packingList**: `any`[]
+
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:27](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABitmapBaseMaterial.ts#L27)
+
+파이프라인 갱신 시 호출되는 콜백 리스트
+
+#### Inherited from
+
+[`ABitmapBaseMaterial`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md).[`__packingList`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md#__packinglist)
 
 ***
 
@@ -77,10 +157,9 @@ Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:24](https://githu
 
 > **dirtyPipeline**: `boolean` = `false`
 
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:47](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L47)
+Defined in: [src/material/core/ABaseMaterial.ts:67](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L67)
 
 파이프라인 dirty 상태 플래그
-
 
 #### Inherited from
 
@@ -92,10 +171,9 @@ Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:47](https://githu
 
 > **gpuRenderInfo**: [`FragmentGPURenderInfo`](../../../../Material/namespaces/Core/classes/FragmentGPURenderInfo.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:57](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L57)
+Defined in: [src/material/core/ABaseMaterial.ts:62](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L62)
 
 프래그먼트 GPU 렌더 정보 객체
-
 
 #### Inherited from
 
@@ -103,13 +181,25 @@ Defined in: [src/material/core/ABaseMaterial.ts:57](https://github.com/redcamel/
 
 ***
 
+### isInstanceofMaterial
+
+> **isInstanceofMaterial**: `boolean`
+
+Defined in: [src/material/core/ABaseMaterial.ts:33](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L33)
+
+#### Inherited from
+
+[`ABitmapBaseMaterial`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md).[`isInstanceofMaterial`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md#isinstanceofmaterial)
+
+***
+
 ### opacity
 
 > **opacity**: `number`
 
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:26](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L26)
+Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:62](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L62)
 
-불투명도
+스카이박스의 불투명도 수치 (0.0 ~ 1.0)
 
 #### Inherited from
 
@@ -117,34 +207,13 @@ Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:26](https://githu
 
 ***
 
-### skyboxTexture
-
-> **skyboxTexture**: [`IBLCubeTexture`](../../../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../../../Resource/classes/CubeTexture.md)
-
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:16](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L16)
-
-현재 스카이박스 큐브 텍스처 (일반 또는 IBL)
-
-***
-
-### skyboxTextureSampler
-
-> **skyboxTextureSampler**: [`Sampler`](../../../../Resource/classes/Sampler.md)
-
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:22](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L22)
-
-스카이박스 텍스처 샘플러
-
-***
-
 ### tint
 
 > **tint**: [`ColorRGBA`](../../../../Color/classes/ColorRGBA.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:28](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L28)
+Defined in: [src/material/core/ABaseMaterial.ts:27](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L27)
 
 머티리얼의 틴트 컬러(RGBA)
-
 
 #### Inherited from
 
@@ -152,44 +221,13 @@ Defined in: [src/material/core/ABaseMaterial.ts:28](https://github.com/redcamel/
 
 ***
 
-### transitionAlphaTexture
-
-> **transitionAlphaTexture**: [`ANoiseTexture`](../../../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) \| [`BitmapTexture`](../../../../Resource/classes/BitmapTexture.md)
-
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:20](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L20)
-
-전환 효과용 알파 노이즈 텍스처
-
-***
-
-### transitionProgress
-
-> **transitionProgress**: `number`
-
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:28](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L28)
-
-전환 진행률
-
-***
-
-### transitionTexture
-
-> **transitionTexture**: [`IBLCubeTexture`](../../../../Resource/namespaces/CoreIBL/classes/IBLCubeTexture.md) \| [`CubeTexture`](../../../../Resource/classes/CubeTexture.md)
-
-Defined in: [src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts:18](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/skyboxs/skyBox/core/SkyBoxMaterial.ts#L18)
-
-전환 대상 큐브 텍스처 (일반 또는 IBL)
-
-***
-
 ### transparent
 
 > **transparent**: `boolean` = `false`
 
-Defined in: [src/material/core/ABaseMaterial.ts:67](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L67)
+Defined in: [src/material/core/ABaseMaterial.ts:72](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L72)
 
 머티리얼 투명도 여부
-
 
 #### Inherited from
 
@@ -201,10 +239,9 @@ Defined in: [src/material/core/ABaseMaterial.ts:67](https://github.com/redcamel/
 
 > **use2PathRender**: `boolean`
 
-Defined in: [src/material/core/ABaseMaterial.ts:52](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L52)
+Defined in: [src/material/core/ABaseMaterial.ts:57](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L57)
 
 2패스 렌더링 사용 여부
-
 
 #### Inherited from
 
@@ -216,10 +253,9 @@ Defined in: [src/material/core/ABaseMaterial.ts:52](https://github.com/redcamel/
 
 > **useTint**: `boolean`
 
-Defined in: [src/material/core/ABaseMaterial.ts:33](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L33)
+Defined in: [src/material/core/ABaseMaterial.ts:32](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L32)
 
 틴트 컬러 사용 여부
-
 
 #### Inherited from
 
@@ -227,16 +263,37 @@ Defined in: [src/material/core/ABaseMaterial.ts:33](https://github.com/redcamel/
 
 ## Accessors
 
+### antialiasingManager
+
+#### Get Signature
+
+> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L76)
+
+안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
+
+##### Returns
+
+[`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
+
+AntialiasingManager 인스턴스
+
+#### Inherited from
+
+[`ABitmapBaseMaterial`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md).[`antialiasingManager`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md#antialiasingmanager)
+
+***
+
 ### blendAlphaState
 
 #### Get Signature
 
 > **get** **blendAlphaState**(): [`BlendState`](../../../../RenderState/classes/BlendState.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:289](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L289)
+Defined in: [src/material/core/ABaseMaterial.ts:291](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L291)
 
 머티리얼의 알파 블렌드 상태 객체 반환
-
 
 ##### Returns
 
@@ -254,10 +311,9 @@ Defined in: [src/material/core/ABaseMaterial.ts:289](https://github.com/redcamel
 
 > **get** **blendColorState**(): [`BlendState`](../../../../RenderState/classes/BlendState.md)
 
-Defined in: [src/material/core/ABaseMaterial.ts:281](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L281)
+Defined in: [src/material/core/ABaseMaterial.ts:283](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L283)
 
 머티리얼의 컬러 블렌드 상태 객체 반환
-
 
 ##### Returns
 
@@ -275,10 +331,9 @@ Defined in: [src/material/core/ABaseMaterial.ts:281](https://github.com/redcamel
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L57)
+Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L53)
 
 캐시 키를 반환합니다.
-
 
 ##### Returns
 
@@ -288,10 +343,9 @@ Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L65)
+Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L61)
 
 캐시 키를 설정합니다.
-
 
 ##### Parameters
 
@@ -309,16 +363,37 @@ Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/
 
 ***
 
+### commandEncoderManager
+
+#### Get Signature
+
+> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L88)
+
+커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
+
+##### Returns
+
+[`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+CommandEncoderManager 인스턴스
+
+#### Inherited from
+
+[`ABitmapBaseMaterial`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md).[`commandEncoderManager`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md#commandencodermanager)
+
+***
+
 ### FRAGMENT\_BIND\_GROUP\_DESCRIPTOR\_NAME
 
 #### Get Signature
 
 > **get** **FRAGMENT\_BIND\_GROUP\_DESCRIPTOR\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:257](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L257)
+Defined in: [src/material/core/ABaseMaterial.ts:259](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L259)
 
 프래그먼트 바인드 그룹 디스크립터명을 반환합니다.
-
 
 ##### Returns
 
@@ -336,10 +411,9 @@ Defined in: [src/material/core/ABaseMaterial.ts:257](https://github.com/redcamel
 
 > **get** **FRAGMENT\_SHADER\_MODULE\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:249](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L249)
+Defined in: [src/material/core/ABaseMaterial.ts:251](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L251)
 
 프래그먼트 셰이더 모듈명을 반환합니다.
-
 
 ##### Returns
 
@@ -357,10 +431,9 @@ Defined in: [src/material/core/ABaseMaterial.ts:249](https://github.com/redcamel
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L106)
+Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L77)
 
 연관된 GPU 디바이스를 반환합니다.
-
 
 ##### Returns
 
@@ -378,10 +451,9 @@ Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel
 
 > **get** **MODULE\_NAME**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:241](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L241)
+Defined in: [src/material/core/ABaseMaterial.ts:243](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L243)
 
 머티리얼 모듈명을 반환합니다.
-
 
 ##### Returns
 
@@ -399,29 +471,29 @@ Defined in: [src/material/core/ABaseMaterial.ts:241](https://github.com/redcamel
 
 > **get** **name**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L81)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L58)
 
-인스턴스의 이름을 반환합니다. 이름이 없으면 클래스명과 ID로 생성합니다.
-
+객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
 
 ##### Returns
 
 `string`
 
+객체 이름
+
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L90)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L71)
 
-인스턴스의 이름을 설정합니다.
-
+객체의 이름을 설정합니다.
 
 ##### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | 설정할 객체 이름
 
 ##### Returns
 
@@ -439,18 +511,41 @@ Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L114)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L40)
 
 RedGPUContext 인스턴스를 반환합니다.
-
 
 ##### Returns
 
 [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
+RedGPUContext 인스턴스
+
 #### Inherited from
 
 [`ABitmapBaseMaterial`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md).[`redGPUContext`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md#redgpucontext)
+
+***
+
+### resourceManager
+
+#### Get Signature
+
+> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L64)
+
+리소스 매니저 인스턴스를 반환합니다. (단축 경로)
+
+##### Returns
+
+[`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
+
+ResourceManager 인스턴스
+
+#### Inherited from
+
+[`ABitmapBaseMaterial`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md).[`resourceManager`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md#resourcemanager)
 
 ***
 
@@ -460,10 +555,9 @@ RedGPUContext 인스턴스를 반환합니다.
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L73)
+Defined in: [src/resources/core/ResourceBase.ts:69](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L69)
 
 리소스 매니저 키를 반환합니다.
-
 
 ##### Returns
 
@@ -475,16 +569,35 @@ Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/
 
 ***
 
+### revision
+
+#### Get Signature
+
+> **get** **revision**(): `number`
+
+Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L45)
+
+리소스의 리비전(업데이트 횟수)을 반환합니다.
+
+##### Returns
+
+`number`
+
+#### Inherited from
+
+[`ABitmapBaseMaterial`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md).[`revision`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md#revision)
+
+***
+
 ### STORAGE\_STRUCT
 
 #### Get Signature
 
 > **get** **STORAGE\_STRUCT**(): `any`
 
-Defined in: [src/material/core/ABaseMaterial.ts:265](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L265)
+Defined in: [src/material/core/ABaseMaterial.ts:267](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L267)
 
 셰이더 storage 구조 정보를 반환합니다.
-
 
 ##### Returns
 
@@ -502,10 +615,9 @@ Defined in: [src/material/core/ABaseMaterial.ts:265](https://github.com/redcamel
 
 > **get** **tintBlendMode**(): `string`
 
-Defined in: [src/material/core/ABaseMaterial.ts:205](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L205)
+Defined in: [src/material/core/ABaseMaterial.ts:207](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L207)
 
 틴트 블렌드 모드 이름을 반환합니다.
-
 
 ##### Returns
 
@@ -513,15 +625,13 @@ Defined in: [src/material/core/ABaseMaterial.ts:205](https://github.com/redcamel
 
 틴트 블렌드 모드 이름
 
-
 #### Set Signature
 
 > **set** **tintBlendMode**(`value`): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:220](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L220)
+Defined in: [src/material/core/ABaseMaterial.ts:222](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L222)
 
 틴트 블렌드 모드를 설정합니다.
-
 
 ##### Parameters
 
@@ -545,10 +655,9 @@ Defined in: [src/material/core/ABaseMaterial.ts:220](https://github.com/redcamel
 
 > **get** **UNIFORM\_STRUCT**(): `any`
 
-Defined in: [src/material/core/ABaseMaterial.ts:273](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L273)
+Defined in: [src/material/core/ABaseMaterial.ts:275](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L275)
 
 셰이더 uniforms 구조 정보를 반환합니다.
-
 
 ##### Returns
 
@@ -566,14 +675,15 @@ Defined in: [src/material/core/ABaseMaterial.ts:273](https://github.com/redcamel
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L98)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L46)
 
-고유 식별자(UUID)를 반환합니다.
-
+객체의 고유 식별자(UUID)를 반환합니다.
 
 ##### Returns
 
 `string`
+
+UUID 문자열
 
 #### Inherited from
 
@@ -587,10 +697,9 @@ Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/
 
 > **get** **writeMaskState**(): `number`
 
-Defined in: [src/material/core/ABaseMaterial.ts:297](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L297)
+Defined in: [src/material/core/ABaseMaterial.ts:299](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L299)
 
 머티리얼의 writeMask 상태 반환
-
 
 ##### Returns
 
@@ -600,10 +709,9 @@ Defined in: [src/material/core/ABaseMaterial.ts:297](https://github.com/redcamel
 
 > **set** **writeMaskState**(`value`): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:308](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L308)
+Defined in: [src/material/core/ABaseMaterial.ts:310](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L310)
 
 머티리얼의 writeMask 상태 설정
-
 
 ##### Parameters
 
@@ -625,10 +733,9 @@ Defined in: [src/material/core/ABaseMaterial.ts:308](https://github.com/redcamel
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L125)
+Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L89)
 
 파이프라인이 더티해질 때 호출될 리스너를 추가합니다.
-
 
 #### Parameters
 
@@ -646,39 +753,13 @@ Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel
 
 ***
 
-### \_\_fireListenerList()
-
-> **\_\_fireListenerList**(`resetList?`): `void`
-
-Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L152)
-
-등록된 더티 리스너들을 실행합니다.
-
-
-#### Parameters
-
-| Parameter | Type | Default value | Description |
-| ------ | ------ | ------ | ------ |
-| `resetList` | `boolean` | `false` | 실행 후 리스너 목록 초기화 여부 (기본값: false)
-
-#### Returns
-
-`void`
-
-#### Inherited from
-
-[`ABitmapBaseMaterial`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md).[`__fireListenerList`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md#__firelistenerlist)
-
-***
-
 ### \_\_removeDirtyPipelineListener()
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L137)
+Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L101)
 
-더티 파이프라인 리스너를 제거합니다.
-
+리소스 업데이트 리스너를 제거합니다.
 
 #### Parameters
 
@@ -700,10 +781,9 @@ Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel
 
 > `protected` **\_updateBaseProperty**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:463](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L463)
+Defined in: [src/material/core/ABaseMaterial.ts:465](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L465)
 
 머티리얼의 유니폼/컬러/틴트 등 기본 속성값을 유니폼 버퍼에 반영합니다.
-
 
 #### Returns
 
@@ -719,10 +799,9 @@ Defined in: [src/material/core/ABaseMaterial.ts:463](https://github.com/redcamel
 
 > `protected` **\_updateFragmentState**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:351](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L351)
+Defined in: [src/material/core/ABaseMaterial.ts:353](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L353)
 
 프래그먼트 셰이더 바인드 그룹/유니폼/텍스처/샘플러 등의 상태를 갱신합니다.
-
 
 #### Returns
 
@@ -738,10 +817,9 @@ Defined in: [src/material/core/ABaseMaterial.ts:351](https://github.com/redcamel
 
 > **getFragmentRenderState**(`entryPoint?`): `GPUFragmentState`
 
-Defined in: [src/material/core/ABaseMaterial.ts:431](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L431)
+Defined in: [src/material/core/ABaseMaterial.ts:433](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L433)
 
 GPU 프래그먼트 렌더 상태 객체를 반환합니다.
-
 
 #### Parameters
 
@@ -755,7 +833,6 @@ GPU 프래그먼트 렌더 상태 객체를 반환합니다.
 
 GPU 프래그먼트 상태
 
-
 #### Inherited from
 
 [`ABitmapBaseMaterial`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md).[`getFragmentRenderState`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md#getfragmentrenderstate)
@@ -766,10 +843,9 @@ GPU 프래그먼트 상태
 
 > **getGPUResourceSampler**(`sampler`): `GPUSampler`
 
-Defined in: [src/material/core/ABaseMaterial.ts:488](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L488)
+Defined in: [src/material/core/ABaseMaterial.ts:490](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L490)
 
 샘플러 객체에서 GPU 샘플러를 반환합니다.
-
 
 #### Parameters
 
@@ -783,7 +859,6 @@ Defined in: [src/material/core/ABaseMaterial.ts:488](https://github.com/redcamel
 
 GPUSampler 인스턴스
 
-
 #### Inherited from
 
 [`ABitmapBaseMaterial`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md).[`getGPUResourceSampler`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md#getgpuresourcesampler)
@@ -794,10 +869,9 @@ GPUSampler 인스턴스
 
 > **initGPURenderInfos**(): `void`
 
-Defined in: [src/material/core/ABaseMaterial.ts:316](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABaseMaterial.ts#L316)
+Defined in: [src/material/core/ABaseMaterial.ts:318](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABaseMaterial.ts#L318)
 
 GPU 렌더 파이프라인 정보 및 유니폼 버퍼를 초기화합니다.
-
 
 #### Returns
 
@@ -809,14 +883,37 @@ GPU 렌더 파이프라인 정보 및 유니폼 버퍼를 초기화합니다.
 
 ***
 
+### notifyUpdate()
+
+> **notifyUpdate**(`resetList?`): `void`
+
+Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L116)
+
+리소스가 업데이트되었음을 등록된 리스너들에게 알립니다.
+
+#### Parameters
+
+| Parameter | Type | Default value | Description |
+| ------ | ------ | ------ | ------ |
+| `resetList` | `boolean` | `false` | 실행 후 리스너 목록 초기화 여부 (기본값: false)
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`ABitmapBaseMaterial`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md).[`notifyUpdate`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md#notifyupdate)
+
+***
+
 ### updateSampler()
 
 > **updateSampler**(`prevSampler`, `newSampler`): `void`
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:75](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABitmapBaseMaterial.ts#L75)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:80](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABitmapBaseMaterial.ts#L80)
 
 샘플러 객체 변경 및 DirtyPipeline 리스너를 관리합니다.
-
 
 #### Parameters
 
@@ -839,17 +936,16 @@ Defined in: [src/material/core/ABitmapBaseMaterial.ts:75](https://github.com/red
 
 > **updateTexture**(`prevTexture`, `texture`): `void`
 
-Defined in: [src/material/core/ABitmapBaseMaterial.ts:59](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/material/core/ABitmapBaseMaterial.ts#L59)
+Defined in: [src/material/core/ABitmapBaseMaterial.ts:64](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/material/core/ABitmapBaseMaterial.ts#L64)
 
 텍스처 객체 변경 및 DirtyPipeline 리스너를 관리합니다.
-
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `prevTexture` | [`ANoiseTexture`](../../../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) \| [`BitmapTexture`](../../../../Resource/classes/BitmapTexture.md) \| [`CubeTexture`](../../../../Resource/classes/CubeTexture.md) \| [`HDRTexture`](../../../../Resource/classes/HDRTexture.md) | 이전 텍스처 (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture)
-| `texture` | [`ANoiseTexture`](../../../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) \| [`BitmapTexture`](../../../../Resource/classes/BitmapTexture.md) \| [`CubeTexture`](../../../../Resource/classes/CubeTexture.md) \| [`HDRTexture`](../../../../Resource/classes/HDRTexture.md) | 새 텍스처 (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture)
+| `prevTexture` | [`CubeTexture`](../../../../Resource/classes/CubeTexture.md) \| [`BitmapTexture`](../../../../Resource/classes/BitmapTexture.md) \| [`ANoiseTexture`](../../../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) \| [`HDRTexture`](../../../../Resource/classes/HDRTexture.md) | 이전 텍스처 (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture)
+| `texture` | [`CubeTexture`](../../../../Resource/classes/CubeTexture.md) \| [`BitmapTexture`](../../../../Resource/classes/BitmapTexture.md) \| [`ANoiseTexture`](../../../../Resource/namespaces/CoreNoiseTexture/classes/ANoiseTexture.md) \| [`HDRTexture`](../../../../Resource/classes/HDRTexture.md) | 새 텍스처 (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture)
 
 #### Returns
 
@@ -858,3 +954,6 @@ Defined in: [src/material/core/ABitmapBaseMaterial.ts:59](https://github.com/red
 #### Inherited from
 
 [`ABitmapBaseMaterial`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md).[`updateTexture`](../../../../Material/namespaces/Core/classes/ABitmapBaseMaterial.md#updatetexture)
+
+
+</details>

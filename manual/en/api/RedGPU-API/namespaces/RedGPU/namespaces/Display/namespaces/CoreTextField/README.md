@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,12 @@
 
 # CoreTextField
 
-
 Provides core base classes and materials for the text field system.
 
 ## Core
 
 - [ATextField](classes/ATextField.md)
 
-## Other
+## Material
 
 - [TextFieldMaterial](classes/TextFieldMaterial.md)

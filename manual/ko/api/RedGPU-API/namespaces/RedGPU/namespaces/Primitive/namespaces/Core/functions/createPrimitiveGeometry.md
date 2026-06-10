@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,10 +8,9 @@
 
 > **createPrimitiveGeometry**(`redGPUContext`, `interleaveData`, `indexData`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/createPrimitiveGeometry.ts:33](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/createPrimitiveGeometry.ts#L33)
+Defined in: [src/primitive/core/createPrimitiveGeometry.ts:33](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/createPrimitiveGeometry.ts#L33)
 
 정점 데이터와 인덱스 데이터를 기반으로 기본 도형 지오메트리를 생성합니다.
-
 
 ### Example
 ```typescript
@@ -32,4 +31,3 @@ const geometry = RedGPU.Core.createPrimitiveGeometry(redGPUContext, interleaveDa
 [`Geometry`](../../../../../classes/Geometry.md)
 
 생성된 Geometry 인스턴스
-

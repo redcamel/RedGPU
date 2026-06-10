@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,10 +8,9 @@
 
 > **getFileName**(`url`, `withExtension?`): `string`
 
-Defined in: [src/utils/file/getFileName.ts:22](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/file/getFileName.ts#L22)
+Defined in: [src/utils/file/getFileName.ts:16](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/file/getFileName.ts#L16)
 
-주어진 URL에서 파일 이름을 추출합니다.
-
+URL 또는 경로에서 파일 이름을 추출합니다.
 
 * ### Example
 ```typescript
@@ -23,12 +22,11 @@ const nameOnly = RedGPU.Util.getFileName('path/to/image.png', false); // 'image'
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
-| `url` | `string` | `undefined` | 파일 이름을 추출할 대상 URL
-| `withExtension` | `boolean` | `true` | 파일 확장자를 포함할지 여부 (기본값: true)
+| `url` | `string` | `undefined` | 대상 URL 또는 경로
+| `withExtension` | `boolean` | `true` | 확장자 포함 여부 (기본값: true)
 
 ## Returns
 
 `string`
 
-추출된 파일 이름
-
+파일 이름

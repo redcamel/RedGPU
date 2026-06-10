@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,20 +6,16 @@
 
 # Class: Sampler
 
-Defined in: [src/resources/sampler/Sampler.ts:33](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/sampler/Sampler.ts#L33)
-
+Defined in: [src/resources/sampler/Sampler.ts:33](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/sampler/Sampler.ts#L33)
 
 Class that manages GPU texture samplers.
 
-
 Various options such as sampler's filter, address mode, and anisotropy can be set.
-
 Samplers with the same options are cached internally to prevent redundant creation, and the sampler is automatically updated when options change.
 
 <iframe src="https://redcamel.github.io/RedGPU/examples/3d/texture/bitmapTextureSampler/"></iframe>
 
 ## See
-
 
 Below is a list of additional sample examples to help understand the structure and operation of Sampler.
  - [Sampler Combination example](https://redcamel.github.io/RedGPU/examples/3d/texture/samplerCombination/)
@@ -35,8 +31,7 @@ Below is a list of additional sample examples to help understand the structure a
 
 > **new Sampler**(`redGPUContext`, `options?`): `Sampler`
 
-Defined in: [src/resources/sampler/Sampler.ts:78](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/sampler/Sampler.ts#L78)
-
+Defined in: [src/resources/sampler/Sampler.ts:78](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/sampler/Sampler.ts#L78)
 
 Creates a Sampler instance.
 
@@ -73,27 +68,29 @@ const sampler = new RedGPU.Resource.Sampler(redGPUContext, {
 
 > **get** **addressModeU**(): `GPUAddressMode`
 
-Defined in: [src/resources/sampler/Sampler.ts:84](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/sampler/Sampler.ts#L84)
+Defined in: [src/resources/sampler/Sampler.ts:88](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/sampler/Sampler.ts#L88)
 
-Address mode for U coordinate
+Returns the address mode for the U coordinate.
 
 ##### Returns
 
 `GPUAddressMode`
 
+- Address mode
+
 #### Set Signature
 
 > **set** **addressModeU**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:89](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/sampler/Sampler.ts#L89)
+Defined in: [src/resources/sampler/Sampler.ts:97](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/sampler/Sampler.ts#L97)
 
-Sets the address mode for U coordinate
+Sets the address mode for the U coordinate.
 
 ##### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `GPUAddressMode` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `GPUAddressMode` | Address mode to set |
 
 ##### Returns
 
@@ -107,27 +104,29 @@ Sets the address mode for U coordinate
 
 > **get** **addressModeV**(): `GPUAddressMode`
 
-Defined in: [src/resources/sampler/Sampler.ts:94](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/sampler/Sampler.ts#L94)
+Defined in: [src/resources/sampler/Sampler.ts:106](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/sampler/Sampler.ts#L106)
 
-Address mode for V coordinate
+Returns the address mode for the V coordinate.
 
 ##### Returns
 
 `GPUAddressMode`
 
+- Address mode
+
 #### Set Signature
 
 > **set** **addressModeV**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:99](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/sampler/Sampler.ts#L99)
+Defined in: [src/resources/sampler/Sampler.ts:115](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/sampler/Sampler.ts#L115)
 
-Sets the address mode for V coordinate
+Sets the address mode for the V coordinate.
 
 ##### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `GPUAddressMode` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `GPUAddressMode` | Address mode to set |
 
 ##### Returns
 
@@ -141,92 +140,33 @@ Sets the address mode for V coordinate
 
 > **get** **addressModeW**(): `GPUAddressMode`
 
-Defined in: [src/resources/sampler/Sampler.ts:104](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/sampler/Sampler.ts#L104)
+Defined in: [src/resources/sampler/Sampler.ts:124](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/sampler/Sampler.ts#L124)
 
-Address mode for W coordinate
+Returns the address mode for the W coordinate.
 
 ##### Returns
 
 `GPUAddressMode`
 
+- Address mode
+
 #### Set Signature
 
 > **set** **addressModeW**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:109](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/sampler/Sampler.ts#L109)
+Defined in: [src/resources/sampler/Sampler.ts:133](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/sampler/Sampler.ts#L133)
 
-Sets the address mode for W coordinate
+Sets the address mode for the W coordinate.
 
 ##### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `GPUAddressMode` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `GPUAddressMode` | Address mode to set |
 
 ##### Returns
 
 `void`
-
-***
-
-### cacheKey
-
-#### Get Signature
-
-> **get** **cacheKey**(): `string`
-
-Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L57)
-
-
-Returns the cache key.
-
-##### Returns
-
-`string`
-
-#### Set Signature
-
-> **set** **cacheKey**(`value`): `void`
-
-Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L65)
-
-
-Sets the cache key.
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `string` |
-
-##### Returns
-
-`void`
-
-#### Inherited from
-
-[`BRDFLUTTexture`](../namespaces/CoreIBL/classes/BRDFLUTTexture.md).[`cacheKey`](../namespaces/CoreIBL/classes/BRDFLUTTexture.md#cachekey)
-
-***
-
-### gpuDevice
-
-#### Get Signature
-
-> **get** **gpuDevice**(): `GPUDevice`
-
-Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L106)
-
-
-Returns the associated GPU device.
-
-##### Returns
-
-`GPUDevice`
-
-#### Inherited from
-
-[`ResourceBase`](../namespaces/Core/classes/ResourceBase.md).[`gpuDevice`](../namespaces/Core/classes/ResourceBase.md#gpudevice)
 
 ***
 
@@ -236,14 +176,15 @@ Returns the associated GPU device.
 
 > **get** **gpuSampler**(): `GPUSampler`
 
-Defined in: [src/resources/sampler/Sampler.ts:136](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/sampler/Sampler.ts#L136)
-
+Defined in: [src/resources/sampler/Sampler.ts:160](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/sampler/Sampler.ts#L160)
 
 Returns the GPU sampler object.
 
 ##### Returns
 
 `GPUSampler`
+
+- WebGPU GPU sampler object
 
 ***
 
@@ -253,14 +194,15 @@ Returns the GPU sampler object.
 
 > **get** **isAnisotropyValid**(): `boolean`
 
-Defined in: [src/resources/sampler/Sampler.ts:206](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/sampler/Sampler.ts#L206)
-
+Defined in: [src/resources/sampler/Sampler.ts:228](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/sampler/Sampler.ts#L228)
 
 Checks if the anisotropy setting is valid. (All filters must be 'linear')
 
 ##### Returns
 
 `boolean`
+
+- Whether it is valid
 
 ***
 
@@ -270,8 +212,7 @@ Checks if the anisotropy setting is valid. (All filters must be 'linear')
 
 > **get** **magFilter**(): `GPUFilterMode`
 
-Defined in: [src/resources/sampler/Sampler.ts:144](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/sampler/Sampler.ts#L144)
-
+Defined in: [src/resources/sampler/Sampler.ts:169](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/sampler/Sampler.ts#L169)
 
 Returns the magnification filter mode.
 
@@ -279,12 +220,13 @@ Returns the magnification filter mode.
 
 `GPUFilterMode`
 
+- Magnification filter mode
+
 #### Set Signature
 
 > **set** **magFilter**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:155](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/sampler/Sampler.ts#L155)
-
+Defined in: [src/resources/sampler/Sampler.ts:178](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/sampler/Sampler.ts#L178)
 
 Sets the magnification filter mode.
 
@@ -292,7 +234,7 @@ Sets the magnification filter mode.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `value` | `GPUFilterMode` | Filter mode |
+| `value` | `GPUFilterMode` | Magnification filter mode to set |
 
 ##### Returns
 
@@ -306,8 +248,7 @@ Sets the magnification filter mode.
 
 > **get** **maxAnisotropy**(): `number`
 
-Defined in: [src/resources/sampler/Sampler.ts:182](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/sampler/Sampler.ts#L182)
-
+Defined in: [src/resources/sampler/Sampler.ts:205](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/sampler/Sampler.ts#L205)
 
 Returns the maximum anisotropy value.
 
@@ -315,17 +256,17 @@ Returns the maximum anisotropy value.
 
 `number`
 
+- Maximum anisotropy value
+
 #### Set Signature
 
 > **set** **maxAnisotropy**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:196](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/sampler/Sampler.ts#L196)
-
+Defined in: [src/resources/sampler/Sampler.ts:217](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/sampler/Sampler.ts#L217)
 
 Sets the maximum anisotropy value. (Between 1 and 16)
 
 ##### Throws
-
 
 Throws RangeError if value is less than 1 or greater than 16
 
@@ -347,8 +288,7 @@ Throws RangeError if value is less than 1 or greater than 16
 
 > **get** **minFilter**(): `GPUFilterMode`
 
-Defined in: [src/resources/sampler/Sampler.ts:163](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/sampler/Sampler.ts#L163)
-
+Defined in: [src/resources/sampler/Sampler.ts:187](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/sampler/Sampler.ts#L187)
 
 Returns the minification filter mode.
 
@@ -356,12 +296,13 @@ Returns the minification filter mode.
 
 `GPUFilterMode`
 
+- Minification filter mode
+
 #### Set Signature
 
 > **set** **minFilter**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:174](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/sampler/Sampler.ts#L174)
-
+Defined in: [src/resources/sampler/Sampler.ts:196](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/sampler/Sampler.ts#L196)
 
 Sets the minification filter mode.
 
@@ -369,7 +310,7 @@ Sets the minification filter mode.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `value` | `GPUFilterMode` | Filter mode |
+| `value` | `GPUFilterMode` | Minification filter mode to set |
 
 ##### Returns
 
@@ -383,8 +324,7 @@ Sets the minification filter mode.
 
 > **get** **mipmapFilter**(): `GPUMipmapFilterMode`
 
-Defined in: [src/resources/sampler/Sampler.ts:117](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/sampler/Sampler.ts#L117)
-
+Defined in: [src/resources/sampler/Sampler.ts:142](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/sampler/Sampler.ts#L142)
 
 Returns the mipmap filter mode.
 
@@ -392,12 +332,13 @@ Returns the mipmap filter mode.
 
 `GPUMipmapFilterMode`
 
+- Mipmap filter mode
+
 #### Set Signature
 
 > **set** **mipmapFilter**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:128](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/sampler/Sampler.ts#L128)
-
+Defined in: [src/resources/sampler/Sampler.ts:151](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/sampler/Sampler.ts#L151)
 
 Sets the mipmap filter mode.
 
@@ -405,7 +346,7 @@ Sets the mipmap filter mode.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `value` | `GPUMipmapFilterMode` | Filter mode |
+| `value` | `GPUMipmapFilterMode` | Mipmap filter mode to set |
 
 ##### Returns
 
@@ -413,16 +354,45 @@ Sets the mipmap filter mode.
 
 ***
 
-### name
+
+***
+
+## Inherited Members
+
+<details>
+<summary>View inherited properties and methods (Click to expand)</summary>
+
+### antialiasingManager
 
 #### Get Signature
 
-> **get** **name**(): `string`
+> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L81)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L76)
 
+Returns the AntialiasingManager instance. (Short-cut path)
 
-Returns the name of the instance. If no name exists, it is generated using the class name and ID.
+##### Returns
+
+[`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+
+AntialiasingManager instance
+
+#### Inherited from
+
+[`ResourceBase`](../namespaces/Core/classes/ResourceBase.md).[`antialiasingManager`](../namespaces/Core/classes/ResourceBase.md#antialiasingmanager)
+
+***
+
+### cacheKey
+
+#### Get Signature
+
+> **get** **cacheKey**(): `string`
+
+Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L53)
+
+Returns the cache key.
 
 ##### Returns
 
@@ -430,12 +400,11 @@ Returns the name of the instance. If no name exists, it is generated using the c
 
 #### Set Signature
 
-> **set** **name**(`value`): `void`
+> **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L90)
+Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L61)
 
-
-Sets the name of the instance.
+Sets the cache key.
 
 ##### Parameters
 
@@ -449,7 +418,89 @@ Sets the name of the instance.
 
 #### Inherited from
 
-[`BRDFLUTTexture`](../namespaces/CoreIBL/classes/BRDFLUTTexture.md).[`name`](../namespaces/CoreIBL/classes/BRDFLUTTexture.md#name)
+[`ANoiseTexture`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md).[`cacheKey`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md#cachekey)
+
+***
+
+### commandEncoderManager
+
+#### Get Signature
+
+> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L88)
+
+Returns the CommandEncoderManager instance. (Short-cut path)
+
+##### Returns
+
+[`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+CommandEncoderManager instance
+
+#### Inherited from
+
+[`ResourceBase`](../namespaces/Core/classes/ResourceBase.md).[`commandEncoderManager`](../namespaces/Core/classes/ResourceBase.md#commandencodermanager)
+
+***
+
+### gpuDevice
+
+#### Get Signature
+
+> **get** **gpuDevice**(): `GPUDevice`
+
+Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L77)
+
+Returns the associated GPU device.
+
+##### Returns
+
+`GPUDevice`
+
+#### Inherited from
+
+[`ResourceBase`](../namespaces/Core/classes/ResourceBase.md).[`gpuDevice`](../namespaces/Core/classes/ResourceBase.md#gpudevice)
+
+***
+
+### name
+
+#### Get Signature
+
+> **get** **name**(): `string`
+
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L58)
+
+Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
+
+##### Returns
+
+`string`
+
+Name of the object
+
+#### Set Signature
+
+> **set** **name**(`value`): `void`
+
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L71)
+
+Sets the name of the object.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | Name of the object to set |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`PostEffectTexturePool`](../../PostEffect/namespaces/Core/classes/PostEffectTexturePool.md).[`name`](../../PostEffect/namespaces/Core/classes/PostEffectTexturePool.md#name)
 
 ***
 
@@ -459,8 +510,7 @@ Sets the name of the instance.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L114)
-
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L40)
 
 Returns the RedGPUContext instance.
 
@@ -468,9 +518,33 @@ Returns the RedGPUContext instance.
 
 [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
+RedGPUContext instance
+
 #### Inherited from
 
 [`ResourceBase`](../namespaces/Core/classes/ResourceBase.md).[`redGPUContext`](../namespaces/Core/classes/ResourceBase.md#redgpucontext)
+
+***
+
+### resourceManager
+
+#### Get Signature
+
+> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L64)
+
+Returns the ResourceManager instance. (Short-cut path)
+
+##### Returns
+
+[`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
+
+ResourceManager instance
+
+#### Inherited from
+
+[`ResourceBase`](../namespaces/Core/classes/ResourceBase.md).[`resourceManager`](../namespaces/Core/classes/ResourceBase.md#resourcemanager)
 
 ***
 
@@ -480,8 +554,7 @@ Returns the RedGPUContext instance.
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L73)
-
+Defined in: [src/resources/core/ResourceBase.ts:69](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L69)
 
 Returns the resource manager key.
 
@@ -495,20 +568,41 @@ Returns the resource manager key.
 
 ***
 
+### revision
+
+#### Get Signature
+
+> **get** **revision**(): `number`
+
+Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L45)
+
+Returns the revision (update count) of the resource.
+
+##### Returns
+
+`number`
+
+#### Inherited from
+
+[`ResourceBase`](../namespaces/Core/classes/ResourceBase.md).[`revision`](../namespaces/Core/classes/ResourceBase.md#revision)
+
+***
+
 ### uuid
 
 #### Get Signature
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L98)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L46)
 
-
-Returns the UUID.
+Returns the universally unique identifier (UUID) of the object.
 
 ##### Returns
 
 `string`
+
+UUID string
 
 #### Inherited from
 
@@ -520,8 +614,7 @@ Returns the UUID.
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L125)
-
+Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L89)
 
 Adds a listener function to be called when the pipeline becomes dirty.
 
@@ -541,39 +634,13 @@ Adds a listener function to be called when the pipeline becomes dirty.
 
 ***
 
-### \_\_fireListenerList()
-
-> **\_\_fireListenerList**(`resetList?`): `void`
-
-Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L152)
-
-
-Fires the registered dirty listeners.
-
-#### Parameters
-
-| Parameter | Type | Default value | Description |
-| ------ | ------ | ------ | ------ |
-| `resetList` | `boolean` | `false` | Whether to reset the listener list after firing (default: false) |
-
-#### Returns
-
-`void`
-
-#### Inherited from
-
-[`ResourceBase`](../namespaces/Core/classes/ResourceBase.md).[`__fireListenerList`](../namespaces/Core/classes/ResourceBase.md#__firelistenerlist)
-
-***
-
 ### \_\_removeDirtyPipelineListener()
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L137)
+Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L101)
 
-
-Removes a dirty pipeline listener.
+Removes a resource update listener.
 
 #### Parameters
 
@@ -588,3 +655,30 @@ Removes a dirty pipeline listener.
 #### Inherited from
 
 [`ResourceBase`](../namespaces/Core/classes/ResourceBase.md).[`__removeDirtyPipelineListener`](../namespaces/Core/classes/ResourceBase.md#__removedirtypipelinelistener)
+
+***
+
+### notifyUpdate()
+
+> **notifyUpdate**(`resetList?`): `void`
+
+Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L116)
+
+Notifies registered listeners that the resource has been updated.
+
+#### Parameters
+
+| Parameter | Type | Default value | Description |
+| ------ | ------ | ------ | ------ |
+| `resetList` | `boolean` | `false` | Whether to reset the listener list after firing (default: false) |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`ResourceBase`](../namespaces/Core/classes/ResourceBase.md).[`notifyUpdate`](../namespaces/Core/classes/ResourceBase.md#notifyupdate)
+
+
+</details>

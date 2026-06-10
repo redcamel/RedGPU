@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -12,6 +12,7 @@
 
 ## Other
 
+- [NoiseDefine](interfaces/NoiseDefine.md)
 - [mergerNoiseHelperFunctions](functions/mergerNoiseHelperFunctions.md)
 - [mergerNoiseUniformDefault](functions/mergerNoiseUniformDefault.md)
 - [mergerNoiseUniformStruct](functions/mergerNoiseUniformStruct.md)

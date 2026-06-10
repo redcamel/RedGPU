@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,11 @@
 
 # Function: computeViewFrustumPlanes()
 
-> **computeViewFrustumPlanes**(`projectionMatrix`, `cameraMatrix`): `number`[][]
+> **computeViewFrustumPlanes**(`projectionMatrix`, `viewMatrix`): `number`[][]
 
-Defined in: [src/math/computeViewFrustumPlanes.ts:27](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/computeViewFrustumPlanes.ts#L27)
-
+Defined in: [src/math/computeViewFrustumPlanes.ts:27](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/computeViewFrustumPlanes.ts#L27)
 
 Computes 6 view frustum planes from projection and camera matrices.
-
 
 Returns equations of each plane normalized in [A, B, C, D] format.
 
@@ -26,11 +24,10 @@ const planes = RedGPU.math.computeViewFrustumPlanes(projectionMTX, cameraMTX);
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `projectionMatrix` | [`mat4`](../type-aliases/mat4.md) | Projection matrix |
-| `cameraMatrix` | [`mat4`](../type-aliases/mat4.md) | Camera matrix |
+| `viewMatrix` | [`mat4`](../type-aliases/mat4.md) | Camera matrix |
 
 ## Returns
 
 `number`[][]
-
 
 Array of [A, B, C, D] for 6 planes

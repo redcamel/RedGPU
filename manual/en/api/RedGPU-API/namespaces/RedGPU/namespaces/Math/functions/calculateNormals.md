@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,11 +8,9 @@
 
 > **calculateNormals**(`vertexArray`, `indexArray`): `number`[]
 
-Defined in: [src/math/calculateNormals.ts:24](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/calculateNormals.ts#L24)
-
+Defined in: [src/math/calculateNormals.ts:24](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/calculateNormals.ts#L24)
 
 Calculates vertex normals from vertex and index arrays.
-
 
 Calculates face normals, then returns averaged and normalized vertex normals.
 
@@ -31,6 +29,5 @@ const normals = RedGPU.math.calculateNormals(vertices, indices);
 ## Returns
 
 `number`[]
-
 
 Calculated vertex normal array

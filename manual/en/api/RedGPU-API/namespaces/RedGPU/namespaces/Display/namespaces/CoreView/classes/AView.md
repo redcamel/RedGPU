@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,17 +6,14 @@
 
 # Abstract Class: AView
 
-Defined in: [src/display/view/core/AView.ts:29](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L29)
-
+Defined in: [src/display/view/core/AView.ts:30](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L30)
 
 Abstract base class that serves as a common foundation for View3D and View2D.
-
 
 Plays a key role in RedGPU's view system, including Scene, Camera, PickingManager, debugging tools (Grid, Axis), and post-effects (TAA, FXAA).
 
 ::: warning
-
-This class is an abstract class used internally by the system.<br/>Do not create instances directly.
+This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
 :::
 
 ## Extends
@@ -31,10 +28,9 @@ This class is an abstract class used internally by the system.<br/>Do not create
 
 ### Constructor
 
-> **new AView**(`redGPUContext`, `scene`, `camera`, `name?`): `AView`
+> `protected` **new AView**(`redGPUContext`, `scene`, `camera`, `name?`): `AView`
 
-Defined in: [src/display/view/core/AView.ts:102](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L102)
-
+Defined in: [src/display/view/core/AView.ts:93](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L93)
 
 AView constructor
 
@@ -44,7 +40,7 @@ AView constructor
 | ------ | ------ | ------ |
 | `redGPUContext` | [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md) | RedGPUContext instance |
 | `scene` | [`Scene`](../../../classes/Scene.md) | Scene instance |
-| `camera` | [`Camera2D`](../../../../Camera/classes/Camera2D.md) \| [`AController`](../../../../Camera/namespaces/Core/classes/AController.md) | AController or Camera2D instance |
+| `camera` | [`Camera2D`](../../../../Camera/classes/Camera2D.md) \| [`PerspectiveCamera`](../../../../Camera/classes/PerspectiveCamera.md) \| [`OrthographicCamera`](../../../../Camera/classes/OrthographicCamera.md) \| [`AController`](../../../../Camera/namespaces/Core/classes/AController.md) | PerspectiveCamera, OrthographicCamera, AController or Camera2D instance |
 | `name?` | `string` | Optional name |
 
 #### Returns
@@ -57,71 +53,25 @@ AView constructor
 
 ## Properties
 
-### onResize()
-
-> **onResize**: (`event`) => `void` = `null`
-
-Defined in: [src/display/view/core/ViewTransform.ts:32](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L32)
-
-뷰 크기 변경 시 호출되는 콜백입니다.
-
-#### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `event` | `RedResizeEvent`\<[`ViewTransform`](ViewTransform.md)\> |
-
-#### Returns
-
-`void`
-
-#### Inherited from
-
-[`ViewTransform`](ViewTransform.md).[`onResize`](ViewTransform.md#onresize)
-
-## Accessors
-
-### aspect
-
-#### Get Signature
-
-> **get** **aspect**(): `number`
-
-Defined in: [src/display/view/core/ViewTransform.ts:243](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L243)
-
-현재 뷰의 종횡비(가로/세로)를 반환합니다.
-
-##### Returns
-
-`number`
-
-#### Inherited from
-
-[`ViewTransform`](ViewTransform.md).[`aspect`](ViewTransform.md#aspect)
-
-***
-
 ### axis
 
 #### Get Signature
 
-> **get** **axis**(): `DrawDebuggerAxis`
+> **get** **axis**(): [`DrawDebuggerAxis`](../../drawDebugger/classes/DrawDebuggerAxis.md)
 
-Defined in: [src/display/view/core/AView.ts:249](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L249)
-
+Defined in: [src/display/view/core/AView.ts:226](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L226)
 
 Returns the axis object for debugging.
 
 ##### Returns
 
-`DrawDebuggerAxis`
+[`DrawDebuggerAxis`](../../drawDebugger/classes/DrawDebuggerAxis.md)
 
 #### Set Signature
 
 > **set** **axis**(`value`): `void`
 
-Defined in: [src/display/view/core/AView.ts:260](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L260)
-
+Defined in: [src/display/view/core/AView.ts:237](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L237)
 
 Sets the axis for debugging.
 
@@ -129,50 +79,11 @@ Sets the axis for debugging.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `value` | `boolean` \| `DrawDebuggerAxis` | boolean or DrawDebuggerAxis instance |
+| `value` | `boolean` \| [`DrawDebuggerAxis`](../../drawDebugger/classes/DrawDebuggerAxis.md) | boolean or DrawDebuggerAxis instance |
 
 ##### Returns
 
 `void`
-
-***
-
-### camera
-
-#### Get Signature
-
-> **get** **camera**(): [`Camera2D`](../../../../Camera/classes/Camera2D.md) \| [`PerspectiveCamera`](../../../../Camera/classes/PerspectiveCamera.md) \| [`OrthographicCamera`](../../../../Camera/classes/OrthographicCamera.md) \| [`AController`](../../../../Camera/namespaces/Core/classes/AController.md)
-
-Defined in: [src/display/view/core/ViewTransform.ts:124](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L124)
-
-현재 연결된 카메라를 반환합니다.
-
-##### Returns
-
-[`Camera2D`](../../../../Camera/classes/Camera2D.md) \| [`PerspectiveCamera`](../../../../Camera/classes/PerspectiveCamera.md) \| [`OrthographicCamera`](../../../../Camera/classes/OrthographicCamera.md) \| [`AController`](../../../../Camera/namespaces/Core/classes/AController.md)
-
-#### Set Signature
-
-> **set** **camera**(`value`): `void`
-
-Defined in: [src/display/view/core/ViewTransform.ts:133](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L133)
-
-카메라를 설정합니다. 허용되는 타입은 PerspectiveCamera, OrthographicCamera, AController, Camera2D 입니다.
-잘못된 타입이 들어오면 오류를 발생시킵니다.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | [`Camera2D`](../../../../Camera/classes/Camera2D.md) \| [`PerspectiveCamera`](../../../../Camera/classes/PerspectiveCamera.md) \| [`OrthographicCamera`](../../../../Camera/classes/OrthographicCamera.md) \| [`AController`](../../../../Camera/namespaces/Core/classes/AController.md) | - |
-
-##### Returns
-
-`void`
-
-#### Inherited from
-
-[`ViewTransform`](ViewTransform.md).[`camera`](ViewTransform.md#camera)
 
 ***
 
@@ -182,8 +93,7 @@ Defined in: [src/display/view/core/ViewTransform.ts:133](https://github.com/redc
 
 > **get** **distanceCulling**(): `number`
 
-Defined in: [src/display/view/core/AView.ts:202](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L202)
-
+Defined in: [src/display/view/core/AView.ts:179](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L179)
 
 Returns the threshold distance for distance-based culling.
 
@@ -195,8 +105,7 @@ Returns the threshold distance for distance-based culling.
 
 > **set** **distanceCulling**(`value`): `void`
 
-Defined in: [src/display/view/core/AView.ts:213](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L213)
-
+Defined in: [src/display/view/core/AView.ts:190](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L190)
 
 Sets the threshold distance for distance-based culling.
 
@@ -212,37 +121,13 @@ Sets the threshold distance for distance-based culling.
 
 ***
 
-### frustumPlanes
-
-#### Get Signature
-
-> **get** **frustumPlanes**(): `number`[][]
-
-Defined in: [src/display/view/core/ViewTransform.ts:252](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L252)
-
-현재 프로젝션 및 카메라 모델 행렬을 기반으로 뷰 프러스텀 평면을 계산하여 반환합니다.
-AController 인스턴스 사용 시 내부 카메라의 modelMatrix를 사용합니다.
-
-##### Returns
-
-`number`[][]
-
-프러스텀 평면 배열
-
-#### Inherited from
-
-[`ViewTransform`](ViewTransform.md).[`frustumPlanes`](ViewTransform.md#frustumplanes)
-
-***
-
 ### fxaa
 
 #### Get Signature
 
 > **get** **fxaa**(): [`FXAA`](../../../../Antialiasing/classes/FXAA.md)
 
-Defined in: [src/display/view/core/AView.ts:277](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L277)
-
+Defined in: [src/display/view/core/AView.ts:257](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L257)
 
 Returns the FXAA post-effect object.
 
@@ -250,29 +135,29 @@ Returns the FXAA post-effect object.
 
 [`FXAA`](../../../../Antialiasing/classes/FXAA.md)
 
+FXAA instance
+
 ***
 
 ### grid
 
 #### Get Signature
 
-> **get** **grid**(): `DrawDebuggerGrid`
+> **get** **grid**(): [`DrawDebuggerGrid`](../../drawDebugger/classes/DrawDebuggerGrid.md)
 
-Defined in: [src/display/view/core/AView.ts:221](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L221)
-
+Defined in: [src/display/view/core/AView.ts:198](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L198)
 
 Returns the grid object for debugging.
 
 ##### Returns
 
-`DrawDebuggerGrid`
+[`DrawDebuggerGrid`](../../drawDebugger/classes/DrawDebuggerGrid.md)
 
 #### Set Signature
 
 > **set** **grid**(`value`): `void`
 
-Defined in: [src/display/view/core/AView.ts:232](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L232)
-
+Defined in: [src/display/view/core/AView.ts:209](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L209)
 
 Sets the grid for debugging.
 
@@ -280,148 +165,11 @@ Sets the grid for debugging.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `value` | `boolean` \| `DrawDebuggerGrid` | boolean or DrawDebuggerGrid instance |
+| `value` | `boolean` \| [`DrawDebuggerGrid`](../../drawDebugger/classes/DrawDebuggerGrid.md) | boolean or DrawDebuggerGrid instance |
 
 ##### Returns
 
 `void`
-
-***
-
-### height
-
-#### Get Signature
-
-> **get** **height**(): `string` \| `number`
-
-Defined in: [src/display/view/core/ViewTransform.ts:190](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L190)
-
-뷰의 높이 값을 반환합니다 (픽셀 또는 퍼센트 문자열).
-
-##### Returns
-
-`string` \| `number`
-
-#### Set Signature
-
-> **set** **height**(`value`): `void`
-
-Defined in: [src/display/view/core/ViewTransform.ts:198](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L198)
-
-뷰의 높이를 설정합니다. 내부적으로 setSize를 호출합니다.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` \| `number` | - |
-
-##### Returns
-
-`void`
-
-#### Inherited from
-
-[`ViewTransform`](ViewTransform.md).[`height`](ViewTransform.md#height)
-
-***
-
-### inverseProjectionMatrix
-
-#### Get Signature
-
-> **get** **inverseProjectionMatrix**(): [`mat4`](../../../../Math/type-aliases/mat4.md)
-
-Defined in: [src/display/view/core/ViewTransform.ts:346](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L346)
-
-현재 프로젝션 행렬의 역행렬을 반환합니다.
-
-##### Returns
-
-[`mat4`](../../../../Math/type-aliases/mat4.md)
-
-역행렬 (계산 실패 시 null)
-
-#### Inherited from
-
-[`ViewTransform`](ViewTransform.md).[`inverseProjectionMatrix`](ViewTransform.md#inverseprojectionmatrix)
-
-***
-
-### jitterOffset
-
-#### Get Signature
-
-> **get** **jitterOffset**(): \[`number`, `number`\]
-
-Defined in: [src/display/view/core/ViewTransform.ts:354](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L354)
-
-현재 적용된 지터 오프셋 [offsetX, offsetY]를 반환합니다.
-
-##### Returns
-
-\[`number`, `number`\]
-
-#### Inherited from
-
-[`ViewTransform`](ViewTransform.md).[`jitterOffset`](ViewTransform.md#jitteroffset)
-
-***
-
-### name
-
-#### Get Signature
-
-> **get** **name**(): `string`
-
-Defined in: [src/display/view/core/AView.ts:113](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L113)
-
-
-Returns the name of the view.
-
-##### Returns
-
-`string`
-
-#### Set Signature
-
-> **set** **name**(`value`): `void`
-
-Defined in: [src/display/view/core/AView.ts:125](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L125)
-
-
-Sets the name of the view.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `string` | Name string to set |
-
-##### Returns
-
-`void`
-
-***
-
-### noneJitterProjectionMatrix
-
-#### Get Signature
-
-> **get** **noneJitterProjectionMatrix**(): [`mat4`](../../../../Math/type-aliases/mat4.md)
-
-Defined in: [src/display/view/core/ViewTransform.ts:275](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L275)
-
-지터가 적용되지 않은 원본 프로젝션 행렬을 계산하여 반환합니다.
-Orthographic, Camera2D, Perspective 각각의 방식으로 행렬을 구성합니다.
-
-##### Returns
-
-[`mat4`](../../../../Math/type-aliases/mat4.md)
-
-#### Inherited from
-
-[`ViewTransform`](ViewTransform.md).[`noneJitterProjectionMatrix`](ViewTransform.md#nonejitterprojectionmatrix)
 
 ***
 
@@ -431,8 +179,7 @@ Orthographic, Camera2D, Perspective 각각의 방식으로 행렬을 구성합�
 
 > **get** **pickingManager**(): [`PickingManager`](../../../../Picking/classes/PickingManager.md)
 
-Defined in: [src/display/view/core/AView.ts:156](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L156)
-
+Defined in: [src/display/view/core/AView.ts:133](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L133)
 
 Returns the PickingManager for mouse coordinate-based object selection.
 
@@ -442,123 +189,13 @@ Returns the PickingManager for mouse coordinate-based object selection.
 
 ***
 
-### pixelRectArray
-
-#### Get Signature
-
-> **get** **pixelRectArray**(): \[`number`, `number`, `number`, `number`\]
-
-Defined in: [src/display/view/core/ViewTransform.ts:206](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L206)
-
-픽셀 단위 사각형 배열을 반환합니다. [x, y, width, height]
-
-##### Returns
-
-\[`number`, `number`, `number`, `number`\]
-
-#### Inherited from
-
-[`ViewTransform`](ViewTransform.md).[`pixelRectArray`](ViewTransform.md#pixelrectarray)
-
-***
-
-### pixelRectObject
-
-#### Get Signature
-
-> **get** **pixelRectObject**(): `object`
-
-Defined in: [src/display/view/core/ViewTransform.ts:214](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L214)
-
-픽셀 단위 사각형을 객체 형태로 반환합니다.
-
-##### Returns
-
-`object`
-
-| Name | Type | Defined in |
-| ------ | ------ | ------ |
-| `height` | `number` | [src/display/view/core/ViewTransform.ts:219](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L219) |
-| `width` | `number` | [src/display/view/core/ViewTransform.ts:218](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L218) |
-| `x` | `number` | [src/display/view/core/ViewTransform.ts:216](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L216) |
-| `y` | `number` | [src/display/view/core/ViewTransform.ts:217](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L217) |
-
-#### Inherited from
-
-[`ViewTransform`](ViewTransform.md).[`pixelRectObject`](ViewTransform.md#pixelrectobject)
-
-***
-
-### projectionMatrix
-
-#### Get Signature
-
-> **get** **projectionMatrix**(): [`mat4`](../../../../Math/type-aliases/mat4.md)
-
-Defined in: [src/display/view/core/ViewTransform.ts:321](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L321)
-
-현재 프로젝션 행렬(지터 적용 여부를 반영)을 반환합니다.
-TAA 사용 시 PerspectiveCamera에 한해 지터 오프셋을 적용합니다.
-
-##### Returns
-
-[`mat4`](../../../../Math/type-aliases/mat4.md)
-
-#### Inherited from
-
-[`ViewTransform`](ViewTransform.md).[`projectionMatrix`](ViewTransform.md#projectionmatrix)
-
-***
-
-### rawCamera
-
-#### Get Signature
-
-> **get** **rawCamera**(): [`Camera2D`](../../../../Camera/classes/Camera2D.md) \| [`PerspectiveCamera`](../../../../Camera/classes/PerspectiveCamera.md) \| [`OrthographicCamera`](../../../../Camera/classes/OrthographicCamera.md)
-
-Defined in: [src/display/view/core/ViewTransform.ts:265](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L265)
-
-내부에 연결된 실제 카메라 인스턴스(PerspectiveCamera 또는 Camera2D)를 반환합니다.
-AController가 연결된 경우 내부 camera를 반환합니다.
-
-##### Returns
-
-[`Camera2D`](../../../../Camera/classes/Camera2D.md) \| [`PerspectiveCamera`](../../../../Camera/classes/PerspectiveCamera.md) \| [`OrthographicCamera`](../../../../Camera/classes/OrthographicCamera.md)
-
-#### Inherited from
-
-[`ViewTransform`](ViewTransform.md).[`rawCamera`](ViewTransform.md#rawcamera)
-
-***
-
-### redGPUContext
-
-#### Get Signature
-
-> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
-
-Defined in: [src/display/view/core/ViewTransform.ts:116](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L116)
-
-연결된 RedGPUContext 반환 (읽기 전용).
-
-##### Returns
-
-[`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
-
-#### Inherited from
-
-[`ViewTransform`](ViewTransform.md).[`redGPUContext`](ViewTransform.md#redgpucontext)
-
-***
-
 ### scene
 
 #### Get Signature
 
 > **get** **scene**(): [`Scene`](../../../classes/Scene.md)
 
-Defined in: [src/display/view/core/AView.ts:133](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L133)
-
+Defined in: [src/display/view/core/AView.ts:110](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L110)
 
 Returns the Scene object connected to the current view.
 
@@ -570,13 +207,11 @@ Returns the Scene object connected to the current view.
 
 > **set** **scene**(`value`): `void`
 
-Defined in: [src/display/view/core/AView.ts:147](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L147)
-
+Defined in: [src/display/view/core/AView.ts:124](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L124)
 
 Sets the Scene for the view.
 
 ##### Throws
-
 
 Throws error if not a Scene instance
 
@@ -592,47 +227,21 @@ Throws error if not a Scene instance
 
 ***
 
-### screenRectObject
-
-#### Get Signature
-
-> **get** **screenRectObject**(): `object`
-
-Defined in: [src/display/view/core/ViewTransform.ts:230](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L230)
-
-스크린 기준 사각형을 반환합니다 (devicePixelRatio로 나눔).
-
-##### Returns
-
-`object`
-
-| Name | Type | Defined in |
-| ------ | ------ | ------ |
-| `height` | `number` | [src/display/view/core/ViewTransform.ts:235](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L235) |
-| `width` | `number` | [src/display/view/core/ViewTransform.ts:234](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L234) |
-| `x` | `number` | [src/display/view/core/ViewTransform.ts:232](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L232) |
-| `y` | `number` | [src/display/view/core/ViewTransform.ts:233](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L233) |
-
-#### Inherited from
-
-[`ViewTransform`](ViewTransform.md).[`screenRectObject`](ViewTransform.md#screenrectobject)
-
-***
-
 ### taa
 
 #### Get Signature
 
 > **get** **taa**(): [`TAA`](../../../../Antialiasing/classes/TAA.md)
 
-Defined in: [src/display/view/core/AView.ts:288](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L288)
-
+Defined in: [src/display/view/core/AView.ts:271](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L271)
 
 Returns the TAA post-effect object.
 
 ##### Returns
 
 [`TAA`](../../../../Antialiasing/classes/TAA.md)
+
+TAA instance
 
 ***
 
@@ -642,8 +251,7 @@ Returns the TAA post-effect object.
 
 > **get** **useDistanceCulling**(): `boolean`
 
-Defined in: [src/display/view/core/AView.ts:183](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L183)
-
+Defined in: [src/display/view/core/AView.ts:160](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L160)
 
 Returns whether to use distance-based culling.
 
@@ -655,8 +263,7 @@ Returns whether to use distance-based culling.
 
 > **set** **useDistanceCulling**(`value`): `void`
 
-Defined in: [src/display/view/core/AView.ts:194](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L194)
-
+Defined in: [src/display/view/core/AView.ts:171](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L171)
 
 Sets whether to use distance-based culling.
 
@@ -678,8 +285,7 @@ Sets whether to use distance-based culling.
 
 > **get** **useFrustumCulling**(): `boolean`
 
-Defined in: [src/display/view/core/AView.ts:164](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L164)
-
+Defined in: [src/display/view/core/AView.ts:141](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L141)
 
 Returns whether to use frustum culling.
 
@@ -691,8 +297,7 @@ Returns whether to use frustum culling.
 
 > **set** **useFrustumCulling**(`value`): `void`
 
-Defined in: [src/display/view/core/AView.ts:175](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L175)
-
+Defined in: [src/display/view/core/AView.ts:152](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L152)
 
 Sets whether to use frustum culling.
 
@@ -708,15 +313,554 @@ Sets whether to use frustum culling.
 
 ***
 
+### checkMouseInViewBounds()
+
+> **checkMouseInViewBounds**(): `boolean`
+
+Defined in: [src/display/view/core/AView.ts:305](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L305)
+
+Checks if the mouse pointer is within the pixel area of the current view.
+
+#### Returns
+
+`boolean`
+
+True if the mouse is inside the view bounds, otherwise false
+
+***
+
+### screenToWorld()
+
+> **screenToWorld**(`screenX`, `screenY`): `number`[]
+
+Defined in: [src/display/view/core/AView.ts:291](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/AView.ts#L291)
+
+Converts screen coordinates to world coordinates.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `screenX` | `number` | Screen X coordinate |
+| `screenY` | `number` | Screen Y coordinate |
+
+#### Returns
+
+`number`[]
+
+Converted world coordinates (3D vector array)
+
+***
+
+
+***
+
+## Inherited Members
+
+<details>
+<summary>View inherited properties and methods (Click to expand)</summary>
+
+### onResize
+
+> **onResize**: (`event`) => `void` = `null`
+
+Defined in: [src/display/view/core/ViewTransform.ts:31](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L31)
+
+Callback function called when the view size changes
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `event` | `RedResizeEvent`\<[`ViewTransform`](ViewTransform.md)\> |
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`onResize`](ViewTransform.md#onresize)
+
+## Accessors
+
+### antialiasingManager
+
+#### Get Signature
+
+> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L76)
+
+Returns the AntialiasingManager instance. (Short-cut path)
+
+##### Returns
+
+[`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
+
+AntialiasingManager instance
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`antialiasingManager`](ViewTransform.md#antialiasingmanager)
+
+***
+
+### aspect
+
+#### Get Signature
+
+> **get** **aspect**(): `number`
+
+Defined in: [src/display/view/core/ViewTransform.ts:232](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L232)
+
+Returns the aspect ratio (width/height) of the current view.
+
+##### Returns
+
+`number`
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`aspect`](ViewTransform.md#aspect)
+
+***
+
+### camera
+
+#### Get Signature
+
+> **get** **camera**(): [`Camera2D`](../../../../Camera/classes/Camera2D.md) \| [`PerspectiveCamera`](../../../../Camera/classes/PerspectiveCamera.md) \| [`OrthographicCamera`](../../../../Camera/classes/OrthographicCamera.md) \| [`AController`](../../../../Camera/namespaces/Core/classes/AController.md)
+
+Defined in: [src/display/view/core/ViewTransform.ts:99](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L99)
+
+Returns the currently connected camera.
+
+##### Returns
+
+[`Camera2D`](../../../../Camera/classes/Camera2D.md) \| [`PerspectiveCamera`](../../../../Camera/classes/PerspectiveCamera.md) \| [`OrthographicCamera`](../../../../Camera/classes/OrthographicCamera.md) \| [`AController`](../../../../Camera/namespaces/Core/classes/AController.md)
+
+#### Set Signature
+
+> **set** **camera**(`value`): `void`
+
+Defined in: [src/display/view/core/ViewTransform.ts:113](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L113)
+
+Sets the camera. Must be one of PerspectiveCamera, OrthographicCamera, AController, or Camera2D.
+
+##### Throws
+
+Throws error if camera type is not supported
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | [`Camera2D`](../../../../Camera/classes/Camera2D.md) \| [`PerspectiveCamera`](../../../../Camera/classes/PerspectiveCamera.md) \| [`OrthographicCamera`](../../../../Camera/classes/OrthographicCamera.md) \| [`AController`](../../../../Camera/namespaces/Core/classes/AController.md) | Camera instance to connect |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`camera`](ViewTransform.md#camera)
+
+***
+
+### commandEncoderManager
+
+#### Get Signature
+
+> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L88)
+
+Returns the CommandEncoderManager instance. (Short-cut path)
+
+##### Returns
+
+[`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+CommandEncoderManager instance
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`commandEncoderManager`](ViewTransform.md#commandencodermanager)
+
+***
+
+### frustumPlanes
+
+#### Get Signature
+
+> **get** **frustumPlanes**(): `number`[][]
+
+Defined in: [src/display/view/core/ViewTransform.ts:243](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L243)
+
+Calculates and returns the view frustum planes based on the current projection and camera view matrices.
+
+##### Returns
+
+`number`[][]
+
+Frustum planes array
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`frustumPlanes`](ViewTransform.md#frustumplanes)
+
+***
+
+### gpuDevice
+
+#### Get Signature
+
+> **get** **gpuDevice**(): `GPUDevice`
+
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L52)
+
+Returns the WebGPU device object. (Short-cut path)
+
+##### Returns
+
+`GPUDevice`
+
+GPUDevice instance
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`gpuDevice`](ViewTransform.md#gpudevice)
+
+***
+
+### height
+
+#### Get Signature
+
+> **get** **height**(): `string` \| `number`
+
+Defined in: [src/display/view/core/ViewTransform.ts:179](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L179)
+
+Returns the height value of the view. (Pixels or percentage string)
+
+##### Returns
+
+`string` \| `number`
+
+#### Set Signature
+
+> **set** **height**(`value`): `void`
+
+Defined in: [src/display/view/core/ViewTransform.ts:190](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L190)
+
+Sets the height of the view.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` \| `number` | Height value to set |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`height`](ViewTransform.md#height)
+
+***
+
+### inverseProjectionMatrix
+
+#### Get Signature
+
+> **get** **inverseProjectionMatrix**(): [`mat4`](../../../../Math/type-aliases/mat4.md)
+
+Defined in: [src/display/view/core/ViewTransform.ts:330](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L330)
+
+Computes and returns the inverse projection matrix.
+
+##### Returns
+
+[`mat4`](../../../../Math/type-aliases/mat4.md)
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`inverseProjectionMatrix`](ViewTransform.md#inverseprojectionmatrix)
+
+***
+
+### jitterOffset
+
+#### Get Signature
+
+> **get** **jitterOffset**(): \[`number`, `number`\]
+
+Defined in: [src/display/view/core/ViewTransform.ts:338](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L338)
+
+Returns the currently configured jitter offset [offsetX, offsetY].
+
+##### Returns
+
+\[`number`, `number`\]
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`jitterOffset`](ViewTransform.md#jitteroffset)
+
+***
+
+### name
+
+#### Get Signature
+
+> **get** **name**(): `string`
+
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L58)
+
+Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
+
+##### Returns
+
+`string`
+
+Name of the object
+
+#### Set Signature
+
+> **set** **name**(`value`): `void`
+
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L71)
+
+Sets the name of the object.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | Name of the object to set |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`name`](ViewTransform.md#name)
+
+***
+
+### noneJitterProjectionMatrix
+
+#### Get Signature
+
+> **get** **noneJitterProjectionMatrix**(): [`mat4`](../../../../Math/type-aliases/mat4.md)
+
+Defined in: [src/display/view/core/ViewTransform.ts:263](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L263)
+
+Returns the original projection matrix with jitter excluded.
+
+##### Returns
+
+[`mat4`](../../../../Math/type-aliases/mat4.md)
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`noneJitterProjectionMatrix`](ViewTransform.md#nonejitterprojectionmatrix)
+
+***
+
+### pixelRectArray
+
+#### Get Signature
+
+> **get** **pixelRectArray**(): \[`number`, `number`, `number`, `number`\]
+
+Defined in: [src/display/view/core/ViewTransform.ts:198](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L198)
+
+Returns the rectangle array in pixels. ([x, y, width, height])
+
+##### Returns
+
+\[`number`, `number`, `number`, `number`\]
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`pixelRectArray`](ViewTransform.md#pixelrectarray)
+
+***
+
+### pixelRectObject
+
+#### Get Signature
+
+> **get** **pixelRectObject**(): `object`
+
+Defined in: [src/display/view/core/ViewTransform.ts:206](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L206)
+
+Returns the pixel rectangle in object form. ({ x, y, width, height })
+
+##### Returns
+
+`object`
+
+| Name | Type | Defined in |
+| ------ | ------ | ------ |
+| `height` | `number` | [src/display/view/core/ViewTransform.ts:211](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L211) |
+| `width` | `number` | [src/display/view/core/ViewTransform.ts:210](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L210) |
+| `x` | `number` | [src/display/view/core/ViewTransform.ts:208](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L208) |
+| `y` | `number` | [src/display/view/core/ViewTransform.ts:209](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L209) |
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`pixelRectObject`](ViewTransform.md#pixelrectobject)
+
+***
+
+### projectionMatrix
+
+#### Get Signature
+
+> **get** **projectionMatrix**(): [`mat4`](../../../../Math/type-aliases/mat4.md)
+
+Defined in: [src/display/view/core/ViewTransform.ts:308](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L308)
+
+Returns the final projection matrix reflecting the jitter offset. (Applied only to PerspectiveCamera when TAA is enabled)
+
+##### Returns
+
+[`mat4`](../../../../Math/type-aliases/mat4.md)
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`projectionMatrix`](ViewTransform.md#projectionmatrix)
+
+***
+
+### rawCamera
+
+#### Get Signature
+
+> **get** **rawCamera**(): [`Camera2D`](../../../../Camera/classes/Camera2D.md) \| [`PerspectiveCamera`](../../../../Camera/classes/PerspectiveCamera.md) \| [`OrthographicCamera`](../../../../Camera/classes/OrthographicCamera.md)
+
+Defined in: [src/display/view/core/ViewTransform.ts:255](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L255)
+
+Returns the raw camera instance referenced internally. (Returns internal camera if AController is linked)
+
+##### Returns
+
+[`Camera2D`](../../../../Camera/classes/Camera2D.md) \| [`PerspectiveCamera`](../../../../Camera/classes/PerspectiveCamera.md) \| [`OrthographicCamera`](../../../../Camera/classes/OrthographicCamera.md)
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`rawCamera`](ViewTransform.md#rawcamera)
+
+***
+
+### redGPUContext
+
+#### Get Signature
+
+> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
+
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L40)
+
+Returns the RedGPUContext instance.
+
+##### Returns
+
+[`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
+
+RedGPUContext instance
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`redGPUContext`](ViewTransform.md#redgpucontext)
+
+***
+
+### resourceManager
+
+#### Get Signature
+
+> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L64)
+
+Returns the ResourceManager instance. (Short-cut path)
+
+##### Returns
+
+[`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
+
+ResourceManager instance
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`resourceManager`](ViewTransform.md#resourcemanager)
+
+***
+
+### screenRectObject
+
+#### Get Signature
+
+> **get** **screenRectObject**(): `object`
+
+Defined in: [src/display/view/core/ViewTransform.ts:219](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L219)
+
+Returns the screen-relative rectangle object scaled by dividing by devicePixelRatio.
+
+##### Returns
+
+`object`
+
+| Name | Type | Defined in |
+| ------ | ------ | ------ |
+| `height` | `number` | [src/display/view/core/ViewTransform.ts:224](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L224) |
+| `width` | `number` | [src/display/view/core/ViewTransform.ts:223](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L223) |
+| `x` | `number` | [src/display/view/core/ViewTransform.ts:221](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L221) |
+| `y` | `number` | [src/display/view/core/ViewTransform.ts:222](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L222) |
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`screenRectObject`](ViewTransform.md#screenrectobject)
+
+***
+
+### uuid
+
+#### Get Signature
+
+> **get** **uuid**(): `string`
+
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L46)
+
+Returns the universally unique identifier (UUID) of the object.
+
+##### Returns
+
+`string`
+
+UUID string
+
+#### Inherited from
+
+[`ViewTransform`](ViewTransform.md).[`uuid`](ViewTransform.md#uuid)
+
+***
+
 ### width
 
 #### Get Signature
 
 > **get** **width**(): `string` \| `number`
 
-Defined in: [src/display/view/core/ViewTransform.ts:174](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L174)
+Defined in: [src/display/view/core/ViewTransform.ts:160](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L160)
 
-뷰의 너비 값을 반환합니다 (픽셀 또는 퍼센트 문자열).
+Returns the width value of the view. (Pixels or percentage string)
 
 ##### Returns
 
@@ -726,15 +870,15 @@ Defined in: [src/display/view/core/ViewTransform.ts:174](https://github.com/redc
 
 > **set** **width**(`value`): `void`
 
-Defined in: [src/display/view/core/ViewTransform.ts:182](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L182)
+Defined in: [src/display/view/core/ViewTransform.ts:171](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L171)
 
-뷰의 너비를 설정합니다. 내부적으로 setSize를 호출합니다.
+Sets the width of the view.
 
 ##### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `value` | `string` \| `number` | - |
+| `value` | `string` \| `number` | Width value to set |
 
 ##### Returns
 
@@ -752,9 +896,9 @@ Defined in: [src/display/view/core/ViewTransform.ts:182](https://github.com/redc
 
 > **get** **x**(): `string` \| `number`
 
-Defined in: [src/display/view/core/ViewTransform.ts:142](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L142)
+Defined in: [src/display/view/core/ViewTransform.ts:122](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L122)
 
-뷰의 X 위치 값을 반환합니다 (픽셀 또는 퍼센트 문자열).
+Returns the X position value of the view. (Pixels or percentage string)
 
 ##### Returns
 
@@ -764,15 +908,15 @@ Defined in: [src/display/view/core/ViewTransform.ts:142](https://github.com/redc
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/display/view/core/ViewTransform.ts:150](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L150)
+Defined in: [src/display/view/core/ViewTransform.ts:133](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L133)
 
-뷰의 X 위치를 설정합니다. 내부적으로 setPosition을 호출합니다.
+Sets the X position of the view.
 
 ##### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `value` | `string` \| `number` | - |
+| `value` | `string` \| `number` | X position value to set |
 
 ##### Returns
 
@@ -790,9 +934,9 @@ Defined in: [src/display/view/core/ViewTransform.ts:150](https://github.com/redc
 
 > **get** **y**(): `string` \| `number`
 
-Defined in: [src/display/view/core/ViewTransform.ts:158](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L158)
+Defined in: [src/display/view/core/ViewTransform.ts:141](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L141)
 
-뷰의 Y 위치 값을 반환합니다 (픽셀 또는 퍼센트 문자열).
+Returns the Y position value of the view. (Pixels or percentage string)
 
 ##### Returns
 
@@ -802,15 +946,15 @@ Defined in: [src/display/view/core/ViewTransform.ts:158](https://github.com/redc
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/display/view/core/ViewTransform.ts:166](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L166)
+Defined in: [src/display/view/core/ViewTransform.ts:152](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L152)
 
-뷰의 Y 위치를 설정합니다. 내부적으로 setPosition을 호출합니다.
+Sets the Y position of the view.
 
 ##### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `value` | `string` \| `number` | - |
+| `value` | `string` \| `number` | Y position value to set |
 
 ##### Returns
 
@@ -822,31 +966,13 @@ Defined in: [src/display/view/core/ViewTransform.ts:166](https://github.com/redc
 
 ## Methods
 
-### checkMouseInViewBounds()
-
-> **checkMouseInViewBounds**(): `boolean`
-
-Defined in: [src/display/view/core/AView.ts:322](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L322)
-
-
-Checks if the mouse is within the pixel area of the current view.
-
-#### Returns
-
-`boolean`
-
-
-Whether it is contained
-
-***
-
 ### clearJitterOffset()
 
 > **clearJitterOffset**(): `void`
 
-Defined in: [src/display/view/core/ViewTransform.ts:371](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L371)
+Defined in: [src/display/view/core/ViewTransform.ts:361](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L361)
 
-지터 오프셋을 초기화합니다.
+Clears and resets the jitter offset to 0.
 
 #### Returns
 
@@ -858,45 +984,20 @@ Defined in: [src/display/view/core/ViewTransform.ts:371](https://github.com/redc
 
 ***
 
-### screenToWorld()
-
-> **screenToWorld**(`screenX`, `screenY`): `number`[]
-
-Defined in: [src/display/view/core/AView.ts:308](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/AView.ts#L308)
-
-
-Converts screen coordinates to world coordinates.
-
-#### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `screenX` | `number` | Screen X coordinate |
-| `screenY` | `number` | Screen Y coordinate |
-
-#### Returns
-
-`number`[]
-
-
-Converted world coordinates
-
-***
-
 ### setJitterOffset()
 
 > **setJitterOffset**(`offsetX`, `offsetY`): `void`
 
-Defined in: [src/display/view/core/ViewTransform.ts:363](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L363)
+Defined in: [src/display/view/core/ViewTransform.ts:352](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L352)
 
-TAA 적용을 위한 지터 오프셋을 설정합니다.
+Sets the render pixel jitter offset for TAA calculations.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `offsetX` | `number` | X축 지터 오프셋 (정규화된 값) |
-| `offsetY` | `number` | Y축 지터 오프셋 (정규화된 값) |
+| `offsetX` | `number` | X-axis jitter offset value |
+| `offsetY` | `number` | Y-axis jitter offset value |
 
 #### Returns
 
@@ -912,17 +1013,16 @@ TAA 적용을 위한 지터 오프셋을 설정합니다.
 
 > **setPosition**(`x?`, `y?`): `void`
 
-Defined in: [src/display/view/core/ViewTransform.ts:382](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L382)
+Defined in: [src/display/view/core/ViewTransform.ts:376](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L376)
 
-뷰의 위치를 설정하고 내부 픽셀 사각형을 업데이트합니다.
-입력 값은 픽셀 또는 퍼센트 문자열을 허용합니다.
+Sets the position (X, Y) of the view and updates physical pixel rectangle values considering DPI.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `x?` | `string` \| `number` | X 위치 (픽셀 또는 퍼센트) |
-| `y?` | `string` \| `number` | Y 위치 (픽셀 또는 퍼센트) |
+| `x` | `string` \| `number` | X position to set (pixel number or percentage string, default: current X) |
+| `y` | `string` \| `number` | Y position to set (pixel number or percentage string, default: current Y) |
 
 #### Returns
 
@@ -938,18 +1038,16 @@ Defined in: [src/display/view/core/ViewTransform.ts:382](https://github.com/redc
 
 > **setSize**(`w?`, `h?`): `void`
 
-Defined in: [src/display/view/core/ViewTransform.ts:402](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/view/core/ViewTransform.ts#L402)
+Defined in: [src/display/view/core/ViewTransform.ts:399](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/view/core/ViewTransform.ts#L399)
 
-뷰의 크기를 설정하고 내부 픽셀 사각형을 업데이트합니다.
-입력 값은 픽셀 또는 퍼센트 문자열을 허용합니다.
-onResize 콜백이 설정되어 있으면 호출합니다.
+Sets the size (width, height) of the view and updates internal physical pixel rectangle values. Triggers onResize callback if registered.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `w?` | `string` \| `number` | 너비 (픽셀 또는 퍼센트) |
-| `h?` | `string` \| `number` | 높이 (픽셀 또는 퍼센트) |
+| `w` | `string` \| `number` | Width to set (pixel number or percentage string, default: current width) |
+| `h` | `string` \| `number` | Height to set (pixel number or percentage string, default: current height) |
 
 #### Returns
 
@@ -958,3 +1056,6 @@ onResize 콜백이 설정되어 있으면 호출합니다.
 #### Inherited from
 
 [`ViewTransform`](ViewTransform.md).[`setSize`](ViewTransform.md#setsize)
+
+
+</details>

@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,9 +6,7 @@
 
 # Util
 
-
 Provides various utility functions and classes commonly used in RedGPU.
-
 
 Includes tools that support core systems such as file processing, mathematical operations, texture management, and unique ID generation.
 
@@ -22,10 +20,6 @@ Includes tools that support core systems such as file processing, mathematical o
 ## Log
 
 - [keepLog](variables/keepLog.md)
-
-## Math
-
-- [formatBytes](functions/formatBytes.md)
 
 ## Texture
 
@@ -44,3 +38,4 @@ Includes tools that support core systems such as file processing, mathematical o
 ## Utility
 
 - [copyGPUBuffer](functions/copyGPUBuffer.md)
+- [formatBytes](functions/formatBytes.md)

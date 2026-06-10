@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,9 +6,7 @@
 
 # Resource
 
-
 Provides various resource objects and utilities (buffers, textures, samplers, resource manager, WGSL parser, etc.).
-
 
 Through each resource and utility, you can easily use various resource management functions required for rendering, such as GPU memory management, data buffering, texture processing, sampling, and WGSL parsing.
 
@@ -41,6 +39,15 @@ Through each resource and utility, you can easily use various resource managemen
 - [CoreNoiseTexture](namespaces/CoreNoiseTexture/README.md)
 - [CoreVertexBuffer](namespaces/CoreVertexBuffer/README.md)
 - [CoreWGSLParser](namespaces/CoreWGSLParser/README.md)
+- [DownSampleCubeMapGenerator](classes/DownSampleCubeMapGenerator.md)
+- [MipmapGenerator](classes/MipmapGenerator.md)
+- [VoronoiSettings](interfaces/VoronoiSettings.md)
+- [BitmapSrcInfo](type-aliases/BitmapSrcInfo.md)
+- [ComponentMapping](type-aliases/ComponentMapping.md)
+- [CubeSrcInfo](type-aliases/CubeSrcInfo.md)
+- [HDRSrcInfo](type-aliases/HDRSrcInfo.md)
+- [NumberArray](type-aliases/NumberArray.md)
+- [TypeInterleave](type-aliases/TypeInterleave.md)
 
 ## Sampler
 
@@ -50,6 +57,8 @@ Through each resource and utility, you can easily use various resource managemen
 
 - [BitmapTexture](classes/BitmapTexture.md)
 - [CubeTexture](classes/CubeTexture.md)
+- [DirectCubeTexture](classes/DirectCubeTexture.md)
+- [DirectTexture](classes/DirectTexture.md)
 - [HDRTexture](classes/HDRTexture.md)
 - [PackedTexture](classes/PackedTexture.md)
 

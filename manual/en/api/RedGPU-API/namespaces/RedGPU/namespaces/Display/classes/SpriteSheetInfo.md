@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,11 +6,9 @@
 
 # Class: SpriteSheetInfo
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:25](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L25)
-
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:25](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L25)
 
 Class that contains information for sprite sheet animation.
-
 
 Defines the structure and playback settings of animation frames arranged in a grid within a single texture. Manages animation metadata shared by sprite sheet instances.
 
@@ -31,8 +29,7 @@ const info = new RedGPU.Display.SpriteSheetInfo(
 
 > **new SpriteSheetInfo**(`redGPUContext`, `src`, `segmentW`, `segmentH`, `totalFrame`, `startIndex`, `loop?`, `frameRate?`): `SpriteSheetInfo`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:95](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L95)
-
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:95](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L95)
 
 Creates a new SpriteSheetInfo instance.
 
@@ -55,7 +52,6 @@ Creates a new SpriteSheetInfo instance.
 
 #### Throws
 
-
 Throws error if redGPUContext is invalid or parameters are out of range
 
 ## Accessors
@@ -66,15 +62,15 @@ Throws error if redGPUContext is invalid or parameters are out of range
 
 > **get** **frameRate**(): `number`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:161](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L161)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:179](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L179)
 
-애니메이션 프레임 레이트를 반환합니다.
+Returns the animation frame rate (FPS).
 
 ##### Returns
 
 `number`
 
-초당 프레임 수 (FPS)
+Frames per second (FPS)
 
 ***
 
@@ -84,15 +80,15 @@ Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:161](https://gi
 
 > **get** **loop**(): `boolean`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:169](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L169)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:190](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L190)
 
-반복 재생 여부를 반환합니다.
+Returns whether to repeat playback.
 
 ##### Returns
 
 `boolean`
 
-true인 경우 애니메이션이 무한 반복, false인 경우 한 번만 재생
+If true, playback loops; if false, it plays once
 
 ***
 
@@ -102,15 +98,15 @@ true인 경우 애니메이션이 무한 반복, false인 경우 한 번만 재�
 
 > **get** **segmentH**(): `number`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:129](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L129)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:135](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L135)
 
-세로 세그먼트 수를 반환합니다.
+Returns the number of vertical segments. (Texture division count vertically)
 
 ##### Returns
 
 `number`
 
-텍스처를 세로로 나누는 세그먼트 수
+Number of vertical segments
 
 ***
 
@@ -120,15 +116,15 @@ Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:129](https://gi
 
 > **get** **segmentW**(): `number`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:121](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L121)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:124](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L124)
 
-가로 세그먼트 수를 반환합니다.
+Returns the number of horizontal segments. (Texture division count horizontally)
 
 ##### Returns
 
 `number`
 
-텍스처를 가로로 나누는 세그먼트 수
+Number of horizontal segments
 
 ***
 
@@ -138,15 +134,15 @@ Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:121](https://gi
 
 > **get** **startIndex**(): `number`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:145](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L145)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:157](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L157)
 
-시작 프레임 인덱스를 반환합니다.
+Returns the starting frame index. (0-based index)
 
 ##### Returns
 
 `number`
 
-애니메이션이 시작될 프레임의 인덱스 (0부터 시작)
+Starting frame index
 
 ***
 
@@ -156,15 +152,15 @@ Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:145](https://gi
 
 > **get** **texture**(): [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:153](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L153)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:168](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L168)
 
-스프라이트 시트 텍스처를 반환합니다.
+Returns the sprite sheet bitmap texture.
 
 ##### Returns
 
 [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-애니메이션에 사용되는 비트맵 텍스처
+Bitmap texture used
 
 ***
 
@@ -174,12 +170,12 @@ Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:153](https://gi
 
 > **get** **totalFrame**(): `number`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:137](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L137)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:146](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L146)
 
-총 애니메이션 프레임 수를 반환합니다.
+Returns the total number of animation frames.
 
 ##### Returns
 
 `number`
 
-애니메이션에 사용할 총 프레임 수
+Total frame count

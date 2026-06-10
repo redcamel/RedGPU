@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,11 @@
 
 # Class: InstanceIdGenerator
 
-Defined in: [src/utils/uuid/InstanceIdGenerator.ts:15](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/uuid/InstanceIdGenerator.ts#L15)
+Defined in: [src/utils/uuid/InstanceIdGenerator.ts:15](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/uuid/InstanceIdGenerator.ts#L15)
 
+Utility for generating unique instance IDs per type (Constructor).
 
-Utility class for generating unique instance IDs per type.
-
-
-Manages separate counters for each constructor to assign IDs from 0.
+Maintains an independent counter for each class type and assigns IDs sequentially starting from 0.
 
 * ### Example
 ```typescript
@@ -35,20 +33,18 @@ const id = RedGPU.Util.InstanceIdGenerator.getNextId(RedMesh);
 
 > `static` **getNextId**(`type`): `number`
 
-Defined in: [src/utils/uuid/InstanceIdGenerator.ts:33](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/uuid/InstanceIdGenerator.ts#L33)
+Defined in: [src/utils/uuid/InstanceIdGenerator.ts:25](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/uuid/InstanceIdGenerator.ts#L25)
 
-
-Returns the next unique instance ID.
+Returns the next unique ID for the given type.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `type` | `Function` | Type to generate ID for |
+| `type` | `Function` | Target type |
 
 #### Returns
 
 `number`
 
-
-Unique instance ID
+Unique ID

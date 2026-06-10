@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,11 +8,9 @@
 
 > **updateObject3DMatrix**(`targetMesh`, `view`): `void`
 
-Defined in: [src/math/updateObject3DMatrix.ts:28](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/updateObject3DMatrix.ts#L28)
+Defined in: [src/math/updateObject3DMatrix.ts:29](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/updateObject3DMatrix.ts#L29)
 
-
-Updates the local matrix and model matrix of Object3D (Mesh, AGroupBase).
-
+Updates the local matrix and model matrix of Object3D (Mesh, Group3D).
 
 This function calculates the local matrix based on the object's position, rotation, scale, and pivot information, and calculates the final model matrix by multiplying it with the parent's model matrix if it exists.
 
@@ -26,7 +24,7 @@ RedGPU.math.updateObject3DMatrix(mesh, view);
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `targetMesh` | [`Mesh`](../../Display/classes/Mesh.md) \| [`AGroupBase`](../../Display/namespaces/CoreGroup/classes/AGroupBase.md) | The target object to update the matrix for (Mesh or AGroupBase) |
+| `targetMesh` | [`Mesh`](../../Display/classes/Mesh.md) \| [`Group3D`](../../Display/classes/Group3D.md) | The target object to update the matrix for (Mesh or Group3D) |
 | `view` | [`View3D`](../../Display/classes/View3D.md) | The View3D instance currently being rendered (used for size calculations, etc.) |
 
 ## Returns

@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,11 +6,9 @@
 
 # Class: TorusKnot
 
-Defined in: [src/primitive/TorusKnot.ts:20](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/TorusKnot.ts#L20)
-
+Defined in: [src/primitive/TorusKnot.ts:20](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/TorusKnot.ts#L20)
 
 TorusKnot primitive geometry class.
-
 
 Generates and manages 3D torus knot data based on radius, tube thickness, knot parameters, etc.
 
@@ -19,7 +17,7 @@ Generates and manages 3D torus knot data based on radius, tube thickness, knot p
 // p=2, q=3 매듭 토러스 생성
 const torusKnot = new RedGPU.TorusKnot(redGPUContext, 1, 0.4, 128, 16, 2, 3);
 ```
-<iframe src="https://redcamel.github.io/RedGPU/examples/3d/primitive/torusNut/" style="width:100%; height:500px;"></iframe>
+<iframe src="https://redcamel.github.io/RedGPU/examples/3d/primitive/torusKnot/" style="width:100%; height:500px;"></iframe>
 
 ## Extends
 
@@ -29,17 +27,11 @@ const torusKnot = new RedGPU.TorusKnot(redGPUContext, 1, 0.4, 128, 16, 2, 3);
 
 ### Constructor
 
-> **new TorusKnot**(`redGPUContext`, `radius?`, `tube?`, `tubularSegments?`, `radialSegments?`, `p?`, `q?`): `TorusKnot`
+> **new TorusKnot**(`redGPUContext`, `radius?`, `tubeRadius?`, `tubularSegments?`, `radialSegments?`, `windingsAroundAxis?`, `windingsAroundCircle?`): `TorusKnot`
 
-Defined in: [src/primitive/TorusKnot.ts:175](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/TorusKnot.ts#L175)
-
+Defined in: [src/primitive/TorusKnot.ts:33](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/TorusKnot.ts#L33)
 
 Creates an instance of TorusKnot.
-
-### Example
-```typescript
-const torusKnot = new RedGPU.TorusKnot(redGPUContext, 1, 0.4, 64, 8, 2, 3);
-```
 
 #### Parameters
 
@@ -47,11 +39,11 @@ const torusKnot = new RedGPU.TorusKnot(redGPUContext, 1, 0.4, 64, 8, 2, 3);
 | ------ | ------ | ------ | ------ |
 | `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `undefined` | RedGPUContext instance |
 | `radius` | `number` | `1` | Overall radius (default 1) |
-| `tube` | `number` | `0.4` | Tube radius (default 0.4) |
+| `tubeRadius` | `number` | `0.4` | Tube radius (default 0.4) |
 | `tubularSegments` | `number` | `64` | Tubular segments (default 64, min 3) |
 | `radialSegments` | `number` | `8` | Radial segments (default 8, min 3) |
-| `p` | `number` | `2` | Knot parameter p (default 2) |
-| `q` | `number` | `3` | Knot parameter q (default 3) |
+| `windingsAroundAxis` | `number` | `2` | Number of times the knot winds around the central axis (p, default 2) |
+| `windingsAroundCircle` | `number` | `3` | Number of times the knot winds around the major circle (q, default 3) |
 
 #### Returns
 
@@ -63,27 +55,29 @@ const torusKnot = new RedGPU.TorusKnot(redGPUContext, 1, 0.4, 64, 8, 2, 3);
 
 ## Accessors
 
+
+***
+
+## Inherited Members
+
+<details>
+<summary>View inherited properties and methods (Click to expand)</summary>
+
 ### gpuRenderInfo
 
 #### Get Signature
 
 > **get** **gpuRenderInfo**(): `object`
 
-Defined in: [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L86)
-
-
-Returns the GPU render information.
+Defined in: [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L51)
 
 ##### Returns
 
 `object`
 
-
-Object containing buffer layouts array
-
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:86](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L86) |
+| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L51) |
 
 #### Inherited from
 
@@ -97,17 +91,11 @@ Object containing buffer layouts array
 
 > **get** **indexBuffer**(): [`IndexBuffer`](../../Resource/classes/IndexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:110](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L110)
-
-
-Returns the current index buffer.
+Defined in: [src/primitive/core/Primitive.ts:59](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L59)
 
 ##### Returns
 
 [`IndexBuffer`](../../Resource/classes/IndexBuffer.md)
-
-
-IndexBuffer instance
 
 #### Inherited from
 
@@ -121,17 +109,11 @@ IndexBuffer instance
 
 > **get** **vertexBuffer**(): [`VertexBuffer`](../../Resource/classes/VertexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:98](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L98)
-
-
-Returns the current vertex buffer.
+Defined in: [src/primitive/core/Primitive.ts:55](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L55)
 
 ##### Returns
 
 [`VertexBuffer`](../../Resource/classes/VertexBuffer.md)
-
-
-VertexBuffer instance
 
 #### Inherited from
 
@@ -145,17 +127,11 @@ VertexBuffer instance
 
 > **get** **volume**(): [`AABB`](../../Bound/classes/AABB.md)
 
-Defined in: [src/primitive/core/Primitive.ts:122](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L122)
-
-
-Returns the AABB bounding volume of the geometry.
+Defined in: [src/primitive/core/Primitive.ts:63](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L63)
 
 ##### Returns
 
 [`AABB`](../../Bound/classes/AABB.md)
-
-
-AABB instance
 
 #### Inherited from
 
@@ -169,17 +145,12 @@ AABB instance
 
 > **get** `static` **primitiveInterleaveStruct**(): [`VertexInterleavedStruct`](../../Resource/classes/VertexInterleavedStruct.md)
 
-Defined in: [src/primitive/core/Primitive.ts:67](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L67)
+Defined in: [src/primitive/core/Primitive.ts:47](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L47)
 
-
-Returns the default vertex layout structure (Position, Normal, UV).
 
 ##### Returns
 
 [`VertexInterleavedStruct`](../../Resource/classes/VertexInterleavedStruct.md)
-
-
-Vertex interleaved struct object
 
 #### Inherited from
 
@@ -187,27 +158,26 @@ Vertex interleaved struct object
 
 ## Methods
 
-### \_setData()
+### generateUniqueKey()
 
-> **\_setData**(`geometry`): `void`
+> `static` **generateUniqueKey**(`name`, `params`): `string`
 
-Defined in: [src/primitive/core/Primitive.ts:138](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/primitive/core/Primitive.ts#L138)
-
-**`Internal`**
-
-
-Sets internal buffers and render information using geometry data.
+Defined in: [src/primitive/core/Primitive.ts:68](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L68)
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `geometry` | [`Geometry`](../../../classes/Geometry.md) | Geometry instance to set |
+| Parameter | Type |
+| ------ | ------ |
+| `name` | `string` |
+| `params` | `Record`\<`string`, `any`\> |
 
 #### Returns
 
-`void`
+`string`
 
 #### Inherited from
 
-[`Primitive`](../namespaces/Core/classes/Primitive.md).[`_setData`](../namespaces/Core/classes/Primitive.md#_setdata)
+[`Primitive`](../namespaces/Core/classes/Primitive.md).[`generateUniqueKey`](../namespaces/Core/classes/Primitive.md#generateuniquekey)
+
+
+</details>

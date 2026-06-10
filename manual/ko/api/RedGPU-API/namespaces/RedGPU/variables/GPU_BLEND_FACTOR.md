@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,13 +8,11 @@
 
 > `const` **GPU\_BLEND\_FACTOR**: `object`
 
-Defined in: [src/gpuConst/GPU\_BLEND\_FACTOR.ts:10](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/gpuConst/GPU_BLEND_FACTOR.ts#L10)
+Defined in: [src/gpuConst/GPU\_BLEND\_FACTOR.ts:10](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/gpuConst/GPU_BLEND_FACTOR.ts#L10)
 
 블렌딩 연산에 사용되는 팩터(계수) 옵션을 정의하는 상수군입니다.
 
-
 소스(Source)와 대상(Destination) 색상을 혼합할 때 각 채널에 곱해지는 값을 결정합니다.
-
 
 ## Type Declaration
 

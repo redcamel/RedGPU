@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -6,11 +6,9 @@
 
 # Class: Renderer
 
-Defined in: [src/renderer/Renderer.ts:34](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/renderer/Renderer.ts#L34)
-
+Defined in: [src/renderer/Renderer.ts:34](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/renderer/Renderer.ts#L34)
 
 The core renderer class of RedGPU.
-
 
 Manages the rendering loop, executes rendering passes for each View3D, and finally displays the result on the screen. It also handles debug rendering and animation updates.
 
@@ -28,7 +26,7 @@ renderer.start(redGPUContext, (time) => {
 
 > **new Renderer**(): `Renderer`
 
-Defined in: [src/renderer/Renderer.ts:40](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/renderer/Renderer.ts#L40)
+Defined in: [src/renderer/Renderer.ts:38](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/renderer/Renderer.ts#L38)
 
 #### Returns
 
@@ -40,8 +38,7 @@ Defined in: [src/renderer/Renderer.ts:40](https://github.com/redcamel/RedGPU/blo
 
 > **renderFrame**(`redGPUContext`, `time`): `void`
 
-Defined in: [src/renderer/Renderer.ts:102](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/renderer/Renderer.ts#L102)
-
+Defined in: [src/renderer/Renderer.ts:99](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/renderer/Renderer.ts#L99)
 
 Renders a single frame. (Called internally)
 
@@ -60,10 +57,9 @@ Renders a single frame. (Called internally)
 
 ### renderView()
 
-> **renderView**(`view`, `time`): `GPURenderPassDescriptor`
+> **renderView**(`view`): `object`
 
-Defined in: [src/renderer/Renderer.ts:136](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/renderer/Renderer.ts#L136)
-
+Defined in: [src/renderer/Renderer.ts:144](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/renderer/Renderer.ts#L144)
 
 Renders a specific View3D.
 
@@ -72,14 +68,16 @@ Renders a specific View3D.
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `view` | [`View3D`](../namespaces/Display/classes/View3D.md) | View3D instance to render |
-| `time` | `number` | Current time (ms) |
 
 #### Returns
 
-`GPURenderPassDescriptor`
-
+`object`
 
 Generated render pass descriptor
+
+| Name | Type | Defined in |
+| ------ | ------ | ------ |
+| `renderPassDescriptor` | `GPURenderPassDescriptor` | [src/renderer/Renderer.ts:145](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/renderer/Renderer.ts#L145) |
 
 ***
 
@@ -87,8 +85,7 @@ Generated render pass descriptor
 
 > **start**(`redGPUContext`, `render`): `void`
 
-Defined in: [src/renderer/Renderer.ts:61](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/renderer/Renderer.ts#L61)
-
+Defined in: [src/renderer/Renderer.ts:59](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/renderer/Renderer.ts#L59)
 
 Starts the rendering loop.
 
@@ -116,8 +113,7 @@ renderer.start(redGPUContext, (time) => {
 
 > **stop**(`redGPUContext`): `void`
 
-Defined in: [src/renderer/Renderer.ts:86](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/renderer/Renderer.ts#L86)
-
+Defined in: [src/renderer/Renderer.ts:83](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/renderer/Renderer.ts#L83)
 
 Stops the rendering loop.
 

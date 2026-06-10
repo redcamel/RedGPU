@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,20 +6,17 @@
 
 # Class: AntialiasingManager
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:22](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/antialiasing/AntialiasingManager.ts#L22)
+Defined in: [src/antialiasing/AntialiasingManager.ts:21](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/antialiasing/AntialiasingManager.ts#L21)
 
 안티앨리어싱(Anti-aliasing) 설정을 관리하는 클래스입니다.
 
-
 ::: warning
 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
-
 :::
 
 * ### Example
 ```typescript
-// RedGPUContext 또는 View를 통해 접근합니다.
-// Access via RedGPUContext or View.
+// RedGPUContext, View 또는 RedGPUObject 상속 객체를 통해 접근합니다.
 const antialiasingManager = redGPUContext.antialiasingManager;
 ```
 
@@ -27,18 +24,14 @@ const antialiasingManager = redGPUContext.antialiasingManager;
 
 ### Constructor
 
-> **new AntialiasingManager**(`redGPUContext`): `AntialiasingManager`
+> **new AntialiasingManager**(): `AntialiasingManager`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:39](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/antialiasing/AntialiasingManager.ts#L39)
+Defined in: [src/antialiasing/AntialiasingManager.ts:38](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/antialiasing/AntialiasingManager.ts#L38)
 
 AntialiasingManager 생성자입니다.
-
-
-#### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPUContext 인스턴스
+`window.devicePixelRatio` 값에 따라 초기 안티앨리어싱 모드가 결정됩니다:
+- `devicePixelRatio > 1.0` (고해상도 화면): TAA가 활성화됩니다.
+- `devicePixelRatio <= 1.0` (일반 해상도 화면): MSAA가 활성화됩니다.
 
 #### Returns
 
@@ -46,68 +39,23 @@ AntialiasingManager 생성자입니다.
 
 ## Accessors
 
-### changedMSAA
-
-#### Get Signature
-
-> **get** **changedMSAA**(): `boolean`
-
-Defined in: [src/antialiasing/AntialiasingManager.ts:168](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/antialiasing/AntialiasingManager.ts#L168)
-
-**`Internal`**
-
-MSAA 설정 변경 여부를 반환합니다.
-
-
-##### Returns
-
-`boolean`
-
-MSAA 변경 여부
-
-
-#### Set Signature
-
-> **set** **changedMSAA**(`value`): `void`
-
-Defined in: [src/antialiasing/AntialiasingManager.ts:181](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/antialiasing/AntialiasingManager.ts#L181)
-
-**`Internal`**
-
-MSAA 설정 변경 여부를 설정합니다.
-
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `boolean` | MSAA 변경 여부
-
-##### Returns
-
-`void`
-
-***
-
 ### msaaID
 
 #### Get Signature
 
 > **get** **msaaID**(): `string`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:194](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/antialiasing/AntialiasingManager.ts#L194)
+Defined in: [src/antialiasing/AntialiasingManager.ts:165](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/antialiasing/AntialiasingManager.ts#L165)
 
 **`Internal`**
 
 현재 MSAA의 고유 ID를 반환합니다.
-
 
 ##### Returns
 
 `string`
 
 MSAA 고유 ID
-
 
 ***
 
@@ -117,10 +65,9 @@ MSAA 고유 ID
 
 > **get** **useFXAA**(): `boolean`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:136](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/antialiasing/AntialiasingManager.ts#L136)
+Defined in: [src/antialiasing/AntialiasingManager.ts:133](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/antialiasing/AntialiasingManager.ts#L133)
 
 FXAA(Fast Approximate Anti-Aliasing) 사용 여부를 반환합니다.
-
 
 * ### Example
 ```typescript
@@ -133,15 +80,13 @@ const useFXAA = antialiasingManager.useFXAA;
 
 FXAA 사용 여부
 
-
 #### Set Signature
 
 > **set** **useFXAA**(`value`): `void`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:153](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/antialiasing/AntialiasingManager.ts#L153)
+Defined in: [src/antialiasing/AntialiasingManager.ts:150](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/antialiasing/AntialiasingManager.ts#L150)
 
 FXAA(Fast Approximate Anti-Aliasing) 사용 여부를 설정합니다.
-
 
 * ### Example
 ```typescript
@@ -166,10 +111,9 @@ antialiasingManager.useFXAA = true;
 
 > **get** **useMSAA**(): `boolean`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:98](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/antialiasing/AntialiasingManager.ts#L98)
+Defined in: [src/antialiasing/AntialiasingManager.ts:96](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/antialiasing/AntialiasingManager.ts#L96)
 
 MSAA(Multi-Sample Anti-Aliasing) 사용 여부를 반환합니다.
-
 
 * ### Example
 ```typescript
@@ -182,15 +126,13 @@ const useMSAA = antialiasingManager.useMSAA;
 
 MSAA 사용 여부
 
-
 #### Set Signature
 
 > **set** **useMSAA**(`value`): `void`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:115](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/antialiasing/AntialiasingManager.ts#L115)
+Defined in: [src/antialiasing/AntialiasingManager.ts:113](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/antialiasing/AntialiasingManager.ts#L113)
 
 MSAA(Multi-Sample Anti-Aliasing) 사용 여부를 설정합니다.
-
 
 * ### Example
 ```typescript
@@ -215,10 +157,9 @@ antialiasingManager.useMSAA = true;
 
 > **get** **useTAA**(): `boolean`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:62](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/antialiasing/AntialiasingManager.ts#L62)
+Defined in: [src/antialiasing/AntialiasingManager.ts:60](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/antialiasing/AntialiasingManager.ts#L60)
 
 TAA(Temporal Anti-Aliasing) 사용 여부를 반환합니다.
-
 
 * ### Example
 ```typescript
@@ -231,15 +172,13 @@ const useTAA = antialiasingManager.useTAA;
 
 TAA 사용 여부
 
-
 #### Set Signature
 
 > **set** **useTAA**(`value`): `void`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:79](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/antialiasing/AntialiasingManager.ts#L79)
+Defined in: [src/antialiasing/AntialiasingManager.ts:77](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/antialiasing/AntialiasingManager.ts#L77)
 
 TAA(Temporal Anti-Aliasing) 사용 여부를 설정합니다.
-
 
 * ### Example
 ```typescript

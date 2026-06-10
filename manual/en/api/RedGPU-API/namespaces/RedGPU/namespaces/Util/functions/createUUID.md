@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,8 +8,7 @@
 
 > **createUUID**(): `string`
 
-Defined in: [src/utils/uuid/createUUID.ts:15](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/uuid/createUUID.ts#L15)
-
+Defined in: [src/utils/uuid/createUUID.ts:13](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/uuid/createUUID.ts#L13)
 
 Generates a random UUID (version 4) string.
 
@@ -22,5 +21,4 @@ const uuid = RedGPU.Util.createUUID();
 
 `string`
 
-
-Randomly generated UUID string
+Generated UUID string

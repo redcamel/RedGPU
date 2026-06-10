@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,10 +8,9 @@
 
 > **localToWorld**(`targetMatrix`, `x`, `y`, `z`): \[`number`, `number`, `number`\]
 
-Defined in: [src/math/coordinates/localToWorld.ts:34](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/coordinates/localToWorld.ts#L34)
+Defined in: [src/math/coordinates/localToWorld.ts:34](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/coordinates/localToWorld.ts#L34)
 
 로컬 좌표를 월드 좌표로 변환합니다.
-
 
 ### Example
 ```typescript
@@ -33,8 +32,6 @@ const worldPos = RedGPU.math.localToWorld(mesh.modelMatrix, 0, 1, 0);
 
 변환된 월드 좌표 [x, y, z]
 
-
 ## Throws
 
 입력 좌표가 숫자가 아니면 Error 발생
-

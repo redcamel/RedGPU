@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,11 +8,9 @@
 
 > **validateNumberRange**(`value`, `minRange?`, `maxRange?`): `boolean`
 
-Defined in: [src/runtimeChecker/validateFunc/validateNumberRange.ts:32](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/runtimeChecker/validateFunc/validateNumberRange.ts#L32)
-
+Defined in: [src/runtimeChecker/validateFunc/validateNumberRange.ts:32](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/runtimeChecker/validateFunc/validateNumberRange.ts#L32)
 
 Validates if the given value is a number within the specified range.
-
 
 Throws an exception if the value is out of range or not a number.
 
@@ -33,10 +31,8 @@ RedGPU.RuntimeChecker.validateNumberRange(50, 0, 100);
 
 `boolean`
 
-
 True if the value is a number within range
 
 ## Throws
-
 
 Throws Error if inputs are not numbers or the value is out of range

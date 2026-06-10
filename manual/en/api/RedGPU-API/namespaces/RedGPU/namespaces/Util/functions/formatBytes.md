@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,10 +8,9 @@
 
 > **formatBytes**(`bytes`, `decimals?`): `string`
 
-Defined in: [src/utils/formatBytes.ts:26](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/formatBytes.ts#L26)
+Defined in: [src/utils/formatBytes.ts:17](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/formatBytes.ts#L17)
 
-
-Converts byte units to a human-readable string.
+Converts bytes to a human-readable string (KB, MB, GB, etc.).
 
 * ### Example
 ```typescript
@@ -29,10 +28,4 @@ const readable = RedGPU.Util.formatBytes(1048576); // '1.00 MB'
 
 `string`
 
-
-Converted byte string (e.g., '1.23 MB')
-
-## Throws
-
-
-Throws Error if bytes is not a valid uint
+Converted string

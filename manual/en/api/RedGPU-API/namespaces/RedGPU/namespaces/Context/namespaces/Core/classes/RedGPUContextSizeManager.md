@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,16 +6,13 @@
 
 # Class: RedGPUContextSizeManager
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:56](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextSizeManager.ts#L56)
-
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:85](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextSizeManager.ts#L85)
 
 Class that manages canvas size and rendering scale.
-
 
 You can set the size in pixels (px) or percentages (%), and it provides rendering resolution adjustment functions.
 
 ::: warning
-
 This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
 :::
 
@@ -26,14 +23,17 @@ sizeManager.renderScale = 0.5; // Reduce resolution to 50%
 sizeManager.setSize('100%', '100%');
 ```
 
+## Extends
+
+- [`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md)
+
 ## Constructors
 
 ### Constructor
 
 > **new RedGPUContextSizeManager**(`redGPUContext`, `width?`, `height?`): `RedGPUContextSizeManager`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:77](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextSizeManager.ts#L77)
-
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:125](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextSizeManager.ts#L125)
 
 RedGPUContextSizeManager constructor
 
@@ -49,6 +49,10 @@ RedGPUContextSizeManager constructor
 
 `RedGPUContextSizeManager`
 
+#### Overrides
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`constructor`](../../../../BaseObject/classes/RedGPUObject.md#constructor)
+
 ## Accessors
 
 ### height
@@ -57,8 +61,7 @@ RedGPUContextSizeManager constructor
 
 > **get** **height**(): `string` \| `number`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:130](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextSizeManager.ts#L130)
-
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:180](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextSizeManager.ts#L180)
 
 Returns the set height value.
 
@@ -70,8 +73,7 @@ Returns the set height value.
 
 > **set** **height**(`value`): `void`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:141](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextSizeManager.ts#L141)
-
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:191](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextSizeManager.ts#L191)
 
 Sets the height. (px, %, or number)
 
@@ -91,16 +93,15 @@ Sets the height. (px, %, or number)
 
 #### Get Signature
 
-> **get** **parentDomRect**(): `DOMRect`
+> **get** **parentDomRect**(): `ParentRect`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:170](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextSizeManager.ts#L170)
-
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:220](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextSizeManager.ts#L220)
 
 Returns the dimension information of the canvas's parent DOM element.
 
 ##### Returns
 
-`DOMRect`
+`ParentRect`
 
 ***
 
@@ -110,8 +111,7 @@ Returns the dimension information of the canvas's parent DOM element.
 
 > **get** **pixelRectArray**(): \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:149](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextSizeManager.ts#L149)
-
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:199](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextSizeManager.ts#L199)
 
 Returns the actual pixel rect to be rendered as an array. [x, y, w, h]
 
@@ -127,8 +127,7 @@ Returns the actual pixel rect to be rendered as an array. [x, y, w, h]
 
 > **get** **pixelRectObject**(): `IRedGPURectObject`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:157](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextSizeManager.ts#L157)
-
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:207](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextSizeManager.ts#L207)
 
 Returns the actual pixel rect to be rendered as an object.
 
@@ -144,8 +143,7 @@ Returns the actual pixel rect to be rendered as an object.
 
 > **get** **renderScale**(): `number`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:89](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextSizeManager.ts#L89)
-
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:139](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextSizeManager.ts#L139)
 
 Returns the rendering scale.
 
@@ -157,8 +155,7 @@ Returns the rendering scale.
 
 > **set** **renderScale**(`value`): `void`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:100](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextSizeManager.ts#L100)
-
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:150](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextSizeManager.ts#L150)
 
 Sets the rendering scale.
 
@@ -180,7 +177,9 @@ Sets the rendering scale.
 
 > **get** **screenRectObject**(): `IRedGPURectObject`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:174](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextSizeManager.ts#L174)
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:249](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextSizeManager.ts#L249)
+
+Returns the screen size information in CSS pixels.
 
 ##### Returns
 
@@ -194,8 +193,7 @@ Defined in: [src/context/core/RedGPUContextSizeManager.ts:174](https://github.co
 
 > **get** **width**(): `string` \| `number`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:111](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextSizeManager.ts#L111)
-
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:161](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextSizeManager.ts#L161)
 
 Returns the set width value.
 
@@ -207,8 +205,7 @@ Returns the set width value.
 
 > **set** **width**(`value`): `void`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:122](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextSizeManager.ts#L122)
-
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:172](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextSizeManager.ts#L172)
 
 Sets the width. (px, %, or number)
 
@@ -228,8 +225,7 @@ Sets the width. (px, %, or number)
 
 > **setSize**(`w?`, `h?`): `void`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:280](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextSizeManager.ts#L280)
-
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:355](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextSizeManager.ts#L355)
 
 Sets the size of the element and updates the canvas style.
 
@@ -250,8 +246,7 @@ Sets the size of the element and updates the canvas style.
 
 > `static` **calculateSizeFromString**(`rect`, `key`, `value`): `number`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:257](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextSizeManager.ts#L257)
-
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:332](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextSizeManager.ts#L332)
 
 Converts string value (px, %) to pixel number.
 
@@ -277,8 +272,7 @@ Converts string value (px, %) to pixel number.
 
 > `static` **getPixelDimension**(`parentRect`, `key`, `value`): `number`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:240](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextSizeManager.ts#L240)
-
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:315](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextSizeManager.ts#L315)
 
 Calculates and returns the pixel size based on the parent Rect.
 
@@ -300,8 +294,7 @@ Calculates and returns the pixel size based on the parent Rect.
 
 > `static` **validatePositionValue**(`value`): `void`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:211](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextSizeManager.ts#L211)
-
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:286](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextSizeManager.ts#L286)
 
 Validates if the input value is a valid position value. (number, px, %)
 
@@ -321,8 +314,7 @@ Validates if the input value is a valid position value. (number, px, %)
 
 > `static` **validateSizeValue**(`value`): `void`
 
-Defined in: [src/context/core/RedGPUContextSizeManager.ts:190](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextSizeManager.ts#L190)
-
+Defined in: [src/context/core/RedGPUContextSizeManager.ts:265](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextSizeManager.ts#L265)
 
 Validates if the input value is a valid size value. (positive number, px, %)
 
@@ -335,3 +327,186 @@ Validates if the input value is a valid size value. (positive number, px, %)
 #### Returns
 
 `void`
+
+
+***
+
+## Inherited Members
+
+<details>
+<summary>View inherited properties and methods (Click to expand)</summary>
+
+### antialiasingManager
+
+#### Get Signature
+
+> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L76)
+
+Returns the AntialiasingManager instance. (Short-cut path)
+
+##### Returns
+
+[`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
+
+AntialiasingManager instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`antialiasingManager`](../../../../BaseObject/classes/RedGPUObject.md#antialiasingmanager)
+
+***
+
+### commandEncoderManager
+
+#### Get Signature
+
+> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L88)
+
+Returns the CommandEncoderManager instance. (Short-cut path)
+
+##### Returns
+
+[`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+CommandEncoderManager instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`commandEncoderManager`](../../../../BaseObject/classes/RedGPUObject.md#commandencodermanager)
+
+***
+
+### gpuDevice
+
+#### Get Signature
+
+> **get** **gpuDevice**(): `GPUDevice`
+
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L52)
+
+Returns the WebGPU device object. (Short-cut path)
+
+##### Returns
+
+`GPUDevice`
+
+GPUDevice instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`gpuDevice`](../../../../BaseObject/classes/RedGPUObject.md#gpudevice)
+
+***
+
+### name
+
+#### Get Signature
+
+> **get** **name**(): `string`
+
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L58)
+
+Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
+
+##### Returns
+
+`string`
+
+Name of the object
+
+#### Set Signature
+
+> **set** **name**(`value`): `void`
+
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L71)
+
+Sets the name of the object.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | Name of the object to set |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`name`](../../../../BaseObject/classes/RedGPUObject.md#name)
+
+***
+
+### redGPUContext
+
+#### Get Signature
+
+> **get** **redGPUContext**(): [`RedGPUContext`](../../../classes/RedGPUContext.md)
+
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L40)
+
+Returns the RedGPUContext instance.
+
+##### Returns
+
+[`RedGPUContext`](../../../classes/RedGPUContext.md)
+
+RedGPUContext instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`redGPUContext`](../../../../BaseObject/classes/RedGPUObject.md#redgpucontext)
+
+***
+
+### resourceManager
+
+#### Get Signature
+
+> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L64)
+
+Returns the ResourceManager instance. (Short-cut path)
+
+##### Returns
+
+[`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
+
+ResourceManager instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`resourceManager`](../../../../BaseObject/classes/RedGPUObject.md#resourcemanager)
+
+***
+
+### uuid
+
+#### Get Signature
+
+> **get** **uuid**(): `string`
+
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L46)
+
+Returns the universally unique identifier (UUID) of the object.
+
+##### Returns
+
+`string`
+
+UUID string
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`uuid`](../../../../BaseObject/classes/RedGPUObject.md#uuid)
+
+***
+
+
+</details>

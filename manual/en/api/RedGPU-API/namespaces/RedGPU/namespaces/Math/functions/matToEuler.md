@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,8 +8,7 @@
 
 > **matToEuler**(`mat`, `dest`, `order?`): `any`
 
-Defined in: [src/math/mat4ToEuler.ts:24](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/mat4ToEuler.ts#L24)
-
+Defined in: [src/math/mat4ToEuler.ts:24](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/mat4ToEuler.ts#L24)
 
 Extracts Euler angles from a 4x4 matrix.
 
@@ -29,6 +28,5 @@ const euler = RedGPU.math.matToEuler(matrix, [0, 0, 0], 'XYZ');
 ## Returns
 
 `any`
-
 
 Array containing Euler angles [x, y, z]

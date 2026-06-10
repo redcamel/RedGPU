@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,10 +6,9 @@
 
 # Class: BitmapTexture
 
-Defined in: [src/resources/texture/BitmapTexture.ts:23](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/BitmapTexture.ts#L23)
+Defined in: [src/resources/texture/BitmapTexture.ts:27](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/BitmapTexture.ts#L27)
 
 비트맵 이미지를 사용하는 텍스처 클래스입니다.
-
 
 * ### Example
 ```typescript
@@ -26,17 +25,16 @@ const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, 'path/to/image.
 
 > **new BitmapTexture**(`redGPUContext`, `src?`, `useMipMap?`, `onLoad?`, `onError?`, `format?`, `usePremultiplyAlpha?`): `BitmapTexture`
 
-Defined in: [src/resources/texture/BitmapTexture.ts:71](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/BitmapTexture.ts#L71)
+Defined in: [src/resources/texture/BitmapTexture.ts:75](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/BitmapTexture.ts#L75)
 
 BitmapTexture 인스턴스를 생성합니다.
-
 
 #### Parameters
 
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
 | `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `undefined` | RedGPUContext 인스턴스
-| `src?` | `SrcInfo` | `undefined` | 텍스처 소스 정보 (URL 또는 객체)
+| `src?` | [`BitmapSrcInfo`](../type-aliases/BitmapSrcInfo.md) | `undefined` | 텍스처 소스 정보 (URL 또는 객체)
 | `useMipMap?` | `boolean` | `true` | 밉맵 사용 여부 (기본값: true)
 | `onLoad?` | (`textureInstance?`) => `void` | `undefined` | 로드 완료 콜백
 | `onError?` | (`error`) => `void` | `undefined` | 에러 콜백
@@ -53,16 +51,239 @@ BitmapTexture 인스턴스를 생성합니다.
 
 ## Accessors
 
+### gpuTexture
+
+#### Get Signature
+
+> **get** **gpuTexture**(): `GPUTexture`
+
+Defined in: [src/resources/texture/BitmapTexture.ts:162](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/BitmapTexture.ts#L162)
+
+GPUTexture 객체를 반환합니다.
+
+##### Returns
+
+`GPUTexture`
+
+GPUTexture 인스턴스
+
+***
+
+### height
+
+#### Get Signature
+
+> **get** **height**(): `number`
+
+Defined in: [src/resources/texture/BitmapTexture.ts:126](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/BitmapTexture.ts#L126)
+
+텍스처 세로 크기를 반환합니다.
+
+##### Returns
+
+`number`
+
+세로 크기 (픽셀)
+
+***
+
+### mipLevelCount
+
+#### Get Signature
+
+> **get** **mipLevelCount**(): `number`
+
+Defined in: [src/resources/texture/BitmapTexture.ts:174](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/BitmapTexture.ts#L174)
+
+밉맵 레벨 개수를 반환합니다.
+
+##### Returns
+
+`number`
+
+밉맵 레벨 개수
+
+***
+
+### src
+
+#### Get Signature
+
+> **get** **src**(): `string`
+
+Defined in: [src/resources/texture/BitmapTexture.ts:186](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/BitmapTexture.ts#L186)
+
+텍스처 소스 경로를 반환합니다.
+
+##### Returns
+
+`string`
+
+소스 경로 문자열
+
+#### Set Signature
+
+> **set** **src**(`value`): `void`
+
+Defined in: [src/resources/texture/BitmapTexture.ts:198](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/BitmapTexture.ts#L198)
+
+텍스처 소스 경로 설정 및 로드를 시작합니다.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | [`BitmapSrcInfo`](../type-aliases/BitmapSrcInfo.md) | 텍스처 소스 정보
+
+##### Returns
+
+`void`
+
+***
+
+### useMipmap
+
+#### Get Signature
+
+> **get** **useMipmap**(): `boolean`
+
+Defined in: [src/resources/texture/BitmapTexture.ts:212](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/BitmapTexture.ts#L212)
+
+밉맵 사용 여부를 반환합니다.
+
+##### Returns
+
+`boolean`
+
+밉맵 사용 여부
+
+#### Set Signature
+
+> **set** **useMipmap**(`value`): `void`
+
+Defined in: [src/resources/texture/BitmapTexture.ts:224](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/BitmapTexture.ts#L224)
+
+밉맵 사용 여부를 설정하고 텍스처를 재생성합니다.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `boolean` | 밉맵 사용 여부
+
+##### Returns
+
+`void`
+
+***
+
+### usePremultiplyAlpha
+
+#### Get Signature
+
+> **get** **usePremultiplyAlpha**(): `boolean`
+
+Defined in: [src/resources/texture/BitmapTexture.ts:138](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/BitmapTexture.ts#L138)
+
+프리멀티플 알파 사용 여부를 반환합니다.
+
+##### Returns
+
+`boolean`
+
+프리멀티플 알파 사용 여부
+
+***
+
+### videoMemorySize
+
+#### Get Signature
+
+> **get** **videoMemorySize**(): `number`
+
+Defined in: [src/resources/texture/BitmapTexture.ts:150](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/BitmapTexture.ts#L150)
+
+비디오 메모리 사용량(byte)을 반환합니다.
+
+##### Returns
+
+`number`
+
+비디오 메모리 사용량 (Bytes)
+
+***
+
+### width
+
+#### Get Signature
+
+> **get** **width**(): `number`
+
+Defined in: [src/resources/texture/BitmapTexture.ts:114](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/BitmapTexture.ts#L114)
+
+텍스처 가로 크기를 반환합니다.
+
+##### Returns
+
+`number`
+
+가로 크기 (픽셀)
+
+## Methods
+
+### destroy()
+
+> **destroy**(): `void`
+
+Defined in: [src/resources/texture/BitmapTexture.ts:230](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/BitmapTexture.ts#L230)
+
+텍스처 리소스를 파괴합니다.
+
+#### Returns
+
+`void`
+
+***
+
+
+***
+
+## 상속받은 멤버
+
+<details>
+<summary>상속받은 속성 및 메서드 보기 (클릭하여 확장)</summary>
+
+### antialiasingManager
+
+#### Get Signature
+
+> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L76)
+
+안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
+
+##### Returns
+
+[`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+
+AntialiasingManager 인스턴스
+
+#### Inherited from
+
+[`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`antialiasingManager`](../namespaces/Core/classes/ManagementResourceBase.md#antialiasingmanager)
+
+***
+
 ### cacheKey
 
 #### Get Signature
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L57)
+Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L53)
 
 캐시 키를 반환합니다.
-
 
 ##### Returns
 
@@ -72,10 +293,9 @@ Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L65)
+Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L61)
 
 캐시 키를 설정합니다.
-
 
 ##### Parameters
 
@@ -93,16 +313,37 @@ Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/
 
 ***
 
+### commandEncoderManager
+
+#### Get Signature
+
+> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L88)
+
+커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
+
+##### Returns
+
+[`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+CommandEncoderManager 인스턴스
+
+#### Inherited from
+
+[`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`commandEncoderManager`](../namespaces/Core/classes/ManagementResourceBase.md#commandencodermanager)
+
+***
+
 ### gpuDevice
 
 #### Get Signature
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L106)
+Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L77)
 
 연관된 GPU 디바이스를 반환합니다.
-
 
 ##### Returns
 
@@ -114,83 +355,35 @@ Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel
 
 ***
 
-### gpuTexture
-
-#### Get Signature
-
-> **get** **gpuTexture**(): `GPUTexture`
-
-Defined in: [src/resources/texture/BitmapTexture.ts:123](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/BitmapTexture.ts#L123)
-
-GPUTexture 객체를 반환합니다.
-
-##### Returns
-
-`GPUTexture`
-
-***
-
-### height
-
-#### Get Signature
-
-> **get** **height**(): `number`
-
-Defined in: [src/resources/texture/BitmapTexture.ts:108](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/BitmapTexture.ts#L108)
-
-텍스처 세로 크기
-
-##### Returns
-
-`number`
-
-***
-
-### mipLevelCount
-
-#### Get Signature
-
-> **get** **mipLevelCount**(): `number`
-
-Defined in: [src/resources/texture/BitmapTexture.ts:128](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/BitmapTexture.ts#L128)
-
-밉맵 레벨 개수를 반환합니다.
-
-##### Returns
-
-`number`
-
-***
-
 ### name
 
 #### Get Signature
 
 > **get** **name**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L81)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L58)
 
-인스턴스의 이름을 반환합니다. 이름이 없으면 클래스명과 ID로 생성합니다.
-
+객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
 
 ##### Returns
 
 `string`
 
+객체 이름
+
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L90)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L71)
 
-인스턴스의 이름을 설정합니다.
-
+객체의 이름을 설정합니다.
 
 ##### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | 설정할 객체 이름
 
 ##### Returns
 
@@ -208,18 +401,41 @@ Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L114)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L40)
 
 RedGPUContext 인스턴스를 반환합니다.
-
 
 ##### Returns
 
 [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
+RedGPUContext 인스턴스
+
 #### Inherited from
 
 [`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`redGPUContext`](../namespaces/Core/classes/ManagementResourceBase.md#redgpucontext)
+
+***
+
+### resourceManager
+
+#### Get Signature
+
+> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L64)
+
+리소스 매니저 인스턴스를 반환합니다. (단축 경로)
+
+##### Returns
+
+[`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
+
+ResourceManager 인스턴스
+
+#### Inherited from
+
+[`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`resourceManager`](../namespaces/Core/classes/ManagementResourceBase.md#resourcemanager)
 
 ***
 
@@ -229,10 +445,9 @@ RedGPUContext 인스턴스를 반환합니다.
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L73)
+Defined in: [src/resources/core/ResourceBase.ts:69](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L69)
 
 리소스 매니저 키를 반환합니다.
-
 
 ##### Returns
 
@@ -244,37 +459,23 @@ Defined in: [src/resources/core/ResourceBase.ts:73](https://github.com/redcamel/
 
 ***
 
-### src
+### revision
 
 #### Get Signature
 
-> **get** **src**(): `string`
+> **get** **revision**(): `number`
 
-Defined in: [src/resources/texture/BitmapTexture.ts:133](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/BitmapTexture.ts#L133)
+Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L45)
 
-텍스처 소스 경로를 반환합니다.
-
-##### Returns
-
-`string`
-
-#### Set Signature
-
-> **set** **src**(`value`): `void`
-
-Defined in: [src/resources/texture/BitmapTexture.ts:138](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/BitmapTexture.ts#L138)
-
-텍스처 소스 경로 설정 및 로드를 시작합니다.
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `SrcInfo` |
+리소스의 리비전(업데이트 횟수)을 반환합니다.
 
 ##### Returns
 
-`void`
+`number`
+
+#### Inherited from
+
+[`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`revision`](../namespaces/Core/classes/ManagementResourceBase.md#revision)
 
 ***
 
@@ -284,10 +485,9 @@ Defined in: [src/resources/texture/BitmapTexture.ts:138](https://github.com/redc
 
 > **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ManagementResourceBase.ts#L45)
+Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ManagementResourceBase.ts#L45)
 
 리소스의 관리 상태 정보를 반환합니다.
-
 
 ##### Returns
 
@@ -299,70 +499,21 @@ Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com
 
 ***
 
-### useMipmap
-
-#### Get Signature
-
-> **get** **useMipmap**(): `boolean`
-
-Defined in: [src/resources/texture/BitmapTexture.ts:145](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/BitmapTexture.ts#L145)
-
-밉맵 사용 여부를 반환합니다.
-
-##### Returns
-
-`boolean`
-
-#### Set Signature
-
-> **set** **useMipmap**(`value`): `void`
-
-Defined in: [src/resources/texture/BitmapTexture.ts:150](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/BitmapTexture.ts#L150)
-
-밉맵 사용 여부를 설정하고 텍스처를 재생성합니다.
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `boolean` |
-
-##### Returns
-
-`void`
-
-***
-
-### usePremultiplyAlpha
-
-#### Get Signature
-
-> **get** **usePremultiplyAlpha**(): `boolean`
-
-Defined in: [src/resources/texture/BitmapTexture.ts:113](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/BitmapTexture.ts#L113)
-
-프리멀티플 알파 사용 여부를 반환합니다.
-
-##### Returns
-
-`boolean`
-
-***
-
 ### uuid
 
 #### Get Signature
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L98)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L46)
 
-고유 식별자(UUID)를 반환합니다.
-
+객체의 고유 식별자(UUID)를 반환합니다.
 
 ##### Returns
 
 `string`
+
+UUID 문자열
 
 #### Inherited from
 
@@ -370,46 +521,13 @@ Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/
 
 ***
 
-### videoMemorySize
-
-#### Get Signature
-
-> **get** **videoMemorySize**(): `number`
-
-Defined in: [src/resources/texture/BitmapTexture.ts:118](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/BitmapTexture.ts#L118)
-
-비디오 메모리 사용량(byte)을 반환합니다.
-
-##### Returns
-
-`number`
-
-***
-
-### width
-
-#### Get Signature
-
-> **get** **width**(): `number`
-
-Defined in: [src/resources/texture/BitmapTexture.ts:103](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/BitmapTexture.ts#L103)
-
-텍스처 가로 크기
-
-##### Returns
-
-`number`
-
-## Methods
-
 ### \_\_addDirtyPipelineListener()
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L125)
+Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L89)
 
 파이프라인이 더티해질 때 호출될 리스너를 추가합니다.
-
 
 #### Parameters
 
@@ -427,39 +545,13 @@ Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel
 
 ***
 
-### \_\_fireListenerList()
-
-> **\_\_fireListenerList**(`resetList?`): `void`
-
-Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L152)
-
-등록된 더티 리스너들을 실행합니다.
-
-
-#### Parameters
-
-| Parameter | Type | Default value | Description |
-| ------ | ------ | ------ | ------ |
-| `resetList` | `boolean` | `false` | 실행 후 리스너 목록 초기화 여부 (기본값: false)
-
-#### Returns
-
-`void`
-
-#### Inherited from
-
-[`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`__fireListenerList`](../namespaces/Core/classes/ManagementResourceBase.md#__firelistenerlist)
-
-***
-
 ### \_\_removeDirtyPipelineListener()
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L137)
+Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L101)
 
-더티 파이프라인 리스너를 제거합니다.
-
+리소스 업데이트 리스너를 제거합니다.
 
 #### Parameters
 
@@ -477,14 +569,27 @@ Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel
 
 ***
 
-### destroy()
+### notifyUpdate()
 
-> **destroy**(): `void`
+> **notifyUpdate**(`resetList?`): `void`
 
-Defined in: [src/resources/texture/BitmapTexture.ts:156](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/BitmapTexture.ts#L156)
+Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L116)
 
-텍스처 리소스를 파괴합니다.
+리소스가 업데이트되었음을 등록된 리스너들에게 알립니다.
+
+#### Parameters
+
+| Parameter | Type | Default value | Description |
+| ------ | ------ | ------ | ------ |
+| `resetList` | `boolean` | `false` | 실행 후 리스너 목록 초기화 여부 (기본값: false)
 
 #### Returns
 
 `void`
+
+#### Inherited from
+
+[`ManagementResourceBase`](../namespaces/Core/classes/ManagementResourceBase.md).[`notifyUpdate`](../namespaces/Core/classes/ManagementResourceBase.md#notifyupdate)
+
+
+</details>

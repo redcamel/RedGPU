@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,11 +8,9 @@
 
 > **validateRedGPUContext**(`value`): `boolean`
 
-Defined in: [src/runtimeChecker/validateFunc/validateRedGPUContext.ts:26](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/runtimeChecker/validateFunc/validateRedGPUContext.ts#L26)
-
+Defined in: [src/runtimeChecker/validateFunc/validateRedGPUContext.ts:26](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/runtimeChecker/validateFunc/validateRedGPUContext.ts#L26)
 
 Validates if the given value is a RedGPUContext instance.
-
 
 Throws an exception if the constructor name of the value is not 'RedGPUContext'.
 
@@ -31,10 +29,8 @@ RedGPU.RuntimeChecker.validateRedGPUContext(redGPUContext);
 
 `boolean`
 
-
 True if the value is a RedGPUContext instance
 
 ## Throws
-
 
 Throws Error if the value is not a RedGPUContext instance

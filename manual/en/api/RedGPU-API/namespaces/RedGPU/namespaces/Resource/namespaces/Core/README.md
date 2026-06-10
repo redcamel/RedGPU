@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,12 +6,20 @@
 
 # Core
 
-
 Provides core abstract classes for resource management and the `ResourceManager`.
 
 ## Other
 
+- [ImmutableKeyMap](classes/ImmutableKeyMap.md)
+- [ResourceStateBitmapTexture](classes/ResourceStateBitmapTexture.md)
+- [ResourceStateCubeTexture](classes/ResourceStateCubeTexture.md)
+- [ResourceStateHDRTexture](classes/ResourceStateHDRTexture.md)
+- [ResourceStateIndexBuffer](classes/ResourceStateIndexBuffer.md)
+- [ResourceStateStorageBuffer](classes/ResourceStateStorageBuffer.md)
+- [ResourceStateUniformBuffer](classes/ResourceStateUniformBuffer.md)
+- [ResourceStateVertexBuffer](classes/ResourceStateVertexBuffer.md)
 - [ResourceStatusInfo](classes/ResourceStatusInfo.md)
+- [ResourceState](type-aliases/ResourceState.md)
 
 ## Resource
 

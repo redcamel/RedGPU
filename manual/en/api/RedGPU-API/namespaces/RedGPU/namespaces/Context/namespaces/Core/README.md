@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,11 +6,14 @@
 
 # Core
 
-
 Provides core components of RedGPUContext.
 
 ## Context
 
-- [RedGPUContextDetector](classes/RedGPUContextDetector.md)
 - [RedGPUContextSizeManager](classes/RedGPUContextSizeManager.md)
 - [RedGPUContextViewContainer](classes/RedGPUContextViewContainer.md)
+
+## Other
+
+- [RedGPUContextDetector](classes/RedGPUContextDetector.md)
+- [RedGPUContextObserver](classes/RedGPUContextObserver.md)

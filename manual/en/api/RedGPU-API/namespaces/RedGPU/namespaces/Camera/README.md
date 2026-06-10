@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -6,9 +6,7 @@
 
 # Camera
 
-
 Provides camera systems and various manipulation controllers for controlling the rendering viewpoint and field of view.
-
 
 Includes perspective, orthographic, and 2D projection methods along with flexible camera manipulation features based on user input.
 

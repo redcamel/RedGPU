@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,11 @@
 
 # Class: InstanceIdGenerator
 
-Defined in: [src/utils/uuid/InstanceIdGenerator.ts:15](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/uuid/InstanceIdGenerator.ts#L15)
+Defined in: [src/utils/uuid/InstanceIdGenerator.ts:15](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/uuid/InstanceIdGenerator.ts#L15)
 
-타입별 고유 인스턴스 ID를 생성하는 유틸리티 클래스입니다.
+타입(Constructor)별로 고유한 인스턴스 ID를 생성하는 유틸리티입니다.
 
-
-각 생성자 타입마다 별도의 카운터를 관리하여 0부터 ID를 부여합니다.
-
+각 클래스 타입마다 독립적인 카운터를 유지하여 0부터 순차적인 ID를 부여합니다.
 
 * ### Example
 ```typescript
@@ -35,20 +33,18 @@ const id = RedGPU.Util.InstanceIdGenerator.getNextId(RedMesh);
 
 > `static` **getNextId**(`type`): `number`
 
-Defined in: [src/utils/uuid/InstanceIdGenerator.ts:33](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/uuid/InstanceIdGenerator.ts#L33)
+Defined in: [src/utils/uuid/InstanceIdGenerator.ts:25](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/uuid/InstanceIdGenerator.ts#L25)
 
-다음 고유 인스턴스 ID를 반환합니다.
-
+해당 타입의 다음 고유 ID를 반환합니다.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `type` | `Function` | ID를 생성할 타입
+| `type` | `Function` | 대상 타입
 
 #### Returns
 
 `number`
 
-고유 인스턴스 ID
-
+고유 ID

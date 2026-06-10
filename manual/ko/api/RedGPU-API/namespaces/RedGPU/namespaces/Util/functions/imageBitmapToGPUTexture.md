@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,10 +8,11 @@
 
 > **imageBitmapToGPUTexture**(`gpuDevice`, `imageBitmaps`, `textureDescriptor`, `usePremultiplyAlpha?`): `GPUTexture`
 
-Defined in: [src/utils/texture/imageBitmapToGPUTexture.ts:27](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/texture/imageBitmapToGPUTexture.ts#L27)
+Defined in: [src/utils/texture/imageBitmapToGPUTexture.ts:20](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/texture/imageBitmapToGPUTexture.ts#L20)
 
-ImageBitmap 배열을 GPUTexture로 생성합니다.
+ImageBitmap 배열을 사용하여 GPUTexture를 생성합니다.
 
+내부적으로 copyExternalImageToTexture를 사용하며, 필요한 Usage 플래그를 자동으로 추가합니다.
 
 * ### Example
 ```typescript
@@ -23,13 +24,12 @@ const texture = RedGPU.Util.imageBitmapToGPUTexture(device, [bitmap], descriptor
 | Parameter | Type | Default value | Description |
 | ------ | ------ | ------ | ------ |
 | `gpuDevice` | `GPUDevice` | `undefined` | GPUDevice 인스턴스
-| `imageBitmaps` | `ImageBitmap`[] | `undefined` | 복사할 ImageBitmap 배열
-| `textureDescriptor` | `GPUTextureDescriptor` | `undefined` | GPUTexture 디스크립터
+| `imageBitmaps` | `ImageBitmap`[] | `undefined` | 소스 ImageBitmap 배열
+| `textureDescriptor` | `GPUTextureDescriptor` | `undefined` | 생성할 텍스처 디스크립터
 | `usePremultiplyAlpha` | `boolean` | `true` | 프리멀티플 알파 사용 여부 (기본값: true)
 
 ## Returns
 
 `GPUTexture`
 
-생성된 GPUTexture 객체
-
+생성된 GPUTexture

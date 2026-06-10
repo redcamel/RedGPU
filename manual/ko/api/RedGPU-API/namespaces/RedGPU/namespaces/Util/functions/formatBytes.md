@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,10 +8,9 @@
 
 > **formatBytes**(`bytes`, `decimals?`): `string`
 
-Defined in: [src/utils/formatBytes.ts:26](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/formatBytes.ts#L26)
+Defined in: [src/utils/formatBytes.ts:17](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/formatBytes.ts#L17)
 
-바이트 단위를 사람이 읽기 쉬운 문자열로 변환합니다.
-
+바이트 단위를 읽기 쉬운 문자열(KB, MB, GB 등)로 변환합니다.
 
 * ### Example
 ```typescript
@@ -29,10 +28,4 @@ const readable = RedGPU.Util.formatBytes(1048576); // '1.00 MB'
 
 `string`
 
-변환된 바이트 문자열 (예: '1.23 MB')
-
-
-## Throws
-
-bytes가 유효한 uint가 아닐 경우 Error 발생
-
+변환된 문자열

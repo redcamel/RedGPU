@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -6,6 +6,9 @@
 
 # Core
 
+RedGPU 라이트 모듈의 핵심 인터페이스 및 추상 클래스를 제공합니다.
+
 ## Light
 
 - [ABaseLight](classes/ABaseLight.md)
+- [LightManager](classes/LightManager.md)

@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -8,9 +8,12 @@
 
 프리미티브 생성을 위한 핵심 클래스 및 유틸리티를 제공합니다.
 
-
 ## Core
 
 - [GeometryGPURenderInfo](classes/GeometryGPURenderInfo.md)
-- [Primitive](classes/Primitive.md)
+- [PrimitiveUtils](classes/PrimitiveUtils.md)
 - [createPrimitiveGeometry](functions/createPrimitiveGeometry.md)
+
+## Other
+
+- [Primitive](classes/Primitive.md)

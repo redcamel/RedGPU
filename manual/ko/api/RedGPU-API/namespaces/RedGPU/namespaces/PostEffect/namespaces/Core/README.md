@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../README.md)
 
 ***
 
@@ -13,4 +13,7 @@
 
 ## Other
 
+- [PostEffectTexturePool](classes/PostEffectTexturePool.md)
+- [IPostEffectResult](interfaces/IPostEffectResult.md)
+- [IPostEffectSourceConfig](interfaces/IPostEffectSourceConfig.md)
 - [createBasicPostEffectCode](functions/createBasicPostEffectCode.md)

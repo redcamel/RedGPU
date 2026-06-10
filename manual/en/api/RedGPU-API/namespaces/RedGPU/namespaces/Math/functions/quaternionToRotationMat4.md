@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,8 +8,7 @@
 
 > **quaternionToRotationMat4**(`q`, `m`): `any`
 
-Defined in: [src/math/quaternionToRotationMat4.ts:21](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/math/quaternionToRotationMat4.ts#L21)
-
+Defined in: [src/math/quaternionToRotationMat4.ts:21](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/math/quaternionToRotationMat4.ts#L21)
 
 Converts a quaternion to a rotation matrix.
 
@@ -28,6 +27,5 @@ RedGPU.math.quaternionToRotationMat4([0, 0, 0, 1], outMatrix);
 ## Returns
 
 `any`
-
 
 Converted rotation matrix

@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,15 +6,13 @@
 
 # Class: VoronoiTexture
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:59](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L59)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:59](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L59)
 
 **`Experimental`**
 
 Voronoi 노이즈 패턴을 생성하는 텍스처 클래스입니다.
 
-
 셀룰러 패턴, 돌 텍스처, 크랙 패턴, 셀 ID 출력 등을 생성할 수 있습니다.
-
 
 * ### Example
 ```typescript
@@ -29,14 +27,13 @@ const texture = new RedGPU.Resource.VoronoiTexture(redGPUContext);
 
 ### Constructor
 
-> **new VoronoiTexture**(`redGPUContext`, `width?`, `height?`, `define?`): `VoronoiTexture`
+> **new VoronoiTexture**(`redGPUContext`, `width?`, `height?`, `define?`, `useMipmap?`): `VoronoiTexture`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:89](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L89)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:90](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L90)
 
 **`Experimental`**
 
 VoronoiTexture 인스턴스를 생성합니다.
-
 
 #### Parameters
 
@@ -45,7 +42,8 @@ VoronoiTexture 인스턴스를 생성합니다.
 | `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | `undefined` | RedGPUContext 인스턴스
 | `width` | `number` | `1024` | 텍스처 가로 크기
 | `height` | `number` | `1024` | 텍스처 세로 크기
-| `define?` | `NoiseDefine` | `undefined` | 노이즈 정의 객체 (선택)
+| `define?` | [`NoiseDefine`](../namespaces/CoreNoiseTexture/interfaces/NoiseDefine.md) | `undefined` | 노이즈 정의 객체 (선택)
+| `useMipmap?` | `boolean` | `true` | 밉맵 사용 여부 (기본값: true)
 
 #### Returns
 
@@ -57,11 +55,783 @@ VoronoiTexture 인스턴스를 생성합니다.
 
 ## Properties
 
+### cellIdColorIntensity
+
+#### Get Signature
+
+> **get** **cellIdColorIntensity**(): `number`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:322](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L322)
+
+**`Experimental`**
+
+셀 ID 색상 강도를 반환합니다.
+
+##### Returns
+
+`number`
+
+- 색상 강도
+
+#### Set Signature
+
+> **set** **cellIdColorIntensity**(`value`): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:331](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L331)
+
+**`Experimental`**
+
+셀 ID 색상 강도를 설정합니다.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `number` | 설정할 색상 강도 (양수)
+
+##### Returns
+
+`void`
+
+***
+
+### distanceScale
+
+#### Get Signature
+
+> **get** **distanceScale**(): `number`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:157](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L157)
+
+**`Experimental`**
+
+거리 값의 스케일을 반환합니다.
+
+##### Returns
+
+`number`
+
+- 거리 스케일 값
+
+#### Set Signature
+
+> **set** **distanceScale**(`value`): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:166](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L166)
+
+**`Experimental`**
+
+거리 값의 스케일을 설정합니다.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `number` | 설정할 거리 스케일 값 (양수)
+
+##### Returns
+
+`void`
+
+***
+
+### distanceType
+
+#### Get Signature
+
+> **get** **distanceType**(): `number`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:256](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L256)
+
+**`Experimental`**
+
+거리 계산 방식을 반환합니다.
+
+##### Returns
+
+`number`
+
+- 거리 계산 방식
+
+#### Set Signature
+
+> **set** **distanceType**(`value`): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:265](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L265)
+
+**`Experimental`**
+
+거리 계산 방식을 설정합니다.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `number` | 거리 계산 방식 (VORONOI_DISTANCE_TYPE 내의 값)
+
+##### Returns
+
+`void`
+
+***
+
+### frequency
+
+#### Get Signature
+
+> **get** **frequency**(): `number`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:137](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L137)
+
+**`Experimental`**
+
+주파수(밀도/크기)를 반환합니다.
+
+##### Returns
+
+`number`
+
+- 주파수 값
+
+#### Set Signature
+
+> **set** **frequency**(`value`): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:146](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L146)
+
+**`Experimental`**
+
+주파수(밀도/크기)를 설정합니다.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `number` | 설정할 주파수 값 (양수)
+
+##### Returns
+
+`void`
+
+***
+
+### jitter
+
+#### Get Signature
+
+> **get** **jitter**(): `number`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:302](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L302)
+
+**`Experimental`**
+
+지터(Jitter) 값(점들의 랜덤성 분포)을 반환합니다.
+
+##### Returns
+
+`number`
+
+- 지터 값
+
+#### Set Signature
+
+> **set** **jitter**(`value`): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:311](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L311)
+
+**`Experimental`**
+
+지터(Jitter) 값(점들의 랜덤성 분포)을 설정합니다.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `number` | 설정할 지터 값 (0~1 범위의 양수)
+
+##### Returns
+
+`void`
+
+***
+
+### lacunarity
+
+#### Get Signature
+
+> **get** **lacunarity**(): `number`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:217](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L217)
+
+**`Experimental`**
+
+간극성(각 옥타브마다의 주파수 증가 비율)을 반환합니다.
+
+##### Returns
+
+`number`
+
+- 간극성 값
+
+#### Set Signature
+
+> **set** **lacunarity**(`value`): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:226](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L226)
+
+**`Experimental`**
+
+간극성(각 옥타브마다의 주파수 증가 비율)을 설정합니다.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `number` | 설정할 간극성 값 (양수)
+
+##### Returns
+
+`void`
+
+***
+
+### octaves
+
+#### Get Signature
+
+> **get** **octaves**(): `number`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:177](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L177)
+
+**`Experimental`**
+
+옥타브 수(합성할 노이즈 레이어 개수)를 반환합니다.
+
+##### Returns
+
+`number`
+
+- 옥타브 수
+
+#### Set Signature
+
+> **set** **octaves**(`value`): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:186](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L186)
+
+**`Experimental`**
+
+옥타브 수(합성할 노이즈 레이어 개수)를 설정합니다.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `number` | 설정할 옥타브 수 (1~8 범위의 정수)
+
+##### Returns
+
+`void`
+
+***
+
+### outputType
+
+#### Get Signature
+
+> **get** **outputType**(): `number`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:279](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L279)
+
+**`Experimental`**
+
+출력 타입을 반환합니다.
+
+##### Returns
+
+`number`
+
+- 출력 타입
+
+#### Set Signature
+
+> **set** **outputType**(`value`): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:288](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L288)
+
+**`Experimental`**
+
+출력 타입을 설정합니다.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `number` | 출력 타입 (VORONOI_OUTPUT_TYPE 내의 값)
+
+##### Returns
+
+`void`
+
+***
+
+### persistence
+
+#### Get Signature
+
+> **get** **persistence**(): `number`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:197](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L197)
+
+**`Experimental`**
+
+지속성(각 옥타브마다의 진폭 감소 비율)을 반환합니다.
+
+##### Returns
+
+`number`
+
+- 지속성 값
+
+#### Set Signature
+
+> **set** **persistence**(`value`): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:206](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L206)
+
+**`Experimental`**
+
+지속성(각 옥타브마다의 진폭 감소 비율)을 설정합니다.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `number` | 설정할 지속성 값 (0~1 범위의 양수)
+
+##### Returns
+
+`void`
+
+***
+
+### seed
+
+#### Get Signature
+
+> **get** **seed**(): `number`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:237](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L237)
+
+**`Experimental`**
+
+시드 값을 반환합니다.
+
+##### Returns
+
+`number`
+
+- 시드 값
+
+#### Set Signature
+
+> **set** **seed**(`value`): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:246](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L246)
+
+**`Experimental`**
+
+시드 값을 설정합니다.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `number` | 설정할 시드 값
+
+##### Returns
+
+`void`
+
+***
+
+### applySettings()
+
+> **applySettings**(`settings`): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:523](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L523)
+
+**`Experimental`**
+
+설정을 일괄 적용합니다.
+
+#### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `settings` | `Partial`\<[`VoronoiSettings`](../interfaces/VoronoiSettings.md)\> | 적용할 설정의 일부 속성을 가진 객체
+
+#### Returns
+
+`void`
+
+***
+
+### getDistanceTypeName()
+
+> **getDistanceTypeName**(): `string`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:541](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L541)
+
+**`Experimental`**
+
+현재 설정된 거리 타입의 이름 문자열을 반환합니다.
+
+#### Returns
+
+`string`
+
+- 거리 타입 이름
+
+***
+
+### getOutputTypeName()
+
+> **getOutputTypeName**(): `string`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:555](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L555)
+
+**`Experimental`**
+
+현재 설정된 출력 타입의 이름 문자열을 반환합니다.
+
+#### Returns
+
+`string`
+
+- 출력 타입 이름
+
+***
+
+### getSettings()
+
+> **getSettings**(): [`VoronoiSettings`](../interfaces/VoronoiSettings.md)
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:503](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L503)
+
+**`Experimental`**
+
+현재 적용된 모든 Voronoi 설정을 객체 형태로 반환합니다.
+
+#### Returns
+
+[`VoronoiSettings`](../interfaces/VoronoiSettings.md)
+
+- 현재 설정 객체
+
+***
+
+### randomizeSeed()
+
+> **randomizeSeed**(): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:341](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L341)
+
+**`Experimental`**
+
+시드를 랜덤한 값으로 변경합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### setBiomeMapPattern()
+
+> **setBiomeMapPattern**(): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:491](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L491)
+
+**`Experimental`**
+
+바이옴 맵 형태의 경계선 패턴 프리셋을 적용합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### setCellIdColorOutput()
+
+> **setCellIdColorOutput**(): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:413](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L413)
+
+**`Experimental`**
+
+출력 타입을 셀 ID 색상(각 셀마다 고유한 RGB 색상 할당) 방식으로 설정합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### setCellIdOutput()
+
+> **setCellIdOutput**(): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:405](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L405)
+
+**`Experimental`**
+
+출력 타입을 셀 ID(각 셀의 고유 ID값 수치화) 방식으로 설정합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### setCellularPattern()
+
+> **setCellularPattern**(): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:421](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L421)
+
+**`Experimental`**
+
+기본적인 셀룰러 패턴 프리셋을 적용합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### setChebyshevDistance()
+
+> **setChebyshevDistance**(): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:365](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L365)
+
+**`Experimental`**
+
+거리 계산 방식을 체비셰프(Chebyshev) 거리로 설정합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### setCrackPattern()
+
+> **setCrackPattern**(): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:389](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L389)
+
+**`Experimental`**
+
+출력 타입을 F2 - F1(크랙 패턴) 방식으로 설정합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### setCrystalPattern()
+
+> **setCrystalPattern**(): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:459](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L459)
+
+**`Experimental`**
+
+크리스탈 결정 무늬 프리셋을 적용합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### setEuclideanDistance()
+
+> **setEuclideanDistance**(): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:349](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L349)
+
+**`Experimental`**
+
+거리 계산 방식을 유클리드(Euclidean) 거리로 설정합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### setF1Output()
+
+> **setF1Output**(): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:373](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L373)
+
+**`Experimental`**
+
+출력 타입을 F1(가장 가까운 거리) 방식으로 설정합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### setF2Output()
+
+> **setF2Output**(): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:381](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L381)
+
+**`Experimental`**
+
+출력 타입을 F2(두 번째로 가까운 거리) 방식으로 설정합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### setGridPattern()
+
+> **setGridPattern**(): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:450](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L450)
+
+**`Experimental`**
+
+완벽한 격자(Grid) 패턴 프리셋을 적용합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### setManhattanDistance()
+
+> **setManhattanDistance**(): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:357](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L357)
+
+**`Experimental`**
+
+거리 계산 방식을 맨하탄(Manhattan) 거리로 설정합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### setMosaicPattern()
+
+> **setMosaicPattern**(): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:480](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L480)
+
+**`Experimental`**
+
+모자이크 타일 무늬 프리셋을 적용합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### setOrganicPattern()
+
+> **setOrganicPattern**(): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:441](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L441)
+
+**`Experimental`**
+
+유기체(Organic) 무늬 프리셋을 적용합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### setSmoothBlend()
+
+> **setSmoothBlend**(): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:397](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L397)
+
+**`Experimental`**
+
+출력 타입을 F1 + F2(부드러운 블렌딩) 방식으로 설정합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### setStainedGlassPattern()
+
+> **setStainedGlassPattern**(): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:469](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L469)
+
+**`Experimental`**
+
+스테인드글라스 무늬 프리셋을 적용합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### setStonePattern()
+
+> **setStonePattern**(): `void`
+
+Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:431](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L431)
+
+**`Experimental`**
+
+돌 질감 프리셋을 적용합니다.
+
+#### Returns
+
+`void`
+
+***
+
+
+***
+
+## 상속받은 멤버
+
+<details>
+<summary>상속받은 속성 및 메서드 보기 (클릭하여 확장)</summary>
+
 ### mipLevelCount
 
-> **mipLevelCount**: `any`
+> **mipLevelCount**: `number` = `1`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:38](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L38)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:39](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L39)
 
 **`Experimental`**
 
@@ -73,9 +843,9 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:38](https:
 
 ### src
 
-> **src**: `any`
+> **src**: `string`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:40](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L40)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:41](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L41)
 
 **`Experimental`**
 
@@ -87,9 +857,9 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:40](https:
 
 ### useMipmap
 
-> **useMipmap**: `any`
+> **useMipmap**: `boolean` = `true`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:39](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L39)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:40](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L40)
 
 **`Experimental`**
 
@@ -105,7 +875,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:39](https:
 
 > **get** **animationSpeed**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:99](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L99)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:103](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L103)
 
 **`Experimental`**
 
@@ -119,7 +889,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:99](https:
 
 > **set** **animationSpeed**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:104](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L104)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:108](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L108)
 
 **`Experimental`**
 
@@ -147,7 +917,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:104](https
 
 > **get** **animationX**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:111](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L111)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:115](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L115)
 
 **`Experimental`**
 
@@ -161,7 +931,7 @@ X축 애니메이션 값을 반환합니다.
 
 > **set** **animationX**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:116](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L116)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:120](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L120)
 
 **`Experimental`**
 
@@ -189,7 +959,7 @@ X축 애니메이션 값을 설정합니다.
 
 > **get** **animationY**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:123](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L123)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:127](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L127)
 
 **`Experimental`**
 
@@ -203,7 +973,7 @@ Y축 애니메이션 값을 반환합니다.
 
 > **set** **animationY**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:128](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L128)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:132](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L132)
 
 **`Experimental`**
 
@@ -225,18 +995,41 @@ Y축 애니메이션 값을 설정합니다.
 
 ***
 
+### antialiasingManager
+
+#### Get Signature
+
+> **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L76)
+
+**`Experimental`**
+
+안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
+
+##### Returns
+
+[`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
+
+AntialiasingManager 인스턴스
+
+#### Inherited from
+
+[`ANoiseTexture`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md).[`antialiasingManager`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md#antialiasingmanager)
+
+***
+
 ### cacheKey
 
 #### Get Signature
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L57)
+Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L53)
 
 **`Experimental`**
 
 캐시 키를 반환합니다.
-
 
 ##### Returns
 
@@ -246,12 +1039,11 @@ Defined in: [src/resources/core/ResourceBase.ts:57](https://github.com/redcamel/
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L65)
+Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L61)
 
 **`Experimental`**
 
 캐시 키를 설정합니다.
-
 
 ##### Parameters
 
@@ -269,155 +1061,27 @@ Defined in: [src/resources/core/ResourceBase.ts:65](https://github.com/redcamel/
 
 ***
 
-### cellIdColorIntensity
+### commandEncoderManager
 
 #### Get Signature
 
-> **get** **cellIdColorIntensity**(): `number`
+> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:242](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L242)
-
-**`Experimental`**
-
-셀 ID 색상 강도를 반환합니다.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **cellIdColorIntensity**(`value`): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:247](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L247)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L88)
 
 **`Experimental`**
 
-셀 ID 색상 강도를 설정합니다.
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
+커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
 
 ##### Returns
 
-`void`
+[`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-***
+CommandEncoderManager 인스턴스
 
-### distanceScale
+#### Inherited from
 
-#### Get Signature
-
-> **get** **distanceScale**(): `number`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:141](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L141)
-
-**`Experimental`**
-
-거리 스케일을 반환합니다.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **distanceScale**(`value`): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:146](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L146)
-
-**`Experimental`**
-
-거리 스케일을 설정합니다.
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
-
-***
-
-### distanceType
-
-#### Get Signature
-
-> **get** **distanceType**(): `number`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:200](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L200)
-
-**`Experimental`**
-
-거리 타입을 반환합니다.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **distanceType**(`value`): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:205](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L205)
-
-**`Experimental`**
-
-거리 타입을 설정합니다.
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
-
-***
-
-### frequency
-
-#### Get Signature
-
-> **get** **frequency**(): `number`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:129](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L129)
-
-**`Experimental`**
-
-주파수를 반환합니다.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **frequency**(`value`): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:134](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L134)
-
-**`Experimental`**
-
-주파수를 설정합니다.
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
+[`ANoiseTexture`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md).[`commandEncoderManager`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md#commandencodermanager)
 
 ***
 
@@ -427,12 +1091,11 @@ Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:134](h
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L106)
+Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L77)
 
 **`Experimental`**
 
 연관된 GPU 디바이스를 반환합니다.
-
 
 ##### Returns
 
@@ -450,7 +1113,7 @@ Defined in: [src/resources/core/ResourceBase.ts:106](https://github.com/redcamel
 
 > **get** **gpuTexture**(): `GPUTexture`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:140](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L140)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:144](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L144)
 
 **`Experimental`**
 
@@ -466,115 +1129,39 @@ GPUTexture 객체를 반환합니다.
 
 ***
 
-### jitter
-
-#### Get Signature
-
-> **get** **jitter**(): `number`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:230](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L230)
-
-**`Experimental`**
-
-지터(Jitter) 값을 반환합니다.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **jitter**(`value`): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:235](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L235)
-
-**`Experimental`**
-
-지터(Jitter) 값을 설정합니다.
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
-
-***
-
-### lacunarity
-
-#### Get Signature
-
-> **get** **lacunarity**(): `number`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:177](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L177)
-
-**`Experimental`**
-
-간극성을 반환합니다.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **lacunarity**(`value`): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:182](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L182)
-
-**`Experimental`**
-
-간극성을 설정합니다.
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
-
-***
-
 ### name
 
 #### Get Signature
 
 > **get** **name**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:81](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L81)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L58)
 
 **`Experimental`**
 
-인스턴스의 이름을 반환합니다. 이름이 없으면 클래스명과 ID로 생성합니다.
-
+객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
 
 ##### Returns
 
 `string`
 
+객체 이름
+
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L90)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L71)
 
 **`Experimental`**
 
-인스턴스의 이름을 설정합니다.
-
+객체의 이름을 설정합니다.
 
 ##### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `string` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | 설정할 객체 이름
 
 ##### Returns
 
@@ -586,140 +1173,51 @@ Defined in: [src/resources/core/ResourceBase.ts:90](https://github.com/redcamel/
 
 ***
 
-### octaves
-
-#### Get Signature
-
-> **get** **octaves**(): `number`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:153](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L153)
-
-**`Experimental`**
-
-옥타브 수를 반환합니다.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **octaves**(`value`): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:158](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L158)
-
-**`Experimental`**
-
-옥타브 수를 설정합니다.
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
-
-***
-
-### outputType
-
-#### Get Signature
-
-> **get** **outputType**(): `number`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:215](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L215)
-
-**`Experimental`**
-
-출력 타입을 반환합니다.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **outputType**(`value`): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:220](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L220)
-
-**`Experimental`**
-
-출력 타입을 설정합니다.
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
-
-***
-
-### persistence
-
-#### Get Signature
-
-> **get** **persistence**(): `number`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:165](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L165)
-
-**`Experimental`**
-
-지속성을 반환합니다.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **persistence**(`value`): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:170](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L170)
-
-**`Experimental`**
-
-지속성을 설정합니다.
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
-
-***
-
 ### redGPUContext
 
 #### Get Signature
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/resources/core/ResourceBase.ts:114](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L114)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L40)
 
 **`Experimental`**
 
 RedGPUContext 인스턴스를 반환합니다.
 
-
 ##### Returns
 
 [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
+RedGPUContext 인스턴스
+
 #### Inherited from
 
 [`ANoiseTexture`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md).[`redGPUContext`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md#redgpucontext)
+
+***
+
+### resourceManager
+
+#### Get Signature
+
+> **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L64)
+
+**`Experimental`**
+
+리소스 매니저 인스턴스를 반환합니다. (단축 경로)
+
+##### Returns
+
+[`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
+
+ResourceManager 인스턴스
+
+#### Inherited from
+
+[`ANoiseTexture`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md).[`resourceManager`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md#resourcemanager)
 
 ***
 
@@ -729,7 +1227,7 @@ RedGPUContext 인스턴스를 반환합니다.
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:94](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L94)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:98](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L98)
 
 **`Experimental`**
 
@@ -745,41 +1243,25 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:94](https:
 
 ***
 
-### seed
+### revision
 
 #### Get Signature
 
-> **get** **seed**(): `number`
+> **get** **revision**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:189](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L189)
+Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L45)
 
 **`Experimental`**
 
-시드를 반환합니다.
+리소스의 리비전(업데이트 횟수)을 반환합니다.
 
 ##### Returns
 
 `number`
 
-#### Set Signature
+#### Inherited from
 
-> **set** **seed**(`value`): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:194](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L194)
-
-**`Experimental`**
-
-시드를 설정합니다.
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `value` | `number` |
-
-##### Returns
-
-`void`
+[`ANoiseTexture`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md).[`revision`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md#revision)
 
 ***
 
@@ -789,12 +1271,11 @@ Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:194](h
 
 > **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ManagementResourceBase.ts#L45)
+Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ManagementResourceBase.ts#L45)
 
 **`Experimental`**
 
 리소스의 관리 상태 정보를 반환합니다.
-
 
 ##### Returns
 
@@ -812,7 +1293,7 @@ Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com
 
 > **get** **time**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:145](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L145)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:149](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L149)
 
 **`Experimental`**
 
@@ -826,7 +1307,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:145](https
 
 > **set** **time**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:150](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L150)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:154](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L154)
 
 **`Experimental`**
 
@@ -854,7 +1335,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:150](https
 
 > **get** **uniformInfo**(): `any`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:135](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L135)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:139](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L139)
 
 **`Experimental`**
 
@@ -876,16 +1357,17 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:135](https
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L98)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L46)
 
 **`Experimental`**
 
-고유 식별자(UUID)를 반환합니다.
-
+객체의 고유 식별자(UUID)를 반환합니다.
 
 ##### Returns
 
 `string`
+
+UUID 문자열
 
 #### Inherited from
 
@@ -899,7 +1381,7 @@ Defined in: [src/resources/core/ResourceBase.ts:98](https://github.com/redcamel/
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:89](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L89)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:93](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L93)
 
 **`Experimental`**
 
@@ -919,12 +1401,11 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:89](https:
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L125)
+Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L89)
 
 **`Experimental`**
 
 파이프라인이 더티해질 때 호출될 리스너를 추가합니다.
-
 
 #### Parameters
 
@@ -942,43 +1423,15 @@ Defined in: [src/resources/core/ResourceBase.ts:125](https://github.com/redcamel
 
 ***
 
-### \_\_fireListenerList()
-
-> **\_\_fireListenerList**(`resetList?`): `void`
-
-Defined in: [src/resources/core/ResourceBase.ts:152](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L152)
-
-**`Experimental`**
-
-등록된 더티 리스너들을 실행합니다.
-
-
-#### Parameters
-
-| Parameter | Type | Default value | Description |
-| ------ | ------ | ------ | ------ |
-| `resetList` | `boolean` | `false` | 실행 후 리스너 목록 초기화 여부 (기본값: false)
-
-#### Returns
-
-`void`
-
-#### Inherited from
-
-[`ANoiseTexture`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md).[`__fireListenerList`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md#__firelistenerlist)
-
-***
-
 ### \_\_removeDirtyPipelineListener()
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/core/ResourceBase.ts#L137)
+Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L101)
 
 **`Experimental`**
 
-더티 파이프라인 리스너를 제거합니다.
-
+리소스 업데이트 리스너를 제거합니다.
 
 #### Parameters
 
@@ -996,33 +1449,11 @@ Defined in: [src/resources/core/ResourceBase.ts:137](https://github.com/redcamel
 
 ***
 
-### applySettings()
-
-> **applySettings**(`settings`): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:377](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L377)
-
-**`Experimental`**
-
-설정을 일괄 적용합니다.
-
-#### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `settings` | `Partial`\<`VoronoiSettings`\> |
-
-#### Returns
-
-`void`
-
-***
-
 ### destroy()
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:183](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L183)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:186](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L186)
 
 **`Experimental`**
 
@@ -1038,67 +1469,29 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:183](https
 
 ***
 
-### getDistanceTypeName()
+### notifyUpdate()
 
-> **getDistanceTypeName**(): `string`
+> **notifyUpdate**(`resetList?`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:391](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L391)
-
-**`Experimental`**
-
-현재 거리 타입의 이름을 반환합니다.
-
-#### Returns
-
-`string`
-
-***
-
-### getOutputTypeName()
-
-> **getOutputTypeName**(): `string`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:401](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L401)
+Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/core/ResourceBase.ts#L116)
 
 **`Experimental`**
 
-현재 출력 타입의 이름을 반환합니다.
+리소스가 업데이트되었음을 등록된 리스너들에게 알립니다.
 
-#### Returns
+#### Parameters
 
-`string`
-
-***
-
-### getSettings()
-
-> **getSettings**(): `VoronoiSettings`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:361](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L361)
-
-**`Experimental`**
-
-현재 설정을 반환합니다.
-
-#### Returns
-
-`VoronoiSettings`
-
-***
-
-### randomizeSeed()
-
-> **randomizeSeed**(): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:254](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L254)
-
-**`Experimental`**
-
-시드를 랜덤하게 변경합니다.
+| Parameter | Type | Default value | Description |
+| ------ | ------ | ------ | ------ |
+| `resetList` | `boolean` | `false` | 실행 후 리스너 목록 초기화 여부 (기본값: false)
 
 #### Returns
 
 `void`
+
+#### Inherited from
+
+[`ANoiseTexture`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md).[`notifyUpdate`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md#notifyupdate)
 
 ***
 
@@ -1106,7 +1499,7 @@ Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:254](h
 
 > **render**(`time`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:177](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L177)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:181](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L181)
 
 **`Experimental`**
 
@@ -1128,283 +1521,11 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:177](https
 
 ***
 
-### setBiomeMapPattern()
-
-> **setBiomeMapPattern**(): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:353](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L353)
-
-**`Experimental`**
-
-바이옴 맵 패턴 프리셋을 적용합니다.
-
-#### Returns
-
-`void`
-
-***
-
-### setCellIdColorOutput()
-
-> **setCellIdColorOutput**(): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:299](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L299)
-
-**`Experimental`**
-
-셀 ID 색상 출력 방식을 설정합니다.
-
-#### Returns
-
-`void`
-
-***
-
-### setCellIdOutput()
-
-> **setCellIdOutput**(): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:294](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L294)
-
-**`Experimental`**
-
-셀 ID 출력 방식을 설정합니다.
-
-#### Returns
-
-`void`
-
-***
-
-### setCellularPattern()
-
-> **setCellularPattern**(): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:304](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L304)
-
-**`Experimental`**
-
-셀룰러 패턴 프리셋을 적용합니다.
-
-#### Returns
-
-`void`
-
-***
-
-### setChebyshevDistance()
-
-> **setChebyshevDistance**(): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:269](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L269)
-
-**`Experimental`**
-
-체비셰프 거리 방식을 설정합니다.
-
-#### Returns
-
-`void`
-
-***
-
-### setCrackPattern()
-
-> **setCrackPattern**(): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:284](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L284)
-
-**`Experimental`**
-
-크랙 패턴 방식을 설정합니다.
-
-#### Returns
-
-`void`
-
-***
-
-### setCrystalPattern()
-
-> **setCrystalPattern**(): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:330](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L330)
-
-**`Experimental`**
-
-크리스탈 패턴 프리셋을 적용합니다.
-
-#### Returns
-
-`void`
-
-***
-
-### setEuclideanDistance()
-
-> **setEuclideanDistance**(): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:259](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L259)
-
-**`Experimental`**
-
-유클리드 거리 방식을 설정합니다.
-
-#### Returns
-
-`void`
-
-***
-
-### setF1Output()
-
-> **setF1Output**(): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:274](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L274)
-
-**`Experimental`**
-
-F1 출력 방식을 설정합니다.
-
-#### Returns
-
-`void`
-
-***
-
-### setF2Output()
-
-> **setF2Output**(): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:279](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L279)
-
-**`Experimental`**
-
-F2 출력 방식을 설정합니다.
-
-#### Returns
-
-`void`
-
-***
-
-### setGridPattern()
-
-> **setGridPattern**(): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:324](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L324)
-
-**`Experimental`**
-
-격자 패턴 프리셋을 적용합니다.
-
-#### Returns
-
-`void`
-
-***
-
-### setManhattanDistance()
-
-> **setManhattanDistance**(): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:264](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L264)
-
-**`Experimental`**
-
-맨하탄 거리 방식을 설정합니다.
-
-#### Returns
-
-`void`
-
-***
-
-### setMosaicPattern()
-
-> **setMosaicPattern**(): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:345](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L345)
-
-**`Experimental`**
-
-모자이크 패턴 프리셋을 적용합니다.
-
-#### Returns
-
-`void`
-
-***
-
-### setOrganicPattern()
-
-> **setOrganicPattern**(): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:318](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L318)
-
-**`Experimental`**
-
-유기체 패턴 프리셋을 적용합니다.
-
-#### Returns
-
-`void`
-
-***
-
-### setSmoothBlend()
-
-> **setSmoothBlend**(): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:289](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L289)
-
-**`Experimental`**
-
-부드러운 블렌딩 방식을 설정합니다.
-
-#### Returns
-
-`void`
-
-***
-
-### setStainedGlassPattern()
-
-> **setStainedGlassPattern**(): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:337](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L337)
-
-**`Experimental`**
-
-스테인드글라스 패턴 프리셋을 적용합니다.
-
-#### Returns
-
-`void`
-
-***
-
-### setStonePattern()
-
-> **setStonePattern**(): `void`
-
-Defined in: [src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts:311](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/voronoi/VoronoiTexture.ts#L311)
-
-**`Experimental`**
-
-돌 패턴 프리셋을 적용합니다.
-
-#### Returns
-
-`void`
-
-***
-
 ### updateUniform()
 
 > **updateUniform**(`name`, `value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:157](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L157)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:161](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L161)
 
 **`Experimental`**
 
@@ -1431,7 +1552,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:157](https
 
 > **updateUniforms**(`uniforms`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:166](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L166)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:170](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L170)
 
 **`Experimental`**
 
@@ -1450,3 +1571,6 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:166](https
 #### Inherited from
 
 [`ANoiseTexture`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md).[`updateUniforms`](../namespaces/CoreNoiseTexture/classes/ANoiseTexture.md#updateuniforms)
+
+
+</details>

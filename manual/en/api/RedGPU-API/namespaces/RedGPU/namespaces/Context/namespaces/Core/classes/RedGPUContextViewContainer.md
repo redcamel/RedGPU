@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,13 +6,15 @@
 
 # Class: RedGPUContextViewContainer
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:21](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L21)
-
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:26](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L26)
 
 Container class that manages View3D objects.
 
-
 Handles adding, removing, reordering, and retrieving views.
+
+::: warning
+This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
+:::
 
 * ### Example
 ```typescript
@@ -31,8 +33,7 @@ redGPUContext.addView(view);
 
 > **new RedGPUContextViewContainer**(): `RedGPUContextViewContainer`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:32](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L32)
-
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:37](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L37)
 
 RedGPUContextViewContainer constructor
 
@@ -48,8 +49,7 @@ RedGPUContextViewContainer constructor
 
 > **get** **numViews**(): `number`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:47](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L47)
-
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:52](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L52)
 
 Returns the number of View3D objects owned.
 
@@ -65,8 +65,7 @@ Returns the number of View3D objects owned.
 
 > **get** **viewList**(): [`View3D`](../../../../Display/classes/View3D.md)[]
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:39](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L39)
-
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:44](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L44)
 
 Returns the list of View3D objects owned by this instance.
 
@@ -80,8 +79,7 @@ Returns the list of View3D objects owned by this instance.
 
 > **addView**(`view`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:72](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L72)
-
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:80](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L80)
 
 Adds a view to the view list.
 
@@ -95,14 +93,17 @@ Adds a view to the view list.
 
 `void`
 
+#### Throws
+
+Throws error if view is not an instance of View3D
+
 ***
 
 ### addViewAt()
 
 > **addViewAt**(`view`, `index`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:87](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L87)
-
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:98](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L98)
 
 Adds a view at the specified index in the view list.
 
@@ -117,14 +118,17 @@ Adds a view at the specified index in the view list.
 
 `void`
 
+#### Throws
+
+Throws error if view is not an instance of View3D or index is not a valid uint
+
 ***
 
 ### contains()
 
 > **contains**(`child`): `boolean`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:61](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L61)
-
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:66](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L66)
 
 Checks if the given child View3D is contained in the current container.
 
@@ -138,7 +142,6 @@ Checks if the given child View3D is contained in the current container.
 
 `boolean`
 
-
 Containment status
 
 ***
@@ -147,8 +150,7 @@ Containment status
 
 > **getViewAt**(`index`): [`View3D`](../../../../Display/classes/View3D.md)
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:103](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L103)
-
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:120](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L120)
 
 Retrieves the view at the specified index.
 
@@ -162,14 +164,19 @@ Retrieves the view at the specified index.
 
 [`View3D`](../../../../Display/classes/View3D.md)
 
+View3D object at the specified index
+
+#### Throws
+
+Throws error if index is not a valid uint
+
 ***
 
 ### getViewIndex()
 
 > **getViewIndex**(`view`): `number`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:115](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L115)
-
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:138](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L138)
 
 Returns the index of the specified view.
 
@@ -183,14 +190,19 @@ Returns the index of the specified view.
 
 `number`
 
+Index of the view (or -1 if not found)
+
+#### Throws
+
+Throws error if view is not an instance of View3D
+
 ***
 
 ### removeAllViews()
 
 > **removeAllViews**(): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:225](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L225)
-
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:257](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L257)
 
 Removes all views from the view list.
 
@@ -204,8 +216,7 @@ Removes all views from the view list.
 
 > **removeView**(`view`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:197](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L197)
-
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:226](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L226)
 
 Removes the specified view from the view list.
 
@@ -219,14 +230,17 @@ Removes the specified view from the view list.
 
 `void`
 
+#### Throws
+
+Throws error if view is not found in the view list
+
 ***
 
 ### removeViewAt()
 
 > **removeViewAt**(`index`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:211](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L211)
-
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:243](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L243)
 
 Removes the view at the specified index from the view list.
 
@@ -240,14 +254,17 @@ Removes the view at the specified index from the view list.
 
 `void`
 
+#### Throws
+
+Throws error if index is out of range
+
 ***
 
 ### setViewIndex()
 
 > **setViewIndex**(`view`, `index`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:133](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L133)
-
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:156](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L156)
 
 Moves the specified view to a specific index in the view list.
 
@@ -264,7 +281,6 @@ Moves the specified view to a specific index in the view list.
 
 #### Throws
 
-
 Throws error if view is not registered or index is out of bounds
 
 ***
@@ -273,8 +289,7 @@ Throws error if view is not registered or index is out of bounds
 
 > **swapViews**(`view1`, `view2`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:160](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L160)
-
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:183](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L183)
 
 Swaps the positions of two views in the view list.
 
@@ -291,7 +306,6 @@ Swaps the positions of two views in the view list.
 
 #### Throws
 
-
 Throws error if view is not a child of this context
 
 ***
@@ -300,8 +314,7 @@ Throws error if view is not a child of this context
 
 > **swapViewsAt**(`index1`, `index2`): `void`
 
-Defined in: [src/context/core/RedGPUContextViewContainer.ts:179](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/context/core/RedGPUContextViewContainer.ts#L179)
-
+Defined in: [src/context/core/RedGPUContextViewContainer.ts:205](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/context/core/RedGPUContextViewContainer.ts#L205)
 
 Swaps the positions of two views at the specified indices.
 
@@ -315,3 +328,7 @@ Swaps the positions of two views at the specified indices.
 #### Returns
 
 `void`
+
+#### Throws
+
+Throws error if indices are out of bounds or identical

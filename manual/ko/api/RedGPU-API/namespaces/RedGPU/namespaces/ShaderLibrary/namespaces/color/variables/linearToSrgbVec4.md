@@ -1,0 +1,32 @@
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+
+***
+
+[RedGPU API](../../../../../../../../README.md) / [RedGPU](../../../../../README.md) / [ShaderLibrary](../../../README.md) / [color](../README.md) / linearToSrgbVec4
+
+# Variable: linearToSrgbVec4
+
+> `const` **linearToSrgbVec4**: `string` = `linearToSrgbVec4_wgsl`
+
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:1070](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/systemCodeManager/ShaderLibrary.ts#L1070)
+
+Linear 색 공간의 vec4 색상을 sRGB 색 공간으로 변환합니다. (Alpha 보존)
+
+//
+
+## Param
+
+입력 Linear 색상
+//
+
+## Returns
+
+변환된 sRGB 색상
+
+```wgsl
+#redgpu_include color.linearToSrgbVec3
+
+fn linearToSrgbVec4(linearColor: vec4<f32>) -> vec4<f32> {
+    return vec4<f32>(linearToSrgbVec3(linearColor.rgb), linearColor.a);
+}
+```

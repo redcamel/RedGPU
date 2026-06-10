@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,10 +8,9 @@
 
 > **loadAndCreateBitmapImage**(`src`, `colorSpaceConversion?`, `premultiplyAlpha?`): `Promise`\<`ImageBitmap`\>
 
-Defined in: [src/utils/texture/loadAndCreateBitmapImage.ts:24](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/utils/texture/loadAndCreateBitmapImage.ts#L24)
+Defined in: [src/utils/texture/loadAndCreateBitmapImage.ts:16](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/utils/texture/loadAndCreateBitmapImage.ts#L16)
 
-이미지 URL에서 ImageBitmap을 생성합니다.
-
+이미지 URL로부터 ImageBitmap을 로드하고 생성합니다.
 
 * ### Example
 ```typescript
@@ -30,5 +29,4 @@ const bitmap = await RedGPU.Util.loadAndCreateBitmapImage('path/to/image.png');
 
 `Promise`\<`ImageBitmap`\>
 
-ImageBitmap을 반환하는 Promise
-
+생성된 ImageBitmap

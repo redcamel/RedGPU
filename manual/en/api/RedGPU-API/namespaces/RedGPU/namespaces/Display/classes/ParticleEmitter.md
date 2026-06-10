@@ -1,4 +1,4 @@
-[**RedGPU API v4.0.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,23 +6,25 @@
 
 # Class: ParticleEmitter
 
-Defined in: [src/display/paticle/ParticleEmitter.ts:18](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L18)
+Defined in: [src/display/particle/ParticleEmitter.ts:18](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L18)
 
+Class that creates and manages a high-performance particle system based on GPU computation (Compute Shader).
 
-Emitter class for a GPU-based particle system.
-
-
-Supports various particle properties (life, position, scale, rotation, alpha, easing, etc.) and mass particle processing based on GPU computation. Provides all features necessary for particle simulation, including range of initial/final values, easing, buffer structures, and compute pipelines.
+Simulates and renders thousands to hundreds of thousands of particles in parallel on the GPU. Allows real-time control over life, size, starting/ending transforms (position, rotation, scale), alpha values, and various easing functions for interpolation.
 
 * ### Example
 ```typescript
 const emitter = new RedGPU.Display.ParticleEmitter(redGPUContext);
 emitter.particleNum = 5000;
+
+// Example of applying texture to particles (sets the diffuseTexture property of the default BitmapMaterial)
+const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, 'path/to/particle.png');
+emitter.material.diffuseTexture = texture;
+
 scene.addChild(emitter);
 ```
 
 <iframe src="https://redcamel.github.io/RedGPU/examples/3d/particle/basic/"></iframe>
-
 
 Below is a list of additional sample examples to help understand the structure and operation of ParticleEmitter.
 
@@ -31,8 +33,7 @@ Below is a list of additional sample examples to help understand the structure a
 [ParticleEmitter Performance](https://redcamel.github.io/RedGPU/examples/3d/particle/performance/)
 
 ## Roadmap
-
-- **Support for various particle emitter types**
+- *Support for various particle emitter types**
 
 ## Extends
 
@@ -44,16 +45,15 @@ Below is a list of additional sample examples to help understand the structure a
 
 > **new ParticleEmitter**(`redGPUContext`): `ParticleEmitter`
 
-Defined in: [src/display/paticle/ParticleEmitter.ts:165](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L165)
+Defined in: [src/display/particle/ParticleEmitter.ts:128](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L128)
 
-
-Creates an instance of ParticleEmitter.
+Creates an instance of ParticleEmitter. Internally initializes Plane as the default geometry and BitmapMaterial as the default material.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPU Context |
+| `redGPUContext` | [`RedGPUContext`](../../Context/classes/RedGPUContext.md) | RedGPU context object |
 
 #### Returns
 
@@ -65,11 +65,1447 @@ Creates an instance of ParticleEmitter.
 
 ## Properties
 
+### isInstanceofParticle
+
+> **isInstanceofParticle**: `boolean`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:28](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L28)
+
+Identifier to determine if it is a ParticleEmitter instance
+
+***
+
+### useBillboard
+
+> **useBillboard**: `boolean`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:23](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L23)
+
+Whether to make particles always face the camera
+
+***
+
+### easeAlpha
+
+#### Get Signature
+
+> **get** **easeAlpha**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:631](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L631)
+
+Gets or sets the easing function (PARTICLE_EASE constant value) applied to the alpha (opacity) change.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **easeAlpha**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:635](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L635)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### easeRotationX
+
+#### Get Signature
+
+> **get** **easeRotationX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:655](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L655)
+
+Gets or sets the easing function (PARTICLE_EASE constant value) applied to the X-axis rotation change.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **easeRotationX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:659](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L659)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### easeRotationY
+
+#### Get Signature
+
+> **get** **easeRotationY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:667](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L667)
+
+Gets or sets the easing function (PARTICLE_EASE constant value) applied to the Y-axis rotation change.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **easeRotationY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:671](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L671)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### easeRotationZ
+
+#### Get Signature
+
+> **get** **easeRotationZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:679](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L679)
+
+Gets or sets the easing function (PARTICLE_EASE constant value) applied to the Z-axis rotation change.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **easeRotationZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:683](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L683)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### easeScale
+
+#### Get Signature
+
+> **get** **easeScale**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:643](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L643)
+
+Gets or sets the easing function (PARTICLE_EASE constant value) applied to the scale change.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **easeScale**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:647](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L647)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### easeX
+
+#### Get Signature
+
+> **get** **easeX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:595](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L595)
+
+Gets or sets the easing function (PARTICLE_EASE constant value) applied to the X-axis coordinate change.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **easeX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:599](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L599)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### easeY
+
+#### Get Signature
+
+> **get** **easeY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:607](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L607)
+
+Gets or sets the easing function (PARTICLE_EASE constant value) applied to the Y-axis coordinate change.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **easeY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:611](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L611)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### easeZ
+
+#### Get Signature
+
+> **get** **easeZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:619](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L619)
+
+Gets or sets the easing function (PARTICLE_EASE constant value) applied to the Z-axis coordinate change.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **easeZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:623](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L623)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxEndAlpha
+
+#### Get Signature
+
+> **get** **maxEndAlpha**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:391](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L391)
+
+Gets or sets the maximum ending opacity of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxEndAlpha**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:395](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L395)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxEndRotationX
+
+#### Get Signature
+
+> **get** **maxEndRotationX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:559](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L559)
+
+Gets or sets the maximum ending X-axis rotation angle (in degrees) of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxEndRotationX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:563](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L563)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxEndRotationY
+
+#### Get Signature
+
+> **get** **maxEndRotationY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:571](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L571)
+
+Gets or sets the maximum ending Y-axis rotation angle (in degrees) of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxEndRotationY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:575](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L575)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxEndRotationZ
+
+#### Get Signature
+
+> **get** **maxEndRotationZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:583](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L583)
+
+Gets or sets the maximum ending Z-axis rotation angle (in degrees) of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxEndRotationZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:587](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L587)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxEndScale
+
+#### Get Signature
+
+> **get** **maxEndScale**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:439](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L439)
+
+Gets or sets the maximum ending scale of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxEndScale**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:443](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L443)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxEndX
+
+#### Get Signature
+
+> **get** **maxEndX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:319](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L319)
+
+Gets or sets the maximum end X coordinate position particles can reach before dying.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxEndX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:323](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L323)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxEndY
+
+#### Get Signature
+
+> **get** **maxEndY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:331](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L331)
+
+Gets or sets the maximum end Y coordinate position particles can reach before dying.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxEndY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:335](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L335)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxEndZ
+
+#### Get Signature
+
+> **get** **maxEndZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:343](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L343)
+
+Gets or sets the maximum end Z coordinate position particles can reach before dying.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxEndZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:347](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L347)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxLife
+
+#### Get Signature
+
+> **get** **maxLife**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:199](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L199)
+
+Gets or sets the maximum life value (in ms) of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxLife**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:203](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L203)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxStartAlpha
+
+#### Get Signature
+
+> **get** **maxStartAlpha**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:367](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L367)
+
+Gets or sets the maximum starting opacity of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxStartAlpha**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:371](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L371)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxStartRotationX
+
+#### Get Signature
+
+> **get** **maxStartRotationX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:487](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L487)
+
+Gets or sets the maximum starting X-axis rotation angle (in degrees) of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxStartRotationX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:491](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L491)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxStartRotationY
+
+#### Get Signature
+
+> **get** **maxStartRotationY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:499](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L499)
+
+Gets or sets the maximum starting Y-axis rotation angle (in degrees) of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxStartRotationY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:503](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L503)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxStartRotationZ
+
+#### Get Signature
+
+> **get** **maxStartRotationZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:511](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L511)
+
+Gets or sets the maximum starting Z-axis rotation angle (in degrees) of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxStartRotationZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:515](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L515)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxStartScale
+
+#### Get Signature
+
+> **get** **maxStartScale**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:415](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L415)
+
+Gets or sets the maximum starting scale of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxStartScale**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:419](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L419)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxStartX
+
+#### Get Signature
+
+> **get** **maxStartX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:247](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L247)
+
+Gets or sets the maximum start X coordinate position particles can have upon generation.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxStartX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:251](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L251)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxStartY
+
+#### Get Signature
+
+> **get** **maxStartY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:259](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L259)
+
+Gets or sets the maximum start Y coordinate position particles can have upon generation.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxStartY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:263](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L263)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### maxStartZ
+
+#### Get Signature
+
+> **get** **maxStartZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:271](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L271)
+
+Gets or sets the maximum start Z coordinate position particles can have upon generation.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **maxStartZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:275](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L275)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minEndAlpha
+
+#### Get Signature
+
+> **get** **minEndAlpha**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:379](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L379)
+
+Gets or sets the minimum ending opacity of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minEndAlpha**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:383](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L383)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minEndRotationX
+
+#### Get Signature
+
+> **get** **minEndRotationX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:523](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L523)
+
+Gets or sets the minimum ending X-axis rotation angle (in degrees) of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minEndRotationX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:527](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L527)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minEndRotationY
+
+#### Get Signature
+
+> **get** **minEndRotationY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:535](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L535)
+
+Gets or sets the minimum ending Y-axis rotation angle (in degrees) of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minEndRotationY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:539](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L539)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minEndRotationZ
+
+#### Get Signature
+
+> **get** **minEndRotationZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:547](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L547)
+
+Gets or sets the minimum ending Z-axis rotation angle (in degrees) of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minEndRotationZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:551](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L551)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minEndScale
+
+#### Get Signature
+
+> **get** **minEndScale**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:427](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L427)
+
+Gets or sets the minimum ending scale of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minEndScale**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:431](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L431)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minEndX
+
+#### Get Signature
+
+> **get** **minEndX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:283](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L283)
+
+Gets or sets the minimum end X coordinate position particles can reach before dying.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minEndX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:287](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L287)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minEndY
+
+#### Get Signature
+
+> **get** **minEndY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:295](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L295)
+
+Gets or sets the minimum end Y coordinate position particles can reach before dying.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minEndY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:299](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L299)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minEndZ
+
+#### Get Signature
+
+> **get** **minEndZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:307](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L307)
+
+Gets or sets the minimum end Z coordinate position particles can reach before dying.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minEndZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:311](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L311)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minLife
+
+#### Get Signature
+
+> **get** **minLife**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:187](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L187)
+
+Gets or sets the minimum life value (in ms) of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minLife**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:191](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L191)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minStartAlpha
+
+#### Get Signature
+
+> **get** **minStartAlpha**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:355](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L355)
+
+Gets or sets the minimum starting opacity of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minStartAlpha**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:359](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L359)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minStartRotationX
+
+#### Get Signature
+
+> **get** **minStartRotationX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:451](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L451)
+
+Gets or sets the minimum starting X-axis rotation angle (in degrees) of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minStartRotationX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:455](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L455)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minStartRotationY
+
+#### Get Signature
+
+> **get** **minStartRotationY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:463](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L463)
+
+Gets or sets the minimum starting Y-axis rotation angle (in degrees) of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minStartRotationY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:467](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L467)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minStartRotationZ
+
+#### Get Signature
+
+> **get** **minStartRotationZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:475](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L475)
+
+Gets or sets the minimum starting Z-axis rotation angle (in degrees) of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minStartRotationZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:479](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L479)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minStartScale
+
+#### Get Signature
+
+> **get** **minStartScale**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:403](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L403)
+
+Gets or sets the minimum starting scale of particles.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minStartScale**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:407](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L407)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minStartX
+
+#### Get Signature
+
+> **get** **minStartX**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:211](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L211)
+
+Gets or sets the minimum start X coordinate position particles can have upon generation.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minStartX**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:215](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L215)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minStartY
+
+#### Get Signature
+
+> **get** **minStartY**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:223](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L223)
+
+Gets or sets the minimum start Y coordinate position particles can have upon generation.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minStartY**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:227](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L227)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### minStartZ
+
+#### Get Signature
+
+> **get** **minStartZ**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:235](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L235)
+
+Gets or sets the minimum start Z coordinate position particles can have upon generation.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **minStartZ**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:239](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L239)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### particleBuffers
+
+#### Get Signature
+
+> **get** **particleBuffers**(): `GPUBuffer`[]
+
+Defined in: [src/display/particle/ParticleEmitter.ts:691](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L691)
+
+Gets the array of GPUBuffers storing particle data and attributes.
+
+##### Returns
+
+`GPUBuffer`[]
+
+***
+
+### particleNum
+
+#### Get Signature
+
+> **get** **particleNum**(): `number`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:173](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L173)
+
+Gets or sets the total number of particles to simulate. The value ranges from 1 to a maximum of 500,000, and modifying this will rebuild the GPU simulation buffers.
+
+##### Returns
+
+`number`
+
+#### Set Signature
+
+> **set** **particleNum**(`value`): `void`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:177](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L177)
+
+##### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `value` | `number` |
+
+##### Returns
+
+`void`
+
+***
+
+### createCustomMeshVertexShaderModule()
+
+> **createCustomMeshVertexShaderModule**(): `GPUShaderModule`
+
+Defined in: [src/display/particle/ParticleEmitter.ts:715](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L715)
+
+Compiles and returns a custom vertex shader module for particles.
+
+#### Returns
+
+`GPUShaderModule`
+
+Compiled GPUShaderModule
+
+***
+
+
+***
+
+## Inherited Members
+
+<details>
+<summary>View inherited properties and methods (Click to expand)</summary>
+
 ### \_geometry
 
 > **\_geometry**: [`Geometry`](../../../classes/Geometry.md) \| [`Primitive`](../../Primitive/namespaces/Core/classes/Primitive.md)
 
-Defined in: [src/display/mesh/Mesh.ts:374](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L374)
+Defined in: [src/display/mesh/Mesh.ts:361](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L361)
 
 #### Inherited from
 
@@ -81,7 +1517,7 @@ Defined in: [src/display/mesh/Mesh.ts:374](https://github.com/redcamel/RedGPU/bl
 
 > **\_material**: `any`
 
-Defined in: [src/display/mesh/Mesh.ts:349](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L349)
+Defined in: [src/display/mesh/Mesh.ts:335](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L335)
 
 #### Inherited from
 
@@ -93,7 +1529,7 @@ Defined in: [src/display/mesh/Mesh.ts:349](https://github.com/redcamel/RedGPU/bl
 
 > **animationInfo**: `object`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:33](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L33)
+Defined in: [src/display/mesh/core/MeshBase.ts:32](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L32)
 
 #### animationsList
 
@@ -125,8 +1561,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:33](https://github.com/redcamel/R
 
 > **castShadow**: `boolean` = `false`
 
-Defined in: [src/display/mesh/Mesh.ts:93](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L93)
-
+Defined in: [src/display/mesh/Mesh.ts:86](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L86)
 
 Whether to cast shadows
 
@@ -140,8 +1575,7 @@ Whether to cast shadows
 
 > **dirtyLOD**: `boolean` = `false`
 
-Defined in: [src/display/mesh/Mesh.ts:98](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L98)
-
+Defined in: [src/display/mesh/Mesh.ts:91](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L91)
 
 Whether LOD info needs update
 
@@ -155,7 +1589,7 @@ Whether LOD info needs update
 
 > **dirtyOpacity**: `boolean` = `true`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:49](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L49)
+Defined in: [src/display/mesh/core/MeshBase.ts:48](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L48)
 
 #### Inherited from
 
@@ -167,7 +1601,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:49](https://github.com/redcamel/R
 
 > **dirtyPipeline**: `boolean` = `true`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:47](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L47)
+Defined in: [src/display/mesh/core/MeshBase.ts:46](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L46)
 
 #### Inherited from
 
@@ -179,7 +1613,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:47](https://github.com/redcamel/R
 
 > **dirtyTransform**: `boolean` = `true`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:48](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L48)
+Defined in: [src/display/mesh/core/MeshBase.ts:47](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L47)
 
 #### Inherited from
 
@@ -191,7 +1625,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:48](https://github.com/redcamel/R
 
 > **disableJitter**: `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:45](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L45)
+Defined in: [src/display/mesh/Mesh.ts:42](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L42)
 
 #### Inherited from
 
@@ -199,26 +1633,11 @@ Defined in: [src/display/mesh/Mesh.ts:45](https://github.com/redcamel/RedGPU/blo
 
 ***
 
-### displacementTexture
-
-> **displacementTexture**: [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
-
-Defined in: [src/display/mesh/Mesh.ts:88](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L88)
-
-
-Displacement texture of the mesh
-
-#### Inherited from
-
-[`Mesh`](Mesh.md).[`displacementTexture`](Mesh.md#displacementtexture)
-
-***
-
 ### gltfLoaderInfo
 
 > **gltfLoaderInfo**: [`GLTFLoader`](../../../classes/GLTFLoader.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:46](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L46)
+Defined in: [src/display/mesh/core/MeshBase.ts:45](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L45)
 
 #### Inherited from
 
@@ -230,7 +1649,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:46](https://github.com/redcamel/R
 
 > **gpuRenderInfo**: [`VertexGPURenderInfo`](../namespaces/CoreMesh/classes/VertexGPURenderInfo.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:32](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L32)
+Defined in: [src/display/mesh/core/MeshBase.ts:31](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L31)
 
 #### Inherited from
 
@@ -238,11 +1657,23 @@ Defined in: [src/display/mesh/core/MeshBase.ts:32](https://github.com/redcamel/R
 
 ***
 
+### isInstanceofMesh
+
+> **isInstanceofMesh**: `boolean`
+
+Defined in: [src/display/mesh/Mesh.ts:44](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L44)
+
+#### Inherited from
+
+[`Mesh`](Mesh.md).[`isInstanceofMesh`](Mesh.md#isinstanceofmesh)
+
+***
+
 ### localMatrix
 
 > **localMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:51](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L51)
+Defined in: [src/display/mesh/core/MeshBase.ts:50](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L50)
 
 #### Inherited from
 
@@ -250,23 +1681,11 @@ Defined in: [src/display/mesh/core/MeshBase.ts:51](https://github.com/redcamel/R
 
 ***
 
-### meshType
-
-> **meshType**: `string`
-
-Defined in: [src/display/mesh/Mesh.ts:46](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L46)
-
-#### Inherited from
-
-[`Mesh`](Mesh.md).[`meshType`](Mesh.md#meshtype)
-
-***
-
 ### modelMatrix
 
 > **modelMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:50](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L50)
+Defined in: [src/display/mesh/core/MeshBase.ts:49](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L49)
 
 이 객체의 모델 행렬입니다. 위치, 회전, 스케일 변환에 사용됩니다.
 
@@ -280,7 +1699,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:50](https://github.com/redcamel/R
 
 > **normalModelMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:52](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L52)
+Defined in: [src/display/mesh/core/MeshBase.ts:51](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L51)
 
 #### Inherited from
 
@@ -292,8 +1711,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:52](https://github.com/redcamel/R
 
 > **passFrustumCulling**: `boolean` = `true`
 
-Defined in: [src/display/mesh/Mesh.ts:103](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L103)
-
+Defined in: [src/display/mesh/Mesh.ts:96](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L96)
 
 Whether it passed frustum culling
 
@@ -307,7 +1725,7 @@ Whether it passed frustum culling
 
 > **receiveShadow**: `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:44](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L44)
+Defined in: [src/display/mesh/Mesh.ts:41](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L41)
 
 #### Inherited from
 
@@ -315,19 +1733,11 @@ Defined in: [src/display/mesh/Mesh.ts:44](https://github.com/redcamel/RedGPU/blo
 
 ***
 
-### useBillboard
-
-> **useBillboard**: `boolean`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:19](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L19)
-
-***
-
 ### useDisplacementTexture
 
 > **useDisplacementTexture**: `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:47](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L47)
+Defined in: [src/display/mesh/Mesh.ts:43](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L43)
 
 #### Inherited from
 
@@ -341,8 +1751,7 @@ Defined in: [src/display/mesh/Mesh.ts:47](https://github.com/redcamel/RedGPU/blo
 
 > **get** **boundingAABB**(): [`AABB`](../../Bound/classes/AABB.md)
 
-Defined in: [src/display/mesh/Mesh.ts:783](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L783)
-
+Defined in: [src/display/mesh/Mesh.ts:750](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L750)
 
 Returns the AABB (Axis-Aligned Bounding Box) information.
 
@@ -362,8 +1771,7 @@ Returns the AABB (Axis-Aligned Bounding Box) information.
 
 > **get** **boundingOBB**(): [`OBB`](../../Bound/classes/OBB.md)
 
-Defined in: [src/display/mesh/Mesh.ts:770](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L770)
-
+Defined in: [src/display/mesh/Mesh.ts:737](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L737)
 
 Returns the OBB (Oriented Bounding Box) information.
 
@@ -383,7 +1791,7 @@ Returns the OBB (Oriented Bounding Box) information.
 
 > **get** **children**(): [`Mesh`](Mesh.md)[]
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:42](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L42)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:44](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L44)
 
 현재 컨테이너에 포함된 자식 Mesh 배열을 반환합니다.
 
@@ -405,8 +1813,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:42](https://github.com/r
 
 > **get** **combinedBoundingAABB**(): [`AABB`](../../Bound/classes/AABB.md)
 
-Defined in: [src/display/mesh/Mesh.ts:796](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L796)
-
+Defined in: [src/display/mesh/Mesh.ts:763](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L763)
 
 Returns the combined AABB information including child objects.
 
@@ -426,7 +1833,7 @@ Returns the combined AABB information including child objects.
 
 > **get** **currentShaderModuleName**(): `string`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:79](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L79)
+Defined in: [src/display/mesh/core/MeshBase.ts:67](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L67)
 
 ##### Returns
 
@@ -436,7 +1843,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:79](https://github.com/redcamel/R
 
 > **set** **currentShaderModuleName**(`value`): `void`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:83](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L83)
+Defined in: [src/display/mesh/core/MeshBase.ts:71](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L71)
 
 ##### Parameters
 
@@ -460,7 +1867,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:83](https://github.com/redcamel/R
 
 > **get** **depthStencilState**(): [`DepthStencilState`](../../RenderState/classes/DepthStencilState.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:92](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L92)
+Defined in: [src/display/mesh/core/MeshBase.ts:80](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L80)
 
 ##### Returns
 
@@ -476,308 +1883,19 @@ Defined in: [src/display/mesh/core/MeshBase.ts:92](https://github.com/redcamel/R
 
 #### Get Signature
 
-> **get** **drawDebugger**(): `DrawDebuggerMesh`
+> **get** **drawDebugger**(): [`DrawDebuggerMesh`](../namespaces/drawDebugger/classes/DrawDebuggerMesh.md)
 
-Defined in: [src/display/mesh/Mesh.ts:345](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L345)
-
+Defined in: [src/display/mesh/Mesh.ts:331](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L331)
 
 Returns the debug mesh object.
 
 ##### Returns
 
-`DrawDebuggerMesh`
+[`DrawDebuggerMesh`](../namespaces/drawDebugger/classes/DrawDebuggerMesh.md)
 
 #### Inherited from
 
 [`Mesh`](Mesh.md).[`drawDebugger`](Mesh.md#drawdebugger)
-
-***
-
-### easeAlpha
-
-#### Get Signature
-
-> **get** **easeAlpha**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:908](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L908)
-
-
-Returns the easing type for alpha change.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **easeAlpha**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:917](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L917)
-
-
-Sets the easing type for alpha change.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | PARTICLE_EASE value |
-
-##### Returns
-
-`void`
-
-***
-
-### easeRotationX
-
-#### Get Signature
-
-> **get** **easeRotationX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:942](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L942)
-
-
-Returns the easing type for X-axis rotation.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **easeRotationX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:951](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L951)
-
-
-Sets the easing type for X-axis rotation.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | PARTICLE_EASE value |
-
-##### Returns
-
-`void`
-
-***
-
-### easeRotationY
-
-#### Get Signature
-
-> **get** **easeRotationY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:959](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L959)
-
-
-Returns the easing type for Y-axis rotation.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **easeRotationY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:968](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L968)
-
-
-Sets the easing type for Y-axis rotation.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | PARTICLE_EASE value |
-
-##### Returns
-
-`void`
-
-***
-
-### easeRotationZ
-
-#### Get Signature
-
-> **get** **easeRotationZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:976](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L976)
-
-
-Returns the easing type for Z-axis rotation.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **easeRotationZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:985](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L985)
-
-
-Sets the easing type for Z-axis rotation.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | PARTICLE_EASE value |
-
-##### Returns
-
-`void`
-
-***
-
-### easeScale
-
-#### Get Signature
-
-> **get** **easeScale**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:925](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L925)
-
-
-Returns the easing type for scale change.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **easeScale**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:934](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L934)
-
-
-Sets the easing type for scale change.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | PARTICLE_EASE value |
-
-##### Returns
-
-`void`
-
-***
-
-### easeX
-
-#### Get Signature
-
-> **get** **easeX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:857](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L857)
-
-
-Returns the easing type for X-axis movement.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **easeX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:866](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L866)
-
-
-Sets the easing type for X-axis movement.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | PARTICLE_EASE value |
-
-##### Returns
-
-`void`
-
-***
-
-### easeY
-
-#### Get Signature
-
-> **get** **easeY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:874](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L874)
-
-
-Returns the easing type for Y-axis movement.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **easeY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:883](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L883)
-
-
-Sets the easing type for Y-axis movement.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | PARTICLE_EASE value |
-
-##### Returns
-
-`void`
-
-***
-
-### easeZ
-
-#### Get Signature
-
-> **get** **easeZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:891](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L891)
-
-
-Returns the easing type for Z-axis movement.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **easeZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:900](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L900)
-
-
-Sets the easing type for Z-axis movement.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | PARTICLE_EASE value |
-
-##### Returns
-
-`void`
 
 ***
 
@@ -787,8 +1905,7 @@ Sets the easing type for Z-axis movement.
 
 > **get** **enableDebugger**(): `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:325](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L325)
-
+Defined in: [src/display/mesh/Mesh.ts:311](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L311)
 
 Returns whether the debugger is enabled.
 
@@ -800,8 +1917,7 @@ Returns whether the debugger is enabled.
 
 > **set** **enableDebugger**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:336](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L336)
-
+Defined in: [src/display/mesh/Mesh.ts:322](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L322)
 
 Sets whether the debugger is enabled.
 
@@ -827,8 +1943,7 @@ Sets whether the debugger is enabled.
 
 > **get** **events**(): `any`
 
-Defined in: [src/display/mesh/Mesh.ts:448](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L448)
-
+Defined in: [src/display/mesh/Mesh.ts:435](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L435)
 
 Returns the registered events.
 
@@ -848,8 +1963,7 @@ Returns the registered events.
 
 > **get** **geometry**(): [`Geometry`](../../../classes/Geometry.md) \| [`Primitive`](../../Primitive/namespaces/Core/classes/Primitive.md)
 
-Defined in: [src/display/mesh/Mesh.ts:379](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L379)
-
+Defined in: [src/display/mesh/Mesh.ts:366](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L366)
 
 Returns the geometry.
 
@@ -861,8 +1975,7 @@ Returns the geometry.
 
 > **set** **geometry**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:390](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L390)
-
+Defined in: [src/display/mesh/Mesh.ts:377](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L377)
 
 Sets the geometry.
 
@@ -888,7 +2001,7 @@ Sets the geometry.
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:100](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L100)
+Defined in: [src/display/mesh/core/MeshBase.ts:88](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L88)
 
 Retrieves the GPU device associated with the current instance.
 
@@ -910,8 +2023,7 @@ The GPU device.
 
 > **get** **ignoreFrustumCulling**(): `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:421](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L421)
-
+Defined in: [src/display/mesh/Mesh.ts:408](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L408)
 
 Returns whether to ignore frustum culling.
 
@@ -923,8 +2035,7 @@ Returns whether to ignore frustum culling.
 
 > **set** **ignoreFrustumCulling**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:432](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L432)
-
+Defined in: [src/display/mesh/Mesh.ts:419](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L419)
 
 Sets whether to ignore frustum culling.
 
@@ -950,15 +2061,13 @@ Sets whether to ignore frustum culling.
 
 > **get** **LODManager**(): [`LODManager`](../namespaces/CoreMesh/classes/LODManager.md)
 
-Defined in: [src/display/mesh/Mesh.ts:317](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L317)
-
+Defined in: [src/display/mesh/Mesh.ts:303](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L303)
 
 Returns the LOD (Level of Detail) manager.
 
 ##### Returns
 
 [`LODManager`](../namespaces/CoreMesh/classes/LODManager.md)
-
 
 LODManager instance
 
@@ -974,8 +2083,7 @@ LODManager instance
 
 > **get** **material**(): `any`
 
-Defined in: [src/display/mesh/Mesh.ts:354](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L354)
-
+Defined in: [src/display/mesh/Mesh.ts:340](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L340)
 
 Returns the material.
 
@@ -987,8 +2095,7 @@ Returns the material.
 
 > **set** **material**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:365](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L365)
-
+Defined in: [src/display/mesh/Mesh.ts:351](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L351)
 
 Sets the material.
 
@@ -1008,1265 +2115,35 @@ Sets the material.
 
 ***
 
-### maxEndAlpha
-
-#### Get Signature
-
-> **get** **maxEndAlpha**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:568](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L568)
-
-
-Returns the maximum end alpha.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxEndAlpha**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:577](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L577)
-
-
-Sets the maximum end alpha.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### maxEndRotationX
-
-#### Get Signature
-
-> **get** **maxEndRotationX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:806](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L806)
-
-
-Returns the maximum end X rotation. (degrees)
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxEndRotationX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:815](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L815)
-
-
-Sets the maximum end X rotation. (degrees)
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### maxEndRotationY
-
-#### Get Signature
-
-> **get** **maxEndRotationY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:823](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L823)
-
-
-Returns the maximum end Y rotation. (degrees)
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxEndRotationY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:832](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L832)
-
-
-Sets the maximum end Y rotation. (degrees)
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### maxEndRotationZ
-
-#### Get Signature
-
-> **get** **maxEndRotationZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:840](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L840)
-
-
-Returns the maximum end Z rotation. (degrees)
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxEndRotationZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:849](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L849)
-
-
-Sets the maximum end Z rotation. (degrees)
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### maxEndScale
-
-#### Get Signature
-
-> **get** **maxEndScale**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:636](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L636)
-
-
-Returns the maximum end scale.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxEndScale**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:645](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L645)
-
-
-Sets the maximum end scale.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### maxEndX
-
-#### Get Signature
-
-> **get** **maxEndX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:466](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L466)
-
-
-Returns the maximum end X coordinate.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxEndX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:475](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L475)
-
-
-Sets the maximum end X coordinate.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### maxEndY
-
-#### Get Signature
-
-> **get** **maxEndY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:483](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L483)
-
-
-Returns the maximum end Y coordinate.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxEndY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:492](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L492)
-
-
-Sets the maximum end Y coordinate.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### maxEndZ
-
-#### Get Signature
-
-> **get** **maxEndZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:500](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L500)
-
-
-Returns the maximum end Z coordinate.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxEndZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:509](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L509)
-
-
-Sets the maximum end Z coordinate.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### maxLife
-
-#### Get Signature
-
-> **get** **maxLife**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:293](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L293)
-
-
-Returns the maximum life of the particle. (ms)
-
-##### Returns
-
-`number`
-
-
-Maximum life
-
-#### Set Signature
-
-> **set** **maxLife**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:305](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L305)
-
-
-Sets the maximum life of the particle. (ms)
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Maximum life |
-
-##### Returns
-
-`void`
-
-***
-
-### maxStartAlpha
-
-#### Get Signature
-
-> **get** **maxStartAlpha**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:534](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L534)
-
-
-Returns the maximum start alpha.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxStartAlpha**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:543](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L543)
-
-
-Sets the maximum start alpha.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### maxStartRotationX
-
-#### Get Signature
-
-> **get** **maxStartRotationX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:704](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L704)
-
-
-Returns the maximum start X rotation. (degrees)
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxStartRotationX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:713](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L713)
-
-
-Sets the maximum start X rotation. (degrees)
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### maxStartRotationY
-
-#### Get Signature
-
-> **get** **maxStartRotationY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:721](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L721)
-
-
-Returns the maximum start Y rotation. (degrees)
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxStartRotationY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:730](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L730)
-
-
-Sets the maximum start Y rotation. (degrees)
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### maxStartRotationZ
-
-#### Get Signature
-
-> **get** **maxStartRotationZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:738](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L738)
-
-
-Returns the maximum start Z rotation. (degrees)
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxStartRotationZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:747](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L747)
-
-
-Sets the maximum start Z rotation. (degrees)
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### maxStartScale
-
-#### Get Signature
-
-> **get** **maxStartScale**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:602](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L602)
-
-
-Returns the maximum start scale.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxStartScale**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:611](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L611)
-
-
-Sets the maximum start scale.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### maxStartX
-
-#### Get Signature
-
-> **get** **maxStartX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:364](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L364)
-
-
-Returns the maximum start X coordinate.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxStartX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:373](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L373)
-
-
-Sets the maximum start X coordinate.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### maxStartY
-
-#### Get Signature
-
-> **get** **maxStartY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:381](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L381)
-
-
-Returns the maximum start Y coordinate.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxStartY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:390](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L390)
-
-
-Sets the maximum start Y coordinate.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### maxStartZ
-
-#### Get Signature
-
-> **get** **maxStartZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:398](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L398)
-
-
-Returns the maximum start Z coordinate.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **maxStartZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:407](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L407)
-
-
-Sets the maximum start Z coordinate.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### minEndAlpha
-
-#### Get Signature
-
-> **get** **minEndAlpha**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:551](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L551)
-
-
-Returns the minimum end alpha.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minEndAlpha**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:560](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L560)
-
-
-Sets the minimum end alpha.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### minEndRotationX
-
-#### Get Signature
-
-> **get** **minEndRotationX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:755](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L755)
-
-
-Returns the minimum end X rotation. (degrees)
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minEndRotationX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:764](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L764)
-
-
-Sets the minimum end X rotation. (degrees)
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### minEndRotationY
-
-#### Get Signature
-
-> **get** **minEndRotationY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:772](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L772)
-
-
-Returns the minimum end Y rotation. (degrees)
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minEndRotationY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:781](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L781)
-
-
-Sets the minimum end Y rotation. (degrees)
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### minEndRotationZ
-
-#### Get Signature
-
-> **get** **minEndRotationZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:789](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L789)
-
-
-Returns the minimum end Z rotation. (degrees)
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minEndRotationZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:798](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L798)
-
-
-Sets the minimum end Z rotation. (degrees)
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### minEndScale
-
-#### Get Signature
-
-> **get** **minEndScale**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:619](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L619)
-
-
-Returns the minimum end scale.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minEndScale**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:628](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L628)
-
-
-Sets the minimum end scale.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### minEndX
-
-#### Get Signature
-
-> **get** **minEndX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:415](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L415)
-
-
-Returns the minimum end X coordinate.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minEndX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:424](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L424)
-
-
-Sets the minimum end X coordinate.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### minEndY
-
-#### Get Signature
-
-> **get** **minEndY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:432](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L432)
-
-
-Returns the minimum end Y coordinate.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minEndY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:441](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L441)
-
-
-Sets the minimum end Y coordinate.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### minEndZ
-
-#### Get Signature
-
-> **get** **minEndZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:449](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L449)
-
-
-Returns the minimum end Z coordinate.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minEndZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:458](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L458)
-
-
-Sets the minimum end Z coordinate.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### minLife
-
-#### Get Signature
-
-> **get** **minLife**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:269](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L269)
-
-
-Returns the minimum life of the particle. (ms)
-
-##### Returns
-
-`number`
-
-
-Minimum life
-
-#### Set Signature
-
-> **set** **minLife**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:281](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L281)
-
-
-Sets the minimum life of the particle. (ms)
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Minimum life |
-
-##### Returns
-
-`void`
-
-***
-
-### minStartAlpha
-
-#### Get Signature
-
-> **get** **minStartAlpha**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:517](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L517)
-
-
-Returns the minimum start alpha.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minStartAlpha**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:526](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L526)
-
-
-Sets the minimum start alpha.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### minStartRotationX
-
-#### Get Signature
-
-> **get** **minStartRotationX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:653](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L653)
-
-
-Returns the minimum start X rotation. (degrees)
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minStartRotationX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:662](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L662)
-
-
-Sets the minimum start X rotation. (degrees)
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### minStartRotationY
-
-#### Get Signature
-
-> **get** **minStartRotationY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:670](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L670)
-
-
-Returns the minimum start Y rotation. (degrees)
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minStartRotationY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:679](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L679)
-
-
-Sets the minimum start Y rotation. (degrees)
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### minStartRotationZ
-
-#### Get Signature
-
-> **get** **minStartRotationZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:687](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L687)
-
-
-Returns the minimum start Z rotation. (degrees)
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minStartRotationZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:696](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L696)
-
-
-Sets the minimum start Z rotation. (degrees)
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### minStartScale
-
-#### Get Signature
-
-> **get** **minStartScale**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:585](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L585)
-
-
-Returns the minimum start scale.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minStartScale**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:594](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L594)
-
-
-Sets the minimum start scale.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### minStartX
-
-#### Get Signature
-
-> **get** **minStartX**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:313](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L313)
-
-
-Returns the minimum start X coordinate.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minStartX**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:322](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L322)
-
-
-Sets the minimum start X coordinate.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### minStartY
-
-#### Get Signature
-
-> **get** **minStartY**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:330](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L330)
-
-
-Returns the minimum start Y coordinate.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minStartY**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:339](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L339)
-
-
-Sets the minimum start Y coordinate.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
-### minStartZ
-
-#### Get Signature
-
-> **get** **minStartZ**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:347](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L347)
-
-
-Returns the minimum start Z coordinate.
-
-##### Returns
-
-`number`
-
-#### Set Signature
-
-> **set** **minStartZ**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:356](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L356)
-
-
-Sets the minimum start Z coordinate.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Value |
-
-##### Returns
-
-`void`
-
-***
-
 ### name
 
 #### Get Signature
 
 > **get** **name**(): `string`
 
-Defined in: [src/display/mesh/Mesh.ts:456](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L456)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L58)
 
-
-Returns the name of the mesh.
+Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
 
 ##### Returns
 
 `string`
 
+Name of the object
+
 #### Set Signature
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:468](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L468)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L71)
 
-
-Sets the name of the mesh.
+Sets the name of the object.
 
 ##### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `value` | `string` | Mesh name |
+| `value` | `string` | Name of the object to set |
 
 ##### Returns
 
@@ -2284,7 +2161,7 @@ Sets the name of the mesh.
 
 > **get** **numChildren**(): `number`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:50](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L50)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:52](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L52)
 
 자식 객체의 개수를 반환합니다.
 
@@ -2306,8 +2183,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:50](https://github.com/r
 
 > **get** **opacity**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:400](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L400)
-
+Defined in: [src/display/mesh/Mesh.ts:387](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L387)
 
 Returns the opacity of the mesh. (0~1)
 
@@ -2319,8 +2195,7 @@ Returns the opacity of the mesh. (0~1)
 
 > **set** **opacity**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:411](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L411)
-
+Defined in: [src/display/mesh/Mesh.ts:398](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L398)
 
 Sets the opacity of the mesh. (0~1)
 
@@ -2346,8 +2221,7 @@ Sets the opacity of the mesh. (0~1)
 
 > **get** **parent**(): [`Object3DContainer`](../namespaces/CoreMesh/classes/Object3DContainer.md)
 
-Defined in: [src/display/mesh/Mesh.ts:484](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L484)
-
+Defined in: [src/display/mesh/Mesh.ts:451](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L451)
 
 Returns the set parent object.
 
@@ -2359,8 +2233,7 @@ Returns the set parent object.
 
 > **set** **parent**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:495](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L495)
-
+Defined in: [src/display/mesh/Mesh.ts:462](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L462)
 
 Sets the parent object.
 
@@ -2380,69 +2253,13 @@ Sets the parent object.
 
 ***
 
-### particleBuffers
-
-#### Get Signature
-
-> **get** **particleBuffers**(): `GPUBuffer`[]
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:992](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L992)
-
-파티클 버퍼(GPUBuffer) 배열 반환
-
-##### Returns
-
-`GPUBuffer`[]
-
-***
-
-### particleNum
-
-#### Get Signature
-
-> **get** **particleNum**(): `number`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:243](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L243)
-
-
-Returns the number of particles. (Max 500,000, Min 1)
-
-##### Returns
-
-`number`
-
-
-Number of particles
-
-#### Set Signature
-
-> **set** **particleNum**(`value`): `void`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:255](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L255)
-
-
-Sets the number of particles. Setting this reconstructs the simulation buffer.
-
-##### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `value` | `number` | Number of particles (1 ~ 500,000) |
-
-##### Returns
-
-`void`
-
-***
-
 ### pickingId
 
 #### Get Signature
 
 > **get** **pickingId**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:440](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L440)
-
+Defined in: [src/display/mesh/Mesh.ts:427](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L427)
 
 Returns the picking ID.
 
@@ -2462,8 +2279,7 @@ Returns the picking ID.
 
 > **get** **pivotX**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:503](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L503)
-
+Defined in: [src/display/mesh/Mesh.ts:470](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L470)
 
 Returns the pivot X coordinate.
 
@@ -2475,8 +2291,7 @@ Returns the pivot X coordinate.
 
 > **set** **pivotX**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:514](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L514)
-
+Defined in: [src/display/mesh/Mesh.ts:481](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L481)
 
 Sets the pivot X coordinate.
 
@@ -2502,8 +2317,7 @@ Sets the pivot X coordinate.
 
 > **get** **pivotY**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:523](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L523)
-
+Defined in: [src/display/mesh/Mesh.ts:490](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L490)
 
 Returns the pivot Y coordinate.
 
@@ -2515,8 +2329,7 @@ Returns the pivot Y coordinate.
 
 > **set** **pivotY**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:534](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L534)
-
+Defined in: [src/display/mesh/Mesh.ts:501](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L501)
 
 Sets the pivot Y coordinate.
 
@@ -2542,8 +2355,7 @@ Sets the pivot Y coordinate.
 
 > **get** **pivotZ**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:543](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L543)
-
+Defined in: [src/display/mesh/Mesh.ts:510](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L510)
 
 Returns the pivot Z coordinate.
 
@@ -2555,8 +2367,7 @@ Returns the pivot Z coordinate.
 
 > **set** **pivotZ**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:554](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L554)
-
+Defined in: [src/display/mesh/Mesh.ts:521](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L521)
 
 Sets the pivot Z coordinate.
 
@@ -2582,15 +2393,13 @@ Sets the pivot Z coordinate.
 
 > **get** **position**(): `Float32Array`
 
-Defined in: [src/display/mesh/Mesh.ts:626](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L626)
-
+Defined in: [src/display/mesh/Mesh.ts:593](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L593)
 
 Returns the current position. [x, y, z]
 
 ##### Returns
 
 `Float32Array`
-
 
 Position array
 
@@ -2606,7 +2415,7 @@ Position array
 
 > **get** **primitiveState**(): [`PrimitiveState`](../../RenderState/classes/PrimitiveState.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:88](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L88)
+Defined in: [src/display/mesh/core/MeshBase.ts:76](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L76)
 
 ##### Returns
 
@@ -2624,7 +2433,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:88](https://github.com/redcamel/R
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:109](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L109)
+Defined in: [src/display/mesh/core/MeshBase.ts:97](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L97)
 
 Retrieves the RedGPUContext instance.
 
@@ -2646,8 +2455,7 @@ The RedGPUContext instance.
 
 > **get** **rotation**(): `Float32Array`
 
-Defined in: [src/display/mesh/Mesh.ts:762](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L762)
-
+Defined in: [src/display/mesh/Mesh.ts:729](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L729)
 
 Returns the current rotation values. [x, y, z] (degrees)
 
@@ -2667,8 +2475,7 @@ Returns the current rotation values. [x, y, z] (degrees)
 
 > **get** **rotationX**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:702](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L702)
-
+Defined in: [src/display/mesh/Mesh.ts:669](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L669)
 
 Returns the X-axis rotation value. (degrees)
 
@@ -2680,8 +2487,7 @@ Returns the X-axis rotation value. (degrees)
 
 > **set** **rotationX**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:713](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L713)
-
+Defined in: [src/display/mesh/Mesh.ts:680](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L680)
 
 Sets the X-axis rotation value. (degrees)
 
@@ -2707,8 +2513,7 @@ Sets the X-axis rotation value. (degrees)
 
 > **get** **rotationY**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:722](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L722)
-
+Defined in: [src/display/mesh/Mesh.ts:689](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L689)
 
 Returns the Y-axis rotation value. (degrees)
 
@@ -2720,8 +2525,7 @@ Returns the Y-axis rotation value. (degrees)
 
 > **set** **rotationY**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:733](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L733)
-
+Defined in: [src/display/mesh/Mesh.ts:700](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L700)
 
 Sets the Y-axis rotation value. (degrees)
 
@@ -2747,8 +2551,7 @@ Sets the Y-axis rotation value. (degrees)
 
 > **get** **rotationZ**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:742](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L742)
-
+Defined in: [src/display/mesh/Mesh.ts:709](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L709)
 
 Returns the Z-axis rotation value. (degrees)
 
@@ -2760,8 +2563,7 @@ Returns the Z-axis rotation value. (degrees)
 
 > **set** **rotationZ**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:753](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L753)
-
+Defined in: [src/display/mesh/Mesh.ts:720](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L720)
 
 Sets the Z-axis rotation value. (degrees)
 
@@ -2787,8 +2589,7 @@ Sets the Z-axis rotation value. (degrees)
 
 > **get** **scale**(): `Float32Array`
 
-Defined in: [src/display/mesh/Mesh.ts:694](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L694)
-
+Defined in: [src/display/mesh/Mesh.ts:661](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L661)
 
 Returns the current scale. [x, y, z]
 
@@ -2808,8 +2609,7 @@ Returns the current scale. [x, y, z]
 
 > **get** **scaleX**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:634](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L634)
-
+Defined in: [src/display/mesh/Mesh.ts:601](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L601)
 
 Returns the X-axis scale.
 
@@ -2821,8 +2621,7 @@ Returns the X-axis scale.
 
 > **set** **scaleX**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:645](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L645)
-
+Defined in: [src/display/mesh/Mesh.ts:612](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L612)
 
 Sets the X-axis scale.
 
@@ -2848,8 +2647,7 @@ Sets the X-axis scale.
 
 > **get** **scaleY**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:654](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L654)
-
+Defined in: [src/display/mesh/Mesh.ts:621](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L621)
 
 Returns the Y-axis scale.
 
@@ -2861,8 +2659,7 @@ Returns the Y-axis scale.
 
 > **set** **scaleY**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:665](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L665)
-
+Defined in: [src/display/mesh/Mesh.ts:632](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L632)
 
 Sets the Y-axis scale.
 
@@ -2888,8 +2685,7 @@ Sets the Y-axis scale.
 
 > **get** **scaleZ**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:674](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L674)
-
+Defined in: [src/display/mesh/Mesh.ts:641](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L641)
 
 Returns the Z-axis scale.
 
@@ -2901,8 +2697,7 @@ Returns the Z-axis scale.
 
 > **set** **scaleZ**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:685](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L685)
-
+Defined in: [src/display/mesh/Mesh.ts:652](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L652)
 
 Sets the Z-axis scale.
 
@@ -2928,15 +2723,15 @@ Sets the Z-axis scale.
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:75](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L75)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L46)
 
-Retrieves the UUID of the object.
+Returns the universally unique identifier (UUID) of the object.
 
 ##### Returns
 
 `string`
 
-The UUID of the object.
+UUID string
 
 #### Inherited from
 
@@ -2950,10 +2745,9 @@ The UUID of the object.
 
 > **get** **vertexStateBuffers**(): `GPUVertexBufferLayout`[]
 
-Defined in: [src/display/paticle/ParticleEmitter.ts:181](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L181)
+Defined in: [src/display/particle/ParticleEmitter.ts:139](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L139)
 
-
-Returns the vertex state buffer layouts.
+Gets the instance-based GPU vertex buffer layout details used for rendering individual particles.
 
 ##### Returns
 
@@ -2971,8 +2765,7 @@ Returns the vertex state buffer layouts.
 
 > **get** **x**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:563](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L563)
-
+Defined in: [src/display/mesh/Mesh.ts:530](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L530)
 
 Returns the X position coordinate.
 
@@ -2984,8 +2777,7 @@ Returns the X position coordinate.
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:574](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L574)
-
+Defined in: [src/display/mesh/Mesh.ts:541](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L541)
 
 Sets the X position coordinate.
 
@@ -3011,8 +2803,7 @@ Sets the X position coordinate.
 
 > **get** **y**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:583](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L583)
-
+Defined in: [src/display/mesh/Mesh.ts:550](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L550)
 
 Returns the Y position coordinate.
 
@@ -3024,8 +2815,7 @@ Returns the Y position coordinate.
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:594](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L594)
-
+Defined in: [src/display/mesh/Mesh.ts:561](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L561)
 
 Sets the Y position coordinate.
 
@@ -3051,8 +2841,7 @@ Sets the Y position coordinate.
 
 > **get** **z**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:603](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L603)
-
+Defined in: [src/display/mesh/Mesh.ts:570](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L570)
 
 Returns the Z position coordinate.
 
@@ -3064,8 +2853,7 @@ Returns the Z position coordinate.
 
 > **set** **z**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:614](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L614)
-
+Defined in: [src/display/mesh/Mesh.ts:581](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L581)
 
 Sets the Z position coordinate.
 
@@ -3085,35 +2873,11 @@ Sets the Z position coordinate.
 
 ## Methods
 
-### \_\_fireListenerList()
-
-> **\_\_fireListenerList**(`resetList?`): `void`
-
-Defined in: [src/display/mesh/core/MeshBase.ts:130](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L130)
-
-Fires the dirty listeners list.
-
-#### Parameters
-
-| Parameter | Type | Default value | Description |
-| ------ | ------ | ------ | ------ |
-| `resetList?` | `boolean` | `false` | Indicates whether to reset the dirty listeners list after firing. |
-
-#### Returns
-
-`void`
-
-#### Inherited from
-
-[`Mesh`](Mesh.md).[`__fireListenerList`](Mesh.md#__firelistenerlist)
-
-***
-
 ### addChild()
 
 > **addChild**(`child`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:69](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L69)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:71](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L71)
 
 자식 Mesh를 컨테이너에 추가합니다.
 
@@ -3139,7 +2903,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:69](https://github.com/r
 
 > **addChildAt**(`child`, `index`): `ParticleEmitter`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:87](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L87)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L89)
 
 자식 Mesh를 특정 인덱스에 추가합니다.
 
@@ -3166,8 +2930,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:87](https://github.com/r
 
 > **addListener**(`eventName`, `callback`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:897](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L897)
-
+Defined in: [src/display/mesh/Mesh.ts:864](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L864)
 
 Adds an event listener.
 
@@ -3192,17 +2955,15 @@ Adds an event listener.
 
 > **clone**(): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/Mesh.ts:1007](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L1007)
+Defined in: [src/display/mesh/Mesh.ts:974](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L974)
 
 **`Experimental`**
-
 
 Clones the mesh.
 
 #### Returns
 
 [`Mesh`](Mesh.md)
-
 
 Cloned Mesh instance
 
@@ -3216,7 +2977,7 @@ Cloned Mesh instance
 
 > **contains**(`child`): `boolean`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:59](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L59)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:61](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L61)
 
 특정 Mesh가 현재 컨테이너에 포함되어 있는지 확인합니다.
 
@@ -3238,27 +2999,11 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:59](https://github.com/r
 
 ***
 
-### createCustomMeshVertexShaderModule()
-
-> **createCustomMeshVertexShaderModule**(): `GPUShaderModule`
-
-Defined in: [src/display/paticle/ParticleEmitter.ts:1011](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L1011)
-
-커스텀 버텍스 셰이더 모듈을 생성합니다.
-
-#### Returns
-
-`GPUShaderModule`
-
-생성된 셰이더 모듈
-
-***
-
 ### createMeshVertexShaderModuleBASIC()
 
 > **createMeshVertexShaderModuleBASIC**(`VERTEX_SHADER_MODULE_NAME`, `SHADER_INFO`, `UNIFORM_STRUCT_BASIC`, `vertexModuleSource`): `GPUShaderModule`
 
-Defined in: [src/display/mesh/Mesh.ts:1711](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L1711)
+Defined in: [src/display/mesh/Mesh.ts:1681](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L1681)
 
 #### Parameters
 
@@ -3283,7 +3028,7 @@ Defined in: [src/display/mesh/Mesh.ts:1711](https://github.com/redcamel/RedGPU/b
 
 > **getChildAt**(`index`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:109](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L109)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:111](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L111)
 
 지정된 인덱스의 자식 Mesh를 반환합니다.
 
@@ -3309,7 +3054,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:109](https://github.com/
 
 > **getChildIndex**(`child`): `number`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:123](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L123)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:125](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L125)
 
 특정 자식 객체의 인덱스를 반환합니다.
 
@@ -3335,15 +3080,13 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:123](https://github.com/
 
 > **getCombinedOpacity**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:879](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L879)
-
+Defined in: [src/display/mesh/Mesh.ts:846](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L846)
 
 Calculates and returns the combined opacity considering the parent hierarchy.
 
 #### Returns
 
 `number`
-
 
 Combined opacity value
 
@@ -3357,7 +3100,7 @@ Combined opacity value
 
 > **getScreenPoint**(`view`): \[`number`, `number`\]
 
-Defined in: [src/display/mesh/core/MeshBase.ts:121](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L121)
+Defined in: [src/display/mesh/core/MeshBase.ts:109](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L109)
 
 #### Parameters
 
@@ -3379,7 +3122,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:121](https://github.com/redcamel/
 
 > **initGPURenderInfos**(): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:1697](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L1697)
+Defined in: [src/display/mesh/Mesh.ts:1667](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L1667)
 
 #### Returns
 
@@ -3395,7 +3138,7 @@ Defined in: [src/display/mesh/Mesh.ts:1697](https://github.com/redcamel/RedGPU/b
 
 > **localToWorld**(`x`, `y`, `z`): \[`number`, `number`, `number`\]
 
-Defined in: [src/display/mesh/core/MeshBase.ts:117](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L117)
+Defined in: [src/display/mesh/core/MeshBase.ts:105](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L105)
 
 #### Parameters
 
@@ -3419,8 +3162,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:117](https://github.com/redcamel/
 
 > **lookAt**(`targetX`, `targetY?`, `targetZ?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:915](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L915)
-
+Defined in: [src/display/mesh/Mesh.ts:882](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L882)
 
 Rotates the mesh to look at a specific coordinate.
 
@@ -3446,7 +3188,7 @@ Rotates the mesh to look at a specific coordinate.
 
 > **removeAllChildren**(): `ParticleEmitter`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:232](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L232)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:234](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L234)
 
 모든 자식 객체를 제거합니다.
 
@@ -3466,7 +3208,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:232](https://github.com/
 
 > **removeChild**(`child`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:201](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L201)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:203](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L203)
 
 특정 자식 객체를 제거합니다.
 
@@ -3492,7 +3234,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:201](https://github.com/
 
 > **removeChildAt**(`index`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:217](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L217)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:219](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L219)
 
 지정된 인덱스의 자식 객체를 제거합니다.
 
@@ -3518,15 +3260,15 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:217](https://github.com/
 
 > **render**(`renderViewStateData`): `void`
 
-Defined in: [src/display/paticle/ParticleEmitter.ts:1000](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/paticle/ParticleEmitter.ts#L1000)
+Defined in: [src/display/particle/ParticleEmitter.ts:702](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/particle/ParticleEmitter.ts#L702)
 
-파티클 렌더링 및 시뮬레이션을 수행합니다.
+Updates and simulates the particle emitter on a per-frame basis. Triggers the GPU Compute Pass each frame to recalculate position and transform states.
 
 #### Parameters
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `renderViewStateData` | [`RenderViewStateData`](../namespaces/CoreView/classes/RenderViewStateData.md) | 렌더 상태 데이터 |
+| `renderViewStateData` | [`RenderViewStateData`](../namespaces/CoreView/classes/RenderViewStateData.md) | Render view state data object |
 
 #### Returns
 
@@ -3542,8 +3284,7 @@ Defined in: [src/display/paticle/ParticleEmitter.ts:1000](https://github.com/red
 
 > **setCastShadowRecursively**(`value?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:825](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L825)
-
+Defined in: [src/display/mesh/Mesh.ts:792](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L792)
 
 Sets shadow casting for all objects in the hierarchy.
 
@@ -3567,7 +3308,7 @@ Sets shadow casting for all objects in the hierarchy.
 
 > **setChildIndex**(`child`, `index`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:138](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L138)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:140](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L140)
 
 자식 객체의 위치를 변경합니다.
 
@@ -3592,8 +3333,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:138](https://github.com/
 
 > **setEnableDebuggerRecursively**(`enableDebugger?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:807](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L807)
-
+Defined in: [src/display/mesh/Mesh.ts:774](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L774)
 
 Sets the debugger visibility for all objects in the hierarchy.
 
@@ -3617,8 +3357,7 @@ Sets the debugger visibility for all objects in the hierarchy.
 
 > **setIgnoreFrustumCullingRecursively**(`value?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:861](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L861)
-
+Defined in: [src/display/mesh/Mesh.ts:828](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L828)
 
 Sets whether to ignore frustum culling for all objects in the hierarchy.
 
@@ -3642,8 +3381,7 @@ Sets whether to ignore frustum culling for all objects in the hierarchy.
 
 > **setPosition**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:966](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L966)
-
+Defined in: [src/display/mesh/Mesh.ts:933](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L933)
 
 Sets the position.
 
@@ -3669,8 +3407,7 @@ Sets the position.
 
 > **setReceiveShadowRecursively**(`value?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:843](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L843)
-
+Defined in: [src/display/mesh/Mesh.ts:810](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L810)
 
 Sets shadow receiving for all objects in the hierarchy.
 
@@ -3694,8 +3431,7 @@ Sets shadow receiving for all objects in the hierarchy.
 
 > **setRotation**(`rotationX`, `rotationY?`, `rotationZ?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:989](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L989)
-
+Defined in: [src/display/mesh/Mesh.ts:956](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L956)
 
 Sets the rotation values. (degrees)
 
@@ -3721,8 +3457,7 @@ Sets the rotation values. (degrees)
 
 > **setScale**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:943](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/Mesh.ts#L943)
-
+Defined in: [src/display/mesh/Mesh.ts:910](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/Mesh.ts#L910)
 
 Sets the scale.
 
@@ -3748,7 +3483,7 @@ Sets the scale.
 
 > **swapChildren**(`child1`, `child2`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:161](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L161)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L163)
 
 두 자식 객체의 위치를 서로 바꿉니다.
 
@@ -3773,7 +3508,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:161](https://github.com/
 
 > **swapChildrenAt**(`index1`, `index2`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:181](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/Object3DContainer.ts#L181)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:183](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/Object3DContainer.ts#L183)
 
 두 인덱스의 자식 객체 위치를 서로 바꿉니다.
 
@@ -3798,7 +3533,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:181](https://github.com/
 
 > **worldToLocal**(`x`, `y`, `z`): \[`number`, `number`, `number`\]
 
-Defined in: [src/display/mesh/core/MeshBase.ts:113](https://github.com/redcamel/RedGPU/blob/99ddf64d120603e3ffe2c0b760ce7ce2feed3965/src/display/mesh/core/MeshBase.ts#L113)
+Defined in: [src/display/mesh/core/MeshBase.ts:101](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/display/mesh/core/MeshBase.ts#L101)
 
 #### Parameters
 
@@ -3815,3 +3550,6 @@ Defined in: [src/display/mesh/core/MeshBase.ts:113](https://github.com/redcamel/
 #### Inherited from
 
 [`Mesh`](Mesh.md).[`worldToLocal`](Mesh.md#worldtolocal)
+
+
+</details>
