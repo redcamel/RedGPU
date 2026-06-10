@@ -1,5 +1,5 @@
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
-import * as RedGPU from "../../../../dist/index.js?t=1778922031603";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1781131404967";
+import * as RedGPU from "../../../../dist/index.js?t=1781131404967";
 /**
  * [KO] Texture Linear Interpolation Test 예제
  * [EN] Texture Linear Interpolation Test example

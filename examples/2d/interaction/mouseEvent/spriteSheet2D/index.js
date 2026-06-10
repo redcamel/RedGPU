@@ -1,6 +1,6 @@
-import * as RedGPU from "../../../../../dist/index.js";
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js";
-import {createEventInfoBox, updateEventInfo} from "../../../../3d/interaction/mouseEvent/eventInfoBox.js";
+import * as RedGPU from "../../../../../dist/index.js?t=1781131404967";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1781131404967";
+import {createEventInfoBox, updateEventInfo} from "../../../../3d/interaction/mouseEvent/eventInfoBox.js?t=1781131404967";
 
 /**
  * [KO] SpriteSheet2D 마우스 이벤트 예제

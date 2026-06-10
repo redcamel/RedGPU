@@ -1,0 +1,34 @@
+import RedGPUContext from "../context/RedGPUContext";
+import Primitive from "./core/Primitive";
+/**
+ * [KO] Cone(원뿔) 기본 도형 클래스입니다.
+ * [EN] Cone primitive geometry class.
+ *
+ * [KO] 반지름, 높이, 세그먼트 등을 기반으로 3D 원뿔 형태의 데이터를 생성하여 관리합니다.
+ * [EN] Generates and manages 3D cone data based on radius, height, segments, etc.
+ *
+ * ### Example
+ * ```typescript
+ * // 반지름 1, 높이 2짜리 원뿔 생성
+ * const cone = new RedGPU.Primitive.Cone(redGPUContext, 1, 2);
+ * ```
+ * <iframe src="/RedGPU/examples/3d/primitive/cone/" style="width:100%; height:500px;"></iframe>
+ * @category Primitive
+ */
+declare class Cone extends Primitive {
+    /**
+     * [KO] Cone 인스턴스를 생성합니다.
+     * [EN] Creates an instance of Cone.
+     *
+     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
+     * @param radius - [KO] 밑면 반지름 (기본값 1) [EN] Base radius (default 1)
+     * @param height - [KO] 높이 (기본값 1) [EN] Height (default 1)
+     * @param radialSegments - [KO] 원주 방향 분할 수 (기본값 32) [EN] Radial segments (default 32)
+     * @param heightSegments - [KO] 높이 방향 분할 수 (기본값 1) [EN] Height segments (default 1)
+     * @param capBottom - [KO] 밑면을 닫을지 여부 (기본값 true) [EN] Whether to close the bottom cap (default true)
+     * @param thetaStart - [KO] 시작 각도 (라디안, 기본값 0) [EN] Start angle (radians, default 0)
+     * @param thetaLength - [KO] 원호 각도 (라디안, 기본값 2*PI) [EN] Arc angle (radians, default 2*PI)
+     */
+    constructor(redGPUContext: RedGPUContext, radius?: number, height?: number, radialSegments?: number, heightSegments?: number, capBottom?: boolean, thetaStart?: number, thetaLength?: number);
+}
+export default Cone;
