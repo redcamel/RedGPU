@@ -19,8 +19,8 @@ features **automatic exposure (`useAutoExposure`) enabled by default (`true`)**,
 the optimal screen brightness in real-time based on the environmental lighting.
 
 ```javascript
-// Create an instance (Context injection required)
-const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+// Create an instance (Context injection not required)
+const camera = new RedGPU.Camera.PerspectiveCamera();
 
 // 1. Control automatic exposure activation (Default: true)
 camera.useAutoExposure = true;
@@ -79,7 +79,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
     
     // 1. PerspectiveCamera setup
-    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+    const camera = new RedGPU.Camera.PerspectiveCamera();
     camera.y = 8; // Look down from a slightly high position
     
     // Field of View setup
@@ -144,7 +144,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     
     scene.lightManager.addDirectionalLight(dirLight);
 
-    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+    const camera = new RedGPU.Camera.PerspectiveCamera();
     camera.y = 8;
     
     // Field of View setup

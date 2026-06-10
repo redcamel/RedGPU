@@ -72,7 +72,7 @@ const canvas = document.getElementById('redgpu-canvas');
 
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
-    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+    const camera = new RedGPU.Camera.PerspectiveCamera();
     camera.z = -15; camera.y = 5;
     camera.lookAt(0, 0, 0);
 
@@ -134,7 +134,7 @@ const canvas = document.getElementById("redgpu-canvas");
 
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
-    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+    const camera = new RedGPU.Camera.PerspectiveCamera();
     camera.z = -15; camera.y = 5;
     camera.lookAt(0, 0, 0);
 

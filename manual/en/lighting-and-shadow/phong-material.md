@@ -136,7 +136,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     material.displacementTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, assetPath + 'test_displacementMap.jpg');
     
     material.displacementScale = 0.5;
-    material.specularPower = 32;
+    material.shininess = 32;
 
     const mesh = new RedGPU.Display.Mesh(
         redGPUContext, 

@@ -63,7 +63,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     scene.lightManager.addDirectionalLight(light);
 
     const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.intensity = 0.5;
+    ambientLight.intensityMultiplier = 0.5;
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. Setup Material and Texture

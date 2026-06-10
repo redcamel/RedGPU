@@ -225,7 +225,7 @@ mainView.setSize('100%', '100%');
 redGPUContext.addView(mainView);
 
 // 2. Setup Minimap View (Fixed top-right)
-const miniMapCamera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+const miniMapCamera = new RedGPU.Camera.PerspectiveCamera();
 miniMapCamera.y = 50;
 miniMapCamera.lookAt(0, 0, 0);
 
@@ -269,7 +269,7 @@ RedGPU.init(
 
         // Minimap view setup
         const miniMapSize = 200;
-        const miniMapCamera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+        const miniMapCamera = new RedGPU.Camera.PerspectiveCamera();
         miniMapCamera.y = 50;
         miniMapCamera.lookAt(0, 0, 0.1);
 

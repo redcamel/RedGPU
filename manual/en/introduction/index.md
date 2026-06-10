@@ -110,7 +110,7 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
 
         // 3. Create a Camera: Set up a Perspective projection camera
-        const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+        const camera = new RedGPU.Camera.PerspectiveCamera();
         camera.z = -5; // Move the camera back from the origin
 
         // 4. Create a Mesh: A combination of a shape (Box) and a material (Color)
@@ -162,7 +162,7 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const scene = new RedGPU.Display.Scene();
-        const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+const camera = new RedGPU.Camera.PerspectiveCamera();
         camera.z = -5;
 
         const geometry = new RedGPU.Primitive.Box(redGPUContext); 
@@ -222,4 +222,4 @@ Now that you've learned basic screen composition, explore the more powerful feat
 - **[Mesh](../basic-objects/mesh.md)**: How to create and control objects by combining geometry and material.
 - **[Lighting & Shadow](../lighting-and-shadow/phong-material.md)**: Realistic texture and shadow expression reacting to light.
 - **[Environment](../environment/skybox.md)**: How to set up Skybox and IBL.
-- **[Extended Objects](../assets/model-loading/index.md)**: How to use external 3D models and sprites.
+- **[Extended Objects](../assets/model-loading/index.md)**: How to use external 3D models and sprites.
