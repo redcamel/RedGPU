@@ -49,9 +49,9 @@ if (fs.existsSync(listPath)) {
 
 function getAllFiles(dir, fileList = []) {
     if (!fs.existsSync(dir)) return fileList;
-    if (dir.includes('node_modules')) return fileList;
     const files = fs.readdirSync(dir);
     files.forEach(file => {
+        if (file === 'node_modules') return; // node_modules 폴더는 스캔에서 제외
         const filePath = path.join(dir, file);
         const stat = fs.statSync(filePath);
         if (stat.isDirectory()) {
