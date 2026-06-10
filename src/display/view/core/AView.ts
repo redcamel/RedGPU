@@ -1,4 +1,6 @@
 import Camera2D from "../../../camera/camera/Camera2D";
+import OrthographicCamera from "../../../camera/camera/OrthographicCamera";
+import PerspectiveCamera from "../../../camera/camera/PerspectiveCamera";
 import AController from "../../../camera/core/AController";
 import RedGPUContext from "../../../context/RedGPUContext";
 import PickingManager from "../../../picking/core/PickingManager";
@@ -12,7 +14,7 @@ import Scene from "../../scene/Scene";
 import ViewTransform from "./ViewTransform";
 
 /**
- * [KO] View3D 및 View2D의 공통 기반이 되는 추상 클래스입니다.
+ * [KO] View3D 및 View2D of the common foundation that serves as an abstract base class.
  * [EN] Abstract base class that serves as a common foundation for View3D and View2D.
  *
  * [KO] RedGPU의 뷰 시스템에서 핵심 역할을 하며, Scene, Camera, PickingManager, 디버깅 도구(Grid, Axis), 후처리 효과(TAA, FXAA) 등을 포함합니다.
@@ -82,13 +84,18 @@ abstract class AView extends ViewTransform {
      * [KO] Scene 인스턴스
      * [EN] Scene instance
      * @param camera -
-     * [KO] AController 또는 Camera2D 인스턴스
-     * [EN] AController or Camera2D instance
+     * [KO] PerspectiveCamera, OrthographicCamera, AController 또는 Camera2D 인스턴스
+     * [EN] PerspectiveCamera, OrthographicCamera, AController or Camera2D instance
      * @param name -
      * [KO] 선택적 이름
      * [EN] Optional name
      */
-    protected constructor(redGPUContext: RedGPUContext, scene: Scene, camera: AController | Camera2D, name?: string) {
+    protected constructor(
+        redGPUContext: RedGPUContext,
+        scene: Scene,
+        camera: PerspectiveCamera | OrthographicCamera | AController | Camera2D,
+        name?: string
+    ) {
         super(redGPUContext)
         this.scene = scene
         this.camera = camera

@@ -123,12 +123,12 @@ RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
     
     // 1. 파란색 점광원
-    const blueLight = new RedGPU.Light.PointLight('#0000ff', 2.0);
+    const blueLight = new RedGPU.Light.PointLight('#0000ff');
     blueLight.radius = 15;
     scene.lightManager.addPointLight(blueLight);
 
     // 2. 빨간색 점광원
-    const redLight = new RedGPU.Light.PointLight('#ff0000', 2.0);
+    const redLight = new RedGPU.Light.PointLight('#ff0000');
     redLight.radius = 15;
     scene.lightManager.addPointLight(redLight);
 
@@ -194,16 +194,16 @@ const canvas = document.getElementById("redgpu-canvas");
 
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
-    
-    const blueLight = new RedGPU.Light.PointLight('#0000ff', 2.0);
+
+    const blueLight = new RedGPU.Light.PointLight('#0000ff');
     blueLight.radius = 15;
     scene.lightManager.addPointLight(blueLight);
 
-    const redLight = new RedGPU.Light.PointLight('#ff0000', 2.0);
+    const redLight = new RedGPU.Light.PointLight('#ff0000');
     redLight.radius = 15;
     scene.lightManager.addPointLight(redLight);
 
-    const material = new RedGPU.Material.PhongMaterial(redGPUContext);
+    const material = new RedGPU.Material.PhongMaterial(redGPUContext,'#ffffff');
     
     const floor = new RedGPU.Display.Mesh(
         redGPUContext,

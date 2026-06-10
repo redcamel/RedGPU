@@ -1,5 +1,7 @@
 import {mat4} from "gl-matrix";
 import Camera2D from "../../camera/camera/Camera2D";
+import OrthographicCamera from "../../camera/camera/OrthographicCamera";
+import PerspectiveCamera from "../../camera/camera/PerspectiveCamera";
 import AController from "../../camera/core/AController";
 import RedGPUContext from "../../context/RedGPUContext";
 import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
@@ -93,7 +95,7 @@ class View3D extends AView {
      * [KO] 뷰의 선택적 이름
      * [EN] Optional name of the view
      */
-    constructor(redGPUContext: RedGPUContext, scene: Scene, camera: AController | Camera2D, name?: string) {
+    constructor(redGPUContext: RedGPUContext, scene: Scene, camera: PerspectiveCamera | OrthographicCamera | AController | Camera2D, name?: string) {
         super(redGPUContext, scene, camera, name)
         this.#init()
         this.#viewRenderTextureManager = new ViewRenderTextureManager(this)

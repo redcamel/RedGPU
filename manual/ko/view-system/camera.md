@@ -19,8 +19,8 @@ RedGPU 는 용도에 따라 세 가지 표준 투영 방식을 지원합니다.
 실시간으로 화면의 적정 밝기 노출값을 자동 계산해주는 **자동 노출(`useAutoExposure`) 기능이 기본 활성화(`true`)** 되어 동작합니다.
 
 ```javascript
-// 인스턴스 생성 (Context 주입 필요)
-const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+// 인스턴스 생성 (Context 주입 불필요)
+const camera = new RedGPU.Camera.PerspectiveCamera();
 
 // 1. 자동 노출 기능 활성화 여부 제어 (기본값: true)
 camera.useAutoExposure = true;
@@ -77,7 +77,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
     
     // 1. PerspectiveCamera 설정
-    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+    const camera = new RedGPU.Camera.PerspectiveCamera();
     camera.y = 8; // 약간 높은 위치에서 내려다보기
     
     // fieldOfView 설정
@@ -142,7 +142,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     
     scene.lightManager.addDirectionalLight(dirLight);
 
-    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+    const camera = new RedGPU.Camera.PerspectiveCamera();
     camera.y = 8;
     
     // fieldOfView 설정

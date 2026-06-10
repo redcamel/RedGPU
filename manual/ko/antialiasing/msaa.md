@@ -49,7 +49,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     scene.lightManager.addDirectionalLight(light);
     
     const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.intensity = 0.3;
+    ambientLight.intensityMultiplier = 0.3;
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. 미세한 그리드 바닥 (패턴 알리어싱 확인용)

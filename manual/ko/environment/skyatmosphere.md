@@ -88,7 +88,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     
     // 1. 태양 역할을 할 DirectionalLight 생성
     const sunLight = new RedGPU.Light.DirectionalLight();
-    scene.addLight(sunLight);
+  scene.lightManager.addDirectionalLight(sunLight);
 
     // 2. SkyAtmosphere 생성 및 적용
     const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);

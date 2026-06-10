@@ -110,7 +110,7 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
 
         // 3. 카메라 생성: 원근 투영(Perspective) 카메라 설정
-        const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+        const camera = new RedGPU.Camera.PerspectiveCamera();
         camera.z = -5; // 카메라를 원점으로부터 뒤로 이동
 
         // 4. 메시(Mesh) 생성: 형태(Box)와 재질(Color)의 결합
@@ -162,7 +162,7 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const scene = new RedGPU.Display.Scene();
-        const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+const camera = new RedGPU.Camera.PerspectiveCamera();
         camera.z = -5;
 
         const geometry = new RedGPU.Primitive.Box(redGPUContext); 
