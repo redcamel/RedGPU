@@ -85,7 +85,7 @@ class PerspectiveCamera extends ACamera {
      * [KO] 원평면(far)
      * [EN] Far clipping plane
      */
-    #farClipping: number = 100000;
+    #farClipping: number = 50000;
 
     /**
      * [KO] PerspectiveCamera 인스턴스를 생성합니다.
