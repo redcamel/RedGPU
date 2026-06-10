@@ -1,5 +1,5 @@
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1781133866175";
-import * as RedGPU from "../../../../dist/index.js?t=1781133866175";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1781134103100";
+import * as RedGPU from "../../../../dist/index.js?t=1781134103100";
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
 const canvas = document.createElement('canvas');
