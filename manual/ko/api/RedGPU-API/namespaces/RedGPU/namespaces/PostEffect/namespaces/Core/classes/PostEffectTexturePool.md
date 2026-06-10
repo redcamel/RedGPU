@@ -6,7 +6,7 @@
 
 # Class: PostEffectTexturePool
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:25](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/PostEffectTexturePool.ts#L25)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:25](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/PostEffectTexturePool.ts#L25)
 
 후처리용 텍스처 풀링 클래스입니다.
 
@@ -33,7 +33,7 @@ const texturePool = view.postEffectManager.texturePool;
 
 > **new PostEffectTexturePool**(`redGPUContext`): `PostEffectTexturePool`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:43](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/PostEffectTexturePool.ts#L43)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:43](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/PostEffectTexturePool.ts#L43)
 
 PostEffectTexturePool 인스턴스를 생성합니다.
 
@@ -59,7 +59,7 @@ PostEffectTexturePool 인스턴스를 생성합니다.
 
 > **get** **activeCount**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:80](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/PostEffectTexturePool.ts#L80)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:80](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/PostEffectTexturePool.ts#L80)
 
 현재 사용 중인 활성 텍스처 개수를 반환합니다.
 
@@ -77,7 +77,7 @@ Defined in: [src/postEffect/core/PostEffectTexturePool.ts:80](https://github.com
 
 > **get** **allocationCount**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:118](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/PostEffectTexturePool.ts#L118)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:118](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/PostEffectTexturePool.ts#L118)
 
 신규로 생성된 총 텍스처 횟수를 반환합니다.
 
@@ -95,7 +95,7 @@ Defined in: [src/postEffect/core/PostEffectTexturePool.ts:118](https://github.co
 
 > **get** **hitRate**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:130](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/PostEffectTexturePool.ts#L130)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:130](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/PostEffectTexturePool.ts#L130)
 
 재사용 적중률(Hit Rate)을 반환합니다. (0~1)
 
@@ -113,7 +113,7 @@ Defined in: [src/postEffect/core/PostEffectTexturePool.ts:130](https://github.co
 
 > **get** **idleCount**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:92](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/PostEffectTexturePool.ts#L92)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:92](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/PostEffectTexturePool.ts#L92)
 
 풀에서 대기 중인 유휴 텍스처 개수를 반환합니다.
 
@@ -131,7 +131,7 @@ Defined in: [src/postEffect/core/PostEffectTexturePool.ts:92](https://github.com
 
 > **get** **peakActiveCount**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:106](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/PostEffectTexturePool.ts#L106)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:106](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/PostEffectTexturePool.ts#L106)
 
 역대 최대 동시 활성 텍스처 수를 반환합니다.
 
@@ -149,7 +149,7 @@ Defined in: [src/postEffect/core/PostEffectTexturePool.ts:106](https://github.co
 
 > **get** **totalCount**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:68](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/PostEffectTexturePool.ts#L68)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:68](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/PostEffectTexturePool.ts#L68)
 
 풀 내의 전체 텍스처 개수(활성 + 유휴)를 반환합니다.
 
@@ -167,7 +167,7 @@ Defined in: [src/postEffect/core/PostEffectTexturePool.ts:68](https://github.com
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:56](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/PostEffectTexturePool.ts#L56)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:56](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/PostEffectTexturePool.ts#L56)
 
 풀 내의 전체 비디오 메모리 사용량(bytes)을 반환합니다.
 
@@ -183,7 +183,7 @@ Defined in: [src/postEffect/core/PostEffectTexturePool.ts:56](https://github.com
 
 > **allocResult**(`width`, `height`, `format?`): [`IPostEffectResult`](../interfaces/IPostEffectResult.md)
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:174](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/PostEffectTexturePool.ts#L174)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:174](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/PostEffectTexturePool.ts#L174)
 
 적절한 텍스처를 풀에서 가져오거나 새로 생성하여 IPostEffectResult 형식으로 반환합니다.
 
@@ -207,7 +207,7 @@ Defined in: [src/postEffect/core/PostEffectTexturePool.ts:174](https://github.co
 
 > **clear**(): `void`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:218](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/PostEffectTexturePool.ts#L218)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:218](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/PostEffectTexturePool.ts#L218)
 
 풀에 있는 모든 텍스처를 파기합니다.
 
@@ -221,7 +221,7 @@ Defined in: [src/postEffect/core/PostEffectTexturePool.ts:218](https://github.co
 
 > **getDetails**(): `any`[]
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:143](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/PostEffectTexturePool.ts#L143)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:143](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/PostEffectTexturePool.ts#L143)
 
 풀에 담긴 상세 내역을 반환합니다.
 
@@ -237,7 +237,7 @@ Defined in: [src/postEffect/core/PostEffectTexturePool.ts:143](https://github.co
 
 > **release**(`texture`): `void`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:190](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/PostEffectTexturePool.ts#L190)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:190](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/PostEffectTexturePool.ts#L190)
 
 특정 텍스처를 풀로 반환합니다.
 
@@ -257,7 +257,7 @@ Defined in: [src/postEffect/core/PostEffectTexturePool.ts:190](https://github.co
 
 > **releaseAll**(): `void`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:204](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/postEffect/core/PostEffectTexturePool.ts#L204)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:204](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/PostEffectTexturePool.ts#L204)
 
 사용 중인 모든 텍스처를 풀로 반환합니다.
 
@@ -279,7 +279,7 @@ Defined in: [src/postEffect/core/PostEffectTexturePool.ts:204](https://github.co
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/base/RedGPUObject.ts#L76)
 
 안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -301,7 +301,7 @@ AntialiasingManager 인스턴스
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/base/RedGPUObject.ts#L88)
 
 커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -323,7 +323,7 @@ CommandEncoderManager 인스턴스
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/base/RedGPUObject.ts#L52)
 
 WebGPU 디바이스 객체를 반환합니다. (단축 경로)
 
@@ -345,7 +345,7 @@ GPUDevice 인스턴스
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/base/BaseObject.ts#L58)
 
 객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
 
@@ -359,7 +359,7 @@ Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L71)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/base/BaseObject.ts#L71)
 
 객체의 이름을 설정합니다.
 
@@ -385,7 +385,7 @@ Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/base/RedGPUObject.ts#L40)
 
 RedGPUContext 인스턴스를 반환합니다.
 
@@ -407,7 +407,7 @@ RedGPUContext 인스턴스
 
 > **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/base/RedGPUObject.ts#L64)
 
 리소스 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -429,7 +429,7 @@ ResourceManager 인스턴스
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/base/BaseObject.ts#L46)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 

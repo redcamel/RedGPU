@@ -8,7 +8,7 @@
 
 > `const` **getLuminance**: `string` = `getLuminance_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:1121](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/systemCodeManager/ShaderLibrary.ts#L1121)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:1121](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/systemCodeManager/ShaderLibrary.ts#L1121)
 
 RGB 색상의 휘도(Luminance)를 계산합니다. (Rec. 709 표준 가중치 적용)
 

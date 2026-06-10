@@ -8,7 +8,7 @@
 
 > `const` **getHammersley**: `string` = `getHammersley_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:384](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/systemCodeManager/ShaderLibrary.ts#L384)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:384](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/systemCodeManager/ShaderLibrary.ts#L384)
 
 균일한 분포를 가지는 2D 준난수(Low-Discrepancy Sequence)를 생성합니다. (IBL 등 중요도 샘플링에 필수적입니다.)
 

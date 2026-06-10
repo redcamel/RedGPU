@@ -8,7 +8,7 @@
 
 > `const` **getInterleavedGradientNoise**: `string` = `getInterleavedGradientNoise_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:401](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/systemCodeManager/ShaderLibrary.ts#L401)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:401](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/systemCodeManager/ShaderLibrary.ts#L401)
 
 Generates Interleaved Gradient Noise by Jorge Jimenez. (Ultra-fast noise for dithering and sample rotation)
 

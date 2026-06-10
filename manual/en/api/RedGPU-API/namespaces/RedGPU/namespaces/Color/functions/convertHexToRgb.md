@@ -10,7 +10,7 @@
 
 > **convertHexToRgb**(`hex`, `returnArrayYn`): \[`number`, `number`, `number`\]
 
-Defined in: [src/color/convertHexToRgb.ts:30](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/convertHexToRgb.ts#L30)
+Defined in: [src/color/convertHexToRgb.ts:30](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/color/convertHexToRgb.ts#L30)
 
 Converts a hexadecimal (Hex) color value to an RGB color.
 
@@ -43,7 +43,7 @@ Throws Error if the input value is not a valid hexadecimal color format
 
 > **convertHexToRgb**(`hex`, `returnArrayYn?`): `object`
 
-Defined in: [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/convertHexToRgb.ts#L31)
+Defined in: [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/color/convertHexToRgb.ts#L31)
 
 Converts a hexadecimal (Hex) color value to an RGB color.
 
@@ -70,9 +70,9 @@ Converted RGB color data. Returns an [r, g, b] array if returnArrayYn is true, o
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `b` | `number` | [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/convertHexToRgb.ts#L31) |
-| `g` | `number` | [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/convertHexToRgb.ts#L31) |
-| `r` | `number` | [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/convertHexToRgb.ts#L31) |
+| `b` | `number` | [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/color/convertHexToRgb.ts#L31) |
+| `g` | `number` | [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/color/convertHexToRgb.ts#L31) |
+| `r` | `number` | [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/color/convertHexToRgb.ts#L31) |
 
 ### Throws
 
@@ -82,7 +82,7 @@ Throws Error if the input value is not a valid hexadecimal color format
 
 > **convertHexToRgb**(`hex`, `returnArrayYn?`): \[`number`, `number`, `number`\] \| \{ `b`: `number`; `g`: `number`; `r`: `number`; \}
 
-Defined in: [src/color/convertHexToRgb.ts:32](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/color/convertHexToRgb.ts#L32)
+Defined in: [src/color/convertHexToRgb.ts:32](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/color/convertHexToRgb.ts#L32)
 
 Converts a hexadecimal (Hex) color value to an RGB color.
 

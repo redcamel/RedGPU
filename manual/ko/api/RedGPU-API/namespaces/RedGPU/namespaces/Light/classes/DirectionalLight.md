@@ -6,7 +6,7 @@
 
 # Class: DirectionalLight
 
-Defined in: [src/light/lights/DirectionalLight.ts:19](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/DirectionalLight.ts#L19)
+Defined in: [src/light/lights/DirectionalLight.ts:19](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/DirectionalLight.ts#L19)
 
 방향성 광원을 정의하는 클래스입니다.
 
@@ -27,7 +27,7 @@ scene.lightManager.addDirectionalLight(light);
 
 > **new DirectionalLight**(`direction?`, `color?`, `lux?`): `DirectionalLight`
 
-Defined in: [src/light/lights/DirectionalLight.ts:42](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/DirectionalLight.ts#L42)
+Defined in: [src/light/lights/DirectionalLight.ts:42](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/DirectionalLight.ts#L42)
 
 새로운 DirectionalLight 인스턴스를 생성합니다.
 
@@ -55,7 +55,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:42](https://github.com/redcame
 
 > **get** **azimuth**(): `number`
 
-Defined in: [src/light/lights/DirectionalLight.ts:87](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/DirectionalLight.ts#L87)
+Defined in: [src/light/lights/DirectionalLight.ts:87](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/DirectionalLight.ts#L87)
 
 광원의 방위각(Azimuth, 도)입니다.
 
@@ -67,7 +67,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:87](https://github.com/redcame
 
 > **set** **azimuth**(`value`): `void`
 
-Defined in: [src/light/lights/DirectionalLight.ts:91](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/DirectionalLight.ts#L91)
+Defined in: [src/light/lights/DirectionalLight.ts:91](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/DirectionalLight.ts#L91)
 
 ##### Parameters
 
@@ -87,7 +87,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:91](https://github.com/redcame
 
 > **get** **direction**(): \[`number`, `number`, `number`\]
 
-Defined in: [src/light/lights/DirectionalLight.ts:139](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/DirectionalLight.ts#L139)
+Defined in: [src/light/lights/DirectionalLight.ts:139](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/DirectionalLight.ts#L139)
 
 광원의 전체 방향 벡터를 반환합니다.
 
@@ -99,7 +99,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:139](https://github.com/redcam
 
 > **set** **direction**(`value`): `void`
 
-Defined in: [src/light/lights/DirectionalLight.ts:147](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/DirectionalLight.ts#L147)
+Defined in: [src/light/lights/DirectionalLight.ts:147](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/DirectionalLight.ts#L147)
 
 광원의 전체 방향 벡터를 설정합니다.
 
@@ -121,7 +121,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:147](https://github.com/redcam
 
 > **get** **directionX**(): `number`
 
-Defined in: [src/light/lights/DirectionalLight.ts:100](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/DirectionalLight.ts#L100)
+Defined in: [src/light/lights/DirectionalLight.ts:100](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/DirectionalLight.ts#L100)
 
 광원의 X 방향 벡터 값입니다.
 
@@ -133,7 +133,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:100](https://github.com/redcam
 
 > **set** **directionX**(`value`): `void`
 
-Defined in: [src/light/lights/DirectionalLight.ts:104](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/DirectionalLight.ts#L104)
+Defined in: [src/light/lights/DirectionalLight.ts:104](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/DirectionalLight.ts#L104)
 
 ##### Parameters
 
@@ -153,7 +153,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:104](https://github.com/redcam
 
 > **get** **directionY**(): `number`
 
-Defined in: [src/light/lights/DirectionalLight.ts:113](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/DirectionalLight.ts#L113)
+Defined in: [src/light/lights/DirectionalLight.ts:113](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/DirectionalLight.ts#L113)
 
 광원의 Y 방향 벡터 값입니다.
 
@@ -165,7 +165,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:113](https://github.com/redcam
 
 > **set** **directionY**(`value`): `void`
 
-Defined in: [src/light/lights/DirectionalLight.ts:117](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/DirectionalLight.ts#L117)
+Defined in: [src/light/lights/DirectionalLight.ts:117](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/DirectionalLight.ts#L117)
 
 ##### Parameters
 
@@ -185,7 +185,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:117](https://github.com/redcam
 
 > **get** **directionZ**(): `number`
 
-Defined in: [src/light/lights/DirectionalLight.ts:126](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/DirectionalLight.ts#L126)
+Defined in: [src/light/lights/DirectionalLight.ts:126](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/DirectionalLight.ts#L126)
 
 광원의 Z 방향 벡터 값입니다.
 
@@ -197,7 +197,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:126](https://github.com/redcam
 
 > **set** **directionZ**(`value`): `void`
 
-Defined in: [src/light/lights/DirectionalLight.ts:130](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/DirectionalLight.ts#L130)
+Defined in: [src/light/lights/DirectionalLight.ts:130](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/DirectionalLight.ts#L130)
 
 ##### Parameters
 
@@ -217,7 +217,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:130](https://github.com/redcam
 
 > **get** **elevation**(): `number`
 
-Defined in: [src/light/lights/DirectionalLight.ts:74](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/DirectionalLight.ts#L74)
+Defined in: [src/light/lights/DirectionalLight.ts:74](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/DirectionalLight.ts#L74)
 
 광원의 고도(Elevation, 도)입니다.
 
@@ -229,7 +229,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:74](https://github.com/redcame
 
 > **set** **elevation**(`value`): `void`
 
-Defined in: [src/light/lights/DirectionalLight.ts:78](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/DirectionalLight.ts#L78)
+Defined in: [src/light/lights/DirectionalLight.ts:78](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/DirectionalLight.ts#L78)
 
 ##### Parameters
 
@@ -249,7 +249,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:78](https://github.com/redcame
 
 > **get** **lux**(): `number`
 
-Defined in: [src/light/lights/DirectionalLight.ts:55](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/DirectionalLight.ts#L55)
+Defined in: [src/light/lights/DirectionalLight.ts:55](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/DirectionalLight.ts#L55)
 
 광원의 조도(Lux, lx)를 반환합니다.
 
@@ -263,7 +263,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:55](https://github.com/redcame
 
 > **set** **lux**(`value`): `void`
 
-Defined in: [src/light/lights/DirectionalLight.ts:66](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/lights/DirectionalLight.ts#L66)
+Defined in: [src/light/lights/DirectionalLight.ts:66](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/DirectionalLight.ts#L66)
 
 광원의 조도(Lux, lx)를 설정합니다.
 
@@ -289,7 +289,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:66](https://github.com/redcame
 
 > **drawDebugger**: [`ADrawDebuggerLight`](../../Display/namespaces/drawDebugger/classes/ADrawDebuggerLight.md)\<[`ABaseLight`](../namespaces/Core/classes/ABaseLight.md)\>
 
-Defined in: [src/light/core/ABaseLight.ts:22](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/core/ABaseLight.ts#L22)
+Defined in: [src/light/core/ABaseLight.ts:22](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/core/ABaseLight.ts#L22)
 
 광원의 디버깅 시각화를 위한 도우미 객체입니다.
 
@@ -307,7 +307,7 @@ Defined in: [src/light/core/ABaseLight.ts:22](https://github.com/redcamel/RedGPU
 
 > **get** **color**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/core/ABaseLight.ts#L84)
+Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/core/ABaseLight.ts#L84)
 
 광원의 색상을 반환합니다.
 
@@ -321,7 +321,7 @@ ColorRGB 객체
 
 > **set** **color**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:95](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/core/ABaseLight.ts#L95)
+Defined in: [src/light/core/ABaseLight.ts:95](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/core/ABaseLight.ts#L95)
 
 광원의 색상을 설정합니다.
 
@@ -347,7 +347,7 @@ Defined in: [src/light/core/ABaseLight.ts:95](https://github.com/redcamel/RedGPU
 
 > **get** **enableDebugger**(): `boolean`
 
-Defined in: [src/light/core/ABaseLight.ts:62](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/core/ABaseLight.ts#L62)
+Defined in: [src/light/core/ABaseLight.ts:62](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/core/ABaseLight.ts#L62)
 
 디버깅 시각화 기능의 활성화 여부를 반환합니다.
 
@@ -361,7 +361,7 @@ Defined in: [src/light/core/ABaseLight.ts:62](https://github.com/redcamel/RedGPU
 
 > **set** **enableDebugger**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:73](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/core/ABaseLight.ts#L73)
+Defined in: [src/light/core/ABaseLight.ts:73](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/core/ABaseLight.ts#L73)
 
 디버깅 시각화 기능을 활성화하거나 비활성화합니다.
 
@@ -387,7 +387,7 @@ Defined in: [src/light/core/ABaseLight.ts:73](https://github.com/redcamel/RedGPU
 
 > **get** **intensityMultiplier**(): `number`
 
-Defined in: [src/light/core/ABaseLight.ts:109](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/core/ABaseLight.ts#L109)
+Defined in: [src/light/core/ABaseLight.ts:109](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/core/ABaseLight.ts#L109)
 
 광원의 세기 배율을 반환합니다.
 
@@ -401,7 +401,7 @@ Defined in: [src/light/core/ABaseLight.ts:109](https://github.com/redcamel/RedGP
 
 > **set** **intensityMultiplier**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:120](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/light/core/ABaseLight.ts#L120)
+Defined in: [src/light/core/ABaseLight.ts:120](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/core/ABaseLight.ts#L120)
 
 광원의 세기 배율을 설정합니다.
 

@@ -8,7 +8,7 @@
 
 > `const` **getRadicalInverseVanDerCorput**: `string` = `getRadicalInverseVanDerCorput_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:366](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/systemCodeManager/ShaderLibrary.ts#L366)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:366](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/systemCodeManager/ShaderLibrary.ts#L366)
 
 입력된 정수의 비트 순서를 뒤집어 0~1 사이의 소수(Van der Corput 시퀀스)를 반환합니다.
 

@@ -8,7 +8,7 @@
 
 > `const` **getViewNormalFromGNormalBuffer**: `string` = `getViewNormalFromGNormalBuffer_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:763](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/systemCodeManager/ShaderLibrary.ts#L763)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:763](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/systemCodeManager/ShaderLibrary.ts#L763)
 
 Reconstructs view space normal vector from G-Buffer data and camera matrix.
 

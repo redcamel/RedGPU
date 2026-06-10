@@ -6,7 +6,7 @@
 
 # Class: VertexInterleavedStruct
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:18](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L18)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:18](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L18)
 
 Class that defines a structure for interleaving vertex attributes.
 
@@ -24,7 +24,7 @@ const struct = new RedGPU.Resource.VertexInterleavedStruct({
 
 > **new VertexInterleavedStruct**(`attributes`, `name?`): `VertexInterleavedStruct`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:34](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L34)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:34](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L34)
 
 Creates a VertexInterleavedStruct instance.
 
@@ -47,7 +47,7 @@ Creates a VertexInterleavedStruct instance.
 
 > **get** **arrayStride**(): `number`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:63](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L63)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:63](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L63)
 
 Returns the total stride (byte size).
 
@@ -65,7 +65,7 @@ Returns the total stride (byte size).
 
 > **get** **attributes**(): `any`[]
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:54](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L54)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:54](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L54)
 
 Returns the array of GPU vertex attributes.
 
@@ -83,7 +83,7 @@ Returns the array of GPU vertex attributes.
 
 > **get** **define**(): `Record`\<`string`, [`VertexInterleavedStructElement`](../namespaces/CoreVertexBuffer/classes/VertexInterleavedStructElement.md)\>
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:72](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L72)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:72](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L72)
 
 Returns the internal attribute definition map.
 
@@ -101,7 +101,7 @@ Returns the internal attribute definition map.
 
 > **get** **label**(): `string`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:45](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L45)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:45](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L45)
 
 Returns the label (name) of the structure.
 
@@ -117,7 +117,7 @@ Returns the label (name) of the structure.
 
 > **getAttributeOffset**(`attributeName`): `number`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:82](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L82)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts:82](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/buffer/vertexBuffer/VertexInterleavedStruct.ts#L82)
 
 Returns the offset (float unit index) of a specific attribute.
 

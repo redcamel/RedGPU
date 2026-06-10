@@ -6,7 +6,7 @@
 
 # Class: Plane
 
-Defined in: [src/primitive/Plane.ts:19](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/Plane.ts#L19)
+Defined in: [src/primitive/Plane.ts:19](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/primitive/Plane.ts#L19)
 
 Plane(평면) 기본 도형 클래스입니다.
 
@@ -28,7 +28,7 @@ const plane = new RedGPU.Plane(redGPUContext, 2, 2);
 
 > **new Plane**(`redGPUContext`, `width?`, `height?`, `widthSegments?`, `heightSegments?`, `flipY?`): `Plane`
 
-Defined in: [src/primitive/Plane.ts:31](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/Plane.ts#L31)
+Defined in: [src/primitive/Plane.ts:31](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/primitive/Plane.ts#L31)
 
 Plane 인스턴스를 생성합니다.
 
@@ -67,7 +67,7 @@ Plane 인스턴스를 생성합니다.
 
 > **get** **gpuRenderInfo**(): `object`
 
-Defined in: [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L51)
+Defined in: [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/primitive/core/Primitive.ts#L51)
 
 ##### Returns
 
@@ -75,7 +75,7 @@ Defined in: [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/Red
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L51) |
+| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/primitive/core/Primitive.ts#L51) |
 
 #### Inherited from
 
@@ -89,7 +89,7 @@ Defined in: [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/Red
 
 > **get** **indexBuffer**(): [`IndexBuffer`](../../Resource/classes/IndexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:59](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L59)
+Defined in: [src/primitive/core/Primitive.ts:59](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/primitive/core/Primitive.ts#L59)
 
 ##### Returns
 
@@ -107,7 +107,7 @@ Defined in: [src/primitive/core/Primitive.ts:59](https://github.com/redcamel/Red
 
 > **get** **vertexBuffer**(): [`VertexBuffer`](../../Resource/classes/VertexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:55](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L55)
+Defined in: [src/primitive/core/Primitive.ts:55](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/primitive/core/Primitive.ts#L55)
 
 ##### Returns
 
@@ -125,7 +125,7 @@ Defined in: [src/primitive/core/Primitive.ts:55](https://github.com/redcamel/Red
 
 > **get** **volume**(): [`AABB`](../../Bound/classes/AABB.md)
 
-Defined in: [src/primitive/core/Primitive.ts:63](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L63)
+Defined in: [src/primitive/core/Primitive.ts:63](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/primitive/core/Primitive.ts#L63)
 
 ##### Returns
 
@@ -143,7 +143,7 @@ Defined in: [src/primitive/core/Primitive.ts:63](https://github.com/redcamel/Red
 
 > **get** `static` **primitiveInterleaveStruct**(): [`VertexInterleavedStruct`](../../Resource/classes/VertexInterleavedStruct.md)
 
-Defined in: [src/primitive/core/Primitive.ts:47](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L47)
+Defined in: [src/primitive/core/Primitive.ts:47](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/primitive/core/Primitive.ts#L47)
 
 캐싱된 정점 인터리브 구조를 반환합니다.
 
@@ -161,7 +161,7 @@ Defined in: [src/primitive/core/Primitive.ts:47](https://github.com/redcamel/Red
 
 > `static` **generateUniqueKey**(`name`, `params`): `string`
 
-Defined in: [src/primitive/core/Primitive.ts:68](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/primitive/core/Primitive.ts#L68)
+Defined in: [src/primitive/core/Primitive.ts:68](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/primitive/core/Primitive.ts#L68)
 
 #### Parameters
 

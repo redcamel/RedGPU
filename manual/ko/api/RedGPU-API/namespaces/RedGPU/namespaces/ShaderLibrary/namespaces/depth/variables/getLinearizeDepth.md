@@ -8,7 +8,7 @@
 
 > `const` **getLinearizeDepth**: `string` = `getLinearizeDepth_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:1386](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/systemCodeManager/ShaderLibrary.ts#L1386)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:1386](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/systemCodeManager/ShaderLibrary.ts#L1386)
 
 비선형 깊이(Depth) 값을 선형 거리로 복구합니다. (Stable Version)
 

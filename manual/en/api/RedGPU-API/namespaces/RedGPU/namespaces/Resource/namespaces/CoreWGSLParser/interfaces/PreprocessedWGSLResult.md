@@ -6,7 +6,7 @@
 
 # Interface: PreprocessedWGSLResult
 
-Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:28](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/preprocessWGSL.ts#L28)
+Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:28](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/wgslParser/core/preprocessWGSL.ts#L28)
 
 Preprocessed WGSL result interface
 
@@ -16,7 +16,7 @@ Preprocessed WGSL result interface
 
 > **cacheKey**: `string`
 
-Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:29](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/preprocessWGSL.ts#L29)
+Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:29](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/wgslParser/core/preprocessWGSL.ts#L29)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:29](https://github.
 
 > **conditionalBlockInfos**: [`ConditionalBlock`](ConditionalBlock.md)[]
 
-Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:33](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/preprocessWGSL.ts#L33)
+Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:33](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/wgslParser/core/preprocessWGSL.ts#L33)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:33](https://github.
 
 > **conditionalBlocks**: `string`[]
 
-Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:32](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/preprocessWGSL.ts#L32)
+Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:32](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/wgslParser/core/preprocessWGSL.ts#L32)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:32](https://github.
 
 > **defaultSource**: `string`
 
-Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:30](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/preprocessWGSL.ts#L30)
+Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:30](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/wgslParser/core/preprocessWGSL.ts#L30)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:30](https://github.
 
 > **shaderSourceVariant**: [`ShaderVariantGenerator`](../classes/ShaderVariantGenerator.md)
 
-Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:31](https://github.com/redcamel/RedGPU/blob/07ca821aa5a5e0e3029b4e96ef3f9523994db21c/src/resources/wgslParser/core/preprocessWGSL.ts#L31)
+Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:31](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/wgslParser/core/preprocessWGSL.ts#L31)
