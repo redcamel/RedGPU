@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../dist/index.js?t=1781132303147";
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1781132303147";
+import * as RedGPU from "../../../dist/index.js?t=1781132971803";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1781132971803";
 
 /**
  * [KO] Hello World 2D 예제

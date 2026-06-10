@@ -1,5 +1,5 @@
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1781132303147";
-import * as RedGPU from "../../../../../dist/index.js?t=1781132303147";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1781132971803";
+import * as RedGPU from "../../../../../dist/index.js?t=1781132971803";
 /**
  * [KO] Clearcoat Wicker 예제
  * [EN] Clearcoat Wicker example
