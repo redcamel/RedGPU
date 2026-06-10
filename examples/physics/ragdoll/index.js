@@ -1,5 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770713934910";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1778922031603";
+import * as RedGPU from "../../../dist/index.js?t=1778922031603";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1778922031603";
 
 const canvas = document.body.appendChild(document.createElement('canvas'));
 
@@ -31,8 +32,6 @@ RedGPU.init(
 		await physicsEngine.init();
 		scene.physicsEngine = physicsEngine;
 
-		scene.lightManager.ambientLight = new RedGPU.Light.AmbientLight();
-		scene.lightManager.ambientLight.intensity = 0.5;
 		scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
 
 		// [KO] 1. 바닥 생성 (시인성을 위해 밝은 회색 적용)
@@ -155,10 +154,11 @@ RedGPU.init(
  * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, spawnRagdoll, resetScene) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
-	pane.addButton({ title: 'Spawn Ragdoll' }).on('click', () => spawnRagdoll((Math.random() * 10) - 5, (Math.random() * 10) - 5));
-	pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
+	
+	new RedGPUExampleHelper(redGPUContext, {
+		gui: (pane) => {
+			pane.addButton({ title: 'Spawn Ragdoll' }).on('click', () => spawnRagdoll((Math.random() * 10) - 5, (Math.random() * 10) - 5));
+			pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
+		}
+	});
 };

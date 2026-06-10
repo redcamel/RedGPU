@@ -1,21 +1,53 @@
 <!DOCTYPE html>
-<!--
-	[KO] 비트맵 및 폰 머티리얼의 UV 트랜스폼(Offset, Scale) 기능을 테스트하는 예제입니다. 모든 계산은 버텍스 쉐이더에서 최적화되어 수행됩니다.
-	[EN] Example testing the UV Transform (Offset, Scale) feature of bitmap and phong materials. All calculations are optimized and performed in the vertex shader.
--->
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-	<meta http-equiv="Pragma" content="no-cache">
-	<meta http-equiv="Expires" content="0">
+    <title>UV Transform</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tests how to implement scrolling effects or tiling by adjusting the texture offset and scale of the material.">
+    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, material, uvTransform, UV Transform">
+    <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/index.html">
 
-	<link rel="stylesheet" href="../../../exampleHelper/createExample/example.css"/>
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/index.html">
+    <meta property="og:title" content="UV Transform">
+    <meta property="og:description" content="Tests how to implement scrolling effects or tiling by adjusting the texture offset and scale of the material.">
+    <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/thumb.webp">
 
-	<script src="index.js?t=1770713934910" type="module"></script>
-	<script src="../../../exampleHelper/createExample/loadExampleInfo/index.js?t=1770713934910" type="module"></script>
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/index.html">
+    <meta property="twitter:title" content="UV Transform">
+    <meta property="twitter:description" content="Tests how to implement scrolling effects or tiling by adjusting the texture offset and scale of the material.">
+    <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/thumb.webp">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "UV Transform",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Web",
+  "description": "Tests how to implement scrolling effects or tiling by adjusting the texture offset and scale of the material.",
+  "url": "https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/index.html",
+  "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/material/uvTransform/thumb.webp",
+  "author": {
+    "@type": "Person",
+    "name": "redcamel"
+  }
+}</script>
+
+    <!-- Assets Preload -->
+    <link rel="preload" href="../../../assets/css/example.css?t=1778922031603" as="style">
+    <link rel="modulepreload" href="index.js?t=1778922031603">
+
+    <!-- Assets -->
+    <link rel="stylesheet" href="../../../assets/css/example.css?t=1778922031603">
+    <script src="index.js?t=1778922031603" type="module"></script>
+
 </head>
 <body>
+<h1 style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;">UV Transform</h1>
 </body>
 </html>

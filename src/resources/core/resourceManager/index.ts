@@ -3,10 +3,29 @@
  * [EN] Provides the `ResourceManager`, which integrates and manages GPU resources, and related status information.
  * @packageDocumentation
  */
-import ResourceManager from "./ResourceManager";
+import ResourceManager, {
+    ImmutableKeyMap,
+    ResourceState,
+    ResourceStateBitmapTexture,
+    ResourceStateCubeTexture,
+    ResourceStateHDRTexture,
+    ResourceStateIndexBuffer,
+    ResourceStateStorageBuffer,
+    ResourceStateUniformBuffer,
+    ResourceStateVertexBuffer
+} from "./ResourceManager";
 import ResourceStatusInfo from "./resourceState/ResourceStatusInfo";
 
 export {
     ResourceManager,
-    ResourceStatusInfo
+    ResourceStatusInfo,
+    ImmutableKeyMap,
+    ResourceState,
+    ResourceStateIndexBuffer,
+    ResourceStateStorageBuffer,
+    ResourceStateUniformBuffer,
+    ResourceStateVertexBuffer,
+    ResourceStateBitmapTexture,
+    ResourceStateCubeTexture,
+    ResourceStateHDRTexture
 }

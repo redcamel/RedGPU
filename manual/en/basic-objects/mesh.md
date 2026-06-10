@@ -7,7 +7,13 @@ order: 1
 const meshGraph = `
     Geometry["Geometry (Shape)"] -->|Compose| Mesh["Mesh (Object)"]
     Material["Material (Surface)"] -->|Compose| Mesh
+
+    %% Grayscale styles applied
+    style Geometry fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Material fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Mesh fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
 `
+
 </script>
 
 # Mesh
@@ -31,13 +37,14 @@ A **Mesh** cannot exist independently and must combine the following two element
 
 RedGPU provides basic shapes called **Primitives** to allow for quick **space configuration or visualization testing** before loading external model files. Using these allows you to design 3D structures immediately without complex data calculations.
 
-| Type | Description |
-| :--- | :--- |
-| **Box** | Hexahedral box shape |
-| **Sphere** | Smooth spherical shape |
-| **Plane** / **Ground** | 2D plane or grid ground shape |
-| **Cylinder** / **Circle** | Cylindrical or circular plane shape |
-| **Torus** / **TorusKnot** | Ring or twisted knot shape |
+| Type                      | Description                                            |
+|:--------------------------|:-------------------------------------------------------|
+| **Box** / **RoundedBox**  | Hexahedral box shape or box shape with rounded corners |
+| **Sphere** / **Capsule**  | Smooth spherical shape or capsule pill shape           |
+| **Cone** / **Cylinder**   | Cone or cylindrical shape                              |
+| **Plane** / **Ground**    | 2D rectangular plane or grid ground shape              |
+| **Circle** / **Ring**     | Filled circular plane or hollow ring plane shape       |
+| **Torus** / **TorusKnot** | Donut-like ring or complexly twisted knot shape        |
 
 ## 3. Defining the Surface: Material
 
@@ -85,7 +92,21 @@ mesh.rotationY = 45;   // Rotate 45 degrees around Y-axis
 mesh.scaleX = 2;       // Scale 2x along X-axis
 ```
 
-## 5. Practice: Creating and Placing a Mesh
+## 5. Key API Properties
+
+A `Mesh` instance has several key properties for adjusting its appearance and rendering options.
+
+* **`geometry`** (`Geometry`): Gets or binds the skeleton of the mesh composed of vertex (points, lines, faces) data.
+* **`material`** (`ABaseMaterial`): Gets or sets the surface material of the mesh, which controls lighting reflections,
+  image mapping, etc.
+* **`castShadow`** (`boolean`, default: `false`): Determines whether this mesh casts shadows onto other objects when
+  illuminated.
+* **`receiveShadow`** (`boolean`, default: `true`): Determines whether shadows cast by other objects will be rendered
+  onto the surface of this mesh.
+
+---
+
+## 6. Practice: Creating and Placing a Mesh
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -94,7 +115,7 @@ const canvas = document.getElementById('redgpu-canvas');
 
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
-    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+    const camera = new RedGPU.Camera.PerspectiveCamera();
     camera.z = -15; 
     camera.y = 5;
     camera.lookAt(0, 0, 0);
@@ -136,7 +157,7 @@ const canvas = document.getElementById("redgpu-canvas");
 
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
-    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+    const camera = new RedGPU.Camera.PerspectiveCamera();
     camera.z = -15; camera.y = 8;
     camera.lookAt(0, 0, 0);
 

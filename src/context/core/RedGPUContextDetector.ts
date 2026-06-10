@@ -4,198 +4,283 @@ import RedGPUContext from "../RedGPUContext";
  * [KO] GPU 어댑터 및 브라우저 환경을 감지하고 분석하는 클래스입니다.
  * [EN] Class that detects and analyzes the GPU adapter and browser environment.
  *
- * [KO] Adapter 정보, 제한값(Limits), Fallback 여부, 모바일 환경 여부 등을 제공합니다.
- * [EN] Provides adapter information, limits, fallback status, mobile environment status, etc.
- *
  * ::: warning
  * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
  * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
- *
- * * ### Example
- * ```typescript
- * const detector = redGPUContext.detector;
- * console.log('Is mobile:', detector.isMobile);
- * console.log('GPU Limits:', detector.limits);
- * ```
- *
- * @category Context
  */
 class RedGPUContextDetector {
-    /* [KO] Adapter 관련 정보 (예: 이름, 벤더 등) */
-    /* [EN] Adapter information (e.g., name, vendor) */
+    #gpuAdapter: GPUAdapter;
     #adapterInfo: GPUAdapterInfo;
-    /* [KO] GPU가 지원하는 한계값 */
-    /* [EN] Limits supported by the GPU */
-    #limits: GPUSupportedLimits;
-    /* [KO] Fallback Adapter 사용 여부 */
-    /* [EN] Whether Fallback Adapter is used */
+    #supportedLimits: GPUSupportedLimits;
+    #activeLimits: GPUSupportedLimits;
+    #supportedFeatures: Record<string, boolean> = {};
+    #activeFeatures: Record<string, boolean> = {};
     #isFallbackAdapter: boolean;
-    /* [KO] 그룹화된 제한값 데이터 */
-    /* [EN] Grouped limit data */
-    #groupedLimits: any;
-    /* [KO] 브라우저 User-Agent 문자열 */
-    /* [EN] Browser User-Agent string */
     #userAgent: string;
+
+    // Platform & Environment (Cached)
+    #isMobile: boolean;
+    #isIOS: boolean;
+    #isAndroid: boolean;
+    #isChromium: boolean;
+    #isSafari: boolean;
+    #isFirefox: boolean;
+
+    // Hardware Resources
+    #hardwareConcurrency: number;
+    #deviceMemory: number;
 
     /**
      * [KO] RedGPUContextDetector 생성자
      * [EN] RedGPUContextDetector constructor
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        this.#init(redGPUContext.gpuAdapter);
-        console.log(this); // 디버그용
+        const ua = navigator.userAgent;
+        this.#userAgent = ua;
+
+        // Platform Detection (Cached)
+        this.#isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone|Kindle|Silk|PlayBook/i.test(ua);
+        this.#isIOS = /iPhone|iPad|iPod/i.test(ua);
+        this.#isAndroid = /Android/i.test(ua);
+        this.#isChromium = /Chrome|Chromium|Edg|Opr/i.test(ua) && !/Edge/i.test(ua);
+        this.#isSafari = /Safari/i.test(ua) && !/Chrome|Chromium|Edg|Opr/i.test(ua);
+        this.#isFirefox = /Firefox/i.test(ua);
+
+        this.#hardwareConcurrency = navigator.hardwareConcurrency || 4;
+        this.#deviceMemory = (navigator as any).deviceMemory || 4;
+
+        const {gpuAdapter, gpuDevice} = redGPUContext;
+        this.#gpuAdapter = gpuAdapter;
+
+        // [KO] 추적할 주요 기능 목록
+        const allKnownFeatures = [
+            "core-features-and-limits",
+            "depth-clip-control",
+            "depth32float-stencil8",
+            "texture-compression-bc",
+            "texture-compression-bc-sliced-3d",
+            "texture-compression-etc2",
+            "texture-compression-astc",
+            "texture-compression-astc-sliced-3d",
+            "timestamp-query",
+            "indirect-first-instance",
+            "shader-f16",
+            "rg11b10ufloat-renderable",
+            "bgra8unorm-storage",
+            "float32-filterable",
+            "float32-blendable",
+            "clip-distances",
+            "dual-source-blending",
+            "subgroups",
+            "texture-formats-tier1",
+            "texture-formats-tier2",
+            "primitive-index",
+            "texture-component-swizzle"
+        ];
+
+        // [KO] 1. 하드웨어 지원 정보 수집 (Adapter)
+        if (gpuAdapter) {
+            this.#adapterInfo = gpuAdapter.info;
+            this.#isFallbackAdapter = gpuAdapter.info.isFallbackAdapter;
+            this.#supportedLimits = gpuAdapter.limits;
+
+            const actualSupported = Array.from(gpuAdapter.features);
+            const finalFeatureList = Array.from(new Set([...allKnownFeatures, ...actualSupported])).sort();
+
+            this.#supportedFeatures = {};
+            for (const k of finalFeatureList) {
+                this.#supportedFeatures[k] = gpuAdapter.features.has(k);
+            }
+        }
+
+        // [KO] 2. 실제 장치 활성화 정보 수집 (Device)
+        if (gpuDevice) {
+            this.#activeLimits = gpuDevice.limits;
+            this.#activeFeatures = {};
+            for (const k in this.#supportedFeatures) {
+                this.#activeFeatures[k] = gpuDevice.features.has(k);
+            }
+        }
+
+        // keepLog(this);
+    }
+
+    // Getters
+    /**
+     * [KO] GPU 어댑터가 지원하는 전체 기능 목록의 키와 지원 여부 맵을 반환합니다.
+     * [EN] Returns a map of all known features and whether they are supported by the GPU adapter.
+     */
+    get supportedFeatures(): Record<string, boolean> {
+        return this.#supportedFeatures;
     }
 
     /**
-     * [KO] 현재 사용중인 GPUAdapter의 정보를 반환합니다.
-     * [EN] Returns information about the currently used GPUAdapter.
+     * [KO] GPU 디바이스에 실제 활성화된 기능 목록의 키와 활성화 여부 맵을 반환합니다.
+     * [EN] Returns a map of all known features and whether they are active on the GPU device.
+     */
+    get activeFeatures(): Record<string, boolean> {
+        return this.#activeFeatures;
+    }
+
+    /**
+     * [KO] GPU 어댑터의 한계 제한치(Limits)를 반환합니다.
+     * [EN] Returns the limits supported by the GPU adapter.
+     */
+    get supportedLimits(): GPUSupportedLimits {
+        return this.#supportedLimits;
+    }
+
+    /**
+     * [KO] GPU 디바이스의 한계 제한치(Limits)를 반환합니다.
+     * [EN] Returns the limits active on the GPU device.
+     */
+    get activeLimits(): GPUSupportedLimits {
+        return this.#activeLimits;
+    }
+
+    /**
+     * [KO] GPU 어댑터 객체를 반환합니다.
+     * [EN] Returns the GPU adapter object.
+     */
+    get gpuAdapter(): GPUAdapter {
+        return this.#gpuAdapter;
+    }
+
+    /**
+     * [KO] GPU 어댑터 정보를 반환합니다.
+     * [EN] Returns the GPU adapter information.
      */
     get adapterInfo(): GPUAdapterInfo {
         return this.#adapterInfo;
     }
 
     /**
-     * [KO] 현재 사용 중인 GPU의 한계값을 반환합니다.
-     * [EN] Returns the supported limits of the currently used GPU.
-     */
-    get limits(): GPUSupportedLimits {
-        return this.#limits;
-    }
-
-    /**
-     * [KO] 현재 어댑터가 Fallback 어댑터인지 여부를 반환합니다.
-     * [EN] Returns whether the current adapter is a fallback adapter.
+     * [KO] 폴백 어댑터(Fallback Adapter) 여부를 반환합니다. (예: CPU 소프트웨어 렌더러)
+     * [EN] Returns whether it is a fallback adapter (e.g., CPU software renderer).
      */
     get isFallbackAdapter(): boolean {
         return this.#isFallbackAdapter;
     }
 
     /**
-     * [KO] 그룹화된 한계값 정보를 반환합니다.
-     * [EN] Returns grouped limit information.
-     */
-    get groupedLimits(): any {
-        return this.#groupedLimits;
-    }
-
-    /**
-     * [KO] 브라우저의 User-Agent 문자열을 반환합니다.
-     * [EN] Returns the browser's User-Agent string.
+     * [KO] 브라우저의 UserAgent 문자열을 반환합니다.
+     * [EN] Returns the UserAgent string of the browser.
      */
     get userAgent(): string {
         return this.#userAgent;
     }
 
     /**
-     * [KO] 모바일 디바이스인지 여부를 반환합니다.
-     * [EN] Returns whether it is a mobile device.
+     * [KO] 모바일 환경(스마트폰, 태블릿 등) 여부를 반환합니다.
+     * [EN] Returns whether it is a mobile environment (smartphones, tablets, etc.).
      */
     get isMobile(): boolean {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Phone|Kindle|Silk|PlayBook/i.test(navigator.userAgent);
-    }
-
-    /* -------------------------------------------------------------------------- */
-
-    /* 내부 유틸리티 메서드 */
-    /**
-     * [KO] 초기화 메서드 (내부용)
-     * [EN] Initialization method (Internal use)
-     */
-    #init(gpuAdapter: GPUAdapter) {
-        this.#userAgent = navigator.userAgent;
-        this.#parseAdapter(gpuAdapter);
-        this.#parseLimits();
+        return this.#isMobile;
     }
 
     /**
-     * [KO] 어댑터 정보를 파싱합니다. (내부용)
-     * [EN] Parses adapter information. (Internal use)
+     * [KO] iOS 운영체제 여부를 반환합니다.
+     * [EN] Returns whether the operating system is iOS.
      */
-    #parseAdapter(gpuAdapter: GPUAdapter) {
-        if (gpuAdapter) {
-            const {limits, info} = gpuAdapter;
-            const {isFallbackAdapter} = info;
-            this.#adapterInfo = info;
-            this.#isFallbackAdapter = isFallbackAdapter;
-            this.#limits = limits;
-        }
+    get isIOS(): boolean {
+        return this.#isIOS;
     }
 
     /**
-     * [KO] 제한값 정보를 그룹화하여 파싱합니다. (내부용)
-     * [EN] Parses limit information by grouping. (Internal use)
+     * [KO] Android 운영체제 여부를 반환합니다.
+     * [EN] Returns whether the operating system is Android.
      */
-    #parseLimits() {
-        const groupSettings = {
-            "TextureLimits": [
-                'maxTextureDimension1D',
-                'maxTextureDimension2D',
-                'maxTextureDimension3D',
-                'maxTextureArrayLayers',
-                'maxSampledTexturesPerShaderStage',
-                'maxSamplersPerShaderStage'
-            ],
-            "BufferLimits": [
-                'maxBindGroups',
-                'maxBindGroupsPlusVertexBuffers',
-                'maxBindingsPerBindGroup',
-                'maxDynamicUniformBuffersPerPipelineLayout',
-                'maxDynamicStorageBuffersPerPipelineLayout',
-                'maxStorageBuffersPerShaderStage',
-                'maxStorageTexturesPerShaderStage',
-                'maxUniformBuffersPerShaderStage',
-                'maxUniformBufferBindingSize',
-                'maxStorageBufferBindingSize',
-                'minUniformBufferOffsetAlignment',
-                'minStorageBufferOffsetAlignment',
-                'maxBufferSize'
-            ],
-            "PipelineAndShaderLimits": [
-                'maxVertexBuffers',
-                'maxVertexAttributes',
-                'maxVertexBufferArrayStride',
-                'maxInterStageShaderComponents',
-                'maxInterStageShaderVariables'
-            ],
-            "ComputeLimits": [
-                'maxComputeWorkgroupStorageSize',
-                'maxComputeInvocationsPerWorkgroup',
-                'maxComputeWorkgroupSizeX',
-                'maxComputeWorkgroupSizeY',
-                'maxComputeWorkgroupSizeZ',
-                'maxComputeWorkgroupsPerDimension'
-            ],
-            "ColorLimits": [
-                'maxColorAttachments',
-                'maxColorAttachmentBytesPerSample'
-            ]
-        };
-        const groupedLimits = {
-            "TextureLimits": {},
-            "BufferLimits": {},
-            "PipelineAndShaderLimits": {},
-            "ComputeLimits": {},
-            "ColorLimits": {},
-            "EtcLimit": {}
-        };
-        for (const limit in this.#limits) {
-            let found = false;
-            for (const group in groupSettings) {
-                if (groupSettings[group].includes(limit)) {
-                    groupedLimits[group][limit] = this.#limits[limit];
-                    found = true;
-                    break;
-                }
+    get isAndroid(): boolean {
+        return this.#isAndroid;
+    }
+
+    /**
+     * [KO] Chromium 기반 브라우저 여부를 반환합니다.
+     * [EN] Returns whether it is a Chromium-based browser.
+     */
+    get isChromium(): boolean {
+        return this.#isChromium;
+    }
+
+    /**
+     * [KO] Safari 브라우저 여부를 반환합니다.
+     * [EN] Returns whether the browser is Safari.
+     */
+    get isSafari(): boolean {
+        return this.#isSafari;
+    }
+
+    /**
+     * [KO] Firefox 브라우저 여부를 반환합니다.
+     * [EN] Returns whether the browser is Firefox.
+     */
+    get isFirefox(): boolean {
+        return this.#isFirefox;
+    }
+
+    /**
+     * [KO] 논리 프로세서 코어 개수를 반환합니다. (기본값: 4)
+     * [EN] Returns the number of logical processor cores. (default: 4)
+     */
+    get hardwareConcurrency(): number {
+        return this.#hardwareConcurrency;
+    }
+
+    /**
+     * [KO] 장치 메모리 용량을 대략적인 GB 단위로 반환합니다. (기본값: 4)
+     * [EN] Returns the approximate device memory in GB. (default: 4)
+     */
+    get deviceMemory(): number {
+        return this.#deviceMemory;
+    }
+
+    /**
+     * [KO] 모든 탐지된 정보를 리포트 객체로 반환합니다.
+     * [EN] Returns all detected information as a report object.
+     * @returns
+     * [KO] 플랫폼, 브라우저, 하드웨어, GPU 정보가 포함된 리포트 객체
+     * [EN] Report object containing platform, browser, hardware, and GPU information
+     */
+    toReport() {
+        return {
+            platform: {
+                isMobile: this.#isMobile,
+                isIOS: this.#isIOS,
+                isAndroid: this.#isAndroid,
+                userAgent: this.#userAgent
+            },
+            browser: {
+                isChromium: this.#isChromium,
+                isSafari: this.#isSafari,
+                isFirefox: this.#isFirefox
+            },
+            hardware: {
+                hardwareConcurrency: this.#hardwareConcurrency,
+                deviceMemory: this.#deviceMemory
+            },
+            gpu: {
+                vendor: this.#adapterInfo?.vendor,
+                architecture: this.#adapterInfo?.architecture,
+                device: this.#adapterInfo?.device,
+                description: this.#adapterInfo?.description,
+                isFallback: this.#isFallbackAdapter,
+                supportedFeatures: {...this.#supportedFeatures},
+                activeFeatures: {...this.#activeFeatures},
+                supportedLimits: this.#supportedLimits ? this.#serializeLimits(this.#supportedLimits) : null,
+                activeLimits: this.#activeLimits ? this.#serializeLimits(this.#activeLimits) : null
             }
-            if (!found) {
-                groupedLimits["EtcLimit"][limit] = this.#limits[limit];
-            }
-        }
-        this.#groupedLimits = groupedLimits;
+        };
+    }
+
+    #serializeLimits(limits: GPUSupportedLimits) {
+        const result: Record<string, number> = {};
+        const proto = Object.getPrototypeOf(limits);
+        Object.getOwnPropertyNames(proto).forEach(key => {
+            const value = (limits as any)[key];
+            if (typeof value === 'number') result[key] = value;
+        });
+        return result;
     }
 }
 

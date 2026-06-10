@@ -1,10 +1,11 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js?t=1778922031603";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
 
 /**
  * [KO] Screen To World 예제
  * [EN] Screen To World example
  *
- * [KO] 2D 화면 좌표(마우스 좌표 등)를 3D 월드 좌표로 변환하는 방법을 보여줍니다.
+ * [KO] 2D 화면 좌표(마우스 좌표 등)를 3D 월드 좌표로 변환하는 방법을 시연합니다.
  * [EN] Demonstrates how to transform 2D screen coordinates (like mouse coordinates) into 3D world coordinates.
  */
 
@@ -14,28 +15,41 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. [KO] 카메라 컨트롤러 설정
+        // [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 15;
         controller.tilt = -45;
 
+        // 2. [KO] 씬 및 뷰 구성
+        // [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.grid = true;
         redGPUContext.addView(view);
 
-        // 간단한 screenToWorld 데모 설정
+        // 3. [KO] 데모 요소 설정 (타겟 메시, 마우스 이벤트, 정보 표시 UI)
+        // [EN] Setup Demo Elements (Target Mesh, Mouse Events, Info UI)
         const demo = setupSimpleDemo(redGPUContext, scene, view);
 
-        // 라이팅 설정
+        // 4. [KO] 조명 설정
+        // [EN] Setup Lighting
         setupLighting(scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        // 5. [KO] 렌더러 생성 및 루프 시작
+        // [EN] Create Renderer and Start Loop
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
+            // [KO] 정보 표시 UI 업데이트
+            // [EN] Update Info Display UI
             updateInfoDisplay(demo);
         };
 
         renderer.start(redGPUContext, render);
-        renderTestPane(redGPUContext)
+
+        // 6. [KO] 테스트용 GUI 렌더링
+        // [EN] Render Test GUI
+        renderTestPane(redGPUContext);
     },
     (failReason) => {
         console.error('RedGPU 초기화 실패:', failReason);
@@ -44,13 +58,12 @@ RedGPU.init(
 );
 
 /**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
+ * [KO] 테스트용 GUI를 구성합니다.
+ * [EN] Configures GUI for testing.
  * @param {RedGPU.RedGPUContext} redGPUContext
  */
-const renderTestPane = async (redGPUContext) => {
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
+const renderTestPane = (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext);
 };
 
 /**
@@ -62,9 +75,10 @@ const renderTestPane = async (redGPUContext) => {
  * @returns {object} Demo object
  */
 function setupSimpleDemo(redGPUContext, scene, view) {
-    // 🎯 단일 타겟 메시 (구체)
+    // [KO] 타겟 메시 생성 (빨간색 구체)
+    // [EN] Create target mesh (red sphere)
     const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-    material.color.setColorByRGB(255, 100, 100); // 빨간색
+    material.color.setColorByRGB(255, 100, 100);
 
     const targetMesh = new RedGPU.Display.Mesh(
         redGPUContext,
@@ -73,17 +87,20 @@ function setupSimpleDemo(redGPUContext, scene, view) {
     );
     scene.addChild(targetMesh);
 
-    // 📊 정보 표시 UI
+    // [KO] 정보 표시용 오버레이 UI 생성
+    // [EN] Create information display overlay UI
     const infoDisplay = createInfoDisplay();
 
-    // 🖱️ 마우스 추적 데이터
+    // [KO] 마우스 데이터 상태 객체
+    // [EN] Mouse data state object
     const mouseData = {
         screen: {x: 0, y: 0},
         world: {x: 0, y: 0, z: 0},
         isInCanvas: false
     };
 
-    // 마우스 이벤트 설정
+    // [KO] 마우스 이벤트 리스너 등록
+    // [EN] Register mouse event listeners
     setupMouseEvents(canvas, view, targetMesh, mouseData);
 
     return {
@@ -95,8 +112,8 @@ function setupSimpleDemo(redGPUContext, scene, view) {
 }
 
 /**
- * [KO] 마우스 이벤트를 설정하여 3D 위치를 업데이트합니다.
- * [EN] Sets up mouse events to update 3D position.
+ * [KO] 마우스 이벤트를 설정하여 3D 위치를 실시간으로 업데이트합니다.
+ * [EN] Sets up mouse events to update 3D position in real-time.
  * @param {HTMLCanvasElement} canvas
  * @param {RedGPU.Display.View3D} view
  * @param {RedGPU.Display.Mesh} targetMesh
@@ -106,19 +123,22 @@ function setupMouseEvents(canvas, view, targetMesh, mouseData) {
     canvas.addEventListener('mousemove', (event) => {
         const rect = canvas.getBoundingClientRect();
 
-        // CSS 픽셀 좌표 계산
+        // [KO] 마우스의 화면 좌표 계산 (CSS 픽셀)
+        // [EN] Calculate mouse screen coordinates (CSS pixels)
         mouseData.screen.x = event.clientX - rect.left;
         mouseData.screen.y = event.clientY - rect.top;
         mouseData.isInCanvas = true;
 
-        // 🌍 Screen to World 변환
+        // [KO] 🌍 Screen to World 변환 수행
+        // [EN] 🌍 Perform Screen to World transformation
         const worldCoords = view.screenToWorld(mouseData.screen.x, mouseData.screen.y);
 
         mouseData.world.x = worldCoords[0];
         mouseData.world.y = worldCoords[1];
         mouseData.world.z = worldCoords[2];
 
-        // 타겟 메시 위치 업데이트
+        // [KO] 타겟 메시를 변환된 월드 좌표로 이동
+        // [EN] Move target mesh to the transformed world coordinates
         targetMesh.setPosition(worldCoords[0], worldCoords[1], worldCoords[2]);
     });
 
@@ -130,19 +150,25 @@ function setupMouseEvents(canvas, view, targetMesh, mouseData) {
         mouseData.isInCanvas = true;
     });
 
-    // 클릭으로 월드 좌표 로깅
-    canvas.addEventListener('click', (event) => {
-        console.log('🎯 클릭 위치:');
+    // [KO] 클릭 시 좌표를 콘솔에 출력
+    // [EN] Log coordinates to console on click
+    canvas.addEventListener('click', () => {
+        console.log('🎯 클릭 위치 (Clicked Position):');
         console.log(`Screen: (${mouseData.screen.x}, ${mouseData.screen.y})`);
         console.log(`World: (${mouseData.world.x.toFixed(3)}, ${mouseData.world.y.toFixed(3)}, ${mouseData.world.z.toFixed(3)})`);
     });
 }
 
+/**
+ * [KO] 정보 표시용 DOM 엘리먼트를 생성합니다.
+ * [EN] Creates a DOM element for information display.
+ * @returns {HTMLDivElement}
+ */
 function createInfoDisplay() {
     const infoDisplay = document.createElement('div');
     Object.assign(infoDisplay.style, {
         position: 'absolute',
-        top: '16px',
+        top: '68px',
         right: '16px',
         color: '#333',
         fontSize: '12px',
@@ -162,11 +188,17 @@ function createInfoDisplay() {
     return infoDisplay;
 }
 
+/**
+ * [KO] 현재 좌표 정보를 UI에 업데이트합니다.
+ * [EN] Updates current coordinate information on the UI.
+ * @param {object} demo
+ */
 function updateInfoDisplay(demo) {
     const {targetMesh, mouseData, view} = demo;
     const devicePixelRatio = window.devicePixelRatio || 1;
 
-    // 화면 좌표 계산 (World to Screen 역변환 테스트)
+    // [KO] World to Screen 역변환 수행 (검증용)
+    // [EN] Perform World to Screen reverse transformation (for validation)
     const targetScreenPoint = targetMesh.getScreenPoint(view);
 
     demo.infoDisplay.innerHTML = `
@@ -227,8 +259,12 @@ function updateInfoDisplay(demo) {
     `;
 }
 
+/**
+ * [KO] 장면에 조명을 설정합니다.
+ * [EN] Sets up lighting in the scene.
+ * @param {RedGPU.Display.Scene} scene
+ */
 function setupLighting(scene) {
-    // 방향성 라이트
     const directionalLight = new RedGPU.Light.DirectionalLight();
     directionalLight.direction = [-0.5, -1, -0.5];
     directionalLight.intensity = 0.8;

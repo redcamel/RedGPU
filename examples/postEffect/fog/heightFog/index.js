@@ -1,7 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
-
-const canvas = document.createElement('canvas');
-document.querySelector('#example-container').appendChild(canvas);
+import * as RedGPU from "../../../../dist/index.js?t=1778922031603";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
 
 /**
  * [KO] Height Fog 예제
@@ -10,6 +8,9 @@ document.querySelector('#example-container').appendChild(canvas);
  * [KO] 포스트 이펙트를 사용하여 높이 기반 안개(Height Fog) 효과를 적용하는 방법을 보여줍니다.
  * [EN] Demonstrates how to apply height-based fog effects using post effects.
  */
+
+const canvas = document.createElement('canvas');
+document.body.appendChild(canvas);
 
 RedGPU.init(
     canvas,
@@ -42,8 +43,8 @@ RedGPU.init(
 
         createGroundLevelScene(redGPUContext, scene);
 
-        let autoRotate = true;
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const autoRotateState = {enabled: true};
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
             scene.children.forEach((child, index) => {
                 if (child.userData) {
@@ -66,21 +67,148 @@ RedGPU.init(
                 }
             });
 
-            if (autoRotate) {
+            if (autoRotateState.enabled) {
                 controller.pan += 0.2;
             }
         };
 
         renderer.start(redGPUContext, render);
 
-        createHeightFogControlPanel(redGPUContext, view, heightFog, controller, () => {
-            autoRotate = !autoRotate;
-        });
+        // [KO] RedGPUExampleHelper 초기화
+        // [EN] Initialize RedGPUExampleHelper
+        renderTestPane(redGPUContext, heightFog, autoRotateState);
     },
     (failReason) => {
         console.error('HeightFog 초기화 실패:', failReason);
     }
 );
+
+/**
+ * [KO] RedGPUExampleHelper 초기화
+ * [EN] Initialize RedGPUExampleHelper
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.PostEffect.HeightFog} heightFog
+ * @param {Object} autoRotateState
+ */
+function renderTestPane(redGPUContext, heightFog, autoRotateState) {
+    const view = redGPUContext.viewList[0];
+    new RedGPUExampleHelper(redGPUContext, {
+        RedGPU,
+        ibl: true,
+        skybox: true,
+        gui: (pane) => {
+            const PARAMS = {
+                enabled: true,
+                autoRotate: autoRotateState.enabled,
+                fogType: 'EXPONENTIAL',
+                density: heightFog.density,
+                baseHeight: heightFog.baseHeight,
+                thickness: heightFog.thickness,
+                falloff: heightFog.falloff,
+                fogColor: {r: 190, g: 210, b: 235}
+            };
+
+            const heightFogFolder = pane.addFolder({title: 'Height Fog Demo', expanded: true});
+
+            heightFogFolder.addBinding(PARAMS, 'enabled').on('change', (ev) => {
+                if (ev.value) {
+                    view.postEffectManager.addEffect(heightFog);
+                } else {
+                    view.postEffectManager.removeAllEffect();
+                }
+            });
+
+            heightFogFolder.addBinding(PARAMS, 'autoRotate').on('change', (ev) => {
+                autoRotateState.enabled = ev.value;
+            });
+
+            const fogFolder = heightFogFolder.addFolder({title: 'Fog Settings', expanded: true});
+
+            fogFolder.addBinding(PARAMS, 'fogType', {
+                options: {
+                    'EXPONENTIAL': 'EXPONENTIAL',
+                    'EXPONENTIAL_SQUARED': 'EXPONENTIAL_SQUARED'
+                }
+            }).on('change', (ev) => {
+                heightFog.fogType = ev.value === 'EXPONENTIAL' ?
+                    RedGPU.PostEffect.HeightFog.EXPONENTIAL :
+                    RedGPU.PostEffect.HeightFog.EXPONENTIAL_SQUARED;
+            });
+
+            fogFolder.addBinding(PARAMS, 'density', {
+                min: 0, max: 5, step: 0.1
+            }).on('change', (ev) => {
+                heightFog.density = ev.value;
+            });
+
+            fogFolder.addBinding(PARAMS, 'baseHeight', {
+                label: 'Base Height',
+                min: -5, max: 8, step: 0.1
+            }).on('change', (ev) => {
+                heightFog.baseHeight = ev.value;
+            });
+
+            fogFolder.addBinding(PARAMS, 'thickness', {
+                min: 2, max: 20, step: 0.5
+            }).on('change', (ev) => {
+                heightFog.thickness = ev.value;
+            });
+
+            fogFolder.addBinding(PARAMS, 'falloff', {
+                min: 0.1, max: 2, step: 0.1
+            }).on('change', (ev) => {
+                heightFog.falloff = ev.value;
+            });
+
+            fogFolder.addBinding(PARAMS, 'fogColor').on('change', (ev) => {
+                heightFog.fogColor.setColorByRGB(
+                    Math.round(ev.value.r),
+                    Math.round(ev.value.g),
+                    Math.round(ev.value.b)
+                );
+            });
+
+            const scenarioFolder = heightFogFolder.addFolder({title: 'Scenarios', expanded: true});
+
+            const applyPreset = (density, baseHeight, thickness, falloff, fogColor, fogType) => {
+                PARAMS.density = density;
+                PARAMS.baseHeight = baseHeight;
+                PARAMS.thickness = thickness;
+                PARAMS.falloff = falloff;
+                PARAMS.fogColor = fogColor;
+                PARAMS.fogType = fogType;
+
+                heightFog.density = density;
+                heightFog.baseHeight = baseHeight;
+                heightFog.thickness = thickness;
+                heightFog.falloff = falloff;
+                heightFog.fogType = fogType === 'EXPONENTIAL' ?
+                    RedGPU.PostEffect.HeightFog.EXPONENTIAL :
+                    RedGPU.PostEffect.HeightFog.EXPONENTIAL_SQUARED;
+                heightFog.fogColor.setColorByRGB(fogColor.r, fogColor.g, fogColor.b);
+
+                pane.refresh();
+            };
+
+            scenarioFolder.addButton({title: 'Dawn Valley'}).on('click', () => {
+                applyPreset(1.8, -2, 6, 1.0, {r: 255, g: 245, b: 220}, 'EXPONENTIAL');
+            });
+
+            scenarioFolder.addButton({title: 'Mysterious Forest'}).on('click', () => {
+                applyPreset(2.5, -1, 8, 1.4, {r: 180, g: 200, b: 180}, 'EXPONENTIAL');
+            });
+
+            scenarioFolder.addButton({title: 'Ancient Ruins'}).on('click', () => {
+                applyPreset(2.0, 0, 7, 1.2, {r: 200, g: 190, b: 160}, 'EXPONENTIAL');
+            });
+
+            scenarioFolder.addButton({title: 'Moonlit Mist'}).on('click', () => {
+                applyPreset(1.5, -1.5, 9, 0.8, {r: 160, g: 170, b: 200}, 'EXPONENTIAL');
+            });
+        }
+    });
+}
+
 
 /**
  * [KO] 지형 레벨 씬을 생성합니다.
@@ -89,10 +217,10 @@ RedGPU.init(
  * @param {RedGPU.Display.Scene} scene
  */
 function createGroundLevelScene(redGPUContext, scene) {
-    const terrain = new RedGPU.Primitive.Ground(redGPUContext, 200, 200, 1000, 1000);
+    const terrain = new RedGPU.Primitive.Ground(redGPUContext, 200, 200, 1024, 1024);
     const terrainMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, '#2d4a2d');
 
-    const terrainNoise = new RedGPU.Resource.SimplexTexture(redGPUContext, 1024, 1024, {
+    const terrainNoise = new RedGPU.Resource.SimplexTexture(redGPUContext, 512, 512, {
         mainLogic: `
 		let noise1 = getSimplexNoiseByDimension(base_uv * 2.0, uniforms);
 		let noise2 = getSimplexNoiseByDimension(base_uv * 4.0, uniforms) * 0.5;
@@ -278,128 +406,4 @@ function createGroundLevelScene(redGPUContext, scene) {
 
         scene.addChild(testMesh);
     });
-}
-
-/**
- * [KO] Height Fog 제어 패널을 생성합니다.
- * [EN] Creates a control panel for Height Fog.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.View3D} view
- * @param {RedGPU.PostEffect.HeightFog} heightFog
- * @param {RedGPU.Camera.OrbitController} controller
- * @param {function} toggleAutoRotate
- */
-async function createHeightFogControlPanel(redGPUContext, view, heightFog, controller, toggleAutoRotate) {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-
-    const pane = new Pane({title: 'Height Fog Demo', expanded: true});
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const PARAMS = {
-        enabled: true,
-        autoRotate: true,
-        fogType: 'EXPONENTIAL',
-        density: heightFog.density,
-        baseHeight: heightFog.baseHeight,
-        thickness: heightFog.thickness,
-        falloff: heightFog.falloff,
-        fogColor: {r: 190, g: 210, b: 235},
-        cameraPreset: 'Ground Explorer'
-    };
-
-    const experienceFolder = pane.addFolder({title: 'Experience', expanded: true});
-
-    experienceFolder.addBinding(PARAMS, 'enabled').on('change', (ev) => {
-        if (ev.value) {
-            view.postEffectManager.addEffect(heightFog);
-        } else {
-            view.postEffectManager.removeAllEffect();
-        }
-    });
-
-    experienceFolder.addBinding(PARAMS, 'autoRotate').on('change', toggleAutoRotate);
-
-    const fogFolder = pane.addFolder({title: 'Fog Settings', expanded: true});
-
-    fogFolder.addBinding(PARAMS, 'fogType', {
-        options: {
-            'EXPONENTIAL': 'EXPONENTIAL',
-            'EXPONENTIAL_SQUARED': 'EXPONENTIAL_SQUARED'
-        }
-    }).on('change', (ev) => {
-        heightFog.fogType = ev.value === 'EXPONENTIAL' ?
-            RedGPU.PostEffect.HeightFog.EXPONENTIAL :
-            RedGPU.PostEffect.HeightFog.EXPONENTIAL_SQUARED;
-    });
-
-    fogFolder.addBinding(PARAMS, 'density', {
-        min: 0, max: 4, step: 0.1
-    }).on('change', (ev) => {
-        heightFog.density = ev.value;
-    });
-
-    fogFolder.addBinding(PARAMS, 'baseHeight', {
-        label: 'Base Height',
-        min: -5, max: 8, step: 0.1
-    }).on('change', (ev) => {
-        heightFog.baseHeight = ev.value;
-    });
-
-    fogFolder.addBinding(PARAMS, 'thickness', {
-        min: 2, max: 20, step: 0.5
-    }).on('change', (ev) => {
-        heightFog.thickness = ev.value;
-    });
-
-    fogFolder.addBinding(PARAMS, 'falloff', {
-        min: 0.1, max: 2, step: 0.1
-    }).on('change', (ev) => {
-        heightFog.falloff = ev.value;
-    });
-
-    fogFolder.addBinding(PARAMS, 'fogColor').on('change', (ev) => {
-        heightFog.fogColor.setColorByRGB(
-            Math.round(ev.value.r),
-            Math.round(ev.value.g),
-            Math.round(ev.value.b)
-        );
-    });
-
-    const scenarioFolder = pane.addFolder({title: 'Scenarios', expanded: true});
-
-    scenarioFolder.addButton({title: 'Dawn Valley'}).on('click', () => {
-        applyPreset(1.8, -2, 6, 1.0, {r: 255, g: 245, b: 220}, 'EXPONENTIAL');
-    });
-
-    scenarioFolder.addButton({title: 'Mysterious Forest'}).on('click', () => {
-        applyPreset(2.5, -1, 8, 1.4, {r: 180, g: 200, b: 180}, 'EXPONENTIAL');
-    });
-
-    scenarioFolder.addButton({title: 'Ancient Ruins'}).on('click', () => {
-        applyPreset(2.0, 0, 7, 1.2, {r: 200, g: 190, b: 160}, 'EXPONENTIAL');
-    });
-
-    scenarioFolder.addButton({title: 'Moonlit Mist'}).on('click', () => {
-        applyPreset(1.5, -1.5, 9, 0.8, {r: 160, g: 170, b: 200}, 'LINEAR');
-    });
-
-    function applyPreset(density, baseHeight, thickness, falloff, fogColor, fogType) {
-        PARAMS.density = density;
-        PARAMS.baseHeight = baseHeight;
-        PARAMS.thickness = thickness;
-        PARAMS.falloff = falloff;
-        PARAMS.fogColor = fogColor;
-        PARAMS.fogType = fogType;
-
-        heightFog.density = density;
-        heightFog.baseHeight = baseHeight;
-        heightFog.thickness = thickness;
-        heightFog.falloff = falloff;
-        heightFog.fogType = fogType === 'EXPONENTIAL' ?
-            RedGPU.PostEffect.HeightFog.EXPONENTIAL :
-            RedGPU.PostEffect.HeightFog.EXPONENTIAL_SQUARED;
-        heightFog.fogColor.setColorByRGB(fogColor.r, fogColor.g, fogColor.b);
-
-        pane.refresh();
-    }
 }

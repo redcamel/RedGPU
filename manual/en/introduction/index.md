@@ -10,10 +10,14 @@ const systemGraph = `
     Scene -->|Contains| Mesh["RedGPU.Display.Mesh"]
     Mesh -->|Combines| Geo["Geometry"] & Mat["Material"]
 
-    %% Apply custom classes
-    class Renderer mermaid-system;
-    class View mermaid-main;
-    class Geo,Mat mermaid-component;
+    %% Grayscale styles applied
+    style Renderer fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+    style View fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Scene fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Camera fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Mesh fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Geo fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Mat fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
 `
 
 const flowGraph = `
@@ -25,6 +29,16 @@ const flowGraph = `
     StartLoop -->|Loop| Update["Frame Update"]
     Update --> Render["Render Screen"]
     Render --> Update
+
+    %% Grayscale styles applied
+    style Start fill:#fafafa,stroke:#d4d4d8,color:#52525b,stroke-width:1px
+    style Init fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Context fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style Create fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style SetupView fill:#f4f4f5,stroke:#d4d4d8,color:#3f3f46,stroke-width:1px
+    style StartLoop fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
+    style Update fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Render fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
 `
 </script>
 
@@ -96,7 +110,7 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
 
         // 3. Create a Camera: Set up a Perspective projection camera
-        const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+        const camera = new RedGPU.Camera.PerspectiveCamera();
         camera.z = -5; // Move the camera back from the origin
 
         // 4. Create a Mesh: A combination of a shape (Box) and a material (Color)
@@ -148,7 +162,7 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const scene = new RedGPU.Display.Scene();
-        const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+const camera = new RedGPU.Camera.PerspectiveCamera();
         camera.z = -5;
 
         const geometry = new RedGPU.Primitive.Box(redGPUContext); 
@@ -204,8 +218,8 @@ This diagram illustrates the relationships between major classes and the applica
 Now that you've learned basic screen composition, explore the more powerful features of RedGPU through these topics:
 
 - **[RedGPU Context](../context/index.md)**: A detailed guide to engine context settings and advanced options.
+- **[Inspector](../inspector/index.md)**: A developer tool for performance profiling and real-time scene debugging.
 - **[Mesh](../basic-objects/mesh.md)**: How to create and control objects by combining geometry and material.
 - **[Lighting & Shadow](../lighting-and-shadow/phong-material.md)**: Realistic texture and shadow expression reacting to light.
 - **[Environment](../environment/skybox.md)**: How to set up Skybox and IBL.
 - **[Extended Objects](../assets/model-loading/index.md)**: How to use external 3D models and sprites.
-- **[API Reference](../../api/RedGPU-API/namespaces/RedGPU/README.md)**: Full class specifications and technical documentation.

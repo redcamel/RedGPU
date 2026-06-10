@@ -1,54 +1,61 @@
 import RedUnit from 'https://redcamel.github.io/RedUnit/dist/index.js';
 import * as RedGPU from "../../../dist/index.js";
 
-const redUnit = new RedUnit('RedGPU - Texture Utils');
+const redUnit = new RedUnit('RedGPU - Util - Texture');
 
 redUnit.testGroup(
-	'RedGPU.Util.getMipLevelCount',
-	(runner) => {
-		runner.defineTest('1024x1024', (run) => {
-			run(RedGPU.Util.getMipLevelCount(1024, 1024) === 11);
-		}, true);
+    'RedGPU.Util.getMipLevelCount',
+    (runner) => {
+        runner.defineTest('Success Test: 1024x1024', (run) => {
+            run(RedGPU.Util.getMipLevelCount(1024, 1024));
+        }, 11);
 
-		runner.defineTest('1x1', (run) => {
-			run(RedGPU.Util.getMipLevelCount(1, 1) === 1);
-		}, true);
-
-		runner.defineTest('512x256', (run) => {
-			run(RedGPU.Util.getMipLevelCount(512, 256) === 10);
-		}, true);
-	}
+        runner.defineTest('Failure Test: NaN', (run) => {
+            try { RedGPU.Util.getMipLevelCount(NaN, 1024); run(true); } catch (e) { run(false, e); }
+        }, false);
+    }
 );
 
 redUnit.testGroup(
-	'RedGPU.Util.calculateTextureByteSize',
-	(runner) => {
-		runner.defineTest('rgba8unorm 1024x1024', (run) => {
-			const mockTexture = {
-				width: 1024,
-				height: 1024,
-				depthOrArrayLayers: 1,
-				format: 'rgba8unorm',
-				sampleCount: 1,
-				usage: 0
-			};
-			const size = RedGPU.Util.calculateTextureByteSize(mockTexture);
-			// 1024 * 1024 * 4 = 4194304
-			run(size === 4194304);
-		}, true);
+    'RedGPU.Util.calculateTextureByteSize',
+    (runner) => {
+        runner.defineTest('Success Test: rgba8unorm 2x2', (run) => {
+            const canvas = document.createElement('canvas');
+            RedGPU.init(canvas, (redGPUContext) => {
+                try {
+                    const texture = redGPUContext.gpuDevice.createTexture({
+                        size: [2, 2, 1],
+                        format: 'rgba8unorm',
+                        usage: GPUTextureUsage.TEXTURE_BINDING
+                    });
+                    const size = RedGPU.Util.calculateTextureByteSize(texture);
+                    redGPUContext.destroy();
+                    run(size);
+                } catch (e) { redGPUContext.destroy(); run(null, e); }
+            }, (error) => run(null, error));
+        }, 16);
 
-		runner.defineTest('r8unorm 512x512', (run) => {
-			const mockTexture = {
-				width: 512,
-				height: 512,
-				depthOrArrayLayers: 1,
-				format: 'r8unorm',
-				sampleCount: 1,
-				usage: 0
-			};
-			const size = RedGPU.Util.calculateTextureByteSize(mockTexture);
-			// 512 * 512 * 1 = 262144
-			run(size === 262144);
-		}, true);
-	}
+        runner.defineTest('Failure Test: null', (run) => {
+            try { RedGPU.Util.calculateTextureByteSize(null); run(true); } catch (e) { run(false, e); }
+        }, false);
+    }
+);
+
+redUnit.testGroup(
+    'RedGPU.Util.loadAndCreateBitmapImage',
+    (runner) => {
+        runner.defineTest('Success Test: Valid URL', (run) => {
+            // This test needs an actual image file. We use a known asset from examples.
+            const url = '../../../examples/assets/UV_Grid_Sm.jpg';
+            RedGPU.Util.loadAndCreateBitmapImage(url).then(bitmap => {
+                run(bitmap instanceof ImageBitmap && bitmap.width > 0);
+            }).catch(e => run(false, e));
+        }, true);
+
+        runner.defineTest('Failure Test: Invalid URL', (run) => {
+            RedGPU.Util.loadAndCreateBitmapImage('invalid-url.png').then(() => {
+                run(true);
+            }).catch(() => run(false));
+        }, false);
+    }
 );

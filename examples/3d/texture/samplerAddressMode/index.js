@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js?t=1778922031603";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
 
 /**
  * [KO] Sampler Address Mode 예제
@@ -28,7 +29,7 @@ RedGPU.init(
 
         createCategoryGroups(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
             scene.children.forEach(group => {
                 if (group.geometry instanceof RedGPU.Primitive.Box) {
@@ -36,8 +37,8 @@ RedGPU.init(
                 }
             });
         });
-        renderTestPane(redGPUContext);
 
+        renderTestPane(redGPUContext);
     },
     (failReason) => {
         console.error("Initialization failed:", failReason);
@@ -45,17 +46,18 @@ RedGPU.init(
 );
 
 /**
- * [KO] 테스트용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for testing.
+ * [KO] 테스트를 위한 GUI 패널을 렌더링합니다.
+ * [EN] Renders a GUI panel for testing.
  * @param {RedGPU.RedGPUContext} redGPUContext
  */
-const renderTestPane = async (redGPUContext,) => {
-    const {
-        setSeparator,
-        setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-}
+const renderTestPane = async (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        gui: (pane) => {
+            // [KO] 필요한 경우 여기에 추가 컨트롤을 구현할 수 있습니다.
+            // [EN] Additional controls can be implemented here if needed.
+        }
+    });
+};
 
 /**
  * [KO] 샘플러 조합을 생성합니다.
@@ -215,6 +217,7 @@ const createMaterialWithSampler = (redGPUContext, sampler) => {
     const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../../assets/texture/crate.png");
     const material = new RedGPU.Material.BitmapMaterial(redGPUContext);
     material.diffuseTexture = texture;
+    material.textureScale = [2, 2];
 
     material.diffuseTextureSampler.addressModeU = sampler.addressModeU;
     material.diffuseTextureSampler.addressModeV = sampler.addressModeV;

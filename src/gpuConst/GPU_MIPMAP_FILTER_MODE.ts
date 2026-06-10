@@ -4,20 +4,20 @@
  *
  * [KO] 텍스처의 밉맵 레벨 사이를 어떻게 보간할지 결정합니다.
  * [EN] Determines how to interpolate between mipmap levels of a texture.
- * 
+ *
  * @category Constants
  */
 const GPU_MIPMAP_FILTER_MODE = {
-	/**
-	 * [KO] 가장 가까운 밉맵 레벨에서 샘플링합니다.
-	 * [EN] Samples from the nearest mipmap level.
-	 */
-	NEAREST: 'nearest',
-	/**
-	 * [KO] 인접한 두 밉맵 레벨 사이를 선형 보간합니다.
-	 * [EN] Linearly interpolates between two adjacent mipmap levels.
-	 */
-	LINEAR: 'linear'
+    /**
+     * [KO] 가장 가까운 밉맵 레벨에서 샘플링합니다.
+     * [EN] Samples from the nearest mipmap level.
+     */
+    NEAREST: 'nearest',
+    /**
+     * [KO] 인접한 두 밉맵 레벨 사이를 선형 보간합니다.
+     * [EN] Linearly interpolates between two adjacent mipmap levels.
+     */
+    LINEAR: 'linear'
 } as const;
 Object.freeze(GPU_MIPMAP_FILTER_MODE);
 export default GPU_MIPMAP_FILTER_MODE;

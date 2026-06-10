@@ -1,19 +1,18 @@
 import ColorRGB from "../../color/ColorRGB";
 import ColorRGBA from "../../color/ColorRGBA";
 import RedGPUContext from "../../context/RedGPUContext";
-import DefineForFragment from "../../defineProperty/DefineForFragment";
-import GPU_BLEND_FACTOR from "../../gpuConst/GPU_BLEND_FACTOR";
-import GPU_BLEND_OPERATION from "../../gpuConst/GPU_BLEND_OPERATION";
 import BlendState from "../../renderState/BlendState";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import ResourceBase from "../../resources/core/ResourceBase";
-import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import Sampler from "../../resources/sampler/Sampler";
 import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
 import TINT_BLEND_MODE from "../TINT_BLEND_MODE";
 import FragmentGPURenderInfo from "./FragmentGPURenderInfo";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroupLayoutDescriptorFromShaderInfo";
-import {keepLog} from "../../utils";
+import definePositiveNumber from "../../defineProperty/funcs/number/definePositiveNumber";
+import defineBoolean from "../../defineProperty/funcs/defineBoolean";
+import defineColorRGBA from "../../defineProperty/funcs/color/defineColorRGBA";
+
 
 interface ABaseMaterial {
     /**
@@ -31,6 +30,7 @@ interface ABaseMaterial {
      * [EN] Whether to use tint color
      */
     useTint: boolean;
+    isInstanceofMaterial: boolean
 }
 
 /**
@@ -42,6 +42,11 @@ interface ABaseMaterial {
  *
  * [KO] 머티리얼별로 GPU 파이프라인의 셰이더, 바인드 그룹, 블렌딩, 컬러/알파, 틴트, 투명도 등 다양한 렌더링 속성을 일관성 있게 제어할 수 있습니다.
  * [EN] It allows consistent control of various rendering attributes such as shader, bind group, blending, color/alpha, tint, and transparency of the GPU pipeline for each material.
+ *
+ * ::: warning
+ * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
+ * :::
  * @category Material
  */
 abstract class ABaseMaterial extends ResourceBase {
@@ -77,10 +82,6 @@ abstract class ABaseMaterial extends ResourceBase {
      * 컬러 writeMask 상태
      */
     #writeMaskState: GPUFlagsConstant = GPUColorWrite.ALL
-    /**
-     * 리소스 매니저 객체
-     */
-    #resourceManager: ResourceManager
     /**
      * 기본 GPU 샘플러
      */
@@ -160,13 +161,14 @@ abstract class ABaseMaterial extends ResourceBase {
      * [KO] 바인드 그룹 인덱스
      * [EN] Bind group index
      */
-    constructor(
+    protected constructor(
         redGPUContext: RedGPUContext,
         moduleName: string,
         SHADER_INFO: any,
         targetGroupIndex: number
     ) {
         super(redGPUContext)
+        const {resourceManager} = redGPUContext
         // console.log('SHADER_INFO', moduleName, SHADER_INFO)
         this.#MODULE_NAME = moduleName
         this.#FRAGMENT_SHADER_MODULE_NAME = `FRAGMENT_MODULE_${this.#MODULE_NAME}`
@@ -181,98 +183,98 @@ abstract class ABaseMaterial extends ResourceBase {
         this.#TEXTURE_STRUCT = SHADER_INFO.shaderSourceVariant.getUnionTextures();
         this.#SAMPLER_STRUCT = SHADER_INFO.shaderSourceVariant.getUnionSamplers();
 
-        this.#bindGroupLayout = redGPUContext.resourceManager.getGPUBindGroupLayout(this.#FRAGMENT_BIND_GROUP_LAYOUT_NAME) || redGPUContext.resourceManager.createBindGroupLayout(
+        this.#bindGroupLayout = resourceManager.getGPUBindGroupLayout(this.#FRAGMENT_BIND_GROUP_LAYOUT_NAME) || resourceManager.createBindGroupLayout(
             this.#FRAGMENT_BIND_GROUP_LAYOUT_NAME,
             getFragmentBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, targetGroupIndex)
         )
         // this.#blendColorState = new BlendState(this, GPU_BLEND_FACTOR.ONE, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
         // this.#blendAlphaState = new BlendState(this, GPU_BLEND_FACTOR.ONE, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
-        this.#blendColorState = new BlendState(this, GPU_BLEND_FACTOR.SRC_ALPHA, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
-        this.#blendAlphaState = new BlendState(this, GPU_BLEND_FACTOR.SRC_ALPHA, GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA, GPU_BLEND_OPERATION.ADD)
-        this.#resourceManager = redGPUContext.resourceManager
-        this.#basicGPUSampler = this.#resourceManager.basicSampler.gpuSampler
-        this.#emptyBitmapGPUTextureView = this.#resourceManager.emptyBitmapTextureView
-        this.#emptyCubeTextureView = this.#resourceManager.emptyCubeTextureView
+        this.#blendColorState = new BlendState(this)
+        this.#blendAlphaState = new BlendState(this)
+
+        this.#basicGPUSampler = resourceManager.basicSampler.gpuSampler
+        this.#emptyBitmapGPUTextureView = resourceManager.emptyBitmapTextureView
+        this.#emptyCubeTextureView = resourceManager.emptyCubeTextureView
     }
 
-	/**
-	 * [KO] 틴트 블렌드 모드 이름을 반환합니다.
-	 * [EN] Returns the tint blend mode name.
-	 * @returns
-	 * [KO] 틴트 블렌드 모드 이름
-	 * [EN] Tint blend mode name
-	 */
-	get tintBlendMode(): string {
-		const entry = Object.entries(TINT_BLEND_MODE).find(([, value]) => value === this.#tintBlendMode);
-		if (!entry) {
-			throw new Error(`Invalid tint mode value: ${this.#tintBlendMode}`);
-		}
-		return entry[0]; // Return the key (e.g., "MULTIPLY")
-	}
+    /**
+     * [KO] 틴트 블렌드 모드 이름을 반환합니다.
+     * [EN] Returns the tint blend mode name.
+     * @returns
+     * [KO] 틴트 블렌드 모드 이름
+     * [EN] Tint blend mode name
+     */
+    get tintBlendMode(): string {
+        const entry = Object.entries(TINT_BLEND_MODE).find(([, value]) => value === this.#tintBlendMode);
+        if (!entry) {
+            throw new Error(`Invalid tint mode value: ${this.#tintBlendMode}`);
+        }
+        return entry[0]; // Return the key (e.g., "MULTIPLY")
+    }
 
-	/**
-	 * [KO] 틴트 블렌드 모드를 설정합니다.
-	 * [EN] Sets the tint blend mode.
-	 * @param value -
-	 * [KO] 틴트 블렌드 모드 값 또는 키
-	 * [EN] Tint blend mode value or key
-	 */
-	set tintBlendMode(value: TINT_BLEND_MODE | keyof typeof TINT_BLEND_MODE) {
-		const {fragmentUniformInfo, fragmentUniformBuffer} = this.gpuRenderInfo;
-		let valueIdx: number;
-		if (typeof value === "string") {
-			if (!(value in TINT_BLEND_MODE)) {
-				throw new Error(`Invalid tint mode key: ${value}`);
-			}
-			valueIdx = TINT_BLEND_MODE[value];
-		} else if (typeof value === "number" && Object.values(TINT_BLEND_MODE).includes(value)) {
-			valueIdx = value;
-		} else {
-			throw new Error(`Invalid tint mode: ${value}`);
-		}
-		fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members.tintBlendMode, valueIdx);
-		this.#tintBlendMode = valueIdx;
-	}
+    /**
+     * [KO] 틴트 블렌드 모드를 설정합니다.
+     * [EN] Sets the tint blend mode.
+     * @param value -
+     * [KO] 틴트 블렌드 모드 값 또는 키
+     * [EN] Tint blend mode value or key
+     */
+    set tintBlendMode(value: TINT_BLEND_MODE | keyof typeof TINT_BLEND_MODE) {
+        const {fragmentUniformInfo, fragmentUniformBuffer} = this.gpuRenderInfo;
+        let valueIdx: number;
+        if (typeof value === "string") {
+            if (!(value in TINT_BLEND_MODE)) {
+                throw new Error(`Invalid tint mode key: ${value}`);
+            }
+            valueIdx = TINT_BLEND_MODE[value];
+        } else if (typeof value === "number" && Object.values(TINT_BLEND_MODE).includes(value)) {
+            valueIdx = value;
+        } else {
+            throw new Error(`Invalid tint mode: ${value}`);
+        }
+        fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members.tintBlendMode, valueIdx);
+        this.#tintBlendMode = valueIdx;
+    }
 
-	/**
-	 * [KO] 머티리얼 모듈명을 반환합니다.
-	 * [EN] Returns the material module name.
-	 */
-	get MODULE_NAME(): string {
-		return this.#MODULE_NAME;
-	}
+    /**
+     * [KO] 머티리얼 모듈명을 반환합니다.
+     * [EN] Returns the material module name.
+     */
+    get MODULE_NAME(): string {
+        return this.#MODULE_NAME;
+    }
 
-	/**
-	 * [KO] 프래그먼트 셰이더 모듈명을 반환합니다.
-	 * [EN] Returns the fragment shader module name.
-	 */
-	get FRAGMENT_SHADER_MODULE_NAME(): string {
-		return this.#FRAGMENT_SHADER_MODULE_NAME;
-	}
+    /**
+     * [KO] 프래그먼트 셰이더 모듈명을 반환합니다.
+     * [EN] Returns the fragment shader module name.
+     */
+    get FRAGMENT_SHADER_MODULE_NAME(): string {
+        return this.#FRAGMENT_SHADER_MODULE_NAME;
+    }
 
-	/**
-	 * [KO] 프래그먼트 바인드 그룹 디스크립터명을 반환합니다.
-	 * [EN] Returns the fragment bind group descriptor name.
-	 */
-	get FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME(): string {
-		return this.#FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME;
-	}
+    /**
+     * [KO] 프래그먼트 바인드 그룹 디스크립터명을 반환합니다.
+     * [EN] Returns the fragment bind group descriptor name.
+     */
+    get FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME(): string {
+        return this.#FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME;
+    }
 
-	/**
-	 * [KO] 셰이더 storage 구조 정보를 반환합니다.
-	 * [EN] Returns the shader storage structure information.
-	 */
-	get STORAGE_STRUCT(): any {
-		return this.#STORAGE_STRUCT;
-	}
+    /**
+     * [KO] 셰이더 storage 구조 정보를 반환합니다.
+     * [EN] Returns the shader storage structure information.
+     */
+    get STORAGE_STRUCT(): any {
+        return this.#STORAGE_STRUCT;
+    }
 
-	/**
-	 * [KO] 셰이더 uniforms 구조 정보를 반환합니다.
-	 * [EN] Returns the shader uniforms structure information.
-	 */
-	get UNIFORM_STRUCT(): any {
-		return this.#UNIFORM_STRUCT;
-	}
+    /**
+     * [KO] 셰이더 uniforms 구조 정보를 반환합니다.
+     * [EN] Returns the shader uniforms structure information.
+     */
+    get UNIFORM_STRUCT(): any {
+        return this.#UNIFORM_STRUCT;
+    }
 
     /**
      * [KO] 머티리얼의 컬러 블렌드 상태 객체 반환
@@ -309,192 +311,192 @@ abstract class ABaseMaterial extends ResourceBase {
         this.#writeMaskState = value;
     }
 
-	/**
-	 * [KO] GPU 렌더 파이프라인 정보 및 유니폼 버퍼를 초기화합니다.
-	 * [EN] Initializes GPU render pipeline info and uniform buffer.
-	 */
-	initGPURenderInfos() {
-		const {redGPUContext} = this
-		const {resourceManager} = redGPUContext
-		const shaderModule = resourceManager.createGPUShaderModule(
-			this.#FRAGMENT_SHADER_MODULE_NAME,
-			{code: this.#SHADER_INFO.defaultSource}
-		)
-		// 데이터 작성
-		const uniformData = new ArrayBuffer(
-			Math.max(this.#UNIFORM_STRUCT.arrayBufferByteLength, 16)
-		)
-		const uniformBuffer = new UniformBuffer(
-			redGPUContext,
-			uniformData,
-			`UniformBuffer_${this.#MODULE_NAME}_${this.uuid}`
-		)
-		this.gpuRenderInfo = new FragmentGPURenderInfo(
-			shaderModule,
-			this.#SHADER_INFO.shaderSourceVariant,
-			this.#SHADER_INFO.conditionalBlocks,
-			this.#UNIFORM_STRUCT,
-			this.#bindGroupLayout,
-			uniformBuffer,
-			null,
-			null,
-		)
-		this._updateBaseProperty()
-		this._updateFragmentState()
-	}
+    /**
+     * [KO] GPU 렌더 파이프라인 정보 및 유니폼 버퍼를 초기화합니다.
+     * [EN] Initializes GPU render pipeline info and uniform buffer.
+     */
+    initGPURenderInfos() {
+        const {redGPUContext} = this
+        const {resourceManager} = redGPUContext
+        const shaderModule = resourceManager.createGPUShaderModule(
+            this.#FRAGMENT_SHADER_MODULE_NAME,
+            {code: this.#SHADER_INFO.defaultSource}
+        )
+        // 데이터 작성
+        const uniformData = new ArrayBuffer(
+            Math.max(this.#UNIFORM_STRUCT.arrayBufferByteLength, 16)
+        )
+        const uniformBuffer = new UniformBuffer(
+            redGPUContext,
+            uniformData,
+            `UniformBuffer_${this.#MODULE_NAME}_${this.uuid}`
+        )
+        this.gpuRenderInfo = new FragmentGPURenderInfo(
+            shaderModule,
+            this.#SHADER_INFO.shaderSourceVariant,
+            this.#SHADER_INFO.conditionalBlocks,
+            this.#UNIFORM_STRUCT,
+            this.#bindGroupLayout,
+            uniformBuffer,
+            null,
+            null,
+        )
+        this._updateBaseProperty()
+        this._updateFragmentState()
+    }
 
-	/**
-	 * [KO] 프래그먼트 셰이더 바인드 그룹/유니폼/텍스처/샘플러 등의 상태를 갱신합니다.
-	 * [EN] Updates fragment shader bind group/uniform/texture/sampler states.
-	 * @protected
-	 */
-	_updateFragmentState() {
-		const {gpuDevice, resourceManager} = this.redGPUContext
-		this.#checkVariant()
-		const entries: GPUBindGroupEntry[] = []
-		// for (const k in this.#storageInfo) {
-		// 	const info = this.#storageInfo[k]
-		// 	const {binding, name} = info
-		// 	entries.push(
-		// 		{
-		// 			binding: binding,
-		// 			resource: name === 'outputTexture' ? targetOutputView : sourceTextureView[binding],
-		// 		}
-		// 	)
-		// }
-		for (const k in this.#TEXTURE_STRUCT) {
-			const info = this.#TEXTURE_STRUCT[k]
-			const {binding, name, group, type} = info
-			const {name: textureType} = type
-			console.log(this, name, this[name])
-			let resource
-			if (textureType === 'texture_cube') resource = resourceManager.getGPUResourceCubeTextureView(this[name])
-			else if (this[name] instanceof PackedTexture) {
-				resource = resourceManager.getGPUResourceBitmapTextureView(this[name])
-			} else {
-				resource = resourceManager.getGPUResourceBitmapTextureView(this[name]) || this.#emptyBitmapGPUTextureView
-			}
-			if (group === 2) {
-				entries.push(
-					{
-						binding: binding,
-						resource
-					}
-				)
-			}
-		}
-		for (const k in this.#SAMPLER_STRUCT) {
-			const info = this.#SAMPLER_STRUCT[k]
-			const {binding, name, group} = info
-			if (group === 2) {
-				entries.push(
-					{
-						binding: binding,
-						resource: this.getGPUResourceSampler(this[name]),
-					}
-				)
-			}
-		}
-		if (this.#UNIFORM_STRUCT) {
-			entries.push(
-				{
-					binding: this.#UNIFORM_STRUCT.binding,
-					resource: {
-						buffer: this.gpuRenderInfo.fragmentUniformBuffer.gpuBuffer,
-						offset: 0,
-						size: this.gpuRenderInfo.fragmentUniformBuffer.size
-					},
-				}
-			)
-		}
-		const bindGroupDescriptor: GPUBindGroupDescriptor = {
-			layout: this.gpuRenderInfo.fragmentBindGroupLayout,
-			label: this.#FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME,
-			entries
-		}
-		const fragmentUniformBindGroup: GPUBindGroup = gpuDevice.createBindGroup(bindGroupDescriptor)
-		this.gpuRenderInfo.fragmentState = this.getFragmentRenderState()
-		this.gpuRenderInfo.fragmentUniformBindGroup = fragmentUniformBindGroup
-		// keepLog(this.gpuRenderInfo)
-	}
+    /**
+     * [KO] 프래그먼트 셰이더 바인드 그룹/유니폼/텍스처/샘플러 등의 상태를 갱신합니다.
+     * [EN] Updates fragment shader bind group/uniform/texture/sampler states.
+     * @protected
+     */
+    _updateFragmentState() {
+        const {gpuDevice, resourceManager} = this.redGPUContext
+        this.#checkVariant()
+        const entries: GPUBindGroupEntry[] = []
+        // for (const k in this.#storageInfo) {
+        // 	const info = this.#storageInfo[k]
+        // 	const {binding, name} = info
+        // 	entries.push(
+        // 		{
+        // 			binding: binding,
+        // 			resource: name === 'outputTexture' ? targetOutputView : sourceTextureView[binding],
+        // 		}
+        // 	)
+        // }
+        for (const k in this.#TEXTURE_STRUCT) {
+            const info = this.#TEXTURE_STRUCT[k]
+            const {binding, name, group, type} = info
+            const {name: textureType} = type
+            console.log(this, name, this[name])
+            let resource
+            if (textureType === 'texture_cube') resource = resourceManager.getGPUResourceCubeTextureView(this[name])
+            else if (this[name] instanceof PackedTexture) {
+                resource = resourceManager.getGPUResourceBitmapTextureView(this[name])
+            } else {
+                resource = resourceManager.getGPUResourceBitmapTextureView(this[name]) || this.#emptyBitmapGPUTextureView
+            }
+            if (group === 2) {
+                entries.push(
+                    {
+                        binding: binding,
+                        resource
+                    }
+                )
+            }
+        }
+        for (const k in this.#SAMPLER_STRUCT) {
+            const info = this.#SAMPLER_STRUCT[k]
+            const {binding, name, group} = info
+            if (group === 2) {
+                entries.push(
+                    {
+                        binding: binding,
+                        resource: this.getGPUResourceSampler(this[name]),
+                    }
+                )
+            }
+        }
+        if (this.#UNIFORM_STRUCT) {
+            entries.push(
+                {
+                    binding: this.#UNIFORM_STRUCT.binding,
+                    resource: {
+                        buffer: this.gpuRenderInfo.fragmentUniformBuffer.gpuBuffer,
+                        offset: 0,
+                        size: this.gpuRenderInfo.fragmentUniformBuffer.size
+                    },
+                }
+            )
+        }
+        const bindGroupDescriptor: GPUBindGroupDescriptor = {
+            layout: this.gpuRenderInfo.fragmentBindGroupLayout,
+            label: this.#FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME,
+            entries
+        }
+        const fragmentUniformBindGroup: GPUBindGroup = gpuDevice.createBindGroup(bindGroupDescriptor)
+        this.gpuRenderInfo.fragmentState = this.getFragmentRenderState()
+        this.gpuRenderInfo.fragmentUniformBindGroup = fragmentUniformBindGroup
+        // keepLog(this.gpuRenderInfo)
+    }
 
-	/**
-	 * [KO] GPU 프래그먼트 렌더 상태 객체를 반환합니다.
-	 * [EN] Returns the GPU fragment render state object.
-	 * @param entryPoint -
-	 * [KO] 셰이더 엔트리포인트 (기본값: 'main')
-	 * [EN] Shader entry point (default: 'main')
-	 * @returns
-	 * [KO] GPU 프래그먼트 상태
-	 * [EN] GPU fragment state
-	 */
-	getFragmentRenderState(entryPoint: string = 'main'): GPUFragmentState {
-		return {
-			module: this.gpuRenderInfo.fragmentShaderModule,
-			entryPoint,
-			targets: [
-				{
-					format: 'rgba16float',
-					blend: {
-						color: this.blendColorState.state,
-						alpha: this.blendAlphaState.state
-					},
-					writeMask: this.writeMaskState,
-				},
-				{
-					format: navigator.gpu.getPreferredCanvasFormat(),
-					blend: undefined,
-					writeMask: this.writeMaskState,
-				},
-				{
-					format: 'rgba16float',
-					blend: undefined,
-					writeMask: this.writeMaskState,
-				},
-			]
-		}
-	}
+    /**
+     * [KO] GPU 프래그먼트 렌더 상태 객체를 반환합니다.
+     * [EN] Returns the GPU fragment render state object.
+     * @param entryPoint -
+     * [KO] 셰이더 엔트리포인트 (기본값: 'main')
+     * [EN] Shader entry point (default: 'main')
+     * @returns
+     * [KO] GPU 프래그먼트 상태
+     * [EN] GPU fragment state
+     */
+    getFragmentRenderState(entryPoint: string = 'main'): GPUFragmentState {
+        return {
+            module: this.gpuRenderInfo.fragmentShaderModule,
+            entryPoint,
+            targets: [
+                {
+                    format: 'rgba16float',
+                    blend: {
+                        color: this.blendColorState.state,
+                        alpha: this.blendAlphaState.state
+                    },
+                    writeMask: this.writeMaskState,
+                },
+                {
+                    format: navigator.gpu.getPreferredCanvasFormat(),
+                    blend: undefined,
+                    writeMask: this.writeMaskState,
+                },
+                {
+                    format: 'rgba16float',
+                    blend: undefined,
+                    writeMask: this.writeMaskState,
+                },
+            ]
+        }
+    }
 
-	/**
-	 * [KO] 머티리얼의 유니폼/컬러/틴트 등 기본 속성값을 유니폼 버퍼에 반영합니다.
-	 * [EN] Reflects basic material properties such as uniforms/color/tint to the uniform buffer.
-	 * @protected
-	 */
-	_updateBaseProperty() {
-		const {fragmentUniformInfo, fragmentUniformBuffer} = this.gpuRenderInfo
-		const {members} = fragmentUniformInfo
-		for (const k in members) {
-			const property = this[k]
-			if (property instanceof ColorRGBA) {
-				fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[k], property.rgbaNormalLinear)
-			} else if (property instanceof ColorRGB) {
-				fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[k], property.rgbNormalLinear)
-			} else {
-				if (!pattern.test(k)) this[k] = property
-			}
-		}
-	}
+    /**
+     * [KO] 머티리얼의 유니폼/컬러/틴트 등 기본 속성값을 유니폼 버퍼에 반영합니다.
+     * [EN] Reflects basic material properties such as uniforms/color/tint to the uniform buffer.
+     * @protected
+     */
+    _updateBaseProperty() {
+        const {fragmentUniformInfo, fragmentUniformBuffer} = this.gpuRenderInfo
+        const {members} = fragmentUniformInfo
+        for (const k in members) {
+            const property = this[k]
+            if (property instanceof ColorRGBA) {
+                fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[k], property.rgbaNormalLinear)
+            } else if (property instanceof ColorRGB) {
+                fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[k], property.rgbNormalLinear)
+            } else {
+                if (!pattern.test(k)) this[k] = property
+            }
+        }
+    }
 
-	/**
-	 * [KO] 샘플러 객체에서 GPU 샘플러를 반환합니다.
-	 * [EN] Returns the GPU sampler from the Sampler object.
-	 * @param sampler -
-	 * [KO] Sampler 객체
-	 * [EN] Sampler object
-	 * @returns
-	 * [KO] GPUSampler 인스턴스
-	 * [EN] GPUSampler instance
-	 */
-	getGPUResourceSampler(sampler: Sampler) {
-		return sampler?.gpuSampler || this.#basicGPUSampler
-	}
+    /**
+     * [KO] 샘플러 객체에서 GPU 샘플러를 반환합니다.
+     * [EN] Returns the GPU sampler from the Sampler object.
+     * @param sampler -
+     * [KO] Sampler 객체
+     * [EN] Sampler object
+     * @returns
+     * [KO] GPUSampler 인스턴스
+     * [EN] GPUSampler instance
+     */
+    getGPUResourceSampler(sampler: Sampler) {
+        return sampler?.gpuSampler || this.#basicGPUSampler
+    }
 
     /**
      * [KO] 셰이더 바리안트(조건부 분기) 상태 체크 및 셰이더 모듈 갱신
      * [EN] Check shader variant (conditional branch) state and update shader module
      */
     #checkVariant() {
-        const {gpuDevice, resourceManager} = this.redGPUContext;
+        const {resourceManager} = this.redGPUContext;
         // 현재 머티리얼 상태에 맞는 바리안트 키 찾기
         const currentVariantKey = this.#findMatchingVariantKey();
 
@@ -559,14 +561,18 @@ abstract class ABaseMaterial extends ResourceBase {
 }
 
 const pattern = /^use\w+Texture$/;
-DefineForFragment.defineByPreset(ABaseMaterial, [
-    DefineForFragment.PRESET_POSITIVE_NUMBER.OPACITY,
+Object.defineProperty(ABaseMaterial.prototype, 'isInstanceofMaterial', {
+    value: true,
+    writable: false
+});
+definePositiveNumber(ABaseMaterial, [
+    {key: 'opacity', value: 1, max: 1}
 ])
-DefineForFragment.defineBoolean(ABaseMaterial, [
-    ['useTint', false]
+defineBoolean(ABaseMaterial, [
+    {key: 'useTint', value: false}
 ])
-DefineForFragment.defineColorRGBA(ABaseMaterial, [
-    'tint', '#ff0000'
+defineColorRGBA(ABaseMaterial, [
+    {key: 'tint', value: '#ffffff'}
 ])
 Object.freeze(ABaseMaterial)
 export default ABaseMaterial

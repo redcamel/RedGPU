@@ -12,7 +12,6 @@ import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validate
 import getScreenPoint from "../../../math/coordinates/getScreenPoint";
 import localToWorld from "../../../math/coordinates/localToWorld";
 import worldToLocal from "../../../math/coordinates/worldToLocal";
-import createUUID from "../../../utils/uuid/createUUID";
 import View3D from "../../view/View3D";
 import Object3DContainer from "./Object3DContainer";
 import VertexGPURenderInfo from "./VertexGPURenderInfo";
@@ -55,8 +54,6 @@ class MeshBase extends Object3DContainer {
     readonly #primitiveState: PrimitiveState
     readonly #depthStencilState: DepthStencilState
     #currentShaderModuleName: string
-    readonly #dirtyListeners: any[] = [];
-    #uuid: string = createUUID()
 
     constructor(redGPUContext: RedGPUContext) {
         super()
@@ -65,15 +62,6 @@ class MeshBase extends Object3DContainer {
         this.#gpuDevice = redGPUContext.gpuDevice
         this.#primitiveState = new PrimitiveState(this)
         this.#depthStencilState = new DepthStencilState(this)
-    }
-
-    /**
-     * Retrieves the UUID of the object.
-     *
-     * @returns {string} The UUID of the object.
-     */
-    get uuid(): string {
-        return this.#uuid;
     }
 
     get currentShaderModuleName(): string {
@@ -120,17 +108,6 @@ class MeshBase extends Object3DContainer {
 
     getScreenPoint(view: View3D): [number, number] {
         return getScreenPoint(view, this.modelMatrix)
-    }
-
-    /**
-     * Fires the dirty listeners list.
-     *
-     * @param {boolean} [resetList=false] - Indicates whether to reset the dirty listeners list after firing.
-     */
-    __fireListenerList(resetList: boolean = false) {
-        // console.log('this.#dirtyListeners', this, this.#dirtyListeners)
-        for (const listener of this.#dirtyListeners) listener(this);
-        if (resetList) this.#dirtyListeners.length = 0
     }
 }
 

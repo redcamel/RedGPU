@@ -1,13 +1,18 @@
 import ColorRGB from "../../color/ColorRGB";
 import RedGPUContext from "../../context/RedGPUContext";
-import DefineForFragment from "../../defineProperty/DefineForFragment";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl'
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
+import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
+import defineBoolean from "../../defineProperty/funcs/defineBoolean";
+import definePositiveNumber from "../../defineProperty/funcs/number/definePositiveNumber";
+import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
+import defineColorRGB from "../../defineProperty/funcs/color/defineColorRGB";
 
-const SHADER_INFO = parseWGSL(fragmentModuleSource)
+
+const SHADER_INFO = parseWGSL('PHONG_MATERIAL', fragmentModuleSource)
 
 /**
  * [KO] PhongMaterial의 공통 속성 인터페이스
@@ -119,6 +124,8 @@ interface PhongMaterial {
      * [EN] Whether to use SSR (Screen Space Reflection)
      */
     useSSR: number;
+    displacementScale: number;
+    displacementTexture: BitmapTexture
 }
 
 /**
@@ -144,127 +151,90 @@ interface PhongMaterial {
  * @category Material
  */
 class PhongMaterial extends AUVTransformBaseMaterial {
-	/**
-	 * [KO] 디스플레이스먼트(변위) 텍스처
-	 * [EN] Displacement texture
-	 */
-	#displacementTexture: BitmapTexture
-	/**
-	 * [KO] 디스플레이스먼트(변위) 스케일 (기본값: 1)
-	 * [EN] Displacement scale (default: 1)
-	 */
-	#displacementScale: number = 1
 
-	/**
-	 * [KO] PhongMaterial 생성자
-	 * [EN] PhongMaterial constructor
-	 * @param redGPUContext -
-	 * [KO] RedGPUContext 인스턴스
-	 * [EN] RedGPUContext instance
-	 * @param color -
-	 * [KO] 기본 색상 (HEX 문자열, 기본값: '#fff')
-	 * [EN] Base color (HEX string, default: '#fff')
-	 * @param name -
-	 * [KO] 머티리얼 이름 (옵션)
-	 * [EN] Material name (optional)
-	 */
-	constructor(redGPUContext: RedGPUContext, color: string = '#fff', name?: string) {
-		super(
-			redGPUContext,
-			'PHONG_MATERIAL',
-			SHADER_INFO,
-			2
-		)
-		if (name) this.name = name
-		this.initGPURenderInfos()
-		this.color.setColorByHEX(color)
-		this.emissiveColor.setColorByHEX(this.emissiveColor.hex)
-		this.specularColor.setColorByHEX(this.specularColor.hex)
-	}
 
-	/**
-	 * [KO] 디스플레이스먼트(변위) 스케일을 반환합니다.
-	 * [EN] Returns the displacement scale.
-	 * @returns
-	 * [KO] 스케일 값
-	 * [EN] Scale value
-	 */
-	get displacementScale(): number {
-		return this.#displacementScale;
-	}
+    /**
+     * [KO] PhongMaterial 생성자
+     * [EN] PhongMaterial constructor
+     * @param redGPUContext -
+     * [KO] RedGPUContext 인스턴스
+     * [EN] RedGPUContext instance
+     * @param color -
+     * [KO] 기본 색상 (HEX 문자열, 기본값: '#fff')
+     * [EN] Base color (HEX string, default: '#fff')
+     * @param name -
+     * [KO] 머티리얼 이름 (옵션)
+     * [EN] Material name (optional)
+     */
+    constructor(redGPUContext: RedGPUContext, color: string = '#fff', name?: string) {
+        super(
+            redGPUContext,
+            'PHONG_MATERIAL',
+            SHADER_INFO,
+            2
+        )
+        if (name) this.name = name
+        this.initGPURenderInfos()
+        this.color.setColorByHEX(color)
+        this.emissiveColor.setColorByHEX(this.emissiveColor.hex)
+        this.specularColor.setColorByHEX(this.specularColor.hex)
+        this.diffuseTextureSampler = new Sampler(this.redGPUContext, {
+            magFilter: 'linear',
+            minFilter: 'linear',
+            mipmapFilter: 'linear',
+            addressModeU: 'repeat',
+            addressModeV: 'repeat',
+            addressModeW: 'repeat',
+        })
+    }
 
-	/**
-	 * [KO] 디스플레이스먼트(변위) 스케일을 설정합니다.
-	 * [EN] Sets the displacement scale.
-	 * @param value -
-	 * [KO] 스케일 값
-	 * [EN] Scale value
-	 */
-	set displacementScale(value: number) {
-		this.#displacementScale = value;
-	}
 
-	/**
-	 * [KO] 디스플레이스먼트(변위) 텍스처를 반환합니다.
-	 * [EN] Returns the displacement texture.
-	 * @returns
-	 * [KO] BitmapTexture
-	 * [EN] BitmapTexture
-	 */
-	get displacementTexture(): BitmapTexture {
-		return this.#displacementTexture;
-	}
-
-	/**
-	 * [KO] 디스플레이스먼트(변위) 텍스처를 설정하고 파이프라인을 갱신합니다.
-	 * [EN] Sets the displacement texture and updates the pipeline.
-	 * @param value -
-	 * [KO] BitmapTexture
-	 * [EN] BitmapTexture
-	 */
-	set displacementTexture(value: BitmapTexture) {
-		const prevTexture: BitmapTexture = this.#displacementTexture
-		this.#displacementTexture = value;
-		this.updateTexture(prevTexture, value)
-		this.dirtyPipeline = true
-	}
 }
 
-DefineForFragment.defineByPreset(PhongMaterial, [
-    DefineForFragment.PRESET_COLOR_RGB.COLOR,
-    //
-    DefineForFragment.PRESET_TEXTURE.ALPHA_TEXTURE,
-    DefineForFragment.PRESET_SAMPLER.ALPHA_TEXTURE_SAMPLER,
-    //
-    DefineForFragment.PRESET_TEXTURE.AO_TEXTURE,
-    DefineForFragment.PRESET_SAMPLER.AO_TEXTURE_SAMPLER,
-    DefineForFragment.PRESET_POSITIVE_NUMBER.AO_STRENGTH,
-    //
-    DefineForFragment.PRESET_TEXTURE.DIFFUSE_TEXTURE,
-    DefineForFragment.PRESET_SAMPLER.DIFFUSE_TEXTURE_SAMPLER,
-    //
-    DefineForFragment.PRESET_TEXTURE.EMISSIVE_TEXTURE,
-    DefineForFragment.PRESET_SAMPLER.EMISSIVE_TEXTURE_SAMPLER,
-    DefineForFragment.PRESET_POSITIVE_NUMBER.EMISSIVE_STRENGTH,
-    [DefineForFragment.PRESET_COLOR_RGB.EMISSIVE_COLOR, '#000000'],
-    //
-    DefineForFragment.PRESET_TEXTURE.NORMAL_TEXTURE,
-    DefineForFragment.PRESET_SAMPLER.NORMAL_TEXTURE_SAMPLER,
-    DefineForFragment.PRESET_POSITIVE_NUMBER.NORMAL_SCALE,
-    //
-    DefineForFragment.PRESET_TEXTURE.SPECULAR_TEXTURE,
-    DefineForFragment.PRESET_SAMPLER.SPECULAR_TEXTURE_SAMPLER,
-    DefineForFragment.PRESET_POSITIVE_NUMBER.SPECULAR_STRENGTH,
-    [DefineForFragment.PRESET_COLOR_RGB.SPECULAR_COLOR, '#ffffff'],
-    //
-    [DefineForFragment.PRESET_POSITIVE_NUMBER.SHININESS, 32],
+defineSampler(
+    PhongMaterial,
+    [
+        {key: 'alphaTextureSampler'},
+        {key: 'aoTextureSampler'},
+        {key: 'diffuseTextureSampler'},
+        {key: 'emissiveTextureSampler'},
+        {key: 'environmentTextureSampler'},
+        {key: 'normalTextureSampler'},
+        {key: 'specularTextureSampler'},
+        {key: 'displacementTextureSampler'}
+    ])
+definePositiveNumber(
+    PhongMaterial,
+    [
+        {key: 'aoStrength', value: 1},
+        {key: 'specularStrength', value: 1},
+        {key: 'emissiveStrength', value: 1},
+        {key: 'shininess', value: 32},
+        {key: 'normalScale', value: 1},
+        {key: 'displacementScale', value: 1}
+    ]
+)
+defineColorRGB(PhongMaterial, [
+    {key: 'color'},
+    {key: 'emissiveColor', value: '#000000'},
+    {key: 'specularColor', value: '#ffffff'}
 ])
-DefineForFragment.defineBoolean(PhongMaterial, [
-    ['useSSR', false]
+defineTexture(PhongMaterial, [
+    {key: 'alphaTexture'},
+    {key: 'aoTexture'},
+    {key: 'diffuseTexture'},
+    {key: 'emissiveTexture'},
+    {key: 'environmentTexture'},
+    {key: 'normalTexture'},
+    {key: 'specularTexture'},
+    {key: 'displacementTexture'},
 ])
-DefineForFragment.definePositiveNumber(PhongMaterial, [
-    ['metallic', 0, 0, 1],
-    ['roughness', 0, 0, 1]
+defineBoolean(PhongMaterial, [
+    {key: 'useSSR', value: false}
+])
+definePositiveNumber(PhongMaterial, [
+    {key: 'metallic', value: 0, min: 0, max: 1},
+    {key: 'roughness', value: 0, min: 0, max: 1}
 ])
 Object.freeze(PhongMaterial)
 export default PhongMaterial

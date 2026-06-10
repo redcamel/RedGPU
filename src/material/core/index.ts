@@ -10,8 +10,8 @@ import AUVTransformBaseMaterial from "./AUVTransformBaseMaterial";
 
 export * from "./getBindGroupLayoutDescriptorFromShaderInfo";
 export {
-	ABaseMaterial,
-	ABitmapBaseMaterial,
-	AUVTransformBaseMaterial,
-	FragmentGPURenderInfo
+    ABaseMaterial,
+    ABitmapBaseMaterial,
+    AUVTransformBaseMaterial,
+    FragmentGPURenderInfo
 }

@@ -1,5 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770713934910";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1778922031603";
+import * as RedGPU from "../../../dist/index.js?t=1778922031603";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1778922031603";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -32,9 +33,6 @@ RedGPU.init(
 
 		// [KO] 조명 설정
 		// [EN] Set up lighting
-		const ambientLight = new RedGPU.Light.AmbientLight();
-		ambientLight.intensity = 0.5;
-		scene.lightManager.ambientLight = ambientLight;
 		scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
 
 		// [KO] 바닥 생성
@@ -85,10 +83,11 @@ RedGPU.init(
  * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, resetScene) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-	const { setDebugButtons } = await import("../../../examples/exampleHelper/createExample/panes/index.js?t=1770713934910");
-	setDebugButtons(RedGPU, redGPUContext);
-	const pane = new Pane();
-	pane.addBlade({ view: 'text', label: 'Guide', value: 'Click boxes to push them!', parse: (v) => v, readonly: true });
-	pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
+	
+	new RedGPUExampleHelper(redGPUContext, {
+		gui: (pane) => {
+			pane.addBlade({ view: 'text', label: 'Guide', value: 'Click boxes to push them!', parse: (v) => v, readonly: true });
+			pane.addButton({ title: 'Reset Scene' }).on('click', () => resetScene());
+		}
+	});
 };

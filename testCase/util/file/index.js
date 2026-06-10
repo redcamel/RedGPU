@@ -1,91 +1,85 @@
 import RedUnit from 'https://redcamel.github.io/RedUnit/dist/index.js';
 import * as RedGPU from "../../../dist/index.js";
 
-const redUnit = new RedUnit('RedGPU - file');
+const redUnit = new RedUnit('RedGPU - Util - File');
+
 redUnit.testGroup(
-	'JavaScript RedGPU.Util Function Tests',
-	(runner) => {
-		//Testing getFilePath function with various inputs
-		runner.defineTest('Test getFilePath - simple path', function (run) {
-			const filePath = '/home/user/project/file.txt';
-			run(RedGPU.Util.getFilePath(filePath));
-		}, '/home/user/project/');
+    'RedGPU.Util.getFilePath',
+    (runner) => {
+        runner.defineTest('Success Test: Valid URL', (run) => {
+            run(RedGPU.Util.getFilePath('https://example.com/assets/textures/diffuse.png'));
+        }, 'https://example.com/assets/textures/');
 
-		runner.defineTest('Test getFilePath - nested path', function (run) {
-			const filePath = '/home/user/project/subdirectory/file.txt';
-			run(RedGPU.Util.getFilePath(filePath));
-		}, '/home/user/project/subdirectory/');
+        runner.defineTest('Failure Test: Empty string', (run) => {
+            try { RedGPU.Util.getFilePath(''); run(true); } catch (e) { run(false, e); }
+        }, false);
 
-		//Testing getFileName function with various inputs
-		runner.defineTest('Test getFileName - jpg file', function (run) {
-			const filePath = '/home/user/project/image.jpg';
-			run(RedGPU.Util.getFileName(filePath));
-		}, 'image.jpg');
+        runner.defineTest('Failure Test: NaN', (run) => {
+            try { RedGPU.Util.getFilePath(NaN); run(true); } catch (e) { run(false, e); }
+        }, false);
 
-		runner.defineTest('Test getFileName - no extension', function (run) {
-			const filePath = '/home/user/project/file';
-			run(RedGPU.Util.getFileName(filePath));
-		}, 'file');
-
-		//Testing getFileExtension function with various inputs
-		runner.defineTest('Test getFileExtension - png file', function (run) {
-			const filePath = '/home/user/project/image.png';
-			run(RedGPU.Util.getFileExtension(filePath));
-		}, 'png');
-
-		runner.defineTest('Test getFileExtension - no extension', function (run) {
-			const filePath = '/home/user/project/file';
-			run(RedGPU.Util.getFileExtension(filePath));
-		}, '');
-	}
+        runner.defineTest('Failure Test: null', (run) => {
+            try { RedGPU.Util.getFilePath(null); run(true); } catch (e) { run(false, e); }
+        }, false);
+    }
 );
+
 redUnit.testGroup(
-	'JavaScript RedGPU.Util Function Tests',
-	(runner) => {
-		// Failure case for getFilePath function
-		runner.defineTest('Test getFilePath - non-string input', function (run) {
-			let negativeTest, error;
-			try {
-				// Passing number instead of string
-				RedGPU.Util.getFilePath(123);
-				negativeTest = true;
-			} catch (e) {
-				negativeTest = false;
-				error = e
+    'RedGPU.Util.getFileName',
+    (runner) => {
+        runner.defineTest('Success Test: Valid path', (run) => {
+            run(RedGPU.Util.getFileName('path/to/image.png'));
+        }, 'image.png');
 
-			}
-			run(negativeTest, error);
+        runner.defineTest('Failure Test: null', (run) => {
+            try { RedGPU.Util.getFileName(null); run(true); } catch (e) { run(false, e); }
+        }, false);
+    }
+);
 
-		}, false);
+redUnit.testGroup(
+    'RedGPU.Util.getFileExtension',
+    (runner) => {
+        runner.defineTest('Success Test: Lowercase check', (run) => {
+            run(RedGPU.Util.getFileExtension('IMAGE.PNG'));
+        }, 'png');
 
-		// Failure case for getFileName function
-		runner.defineTest('Test getFileName - non-string input', function (run) {
-			let negativeTest, error;
-			try {
-				// Passing number instead of string
-				RedGPU.Util.getFileName(123);
-				negativeTest = true;
-			} catch (e) {
-				negativeTest = false;
-				error = e
-			}
-			run(negativeTest, error);
+        runner.defineTest('Failure Test: No extension', (run) => {
+            run(RedGPU.Util.getFileExtension('filename'));
+        }, '');
 
-		}, false);
+        runner.defineTest('Failure Test: undefined', (run) => {
+            try { RedGPU.Util.getFileExtension(undefined); run(true); } catch (e) { run(false, e); }
+        }, false);
+    }
+);
 
-		// Failure case for getFileExtension function
-		runner.defineTest('Test getFileExtension - non-string input', function (run) {
-			let negativeTest, error;
-			try {
-				// Passing number instead of string
-				RedGPU.Util.getFileExtension(123);
-				negativeTest = true;
-			} catch (e) {
-				negativeTest = false;
-				error = e
-			}
-			run(negativeTest, error);
+redUnit.testGroup(
+    'RedGPU.Util.getAbsoluteURL',
+    (runner) => {
+        runner.defineTest('Success: Resolve relative path', (run) => {
+            run(RedGPU.Util.getAbsoluteURL('https://example.com/path/', 'image.png'));
+        }, 'https://example.com/path/image.png');
 
-		}, false);
-	}
+        runner.defineTest('Success: With URL object as base', (run) => {
+            const base = new URL('https://example.com/path/');
+            run(RedGPU.Util.getAbsoluteURL(base, 'image.png'));
+        }, 'https://example.com/path/image.png');
+
+        runner.defineTest('Success: Parent directory traversal (../)', (run) => {
+            run(RedGPU.Util.getAbsoluteURL('https://example.com/a/b/', '../image.png'));
+        }, 'https://example.com/a/image.png');
+
+        runner.defineTest('Failure: null base', (run) => {
+            try { RedGPU.Util.getAbsoluteURL(null, 'file.txt'); run(true); } catch (e) { run(false, e); }
+        }, false);
+
+        runner.defineTest('Failure: empty relative', (run) => {
+            try { RedGPU.Util.getAbsoluteURL('https://a.com', ''); run(true); } catch (e) { run(false, e); }
+        }, false);
+
+        runner.defineTest('Failure: invalid URL combination', (run) => {
+            try { RedGPU.Util.getAbsoluteURL('invalid-base', 'relative'); run(true); } catch (e) { run(false, e); }
+        }, false);
+    }
 );

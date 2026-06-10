@@ -1,18 +1,15 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import {keepLog} from "../../../utils";
 import Sampler from "../../sampler/Sampler";
-import BitmapTexture from "../../texture/BitmapTexture";
 import {
     BRDFGenerator,
     EquirectangularToCubeGenerator,
-    IBLCubeTexture,
     IrradianceGenerator,
     PrefilterGenerator
 } from "../../texture/ibl/core";
 import DownSampleCubeMapGenerator from "../../texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
 import MipmapGenerator from "../../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../../texture/CubeTexture";
-import PackedTexture from "../../texture/packedTexture/PackedTexture";
 import preprocessWGSL from "../../wgslParser/core/preprocessWGSL";
 import ManagementResourceBase from "../ManagementResourceBase";
 import ResourceStateIndexBuffer from "./resourceState/ResourceStateIndexBuffer";
@@ -23,6 +20,7 @@ import ResourceStatusInfo from "./resourceState/ResourceStatusInfo";
 import ResourceStateBitmapTexture from "./resourceState/texture/ResourceStateBitmapTexture";
 import ResourceStateCubeTexture from "./resourceState/texture/ResourceStateCubeTexture";
 import ResourceStateHDRTexture from "./resourceState/texture/ResourceStateHDRTexture";
+import RedGPUObject from "../../../base/RedGPUObject";
 
 enum ResourceType {
     GPUShaderModule = 'GPUShaderModule',
@@ -31,7 +29,17 @@ enum ResourceType {
     GPUBuffer = 'GPUBuffer',
 }
 
-type ResourceState = ResourceStateVertexBuffer
+export type {
+    ResourceStateIndexBuffer,
+    ResourceStateStorageBuffer,
+    ResourceStateUniformBuffer,
+    ResourceStateVertexBuffer,
+    ResourceStateBitmapTexture,
+    ResourceStateCubeTexture,
+    ResourceStateHDRTexture
+};
+
+export type ResourceState = ResourceStateVertexBuffer
     | ResourceStateIndexBuffer
     | ResourceStateUniformBuffer
     | ResourceStateStorageBuffer
@@ -55,12 +63,12 @@ type ResourceState = ResourceStateVertexBuffer
  * ```
  * @category Resource
  */
-class ResourceManager {
+class ResourceManager extends RedGPUObject {
     static PRESET_GPUBindGroupLayout_System = 'PRESET_GPUBindGroupLayout_System'
     static PRESET_VERTEX_GPUBindGroupLayout_Instancing = 'PRESET_VERTEX_GPUBindGroupLayout_Instancing'
     static PRESET_VERTEX_GPUBindGroupLayout = 'PRESET_VERTEX_GPUBindGroupLayout'
     static PRESET_VERTEX_GPUBindGroupLayout_SKIN = 'PRESET_VERTEX_GPUBindGroupLayout_SKIN'
-    #gpuBufferVideoMemory: number = 0;
+
     #resources = new ImmutableKeyMap([
         [ResourceType.GPUShaderModule, new Map()],
         [ResourceType.GPUBindGroupLayout, new Map()],
@@ -77,6 +85,8 @@ class ResourceManager {
     #cachedBufferState: any = {}
     #emptyBitmapTextureView: GPUTextureView
     #emptyCubeTextureView: GPUTextureView
+    #emptyTexture3DView: GPUTextureView
+    #emptyDepthTextureView: GPUTextureView
     readonly #mipmapGenerator: MipmapGenerator
     readonly #downSampleCubeMapGenerator: DownSampleCubeMapGenerator
     readonly #brdfGenerator: BRDFGenerator
@@ -84,10 +94,10 @@ class ResourceManager {
     readonly #prefilterGenerator: PrefilterGenerator
     readonly #equirectangularToCubeGenerator: EquirectangularToCubeGenerator
     #basicSampler: Sampler
+    #basicDisplacementSampler: Sampler
     #bitmapTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
     #cubeTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
-    readonly #redGPUContext: RedGPUContext
-    readonly #gpuDevice: GPUDevice
+
 
     /**
      * [KO] ResourceManager 인스턴스를 생성합니다. (내부 시스템 전용)
@@ -97,8 +107,7 @@ class ResourceManager {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext
-        this.#gpuDevice = redGPUContext.gpuDevice
+        super(redGPUContext)
         this.#mipmapGenerator = new MipmapGenerator(redGPUContext)
         this.#downSampleCubeMapGenerator = new DownSampleCubeMapGenerator(redGPUContext)
         this.#brdfGenerator = new BRDFGenerator(redGPUContext)
@@ -108,33 +117,38 @@ class ResourceManager {
         this.#initPresets()
     }
 
-    /**
-     * [KO] RedGPUContext 인스턴스를 반환합니다.
-     * [EN] Returns the RedGPUContext instance.
-     */
-    get redGPUContext(): RedGPUContext {
-        return this.#redGPUContext
-    }
-
-    /**
-     * [KO] GPU 디바이스를 반환합니다.
-     * [EN] Returns the GPU device.
-     */
-    get gpuDevice(): GPUDevice {
-        return this.#gpuDevice
-    }
 
     /**
      * [KO] 기본 샘플러를 반환합니다.
      * [EN] Returns the basic sampler.
+     *
+     * @returns
+     * [KO] 기본 Sampler 인스턴스
+     * [EN] Basic Sampler instance
      */
     get basicSampler(): Sampler {
         return this.#basicSampler;
     }
 
     /**
+     * [KO] 기본 디스플레이스먼트 맵용 샘플러를 반환합니다.
+     * [EN] Returns the basic displacement sampler.
+     *
+     * @returns
+     * [KO] displacement Sampler 인스턴스
+     * [EN] Displacement Sampler instance
+     */
+    get basicDisplacementSampler(): Sampler {
+        return this.#basicDisplacementSampler
+    }
+
+    /**
      * [KO] BRDF 생성기를 반환합니다.
      * [EN] Returns the BRDF generator.
+     *
+     * @returns
+     * [KO] BRDFGenerator 인스턴스
+     * [EN] BRDFGenerator instance
      */
     get brdfGenerator(): BRDFGenerator {
         return this.#brdfGenerator;
@@ -143,6 +157,10 @@ class ResourceManager {
     /**
      * [KO] Irradiance 생성기를 반환합니다.
      * [EN] Returns the Irradiance generator.
+     *
+     * @returns
+     * [KO] IrradianceGenerator 인스턴스
+     * [EN] IrradianceGenerator instance
      */
     get irradianceGenerator(): IrradianceGenerator {
         return this.#irradianceGenerator;
@@ -151,6 +169,10 @@ class ResourceManager {
     /**
      * [KO] Prefilter 생성기를 반환합니다.
      * [EN] Returns the Prefilter generator.
+     *
+     * @returns
+     * [KO] PrefilterGenerator 인스턴스
+     * [EN] PrefilterGenerator instance
      */
     get prefilterGenerator(): PrefilterGenerator {
         return this.#prefilterGenerator;
@@ -159,6 +181,10 @@ class ResourceManager {
     /**
      * [KO] Equirectangular(2D)를 CubeMap으로 변환하는 생성기를 반환합니다.
      * [EN] Returns the generator that converts Equirectangular (2D) to CubeMap.
+     *
+     * @returns
+     * [KO] EquirectangularToCubeGenerator 인스턴스
+     * [EN] EquirectangularToCubeGenerator instance
      */
     get equirectangularToCubeGenerator(): EquirectangularToCubeGenerator {
         return this.#equirectangularToCubeGenerator;
@@ -167,6 +193,10 @@ class ResourceManager {
     /**
      * [KO] 밉맵 생성기를 반환합니다.
      * [EN] Returns the mipmap generator.
+     *
+     * @returns
+     * [KO] MipmapGenerator 인스턴스
+     * [EN] MipmapGenerator instance
      */
     get mipmapGenerator(): MipmapGenerator {
         return this.#mipmapGenerator;
@@ -175,6 +205,10 @@ class ResourceManager {
     /**
      * [KO] 큐브맵 다운샘플링 생성기를 반환합니다.
      * [EN] Returns the down-sample cube map generator.
+     *
+     * @returns
+     * [KO] DownSampleCubeMapGenerator 인스턴스
+     * [EN] DownSampleCubeMapGenerator instance
      */
     get downSampleCubeMapGenerator(): DownSampleCubeMapGenerator {
         return this.#downSampleCubeMapGenerator
@@ -183,6 +217,10 @@ class ResourceManager {
     /**
      * [KO] 캐시된 버퍼 상태를 반환합니다.
      * [EN] Returns the cached buffer state.
+     *
+     * @returns
+     * [KO] 캐시된 버퍼 상태 객체
+     * [EN] Cached buffer state object
      */
     get cachedBufferState(): any {
         return this.#cachedBufferState;
@@ -191,6 +229,10 @@ class ResourceManager {
     /**
      * [KO] 빈 비트맵 텍스처 뷰를 반환합니다.
      * [EN] Returns the empty bitmap texture view.
+     *
+     * @returns
+     * [KO] 빈 비트맵 GPUTextureView
+     * [EN] Empty bitmap GPUTextureView
      */
     get emptyBitmapTextureView(): GPUTextureView {
         return this.#emptyBitmapTextureView;
@@ -199,14 +241,46 @@ class ResourceManager {
     /**
      * [KO] 빈 큐브 텍스처 뷰를 반환합니다.
      * [EN] Returns the empty cube texture view.
+     *
+     * @returns
+     * [KO] 빈 큐브 GPUTextureView
+     * [EN] Empty cube GPUTextureView
      */
     get emptyCubeTextureView(): GPUTextureView {
         return this.#emptyCubeTextureView;
     }
 
     /**
+     * [KO] 빈 3D 텍스처 뷰를 반환합니다.
+     * [EN] Returns the empty 3D texture view.
+     *
+     * @returns
+     * [KO] 빈 3D GPUTextureView
+     * [EN] Empty 3D GPUTextureView
+     */
+    get emptyTexture3DView(): GPUTextureView {
+        return this.#emptyTexture3DView;
+    }
+
+    /**
+     * [KO] 빈 깊이 텍스처 뷰를 반환합니다.
+     * [EN] Returns the empty depth texture view.
+     *
+     * @returns
+     * [KO] 빈 깊이 GPUTextureView
+     * [EN] Empty depth GPUTextureView
+     */
+    get emptyDepthTextureView(): GPUTextureView {
+        return this.#emptyDepthTextureView;
+    }
+
+    /**
      * [KO] 비트맵 텍스처 관리 상태를 반환합니다.
      * [EN] Returns the managed bitmap texture state.
+     *
+     * @returns
+     * [KO] 비트맵 텍스처 관리 상태 정보 객체
+     * [EN] Managed bitmap texture status info object
      */
     get managedBitmapTextureState(): ResourceStatusInfo {
         return this.#managedBitmapTextureState;
@@ -215,6 +289,10 @@ class ResourceManager {
     /**
      * [KO] 큐브 텍스처 관리 상태를 반환합니다.
      * [EN] Returns the managed cube texture state.
+     *
+     * @returns
+     * [KO] 큐브 텍스처 관리 상태 정보 객체
+     * [EN] Managed cube texture status info object
      */
     get managedCubeTextureState(): ResourceStatusInfo {
         return this.#managedCubeTextureState;
@@ -223,6 +301,10 @@ class ResourceManager {
     /**
      * [KO] HDR 텍스처 관리 상태를 반환합니다.
      * [EN] Returns the managed HDR texture state.
+     *
+     * @returns
+     * [KO] HDR 텍스처 관리 상태 정보 객체
+     * [EN] Managed HDR texture status info object
      */
     get managedHDRTextureState(): ResourceStatusInfo {
         return this.#managedHDRTextureState;
@@ -231,6 +313,10 @@ class ResourceManager {
     /**
      * [KO] 유니폼 버퍼 관리 상태를 반환합니다.
      * [EN] Returns the managed uniform buffer state.
+     *
+     * @returns
+     * [KO] 유니폼 버퍼 관리 상태 정보 객체
+     * [EN] Managed uniform buffer status info object
      */
     get managedUniformBufferState(): ResourceStatusInfo {
         return this.#managedUniformBufferState;
@@ -239,6 +325,10 @@ class ResourceManager {
     /**
      * [KO] 버텍스 버퍼 관리 상태를 반환합니다.
      * [EN] Returns the managed vertex buffer state.
+     *
+     * @returns
+     * [KO] 버텍스 버퍼 관리 상태 정보 객체
+     * [EN] Managed vertex buffer status info object
      */
     get managedVertexBufferState(): ResourceStatusInfo {
         return this.#managedVertexBufferState;
@@ -247,6 +337,10 @@ class ResourceManager {
     /**
      * [KO] 인덱스 버퍼 관리 상태를 반환합니다.
      * [EN] Returns the managed index buffer state.
+     *
+     * @returns
+     * [KO] 인덱스 버퍼 관리 상태 정보 객체
+     * [EN] Managed index buffer status info object
      */
     get managedIndexBufferState(): ResourceStatusInfo {
         return this.#managedIndexBufferState;
@@ -255,6 +349,10 @@ class ResourceManager {
     /**
      * [KO] Storage 버퍼 관리 상태를 반환합니다.
      * [EN] Returns the managed storage buffer state.
+     *
+     * @returns
+     * [KO] 스토리지 버퍼 관리 상태 정보 객체
+     * [EN] Managed storage buffer status info object
      */
     get managedStorageBufferState(): ResourceStatusInfo {
         return this.#managedStorageBufferState;
@@ -263,6 +361,10 @@ class ResourceManager {
     /**
      * [KO] 내부 리소스 맵을 반환합니다.
      * [EN] Returns the internal resource map.
+     *
+     * @returns
+     * [KO] ImmutableKeyMap 기반 리소스 맵
+     * [EN] ImmutableKeyMap based resource map
      */
     get resources(): ImmutableKeyMap {
         return this.#resources;
@@ -320,7 +422,7 @@ class ResourceManager {
     createManagedTexture(desc: GPUTextureDescriptor): GPUTexture {
         const texture = this.gpuDevice.createTexture(desc);
         const originalDestroy = texture.destroy.bind(texture);
-        texture.destroy = () => {
+        texture.destroy = (): undefined => {
             this.#clearTextureCache(texture, desc);
             originalDestroy();
         };
@@ -331,8 +433,8 @@ class ResourceManager {
      * [KO] 비트맵 텍스처의 뷰를 캐시에서 가져오거나 새로 생성합니다.
      * [EN] Retrieves or creates a view for a bitmap texture from cache.
      * @param texture -
-     * [KO] 대상 텍스처 (BitmapTexture, PackedTexture 또는 GPUTexture)
-     * [EN] Target texture (BitmapTexture, PackedTexture, or GPUTexture)
+     * [KO] 대상 텍스처 (BitmapTexture, PackedTexture, DirectTexture 또는 GPUTexture)
+     * [EN] Target texture (BitmapTexture, PackedTexture, DirectTexture, or GPUTexture)
      * @param viewDescriptor -
      * [KO] 뷰 디스크립터 (선택)
      * [EN] View descriptor (optional)
@@ -341,7 +443,7 @@ class ResourceManager {
      * [EN] GPUTextureView
      */
     getGPUResourceBitmapTextureView(
-        texture: BitmapTexture | PackedTexture | GPUTexture,
+        texture: any,
         viewDescriptor?: GPUTextureViewDescriptor
     ): GPUTextureView | null {
         const targetGPUTexture = texture instanceof GPUTexture ? texture : texture?.gpuTexture;
@@ -375,8 +477,8 @@ class ResourceManager {
      * [KO] 큐브 텍스처의 뷰를 캐시에서 가져오거나 새로 생성합니다.
      * [EN] Retrieves or creates a view for a cube texture from cache.
      * @param cubeTexture -
-     * [KO] 대상 큐브 텍스처 (CubeTexture, IBLCubeTexture 또는 GPUTexture)
-     * [EN] Target cube texture (CubeTexture, IBLCubeTexture, or GPUTexture)
+     * [KO] 대상 큐브 텍스처 (CubeTexture, DirectCubeTexture 또는 GPUTexture)
+     * [EN] Target cube texture (CubeTexture, DirectCubeTexture, or GPUTexture)
      * @param viewDescriptor -
      * [KO] 뷰 디스크립터 (선택)
      * [EN] View descriptor (optional)
@@ -385,7 +487,7 @@ class ResourceManager {
      * [EN] GPUTextureView
      */
     getGPUResourceCubeTextureView(
-        cubeTexture: CubeTexture | GPUTexture | IBLCubeTexture,
+        cubeTexture: any,
         viewDescriptor?: GPUTextureViewDescriptor
     ): GPUTextureView | null {
         const targetGPUTexture = cubeTexture instanceof GPUTexture ? cubeTexture : cubeTexture?.gpuTexture;
@@ -397,8 +499,7 @@ class ResourceManager {
             textureViewMap = new Map();
             this.#cubeTextureViewCache.set(targetGPUTexture, textureViewMap);
         }
-        if (!(cubeTexture instanceof GPUTexture) && !viewDescriptor) viewDescriptor = cubeTexture.viewDescriptor;
-        const effectiveDescriptor = viewDescriptor || CubeTexture.defaultViewDescriptor;
+        const effectiveDescriptor: GPUTextureViewDescriptor = viewDescriptor || (cubeTexture instanceof GPUTexture ? CubeTexture.defaultViewDescriptor : cubeTexture.viewDescriptor);
         const cacheKey = this.#createDescriptorKey(effectiveDescriptor);
         let cachedView = textureViewMap.get(cacheKey);
         if (!cachedView) {
@@ -607,7 +708,36 @@ class ResourceManager {
                     {width: 1, height: 1, depthOrArrayLayers: 1}
                 );
             }
+
+            const emptyTexture3D = gpuDevice.createTexture({
+                size: {width: 1, height: 1, depthOrArrayLayers: 1},
+                dimension: '3d',
+                format: 'rgba8unorm',
+                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+                label: 'EMPTY_TEXTURE_3D',
+            });
+            this.#emptyTexture3DView = emptyTexture3D.createView({
+                label: emptyTexture3D.label,
+                dimension: '3d'
+            });
+
+            const emptyDepthTexture = gpuDevice.createTexture({
+                size: {width: 1, height: 1, depthOrArrayLayers: 1},
+                format: 'depth24plus',
+                usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
+                label: 'EMPTY_DEPTH_TEXTURE',
+            });
+            this.#emptyDepthTextureView = emptyDepthTexture.createView({label: emptyDepthTexture.label});
+
             this.#basicSampler = new Sampler(this.redGPUContext)
+            this.#basicDisplacementSampler = new Sampler(this.redGPUContext, {
+                magFilter: 'linear',
+                minFilter: 'linear',
+                mipmapFilter: 'linear',
+                addressModeU: 'repeat',
+                addressModeV: 'repeat',
+                addressModeW: 'repeat',
+            })
         }
         {
             this.createBindGroupLayout(
@@ -642,6 +772,10 @@ class ResourceManager {
                         {binding: 10, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
                         {binding: 11, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
                         {binding: 12, visibility: GPUShaderStage.FRAGMENT, texture: {}},
+                        {binding: 13, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
+                        {binding: 14, visibility: GPUShaderStage.FRAGMENT, texture: {}},
+                        {binding: 15, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
+                        {binding: 16, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
                     ],
                 }
             )
@@ -687,7 +821,7 @@ class ResourceManager {
 
     #createAndCacheModule(name: string, gpuShaderModuleDescriptor: GPUShaderModuleDescriptor) {
         const {code} = gpuShaderModuleDescriptor
-        const newCode = preprocessWGSL(code).defaultSource
+        const newCode = preprocessWGSL(name, code).defaultSource
         const newModule: GPUShaderModule = this.redGPUContext.gpuDevice.createShaderModule({
             ...gpuShaderModuleDescriptor,
             code: newCode,
@@ -727,10 +861,10 @@ class ResourceManager {
     }
 }
 
-Object.freeze(BitmapTexture)
+Object.freeze(ResourceManager)
 export default ResourceManager
 
-class ImmutableKeyMap extends Map {
+export class ImmutableKeyMap extends Map {
     constructor(initValues: [any, any][] = []) {
         super();
         initValues?.forEach(([key, value]) => super.set(key, value));
@@ -770,10 +904,10 @@ class MemoryTrackingMap<K, V> extends Map<K, V> {
         }
         // 새 값의 메모리 추가
         if (value && (value as any)) {
-            this.#videoMemory += (value as any)[videoMemoryKey];
+            const size = (value as any)[videoMemoryKey];
+            if (typeof size === 'number') this.#videoMemory += size;
         }
-        const result = super.set(key, value);
-        return result;
+        return super.set(key, value);
     }
 
     delete(key: K): boolean {
@@ -783,12 +917,11 @@ class MemoryTrackingMap<K, V> extends Map<K, V> {
                 (value && 'videoMemorySize' in (value as any)) ? 'videoMemorySize'
                     : (value && 'size' in (value as any)) ? 'size'
                         : undefined;
-            if (value && value[videoMemoryKey]) {
+            if (value && typeof value[videoMemoryKey] === 'number') {
                 this.#videoMemory -= value[videoMemoryKey];
             }
         }
-        const result = super.delete(key);
-        return result;
+        return super.delete(key);
     }
 
     clear(): void {

@@ -231,4 +231,5 @@ class ColorRGBA extends ColorRGB {
     }
 }
 
+Object.freeze(ColorRGBA)
 export default ColorRGBA

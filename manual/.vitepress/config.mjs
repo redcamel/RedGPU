@@ -1,6 +1,8 @@
-import { defineConfig } from 'vitepress'
-import { generateSidebar } from 'vitepress-sidebar';
-import { withMermaid } from 'vitepress-plugin-mermaid';
+import {defineConfig} from 'vitepress'
+import {generateSidebar} from 'vitepress-sidebar';
+import {withMermaid} from 'vitepress-plugin-mermaid';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * 1. Sidebar Sorting Utility
@@ -58,7 +60,7 @@ const manualSidebarConfigs = languages.map(lang => ({
     useFolderLinkFromIndexFile: true,
     sortMenusByFrontmatterOrder: true,
         // 폴더 및 파일 정렬 순서 지정
-        manualSortFileNameByPriority: ['introduction', 'context', 'view-system', 'basic-objects', 'lighting-and-shadow', 'environment', 'assets', 'interaction', 'post-effect', 'lod', 'antialiasing', 'plugins']
+    manualSortFileNameByPriority: ['introduction', 'context', 'view-system', 'basic-objects', 'lighting-and-shadow', 'environment', 'assets', 'interaction', 'post-effect', 'lod', 'antialiasing', 'plugins', 'inspector']
     }));
 
 // [Group 2] API 문서 사이드바 설정 (API Reference)
@@ -88,9 +90,62 @@ const finalSidebar = sortSidebar(rawSidebarConfig);
 export default withMermaid(defineConfig({
     title: 'RedGPU',
     description: 'RedGPU - WebGPU based 3D Graphics Engine',
-    base: '/RedGPU/manual/',
+    base: process.env.NODE_ENV === 'production' ? '/RedGPU/manual/' : '/',
     ignoreDeadLinks: true,
     lastUpdated: true,
+
+    // 로컬 개발 서버 환경에서 /RedGPU/examples/ 요청을 실제 examples 폴더로 라우팅하는 설정
+    vite: {
+        server: {
+            fs: {
+                // 프로젝트 루트 상위 디렉토리 파일 접근 허용 (보안 해제)
+                allow: ['..']
+            }
+        },
+        plugins: [
+            {
+                name: 'serve-examples',
+                configureServer(server) {
+                    server.middlewares.use((req, res, next) => {
+                        let targetFile = null;
+                        if (req.url.startsWith('/RedGPU/examples/')) {
+                            const relativePath = req.url.replace('/RedGPU/examples/', '').split('?')[0];
+                            const filePath = path.resolve(process.cwd(), 'examples', relativePath);
+                            targetFile = filePath;
+                            if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+                                targetFile = path.join(filePath, 'index.html');
+                            }
+                        } else if (req.url.startsWith('/RedGPU/dist/')) {
+                            const relativePath = req.url.replace('/RedGPU/dist/', '').split('?')[0];
+                            const filePath = path.resolve(process.cwd(), 'dist', relativePath);
+                            targetFile = filePath;
+                            if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+                                targetFile = path.join(filePath, 'index.html');
+                            }
+                        }
+
+                        if (targetFile && fs.existsSync(targetFile) && fs.statSync(targetFile).isFile()) {
+                            const ext = path.extname(targetFile);
+                            let contentType = 'text/plain';
+                            if (ext === '.html') contentType = 'text/html';
+                            else if (ext === '.js' || ext === '.mjs') contentType = 'application/javascript';
+                            else if (ext === '.css') contentType = 'text/css';
+                            else if (ext === '.png') contentType = 'image/png';
+                            else if (ext === '.jpg' || ext === '.jpeg') contentType = 'image/jpeg';
+                            else if (ext === '.svg') contentType = 'image/svg+xml';
+                            else if (ext === '.json') contentType = 'application/json';
+                            else if (ext === '.wasm') contentType = 'application/wasm';
+
+                            res.setHeader('Content-Type', contentType);
+                            res.end(fs.readFileSync(targetFile));
+                            return;
+                        }
+                        next();
+                    });
+                }
+            }
+        ]
+    },
 
     // SEO Configuration
     sitemap: {
@@ -125,7 +180,7 @@ export default withMermaid(defineConfig({
                     nav: [
                         { text: 'Getting Started', link: lang.entry },
                         { text: 'API Reference', link: `/${lang.code}/api/RedGPU-API/namespaces/RedGPU/README` },
-                        { text: 'Examples', link: 'https://redcamel.github.io/RedGPU/examples/' },
+                        {text: 'Examples', link: '/RedGPU/examples/', target: '_blank'},
                     ],
                 }
             }
@@ -142,6 +197,33 @@ export default withMermaid(defineConfig({
                     return content.replace(/<iframe/g, '<ExampleFrame').replace(/<\/iframe>/g, '</ExampleFrame>');
                 }
                 return defaultRender(tokens, idx, options, env, self);
+            };
+
+            // 링크 규칙 커스터마이징 (외부 링크나 특정 경로에 대해 target 설정)
+            const defaultLinkRender = md.renderer.rules.link_open || ((tokens, idx, options, env, self) => {
+                return self.renderToken(tokens, idx, options);
+            });
+            md.renderer.rules.link_open = (tokens, idx, options, env, self) => {
+                const aIndex = tokens[idx].attrIndex('href');
+                if (aIndex >= 0) {
+                    const href = tokens[idx].attrs[aIndex][1];
+                    // 만약 링크가 /RedGPU/examples/ 로 시작한다면 target="_blank"를 지정하여 SPA 라우터를 우회
+                    if (href.startsWith('/RedGPU/examples/') || href.startsWith('/RedGPU/dist/')) {
+                        const targetIndex = tokens[idx].attrIndex('target');
+                        if (targetIndex >= 0) {
+                            tokens[idx].attrs[targetIndex][1] = '_blank';
+                        } else {
+                            tokens[idx].attrs.push(['target', '_blank']);
+                        }
+                        const relIndex = tokens[idx].attrIndex('rel');
+                        if (relIndex >= 0) {
+                            tokens[idx].attrs[relIndex][1] = 'noopener noreferrer';
+                        } else {
+                            tokens[idx].attrs.push(['rel', 'noopener noreferrer']);
+                        }
+                    }
+                }
+                return defaultLinkRender(tokens, idx, options, env, self);
             };
         }
     },

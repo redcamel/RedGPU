@@ -1,17 +1,21 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
-
-// 1. Create and append a canvas
-// 1. 캔버스를 생성하고 문서에 추가
-const canvas = document.createElement('canvas');
-document.querySelector('#example-container').appendChild(canvas);
+import * as RedGPU from "../../../dist/index.js?t=1778922031603";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1778922031603";
 
 /**
  * [KO] Convolution 예제
  * [EN] Convolution example
  *
- * [KO] 컨볼루션(Convolution) 필터를 사용하여 다양한 이미지 처리 효과(Sharpen, Blur, Edge Detection 등)를 적용하는 방법을 보여줍니다.
+ * [KO] 컨볼루션(Convolution) 필터를 사용하여 다양한 이미지 처리 효과(Sharpen, Blur, Edge Detection 등) 적용 방법을 보여줍니다.
  * [EN] Demonstrates how to apply various image processing effects (Sharpen, Blur, Edge Detection, etc.) using a convolution filter.
  */
+
+// 1. Create and append a container and canvas
+// 1. 컨테이너와 캔버스를 생성하고 문서에 추가
+const container = document.createElement('div');
+document.body.appendChild(container);
+
+const canvas = document.createElement('canvas');
+container.appendChild(canvas);
 
 // 2. Initialize RedGPU
 // 2. RedGPU 초기화
@@ -36,13 +40,14 @@ RedGPU.init(
         // ============================================
 
         const ibl = new RedGPU.Resource.IBL(redGPUContext, '../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr')
-        // 일반 뷰 생성
+        
+        // 일반 뷰 생성 (Top/Left)
         const viewNormal = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewNormal.ibl = ibl;
         viewNormal.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
         redGPUContext.addView(viewNormal);
 
-        // 이펙트 뷰 생성
+        // 이펙트 뷰 생성 (Bottom/Right)
         const viewEffect = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         viewEffect.ibl = ibl;
         viewEffect.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
@@ -64,33 +69,34 @@ RedGPU.init(
         // 레이아웃 설정
         // ============================================
 
-        if (redGPUContext.detector.isMobile) {
-            // 모바일: 위아래 분할
-            viewNormal.setSize('100%', '50%');
-            viewNormal.setPosition(0, 0);         // 상단
-            viewEffect.setSize('100%', '50%');
-            viewEffect.setPosition(0, '50%');     // 하단
-        } else {
-            // 데스크톱: 좌우 분할
-            viewNormal.setSize('50%', '100%');
-            viewNormal.setPosition(0, 0);         // 좌측
-            viewEffect.setSize('50%', '100%');
-            viewEffect.setPosition('50%', 0);     // 우측
-        }
+        const updateLayout = () => {
+            const isNarrow = window.innerWidth <= 768;
+            if (isNarrow) {
+                // 세로형 분할
+                viewNormal.setSize('100%', '50%');
+                viewNormal.setPosition(0, 0);         // 상단 (Normal)
+                viewEffect.setSize('100%', '50%');
+                viewEffect.setPosition(0, '50%');     // 하단 (Effect)
+            } else {
+                // 가로형 분할
+                viewNormal.setSize('50%', '100%');
+                viewNormal.setPosition(0, 0);         // 좌측 (Normal)
+                viewEffect.setSize('50%', '100%');
+                viewEffect.setPosition('50%', 0);     // 우측 (Effect)
+            }
+        };
+        updateLayout();
+        window.addEventListener('resize', updateLayout);
 
         // ============================================
         // 렌더링 시작
         // ============================================
 
-        // 렌더러 생성 및 시작
-        const renderer = new RedGPU.Renderer(redGPUContext);
-        const render = () => {
-            // 추가 렌더링 로직이 필요하면 여기에 작성
-        };
-        renderer.start(redGPUContext, render);
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext);
 
         // 컨트롤 패널 생성
-        renderTestPane(redGPUContext, viewEffect);
+        renderTestPane(redGPUContext, viewEffect, container);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -103,18 +109,13 @@ RedGPU.init(
 /**
  * [KO] GLTF 모델을 로드합니다.
  * [EN] Loads a GLTF model.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @param {string} url
  */
 function loadGLTF(redGPUContext, scene, url) {
-
-    let mesh
     new RedGPU.GLTFLoader(
         redGPUContext,
         url,
         (v) => {
-            mesh = scene.addChild(v['resultMesh'])
+            scene.addChild(v['resultMesh'])
         }
     )
 }
@@ -122,110 +123,99 @@ function loadGLTF(redGPUContext, scene, url) {
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.View3D} targetView
  */
-const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {createPostEffectLabel} = await import('../../exampleHelper/createExample/loadExampleInfo/createPostEffectLabel.js?t=1770713934910');
-    createPostEffectLabel('Convolution', redGPUContext.detector.isMobile)
-    const {setDebugButtons} = await import("../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
-    const TEST_STATE = {
-        Convolution: true,
-        kernel: 'BLUR',
-        useCustomKernel: false,
-        customMatrix: [...targetView.postEffectManager.getEffectAt(0).kernel]
-    };
-
-    const convolutionMatrices = {
-        NORMAL: RedGPU.PostEffect.Convolution.NORMAL,
-        SHARPEN: RedGPU.PostEffect.Convolution.SHARPEN,
-        BLUR: RedGPU.PostEffect.Convolution.BLUR,
-        EDGE: RedGPU.PostEffect.Convolution.EDGE,
-        EMBOSE: RedGPU.PostEffect.Convolution.EMBOSE,
-    };
-
-    const updateEffectKernel = () => {
-        const effect = targetView.postEffectManager.getEffectAt(0);
-        if (!effect) return;
-        effect.kernel = TEST_STATE.useCustomKernel
-            ? TEST_STATE.customMatrix
-            : convolutionMatrices[TEST_STATE.kernel];
-    };
-
-    const folder = pane.addFolder({title: 'PostEffect', expanded: true});
-
-    // Convolution 활성화/비활성화
-    folder.addBinding(TEST_STATE, 'Convolution').on('change', (v) => {
-        if (v.value) {
-            const effect = new RedGPU.PostEffect.Convolution(redGPUContext);
-            effect.kernel = TEST_STATE.useCustomKernel
-                ? TEST_STATE.customMatrix
-                : convolutionMatrices[TEST_STATE.kernel];
-            targetView.postEffectManager.addEffect(effect);
-        } else {
-            targetView.postEffectManager.removeAllEffect();
-        }
-
-        typeControl.disabled = !v.value && TEST_STATE.useCustomKernel;
-        customMatrixFolder.hidden = !v.value;
-    });
-
-    // 필터 타입 선택
-    const typeControl = folder.addBinding(TEST_STATE, 'kernel', {
-        options: {
-            Normal: 'NORMAL',
-            Sharpen: 'SHARPEN',
-            Blur: 'BLUR',
-            Edge: 'EDGE',
-            Embose: 'EMBOSE',
+const renderTestPane = async (redGPUContext, targetView, container) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        compareLabel: {
+            title: 'PostEffect Applied',
+            normalTitle: 'Original',
+            targetContainer: container
         },
-    }).on('change', (v) => {
-        const effect = targetView.postEffectManager.getEffectAt(0);
-        if (effect) {
-            TEST_STATE.customMatrix.forEach(
-                (_, index) => (TEST_STATE.customMatrix[index] = convolutionMatrices[v.value][index])
-            );
+        gui: (pane) => {
+            const effect = targetView.postEffectManager.getEffectAt(0);
+            const TEST_STATE = {
+                Convolution: true,
+                kernel: 'BLUR',
+                useCustomKernel: false,
+                customMatrix: [...effect.kernel]
+            };
+
+            const convolutionMatrices = {
+                NORMAL: RedGPU.PostEffect.Convolution.NORMAL,
+                SHARPEN: RedGPU.PostEffect.Convolution.SHARPEN,
+                BLUR: RedGPU.PostEffect.Convolution.BLUR,
+                EDGE: RedGPU.PostEffect.Convolution.EDGE,
+                EMBOSS: RedGPU.PostEffect.Convolution.EMBOSS,
+            };
+
+            const updateEffectKernel = () => {
+                const effect = targetView.postEffectManager.getEffectAt(0);
+                if (!effect) return;
+                effect.kernel = TEST_STATE.useCustomKernel
+                    ? TEST_STATE.customMatrix
+                    : convolutionMatrices[TEST_STATE.kernel];
+            };
+
+            const folder = pane.addFolder({title: 'PostEffect', expanded: true});
+
+            // Convolution 활성화/비활성화
+            folder.addBinding(TEST_STATE, 'Convolution').on('change', (v) => {
+                if (v.value) {
+                    const effect = new RedGPU.PostEffect.Convolution(redGPUContext);
+                    targetView.postEffectManager.addEffect(effect);
+                    updateEffectKernel();
+                } else {
+                    targetView.postEffectManager.removeAllEffect();
+                }
+
+                typeControl.disabled = !v.value || TEST_STATE.useCustomKernel;
+                useCustomBinding.disabled = !v.value;
+                customMatrixFolder.hidden = !v.value || !TEST_STATE.useCustomKernel;
+            });
+
+            // 필터 타입 선택
+            const typeControl = folder.addBinding(TEST_STATE, 'kernel', {
+                label: 'Kernel Preset',
+                options: {
+                    Normal: 'NORMAL',
+                    Sharpen: 'SHARPEN',
+                    Blur: 'BLUR',
+                    Edge: 'EDGE',
+                    Emboss: 'EMBOSS',
+                },
+            }).on('change', (v) => {
+                const preset = convolutionMatrices[v.value];
+                for (let i = 0; i < 12; i++) {
+                    TEST_STATE.customMatrix[i] = preset[i];
+                }
+                updateEffectKernel();
+                pane.refresh();
+            });
+
+            // Custom Kernel 활성화
+            const useCustomBinding = folder.addBinding(TEST_STATE, 'useCustomKernel', {label: 'Use Custom Kernel'}).on('change', (v) => {
+                typeControl.disabled = v.value;
+                customMatrixFolder.hidden = !v.value;
+                updateEffectKernel();
+            });
+
+            // Custom Kernel Matrix 설정
+            const customMatrixFolder = folder.addFolder({title: 'Custom Kernel (3x3)', expanded: true, hidden: true});
+            for (let i = 0; i < 3; i++) {
+                const rowFolder = customMatrixFolder.addFolder({title: `Row ${i + 1}`, expanded: true});
+                for (let j = 0; j < 3; j++) {
+                    const idx = i * 4 + j;
+                    rowFolder.addBinding(TEST_STATE.customMatrix, idx, {
+                        label: `Col ${j + 1}`,
+                        min: -5,
+                        max: 5,
+                        step: 0.01,
+                    }).on('change', updateEffectKernel);
+                }
+            }
+
+            // 초기 상태 동기화
             updateEffectKernel();
-            pane.refresh();
         }
     });
-
-    // Custom Kernel
-    const customMatrixFolder = pane.addFolder({title: 'Custom Kernel', expanded: true});
-    customMatrixFolder.addBinding(TEST_STATE, 'useCustomKernel').on('change', (v) => {
-        typeControl.disabled = v.value;
-        customMatrixSliders.forEach((slider, index) => {
-            slider.disabled = !v.value || index % 4 === 3; // useCustomKernel이 false이거나 마지막 컬럼인 경우 비활성화
-        });
-        if (v.value) {
-            TEST_STATE.customMatrix.forEach(
-                (_, index) => (TEST_STATE.customMatrix[index] = convolutionMatrices[TEST_STATE.kernel][index])
-            );
-            updateEffectKernel();
-            pane.refresh();
-        } else {
-            updateEffectKernel();
-        }
-    });
-
-    // Custom Matrix 입력 슬라이더 생성
-// Custom Matrix 입력 슬라이더 생성
-    const customMatrixSliders = [];
-    TEST_STATE.customMatrix.forEach((_, index) => {
-        const slider = customMatrixFolder.addBinding(TEST_STATE.customMatrix, index, {
-            min: -2,
-            max: 2,
-            step: 0.001,
-            label: `Row ${Math.floor(index / 4) + 1}, Col ${index % 4 + 1}`,
-        });
-        slider.disabled = true; // 마지막 컬럼 비활성화
-        customMatrixSliders.push(slider);
-    });
-
-    // 값 변경 시 반영
-    pane.on('change', updateEffectKernel);
-
 };

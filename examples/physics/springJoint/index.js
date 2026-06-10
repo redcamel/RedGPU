@@ -1,5 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770713934910";
+import * as RedGPU from "../../../dist/index.js?t=1778922031603";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1778922031603";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1778922031603";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -32,10 +33,6 @@ RedGPU.init(
 
 		// [KO] 조명 설정: 씬에 입체감을 주기 위한 환경광과 직사광 추가
 		// [EN] Lighting setup: Add ambient and directional light for depth in the scene
-		const ambientLight = new RedGPU.Light.AmbientLight();
-		ambientLight.intensity = 0.5;
-		scene.lightManager.ambientLight = ambientLight;
-
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		directionalLight.x = 10;
 		directionalLight.y = 20;
@@ -208,25 +205,26 @@ RedGPU.init(
 
 		// [KO] 8. 테스트 UI 구성: 플랫폼 충격 주기 및 오브젝트 제거 기능
 		// [EN] 8. Set up test UI: Platform kick and object clearing functions
-		const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-		const pane = new Pane();
-		
-		const params = {
-			kick: () => {
-				platformBody.nativeBody.wakeUp();
-				platformBody.applyImpulse({ x: 0, y: 200, z: 0 });
-			},
-			reset: () => {
-				activeObjects.forEach(item => {
-					physicsEngine.removeBody(item.body);
-					scene.removeChild(item.mesh);
-				});
-				activeObjects.length = 0;
-			}
-		};
+		new RedGPUExampleHelper(redGPUContext, {
+			gui: (pane) => {
+				const params = {
+					kick: () => {
+						platformBody.nativeBody.wakeUp();
+						platformBody.applyImpulse({ x: 0, y: 200, z: 0 });
+					},
+					reset: () => {
+						activeObjects.forEach(item => {
+							physicsEngine.removeBody(item.body);
+							scene.removeChild(item.mesh);
+						});
+						activeObjects.length = 0;
+					}
+				};
 
-		pane.addButton({ title: 'Kick Platform' }).on('click', params.kick);
-		pane.addButton({ title: 'Clear Objects' }).on('click', params.reset);
+				pane.addButton({ title: 'Kick Platform' }).on('click', params.kick);
+				pane.addButton({ title: 'Clear Objects' }).on('click', params.reset);
+			}
+		});
 	},
 	(failReason) => {
 		console.error(failReason);

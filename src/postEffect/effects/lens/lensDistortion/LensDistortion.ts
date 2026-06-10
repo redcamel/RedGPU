@@ -1,24 +1,35 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import validateNumber from "../../../../runtimeChecker/validateFunc/validateNumber";
-import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
+
+
+interface LensDistortion {
+    /** [KO] 왜곡 강도. 양수일 때 배럴 왜곡(볼록), 음수일 때 핀쿠션 왜곡(오목)이 발생합니다. [EN] Distortion strength. Positive for barrel distortion (convex), negative for pincushion distortion (concave). */
+    distortion: number
+    /** [KO] 왜곡의 중심점 X 오프셋 (픽셀 단위, 0은 화면 중앙). [EN] Distortion center X offset (in pixels, 0 is screen center). */
+    centerX: number
+    /** [KO] 왜곡의 중심점 Y 오프셋 (픽셀 단위, 0은 화면 중앙). [EN] Distortion center Y offset (in pixels, 0 is screen center). */
+    centerY: number
+}
 
 /**
  * [KO] 렌즈 왜곡(Lens Distortion) 후처리 이펙트입니다.
  * [EN] Lens Distortion post-processing effect.
  *
- * [KO] 배럴/핀쿠션 왜곡, 중심 위치를 조절할 수 있습니다.
- * [EN] Can adjust Barrel/Pincushion distortion and center position.
+ * [KO] 광각 렌즈나 어안 렌즈에서 발생하는 기하학적 왜곡을 시뮬레이션합니다. 화면의 특정 지점(0,0은 정중앙)을 기준으로 이미지를 볼록하게 하거나 오목하게 변형시킵니다.
+ * [EN] Simulates geometric distortion found in wide-angle or fisheye lenses. It warps the image to be convex or concave relative to a specific point (0,0 is exact center).
+ *
+ * [KO] 하드웨어 선형 샘플러를 사용하여 왜곡된 이미지의 계단 현상을 제거하고 매끄러운 화질을 유지합니다.
+ * [EN] Uses a hardware linear sampler to eliminate aliasing in the warped image and maintain smooth image quality.
+ *
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.LensDistortion(redGPUContext);
- * effect.barrelStrength = 0.2;      // 배럴 왜곡 강도
- * effect.pincushionStrength = 0.1;  // 핀쿠션 왜곡 강도
- * effect.centerX = 0.5;             // 왜곡 중심 X
- * effect.centerY = 0.5;             // 왜곡 중심 Y
+ * effect.distortion = 0.2;  // 배럴 왜곡 적용
+ * effect.centerX = 100;     // 중심을 오른쪽으로 100픽셀 이동
  * view.postEffectManager.addEffect(effect);
  * ```
  *
@@ -26,31 +37,6 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * @category Lens
  */
 class LensDistortion extends ASinglePassPostEffect {
-    /**
-     * [KO] 배럴 왜곡 강도 (최소 0)
-     * [EN] Barrel distortion strength (Minimum 0)
-     * @defaultValue 0.1
-     */
-    #barrelStrength: number = 0.1
-    /**
-     * [KO] 핀쿠션 왜곡 강도 (최소 0)
-     * [EN] Pincushion distortion strength (Minimum 0)
-     * @defaultValue 0.0
-     */
-    #pincushionStrength: number = 0.0
-    /**
-     * [KO] 왜곡 중심 X
-     * [EN] Distortion center X
-     * @defaultValue 0
-     */
-    #centerX: number = 0
-    /**
-     * [KO] 왜곡 중심 Y
-     * [EN] Distortion center Y
-     * @defaultValue 0
-     */
-    #centerY: number = 0
-
     /**
      * [KO] LensDistortion 인스턴스를 생성합니다.
      * [EN] Creates a LensDistortion instance.
@@ -61,89 +47,19 @@ class LensDistortion extends ASinglePassPostEffect {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
+        this.isLdr = true;
         this.init(
             redGPUContext,
             'POST_EFFECT_LENS_DISTORTION',
-            createBasicPostEffectCode(this, computeCode, uniformStructCode),
+            createBasicPostEffectCode(this, computeCode, uniformStructCode)
         )
-        this.barrelStrength = this.#barrelStrength
-        this.pincushionStrength = this.#pincushionStrength
-        this.centerX = this.#centerX
-        this.centerY = this.#centerY
-    }
-
-    /**
-     * [KO] 배럴 왜곡 강도를 반환합니다.
-     * [EN] Returns the barrel distortion strength.
-     */
-    get barrelStrength(): number {
-        return this.#barrelStrength;
-    }
-
-    /**
-     * [KO] 배럴 왜곡 강도를 설정합니다. (최소 0)
-     * [EN] Sets the barrel distortion strength. (Minimum 0)
-     */
-    set barrelStrength(value: number) {
-        validateNumberRange(value, 0)
-        this.#barrelStrength = value;
-        this.updateUniform('barrelStrength', value)
-    }
-
-    /**
-     * [KO] 핀쿠션 왜곡 강도를 반환합니다.
-     * [EN] Returns the pincushion distortion strength.
-     */
-    get pincushionStrength(): number {
-        return this.#pincushionStrength;
-    }
-
-    /**
-     * [KO] 핀쿠션 왜곡 강도를 설정합니다. (최소 0)
-     * [EN] Sets the pincushion distortion strength. (Minimum 0)
-     */
-    set pincushionStrength(value: number) {
-        validateNumberRange(value, 0)
-        this.#pincushionStrength = value;
-        this.updateUniform('pincushionStrength', value)
-    }
-
-    /**
-     * [KO] 왜곡 중심 X 좌표를 반환합니다.
-     * [EN] Returns the distortion center X coordinate.
-     */
-    get centerX(): number {
-        return this.#centerX;
-    }
-
-    /**
-     * [KO] 왜곡 중심 X 좌표를 설정합니다.
-     * [EN] Sets the distortion center X coordinate.
-     */
-    set centerX(value: number) {
-        validateNumber(value)
-        this.#centerX = value;
-        this.updateUniform('centerX', value)
-    }
-
-    /**
-     * [KO] 왜곡 중심 Y 좌표를 반환합니다.
-     * [EN] Returns the distortion center Y coordinate.
-     */
-    get centerY(): number {
-        return this.#centerY;
-    }
-
-    /**
-     * [KO] 왜곡 중심 Y 좌표를 설정합니다.
-     * [EN] Sets the distortion center Y coordinate.
-     */
-    set centerY(value: number) {
-        validateNumber(value)
-        this.#centerY = value;
-        this.updateUniform('centerY', value)
     }
 }
 
+defineNumber(LensDistortion, [
+    {key: 'distortion', value: 0.1,},
+    {key: 'centerX', value: 0,},
+    {key: 'centerY', value: 0,},
+])
 Object.freeze(LensDistortion)
 export default LensDistortion

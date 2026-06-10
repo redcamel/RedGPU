@@ -32,4 +32,14 @@ module.exports = {
 
 	// 열거형(Enum)의 멤버 목록을 표(Table) 형식으로 출력합니다.
 	enumMembersFormat: 'table',
+
+	// 마크다운 생성 과정에서 상속된 속성(inherited) 및 private/protected 멤버들을 필터링합니다.
+	visibilityFilters: {
+		protected: false,
+		private: false,
+		inherited: false,
+		external: false,
+		"@alpha": false,
+		"@beta": false
+	}
 };

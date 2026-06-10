@@ -2,519 +2,192 @@ import RedUnit from 'https://redcamel.github.io/RedUnit/dist/index.js';
 import * as RedGPU from "../../dist/index.js";
 
 const redUnit = new RedUnit('RedGPU - RuntimeChecker');
-redUnit.testGroup(
-	'JavaScript RedGPU.RuntimeChecker.isHexColor Success Cases',
-	(runner) => {
-		runner.defineTest('isHexColor - Valid hex color', function (run) {
-			const color = '#FF5733';
-			const result = RedGPU.RuntimeChecker.isHexColor(color);
-			run(result);
-		}, true);
 
-		runner.defineTest('isHexColor - Valid 0x hex color', function (run) {
-			const color = '0x112233';
-			const result = RedGPU.RuntimeChecker.isHexColor(color);
-			run(result);
-		}, true);
-
-		runner.defineTest('isHexColor - Valid white 0x hex color', function (run) {
-			const color = '0xFFFFFF';
-			const result = RedGPU.RuntimeChecker.isHexColor(color);
-			run(result);
-		}, true);
-		runner.defineTest('isHexColor - Valid short hex color', function (run) {
-			const color = '#abc';
-			const result = RedGPU.RuntimeChecker.isHexColor(color);
-			run(result);
-		}, true);
-		runner.defineTest('isHexColor - Valid short hex color', function (run) {
-			const color = '0xabc';
-			const result = RedGPU.RuntimeChecker.isHexColor(color);
-			run(result);
-		}, true);
-	}
-);
 redUnit.testGroup(
-	'JavaScript RedGPU.RuntimeChecker.isHexColor Failure Cases',
-	(runner) => {
-		runner.defineTest('isHexColor - invalid hex color', function (run) {
-			const color = '#XYZ123';
-			const result = RedGPU.RuntimeChecker.isHexColor(color);
-			run(result);
-		}, false);
-		runner.defineTest('isHexColor - invalid short hex color', function (run) {
-			const color = '#gha';
-			const result = RedGPU.RuntimeChecker.isHexColor(color);
-			run(result);
-		}, false);
-		runner.defineTest('isHexColor - invalid short hex color', function (run) {
-			const color = '0xgha';
-			const result = RedGPU.RuntimeChecker.isHexColor(color);
-			run(result);
-		}, false);
-		runner.defineTest('isHexColor - invalid short hex color', function (run) {
-			const color = '#11';
-			const result = RedGPU.RuntimeChecker.isHexColor(color);
-			run(result);
-		}, false);
-		runner.defineTest('isHexColor - invalid short hex color', function (run) {
-			const color = '0x11';
-			const result = RedGPU.RuntimeChecker.isHexColor(color);
-			run(result);
-		}, false);
-	}
+    'RedGPU.RuntimeChecker.isHexColor',
+    (runner) => {
+        runner.defineTest('Success Test: Valid string formats (#prefix)', (run) => {
+            run(RedGPU.RuntimeChecker.isHexColor('#fff') && 
+                RedGPU.RuntimeChecker.isHexColor('#ffffff') &&
+                RedGPU.RuntimeChecker.isHexColor('#ABCDEF'));
+        }, true);
+
+        runner.defineTest('Success Test: Valid numeric formats', (run) => {
+            run(RedGPU.RuntimeChecker.isHexColor(0xfff) && 
+                RedGPU.RuntimeChecker.isHexColor(0xffffff) &&
+                RedGPU.RuntimeChecker.isHexColor(0x00FF00) &&
+                RedGPU.RuntimeChecker.isHexColor(0));
+        }, true);
+
+        runner.defineTest('Failure Test: Invalid string prefix or no prefix', (run) => {
+            // Strings with 0x are now failures. Strings must start with #.
+            run(RedGPU.RuntimeChecker.isHexColor('0xfff') || 
+                RedGPU.RuntimeChecker.isHexColor('0xffffff') || 
+                RedGPU.RuntimeChecker.isHexColor('ffffff') || 
+                RedGPU.RuntimeChecker.isHexColor('fff'));
+        }, false);
+
+        runner.defineTest('Failure Test: Invalid string characters or length', (run) => {
+            run(RedGPU.RuntimeChecker.isHexColor('#gggggg') || 
+                RedGPU.RuntimeChecker.isHexColor('#12345') || 
+                RedGPU.RuntimeChecker.isHexColor('#1234567') || 
+                RedGPU.RuntimeChecker.isHexColor(''));
+        }, false);
+
+        runner.defineTest('Failure Test: Invalid numeric ranges or types', (run) => {
+            run(RedGPU.RuntimeChecker.isHexColor(-1) || 
+                RedGPU.RuntimeChecker.isHexColor(0xFFFFFF + 1) || 
+                RedGPU.RuntimeChecker.isHexColor(127.5) ||
+                RedGPU.RuntimeChecker.isHexColor(NaN) ||
+                RedGPU.RuntimeChecker.isHexColor(Infinity));
+        }, false);
+
+        runner.defineTest('Failure Test: Wrong types (null, undefined, etc.)', (run) => {
+            run(RedGPU.RuntimeChecker.isHexColor(null) || 
+                RedGPU.RuntimeChecker.isHexColor(undefined) || 
+                RedGPU.RuntimeChecker.isHexColor({}) || 
+                RedGPU.RuntimeChecker.isHexColor([]));
+        }, false);
+    }
 );
 
 redUnit.testGroup(
-	'JavaScript RedGPU.RuntimeChecker.isUint Success Cases',
-	(runner) => {
-		runner.defineTest('isUint - Valid uint', function (run) {
-			const number = 5;
-			const result = RedGPU.RuntimeChecker.isUint(number);
-			run(result);
-		}, true);
+    'RedGPU.RuntimeChecker.isUint',
+    (runner) => {
+        runner.defineTest('Success Test: Valid uints', (run) => {
+            run(RedGPU.RuntimeChecker.isUint(0) && RedGPU.RuntimeChecker.isUint(100) && RedGPU.RuntimeChecker.isUint(4294967295));
+        }, true);
 
-		runner.defineTest('isUint - Valid uint zero', function (run) {
-			const number = 0;
-			const result = RedGPU.RuntimeChecker.isUint(number);
-			run(result);
-		}, true);
-	}
-);
-redUnit.testGroup(
-	'JavaScript RedGPU.RuntimeChecker.isUint Failure Cases',
-	(runner) => {
-		runner.defineTest('isUint - negative integer', function (run) {
-			const number = -5;
-			const result = RedGPU.RuntimeChecker.isUint(number);
-			run(result);
-		}, false);
+        runner.defineTest('Failure Test: Negative or Float', (run) => {
+            run(RedGPU.RuntimeChecker.isUint(-1) || RedGPU.RuntimeChecker.isUint(0.5) || RedGPU.RuntimeChecker.isUint(-0.1));
+        }, false);
 
-		runner.defineTest('isUint - non-integer number', function (run) {
-			const number = 2.5;
-			const result = RedGPU.RuntimeChecker.isUint(number);
-			run(result);
-		}, false);
+        runner.defineTest('Failure Test: NaN/Infinity', (run) => {
+            run(RedGPU.RuntimeChecker.isUint(NaN) || RedGPU.RuntimeChecker.isUint(Infinity) || RedGPU.RuntimeChecker.isUint(-Infinity));
+        }, false);
 
-		runner.defineTest('isUint - non-numeric value', function (run) {
-			const number = 'abc';
-			const result = RedGPU.RuntimeChecker.isUint(number);
-			run(result);
-		}, false);
-		runner.defineTest('isUint - null value', function (run) {
-			const number = null;
-			const result = RedGPU.RuntimeChecker.isUint(number);
-			run(result);
-		}, false);
-
-		runner.defineTest('isUint - undefined value', function (run) {
-			const number = undefined;
-			const result = RedGPU.RuntimeChecker.isUint(number);
-			run(result);
-		}, false);
-
-		runner.defineTest('isUint - boolean value', function (run) {
-			const number = true;
-			const result = RedGPU.RuntimeChecker.isUint(number);
-			run(result);
-		}, false);
-
-		runner.defineTest('isUint - object value', function (run) {
-			const number = {};
-			const result = RedGPU.RuntimeChecker.isUint(number);
-			run(result);
-		}, false);
-
-		runner.defineTest('isUint - array value', function (run) {
-			const number = [];
-			const result = RedGPU.RuntimeChecker.isUint(number);
-			run(result);
-		}, false);
-
-		runner.defineTest('isUint - function value', function (run) {
-			const number = function () {};
-			const result = RedGPU.RuntimeChecker.isUint(number);
-			run(result);
-		}, false);
-	}
+        runner.defineTest('Failure Test: Non-numbers', (run) => {
+            run(RedGPU.RuntimeChecker.isUint("10") || RedGPU.RuntimeChecker.isUint(null) || RedGPU.RuntimeChecker.isUint(undefined) || RedGPU.RuntimeChecker.isUint({}));
+        }, false);
+    }
 );
 
 redUnit.testGroup(
-	'JavaScript RedGPU.RuntimeChecker.validateNumber Success Cases',
-	(runner) => {
-		runner.defineTest('validateNumber - Valid number', function (run) {
-			const number = 5;
-			const result = RedGPU.RuntimeChecker.validateNumber(number);
-			run(result);
-		}, true);
+    'RedGPU.RuntimeChecker.validateNumber',
+    (runner) => {
+        runner.defineTest('Success Test: 123', (run) => {
+            try { RedGPU.RuntimeChecker.validateNumber(123); run(true); } catch (e) { run(false, e); }
+        }, true);
 
-		runner.defineTest('validateNumber - Valid negative number', function (run) {
-			const number = -5;
-			const result = RedGPU.RuntimeChecker.validateNumber(number);
-			run(result);
-		}, true);
+        runner.defineTest('Success Test: 0 and negative', (run) => {
+            try { RedGPU.RuntimeChecker.validateNumber(0); RedGPU.RuntimeChecker.validateNumber(-123); run(true); } catch (e) { run(false, e); }
+        }, true);
 
-		runner.defineTest('validateNumber - Valid decimal number', function (run) {
-			const number = 2.5;
-			const result = RedGPU.RuntimeChecker.validateNumber(number);
-			run(result);
-		}, true);
-	}
-);
-redUnit.testGroup(
-	'JavaScript RedGPU.RuntimeChecker.validateNumber Failure Cases',
-	(runner) => {
-		runner.defineTest('validateNumber - String', function (run) {
-			const number = '5';
-			try {
-				RedGPU.RuntimeChecker.validateNumber(number);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
+        runner.defineTest('Failure Test: NaN', (run) => {
+            try { RedGPU.RuntimeChecker.validateNumber(NaN); run(true); } catch (e) { run(false, e); }
+        }, false);
 
-		runner.defineTest('validateNumber - Boolean', function (run) {
-			const number = true;
+        runner.defineTest('Failure Test: string "123"', (run) => {
+            try { RedGPU.RuntimeChecker.validateNumber("123"); run(true); } catch (e) { run(false, e); }
+        }, false);
 
-			try {
-				RedGPU.RuntimeChecker.validateNumber(number);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
-
-		runner.defineTest('validateNumber - Object', function (run) {
-			const number = {};
-
-			try {
-				RedGPU.RuntimeChecker.validateNumber(number);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
-
-		runner.defineTest('validateNumber - Null', function (run) {
-			const number = null;
-
-			try {
-				RedGPU.RuntimeChecker.validateNumber(number);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
-	}
+        runner.defineTest('Failure Test: null/undefined', (run) => {
+            try { RedGPU.RuntimeChecker.validateNumber(null); run(true); } catch (e) { run(false, e); }
+        }, false);
+    }
 );
 
 redUnit.testGroup(
-	'TypeScript RedGPU.RuntimeChecker.validateNumberRange Success Cases',
-	(runner) => {
-		runner.defineTest('validateNumberRange - Valid range', function (run) {
-			const number = 5;
-			const min = 1;
-			const max = 10;
-			const result = RedGPU.RuntimeChecker.validateNumberRange(number, min, max);
-			run(result);
-		}, true);
+    'RedGPU.RuntimeChecker.validateNumberRange',
+    (runner) => {
+        runner.defineTest('Success Test: 50 in [0, 100]', (run) => {
+            try { RedGPU.RuntimeChecker.validateNumberRange(50, 0, 100); run(true); } catch (e) { run(false, e); }
+        }, true);
 
-		runner.defineTest('validateNumberRange - Valid range with negative number', function (run) {
-			const number = -5;
-			const min = -10;
-			const max = 0;
-			const result = RedGPU.RuntimeChecker.validateNumberRange(number, min, max);
-			run(result);
-		}, true);
+        runner.defineTest('Success Test: Boundary 0 and 100', (run) => {
+            try { 
+                RedGPU.RuntimeChecker.validateNumberRange(0, 0, 100); 
+                RedGPU.RuntimeChecker.validateNumberRange(100, 0, 100); 
+                run(true); 
+            } catch (e) { run(false, e); }
+        }, true);
 
-		runner.defineTest('validateNumberRange - Valid range with decimal number', function (run) {
-			const number = 2.5;
-			const min = 0;
-			const max = 5;
-			const result = RedGPU.RuntimeChecker.validateNumberRange(number, min, max);
-			run(result);
-		}, true);
-	}
+        runner.defineTest('Failure Test: 101 in [0, 100]', (run) => {
+            try { RedGPU.RuntimeChecker.validateNumberRange(101, 0, 100); run(true); } catch (e) { run(false, e); }
+        }, false);
+
+        runner.defineTest('Failure Test: NaN input', (run) => {
+            try { RedGPU.RuntimeChecker.validateNumberRange(NaN, 0, 100); run(true); } catch (e) { run(false, e); }
+        }, false);
+
+        runner.defineTest('Failure Test: Wrong type (string)', (run) => {
+            try { RedGPU.RuntimeChecker.validateNumberRange("50", 0, 100); run(true); } catch (e) { run(false, e); }
+        }, false);
+    }
 );
 
 redUnit.testGroup(
-	'TypeScript RedGPU.RuntimeChecker.validateNumberRange Failure Cases',
-	(runner) => {
-		runner.defineTest('validateNumberRange - Number out of range', function (run) {
-			const number = 15;
-			const min = 1;
-			const max = 10;
-			try {
-				RedGPU.RuntimeChecker.validateNumberRange(number, min, max);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
+    'RedGPU.RuntimeChecker.validatePositiveNumberRange',
+    (runner) => {
+        runner.defineTest('Success Test: 10 in [5, 20]', (run) => {
+            try { RedGPU.RuntimeChecker.validatePositiveNumberRange(10, 5, 20); run(true); } catch (e) { run(false, e); }
+        }, true);
 
-		runner.defineTest('validateNumberRange - Range bounds as string', function (run) {
-			const number = 5;
-			const min = '1';
-			const max = '10';
-			try {
-				RedGPU.RuntimeChecker.validateNumberRange(number, min, max);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
+        runner.defineTest('Success Test: 0 at boundary', (run) => {
+            try { RedGPU.RuntimeChecker.validatePositiveNumberRange(0, 0, 10); run(true); } catch (e) { run(false, e); }
+        }, true);
 
-		runner.defineTest('validateNumberRange - Null as range bounds', function (run) {
-			const number = 5;
-			const min = null;
-			const max = null;
-			try {
-				RedGPU.RuntimeChecker.validateNumberRange(number, min, max);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
+        runner.defineTest('Failure Test: -1', (run) => {
+            try { RedGPU.RuntimeChecker.validatePositiveNumberRange(-1, 0, 100); run(true); } catch (e) { run(false, e); }
+        }, false);
 
-		runner.defineTest('validateNumberRange - Number is string', function (run) {
-			const number = '5';
-			const min = 1;
-			const max = 10;
-			try {
-				RedGPU.RuntimeChecker.validateNumberRange(number, min, max);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
-
-		runner.defineTest('validateNumberRange - Boolean as input', function (run) {
-			const number = true;
-			const min = 1;
-			const max = 10;
-			try {
-				RedGPU.RuntimeChecker.validateNumberRange(number, min, max);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
-
-		runner.defineTest('validateNumberRange - Object as input', function (run) {
-			const number = {};
-			const min = 1;
-			const max = 10;
-			try {
-				RedGPU.RuntimeChecker.validateNumberRange(number, min, max);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
-	}
+        runner.defineTest('Failure Test: NaN', (run) => {
+            try { RedGPU.RuntimeChecker.validatePositiveNumberRange(NaN, 0, 100); run(true); } catch (e) { run(false, e); }
+        }, false);
+    }
 );
 
 redUnit.testGroup(
-	'TypeScript RedGPU.RuntimeChecker.validatePositiveNumberRange Success Cases',
-	(runner) => {
-		runner.defineTest('validatePositiveNumberRange - Valid range', function (run) {
-			const number = 5;
-			const min = 1;
-			const max = 10;
-			const result = RedGPU.RuntimeChecker.validatePositiveNumberRange(number, min, max);
-			run(result);
-		}, true);
+    'RedGPU.RuntimeChecker.validateUintRange',
+    (runner) => {
+        runner.defineTest('Success Test: 10 in [0, 100]', (run) => {
+            try { RedGPU.RuntimeChecker.validateUintRange(10, 0, 100); run(true); } catch (e) { run(false, e); }
+        }, true);
 
-		runner.defineTest('validatePositiveNumberRange - Valid range with decimal number', function (run) {
-			const number = 2.5;
-			const min = 0;
-			const max = 5;
-			const result = RedGPU.RuntimeChecker.validatePositiveNumberRange(number, min, max);
-			run(result);
-		}, true);
-	}
+        runner.defineTest('Failure Test: 10.5 (float)', (run) => {
+            try { RedGPU.RuntimeChecker.validateUintRange(10.5, 0, 100); run(true); } catch (e) { run(false, e); }
+        }, false);
+
+        runner.defineTest('Failure Test: Out of range (101)', (run) => {
+            try { RedGPU.RuntimeChecker.validateUintRange(101, 0, 100); run(true); } catch (e) { run(false, e); }
+        }, false);
+
+        runner.defineTest('Failure Test: Negative (-1)', (run) => {
+            try { RedGPU.RuntimeChecker.validateUintRange(-1, 0, 100); run(true); } catch (e) { run(false, e); }
+        }, false);
+    }
 );
 
 redUnit.testGroup(
-	'TypeScript RedGPU.RuntimeChecker.validatePositiveNumberRange Failure Cases',
-	(runner) => {
-		runner.defineTest('validatePositiveNumberRange - Number out of range', function (run) {
-			const number = 15;
-			const min = 1;
-			const max = 10;
-			try {
-				RedGPU.RuntimeChecker.validatePositiveNumberRange(number, min, max);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
+    'RedGPU.RuntimeChecker.validateRedGPUContext',
+    (runner) => {
+        runner.defineTest('Success Test: Valid context', (run) => {
+            const canvas = document.createElement('canvas');
+            RedGPU.init(canvas, (redGPUContext) => {
+                try {
+                    const pass = RedGPU.RuntimeChecker.validateRedGPUContext(redGPUContext);
+                    redGPUContext.destroy();
+                    run(pass);
+                } catch (e) { redGPUContext.destroy(); run(false, e); }
+            }, (error) => run(false, error));
+        }, true);
 
-		runner.defineTest('validatePositiveNumberRange - Negative numbers', function (run) {
-			const number = -5;
-			const min = -10;
-			const max = 0;
-			try {
-				RedGPU.RuntimeChecker.validatePositiveNumberRange(number, min, max);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
+        runner.defineTest('Failure Test: Plain object', (run) => {
+            try { RedGPU.RuntimeChecker.validateRedGPUContext({}); run(true); } catch (e) { run(false, e); }
+        }, false);
 
-		runner.defineTest('validatePositiveNumberRange - Range bounds as string', function (run) {
-			const number = 5;
-			const min = '1';
-			const max = '10';
-			try {
-				RedGPU.RuntimeChecker.validatePositiveNumberRange(number, min, max);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
-
-		runner.defineTest('validatePositiveNumberRange - Null as range bounds', function (run) {
-			const number = 5;
-			const min = null;
-			const max = null;
-			try {
-				RedGPU.RuntimeChecker.validatePositiveNumberRange(number, min, max);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
-
-		runner.defineTest('validatePositiveNumberRange - Number is string', function (run) {
-			const number = '5';
-			const min = 1;
-			const max = 10;
-			try {
-				RedGPU.RuntimeChecker.validatePositiveNumberRange(number, min, max);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
-
-		runner.defineTest('validatePositiveNumberRange - Boolean as input', function (run) {
-			const number = true;
-			const min = 1;
-			const max = 10;
-			try {
-				RedGPU.RuntimeChecker.validatePositiveNumberRange(number, min, max);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
-
-		runner.defineTest('validatePositiveNumberRange - Object as input', function (run) {
-			const number = {};
-			const min = 1;
-			const max = 10;
-			try {
-				RedGPU.RuntimeChecker.validatePositiveNumberRange(number, min, max);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
-	}
-);
-
-redUnit.testGroup(
-	'TypeScript RedGPU.RuntimeChecker.validateUintRange Success Cases',
-	(runner) => {
-		runner.defineTest('validateUintRange - Valid range', function (run) {
-			const number = 5;
-			const min = 0;
-			const max = 10;
-			const result = RedGPU.RuntimeChecker.validateUintRange(number, min, max);
-			run(result);
-		}, true);
-
-		runner.defineTest('validateUintRange - Valid max limit', function (run) {
-			const number = 10;
-			const min = 0;
-			const max = 10;
-			const result = RedGPU.RuntimeChecker.validateUintRange(number, min, max);
-			run(result);
-		}, true);
-
-		runner.defineTest('validateUintRange - Valid min limit', function (run) {
-			const number = 0;
-			const min = 0;
-			const max = 10;
-			const result = RedGPU.RuntimeChecker.validateUintRange(number, min, max);
-			run(result);
-		}, true);
-	}
-);
-
-redUnit.testGroup(
-	'TypeScript RedGPU.RuntimeChecker.validateUintRange Failure Cases',
-	(runner) => {
-		runner.defineTest('validateUintRange - Number out of range', function (run) {
-			const number = 15;
-			const min = 0;
-			const max = 10;
-			try {
-				RedGPU.RuntimeChecker.validateUintRange(number, min, max);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
-
-		runner.defineTest('validateUintRange - Negative numbers', function (run) {
-			const number = -5;
-			const min = 0;
-			const max = 10;
-			try {
-				RedGPU.RuntimeChecker.validateUintRange(number, min, max);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
-
-		runner.defineTest('validateUintRange - Decimal numbers', function (run) {
-			const number = 5.5;
-			const min = 0;
-			const max = 10;
-			try {
-				RedGPU.RuntimeChecker.validateUintRange(number, min, max);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
-
-		runner.defineTest('validateUintRange - Input type not Number', function (run) {
-			const number = "5";
-			const min = 0;
-			const max = 10;
-			try {
-				RedGPU.RuntimeChecker.validateUintRange(number, min, max);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
-
-		runner.defineTest('validateUintRange - Null as input', function (run) {
-			const number = null;
-			const min = 0;
-			const max = 10;
-			try {
-				RedGPU.RuntimeChecker.validateUintRange(number, min, max);
-				run(true);
-			} catch (error) {
-				run(false, error);
-			}
-		}, false);
-	}
+        runner.defineTest('Failure Test: null/undefined', (run) => {
+            try { RedGPU.RuntimeChecker.validateRedGPUContext(null); run(true); } catch (e) { run(false, e); }
+        }, false);
+    }
 );

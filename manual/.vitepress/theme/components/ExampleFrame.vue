@@ -13,7 +13,7 @@ const props = defineProps({
 })
 
 // 호스트 주소 설정
-const HOST = 'https://redcamel.github.io/'
+const HOST = ''
 
 // src가 외부 링크인지 확인하고, 상대 경로라면 호스트를 붙임
 const resolvedSrc = computed(() => {
@@ -22,9 +22,13 @@ const resolvedSrc = computed(() => {
     return props.src
   }
 
-  // 상대 경로일 경우: 앞부분의 '/'를 제거하고 호스트와 결합
-  const cleanSrc = props.src.startsWith('/') ? props.src.slice(1) : props.src
-  return `${HOST}${cleanSrc}`
+  // HOST가 지정되어 있다면 결합하고, 비어 있다면 원래의 루트 절대 경로를 보존하여 반환합니다.
+  if (HOST) {
+    const cleanSrc = props.src.startsWith('/') ? props.src.slice(1) : props.src
+    return `${HOST}${cleanSrc}`
+  }
+
+  return props.src.startsWith('/') ? props.src : '/' + props.src
 })
 </script>
 
@@ -55,13 +59,13 @@ const resolvedSrc = computed(() => {
 }
 @media (max-width: 1280px) {
   .example-frame iframe{
-    height : 500px !important;
+    height: 600px !important;
   }
 }
 
 @media (max-width: 960px) {
   .example-frame iframe{
-    height : 400px !important;
+    height: 700px !important;
   }
 }
 

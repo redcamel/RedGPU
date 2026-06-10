@@ -1,5 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770713934910";
+import * as RedGPU from "../../../dist/index.js?t=1778922031603";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1778922031603";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1778922031603";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -35,10 +36,6 @@ RedGPU.init(
 
 		// [KO] 조명 설정
 		// [EN] Light setup
-		const ambientLight = new RedGPU.Light.AmbientLight();
-		ambientLight.intensity = 0.5;
-		scene.lightManager.ambientLight = ambientLight;
-
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
@@ -234,17 +231,17 @@ RedGPU.init(
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {function} resetScene
  */
-const renderTestPane = async (redGPUContext, resetScene) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
-	pane.addBlade({
-		view: 'text',
-		label: 'System',
-		value: 'Surface Velocity Conveyor',
-		parse: (v) => v,
-		readonly: true
+const renderTestPane = (redGPUContext, resetScene) => {
+	new RedGPUExampleHelper(redGPUContext, {
+		gui: (pane) => {
+			pane.addBlade({
+				view: 'text',
+				label: 'System',
+				value: 'Surface Velocity Conveyor',
+				parse: (v) => v,
+				readonly: true
+			});
+			pane.addButton({ title: 'Reset Objects' }).on('click', () => resetScene());
+		}
 	});
-	pane.addButton({ title: 'Reset Objects' }).on('click', () => resetScene());
 };

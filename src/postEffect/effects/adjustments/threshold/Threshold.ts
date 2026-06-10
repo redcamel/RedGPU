@@ -1,20 +1,33 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
+
+
+interface Threshold {
+    /** [KO] 흑백 전환 기준 임계값 (1 ~ 255) [EN] Threshold value for binary conversion (1 ~ 255) */
+    threshold: number
+}
 
 /**
  * [KO] 임계값(Threshold) 후처리 이펙트입니다.
  * [EN] Threshold post-processing effect.
  *
- * [KO] 지정한 임계값을 기준으로 픽셀을 흑백으로 변환합니다.
- * [EN] Converts pixels to black and white based on the specified threshold value.
+ * [KO] 설정된 임계값을 기준으로 이미지의 각 픽셀을 순수 흑색(0.0) 또는 순수 백색(1.0)으로 변환합니다.
+ * [EN] Converts each pixel of the image to pure black (0.0) or pure white (1.0) based on the set threshold value.
+ *
+ * [KO] 입력 픽셀의 휘도(Luminance)가 임계값보다 크면 백색, 작으면 흑색으로 분류되어 강렬한 이진화 효과를 제공합니다.
+ * [EN] If the luminance of the input pixel is greater than the threshold, it is classified as white; otherwise, it is black, providing a strong binarization effect.
+ *
+ * [KO] 이 효과는 LDR 공간에서 0~1 사이의 표준 휘도를 기반으로 동작할 때 가장 정확한 결과를 얻을 수 있습니다.
+ * [EN] This effect provides the most accurate results when operating based on standard luminance between 0-1 in LDR space.
+ *
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.Threshold(redGPUContext);
- * effect.threshold = 200; // 임계값 조절
+ * effect.threshold = 128; // 중간 밝기를 기준으로 흑백 분리
  * view.postEffectManager.addEffect(effect);
  * ```
  *
@@ -22,49 +35,28 @@ import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
  * @category Adjustments
  */
 class Threshold extends ASinglePassPostEffect {
-    /**
-     * [KO] 임계값 (1 ~ 255)
-     * [EN] Threshold (1 ~ 255)
-     * @defaultValue 128
-     */
-    #threshold: number = 128
 
     /**
      * [KO] Threshold 인스턴스를 생성합니다.
      * [EN] Creates a Threshold instance.
      *
-     * @param redGPUContext
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
+        this.isLdr = true;
         this.init(
             redGPUContext,
             'POST_EFFECT_THRESHOLD',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
-        )
-        this.threshold = this.#threshold
+        );
     }
 
-    /**
-     * [KO] 임계값을 반환합니다.
-     * [EN] Returns the threshold value.
-     */
-    get threshold(): number {
-        return this.#threshold;
-    }
-
-    /**
-     * [KO] 임계값을 설정합니다. (1 ~ 255)
-     * [EN] Sets the threshold value. (1 ~ 255)
-     */
-    set threshold(value: number) {
-        validateNumberRange(value, 1, 255)
-        this.#threshold = value;
-        this.updateUniform('threshold', value)
-    }
 }
+
+definePositiveNumber(Threshold, [
+    {key: 'threshold', value: 128, min: 1, max: 255}
+])
 
 Object.freeze(Threshold)
 export default Threshold

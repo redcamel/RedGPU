@@ -3,49 +3,84 @@ import ASinglePassPostEffect from "../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import definePositiveNumber from "../../../defineProperty/funcs/number/definePositiveNumber";
 
-const SUBTLE = {
-    filmGrainIntensity: 0.02,
-    filmGrainResponse: 0.9,
-    filmGrainScale: 2.5,
-    coloredGrain: 0.3,
-    grainSaturation: 0.4
-};
-const MEDIUM = {
-    filmGrainIntensity: 0.05,
-    filmGrainResponse: 0.8,
-    filmGrainScale: 3.0,
-    coloredGrain: 0.5,
-    grainSaturation: 0.6
-};
-const HEAVY = {
-    filmGrainIntensity: 0.12,
-    filmGrainResponse: 0.6,
-    filmGrainScale: 4.0,
-    coloredGrain: 0.7,
-    grainSaturation: 0.8
-};
-const VINTAGE = {
-    filmGrainIntensity: 0.08,
-    filmGrainResponse: 0.7,
-    filmGrainScale: 5.0,
-    coloredGrain: 0.9,
-    grainSaturation: 1.0
-};
 
 /**
- * [KO] 필름 그레인(Film Grain) 후처리 이펙트입니다.
- * [EN] Film Grain post-processing effect.
+ * [KO] 필름 그레인 프리셋 정의 (업계 표준 수치 기반)
+ * [EN] Film Grain preset definitions (Based on industry standard values)
+ */
+const SUBTLE = {
+    filmGrainIntensity: 0.008,
+    filmGrainResponse: 1.5,
+    filmGrainScale: 1.2,
+    coloredGrain: 0.05,
+    grainSaturation: 0.1
+};
+const MEDIUM = {
+    filmGrainIntensity: 0.015,
+    filmGrainResponse: 1.2,
+    filmGrainScale: 1.8,
+    coloredGrain: 0.15,
+    grainSaturation: 0.3
+};
+const HEAVY = {
+    filmGrainIntensity: 0.03,
+    filmGrainResponse: 1.0,
+    filmGrainScale: 2.5,
+    coloredGrain: 0.25,
+    grainSaturation: 0.5
+};
+const VINTAGE = {
+    filmGrainIntensity: 0.06,
+    filmGrainResponse: 0.7,
+    filmGrainScale: 4.0,
+    coloredGrain: 0.6,
+    grainSaturation: 0.8
+};
+
+interface FilmGrain {
+    /**
+     * [KO] 그레인 입자의 전체적인 강도 (0 ~ 1)
+     * [EN] Overall intensity of grain particles (0 ~ 1)
+     */
+    filmGrainIntensity: number;
+    /**
+     * [KO] 명도에 따른 그레인 반응 곡선 (값이 높을수록 어두운 영역에 집중)
+     * [EN] Grain response curve based on luminance (higher values concentrate in dark areas)
+     */
+    filmGrainResponse: number;
+    /**
+     * [KO] 그레인 입자의 크기 (스케일)
+     * [EN] Size (scale) of grain particles
+     */
+    filmGrainScale: number;
+    /**
+     * [KO] 유색 그레인 적용 비율 (0: 단색, 1: 풀컬러)
+     * [EN] Colored grain application ratio (0: monochromatic, 1: full color)
+     */
+    coloredGrain: number;
+    /**
+     * [KO] 입자의 채도 강도
+     * [EN] Saturation intensity of particles
+     */
+    grainSaturation: number;
+}
+
+/**
+ * [KO] 현대적인 시네마틱 필름 그레인(Film Grain) 후처리 이펙트입니다.
+ * [EN] Modern cinematic Film Grain post-processing effect.
  *
- * [KO] 다양한 프리셋과 강도, 색상, 스케일, 채도 등 세부 조절이 가능합니다.
- * [EN] Allows detailed adjustments such as presets, intensity, color, scale, and saturation.
+ * [KO] 단순한 노이즈가 아닌, 실제 필름의 화학적 입자 질감을 수학적으로 시뮬레이션합니다.
+ * [EN] Mathematically simulates the chemical grain texture of real film, rather than just simple noise.
+ *
+ * [KO] 하이라이트 영역보다 어두운 영역에서 입자가 더 도드라지는 물리적 특성을 반영하며, 시간(프레임)에 따라 변하는 동적 질감을 제공합니다.
+ * [EN] Reflects the physical characteristic where particles are more prominent in darker areas than highlights, and provides dynamic texture that changes over time (frames).
+ *
  * * ### Example
  * ```typescript
  * const effect = new RedGPU.PostEffect.FilmGrain(redGPUContext);
- * effect.filmGrainIntensity = 0.08;
- * effect.filmGrainScale = 5.0;
- * effect.coloredGrain = 0.7;
- * effect.applyPreset(RedGPU.PostEffect.FilmGrain.VINTAGE);
+ * effect.applyPreset(RedGPU.PostEffect.FilmGrain.MEDIUM);
  * view.postEffectManager.addEffect(effect);
  * ```
  *
@@ -53,207 +88,54 @@ const VINTAGE = {
  * @category Visual Effects
  */
 class FilmGrain extends ASinglePassPostEffect {
-    /**
-     * [KO] 미세한 그레인 프리셋
-     * [EN] Subtle grain preset
-     */
+    /** [KO] 미세한 질감 프리셋 [EN] Subtle texture preset */
     static SUBTLE = SUBTLE;
-    /**
-     * [KO] 중간 강도 프리셋
-     * [EN] Medium intensity preset
-     */
+    /** [KO] 표준적인 질감 프리셋 [EN] Medium texture preset */
     static MEDIUM = MEDIUM;
-    /**
-     * [KO] 강한 그레인 프리셋
-     * [EN] Heavy grain preset
-     */
+    /** [KO] 강한 질감 프리셋 [EN] Heavy texture preset */
     static HEAVY = HEAVY;
-    /**
-     * [KO] 빈티지 프리셋
-     * [EN] Vintage preset
-     */
+    /** [KO] 고전 영화 스타일 프리셋 [EN] Vintage cinematic preset */
     static VINTAGE = VINTAGE;
-    /**
-     * [KO] 그레인 강도 (0 ~ 1)
-     * [EN] Grain intensity (0 ~ 1)
-     * @defaultValue 0.12
-     */
-    #filmGrainIntensity: number = HEAVY.filmGrainIntensity;
-    /**
-     * [KO] 밝기 반응도 (0 ~ 2)
-     * [EN] Brightness response (0 ~ 2)
-     * @defaultValue 0.6
-     */
-    #filmGrainResponse: number = HEAVY.filmGrainResponse;
-    /**
-     * [KO] 그레인 스케일 (0.1 ~ 20)
-     * [EN] Grain scale (0.1 ~ 20)
-     * @defaultValue 4.0
-     */
-    #filmGrainScale: number = HEAVY.filmGrainScale;
-    /**
-     * [KO] 컬러 그레인 비율 (0 ~ 1)
-     * [EN] Colored grain ratio (0 ~ 1)
-     * @defaultValue 0.7
-     */
-    #coloredGrain: number = HEAVY.coloredGrain;
-    /**
-     * [KO] 그레인 채도 (0 ~ 2)
-     * [EN] Grain saturation (0 ~ 2)
-     * @defaultValue 0.8
-     */
-    #grainSaturation: number = HEAVY.grainSaturation;
-    #time: number = 0.0;
-    #devicePixelRatio: number = 1.0;
 
     /**
      * [KO] FilmGrain 인스턴스를 생성합니다.
      * [EN] Creates a FilmGrain instance.
      *
-     * @param redGPUContext
-     * [KO] RedGPU 컨텍스트
-     * [EN] RedGPU Context
+     * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU Context
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-        this.#devicePixelRatio = window?.devicePixelRatio || 1.0;
+        this.isLdr = true;
         this.init(
             redGPUContext,
             'POST_EFFECT_FILM_GRAIN',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
-        this.#updateUniforms();
     }
 
     /**
-     * [KO] 그레인 강도를 반환합니다.
-     * [EN] Returns the grain intensity.
-     */
-    get filmGrainIntensity(): number {
-        return this.#filmGrainIntensity;
-    }
-
-    /**
-     * [KO] 그레인 강도를 설정합니다. (0 ~ 1)
-     * [EN] Sets the grain intensity. (0 ~ 1)
-     */
-    set filmGrainIntensity(value: number) {
-        this.#filmGrainIntensity = Math.max(0.0, Math.min(1.0, value));
-        this.updateUniform('filmGrainIntensity', this.#filmGrainIntensity);
-    }
-
-    /**
-     * [KO] 밝기 반응도를 반환합니다.
-     * [EN] Returns the brightness response.
-     */
-    get filmGrainResponse(): number {
-        return this.#filmGrainResponse;
-    }
-
-    /**
-     * [KO] 밝기 반응도를 설정합니다. (0 ~ 2)
-     * [EN] Sets the brightness response. (0 ~ 2)
-     */
-    set filmGrainResponse(value: number) {
-        this.#filmGrainResponse = Math.max(0.0, Math.min(2.0, value));
-        this.updateUniform('filmGrainResponse', this.#filmGrainResponse);
-    }
-
-    /**
-     * [KO] 그레인 스케일을 반환합니다.
-     * [EN] Returns the grain scale.
-     */
-    get filmGrainScale(): number {
-        return this.#filmGrainScale;
-    }
-
-    /**
-     * [KO] 그레인 스케일을 설정합니다. (0.1 ~ 20)
-     * [EN] Sets the grain scale. (0.1 ~ 20)
-     */
-    set filmGrainScale(value: number) {
-        this.#filmGrainScale = Math.max(0.1, Math.min(20.0, value));
-        this.updateUniform('filmGrainScale', this.#filmGrainScale);
-    }
-
-    /**
-     * [KO] 컬러 그레인 비율을 반환합니다.
-     * [EN] Returns the colored grain ratio.
-     */
-    get coloredGrain(): number {
-        return this.#coloredGrain;
-    }
-
-    /**
-     * [KO] 컬러 그레인 비율을 설정합니다. (0 ~ 1)
-     * [EN] Sets the colored grain ratio. (0 ~ 1)
-     */
-    set coloredGrain(value: number) {
-        this.#coloredGrain = Math.max(0.0, Math.min(1.0, value));
-        this.updateUniform('coloredGrain', this.#coloredGrain);
-    }
-
-    /**
-     * [KO] 그레인 채도를 반환합니다.
-     * [EN] Returns the grain saturation.
-     */
-    get grainSaturation(): number {
-        return this.#grainSaturation;
-    }
-
-    /**
-     * [KO] 그레인 채도를 설정합니다. (0 ~ 2)
-     * [EN] Sets the grain saturation. (0 ~ 2)
-     */
-    set grainSaturation(value: number) {
-        this.#grainSaturation = Math.max(0.0, Math.min(2.0, value));
-        this.updateUniform('grainSaturation', this.#grainSaturation);
-    }
-
-    /**
-     * [KO] 프리셋을 적용합니다.
-     * [EN] Applies a preset.
+     * [KO] 정의된 프리셋 수치를 이펙트에 즉시 적용합니다.
+     * [EN] Immediately applies defined preset values to the effect.
      *
-     * @param preset
-     * [KO] 적용할 프리셋 객체
-     * [EN] Preset object to apply
+     * @param preset - [KO] 적용할 프리셋 객체 [EN] Preset object to apply
      */
-    applyPreset(preset: typeof SUBTLE | typeof MEDIUM | typeof HEAVY | typeof VINTAGE): void {
-        this.#filmGrainIntensity = preset.filmGrainIntensity;
-        this.#filmGrainResponse = preset.filmGrainResponse;
-        this.#filmGrainScale = preset.filmGrainScale;
-        this.#coloredGrain = preset.coloredGrain;
-        this.#grainSaturation = preset.grainSaturation;
-        this.#updateUniforms();
+    applyPreset(preset: typeof SUBTLE): void {
+        this.filmGrainIntensity = preset.filmGrainIntensity;
+        this.filmGrainResponse = preset.filmGrainResponse;
+        this.filmGrainScale = preset.filmGrainScale;
+        this.coloredGrain = preset.coloredGrain;
+        this.grainSaturation = preset.grainSaturation;
     }
 
-    /**
-     * [KO] 시간을 업데이트합니다. (애니메이션용)
-     * [EN] Updates the time. (For animation)
-     *
-     * @param deltaTime
-     * [KO] 델타 타임
-     * [EN] Delta time
-     */
-    update(deltaTime: number): void {
-        this.#time += deltaTime;
-        this.updateUniform('time', this.#time);
-    }
 
-    /**
-     * [KO] 내부 유니폼을 일괄 갱신합니다.
-     * [EN] Updates internal uniforms in batch.
-     */
-    #updateUniforms(): void {
-        this.updateUniform('filmGrainIntensity', this.#filmGrainIntensity);
-        this.updateUniform('filmGrainResponse', this.#filmGrainResponse);
-        this.updateUniform('filmGrainScale', this.#filmGrainScale);
-        this.updateUniform('coloredGrain', this.#coloredGrain);
-        this.updateUniform('grainSaturation', this.#grainSaturation);
-        this.updateUniform('time', this.#time);
-        this.updateUniform('devicePixelRatio', this.#devicePixelRatio);
-    }
 }
 
+definePositiveNumber(FilmGrain, [
+    {key: 'filmGrainIntensity', value: VINTAGE.filmGrainIntensity},
+    {key: 'filmGrainResponse', value: VINTAGE.filmGrainResponse},
+    {key: 'filmGrainScale', value: VINTAGE.filmGrainScale},
+    {key: 'coloredGrain', value: VINTAGE.coloredGrain},
+    {key: 'grainSaturation', value: VINTAGE.grainSaturation},
+])
 Object.freeze(FilmGrain);
 export default FilmGrain;

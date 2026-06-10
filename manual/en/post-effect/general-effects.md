@@ -149,13 +149,13 @@ Here is the complete list of all general effects provided by RedGPU. All effects
 | | `Sharpen` | Sharpening |
 | | `Convolution` | Kernel-based filter (supports Sharpen, Edge, Emboss, etc.) |
 
-::: info [Check Live]
-All the effects listed above can be checked in real-time demos in the **PostEffect** category of the [RedGPU Official Examples Page](https://redcamel.github.io/RedGPU/examples/#postEffect).
+::: info [Live Verification]
+All the effects listed above can be checked in real-time demos in the **PostEffect** category of
+the [RedGPU Official Examples Page](https://redcamel.github.io/RedGPU/examples/index.html?tab=PostEffect).
 :::
 
 ## Key Summary
 - You can layer effects in any order using `addEffect()`.
-- All effect objects require a `redGPUContext` upon creation.
 - Actual rendering is performed immediately after the tone mapping stage.
 
 ## Next Learning Recommendations

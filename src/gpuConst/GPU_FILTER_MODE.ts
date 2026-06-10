@@ -4,20 +4,20 @@
  *
  * [KO] 텍스처 확대 및 축소 시 픽셀 간 보간 방식을 결정합니다.
  * [EN] Determines the interpolation method between pixels during texture magnification and minification.
- * 
+ *
  * @category Constants
  */
 const GPU_FILTER_MODE = {
-	/**
-	 * [KO] 가장 가까운 텍셀의 값을 사용합니다.
-	 * [EN] Uses the value of the nearest texel.
-	 */
-	NEAREST: 'nearest',
-	/**
-	 * [KO] 주변 텍셀 값들을 선형 보간하여 사용합니다.
-	 * [EN] Uses linear interpolation of surrounding texel values.
-	 */
-	LINEAR: 'linear'
+    /**
+     * [KO] 가장 가까운 텍셀의 값을 사용합니다.
+     * [EN] Uses the value of the nearest texel.
+     */
+    NEAREST: 'nearest',
+    /**
+     * [KO] 주변 텍셀 값들을 선형 보간하여 사용합니다.
+     * [EN] Uses linear interpolation of surrounding texel values.
+     */
+    LINEAR: 'linear'
 } as const;
 Object.freeze(GPU_FILTER_MODE);
 export default GPU_FILTER_MODE;

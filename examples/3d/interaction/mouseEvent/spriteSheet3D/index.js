@@ -1,4 +1,6 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../../dist/index.js?t=1778922031603";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1778922031603";
+import {createEventInfoBox, updateEventInfoBoxStyle, updateEventInfo} from "../eventInfoBox.js";
 
 /**
  * [KO] SpriteSheet3D Mouse Event 예제
@@ -14,7 +16,10 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        const isMobile = redGPUContext.detector.isMobile;
+        const {detector} = redGPUContext;
+        const isMobile = detector.isMobile;
+
+        // 1. 카메라 및 뷰 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = isMobile ? 12 : 9.5;
         controller.tilt = -15;
@@ -23,66 +28,40 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        // [KO] 정보 표시용 HTML 요소 생성
-        // [EN] Create HTML element for displaying information
-        const infoBox = document.createElement('div');
-        const updateInfoBoxStyle = () => {
-            const isMobile = redGPUContext.detector.isMobile;
-            Object.assign(infoBox.style, {
-                position: 'absolute',
-                bottom: isMobile ? '100px' : '70px',
-                left: '12px',
-                width: isMobile ? 'calc(100% - 64px)' : 'auto',
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                color: '#fff',
-                padding: '6px 12px',
-                borderRadius: '12px',
-                fontSize: isMobile ? '12px' : '11px',
-                lineHeight: '1.6',
-                pointerEvents: 'none',
-                textAlign: 'left',
-                whiteSpace: 'pre-wrap',
-                display: 'none',
-                userSelect: 'none',
-                zIndex: '100',
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
-            });
-        };
-        updateInfoBoxStyle();
-        document.body.appendChild(infoBox);
+        // 2. UI 요소 (이벤트 정보 표시 박스) 생성
+        const infoBox = createEventInfoBox(isMobile);
 
-        const updateInfo = (eventName, e) => {
-            infoBox.style.display = 'block';
-            infoBox.innerHTML = `[Event Info]
-Object: ${e.target.name || 'SpriteSheet3D'}
-Event: ${eventName}
-Distance: ${e.distance ? e.distance.toFixed(4) : 'N/A'}
-World Point: [${e.point[0].toFixed(2)}, ${e.point[1].toFixed(2)}, ${e.point[2].toFixed(2)}]
-Local Point: [${e.localPoint[0].toFixed(2)}, ${e.localPoint[1].toFixed(2)}, ${e.localPoint[2].toFixed(2)}]
-Face Index: ${e.faceIndex}
-UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]`;
-        };
+        // 3. 샘플 SpriteSheet3D 생성 및 배치
+        const {updateLayout} = createSampleSprite3D(redGPUContext, scene, infoBox);
 
-        const { updateLayout } = createSampleSprite3D(redGPUContext, scene, infoBox, updateInfo);
-
+        // 4. 리사이즈 핸들러 설정
+        /**
+         * [KO] 화면 크기가 변경될 때 호출되는 이벤트 핸들러입니다.
+         * [EN] Event handler called when the screen size changes.
+         */
         redGPUContext.onResize = (resizeEvent) => {
-            const { width, height } = resizeEvent.pixelRectObject;
+            const {width, height} = resizeEvent.pixelRectObject;
             const aspect = width / height;
-            const isMobile = redGPUContext.detector.isMobile;
+            const isMobile = detector.isMobile;
             const baseDistance = isMobile ? 7.5 : 9.5;
+
+            // 화면 비율에 맞춰 카메라 거리 자동 조절
             controller.distance = aspect < 1 ? baseDistance / aspect : baseDistance;
-            updateInfoBoxStyle();
+
+            // UI 스타일 및 배치 업데이트
+            updateEventInfoBoxStyle(infoBox, isMobile);
             updateLayout();
         };
+
+        // 초기 리사이즈 실행
         redGPUContext.onResize({
             target: redGPUContext,
             screenRectObject: redGPUContext.screenRectObject,
             pixelRectObject: redGPUContext.pixelRectObject
         });
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        // 5. 렌더링 시작
+        const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext);
 
         renderTestPane(redGPUContext, scene);
@@ -98,20 +77,15 @@ UV: [${e.uv ? e.uv[0].toFixed(3) : 'N/A'}, ${e.uv ? e.uv[1].toFixed(3) : 'N/A'}]
 /**
  * [KO] 샘플 SpriteSheet3D를 생성합니다.
  * [EN] Creates sample SpriteSheet3D.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @param {HTMLElement} infoBox
- * @param {function} updateInfo
- * @returns {{sprites: Array<RedGPU.Display.SpriteSheet3D>, updateLayout: function}}
  */
-const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
+const createSampleSprite3D = (redGPUContext, scene, infoBox) => {
     const spriteSheetInfo = new RedGPU.Display.SpriteSheetInfo(redGPUContext, '../../../../assets/spriteSheet/spriteSheet.png', 5, 3, 15, 0, true, 24);
     const sprites = [];
     const labels = [];
 
     Object.values(RedGPU.Picking.PICKING_EVENT_TYPE).forEach((eventName, index, array) => {
         const spriteSheet = new RedGPU.Display.SpriteSheet3D(redGPUContext, spriteSheetInfo);
-        
+
         // [KO] SpriteSheet3D는 내부에서 자동 생성된 머티리얼을 사용합니다.
         // [EN] SpriteSheet3D uses an internally auto-generated material.
         const material = spriteSheet.material;
@@ -123,7 +97,7 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
 
         scene.addChild(spriteSheet);
         spriteSheet.addListener(eventName, (e) => {
-            updateInfo(eventName, e);
+            updateEventInfo(infoBox, eventName, e);
             // [KO] 인스턴스의 실제 머티리얼 틴트를 애니메이션합니다.
             // [EN] Animate the actual material tint of the instance.
             TweenMax.to(material.tint, 0.5, {
@@ -137,8 +111,8 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
 
         const label = new RedGPU.Display.TextField3D(redGPUContext);
         label.text = eventName;
-        label.fontSize = 14;
-        label.worldSize = 0.7;
+        label.fontSize = 32;
+        label.worldSize = 0.5;
         scene.addChild(label);
 
         sprites.push(spriteSheet);
@@ -162,83 +136,73 @@ const createSampleSprite3D = (redGPUContext, scene, infoBox, updateInfo) => {
     };
 
     updateLayout();
-    return { sprites, updateLayout };
+    return {sprites, updateLayout};
 };
 
 /**
  * [KO] 테스트용 GUI를 렌더링합니다.
  * [EN] Renders the GUI for testing.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
  */
 const renderTestPane = async (redGPUContext, scene) => {
-    const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const pane = new Pane();
-    const { setDebugButtons } = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const folder = pane.addFolder({ title: 'SpriteSheet3D', expanded: true });
-    
-    const child = scene.children.find(c => c instanceof RedGPU.Display.SpriteSheet3D);
-    const controls = {
-        useBillboard: child.useBillboard,
-        usePixelSize: child.usePixelSize,
-        pixelSize: child.pixelSize,
-        worldSize: child.worldSize,
-    };
+    new RedGPUExampleHelper(redGPUContext, {
+        gui: (pane) => {
+            const folder = pane.addFolder({title: 'SpriteSheet3D', expanded: true});
 
-    const useBillboardBinding = folder.addBinding(controls, 'useBillboard').on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.SpriteSheet3D) child.useBillboard = evt.value;
-        });
-        updateControlsState();
-    });
+            const child = scene.children.find(c => c instanceof RedGPU.Display.SpriteSheet3D);
+            const controls = {
+                useBillboard: child.useBillboard,
+                usePixelSize: child.usePixelSize,
+                pixelSize: child.pixelSize,
+                worldSize: child.worldSize,
+            };
 
-    const usePixelSizeBinding = folder.addBinding(controls, 'usePixelSize').on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.SpriteSheet3D) child.usePixelSize = evt.value;
-        });
-        updateControlsState();
-    });
+            const useBillboardBinding = folder.addBinding(controls, 'useBillboard').on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    if (child instanceof RedGPU.Display.SpriteSheet3D) child.useBillboard = evt.value;
+                });
+                updateControlsState();
+            });
 
-    const pixelSizeBinding = folder.addBinding(controls, 'pixelSize', {min: 1, max: 256, step: 1}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.SpriteSheet3D) child.pixelSize = evt.value;
-        });
-    });
+            const usePixelSizeBinding = folder.addBinding(controls, 'usePixelSize').on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    if (child instanceof RedGPU.Display.SpriteSheet3D) child.usePixelSize = evt.value;
+                });
+                updateControlsState();
+            });
 
-    const worldSizeBinding = folder.addBinding(controls, 'worldSize', {min: 0.01, max: 5, step: 0.01}).on('change', (evt) => {
-        scene.children.forEach((child) => {
-            if (child instanceof RedGPU.Display.SpriteSheet3D) child.worldSize = evt.value;
-        });
-    });
+            const pixelSizeBinding = folder.addBinding(controls, 'pixelSize', {min: 1, max: 256, step: 1}).on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    if (child instanceof RedGPU.Display.SpriteSheet3D) child.pixelSize = evt.value;
+                });
+            });
 
-    const updateControlsState = () => {
-        const {useBillboard, usePixelSize} = controls;
+            const worldSizeBinding = folder.addBinding(controls, 'worldSize', {min: 0.01, max: 5, step: 0.01}).on('change', (evt) => {
+                scene.children.forEach((child) => {
+                    if (child instanceof RedGPU.Display.SpriteSheet3D) child.worldSize = evt.value;
+                });
+            });
 
-        if (!useBillboard) {
-            usePixelSizeBinding.element.style.opacity = 0.25;
-            usePixelSizeBinding.element.style.pointerEvents = 'none';
-            pixelSizeBinding.element.style.opacity = 0.25;
-            pixelSizeBinding.element.style.pointerEvents = 'none';
-            worldSizeBinding.element.style.opacity = 1;
-            worldSizeBinding.element.style.pointerEvents = 'painted';
-        } else {
-            usePixelSizeBinding.element.style.opacity = 1;
-            usePixelSizeBinding.element.style.pointerEvents = 'painted';
+            const updateControlsState = () => {
+                const {useBillboard, usePixelSize} = controls;
 
-            if (usePixelSize) {
-                pixelSizeBinding.element.style.opacity = 1;
-                pixelSizeBinding.element.style.pointerEvents = 'painted';
-                worldSizeBinding.element.style.opacity = 0.25;
-                worldSizeBinding.element.style.pointerEvents = 'none';
-            } else {
-                pixelSizeBinding.element.style.opacity = 0.25;
-                pixelSizeBinding.element.style.pointerEvents = 'none';
-                worldSizeBinding.element.style.opacity = 1;
-                worldSizeBinding.element.style.pointerEvents = 'painted';
-            }
+                if (!useBillboard) {
+                    usePixelSizeBinding.disabled = true;
+                    pixelSizeBinding.disabled = true;
+                    worldSizeBinding.disabled = false;
+                } else {
+                    usePixelSizeBinding.disabled = false;
+
+                    if (usePixelSize) {
+                        pixelSizeBinding.disabled = false;
+                        worldSizeBinding.disabled = true;
+                    } else {
+                        pixelSizeBinding.disabled = true;
+                        worldSizeBinding.disabled = false;
+                    }
+                }
+            };
+
+            updateControlsState();
         }
-    };
-
-    updateControlsState();
+    });
 };

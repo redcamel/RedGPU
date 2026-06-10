@@ -1,5 +1,4 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import DefineForVertex from "../../../../defineProperty/DefineForVertex";
 import Geometry from "../../../../geometry/Geometry";
 import Primitive from "../../../../primitive/core/Primitive";
 import Plane from "../../../../primitive/Plane";
@@ -10,24 +9,36 @@ import ASpriteSheet from "../core/ASpriteSheet";
 import SpriteSheetInfo from "../SpriteSheetInfo";
 import RenderViewStateData from "../../../view/core/RenderViewStateData";
 import vertexModuleSource from "./shader/spriteSheet3DVertex.wgsl";
-import {keepLog} from "../../../../utils";
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
+import defineBoolean from "../../../../defineProperty/funcs/defineBoolean";
+
 
 /** SpriteSheet3D 전용 버텍스 셰이더 모듈 이름 */
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_SHEET_3D'
 /** 파싱된 WGSL 셰이더 정보 */
-const SHADER_INFO = parseWGSL(vertexModuleSource);
+const SHADER_INFO = parseWGSL('SPRITE_SHEET_3D_VERTEX', vertexModuleSource);
 /** 버텍스 유니폼 구조체 정보 */
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 
 /**
- * 3D 스프라이트 시트의 빌보드 및 렌더링 속성을 정의하는 인터페이스
+ * [KO] 3D 스프라이트 시트의 빌보드 및 렌더링 속성을 정의하는 인터페이스
+ * [EN] Interface defining the billboard and rendering properties of 3D sprite sheets
  */
 interface SpriteSheet3D extends ASpriteSheet {
-    /** 빌보드 모드 사용 여부 */
+    /**
+     * [KO] 빌보드 모드 사용 여부 (true일 경우 항상 카메라를 향함)
+     * [EN] Whether to use billboard mode (if true, always faces the camera)
+     */
     useBillboard: boolean;
-    /** X축 렌더링 비율 */
+    /**
+     * [KO] X축 렌더링 비율
+     * [EN] X-axis rendering ratio
+     */
     _renderRatioX: number;
-    /** Y축 렌더링 비율 */
+    /**
+     * [KO] Y축 렌더링 비율
+     * [EN] Y-axis rendering ratio
+     */
     _renderRatioY: number;
 }
 
@@ -47,15 +58,9 @@ interface SpriteSheet3D extends ASpriteSheet {
  *
  * <iframe src="/RedGPU/examples/3d/sprite/spriteSheet3D/"></iframe>
  *
- * [KO] 월드 사이즈와 픽셀 사이즈 모드를 비교하는 예제입니다.
- * [EN] An example comparing World Size and Pixel Size modes.
- * <iframe src="/RedGPU/examples/3d/sprite/spriteSheet3DCompare/"></iframe>
- *
- * @see
- * [KO] 아래는 SpriteSheet3D의 구조와 동작을 이해하는 데 도움이 되는 추가 샘플 예제 목록입니다.
- * [EN] Below is a list of additional sample examples to help understand the structure and operation of SpriteSheet3D.
+ * @see [SpriteSheet3D Basic Example](/RedGPU/examples/3d/sprite/spriteSheet3D/)
  * @see [SpriteSheet3D Comparison (World vs Pixel)](/RedGPU/examples/3d/sprite/spriteSheet3DCompare/)
- * @see [SpriteSheet3D MouseEvent example](/RedGPU/examples/3d/mouseEvent/spriteSheet3D/)
+ * @see [SpriteSheet3D MouseEvent Example](/RedGPU/examples/3d/interaction/mouseEvent/spriteSheet3D/)
  * @category SpriteSheet
  */
 class SpriteSheet3D extends ASpriteSheet {
@@ -95,12 +100,11 @@ class SpriteSheet3D extends ASpriteSheet {
                         this.#nativeWidth = tW
                         this.#nativeHeight = tH
 
-                        const prevPixelSize = this.pixelSize;
                         // [KO] 원본 세그먼트 해상도를 pixelSize 기본값으로 설정
                         // [EN] Sync physical segment resolution to default pixelSize
                         this.pixelSize = this.#pixelSize ? this.#pixelSize : tH;
                         this.#updateRatios();
-                        keepLog('오냐 ',this.pixelSize)
+                        // keepLog('오냐 ', this.pixelSize)
                         this.dirtyTransform = true
                     }
                 }
@@ -149,12 +153,12 @@ class SpriteSheet3D extends ASpriteSheet {
      * [EN] Pixel size to set
      */
     set pixelSize(value: number) {
-        if(this.gpuRenderInfo){
+        if (this.gpuRenderInfo) {
             const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
             this.redGPUContext.gpuDevice.queue.writeBuffer(
                 vertexUniformBuffer.gpuBuffer,
                 vertexUniformInfo.members.pixelSize.uniformOffset,
-                new Float32Array([value * window.devicePixelRatio]) 
+                new Float32Array([value * window.devicePixelRatio])
             )
         }
         this.#pixelSize = value;
@@ -176,7 +180,7 @@ class SpriteSheet3D extends ASpriteSheet {
      * [EN] Whether to use
      */
     set usePixelSize(value: boolean) {
-        if(this.gpuRenderInfo){
+        if (this.gpuRenderInfo) {
             const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo
             this.redGPUContext.gpuDevice.queue.writeBuffer(
                 vertexUniformBuffer.gpuBuffer,
@@ -187,6 +191,82 @@ class SpriteSheet3D extends ASpriteSheet {
         if (this.#usePixelSize === value) return;
         this.#usePixelSize = value;
         this.#updateRatios();
+    }
+
+    /**
+     * [KO] 지오메트리를 반환합니다. SpriteSheet3D는 Plane으로 고정되어 있습니다.
+     * [EN] Returns the geometry. SpriteSheet3D is fixed with Plane.
+     * @returns
+     * [KO] 현재 지오메트리
+     * [EN] Current geometry
+     */
+    get geometry(): Geometry | Primitive {
+        return this._geometry;
+    }
+
+    /**
+     * [KO] SpriteSheet3D는 지오메트리를 변경할 수 없습니다.
+     * [EN] SpriteSheet3D cannot change geometry.
+     * @param value -
+     * [KO] 설정하려는 지오메트리
+     * [EN] Geometry to set
+     * @throws
+     * [KO] 지오메트리 변경 시도 시 에러가 발생합니다.
+     * [EN] Throws an error when attempting to change geometry.
+     */
+    set geometry(value: Geometry | Primitive) {
+        consoleAndThrowError('SpriteSheet3D can not change geometry')
+    }
+
+    /**
+     * [KO] 머티리얼을 반환합니다.
+     * [EN] Returns the material.
+     * @returns
+     * [KO] 현재 머티리얼
+     * [EN] Current material
+     */
+    get material() {
+        return this._material;
+    }
+
+    /**
+     * [KO] SpriteSheet3D는 머티리얼을 변경할 수 없습니다.
+     * [EN] SpriteSheet3D cannot change material.
+     * @param value -
+     * [KO] 설정하려는 머티리얼
+     * [EN] Material to set
+     * @throws
+     * [KO] 머티리얼 변경 시도 시 에러가 발생합니다.
+     * [EN] Throws an error when attempting to change material.
+     */
+    set material(value) {
+        consoleAndThrowError('SpriteSheet3D can not change material')
+    }
+
+    /**
+     * [KO] 프레임마다 스프라이트 시트를 렌더링합니다.
+     * [EN] Renders the sprite sheet every frame.
+     * @param renderViewStateData -
+     * [KO] 현재 렌더링 상태 데이터
+     * [EN] Current render view state data
+     */
+    render(renderViewStateData: RenderViewStateData) {
+        super.render(renderViewStateData);
+    }
+
+    /**
+     * [KO] SpriteSheet3D 전용 커스텀 버텍스 셰이더 모듈을 생성합니다.
+     * [EN] Creates a custom vertex shader module dedicated to SpriteSheet3D.
+     *
+     * [KO] 3D 공간에서의 빌보드 효과와 스프라이트 시트 렌더링에 최적화된 셰이더를 생성합니다.
+     * [EN] Creates a shader optimized for billboard effects and sprite sheet rendering in 3D space.
+     *
+     * @returns
+     * [KO] 생성된 GPU 셰이더 모듈
+     * [EN] Created GPU shader module
+     */
+    createCustomMeshVertexShaderModule = (): GPUShaderModule => {
+        return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
     }
 
     /**
@@ -211,96 +291,17 @@ class SpriteSheet3D extends ASpriteSheet {
             }
         }
     }
-
-    /**
-     * [KO] 프레임마다 스프라이트 시트를 렌더링합니다.
-     * [EN] Renders the sprite sheet every frame.
-     * @param renderViewStateData -
-     * [KO] 현재 렌더링 상태 데이터
-     * [EN] Current render view state data
-     */
-    render(renderViewStateData: RenderViewStateData) {
-        super.render(renderViewStateData);
-    }
-
-    /**
-     * [KO] 지오메트리를 반환합니다. SpriteSheet3D는 Plane으로 고정되어 있습니다.
-     * [EN] Returns the geometry. SpriteSheet3D is fixed with Plane.
-     * @returns
-     * [KO] 현재 지오메트리
-     * [EN] Current geometry
-     */
-    get geometry(): Geometry | Primitive {
-        return this._geometry;
-    }
-
-    /**
-     * [KO] SpriteSheet3D는 지오메트리를 변경할 수 없습니다.
-     * [EN] SpriteSheet3D cannot change geometry.
-     * @param value -
-     * [KO] 설정하려는 지오메트리
-     * [EN] Geometry to set
-     * @throws
-     * [KO] 지오메트리 변경 시도 시 에러 발생
-     * [EN] Throws error when attempting to change geometry
-     */
-    set geometry(value: Geometry | Primitive) {
-        consoleAndThrowError('SpriteSheet3D can not change geometry')
-    }
-
-    /**
-     * [KO] 머티리얼을 반환합니다.
-     * [EN] Returns the material.
-     * @returns
-     * [KO] 현재 머티리얼
-     * [EN] Current material
-     */
-    get material() {
-        return this._material;
-    }
-
-    /**
-     * [KO] SpriteSheet3D는 머티리얼을 변경할 수 없습니다.
-     * [EN] SpriteSheet3D cannot change material.
-     * @param value -
-     * [KO] 설정하려는 머티리얼
-     * [EN] Material to set
-     * @throws
-     * [KO] 머티리얼 변경 시도 시 에러 발생
-     * [EN] Throws error when attempting to change material
-     */
-    set material(value) {
-        consoleAndThrowError('SpriteSheet3D can not change material')
-    }
-
-    /**
-     * [KO] SpriteSheet3D 전용 커스텀 버텍스 셰이더 모듈을 생성합니다.
-     * [EN] Creates a custom vertex shader module dedicated to SpriteSheet3D.
-     *
-     * [KO] 3D 공간에서의 빌보드 효과와 스프라이트 시트 렌더링에 최적화된 셰이더를 생성합니다.
-     * [EN] Creates a shader optimized for billboard effects and sprite sheet rendering in 3D space.
-     *
-     * @returns
-     * [KO] 생성된 GPU 셰이더 모듈
-     * [EN] Created GPU shader module
-     */
-    createCustomMeshVertexShaderModule = (): GPUShaderModule => {
-        return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
-    }
 }
 
 /**
  * SpriteSheet3D 클래스에 렌더링 비율 속성들을 정의합니다.
  */
-DefineForVertex.definePositiveNumber(SpriteSheet3D, [
-    ['_renderRatioX', 1],
-    ['_renderRatioY', 1],
+definePositiveNumber(SpriteSheet3D, [
+    {key: '_renderRatioX', value: 1},
+    {key: '_renderRatioY', value: 1},
 ])
-/**
- * SpriteSheet3D 클래스에 빌보드 관련 속성들을 정의합니다.
- */
-DefineForVertex.defineByPreset(SpriteSheet3D, [
-    [DefineForVertex.PRESET_BOOLEAN.USE_BILLBOARD, true],
+defineBoolean(SpriteSheet3D, [
+    {key: 'useBillboard', value: true},
 ])
 /**
  * SpriteSheet3D 클래스를 동결하여 런타임에서의 수정을 방지합니다.

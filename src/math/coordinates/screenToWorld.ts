@@ -38,7 +38,7 @@ const screenToWorld = (screenX: number, screenY: number, view: AView,) => {
     x = 2.0 * (screenX * window.devicePixelRatio + pixelRectArray[0]) / pixelRectArray[2] - 1;
     y = -2.0 * (screenY * window.devicePixelRatio + pixelRectArray[1]) / pixelRectArray[3] + 1;
     z = 1;
-    mat4.multiply(invViewProjection, view.noneJitterProjectionMatrix, rawCamera.modelMatrix);
+    mat4.multiply(invViewProjection, view.noneJitterProjectionMatrix, rawCamera.viewMatrix);
     resultMTX = mat4.clone(invViewProjection);
     mat4.invert(resultMTX, resultMTX);
     point = vec3.fromValues(x, y, z);

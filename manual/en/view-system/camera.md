@@ -7,32 +7,54 @@ order: 4
 
 If **Scene** is the 'stage' where all objects are placed, **Camera** is the 'observer's eye' looking at that stage. It is a core object that manages the **Projection Matrix** and **View Matrix** for converting from the **World Coordinate** system to the **Screen Coordinate** system.
 
-RedGPU supports two standard projection methods depending on the use case.
+RedGPU supports three standard projection methods depending on the use case.
 
 ## 1. PerspectiveCamera
 
-**PerspectiveCamera** uses the **Perspective Projection** method. Similar to the human eye or a real camera lens, objects that are far away appear smaller and closer objects appear larger, providing a sense of space with depth.
+**PerspectiveCamera** uses the **Perspective Projection** method. Operating similarly to the human eye or a real camera
+lens, objects that are far away appear smaller and closer objects appear larger, providing a realistic sense of depth.
+
+In particular, RedGPU's **PerspectiveCamera** aims for **Physical Camera** modeling that simulates a real-world lens. It
+features **automatic exposure (`useAutoExposure`) enabled by default (`true`)**, which dynamically calculates and adapts
+the optimal screen brightness in real-time based on the environmental lighting.
 
 ```javascript
-// Create an instance (Context injection required)
-const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+// Create an instance (Context injection not required)
+const camera = new RedGPU.Camera.PerspectiveCamera();
 
-// 1. Field of View setup (Default: 60 degrees)
+// 1. Control automatic exposure activation (Default: true)
+camera.useAutoExposure = true;
+
+// 2. Field of View setup (Default: 60 degrees)
 // Larger values show a wider area but may result in more edge distortion.
-camera.fieldOfView = 45; 
+camera.fieldOfView = 45;
 
-// 2. Clipping Planes setup
+// 3. Clipping Planes setup
 // Only objects between near and far are rendered on the screen.
 camera.nearClipping = 0.1; 
-camera.farClipping = 1000; 
+camera.farClipping = 1000;
 
-// 3. Transform setup
+// 4. Transform setup
 camera.x = 0;
 camera.y = 5;
 camera.z = -15;
 ```
 
-## 2. Gaze Control (lookAt)
+## 2. Camera2D
+
+**Camera2D** is a 2D-dedicated camera optimized for rendering UI and 2D elements. This camera is not explicitly
+instantiated by the developer using the `new` keyword. Instead, it is **automatically created and registered internally
+** when initializing a **View2D** instance.
+
+## 3. OrthographicCamera
+
+**OrthographicCamera** uses the **Orthographic Projection** method, which preserves the actual dimensions of objects
+without distance-based perspective distortion. It is typically used for visualizations like blueprint drawings, 2.5D, or
+isometric gaming environments where perspective is not required.
+
+---
+
+## 4. Gaze Control (lookAt)
 
 To move the camera's position and then make it look directly at a specific point, use the `lookAt()` method. This method automatically recalculates the **View Matrix** to look at the target point.
 
@@ -57,7 +79,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
     
     // 1. PerspectiveCamera setup
-    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+    const camera = new RedGPU.Camera.PerspectiveCamera();
     camera.y = 8; // Look down from a slightly high position
     
     // Field of View setup
@@ -122,7 +144,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     
     scene.lightManager.addDirectionalLight(dirLight);
 
-    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+    const camera = new RedGPU.Camera.PerspectiveCamera();
     camera.y = 8;
     
     // Field of View setup

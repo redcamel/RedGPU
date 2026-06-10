@@ -7,7 +7,13 @@ order: 1
 const meshGraph = `
     Geometry["지오메트리 (형태)"] -->|구성| Mesh["메시 (객체)"]
     Material["머티리얼 (표면)"] -->|구성| Mesh
+
+    %% 회색조 스타일 적용
+    style Geometry fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Material fill:#fafafa,stroke:#e4e4e7,color:#71717a,stroke-width:1px
+    style Mesh fill:#d4d4d8,stroke:#a1a1aa,color:#18181b,stroke-width:2px
 `
+
 </script>
 
 # Mesh
@@ -31,13 +37,14 @@ const meshGraph = `
 
 RedGPU는 외부 모델 파일을 불러오기 전, **공간 구성이나 시각화 테스트** 를 빠르게 수행할 수 있도록 **프리미티브**(Primitive) 라는 기본 도형들을 제공합니다. 이를 사용하면 복잡한 데이터 계산 없이 즉시 3D 구조를 설계할 수 있습니다.
 
-| 종류 | 설명 |
-| :--- | :--- |
-| **Box** | 육면체 상자 형태 |
-| **Sphere** | 매끄러운 구체 형태 |
-| **Plane** / **Ground** | 2D 평면 또는 격자 지면 형태 |
-| **Cylinder** / **Circle** | 원기둥 또는 원형 평면 형태 |
-| **Torus** / **TorusKnot** | 고리 또는 꼬인 매듭 형태 |
+| 종류                        | 설명                           |
+|:--------------------------|:-----------------------------|
+| **Box** / **RoundedBox**  | 육면체 상자 형태 또는 모서리가 둥근 상자 형태   |
+| **Sphere** / **Capsule**  | 매끄러운 구체 또는 캡슐 알약 형태          |
+| **Cone** / **Cylinder**   | 원뿔 또는 원기둥 형태                 |
+| **Plane** / **Ground**    | 2D 사각형 평면 또는 격자 지면 형태        |
+| **Circle** / **Ring**     | 채워진 원형 평면 또는 가운데가 뚫린 링 평면 형태 |
+| **Torus** / **TorusKnot** | 도넛 모양의 고리 또는 복잡하게 꼬인 매듭 형태   |
 
 ## 3. 표면 정의: 머티리얼 (Material)
 
@@ -85,7 +92,18 @@ mesh.rotationY = 45;   // Y축 45도 회전
 mesh.scaleX = 2;       // X축 방향으로 2배 확대
 ```
 
-## 5. 실습: 메시 생성 및 배치
+## 5. 주요 API 속성
+
+`Mesh` 인스턴스는 외형과 렌더링 세부 옵션을 조율하기 위한 핵심 속성을 가집니다.
+
+* **`geometry`** (`Geometry`): 버텍스(점, 선, 면) 데이터로 구성된 메시의 뼈대를 가져오거나 바인딩합니다.
+* **`material`** (`ABaseMaterial`): 조명 반사도, 이미지 매핑 등을 관장하는 메시의 표면 머티리얼을 설정하거나 가져옵니다.
+* **`castShadow`** (`boolean`, 기본값: `false`): 이 메시가 빛을 받았을 때 다른 물체 위로 그림자를 드리울지(Casting) 여부를 결정합니다.
+* **`receiveShadow`** (`boolean`, 기본값: `true`): 다른 물체가 드리운 그림자가 이 메시의 표면 위에 맺히게 할지(Receiving) 여부를 결정합니다.
+
+---
+
+## 6. 실습: 메시 생성 및 배치
 
 ```javascript
 import * as RedGPU from "https://redcamel.github.io/RedGPU/dist/index.js";
@@ -94,7 +112,7 @@ const canvas = document.getElementById('redgpu-canvas');
 
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
-    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+    const camera = new RedGPU.Camera.PerspectiveCamera();
     camera.z = -15; 
     camera.y = 5;
     camera.lookAt(0, 0, 0);
@@ -136,7 +154,7 @@ const canvas = document.getElementById("redgpu-canvas");
 
 RedGPU.init(canvas, (redGPUContext) => {
     const scene = new RedGPU.Display.Scene();
-    const camera = new RedGPU.Camera.PerspectiveCamera(redGPUContext);
+const camera = new RedGPU.Camera.PerspectiveCamera();
     camera.z = -15; camera.y = 8;
     camera.lookAt(0, 0, 0);
 

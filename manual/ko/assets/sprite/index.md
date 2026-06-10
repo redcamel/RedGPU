@@ -23,9 +23,9 @@ RedGPU는 3D 공간에서 2D 이미지를 효과적으로 활용할 수 있는 *
 
 ## 학습 로드맵
 
-1.  **[Sprite3D](./sprite)**: 단일 이미지를 이용한 빌보드 스프라이트 만들기
-2.  **[SpriteSheet3D](./spritesheet)**: 애니메이션이 포함된 스프라이트 시트 활용하기
+1. **[Sprite3D](./sprite.md)**: 단일 이미지를 이용한 빌보드 스프라이트 만들기
+2. **[SpriteSheet3D](./spritesheet.md)**: 애니메이션이 포함된 스프라이트 시트 활용하기
 
 ---
 
-[다음 단계: TextField3D 배우기](../text-field/textfield3d.md)
+[다음 단계: Sprite3D 배우기](./sprite.md)

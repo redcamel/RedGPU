@@ -1,0 +1,40 @@
+
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background: url(../documentBody.png);
+}
+
+* {
+
+    margin: 0;
+    padding: 0;
+    font-family:  'Arial', sans-serif;
+    font-weight: 500;
+
+    box-sizing: border-box;
+    position: relative;
+
+}
+
+/* width */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #222;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #70020c;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #70020c;
+}

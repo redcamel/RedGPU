@@ -1,5 +1,5 @@
 ---
-title: LOD (Level of Detail)
+title: LOD
 order: 9
 ---
 

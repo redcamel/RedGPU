@@ -1,11 +1,20 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include getBillboardMatrix;
+
+/**
+ * [KO] 행렬 목록 구조체 정의입니다.
+ * [EN] Matrix list structure definition.
+ */
 struct MatrixList{
     modelMatrix: mat4x4<f32>,
     normalModelMatrix: mat4x4<f32>,
 }
+
+/**
+ * [KO] 스프라이트 시트 2D를 위한 버텍스 유니폼 구조체입니다.
+ * [EN] Vertex uniform structure for SpriteSheet 2D.
+ */
 struct VertexUniforms {
-    matrixList:MatrixList,
+    matrixList: MatrixList,
     pickingId: u32,
     segmentW: f32,
     segmentH: f32,
@@ -16,13 +25,21 @@ struct VertexUniforms {
 
 @group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
 
+/**
+ * [KO] 버텍스 입력 데이터 구조체입니다.
+ * [EN] Vertex input data structure.
+ */
 struct InputData {
     @location(0) position: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
 };
 
-struct OutputData {
+/**
+ * [KO] 버텍스 출력 데이터 구조체입니다.
+ * [EN] Vertex output data structure.
+ */
+struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
@@ -31,90 +48,80 @@ struct OutputData {
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
     @location(11) combinedOpacity: f32,
-    //
+
     @location(12) motionVector: vec3<f32>,
-    @location(13) shadowPos: vec3<f32>,
+    @location(13) shadowCoord: vec3<f32>,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
-
+/**
+ * [KO] 스프라이트 시트 2D 메인 버텍스 셰이더 엔트리 포인트입니다.
+ * [EN] Main vertex shader entry point for SpriteSheet 2D.
+ */
 @vertex
-fn main(inputData: InputData) -> OutputData {
-    var output: OutputData;
+fn main(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
 
-    // 시스템 Uniform 변수 가져오기
-    let u_projectionMatrix = systemUniforms.projectionMatrix;
+    // [KO] 시스템 유니폼 변수 가져오기
+    // [EN] Get system uniform variables
+    let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
     let u_camera = systemUniforms.camera;
-    let u_cameraMatrix = u_camera.cameraMatrix;
-    let u_cameraPosition = u_camera.cameraPosition;
+    let u_viewMatrix = u_camera.viewMatrix;
 
-    // Vertex별 Uniform 변수 가져오기
+    // [KO] 버텍스 유니폼 변수 가져오기
+    // [EN] Get vertex uniform variables
     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
     let u_normalModelMatrix = vertexUniforms.matrixList.normalModelMatrix;
 
-    // 입력 데이터
+    // [KO] 입력 데이터 처리
+    // [EN] Process input data
     let input_position = inputData.position;
     let input_vertexNormal = inputData.vertexNormal;
     let input_uv = inputData.uv;
 
-    // 처리에 필요한 변수 초기화
-    var position: vec4<f32>;
-    var normalPosition: vec4<f32>;
+    // [KO] 위치 및 노말 변환
+    // [EN] Position and normal transformation
+    let viewPos = u_viewMatrix * u_modelMatrix * vec4<f32>(input_position, 1.0);
+    let viewNormal = u_viewMatrix * u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0);
 
-    // 일반적인 변환 계산
-    position = u_cameraMatrix * u_modelMatrix * vec4<f32>(input_position, 1.0);
-    normalPosition = u_cameraMatrix * u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
+    // [KO] 최종 클립 공간 위치 계산
+    // [EN] Calculate final clip space position
+    output.position = u_projectionMatrix * viewPos;
 
-    // View3D-Projection Matrix 곱
-    output.position = u_projectionMatrix * position;
-
-    // 출력 데이터 설정
-    output.vertexPosition = position.xyz;
-    output.vertexNormal = normalPosition.xyz;
+    // [KO] 출력 데이터 설정
+    // [EN] Set output data
+    output.vertexPosition = viewPos.xyz;
+    output.vertexNormal = viewNormal.xyz;
     output.combinedOpacity = vertexUniforms.combinedOpacity;
 
-    // UV 좌표 계산 (스프라이트 시트 애니메이션)
+    // [KO] UV 좌표 계산 (스프라이트 시트 애니메이션 적용)
+    // [EN] Calculate UV coordinates (apply sprite sheet animation)
     let uv = vec2<f32>(
-        input_uv.x * 1 / vertexUniforms.segmentW + ((vertexUniforms.currentIndex % vertexUniforms.segmentW) / vertexUniforms.segmentW),
-        input_uv.y * 1 / vertexUniforms.segmentH - (floor(vertexUniforms.currentIndex / vertexUniforms.segmentH) / vertexUniforms.segmentH)
+        input_uv.x * (1.0 / vertexUniforms.segmentW) + ((vertexUniforms.currentIndex % vertexUniforms.segmentW) / vertexUniforms.segmentW),
+        input_uv.y * (1.0 / vertexUniforms.segmentH) - (floor(vertexUniforms.currentIndex / vertexUniforms.segmentH) / vertexUniforms.segmentH)
     );
 
     output.uv = uv;
     return output;
 }
 
-
+/**
+ * [KO] 스프라이트 시트 2D 피킹 처리를 위한 버텍스 셰이더입니다.
+ * [EN] Vertex shader for SpriteSheet 2D picking.
+ */
 @vertex
-fn picking(inputData: InputData) -> OutputData {
-    var output: OutputData;
+fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
 
-    // 시스템 Uniform 변수 가져오기
-    let u_projectionMatrix = systemUniforms.projectionMatrix;
-    let u_camera = systemUniforms.camera;
-    let u_cameraMatrix = u_camera.cameraMatrix;
-    let u_cameraPosition = u_camera.cameraPosition;
-
-    // Vertex별 Uniform 변수 가져오기
+    let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
+    let u_viewMatrix = systemUniforms.camera.viewMatrix;
     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
-    let u_normalModelMatrix = vertexUniforms.matrixList.normalModelMatrix;
 
-    // 입력 데이터
-    let input_position = inputData.position;
-    let input_vertexNormal = inputData.vertexNormal;
-    let input_uv = inputData.uv;
+    let viewPos = u_viewMatrix * u_modelMatrix * vec4<f32>(inputData.position, 1.0);
+    output.position = u_projectionMatrix * viewPos;
 
-    // 처리에 필요한 변수 초기화
-    var position: vec4<f32>;
-    var normalPosition: vec4<f32>;
-
-    // 일반적인 변환 계산
-    position = u_cameraMatrix * u_modelMatrix * vec4<f32>(input_position, 1.0);
-    normalPosition = u_cameraMatrix * u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
-
-    // View3D-Projection Matrix 곱
-    output.position = u_projectionMatrix * position;
-
-    // 추가 출력 데이터 설정
+    // [KO] 피킹 ID 할당
+    // [EN] Assign picking ID
     output.pickingId = unpack4x8unorm(vertexUniforms.pickingId);
 
     return output;

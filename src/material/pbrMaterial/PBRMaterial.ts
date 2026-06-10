@@ -1,19 +1,34 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import DefineForFragment from "../../defineProperty/DefineForFragment";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
-import ABitmapBaseMaterial from "../core/ABitmapBaseMaterial";
 import fragmentModuleSource from './fragment.wgsl';
 
-const EXTENSION_LIST = [
+import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
+import definePositiveNumber, {DefinePositiveNumberInfo} from "../../defineProperty/funcs/number/definePositiveNumber";
+import defineVector3, {DefineVector3Info} from "../../defineProperty/funcs/vector/defineVector3";
+import defineVector4, {DefineVector4Info} from "../../defineProperty/funcs/vector/defineVector4";
+import defineBoolean from "../../defineProperty/funcs/defineBoolean";
+import defineUint from "../../defineProperty/funcs/number/defineUint";
+import defineVector2 from "../../defineProperty/funcs/vector/defineVector2";
+import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
+import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
+
+
+const EXTENSION_LIST: {
+    textureList?: string[],
+    vec4List?: DefineVector4Info[],
+    vec3List?: DefineVector3Info[],
+    positiveNumberList?: DefinePositiveNumberInfo[],
+    extensionName?: string,
+}[] = [
     {
         textureList: [
             'baseColorTexture',
         ],
         vec4List: [
-            ['baseColorFactor', [1, 1, 1, 1]]
+            {key: 'baseColorFactor', value: [1, 1, 1, 1]},
         ]
     },
     {
@@ -26,8 +41,8 @@ const EXTENSION_LIST = [
             'metallicRoughnessTexture',
         ],
         positiveNumberList: [
-            'metallicFactor',
-            'roughnessFactor',
+            {key: 'metallicFactor', value: 1},
+            {key: 'roughnessFactor', value: 1},
         ]
     },
     {
@@ -35,7 +50,7 @@ const EXTENSION_LIST = [
             'emissiveTexture',
         ],
         vec3List: [
-            'emissiveFactor',
+            {key: 'emissiveFactor', value: [0, 0, 0]}
         ]
     },
     {
@@ -43,7 +58,7 @@ const EXTENSION_LIST = [
             'occlusionTexture',
         ],
         positiveNumberList: [
-            'occlusionStrength',
+            {key: 'occlusionStrength', value: 1},
         ]
     },
     {
@@ -54,9 +69,9 @@ const EXTENSION_LIST = [
             'KHR_clearcoatRoughnessTexture',
         ],
         positiveNumberList: [
-            ['KHR_clearcoatFactor', 0],
-            ['KHR_clearcoatRoughnessFactor', 0],
-            'KHR_clearcoatNormalScale',
+            {key: 'KHR_clearcoatFactor', value: 0},
+            {key: 'KHR_clearcoatRoughnessFactor', value: 0},
+            {key: 'KHR_clearcoatNormalScale', value: 1},
         ]
     },
     {
@@ -66,10 +81,10 @@ const EXTENSION_LIST = [
             'KHR_sheenRoughnessTexture',
         ],
         positiveNumberList: [
-            ['KHR_sheenRoughnessFactor', 0]
+            {key: 'KHR_sheenRoughnessFactor', value: 0},
         ],
         vec3List: [
-            ['KHR_sheenColorFactor', [0, 0, 0]]
+            {key: 'KHR_sheenColorFactor', value: [0, 0, 0]}
         ]
     },
     {
@@ -79,10 +94,10 @@ const EXTENSION_LIST = [
             'KHR_specularColorTexture',
         ],
         positiveNumberList: [
-            'KHR_specularFactor',
+            {key: 'KHR_specularFactor', value: 1},
         ],
         vec3List: [
-            ['KHR_specularColorFactor', [1, 1, 1]],
+            {key: 'KHR_specularColorFactor', value: [1, 1, 1]},
         ]
     },
     {
@@ -91,7 +106,7 @@ const EXTENSION_LIST = [
             'KHR_transmissionTexture',
         ],
         positiveNumberList: [
-            ['KHR_transmissionFactor', 0],
+            {key: 'KHR_transmissionFactor', value: 0},
         ],
     },
     {
@@ -100,11 +115,11 @@ const EXTENSION_LIST = [
             'KHR_thicknessTexture',
         ],
         positiveNumberList: [
-            ['KHR_thicknessFactor', 0],
-            ['KHR_attenuationDistance', 1],
+            {key: 'KHR_thicknessFactor', value: 0},
+            {key: 'KHR_attenuationDistance', value: 1},
         ],
         vec3List: [
-            ['KHR_attenuationColor', [1, 1, 1]],
+            {key: 'KHR_attenuationColor', value: [1, 1, 1]},
         ]
     },
     {
@@ -114,10 +129,10 @@ const EXTENSION_LIST = [
             'KHR_diffuseTransmissionColorTexture',
         ],
         positiveNumberList: [
-            ['KHR_diffuseTransmissionFactor', 0],
+            {key: 'KHR_diffuseTransmissionFactor', value: 0},
         ],
         vec3List: [
-            ['KHR_diffuseTransmissionColorFactor', [1, 1, 1]],
+            {key: 'KHR_diffuseTransmissionColorFactor', value: [1, 1, 1]},
         ]
     },
     {
@@ -126,8 +141,8 @@ const EXTENSION_LIST = [
             'KHR_anisotropyTexture',
         ],
         positiveNumberList: [
-            ['KHR_anisotropyStrength', 0],
-            ['KHR_anisotropyRotation', 0],
+            {key: 'KHR_anisotropyStrength', value: 0},
+            {key: 'KHR_anisotropyRotation', value: 0},
         ]
     },
     {
@@ -137,16 +152,16 @@ const EXTENSION_LIST = [
             'KHR_iridescenceThicknessTexture',
         ],
         positiveNumberList: [
-            ['KHR_iridescenceFactor', 0.0],
-            ['KHR_iridescenceIor', 1.3],
-            ['KHR_iridescenceThicknessMinimum', 100],
-            ['KHR_iridescenceThicknessMaximum', 400],
+            {key: 'KHR_iridescenceFactor', value: 0.0},
+            {key: 'KHR_iridescenceIor', value: 1.3},
+            {key: 'KHR_iridescenceThicknessMinimum', value: 100},
+            {key: 'KHR_iridescenceThicknessMaximum', value: 400},
         ]
     }
 ]
 const parseExtensionShaderCode = (source: string) => {
     const result = EXTENSION_LIST.map(v => {
-        const {textureList, positiveNumberList} = v
+        const {textureList} = v
         const textureDefine = textureList?.map(textureName => {
             return `
 				use${textureName.charAt(0).toUpperCase()}${textureName.substring(1)}: u32,
@@ -162,7 +177,7 @@ const parseExtensionShaderCode = (source: string) => {
     // console.log('resultStr', resultStr)
     return resultStr
 }
-const SHADER_INFO = parseWGSL(parseExtensionShaderCode(fragmentModuleSource))
+const SHADER_INFO = parseWGSL('PBR_MATERIAL', parseExtensionShaderCode(fragmentModuleSource))
 
 /**
  * [KO] PBRMaterial 속성 인터페이스
@@ -596,12 +611,12 @@ interface PBRMaterial {
     emissiveTexture_texCoord_index: number
     /**
      * [KO] 발광 팩터
-     * [EN] Emissive factor
+     * [EN] emissive factor
      */
     emissiveFactor: number[]
     /**
      * [KO] 발광 강도
-     * [EN] Emissive strength
+     * [EN] emissive strength
      */
     emissiveStrength: number[]
     //
@@ -676,7 +691,7 @@ interface PBRMaterial {
  * [EN] Inherits from ABitmapBaseMaterial to create a material for PBR rendering.
  * @category Material
  */
-class PBRMaterial extends ABitmapBaseMaterial {
+class PBRMaterial extends AUVTransformBaseMaterial {
     #packedORMTexture: PackedTexture
     // #packedKHR_clearcoatTexture: PackedTexture
     // #packedKHR_transmission: PackedTexture
@@ -767,10 +782,10 @@ class PBRMaterial extends ABitmapBaseMaterial {
      * [EN] Setup ORM (Occlusion, Roughness, Metallic) texture packing
      */
     async setupPackORMTexture() {
-        if(!(this.occlusionTexture || this.metallicRoughnessTexture)){
+        if (!(this.occlusionTexture || this.metallicRoughnessTexture)) {
             return
         }
-        if(!this.#packedORMTexture){
+        if (!this.#packedORMTexture) {
             this.#packedORMTexture = new PackedTexture(this.redGPUContext)
         }
         const width = Math.max(
@@ -801,7 +816,7 @@ class PBRMaterial extends ABitmapBaseMaterial {
         // if(!this.useKHR_materials_clearcoat && !this.useKHR_materials_transmission){
         //     return
         // }
-        if(!this.#packedKHR_clearcoatTexture_transmission){
+        if (!this.#packedKHR_clearcoatTexture_transmission) {
             this.#packedKHR_clearcoatTexture_transmission = new PackedTexture(this.redGPUContext)
         }
         // Clearcoat + Transmission을 하나의 텍스처로 패킹
@@ -885,10 +900,10 @@ class PBRMaterial extends ABitmapBaseMaterial {
      * [EN] Setup Diffuse Transmission texture packing
      */
     async setupPackedKHR_diffuse_transmission() {
-        if(!(this.KHR_diffuseTransmissionColorTexture || this.KHR_diffuseTransmissionTexture)){
+        if (!(this.KHR_diffuseTransmissionColorTexture || this.KHR_diffuseTransmissionTexture)) {
             return
         }
-        if(!this.#packedKHR_diffuse_transmission){
+        if (!this.#packedKHR_diffuse_transmission) {
             this.#packedKHR_diffuse_transmission = new PackedTexture(this.redGPUContext)
         }
         const width = Math.max(
@@ -917,10 +932,10 @@ class PBRMaterial extends ABitmapBaseMaterial {
      * [EN] Setup Sheen texture packing
      */
     async setupPackedKHR_sheen() {
-        if(!(this.KHR_sheenColorTexture || this.KHR_sheenRoughnessTexture)){
+        if (!(this.KHR_sheenColorTexture || this.KHR_sheenRoughnessTexture)) {
             return
         }
-        if(!this.#packedKHR_sheen){
+        if (!this.#packedKHR_sheen) {
             this.#packedKHR_sheen = new PackedTexture(this.redGPUContext)
         }
         const width = Math.max(
@@ -949,10 +964,10 @@ class PBRMaterial extends ABitmapBaseMaterial {
      * [EN] Setup Iridescence texture packing
      */
     async setupPackedKHR_iridescence() {
-        if(!(this.KHR_iridescenceTexture || this.KHR_iridescenceThicknessTexture)){
+        if (!(this.KHR_iridescenceTexture || this.KHR_iridescenceThicknessTexture)) {
             return
         }
-        if(!this.#packedKHR_iridescence){
+        if (!this.#packedKHR_iridescence) {
             this.#packedKHR_iridescence = new PackedTexture(this.redGPUContext)
         }
         const width = Math.max(
@@ -975,36 +990,38 @@ class PBRMaterial extends ABitmapBaseMaterial {
     }
 }
 
-DefineForFragment.defineByPreset(PBRMaterial, [
-    DefineForFragment.PRESET_POSITIVE_NUMBER.EMISSIVE_STRENGTH,
-    DefineForFragment.PRESET_POSITIVE_NUMBER.NORMAL_SCALE,
-]);
-const defineTexture = (textureList: string[], useSampler: boolean) => {
+definePositiveNumber(PBRMaterial,
+    [
+        {key: 'emissiveStrength', value: 1},
+        {key: 'normalScale', value: 1}
+    ]
+)
+const defineTexturePropertys = (textureList: string[], useSampler: boolean) => {
     textureList?.forEach(key => {
-        DefineForFragment.defineBoolean(PBRMaterial, [
-            `use${key.charAt(0).toUpperCase()}${key.substring(1)}`
+        defineBoolean(PBRMaterial, [
+            {key: `use${key.charAt(0).toUpperCase()}${key.substring(1)}`, value: false}
         ])
-        DefineForFragment.definePositiveNumber(PBRMaterial, [
-            [`${key}_KHR_texture_transform_rotation`, 0],
+        definePositiveNumber(PBRMaterial, [
+            {key: `${key}_KHR_texture_transform_rotation`, value: 0},
         ]);
-        DefineForFragment.defineBoolean(PBRMaterial, [
-            `use_${key}_KHR_texture_transform`,
+        defineBoolean(PBRMaterial, [
+            {key: `use_${key}_KHR_texture_transform`, value: false},
         ])
-        DefineForFragment.defineVec2(PBRMaterial, [
-            `${key}_KHR_texture_transform_offset`,
-            [`${key}_KHR_texture_transform_scale`, [1, 1]],
-        ])
-        //
-        DefineForFragment.defineUint(PBRMaterial, [
-            `${key}_texCoord_index`,
+        defineVector2(PBRMaterial, [
+            {key: `${key}_KHR_texture_transform_offset`},
+            {key: `${key}_KHR_texture_transform_scale`, value: [1, 1]},
         ])
         //
-        DefineForFragment.defineTexture(PBRMaterial, [
-            key
+        defineUint(PBRMaterial, [
+            {key: `${key}_texCoord_index`, value: 0}
+        ])
+        //
+        defineTexture(PBRMaterial, [
+            {key: key}
         ])
         if (useSampler) {
-            DefineForFragment.defineSampler(PBRMaterial, [
-                `${key}Sampler`,
+            defineSampler(PBRMaterial, [
+                {key: `${key}Sampler`},
             ])
         }
     })
@@ -1013,43 +1030,46 @@ const extensionDefine = (defineList) => {
     defineList.forEach(v => {
         const {extensionName, textureList, useSampler} = v;
         const {positiveNumberList, vec3List, vec4List} = v;
-        if (extensionName) DefineForFragment.defineBoolean(PBRMaterial, [`use${extensionName}`])
-        defineTexture(textureList, !useSampler)
+        if (extensionName) defineBoolean(PBRMaterial, [{
+            key: `use${extensionName}`,
+            value: false
+        }])
+        defineTexturePropertys(textureList, !useSampler)
         positiveNumberList?.forEach(v => {
-            DefineForFragment.definePositiveNumber(PBRMaterial, [
+            definePositiveNumber(PBRMaterial, [
                 v
             ])
         })
         vec3List?.forEach(v => {
-            DefineForFragment.defineVec3(PBRMaterial, [
+            defineVector3(PBRMaterial, [
                 v
             ])
         })
         vec4List?.forEach(v => {
-            DefineForFragment.defineVec4(PBRMaterial, [
+            defineVector4(PBRMaterial, [
                 v
             ])
         })
     })
 }
 extensionDefine(EXTENSION_LIST)
-DefineForFragment.definePositiveNumber(PBRMaterial, [
-    ['cutOff', 0],
-    ['KHR_materials_ior', 1.5],
-    ['KHR_dispersion', 0],
+definePositiveNumber(PBRMaterial, [
+    {key: 'cutOff', value: 0},
+    {key: 'KHR_materials_ior', value: 1.5},
+    {key: 'KHR_dispersion', value: 0},
 ]);
-DefineForFragment.defineUint(PBRMaterial, [
-    'alphaBlend',
+defineUint(PBRMaterial, [
+    {key: 'alphaBlend', value: 0},
 ])
-DefineForFragment.defineBoolean(PBRMaterial, [
-    'doubleSided',
-    'useCutOff',
-    'useVertexColor',
-    'useVertexTangent',
+defineBoolean(PBRMaterial, [
+    {key: 'doubleSided', value: false},
+    {key: 'useCutOff', value: false},
+    {key: 'useVertexColor', value: false},
+    {key: 'useVertexTangent', value: false},
     //
-    'useKHR_materials_unlit',
+    {key: 'useKHR_materials_unlit', value: false},
     //
-    ['useSSR', true]
+    {key: 'useSSR', value: true}
 ])
 Object.freeze(PBRMaterial)
 export default PBRMaterial

@@ -115,56 +115,77 @@ class SpriteSheetInfo {
     }
 
     /**
-     * 가로 세그먼트 수를 반환합니다.
-     * @returns 텍스처를 가로로 나누는 세그먼트 수
+     * [KO] 가로 세그먼트 수를 반환합니다. (텍스처를 가로로 나누는 분할 수)
+     * [EN] Returns the number of horizontal segments. (Texture division count horizontally)
+     * @returns
+     * [KO] 가로 세그먼트 수
+     * [EN] Number of horizontal segments
      */
     get segmentW(): number {
         return this.#segmentW;
     }
 
     /**
-     * 세로 세그먼트 수를 반환합니다.
-     * @returns 텍스처를 세로로 나누는 세그먼트 수
+     * [KO] 세로 세그먼트 수를 반환합니다. (텍스처를 세로로 나누는 분할 수)
+     * [EN] Returns the number of vertical segments. (Texture division count vertically)
+     * @returns
+     * [KO] 세로 세그먼트 수
+     * [EN] Number of vertical segments
      */
     get segmentH(): number {
         return this.#segmentH;
     }
 
     /**
-     * 총 애니메이션 프레임 수를 반환합니다.
-     * @returns 애니메이션에 사용할 총 프레임 수
+     * [KO] 총 애니메이션 프레임 수를 반환합니다.
+     * [EN] Returns the total number of animation frames.
+     * @returns
+     * [KO] 총 프레임 수
+     * [EN] Total frame count
      */
     get totalFrame(): number {
         return this.#totalFrame;
     }
 
     /**
-     * 시작 프레임 인덱스를 반환합니다.
-     * @returns 애니메이션이 시작될 프레임의 인덱스 (0부터 시작)
+     * [KO] 시작 프레임 인덱스를 반환합니다. (0부터 시작)
+     * [EN] Returns the starting frame index. (0-based index)
+     * @returns
+     * [KO] 시작 프레임 인덱스
+     * [EN] Starting frame index
      */
     get startIndex(): number {
         return this.#startIndex;
     }
 
     /**
-     * 스프라이트 시트 텍스처를 반환합니다.
-     * @returns 애니메이션에 사용되는 비트맵 텍스처
+     * [KO] 스프라이트 시트 비트맵 텍스처를 반환합니다.
+     * [EN] Returns the sprite sheet bitmap texture.
+     * @returns
+     * [KO] 사용되는 비트맵 텍스처
+     * [EN] Bitmap texture used
      */
     get texture(): BitmapTexture {
         return this.#texture;
     }
 
     /**
-     * 애니메이션 프레임 레이트를 반환합니다.
-     * @returns 초당 프레임 수 (FPS)
+     * [KO] 애니메이션 프레임 레이트 (FPS)를 반환합니다.
+     * [EN] Returns the animation frame rate (FPS).
+     * @returns
+     * [KO] 초당 프레임 수
+     * [EN] Frames per second (FPS)
      */
     get frameRate(): number {
         return this.#frameRate;
     }
 
     /**
-     * 반복 재생 여부를 반환합니다.
-     * @returns true인 경우 애니메이션이 무한 반복, false인 경우 한 번만 재생
+     * [KO] 반복 재생 여부를 반환합니다.
+     * [EN] Returns whether to repeat playback.
+     * @returns
+     * [KO] true일 경우 반복 재생, false인 경우 한 번만 재생
+     * [EN] If true, playback loops; if false, it plays once
      */
     get loop(): boolean {
         return this.#loop;

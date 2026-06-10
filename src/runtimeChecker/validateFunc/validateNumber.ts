@@ -12,19 +12,19 @@ import consoleAndThrowError from "../../utils/consoleAndThrowError";
  * RedGPU.RuntimeChecker.validateNumber(123);
  * ```
  *
- * @param value - 
- * [KO] 검증할 값 
+ * @param value -
+ * [KO] 검증할 값
  * [EN] Value to validate
- * @returns 
- * [KO] 값이 숫자이면 true 
+ * @returns
+ * [KO] 값이 숫자이면 true
  * [EN] True if the value is a number
- * @throws 
- * [KO] 값이 숫자가 아닐 경우 Error 발생 
+ * @throws
+ * [KO] 값이 숫자가 아닐 경우 Error 발생
  * [EN] Throws Error if the value is not a number
  * @category Validation
  */
 const validateNumber = (value: number): boolean => {
-    if (typeof value !== 'number') {
+    if (typeof value !== 'number' || Number.isNaN(value)) {
         consoleAndThrowError('Only numbers allowed.')
         return false
     }

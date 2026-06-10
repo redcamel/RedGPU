@@ -1,41 +1,54 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../../dist/index.js?t=1778922031603";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1778922031603";
+
+/**
+ * [KO] Irradiance 맵 테스트 예제
+ * [EN] Irradiance Map Test Example
+ *
+ * [KO] 환경 맵으로부터 정교한 Irradiance 맵을 생성하고 시각적으로 검증하는 과정을 시연합니다.
+ * [EN] Demonstrates the process of generating and visually verifying a sophisticated Irradiance map from an environment map.
+ */
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 RedGPU.init(
     canvas,
-    async (redGPUContext) => {
-        const scene = new RedGPU.Display.Scene();
+    (redGPUContext) => {
+        // 1. [KO] 카메라 컨트롤러 설정
+        // [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+
+        // 2. [KO] 씬 및 뷰 구성
+        // [EN] Configure Scene and View
+        const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        // [KO] HDR 텍스처 로드 (현재 버전은 순수 2D 리소스로 로드됨)
-        // [EN] Load HDR texture (loaded as a pure 2D resource in current version)
+        // 3. [KO] HDR 텍스처 로드 및 맵 생성 워크플로우
+        // [EN] HDR Texture Load and Map Generation Workflow
         const hdrTexture = new RedGPU.Resource.HDRTexture(
             redGPUContext,
             '../../../../assets/hdr/pisa.hdr',
-            async (v) => {
-                // [KO] 1. 로드된 2D HDR을 큐브맵으로 변환
-                // [EN] 1. Convert the loaded 2D HDR to a cubemap
-                const sourceCubeTexture = await redGPUContext.resourceManager.equirectangularToCubeGenerator.generate(v.gpuTexture);
+            async (hdrResource) => {
+                // [KO] A. 2D HDR 이미지를 큐브맵으로 변환
+                // [EN] A. Convert 2D HDR image to a Cubemap
+                const sourceCube = await redGPUContext.resourceManager.equirectangularToCubeGenerator.generate(hdrResource.gpuTexture);
 
-                // [KO] 2. 변환된 큐브맵으로부터 Irradiance 맵 생성
-                // [EN] 2. Generate Irradiance map from the converted cubemap
-                const irradianceCubeTexture = await redGPUContext.resourceManager.irradianceGenerator.generate(sourceCubeTexture.gpuTexture);
+                // [KO] B. 큐브맵으로부터 Irradiance 맵 생성
+                // [EN] B. Generate Irradiance map from the Cubemap
+                const irradianceCube = await redGPUContext.resourceManager.irradianceGenerator.generate(sourceCube.gpuTexture);
 
-                // [KO] 결과를 시각적으로 확인하기 위해 스카이박스에 적용
-                // [EN] Apply to Skybox to visually verify the result
-                const skybox = new RedGPU.Display.SkyBox(redGPUContext, irradianceCubeTexture);
-                view.skybox = skybox;
+                // [KO] C. 결과를 시각적으로 확인하기 위해 스카이박스에 적용
+                // [EN] C. Apply to Skybox for visual verification
+                view.skybox = new RedGPU.Display.SkyBox(redGPUContext, irradianceCube);
 
                 console.log('Irradiance map generated and applied to skybox');
             }
         );
 
-        // [KO] 원본 2D HDR 이미지를 확인하기 위한 Sprite3D 생성
-        // [EN] Create Sprite3D to view the original 2D HDR image
+        // 4. [KO] 원본 HDR 미리보기용 Sprite3D 생성
+        // [EN] Create Sprite3D for original HDR preview
         const previewMesh = new RedGPU.Display.Sprite3D(
             redGPUContext,
             new RedGPU.Material.BitmapMaterial(redGPUContext, hdrTexture)
@@ -44,17 +57,27 @@ RedGPU.init(
         previewMesh.pixelSize = 300;
         scene.addChild(previewMesh);
 
+        // 5. [KO] 렌더러 생성 및 루프 시작
+        // [EN] Create Renderer and Start Loop
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext);
 
-        renderTestPane(redGPUContext, scene, hdrTexture);
+        // 6. [KO] 테스트용 GUI 렌더링
+        // [EN] Render Test GUI
+        renderTestPane(redGPUContext);
     },
     (failReason) => {
-        console.error(failReason);
+        console.error('Initialization failed:', failReason);
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = failReason;
+        document.body.appendChild(errorMessage);
     }
 );
 
-const renderTestPane = async (redGPUContext, scene, hdrTexture) => {
-    const {setDebugButtons} = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
+/**
+ * [KO] 테스트용 GUI를 구성합니다.
+ * [EN] Configures GUI for testing.
+ */
+const renderTestPane = (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext);
 };

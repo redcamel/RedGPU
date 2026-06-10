@@ -1,10 +1,11 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../../dist/index.js?t=1778922031603";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1778922031603";
 
 /**
  * [KO] Mesh AABB Intersects 예제
  * [EN] Mesh AABB Intersects example
  *
- * [KO] 두 메시 간의 AABB(Axis-Aligned Bounding Box) 충돌 감지를 보여줍니다.
+ * [KO] 두 메시 간의 AABB(Axis-Aligned Bounding Box) 충돌 감지를 시연합니다.
  * [EN] Demonstrates AABB (Axis-Aligned Bounding Box) collision detection between two meshes.
  */
 
@@ -14,52 +15,62 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. [KO] 카메라 컨트롤러 설정 [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.speedDistance = 0.3;
         controller.distance = 15;
 
+        // 2. [KO] 씬 및 뷰 구성 [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.grid = true;
         redGPUContext.addView(view);
 
+        // 3. [KO] 충돌 테스트용 객체 생성 [EN] Create Objects for Collision Test
         const {mesh1, mesh2, intersectionLabel} = createIntersectionTest(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        // 4. [KO] 렌더러 생성 및 루프 시작 [EN] Create Renderer and Start Loop
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
+            // [KO] 애니메이션 로직 [EN] Animation logic
             mesh2.rotationX += 0.3;
             mesh2.rotationY += 0.3;
             mesh2.rotationZ += 0.3;
             mesh2.x = Math.sin(time * 0.001) * 5;
             mesh2.z = Math.cos(time * 0.001) * 3;
+
+            // [KO] 실시간 AABB 충돌 체크 [EN] Real-time AABB collision check
             checkAABBIntersection(mesh1, mesh2, intersectionLabel);
         };
         renderer.start(redGPUContext, render);
-        renderTestPane(redGPUContext, view);
+
+        // 5. [KO] 테스트용 GUI 렌더링 [EN] Render Test GUI
+        renderTestPane(redGPUContext);
     },
     (failReason) => {
-        console.error('RedGPU 초기화 실패:', failReason);
-        document.body.innerHTML = `<div>오류: ${failReason}</div>`;
+        console.error('Initialization failed:', failReason);
+        document.body.innerHTML = `<div>Error: ${failReason}</div>`;
     }
 );
 
 /**
- * [KO] 테스트용 Tweakpane 버튼을 설정합니다.
- * [EN] Sets up Tweakpane buttons for testing.
+ * [KO] 테스트용 GUI를 구성합니다.
+ * [EN] Configures GUI for testing.
+ * @param {RedGPU.RedGPUContext} redGPUContext
  */
-const renderTestPane = async (redGPUContext, view) => {
-    const {setDebugButtons} = await import("../../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
+const renderTestPane = (redGPUContext) => {
+    new RedGPUExampleHelper(redGPUContext);
 };
 
 /**
  * [KO] 교차 테스트를 위한 객체들을 생성하고 배치합니다.
  * [EN] Creates and places objects for intersection testing.
- * 
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
  * @returns {Object} {mesh1, mesh2, intersectionLabel}
  */
 function createIntersectionTest(redGPUContext, scene) {
-    // 메시 1 (고정)
+    // [KO] 메시 1 (고정) [EN] Mesh 1 (Fixed)
     const material1 = new RedGPU.Material.ColorMaterial(redGPUContext, '#4CAF50');
     const geometry1 = new RedGPU.Primitive.Box(redGPUContext, 3, 3, 3);
     const mesh1 = new RedGPU.Display.Mesh(redGPUContext, geometry1, material1);
@@ -68,7 +79,7 @@ function createIntersectionTest(redGPUContext, scene) {
     mesh1.drawDebugger.debugMode = 'AABB';
     scene.addChild(mesh1);
 
-    // 메시 2 (이동)
+    // [KO] 메시 2 (이동) [EN] Mesh 2 (Moving)
     const material2 = new RedGPU.Material.ColorMaterial(redGPUContext, '#2196F3');
     const geometry2 = new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2);
     const mesh2 = new RedGPU.Display.Mesh(redGPUContext, geometry2, material2);
@@ -77,23 +88,23 @@ function createIntersectionTest(redGPUContext, scene) {
     mesh2.drawDebugger.debugMode = 'AABB';
     scene.addChild(mesh2);
 
-    // 메인 상태 타이틀 (y: 5.0)
+    // [KO] 상태 표시용 라벨 [EN] Status Display Label
     const intersectionLabel = new RedGPU.Display.TextField3D(redGPUContext, 'No Intersection');
     intersectionLabel.setPosition(0, 5, 0);
     intersectionLabel.fontSize = 48;
     intersectionLabel.worldSize = 1.3;
     scene.addChild(intersectionLabel);
 
-    // 개별 객체 라벨 (14px / 0.7)
+    // [KO] 개별 객체 라벨 [EN] Individual Object Labels
     const label1 = new RedGPU.Display.TextField3D(redGPUContext, 'Fixed Mesh');
-    label1.setPosition(0, 2.5, 0); // H=3 -> y=1.5+1.0
+    label1.setPosition(0, 2.5, 0);
     label1.color = '#4CAF50';
     label1.fontSize = 14;
     label1.worldSize = 0.7;
     mesh1.addChild(label1);
 
     const label2 = new RedGPU.Display.TextField3D(redGPUContext, 'Moving Mesh');
-    label2.setPosition(0, 2.0, 0); // H=2 -> y=1.0+1.0
+    label2.setPosition(0, 2.0, 0);
     label2.color = '#2196F3';
     label2.fontSize = 14;
     label2.worldSize = 0.7;
@@ -105,6 +116,9 @@ function createIntersectionTest(redGPUContext, scene) {
 /**
  * [KO] 두 메시의 AABB 교차 여부를 실시간으로 체크하고 시각화합니다.
  * [EN] Real-time check and visualization of AABB intersection between two meshes.
+ * @param {RedGPU.Display.Mesh} mesh1
+ * @param {RedGPU.Display.Mesh} mesh2
+ * @param {RedGPU.Display.TextField3D} label
  */
 function checkAABBIntersection(mesh1, mesh2, label) {
     const aabb1 = mesh1.boundingAABB;

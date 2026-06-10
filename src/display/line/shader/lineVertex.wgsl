@@ -16,7 +16,7 @@ struct InputData {
     @location(1) vertexColor: vec4<f32>,
 };
 
-struct OutputData {
+struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexColor: vec4<f32>,
@@ -27,16 +27,12 @@ struct OutputData {
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
-struct OutputShadowData {
-    @builtin(position) position: vec4<f32>,
-};
-
 @vertex
-fn main(inputData: InputData) -> OutputData {
-    var output: OutputData;
-    let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
-    let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
-    let u_prevNoneJitterProjectionCameraMatrix = systemUniforms.prevNoneJitterProjectionCameraMatrix;
+fn main(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
+    let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
+    let u_noneJitterProjectionViewMatrix = systemUniforms.projection.noneJitterProjectionViewMatrix;
+    let u_prevNoneJitterProjectionViewMatrix = systemUniforms.projection.prevNoneJitterProjectionViewMatrix;
 
     let u_matrixList = vertexUniforms.matrixList;
     let u_modelMatrix = u_matrixList.modelMatrix;
@@ -48,22 +44,19 @@ fn main(inputData: InputData) -> OutputData {
 
     var position: vec4<f32>;
     position = u_modelMatrix * input_position_vec4;
-    output.position = u_projectionCameraMatrix * position;
+    output.position = u_projectionViewMatrix * position;
     output.vertexPosition = position.xyz;
     output.vertexColor = input_vertexColor;
 
     // Motion vector calculation
     {
-      output.currentClipPos = u_noneJitterProjectionCameraMatrix * position;
-      output.prevClipPos = u_prevNoneJitterProjectionCameraMatrix * u_prevModelMatrix * input_position_vec4;
+      output.currentClipPos = u_noneJitterProjectionViewMatrix * position;
+      output.prevClipPos = u_prevNoneJitterProjectionViewMatrix * u_prevModelMatrix * input_position_vec4;
     }
 
     return output;
 }
 
-@vertex
-fn picking(inputData: InputData) -> OutputData {
-    //TODO 일단 두께지원을 안하니 나중에 개선
-    var output: OutputData;
-    return output;
-}
+#redgpu_include entryPoint.empty.entryPointPickingVertex;
+#redgpu_include entryPoint.empty.entryPointShadowVertex;
+

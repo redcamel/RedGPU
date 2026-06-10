@@ -1,37 +1,36 @@
+import * as RedGPU from "../../../../dist/index.js?t=1778922031603";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
+
 /**
  * [KO] Sprite3D 예제
  * [EN] Sprite3D example
  *
- * [KO] 3D 공간에서 Sprite3D의 사용법과 빌보드, 픽셀 사이즈 모드 등의 기능을 시연합니다.
+ * [KO] 3D 공간에서 Sprite3D의 사용법과 빌보드(Billboard), 픽셀 사이즈 모드 등의 기능을 시연합니다.
  * [EN] Demonstrates the usage of Sprite3D in 3D space, including features like billboard and pixel size modes.
- * @packageDocumentation
  */
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
-// [KO] RedGPU 초기화
-// [EN] Initialize RedGPU
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // [KO] 카메라 컨트롤러 설정
-        // [EN] Camera controller setup
+        // 1. [KO] 카메라 컨트롤러 설정
+        // [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 10;
         controller.speedDistance = 0.5;
 
-        // [KO] 씬 및 뷰 설정
-        // [EN] Scene and View setup
+        // 2. [KO] 씬 및 뷰 구성
+        // [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.grid = true;
         redGPUContext.addView(view);
 
-        // [KO] 머티리얼 설정
-        // [EN] Material setup
-        const material = new RedGPU.Material.BitmapMaterial(
+        // 3. [KO] 머티리얼 및 스프라이트 생성
+        // [EN] Create Materials and Sprites
+        const materialGrid = new RedGPU.Material.BitmapMaterial(
             redGPUContext,
             new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
         );
@@ -46,42 +45,48 @@ RedGPU.init(
             new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/texture/v_test.jpg')
         );
 
-        const sprite3D = new RedGPU.Display.Sprite3D(redGPUContext, material);
-        scene.addChild(sprite3D);
+        // [KO] 중앙 메인 스프라이트 생성
+        // [EN] Create center main sprite
+        const mainSprite = new RedGPU.Display.Sprite3D(redGPUContext, materialGrid);
+        scene.addChild(mainSprite);
 
         // [KO] 가로/세로 비율 테스트용 스프라이트 배치
         // [EN] Arrange sprites for aspect ratio testing
-        const sprite3DH = new RedGPU.Display.Sprite3D(redGPUContext, materialH);
-        sprite3DH.x = -2.5;
-        scene.addChild(sprite3DH);
+        const spriteH = new RedGPU.Display.Sprite3D(redGPUContext, materialH);
+        spriteH.x = -2.5;
+        scene.addChild(spriteH);
 
-        const sprite3DV = new RedGPU.Display.Sprite3D(redGPUContext, materialV);
-        sprite3DV.x = 2.5;
-        scene.addChild(sprite3DV);
+        const spriteV = new RedGPU.Display.Sprite3D(redGPUContext, materialV);
+        spriteV.x = 2.5;
+        scene.addChild(spriteV);
 
         // [KO] 추가 인스턴스들을 원형으로 배치
         // [EN] Arrange additional instances in a circle
         const spriteCount = 10;
-        const radius = 6;
+        const circleRadius = 6;
 
         for (let i = 0; i < spriteCount; i++) {
             const angle = (i / spriteCount) * Math.PI * 2;
-            const x = Math.cos(angle) * radius;
-            const z = Math.sin(angle) * radius;
+            const x = Math.cos(angle) * circleRadius;
+            const z = Math.sin(angle) * circleRadius;
 
-            const instance = new RedGPU.Display.Sprite3D(redGPUContext, material);
+            const instance = new RedGPU.Display.Sprite3D(redGPUContext, materialGrid);
             instance.x = x;
             instance.z = z;
             scene.addChild(instance);
         }
 
-        // [KO] 렌더러 생성 및 시작
-        // [EN] Create and start renderer
-        const renderer = new RedGPU.Renderer(redGPUContext);
-        renderer.start(redGPUContext);
+        // 4. [KO] 렌더러 생성 및 루프 시작
+        // [EN] Create Renderer and Start Loop
+        const renderer = new RedGPU.Renderer();
+        const render = (time) => {
+            // [KO] 매 프레임 로직
+            // [EN] Logic per frame
+        };
+        renderer.start(redGPUContext, render);
 
-        // [KO] 테스트용 GUI 설정
-        // [EN] Setup GUI for testing
+        // 5. [KO] 테스트용 GUI 렌더링
+        // [EN] Render Test GUI
         renderTestPane(redGPUContext, scene);
     },
     (failReason) => {
@@ -93,73 +98,78 @@ RedGPU.init(
 );
 
 /**
- * [KO] 테스트를 위한 Tweakpane GUI를 설정합니다.
- * [EN] Sets up the Tweakpane GUI for testing.
- *
- * [KO] Sprite3D의 빌보드 모드, 픽셀 사이즈, 월드 사이즈 등을 실시간으로 제어할 수 있는 UI를 생성합니다.
- * [EN] Creates a UI to control Sprite3D's billboard mode, pixel size, and world size in real-time.
- *
- * @param redGPUContext -
- * [KO] RedGPU 렌더링 컨텍스트
- * [EN] RedGPU rendering context
- * @param scene -
- * [KO] 제어할 스프라이트들이 포함된 씬
- * [EN] Scene containing the sprites to control
+ * [KO] 실시간 속성 제어를 위한 GUI를 구성합니다.
+ * [EN] Configures GUI for real-time property control.
  */
-const renderTestPane = async (redGPUContext, scene) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {
-        setDebugButtons,
-        setSeparator
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
+const renderTestPane = (redGPUContext, scene) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        gui: (pane) => {
+            const folder = pane.addFolder({title: 'Sprite3D Control', expanded: true});
 
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
-    const folder = pane.addFolder({title: 'Sprite3D', expanded: true});
+            const firstSprite = scene.children[0];
 
-    const target = scene.children[0];
-    const updateAll = (key, value) => {
-        scene.children.forEach(c => {
-            if (c instanceof RedGPU.Display.Sprite3D) {
+            /**
+             * [KO] 모든 Sprite3D 인스턴스의 속성을 일괄 업데이트합니다.
+             * [EN] Batch updates properties of all Sprite3D instances.
+             */
+            const updateAllSprites = (key, value) => {
+                scene.children.forEach(child => {
+                    if (child instanceof RedGPU.Display.Sprite3D) {
+                        child[key] = value;
+                    }
+                });
+            };
 
-                c[key] = value;
-            }
-        });
-    };
+            // [KO] 빌보드 설정 (카메라를 항상 바라보게 함)
+            // [EN] Billboard Setting (Always face the camera)
+            folder.addBinding(firstSprite, 'useBillboard', {
+                label: 'Use Billboard'
+            }).on('change', (evt) => {
+                updateAllSprites('useBillboard', evt.value);
+                updateUIState();
+            });
 
-    // [KO] 빌보드 및 크기 설정
-    // [EN] Billboard & Size Settings
-    folder.addBinding(target, 'useBillboard').on('change', (evt) => {
-        updateAll('useBillboard', evt.value);
-        updateUI();
+            // [KO] 픽셀 사이즈 모드 사용 여부
+            // [EN] Use Pixel Size Mode
+            const usePixelSizeBinding = folder.addBinding(firstSprite, 'usePixelSize', {
+                label: 'Use Pixel Size'
+            }).on('change', (evt) => {
+                updateAllSprites('usePixelSize', evt.value);
+                updateUIState();
+            });
+
+            // [KO] 픽셀 단위 크기 (화면 해상도 기준)
+            // [EN] Size in Pixels (Based on screen resolution)
+            const pixelSizeBinding = folder.addBinding(firstSprite, 'pixelSize', {
+                min: 1, max: 1024, step: 1,
+                label: 'Pixel Size'
+            }).on('change', (evt) => {
+                updateAllSprites('pixelSize', evt.value);
+            });
+
+            // [KO] 월드 단위 크기 (3D 공간 좌표 기준)
+            // [EN] Size in World Units (Based on 3D space coordinates)
+            const worldSizeBinding = folder.addBinding(firstSprite, 'worldSize', {
+                min: 0.1, max: 10, step: 0.1,
+                label: 'World Size'
+            }).on('change', (evt) => {
+                updateAllSprites('worldSize', evt.value);
+            });
+
+            /**
+             * [KO] 설정 상태에 따라 GUI 요소의 활성화 여부를 업데이트합니다.
+             * [EN] Updates the enabled state of GUI elements based on settings.
+             */
+            const updateUIState = () => {
+                const isBillboard = firstSprite.useBillboard;
+                const isPixel = firstSprite.usePixelSize;
+
+                usePixelSizeBinding.disabled = !isBillboard;
+                pixelSizeBinding.disabled = !isBillboard || !isPixel;
+                worldSizeBinding.disabled = isBillboard && isPixel;
+            };
+
+            updateUIState();
+        }
     });
-    const usePixelSize = folder.addBinding(target, 'usePixelSize').on('change', (evt) => {
-        updateAll('usePixelSize', evt.value);
-        updateUI();
-    });
-    const pixelSize = folder.addBinding(target, 'pixelSize', {min: 0, max: 1024, step: 1}).on('change', (evt) => {
-        updateAll('pixelSize', evt.value);
-    });
-    const worldSize = folder.addBinding(target, 'worldSize', {min: 0.01, max: 10, step: 0.01}).on('change', (evt) => {
-        updateAll('worldSize', evt.value);
-    });
-
-    // [KO] UI 활성화 상태 업데이트
-    // [EN] Update UI activation state
-    const updateUI = () => {
-        const isBillboard = target.useBillboard;
-        const isPixel = target.usePixelSize;
-
-        usePixelSize.disabled = !isBillboard;
-        pixelSize.disabled = !isBillboard || !isPixel;
-        worldSize.disabled = isBillboard && isPixel;
-    };
-
-    const refresh = () => {
-        pane.refresh();
-        requestAnimationFrame(refresh);
-    };
-
-    refresh();
-    updateUI();
 };

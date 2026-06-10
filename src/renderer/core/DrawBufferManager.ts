@@ -1,16 +1,17 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import formatBytes from "../../utils/formatBytes";
+import RedGPUObject from "../../base/RedGPUObject";
 
 /**
  * WebGPU 드로우 커맨드를 효율적으로 관리하는 매니저 클래스
  * 동적 확장 가능한 버퍼 풀을 통해 무제한 드로우 커맨드를 지원합니다.
  */
-class DrawBufferManager {
+class DrawBufferManager extends RedGPUObject {
     static #instance: DrawBufferManager
     // 드로우 커맨드 타입별 크기
     static readonly #INDEXED_COMMAND_SIZE = 5  // drawIndexedIndirect
-    #redGPUContext: RedGPUContext
+
     #bufferPool: GPUBuffer[] = []
     #dataPool: Uint32Array[] = []
     #maxCommandsPerBuffer: number
@@ -20,7 +21,7 @@ class DrawBufferManager {
     #usedBufferIndices: Set<number> = new Set()
 
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext
+        super(redGPUContext)
         this.#initializeSystem()
     }
 
@@ -116,7 +117,7 @@ class DrawBufferManager {
         const commandSize = DrawBufferManager.#INDEXED_COMMAND_SIZE
         const byteOffset = slot.commandOffset * 4
         const elementCount = commandSize
-        this.#redGPUContext.gpuDevice.queue.writeBuffer(
+        this.gpuDevice.queue.writeBuffer(
             buffer,
             byteOffset,
             data as BufferSource,
@@ -164,7 +165,7 @@ class DrawBufferManager {
         // 	// keepLog('⚡ 드로우 커맨드 변경사항없음')
         // 	return
         // }
-        const startTime = performance.now()
+        // const startTime = performance.now()
         let totalUploaded = 0
         for (const bufferIndex of this.#usedBufferIndices) {
             const buffer = this.#bufferPool[bufferIndex]
@@ -174,7 +175,7 @@ class DrawBufferManager {
                 this.#currentCommandIndex :
                 this.#maxCommandsPerBuffer
             const uploadSize = usedCommands * DrawBufferManager.#INDEXED_COMMAND_SIZE * 4
-            this.#redGPUContext.gpuDevice.queue.writeBuffer(
+            this.gpuDevice.queue.writeBuffer(
                 buffer,
                 0,
                 data as BufferSource,
@@ -206,26 +207,26 @@ class DrawBufferManager {
         // })
     }
 
-    // /**
-    //  * 모든 사용된 버퍼의 데이터를 GPU로 업로드합니다.
     /**
      * 디바이스의 실제 버퍼 크기 제한을 계산합니다.
      */
     #calculateDeviceLimits(): void {
-        const limits = this.#redGPUContext.gpuDevice.limits
-        // 안전한 최대 크기 계산 (실제 제한의 90% 사용)
+        const limits = this.redGPUContext.detector.activeLimits;
+
+        // [KO] 디바이스의 실제 한계치를 반영하되, 너무 비대해지지 않도록 최대 128MB로 제한합니다.
+        // [EN] Reflect the actual limits of the device, but cap it at 128MB to prevent excessive size.
+        const SAFE_MAX_SIZE = 134217728; // 128MB
+
         this.#deviceMaxBufferSize = Math.floor(
-            Math.min(
-                // limits.maxBufferSize || 268435456,           // 256MB
-                // limits.maxStorageBufferBindingSize || 134217728  // 128MB
-                268435456,           // 256MB
-                134217728  // 128MB
-            ) * 0.9
-        )
+            Math.min(limits.maxBufferSize, SAFE_MAX_SIZE) * 0.9
+        );
+
         // 버퍼당 최대 커맨드 수 (가장 큰 커맨드 크기 기준)
         this.#maxCommandsPerBuffer = Math.floor(
             this.#deviceMaxBufferSize / (DrawBufferManager.#INDEXED_COMMAND_SIZE * 4)
-        )
+        );
+
+        console.log(`🚀 DrawBufferManager: Device Max Buffer Size: ${formatBytes(this.#deviceMaxBufferSize)}, Max Commands Per Buffer: ${this.#maxCommandsPerBuffer.toLocaleString()}`);
     }
 
     // /**
@@ -248,7 +249,7 @@ class DrawBufferManager {
      */
     #createNewBuffer(): number {
         const bufferSize = this.#maxCommandsPerBuffer * DrawBufferManager.#INDEXED_COMMAND_SIZE * 4
-        const buffer = this.#redGPUContext.gpuDevice.createBuffer({
+        const buffer = this.gpuDevice.createBuffer({
             size: bufferSize,
             usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_DST,
             label: `DrawBuffer_${this.#bufferPool.length}`

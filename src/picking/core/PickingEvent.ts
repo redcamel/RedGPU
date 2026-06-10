@@ -1,6 +1,6 @@
-import { vec3, vec2 } from "gl-matrix";
+import {vec2, vec3} from "gl-matrix";
 import Mesh from "../../display/mesh/Mesh";
-import { RayIntersectResult } from "../Raycaster3D";
+import {RayIntersectResult} from "../Raycaster3D";
 import Ray from "../../math/Ray";
 
 /**
@@ -171,18 +171,19 @@ class PickingEvent {
         this.ctrlKey = nativeEvent.ctrlKey;
         this.shiftKey = nativeEvent.shiftKey;
 
-		if (hit) {
-			this.point = hit.point;
-			this.localPoint = hit.localPoint;
-			this.localX = hit.localPoint[0];
-			this.localY = hit.localPoint[1];
-			this.localZ = hit.localPoint[2];
-			this.distance = hit.distance;
-			this.faceIndex = hit.faceIndex;
-			this.uv = hit.uv;
-			this.ray = hit.ray;
-		}
+        if (hit) {
+            this.point = hit.point;
+            this.localPoint = hit.localPoint;
+            this.localX = hit.localPoint[0];
+            this.localY = hit.localPoint[1];
+            this.localZ = hit.localPoint[2];
+            this.distance = hit.distance;
+            this.faceIndex = hit.faceIndex;
+            this.uv = hit.uv;
+            this.ray = hit.ray;
+        }
     }
 }
 
+Object.freeze(PickingEvent);
 export default PickingEvent;

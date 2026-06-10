@@ -1,28 +1,30 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import DefineForFragment from "../../defineProperty/DefineForFragment";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl';
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
+import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
+import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
 
-const SHADER_INFO = parseWGSL(fragmentModuleSource)
+
+const SHADER_INFO = parseWGSL('BITMAP_MATERIAL', fragmentModuleSource)
 
 /**
  * [KO] 비트맵 텍스처 기반 머티리얼의 공통 속성 인터페이스
  * [EN] Common property interface for bitmap texture-based materials
  */
 interface BitmapMaterial {
-	/**
-	 * [KO] 머티리얼에 적용할 비트맵 텍스처
-	 * [EN] Bitmap texture to apply to the material
-	 */
-	diffuseTexture: BitmapTexture
-	/**
-	 * [KO] 비트맵 텍스처 샘플러
-	 * [EN] Bitmap texture sampler
-	 */
-	diffuseTextureSampler: Sampler;
+    /**
+     * [KO] 머티리얼에 적용할 비트맵 텍스처
+     * [EN] Bitmap texture to apply to the material
+     */
+    diffuseTexture: BitmapTexture
+    /**
+     * [KO] 비트맵 텍스처 샘플러
+     * [EN] Bitmap texture sampler
+     */
+    diffuseTextureSampler: Sampler;
 }
 
 /**
@@ -44,11 +46,7 @@ interface BitmapMaterial {
  * @category Material
  */
 class BitmapMaterial extends AUVTransformBaseMaterial {
-	/**
-	 * [KO] 파이프라인 dirty 상태 플래그
-	 * [EN] Pipeline dirty status flag
-	 */
-	dirtyPipeline: boolean = false
+
 
     /**
      * [KO] BitmapMaterial 생성자
@@ -77,9 +75,11 @@ class BitmapMaterial extends AUVTransformBaseMaterial {
     }
 }
 
-DefineForFragment.defineByPreset(BitmapMaterial, [
-    DefineForFragment.PRESET_TEXTURE.DIFFUSE_TEXTURE,
-    DefineForFragment.PRESET_SAMPLER.DIFFUSE_TEXTURE_SAMPLER,
+defineSampler(BitmapMaterial, [
+    {key: 'diffuseTextureSampler'}
+])
+defineTexture(BitmapMaterial, [
+    {key: 'diffuseTexture'}
 ])
 
 Object.freeze(BitmapMaterial)

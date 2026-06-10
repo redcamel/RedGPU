@@ -23,9 +23,9 @@ RedGPU provides a **Sprite** system that allows you to effectively use 2D images
 
 ## Learning Roadmap
 
-1.  **[Sprite3D](./sprite)**: Creating billboard sprites using a single image
-2.  **[SpriteSheet3D](./spritesheet)**: Utilizing sprite sheets with animation
+1. **[Sprite3D](./sprite.md)**: Creating billboard sprites using a single image
+2. **[SpriteSheet3D](./spritesheet.md)**: Utilizing sprite sheets with animation
 
 ---
 
-[Next Step: Learn TextField3D](../text-field/textfield3d.md)
+[Next Step: Learn Sprite3D](./sprite.md)

@@ -18,15 +18,15 @@ RedGPU는 3D 공간에서 텍스트를 편리하게 렌더링할 수 있는 **Te
 
 텍스트 필드 객체는 다음과 같은 스타일 속성을 제공합니다.
 
-| 속성 | 설명 | 기본값 |
-| :--- | :--- | :--- |
-| `text` | 출력할 문자열 (`<br/>` 지원) | `""` |
-| `fontSize` | 폰트 크기 (px) | `16` |
-| `fontFamily` | 폰트 종류 | `"Arial"` |
-| `color` | 글자 색상 (Hex, RGB 등) | `"#fff"` |
-| `background` | 배경색 및 투명도 | `"transparent"` |
-| `textAlign` | 텍스트 정렬 (`left`, `center`, `right`) | `"center"` |
-| `padding` | 여백 (px) | `0` |
+| 속성           | 설명                                 | 기본값             |
+|:-------------|:-----------------------------------|:----------------|
+| `text`       | 출력할 문자열 (`<br/>` 지원)               | `""`            |
+| `fontSize`   | 폰트 크기 (px)                         | `24`            |
+| `fontFamily` | 폰트 종류                              | `"Arial"`       |
+| `color`      | 글자 색상 (Hex, RGB 등)                 | `"#fff"`        |
+| `background` | 배경색 및 투명도                          | `"transparent"` |
+| `textAlign`  | 텍스트 정렬 (`left`, `center`, `right`) | `"center"`      |
+| `padding`    | 여백 (px)                            | `0`             |
 
 ::: info [HTML 태그 지원]
 `text` 속성에 `<br/>` 태그를 사용하여 줄바꿈을 처리할 수 있습니다.

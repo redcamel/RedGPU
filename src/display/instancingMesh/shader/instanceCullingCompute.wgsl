@@ -1,7 +1,9 @@
 struct InstanceUniforms {
+    instanceGroupModelMatrix: mat4x4<f32>,
+    instanceGroupNormalModelMatrix: mat4x4<f32>,
     useDisplacementTexture: u32,
     displacementScale: f32,
-    instanceGroupModelMatrix: mat4x4<f32>,
+    padding: vec2<f32>,
     instanceModelMatrixs: array<mat4x4<f32>, __INSTANCE_COUNT__>,
     instanceNormalModelMatrix: array<mat4x4<f32>, __INSTANCE_COUNT__>,
     instanceOpacity: array<f32, __INSTANCE_COUNT__>,

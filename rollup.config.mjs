@@ -5,7 +5,20 @@ import terser from '@rollup/plugin-terser';
 import typescript from '@rollup/plugin-typescript';
 import {createFilter} from '@rollup/pluginutils';
 import postcss from 'rollup-plugin-postcss'
-
+const terserOptions = {
+	format: {
+		comments: false,
+	},
+	mangle: {
+		properties: false,
+		keep_classnames: true,
+		keep_fnames: true,
+	},
+	compress: {
+		dead_code: true,
+		if_return: true
+	},
+}
 export default [
 	{
 		input: './src/index.ts',
@@ -34,21 +47,8 @@ export default [
 					tsconfig: 'tsconfig.json'
 				}
 			),
-			terser({
-				format: {
-					comments: false,
-				},
-				mangle: {
-					properties: false,
-					keep_classnames: true,
-					keep_fnames: true,
-				},
-				compress: {
-					dead_code: true,
-					if_return: true
-				},
-			}),
-			removeSpacesAndTabs()
+			terser(terserOptions),
+			// removeSpacesAndTabs()
 		]
 	},
 	{
@@ -66,33 +66,27 @@ export default [
 				declaration: false,
 				declarationDir: null
 			}),
-			terser({
-				format: { comments: false },
-				mangle: { keep_classnames: true, keep_fnames: true },
-			}),
-			removeSpacesAndTabs()
+			terser(terserOptions),
+			// removeSpacesAndTabs()
 		]
 	}
 ]
 
 function removeSpacesAndTabs() {
 	return {
-		generateBundle(_, bundle) {
-			for (const filename in bundle) {
-				const file = bundle[filename];
-				if (file.type === 'chunk') {
-					file.code = file.code
-						.replace(/(\\t){2,}/g, '\t')
-						.replace(/(\s?)=(\s?)/g, '=')
-						.replace(/(\s?):(\s?)/g, ':')
-						.replace(/(\s?);(\s?)/g, ';')
-						.replace(/(\s?),(\s?)/g, ',')
-						.replace(/(\s?)\/(\s?)/g, '/')
-						.replace(/\s{1,}/g, ' ')
-						.replace(/\\n /g, ' ')
-					;
-				}
-			}
+		name: 'remove-spaces-and-tabs',
+		renderChunk(code) {
+			return code.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/g, (match) => {
+
+				let content = match.substring(1, match.length - 1);
+				content.replace(/\/\*[\s\S]*?\*\//g, '')
+					.replace(/\/\/.*?(\\n|\\r|$)/g, '$1')
+					.replace(/\\r\\n|\\n|\\r|\\t/g, ' ')
+					.replace(/\s+/g, ' ')
+					.replace(/\s*(&&|\|\||[=+\-*/<>:;,{}()[\]])\s*/g, '$1')
+					.trim();
+				return match;
+			});
 		}
 	};
 }
@@ -103,16 +97,16 @@ function stringWgsl() {
 		transform(code, id) {
 			if (filter(id)) {
 				let newCode = code
-					// 블록 주석 제거 (/* */)
-					.replace(/\/\*[\s\S]*?\*\//g, '')
-					// 라인 주석 제거 (//)
-					.replace(/\/\/.*/g, '')
-					// 캐리지 리턴 제거
-					.replace(/\r/g, '')
-					// 연속된 개행문자를 하나로 치환
-					.replace(/\n\s*\n/g, '\n')
-					// 연속된 공백을 하나로 치환
-					.replace(/[ \t]+/g, ' ')
+					// 주석 제거 (블록 및 라인)
+					.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '')
+					// 모든 종류의 공백(개행 포함)을 하나의 공백으로 치환
+					.replace(/\s+/g, ' ')
+					// 연산자 및 기호 주변 공백 제거
+					.replace(/\s*(&&|\|\||[=+\-*/<>:;,{}()[\]])\s*/g, '$1')
+
+					// 소수점 앞의 불필요한 0 제거 (예: 0.05 -> .05)
+					.replace(/\b0\.0/g, '.0')
+					.trim();
 				newCode = JSON.stringify(newCode)
 				return {
 					code: `export default ${newCode};`,

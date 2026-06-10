@@ -1,4 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js?t=1778922031603";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
 
 /**
  * [KO] Blend Mode 예제
@@ -93,13 +94,14 @@ RedGPU.init(
             pixelRectObject: redGPUContext.pixelRectObject
         });
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
             // base.rotation += 1;
         };
         renderer.start(redGPUContext, render);
 
         renderTestPane(redGPUContext, base, shape);
+
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -207,33 +209,20 @@ function createSourceView(redGPUContext, scene, texture_blendTest_base, texture_
  * @param {RedGPU.Display.Sprite2D} base
  * @param {RedGPU.Display.Sprite2D} shape
  */
-const renderTestPane = async (redGPUContext, base, shape) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {
-        setRedGPUTest_pane,
-        setDebugButtons
-    } = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const pane = new Pane();
-    setRedGPUTest_pane(pane, redGPUContext, false);
-    const tintSettings = {
-        blendMode: RedGPU.Material.BLEND_MODE[shape.blendMode],
-    };
-    console.log('shape', shape, shape.blendMode);
-    const setBlendModeTest = () => {
-        const folder = pane.addFolder({title: '2D Object BlendMode'});
+const renderTestPane = (redGPUContext, base, shape) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        gui: (pane) => {
+            const tintSettings = {
+                blendMode: RedGPU.Material.BLEND_MODE[shape.blendMode],
+            };
+            const folder = pane.addFolder({title: '2D Object BlendMode'});
 
-        folder.addBinding(tintSettings, 'blendMode', {
-            label: 'Blend Mode',
-            options: RedGPU.Material.BLEND_MODE,
-        }).on('change', (ev) => {
-            const selectedKey = Object.keys(RedGPU.Material.BLEND_MODE).find(
-                (key) => RedGPU.Material.BLEND_MODE[key] === ev.value
-            );
-            console.log(`Selected Blend Mode: ${selectedKey}`);
-
-            shape.blendMode = ev.value;
-        });
-    };
-    setBlendModeTest();
+            folder.addBinding(tintSettings, 'blendMode', {
+                label: 'Blend Mode',
+                options: RedGPU.Material.BLEND_MODE,
+            }).on('change', (ev) => {
+                shape.blendMode = ev.value;
+            });
+        }
+    });
 };

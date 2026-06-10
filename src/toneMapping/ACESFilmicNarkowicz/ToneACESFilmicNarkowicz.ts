@@ -22,7 +22,6 @@ class ToneACESFilmicNarkowicz extends AToneMappingEffect {
             'POST_EFFECT_TONE_MAPPING_ACES_FILMIC_NARKOWICZ',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
-        this.updateUniforms();
     }
 }
 

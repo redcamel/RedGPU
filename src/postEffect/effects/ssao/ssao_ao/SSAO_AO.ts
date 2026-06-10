@@ -1,32 +1,45 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import validateNumberRange from "../../../../runtimeChecker/validateFunc/validateNumberRange";
-import validatePositiveNumberRange from "../../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import ASinglePassPostEffect from "../../../core/ASinglePassPostEffect";
 import createBasicPostEffectCode from "../../../core/createBasicPostEffectCode";
 import computeCode from "./wgsl/computeCode.wgsl"
 import uniformStructCode from "./wgsl/uniformStructCode.wgsl"
+import defineBoolean from "../../../../defineProperty/funcs/defineBoolean";
+import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
+
+
+interface SSAO_AO {
+    /** [KO] 블러 사용 여부. true 시 AO 노이즈를 억제하기 위한 가우시안 블러가 수행됩니다. [EN] Whether to use blur. If true, Gaussian blur is performed to suppress AO noise. */
+    useBlur: boolean;
+    /** [KO] AO의 대비(Contrast). 값이 클수록 그림자가 더 진해집니다. [EN] Contrast of AO. Higher values result in darker shadows. */
+    contrast: number;
+    /** [KO] 샘플링 반경 (월드 단위). 물체로부터 어느 정도 거리까지 차폐를 계산할지 결정합니다. [EN] Sampling radius (in world units). Determines the distance up to which occlusion is calculated from an object. */
+    radius: number;
+    /** [KO] AO 효과의 전체적인 강도. [EN] Overall intensity of the AO effect. */
+    intensity: number;
+    /** [KO] 자기 차폐 방지를 위한 바이어스 값. [EN] Bias value to prevent self-occlusion. */
+    bias: number;
+    /** [KO] 거리에 따른 바이어스 가중치. [EN] Bias weight based on distance. */
+    biasDistanceScale: number;
+    /** [KO] AO 효과가 사라지기 시작하는 거리. [EN] Distance where the AO effect starts to fade out. */
+    fadeDistanceStart: number;
+    /** [KO] AO 효과의 페이드 범위. [EN] Fade range of the AO effect. */
+    fadeDistanceRange: number;
+}
 
 /**
- * [KO] SSAO AO 계산 이펙트입니다. (내부용)
- * [EN] SSAO AO calculation effect. (Internal use)
+ * [KO] SSAO의 핵심인 차폐도(Occlusion) 계산을 담당하는 이펙트입니다.
+ * [EN] Effect responsible for calculating Occlusion, the core of SSAO.
+ *
+ * [KO] 뷰 공간(View Space)에서 법선 방향의 반구(Hemisphere) 샘플링을 수행하여 주변 지형에 의한 빛의 차폐 정도를 산출합니다.
+ * [EN] Performs hemisphere sampling in the normal direction within view space to calculate the degree of light occlusion by surrounding terrain.
+ *
  * @category PostEffect
  */
 class SSAO_AO extends ASinglePassPostEffect {
 
 
-    #radius: number = 0.253;
-    #intensity: number = 1.0;
-    #bias: number = 0.02;
-    #biasDistanceScale: number = 0.02;
-    #fadeDistanceStart: number = 30.0;
-    #fadeDistanceRange: number = 20.0;
-    #contrast: number = 1.5;
-    #useBlur: boolean = true
-
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-        this.useDepthTexture = true;
-        this.useGBufferNormalTexture = true;
 
         this.init(
             redGPUContext,
@@ -34,96 +47,21 @@ class SSAO_AO extends ASinglePassPostEffect {
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
 
-        this.radius = this.#radius;
-        this.intensity = this.#intensity;
-        this.bias = this.#bias;
-        this.biasDistanceScale = this.#biasDistanceScale;
-        this.fadeDistanceStart = this.#fadeDistanceStart;
-        this.fadeDistanceRange = this.#fadeDistanceRange;
-        this.contrast = this.#contrast;
-        this.useBlur = true
-    }
-
-    get useBlur(): boolean {
-        return this.#useBlur;
-    }
-
-    set useBlur(value: boolean) {
-        this.#useBlur = value;
-        this.updateUniform('useBlur', value ? 1 : 0);
-    }
-
-    get radius(): number {
-        return this.#radius;
-    }
-
-    set radius(value: number) {
-        validatePositiveNumberRange(value, 0.01, 5.0);
-        this.#radius = value;
-        this.updateUniform('radius', value);
-    }
-
-    get intensity(): number {
-        return this.#intensity;
-    }
-
-    set intensity(value: number) {
-        validateNumberRange(value, 0.0, 10.0);
-        this.#intensity = value;
-        this.updateUniform('intensity', value);
-    }
-
-    get bias(): number {
-        return this.#bias;
-    }
-
-    set bias(value: number) {
-        validateNumberRange(value, 0.0, 0.1);
-        this.#bias = value;
-        this.updateUniform('bias', value);
-    }
-
-    get biasDistanceScale(): number {
-        return this.#biasDistanceScale;
-    }
-
-    set biasDistanceScale(value: number) {
-        validateNumberRange(value, 0.0, 0.5);
-        this.#biasDistanceScale = value;
-        this.updateUniform('biasDistanceScale', value);
-    }
-
-    get fadeDistanceStart(): number {
-        return this.#fadeDistanceStart;
-    }
-
-    set fadeDistanceStart(value: number) {
-        validatePositiveNumberRange(value, 1.0, 200.0);
-        this.#fadeDistanceStart = value;
-        this.updateUniform('fadeDistanceStart', value);
-    }
-
-    get fadeDistanceRange(): number {
-        return this.#fadeDistanceRange;
-    }
-
-    set fadeDistanceRange(value: number) {
-        validatePositiveNumberRange(value, 1.0, 100.0);
-        this.#fadeDistanceRange = value;
-        this.updateUniform('fadeDistanceRange', value);
-    }
-
-    get contrast(): number {
-        return this.#contrast;
-    }
-
-    set contrast(value: number) {
-        validateNumberRange(value, 0.5, 4.0);
-        this.#contrast = value;
-        this.updateUniform('contrast', value);
     }
 
 }
 
+defineBoolean(SSAO_AO, [
+    {key: 'useBlur', value: true}
+])
+definePositiveNumber(SSAO_AO, [
+    {key: 'contrast', value: 1.5, min: 0.5, max: 4.0},
+    {key: 'radius', value: 0.253, min: 0.01, max: 5.0},
+    {key: 'intensity', value: 1, min: 0, max: 10},
+    {key: 'bias', value: 0.02, min: 0.0, max: 0.1},
+    {key: 'biasDistanceScale', value: 0.02, min: 0.0, max: 0.5},
+    {key: 'fadeDistanceStart', value: 30.0, min: 1.0, max: 200.0},
+    {key: 'fadeDistanceRange', value: 20.0, min: 1.0, max: 100.0},
+])
 Object.freeze(SSAO_AO);
 export default SSAO_AO;

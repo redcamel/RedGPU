@@ -1,0 +1,128 @@
+import * as RedGPU from "../../../../dist/index.js?t=1778922031603";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
+
+/**
+ * [KO] SkyAtmosphere & SkyLight Decoupling Test 예제
+ * [EN] SkyAtmosphere & SkyLight Decoupling Test example
+ *
+ * [KO] 시각적 대기 효과(SkyAtmosphere)와 조명 요소(SkyLight)를 분리하여 제어하는 물리 기반 대기 산란 예제입니다.
+ * [EN] A physically based atmospheric scattering example that independently controls visual atmospheric effects (SkyAtmosphere) and lighting elements (SkyLight).
+ */
+
+const canvas = document.createElement('canvas');
+document.body.appendChild(canvas);
+
+RedGPU.init(
+    canvas,
+    (redGPUContext) => {
+        const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.tilt = -15;
+        controller.distance = 15;
+
+        const scene = new RedGPU.Display.Scene();
+        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        redGPUContext.addView(view);
+
+        // 1. 디렉셔널 라이트 (태양 광원)
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+        directionalLight.elevation = 45;
+        directionalLight.azimuth = 0;
+        scene.lightManager.addDirectionalLight(directionalLight);
+
+        // 2. SkyAtmosphere 초기화
+        const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
+        view.skyAtmosphere = skyAtmosphere;
+
+        // 3. 모델 로드
+        loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/EnvironmentTest/glTF/EnvironmentTest.gltf');
+        loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/TransmissionTest/glTF-Binary/TransmissionTest.glb');
+        loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MosquitoInAmber/glTF-Binary/MosquitoInAmber.glb');
+        loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ClearcoatWicker/glTF-Binary/ClearcoatWicker.glb');
+        loadGLTF(view, 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/Corset/glTF-Binary/Corset.glb');
+        loadGLTF(view,  'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/GlassHurricaneCandleHolder/glTF-Binary/GlassHurricaneCandleHolder.glb');
+
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext);
+
+        renderTestPane(view, skyAtmosphere, directionalLight);
+    },
+    (failReason) => {
+        console.error("Initialization failed:", failReason);
+    }
+);
+
+function loadGLTF(view, url) {
+    const {redGPUContext, scene} = view;
+    new RedGPU.GLTFLoader(redGPUContext, url, (v) => {
+        const mesh = scene.addChild(v['resultMesh']);
+        if (url.includes('Corset')) { mesh.setScale(40); mesh.z = 2; mesh.y = -2; }
+        if (url.includes('ClearcoatWicker')) { mesh.setScale(3); mesh.x = -6; mesh.y = -1.5; }
+        if (url.includes('TransmissionTest')) { mesh.setScale(5); }
+        if (url.includes('MosquitoInAmber')) { mesh.setScale(20); mesh.x = 8; }
+        if (url.includes('GlassHurricaneCandleHolder')) { mesh.setScale(12); mesh.x = 5; mesh.y = -2 }
+    }, RedGPUExampleHelper.loadingProgressInfoHandler);
+}
+
+const renderTestPane = (targetView, skyAtmosphere, sunSource) => {
+    new RedGPUExampleHelper(targetView.redGPUContext, {
+        gui: (pane) => {
+            // -------------------------------------------------------------------------
+            // 1. Sun (Directional Light)
+            // -------------------------------------------------------------------------
+            const f_sun = pane.addFolder({title: 'Sun (DirectionalLight)', expanded: true});
+            f_sun.addBinding(sunSource, 'elevation', {min: -90, max: 90, step: 0.0001});
+            f_sun.addBinding(sunSource, 'azimuth', {min: -360, max: 360, step: 0.0001});
+
+            // -------------------------------------------------------------------------
+            // 2. SkyAtmosphere
+            // -------------------------------------------------------------------------
+            const f_atmo = pane.addFolder({title: 'SkyAtmosphere', expanded: true});
+            f_atmo.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01});
+            f_atmo.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01});
+
+            // Clouds
+            const f_clouds = f_atmo.addFolder({title: 'Clouds', expanded: true});
+            f_clouds.addBinding(skyAtmosphere, 'cloudCoverage', {min: 0, max: 1, step: 0.01});
+            f_clouds.addBinding(skyAtmosphere, 'cloudDensity', {min: 0, max: 1, step: 0.01});
+            f_clouds.addBinding(skyAtmosphere, 'cloudHeight', {min: 0.1, max: 20, step: 0.1});
+            f_clouds.addBinding(skyAtmosphere, 'cloudTimeMultiplier', {min: -10000, max: 10000, step: 0.01});
+
+            // Scattering Details
+            const f_scattering = f_atmo.addFolder({title: 'Scattering & Physics (Unified Control via Sun Lux)', expanded: false});
+            
+            // Rayleigh
+            const f_rayleigh = f_scattering.addFolder({title: 'Rayleigh', expanded: true});
+            const rayleighState = { rayleighScattering: { r: skyAtmosphere.rayleighScattering[0], g: skyAtmosphere.rayleighScattering[1], b: skyAtmosphere.rayleighScattering[2] } };
+            f_rayleigh.addBinding(rayleighState, 'rayleighScattering', {color: {type: 'float'}}).on('change', (ev) => {
+                skyAtmosphere.rayleighScattering = [ev.value.r, ev.value.g, ev.value.b];
+            });
+            f_rayleigh.addBinding(skyAtmosphere, 'rayleighExponentialDistribution', {min: 0.1, max: 20, step: 0.1});
+
+            // Mie
+            const f_mie = f_scattering.addFolder({title: 'Mie', expanded: true});
+            const mieScatState = { mieScattering: { r: skyAtmosphere.mieScattering[0], g: skyAtmosphere.mieScattering[1], b: skyAtmosphere.mieScattering[2] } };
+            f_mie.addBinding(mieScatState, 'mieScattering', {color: {type: 'float'}}).on('change', (ev) => {
+                skyAtmosphere.mieScattering = [ev.value.r, ev.value.g, ev.value.b];
+            });
+            f_mie.addBinding(skyAtmosphere, 'mieAnisotropy', {min: 0, max: 0.999, step: 0.001});
+            f_mie.addBinding(skyAtmosphere, 'mieExponentialDistribution', {min: 0.1, max: 20, step: 0.1});
+
+            // Planet
+            const f_planet = f_scattering.addFolder({title: 'Planet', expanded: true});
+            f_planet.addBinding(skyAtmosphere, 'groundRadius', {min: 1000, max: 10000, step: 1});
+            f_planet.addBinding(skyAtmosphere, 'atmosphereHeight', {min: 1, max: 200, step: 1});
+            const groundState = { groundAlbedo: { r: skyAtmosphere.groundAlbedo[0], g: skyAtmosphere.groundAlbedo[1], b: skyAtmosphere.groundAlbedo[2] } };
+            f_planet.addBinding(groundState, 'groundAlbedo', {color: {type: 'float'}}).on('change', (ev) => {
+                skyAtmosphere.groundAlbedo = [ev.value.r, ev.value.g, ev.value.b];
+            });
+
+            // -------------------------------------------------------------------------
+            // 3. SkyLight (IBL Management)
+            // -------------------------------------------------------------------------
+            const state = {enabled: true};
+            pane.addBinding(state, 'enabled', {label: 'Enable SkyAtmosphere'}).on('change', (v) => {
+                targetView.skyAtmosphere = v.value ? skyAtmosphere : null;
+            });
+        }
+    });
+};

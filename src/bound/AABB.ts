@@ -191,4 +191,5 @@ export class AABB {
     }
 }
 
+Object.freeze(AABB);
 export default AABB;

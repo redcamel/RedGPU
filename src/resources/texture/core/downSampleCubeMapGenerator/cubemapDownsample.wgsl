@@ -47,13 +47,16 @@ fn cubemapUVToDirection(uv: vec2<f32>, face: u32) -> vec3<f32> {
 // 고품질 가우시안 블러 가중치 계산
 fn gaussianWeight(x: f32, y: f32, sigma: f32) -> f32 {
     let sigmaSq = sigma * sigma;
-    return exp(-(x * x + y * y) / (2.0 * sigmaSq)) / (2.0 * 3.14159265359 * sigmaSq);
+    return exp(-(x * x + y * y) / (2.0 * sigmaSq)) / (2.0 * PI * sigmaSq);
 }
 
 // 큐브맵 면 범위 내 UV 클램핑
 fn clampCubemapUV(uv: vec2<f32>) -> vec2<f32> {
     return clamp(uv, vec2<f32>(0.0), vec2<f32>(1.0));
 }
+
+#redgpu_include color.getLuminance
+#redgpu_include math.PI
 
 @compute @workgroup_size(8, 8, 1)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
@@ -87,7 +90,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         for (var i = 0u; i < sampleCount; i++) {
             // 원형 패턴으로 샘플링
-            let angle = 2.0 * 3.14159265359 * f32(i) / f32(sampleCount);
+            let angle = 2.0 * PI * f32(i) / f32(sampleCount);
             let radius = sampleRadius * (0.5 + 0.5 * f32(i % 4u) / 4.0);
 
             let offsetUV = clampCubemapUV(uv + vec2<f32>(
@@ -165,7 +168,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     // 색상 보정 (높은 밉맵 레벨에서 채도 조정)
     if (targetMipLevel > 0.0) {
-        let luminance = dot(color.rgb, vec3<f32>(0.299, 0.587, 0.114));
+        let luminance = getLuminance(color.rgb);
         let saturation = 0.9 + 0.1 / (1.0 + targetMipLevel * 0.1);
         color = vec4<f32>(mix(vec3<f32>(luminance), color.rgb, saturation), color.a);
     }

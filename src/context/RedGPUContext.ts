@@ -7,6 +7,8 @@ import AntialiasingManager from "../antialiasing/AntialiasingManager";
 import RedGPUContextDetector from "./core/RedGPUContextDetector";
 import RedGPUContextSizeManager, {IRedGPURectObject, RedResizeEvent} from "./core/RedGPUContextSizeManager";
 import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
+import CommandEncoderManager from "../commandEncoderManager/CommandEncoderManager";
+import RedGPUContextObserver from "./core/RedGPUContextObserver";
 
 /**
  * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
@@ -20,8 +22,8 @@ import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
  * [EN] It provides various features such as resizing, background color, debug panel, anti-aliasing, and resource management.
  *
  * ::: warning
- * [KO] 이 클래스는 RedGPU.init()에 의해 내부적으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is created internally by RedGPU.init().<br/>Do not create an instance directly using the 'new' keyword.
+ * [KO] 이 클래스는 시스템에 의해 자동으로 생성됩니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is automatically created by the system.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * * ### Example
@@ -51,7 +53,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Current time (frame based, ms)
      */
     currentTime: number
-    /**
+    /**ㄹ
      * [KO] GPU 캔버스 구성 정보 (WebGPU 설정용)
      * [EN] GPU canvas configuration info (for WebGPU setup)
      */
@@ -97,27 +99,34 @@ class RedGPUContext extends RedGPUContextViewContainer {
      */
     readonly #resourceManager: ResourceManager
     /**
+     * [KO] 커맨드 인코더 매니저 (GPU 커맨드 인코더 관리)
+     * [EN] Command encoder manager (GPU command encoder management)
+     */
+    readonly #commandEncoderManager: CommandEncoderManager
+    /**
+     * [KO] 안티앨리어싱 매니저
+     * [EN] Antialiasing manager
+     */
+    readonly #antialiasingManager: AntialiasingManager
+    /**
      * [KO] 배경색
      * [EN] Background color
      */
     #backgroundColor: ColorRGBA = new ColorRGBA(0, 0, 0, 1)
     /**
-     * [KO] 디버그 패널 사용 여부
-     * [EN] Whether to use the debug panel
-     */
-    #useDebugPanel: boolean = false
-    /**
      * [KO] 키보드 입력 버퍼
      * [EN] Keyboard input buffer
      */
     #keyboardKeyBuffer: { [key: string]: boolean } = {}
-    /**
-     * [KO] 안티앨리어싱 매니저
-     * [EN] Antialiasing manager
-     */
-    #antialiasingManager: AntialiasingManager
+
 
     #boundingClientRect: DOMRect
+
+    /**
+     * [KO] 캔버스 환경 변화 감지 옵저버
+     * [EN] Canvas environment change detector observer
+     */
+    #observer: RedGPUContextObserver
 
     /**
      * [KO] RedGPUContext 생성자
@@ -154,10 +163,23 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#sizeManager = new RedGPUContextSizeManager(this)
         this.#detector = new RedGPUContextDetector(this)
         this.#resourceManager = new ResourceManager(this)
-        this.#antialiasingManager = new AntialiasingManager(this)
+        this.#commandEncoderManager = new CommandEncoderManager(this)
+        this.#antialiasingManager = new AntialiasingManager()
         this.#initialize()
     }
 
+    /**
+     * [KO] 커맨드 인코더 매니저를 반환합니다.
+     * [EN] Returns the command encoder manager.
+     */
+    get commandEncoderManager(): CommandEncoderManager {
+        return this.#commandEncoderManager;
+    }
+
+    /**
+     * [KO] HTML 캔버스의 BoundingClientRect 정보를 반환합니다.
+     * [EN] Returns the BoundingClientRect info of the HTML canvas.
+     */
     get boundingClientRect(): DOMRect {
         return this.#boundingClientRect
     }
@@ -168,25 +190,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
      */
     get antialiasingManager(): AntialiasingManager {
         return this.#antialiasingManager;
-    }
-
-    /**
-     * [KO] 디버그 패널 사용 여부를 반환합니다.
-     * [EN] Returns whether the debug panel is used.
-     */
-    get useDebugPanel(): boolean {
-        return this.#useDebugPanel;
-    }
-
-    /**
-     * [KO] 디버그 패널 사용 여부를 설정합니다.
-     * [EN] Sets whether to use the debug panel.
-     * @param value -
-     * [KO] 사용 여부
-     * [EN] Usage status
-     */
-    set useDebugPanel(value: boolean) {
-        this.#useDebugPanel = value;
     }
 
     /**
@@ -281,16 +284,16 @@ class RedGPUContext extends RedGPUContextViewContainer {
     }
 
     /**
-     * [KO] 키보드 입력 버퍼를 반환합니다.
-     * [EN] Returns the keyboard input buffer.
+     * [KO] 키보드 입력 상태 버퍼를 반환합니다.
+     * [EN] Returns the keyboard input state buffer.
      */
     get keyboardKeyBuffer(): { [p: string]: boolean } {
         return this.#keyboardKeyBuffer;
     }
 
     /**
-     * [KO] 키보드 입력 버퍼를 설정합니다.
-     * [EN] Sets the keyboard input buffer.
+     * [KO] 키보드 입력 상태 버퍼를 설정합니다.
+     * [EN] Sets the keyboard input state buffer.
      * @param value -
      * [KO] 키보드 상태 객체
      * [EN] Keyboard state object
@@ -397,6 +400,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Destroys the GPU device and releases resources.
      */
     destroy() {
+        this.#observer?.stop()
         this.#gpuDevice.destroy()
     }
 
@@ -415,17 +419,22 @@ class RedGPUContext extends RedGPUContextViewContainer {
     }
 
     /**
+     * [KO] BoundingClientRect 정보를 갱신합니다. (내부용)
+     * [EN] Updates the BoundingClientRect information. (Internal use)
+     */
+    #updateBoundingClientRect() {
+        this.#boundingClientRect = this.#htmlCanvas.getBoundingClientRect();
+    }
+
+    /**
      * [KO] 초기화 메서드 (내부용)
      * [EN] Initialization method (Internal use)
      */
     #initialize() {
         this.#configure()
+        this.#updateBoundingClientRect();
         this.sizeManager.setSize('100%', '100%')
-        window?.addEventListener('resize', () => {
-            this.#boundingClientRect = this.#htmlCanvas.getBoundingClientRect();
-            this.sizeManager.setSize()
-        });
-        this.#boundingClientRect = this.#htmlCanvas.getBoundingClientRect();
+        this.#observer = new RedGPUContextObserver(this, () => this.#updateBoundingClientRect())
         const eventList = this.detector.isMobile ?
             [
                 'click',
@@ -463,12 +472,12 @@ class RedGPUContext extends RedGPUContextViewContainer {
                 this.viewList.forEach((view: View3D) => {
                     if (this.detector.isMobile && e instanceof TouchEvent && e.touches.length > 0) {
                         // Touch event
-                        view.pickingManager.mouseX = e.touches[0].clientX * devicePixelRatio - view.pixelRectObject.x;
-                        view.pickingManager.mouseY = e.touches[0].clientY * devicePixelRatio - view.pixelRectObject.y;
+                        view.pickingManager.mouseX = e.touches[0].clientX - view.pixelRectObject.x;
+                        view.pickingManager.mouseY = e.touches[0].clientY - view.pixelRectObject.y;
                     } else if (e instanceof MouseEvent) {
                         // Mouse event
-                        view.pickingManager.mouseX = e.offsetX * devicePixelRatio - view.pixelRectObject.x;
-                        view.pickingManager.mouseY = e.offsetY * devicePixelRatio - view.pixelRectObject.y;
+                        view.pickingManager.mouseX = e.offsetX - view.pixelRectObject.x;
+                        view.pickingManager.mouseY = e.offsetY - view.pixelRectObject.y;
                     }
                     if (eventTypeForDevice === PICKING_EVENT_TYPE.CLICK) {
                         view.pickingManager.lastMouseClickEvent = {...e, type: eventTypeForDevice}
@@ -489,16 +498,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
             window?.addEventListener('keyup', HD_keyUp);
             window?.addEventListener('keydown', HD_keyDown);
         }
-        const resizeObserver = new ResizeObserver(entries => {
-            // for (const entry of entries) {
-            // 	if (entry.target != canvas) { continue; }
-            // 	canvas.width = entry.devicePixelContentBoxSize[0].inlineSize;
-            // 	canvas.height = entry.devicePixelContentBoxSize[0].blockSize;
-            // }
-            // this.sizeManager.setSize()
-            console.log('entries', entries)
-        });
-        resizeObserver.observe(this.#htmlCanvas);
     }
 
     /**

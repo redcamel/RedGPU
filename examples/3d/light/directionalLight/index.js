@@ -1,11 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js?t=1778922031603";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
 
 /**
- * [KO] Directional Light 예제
- * [EN] Directional Light example
+ * [KO] DirectionalLight 예제 (Lighting Studio)
+ * [EN] DirectionalLight Example (Lighting Studio)
  *
- * [KO] Directional Light의 사용법과 속성 제어 방법을 보여줍니다.
- * [EN] Demonstrates the usage and property control of Directional Light.
+ * [KO] 태양광과 같은 평행광인 DirectionalLight의 기본 사용법과 실시간 제어 기능을 시연합니다.
+ * [EN] Demonstrates the basic usage and real-time control of DirectionalLight, which acts as a parallel light source like sunlight.
  */
 
 const canvas = document.createElement('canvas');
@@ -14,24 +15,38 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. [KO] 카메라 컨트롤러 설정
+        // [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.distance = 35;
         controller.speedDistance = 0.5;
 
+        // 2. [KO] 씬 및 뷰 구성
+        // [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view.grid = true;
-        view.axis = true;
         redGPUContext.addView(view);
 
+        // 3. [KO] 라이트 및 환경 구성
+        // [EN] Configure Light and Environment
+        
+        // [KO] 디렉셔널 라이트 생성
+        // [EN] Create Directional Light
         const light = createDirectionalLight(scene);
-        const mesh = createSampleMesh(redGPUContext, scene);
+        
+        // [KO] 스튜디오 환경 및 재질 구 배치
+        // [EN] Arrange studio environment and material spheres
+        createStudioEnvironment(redGPUContext, scene);
+        createMaterialStudio(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
-        const render = () => {
-        };
-        renderer.start(redGPUContext, render);
+        // 4. [KO] 렌더러 생성 및 루프 시작
+        // [EN] Create Renderer and Start Loop
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext);
 
-        renderTestPaneWithLightControl(redGPUContext, mesh, light);
+        // 5. [KO] 테스트용 GUI 렌더링
+        // [EN] Render Test GUI
+        renderTestPane(redGPUContext, light);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);
@@ -42,100 +57,119 @@ RedGPU.init(
 );
 
 /**
- * [KO] Directional Light를 생성합니다.
- * [EN] Creates a Directional Light.
- * @param {RedGPU.Display.Scene} scene
- * @returns {RedGPU.Light.DirectionalLight}
+ * [KO] 디렉셔널 라이트를 생성하고 씬에 추가합니다.
+ * [EN] Creates a directional light and adds it to the scene.
  */
 const createDirectionalLight = (scene) => {
     const direction = [-1, -1, -1];
-    const light = new RedGPU.Light.DirectionalLight(direction, '#fff');
+    const light = new RedGPU.Light.DirectionalLight(direction, '#ffffff');
     light.enableDebugger = true;
     scene.lightManager.addDirectionalLight(light);
     return light;
 };
 
 /**
- * [KO] 샘플 메시를 생성합니다.
- * [EN] Creates a sample mesh.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @returns {RedGPU.Display.Mesh}
+ * [KO] 바닥과 벽으로 구성된 스튜디오 배경을 생성합니다.
+ * [EN] Creates a studio background consisting of a floor and a wall.
  */
-const createSampleMesh = (redGPUContext, scene) => {
-    const material = new RedGPU.Material.PhongMaterial(redGPUContext);
-    material.diffuseTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
+const createStudioEnvironment = (redGPUContext, scene) => {
+    const studioMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+    studioMaterial.baseColorFactor = [0.5, 0.5, 0.5, 1.0];
+    studioMaterial.roughnessFactor = 0.5;
 
-    const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 2, 32, 32, 32);
-    const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
-    scene.addChild(mesh);
+    // [KO] 바닥 (Floor)
+    // [EN] Floor
+    const floorGeo = new RedGPU.Primitive.Plane(redGPUContext, 100, 100);
+    const floor = new RedGPU.Display.Mesh(redGPUContext, floorGeo, studioMaterial);
+    floor.rotationX = -90;
+    floor.y = -6;
+    scene.addChild(floor);
 
-    return mesh;
+    // [KO] 뒷벽 (Back Wall)
+    // [EN] Back Wall
+    const wallGeo = new RedGPU.Primitive.Plane(redGPUContext, 100, 60);
+    const wall = new RedGPU.Display.Mesh(redGPUContext, wallGeo, studioMaterial);
+    wall.z = -25;
+    wall.y = 24;
+    scene.addChild(wall);
 };
 
 /**
- * [KO] 조명 제어용 GUI를 렌더링합니다.
- * [EN] Renders the GUI for light control.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Mesh} mesh
- * @param {RedGPU.Light.DirectionalLight} light
+ * [KO] 금속성(Metallic)과 거칠기(Roughness) 변화를 시각화하는 구체들을 배치합니다.
+ * [EN] Arranges spheres to visualize variations in Metallic and Roughness.
  */
-const renderTestPaneWithLightControl = async (redGPUContext, mesh, light) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const pane = new Pane();
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-    const lightConfig = {
-        directionX: light.direction[0],
-        directionY: light.direction[1],
-        directionZ: light.direction[2],
-        intensity: light.intensity,
-        color: {r: light.color.r, g: light.color.g, b: light.color.b},
-        enableDebugger: light.enableDebugger
-    };
+const createMaterialStudio = (redGPUContext, scene) => {
+    const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 2.5, 32, 32, 32);
+    const rows = 2;
+    const cols = 5;
+    const spacing = 8;
 
-    const lightFolder = pane.addFolder({title: 'Directional Light', expanded: true});
-    lightFolder.addBinding(lightConfig, 'directionX', {min: -3, max: 3, step: 0.01}).on('change', (evt) => {
-        light.direction = [evt.value, lightConfig.directionY, lightConfig.directionZ];
-    });
-    lightFolder.addBinding(lightConfig, 'directionY', {min: -3, max: 3, step: 0.01}).on('change', (evt) => {
-        light.direction = [lightConfig.directionX, evt.value, lightConfig.directionZ];
-    });
-    lightFolder.addBinding(lightConfig, 'directionZ', {min: -3, max: 3, step: 0.01}).on('change', (evt) => {
-        light.direction = [lightConfig.directionX, lightConfig.directionY, evt.value];
-    });
-    lightFolder.addBinding(lightConfig, 'intensity', {min: 0, max: 2, step: 0.01}).on('change', (evt) => {
-        light.intensity = evt.value;
-    });
-    lightFolder.addBinding(lightConfig, "color", {picker: "inline", view: "color", expanded: true})
-        .on("change", (ev) => {
-            const {r, g, b} = ev.value;
-            light.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
-        });
-    lightFolder.addBinding(lightConfig, 'enableDebugger').on('change', (evt) => {
-        light.enableDebugger = evt.value;
-    });
-    const config = {
-        x: mesh.x,
-        y: mesh.y,
-        z: mesh.z,
-        scaleX: mesh.scaleX,
-        scaleY: mesh.scaleY,
-        scaleZ: mesh.scaleZ,
-        rotationX: mesh.rotationX,
-        rotationY: mesh.rotationY,
-        rotationZ: mesh.rotationZ
-    };
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            const metallic = row === 1 ? 1.0 : 0.0;
+            const roughness = col / (cols - 1);
+            
+            const material = new RedGPU.Material.PBRMaterial(redGPUContext);
+            material.baseColorFactor = metallic === 1.0 ? [1.0, 1.0, 1.0, 1.0] : [1.0, 0.0, 0.0, 1.0];
+            material.metallicFactor = metallic;
+            material.roughnessFactor = roughness;
 
-    const positionFolder = pane.addFolder({title: 'Mesh Position', expanded: true});
-    positionFolder.addBinding(config, 'x', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
-        mesh.setPosition(evt.value, config.y, config.z);
-    });
-    positionFolder.addBinding(config, 'y', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
-        mesh.setPosition(config.x, evt.value, config.z);
-    });
-    positionFolder.addBinding(config, 'z', {min: -10, max: 10, step: 0.1}).on('change', (evt) => {
-        mesh.setPosition(config.x, config.y, evt.value);
-    });
+            const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+            const x = col * spacing - ((cols - 1) * spacing) / 2;
+            const y = row * spacing - ((rows - 1) * spacing) / 2;
+            
+            mesh.setPosition(x, y + 2, 0);
+            scene.addChild(mesh);
+        }
+    }
+};
 
+/**
+ * [KO] 라이트 속성을 실시간으로 제어하기 위한 GUI를 구성합니다.
+ * [EN] Configures GUI for real-time light property control.
+ */
+const renderTestPane = (redGPUContext, light) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        gui: (pane) => {
+            const lightConfig = {
+                color: {r: light.color.r, g: light.color.g, b: light.color.b}
+            };
+
+            const lightFolder = pane.addFolder({title: 'DirectionalLight Control', expanded: true});
+            
+            // [KO] 색상 제어
+            // [EN] Color Control
+            const colorFolder = lightFolder.addFolder({title: 'Light Color', expanded: true});
+            colorFolder.addBinding(lightConfig, 'color', {picker: 'inline', view: 'color'}).on('change', (evt) => {
+                const {r, g, b} = evt.value;
+                light.color.setColorByRGB(Math.floor(r), Math.floor(g), Math.floor(b));
+            });
+
+            // [KO] 조도 제어 (Lux)
+            // [EN] Illuminance Control (Lux)
+            const luxFolder = lightFolder.addFolder({title: 'Illuminance', expanded: true});
+            luxFolder.addBinding(light, 'lux', {
+                min: 0,
+                max: 200000,
+                step: 100
+            });
+
+            // [KO] 구면 좌표 기반 방향 제어 (elevation, azimuth)
+            // [EN] Spherical Coordinate Direction Control (elevation, azimuth)
+            const sphericalFolder = lightFolder.addFolder({title: 'Spherical Direction (Sun)', expanded: true});
+            sphericalFolder.addBinding(light, 'elevation', {min: -90, max: 90, step: 0.1}).on('change', () => pane.refresh());
+            sphericalFolder.addBinding(light, 'azimuth', {min: 0, max: 360, step: 0.1}).on('change', () => pane.refresh());
+
+            // [KO] Cartesian 좌표 기반 방향 제어 (directionX, directionY, directionZ)
+            // [EN] Cartesian Coordinate Direction Control (directionX, directionY, directionZ)
+            const dirFolder = lightFolder.addFolder({title: 'Cartesian Direction', expanded: true});
+            dirFolder.addBinding(light, 'directionX', {min: -1, max: 1, step: 0.01}).on('change', () => pane.refresh());
+            dirFolder.addBinding(light, 'directionY', {min: -1, max: 1, step: 0.01}).on('change', () => pane.refresh());
+            dirFolder.addBinding(light, 'directionZ', {min: -1, max: 1, step: 0.01}).on('change', () => pane.refresh());
+            
+            // [KO] 디버거 활성화 여부
+            // [EN] Debugger visibility
+            lightFolder.addBinding(light, 'enableDebugger', {label: 'Show Light Debugger'});
+        }
+    });
 };

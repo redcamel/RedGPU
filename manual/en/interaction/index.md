@@ -5,7 +5,11 @@ order: 8
 
 # Interaction
 
-RedGPU provides an intuitive **Picking** system that handles mouse and touch events for both 3D and 2D objects, as well as a **Keyboard Buffer** (`keyboardKeyBuffer`) feature that manages keyboard states in real-time. This allows you to easily handle various user inputs, from simple mouse clicks to complex character controls.
+RedGPU provides tools to intuitively and easily handle various user inputs:
+
+- **Picking System**: Handles mouse and touch events for both 3D and 2D objects.
+- **Keyboard Buffer (`keyboardKeyBuffer`)**: Manages keyboard states in real-time to support fine-grained,
+  frame-by-frame control.
 
 ## 1. Mouse and Touch Interaction (Picking)
 
@@ -89,7 +93,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
     scene.addChild(mesh);
 
-    // 4. Create an HTML UI for status display (bottom left)
+    // 2. Create an HTML UI for status display (bottom left)
     const statusOverlay = document.createElement('div');
     Object.assign(statusOverlay.style, {
         position: 'fixed',
@@ -181,7 +185,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     redGPUContext.addView(view);
 
     // 5. Start Rendering
-    const renderer = new RedGPU.Renderer(redGPUContext);
+    const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext);
 });
 </pre>
@@ -228,21 +232,21 @@ You can directly explore various interaction behaviors provided by RedGPU throug
 ### 3.1 Mouse and Touch Examples
 - [Basic Mesh Interaction](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/mesh/)
 - [Sprite Interaction](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/sprite3D/)
+- [Sprite Sheet Interaction](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/spriteSheet3D/)
 - [Text Field Interaction](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/textField3D/)
 - [High-Precision Raycasting (Raycasting)](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/raycasting/)
 
 ### 3.2 Keyboard Interaction Examples
 - [Keyboard Interaction 3D Example](https://redcamel.github.io/RedGPU/examples/3d/interaction/keyboardEvent/)
 - [Keyboard Interaction 2D Example](https://redcamel.github.io/RedGPU/examples/2d/interaction/keyboardEvent/)
-- [Character Controller (WASD)](https://redcamel.github.io/RedGPU/examples/3d/controller/characterController/)
 
-## Key Summary
+## 4. Key Summary
 
 - Independent event processing for each object is possible through `addListener`.
 - Precise, frame-by-frame keyboard state control is possible through `keyboardKeyBuffer`.
 - A rich user experience (UX) can be provided by using these alongside the web-standard DOM API.
 
-## Next Learning Recommendation
+## 5. Next Learning Recommendation
 
 Apply post-processing effects that enhance the visual completion of scenes enriched with interaction.
 

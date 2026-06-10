@@ -62,7 +62,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     scene.lightManager.addDirectionalLight(light);
     
     const ambientLight = new RedGPU.Light.AmbientLight();
-    ambientLight.intensity = 0.5;
+    ambientLight.intensityMultiplier = 0.5;
     scene.lightManager.ambientLight = ambientLight;
 
     // 1. InstancingMesh 생성
@@ -111,7 +111,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     redGPUContext.addView(view);
 
     // 5. 렌더링
-    const renderer = new RedGPU.Renderer(redGPUContext);
+    const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext, () => {
         // 전체 회전
         mesh.rotationY += 0.002;

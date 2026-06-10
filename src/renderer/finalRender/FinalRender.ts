@@ -15,8 +15,8 @@ import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl'
 import vertexModuleSource from './vertex.wgsl'
 
-const VERTEX_SHADER_INFO = parseWGSL(vertexModuleSource)
-const FRAGMENT_SHADER_INFO = parseWGSL(fragmentModuleSource)
+const VERTEX_SHADER_INFO = parseWGSL('FINAL_RENDER_VERTEX', vertexModuleSource)
+const FRAGMENT_SHADER_INFO = parseWGSL('FINAL_RENDER_FRAGMENT', fragmentModuleSource)
 const VERTEX_UNIFORM_STRUCT = VERTEX_SHADER_INFO.uniforms.vertexUniforms
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_FINAL_RENDER'
 const FRAGMENT_SHADER_MODULE_NAME = 'FRAGMENT_MODULE_FINAL_RENDER'
@@ -37,15 +37,14 @@ class FinalRender {
     //
     #fragmentBindGroupLayout: GPUBindGroupLayout
     #fragmentShader: GPUShaderModule
-    #fragmentUniformBindGroups: GPUBindGroup[] = []
+    #fragmentBindGroupCache: WeakMap<GPUTextureView, GPUBindGroup>[] = []
     //
     #pipeline: GPURenderPipeline
     //
-    #viewSizes: { width; height }[] = []
-    #viewGpuTextureViews: GPUTextureView[] = []
     #sampler: Sampler
     #fragmentBuffer: GPUBuffer[] = []
     #fragmentBufferData: Float32Array[] = []
+    #lastUpdateMSAAID: string
 
     constructor() {
     }
@@ -56,31 +55,35 @@ class FinalRender {
      * @param {RedGPUContext} redGPUContext - The RedGPUContext object.
      * @param {GPURenderPassDescriptor[]} viewList_renderPassDescriptorList - The list of render passes to be rendered.
      */
-    render(redGPUContext: RedGPUContext, viewList_renderPassDescriptorList: GPURenderPassDescriptor[]) {
-        const {sizeManager, gpuDevice, antialiasingManager} = redGPUContext
-        const {changedMSAA, useMSAA} = antialiasingManager
+    render(redGPUContext: RedGPUContext, viewList_renderPassDescriptorList: GPURenderPassDescriptor[]): void {
+        const {sizeManager, antialiasingManager, commandEncoderManager} = redGPUContext
+        const {msaaID,} = antialiasingManager
         const {pixelRectObject: canvasPixelRectObject} = sizeManager
         const {width: canvasW, height: canvasH} = canvasPixelRectObject
         if (canvasW === 0 || canvasH === 0) return
         //
+        const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID
         const finalRenderPassDesc: GPURenderPassDescriptor = this.#getFinalRenderPassDesc(redGPUContext)
-        const finalRenderCommandEnc: GPUCommandEncoder = gpuDevice.createCommandEncoder()
-        const finalRenderPassEnc: GPURenderPassEncoder = finalRenderCommandEnc.beginRenderPass(finalRenderPassDesc)
-        finalRenderPassEnc.setViewport(0, 0, canvasW, canvasH, 0, 1);
-        finalRenderPassEnc.setScissorRect(0, 0, canvasW, canvasH);
-        //
-        if (!this.#vertexBindGroupLayout || changedMSAA) this.#initGPUDetails(redGPUContext)
-        this.#renderViewList(
-            redGPUContext,
-            finalRenderPassEnc,
-            viewList_renderPassDescriptorList.map((v: GPURenderPassDescriptor) => {
-                const temp = v.colorAttachments[0]
-                return temp.postEffectView || temp.pickingView || temp.resolveTarget || temp.view
-            }), canvasW, canvasH,
-            useMSAA
-        )
-        finalRenderPassEnc.end()
-        gpuDevice.queue.submit([finalRenderCommandEnc.finish()])
+        commandEncoderManager.addMainRenderPass(finalRenderPassDesc, (finalRenderPassEnc) => {
+            finalRenderPassEnc.setViewport(0, 0, canvasW, canvasH, 0, 1);
+            finalRenderPassEnc.setScissorRect(0, 0, canvasW, canvasH);
+            //
+            if (!this.#vertexBindGroupLayout || dirtyMSAA) {
+                this.#initGPUDetails(redGPUContext);
+                this.#fragmentBindGroupCache = [];
+            }
+            this.#renderViewList(
+                redGPUContext,
+                finalRenderPassEnc,
+                viewList_renderPassDescriptorList.map((v: GPURenderPassDescriptor) => {
+                    const temp = v.colorAttachments[0]
+                    return temp.postEffectView || temp.pickingView || temp.resolveTarget || temp.view
+                }), canvasW, canvasH,
+
+                dirtyMSAA
+            )
+        })
+        this.#lastUpdateMSAAID = msaaID
     }
 
     #updateFinalViewBackgroundColor(view: View3D, index: number) {
@@ -122,7 +125,7 @@ class FinalRender {
         finalRenderPassEnc: GPURenderPassEncoder,
         resultTextureViews: GPUTextureView[],
         canvasW: number, canvasH: number,
-        useMSAA: boolean
+        dirtyMSAA: boolean
     ) {
         const {gpuDevice} = redGPUContext
         resultTextureViews.forEach((gpuTextureView, index) => {
@@ -145,21 +148,13 @@ class FinalRender {
                 projectionMatrix as Float32Array as BufferSource
             )
             //
-            const needNewBindGroup =
-                redGPUContext.antialiasingManager.changedMSAA
-                || !this.#viewSizes[index]
-                || this.#viewSizes[index].width !== viewW
-                || this.#viewSizes[index].height !== viewH
-                || this.#viewGpuTextureViews[index] !== gpuTextureView
-            if (needNewBindGroup) {
-                if (!this.#fragmentBuffer[index]) {
-                    this.#fragmentBuffer[index] = redGPUContext.gpuDevice.createBuffer({
-                        label: `FINAL_RENDER_FRAGMENT_BUFFER_${index}`,
-                        size: 16,
-                        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-                    })
-                    this.#fragmentBufferData[index] = new Float32Array([1, 0, 0, 1])
-                }
+            if (!this.#fragmentBindGroupCache[index] || dirtyMSAA) {
+                this.#fragmentBindGroupCache[index] = null
+                this.#fragmentBindGroupCache[index] = new WeakMap();
+            }
+
+            let fragmentBindGroup = this.#fragmentBindGroupCache[index].get(gpuTextureView);
+            if (!fragmentBindGroup) {
                 const fragmentBindGroupDesc: GPUBindGroupDescriptor = {
                     layout: this.#fragmentBindGroupLayout,
                     label: FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME,
@@ -175,14 +170,15 @@ class FinalRender {
                         }
                     ]
                 }
-                this.#fragmentUniformBindGroups[index] = gpuDevice.createBindGroup(fragmentBindGroupDesc)
-                this.#viewSizes[index] = {width: viewW || 1, height: viewH || 1}
-                this.#viewGpuTextureViews[index] = gpuTextureView
+                fragmentBindGroup = gpuDevice.createBindGroup(fragmentBindGroupDesc)
+                this.#fragmentBindGroupCache[index].set(gpuTextureView, fragmentBindGroup);
+
             }
+
             this.#updateFinalViewBackgroundColor(targetView, index)
-            finalRenderPassEnc.setPipeline(this.#getPipeline(redGPUContext))
+            finalRenderPassEnc.setPipeline(this.#getPipeline(redGPUContext, dirtyMSAA))
             finalRenderPassEnc.setBindGroup(0, vertexUniformBindGroup);
-            finalRenderPassEnc.setBindGroup(1, this.#fragmentUniformBindGroups[index])
+            finalRenderPassEnc.setBindGroup(1, fragmentBindGroup)
             finalRenderPassEnc.draw(6, 1, 0, 0);
         })
     }
@@ -237,10 +233,18 @@ class FinalRender {
             }
             this.#vertexUniformBindGroups[index] = gpuDevice.createBindGroup(vertexBindGroupDesc)
         }
+        if (!this.#fragmentBuffer[index]) {
+            this.#fragmentBuffer[index] = redGPUContext.gpuDevice.createBuffer({
+                label: `FINAL_RENDER_FRAGMENT_BUFFER_${index}`,
+                size: 16,
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+            })
+            this.#fragmentBufferData[index] = new Float32Array([1, 0, 0, 1])
+        }
     }
 
     #getFinalRenderPassDesc(redGPUContext: RedGPUContext): GPURenderPassDescriptor {
-        const {backgroundColor, gpuContext} = redGPUContext
+        const {gpuContext} = redGPUContext
         const finalRenderTextureView = gpuContext.getCurrentTexture().createView({label: 'FINAL_RENDER'})
         const colorAttachment: GPURenderPassColorAttachment = {
             view: finalRenderTextureView,
@@ -255,8 +259,8 @@ class FinalRender {
         }
     }
 
-    #getPipeline(redGPUContext: RedGPUContext) {
-        if (!this.#pipeline || redGPUContext.antialiasingManager.changedMSAA) {
+    #getPipeline(redGPUContext: RedGPUContext, dirtyMSAA: boolean) {
+        if (!this.#pipeline || dirtyMSAA) {
             const {gpuDevice} = redGPUContext
             const pipelineLayout: GPUPipelineLayout = gpuDevice.createPipelineLayout({
                 label: "FINAL_RENDER_PIPELINE_LAYOUT",

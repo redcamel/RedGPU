@@ -18,15 +18,15 @@ RedGPU provides a **TextField** system that allows you to conveniently render te
 
 Text field objects provide the following style properties.
 
-| Property | Description | Default Value |
-| :--- | :--- | :--- |
-| `text` | String to display (supports `<br/>`) | `""` |
-| `fontSize` | Font size (px) | `16` |
-| `fontFamily` | Font family | `"Arial"` |
-| `color` | Text color (Hex, RGB, etc.) | `"#fff"` |
-| `background` | Background color and transparency | `"transparent"` |
-| `textAlign` | Text alignment (`left`, `center`, `right`) | `"center"` |
-| `padding` | Padding (px) | `0` |
+| Property     | Description                                | Default Value   |
+|:-------------|:-------------------------------------------|:----------------|
+| `text`       | String to display (supports `<br/>`)       | `""`            |
+| `fontSize`   | Font size (px)                             | `24`            |
+| `fontFamily` | Font family                                | `"Arial"`       |
+| `color`      | Text color (Hex, RGB, etc.)                | `"#fff"`        |
+| `background` | Background color and transparency          | `"transparent"` |
+| `textAlign`  | Text alignment (`left`, `center`, `right`) | `"center"`      |
+| `padding`    | Padding (px)                               | `0`             |
 
 ::: info [HTML Tag Support]
 You can handle line breaks using the `<br/>` tag in the `text` property.

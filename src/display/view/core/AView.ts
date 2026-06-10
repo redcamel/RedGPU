@@ -1,4 +1,6 @@
 import Camera2D from "../../../camera/camera/Camera2D";
+import OrthographicCamera from "../../../camera/camera/OrthographicCamera";
+import PerspectiveCamera from "../../../camera/camera/PerspectiveCamera";
 import AController from "../../../camera/core/AController";
 import RedGPUContext from "../../../context/RedGPUContext";
 import PickingManager from "../../../picking/core/PickingManager";
@@ -6,47 +8,36 @@ import FXAA from "../../../antialiasing/fxaa/FXAA";
 import TAA from "../../../antialiasing/taa/TAA";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import screenToWorld from "../../../math/coordinates/screenToWorld";
-import InstanceIdGenerator from "../../../utils/uuid/InstanceIdGenerator";
 import DrawDebuggerAxis from "../../drawDebugger/DrawDebuggerAxis";
 import DrawDebuggerGrid from "../../drawDebugger/grid/DrawDebuggerGrid";
 import Scene from "../../scene/Scene";
 import ViewTransform from "./ViewTransform";
 
 /**
- * [KO] View3D 및 View2D의 공통 기반이 되는 추상 클래스입니다.
+ * [KO] View3D 및 View2D of the common foundation that serves as an abstract base class.
  * [EN] Abstract base class that serves as a common foundation for View3D and View2D.
  *
  * [KO] RedGPU의 뷰 시스템에서 핵심 역할을 하며, Scene, Camera, PickingManager, 디버깅 도구(Grid, Axis), 후처리 효과(TAA, FXAA) 등을 포함합니다.
  * [EN] Plays a key role in RedGPU's view system, including Scene, Camera, PickingManager, debugging tools (Grid, Axis), and post-effects (TAA, FXAA).
  *
  * ::: warning
- * [KO] 이 클래스는 시스템 내부적으로 사용되는 추상 클래스입니다.<br/>직접 인스턴스를 생성하지 마십시오.
- * [EN] This class is an abstract class used internally by the system.<br/>Do not create instances directly.
+ * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
+ * [EN] This class is an abstract class, so you cannot create an instance directly.<br/>Do not create an instance directly using the 'new' keyword.
  * :::
  *
  * @category Core
  */
 abstract class AView extends ViewTransform {
     /**
-     * [KO] 뷰의 이름
-     * [EN] Name of the view
-     */
-    #name: string
-    /**
      * [KO] 연결된 Scene 객체
      * [EN] Connected Scene object
      */
     #scene: Scene
     /**
-     * [KO] 인스턴스 고유 ID
-     * [EN] Instance unique ID
-     */
-    #instanceId: number
-    /**
      * [KO] 객체 선택을 관리하는 PickingManager
      * [EN] PickingManager that manages object selection
      */
-    #pickingManager: PickingManager = new PickingManager()
+    #pickingManager: PickingManager
     /**
      * [KO] Frustum Culling 사용 여부
      * [EN] Whether to use frustum culling
@@ -93,37 +84,23 @@ abstract class AView extends ViewTransform {
      * [KO] Scene 인스턴스
      * [EN] Scene instance
      * @param camera -
-     * [KO] AController 또는 Camera2D 인스턴스
-     * [EN] AController or Camera2D instance
+     * [KO] PerspectiveCamera, OrthographicCamera, AController 또는 Camera2D 인스턴스
+     * [EN] PerspectiveCamera, OrthographicCamera, AController or Camera2D instance
      * @param name -
      * [KO] 선택적 이름
      * [EN] Optional name
      */
-    constructor(redGPUContext: RedGPUContext, scene: Scene, camera: AController | Camera2D, name?: string) {
+    protected constructor(
+        redGPUContext: RedGPUContext,
+        scene: Scene,
+        camera: PerspectiveCamera | OrthographicCamera | AController | Camera2D,
+        name?: string
+    ) {
         super(redGPUContext)
         this.scene = scene
         this.camera = camera
+        this.#pickingManager = new PickingManager(this)
         if (name) this.name = name
-    }
-
-    /**
-     * [KO] 뷰의 이름을 반환합니다.
-     * [EN] Returns the name of the view.
-     */
-    get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor)
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
-
-    /**
-     * [KO] 뷰의 이름을 설정합니다.
-     * [EN] Sets the name of the view.
-     * @param value -
-     * [KO] 설정할 이름 문자열
-     * [EN] Name string to set
-     */
-    set name(value: string) {
-        this.#name = value;
     }
 
     /**
@@ -273,6 +250,9 @@ abstract class AView extends ViewTransform {
     /**
      * [KO] FXAA 후처리 효과 객체를 반환합니다.
      * [EN] Returns the FXAA post-effect object.
+     * @returns
+     * [KO] FXAA 인스턴스
+     * [EN] FXAA instance
      */
     get fxaa(): FXAA {
         if (!this.#fxaa) {
@@ -284,6 +264,9 @@ abstract class AView extends ViewTransform {
     /**
      * [KO] TAA 후처리 효과 객체를 반환합니다.
      * [EN] Returns the TAA post-effect object.
+     * @returns
+     * [KO] TAA 인스턴스
+     * [EN] TAA instance
      */
     get taa(): TAA {
         if (!this.#taa) {
@@ -302,8 +285,8 @@ abstract class AView extends ViewTransform {
      * [KO] 화면 Y 좌표
      * [EN] Screen Y coordinate
      * @returns
-     * [KO] 변환된 월드 좌표
-     * [EN] Converted world coordinates
+     * [KO] 변환된 월드 좌표 (3D 벡터 배열)
+     * [EN] Converted world coordinates (3D vector array)
      */
     screenToWorld(
         screenX: number,
@@ -313,11 +296,11 @@ abstract class AView extends ViewTransform {
     }
 
     /**
-     * [KO] 마우스가 현재 뷰의 픽셀 영역 내에 있는지 확인합니다.
-     * [EN] Checks if the mouse is within the pixel area of the current view.
+     * [KO] 마우스 포인터가 현재 뷰의 픽셀 영역 내에 있는지 확인합니다.
+     * [EN] Checks if the mouse pointer is within the pixel area of the current view.
      * @returns
-     * [KO] 포함 여부
-     * [EN] Whether it is contained
+     * [KO] 마우스가 뷰 영역 안에 있으면 true, 그렇지 않으면 false
+     * [EN] True if the mouse is inside the view bounds, otherwise false
      */
     checkMouseInViewBounds(): boolean {
         const {pixelRectObject, pickingManager} = this;

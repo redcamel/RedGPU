@@ -18,11 +18,11 @@ const createBasePipeline = (
     // module = mesh.gpuRenderInfo.vertexShaderModule
     switch (pipelineType) {
         case PIPELINE_TYPE.SHADOW :
-            entryPoint = 'drawDirectionalShadowDepth'
+            entryPoint = 'entryPointShadowVertex'
             pipelineLabel = `${module.label}_shadow_pipeline`
             break
         case PIPELINE_TYPE.PICKING :
-            entryPoint = 'picking'
+            entryPoint = 'entryPointPickingVertex'
             pipelineLabel = `${module.label}_picking_pipeline`
             break
         default :
@@ -66,7 +66,7 @@ const createBasePipeline = (
             if (mesh.material) {
                 pipelineDescriptor.fragment = {
                     module: mesh.material.gpuRenderInfo.fragmentShaderModule,
-                    entryPoint: 'picking',
+                    entryPoint: 'entryPointPickingFragment',
                     targets: [
                         {
                             format: navigator.gpu.getPreferredCanvasFormat(),

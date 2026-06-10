@@ -5,7 +5,10 @@ order: 8
 
 # 인터렉션
 
-RedGPU는 3D 및 2D 객체에 대한 마우스 및 터치 이벤트를 처리하는 직관적인 **피킹**(Picking) 시스템과 키보드 상태를 실시간으로 관리하는 **키보드 버퍼**(keyboardKeyBuffer) 기능을 제공합니다. 이를 통해 마우스 클릭부터 복잡한 캐릭터 컨트롤까지 다양한 사용자 입력을 손쉽게 처리할 수 있습니다.
+RedGPU는 다양한 사용자 입력을 직관적이고 손쉽게 처리할 수 있는 도구를 제공합니다:
+
+- **피킹(Picking) 시스템**: 3D 및 2D 객체에 대한 마우스 및 터치 이벤트를 직관적으로 처리합니다.
+- **키보드 버퍼(keyboardKeyBuffer)**: 키보드 상태를 실시간으로 관리하여 프레임 단위의 세밀한 컨트롤을 지원합니다.
 
 ## 1. 마우스 및 터치 인터렉션 (Picking)
 
@@ -89,7 +92,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
     scene.addChild(mesh);
 
-    // 4. 상태 표시를 위한 HTML UI 생성 (하단 좌측)
+    // 2. 상태 표시를 위한 HTML UI 생성 (하단 좌측)
     const statusOverlay = document.createElement('div');
     Object.assign(statusOverlay.style, {
         position: 'fixed',
@@ -182,7 +185,7 @@ RedGPU.init(canvas, (redGPUContext) => {
     redGPUContext.addView(view);
 
     // 5. 렌더링 시작
-    const renderer = new RedGPU.Renderer(redGPUContext);
+    const renderer = new RedGPU.Renderer();
     renderer.start(redGPUContext);
 });
 </pre>
@@ -227,23 +230,25 @@ RedGPU.init(canvas, (redGPUContext) => {
 RedGPU가 제공하는 다양한 인터렉션 동작을 아래 예제들을 통해 직접 확인할 수 있습니다.
 
 ### 3.1 마우스 및 터치 예제
-- [일반 메시 인터렉션](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/mesh/)
-- [스프라이트 인터렉션](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/sprite3D/)
-- [텍스트 필드 인터렉션](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/textField3D/)
-- [고정밀 레이캐스팅 (Raycasting)](https://redcamel.github.io/RedGPU/examples/3d/interaction/mouseEvent/raycasting/)
+
+- [일반 메시 인터렉션](/RedGPU/examples/3d/interaction/mouseEvent/mesh/)
+- [스프라이트 인터렉션](/RedGPU/examples/3d/interaction/mouseEvent/sprite3D/)
+- [스프라이트 시트 인터렉션](/RedGPU/examples/3d/interaction/mouseEvent/spriteSheet3D/)
+- [텍스트 필드 인터렉션](/RedGPU/examples/3d/interaction/mouseEvent/textField3D/)
+- [고정밀 레이캐스팅 (Raycasting)](/RedGPU/examples/3d/interaction/mouseEvent/raycasting/)
 
 ### 3.2 키보드 인터렉션 예제
-- [키보드 인터렉션 3D예제](https://redcamel.github.io/RedGPU/examples/3d/interaction/keyboardEvent/)
-- [키보드 인터렉션 2D예제](https://redcamel.github.io/RedGPU/examples/2d/interaction/keyboardEvent/)
-- [캐릭터 컨트롤러 (WASD)](https://redcamel.github.io/RedGPU/examples/3d/controller/characterController/)
 
-## 핵심 요약
+- [키보드 인터렉션 3D 예제](/RedGPU/examples/3d/interaction/keyboardEvent/)
+- [키보드 인터렉션 2D 예제](/RedGPU/examples/2d/interaction/keyboardEvent/)
+
+## 4. 핵심 요약
 
 - `addListener` 를 통해 객체별로 독립적인 이벤트 처리가 가능합니다.
 - `keyboardKeyBuffer` 를 통해 프레임 단위의 정밀한 키보드 상태 제어가 가능합니다.
 - 웹 표준 DOM API와 함께 사용하여 풍부한 사용자 경험(UX)을 제공할 수 있습니다.
 
-## 다음 학습 추천
+## 5. 다음 학습 추천
 
 인터렉션까지 더해진 풍성한 장면에 시각적인 완성도를 높여주는 후처리 효과를 적용해 봅니다.
 

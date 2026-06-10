@@ -7,7 +7,11 @@ import HDRLoader, {HDRData} from "./HDRLoader";
 import {float32ToFloat16Linear} from "./tone/float32ToFloat16Linear";
 
 const MANAGED_STATE_KEY = 'managedHDRTextureState'
-type SrcInfo = string | { src: string, cacheKey: string }
+/**
+ * [KO] HDR 텍스처 소스 정보 타입입니다. 이미지 URL 문자열이거나 src와 cacheKey를 가진 객체일 수 있습니다.
+ * [EN] HDR texture source information type. Can be an image URL string or an object with src and cacheKey.
+ */
+export type HDRSrcInfo = string | { src: string, cacheKey: string }
 
 /**
  * [KO] Radiance HDR(.hdr) 파일을 사용하는 2D 텍스처 클래스입니다.
@@ -59,7 +63,7 @@ class HDRTexture extends ManagementResourceBase {
      */
     constructor(
         redGPUContext: RedGPUContext,
-        src: SrcInfo,
+        src: HDRSrcInfo,
         onLoad?: (textureInstance?: HDRTexture) => void,
         onError?: (error: Error) => void
     ) {
@@ -85,16 +89,65 @@ class HDRTexture extends ManagementResourceBase {
         }
     }
 
-    /** [KO] 텍스처 가로 크기 [EN] Texture width */
-    get width(): number { return this.#width; }
-    /** [KO] 텍스처 세로 크기 [EN] Texture height */
-    get height(): number { return this.#height; }
-    /** [KO] 비디오 메모리 사용량(byte) [EN] Video memory usage in bytes */
-    get videoMemorySize(): number { return this.#videoMemorySize; }
-    /** [KO] GPUTexture 객체 [EN] GPUTexture object */
-    get gpuTexture(): GPUTexture { return this.#gpuTexture; }
-    /** [KO] 텍스처 소스 경로 [EN] Texture source path */
-    get src(): string { return this.#src; }
+    /**
+     * [KO] 텍스처 가로 크기를 반환합니다.
+     * [EN] Returns the texture width.
+     *
+     * @returns
+     * [KO] 가로 크기 (픽셀)
+     * [EN] Width in pixels
+     */
+    get width(): number {
+        return this.#width;
+    }
+
+    /**
+     * [KO] 텍스처 세로 크기를 반환합니다.
+     * [EN] Returns the texture height.
+     *
+     * @returns
+     * [KO] 세로 크기 (픽셀)
+     * [EN] Height in pixels
+     */
+    get height(): number {
+        return this.#height;
+    }
+
+    /**
+     * [KO] 비디오 메모리 사용량(byte)을 반환합니다.
+     * [EN] Returns the video memory usage in bytes.
+     *
+     * @returns
+     * [KO] 비디오 메모리 사용량 (Bytes)
+     * [EN] Video memory usage in bytes
+     */
+    get videoMemorySize(): number {
+        return this.#videoMemorySize;
+    }
+
+    /**
+     * [KO] GPUTexture 객체를 반환합니다.
+     * [EN] Returns the GPUTexture object.
+     *
+     * @returns
+     * [KO] GPUTexture 인스턴스
+     * [EN] GPUTexture instance
+     */
+    get gpuTexture(): GPUTexture {
+        return this.#gpuTexture;
+    }
+
+    /**
+     * [KO] 텍스처 소스 경로를 반환합니다.
+     * [EN] Returns the texture source path.
+     *
+     * @returns
+     * [KO] 소스 경로
+     * [EN] Source path
+     */
+    get src(): string {
+        return this.#src;
+    }
 
     /**
      * [KO] 텍스처 소스 경로 설정 및 로드를 시작합니다.
@@ -104,7 +157,7 @@ class HDRTexture extends ManagementResourceBase {
      * [KO] 설정할 소스 정보
      * [EN] Source info to set
      */
-    set src(value: SrcInfo) {
+    set src(value: HDRSrcInfo) {
         const newSrc = this.#getParsedSrc(value)
         this.#validateHDRFormat(newSrc);
         this.#src = newSrc;
@@ -116,14 +169,16 @@ class HDRTexture extends ManagementResourceBase {
     destroy() {
         const temp = this.#gpuTexture
         this.#setGpuTexture(null);
-        this.__fireListenerList(true)
+        this.notifyUpdate(true)
         this.#unregisterResource()
         this.#src = null
         this.cacheKey = null
-        if (temp) temp.destroy()
+        if (temp) {
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(temp)
+        }
     }
 
-    #getCacheKey(srcInfo?: SrcInfo): string {
+    #getCacheKey(srcInfo?: HDRSrcInfo): string {
         let result
         if (!srcInfo) result = this.uuid;
         if (typeof srcInfo === 'string') {
@@ -134,7 +189,7 @@ class HDRTexture extends ManagementResourceBase {
         return `HDRTexture_${result}`
     }
 
-    #getParsedSrc(srcInfo?: SrcInfo): string {
+    #getParsedSrc(srcInfo?: HDRSrcInfo): string {
         return typeof srcInfo === 'string' ? srcInfo : srcInfo.src
     }
 
@@ -151,7 +206,7 @@ class HDRTexture extends ManagementResourceBase {
             this.#height = hdrData.height;
             await this.#createGPUTexture(hdrData);
             this.#onLoad?.(this);
-            this.__fireListenerList();
+            this.notifyUpdate();
         } catch (error) {
             console.error('HDR loading error:', error);
             this.#onError?.(error);
@@ -161,39 +216,31 @@ class HDRTexture extends ManagementResourceBase {
     async #createGPUTexture(hdrData: HDRData) {
         const {gpuDevice} = this.redGPUContext
         const oldTexture = this.#gpuTexture;
-        
+
         const textureDescriptor: GPUTextureDescriptor = {
             size: [this.#width, this.#height, 1],
             format: this.#format,
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC,
             label: `HDRTexture_2D_${this.#src}`
         };
 
         const newGPUTexture = gpuDevice.createTexture(textureDescriptor);
-        
+
         // Float32 to Float16 conversion and upload
-        const float16Data = await float32ToFloat16Linear(
+        await float32ToFloat16Linear(
             this.redGPUContext,
             hdrData.data,
             {
                 width: this.#width,
                 height: this.#height,
-                workgroupSize: [8, 8]
+                targetTexture: newGPUTexture
             }
         );
 
-        gpuDevice.queue.writeTexture(
-            { texture: newGPUTexture },
-            float16Data.data.buffer,
-            { bytesPerRow: this.#width * 8, rowsPerImage: this.#height },
-            { width: this.#width, height: this.#height }
-        );
-
         this.#setGpuTexture(newGPUTexture);
-        
+
         if (oldTexture) {
-            await gpuDevice.queue.onSubmittedWorkDone();
-            oldTexture.destroy();
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(oldTexture);
         }
     }
 
@@ -202,7 +249,7 @@ class HDRTexture extends ManagementResourceBase {
         this.#gpuTexture = value;
         this.#videoMemorySize = value ? calculateTextureByteSize(value) : 0;
         this.targetResourceManagedState.videoMemory += this.#videoMemorySize;
-        this.__fireListenerList();
+        this.notifyUpdate();
     }
 
     #registerResource() {

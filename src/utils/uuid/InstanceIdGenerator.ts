@@ -1,9 +1,9 @@
 /**
- * [KO] 타입별 고유 인스턴스 ID를 생성하는 유틸리티 클래스입니다.
- * [EN] Utility class for generating unique instance IDs per type.
+ * [KO] 타입(Constructor)별로 고유한 인스턴스 ID를 생성하는 유틸리티입니다.
+ * [EN] Utility for generating unique instance IDs per type (Constructor).
  *
- * [KO] 각 생성자 타입마다 별도의 카운터를 관리하여 0부터 ID를 부여합니다.
- * [EN] Manages separate counters for each constructor to assign IDs from 0.
+ * [KO] 각 클래스 타입마다 독립적인 카운터를 유지하여 0부터 순차적인 ID를 부여합니다.
+ * [EN] Maintains an independent counter for each class type and assigns IDs sequentially starting from 0.
  *
  * * ### Example
  * ```typescript
@@ -13,22 +13,14 @@
  * @category UUID
  */
 class InstanceIdGenerator {
-    /**
-     * [KO] 타입별 현재 ID 맵
-     * [EN] Current ID map per type
-     */
     private static idMaps: Map<Function, number> = new Map();
 
     /**
-     * [KO] 다음 고유 인스턴스 ID를 반환합니다.
-     * [EN] Returns the next unique instance ID.
+     * [KO] 해당 타입의 다음 고유 ID를 반환합니다.
+     * [EN] Returns the next unique ID for the given type.
      *
-     * @param type -
-     * [KO] ID를 생성할 타입
-     * [EN] Type to generate ID for
-     * @returns
-     * [KO] 고유 인스턴스 ID
-     * [EN] Unique instance ID
+     * @param type - [KO] 대상 타입 [EN] Target type
+     * @returns [KO] 고유 ID [EN] Unique ID
      */
     static getNextId(type: Function): number {
         let currentId = this.idMaps.get(type) || 0;

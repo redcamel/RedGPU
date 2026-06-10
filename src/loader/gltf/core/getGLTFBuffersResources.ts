@@ -68,7 +68,7 @@ export default getGLTFBuffersResources
 const cacheMap: Map<string, ArrayBuffer> = new Map();
 const pendingMap: Map<string, Promise<ArrayBuffer>> = new Map();
 const arrayBufferLoader = (url: string, onSuccess, onError) => {
-    const originURL = url
+
     url = getAbsoluteURL(window.location.href, url)
     // keepLog(url,originURL)
     if (cacheMap.has(url)) {

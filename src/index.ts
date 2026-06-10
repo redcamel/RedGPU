@@ -8,16 +8,19 @@
  */
 import init from "./init";
 import GLTFLoader from "./loader/gltf/GLTFLoader";
-import SystemCode from "./resources/systemCode/SystemCode";
+import ShaderLibrary from "./systemCodeManager/ShaderLibrary";
+
 export * as Bound from "./bound";
 export {
     init,
-    SystemCode,
+    ShaderLibrary,
     GLTFLoader
 }
+export * as BaseObject from "./base";
 export * as Camera from "./camera/";
 export * as Context from "./context";
 export * as Color from "./color";
+export * as CommandEncoderManager from "./commandEncoderManager";
 export * from "./geometry";
 export * as Util from "./utils";
 export * as Display from "./display";
@@ -34,7 +37,7 @@ export * as Picking from "./picking";
 export * as RenderState from "./renderState";
 export * as ToneMapping from "./toneMapping";
 export * as Shadow from "./shadow";
-export * from "./defineProperty"
+export * as DefineGPUProperty from "./defineProperty"
 export * as Antialiasing from "./antialiasing"
 export * as Physics from "./physics"
 

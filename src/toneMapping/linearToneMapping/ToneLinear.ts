@@ -22,7 +22,6 @@ class ToneLinear extends AToneMappingEffect {
             'POST_EFFECT_TONE_MAPPING_LINEAR',
             createBasicPostEffectCode(this, computeCode, uniformStructCode)
         );
-        this.updateUniforms();
     }
 }
 

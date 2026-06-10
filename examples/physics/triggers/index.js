@@ -1,5 +1,6 @@
-import * as RedGPU from "../../../dist/index.js?t=1770713934910";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1770713934910";
+import * as RedGPU from "../../../dist/index.js?t=1778922031603";
+import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1778922031603";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1778922031603";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -39,10 +40,6 @@ RedGPU.init(
 
 		// [KO] 조명 설정: 환경광과 방향광
 		// [EN] Lighting setup: Ambient and Directional lights
-		const ambientLight = new RedGPU.Light.AmbientLight();
-		ambientLight.intensity = 0.5;
-		scene.lightManager.ambientLight = ambientLight;
-
 		const directionalLight = new RedGPU.Light.DirectionalLight();
 		scene.lightManager.addDirectionalLight(directionalLight);
 
@@ -189,33 +186,32 @@ RedGPU.init(
  * @param {function} resetScene
  */
 const renderTestPane = async (redGPUContext, scene, triggerMesh, resetScene) => {
-	const { Pane } = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-	const { setDebugButtons } = await import("../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-	setDebugButtons(RedGPU, redGPUContext)
-	const pane = new Pane();
-	
-	const params = {
-		showSensor: !!triggerMesh.parent
-	};
+	new RedGPUExampleHelper(redGPUContext, {
+		gui: (pane) => {
+			const params = {
+				showSensor: !!triggerMesh.parent
+			};
 
-	// [KO] 센서 영역 가시성 제어 (addChild/removeChild 사용)
-	// [EN] Control sensor area visibility (using addChild/removeChild)
-	pane.addBinding(params, 'showSensor', {
-		label: 'Show Sensor Mesh'
-	}).on('change', (ev) => {
-		if (ev.value) {
-			scene.addChild(triggerMesh);
-		} else {
-			scene.removeChild(triggerMesh);
+			// [KO] 센서 영역 가시성 제어 (addChild/removeChild 사용)
+			// [EN] Control sensor area visibility (using addChild/removeChild)
+			pane.addBinding(params, 'showSensor', {
+				label: 'Show Sensor Mesh'
+			}).on('change', (ev) => {
+				if (ev.value) {
+					scene.addChild(triggerMesh);
+				} else {
+					scene.removeChild(triggerMesh);
+				}
+			});
+
+			pane.addBlade({
+				view: 'text',
+				label: 'Info',
+				value: 'Green box is a Sensor!',
+				parse: (v) => v,
+				readonly: true
+			});
+			pane.addButton({ title: 'Reset Balls' }).on('click', () => resetScene());
 		}
 	});
-
-	pane.addBlade({
-		view: 'text',
-		label: 'Info',
-		value: 'Green box is a Sensor!',
-		parse: (v) => v,
-		readonly: true
-	});
-	pane.addButton({ title: 'Reset Balls' }).on('click', () => resetScene());
 };

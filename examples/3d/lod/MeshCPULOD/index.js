@@ -1,199 +1,157 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
-
-// 1. Create and append a canvas
-const canvas = document.createElement('canvas');
-document.body.appendChild(canvas);
+import * as RedGPU from "../../../../dist/index.js?t=1778922031603";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
 
 /**
  * [KO] Mesh CPU LOD 예제
  * [EN] Mesh CPU LOD example
  *
- * [KO] CPU 기반 LOD(Level of Detail)를 적용한 메시 렌더링을 시연합니다.
- * [EN] Demonstrates mesh rendering with CPU-based LOD (Level of Detail).
+ * [KO] CPU 기반의 LOD(Level of Detail) 기능을 개별 Mesh 객체들에 적용하여 거리별 최적화 성능을 시연합니다.
+ * [EN] Demonstrates CPU-based LOD (Level of Detail) on individual Mesh objects for distance-based optimization performance.
  */
 
-// 2. Initialize RedGPU
+const canvas = document.createElement('canvas');
+document.body.appendChild(canvas);
+
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. 카메라 및 뷰 설정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.speedDistance = 3;
+
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        const light = new RedGPU.Light.DirectionalLight()
-        scene.lightManager.addDirectionalLight(light)
+        // 2. 조명 설정
+        const light = new RedGPU.Light.DirectionalLight();
+        scene.lightManager.addDirectionalLight(light);
 
-        const texture = new RedGPU.Resource.BitmapTexture(
+        // 3. IBL 및 스카이박스 설정
+        const ibl = new RedGPU.Resource.IBL(
             redGPUContext,
-            '../../../assets/UV_Grid_Sm.jpg'
+            '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr'
         );
+        view.ibl = ibl;
+
+        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, ibl.environmentTexture);
+        view.grid = true;
+
+        // 4. 머티리얼 설정
+        const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg');
         const material = new RedGPU.Material.PhongMaterial(redGPUContext);
         material.diffuseTexture = texture;
 
-        const skyboxTexture = new RedGPU.Resource.CubeTexture(
-            redGPUContext,
-            [
-                "../../../assets/skybox/px.jpg", // Positive X
-                "../../../assets/skybox/nx.jpg", // Negative X
-                "../../../assets/skybox/py.jpg", // Positive Y
-                "../../../assets/skybox/ny.jpg", // Negative Y
-                "../../../assets/skybox/pz.jpg", // Positive Z
-                "../../../assets/skybox/nz.jpg", // Negative Z
-            ]
-        );
-        view.skybox = new RedGPU.Display.SkyBox(redGPUContext, skyboxTexture);
-        view.grid = true
+        // 5. CPU LOD 테스트 생성
+        createMeshCPULODTest(redGPUContext, scene, material);
 
-        createTest(redGPUContext, scene, material);
+        // 6. 렌더링 시작
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
-        const render = (time) => {
-            // Logic for every frame goes here
-            // 매 프레임마다 실행될 로직 추가
-            if (scene.children[0]) {
-                // scene.children[0].rotationY += 0.001;
-            }
-        };
-        renderer.start(redGPUContext, render);
-
+        // 7. 테스트 GUI 설정
+        renderTestPane(redGPUContext, scene);
     },
     (failReason) => {
-        // Show the error if initialization fails
-        // 초기화 실패 시 에러 표시
-        console.error('초기화 실패:', failReason);
-
-        // Create an element for the error message
-        // 에러 메시지 표시용 요소 생성
-        const errorMessage = document.createElement('div');
+        console.error("Initialization failed:", failReason);
+        const errorMessage = document.createElement("div");
         errorMessage.innerHTML = failReason;
-
-        // Append the error message to the document body
-        // 문서 본문에 에러 메시지 추가
         document.body.appendChild(errorMessage);
     }
 );
 
 /**
- * [KO] 테스트 씬을 생성하고 GUI를 설정합니다.
- * [EN] Creates the test scene and sets up the GUI.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Scene} scene
- * @param {RedGPU.Material.PhongMaterial} material
+ * [KO] CPU LOD 테스트를 위한 다수의 메시를 생성합니다.
+ * [EN] Creates multiple meshes for CPU LOD test.
  */
-async function createTest(redGPUContext, scene, material) {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext);
-
+const createMeshCPULODTest = (redGPUContext, scene, material) => {
     const maxNum = redGPUContext.detector.isMobile ? 1000 : 5000;
+    const sphereGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 1, 32, 32, 32);
+
     for (let i = 0; i < maxNum; i++) {
-        const mesh = new RedGPU.Display.Mesh(
-            redGPUContext,
-            new RedGPU.Primitive.Sphere(redGPUContext, 1, 32, 32, 32),
-            material
+        const mesh = new RedGPU.Display.Mesh(redGPUContext, sphereGeometry, material);
+        mesh.setPosition(
+            Math.random() * 140 - 70,
+            Math.random() * 140 - 70,
+            Math.random() * 140 - 70
         );
-        mesh.setPosition(Math.random() * 140 - 70, Math.random() * 140 - 70, Math.random() * 140 - 70);
-        mesh.setRotation(Math.random() * 360, Math.random() * 360, Math.random() * 360);
+        mesh.setRotation(
+            Math.random() * 360,
+            Math.random() * 360,
+            Math.random() * 360
+        );
+
+        // 초기 LOD 단계 설정
+        mesh.LODManager.addLOD(25, new RedGPU.Primitive.Sphere(redGPUContext, 1, 5, 5, 5)); // 중해상도
+        mesh.LODManager.addLOD(50, new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2)); // 저해상도 (박스)
+        mesh.LODManager.addLOD(70, new RedGPU.Primitive.Circle(redGPUContext, 1)); // 최저해상도 (원형)
+
         scene.addChild(mesh);
-
     }
+};
 
-    const pane = new Pane();
+/**
+ * [KO] 테스트용 GUI를 렌더링하고 LOD 설정을 제어합니다.
+ * [EN] Renders the GUI for testing and controls LOD settings.
+ */
+const renderTestPane = (redGPUContext, scene) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        gui: (pane) => {
+            const lodFolder = pane.addFolder({title: 'CPU LOD Settings', expanded: true});
 
-    // ---- 기본 메쉬 (LOD 0) 표시용 - 토글 불가 ----
-    const baseInfo = {
-        baseMesh: "Base Mesh (Sphere 32x32)",
-    };
-    pane.addBinding(baseInfo, "baseMesh", {
-        label: "Base Mesh",
-        readonly: true,
-    });
+            // LOD 정보 상태 관리 객체
+            const lodState = {
+                lod25: true,
+                lod50: true,
+                lod70: true,
+                get lodCount() { return scene.children[0]?.LODManager.LODList.length || 0; },
+                get lodDistances() {
+                    return (scene.children[0]?.LODManager.LODList || [])
+                        .map(lod => lod.distance)
+                        .sort((a, b) => a - b)
+                        .join(', ');
+                }
+            };
 
-    // ---- LOD 토글용 유틸 ----
-    const hasLOD = (distance) => {
-        return scene.children[0].LODManager.LODList.some(lod => lod.distance === distance);
-    };
+            const baseInfo = {baseMesh: "Sphere (32x32x32)"};
+            lodFolder.addBinding(baseInfo, "baseMesh", {label: "Base Mesh (LOD 0)", readonly: true});
 
-    const addLODIfNeeded = (distance, createGeometry) => {
-        if (!hasLOD(distance)) {
-            scene.children.forEach(mesh => mesh.LODManager.addLOD(distance, createGeometry()));
+            // 모든 메시의 LOD를 일괄 변경하는 헬퍼 함수
+            const updateAllLODs = (distance, action, geometryFactory) => {
+                scene.children.forEach(mesh => {
+                    if (mesh instanceof RedGPU.Display.Mesh) {
+                        if (action === 'add') {
+                            const exists = mesh.LODManager.LODList.some(lod => lod.distance === distance);
+                            if (!exists) mesh.LODManager.addLOD(distance, geometryFactory());
+                        } else {
+                            mesh.LODManager.removeLOD(distance);
+                        }
+                    }
+                });
+            };
+
+            // LOD 레이어 토글 바인딩
+            const setupLODToggle = (distance, label, geometryFactory) => {
+                lodFolder.addBinding(lodState, `lod${distance}`, {label})
+                    .on('change', (ev) => {
+                        updateAllLODs(distance, ev.value ? 'add' : 'remove', geometryFactory);
+                        pane.refresh();
+                    });
+            };
+
+            setupLODToggle(25, 'LOD 25 (Sphere 5x5)', () => new RedGPU.Primitive.Sphere(redGPUContext, 1, 5, 5, 5));
+            setupLODToggle(50, 'LOD 50 (Box)', () => new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2));
+            setupLODToggle(70, 'LOD 70 (Circle)', () => new RedGPU.Primitive.Circle(redGPUContext, 1));
+
+            lodFolder.addBinding(lodState, 'lodCount', {label: 'Active LOD Steps', readonly: true});
+            lodFolder.addBinding(lodState, 'lodDistances', {label: 'Distances', readonly: true});
+
+            const infoFolder = pane.addFolder({title: 'Scene Info', expanded: true});
+            infoFolder.addBinding({meshCount: scene.numChildren}, 'meshCount', {
+                label: 'Mesh Count',
+                readonly: true,
+                format: (v) => `${Math.floor(v).toLocaleString()}`
+            });
         }
-    };
-
-    const removeLODIfExists = (distance) => {
-        if (hasLOD(distance)) {
-            scene.children.forEach(mesh => mesh.LODManager.removeLOD(distance));
-        }
-    };
-
-    const lodState = {
-        lod25: true,
-        lod50: true,
-        lod70: true,
-        lodCount: 0,
-        lodDistances: '',
-    };
-
-    const updateLODInfo = () => {
-        const list = scene.children[0].LODManager.LODList;
-        lodState.lodCount = list.length;
-        lodState.lodDistances = list
-            .map(lod => lod.distance)
-            .sort((a, b) => a - b)
-            .join(', ');
-    };
-
-    // 초기 LOD 3개 활성화
-    addLODIfNeeded(25, () => new RedGPU.Primitive.Sphere(redGPUContext, 1, 5, 5, 5));
-    addLODIfNeeded(50, () => new RedGPU.Primitive.Box(redGPUContext));
-    addLODIfNeeded(70, () => new RedGPU.Primitive.Circle(redGPUContext, 1));
-    updateLODInfo();
-
-    // 25 LOD 토글
-    pane.addBinding(lodState, 'lod25', {label: 'LOD 25 (Sphere 5x5x5)'})
-        .on('change', (ev) => {
-            if (ev.value) {
-                addLODIfNeeded(25, () => new RedGPU.Primitive.Sphere(redGPUContext, 1, 5, 5, 5));
-            } else {
-                removeLODIfExists(25);
-            }
-            updateLODInfo();
-        });
-
-    // 50 LOD 토글
-    pane.addBinding(lodState, 'lod50', {label: 'LOD 50 (Box)'})
-        .on('change', (ev) => {
-            if (ev.value) {
-                addLODIfNeeded(50, () => new RedGPU.Primitive.Box(redGPUContext, 2, 2, 2));
-            } else {
-                removeLODIfExists(50);
-            }
-            updateLODInfo();
-        });
-
-    // 70 LOD 토글
-    pane.addBinding(lodState, 'lod70', {label: 'LOD 70 (Circle)'})
-        .on('change', (ev) => {
-            if (ev.value) {
-                addLODIfNeeded(70, () => new RedGPU.Primitive.Circle(redGPUContext, 1));
-            } else {
-                removeLODIfExists(70);
-            }
-            updateLODInfo();
-        });
-
-    // 현재 LOD 상태 표시
-    pane.addBinding(lodState, 'lodCount', {
-        label: 'LOD Count',
-        readonly: true,
-        format: (v) => `${Math.floor(v).toLocaleString()}`
     });
-    pane.addBinding(lodState, 'lodDistances', {
-        label: 'LOD Distances',
-        readonly: true,
-    });
-
-}
+};

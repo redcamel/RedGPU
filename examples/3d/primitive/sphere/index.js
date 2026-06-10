@@ -1,11 +1,12 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
+import * as RedGPU from "../../../../dist/index.js?t=1778922031603";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
 
 /**
  * [KO] Sphere Primitive 예제
  * [EN] Sphere Primitive example
  *
- * [KO] Sphere 프리미티브 생성 및 반지름, 세그먼트, 각도 속성을 실시간으로 제어하는 방법을 보여줍니다.
- * [EN] Demonstrates how to create a Sphere primitive and control its radius, segments, and angle properties in real-time.
+ * [KO] Sphere 프리미티브 생성 및 속성을 실시간으로 제어하는 방법을 시연합니다.
+ * [EN] Demonstrates creating a Sphere primitive and controlling its properties in real-time.
  */
 
 const canvas = document.createElement('canvas');
@@ -14,28 +15,32 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        // 1. [KO] 카메라 컨트롤러 설정 [EN] Setup Camera Controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 10;
         controller.tilt = 0;
         controller.speedDistance = 0.3;
 
+        // 2. [KO] 씬 및 뷰 구성 [EN] Configure Scene and View
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
+        // 3. [KO] 프리미티브 생성 및 추가 [EN] Create and Add Primitives
         createPrimitive(redGPUContext, scene);
 
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        // 4. [KO] 렌더러 생성 및 루프 시작 [EN] Create Renderer and Start Loop
+        const renderer = new RedGPU.Renderer();
         const render = (time) => {
-            // [KO] 매 프레임 실행될 로직
-            // [EN] Logic per frame
+            // [KO] 매 프레임 실행될 로직 [EN] Logic per frame
         };
         renderer.start(redGPUContext, render);
 
+        // 5. [KO] 테스트용 GUI 렌더링 [EN] Render Test GUI
         renderTestPane(redGPUContext);
     },
     (failReason) => {
-        console.error("Initialization failed:", failReason);
+        console.error('Initialization failed:', failReason);
         const errorMessage = document.createElement('div');
         errorMessage.innerHTML = failReason;
         document.body.appendChild(errorMessage);
@@ -43,136 +48,113 @@ RedGPU.init(
 );
 
 /**
- * [KO] Sphere 프리미티브들을 생성하고 정돈된 레이아웃으로 씬에 배치합니다.
- * [EN] Creates Sphere primitives and places them in the scene with an organized layout.
- *
- * @param {RedGPU.RedGPUContext} redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
- * @param {RedGPU.Display.Scene} scene - [KO] 프리미티브가 추가될 씬 [EN] Scene where primitives will be added
+ * [KO] 다양한 토폴로지의 Sphere 메시와 라벨을 생성합니다.
+ * [EN] Creates Sphere meshes with various topologies and labels.
+ * @param {RedGPU.RedGPUContext} redGPUContext
+ * @param {RedGPU.Display.Scene} scene
  */
 const createPrimitive = (redGPUContext, scene) => {
-    const materials = {
-        solid: new RedGPU.Material.BitmapMaterial(
-            redGPUContext,
-            new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')
-        ),
-        wireframe: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ff00'),
-        point: new RedGPU.Material.ColorMaterial(redGPUContext, '#00ffff'),
+    // [KO] 재질 정의 [EN] Define Materials
+    const MAT = {
+        grid:    new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/UV_Grid_Sm.jpg')),
+        diffuse: new RedGPU.Material.BitmapMaterial(redGPUContext, new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/texture/h_test.jpg')),
+        line:    new RedGPU.Material.ColorMaterial(redGPUContext, '#00ff00'),
+        point:   new RedGPU.Material.ColorMaterial(redGPUContext, '#00ffff'),
     };
 
-    const defaultOptions = {
-        radius: 1,
-        widthSegments: 16,
-        heightSegments: 16,
-        phiStart: 0,
-        phiLength: Math.PI * 2,
-        thetaStart: 0,
-        thetaLength: Math.PI,
-        uvSize: 1,
-    };
+    // [KO] 공유 지오메트리 생성 [EN] Create Shared Geometry
+    const sphereGeometry = new RedGPU.Primitive.Sphere(redGPUContext, 1, 32, 16);
 
-    const sphereGeometry = new RedGPU.Primitive.Sphere(
-        redGPUContext,
-        defaultOptions.radius,
-        defaultOptions.widthSegments,
-        defaultOptions.heightSegments,
-        defaultOptions.phiStart,
-        defaultOptions.phiLength,
-        defaultOptions.thetaStart,
-        defaultOptions.thetaLength,
-        defaultOptions.uvSize
-    );
-
-    const gap = 3.5;
-    const objects = [
-        {material: materials.wireframe, position: [-gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST},
-        {material: materials.solid, position: [0, 0, 0]},
-        {material: materials.point, position: [gap, 0, 0], topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST},
+    const GAP = 3.5;
+    const MESH_ITEMS = [
+        {material: MAT.line,    x: -GAP * 1.5, topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.LINE_LIST,  label: 'Line List'},
+        {material: MAT.grid,    x: -GAP * 0.5,                                                     label: 'Triangle List<br/>(Grid)'},
+        {material: MAT.diffuse, x:  GAP * 0.5,                                                     label: 'Triangle List<br/>(Diffuse)'},
+        {material: MAT.point,   x:  GAP * 1.5, topology: RedGPU.GPU_PRIMITIVE_TOPOLOGY.POINT_LIST, label: 'Point List'},
     ];
 
-    objects.forEach(({material, position, topology}) => {
+    MESH_ITEMS.forEach(({material, x, topology, label}) => {
+        // [KO] 메시 생성 및 설정 [EN] Create and configure Mesh
         const mesh = new RedGPU.Display.Mesh(redGPUContext, sphereGeometry, material);
         if (topology) mesh.primitiveState.topology = topology;
-        mesh.setPosition(...position);
+        mesh.setPosition(x, 0, 0);
         scene.addChild(mesh);
 
-        // [KO] 토폴로지 이름 라벨 생성
-        // [EN] Create topology name label
-        const label = new RedGPU.Display.TextField3D(redGPUContext);
-        label.setPosition(position[0], 2.0, position[2]);
-        label.text = topology || RedGPU.GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
-        label.color = '#ffffff';
-        label.fontSize = 14;
-        label.worldSize = 0.7;
-        scene.addChild(label);
+        // [KO] 3D 라벨 생성 [EN] Create 3D Label
+        const text = new RedGPU.Display.TextField3D(redGPUContext);
+        text.setPosition(x, 2.0, 0);
+        text.text      = label;
+        text.color     = '#ffffff';
+        text.fontSize  = 32;
+        text.worldSize = label.includes('<br/>') ? 1.0 : 0.5;
+        scene.addChild(text);
     });
 
-    // [KO] 타이틀 라벨 생성
-    // [EN] Create title label
-    const titleText = new RedGPU.Display.TextField3D(redGPUContext);
-    titleText.setPosition(0, -2.3, 0);
-    titleText.text = 'Customizable Sphere Primitive';
-    titleText.color = '#ffffff';
-    titleText.fontSize = 48;
-    titleText.fontWeight = 500;
-    titleText.worldSize = 1.3;
-    scene.addChild(titleText);
+    // [KO] 타이틀 텍스트 추가 [EN] Add Title Text
+    const title = new RedGPU.Display.TextField3D(redGPUContext);
+    title.setPosition(0, -2.3, 0);
+    title.text       = 'Customizable Sphere Primitive';
+    title.color      = '#ffffff';
+    title.fontSize   = 96;
+    title.fontWeight = 500;
+    title.worldSize  = 1.3;
+    scene.addChild(title);
 };
 
 /**
- * [KO] 테스트를 위한 Tweakpane GUI를 초기화합니다.
- * [EN] Initializes the Tweakpane GUI for testing.
- *
- * @param {RedGPU.RedGPUContext} redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU context
+ * [KO] 실시간 속성 제어를 위한 GUI를 구성합니다.
+ * [EN] Configures GUI for real-time property control.
+ * @param {RedGPU.RedGPUContext} redGPUContext
  */
-const renderTestPane = async (redGPUContext) => {
-    const {Pane} = await import("https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910");
-    const {setDebugButtons} = await import("../../../exampleHelper/createExample/panes/index.js?t=1770713934910");
-    setDebugButtons(RedGPU, redGPUContext)
-    const pane = new Pane();
-
+const renderTestPane = (redGPUContext) => {
     const config = {
         radius: 1,
-        widthSegments: 16,
+        widthSegments: 32,
         heightSegments: 16,
         phiStart: 0,
         phiLength: Math.PI * 2,
         thetaStart: 0,
         thetaLength: Math.PI,
-        uvSize: 1,
+        cullMode: RedGPU.GPU_CULL_MODE.BACK,
     };
 
-    /**
-     * [KO] 설정값 변경 시 Sphere 지오메트리를 재생성하여 업데이트합니다.
-     * [EN] Recreates and updates the Sphere geometry when configuration values change.
-     */
-    const updateGeometry = () => {
-        const meshList = redGPUContext.viewList[0].scene.children;
-        const newGeometry = new RedGPU.Primitive.Sphere(
-            redGPUContext,
-            config.radius,
-            config.widthSegments,
-            config.heightSegments,
-            config.phiStart,
-            config.phiLength,
-            config.thetaStart,
-            config.thetaLength,
-            config.uvSize
+    const getMeshes = () =>
+        redGPUContext.viewList[0].scene.children.filter(
+            obj => obj instanceof RedGPU.Display.Mesh && !(obj instanceof RedGPU.Display.TextField3D)
         );
 
-        meshList.forEach(mesh => {
-            if (mesh instanceof RedGPU.Display.Mesh && !(mesh instanceof RedGPU.Display.TextField3D)) {
-                mesh.geometry = newGeometry;
-            }
-        });
+    const updateGeometry = () => {
+        const newGeometry = new RedGPU.Primitive.Sphere(
+            redGPUContext,
+            config.radius, config.widthSegments, config.heightSegments,
+            config.phiStart, config.phiLength, config.thetaStart, config.thetaLength
+        );
+        getMeshes().forEach(mesh => mesh.geometry = newGeometry);
     };
 
-    const folder = pane.addFolder({title: 'Sphere Properties', expanded: true});
-    folder.addBinding(config, 'radius', {min: 0.5, max: 5, step: 0.1}).on('change', updateGeometry);
-    folder.addBinding(config, 'widthSegments', {min: 3, max: 64, step: 1}).on('change', updateGeometry);
-    folder.addBinding(config, 'heightSegments', {min: 3, max: 64, step: 1}).on('change', updateGeometry);
-    folder.addBinding(config, 'phiStart', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
-    folder.addBinding(config, 'phiLength', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
-    folder.addBinding(config, 'thetaStart', {min: 0, max: Math.PI, step: 0.1}).on('change', updateGeometry);
-    folder.addBinding(config, 'thetaLength', {min: 0, max: Math.PI, step: 0.1}).on('change', updateGeometry);
-    folder.addBinding(config, 'uvSize', {min: 0.1, max: 5, step: 0.1}).on('change', updateGeometry);
+    const updateCullMode = () => {
+        getMeshes().forEach(mesh => mesh.primitiveState.cullMode = config.cullMode);
+    };
+
+    new RedGPUExampleHelper(redGPUContext, {
+        gui: (pane) => {
+            const geoFolder = pane.addFolder({title: 'Geometry', expanded: true});
+            geoFolder.addBinding(config, 'radius', {min: 0.5, max: 5, step: 0.1}).on('change', updateGeometry);
+            geoFolder.addBinding(config, 'widthSegments', {min: 3, max: 64, step: 1}).on('change', updateGeometry);
+            geoFolder.addBinding(config, 'heightSegments', {min: 3, max: 64, step: 1}).on('change', updateGeometry);
+            geoFolder.addBinding(config, 'phiStart', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
+            geoFolder.addBinding(config, 'phiLength', {min: 0, max: Math.PI * 2, step: 0.1}).on('change', updateGeometry);
+            geoFolder.addBinding(config, 'thetaStart', {min: 0, max: Math.PI, step: 0.1}).on('change', updateGeometry);
+            geoFolder.addBinding(config, 'thetaLength', {min: 0, max: Math.PI, step: 0.1}).on('change', updateGeometry);
+
+            const matFolder = pane.addFolder({title: 'CullMode', expanded: true});
+            matFolder.addBinding(config, 'cullMode', {
+                options: {
+                    NONE:  RedGPU.GPU_CULL_MODE.NONE,
+                    BACK:  RedGPU.GPU_CULL_MODE.BACK,
+                    FRONT: RedGPU.GPU_CULL_MODE.FRONT,
+                }
+            }).on('change', updateCullMode);
+        }
+    });
 };

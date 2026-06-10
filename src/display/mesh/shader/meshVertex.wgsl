@@ -1,12 +1,12 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include drawDirectionalShadowDepth;
-#redgpu_include picking;
-#redgpu_include calcDisplacements;
+#redgpu_include shadow.getShadowCoord;
+#redgpu_include entryPoint.mesh.entryPointShadowVertex;
+#redgpu_include entryPoint.mesh.entryPointPickingVertex;
+#redgpu_include displacement.getDisplacementPosition;
 
-#redgpu_include meshVertexBasicUniform;
+#redgpu_include systemStruct.meshVertexBasicUniform;
 
 const maxDistance: f32 = 1000.0;
-const maxMipLevel: f32 = 10.0;
 
 @group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
 @group(1) @binding(1) var displacementTextureSampler: sampler;
@@ -14,26 +14,26 @@ const maxMipLevel: f32 = 10.0;
 
 
 @vertex
-fn main(inputData: InputData) -> OutputData {
-    var output: OutputData;
+fn main(inputData: InputData) -> VertexOutput {
+    var output: VertexOutput;
 
     // System uniforms
     #redgpu_if disableJitter
     {
-        let u_projectionMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
+        let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionViewMatrix;
     }
     #redgpu_else
     {
-        let u_projectionMatrix = systemUniforms.projectionMatrix;
+        let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
     }
     #redgpu_endIf
 
-    let u_projectionCameraMatrix = systemUniforms.projectionCameraMatrix;
-    let u_noneJitterProjectionCameraMatrix = systemUniforms.noneJitterProjectionCameraMatrix;
-    let u_prevNoneJitterProjectionCameraMatrix = systemUniforms.prevNoneJitterProjectionCameraMatrix;
+    let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
+    let u_noneJitterProjectionViewMatrix = systemUniforms.projection.noneJitterProjectionViewMatrix;
+    let u_prevNoneJitterProjectionViewMatrix = systemUniforms.projection.prevNoneJitterProjectionViewMatrix;
     let u_resolution = systemUniforms.resolution;
     let u_camera = systemUniforms.camera;
-    let u_cameraMatrix = u_camera.cameraMatrix;
+    let u_viewMatrix = u_camera.viewMatrix;
     let u_cameraPosition = u_camera.cameraPosition;
 
     // Vertex uniforms
@@ -56,65 +56,69 @@ fn main(inputData: InputData) -> OutputData {
     let input_vertexNormal = inputData.vertexNormal;
     let input_uv = inputData.uv;
 
+    // [KO] 트랜스폼이 적용된 UV 계산
+    let transformedUV = input_uv * vertexUniforms.uvTransform.zw + vertexUniforms.uvTransform.xy;
+
     // Position and normal calculation
     var position: vec4<f32>;
-    var normalPosition: vec4<f32>;
 
 
     #redgpu_if useDisplacementTexture
+        // [KO] 실제 텍스처의 최대 밉레벨을 가져와서 거리에 비례한 샘플링 레벨을 결정합니다.
+        // [EN] Get the actual maximum mip level of the texture and determine the sampling level proportional to the distance.
         let tempPosition = u_modelMatrix * input_position_vec4;
         let distance = distance(tempPosition.xyz, u_cameraPosition);
-        let mipLevel = (distance / maxDistance) * maxMipLevel;
+        let maxMipLevel = f32(textureNumLevels(displacementTexture)) - 1.0;
+        
+        // [KO] 거리에 따른 밉레벨 계산 (바이어스 제거)
+        // [EN] Mip level calculation based on distance (remove bias)
+        let targetMipLevel = clamp((distance / maxDistance) * maxMipLevel, 0.0, maxMipLevel);
 
-        let displacedPosition = calcDisplacementPosition(
+        // [KO] 트랜스폼된 UV를 사용하여 위치 이동 계산
+        let displacedPosition = getDisplacementPosition(
             input_position,
             input_vertexNormal,
             displacementTexture,
             displacementTextureSampler,
             u_displacementScale,
-            input_uv,
-            mipLevel
+            transformedUV,
+            targetMipLevel
         );
 
         position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
-
-        let worldUV = input_uv;
-        let displacedNormal = calcDisplacementNormal(
-            normalize((u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz),
-            displacementTexture,
-            displacementTextureSampler,
-            u_displacementScale,
-            worldUV,
-            mipLevel
-        );
-        normalPosition = vec4<f32>(displacedNormal, 0.0);
     #redgpu_else
         position = u_modelMatrix * input_position_vec4;
-        normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 1.0);
     #redgpu_endIf
 
+    // [KO] 방향 벡터 변환이므로 W=0.0 사용 및 정규화
+    let worldNormal = normalize((u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz);
+    let normalPosition = vec4<f32>(worldNormal, 0.0);
+
     // Basic output assignments
-    output.position = u_projectionCameraMatrix * position;
+    output.position = u_projectionViewMatrix * position;
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition.xyz;
-    output.uv = input_uv * vertexUniforms.uvTransform.zw + vertexUniforms.uvTransform.xy;
+    output.uv = transformedUV;
+
+    let transformedTangentXYZ = (u_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
+    output.vertexTangent = vec4<f32>(normalize(transformedTangentXYZ), inputData.vertexTangent.w);
 
     output.combinedOpacity = vertexUniforms.combinedOpacity;
 
     // Shadow calculation
     #redgpu_if receiveShadow
     {
-        let posFromLight = u_directionalLightProjectionViewMatrix * vec4(position.xyz, 1.0);
-        output.shadowPos = vec3(posFromLight.xy * vec2(0.5, -0.5) + vec2(0.5), posFromLight.z);
+        output.shadowCoord = getShadowCoord(position.xyz, u_directionalLightProjectionViewMatrix);
         output.receiveShadow = vertexUniforms.receiveShadow;
     }
     #redgpu_endIf
 
     // Motion vector calculation
     {
-      output.currentClipPos = u_noneJitterProjectionCameraMatrix * position;
-      output.prevClipPos = u_prevNoneJitterProjectionCameraMatrix * u_prevModelMatrix * input_position_vec4;
+      output.currentClipPos = u_noneJitterProjectionViewMatrix * position;
+      output.prevClipPos = u_prevNoneJitterProjectionViewMatrix * u_prevModelMatrix * input_position_vec4;
     }
 
     return output;
 }
+

@@ -1,15 +1,12 @@
 import {mat4} from "gl-matrix";
 import {Function} from "wgsl_reflect";
 import {OrthographicCamera} from "../../camera";
-import IsometricController from "../../camera/controller/IsometricController";
 import RedGPUContext from "../../context/RedGPUContext";
-import DefineForVertex from "../../defineProperty/DefineForVertex";
 import Geometry from "../../geometry/Geometry";
 import {ABaseMaterial} from "../../material/core";
 import Primitive from "../../primitive/core/Primitive";
 import DrawBufferManager, {DrawCommandSlot} from "../../renderer/core/DrawBufferManager";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
-import BitmapTexture from "../../resources/texture/BitmapTexture";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import AABB from "../../bound/AABB";
 import calculateMeshAABB from "../../bound/math/calculateMeshAABB";
@@ -17,10 +14,8 @@ import calculateMeshCombinedAABB from "../../bound/math/calculateMeshCombinedAAB
 import calculateMeshOBB from "../../bound/math/calculateMeshOBB";
 import OBB from "../../bound/OBB";
 import mat4ToEuler from "../../math/mat4ToEuler";
-import InstanceIdGenerator from "../../utils/uuid/InstanceIdGenerator";
 import uuidToUint from "../../utils/uuid/uuidToUint";
 import DrawDebuggerMesh from "../drawDebugger/DrawDebuggerMesh";
-import MESH_TYPE from "../MESH_TYPE";
 import RenderViewStateData from "../view/core/RenderViewStateData";
 import View3D from "../view/View3D";
 import createMeshVertexUniformBuffers from "./core/createMeshVertexUniformBuffers";
@@ -31,6 +26,8 @@ import createBasePipeline from "./core/pipeline/createBasePipeline";
 import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
+import defineBoolean from "../../defineProperty/funcs/defineBoolean";
+
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -43,8 +40,8 @@ const up = new Float32Array([0, 1, 0]);
 interface Mesh {
     receiveShadow: boolean
     disableJitter: boolean
-    meshType: string
     useDisplacementTexture: boolean
+    isInstanceofMesh: boolean
 }
 
 interface LODGPURenderInfo {
@@ -81,11 +78,7 @@ interface LODGPURenderInfo {
  * @category Mesh
  */
 class Mesh extends MeshBase {
-    /**
-     * [KO] 메시의 디스플레이스먼트 텍스처
-     * [EN] Displacement texture of the mesh
-     */
-    displacementTexture: BitmapTexture;
+
     /**
      * [KO] 그림자 캐스팅 여부
      * [EN] Whether to cast shadows
@@ -106,16 +99,9 @@ class Mesh extends MeshBase {
      * [EN] Function to create custom vertex shader module
      */
     createCustomMeshVertexShaderModule?: () => GPUShaderModule;
-    /**
-     * [KO] 인스턴스 고유 ID
-     * [EN] Instance unique ID
-     */
-    #instanceId: number
-    /**
-     * [KO] 메시 이름
-     * [EN] Mesh name
-     */
-    #name: string
+
+    #lastUpdateMSAAID: string;
+
     /**
      * [KO] 부모 객체
      * [EN] Parent object
@@ -367,6 +353,7 @@ class Mesh extends MeshBase {
         this.dirtyPipeline = true;
         // blendMode 키가 있는 경우 블렌드 모드 재적용
         if ("blendMode" in this) {
+            //TODO - 이거 이제 해결된것 같은데 확인해봐야함
             this.blendMode = this.blendMode;
         }
     }
@@ -447,26 +434,6 @@ class Mesh extends MeshBase {
      */
     get events(): any {
         return this.#events;
-    }
-
-    /**
-     * [KO] 메시의 이름을 반환합니다.
-     * [EN] Returns the name of the mesh.
-     */
-    get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
-
-    /**
-     * [KO] 메시의 이름을 설정합니다.
-     * [EN] Sets the name of the mesh.
-     * @param value -
-     * [KO] 메시 이름
-     * [EN] Mesh name
-     */
-    set name(value: string) {
-        this.#name = value;
     }
 
     /**
@@ -913,8 +880,8 @@ class Mesh extends MeshBase {
      * [EN] Target Z coordinate (ignored if targetX is an array)
      */
     lookAt(targetX: number | [number, number, number], targetY?: number, targetZ?: number): void {
-        var tPosition = [];
-        var tRotation = [];
+        let tPosition = [];
+        let tRotation = [];
         tPosition[0] = targetX;
         tPosition[1] = targetY;
         tPosition[2] = targetZ;
@@ -1061,7 +1028,6 @@ class Mesh extends MeshBase {
             this.#needUpdateNormalMatrixUniform = true
             this.#needUpdateMatrixUniform = true
             {
-                const {pixelRectObject} = view
                 const parent = this.parent
                 const tLocalMatrix = this.localMatrix;
                 let aX, aY, aZ;
@@ -1308,7 +1274,7 @@ class Mesh extends MeshBase {
             const {rawCamera} = view
             const combinedAABB = this.boundingAABB;
 
-            const isIsometricController = rawCamera instanceof IsometricController;
+            const isIsometricController = rawCamera.constructor.name === 'IsometricController';
 
             if (isIsometricController) {
                 // ==================== AABB 정보 추출 ====================
@@ -1363,12 +1329,15 @@ class Mesh extends MeshBase {
                 const centerZ = combinedAABB.centerZ;
                 const radius = combinedAABB.geometryRadius;
 
-                frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius ? passFrustumCulling = false
-                    : frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius ? passFrustumCulling = false
-                        : frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius ? passFrustumCulling = false
-                            : frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius ? passFrustumCulling = false
-                                : frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius ? passFrustumCulling = false
-                                    : frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius ? passFrustumCulling = false : 0;
+                const bias = 1.0; // [KO] 원거리 정밀도 보정을 위한 여유값 [EN] Numerical bias for far distance precision
+
+                frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius - bias ? passFrustumCulling = false
+                    : frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius - bias ? passFrustumCulling = false
+                        : frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius - bias ? passFrustumCulling = false
+                            : frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius - bias ? passFrustumCulling = false
+                                : frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius - bias ? passFrustumCulling = false
+                                    : frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius - bias ? passFrustumCulling = false : 0;
+
             }
         }
         if (passFrustumCulling) {
@@ -1394,10 +1363,11 @@ class Mesh extends MeshBase {
         }
         // keepLog(this.gpuRenderInfo?.vertexStructInfo)
         if (currentGeometry) {
-            renderViewStateData.num3DObjects++
-            if (antialiasingManager.changedMSAA) {
+            renderViewStateData.renderResults.num3DObjects++
+            if (this.#lastUpdateMSAAID !== antialiasingManager.msaaID) {
                 currentDirtyPipeline = true
                 this.dirtyLOD = true
+                this.#lastUpdateMSAAID = antialiasingManager.msaaID
             }
             if (!this.gpuRenderInfo) this.initGPURenderInfos()
             const currentUseDisplacementTexture = !!displacementTexture
@@ -1416,16 +1386,16 @@ class Mesh extends MeshBase {
                 const {gpuRenderInfo} = this
                 const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
                 const {members: vertexUniformInfoMembers} = vertexUniformInfo
-               const {gpuBuffer: vertexUniformGPUBuffer} = vertexUniformBuffer
+                const {gpuBuffer: vertexUniformGPUBuffer} = vertexUniformBuffer
                 if (!this.#uniformDataMatrixList) {
                     this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
                 }
-                if (vertexUniformInfoMembers.uvTransform && (currentMaterial.dirtyTextureTransform || dirtyVertexUniformFromMaterial[currentMaterialUUID] )) {
+                if (vertexUniformInfoMembers.uvTransform && (currentMaterial.dirtyTextureTransform || dirtyVertexUniformFromMaterial[currentMaterialUUID])) {
                     const material = currentMaterial as any;
-                    const offset = material.textureOffset;
-                    const scale = material.textureScale;
+                    const offset = material.textureOffset || [0, 0];
+                    const scale = material.textureScale || [1, 1];
 
-                    if(offset) {
+                    if (offset) {
 
                         dirtyVertexUniformFromMaterial[currentMaterialUUID] = true
                         tempFloat32_4[0] = offset[0];
@@ -1445,7 +1415,7 @@ class Mesh extends MeshBase {
                 }
             }
         } else {
-            renderViewStateData.num3DGroups++
+            renderViewStateData.renderResults.num3DGroups++
         }
         if (currentGeometry && passFrustumCulling) {
             const {gpuRenderInfo} = this
@@ -1572,7 +1542,7 @@ class Mesh extends MeshBase {
                 bundleListTransparentLayer,
                 bundleListAlphaLayer,
                 bundleListBasicList
-            } = renderViewStateData
+            } = renderViewStateData.renderBundleResults
             {
                 {
                     const {fragmentUniformBindGroup} = currentMaterial.gpuRenderInfo
@@ -1586,17 +1556,17 @@ class Mesh extends MeshBase {
                         this.#setRenderBundle(renderViewStateData)
                     }
 
-                    renderViewStateData.numDrawCalls++
+                    renderViewStateData.renderResults.numDrawCalls++
                     if (currentGeometry.indexBuffer) {
                         const {indexBuffer} = currentGeometry
                         const {indexCount, triangleCount} = indexBuffer
-                        renderViewStateData.numTriangles += triangleCount
-                        renderViewStateData.numPoints += indexCount
+                        renderViewStateData.renderResults.numTriangles += triangleCount
+                        renderViewStateData.renderResults.numPoints += indexCount
                     } else {
                         const {vertexBuffer} = currentGeometry
                         const {vertexCount, triangleCount} = vertexBuffer
-                        renderViewStateData.numTriangles += triangleCount;
-                        renderViewStateData.numPoints += vertexCount
+                        renderViewStateData.renderResults.numTriangles += triangleCount;
+                        renderViewStateData.renderResults.numPoints += vertexCount
                     }
                     let renderBundle = this.#renderBundle;
                     {
@@ -1656,7 +1626,7 @@ class Mesh extends MeshBase {
                     }
                     if (currentMaterial.use2PathRender) {
                         bundleListRender2PathLayer[bundleListRender2PathLayer.length] = renderBundle
-                    } else if (this.meshType === MESH_TYPE.PARTICLE) {
+                    } else if (this['isInstanceofParticle']) {
                         bundleListParticleLayer[bundleListParticleLayer.length] = renderBundle
                     } else if (currentMaterial.transparent) {
                         bundleListTransparentLayer[bundleListTransparentLayer.length] = renderBundle
@@ -1723,19 +1693,10 @@ class Mesh extends MeshBase {
         return this.gpuRenderInfo.vertexShaderModule
     }
 
-    #normalizeRotationDelta(prevAngle: number, newAngle: number): number {
-        let delta = newAngle - prevAngle;
-
-        // delta가 180도보다 크면 반대 방향으로 회전
-        while (delta > 180) delta -= 360;
-        while (delta < -180) delta += 360;
-
-        return prevAngle + delta;
-    }
 
     #updateLODPipeline = () => {
 
-        const {gpuDevice, redGPUContext} = this
+        const {redGPUContext} = this
         const {resourceManager} = redGPUContext
         this.#lodGPURenderInfoList.length = 0;
         const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
@@ -1893,7 +1854,7 @@ class Mesh extends MeshBase {
     }
 
     #checkVariant(moduleName: String) {
-        const {gpuDevice, resourceManager} = this.redGPUContext
+        const {resourceManager} = this.redGPUContext
         // 현재 머티리얼 상태에 맞는 바리안트 키 찾기
         const currentVariantKey = this.#findMatchingVariantKey();
         // 바리안트별 셰이더 모듈 확인/생성
@@ -1952,16 +1913,14 @@ class Mesh extends MeshBase {
     }
 }
 
-Object.defineProperty(Mesh.prototype, 'meshType', {
-    value: MESH_TYPE.MESH,
+Object.defineProperty(Mesh.prototype, 'isInstanceofMesh', {
+    value: true,
     writable: false
 });
-DefineForVertex.defineByPreset(Mesh, [
-    DefineForVertex.PRESET_BOOLEAN.RECEIVE_SHADOW
-])
-DefineForVertex.defineBoolean(Mesh, [
-    ['useDisplacementTexture', false],
-    ['disableJitter', false],
+defineBoolean(Mesh, [
+    {key: 'receiveShadow', value: false},
+    {key: 'useDisplacementTexture', value: false},
+    {key: 'disableJitter', value: false},
 ])
 Object.freeze(Mesh)
 export default Mesh

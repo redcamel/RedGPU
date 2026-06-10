@@ -1,8 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1770713934910";
-import {
-    loadingProgressInfoHandler
-} from '../../../exampleHelper/createExample/loadingProgressInfoHandler.js?t=1770713934910'
-
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1778922031603";
+import * as RedGPU from "../../../../dist/index.js?t=1778922031603";
 // 1. Create and append a canvas
 // 1. 캔버스를 생성하고 문서에 추가
 const canvas = document.createElement('canvas');
@@ -35,7 +32,7 @@ RedGPU.init(
 
         // Create a renderer and start rendering
         // 렌더러 생성 후 렌더링 시작
-        const renderer = new RedGPU.Renderer(redGPUContext);
+        const renderer = new RedGPU.Renderer();
         const render = () => {
 
         };
@@ -88,24 +85,32 @@ function loadGLTFGrid(view, urls, gridSize = 4, spacing = 3) {
                 }
 
                 if (loadedNum === urls.length) {
-                    view.camera.fitMeshToScreenCenter(container, view)
+                    RedGPUExampleHelper.fitMeshToScreenCenter(container, view)
                 }
             },
             (info) => {
-                loadingProgressInfoHandler(info);
+                RedGPUExampleHelper.loadingProgressInfoHandler(info);
             }
         );
     });
 }
 
-const renderTestPane = async (redGPUContext, targetView) => {
-    const {Pane} = await import('https://cdn.jsdelivr.net/npm/tweakpane@4.0.3/dist/tweakpane.min.js?t=1770713934910');
-    const {
-        createIblHelper,
-        setDebugButtons
-    } = await import('../../../exampleHelper/createExample/panes/index.js?t=1770713934910');
-    setDebugButtons(RedGPU, redGPUContext);
+const renderTestPane = (redGPUContext, targetView) => {
+    new RedGPUExampleHelper(redGPUContext, {
+        RedGPU: RedGPU,
+        ibl: true,
+        skybox: true,
+        gui: (pane) => {
+            const {skyAtmosphere} = targetView;
+            if (skyAtmosphere) {
+                pane.addBinding(skyAtmosphere, 'useGround', {label: 'Use Ground'});
+                pane.addBinding(skyAtmosphere, 'showGround', {label: 'Show Ground'});
+                pane.addBinding(skyAtmosphere, 'seaLevel', {min: -10, max: 10, step: 0.01, label: 'Sea Level (km)'});
 
-    const pane = new Pane();
-    createIblHelper(pane, targetView, RedGPU);
+                const f_sun = pane.addFolder({title: 'Sun Position'});
+                f_sun.addBinding(skyAtmosphere, 'sunElevation', {min: -90, max: 90, step: 0.0001, label: 'Sun Elevation'});
+                f_sun.addBinding(skyAtmosphere, 'sunAzimuth', {min: -360, max: 360, step: 0.0001, label: 'Sun Azimuth'});
+            }
+        }
+    });
 };
