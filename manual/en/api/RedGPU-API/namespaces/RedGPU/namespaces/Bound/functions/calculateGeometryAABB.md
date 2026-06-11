@@ -8,7 +8,7 @@
 
 > **calculateGeometryAABB**(`vertexBuffer`): [`AABB`](../classes/AABB.md)
 
-Defined in: [src/bound/math/calculateGeometryAABB.ts:24](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/bound/math/calculateGeometryAABB.ts#L24)
+Defined in: [src/bound/math/calculateGeometryAABB.ts:24](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/bound/math/calculateGeometryAABB.ts#L24)
 
 Calculates AABB based on VertexBuffer information.
 

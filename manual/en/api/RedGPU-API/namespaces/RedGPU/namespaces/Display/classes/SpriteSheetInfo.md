@@ -6,7 +6,7 @@
 
 # Class: SpriteSheetInfo
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:25](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L25)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:25](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L25)
 
 Class that contains information for sprite sheet animation.
 
@@ -29,7 +29,7 @@ const info = new RedGPU.Display.SpriteSheetInfo(
 
 > **new SpriteSheetInfo**(`redGPUContext`, `src`, `segmentW`, `segmentH`, `totalFrame`, `startIndex`, `loop?`, `frameRate?`): `SpriteSheetInfo`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:95](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L95)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:95](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L95)
 
 Creates a new SpriteSheetInfo instance.
 
@@ -62,7 +62,7 @@ Throws error if redGPUContext is invalid or parameters are out of range
 
 > **get** **frameRate**(): `number`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:179](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L179)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:179](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L179)
 
 Returns the animation frame rate (FPS).
 
@@ -80,7 +80,7 @@ Frames per second (FPS)
 
 > **get** **loop**(): `boolean`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:190](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L190)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:190](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L190)
 
 Returns whether to repeat playback.
 
@@ -98,7 +98,7 @@ If true, playback loops; if false, it plays once
 
 > **get** **segmentH**(): `number`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:135](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L135)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:135](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L135)
 
 Returns the number of vertical segments. (Texture division count vertically)
 
@@ -116,7 +116,7 @@ Number of vertical segments
 
 > **get** **segmentW**(): `number`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:124](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L124)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:124](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L124)
 
 Returns the number of horizontal segments. (Texture division count horizontally)
 
@@ -134,7 +134,7 @@ Number of horizontal segments
 
 > **get** **startIndex**(): `number`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:157](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L157)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:157](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L157)
 
 Returns the starting frame index. (0-based index)
 
@@ -152,7 +152,7 @@ Starting frame index
 
 > **get** **texture**(): [`BitmapTexture`](../../Resource/classes/BitmapTexture.md)
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:168](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L168)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:168](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L168)
 
 Returns the sprite sheet bitmap texture.
 
@@ -170,7 +170,7 @@ Bitmap texture used
 
 > **get** **totalFrame**(): `number`
 
-Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:146](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L146)
+Defined in: [src/display/sprites/spriteSheets/SpriteSheetInfo.ts:146](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/sprites/spriteSheets/SpriteSheetInfo.ts#L146)
 
 Returns the total number of animation frames.
 

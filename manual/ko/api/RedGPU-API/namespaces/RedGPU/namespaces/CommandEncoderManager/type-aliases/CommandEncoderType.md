@@ -8,6 +8,6 @@
 
 > **CommandEncoderType** = *typeof* [`COMMAND_ENCODER_TYPE`](../variables/COMMAND_ENCODER_TYPE.md)\[keyof *typeof* [`COMMAND_ENCODER_TYPE`](../variables/COMMAND_ENCODER_TYPE.md)\]
 
-Defined in: [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:34](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L34)
+Defined in: [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:34](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L34)
 
 GPU 커맨드 인코더의 타입 정의입니다.

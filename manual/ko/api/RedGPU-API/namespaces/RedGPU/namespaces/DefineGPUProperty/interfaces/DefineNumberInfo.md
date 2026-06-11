@@ -6,7 +6,7 @@
 
 # Interface: DefineNumberInfo
 
-Defined in: [src/defineProperty/funcs/number/defineNumber.ts:9](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/defineProperty/funcs/number/defineNumber.ts#L9)
+Defined in: [src/defineProperty/funcs/number/defineNumber.ts:9](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/defineProperty/funcs/number/defineNumber.ts#L9)
 
 `defineNumber` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
 
@@ -16,7 +16,7 @@ Defined in: [src/defineProperty/funcs/number/defineNumber.ts:9](https://github.c
 
 > **key**: `string`
 
-Defined in: [src/defineProperty/funcs/number/defineNumber.ts:14](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/defineProperty/funcs/number/defineNumber.ts#L14)
+Defined in: [src/defineProperty/funcs/number/defineNumber.ts:14](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/defineProperty/funcs/number/defineNumber.ts#L14)
 
 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
 
@@ -26,7 +26,7 @@ Defined in: [src/defineProperty/funcs/number/defineNumber.ts:14](https://github.
 
 > `optional` **max?**: `number`
 
-Defined in: [src/defineProperty/funcs/number/defineNumber.ts:29](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/defineProperty/funcs/number/defineNumber.ts#L29)
+Defined in: [src/defineProperty/funcs/number/defineNumber.ts:29](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/defineProperty/funcs/number/defineNumber.ts#L29)
 
 허용할 최대값 (옵션). 설정 범위 초과의 값이 setter에 할당되면 경고를 내고 이 값으로 고정됩니다.
 
@@ -36,7 +36,7 @@ Defined in: [src/defineProperty/funcs/number/defineNumber.ts:29](https://github.
 
 > `optional` **min?**: `number`
 
-Defined in: [src/defineProperty/funcs/number/defineNumber.ts:24](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/defineProperty/funcs/number/defineNumber.ts#L24)
+Defined in: [src/defineProperty/funcs/number/defineNumber.ts:24](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/defineProperty/funcs/number/defineNumber.ts#L24)
 
 허용할 최소값 (옵션). 설정 범위 미만의 값이 setter에 할당되면 경고를 내고 이 값으로 고정됩니다.
 
@@ -46,6 +46,6 @@ Defined in: [src/defineProperty/funcs/number/defineNumber.ts:24](https://github.
 
 > **value**: `number`
 
-Defined in: [src/defineProperty/funcs/number/defineNumber.ts:19](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/defineProperty/funcs/number/defineNumber.ts#L19)
+Defined in: [src/defineProperty/funcs/number/defineNumber.ts:19](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/defineProperty/funcs/number/defineNumber.ts#L19)
 
 속성의 초기 숫자값.

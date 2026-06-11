@@ -6,7 +6,7 @@
 
 # Class: SimplexTexture
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:39](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L39)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:39](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L39)
 
 **`Experimental`**
 
@@ -29,7 +29,7 @@ const texture = new RedGPU.Resource.SimplexTexture(redGPUContext);
 
 > **new SimplexTexture**(`redGPUContext`, `width?`, `height?`, `define`, `useMipmap?`): `SimplexTexture`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:64](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L64)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:64](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L64)
 
 **`Experimental`**
 
@@ -61,7 +61,7 @@ Creates a SimplexTexture instance.
 
 > **get** **amplitude**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:126](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L126)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:126](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L126)
 
 **`Experimental`**
 
@@ -75,7 +75,7 @@ Returns the amplitude.
 
 > **set** **amplitude**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:131](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L131)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:131](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L131)
 
 **`Experimental`**
 
@@ -99,7 +99,7 @@ Sets the amplitude.
 
 > **get** **frequency**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:114](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L114)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:114](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L114)
 
 **`Experimental`**
 
@@ -113,7 +113,7 @@ Returns the frequency.
 
 > **set** **frequency**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:119](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L119)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:119](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L119)
 
 **`Experimental`**
 
@@ -137,7 +137,7 @@ Sets the frequency.
 
 > **get** **lacunarity**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:162](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L162)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:162](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L162)
 
 **`Experimental`**
 
@@ -151,7 +151,7 @@ Returns the lacunarity.
 
 > **set** **lacunarity**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:167](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L167)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:167](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L167)
 
 **`Experimental`**
 
@@ -175,7 +175,7 @@ Sets the lacunarity.
 
 > **get** **noiseDimension**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:99](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L99)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:99](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L99)
 
 **`Experimental`**
 
@@ -189,7 +189,7 @@ Returns the noise dimension.
 
 > **set** **noiseDimension**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:104](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L104)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:104](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L104)
 
 **`Experimental`**
 
@@ -213,7 +213,7 @@ Sets the noise dimension.
 
 > **get** **octaves**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:138](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L138)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:138](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L138)
 
 **`Experimental`**
 
@@ -227,7 +227,7 @@ Returns the number of octaves.
 
 > **set** **octaves**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:143](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L143)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:143](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L143)
 
 **`Experimental`**
 
@@ -251,7 +251,7 @@ Sets the number of octaves.
 
 > **get** **persistence**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:150](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L150)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:150](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L150)
 
 **`Experimental`**
 
@@ -265,7 +265,7 @@ Returns the persistence.
 
 > **set** **persistence**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:155](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L155)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:155](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L155)
 
 **`Experimental`**
 
@@ -289,7 +289,7 @@ Sets the persistence.
 
 > **get** **seed**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:174](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L174)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:174](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L174)
 
 **`Experimental`**
 
@@ -303,7 +303,7 @@ Returns the seed.
 
 > **set** **seed**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:179](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L179)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:179](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L179)
 
 **`Experimental`**
 
@@ -325,7 +325,7 @@ Sets the seed.
 
 > **applySettings**(`settings`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:209](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L209)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:209](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L209)
 
 **`Experimental`**
 
@@ -347,7 +347,7 @@ Applies noise settings at once.
 
 > **getSettings**(): `object`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:190](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L190)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:190](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L190)
 
 **`Experimental`**
 
@@ -359,12 +359,12 @@ Returns all current noise settings.
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `amplitude` | `number` | [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:192](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L192) |
-| `frequency` | `number` | [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:191](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L191) |
-| `lacunarity` | `number` | [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:195](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L195) |
-| `octaves` | `number` | [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:193](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L193) |
-| `persistence` | `number` | [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:194](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L194) |
-| `seed` | `number` | [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:196](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L196) |
+| `amplitude` | `number` | [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:192](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L192) |
+| `frequency` | `number` | [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:191](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L191) |
+| `lacunarity` | `number` | [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:195](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L195) |
+| `octaves` | `number` | [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:193](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L193) |
+| `persistence` | `number` | [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:194](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L194) |
+| `seed` | `number` | [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:196](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L196) |
 
 ***
 
@@ -372,7 +372,7 @@ Returns all current noise settings.
 
 > **randomizeSeed**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:185](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L185)
+Defined in: [src/resources/texture/noiseTexture/simplex/SimplexTexture.ts:185](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/simplex/SimplexTexture.ts#L185)
 
 **`Experimental`**
 
@@ -396,7 +396,7 @@ Randomizes the seed value.
 
 > **mipLevelCount**: `number` = `1`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:39](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L39)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:39](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L39)
 
 **`Experimental`**
 
@@ -410,7 +410,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:39](https:
 
 > **src**: `string`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:41](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L41)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:41](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L41)
 
 **`Experimental`**
 
@@ -424,7 +424,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:41](https:
 
 > **useMipmap**: `boolean` = `true`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:40](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L40)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:40](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L40)
 
 **`Experimental`**
 
@@ -440,7 +440,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:40](https:
 
 > **get** **animationSpeed**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:103](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L103)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:103](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L103)
 
 **`Experimental`**
 
@@ -454,7 +454,7 @@ Returns the animation speed.
 
 > **set** **animationSpeed**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:108](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L108)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:108](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L108)
 
 **`Experimental`**
 
@@ -482,7 +482,7 @@ Sets the animation speed.
 
 > **get** **animationX**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:115](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L115)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:115](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L115)
 
 **`Experimental`**
 
@@ -496,7 +496,7 @@ Returns the animation X value.
 
 > **set** **animationX**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:120](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L120)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:120](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L120)
 
 **`Experimental`**
 
@@ -524,7 +524,7 @@ Sets the animation X value.
 
 > **get** **animationY**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:127](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L127)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:127](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L127)
 
 **`Experimental`**
 
@@ -538,7 +538,7 @@ Returns the animation Y value.
 
 > **set** **animationY**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:132](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L132)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:132](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L132)
 
 **`Experimental`**
 
@@ -566,7 +566,7 @@ Sets the animation Y value.
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L76)
 
 **`Experimental`**
 
@@ -590,7 +590,7 @@ AntialiasingManager instance
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/core/ResourceBase.ts#L53)
+Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/core/ResourceBase.ts#L53)
 
 **`Experimental`**
 
@@ -604,7 +604,7 @@ Returns the cache key.
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/core/ResourceBase.ts#L61)
+Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/core/ResourceBase.ts#L61)
 
 **`Experimental`**
 
@@ -632,7 +632,7 @@ Sets the cache key.
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L88)
 
 **`Experimental`**
 
@@ -656,7 +656,7 @@ CommandEncoderManager instance
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/core/ResourceBase.ts#L77)
+Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/core/ResourceBase.ts#L77)
 
 **`Experimental`**
 
@@ -678,7 +678,7 @@ Returns the associated GPU device.
 
 > **get** **gpuTexture**(): `GPUTexture`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:144](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L144)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:144](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L144)
 
 **`Experimental`**
 
@@ -700,7 +700,7 @@ Returns the GPUTexture object.
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/BaseObject.ts#L58)
 
 **`Experimental`**
 
@@ -716,7 +716,7 @@ Name of the object
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/BaseObject.ts#L71)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/BaseObject.ts#L71)
 
 **`Experimental`**
 
@@ -744,7 +744,7 @@ Sets the name of the object.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L40)
 
 **`Experimental`**
 
@@ -768,7 +768,7 @@ RedGPUContext instance
 
 > **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L64)
 
 **`Experimental`**
 
@@ -792,7 +792,7 @@ ResourceManager instance
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:98](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L98)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:98](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L98)
 
 **`Experimental`**
 
@@ -814,7 +814,7 @@ Resource manager key
 
 > **get** **revision**(): `number`
 
-Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/core/ResourceBase.ts#L45)
+Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/core/ResourceBase.ts#L45)
 
 **`Experimental`**
 
@@ -836,7 +836,7 @@ Returns the revision (update count) of the resource.
 
 > **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/core/ManagementResourceBase.ts#L45)
+Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/core/ManagementResourceBase.ts#L45)
 
 **`Experimental`**
 
@@ -858,7 +858,7 @@ Returns the managed state information of the resource.
 
 > **get** **time**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:149](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L149)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:149](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L149)
 
 **`Experimental`**
 
@@ -872,7 +872,7 @@ Returns the current time.
 
 > **set** **time**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:154](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L154)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:154](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L154)
 
 **`Experimental`**
 
@@ -900,7 +900,7 @@ Sets the current time.
 
 > **get** **uniformInfo**(): `any`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:139](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L139)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:139](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L139)
 
 **`Experimental`**
 
@@ -922,7 +922,7 @@ Returns the uniform information.
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/BaseObject.ts#L46)
 
 **`Experimental`**
 
@@ -946,7 +946,7 @@ UUID string
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:93](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L93)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:93](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L93)
 
 **`Experimental`**
 
@@ -966,7 +966,7 @@ Video memory usage in bytes
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/core/ResourceBase.ts#L89)
+Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/core/ResourceBase.ts#L89)
 
 **`Experimental`**
 
@@ -992,7 +992,7 @@ Adds a listener function to be called when the pipeline becomes dirty.
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/core/ResourceBase.ts#L101)
+Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/core/ResourceBase.ts#L101)
 
 **`Experimental`**
 
@@ -1018,7 +1018,7 @@ Removes a resource update listener.
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:186](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L186)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:186](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L186)
 
 **`Experimental`**
 
@@ -1038,7 +1038,7 @@ Destroys the resource.
 
 > **notifyUpdate**(`resetList?`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/core/ResourceBase.ts#L116)
+Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/core/ResourceBase.ts#L116)
 
 **`Experimental`**
 
@@ -1064,7 +1064,7 @@ Notifies registered listeners that the resource has been updated.
 
 > **render**(`time`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:181](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L181)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:181](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L181)
 
 **`Experimental`**
 
@@ -1090,7 +1090,7 @@ Renders noise at the specified time.
 
 > **updateUniform**(`name`, `value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:161](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L161)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:161](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L161)
 
 **`Experimental`**
 
@@ -1117,7 +1117,7 @@ Updates an individual uniform parameter.
 
 > **updateUniforms**(`uniforms`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:170](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L170)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:170](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L170)
 
 **`Experimental`**
 

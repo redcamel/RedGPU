@@ -8,7 +8,7 @@
 
 > `const` **GPU\_STORE\_OP**: `object`
 
-Defined in: [src/gpuConst/GPU\_STORE\_OP.ts:10](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/gpuConst/GPU_STORE_OP.ts#L10)
+Defined in: [src/gpuConst/GPU\_STORE\_OP.ts:10](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/gpuConst/GPU_STORE_OP.ts#L10)
 
 Constants defining how to store attachment contents at the end of a render pass.
 
@@ -18,5 +18,5 @@ Determines whether to store the rendering results in memory or discard them.
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="property-discard"></a> `DISCARD` | `"discard"` | `'discard'` | Discards the rendered results without storing them. | [src/gpuConst/GPU\_STORE\_OP.ts:20](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/gpuConst/GPU_STORE_OP.ts#L20) |
-| <a id="property-store"></a> `STORE` | `"store"` | `'store'` | Stores the rendered results in the attachment. | [src/gpuConst/GPU\_STORE\_OP.ts:15](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/gpuConst/GPU_STORE_OP.ts#L15) |
+| <a id="property-discard"></a> `DISCARD` | `"discard"` | `'discard'` | Discards the rendered results without storing them. | [src/gpuConst/GPU\_STORE\_OP.ts:20](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/gpuConst/GPU_STORE_OP.ts#L20) |
+| <a id="property-store"></a> `STORE` | `"store"` | `'store'` | Stores the rendered results in the attachment. | [src/gpuConst/GPU\_STORE\_OP.ts:15](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/gpuConst/GPU_STORE_OP.ts#L15) |

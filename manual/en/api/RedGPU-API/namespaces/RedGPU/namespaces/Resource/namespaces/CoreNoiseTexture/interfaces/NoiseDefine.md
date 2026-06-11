@@ -6,7 +6,7 @@
 
 # Interface: NoiseDefine
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:15](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L15)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:15](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L15)
 
 Noise definition interface
 
@@ -16,7 +16,7 @@ Noise definition interface
 
 > `optional` **helperFunctions?**: `string`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:19](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L19)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:19](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L19)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:19](https:
 
 > **mainLogic**: `string`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:16](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L16)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:16](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L16)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:16](https:
 
 > **uniformDefaults**: `object`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:18](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L18)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:18](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L18)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:18](https:
 
 > **uniformStruct**: `string`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:17](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L17)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:17](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L17)

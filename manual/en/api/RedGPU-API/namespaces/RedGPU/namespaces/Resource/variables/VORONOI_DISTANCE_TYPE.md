@@ -8,7 +8,7 @@
 
 > `const` **VORONOI\_DISTANCE\_TYPE**: `object`
 
-Defined in: [src/resources/texture/noiseTexture/voronoi/VORONOI\_DISTANCE\_TYPE.ts:5](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/voronoi/VORONOI_DISTANCE_TYPE.ts#L5)
+Defined in: [src/resources/texture/noiseTexture/voronoi/VORONOI\_DISTANCE\_TYPE.ts:5](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/voronoi/VORONOI_DISTANCE_TYPE.ts#L5)
 
 **`Experimental`**
 
@@ -16,6 +16,6 @@ Defined in: [src/resources/texture/noiseTexture/voronoi/VORONOI\_DISTANCE\_TYPE.
 
 | Name | Type | Default value | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="property-chebyshev"></a> `CHEBYSHEV` | `2` | `2` | [src/resources/texture/noiseTexture/voronoi/VORONOI\_DISTANCE\_TYPE.ts:8](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/voronoi/VORONOI_DISTANCE_TYPE.ts#L8) |
-| <a id="property-euclidean"></a> `EUCLIDEAN` | `0` | `0` | [src/resources/texture/noiseTexture/voronoi/VORONOI\_DISTANCE\_TYPE.ts:6](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/voronoi/VORONOI_DISTANCE_TYPE.ts#L6) |
-| <a id="property-manhattan"></a> `MANHATTAN` | `1` | `1` | [src/resources/texture/noiseTexture/voronoi/VORONOI\_DISTANCE\_TYPE.ts:7](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/texture/noiseTexture/voronoi/VORONOI_DISTANCE_TYPE.ts#L7) |
+| <a id="property-chebyshev"></a> `CHEBYSHEV` | `2` | `2` | [src/resources/texture/noiseTexture/voronoi/VORONOI\_DISTANCE\_TYPE.ts:8](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/voronoi/VORONOI_DISTANCE_TYPE.ts#L8) |
+| <a id="property-euclidean"></a> `EUCLIDEAN` | `0` | `0` | [src/resources/texture/noiseTexture/voronoi/VORONOI\_DISTANCE\_TYPE.ts:6](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/voronoi/VORONOI_DISTANCE_TYPE.ts#L6) |
+| <a id="property-manhattan"></a> `MANHATTAN` | `1` | `1` | [src/resources/texture/noiseTexture/voronoi/VORONOI\_DISTANCE\_TYPE.ts:7](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/voronoi/VORONOI_DISTANCE_TYPE.ts#L7) |

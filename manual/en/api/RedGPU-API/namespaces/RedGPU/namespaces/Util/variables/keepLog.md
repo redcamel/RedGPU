@@ -8,7 +8,7 @@
 
 > `const` **keepLog**: `any`
 
-Defined in: [src/utils/index.ts:22](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/utils/index.ts#L22)
+Defined in: [src/utils/index.ts:22](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/utils/index.ts#L22)
 
 Console log function that is not removed during build.
 * ### Example

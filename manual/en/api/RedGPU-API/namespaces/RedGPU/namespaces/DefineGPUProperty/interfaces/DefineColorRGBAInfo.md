@@ -6,7 +6,7 @@
 
 # Interface: DefineColorRGBAInfo
 
-Defined in: [src/defineProperty/funcs/color/defineColorRGBA.ts:11](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/defineProperty/funcs/color/defineColorRGBA.ts#L11)
+Defined in: [src/defineProperty/funcs/color/defineColorRGBA.ts:11](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/defineProperty/funcs/color/defineColorRGBA.ts#L11)
 
 `defineColorRGBA` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
 
@@ -16,7 +16,7 @@ Defined in: [src/defineProperty/funcs/color/defineColorRGBA.ts:11](https://githu
 
 > **key**: `string`
 
-Defined in: [src/defineProperty/funcs/color/defineColorRGBA.ts:16](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/defineProperty/funcs/color/defineColorRGBA.ts#L16)
+Defined in: [src/defineProperty/funcs/color/defineColorRGBA.ts:16](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/defineProperty/funcs/color/defineColorRGBA.ts#L16)
 
 Key name of the property. Defined on the target object's prototype under this name.
 
@@ -26,6 +26,6 @@ Key name of the property. Defined on the target object's prototype under this na
 
 > `optional` **value?**: `string`
 
-Defined in: [src/defineProperty/funcs/color/defineColorRGBA.ts:21](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/defineProperty/funcs/color/defineColorRGBA.ts#L21)
+Defined in: [src/defineProperty/funcs/color/defineColorRGBA.ts:21](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/defineProperty/funcs/color/defineColorRGBA.ts#L21)
 
 Initial hex color code (e.g., `#ff0000`). If not specified, defaults to `#fff`.

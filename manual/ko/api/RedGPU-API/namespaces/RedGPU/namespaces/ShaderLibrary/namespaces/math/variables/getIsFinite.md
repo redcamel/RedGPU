@@ -8,7 +8,7 @@
 
 > `const` **getIsFinite**: `string` = `getIsFinite_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:472](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/systemCodeManager/ShaderLibrary.ts#L472)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:472](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/systemCodeManager/ShaderLibrary.ts#L472)
 
 단일 스칼라 값이 유한(Finite)한지 체크합니다. (NaN과 Inf 체크)
 

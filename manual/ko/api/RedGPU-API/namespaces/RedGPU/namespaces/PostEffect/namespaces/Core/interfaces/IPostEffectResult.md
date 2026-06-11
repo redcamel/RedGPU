@@ -6,7 +6,7 @@
 
 # Interface: IPostEffectResult
 
-Defined in: [src/postEffect/core/types.ts:5](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/types.ts#L5)
+Defined in: [src/postEffect/core/types.ts:5](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/types.ts#L5)
 
 단일 패스 후처리 이펙트 결과 인터페이스입니다.
 
@@ -16,7 +16,7 @@ Defined in: [src/postEffect/core/types.ts:5](https://github.com/redcamel/RedGPU/
 
 > **texture**: `GPUTexture`
 
-Defined in: [src/postEffect/core/types.ts:10](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/types.ts#L10)
+Defined in: [src/postEffect/core/types.ts:10](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/types.ts#L10)
 
 결과 텍스처
 
@@ -26,6 +26,6 @@ Defined in: [src/postEffect/core/types.ts:10](https://github.com/redcamel/RedGPU
 
 > **textureView**: `GPUTextureView`
 
-Defined in: [src/postEffect/core/types.ts:15](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/types.ts#L15)
+Defined in: [src/postEffect/core/types.ts:15](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/types.ts#L15)
 
 결과 텍스처 뷰

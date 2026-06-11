@@ -6,7 +6,7 @@
 
 # Class: Primitive
 
-Defined in: [src/primitive/core/Primitive.ts:16](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/primitive/core/Primitive.ts#L16)
+Defined in: [src/primitive/core/Primitive.ts:16](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/primitive/core/Primitive.ts#L16)
 
 Base class for all primitive geometries.
 
@@ -31,7 +31,7 @@ Base class for all primitive geometries.
 
 > **new Primitive**(`redGPUContext`, `uniqueKey`, `makeData`): `Primitive`
 
-Defined in: [src/primitive/core/Primitive.ts:34](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/primitive/core/Primitive.ts#L34)
+Defined in: [src/primitive/core/Primitive.ts:34](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/primitive/core/Primitive.ts#L34)
 
 #### Parameters
 
@@ -53,7 +53,7 @@ Defined in: [src/primitive/core/Primitive.ts:34](https://github.com/redcamel/Red
 
 > **get** **gpuRenderInfo**(): `object`
 
-Defined in: [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/primitive/core/Primitive.ts#L51)
+Defined in: [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/primitive/core/Primitive.ts#L51)
 
 ##### Returns
 
@@ -61,7 +61,7 @@ Defined in: [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/Red
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/primitive/core/Primitive.ts#L51) |
+| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/primitive/core/Primitive.ts#L51) |
 
 ***
 
@@ -71,7 +71,7 @@ Defined in: [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/Red
 
 > **get** **indexBuffer**(): [`IndexBuffer`](../../../../Resource/classes/IndexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:59](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/primitive/core/Primitive.ts#L59)
+Defined in: [src/primitive/core/Primitive.ts:59](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/primitive/core/Primitive.ts#L59)
 
 ##### Returns
 
@@ -85,7 +85,7 @@ Defined in: [src/primitive/core/Primitive.ts:59](https://github.com/redcamel/Red
 
 > **get** **vertexBuffer**(): [`VertexBuffer`](../../../../Resource/classes/VertexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:55](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/primitive/core/Primitive.ts#L55)
+Defined in: [src/primitive/core/Primitive.ts:55](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/primitive/core/Primitive.ts#L55)
 
 ##### Returns
 
@@ -99,7 +99,7 @@ Defined in: [src/primitive/core/Primitive.ts:55](https://github.com/redcamel/Red
 
 > **get** **volume**(): [`AABB`](../../../../Bound/classes/AABB.md)
 
-Defined in: [src/primitive/core/Primitive.ts:63](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/primitive/core/Primitive.ts#L63)
+Defined in: [src/primitive/core/Primitive.ts:63](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/primitive/core/Primitive.ts#L63)
 
 ##### Returns
 
@@ -113,7 +113,7 @@ Defined in: [src/primitive/core/Primitive.ts:63](https://github.com/redcamel/Red
 
 > **get** `static` **primitiveInterleaveStruct**(): [`VertexInterleavedStruct`](../../../../Resource/classes/VertexInterleavedStruct.md)
 
-Defined in: [src/primitive/core/Primitive.ts:47](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/primitive/core/Primitive.ts#L47)
+Defined in: [src/primitive/core/Primitive.ts:47](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/primitive/core/Primitive.ts#L47)
 
 
 ##### Returns
@@ -126,7 +126,7 @@ Defined in: [src/primitive/core/Primitive.ts:47](https://github.com/redcamel/Red
 
 > `static` **generateUniqueKey**(`name`, `params`): `string`
 
-Defined in: [src/primitive/core/Primitive.ts:68](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/primitive/core/Primitive.ts#L68)
+Defined in: [src/primitive/core/Primitive.ts:68](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/primitive/core/Primitive.ts#L68)
 
 #### Parameters
 

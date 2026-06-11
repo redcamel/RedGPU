@@ -8,7 +8,7 @@
 
 > `const` **GPU\_FRONT\_FACE**: `object`
 
-Defined in: [src/gpuConst/GPU\_FRONT\_FACE.ts:10](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/gpuConst/GPU_FRONT_FACE.ts#L10)
+Defined in: [src/gpuConst/GPU\_FRONT\_FACE.ts:10](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/gpuConst/GPU_FRONT_FACE.ts#L10)
 
 Constants defining the vertex winding order used to determine the front face.
 
@@ -18,5 +18,5 @@ Determines which side is the front face based on the order in which vertices are
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="property-ccw"></a> `CCW` | `"ccw"` | `'ccw'` | Considers faces with counter-clockwise winding as the front face. | [src/gpuConst/GPU\_FRONT\_FACE.ts:20](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/gpuConst/GPU_FRONT_FACE.ts#L20) |
-| <a id="property-cw"></a> `CW` | `"cw"` | `'cw'` | Considers faces with clockwise winding as the front face. | [src/gpuConst/GPU\_FRONT\_FACE.ts:15](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/gpuConst/GPU_FRONT_FACE.ts#L15) |
+| <a id="property-ccw"></a> `CCW` | `"ccw"` | `'ccw'` | Considers faces with counter-clockwise winding as the front face. | [src/gpuConst/GPU\_FRONT\_FACE.ts:20](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/gpuConst/GPU_FRONT_FACE.ts#L20) |
+| <a id="property-cw"></a> `CW` | `"cw"` | `'cw'` | Considers faces with clockwise winding as the front face. | [src/gpuConst/GPU\_FRONT\_FACE.ts:15](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/gpuConst/GPU_FRONT_FACE.ts#L15) |

@@ -6,7 +6,7 @@
 
 # Class: SkyLight
 
-Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:18](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L18)
+Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:18](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L18)
 
 The SkyLight class analyzes SkyAtmosphere's atmospheric scattering data in real-time to generate indirect lighting (IBL) for the scene.
 
@@ -22,7 +22,7 @@ Bakes diffuse (Irradiance) and specular (Reflection) cubemaps based on atmospher
 
 > **new SkyLight**(`redGPUContext`, `sharedUniformBuffer`, `sampler`): `SkyLight`
 
-Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:36](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L36)
+Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:36](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L36)
 
 #### Parameters
 
@@ -46,7 +46,7 @@ Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:36](https://git
 
 > **dirty**: `boolean` = `true`
 
-Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:23](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L23)
+Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:23](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L23)
 
 Whether IBL needs to be updated (if true, update is performed on the next frame)
 
@@ -58,7 +58,7 @@ Whether IBL needs to be updated (if true, update is performed on the next frame)
 
 > **get** **irradianceLUT**(): [`DirectCubeTexture`](../../../../Resource/classes/DirectCubeTexture.md)
 
-Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:56](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L56)
+Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:56](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L56)
 
 Irradiance LUT for indirect diffuse lighting
 
@@ -74,7 +74,7 @@ Irradiance LUT for indirect diffuse lighting
 
 > **get** **reflectionLUT**(): [`DirectCubeTexture`](../../../../Resource/classes/DirectCubeTexture.md)
 
-Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:61](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L61)
+Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:61](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L61)
 
 Reflection LUT for indirect specular lighting
 
@@ -88,7 +88,7 @@ Reflection LUT for indirect specular lighting
 
 > **update**(`skyAtmosphere`): `Promise`\<`void`\>
 
-Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:70](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L70)
+Defined in: [src/display/skyAtmosphere/core/skyLight/SkyLight.ts:70](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/skyLight/SkyLight.ts#L70)
 
 Updates IBL data based on the state of SkyAtmosphere.
 
@@ -116,7 +116,7 @@ Updates IBL data based on the state of SkyAtmosphere.
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L76)
 
 Returns the AntialiasingManager instance. (Short-cut path)
 
@@ -138,7 +138,7 @@ AntialiasingManager instance
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L88)
 
 Returns the CommandEncoderManager instance. (Short-cut path)
 
@@ -160,7 +160,7 @@ CommandEncoderManager instance
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L52)
 
 Returns the WebGPU device object. (Short-cut path)
 
@@ -182,7 +182,7 @@ GPUDevice instance
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/BaseObject.ts#L58)
 
 Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
 
@@ -196,7 +196,7 @@ Name of the object
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/BaseObject.ts#L71)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/BaseObject.ts#L71)
 
 Sets the name of the object.
 
@@ -222,7 +222,7 @@ Sets the name of the object.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L40)
 
 Returns the RedGPUContext instance.
 
@@ -244,7 +244,7 @@ RedGPUContext instance
 
 > **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L64)
 
 Returns the ResourceManager instance. (Short-cut path)
 
@@ -266,7 +266,7 @@ ResourceManager instance
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/BaseObject.ts#L46)
 
 Returns the universally unique identifier (UUID) of the object.
 

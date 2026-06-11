@@ -6,7 +6,7 @@
 
 # Interface: IPostEffectResult
 
-Defined in: [src/postEffect/core/types.ts:5](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/types.ts#L5)
+Defined in: [src/postEffect/core/types.ts:5](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/types.ts#L5)
 
 Result interface for a single-pass post-processing effect.
 
@@ -16,7 +16,7 @@ Result interface for a single-pass post-processing effect.
 
 > **texture**: `GPUTexture`
 
-Defined in: [src/postEffect/core/types.ts:10](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/types.ts#L10)
+Defined in: [src/postEffect/core/types.ts:10](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/types.ts#L10)
 
 Result texture
 
@@ -26,6 +26,6 @@ Result texture
 
 > **textureView**: `GPUTextureView`
 
-Defined in: [src/postEffect/core/types.ts:15](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/types.ts#L15)
+Defined in: [src/postEffect/core/types.ts:15](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/types.ts#L15)
 
 Result texture view

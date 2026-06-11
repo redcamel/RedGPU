@@ -8,7 +8,7 @@
 
 > **getAbsoluteURL**(`base`, `relative`): `string`
 
-Defined in: [src/utils/file/getAbsoluteURL.ts:18](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/utils/file/getAbsoluteURL.ts#L18)
+Defined in: [src/utils/file/getAbsoluteURL.ts:18](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/utils/file/getAbsoluteURL.ts#L18)
 
 상대 경로를 절대 URL로 변환합니다.
 

@@ -6,7 +6,7 @@
 
 # Class: FragmentGPURenderInfo
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:14](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/material/core/FragmentGPURenderInfo.ts#L14)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:14](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/material/core/FragmentGPURenderInfo.ts#L14)
 
 Represents information about a GPU fragment render operation.
 
@@ -20,7 +20,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new FragmentGPURenderInfo**(`fragmentShaderModule`, `fragmentShaderSourceVariant`, `fragmentShaderVariantConditionalBlocks`, `fragmentUniformInfo`, `fragmentBindGroupLayout`, `fragmentUniformBuffer`, `fragmentUniformBindGroup?`, `fragmentState?`): `FragmentGPURenderInfo`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:84](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/material/core/FragmentGPURenderInfo.ts#L84)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:84](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/material/core/FragmentGPURenderInfo.ts#L84)
 
 FragmentGPURenderInfo constructor
 
@@ -47,7 +47,7 @@ FragmentGPURenderInfo constructor
 
 > **fragmentBindGroupLayout**: `GPUBindGroupLayout`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:39](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/material/core/FragmentGPURenderInfo.ts#L39)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:39](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/material/core/FragmentGPURenderInfo.ts#L39)
 
 Fragment bind group layout
 
@@ -57,7 +57,7 @@ Fragment bind group layout
 
 > **fragmentShaderModule**: `GPUShaderModule`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:19](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/material/core/FragmentGPURenderInfo.ts#L19)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:19](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/material/core/FragmentGPURenderInfo.ts#L19)
 
 Fragment shader module
 
@@ -67,7 +67,7 @@ Fragment shader module
 
 > **fragmentShaderSourceVariant**: [`ShaderVariantGenerator`](../../../../Resource/namespaces/CoreWGSLParser/classes/ShaderVariantGenerator.md)
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:24](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/material/core/FragmentGPURenderInfo.ts#L24)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:24](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/material/core/FragmentGPURenderInfo.ts#L24)
 
 Fragment shader source variant generator
 
@@ -77,7 +77,7 @@ Fragment shader source variant generator
 
 > **fragmentShaderVariantConditionalBlocks**: `string`[]
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:29](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/material/core/FragmentGPURenderInfo.ts#L29)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:29](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/material/core/FragmentGPURenderInfo.ts#L29)
 
 List of fragment shader variant conditional blocks
 
@@ -87,7 +87,7 @@ List of fragment shader variant conditional blocks
 
 > **fragmentState**: `GPUFragmentState`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:54](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/material/core/FragmentGPURenderInfo.ts#L54)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:54](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/material/core/FragmentGPURenderInfo.ts#L54)
 
 Fragment render state
 
@@ -97,7 +97,7 @@ Fragment render state
 
 > **fragmentUniformBindGroup**: `GPUBindGroup`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:49](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/material/core/FragmentGPURenderInfo.ts#L49)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:49](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/material/core/FragmentGPURenderInfo.ts#L49)
 
 Fragment uniform bind group
 
@@ -107,7 +107,7 @@ Fragment uniform bind group
 
 > **fragmentUniformBuffer**: [`UniformBuffer`](../../../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:44](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/material/core/FragmentGPURenderInfo.ts#L44)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:44](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/material/core/FragmentGPURenderInfo.ts#L44)
 
 Fragment uniform buffer
 
@@ -117,6 +117,6 @@ Fragment uniform buffer
 
 > **fragmentUniformInfo**: `any`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:34](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/material/core/FragmentGPURenderInfo.ts#L34)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:34](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/material/core/FragmentGPURenderInfo.ts#L34)
 
 Fragment uniform information

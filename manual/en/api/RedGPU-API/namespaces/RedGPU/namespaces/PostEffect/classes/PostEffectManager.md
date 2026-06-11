@@ -6,7 +6,7 @@
 
 # Class: PostEffectManager
 
-Defined in: [src/postEffect/PostEffectManager.ts:37](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L37)
+Defined in: [src/postEffect/PostEffectManager.ts:37](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L37)
 
 Class for managing post-processing effects.
 
@@ -27,7 +27,7 @@ view.postEffectManager.addEffect(effect);
 
 > **new PostEffectManager**(`view`): `PostEffectManager`
 
-Defined in: [src/postEffect/PostEffectManager.ts:99](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L99)
+Defined in: [src/postEffect/PostEffectManager.ts:99](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L99)
 
 Creates a PostEffectManager instance.
 
@@ -49,7 +49,7 @@ Creates a PostEffectManager instance.
 
 > **get** **autoExposure**(): [`AutoExposure`](../../Camera/namespaces/Core/classes/AutoExposure.md)
 
-Defined in: [src/postEffect/PostEffectManager.ts:150](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L150)
+Defined in: [src/postEffect/PostEffectManager.ts:150](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L150)
 
 Returns the Auto Exposure instance.
 
@@ -67,7 +67,7 @@ Auto Exposure instance
 
 > **get** **effectList**(): ([`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md) \| [`AMultiPassPostEffect`](../namespaces/Core/classes/AMultiPassPostEffect.md))[]
 
-Defined in: [src/postEffect/PostEffectManager.ts:269](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L269)
+Defined in: [src/postEffect/PostEffectManager.ts:269](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L269)
 
 Returns the list of registered effects.
 
@@ -85,7 +85,7 @@ Array of post-processing effects
 
 > **get** **gbufferBindGroup**(): `GPUBindGroup`
 
-Defined in: [src/postEffect/PostEffectManager.ts:126](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L126)
+Defined in: [src/postEffect/PostEffectManager.ts:126](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L126)
 
 Returns the shared G-Buffer bind group for the current swap index.
 
@@ -103,7 +103,7 @@ Shared G-Buffer bind group
 
 > **get** **gbufferBindGroupLayout**(): `GPUBindGroupLayout`
 
-Defined in: [src/postEffect/PostEffectManager.ts:114](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L114)
+Defined in: [src/postEffect/PostEffectManager.ts:114](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L114)
 
 Returns the standard G-Buffer bind group layout for the current MSAA state.
 
@@ -121,7 +121,7 @@ G-Buffer bind group layout
 
 > **get** **postEffectSystemUniformBuffer**(): [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/postEffect/PostEffectManager.ts:245](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L245)
+Defined in: [src/postEffect/PostEffectManager.ts:245](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L245)
 
 Returns the system uniform buffer.
 
@@ -139,7 +139,7 @@ UniformBuffer instance
 
 > **get** **ssao**(): `SSAO`
 
-Defined in: [src/postEffect/PostEffectManager.ts:190](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L190)
+Defined in: [src/postEffect/PostEffectManager.ts:190](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L190)
 
 Returns the SSAO effect instance.
 
@@ -157,7 +157,7 @@ SSAO instance
 
 > **get** **ssr**(): `SSR`
 
-Defined in: [src/postEffect/PostEffectManager.ts:230](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L230)
+Defined in: [src/postEffect/PostEffectManager.ts:230](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L230)
 
 Returns the SSR effect instance.
 
@@ -175,7 +175,7 @@ SSR instance
 
 > **get** **texturePool**(): [`PostEffectTexturePool`](../namespaces/Core/classes/PostEffectTexturePool.md)
 
-Defined in: [src/postEffect/PostEffectManager.ts:138](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L138)
+Defined in: [src/postEffect/PostEffectManager.ts:138](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L138)
 
 Returns the texture pool instance.
 
@@ -193,7 +193,7 @@ Post-effect texture pool instance
 
 > **get** **useSSAO**(): `boolean`
 
-Defined in: [src/postEffect/PostEffectManager.ts:165](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L165)
+Defined in: [src/postEffect/PostEffectManager.ts:165](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L165)
 
 Returns whether SSAO is used.
 
@@ -207,7 +207,7 @@ Whether SSAO is used
 
 > **set** **useSSAO**(`value`): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:177](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L177)
+Defined in: [src/postEffect/PostEffectManager.ts:177](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L177)
 
 Sets whether SSAO is used.
 
@@ -229,7 +229,7 @@ Sets whether SSAO is used.
 
 > **get** **useSSR**(): `boolean`
 
-Defined in: [src/postEffect/PostEffectManager.ts:205](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L205)
+Defined in: [src/postEffect/PostEffectManager.ts:205](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L205)
 
 Returns whether SSR is used.
 
@@ -243,7 +243,7 @@ Whether SSR is used
 
 > **set** **useSSR**(`value`): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:217](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L217)
+Defined in: [src/postEffect/PostEffectManager.ts:217](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L217)
 
 Sets whether SSR is used.
 
@@ -265,7 +265,7 @@ Sets whether SSR is used.
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/postEffect/PostEffectManager.ts:281](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L281)
+Defined in: [src/postEffect/PostEffectManager.ts:281](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L281)
 
 Returns video memory usage.
 
@@ -283,7 +283,7 @@ Video memory usage (bytes)
 
 > **get** **view**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/postEffect/PostEffectManager.ts:257](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L257)
+Defined in: [src/postEffect/PostEffectManager.ts:257](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L257)
 
 Returns the connected View3D instance.
 
@@ -299,7 +299,7 @@ View3D instance
 
 > **addEffect**(`v`): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:299](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L299)
+Defined in: [src/postEffect/PostEffectManager.ts:299](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L299)
 
 Adds an effect.
 
@@ -324,7 +324,7 @@ view.postEffectManager.addEffect(new RedGPU.PostEffect.Bloom(redGPUContext));
 
 > **clear**(): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:508](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L508)
+Defined in: [src/postEffect/PostEffectManager.ts:508](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L508)
 
 Clears all effect resources.
 
@@ -338,7 +338,7 @@ Clears all effect resources.
 
 > **getEffectAt**(`index`): [`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md) \| [`AMultiPassPostEffect`](../namespaces/Core/classes/AMultiPassPostEffect.md)
 
-Defined in: [src/postEffect/PostEffectManager.ts:314](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L314)
+Defined in: [src/postEffect/PostEffectManager.ts:314](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L314)
 
 Returns the effect at a specific index.
 
@@ -360,7 +360,7 @@ Effect at the given index
 
 > **removeAllEffect**(): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:353](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L353)
+Defined in: [src/postEffect/PostEffectManager.ts:353](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L353)
 
 Removes all effects.
 
@@ -374,7 +374,7 @@ Removes all effects.
 
 > **removeEffect**(`v`): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:326](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L326)
+Defined in: [src/postEffect/PostEffectManager.ts:326](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L326)
 
 Removes a specific effect.
 
@@ -394,7 +394,7 @@ Removes a specific effect.
 
 > **removeEffectAt**(`index`): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:342](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L342)
+Defined in: [src/postEffect/PostEffectManager.ts:342](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L342)
 
 Removes the effect at a specific index.
 
@@ -414,7 +414,7 @@ Removes the effect at a specific index.
 
 > **render**(): [`IPostEffectResult`](../namespaces/Core/interfaces/IPostEffectResult.md)
 
-Defined in: [src/postEffect/PostEffectManager.ts:368](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/PostEffectManager.ts#L368)
+Defined in: [src/postEffect/PostEffectManager.ts:368](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/PostEffectManager.ts#L368)
 
 Renders the post-processing pipeline.
 

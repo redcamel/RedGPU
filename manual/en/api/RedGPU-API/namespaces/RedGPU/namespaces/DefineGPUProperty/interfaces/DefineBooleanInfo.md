@@ -6,7 +6,7 @@
 
 # Interface: DefineBooleanInfo
 
-Defined in: [src/defineProperty/funcs/defineBoolean.ts:12](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/defineProperty/funcs/defineBoolean.ts#L12)
+Defined in: [src/defineProperty/funcs/defineBoolean.ts:12](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/defineProperty/funcs/defineBoolean.ts#L12)
 
 `defineBoolean` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
 
@@ -20,7 +20,7 @@ Since GPUs do not natively support booleans, they are converted to 0 or 1 intege
 
 > **key**: `string`
 
-Defined in: [src/defineProperty/funcs/defineBoolean.ts:17](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/defineProperty/funcs/defineBoolean.ts#L17)
+Defined in: [src/defineProperty/funcs/defineBoolean.ts:17](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/defineProperty/funcs/defineBoolean.ts#L17)
 
 Key name of the property. Defined on the target object's prototype under this name.
 
@@ -30,6 +30,6 @@ Key name of the property. Defined on the target object's prototype under this na
 
 > **value**: `boolean`
 
-Defined in: [src/defineProperty/funcs/defineBoolean.ts:22](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/defineProperty/funcs/defineBoolean.ts#L22)
+Defined in: [src/defineProperty/funcs/defineBoolean.ts:22](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/defineProperty/funcs/defineBoolean.ts#L22)
 
 Initial boolean value of the property.

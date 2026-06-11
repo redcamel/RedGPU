@@ -8,7 +8,7 @@
 
 > **calculateTextureByteSize**(`texture`): `number`
 
-Defined in: [src/utils/texture/calculateTextureByteSize.ts:17](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/utils/texture/calculateTextureByteSize.ts#L17)
+Defined in: [src/utils/texture/calculateTextureByteSize.ts:17](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/utils/texture/calculateTextureByteSize.ts#L17)
 
 Calculates the total byte size of a GPUTexture.
 

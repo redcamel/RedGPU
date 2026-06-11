@@ -8,7 +8,7 @@
 
 > **calculateNormals**(`vertexArray`, `indexArray`): `number`[]
 
-Defined in: [src/math/calculateNormals.ts:24](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/math/calculateNormals.ts#L24)
+Defined in: [src/math/calculateNormals.ts:24](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/math/calculateNormals.ts#L24)
 
 Calculates vertex normals from vertex and index arrays.
 

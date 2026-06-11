@@ -8,7 +8,7 @@
 
 > `const` **SYSTEM\_UNIFORM**: `string` = `SYSTEM_UNIFORM_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2720](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/systemCodeManager/ShaderLibrary.ts#L2720)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2720](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/systemCodeManager/ShaderLibrary.ts#L2720)
 
 Definitions of the engine's standard system uniforms and global binding structures.
 
