@@ -18,7 +18,7 @@ const texturePaths = {
     ao: "../../../assets/phongMaterial/test_aoMap.jpg",
     normal: "../../../assets/phongMaterial/test_normalMap.jpg",
     emissive: "../../../assets/phongMaterial/test_emissiveMap.jpg",
-    displacement: "../../../assets/phongMaterial/test_displacementMap.jpg",
+    // displacement: "../../../assets/phongMaterial/test_displacementMap.jpg",
     specular: "../../../assets/phongMaterial/test_specularMap.jpg",
 };
 
@@ -117,7 +117,7 @@ const renderUI = (redGPUContext, mesh) => {
                 specularStrength: material.specularStrength,
                 shininess: material.shininess,
                 normalScale: material.normalScale,
-                displacementScale: material.displacementScale,
+                // displacementScale: material.displacementScale,
                 textures: {
                     useDiffuse: !!material.diffuseTexture,
                     useAlpha: !!material.alphaTexture,
@@ -125,7 +125,7 @@ const renderUI = (redGPUContext, mesh) => {
                     useSpecular: !!material.specularTexture,
                     useNormal: !!material.normalTexture,
                     useEmissive: !!material.emissiveTexture,
-                    useDisplacement: !!material.displacementTexture,
+                    // useDisplacement: !!material.displacementTexture,
                 },
             };
 
@@ -163,7 +163,7 @@ const renderUI = (redGPUContext, mesh) => {
                 {key: "specularStrength", min: 0, max: 20, step: 0.01},
                 {key: "shininess", min: 0, max: 128, step: 1},
                 {key: "normalScale", min: 0, max: 2, step: 0.01},
-                {key: "displacementScale", min: 0, max: 5, step: 0.01},
+                // {key: "displacementScale", min: 0, max: 5, step: 0.01},
             ];
 
             properties.forEach(({key, min, max, step}) =>
@@ -200,7 +200,7 @@ const renderUI = (redGPUContext, mesh) => {
             // [KO] 초기 텍스처 활성화
             // [EN] Initial Texture Activation
             material.diffuseTexture = textures.diffuse;
-            material.displacementTexture = textures.displacement;
+            // material.displacementTexture = textures.displacement;
             material.normalTexture = textures.normal;
             params.textures.useDisplacement = true;
             params.textures.useNormal = true;
