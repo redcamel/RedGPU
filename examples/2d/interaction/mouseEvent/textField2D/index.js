@@ -1,6 +1,6 @@
-import * as RedGPU from "../../../../../dist/index.js?t=1781141623471";
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1781141623471";
-import {createEventInfoBox, updateEventInfo} from "../../../../3d/interaction/mouseEvent/eventInfoBox.js?t=1781141623471";
+import * as RedGPU from "../../../../../dist/index.js?t=1781143364605";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1781143364605";
+import {createEventInfoBox, updateEventInfo} from "../../../../3d/interaction/mouseEvent/eventInfoBox.js?t=1781143364605";
 
 /**
  * [KO] TextField2D 마우스 이벤트 예제
