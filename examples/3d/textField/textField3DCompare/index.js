@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1781143364605";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1781143364605";
+import * as RedGPU from "../../../../dist/index.js?t=1781144235516";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1781144235516";
 
 /**
  * [KO] TextField3D 비교 예제 (World Size vs Pixel Size)
