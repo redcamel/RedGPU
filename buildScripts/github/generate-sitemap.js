@@ -99,5 +99,5 @@ const sitemapIndexXML = `<?xml version="1.0" encoding="UTF-8"?>
 </sitemapindex>`;
 
 // Root 사이트맵 인덱스 파일 저장
-fs.writeFileSync(path.join(sitemapDir, 'sitemap.xml'), sitemapIndexXML);
+fs.writeFileSync(path.join(sitemapDir, 'sitemap_v2.xml'), sitemapIndexXML);
 console.log(`루트 사이트맵 인덱스가 생성되었습니다: sitemap.xml`);
