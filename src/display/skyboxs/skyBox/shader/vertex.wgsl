@@ -23,9 +23,9 @@ fn main(inputData:InputData) -> VertexOutput {
     var viewRotation = u_viewMatrix;
     viewRotation[3] = vec4<f32>(0.0, 0.0, 0.0, 1.0);
 
-    // NDC Z를 1.0으로 고정하기 위해 xyww 트릭 사용 (xyww trick to fix NDC Z to 1.0)
+    // NDC Z를 1.0 직전으로 고정하여 Far Clipping 방지 (Fix NDC Z slightly below 1.0 to avoid Far Clipping)
     let clipPos = u_projectionMatrix * viewRotation * vertexUniforms.modelMatrix * vec4<f32>(inputData.position, 1.0);
-    output.position = clipPos.xyww;
+    output.position = vec4<f32>(clipPos.xy, clipPos.w * 0.99999, clipPos.w);
     
     output.vertexPosition = vec4<f32>(inputData.position, 1.0);
     return output;
