@@ -8,7 +8,7 @@
 
 > `const` **PHYSICS\_BODY\_TYPE**: `object`
 
-Defined in: [src/physics/PhysicsBodyType.ts:13](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/physics/PhysicsBodyType.ts#L13)
+Defined in: [src/physics/PhysicsBodyType.ts:13](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/physics/PhysicsBodyType.ts#L13)
 
 **`Experimental`**
 

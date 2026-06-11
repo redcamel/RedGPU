@@ -8,7 +8,7 @@
 
 > `const` **getHash3D\_vec3**: `string` = `getHash3D_vec3_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:209](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/systemCodeManager/ShaderLibrary.ts#L209)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:209](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/systemCodeManager/ShaderLibrary.ts#L209)
 
 Generates a 3D random vector by converting a 3D position to integers. (Stable Grid-based)
 

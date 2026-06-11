@@ -8,7 +8,7 @@
 
 > **parseWGSL**(`sourceName`, `code`, `injectLibrary?`): `object`
 
-Defined in: [src/resources/wgslParser/parseWGSL.ts:153](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/wgslParser/parseWGSL.ts#L153)
+Defined in: [src/resources/wgslParser/parseWGSL.ts:153](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/wgslParser/parseWGSL.ts#L153)
 
 Parses WGSL code and returns reflection information.
 
@@ -30,13 +30,13 @@ An object containing reflection information and preprocessed source code
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `computeEntries` | `string`[] | [src/resources/wgslParser/parseWGSL.ts:160](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/wgslParser/parseWGSL.ts#L160) |
-| `conditionalBlocks` | `string`[] | [src/resources/wgslParser/parseWGSL.ts:163](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/wgslParser/parseWGSL.ts#L163) |
-| `defaultSource` | `string` | [src/resources/wgslParser/parseWGSL.ts:161](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/wgslParser/parseWGSL.ts#L161) |
-| `fragmentEntries` | `string`[] | [src/resources/wgslParser/parseWGSL.ts:159](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/wgslParser/parseWGSL.ts#L159) |
-| `samplers` | `any` | [src/resources/wgslParser/parseWGSL.ts:156](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/wgslParser/parseWGSL.ts#L156) |
-| `shaderSourceVariant` | `any` | [src/resources/wgslParser/parseWGSL.ts:162](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/wgslParser/parseWGSL.ts#L162) |
-| `storage` | `any` | [src/resources/wgslParser/parseWGSL.ts:155](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/wgslParser/parseWGSL.ts#L155) |
-| `textures` | `any` | [src/resources/wgslParser/parseWGSL.ts:157](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/wgslParser/parseWGSL.ts#L157) |
-| `uniforms` | `any` | [src/resources/wgslParser/parseWGSL.ts:154](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/wgslParser/parseWGSL.ts#L154) |
-| `vertexEntries` | `string`[] | [src/resources/wgslParser/parseWGSL.ts:158](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/wgslParser/parseWGSL.ts#L158) |
+| `computeEntries` | `string`[] | [src/resources/wgslParser/parseWGSL.ts:160](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/wgslParser/parseWGSL.ts#L160) |
+| `conditionalBlocks` | `string`[] | [src/resources/wgslParser/parseWGSL.ts:163](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/wgslParser/parseWGSL.ts#L163) |
+| `defaultSource` | `string` | [src/resources/wgslParser/parseWGSL.ts:161](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/wgslParser/parseWGSL.ts#L161) |
+| `fragmentEntries` | `string`[] | [src/resources/wgslParser/parseWGSL.ts:159](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/wgslParser/parseWGSL.ts#L159) |
+| `samplers` | `any` | [src/resources/wgslParser/parseWGSL.ts:156](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/wgslParser/parseWGSL.ts#L156) |
+| `shaderSourceVariant` | `any` | [src/resources/wgslParser/parseWGSL.ts:162](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/wgslParser/parseWGSL.ts#L162) |
+| `storage` | `any` | [src/resources/wgslParser/parseWGSL.ts:155](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/wgslParser/parseWGSL.ts#L155) |
+| `textures` | `any` | [src/resources/wgslParser/parseWGSL.ts:157](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/wgslParser/parseWGSL.ts#L157) |
+| `uniforms` | `any` | [src/resources/wgslParser/parseWGSL.ts:154](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/wgslParser/parseWGSL.ts#L154) |
+| `vertexEntries` | `string`[] | [src/resources/wgslParser/parseWGSL.ts:158](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/wgslParser/parseWGSL.ts#L158) |

@@ -8,7 +8,7 @@
 
 > `const` **Time**: `string` = `Time_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2332](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/systemCodeManager/ShaderLibrary.ts#L2332)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2332](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/systemCodeManager/ShaderLibrary.ts#L2332)
 
 시간 관련 데이터 구조체 정의입니다.
 

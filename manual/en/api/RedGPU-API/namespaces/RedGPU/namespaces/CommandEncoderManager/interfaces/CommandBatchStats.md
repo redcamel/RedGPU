@@ -6,7 +6,7 @@
 
 # Interface: CommandBatchStats
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:63](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/commandEncoderManager/CommandEncoderManager.ts#L63)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:63](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/commandEncoderManager/CommandEncoderManager.ts#L63)
 
 Batch submission statistics
 
@@ -16,7 +16,7 @@ Batch submission statistics
 
 > **deferredDestroyCount**: `number`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:73](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/commandEncoderManager/CommandEncoderManager.ts#L73)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:73](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/commandEncoderManager/CommandEncoderManager.ts#L73)
 
 Number of resources deferred destroyed after this submission
 
@@ -26,6 +26,6 @@ Number of resources deferred destroyed after this submission
 
 > **phases**: `Record`\<`string`, [`CommandPhaseStats`](CommandPhaseStats.md)\>
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:68](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/commandEncoderManager/CommandEncoderManager.ts#L68)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:68](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/commandEncoderManager/CommandEncoderManager.ts#L68)
 
 Detailed statistics record per phase

@@ -6,7 +6,7 @@
 
 # Class: OBB
 
-Defined in: [src/bound/OBB.ts:19](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/bound/OBB.ts#L19)
+Defined in: [src/bound/OBB.ts:19](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/bound/OBB.ts#L19)
 
 3D Oriented Bounding Box (OBB) class.
 
@@ -24,7 +24,7 @@ const intersects = obb.intersects(otherOBB);
 
 > **new OBB**(`center`, `halfExtents`, `orientation`): `OBB`
 
-Defined in: [src/bound/OBB.ts:85](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/bound/OBB.ts#L85)
+Defined in: [src/bound/OBB.ts:85](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/bound/OBB.ts#L85)
 
 Creates an OBB instance.
 
@@ -46,7 +46,7 @@ Creates an OBB instance.
 
 > `readonly` **center**: \[`number`, `number`, `number`\]
 
-Defined in: [src/bound/OBB.ts:59](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/bound/OBB.ts#L59)
+Defined in: [src/bound/OBB.ts:59](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/bound/OBB.ts#L59)
 
 Center coordinates [x, y, z]
 
@@ -56,7 +56,7 @@ Center coordinates [x, y, z]
 
 > `readonly` **centerX**: `number`
 
-Defined in: [src/bound/OBB.ts:24](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/bound/OBB.ts#L24)
+Defined in: [src/bound/OBB.ts:24](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/bound/OBB.ts#L24)
 
 Center X coordinate
 
@@ -66,7 +66,7 @@ Center X coordinate
 
 > `readonly` **centerY**: `number`
 
-Defined in: [src/bound/OBB.ts:29](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/bound/OBB.ts#L29)
+Defined in: [src/bound/OBB.ts:29](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/bound/OBB.ts#L29)
 
 Center Y coordinate
 
@@ -76,7 +76,7 @@ Center Y coordinate
 
 > `readonly` **centerZ**: `number`
 
-Defined in: [src/bound/OBB.ts:34](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/bound/OBB.ts#L34)
+Defined in: [src/bound/OBB.ts:34](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/bound/OBB.ts#L34)
 
 Center Z coordinate
 
@@ -86,7 +86,7 @@ Center Z coordinate
 
 > `readonly` **geometryRadius**: `number`
 
-Defined in: [src/bound/OBB.ts:69](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/bound/OBB.ts#L69)
+Defined in: [src/bound/OBB.ts:69](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/bound/OBB.ts#L69)
 
 Distance from center to vertex (radius)
 
@@ -96,7 +96,7 @@ Distance from center to vertex (radius)
 
 > `readonly` **halfExtents**: \[`number`, `number`, `number`\]
 
-Defined in: [src/bound/OBB.ts:64](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/bound/OBB.ts#L64)
+Defined in: [src/bound/OBB.ts:64](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/bound/OBB.ts#L64)
 
 Half extents [x, y, z]
 
@@ -106,7 +106,7 @@ Half extents [x, y, z]
 
 > `readonly` **halfExtentX**: `number`
 
-Defined in: [src/bound/OBB.ts:39](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/bound/OBB.ts#L39)
+Defined in: [src/bound/OBB.ts:39](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/bound/OBB.ts#L39)
 
 X half extent
 
@@ -116,7 +116,7 @@ X half extent
 
 > `readonly` **halfExtentY**: `number`
 
-Defined in: [src/bound/OBB.ts:44](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/bound/OBB.ts#L44)
+Defined in: [src/bound/OBB.ts:44](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/bound/OBB.ts#L44)
 
 Y half extent
 
@@ -126,7 +126,7 @@ Y half extent
 
 > `readonly` **halfExtentZ**: `number`
 
-Defined in: [src/bound/OBB.ts:49](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/bound/OBB.ts#L49)
+Defined in: [src/bound/OBB.ts:49](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/bound/OBB.ts#L49)
 
 Z half extent
 
@@ -136,7 +136,7 @@ Z half extent
 
 > `readonly` **orientation**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/bound/OBB.ts:54](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/bound/OBB.ts#L54)
+Defined in: [src/bound/OBB.ts:54](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/bound/OBB.ts#L54)
 
 Orientation matrix (mat4)
 
@@ -146,7 +146,7 @@ Orientation matrix (mat4)
 
 > **clone**(): `OBB`
 
-Defined in: [src/bound/OBB.ts:186](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/bound/OBB.ts#L186)
+Defined in: [src/bound/OBB.ts:186](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/bound/OBB.ts#L186)
 
 Clones the OBB instance.
 
@@ -162,7 +162,7 @@ Cloned OBB instance
 
 > **contains**(`pointOrX`, `y?`, `z?`): `boolean`
 
-Defined in: [src/bound/OBB.ts:160](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/bound/OBB.ts#L160)
+Defined in: [src/bound/OBB.ts:160](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/bound/OBB.ts#L160)
 
 Returns whether a point or coordinate is contained within the OBB.
 
@@ -186,7 +186,7 @@ True if contained, otherwise false
 
 > **intersects**(`other`): `boolean`
 
-Defined in: [src/bound/OBB.ts:117](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/bound/OBB.ts#L117)
+Defined in: [src/bound/OBB.ts:117](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/bound/OBB.ts#L117)
 
 Returns whether it intersects with another OBB.
 

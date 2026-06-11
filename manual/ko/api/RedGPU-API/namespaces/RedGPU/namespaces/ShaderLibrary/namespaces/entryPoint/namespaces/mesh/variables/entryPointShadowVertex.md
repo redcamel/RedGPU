@@ -8,7 +8,7 @@
 
 > `const` **entryPointShadowVertex**: `string` = `meshEntryPointShadowVertex_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2143](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/systemCodeManager/ShaderLibrary.ts#L2143)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2143](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/systemCodeManager/ShaderLibrary.ts#L2143)
 
 그림자 맵 생성을 위한 버텍스 셰이더 엔트리 포인트입니다.
 

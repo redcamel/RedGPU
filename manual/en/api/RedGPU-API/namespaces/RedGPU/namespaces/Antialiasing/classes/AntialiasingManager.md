@@ -6,7 +6,7 @@
 
 # Class: AntialiasingManager
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:21](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/antialiasing/AntialiasingManager.ts#L21)
+Defined in: [src/antialiasing/AntialiasingManager.ts:21](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/antialiasing/AntialiasingManager.ts#L21)
 
 Class that manages anti-aliasing settings.
 
@@ -26,7 +26,7 @@ const antialiasingManager = redGPUContext.antialiasingManager;
 
 > **new AntialiasingManager**(): `AntialiasingManager`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:38](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/antialiasing/AntialiasingManager.ts#L38)
+Defined in: [src/antialiasing/AntialiasingManager.ts:38](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/antialiasing/AntialiasingManager.ts#L38)
 
 `window.devicePixelRatio` 값에 따라 초기 안티앨리어싱 모드가 결정됩니다:
 - `devicePixelRatio > 1.0` (고해상도 화면): TAA가 활성화됩니다.
@@ -48,7 +48,7 @@ The initial anti-aliasing mode is determined based on the `window.devicePixelRat
 
 > **get** **msaaID**(): `string`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:165](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/antialiasing/AntialiasingManager.ts#L165)
+Defined in: [src/antialiasing/AntialiasingManager.ts:165](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/antialiasing/AntialiasingManager.ts#L165)
 
 **`Internal`**
 
@@ -68,7 +68,7 @@ Unique ID of MSAA
 
 > **get** **useFXAA**(): `boolean`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:133](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/antialiasing/AntialiasingManager.ts#L133)
+Defined in: [src/antialiasing/AntialiasingManager.ts:133](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/antialiasing/AntialiasingManager.ts#L133)
 
 Returns whether FXAA (Fast Approximate Anti-Aliasing) is used.
 
@@ -87,7 +87,7 @@ Whether FXAA is used
 
 > **set** **useFXAA**(`value`): `void`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:150](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/antialiasing/AntialiasingManager.ts#L150)
+Defined in: [src/antialiasing/AntialiasingManager.ts:150](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/antialiasing/AntialiasingManager.ts#L150)
 
 Sets whether to use FXAA (Fast Approximate Anti-Aliasing).
 
@@ -114,7 +114,7 @@ antialiasingManager.useFXAA = true;
 
 > **get** **useMSAA**(): `boolean`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:96](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/antialiasing/AntialiasingManager.ts#L96)
+Defined in: [src/antialiasing/AntialiasingManager.ts:96](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/antialiasing/AntialiasingManager.ts#L96)
 
 Returns whether MSAA (Multi-Sample Anti-Aliasing) is used.
 
@@ -133,7 +133,7 @@ Whether MSAA is used
 
 > **set** **useMSAA**(`value`): `void`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:113](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/antialiasing/AntialiasingManager.ts#L113)
+Defined in: [src/antialiasing/AntialiasingManager.ts:113](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/antialiasing/AntialiasingManager.ts#L113)
 
 Sets whether to use MSAA (Multi-Sample Anti-Aliasing).
 
@@ -160,7 +160,7 @@ antialiasingManager.useMSAA = true;
 
 > **get** **useTAA**(): `boolean`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:60](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/antialiasing/AntialiasingManager.ts#L60)
+Defined in: [src/antialiasing/AntialiasingManager.ts:60](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/antialiasing/AntialiasingManager.ts#L60)
 
 Returns whether TAA (Temporal Anti-Aliasing) is used.
 
@@ -179,7 +179,7 @@ Whether TAA is used
 
 > **set** **useTAA**(`value`): `void`
 
-Defined in: [src/antialiasing/AntialiasingManager.ts:77](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/antialiasing/AntialiasingManager.ts#L77)
+Defined in: [src/antialiasing/AntialiasingManager.ts:77](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/antialiasing/AntialiasingManager.ts#L77)
 
 Sets whether to use TAA (Temporal Anti-Aliasing).
 

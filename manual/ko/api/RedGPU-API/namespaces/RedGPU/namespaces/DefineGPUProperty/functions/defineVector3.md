@@ -8,7 +8,7 @@
 
 > **defineVector3**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/vector/defineVector3.ts:51](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/defineProperty/funcs/vector/defineVector3.ts#L51)
+Defined in: [src/defineProperty/funcs/vector/defineVector3.ts:51](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/defineProperty/funcs/vector/defineVector3.ts#L51)
 
 지정된 클래스의 프로토타입에 GPU와 연동되는 3차원 벡터(Vector3) 속성을 정의합니다.
 

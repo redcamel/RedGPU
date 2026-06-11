@@ -8,7 +8,7 @@
 
 > **createUUID**(): `string`
 
-Defined in: [src/utils/uuid/createUUID.ts:13](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/utils/uuid/createUUID.ts#L13)
+Defined in: [src/utils/uuid/createUUID.ts:13](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/utils/uuid/createUUID.ts#L13)
 
 임의의 UUID(버전 4) 문자열을 생성합니다.
 

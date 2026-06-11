@@ -8,7 +8,7 @@
 
 > **isHexColor**(`hex`): `boolean`
 
-Defined in: [src/runtimeChecker/isFunc/isHexColor.ts:22](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/runtimeChecker/isFunc/isHexColor.ts#L22)
+Defined in: [src/runtimeChecker/isFunc/isHexColor.ts:22](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/runtimeChecker/isFunc/isHexColor.ts#L22)
 
 Checks if the given value is a valid hexadecimal (Hex) color format.
 

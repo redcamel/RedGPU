@@ -8,7 +8,7 @@
 
 > `const` **getBitHash3D\_vec3**: `string` = `getBitHash3D_vec3_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:345](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/systemCodeManager/ShaderLibrary.ts#L345)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:345](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/systemCodeManager/ShaderLibrary.ts#L345)
 
 3D 벡터의 비트 구조를 보존하여 3D 난수 벡터를 생성합니다. (초정밀)
 

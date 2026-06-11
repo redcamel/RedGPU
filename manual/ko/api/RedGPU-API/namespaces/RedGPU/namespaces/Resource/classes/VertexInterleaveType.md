@@ -6,7 +6,7 @@
 
 # Class: VertexInterleaveType
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:13](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L13)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:13](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L13)
 
 정점 데이터의 인터리브 형식을 정의하는 클래스입니다.
 
@@ -33,7 +33,7 @@ const type = RedGPU.Resource.VertexInterleaveType.float32x3;
 
 > **get** `static` **float32**(): [`TypeInterleave`](../type-aliases/TypeInterleave.md)
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:18](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L18)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:18](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L18)
 
 float32 형식 (요소 1개, 4바이트)
 
@@ -49,7 +49,7 @@ float32 형식 (요소 1개, 4바이트)
 
 > **get** `static` **float32x2**(): [`TypeInterleave`](../type-aliases/TypeInterleave.md)
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:26](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L26)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:26](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L26)
 
 float32x2 형식 (요소 2개, 8바이트)
 
@@ -65,7 +65,7 @@ float32x2 형식 (요소 2개, 8바이트)
 
 > **get** `static` **float32x3**(): [`TypeInterleave`](../type-aliases/TypeInterleave.md)
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:34](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L34)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:34](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L34)
 
 float32x3 형식 (요소 3개, 12바이트)
 
@@ -81,7 +81,7 @@ float32x3 형식 (요소 3개, 12바이트)
 
 > **get** `static` **float32x4**(): [`TypeInterleave`](../type-aliases/TypeInterleave.md)
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:42](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L42)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:42](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L42)
 
 float32x4 형식 (요소 4개, 16바이트)
 

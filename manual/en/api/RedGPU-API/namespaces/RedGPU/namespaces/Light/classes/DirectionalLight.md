@@ -6,7 +6,7 @@
 
 # Class: DirectionalLight
 
-Defined in: [src/light/lights/DirectionalLight.ts:19](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/lights/DirectionalLight.ts#L19)
+Defined in: [src/light/lights/DirectionalLight.ts:19](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/lights/DirectionalLight.ts#L19)
 
 Class that defines a directional light source.
 
@@ -28,7 +28,7 @@ scene.lightManager.addDirectionalLight(light);
 
 > **new DirectionalLight**(`direction?`, `color?`, `lux?`): `DirectionalLight`
 
-Defined in: [src/light/lights/DirectionalLight.ts:42](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/lights/DirectionalLight.ts#L42)
+Defined in: [src/light/lights/DirectionalLight.ts:42](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/lights/DirectionalLight.ts#L42)
 
 Creates a new DirectionalLight instance.
 
@@ -56,7 +56,7 @@ Creates a new DirectionalLight instance.
 
 > **get** **azimuth**(): `number`
 
-Defined in: [src/light/lights/DirectionalLight.ts:87](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/lights/DirectionalLight.ts#L87)
+Defined in: [src/light/lights/DirectionalLight.ts:87](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/lights/DirectionalLight.ts#L87)
 
 Azimuth of the light source (degrees).
 
@@ -68,7 +68,7 @@ Azimuth of the light source (degrees).
 
 > **set** **azimuth**(`value`): `void`
 
-Defined in: [src/light/lights/DirectionalLight.ts:91](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/lights/DirectionalLight.ts#L91)
+Defined in: [src/light/lights/DirectionalLight.ts:91](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/lights/DirectionalLight.ts#L91)
 
 ##### Parameters
 
@@ -88,7 +88,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:91](https://github.com/redcame
 
 > **get** **direction**(): \[`number`, `number`, `number`\]
 
-Defined in: [src/light/lights/DirectionalLight.ts:139](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/lights/DirectionalLight.ts#L139)
+Defined in: [src/light/lights/DirectionalLight.ts:139](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/lights/DirectionalLight.ts#L139)
 
 Returns the full direction vector of the light.
 
@@ -100,7 +100,7 @@ Returns the full direction vector of the light.
 
 > **set** **direction**(`value`): `void`
 
-Defined in: [src/light/lights/DirectionalLight.ts:147](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/lights/DirectionalLight.ts#L147)
+Defined in: [src/light/lights/DirectionalLight.ts:147](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/lights/DirectionalLight.ts#L147)
 
 Sets the full direction vector of the light.
 
@@ -122,7 +122,7 @@ Sets the full direction vector of the light.
 
 > **get** **directionX**(): `number`
 
-Defined in: [src/light/lights/DirectionalLight.ts:100](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/lights/DirectionalLight.ts#L100)
+Defined in: [src/light/lights/DirectionalLight.ts:100](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/lights/DirectionalLight.ts#L100)
 
 X direction vector value of the light.
 
@@ -134,7 +134,7 @@ X direction vector value of the light.
 
 > **set** **directionX**(`value`): `void`
 
-Defined in: [src/light/lights/DirectionalLight.ts:104](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/lights/DirectionalLight.ts#L104)
+Defined in: [src/light/lights/DirectionalLight.ts:104](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/lights/DirectionalLight.ts#L104)
 
 ##### Parameters
 
@@ -154,7 +154,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:104](https://github.com/redcam
 
 > **get** **directionY**(): `number`
 
-Defined in: [src/light/lights/DirectionalLight.ts:113](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/lights/DirectionalLight.ts#L113)
+Defined in: [src/light/lights/DirectionalLight.ts:113](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/lights/DirectionalLight.ts#L113)
 
 Y direction vector value of the light.
 
@@ -166,7 +166,7 @@ Y direction vector value of the light.
 
 > **set** **directionY**(`value`): `void`
 
-Defined in: [src/light/lights/DirectionalLight.ts:117](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/lights/DirectionalLight.ts#L117)
+Defined in: [src/light/lights/DirectionalLight.ts:117](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/lights/DirectionalLight.ts#L117)
 
 ##### Parameters
 
@@ -186,7 +186,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:117](https://github.com/redcam
 
 > **get** **directionZ**(): `number`
 
-Defined in: [src/light/lights/DirectionalLight.ts:126](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/lights/DirectionalLight.ts#L126)
+Defined in: [src/light/lights/DirectionalLight.ts:126](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/lights/DirectionalLight.ts#L126)
 
 Z direction vector value of the light.
 
@@ -198,7 +198,7 @@ Z direction vector value of the light.
 
 > **set** **directionZ**(`value`): `void`
 
-Defined in: [src/light/lights/DirectionalLight.ts:130](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/lights/DirectionalLight.ts#L130)
+Defined in: [src/light/lights/DirectionalLight.ts:130](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/lights/DirectionalLight.ts#L130)
 
 ##### Parameters
 
@@ -218,7 +218,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:130](https://github.com/redcam
 
 > **get** **elevation**(): `number`
 
-Defined in: [src/light/lights/DirectionalLight.ts:74](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/lights/DirectionalLight.ts#L74)
+Defined in: [src/light/lights/DirectionalLight.ts:74](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/lights/DirectionalLight.ts#L74)
 
 Elevation of the light source (degrees).
 
@@ -230,7 +230,7 @@ Elevation of the light source (degrees).
 
 > **set** **elevation**(`value`): `void`
 
-Defined in: [src/light/lights/DirectionalLight.ts:78](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/lights/DirectionalLight.ts#L78)
+Defined in: [src/light/lights/DirectionalLight.ts:78](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/lights/DirectionalLight.ts#L78)
 
 ##### Parameters
 
@@ -250,7 +250,7 @@ Defined in: [src/light/lights/DirectionalLight.ts:78](https://github.com/redcame
 
 > **get** **lux**(): `number`
 
-Defined in: [src/light/lights/DirectionalLight.ts:55](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/lights/DirectionalLight.ts#L55)
+Defined in: [src/light/lights/DirectionalLight.ts:55](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/lights/DirectionalLight.ts#L55)
 
 Returns the illuminance (Lux, lx) of the light source.
 
@@ -264,7 +264,7 @@ Illuminance value
 
 > **set** **lux**(`value`): `void`
 
-Defined in: [src/light/lights/DirectionalLight.ts:66](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/lights/DirectionalLight.ts#L66)
+Defined in: [src/light/lights/DirectionalLight.ts:66](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/lights/DirectionalLight.ts#L66)
 
 Sets the illuminance (Lux, lx) of the light source.
 
@@ -290,7 +290,7 @@ Sets the illuminance (Lux, lx) of the light source.
 
 > **drawDebugger**: [`ADrawDebuggerLight`](../../Display/namespaces/drawDebugger/classes/ADrawDebuggerLight.md)\<[`ABaseLight`](../namespaces/Core/classes/ABaseLight.md)\>
 
-Defined in: [src/light/core/ABaseLight.ts:22](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/core/ABaseLight.ts#L22)
+Defined in: [src/light/core/ABaseLight.ts:22](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/core/ABaseLight.ts#L22)
 
 Helper object for debugging visualization of the light.
 
@@ -308,7 +308,7 @@ Set externally, it can visually display the position or direction of the light.
 
 > **get** **color**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/core/ABaseLight.ts#L84)
+Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/core/ABaseLight.ts#L84)
 
 Returns the color of the light.
 
@@ -322,7 +322,7 @@ ColorRGB object
 
 > **set** **color**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:95](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/core/ABaseLight.ts#L95)
+Defined in: [src/light/core/ABaseLight.ts:95](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/core/ABaseLight.ts#L95)
 
 Sets the color of the light.
 
@@ -348,7 +348,7 @@ Sets the color of the light.
 
 > **get** **enableDebugger**(): `boolean`
 
-Defined in: [src/light/core/ABaseLight.ts:62](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/core/ABaseLight.ts#L62)
+Defined in: [src/light/core/ABaseLight.ts:62](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/core/ABaseLight.ts#L62)
 
 Returns whether the debugging visualization feature is enabled.
 
@@ -362,7 +362,7 @@ Whether enabled
 
 > **set** **enableDebugger**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:73](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/core/ABaseLight.ts#L73)
+Defined in: [src/light/core/ABaseLight.ts:73](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/core/ABaseLight.ts#L73)
 
 Enables or disables the debugging visualization feature.
 
@@ -388,7 +388,7 @@ Enables or disables the debugging visualization feature.
 
 > **get** **intensityMultiplier**(): `number`
 
-Defined in: [src/light/core/ABaseLight.ts:109](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/core/ABaseLight.ts#L109)
+Defined in: [src/light/core/ABaseLight.ts:109](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/core/ABaseLight.ts#L109)
 
 Returns the intensity multiplier of the light.
 
@@ -402,7 +402,7 @@ Multiplier value
 
 > **set** **intensityMultiplier**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:120](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/light/core/ABaseLight.ts#L120)
+Defined in: [src/light/core/ABaseLight.ts:120](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/light/core/ABaseLight.ts#L120)
 
 Sets the intensity multiplier of the light.
 

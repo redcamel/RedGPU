@@ -6,7 +6,7 @@
 
 # Class: Group2D
 
-Defined in: [src/display/group/Group2D.ts:21](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group2D.ts#L21)
+Defined in: [src/display/group/Group2D.ts:21](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group2D.ts#L21)
 
 2D 공간 내에서 자식 객체들을 계층적으로 구성하고 그룹 제어하기 위한 컨테이너 클래스입니다.
 
@@ -32,7 +32,7 @@ scene.addChild(group);
 
 > **new Group2D**(`name?`): `Group2D`
 
-Defined in: [src/display/group/Group2D.ts:35](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group2D.ts#L35)
+Defined in: [src/display/group/Group2D.ts:35](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group2D.ts#L35)
 
 Group2D 인스턴스를 생성합니다.
 
@@ -58,7 +58,7 @@ Group2D 인스턴스를 생성합니다.
 
 > **get** **rotation**(): `number`
 
-Defined in: [src/display/group/Group2D.ts:45](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group2D.ts#L45)
+Defined in: [src/display/group/Group2D.ts:45](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group2D.ts#L45)
 
 그룹의 회전 값(라디안)을 반환하거나 설정합니다. 설정 시 내부적으로 Z축 회전에 연동됩니다.
 
@@ -70,7 +70,7 @@ Defined in: [src/display/group/Group2D.ts:45](https://github.com/redcamel/RedGPU
 
 > **set** **rotation**(`value`): `void`
 
-Defined in: [src/display/group/Group2D.ts:50](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group2D.ts#L50)
+Defined in: [src/display/group/Group2D.ts:50](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group2D.ts#L50)
 
 그룹의 회전각 [rotationX, rotationY, rotationZ] 배열(Degree)을 가져옵니다.
 
@@ -94,7 +94,7 @@ Defined in: [src/display/group/Group2D.ts:50](https://github.com/redcamel/RedGPU
 
 > **setPosition**(`x`, `y?`): `void`
 
-Defined in: [src/display/group/Group2D.ts:81](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group2D.ts#L81)
+Defined in: [src/display/group/Group2D.ts:81](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group2D.ts#L81)
 
 그룹의 2D 위치(X, Y 좌표)를 설정합니다. Y값을 생략하면 X값과 동일하게 대입됩니다.
 
@@ -119,7 +119,7 @@ Defined in: [src/display/group/Group2D.ts:81](https://github.com/redcamel/RedGPU
 
 > **setRotation**(`value`): `void`
 
-Defined in: [src/display/group/Group2D.ts:94](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group2D.ts#L94)
+Defined in: [src/display/group/Group2D.ts:94](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group2D.ts#L94)
 
 그룹의 2D 회전 값을 라디안(Radian) 단위로 설정합니다.
 
@@ -143,7 +143,7 @@ Defined in: [src/display/group/Group2D.ts:94](https://github.com/redcamel/RedGPU
 
 > **setScale**(`x`, `y?`): `void`
 
-Defined in: [src/display/group/Group2D.ts:65](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group2D.ts#L65)
+Defined in: [src/display/group/Group2D.ts:65](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group2D.ts#L65)
 
 그룹의 2D 스케일을 일괄적으로 설정합니다. Y값을 생략하면 X값과 동일하게 통일되어 적용됩니다.
 
@@ -176,7 +176,7 @@ Defined in: [src/display/group/Group2D.ts:65](https://github.com/redcamel/RedGPU
 
 > **localMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/group/Group3D.ts:38](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L38)
+Defined in: [src/display/group/Group3D.ts:38](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L38)
 
 그룹의 로컬 변환 행렬
 
@@ -190,7 +190,7 @@ Defined in: [src/display/group/Group3D.ts:38](https://github.com/redcamel/RedGPU
 
 > **modelMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/group/Group3D.ts:33](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L33)
+Defined in: [src/display/group/Group3D.ts:33](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L33)
 
 그룹의 최종 전역 모델 변환 행렬
 
@@ -206,7 +206,7 @@ Defined in: [src/display/group/Group3D.ts:33](https://github.com/redcamel/RedGPU
 
 > **get** **children**(): [`Mesh`](Mesh.md)[]
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:44](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/mesh/core/Object3DContainer.ts#L44)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:44](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/mesh/core/Object3DContainer.ts#L44)
 
 현재 컨테이너에 포함된 자식 Mesh 배열을 반환합니다.
 
@@ -228,7 +228,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:44](https://github.com/r
 
 > **get** **dirtyTransform**(): `boolean`
 
-Defined in: [src/display/group/Group3D.ts:78](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L78)
+Defined in: [src/display/group/Group3D.ts:78](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L78)
 
 변환 행렬의 갱신이 필요한 상태(Dirty)인지 여부를 설정하거나 가져옵니다.
 
@@ -240,7 +240,7 @@ Defined in: [src/display/group/Group3D.ts:78](https://github.com/redcamel/RedGPU
 
 > **set** **dirtyTransform**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:82](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L82)
+Defined in: [src/display/group/Group3D.ts:82](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L82)
 
 ##### Parameters
 
@@ -264,7 +264,7 @@ Defined in: [src/display/group/Group3D.ts:82](https://github.com/redcamel/RedGPU
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/base/BaseObject.ts#L58)
 
 객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
 
@@ -278,7 +278,7 @@ Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/BaseObject.ts#L71)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/base/BaseObject.ts#L71)
 
 객체의 이름을 설정합니다.
 
@@ -304,7 +304,7 @@ Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **numChildren**(): `number`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:52](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/mesh/core/Object3DContainer.ts#L52)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:52](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/mesh/core/Object3DContainer.ts#L52)
 
 자식 객체의 개수를 반환합니다.
 
@@ -326,7 +326,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:52](https://github.com/r
 
 > **get** **parent**(): [`Object3DContainer`](../namespaces/CoreMesh/classes/Object3DContainer.md)
 
-Defined in: [src/display/group/Group3D.ts:90](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L90)
+Defined in: [src/display/group/Group3D.ts:90](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L90)
 
 이 그룹 객체가 포함된 부모 컨테이너(Object3DContainer)를 설정하거나 가져옵니다.
 
@@ -338,7 +338,7 @@ Defined in: [src/display/group/Group3D.ts:90](https://github.com/redcamel/RedGPU
 
 > **set** **parent**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:94](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L94)
+Defined in: [src/display/group/Group3D.ts:94](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L94)
 
 ##### Parameters
 
@@ -362,7 +362,7 @@ Defined in: [src/display/group/Group3D.ts:94](https://github.com/redcamel/RedGPU
 
 > **get** **pivotX**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:102](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L102)
+Defined in: [src/display/group/Group3D.ts:102](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L102)
 
 X축 피벗(중심점) 좌표를 가져오거나 설정합니다.
 
@@ -374,7 +374,7 @@ X축 피벗(중심점) 좌표를 가져오거나 설정합니다.
 
 > **set** **pivotX**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:106](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L106)
+Defined in: [src/display/group/Group3D.ts:106](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L106)
 
 ##### Parameters
 
@@ -398,7 +398,7 @@ Defined in: [src/display/group/Group3D.ts:106](https://github.com/redcamel/RedGP
 
 > **get** **pivotY**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:115](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L115)
+Defined in: [src/display/group/Group3D.ts:115](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L115)
 
 Y축 피벗(중심점) 좌표를 가져오거나 설정합니다.
 
@@ -410,7 +410,7 @@ Y축 피벗(중심점) 좌표를 가져오거나 설정합니다.
 
 > **set** **pivotY**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:119](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L119)
+Defined in: [src/display/group/Group3D.ts:119](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L119)
 
 ##### Parameters
 
@@ -434,7 +434,7 @@ Defined in: [src/display/group/Group3D.ts:119](https://github.com/redcamel/RedGP
 
 > **get** **pivotZ**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:128](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L128)
+Defined in: [src/display/group/Group3D.ts:128](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L128)
 
 Z축 피벗(중심점) 좌표를 가져오거나 설정합니다.
 
@@ -446,7 +446,7 @@ Z축 피벗(중심점) 좌표를 가져오거나 설정합니다.
 
 > **set** **pivotZ**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:132](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L132)
+Defined in: [src/display/group/Group3D.ts:132](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L132)
 
 ##### Parameters
 
@@ -470,7 +470,7 @@ Defined in: [src/display/group/Group3D.ts:132](https://github.com/redcamel/RedGP
 
 > **get** **position**(): \[`number`, `number`, `number`\]
 
-Defined in: [src/display/group/Group3D.ts:180](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L180)
+Defined in: [src/display/group/Group3D.ts:180](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L180)
 
 그룹의 X, Y, Z 위치 좌표 배열 [x, y, z]을 가져옵니다.
 
@@ -490,7 +490,7 @@ Defined in: [src/display/group/Group3D.ts:180](https://github.com/redcamel/RedGP
 
 > **get** **rotationX**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:235](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L235)
+Defined in: [src/display/group/Group3D.ts:235](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L235)
 
 X축 회전각(Degree)을 가져오거나 설정합니다.
 
@@ -502,7 +502,7 @@ X축 회전각(Degree)을 가져오거나 설정합니다.
 
 > **set** **rotationX**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:239](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L239)
+Defined in: [src/display/group/Group3D.ts:239](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L239)
 
 ##### Parameters
 
@@ -526,7 +526,7 @@ Defined in: [src/display/group/Group3D.ts:239](https://github.com/redcamel/RedGP
 
 > **get** **rotationY**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:248](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L248)
+Defined in: [src/display/group/Group3D.ts:248](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L248)
 
 Y축 회전각(Degree)을 가져오거나 설정합니다.
 
@@ -538,7 +538,7 @@ Y축 회전각(Degree)을 가져오거나 설정합니다.
 
 > **set** **rotationY**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:252](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L252)
+Defined in: [src/display/group/Group3D.ts:252](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L252)
 
 ##### Parameters
 
@@ -562,7 +562,7 @@ Defined in: [src/display/group/Group3D.ts:252](https://github.com/redcamel/RedGP
 
 > **get** **rotationZ**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:261](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L261)
+Defined in: [src/display/group/Group3D.ts:261](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L261)
 
 Z축 회전각(Degree)을 가져오거나 설정합니다.
 
@@ -574,7 +574,7 @@ Z축 회전각(Degree)을 가져오거나 설정합니다.
 
 > **set** **rotationZ**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:265](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L265)
+Defined in: [src/display/group/Group3D.ts:265](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L265)
 
 ##### Parameters
 
@@ -598,7 +598,7 @@ Defined in: [src/display/group/Group3D.ts:265](https://github.com/redcamel/RedGP
 
 > **get** **scale**(): `number`[]
 
-Defined in: [src/display/group/Group3D.ts:227](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L227)
+Defined in: [src/display/group/Group3D.ts:227](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L227)
 
 그룹의 X, Y, Z 스케일 배율 배열 [scaleX, scaleY, scaleZ]을 가져옵니다.
 
@@ -618,7 +618,7 @@ Defined in: [src/display/group/Group3D.ts:227](https://github.com/redcamel/RedGP
 
 > **get** **scaleX**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:188](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L188)
+Defined in: [src/display/group/Group3D.ts:188](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L188)
 
 X축 스케일 배율을 가져오거나 설정합니다.
 
@@ -630,7 +630,7 @@ X축 스케일 배율을 가져오거나 설정합니다.
 
 > **set** **scaleX**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:192](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L192)
+Defined in: [src/display/group/Group3D.ts:192](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L192)
 
 ##### Parameters
 
@@ -654,7 +654,7 @@ Defined in: [src/display/group/Group3D.ts:192](https://github.com/redcamel/RedGP
 
 > **get** **scaleY**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:201](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L201)
+Defined in: [src/display/group/Group3D.ts:201](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L201)
 
 Y축 스케일 배율을 가져오거나 설정합니다.
 
@@ -666,7 +666,7 @@ Y축 스케일 배율을 가져오거나 설정합니다.
 
 > **set** **scaleY**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:205](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L205)
+Defined in: [src/display/group/Group3D.ts:205](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L205)
 
 ##### Parameters
 
@@ -690,7 +690,7 @@ Defined in: [src/display/group/Group3D.ts:205](https://github.com/redcamel/RedGP
 
 > **get** **scaleZ**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:214](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L214)
+Defined in: [src/display/group/Group3D.ts:214](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L214)
 
 Z축 스케일 배율을 가져오거나 설정합니다.
 
@@ -702,7 +702,7 @@ Z축 스케일 배율을 가져오거나 설정합니다.
 
 > **set** **scaleZ**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:218](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L218)
+Defined in: [src/display/group/Group3D.ts:218](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L218)
 
 ##### Parameters
 
@@ -726,7 +726,7 @@ Defined in: [src/display/group/Group3D.ts:218](https://github.com/redcamel/RedGP
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/base/BaseObject.ts#L46)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 
@@ -748,7 +748,7 @@ UUID 문자열
 
 > **get** **x**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:141](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L141)
+Defined in: [src/display/group/Group3D.ts:141](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L141)
 
 그룹의 X축 위치 좌표를 가져오거나 설정합니다.
 
@@ -760,7 +760,7 @@ Defined in: [src/display/group/Group3D.ts:141](https://github.com/redcamel/RedGP
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:145](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L145)
+Defined in: [src/display/group/Group3D.ts:145](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L145)
 
 ##### Parameters
 
@@ -784,7 +784,7 @@ Defined in: [src/display/group/Group3D.ts:145](https://github.com/redcamel/RedGP
 
 > **get** **y**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:154](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L154)
+Defined in: [src/display/group/Group3D.ts:154](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L154)
 
 그룹의 Y축 위치 좌표를 가져오거나 설정합니다.
 
@@ -796,7 +796,7 @@ Defined in: [src/display/group/Group3D.ts:154](https://github.com/redcamel/RedGP
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:158](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L158)
+Defined in: [src/display/group/Group3D.ts:158](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L158)
 
 ##### Parameters
 
@@ -820,7 +820,7 @@ Defined in: [src/display/group/Group3D.ts:158](https://github.com/redcamel/RedGP
 
 > **get** **z**(): `number`
 
-Defined in: [src/display/group/Group3D.ts:167](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L167)
+Defined in: [src/display/group/Group3D.ts:167](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L167)
 
 그룹의 Z축 위치 좌표를 가져오거나 설정합니다.
 
@@ -832,7 +832,7 @@ Defined in: [src/display/group/Group3D.ts:167](https://github.com/redcamel/RedGP
 
 > **set** **z**(`value`): `void`
 
-Defined in: [src/display/group/Group3D.ts:171](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L171)
+Defined in: [src/display/group/Group3D.ts:171](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L171)
 
 ##### Parameters
 
@@ -854,7 +854,7 @@ Defined in: [src/display/group/Group3D.ts:171](https://github.com/redcamel/RedGP
 
 > **addChild**(`child`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:71](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/mesh/core/Object3DContainer.ts#L71)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:71](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/mesh/core/Object3DContainer.ts#L71)
 
 자식 Mesh를 컨테이너에 추가합니다.
 
@@ -880,7 +880,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:71](https://github.com/r
 
 > **addChildAt**(`child`, `index`): `Group2D`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/mesh/core/Object3DContainer.ts#L89)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/mesh/core/Object3DContainer.ts#L89)
 
 자식 Mesh를 특정 인덱스에 추가합니다.
 
@@ -907,7 +907,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/r
 
 > **contains**(`child`): `boolean`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:61](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/mesh/core/Object3DContainer.ts#L61)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:61](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/mesh/core/Object3DContainer.ts#L61)
 
 특정 Mesh가 현재 컨테이너에 포함되어 있는지 확인합니다.
 
@@ -933,7 +933,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:61](https://github.com/r
 
 > **getChildAt**(`index`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:111](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/mesh/core/Object3DContainer.ts#L111)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:111](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/mesh/core/Object3DContainer.ts#L111)
 
 지정된 인덱스의 자식 Mesh를 반환합니다.
 
@@ -959,7 +959,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:111](https://github.com/
 
 > **getChildIndex**(`child`): `number`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:125](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/mesh/core/Object3DContainer.ts#L125)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:125](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/mesh/core/Object3DContainer.ts#L125)
 
 특정 자식 객체의 인덱스를 반환합니다.
 
@@ -985,7 +985,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:125](https://github.com/
 
 > **removeAllChildren**(): `Group2D`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:234](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/mesh/core/Object3DContainer.ts#L234)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:234](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/mesh/core/Object3DContainer.ts#L234)
 
 모든 자식 객체를 제거합니다.
 
@@ -1005,7 +1005,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:234](https://github.com/
 
 > **removeChild**(`child`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:203](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/mesh/core/Object3DContainer.ts#L203)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:203](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/mesh/core/Object3DContainer.ts#L203)
 
 특정 자식 객체를 제거합니다.
 
@@ -1031,7 +1031,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:203](https://github.com/
 
 > **removeChildAt**(`index`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:219](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/mesh/core/Object3DContainer.ts#L219)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:219](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/mesh/core/Object3DContainer.ts#L219)
 
 지정된 인덱스의 자식 객체를 제거합니다.
 
@@ -1057,7 +1057,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:219](https://github.com/
 
 > **render**(`renderViewStateData`): `void`
 
-Defined in: [src/display/group/Group3D.ts:354](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/group/Group3D.ts#L354)
+Defined in: [src/display/group/Group3D.ts:354](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/group/Group3D.ts#L354)
 
 이 그룹 노드 및 하위 자식 노드들의 트랜스폼 행렬 갱신을 실행하고 렌더링에 필요한 처리를 갱신합니다.
 
@@ -1081,7 +1081,7 @@ Defined in: [src/display/group/Group3D.ts:354](https://github.com/redcamel/RedGP
 
 > **setChildIndex**(`child`, `index`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:140](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/mesh/core/Object3DContainer.ts#L140)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:140](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/mesh/core/Object3DContainer.ts#L140)
 
 자식 객체의 위치를 변경합니다.
 
@@ -1106,7 +1106,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:140](https://github.com/
 
 > **swapChildren**(`child1`, `child2`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/mesh/core/Object3DContainer.ts#L163)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/mesh/core/Object3DContainer.ts#L163)
 
 두 자식 객체의 위치를 서로 바꿉니다.
 
@@ -1131,7 +1131,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/
 
 > **swapChildrenAt**(`index1`, `index2`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:183](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/mesh/core/Object3DContainer.ts#L183)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:183](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/mesh/core/Object3DContainer.ts#L183)
 
 두 인덱스의 자식 객체 위치를 서로 바꿉니다.
 

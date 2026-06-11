@@ -8,4 +8,4 @@
 
 > **TypedArrayConstructor** = `Int8ArrayConstructor` \| `Uint8ArrayConstructor` \| `Int16ArrayConstructor` \| `Uint16ArrayConstructor` \| `Int32ArrayConstructor` \| `Uint32ArrayConstructor` \| `Float32ArrayConstructor` \| `Float64ArrayConstructor`
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:1](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/wgslParser/core/WGSLUniformTypes.ts#L1)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:1](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/wgslParser/core/WGSLUniformTypes.ts#L1)

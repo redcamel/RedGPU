@@ -6,7 +6,7 @@
 
 # Class: ResourceStateIndexBuffer
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:3](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L3)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:3](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L3)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndex
 
 > **new ResourceStateIndexBuffer**(`buffer`): `ResourceStateIndexBuffer`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:10](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L10)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:10](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L10)
 
 #### Parameters
 
@@ -32,7 +32,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndex
 
 > **buffer**: [`IndexBuffer`](../../../classes/IndexBuffer.md)
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:5](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L5)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:5](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L5)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndex
 
 > **label**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:6](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L6)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:6](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L6)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndex
 
 > **uuid**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:7](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L7)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:7](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L7)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndex
 
 > `static` **dirtyList**: `any`[] = `[]`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:4](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L4)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:4](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L4)
 
 ## Accessors
 
@@ -66,7 +66,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndex
 
 > **get** **useNum**(): `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:16](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L16)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:16](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L16)
 
 ##### Returns
 
@@ -76,7 +76,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndex
 
 > **set** **useNum**(`value`): `void`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:20](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L20)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts:20](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/ResourceStateIndexBuffer.ts#L20)
 
 ##### Parameters
 

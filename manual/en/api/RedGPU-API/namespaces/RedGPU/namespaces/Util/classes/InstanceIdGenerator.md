@@ -6,7 +6,7 @@
 
 # Class: InstanceIdGenerator
 
-Defined in: [src/utils/uuid/InstanceIdGenerator.ts:15](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/utils/uuid/InstanceIdGenerator.ts#L15)
+Defined in: [src/utils/uuid/InstanceIdGenerator.ts:15](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/utils/uuid/InstanceIdGenerator.ts#L15)
 
 Utility for generating unique instance IDs per type (Constructor).
 
@@ -33,7 +33,7 @@ const id = RedGPU.Util.InstanceIdGenerator.getNextId(RedMesh);
 
 > `static` **getNextId**(`type`): `number`
 
-Defined in: [src/utils/uuid/InstanceIdGenerator.ts:25](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/utils/uuid/InstanceIdGenerator.ts#L25)
+Defined in: [src/utils/uuid/InstanceIdGenerator.ts:25](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/utils/uuid/InstanceIdGenerator.ts#L25)
 
 Returns the next unique ID for the given type.
 

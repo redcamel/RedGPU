@@ -6,7 +6,7 @@
 
 # Class: BlendState
 
-Defined in: [src/renderState/BlendState.ts:24](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/renderState/BlendState.ts#L24)
+Defined in: [src/renderState/BlendState.ts:24](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/renderState/BlendState.ts#L24)
 
 State class that controls color and alpha blending behavior for materials.
 
@@ -26,7 +26,7 @@ blendState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
 
 > **new BlendState**(`targetMaterial`, `srcFactor?`, `dstFactor?`, `operation?`): `BlendState`
 
-Defined in: [src/renderState/BlendState.ts:52](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/renderState/BlendState.ts#L52)
+Defined in: [src/renderState/BlendState.ts:52](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/renderState/BlendState.ts#L52)
 
 Creates an instance of BlendState.
 
@@ -49,7 +49,7 @@ Creates an instance of BlendState.
 
 > **state**: `GPUBlendComponent`
 
-Defined in: [src/renderState/BlendState.ts:29](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/renderState/BlendState.ts#L29)
+Defined in: [src/renderState/BlendState.ts:29](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/renderState/BlendState.ts#L29)
 
 Final GPUBlendComponent state object
 
@@ -61,7 +61,7 @@ Final GPUBlendComponent state object
 
 > **get** **dstFactor**(): `GPUBlendFactor`
 
-Defined in: [src/renderState/BlendState.ts:107](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/renderState/BlendState.ts#L107)
+Defined in: [src/renderState/BlendState.ts:107](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/renderState/BlendState.ts#L107)
 
 Gets or sets the destination blend factor.
 
@@ -75,7 +75,7 @@ Current GPUBlendFactor
 
 > **set** **dstFactor**(`newDstFactor`): `void`
 
-Defined in: [src/renderState/BlendState.ts:111](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/renderState/BlendState.ts#L111)
+Defined in: [src/renderState/BlendState.ts:111](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/renderState/BlendState.ts#L111)
 
 ##### Parameters
 
@@ -95,7 +95,7 @@ Defined in: [src/renderState/BlendState.ts:111](https://github.com/redcamel/RedG
 
 > **get** **operation**(): `GPUBlendOperation`
 
-Defined in: [src/renderState/BlendState.ts:67](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/renderState/BlendState.ts#L67)
+Defined in: [src/renderState/BlendState.ts:67](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/renderState/BlendState.ts#L67)
 
 Gets or sets the blend operation.
 
@@ -109,7 +109,7 @@ Current GPUBlendOperation
 
 > **set** **operation**(`newOperation`): `void`
 
-Defined in: [src/renderState/BlendState.ts:71](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/renderState/BlendState.ts#L71)
+Defined in: [src/renderState/BlendState.ts:71](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/renderState/BlendState.ts#L71)
 
 ##### Parameters
 
@@ -129,7 +129,7 @@ Defined in: [src/renderState/BlendState.ts:71](https://github.com/redcamel/RedGP
 
 > **get** **srcFactor**(): `GPUBlendFactor`
 
-Defined in: [src/renderState/BlendState.ts:87](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/renderState/BlendState.ts#L87)
+Defined in: [src/renderState/BlendState.ts:87](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/renderState/BlendState.ts#L87)
 
 Gets or sets the source blend factor.
 
@@ -143,7 +143,7 @@ Current GPUBlendFactor
 
 > **set** **srcFactor**(`newSrcFactor`): `void`
 
-Defined in: [src/renderState/BlendState.ts:91](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/renderState/BlendState.ts#L91)
+Defined in: [src/renderState/BlendState.ts:91](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/renderState/BlendState.ts#L91)
 
 ##### Parameters
 

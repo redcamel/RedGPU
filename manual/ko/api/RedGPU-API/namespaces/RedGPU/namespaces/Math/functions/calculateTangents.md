@@ -8,7 +8,7 @@
 
 > **calculateTangents**(`vertices`, `normals`, `uvs`, `indices`): `Float32Array`
 
-Defined in: [src/math/calculateTangents.ts:131](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/math/calculateTangents.ts#L131)
+Defined in: [src/math/calculateTangents.ts:131](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/math/calculateTangents.ts#L131)
 
 MikkTSpace 알고리즘 기반으로 정점 탄젠트 벡터를 계산하여 새로운 배열로 반환합니다. (순수 수학 유틸리티)
 

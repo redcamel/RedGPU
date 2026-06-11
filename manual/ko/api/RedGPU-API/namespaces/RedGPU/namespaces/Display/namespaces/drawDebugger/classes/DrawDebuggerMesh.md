@@ -6,7 +6,7 @@
 
 # Class: DrawDebuggerMesh
 
-Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:48](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/drawDebugger/DrawDebuggerMesh.ts#L48)
+Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:48](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/drawDebugger/DrawDebuggerMesh.ts#L48)
 
 대상 3D 메시(Mesh)의 공간 바운딩 박스(AABB, OBB) 정보를 추출하여 시각적으로 투영해 주는 디버깅용 클래스입니다.
 
@@ -28,7 +28,7 @@ Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:48](https://github.com
 
 > **new DrawDebuggerMesh**(`redGPUContext`, `target`): `DrawDebuggerMesh`
 
-Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:61](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/drawDebugger/DrawDebuggerMesh.ts#L61)
+Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:61](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/drawDebugger/DrawDebuggerMesh.ts#L61)
 
 #### Parameters
 
@@ -49,7 +49,7 @@ Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:61](https://github.com
 
 > **get** **debugMode**(): `DebugMode`
 
-Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:80](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/drawDebugger/DrawDebuggerMesh.ts#L80)
+Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:80](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/drawDebugger/DrawDebuggerMesh.ts#L80)
 
 ##### Returns
 
@@ -59,7 +59,7 @@ Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:80](https://github.com
 
 > **set** **debugMode**(`value`): `void`
 
-Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:84](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/drawDebugger/DrawDebuggerMesh.ts#L84)
+Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:84](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/drawDebugger/DrawDebuggerMesh.ts#L84)
 
 ##### Parameters
 
@@ -77,7 +77,7 @@ Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:84](https://github.com
 
 > **render**(`renderViewStateData`): `void`
 
-Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:99](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/drawDebugger/DrawDebuggerMesh.ts#L99)
+Defined in: [src/display/drawDebugger/DrawDebuggerMesh.ts:99](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/drawDebugger/DrawDebuggerMesh.ts#L99)
 
 #### Parameters
 

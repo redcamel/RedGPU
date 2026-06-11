@@ -6,7 +6,7 @@
 
 # Abstract Class: AController
 
-Defined in: [src/camera/core/AController.ts:29](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L29)
+Defined in: [src/camera/core/AController.ts:29](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L29)
 
 카메라 컨트롤러의 추상 클래스입니다.
 
@@ -33,7 +33,7 @@ PerspectiveCamera, OrthographicCamera 등 다양한 카메라 타입을 제어�
 
 > `protected` **new AController**(`redGPUContext`, `initInfo`): `AController`
 
-Defined in: [src/camera/core/AController.ts:76](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L76)
+Defined in: [src/camera/core/AController.ts:76](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L76)
 
 AController 인스턴스를 생성합니다.
 
@@ -60,7 +60,7 @@ AController 인스턴스를 생성합니다.
 
 > **get** **camera**(): [`PerspectiveCamera`](../../../classes/PerspectiveCamera.md) \| [`OrthographicCamera`](../../../classes/OrthographicCamera.md)
 
-Defined in: [src/camera/core/AController.ts:100](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L100)
+Defined in: [src/camera/core/AController.ts:100](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L100)
 
 이 컨트롤러가 제어하는 카메라를 반환합니다.
 
@@ -78,7 +78,7 @@ Defined in: [src/camera/core/AController.ts:100](https://github.com/redcamel/Red
 
 > **get** **hoveredView**(): [`View3D`](../../../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:150](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L150)
+Defined in: [src/camera/core/AController.ts:150](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L150)
 
 **`Internal`**
 
@@ -98,7 +98,7 @@ Defined in: [src/camera/core/AController.ts:150](https://github.com/redcamel/Red
 
 > **get** **isKeyboardActiveController**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:196](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L196)
+Defined in: [src/camera/core/AController.ts:196](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L196)
 
 **`Internal`**
 
@@ -118,7 +118,7 @@ Defined in: [src/camera/core/AController.ts:196](https://github.com/redcamel/Red
 
 > **get** **keyboardActiveView**(): [`View3D`](../../../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:163](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L163)
+Defined in: [src/camera/core/AController.ts:163](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L163)
 
 **`Internal`**
 
@@ -134,7 +134,7 @@ Defined in: [src/camera/core/AController.ts:163](https://github.com/redcamel/Red
 
 > **set** **keyboardActiveView**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:176](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L176)
+Defined in: [src/camera/core/AController.ts:176](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L176)
 
 **`Internal`**
 
@@ -158,7 +158,7 @@ Defined in: [src/camera/core/AController.ts:176](https://github.com/redcamel/Red
 
 > **get** **keyboardProcessedThisFrame**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:209](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L209)
+Defined in: [src/camera/core/AController.ts:209](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L209)
 
 **`Internal`**
 
@@ -174,7 +174,7 @@ Defined in: [src/camera/core/AController.ts:209](https://github.com/redcamel/Red
 
 > **set** **keyboardProcessedThisFrame**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:222](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L222)
+Defined in: [src/camera/core/AController.ts:222](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L222)
 
 **`Internal`**
 
@@ -198,7 +198,7 @@ Defined in: [src/camera/core/AController.ts:222](https://github.com/redcamel/Red
 
 > **get** **x**(): `number`
 
-Defined in: [src/camera/core/AController.ts:112](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L112)
+Defined in: [src/camera/core/AController.ts:112](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L112)
 
 카메라의 현재 월드 X 좌표를 가져옵니다.
 
@@ -216,7 +216,7 @@ X 좌표
 
 > **get** **y**(): `number`
 
-Defined in: [src/camera/core/AController.ts:124](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L124)
+Defined in: [src/camera/core/AController.ts:124](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L124)
 
 카메라의 현재 월드 Y 좌표를 가져옵니다.
 
@@ -234,7 +234,7 @@ Y 좌표
 
 > **get** **z**(): `number`
 
-Defined in: [src/camera/core/AController.ts:136](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L136)
+Defined in: [src/camera/core/AController.ts:136](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L136)
 
 카메라의 현재 월드 Z 좌표를 가져옵니다.
 
@@ -250,7 +250,7 @@ Z 좌표
 
 > **checkKeyboardInput**\<`T`\>(`view`, `keyNameMapper`): `boolean`
 
-Defined in: [src/camera/core/AController.ts:286](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L286)
+Defined in: [src/camera/core/AController.ts:286](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L286)
 
 키보드 입력이 있는지 체크하고 활성 View를 설정합니다.
 
@@ -279,7 +279,7 @@ Defined in: [src/camera/core/AController.ts:286](https://github.com/redcamel/Red
 
 > **destroy**(): `void`
 
-Defined in: [src/camera/core/AController.ts:230](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L230)
+Defined in: [src/camera/core/AController.ts:230](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L230)
 
 컨트롤러를 제거하고 이벤트 리스너를 해제합니다.
 
@@ -293,7 +293,7 @@ Defined in: [src/camera/core/AController.ts:230](https://github.com/redcamel/Red
 
 > **findTargetViewByInputEvent**(`e`): [`View3D`](../../../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:369](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L369)
+Defined in: [src/camera/core/AController.ts:369](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L369)
 
 **`Internal`**
 
@@ -317,7 +317,7 @@ Defined in: [src/camera/core/AController.ts:369](https://github.com/redcamel/Red
 
 > **getCanvasEventPoint**(`e`, `redGPUContext`): `object`
 
-Defined in: [src/camera/core/AController.ts:333](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L333)
+Defined in: [src/camera/core/AController.ts:333](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L333)
 
 **`Internal`**
 
@@ -338,8 +338,8 @@ Defined in: [src/camera/core/AController.ts:333](https://github.com/redcamel/Red
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `x` | `number` | [src/camera/core/AController.ts:352](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L352) |
-| `y` | `number` | [src/camera/core/AController.ts:353](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L353) |
+| `x` | `number` | [src/camera/core/AController.ts:352](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L352) |
+| `y` | `number` | [src/camera/core/AController.ts:353](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L353) |
 
 ***
 
@@ -347,7 +347,7 @@ Defined in: [src/camera/core/AController.ts:333](https://github.com/redcamel/Red
 
 > **update**(`view`, `time`, `updateAnimation`): `void`
 
-Defined in: [src/camera/core/AController.ts:257](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/camera/core/AController.ts#L257)
+Defined in: [src/camera/core/AController.ts:257](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/AController.ts#L257)
 
 컨트롤러 상태를 업데이트합니다. 파생 클래스에서 구현해야 합니다.
 
@@ -377,7 +377,7 @@ Defined in: [src/camera/core/AController.ts:257](https://github.com/redcamel/Red
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/base/RedGPUObject.ts#L76)
 
 안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -399,7 +399,7 @@ AntialiasingManager 인스턴스
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/base/RedGPUObject.ts#L88)
 
 커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -421,7 +421,7 @@ CommandEncoderManager 인스턴스
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/base/RedGPUObject.ts#L52)
 
 WebGPU 디바이스 객체를 반환합니다. (단축 경로)
 
@@ -443,7 +443,7 @@ GPUDevice 인스턴스
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/base/BaseObject.ts#L58)
 
 객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
 
@@ -457,7 +457,7 @@ Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/BaseObject.ts#L71)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/base/BaseObject.ts#L71)
 
 객체의 이름을 설정합니다.
 
@@ -483,7 +483,7 @@ Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/base/RedGPUObject.ts#L40)
 
 RedGPUContext 인스턴스를 반환합니다.
 
@@ -505,7 +505,7 @@ RedGPUContext 인스턴스
 
 > **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/base/RedGPUObject.ts#L64)
 
 리소스 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -527,7 +527,7 @@ ResourceManager 인스턴스
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/base/BaseObject.ts#L46)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 

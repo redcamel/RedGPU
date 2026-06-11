@@ -6,7 +6,7 @@
 
 # Class: SystemUniformUpdater
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:22](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/renderer/helperFunc/SystemUniformUpdater.ts#L22)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:22](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/renderer/helperFunc/SystemUniformUpdater.ts#L22)
 
 A utility class for updating system uniform data.
 
@@ -28,7 +28,7 @@ Maps WGSL structure data commonly used globally in the system, such as cameras, 
 
 > `static` **updateAmbientLight**(`ambientLight`, `ambientLightMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:384](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/renderer/helperFunc/SystemUniformUpdater.ts#L384)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:384](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/renderer/helperFunc/SystemUniformUpdater.ts#L384)
 
 Updates AmbientLight information to uniform data.
 
@@ -51,7 +51,7 @@ Updates AmbientLight information to uniform data.
 
 > `static` **updateCamera**(`camera`, `cameraMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:40](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/renderer/helperFunc/SystemUniformUpdater.ts#L40)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:40](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/renderer/helperFunc/SystemUniformUpdater.ts#L40)
 
 Updates camera information to uniform data.
 
@@ -74,7 +74,7 @@ Updates camera information to uniform data.
 
 > `static` **updateDirectionalLights**(`directionalLights`, `directionalLightsMemberList`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:339](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/renderer/helperFunc/SystemUniformUpdater.ts#L339)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:339](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/renderer/helperFunc/SystemUniformUpdater.ts#L339)
 
 Updates DirectionalLight array information to uniform data.
 
@@ -97,7 +97,7 @@ Updates DirectionalLight array information to uniform data.
 
 > `static` **updateProjection**(`projectionInfo`, `projectionMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:273](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/renderer/helperFunc/SystemUniformUpdater.ts#L273)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:273](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/renderer/helperFunc/SystemUniformUpdater.ts#L273)
 
 Updates projection-related matrix information to uniform data.
 
@@ -127,7 +127,7 @@ Updates projection-related matrix information to uniform data.
 
 > `static` **updateShadow**(`shadowManager`, `shadowMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:117](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/renderer/helperFunc/SystemUniformUpdater.ts#L117)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:117](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/renderer/helperFunc/SystemUniformUpdater.ts#L117)
 
 Updates shadow configuration information to uniform data.
 
@@ -150,7 +150,7 @@ Updates shadow configuration information to uniform data.
 
 > `static` **updateSkyAtmosphere**(`skyAtmosphere`, `systemMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:155](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/renderer/helperFunc/SystemUniformUpdater.ts#L155)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:155](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/renderer/helperFunc/SystemUniformUpdater.ts#L155)
 
 Updates SkyAtmosphere information to uniform data.
 
@@ -173,7 +173,7 @@ Updates SkyAtmosphere information to uniform data.
 
 > `static` **updateTime**(`timeInfo`, `timeMembers`, `uniformDataF32`, `uniformDataU32`): `void`
 
-Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:222](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/renderer/helperFunc/SystemUniformUpdater.ts#L222)
+Defined in: [src/renderer/helperFunc/SystemUniformUpdater.ts:222](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/renderer/helperFunc/SystemUniformUpdater.ts#L222)
 
 Updates time-related information to uniform data.
 

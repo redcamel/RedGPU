@@ -8,7 +8,7 @@
 
 > `const` **COMMAND\_ENCODER\_TYPE**: `object`
 
-Defined in: [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:6](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L6)
+Defined in: [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:6](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L6)
 
 GPU 커맨드 인코더의 타입을 정의하는 상수 객체입니다.
 
