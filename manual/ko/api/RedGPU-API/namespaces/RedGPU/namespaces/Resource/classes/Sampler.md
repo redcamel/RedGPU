@@ -6,7 +6,7 @@
 
 # Class: Sampler
 
-Defined in: [src/resources/sampler/Sampler.ts:33](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/sampler/Sampler.ts#L33)
+Defined in: [src/resources/sampler/Sampler.ts:33](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/sampler/Sampler.ts#L33)
 
 GPU 텍스처 샘플러를 관리하는 클래스입니다.
 
@@ -29,7 +29,7 @@ GPU 텍스처 샘플러를 관리하는 클래스입니다.
 
 > **new Sampler**(`redGPUContext`, `options?`): `Sampler`
 
-Defined in: [src/resources/sampler/Sampler.ts:78](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/sampler/Sampler.ts#L78)
+Defined in: [src/resources/sampler/Sampler.ts:78](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/sampler/Sampler.ts#L78)
 
 Sampler 인스턴스를 생성합니다.
 
@@ -66,7 +66,7 @@ const sampler = new RedGPU.Resource.Sampler(redGPUContext, {
 
 > **get** **addressModeU**(): `GPUAddressMode`
 
-Defined in: [src/resources/sampler/Sampler.ts:88](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/sampler/Sampler.ts#L88)
+Defined in: [src/resources/sampler/Sampler.ts:88](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/sampler/Sampler.ts#L88)
 
 U축 어드레스 모드를 반환합니다.
 
@@ -80,7 +80,7 @@ U축 어드레스 모드를 반환합니다.
 
 > **set** **addressModeU**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:97](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/sampler/Sampler.ts#L97)
+Defined in: [src/resources/sampler/Sampler.ts:97](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/sampler/Sampler.ts#L97)
 
 U축 어드레스 모드를 설정합니다.
 
@@ -102,7 +102,7 @@ U축 어드레스 모드를 설정합니다.
 
 > **get** **addressModeV**(): `GPUAddressMode`
 
-Defined in: [src/resources/sampler/Sampler.ts:106](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/sampler/Sampler.ts#L106)
+Defined in: [src/resources/sampler/Sampler.ts:106](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/sampler/Sampler.ts#L106)
 
 V축 어드레스 모드를 반환합니다.
 
@@ -116,7 +116,7 @@ V축 어드레스 모드를 반환합니다.
 
 > **set** **addressModeV**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:115](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/sampler/Sampler.ts#L115)
+Defined in: [src/resources/sampler/Sampler.ts:115](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/sampler/Sampler.ts#L115)
 
 V축 어드레스 모드를 설정합니다.
 
@@ -138,7 +138,7 @@ V축 어드레스 모드를 설정합니다.
 
 > **get** **addressModeW**(): `GPUAddressMode`
 
-Defined in: [src/resources/sampler/Sampler.ts:124](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/sampler/Sampler.ts#L124)
+Defined in: [src/resources/sampler/Sampler.ts:124](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/sampler/Sampler.ts#L124)
 
 W축 어드레스 모드를 반환합니다.
 
@@ -152,7 +152,7 @@ W축 어드레스 모드를 반환합니다.
 
 > **set** **addressModeW**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:133](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/sampler/Sampler.ts#L133)
+Defined in: [src/resources/sampler/Sampler.ts:133](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/sampler/Sampler.ts#L133)
 
 W축 어드레스 모드를 설정합니다.
 
@@ -174,7 +174,7 @@ W축 어드레스 모드를 설정합니다.
 
 > **get** **gpuSampler**(): `GPUSampler`
 
-Defined in: [src/resources/sampler/Sampler.ts:160](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/sampler/Sampler.ts#L160)
+Defined in: [src/resources/sampler/Sampler.ts:160](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/sampler/Sampler.ts#L160)
 
 GPU 샘플러 객체를 반환합니다.
 
@@ -192,7 +192,7 @@ GPU 샘플러 객체를 반환합니다.
 
 > **get** **isAnisotropyValid**(): `boolean`
 
-Defined in: [src/resources/sampler/Sampler.ts:228](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/sampler/Sampler.ts#L228)
+Defined in: [src/resources/sampler/Sampler.ts:228](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/sampler/Sampler.ts#L228)
 
 애니소트로피 설정이 유효한지 확인합니다. (모든 필터가 'linear'여야 함)
 
@@ -210,7 +210,7 @@ Defined in: [src/resources/sampler/Sampler.ts:228](https://github.com/redcamel/R
 
 > **get** **magFilter**(): `GPUFilterMode`
 
-Defined in: [src/resources/sampler/Sampler.ts:169](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/sampler/Sampler.ts#L169)
+Defined in: [src/resources/sampler/Sampler.ts:169](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/sampler/Sampler.ts#L169)
 
 확대 필터 모드를 반환합니다.
 
@@ -224,7 +224,7 @@ Defined in: [src/resources/sampler/Sampler.ts:169](https://github.com/redcamel/R
 
 > **set** **magFilter**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:178](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/sampler/Sampler.ts#L178)
+Defined in: [src/resources/sampler/Sampler.ts:178](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/sampler/Sampler.ts#L178)
 
 확대 필터 모드를 설정합니다.
 
@@ -246,7 +246,7 @@ Defined in: [src/resources/sampler/Sampler.ts:178](https://github.com/redcamel/R
 
 > **get** **maxAnisotropy**(): `number`
 
-Defined in: [src/resources/sampler/Sampler.ts:205](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/sampler/Sampler.ts#L205)
+Defined in: [src/resources/sampler/Sampler.ts:205](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/sampler/Sampler.ts#L205)
 
 최대 애니소트로피 값을 반환합니다.
 
@@ -260,7 +260,7 @@ Defined in: [src/resources/sampler/Sampler.ts:205](https://github.com/redcamel/R
 
 > **set** **maxAnisotropy**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:217](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/sampler/Sampler.ts#L217)
+Defined in: [src/resources/sampler/Sampler.ts:217](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/sampler/Sampler.ts#L217)
 
 최대 애니소트로피 값을 설정합니다. (1~16 사이)
 
@@ -286,7 +286,7 @@ Defined in: [src/resources/sampler/Sampler.ts:217](https://github.com/redcamel/R
 
 > **get** **minFilter**(): `GPUFilterMode`
 
-Defined in: [src/resources/sampler/Sampler.ts:187](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/sampler/Sampler.ts#L187)
+Defined in: [src/resources/sampler/Sampler.ts:187](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/sampler/Sampler.ts#L187)
 
 축소 필터 모드를 반환합니다.
 
@@ -300,7 +300,7 @@ Defined in: [src/resources/sampler/Sampler.ts:187](https://github.com/redcamel/R
 
 > **set** **minFilter**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:196](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/sampler/Sampler.ts#L196)
+Defined in: [src/resources/sampler/Sampler.ts:196](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/sampler/Sampler.ts#L196)
 
 축소 필터 모드를 설정합니다.
 
@@ -322,7 +322,7 @@ Defined in: [src/resources/sampler/Sampler.ts:196](https://github.com/redcamel/R
 
 > **get** **mipmapFilter**(): `GPUMipmapFilterMode`
 
-Defined in: [src/resources/sampler/Sampler.ts:142](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/sampler/Sampler.ts#L142)
+Defined in: [src/resources/sampler/Sampler.ts:142](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/sampler/Sampler.ts#L142)
 
 밉맵 필터 모드를 반환합니다.
 
@@ -336,7 +336,7 @@ Defined in: [src/resources/sampler/Sampler.ts:142](https://github.com/redcamel/R
 
 > **set** **mipmapFilter**(`value`): `void`
 
-Defined in: [src/resources/sampler/Sampler.ts:151](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/sampler/Sampler.ts#L151)
+Defined in: [src/resources/sampler/Sampler.ts:151](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/sampler/Sampler.ts#L151)
 
 밉맵 필터 모드를 설정합니다.
 
@@ -366,7 +366,7 @@ Defined in: [src/resources/sampler/Sampler.ts:151](https://github.com/redcamel/R
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L76)
 
 안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -388,7 +388,7 @@ AntialiasingManager 인스턴스
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/core/ResourceBase.ts#L53)
+Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/ResourceBase.ts#L53)
 
 캐시 키를 반환합니다.
 
@@ -400,7 +400,7 @@ Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/core/ResourceBase.ts#L61)
+Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/ResourceBase.ts#L61)
 
 캐시 키를 설정합니다.
 
@@ -426,7 +426,7 @@ Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L88)
 
 커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -448,7 +448,7 @@ CommandEncoderManager 인스턴스
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/core/ResourceBase.ts#L77)
+Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/ResourceBase.ts#L77)
 
 연관된 GPU 디바이스를 반환합니다.
 
@@ -468,7 +468,7 @@ Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/BaseObject.ts#L58)
 
 객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
 
@@ -482,7 +482,7 @@ Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/BaseObject.ts#L71)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/BaseObject.ts#L71)
 
 객체의 이름을 설정합니다.
 
@@ -508,7 +508,7 @@ Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L40)
 
 RedGPUContext 인스턴스를 반환합니다.
 
@@ -530,7 +530,7 @@ RedGPUContext 인스턴스
 
 > **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L64)
 
 리소스 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -552,7 +552,7 @@ ResourceManager 인스턴스
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:69](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/core/ResourceBase.ts#L69)
+Defined in: [src/resources/core/ResourceBase.ts:69](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/ResourceBase.ts#L69)
 
 리소스 매니저 키를 반환합니다.
 
@@ -572,7 +572,7 @@ Defined in: [src/resources/core/ResourceBase.ts:69](https://github.com/redcamel/
 
 > **get** **revision**(): `number`
 
-Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/core/ResourceBase.ts#L45)
+Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/ResourceBase.ts#L45)
 
 리소스의 리비전(업데이트 횟수)을 반환합니다.
 
@@ -592,7 +592,7 @@ Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/BaseObject.ts#L46)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 
@@ -612,7 +612,7 @@ UUID 문자열
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/core/ResourceBase.ts#L89)
+Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/ResourceBase.ts#L89)
 
 파이프라인이 더티해질 때 호출될 리스너를 추가합니다.
 
@@ -636,7 +636,7 @@ Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/core/ResourceBase.ts#L101)
+Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/ResourceBase.ts#L101)
 
 리소스 업데이트 리스너를 제거합니다.
 
@@ -660,7 +660,7 @@ Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel
 
 > **notifyUpdate**(`resetList?`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/core/ResourceBase.ts#L116)
+Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/ResourceBase.ts#L116)
 
 리소스가 업데이트되었음을 등록된 리스너들에게 알립니다.
 

@@ -8,6 +8,6 @@
 
 > **CommandEncoderType** = *typeof* [`COMMAND_ENCODER_TYPE`](../variables/COMMAND_ENCODER_TYPE.md)\[keyof *typeof* [`COMMAND_ENCODER_TYPE`](../variables/COMMAND_ENCODER_TYPE.md)\]
 
-Defined in: [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:34](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L34)
+Defined in: [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:34](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L34)
 
 Type definition for GPU command encoders.

@@ -8,7 +8,7 @@
 
 > **defineColorRGB**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/color/defineColorRGB.ts:99](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/defineProperty/funcs/color/defineColorRGB.ts#L99)
+Defined in: [src/defineProperty/funcs/color/defineColorRGB.ts:99](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/defineProperty/funcs/color/defineColorRGB.ts#L99)
 
 지정된 클래스의 프로토타입에 GPU와 연동되는 RGB 색상(ColorRGB) 속성을 정의합니다.
 

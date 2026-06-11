@@ -8,7 +8,7 @@
 
 > **calculateMeshOBB**(`mesh`): [`OBB`](../classes/OBB.md)
 
-Defined in: [src/bound/math/calculateMeshOBB.ts:25](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/bound/math/calculateMeshOBB.ts#L25)
+Defined in: [src/bound/math/calculateMeshOBB.ts:25](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/bound/math/calculateMeshOBB.ts#L25)
 
 Calculates world-space OBB by applying mesh modelMatrix.
 

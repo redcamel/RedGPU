@@ -8,7 +8,7 @@
 
 > `const` **getShadowClipPosition**: `string` = `getShadowClipPosition_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:941](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/systemCodeManager/ShaderLibrary.ts#L941)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:941](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/systemCodeManager/ShaderLibrary.ts#L941)
 
 Converts world coordinates to clip space coordinates from the light's perspective. (For Shadow Pass)
 

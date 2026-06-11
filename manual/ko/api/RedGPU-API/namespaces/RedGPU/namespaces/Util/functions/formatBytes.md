@@ -8,7 +8,7 @@
 
 > **formatBytes**(`bytes`, `decimals?`): `string`
 
-Defined in: [src/utils/formatBytes.ts:17](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/utils/formatBytes.ts#L17)
+Defined in: [src/utils/formatBytes.ts:17](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/utils/formatBytes.ts#L17)
 
 바이트 단위를 읽기 쉬운 문자열(KB, MB, GB 등)로 변환합니다.
 

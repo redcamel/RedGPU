@@ -6,7 +6,7 @@
 
 # Interface: IPhysicsEngine
 
-Defined in: [src/physics/IPhysicsEngine.ts:96](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/physics/IPhysicsEngine.ts#L96)
+Defined in: [src/physics/IPhysicsEngine.ts:96](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/physics/IPhysicsEngine.ts#L96)
 
 **`Experimental`**
 
@@ -22,7 +22,7 @@ Defined in: [src/physics/IPhysicsEngine.ts:96](https://github.com/redcamel/RedGP
 
 > `readonly` **bodies**: [`IPhysicsBody`](IPhysicsBody.md)[]
 
-Defined in: [src/physics/IPhysicsEngine.ts:111](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/physics/IPhysicsEngine.ts#L111)
+Defined in: [src/physics/IPhysicsEngine.ts:111](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/physics/IPhysicsEngine.ts#L111)
 
 **`Experimental`**
 
@@ -34,7 +34,7 @@ Defined in: [src/physics/IPhysicsEngine.ts:111](https://github.com/redcamel/RedG
 
 > **gravity**: `object`
 
-Defined in: [src/physics/IPhysicsEngine.ts:133](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/physics/IPhysicsEngine.ts#L133)
+Defined in: [src/physics/IPhysicsEngine.ts:133](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/physics/IPhysicsEngine.ts#L133)
 
 **`Experimental`**
 
@@ -63,7 +63,7 @@ physicsEngine.gravity = { x: 0, y: -9.81, z: 0 };
 
 > `readonly` **nativeWorld**: `any`
 
-Defined in: [src/physics/IPhysicsEngine.ts:101](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/physics/IPhysicsEngine.ts#L101)
+Defined in: [src/physics/IPhysicsEngine.ts:101](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/physics/IPhysicsEngine.ts#L101)
 
 **`Experimental`**
 
@@ -75,7 +75,7 @@ Defined in: [src/physics/IPhysicsEngine.ts:101](https://github.com/redcamel/RedG
 
 > **onCollisionStarted**: (`handle1`, `handle2`) => `void`
 
-Defined in: [src/physics/IPhysicsEngine.ts:123](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/physics/IPhysicsEngine.ts#L123)
+Defined in: [src/physics/IPhysicsEngine.ts:123](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/physics/IPhysicsEngine.ts#L123)
 
 **`Experimental`**
 
@@ -98,7 +98,7 @@ Defined in: [src/physics/IPhysicsEngine.ts:123](https://github.com/redcamel/RedG
 
 > `readonly` **RAPIER**: `any`
 
-Defined in: [src/physics/IPhysicsEngine.ts:106](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/physics/IPhysicsEngine.ts#L106)
+Defined in: [src/physics/IPhysicsEngine.ts:106](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/physics/IPhysicsEngine.ts#L106)
 
 **`Experimental`**
 
@@ -110,7 +110,7 @@ Defined in: [src/physics/IPhysicsEngine.ts:106](https://github.com/redcamel/RedG
 
 > **createBody**(`mesh`, `params`): [`IPhysicsBody`](IPhysicsBody.md)
 
-Defined in: [src/physics/IPhysicsEngine.ts:167](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/physics/IPhysicsEngine.ts#L167)
+Defined in: [src/physics/IPhysicsEngine.ts:167](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/physics/IPhysicsEngine.ts#L167)
 
 **`Experimental`**
 
@@ -135,7 +135,7 @@ Defined in: [src/physics/IPhysicsEngine.ts:167](https://github.com/redcamel/RedG
 
 > **createCharacterController**(`offset`): `any`
 
-Defined in: [src/physics/IPhysicsEngine.ts:189](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/physics/IPhysicsEngine.ts#L189)
+Defined in: [src/physics/IPhysicsEngine.ts:189](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/physics/IPhysicsEngine.ts#L189)
 
 **`Experimental`**
 
@@ -159,7 +159,7 @@ Defined in: [src/physics/IPhysicsEngine.ts:189](https://github.com/redcamel/RedG
 
 > **init**(): `Promise`\<`void`\>
 
-Defined in: [src/physics/IPhysicsEngine.ts:143](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/physics/IPhysicsEngine.ts#L143)
+Defined in: [src/physics/IPhysicsEngine.ts:143](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/physics/IPhysicsEngine.ts#L143)
 
 **`Experimental`**
 
@@ -177,7 +177,7 @@ Defined in: [src/physics/IPhysicsEngine.ts:143](https://github.com/redcamel/RedG
 
 > **removeBody**(`body`): `void`
 
-Defined in: [src/physics/IPhysicsEngine.ts:176](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/physics/IPhysicsEngine.ts#L176)
+Defined in: [src/physics/IPhysicsEngine.ts:176](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/physics/IPhysicsEngine.ts#L176)
 
 **`Experimental`**
 
@@ -199,7 +199,7 @@ Defined in: [src/physics/IPhysicsEngine.ts:176](https://github.com/redcamel/RedG
 
 > **step**(`deltaTime`): `void`
 
-Defined in: [src/physics/IPhysicsEngine.ts:152](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/physics/IPhysicsEngine.ts#L152)
+Defined in: [src/physics/IPhysicsEngine.ts:152](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/physics/IPhysicsEngine.ts#L152)
 
 **`Experimental`**
 

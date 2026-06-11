@@ -6,7 +6,7 @@
 
 # Class: Capsule
 
-Defined in: [src/primitive/Capsule.ts:20](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/primitive/Capsule.ts#L20)
+Defined in: [src/primitive/Capsule.ts:20](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/primitive/Capsule.ts#L20)
 
 Capsule(캡슐) 기본 도형 클래스입니다.
 
@@ -29,7 +29,7 @@ const capsule = new RedGPU.Capsule(redGPUContext, 0.5, 1, 32, 1, 12);
 
 > **new Capsule**(`redGPUContext`, `radius?`, `height?`, `radialSegments?`, `heightSegments?`, `capSegments?`): `Capsule`
 
-Defined in: [src/primitive/Capsule.ts:37](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/primitive/Capsule.ts#L37)
+Defined in: [src/primitive/Capsule.ts:37](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/primitive/Capsule.ts#L37)
 
 Capsule 인스턴스를 생성합니다.
 
@@ -73,7 +73,7 @@ const capsule = new RedGPU.Capsule(redGPUContext, 0.5, 1.0, 32, 1, 12);
 
 > **get** **gpuRenderInfo**(): `object`
 
-Defined in: [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/primitive/core/Primitive.ts#L51)
+Defined in: [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/primitive/core/Primitive.ts#L51)
 
 ##### Returns
 
@@ -81,7 +81,7 @@ Defined in: [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/Red
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/primitive/core/Primitive.ts#L51) |
+| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/primitive/core/Primitive.ts#L51) |
 
 #### Inherited from
 
@@ -95,7 +95,7 @@ Defined in: [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/Red
 
 > **get** **indexBuffer**(): [`IndexBuffer`](../../Resource/classes/IndexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:59](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/primitive/core/Primitive.ts#L59)
+Defined in: [src/primitive/core/Primitive.ts:59](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/primitive/core/Primitive.ts#L59)
 
 ##### Returns
 
@@ -113,7 +113,7 @@ Defined in: [src/primitive/core/Primitive.ts:59](https://github.com/redcamel/Red
 
 > **get** **vertexBuffer**(): [`VertexBuffer`](../../Resource/classes/VertexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:55](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/primitive/core/Primitive.ts#L55)
+Defined in: [src/primitive/core/Primitive.ts:55](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/primitive/core/Primitive.ts#L55)
 
 ##### Returns
 
@@ -131,7 +131,7 @@ Defined in: [src/primitive/core/Primitive.ts:55](https://github.com/redcamel/Red
 
 > **get** **volume**(): [`AABB`](../../Bound/classes/AABB.md)
 
-Defined in: [src/primitive/core/Primitive.ts:63](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/primitive/core/Primitive.ts#L63)
+Defined in: [src/primitive/core/Primitive.ts:63](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/primitive/core/Primitive.ts#L63)
 
 ##### Returns
 
@@ -149,7 +149,7 @@ Defined in: [src/primitive/core/Primitive.ts:63](https://github.com/redcamel/Red
 
 > **get** `static` **primitiveInterleaveStruct**(): [`VertexInterleavedStruct`](../../Resource/classes/VertexInterleavedStruct.md)
 
-Defined in: [src/primitive/core/Primitive.ts:47](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/primitive/core/Primitive.ts#L47)
+Defined in: [src/primitive/core/Primitive.ts:47](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/primitive/core/Primitive.ts#L47)
 
 캐싱된 정점 인터리브 구조를 반환합니다.
 
@@ -167,7 +167,7 @@ Defined in: [src/primitive/core/Primitive.ts:47](https://github.com/redcamel/Red
 
 > `static` **generateUniqueKey**(`name`, `params`): `string`
 
-Defined in: [src/primitive/core/Primitive.ts:68](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/primitive/core/Primitive.ts#L68)
+Defined in: [src/primitive/core/Primitive.ts:68](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/primitive/core/Primitive.ts#L68)
 
 #### Parameters
 

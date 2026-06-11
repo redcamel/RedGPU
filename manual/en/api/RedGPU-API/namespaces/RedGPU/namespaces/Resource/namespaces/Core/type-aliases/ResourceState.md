@@ -8,4 +8,4 @@
 
 > **ResourceState** = [`ResourceStateVertexBuffer`](../classes/ResourceStateVertexBuffer.md) \| [`ResourceStateIndexBuffer`](../classes/ResourceStateIndexBuffer.md) \| [`ResourceStateUniformBuffer`](../classes/ResourceStateUniformBuffer.md) \| [`ResourceStateStorageBuffer`](../classes/ResourceStateStorageBuffer.md) \| [`ResourceStateCubeTexture`](../classes/ResourceStateCubeTexture.md) \| [`ResourceStateBitmapTexture`](../classes/ResourceStateBitmapTexture.md) \| [`ResourceStateHDRTexture`](../classes/ResourceStateHDRTexture.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:42](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/core/resourceManager/ResourceManager.ts#L42)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:42](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/resourceManager/ResourceManager.ts#L42)

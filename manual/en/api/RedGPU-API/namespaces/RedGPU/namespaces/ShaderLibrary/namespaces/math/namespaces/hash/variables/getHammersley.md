@@ -8,7 +8,7 @@
 
 > `const` **getHammersley**: `string` = `getHammersley_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:384](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/systemCodeManager/ShaderLibrary.ts#L384)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:384](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/systemCodeManager/ShaderLibrary.ts#L384)
 
 Generates a uniformly distributed 2D quasi-random number (Low-Discrepancy Sequence). (Essential for importance sampling like IBL.)
 

@@ -8,7 +8,7 @@
 
 > **uuidToUint**(`uuid`): `number`
 
-Defined in: [src/utils/uuid/uuidToUint.ts:17](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/utils/uuid/uuidToUint.ts#L17)
+Defined in: [src/utils/uuid/uuidToUint.ts:17](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/utils/uuid/uuidToUint.ts#L17)
 
 Converts a UUID string to a 32-bit unsigned integer (uint32).
 

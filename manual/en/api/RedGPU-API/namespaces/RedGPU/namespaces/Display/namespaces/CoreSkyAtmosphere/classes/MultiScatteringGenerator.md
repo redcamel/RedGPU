@@ -6,7 +6,7 @@
 
 # Class: MultiScatteringGenerator
 
-Defined in: [src/display/skyAtmosphere/core/generator/multiScattering/MultiScatteringGenerator.ts:21](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/generator/multiScattering/MultiScatteringGenerator.ts#L21)
+Defined in: [src/display/skyAtmosphere/core/generator/multiScattering/MultiScatteringGenerator.ts:21](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/display/skyAtmosphere/core/generator/multiScattering/MultiScatteringGenerator.ts#L21)
 
 MultiScatteringGenerator creates the Multi-Scattering LUT.
 
@@ -22,7 +22,7 @@ Simulates additional scattered light caused by light hitting atmospheric particl
 
 > **new MultiScatteringGenerator**(`redGPUContext`, `sharedUniformBuffer`, `sampler`): `MultiScatteringGenerator`
 
-Defined in: [src/display/skyAtmosphere/core/generator/multiScattering/MultiScatteringGenerator.ts:26](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/generator/multiScattering/MultiScatteringGenerator.ts#L26)
+Defined in: [src/display/skyAtmosphere/core/generator/multiScattering/MultiScatteringGenerator.ts:26](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/display/skyAtmosphere/core/generator/multiScattering/MultiScatteringGenerator.ts#L26)
 
 #### Parameters
 
@@ -48,7 +48,7 @@ Defined in: [src/display/skyAtmosphere/core/generator/multiScattering/MultiScatt
 
 > **get** **lutTexture**(): [`DirectTexture`](../../../../Resource/classes/DirectTexture.md)
 
-Defined in: [src/display/skyAtmosphere/core/generator/multiScattering/MultiScatteringGenerator.ts:31](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/generator/multiScattering/MultiScatteringGenerator.ts#L31)
+Defined in: [src/display/skyAtmosphere/core/generator/multiScattering/MultiScatteringGenerator.ts:31](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/display/skyAtmosphere/core/generator/multiScattering/MultiScatteringGenerator.ts#L31)
 
 ##### Returns
 
@@ -64,7 +64,7 @@ Defined in: [src/display/skyAtmosphere/core/generator/multiScattering/MultiScatt
 
 > **render**(`transmittance`): `void`
 
-Defined in: [src/display/skyAtmosphere/core/generator/multiScattering/MultiScatteringGenerator.ts:35](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/generator/multiScattering/MultiScatteringGenerator.ts#L35)
+Defined in: [src/display/skyAtmosphere/core/generator/multiScattering/MultiScatteringGenerator.ts:35](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/display/skyAtmosphere/core/generator/multiScattering/MultiScatteringGenerator.ts#L35)
 
 #### Parameters
 
@@ -90,7 +90,7 @@ Defined in: [src/display/skyAtmosphere/core/generator/multiScattering/MultiScatt
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L76)
 
 Returns the AntialiasingManager instance. (Short-cut path)
 
@@ -112,7 +112,7 @@ AntialiasingManager instance
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L88)
 
 Returns the CommandEncoderManager instance. (Short-cut path)
 
@@ -134,7 +134,7 @@ CommandEncoderManager instance
 
 > **get** **depth**(): `number`
 
-Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:60](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L60)
+Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:60](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L60)
 
 ##### Returns
 
@@ -152,7 +152,7 @@ Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L52)
 
 Returns the WebGPU device object. (Short-cut path)
 
@@ -174,7 +174,7 @@ GPUDevice instance
 
 > **get** **height**(): `number`
 
-Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:56](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L56)
+Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:56](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L56)
 
 ##### Returns
 
@@ -192,7 +192,7 @@ Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator
 
 > **get** **label**(): `string`
 
-Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:48](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L48)
+Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:48](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L48)
 
 ##### Returns
 
@@ -210,7 +210,7 @@ Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/BaseObject.ts#L58)
 
 Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
 
@@ -224,7 +224,7 @@ Name of the object
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/BaseObject.ts#L71)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/BaseObject.ts#L71)
 
 Sets the name of the object.
 
@@ -250,7 +250,7 @@ Sets the name of the object.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L40)
 
 Returns the RedGPUContext instance.
 
@@ -272,7 +272,7 @@ RedGPUContext instance
 
 > **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L64)
 
 Returns the ResourceManager instance. (Short-cut path)
 
@@ -294,7 +294,7 @@ ResourceManager instance
 
 > **get** **sampler**(): [`Sampler`](../../../../Resource/classes/Sampler.md)
 
-Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:44](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L44)
+Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:44](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L44)
 
 ##### Returns
 
@@ -312,7 +312,7 @@ Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator
 
 > **get** **sharedUniformBuffer**(): [`UniformBuffer`](../../../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:40](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L40)
+Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:40](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L40)
 
 ##### Returns
 
@@ -330,7 +330,7 @@ Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/BaseObject.ts#L46)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -352,7 +352,7 @@ UUID string
 
 > **get** **width**(): `number`
 
-Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:52](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L52)
+Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:52](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L52)
 
 ##### Returns
 
@@ -368,7 +368,7 @@ Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator
 
 > `protected` **createBindGroup**(`label`, `pipeline`, `entries`): `GPUBindGroup`
 
-Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:107](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L107)
+Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:107](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L107)
 
 #### Parameters
 
@@ -392,7 +392,7 @@ Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator
 
 > `protected` **createComputePipeline**(`label`, `shaderCode`): `GPUComputePipeline`
 
-Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:95](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L95)
+Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:95](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L95)
 
 #### Parameters
 
@@ -415,7 +415,7 @@ Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator
 
 > **createLUTTexture**(`is3D?`, `format?`): `GPUTexture`
 
-Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:84](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L84)
+Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:84](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L84)
 
 #### Parameters
 
@@ -438,7 +438,7 @@ Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator
 
 > **executeComputePass**(`pipeline`, `bindGroup`, `workgroupSize?`): `void`
 
-Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:66](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L66)
+Defined in: [src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts:66](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/display/skyAtmosphere/core/generator/ASkyAtmosphereLUTGenerator.ts#L66)
 
 #### Parameters
 

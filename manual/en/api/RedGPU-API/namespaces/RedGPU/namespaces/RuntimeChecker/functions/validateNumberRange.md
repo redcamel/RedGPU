@@ -8,7 +8,7 @@
 
 > **validateNumberRange**(`value`, `minRange?`, `maxRange?`): `boolean`
 
-Defined in: [src/runtimeChecker/validateFunc/validateNumberRange.ts:32](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/runtimeChecker/validateFunc/validateNumberRange.ts#L32)
+Defined in: [src/runtimeChecker/validateFunc/validateNumberRange.ts:32](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/runtimeChecker/validateFunc/validateNumberRange.ts#L32)
 
 Validates if the given value is a number within the specified range.
 

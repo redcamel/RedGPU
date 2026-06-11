@@ -8,7 +8,7 @@
 
 > `const` **getShadowCoord**: `string` = `getShadowCoord_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:923](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/systemCodeManager/ShaderLibrary.ts#L923)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:923](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/systemCodeManager/ShaderLibrary.ts#L923)
 
 월드 좌표를 빛의 클립 공간 좌표(UV + Depth)로 변환합니다.
 

@@ -6,7 +6,7 @@
 
 # Class: TAA
 
-Defined in: [src/antialiasing/taa/TAA.ts:36](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/antialiasing/taa/TAA.ts#L36)
+Defined in: [src/antialiasing/taa/TAA.ts:36](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/antialiasing/taa/TAA.ts#L36)
 
 TAA(Temporal Anti-Aliasing) 후처리 이펙트입니다.
 
@@ -34,7 +34,7 @@ redGPUContext.antialiasingManager.useTAA = true;
 
 > **new TAA**(`redGPUContext`): `TAA`
 
-Defined in: [src/antialiasing/taa/TAA.ts:54](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/antialiasing/taa/TAA.ts#L54)
+Defined in: [src/antialiasing/taa/TAA.ts:54](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/antialiasing/taa/TAA.ts#L54)
 
 TAA 인스턴스를 생성합니다.
 
@@ -60,7 +60,7 @@ TAA 인스턴스를 생성합니다.
 
 > **get** **frameIndex**(): `number`
 
-Defined in: [src/antialiasing/taa/TAA.ts:93](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/antialiasing/taa/TAA.ts#L93)
+Defined in: [src/antialiasing/taa/TAA.ts:93](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/antialiasing/taa/TAA.ts#L93)
 
 프레임 인덱스를 반환합니다.
 
@@ -78,7 +78,7 @@ Defined in: [src/antialiasing/taa/TAA.ts:93](https://github.com/redcamel/RedGPU/
 
 > **get** **jitterStrength**(): `number`
 
-Defined in: [src/antialiasing/taa/TAA.ts:117](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/antialiasing/taa/TAA.ts#L117)
+Defined in: [src/antialiasing/taa/TAA.ts:117](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/antialiasing/taa/TAA.ts#L117)
 
 지터링 강도를 반환합니다.
 
@@ -92,7 +92,7 @@ Defined in: [src/antialiasing/taa/TAA.ts:117](https://github.com/redcamel/RedGPU
 
 > **set** **jitterStrength**(`value`): `void`
 
-Defined in: [src/antialiasing/taa/TAA.ts:129](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/antialiasing/taa/TAA.ts#L129)
+Defined in: [src/antialiasing/taa/TAA.ts:129](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/antialiasing/taa/TAA.ts#L129)
 
 지터링 강도를 설정합니다.
 
@@ -114,7 +114,7 @@ Defined in: [src/antialiasing/taa/TAA.ts:129](https://github.com/redcamel/RedGPU
 
 > **get** **prevNoneJitterProjectionViewMatrix**(): [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/antialiasing/taa/TAA.ts:81](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/antialiasing/taa/TAA.ts#L81)
+Defined in: [src/antialiasing/taa/TAA.ts:81](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/antialiasing/taa/TAA.ts#L81)
 
 이전 프레임의 지터링 없는 투영 뷰(Projection-View) 행렬을 반환합니다.
 
@@ -132,7 +132,7 @@ Defined in: [src/antialiasing/taa/TAA.ts:81](https://github.com/redcamel/RedGPU/
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/antialiasing/taa/TAA.ts:105](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/antialiasing/taa/TAA.ts#L105)
+Defined in: [src/antialiasing/taa/TAA.ts:105](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/antialiasing/taa/TAA.ts#L105)
 
 비디오 메모리 사용량을 반환합니다.
 
@@ -152,7 +152,7 @@ Defined in: [src/antialiasing/taa/TAA.ts:105](https://github.com/redcamel/RedGPU
 
 > **clear**(): `void`
 
-Defined in: [src/antialiasing/taa/TAA.ts:197](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/antialiasing/taa/TAA.ts#L197)
+Defined in: [src/antialiasing/taa/TAA.ts:197](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/antialiasing/taa/TAA.ts#L197)
 
 TAA 리소스를 해제합니다.
 
@@ -170,7 +170,7 @@ TAA 리소스를 해제합니다.
 
 > **render**(`view`, `width`, `height`, `sourceTextureInfo`): [`IPostEffectResult`](../../PostEffect/namespaces/Core/interfaces/IPostEffectResult.md)
 
-Defined in: [src/antialiasing/taa/TAA.ts:153](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/antialiasing/taa/TAA.ts#L153)
+Defined in: [src/antialiasing/taa/TAA.ts:153](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/antialiasing/taa/TAA.ts#L153)
 
 TAA 이펙트를 렌더링합니다.
 
@@ -207,7 +207,7 @@ TAA 이펙트를 렌더링합니다.
 
 > **isInstanceofPostEffect**: `boolean`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:13](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/ASinglePassPostEffect.ts#L13)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:13](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L13)
 
 #### Inherited from
 
@@ -219,7 +219,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:13](https://github.com
 
 > **isLdr**: `boolean` = `false`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:30](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/ASinglePassPostEffect.ts#L30)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:30](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L30)
 
 이펙트가 LDR(Low Dynamic Range) 공간에서 동작하는지 여부
 
@@ -235,7 +235,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:30](https://github.com
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L76)
 
 안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -257,7 +257,7 @@ AntialiasingManager 인스턴스
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L88)
 
 커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -279,7 +279,7 @@ CommandEncoderManager 인스턴스
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L52)
 
 WebGPU 디바이스 객체를 반환합니다. (단축 경로)
 
@@ -301,7 +301,7 @@ GPUDevice 인스턴스
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/BaseObject.ts#L58)
 
 객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
 
@@ -315,7 +315,7 @@ Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/BaseObject.ts#L71)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/BaseObject.ts#L71)
 
 객체의 이름을 설정합니다.
 
@@ -341,7 +341,7 @@ Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **outputTextureView**(): `GPUTextureView`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:208](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/ASinglePassPostEffect.ts#L208)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:208](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L208)
 
 현재 할당된 출력 텍스처 뷰를 반환합니다.
 
@@ -363,7 +363,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:208](https://github.co
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L40)
 
 RedGPUContext 인스턴스를 반환합니다.
 
@@ -385,7 +385,7 @@ RedGPUContext 인스턴스
 
 > **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L64)
 
 리소스 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -407,7 +407,7 @@ ResourceManager 인스턴스
 
 > **get** **shaderInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:124](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/ASinglePassPostEffect.ts#L124)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:124](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L124)
 
 현재 MSAA 상태에 따른 셰이더 정보를 반환합니다.
 
@@ -429,7 +429,7 @@ WGSL 셰이더 분석 정보
 
 > **get** **storageInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:112](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/ASinglePassPostEffect.ts#L112)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:112](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L112)
 
 셰이더의 스토리지 구조 정보를 반환합니다.
 
@@ -451,7 +451,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:112](https://github.co
 
 > **get** **systemUniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:160](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/ASinglePassPostEffect.ts#L160)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:160](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L160)
 
 시스템 공용 유니폼 구조 정보를 반환합니다.
 
@@ -473,7 +473,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:160](https://github.co
 
 > **get** **uniformBuffer**(): [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:136](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/ASinglePassPostEffect.ts#L136)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:136](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L136)
 
 이펙트 전용 유니폼 버퍼를 반환합니다.
 
@@ -495,7 +495,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:136](https://github.co
 
 > **get** **uniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:148](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/ASinglePassPostEffect.ts#L148)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:148](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L148)
 
 이펙트 전용 유니폼 구조 정보를 반환합니다.
 
@@ -517,7 +517,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:148](https://github.co
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/BaseObject.ts#L46)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 
@@ -539,7 +539,7 @@ UUID 문자열
 
 > **get** **WORK\_SIZE\_X**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:172](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/ASinglePassPostEffect.ts#L172)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:172](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L172)
 
 워크그룹 사이즈 X를 반환합니다.
 
@@ -561,7 +561,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:172](https://github.co
 
 > **get** **WORK\_SIZE\_Y**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:184](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/ASinglePassPostEffect.ts#L184)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:184](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L184)
 
 워크그룹 사이즈 Y를 반환합니다.
 
@@ -583,7 +583,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:184](https://github.co
 
 > **get** **WORK\_SIZE\_Z**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:196](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/ASinglePassPostEffect.ts#L196)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:196](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L196)
 
 워크그룹 사이즈 Z를 반환합니다.
 
@@ -603,7 +603,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:196](https://github.co
 
 > **init**(`redGPUContext`, `name`, `computeCodes`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:238](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/ASinglePassPostEffect.ts#L238)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:238](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L238)
 
 이펙트를 초기화합니다. 컴퓨트 셰이더 및 유니폼 버퍼를 생성합니다.
 
@@ -631,7 +631,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:238](https://github.co
 
 > **updateUniform**(`key`, `value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:349](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/postEffect/core/ASinglePassPostEffect.ts#L349)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:349](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L349)
 
 특정 유니폼 값을 업데이트합니다.
 

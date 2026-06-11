@@ -8,7 +8,7 @@
 
 > **calculateTangents**(`vertices`, `normals`, `uvs`, `indices`): `Float32Array`
 
-Defined in: [src/math/calculateTangents.ts:131](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/math/calculateTangents.ts#L131)
+Defined in: [src/math/calculateTangents.ts:131](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/math/calculateTangents.ts#L131)
 
 Calculates vertex tangent vectors and returns them as a new array. (Pure math utility)
 

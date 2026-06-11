@@ -8,7 +8,7 @@
 
 > **mergerNoiseUniformStruct**(`baseStruct`, `addStruct`): `string`
 
-Defined in: [src/resources/texture/noiseTexture/core/noiseDefineMerges.ts:1](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/noiseTexture/core/noiseDefineMerges.ts#L1)
+Defined in: [src/resources/texture/noiseTexture/core/noiseDefineMerges.ts:1](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/texture/noiseTexture/core/noiseDefineMerges.ts#L1)
 
 ## Parameters
 

@@ -8,7 +8,7 @@
 
 > `const` **GPU\_MIPMAP\_FILTER\_MODE**: `object`
 
-Defined in: [src/gpuConst/GPU\_MIPMAP\_FILTER\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/gpuConst/GPU_MIPMAP_FILTER_MODE.ts#L10)
+Defined in: [src/gpuConst/GPU\_MIPMAP\_FILTER\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/gpuConst/GPU_MIPMAP_FILTER_MODE.ts#L10)
 
 밉맵 레벨 간 샘플링 시의 필터링 모드 옵션을 정의하는 상수군입니다.
 

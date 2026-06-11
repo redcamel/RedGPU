@@ -8,7 +8,7 @@
 
 > `const` **GPU\_LOAD\_OP**: `object`
 
-Defined in: [src/gpuConst/GPU\_LOAD\_OP.ts:10](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/gpuConst/GPU_LOAD_OP.ts#L10)
+Defined in: [src/gpuConst/GPU\_LOAD\_OP.ts:10](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/gpuConst/GPU_LOAD_OP.ts#L10)
 
 렌더 패스 시작 시 어태치먼트를 로드하는 방식을 정의하는 상수군입니다.
 

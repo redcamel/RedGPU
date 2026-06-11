@@ -8,7 +8,7 @@
 
 > `const` **getBitHash2D\_vec2**: `string` = `getBitHash2D_vec2_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:317](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/systemCodeManager/ShaderLibrary.ts#L317)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:317](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/systemCodeManager/ShaderLibrary.ts#L317)
 
 2D 벡터의 비트 구조를 보존하여 2D 난수 벡터를 생성합니다. (초정밀)
 

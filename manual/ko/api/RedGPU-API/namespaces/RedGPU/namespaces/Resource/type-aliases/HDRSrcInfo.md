@@ -8,6 +8,6 @@
 
 > **HDRSrcInfo** = `string` \| \{ `cacheKey`: `string`; `src`: `string`; \}
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:14](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/resources/texture/hdr/HDRTexture.ts#L14)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:14](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/texture/hdr/HDRTexture.ts#L14)
 
 HDR 텍스처 소스 정보 타입입니다. 이미지 URL 문자열이거나 src와 cacheKey를 가진 객체일 수 있습니다.

@@ -8,4 +8,4 @@
 
 > `const` **RAD\_TO\_DEG**: `"const RAD_TO_DEG: f32 = 57.29577951308232;"` = `'const RAD_TO_DEG: f32 = 57.29577951308232;'`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:890](https://github.com/redcamel/RedGPU/blob/1acaed6a7f0d9944ec006546eb911e628cd46850/src/systemCodeManager/ShaderLibrary.ts#L890)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:890](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/systemCodeManager/ShaderLibrary.ts#L890)
