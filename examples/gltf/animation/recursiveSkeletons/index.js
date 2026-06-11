@@ -1,5 +1,5 @@
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1781132971803";
-import * as RedGPU from "../../../../dist/index.js?t=1781132971803";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1781136546834";
+import * as RedGPU from "../../../../dist/index.js?t=1781136546834";
 
 /**
  * [KO] Recursive Skeletons 예제

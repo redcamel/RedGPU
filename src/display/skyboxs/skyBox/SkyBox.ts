@@ -103,6 +103,7 @@ class SkyBox extends RedGPUObject {
         this.#primitiveState = new PrimitiveState(this)
         this.#primitiveState.cullMode = GPU_CULL_MODE.NONE
         this.#depthStencilState = new DepthStencilState(this)
+        this.#depthStencilState.depthWriteEnabled = false
     }
 
     /**

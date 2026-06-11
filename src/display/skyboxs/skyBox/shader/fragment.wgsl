@@ -39,12 +39,12 @@ fn main(inputData: InputData) -> OutputFragment {
     let mipmapCount = f32(textureNumLevels(texture0) - 1);
     let blurCurve = uniforms.blur * uniforms.blur;
     
-    let skyboxColor = textureSampleLevel(texture0, sampler0, cubemapVec, mipmapCount * blurCurve);
+    let skyboxColor = textureSampleLevel(texture0, sampler0, viewDir, mipmapCount * blurCurve);
     var sampleColor = skyboxColor;
     let u_transitionProgress = uniforms.transitionProgress;
 
     if (u_transitionProgress > 0.0) {
-        let transitionSample = textureSampleLevel(transitionTexture, sampler0, cubemapVec, mipmapCount * blurCurve);
+        let transitionSample = textureSampleLevel(transitionTexture, sampler0, viewDir, mipmapCount * blurCurve);
         #redgpu_if transitionMask
             let uv = sphericalToUV(viewDir);
             let maskSample = textureSampleLevel(transitionMask, sampler0, uv, 0.0);
