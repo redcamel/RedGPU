@@ -6,7 +6,7 @@
 
 # Class: AmbientLight
 
-Defined in: [src/light/lights/AmbientLight.ts:28](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/AmbientLight.ts#L28)
+Defined in: [src/light/lights/AmbientLight.ts:28](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/light/lights/AmbientLight.ts#L28)
 
 환경광(AmbientLight)을 정의하는 클래스입니다.
 
@@ -36,7 +36,7 @@ scene.lightManager.ambientLight = ambient;
 
 > **new AmbientLight**(`color?`, `lux?`): `AmbientLight`
 
-Defined in: [src/light/lights/AmbientLight.ts:41](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/AmbientLight.ts#L41)
+Defined in: [src/light/lights/AmbientLight.ts:41](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/light/lights/AmbientLight.ts#L41)
 
 새로운 AmbientLight 인스턴스를 생성합니다.
 
@@ -63,7 +63,7 @@ Defined in: [src/light/lights/AmbientLight.ts:41](https://github.com/redcamel/Re
 
 > **get** **lux**(): `number`
 
-Defined in: [src/light/lights/AmbientLight.ts:50](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/AmbientLight.ts#L50)
+Defined in: [src/light/lights/AmbientLight.ts:50](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/light/lights/AmbientLight.ts#L50)
 
 광원의 조도(Lux)를 반환하거나 설정합니다.
 
@@ -75,7 +75,7 @@ Defined in: [src/light/lights/AmbientLight.ts:50](https://github.com/redcamel/Re
 
 > **set** **lux**(`value`): `void`
 
-Defined in: [src/light/lights/AmbientLight.ts:54](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/lights/AmbientLight.ts#L54)
+Defined in: [src/light/lights/AmbientLight.ts:54](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/light/lights/AmbientLight.ts#L54)
 
 ##### Parameters
 
@@ -99,7 +99,7 @@ Defined in: [src/light/lights/AmbientLight.ts:54](https://github.com/redcamel/Re
 
 > **drawDebugger**: [`ADrawDebuggerLight`](../../Display/namespaces/drawDebugger/classes/ADrawDebuggerLight.md)\<[`ABaseLight`](../namespaces/Core/classes/ABaseLight.md)\>
 
-Defined in: [src/light/core/ABaseLight.ts:22](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/core/ABaseLight.ts#L22)
+Defined in: [src/light/core/ABaseLight.ts:22](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/light/core/ABaseLight.ts#L22)
 
 광원의 디버깅 시각화를 위한 도우미 객체입니다.
 
@@ -117,7 +117,7 @@ Defined in: [src/light/core/ABaseLight.ts:22](https://github.com/redcamel/RedGPU
 
 > **get** **color**(): [`ColorRGB`](../../Color/classes/ColorRGB.md)
 
-Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/core/ABaseLight.ts#L84)
+Defined in: [src/light/core/ABaseLight.ts:84](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/light/core/ABaseLight.ts#L84)
 
 광원의 색상을 반환합니다.
 
@@ -131,7 +131,7 @@ ColorRGB 객체
 
 > **set** **color**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:95](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/core/ABaseLight.ts#L95)
+Defined in: [src/light/core/ABaseLight.ts:95](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/light/core/ABaseLight.ts#L95)
 
 광원의 색상을 설정합니다.
 
@@ -157,7 +157,7 @@ Defined in: [src/light/core/ABaseLight.ts:95](https://github.com/redcamel/RedGPU
 
 > **get** **enableDebugger**(): `boolean`
 
-Defined in: [src/light/core/ABaseLight.ts:62](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/core/ABaseLight.ts#L62)
+Defined in: [src/light/core/ABaseLight.ts:62](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/light/core/ABaseLight.ts#L62)
 
 디버깅 시각화 기능의 활성화 여부를 반환합니다.
 
@@ -171,7 +171,7 @@ Defined in: [src/light/core/ABaseLight.ts:62](https://github.com/redcamel/RedGPU
 
 > **set** **enableDebugger**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:73](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/core/ABaseLight.ts#L73)
+Defined in: [src/light/core/ABaseLight.ts:73](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/light/core/ABaseLight.ts#L73)
 
 디버깅 시각화 기능을 활성화하거나 비활성화합니다.
 
@@ -197,7 +197,7 @@ Defined in: [src/light/core/ABaseLight.ts:73](https://github.com/redcamel/RedGPU
 
 > **get** **intensityMultiplier**(): `number`
 
-Defined in: [src/light/core/ABaseLight.ts:109](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/core/ABaseLight.ts#L109)
+Defined in: [src/light/core/ABaseLight.ts:109](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/light/core/ABaseLight.ts#L109)
 
 광원의 세기 배율을 반환합니다.
 
@@ -211,7 +211,7 @@ Defined in: [src/light/core/ABaseLight.ts:109](https://github.com/redcamel/RedGP
 
 > **set** **intensityMultiplier**(`value`): `void`
 
-Defined in: [src/light/core/ABaseLight.ts:120](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/light/core/ABaseLight.ts#L120)
+Defined in: [src/light/core/ABaseLight.ts:120](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/light/core/ABaseLight.ts#L120)
 
 광원의 세기 배율을 설정합니다.
 

@@ -6,7 +6,7 @@
 
 # Class: ResourceStateBitmapTexture
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:5](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L5)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:5](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L5)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **new ResourceStateBitmapTexture**(`texture`): `ResourceStateBitmapTexture`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:12](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L12)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:12](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L12)
 
 #### Parameters
 
@@ -32,7 +32,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **cacheKey**: `string`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:8](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L8)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:8](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L8)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **src**: `string`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:7](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L7)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:7](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L7)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **texture**: [`BitmapTexture`](../../../classes/BitmapTexture.md) \| [`ANoiseTexture`](../../CoreNoiseTexture/classes/ANoiseTexture.md) \| [`DirectTexture`](../../../classes/DirectTexture.md)
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:6](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L6)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:6](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L6)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **useNum**: `number` = `0`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:9](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L9)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:9](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L9)
 
 ***
 
@@ -64,4 +64,4 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **uuid**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:10](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L10)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts:10](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/core/resourceManager/resourceState/texture/ResourceStateBitmapTexture.ts#L10)

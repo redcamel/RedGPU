@@ -8,7 +8,7 @@
 
 > **sortTransparentObjects**(`cameraPos`, `objects`): `GPURenderBundle`[]
 
-Defined in: [src/math/sortTransparentObjects.ts:21](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/math/sortTransparentObjects.ts#L21)
+Defined in: [src/math/sortTransparentObjects.ts:21](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/math/sortTransparentObjects.ts#L21)
 
 카메라 거리를 기준으로 투명 객체를 원근 거리 내림차순 정렬합니다.
 

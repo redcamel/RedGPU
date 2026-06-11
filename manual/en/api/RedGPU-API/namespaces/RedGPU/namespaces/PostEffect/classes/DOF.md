@@ -6,7 +6,7 @@
 
 # Class: DOF
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:35](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L35)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:35](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L35)
 
 Depth of Field (DOF) post-processing effect.
 
@@ -38,7 +38,7 @@ view.postEffectManager.addEffect(effect);
 
 > **new DOF**(`redGPUContext`): `DOF`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:111](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L111)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:111](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L111)
 
 Creates a DOF instance.
 
@@ -64,7 +64,7 @@ Creates a DOF instance.
 
 > **get** **aperture**(): `number`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:168](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L168)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:168](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L168)
 
 Returns the aperture value.
 
@@ -78,7 +78,7 @@ Aperture value (F-number)
 
 > **set** **aperture**(`value`): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:180](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L180)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:180](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L180)
 
 Sets the aperture value.
 
@@ -100,7 +100,7 @@ Sets the aperture value.
 
 > **get** **farBlurSize**(): `number`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:294](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L294)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:294](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L294)
 
 Returns the far blur size.
 
@@ -114,7 +114,7 @@ Far blur size in pixels
 
 > **set** **farBlurSize**(`value`): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:306](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L306)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:306](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L306)
 
 Sets the far blur size.
 
@@ -136,7 +136,7 @@ Sets the far blur size.
 
 > **get** **farPlane**(): `number`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:243](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L243)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:243](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L243)
 
 Returns the far plane value.
 
@@ -150,7 +150,7 @@ Far plane distance
 
 > **set** **farPlane**(`value`): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:255](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L255)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:255](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L255)
 
 Sets the far plane value.
 
@@ -172,7 +172,7 @@ Sets the far plane value.
 
 > **get** **farStrength**(): `number`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:344](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L344)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:344](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L344)
 
 Returns the far blur strength.
 
@@ -186,7 +186,7 @@ Far blur strength
 
 > **set** **farStrength**(`value`): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:356](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L356)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:356](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L356)
 
 Sets the far blur strength.
 
@@ -208,7 +208,7 @@ Sets the far blur strength.
 
 > **get** **focusDistance**(): `number`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:143](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L143)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:143](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L143)
 
 Returns the focus distance.
 
@@ -222,7 +222,7 @@ Focus distance
 
 > **set** **focusDistance**(`value`): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:155](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L155)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:155](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L155)
 
 Sets the focus distance.
 
@@ -244,7 +244,7 @@ Sets the focus distance.
 
 > **get** **maxCoC**(): `number`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:193](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L193)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:193](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L193)
 
 Returns the max CoC value.
 
@@ -258,7 +258,7 @@ Max CoC value
 
 > **set** **maxCoC**(`value`): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:205](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L205)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:205](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L205)
 
 Sets the max CoC value.
 
@@ -280,7 +280,7 @@ Sets the max CoC value.
 
 > **get** **nearBlurSize**(): `number`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:269](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L269)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:269](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L269)
 
 Returns the near blur size.
 
@@ -294,7 +294,7 @@ Near blur size in pixels
 
 > **set** **nearBlurSize**(`value`): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:281](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L281)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:281](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L281)
 
 Sets the near blur size.
 
@@ -316,7 +316,7 @@ Sets the near blur size.
 
 > **get** **nearPlane**(): `number`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:218](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L218)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:218](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L218)
 
 Returns the near plane value.
 
@@ -330,7 +330,7 @@ Near plane distance
 
 > **set** **nearPlane**(`value`): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:230](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L230)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:230](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L230)
 
 Sets the near plane value.
 
@@ -352,7 +352,7 @@ Sets the near plane value.
 
 > **get** **nearStrength**(): `number`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:319](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L319)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:319](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L319)
 
 Returns the near blur strength.
 
@@ -366,7 +366,7 @@ Near blur strength
 
 > **set** **nearStrength**(`value`): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:331](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L331)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:331](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L331)
 
 Sets the near blur strength.
 
@@ -386,7 +386,7 @@ Sets the near blur strength.
 
 > **render**(`view`, `width`, `height`, `sourceTextureInfo`): [`IPostEffectResult`](../namespaces/Core/interfaces/IPostEffectResult.md)
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:479](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L479)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:479](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L479)
 
 Renders the DOF effect.
 
@@ -415,7 +415,7 @@ Final DOF result
 
 > **setCinematic**(): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:379](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L379)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:379](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L379)
 
 Applies the Cinematic preset. (Strong DOF, cinematic feel)
 
@@ -429,7 +429,7 @@ Applies the Cinematic preset. (Strong DOF, cinematic feel)
 
 > **setGameDefault**(): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:365](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L365)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:365](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L365)
 
 Applies the Game Default preset. (Balanced quality/performance)
 
@@ -443,7 +443,7 @@ Applies the Game Default preset. (Balanced quality/performance)
 
 > **setLandscape**(): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:407](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L407)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:407](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L407)
 
 Applies the Landscape preset. (Generally sharp, slight far blur)
 
@@ -457,7 +457,7 @@ Applies the Landscape preset. (Generally sharp, slight far blur)
 
 > **setMacro**(): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:421](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L421)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:421](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L421)
 
 Applies the Macro preset. (Extremely shallow depth of field)
 
@@ -471,7 +471,7 @@ Applies the Macro preset. (Extremely shallow depth of field)
 
 > **setNightMode**(): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:449](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L449)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:449](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L449)
 
 Applies the Night Mode preset. (Low light environment)
 
@@ -485,7 +485,7 @@ Applies the Night Mode preset. (Low light environment)
 
 > **setPortrait**(): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:393](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L393)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:393](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L393)
 
 Applies the Portrait preset. (Blurred background, focused subject)
 
@@ -499,7 +499,7 @@ Applies the Portrait preset. (Blurred background, focused subject)
 
 > **setSports**(): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:435](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/effects/lens/dof/DOF.ts#L435)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:435](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/effects/lens/dof/DOF.ts#L435)
 
 Applies the Action/Sports preset. (Suitable for fast motion)
 
@@ -521,7 +521,7 @@ Applies the Action/Sports preset. (Suitable for fast motion)
 
 > **isInstanceofPostEffect**: `boolean`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:13](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/ASinglePassPostEffect.ts#L13)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:13](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/ASinglePassPostEffect.ts#L13)
 
 #### Inherited from
 
@@ -533,7 +533,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:13](https://github.com
 
 > **isLdr**: `boolean` = `false`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:30](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/ASinglePassPostEffect.ts#L30)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:30](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/ASinglePassPostEffect.ts#L30)
 
 Whether the effect operates in LDR (Low Dynamic Range) space
 
@@ -549,7 +549,7 @@ Whether the effect operates in LDR (Low Dynamic Range) space
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/RedGPUObject.ts#L76)
 
 Returns the AntialiasingManager instance. (Short-cut path)
 
@@ -571,7 +571,7 @@ AntialiasingManager instance
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/RedGPUObject.ts#L88)
 
 Returns the CommandEncoderManager instance. (Short-cut path)
 
@@ -593,7 +593,7 @@ CommandEncoderManager instance
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/RedGPUObject.ts#L52)
 
 Returns the WebGPU device object. (Short-cut path)
 
@@ -615,7 +615,7 @@ GPUDevice instance
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/BaseObject.ts#L58)
 
 Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
 
@@ -629,7 +629,7 @@ Name of the object
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/base/BaseObject.ts#L71)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/BaseObject.ts#L71)
 
 Sets the name of the object.
 
@@ -655,7 +655,7 @@ Sets the name of the object.
 
 > **get** **outputTextureView**(): `GPUTextureView`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:208](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/ASinglePassPostEffect.ts#L208)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:208](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/ASinglePassPostEffect.ts#L208)
 
 Returns the currently allocated output texture view.
 
@@ -677,7 +677,7 @@ Output GPUTextureView
 
 > **get** **passList**(): [`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md)[]
 
-Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:65](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/AMultiPassPostEffect.ts#L65)
+Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:65](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/AMultiPassPostEffect.ts#L65)
 
 Returns the list of registered internal passes.
 
@@ -699,7 +699,7 @@ Array of internal single-pass post effects
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/RedGPUObject.ts#L40)
 
 Returns the RedGPUContext instance.
 
@@ -721,7 +721,7 @@ RedGPUContext instance
 
 > **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/RedGPUObject.ts#L64)
 
 Returns the ResourceManager instance. (Short-cut path)
 
@@ -743,7 +743,7 @@ ResourceManager instance
 
 > **get** **shaderInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:124](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/ASinglePassPostEffect.ts#L124)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:124](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/ASinglePassPostEffect.ts#L124)
 
 Returns shader information based on the current MSAA state.
 
@@ -765,7 +765,7 @@ WGSL shader analysis info
 
 > **get** **storageInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:112](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/ASinglePassPostEffect.ts#L112)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:112](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/ASinglePassPostEffect.ts#L112)
 
 Returns storage info from the shader.
 
@@ -787,7 +787,7 @@ Storage structure information
 
 > **get** **systemUniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:160](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/ASinglePassPostEffect.ts#L160)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:160](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/ASinglePassPostEffect.ts#L160)
 
 Returns the system common uniform struct information.
 
@@ -809,7 +809,7 @@ System uniform structure info
 
 > **get** **uniformBuffer**(): [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:136](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/ASinglePassPostEffect.ts#L136)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:136](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/ASinglePassPostEffect.ts#L136)
 
 Returns the effect-specific uniform buffer.
 
@@ -831,7 +831,7 @@ Uniform buffer instance
 
 > **get** **uniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:148](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/ASinglePassPostEffect.ts#L148)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:148](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/ASinglePassPostEffect.ts#L148)
 
 Returns the effect-specific uniform struct information.
 
@@ -853,7 +853,7 @@ Uniform structure info
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/base/BaseObject.ts#L46)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -875,7 +875,7 @@ UUID string
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:52](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/AMultiPassPostEffect.ts#L52)
+Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:52](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/AMultiPassPostEffect.ts#L52)
 
 Returns the sum of video memory usage of all internal passes.
 
@@ -897,7 +897,7 @@ Video memory usage in bytes
 
 > **get** **WORK\_SIZE\_X**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:172](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/ASinglePassPostEffect.ts#L172)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:172](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/ASinglePassPostEffect.ts#L172)
 
 Returns the workgroup size X.
 
@@ -919,7 +919,7 @@ Workgroup size X
 
 > **get** **WORK\_SIZE\_Y**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:184](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/ASinglePassPostEffect.ts#L184)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:184](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/ASinglePassPostEffect.ts#L184)
 
 Returns the workgroup size Y.
 
@@ -941,7 +941,7 @@ Workgroup size Y
 
 > **get** **WORK\_SIZE\_Z**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:196](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/ASinglePassPostEffect.ts#L196)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:196](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/ASinglePassPostEffect.ts#L196)
 
 Returns the workgroup size Z.
 
@@ -961,7 +961,7 @@ Workgroup size Z
 
 > **clear**(): `void`
 
-Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:73](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/AMultiPassPostEffect.ts#L73)
+Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:73](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/AMultiPassPostEffect.ts#L73)
 
 Clears the resources of all registered internal passes.
 
@@ -979,7 +979,7 @@ Clears the resources of all registered internal passes.
 
 > **init**(`redGPUContext`, `name`, `computeCodes`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:238](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/ASinglePassPostEffect.ts#L238)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:238](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/ASinglePassPostEffect.ts#L238)
 
 Initializes the effect. Creates compute shaders and uniform buffers.
 
@@ -1007,7 +1007,7 @@ Initializes the effect. Creates compute shaders and uniform buffers.
 
 > **updateUniform**(`key`, `value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:349](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/postEffect/core/ASinglePassPostEffect.ts#L349)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:349](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/postEffect/core/ASinglePassPostEffect.ts#L349)
 
 Updates a specific uniform value.
 

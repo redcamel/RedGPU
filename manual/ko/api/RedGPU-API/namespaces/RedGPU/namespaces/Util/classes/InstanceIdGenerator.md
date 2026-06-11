@@ -6,7 +6,7 @@
 
 # Class: InstanceIdGenerator
 
-Defined in: [src/utils/uuid/InstanceIdGenerator.ts:15](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/utils/uuid/InstanceIdGenerator.ts#L15)
+Defined in: [src/utils/uuid/InstanceIdGenerator.ts:15](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/utils/uuid/InstanceIdGenerator.ts#L15)
 
 타입(Constructor)별로 고유한 인스턴스 ID를 생성하는 유틸리티입니다.
 
@@ -33,7 +33,7 @@ const id = RedGPU.Util.InstanceIdGenerator.getNextId(RedMesh);
 
 > `static` **getNextId**(`type`): `number`
 
-Defined in: [src/utils/uuid/InstanceIdGenerator.ts:25](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/utils/uuid/InstanceIdGenerator.ts#L25)
+Defined in: [src/utils/uuid/InstanceIdGenerator.ts:25](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/utils/uuid/InstanceIdGenerator.ts#L25)
 
 해당 타입의 다음 고유 ID를 반환합니다.
 

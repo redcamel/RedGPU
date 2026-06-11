@@ -8,7 +8,7 @@
 
 > **getScreenPoint**(`view`, `targetMatrix`): \[`number`, `number`\]
 
-Defined in: [src/math/coordinates/getScreenPoint.ts:33](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/math/coordinates/getScreenPoint.ts#L33)
+Defined in: [src/math/coordinates/getScreenPoint.ts:33](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/math/coordinates/getScreenPoint.ts#L33)
 
 Calculates 2D screen pixel coordinates from a 3D model matrix.
 

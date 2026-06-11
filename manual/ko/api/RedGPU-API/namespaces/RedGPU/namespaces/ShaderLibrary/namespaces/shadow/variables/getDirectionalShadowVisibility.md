@@ -8,7 +8,7 @@
 
 > `const` **getDirectionalShadowVisibility**: `string` = `getDirectionalShadowVisibility_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:995](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/systemCodeManager/ShaderLibrary.ts#L995)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:995](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/systemCodeManager/ShaderLibrary.ts#L995)
 
 방향성 광원의 그림자 가시성(Visibility)을 계산합니다.
 

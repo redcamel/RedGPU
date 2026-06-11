@@ -8,7 +8,7 @@
 
 > `const` **getNormalFromNormalMap**: `string` = `getNormalFromNormalMap_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:882](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/systemCodeManager/ShaderLibrary.ts#L882)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:882](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/systemCodeManager/ShaderLibrary.ts#L882)
 
 노멀 맵 데이터를 탄젠트 공간의 법선 벡터로 변환하고 TBN 행렬을 적용합니다.
 

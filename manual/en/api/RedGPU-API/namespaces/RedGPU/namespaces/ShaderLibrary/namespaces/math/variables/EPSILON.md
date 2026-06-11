@@ -8,4 +8,4 @@
 
 > `const` **EPSILON**: `"const EPSILON: f32 = 1e-6;"` = `'const EPSILON: f32 = 1e-6;'`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:891](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/systemCodeManager/ShaderLibrary.ts#L891)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:891](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/systemCodeManager/ShaderLibrary.ts#L891)

@@ -8,7 +8,7 @@
 
 > `const` **GPU\_CULL\_MODE**: `object`
 
-Defined in: [src/gpuConst/GPU\_CULL\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/gpuConst/GPU_CULL_MODE.ts#L10)
+Defined in: [src/gpuConst/GPU\_CULL\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/gpuConst/GPU_CULL_MODE.ts#L10)
 
 Constants defining which faces to cull during rendering.
 
@@ -18,6 +18,6 @@ Determines whether to exclude front or back faces from rendering relative to the
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="property-back"></a> `BACK` | `"back"` | `'back'` | Culls back faces, rendering only front faces. (Standard setting) | [src/gpuConst/GPU\_CULL\_MODE.ts:25](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/gpuConst/GPU_CULL_MODE.ts#L25) |
-| <a id="property-front"></a> `FRONT` | `"front"` | `'front'` | Culls front faces, rendering only back faces. | [src/gpuConst/GPU\_CULL\_MODE.ts:20](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/gpuConst/GPU_CULL_MODE.ts#L20) |
-| <a id="property-none"></a> `NONE` | `"none"` | `'none'` | Does not perform any culling. | [src/gpuConst/GPU\_CULL\_MODE.ts:15](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/gpuConst/GPU_CULL_MODE.ts#L15) |
+| <a id="property-back"></a> `BACK` | `"back"` | `'back'` | Culls back faces, rendering only front faces. (Standard setting) | [src/gpuConst/GPU\_CULL\_MODE.ts:25](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/gpuConst/GPU_CULL_MODE.ts#L25) |
+| <a id="property-front"></a> `FRONT` | `"front"` | `'front'` | Culls front faces, rendering only back faces. | [src/gpuConst/GPU\_CULL\_MODE.ts:20](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/gpuConst/GPU_CULL_MODE.ts#L20) |
+| <a id="property-none"></a> `NONE` | `"none"` | `'none'` | Does not perform any culling. | [src/gpuConst/GPU\_CULL\_MODE.ts:15](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/gpuConst/GPU_CULL_MODE.ts#L15) |

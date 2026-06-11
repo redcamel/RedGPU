@@ -10,7 +10,7 @@
 
 > **convertHexToRgb**(`hex`, `returnArrayYn`): \[`number`, `number`, `number`\]
 
-Defined in: [src/color/convertHexToRgb.ts:30](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/color/convertHexToRgb.ts#L30)
+Defined in: [src/color/convertHexToRgb.ts:30](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/color/convertHexToRgb.ts#L30)
 
 16진수(Hex) 색상 값을 RGB 색상으로 변환합니다.
 
@@ -43,7 +43,7 @@ const rgbArray = RedGPU.Color.convertHexToRgb(0x00ff00, true); // [0, 255, 0]
 
 > **convertHexToRgb**(`hex`, `returnArrayYn?`): `object`
 
-Defined in: [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/color/convertHexToRgb.ts#L31)
+Defined in: [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/color/convertHexToRgb.ts#L31)
 
 16진수(Hex) 색상 값을 RGB 색상으로 변환합니다.
 
@@ -70,9 +70,9 @@ const rgbArray = RedGPU.Color.convertHexToRgb(0x00ff00, true); // [0, 255, 0]
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `b` | `number` | [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/color/convertHexToRgb.ts#L31) |
-| `g` | `number` | [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/color/convertHexToRgb.ts#L31) |
-| `r` | `number` | [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/color/convertHexToRgb.ts#L31) |
+| `b` | `number` | [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/color/convertHexToRgb.ts#L31) |
+| `g` | `number` | [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/color/convertHexToRgb.ts#L31) |
+| `r` | `number` | [src/color/convertHexToRgb.ts:31](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/color/convertHexToRgb.ts#L31) |
 
 ### Throws
 
@@ -82,7 +82,7 @@ const rgbArray = RedGPU.Color.convertHexToRgb(0x00ff00, true); // [0, 255, 0]
 
 > **convertHexToRgb**(`hex`, `returnArrayYn?`): \[`number`, `number`, `number`\] \| \{ `b`: `number`; `g`: `number`; `r`: `number`; \}
 
-Defined in: [src/color/convertHexToRgb.ts:32](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/color/convertHexToRgb.ts#L32)
+Defined in: [src/color/convertHexToRgb.ts:32](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/color/convertHexToRgb.ts#L32)
 
 16진수(Hex) 색상 값을 RGB 색상으로 변환합니다.
 

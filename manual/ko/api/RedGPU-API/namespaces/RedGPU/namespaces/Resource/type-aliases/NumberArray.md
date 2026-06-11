@@ -8,6 +8,6 @@
 
 > **NumberArray** = `number`[] \| `Uint32Array`
 
-Defined in: [src/resources/buffer/indexBuffer/IndexBuffer.ts:11](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/buffer/indexBuffer/IndexBuffer.ts#L11)
+Defined in: [src/resources/buffer/indexBuffer/IndexBuffer.ts:11](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/buffer/indexBuffer/IndexBuffer.ts#L11)
 
 인덱스 버퍼 데이터 타입입니다.

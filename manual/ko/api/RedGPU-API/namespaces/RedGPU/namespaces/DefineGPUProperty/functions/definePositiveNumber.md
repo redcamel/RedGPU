@@ -8,7 +8,7 @@
 
 > **definePositiveNumber**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/number/definePositiveNumber.ts:98](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/defineProperty/funcs/number/definePositiveNumber.ts#L98)
+Defined in: [src/defineProperty/funcs/number/definePositiveNumber.ts:98](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/defineProperty/funcs/number/definePositiveNumber.ts#L98)
 
 지정된 클래스의 프로토타입에 GPU와 연동되는 양수(Positive Number) 범위 속성을 정의합니다.
 

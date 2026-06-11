@@ -8,7 +8,7 @@
 
 > **loadAndCreateBitmapImage**(`src`, `colorSpaceConversion?`, `premultiplyAlpha?`): `Promise`\<`ImageBitmap`\>
 
-Defined in: [src/utils/texture/loadAndCreateBitmapImage.ts:16](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/utils/texture/loadAndCreateBitmapImage.ts#L16)
+Defined in: [src/utils/texture/loadAndCreateBitmapImage.ts:16](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/utils/texture/loadAndCreateBitmapImage.ts#L16)
 
 이미지 URL로부터 ImageBitmap을 로드하고 생성합니다.
 

@@ -8,7 +8,7 @@
 
 > **calculateMeshCombinedAABB**(`mesh`): [`AABB`](../classes/AABB.md)
 
-Defined in: [src/bound/math/calculateMeshCombinedAABB.ts:24](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/bound/math/calculateMeshCombinedAABB.ts#L24)
+Defined in: [src/bound/math/calculateMeshCombinedAABB.ts:24](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/bound/math/calculateMeshCombinedAABB.ts#L24)
 
 메시와 모든 자식 메시의 AABB를 통합하여 계산합니다.
 

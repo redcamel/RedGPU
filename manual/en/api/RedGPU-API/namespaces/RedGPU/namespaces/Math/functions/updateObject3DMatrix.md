@@ -8,7 +8,7 @@
 
 > **updateObject3DMatrix**(`targetMesh`, `view`): `void`
 
-Defined in: [src/math/updateObject3DMatrix.ts:29](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/math/updateObject3DMatrix.ts#L29)
+Defined in: [src/math/updateObject3DMatrix.ts:29](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/math/updateObject3DMatrix.ts#L29)
 
 Updates the local matrix and model matrix of Object3D (Mesh, Group3D).
 

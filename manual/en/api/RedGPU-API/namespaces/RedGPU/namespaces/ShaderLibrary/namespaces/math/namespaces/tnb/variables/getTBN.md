@@ -8,7 +8,7 @@
 
 > `const` **getTBN**: `string` = `getTBN_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:811](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/systemCodeManager/ShaderLibrary.ts#L811)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:811](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/systemCodeManager/ShaderLibrary.ts#L811)
 
 Constructs a perfectly orthonormal TBN (Tangent, Bitangent, Normal) matrix using a normal and an arbitrary tangent vector.
 

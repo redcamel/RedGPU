@@ -8,7 +8,7 @@
 
 > **ensureVertexIndexBuiltin**(`shaderSource`): `string`
 
-Defined in: [src/resources/wgslParser/core/ensureVertexIndexBuiltin.ts:16](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/resources/wgslParser/core/ensureVertexIndexBuiltin.ts#L16)
+Defined in: [src/resources/wgslParser/core/ensureVertexIndexBuiltin.ts:16](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/resources/wgslParser/core/ensureVertexIndexBuiltin.ts#L16)
 
 WGSL 셰이더 코드에 `vertex_index` 빌트인 인자가 포함되어 있는지 확인하고, 없으면 자동으로 주입합니다.
 

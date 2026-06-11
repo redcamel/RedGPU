@@ -8,7 +8,7 @@
 
 > `const` **GPU\_ADDRESS\_MODE**: `object`
 
-Defined in: [src/gpuConst/GPU\_ADDRESS\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/gpuConst/GPU_ADDRESS_MODE.ts#L10)
+Defined in: [src/gpuConst/GPU\_ADDRESS\_MODE.ts:10](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/gpuConst/GPU_ADDRESS_MODE.ts#L10)
 
 텍스처 샘플링 및 래핑을 위한 주소 모드 옵션을 정의하는 상수군입니다.
 

@@ -8,7 +8,7 @@
 
 > **imageBitmapToGPUTexture**(`gpuDevice`, `imageBitmaps`, `textureDescriptor`, `usePremultiplyAlpha?`): `GPUTexture`
 
-Defined in: [src/utils/texture/imageBitmapToGPUTexture.ts:20](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/utils/texture/imageBitmapToGPUTexture.ts#L20)
+Defined in: [src/utils/texture/imageBitmapToGPUTexture.ts:20](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/utils/texture/imageBitmapToGPUTexture.ts#L20)
 
 ImageBitmap 배열을 사용하여 GPUTexture를 생성합니다.
 

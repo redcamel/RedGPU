@@ -8,7 +8,7 @@
 
 > `const` **PICKING\_EVENT\_TYPE**: `object`
 
-Defined in: [src/picking/PICKING\_EVENT\_TYPE.ts:14](https://github.com/redcamel/RedGPU/blob/92e43fdf28e3ceced28d533c99c1ab7acee472f2/src/picking/PICKING_EVENT_TYPE.ts#L14)
+Defined in: [src/picking/PICKING\_EVENT\_TYPE.ts:14](https://github.com/redcamel/RedGPU/blob/ed852b773d59f6e9bad76f340c03dc4200b077ba/src/picking/PICKING_EVENT_TYPE.ts#L14)
 
 피킹 이벤트 타입 정의 객체입니다.
 
