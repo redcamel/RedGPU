@@ -6,7 +6,7 @@
 
 # Class: ImmutableKeyMap
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:867](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/resourceManager/ResourceManager.ts#L867)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:867](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/resourceManager/ResourceManager.ts#L867)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:867](https://
 
 > **new ImmutableKeyMap**(`initValues?`): `ImmutableKeyMap`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:868](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/resourceManager/ResourceManager.ts#L868)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:868](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/resourceManager/ResourceManager.ts#L868)
 
 #### Parameters
 
@@ -40,7 +40,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:868](https://
 
 > **set**(`key`, `value`): `this`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:873](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/resourceManager/ResourceManager.ts#L873)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:873](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/resourceManager/ResourceManager.ts#L873)
 
 Adds a new element with a specified key and value to the Map. If an element with the same key already exists, the element will be updated.
 

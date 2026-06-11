@@ -6,7 +6,7 @@
 
 # Interface: DefineNumberInfo
 
-Defined in: [src/defineProperty/funcs/number/defineNumber.ts:9](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/defineProperty/funcs/number/defineNumber.ts#L9)
+Defined in: [src/defineProperty/funcs/number/defineNumber.ts:9](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/defineProperty/funcs/number/defineNumber.ts#L9)
 
 `defineNumber` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
 
@@ -16,7 +16,7 @@ Defined in: [src/defineProperty/funcs/number/defineNumber.ts:9](https://github.c
 
 > **key**: `string`
 
-Defined in: [src/defineProperty/funcs/number/defineNumber.ts:14](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/defineProperty/funcs/number/defineNumber.ts#L14)
+Defined in: [src/defineProperty/funcs/number/defineNumber.ts:14](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/defineProperty/funcs/number/defineNumber.ts#L14)
 
 Key name of the property. Defined on the target object's prototype under this name.
 
@@ -26,7 +26,7 @@ Key name of the property. Defined on the target object's prototype under this na
 
 > `optional` **max?**: `number`
 
-Defined in: [src/defineProperty/funcs/number/defineNumber.ts:29](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/defineProperty/funcs/number/defineNumber.ts#L29)
+Defined in: [src/defineProperty/funcs/number/defineNumber.ts:29](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/defineProperty/funcs/number/defineNumber.ts#L29)
 
 Optional maximum allowed value. Assigning a value above this limit will log a warning and clamp it.
 
@@ -36,7 +36,7 @@ Optional maximum allowed value. Assigning a value above this limit will log a wa
 
 > `optional` **min?**: `number`
 
-Defined in: [src/defineProperty/funcs/number/defineNumber.ts:24](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/defineProperty/funcs/number/defineNumber.ts#L24)
+Defined in: [src/defineProperty/funcs/number/defineNumber.ts:24](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/defineProperty/funcs/number/defineNumber.ts#L24)
 
 Optional minimum allowed value. Assigning a value below this limit will log a warning and clamp it.
 
@@ -46,6 +46,6 @@ Optional minimum allowed value. Assigning a value below this limit will log a wa
 
 > **value**: `number`
 
-Defined in: [src/defineProperty/funcs/number/defineNumber.ts:19](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/defineProperty/funcs/number/defineNumber.ts#L19)
+Defined in: [src/defineProperty/funcs/number/defineNumber.ts:19](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/defineProperty/funcs/number/defineNumber.ts#L19)
 
 Initial numeric value of the property.

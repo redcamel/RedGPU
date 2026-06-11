@@ -8,7 +8,7 @@
 
 > `const` **entryPointPickingVertex**: `string` = `meshEntryPointPickingVertex_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2065](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/systemCodeManager/ShaderLibrary.ts#L2065)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2065](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/systemCodeManager/ShaderLibrary.ts#L2065)
 
 메쉬 피킹 버텍스 셰이더 엔트리 포인트입니다.
 

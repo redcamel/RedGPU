@@ -8,7 +8,7 @@
 
 > `const` **PARTICLE\_EASE**: `object`
 
-Defined in: [src/display/particle/PARTICLE\_EASE.ts:16](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/display/particle/PARTICLE_EASE.ts#L16)
+Defined in: [src/display/particle/PARTICLE\_EASE.ts:16](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/display/particle/PARTICLE_EASE.ts#L16)
 
 파티클 애니메이션에 적용되는 이징(Easing) 함수 상수 정의입니다.
 

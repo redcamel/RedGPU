@@ -8,7 +8,7 @@
 
 > `const` **getBitHash1D\_vec3**: `string` = `getBitHash1D_vec3_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:270](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/systemCodeManager/ShaderLibrary.ts#L270)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:270](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/systemCodeManager/ShaderLibrary.ts#L270)
 
 3D 벡터의 비트 구조를 보존하여 1D 난수(0.0 ~ 1.0)를 생성합니다. (초정밀)
 

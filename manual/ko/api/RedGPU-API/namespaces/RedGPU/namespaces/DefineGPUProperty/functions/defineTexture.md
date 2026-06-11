@@ -8,7 +8,7 @@
 
 > **defineTexture**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/texture/defineTexture.ts:75](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/defineProperty/funcs/texture/defineTexture.ts#L75)
+Defined in: [src/defineProperty/funcs/texture/defineTexture.ts:75](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/defineProperty/funcs/texture/defineTexture.ts#L75)
 
 지정된 클래스의 프로토타입에 GPU와 연동되는 일반 텍스처(Texture) 속성을 정의합니다.
 

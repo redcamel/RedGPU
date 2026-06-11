@@ -8,7 +8,7 @@
 
 > `const` **entryPointPickingVertex**: `string` = `meshEntryPointPickingVertex_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2065](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/systemCodeManager/ShaderLibrary.ts#L2065)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2065](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/systemCodeManager/ShaderLibrary.ts#L2065)
 
 Vertex shader entry point for mesh picking.
 

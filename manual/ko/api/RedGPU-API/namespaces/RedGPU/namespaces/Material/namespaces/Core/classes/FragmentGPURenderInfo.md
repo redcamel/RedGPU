@@ -6,7 +6,7 @@
 
 # Class: FragmentGPURenderInfo
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:14](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/material/core/FragmentGPURenderInfo.ts#L14)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:14](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/material/core/FragmentGPURenderInfo.ts#L14)
 
 GPU 프래그먼트 렌더링 작업에 대한 정보를 나타냅니다.
 
@@ -20,7 +20,7 @@ GPU 프래그먼트 렌더링 작업에 대한 정보를 나타냅니다.
 
 > **new FragmentGPURenderInfo**(`fragmentShaderModule`, `fragmentShaderSourceVariant`, `fragmentShaderVariantConditionalBlocks`, `fragmentUniformInfo`, `fragmentBindGroupLayout`, `fragmentUniformBuffer`, `fragmentUniformBindGroup?`, `fragmentState?`): `FragmentGPURenderInfo`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:84](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/material/core/FragmentGPURenderInfo.ts#L84)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:84](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/material/core/FragmentGPURenderInfo.ts#L84)
 
 FragmentGPURenderInfo 생성자
 
@@ -47,7 +47,7 @@ FragmentGPURenderInfo 생성자
 
 > **fragmentBindGroupLayout**: `GPUBindGroupLayout`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:39](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/material/core/FragmentGPURenderInfo.ts#L39)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:39](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/material/core/FragmentGPURenderInfo.ts#L39)
 
 프래그먼트 바인드 그룹 레이아웃
 
@@ -57,7 +57,7 @@ Defined in: [src/material/core/FragmentGPURenderInfo.ts:39](https://github.com/r
 
 > **fragmentShaderModule**: `GPUShaderModule`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:19](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/material/core/FragmentGPURenderInfo.ts#L19)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:19](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/material/core/FragmentGPURenderInfo.ts#L19)
 
 프래그먼트 셰이더 모듈
 
@@ -67,7 +67,7 @@ Defined in: [src/material/core/FragmentGPURenderInfo.ts:19](https://github.com/r
 
 > **fragmentShaderSourceVariant**: [`ShaderVariantGenerator`](../../../../Resource/namespaces/CoreWGSLParser/classes/ShaderVariantGenerator.md)
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:24](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/material/core/FragmentGPURenderInfo.ts#L24)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:24](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/material/core/FragmentGPURenderInfo.ts#L24)
 
 프래그먼트 셰이더 소스 바리안트 생성기
 
@@ -77,7 +77,7 @@ Defined in: [src/material/core/FragmentGPURenderInfo.ts:24](https://github.com/r
 
 > **fragmentShaderVariantConditionalBlocks**: `string`[]
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:29](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/material/core/FragmentGPURenderInfo.ts#L29)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:29](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/material/core/FragmentGPURenderInfo.ts#L29)
 
 프래그먼트 셰이더 바리안트 조건부 블록 리스트
 
@@ -87,7 +87,7 @@ Defined in: [src/material/core/FragmentGPURenderInfo.ts:29](https://github.com/r
 
 > **fragmentState**: `GPUFragmentState`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:54](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/material/core/FragmentGPURenderInfo.ts#L54)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:54](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/material/core/FragmentGPURenderInfo.ts#L54)
 
 프래그먼트 렌더 상태
 
@@ -97,7 +97,7 @@ Defined in: [src/material/core/FragmentGPURenderInfo.ts:54](https://github.com/r
 
 > **fragmentUniformBindGroup**: `GPUBindGroup`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:49](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/material/core/FragmentGPURenderInfo.ts#L49)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:49](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/material/core/FragmentGPURenderInfo.ts#L49)
 
 프래그먼트 유니폼 바인드 그룹
 
@@ -107,7 +107,7 @@ Defined in: [src/material/core/FragmentGPURenderInfo.ts:49](https://github.com/r
 
 > **fragmentUniformBuffer**: [`UniformBuffer`](../../../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:44](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/material/core/FragmentGPURenderInfo.ts#L44)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:44](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/material/core/FragmentGPURenderInfo.ts#L44)
 
 프래그먼트 유니폼 버퍼
 
@@ -117,6 +117,6 @@ Defined in: [src/material/core/FragmentGPURenderInfo.ts:44](https://github.com/r
 
 > **fragmentUniformInfo**: `any`
 
-Defined in: [src/material/core/FragmentGPURenderInfo.ts:34](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/material/core/FragmentGPURenderInfo.ts#L34)
+Defined in: [src/material/core/FragmentGPURenderInfo.ts:34](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/material/core/FragmentGPURenderInfo.ts#L34)
 
 프래그먼트 유니폼 정보

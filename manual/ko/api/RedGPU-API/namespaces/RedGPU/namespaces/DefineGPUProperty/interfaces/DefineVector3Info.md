@@ -6,7 +6,7 @@
 
 # Interface: DefineVector3Info
 
-Defined in: [src/defineProperty/funcs/vector/defineVector3.ts:7](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/defineProperty/funcs/vector/defineVector3.ts#L7)
+Defined in: [src/defineProperty/funcs/vector/defineVector3.ts:7](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/defineProperty/funcs/vector/defineVector3.ts#L7)
 
 `defineVector3` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
 
@@ -16,7 +16,7 @@ Defined in: [src/defineProperty/funcs/vector/defineVector3.ts:7](https://github.
 
 > **key**: `string`
 
-Defined in: [src/defineProperty/funcs/vector/defineVector3.ts:12](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/defineProperty/funcs/vector/defineVector3.ts#L12)
+Defined in: [src/defineProperty/funcs/vector/defineVector3.ts:12](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/defineProperty/funcs/vector/defineVector3.ts#L12)
 
 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
 
@@ -26,6 +26,6 @@ Defined in: [src/defineProperty/funcs/vector/defineVector3.ts:12](https://github
 
 > `optional` **value?**: \[`number`, `number`, `number`\]
 
-Defined in: [src/defineProperty/funcs/vector/defineVector3.ts:17](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/defineProperty/funcs/vector/defineVector3.ts#L17)
+Defined in: [src/defineProperty/funcs/vector/defineVector3.ts:17](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/defineProperty/funcs/vector/defineVector3.ts#L17)
 
 속성의 초기 3차원 숫자 배열 값 (튜플 형태). 기본값은 `[0, 0, 0]`입니다.

@@ -8,7 +8,7 @@
 
 > **defineVector4**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/vector/defineVector4.ts:51](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/defineProperty/funcs/vector/defineVector4.ts#L51)
+Defined in: [src/defineProperty/funcs/vector/defineVector4.ts:51](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/defineProperty/funcs/vector/defineVector4.ts#L51)
 
 지정된 클래스의 프로토타입에 GPU와 연동되는 4차원 벡터(Vector4) 속성을 정의합니다.
 

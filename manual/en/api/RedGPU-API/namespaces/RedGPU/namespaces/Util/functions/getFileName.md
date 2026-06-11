@@ -8,7 +8,7 @@
 
 > **getFileName**(`url`, `withExtension?`): `string`
 
-Defined in: [src/utils/file/getFileName.ts:16](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/utils/file/getFileName.ts#L16)
+Defined in: [src/utils/file/getFileName.ts:16](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/utils/file/getFileName.ts#L16)
 
 Extracts the file name from a URL or path.
 

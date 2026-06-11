@@ -8,7 +8,7 @@
 
 > `const` **getDisplacementNormal**: `string` = `getDisplacementNormal_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2572](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/systemCodeManager/ShaderLibrary.ts#L2572)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2572](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/systemCodeManager/ShaderLibrary.ts#L2572)
 
 바이큐빅 필터링 헬퍼 (B-Spline 기반 고정밀 버전)
 

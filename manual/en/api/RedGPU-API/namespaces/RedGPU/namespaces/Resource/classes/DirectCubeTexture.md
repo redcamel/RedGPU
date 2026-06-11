@@ -6,7 +6,7 @@
 
 # Class: DirectCubeTexture
 
-Defined in: [src/resources/texture/DirectCubeTexture.ts:14](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/texture/DirectCubeTexture.ts#L14)
+Defined in: [src/resources/texture/DirectCubeTexture.ts:14](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/texture/DirectCubeTexture.ts#L14)
 
 Multi-dimensional (Cube and 3D) texture class that directly injects and manages GPUTexture without loading from file paths (URLs).
 
@@ -20,7 +20,7 @@ Multi-dimensional (Cube and 3D) texture class that directly injects and manages 
 
 > **new DirectCubeTexture**(`redGPUContext`, `cacheKey`, `gpuTexture?`): `DirectCubeTexture`
 
-Defined in: [src/resources/texture/DirectCubeTexture.ts:25](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/texture/DirectCubeTexture.ts#L25)
+Defined in: [src/resources/texture/DirectCubeTexture.ts:25](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/texture/DirectCubeTexture.ts#L25)
 
 Creates a DirectCubeTexture instance.
 
@@ -48,7 +48,7 @@ Creates a DirectCubeTexture instance.
 
 > **get** **viewDescriptor**(): `GPUTextureViewDescriptor`
 
-Defined in: [src/resources/texture/DirectCubeTexture.ts:48](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/texture/DirectCubeTexture.ts#L48)
+Defined in: [src/resources/texture/DirectCubeTexture.ts:48](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/texture/DirectCubeTexture.ts#L48)
 
 Returns the view descriptor.
 
@@ -68,7 +68,7 @@ Returns the view descriptor.
 
 > `protected` **registerResource**(): `void`
 
-Defined in: [src/resources/texture/DirectCubeTexture.ts:63](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/texture/DirectCubeTexture.ts#L63)
+Defined in: [src/resources/texture/DirectCubeTexture.ts:63](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/texture/DirectCubeTexture.ts#L63)
 
 #### Returns
 
@@ -84,7 +84,7 @@ Defined in: [src/resources/texture/DirectCubeTexture.ts:63](https://github.com/r
 
 > `protected` **setGpuTexture**(`value`): `void`
 
-Defined in: [src/resources/texture/DirectCubeTexture.ts:58](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/texture/DirectCubeTexture.ts#L58)
+Defined in: [src/resources/texture/DirectCubeTexture.ts:58](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/texture/DirectCubeTexture.ts#L58)
 
 Sets the GPUTexture object and synchronizes internal state.
 
@@ -108,7 +108,7 @@ Sets the GPUTexture object and synchronizes internal state.
 
 > `protected` **unregisterResource**(): `void`
 
-Defined in: [src/resources/texture/DirectCubeTexture.ts:67](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/texture/DirectCubeTexture.ts#L67)
+Defined in: [src/resources/texture/DirectCubeTexture.ts:67](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/texture/DirectCubeTexture.ts#L67)
 
 #### Returns
 
@@ -132,7 +132,7 @@ Defined in: [src/resources/texture/DirectCubeTexture.ts:67](https://github.com/r
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/RedGPUObject.ts#L76)
 
 Returns the AntialiasingManager instance. (Short-cut path)
 
@@ -154,7 +154,7 @@ AntialiasingManager instance
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/ResourceBase.ts#L53)
+Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/ResourceBase.ts#L53)
 
 Returns the cache key.
 
@@ -166,7 +166,7 @@ Returns the cache key.
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/ResourceBase.ts#L61)
+Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/ResourceBase.ts#L61)
 
 Sets the cache key.
 
@@ -192,7 +192,7 @@ Sets the cache key.
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/RedGPUObject.ts#L88)
 
 Returns the CommandEncoderManager instance. (Short-cut path)
 
@@ -214,7 +214,7 @@ CommandEncoderManager instance
 
 > **get** **format**(): `GPUTextureFormat`
 
-Defined in: [src/resources/texture/core/ADirectTexture.ts:40](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/texture/core/ADirectTexture.ts#L40)
+Defined in: [src/resources/texture/core/ADirectTexture.ts:40](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/texture/core/ADirectTexture.ts#L40)
 
 ##### Returns
 
@@ -232,7 +232,7 @@ Defined in: [src/resources/texture/core/ADirectTexture.ts:40](https://github.com
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/ResourceBase.ts#L77)
+Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/ResourceBase.ts#L77)
 
 Returns the associated GPU device.
 
@@ -252,7 +252,7 @@ Returns the associated GPU device.
 
 > **get** **gpuTexture**(): `GPUTexture`
 
-Defined in: [src/resources/texture/core/ADirectTexture.ts:24](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/texture/core/ADirectTexture.ts#L24)
+Defined in: [src/resources/texture/core/ADirectTexture.ts:24](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/texture/core/ADirectTexture.ts#L24)
 
 ##### Returns
 
@@ -262,7 +262,7 @@ Defined in: [src/resources/texture/core/ADirectTexture.ts:24](https://github.com
 
 > **set** **gpuTexture**(`value`): `void`
 
-Defined in: [src/resources/texture/core/ADirectTexture.ts:28](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/texture/core/ADirectTexture.ts#L28)
+Defined in: [src/resources/texture/core/ADirectTexture.ts:28](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/texture/core/ADirectTexture.ts#L28)
 
 ##### Parameters
 
@@ -286,7 +286,7 @@ Defined in: [src/resources/texture/core/ADirectTexture.ts:28](https://github.com
 
 > **get** **gpuTextureView**(): `GPUTextureView`
 
-Defined in: [src/resources/texture/core/ADirectTexture.ts:32](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/texture/core/ADirectTexture.ts#L32)
+Defined in: [src/resources/texture/core/ADirectTexture.ts:32](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/texture/core/ADirectTexture.ts#L32)
 
 ##### Returns
 
@@ -304,7 +304,7 @@ Defined in: [src/resources/texture/core/ADirectTexture.ts:32](https://github.com
 
 > **get** **mipLevelCount**(): `number`
 
-Defined in: [src/resources/texture/core/ADirectTexture.ts:44](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/texture/core/ADirectTexture.ts#L44)
+Defined in: [src/resources/texture/core/ADirectTexture.ts:44](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/texture/core/ADirectTexture.ts#L44)
 
 ##### Returns
 
@@ -322,7 +322,7 @@ Defined in: [src/resources/texture/core/ADirectTexture.ts:44](https://github.com
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/BaseObject.ts#L58)
 
 Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
 
@@ -336,7 +336,7 @@ Name of the object
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/BaseObject.ts#L71)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/BaseObject.ts#L71)
 
 Sets the name of the object.
 
@@ -362,7 +362,7 @@ Sets the name of the object.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/RedGPUObject.ts#L40)
 
 Returns the RedGPUContext instance.
 
@@ -384,7 +384,7 @@ RedGPUContext instance
 
 > **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/RedGPUObject.ts#L64)
 
 Returns the ResourceManager instance. (Short-cut path)
 
@@ -406,7 +406,7 @@ ResourceManager instance
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:69](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/ResourceBase.ts#L69)
+Defined in: [src/resources/core/ResourceBase.ts:69](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/ResourceBase.ts#L69)
 
 Returns the resource manager key.
 
@@ -426,7 +426,7 @@ Returns the resource manager key.
 
 > **get** **revision**(): `number`
 
-Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/ResourceBase.ts#L45)
+Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/ResourceBase.ts#L45)
 
 Returns the revision (update count) of the resource.
 
@@ -446,7 +446,7 @@ Returns the revision (update count) of the resource.
 
 > **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../namespaces/Core/classes/ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/ManagementResourceBase.ts#L45)
+Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/ManagementResourceBase.ts#L45)
 
 Returns the managed state information of the resource.
 
@@ -466,7 +466,7 @@ Returns the managed state information of the resource.
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/BaseObject.ts#L46)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -488,7 +488,7 @@ UUID string
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/resources/texture/core/ADirectTexture.ts:36](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/texture/core/ADirectTexture.ts#L36)
+Defined in: [src/resources/texture/core/ADirectTexture.ts:36](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/texture/core/ADirectTexture.ts#L36)
 
 ##### Returns
 
@@ -504,7 +504,7 @@ Defined in: [src/resources/texture/core/ADirectTexture.ts:36](https://github.com
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/ResourceBase.ts#L89)
+Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/ResourceBase.ts#L89)
 
 Adds a listener function to be called when the pipeline becomes dirty.
 
@@ -528,7 +528,7 @@ Adds a listener function to be called when the pipeline becomes dirty.
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/ResourceBase.ts#L101)
+Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/ResourceBase.ts#L101)
 
 Removes a resource update listener.
 
@@ -552,7 +552,7 @@ Removes a resource update listener.
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/texture/core/ADirectTexture.ts:49](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/texture/core/ADirectTexture.ts#L49)
+Defined in: [src/resources/texture/core/ADirectTexture.ts:49](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/texture/core/ADirectTexture.ts#L49)
 
 Destroys the resource.
 
@@ -570,7 +570,7 @@ Destroys the resource.
 
 > **notifyUpdate**(`resetList?`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/core/ResourceBase.ts#L116)
+Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/core/ResourceBase.ts#L116)
 
 Notifies registered listeners that the resource has been updated.
 

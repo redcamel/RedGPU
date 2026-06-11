@@ -8,7 +8,7 @@
 
 > `const` **getReflectionVectorFromViewDirection**: `string` = `getReflectionVectorFromViewDirection_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:656](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/systemCodeManager/ShaderLibrary.ts#L656)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:656](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/systemCodeManager/ShaderLibrary.ts#L656)
 
 Calculates the normalized reflection direction vector using the view direction (vector from pixel to camera) and the normal vector.
 

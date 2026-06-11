@@ -6,7 +6,7 @@
 
 # Class: DOF
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:35](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L35)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:35](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L35)
 
 피사계 심도(DOF, Depth of Field) 후처리 이펙트입니다.
 
@@ -38,7 +38,7 @@ view.postEffectManager.addEffect(effect);
 
 > **new DOF**(`redGPUContext`): `DOF`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:111](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L111)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:111](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L111)
 
 DOF 인스턴스를 생성합니다.
 
@@ -64,7 +64,7 @@ DOF 인스턴스를 생성합니다.
 
 > **get** **aperture**(): `number`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:168](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L168)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:168](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L168)
 
 조리개 값을 반환합니다.
 
@@ -78,7 +78,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:168](https://github.com/redc
 
 > **set** **aperture**(`value`): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:180](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L180)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:180](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L180)
 
 조리개 값을 설정합니다.
 
@@ -100,7 +100,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:180](https://github.com/redc
 
 > **get** **farBlurSize**(): `number`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:294](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L294)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:294](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L294)
 
 원거리 블러 크기를 반환합니다.
 
@@ -114,7 +114,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:294](https://github.com/redc
 
 > **set** **farBlurSize**(`value`): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:306](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L306)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:306](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L306)
 
 원거리 블러 크기를 설정합니다.
 
@@ -136,7 +136,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:306](https://github.com/redc
 
 > **get** **farPlane**(): `number`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:243](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L243)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:243](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L243)
 
 원평면 값을 반환합니다.
 
@@ -150,7 +150,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:243](https://github.com/redc
 
 > **set** **farPlane**(`value`): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:255](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L255)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:255](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L255)
 
 원평면 값을 설정합니다.
 
@@ -172,7 +172,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:255](https://github.com/redc
 
 > **get** **farStrength**(): `number`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:344](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L344)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:344](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L344)
 
 원거리 블러 강도를 반환합니다.
 
@@ -186,7 +186,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:344](https://github.com/redc
 
 > **set** **farStrength**(`value`): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:356](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L356)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:356](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L356)
 
 원거리 블러 강도를 설정합니다.
 
@@ -208,7 +208,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:356](https://github.com/redc
 
 > **get** **focusDistance**(): `number`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:143](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L143)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:143](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L143)
 
 초점 거리를 반환합니다.
 
@@ -222,7 +222,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:143](https://github.com/redc
 
 > **set** **focusDistance**(`value`): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:155](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L155)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:155](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L155)
 
 초점 거리를 설정합니다.
 
@@ -244,7 +244,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:155](https://github.com/redc
 
 > **get** **maxCoC**(): `number`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:193](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L193)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:193](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L193)
 
 최대 CoC 값을 반환합니다.
 
@@ -258,7 +258,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:193](https://github.com/redc
 
 > **set** **maxCoC**(`value`): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:205](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L205)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:205](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L205)
 
 최대 CoC 값을 설정합니다.
 
@@ -280,7 +280,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:205](https://github.com/redc
 
 > **get** **nearBlurSize**(): `number`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:269](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L269)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:269](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L269)
 
 근거리 블러 크기를 반환합니다.
 
@@ -294,7 +294,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:269](https://github.com/redc
 
 > **set** **nearBlurSize**(`value`): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:281](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L281)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:281](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L281)
 
 근거리 블러 크기를 설정합니다.
 
@@ -316,7 +316,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:281](https://github.com/redc
 
 > **get** **nearPlane**(): `number`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:218](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L218)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:218](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L218)
 
 근평면 값을 반환합니다.
 
@@ -330,7 +330,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:218](https://github.com/redc
 
 > **set** **nearPlane**(`value`): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:230](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L230)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:230](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L230)
 
 근평면 값을 설정합니다.
 
@@ -352,7 +352,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:230](https://github.com/redc
 
 > **get** **nearStrength**(): `number`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:319](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L319)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:319](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L319)
 
 근거리 블러 강도를 반환합니다.
 
@@ -366,7 +366,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:319](https://github.com/redc
 
 > **set** **nearStrength**(`value`): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:331](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L331)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:331](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L331)
 
 근거리 블러 강도를 설정합니다.
 
@@ -386,7 +386,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:331](https://github.com/redc
 
 > **render**(`view`, `width`, `height`, `sourceTextureInfo`): [`IPostEffectResult`](../namespaces/Core/interfaces/IPostEffectResult.md)
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:479](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L479)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:479](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L479)
 
 DOF 효과를 렌더링합니다.
 
@@ -415,7 +415,7 @@ DOF 효과를 렌더링합니다.
 
 > **setCinematic**(): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:379](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L379)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:379](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L379)
 
 시네마틱 프리셋을 적용합니다. (강한 DOF, 영화같은 느낌)
 
@@ -429,7 +429,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:379](https://github.com/redc
 
 > **setGameDefault**(): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:365](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L365)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:365](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L365)
 
 게임 기본 프리셋을 적용합니다. (균형잡힌 품질/성능)
 
@@ -443,7 +443,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:365](https://github.com/redc
 
 > **setLandscape**(): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:407](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L407)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:407](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L407)
 
 풍경 사진 프리셋을 적용합니다. (전체적으로 선명, 약간의 원거리 흐림)
 
@@ -457,7 +457,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:407](https://github.com/redc
 
 > **setMacro**(): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:421](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L421)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:421](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L421)
 
 매크로 촬영 프리셋을 적용합니다. (극도로 얕은 심도)
 
@@ -471,7 +471,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:421](https://github.com/redc
 
 > **setNightMode**(): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:449](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L449)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:449](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L449)
 
 야간 촬영 프리셋을 적용합니다. (저조도 환경)
 
@@ -485,7 +485,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:449](https://github.com/redc
 
 > **setPortrait**(): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:393](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L393)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:393](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L393)
 
 인물 사진 프리셋을 적용합니다. (배경 흐림, 인물 포커스)
 
@@ -499,7 +499,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:393](https://github.com/redc
 
 > **setSports**(): `void`
 
-Defined in: [src/postEffect/effects/lens/dof/DOF.ts:435](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/effects/lens/dof/DOF.ts#L435)
+Defined in: [src/postEffect/effects/lens/dof/DOF.ts:435](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/effects/lens/dof/DOF.ts#L435)
 
 액션/스포츠 프리셋을 적용합니다. (빠른 움직임에 적합)
 
@@ -521,7 +521,7 @@ Defined in: [src/postEffect/effects/lens/dof/DOF.ts:435](https://github.com/redc
 
 > **isInstanceofPostEffect**: `boolean`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:13](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L13)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:13](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/core/ASinglePassPostEffect.ts#L13)
 
 #### Inherited from
 
@@ -533,7 +533,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:13](https://github.com
 
 > **isLdr**: `boolean` = `false`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:30](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L30)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:30](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/core/ASinglePassPostEffect.ts#L30)
 
 이펙트가 LDR(Low Dynamic Range) 공간에서 동작하는지 여부
 
@@ -549,7 +549,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:30](https://github.com
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/RedGPUObject.ts#L76)
 
 안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -571,7 +571,7 @@ AntialiasingManager 인스턴스
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/RedGPUObject.ts#L88)
 
 커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -593,7 +593,7 @@ CommandEncoderManager 인스턴스
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/RedGPUObject.ts#L52)
 
 WebGPU 디바이스 객체를 반환합니다. (단축 경로)
 
@@ -615,7 +615,7 @@ GPUDevice 인스턴스
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/BaseObject.ts#L58)
 
 객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
 
@@ -629,7 +629,7 @@ Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/BaseObject.ts#L71)
+Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/BaseObject.ts#L71)
 
 객체의 이름을 설정합니다.
 
@@ -655,7 +655,7 @@ Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **outputTextureView**(): `GPUTextureView`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:208](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L208)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:208](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/core/ASinglePassPostEffect.ts#L208)
 
 현재 할당된 출력 텍스처 뷰를 반환합니다.
 
@@ -677,7 +677,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:208](https://github.co
 
 > **get** **passList**(): [`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md)[]
 
-Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:65](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/AMultiPassPostEffect.ts#L65)
+Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:65](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/core/AMultiPassPostEffect.ts#L65)
 
 등록된 내부 패스 리스트를 반환합니다.
 
@@ -699,7 +699,7 @@ Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:65](https://github.com/
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/RedGPUObject.ts#L40)
 
 RedGPUContext 인스턴스를 반환합니다.
 
@@ -721,7 +721,7 @@ RedGPUContext 인스턴스
 
 > **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/RedGPUObject.ts#L64)
 
 리소스 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -743,7 +743,7 @@ ResourceManager 인스턴스
 
 > **get** **shaderInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:124](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L124)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:124](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/core/ASinglePassPostEffect.ts#L124)
 
 현재 MSAA 상태에 따른 셰이더 정보를 반환합니다.
 
@@ -765,7 +765,7 @@ WGSL 셰이더 분석 정보
 
 > **get** **storageInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:112](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L112)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:112](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/core/ASinglePassPostEffect.ts#L112)
 
 셰이더의 스토리지 구조 정보를 반환합니다.
 
@@ -787,7 +787,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:112](https://github.co
 
 > **get** **systemUniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:160](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L160)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:160](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/core/ASinglePassPostEffect.ts#L160)
 
 시스템 공용 유니폼 구조 정보를 반환합니다.
 
@@ -809,7 +809,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:160](https://github.co
 
 > **get** **uniformBuffer**(): [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:136](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L136)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:136](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/core/ASinglePassPostEffect.ts#L136)
 
 이펙트 전용 유니폼 버퍼를 반환합니다.
 
@@ -831,7 +831,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:136](https://github.co
 
 > **get** **uniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:148](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L148)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:148](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/core/ASinglePassPostEffect.ts#L148)
 
 이펙트 전용 유니폼 구조 정보를 반환합니다.
 
@@ -853,7 +853,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:148](https://github.co
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/base/BaseObject.ts#L46)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 
@@ -875,7 +875,7 @@ UUID 문자열
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:52](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/AMultiPassPostEffect.ts#L52)
+Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:52](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/core/AMultiPassPostEffect.ts#L52)
 
 모든 내부 패스의 비디오 메모리 사용량을 합산하여 반환합니다.
 
@@ -897,7 +897,7 @@ Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:52](https://github.com/
 
 > **get** **WORK\_SIZE\_X**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:172](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L172)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:172](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/core/ASinglePassPostEffect.ts#L172)
 
 워크그룹 사이즈 X를 반환합니다.
 
@@ -919,7 +919,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:172](https://github.co
 
 > **get** **WORK\_SIZE\_Y**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:184](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L184)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:184](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/core/ASinglePassPostEffect.ts#L184)
 
 워크그룹 사이즈 Y를 반환합니다.
 
@@ -941,7 +941,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:184](https://github.co
 
 > **get** **WORK\_SIZE\_Z**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:196](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L196)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:196](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/core/ASinglePassPostEffect.ts#L196)
 
 워크그룹 사이즈 Z를 반환합니다.
 
@@ -961,7 +961,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:196](https://github.co
 
 > **clear**(): `void`
 
-Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:73](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/AMultiPassPostEffect.ts#L73)
+Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:73](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/core/AMultiPassPostEffect.ts#L73)
 
 등록된 모든 내부 패스의 리소스를 해제합니다.
 
@@ -979,7 +979,7 @@ Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:73](https://github.com/
 
 > **init**(`redGPUContext`, `name`, `computeCodes`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:238](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L238)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:238](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/core/ASinglePassPostEffect.ts#L238)
 
 이펙트를 초기화합니다. 컴퓨트 셰이더 및 유니폼 버퍼를 생성합니다.
 
@@ -1007,7 +1007,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:238](https://github.co
 
 > **updateUniform**(`key`, `value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:349](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/postEffect/core/ASinglePassPostEffect.ts#L349)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:349](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/postEffect/core/ASinglePassPostEffect.ts#L349)
 
 특정 유니폼 값을 업데이트합니다.
 

@@ -8,6 +8,6 @@
 
 > **HDRSrcInfo** = `string` \| \{ `cacheKey`: `string`; `src`: `string`; \}
 
-Defined in: [src/resources/texture/hdr/HDRTexture.ts:14](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/texture/hdr/HDRTexture.ts#L14)
+Defined in: [src/resources/texture/hdr/HDRTexture.ts:14](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/texture/hdr/HDRTexture.ts#L14)
 
 HDR texture source information type. Can be an image URL string or an object with src and cacheKey.

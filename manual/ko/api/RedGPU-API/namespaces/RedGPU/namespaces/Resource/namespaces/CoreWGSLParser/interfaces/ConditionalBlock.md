@@ -6,7 +6,7 @@
 
 # Interface: ConditionalBlock
 
-Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:19](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/wgslParser/core/preprocessWGSL.ts#L19)
+Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:19](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/wgslParser/core/preprocessWGSL.ts#L19)
 
 조건부 블록 정보 인터페이스
 
@@ -16,7 +16,7 @@ Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:19](https://github.
 
 > **blockIndex**: `number`
 
-Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:24](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/wgslParser/core/preprocessWGSL.ts#L24)
+Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:24](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/wgslParser/core/preprocessWGSL.ts#L24)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:24](https://github.
 
 > `optional` **elseBlock?**: `string`
 
-Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:22](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/wgslParser/core/preprocessWGSL.ts#L22)
+Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:22](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/wgslParser/core/preprocessWGSL.ts#L22)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:22](https://github.
 
 > **fullMatch**: `string`
 
-Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:23](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/wgslParser/core/preprocessWGSL.ts#L23)
+Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:23](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/wgslParser/core/preprocessWGSL.ts#L23)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:23](https://github.
 
 > **ifBlock**: `string`
 
-Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:21](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/wgslParser/core/preprocessWGSL.ts#L21)
+Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:21](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/wgslParser/core/preprocessWGSL.ts#L21)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:21](https://github.
 
 > **uniformName**: `string`
 
-Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:20](https://github.com/redcamel/RedGPU/blob/3d0e87c793f11123b8dcd1969f9b5adb42f2200e/src/resources/wgslParser/core/preprocessWGSL.ts#L20)
+Defined in: [src/resources/wgslParser/core/preprocessWGSL.ts:20](https://github.com/redcamel/RedGPU/blob/a734ff9f69c2580cada1bff993a61d03dd359f8b/src/resources/wgslParser/core/preprocessWGSL.ts#L20)
