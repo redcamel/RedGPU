@@ -1317,27 +1317,46 @@ class Mesh extends MeshBase {
                     }
                 }
             } else {
-                const frustumPlanes0 = frustumPlanes[0];
-                const frustumPlanes1 = frustumPlanes[1];
-                const frustumPlanes2 = frustumPlanes[2];
-                const frustumPlanes3 = frustumPlanes[3];
-                const frustumPlanes4 = frustumPlanes[4];
-                const frustumPlanes5 = frustumPlanes[5];
-
                 const centerX = combinedAABB.centerX;
                 const centerY = combinedAABB.centerY;
                 const centerZ = combinedAABB.centerZ;
                 const radius = combinedAABB.geometryRadius;
 
+                // ==================== 2차 필터: Early-Out (카메라 뒤쪽 판정) ====================
+                // 카메라의 viewMatrix(column-major)에서 3번째 행(row) 벡터의 부호를 반전한 것이 월드 전방 방향 벡터가 됨
+                const viewMatrix = rawCamera.viewMatrix;
+                const camForwardX = -viewMatrix[2];
+                const camForwardY = -viewMatrix[6];
+                const camForwardZ = -viewMatrix[10];
+
+                // 카메라로부터 메쉬 중심까지의 방향 벡터
+                const dx = centerX - rawCamera.x;
+                const dy = centerY - rawCamera.y;
+                const dz = centerZ - rawCamera.z;
+
+                // 내적 연산 (Dot Product)
+                const dot = dx * camForwardX + dy * camForwardY + dz * camForwardZ;
+
                 const bias = 1.0; // [KO] 원거리 정밀도 보정을 위한 여유값 [EN] Numerical bias for far distance precision
 
-                frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius - bias ? passFrustumCulling = false
-                    : frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius - bias ? passFrustumCulling = false
-                        : frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius - bias ? passFrustumCulling = false
-                            : frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius - bias ? passFrustumCulling = false
-                                : frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius - bias ? passFrustumCulling = false
-                                    : frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius - bias ? passFrustumCulling = false : 0;
+                // 카메라 뒤쪽이면 즉시 조기 탈락(Early-Out) 처리하여 6-Plane 연산 회피
+                if (dot < -radius - bias) {
+                    passFrustumCulling = false;
+                } else {
+                    const frustumPlanes0 = frustumPlanes[0];
+                    const frustumPlanes1 = frustumPlanes[1];
+                    const frustumPlanes2 = frustumPlanes[2];
+                    const frustumPlanes3 = frustumPlanes[3];
+                    const frustumPlanes4 = frustumPlanes[4];
+                    const frustumPlanes5 = frustumPlanes[5];
 
+                    frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius - bias ? passFrustumCulling = false
+                        : frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius - bias ? passFrustumCulling = false
+                            : frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius - bias ? passFrustumCulling = false
+                                : frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius - bias ? passFrustumCulling = false
+                                    : frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius - bias ? passFrustumCulling = false
+                                        : frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius - bias ? passFrustumCulling = false : 0;
+                }
             }
         }
         if (passFrustumCulling) {
