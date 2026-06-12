@@ -203,6 +203,16 @@ class Mesh extends MeshBase {
      */
     #ignoreFrustumCulling: boolean = false
     /**
+     * [KO] 투영 면적 Culling 사용 여부
+     * [EN] Whether to use screen space size culling
+     */
+    #useScreenSpaceSizeCulling: boolean = false
+    /**
+     * [KO] 투영 면적 Culling의 화면상 크기 비율 임계값
+     * [EN] Minimum size ratio threshold for screen space size culling
+     */
+    #minScreenSpaceSize: number = 0.01
+    /**
      * [KO] 메시 투명도
      * [EN] Mesh opacity
      */
@@ -418,6 +428,40 @@ class Mesh extends MeshBase {
      */
     set ignoreFrustumCulling(value: boolean) {
         this.#ignoreFrustumCulling = value;
+    }
+
+    /**
+     * [KO] 투영 면적 Culling 사용 여부를 반환합니다.
+     * [EN] Returns whether to use screen space size culling.
+     */
+    get useScreenSpaceSizeCulling(): boolean {
+        return this.#useScreenSpaceSizeCulling;
+    }
+
+    /**
+     * [KO] 투영 면적 Culling 사용 여부를 설정합니다.
+     * [EN] Sets whether to use screen space size culling.
+     * @param value - [KO] 사용 여부 [EN] Whether to use
+     */
+    set useScreenSpaceSizeCulling(value: boolean) {
+        this.#useScreenSpaceSizeCulling = value;
+    }
+
+    /**
+     * [KO] 투영 면적 Culling의 화면상 크기 비율 임계값을 반환합니다.
+     * [EN] Returns the minimum size ratio threshold for screen space size culling.
+     */
+    get minScreenSpaceSize(): number {
+        return this.#minScreenSpaceSize;
+    }
+
+    /**
+     * [KO] 투영 면적 Culling의 화면상 크기 비율 임계값을 설정합니다.
+     * [EN] Sets the minimum size ratio threshold for screen space size culling.
+     * @param value - [KO] 크기 비율 임계값 [EN] Size ratio threshold
+     */
+    set minScreenSpaceSize(value: number) {
+        this.#minScreenSpaceSize = value;
     }
 
     /**
@@ -1002,7 +1046,10 @@ class Mesh extends MeshBase {
             dirtyVertexUniformFromMaterial,
             useDistanceCulling,
             cullingDistanceSquared,
+            projectionScale,
         } = renderViewStateData
+        const useScreenSpaceSizeCulling = this.#useScreenSpaceSizeCulling
+        const minScreenSpaceSize = this.#minScreenSpaceSize
         const {antialiasingManager, gpuDevice} = redGPUContext
         const {scene} = view
         const {shadowManager} = scene
@@ -1318,19 +1365,30 @@ class Mesh extends MeshBase {
                 if (dot < -radius - bias) {
                     passFrustumCulling = false;
                 } else {
-                    const frustumPlanes0 = frustumPlanes[0];
-                    const frustumPlanes1 = frustumPlanes[1];
-                    const frustumPlanes2 = frustumPlanes[2];
-                    const frustumPlanes3 = frustumPlanes[3];
-                    const frustumPlanes4 = frustumPlanes[4];
-                    const frustumPlanes5 = frustumPlanes[5];
+                    let passedScreenSpaceCulling = true;
+                    if (useScreenSpaceSizeCulling && dot > 0) {
+                        const screenRatio = (radius * 2.0 / dot) * projectionScale;
+                        if (screenRatio < minScreenSpaceSize) {
+                            passedScreenSpaceCulling = false;
+                            passFrustumCulling = false;
+                        }
+                    }
 
-                    frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius - bias ? passFrustumCulling = false
-                        : frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius - bias ? passFrustumCulling = false
-                            : frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius - bias ? passFrustumCulling = false
-                                : frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius - bias ? passFrustumCulling = false
-                                    : frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius - bias ? passFrustumCulling = false
-                                        : frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius - bias ? passFrustumCulling = false : 0;
+                    if (passedScreenSpaceCulling) {
+                        const frustumPlanes0 = frustumPlanes[0];
+                        const frustumPlanes1 = frustumPlanes[1];
+                        const frustumPlanes2 = frustumPlanes[2];
+                        const frustumPlanes3 = frustumPlanes[3];
+                        const frustumPlanes4 = frustumPlanes[4];
+                        const frustumPlanes5 = frustumPlanes[5];
+
+                        frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius - bias ? passFrustumCulling = false
+                            : frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius - bias ? passFrustumCulling = false
+                                : frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius - bias ? passFrustumCulling = false
+                                    : frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius - bias ? passFrustumCulling = false
+                                        : frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius - bias ? passFrustumCulling = false
+                                            : frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius - bias ? passFrustumCulling = false : 0;
+                    }
                 }
             }
         }

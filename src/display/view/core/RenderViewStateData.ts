@@ -66,6 +66,11 @@ class RenderViewStateData {
      * [EN] Distance threshold for culling objects
      */
     distanceCulling: number;
+    /**
+     * [KO] 투영 면적 Culling의 화면상 크기 환산용 카메라 투영 배율
+     * [EN] Camera projection scale for screen space size culling
+     */
+    projectionScale: number;
 
     /**
      * [KO] 렌더링 통계 결과 데이터 그룹
@@ -272,6 +277,8 @@ class RenderViewStateData {
         this.useDistanceCulling = view.useDistanceCulling;
         this.distanceCulling = view.distanceCulling;
         this.cullingDistanceSquared = this.distanceCulling * this.distanceCulling;
+        this.projectionScale = view.projectionMatrix[5];
+
         const {renderResults} = this;
         renderResults.num3DGroups = 0;
         renderResults.num3DObjects = 0;
