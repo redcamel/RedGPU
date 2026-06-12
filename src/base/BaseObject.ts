@@ -61,6 +61,19 @@ abstract class BaseObject {
     }
 
     /**
+     * [KO] 클래스별 인스턴스 순번 ID를 반환합니다.
+     * [EN] Returns the instance sequence ID per class.
+     *
+     * @returns
+     * [KO] 인스턴스 순번 ID
+     * [EN] Instance sequence ID
+     */
+    get instanceId(): number {
+        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
+        return this.#instanceId;
+    }
+
+    /**
      * [KO] 객체의 이름을 설정합니다.
      * [EN] Sets the name of the object.
      *
