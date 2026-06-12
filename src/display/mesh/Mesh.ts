@@ -93,7 +93,7 @@ class Mesh extends MeshBase {
      * [KO] 프러스텀 컬링 통과 여부
      * [EN] Whether it passed frustum culling
      */
-    passFrustumCulling: boolean = true;
+    passFrustumCulling: boolean = false
     /**
      * [KO] 커스텀 버텍스 셰이더 모듈 생성 함수
      * [EN] Function to create custom vertex shader module
@@ -263,7 +263,7 @@ class Mesh extends MeshBase {
     #LODManager: LODManager;
     #lodGPURenderInfoList: LODGPURenderInfo[] = [];
     #currentLODIndex: number = -1;
-
+    #interleavedCullingID: number = Math.floor(Math.random() * 4)
     /**
      * [KO] Mesh 인스턴스를 생성합니다.
      * [EN] Creates an instance of Mesh.
@@ -1214,43 +1214,18 @@ class Mesh extends MeshBase {
             this.#cachedBoundingAABB = null
             this.#cachedBoundingOBB = null
         }
-        {
-            // 변경시만 이전 모델 메트릭스 업데이트
-            if (antialiasingManager.useTAA && this.#uniformDataMatrixList) {
 
-                const {gpuRenderInfo} = this
-                const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
-                const {members: vertexUniformInfoMembers} = vertexUniformInfo
-                const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
-                if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
-                    this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
-                    if (!this.#needUpdateMatrixUniform) {
-                        redGPUContext.gpuDevice.queue.writeBuffer(
-                            vertexUniformBuffer.gpuBuffer,
-                            vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset,
-                            this.#prevModelMatrix as BufferSource,
-                        )
-                    }
-                }
-                // 브랜치가 먼가 꼬였네
-                {
-                    if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
-                    const prev = this.#prevModelMatrix
-                    const current = this.modelMatrix
-                    prev[0] = current[0], prev[1] = current[1], prev[2] = current[2], prev[3] = current[3];
-                    prev[4] = current[4], prev[5] = current[5], prev[6] = current[6], prev[7] = current[7];
-                    prev[8] = current[8], prev[9] = current[9], prev[10] = current[10], prev[11] = current[11];
-                    prev[12] = current[12], prev[13] = current[13], prev[14] = current[14], prev[15] = current[15];
-                }
-            } else {
-                this.#prevModelMatrix = null
-            }
-        }
         // check distanceCulling
-        let passFrustumCulling = this.passFrustumCulling = true
+        const needCheckInterleavedCulling = (this.#interleavedCullingID === renderViewStateData.interleavedCullingCheckFrameIndex)
+        let passFrustumCulling = this.passFrustumCulling
         let distanceSquared = 0
         const lodList = this.#LODManager.LODList;
         const lodLen = lodList.length;
+
+        if (needCheckInterleavedCulling) {
+
+            passFrustumCulling = true
+            distanceSquared = 0
         if (useDistanceCulling && currentGeometry || this.#LODManager.LODList.length) {
             const {rawCamera} = view
             const aabb = this.boundingAABB;
@@ -1359,7 +1334,40 @@ class Mesh extends MeshBase {
                 }
             }
         }
+        }
         if (passFrustumCulling) {
+            {
+                // 변경시만 이전 모델 메트릭스 업데이트
+                if (antialiasingManager.useTAA && this.#uniformDataMatrixList) {
+
+                    const {gpuRenderInfo} = this
+                    const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
+                    const {members: vertexUniformInfoMembers} = vertexUniformInfo
+                    const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
+                    if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
+                        this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
+                        if (!this.#needUpdateMatrixUniform) {
+                            redGPUContext.gpuDevice.queue.writeBuffer(
+                                vertexUniformBuffer.gpuBuffer,
+                                vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset,
+                                this.#prevModelMatrix as BufferSource,
+                            )
+                        }
+                    }
+                    // 브랜치가 먼가 꼬였네
+                    {
+                        if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
+                        const prev = this.#prevModelMatrix
+                        const current = this.modelMatrix
+                        prev[0] = current[0], prev[1] = current[1], prev[2] = current[2], prev[3] = current[3];
+                        prev[4] = current[4], prev[5] = current[5], prev[6] = current[6], prev[7] = current[7];
+                        prev[8] = current[8], prev[9] = current[9], prev[10] = current[10], prev[11] = current[11];
+                        prev[12] = current[12], prev[13] = current[13], prev[14] = current[14], prev[15] = current[15];
+                    }
+                } else {
+                    this.#prevModelMatrix = null
+                }
+            }
             if (this.gltfLoaderInfo?.activeAnimations?.length) {
                 renderViewStateData.animationList[renderViewStateData.animationList.length] = this.gltfLoaderInfo?.activeAnimations
             }

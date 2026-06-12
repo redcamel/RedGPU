@@ -25,14 +25,14 @@ abstract class BaseObject {
      * [KO] 클래스별 인스턴스 순번 ID
      * [EN] Instance sequence ID per class
      */
-    #instanceId: number;
+    readonly instanceId: number;
 
     /**
      * [KO] BaseObject 생성자입니다. (추상 클래스로 직접 인스턴스 생성은 불가합니다)
      * [EN] BaseObject constructor. (Abstract class, cannot be instantiated directly)
      */
     protected constructor() {
-
+        this.instanceId = InstanceIdGenerator.getNextId(this.constructor);
     }
 
     /**
@@ -56,21 +56,7 @@ abstract class BaseObject {
      * [EN] Name of the object
      */
     get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
-    }
-
-    /**
-     * [KO] 클래스별 인스턴스 순번 ID를 반환합니다.
-     * [EN] Returns the instance sequence ID per class.
-     *
-     * @returns
-     * [KO] 인스턴스 순번 ID
-     * [EN] Instance sequence ID
-     */
-    get instanceId(): number {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
-        return this.#instanceId;
+        return this.#name || `${this.constructor.name} Instance ${this.instanceId}`;
     }
 
     /**

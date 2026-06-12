@@ -112,6 +112,7 @@ class RenderViewStateData {
      * [EN] Current frame index (accumulated rendering count)
      */
     frameIndex: number = 0;
+    interleavedCullingCheckFrameIndex: number = 0;
     /**
      * [KO] 현재 프레임의 절대 시간 (초)
      * [EN] Absolute time of the current frame (seconds)
@@ -322,7 +323,7 @@ class RenderViewStateData {
         const now = performance.now();
         this.viewRenderCPURecordingTime = 0;
         this.frameIndex++;
-
+        this.interleavedCullingCheckFrameIndex = this.frameIndex % 4;
         // [KO] 이전 물리 업데이트 시점으로부터의 누적 경과 시간 계산
         // [EN] Calculate accumulated elapsed time since the last physics update point
         const physicsElapsed = now - this.prevTimestamp;
