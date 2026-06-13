@@ -1046,8 +1046,9 @@ class Mesh extends MeshBase {
             dirtyVertexUniformFromMaterial,
             useDistanceCulling,
             cullingDistanceSquared,
-            projectionScale,
+            interleavedCullingInfo,
         } = renderViewStateData
+        const {projectionScale, interleavedCullingCheckFrameIndex} = interleavedCullingInfo
         const useScreenSpaceSizeCulling = this.#useScreenSpaceSizeCulling
         const minScreenSpaceSize = this.#minScreenSpaceSize
         const {antialiasingManager, gpuDevice} = redGPUContext
@@ -1263,7 +1264,8 @@ class Mesh extends MeshBase {
         }
 
         // check distanceCulling
-        const needCheckInterleavedCulling = (this.#interleavedCullingID === renderViewStateData.interleavedCullingCheckFrameIndex)
+        const needCheckInterleavedCulling = !interleavedCullingInfo.skipCullingCheck &&
+            (interleavedCullingInfo.forceCullingCheck || (this.#interleavedCullingID === interleavedCullingCheckFrameIndex))
         let passFrustumCulling = this.passFrustumCulling
         let distanceSquared = 0
         const lodList = this.#LODManager.LODList;

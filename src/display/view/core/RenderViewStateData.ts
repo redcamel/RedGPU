@@ -66,11 +66,7 @@ class RenderViewStateData {
      * [EN] Distance threshold for culling objects
      */
     distanceCulling: number;
-    /**
-     * [KO] 투영 면적 Culling의 화면상 크기 환산용 카메라 투영 배율
-     * [EN] Camera projection scale for screen space size culling
-     */
-    projectionScale: number;
+
 
     /**
      * [KO] 렌더링 통계 결과 데이터 그룹
@@ -117,7 +113,18 @@ class RenderViewStateData {
      * [EN] Current frame index (accumulated rendering count)
      */
     frameIndex: number = 0;
-    interleavedCullingCheckFrameIndex: number = 0;
+    interleavedCullingInfo = {
+        prevCameraX: 0,
+        prevCameraY: 0,
+        prevCameraZ: 0,
+        prevCameraRotX: 0,
+        prevCameraRotY: 0,
+        prevCameraRotZ: 0,
+        forceCullingCheck: false,
+        skipCullingCheck: false,
+        interleavedCullingCheckFrameIndex: 0,
+        projectionScale: 0
+    };
     /**
      * [KO] 현재 프레임의 절대 시간 (초)
      * [EN] Absolute time of the current frame (seconds)
@@ -277,7 +284,7 @@ class RenderViewStateData {
         this.useDistanceCulling = view.useDistanceCulling;
         this.distanceCulling = view.distanceCulling;
         this.cullingDistanceSquared = this.distanceCulling * this.distanceCulling;
-        this.projectionScale = view.projectionMatrix[5];
+        this.interleavedCullingInfo.projectionScale = view.projectionMatrix[5];
 
         const {renderResults} = this;
         renderResults.num3DGroups = 0;
@@ -319,6 +326,55 @@ class RenderViewStateData {
             throw new Error('Could not calculate texture size: ' + e.message);
         }
         this.frustumPlanes = useFrustumCulling ? frustumPlanes : null;
+        this.#updateInterleavedCullingInfo(view);
+    }
+
+    #updateInterleavedCullingInfo(view: View3D) {
+        this.interleavedCullingInfo.interleavedCullingCheckFrameIndex = this.frameIndex % 4;
+        const camera = view.rawCamera as any;
+        if (camera) {
+            const cx = camera.x || 0;
+            const cy = camera.y || 0;
+            const cz = camera.z || 0;
+            const rx = camera.rotationX || 0;
+            const ry = camera.rotationY || 0;
+            const rz = camera.rotationZ || 0;
+
+            const dx = cx - this.interleavedCullingInfo.prevCameraX;
+            const dy = cy - this.interleavedCullingInfo.prevCameraY;
+            const dz = cz - this.interleavedCullingInfo.prevCameraZ;
+            const drx = rx - this.interleavedCullingInfo.prevCameraRotX;
+            const dry = ry - this.interleavedCullingInfo.prevCameraRotY;
+            const drz = rz - this.interleavedCullingInfo.prevCameraRotZ;
+
+            const moveDistanceSq = dx * dx + dy * dy + dz * dz;
+            const rotateDistanceSq = drx * drx + dry * dry + drz * drz;
+
+            const MOVE_THRESHOLD_FAST = 0.05 * 0.05;
+            const ROTATE_THRESHOLD_FAST = 0.01 * 0.01;
+            const STILL_THRESHOLD = 0.00001;
+
+            if (moveDistanceSq > MOVE_THRESHOLD_FAST || rotateDistanceSq > ROTATE_THRESHOLD_FAST) {
+                this.interleavedCullingInfo.forceCullingCheck = true;
+                this.interleavedCullingInfo.skipCullingCheck = false;
+            } else if (moveDistanceSq < STILL_THRESHOLD && rotateDistanceSq < STILL_THRESHOLD) {
+                this.interleavedCullingInfo.forceCullingCheck = false;
+                this.interleavedCullingInfo.skipCullingCheck = true;
+            } else {
+                this.interleavedCullingInfo.forceCullingCheck = false;
+                this.interleavedCullingInfo.skipCullingCheck = false;
+            }
+
+            this.interleavedCullingInfo.prevCameraX = cx;
+            this.interleavedCullingInfo.prevCameraY = cy;
+            this.interleavedCullingInfo.prevCameraZ = cz;
+            this.interleavedCullingInfo.prevCameraRotX = rx;
+            this.interleavedCullingInfo.prevCameraRotY = ry;
+            this.interleavedCullingInfo.prevCameraRotZ = rz;
+        } else {
+            this.interleavedCullingInfo.forceCullingCheck = false;
+            this.interleavedCullingInfo.skipCullingCheck = false;
+        }
     }
 
     /**
@@ -330,7 +386,6 @@ class RenderViewStateData {
         const now = performance.now();
         this.viewRenderCPURecordingTime = 0;
         this.frameIndex++;
-        this.interleavedCullingCheckFrameIndex = this.frameIndex % 4;
         // [KO] 이전 물리 업데이트 시점으로부터의 누적 경과 시간 계산
         // [EN] Calculate accumulated elapsed time since the last physics update point
         const physicsElapsed = now - this.prevTimestamp;
