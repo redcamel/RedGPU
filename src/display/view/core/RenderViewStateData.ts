@@ -330,9 +330,15 @@ class RenderViewStateData {
     }
 
     #updateInterleavedCullingInfo(view: View3D) {
-        this.interleavedCullingInfo.interleavedCullingCheckFrameIndex = this.frameIndex % 4;
+        const info = this.interleavedCullingInfo;
+        // [KO] 현재 프레임 인덱스에 따라 분산 검사할 인터리빙 프레임 인덱스를 계산합니다.
+        // [EN] Calculate the interleaved frame index to distribute culling checks based on the current frame index.
+        info.interleavedCullingCheckFrameIndex = this.frameIndex % 4;
+        
         const camera = view.rawCamera as any;
         if (camera) {
+            // [KO] 카메라의 현재 위치와 회전 정보를 추출합니다. (속성이 없을 경우 기본값 0을 적용)
+            // [EN] Extract current camera position and rotation values. (Fallback to 0 if properties are undefined)
             const cx = camera.x || 0;
             const cy = camera.y || 0;
             const cz = camera.z || 0;
@@ -340,40 +346,54 @@ class RenderViewStateData {
             const ry = camera.rotationY || 0;
             const rz = camera.rotationZ || 0;
 
-            const dx = cx - this.interleavedCullingInfo.prevCameraX;
-            const dy = cy - this.interleavedCullingInfo.prevCameraY;
-            const dz = cz - this.interleavedCullingInfo.prevCameraZ;
-            const drx = rx - this.interleavedCullingInfo.prevCameraRotX;
-            const dry = ry - this.interleavedCullingInfo.prevCameraRotY;
-            const drz = rz - this.interleavedCullingInfo.prevCameraRotZ;
+            // [KO] 이전 프레임 상태와 비교한 이동 및 회전 변화량을 산출합니다.
+            // [EN] Calculate the delta values of position and rotation relative to the previous frame state.
+            const dx = cx - info.prevCameraX;
+            const dy = cy - info.prevCameraY;
+            const dz = cz - info.prevCameraZ;
+            const drx = rx - info.prevCameraRotX;
+            const dry = ry - info.prevCameraRotY;
+            const drz = rz - info.prevCameraRotZ;
 
+            // [KO] 연산 속도 향상을 위해 제곱 거리(Squared Distance) 형태로 계산합니다.
+            // [EN] Calculate squared values to optimize calculation performance by avoiding Math.sqrt.
             const moveDistanceSq = dx * dx + dy * dy + dz * dz;
             const rotateDistanceSq = drx * drx + dry * dry + drz * drz;
 
-            const MOVE_THRESHOLD_FAST = 0.05 * 0.05;
-            const ROTATE_THRESHOLD_FAST = 0.01 * 0.01;
-            const STILL_THRESHOLD = 0.00001;
+            // [KO] 카메라 움직임 정도를 판정할 임계값을 설정합니다.
+            // [EN] Define threshold parameters to classify camera movements.
+            const MOVE_THRESHOLD_FAST = 0.05 * 0.05; // [KO] 고속 이동 임계값 [EN] Fast translation threshold
+            const ROTATE_THRESHOLD_FAST = 0.01 * 0.01; // [KO] 고속 회전 임계값 [EN] Fast rotation threshold
+            const STILL_THRESHOLD = 0.00001; // [KO] 정지 상태 임계값 [EN] Still state threshold
 
             if (moveDistanceSq > MOVE_THRESHOLD_FAST || rotateDistanceSq > ROTATE_THRESHOLD_FAST) {
-                this.interleavedCullingInfo.forceCullingCheck = true;
-                this.interleavedCullingInfo.skipCullingCheck = false;
+                // [KO] 카메라가 빠르게 움직이는 경우: 팝인 현상을 줄이기 위해 전체 객체의 컬링을 강제 매 프레임 재검사합니다.
+                // [EN] Camera moving fast: Force culling checks every frame for all meshes to prevent pop-in issues.
+                info.forceCullingCheck = true;
+                info.skipCullingCheck = false;
             } else if (moveDistanceSq < STILL_THRESHOLD && rotateDistanceSq < STILL_THRESHOLD) {
-                this.interleavedCullingInfo.forceCullingCheck = false;
-                this.interleavedCullingInfo.skipCullingCheck = true;
+                // [KO] 카메라가 정지된 경우: 컬링 검사를 생략하고 이전 프레임의 결과를 재사용하여 CPU 자원을 절약합니다.
+                // [EN] Camera is still: Skip recalculating culling, reuse cached culling results to save CPU overhead.
+                info.forceCullingCheck = false;
+                info.skipCullingCheck = true;
             } else {
-                this.interleavedCullingInfo.forceCullingCheck = false;
-                this.interleavedCullingInfo.skipCullingCheck = false;
+                // [KO] 일반적인 속도의 움직임인 경우: 분산(인터리빙) 컬링 검사를 적용합니다.
+                // [EN] Normal camera movement: Apply standard interleaved culling distribution.
+                info.forceCullingCheck = false;
+                info.skipCullingCheck = false;
             }
 
-            this.interleavedCullingInfo.prevCameraX = cx;
-            this.interleavedCullingInfo.prevCameraY = cy;
-            this.interleavedCullingInfo.prevCameraZ = cz;
-            this.interleavedCullingInfo.prevCameraRotX = rx;
-            this.interleavedCullingInfo.prevCameraRotY = ry;
-            this.interleavedCullingInfo.prevCameraRotZ = rz;
+            // [KO] 다음 프레임 비교를 위해 카메라 상태를 갱신합니다.
+            // [EN] Save current camera state for comparison in the next frame.
+            info.prevCameraX = cx;
+            info.prevCameraY = cy;
+            info.prevCameraZ = cz;
+            info.prevCameraRotX = rx;
+            info.prevCameraRotY = ry;
+            info.prevCameraRotZ = rz;
         } else {
-            this.interleavedCullingInfo.forceCullingCheck = false;
-            this.interleavedCullingInfo.skipCullingCheck = false;
+            info.forceCullingCheck = false;
+            info.skipCullingCheck = false;
         }
     }
 
