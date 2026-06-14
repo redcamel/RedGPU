@@ -274,6 +274,7 @@ class Mesh extends MeshBase {
     #lodGPURenderInfoList: LODGPURenderInfo[] = [];
     #currentLODIndex: number = -1;
     #interleavedCullingID: number = Math.floor(Math.random() * 4)
+
     /**
      * [KO] Mesh 인스턴스를 생성합니다.
      * [EN] Creates an instance of Mesh.
@@ -1270,12 +1271,8 @@ class Mesh extends MeshBase {
         let distanceSquared = 0
         const lodList = this.#LODManager.LODList;
         const lodLen = lodList.length;
-
-        if (needCheckInterleavedCulling) {
-
-            passFrustumCulling = true
-            distanceSquared = 0
-        if (useDistanceCulling && currentGeometry || this.#LODManager.LODList.length) {
+        distanceSquared = 0
+        if (useDistanceCulling && currentGeometry || lodLen) {
             const {rawCamera} = view
             const aabb = this.boundingAABB;
             // AABB 중심점과 카메라 위치 간의 거리 계산
@@ -1285,115 +1282,118 @@ class Mesh extends MeshBase {
             // 거리 제곱 계산
             distanceSquared = dx * dx + dy * dy + dz * dz;
         }
-        if (useDistanceCulling && currentGeometry) {
-            const geometryRadius = this.boundingAABB.geometryRadius;
-            // AABB의 반지름을 고려한 컬링 거리 계산
-            const cullingDistanceWithRadius = cullingDistanceSquared + (geometryRadius * geometryRadius);
-            if (distanceSquared > cullingDistanceWithRadius) {
-                passFrustumCulling = false;
-            }
-        }
-        // check frustumCulling
-        if (frustumPlanes && passFrustumCulling && !this.#ignoreFrustumCulling) {
-            const {rawCamera} = view
-            const combinedAABB = this.boundingAABB;
+        if (needCheckInterleavedCulling) {
+            passFrustumCulling = true
 
-            const isIsometricController = rawCamera.constructor.name === 'IsometricController';
-
-            if (isIsometricController) {
-                // ==================== AABB 정보 추출 ====================
-                const {centerX, centerY, centerZ, geometryRadius: radius} = combinedAABB;
-
-                // ==================== 카메라 정보 추출 ====================
-                const orthoCamera = rawCamera as OrthographicCamera;
-                const {left, right, top, bottom, nearClipping: near, farClipping: far} = orthoCamera;
-                const {x: camX, y: camY, z: camZ} = orthoCamera;
-
-                // ==================== 각도 기반 컬링 ====================
-                const cameraAngle = 45;
-
-                if (cameraAngle) {
-                    // 상대 좌표 계산
-                    const relX = centerX - camX;
-                    const relY = centerY - camY;
-                    const relZ = centerZ - camZ;
-
-                    // 회전 적용
-                    const angleRad = cameraAngle * (Math.PI / 180);
-                    const cos = Math.cos(angleRad);
-                    const sin = Math.sin(angleRad);
-
-                    const rotatedX = relX * cos + relZ * sin;
-                    const rotatedZ = -relX * sin + relZ * cos;
-
-                    // 뷰 범위 확인
-                    if (rotatedX + radius < left || rotatedX - radius > right ||
-                        relY + radius < bottom || relY - radius > top ||
-                        rotatedZ + radius < near || rotatedZ - radius > far) {
-                        passFrustumCulling = false;
-                    }
-                } else {
-                    // 각도 없음 (기본 처리)
-                    if (centerX + radius < left || centerX - radius > right ||
-                        centerY + radius < bottom || centerY - radius > top ||
-                        centerZ + radius < near || centerZ - radius > far) {
-                        passFrustumCulling = false;
-                    }
-                }
-            } else {
-                const centerX = combinedAABB.centerX;
-                const centerY = combinedAABB.centerY;
-                const centerZ = combinedAABB.centerZ;
-                const radius = combinedAABB.geometryRadius;
-
-                // ==================== 2차 필터: Early-Out (카메라 뒤쪽 판정) ====================
-                // 카메라의 viewMatrix(column-major)에서 3번째 행(row) 벡터의 부호를 반전한 것이 월드 전방 방향 벡터가 됨
-                const viewMatrix = rawCamera.viewMatrix;
-                const camForwardX = -viewMatrix[2];
-                const camForwardY = -viewMatrix[6];
-                const camForwardZ = -viewMatrix[10];
-
-                // 카메라로부터 메쉬 중심까지의 방향 벡터
-                const dx = centerX - rawCamera.x;
-                const dy = centerY - rawCamera.y;
-                const dz = centerZ - rawCamera.z;
-
-                // 내적 연산 (Dot Product)
-                const dot = dx * camForwardX + dy * camForwardY + dz * camForwardZ;
-
-                const bias = 1.0; // [KO] 원거리 정밀도 보정을 위한 여유값 [EN] Numerical bias for far distance precision
-
-                // 카메라 뒤쪽이면 즉시 조기 탈락(Early-Out) 처리하여 6-Plane 연산 회피
-                if (dot < -radius - bias) {
+            if (useDistanceCulling && currentGeometry) {
+                const geometryRadius = this.boundingAABB.geometryRadius;
+                // AABB의 반지름을 고려한 컬링 거리 계산
+                const cullingDistanceWithRadius = cullingDistanceSquared + (geometryRadius * geometryRadius);
+                if (distanceSquared > cullingDistanceWithRadius) {
                     passFrustumCulling = false;
-                } else {
-                    let passedScreenSpaceCulling = true;
-                    if (useScreenSpaceSizeCulling && dot > 0) {
-                        const screenRatio = (radius * 2.0 / dot) * projectionScale;
-                        if (screenRatio < minScreenSpaceSize) {
-                            passedScreenSpaceCulling = false;
+                }
+            }
+            // check frustumCulling
+            if (frustumPlanes && passFrustumCulling && !this.#ignoreFrustumCulling) {
+                const {rawCamera} = view
+                const combinedAABB = this.boundingAABB;
+
+                const isIsometricController = rawCamera.constructor.name === 'IsometricController';
+
+                if (isIsometricController) {
+                    // ==================== AABB 정보 추출 ====================
+                    const {centerX, centerY, centerZ, geometryRadius: radius} = combinedAABB;
+
+                    // ==================== 카메라 정보 추출 ====================
+                    const orthoCamera = rawCamera as OrthographicCamera;
+                    const {left, right, top, bottom, nearClipping: near, farClipping: far} = orthoCamera;
+                    const {x: camX, y: camY, z: camZ} = orthoCamera;
+
+                    // ==================== 각도 기반 컬링 ====================
+                    const cameraAngle = 45;
+
+                    if (cameraAngle) {
+                        // 상대 좌표 계산
+                        const relX = centerX - camX;
+                        const relY = centerY - camY;
+                        const relZ = centerZ - camZ;
+
+                        // 회전 적용
+                        const angleRad = cameraAngle * (Math.PI / 180);
+                        const cos = Math.cos(angleRad);
+                        const sin = Math.sin(angleRad);
+
+                        const rotatedX = relX * cos + relZ * sin;
+                        const rotatedZ = -relX * sin + relZ * cos;
+
+                        // 뷰 범위 확인
+                        if (rotatedX + radius < left || rotatedX - radius > right ||
+                            relY + radius < bottom || relY - radius > top ||
+                            rotatedZ + radius < near || rotatedZ - radius > far) {
+                            passFrustumCulling = false;
+                        }
+                    } else {
+                        // 각도 없음 (기본 처리)
+                        if (centerX + radius < left || centerX - radius > right ||
+                            centerY + radius < bottom || centerY - radius > top ||
+                            centerZ + radius < near || centerZ - radius > far) {
                             passFrustumCulling = false;
                         }
                     }
+                } else {
+                    const centerX = combinedAABB.centerX;
+                    const centerY = combinedAABB.centerY;
+                    const centerZ = combinedAABB.centerZ;
+                    const radius = combinedAABB.geometryRadius;
 
-                    if (passedScreenSpaceCulling) {
-                        const frustumPlanes0 = frustumPlanes[0];
-                        const frustumPlanes1 = frustumPlanes[1];
-                        const frustumPlanes2 = frustumPlanes[2];
-                        const frustumPlanes3 = frustumPlanes[3];
-                        const frustumPlanes4 = frustumPlanes[4];
-                        const frustumPlanes5 = frustumPlanes[5];
+                    // ==================== 2차 필터: Early-Out (카메라 뒤쪽 판정) ====================
+                    // 카메라의 viewMatrix(column-major)에서 3번째 행(row) 벡터의 부호를 반전한 것이 월드 전방 방향 벡터가 됨
+                    const viewMatrix = rawCamera.viewMatrix;
+                    const camForwardX = -viewMatrix[2];
+                    const camForwardY = -viewMatrix[6];
+                    const camForwardZ = -viewMatrix[10];
 
-                        frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius - bias ? passFrustumCulling = false
-                            : frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius - bias ? passFrustumCulling = false
-                                : frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius - bias ? passFrustumCulling = false
-                                    : frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius - bias ? passFrustumCulling = false
-                                        : frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius - bias ? passFrustumCulling = false
-                                            : frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius - bias ? passFrustumCulling = false : 0;
+                    // 카메라로부터 메쉬 중심까지의 방향 벡터
+                    const dx = centerX - rawCamera.x;
+                    const dy = centerY - rawCamera.y;
+                    const dz = centerZ - rawCamera.z;
+
+                    // 내적 연산 (Dot Product)
+                    const dot = dx * camForwardX + dy * camForwardY + dz * camForwardZ;
+
+                    const bias = 1.0; // [KO] 원거리 정밀도 보정을 위한 여유값 [EN] Numerical bias for far distance precision
+
+                    // 카메라 뒤쪽이면 즉시 조기 탈락(Early-Out) 처리하여 6-Plane 연산 회피
+                    if (dot < -radius - bias) {
+                        passFrustumCulling = false;
+                    } else {
+                        let passedScreenSpaceCulling = true;
+                        if (useScreenSpaceSizeCulling && dot > 0) {
+                            const screenRatio = (radius * 2.0 / dot) * projectionScale;
+                            if (screenRatio < minScreenSpaceSize) {
+                                passedScreenSpaceCulling = false;
+                                passFrustumCulling = false;
+                            }
+                        }
+
+                        if (passedScreenSpaceCulling) {
+                            const frustumPlanes0 = frustumPlanes[0];
+                            const frustumPlanes1 = frustumPlanes[1];
+                            const frustumPlanes2 = frustumPlanes[2];
+                            const frustumPlanes3 = frustumPlanes[3];
+                            const frustumPlanes4 = frustumPlanes[4];
+                            const frustumPlanes5 = frustumPlanes[5];
+
+                            frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius - bias ? passFrustumCulling = false
+                                : frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius - bias ? passFrustumCulling = false
+                                    : frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius - bias ? passFrustumCulling = false
+                                        : frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius - bias ? passFrustumCulling = false
+                                            : frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius - bias ? passFrustumCulling = false
+                                                : frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius - bias ? passFrustumCulling = false : 0;
+                        }
                     }
                 }
             }
-        }
         }
         if (passFrustumCulling) {
             {
