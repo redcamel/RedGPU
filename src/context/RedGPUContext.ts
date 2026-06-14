@@ -9,6 +9,8 @@ import RedGPUContextSizeManager, {IRedGPURectObject, RedResizeEvent} from "./cor
 import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
 import CommandEncoderManager from "../commandEncoderManager/CommandEncoderManager";
 import RedGPUContextObserver from "./core/RedGPUContextObserver";
+import GlobalSSAOVertexManager from "../postEffect/effects/ssao/GlobalSSAOVertexManager";
+import GlobalSSAOFragmentManager from "../postEffect/effects/ssao/GlobalSSAOFragmentManager";
 
 /**
  * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
@@ -119,6 +121,18 @@ class RedGPUContext extends RedGPUContextViewContainer {
      */
     #keyboardKeyBuffer: { [key: string]: boolean } = {}
 
+    /**
+     * [KO] 글로벌 SSAO 버텍스 매니저
+     * [EN] Global SSAO vertex manager
+     */
+    #globalSSAOVertexManager: GlobalSSAOVertexManager
+
+    /**
+     * [KO] 글로벌 SSAO 프래그먼트 매니저
+     * [EN] Global SSAO fragment manager
+     */
+    #globalSSAOFragmentManager: GlobalSSAOFragmentManager
+
 
     #boundingClientRect: DOMRect
 
@@ -165,6 +179,8 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#resourceManager = new ResourceManager(this)
         this.#commandEncoderManager = new CommandEncoderManager(this)
         this.#antialiasingManager = new AntialiasingManager()
+        this.#globalSSAOVertexManager = new GlobalSSAOVertexManager(this)
+        this.#globalSSAOFragmentManager = new GlobalSSAOFragmentManager(this)
         this.#initialize()
     }
 
@@ -190,6 +206,22 @@ class RedGPUContext extends RedGPUContextViewContainer {
      */
     get antialiasingManager(): AntialiasingManager {
         return this.#antialiasingManager;
+    }
+
+    /**
+     * [KO] 글로벌 SSAO 버텍스 매니저를 반환합니다.
+     * [EN] Returns the global SSAO vertex manager.
+     */
+    get globalSSAOVertexManager(): GlobalSSAOVertexManager {
+        return this.#globalSSAOVertexManager;
+    }
+
+    /**
+     * [KO] 글로벌 SSAO 프래그먼트 매니저를 반환합니다.
+     * [EN] Returns the global SSAO fragment manager.
+     */
+    get globalSSAOFragmentManager(): GlobalSSAOFragmentManager {
+        return this.#globalSSAOFragmentManager;
     }
 
     /**
