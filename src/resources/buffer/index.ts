@@ -6,7 +6,7 @@
 import IndexBuffer, {NumberArray} from "./indexBuffer/IndexBuffer";
 import StorageBuffer from "./storageBuffer/StorageBuffer";
 import UniformBuffer from "./uniformBuffer/UniformBuffer";
-import GlobalBufferManager, {BufferSlot} from "./globalBufferManager/GlobalBufferManager";
+import GlobalStorageBufferManager, {BufferSlot} from "./globalStorageBufferManager/GlobalStorageBufferManager";
 
 export * as CoreBuffer from './core'
 export * from './vertexBuffer'
@@ -15,6 +15,6 @@ export {
     NumberArray,
     StorageBuffer,
     UniformBuffer,
-    GlobalBufferManager,
+    GlobalStorageBufferManager,
     BufferSlot
 }

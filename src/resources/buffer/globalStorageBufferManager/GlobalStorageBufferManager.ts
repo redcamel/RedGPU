@@ -12,7 +12,7 @@ interface BufferSlot {
  *
  * @category Resource
  */
-class GlobalBufferManager extends RedGPUObject {
+class GlobalStorageBufferManager extends RedGPUObject {
     /**
      * [KO] 단일 슬롯 원소의 바이트 크기입니다. (예: Vertex 304, Material 912 등)
      * [EN] Byte size of a single slot element. (e.g. Vertex 304, Material 912, etc.)
@@ -81,11 +81,11 @@ class GlobalBufferManager extends RedGPUObject {
      * [KO] 버퍼 리사이징이 완료되었을 때 바인드 그룹 갱신 등을 수행하기 위한 콜백입니다.
      * [EN] Callback invoked when buffer resizing is complete, typically used to update bind groups.
      */
-    #onResizeCallback: ((manager: GlobalBufferManager) => void) | null = null;
+    #onResizeCallback: ((manager: GlobalStorageBufferManager) => void) | null = null;
 
     /**
-     * [KO] GlobalBufferManager 인스턴스를 생성합니다.
-     * [EN] Creates an instance of GlobalBufferManager.
+     * [KO] GlobalStorageBufferManager 인스턴스를 생성합니다.
+     * [EN] Creates an instance of GlobalStorageBufferManager.
      *
      * @param redGPUContext -
      * [KO] RedGPUContext 컨텍스트 인스턴스
@@ -202,7 +202,7 @@ class GlobalBufferManager extends RedGPUObject {
      * [KO] 리사이즈 실행 후 호출될 콜백 함수
      * [EN] Callback function to be called after resizing
      */
-    setOnResize(callback: (manager: GlobalBufferManager) => void): void {
+    setOnResize(callback: (manager: GlobalStorageBufferManager) => void): void {
         this.#onResizeCallback = callback;
     }
 
@@ -260,7 +260,7 @@ class GlobalBufferManager extends RedGPUObject {
     updateFloatData(index: number, data: Float32Array, floatOffsetInsideElement = 0): void {
         const maxFloatCount = this.#elementSize / 4;
         if (floatOffsetInsideElement + data.length > maxFloatCount) {
-            throw new Error(`[GlobalBufferManager - ${this.#label}] 입력 데이터의 크기(${data.length} floats, offset: ${floatOffsetInsideElement})가 할당된 단일 슬롯 수용량(${maxFloatCount} floats)을 초과했습니다.`);
+            throw new Error(`[GlobalStorageBufferManager - ${this.#label}] 입력 데이터의 크기(${data.length} floats, offset: ${floatOffsetInsideElement})가 할당된 단일 슬롯 수용량(${maxFloatCount} floats)을 초과했습니다.`);
         }
 
         const baseFloatOffset = (index * this.#elementSize) / 4 + floatOffsetInsideElement;
@@ -287,7 +287,7 @@ class GlobalBufferManager extends RedGPUObject {
     updateUintData(index: number, data: Uint32Array, uintOffsetInsideElement = 0): void {
         const maxUintCount = this.#elementSize / 4;
         if (uintOffsetInsideElement + data.length > maxUintCount) {
-            throw new Error(`[GlobalBufferManager - ${this.#label}] 입력 데이터의 크기(${data.length} uints, offset: ${uintOffsetInsideElement})가 할당된 단일 슬롯 수용량(${maxUintCount} uints)을 초과했습니다.`);
+            throw new Error(`[GlobalStorageBufferManager - ${this.#label}] 입력 데이터의 크기(${data.length} uints, offset: ${uintOffsetInsideElement})가 할당된 단일 슬롯 수용량(${maxUintCount} uints)을 초과했습니다.`);
         }
 
         const baseUintOffset = (index * this.#elementSize) / 4 + uintOffsetInsideElement;
@@ -335,7 +335,7 @@ class GlobalBufferManager extends RedGPUObject {
         const byteSize = this.#totalSlotCount * this.#elementSize;
 
         if (byteSize > this.#safeMaxBufferSize) {
-            throw new Error(`[GlobalBufferManager - ${this.#label}] Buffer 용량이 초과되었습니다. RedGPU는 안전을 위해 최대 128MB까지만 허용합니다.`);
+            throw new Error(`[GlobalStorageBufferManager - ${this.#label}] Buffer 용량이 초과되었습니다. RedGPU는 안전을 위해 최대 128MB까지만 허용합니다.`);
         }
 
         this.#gpuBuffer = this.gpuDevice.createBuffer({
@@ -359,7 +359,7 @@ class GlobalBufferManager extends RedGPUObject {
 
         if (newByteSize > this.#safeMaxBufferSize) {
             //TODO - 나중에 모바일일떄와 데스트톱일때 허용치를 분기해야할듯
-            throw new Error(`[GlobalBufferManager - ${this.#label}] Buffer 용량이 초과되었습니다. RedGPU는 안전을 위해 최대 128MB까지만 허용합니다.`);
+            throw new Error(`[GlobalStorageBufferManager - ${this.#label}] Buffer 용량이 초과되었습니다. RedGPU는 안전을 위해 최대 128MB까지만 허용합니다.`);
         }
 
         console.log(`🔄 [${this.#label}] 리사이즈 실행: ${this.#totalSlotCount} -> ${newSlotCount}`);
@@ -396,6 +396,6 @@ class GlobalBufferManager extends RedGPUObject {
     }
 }
 
-Object.freeze(GlobalBufferManager);
-export default GlobalBufferManager;
+Object.freeze(GlobalStorageBufferManager);
+export default GlobalStorageBufferManager;
 export type {BufferSlot};

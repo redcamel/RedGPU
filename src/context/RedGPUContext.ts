@@ -9,8 +9,7 @@ import RedGPUContextSizeManager, {IRedGPURectObject, RedResizeEvent} from "./cor
 import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
 import CommandEncoderManager from "../commandEncoderManager/CommandEncoderManager";
 import RedGPUContextObserver from "./core/RedGPUContextObserver";
-import GlobalSSAOVertexManager from "../postEffect/effects/ssao/GlobalSSAOVertexManager";
-import GlobalSSAOFragmentManager from "../postEffect/effects/ssao/GlobalSSAOFragmentManager";
+import GlobalStorageBufferManager from "../resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager";
 
 /**
  * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
@@ -122,16 +121,16 @@ class RedGPUContext extends RedGPUContextViewContainer {
     #keyboardKeyBuffer: { [key: string]: boolean } = {}
 
     /**
-     * [KO] 글로벌 SSAO 버텍스 매니저
-     * [EN] Global SSAO vertex manager
+     * [KO] 글로벌 SSAO 버텍스 버퍼 매니저
+     * [EN] Global SSAO vertex buffer manager
      */
-    #globalSSAOVertexManager: GlobalSSAOVertexManager
+    #globalSSAOVertexBuffer: GlobalStorageBufferManager
 
     /**
-     * [KO] 글로벌 SSAO 프래그먼트 매니저
-     * [EN] Global SSAO fragment manager
+     * [KO] 글로벌 SSAO 프래그먼트 버퍼 매니저
+     * [EN] Global SSAO fragment buffer manager
      */
-    #globalSSAOFragmentManager: GlobalSSAOFragmentManager
+    #globalSSAOFragmentBuffer: GlobalStorageBufferManager
 
 
     #boundingClientRect: DOMRect
@@ -179,8 +178,8 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#resourceManager = new ResourceManager(this)
         this.#commandEncoderManager = new CommandEncoderManager(this)
         this.#antialiasingManager = new AntialiasingManager()
-        this.#globalSSAOVertexManager = new GlobalSSAOVertexManager(this)
-        this.#globalSSAOFragmentManager = new GlobalSSAOFragmentManager(this)
+        this.#globalSSAOVertexBuffer = new GlobalStorageBufferManager(this, 304, 4096, "GLOBAL_SSAO_VERTEX_BUFFER")
+        this.#globalSSAOFragmentBuffer = new GlobalStorageBufferManager(this, 912, 1024, "GLOBAL_SSAO_FRAGMENT_BUFFER")
         this.#initialize()
     }
 
@@ -209,19 +208,19 @@ class RedGPUContext extends RedGPUContextViewContainer {
     }
 
     /**
-     * [KO] 글로벌 SSAO 버텍스 매니저를 반환합니다.
-     * [EN] Returns the global SSAO vertex manager.
+     * [KO] 글로벌 SSAO 버텍스 버퍼 매니저를 반환합니다.
+     * [EN] Returns the global SSAO vertex buffer manager.
      */
-    get globalSSAOVertexManager(): GlobalSSAOVertexManager {
-        return this.#globalSSAOVertexManager;
+    get globalSSAOVertexBuffer(): GlobalStorageBufferManager {
+        return this.#globalSSAOVertexBuffer;
     }
 
     /**
-     * [KO] 글로벌 SSAO 프래그먼트 매니저를 반환합니다.
-     * [EN] Returns the global SSAO fragment manager.
+     * [KO] 글로벌 SSAO 프래그먼트 버퍼 매니저를 반환합니다.
+     * [EN] Returns the global SSAO fragment buffer manager.
      */
-    get globalSSAOFragmentManager(): GlobalSSAOFragmentManager {
-        return this.#globalSSAOFragmentManager;
+    get globalSSAOFragmentBuffer(): GlobalStorageBufferManager {
+        return this.#globalSSAOFragmentBuffer;
     }
 
     /**

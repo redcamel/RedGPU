@@ -287,6 +287,9 @@ class View3D extends AView {
             const skyAtmosphereReflectionLUT = skyAtmosphere?.skyAtmosphereReflectionLUT;
             const skyAtmosphereIrradianceLUT = skyAtmosphere?.skyAtmosphereIrradianceLUT;
 
+            const globalSSAOVertexGPUBuffer = redGPUContext.globalSSAOVertexBuffer.gpuBuffer;
+            const globalSSAOFragmentGPUBuffer = redGPUContext.globalSSAOFragmentBuffer.gpuBuffer;
+
             if (prevInfo) {
                 needResetBindGroup = (
                     prevInfo.ibl !== ibl ||
@@ -299,6 +302,8 @@ class View3D extends AView {
                     prevInfo.ibl_irradianceTexture !== ibl_irradianceTexture ||
                     prevInfo.renderPath1ResultTextureView !== renderPath1ResultTextureView ||
                     prevInfo.shadowDepthTextureView !== shadowDepthTextureView ||
+                    prevInfo.globalSSAOVertexGPUBuffer !== globalSSAOVertexGPUBuffer ||
+                    prevInfo.globalSSAOFragmentGPUBuffer !== globalSSAOFragmentGPUBuffer ||
                     !this.#clusterLightManager.passClustersLight
                 )
             }
@@ -316,6 +321,8 @@ class View3D extends AView {
                 ibl_irradianceTexture,
                 renderPath1ResultTextureView,
                 shadowDepthTextureView,
+                globalSSAOVertexGPUBuffer,
+                globalSSAOFragmentGPUBuffer,
                 vertexUniformBindGroup: this.#systemUniform_Vertex_UniformBindGroup
             }
         }
@@ -462,6 +469,22 @@ class View3D extends AView {
                 {
                     binding: 16,
                     resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.skyAtmosphereReflectionLUT, this.skyAtmosphere?.skyAtmosphereReflectionLUT?.viewDescriptor || CubeTexture.defaultViewDescriptor)
+                },
+                {
+                    binding: 17,
+                    resource: {
+                        buffer: redGPUContext.globalSSAOVertexBuffer.gpuBuffer,
+                        offset: 0,
+                        size: redGPUContext.globalSSAOVertexBuffer.gpuBuffer.size
+                    }
+                },
+                {
+                    binding: 18,
+                    resource: {
+                        buffer: redGPUContext.globalSSAOFragmentBuffer.gpuBuffer,
+                        offset: 0,
+                        size: redGPUContext.globalSSAOFragmentBuffer.gpuBuffer.size
+                    }
                 },
             ]
         }
