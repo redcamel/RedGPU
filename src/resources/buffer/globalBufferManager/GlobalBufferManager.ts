@@ -258,6 +258,11 @@ class GlobalBufferManager extends RedGPUObject {
      * [EN] Additional float unit offset inside the slot (default: 0)
      */
     updateFloatData(index: number, data: Float32Array, floatOffsetInsideElement = 0): void {
+        const maxFloatCount = this.#elementSize / 4;
+        if (floatOffsetInsideElement + data.length > maxFloatCount) {
+            throw new Error(`[GlobalBufferManager - ${this.#label}] 입력 데이터의 크기(${data.length} floats, offset: ${floatOffsetInsideElement})가 할당된 단일 슬롯 수용량(${maxFloatCount} floats)을 초과했습니다.`);
+        }
+
         const baseFloatOffset = (index * this.#elementSize) / 4 + floatOffsetInsideElement;
         this.#floatView.set(data, baseFloatOffset);
 
@@ -280,6 +285,11 @@ class GlobalBufferManager extends RedGPUObject {
      * [EN] Additional uint unit offset inside the slot (default: 0)
      */
     updateUintData(index: number, data: Uint32Array, uintOffsetInsideElement = 0): void {
+        const maxUintCount = this.#elementSize / 4;
+        if (uintOffsetInsideElement + data.length > maxUintCount) {
+            throw new Error(`[GlobalBufferManager - ${this.#label}] 입력 데이터의 크기(${data.length} uints, offset: ${uintOffsetInsideElement})가 할당된 단일 슬롯 수용량(${maxUintCount} uints)을 초과했습니다.`);
+        }
+
         const baseUintOffset = (index * this.#elementSize) / 4 + uintOffsetInsideElement;
         this.#uintView.set(data, baseUintOffset);
 

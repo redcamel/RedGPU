@@ -367,3 +367,63 @@ redUnit.testGroup(
         }, true);
     }
 );
+
+// 10. 슬롯 허용 한도 초과 쓰기 차단 검증
+redUnit.testGroup(
+    'GlobalBufferManager - Slot Boundary Enforcement',
+    (runner) => {
+        runner.defineTest('Failure Test: Throw error when input Float data exceeds elementSize', (run) => {
+            makeContext((redGPUContext) => {
+                try {
+                    const manager = new RedGPU.Resource.GlobalBufferManager(redGPUContext, 16, 2, 'TEST_SLOT_OVERFLOW_FLOAT');
+                    const slot = manager.allocateSlot();
+
+                    // 16바이트(4 floats) 한계를 넘어서는 5 floats 쓰기 시도
+                    manager.updateFloatData(slot.index, new Float32Array([1, 2, 3, 4, 5]));
+
+                    redGPUContext.destroy();
+                    run(true);
+                } catch (e) {
+                    redGPUContext.destroy();
+                    run(false, e);
+                }
+            });
+        }, false);
+
+        runner.defineTest('Failure Test: Throw error when input Float data with offset exceeds elementSize', (run) => {
+            makeContext((redGPUContext) => {
+                try {
+                    const manager = new RedGPU.Resource.GlobalBufferManager(redGPUContext, 16, 2, 'TEST_SLOT_OVERFLOW_OFFSET');
+                    const slot = manager.allocateSlot();
+
+                    // 3 floats 쓰기이지만, offset 2에서 시작하므로 총 5 floats 공간을 소모하여 초과
+                    manager.updateFloatData(slot.index, new Float32Array([1, 2, 3]), 2);
+
+                    redGPUContext.destroy();
+                    run(true);
+                } catch (e) {
+                    redGPUContext.destroy();
+                    run(false, e);
+                }
+            });
+        }, false);
+
+        runner.defineTest('Failure Test: Throw error when input Uint data exceeds elementSize', (run) => {
+            makeContext((redGPUContext) => {
+                try {
+                    const manager = new RedGPU.Resource.GlobalBufferManager(redGPUContext, 16, 2, 'TEST_SLOT_OVERFLOW_UINT');
+                    const slot = manager.allocateSlot();
+
+                    // 16바이트(4 uints) 한계를 넘어서는 5 uints 쓰기 시도
+                    manager.updateUintData(slot.index, new Uint32Array([1, 2, 3, 4, 5]));
+
+                    redGPUContext.destroy();
+                    run(true);
+                } catch (e) {
+                    redGPUContext.destroy();
+                    run(false, e);
+                }
+            });
+        }, false);
+    }
+);
