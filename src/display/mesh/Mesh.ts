@@ -93,7 +93,7 @@ class Mesh extends MeshBase {
      * [KO] 프러스텀 컬링 통과 여부
      * [EN] Whether it passed frustum culling
      */
-    passFrustumCulling: boolean = false
+    passFrustumCulling: boolean = true
     /**
      * [KO] 커스텀 버텍스 셰이더 모듈 생성 함수
      * [EN] Function to create custom vertex shader module
