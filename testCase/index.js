@@ -20,7 +20,7 @@ RedUnit.pageLoader('RedGPU', [
 	{title: 'renderState', src: './renderState'},
 	{title: 'runtimeChecker', src: './runtimeChecker'},
 	{title: 'shadow', src: './shadow'},
-    {title: 'globalBufferManager', src: './resources/globalBufferManager'},
+	{title: 'globalStorageBufferManager', src: './resources/globalStorageBufferManager'},
 	{title: 'toneMappingManager', src: './toneMapping/toneMappingManager'},
 	{title: 'copyGPUBuffer', src: './util/copyGPUBuffer'},
 	{title: 'file', src: './util/file'},

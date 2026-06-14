@@ -1,7 +1,7 @@
 import RedUnit from 'https://redcamel.github.io/RedUnit/dist/index.js';
 import * as RedGPU from "../../../dist/index.js";
 
-const redUnit = new RedUnit('RedGPU - Resource.GlobalBufferManager');
+const redUnit = new RedUnit('RedGPU - Resource.GlobalStorageBufferManager');
 
 const makeContext = (callback) => {
     const canvas = document.createElement('canvas');
@@ -18,12 +18,12 @@ const makeContext = (callback) => {
 
 // 1. 초기화 및 기본 속성 검증
 redUnit.testGroup(
-    'GlobalBufferManager - Initialization & Properties',
+    'GlobalStorageBufferManager - Initialization & Properties',
     (runner) => {
         runner.defineTest('Success Test: Create instance with correct properties', (run) => {
             makeContext((redGPUContext) => {
                 try {
-                    const manager = new RedGPU.Resource.GlobalBufferManager(redGPUContext, 256, 128, 'TEST_BUFFER');
+                    const manager = new RedGPU.Resource.GlobalStorageBufferManager(redGPUContext, 256, 128, 'TEST_BUFFER');
                     const totalSlotCount = manager.totalSlotCount;
                     const elementSize = manager.elementSize;
                     const label = manager.label;
@@ -42,12 +42,12 @@ redUnit.testGroup(
 
 // 2. 슬롯 할당, 해제 및 재사용 (LIFO 구조) 검증
 redUnit.testGroup(
-    'GlobalBufferManager - Slot Allocation, Free & Reuse',
+    'GlobalStorageBufferManager - Slot Allocation, Free & Reuse',
     (runner) => {
         runner.defineTest('Success Test: LIFO reuse and sequence allocation', (run) => {
             makeContext((redGPUContext) => {
                 try {
-                    const manager = new RedGPU.Resource.GlobalBufferManager(redGPUContext, 256, 10, 'TEST_ALLOC');
+                    const manager = new RedGPU.Resource.GlobalStorageBufferManager(redGPUContext, 256, 10, 'TEST_ALLOC');
 
                     const s0 = manager.allocateSlot();
                     const s1 = manager.allocateSlot();
@@ -80,13 +80,13 @@ redUnit.testGroup(
 
 // 3. 다단계 연속 리사이징 및 데이터 보존성 정밀 검증
 redUnit.testGroup(
-    'GlobalBufferManager - Multi-step Resizing & Data Retention',
+    'GlobalStorageBufferManager - Multi-step Resizing & Data Retention',
     (runner) => {
         runner.defineTest('Success Test: Retain existing data after cascading resizes', (run) => {
             makeContext((redGPUContext) => {
                 try {
                     // 초깃값 1개짜리 버퍼 생성 (elementSize: 16 bytes)
-                    const manager = new RedGPU.Resource.GlobalBufferManager(redGPUContext, 16, 1, 'TEST_CASCADE');
+                    const manager = new RedGPU.Resource.GlobalStorageBufferManager(redGPUContext, 16, 1, 'TEST_CASCADE');
 
                     const s0 = manager.allocateSlot(); // index: 0
                     const testData0 = new Float32Array([1.1, 2.2, 3.3, 4.4]);
@@ -130,13 +130,13 @@ redUnit.testGroup(
 
 // 4. 슬롯 내부 미세 오프셋 데이터 쓰기 및 데이터 정밀 매핑 검증
 redUnit.testGroup(
-    'GlobalBufferManager - OffsetInsideElement Precision Check',
+    'GlobalStorageBufferManager - OffsetInsideElement Precision Check',
     (runner) => {
         runner.defineTest('Success Test: Exact memory mapping with internal offsets', (run) => {
             makeContext((redGPUContext) => {
                 try {
                     // elementSize: 32 bytes (8 floats)
-                    const manager = new RedGPU.Resource.GlobalBufferManager(redGPUContext, 32, 2, 'TEST_OFFSET');
+                    const manager = new RedGPU.Resource.GlobalStorageBufferManager(redGPUContext, 32, 2, 'TEST_OFFSET');
                     const s0 = manager.allocateSlot(); // index: 0, byteOffset: 0
                     const s1 = manager.allocateSlot(); // index: 1, byteOffset: 32 (float index 8)
 
@@ -167,13 +167,13 @@ redUnit.testGroup(
 
 // 5. 동일 슬롯 내부 영역에 Float 및 Uint 데이터 혼합 쓰기 무결성 검증
 redUnit.testGroup(
-    'GlobalBufferManager - Float & Uint Data Coexistence',
+    'GlobalStorageBufferManager - Float & Uint Data Coexistence',
     (runner) => {
         runner.defineTest('Success Test: Float and Uint parameters written in different partition of same slot', (run) => {
             makeContext((redGPUContext) => {
                 try {
                     // elementSize: 16 bytes (4 words)
-                    const manager = new RedGPU.Resource.GlobalBufferManager(redGPUContext, 16, 2, 'TEST_MIXED');
+                    const manager = new RedGPU.Resource.GlobalStorageBufferManager(redGPUContext, 16, 2, 'TEST_MIXED');
                     const s0 = manager.allocateSlot();
 
                     // 앞의 2개 워드(8바이트)는 Float
@@ -207,12 +207,12 @@ redUnit.testGroup(
 
 // 6. 대규모 슬롯 할당 및 해제 스트레스 테스트 (인덱스 무결성 검사)
 redUnit.testGroup(
-    'GlobalBufferManager - High Load Allocation Stress Test',
+    'GlobalStorageBufferManager - High Load Allocation Stress Test',
     (runner) => {
         runner.defineTest('Success Test: Allocate and free 1,000 slots repeatedly without errors', (run) => {
             makeContext((redGPUContext) => {
                 try {
-                    const manager = new RedGPU.Resource.GlobalBufferManager(redGPUContext, 16, 16, 'TEST_STRESS');
+                    const manager = new RedGPU.Resource.GlobalStorageBufferManager(redGPUContext, 16, 16, 'TEST_STRESS');
                     const slots = [];
 
                     // 1. 1000개 할당 (동적 리사이징 반복 트리거)
@@ -253,12 +253,12 @@ redUnit.testGroup(
 
 // 7. 더티 트래킹 변수의 실시간 수치 변화 정밀 검증
 redUnit.testGroup(
-    'GlobalBufferManager - Dirty Tracking Bounds',
+    'GlobalStorageBufferManager - Dirty Tracking Bounds',
     (runner) => {
         runner.defineTest('Success Test: Dirty ranges correctly track min/max indices and reset after flush', (run) => {
             makeContext((redGPUContext) => {
                 try {
-                    const manager = new RedGPU.Resource.GlobalBufferManager(redGPUContext, 16, 10, 'TEST_DIRTY');
+                    const manager = new RedGPU.Resource.GlobalStorageBufferManager(redGPUContext, 16, 10, 'TEST_DIRTY');
 
                     // 초기 상태는 min = Infinity, max = -Infinity
                     const isInitialClean = manager.dirtyMin === Infinity && manager.dirtyMax === -Infinity;
@@ -290,7 +290,7 @@ redUnit.testGroup(
 
 // 8. 하드웨어 한계 용량 초과 예외 처리 검증
 redUnit.testGroup(
-    'GlobalBufferManager - Hardware Limit Enforcement',
+    'GlobalStorageBufferManager - Hardware Limit Enforcement',
     (runner) => {
         runner.defineTest('Success Test: Throw error when resized beyond safe Max Buffer Size', (run) => {
             makeContext((redGPUContext) => {
@@ -298,7 +298,7 @@ redUnit.testGroup(
                     // 64MB(67,108,864 bytes) 크기의 슬롯으로 2개 최초 용량 설정 (총 128MB 수용)
                     // safeMaxBufferSize 기본값은 128MB이므로, 다음 번 리사이즈 시 128MB를 초과하게 됩니다.
                     const elementSize = 67108864; // 64MB
-                    const manager = new RedGPU.Resource.GlobalBufferManager(redGPUContext, elementSize, 2, 'TEST_LIMIT');
+                    const manager = new RedGPU.Resource.GlobalStorageBufferManager(redGPUContext, elementSize, 2, 'TEST_LIMIT');
 
                     // 현재 용량 2개 * 64MB = 128MB (한계치인 128MB와 동일하여 안전)
                     manager.allocateSlot(); // idx 0
@@ -324,7 +324,7 @@ redUnit.testGroup(
                 try {
                     // 처음부터 64MB * 3 = 192MB 크기로 생성을 유도 (한계치인 128MB를 생성 시점에 즉각 돌파)
                     const elementSize = 67108864; // 64MB
-                    new RedGPU.Resource.GlobalBufferManager(redGPUContext, elementSize, 3, 'TEST_INIT_LIMIT');
+                    new RedGPU.Resource.GlobalStorageBufferManager(redGPUContext, elementSize, 3, 'TEST_INIT_LIMIT');
 
                     // 예외 없이 생성 완료되면 테스트 실패
                     redGPUContext.destroy();
@@ -341,12 +341,12 @@ redUnit.testGroup(
 
 // 9. 동적 리사이즈 콜백 호출 검증
 redUnit.testGroup(
-    'GlobalBufferManager - Resize Callback Notification',
+    'GlobalStorageBufferManager - Resize Callback Notification',
     (runner) => {
         runner.defineTest('Success Test: Trigger onResize callback with manager instance as argument', (run) => {
             makeContext((redGPUContext) => {
                 try {
-                    const manager = new RedGPU.Resource.GlobalBufferManager(redGPUContext, 16, 1, 'TEST_RESIZE');
+                    const manager = new RedGPU.Resource.GlobalStorageBufferManager(redGPUContext, 16, 1, 'TEST_RESIZE');
                     let callbackArgument = null;
 
                     manager.setOnResize((mgr) => {
@@ -370,12 +370,12 @@ redUnit.testGroup(
 
 // 10. 슬롯 허용 한도 초과 쓰기 차단 검증
 redUnit.testGroup(
-    'GlobalBufferManager - Slot Boundary Enforcement',
+    'GlobalStorageBufferManager - Slot Boundary Enforcement',
     (runner) => {
         runner.defineTest('Failure Test: Throw error when input Float data exceeds elementSize', (run) => {
             makeContext((redGPUContext) => {
                 try {
-                    const manager = new RedGPU.Resource.GlobalBufferManager(redGPUContext, 16, 2, 'TEST_SLOT_OVERFLOW_FLOAT');
+                    const manager = new RedGPU.Resource.GlobalStorageBufferManager(redGPUContext, 16, 2, 'TEST_SLOT_OVERFLOW_FLOAT');
                     const slot = manager.allocateSlot();
 
                     // 16바이트(4 floats) 한계를 넘어서는 5 floats 쓰기 시도
@@ -393,7 +393,7 @@ redUnit.testGroup(
         runner.defineTest('Failure Test: Throw error when input Float data with offset exceeds elementSize', (run) => {
             makeContext((redGPUContext) => {
                 try {
-                    const manager = new RedGPU.Resource.GlobalBufferManager(redGPUContext, 16, 2, 'TEST_SLOT_OVERFLOW_OFFSET');
+                    const manager = new RedGPU.Resource.GlobalStorageBufferManager(redGPUContext, 16, 2, 'TEST_SLOT_OVERFLOW_OFFSET');
                     const slot = manager.allocateSlot();
 
                     // 3 floats 쓰기이지만, offset 2에서 시작하므로 총 5 floats 공간을 소모하여 초과
@@ -411,7 +411,7 @@ redUnit.testGroup(
         runner.defineTest('Failure Test: Throw error when input Uint data exceeds elementSize', (run) => {
             makeContext((redGPUContext) => {
                 try {
-                    const manager = new RedGPU.Resource.GlobalBufferManager(redGPUContext, 16, 2, 'TEST_SLOT_OVERFLOW_UINT');
+                    const manager = new RedGPU.Resource.GlobalStorageBufferManager(redGPUContext, 16, 2, 'TEST_SLOT_OVERFLOW_UINT');
                     const slot = manager.allocateSlot();
 
                     // 16바이트(4 uints) 한계를 넘어서는 5 uints 쓰기 시도
