@@ -274,6 +274,7 @@ class Mesh extends MeshBase {
     #lodGPURenderInfoList: LODGPURenderInfo[] = [];
     #currentLODIndex: number = -1;
     #interleavedCullingID: number = Math.floor(Math.random() * 4)
+    #globalBufferSlotIndex: number = -1;
 
     /**
      * [KO] Mesh 인스턴스를 생성합니다.
@@ -302,6 +303,27 @@ class Mesh extends MeshBase {
         this.#LODManager = new LODManager(this, () => {
             this.dirtyLOD = true;
         });
+        const slot = redGPUContext.globalSSAOVertexBuffer.allocateSlot();
+        this.#globalBufferSlotIndex = slot.index;
+    }
+
+    /**
+     * [KO] 글로벌 버퍼 슬롯 인덱스를 반환합니다.
+     * [EN] Returns the global buffer slot index.
+     */
+    get globalBufferSlotIndex(): number {
+        return this.#globalBufferSlotIndex;
+    }
+
+    /**
+     * [KO] 리소스를 해제합니다.
+     * [EN] Disposes of the resources.
+     */
+    dispose() {
+        if (this.#globalBufferSlotIndex !== -1) {
+            this.redGPUContext.globalSSAOVertexBuffer.freeSlot(this.#globalBufferSlotIndex);
+            this.#globalBufferSlotIndex = -1;
+        }
     }
 
     /**
