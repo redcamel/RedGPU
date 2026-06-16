@@ -91,7 +91,7 @@ const init = async (
             // "shader-f16",
             // "timestamp-query",
             // "depth-clip-control",
-            // "indirect-first-instance",
+            "indirect-first-instance",
             // "rg11b10ufloat-renderable",
             // "bgra8unorm-storage",
             // "float32-filterable"
