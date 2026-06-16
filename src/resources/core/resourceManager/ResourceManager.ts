@@ -781,11 +781,6 @@ class ResourceManager extends RedGPUObject {
                             visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
                             buffer: {type: 'read-only-storage'}
                         },
-                        {
-                            binding: 18,
-                            visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
-                            buffer: {type: 'read-only-storage'}
-                        },
                     ],
                 }
             )
