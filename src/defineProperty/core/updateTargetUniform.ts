@@ -18,10 +18,25 @@ const updateTargetUniform = (target: any, propertyKey: string, newValue: any) =>
         targetUniformBuffer = target.uniformBuffer
     } else if (gpuRenderInfo?.vertexUniformInfo) {
         targetUniformInfo = gpuRenderInfo.vertexUniformInfo
-        targetUniformBuffer = gpuRenderInfo.vertexUniformBuffer
+        const memberInfo = targetUniformInfo.members[propertyKey];
+        if (memberInfo && target.globalBufferSlotIndex !== undefined && target.globalBufferSlotIndex !== -1) {
+            const redGPUContext = target.redGPUContext;
+            if (redGPUContext) {
+                const floatOffset = memberInfo.uniformOffset / 4;
+                if (memberInfo.View === Uint32Array) {
+                    redGPUContext.globalSSAOVertexBuffer.updateUintData(
+                        target.globalBufferSlotIndex, new Uint32Array([newValue]), floatOffset
+                    );
+                } else {
+                    redGPUContext.globalSSAOVertexBuffer.updateFloatData(
+                        target.globalBufferSlotIndex, new Float32Array([newValue]), floatOffset
+                    );
+                }
+            }
+        }
     }
 
-    if (targetUniformBuffer && targetUniformInfo.members[propertyKey]) {
+    if (targetUniformBuffer && targetUniformInfo && targetUniformInfo.members[propertyKey]) {
         targetUniformBuffer.writeOnlyBuffer(
             targetUniformInfo.members[propertyKey],
             newValue

@@ -4,7 +4,7 @@
 
 #redgpu_include systemStruct.meshVertexBasicUniform;
 
-@group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
+@group(1) @binding(0) var<uniform> vertexUniforms: GlobalVertexUniforms;
 @group(1) @binding(1) var displacementTextureSampler: sampler;
 @group(1) @binding(2) var displacementTexture: texture_2d<f32>;
 @group(1) @binding(3) var<storage, read> vertexStorages: array<mat4x4<f32>>;

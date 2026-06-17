@@ -4,7 +4,7 @@
 #redgpu_include entryPoint.mesh.entryPointPickingVertex;
 #redgpu_include systemStruct.meshVertexBasicUniform;
 
-@group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
+@group(1) @binding(0) var<uniform> vertexUniforms: GlobalVertexUniforms;
 @group(1) @binding(1) var displacementTextureSampler: sampler;
 @group(1) @binding(2) var displacementTexture: texture_2d<f32>;
 

@@ -8,7 +8,7 @@
 
 const maxDistance: f32 = 1000.0;
 
-@group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
+@group(1) @binding(0) var<uniform> vertexUniforms: GlobalVertexUniforms;
 @group(1) @binding(1) var displacementTextureSampler: sampler;
 @group(1) @binding(2) var displacementTexture: texture_2d<f32>;
 
@@ -16,6 +16,7 @@ const maxDistance: f32 = 1000.0;
 @vertex
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
+    let vertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
 
     // System uniforms
     #redgpu_if disableJitter

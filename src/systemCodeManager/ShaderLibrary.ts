@@ -2417,7 +2417,7 @@ export namespace SystemStructLibrary {
      *     prevModelMatrix: mat4x4<f32>,
      *     normalModelMatrix: mat4x4<f32>,
      * }
-     * struct VertexUniforms {
+     * struct GlobalVertexUniforms {
      *     matrixList:MatrixList,
      *     pickingId: u32,
      *     receiveShadow: f32,
