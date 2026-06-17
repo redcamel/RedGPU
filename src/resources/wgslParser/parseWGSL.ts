@@ -2,6 +2,7 @@ import {WgslReflect} from "wgsl_reflect";
 import ensureVertexIndexBuiltin from "./core/ensureVertexIndexBuiltin";
 import preprocessWGSL from "./core/preprocessWGSL";
 import WGSLUniformTypes from "./core/WGSLUniformTypes";
+import {keepLog} from "../../utils";
 
 /**
  * [KO] 개별 유니폼 멤버 정보를 생성합니다.
@@ -102,6 +103,33 @@ const processUniforms = (uniforms) => {
     }, {});
 };
 
+const convertMembersToKeyValue = (typeInfo) => {
+    if (!typeInfo) return typeInfo;
+    const newType = {...typeInfo};
+    if (Array.isArray(newType.members)) {
+        newType.members = newType.members.reduce((prev, curr) => {
+            prev[curr.name] = {
+                ...curr,
+                type: convertMembersToKeyValue(curr.type)
+            };
+            return prev;
+        }, {});
+    }
+    if (newType.format) {
+        newType.format = {...newType.format};
+        if (Array.isArray(newType.format.members)) {
+            newType.format.members = newType.format.members.reduce((prev, curr) => {
+                prev[curr.name] = {
+                    ...curr,
+                    type: convertMembersToKeyValue(curr.type)
+                };
+                return prev;
+            }, {});
+        }
+    }
+    return newType;
+};
+
 /**
  * [KO] 스토리지 정보 배열을 처리하여 맵으로 반환합니다.
  * [EN] Processes an array of storage information and returns it as a map.
@@ -114,13 +142,14 @@ const processUniforms = (uniforms) => {
  */
 const processStorages = (storage) => {
     return storage.reduce((prev, curr) => {
+        const typeInfo = convertMembersToKeyValue(curr.type);
         prev[curr.name] = {
             name: curr.name,
             ...processMembers(curr.members),
             arrayBufferByteLength: curr.size,
             stride: curr.stride,
             acccess: curr.access,
-            type: curr.type
+            type: typeInfo,
         };
         curr.attributes?.forEach(v => prev[curr.name][v.name] = +v.value);
         return prev;
@@ -215,6 +244,15 @@ const parseWGSL = (sourceName: string, code: string, injectLibrary?: Record<stri
 
         reflectCache.set(cacheKey, reflectResult);
     }
+    keepLog(
+        sourceName,
+        {
+            ...reflectResult,
+            defaultSource,
+            shaderSourceVariant,
+            conditionalBlocks: uniqueKeys
+        }
+    )
     return {
         ...reflectResult,
         defaultSource,
