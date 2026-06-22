@@ -59,7 +59,7 @@ struct VertexOutput {
 @vertex
 fn main(inputData: InputDataSkin) -> VertexOutput {
     var output: VertexOutput;
-    let vertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
+    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
     // [KO] 입력 데이터 처리
     // [EN] Process input data
     let input_position = inputData.position;
@@ -79,12 +79,12 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
 
     // [KO] 버텍스 유니폼 캐싱
     // [EN] Cache vertex uniforms
-    let u_matrixList = vertexUniforms.matrixList;
+    let u_matrixList = globalVertexUniforms.matrixList;
     let u_localMatrix = u_matrixList.localMatrix;
     let u_modelMatrix = u_matrixList.modelMatrix;
     let u_prevModelMatrix = u_matrixList.prevModelMatrix;
     let u_normalModelMatrix = u_matrixList.normalModelMatrix;
-    let u_receiveShadow = vertexUniforms.receiveShadow;
+    let u_receiveShadow = globalVertexUniforms.receiveShadow;
 
     // [KO] 조명 데이터 캐싱
     // [EN] Cache lighting data
@@ -127,7 +127,7 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
     #redgpu_if receiveShadow
     {
         output.shadowCoord = getShadowCoord(position.xyz, u_directionalLightProjectionViewMatrix);
-        output.receiveShadow = vertexUniforms.receiveShadow;
+        output.receiveShadow = globalVertexUniforms.receiveShadow;
     }
     #redgpu_endIf
 
@@ -163,8 +163,9 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
 fn entryPointShadowVertex(inputData: InputDataSkin) -> OutputShadowData {
     var output: OutputShadowData;
 
+    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
     let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
-    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
+    let u_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
     let input_position = inputData.position;
 
     // [KO] 스키닝이 적용된 그림자 위치 계산
@@ -184,8 +185,9 @@ fn entryPointShadowVertex(inputData: InputDataSkin) -> OutputShadowData {
 fn entryPointPickingVertex(inputData: InputDataSkin) -> VertexOutput {
     var output: VertexOutput;
 
+    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
     let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
-    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
+    let u_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
 
     // [KO] 스키닝이 적용된 피킹 위치 계산
     // [EN] Calculate skinned picking position
