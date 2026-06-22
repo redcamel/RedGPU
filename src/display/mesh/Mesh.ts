@@ -304,7 +304,7 @@ class Mesh extends MeshBase {
         this.#LODManager = new LODManager(this, () => {
             this.dirtyLOD = true;
         });
-        const slot = redGPUContext.globalSSAOVertexBuffer.allocateSlot();
+        const slot = redGPUContext.globalVertexUniformBuffer.allocateSlot();
         this.#globalVertexBufferSlotIndex = slot.index;
     }
 
@@ -322,7 +322,7 @@ class Mesh extends MeshBase {
      */
     dispose() {
         if (this.#globalVertexBufferSlotIndex !== -1) {
-            this.redGPUContext.globalSSAOVertexBuffer.freeSlot(this.#globalVertexBufferSlotIndex);
+            this.redGPUContext.globalVertexUniformBuffer.freeSlot(this.#globalVertexBufferSlotIndex);
             this.#globalVertexBufferSlotIndex = -1;
         }
     }
@@ -1430,7 +1430,7 @@ class Mesh extends MeshBase {
                     if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
                         this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
                         if (!this.#needUpdateMatrixUniform) {
-                            redGPUContext.globalSSAOVertexBuffer.updateFloatData(
+                            redGPUContext.globalVertexUniformBuffer.updateFloatData(
                                 this.#globalVertexBufferSlotIndex,
                                 this.#prevModelMatrix,
                                 vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset / 4
@@ -1511,7 +1511,7 @@ class Mesh extends MeshBase {
                         tempFloat32_4[2] = scale[0];
                         tempFloat32_4[3] = scale[1];
 
-                        redGPUContext.globalSSAOVertexBuffer.updateFloatData(
+                        redGPUContext.globalVertexUniformBuffer.updateFloatData(
                             this.#globalVertexBufferSlotIndex,
                             tempFloat32_4,
                             vertexUniformInfoMembers.uvTransform.uniformOffset / 4
@@ -1540,7 +1540,7 @@ class Mesh extends MeshBase {
                     this.#displacementScale = displacementScale
                     // keepLog('실행을 하나보네',displacementScale)
                     tempFloat32_1[0] = displacementScale
-                    redGPUContext.globalSSAOVertexBuffer.updateFloatData(
+                    redGPUContext.globalVertexUniformBuffer.updateFloatData(
                         this.#globalVertexBufferSlotIndex,
                         tempFloat32_1,
                         vertexUniformInfoMembers.displacementScale.uniformOffset / 4
@@ -1623,7 +1623,7 @@ class Mesh extends MeshBase {
                 dirtyTransformForChildren = true
                 this.#needUpdateMatrixUniform = false
                 // keepLog('진짜 버퍼업로드', this.name)
-                redGPUContext.globalSSAOVertexBuffer.updateFloatData(
+                redGPUContext.globalVertexUniformBuffer.updateFloatData(
                     this.#globalVertexBufferSlotIndex,
                     this.#uniformDataMatrixList,
                     vertexUniformInfoMembers.matrixList.startOffset / 4
@@ -1633,7 +1633,7 @@ class Mesh extends MeshBase {
                 dirtyOpacityForChildren = true
                 if (vertexUniformInfoMembers.combinedOpacity) {
                     tempFloat32_1[0] = this.getCombinedOpacity()
-                    redGPUContext.globalSSAOVertexBuffer.updateFloatData(
+                    redGPUContext.globalVertexUniformBuffer.updateFloatData(
                         this.#globalVertexBufferSlotIndex,
                         tempFloat32_1,
                         vertexUniformInfoMembers.combinedOpacity.uniformOffset / 4

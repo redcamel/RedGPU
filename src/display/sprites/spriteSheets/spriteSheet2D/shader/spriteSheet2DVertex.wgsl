@@ -50,7 +50,7 @@ struct VertexOutput {
 @vertex
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
-    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
+    let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
     // [KO] 시스템 유니폼 변수 가져오기
     // [EN] Get system uniform variables
     let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
@@ -102,7 +102,7 @@ fn main(inputData: InputData) -> VertexOutput {
 fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
 
-    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
+    let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
     let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
     let u_viewMatrix = systemUniforms.camera.viewMatrix;
     let u_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;

@@ -287,8 +287,8 @@ class View3D extends AView {
             const skyAtmosphereReflectionLUT = skyAtmosphere?.skyAtmosphereReflectionLUT;
             const skyAtmosphereIrradianceLUT = skyAtmosphere?.skyAtmosphereIrradianceLUT;
 
-            const globalSSAOVertexGPUBuffer = redGPUContext.globalSSAOVertexBuffer.gpuBuffer;
-            const globalSSAOFragmentGPUBuffer = redGPUContext.globalSSAOFragmentBuffer.gpuBuffer;
+            const globalSSAOVertexGPUBuffer = redGPUContext.globalVertexUniformBuffer.gpuBuffer;
+            const globalSSAOFragmentGPUBuffer = redGPUContext.globalFragmentUniformBuffer.gpuBuffer;
 
             if (prevInfo) {
                 needResetBindGroup = (
@@ -473,9 +473,9 @@ class View3D extends AView {
                 {
                     binding: 17,
                     resource: {
-                        buffer: redGPUContext.globalSSAOVertexBuffer.gpuBuffer,
+                        buffer: redGPUContext.globalVertexUniformBuffer.gpuBuffer,
                         offset: 0,
-                        size: redGPUContext.globalSSAOVertexBuffer.gpuBuffer.size
+                        size: redGPUContext.globalVertexUniformBuffer.gpuBuffer.size
                     }
                 },
             ]

@@ -151,7 +151,7 @@ class Renderer {
             pixelRectObject,
             renderViewStateData,
         } = view
-        const {globalSSAOVertexBuffer} = redGPUContext
+        const {globalVertexUniformBuffer} = redGPUContext
         const {
             colorAttachment,
             depthStencilAttachment,
@@ -176,7 +176,7 @@ class Renderer {
                 view.clusterLightManager.updateClusterLights();
             }
             {
-                globalSSAOVertexBuffer.flush()
+                globalVertexUniformBuffer.flush()
             }
             {
                 const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)

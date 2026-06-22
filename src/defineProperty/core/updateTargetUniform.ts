@@ -19,11 +19,11 @@ const updateTargetUniform = (target: any, propertyKey: string, newValue: any) =>
         if (memberInfo) {
             const floatOffset = memberInfo.uniformOffset / 4;
             if (memberInfo.View === Uint32Array) {
-                redGPUContext.globalSSAOVertexBuffer.updateUintData(
+                redGPUContext.globalVertexUniformBuffer.updateUintData(
                     target.globalVertexBufferSlotIndex, new Uint32Array([newValue]), floatOffset
                 );
             } else {
-                redGPUContext.globalSSAOVertexBuffer.updateFloatData(
+                redGPUContext.globalVertexUniformBuffer.updateFloatData(
                     target.globalVertexBufferSlotIndex, new Float32Array([newValue]), floatOffset
                 );
             }

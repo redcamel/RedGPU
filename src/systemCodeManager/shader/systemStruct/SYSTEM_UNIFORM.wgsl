@@ -55,7 +55,7 @@ struct SystemUniform {
 @group(0) @binding(16) var skyAtmosphere_prefilteredTexture: texture_cube<f32>;
 
 #redgpu_include systemStruct.meshVertexBasicUniform;
-@group(0) @binding(17) var<storage> globalSSAOVertexBuffer : array<GlobalVertexUniforms>;
+@group(0) @binding(17) var<storage> globalVertexUniformBuffer : array<GlobalVertexUniforms>;
 
 #redgpu_include depth.getLinearizeDepth
 

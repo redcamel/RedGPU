@@ -135,7 +135,7 @@ fn main( inputData:InputData) -> VertexOutput {
   let u_viewMatrix = u_camera.viewMatrix;
   let u_cameraPosition = u_camera.cameraPosition;
   //
-  let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
+  let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
   let u_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
   let u_normalModelMatrix = globalVertexUniforms.matrixList.normalModelMatrix;
 //

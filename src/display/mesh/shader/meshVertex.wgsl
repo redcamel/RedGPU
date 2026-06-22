@@ -16,7 +16,7 @@ const maxDistance: f32 = 1000.0;
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
 
-    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
+    let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
 
     // System uniforms
     let su_projection = systemUniforms.projection;

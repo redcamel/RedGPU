@@ -60,7 +60,7 @@ struct VertexOutput {
 @vertex
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
-    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
+    let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
     // [KO] 빌보드 및 사이즈 보정 계산 결과 획득
     // [EN] Get billboard and size attenuation calculation results
     let billboardResult = getBillboardResult(

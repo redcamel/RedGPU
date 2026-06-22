@@ -58,7 +58,7 @@ struct VertexOutput {
 @vertex
 fn main(inputData: InputDataSkin) -> VertexOutput {
     var output: VertexOutput;
-    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
+    let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
     // [KO] 입력 데이터 처리
     // [EN] Process input data
     let input_position = inputData.position;
@@ -154,7 +154,7 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
 fn entryPointShadowVertex(inputData: InputDataSkin) -> OutputShadowData {
     var output: OutputShadowData;
 
-    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
+    let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
     let su_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
     let gu_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
     let input_position = inputData.position;
@@ -176,7 +176,7 @@ fn entryPointShadowVertex(inputData: InputDataSkin) -> OutputShadowData {
 fn entryPointPickingVertex(inputData: InputDataSkin) -> VertexOutput {
     var output: VertexOutput;
 
-    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
+    let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
 
     // [KO] 스키닝이 적용된 피킹 위치 계산
     // [EN] Calculate skinned picking position
