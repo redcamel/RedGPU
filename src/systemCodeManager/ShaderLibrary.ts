@@ -2050,14 +2050,15 @@ export namespace EntryPointLibrary {
          * fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
          *     var output: VertexOutput;
          *     let input_position = inputData.position;
-         *     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
+         *     let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
+         *     let u_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
          *     let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
          *     let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
          *     let u_camera = systemUniforms.camera;
          *     let u_viewMatrix = u_camera.viewMatrix;
          *     var position: vec4<f32> = u_modelMatrix * vec4<f32>(input_position, 1.0);
          *     output.position = u_projectionViewMatrix * position;
-         *     output.pickingId = unpack4x8unorm(vertexUniforms.pickingId);
+         *     output.pickingId = unpack4x8unorm(globalVertexUniforms.pickingId);
          *     return output;
          * }
          * ```
@@ -2157,7 +2158,7 @@ export namespace EntryPointLibrary {
          * fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
          *     var output: VertexOutput;
          *     let u_resolution = systemUniforms.resolution;
-         *     
+         *      let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
          *     #redgpu_if disableJitter
          *         let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionMatrix;
          *     #redgpu_else
@@ -2165,7 +2166,7 @@ export namespace EntryPointLibrary {
          *     #redgpu_endIf
          *     
          *     let u_viewMatrix = systemUniforms.camera.viewMatrix;
-         *     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
+         *     let u_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
          *     let u_useBillboard = vertexUniforms.useBillboard;
          *     let u_usePixelSize = vertexUniforms.usePixelSize;
          *     let u_pixelSize = vertexUniforms.pixelSize;
@@ -2198,8 +2199,8 @@ export namespace EntryPointLibrary {
          *     } else {
          *         output.position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * ratioScaleMatrix * vec4<f32>(inputData.position, 1.0);
          *     }
-         * 
-         *     output.pickingId = unpack4x8unorm(vertexUniforms.pickingId);
+         *
+         *     output.pickingId = unpack4x8unorm(globalVertexUniforms.pickingId);
          *     return output;
          * }
          * ```
@@ -2630,6 +2631,9 @@ export namespace ShaderLibrary {
      * 
      * @group(0) @binding(15) var atmosphereIrradianceLUT: texture_cube<f32>;
      * @group(0) @binding(16) var skyAtmosphere_prefilteredTexture: texture_cube<f32>;
+     *
+     * #redgpu_include systemStruct.meshVertexBasicUniform;
+     * @group(0) @binding(17) var<storage> globalSSAOVertexBuffer : array<GlobalVertexUniforms>;
      * 
      * #redgpu_include depth.getLinearizeDepth
      * 
