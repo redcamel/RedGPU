@@ -10,7 +10,7 @@ struct ParticleVertexUniforms {
 @group(1) @binding(0) var<uniform> vertexUniforms: ParticleVertexUniforms;
 
 struct InputData {
-    @builtin(instance_index) globalBufferSlotIndex: u32,
+    @builtin(instance_index) globalVertexBufferSlotIndex: u32,
     @location(0) a_position : vec3<f32>,
     @location(1) a_normal : vec3<f32>,
     @location(2) a_uv : vec2<f32>,
@@ -136,7 +136,7 @@ fn main( inputData:InputData) -> VertexOutput {
   let u_viewMatrix = u_camera.viewMatrix;
   let u_cameraPosition = u_camera.cameraPosition;
   //
-  let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
+  let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
   let u_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
   let u_normalModelMatrix = globalVertexUniforms.matrixList.normalModelMatrix;
 //

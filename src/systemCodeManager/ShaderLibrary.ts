@@ -2050,7 +2050,7 @@ export namespace EntryPointLibrary {
          * fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
          *     var output: VertexOutput;
          *     let input_position = inputData.position;
-         *     let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
+         *     let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
          *     let u_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
          *     let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
          *     let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
@@ -2158,7 +2158,7 @@ export namespace EntryPointLibrary {
          * fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
          *     var output: VertexOutput;
          *     let u_resolution = systemUniforms.resolution;
-         *      let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
+         *      let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
          *     #redgpu_if disableJitter
          *         let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionMatrix;
          *     #redgpu_else

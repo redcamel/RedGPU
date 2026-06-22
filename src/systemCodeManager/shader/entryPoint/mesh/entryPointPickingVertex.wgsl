@@ -9,7 +9,7 @@
 fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
     let input_position = inputData.position;
-    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
+    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
     let u_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
     let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
     let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;

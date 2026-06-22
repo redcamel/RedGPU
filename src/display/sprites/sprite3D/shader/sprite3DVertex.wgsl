@@ -16,7 +16,7 @@ struct Sprite3DVertexUniforms {
 @group(1) @binding(0) var<uniform> vertexUniforms: Sprite3DVertexUniforms;
 
 struct InputData {
-    @builtin(instance_index) globalBufferSlotIndex: u32,
+    @builtin(instance_index) globalVertexBufferSlotIndex: u32,
     @location(0) position: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
@@ -43,7 +43,7 @@ struct VertexOutput {
 @vertex
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
-    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
+    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
     let billboardResult = getBillboardResult(
         inputData.position,
         inputData.vertexNormal,

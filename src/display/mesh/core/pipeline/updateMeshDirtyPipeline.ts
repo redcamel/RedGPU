@@ -23,21 +23,26 @@ const updateMeshDirtyPipeline = (
     if (material.dirtyPipeline) material._updateFragmentState()
     const vertexShader = createMeshVertexShaderModule(mesh)
     const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
-        mesh.animationInfo.skinInfo ? ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_SKIN : ResourceManager.PRESET_VERTEX_GPUBindGroupLayout
+        gpuRenderInfo.vertexStructInfo.uniforms.vertexUniforms ? ResourceManager.PRESET_VERTEX_GPUBindGroupLayout :
+            mesh.animationInfo.skinInfo ? ResourceManager.PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN : ResourceManager.PRESET_GLOBAL_VERTEX_GPUBindGroupLayout
     )
     gpuRenderInfo.vertexShaderModule = vertexShader
     gpuRenderInfo.pipeline = createBasePipeline(mesh, vertexShader, vertexBindGroupLayout)
     gpuRenderInfo.shadowPipeline = null
     gpuRenderInfo.pickingPipeline = null
-    const {vertexUniformInfo} = mesh.gpuRenderInfo
-    const {members} = vertexUniformInfo
-    for (const k in members) {
-        if (k !== 'pickingId' && k !== 'pixelSize') mesh[k] = mesh[k]
+    const {vertexUniformInfo, vertexUniformBuffer} = mesh.gpuRenderInfo
+
+    if (vertexUniformInfo) {
+        const {members} = vertexUniformInfo
+        for (const k in members) {
+            if (k !== 'pickingId' && k !== 'pixelSize') mesh[k] = mesh[k]
+        }
     }
+
     // if (mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId) {
     // mesh.gpuRenderInfo.vertexUniformBuffer.writeOnlyBuffer(mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId, mesh.pickingId)
     mesh.redGPUContext.globalSSAOVertexBuffer.updateUintData(
-        mesh.globalBufferSlotIndex,
+        mesh.globalVertexBufferSlotIndex,
         new Uint32Array([mesh.pickingId]),
         ResourceManager.GLOBAL_SSAO_VERTEX_STRUCT.members.pickingId.uniformOffset / 4
     )

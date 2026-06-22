@@ -4,7 +4,6 @@
 
 #redgpu_include systemStruct.meshVertexBasicUniform;
 
-@group(1) @binding(0) var<uniform> vertexUniforms: GlobalVertexUniforms;
 @group(1) @binding(1) var displacementTextureSampler: sampler;
 @group(1) @binding(2) var displacementTexture: texture_2d<f32>;
 @group(1) @binding(3) var<storage, read> vertexStorages: array<mat4x4<f32>>;
@@ -15,7 +14,7 @@
  * [EN] Vertex input structure for skinned meshes.
  */
 struct InputDataSkin {
-    @builtin(instance_index) globalBufferSlotIndex: u32,
+    @builtin(instance_index) globalVertexBufferSlotIndex: u32,
     @builtin(vertex_index) idx: u32,
     @location(0) position: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
@@ -59,7 +58,7 @@ struct VertexOutput {
 @vertex
 fn main(inputData: InputDataSkin) -> VertexOutput {
     var output: VertexOutput;
-    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
+    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
     // [KO] 입력 데이터 처리
     // [EN] Process input data
     let input_position = inputData.position;
@@ -68,29 +67,24 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
 
     // [KO] 시스템 유니폼 캐싱
     // [EN] Cache system uniforms
-    let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
-    let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
-    let u_noneJitterProjectionViewMatrix = systemUniforms.projection.noneJitterProjectionViewMatrix;
-    let u_prevNoneJitterProjectionViewMatrix = systemUniforms.projection.prevNoneJitterProjectionViewMatrix;
-    let u_resolution = systemUniforms.resolution;
-    let u_camera = systemUniforms.camera;
-    let u_viewMatrix = u_camera.viewMatrix;
-    let u_cameraPosition = u_camera.cameraPosition;
+    let su_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
+    let su_noneJitterProjectionViewMatrix = systemUniforms.projection.noneJitterProjectionViewMatrix;
+    let su_prevNoneJitterProjectionViewMatrix = systemUniforms.projection.prevNoneJitterProjectionViewMatrix;
+
+    let su_cameraPosition = systemUniforms.camera.cameraPosition;
 
     // [KO] 버텍스 유니폼 캐싱
     // [EN] Cache vertex uniforms
-    let u_matrixList = globalVertexUniforms.matrixList;
-    let u_localMatrix = u_matrixList.localMatrix;
-    let u_modelMatrix = u_matrixList.modelMatrix;
-    let u_prevModelMatrix = u_matrixList.prevModelMatrix;
-    let u_normalModelMatrix = u_matrixList.normalModelMatrix;
-    let u_receiveShadow = globalVertexUniforms.receiveShadow;
+    let gu_matrixList = globalVertexUniforms.matrixList;
+    let gu_localMatrix = gu_matrixList.localMatrix;
+    let gu_modelMatrix = gu_matrixList.modelMatrix;
+    let gu_prevModelMatrix = gu_matrixList.prevModelMatrix;
+    let gu_normalModelMatrix = gu_matrixList.normalModelMatrix;
+
 
     // [KO] 조명 데이터 캐싱
     // [EN] Cache lighting data
-    let u_directionalLightCount = systemUniforms.directionalLightCount;
-    let u_directionalLights = systemUniforms.directionalLights;
-    let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
+    let su_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
 
     // [KO] 스키닝 행렬 획득
     // [EN] Get skinning matrices
@@ -100,23 +94,23 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
     // [KO] 스킨드 포지션 및 월드 포지션 계산
     // [EN] Calculate skinned position and world position
     let skinnedPosition = (skinMat * vec4<f32>(inputData.position, 1.0));
-    let position = u_modelMatrix * skinnedPosition;
+    let position = gu_modelMatrix * skinnedPosition;
 
     // [KO] 스킨드 노말 및 최종 노말 변환
     // [EN] Calculate skinned normal and final normal transformation
     let skinnedNormal = (skinMat * vec4<f32>(input_vertexNormal, 0.0)).xyz;
-    let transformedNormal = normalize((u_normalModelMatrix * vec4<f32>(skinnedNormal, 0.0)).xyz);
+    let transformedNormal = normalize((gu_normalModelMatrix * vec4<f32>(skinnedNormal, 0.0)).xyz);
     output.vertexNormal = transformedNormal;
 
     // [KO] 탄젠트 변환 (노말과 동일하게 처리)
     // [EN] Tangent transformation (processed same as normal)
     let skinnedTangent = (skinMat * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
-    let transformedTangentXYZ = (u_normalModelMatrix * vec4<f32>(skinnedTangent, 0.0)).xyz;
+    let transformedTangentXYZ = (gu_normalModelMatrix * vec4<f32>(skinnedTangent, 0.0)).xyz;
     output.vertexTangent = vec4<f32>(normalize(transformedTangentXYZ), inputData.vertexTangent.w);
 
     // [KO] 출력 데이터 할당
     // [EN] Assign output data
-    output.position = u_projectionViewMatrix * position;
+    output.position = su_projectionViewMatrix * position;
     output.vertexPosition = position.xyz;
     output.uv = inputData.uv;
     output.uv1 = inputData.uv1;
@@ -126,7 +120,7 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
     // [EN] Calculate shadow coordinates
     #redgpu_if receiveShadow
     {
-        output.shadowCoord = getShadowCoord(position.xyz, u_directionalLightProjectionViewMatrix);
+        output.shadowCoord = getShadowCoord(position.xyz, su_directionalLightProjectionViewMatrix);
         output.receiveShadow = globalVertexUniforms.receiveShadow;
     }
     #redgpu_endIf
@@ -134,18 +128,18 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
     // [KO] 모션 벡터 계산을 위한 클립 좌표 저장
     // [EN] Store clip coordinates for motion vector calculation
     {
-        output.currentClipPos = u_noneJitterProjectionViewMatrix * position;
-        output.prevClipPos = u_prevNoneJitterProjectionViewMatrix * u_prevModelMatrix  * (prevSkinMat * input_position_vec4);
+        output.currentClipPos = su_noneJitterProjectionViewMatrix * position;
+        output.prevClipPos = su_prevNoneJitterProjectionViewMatrix * gu_prevModelMatrix  * (prevSkinMat * input_position_vec4);
     }
 
     // [KO] 노드 및 볼륨 스케일 계산
     // [EN] Calculate node and volume scales
-    let nodeScaleX = length(u_localMatrix[0].xyz);
-    let nodeScaleY = length(u_localMatrix[1].xyz);
-    let nodeScaleZ = length(u_localMatrix[2].xyz);
-    let volumeScaleX = length(u_modelMatrix[0].xyz);
-    let volumeScaleY = length(u_modelMatrix[1].xyz);
-    let volumeScaleZ = length(u_modelMatrix[2].xyz);
+    let nodeScaleX = length(gu_localMatrix[0].xyz);
+    let nodeScaleY = length(gu_localMatrix[1].xyz);
+    let nodeScaleZ = length(gu_localMatrix[2].xyz);
+    let volumeScaleX = length(gu_modelMatrix[0].xyz);
+    let volumeScaleY = length(gu_modelMatrix[1].xyz);
+    let volumeScaleZ = length(gu_modelMatrix[2].xyz);
 
     output.localNodeScale_volumeScale = vec2<f32>(
         pow(nodeScaleX * nodeScaleY * nodeScaleZ, 1.0 / 3.0),
@@ -163,16 +157,16 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
 fn entryPointShadowVertex(inputData: InputDataSkin) -> OutputShadowData {
     var output: OutputShadowData;
 
-    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
-    let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
-    let u_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
+    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
+    let su_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
+    let gu_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
     let input_position = inputData.position;
 
     // [KO] 스키닝이 적용된 그림자 위치 계산
     // [EN] Calculate skinned shadow position
     let skinMat = vertexStorages[inputData.idx];
-    let position = u_modelMatrix * skinMat * vec4<f32>(input_position, 1.0);
-    output.position = getShadowClipPosition(position.xyz, u_directionalLightProjectionViewMatrix);
+    let position = gu_modelMatrix * skinMat * vec4<f32>(input_position, 1.0);
+    output.position = getShadowClipPosition(position.xyz, su_directionalLightProjectionViewMatrix);
 
     return output;
 }
@@ -185,15 +179,15 @@ fn entryPointShadowVertex(inputData: InputDataSkin) -> OutputShadowData {
 fn entryPointPickingVertex(inputData: InputDataSkin) -> VertexOutput {
     var output: VertexOutput;
 
-    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
-    let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
-    let u_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
+    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
+    let su_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
+    let gu_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
 
     // [KO] 스키닝이 적용된 피킹 위치 계산
     // [EN] Calculate skinned picking position
     let skinMat = vertexStorages[inputData.idx];
-    let position = u_modelMatrix * skinMat * vec4<f32>(inputData.position, 1.0);
-    output.position = u_projectionViewMatrix * position;
+    let position = gu_modelMatrix * skinMat * vec4<f32>(inputData.position, 1.0);
+    output.position = su_projectionViewMatrix * position;
     output.pickingId = unpack4x8unorm(globalVertexUniforms.pickingId);
 
     return output;

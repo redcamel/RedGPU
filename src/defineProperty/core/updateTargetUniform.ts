@@ -13,18 +13,18 @@ const updateTargetUniform = (target: any, propertyKey: string, newValue: any) =>
     let targetUniformInfo;
     let targetUniformBuffer;
     const {gpuRenderInfo} = target
-    if (target.globalBufferSlotIndex !== undefined && target.globalBufferSlotIndex !== -1) {
+    if (target.globalVertexBufferSlotIndex !== undefined && target.globalVertexBufferSlotIndex !== -1) {
         const redGPUContext = target.redGPUContext;
         const memberInfo = ResourceManager.GLOBAL_SSAO_VERTEX_STRUCT.members[propertyKey];
         if (memberInfo) {
             const floatOffset = memberInfo.uniformOffset / 4;
             if (memberInfo.View === Uint32Array) {
                 redGPUContext.globalSSAOVertexBuffer.updateUintData(
-                    target.globalBufferSlotIndex, new Uint32Array([newValue]), floatOffset
+                    target.globalVertexBufferSlotIndex, new Uint32Array([newValue]), floatOffset
                 );
             } else {
                 redGPUContext.globalSSAOVertexBuffer.updateFloatData(
-                    target.globalBufferSlotIndex, new Float32Array([newValue]), floatOffset
+                    target.globalVertexBufferSlotIndex, new Float32Array([newValue]), floatOffset
                 );
             }
 

@@ -276,7 +276,7 @@ class Mesh extends MeshBase {
     #lodGPURenderInfoList: LODGPURenderInfo[] = [];
     #currentLODIndex: number = -1;
     #interleavedCullingID: number = Math.floor(Math.random() * 4)
-    #globalBufferSlotIndex: number = -1;
+    #globalVertexBufferSlotIndex: number = -1;
 
     /**
      * [KO] Mesh 인스턴스를 생성합니다.
@@ -306,15 +306,15 @@ class Mesh extends MeshBase {
             this.dirtyLOD = true;
         });
         const slot = redGPUContext.globalSSAOVertexBuffer.allocateSlot();
-        this.#globalBufferSlotIndex = slot.index;
+        this.#globalVertexBufferSlotIndex = slot.index;
     }
 
     /**
      * [KO] 글로벌 버퍼 슬롯 인덱스를 반환합니다.
      * [EN] Returns the global buffer slot index.
      */
-    get globalBufferSlotIndex(): number {
-        return this.#globalBufferSlotIndex;
+    get globalVertexBufferSlotIndex(): number {
+        return this.#globalVertexBufferSlotIndex;
     }
 
     /**
@@ -322,9 +322,9 @@ class Mesh extends MeshBase {
      * [EN] Disposes of the resources.
      */
     dispose() {
-        if (this.#globalBufferSlotIndex !== -1) {
-            this.redGPUContext.globalSSAOVertexBuffer.freeSlot(this.#globalBufferSlotIndex);
-            this.#globalBufferSlotIndex = -1;
+        if (this.#globalVertexBufferSlotIndex !== -1) {
+            this.redGPUContext.globalSSAOVertexBuffer.freeSlot(this.#globalVertexBufferSlotIndex);
+            this.#globalVertexBufferSlotIndex = -1;
         }
     }
 
@@ -1432,7 +1432,7 @@ class Mesh extends MeshBase {
                         this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
                         if (!this.#needUpdateMatrixUniform) {
                             redGPUContext.globalSSAOVertexBuffer.updateFloatData(
-                                this.#globalBufferSlotIndex,
+                                this.#globalVertexBufferSlotIndex,
                                 this.#prevModelMatrix,
                                 vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset / 4
                             )
@@ -1494,10 +1494,8 @@ class Mesh extends MeshBase {
             }
 
             {
-                const {gpuRenderInfo, redGPUContext} = this
-                const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
+                const {redGPUContext} = this
                 const {members: vertexUniformInfoMembers} = GLOBAL_SSAO_VERTEX_STRUCT
-                const {gpuBuffer: vertexUniformGPUBuffer} = vertexUniformBuffer
                 if (!this.#uniformDataMatrixList) {
                     this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
                 }
@@ -1515,7 +1513,7 @@ class Mesh extends MeshBase {
                         tempFloat32_4[3] = scale[1];
 
                         redGPUContext.globalSSAOVertexBuffer.updateFloatData(
-                            this.#globalBufferSlotIndex,
+                            this.#globalVertexBufferSlotIndex,
                             tempFloat32_4,
                             vertexUniformInfoMembers.uvTransform.uniformOffset / 4
                         );
@@ -1529,11 +1527,9 @@ class Mesh extends MeshBase {
             renderViewStateData.renderResults.num3DGroups++
         }
         if (currentGeometry && passFrustumCulling) {
-            const {gpuRenderInfo, redGPUContext} = this
-            const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
+            const {redGPUContext} = this
             const {members: vertexUniformInfoMembers} = GLOBAL_SSAO_VERTEX_STRUCT
             const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
-            const {gpuBuffer: vertexUniformGPUBuffer} = vertexUniformBuffer
             if (!this.#uniformDataMatrixList) {
                 this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
             }
@@ -1546,7 +1542,7 @@ class Mesh extends MeshBase {
                     // keepLog('실행을 하나보네',displacementScale)
                     tempFloat32_1[0] = displacementScale
                     redGPUContext.globalSSAOVertexBuffer.updateFloatData(
-                        this.#globalBufferSlotIndex,
+                        this.#globalVertexBufferSlotIndex,
                         tempFloat32_1,
                         vertexUniformInfoMembers.displacementScale.uniformOffset / 4
                     );
@@ -1629,7 +1625,7 @@ class Mesh extends MeshBase {
                 this.#needUpdateMatrixUniform = false
                 // keepLog('진짜 버퍼업로드', this.name)
                 redGPUContext.globalSSAOVertexBuffer.updateFloatData(
-                    this.#globalBufferSlotIndex,
+                    this.#globalVertexBufferSlotIndex,
                     this.#uniformDataMatrixList,
                     vertexUniformInfoMembers.matrixList.startOffset / 4
                 )
@@ -1639,7 +1635,7 @@ class Mesh extends MeshBase {
                 if (vertexUniformInfoMembers.combinedOpacity) {
                     tempFloat32_1[0] = this.getCombinedOpacity()
                     redGPUContext.globalSSAOVertexBuffer.updateFloatData(
-                        this.#globalBufferSlotIndex,
+                        this.#globalVertexBufferSlotIndex,
                         tempFloat32_1,
                         vertexUniformInfoMembers.combinedOpacity.uniformOffset / 4
                     );
@@ -1810,7 +1806,7 @@ class Mesh extends MeshBase {
         const {resourceManager} = redGPUContext
         this.#lodGPURenderInfoList.length = 0;
         const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
-            ResourceManager.PRESET_VERTEX_GPUBindGroupLayout,
+            ResourceManager.PRESET_GLOBAL_VERTEX_GPUBindGroupLayout,
         );
 
         this.LODManager.LODList.forEach((lod, index) => {
@@ -1945,9 +1941,9 @@ class Mesh extends MeshBase {
             // @ts-ignore
             if (this.particleBuffers) {
                 // @ts-ignore
-                drawBufferManager.setIndexedIndirectCommand(drawCommandSlot, indexCount, this.particleNum, 0, 0, this.#globalBufferSlotIndex)
+                drawBufferManager.setIndexedIndirectCommand(drawCommandSlot, indexCount, this.particleNum, 0, 0, this.#globalVertexBufferSlotIndex)
             } else {
-                drawBufferManager.setIndexedIndirectCommand(drawCommandSlot, indexCount, 1, 0, 0, this.#globalBufferSlotIndex)
+                drawBufferManager.setIndexedIndirectCommand(drawCommandSlot, indexCount, 1, 0, 0, this.#globalVertexBufferSlotIndex)
                 // {
                 //     const data = this.#drawCommandSlot.dataArray
                 //     const offset = this.#drawCommandSlot.commandOffset
@@ -1959,7 +1955,7 @@ class Mesh extends MeshBase {
             }
         } else {
             const {vertexCount} = vertexBuffer
-            drawBufferManager.setIndirectCommand(drawCommandSlot, vertexCount, 1, 0, this.#globalBufferSlotIndex)
+            drawBufferManager.setIndirectCommand(drawCommandSlot, vertexCount, 1, 0, this.#globalVertexBufferSlotIndex)
         }
     }
 

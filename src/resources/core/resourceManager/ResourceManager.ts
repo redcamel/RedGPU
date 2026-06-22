@@ -69,9 +69,10 @@ export type ResourceState = ResourceStateVertexBuffer
  */
 class ResourceManager extends RedGPUObject {
     static PRESET_GPUBindGroupLayout_System = 'PRESET_GPUBindGroupLayout_System'
-    static PRESET_VERTEX_GPUBindGroupLayout_Instancing = 'PRESET_VERTEX_GPUBindGroupLayout_Instancing'
+    static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_Instancing = 'PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_Instancing'
+    static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout = 'PRESET_GLOBAL_VERTEX_GPUBindGroupLayout'
     static PRESET_VERTEX_GPUBindGroupLayout = 'PRESET_VERTEX_GPUBindGroupLayout'
-    static PRESET_VERTEX_GPUBindGroupLayout_SKIN = 'PRESET_VERTEX_GPUBindGroupLayout_SKIN'
+    static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN = 'PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN'
     static GLOBAL_SSAO_VERTEX_STRUCT = GLOBAL_SSAO_VERTEX_STRUCT
 
     #resources = new ImmutableKeyMap([
@@ -790,6 +791,16 @@ class ResourceManager extends RedGPUObject {
                 }
             )
             this.createBindGroupLayout(
+                ResourceManager.PRESET_GLOBAL_VERTEX_GPUBindGroupLayout,
+                {
+                    entries: [
+
+                        {binding: 1, visibility: GPUShaderStage.VERTEX, sampler: {type: 'filtering'}},
+                        {binding: 2, visibility: GPUShaderStage.VERTEX, texture: {}}
+                    ],
+                }
+            )
+            this.createBindGroupLayout(
                 ResourceManager.PRESET_VERTEX_GPUBindGroupLayout,
                 {
                     entries: [
@@ -800,10 +811,9 @@ class ResourceManager extends RedGPUObject {
                 }
             )
             this.createBindGroupLayout(
-                ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_SKIN,
+                ResourceManager.PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN,
                 {
                     entries: [
-                        {binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {type: 'uniform'}},
                         {binding: 1, visibility: GPUShaderStage.VERTEX, sampler: {type: 'filtering'}},
                         {binding: 2, visibility: GPUShaderStage.VERTEX, texture: {}},
                         {binding: 3, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
@@ -812,7 +822,7 @@ class ResourceManager extends RedGPUObject {
                 }
             )
             this.createBindGroupLayout(
-                ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing,
+                ResourceManager.PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_Instancing,
                 {
                     entries: [
                         {binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},

@@ -26,7 +26,7 @@ struct TextFieldVertexUniforms {
  * [EN] Vertex input data structure.
  */
 struct InputData {
-    @builtin(instance_index) globalBufferSlotIndex: u32,
+    @builtin(instance_index) globalVertexBufferSlotIndex: u32,
     @location(0) position: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
@@ -54,7 +54,7 @@ struct VertexOutput {
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
 
-    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
+    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
     // [KO] TextField3D의 선명도를 위해 지터링이 제거된 투영 행렬(noneJitterProjectionMatrix)을 사용합니다.
     // [EN] Uses a jitter-free projection matrix (noneJitterProjectionMatrix) for the clarity of TextField3D.
     let billboardResult = getBillboardResult(

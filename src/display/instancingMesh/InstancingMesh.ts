@@ -631,7 +631,7 @@ class InstancingMesh extends Mesh {
             vModuleDescriptor,
         );
         const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
-            ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing,
+            ResourceManager.PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_Instancing,
         );
 
         // 메인 파이프라인
@@ -691,7 +691,7 @@ class InstancingMesh extends Mesh {
         const {basicSampler, basicDisplacementSampler, emptyBitmapTextureView} = resourceManager;
         const {gpuSampler: basicGPUSampler,} = basicSampler;
         const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
-            ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing,
+            ResourceManager.PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_Instancing,
         );
         const stride = this.#visibilityStrideBytes;
         const offset = stride * index;

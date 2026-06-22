@@ -8,7 +8,6 @@
 
 const maxDistance: f32 = 1000.0;
 
-@group(1) @binding(0) var<uniform> vertexUniforms: GlobalVertexUniforms;
 @group(1) @binding(1) var displacementTextureSampler: sampler;
 @group(1) @binding(2) var displacementTexture: texture_2d<f32>;
 
@@ -16,40 +15,41 @@ const maxDistance: f32 = 1000.0;
 @vertex
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
-    let vertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
+
+    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
+    let su_projection = systemUniforms.projection;
 
     // System uniforms
     #redgpu_if disableJitter
     {
-        let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionViewMatrix;
+        let su_projectionMatrix = su_projection.noneJitterProjectionViewMatrix;
     }
     #redgpu_else
     {
-        let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
+        let su_projectionMatrix = su_projection.projectionMatrix;
     }
     #redgpu_endIf
 
-    let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
-    let u_noneJitterProjectionViewMatrix = systemUniforms.projection.noneJitterProjectionViewMatrix;
-    let u_prevNoneJitterProjectionViewMatrix = systemUniforms.projection.prevNoneJitterProjectionViewMatrix;
-    let u_resolution = systemUniforms.resolution;
-    let u_camera = systemUniforms.camera;
-    let u_viewMatrix = u_camera.viewMatrix;
-    let u_cameraPosition = u_camera.cameraPosition;
+    let su_projectionViewMatrix = su_projection.projectionViewMatrix;
+    let su_noneJitterProjectionViewMatrix = su_projection.noneJitterProjectionViewMatrix;
+    let su_prevNoneJitterProjectionViewMatrix = su_projection.prevNoneJitterProjectionViewMatrix;
+
+    let u_cameraPosition = systemUniforms.camera.cameraPosition;
 
     // Vertex uniforms
-    let u_matrixList = vertexUniforms.matrixList;
-    let u_modelMatrix = u_matrixList.modelMatrix;
-    let u_prevModelMatrix = u_matrixList.prevModelMatrix;
-    let u_normalModelMatrix = u_matrixList.normalModelMatrix;
-    let u_displacementScale = vertexUniforms.displacementScale;
-    let u_useDisplacementTexture = vertexUniforms.useDisplacementTexture == 1u;
-    let u_receiveShadow = vertexUniforms.receiveShadow;
+    let gu_matrixList = globalVertexUniforms.matrixList;
+    let gu_displacementScale = globalVertexUniforms.displacementScale;
+    let gu_combinedOpacity = globalVertexUniforms.combinedOpacity;
 
-    // Light uniforms
-    let u_directionalLightCount = systemUniforms.directionalLightCount;
-    let u_directionalLights = systemUniforms.directionalLights;
-    let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
+
+
+    let gu_modelMatrix = gu_matrixList.modelMatrix;
+    let gu_prevModelMatrix = gu_matrixList.prevModelMatrix;
+    let gu_normalModelMatrix = gu_matrixList.normalModelMatrix;
+    let gu_receiveShadow = globalVertexUniforms.receiveShadow;
+    let gu_uvTransform = globalVertexUniforms.uvTransform;
+
+
 
     // Input data
     let input_position = inputData.position;
@@ -58,7 +58,7 @@ fn main(inputData: InputData) -> VertexOutput {
     let input_uv = inputData.uv;
 
     // [KO] 트랜스폼이 적용된 UV 계산
-    let transformedUV = input_uv * vertexUniforms.uvTransform.zw + vertexUniforms.uvTransform.xy;
+    let transformedUV = input_uv * gu_uvTransform.zw + gu_uvTransform.xy;
 
     // Position and normal calculation
     var position: vec4<f32>;
@@ -67,10 +67,10 @@ fn main(inputData: InputData) -> VertexOutput {
     #redgpu_if useDisplacementTexture
         // [KO] 실제 텍스처의 최대 밉레벨을 가져와서 거리에 비례한 샘플링 레벨을 결정합니다.
         // [EN] Get the actual maximum mip level of the texture and determine the sampling level proportional to the distance.
-        let tempPosition = u_modelMatrix * input_position_vec4;
+        let tempPosition = gu_modelMatrix * input_position_vec4;
         let distance = distance(tempPosition.xyz, u_cameraPosition);
         let maxMipLevel = f32(textureNumLevels(displacementTexture)) - 1.0;
-        
+
         // [KO] 거리에 따른 밉레벨 계산 (바이어스 제거)
         // [EN] Mip level calculation based on distance (remove bias)
         let targetMipLevel = clamp((distance / maxDistance) * maxMipLevel, 0.0, maxMipLevel);
@@ -81,43 +81,43 @@ fn main(inputData: InputData) -> VertexOutput {
             input_vertexNormal,
             displacementTexture,
             displacementTextureSampler,
-            u_displacementScale,
+            gu_displacementScale,
             transformedUV,
             targetMipLevel
         );
 
-        position = u_modelMatrix * vec4<f32>(displacedPosition, 1.0);
+        position = gu_modelMatrix * vec4<f32>(displacedPosition, 1.0);
     #redgpu_else
-        position = u_modelMatrix * input_position_vec4;
+        position = gu_modelMatrix * input_position_vec4;
     #redgpu_endIf
 
     // [KO] 방향 벡터 변환이므로 W=0.0 사용 및 정규화
-    let worldNormal = normalize((u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz);
+    let worldNormal = normalize((gu_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0)).xyz);
     let normalPosition = vec4<f32>(worldNormal, 0.0);
 
     // Basic output assignments
-    output.position = u_projectionViewMatrix * position;
+    output.position = su_projectionViewMatrix * position;
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition.xyz;
     output.uv = transformedUV;
 
-    let transformedTangentXYZ = (u_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
+    let transformedTangentXYZ = (gu_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
     output.vertexTangent = vec4<f32>(normalize(transformedTangentXYZ), inputData.vertexTangent.w);
 
-    output.combinedOpacity = vertexUniforms.combinedOpacity;
+    output.combinedOpacity = gu_combinedOpacity;
 
     // Shadow calculation
     #redgpu_if receiveShadow
     {
-        output.shadowCoord = getShadowCoord(position.xyz, u_directionalLightProjectionViewMatrix);
-        output.receiveShadow = vertexUniforms.receiveShadow;
+        output.shadowCoord = getShadowCoord(position.xyz, systemUniforms.directionalLightProjectionViewMatrix);
+        output.receiveShadow = gu_receiveShadow;
     }
     #redgpu_endIf
 
     // Motion vector calculation
     {
-      output.currentClipPos = u_noneJitterProjectionViewMatrix * position;
-      output.prevClipPos = u_prevNoneJitterProjectionViewMatrix * u_prevModelMatrix * input_position_vec4;
+      output.currentClipPos = su_noneJitterProjectionViewMatrix * position;
+      output.prevClipPos = su_prevNoneJitterProjectionViewMatrix * gu_prevModelMatrix * input_position_vec4;
     }
 
     return output;
