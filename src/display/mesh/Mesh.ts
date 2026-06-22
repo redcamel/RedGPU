@@ -27,7 +27,6 @@ import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
-import {keepLog} from "../../utils";
 
 const GLOBAL_SSAO_VERTEX_STRUCT = ResourceManager.GLOBAL_SSAO_VERTEX_STRUCT
 
@@ -1569,7 +1568,7 @@ class Mesh extends MeshBase {
                     // 	vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffset,
                     // 	modelMatrix
                     // )
-                    keepLog(GLOBAL_SSAO_VERTEX_STRUCT)
+                    // keepLog(GLOBAL_SSAO_VERTEX_STRUCT)
                     this.#uniformDataMatrixList.set(modelMatrix, vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
                 }
                 {

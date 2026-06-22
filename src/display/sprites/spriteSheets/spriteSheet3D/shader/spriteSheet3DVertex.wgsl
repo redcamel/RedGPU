@@ -8,8 +8,7 @@
  * [KO] 스프라이트 시트 3D를 위한 버텍스 유니폼 구조체입니다.
  * [EN] Vertex uniform structure for SpriteSheet 3D.
  */
-struct VertexUniforms {
-    pickingId: u32,
+struct SpriteSheet3DVertexUniforms {
     useSizeAttenuation: u32,
     useBillboard: u32,
     segmentW: f32,
@@ -22,7 +21,7 @@ struct VertexUniforms {
     _renderRatioY: f32,
 };
 
-@group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
+@group(1) @binding(0) var<uniform> vertexUniforms: SpriteSheet3DVertexUniforms;
 
 /**
  * [KO] 버텍스 입력 데이터 구조체입니다.

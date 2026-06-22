@@ -17,9 +17,10 @@ fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
 
     let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
-    let su_projection = systemUniforms.projection;
 
     // System uniforms
+    let su_projection = systemUniforms.projection;
+    let su_projectionViewMatrix = su_projection.projectionViewMatrix;
     #redgpu_if disableJitter
     {
         let su_projectionMatrix = su_projection.noneJitterProjectionViewMatrix;
@@ -30,26 +31,17 @@ fn main(inputData: InputData) -> VertexOutput {
     }
     #redgpu_endIf
 
-    let su_projectionViewMatrix = su_projection.projectionViewMatrix;
-    let su_noneJitterProjectionViewMatrix = su_projection.noneJitterProjectionViewMatrix;
-    let su_prevNoneJitterProjectionViewMatrix = su_projection.prevNoneJitterProjectionViewMatrix;
-
-    let u_cameraPosition = systemUniforms.camera.cameraPosition;
+    let su_cameraPosition = systemUniforms.camera.cameraPosition;
 
     // Vertex uniforms
     let gu_matrixList = globalVertexUniforms.matrixList;
     let gu_displacementScale = globalVertexUniforms.displacementScale;
     let gu_combinedOpacity = globalVertexUniforms.combinedOpacity;
-
-
+    let gu_uvTransform = globalVertexUniforms.uvTransform;
 
     let gu_modelMatrix = gu_matrixList.modelMatrix;
     let gu_prevModelMatrix = gu_matrixList.prevModelMatrix;
     let gu_normalModelMatrix = gu_matrixList.normalModelMatrix;
-    let gu_receiveShadow = globalVertexUniforms.receiveShadow;
-    let gu_uvTransform = globalVertexUniforms.uvTransform;
-
-
 
     // Input data
     let input_position = inputData.position;
@@ -68,7 +60,7 @@ fn main(inputData: InputData) -> VertexOutput {
         // [KO] 실제 텍스처의 최대 밉레벨을 가져와서 거리에 비례한 샘플링 레벨을 결정합니다.
         // [EN] Get the actual maximum mip level of the texture and determine the sampling level proportional to the distance.
         let tempPosition = gu_modelMatrix * input_position_vec4;
-        let distance = distance(tempPosition.xyz, u_cameraPosition);
+        let distance = distance(tempPosition.xyz, su_cameraPosition);
         let maxMipLevel = f32(textureNumLevels(displacementTexture)) - 1.0;
 
         // [KO] 거리에 따른 밉레벨 계산 (바이어스 제거)
@@ -110,14 +102,14 @@ fn main(inputData: InputData) -> VertexOutput {
     #redgpu_if receiveShadow
     {
         output.shadowCoord = getShadowCoord(position.xyz, systemUniforms.directionalLightProjectionViewMatrix);
-        output.receiveShadow = gu_receiveShadow;
+        output.receiveShadow = globalVertexUniforms.receiveShadow;
     }
     #redgpu_endIf
 
     // Motion vector calculation
     {
-      output.currentClipPos = su_noneJitterProjectionViewMatrix * position;
-      output.prevClipPos = su_prevNoneJitterProjectionViewMatrix * gu_prevModelMatrix * input_position_vec4;
+      output.currentClipPos = su_projection.noneJitterProjectionViewMatrix * position;
+      output.prevClipPos = su_projection.prevNoneJitterProjectionViewMatrix * gu_prevModelMatrix * input_position_vec4;
     }
 
     return output;

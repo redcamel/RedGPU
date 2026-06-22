@@ -2,7 +2,6 @@
 #redgpu_include math.billboard.getBillboardMatrix;
 
 struct ParticleVertexUniforms {
-
     useBillboardPerspective:u32,
     useBillboard:u32,
 };

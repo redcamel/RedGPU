@@ -21,18 +21,18 @@ fn main(inputData: InputData) -> VertexOutput {
 
     // System uniforms
     let su_projectionViewMatrix = su_projection.projectionViewMatrix;
-    let su_noneJitterProjectionViewMatrix = su_projection.noneJitterProjectionViewMatrix;
-    let su_prevNoneJitterProjectionViewMatrix = su_projection.prevNoneJitterProjectionViewMatrix;
 
-    let u_viewMatrix = systemUniforms.camera.viewMatrix;
+    let su_viewMatrix = systemUniforms.camera.viewMatrix;
 
     // Vertex uniforms
     let gu_matrixList = globalVertexUniforms.matrixList;
+    let gu_uvTransform = globalVertexUniforms.uvTransform;
+
     let gu_localMatrix = gu_matrixList.localMatrix;
     let gu_modelMatrix = gu_matrixList.modelMatrix;
-    let gu_normalModelMatrix = gu_matrixList.normalModelMatrix;
     let gu_prevModelMatrix = gu_matrixList.prevModelMatrix;
-    let gu_uvTransform = globalVertexUniforms.uvTransform;
+    let gu_normalModelMatrix = gu_matrixList.normalModelMatrix;
+
 
 
     // Position and normal calculation
@@ -65,8 +65,8 @@ fn main(inputData: InputData) -> VertexOutput {
 
     // Motion vector calculation
     {
-        output.currentClipPos = su_noneJitterProjectionViewMatrix * position;
-        output.prevClipPos = su_prevNoneJitterProjectionViewMatrix * gu_prevModelMatrix * input_position_vec4;
+        output.currentClipPos = su_projection.noneJitterProjectionViewMatrix * position;
+        output.prevClipPos = su_projection.prevNoneJitterProjectionViewMatrix * gu_prevModelMatrix * input_position_vec4;
     }
 
     // Scale calculations

@@ -67,11 +67,8 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
 
     // [KO] 시스템 유니폼 캐싱
     // [EN] Cache system uniforms
-    let su_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
-    let su_noneJitterProjectionViewMatrix = systemUniforms.projection.noneJitterProjectionViewMatrix;
-    let su_prevNoneJitterProjectionViewMatrix = systemUniforms.projection.prevNoneJitterProjectionViewMatrix;
-
-    let su_cameraPosition = systemUniforms.camera.cameraPosition;
+    let su_projection = systemUniforms.projection;
+    let su_projectionViewMatrix = su_projection.projectionViewMatrix;
 
     // [KO] 버텍스 유니폼 캐싱
     // [EN] Cache vertex uniforms
@@ -128,8 +125,8 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
     // [KO] 모션 벡터 계산을 위한 클립 좌표 저장
     // [EN] Store clip coordinates for motion vector calculation
     {
-        output.currentClipPos = su_noneJitterProjectionViewMatrix * position;
-        output.prevClipPos = su_prevNoneJitterProjectionViewMatrix * gu_prevModelMatrix  * (prevSkinMat * input_position_vec4);
+        output.currentClipPos = su_projection.noneJitterProjectionViewMatrix * position;
+        output.prevClipPos = su_projection.prevNoneJitterProjectionViewMatrix * gu_prevModelMatrix  * (prevSkinMat * input_position_vec4);
     }
 
     // [KO] 노드 및 볼륨 스케일 계산
@@ -180,14 +177,12 @@ fn entryPointPickingVertex(inputData: InputDataSkin) -> VertexOutput {
     var output: VertexOutput;
 
     let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalVertexBufferSlotIndex];
-    let su_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
-    let gu_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
 
     // [KO] 스키닝이 적용된 피킹 위치 계산
     // [EN] Calculate skinned picking position
     let skinMat = vertexStorages[inputData.idx];
-    let position = gu_modelMatrix * skinMat * vec4<f32>(inputData.position, 1.0);
-    output.position = su_projectionViewMatrix * position;
+    let position = globalVertexUniforms.matrixList.modelMatrix * skinMat * vec4<f32>(inputData.position, 1.0);
+    output.position = systemUniforms.projection.projectionViewMatrix * position;
     output.pickingId = unpack4x8unorm(globalVertexUniforms.pickingId);
 
     return output;

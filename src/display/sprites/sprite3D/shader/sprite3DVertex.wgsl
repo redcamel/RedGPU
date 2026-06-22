@@ -5,7 +5,6 @@
 #redgpu_include entryPoint.empty.entryPointShadowVertex;
 
 struct Sprite3DVertexUniforms {
-    pickingId: u32,
     useBillboard: u32,
     usePixelSize: u32,
     pixelSize: f32,
@@ -63,6 +62,7 @@ fn main(inputData: InputData) -> VertexOutput {
     output.vertexNormal = billboardResult.vertexNormal;
     output.uv = inputData.uv;
     output.combinedOpacity = globalVertexUniforms.combinedOpacity;
+
     return output;
 }
 

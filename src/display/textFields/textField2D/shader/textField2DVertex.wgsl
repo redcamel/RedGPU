@@ -2,16 +2,6 @@
 
 
 /**
- * [KO] TextField2D를 위한 버텍스 유니폼 구조체입니다.
- * [EN] Vertex uniform structure for TextField2D.
- */
-struct TextFieldVertexUniforms {
-    padding:f32
-};
-
-@group(1) @binding(0) var<uniform> vertexUniforms: TextFieldVertexUniforms;
-
-/**
  * [KO] 버텍스 입력 데이터 구조체입니다.
  * [EN] Vertex input data structure.
  */
