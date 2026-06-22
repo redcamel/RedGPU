@@ -12,7 +12,7 @@
 @vertex
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
-
+    let vertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
     // Input data
     let input_position = inputData.position;
     let input_position_vec4 = vec4<f32>(input_position, 1.0);

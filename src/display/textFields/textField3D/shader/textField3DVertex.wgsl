@@ -4,39 +4,29 @@
 #redgpu_include entryPoint.billboard.entryPointPickingVertex;
 #redgpu_include entryPoint.empty.entryPointShadowVertex;
 
-/**
- * [KO] 행렬 목록 구조체 정의입니다.
- * [EN] Matrix list structure definition.
- */
-struct MatrixList{
-    modelMatrix: mat4x4<f32>,
-    normalModelMatrix: mat4x4<f32>,
-}
+
 
 /**
  * [KO] TextField3D를 위한 버텍스 유니폼 구조체입니다.
  * [EN] Vertex uniform structure for TextField3D.
  */
-struct VertexUniforms {
-    pickingId: u32,
-    matrixList: MatrixList,
-    normalModelMatrix: mat4x4<f32>,
+struct TextFieldVertexUniforms {
     useSizeAttenuation: u32,
     useBillboard: u32,
     usePixelSize: u32,
     pixelSize: f32,
     _renderRatioX: f32,
     _renderRatioY: f32,
-    combinedOpacity: f32,
 };
 
-@group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
+@group(1) @binding(0) var<uniform> vertexUniforms: TextFieldVertexUniforms;
 
 /**
  * [KO] 버텍스 입력 데이터 구조체입니다.
  * [EN] Vertex input data structure.
  */
 struct InputData {
+    @builtin(instance_index) globalBufferSlotIndex: u32,
     @location(0) position: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
@@ -64,12 +54,13 @@ struct VertexOutput {
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
 
+    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
     // [KO] TextField3D의 선명도를 위해 지터링이 제거된 투영 행렬(noneJitterProjectionMatrix)을 사용합니다.
     // [EN] Uses a jitter-free projection matrix (noneJitterProjectionMatrix) for the clarity of TextField3D.
     let billboardResult = getBillboardResult(
         inputData.position,
         inputData.vertexNormal,
-        vertexUniforms.matrixList.modelMatrix,
+        globalVertexUniforms.matrixList.modelMatrix,
         systemUniforms.camera.viewMatrix,
         systemUniforms.projection.noneJitterProjectionMatrix,
         systemUniforms.resolution,
@@ -84,7 +75,7 @@ fn main(inputData: InputData) -> VertexOutput {
     output.vertexPosition = billboardResult.vertexPosition;
     output.vertexNormal = billboardResult.vertexNormal;
     output.uv = inputData.uv;
-    output.combinedOpacity = vertexUniforms.combinedOpacity;
+    output.combinedOpacity = globalVertexUniforms.combinedOpacity;
 
     return output;
 }

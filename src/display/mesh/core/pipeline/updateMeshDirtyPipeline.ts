@@ -34,9 +34,14 @@ const updateMeshDirtyPipeline = (
     for (const k in members) {
         if (k !== 'pickingId' && k !== 'pixelSize') mesh[k] = mesh[k]
     }
-    if (mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId) {
-        mesh.gpuRenderInfo.vertexUniformBuffer.writeOnlyBuffer(mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId, mesh.pickingId)
-    }
+    // if (mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId) {
+    // mesh.gpuRenderInfo.vertexUniformBuffer.writeOnlyBuffer(mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId, mesh.pickingId)
+    mesh.redGPUContext.globalSSAOVertexBuffer.updateUintData(
+        mesh.globalBufferSlotIndex,
+        new Uint32Array([mesh.pickingId]),
+        ResourceManager.GLOBAL_SSAO_VERTEX_STRUCT.members.pickingId.uniformOffset / 4
+    )
+    // }
     material.dirtyPipeline = false
     mesh.dirtyPipeline = false
     if (renderViewStateData) renderViewStateData.renderResults.numDirtyPipelines++

@@ -27,7 +27,9 @@ import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
+import {keepLog} from "../../utils";
 
+const GLOBAL_SSAO_VERTEX_STRUCT = ResourceManager.GLOBAL_SSAO_VERTEX_STRUCT
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -1424,7 +1426,7 @@ class Mesh extends MeshBase {
 
                     const {gpuRenderInfo, redGPUContext} = this
                     const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
-                    const {members: vertexUniformInfoMembers} = vertexUniformInfo
+                    const {members: vertexUniformInfoMembers} = GLOBAL_SSAO_VERTEX_STRUCT
                     const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
                     if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
                         this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
@@ -1494,7 +1496,7 @@ class Mesh extends MeshBase {
             {
                 const {gpuRenderInfo, redGPUContext} = this
                 const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
-                const {members: vertexUniformInfoMembers} = vertexUniformInfo
+                const {members: vertexUniformInfoMembers} = GLOBAL_SSAO_VERTEX_STRUCT
                 const {gpuBuffer: vertexUniformGPUBuffer} = vertexUniformBuffer
                 if (!this.#uniformDataMatrixList) {
                     this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
@@ -1529,7 +1531,7 @@ class Mesh extends MeshBase {
         if (currentGeometry && passFrustumCulling) {
             const {gpuRenderInfo, redGPUContext} = this
             const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
-            const {members: vertexUniformInfoMembers} = vertexUniformInfo
+            const {members: vertexUniformInfoMembers} = GLOBAL_SSAO_VERTEX_STRUCT
             const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
             const {gpuBuffer: vertexUniformGPUBuffer} = vertexUniformBuffer
             if (!this.#uniformDataMatrixList) {
@@ -1571,6 +1573,7 @@ class Mesh extends MeshBase {
                     // 	vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffset,
                     // 	modelMatrix
                     // )
+                    keepLog(GLOBAL_SSAO_VERTEX_STRUCT)
                     this.#uniformDataMatrixList.set(modelMatrix, vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
                 }
                 {
@@ -1942,7 +1945,7 @@ class Mesh extends MeshBase {
             // @ts-ignore
             if (this.particleBuffers) {
                 // @ts-ignore
-                drawBufferManager.setIndexedIndirectCommand(drawCommandSlot, indexCount, this.particleNum, 0, 0, 0)
+                drawBufferManager.setIndexedIndirectCommand(drawCommandSlot, indexCount, this.particleNum, 0, 0, this.#globalBufferSlotIndex)
             } else {
                 drawBufferManager.setIndexedIndirectCommand(drawCommandSlot, indexCount, 1, 0, 0, this.#globalBufferSlotIndex)
                 // {

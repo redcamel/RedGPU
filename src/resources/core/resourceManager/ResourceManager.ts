@@ -21,7 +21,11 @@ import ResourceStateBitmapTexture from "./resourceState/texture/ResourceStateBit
 import ResourceStateCubeTexture from "./resourceState/texture/ResourceStateCubeTexture";
 import ResourceStateHDRTexture from "./resourceState/texture/ResourceStateHDRTexture";
 import RedGPUObject from "../../../base/RedGPUObject";
+import parseWGSL from "../../wgslParser/parseWGSL";
+import ShaderLibrary from "../../../systemCodeManager/ShaderLibrary";
 
+const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
+const GLOBAL_SSAO_VERTEX_STRUCT = SHADER_INFO.storage.globalSSAOVertexBuffer.type.format;
 enum ResourceType {
     GPUShaderModule = 'GPUShaderModule',
     GPUBindGroupLayout = 'GPUBindGroupLayout',
@@ -68,6 +72,7 @@ class ResourceManager extends RedGPUObject {
     static PRESET_VERTEX_GPUBindGroupLayout_Instancing = 'PRESET_VERTEX_GPUBindGroupLayout_Instancing'
     static PRESET_VERTEX_GPUBindGroupLayout = 'PRESET_VERTEX_GPUBindGroupLayout'
     static PRESET_VERTEX_GPUBindGroupLayout_SKIN = 'PRESET_VERTEX_GPUBindGroupLayout_SKIN'
+    static GLOBAL_SSAO_VERTEX_STRUCT = GLOBAL_SSAO_VERTEX_STRUCT
 
     #resources = new ImmutableKeyMap([
         [ResourceType.GPUShaderModule, new Map()],

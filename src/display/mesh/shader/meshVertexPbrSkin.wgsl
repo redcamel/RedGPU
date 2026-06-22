@@ -15,6 +15,7 @@
  * [EN] Vertex input structure for skinned meshes.
  */
 struct InputDataSkin {
+    @builtin(instance_index) globalBufferSlotIndex: u32,
     @builtin(vertex_index) idx: u32,
     @location(0) position: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
@@ -58,7 +59,7 @@ struct VertexOutput {
 @vertex
 fn main(inputData: InputDataSkin) -> VertexOutput {
     var output: VertexOutput;
-
+    let vertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
     // [KO] 입력 데이터 처리
     // [EN] Process input data
     let input_position = inputData.position;

@@ -107,25 +107,13 @@ const convertMembersToKeyValue = (typeInfo) => {
     if (!typeInfo) return typeInfo;
     const newType = {...typeInfo};
     if (Array.isArray(newType.members)) {
-        newType.members = newType.members.reduce((prev, curr) => {
-            prev[curr.name] = {
-                ...curr,
-                type: convertMembersToKeyValue(curr.type)
-            };
-            return prev;
-        }, {});
+        const processed = processMembers(newType.members);
+        newType.members = processed.members;
     }
-    if (newType.format) {
+    if (newType.format && Array.isArray(newType.format.members)) {
         newType.format = {...newType.format};
-        if (Array.isArray(newType.format.members)) {
-            newType.format.members = newType.format.members.reduce((prev, curr) => {
-                prev[curr.name] = {
-                    ...curr,
-                    type: convertMembersToKeyValue(curr.type)
-                };
-                return prev;
-            }, {});
-        }
+        const processed = processMembers(newType.format.members);
+        newType.format.members = processed.members;
     }
     return newType;
 };

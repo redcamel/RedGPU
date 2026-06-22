@@ -4,24 +4,19 @@
 #redgpu_include entryPoint.billboard.entryPointPickingVertex;
 #redgpu_include entryPoint.empty.entryPointShadowVertex;
 
-struct MatrixList{
-    modelMatrix: mat4x4<f32>,
-    normalModelMatrix: mat4x4<f32>,
-}
-struct VertexUniforms {
-    matrixList:MatrixList,
+struct Sprite3DVertexUniforms {
     pickingId: u32,
     useBillboard: u32,
     usePixelSize: u32,
     pixelSize: f32,
     _renderRatioX: f32,
     _renderRatioY: f32,
-    combinedOpacity: f32,
 };
 
-@group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
+@group(1) @binding(0) var<uniform> vertexUniforms: Sprite3DVertexUniforms;
 
 struct InputData {
+    @builtin(instance_index) globalBufferSlotIndex: u32,
     @location(0) position: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
@@ -48,11 +43,11 @@ struct VertexOutput {
 @vertex
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
-
+    let globalVertexUniforms = globalSSAOVertexBuffer[inputData.globalBufferSlotIndex];
     let billboardResult = getBillboardResult(
         inputData.position,
         inputData.vertexNormal,
-        vertexUniforms.matrixList.modelMatrix,
+        globalVertexUniforms.matrixList.modelMatrix,
         systemUniforms.camera.viewMatrix,
         systemUniforms.projection.projectionMatrix,
         systemUniforms.resolution,
@@ -67,7 +62,7 @@ fn main(inputData: InputData) -> VertexOutput {
     output.vertexPosition = billboardResult.vertexPosition;
     output.vertexNormal = billboardResult.vertexNormal;
     output.uv = inputData.uv;
-    output.combinedOpacity = vertexUniforms.combinedOpacity;
+    output.combinedOpacity = globalVertexUniforms.combinedOpacity;
     return output;
 }
 

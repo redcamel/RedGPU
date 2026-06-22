@@ -178,7 +178,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#resourceManager = new ResourceManager(this)
         this.#commandEncoderManager = new CommandEncoderManager(this)
         this.#antialiasingManager = new AntialiasingManager()
-        this.#globalSSAOVertexBuffer = new GlobalStorageBufferManager(this, 304, 4096, "GLOBAL_SSAO_VERTEX_BUFFER")
+        this.#globalSSAOVertexBuffer = new GlobalStorageBufferManager(this, 304, 50000, "GLOBAL_SSAO_VERTEX_BUFFER")
         this.#globalSSAOFragmentBuffer = new GlobalStorageBufferManager(this, 912, 1024, "GLOBAL_SSAO_FRAGMENT_BUFFER")
         this.#initialize()
     }
