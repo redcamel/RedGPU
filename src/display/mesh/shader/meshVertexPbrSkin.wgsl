@@ -194,7 +194,7 @@ fn entryPointPickingVertex(inputData: InputDataSkin) -> VertexOutput {
     let skinMat = vertexStorages[inputData.idx];
     let position = u_modelMatrix * skinMat * vec4<f32>(inputData.position, 1.0);
     output.position = u_projectionViewMatrix * position;
-    output.pickingId = unpack4x8unorm(vertexUniforms.pickingId);
+    output.pickingId = unpack4x8unorm(globalVertexUniforms.pickingId);
 
     return output;
 }
