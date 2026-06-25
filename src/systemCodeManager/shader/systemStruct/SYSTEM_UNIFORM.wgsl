@@ -57,6 +57,11 @@ struct SystemUniform {
 #redgpu_include systemStruct.meshVertexBasicUniform;
 @group(0) @binding(17) var<storage> globalVertexUniformBuffer : array<GlobalVertexUniforms>;
 
+struct GlobalFragmentUniforms {
+    data: array<vec4<f32>, 57>
+};
+@group(0) @binding(18) var<storage> globalFragmentUniformBuffer : array<GlobalFragmentUniforms>;
+
 #redgpu_include depth.getLinearizeDepth
 
 const clusterLight_indicesLength:u32 = u32(REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTERu * REDGPU_DEFINE_TOTAL_TILESu);
