@@ -31,14 +31,7 @@ struct InputData {
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
-    let globalFragmentUniform = globalFragmentUniformBuffer[inputData.globalFragmentBufferSlotIndex].data;
-    let uniforms = Uniforms(
-        globalFragmentUniform[0].xyz, // color
-        globalFragmentUniform[0].w,   // opacity
-        u32(globalFragmentUniform[1].x), // useTint (u32 캐스팅)
-        u32(globalFragmentUniform[1].y),  // tintBlendMode (u32 캐스팅)
-        globalFragmentUniform[2],  // tint
-    );
+    #redgpu_restore_fragment_uniforms
     var finalColor = vec4<f32>( uniforms.color.r , uniforms.color.g , uniforms.color.b , uniforms.opacity * inputData.combinedOpacity);
     #redgpu_if useTint
         finalColor = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);

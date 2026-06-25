@@ -166,6 +166,65 @@ const processStructs = (structs) => {
     }, {});
 };
 
+/**
+ * [KO] Uniforms 구조체의 멤버 정보를 기반으로 WGSL 복원 코드를 생성합니다.
+ * [EN] Generates WGSL restore code based on the member information of the Uniforms struct.
+ */
+const generateRestoreCode = (uniformsStruct: any): string => {
+    if (!uniformsStruct || !uniformsStruct.members) return '';
+    const sortedMembers = Object.entries(uniformsStruct.members).sort((a: any, b: any) => a[1].uniformOffset - b[1].uniformOffset);
+    const lines: string[] = [];
+    for (const [name, memberVal] of sortedMembers) {
+        const member = memberVal as any;
+        const offset = member.uniformOffset;
+        const typeInfo = member.typeInfo;
+        if (!typeInfo) continue;
+
+        const vec4Index = Math.floor(offset / 16);
+        const floatOffset = (offset % 16) / 4;
+        const numElements = typeInfo.numElements;
+        const baseType = typeInfo.type;
+
+        let accessStr = '';
+        if (numElements === 4) {
+            accessStr = `globalFragmentUniform[${vec4Index}]`;
+        } else if (numElements === 3) {
+            const swizzles = ['xyz', 'yzw'];
+            const swizzle = swizzles[floatOffset] || 'xyz';
+            accessStr = `globalFragmentUniform[${vec4Index}].${swizzle}`;
+        } else if (numElements === 2) {
+            const swizzles = ['xy', 'yz', 'zw'];
+            const swizzle = swizzles[floatOffset] || 'xy';
+            accessStr = `globalFragmentUniform[${vec4Index}].${swizzle}`;
+        } else if (numElements === 1) {
+            const swizzles = ['x', 'y', 'z', 'w'];
+            const swizzle = swizzles[floatOffset] || 'x';
+            accessStr = `globalFragmentUniform[${vec4Index}].${swizzle}`;
+        }
+
+        let castedAccess = accessStr;
+        if (baseType === 'u32') {
+            if (numElements > 1) {
+                castedAccess = `vec${numElements}<u32>(${accessStr})`;
+            } else {
+                castedAccess = `u32(${accessStr})`;
+            }
+        } else if (baseType === 'i32') {
+            if (numElements > 1) {
+                castedAccess = `vec${numElements}<i32>(${accessStr})`;
+            } else {
+                castedAccess = `i32(${accessStr})`;
+            }
+        }
+        lines.push(`        ${castedAccess}, // ${name}`);
+    }
+
+    return `let globalFragmentUniform = globalFragmentUniformBuffer[inputData.globalFragmentBufferSlotIndex].data;
+    let uniforms = Uniforms(
+${lines.join('\n')}
+    );`;
+};
+
 const reflectCache = new Map<string, any>();
 
 /**
@@ -205,6 +264,7 @@ const parseWGSL = (sourceName: string, code: string, injectLibrary?: Record<stri
     if (!sourceName) {
         throw new Error(`[parseWGSL] sourceName is required. (provided: ${sourceName})`);
     }
+    const hasRestorePlaceHolder = code.includes('#redgpu_restore_fragment_uniforms');
     code = ensureVertexIndexBuiltin(code)
     const {
         defaultSource,
@@ -219,7 +279,7 @@ const parseWGSL = (sourceName: string, code: string, injectLibrary?: Record<stri
         reflectResult = cachedReflect
     } else {
         console.log('🔄 리플렉트 파싱 시작:', cacheKey);
-        const reflect = new WgslReflect(defaultSource);
+        const reflect = new WgslReflect(defaultSource.replace(/#redgpu_restore_fragment_uniforms/g, ''));
         reflectResult = {
             uniforms: {...processUniforms(reflect.uniforms)},
             storage: {...processStorages(reflect.storage)},
@@ -239,7 +299,7 @@ const parseWGSL = (sourceName: string, code: string, injectLibrary?: Record<stri
         // [EN] Collect textures/samplers added for each conditional key
         uniqueKeys.forEach(key => {
             const variantSource = shaderSourceVariant.getVariant(key);
-            const variantReflect = new WgslReflect(variantSource);
+            const variantReflect = new WgslReflect(variantSource.replace(/#redgpu_restore_fragment_uniforms/g, ''));
             const extraTextures = variantReflect.textures.filter(t =>
                 !reflectResult.textures.find(bt => bt.name === t.name)
             );
@@ -256,18 +316,29 @@ const parseWGSL = (sourceName: string, code: string, injectLibrary?: Record<stri
 
         reflectCache.set(cacheKey, reflectResult);
     }
+
+    if (hasRestorePlaceHolder) {
+        const uniformsStruct = reflectResult.structs['Uniforms'];
+        const restoreCode = uniformsStruct ? generateRestoreCode(uniformsStruct) : '';
+        shaderSourceVariant.setRestoreCode(restoreCode);
+    }
+
+    const finalDefaultSource = hasRestorePlaceHolder
+        ? shaderSourceVariant.getVariant('none')
+        : defaultSource;
+
     keepLog(
         sourceName,
         {
             ...reflectResult,
-            defaultSource,
+            defaultSource: finalDefaultSource,
             shaderSourceVariant,
             conditionalBlocks: uniqueKeys
         }
     )
     return {
         ...reflectResult,
-        defaultSource,
+        defaultSource: finalDefaultSource,
         shaderSourceVariant,
         conditionalBlocks: uniqueKeys
     };
