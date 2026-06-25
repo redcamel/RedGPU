@@ -27,7 +27,6 @@ struct InputData {
   @location(15) @interpolate(flat) pickingId: vec4<f32>,
 }
 
-//@group(2) @binding(0) var<uniform> uniforms: Uniforms;
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
