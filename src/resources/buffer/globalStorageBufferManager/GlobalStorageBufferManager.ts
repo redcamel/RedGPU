@@ -68,15 +68,15 @@ class GlobalStorageBufferManager extends RedGPUObject {
     #safeMaxBufferSize: number;
 
     /**
-     * [KO] GPU 전송을 위해 추적 중인 더티 슬롯의 최소 인덱스입니다.
-     * [EN] The minimum index of the dirty slot being tracked for GPU transfer.
+     * [KO] GPU 전송을 위해 추적 중인 더티 슬롯 인덱스 플래그 배열입니다.
+     * [EN] Array of dirty slot index flags tracked for GPU transfer.
      */
-    #dirtyMin = Infinity;
+    #dirtyFlags!: Uint8Array;
     /**
-     * [KO] GPU 전송을 위해 추적 중인 더티 슬롯의 최대 인덱스입니다.
-     * [EN] The maximum index of the dirty slot being tracked for GPU transfer.
+     * [KO] GPU 전송을 위해 추적 중인 더티 슬롯 인덱스 목록입니다.
+     * [EN] List of dirty slot indices tracked for GPU transfer.
      */
-    #dirtyMax = -Infinity;
+    #dirtySlots: number[] = [];
 
     /**
      * [KO] 버퍼 리사이징이 완료되었을 때 바인드 그룹 갱신 등을 수행하기 위한 콜백입니다.
@@ -156,19 +156,11 @@ class GlobalStorageBufferManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 현재 더티로 추적된 슬롯의 최소 인덱스를 반환합니다. (디버그 및 테스트 용도)
-     * [EN] Returns the minimum index of the slot currently tracked as dirty. (For debugging and testing purposes)
+     * [KO] 현재 더티로 추적된 슬롯 인덱스 목록을 반환합니다. (디버그 및 테스트 용도)
+     * [EN] Returns the list of slot indices currently tracked as dirty. (For debugging and testing purposes)
      */
-    get dirtyMin(): number {
-        return this.#dirtyMin;
-    }
-
-    /**
-     * [KO] 현재 더티로 추적된 슬롯의 최대 인덱스를 반환합니다. (디버그 및 테스트 용도)
-     * [EN] Returns the maximum index of the slot currently tracked as dirty. (For debugging and testing purposes)
-     */
-    get dirtyMax(): number {
-        return this.#dirtyMax;
+    get dirtySlots(): number[] {
+        return this.#dirtySlots;
     }
 
     /**
@@ -267,8 +259,10 @@ class GlobalStorageBufferManager extends RedGPUObject {
         const baseFloatOffset = (index * this.#elementSize) / 4 + floatOffsetInsideElement;
         this.#floatView.set(data, baseFloatOffset);
 
-        this.#dirtyMin = Math.min(this.#dirtyMin, index);
-        this.#dirtyMax = Math.max(this.#dirtyMax, index);
+        if (!this.#dirtyFlags[index]) {
+            this.#dirtyFlags[index] = 1;
+            this.#dirtySlots.push(index);
+        }
     }
 
     /**
@@ -294,8 +288,10 @@ class GlobalStorageBufferManager extends RedGPUObject {
         const baseUintOffset = (index * this.#elementSize) / 4 + uintOffsetInsideElement;
         this.#uintView.set(data, baseUintOffset);
 
-        this.#dirtyMin = Math.min(this.#dirtyMin, index);
-        this.#dirtyMax = Math.max(this.#dirtyMax, index);
+        if (!this.#dirtyFlags[index]) {
+            this.#dirtyFlags[index] = 1;
+            this.#dirtySlots.push(index);
+        }
     }
 
     /**
@@ -303,23 +299,47 @@ class GlobalStorageBufferManager extends RedGPUObject {
      * [EN] Uploads only the dirty-tracked range (the portion with modified data) to the GPU memory.
      */
     flush(): void {
-        if (this.#dirtyMax >= this.#dirtyMin) {
-            const startByte = this.#dirtyMin * this.#elementSize;
-            const endByte = (this.#dirtyMax + 1) * this.#elementSize;
-            const uploadSize = endByte - startByte;
+        if (this.#dirtySlots.length > 0) {
+            // 인덱스 오름차순 정렬
+            this.#dirtySlots.sort((a, b) => a - b);
 
-            this.gpuDevice.queue.writeBuffer(
-                this.#gpuBuffer,
-                startByte,
-                this.#cpuData,
-                startByte,
-                uploadSize
-            );
+            let startIdx = this.#dirtySlots[0];
+            let prevIdx = startIdx;
 
-            // 더티 플래그 초기화
-            this.#dirtyMin = Infinity;
-            this.#dirtyMax = -Infinity;
+            for (let i = 1; i < this.#dirtySlots.length; i++) {
+                const currIdx = this.#dirtySlots[i];
+                if (currIdx === prevIdx + 1) {
+                    // 연속된 인덱스는 병합 대상
+                    prevIdx = currIdx;
+                } else {
+                    // 끊겼으므로 이전 청크 업로드
+                    this.#uploadSlotRange(startIdx, prevIdx);
+                    startIdx = currIdx;
+                    prevIdx = currIdx;
+                }
+            }
+            // 마지막 남은 청크 업로드
+            this.#uploadSlotRange(startIdx, prevIdx);
+
+            // 더티 상태 초기화
+            for (let i = 0; i < this.#dirtySlots.length; i++) {
+                this.#dirtyFlags[this.#dirtySlots[i]] = 0;
+            }
+            this.#dirtySlots.length = 0;
         }
+    }
+
+    #uploadSlotRange(startIdx: number, endIdx: number): void {
+        const startByte = startIdx * this.#elementSize;
+        const uploadSize = (endIdx - startIdx + 1) * this.#elementSize;
+
+        this.gpuDevice.queue.writeBuffer(
+            this.#gpuBuffer,
+            startByte,
+            this.#cpuData,
+            startByte,
+            uploadSize
+        );
     }
 
     #initializeManager(): void {
@@ -348,6 +368,7 @@ class GlobalStorageBufferManager extends RedGPUObject {
         this.#cpuData = new ArrayBuffer(byteSize);
         this.#floatView = new Float32Array(this.#cpuData);
         this.#uintView = new Uint32Array(this.#cpuData);
+        this.#dirtyFlags = new Uint8Array(this.#totalSlotCount);
     }
 
     /**
@@ -379,12 +400,9 @@ class GlobalStorageBufferManager extends RedGPUObject {
         newFloatView.set(this.#floatView);
 
         // 3. GPU 하드웨어 가속 복사 커맨드 실행
-        const commandEncoder = this.gpuDevice.createCommandEncoder();
-        // commandEncoder.copyBufferToBuffer(oldBuffer, 0, newBuffer, 0, oldByteSize);
         this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (encoder) => {
-            encoder.copyBufferToBuffer(oldBuffer, 0, oldBuffer, 0, oldByteSize);
+            encoder.copyBufferToBuffer(oldBuffer, 0, newBuffer, 0, oldByteSize);
         });
-        this.gpuDevice.queue.submit([commandEncoder.finish()]);
 
         // 4. 기존 GPU 버퍼 해제 및 바인딩 교체
         oldBuffer.destroy();
@@ -393,7 +411,12 @@ class GlobalStorageBufferManager extends RedGPUObject {
         this.#floatView = newFloatView;
         this.#uintView = new Uint32Array(newCpuData);
 
-        // 5. 바인드그룹 재생성을 위해 외부 콜백 실행
+        // 5. 더티 플래그 배열 확장
+        const newDirtyFlags = new Uint8Array(newSlotCount);
+        newDirtyFlags.set(this.#dirtyFlags);
+        this.#dirtyFlags = newDirtyFlags;
+
+        // 6. 바인드그룹 재생성을 위해 외부 콜백 실행
         if (this.#onResizeCallback) {
             this.#onResizeCallback(this);
         }

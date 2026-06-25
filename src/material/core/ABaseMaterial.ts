@@ -12,7 +12,6 @@ import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroup
 import definePositiveNumber from "../../defineProperty/funcs/number/definePositiveNumber";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import defineColorRGBA from "../../defineProperty/funcs/color/defineColorRGBA";
-import {keepLog} from "../../utils";
 
 
 interface ABaseMaterial {
@@ -184,7 +183,7 @@ abstract class ABaseMaterial extends ResourceBase {
         this.#TEXTURE_STRUCT = SHADER_INFO.shaderSourceVariant.getUnionTextures();
         this.#SAMPLER_STRUCT = SHADER_INFO.shaderSourceVariant.getUnionSamplers();
         this.#globalFragmentBufferSlotIndex = redGPUContext.globalFragmentUniformBuffer.allocateSlot().index
-        keepLog(' this.#globalFragmentBufferSlotIndex ', this.#globalFragmentBufferSlotIndex)
+        // keepLog(' this.#globalFragmentBufferSlotIndex ', this.#globalFragmentBufferSlotIndex)
         this.#bindGroupLayout = resourceManager.getGPUBindGroupLayout(this.#FRAGMENT_BIND_GROUP_LAYOUT_NAME) || resourceManager.createBindGroupLayout(
             this.#FRAGMENT_BIND_GROUP_LAYOUT_NAME,
             getFragmentBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, targetGroupIndex)

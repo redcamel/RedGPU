@@ -1,5 +1,4 @@
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
-import {keepLog} from "../../utils";
 
 
 /**
@@ -42,7 +41,7 @@ const updateTargetUniform = (target: any, propertyKey: string, newValue: any) =>
 
         const redGPUContext = target.redGPUContext;
         if (gpuRenderInfo && gpuRenderInfo.fragmentUniformInfo) {
-            keepLog(target.globalFragmentBufferSlotIndex, propertyKey, newValue, target.gpuRenderInfo)
+            // keepLog(target.globalFragmentBufferSlotIndex, propertyKey, newValue, target.gpuRenderInfo)
             const memberInfo = gpuRenderInfo.fragmentUniformInfo.members[propertyKey];
             if (memberInfo) {
                 const floatOffset = memberInfo.uniformOffset / 4;

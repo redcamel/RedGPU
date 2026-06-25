@@ -40,6 +40,7 @@ struct VertexOutput {
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
 
+    @location(9) @interpolate(flat) globalFragmentBufferSlotIndex: u32,
     @location(10) localNodeScale_volumeScale: vec2<f32>,
     @location(11) combinedOpacity: f32,
 
@@ -112,6 +113,7 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
     output.uv = inputData.uv;
     output.uv1 = inputData.uv1;
     output.vertexColor_0 = inputData.vertexColor_0;
+    output.globalFragmentBufferSlotIndex = globalVertexUniforms.globalFragmentBufferSlotIndex;
 
     // [KO] 그림자 좌표 계산
     // [EN] Calculate shadow coordinates

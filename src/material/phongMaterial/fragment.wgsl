@@ -55,6 +55,7 @@ struct InputData {
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
 
+    @location(10) @interpolate(flat) globalFragmentBufferSlotIndex: u32,
     @location(11) combinedOpacity: f32,
     //
     @location(12) motionVector: vec3<f32>,
@@ -63,7 +64,6 @@ struct InputData {
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 }
 
-@group(2) @binding(0) var<uniform> uniforms: Uniforms;
 @group(2) @binding(1) var diffuseTextureSampler: sampler;
 @group(2) @binding(2) var diffuseTexture: texture_2d<f32>;
 @group(2) @binding(3) var alphaTextureSampler: sampler;
@@ -152,7 +152,7 @@ fn getSpecularBRDF(
 @fragment
 fn main(inputData:InputData) -> OutputFragment {
     var output: OutputFragment;
-
+    #redgpu_restore_fragment_uniforms
     // [KO] 입력 데이터 추출 [EN] Extract input data
     let input_vertexNormal = inputData.vertexNormal.xyz;
     let input_vertexPosition = inputData.vertexPosition.xyz;

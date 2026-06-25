@@ -6,7 +6,6 @@ import Box from "../../../primitive/Box";
 import Primitive from "../../../primitive/core/Primitive";
 import DepthStencilState from "../../../renderState/DepthStencilState";
 import PrimitiveState from "../../../renderState/PrimitiveState";
-import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
 import ResourceManager from "../../../resources/core/resourceManager/ResourceManager";
 import CubeTexture from "../../../resources/texture/CubeTexture";
 import DirectCubeTexture from "../../../resources/texture/DirectCubeTexture";
@@ -23,7 +22,7 @@ import RedGPUObject from "../../../base/RedGPUObject";
 /** 파싱된 WGSL 셰이더 정보 */
 const SHADER_INFO = parseWGSL('SKYBOX_VERTEX', vertexModuleSource)
 /** 버텍스 유니폼 구조체 정보 */
-const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
+const UNIFORM_STRUCT = ResourceManager.GLOBAL_SSAO_VERTEX_STRUCT;
 /** 버텍스 셰이더 모듈 이름 */
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SKYBOX'
 /** 버텍스 바인드 그룹 디스크립터 이름 */
@@ -80,7 +79,7 @@ class SkyBox extends RedGPUObject {
     #prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
     #luminance: number = 25000.0;
     #lastUpdateMSAAID: string
-
+    #globalVertexBufferSlotIndex: number = -1
     /**
      * [KO] SkyBox 인스턴스를 생성합니다.
      * [EN] Creates an instance of SkyBox.
@@ -104,6 +103,8 @@ class SkyBox extends RedGPUObject {
         this.#primitiveState.cullMode = GPU_CULL_MODE.NONE
         this.#depthStencilState = new DepthStencilState(this)
         this.#depthStencilState.depthWriteEnabled = false
+        const slot = redGPUContext.globalVertexUniformBuffer.allocateSlot();
+        this.#globalVertexBufferSlotIndex = slot.index;
     }
 
     /**
@@ -249,7 +250,7 @@ class SkyBox extends RedGPUObject {
                 bundleEncoder.setBindGroup(1, vertexUniformBindGroup);
                 bundleEncoder.setBindGroup(2, this.#material.gpuRenderInfo.fragmentUniformBindGroup)
                 bundleEncoder.setIndexBuffer(indexBuffer.gpuBuffer, format)
-                bundleEncoder.drawIndexed(indexBuffer.indexCount, 1, 0, 0, 0);
+                bundleEncoder.drawIndexed(indexBuffer.indexCount, 1, 0, 0, this.#globalVertexBufferSlotIndex);
                 this.#renderBundle = bundleEncoder.finish({label: 'renderBundle skybox'})
             }
         }
@@ -276,24 +277,29 @@ class SkyBox extends RedGPUObject {
             'SKYBOX_VERTEX_BIND_GROUP_LAYOUT',
             getVertexBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, 1)
         )
-        const vertexUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
-        const vertexUniformBuffer: UniformBuffer = new UniformBuffer(redGPUContext, vertexUniformData, 'SKYBOX_VERTEX_UNIFORM_BUFFER', 'SKYBOX_VERTEX_UNIFORM_BUFFER')
-        mat4.identity(this.modelMatrix);
-        vertexUniformBuffer.writeOnlyBuffer(UNIFORM_STRUCT.members.modelMatrix, this.modelMatrix)
+
+        redGPUContext.globalVertexUniformBuffer.updateFloatData(
+            this.#globalVertexBufferSlotIndex,
+            new Float32Array(this.modelMatrix),
+            UNIFORM_STRUCT.members.matrixList.members.modelMatrix.uniformOffset / 4
+        );
 
         const vertexBindGroupDescriptor: GPUBindGroupDescriptor = {
             layout: vertex_BindGroupLayout,
             label: VERTEX_BIND_GROUP_DESCRIPTOR_NAME,
-            entries: [{
-                binding: 0,
-                resource: {buffer: vertexUniformBuffer.gpuBuffer, offset: 0, size: vertexUniformBuffer.size},
-            }]
+            entries: []
         }
         const vertexUniformBindGroup: GPUBindGroup = redGPUContext.gpuDevice.createBindGroup(vertexBindGroupDescriptor)
         this.gpuRenderInfo = new VertexGPURenderInfo(
             null, SHADER_INFO.shaderSourceVariant, SHADER_INFO.conditionalBlocks, UNIFORM_STRUCT,
-            vertex_BindGroupLayout, vertexUniformBuffer, vertexUniformBindGroup, this.#updatePipeline(),
+            vertex_BindGroupLayout, null, vertexUniformBindGroup, this.#updatePipeline(),
         )
+        redGPUContext.globalVertexUniformBuffer.updateUintData(
+            this.#globalVertexBufferSlotIndex,
+            new Uint32Array([this.#material.globalFragmentBufferSlotIndex]),
+            ResourceManager.GLOBAL_SSAO_VERTEX_STRUCT.members.globalFragmentBufferSlotIndex.uniformOffset / 4
+        );
+
     }
 
     #updatePipeline(): GPURenderPipeline {
@@ -327,6 +333,7 @@ class SkyBox extends RedGPUObject {
             depthStencil: this.#depthStencilState.state,
             multisample: {count: antialiasingManager.useMSAA ? 4 : 1},
         }
+
         return gpuDevice.createRenderPipeline(pipelineDescriptor)
     }
 }

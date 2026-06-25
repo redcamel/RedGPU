@@ -15,7 +15,6 @@ struct Uniforms {
     transitionProgress: f32,
 };
 
-@group(2) @binding(0) var<uniform> uniforms: Uniforms;
 @group(2) @binding(1) var sampler0: sampler;
 @group(2) @binding(2) var texture0: texture_cube<f32>;
 @group(2) @binding(3) var transitionTexture: texture_cube<f32>;
@@ -23,6 +22,7 @@ struct Uniforms {
 
 struct InputData {
     @location(0) vertexPosition: vec4<f32>,
+    @location(10) @interpolate(flat) globalFragmentBufferSlotIndex: u32,
 };
 
 fn sphericalToUV(dir: vec3<f32>) -> vec2<f32> {
@@ -34,6 +34,7 @@ fn sphericalToUV(dir: vec3<f32>) -> vec2<f32> {
 
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
+    #redgpu_restore_fragment_uniforms
     var cubemapVec = inputData.vertexPosition.xyz;
     let viewDir = normalize(cubemapVec);
     let mipmapCount = f32(textureNumLevels(texture0) - 1);
