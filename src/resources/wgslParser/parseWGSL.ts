@@ -144,6 +144,28 @@ const processStorages = (storage) => {
     }, {});
 };
 
+/**
+ * [KO] 구조체 정보 배열을 처리하여 맵으로 반환합니다.
+ * [EN] Processes an array of struct information and returns it as a map.
+ * @param structs -
+ * [KO] 구조체 배열
+ * [EN] Structs array
+ * @returns
+ * [KO] 가공된 구조체 정보 맵
+ * [EN] Processed struct information map
+ */
+const processStructs = (structs) => {
+    return structs.reduce((prev, curr) => {
+        prev[curr.name] = {
+            name: curr.name,
+            ...processMembers(curr.members),
+            arrayBufferByteLength: curr.size,
+        };
+        curr.attributes?.forEach(v => prev[curr.name][v.name] = +v.value);
+        return prev;
+    }, {});
+};
+
 const reflectCache = new Map<string, any>();
 
 /**
@@ -170,6 +192,7 @@ const reflectCache = new Map<string, any>();
 const parseWGSL = (sourceName: string, code: string, injectLibrary?: Record<string, string>): {
     uniforms: any;
     storage: any;
+    structs: any;
     samplers: any;
     textures: any;
     vertexEntries: string[];
@@ -200,6 +223,7 @@ const parseWGSL = (sourceName: string, code: string, injectLibrary?: Record<stri
         reflectResult = {
             uniforms: {...processUniforms(reflect.uniforms)},
             storage: {...processStorages(reflect.storage)},
+            structs: {...processStructs(reflect.structs)},
             samplers: reflect.samplers,
             textures: reflect.textures,
             vertexEntries: reflect.entry.vertex.map(v => v.name),
