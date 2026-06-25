@@ -27,6 +27,7 @@ import updateMeshDirtyPipeline from "./core/pipeline/updateMeshDirtyPipeline";
 import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVertexBindGroupDescriptor";
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
+import {keepLog} from "../../utils";
 
 const GLOBAL_SSAO_VERTEX_STRUCT = ResourceManager.GLOBAL_SSAO_VERTEX_STRUCT
 
@@ -1658,6 +1659,13 @@ class Mesh extends MeshBase {
                         || this.#prevSystemBindGroupList[renderViewStateData.viewIndex] !== view.systemUniform_Vertex_UniformBindGroup
                         || this.dirtyLOD
                     ) {
+                        keepLog(ResourceManager.GLOBAL_SSAO_VERTEX_STRUCT)
+                        redGPUContext.globalVertexUniformBuffer.updateUintData(
+                            this.#globalVertexBufferSlotIndex,
+                            new Uint32Array([currentMaterial.globalFragmentBufferSlotIndex]),
+                            ResourceManager.GLOBAL_SSAO_VERTEX_STRUCT.members.globalFragmentBufferSlotIndex.uniformOffset / 4
+                        );
+
                         this.#setRenderBundle(renderViewStateData)
                     }
 

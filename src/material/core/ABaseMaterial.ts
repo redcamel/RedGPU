@@ -12,6 +12,7 @@ import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroup
 import definePositiveNumber from "../../defineProperty/funcs/number/definePositiveNumber";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import defineColorRGBA from "../../defineProperty/funcs/color/defineColorRGBA";
+import {keepLog} from "../../utils";
 
 
 interface ABaseMaterial {
@@ -144,7 +145,7 @@ abstract class ABaseMaterial extends ResourceBase {
      * [EN] Tint blend mode value
      */
     #tintBlendMode: number = TINT_BLEND_MODE.MULTIPLY;
-
+    #globalFragmentBufferSlotIndex: number = -1
     /**
      * [KO] ABaseMaterial 생성자
      * [EN] ABaseMaterial constructor
@@ -176,13 +177,14 @@ abstract class ABaseMaterial extends ResourceBase {
         this.#FRAGMENT_BIND_GROUP_LAYOUT_NAME = `FRAGMENT_BIND_GROUP_LAYOUT_${moduleName}`
         this.#SHADER_INFO = SHADER_INFO
         this.#STORAGE_STRUCT = SHADER_INFO?.storage;
-        this.#UNIFORM_STRUCT = SHADER_INFO?.uniforms.uniforms;
+        this.#UNIFORM_STRUCT = SHADER_INFO?.structs.Uniforms;
         this.#targetGroupIndex = targetGroupIndex;
         // [KO] 초기 텍스처/샘플러 구조는 전체(Union) 정보를 사용합니다.
         // [EN] The initial texture/sampler structure uses the union information.
         this.#TEXTURE_STRUCT = SHADER_INFO.shaderSourceVariant.getUnionTextures();
         this.#SAMPLER_STRUCT = SHADER_INFO.shaderSourceVariant.getUnionSamplers();
-
+        this.#globalFragmentBufferSlotIndex = redGPUContext.globalFragmentUniformBuffer.allocateSlot().index
+        keepLog(' this.#globalFragmentBufferSlotIndex ', this.#globalFragmentBufferSlotIndex)
         this.#bindGroupLayout = resourceManager.getGPUBindGroupLayout(this.#FRAGMENT_BIND_GROUP_LAYOUT_NAME) || resourceManager.createBindGroupLayout(
             this.#FRAGMENT_BIND_GROUP_LAYOUT_NAME,
             getFragmentBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, targetGroupIndex)
@@ -195,6 +197,11 @@ abstract class ABaseMaterial extends ResourceBase {
         this.#basicGPUSampler = resourceManager.basicSampler.gpuSampler
         this.#emptyBitmapGPUTextureView = resourceManager.emptyBitmapTextureView
         this.#emptyCubeTextureView = resourceManager.emptyCubeTextureView
+    }
+
+
+    get globalFragmentBufferSlotIndex(): number {
+        return this.#globalFragmentBufferSlotIndex;
     }
 
     /**
@@ -397,18 +404,18 @@ abstract class ABaseMaterial extends ResourceBase {
                 )
             }
         }
-        if (this.#UNIFORM_STRUCT) {
-            entries.push(
-                {
-                    binding: this.#UNIFORM_STRUCT.binding,
-                    resource: {
-                        buffer: this.gpuRenderInfo.fragmentUniformBuffer.gpuBuffer,
-                        offset: 0,
-                        size: this.gpuRenderInfo.fragmentUniformBuffer.size
-                    },
-                }
-            )
-        }
+        // if (this.#UNIFORM_STRUCT) {
+        //     entries.push(
+        //         {
+        //             binding: this.#UNIFORM_STRUCT.binding,
+        //             resource: {
+        //                 buffer: this.gpuRenderInfo.fragmentUniformBuffer.gpuBuffer,
+        //                 offset: 0,
+        //                 size: this.gpuRenderInfo.fragmentUniformBuffer.size
+        //             },
+        //         }
+        //     )
+        // }
         const bindGroupDescriptor: GPUBindGroupDescriptor = {
             layout: this.gpuRenderInfo.fragmentBindGroupLayout,
             label: this.#FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME,

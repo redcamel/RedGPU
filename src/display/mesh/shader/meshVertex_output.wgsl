@@ -9,6 +9,7 @@ struct VertexOutput {
     @location(8) prevClipPos: vec4<f32>,
 
     //
+    @location(10) @interpolate(flat) globalFragmentBufferSlotIndex: u32,
     @location(11) combinedOpacity: f32,
     @location(12) motionVector: vec3<f32>,
     @location(13) shadowCoord: vec3<f32>,

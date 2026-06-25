@@ -9,8 +9,8 @@ struct Uniforms {
     //
     opacity:f32,
     useTint:u32,
-    tint:vec4<f32>,
     tintBlendMode:u32,
+    tint:vec4<f32>,
 };
 // Input structure for model data
 struct InputData {
@@ -22,14 +22,23 @@ struct InputData {
   @location(8) prevClipPos: vec4<f32>,
   @location(11) combinedOpacity: f32,
   //
+  @location(10) @interpolate(flat) globalFragmentBufferSlotIndex: u32,
   @location(12) motionVector: vec3<f32>,
   @location(15) @interpolate(flat) pickingId: vec4<f32>,
 }
 
-@group(2) @binding(0) var<uniform> uniforms: Uniforms;
+//@group(2) @binding(0) var<uniform> uniforms: Uniforms;
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
+    let globalFragmentUniform = globalFragmentUniformBuffer[inputData.globalFragmentBufferSlotIndex].data;
+    let uniforms = Uniforms(
+        globalFragmentUniform[0].xyz, // color
+        globalFragmentUniform[0].w,   // opacity
+        u32(globalFragmentUniform[1].x), // useTint (u32 캐스팅)
+        u32(globalFragmentUniform[1].y),  // tintBlendMode (u32 캐스팅)
+        globalFragmentUniform[2],  // tint
+    );
     var finalColor = vec4<f32>( uniforms.color.r , uniforms.color.g , uniforms.color.b , uniforms.opacity * inputData.combinedOpacity);
     #redgpu_if useTint
         finalColor = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
