@@ -471,7 +471,8 @@ abstract class ABaseMaterial extends ResourceBase {
      * @protected
      */
     _updateBaseProperty() {
-        const {members} = this['isPBRMaterial'] ? ResourceManager.GLOBAL_SSAO_FRAGMENT_PBR_STRUCT : this.gpuRenderInfo.fragmentUniformInfo
+
+        const {members} = this['isPBRMaterial'] ? ResourceManager.GLOBAL_FRAGMENT_PBR_STRUCT : this['isBuiltInMaterial'] ? ResourceManager.GLOBAL_FRAGMENT_BUILT_IN_STRUCT : this.gpuRenderInfo.fragmentUniformInfo
         for (const k in members) {
             const property = this[k]
             if (property instanceof ColorRGBA) {

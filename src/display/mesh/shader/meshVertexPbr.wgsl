@@ -49,7 +49,7 @@ fn main(inputData: InputData) -> VertexOutput {
     output.uv = inputData.uv;
     output.uv1 = inputData.uv1;
     output.vertexColor_0 = inputData.vertexColor_0;
-    output.globalPBRFragmentBufferSlotIndex = globalVertexUniforms.globalPBRFragmentBufferSlotIndex;
+    output.globalFragmentBufferSlotIndex = globalVertexUniforms.globalFragmentBufferSlotIndex;
 
     let transformedTangentXYZ = (gu_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
     output.vertexTangent = vec4<f32>( normalize(transformedTangentXYZ), inputData.vertexTangent.w );

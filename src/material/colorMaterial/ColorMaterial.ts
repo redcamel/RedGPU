@@ -32,6 +32,7 @@ interface ColorMaterial {
  * @category Material
  */
 class ColorMaterial extends ABaseMaterial {
+    #globalFragmentBufferSlotIndex: number = -1
     /**
      * [KO] ColorMaterial 생성자
      * [EN] ColorMaterial constructor
@@ -49,11 +50,21 @@ class ColorMaterial extends ABaseMaterial {
             SHADER_INFO,
             2
         )
+        const slot = redGPUContext.globalFragmentBuiltInUniformBuffer.allocateSlot();
+        this.#globalFragmentBufferSlotIndex = slot.index;
         this.initGPURenderInfos()
         this.color.setColorByHEX(color)
     }
+
+    get globalFragmentBufferSlotIndex(): number {
+        return this.#globalFragmentBufferSlotIndex;
+    }
 }
 
+Object.defineProperty(ColorMaterial.prototype, 'isBuiltInMaterial', {
+    value: true,
+    writable: false
+});
 defineColorRGB(ColorMaterial, [
     {key: 'color'},
 ])

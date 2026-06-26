@@ -44,7 +44,7 @@ const updateMeshDirtyPipeline = (
     mesh.redGPUContext.globalVertexUniformBuffer.updateUintData(
         mesh.globalVertexBufferSlotIndex,
         new Uint32Array([mesh.pickingId]),
-        ResourceManager.GLOBAL_SSAO_VERTEX_STRUCT.members.pickingId.uniformOffset / 4
+        ResourceManager.GLOBAL_VERTEX_STRUCT.members.pickingId.uniformOffset / 4
     )
     // }
     material.dirtyPipeline = false

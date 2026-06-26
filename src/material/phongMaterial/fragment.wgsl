@@ -16,8 +16,14 @@
 const maxDistance: f32 = 1000.0;
 
 struct Uniforms {
+    // basic
+    opacity: f32,
+    useTint:u32,
+    tintBlendMode:u32,
+    tint:vec4<f32>,
+    // color
     color: vec3<f32>,
-    //
+    // phong
     emissiveColor: vec3<f32>,
     emissiveStrength:f32,
     //
@@ -29,11 +35,6 @@ struct Uniforms {
     //
     normalScale:f32,
     displacementScale:f32,
-    //
-    opacity: f32,
-    useTint:u32,
-    tint:vec4<f32>,
-    tintBlendMode:u32,
     //
     useSSR:u32,
     metallic:f32,
@@ -63,7 +64,6 @@ struct InputData {
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 }
 
-@group(2) @binding(0) var<uniform> uniforms: Uniforms;
 @group(2) @binding(1) var diffuseTextureSampler: sampler;
 @group(2) @binding(2) var diffuseTexture: texture_2d<f32>;
 @group(2) @binding(3) var alphaTextureSampler: sampler;

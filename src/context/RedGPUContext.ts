@@ -10,7 +10,6 @@ import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
 import CommandEncoderManager from "../commandEncoderManager/CommandEncoderManager";
 import RedGPUContextObserver from "./core/RedGPUContextObserver";
 import GlobalStorageBufferManager from "../resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager";
-import {keepLog} from "../utils";
 
 /**
  * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
@@ -132,6 +131,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Global SSAO fragment buffer manager
      */
     #globalFragmentUniformBuffer: GlobalStorageBufferManager
+    #globalFragmentBuiltInUniformBuffer: GlobalStorageBufferManager
 
 
     #boundingClientRect: DOMRect
@@ -179,9 +179,10 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#resourceManager = new ResourceManager(this)
         this.#commandEncoderManager = new CommandEncoderManager(this)
         this.#antialiasingManager = new AntialiasingManager()
-        this.#globalVertexUniformBuffer = new GlobalStorageBufferManager(this, 304, 50000, "GLOBAL_SSAO_VERTEX_BUFFER")
-        keepLog(ResourceManager.GLOBAL_SSAO_FRAGMENT_PBR_STRUCT)
-        this.#globalFragmentUniformBuffer = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_SSAO_FRAGMENT_PBR_STRUCT.size, 1024, "GLOBAL_SSAO_FRAGMENT_BUFFER")
+        // keepLog(ResourceManager.GLOBAL_FRAGMENT_PBR_STRUCT)
+        this.#globalVertexUniformBuffer = new GlobalStorageBufferManager(this, 304, 50000, "GLOBAL_VERTEX_BUFFER")
+        this.#globalFragmentUniformBuffer = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_FRAGMENT_PBR_STRUCT.size, 1024, "GLOBAL_FRAGMENT_BUFFER")
+        this.#globalFragmentBuiltInUniformBuffer = new GlobalStorageBufferManager(this, 112, 10000, "GLOBAL_FRAGMENT_BUILT_IN_BUFFER")
         this.#initialize()
     }
 
@@ -223,6 +224,11 @@ class RedGPUContext extends RedGPUContextViewContainer {
      */
     get globalFragmentUniformBuffer(): GlobalStorageBufferManager {
         return this.#globalFragmentUniformBuffer;
+    }
+
+
+    get globalFragmentBuiltInUniformBuffer(): GlobalStorageBufferManager {
+        return this.#globalFragmentBuiltInUniformBuffer;
     }
 
     /**

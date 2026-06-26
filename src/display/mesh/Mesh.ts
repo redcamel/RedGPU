@@ -28,7 +28,7 @@ import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVer
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 
-const GLOBAL_SSAO_VERTEX_STRUCT = ResourceManager.GLOBAL_SSAO_VERTEX_STRUCT
+const GLOBAL_VERTEX_STRUCT = ResourceManager.GLOBAL_VERTEX_STRUCT
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -1425,7 +1425,7 @@ class Mesh extends MeshBase {
 
                     const {gpuRenderInfo, redGPUContext} = this
                     const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
-                    const {members: vertexUniformInfoMembers} = GLOBAL_SSAO_VERTEX_STRUCT
+                    const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
                     const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
                     if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
                         this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
@@ -1494,7 +1494,7 @@ class Mesh extends MeshBase {
 
             {
                 const {redGPUContext} = this
-                const {members: vertexUniformInfoMembers} = GLOBAL_SSAO_VERTEX_STRUCT
+                const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
                 if (!this.#uniformDataMatrixList) {
                     this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
                 }
@@ -1527,7 +1527,7 @@ class Mesh extends MeshBase {
         }
         if (currentGeometry && passFrustumCulling) {
             const {redGPUContext} = this
-            const {members: vertexUniformInfoMembers} = GLOBAL_SSAO_VERTEX_STRUCT
+            const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
             const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
             if (!this.#uniformDataMatrixList) {
                 this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
@@ -1568,7 +1568,7 @@ class Mesh extends MeshBase {
                     // 	vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffset,
                     // 	modelMatrix
                     // )
-                    // keepLog(GLOBAL_SSAO_VERTEX_STRUCT)
+                    // keepLog(GLOBAL_VERTEX_STRUCT)
                     this.#uniformDataMatrixList.set(modelMatrix, vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
                 }
                 {
@@ -1658,11 +1658,11 @@ class Mesh extends MeshBase {
                         || this.#prevSystemBindGroupList[renderViewStateData.viewIndex] !== view.systemUniform_Vertex_UniformBindGroup
                         || this.dirtyLOD
                     ) {
-                        if (currentMaterial.isPBRMaterial) {
+                        if (currentMaterial.globalFragmentBufferSlotIndex !== undefined && currentMaterial.globalFragmentBufferSlotIndex > -1) {
                             redGPUContext.globalVertexUniformBuffer.updateUintData(
                                 this.#globalVertexBufferSlotIndex,
-                                new Uint32Array([currentMaterial.globalPBRFragmentBufferSlotIndex]),
-                                ResourceManager.GLOBAL_SSAO_VERTEX_STRUCT.members.globalPBRFragmentBufferSlotIndex.uniformOffset / 4
+                                new Uint32Array([currentMaterial.globalFragmentBufferSlotIndex]),
+                                ResourceManager.GLOBAL_VERTEX_STRUCT.members.globalFragmentBufferSlotIndex.uniformOffset / 4
                             );
                         }
 

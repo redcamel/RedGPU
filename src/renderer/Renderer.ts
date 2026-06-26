@@ -12,6 +12,7 @@ import processAnimationsAndSkinning from "./helperFunc/processAnimationsAndSkinn
 import updateJitter from "./helperFunc/updateJitter";
 import updateViewportAndScissor from "./helperFunc/updateViewportAndScissor";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
+import {SystemStructLibrary} from "../systemCodeManager/ShaderLibrary";
 
 
 /**
@@ -151,7 +152,11 @@ class Renderer {
             pixelRectObject,
             renderViewStateData,
         } = view
-        const {globalVertexUniformBuffer, globalFragmentUniformBuffer} = redGPUContext
+        const {
+            globalVertexUniformBuffer,
+            globalFragmentBuiltInUniformBuffer,
+            globalFragmentUniformBuffer
+        } = redGPUContext
         const {
             colorAttachment,
             depthStencilAttachment,
@@ -178,6 +183,7 @@ class Renderer {
             {
                 globalVertexUniformBuffer.flush()
                 globalFragmentUniformBuffer.flush()
+                globalFragmentBuiltInUniformBuffer.flush()
             }
             {
                 const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)

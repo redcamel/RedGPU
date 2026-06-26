@@ -699,7 +699,7 @@ class PBRMaterial extends AUVTransformBaseMaterial {
     #packedKHR_sheen: PackedTexture
     #packedKHR_iridescence: PackedTexture
     #packedKHR_clearcoatTexture_transmission: PackedTexture
-    #globalPBRFragmentBufferSlotIndex: number = -1
+    #globalFragmentBufferSlotIndex: number = -1
     /**
      * [KO] PBRMaterial 생성자
      * [EN] PBRMaterial constructor
@@ -715,7 +715,7 @@ class PBRMaterial extends AUVTransformBaseMaterial {
             2
         )
         const slot = redGPUContext.globalFragmentUniformBuffer.allocateSlot();
-        this.#globalPBRFragmentBufferSlotIndex = slot.index;
+        this.#globalFragmentBufferSlotIndex = slot.index;
         this.initGPURenderInfos();
 
 
@@ -734,8 +734,8 @@ class PBRMaterial extends AUVTransformBaseMaterial {
     }
 
 
-    get globalPBRFragmentBufferSlotIndex(): number {
-        return this.#globalPBRFragmentBufferSlotIndex;
+    get globalFragmentBufferSlotIndex(): number {
+        return this.#globalFragmentBufferSlotIndex;
     }
 
     /**

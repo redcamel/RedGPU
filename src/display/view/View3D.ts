@@ -486,6 +486,14 @@ class View3D extends AView {
                         size: redGPUContext.globalFragmentUniformBuffer.gpuBuffer.size
                     }
                 },
+                {
+                    binding: 19,
+                    resource: {
+                        buffer: redGPUContext.globalFragmentBuiltInUniformBuffer.gpuBuffer,
+                        offset: 0,
+                        size: redGPUContext.globalFragmentBuiltInUniformBuffer.gpuBuffer.size
+                    }
+                },
             ]
         }
         this.#systemUniform_Vertex_UniformBindGroup = gpuDevice.createBindGroup(systemUniform_Vertex_BindGroupDescriptor);

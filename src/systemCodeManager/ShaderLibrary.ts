@@ -33,8 +33,9 @@ import DirectionalLight_wgsl from './shader/systemStruct/DirectionalLight.wgsl';
 import AmbientLight_wgsl from './shader/systemStruct/AmbientLight.wgsl';
 import Shadow_wgsl from './shader/systemStruct/Shadow.wgsl';
 import SkyAtmosphere_wgsl from './shader/systemStruct/SkyAtmosphere.wgsl';
-import globalVertexUniform_wgsl from './shader/systemStruct/globalVertexUniform.wgsl';
-import globalPBRUniforms_wgsl from './shader/systemStruct/globalFragmentPBRUniform.wgsl';
+import globalVertexUniform_wgsl from './shader/systemStruct/uniform/globalVertexUniform.wgsl';
+import globalPBRUniforms_wgsl from './shader/systemStruct/uniform/globalFragmentPBRUniform.wgsl';
+import globalFragmentBuiltInUniform_wgsl from './shader/systemStruct/uniform/globalFragmentBuiltInUniform.wgsl';
 import POST_EFFECT_SYSTEM_UNIFORM_wgsl from './shader/systemStruct/POST_EFFECT_SYSTEM_UNIFORM.wgsl';
 import SYSTEM_UNIFORM_wgsl from './shader/systemStruct/SYSTEM_UNIFORM.wgsl';
 import getReflectionVectorFromViewDirection_wgsl
@@ -2437,6 +2438,7 @@ export namespace SystemStructLibrary {
      * [EN] Definition of the PBR Material Uniforms structure.
      */
     export const globalFragmentPBRUniform = globalPBRUniforms_wgsl;
+    export const globalFragmentBuiltInUniform = globalFragmentBuiltInUniform_wgsl;
 }
 
 export namespace DisplacementLibrary {

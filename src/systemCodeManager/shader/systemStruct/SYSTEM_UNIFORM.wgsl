@@ -60,6 +60,9 @@ struct SystemUniform {
 #redgpu_include systemStruct.globalFragmentPBRUniform;
 @group(0) @binding(18) var<storage> globalPBRUniformBuffer : array<GlobalFragmentPBRUniform>;
 
+#redgpu_include systemStruct.globalFragmentBuiltInUniform;
+@group(0) @binding(19) var<storage> globalFragmentBuiltInUniformBuffer : array<GlobalFragmentBuiltInUniform>;
+
 #redgpu_include depth.getLinearizeDepth
 
 const clusterLight_indicesLength:u32 = u32(REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTERu * REDGPU_DEFINE_TOTAL_TILESu);
