@@ -146,7 +146,7 @@ abstract class ABaseMaterial extends ResourceBase {
      * [EN] Tint blend mode value
      */
     #tintBlendMode: number = TINT_BLEND_MODE.MULTIPLY;
-
+    #globalFragmentBufferSlotIndex: number = -1
     /**
      * [KO] ABaseMaterial 생성자
      * [EN] ABaseMaterial constructor
@@ -314,6 +314,11 @@ abstract class ABaseMaterial extends ResourceBase {
         this.#writeMaskState = value;
     }
 
+
+    get globalFragmentBufferSlotIndex(): number {
+        return this.#globalFragmentBufferSlotIndex;
+    }
+
     /**
      * [KO] GPU 렌더 파이프라인 정보 및 유니폼 버퍼를 초기화합니다.
      * [EN] Initializes GPU render pipeline info and uniform buffer.
@@ -325,7 +330,13 @@ abstract class ABaseMaterial extends ResourceBase {
             this.#FRAGMENT_SHADER_MODULE_NAME,
             {code: this.#SHADER_INFO.defaultSource}
         )
-
+        if (this['isPBRMaterial']) {
+            const slot = redGPUContext.globalFragmentUniformBuffer.allocateSlot();
+            this.#globalFragmentBufferSlotIndex = slot.index;
+        } else if (this['isBuiltInMaterial']) {
+            const slot = redGPUContext.globalFragmentBuiltInUniformBuffer.allocateSlot();
+            this.#globalFragmentBufferSlotIndex = slot.index;
+        }
         // 데이터 작성
         let uniformData, uniformBuffer
         if (this.#UNIFORM_STRUCT) {

@@ -69,6 +69,8 @@ class TextFieldMaterial extends ABitmapBaseMaterial {
         this.diffuseTextureSampler = new Sampler(this.redGPUContext)
         this.initGPURenderInfos()
     }
+
+
 }
 
 defineSampler(TextFieldMaterial, [
@@ -84,7 +86,8 @@ defineTexture(TextFieldMaterial, [
  * `TextFieldMaterial` 클래스의 속성을 변경할 수 없도록 고정합니다.
  */
 Object.freeze(TextFieldMaterial)
-/**
- * `TextFieldMaterial` 클래스를 기본 export로 내보냅니다.
- */
+Object.defineProperty(TextFieldMaterial.prototype, 'isBuiltInMaterial', {
+    value: true,
+    writable: false
+});
 export default TextFieldMaterial
