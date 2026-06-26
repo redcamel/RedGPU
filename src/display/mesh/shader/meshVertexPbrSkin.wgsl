@@ -2,7 +2,7 @@
 #redgpu_include shadow.getShadowCoord;
 #redgpu_include shadow.getShadowClipPosition;
 
-#redgpu_include systemStruct.meshVertexBasicUniform;
+#redgpu_include systemStruct.globalVertexUniform;
 
 @group(1) @binding(1) var displacementTextureSampler: sampler;
 @group(1) @binding(2) var displacementTexture: texture_2d<f32>;
@@ -39,6 +39,7 @@ struct VertexOutput {
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
+    @location(9) @interpolate(flat) globalPBRFragmentBufferSlotIndex: u32,
 
     @location(10) localNodeScale_volumeScale: vec2<f32>,
     @location(11) combinedOpacity: f32,
@@ -112,6 +113,7 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
     output.uv = inputData.uv;
     output.uv1 = inputData.uv1;
     output.vertexColor_0 = inputData.vertexColor_0;
+    output.globalPBRFragmentBufferSlotIndex = globalVertexUniforms.globalPBRFragmentBufferSlotIndex;
 
     // [KO] 그림자 좌표 계산
     // [EN] Calculate shadow coordinates

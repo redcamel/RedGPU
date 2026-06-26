@@ -26,6 +26,7 @@ import ShaderLibrary from "../../../systemCodeManager/ShaderLibrary";
 
 const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
 const GLOBAL_SSAO_VERTEX_STRUCT = SHADER_INFO.storage.globalVertexUniformBuffer.type.format;
+const GLOBAL_SSAO_FRAGMENT_PBR_STRUCT = SHADER_INFO.storage.globalPBRUniformBuffer.type.format;
 enum ResourceType {
     GPUShaderModule = 'GPUShaderModule',
     GPUBindGroupLayout = 'GPUBindGroupLayout',
@@ -74,6 +75,7 @@ class ResourceManager extends RedGPUObject {
     static PRESET_VERTEX_GPUBindGroupLayout = 'PRESET_VERTEX_GPUBindGroupLayout'
     static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN = 'PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN'
     static GLOBAL_SSAO_VERTEX_STRUCT = GLOBAL_SSAO_VERTEX_STRUCT
+    static GLOBAL_SSAO_FRAGMENT_PBR_STRUCT = GLOBAL_SSAO_FRAGMENT_PBR_STRUCT
 
     #resources = new ImmutableKeyMap([
         [ResourceType.GPUShaderModule, new Map()],

@@ -1658,6 +1658,14 @@ class Mesh extends MeshBase {
                         || this.#prevSystemBindGroupList[renderViewStateData.viewIndex] !== view.systemUniform_Vertex_UniformBindGroup
                         || this.dirtyLOD
                     ) {
+                        if (currentMaterial.isPBRMaterial) {
+                            redGPUContext.globalVertexUniformBuffer.updateUintData(
+                                this.#globalVertexBufferSlotIndex,
+                                new Uint32Array([currentMaterial.globalPBRFragmentBufferSlotIndex]),
+                                ResourceManager.GLOBAL_SSAO_VERTEX_STRUCT.members.globalPBRFragmentBufferSlotIndex.uniformOffset / 4
+                            );
+                        }
+
                         this.#setRenderBundle(renderViewStateData)
                     }
 

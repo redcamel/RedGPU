@@ -12,9 +12,10 @@ import ResourceManager from "../../resources/core/resourceManager/ResourceManage
 const updateTargetUniform = (target: any, propertyKey: string, newValue: any) => {
     let targetUniformInfo;
     let targetUniformBuffer;
-    const {gpuRenderInfo} = target
-    if (target.globalVertexBufferSlotIndex !== undefined && target.globalVertexBufferSlotIndex !== -1) {
-        const redGPUContext = target.redGPUContext;
+    const {gpuRenderInfo, redGPUContext} = target
+    const {globalVertexUniformBuffer, globalFragmentUniformBuffer} = redGPUContext
+    const {globalVertexBufferSlotIndex, globalPBRFragmentBufferSlotIndex} = target
+    if (globalVertexBufferSlotIndex !== undefined && globalVertexBufferSlotIndex !== -1) {
         const memberInfo = ResourceManager.GLOBAL_SSAO_VERTEX_STRUCT.members[propertyKey];
         if (memberInfo) {
             const floatOffset = memberInfo.uniformOffset / 4;
@@ -23,15 +24,41 @@ const updateTargetUniform = (target: any, propertyKey: string, newValue: any) =>
                 const uploadValue = isArrayLike
                     ? (newValue instanceof Uint32Array ? newValue : new Uint32Array(newValue as any))
                     : new Uint32Array([newValue]);
-                redGPUContext.globalVertexUniformBuffer.updateUintData(
-                    target.globalVertexBufferSlotIndex, uploadValue, floatOffset
+                globalVertexUniformBuffer.updateUintData(
+                    globalVertexBufferSlotIndex, uploadValue, floatOffset
                 );
             } else {
                 const uploadValue = isArrayLike
                     ? (newValue instanceof Float32Array ? newValue : new Float32Array(newValue as any))
                     : new Float32Array([newValue]);
-                redGPUContext.globalVertexUniformBuffer.updateFloatData(
-                    target.globalVertexBufferSlotIndex, uploadValue, floatOffset
+                globalVertexUniformBuffer.updateFloatData(
+                    globalVertexBufferSlotIndex, uploadValue, floatOffset
+                );
+            }
+
+            return
+        }
+
+    }
+
+    if (globalPBRFragmentBufferSlotIndex !== undefined && globalPBRFragmentBufferSlotIndex !== -1) {
+        const memberInfo = ResourceManager.GLOBAL_SSAO_FRAGMENT_PBR_STRUCT.members[propertyKey];
+        if (memberInfo) {
+            const floatOffset = memberInfo.uniformOffset / 4;
+            const isArrayLike = Array.isArray(newValue) || ArrayBuffer.isView(newValue);
+            if (memberInfo.View === Uint32Array) {
+                const uploadValue = isArrayLike
+                    ? (newValue instanceof Uint32Array ? newValue : new Uint32Array(newValue as any))
+                    : new Uint32Array([newValue]);
+                globalFragmentUniformBuffer.updateUintData(
+                    globalPBRFragmentBufferSlotIndex, uploadValue, floatOffset
+                );
+            } else {
+                const uploadValue = isArrayLike
+                    ? (newValue instanceof Float32Array ? newValue : new Float32Array(newValue as any))
+                    : new Float32Array([newValue]);
+                globalFragmentUniformBuffer.updateFloatData(
+                    globalPBRFragmentBufferSlotIndex, uploadValue, floatOffset
                 );
             }
 

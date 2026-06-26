@@ -12,5 +12,6 @@ struct GlobalVertexUniforms {
     useDisplacementTexture: u32,
     displacementScale: f32,
     disableJitter: u32,
+    globalPBRFragmentBufferSlotIndex:u32,
     uvTransform: vec4<f32>,
 };

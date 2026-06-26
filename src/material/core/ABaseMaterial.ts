@@ -322,15 +322,20 @@ abstract class ABaseMaterial extends ResourceBase {
             this.#FRAGMENT_SHADER_MODULE_NAME,
             {code: this.#SHADER_INFO.defaultSource}
         )
+
         // 데이터 작성
-        const uniformData = new ArrayBuffer(
-            Math.max(this.#UNIFORM_STRUCT.arrayBufferByteLength, 16)
-        )
-        const uniformBuffer = new UniformBuffer(
-            redGPUContext,
-            uniformData,
-            `UniformBuffer_${this.#MODULE_NAME}_${this.uuid}`
-        )
+        let uniformData, uniformBuffer
+        if (this.#UNIFORM_STRUCT) {
+            uniformData = new ArrayBuffer(
+                Math.max(this.#UNIFORM_STRUCT.arrayBufferByteLength, 16)
+            )
+            uniformBuffer = new UniformBuffer(
+                redGPUContext,
+                uniformData,
+                `UniformBuffer_${this.#MODULE_NAME}_${this.uuid}`
+            )
+        }
+
         this.gpuRenderInfo = new FragmentGPURenderInfo(
             shaderModule,
             this.#SHADER_INFO.shaderSourceVariant,
@@ -464,15 +469,17 @@ abstract class ABaseMaterial extends ResourceBase {
      */
     _updateBaseProperty() {
         const {fragmentUniformInfo, fragmentUniformBuffer} = this.gpuRenderInfo
-        const {members} = fragmentUniformInfo
-        for (const k in members) {
-            const property = this[k]
-            if (property instanceof ColorRGBA) {
-                fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[k], property.rgbaNormalLinear)
-            } else if (property instanceof ColorRGB) {
-                fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[k], property.rgbNormalLinear)
-            } else {
-                if (!pattern.test(k)) this[k] = property
+        if (fragmentUniformInfo) {
+            const {members} = fragmentUniformInfo
+            for (const k in members) {
+                const property = this[k]
+                if (property instanceof ColorRGBA) {
+                    fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[k], property.rgbaNormalLinear)
+                } else if (property instanceof ColorRGB) {
+                    fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[k], property.rgbNormalLinear)
+                } else {
+                    if (!pattern.test(k)) this[k] = property
+                }
             }
         }
     }

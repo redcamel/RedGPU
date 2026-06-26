@@ -33,7 +33,8 @@ import DirectionalLight_wgsl from './shader/systemStruct/DirectionalLight.wgsl';
 import AmbientLight_wgsl from './shader/systemStruct/AmbientLight.wgsl';
 import Shadow_wgsl from './shader/systemStruct/Shadow.wgsl';
 import SkyAtmosphere_wgsl from './shader/systemStruct/SkyAtmosphere.wgsl';
-import meshVertexBasicUniform_wgsl from '../display/mesh/core/shader/meshVertexBasicUniform.wgsl';
+import globalVertexUniform_wgsl from './shader/systemStruct/globalVertexUniform.wgsl';
+import globalPBRUniforms_wgsl from './shader/systemStruct/globalFragmentPBRUniform.wgsl';
 import POST_EFFECT_SYSTEM_UNIFORM_wgsl from './shader/systemStruct/POST_EFFECT_SYSTEM_UNIFORM.wgsl';
 import SYSTEM_UNIFORM_wgsl from './shader/systemStruct/SYSTEM_UNIFORM.wgsl';
 import getReflectionVectorFromViewDirection_wgsl
@@ -2430,7 +2431,12 @@ export namespace SystemStructLibrary {
      * };
      * ```
      */
-    export const meshVertexBasicUniform = meshVertexBasicUniform_wgsl;
+    export const globalVertexUniform = globalVertexUniform_wgsl;
+    /**
+     * [KO] PBR 재질 유니폼 구조체 정의입니다.
+     * [EN] Definition of the PBR Material Uniforms structure.
+     */
+    export const globalFragmentPBRUniform = globalPBRUniforms_wgsl;
 }
 
 export namespace DisplacementLibrary {
@@ -2632,7 +2638,7 @@ export namespace ShaderLibrary {
      * @group(0) @binding(15) var atmosphereIrradianceLUT: texture_cube<f32>;
      * @group(0) @binding(16) var skyAtmosphere_prefilteredTexture: texture_cube<f32>;
      *
-     * #redgpu_include systemStruct.meshVertexBasicUniform;
+     * #redgpu_include systemStruct.globalVertexUniform;
      * @group(0) @binding(17) var<storage> globalVertexUniformBuffer : array<GlobalVertexUniforms>;
      * 
      * #redgpu_include depth.getLinearizeDepth

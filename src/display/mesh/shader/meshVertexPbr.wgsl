@@ -2,7 +2,7 @@
 #redgpu_include shadow.getShadowCoord;
 #redgpu_include entryPoint.mesh.entryPointShadowVertex;
 #redgpu_include entryPoint.mesh.entryPointPickingVertex;
-#redgpu_include systemStruct.meshVertexBasicUniform;
+#redgpu_include systemStruct.globalVertexUniform;
 
 @group(1) @binding(1) var displacementTextureSampler: sampler;
 @group(1) @binding(2) var displacementTexture: texture_2d<f32>;
@@ -49,6 +49,7 @@ fn main(inputData: InputData) -> VertexOutput {
     output.uv = inputData.uv;
     output.uv1 = inputData.uv1;
     output.vertexColor_0 = inputData.vertexColor_0;
+    output.globalPBRFragmentBufferSlotIndex = globalVertexUniforms.globalPBRFragmentBufferSlotIndex;
 
     let transformedTangentXYZ = (gu_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
     output.vertexTangent = vec4<f32>( normalize(transformedTangentXYZ), inputData.vertexTangent.w );
