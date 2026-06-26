@@ -69,6 +69,7 @@ struct Uniforms {
     #redgpu_include KHR_texture_transform
 };
 
+@group(2) @binding(0) var<uniform> uniforms: Uniforms;
 @group(2) @binding(1) var baseColorTextureSampler: sampler;
 #redgpu_if baseColorTexture
 @group(2) @binding(2) var baseColorTexture: texture_2d<f32>;
@@ -115,8 +116,6 @@ struct InputData {
     @location(5) vertexTangent: vec4<f32>,
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
-
-    @location(9) @interpolate(flat) globalFragmentBufferSlotIndex: u32,
     @location(10) localNodeScale_volumeScale: vec2<f32>,
     @location(11) combinedOpacity: f32,
     @location(12) motionVector: vec3<f32>,
@@ -250,7 +249,6 @@ fn getTransmissionRefraction(
 @fragment
 fn main(inputData:InputData) -> OutputFragment {
     var output: OutputFragment;
-    #redgpu_restore_fragment_uniforms
     let input_vertexNormal = (inputData.vertexNormal.xyz);
     let input_vertexPosition = inputData.vertexPosition.xyz;
     let input_vertexColor_0 = inputData.vertexColor_0;

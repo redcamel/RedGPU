@@ -151,7 +151,7 @@ class Renderer {
             pixelRectObject,
             renderViewStateData,
         } = view
-        const {globalVertexUniformBuffer, globalFragmentUniformBuffer} = redGPUContext
+        const {globalVertexUniformBuffer} = redGPUContext
         const {
             colorAttachment,
             depthStencilAttachment,
@@ -177,7 +177,6 @@ class Renderer {
             }
             {
                 globalVertexUniformBuffer.flush()
-                globalFragmentUniformBuffer.flush()
             }
             {
                 const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)

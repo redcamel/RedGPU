@@ -19,51 +19,18 @@ const updateTargetUniform = (target: any, propertyKey: string, newValue: any) =>
         if (memberInfo) {
             const floatOffset = memberInfo.uniformOffset / 4;
             if (memberInfo.View === Uint32Array) {
-                const data = Array.isArray(newValue) || newValue instanceof Uint32Array
-                    ? new Uint32Array(newValue)
-                    : new Uint32Array([newValue]);
                 redGPUContext.globalVertexUniformBuffer.updateUintData(
-                    target.globalVertexBufferSlotIndex, data, floatOffset
+                    target.globalVertexBufferSlotIndex, new Uint32Array([newValue]), floatOffset
                 );
             } else {
-                const data = Array.isArray(newValue) || newValue instanceof Float32Array
-                    ? new Float32Array(newValue)
-                    : new Float32Array([newValue]);
                 redGPUContext.globalVertexUniformBuffer.updateFloatData(
-                    target.globalVertexBufferSlotIndex, data, floatOffset
+                    target.globalVertexBufferSlotIndex, new Float32Array([newValue]), floatOffset
                 );
             }
 
             return
         }
-    }
-    if (target.globalFragmentBufferSlotIndex !== undefined && target.globalFragmentBufferSlotIndex !== -1) {
 
-        const redGPUContext = target.redGPUContext;
-        if (gpuRenderInfo && gpuRenderInfo.fragmentUniformInfo) {
-            // keepLog(target.globalFragmentBufferSlotIndex, propertyKey, newValue, target.gpuRenderInfo)
-            const memberInfo = gpuRenderInfo.fragmentUniformInfo.members[propertyKey];
-            if (memberInfo) {
-                const floatOffset = memberInfo.uniformOffset / 4;
-                if (memberInfo.View === Uint32Array) {
-                    const data = Array.isArray(newValue) || newValue instanceof Uint32Array
-                        ? new Uint32Array(newValue)
-                        : new Uint32Array([newValue]);
-                    redGPUContext.globalFragmentUniformBuffer.updateUintData(
-                        target.globalFragmentBufferSlotIndex, data, floatOffset
-                    );
-                } else {
-                    const data = Array.isArray(newValue) || newValue instanceof Float32Array
-                        ? new Float32Array(newValue)
-                        : new Float32Array([newValue]);
-                    redGPUContext.globalFragmentUniformBuffer.updateFloatData(
-                        target.globalFragmentBufferSlotIndex, data, floatOffset
-                    );
-                }
-
-                return
-            }
-        }
     }
 
     if (target.isInstanceofMaterial) {

@@ -22,7 +22,6 @@ class ShaderVariantGenerator {
     #baseSamplers: any[] = [];
     #texturesByUniformName = new Map<string, any[]>();
     #samplersByUniformName = new Map<string, any[]>();
-    #restoreCode: string | null = null;
 
     /**
      * [KO] ShaderVariantGenerator 인스턴스를 생성합니다. (내부 시스템 전용)
@@ -40,17 +39,6 @@ class ShaderVariantGenerator {
     ) {
         this.#defines = defines;
         this.#conditionalBlocks = conditionalBlocks;
-    }
-
-    /**
-     * [KO] Uniforms 복원 코드를 설정하고 캐시된 코드를 업데이트합니다.
-     * [EN] Sets the Uniforms restore code and updates the cached code.
-     */
-    setRestoreCode(code: string) {
-        this.#restoreCode = code;
-        for (const [key, value] of this.#variantCache.entries()) {
-            this.#variantCache.set(key, value.replace(/#redgpu_restore_fragment_uniforms/g, code));
-        }
     }
 
     /**
@@ -183,10 +171,7 @@ class ShaderVariantGenerator {
             return this.#variantCache.get(variantKey)!;
         }
         const enabledKeys = variantKey === 'none' ? [] : variantKey.split('+');
-        let variantCode = this.#processConditionalBlocks(enabledKeys);
-        if (this.#restoreCode !== null) {
-            variantCode = variantCode.replace(/#redgpu_restore_fragment_uniforms/g, this.#restoreCode);
-        }
+        const variantCode = this.#processConditionalBlocks(enabledKeys);
         this.#variantCache.set(variantKey, variantCode);
         return variantCode;
     }

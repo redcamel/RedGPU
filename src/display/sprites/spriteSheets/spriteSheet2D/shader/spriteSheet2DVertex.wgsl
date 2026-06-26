@@ -36,9 +36,8 @@ struct VertexOutput {
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
-
-    @location(10) @interpolate(flat) globalFragmentBufferSlotIndex: u32,
     @location(11) combinedOpacity: f32,
+
     @location(12) motionVector: vec3<f32>,
     @location(13) shadowCoord: vec3<f32>,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
@@ -83,7 +82,6 @@ fn main(inputData: InputData) -> VertexOutput {
     output.vertexPosition = viewPos.xyz;
     output.vertexNormal = viewNormal.xyz;
     output.combinedOpacity = globalVertexUniforms.combinedOpacity;
-    output.globalFragmentBufferSlotIndex = globalVertexUniforms.globalFragmentBufferSlotIndex;
 
     // [KO] UV 좌표 계산 (스프라이트 시트 애니메이션 적용)
     // [EN] Calculate UV coordinates (apply sprite sheet animation)
