@@ -151,7 +151,7 @@ interface PhongMaterial {
  * @category Material
  */
 class PhongMaterial extends AUVTransformBaseMaterial {
-
+    #globalFragmentBufferSlotIndex: number = -1
 
     /**
      * [KO] PhongMaterial 생성자
@@ -174,10 +174,7 @@ class PhongMaterial extends AUVTransformBaseMaterial {
             2
         )
         if (name) this.name = name
-        this.initGPURenderInfos()
-        this.color.setColorByHEX(color)
-        this.emissiveColor.setColorByHEX(this.emissiveColor.hex)
-        this.specularColor.setColorByHEX(this.specularColor.hex)
+        const slot = redGPUContext.globalFragmentBuiltInUniformBuffer.allocateSlot();
         this.diffuseTextureSampler = new Sampler(this.redGPUContext, {
             magFilter: 'linear',
             minFilter: 'linear',
@@ -186,6 +183,17 @@ class PhongMaterial extends AUVTransformBaseMaterial {
             addressModeV: 'repeat',
             addressModeW: 'repeat',
         })
+        this.#globalFragmentBufferSlotIndex = slot.index;
+        this.initGPURenderInfos()
+        this.color.setColorByHEX(color)
+        this.emissiveColor.setColorByHEX(this.emissiveColor.hex)
+        this.specularColor.setColorByHEX(this.specularColor.hex)
+
+
+    }
+
+    get globalFragmentBufferSlotIndex(): number {
+        return this.#globalFragmentBufferSlotIndex;
     }
 
 
@@ -236,5 +244,9 @@ definePositiveNumber(PhongMaterial, [
     {key: 'metallic', value: 0, min: 0, max: 1},
     {key: 'roughness', value: 0, min: 0, max: 1}
 ])
+Object.defineProperty(PhongMaterial.prototype, 'isBuiltInMaterial', {
+    value: true,
+    writable: false
+});
 Object.freeze(PhongMaterial)
 export default PhongMaterial

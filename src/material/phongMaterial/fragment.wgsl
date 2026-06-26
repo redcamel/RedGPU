@@ -15,32 +15,6 @@
 
 const maxDistance: f32 = 1000.0;
 
-struct Uniforms {
-    // basic
-    opacity: f32,
-    useTint:u32,
-    tintBlendMode:u32,
-    tint:vec4<f32>,
-    // color
-    color: vec3<f32>,
-    // phong
-    emissiveColor: vec3<f32>,
-    emissiveStrength:f32,
-    //
-    specularColor:vec3<f32>,
-    specularStrength:f32,
-    shininess: f32,
-    //
-    aoStrength:f32,
-    //
-    normalScale:f32,
-    displacementScale:f32,
-    //
-    useSSR:u32,
-    metallic:f32,
-    roughness:f32,
-    //
-};
 
 struct InputData {
     // Built-in attributes
@@ -55,6 +29,7 @@ struct InputData {
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
+    @location(9) @interpolate(flat) globalFragmentBufferSlotIndex: u32,
 
     @location(11) combinedOpacity: f32,
     //
@@ -152,6 +127,7 @@ fn getSpecularBRDF(
 @fragment
 fn main(inputData:InputData) -> OutputFragment {
     var output: OutputFragment;
+    let uniforms = globalFragmentBuiltInUniformBuffer[inputData.globalFragmentBufferSlotIndex];
 
     // [KO] 입력 데이터 추출 [EN] Extract input data
     let input_vertexNormal = inputData.vertexNormal.xyz;

@@ -46,7 +46,7 @@ interface BitmapMaterial {
  * @category Material
  */
 class BitmapMaterial extends AUVTransformBaseMaterial {
-
+    #globalFragmentBufferSlotIndex: number = -1
 
     /**
      * [KO] BitmapMaterial 생성자
@@ -71,7 +71,13 @@ class BitmapMaterial extends AUVTransformBaseMaterial {
         if (name) this.name = name
         this.diffuseTexture = diffuseTexture
         this.diffuseTextureSampler = new Sampler(this.redGPUContext)
+        const slot = redGPUContext.globalFragmentBuiltInUniformBuffer.allocateSlot();
+        this.#globalFragmentBufferSlotIndex = slot.index;
         this.initGPURenderInfos()
+    }
+
+    get globalFragmentBufferSlotIndex(): number {
+        return this.#globalFragmentBufferSlotIndex;
     }
 }
 
@@ -81,6 +87,9 @@ defineSampler(BitmapMaterial, [
 defineTexture(BitmapMaterial, [
     {key: 'diffuseTexture'}
 ])
-
+Object.defineProperty(BitmapMaterial.prototype, 'isBuiltInMaterial', {
+    value: true,
+    writable: false
+});
 Object.freeze(BitmapMaterial)
 export default BitmapMaterial

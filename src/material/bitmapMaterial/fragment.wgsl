@@ -4,14 +4,6 @@
 #redgpu_include systemStruct.OutputFragment
 #redgpu_include math.getMotionVector
 
-struct Uniforms {
-    opacity: f32,
-    useTint:u32,
-    tintBlendMode:u32,
-    tint:vec4<f32>,
-};
-
-@group(2) @binding(0) var<uniform> uniforms: Uniforms;
 @group(2) @binding(1) var diffuseTextureSampler: sampler;
 @group(2) @binding(2) var diffuseTexture: texture_2d<f32>;
 
@@ -23,6 +15,7 @@ struct InputData {
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
+    @location(9) @interpolate(flat) globalFragmentBufferSlotIndex: u32,
 
     @location(11) combinedOpacity: f32,
     //
@@ -34,6 +27,7 @@ struct InputData {
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
   var output:OutputFragment;
+  let uniforms = globalFragmentBuiltInUniformBuffer[inputData.globalFragmentBufferSlotIndex];
   // 텍스처 색상 샘플링
   var finalColor: vec4<f32> = vec4<f32>(0.0);
   #redgpu_if diffuseTexture
