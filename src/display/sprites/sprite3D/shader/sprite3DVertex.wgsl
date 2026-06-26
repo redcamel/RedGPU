@@ -29,6 +29,7 @@ struct VertexOutput {
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
+    @location(9) @interpolate(flat) globalFragmentBufferSlotIndex: u32,
 
     @location(11) combinedOpacity: f32,
     //
@@ -62,6 +63,7 @@ fn main(inputData: InputData) -> VertexOutput {
     output.vertexNormal = billboardResult.vertexNormal;
     output.uv = inputData.uv;
     output.combinedOpacity = globalVertexUniforms.combinedOpacity;
+    output.globalFragmentBufferSlotIndex = globalVertexUniforms.globalFragmentBufferSlotIndex;
 
     return output;
 }
