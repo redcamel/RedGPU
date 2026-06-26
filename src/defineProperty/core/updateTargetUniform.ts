@@ -18,13 +18,20 @@ const updateTargetUniform = (target: any, propertyKey: string, newValue: any) =>
         const memberInfo = ResourceManager.GLOBAL_SSAO_VERTEX_STRUCT.members[propertyKey];
         if (memberInfo) {
             const floatOffset = memberInfo.uniformOffset / 4;
+            const isArrayLike = Array.isArray(newValue) || ArrayBuffer.isView(newValue);
             if (memberInfo.View === Uint32Array) {
+                const uploadValue = isArrayLike
+                    ? (newValue instanceof Uint32Array ? newValue : new Uint32Array(newValue as any))
+                    : new Uint32Array([newValue]);
                 redGPUContext.globalVertexUniformBuffer.updateUintData(
-                    target.globalVertexBufferSlotIndex, new Uint32Array([newValue]), floatOffset
+                    target.globalVertexBufferSlotIndex, uploadValue, floatOffset
                 );
             } else {
+                const uploadValue = isArrayLike
+                    ? (newValue instanceof Float32Array ? newValue : new Float32Array(newValue as any))
+                    : new Float32Array([newValue]);
                 redGPUContext.globalVertexUniformBuffer.updateFloatData(
-                    target.globalVertexBufferSlotIndex, new Float32Array([newValue]), floatOffset
+                    target.globalVertexBufferSlotIndex, uploadValue, floatOffset
                 );
             }
 
