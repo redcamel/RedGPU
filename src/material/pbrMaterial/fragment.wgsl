@@ -18,171 +18,6 @@
 #redgpu_include math.tnb.getNormalFromNormalMap
 #redgpu_include skyAtmosphere.skyAtmosphereFn
 
-struct Uniforms {
-    useVertexColor: u32,
-    useCutOff: u32,
-    cutOff: f32,
-    alphaBlend: u32,
-    doubleSided: u32,
-    useVertexTangent: u32,
-    opacity: f32,
-    useTint: u32,
-    tint: vec4<f32>,
-    tintBlendMode: u32,
-    baseColorFactor: vec4<f32>,
-    emissiveFactor: vec3<f32>,
-    emissiveStrength: f32,
-    occlusionStrength: f32,
-    metallicFactor: f32,
-    roughnessFactor: f32,
-    normalScale: f32,
-    useKHR_materials_unlit: u32,
-    KHR_materials_ior: f32,
-    useKHR_materials_transmission: u32,
-    KHR_transmissionFactor: f32,
-    useKHR_materials_diffuse_transmission: u32,
-    KHR_diffuseTransmissionFactor: f32,
-    KHR_diffuseTransmissionColorFactor: vec3<f32>,
-    KHR_dispersion: f32,
-    useKHR_materials_volume: u32,
-    KHR_thicknessFactor: f32,
-    KHR_attenuationDistance: f32,
-    KHR_attenuationColor: vec3<f32>,
-    useKHR_materials_specular: u32,
-    KHR_specularFactor: f32,
-    KHR_specularColorFactor: vec3<f32>,
-    useKHR_materials_anisotropy: u32,
-    KHR_anisotropyStrength: f32,
-    KHR_anisotropyRotation: f32,
-    useKHR_materials_iridescence: u32,
-    KHR_iridescenceFactor: f32,
-    KHR_iridescenceIor: f32,
-    KHR_iridescenceThicknessMinimum: f32,
-    KHR_iridescenceThicknessMaximum: f32,
-    useKHR_materials_sheen: u32,
-    KHR_sheenColorFactor: vec3<f32>,
-    KHR_sheenRoughnessFactor: f32,
-    useKHR_materials_clearcoat: u32,
-    KHR_clearcoatFactor: f32,
-    KHR_clearcoatRoughnessFactor: f32,
-    KHR_clearcoatNormalScale: f32,
-//    #redgpu_include KHR_texture_transform
-    useBaseColorTexture: u32,
-    baseColorTexture_texCoord_index: u32,
-    use_baseColorTexture_KHR_texture_transform: u32,
-    baseColorTexture_KHR_texture_transform_offset: vec2<f32>,
-    baseColorTexture_KHR_texture_transform_scale: vec2<f32>,
-    baseColorTexture_KHR_texture_transform_rotation: f32,
-    useNormalTexture: u32,
-    normalTexture_texCoord_index: u32,
-    use_normalTexture_KHR_texture_transform: u32,
-    normalTexture_KHR_texture_transform_offset: vec2<f32>,
-    normalTexture_KHR_texture_transform_scale: vec2<f32>,
-    normalTexture_KHR_texture_transform_rotation: f32,
-    useMetallicRoughnessTexture: u32,
-    metallicRoughnessTexture_texCoord_index: u32,
-    use_metallicRoughnessTexture_KHR_texture_transform: u32,
-    metallicRoughnessTexture_KHR_texture_transform_offset: vec2<f32>,
-    metallicRoughnessTexture_KHR_texture_transform_scale: vec2<f32>,
-    metallicRoughnessTexture_KHR_texture_transform_rotation: f32,
-    useEmissiveTexture: u32,
-    emissiveTexture_texCoord_index: u32,
-    use_emissiveTexture_KHR_texture_transform: u32,
-    emissiveTexture_KHR_texture_transform_offset: vec2<f32>,
-    emissiveTexture_KHR_texture_transform_scale: vec2<f32>,
-    emissiveTexture_KHR_texture_transform_rotation: f32,
-    useOcclusionTexture: u32,
-    occlusionTexture_texCoord_index: u32,
-    use_occlusionTexture_KHR_texture_transform: u32,
-    occlusionTexture_KHR_texture_transform_offset: vec2<f32>,
-    occlusionTexture_KHR_texture_transform_scale: vec2<f32>,
-    occlusionTexture_KHR_texture_transform_rotation: f32,
-    useKHR_clearcoatTexture: u32,
-    KHR_clearcoatTexture_texCoord_index: u32,
-    use_KHR_clearcoatTexture_KHR_texture_transform: u32,
-    KHR_clearcoatTexture_KHR_texture_transform_offset: vec2<f32>,
-    KHR_clearcoatTexture_KHR_texture_transform_scale: vec2<f32>,
-    KHR_clearcoatTexture_KHR_texture_transform_rotation: f32,
-    useKHR_clearcoatNormalTexture: u32,
-    KHR_clearcoatNormalTexture_texCoord_index: u32,
-    use_KHR_clearcoatNormalTexture_KHR_texture_transform: u32,
-    KHR_clearcoatNormalTexture_KHR_texture_transform_offset: vec2<f32>,
-    KHR_clearcoatNormalTexture_KHR_texture_transform_scale: vec2<f32>,
-    KHR_clearcoatNormalTexture_KHR_texture_transform_rotation: f32,
-    useKHR_clearcoatRoughnessTexture: u32,
-    KHR_clearcoatRoughnessTexture_texCoord_index: u32,
-    use_KHR_clearcoatRoughnessTexture_KHR_texture_transform: u32,
-    KHR_clearcoatRoughnessTexture_KHR_texture_transform_offset: vec2<f32>,
-    KHR_clearcoatRoughnessTexture_KHR_texture_transform_scale: vec2<f32>,
-    KHR_clearcoatRoughnessTexture_KHR_texture_transform_rotation: f32,
-    useKHR_sheenColorTexture: u32,
-    KHR_sheenColorTexture_texCoord_index: u32,
-    use_KHR_sheenColorTexture_KHR_texture_transform: u32,
-    KHR_sheenColorTexture_KHR_texture_transform_offset: vec2<f32>,
-    KHR_sheenColorTexture_KHR_texture_transform_scale: vec2<f32>,
-    KHR_sheenColorTexture_KHR_texture_transform_rotation: f32,
-    useKHR_sheenRoughnessTexture: u32,
-    KHR_sheenRoughnessTexture_texCoord_index: u32,
-    use_KHR_sheenRoughnessTexture_KHR_texture_transform: u32,
-    KHR_sheenRoughnessTexture_KHR_texture_transform_offset: vec2<f32>,
-    KHR_sheenRoughnessTexture_KHR_texture_transform_scale: vec2<f32>,
-    KHR_sheenRoughnessTexture_KHR_texture_transform_rotation: f32,
-    useKHR_specularTexture: u32,
-    KHR_specularTexture_texCoord_index: u32,
-    use_KHR_specularTexture_KHR_texture_transform: u32,
-    KHR_specularTexture_KHR_texture_transform_offset: vec2<f32>,
-    KHR_specularTexture_KHR_texture_transform_scale: vec2<f32>,
-    KHR_specularTexture_KHR_texture_transform_rotation: f32,
-    useKHR_specularColorTexture: u32,
-    KHR_specularColorTexture_texCoord_index: u32,
-    use_KHR_specularColorTexture_KHR_texture_transform: u32,
-    KHR_specularColorTexture_KHR_texture_transform_offset: vec2<f32>,
-    KHR_specularColorTexture_KHR_texture_transform_scale: vec2<f32>,
-    KHR_specularColorTexture_KHR_texture_transform_rotation: f32,
-    useKHR_transmissionTexture: u32,
-    KHR_transmissionTexture_texCoord_index: u32,
-    use_KHR_transmissionTexture_KHR_texture_transform: u32,
-    KHR_transmissionTexture_KHR_texture_transform_offset: vec2<f32>,
-    KHR_transmissionTexture_KHR_texture_transform_scale: vec2<f32>,
-    KHR_transmissionTexture_KHR_texture_transform_rotation: f32,
-    useKHR_thicknessTexture: u32,
-    KHR_thicknessTexture_texCoord_index: u32,
-    use_KHR_thicknessTexture_KHR_texture_transform: u32,
-    KHR_thicknessTexture_KHR_texture_transform_offset: vec2<f32>,
-    KHR_thicknessTexture_KHR_texture_transform_scale: vec2<f32>,
-    KHR_thicknessTexture_KHR_texture_transform_rotation: f32,
-    useKHR_diffuseTransmissionTexture: u32,
-    KHR_diffuseTransmissionTexture_texCoord_index: u32,
-    use_KHR_diffuseTransmissionTexture_KHR_texture_transform: u32,
-    KHR_diffuseTransmissionTexture_KHR_texture_transform_offset: vec2<f32>,
-    KHR_diffuseTransmissionTexture_KHR_texture_transform_scale: vec2<f32>,
-    KHR_diffuseTransmissionTexture_KHR_texture_transform_rotation: f32,
-    useKHR_diffuseTransmissionColorTexture: u32,
-    KHR_diffuseTransmissionColorTexture_texCoord_index: u32,
-    use_KHR_diffuseTransmissionColorTexture_KHR_texture_transform: u32,
-    KHR_diffuseTransmissionColorTexture_KHR_texture_transform_offset: vec2<f32>,
-    KHR_diffuseTransmissionColorTexture_KHR_texture_transform_scale: vec2<f32>,
-    KHR_diffuseTransmissionColorTexture_KHR_texture_transform_rotation: f32,
-    useKHR_anisotropyTexture: u32,
-    KHR_anisotropyTexture_texCoord_index: u32,
-    use_KHR_anisotropyTexture_KHR_texture_transform: u32,
-    KHR_anisotropyTexture_KHR_texture_transform_offset: vec2<f32>,
-    KHR_anisotropyTexture_KHR_texture_transform_scale: vec2<f32>,
-    KHR_anisotropyTexture_KHR_texture_transform_rotation: f32,
-    useKHR_iridescenceTexture: u32,
-    KHR_iridescenceTexture_texCoord_index: u32,
-    use_KHR_iridescenceTexture_KHR_texture_transform: u32,
-    KHR_iridescenceTexture_KHR_texture_transform_offset: vec2<f32>,
-    KHR_iridescenceTexture_KHR_texture_transform_scale: vec2<f32>,
-    KHR_iridescenceTexture_KHR_texture_transform_rotation: f32,
-    useKHR_iridescenceThicknessTexture: u32,
-    KHR_iridescenceThicknessTexture_texCoord_index: u32,
-    use_KHR_iridescenceThicknessTexture_KHR_texture_transform: u32,
-    KHR_iridescenceThicknessTexture_KHR_texture_transform_offset: vec2<f32>,
-    KHR_iridescenceThicknessTexture_KHR_texture_transform_scale: vec2<f32>,
-    KHR_iridescenceThicknessTexture_KHR_texture_transform_rotation: f32,
-};
-
 @group(2) @binding(1) var baseColorTextureSampler: sampler;
 #redgpu_if baseColorTexture
 @group(2) @binding(2) var baseColorTexture: texture_2d<f32>;
@@ -531,18 +366,25 @@ fn main(inputData:InputData) -> OutputFragment {
     var clearcoatNormal:vec3<f32> = select(baseNormal, -baseNormal, backFaceYn);
     #redgpu_if useKHR_materials_clearcoat
     {
+        #redgpu_if useKHR_clearcoatTexture
+            let clearcoatSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatUV);
+        #redgpu_endIf
+        #redgpu_if useKHR_clearcoatRoughnessTexture
+            let clearcoatRoughnesstSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatRoughnessUV);
+        #redgpu_endIf
+        #redgpu_if useKHR_clearcoatNormalTexture
+            let clearcoatNormalSamplerColor = textureSample(KHR_clearcoatNormalTexture, baseColorTextureSampler, KHR_clearcoatNormalUV).rgb;
+        #redgpu_endIf
+
         if(clearcoatParameter > 0.0){
             #redgpu_if useKHR_clearcoatTexture
-                let clearcoatSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatUV);
                 clearcoatParameter *= clearcoatSample.r;
             #redgpu_endIf
             #redgpu_if useKHR_clearcoatRoughnessTexture
-                let clearcoatRoughnesstSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatRoughnessUV);
                 clearcoatRoughnessParameter *= clearcoatRoughnesstSample.g;
             #redgpu_endIf
             #redgpu_if useKHR_clearcoatNormalTexture
             {
-                let clearcoatNormalSamplerColor = textureSample(KHR_clearcoatNormalTexture, baseColorTextureSampler, KHR_clearcoatNormalUV).rgb;
                 let texturedNormal = getNormalFromNormalMap(clearcoatNormalSamplerColor, tbn, u_KHR_clearcoatNormalScale);
                 clearcoatNormal = select(texturedNormal, -texturedNormal, backFaceYn);
             }
@@ -620,8 +462,8 @@ fn main(inputData:InputData) -> OutputFragment {
        let T = tbn[0];
        let B = tbn[1];
        var anisotropicDirection: vec2<f32> = vec2<f32>(1.0, 0.0);
+       let anisotropyTex = textureSample(KHR_anisotropyTexture, baseColorTextureSampler, KHR_anisotropyUV).rgb;
        if(u_useKHR_anisotropyTexture){
-           let anisotropyTex = textureSample(KHR_anisotropyTexture, baseColorTextureSampler, KHR_anisotropyUV).rgb;
            anisotropicDirection = anisotropyTex.rg * 2.0 - 1.0;
            anisotropy *= anisotropyTex.b;
        }

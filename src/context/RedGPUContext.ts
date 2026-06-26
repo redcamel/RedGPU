@@ -10,6 +10,7 @@ import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
 import CommandEncoderManager from "../commandEncoderManager/CommandEncoderManager";
 import RedGPUContextObserver from "./core/RedGPUContextObserver";
 import GlobalStorageBufferManager from "../resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager";
+import {keepLog} from "../utils";
 
 /**
  * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
@@ -179,7 +180,8 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#commandEncoderManager = new CommandEncoderManager(this)
         this.#antialiasingManager = new AntialiasingManager()
         this.#globalVertexUniformBuffer = new GlobalStorageBufferManager(this, 304, 50000, "GLOBAL_SSAO_VERTEX_BUFFER")
-        this.#globalFragmentUniformBuffer = new GlobalStorageBufferManager(this, 912, 1024, "GLOBAL_SSAO_FRAGMENT_BUFFER")
+        keepLog(ResourceManager.GLOBAL_SSAO_FRAGMENT_PBR_STRUCT)
+        this.#globalFragmentUniformBuffer = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_SSAO_FRAGMENT_PBR_STRUCT.size, 1024, "GLOBAL_SSAO_FRAGMENT_BUFFER")
         this.#initialize()
     }
 

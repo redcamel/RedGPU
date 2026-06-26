@@ -43,6 +43,7 @@ const updateTargetUniform = (target: any, propertyKey: string, newValue: any) =>
 
     if (globalPBRFragmentBufferSlotIndex !== undefined && globalPBRFragmentBufferSlotIndex !== -1) {
         const memberInfo = ResourceManager.GLOBAL_SSAO_FRAGMENT_PBR_STRUCT.members[propertyKey];
+
         if (memberInfo) {
             const floatOffset = memberInfo.uniformOffset / 4;
             const isArrayLike = Array.isArray(newValue) || ArrayBuffer.isView(newValue);

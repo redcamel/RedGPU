@@ -12,6 +12,8 @@ import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroup
 import definePositiveNumber from "../../defineProperty/funcs/number/definePositiveNumber";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import defineColorRGBA from "../../defineProperty/funcs/color/defineColorRGBA";
+import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
+import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 
 
 interface ABaseMaterial {
@@ -232,7 +234,8 @@ abstract class ABaseMaterial extends ResourceBase {
         } else {
             throw new Error(`Invalid tint mode: ${value}`);
         }
-        fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members.tintBlendMode, valueIdx);
+        // fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members.tintBlendMode, valueIdx);
+        updateTargetUniform(this, 'tintBlendMode', valueIdx)
         this.#tintBlendMode = valueIdx;
     }
 
@@ -468,18 +471,15 @@ abstract class ABaseMaterial extends ResourceBase {
      * @protected
      */
     _updateBaseProperty() {
-        const {fragmentUniformInfo, fragmentUniformBuffer} = this.gpuRenderInfo
-        if (fragmentUniformInfo) {
-            const {members} = fragmentUniformInfo
-            for (const k in members) {
-                const property = this[k]
-                if (property instanceof ColorRGBA) {
-                    fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[k], property.rgbaNormalLinear)
-                } else if (property instanceof ColorRGB) {
-                    fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[k], property.rgbNormalLinear)
-                } else {
-                    if (!pattern.test(k)) this[k] = property
-                }
+        const {members} = this['isPBRMaterial'] ? ResourceManager.GLOBAL_SSAO_FRAGMENT_PBR_STRUCT : this.gpuRenderInfo.fragmentUniformInfo
+        for (const k in members) {
+            const property = this[k]
+            if (property instanceof ColorRGBA) {
+                updateTargetUniform(this, k, property.rgbaNormalLinear);
+            } else if (property instanceof ColorRGB) {
+                updateTargetUniform(this, k, property.rgbNormalLinear);
+            } else {
+                if (!pattern.test(k)) this[k] = property
             }
         }
     }
