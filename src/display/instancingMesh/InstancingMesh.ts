@@ -29,6 +29,7 @@ const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = "VERTEX_BIND_GROUP_DESCRIPTOR_INSTANCI
 const CULLING_COMPUTE_MODULE_NAME = "CULLING_COMPUTE_MODULE_INSTANCING";
 const INDIRECT_ARGS_SIZE = 20;
 
+//TODO - 여기도 전역버퍼를 쳐다보도록 수정해야함( 재질만 )
 /**
  * [KO] LOD별 GPU 렌더링 리소스 정보를 정의하는 인터페이스입니다.
  * [EN] Interface defining GPU rendering resource details for each LOD.
