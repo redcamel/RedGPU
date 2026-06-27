@@ -7,7 +7,7 @@ fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
     var output: OutputShadowData;
 
 
-    let input_instanceIdx: u32 = visibilityBuffer[inputData.instanceIdx];
+    let input_instanceIdx: u32 = visibilityBuffer[inputData.instanceIdx].instanceIdx;
 
     let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
     let u_modelMatrix = instanceUniforms.instanceModelMatrixs[input_instanceIdx];

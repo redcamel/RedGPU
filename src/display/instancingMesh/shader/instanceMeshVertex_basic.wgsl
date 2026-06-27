@@ -2,7 +2,8 @@
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
 
-    let input_instanceIdx: u32 = visibilityBuffer[inputData.instanceIdx];
+    let input_instanceIdx: u32 = visibilityBuffer[inputData.instanceIdx].instanceIdx;
+    output.globalFragmentBufferSlotIndex = visibilityBuffer[inputData.instanceIdx].globalFragmentBufferSlotIndex;
 
     let u_modelMatrix = instanceUniforms.instanceModelMatrixs[input_instanceIdx];
     let u_normalModelMatrix = instanceUniforms.instanceNormalModelMatrix[input_instanceIdx];

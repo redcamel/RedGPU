@@ -81,6 +81,7 @@ class InstancingMesh extends Mesh {
      * [EN] Whether the active instance count information has been modified.
      */
     dirtyInstanceNum: boolean = true;
+    #lastLodSlotIndexes: Uint32Array = new Uint32Array(8);
 
     #lastUpdateMSAAID: string;
 
@@ -225,9 +226,10 @@ class InstancingMesh extends Mesh {
          * useDisplacementTexture: u32 (1 float size)
          * displacementScale: f32 (1 float size)
          * padding: vec2<f32> (2 floats)
-         * Total headSize = 36 * 4 = 144 bytes
+         * lodGlobalFragmentBufferSlotIndex: array<u32, 8> (8 floats size = 32 bytes)
+         * Total headSize including 16 bytes alignment padding for mat4x4 = 192 bytes
          */
-        const headSize = (16 + 16 + 1 + 1 + 2) * 4;
+        const headSize = 192;
 
         /**
          * Per-instance data in InstanceUniforms struct (WGSL):
@@ -287,9 +289,20 @@ class InstancingMesh extends Mesh {
             if (!this.gpuRenderInfo) {
                 this.#initGPURenderInfos(redGPUContext);
             }
-            const dirtyPipeline: boolean = this.dirtyPipeline || this.material.dirtyPipeline;
+            let dirtyPipeline: boolean = this.dirtyPipeline || this.material.dirtyPipeline;
+            if (!dirtyPipeline) {
+                for (const lod of this.LODManager.LODList) {
+                    if (lod.material?.dirtyPipeline) {
+                        dirtyPipeline = true;
+                        break;
+                    }
+                }
+            }
             if (dirtyPipeline) {
                 this.#updatePipelineState(renderViewStateData);
+                this.LODManager.LODList.forEach(lod => {
+                    if (lod.material) lod.material.dirtyPipeline = false;
+                });
             }
             if (!shadowRender) {
                 this.#performGPUCulling(renderViewStateData);
@@ -427,6 +440,39 @@ class InstancingMesh extends Mesh {
         const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo;
         const {gpuDevice} = this.#redGPUContext;
         const {members} = vertexUniformInfo;
+
+        // lodGlobalFragmentBufferSlotIndex 데이터 갱신 및 업로드
+        if (members.lodGlobalFragmentBufferSlotIndex !== undefined) {
+            const lodSlotIndexes = new Uint32Array(8);
+            lodSlotIndexes[0] = Math.max(0, this.material.globalFragmentBufferSlotIndex);
+            this.LODManager.LODList.forEach((lod, index) => {
+                if (index < 7) {
+                    const mat = lod.material || this.material;
+                    lodSlotIndexes[index + 1] = Math.max(0, mat.globalFragmentBufferSlotIndex);
+                }
+            });
+
+            let changed = false;
+            for (let i = 0; i < 8; i++) {
+                if (this.#lastLodSlotIndexes[i] !== lodSlotIndexes[i]) {
+                    changed = true;
+                    this.#lastLodSlotIndexes[i] = lodSlotIndexes[i];
+                }
+            }
+
+            if (changed) {
+                vertexUniformBuffer.dataViewU32.set(
+                    lodSlotIndexes,
+                    members.lodGlobalFragmentBufferSlotIndex.uniformOffset / 4,
+                );
+                gpuDevice.queue.writeBuffer(
+                    vertexUniformBuffer.gpuBuffer,
+                    members.lodGlobalFragmentBufferSlotIndex.uniformOffset,
+                    lodSlotIndexes,
+                );
+            }
+        }
+
         if (this.dirtyTransform) {
             vertexUniformBuffer.dataViewF32.set(
                 this.modelMatrix,
@@ -738,9 +784,9 @@ class InstancingMesh extends Mesh {
     // ========== Utility 메서드 ==========
 
     #updateVisibilityStride(): void {
-        const rawStride = this.#maxInstanceCount * 4;
+        const rawStride = this.#maxInstanceCount * 8; // u32가 2개(instanceIdx, globalFragmentBufferSlotIndex)이므로 8바이트
         this.#visibilityStrideBytes = Math.ceil(rawStride / 256) * 256;
-        this.#visibilityStrideU32 = this.#visibilityStrideBytes / 4;
+        this.#visibilityStrideU32 = this.#visibilityStrideBytes / 8; // VisibilityData 구조체 크기(8바이트) 단위로 계산
     }
 
     #rebuildInstanceUniformBuffer(): void {
