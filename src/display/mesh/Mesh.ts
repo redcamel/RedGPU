@@ -276,6 +276,7 @@ class Mesh extends MeshBase {
     #currentLODIndex: number = -1;
     #interleavedCullingID: number = Math.floor(Math.random() * 4)
     #globalVertexBufferSlotIndex: number = -1;
+    #prevLodIDX: number;
 
     /**
      * [KO] Mesh 인스턴스를 생성합니다.
@@ -303,6 +304,7 @@ class Mesh extends MeshBase {
         this.#checkDrawCommandSlot();
         this.#LODManager = new LODManager(this, () => {
             this.dirtyLOD = true;
+            this.#prevLodIDX = -1
         });
         const slot = redGPUContext.globalVertexUniformBuffer.allocateSlot();
         this.#globalVertexBufferSlotIndex = slot.index;
@@ -1658,13 +1660,7 @@ class Mesh extends MeshBase {
                         || this.#prevSystemBindGroupList[renderViewStateData.viewIndex] !== view.systemUniform_Vertex_UniformBindGroup
                         || this.dirtyLOD
                     ) {
-                        if (currentMaterial.globalFragmentBufferSlotIndex !== undefined && currentMaterial.globalFragmentBufferSlotIndex > -1) {
-                            redGPUContext.globalVertexUniformBuffer.updateUintData(
-                                this.#globalVertexBufferSlotIndex,
-                                new Uint32Array([currentMaterial.globalFragmentBufferSlotIndex]),
-                                ResourceManager.GLOBAL_VERTEX_STRUCT.members.globalFragmentBufferSlotIndex.uniformOffset / 4
-                            );
-                        }
+
 
                         this.#setRenderBundle(renderViewStateData)
                     }
@@ -1730,10 +1726,25 @@ class Mesh extends MeshBase {
                                         renderBundle = this.#renderBundle_LODList[newIdx];
                                     }
                                     // newIdx가 -1이면 기본 renderBundle 사용 (이미 설정됨)
+
                                 }
+
                             } else if (idx >= 0 && idx < lodLen) {
                                 // 현재 LOD 유지
                                 renderBundle = this.#renderBundle_LODList[idx];
+
+                            }
+                            let targetIdx = this.#renderBundle_LODList.indexOf(renderBundle)
+                            const lodMaterial = this.#LODManager.LODList[targetIdx]?.material || currentMaterial
+                            if (this.#prevLodIDX !== targetIdx && lodMaterial.globalFragmentBufferSlotIndex !== undefined && lodMaterial.globalFragmentBufferSlotIndex > -1) {
+
+                                redGPUContext.globalVertexUniformBuffer.updateUintData(
+                                    this.#globalVertexBufferSlotIndex,
+                                    new Uint32Array([lodMaterial.globalFragmentBufferSlotIndex]),
+                                    ResourceManager.GLOBAL_VERTEX_STRUCT.members.globalFragmentBufferSlotIndex.uniformOffset / 4
+                                );
+                                redGPUContext.globalVertexUniformBuffer.flush();
+                                this.#prevLodIDX = targetIdx
                             }
                         }
                     }
@@ -1855,6 +1866,17 @@ class Mesh extends MeshBase {
 
     #setRenderBundle(renderViewStateData: RenderViewStateData) {
         const {view} = renderViewStateData
+        const {redGPUContext} = this
+        const currentMaterial = this._material
+        if (currentMaterial.globalFragmentBufferSlotIndex !== undefined && currentMaterial.globalFragmentBufferSlotIndex > -1) {
+            redGPUContext.globalVertexUniformBuffer.updateUintData(
+                this.#globalVertexBufferSlotIndex,
+                new Uint32Array([currentMaterial.globalFragmentBufferSlotIndex]),
+                ResourceManager.GLOBAL_VERTEX_STRUCT.members.globalFragmentBufferSlotIndex.uniformOffset / 4
+            );
+            redGPUContext.globalVertexUniformBuffer.flush();
+        }
+        this.#prevLodIDX = -1;
         this.#renderBundle = this.#createRenderBundle(view, this._geometry, this._material)
         if (this.dirtyLOD) {
             this.#updateLODPipeline()
@@ -1862,7 +1884,8 @@ class Mesh extends MeshBase {
         }
         this.#renderBundle_LODList.length = 0;
         this.LODManager.LODList.forEach((lod, index) => {
-            this.#renderBundle_LODList[index] = this.#createRenderBundle(view, lod.geometry, lod.material || this._material, index)
+            const currentMaterial = lod.material || this._material
+            this.#renderBundle_LODList[index] = this.#createRenderBundle(view, lod.geometry, currentMaterial, index)
         });
         // keepLog('렌더번들갱신', this.name)
         // keepLog(this.#renderBundle_LODList)
