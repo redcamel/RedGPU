@@ -2,7 +2,6 @@ import {WgslReflect} from "wgsl_reflect";
 import ensureVertexIndexBuiltin from "./core/ensureVertexIndexBuiltin";
 import preprocessWGSL from "./core/preprocessWGSL";
 import WGSLUniformTypes from "./core/WGSLUniformTypes";
-import {keepLog} from "../../utils";
 
 /**
  * [KO] 개별 유니폼 멤버 정보를 생성합니다.
@@ -256,15 +255,15 @@ const parseWGSL = (sourceName: string, code: string, injectLibrary?: Record<stri
 
         reflectCache.set(cacheKey, reflectResult);
     }
-    keepLog(
-        sourceName,
-        {
-            ...reflectResult,
-            defaultSource,
-            shaderSourceVariant,
-            conditionalBlocks: uniqueKeys
-        }
-    )
+    // keepLog(
+    //     sourceName,
+    //     {
+    //         ...reflectResult,
+    //         defaultSource,
+    //         shaderSourceVariant,
+    //         conditionalBlocks: uniqueKeys
+    //     }
+    // )
     return {
         ...reflectResult,
         defaultSource,

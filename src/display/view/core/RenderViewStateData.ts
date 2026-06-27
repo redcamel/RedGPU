@@ -334,7 +334,7 @@ class RenderViewStateData {
         // [KO] 현재 프레임 인덱스에 따라 분산 검사할 인터리빙 프레임 인덱스를 계산합니다.
         // [EN] Calculate the interleaved frame index to distribute culling checks based on the current frame index.
         info.interleavedCullingCheckFrameIndex = this.frameIndex % 4;
-        
+
         const camera = view.rawCamera as any;
         if (camera) {
             // [KO] 카메라의 현재 위치와 회전 정보를 추출합니다. (속성이 없을 경우 기본값 0을 적용)

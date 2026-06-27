@@ -28,6 +28,7 @@ const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIF
 const GLOBAL_VERTEX_STRUCT = SHADER_INFO.storage.globalVertexUniformBuffer.type.format;
 const GLOBAL_FRAGMENT_PBR_STRUCT = SHADER_INFO.storage.globalPBRUniformBuffer.type.format;
 const GLOBAL_FRAGMENT_BUILT_IN_STRUCT = SHADER_INFO.storage.globalFragmentBuiltInUniformBuffer.type.format;
+
 enum ResourceType {
     GPUShaderModule = 'GPUShaderModule',
     GPUBindGroupLayout = 'GPUBindGroupLayout',

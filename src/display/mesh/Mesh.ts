@@ -319,17 +319,6 @@ class Mesh extends MeshBase {
     }
 
     /**
-     * [KO] 리소스를 해제합니다.
-     * [EN] Disposes of the resources.
-     */
-    dispose() {
-        if (this.#globalVertexBufferSlotIndex !== -1) {
-            this.redGPUContext.globalVertexUniformBuffer.freeSlot(this.#globalVertexBufferSlotIndex);
-            this.#globalVertexBufferSlotIndex = -1;
-        }
-    }
-
-    /**
      * [KO] LOD(Level of Detail) 매니저를 반환합니다.
      * [EN] Returns the LOD (Level of Detail) manager.
      * @returns
@@ -369,6 +358,7 @@ class Mesh extends MeshBase {
     }
 
     _material;
+
     /**
      * [KO] 머티리얼을 반환합니다.
      * [EN] Returns the material.
@@ -395,6 +385,7 @@ class Mesh extends MeshBase {
     }
 
     _geometry: Geometry | Primitive;
+
     /**
      * [KO] 지오메트리를 반환합니다.
      * [EN] Returns the geometry.
@@ -832,6 +823,17 @@ class Mesh extends MeshBase {
      */
     get combinedBoundingAABB(): AABB {
         return calculateMeshCombinedAABB(this);
+    }
+
+    /**
+     * [KO] 리소스를 해제합니다.
+     * [EN] Disposes of the resources.
+     */
+    dispose() {
+        if (this.#globalVertexBufferSlotIndex !== -1) {
+            this.redGPUContext.globalVertexUniformBuffer.freeSlot(this.#globalVertexBufferSlotIndex);
+            this.#globalVertexBufferSlotIndex = -1;
+        }
     }
 
     /**

@@ -147,6 +147,7 @@ abstract class ABaseMaterial extends ResourceBase {
      */
     #tintBlendMode: number = TINT_BLEND_MODE.MULTIPLY;
     #globalFragmentBufferSlotIndex: number = -1
+
     /**
      * [KO] ABaseMaterial 생성자
      * [EN] ABaseMaterial constructor

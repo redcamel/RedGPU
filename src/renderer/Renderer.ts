@@ -12,7 +12,6 @@ import processAnimationsAndSkinning from "./helperFunc/processAnimationsAndSkinn
 import updateJitter from "./helperFunc/updateJitter";
 import updateViewportAndScissor from "./helperFunc/updateViewportAndScissor";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
-import {SystemStructLibrary} from "../systemCodeManager/ShaderLibrary";
 
 
 /**

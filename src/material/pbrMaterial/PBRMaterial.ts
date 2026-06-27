@@ -699,6 +699,7 @@ class PBRMaterial extends AUVTransformBaseMaterial {
     #packedKHR_sheen: PackedTexture
     #packedKHR_iridescence: PackedTexture
     #packedKHR_clearcoatTexture_transmission: PackedTexture
+
     /**
      * [KO] PBRMaterial 생성자
      * [EN] PBRMaterial constructor
