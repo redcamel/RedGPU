@@ -1,6 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager";
+import {keepLog} from "../../../utils";
 
 interface BufferSlot {
     index: number;
@@ -363,7 +364,7 @@ class GlobalStorageBufferManager extends RedGPUObject {
             throw new Error(`[GlobalStorageBufferManager - ${this.#label}] Buffer 용량이 초과되었습니다. RedGPU는 안전을 위해 최대 128MB까지만 허용합니다.`);
         }
 
-        console.log(`🔄 [${this.#label}] 리사이즈 실행: ${this.#totalSlotCount} -> ${newSlotCount}`);
+        keepLog(`🔄 [${this.#label}] 리사이즈 실행: ${this.#totalSlotCount} -> ${newSlotCount}`);
         this.#totalSlotCount = newSlotCount;
 
         // 1. 새 GPU 버퍼 생성 및 CPU 백킹 데이터 공간 재할당
@@ -379,15 +380,12 @@ class GlobalStorageBufferManager extends RedGPUObject {
         newFloatView.set(this.#floatView);
 
         // 3. GPU 하드웨어 가속 복사 커맨드 실행
-        const commandEncoder = this.gpuDevice.createCommandEncoder();
-        // commandEncoder.copyBufferToBuffer(oldBuffer, 0, newBuffer, 0, oldByteSize);
         this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (encoder) => {
-            encoder.copyBufferToBuffer(oldBuffer, 0, oldBuffer, 0, oldByteSize);
+            encoder.copyBufferToBuffer(oldBuffer, 0, newBuffer, 0, oldByteSize);
         });
-        this.gpuDevice.queue.submit([commandEncoder.finish()]);
 
         // 4. 기존 GPU 버퍼 해제 및 바인딩 교체
-        oldBuffer.destroy();
+        this.commandEncoderManager.addDeferredDestroy(oldBuffer)
         this.#gpuBuffer = newBuffer;
         this.#cpuData = newCpuData;
         this.#floatView = newFloatView;
