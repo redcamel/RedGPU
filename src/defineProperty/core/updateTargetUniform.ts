@@ -13,9 +13,9 @@ const updateTargetUniform = (target: any, propertyKey: string, newValue: any) =>
     let targetUniformInfo;
     let targetUniformBuffer;
     const {gpuRenderInfo, redGPUContext} = target
-    const {globalVertexUniformBuffer, globalFragmentUniformBuffer, globalFragmentBuiltInUniformBuffer} = redGPUContext
-    const {globalVertexBufferSlotIndex, globalFragmentBufferSlotIndex} = target
-    if (globalVertexBufferSlotIndex !== undefined && globalVertexBufferSlotIndex !== -1) {
+    const {globalVertexSSBO, globalFragmentSSBO_PBR, globalFragmentSSBO_BuiltIn} = redGPUContext
+    const {globalVertexSlotIndex, globalFragmentSlotIndex} = target
+    if (globalVertexSlotIndex !== undefined && globalVertexSlotIndex !== -1) {
         const memberInfo = ResourceManager.GLOBAL_VERTEX_STRUCT.members[propertyKey];
         if (memberInfo) {
             const floatOffset = memberInfo.uniformOffset / 4;
@@ -24,15 +24,15 @@ const updateTargetUniform = (target: any, propertyKey: string, newValue: any) =>
                 const uploadValue = isArrayLike
                     ? (newValue instanceof Uint32Array ? newValue : new Uint32Array(newValue as any))
                     : new Uint32Array([newValue]);
-                globalVertexUniformBuffer.updateUintData(
-                    globalVertexBufferSlotIndex, uploadValue, floatOffset
+                globalVertexSSBO.updateUintData(
+                    globalVertexSlotIndex, uploadValue, floatOffset
                 );
             } else {
                 const uploadValue = isArrayLike
                     ? (newValue instanceof Float32Array ? newValue : new Float32Array(newValue as any))
                     : new Float32Array([newValue]);
-                globalVertexUniformBuffer.updateFloatData(
-                    globalVertexBufferSlotIndex, uploadValue, floatOffset
+                globalVertexSSBO.updateFloatData(
+                    globalVertexSlotIndex, uploadValue, floatOffset
                 );
             }
 
@@ -41,9 +41,9 @@ const updateTargetUniform = (target: any, propertyKey: string, newValue: any) =>
 
     }
 
-    if (globalFragmentBufferSlotIndex !== undefined && globalFragmentBufferSlotIndex !== -1) {
+    if (globalFragmentSlotIndex !== undefined && globalFragmentSlotIndex !== -1) {
         const {members} = target['isPBRMaterial'] ? ResourceManager.GLOBAL_FRAGMENT_PBR_STRUCT : target['isBuiltInMaterial'] ? ResourceManager.GLOBAL_FRAGMENT_BUILT_IN_STRUCT : target.gpuRenderInfo.fragmentUniformInfo
-        const targetFragmentUniformBuffer = target['isPBRMaterial'] ? globalFragmentUniformBuffer : globalFragmentBuiltInUniformBuffer
+        const targetFragmentUniformBuffer = target['isPBRMaterial'] ? globalFragmentSSBO_PBR : globalFragmentSSBO_BuiltIn
 
         const memberInfo = members[propertyKey];
         if (memberInfo) {
@@ -54,14 +54,14 @@ const updateTargetUniform = (target: any, propertyKey: string, newValue: any) =>
                     ? (newValue instanceof Uint32Array ? newValue : new Uint32Array(newValue as any))
                     : new Uint32Array([newValue]);
                 targetFragmentUniformBuffer.updateUintData(
-                    globalFragmentBufferSlotIndex, uploadValue, floatOffset
+                    globalFragmentSlotIndex, uploadValue, floatOffset
                 );
             } else {
                 const uploadValue = isArrayLike
                     ? (newValue instanceof Float32Array ? newValue : new Float32Array(newValue as any))
                     : new Float32Array([newValue]);
                 targetFragmentUniformBuffer.updateFloatData(
-                    globalFragmentBufferSlotIndex, uploadValue, floatOffset
+                    globalFragmentSlotIndex, uploadValue, floatOffset
                 );
             }
 

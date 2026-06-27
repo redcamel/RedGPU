@@ -444,11 +444,11 @@ class InstancingMesh extends Mesh {
         // lodGlobalFragmentBufferSlotIndex 데이터 갱신 및 업로드
         if (members.lodGlobalFragmentBufferSlotIndex !== undefined) {
             const lodSlotIndexes = new Uint32Array(8);
-            lodSlotIndexes[0] = Math.max(0, this.material.globalFragmentBufferSlotIndex);
+            lodSlotIndexes[0] = Math.max(0, this.material.globalFragmentSlotIndex);
             this.LODManager.LODList.forEach((lod, index) => {
                 if (index < 7) {
                     const mat = lod.material || this.material;
-                    lodSlotIndexes[index + 1] = Math.max(0, mat.globalFragmentBufferSlotIndex);
+                    lodSlotIndexes[index + 1] = Math.max(0, mat.globalFragmentSlotIndex);
                 }
             });
 
@@ -784,7 +784,7 @@ class InstancingMesh extends Mesh {
     // ========== Utility 메서드 ==========
 
     #updateVisibilityStride(): void {
-        const rawStride = this.#maxInstanceCount * 8; // u32가 2개(instanceIdx, globalFragmentBufferSlotIndex)이므로 8바이트
+        const rawStride = this.#maxInstanceCount * 8; // u32가 2개(instanceIdx, globalFragmentSlotIndex)이므로 8바이트
         this.#visibilityStrideBytes = Math.ceil(rawStride / 256) * 256;
         this.#visibilityStrideU32 = this.#visibilityStrideBytes / 8; // VisibilityData 구조체 크기(8바이트) 단위로 계산
     }

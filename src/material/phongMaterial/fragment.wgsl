@@ -29,7 +29,7 @@ struct InputData {
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
-    @location(9) @interpolate(flat) globalFragmentBufferSlotIndex: u32,
+    @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
 
     @location(11) combinedOpacity: f32,
     //
@@ -127,7 +127,7 @@ fn getSpecularBRDF(
 @fragment
 fn main(inputData:InputData) -> OutputFragment {
     var output: OutputFragment;
-    let uniforms = globalFragmentBuiltInUniformBuffer[inputData.globalFragmentBufferSlotIndex];
+    let uniforms = globalFragmentSSBO_BuiltIn[inputData.globalFragmentSlotIndex];
 
     // [KO] 입력 데이터 추출 [EN] Extract input data
     let input_vertexNormal = inputData.vertexNormal.xyz;

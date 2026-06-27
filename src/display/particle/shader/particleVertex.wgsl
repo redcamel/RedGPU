@@ -9,7 +9,7 @@ struct ParticleVertexUniforms {
 @group(1) @binding(0) var<uniform> vertexUniforms: ParticleVertexUniforms;
 
 struct InputData {
-    @builtin(instance_index) globalVertexBufferSlotIndex: u32,
+    @builtin(instance_index) globalVertexSlotIndex: u32,
     @location(0) a_position : vec3<f32>,
     @location(1) a_normal : vec3<f32>,
     @location(2) a_uv : vec2<f32>,
@@ -27,7 +27,7 @@ struct VertexOutput {
     //
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
-    @location(9) @interpolate(flat) globalFragmentBufferSlotIndex: u32,
+    @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
     @location(11) combinedOpacity: f32,
     //
     @location(12) motionVector: vec3<f32>,
@@ -136,7 +136,7 @@ fn main( inputData:InputData) -> VertexOutput {
   let u_viewMatrix = u_camera.viewMatrix;
   let u_cameraPosition = u_camera.cameraPosition;
   //
-  let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
+  let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
   let u_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
   let u_normalModelMatrix = globalVertexUniforms.matrixList.normalModelMatrix;
 //

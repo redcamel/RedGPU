@@ -16,7 +16,7 @@ const maxDistance: f32 = 1000.0;
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
 
-    let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
+    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
 
     // System uniforms
     let su_projection = systemUniforms.projection;
@@ -92,7 +92,7 @@ fn main(inputData: InputData) -> VertexOutput {
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition.xyz;
     output.uv = transformedUV;
-    output.globalFragmentBufferSlotIndex = globalVertexUniforms.globalFragmentBufferSlotIndex;
+    output.globalFragmentSlotIndex = globalVertexUniforms.globalFragmentSlotIndex;
 
     let transformedTangentXYZ = (gu_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
     output.vertexTangent = vec4<f32>(normalize(transformedTangentXYZ), inputData.vertexTangent.w);

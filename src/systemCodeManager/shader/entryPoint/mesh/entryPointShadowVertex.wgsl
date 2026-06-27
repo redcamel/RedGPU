@@ -12,7 +12,7 @@
 fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
     var output: OutputShadowData;
 
-    let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
+    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
     // 시스템 Uniform 변수 가져오기
     let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
     let u_camera = systemUniforms.camera;

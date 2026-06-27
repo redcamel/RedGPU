@@ -2,7 +2,7 @@
 
 
 struct InputData {
-    @builtin(instance_index) globalVertexBufferSlotIndex: u32,
+    @builtin(instance_index) globalVertexSlotIndex: u32,
     @location(0) position: vec3<f32>,
     @location(1) vertexColor: vec4<f32>,
 };
@@ -25,7 +25,7 @@ fn main(inputData: InputData) -> VertexOutput {
     let u_noneJitterProjectionViewMatrix = systemUniforms.projection.noneJitterProjectionViewMatrix;
     let u_prevNoneJitterProjectionViewMatrix = systemUniforms.projection.prevNoneJitterProjectionViewMatrix;
 
-    let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
+    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
     let u_matrixList = globalVertexUniforms.matrixList;
     let u_modelMatrix = u_matrixList.modelMatrix;
     let u_prevModelMatrix = u_matrixList.prevModelMatrix;

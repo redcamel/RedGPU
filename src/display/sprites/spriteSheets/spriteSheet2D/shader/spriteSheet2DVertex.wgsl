@@ -18,7 +18,7 @@ struct SpriteSheet2DVertexUniforms {
  * [EN] Vertex input data structure.
  */
 struct InputData {
-    @builtin(instance_index) globalVertexBufferSlotIndex: u32,
+    @builtin(instance_index) globalVertexSlotIndex: u32,
     @location(0) position: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
@@ -36,7 +36,7 @@ struct VertexOutput {
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
-    @location(9) @interpolate(flat) globalFragmentBufferSlotIndex: u32,
+    @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
     @location(11) combinedOpacity: f32,
 
     @location(12) motionVector: vec3<f32>,
@@ -51,7 +51,7 @@ struct VertexOutput {
 @vertex
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
-    let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
+    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
     // [KO] 시스템 유니폼 변수 가져오기
     // [EN] Get system uniform variables
     let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
@@ -83,7 +83,7 @@ fn main(inputData: InputData) -> VertexOutput {
     output.vertexPosition = viewPos.xyz;
     output.vertexNormal = viewNormal.xyz;
     output.combinedOpacity = globalVertexUniforms.combinedOpacity;
-    output.globalFragmentBufferSlotIndex = globalVertexUniforms.globalFragmentBufferSlotIndex;
+    output.globalFragmentSlotIndex = globalVertexUniforms.globalFragmentSlotIndex;
 
     // [KO] UV 좌표 계산 (스프라이트 시트 애니메이션 적용)
     // [EN] Calculate UV coordinates (apply sprite sheet animation)
@@ -104,7 +104,7 @@ fn main(inputData: InputData) -> VertexOutput {
 fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
 
-    let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
+    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
     let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
     let u_viewMatrix = systemUniforms.camera.viewMatrix;
     let u_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;

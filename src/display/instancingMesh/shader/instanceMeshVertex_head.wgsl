@@ -16,7 +16,7 @@ struct InstanceUniforms {
 
 struct VisibilityData {
     instanceIdx: u32,
-    globalFragmentBufferSlotIndex: u32,
+    globalFragmentSlotIndex: u32,
 };
 
 @group(1) @binding(0) var<storage, read> instanceUniforms: InstanceUniforms;

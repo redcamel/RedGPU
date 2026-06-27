@@ -12,7 +12,7 @@
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
 
-    let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
+    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
     let su_projection = systemUniforms.projection;
 
     // Input data
@@ -49,7 +49,7 @@ fn main(inputData: InputData) -> VertexOutput {
     output.uv = inputData.uv;
     output.uv1 = inputData.uv1;
     output.vertexColor_0 = inputData.vertexColor_0;
-    output.globalFragmentBufferSlotIndex = globalVertexUniforms.globalFragmentBufferSlotIndex;
+    output.globalFragmentSlotIndex = globalVertexUniforms.globalFragmentSlotIndex;
 
     let transformedTangentXYZ = (gu_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
     output.vertexTangent = vec4<f32>( normalize(transformedTangentXYZ), inputData.vertexTangent.w );

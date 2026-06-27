@@ -2052,7 +2052,7 @@ export namespace EntryPointLibrary {
          * fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
          *     var output: VertexOutput;
          *     let input_position = inputData.position;
-         *     let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
+         *     let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
          *     let u_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
          *     let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
          *     let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
@@ -2160,7 +2160,7 @@ export namespace EntryPointLibrary {
          * fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
          *     var output: VertexOutput;
          *     let u_resolution = systemUniforms.resolution;
-         *      let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
+         *      let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
          *     #redgpu_if disableJitter
          *         let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionMatrix;
          *     #redgpu_else
@@ -2641,7 +2641,7 @@ export namespace ShaderLibrary {
      * @group(0) @binding(16) var skyAtmosphere_prefilteredTexture: texture_cube<f32>;
      *
      * #redgpu_include systemStruct.globalVertexUniform;
-     * @group(0) @binding(17) var<storage> globalVertexUniformBuffer : array<GlobalVertexUniforms>;
+     * @group(0) @binding(17) var<storage> globalVertexSSBO : array<GlobalVertexUniforms>;
      *
      * #redgpu_include depth.getLinearizeDepth
      *

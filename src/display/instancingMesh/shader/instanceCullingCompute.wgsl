@@ -31,7 +31,7 @@ struct IndirectDrawArgs {
 
 struct VisibilityData {
     instanceIdx: u32,
-    globalFragmentBufferSlotIndex: u32,
+    globalFragmentSlotIndex: u32,
 };
 
 @group(0) @binding(0) var<storage, read> instanceUniforms: InstanceUniforms;
@@ -101,6 +101,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         let aliveIndex = atomicAdd(&indirectDrawBuffer[lodLevel].instanceCount, 1u);
         let writeIdx = visibilityStride * lodLevel + aliveIndex;
         visibilityBuffer[writeIdx].instanceIdx = instanceIdx;
-        visibilityBuffer[writeIdx].globalFragmentBufferSlotIndex = instanceUniforms.lodGlobalFragmentBufferSlotIndex[lodLevel];
+        visibilityBuffer[writeIdx].globalFragmentSlotIndex = instanceUniforms.lodGlobalFragmentBufferSlotIndex[lodLevel];
     }
 }

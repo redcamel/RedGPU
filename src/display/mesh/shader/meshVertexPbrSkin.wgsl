@@ -14,7 +14,7 @@
  * [EN] Vertex input structure for skinned meshes.
  */
 struct InputDataSkin {
-    @builtin(instance_index) globalVertexBufferSlotIndex: u32,
+    @builtin(instance_index) globalVertexSlotIndex: u32,
     @builtin(vertex_index) idx: u32,
     @location(0) position: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
@@ -39,7 +39,7 @@ struct VertexOutput {
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
-    @location(9) @interpolate(flat) globalFragmentBufferSlotIndex: u32,
+    @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
 
     @location(10) localNodeScale_volumeScale: vec2<f32>,
     @location(11) combinedOpacity: f32,
@@ -59,7 +59,7 @@ struct VertexOutput {
 @vertex
 fn main(inputData: InputDataSkin) -> VertexOutput {
     var output: VertexOutput;
-    let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
+    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
     // [KO] 입력 데이터 처리
     // [EN] Process input data
     let input_position = inputData.position;
@@ -113,7 +113,7 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
     output.uv = inputData.uv;
     output.uv1 = inputData.uv1;
     output.vertexColor_0 = inputData.vertexColor_0;
-    output.globalFragmentBufferSlotIndex = globalVertexUniforms.globalFragmentBufferSlotIndex;
+    output.globalFragmentSlotIndex = globalVertexUniforms.globalFragmentSlotIndex;
 
     // [KO] 그림자 좌표 계산
     // [EN] Calculate shadow coordinates
@@ -156,7 +156,7 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
 fn entryPointShadowVertex(inputData: InputDataSkin) -> OutputShadowData {
     var output: OutputShadowData;
 
-    let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
+    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
     let su_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
     let gu_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
     let input_position = inputData.position;
@@ -178,7 +178,7 @@ fn entryPointShadowVertex(inputData: InputDataSkin) -> OutputShadowData {
 fn entryPointPickingVertex(inputData: InputDataSkin) -> VertexOutput {
     var output: VertexOutput;
 
-    let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
+    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
 
     // [KO] 스키닝이 적용된 피킹 위치 계산
     // [EN] Calculate skinned picking position

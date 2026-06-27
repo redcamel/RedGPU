@@ -12,7 +12,7 @@ struct InputData {
 
   @location(7) currentClipPos: vec4<f32>,
   @location(8) prevClipPos: vec4<f32>,
-  @location(9) @interpolate(flat) globalFragmentBufferSlotIndex: u32,
+  @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
   @location(11) combinedOpacity: f32,
   //
   @location(12) motionVector: vec3<f32>,
@@ -22,7 +22,7 @@ struct InputData {
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
-    let uniforms = globalFragmentBuiltInUniformBuffer[inputData.globalFragmentBufferSlotIndex];
+    let uniforms = globalFragmentSSBO_BuiltIn[inputData.globalFragmentSlotIndex];
 
     var finalColor = vec4<f32>( uniforms.color.r , uniforms.color.g , uniforms.color.b , uniforms.opacity * inputData.combinedOpacity);
     #redgpu_if useTint

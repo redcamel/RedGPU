@@ -64,7 +64,7 @@ struct InputData {
     @location(5) vertexTangent: vec4<f32>,
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
-    @location(9) @interpolate(flat) globalFragmentBufferSlotIndex: u32,
+    @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
     @location(10) localNodeScale_volumeScale: vec2<f32>,
     @location(11) combinedOpacity: f32,
     @location(12) motionVector: vec3<f32>,
@@ -198,7 +198,7 @@ fn getTransmissionRefraction(
 @fragment
 fn main(inputData:InputData) -> OutputFragment {
     var output: OutputFragment;
-    let uniforms = globalPBRUniformBuffer[inputData.globalFragmentBufferSlotIndex];
+    let uniforms = globalPBRUniformBuffer[inputData.globalFragmentSlotIndex];
 
     let input_vertexNormal = (inputData.vertexNormal.xyz);
     let input_vertexPosition = inputData.vertexPosition.xyz;

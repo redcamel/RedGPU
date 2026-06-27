@@ -15,7 +15,7 @@ struct InputData {
   @location(0) vertexPosition: vec3<f32>,
   @location(1) vertexNormal: vec3<f32>,
   @location(2) uv: vec2<f32>,
-  @location(9) @interpolate(flat) globalFragmentBufferSlotIndex: u32,
+  @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
   @location(11) combinedOpacity: f32,
   @location(13) shadowCoord: vec3<f32>,
   @location(15) @interpolate(flat) pickingId: vec4<f32>,
@@ -28,7 +28,7 @@ struct InputData {
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
-    let uniforms = globalFragmentBuiltInUniformBuffer[inputData.globalFragmentBufferSlotIndex];
+    let uniforms = globalFragmentSSBO_BuiltIn[inputData.globalFragmentSlotIndex];
     // [KO] 텍스트 및 글리프 텍스처 샘플링 [EN] Sample text and glyph texture
     var finalColor: vec4<f32> = textureSample(diffuseTexture, diffuseTextureSampler, inputData.uv);
 

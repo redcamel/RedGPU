@@ -28,7 +28,7 @@ struct SpriteSheet3DVertexUniforms {
  * [EN] Vertex input data structure.
  */
 struct InputData {
-    @builtin(instance_index) globalVertexBufferSlotIndex: u32,
+    @builtin(instance_index) globalVertexSlotIndex: u32,
     @location(0) position: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
@@ -46,7 +46,7 @@ struct VertexOutput {
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
-    @location(9) @interpolate(flat) globalFragmentBufferSlotIndex: u32,
+    @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
 
     @location(11) combinedOpacity: f32,
     @location(12) motionVector: vec3<f32>,
@@ -61,7 +61,7 @@ struct VertexOutput {
 @vertex
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
-    let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
+    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
     // [KO] 빌보드 및 사이즈 보정 계산 결과 획득
     // [EN] Get billboard and size attenuation calculation results
     let billboardResult = getBillboardResult(
@@ -90,7 +90,7 @@ fn main(inputData: InputData) -> VertexOutput {
     );
     
     output.combinedOpacity = globalVertexUniforms.combinedOpacity;
-    output.globalFragmentBufferSlotIndex = globalVertexUniforms.globalFragmentBufferSlotIndex;
+    output.globalFragmentSlotIndex = globalVertexUniforms.globalFragmentSlotIndex;
 
     return output;
 }

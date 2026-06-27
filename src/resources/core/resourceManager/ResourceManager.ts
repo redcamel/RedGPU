@@ -25,9 +25,9 @@ import parseWGSL from "../../wgslParser/parseWGSL";
 import ShaderLibrary from "../../../systemCodeManager/ShaderLibrary";
 
 const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
-const GLOBAL_VERTEX_STRUCT = SHADER_INFO.storage.globalVertexUniformBuffer.type.format;
+const GLOBAL_VERTEX_STRUCT = SHADER_INFO.storage.globalVertexSSBO.type.format;
 const GLOBAL_FRAGMENT_PBR_STRUCT = SHADER_INFO.storage.globalPBRUniformBuffer.type.format;
-const GLOBAL_FRAGMENT_BUILT_IN_STRUCT = SHADER_INFO.storage.globalFragmentBuiltInUniformBuffer.type.format;
+const GLOBAL_FRAGMENT_BUILT_IN_STRUCT = SHADER_INFO.storage.globalFragmentSSBO_BuiltIn.type.format;
 
 enum ResourceType {
     GPUShaderModule = 'GPUShaderModule',

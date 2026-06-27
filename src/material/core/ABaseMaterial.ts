@@ -146,7 +146,7 @@ abstract class ABaseMaterial extends ResourceBase {
      * [EN] Tint blend mode value
      */
     #tintBlendMode: number = TINT_BLEND_MODE.MULTIPLY;
-    #globalFragmentBufferSlotIndex: number = -1
+    #globalFragmentSlotIndex: number = -1
 
     /**
      * [KO] ABaseMaterial 생성자
@@ -316,8 +316,8 @@ abstract class ABaseMaterial extends ResourceBase {
     }
 
 
-    get globalFragmentBufferSlotIndex(): number {
-        return this.#globalFragmentBufferSlotIndex;
+    get globalFragmentSlotIndex(): number {
+        return this.#globalFragmentSlotIndex;
     }
 
     /**
@@ -332,11 +332,11 @@ abstract class ABaseMaterial extends ResourceBase {
             {code: this.#SHADER_INFO.defaultSource}
         )
         if (this['isPBRMaterial']) {
-            const slot = redGPUContext.globalFragmentUniformBuffer.allocateSlot();
-            this.#globalFragmentBufferSlotIndex = slot.index;
+            const slot = redGPUContext.globalFragmentSSBO_PBR.allocateSlot();
+            this.#globalFragmentSlotIndex = slot.index;
         } else if (this['isBuiltInMaterial']) {
-            const slot = redGPUContext.globalFragmentBuiltInUniformBuffer.allocateSlot();
-            this.#globalFragmentBufferSlotIndex = slot.index;
+            const slot = redGPUContext.globalFragmentSSBO_BuiltIn.allocateSlot();
+            this.#globalFragmentSlotIndex = slot.index;
         }
         // 데이터 작성
         let uniformData, uniformBuffer

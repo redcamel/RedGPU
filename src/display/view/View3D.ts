@@ -287,8 +287,8 @@ class View3D extends AView {
             const skyAtmosphereReflectionLUT = skyAtmosphere?.skyAtmosphereReflectionLUT;
             const skyAtmosphereIrradianceLUT = skyAtmosphere?.skyAtmosphereIrradianceLUT;
 
-            const globalSSAOVertexGPUBuffer = redGPUContext.globalVertexUniformBuffer.gpuBuffer;
-            const globalSSAOFragmentGPUBuffer = redGPUContext.globalFragmentUniformBuffer.gpuBuffer;
+            const globalSSAOVertexGPUBuffer = redGPUContext.globalVertexSSBO.gpuBuffer;
+            const globalSSAOFragmentGPUBuffer = redGPUContext.globalFragmentSSBO_PBR.gpuBuffer;
 
             if (prevInfo) {
                 needResetBindGroup = (
@@ -473,25 +473,25 @@ class View3D extends AView {
                 {
                     binding: 17,
                     resource: {
-                        buffer: redGPUContext.globalVertexUniformBuffer.gpuBuffer,
+                        buffer: redGPUContext.globalVertexSSBO.gpuBuffer,
                         offset: 0,
-                        size: redGPUContext.globalVertexUniformBuffer.gpuBuffer.size
+                        size: redGPUContext.globalVertexSSBO.gpuBuffer.size
                     }
                 },
                 {
                     binding: 18,
                     resource: {
-                        buffer: redGPUContext.globalFragmentUniformBuffer.gpuBuffer,
+                        buffer: redGPUContext.globalFragmentSSBO_PBR.gpuBuffer,
                         offset: 0,
-                        size: redGPUContext.globalFragmentUniformBuffer.gpuBuffer.size
+                        size: redGPUContext.globalFragmentSSBO_PBR.gpuBuffer.size
                     }
                 },
                 {
                     binding: 19,
                     resource: {
-                        buffer: redGPUContext.globalFragmentBuiltInUniformBuffer.gpuBuffer,
+                        buffer: redGPUContext.globalFragmentSSBO_BuiltIn.gpuBuffer,
                         offset: 0,
-                        size: redGPUContext.globalFragmentBuiltInUniformBuffer.gpuBuffer.size
+                        size: redGPUContext.globalFragmentSSBO_BuiltIn.gpuBuffer.size
                     }
                 },
             ]

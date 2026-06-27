@@ -9,7 +9,7 @@
 fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
     let u_resolution = systemUniforms.resolution;
-     let globalVertexUniforms = globalVertexUniformBuffer[inputData.globalVertexBufferSlotIndex];
+     let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
     #redgpu_if disableJitter
         let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionMatrix;
     #redgpu_else

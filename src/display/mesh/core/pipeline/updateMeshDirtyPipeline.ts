@@ -41,8 +41,8 @@ const updateMeshDirtyPipeline = (
 
     // if (mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId) {
     // mesh.gpuRenderInfo.vertexUniformBuffer.writeOnlyBuffer(mesh.gpuRenderInfo.vertexUniformInfo.members.pickingId, mesh.pickingId)
-    mesh.redGPUContext.globalVertexUniformBuffer.updateUintData(
-        mesh.globalVertexBufferSlotIndex,
+    mesh.redGPUContext.globalVertexSSBO.updateUintData(
+        mesh.globalVertexSlotIndex,
         new Uint32Array([mesh.pickingId]),
         ResourceManager.GLOBAL_VERTEX_STRUCT.members.pickingId.uniformOffset / 4
     )

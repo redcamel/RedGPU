@@ -152,9 +152,9 @@ class Renderer {
             renderViewStateData,
         } = view
         const {
-            globalVertexUniformBuffer,
-            globalFragmentBuiltInUniformBuffer,
-            globalFragmentUniformBuffer
+            globalVertexSSBO,
+            globalFragmentSSBO_BuiltIn,
+            globalFragmentSSBO_PBR
         } = redGPUContext
         const {
             colorAttachment,
@@ -180,9 +180,9 @@ class Renderer {
                 view.clusterLightManager.updateClusterLights();
             }
             {
-                globalVertexUniformBuffer.flush()
-                globalFragmentUniformBuffer.flush()
-                globalFragmentBuiltInUniformBuffer.flush()
+                globalVertexSSBO.flush()
+                globalFragmentSSBO_PBR.flush()
+                globalFragmentSSBO_BuiltIn.flush()
             }
             {
                 const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)

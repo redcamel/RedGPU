@@ -124,14 +124,14 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [KO] 글로벌 SSAO 버텍스 버퍼 매니저
      * [EN] Global SSAO vertex buffer manager
      */
-    #globalVertexUniformBuffer: GlobalStorageBufferManager
+    #globalVertexSSBO: GlobalStorageBufferManager
 
     /**
      * [KO] 글로벌 SSAO 프래그먼트 버퍼 매니저
      * [EN] Global SSAO fragment buffer manager
      */
-    #globalFragmentUniformBuffer: GlobalStorageBufferManager
-    #globalFragmentBuiltInUniformBuffer: GlobalStorageBufferManager
+    #globalFragmentSSBO_PBR: GlobalStorageBufferManager
+    #globalFragmentSSBO_BuiltIn: GlobalStorageBufferManager
 
 
     #boundingClientRect: DOMRect
@@ -180,9 +180,10 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#commandEncoderManager = new CommandEncoderManager(this)
         this.#antialiasingManager = new AntialiasingManager()
         // keepLog(ResourceManager.GLOBAL_FRAGMENT_PBR_STRUCT)
-        this.#globalVertexUniformBuffer = new GlobalStorageBufferManager(this, 304, 50000, "GLOBAL_VERTEX_BUFFER")
-        this.#globalFragmentUniformBuffer = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_FRAGMENT_PBR_STRUCT.size, 1024, "GLOBAL_FRAGMENT_BUFFER")
-        this.#globalFragmentBuiltInUniformBuffer = new GlobalStorageBufferManager(this, 112, 10000, "GLOBAL_FRAGMENT_BUILT_IN_BUFFER")
+        // keepLog('ResourceManager.GLOBAL_VERTEX_STRUCT.size',ResourceManager.GLOBAL_VERTEX_STRUCT.size)
+        this.#globalVertexSSBO = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_VERTEX_STRUCT.size, 50000, "GLOBAL_VERTEX_BUFFER")
+        this.#globalFragmentSSBO_PBR = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_FRAGMENT_PBR_STRUCT.size, 1024, "GLOBAL_FRAGMENT_BUFFER")
+        this.#globalFragmentSSBO_BuiltIn = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_FRAGMENT_BUILT_IN_STRUCT.size, 1024, "GLOBAL_FRAGMENT_BUILT_IN_BUFFER")
         this.#initialize()
     }
 
@@ -214,21 +215,21 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [KO] 글로벌 SSAO 버텍스 버퍼 매니저를 반환합니다.
      * [EN] Returns the global SSAO vertex buffer manager.
      */
-    get globalVertexUniformBuffer(): GlobalStorageBufferManager {
-        return this.#globalVertexUniformBuffer;
+    get globalVertexSSBO(): GlobalStorageBufferManager {
+        return this.#globalVertexSSBO;
     }
 
     /**
      * [KO] 글로벌 SSAO 프래그먼트 버퍼 매니저를 반환합니다.
      * [EN] Returns the global SSAO fragment buffer manager.
      */
-    get globalFragmentUniformBuffer(): GlobalStorageBufferManager {
-        return this.#globalFragmentUniformBuffer;
+    get globalFragmentSSBO_PBR(): GlobalStorageBufferManager {
+        return this.#globalFragmentSSBO_PBR;
     }
 
 
-    get globalFragmentBuiltInUniformBuffer(): GlobalStorageBufferManager {
-        return this.#globalFragmentBuiltInUniformBuffer;
+    get globalFragmentSSBO_BuiltIn(): GlobalStorageBufferManager {
+        return this.#globalFragmentSSBO_BuiltIn;
     }
 
     /**
