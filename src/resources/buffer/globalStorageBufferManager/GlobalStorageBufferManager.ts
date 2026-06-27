@@ -16,6 +16,18 @@ interface BufferSlot {
  */
 class GlobalStorageBufferManager extends RedGPUObject {
     /**
+     * [KO] 기하급수 성장(2배)에서 선형 성장으로 전환되는 임계 버퍼 크기 (32MB)
+     * [EN] Threshold buffer size to transition from exponential (2x) to linear growth (32MB)
+     */
+    static readonly RESIZE_THRESHOLD_BYTES = 32 * 1024 * 1024;
+
+    /**
+     * [KO] 임계 크기 초과 후 선형 증가 시 가산할 고정 메모리 바이트 크기 (8MB)
+     * [EN] Fixed memory byte size to add during linear growth after exceeding the threshold (8MB)
+     */
+    static readonly RESIZE_LINEAR_ADDITION_BYTES = 8 * 1024 * 1024;
+
+    /**
      * [KO] 단일 슬롯 원소의 바이트 크기입니다. (예: Vertex 304, Material 912 등)
      * [EN] Byte size of a single slot element. (e.g. Vertex 304, Material 912, etc.)
      */
@@ -222,7 +234,19 @@ class GlobalStorageBufferManager extends RedGPUObject {
             index = this.#freeIndices.pop()!;
         } else {
             if (this.#nextIndex >= this.#totalSlotCount) {
-                this.#resizeBuffer(this.#totalSlotCount * 2);
+                const currentByteSize = this.#totalSlotCount * this.#elementSize;
+                let newSlotCount: number;
+
+                if (currentByteSize <= GlobalStorageBufferManager.RESIZE_THRESHOLD_BYTES) {
+                    // 32MB 이하일 때는 2배 급격 성장으로 리사이징 빈도 최소화
+                    newSlotCount = this.#totalSlotCount * 2;
+                } else {
+                    // 32MB 초과 시에는 8MB 슬롯 분량만큼만 안전하게 선형 성장 (메모리 파편화 및 OOM 방지)
+                    const additionalSlots = Math.ceil(GlobalStorageBufferManager.RESIZE_LINEAR_ADDITION_BYTES / this.#elementSize);
+                    newSlotCount = this.#totalSlotCount + additionalSlots;
+                }
+
+                this.#resizeBuffer(newSlotCount);
             }
             index = this.#nextIndex++;
         }
