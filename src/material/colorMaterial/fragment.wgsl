@@ -22,11 +22,11 @@ struct InputData {
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
-    let uniforms = globalFragmentSSBO_BuiltIn[inputData.globalFragmentSlotIndex];
+    let globalFragmentData = globalFragmentSSBO_BuiltIn[inputData.globalFragmentSlotIndex];
 
-    var finalColor = vec4<f32>( uniforms.color.r , uniforms.color.g , uniforms.color.b , uniforms.opacity * inputData.combinedOpacity);
+    var finalColor = vec4<f32>( globalFragmentData.color.r , globalFragmentData.color.g , globalFragmentData.color.b , globalFragmentData.opacity * inputData.combinedOpacity);
     #redgpu_if useTint
-        finalColor = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
+        finalColor = getTintBlendMode(finalColor, globalFragmentData.tintBlendMode, globalFragmentData.tint);
     #redgpu_endIf
 
     if (finalColor.a == 0.0) {

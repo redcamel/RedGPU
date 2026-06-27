@@ -2052,15 +2052,15 @@ export namespace EntryPointLibrary {
          * fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
          *     var output: VertexOutput;
          *     let input_position = inputData.position;
-         *     let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
-         *     let u_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
+         *     let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
+         *     let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
          *     let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
          *     let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
          *     let u_camera = systemUniforms.camera;
          *     let u_viewMatrix = u_camera.viewMatrix;
          *     var position: vec4<f32> = u_modelMatrix * vec4<f32>(input_position, 1.0);
          *     output.position = u_projectionViewMatrix * position;
-         *     output.pickingId = unpack4x8unorm(globalVertexUniforms.pickingId);
+         *     output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
          *     return output;
          * }
          * ```
@@ -2160,7 +2160,7 @@ export namespace EntryPointLibrary {
          * fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
          *     var output: VertexOutput;
          *     let u_resolution = systemUniforms.resolution;
-         *      let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
+         *      let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
          *     #redgpu_if disableJitter
          *         let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionMatrix;
          *     #redgpu_else
@@ -2168,7 +2168,7 @@ export namespace EntryPointLibrary {
          *     #redgpu_endIf
          *
          *     let u_viewMatrix = systemUniforms.camera.viewMatrix;
-         *     let u_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
+         *     let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
          *     let u_useBillboard = vertexUniforms.useBillboard;
          *     let u_usePixelSize = vertexUniforms.usePixelSize;
          *     let u_pixelSize = vertexUniforms.pixelSize;
@@ -2202,7 +2202,7 @@ export namespace EntryPointLibrary {
          *         output.position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * ratioScaleMatrix * vec4<f32>(inputData.position, 1.0);
          *     }
          *
-         *     output.pickingId = unpack4x8unorm(globalVertexUniforms.pickingId);
+         *     output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
          *     return output;
          * }
          * ```

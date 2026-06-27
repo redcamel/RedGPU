@@ -12,7 +12,7 @@
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
 
-    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
+    let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
     let su_projection = systemUniforms.projection;
 
     // Input data
@@ -25,8 +25,8 @@ fn main(inputData: InputData) -> VertexOutput {
     let su_viewMatrix = systemUniforms.camera.viewMatrix;
 
     // Vertex uniforms
-    let gu_matrixList = globalVertexUniforms.matrixList;
-    let gu_uvTransform = globalVertexUniforms.uvTransform;
+    let gu_matrixList = globalVertexData.matrixList;
+    let gu_uvTransform = globalVertexData.uvTransform;
 
     let gu_localMatrix = gu_matrixList.localMatrix;
     let gu_modelMatrix = gu_matrixList.modelMatrix;
@@ -49,7 +49,7 @@ fn main(inputData: InputData) -> VertexOutput {
     output.uv = inputData.uv;
     output.uv1 = inputData.uv1;
     output.vertexColor_0 = inputData.vertexColor_0;
-    output.globalFragmentSlotIndex = globalVertexUniforms.globalFragmentSlotIndex;
+    output.globalFragmentSlotIndex = globalVertexData.globalFragmentSlotIndex;
 
     let transformedTangentXYZ = (gu_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
     output.vertexTangent = vec4<f32>( normalize(transformedTangentXYZ), inputData.vertexTangent.w );
@@ -60,7 +60,7 @@ fn main(inputData: InputData) -> VertexOutput {
     #redgpu_if receiveShadow
     {
         output.shadowCoord = getShadowCoord(position.xyz, systemUniforms.directionalLightProjectionViewMatrix);
-        output.receiveShadow = globalVertexUniforms.receiveShadow;
+        output.receiveShadow = globalVertexData.receiveShadow;
     }
     #redgpu_endIf
 

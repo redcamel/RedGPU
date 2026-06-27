@@ -25,8 +25,8 @@ fn main(inputData: InputData) -> VertexOutput {
     let u_noneJitterProjectionViewMatrix = systemUniforms.projection.noneJitterProjectionViewMatrix;
     let u_prevNoneJitterProjectionViewMatrix = systemUniforms.projection.prevNoneJitterProjectionViewMatrix;
 
-    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
-    let u_matrixList = globalVertexUniforms.matrixList;
+    let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
+    let u_matrixList = globalVertexData.matrixList;
     let u_modelMatrix = u_matrixList.modelMatrix;
     let u_prevModelMatrix = u_matrixList.prevModelMatrix;
 

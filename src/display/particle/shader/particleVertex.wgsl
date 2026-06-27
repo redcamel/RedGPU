@@ -136,9 +136,9 @@ fn main( inputData:InputData) -> VertexOutput {
   let u_viewMatrix = u_camera.viewMatrix;
   let u_cameraPosition = u_camera.cameraPosition;
   //
-  let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
-  let u_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
-  let u_normalModelMatrix = globalVertexUniforms.matrixList.normalModelMatrix;
+  let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
+  let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
+  let u_normalModelMatrix = globalVertexData.matrixList.normalModelMatrix;
 //
   let u_useBillboardPerspective = vertexUniforms.useBillboardPerspective == 1u;
   let u_useBillboard = vertexUniforms.useBillboard == 1u;

@@ -16,7 +16,7 @@ const maxDistance: f32 = 1000.0;
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
 
-    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
+    let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
 
     // System uniforms
     let su_projection = systemUniforms.projection;
@@ -34,10 +34,10 @@ fn main(inputData: InputData) -> VertexOutput {
     let su_cameraPosition = systemUniforms.camera.cameraPosition;
 
     // Vertex uniforms
-    let gu_matrixList = globalVertexUniforms.matrixList;
-    let gu_displacementScale = globalVertexUniforms.displacementScale;
-    let gu_combinedOpacity = globalVertexUniforms.combinedOpacity;
-    let gu_uvTransform = globalVertexUniforms.uvTransform;
+    let gu_matrixList = globalVertexData.matrixList;
+    let gu_displacementScale = globalVertexData.displacementScale;
+    let gu_combinedOpacity = globalVertexData.combinedOpacity;
+    let gu_uvTransform = globalVertexData.uvTransform;
 
     let gu_modelMatrix = gu_matrixList.modelMatrix;
     let gu_prevModelMatrix = gu_matrixList.prevModelMatrix;
@@ -92,7 +92,7 @@ fn main(inputData: InputData) -> VertexOutput {
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalPosition.xyz;
     output.uv = transformedUV;
-    output.globalFragmentSlotIndex = globalVertexUniforms.globalFragmentSlotIndex;
+    output.globalFragmentSlotIndex = globalVertexData.globalFragmentSlotIndex;
 
     let transformedTangentXYZ = (gu_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
     output.vertexTangent = vec4<f32>(normalize(transformedTangentXYZ), inputData.vertexTangent.w);
@@ -103,7 +103,7 @@ fn main(inputData: InputData) -> VertexOutput {
     #redgpu_if receiveShadow
     {
         output.shadowCoord = getShadowCoord(position.xyz, systemUniforms.directionalLightProjectionViewMatrix);
-        output.receiveShadow = globalVertexUniforms.receiveShadow;
+        output.receiveShadow = globalVertexData.receiveShadow;
     }
     #redgpu_endIf
 

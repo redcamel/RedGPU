@@ -28,16 +28,16 @@ struct InputData {
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
-    let uniforms = globalFragmentSSBO_BuiltIn[inputData.globalFragmentSlotIndex];
+    let globalFragmentData = globalFragmentSSBO_BuiltIn[inputData.globalFragmentSlotIndex];
     // [KO] 텍스트 및 글리프 텍스처 샘플링 [EN] Sample text and glyph texture
     var finalColor: vec4<f32> = textureSample(diffuseTexture, diffuseTextureSampler, inputData.uv);
 
     // [KO] 투명도 보정 및 컴바인드 오퍼시티 적용 [EN] Correct alpha and apply combined opacity
-    finalColor = vec4<f32>(finalColor.rgb / finalColor.a, finalColor.a * uniforms.opacity * inputData.combinedOpacity);
+    finalColor = vec4<f32>(finalColor.rgb / finalColor.a, finalColor.a * globalFragmentData.opacity * inputData.combinedOpacity);
 
     // [KO] 틴트 색상 및 블렌딩 모드 적용 [EN] Apply tint color and blend mode
     #redgpu_if useTint
-        finalColor = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
+        finalColor = getTintBlendMode(finalColor, globalFragmentData.tintBlendMode, globalFragmentData.tint);
     #redgpu_endIf
 
     // [KO] 알파 값이 0인 픽셀은 렌더링에서 제외 [EN] Discard pixels with zero alpha

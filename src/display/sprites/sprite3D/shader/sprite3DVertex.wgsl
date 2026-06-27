@@ -43,11 +43,11 @@ struct VertexOutput {
 @vertex
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
-    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
+    let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
     let billboardResult = getBillboardResult(
         inputData.position,
         inputData.vertexNormal,
-        globalVertexUniforms.matrixList.modelMatrix,
+        globalVertexData.matrixList.modelMatrix,
         systemUniforms.camera.viewMatrix,
         systemUniforms.projection.projectionMatrix,
         systemUniforms.resolution,
@@ -62,8 +62,8 @@ fn main(inputData: InputData) -> VertexOutput {
     output.vertexPosition = billboardResult.vertexPosition;
     output.vertexNormal = billboardResult.vertexNormal;
     output.uv = inputData.uv;
-    output.combinedOpacity = globalVertexUniforms.combinedOpacity;
-    output.globalFragmentSlotIndex = globalVertexUniforms.globalFragmentSlotIndex;
+    output.combinedOpacity = globalVertexData.combinedOpacity;
+    output.globalFragmentSlotIndex = globalVertexData.globalFragmentSlotIndex;
 
     return output;
 }

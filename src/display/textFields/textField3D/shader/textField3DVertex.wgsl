@@ -55,13 +55,13 @@ struct VertexOutput {
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
 
-    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
+    let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
     // [KO] TextField3D의 선명도를 위해 지터링이 제거된 투영 행렬(noneJitterProjectionMatrix)을 사용합니다.
     // [EN] Uses a jitter-free projection matrix (noneJitterProjectionMatrix) for the clarity of TextField3D.
     let billboardResult = getBillboardResult(
         inputData.position,
         inputData.vertexNormal,
-        globalVertexUniforms.matrixList.modelMatrix,
+        globalVertexData.matrixList.modelMatrix,
         systemUniforms.camera.viewMatrix,
         systemUniforms.projection.noneJitterProjectionMatrix,
         systemUniforms.resolution,
@@ -76,7 +76,7 @@ fn main(inputData: InputData) -> VertexOutput {
     output.vertexPosition = billboardResult.vertexPosition;
     output.vertexNormal = billboardResult.vertexNormal;
     output.uv = inputData.uv;
-    output.combinedOpacity = globalVertexUniforms.combinedOpacity;
+    output.combinedOpacity = globalVertexData.combinedOpacity;
 
     return output;
 }

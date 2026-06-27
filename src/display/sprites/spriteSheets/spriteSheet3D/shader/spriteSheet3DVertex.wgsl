@@ -61,13 +61,13 @@ struct VertexOutput {
 @vertex
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
-    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
+    let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
     // [KO] 빌보드 및 사이즈 보정 계산 결과 획득
     // [EN] Get billboard and size attenuation calculation results
     let billboardResult = getBillboardResult(
         inputData.position,
         inputData.vertexNormal,
-        globalVertexUniforms.matrixList.modelMatrix,
+        globalVertexData.matrixList.modelMatrix,
         systemUniforms.camera.viewMatrix,
         systemUniforms.projection.projectionMatrix,
         systemUniforms.resolution,
@@ -89,8 +89,8 @@ fn main(inputData: InputData) -> VertexOutput {
         inputData.uv.y / vertexUniforms.segmentH - (floor(vertexUniforms.currentIndex / vertexUniforms.segmentH) / vertexUniforms.segmentH)
     );
     
-    output.combinedOpacity = globalVertexUniforms.combinedOpacity;
-    output.globalFragmentSlotIndex = globalVertexUniforms.globalFragmentSlotIndex;
+    output.combinedOpacity = globalVertexData.combinedOpacity;
+    output.globalFragmentSlotIndex = globalVertexData.globalFragmentSlotIndex;
 
     return output;
 }

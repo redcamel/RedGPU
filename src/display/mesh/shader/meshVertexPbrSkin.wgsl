@@ -59,7 +59,7 @@ struct VertexOutput {
 @vertex
 fn main(inputData: InputDataSkin) -> VertexOutput {
     var output: VertexOutput;
-    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
+    let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
     // [KO] 입력 데이터 처리
     // [EN] Process input data
     let input_position = inputData.position;
@@ -73,7 +73,7 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
 
     // [KO] 버텍스 유니폼 캐싱
     // [EN] Cache vertex uniforms
-    let gu_matrixList = globalVertexUniforms.matrixList;
+    let gu_matrixList = globalVertexData.matrixList;
     let gu_localMatrix = gu_matrixList.localMatrix;
     let gu_modelMatrix = gu_matrixList.modelMatrix;
     let gu_prevModelMatrix = gu_matrixList.prevModelMatrix;
@@ -113,14 +113,14 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
     output.uv = inputData.uv;
     output.uv1 = inputData.uv1;
     output.vertexColor_0 = inputData.vertexColor_0;
-    output.globalFragmentSlotIndex = globalVertexUniforms.globalFragmentSlotIndex;
+    output.globalFragmentSlotIndex = globalVertexData.globalFragmentSlotIndex;
 
     // [KO] 그림자 좌표 계산
     // [EN] Calculate shadow coordinates
     #redgpu_if receiveShadow
     {
         output.shadowCoord = getShadowCoord(position.xyz, su_directionalLightProjectionViewMatrix);
-        output.receiveShadow = globalVertexUniforms.receiveShadow;
+        output.receiveShadow = globalVertexData.receiveShadow;
     }
     #redgpu_endIf
 
@@ -156,9 +156,9 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
 fn entryPointShadowVertex(inputData: InputDataSkin) -> OutputShadowData {
     var output: OutputShadowData;
 
-    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
+    let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
     let su_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
-    let gu_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
+    let gu_modelMatrix = globalVertexData.matrixList.modelMatrix;
     let input_position = inputData.position;
 
     // [KO] 스키닝이 적용된 그림자 위치 계산
@@ -178,14 +178,14 @@ fn entryPointShadowVertex(inputData: InputDataSkin) -> OutputShadowData {
 fn entryPointPickingVertex(inputData: InputDataSkin) -> VertexOutput {
     var output: VertexOutput;
 
-    let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
+    let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
 
     // [KO] 스키닝이 적용된 피킹 위치 계산
     // [EN] Calculate skinned picking position
     let skinMat = vertexStorages[inputData.idx];
-    let position = globalVertexUniforms.matrixList.modelMatrix * skinMat * vec4<f32>(inputData.position, 1.0);
+    let position = globalVertexData.matrixList.modelMatrix * skinMat * vec4<f32>(inputData.position, 1.0);
     output.position = systemUniforms.projection.projectionViewMatrix * position;
-    output.pickingId = unpack4x8unorm(globalVertexUniforms.pickingId);
+    output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
 
     return output;
 }
