@@ -527,7 +527,7 @@ class AutoExposure extends RedGPUObject {
             label: 'AutoExposure_ReadBuffer'
         });
 
-        // [KO] 통합 유니폼 데이터 구성 (총 18개 요소) [EN] Unified uniform data configuration (total 18 elements)
+        // [KO] 통합 유니폼 데이터 구성 (총 18개 요소) [EN] Unified globalStruct data configuration (total 18 elements)
         const uniformData = new Float32Array(18);
         this.#uniformBuffer = new UniformBuffer(redGPUContext, uniformData.buffer, 'AutoExposure_UniformBuffer');
     }

@@ -33,9 +33,9 @@ import DirectionalLight_wgsl from './shader/systemStruct/DirectionalLight.wgsl';
 import AmbientLight_wgsl from './shader/systemStruct/AmbientLight.wgsl';
 import Shadow_wgsl from './shader/systemStruct/Shadow.wgsl';
 import SkyAtmosphere_wgsl from './shader/systemStruct/SkyAtmosphere.wgsl';
-import globalVertexUniform_wgsl from './shader/systemStruct/uniform/globalVertexUniform.wgsl';
-import globalPBRUniforms_wgsl from './shader/systemStruct/uniform/globalFragmentPBRUniform.wgsl';
-import globalFragmentBuiltInUniform_wgsl from './shader/systemStruct/uniform/globalFragmentBuiltInUniform.wgsl';
+import globalVertexStruct_wgsl from './shader/systemStruct/globalStruct/globalVertexStruct.wgsl';
+import globalFragmentStructPBR_wgsl from './shader/systemStruct/globalStruct/globalFragmentStructPBR.wgsl';
+import globalFragmentStructBuiltIn_wgsl from './shader/systemStruct/globalStruct/globalFragmentStructBuiltIn.wgsl';
 import POST_EFFECT_SYSTEM_UNIFORM_wgsl from './shader/systemStruct/POST_EFFECT_SYSTEM_UNIFORM.wgsl';
 import SYSTEM_UNIFORM_wgsl from './shader/systemStruct/SYSTEM_UNIFORM.wgsl';
 import getReflectionVectorFromViewDirection_wgsl
@@ -1987,7 +1987,7 @@ export namespace SkyAtmosphereLibrary {
      * #redgpu_include skyAtmosphere.skyAtmosphereFn
      *
      * @group(0) @binding(0) var transmittanceLUT: texture_storage_2d<rgba16float, write>;
-     * @group(0) @binding(1) var<uniform> params: SkyAtmosphere;
+     * @group(0) @binding(1) var<globalStruct> params: SkyAtmosphere;
      *
      * @compute @workgroup_size(16, 16)
      * fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
@@ -2420,7 +2420,7 @@ export namespace SystemStructLibrary {
      *     prevModelMatrix: mat4x4<f32>,
      *     normalModelMatrix: mat4x4<f32>,
      * }
-     * struct GlobalVertexUniforms {
+     * struct GlobalVertexStruct {
      *     matrixList:MatrixList,
      *     pickingId: u32,
      *     receiveShadow: f32,
@@ -2432,13 +2432,13 @@ export namespace SystemStructLibrary {
      * };
      * ```
      */
-    export const globalVertexUniform = globalVertexUniform_wgsl;
+    export const globalVertexStruct = globalVertexStruct_wgsl;
     /**
      * [KO] PBR 재질 유니폼 구조체 정의입니다.
      * [EN] Definition of the PBR Material Uniforms structure.
      */
-    export const globalFragmentPBRUniform = globalPBRUniforms_wgsl;
-    export const globalFragmentBuiltInUniform = globalFragmentBuiltInUniform_wgsl;
+    export const globalFragmentStructPBR = globalFragmentStructPBR_wgsl;
+    export const globalFragmentStructBuiltIn = globalFragmentStructBuiltIn_wgsl;
 }
 
 export namespace DisplacementLibrary {
@@ -2622,7 +2622,7 @@ export namespace ShaderLibrary {
      *
      * };
      *
-     * @group(0) @binding(0) var<uniform> systemUniforms: SystemUniform;
+     * @group(0) @binding(0) var<globalStruct> systemUniforms: SystemUniform;
      * @group(0) @binding(1) var directionalShadowMapSampler: sampler_comparison;
      * @group(0) @binding(2) var directionalShadowMap: texture_depth_2d;
      * @group(0) @binding(3) var prefilterTextureSampler: sampler;
@@ -2640,8 +2640,8 @@ export namespace ShaderLibrary {
      * @group(0) @binding(15) var atmosphereIrradianceLUT: texture_cube<f32>;
      * @group(0) @binding(16) var skyAtmosphere_prefilteredTexture: texture_cube<f32>;
      *
-     * #redgpu_include systemStruct.globalVertexUniform;
-     * @group(0) @binding(17) var<storage> globalVertexSSBO : array<GlobalVertexUniforms>;
+     * #redgpu_include systemStruct.globalVertexStruct;
+     * @group(0) @binding(17) var<storage> globalVertexSSBO : array<GlobalVertexStruct>;
      *
      * #redgpu_include depth.getLinearizeDepth
      *
@@ -2732,7 +2732,7 @@ export namespace ShaderLibrary {
     export const SYSTEM_UNIFORM = SYSTEM_UNIFORM_wgsl;
     /**
      * // [KO] 포스트 이펙트 시스템 유니폼 구조체입니다.
-     * // [EN] Post effect system uniform structure.
+     * // [EN] Post effect system globalStruct structure.
      *
      *
      * ```wgsl
@@ -2751,7 +2751,7 @@ export namespace ShaderLibrary {
      *     skyAtmosphere:SkyAtmosphere,
      * };
      *
-     * @group(2) @binding(4) var<uniform> systemUniforms: SystemUniform;
+     * @group(2) @binding(4) var<globalStruct> systemUniforms: SystemUniform;
      * ```
      */
     export const POST_EFFECT_SYSTEM_UNIFORM = POST_EFFECT_SYSTEM_UNIFORM_wgsl;

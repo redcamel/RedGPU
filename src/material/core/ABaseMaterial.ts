@@ -40,7 +40,7 @@ interface ABaseMaterial {
  * [EN] Abstract class serving as a common base for various materials.
  *
  * [KO] 셰이더 정보, 유니폼/텍스처/샘플러 구조, 블렌드 상태 등 렌더 파이프라인의 핵심 속성을 관리합니다.
- * [EN] It manages core attributes of the render pipeline such as shader information, uniform/texture/sampler structures, and blend states.
+ * [EN] It manages core attributes of the render pipeline such as shader information, globalStruct/texture/sampler structures, and blend states.
  *
  * [KO] 머티리얼별로 GPU 파이프라인의 셰이더, 바인드 그룹, 블렌딩, 컬러/알파, 틴트, 투명도 등 다양한 렌더링 속성을 일관성 있게 제어할 수 있습니다.
  * [EN] It allows consistent control of various rendering attributes such as shader, bind group, blending, color/alpha, tint, and transparency of the GPU pipeline for each material.
@@ -322,7 +322,7 @@ abstract class ABaseMaterial extends ResourceBase {
 
     /**
      * [KO] GPU 렌더 파이프라인 정보 및 유니폼 버퍼를 초기화합니다.
-     * [EN] Initializes GPU render pipeline info and uniform buffer.
+     * [EN] Initializes GPU render pipeline info and globalStruct buffer.
      */
     initGPURenderInfos() {
         const {redGPUContext} = this
@@ -367,7 +367,7 @@ abstract class ABaseMaterial extends ResourceBase {
 
     /**
      * [KO] 프래그먼트 셰이더 바인드 그룹/유니폼/텍스처/샘플러 등의 상태를 갱신합니다.
-     * [EN] Updates fragment shader bind group/uniform/texture/sampler states.
+     * [EN] Updates fragment shader bind group/globalStruct/texture/sampler states.
      * @protected
      */
     _updateFragmentState() {
@@ -479,12 +479,12 @@ abstract class ABaseMaterial extends ResourceBase {
 
     /**
      * [KO] 머티리얼의 유니폼/컬러/틴트 등 기본 속성값을 유니폼 버퍼에 반영합니다.
-     * [EN] Reflects basic material properties such as uniforms/color/tint to the uniform buffer.
+     * [EN] Reflects basic material properties such as uniforms/color/tint to the globalStruct buffer.
      * @protected
      */
     _updateBaseProperty() {
 
-        const {members} = this['isPBRMaterial'] ? ResourceManager.GLOBAL_FRAGMENT_PBR_STRUCT : this['isBuiltInMaterial'] ? ResourceManager.GLOBAL_FRAGMENT_BUILT_IN_STRUCT : this.gpuRenderInfo.fragmentUniformInfo
+        const {members} = this['isPBRMaterial'] ? ResourceManager.GLOBAL_FRAGMENT_STRUCT_PBR : this['isBuiltInMaterial'] ? ResourceManager.GLOBAL_FRAGMENT_STRUCT_BUILT_IN : this.gpuRenderInfo.fragmentUniformInfo
         for (const k in members) {
             const property = this[k]
             if (property instanceof ColorRGBA) {

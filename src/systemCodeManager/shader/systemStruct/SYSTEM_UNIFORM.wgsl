@@ -54,14 +54,14 @@ struct SystemUniform {
 @group(0) @binding(15) var atmosphereIrradianceLUT: texture_cube<f32>;
 @group(0) @binding(16) var skyAtmosphere_prefilteredTexture: texture_cube<f32>;
 
-#redgpu_include systemStruct.globalVertexUniform;
-@group(0) @binding(17) var<storage> globalVertexSSBO : array<GlobalVertexUniforms>;
+#redgpu_include systemStruct.globalVertexStruct;
+@group(0) @binding(17) var<storage> globalVertexSSBO : array<GlobalVertexStruct>;
 
-#redgpu_include systemStruct.globalFragmentPBRUniform;
-@group(0) @binding(18) var<storage> globalPBRUniformBuffer : array<GlobalFragmentPBRUniform>;
+#redgpu_include systemStruct.globalFragmentStructPBR;
+@group(0) @binding(18) var<storage> globalFragmentSSBO_PBR : array<GlobalFragmentStructPBR>;
 
-#redgpu_include systemStruct.globalFragmentBuiltInUniform;
-@group(0) @binding(19) var<storage> globalFragmentSSBO_BuiltIn : array<GlobalFragmentBuiltInUniform>;
+#redgpu_include systemStruct.globalFragmentStructBuiltIn;
+@group(0) @binding(19) var<storage> globalFragmentSSBO_BuiltIn : array<GlobalFragmentStructBuiltIn>;
 
 #redgpu_include depth.getLinearizeDepth
 

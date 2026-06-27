@@ -5,7 +5,7 @@ import WGSLUniformTypes from "./core/WGSLUniformTypes";
 
 /**
  * [KO] 개별 유니폼 멤버 정보를 생성합니다.
- * [EN] Creates individual uniform member information.
+ * [EN] Creates individual globalStruct member information.
  * @param curr -
  * [KO] 현재 멤버 정보
  * [EN] Current member information
@@ -17,7 +17,7 @@ import WGSLUniformTypes from "./core/WGSLUniformTypes";
  * [EN] Type name
  * @returns
  * [KO] 가공된 유니폼 멤버 정보
- * [EN] Processed uniform member information
+ * [EN] Processed globalStruct member information
  */
 const createUniformMember = (curr, start, typeName) => {
     const UniformTypeInfo = WGSLUniformTypes[typeName];
@@ -81,13 +81,13 @@ const processMembers = (members, start = 0, end = 0) => {
 
 /**
  * [KO] 유니폼 정보 배열을 처리하여 맵으로 반환합니다.
- * [EN] Processes an array of uniform information and returns it as a map.
+ * [EN] Processes an array of globalStruct information and returns it as a map.
  * @param uniforms -
  * [KO] 유니폼 배열
  * [EN] Uniforms array
  * @returns
  * [KO] 가공된 유니폼 정보 맵
- * [EN] Processed uniform information map
+ * [EN] Processed globalStruct information map
  */
 const processUniforms = (uniforms) => {
     return uniforms.reduce((prev, curr) => {

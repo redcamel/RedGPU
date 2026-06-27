@@ -54,7 +54,7 @@ function defineTexture_func(propertyInfo: DefineTextureInfo) {
  * **[EN]**
  * - Handles {@link BitmapTexture}, {@link ANoiseTexture}, and {@link HDRTexture} instances.
  * - When a texture is set, it invokes `updateTexture(prevTexture, texture)` on the target instance to update bind groups.
- * - If a corresponding `use{Key}` property (e.g. `useDiffuseTexture`) exists on the target, it automatically synchronizes its boolean state and GPU uniform value (1 or 0) based on texture presence.
+ * - If a corresponding `use{Key}` property (e.g. `useDiffuseTexture`) exists on the target, it automatically synchronizes its boolean state and GPU globalStruct value (1 or 0) based on texture presence.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
  * @param defineInfo - [KO] 단일 {@link DefineTextureInfo} 설정 또는 그 배열 [EN] A single {@link DefineTextureInfo} configuration or an array of configurations

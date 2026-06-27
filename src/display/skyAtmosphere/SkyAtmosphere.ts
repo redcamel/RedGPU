@@ -50,7 +50,7 @@ class SkyAtmosphere extends RedGPUObject {
     #aerialPerspectiveGenerator: AerialPerspectiveGenerator;
     /** [KO] 대기 산란 전용 선형 샘플러 [EN] Linear sampler for atmospheric scattering */
     #sampler: Sampler;
-    /** [KO] 물리 파라미터 공유 유니폼 버퍼 [EN] Shared uniform buffer for physical parameters */
+    /** [KO] 물리 파라미터 공유 유니폼 버퍼 [EN] Shared globalStruct buffer for physical parameters */
     #sharedUniformBuffer: UniformBuffer;
     /** [KO] 대기 데이터를 기반으로 한 IBL 시스템 [EN] IBL system based on atmospheric data */
     #skyLight: SkyLight;

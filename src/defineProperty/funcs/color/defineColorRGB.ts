@@ -79,7 +79,7 @@ function defineColorRGB_func(
  * **[EN]**
  * - The getter returns a {@link ColorRGB} instance.
  * - The setter accepts a hex color string (e.g. `#ff0000`) or a {@link ColorRGB} instance.
- * - When the value changes, it automatically normalizes and writes to the GPU uniform buffer as linear RGB values (rgbNormalLinear).
+ * - When the value changes, it automatically normalizes and writes to the GPU globalStruct buffer as linear RGB values (rgbNormalLinear).
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
  * @param defineInfo - [KO] 단일 {@link DefineColorRGBInfo} 설정 또는 그 배열 [EN] A single {@link DefineColorRGBInfo} configuration or an array of configurations

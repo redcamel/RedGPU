@@ -31,7 +31,7 @@ function defineVector3_func(propertyInfo: DefineVector3Info) {
  *
  * **[EN]**
  * - Handles a 3-tuple array (`[number, number, number]`).
- * - Automatically updates the GPU uniform buffer on value change.
+ * - Automatically updates the GPU globalStruct buffer on value change.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
  * @param defineInfo - [KO] 단일 {@link DefineVector3Info} 설정 또는 그 배열 [EN] A single {@link DefineVector3Info} configuration or an array of configurations

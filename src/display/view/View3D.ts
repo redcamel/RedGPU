@@ -126,7 +126,7 @@ class View3D extends AView {
 
     /**
      * [KO] 시스템 버텍스 유니폼의 구조체 정보를 반환합니다.
-     * [EN] Returns the system vertex uniform structure information.
+     * [EN] Returns the system vertex globalStruct structure information.
      */
     get systemUniform_Vertex_StructInfo(): any {
         return this.#systemUniform_Vertex_StructInfo;
@@ -134,7 +134,7 @@ class View3D extends AView {
 
     /**
      * [KO] 시스템 버텍스 유니폼 바인드 그룹을 반환합니다.
-     * [EN] Returns the system vertex uniform bind group.
+     * [EN] Returns the system vertex globalStruct bind group.
      */
     get systemUniform_Vertex_UniformBindGroup(): GPUBindGroup {
         return this.#systemUniform_Vertex_UniformBindGroup;
@@ -142,7 +142,7 @@ class View3D extends AView {
 
     /**
      * [KO] 시스템 버텍스 유니폼 버퍼를 반환합니다.
-     * [EN] Returns the system vertex uniform buffer.
+     * [EN] Returns the system vertex globalStruct buffer.
      */
     get systemUniform_Vertex_UniformBuffer(): UniformBuffer {
         return this.#systemUniform_Vertex_UniformBuffer;

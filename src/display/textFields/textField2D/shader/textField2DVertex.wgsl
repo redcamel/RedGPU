@@ -39,12 +39,12 @@ fn main(inputData: InputData) -> VertexOutput {
 
     let globalVertexUniforms = globalVertexSSBO[inputData.globalVertexSlotIndex];
     // [KO] 시스템 유니폼 변수 가져오기
-    // [EN] Get system uniform variables
+    // [EN] Get system globalStruct variables
     let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
     let u_viewMatrix = systemUniforms.camera.viewMatrix;
 
     // [KO] 버텍스 유니폼 변수 가져오기
-    // [EN] Get vertex uniform variables
+    // [EN] Get vertex globalStruct variables
     let u_modelMatrix = globalVertexUniforms.matrixList.modelMatrix;
     let u_normalModelMatrix = globalVertexUniforms.matrixList.normalModelMatrix;
 

@@ -26,8 +26,8 @@ import ShaderLibrary from "../../../systemCodeManager/ShaderLibrary";
 
 const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
 const GLOBAL_VERTEX_STRUCT = SHADER_INFO.storage.globalVertexSSBO.type.format;
-const GLOBAL_FRAGMENT_PBR_STRUCT = SHADER_INFO.storage.globalPBRUniformBuffer.type.format;
-const GLOBAL_FRAGMENT_BUILT_IN_STRUCT = SHADER_INFO.storage.globalFragmentSSBO_BuiltIn.type.format;
+const GLOBAL_FRAGMENT_STRUCT_PBR = SHADER_INFO.storage.globalFragmentSSBO_PBR.type.format;
+const GLOBAL_FRAGMENT_STRUCT_BUILT_IN = SHADER_INFO.storage.globalFragmentSSBO_BuiltIn.type.format;
 
 enum ResourceType {
     GPUShaderModule = 'GPUShaderModule',
@@ -77,8 +77,8 @@ class ResourceManager extends RedGPUObject {
     static PRESET_VERTEX_GPUBindGroupLayout = 'PRESET_VERTEX_GPUBindGroupLayout'
     static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN = 'PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN'
     static GLOBAL_VERTEX_STRUCT = GLOBAL_VERTEX_STRUCT
-    static GLOBAL_FRAGMENT_PBR_STRUCT = GLOBAL_FRAGMENT_PBR_STRUCT
-    static GLOBAL_FRAGMENT_BUILT_IN_STRUCT = GLOBAL_FRAGMENT_BUILT_IN_STRUCT
+    static GLOBAL_FRAGMENT_STRUCT_PBR = GLOBAL_FRAGMENT_STRUCT_PBR
+    static GLOBAL_FRAGMENT_STRUCT_BUILT_IN = GLOBAL_FRAGMENT_STRUCT_BUILT_IN
 
     #resources = new ImmutableKeyMap([
         [ResourceType.GPUShaderModule, new Map()],
@@ -323,11 +323,11 @@ class ResourceManager extends RedGPUObject {
 
     /**
      * [KO] 유니폼 버퍼 관리 상태를 반환합니다.
-     * [EN] Returns the managed uniform buffer state.
+     * [EN] Returns the managed globalStruct buffer state.
      *
      * @returns
      * [KO] 유니폼 버퍼 관리 상태 정보 객체
-     * [EN] Managed uniform buffer status info object
+     * [EN] Managed globalStruct buffer status info object
      */
     get managedUniformBufferState(): ResourceStatusInfo {
         return this.#managedUniformBufferState;

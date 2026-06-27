@@ -103,7 +103,7 @@ class TextField3D extends ATextField {
                     this.#nativeHeight = height
 
                     // [KO] 실제 렌더링된 컨테이너 크기(물리 픽셀)를 유니폼으로 전달
-                    // [EN] Pass the actual rendered container size (physical pixels) to the uniform
+                    // [EN] Pass the actual rendered container size (physical pixels) to the globalStruct
                     if (this.gpuRenderInfo) {
                         this.redGPUContext.gpuDevice.queue.writeBuffer(
                             this.gpuRenderInfo.vertexUniformBuffer.gpuBuffer,

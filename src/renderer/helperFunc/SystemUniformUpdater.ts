@@ -12,7 +12,7 @@ let temp3 = mat4.create()
 
 /**
  * [KO] 시스템 유니폼 데이터를 업데이트하는 유틸리티 클래스입니다.
- * [EN] A utility class for updating system uniform data.
+ * [EN] A utility class for updating system globalStruct data.
  *
  * [KO] 카메라, 조명, 그림자 등 시스템 전역에서 공통으로 사용되는 WGSL 구조체 데이터를 Float32Array/Uint32Array 버퍼에 매핑합니다.
  * [EN] Maps WGSL structure data commonly used globally in the system, such as cameras, lights, and shadows, to Float32Array/Uint32Array buffers.
@@ -22,7 +22,7 @@ let temp3 = mat4.create()
 class SystemUniformUpdater {
     /**
      * [KO] 카메라 정보를 유니폼 데이터에 업데이트합니다.
-     * [EN] Updates camera information to uniform data.
+     * [EN] Updates camera information to globalStruct data.
      *
      * @param camera -
      * [KO] 업데이트할 카메라 인스턴스
@@ -99,7 +99,7 @@ class SystemUniformUpdater {
 
     /**
      * [KO] 그림자 설정 정보를 유니폼 데이터에 업데이트합니다.
-     * [EN] Updates shadow configuration information to uniform data.
+     * [EN] Updates shadow configuration information to globalStruct data.
      *
      * @param shadowManager -
      * [KO] 쉐도우 매니저 인스턴스
@@ -137,7 +137,7 @@ class SystemUniformUpdater {
 
     /**
      * [KO] 대기 산란(SkyAtmosphere) 정보를 유니폼 데이터에 업데이트합니다.
-     * [EN] Updates SkyAtmosphere information to uniform data.
+     * [EN] Updates SkyAtmosphere information to globalStruct data.
      *
      * @param skyAtmosphere -
      * [KO] 대기 산란 인스턴스
@@ -204,7 +204,7 @@ class SystemUniformUpdater {
 
     /**
      * [KO] 시간 관련 정보를 유니폼 데이터에 업데이트합니다.
-     * [EN] Updates time-related information to uniform data.
+     * [EN] Updates time-related information to globalStruct data.
      *
      * @param timeInfo -
      * [KO] 시간 정보 객체
@@ -255,7 +255,7 @@ class SystemUniformUpdater {
 
     /**
      * [KO] 투영 관련 행렬 정보를 유니폼 데이터에 업데이트합니다.
-     * [EN] Updates projection-related matrix information to uniform data.
+     * [EN] Updates projection-related matrix information to globalStruct data.
      *
      * @param projectionInfo -
      * [KO] 투영 행렬 정보 객체
@@ -321,7 +321,7 @@ class SystemUniformUpdater {
 
     /**
      * [KO] 직사광(DirectionalLight) 배열 정보를 유니폼 데이터에 업데이트합니다.
-     * [EN] Updates DirectionalLight array information to uniform data.
+     * [EN] Updates DirectionalLight array information to globalStruct data.
      *
      * @param directionalLights -
      * [KO] 업데이트할 직사광 배열
@@ -366,7 +366,7 @@ class SystemUniformUpdater {
 
     /**
      * [KO] 환경광(AmbientLight) 정보를 유니폼 데이터에 업데이트합니다.
-     * [EN] Updates AmbientLight information to uniform data.
+     * [EN] Updates AmbientLight information to globalStruct data.
      *
      * @param ambientLight -
      * [KO] 업데이트할 환경광 인스턴스

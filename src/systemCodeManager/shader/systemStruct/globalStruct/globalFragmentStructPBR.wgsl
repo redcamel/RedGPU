@@ -1,4 +1,4 @@
-struct GlobalFragmentPBRUniform {
+struct GlobalFragmentStructPBR {
     useVertexColor: u32,
     useCutOff: u32,
     cutOff: f32,

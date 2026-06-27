@@ -198,7 +198,7 @@ fn getTransmissionRefraction(
 @fragment
 fn main(inputData:InputData) -> OutputFragment {
     var output: OutputFragment;
-    let uniforms = globalPBRUniformBuffer[inputData.globalFragmentSlotIndex];
+    let uniforms = globalFragmentSSBO_PBR[inputData.globalFragmentSlotIndex];
 
     let input_vertexNormal = (inputData.vertexNormal.xyz);
     let input_vertexPosition = inputData.vertexPosition.xyz;

@@ -2,7 +2,7 @@
 #redgpu_include shadow.getShadowCoord;
 #redgpu_include entryPoint.mesh.entryPointShadowVertex;
 #redgpu_include entryPoint.mesh.entryPointPickingVertex;
-#redgpu_include systemStruct.globalVertexUniform;
+#redgpu_include systemStruct.globalVertexStruct;
 
 @group(1) @binding(1) var displacementTextureSampler: sampler;
 @group(1) @binding(2) var displacementTexture: texture_2d<f32>;

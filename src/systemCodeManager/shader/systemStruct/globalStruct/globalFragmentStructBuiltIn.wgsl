@@ -1,5 +1,5 @@
 
-struct GlobalFragmentBuiltInUniform {
+struct GlobalFragmentStructBuiltIn {
     // basic
     opacity: f32,
     useTint:u32,

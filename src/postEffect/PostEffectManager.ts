@@ -58,12 +58,12 @@ class PostEffectManager {
     #previousDimensions: { width: number, height: number }
     /**
      * [KO] 시스템 유니폼 버퍼
-     * [EN] System uniform buffer
+     * [EN] System globalStruct buffer
      */
     #postEffectSystemUniformBuffer: UniformBuffer;
     /**
      * [KO] 시스템 유니폼 버퍼 구조 정보
-     * [EN] System uniform buffer struct info
+     * [EN] System globalStruct buffer struct info
      */
     #postEffectSystemUniformBufferStructInfo;
     /**
@@ -236,7 +236,7 @@ class PostEffectManager {
 
     /**
      * [KO] 시스템 유니폼 버퍼를 반환합니다.
-     * [EN] Returns the system uniform buffer.
+     * [EN] Returns the system globalStruct buffer.
      *
      * @returns
      * [KO] UniformBuffer 인스턴스

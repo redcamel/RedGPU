@@ -4,7 +4,7 @@
 #redgpu_include entryPoint.mesh.entryPointPickingVertex;
 #redgpu_include displacement.getDisplacementPosition;
 
-#redgpu_include systemStruct.globalVertexUniform;
+#redgpu_include systemStruct.globalVertexStruct;
 
 const maxDistance: f32 = 1000.0;
 
