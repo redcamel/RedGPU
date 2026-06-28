@@ -225,7 +225,7 @@ class Renderer {
             renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
         }
 
-        processAnimationsAndSkinning(redGPUContext, renderViewStateData, this.#gltfAnimationLooperManager);
+        processAnimationsAndSkinning(redGPUContext, renderViewStateData, this.#gltfAnimationLooperManager, view);
 
         {
             globalVertexSSBO.flush()

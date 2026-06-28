@@ -26,11 +26,11 @@ const createMeshVertexShaderModulePBRSkin = (
             // const newData = new ArrayBuffer(mesh.animationInfo.skinInfo.vertexStorageInfo.arrayBufferByteLength)
 
             mesh.animationInfo.skinInfo.vertexStorageBuffer = gpuDevice.createBuffer({
-                size: mesh.geometry.vertexBuffer.vertexCount * 48, // SkinnedVertex (position 16, normal 16, tangent 16) = 48 bytes
+                size: mesh.geometry.vertexBuffer.vertexCount * 64, // SkinnedVertex (position 16, normal 16, tangent 16, currentClipPos 16) = 64 bytes
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
             });
             mesh.animationInfo.skinInfo.prevVertexStorageBuffer = gpuDevice.createBuffer({
-                size: mesh.geometry.vertexBuffer.vertexCount * 48, // SkinnedVertex (position 16, normal 16, tangent 16) = 48 bytes
+                size: mesh.geometry.vertexBuffer.vertexCount * 16, // vec4<f32> position = 16 bytes
                 usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
             });
             gpuRenderInfo.vertexUniformBindGroup = redGPUContext.gpuDevice.createBindGroup(getBasicMeshVertexBindGroupDescriptor(mesh, true));

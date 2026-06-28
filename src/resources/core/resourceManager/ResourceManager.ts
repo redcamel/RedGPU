@@ -789,17 +789,17 @@ class ResourceManager extends RedGPUObject {
                         {binding: 16, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
                         {
                             binding: 17,
-                            visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+                            visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
                             buffer: {type: 'read-only-storage'}
                         },
                         {
                             binding: 18,
-                            visibility: GPUShaderStage.FRAGMENT,
+                            visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
                             buffer: {type: 'read-only-storage'}
                         },
                         {
                             binding: 19,
-                            visibility: GPUShaderStage.FRAGMENT,
+                            visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
                             buffer: {type: 'read-only-storage'}
                         },
                     ],

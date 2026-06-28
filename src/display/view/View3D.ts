@@ -256,6 +256,14 @@ class View3D extends AView {
     }
 
     /**
+     * [KO] 이전 프레임의 지터가 적용되지 않은 투영 뷰 행렬을 반환합니다.
+     * [EN] Returns the projection view matrix from the previous frame with jitter excluded.
+     */
+    get prevNoneJitterProjectionViewMatrix(): mat4 {
+        return this.redGPUContext.antialiasingManager.useTAA ? this.taa.prevNoneJitterProjectionViewMatrix : this.#noneJitterProjectionViewMatrix;
+    }
+
+    /**
      * [KO] 매 프레임마다 뷰 및 라이팅 데이터를 업데이트합니다.
      * [EN] Updates view and lighting data every frame.
      * @param shadowRender -

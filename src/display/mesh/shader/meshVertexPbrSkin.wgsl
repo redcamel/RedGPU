@@ -11,10 +11,11 @@ struct SkinnedVertex {
   position: vec3<f32>,
   normal:   vec3<f32>,
   tangent:  vec4<f32>,
+  currentClipPos: vec4<f32>,
 };
 
 @group(1) @binding(3) var<storage, read> skinnedVertices: array<SkinnedVertex>;
-@group(1) @binding(4) var<storage, read> prevSkinnedVertices: array<SkinnedVertex>;
+@group(1) @binding(4) var<storage, read> prevSkinnedVertices: array<vec4<f32>>;
 
 /**
  * [KO] 스키닝이 적용된 메시의 버텍스 입력 구조체입니다.
@@ -87,24 +88,18 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
     // [KO] 컴퓨트 셰이더에서 구워진 스키닝된 데이터 로드
     // [EN] Load skinned data baked in Compute Shader
     let skinnedPosData = skinnedVertices[inputData.idx];
-    let prevSkinnedPosData = prevSkinnedVertices[inputData.idx];
 
-    // [KO] 스킨드 월드 포지션 계산
+    // [KO] 스킨드 월드 포지션 계산 (컴퓨트 셰이더에서 구워져 온 월드 좌표를 그대로 사용)
     // [EN] Calculate skinned world position
-    let skinnedPosition = vec4<f32>(skinnedPosData.position, 1.0);
-    let position = gu_modelMatrix * skinnedPosition;
+    let position = vec4<f32>(skinnedPosData.position, 1.0);
 
     // [KO] 스킨드 최종 노말 변환
     // [EN] Calculate skinned final normal transformation
-    let skinnedNormal = skinnedPosData.normal;
-    let transformedNormal = normalize((gu_normalModelMatrix * vec4<f32>(skinnedNormal, 0.0)).xyz);
-    output.vertexNormal = transformedNormal;
+    output.vertexNormal = skinnedPosData.normal;
 
     // [KO] 탄젠트 변환
     // [EN] Tangent transformation
-    let skinnedTangent = skinnedPosData.tangent.xyz;
-    let transformedTangentXYZ = (gu_normalModelMatrix * vec4<f32>(skinnedTangent, 0.0)).xyz;
-    output.vertexTangent = vec4<f32>(normalize(transformedTangentXYZ), skinnedPosData.tangent.w);
+    output.vertexTangent = skinnedPosData.tangent;
 
     // [KO] 출력 데이터 할당
     // [EN] Assign output data
@@ -124,12 +119,11 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
     }
     #redgpu_endIf
 
-    // [KO] 모션 벡터 계산을 위한 클립 좌표 저장
+    // [KO] 모션 벡터 계산을 위한 클립 좌표 저장 (컴퓨트 셰이더에서 구워진 최종 클립 좌표들을 바로 사용)
     // [EN] Store clip coordinates for motion vector calculation
     {
-        output.currentClipPos = su_projection.noneJitterProjectionViewMatrix * position;
-        let prevSkinnedPosition = vec4<f32>(prevSkinnedPosData.position, 1.0);
-        output.prevClipPos = su_projection.prevNoneJitterProjectionViewMatrix * gu_prevModelMatrix  * prevSkinnedPosition;
+        output.currentClipPos = skinnedPosData.currentClipPos;
+        output.prevClipPos = prevSkinnedVertices[inputData.idx];
     }
 
     // [KO] 노드 및 볼륨 스케일 계산
