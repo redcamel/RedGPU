@@ -289,6 +289,7 @@ class View3D extends AView {
 
             const globalSSAOVertexGPUBuffer = redGPUContext.globalVertexSSBO.gpuBuffer;
             const globalSSAOFragmentGPUBuffer = redGPUContext.globalFragmentSSBO_PBR.gpuBuffer;
+            const globalSSAOFragmentBuiltInGPUBuffer = redGPUContext.globalFragmentSSBO_BuiltIn.gpuBuffer;
 
             if (prevInfo) {
                 needResetBindGroup = (
@@ -304,6 +305,7 @@ class View3D extends AView {
                     prevInfo.shadowDepthTextureView !== shadowDepthTextureView ||
                     prevInfo.globalSSAOVertexGPUBuffer !== globalSSAOVertexGPUBuffer ||
                     prevInfo.globalSSAOFragmentGPUBuffer !== globalSSAOFragmentGPUBuffer ||
+                    prevInfo.globalSSAOFragmentBuiltInGPUBuffer !== globalSSAOFragmentBuiltInGPUBuffer ||
                     !this.#clusterLightManager.passClustersLight
                 )
             }
@@ -323,6 +325,7 @@ class View3D extends AView {
                 shadowDepthTextureView,
                 globalSSAOVertexGPUBuffer,
                 globalSSAOFragmentGPUBuffer,
+                globalSSAOFragmentBuiltInGPUBuffer,
                 vertexUniformBindGroup: this.#systemUniform_Vertex_UniformBindGroup
             }
         }
