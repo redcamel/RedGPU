@@ -1284,31 +1284,16 @@ class Mesh extends MeshBase {
                 // }
 
             }
-            if (!currentGeometry) this.#needUpdateMatrixUniform = false
+            // if (!currentGeometry) this.#needUpdateMatrixUniform = false
 
-            if (this.isJointMesh) {
-                const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
-                const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
-                if (!this.#uniformDataMatrixList) {
-                    this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
-                }
 
-                this.#uniformDataMatrixList.set(this.modelMatrix, vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT);
-
-                redGPUContext.globalVertexSSBO.updateFloatData(
-                    this.#globalVertexSlotIndex,
-                    new Float32Array(this.modelMatrix),
-                    vertexUniformInfoMembers.matrixList.members.modelMatrix.uniformOffset / 4
-                );
-            }
 
             this.dirtyTransform = false
             this.#cachedBoundingAABB = null
             this.#cachedBoundingOBB = null
         }
 
-        // 조인트 메쉬는 렌더링을 하지 않는 비가시 뼈대 노드이므로 렌더링 패스 루프를 타지 않고 조기 리턴
-        // if (this.isJointMesh) return;
+
 
         // check distanceCulling
         const needCheckInterleavedCulling = !interleavedCullingInfo.skipCullingCheck &&
@@ -1547,7 +1532,7 @@ class Mesh extends MeshBase {
         } else {
             renderViewStateData.renderResults.num3DGroups++
         }
-        if (currentGeometry && passFrustumCulling) {
+        if (passFrustumCulling) {
             const {redGPUContext} = this
             const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
             const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
@@ -1555,20 +1540,6 @@ class Mesh extends MeshBase {
                 this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
             }
 
-            {
-                if (vertexUniformInfoMembers.displacementScale !== undefined &&
-                    this.#displacementScale !== displacementScale
-                ) {
-                    this.#displacementScale = displacementScale
-                    // keepLog('실행을 하나보네',displacementScale)
-                    tempFloat32_1[0] = displacementScale
-                    redGPUContext.globalVertexSSBO.updateFloatData(
-                        this.#globalVertexSlotIndex,
-                        tempFloat32_1,
-                        vertexUniformInfoMembers.displacementScale.uniformOffset / 4
-                    );
-                }
-            }
             if (this.#needUpdateMatrixUniform) {
                 {
                     const modelMatrix = (
@@ -1651,6 +1622,27 @@ class Mesh extends MeshBase {
                     vertexUniformInfoMembers.matrixList.startOffset / 4
                 )
             }
+        }
+        if (currentGeometry && passFrustumCulling) {
+            const {redGPUContext} = this
+            const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
+
+
+            {
+                if (vertexUniformInfoMembers.displacementScale !== undefined &&
+                    this.#displacementScale !== displacementScale
+                ) {
+                    this.#displacementScale = displacementScale
+                    // keepLog('실행을 하나보네',displacementScale)
+                    tempFloat32_1[0] = displacementScale
+                    redGPUContext.globalVertexSSBO.updateFloatData(
+                        this.#globalVertexSlotIndex,
+                        tempFloat32_1,
+                        vertexUniformInfoMembers.displacementScale.uniformOffset / 4
+                    );
+                }
+            }
+
             if (this.dirtyOpacity) {
                 dirtyOpacityForChildren = true
                 if (vertexUniformInfoMembers.combinedOpacity) {
