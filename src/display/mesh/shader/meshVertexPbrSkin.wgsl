@@ -23,12 +23,9 @@ struct SkinnedVertex {
 struct InputDataSkin {
     @builtin(instance_index) globalVertexSlotIndex: u32,
     @builtin(vertex_index) idx: u32,
-    @location(0) position: vec3<f32>,
-    @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
     @location(3) uv1: vec2<f32>,
     @location(4) vertexColor_0: vec4<f32>,
-    @location(5) vertexTangent: vec4<f32>,
 };
 
 /**
@@ -69,9 +66,6 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
     let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
     // [KO] 입력 데이터 처리
     // [EN] Process input data
-    let input_position = inputData.position;
-    let input_position_vec4 = vec4<f32>(input_position, 1.0);
-    let input_vertexNormal = inputData.vertexNormal;
 
     // [KO] 시스템 유니폼 캐싱
     // [EN] Cache system uniforms

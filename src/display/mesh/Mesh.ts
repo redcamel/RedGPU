@@ -277,7 +277,7 @@ class Mesh extends MeshBase {
     #interleavedCullingID: number = Math.floor(Math.random() * 4)
     #globalVertexSlotIndex: number = -1;
     #prevLodIDX: number;
-
+    isJointMesh: boolean = false;
     /**
      * [KO] Mesh 인스턴스를 생성합니다.
      * [EN] Creates an instance of Mesh.
@@ -1286,10 +1286,29 @@ class Mesh extends MeshBase {
             }
             if (!currentGeometry) this.#needUpdateMatrixUniform = false
 
+            if (this.isJointMesh) {
+                const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
+                const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
+                if (!this.#uniformDataMatrixList) {
+                    this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
+                }
+
+                this.#uniformDataMatrixList.set(this.modelMatrix, vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT);
+
+                redGPUContext.globalVertexSSBO.updateFloatData(
+                    this.#globalVertexSlotIndex,
+                    new Float32Array(this.modelMatrix),
+                    vertexUniformInfoMembers.matrixList.members.modelMatrix.uniformOffset / 4
+                );
+            }
+
             this.dirtyTransform = false
             this.#cachedBoundingAABB = null
             this.#cachedBoundingOBB = null
         }
+
+        // 조인트 메쉬는 렌더링을 하지 않는 비가시 뼈대 노드이므로 렌더링 패스 루프를 타지 않고 조기 리턴
+        // if (this.isJointMesh) return;
 
         // check distanceCulling
         const needCheckInterleavedCulling = !interleavedCullingInfo.skipCullingCheck &&
@@ -1427,8 +1446,7 @@ class Mesh extends MeshBase {
                 // 변경시만 이전 모델 메트릭스 업데이트
                 if (antialiasingManager.useTAA && this.#uniformDataMatrixList) {
 
-                    const {gpuRenderInfo, redGPUContext} = this
-                    const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
+                    const {redGPUContext} = this
                     const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
                     const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
                     if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {

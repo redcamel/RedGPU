@@ -6,6 +6,7 @@ const parseJoint_GLTF = (gltfLoader: GLTFLoader, skinInfo: ParsedSkinInfo_GLTF, 
     // const {redGPUContext} = gltfLoader
     const jointMesh = nodes[jointGlTfId]['Mesh'];
     if (jointMesh) {
+        jointMesh.isJointMesh = true;
         skinInfo.joints.push(jointMesh);
         // jointMesh.geometry = new Sphere(redGPUContext, 0.05, 3, 3, 3);
         // jointMesh.material = new ColorMaterial(redGPUContext, '#ff0000');

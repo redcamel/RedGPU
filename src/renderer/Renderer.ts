@@ -185,11 +185,7 @@ class Renderer {
             if (lightManager.pointLightCount || lightManager.spotLightCount) {
                 view.clusterLightManager.updateClusterLights();
             }
-            {
-                globalVertexSSBO.flush()
-                globalFragmentSSBO_PBR.flush()
-                globalFragmentSSBO_BuiltIn.flush()
-            }
+
             {
                 const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
                 drawBufferManager.flushAllCommands(renderViewStateData)
@@ -230,6 +226,12 @@ class Renderer {
         }
 
         processAnimationsAndSkinning(redGPUContext, renderViewStateData, this.#gltfAnimationLooperManager);
+
+        {
+            globalVertexSSBO.flush()
+            globalFragmentSSBO_PBR.flush()
+            globalFragmentSSBO_BuiltIn.flush()
+        }
 
         view.renderViewStateData.viewRenderCPURecordingTime = (performance.now() - view.renderViewStateData.viewRenderStartTime);
         return {
