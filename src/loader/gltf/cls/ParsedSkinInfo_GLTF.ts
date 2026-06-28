@@ -95,8 +95,35 @@ class ParsedSkinInfo_GLTF {
 			@group(1) @binding(4) var<uniform>             uniforms:          Uniforms;
 			@group(1) @binding(5) var<storage, read>       originalVertices:  array<f32>;
 			
+			var<workgroup> sharedSkinMatrices: array<mat4x4<f32>, ${this.joints.length}>;
+
 			@compute @workgroup_size(${this.WORK_SIZE},1,1)
-			fn main(@builtin(global_invocation_id) global_id: vec3<u32>) { 
+			fn main(
+			  @builtin(global_invocation_id) global_id: vec3<u32>,
+			  @builtin(local_invocation_id) local_id: vec3<u32>
+			) { 
+			  // --- 1. 워크그룹 협력적 조인트 합성 행렬 계산 (1프레임/1워크그룹당 단 1번만 계산) ---
+			  let jointCount = ${this.joints.length}u;
+			  let localIdx = local_id.x;
+			  
+			  if (localIdx < jointCount) {
+			    let searchJointIndexTable = uniforms.searchJointIndexTable;
+			    let localJointIdx = searchJointIndexTable[localIdx].x;
+			    
+			    let jointSlotIndices = uniforms.jointSlotIndices;
+			    let jointModelMatrix = globalVertexSSBO[jointSlotIndices[localJointIdx >> 2u][localJointIdx & 3u]].matrixList.modelMatrix;
+			    
+			    let inverseBindMatrices = uniforms.inverseBindMatrices;
+			    let invBind = inverseBindMatrices[localIdx];
+			    
+			    // 합성 행렬 계산하여 공유 메모리에 보존
+			    sharedSkinMatrices[localIdx] = jointModelMatrix * invBind;
+			  }
+			  
+			  // 모든 스레드가 공유 메모리 작성을 끝마칠 때까지 동기화 대기!
+			  workgroupBarrier();
+
+			  // --- 2. 버텍스 연산 시작 ---
 			  let idx = global_id.x;
 			  if (idx >= arrayLength(&vertexWeight)) {
 			    return;
@@ -104,25 +131,6 @@ class ParsedSkinInfo_GLTF {
 			
 			  let weights = vertexWeight[idx];
 			  let joints = vertexJoint[idx];
-			  
-			  // 조인트 modelMatrix 조회 및 인버스 바인드 행렬 로드 (하단 어디서든 접근 가능하도록 선두에 배치)
-			  let searchJointIndexTable = uniforms.searchJointIndexTable;
-			  let localJointIdxX = searchJointIndexTable[joints.x].x;
-			  let localJointIdxY = searchJointIndexTable[joints.y].x;
-			  let localJointIdxZ = searchJointIndexTable[joints.z].x;
-			  let localJointIdxW = searchJointIndexTable[joints.w].x;
-
-			  let jointSlotIndices = uniforms.jointSlotIndices;
-			  let jointModelMatrixX = globalVertexSSBO[jointSlotIndices[localJointIdxX >> 2u][localJointIdxX & 3u]].matrixList.modelMatrix;
-			  let jointModelMatrixY = globalVertexSSBO[jointSlotIndices[localJointIdxY >> 2u][localJointIdxY & 3u]].matrixList.modelMatrix;
-			  let jointModelMatrixZ = globalVertexSSBO[jointSlotIndices[localJointIdxZ >> 2u][localJointIdxZ & 3u]].matrixList.modelMatrix;
-			  let jointModelMatrixW = globalVertexSSBO[jointSlotIndices[localJointIdxW >> 2u][localJointIdxW & 3u]].matrixList.modelMatrix;
-
-			  let inverseBindMatrices = uniforms.inverseBindMatrices;
-			  let invBindX = inverseBindMatrices[joints.x];
-			  let invBindY = inverseBindMatrices[joints.y];
-			  let invBindZ = inverseBindMatrices[joints.z];
-			  let invBindW = inverseBindMatrices[joints.w];
 			  
 			  // 1. 원본 버텍스 데이터 읽기
 			  let baseIdx = idx * uniforms.vertexStride;
@@ -141,6 +149,12 @@ class ParsedSkinInfo_GLTF {
 			    originalVertices[normalIdx + 2u]
 			  );
 			  
+			  // 공유 메모리로부터 사전 계산된 합성 조인트 행렬들 가져와 가중치 합산 (정점당 단 1회의 합성 스킨 행렬 구축)
+			  let skinMat = weights.x * sharedSkinMatrices[joints.x] +
+			                weights.y * sharedSkinMatrices[joints.y] +
+			                weights.z * sharedSkinMatrices[joints.z] +
+			                weights.w * sharedSkinMatrices[joints.w];
+
 			  var skinnedTangent = vec4<f32>(0.0, 0.0, 0.0, 1.0);
 			  if (uniforms.tangentOffset != 0u) {
 			    let tangentIdx = baseIdx + uniforms.tangentOffset;
@@ -151,36 +165,22 @@ class ParsedSkinInfo_GLTF {
 			      originalVertices[tangentIdx + 3u]
 			    );
 			    
-			    let t = vec4<f32>(rawTangent.xyz, 0.0);
-			    let skinnedTangentVec4 = weights.x * (jointModelMatrixX * (invBindX * t)) +
-			                            weights.y * (jointModelMatrixY * (invBindY * t)) +
-			                            weights.z * (jointModelMatrixZ * (invBindZ * t)) +
-			                            weights.w * (jointModelMatrixW * (invBindW * t));
+			    let skinnedTangentVec4 = skinMat * vec4<f32>(rawTangent.xyz, 0.0);
 			    skinnedTangent = vec4<f32>(normalize(skinnedTangentVec4.xyz), rawTangent.w);
 			  }
 
-			  // --- 1. 포지션 스키닝 계산 (Matrix-Vector multiplication 8회) ---
-			  let v = vec4<f32>(rawPos, 1.0);
-			  let skinnedPos = weights.x * (jointModelMatrixX * (invBindX * v)) +
-			                   weights.y * (jointModelMatrixY * (invBindY * v)) +
-			                   weights.z * (jointModelMatrixZ * (invBindZ * v)) +
-			                   weights.w * (jointModelMatrixW * (invBindW * v));
+			  // --- 3. 정점 속성 변환 (Matrix-Vector multiplication 단 3회로 극비 절감!) ---
+			  let skinnedPos = skinMat * vec4<f32>(rawPos, 1.0);
 
 			  // 3. 이전 프레임 결과 보존 (이전 프레임 클립 위치 계산 및 기록)
-			  // skinnedVertexBuffer[idx]의 position은 이전 프레임 시점의 최종 월드 포지션이다!
 			  let prevWorldPos = vec4<f32>(skinnedVertexBuffer[idx].position, 1.0);
 			  prevSkinnedVertexBuffer[idx] = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * prevWorldPos;
 			  
-			  // 4. 스키닝 적용된 데이터 기록 (조인트 스킨 합성 행렬에 의해 최종 월드 공간으로 바로 변환됨!)
+			  // 4. 스키닝 적용된 데이터 기록
 			  var skinnedOut: SkinnedVertex;
 			  skinnedOut.position = skinnedPos.xyz;
 			  
-			  // --- 2. 노말 스키닝 계산 (방향 벡터이므로 w = 0.0) ---
-			  let n = vec4<f32>(rawNormal, 0.0);
-			  let skinnedNormalVec4 = weights.x * (jointModelMatrixX * (invBindX * n)) +
-			                         weights.y * (jointModelMatrixY * (invBindY * n)) +
-			                         weights.z * (jointModelMatrixZ * (invBindZ * n)) +
-			                         weights.w * (jointModelMatrixW * (invBindW * n));
+			  let skinnedNormalVec4 = skinMat * vec4<f32>(rawNormal, 0.0);
 			  skinnedOut.normal = normalize(skinnedNormalVec4.xyz);
 			  
 			  skinnedOut.tangent = skinnedTangent;
