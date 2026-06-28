@@ -63,6 +63,11 @@ class ParsedSkinInfo_GLTF {
         weightBuffer: VertexBuffer,
         jointBuffer: IndexBuffer,
     ) {
+        const interleavedStruct = vertexBuffer.interleavedStruct;
+        const stride = vertexBuffer.stride;
+        const positionOffset = interleavedStruct.getAttributeOffset('aVertexPosition');
+        const normalOffset = interleavedStruct.getAttributeOffset('aVertexNormal');
+        const tangentOffset = interleavedStruct.define['aVertexTangent'] ? interleavedStruct.getAttributeOffset('aVertexTangent') : 0;
 
         const source = `
 			struct Uniforms {
@@ -70,13 +75,26 @@ class ParsedSkinInfo_GLTF {
 			  jointModelMatrices:     array<mat4x4<f32>, ${this.usedJoints.length}>,
 			  inverseBindMatrices:    array<mat4x4<f32>, ${this.joints.length}>,
 			  searchJointIndexTable:    array<vec4<u32>, ${this.joints.length}>,
+			  
+			  // 정점 레이아웃 메타데이터
+			  vertexStride:   u32,
+			  positionOffset: u32,
+			  normalOffset:   u32,
+			  tangentOffset:  u32,
+			};
+			
+			struct SkinnedVertex {
+			  position: vec3<f32>,
+			  normal:   vec3<f32>,
+			  tangent:  vec4<f32>,
 			};
 			
 			@group(0) @binding(0) var<storage, read>       vertexWeight:  array<vec4<f32>>;
 			@group(0) @binding(1) var<storage, read>       vertexJoint:  array<vec4<u32>>;
-			@group(0) @binding(2) var<storage, read_write> skinMatrixBuffer:  array<mat4x4<f32>>;
-			@group(0) @binding(3) var<storage, read_write> prevSkinMatrixBuffer:  array<mat4x4<f32>>;
+			@group(0) @binding(2) var<storage, read_write> skinnedVertexBuffer:  array<SkinnedVertex>;
+			@group(0) @binding(3) var<storage, read_write> prevSkinnedVertexBuffer:  array<SkinnedVertex>;
 			@group(0) @binding(4) var<uniform>             uniforms:          Uniforms;
+			@group(0) @binding(5) var<storage, read>       originalVertices:  array<f32>;
 			
 			@compute @workgroup_size(${this.WORK_SIZE},1,1)
 			fn main(@builtin(global_invocation_id) global_id: vec3<u32>) { 
@@ -87,8 +105,32 @@ class ParsedSkinInfo_GLTF {
 			
 			  let weights = vertexWeight[idx];
 			  let joints = vertexJoint[idx];
-			  prevSkinMatrixBuffer[idx] = skinMatrixBuffer[idx];
-			  skinMatrixBuffer[idx] = uniforms.invertNodeGlobalTransform * (
+			  
+			  // 1. 원본 버텍스 데이터 읽기
+			  let baseIdx = idx * uniforms.vertexStride;
+			  let rawPos = vec3<f32>(
+			    originalVertices[baseIdx + uniforms.positionOffset],
+			    originalVertices[baseIdx + uniforms.positionOffset + 1u],
+			    originalVertices[baseIdx + uniforms.positionOffset + 2u]
+			  );
+			  let rawNormal = vec3<f32>(
+			    originalVertices[baseIdx + uniforms.normalOffset],
+			    originalVertices[baseIdx + uniforms.normalOffset + 1u],
+			    originalVertices[baseIdx + uniforms.normalOffset + 2u]
+			  );
+			  
+			  var rawTangent = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+			  if (uniforms.tangentOffset != 0u) {
+			    rawTangent = vec4<f32>(
+			      originalVertices[baseIdx + uniforms.tangentOffset],
+			      originalVertices[baseIdx + uniforms.tangentOffset + 1u],
+			      originalVertices[baseIdx + uniforms.tangentOffset + 2u],
+			      originalVertices[baseIdx + uniforms.tangentOffset + 3u]
+			    );
+			  }
+			
+			  // 2. 스키닝 합성 행렬 계산
+			  let skinMat = uniforms.invertNodeGlobalTransform * (
 				    weights.x * (
 				    	uniforms.jointModelMatrices[uniforms.searchJointIndexTable[joints.x].x] * uniforms.inverseBindMatrices[joints.x]
 				    ) +
@@ -102,9 +144,19 @@ class ParsedSkinInfo_GLTF {
 				    	uniforms.jointModelMatrices[uniforms.searchJointIndexTable[joints.w].x] * uniforms.inverseBindMatrices[joints.w]
 				    )
 				);
+				
+			  // 3. 이전 프레임 결과 보존
+			  prevSkinnedVertexBuffer[idx] = skinnedVertexBuffer[idx];
+			  
+			  // 4. 스키닝 적용된 데이터 기록
+			  var skinnedOut: SkinnedVertex;
+			  skinnedOut.position = (skinMat * vec4<f32>(rawPos, 1.0)).xyz;
+			  skinnedOut.normal = normalize((skinMat * vec4<f32>(rawNormal, 0.0)).xyz);
+			  skinnedOut.tangent = vec4<f32>(normalize((skinMat * vec4<f32>(rawTangent.xyz, 0.0)).xyz), rawTangent.w);
+			  
+			  skinnedVertexBuffer[idx] = skinnedOut;
 			}
     `;
-        // keepLog(this.joints, this.usedJoints)
         this.jointData = new Float32Array((1 + this.usedJoints.length) * 16)
         this.computeShader = redGPUContext.resourceManager.createGPUShaderModule(`calcSkinMatrix_${this.usedJoints.length}`, {code: source})
         this.computePipeline = device.createComputePipeline({
@@ -115,8 +167,9 @@ class ParsedSkinInfo_GLTF {
                 entryPoint: 'main',
             },
         });
+        // uniforms 사이즈 = jointData 크기 + inverseBindMatrices 크기 + searchJointIndexTable 크기 + layout 메타데이터 (16바이트)
         this.uniformBuffer = device.createBuffer({
-            size: this.jointData.byteLength + (this.joints.length * 16 * 4) + (this.joints.length * 4 * 4),
+            size: this.jointData.byteLength + (this.joints.length * 16 * 4) + (this.joints.length * 4 * 4) + 16,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         })
         device.queue.writeBuffer(
@@ -125,20 +178,24 @@ class ParsedSkinInfo_GLTF {
             new Float32Array(this.inverseBindMatrices.map(v => Array.from(v)).flat())
         )
         const searchJointIndexTableData = new Uint32Array(this.joints.length * 4);
-        searchJointIndexTableData.fill(0); // 또는 적절한 기본값
+        searchJointIndexTableData.fill(0);
         this.usedJoints.forEach((jointIdx, i) => {
             searchJointIndexTableData[jointIdx * 4] = i;
         });
-        // keepLog(this.joints,this.usedJoints,searchJointIndexTableData)
         device.queue.writeBuffer(
             this.uniformBuffer,
             this.jointData.byteLength + (this.joints.length * 16 * 4),
             searchJointIndexTableData
         )
-        // keepLog(
-        // 	this.usedJoints,
-        // 	searchJointIndexTableData
-        // )
+
+        // 정점 레이아웃 메타데이터 기록 (u32 4개 = 16바이트)
+        const layoutMetadata = new Uint32Array([stride, positionOffset, normalOffset, tangentOffset]);
+        device.queue.writeBuffer(
+            this.uniformBuffer,
+            this.jointData.byteLength + (this.joints.length * 16 * 4) + (this.joints.length * 4 * 4),
+            layoutMetadata
+        )
+
         this.bindGroup = device.createBindGroup({
             layout: this.computePipeline.getBindGroupLayout(0),
             entries: [
@@ -147,6 +204,7 @@ class ParsedSkinInfo_GLTF {
                 {binding: 2, resource: {buffer: this.vertexStorageBuffer}},
                 {binding: 3, resource: {buffer: this.prevVertexStorageBuffer}},
                 {binding: 4, resource: {buffer: this.uniformBuffer}},
+                {binding: 5, resource: {buffer: vertexBuffer.gpuBuffer}},
             ],
         });
     }
