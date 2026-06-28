@@ -1,6 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
-import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager";
 import {keepLog} from "../../../utils";
 
 interface BufferSlot {
@@ -403,10 +402,13 @@ class GlobalStorageBufferManager extends RedGPUObject {
         // 2. CPU 데이터 이전
         newFloatView.set(this.#floatView);
 
-        // 3. GPU 하드웨어 가속 복사 커맨드 실행
-        this.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (encoder) => {
-            encoder.copyBufferToBuffer(oldBuffer, 0, newBuffer, 0, oldByteSize);
+        // 3. GPU 하드웨어 가속 복사 커맨드 실행 (개별 독립 인코더 사용 및 즉시 제출)
+        const copyEncoder = this.gpuDevice.createCommandEncoder({
+            label: `GlobalStorageBufferManager_ResizeCopy_${this.#label}`
         });
+        copyEncoder.copyBufferToBuffer(oldBuffer, 0, newBuffer, 0, oldByteSize);
+        const copyCommandBuffer = copyEncoder.finish();
+        this.gpuDevice.queue.submit([copyCommandBuffer]);
 
         // 4. 기존 GPU 버퍼 해제 및 바인딩 교체
         this.commandEncoderManager.addDeferredDestroy(oldBuffer)
