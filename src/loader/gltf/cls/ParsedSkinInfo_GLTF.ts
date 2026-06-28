@@ -19,6 +19,7 @@ class ParsedSkinInfo_GLTF {
     computeShader: GPUShaderModule;
     computePipeline: GPUComputePipeline;
     bindGroup: GPUBindGroup;
+    prevGlobalVertexSSBOBuffer: GPUBuffer;
 
     constructor() {
         this.joints = [];
@@ -306,6 +307,22 @@ class ParsedSkinInfo_GLTF {
             jointSlotIndices
         )
 
+        this.updateBindGroup(
+            redGPUContext,
+            device,
+            vertexBuffer,
+            weightBuffer,
+            jointBuffer,
+        )
+    }
+
+    updateBindGroup(
+        redGPUContext: RedGPUContext,
+        device: GPUDevice,
+        vertexBuffer: VertexBuffer,
+        weightBuffer: VertexBuffer,
+        jointBuffer: IndexBuffer,
+    ) {
         this.bindGroup = device.createBindGroup({
             layout: this.computePipeline.getBindGroupLayout(0),
             entries: [
@@ -319,6 +336,7 @@ class ParsedSkinInfo_GLTF {
                 {binding: 7, resource: {buffer: this.jointSlotIndicesBuffer}},
             ],
         });
+        this.prevGlobalVertexSSBOBuffer = redGPUContext.globalVertexSSBO.gpuBuffer
     }
 }
 

@@ -48,6 +48,14 @@ const processAnimationsAndSkinning = (
                     mesh
                 );
             }
+            if (skinInfo.prevGlobalVertexSSBOBuffer !== redGPUContext.globalVertexSSBO.gpuBuffer) {
+                skinInfo.updateBindGroup(redGPUContext,
+                    gpuDevice,
+                    mesh.geometry.vertexBuffer,
+                    mesh.animationInfo.weightBuffer,
+                    mesh.animationInfo.jointBuffer,
+                )
+            }
 
             // Compute Pass 설정 및 Dispatch (매 프레임 CPU단 루프 대입 및 GPU writeBuffer 전송 0회)
             passEncoder.setPipeline(skinInfo.computePipeline);

@@ -181,7 +181,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#antialiasingManager = new AntialiasingManager()
         // keepLog(ResourceManager.GLOBAL_FRAGMENT_PBR_STRUCT)
         // keepLog('ResourceManager.GLOBAL_VERTEX_STRUCT.size',ResourceManager.GLOBAL_VERTEX_STRUCT.size)
-        this.#globalVertexSSBO = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_VERTEX_STRUCT.size, 1000, "GLOBAL_VERTEX_BUFFER")
+        this.#globalVertexSSBO = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_VERTEX_STRUCT.size, 2000, "GLOBAL_VERTEX_BUFFER")
         this.#globalFragmentSSBO_PBR = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_FRAGMENT_STRUCT_PBR.size, 1024, "GLOBAL_FRAGMENT_BUFFER")
         this.#globalFragmentSSBO_BuiltIn = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_FRAGMENT_STRUCT_BUILT_IN.size, 1024, "GLOBAL_FRAGMENT_BUILT_IN_BUFFER")
         this.#initialize()

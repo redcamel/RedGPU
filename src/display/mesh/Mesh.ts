@@ -1296,8 +1296,8 @@ class Mesh extends MeshBase {
 
 
         // check distanceCulling
-        const needCheckInterleavedCulling = !interleavedCullingInfo.skipCullingCheck &&
-            (interleavedCullingInfo.forceCullingCheck || (this.#interleavedCullingID === interleavedCullingCheckFrameIndex))
+        const needCheckInterleavedCulling = dirtyTransformForChildren || (!interleavedCullingInfo.skipCullingCheck &&
+            (interleavedCullingInfo.forceCullingCheck || (this.#interleavedCullingID === interleavedCullingCheckFrameIndex)))
         let passFrustumCulling = this.passFrustumCulling
         let distanceSquared = 0
         const lodList = this.#LODManager.LODList;
