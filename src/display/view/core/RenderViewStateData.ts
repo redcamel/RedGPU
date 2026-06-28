@@ -123,7 +123,9 @@ class RenderViewStateData {
         forceCullingCheck: false,
         skipCullingCheck: false,
         interleavedCullingCheckFrameIndex: 0,
-        projectionScale: 0
+        projectionScale: 0,
+        prevViewportWidth: 0,
+        prevViewportHeight: 0
     };
     /**
      * [KO] 현재 프레임의 절대 시간 (초)
@@ -366,9 +368,13 @@ class RenderViewStateData {
             const ROTATE_THRESHOLD_FAST = 0.01 * 0.01; // [KO] 고속 회전 임계값 [EN] Fast rotation threshold
             const STILL_THRESHOLD = 0.00001; // [KO] 정지 상태 임계값 [EN] Still state threshold
 
-            if (moveDistanceSq > MOVE_THRESHOLD_FAST || rotateDistanceSq > ROTATE_THRESHOLD_FAST) {
-                // [KO] 카메라가 빠르게 움직이는 경우: 팝인 현상을 줄이기 위해 전체 객체의 컬링을 강제 매 프레임 재검사합니다.
-                // [EN] Camera moving fast: Force culling checks every frame for all meshes to prevent pop-in issues.
+            const cw = view.pixelRectObject.width;
+            const ch = view.pixelRectObject.height;
+            const isViewportResized = (info.prevViewportWidth !== 0 && (info.prevViewportWidth !== cw || info.prevViewportHeight !== ch));
+
+            if (isViewportResized || moveDistanceSq > MOVE_THRESHOLD_FAST || rotateDistanceSq > ROTATE_THRESHOLD_FAST) {
+                // [KO] 카메라가 빠르게 움직이거나 뷰포트가 리사이즈된 경우: 전체 객체의 컬링을 강제 매 프레임 재검사합니다.
+                // [EN] Camera moving fast or viewport resized: Force culling checks every frame for all meshes.
                 info.forceCullingCheck = true;
                 info.skipCullingCheck = false;
             } else if (moveDistanceSq < STILL_THRESHOLD && rotateDistanceSq < STILL_THRESHOLD) {
@@ -383,14 +389,16 @@ class RenderViewStateData {
                 info.skipCullingCheck = false;
             }
 
-            // [KO] 다음 프레임 비교를 위해 카메라 상태를 갱신합니다.
-            // [EN] Save current camera state for comparison in the next frame.
+            // [KO] 다음 프레임 비교를 위해 카메라 및 뷰포트 상태를 갱신합니다.
+            // [EN] Save current camera and viewport state for comparison in the next frame.
             info.prevCameraX = cx;
             info.prevCameraY = cy;
             info.prevCameraZ = cz;
             info.prevCameraRotX = rx;
             info.prevCameraRotY = ry;
             info.prevCameraRotZ = rz;
+            info.prevViewportWidth = cw;
+            info.prevViewportHeight = ch;
         } else {
             info.forceCullingCheck = false;
             info.skipCullingCheck = false;
