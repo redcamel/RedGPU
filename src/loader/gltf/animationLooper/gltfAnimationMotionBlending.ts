@@ -8,7 +8,10 @@ import {PlayAnimationInfo} from "../GLTFLoader";
  * [EN] Keyframe pose sampling helper (binary search and interpolation)
  */
 function sampleTrackPose(track: AniTrack_GLTF, time: number): Float32Array | null {
-    const {timeAnimationInfo, aniDataAnimationInfo, interpolation} = track;
+    const timeAnimationInfo = track.timeAnimationInfo;
+    const aniDataAnimationInfo = track.aniDataAnimationInfo;
+    const interpolation = track.interpolation;
+    
     const targetTimeDataList = timeAnimationInfo.dataList;
     const targetAnimationDataList = aniDataAnimationInfo.dataList;
     const targetTimeDataListLength = targetTimeDataList.length;
@@ -323,7 +326,8 @@ function sampleTrackPose(track: AniTrack_GLTF, time: number): Float32Array | nul
             return pose;
         }
         case 'weights': {
-            const morphLength = track.weightMeshes[0]?.animationInfo.morphInfo.morphInfoDataList.length || 0;
+            const weightMeshes = track.weightMeshes;
+            const morphLength = weightMeshes[0]?.animationInfo.morphInfo.morphInfoDataList.length || 0;
             const pose = new Float32Array(morphLength);
             if (morphLength > 0) {
                 for (let i = 0; i < morphLength; i++) {
@@ -390,12 +394,13 @@ function applySinglePose(
             mesh.scaleZ = pose[2];
             break;
         case 'weights': {
-            let animationTargetIndex = track.weightMeshes.length;
+            const weightMeshes = track.weightMeshes;
+            let animationTargetIndex = weightMeshes.length;
             while (animationTargetIndex--) {
                 track.renderWeight(
                     redGPUContext,
                     computePassEncoder,
-                    track.weightMeshes[animationTargetIndex],
+                    weightMeshes[animationTargetIndex],
                     track.lastInterpolationValue,
                     track.lastPrevIdx,
                     track.lastNextIdx
@@ -496,12 +501,13 @@ function applyBlendedPose(
         }
         case 'weights': {
             const selectedTrack = blendWeight < 0.5 ? trackFrom : trackTo;
-            let animationTargetIndex = selectedTrack.weightMeshes.length;
+            const weightMeshes = selectedTrack.weightMeshes;
+            let animationTargetIndex = weightMeshes.length;
             while (animationTargetIndex--) {
                 selectedTrack.renderWeight(
                     redGPUContext,
                     computePassEncoder,
-                    selectedTrack.weightMeshes[animationTargetIndex],
+                    weightMeshes[animationTargetIndex],
                     selectedTrack.lastInterpolationValue,
                     selectedTrack.lastPrevIdx,
                     selectedTrack.lastNextIdx
@@ -527,25 +533,32 @@ export default function gltfAnimationMotionBlending(
     const blendWeight = targetPlayAnimationInfo.blendWeight ?? 0.5;
 
     const maxTimeFrom = fromClip['maxTime'];
-    const timeFrom = ((timestamp - targetPlayAnimationInfo.startTimeFrom!) % (maxTimeFrom * 1000)) / 1000;
+    const startTimeFrom = targetPlayAnimationInfo.startTimeFrom!;
+    const timeFrom = ((timestamp - startTimeFrom) % (maxTimeFrom * 1000)) / 1000;
 
     const maxTimeTo = toClip['maxTime'];
-    const timeTo = ((timestamp - targetPlayAnimationInfo.startTimeTo!) % (maxTimeTo * 1000)) / 1000;
+    const startTimeTo = targetPlayAnimationInfo.startTimeTo!;
+    const timeTo = ((timestamp - startTimeTo) % (maxTimeTo * 1000)) / 1000;
 
     // fromClip을 주축으로 돌며 동일 조인트 트랙 매칭 보간
     for (let i = 0; i < fromClip.length; i++) {
         const trackFrom = fromClip[i];
-        const trackTo = toClip.find(t => t.animationTargetMesh === trackFrom.animationTargetMesh && t.key === trackFrom.key);
+
+        // 룩업 캐싱
+        const mesh = trackFrom.animationTargetMesh;
+        const key = trackFrom.key;
+
+        const trackTo = toClip.find(t => t.animationTargetMesh === mesh && t.key === key);
 
         if (trackTo) {
             const poseFrom = sampleTrackPose(trackFrom, timeFrom);
             const poseTo = sampleTrackPose(trackTo, timeTo);
 
             if (poseFrom && poseTo) {
-                trackFrom.animationTargetMesh.dirtyTransform = true;
+                mesh.dirtyTransform = true;
                 applyBlendedPose(
-                    trackFrom.animationTargetMesh,
-                    trackFrom.key,
+                    mesh,
+                    key,
                     poseFrom,
                     poseTo,
                     blendWeight,
@@ -558,10 +571,10 @@ export default function gltfAnimationMotionBlending(
         } else {
             const poseFrom = sampleTrackPose(trackFrom, timeFrom);
             if (poseFrom) {
-                trackFrom.animationTargetMesh.dirtyTransform = true;
+                mesh.dirtyTransform = true;
                 applySinglePose(
-                    trackFrom.animationTargetMesh,
-                    trackFrom.key,
+                    mesh,
+                    key,
                     poseFrom,
                     redGPUContext,
                     computePassEncoder,
@@ -574,15 +587,20 @@ export default function gltfAnimationMotionBlending(
     // toClip에만 있고 fromClip에는 없는 독자 조인트 트랙 처리
     for (let j = 0; j < toClip.length; j++) {
         const trackTo = toClip[j];
-        const trackFrom = fromClip.find(t => t.animationTargetMesh === trackTo.animationTargetMesh && t.key === trackTo.key);
+
+        // 룩업 캐싱
+        const mesh = trackTo.animationTargetMesh;
+        const key = trackTo.key;
+
+        const trackFrom = fromClip.find(t => t.animationTargetMesh === mesh && t.key === key);
 
         if (!trackFrom) {
             const poseTo = sampleTrackPose(trackTo, timeTo);
             if (poseTo) {
-                trackTo.animationTargetMesh.dirtyTransform = true;
+                mesh.dirtyTransform = true;
                 applySinglePose(
-                    trackTo.animationTargetMesh,
-                    trackTo.key,
+                    mesh,
+                    key,
                     poseTo,
                     redGPUContext,
                     computePassEncoder,

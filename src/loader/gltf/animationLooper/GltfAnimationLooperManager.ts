@@ -30,12 +30,15 @@ class GltfAnimationLooperManager {
         while (playAnimationInfoIDX--) {
             targetPlayAnimationInfo = playAnimationInfoList[playAnimationInfoIDX];
 
-            // 상태 머신 업데이트 위임
-            if (targetPlayAnimationInfo.animStateMachine) {
-                targetPlayAnimationInfo.animStateMachine.update(deltaTime, timestamp, targetPlayAnimationInfo);
+            // 룩업 최소화: 상태 머신 로컬 캐싱
+            const animStateMachine = targetPlayAnimationInfo.animStateMachine;
+            if (animStateMachine) {
+                animStateMachine.update(deltaTime, timestamp, targetPlayAnimationInfo);
             }
 
-            if (targetPlayAnimationInfo.isBlending) {
+            // 룩업 최소화: 블렌딩 여부 로컬 캐싱
+            const isBlending = targetPlayAnimationInfo.isBlending;
+            if (isBlending) {
                 // 블렌딩 재생 모드 (외부 파일 모듈 위임)
                 gltfAnimationMotionBlending(redGPUContext, timestamp, computePassEncoder, targetPlayAnimationInfo);
             } else {
@@ -44,7 +47,8 @@ class GltfAnimationLooperManager {
                 // ==========================================
                 const fromClip = targetPlayAnimationInfo.targetGLTFParsedSingleClip;
                 const maxTimeFrom = fromClip['maxTime'];
-                const timeFrom = ((timestamp - targetPlayAnimationInfo.startTime) % (maxTimeFrom * 1000)) / 1000;
+                const startTime = targetPlayAnimationInfo.startTime;
+                const timeFrom = ((timestamp - startTime) % (maxTimeFrom * 1000)) / 1000;
                 let targetAniTrackIDX = fromClip.length;
 
                 while (targetAniTrackIDX--) {
@@ -53,7 +57,9 @@ class GltfAnimationLooperManager {
 
                     // [Inline sampleTrackPose for trackFrom with timeFrom]
                     {
-                        const {timeAnimationInfo, aniDataAnimationInfo, interpolation} = trackFrom;
+                        const timeAnimationInfo = trackFrom.timeAnimationInfo;
+                        const aniDataAnimationInfo = trackFrom.aniDataAnimationInfo;
+                        const interpolation = trackFrom.interpolation;
                         const targetTimeDataList = timeAnimationInfo.dataList;
                         const targetAnimationDataList = aniDataAnimationInfo.dataList;
                         const targetTimeDataListLength = targetTimeDataList.length;
@@ -383,12 +389,15 @@ class GltfAnimationLooperManager {
                     }
 
                     if (poseFrom) {
-                        trackFrom.animationTargetMesh.dirtyTransform = true;
+                        // 룩업 최소화: 뼈대 타깃 메쉬 변수 캐싱
+                        const mesh = trackFrom.animationTargetMesh;
+                        mesh.dirtyTransform = true;
+
                         switch (trackFrom.key) {
                             case 'translation': {
-                                trackFrom.animationTargetMesh.x = poseFrom[0];
-                                trackFrom.animationTargetMesh.y = poseFrom[1];
-                                trackFrom.animationTargetMesh.z = poseFrom[2];
+                                mesh.x = poseFrom[0];
+                                mesh.y = poseFrom[1];
+                                mesh.z = poseFrom[2];
                                 break;
                             }
                             case 'rotation': {
@@ -416,15 +425,15 @@ class GltfAnimationLooperManager {
                                     rotZ = 0;
                                 }
 
-                                trackFrom.animationTargetMesh.rotationX = rotX * PI_180;
-                                trackFrom.animationTargetMesh.rotationY = rotY * PI_180;
-                                trackFrom.animationTargetMesh.rotationZ = rotZ * PI_180;
+                                mesh.rotationX = rotX * PI_180;
+                                mesh.rotationY = rotY * PI_180;
+                                mesh.rotationZ = rotZ * PI_180;
                                 break;
                             }
                             case 'scale': {
-                                trackFrom.animationTargetMesh.scaleX = poseFrom[0];
-                                trackFrom.animationTargetMesh.scaleY = poseFrom[1];
-                                trackFrom.animationTargetMesh.scaleZ = poseFrom[2];
+                                mesh.scaleX = poseFrom[0];
+                                mesh.scaleY = poseFrom[1];
+                                mesh.scaleZ = poseFrom[2];
                                 break;
                             }
                             case 'weights': {
