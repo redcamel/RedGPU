@@ -107,14 +107,9 @@ class ParsedSkinInfo_GLTF {
 			  let localIdx = local_id.x;
 			  
 			  if (localIdx < jointCount) {
-			    let searchJointIndexTable = uniforms.searchJointIndexTable;
-			    let localJointIdx = searchJointIndexTable[localIdx].x;
-			    
-			    let jointSlotIndices = uniforms.jointSlotIndices;
-			    let jointModelMatrix = globalVertexSSBO[jointSlotIndices[localJointIdx >> 2u][localJointIdx & 3u]].matrixList.modelMatrix;
-			    
-			    let inverseBindMatrices = uniforms.inverseBindMatrices;
-			    let invBind = inverseBindMatrices[localIdx];
+			    let localJointIdx = uniforms.searchJointIndexTable[localIdx].x;
+			    let jointModelMatrix = globalVertexSSBO[uniforms.jointSlotIndices[localJointIdx >> 2u][localJointIdx & 3u]].matrixList.modelMatrix;
+			    let invBind = uniforms.inverseBindMatrices[localIdx];
 			    
 			    // 합성 행렬 계산하여 공유 메모리에 보존
 			    sharedSkinMatrices[localIdx] = jointModelMatrix * invBind;

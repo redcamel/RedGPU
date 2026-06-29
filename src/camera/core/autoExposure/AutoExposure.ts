@@ -453,7 +453,7 @@ class AutoExposure extends RedGPUObject {
             pass1.setPipeline(pipeline);
             pass1.setBindGroup(0, swapBufferIndex ? cachedBG0.swap1 : cachedBG0.swap0);
             pass1.setBindGroup(1, this.#downsampleBindGroup1);
-            pass1.dispatchWorkgroups(Math.ceil(width / 16), Math.ceil(height / 16), 1);
+            pass1.dispatchWorkgroups(Math.ceil(width / 32), Math.ceil(height / 32), 1);
         });
 
         // Pass 2: Average Histogram and Adapt

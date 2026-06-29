@@ -40,48 +40,49 @@ fn main(
     }
     workgroupBarrier();
 
-    if (f32(global_id.x) < uniforms.width && f32(global_id.y) < uniforms.height) {
-        // [KO] 성능을 위해 2x2 간격으로 샘플링 [EN] Sample at 2x2 intervals for performance
-        if (global_id.x % 2u == 0u && global_id.y % 2u == 0u) {
-            let color = textureLoad(sourceTexture, vec2<i32>(i32(global_id.x), i32(global_id.y)), 0).rgb;
+    let coords = global_id.xy * 2u;
+    if (coords.x < u32(uniforms.width) && coords.y < u32(uniforms.height)) {
+        // [KO] 깊이 텍스처를 먼저 조회하여 배경(depth >= 1.0)인 경우 색상 텍스처 페칭을 생략 (Early Exit)
+        // [EN] Fetch depth texture first and skip color texture fetch for background pixels (Early Exit)
+        let depth = textureLoad(depthTexture, vec2<i32>(coords), 0);
+        
+        if (depth < 1.0) {
+            // [KO] 단 한 번만 색상 텍스처를 페칭하여 알파와 RGB 채널을 모두 검사
+            // [EN] Fetch the color texture only once to check both alpha and RGB channels
+            let texel = textureLoad(sourceTexture, vec2<i32>(coords), 0);
             
-            // [KO] 색채 에너지를 보존하기 위해 단순 휘도(Luminance) 대신 각 채널의 최대값(Max Component)을 사용하여 밝기를 판단합니다.
-            // [EN] Use the maximum color component (Max Component) instead of simple luminance to judge brightness and preserve color energy.
-            let brightness = max(color.r, max(color.g, color.b));
-            let lum = brightness / max(uniforms.currentPreExposure, 0.0001);
-
-            // [KO] 배경 제외: 휘도가 매우 낮거나, Alpha가 0이거나, Depth가 1.0(배경)인 픽셀은 제외합니다.
-            // [EN] Exclude background: exclude pixels with very low luminance, alpha 0, or depth 1.0 (background).
-            let texel = textureLoad(sourceTexture, vec2<i32>(i32(global_id.x), i32(global_id.y)), 0);
-            let depth = textureLoad(depthTexture, vec2<i32>(i32(global_id.x), i32(global_id.y)), 0);
-            
-            if (lum > 0.0001 && texel.a > 0.0 && depth < 1.0) {
-//            if (lum > 0.0001 && texel.a > 0.0) {
-                // [KO] 휘도를 EV100으로 변환: EV100 = log2(L * 100 / K)
-                // [EN] Convert luminance to EV100: EV100 = log2(L * 100 / K)
-                let ev100 = log2(lum * 100.0 / uniforms.calibrationConstant);
+            if (texel.a > 0.0) {
+                let color = texel.rgb;
+                let brightness = max(color.r, max(color.g, color.b));
+                let lum = brightness / max(uniforms.currentPreExposure, 0.0001);
                 
-                let normalizedEV100 = clamp((ev100 - uniforms.minEV100) * uniforms.invEv100Range, 0.0, 1.0);
-                let binIndex = u32(normalizedEV100 * 255.0);
+                if (lum > 0.0001) {
+                    // [KO] 휘도를 EV100으로 변환: EV100 = log2(L * 100 / K)
+                    // [EN] Convert luminance to EV100: EV100 = log2(L * 100 / K)
+                    let ev100 = log2(lum * 100.0 / uniforms.calibrationConstant);
+                    
+                    let normalizedEV100 = clamp((ev100 - uniforms.minEV100) * uniforms.invEv100Range, 0.0, 1.0);
+                    let binIndex = u32(normalizedEV100 * 255.0);
 
-                // [KO] 측광 가중치 계산 [EN] Calculate metering weight
-                var weight = 1.0;
-                let uv = vec2<f32>(f32(global_id.x) / uniforms.width, f32(global_id.y) / uniforms.height);
-                let dist = distance(uv, vec2<f32>(0.5, 0.5));
+                    // [KO] 측광 가중치 계산 [EN] Calculate metering weight
+                    var weight = 1.0;
+                    let uv = vec2<f32>(f32(coords.x) / uniforms.width, f32(coords.y) / uniforms.height);
+                    let dist = distance(uv, vec2<f32>(0.5, 0.5));
 
-                if (uniforms.meteringMode == 1.0) {
-                    // [KO] 중앙 중점 측광 (Center-weighted) [EN] Center-weighted
-                    weight = clamp(1.0 - dist * 1.0, 0.0, 1.0);
-                    weight = weight * weight; // [KO] 부드러운 감쇄 [EN] Smooth falloff
-                } else if (uniforms.meteringMode == 2.0) {
-                    // [KO] 스포트 측광 (Spot) [EN] Spot
-                    weight = clamp(1.0 - dist * 4.0, 0.0, 1.0);
-                    weight = weight * weight * weight * weight; // [KO] 중앙 집중 [EN] Highly concentrated
+                    if (uniforms.meteringMode == 1.0) {
+                        // [KO] 중앙 중점 측광 (Center-weighted) [EN] Center-weighted
+                        weight = clamp(1.0 - dist * 1.0, 0.0, 1.0);
+                        weight = weight * weight; // [KO] 부드러운 감쇄 [EN] Smooth falloff
+                    } else if (uniforms.meteringMode == 2.0) {
+                        // [KO] 스포트 측광 (Spot) [EN] Spot
+                        weight = clamp(1.0 - dist * 4.0, 0.0, 1.0);
+                        weight = weight * weight * weight * weight; // [KO] 중앙 집중 [EN] Highly concentrated
+                    }
+
+                    // [KO] 가중치를 반영하여 로컬 히스토그램에 누적 (0~100 스케일링)
+                    // [EN] Accumulate into local histogram with weight (scaled 0-100)
+                    atomicAdd(&localHistogram[binIndex], u32(weight * 100.0));
                 }
-
-                // [KO] 가중치를 반영하여 로컬 히스토그램에 누적 (0~100 스케일링)
-                // [EN] Accumulate into local histogram with weight (scaled 0-100)
-                atomicAdd(&localHistogram[binIndex], u32(weight * 100.0));
             }
         }
     }
