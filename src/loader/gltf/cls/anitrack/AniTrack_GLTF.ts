@@ -11,6 +11,8 @@ type MeshResources = {
 
 class AniTrack_GLTF {
     lastPrevIdx: number
+    lastNextIdx: number
+    lastInterpolationValue: number
     key;
     timeAnimationInfo: AnimationData_GLTF;
     aniDataAnimationInfo: AnimationData_GLTF;

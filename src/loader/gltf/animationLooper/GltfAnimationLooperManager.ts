@@ -1,14 +1,14 @@
 import {glMatrix} from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
-import AniTrack_GLTF from "../cls/anitrack/AniTrack_GLTF";
 import {PlayAnimationInfo} from "../GLTFLoader";
-import {GLTFParsedSingleClip} from "../parsers/animation/parseAnimations";
+import gltfAnimationMotionBlending from "./gltfAnimationMotionBlending";
 
 class GltfAnimationLooperManager {
     #targetFps: number = 60;
     #frameTime: number = 1000 / this.#targetFps; // 16.67ms
     #lastUpdateTime: number = 0;
     #frameCount: number = 0;
+
     render = (
         redGPUContext: RedGPUContext,
         timestamp: number,
@@ -22,238 +22,153 @@ class GltfAnimationLooperManager {
         }
         this.#lastUpdateTime = now;
         this.#frameCount++;
-        // 사전 계산된 상수들
-        const EPSILON = glMatrix.EPSILON;
+
         const PI_180 = 180 / Math.PI;
-        let tempX, tempY, tempZ, tempW, tempLen, tempInvLen;
-        let prevX, prevY, prevZ, prevW, nextX, nextY, nextZ, nextW;
-        let cosom, omega, sinom, scale0, scale1;
-        let x2, y2, z2, xx, xy, xz, yy, yz, zz, wx, wy, wz;
-        let m11, m12, m13, m22, m23, m32, m33;
-        let prevIdx, nextIdx;
-        let nX, nY, nZ, pX, pY, pZ;
-        let nXOut, nYOut, nZOut, pXOut, pYOut, pZOut;
-        let startOut, endIn;
-        let currentTime: number, previousTimeFrame: number, nextTimeFrame: number;
         let playAnimationInfoIDX: number = playAnimationInfoList.length;
-        let interpolationValue: number;
-        let targetAniTrackIDX: number;
-        let targetClip: GLTFParsedSingleClip;
         let targetPlayAnimationInfo: PlayAnimationInfo;
-        let currentAniTrack: AniTrack_GLTF;
-        let currentAniTrackCacheTable;
-        //
-        let nextTimeDataIDX: number, previousTimeDataIDX: number;
-        let targetTimeDataList: Float32Array;
-        let targetAnimationDataList: Float32Array;
-        let targetTimeDataListLength: number;
+
         while (playAnimationInfoIDX--) {
             targetPlayAnimationInfo = playAnimationInfoList[playAnimationInfoIDX];
-            targetClip = targetPlayAnimationInfo.targetGLTFParsedSingleClip;
-            targetAniTrackIDX = targetClip.length;
-            const maxTime = targetClip['maxTime'];
-            while (targetAniTrackIDX--) {
-                currentAniTrack = targetClip[targetAniTrackIDX];
-                currentAniTrackCacheTable = currentAniTrack.cacheTable;
-                const {animationTargetMesh, timeAnimationInfo, aniDataAnimationInfo, weightMeshes} = currentAniTrack;
-                animationTargetMesh.dirtyTransform = true
-                currentTime = ((timestamp - targetPlayAnimationInfo.startTime) % (maxTime * 1000)) / 1000;
-                /////////////////////////////////////////////////////////////////////////////////
-                // 이진 탐색으로 타임프레임 찾기 (인라인)
-                targetTimeDataList = timeAnimationInfo.dataList;
-                targetAnimationDataList = aniDataAnimationInfo.dataList;
-                targetTimeDataListLength = targetTimeDataList.length;
-                const lastHint = currentAniTrack.lastPrevIdx || 0;
-                // 이진 탐색 로직 직접 삽입
-                if (lastHint < targetTimeDataListLength - 1) {
-                    if (targetTimeDataList[lastHint] <= currentTime && currentTime < targetTimeDataList[lastHint + 1]) {
-                        previousTimeDataIDX = lastHint;
-                        nextTimeDataIDX = lastHint + 1;
-                    } else if (lastHint + 1 < targetTimeDataListLength - 1 &&
-                        targetTimeDataList[lastHint + 1] <= currentTime &&
-                        currentTime < targetTimeDataList[lastHint + 2]) {
-                        previousTimeDataIDX = lastHint + 1;
-                        nextTimeDataIDX = lastHint + 2;
-                    } else {
-                        // 엣지 케이스와 이진 탐색
-                        if (currentTime <= targetTimeDataList[0]) {
-                            previousTimeDataIDX = targetTimeDataListLength - 1;
-                            nextTimeDataIDX = 0;
-                        } else if (currentTime >= targetTimeDataList[targetTimeDataListLength - 1]) {
-                            previousTimeDataIDX = targetTimeDataListLength - 1;
-                            nextTimeDataIDX = 0;
+
+            // 상태 머신 업데이트 위임
+            if (targetPlayAnimationInfo.animStateMachine) {
+                targetPlayAnimationInfo.animStateMachine.update(deltaTime, timestamp, targetPlayAnimationInfo);
+            }
+
+            if (targetPlayAnimationInfo.isBlending) {
+                // 블렌딩 재생 모드 (외부 파일 모듈 위임)
+                gltfAnimationMotionBlending(redGPUContext, timestamp, computePassEncoder, targetPlayAnimationInfo);
+            } else {
+                // ==========================================
+                // 1. 단일 재생 모드 (씬 대다수의 액티브 애니메이션 오브젝트 - 초고속 인라인 유지)
+                // ==========================================
+                const fromClip = targetPlayAnimationInfo.targetGLTFParsedSingleClip;
+                const maxTimeFrom = fromClip['maxTime'];
+                const timeFrom = ((timestamp - targetPlayAnimationInfo.startTime) % (maxTimeFrom * 1000)) / 1000;
+                let targetAniTrackIDX = fromClip.length;
+
+                while (targetAniTrackIDX--) {
+                    const trackFrom = fromClip[targetAniTrackIDX];
+                    let poseFrom: Float32Array | null = null;
+
+                    // [Inline sampleTrackPose for trackFrom with timeFrom]
+                    {
+                        const {timeAnimationInfo, aniDataAnimationInfo, interpolation} = trackFrom;
+                        const targetTimeDataList = timeAnimationInfo.dataList;
+                        const targetAnimationDataList = aniDataAnimationInfo.dataList;
+                        const targetTimeDataListLength = targetTimeDataList.length;
+
+                        let previousTimeDataIDX: number;
+                        let nextTimeDataIDX: number;
+                        const lastHint = trackFrom.lastPrevIdx || 0;
+
+                        if (lastHint < targetTimeDataListLength - 1) {
+                            if (targetTimeDataList[lastHint] <= timeFrom && timeFrom < targetTimeDataList[lastHint + 1]) {
+                                previousTimeDataIDX = lastHint;
+                                nextTimeDataIDX = lastHint + 1;
+                            } else if (lastHint + 1 < targetTimeDataListLength - 1 &&
+                                targetTimeDataList[lastHint + 1] <= timeFrom &&
+                                timeFrom < targetTimeDataList[lastHint + 2]) {
+                                previousTimeDataIDX = lastHint + 1;
+                                nextTimeDataIDX = lastHint + 2;
+                            } else {
+                                if (timeFrom <= targetTimeDataList[0]) {
+                                    previousTimeDataIDX = targetTimeDataListLength - 1;
+                                    nextTimeDataIDX = 0;
+                                } else if (timeFrom >= targetTimeDataList[targetTimeDataListLength - 1]) {
+                                    previousTimeDataIDX = targetTimeDataListLength - 1;
+                                    nextTimeDataIDX = 0;
+                                } else {
+                                    let left = 0;
+                                    let right = targetTimeDataListLength - 1;
+                                    while (left < right - 1) {
+                                        const mid = (left + right) >> 1;
+                                        if (targetTimeDataList[mid] <= timeFrom) {
+                                            left = mid;
+                                        } else {
+                                            right = mid;
+                                        }
+                                    }
+                                    previousTimeDataIDX = left;
+                                    nextTimeDataIDX = right;
+                                }
+                            }
                         } else {
-                            let left = 0;
-                            let right = targetTimeDataListLength - 1;
-                            while (left < right - 1) {
-                                const mid = (left + right) >> 1;
-                                if (targetTimeDataList[mid] <= currentTime) {
-                                    left = mid;
-                                } else {
-                                    right = mid;
-                                }
-                            }
-                            previousTimeDataIDX = left;
-                            nextTimeDataIDX = right;
-                        }
-                    }
-                } else {
-                    // lastHint가 범위를 벗어났을 때의 처리
-                    if (currentTime <= targetTimeDataList[0]) {
-                        previousTimeDataIDX = targetTimeDataListLength - 1;
-                        nextTimeDataIDX = 0;
-                    } else if (currentTime >= targetTimeDataList[targetTimeDataListLength - 1]) {
-                        previousTimeDataIDX = targetTimeDataListLength - 1;
-                        nextTimeDataIDX = 0;
-                    } else {
-                        let left = 0;
-                        let right = targetTimeDataListLength - 1;
-                        while (left < right - 1) {
-                            const mid = (left + right) >> 1;
-                            if (targetTimeDataList[mid] <= currentTime) {
-                                left = mid;
+                            if (timeFrom <= targetTimeDataList[0]) {
+                                previousTimeDataIDX = targetTimeDataListLength - 1;
+                                nextTimeDataIDX = 0;
+                            } else if (timeFrom >= targetTimeDataList[targetTimeDataListLength - 1]) {
+                                previousTimeDataIDX = targetTimeDataListLength - 1;
+                                nextTimeDataIDX = 0;
                             } else {
-                                right = mid;
+                                let left = 0;
+                                let right = targetTimeDataListLength - 1;
+                                while (left < right - 1) {
+                                    const mid = (left + right) >> 1;
+                                    if (targetTimeDataList[mid] <= timeFrom) {
+                                        left = mid;
+                                    } else {
+                                        right = mid;
+                                    }
+                                }
+                                previousTimeDataIDX = left;
+                                nextTimeDataIDX = right;
                             }
                         }
-                        previousTimeDataIDX = left;
-                        nextTimeDataIDX = right;
-                    }
-                }
-                currentAniTrack.lastPrevIdx = previousTimeDataIDX;
-                previousTimeFrame = targetTimeDataList[previousTimeDataIDX];
-                nextTimeFrame = targetTimeDataList[nextTimeDataIDX];
-                /////////////////////////////////////////////////////////////////////////////////
-                let p: number;
-                let pp: number;
-                let ppp: number;
-                let s0: number, s1: number, s2: number, s3: number;
-                const interpolation = currentAniTrack.interpolation;
-                const isCUBICSPLINE = interpolation == 'CUBICSPLINE';
-                if (isCUBICSPLINE) {
-                    // fixNaN을 인라인으로 변경
-                    const timeDiff = nextTimeFrame - previousTimeFrame;
-                    interpolationValue = timeDiff === timeDiff ? timeDiff : 0; // fixNaN 인라인
-                    const timeRatio = (currentTime - previousTimeFrame) / interpolationValue;
-                    p = timeRatio === timeRatio ? timeRatio : 0; // fixNaN 인라인
-                    pp = p * p;
-                    ppp = pp * p;
-                    s2 = -2 * ppp + 3 * pp;
-                    s3 = ppp - pp;
-                    s0 = 1 - s2;
-                    s1 = s3 - pp + p;
-                } else {
-                    if (interpolation == 'STEP') {
-                        interpolationValue = 0;
-                    } else {
-                        const timeRatio = (currentTime - previousTimeFrame) / (nextTimeFrame - previousTimeFrame);
-                        interpolationValue = timeRatio === timeRatio ? timeRatio : 0; // fixNaN 인라인
-                    }
-                }
-                switch (currentAniTrack.key) {
-                    case 'rotation': {
-                        if (previousTimeDataIDX !== targetTimeDataListLength - 1) {
-                            if (interpolation === 'CUBICSPLINE') {
-                                prevIdx = previousTimeDataIDX * 12;
-                                nextIdx = nextTimeDataIDX * 12;
-                                // 이전 키프레임 quaternion 정규화
-                                tempX = targetAnimationDataList[prevIdx + 4];
-                                tempY = targetAnimationDataList[prevIdx + 5];
-                                tempZ = targetAnimationDataList[prevIdx + 6];
-                                tempW = targetAnimationDataList[prevIdx + 7];
-                                tempLen = tempX * tempX + tempY * tempY + tempZ * tempZ + tempW * tempW;
-                                if (tempLen > 0) {
-                                    tempInvLen = 1 / Math.sqrt(tempLen);
-                                    prevX = tempX * tempInvLen;
-                                    prevY = tempY * tempInvLen;
-                                    prevZ = tempZ * tempInvLen;
-                                    prevW = tempW * tempInvLen;
-                                } else {
-                                    prevX = prevY = prevZ = 0;
-                                    prevW = 1;
-                                }
-                                // 이전 아웃 탄젠트 정규화
-                                tempX = targetAnimationDataList[prevIdx + 8];
-                                tempY = targetAnimationDataList[prevIdx + 9];
-                                tempZ = targetAnimationDataList[prevIdx + 10];
-                                tempW = targetAnimationDataList[prevIdx + 11];
-                                tempLen = tempX * tempX + tempY * tempY + tempZ * tempZ + tempW * tempW;
-                                let prevOutX, prevOutY, prevOutZ, prevOutW;
-                                if (tempLen > 0) {
-                                    tempInvLen = 1 / Math.sqrt(tempLen);
-                                    prevOutX = tempX * tempInvLen;
-                                    prevOutY = tempY * tempInvLen;
-                                    prevOutZ = tempZ * tempInvLen;
-                                    prevOutW = tempW * tempInvLen;
-                                } else {
-                                    prevOutX = prevOutY = prevOutZ = 0;
-                                    prevOutW = 1;
-                                }
-                                // 다음 인 탄젠트 정규화
-                                tempX = targetAnimationDataList[nextIdx];
-                                tempY = targetAnimationDataList[nextIdx + 1];
-                                tempZ = targetAnimationDataList[nextIdx + 2];
-                                tempW = targetAnimationDataList[nextIdx + 3];
-                                tempLen = tempX * tempX + tempY * tempY + tempZ * tempZ + tempW * tempW;
-                                let nextInX, nextInY, nextInZ, nextInW;
-                                if (tempLen > 0) {
-                                    tempInvLen = 1 / Math.sqrt(tempLen);
-                                    nextInX = tempX * tempInvLen;
-                                    nextInY = tempY * tempInvLen;
-                                    nextInZ = tempZ * tempInvLen;
-                                    nextInW = tempW * tempInvLen;
-                                } else {
-                                    nextInX = nextInY = nextInZ = 0;
-                                    nextInW = 1;
-                                }
-                                // 다음 키프레임 quaternion 정규화
-                                tempX = targetAnimationDataList[nextIdx + 4];
-                                tempY = targetAnimationDataList[nextIdx + 5];
-                                tempZ = targetAnimationDataList[nextIdx + 6];
-                                tempW = targetAnimationDataList[nextIdx + 7];
-                                tempLen = tempX * tempX + tempY * tempY + tempZ * tempZ + tempW * tempW;
-                                if (tempLen > 0) {
-                                    tempInvLen = 1 / Math.sqrt(tempLen);
-                                    nextX = tempX * tempInvLen;
-                                    nextY = tempY * tempInvLen;
-                                    nextZ = tempZ * tempInvLen;
-                                    nextW = tempW * tempInvLen;
-                                } else {
-                                    nextX = nextY = nextZ = 0;
-                                    nextW = 1;
-                                }
-                                // Cubic spline 보간
-                                tempX = s0 * prevX + s1 * prevOutX * interpolationValue + s2 * nextX + s3 * nextInX * interpolationValue;
-                                tempY = s0 * prevY + s1 * prevOutY * interpolationValue + s2 * nextY + s3 * nextInY * interpolationValue;
-                                tempZ = s0 * prevZ + s1 * prevOutZ * interpolationValue + s2 * nextZ + s3 * nextInZ * interpolationValue;
-                                tempW = s0 * prevW + s1 * prevOutW * interpolationValue + s2 * nextW + s3 * nextInW * interpolationValue;
+
+                        trackFrom.lastPrevIdx = previousTimeDataIDX;
+                        trackFrom.lastNextIdx = nextTimeDataIDX;
+                        const previousTimeFrame = targetTimeDataList[previousTimeDataIDX];
+                        const nextTimeFrame = targetTimeDataList[nextTimeDataIDX];
+
+                        let interpolationValue: number;
+                        let p: number, pp: number, ppp: number;
+                        let s0: number, s1: number, s2: number, s3: number;
+                        const isCUBICSPLINE = interpolation === 'CUBICSPLINE';
+
+                        if (isCUBICSPLINE) {
+                            const timeDiff = nextTimeFrame - previousTimeFrame;
+                            interpolationValue = timeDiff === timeDiff ? timeDiff : 0;
+                            const timeRatio = (timeFrom - previousTimeFrame) / interpolationValue;
+                            p = timeRatio === timeRatio ? timeRatio : 0;
+                            pp = p * p;
+                            ppp = pp * p;
+                            s2 = -2 * ppp + 3 * pp;
+                            s3 = ppp - pp;
+                            s0 = 1 - s2;
+                            s1 = s3 - pp + p;
+                        } else {
+                            if (interpolation === 'STEP') {
+                                interpolationValue = 0;
                             } else {
-                                // Linear/Step 보간
-                                prevIdx = previousTimeDataIDX << 2; // * 4를 비트 시프트로
-                                nextIdx = nextTimeDataIDX << 2;
-                                // 숫자 캐시 키 (문자열보다 훨씬 빠름)
-                                const numericCacheKey = (prevIdx << 16) | nextIdx;
-                                let cached = currentAniTrackCacheTable[numericCacheKey];
-                                if (cached) {
-                                    // 캐시에서 직접 읽기
-                                    cosom = cached[0];
-                                    prevX = cached[1];
-                                    prevY = cached[2];
-                                    prevZ = cached[3];
-                                    prevW = cached[4];
-                                    nextX = cached[5];
-                                    nextY = cached[6];
-                                    nextZ = cached[7];
-                                    nextW = cached[8];
-                                } else {
-                                    // 이전 키프레임 quaternion 정규화
-                                    tempX = targetAnimationDataList[prevIdx];
-                                    tempY = targetAnimationDataList[prevIdx + 1];
-                                    tempZ = targetAnimationDataList[prevIdx + 2];
-                                    tempW = targetAnimationDataList[prevIdx + 3];
-                                    tempLen = tempX * tempX + tempY * tempY + tempZ * tempZ + tempW * tempW;
+                                const timeRatio = (timeFrom - previousTimeFrame) / (nextTimeFrame - previousTimeFrame);
+                                interpolationValue = timeRatio === timeRatio ? timeRatio : 0;
+                            }
+                        }
+
+                        trackFrom.lastInterpolationValue = interpolationValue;
+                        let prevIdx: number, nextIdx: number;
+
+                        switch (trackFrom.key) {
+                            case 'rotation': {
+                                poseFrom = new Float32Array(4);
+                                if (previousTimeDataIDX === targetTimeDataListLength - 1) {
+                                    const idx = previousTimeDataIDX << 2;
+                                    poseFrom[0] = targetAnimationDataList[idx];
+                                    poseFrom[1] = targetAnimationDataList[idx + 1];
+                                    poseFrom[2] = targetAnimationDataList[idx + 2];
+                                    poseFrom[3] = targetAnimationDataList[idx + 3];
+                                } else if (isCUBICSPLINE) {
+                                    prevIdx = previousTimeDataIDX * 12;
+                                    nextIdx = nextTimeDataIDX * 12;
+                                    let tempX = targetAnimationDataList[prevIdx + 4];
+                                    let tempY = targetAnimationDataList[prevIdx + 5];
+                                    let tempZ = targetAnimationDataList[prevIdx + 6];
+                                    let tempW = targetAnimationDataList[prevIdx + 7];
+                                    let tempLen = tempX * tempX + tempY * tempY + tempZ * tempZ + tempW * tempW;
+                                    let prevX, prevY, prevZ, prevW;
                                     if (tempLen > 0) {
-                                        tempInvLen = 1 / Math.sqrt(tempLen);
+                                        let tempInvLen = 1 / Math.sqrt(tempLen);
                                         prevX = tempX * tempInvLen;
                                         prevY = tempY * tempInvLen;
                                         prevZ = tempZ * tempInvLen;
@@ -262,14 +177,49 @@ class GltfAnimationLooperManager {
                                         prevX = prevY = prevZ = 0;
                                         prevW = 1;
                                     }
-                                    // 다음 키프레임 quaternion 정규화
+
+                                    tempX = targetAnimationDataList[prevIdx + 8];
+                                    tempY = targetAnimationDataList[prevIdx + 9];
+                                    tempZ = targetAnimationDataList[prevIdx + 10];
+                                    tempW = targetAnimationDataList[prevIdx + 11];
+                                    tempLen = tempX * tempX + tempY * tempY + tempZ * tempZ + tempW * tempW;
+                                    let prevOutX, prevOutY, prevOutZ, prevOutW;
+                                    if (tempLen > 0) {
+                                        let tempInvLen = 1 / Math.sqrt(tempLen);
+                                        prevOutX = tempX * tempInvLen;
+                                        prevOutY = tempY * tempInvLen;
+                                        prevOutZ = tempZ * tempInvLen;
+                                        prevOutW = tempW * tempInvLen;
+                                    } else {
+                                        prevOutX = prevOutY = prevOutZ = 0;
+                                        prevOutW = 1;
+                                    }
+
                                     tempX = targetAnimationDataList[nextIdx];
                                     tempY = targetAnimationDataList[nextIdx + 1];
                                     tempZ = targetAnimationDataList[nextIdx + 2];
                                     tempW = targetAnimationDataList[nextIdx + 3];
                                     tempLen = tempX * tempX + tempY * tempY + tempZ * tempZ + tempW * tempW;
+                                    let nextInX, nextInY, nextInZ, nextInW;
                                     if (tempLen > 0) {
-                                        tempInvLen = 1 / Math.sqrt(tempLen);
+                                        let tempInvLen = 1 / Math.sqrt(tempLen);
+                                        nextInX = tempX * tempInvLen;
+                                        nextInY = tempY * tempInvLen;
+                                        nextInZ = tempZ * tempInvLen;
+                                        nextInW = tempW * tempInvLen;
+                                    } else {
+                                        nextInX = nextInY = nextInZ = 0;
+                                        nextInW = 1;
+                                    }
+
+                                    tempX = targetAnimationDataList[nextIdx + 4];
+                                    tempY = targetAnimationDataList[nextIdx + 5];
+                                    tempZ = targetAnimationDataList[nextIdx + 6];
+                                    tempW = targetAnimationDataList[nextIdx + 7];
+                                    tempLen = tempX * tempX + tempY * tempY + tempZ * tempZ + tempW * tempW;
+                                    let nextX, nextY, nextZ, nextW;
+                                    if (tempLen > 0) {
+                                        let tempInvLen = 1 / Math.sqrt(tempLen);
                                         nextX = tempX * tempInvLen;
                                         nextY = tempY * tempInvLen;
                                         nextZ = tempZ * tempInvLen;
@@ -278,187 +228,220 @@ class GltfAnimationLooperManager {
                                         nextX = nextY = nextZ = 0;
                                         nextW = 1;
                                     }
-                                    // SLERP 보간
-                                    cosom = prevX * nextX + prevY * nextY + prevZ * nextZ + prevW * nextW;
-                                    // 최단 경로 선택
-                                    if (cosom < 0) {
-                                        cosom = -cosom;
-                                        nextX = -nextX;
-                                        nextY = -nextY;
-                                        nextZ = -nextZ;
-                                        nextW = -nextW;
-                                    }
-                                    // 캐시 생성 및 저장
-                                    cached = new Float32Array(9);
-                                    cached[0] = cosom;
-                                    cached[1] = prevX;
-                                    cached[2] = prevY;
-                                    cached[3] = prevZ;
-                                    cached[4] = prevW;
-                                    cached[5] = nextX;
-                                    cached[6] = nextY;
-                                    cached[7] = nextZ;
-                                    cached[8] = nextW;
-                                    currentAniTrackCacheTable[numericCacheKey] = cached;
-                                }
-                                // SLERP 계산
-                                if ((1 - cosom) > EPSILON) {
-                                    omega = Math.acos(cosom);
-                                    sinom = Math.sin(omega);
-                                    scale0 = Math.sin((1 - interpolationValue) * omega) / sinom;
-                                    scale1 = Math.sin(interpolationValue * omega) / sinom;
+
+                                    poseFrom[0] = s0 * prevX + s1 * prevOutX * interpolationValue + s2 * nextX + s3 * nextInX * interpolationValue;
+                                    poseFrom[1] = s0 * prevY + s1 * prevOutY * interpolationValue + s2 * nextY + s3 * nextInY * interpolationValue;
+                                    poseFrom[2] = s0 * prevZ + s1 * prevOutZ * interpolationValue + s2 * nextX + s3 * nextInX * interpolationValue;
+                                    poseFrom[3] = s0 * prevW + s1 * prevOutW * interpolationValue + s2 * nextW + s3 * nextInW * interpolationValue;
                                 } else {
-                                    scale0 = 1 - interpolationValue;
-                                    scale1 = interpolationValue;
+                                    prevIdx = previousTimeDataIDX << 2;
+                                    nextIdx = nextTimeDataIDX << 2;
+                                    const numericCacheKey = (prevIdx << 16) | nextIdx;
+                                    let cached = trackFrom.cacheTable[numericCacheKey];
+                                    let cosom, prevX, prevY, prevZ, prevW, nextX, nextY, nextZ, nextW;
+                                    if (cached) {
+                                        cosom = cached[0];
+                                        prevX = cached[1];
+                                        prevY = cached[2];
+                                        prevZ = cached[3];
+                                        prevW = cached[4];
+                                        nextX = cached[5];
+                                        nextY = cached[6];
+                                        nextZ = cached[7];
+                                        nextW = cached[8];
+                                    } else {
+                                        let tempX = targetAnimationDataList[prevIdx];
+                                        let tempY = targetAnimationDataList[prevIdx + 1];
+                                        let tempZ = targetAnimationDataList[prevIdx + 2];
+                                        let tempW = targetAnimationDataList[prevIdx + 3];
+                                        let tempLen = tempX * tempX + tempY * tempY + tempZ * tempZ + tempW * tempW;
+                                        if (tempLen > 0) {
+                                            let tempInvLen = 1 / Math.sqrt(tempLen);
+                                            prevX = tempX * tempInvLen;
+                                            prevY = tempY * tempInvLen;
+                                            prevZ = tempZ * tempInvLen;
+                                            prevW = tempW * tempInvLen;
+                                        } else {
+                                            prevX = prevY = prevZ = 0;
+                                            prevW = 1;
+                                        }
+
+                                        tempX = targetAnimationDataList[nextIdx];
+                                        tempY = targetAnimationDataList[nextIdx + 1];
+                                        tempZ = targetAnimationDataList[nextIdx + 2];
+                                        tempW = targetAnimationDataList[nextIdx + 3];
+                                        tempLen = tempX * tempX + tempY * tempY + tempZ * tempZ + tempW * tempW;
+                                        if (tempLen > 0) {
+                                            let tempInvLen = 1 / Math.sqrt(tempLen);
+                                            nextX = tempX * tempInvLen;
+                                            nextY = tempY * tempInvLen;
+                                            nextZ = tempZ * tempInvLen;
+                                            nextW = tempW * tempInvLen;
+                                        } else {
+                                            nextX = nextY = nextZ = 0;
+                                            nextW = 1;
+                                        }
+
+                                        cosom = prevX * nextX + prevY * nextY + prevZ * nextZ + prevW * nextW;
+                                        if (cosom < 0) {
+                                            cosom = -cosom;
+                                            nextX = -nextX;
+                                            nextY = -nextY;
+                                            nextZ = -nextZ;
+                                            nextW = -nextW;
+                                        }
+
+                                        cached = new Float32Array(9);
+                                        cached[0] = cosom;
+                                        cached[1] = prevX;
+                                        cached[2] = prevY;
+                                        cached[3] = prevZ;
+                                        cached[4] = prevW;
+                                        cached[5] = nextX;
+                                        cached[6] = nextY;
+                                        cached[7] = nextZ;
+                                        cached[8] = nextW;
+                                        trackFrom.cacheTable[numericCacheKey] = cached;
+                                    }
+
+                                    let scale0, scale1;
+                                    if ((1 - cosom) > glMatrix.EPSILON) {
+                                        const omega = Math.acos(cosom);
+                                        const sinom = Math.sin(omega);
+                                        scale0 = Math.sin((1 - interpolationValue) * omega) / sinom;
+                                        scale1 = Math.sin(interpolationValue * omega) / sinom;
+                                    } else {
+                                        scale0 = 1 - interpolationValue;
+                                        scale1 = interpolationValue;
+                                    }
+
+                                    poseFrom[0] = scale0 * prevX + scale1 * nextX;
+                                    poseFrom[1] = scale0 * prevY + scale1 * nextY;
+                                    poseFrom[2] = scale0 * prevZ + scale1 * nextZ;
+                                    poseFrom[3] = scale0 * prevW + scale1 * nextW;
                                 }
-                                tempX = scale0 * prevX + scale1 * nextX;
-                                tempY = scale0 * prevY + scale1 * nextY;
-                                tempZ = scale0 * prevZ + scale1 * nextZ;
-                                tempW = scale0 * prevW + scale1 * nextW;
+                                break;
                             }
-                            // Quaternion to Euler 변환
-                            x2 = tempX + tempX;
-                            y2 = tempY + tempY;
-                            z2 = tempZ + tempZ;
-                            xx = tempX * x2;
-                            xy = tempX * y2;
-                            xz = tempX * z2;
-                            yy = tempY * y2;
-                            yz = tempY * z2;
-                            zz = tempZ * z2;
-                            wx = tempW * x2;
-                            wy = tempW * y2;
-                            wz = tempW * z2;
-                            // 직접 오일러 각도 계산
-                            m13 = xz + wy;
-                            m11 = 1 - (yy + zz);
-                            m12 = xy - wz;
-                            m23 = yz - wx;
-                            m33 = 1 - (xx + yy);
-                            m32 = yz + wx;
-                            m22 = 1 - (xx + zz);
-                            tempY = Math.asin(Math.max(-1, Math.min(1, m13)));
-                            if (Math.abs(m13) < 0.99999) {
-                                tempX = Math.atan2(-m23, m33);
-                                tempZ = Math.atan2(-m12, m11);
-                            } else {
-                                tempX = Math.atan2(m32, m22);
-                                tempZ = 0;
+                            case 'translation':
+                            case 'scale': {
+                                poseFrom = new Float32Array(3);
+                                if (previousTimeDataIDX === targetTimeDataListLength - 1) {
+                                    const idx = previousTimeDataIDX * 3;
+                                    poseFrom[0] = targetAnimationDataList[idx];
+                                    poseFrom[1] = targetAnimationDataList[idx + 1];
+                                    poseFrom[2] = targetAnimationDataList[idx + 2];
+                                } else if (isCUBICSPLINE) {
+                                    prevIdx = previousTimeDataIDX * 9;
+                                    let nX = targetAnimationDataList[prevIdx + 3];
+                                    let nY = targetAnimationDataList[prevIdx + 4];
+                                    let nZ = targetAnimationDataList[prevIdx + 5];
+                                    let pXOut = targetAnimationDataList[prevIdx + 6];
+                                    let pYOut = targetAnimationDataList[prevIdx + 7];
+                                    let pZOut = targetAnimationDataList[prevIdx + 8];
+
+                                    nextIdx = nextTimeDataIDX * 9;
+                                    let nXOut = targetAnimationDataList[nextIdx];
+                                    let nYOut = targetAnimationDataList[nextIdx + 1];
+                                    let nZOut = targetAnimationDataList[nextIdx + 2];
+                                    let pX = targetAnimationDataList[nextIdx + 3];
+                                    let pY = targetAnimationDataList[nextIdx + 4];
+                                    let pZ = targetAnimationDataList[nextIdx + 5];
+
+                                    poseFrom[0] = s0 * pX + s1 * pXOut * interpolationValue + s2 * nX + s3 * nXOut * interpolationValue;
+                                    poseFrom[1] = s0 * pY + s1 * pYOut * interpolationValue + s2 * nY + s3 * nYOut * interpolationValue;
+                                    poseFrom[2] = s0 * pZ + s1 * pZOut * interpolationValue + s2 * nZ + s3 * nZOut * interpolationValue;
+                                } else {
+                                    prevIdx = nextTimeDataIDX * 3;
+                                    let nX = targetAnimationDataList[prevIdx];
+                                    let nY = targetAnimationDataList[prevIdx + 1];
+                                    let nZ = targetAnimationDataList[prevIdx + 2];
+
+                                    nextIdx = previousTimeDataIDX * 3;
+                                    let pX = targetAnimationDataList[nextIdx];
+                                    let pY = targetAnimationDataList[nextIdx + 1];
+                                    let pZ = targetAnimationDataList[nextIdx + 2];
+
+                                    poseFrom[0] = pX + interpolationValue * (nX - pX);
+                                    poseFrom[1] = pY + interpolationValue * (nY - pY);
+                                    poseFrom[2] = pZ + interpolationValue * (nZ - pZ);
+                                }
+                                break;
                             }
-                            // 라디안을 도로 변환하고 결과 적용 (한 번에)
-                            animationTargetMesh.rotationX = (tempX * PI_180);
-                            animationTargetMesh.rotationY = (tempY * PI_180);
-                            animationTargetMesh.rotationZ = (tempZ * PI_180);
+                            case 'weights': {
+                                const morphLength = trackFrom.weightMeshes[0]?.animationInfo.morphInfo.morphInfoDataList.length || 0;
+                                poseFrom = new Float32Array(morphLength);
+                                if (morphLength > 0) {
+                                    for (let i = 0; i < morphLength; i++) {
+                                        const prevW = targetAnimationDataList[previousTimeDataIDX * morphLength + i];
+                                        const nextW = targetAnimationDataList[nextTimeDataIDX * morphLength + i];
+                                        poseFrom[i] = prevW + interpolationValue * (nextW - prevW);
+                                    }
+                                }
+                                break;
+                            }
                         }
-                        break;
                     }
-                    case 'translation': {
-                        if (interpolation === 'CUBICSPLINE') {
-                            if (previousTimeDataIDX !== targetTimeDataListLength - 1) {
-                                // 이전 키프레임 데이터
-                                prevIdx = previousTimeDataIDX * 9;
-                                nX = targetAnimationDataList[prevIdx + 3];
-                                nY = targetAnimationDataList[prevIdx + 4];
-                                nZ = targetAnimationDataList[prevIdx + 5];
-                                pXOut = targetAnimationDataList[prevIdx + 6];
-                                pYOut = targetAnimationDataList[prevIdx + 7];
-                                pZOut = targetAnimationDataList[prevIdx + 8];
-                                // 다음 키프레임 데이터
-                                nextIdx = nextTimeDataIDX * 9;
-                                nXOut = targetAnimationDataList[nextIdx];
-                                nYOut = targetAnimationDataList[nextIdx + 1];
-                                nZOut = targetAnimationDataList[nextIdx + 2];
-                                pX = targetAnimationDataList[nextIdx + 3];
-                                pY = targetAnimationDataList[nextIdx + 4];
-                                pZ = targetAnimationDataList[nextIdx + 5];
-                                // Cubic spline 보간 및 직접 할당 (X, Y, Z 동시 처리)
-                                startOut = pXOut * interpolationValue;
-                                endIn = nXOut * interpolationValue;
-                                animationTargetMesh.x = s0 * pX + s1 * startOut + s2 * nX + s3 * endIn;
-                                startOut = pYOut * interpolationValue;
-                                endIn = nYOut * interpolationValue;
-                                animationTargetMesh.y = s0 * pY + s1 * startOut + s2 * nY + s3 * endIn;
-                                startOut = pZOut * interpolationValue;
-                                endIn = nZOut * interpolationValue;
-                                animationTargetMesh.z = s0 * pZ + s1 * startOut + s2 * nZ + s3 * endIn;
+
+                    if (poseFrom) {
+                        trackFrom.animationTargetMesh.dirtyTransform = true;
+                        switch (trackFrom.key) {
+                            case 'translation': {
+                                trackFrom.animationTargetMesh.x = poseFrom[0];
+                                trackFrom.animationTargetMesh.y = poseFrom[1];
+                                trackFrom.animationTargetMesh.z = poseFrom[2];
+                                break;
                             }
-                        } else {
-                            // Linear 보간
-                            prevIdx = nextTimeDataIDX * 3;
-                            nX = targetAnimationDataList[prevIdx];
-                            nY = targetAnimationDataList[prevIdx + 1];
-                            nZ = targetAnimationDataList[prevIdx + 2];
-                            nextIdx = previousTimeDataIDX * 3;
-                            pX = targetAnimationDataList[nextIdx];
-                            pY = targetAnimationDataList[nextIdx + 1];
-                            pZ = targetAnimationDataList[nextIdx + 2];
-                            // Linear 보간 및 직접 할당 (한 번에)
-                            animationTargetMesh.x = pX + interpolationValue * (nX - pX);
-                            animationTargetMesh.y = pY + interpolationValue * (nY - pY);
-                            animationTargetMesh.z = pZ + interpolationValue * (nZ - pZ);
-                        }
-                        break;
-                    }
-                    case 'scale': {
-                        if (interpolation === 'CUBICSPLINE') {
-                            if (previousTimeDataIDX !== targetTimeDataListLength - 1) {
-                                // 이전 키프레임 데이터
-                                prevIdx = previousTimeDataIDX * 9;
-                                nX = targetAnimationDataList[prevIdx + 3];
-                                nY = targetAnimationDataList[prevIdx + 4];
-                                nZ = targetAnimationDataList[prevIdx + 5];
-                                pXOut = targetAnimationDataList[prevIdx + 6];
-                                pYOut = targetAnimationDataList[prevIdx + 7];
-                                pZOut = targetAnimationDataList[prevIdx + 8];
-                                // 다음 키프레임 데이터
-                                nextIdx = nextTimeDataIDX * 9;
-                                nXOut = targetAnimationDataList[nextIdx];
-                                nYOut = targetAnimationDataList[nextIdx + 1];
-                                nZOut = targetAnimationDataList[nextIdx + 2];
-                                pX = targetAnimationDataList[nextIdx + 3];
-                                pY = targetAnimationDataList[nextIdx + 4];
-                                pZ = targetAnimationDataList[nextIdx + 5];
-                                // Cubic spline 보간 및 직접 할당 (X, Y, Z 동시 처리)
-                                startOut = pXOut * interpolationValue;
-                                endIn = nXOut * interpolationValue;
-                                animationTargetMesh.scaleX = s0 * pX + s1 * startOut + s2 * nX + s3 * endIn;
-                                startOut = pYOut * interpolationValue;
-                                endIn = nYOut * interpolationValue;
-                                animationTargetMesh.scaleY = s0 * pY + s1 * startOut + s2 * nY + s3 * endIn;
-                                startOut = pZOut * interpolationValue;
-                                endIn = nZOut * interpolationValue;
-                                animationTargetMesh.scaleZ = s0 * pZ + s1 * startOut + s2 * nZ + s3 * endIn;
+                            case 'rotation': {
+                                // [quatToEuler inline]
+                                const tempX = poseFrom[0], tempY = poseFrom[1], tempZ = poseFrom[2],
+                                    tempW = poseFrom[3];
+                                const x2 = tempX + tempX, y2 = tempY + tempY, z2 = tempZ + tempZ;
+                                const xx = tempX * x2, xy = tempX * y2, xz = tempX * z2;
+                                const yy = tempY * y2, yz = tempY * z2, zz = tempZ * z2;
+                                const wx = tempW * x2, wy = tempW * y2, wz = tempW * z2;
+                                const m13 = xz + wy;
+                                const m11 = 1 - (yy + zz);
+                                const m12 = xy - wz;
+                                const m23 = yz - wx;
+                                const m33 = 1 - (xx + yy);
+                                const m32 = yz + wx;
+                                const m22 = 1 - (xx + zz);
+                                let rotY = Math.asin(Math.max(-1, Math.min(1, m13)));
+                                let rotX, rotZ;
+                                if (Math.abs(m13) < 0.99999) {
+                                    rotX = Math.atan2(-m23, m33);
+                                    rotZ = Math.atan2(-m12, m11);
+                                } else {
+                                    rotX = Math.atan2(m32, m22);
+                                    rotZ = 0;
+                                }
+
+                                trackFrom.animationTargetMesh.rotationX = rotX * PI_180;
+                                trackFrom.animationTargetMesh.rotationY = rotY * PI_180;
+                                trackFrom.animationTargetMesh.rotationZ = rotZ * PI_180;
+                                break;
                             }
-                        } else {
-                            // Linear 보간
-                            prevIdx = nextTimeDataIDX * 3;
-                            nX = targetAnimationDataList[prevIdx];
-                            nY = targetAnimationDataList[prevIdx + 1];
-                            nZ = targetAnimationDataList[prevIdx + 2];
-                            nextIdx = previousTimeDataIDX * 3;
-                            pX = targetAnimationDataList[nextIdx];
-                            pY = targetAnimationDataList[nextIdx + 1];
-                            pZ = targetAnimationDataList[nextIdx + 2];
-                            // Linear 보간 및 직접 할당 (한 번에)
-                            animationTargetMesh.scaleX = pX + interpolationValue * (nX - pX);
-                            animationTargetMesh.scaleY = pY + interpolationValue * (nY - pY);
-                            animationTargetMesh.scaleZ = pZ + interpolationValue * (nZ - pZ);
+                            case 'scale': {
+                                trackFrom.animationTargetMesh.scaleX = poseFrom[0];
+                                trackFrom.animationTargetMesh.scaleY = poseFrom[1];
+                                trackFrom.animationTargetMesh.scaleZ = poseFrom[2];
+                                break;
+                            }
+                            case 'weights': {
+                                let animationTargetIndex = trackFrom.weightMeshes.length;
+                                while (animationTargetIndex--) {
+                                    trackFrom.renderWeight(
+                                        redGPUContext,
+                                        computePassEncoder,
+                                        trackFrom.weightMeshes[animationTargetIndex],
+                                        trackFrom.lastInterpolationValue,
+                                        trackFrom.lastPrevIdx,
+                                        trackFrom.lastNextIdx
+                                    );
+                                }
+                                break;
+                            }
                         }
-                        break;
-                    }
-                    case 'weights': {
-                        let animationTargetIndex = weightMeshes.length;
-                        while (animationTargetIndex--) {
-                            currentAniTrack.renderWeight(
-                                redGPUContext,
-                                computePassEncoder,
-                                weightMeshes[animationTargetIndex],
-                                interpolationValue,
-                                previousTimeDataIDX,
-                                nextTimeDataIDX
-                            );
-                        }
-                        break;
                     }
                 }
             }

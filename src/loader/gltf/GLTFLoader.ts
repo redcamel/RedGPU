@@ -324,6 +324,15 @@ export class PlayAnimationInfo {
      */
     targetGLTFParsedSingleClip: GLTFParsedSingleClip
 
+    // 블렌딩 및 상태 머신 지원 필드 추가
+    isBlending?: boolean
+    fromClip?: GLTFParsedSingleClip
+    toClip?: GLTFParsedSingleClip
+    blendWeight?: number
+    startTimeFrom?: number
+    startTimeTo?: number
+    animStateMachine?: any
+
     /**
      * [KO] PlayAnimationInfo 인스턴스를 생성합니다.
      * [EN] Creates a PlayAnimationInfo instance.

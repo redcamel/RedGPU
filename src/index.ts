@@ -40,4 +40,5 @@ export * as Shadow from "./shadow";
 export * as DefineGPUProperty from "./defineProperty"
 export * as Antialiasing from "./antialiasing"
 export * as Physics from "./physics"
+export * from "./loader/gltf/animationLooper/AnimStateMachine";
 
