@@ -62,14 +62,15 @@ const loadGLTF = (view, url) => {
             if (clips && clips.length > 0) {
                 // Soldier.glb의 보편적 애니메이션 구조 매핑
                 // 0: Idle, 1: Run, 2: Walk, 3: WalkWithWeapon 등
-                const idleClip = clips[0];
-                const runClip = clips[1];
-                const walkClip = clips[3] || clips[2]; // WalkWithWeapon 또는 Walk 적용
+                // clips[]는 이미 ClipAnimState 배열이므로 바로 사용
+                const idleState = clips[0];
+                const runState = clips[1];
+                const walkState = clips[3] || clips[2]; // WalkWithWeapon 또는 Walk 적용
 
-                // 각 애니메이션 클립 상태 래핑
-                const idleState = new RedGPU.ClipAnimState("Idle", idleClip);
-                const walkState = new RedGPU.ClipAnimState("Walk", walkClip);
-                const runState = new RedGPU.ClipAnimState("Run", runClip);
+                // 상태 이름 설정 (GLTF 파일 내 이름을 그대로 사용하거나 덮어쓰기)
+                idleState.name = "Idle";
+                walkState.name = "Walk";
+                runState.name = "Run";
 
                 // 상태 머신 초기화 (기본 상태: Idle)
                 stateMachine = new RedGPU.AnimStateMachine(idleState);
@@ -109,8 +110,8 @@ const loadGLTF = (view, url) => {
                     conditions: () => targetStateName === 'Walk'
                 });
 
-                // 애니메이션 재생 활성화 및 상태 머신 주입
-                loader.playAnimation(idleClip);
+                // Idle 상태부터 재생 시작, 상태 머신 주입
+                loader.playAnimation(idleState);
                 if (loader.activeAnimations.length > 0) {
                     const playInfo = loader.activeAnimations[0];
                     playInfo.animStateMachine = stateMachine;

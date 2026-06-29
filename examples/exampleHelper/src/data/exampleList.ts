@@ -1278,6 +1278,19 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
+                        name: 'Motion Blending',
+                        list: [
+                            {
+                                name: 'Motion Blending',
+                                path: 'gltf/animation/motionBlending',
+                                description: {
+                                    ko: `AnimStateMachine을 사용하여 여러 애니메이션 클립 간의 부드러운 모션 블렌딩(크로스페이드)을 구현하는 예제입니다.<br/>Idle, Walk, Run 상태 간의 전이 조건과 페이드 지속 시간을 실시간으로 조절할 수 있습니다.`,
+                                    en: `An example implementing smooth motion blending (crossfade) between multiple animation clips using AnimStateMachine.<br/>State transition conditions and fade duration between Idle, Walk, and Run states can be adjusted in real time.`
+                                },
+                            },
+                        ]
+                    },
+                    {
                         name: 'Animation Performance Test',
                         list: [
                             {
@@ -1312,6 +1325,7 @@ Check performance limits on each device.`
                     },
                 ]
             },
+
             {
                 name: '3D Models',
                 list: [

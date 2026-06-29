@@ -1,4 +1,4 @@
-import {GLTFParsedSingleClip} from "../parsers/animation/parseAnimations";
+import {GLTFParsedSingleClip} from "../parsers/animation/GLTFParsedSingleClip";
 import {PlayAnimationInfo} from "../GLTFLoader";
 
 /**
@@ -123,11 +123,11 @@ export class AnimStateMachine {
 
                     playInfo.isBlending = true;
                     if (this.currentState instanceof ClipAnimState) {
-                        playInfo.fromClip = this.currentState.clip;
+                        playInfo.fromClip = this.currentState;
                         playInfo.startTimeFrom = this.currentState.startTime;
                     }
                     if (this.targetState instanceof ClipAnimState) {
-                        playInfo.toClip = this.targetState.clip;
+                        playInfo.toClip = this.targetState;
                         playInfo.startTimeTo = timestamp;
                     }
                     playInfo.blendWeight = 0;
@@ -148,7 +148,7 @@ export class AnimStateMachine {
 
                 playInfo.isBlending = false;
                 if (this.currentState instanceof ClipAnimState) {
-                    playInfo.targetGLTFParsedSingleClip = this.currentState.clip;
+                    playInfo.targetGLTFParsedSingleClip = this.currentState;
                     playInfo.startTime = this.currentState.startTime;
                 }
 
@@ -164,7 +164,7 @@ export class AnimStateMachine {
             this.currentState.update(deltaTime, timestamp);
             playInfo.isBlending = false;
             if (this.currentState instanceof ClipAnimState) {
-                playInfo.targetGLTFParsedSingleClip = this.currentState.clip;
+                playInfo.targetGLTFParsedSingleClip = this.currentState;
                 playInfo.startTime = this.currentState.startTime;
             }
         }

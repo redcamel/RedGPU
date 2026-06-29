@@ -3,7 +3,7 @@ import parseAnimationInfo_GLTF from "../../cls/AnimationData_GLTF";
 import AniTrack_GLTF from "../../cls/anitrack/AniTrack_GLTF";
 import {AnimationChannel, AnimationSampler, GLTF} from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
-import {GLTFParsedSingleClip} from "./parseAnimations";
+import {GLTFParsedSingleClip} from "./GLTFParsedSingleClip";
 
 /**
  * Parse a single animation channel for GLTF.
@@ -67,7 +67,7 @@ const parseAnimationChannel_GLTF = (
             tMesh,
             targetMeshes
         )
-        parsedSingleClip.push(aniTrack);
+        parsedSingleClip.tracks.push(aniTrack);
     } else {
         console.log('파싱할수없는 데이터', channelTargetDataPath);
     }

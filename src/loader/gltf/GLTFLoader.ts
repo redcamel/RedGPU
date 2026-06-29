@@ -5,7 +5,7 @@ import getFileExtension from "../../utils/file/getFileExtension";
 import getFileName from "../../utils/file/getFileName";
 import getFilePath from "../../utils/file/getFilePath";
 import {GLTF} from "./GLTF";
-import {GLTFParsedSingleClip} from "./parsers/animation/parseAnimations";
+import {ClipAnimState} from "./animationLooper/AnimStateMachine";
 import parseFileGLB from "./parsers/loadFile/parseFileGLB";
 import parseFileGLTF from "./parsers/loadFile/parseFileGLTF";
 import RedGPUObject from "../../base/RedGPUObject";
@@ -51,7 +51,7 @@ type GLTFParsingResult = {
      * [KO] GLTF 파일에 정의된 파싱된 애니메이션 클립 목록
      * [EN] The parsed animation clips defined in the GLTF file.
      */
-    animations: GLTFParsedSingleClip[]
+    animations: ClipAnimState[]
 }
 
 /**
@@ -277,14 +277,14 @@ class GLTFLoader extends RedGPUObject {
      * loader.playAnimation(clip);
      * ```
      *
-     * @param parsedSingleClip -
-     * [KO] 재생할 애니메이션 클립
-     * [EN] Animation clip to play
+     * @param clipState -
+     * [KO] 재생할 애니메이션 클립 상태
+     * [EN] Animation clip state to play
      */
-    playAnimation(parsedSingleClip: GLTFParsedSingleClip) {
+    playAnimation(clipState: ClipAnimState) {
         const {activeAnimations} = this
         activeAnimations.push(
-            new PlayAnimationInfo(performance.now(), parsedSingleClip)
+            new PlayAnimationInfo(performance.now(), clipState)
         );
     };
 
@@ -319,15 +319,15 @@ export class PlayAnimationInfo {
      */
     startTime: number
     /**
-     * [KO] 재생 중인 GLTF 파싱 애니메이션 클립
-     * [EN] The parsed GLTF animation clip being played
+     * [KO] 재생 중인 애니메이션 클립 상태
+     * [EN] The animation clip state being played
      */
-    targetGLTFParsedSingleClip: GLTFParsedSingleClip
+    targetGLTFParsedSingleClip: ClipAnimState
 
     // 블렌딩 및 상태 머신 지원 필드 추가
     isBlending?: boolean
-    fromClip?: GLTFParsedSingleClip
-    toClip?: GLTFParsedSingleClip
+    fromClip?: ClipAnimState
+    toClip?: ClipAnimState
     blendWeight?: number
     startTimeFrom?: number
     startTimeTo?: number
@@ -344,8 +344,8 @@ export class PlayAnimationInfo {
      * [KO] 대상 애니메이션 클립
      * [EN] Target animation clip
      */
-    constructor(startTime: number, targetAniTrackList: GLTFParsedSingleClip) {
+    constructor(startTime: number, clipState: ClipAnimState) {
         this.startTime = startTime
-        this.targetGLTFParsedSingleClip = targetAniTrackList
+        this.targetGLTFParsedSingleClip = clipState
     }
 }

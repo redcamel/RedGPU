@@ -614,11 +614,11 @@ export default function gltfAnimationMotionBlending(
     let toClip = targetPlayAnimationInfo.toClip!;
     let blendWeight = targetPlayAnimationInfo.blendWeight ?? 0.5;
 
-    let maxTimeFrom = fromClip['maxTime'];
+    let maxTimeFrom = fromClip.clip.maxTime;
     let startTimeFrom = targetPlayAnimationInfo.startTimeFrom!;
     let timeFrom = ((timestamp - startTimeFrom) % (maxTimeFrom * 1000)) / 1000;
 
-    let maxTimeTo = toClip['maxTime'];
+    let maxTimeTo = toClip.clip.maxTime;
     let startTimeTo = targetPlayAnimationInfo.startTimeTo!;
     let timeTo = ((timestamp - startTimeTo) % (maxTimeTo * 1000)) / 1000;
 
@@ -638,12 +638,12 @@ export default function gltfAnimationMotionBlending(
     let poseToSingle: any;
 
     // fromClip을 주축으로 돌며 동일 조인트 트랙 매칭 보간
-    for (i = 0; i < fromClip.length; i++) {
-        trackFrom = fromClip[i];
+    for (i = 0; i < fromClip.clip.tracks.length; i++) {
+        trackFrom = fromClip.clip.tracks[i];
         mesh = trackFrom.animationTargetMesh;
         keyType = trackFrom.keyType;
 
-        trackTo = toClip.find(t => t.animationTargetMesh === mesh && t.keyType === keyType);
+        trackTo = toClip.clip.tracks.find(t => t.animationTargetMesh === mesh && t.keyType === keyType);
 
         if (trackTo) {
             poseFrom = sampleTrackPose(trackFrom, timeFrom);
@@ -680,12 +680,12 @@ export default function gltfAnimationMotionBlending(
     }
 
     // toClip에만 있고 fromClip에는 없는 독자 조인트 트랙 처리
-    for (j = 0; j < toClip.length; j++) {
-        trackToSingle = toClip[j];
+    for (j = 0; j < toClip.clip.tracks.length; j++) {
+        trackToSingle = toClip.clip.tracks[j];
         meshSingle = trackToSingle.animationTargetMesh;
         keyTypeSingle = trackToSingle.keyType;
 
-        trackFromSingle = fromClip.find(t => t.animationTargetMesh === meshSingle && t.keyType === keyTypeSingle);
+        trackFromSingle = fromClip.clip.tracks.find(t => t.animationTargetMesh === meshSingle && t.keyType === keyTypeSingle);
 
         if (!trackFromSingle) {
             poseToSingle = sampleTrackPose(trackToSingle, timeTo);

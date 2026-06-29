@@ -2,7 +2,8 @@ import {glMatrix} from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
 import AniTrack_GLTF from "../cls/anitrack/AniTrack_GLTF";
 import {PlayAnimationInfo} from "../GLTFLoader";
-import {GLTFParsedSingleClip} from "../parsers/animation/parseAnimations";
+
+import {ClipAnimState} from "./AnimStateMachine";
 import gltfAnimationMotionBlending from "./gltfAnimationMotionBlending";
 
 // 최적화: 매 프레임 산술 연산 및 변수 생성을 방지하기 위해 상수를 파일 모듈 스코프로 승격
@@ -36,7 +37,7 @@ class GltfAnimationLooperManager {
         let animStateMachine;
         let isBlending: boolean;
 
-        let fromClip: GLTFParsedSingleClip;
+        let fromClip: ClipAnimState;
         let maxTimeFrom: number;
         let startTime: number;
         let timeFrom: number;
@@ -111,13 +112,13 @@ class GltfAnimationLooperManager {
                 // 1. 단일 재생 모드 (씬 대다수의 액티브 애니메이션 오브젝트 - 초고속 다이렉트 핫 패스)
                 // ==========================================
                 fromClip = targetPlayAnimationInfo.targetGLTFParsedSingleClip;
-                maxTimeFrom = fromClip['maxTime'];
+                maxTimeFrom = fromClip.clip.maxTime;
                 startTime = targetPlayAnimationInfo.startTime;
                 timeFrom = ((timestamp - startTime) % (maxTimeFrom * 1000)) / 1000;
-                targetAniTrackIDX = fromClip.length;
+                targetAniTrackIDX = fromClip.clip.tracks.length;
 
                 while (targetAniTrackIDX--) {
-                    trackFrom = fromClip[targetAniTrackIDX];
+                    trackFrom = fromClip.clip.tracks[targetAniTrackIDX];
 
                     // 최적화: 구조 분해 할당을 대입문으로 해제하여 미세 임시 객체 생성을 회피
                     mesh = trackFrom.animationTargetMesh;
