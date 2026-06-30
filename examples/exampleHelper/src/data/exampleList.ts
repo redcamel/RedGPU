@@ -1288,6 +1288,14 @@ export const ExampleList: ExampleListType = [
                                     en: `An example implementing smooth motion blending (crossfade) between multiple animation clips using AnimStateMachine.<br/>State transition conditions and fade duration between Idle, Walk, and Run states can be adjusted in real time.`
                                 },
                             },
+                            {
+                                name: 'Keyboard Character Control',
+                                path: 'gltf/animation/keyboardCharacterControl',
+                                description: {
+                                    ko: `키보드(WASD / 방향키)로 캐릭터를 이동시키고 Shift로 달리기 전환하는 3인칭 캐릭터 컨트롤 예제입니다.<br/>AnimStateMachine으로 Idle / Walk / Run 애니메이션이 자동 전환되며, FollowController 카메라가 캐릭터를 추적합니다.`,
+                                    en: `A third-person character control example where you move with WASD/Arrow keys and sprint by holding Shift.<br/>AnimStateMachine automatically blends Idle, Walk, and Run animations, while FollowController tracks the character.`
+                                },
+                            },
                         ]
                     },
                     {
@@ -1325,6 +1333,7 @@ Check performance limits on each device.`
                     },
                 ]
             },
+
 
             {
                 name: '3D Models',
