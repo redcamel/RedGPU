@@ -1,5 +1,6 @@
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1781144235516";
 import * as RedGPU from "../../../../dist/index.js?t=1781144235516";
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -10,6 +11,8 @@ RedGPU.init(
         // Setup camera or controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.tilt = 0;
+        controller.centerX = 50
+        controller.centerZ = 50
 
         // Create scene and view
         const scene = new RedGPU.Display.Scene();
@@ -46,7 +49,9 @@ const loadGLTF = (view, url) => {
         (result) => {
             const mesh = result.resultMesh
             scene.addChild(mesh)
-            RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view)
+            mesh.x = 50
+            mesh.z = 50
+            // RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view)
 
         },
         RedGPUExampleHelper.loadingProgressInfoHandler

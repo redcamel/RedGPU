@@ -79,6 +79,7 @@ class ParsedSkinInfo_GLTF {
 			  tangentOffset:  u32,
 
 			  jointSlotIndices:       array<vec4<u32>, ${Math.ceil(this.usedJoints.length / 4)}>,
+			  invertNodeGlobalTransform: mat4x4<f32>,
 			};
 			
 			struct SkinnedVertex {
@@ -106,13 +107,13 @@ class ParsedSkinInfo_GLTF {
 			  let jointCount = ${this.joints.length}u;
 			  let localIdx = local_id.x;
 			  
-			  if (localIdx < jointCount) {
-			    let localJointIdx = uniforms.searchJointIndexTable[localIdx].x;
+			  for (var i = localIdx; i < jointCount; i += ${this.WORK_SIZE}u) {
+			    let localJointIdx = uniforms.searchJointIndexTable[i].x;
 			    let jointModelMatrix = globalVertexSSBO[uniforms.jointSlotIndices[localJointIdx >> 2u][localJointIdx & 3u]].matrixList.modelMatrix;
-			    let invBind = uniforms.inverseBindMatrices[localIdx];
+			    let invBind = uniforms.inverseBindMatrices[i];
 			    
 			    // 합성 행렬 계산하여 공유 메모리에 보존
-			    sharedSkinMatrices[localIdx] = jointModelMatrix * invBind;
+			    sharedSkinMatrices[i] = jointModelMatrix * invBind;
 			  }
 			  
 			  // 모든 스레드가 공유 메모리 작성을 끝마칠 때까지 동기화 대기!
@@ -160,28 +161,33 @@ class ParsedSkinInfo_GLTF {
 			      originalVertices[tangentIdx + 3u]
 			    );
 			    
-			    let skinnedTangentVec4 = skinMat * vec4<f32>(rawTangent.xyz, 0.0);
+			    let worldTangentVec4 = skinMat * vec4<f32>(rawTangent.xyz, 0.0);
+			    let skinnedTangentVec4 = uniforms.invertNodeGlobalTransform * worldTangentVec4;
 			    skinnedTangent = vec4<f32>(normalize(skinnedTangentVec4.xyz), rawTangent.w);
 			  }
 
-			  // --- 3. 정점 속성 변환 (Matrix-Vector multiplication 단 3회로 극비 절감!) ---
-			  let skinnedPos = skinMat * vec4<f32>(rawPos, 1.0);
+			  // --- 3. 정점 속성 변환 ---
+			  let worldPos = skinMat * vec4<f32>(rawPos, 1.0);
+			  let skinnedPos = uniforms.invertNodeGlobalTransform * worldPos;
 
 			  // 3. 이전 프레임 결과 보존 (이전 프레임 클립 위치 계산 및 기록)
-			  let prevWorldPos = vec4<f32>(skinnedVertexBuffer[idx].position, 1.0);
+			  let prevModelMatrix = globalVertexSSBO[uniforms.meshSlotIndex].matrixList.prevModelMatrix;
+			  let prevWorldPos = prevModelMatrix * vec4<f32>(skinnedVertexBuffer[idx].position, 1.0);
 			  prevSkinnedVertexBuffer[idx] = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * prevWorldPos;
 			  
 			  // 4. 스키닝 적용된 데이터 기록
 			  var skinnedOut: SkinnedVertex;
 			  skinnedOut.position = skinnedPos.xyz;
 			  
-			  let skinnedNormalVec4 = skinMat * vec4<f32>(rawNormal, 0.0);
+			  let worldNormalVec4 = skinMat * vec4<f32>(rawNormal, 0.0);
+			  let skinnedNormalVec4 = uniforms.invertNodeGlobalTransform * worldNormalVec4;
 			  skinnedOut.normal = normalize(skinnedNormalVec4.xyz);
 			  
 			  skinnedOut.tangent = skinnedTangent;
 			  
 			  // 현재 프레임의 클립 공간(Jitter 배제) 위치 사전 계산 및 기록!
-			  skinnedOut.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * vec4<f32>(skinnedOut.position, 1.0);
+			  let currentModelMatrix = globalVertexSSBO[uniforms.meshSlotIndex].matrixList.modelMatrix;
+			  skinnedOut.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * (currentModelMatrix * vec4<f32>(skinnedOut.position, 1.0));
 			  
 			  skinnedVertexBuffer[idx] = skinnedOut;
 			}
@@ -219,10 +225,10 @@ class ParsedSkinInfo_GLTF {
             },
         });
 
-        // uniforms 사이즈 = meshSlotIndex (16바이트 정렬) + searchJointIndexTable + inverseBindMatrices + layout 메타데이터 (16바이트) + jointSlotIndices (Math.ceil(this.usedJoints.length / 4) * 16바이트)
+        // uniforms 사이즈 = meshSlotIndex (16바이트 정렬) + searchJointIndexTable + inverseBindMatrices + layout 메타데이터 (16바이트) + jointSlotIndices (Math.ceil(this.usedJoints.length / 4) * 16바이트) + invertNodeGlobalTransform (64바이트)
         const jointSlotIndicesNum = Math.ceil(this.usedJoints.length / 4) * 4;
         this.uniformBuffer = device.createBuffer({
-            size: 16 + (this.joints.length * 4 * 4) + (this.joints.length * 16 * 4) + 16 + (jointSlotIndicesNum * 4),
+            size: 16 + (this.joints.length * 4 * 4) + (this.joints.length * 16 * 4) + 16 + (jointSlotIndicesNum * 4) + 64,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         })
 

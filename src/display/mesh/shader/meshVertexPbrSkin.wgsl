@@ -89,17 +89,17 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
     // [EN] Load skinned data baked in Compute Shader
     let skinnedPosData = skinnedVertices[inputData.idx];
 
-    // [KO] 스킨드 월드 포지션 계산 (컴퓨트 셰이더에서 구워져 온 월드 좌표를 그대로 사용)
+    // [KO] 스킨드 월드 포지션 계산
     // [EN] Calculate skinned world position
-    let position = vec4<f32>(skinnedPosData.position, 1.0);
+    let position = gu_modelMatrix * vec4<f32>(skinnedPosData.position, 1.0);
 
     // [KO] 스킨드 최종 노말 변환
     // [EN] Calculate skinned final normal transformation
-    output.vertexNormal = skinnedPosData.normal;
+    output.vertexNormal = normalize((gu_normalModelMatrix * vec4<f32>(skinnedPosData.normal, 0.0)).xyz);
 
     // [KO] 탄젠트 변환
     // [EN] Tangent transformation
-    output.vertexTangent = skinnedPosData.tangent;
+    output.vertexTangent = vec4<f32>(normalize((gu_normalModelMatrix * vec4<f32>(skinnedPosData.tangent.xyz, 0.0)).xyz), skinnedPosData.tangent.w);
 
     // [KO] 출력 데이터 할당
     // [EN] Assign output data
