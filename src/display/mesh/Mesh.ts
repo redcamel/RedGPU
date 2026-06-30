@@ -277,7 +277,7 @@ class Mesh extends MeshBase {
     #interleavedCullingID: number = Math.floor(Math.random() * 4)
     #globalVertexSlotIndex: number = -1;
     #prevLodIDX: number;
-    isJointMesh: boolean = false;
+
     /**
      * [KO] Mesh 인스턴스를 생성합니다.
      * [EN] Creates an instance of Mesh.
@@ -1457,6 +1457,97 @@ class Mesh extends MeshBase {
                 } else {
                     this.#prevModelMatrix = null
                 }
+                {
+                    const {redGPUContext} = this
+                    const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
+                    const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
+                    if (!this.#uniformDataMatrixList) {
+                        this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
+                    }
+
+                    if (this.#needUpdateMatrixUniform) {
+                        {
+                            const modelMatrix = (
+                                //TODO - Sprite2D떄문에 처리했지만 이거 일반화해야함
+                                // TODO - renderTextureWidth 이놈도 같이 처리해야할듯
+                                // @ts-ignore
+                                this.is2DMeshType ? mat4.multiply(
+                                    mat4.create(),
+                                    this.modelMatrix,
+                                    mat4.fromValues(
+                                        // @ts-ignore
+                                        this.width, 0, 0, 0, 0, this.height, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+                                    ),
+                                ) : this.modelMatrix
+                            )
+                            //
+                            // gpuDevice.queue.writeBuffer(
+                            // 	vertexUniformGPUBuffer,
+                            // 	vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffset,
+                            // 	modelMatrix
+                            // )
+                            // keepLog(GLOBAL_VERTEX_STRUCT)
+                            this.#uniformDataMatrixList.set(modelMatrix, vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
+                        }
+                        {
+                            if (this.#needUpdateNormalMatrixUniform && vertexUniformInfoMatrixListMembers.normalModelMatrix) {
+                                this.#needUpdateNormalMatrixUniform = false
+                                // calculate NormalMatrix
+                                const m = this.modelMatrix;
+                                const n = this.normalModelMatrix;
+                                const a00 = m[0], a01 = m[1], a02 = m[2];
+                                const a10 = m[4], a11 = m[5], a12 = m[6];
+                                const a20 = m[8], a21 = m[9], a22 = m[10];
+                                const det = a00 * (a11 * a22 - a12 * a21) - a01 * (a10 * a22 - a12 * a20) + a02 * (a10 * a21 - a11 * a20);
+                                if (det === 0) {
+                                    // 역행렬 없음 → 단위 행렬로 대체
+                                    n[0] = 1, n[1] = 0, n[2] = 0, n[3] = 0, n[4] = 0, n[5] = 1, n[6] = 0, n[7] = 0, n[8] = 0, n[9] = 0, n[10] = 1, n[11] = 0, n[12] = 0, n[13] = 0, n[14] = 0, n[15] = 1;
+                                } else {
+                                    const invDet = 1 / det;
+                                    // 역행렬의 전치 (transpose of inverse)
+                                    n[0] = (a11 * a22 - a12 * a21) * invDet;
+                                    n[1] = (a12 * a20 - a10 * a22) * invDet;
+                                    n[2] = (a10 * a21 - a11 * a20) * invDet;
+                                    n[3] = 0;
+                                    n[4] = (a02 * a21 - a01 * a22) * invDet;
+                                    n[5] = (a00 * a22 - a02 * a20) * invDet;
+                                    n[6] = (a01 * a20 - a00 * a21) * invDet;
+                                    n[7] = 0;
+                                    n[8] = (a01 * a12 - a02 * a11) * invDet;
+                                    n[9] = (a02 * a10 - a00 * a12) * invDet;
+                                    n[10] = (a00 * a11 - a01 * a10) * invDet;
+                                    n[11] = 0;
+                                    // 하단 행은 단위 행렬처럼 설정
+                                    n[12] = 0, n[13] = 0, n[14] = 0, n[15] = 1;
+                                }
+                            }
+                            // gpuDevice.queue.writeBuffer(
+                            // 	vertexUniformGPUBuffer,
+                            // 	vertexUniformInfoMatrixListMembers.normalModelMatrix.uniformOffset,
+                            // 	// new vertexUniformInfoMatrixListMembers.normalModelMatrix.View(this.normalModelMatrix),
+                            // 	this.normalModelMatrix as Float32Array
+                            // )
+                            this.#uniformDataMatrixList.set(this.normalModelMatrix, vertexUniformInfoMatrixListMembers.normalModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
+                        }
+                        if (vertexUniformInfoMatrixListMembers.localMatrix) {
+                            // gpuDevice.queue.writeBuffer(
+                            // 	vertexUniformGPUBuffer,
+                            // 	vertexUniformInfoMatrixListMembers.localMatrix.uniformOffset,
+                            // 	// new vertexUniformInfoMatrixListMembers.localMatrix.View(this.localMatrix),
+                            // 	this.localMatrix as Float32Array
+                            // )
+                            this.#uniformDataMatrixList.set(this.localMatrix, vertexUniformInfoMatrixListMembers.localMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
+                        }
+                        dirtyTransformForChildren = true
+                        this.#needUpdateMatrixUniform = false
+                        // keepLog('진짜 버퍼업로드', this.name)
+                        redGPUContext.globalVertexSSBO.updateFloatData(
+                            this.#globalVertexSlotIndex,
+                            this.#uniformDataMatrixList,
+                            vertexUniformInfoMembers.matrixList.startOffset / 4
+                        )
+                    }
+                }
             }
             if (this.gltfLoaderInfo?.activeAnimations?.length) {
                 renderViewStateData.animationList[renderViewStateData.animationList.length] = this.gltfLoaderInfo?.activeAnimations
@@ -1532,97 +1623,7 @@ class Mesh extends MeshBase {
         } else {
             renderViewStateData.renderResults.num3DGroups++
         }
-        if (passFrustumCulling) {
-            const {redGPUContext} = this
-            const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
-            const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
-            if (!this.#uniformDataMatrixList) {
-                this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
-            }
 
-            if (this.#needUpdateMatrixUniform) {
-                {
-                    const modelMatrix = (
-                        //TODO - Sprite2D떄문에 처리했지만 이거 일반화해야함
-                        // TODO - renderTextureWidth 이놈도 같이 처리해야할듯
-                        // @ts-ignore
-                        this.is2DMeshType ? mat4.multiply(
-                            mat4.create(),
-                            this.modelMatrix,
-                            mat4.fromValues(
-                                // @ts-ignore
-                                this.width, 0, 0, 0, 0, this.height, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
-                            ),
-                        ) : this.modelMatrix
-                    )
-                    //
-                    // gpuDevice.queue.writeBuffer(
-                    // 	vertexUniformGPUBuffer,
-                    // 	vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffset,
-                    // 	modelMatrix
-                    // )
-                    // keepLog(GLOBAL_VERTEX_STRUCT)
-                    this.#uniformDataMatrixList.set(modelMatrix, vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
-                }
-                {
-                    if (this.#needUpdateNormalMatrixUniform && vertexUniformInfoMatrixListMembers.normalModelMatrix) {
-                        this.#needUpdateNormalMatrixUniform = false
-                        // calculate NormalMatrix
-                        const m = this.modelMatrix;
-                        const n = this.normalModelMatrix;
-                        const a00 = m[0], a01 = m[1], a02 = m[2];
-                        const a10 = m[4], a11 = m[5], a12 = m[6];
-                        const a20 = m[8], a21 = m[9], a22 = m[10];
-                        const det = a00 * (a11 * a22 - a12 * a21) - a01 * (a10 * a22 - a12 * a20) + a02 * (a10 * a21 - a11 * a20);
-                        if (det === 0) {
-                            // 역행렬 없음 → 단위 행렬로 대체
-                            n[0] = 1, n[1] = 0, n[2] = 0, n[3] = 0, n[4] = 0, n[5] = 1, n[6] = 0, n[7] = 0, n[8] = 0, n[9] = 0, n[10] = 1, n[11] = 0, n[12] = 0, n[13] = 0, n[14] = 0, n[15] = 1;
-                        } else {
-                            const invDet = 1 / det;
-                            // 역행렬의 전치 (transpose of inverse)
-                            n[0] = (a11 * a22 - a12 * a21) * invDet;
-                            n[1] = (a12 * a20 - a10 * a22) * invDet;
-                            n[2] = (a10 * a21 - a11 * a20) * invDet;
-                            n[3] = 0;
-                            n[4] = (a02 * a21 - a01 * a22) * invDet;
-                            n[5] = (a00 * a22 - a02 * a20) * invDet;
-                            n[6] = (a01 * a20 - a00 * a21) * invDet;
-                            n[7] = 0;
-                            n[8] = (a01 * a12 - a02 * a11) * invDet;
-                            n[9] = (a02 * a10 - a00 * a12) * invDet;
-                            n[10] = (a00 * a11 - a01 * a10) * invDet;
-                            n[11] = 0;
-                            // 하단 행은 단위 행렬처럼 설정
-                            n[12] = 0, n[13] = 0, n[14] = 0, n[15] = 1;
-                        }
-                    }
-                    // gpuDevice.queue.writeBuffer(
-                    // 	vertexUniformGPUBuffer,
-                    // 	vertexUniformInfoMatrixListMembers.normalModelMatrix.uniformOffset,
-                    // 	// new vertexUniformInfoMatrixListMembers.normalModelMatrix.View(this.normalModelMatrix),
-                    // 	this.normalModelMatrix as Float32Array
-                    // )
-                    this.#uniformDataMatrixList.set(this.normalModelMatrix, vertexUniformInfoMatrixListMembers.normalModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
-                }
-                if (vertexUniformInfoMatrixListMembers.localMatrix) {
-                    // gpuDevice.queue.writeBuffer(
-                    // 	vertexUniformGPUBuffer,
-                    // 	vertexUniformInfoMatrixListMembers.localMatrix.uniformOffset,
-                    // 	// new vertexUniformInfoMatrixListMembers.localMatrix.View(this.localMatrix),
-                    // 	this.localMatrix as Float32Array
-                    // )
-                    this.#uniformDataMatrixList.set(this.localMatrix, vertexUniformInfoMatrixListMembers.localMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
-                }
-                dirtyTransformForChildren = true
-                this.#needUpdateMatrixUniform = false
-                // keepLog('진짜 버퍼업로드', this.name)
-                redGPUContext.globalVertexSSBO.updateFloatData(
-                    this.#globalVertexSlotIndex,
-                    this.#uniformDataMatrixList,
-                    vertexUniformInfoMembers.matrixList.startOffset / 4
-                )
-            }
-        }
         if (currentGeometry && passFrustumCulling) {
             const {redGPUContext} = this
             const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT

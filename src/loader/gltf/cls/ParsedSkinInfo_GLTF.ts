@@ -3,6 +3,8 @@ import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import Mesh from "../../../display/mesh/Mesh";
 import ResourceManager from "../../../resources/core/resourceManager/ResourceManager";
+import Sphere from "../../../primitive/Sphere";
+import ColorMaterial from "../../../material/colorMaterial/ColorMaterial";
 
 class ParsedSkinInfo_GLTF {
     joints: Mesh[] = []
@@ -23,6 +25,8 @@ class ParsedSkinInfo_GLTF {
     bindGroup: GPUBindGroup;
     skinnerBindGroupLayout: GPUBindGroupLayout;
     prevGlobalVertexSSBOBuffer: GPUBuffer;
+    #geometry: Sphere;
+    #material: ColorMaterial
 
     constructor() {
         this.joints = [];
@@ -50,6 +54,14 @@ class ParsedSkinInfo_GLTF {
         return Array.from(usedJoints);
     }
 
+    get geometry(): Sphere {
+        return this.#geometry;
+    }
+
+    get material(): ColorMaterial {
+        return this.#material;
+    }
+
     createCompute(
         redGPUContext: RedGPUContext,
         device: GPUDevice,
@@ -64,6 +76,8 @@ class ParsedSkinInfo_GLTF {
         const normalOffset = interleavedStruct.getAttributeOffset('aVertexNormal');
         const tangentOffset = interleavedStruct.define['aVertexTangent'] ? interleavedStruct.getAttributeOffset('aVertexTangent') : 0;
 
+        this.#geometry = new Sphere(redGPUContext, 0.05, 3, 3, 3);
+        this.#material = new ColorMaterial(redGPUContext, '#ff0000');
         const source = `
 			#redgpu_include SYSTEM_UNIFORM;
 
