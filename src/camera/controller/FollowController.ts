@@ -160,7 +160,7 @@ class FollowController extends AController {
                 this.#targetDistance -= scaleChange * this.#targetDistance;
             },
         });
-        this.targetMesh = targetMesh;
+        this.targetMesh = targetMesh || new Mesh(redGPUContext);
         this.#targetMesh.setIgnoreFrustumCullingRecursively(true);
 
     }

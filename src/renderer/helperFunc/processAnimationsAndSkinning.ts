@@ -28,6 +28,7 @@ const processAnimationsAndSkinning = (
 
         // @group(0): 시스템 유니폼 바인드 그룹 연결
         passEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
+
         for (let i = 0; i < skinListNum; i++) {
             const mesh = skinList[i];
             const skinInfo = mesh.animationInfo.skinInfo as ParsedSkinInfo_GLTF;
