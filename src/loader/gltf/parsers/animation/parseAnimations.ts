@@ -31,6 +31,9 @@ const parseAnimations = (gltfLoader: GLTFLoader, gltfData: GLTF) => {
                 }));
             });
             await Promise.all(allPromises);
+            if (parsedAnimations.length) {
+                parsedAnimations.forEach(clipState => gltfLoader.playAnimation(clipState));
+            }
         }
         resolve();
     });
