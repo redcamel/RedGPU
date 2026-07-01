@@ -1,6 +1,6 @@
 import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1781144235516";
 import * as RedGPU from "../../../dist/index.js?t=1781144235516";
-import { RapierPhysics } from "../../../dist/plugins/physics/rapier/index.js?t=1781144235516";
+import {RapierPhysics} from "../../../dist/plugins/physics/rapier/index.js?t=1781144235516";
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -81,14 +81,79 @@ RedGPU.init(
 			);
 		}
 
-		// [KO] 캐릭터 생성 (지름 0.6m, 총 높이 1.8m 캡슐)
-		// [EN] Create character (Capsule with diameter 0.6m, total height 1.8m)
+		// [KO] GLTF 캐릭터 로딩
+		// [EN] GLTF Character Loading
+		let soldierMesh = null;
+		let stateMachine = null;
+		let targetStateName = 'Idle';
+		let lastTime = null;
+
+		const MODEL_URL = 'https://threejs.org/examples/models/gltf/Soldier.glb';
+		new RedGPU.GLTFLoader(
+			redGPUContext,
+			MODEL_URL,
+			(loader) => {
+				soldierMesh = loader.resultMesh;
+
+				// Soldier.glb의 기본 앞면 각도 정렬 (180도 회전 필요)
+				soldierMesh.rotationY = 180;
+				scene.addChild(soldierMesh);
+
+				// ── 애니메이션 클립 매핑 ─────────
+				const clips = loader.parsingResult.animations;
+				// Soldier.glb: 0=Idle, 1=Run, 2=TPose, 3=Walk
+				if (clips && clips.length > 0) {
+					const idleState = clips[0];
+					const runState = clips[1];
+					const walkState = clips[3] || clips[2];
+
+					idleState.name = 'Idle';
+					walkState.name = 'Walk';
+					runState.name = 'Run';
+
+					// ── 상태 머신 ──────────────────
+					stateMachine = new RedGPU.AnimStateMachine(idleState);
+					stateMachine.addState(walkState);
+					stateMachine.addState(runState);
+
+					const BLEND = 0.25; // 전이 시간 (초)
+
+					// Idle ↔ Walk ↔ Run 전이 그래프
+					const pairs = [
+						['Idle', 'Walk'], ['Idle', 'Run'],
+						['Walk', 'Idle'], ['Walk', 'Run'],
+						['Run', 'Idle'], ['Run', 'Walk'],
+					];
+					pairs.forEach(([from, to]) => {
+						stateMachine.addTransition({
+							fromState: from,
+							toState: to,
+							duration: BLEND,
+							conditions: () => targetStateName === to,
+						});
+					});
+
+					// 기존 자동 재생 정지 후, 재생 시작 + 상태 머신 주입
+					loader.stopAnimation();
+					loader.playAnimation(idleState);
+					if (loader.activeAnimations.length > 0) {
+						loader.activeAnimations[0].animStateMachine = stateMachine;
+					}
+				}
+			},
+			RedGPUExampleHelper.loadingProgressInfoHandler
+		);
+
+		// [KO] 캐릭터 물리 앵커 캡슐 생성 (가시성 및 렌더링을 완전히 꺼서 숨김)
+		// [EN] Create character physics anchor capsule (Hide completely by disabling visibility)
 		const charMesh = new RedGPU.Display.Mesh(
 			redGPUContext,
 			new RedGPU.Primitive.Capsule(redGPUContext, 0.3, 1.2),
 			new RedGPU.Material.PhongMaterial(redGPUContext)
 		);
-		charMesh.material.color.setColorByHEX('#ff4444');
+		charMesh.material.transparent = true;
+		charMesh.material.opacity = 0.0; // 캡슐을 완전히 투명하게 설정
+		charMesh.visible = false; // 가시성을 꺼서 렌더링에서 완전히 스킵
 		charMesh.y = 3;
 		scene.addChild(charMesh);
 
@@ -109,10 +174,16 @@ RedGPU.init(
 		const resetCharacter = () => {
 			charBody.nativeBody.setTranslation({ x: 0, y: 2, z: 0 }, true);
 			movement.x = movement.y = movement.z = 0;
+			if (soldierMesh) {
+				soldierMesh.rotationY = 180;
+			}
 		};
 
 		const renderer = new RedGPU.Renderer();
 		const render = (time) => {
+			const dt = lastTime !== null ? (time - lastTime) / 1000 : 0;
+			lastTime = time;
+
 			// [KO] 카메라 방향 기준 이동 계산
 			// [EN] Calculate movement based on camera direction
 			const camX = controller.camera.x;
@@ -143,8 +214,12 @@ RedGPU.init(
 				inputZ /= len;
 			}
 
-			movement.x = (fX * -inputZ + rX * inputX) * speed;
-			movement.z = (fZ * -inputZ + rZ * inputX) * speed;
+			// Shift 달리기 체크
+			const isRunning = len > 0 && (keyboardBuffer.shift || keyboardBuffer.Shift);
+			const currentSpeed = isRunning ? 0.3 : speed;
+
+			movement.x = (fX * -inputZ + rX * inputX) * currentSpeed;
+			movement.z = (fZ * -inputZ + rZ * inputX) * currentSpeed;
 			movement.y += gravityConst;
 
 			// [KO] 컨트롤러를 통한 충돌 감지 및 이동 계산
@@ -161,6 +236,33 @@ RedGPU.init(
 
 			const isGrounded = charController.computedGrounded ? charController.computedGrounded() : false;
 			if (isGrounded) movement.y = 0;
+
+			// [KO] gltf 캐릭터 위치 및 회전 업데이트
+			// [EN] Update gltf character position and rotation
+			if (soldierMesh) {
+				soldierMesh.x = charMesh.x;
+				soldierMesh.y = charMesh.y - 0.9; // 캡슐 중심에서 아래로 0.9m 오프셋 정렬 (발바닥 위치)
+				soldierMesh.z = charMesh.z;
+
+				// 이동 벡터 방향으로 자연스럽게 회전 (Orient Rotation to Movement)
+				if (len > 0 && dt > 0) {
+					const targetYawRad = Math.atan2(-movement.x, -movement.z);
+					const targetYawDeg = targetYawRad * (180 / Math.PI);
+					const desiredRotationY = targetYawDeg + 180; // 기본 오프셋 보정
+
+					let diff = (desiredRotationY - soldierMesh.rotationY) % 360;
+					if (diff > 180) diff -= 360;
+					if (diff < -180) diff += 360;
+
+					const factor = 1 - Math.exp(-8.0 * dt);
+					soldierMesh.rotationY += diff * factor;
+				}
+
+				// 상태 머신용 전이 조건 상태 갱신
+				if (isRunning) targetStateName = 'Run';
+				else if (len > 0) targetStateName = 'Walk';
+				else targetStateName = 'Idle';
+			}
 
 			// [KO] 카메라가 캐릭터를 따라가도록 업데이트
 			// [EN] Update camera to follow the character
@@ -190,7 +292,7 @@ const renderTestPane = async (redGPUContext, resetCharacter) => {
 			pane.addBlade({
 				view: 'text',
 				label: 'Control',
-				value: 'Use WASD to Move!',
+				value: 'WASD (Move) / Shift (Run)',
 				parse: (v) => v,
 				readonly: true
 			});

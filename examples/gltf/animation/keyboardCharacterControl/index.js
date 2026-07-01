@@ -42,11 +42,10 @@ RedGPU.init(
         const dirLight = new RedGPU.Light.DirectionalLight();
         scene.lightManager.addDirectionalLight(dirLight);
 
-        // ── FollowController ─────────────────
-        const controller = new RedGPU.Camera.FollowController(redGPUContext);
+        // ── OrbitController ─────────────────
+        const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.distance = 5;
-        controller.height = 2;
-        controller.tilt = 5;
+        controller.tilt = 15;
 
         // ── View ─────────────────────────────
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -88,7 +87,9 @@ function loadCharacter(redGPUContext, scene, view) {
 
             // character(빈 Mesh) 의 자식으로 추가
             scene.addChild(mesh);
-            view.camera.targetMesh = mesh
+            view.camera.centerX = mesh.x;
+            view.camera.centerY = mesh.y;
+            view.camera.centerZ = mesh.z;
 
             // 캐릭터 컨트롤러 생성
             characterController = new RedGPU.Charactor.SimpleCharacterController(
@@ -167,6 +168,12 @@ function updateCharacter(timestamp, view, targetMesh) {
     // ── 캐릭터 컨트롤러 업데이트 ──
     characterController.update(view, timestamp);
 
+    // ── OrbitController 카메라가 캐릭터 위치를 부드럽게 추적하도록 갱신 ──
+    const controller = view.camera;
+    controller.centerX = character.x;
+    controller.centerY = character.y + 1.0; // 캐릭터 눈높이에 맞춰 약간 높여 추적합니다.
+    controller.centerZ = character.z;
+
     // ── 상태 전이 판단 ────────────────────
     if (characterController.isRunning) targetStateName = 'Run';
     else if (characterController.isMoving) targetStateName = 'Walk';
@@ -183,13 +190,13 @@ function renderTestPane(redGPUContext, view) {
             // 조작 안내
             const helpFolder = pane.addFolder({title: '⌨️ Controls'});
             const config = {
-                move: 'W / S (Move)  A / D (Strafe)',
-                turn: 'Q / E (Turn Left / Right)',
+                move: 'W / S / A / D (Move)',
+                turn: 'Drag Mouse (Rotate Camera)',
                 run: 'Hold  Shift  while moving',
                 state: 'Idle',
             };
             helpFolder.addBinding(config, 'move', {readonly: true, label: 'Move'});
-            helpFolder.addBinding(config, 'turn', {readonly: true, label: 'Turn'});
+            helpFolder.addBinding(config, 'turn', {readonly: true, label: 'Camera'});
             helpFolder.addBinding(config, 'run', {readonly: true, label: 'Run'});
 
             // 현재 상태 모니터
@@ -209,18 +216,12 @@ function renderTestPane(redGPUContext, view) {
             const {camera} = view;
             if (camera) {
                 const camFolder = pane.addFolder({title: '📷 Camera'});
-                const camConfig = {distance: 5, height: 2};
+                const camConfig = {distance: 5};
 
                 camFolder.addBinding(camConfig, 'distance', {
                     min: 2, max: 15, step: 0.5, label: 'Distance'
                 }).on('change', ev => {
                     camera.distance = ev.value;
-                });
-
-                camFolder.addBinding(camConfig, 'height', {
-                    min: 0, max: 6, step: 0.25, label: 'Height'
-                }).on('change', ev => {
-                    camera.height = ev.value;
                 });
             }
         },

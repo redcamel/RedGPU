@@ -43,6 +43,10 @@ export interface SimpleCharacterControllerOptions {
     useKeyboard?: boolean;
     /** [KO] 모델 자체의 기본 회전 오프셋 각도 (도 단위, 기본값: 0.0) [EN] Model's default rotation offset angle (in degrees, default: 0.0) */
     modelRotationOffset?: number;
+    /** [KO] 컨트롤러 회전 사용 여부 (캐릭터가 카메라 방향을 항상 유지할지 여부, 기본값: false) [EN] Whether to use controller rotation yaw (whether the character always aligns with camera direction, default: false) */
+    useControllerRotationYaw?: boolean;
+    /** [KO] 이동 방향으로 캐릭터 회전 정렬 여부 (기본값: true) [EN] Whether to orient character rotation to movement direction (default: true) */
+    orientRotationToMovement?: boolean;
     /** [KO] 사용자 정의 키보드 매핑 [EN] Custom keyboard mapping configuration */
     keyMap?: CharacterKeyMap;
 }
@@ -66,6 +70,8 @@ class SimpleCharacterController extends RedGPUObject {
     public floorHeight: number;
     public useKeyboard: boolean;
     public modelRotationOffset: number;
+    public useControllerRotationYaw: boolean;
+    public orientRotationToMovement: boolean;
     public keyMap: Required<CharacterKeyMap>;
     /** [KO] 조종할 대상 메시 [EN] Target mesh to control */
     #targetMesh: Mesh;
@@ -110,6 +116,8 @@ class SimpleCharacterController extends RedGPUObject {
         this.floorHeight = options.floorHeight ?? 0.0;
         this.useKeyboard = options.useKeyboard ?? true;
         this.modelRotationOffset = options.modelRotationOffset ?? 0.0;
+        this.useControllerRotationYaw = options.useControllerRotationYaw ?? false;
+        this.orientRotationToMovement = options.orientRotationToMovement ?? true;
 
         // 최초 컨트롤러 주입 시, 3D 모델의 방향각 오차(modelRotationOffset)를 실제 메쉬 회전각에 선행 가산하여 정렬합니다.
         this.#targetMesh.rotationY += this.modelRotationOffset;
@@ -229,12 +237,49 @@ class SimpleCharacterController extends RedGPUObject {
         // 특정 기능에 할당된 키 목록 중 하나라도 입력되었는지 판단하는 헬퍼 함수
         const hasKey = (keys: string[]): boolean => keys.some(key => keyboardKeyBuffer[key]);
 
-        // 1. 회전 입력 처리 (Turn Left / Turn Right)
+        // 카메라 객체 안전 검출
+        const actualCamera = ('camera' in this.#camera) ? (this.#camera as any).camera : this.#camera;
+        const hasCamera = !!(actualCamera && actualCamera.viewMatrix);
+
+        let cameraYawDeg = 0;
+        let viewMatrix: mat4 | null = null;
+        if (hasCamera) {
+            viewMatrix = actualCamera.viewMatrix;
+
+            // 카메라 수평 정면 벡터 추출
+            let camForwardX = -viewMatrix[2];
+            let camForwardZ = -viewMatrix[10];
+            const lenF = Math.sqrt(camForwardX * camForwardX + camForwardZ * camForwardZ);
+            if (lenF > 0.0001) {
+                camForwardX /= lenF;
+                camForwardZ /= lenF;
+            } else {
+                camForwardX = 0;
+                camForwardZ = -1;
+            }
+
+            // 카메라의 수평 방향각(Yaw) 산출 (도 단위)
+            const cameraYawRad = Math.atan2(-camForwardX, -camForwardZ);
+            cameraYawDeg = cameraYawRad * (180 / Math.PI);
+        }
+
+        // 1. 회전 입력 처리 (Turn Left / Turn Right - 기존 수동 회전도 허용)
         const turnInput = (hasKey(this.keyMap.turnLeft) ? 1 : 0) -
             (hasKey(this.keyMap.turnRight) ? 1 : 0);
         if (turnInput !== 0) {
             // 회전 속도에 비례하여 Y축 회전 변경 (도 단위)
             this.#targetMesh.rotationY += turnInput * this.rotationSpeed * 10 * dt;
+        }
+
+        // Use Controller Rotation Yaw 가 true일 때 캐릭터 회전을 카메라 방향과 스무스하게 실시간 정렬
+        if (this.useControllerRotationYaw && hasCamera && viewMatrix) {
+            const desiredRotationY = cameraYawDeg - this.modelRotationOffset;
+            let diff = (desiredRotationY - this.#targetMesh.rotationY) % 360;
+            if (diff > 180) diff -= 360;
+            if (diff < -180) diff += 360;
+
+            const factor = 1 - Math.exp(-this.rotationSpeed * dt);
+            this.#targetMesh.rotationY += diff * factor;
         }
 
         // 2. 이동 입력값 수집 (전진/후진/횡이동)
@@ -249,20 +294,49 @@ class SimpleCharacterController extends RedGPUObject {
 
         if (!this.#isMoving) return;
 
-        // 캐릭터 메쉬의 현재 회전값과 모델 회전 오프셋을 결합하여 월드 방향각 산출 (라디안 단위)
-        const yawAngle = (this.#targetMesh.rotationY + this.modelRotationOffset) * (Math.PI / 180);
+        let moveX = 0;
+        let moveZ = 0;
 
-        // 정면 전진 방향 벡터 (-Z축이 캐릭터 정면이 되도록 유도)
-        const fx = -Math.sin(yawAngle);
-        const fz = -Math.cos(yawAngle);
+        // 카메라 기반 조작 모드 (orientRotationToMovement 또는 useControllerRotationYaw 가 켜져 있을 때)
+        if (hasCamera && viewMatrix && (this.orientRotationToMovement || this.useControllerRotationYaw)) {
+            // 카메라 기준 수평 앞 방향 벡터
+            let camForwardX = -viewMatrix[2];
+            let camForwardZ = -viewMatrix[10];
+            const lenF = Math.sqrt(camForwardX * camForwardX + camForwardZ * camForwardZ);
+            if (lenF > 0.0001) {
+                camForwardX /= lenF;
+                camForwardZ /= lenF;
+            } else {
+                camForwardX = 0;
+                camForwardZ = -1;
+            }
 
-        // 우측 횡이동 방향 벡터 (로컬 X축)
-        const rx = Math.cos(yawAngle);
-        const rz = -Math.sin(yawAngle);
+            // 카메라 기준 수평 오른쪽 방향 벡터
+            let camRightX = viewMatrix[0];
+            let camRightZ = viewMatrix[8];
+            const lenR = Math.sqrt(camRightX * camRightX + camRightZ * camRightZ);
+            if (lenR > 0.0001) {
+                camRightX /= lenR;
+                camRightZ /= lenR;
+            } else {
+                camRightX = 1;
+                camRightZ = 0;
+            }
 
-        // 최종 이동 방향 벡터 결합
-        const moveX = (fx * forwardInput) + (rx * rightInput);
-        const moveZ = (fz * forwardInput) + (rz * rightInput);
+            // 최종 이동 방향 벡터 결합
+            moveX = (camForwardX * forwardInput) + (camRightX * rightInput);
+            moveZ = (camForwardZ * forwardInput) + (camRightZ * rightInput);
+        } else {
+            // 레거시/탱크 조작 모드 (캐릭터 로컬 기준 이동)
+            const yawAngle = (this.#targetMesh.rotationY + this.modelRotationOffset) * (Math.PI / 180);
+            const fx = -Math.sin(yawAngle);
+            const fz = -Math.cos(yawAngle);
+            const rx = Math.cos(yawAngle);
+            const rz = -Math.sin(yawAngle);
+
+            moveX = (fx * forwardInput) + (rx * rightInput);
+            moveZ = (fz * forwardInput) + (rz * rightInput);
+        }
 
         const moveLen = Math.sqrt(moveX * moveX + moveZ * moveZ);
         if (moveLen > 0) {
@@ -273,6 +347,21 @@ class SimpleCharacterController extends RedGPUObject {
             // 캐릭터 위치 업데이트
             this.#targetMesh.x += dx;
             this.#targetMesh.z += dz;
+
+            // Orient Rotation to Movement 회전 보간 처리 (useControllerRotationYaw 가 꺼져있고 orientRotationToMovement 가 켜져 있을 때만 적용)
+            if (!this.useControllerRotationYaw && this.orientRotationToMovement) {
+                const targetYawRad = Math.atan2(-moveX, -moveZ);
+                const targetYawDeg = targetYawRad * (180 / Math.PI);
+                const desiredRotationY = targetYawDeg - this.modelRotationOffset;
+
+                // 360도 보정 및 최단 경로 회전 보간
+                let diff = (desiredRotationY - this.#targetMesh.rotationY) % 360;
+                if (diff > 180) diff -= 360;
+                if (diff < -180) diff += 360;
+
+                const factor = 1 - Math.exp(-this.rotationSpeed * dt);
+                this.#targetMesh.rotationY += diff * factor;
+            }
         }
     }
 
