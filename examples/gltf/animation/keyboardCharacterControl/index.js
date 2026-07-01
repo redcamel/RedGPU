@@ -18,19 +18,6 @@ document.body.appendChild(canvas);
 // ──────────────────────────────────────────
 let characterController = null;
 
-const isMoving = (view) => {
-    const k = view.redGPUContext.keyboardKeyBuffer;
-    if (!k) return false;
-    return k['w'] || k['W'] || k['s'] || k['S'] || k['a'] || k['A'] || k['d'] || k['D']
-        || k['arrowup'] || k['ArrowUp'] || k['arrowdown'] || k['ArrowDown']
-        || k['arrowleft'] || k['ArrowLeft'] || k['arrowright'] || k['ArrowRight'];
-};
-const isRunning = (view) => {
-    const k = view.redGPUContext.keyboardKeyBuffer;
-    if (!k) return false;
-    return isMoving(view) && (k['shift'] || k['Shift']);
-};
-
 // 이동 속도 (단위/초)
 const WALK_SPEED = 3.0;
 const RUN_SPEED = 7.0;
@@ -111,6 +98,7 @@ function loadCharacter(redGPUContext, scene, view) {
                 view.camera,
                 {
                     speed: WALK_SPEED,
+                    runSpeed: RUN_SPEED,
                     rotationSpeed: 8.0,
                     floorHeight: 0.0
                 }
@@ -177,14 +165,13 @@ function updateCharacter(timestamp, view, targetMesh) {
     lastTime = timestamp;
     if (dt <= 0) return;
 
-    // ── 상태 전이 판단 ────────────────────
-    if (isRunning(view)) targetStateName = 'Run';
-    else if (isMoving(view)) targetStateName = 'Walk';
-    else targetStateName = 'Idle';
-
-    // ── 캐릭터 컨트롤러 속도 갱신 및 업데이트 ──
-    characterController.speed = isRunning(view) ? RUN_SPEED : WALK_SPEED;
+    // ── 캐릭터 컨트롤러 업데이트 ──
     characterController.update(view, timestamp);
+
+    // ── 상태 전이 판단 ────────────────────
+    if (characterController.isRunning) targetStateName = 'Run';
+    else if (characterController.isMoving) targetStateName = 'Walk';
+    else targetStateName = 'Idle';
 }
 
 // ──────────────────────────────────────────
@@ -197,11 +184,13 @@ function renderTestPane(redGPUContext, view) {
             // 조작 안내
             const helpFolder = pane.addFolder({title: '⌨️ Controls'});
             const config = {
-                move: 'W / A / S / D  or  Arrow Keys',
+                move: 'W / S (Move)  A / D (Strafe)',
+                turn: 'Q / E (Turn Left / Right)',
                 run: 'Hold  Shift  while moving',
                 state: 'Idle',
             };
             helpFolder.addBinding(config, 'move', {readonly: true, label: 'Move'});
+            helpFolder.addBinding(config, 'turn', {readonly: true, label: 'Turn'});
             helpFolder.addBinding(config, 'run', {readonly: true, label: 'Run'});
 
             // 현재 상태 모니터

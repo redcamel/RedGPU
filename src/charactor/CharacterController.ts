@@ -14,6 +14,8 @@ const tempMat4 = mat4.create();
 export interface CharacterControllerOptions {
     /** [KO] 이동 속도 (기본값: 5.0) [EN] Movement speed (default: 5.0) */
     speed?: number;
+    /** [KO] 달리기 속도 (기본값: 10.0) [EN] Run speed (default: 10.0) */
+    runSpeed?: number;
     /** [KO] 회전 보간 속도 (기본값: 8.0) [EN] Rotation interpolation speed (default: 8.0) */
     rotationSpeed?: number;
     /** [KO] 중력 가속도 (기본값: 9.8) [EN] Gravity acceleration (default: 9.8) */
@@ -40,6 +42,7 @@ export interface CharacterControllerOptions {
 class CharacterController extends RedGPUObject {
     // 조작 속성
     public speed: number;
+    public runSpeed: number;
     public rotationSpeed: number;
     public gravity: number;
     public jumpForce: number;
@@ -51,6 +54,8 @@ class CharacterController extends RedGPUObject {
     /** [KO] 방향 기준으로 삼을 카메라 [EN] Camera used as orientation reference */
     #camera: ACamera;
     // 물리 상태 변수
+    #isMoving: boolean = false;
+    #isRunning: boolean = false;
     #velocityY: number = 0;
     #isGrounded: boolean = true;
     #lastUpdateTime: number = -1;
@@ -80,6 +85,7 @@ class CharacterController extends RedGPUObject {
         this.#camera = camera;
 
         this.speed = options.speed ?? 5.0;
+        this.runSpeed = options.runSpeed ?? (this.speed * 2);
         this.rotationSpeed = options.rotationSpeed ?? 8.0;
         this.gravity = options.gravity ?? 9.8;
         this.jumpForce = options.jumpForce ?? 5.0;
@@ -110,6 +116,16 @@ class CharacterController extends RedGPUObject {
     set camera(value: ACamera) {
         if (!value) throw new Error("CharacterController: camera cannot be null or undefined");
         this.#camera = value;
+    }
+
+    /** [KO] 캐릭터가 현재 이동(WASD 입력) 중인지 여부를 반환합니다. [EN] Returns whether the character is currently moving. */
+    get isMoving(): boolean {
+        return this.#isMoving;
+    }
+
+    /** [KO] 캐릭터가 현재 달리기(Shift 조합 입력) 중인지 여부를 반환합니다. [EN] Returns whether the character is currently running. */
+    get isRunning(): boolean {
+        return this.#isRunning;
     }
 
     /** [KO] 지면에 닿아있는지 여부를 반환합니다. [EN] Returns whether the character is on the ground. */
@@ -152,18 +168,64 @@ class CharacterController extends RedGPUObject {
      * [EN] Processes inputs and applies camera-relative movement and rotation.
      */
     #updateMovementAndRotation(view: View3D, dt: number): void {
-        if (!this.useKeyboard) return;
+        if (!this.useKeyboard) {
+            this.#isMoving = false;
+            this.#isRunning = false;
+            return;
+        }
 
         const keyboardKeyBuffer = view.redGPUContext.keyboardKeyBuffer;
-        if (!keyboardKeyBuffer) return;
+        if (!keyboardKeyBuffer) {
+            this.#isMoving = false;
+            this.#isRunning = false;
+            return;
+        }
 
-        // W, S, A, D 및 방향키 입력값 수집
+        // Shift 키조합 상태 변화로 인해 대소문자 keyup 이벤트가 브라우저에서 누락되는 현상 보정
+        if (!keyboardKeyBuffer['w'] && !keyboardKeyBuffer['W']) {
+            keyboardKeyBuffer['w'] = false;
+            keyboardKeyBuffer['W'] = false;
+        } else if (!keyboardKeyBuffer['w']) {
+            keyboardKeyBuffer['W'] = false;
+        }
+        if (!keyboardKeyBuffer['s'] && !keyboardKeyBuffer['S']) {
+            keyboardKeyBuffer['s'] = false;
+            keyboardKeyBuffer['S'] = false;
+        } else if (!keyboardKeyBuffer['s']) {
+            keyboardKeyBuffer['S'] = false;
+        }
+        if (!keyboardKeyBuffer['a'] && !keyboardKeyBuffer['A']) {
+            keyboardKeyBuffer['a'] = false;
+            keyboardKeyBuffer['A'] = false;
+        } else if (!keyboardKeyBuffer['a']) {
+            keyboardKeyBuffer['A'] = false;
+        }
+        if (!keyboardKeyBuffer['d'] && !keyboardKeyBuffer['D']) {
+            keyboardKeyBuffer['d'] = false;
+            keyboardKeyBuffer['D'] = false;
+        } else if (!keyboardKeyBuffer['d']) {
+            keyboardKeyBuffer['D'] = false;
+        }
+
+        // 1. Q/E 회전 입력 처리 (Turn Left / Turn Right)
+        const turnInput = (keyboardKeyBuffer['q'] || keyboardKeyBuffer['Q'] ? 1 : 0) -
+            (keyboardKeyBuffer['e'] || keyboardKeyBuffer['E'] ? 1 : 0);
+        if (turnInput !== 0) {
+            // 회전 속도에 비례하여 Y축 회전 변경 (도 단위)
+            this.#targetMesh.rotationY += turnInput * this.rotationSpeed * 10 * dt;
+        }
+
+        // 2. W, S, A, D 및 방향키 입력값 수집 (이동)
         const forwardInput = (keyboardKeyBuffer['w'] || keyboardKeyBuffer['W'] || keyboardKeyBuffer['arrowup'] || keyboardKeyBuffer['ArrowUp'] ? 1 : 0) -
             (keyboardKeyBuffer['s'] || keyboardKeyBuffer['S'] || keyboardKeyBuffer['arrowdown'] || keyboardKeyBuffer['ArrowDown'] ? 1 : 0);
         const rightInput = (keyboardKeyBuffer['d'] || keyboardKeyBuffer['D'] || keyboardKeyBuffer['arrowright'] || keyboardKeyBuffer['ArrowRight'] ? 1 : 0) -
             (keyboardKeyBuffer['a'] || keyboardKeyBuffer['A'] || keyboardKeyBuffer['arrowleft'] || keyboardKeyBuffer['ArrowLeft'] ? 1 : 0);
 
-        if (forwardInput === 0 && rightInput === 0) return;
+        // 이동 상태 및 달리기 상태 판정
+        this.#isMoving = (forwardInput !== 0 || rightInput !== 0);
+        this.#isRunning = this.#isMoving && !!(keyboardKeyBuffer['shift'] || keyboardKeyBuffer['Shift']);
+
+        if (!this.#isMoving) return;
 
         // 카메라 객체 추출 (컨트롤러인 경우 실제 카메라를 획득)
         const actualCamera = (this.#camera as any).camera || this.#camera;
@@ -193,31 +255,19 @@ class CharacterController extends RedGPUObject {
         const forwardX = fLen > 0 ? fx / fLen : 0;
         const forwardZ = fLen > 0 ? fz / fLen : 0;
 
-        // 최종 이동 방향 벡터 결합
+        // 최종 이동 방향 벡터 결합 (A/D는 횡이동이므로 몸을 틀지 않고 그대로 횡방향 위치만 변경)
         const moveX = (forwardX * forwardInput) + (rightX * rightInput);
         const moveZ = (forwardZ * forwardInput) + (rightZ * rightInput);
 
         const moveLen = Math.sqrt(moveX * moveX + moveZ * moveZ);
         if (moveLen > 0) {
-            const dx = (moveX / moveLen) * this.speed * dt;
-            const dz = (moveZ / moveLen) * this.speed * dt;
+            const currentSpeed = this.#isRunning ? this.runSpeed : this.speed;
+            const dx = (moveX / moveLen) * currentSpeed * dt;
+            const dz = (moveZ / moveLen) * currentSpeed * dt;
 
             // 캐릭터 위치 업데이트
             this.#targetMesh.x += dx;
             this.#targetMesh.z += dz;
-
-            // 이동 벡터 기준의 타겟 각도(도 단위) 구하기
-            // RedGPU는 -Z축 방향이 캐릭터 정면이므로 이에 맞추어 각도 오프셋 계산 (+ 모델 자체의 오프셋 반영)
-            const targetAngle = Math.atan2(moveX, moveZ) * (180 / Math.PI) + this.modelRotationOffset;
-
-            // 캐릭터 회전 처리 (최단 방향 선회 보간)
-            let currentAngle = this.#targetMesh.rotationY ?? 0;
-            let angleDiff = targetAngle - currentAngle;
-
-            while (angleDiff < -180) angleDiff += 360;
-            while (angleDiff > 180) angleDiff -= 360;
-
-            this.#targetMesh.rotationY = currentAngle + angleDiff * this.rotationSpeed * dt;
         }
     }
 
