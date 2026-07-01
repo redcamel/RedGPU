@@ -18,6 +18,7 @@ export {
 }
 export * as BaseObject from "./base";
 export * as Camera from "./camera/";
+export * as Charactor from "./charactor";
 export * as Context from "./context";
 export * as Color from "./color";
 export * as CommandEncoderManager from "./commandEncoderManager";

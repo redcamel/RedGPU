@@ -14,23 +14,26 @@ const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 // ──────────────────────────────────────────
-// 키 입력 상태
+// 상태 변수
 // ──────────────────────────────────────────
-const keys = {};
-window.addEventListener('keydown', e => {
-    keys[e.code] = true;
-});
-window.addEventListener('keyup', e => {
-    keys[e.code] = false;
-});
+let characterController = null;
 
-const isMoving = () => keys['KeyW'] || keys['KeyS'] || keys['KeyA'] || keys['KeyD']
-    || keys['ArrowUp'] || keys['ArrowDown'] || keys['ArrowLeft'] || keys['ArrowRight'];
-const isRunning = () => isMoving() && (keys['ShiftLeft'] || keys['ShiftRight']);
+const isMoving = (view) => {
+    const k = view.redGPUContext.keyboardKeyBuffer;
+    if (!k) return false;
+    return k['w'] || k['W'] || k['s'] || k['S'] || k['a'] || k['A'] || k['d'] || k['D']
+        || k['arrowup'] || k['ArrowUp'] || k['arrowdown'] || k['ArrowDown']
+        || k['arrowleft'] || k['ArrowLeft'] || k['arrowright'] || k['ArrowRight'];
+};
+const isRunning = (view) => {
+    const k = view.redGPUContext.keyboardKeyBuffer;
+    if (!k) return false;
+    return isMoving(view) && (k['shift'] || k['Shift']);
+};
 
-// 이동 속도 (단위/ms)
-const WALK_SPEED = 0.003;
-const RUN_SPEED = 0.007;
+// 이동 속도 (단위/초)
+const WALK_SPEED = 3.0;
+const RUN_SPEED = 7.0;
 
 // ──────────────────────────────────────────
 // 상태 변수
@@ -50,12 +53,11 @@ RedGPU.init(
 
         // ── 조명 ────────────────────────────
         const dirLight = new RedGPU.Light.DirectionalLight();
-        dirLight.intensity = 1.5;
         scene.lightManager.addDirectionalLight(dirLight);
 
         // ── FollowController ─────────────────
-        // const controller = new RedGPU.Camera.FollowController(redGPUContext);
-        const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        const controller = new RedGPU.Camera.FollowController(redGPUContext);
+        // const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         // controller.distance = 5;
         // controller.height   = 2;
         // controller.tilt     = 5;
@@ -71,7 +73,7 @@ RedGPU.init(
         // ── 렌더 루프 ────────────────────────
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (timestamp) => {
-            updateCharacter(timestamp, controller, scene.getChildAt(0));
+            updateCharacter(timestamp, view, scene.getChildAt(0));
         });
 
         // ── GUI ──────────────────────────────
@@ -95,11 +97,24 @@ function loadCharacter(redGPUContext, scene, view) {
         redGPUContext,
         MODEL_URL,
         (loader) => {
+            console.log(loader)
             const mesh = loader.resultMesh;
 
             // character(빈 Mesh) 의 자식으로 추가
             scene.addChild(mesh);
-            view.camera.targetMesh = mesh;
+            view.camera.targetMesh = mesh
+
+            // 캐릭터 컨트롤러 생성
+            characterController = new RedGPU.Charactor.CharacterController(
+                redGPUContext,
+                mesh,
+                view.camera,
+                {
+                    speed: WALK_SPEED,
+                    rotationSpeed: 8.0,
+                    floorHeight: 0.0
+                }
+            );
             // mesh.x = 50
             // mesh.z = 50
             // FollowController 가 이미 character 를 추적 중이므로
@@ -154,61 +169,22 @@ function loadCharacter(redGPUContext, scene, view) {
 // ──────────────────────────────────────────
 // 매 프레임 캐릭터 이동 처리
 // ──────────────────────────────────────────
-function updateCharacter(timestamp, followController, targetMesh) {
-    const character = targetMesh
-    if (!character) return;
+function updateCharacter(timestamp, view, targetMesh) {
+    const character = targetMesh;
+    if (!character || !characterController) return;
 
     const dt = lastTime !== null ? timestamp - lastTime : 0;
     lastTime = timestamp;
     if (dt <= 0) return;
 
     // ── 상태 전이 판단 ────────────────────
-    if (isRunning()) targetStateName = 'Run';
-    else if (isMoving()) targetStateName = 'Walk';
+    if (isRunning(view)) targetStateName = 'Run';
+    else if (isMoving(view)) targetStateName = 'Walk';
     else targetStateName = 'Idle';
 
-    if (!isMoving()) return;
-
-    // ── 이동 방향 계산 (카메라 수평 방향 기준) ──
-    const speed = isRunning() ? RUN_SPEED : WALK_SPEED;
-
-    // 카메라의 수평 방위각(yaw)을 구함
-    // FollowController 에 pan 프로퍼티가 없으면 rotationY 직접 계산
-    const camYaw = followController.pan !== undefined
-        ? (followController.pan * Math.PI / 180)
-        : 0;
-
-    // WASD 입력 벡터 (로컬)
-    let fx = 0, fz = 0;
-    if (keys['KeyW'] || keys['ArrowUp']) fz -= 5;
-    if (keys['KeyS'] || keys['ArrowDown']) fz += 5;
-    if (keys['KeyA'] || keys['ArrowLeft']) fx -= 5;
-    if (keys['KeyD'] || keys['ArrowRight']) fx += 5;
-
-    // 정규화
-    const len = Math.sqrt(fx * fx + fz * fz);
-    if (len === 0) return;
-    fx /= len;
-    fz /= len;
-
-    // 카메라 방위각 기준으로 월드 방향 변환
-    const sinY = Math.sin(camYaw);
-    const cosY = Math.cos(camYaw);
-    const worldX = fx * cosY - fz * sinY;
-    const worldZ = fx * sinY + fz * cosY;
-
-    // 캐릭터 이동
-    character.x += worldX * speed * dt;
-    character.z += worldZ * speed * dt;
-
-    // 캐릭터가 진행 방향을 향해 회전 (Y축)
-    const targetAngle = Math.atan2(worldX, worldZ) * (180 / Math.PI);
-    // 부드러운 회전 보간 (lerp)
-    let delta = targetAngle - character.rotationY;
-    // -180 ~ 180 범위로 정규화
-    while (delta > 180) delta -= 360;
-    while (delta < -180) delta += 360;
-    character.rotationY += delta * Math.min(1, dt * 0.015);
+    // ── 캐릭터 컨트롤러 속도 갱신 및 업데이트 ──
+    characterController.speed = isRunning(view) ? RUN_SPEED : WALK_SPEED;
+    characterController.update(view, timestamp);
 }
 
 // ──────────────────────────────────────────
