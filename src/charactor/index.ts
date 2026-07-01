@@ -1,6 +1,6 @@
-import CharacterController from "./CharacterController";
+import SimpleCharacterController from "./SimpleCharacterController";
 
 export {
-    CharacterController
+    SimpleCharacterController
 };
-export * from "./CharacterController";
+export * from "./SimpleCharacterController";

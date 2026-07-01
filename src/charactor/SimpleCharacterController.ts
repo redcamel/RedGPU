@@ -8,8 +8,8 @@ import View3D from "../display/view/View3D";
 const tempMat4 = mat4.create();
 
 /**
- * [KO] 캐릭터 컨트롤러의 키 매핑 규격 인터페이스입니다.
- * [EN] Key mapping specification interface for CharacterController.
+ * [KO] Simple 캐릭터 컨트롤러의 키 매핑 규격 인터페이스입니다.
+ * [EN] Key mapping specification interface for SimpleCharacterController.
  */
 export interface CharacterKeyMap {
     moveForward?: string[];
@@ -23,10 +23,10 @@ export interface CharacterKeyMap {
 }
 
 /**
- * [KO] 캐릭터 컨트롤러의 초기화 옵션 인터페이스입니다.
- * [EN] Initialization options interface for CharacterController.
+ * [KO] Simple 캐릭터 컨트롤러의 초기화 옵션 인터페이스입니다.
+ * [EN] Initialization options interface for SimpleCharacterController.
  */
-export interface CharacterControllerOptions {
+export interface SimpleCharacterControllerOptions {
     /** [KO] 이동 속도 (기본값: 5.0) [EN] Movement speed (default: 5.0) */
     speed?: number;
     /** [KO] 달리기 속도 (기본값: 10.0) [EN] Run speed (default: 10.0) */
@@ -48,15 +48,15 @@ export interface CharacterControllerOptions {
 }
 
 /**
- * [KO] 3D 캐릭터의 움직임과 회전을 제어하는 캐릭터 컨트롤러 클래스입니다.
- * [EN] Character controller class that controls the movement and rotation of a 3D character.
+ * [KO] 3D 캐릭터의 움직임과 회전을 제어하는 Simple 캐릭터 컨트롤러 클래스입니다.
+ * [EN] Simple character controller class that controls the movement and rotation of a 3D character.
  *
- * [KO] 카메라 뷰 방향에 맞춘 이동(WASD) 및 자연스러운 선회 회전, 그리고 점프 및 낙하 중력을 단독으로 구현합니다.
- * [EN] Implements camera-relative movement (WASD), smooth rotation interpolation, and jump/fall gravity independently.
+ * [KO] 카메라 뷰 방향과 독립된 이동(WASD) 및 자연스러운 선회 회전, 그리고 점프 및 낙하 중력을 단독으로 구현합니다.
+ * [EN] Implements camera-independent movement (WASD), smooth rotation interpolation, and jump/fall gravity independently.
  *
  * @category Controller
  */
-class CharacterController extends RedGPUObject {
+class SimpleCharacterController extends RedGPUObject {
     // 조작 속성
     public speed: number;
     public runSpeed: number;
@@ -80,8 +80,8 @@ class CharacterController extends RedGPUObject {
     #currentDeltaTime: number = 0;
 
     /**
-     * [KO] CharacterController 인스턴스를 생성합니다.
-     * [EN] Creates an instance of CharacterController.
+     * [KO] SimpleCharacterController 인스턴스를 생성합니다.
+     * [EN] Creates an instance of SimpleCharacterController.
      *
      * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU Context
      * @param targetMesh - [KO] 제어할 캐릭터 메시 [EN] Character mesh to control
@@ -92,12 +92,12 @@ class CharacterController extends RedGPUObject {
         redGPUContext: RedGPUContext,
         targetMesh: Mesh,
         camera: ACamera,
-        options: CharacterControllerOptions = {}
+        options: SimpleCharacterControllerOptions = {}
     ) {
         super(redGPUContext);
 
-        if (!targetMesh) throw new Error("CharacterController: targetMesh is required.");
-        if (!camera) throw new Error("CharacterController: camera is required.");
+        if (!targetMesh) throw new Error("SimpleCharacterController: targetMesh is required.");
+        if (!camera) throw new Error("SimpleCharacterController: camera is required.");
 
         this.#targetMesh = targetMesh;
         this.#camera = camera;
@@ -135,7 +135,7 @@ class CharacterController extends RedGPUObject {
 
     /** [KO] 제어 중인 대상 메시를 설정합니다. [EN] Sets the controlled target mesh. */
     set targetMesh(value: Mesh) {
-        if (!value) throw new Error("CharacterController: targetMesh cannot be null or undefined");
+        if (!value) throw new Error("SimpleCharacterController: targetMesh cannot be null or undefined");
         this.#targetMesh = value;
     }
 
@@ -146,7 +146,7 @@ class CharacterController extends RedGPUObject {
 
     /** [KO] 방향 기준 카메라를 설정합니다. [EN] Sets the reference camera. */
     set camera(value: ACamera) {
-        if (!value) throw new Error("CharacterController: camera cannot be null or undefined");
+        if (!value) throw new Error("SimpleCharacterController: camera cannot be null or undefined");
         this.#camera = value;
     }
 
@@ -308,4 +308,4 @@ class CharacterController extends RedGPUObject {
     }
 }
 
-export default CharacterController;
+export default SimpleCharacterController;
