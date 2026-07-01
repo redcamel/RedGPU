@@ -8,6 +8,21 @@ import View3D from "../display/view/View3D";
 const tempMat4 = mat4.create();
 
 /**
+ * [KO] 캐릭터 컨트롤러의 키 매핑 규격 인터페이스입니다.
+ * [EN] Key mapping specification interface for CharacterController.
+ */
+export interface CharacterKeyMap {
+    moveForward?: string[];
+    moveBackward?: string[];
+    strafeLeft?: string[];
+    strafeRight?: string[];
+    turnLeft?: string[];
+    turnRight?: string[];
+    jump?: string[];
+    run?: string[];
+}
+
+/**
  * [KO] 캐릭터 컨트롤러의 초기화 옵션 인터페이스입니다.
  * [EN] Initialization options interface for CharacterController.
  */
@@ -26,8 +41,10 @@ export interface CharacterControllerOptions {
     floorHeight?: number;
     /** [KO] 키보드 조작 활성화 여부 (기본값: true) [EN] Whether to enable keyboard control (default: true) */
     useKeyboard?: boolean;
-    /** [KO] 모델 자체의 기본 회전 오프셋 각도 (도 단위, 기본값: 180.0) [EN] Model's default rotation offset angle (in degrees, default: 180.0) */
+    /** [KO] 모델 자체의 기본 회전 오프셋 각도 (도 단위, 기본값: 0.0) [EN] Model's default rotation offset angle (in degrees, default: 0.0) */
     modelRotationOffset?: number;
+    /** [KO] 사용자 정의 키보드 매핑 [EN] Custom keyboard mapping configuration */
+    keyMap?: CharacterKeyMap;
 }
 
 /**
@@ -49,6 +66,7 @@ class CharacterController extends RedGPUObject {
     public floorHeight: number;
     public useKeyboard: boolean;
     public modelRotationOffset: number;
+    public keyMap: Required<CharacterKeyMap>;
     /** [KO] 조종할 대상 메시 [EN] Target mesh to control */
     #targetMesh: Mesh;
     /** [KO] 방향 기준으로 삼을 카메라 [EN] Camera used as orientation reference */
@@ -91,7 +109,21 @@ class CharacterController extends RedGPUObject {
         this.jumpForce = options.jumpForce ?? 5.0;
         this.floorHeight = options.floorHeight ?? 0.0;
         this.useKeyboard = options.useKeyboard ?? true;
-        this.modelRotationOffset = options.modelRotationOffset ?? 180.0;
+        this.modelRotationOffset = options.modelRotationOffset ?? 0.0;
+
+        // 최초 컨트롤러 주입 시, 3D 모델의 방향각 오차(modelRotationOffset)를 실제 메쉬 회전각에 선행 가산하여 정렬합니다.
+        this.#targetMesh.rotationY += this.modelRotationOffset;
+
+        this.keyMap = {
+            moveForward: options.keyMap?.moveForward ?? ['w', 'W', 'arrowup', 'ArrowUp'],
+            moveBackward: options.keyMap?.moveBackward ?? ['s', 'S', 'arrowdown', 'ArrowDown'],
+            strafeLeft: options.keyMap?.strafeLeft ?? ['a', 'A', 'arrowleft', 'ArrowLeft'],
+            strafeRight: options.keyMap?.strafeRight ?? ['d', 'D', 'arrowright', 'ArrowRight'],
+            turnLeft: options.keyMap?.turnLeft ?? ['q', 'Q'],
+            turnRight: options.keyMap?.turnRight ?? ['e', 'E'],
+            jump: options.keyMap?.jump ?? [' '],
+            run: options.keyMap?.run ?? ['shift', 'Shift']
+        };
     }
 
     // ==================== Getters / Setters ====================
@@ -181,83 +213,56 @@ class CharacterController extends RedGPUObject {
             return;
         }
 
-        // Shift 키조합 상태 변화로 인해 대소문자 keyup 이벤트가 브라우저에서 누락되는 현상 보정
-        if (!keyboardKeyBuffer['w'] && !keyboardKeyBuffer['W']) {
-            keyboardKeyBuffer['w'] = false;
-            keyboardKeyBuffer['W'] = false;
-        } else if (!keyboardKeyBuffer['w']) {
-            keyboardKeyBuffer['W'] = false;
-        }
-        if (!keyboardKeyBuffer['s'] && !keyboardKeyBuffer['S']) {
-            keyboardKeyBuffer['s'] = false;
-            keyboardKeyBuffer['S'] = false;
-        } else if (!keyboardKeyBuffer['s']) {
-            keyboardKeyBuffer['S'] = false;
-        }
-        if (!keyboardKeyBuffer['a'] && !keyboardKeyBuffer['A']) {
-            keyboardKeyBuffer['a'] = false;
-            keyboardKeyBuffer['A'] = false;
-        } else if (!keyboardKeyBuffer['a']) {
-            keyboardKeyBuffer['A'] = false;
-        }
-        if (!keyboardKeyBuffer['d'] && !keyboardKeyBuffer['D']) {
-            keyboardKeyBuffer['d'] = false;
-            keyboardKeyBuffer['D'] = false;
-        } else if (!keyboardKeyBuffer['d']) {
-            keyboardKeyBuffer['D'] = false;
+        // 대소문자 키 해제 유실 버그 방지 보정 (모든 키 목록에 대해 소문자가 false이면 대문자 키도 강제 false)
+        for (const keyList of Object.values(this.keyMap)) {
+            for (const key of keyList) {
+                const lower = key.toLowerCase();
+                const upper = key.toUpperCase();
+                if (lower !== upper) {
+                    if (!keyboardKeyBuffer[lower]) {
+                        keyboardKeyBuffer[upper] = false;
+                    }
+                }
+            }
         }
 
-        // 1. Q/E 회전 입력 처리 (Turn Left / Turn Right)
-        const turnInput = (keyboardKeyBuffer['q'] || keyboardKeyBuffer['Q'] ? 1 : 0) -
-            (keyboardKeyBuffer['e'] || keyboardKeyBuffer['E'] ? 1 : 0);
+        // 특정 기능에 할당된 키 목록 중 하나라도 입력되었는지 판단하는 헬퍼 함수
+        const hasKey = (keys: string[]): boolean => keys.some(key => keyboardKeyBuffer[key]);
+
+        // 1. 회전 입력 처리 (Turn Left / Turn Right)
+        const turnInput = (hasKey(this.keyMap.turnLeft) ? 1 : 0) -
+            (hasKey(this.keyMap.turnRight) ? 1 : 0);
         if (turnInput !== 0) {
             // 회전 속도에 비례하여 Y축 회전 변경 (도 단위)
             this.#targetMesh.rotationY += turnInput * this.rotationSpeed * 10 * dt;
         }
 
-        // 2. W, S, A, D 및 방향키 입력값 수집 (이동)
-        const forwardInput = (keyboardKeyBuffer['w'] || keyboardKeyBuffer['W'] || keyboardKeyBuffer['arrowup'] || keyboardKeyBuffer['ArrowUp'] ? 1 : 0) -
-            (keyboardKeyBuffer['s'] || keyboardKeyBuffer['S'] || keyboardKeyBuffer['arrowdown'] || keyboardKeyBuffer['ArrowDown'] ? 1 : 0);
-        const rightInput = (keyboardKeyBuffer['d'] || keyboardKeyBuffer['D'] || keyboardKeyBuffer['arrowright'] || keyboardKeyBuffer['ArrowRight'] ? 1 : 0) -
-            (keyboardKeyBuffer['a'] || keyboardKeyBuffer['A'] || keyboardKeyBuffer['arrowleft'] || keyboardKeyBuffer['ArrowLeft'] ? 1 : 0);
+        // 2. 이동 입력값 수집 (전진/후진/횡이동)
+        const forwardInput = (hasKey(this.keyMap.moveForward) ? 1 : 0) -
+            (hasKey(this.keyMap.moveBackward) ? 1 : 0);
+        const rightInput = (hasKey(this.keyMap.strafeRight) ? 1 : 0) -
+            (hasKey(this.keyMap.strafeLeft) ? 1 : 0);
 
         // 이동 상태 및 달리기 상태 판정
         this.#isMoving = (forwardInput !== 0 || rightInput !== 0);
-        this.#isRunning = this.#isMoving && !!(keyboardKeyBuffer['shift'] || keyboardKeyBuffer['Shift']);
+        this.#isRunning = this.#isMoving && hasKey(this.keyMap.run);
 
         if (!this.#isMoving) return;
 
-        // 카메라 객체 추출 (컨트롤러인 경우 실제 카메라를 획득)
-        const actualCamera = (this.#camera as any).camera || this.#camera;
+        // 캐릭터 메쉬의 현재 회전값과 모델 회전 오프셋을 결합하여 월드 방향각 산출 (라디안 단위)
+        const yawAngle = (this.#targetMesh.rotationY + this.modelRotationOffset) * (Math.PI / 180);
 
-        // 카메라의 뷰 매트릭스 획득
-        const viewMatrix = actualCamera.viewMatrix;
-        if (!viewMatrix) return;
+        // 정면 전진 방향 벡터 (-Z축이 캐릭터 정면이 되도록 유도)
+        const fx = -Math.sin(yawAngle);
+        const fz = -Math.cos(yawAngle);
 
-        // 뷰 매트릭스의 역행렬(카메라 월드 행렬) 구하기
-        mat4.invert(tempMat4, viewMatrix);
+        // 우측 횡이동 방향 벡터 (로컬 X축)
+        const rx = Math.cos(yawAngle);
+        const rz = -Math.sin(yawAngle);
 
-        // 월드 행렬(tempMat4)의 열(Column) 성분으로부터 카메라의 실제 월드 우측/전방 방향 추출
-        // 우측 벡터 (Right Vector): 1번째 열 (X축) -> tempMat4[0], tempMat4[2]
-        const rx = tempMat4[0];
-        const rz = tempMat4[2];
-
-        // 전방 벡터 (Forward Vector): 3번째 열 (Z축)의 반대 -> -tempMat4[8], -tempMat4[10]
-        const fx = -tempMat4[8];
-        const fz = -tempMat4[10];
-
-        // Y축 성분을 제거한 수평면 벡터 크기 정형화
-        const rLen = Math.sqrt(rx * rx + rz * rz);
-        const rightX = rLen > 0 ? rx / rLen : 0;
-        const rightZ = rLen > 0 ? rz / rLen : 0;
-
-        const fLen = Math.sqrt(fx * fx + fz * fz);
-        const forwardX = fLen > 0 ? fx / fLen : 0;
-        const forwardZ = fLen > 0 ? fz / fLen : 0;
-
-        // 최종 이동 방향 벡터 결합 (A/D는 횡이동이므로 몸을 틀지 않고 그대로 횡방향 위치만 변경)
-        const moveX = (forwardX * forwardInput) + (rightX * rightInput);
-        const moveZ = (forwardZ * forwardInput) + (rightZ * rightInput);
+        // 최종 이동 방향 벡터 결합
+        const moveX = (fx * forwardInput) + (rx * rightInput);
+        const moveZ = (fz * forwardInput) + (rz * rightInput);
 
         const moveLen = Math.sqrt(moveX * moveX + moveZ * moveZ);
         if (moveLen > 0) {
@@ -277,9 +282,11 @@ class CharacterController extends RedGPUObject {
      */
     #updateGravity(view: View3D, dt: number): void {
         const keyboardKeyBuffer = view.redGPUContext.keyboardKeyBuffer;
+        if (!keyboardKeyBuffer) return;
 
-        // 1. 점프 입력 감지 (Space 키가 눌렸고 접지 상태일 때)
-        if (this.useKeyboard && keyboardKeyBuffer && keyboardKeyBuffer[' '] && this.#isGrounded) {
+        // 1. 점프 입력 감지 (점프 키가 눌렸고 접지 상태일 때)
+        const hasJumpKey = this.keyMap.jump.some(key => keyboardKeyBuffer[key]);
+        if (this.useKeyboard && hasJumpKey && this.#isGrounded) {
             this.#velocityY = this.jumpForce;
             this.#isGrounded = false;
         }

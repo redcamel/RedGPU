@@ -44,10 +44,9 @@ RedGPU.init(
 
         // ── FollowController ─────────────────
         const controller = new RedGPU.Camera.FollowController(redGPUContext);
-        // const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        // controller.distance = 5;
-        // controller.height   = 2;
-        // controller.tilt     = 5;
+        controller.distance = 5;
+        controller.height = 2;
+        controller.tilt = 5;
 
         // ── View ─────────────────────────────
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -100,7 +99,7 @@ function loadCharacter(redGPUContext, scene, view) {
                     speed: WALK_SPEED,
                     runSpeed: RUN_SPEED,
                     rotationSpeed: 8.0,
-                    floorHeight: 0.0
+                    floorHeight: 0.0,
                 }
             );
             // mesh.x = 50
