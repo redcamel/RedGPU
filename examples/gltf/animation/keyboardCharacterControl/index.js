@@ -91,7 +91,7 @@ function loadCharacter(redGPUContext, scene, view) {
             view.camera.targetMesh = mesh
 
             // 캐릭터 컨트롤러 생성
-            characterController = new RedGPU.Charactor.CharacterController(
+            characterController = new RedGPU.Charactor.SimpleCharacterController(
                 redGPUContext,
                 mesh,
                 view.camera,
