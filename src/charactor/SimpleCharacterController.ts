@@ -221,18 +221,6 @@ class SimpleCharacterController extends RedGPUObject {
             return;
         }
 
-        // 대소문자 키 해제 유실 버그 방지 보정 (모든 키 목록에 대해 소문자가 false이면 대문자 키도 강제 false)
-        for (const keyList of Object.values(this.keyMap)) {
-            for (const key of keyList) {
-                const lower = key.toLowerCase();
-                const upper = key.toUpperCase();
-                if (lower !== upper) {
-                    if (!keyboardKeyBuffer[lower]) {
-                        keyboardKeyBuffer[upper] = false;
-                    }
-                }
-            }
-        }
 
         // 특정 기능에 할당된 키 목록 중 하나라도 입력되었는지 판단하는 헬퍼 함수
         const hasKey = (keys: string[]): boolean => keys.some(key => keyboardKeyBuffer[key]);
