@@ -1426,6 +1426,8 @@ class Mesh extends MeshBase {
                 }
             }
         }
+        // TODO - 일단 임시로 그림자 케스팅이 된녀석은 무조건 통과
+        if (this.castShadow) passFrustumCulling = true
         if (passFrustumCulling) {
             {
                 // 변경시만 이전 모델 메트릭스 업데이트
