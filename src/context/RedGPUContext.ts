@@ -542,7 +542,9 @@ class RedGPUContext extends RedGPUContextViewContainer {
                 }
             };
             const HD_blur = () => {
-                this.#keyboardKeyBuffer = {};
+                for (const key in this.#keyboardKeyBuffer) {
+                    delete this.#keyboardKeyBuffer[key];
+                }
             };
             window?.addEventListener('keyup', HD_keyUp);
             window?.addEventListener('keydown', HD_keyDown);
