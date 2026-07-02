@@ -383,7 +383,7 @@ class LightManager {
         const lightProjectionMatrix = mat4.create()
         const cameraPosition = view.rawCamera instanceof Camera2D ? vec3.fromValues(0, 0, 0) : vec3.fromValues(
             view.rawCamera.x,
-            view.rawCamera.y,
+            view.rawCamera.y, // ㅅㄷㄴㅅ
             view.rawCamera.z
         );
         const distance = Math.max(vec3.distance(cameraPosition, vec3.create()), 1);
