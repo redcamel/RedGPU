@@ -234,6 +234,7 @@ fn main(inputData:InputData) -> OutputFragment {
         directionalShadowMapSampler,
         u_directionalShadowDepthTextureSize,
         u_directionalShadowBias,
+        systemUniforms.shadow.directionalShadowFilterScale,
         inputData.shadowCoord
     );
     if(!receiveShadowYn){ 

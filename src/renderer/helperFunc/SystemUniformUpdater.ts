@@ -134,6 +134,10 @@ class SystemUniformUpdater {
                 {
                     key: 'directionalShadowStrength',
                     value: shadowManager.directionalShadowManager.strength,
+                },
+                {
+                    key: 'directionalShadowFilterScale',
+                    value: shadowManager.directionalShadowManager.filterScale,
                 }
             ]
         )

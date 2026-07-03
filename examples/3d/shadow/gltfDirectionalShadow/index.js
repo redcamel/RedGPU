@@ -122,6 +122,12 @@ const renderTestPane = (redGPUContext, scene) => {
                 step: 0.01,
                 label: 'Shadow Strength'
             });
+            folder.addBinding(directionalShadowManager, 'filterScale', {
+                min: 0.0,
+                max: 15.0,
+                step: 0.1,
+                label: 'Filter Scale'
+            });
         }
     });
 };

@@ -19,6 +19,7 @@ fn getDirectionalShadowVisibility(
    directionalShadowMapSampler: sampler_comparison,
    shadowDepthTextureSize: u32,
    bias: f32,
+   filterScale: f32,
    shadowCoord: vec3<f32>
 ) -> f32 {
     let oneOverShadowDepthTextureSize = 1.0 / f32(shadowDepthTextureSize);
@@ -42,9 +43,6 @@ fn getDirectionalShadowVisibility(
 
     var visibility: f32 = 0.0;
     
-    // 그림자 필터 번짐 반경 스케일 (지터링 도입으로 4.0 수준에서도 매우 우수한 소프트 섀도우를 연출함)
-    let filterScale = 3.0;
-
     // 픽셀 스크린 공간 좌표 기반으로 무작위 회전 각도 계산
     let randomAngle = getShadowRandomAngle(shadowCoord.xy * 1000.0);
     let cosAngle = cos(randomAngle);
