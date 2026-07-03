@@ -18,7 +18,7 @@ import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize"
  */
 class DirectionalShadowManager {
     #shadowDepthTextureSize: number = 4096
-    #bias: number = 0.0005
+    #bias: number = 0.00015
     #shadowDepthTexture: GPUTexture
     #shadowDepthTextureView: GPUTextureView
     #shadowDepthTextureEmpty: GPUTexture

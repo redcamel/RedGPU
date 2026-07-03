@@ -112,7 +112,7 @@ const renderTestPane = (redGPUContext, scene) => {
             const folder = pane.addFolder({title: 'Directional Shadow', expanded: true});
             folder.addBinding(directionalShadowManager, 'shadowDepthTextureSize', {
                 min: 128,
-                max: 2048,
+                max: 4096,
                 step: 1,
                 label: 'Texture Size'
             });

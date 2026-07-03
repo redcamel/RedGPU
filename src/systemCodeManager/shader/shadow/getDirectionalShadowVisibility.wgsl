@@ -24,9 +24,10 @@ fn getDirectionalShadowVisibility(
     // 3x3 PCF 필터링 적용 (Apply 3x3 PCF filtering)
     for (var y = -1; y <= 1; y++) {
         for (var x = -1; x <= 1; x++) {
-            let offset = vec2f(vec2(x, y)) * oneOverShadowDepthTextureSize;
+            let offset = vec2<f32>(f32(x), f32(y)) * oneOverShadowDepthTextureSize;
             let tUV = shadowCoord.xy + offset;
 
+            // textureSampleCompare는 분기문 내부가 아닌, 항상 실행되는 영역(Uniform Control Flow)에 두어야 컴파일러 에러가 발생하지 않습니다.
             let sampleVisibility = textureSampleCompare(
                 directionalShadowMap,
                 directionalShadowMapSampler,
@@ -34,16 +35,15 @@ fn getDirectionalShadowVisibility(
                 shadowDepth - bias
             );
 
-            // 텍스처 범위를 벗어난 경우 그림자가 없는 것으로 처리 (Visibility 1.0)
-            if (tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0) {
-                visibility += 1.0;
-            } else {
-                visibility += sampleVisibility;
-            }
+            // 범위 밖의 영역은 그림자 가시성을 1.0으로 고정 (select 함수를 사용하여 분기를 피함)
+            let outOfBounds = tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0;
+            visibility += select(sampleVisibility, 1.0, outOfBounds);
         }
     }
 
     visibility /= 9.0;
 
-    return visibility;
+    // 라이트 프러스트럼 범위 밖(Near/Far plane 너머)인 경우 분기문 없이 select로 1.0 반환 처리
+    let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
+    return select(visibility, 1.0, invalidDepth);
 }
