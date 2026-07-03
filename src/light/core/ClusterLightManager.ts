@@ -172,6 +172,7 @@ class ClusterLightManager extends RedGPUObject {
                         offset,
                     )
                     if (tLight.enableDebugger) {
+                        // TODO - 버그 IBL과 함꼐 실행하면 죽는다
                         if (!tLight.drawDebugger) tLight.drawDebugger = new DrawDebuggerSpotLight(redGPUContext, tLight)
                         tLight.drawDebugger.render(renderViewStateData)
                     }
