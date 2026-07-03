@@ -46,7 +46,7 @@ fn main(
         // [EN] Fetch depth texture first and skip color texture fetch for background pixels (Early Exit)
         let depth = textureLoad(depthTexture, vec2<i32>(coords), 0);
         
-        if (depth < 1.0) {
+//        if (depth < 1.0) {
             // [KO] 단 한 번만 색상 텍스처를 페칭하여 알파와 RGB 채널을 모두 검사
             // [EN] Fetch the color texture only once to check both alpha and RGB channels
             let texel = textureLoad(sourceTexture, vec2<i32>(coords), 0);
@@ -83,7 +83,7 @@ fn main(
                     // [EN] Accumulate into local histogram with weight (scaled 0-100)
                     atomicAdd(&localHistogram[binIndex], u32(weight * 100.0));
                 }
-            }
+//            }
         }
     }
 

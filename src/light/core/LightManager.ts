@@ -497,7 +497,7 @@ class LightManager {
         vec3.normalize(lightDir, lightDir);
 
         // 3. 가로/세로 영역(X, Y): 줌 거리(focusDistance)에 비례하여 그림자 상자 크기 설정
-        const shadowRadius = Math.min(actualRadius, Math.max(focusDistance * 1.5, 30.0));
+        const shadowRadius = Math.min(actualRadius, Math.max(focusDistance * 1.5, 15.0));
         const margin = shadowRadius * 0.20;
         const left = -shadowRadius - margin;
         const right = shadowRadius + margin;
