@@ -19,6 +19,7 @@ import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize"
 class DirectionalShadowManager {
     #shadowDepthTextureSize: number = 4096
     #bias: number = 0.00015
+    #strength: number = 1.0
     #shadowDepthTexture: GPUTexture
     #shadowDepthTextureView: GPUTextureView
     #shadowDepthTextureEmpty: GPUTexture
@@ -98,6 +99,31 @@ class DirectionalShadowManager {
     set bias(value: number) {
         validatePositiveNumberRange(value, 0, 1)
         this.#bias = value;
+    }
+
+    /**
+     * [KO] 그림자의 세기(Strength) 값을 반환합니다.
+     * [EN] Returns the shadow strength value.
+     *
+     * @returns
+     * [KO] 세기 값 (0.0 ~ 1.0)
+     * [EN] Strength value (0.0 to 1.0)
+     */
+    get strength(): number {
+        return this.#strength;
+    }
+
+    /**
+     * [KO] 그림자의 세기(Strength) 값을 설정합니다. (0.0 ~ 1.0)
+     * [EN] Sets the shadow strength value. (0.0 to 1.0)
+     *
+     * @param value -
+     * [KO] 세기 값
+     * [EN] Strength value
+     */
+    set strength(value: number) {
+        validatePositiveNumberRange(value, 0, 1)
+        this.#strength = value;
     }
 
     /**

@@ -130,6 +130,10 @@ class SystemUniformUpdater {
                 {
                     key: 'directionalShadowBias',
                     value: shadowManager.directionalShadowManager.bias,
+                },
+                {
+                    key: 'directionalShadowStrength',
+                    value: shadowManager.directionalShadowManager.strength,
                 }
             ]
         )

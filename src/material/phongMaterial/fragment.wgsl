@@ -236,7 +236,11 @@ fn main(inputData:InputData) -> OutputFragment {
         u_directionalShadowBias,
         inputData.shadowCoord
     );
-    if(!receiveShadowYn){ visibility = 1.0; }
+    if(!receiveShadowYn){ 
+        visibility = 1.0; 
+    } else {
+        visibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, visibility);
+    }
 
     var totalDirectLighting = vec3<f32>(0.0);
 

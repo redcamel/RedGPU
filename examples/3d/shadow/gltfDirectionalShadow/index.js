@@ -116,6 +116,12 @@ const renderTestPane = (redGPUContext, scene) => {
                 step: 1,
                 label: 'Texture Size'
             });
+            folder.addBinding(directionalShadowManager, 'strength', {
+                min: 0.0,
+                max: 1.0,
+                step: 0.01,
+                label: 'Shadow Strength'
+            });
         }
     });
 };

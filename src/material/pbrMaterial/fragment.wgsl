@@ -323,7 +323,11 @@ fn main(inputData:InputData) -> OutputFragment {
     let receiveShadowYn = inputData.receiveShadow != 0.0;
     var visibility:f32 = 1.0;
     visibility = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, systemUniforms.shadow.directionalShadowDepthTextureSize, systemUniforms.shadow.directionalShadowBias, inputData.shadowCoord);
-    if(!receiveShadowYn){ visibility = 1.0; }
+    if(!receiveShadowYn){ 
+        visibility = 1.0; 
+    } else {
+        visibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, visibility);
+    }
 
     // Base Color & Alpha
     var baseColor = u_baseColorFactor;
