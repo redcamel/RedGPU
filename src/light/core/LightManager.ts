@@ -438,18 +438,23 @@ class LightManager {
             };
         }
 
-        // 1. 카메라의 월드 위치 및 대략적인 줌 거리 계산
+        // 1. 카메라 위치, 전방 벡터, 그리고 바라보는 지점까지의 거리(focusDistance) 계산
         const camPos = vec3.fromValues(invVM[12], invVM[13], invVM[14]);
-        const cameraDistance = Math.max(vec3.distance(camPos, vec3.create()), 10.0);
+        const camForward = vec3.fromValues(-invVM[8], -invVM[9], -invVM[10]);
 
-        // 2. 메인 카메라가 바라보는 화면 중앙의 포커스 지점을 섀도우 카메라의 타겟 중심으로 설정합니다.
-        // 카메라 공간 상의 (0, 0, -cameraDistance) 지점을 월드 좌표로 복원하여 피사체 중심 정렬을 달성합니다.
-        const focusLocal = vec3.fromValues(0, 0, -cameraDistance);
-        const shadowTarget = vec3.create();
-        vec3.transformMat4(shadowTarget, focusLocal, invVM);
+        let focusDistance = 100.0;
+        if (Math.abs(camForward[1]) > 0.01) {
+            const t = -camPos[1] / camForward[1];
+            if (t > 0) focusDistance = Math.max(t, 10.0);
+        }
+        // (TIP: OrbitControls 사용 시 vec3.distance(camPos, controls.target)을 쓰면 가장 정확합니다)
 
-        // 3. 줌 거리에 연동하여 가시 거리를 동적 제어하되, 먼 거리까지 그림자가 생성되도록 최소 1500.0 유닛을 확보합니다.
-        const shadowFar = Math.min(rawCamera.farClipping, Math.max(cameraDistance * 1.5, 300.0));
+        // [핵심 수정 1] 카메라가 실제로 시선을 두고 있는 3D 공간상의 '포커스 지점'을 정확히 구합니다.
+        const focusPoint = vec3.create();
+        vec3.scaleAndAdd(focusPoint, camPos, camForward, focusDistance);
+
+        // 2. 줌 거리에 연동하여 가시거리 제어 (배경 그림자를 위해 길게 잡아도 괜찮습니다)
+        const shadowFar = Math.min(rawCamera.farClipping, Math.max(focusDistance * 1.5, 300.0));
 
         const fov = (Math.PI / 180) * rawCamera.fieldOfView;
         const aspect = view.aspect;
@@ -478,16 +483,10 @@ class LightManager {
             worldCorners.push(worldPt);
         }
 
-        const center = vec3.create();
-        for (const corner of worldCorners) {
-            vec3.add(center, center, corner);
-        }
-        vec3.scale(center, center, 1 / 8);
-
-        // 실제 프러스텀 반경 계산
+        // 실제 프러스텀이 포괄하는 최대 바운딩 반경 계산 (깊이 Z 범위 계산용)
         let actualRadius = 0;
         for (const corner of worldCorners) {
-            const d = vec3.distance(corner, center);
+            const d = vec3.distance(corner, focusPoint);
             if (d > actualRadius) {
                 actualRadius = d;
             }
@@ -497,19 +496,19 @@ class LightManager {
         const lightDir = vec3.fromValues(light.direction[0], light.direction[1], light.direction[2]);
         vec3.normalize(lightDir, lightDir);
 
-        // 1. 가로/세로 영역(X, Y): 섀도우 해상도가 거대 영역으로 넓어져 흐려지지 않도록
-        // 줌 거리에 비례하되 최소 30.0 유닛 한도로 정사영 반경(shadowRadius)을 유연하게 수축 조절합니다.
-        const shadowRadius = Math.min(actualRadius, Math.max(cameraDistance * 2.0, 30.0));
+        // 3. 가로/세로 영역(X, Y): 줌 거리(focusDistance)에 비례하여 그림자 상자 크기 설정
+        const shadowRadius = Math.min(actualRadius, Math.max(focusDistance * 1.5, 30.0));
         const margin = shadowRadius * 0.20;
         const left = -shadowRadius - margin;
         const right = shadowRadius + margin;
         const bottom = -shadowRadius - margin;
         const top = shadowRadius + margin;
 
-        // 2. 깊이 영역(Z): 고정형이 아닌 계산 기반으로 뷰 정점들을 lightView 공간으로 투영시켜 Z축 최소/최대 영역을 도출합니다.
+        // [핵심 수정 2] 라이트 카메라의 타겟 중심을 허공(frustumCenter)이 아닌 실제 'focusPoint'로 지정!
+        // 이제 그림자 정사영 상자의 정중앙(0, 0)에 카메라가 보고 있는 피사체가 무조건 위치하게 됩니다.
         const lightDistance = Math.max(actualRadius * 2.0, 500.0);
         const lightPos = vec3.create();
-        vec3.scaleAndAdd(lightPos, shadowTarget, lightDir, -lightDistance);
+        vec3.scaleAndAdd(lightPos, focusPoint, lightDir, -lightDistance);
 
         const up = vec3.fromValues(0, 1, 0);
         if (Math.abs(vec3.dot(lightDir, up)) > 0.99) {
@@ -517,8 +516,9 @@ class LightManager {
         }
 
         const lightView = mat4.create();
-        mat4.lookAt(lightView, lightPos, shadowTarget, up);
+        mat4.lookAt(lightView, lightPos, focusPoint, up); // 타겟을 focusPoint로 변경
 
+        // 4. 깊이 영역(Z): worldCorners를 lightView 공간으로 투영하여 앞뒤 잘림 없는 완벽한 Z 영역 도출
         let minZ = Infinity, maxZ = -Infinity;
         const p = vec3.create();
         for (const pt of worldCorners) {
@@ -527,8 +527,7 @@ class LightManager {
             if (p[2] > maxZ) maxZ = p[2];
         }
 
-        // 3. 추출된 minZ, maxZ 부호를 반전하고, 앞뒤 캐스터 잘림 방지를 위해 넉넉한 깊이 마진(zMargin)을 부여하여
-        // nearPlane과 farPlane을 계산을 통해 동적 도출합니다.
+        // 5. nearPlane / farPlane 도출 (오른손 좌표계 기준 -Z 전방)
         const zMargin = actualRadius * 0.50;
         const nearPlane = Math.max(0.1, -maxZ - zMargin);
         const farPlane = -minZ + zMargin;
