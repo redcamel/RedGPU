@@ -186,14 +186,11 @@ const init = async (
                     window.location.reload();
                 }
             });
-            // bfcache에 저장되기 전 정리
-            window?.addEventListener('pagehide', (event) => {
-                if (event.persisted) {
-                    // bfcache에 저장되는 경우
-                    keepLog('💾 bfcache에 저장됨');
-                    if (redGPUContext && redGPUContext.gpuDevice) {
-                        clearDevice()
-                    }
+            // [KO] 페이지 이동 시 항상 정리 (bfcache 저장 여부와 무관)
+            // [EN] Always clean up on page navigation (regardless of bfcache)
+            window?.addEventListener('pagehide', () => {
+                if (redGPUContext && redGPUContext.gpuDevice) {
+                    clearDevice()
                 }
             });
         } catch (e) {
