@@ -176,7 +176,7 @@ const init = async (
                     }
                 }
                 window?.cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
-                redGPUContext.gpuDevice.destroy();
+                redGPUContext.destroy();
             }
             // bfcache에서 복원 시 페이지 재로드 (뒤로가기 + 앞으로가기)
             window?.addEventListener('pageshow', (event) => {

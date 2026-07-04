@@ -442,6 +442,9 @@ class RedGPUContext extends RedGPUContextViewContainer {
     destroy() {
         this.#observer?.stop()
         this.#gpuDevice.destroy()
+        this.#globalVertexSSBO.destroy()
+        this.#globalFragmentSSBO_PBR.destroy()
+        this.#globalFragmentSSBO_BuiltIn.destroy()
     }
 
     /**

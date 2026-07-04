@@ -96,6 +96,13 @@ class GlobalStorageBufferManager extends RedGPUObject {
      */
     #onResizeCallback: ((manager: GlobalStorageBufferManager) => void) | null = null;
 
+    destroy() {
+        this.#gpuBuffer.destroy()
+        this.#cpuData = null;
+        this.#floatView = null;
+        this.#uintView = null;
+        this.#freeIndices = null;
+    }
     /**
      * [KO] GlobalStorageBufferManager 인스턴스를 생성합니다.
      * [EN] Creates an instance of GlobalStorageBufferManager.
