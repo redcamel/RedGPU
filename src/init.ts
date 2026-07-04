@@ -183,6 +183,7 @@ const init = async (
                 if (event.persisted) {
                     // bfcache에서 복원된 경우
                     keepLog('🔄 bfcache에서 복원됨 (뒤로가기 또는 앞으로가기) - 페이지 재로드');
+                    clearDevice()
                     window.location.reload();
                 }
             });

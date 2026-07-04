@@ -11,8 +11,6 @@ RedGPU.init(
         // Setup camera or controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.tilt = 0;
-        controller.centerX = 50
-        controller.centerZ = 50
 
         // Create scene and view
         const scene = new RedGPU.Display.Scene();
@@ -49,9 +47,7 @@ const loadGLTF = (view, url) => {
         (result) => {
             const mesh = result.resultMesh
             scene.addChild(mesh)
-            mesh.x = 50
-            mesh.z = 50
-            // RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view)
+            RedGPUExampleHelper.fitMeshToScreenCenter(mesh, view)
 
         },
         RedGPUExampleHelper.loadingProgressInfoHandler
