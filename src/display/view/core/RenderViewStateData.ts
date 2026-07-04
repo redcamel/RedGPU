@@ -121,7 +121,6 @@ class RenderViewStateData {
         prevCameraRotY: 0,
         prevCameraRotZ: 0,
         forceCullingCheck: false,
-        skipCullingCheck: false,
         interleavedCullingCheckFrameIndex: 0,
         projectionScale: 0,
         prevViewportWidth: 0,
@@ -376,17 +375,14 @@ class RenderViewStateData {
                 // [KO] 카메라가 빠르게 움직이거나 뷰포트가 리사이즈된 경우: 전체 객체의 컬링을 강제 매 프레임 재검사합니다.
                 // [EN] Camera moving fast or viewport resized: Force culling checks every frame for all meshes.
                 info.forceCullingCheck = true;
-                info.skipCullingCheck = false;
             } else if (moveDistanceSq < STILL_THRESHOLD && rotateDistanceSq < STILL_THRESHOLD) {
                 // [KO] 카메라가 정지된 경우: 컬링 검사를 생략하고 이전 프레임의 결과를 재사용하여 CPU 자원을 절약합니다.
                 // [EN] Camera is still: Skip recalculating culling, reuse cached culling results to save CPU overhead.
                 info.forceCullingCheck = false;
-                info.skipCullingCheck = true;
             } else {
                 // [KO] 일반적인 속도의 움직임인 경우: 분산(인터리빙) 컬링 검사를 적용합니다.
                 // [EN] Normal camera movement: Apply standard interleaved culling distribution.
                 info.forceCullingCheck = false;
-                info.skipCullingCheck = false;
             }
 
             // [KO] 다음 프레임 비교를 위해 카메라 및 뷰포트 상태를 갱신합니다.
@@ -401,7 +397,6 @@ class RenderViewStateData {
             info.prevViewportHeight = ch;
         } else {
             info.forceCullingCheck = false;
-            info.skipCullingCheck = false;
         }
     }
 
