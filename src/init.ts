@@ -178,13 +178,6 @@ const init = async (
                 window?.cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
                 redGPUContext.gpuDevice.destroy();
             }
-            // 페이지 종료 시 GPU 디바이스 정리
-            window?.addEventListener('beforeunload', () => {
-                if (redGPUContext && redGPUContext.gpuDevice) {
-                    keepLog('🧹 페이지 종료 시 GPU 디바이스 정리');
-                    clearDevice()
-                }
-            });
             // bfcache에서 복원 시 페이지 재로드 (뒤로가기 + 앞으로가기)
             window?.addEventListener('pageshow', (event) => {
                 if (event.persisted) {

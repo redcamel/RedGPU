@@ -1,6 +1,6 @@
 {
   "name": "redgpu",
-  "version": "4.1.0-Alpha",
+  "version": "4.2.0-Alpha",
   "description": "RedGPU",
   "repository": {
     "type": "git",
@@ -49,7 +49,7 @@
     "vitepress-sidebar": "^1.7.5"
   },
   "dependencies": {
-    "wgsl_reflect": "^1.2.3"
+    "wgsl_reflect": "^1.4.0"
   },
   "overrides": {
     "lodash-es": "^4.17.21",
