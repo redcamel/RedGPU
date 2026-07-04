@@ -1287,12 +1287,10 @@ class Mesh extends MeshBase {
             // if (!currentGeometry) this.#needUpdateMatrixUniform = false
 
 
-
             this.dirtyTransform = false
             this.#cachedBoundingAABB = null
             this.#cachedBoundingOBB = null
         }
-
 
 
         // check distanceCulling

@@ -66,6 +66,7 @@ class LightManager {
      * @private
      */
     #ambientLight: AmbientLight
+
     /**
      * [KO] 방향성 조명의 투영 행렬 계산에 사용되는 내부 캐시 행렬입니다.
      * [EN] Internal cache matrix used for calculating the projection matrix of directional lights.

@@ -125,7 +125,7 @@ class GltfAnimationLooperManager {
                     timeAnimationInfo = trackFrom.timeAnimationInfo;
                     aniDataAnimationInfo = trackFrom.aniDataAnimationInfo;
                     weightMeshes = trackFrom.weightMeshes;
-                    
+
                     mesh.dirtyTransform = true;
 
                     targetTimeDataList = timeAnimationInfo.dataList;

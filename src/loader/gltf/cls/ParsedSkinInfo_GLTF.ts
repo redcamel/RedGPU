@@ -34,6 +34,14 @@ class ParsedSkinInfo_GLTF {
         this.skeletonMesh = null;
     }
 
+    get geometry(): Sphere {
+        return this.#geometry;
+    }
+
+    get material(): ColorMaterial {
+        return this.#material;
+    }
+
     getUsedJointIndices(mesh: Mesh): number[] {
         const usedJoints = new Set<number>();
         const {jointBuffer} = mesh.animationInfo;
@@ -52,14 +60,6 @@ class ParsedSkinInfo_GLTF {
             }
         }
         return Array.from(usedJoints);
-    }
-
-    get geometry(): Sphere {
-        return this.#geometry;
-    }
-
-    get material(): ColorMaterial {
-        return this.#material;
     }
 
     createCompute(
@@ -207,7 +207,7 @@ class ParsedSkinInfo_GLTF {
 			}
     `;
         this.computeShader = redGPUContext.resourceManager.createGPUShaderModule(`calcSkinMatrix_${this.usedJoints.length}`, {code: source})
-        
+
         // systemLayout 가져오기 (group 0)
         const systemLayout = redGPUContext.resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
 
@@ -215,12 +215,12 @@ class ParsedSkinInfo_GLTF {
         this.skinnerBindGroupLayout = device.createBindGroupLayout({
             label: 'calcSkinMatrix_skinnerLayout',
             entries: [
-                { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'read-only-storage' } },
-                { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'read-only-storage' } },
-                { binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },
-                { binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },
-                { binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } },
-                { binding: 5, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'read-only-storage' } }
+                {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
+                {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
+                {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
+                {binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
+                {binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
+                {binding: 5, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}}
             ]
         });
 
@@ -271,7 +271,7 @@ class ParsedSkinInfo_GLTF {
             16 + (this.joints.length * 16),
             new Float32Array(this.inverseBindMatrices.map(v => Array.from(v)).flat())
         )
-        
+
         // 정점 레이아웃 메타데이터 기록 (u32 4개 = 16바이트)
         const layoutMetadata = new Uint32Array([stride, positionOffset, normalOffset, tangentOffset]);
         device.queue.writeBuffer(
