@@ -55,13 +55,6 @@ class ClusterLightManager extends RedGPUObject {
      */
     #clusterLightsBufferData: Float32Array
 
-    /**
-     * [KO] ClusterLightManager 생성자
-     * [EN] ClusterLightManager constructor
-     * @param view -
-     * [KO] 연결할 View3D 인스턴스
-     * [EN] View3D instance to link
-     */
     constructor(view: View3D) {
         super(view.redGPUContext)
         const {resourceManager, gpuDevice} = this
@@ -76,10 +69,12 @@ class ClusterLightManager extends RedGPUObject {
         )
         gpuDevice.queue.writeBuffer(this.#clusterLightsBuffer, 0, this.#clusterLightsBufferData as BufferSource)
 
+        this.#passClusterLightBound = new PassClusterLightBound(this.redGPUContext, this.#view)
+        this.#passClustersLight = new PassClustersLight(this.redGPUContext, this.#view, this.#passClusterLightBound)
     }
 
     /**
-     * [KO] 클러스터 라이트 경계 패스를 반환합니다.
+     * [KO] 클러스터 라이팅 경계 패스를 반환합니다.
      * [EN] Returns the cluster light boundary pass.
      */
     get passClusterLightBound(): PassClusterLightBound {
@@ -121,8 +116,6 @@ class ClusterLightManager extends RedGPUObject {
         const width = pixelRectArray[2]
         const height = pixelRectArray[3]
 
-        if (!this.#passClusterLightBound) this.#passClusterLightBound = new PassClusterLightBound(redGPUContext, this.#view)
-        if (!this.#passClustersLight) this.#passClustersLight = new PassClustersLight(redGPUContext, this.#view)
         if (!this.#view.systemUniform_Vertex_UniformBindGroup || width === 0 || height === 0) return
 
         const dirtyPixelSize = this.#prevWidth === undefined || this.#prevHeight === undefined || this.#prevWidth !== width || this.#prevHeight !== height

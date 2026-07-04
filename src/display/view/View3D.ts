@@ -98,11 +98,11 @@ class View3D extends AView {
     constructor(redGPUContext: RedGPUContext, scene: Scene, camera: PerspectiveCamera | OrthographicCamera | AController | Camera2D, name?: string) {
         super(redGPUContext, scene, camera, name)
         this.#init()
+        this.#clusterLightManager = new ClusterLightManager(this)
         this.#viewRenderTextureManager = new ViewRenderTextureManager(this)
         this.#renderViewStateData = new RenderViewStateData(this)
         this.#postEffectManager = new PostEffectManager(this)
         this.#toneMappingManager = new ToneMappingManager(redGPUContext)
-        this.#clusterLightManager = new ClusterLightManager(this)
         this.#uniformData = new ArrayBuffer(this.systemUniform_Vertex_StructInfo.endOffset)
         this.#uniformDataF32 = new Float32Array(this.#uniformData)
         this.#uniformDataU32 = new Uint32Array(this.#uniformData)
@@ -414,7 +414,7 @@ class View3D extends AView {
     }
 
     #createVertexUniformBindGroup(key: string, shadowDepthTextureView: GPUTextureView, ibl: IBL, renderPath1ResultTextureView: GPUTextureView) {
-        this.#clusterLightManager.updateClusterLights()
+
         const ibl_prefilterTexture = ibl?.prefilterTexture
         const ibl_irradianceTexture = ibl?.irradianceTexture
         const {redGPUContext} = this
@@ -508,6 +508,7 @@ class View3D extends AView {
             ]
         }
         this.#systemUniform_Vertex_UniformBindGroup = gpuDevice.createBindGroup(systemUniform_Vertex_BindGroupDescriptor);
+
         this.#updateIBLResourceStates(resourceManager, ibl_prefilterTexture, ibl_irradianceTexture);
     }
 
