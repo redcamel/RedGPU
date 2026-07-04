@@ -113,6 +113,10 @@ class RenderViewStateData {
      * [EN] Current frame index (accumulated rendering count)
      */
     frameIndex: number = 0;
+    /**
+     * [KO] 인터리빙(분산) 콸링 처리를 위한 카메라 및 뷰포트 상태 추적 정보 객체입니다.
+     * [EN] Object tracking camera and viewport state for interleaved (distributed) culling processing.
+     */
     interleavedCullingInfo = {
         prevCameraX: 0,
         prevCameraY: 0,
@@ -330,6 +334,15 @@ class RenderViewStateData {
         this.#updateInterleavedCullingInfo(view);
     }
 
+    /**
+     * [KO] 카메라 이동량과 뷰포트 크기 변화를 분석하여 인터리빙 쾌링 정보를 갱신합니다.
+     * [EN] Analyzes camera movement and viewport size changes to update interleaved culling information.
+     *
+     * @param view -
+     * [KO] 분석할 View3D 인스턴스
+     * [EN] View3D instance to analyze
+     * @private
+     */
     #updateInterleavedCullingInfo(view: View3D) {
         const info = this.interleavedCullingInfo;
         // [KO] 현재 프레임 인덱스에 따라 분산 검사할 인터리빙 프레임 인덱스를 계산합니다.

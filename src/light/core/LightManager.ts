@@ -67,11 +67,6 @@ class LightManager {
      */
     #ambientLight: AmbientLight
 
-    /**
-     * [KO] 방향성 조명의 투영 행렬 계산에 사용되는 내부 캐시 행렬입니다.
-     * [EN] Internal cache matrix used for calculating the projection matrix of directional lights.
-     * @private
-     */
 
 
     /**
@@ -360,7 +355,6 @@ class LightManager {
      * @returns
      * [KO] mat4 투영-뷰 행렬
      * [EN] mat4 projection-view matrix
-     * @private
      */
     getDirectionalLightProjectionViewMatrix(view: View3D): mat4 {
         return this.#calculateDirectionalLightMatrices(view).projectionView;
@@ -376,7 +370,6 @@ class LightManager {
      * @returns
      * [KO] mat4 투영 행렬
      * [EN] mat4 projection matrix
-     * @private
      */
     getDirectionalLightProjectionMatrix(view: View3D): mat4 {
         return this.#calculateDirectionalLightMatrices(view).projection;
@@ -392,7 +385,6 @@ class LightManager {
      * @returns
      * [KO] mat4 뷰 행렬
      * [EN] mat4 view matrix
-     * @private
      */
     getDirectionalLightViewMatrix(view: View3D): mat4 {
         return this.#calculateDirectionalLightMatrices(view).view;

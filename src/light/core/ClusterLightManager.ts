@@ -55,6 +55,14 @@ class ClusterLightManager extends RedGPUObject {
      */
     #clusterLightsBufferData: Float32Array
 
+    /**
+     * [KO] ClusterLightManager 인스턴스를 생성합니다.
+     * [EN] Creates a ClusterLightManager instance.
+     *
+     * @param view -
+     * [KO] 이 매니저가 속할 View3D 인스턴스
+     * [EN] The View3D instance this manager belongs to
+     */
     constructor(view: View3D) {
         super(view.redGPUContext)
         const {resourceManager, gpuDevice} = this
