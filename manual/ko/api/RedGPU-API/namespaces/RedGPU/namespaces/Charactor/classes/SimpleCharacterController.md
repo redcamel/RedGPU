@@ -6,7 +6,7 @@
 
 # Class: SimpleCharacterController
 
-Defined in: [src/charactor/SimpleCharacterController.ts:63](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L63)
+Defined in: [src/charactor/SimpleCharacterController.ts:63](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L63)
 
 3D 캐릭터의 움직임과 회전을 제어하는 Simple 캐릭터 컨트롤러 클래스입니다.
 
@@ -22,7 +22,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:63](https://github.com/r
 
 > **new SimpleCharacterController**(`redGPUContext`, `targetMesh`, `camera`, `options?`): `SimpleCharacterController`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:97](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L97)
+Defined in: [src/charactor/SimpleCharacterController.ts:97](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L97)
 
 SimpleCharacterController 인스턴스를 생성합니다.
 
@@ -49,7 +49,7 @@ SimpleCharacterController 인스턴스를 생성합니다.
 
 > **floorHeight**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:70](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L70)
+Defined in: [src/charactor/SimpleCharacterController.ts:70](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L70)
 
 ***
 
@@ -57,7 +57,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:70](https://github.com/r
 
 > **gravity**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:68](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L68)
+Defined in: [src/charactor/SimpleCharacterController.ts:68](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L68)
 
 ***
 
@@ -65,7 +65,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:68](https://github.com/r
 
 > **jumpForce**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:69](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L69)
+Defined in: [src/charactor/SimpleCharacterController.ts:69](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L69)
 
 ***
 
@@ -73,7 +73,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:69](https://github.com/r
 
 > **keyMap**: `Required`\<[`CharacterKeyMap`](../interfaces/CharacterKeyMap.md)\>
 
-Defined in: [src/charactor/SimpleCharacterController.ts:75](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L75)
+Defined in: [src/charactor/SimpleCharacterController.ts:75](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L75)
 
 ***
 
@@ -81,7 +81,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:75](https://github.com/r
 
 > **modelRotationOffset**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:72](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L72)
+Defined in: [src/charactor/SimpleCharacterController.ts:72](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L72)
 
 ***
 
@@ -89,7 +89,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:72](https://github.com/r
 
 > **orientRotationToMovement**: `boolean`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:74](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L74)
+Defined in: [src/charactor/SimpleCharacterController.ts:74](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L74)
 
 ***
 
@@ -97,7 +97,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:74](https://github.com/r
 
 > **rotationSpeed**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:67](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L67)
+Defined in: [src/charactor/SimpleCharacterController.ts:67](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L67)
 
 ***
 
@@ -105,7 +105,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:67](https://github.com/r
 
 > **runSpeed**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:66](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L66)
+Defined in: [src/charactor/SimpleCharacterController.ts:66](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L66)
 
 ***
 
@@ -113,7 +113,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:66](https://github.com/r
 
 > **speed**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:65](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L65)
+Defined in: [src/charactor/SimpleCharacterController.ts:65](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L65)
 
 ***
 
@@ -121,7 +121,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:65](https://github.com/r
 
 > **useControllerRotationYaw**: `boolean`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:73](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L73)
+Defined in: [src/charactor/SimpleCharacterController.ts:73](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L73)
 
 ***
 
@@ -129,7 +129,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:73](https://github.com/r
 
 > **useKeyboard**: `boolean`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:71](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L71)
+Defined in: [src/charactor/SimpleCharacterController.ts:71](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L71)
 
 ## Accessors
 
@@ -139,7 +139,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:71](https://github.com/r
 
 > **get** **camera**(): [`ACamera`](../../Camera/namespaces/Core/classes/ACamera.md)
 
-Defined in: [src/charactor/SimpleCharacterController.ts:151](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L151)
+Defined in: [src/charactor/SimpleCharacterController.ts:151](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L151)
 
 방향 기준 카메라를 반환합니다.
 
@@ -151,7 +151,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:151](https://github.com/
 
 > **set** **camera**(`value`): `void`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:156](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L156)
+Defined in: [src/charactor/SimpleCharacterController.ts:156](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L156)
 
 방향 기준 카메라를 설정합니다.
 
@@ -173,7 +173,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:156](https://github.com/
 
 > **get** **isGrounded**(): `boolean`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:172](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L172)
+Defined in: [src/charactor/SimpleCharacterController.ts:172](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L172)
 
 지면에 닿아있는지 여부를 반환합니다.
 
@@ -189,7 +189,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:172](https://github.com/
 
 > **get** **isMoving**(): `boolean`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:162](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L162)
+Defined in: [src/charactor/SimpleCharacterController.ts:162](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L162)
 
 캐릭터가 현재 이동(WASD 입력) 중인지 여부를 반환합니다.
 
@@ -205,7 +205,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:162](https://github.com/
 
 > **get** **isRunning**(): `boolean`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:167](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L167)
+Defined in: [src/charactor/SimpleCharacterController.ts:167](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L167)
 
 캐릭터가 현재 달리기(Shift 조합 입력) 중인지 여부를 반환합니다.
 
@@ -221,7 +221,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:167](https://github.com/
 
 > **get** **targetMesh**(): [`Mesh`](../../Display/classes/Mesh.md)
 
-Defined in: [src/charactor/SimpleCharacterController.ts:140](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L140)
+Defined in: [src/charactor/SimpleCharacterController.ts:140](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L140)
 
 제어 중인 대상 메시를 반환합니다.
 
@@ -233,7 +233,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:140](https://github.com/
 
 > **set** **targetMesh**(`value`): `void`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:145](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L145)
+Defined in: [src/charactor/SimpleCharacterController.ts:145](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L145)
 
 제어 중인 대상 메시를 설정합니다.
 
@@ -253,7 +253,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:145](https://github.com/
 
 > **update**(`view`, `time`): `void`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:185](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L185)
+Defined in: [src/charactor/SimpleCharacterController.ts:185](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/charactor/SimpleCharacterController.ts#L185)
 
 매 프레임 업데이트 루프를 수행합니다.
 
@@ -280,7 +280,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:185](https://github.com/
 
 > `readonly` **instanceId**: `number`
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/BaseObject.ts#L18)
+Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L18)
 
 클래스별 인스턴스 순번 ID
 
@@ -296,7 +296,7 @@ Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L76)
 
 안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -318,7 +318,7 @@ AntialiasingManager 인스턴스
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L88)
 
 커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -340,7 +340,7 @@ CommandEncoderManager 인스턴스
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L52)
 
 WebGPU 디바이스 객체를 반환합니다. (단축 경로)
 
@@ -362,7 +362,7 @@ GPUDevice 인스턴스
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L58)
 
 객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
 
@@ -376,7 +376,7 @@ Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L70)
 
 객체의 이름을 설정합니다.
 
@@ -402,7 +402,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L40)
 
 RedGPUContext 인스턴스를 반환합니다.
 
@@ -424,7 +424,7 @@ RedGPUContext 인스턴스
 
 > **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L64)
 
 리소스 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -446,7 +446,7 @@ ResourceManager 인스턴스
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L46)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 

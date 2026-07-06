@@ -6,7 +6,7 @@
 
 # Interface: DefineTextureInfo
 
-Defined in: [src/defineProperty/funcs/texture/defineTexture.ts:11](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/defineProperty/funcs/texture/defineTexture.ts#L11)
+Defined in: [src/defineProperty/funcs/texture/defineTexture.ts:11](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/defineProperty/funcs/texture/defineTexture.ts#L11)
 
 `defineTexture` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
 
@@ -16,6 +16,6 @@ Defined in: [src/defineProperty/funcs/texture/defineTexture.ts:11](https://githu
 
 > **key**: `string`
 
-Defined in: [src/defineProperty/funcs/texture/defineTexture.ts:16](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/defineProperty/funcs/texture/defineTexture.ts#L16)
+Defined in: [src/defineProperty/funcs/texture/defineTexture.ts:16](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/defineProperty/funcs/texture/defineTexture.ts#L16)
 
 Key name of the property. Defined on the target object's prototype under this name.

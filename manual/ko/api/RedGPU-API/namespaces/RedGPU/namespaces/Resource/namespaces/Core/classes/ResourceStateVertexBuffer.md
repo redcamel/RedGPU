@@ -6,7 +6,7 @@
 
 # Class: ResourceStateVertexBuffer
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:3](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L3)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:3](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L3)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVerte
 
 > **new ResourceStateVertexBuffer**(`buffer`): `ResourceStateVertexBuffer`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:10](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L10)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:10](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L10)
 
 #### Parameters
 
@@ -32,7 +32,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVerte
 
 > **buffer**: [`VertexBuffer`](../../../classes/VertexBuffer.md)
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:5](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L5)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:5](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L5)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVerte
 
 > **label**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:6](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L6)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:6](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L6)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVerte
 
 > **uuid**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:7](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L7)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:7](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L7)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVerte
 
 > `static` **dirtyList**: `any`[] = `[]`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:4](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L4)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:4](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L4)
 
 ## Accessors
 
@@ -66,7 +66,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVerte
 
 > **get** **useNum**(): `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:16](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L16)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:16](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L16)
 
 ##### Returns
 
@@ -76,7 +76,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVerte
 
 > **set** **useNum**(`value`): `void`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:20](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L20)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts:20](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/resources/core/resourceManager/resourceState/ResourceStateVertexBuffer.ts#L20)
 
 ##### Parameters
 

@@ -6,7 +6,7 @@
 
 # Class: Renderer
 
-Defined in: [src/renderer/Renderer.ts:34](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/renderer/Renderer.ts#L34)
+Defined in: [src/renderer/Renderer.ts:34](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/renderer/Renderer.ts#L34)
 
 RedGPU의 핵심 렌더러 클래스입니다.
 
@@ -26,7 +26,7 @@ renderer.start(redGPUContext, (time) => {
 
 > **new Renderer**(): `Renderer`
 
-Defined in: [src/renderer/Renderer.ts:38](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/renderer/Renderer.ts#L38)
+Defined in: [src/renderer/Renderer.ts:38](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/renderer/Renderer.ts#L38)
 
 #### Returns
 
@@ -38,7 +38,7 @@ Defined in: [src/renderer/Renderer.ts:38](https://github.com/redcamel/RedGPU/blo
 
 > **renderFrame**(`redGPUContext`, `time`): `void`
 
-Defined in: [src/renderer/Renderer.ts:99](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/renderer/Renderer.ts#L99)
+Defined in: [src/renderer/Renderer.ts:99](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/renderer/Renderer.ts#L99)
 
 단일 프레임을 렌더링합니다. (내부적으로 호출됨)
 
@@ -59,7 +59,7 @@ Defined in: [src/renderer/Renderer.ts:99](https://github.com/redcamel/RedGPU/blo
 
 > **renderView**(`view`): `object`
 
-Defined in: [src/renderer/Renderer.ts:144](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/renderer/Renderer.ts#L144)
+Defined in: [src/renderer/Renderer.ts:144](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/renderer/Renderer.ts#L144)
 
 특정 View3D를 렌더링합니다.
 
@@ -77,7 +77,7 @@ Defined in: [src/renderer/Renderer.ts:144](https://github.com/redcamel/RedGPU/bl
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `renderPassDescriptor` | `GPURenderPassDescriptor` | [src/renderer/Renderer.ts:145](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/renderer/Renderer.ts#L145) |
+| `renderPassDescriptor` | `GPURenderPassDescriptor` | [src/renderer/Renderer.ts:145](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/renderer/Renderer.ts#L145) |
 
 ***
 
@@ -85,7 +85,7 @@ Defined in: [src/renderer/Renderer.ts:144](https://github.com/redcamel/RedGPU/bl
 
 > **start**(`redGPUContext`, `render`): `void`
 
-Defined in: [src/renderer/Renderer.ts:59](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/renderer/Renderer.ts#L59)
+Defined in: [src/renderer/Renderer.ts:59](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/renderer/Renderer.ts#L59)
 
 렌더링 루프를 시작합니다.
 
@@ -113,7 +113,7 @@ renderer.start(redGPUContext, (time) => {
 
 > **stop**(`redGPUContext`): `void`
 
-Defined in: [src/renderer/Renderer.ts:83](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/renderer/Renderer.ts#L83)
+Defined in: [src/renderer/Renderer.ts:83](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/renderer/Renderer.ts#L83)
 
 렌더링 루프를 정지합니다.
 

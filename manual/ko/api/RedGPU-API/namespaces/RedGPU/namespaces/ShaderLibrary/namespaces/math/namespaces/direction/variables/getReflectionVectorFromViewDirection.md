@@ -8,7 +8,7 @@
 
 > `const` **getReflectionVectorFromViewDirection**: `string` = `getReflectionVectorFromViewDirection_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:658](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/systemCodeManager/ShaderLibrary.ts#L658)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:658](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/systemCodeManager/ShaderLibrary.ts#L658)
 
 시선 방향(픽셀에서 카메라를 향하는 벡터)과 법선 벡터를 사용하여 정규화된 반사 방향 벡터를 계산합니다.
 

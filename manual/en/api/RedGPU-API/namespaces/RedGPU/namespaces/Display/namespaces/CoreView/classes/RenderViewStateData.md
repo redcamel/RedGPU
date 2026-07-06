@@ -6,7 +6,7 @@
 
 # Class: RenderViewStateData
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:53](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L53)
+Defined in: [src/display/view/core/RenderViewStateData.ts:53](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L53)
 
 Class that manages and tracks the rendering state data of a 3D view.
 
@@ -22,7 +22,7 @@ This class is a data structure used internally by the system.<br/>Do not create 
 
 > **new RenderViewStateData**(`view`): `RenderViewStateData`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:244](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L244)
+Defined in: [src/display/view/core/RenderViewStateData.ts:244](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L244)
 
 Creates a new RenderViewStateData instance.
 
@@ -42,7 +42,7 @@ Creates a new RenderViewStateData instance.
 
 > **animationList**: `any`[] = `[]`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:217](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L217)
+Defined in: [src/display/view/core/RenderViewStateData.ts:217](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L217)
 
 List of animations to process
 
@@ -52,7 +52,7 @@ List of animations to process
 
 > **commandBatchStats**: [`CommandBatchStats`](../../../../CommandEncoderManager/interfaces/CommandBatchStats.md) = `null`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:228](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L228)
+Defined in: [src/display/view/core/RenderViewStateData.ts:228](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L228)
 
 Command batch statistics info
 
@@ -62,7 +62,7 @@ Command batch statistics info
 
 > **cullingDistanceSquared**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:63](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L63)
+Defined in: [src/display/view/core/RenderViewStateData.ts:63](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L63)
 
 Squared distance value used for culling calculations
 
@@ -72,7 +72,7 @@ Squared distance value used for culling calculations
 
 > **currentRenderPassEncoder**: `GPURenderPassEncoder`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:183](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L183)
+Defined in: [src/display/view/core/RenderViewStateData.ts:183](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L183)
 
 Current GPU render pass encoder in use
 
@@ -82,7 +82,7 @@ Current GPU render pass encoder in use
 
 > **deltaTime**: `number` = `0`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:142](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L142)
+Defined in: [src/display/view/core/RenderViewStateData.ts:142](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L142)
 
 Elapsed time between frames (seconds)
 
@@ -92,7 +92,7 @@ Elapsed time between frames (seconds)
 
 > **dirtyVertexUniformFromMaterial**: `object` = `{}`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:194](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L194)
+Defined in: [src/display/view/core/RenderViewStateData.ts:194](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L194)
 
 Map of vertex uniforms changed from materials
 
@@ -102,7 +102,7 @@ Map of vertex uniforms changed from materials
 
 > **distanceCulling**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:68](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L68)
+Defined in: [src/display/view/core/RenderViewStateData.ts:68](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L68)
 
 Distance threshold for culling objects
 
@@ -112,7 +112,7 @@ Distance threshold for culling objects
 
 > **elapsed**: `number` = `0`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:105](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L105)
+Defined in: [src/display/view/core/RenderViewStateData.ts:105](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L105)
 
 Elapsed time since the previous frame (ms)
 
@@ -122,7 +122,7 @@ Elapsed time since the previous frame (ms)
 
 > **fixedStepDeltaTime**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:157](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L157)
+Defined in: [src/display/view/core/RenderViewStateData.ts:157](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L157)
 
 Fixed timestep interval (seconds)
 
@@ -132,7 +132,7 @@ Fixed timestep interval (seconds)
 
 > **frameIndex**: `number` = `0`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:115](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L115)
+Defined in: [src/display/view/core/RenderViewStateData.ts:115](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L115)
 
 Current frame index (accumulated rendering count)
 
@@ -142,7 +142,7 @@ Current frame index (accumulated rendering count)
 
 > **frustumPlanes**: `number`[][]
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:189](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L189)
+Defined in: [src/display/view/core/RenderViewStateData.ts:189](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L189)
 
 Frustum planes array for culling
 
@@ -152,7 +152,7 @@ Frustum planes array for culling
 
 > **interleavedCullingInfo**: `object`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:120](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L120)
+Defined in: [src/display/view/core/RenderViewStateData.ts:120](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L120)
 
 Object tracking camera and viewport state for interleaved (distributed) culling processing.
 
@@ -206,7 +206,7 @@ Object tracking camera and viewport state for interleaved (distributed) culling 
 
 > **isScene2DMode**: `boolean` = `false`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:223](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L223)
+Defined in: [src/display/view/core/RenderViewStateData.ts:223](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L223)
 
 Whether the scene is in 2D mode
 
@@ -216,7 +216,7 @@ Whether the scene is in 2D mode
 
 > **numFixedSteps**: `number` = `0`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:152](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L152)
+Defined in: [src/display/view/core/RenderViewStateData.ts:152](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L152)
 
 Number of fixed timestep updates needed for physics engine etc.
 
@@ -226,7 +226,7 @@ Number of fixed timestep updates needed for physics engine etc.
 
 > **prevTimestamp**: `number` = `0`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:100](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L100)
+Defined in: [src/display/view/core/RenderViewStateData.ts:100](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L100)
 
 Timestamp of the previous frame (ms)
 
@@ -236,7 +236,7 @@ Timestamp of the previous frame (ms)
 
 > **renderBundleResults**: `object`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:200](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L200)
+Defined in: [src/display/view/core/RenderViewStateData.ts:200](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L200)
 
 Group of bundle lists for each rendering layer
 
@@ -266,7 +266,7 @@ Group of bundle lists for each rendering layer
 
 > **renderResults**: `object`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:75](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L75)
+Defined in: [src/display/view/core/RenderViewStateData.ts:75](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L75)
 
 Group of rendering statistics results
 
@@ -304,7 +304,7 @@ Group of rendering statistics results
 
 > **sinTime**: `number` = `0`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:147](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L147)
+Defined in: [src/display/view/core/RenderViewStateData.ts:147](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L147)
 
 Calculated value of sin(time)
 
@@ -314,7 +314,7 @@ Calculated value of sin(time)
 
 > **skinList**: `any`[] = `[]`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:212](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L212)
+Defined in: [src/display/view/core/RenderViewStateData.ts:212](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L212)
 
 List of skin meshes to process
 
@@ -324,7 +324,7 @@ List of skin meshes to process
 
 > **swapBufferIndex**: `number` = `1`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:173](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L173)
+Defined in: [src/display/view/core/RenderViewStateData.ts:173](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L173)
 
 Swap buffer index for double buffering
 
@@ -334,7 +334,7 @@ Swap buffer index for double buffering
 
 > **time**: `number` = `0`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:137](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L137)
+Defined in: [src/display/view/core/RenderViewStateData.ts:137](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L137)
 
 Absolute time of the current frame (seconds)
 
@@ -344,7 +344,7 @@ Absolute time of the current frame (seconds)
 
 > **timestamp**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:95](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L95)
+Defined in: [src/display/view/core/RenderViewStateData.ts:95](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L95)
 
 Current timestamp of the rendering frame (ms)
 
@@ -354,7 +354,7 @@ Current timestamp of the rendering frame (ms)
 
 > **useDistanceCulling**: `boolean`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:58](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L58)
+Defined in: [src/display/view/core/RenderViewStateData.ts:58](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L58)
 
 Whether distance culling is enabled for this view
 
@@ -364,7 +364,7 @@ Whether distance culling is enabled for this view
 
 > **usedVideoMemory**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:178](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L178)
+Defined in: [src/display/view/core/RenderViewStateData.ts:178](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L178)
 
 Amount of video memory used by render textures (in bytes)
 
@@ -374,7 +374,7 @@ Amount of video memory used by render textures (in bytes)
 
 > **viewIndex**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:168](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L168)
+Defined in: [src/display/view/core/RenderViewStateData.ts:168](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L168)
 
 View index
 
@@ -384,7 +384,7 @@ View index
 
 > **viewportSize**: `ViewportSize`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:163](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L163)
+Defined in: [src/display/view/core/RenderViewStateData.ts:163](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L163)
 
 Current viewport size and position information
 
@@ -394,7 +394,7 @@ Current viewport size and position information
 
 > **viewRenderCPURecordingTime**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:110](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L110)
+Defined in: [src/display/view/core/RenderViewStateData.ts:110](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L110)
 
 Time taken for view render preparation (ms)
 
@@ -404,7 +404,7 @@ Time taken for view render preparation (ms)
 
 > **viewRenderStartTime**: `number`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:90](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L90)
+Defined in: [src/display/view/core/RenderViewStateData.ts:90](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L90)
 
 Performance timestamp marking the start of rendering (ms)
 
@@ -416,7 +416,7 @@ Performance timestamp marking the start of rendering (ms)
 
 > **get** **view**(): [`View3D`](../../../classes/View3D.md)
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:254](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L254)
+Defined in: [src/display/view/core/RenderViewStateData.ts:254](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L254)
 
 Returns the connected View3D instance.
 
@@ -430,7 +430,7 @@ Returns the connected View3D instance.
 
 > **reset**(): `void`
 
-Defined in: [src/display/view/core/RenderViewStateData.ts:269](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/view/core/RenderViewStateData.ts#L269)
+Defined in: [src/display/view/core/RenderViewStateData.ts:269](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/view/core/RenderViewStateData.ts#L269)
 
 Resets render state data for a new frame.
 

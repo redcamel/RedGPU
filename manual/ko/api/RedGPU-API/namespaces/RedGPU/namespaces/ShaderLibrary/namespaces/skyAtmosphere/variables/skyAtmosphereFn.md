@@ -8,7 +8,7 @@
 
 > `const` **skyAtmosphereFn**: `string` = `skyAtmosphereFn_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2012](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/systemCodeManager/ShaderLibrary.ts#L2012)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2012](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/systemCodeManager/ShaderLibrary.ts#L2012)
 
 특정 고도와 각도에서의 대기 투과율(Transmittance)을 조회합니다.
 

@@ -6,7 +6,7 @@
 
 # Class: PostEffectTexturePool
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:25](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/postEffect/core/PostEffectTexturePool.ts#L25)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:25](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/postEffect/core/PostEffectTexturePool.ts#L25)
 
 Texture pooling class for post-processing.
 
@@ -33,7 +33,7 @@ const texturePool = view.postEffectManager.texturePool;
 
 > **new PostEffectTexturePool**(`redGPUContext`): `PostEffectTexturePool`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:43](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/postEffect/core/PostEffectTexturePool.ts#L43)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:43](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/postEffect/core/PostEffectTexturePool.ts#L43)
 
 Creates a PostEffectTexturePool instance.
 
@@ -59,7 +59,7 @@ Creates a PostEffectTexturePool instance.
 
 > **get** **activeCount**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:80](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/postEffect/core/PostEffectTexturePool.ts#L80)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:80](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/postEffect/core/PostEffectTexturePool.ts#L80)
 
 Returns the number of currently active textures.
 
@@ -77,7 +77,7 @@ Active texture count
 
 > **get** **allocationCount**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:118](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/postEffect/core/PostEffectTexturePool.ts#L118)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:118](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/postEffect/core/PostEffectTexturePool.ts#L118)
 
 Returns the total number of newly created textures.
 
@@ -95,7 +95,7 @@ Total allocation count
 
 > **get** **hitRate**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:130](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/postEffect/core/PostEffectTexturePool.ts#L130)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:130](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/postEffect/core/PostEffectTexturePool.ts#L130)
 
 Returns the reuse hit rate. (0~1)
 
@@ -113,7 +113,7 @@ Hit rate (between 0 and 1)
 
 > **get** **idleCount**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:92](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/postEffect/core/PostEffectTexturePool.ts#L92)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:92](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/postEffect/core/PostEffectTexturePool.ts#L92)
 
 Returns the number of idle textures waiting in the pool.
 
@@ -131,7 +131,7 @@ Idle texture count
 
 > **get** **peakActiveCount**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:106](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/postEffect/core/PostEffectTexturePool.ts#L106)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:106](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/postEffect/core/PostEffectTexturePool.ts#L106)
 
 Returns the historical peak number of concurrently active textures.
 
@@ -149,7 +149,7 @@ Peak active texture count
 
 > **get** **totalCount**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:68](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/postEffect/core/PostEffectTexturePool.ts#L68)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:68](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/postEffect/core/PostEffectTexturePool.ts#L68)
 
 Returns the total number of textures in the pool (active + idle).
 
@@ -167,7 +167,7 @@ Total texture count
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:56](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/postEffect/core/PostEffectTexturePool.ts#L56)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:56](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/postEffect/core/PostEffectTexturePool.ts#L56)
 
 Returns the total video memory usage (bytes) in the pool.
 
@@ -183,7 +183,7 @@ Video memory usage in bytes
 
 > **allocResult**(`width`, `height`, `format?`): [`IPostEffectResult`](../interfaces/IPostEffectResult.md)
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:174](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/postEffect/core/PostEffectTexturePool.ts#L174)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:174](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/postEffect/core/PostEffectTexturePool.ts#L174)
 
 Gets a suitable texture from the pool or creates a new one, returning it as IPostEffectResult.
 
@@ -207,7 +207,7 @@ Allocated texture and view information object
 
 > **clear**(): `void`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:218](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/postEffect/core/PostEffectTexturePool.ts#L218)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:218](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/postEffect/core/PostEffectTexturePool.ts#L218)
 
 Destroys all textures in the pool.
 
@@ -221,7 +221,7 @@ Destroys all textures in the pool.
 
 > **getDetails**(): `any`[]
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:143](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/postEffect/core/PostEffectTexturePool.ts#L143)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:143](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/postEffect/core/PostEffectTexturePool.ts#L143)
 
 Returns the detailed breakdown of the pool.
 
@@ -237,7 +237,7 @@ Array of detailed pool status objects
 
 > **release**(`texture`): `void`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:190](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/postEffect/core/PostEffectTexturePool.ts#L190)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:190](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/postEffect/core/PostEffectTexturePool.ts#L190)
 
 Returns a specific texture to the pool.
 
@@ -257,7 +257,7 @@ Returns a specific texture to the pool.
 
 > **releaseAll**(): `void`
 
-Defined in: [src/postEffect/core/PostEffectTexturePool.ts:204](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/postEffect/core/PostEffectTexturePool.ts#L204)
+Defined in: [src/postEffect/core/PostEffectTexturePool.ts:204](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/postEffect/core/PostEffectTexturePool.ts#L204)
 
 Returns all active textures to the pool.
 
@@ -277,7 +277,7 @@ Returns all active textures to the pool.
 
 > `readonly` **instanceId**: `number`
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/BaseObject.ts#L18)
+Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L18)
 
 Instance sequence ID per class
 
@@ -293,7 +293,7 @@ Instance sequence ID per class
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L76)
 
 Returns the AntialiasingManager instance. (Short-cut path)
 
@@ -315,7 +315,7 @@ AntialiasingManager instance
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L88)
 
 Returns the CommandEncoderManager instance. (Short-cut path)
 
@@ -337,7 +337,7 @@ CommandEncoderManager instance
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L52)
 
 Returns the WebGPU device object. (Short-cut path)
 
@@ -359,7 +359,7 @@ GPUDevice instance
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L58)
 
 Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
 
@@ -373,7 +373,7 @@ Name of the object
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L70)
 
 Sets the name of the object.
 
@@ -399,7 +399,7 @@ Sets the name of the object.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L40)
 
 Returns the RedGPUContext instance.
 
@@ -421,7 +421,7 @@ RedGPUContext instance
 
 > **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L64)
 
 Returns the ResourceManager instance. (Short-cut path)
 
@@ -443,7 +443,7 @@ ResourceManager instance
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L46)
 
 Returns the universally unique identifier (UUID) of the object.
 

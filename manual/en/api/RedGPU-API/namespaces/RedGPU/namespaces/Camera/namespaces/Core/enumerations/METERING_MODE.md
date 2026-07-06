@@ -6,7 +6,7 @@
 
 # Enumeration: METERING\_MODE
 
-Defined in: [src/camera/core/METERING\_MODE.ts:7](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/camera/core/METERING_MODE.ts#L7)
+Defined in: [src/camera/core/METERING\_MODE.ts:7](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/METERING_MODE.ts#L7)
 
 Metering mode enum for auto-exposure.
 
@@ -14,6 +14,6 @@ Metering mode enum for auto-exposure.
 
 | Enumeration Member | Value | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="enumeration-member-average"></a> `AVERAGE` | `0` | Average: Reflects the brightness of the entire screen equally. | [src/camera/core/METERING\_MODE.ts:12](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/camera/core/METERING_MODE.ts#L12) |
-| <a id="enumeration-member-center_weighted"></a> `CENTER_WEIGHTED` | `1` | Center-weighted: Gives higher weight to the center area of the screen. | [src/camera/core/METERING\_MODE.ts:17](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/camera/core/METERING_MODE.ts#L17) |
-| <a id="enumeration-member-spot"></a> `SPOT` | `2` | Spot: Reflects only a very narrow area in the center of the screen. | [src/camera/core/METERING\_MODE.ts:22](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/camera/core/METERING_MODE.ts#L22) |
+| <a id="enumeration-member-average"></a> `AVERAGE` | `0` | Average: Reflects the brightness of the entire screen equally. | [src/camera/core/METERING\_MODE.ts:12](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/METERING_MODE.ts#L12) |
+| <a id="enumeration-member-center_weighted"></a> `CENTER_WEIGHTED` | `1` | Center-weighted: Gives higher weight to the center area of the screen. | [src/camera/core/METERING\_MODE.ts:17](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/METERING_MODE.ts#L17) |
+| <a id="enumeration-member-spot"></a> `SPOT` | `2` | Spot: Reflects only a very narrow area in the center of the screen. | [src/camera/core/METERING\_MODE.ts:22](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/METERING_MODE.ts#L22) |

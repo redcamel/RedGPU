@@ -6,7 +6,7 @@
 
 # Interface: AnimTransition
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:54](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/loader/gltf/animationLooper/AnimStateMachine.ts#L54)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:54](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/loader/gltf/animationLooper/AnimStateMachine.ts#L54)
 
 Interface for animation state transition rules.
 
@@ -16,7 +16,7 @@ Interface for animation state transition rules.
 
 > **conditions**: () => `boolean`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:58](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/loader/gltf/animationLooper/AnimStateMachine.ts#L58)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:58](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/loader/gltf/animationLooper/AnimStateMachine.ts#L58)
 
 #### Returns
 
@@ -28,7 +28,7 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:58](https://git
 
 > **duration**: `number`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:57](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/loader/gltf/animationLooper/AnimStateMachine.ts#L57)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:57](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/loader/gltf/animationLooper/AnimStateMachine.ts#L57)
 
 ***
 
@@ -36,7 +36,7 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:57](https://git
 
 > **fromState**: `string`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:55](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/loader/gltf/animationLooper/AnimStateMachine.ts#L55)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:55](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/loader/gltf/animationLooper/AnimStateMachine.ts#L55)
 
 ***
 
@@ -44,4 +44,4 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:55](https://git
 
 > **toState**: `string`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:56](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/loader/gltf/animationLooper/AnimStateMachine.ts#L56)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:56](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/loader/gltf/animationLooper/AnimStateMachine.ts#L56)

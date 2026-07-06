@@ -6,7 +6,7 @@
 
 # Enumeration: METERING\_MODE
 
-Defined in: [src/camera/core/METERING\_MODE.ts:7](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/camera/core/METERING_MODE.ts#L7)
+Defined in: [src/camera/core/METERING\_MODE.ts:7](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/METERING_MODE.ts#L7)
 
 자동 노출을 위한 측광 모드 열거형입니다.
 

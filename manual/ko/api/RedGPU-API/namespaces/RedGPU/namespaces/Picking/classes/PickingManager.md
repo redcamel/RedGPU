@@ -6,7 +6,7 @@
 
 # Class: PickingManager
 
-Defined in: [src/picking/core/PickingManager.ts:38](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/picking/core/PickingManager.ts#L38)
+Defined in: [src/picking/core/PickingManager.ts:38](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/picking/core/PickingManager.ts#L38)
 
 마우스 이벤트를 처리하고 객체와의 상호작용을 관리하는 클래스입니다.
 
@@ -32,7 +32,7 @@ const pickingManager = view.pickingManager;
 
 > **new PickingManager**(`view`): `PickingManager`
 
-Defined in: [src/picking/core/PickingManager.ts:60](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/picking/core/PickingManager.ts#L60)
+Defined in: [src/picking/core/PickingManager.ts:60](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/picking/core/PickingManager.ts#L60)
 
 #### Parameters
 
@@ -54,7 +54,7 @@ Defined in: [src/picking/core/PickingManager.ts:60](https://github.com/redcamel/
 
 > **lastMouseClickEvent**: `MouseEvent`
 
-Defined in: [src/picking/core/PickingManager.ts:40](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/picking/core/PickingManager.ts#L40)
+Defined in: [src/picking/core/PickingManager.ts:40](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/picking/core/PickingManager.ts#L40)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [src/picking/core/PickingManager.ts:40](https://github.com/redcamel/
 
 > **lastMouseEvent**: `MouseEvent`
 
-Defined in: [src/picking/core/PickingManager.ts:39](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/picking/core/PickingManager.ts#L39)
+Defined in: [src/picking/core/PickingManager.ts:39](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/picking/core/PickingManager.ts#L39)
 
 ## Accessors
 
@@ -72,7 +72,7 @@ Defined in: [src/picking/core/PickingManager.ts:39](https://github.com/redcamel/
 
 > **get** **castingList**(): ([`Mesh`](../../Display/classes/Mesh.md) \| [`InstancingMesh`](../../Display/classes/InstancingMesh.md))[]
 
-Defined in: [src/picking/core/PickingManager.ts:101](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/picking/core/PickingManager.ts#L101)
+Defined in: [src/picking/core/PickingManager.ts:101](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/picking/core/PickingManager.ts#L101)
 
 피킹 대상 리스트를 반환합니다.
 
@@ -88,7 +88,7 @@ Defined in: [src/picking/core/PickingManager.ts:101](https://github.com/redcamel
 
 > **get** **mouseX**(): `number`
 
-Defined in: [src/picking/core/PickingManager.ts:77](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/picking/core/PickingManager.ts#L77)
+Defined in: [src/picking/core/PickingManager.ts:77](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/picking/core/PickingManager.ts#L77)
 
 마우스 X 좌표
 
@@ -100,7 +100,7 @@ Defined in: [src/picking/core/PickingManager.ts:77](https://github.com/redcamel/
 
 > **set** **mouseX**(`value`): `void`
 
-Defined in: [src/picking/core/PickingManager.ts:81](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/picking/core/PickingManager.ts#L81)
+Defined in: [src/picking/core/PickingManager.ts:81](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/picking/core/PickingManager.ts#L81)
 
 ##### Parameters
 
@@ -120,7 +120,7 @@ Defined in: [src/picking/core/PickingManager.ts:81](https://github.com/redcamel/
 
 > **get** **mouseY**(): `number`
 
-Defined in: [src/picking/core/PickingManager.ts:89](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/picking/core/PickingManager.ts#L89)
+Defined in: [src/picking/core/PickingManager.ts:89](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/picking/core/PickingManager.ts#L89)
 
 마우스 Y 좌표
 
@@ -132,7 +132,7 @@ Defined in: [src/picking/core/PickingManager.ts:89](https://github.com/redcamel/
 
 > **set** **mouseY**(`value`): `void`
 
-Defined in: [src/picking/core/PickingManager.ts:93](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/picking/core/PickingManager.ts#L93)
+Defined in: [src/picking/core/PickingManager.ts:93](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/picking/core/PickingManager.ts#L93)
 
 ##### Parameters
 
@@ -152,7 +152,7 @@ Defined in: [src/picking/core/PickingManager.ts:93](https://github.com/redcamel/
 
 > **get** **pickingDepthGPUTextureView**(): `GPUTextureView`
 
-Defined in: [src/picking/core/PickingManager.ts:125](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/picking/core/PickingManager.ts#L125)
+Defined in: [src/picking/core/PickingManager.ts:125](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/picking/core/PickingManager.ts#L125)
 
 피킹용 깊이 텍스처 뷰를 반환합니다.
 
@@ -168,7 +168,7 @@ Defined in: [src/picking/core/PickingManager.ts:125](https://github.com/redcamel
 
 > **get** **pickingGPUTexture**(): `GPUTexture`
 
-Defined in: [src/picking/core/PickingManager.ts:109](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/picking/core/PickingManager.ts#L109)
+Defined in: [src/picking/core/PickingManager.ts:109](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/picking/core/PickingManager.ts#L109)
 
 피킹용 GPU 텍스처를 반환합니다.
 
@@ -184,7 +184,7 @@ Defined in: [src/picking/core/PickingManager.ts:109](https://github.com/redcamel
 
 > **get** **pickingGPUTextureView**(): `GPUTextureView`
 
-Defined in: [src/picking/core/PickingManager.ts:117](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/picking/core/PickingManager.ts#L117)
+Defined in: [src/picking/core/PickingManager.ts:117](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/picking/core/PickingManager.ts#L117)
 
 피킹용 GPU 텍스처 뷰를 반환합니다.
 
@@ -200,7 +200,7 @@ Defined in: [src/picking/core/PickingManager.ts:117](https://github.com/redcamel
 
 > **get** **pickingPassDescriptor**(): `GPURenderPassDescriptor`
 
-Defined in: [src/picking/core/PickingManager.ts:129](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/picking/core/PickingManager.ts#L129)
+Defined in: [src/picking/core/PickingManager.ts:129](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/picking/core/PickingManager.ts#L129)
 
 ##### Returns
 
@@ -214,7 +214,7 @@ Defined in: [src/picking/core/PickingManager.ts:129](https://github.com/redcamel
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/picking/core/PickingManager.ts:69](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/picking/core/PickingManager.ts#L69)
+Defined in: [src/picking/core/PickingManager.ts:69](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/picking/core/PickingManager.ts#L69)
 
 비디오 메모리 사용량을 반환합니다.
 
@@ -228,7 +228,7 @@ Defined in: [src/picking/core/PickingManager.ts:69](https://github.com/redcamel/
 
 > **checkEvents**(`view`, `time`): `Promise`\<`void`\>
 
-Defined in: [src/picking/core/PickingManager.ts:206](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/picking/core/PickingManager.ts#L206)
+Defined in: [src/picking/core/PickingManager.ts:206](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/picking/core/PickingManager.ts#L206)
 
 이벤트를 확인하고 처리합니다.
 
@@ -249,7 +249,7 @@ Defined in: [src/picking/core/PickingManager.ts:206](https://github.com/redcamel
 
 > **destroy**(): `void`
 
-Defined in: [src/picking/core/PickingManager.ts:184](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/picking/core/PickingManager.ts#L184)
+Defined in: [src/picking/core/PickingManager.ts:184](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/picking/core/PickingManager.ts#L184)
 
 PickingManager를 파기합니다.
 
@@ -263,7 +263,7 @@ PickingManager를 파기합니다.
 
 > **render**(`view`): `void`
 
-Defined in: [src/picking/core/PickingManager.ts:133](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/picking/core/PickingManager.ts#L133)
+Defined in: [src/picking/core/PickingManager.ts:133](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/picking/core/PickingManager.ts#L133)
 
 #### Parameters
 
@@ -281,7 +281,7 @@ Defined in: [src/picking/core/PickingManager.ts:133](https://github.com/redcamel
 
 > **resetCastingList**(): `void`
 
-Defined in: [src/picking/core/PickingManager.ts:176](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/picking/core/PickingManager.ts#L176)
+Defined in: [src/picking/core/PickingManager.ts:176](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/picking/core/PickingManager.ts#L176)
 
 캐스팅 리스트를 초기화합니다.
 
@@ -301,7 +301,7 @@ Defined in: [src/picking/core/PickingManager.ts:176](https://github.com/redcamel
 
 > `readonly` **instanceId**: `number`
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/BaseObject.ts#L18)
+Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L18)
 
 클래스별 인스턴스 순번 ID
 
@@ -317,7 +317,7 @@ Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L76)
 
 안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -339,7 +339,7 @@ AntialiasingManager 인스턴스
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L88)
 
 커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -361,7 +361,7 @@ CommandEncoderManager 인스턴스
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L52)
 
 WebGPU 디바이스 객체를 반환합니다. (단축 경로)
 
@@ -383,7 +383,7 @@ GPUDevice 인스턴스
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L58)
 
 객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
 
@@ -397,7 +397,7 @@ Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L70)
 
 객체의 이름을 설정합니다.
 
@@ -423,7 +423,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L40)
 
 RedGPUContext 인스턴스를 반환합니다.
 
@@ -445,7 +445,7 @@ RedGPUContext 인스턴스
 
 > **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L64)
 
 리소스 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -467,7 +467,7 @@ ResourceManager 인스턴스
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L46)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 

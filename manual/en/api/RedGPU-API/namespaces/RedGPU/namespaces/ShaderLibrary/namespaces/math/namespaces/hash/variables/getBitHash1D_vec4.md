@@ -8,7 +8,7 @@
 
 > `const` **getBitHash1D\_vec4**: `string` = `getBitHash1D_vec4_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:293](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/systemCodeManager/ShaderLibrary.ts#L293)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:293](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/systemCodeManager/ShaderLibrary.ts#L293)
 
 Generates a 1D random number (0.0 ~ 1.0) by preserving the bit structure of a 4D vector. (Ultra-precise)
 

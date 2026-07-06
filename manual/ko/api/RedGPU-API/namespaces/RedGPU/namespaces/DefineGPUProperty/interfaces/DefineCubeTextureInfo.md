@@ -6,7 +6,7 @@
 
 # Interface: DefineCubeTextureInfo
 
-Defined in: [src/defineProperty/funcs/texture/defineCubeTexture.ts:10](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/defineProperty/funcs/texture/defineCubeTexture.ts#L10)
+Defined in: [src/defineProperty/funcs/texture/defineCubeTexture.ts:10](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/defineProperty/funcs/texture/defineCubeTexture.ts#L10)
 
 `defineCubeTexture` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
 
@@ -16,6 +16,6 @@ Defined in: [src/defineProperty/funcs/texture/defineCubeTexture.ts:10](https://g
 
 > **key**: `string`
 
-Defined in: [src/defineProperty/funcs/texture/defineCubeTexture.ts:15](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/defineProperty/funcs/texture/defineCubeTexture.ts#L15)
+Defined in: [src/defineProperty/funcs/texture/defineCubeTexture.ts:15](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/defineProperty/funcs/texture/defineCubeTexture.ts#L15)
 
 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.

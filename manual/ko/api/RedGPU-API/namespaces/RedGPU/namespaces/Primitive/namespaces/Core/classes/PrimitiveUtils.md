@@ -6,7 +6,7 @@
 
 # Class: PrimitiveUtils
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:13](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L13)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:13](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L13)
 
 프리미티브 생성을 위한 공통 수학 및 데이터 처리 유틸리티 클래스입니다.
 
@@ -26,7 +26,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:13](https://github.com/redcame
 
 > `static` **calculateTangents**(`interleaveData`, `indexData`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:383](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L383)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:383](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L383)
 
 #### Parameters
 
@@ -45,7 +45,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:383](https://github.com/redcam
 
 > `static` **finalize**(`redGPUContext`, `interleaveData`, `indexData`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:37](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L37)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:37](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L37)
 
 #### Parameters
 
@@ -66,7 +66,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:37](https://github.com/redcame
 
 > `static` **generateBoxData**(`redGPUContext`, `width`, `height`, `depth`, `widthSegments`, `heightSegments`, `depthSegments`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:59](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L59)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:59](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L59)
 
 #### Parameters
 
@@ -91,7 +91,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:59](https://github.com/redcame
 
 > `static` **generateCapsuleData**(`redGPUContext`, `radius`, `height`, `radialSegments`, `heightSegments`, `capSegments`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:362](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L362)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:362](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L362)
 
 #### Parameters
 
@@ -115,7 +115,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:362](https://github.com/redcam
 
 > `static` **generateCircleEntryData**(`redGPUContext`, `radius`, `radialSegments`, `thetaStart`, `thetaLength`, `isRadial`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:228](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L228)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:228](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L228)
 
 #### Parameters
 
@@ -139,7 +139,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:228](https://github.com/redcam
 
 > `static` **generateConeData**(`redGPUContext`, `radius`, `height`, `radialSegments`, `heightSegments`, `capBottom`, `thetaStart`, `thetaLength`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:202](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L202)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:202](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L202)
 
 #### Parameters
 
@@ -165,7 +165,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:202](https://github.com/redcam
 
 > `static` **generateCylinderData**(`redGPUContext`, `radiusTop`, `radiusBottom`, `height`, `radialSegments`, `heightSegments`, `capTop`, `capBottom`, `thetaStart`, `thetaLength`, `isRadialTop`, `isRadialBottom`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:185](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L185)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:185](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L185)
 
 #### Parameters
 
@@ -195,7 +195,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:185](https://github.com/redcam
 
 > `static` **generateCylinderTorsoData**(`interleaveData`, `indexData`, `radiusTop`, `radiusBottom`, `height`, `radialSegments`, `heightSegments`, `thetaStart`, `thetaLength`, `center`, `uV`, `vV`, `axisVector?`, `skipIndices?`, `uvVStart?`, `uvVEnd?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:334](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L334)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:334](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L334)
 
 #### Parameters
 
@@ -240,7 +240,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:334](https://github.com/redcam
 
 > `static` **generateGrid**(`interleaveData`, `indexData`, `resolutionX`, `resolutionY`, `vertexCallback`, `skipIndices?`, `reverseIndices?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:42](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L42)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:42](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L42)
 
 #### Parameters
 
@@ -264,7 +264,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:42](https://github.com/redcame
 
 > `static` **generateGridIndices**(`indexData`, `vertexOffset`, `gridX`, `gridY`, `gridX1`, `reverse?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:373](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L373)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:373](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L373)
 
 #### Parameters
 
@@ -287,7 +287,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:373](https://github.com/redcam
 
 > `static` **generateGroundData**(`redGPUContext`, `width`, `height`, `widthSegments`, `heightSegments`, `flipY`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:217](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L217)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:217](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L217)
 
 #### Parameters
 
@@ -311,7 +311,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:217](https://github.com/redcam
 
 > `static` **generatePlaneData**(`interleaveData`, `indexData`, `width`, `height`, `mainSegmentsX`, `mainSegmentsY`, `center`, `uV`, `vV`, `normal`, `radius?`, `radiusSegments?`, `boxDim?`, `flipY?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:103](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L103)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:103](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L103)
 
 #### Parameters
 
@@ -342,7 +342,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:103](https://github.com/redcam
 
 > `static` **generatePlaneEntryData**(`redGPUContext`, `width`, `height`, `widthSegments`, `heightSegments`, `flipY`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:206](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L206)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:206](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L206)
 
 #### Parameters
 
@@ -366,7 +366,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:206](https://github.com/redcam
 
 > `static` **generateRingData**(`interleaveData`, `indexData`, `innerRadius`, `outerRadius`, `thetaSegments`, `phiSegments`, `thetaStart`, `thetaLength`, `center`, `uV`, `vV`, `normal`, `isFront?`, `isRadial?`, `uvVStart?`, `uvVEnd?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:300](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L300)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:300](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L300)
 
 #### Parameters
 
@@ -411,7 +411,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:300](https://github.com/redcam
 
 > `static` **generateRingEntryData**(`redGPUContext`, `innerRadius`, `outerRadius`, `thetaSegments`, `phiSegments`, `thetaStart`, `thetaLength`, `isRadial`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:235](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L235)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:235](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L235)
 
 #### Parameters
 
@@ -437,7 +437,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:235](https://github.com/redcam
 
 > `static` **generateRoundedBoxData**(`redGPUContext`, `width`, `height`, `depth`, `widthSegments`, `heightSegments`, `depthSegments`, `radius`, `radiusSegments`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:63](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L63)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:63](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L63)
 
 #### Parameters
 
@@ -464,7 +464,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:63](https://github.com/redcame
 
 > `static` **generateSphereData**(`redGPUContext`, `radius`, `widthSegments`, `heightSegments`, `phiStart`, `phiLength`, `thetaStart`, `thetaLength`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:178](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L178)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:178](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L178)
 
 #### Parameters
 
@@ -490,7 +490,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:178](https://github.com/redcam
 
 > `static` **generateSphericalData**(`interleaveData`, `indexData`, `radius`, `widthSegments`, `heightSegments`, `phiStart`, `phiLength`, `thetaStart`, `thetaLength`, `yOffset?`, `uvVStart?`, `uvVEnd?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:324](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L324)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:324](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L324)
 
 #### Parameters
 
@@ -519,7 +519,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:324](https://github.com/redcam
 
 > `static` **generateTorusData**(`redGPUContext`, `radius`, `thickness`, `radialSegments`, `tubularSegments`, `thetaStart`, `thetaLength`, `capStart`, `capEnd`, `isRadialCapStart`, `isRadialCapEnd`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:242](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L242)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:242](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L242)
 
 #### Parameters
 
@@ -548,7 +548,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:242](https://github.com/redcam
 
 > `static` **generateTorusKnotData**(`redGPUContext`, `radius`, `tubeRadius`, `tubularSegments`, `radialSegments`, `windingsAroundAxis`, `windingsAroundCircle`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:275](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L275)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:275](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L275)
 
 #### Parameters
 
@@ -573,7 +573,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:275](https://github.com/redcam
 
 > `static` **getEmptyGeometry**(`redGPUContext`, `uniqueKey`): [`Geometry`](../../../../../classes/Geometry.md)
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:53](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L53)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:53](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L53)
 
 #### Parameters
 
@@ -592,7 +592,7 @@ Defined in: [src/primitive/core/PrimitiveUtils.ts:53](https://github.com/redcame
 
 > `static` **interleavePacker**(`interleaveData`, `px`, `py`, `pz`, `nx`, `ny`, `nz`, `u`, `v`, `tx?`, `ty?`, `tz?`, `tw?`): `void`
 
-Defined in: [src/primitive/core/PrimitiveUtils.ts:410](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/primitive/core/PrimitiveUtils.ts#L410)
+Defined in: [src/primitive/core/PrimitiveUtils.ts:410](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/primitive/core/PrimitiveUtils.ts#L410)
 
 #### Parameters
 

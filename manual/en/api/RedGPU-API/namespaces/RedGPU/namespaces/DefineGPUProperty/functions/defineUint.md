@@ -8,7 +8,7 @@
 
 > **defineUint**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/number/defineUint.ts:96](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/defineProperty/funcs/number/defineUint.ts#L96)
+Defined in: [src/defineProperty/funcs/number/defineUint.ts:96](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/defineProperty/funcs/number/defineUint.ts#L96)
 
 지정된 클래스의 프로토타입에 GPU와 연동되는 부호 없는 정수(Uint) 속성을 정의합니다.
 

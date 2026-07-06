@@ -8,7 +8,7 @@
 
 > **TypeInterleave** = `object`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:1](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L1)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:1](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L1)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:1](https:
 
 > **gpuVertexFormat**: `GPUVertexFormat`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:1](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L1)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:1](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L1)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:1](https:
 
 > **numElements**: `number`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:1](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L1)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:1](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L1)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:1](https:
 
 > **offset**: `number`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:1](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L1)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:1](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L1)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:1](https:
 
 > **stride**: `number`
 
-Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:1](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L1)
+Defined in: [src/resources/buffer/vertexBuffer/VertexInterleaveType.ts:1](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/resources/buffer/vertexBuffer/VertexInterleaveType.ts#L1)
