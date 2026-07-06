@@ -969,7 +969,7 @@ export namespace ShadowLibrary {
      * ) -> f32 {
      *     let oneOverShadowDepthTextureSize = 1.0 / f32(shadowDepthTextureSize);
      *     let shadowDepth = clamp(shadowCoord.z, 0.0, 1.0);
-     *
+     * 
      *     // 12-Sample Poisson Disk 패턴 선언
      *     var poissonDisk = array<vec2<f32>, 12>(
      *         vec2<f32>(-0.171104, -0.635832),
@@ -987,20 +987,20 @@ export namespace ShadowLibrary {
      *     );
      * 
      *     var visibility: f32 = 0.0;
-     *
+     *     
      *     // 픽셀 스크린 공간 좌표 기반으로 무작위 회전 각도 계산
      *     let randomAngle = getShadowRandomAngle(shadowCoord.xy * 1000.0);
      *     let cosAngle = cos(randomAngle);
      *     let sinAngle = sin(randomAngle);
      *     let rotationMatrix = mat2x2<f32>(cosAngle, -sinAngle, sinAngle, cosAngle);
-     *
+     * 
      *     // Poisson Disk 샘플링 루프 순회
      *     for (var i = 0; i < 12; i++) {
      *         // 포아송 오프셋을 랜덤 각도로 회전
      *         let rotatedOffset = rotationMatrix * poissonDisk[i];
      *         let offset = rotatedOffset * oneOverShadowDepthTextureSize * filterScale;
      *         let tUV = shadowCoord.xy + offset;
-     *
+     * 
      *         // textureSampleCompare는 Uniform Control Flow 규격을 유지하기 위해 분기문 밖에서 실행
      *         let sampleVisibility = textureSampleCompare(
      *             directionalShadowMap,
@@ -1008,14 +1008,14 @@ export namespace ShadowLibrary {
      *             tUV,
      *             shadowDepth - bias
      *         );
-     *
+     * 
      *         // 범위 밖의 영역은 그림자 가시성을 1.0으로 고정 (select 함수 사용)
      *         let outOfBounds = tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0;
      *         visibility += select(sampleVisibility, 1.0, outOfBounds);
      *     }
-     *
+     * 
      *     visibility /= 12.0;
-     *
+     * 
      *     // 라이트 프러스트럼 범위 밖(Near/Far plane 너머)인 경우 가시성 1.0 반환
      *     let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
      *     return select(visibility, 1.0, invalidDepth);
@@ -2126,7 +2126,7 @@ export namespace EntryPointLibrary {
          * @vertex
          * fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
          *     var output: OutputShadowData;
-         *
+         * 
          *     let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
          *     // 시스템 Uniform 변수 가져오기
          *     let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
@@ -2846,7 +2846,7 @@ export namespace ShaderLibrary {
      *      ambientLight:AmbientLight,
      * 
      * };
-     *
+     * 
      * @group(0) @binding(0) var<uniform> systemUniforms: SystemUniform;
      * @group(0) @binding(1) var directionalShadowMapSampler: sampler_comparison;
      * @group(0) @binding(2) var directionalShadowMap: texture_depth_2d;
@@ -2867,10 +2867,10 @@ export namespace ShaderLibrary {
      * 
      * #redgpu_include systemStruct.globalVertexStruct;
      * @group(0) @binding(17) var<storage> globalVertexSSBO : array<GlobalVertexStruct>;
-     *
+     * 
      * #redgpu_include systemStruct.globalFragmentStructPBR;
      * @group(0) @binding(18) var<storage> globalFragmentSSBO_PBR : array<GlobalFragmentStructPBR>;
-     *
+     * 
      * #redgpu_include systemStruct.globalFragmentStructBuiltIn;
      * @group(0) @binding(19) var<storage> globalFragmentSSBO_BuiltIn : array<GlobalFragmentStructBuiltIn>;
      * 
@@ -2981,7 +2981,7 @@ export namespace ShaderLibrary {
      *     devicePixelRatio: f32,
      *     skyAtmosphere:SkyAtmosphere,
      * };
-     *
+     * 
      * @group(2) @binding(4) var<uniform> systemUniforms: SystemUniform;
      * ```
      */
