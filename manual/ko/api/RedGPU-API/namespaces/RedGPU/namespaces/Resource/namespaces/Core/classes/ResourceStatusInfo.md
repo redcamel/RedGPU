@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: ResourceStatusInfo
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:1](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L1)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:1](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L1)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo
 
 > **new ResourceStatusInfo**(): `ResourceStatusInfo`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:5](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L5)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:5](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L5)
 
 #### Returns
 
@@ -26,7 +26,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo
 
 > **table**: `Map`\<`string`, `any`\>
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:2](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L2)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:2](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L2)
 
 ***
 
@@ -34,4 +34,4 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo
 
 > **videoMemory**: `number` = `0`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:3](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L3)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts:3](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/resources/core/resourceManager/resourceState/ResourceStatusInfo.ts#L3)

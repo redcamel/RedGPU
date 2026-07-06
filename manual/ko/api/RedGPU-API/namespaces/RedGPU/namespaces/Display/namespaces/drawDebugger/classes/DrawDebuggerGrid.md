@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: DrawDebuggerGrid
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:48](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L48)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:48](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L48)
 
 3D 씬(Scene)의 기준 바닥면을 바둑판 형태의 격자로 렌더링하여 구조와 위치를 가늠하게 돕는 디버깅용 그리드 클래스입니다.
 
@@ -31,7 +31,7 @@ Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:48](https://githu
 
 > **new DrawDebuggerGrid**(`redGPUContext`): `DrawDebuggerGrid`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:66](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L66)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:66](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L66)
 
 #### Parameters
 
@@ -47,7 +47,7 @@ Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:66](https://githu
 
 [`BaseObject`](../../../../BaseObject/classes/BaseObject.md).[`constructor`](../../../../BaseObject/classes/BaseObject.md#constructor)
 
-## Accessors
+## Properties
 
 ### lineColor
 
@@ -55,7 +55,7 @@ Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:66](https://githu
 
 > **get** **lineColor**(): [`ColorRGBA`](../../../../Color/classes/ColorRGBA.md)
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:166](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L166)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:166](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L166)
 
 ##### Returns
 
@@ -69,7 +69,7 @@ Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:166](https://gith
 
 > **get** **size**(): `number`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:158](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L158)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:158](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L158)
 
 ##### Returns
 
@@ -79,7 +79,7 @@ Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:158](https://gith
 
 > **set** **size**(`value`): `void`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:162](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L162)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:162](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L162)
 
 ##### Parameters
 
@@ -97,7 +97,7 @@ Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:162](https://gith
 
 > **render**(`renderViewStateData`): `void`
 
-Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:170](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L170)
+Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:170](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/display/drawDebugger/grid/DrawDebuggerGrid.ts#L170)
 
 #### Parameters
 
@@ -117,13 +117,27 @@ Defined in: [src/display/drawDebugger/grid/DrawDebuggerGrid.ts:170](https://gith
 <details>
 <summary>상속받은 속성 및 메서드 보기 (클릭하여 확장)</summary>
 
+### instanceId
+
+> `readonly` **instanceId**: `number`
+
+Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/base/BaseObject.ts#L18)
+
+클래스별 인스턴스 순번 ID
+
+#### Inherited from
+
+[`BaseObject`](../../../../BaseObject/classes/BaseObject.md).[`instanceId`](../../../../BaseObject/classes/BaseObject.md#instanceid)
+
+## Accessors
+
 ### name
 
 #### Get Signature
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/base/BaseObject.ts#L58)
 
 객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
 
@@ -137,7 +151,7 @@ Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/base/BaseObject.ts#L71)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/base/BaseObject.ts#L70)
 
 객체의 이름을 설정합니다.
 
@@ -163,7 +177,7 @@ Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/base/BaseObject.ts#L46)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 

@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getIsFinite**: `string` = `getIsFinite_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:472](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/systemCodeManager/ShaderLibrary.ts#L472)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:474](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/systemCodeManager/ShaderLibrary.ts#L474)
 
 Checks if a single scalar value is finite. (Checks for NaN and Inf)
 

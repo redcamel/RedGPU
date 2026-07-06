@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **COMMAND\_ENCODER\_TYPE**: `object`
 
-Defined in: [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:6](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L6)
+Defined in: [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:6](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L6)
 
 Constant object defining the types of GPU command encoders.
 
@@ -16,7 +16,7 @@ Constant object defining the types of GPU command encoders.
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="property-main"></a> `MAIN` | `"MAIN"` | `'MAIN'` | Main rendering phase (main scene draw, etc.) | [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:21](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L21) |
-| <a id="property-post_process"></a> `POST_PROCESS` | `"POST_PROCESS"` | `'POST_PROCESS'` | Post-processing phase (apply post-processing effects like blur, tonemapping) | [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:26](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L26) |
-| <a id="property-pre_process"></a> `PRE_PROCESS` | `"PRE_PROCESS"` | `'PRE_PROCESS'` | Pre-processing phase (e.g., G-Buffer rendering, shadow map rendering, physics simulation) | [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:16](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L16) |
-| <a id="property-resource"></a> `RESOURCE` | `"RESOURCE"` | `'RESOURCE'` | Resource processing phase (e.g., copy, write buffer) | [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:11](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L11) |
+| <a id="property-main"></a> `MAIN` | `"MAIN"` | `'MAIN'` | Main rendering phase (main scene draw, etc.) | [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:21](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L21) |
+| <a id="property-post_process"></a> `POST_PROCESS` | `"POST_PROCESS"` | `'POST_PROCESS'` | Post-processing phase (apply post-processing effects like blur, tonemapping) | [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:26](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L26) |
+| <a id="property-pre_process"></a> `PRE_PROCESS` | `"PRE_PROCESS"` | `'PRE_PROCESS'` | Pre-processing phase (e.g., G-Buffer rendering, shadow map rendering, physics simulation) | [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:16](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L16) |
+| <a id="property-resource"></a> `RESOURCE` | `"RESOURCE"` | `'RESOURCE'` | Resource processing phase (e.g., copy, write buffer) | [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:11](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L11) |

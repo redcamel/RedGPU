@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **Projection**: `string` = `Projection_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2317](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/systemCodeManager/ShaderLibrary.ts#L2317)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2349](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/systemCodeManager/ShaderLibrary.ts#L2349)
 
 투영(Projection) 관련 행렬 구조체 정의입니다.
 

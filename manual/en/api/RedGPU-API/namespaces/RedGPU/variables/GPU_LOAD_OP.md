@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **GPU\_LOAD\_OP**: `object`
 
-Defined in: [src/gpuConst/GPU\_LOAD\_OP.ts:10](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/gpuConst/GPU_LOAD_OP.ts#L10)
+Defined in: [src/gpuConst/GPU\_LOAD\_OP.ts:10](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/gpuConst/GPU_LOAD_OP.ts#L10)
 
 Constants defining how to load attachments at the start of a render pass.
 
@@ -18,5 +18,5 @@ Determines how to handle existing data before starting a new rendering task.
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="property-clear"></a> `CLEAR` | `"clear"` | `'clear'` | Initializes (clears) the attachment with a specified color or value. | [src/gpuConst/GPU\_LOAD\_OP.ts:20](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/gpuConst/GPU_LOAD_OP.ts#L20) |
-| <a id="property-load"></a> `LOAD` | `"load"` | `'load'` | Loads and maintains the contents of the existing attachment. | [src/gpuConst/GPU\_LOAD\_OP.ts:15](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/gpuConst/GPU_LOAD_OP.ts#L15) |
+| <a id="property-clear"></a> `CLEAR` | `"clear"` | `'clear'` | Initializes (clears) the attachment with a specified color or value. | [src/gpuConst/GPU\_LOAD\_OP.ts:20](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/gpuConst/GPU_LOAD_OP.ts#L20) |
+| <a id="property-load"></a> `LOAD` | `"load"` | `'load'` | Loads and maintains the contents of the existing attachment. | [src/gpuConst/GPU\_LOAD\_OP.ts:15](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/gpuConst/GPU_LOAD_OP.ts#L15) |

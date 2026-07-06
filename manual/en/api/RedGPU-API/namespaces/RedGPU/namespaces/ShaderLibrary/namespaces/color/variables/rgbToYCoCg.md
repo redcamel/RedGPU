@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **rgbToYCoCg**: `string` = `rgbToYCoCg_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:1016](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/systemCodeManager/ShaderLibrary.ts#L1016)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:1046](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/systemCodeManager/ShaderLibrary.ts#L1046)
 
 Converts RGB color to YCoCg color space. (Optimized for TAA and compression efficiency)
 

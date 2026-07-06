@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **Shadow**: `string` = `Shadow_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2373](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/systemCodeManager/ShaderLibrary.ts#L2373)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2406](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/systemCodeManager/ShaderLibrary.ts#L2406)
 
 Definition of the Shadow configuration structure.
 
@@ -16,6 +16,7 @@ Definition of the Shadow configuration structure.
 struct Shadow {
     directionalShadowDepthTextureSize: u32,
     directionalShadowBias: f32,
-    padding: vec2<f32> // Padding for 16-byte alignment
+    directionalShadowStrength: f32,
+    directionalShadowFilterScale: f32
 };
 ```

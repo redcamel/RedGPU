@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: ResourceStateHDRTexture
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:7](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L7)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:7](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L7)
 
 HDR 관련 텍스처(2D)의 관리 상태를 정의하는 클래스입니다.
 
@@ -16,7 +16,7 @@ HDR 관련 텍스처(2D)의 관리 상태를 정의하는 클래스입니다.
 
 > **new ResourceStateHDRTexture**(`texture`): `ResourceStateHDRTexture`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:19](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L19)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:19](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L19)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **cacheKey**: `string`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:13](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L13)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:13](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L13)
 
 캐시 키
 
@@ -44,7 +44,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **src**: `string`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:11](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L11)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:11](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L11)
 
 소스 경로
 
@@ -54,7 +54,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **texture**: [`HDRTexture`](../../../classes/HDRTexture.md)
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:9](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L9)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:9](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L9)
 
 관리 대상 텍스처 인스턴스
 
@@ -64,7 +64,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **useNum**: `number` = `0`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:15](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L15)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:15](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L15)
 
 참조 횟수
 
@@ -74,6 +74,6 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **uuid**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:17](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L17)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts:17](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/resources/core/resourceManager/resourceState/texture/ResourceStateHDRTexture.ts#L17)
 
 고유 ID

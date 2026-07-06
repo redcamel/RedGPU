@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../README.md)
 
 ***
 
@@ -41,6 +41,7 @@ Through each resource and utility, you can easily use various resource managemen
 - [CoreWGSLParser](namespaces/CoreWGSLParser/README.md)
 - [DownSampleCubeMapGenerator](classes/DownSampleCubeMapGenerator.md)
 - [MipmapGenerator](classes/MipmapGenerator.md)
+- [BufferSlot](interfaces/BufferSlot.md)
 - [VoronoiSettings](interfaces/VoronoiSettings.md)
 - [BitmapSrcInfo](type-aliases/BitmapSrcInfo.md)
 - [ComponentMapping](type-aliases/ComponentMapping.md)
@@ -48,6 +49,10 @@ Through each resource and utility, you can easily use various resource managemen
 - [HDRSrcInfo](type-aliases/HDRSrcInfo.md)
 - [NumberArray](type-aliases/NumberArray.md)
 - [TypeInterleave](type-aliases/TypeInterleave.md)
+
+## Resource
+
+- [GlobalStorageBufferManager](classes/GlobalStorageBufferManager.md)
 
 ## Sampler
 

@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: Raycaster2D
 
-Defined in: [src/picking/Raycaster2D.ts:22](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/picking/Raycaster2D.ts#L22)
+Defined in: [src/picking/Raycaster2D.ts:22](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/picking/Raycaster2D.ts#L22)
 
 2D 공간에서 객체와의 교차를 검사하는 클래스입니다.
 
@@ -25,7 +25,7 @@ const intersects = raycaster.intersectObjects(scene.children);
 
 > **new Raycaster2D**(): `Raycaster2D`
 
-Defined in: [src/picking/Raycaster2D.ts:42](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/picking/Raycaster2D.ts#L42)
+Defined in: [src/picking/Raycaster2D.ts:42](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/picking/Raycaster2D.ts#L42)
 
 Raycaster2D 인스턴스를 생성합니다.
 
@@ -39,7 +39,7 @@ Raycaster2D 인스턴스를 생성합니다.
 
 > `readonly` **ray**: [`Ray`](../../Math/classes/Ray.md)
 
-Defined in: [src/picking/Raycaster2D.ts:30](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/picking/Raycaster2D.ts#L30)
+Defined in: [src/picking/Raycaster2D.ts:30](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/picking/Raycaster2D.ts#L30)
 
 내부적으로 관리되는 광선 객체
 
@@ -51,7 +51,7 @@ Defined in: [src/picking/Raycaster2D.ts:30](https://github.com/redcamel/RedGPU/b
 
 > **intersectObject**(`mesh`, `recursive?`): `RayIntersectResult`[]
 
-Defined in: [src/picking/Raycaster2D.ts:98](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/picking/Raycaster2D.ts#L98)
+Defined in: [src/picking/Raycaster2D.ts:98](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/picking/Raycaster2D.ts#L98)
 
 단일 객체와의 교차 여부를 검사합니다.
 
@@ -79,7 +79,7 @@ const result = raycaster.intersectObject(mesh);
 
 > **intersectObjects**(`meshes`, `recursive?`): `RayIntersectResult`[]
 
-Defined in: [src/picking/Raycaster2D.ts:123](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/picking/Raycaster2D.ts#L123)
+Defined in: [src/picking/Raycaster2D.ts:123](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/picking/Raycaster2D.ts#L123)
 
 여러 객체와의 교차 여부를 검사합니다.
 
@@ -107,7 +107,7 @@ const results = raycaster.intersectObjects(scene.children);
 
 > **setFromCamera**(`screenX`, `screenY`, `view`): `void`
 
-Defined in: [src/picking/Raycaster2D.ts:65](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/picking/Raycaster2D.ts#L65)
+Defined in: [src/picking/Raycaster2D.ts:65](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/picking/Raycaster2D.ts#L65)
 
 화면 좌표를 기반으로 피킹 지점을 설정합니다.
 

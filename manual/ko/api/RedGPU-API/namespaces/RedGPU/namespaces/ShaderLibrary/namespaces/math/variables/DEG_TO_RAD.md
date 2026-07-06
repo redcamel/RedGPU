@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,4 +8,4 @@
 
 > `const` **DEG\_TO\_RAD**: `"const DEG_TO_RAD: f32 = 0.017453292519943295;"` = `'const DEG_TO_RAD: f32 = 0.017453292519943295;'`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:889](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/systemCodeManager/ShaderLibrary.ts#L889)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:891](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/systemCodeManager/ShaderLibrary.ts#L891)

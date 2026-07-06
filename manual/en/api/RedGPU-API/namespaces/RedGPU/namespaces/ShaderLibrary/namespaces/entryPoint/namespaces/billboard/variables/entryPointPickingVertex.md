@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **entryPointPickingVertex**: `string` = `billboardEntryPointPickingVertex_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2207](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/systemCodeManager/ShaderLibrary.ts#L2207)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2239](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/systemCodeManager/ShaderLibrary.ts#L2239)
 
 Vertex shader entry point for billboard picking.
 
@@ -28,7 +28,7 @@ Vertex output data
 fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
     let u_resolution = systemUniforms.resolution;
-
+     let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
     #redgpu_if disableJitter
         let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionMatrix;
     #redgpu_else
@@ -36,7 +36,7 @@ fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
     #redgpu_endIf
 
     let u_viewMatrix = systemUniforms.camera.viewMatrix;
-    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
+    let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
     let u_useBillboard = vertexUniforms.useBillboard;
     let u_usePixelSize = vertexUniforms.usePixelSize;
     let u_pixelSize = vertexUniforms.pixelSize;
@@ -70,7 +70,7 @@ fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
         output.position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * ratioScaleMatrix * vec4<f32>(inputData.position, 1.0);
     }
 
-    output.pickingId = unpack4x8unorm(vertexUniforms.pickingId);
+    output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
     return output;
 }
 ```

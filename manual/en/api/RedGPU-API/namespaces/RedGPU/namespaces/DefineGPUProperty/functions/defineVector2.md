@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **defineVector2**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/vector/defineVector2.ts:51](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/defineProperty/funcs/vector/defineVector2.ts#L51)
+Defined in: [src/defineProperty/funcs/vector/defineVector2.ts:51](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/defineProperty/funcs/vector/defineVector2.ts#L51)
 
 지정된 클래스의 프로토타입에 GPU와 연동되는 2차원 벡터(Vector2) 속성을 정의합니다.
 
@@ -28,7 +28,7 @@ Defined in: [src/defineProperty/funcs/vector/defineVector2.ts:51](https://github
 
 ***
 - Handles a 2-tuple array (`[number, number]`).
-- Automatically updates the GPU uniform buffer on value change.
+- Automatically updates the GPU globalStruct buffer on value change.
 
 ## Example
 

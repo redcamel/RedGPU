@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,4 +8,4 @@
 
 > **TypedArrayConstructor** = `Int8ArrayConstructor` \| `Uint8ArrayConstructor` \| `Int16ArrayConstructor` \| `Uint16ArrayConstructor` \| `Int32ArrayConstructor` \| `Uint32ArrayConstructor` \| `Float32ArrayConstructor` \| `Float64ArrayConstructor`
 
-Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:1](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/wgslParser/core/WGSLUniformTypes.ts#L1)
+Defined in: [src/resources/wgslParser/core/WGSLUniformTypes.ts:1](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/resources/wgslParser/core/WGSLUniformTypes.ts#L1)

@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Abstract Class: ACamera
 
-Defined in: [src/camera/core/ACamera.ts:11](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/ACamera.ts#L11)
+Defined in: [src/camera/core/ACamera.ts:11](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/camera/core/ACamera.ts#L11)
 
 Abstract base class for all cameras. Manages physical camera properties and common metadata.
 
@@ -25,7 +25,7 @@ Abstract base class for all cameras. Manages physical camera properties and comm
 
 > `protected` **new ACamera**(): `ACamera`
 
-Defined in: [src/base/BaseObject.ts:34](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/base/BaseObject.ts#L34)
+Defined in: [src/base/BaseObject.ts:34](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/base/BaseObject.ts#L34)
 
 BaseObject constructor. (Abstract class, cannot be instantiated directly)
 
@@ -43,7 +43,7 @@ BaseObject constructor. (Abstract class, cannot be instantiated directly)
 
 > `readonly` `static` **CALIBRATION\_CONSTANT**: `number` = `12.5`
 
-Defined in: [src/camera/core/ACamera.ts:19](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/ACamera.ts#L19)
+Defined in: [src/camera/core/ACamera.ts:19](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/camera/core/ACamera.ts#L19)
 
 Calibration constant (K)
 
@@ -59,7 +59,7 @@ Unreal Engine 5 and photographic standard (K = 12.5 based on ISO 2720)
 
 > **get** **aperture**(): `number`
 
-Defined in: [src/camera/core/ACamera.ts:123](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/ACamera.ts#L123)
+Defined in: [src/camera/core/ACamera.ts:123](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/camera/core/ACamera.ts#L123)
 
 Returns the aperture (f-stop) value.
 
@@ -73,7 +73,7 @@ Aperture value
 
 > **set** **aperture**(`value`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:135](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/ACamera.ts#L135)
+Defined in: [src/camera/core/ACamera.ts:135](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/camera/core/ACamera.ts#L135)
 
 Sets the aperture (f-stop) value.
 
@@ -95,7 +95,7 @@ Sets the aperture (f-stop) value.
 
 > **get** **ev100**(): `number`
 
-Defined in: [src/camera/core/ACamera.ts:110](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/ACamera.ts#L110)
+Defined in: [src/camera/core/ACamera.ts:110](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/camera/core/ACamera.ts#L110)
 
 Returns the physical exposure value (EV100).
 
@@ -113,7 +113,7 @@ EV100 value
 
 > **get** **iso**(): `number`
 
-Defined in: [src/camera/core/ACamera.ts:177](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/ACamera.ts#L177)
+Defined in: [src/camera/core/ACamera.ts:177](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/camera/core/ACamera.ts#L177)
 
 Returns the sensor sensitivity (ISO).
 
@@ -127,7 +127,7 @@ ISO sensitivity
 
 > **set** **iso**(`value`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:189](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/ACamera.ts#L189)
+Defined in: [src/camera/core/ACamera.ts:189](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/camera/core/ACamera.ts#L189)
 
 Sets the sensor sensitivity (ISO).
 
@@ -149,7 +149,7 @@ Sets the sensor sensitivity (ISO).
 
 > **get** **shutterSpeed**(): `number`
 
-Defined in: [src/camera/core/ACamera.ts:150](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/ACamera.ts#L150)
+Defined in: [src/camera/core/ACamera.ts:150](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/camera/core/ACamera.ts#L150)
 
 Returns the shutter speed (in seconds).
 
@@ -163,7 +163,7 @@ Shutter speed
 
 > **set** **shutterSpeed**(`value`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:162](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/ACamera.ts#L162)
+Defined in: [src/camera/core/ACamera.ts:162](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/camera/core/ACamera.ts#L162)
 
 Sets the shutter speed (in seconds).
 
@@ -185,7 +185,7 @@ Sets the shutter speed (in seconds).
 
 > **get** **useAutoExposure**(): `boolean`
 
-Defined in: [src/camera/core/ACamera.ts:61](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/ACamera.ts#L61)
+Defined in: [src/camera/core/ACamera.ts:61](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/camera/core/ACamera.ts#L61)
 
 Returns whether to use auto exposure.
 
@@ -199,7 +199,7 @@ Whether auto exposure is enabled
 
 > **set** **useAutoExposure**(`value`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:73](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/ACamera.ts#L73)
+Defined in: [src/camera/core/ACamera.ts:73](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/camera/core/ACamera.ts#L73)
 
 Sets whether to use auto exposure.
 
@@ -219,7 +219,7 @@ Sets whether to use auto exposure.
 
 > **updateExposure**(`view?`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:204](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/camera/core/ACamera.ts#L204)
+Defined in: [src/camera/core/ACamera.ts:204](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/camera/core/ACamera.ts#L204)
 
 Updates the exposure value.
 
@@ -241,13 +241,27 @@ Updates the exposure value.
 <details>
 <summary>View inherited properties and methods (Click to expand)</summary>
 
+### instanceId
+
+> `readonly` **instanceId**: `number`
+
+Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/base/BaseObject.ts#L18)
+
+Instance sequence ID per class
+
+#### Inherited from
+
+[`BaseObject`](../../../../BaseObject/classes/BaseObject.md).[`instanceId`](../../../../BaseObject/classes/BaseObject.md#instanceid)
+
+***
+
 ### name
 
 #### Get Signature
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/base/BaseObject.ts#L58)
 
 Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
 
@@ -261,7 +275,7 @@ Name of the object
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:71](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/base/BaseObject.ts#L71)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/base/BaseObject.ts#L70)
 
 Sets the name of the object.
 
@@ -287,7 +301,7 @@ Sets the name of the object.
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/base/BaseObject.ts#L46)
 
 Returns the universally unique identifier (UUID) of the object.
 

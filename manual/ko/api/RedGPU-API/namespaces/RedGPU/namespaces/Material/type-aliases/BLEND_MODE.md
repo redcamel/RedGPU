@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,6 +8,6 @@
 
 > **BLEND\_MODE** = *typeof* [`BLEND_MODE`](../variables/BLEND_MODE.md)\[keyof *typeof* [`BLEND_MODE`](../variables/BLEND_MODE.md)\]
 
-Defined in: [src/material/BLEND\_MODE.ts:6](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/material/BLEND_MODE.ts#L6)
+Defined in: [src/material/BLEND\_MODE.ts:6](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/material/BLEND_MODE.ts#L6)
 
 블렌드 모드 상수

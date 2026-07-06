@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,4 +8,4 @@
 
 > **ResourceState** = [`ResourceStateVertexBuffer`](../classes/ResourceStateVertexBuffer.md) \| [`ResourceStateIndexBuffer`](../classes/ResourceStateIndexBuffer.md) \| [`ResourceStateUniformBuffer`](../classes/ResourceStateUniformBuffer.md) \| [`ResourceStateStorageBuffer`](../classes/ResourceStateStorageBuffer.md) \| [`ResourceStateCubeTexture`](../classes/ResourceStateCubeTexture.md) \| [`ResourceStateBitmapTexture`](../classes/ResourceStateBitmapTexture.md) \| [`ResourceStateHDRTexture`](../classes/ResourceStateHDRTexture.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:42](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/resources/core/resourceManager/ResourceManager.ts#L42)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:49](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/resources/core/resourceManager/ResourceManager.ts#L49)

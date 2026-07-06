@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **entryPointShadowVertex**: `string` = `meshEntryPointShadowVertex_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2143](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/systemCodeManager/ShaderLibrary.ts#L2143)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2175](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/systemCodeManager/ShaderLibrary.ts#L2175)
 
 그림자 맵 생성을 위한 버텍스 셰이더 엔트리 포인트입니다.
 
@@ -31,6 +31,7 @@ Defined in: [src/systemCodeManager/ShaderLibrary.ts:2143](https://github.com/red
 fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
     var output: OutputShadowData;
 
+    let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
     // 시스템 Uniform 변수 가져오기
     let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
     let u_camera = systemUniforms.camera;
@@ -38,7 +39,7 @@ fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
     let u_cameraPosition = u_camera.cameraPosition;
 
     // Vertex별 Uniform 변수 가져오기
-    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
+    let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
 
     // 입력 데이터
     let input_position = inputData.position;
@@ -60,7 +61,7 @@ fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
             input_vertexNormal,
             displacementTexture,
             displacementTextureSampler,
-            vertexUniforms.displacementScale,
+            globalVertexData.displacementScale,
             input_uv,
             mipLevel
         );

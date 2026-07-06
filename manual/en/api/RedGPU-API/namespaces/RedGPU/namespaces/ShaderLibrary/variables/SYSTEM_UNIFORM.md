@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **SYSTEM\_UNIFORM**: `string` = `SYSTEM_UNIFORM_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2720](https://github.com/redcamel/RedGPU/blob/be50b2c2c71cc3b1b61935ef99a8ccd1d938046a/src/systemCodeManager/ShaderLibrary.ts#L2720)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2963](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/systemCodeManager/ShaderLibrary.ts#L2963)
 
 Definitions of the engine's standard system uniforms and global binding structures.
 
@@ -64,6 +64,15 @@ struct SystemUniform {
 
 @group(0) @binding(15) var atmosphereIrradianceLUT: texture_cube<f32>;
 @group(0) @binding(16) var skyAtmosphere_prefilteredTexture: texture_cube<f32>;
+
+#redgpu_include systemStruct.globalVertexStruct;
+@group(0) @binding(17) var<storage> globalVertexSSBO : array<GlobalVertexStruct>;
+
+#redgpu_include systemStruct.globalFragmentStructPBR;
+@group(0) @binding(18) var<storage> globalFragmentSSBO_PBR : array<GlobalFragmentStructPBR>;
+
+#redgpu_include systemStruct.globalFragmentStructBuiltIn;
+@group(0) @binding(19) var<storage> globalFragmentSSBO_BuiltIn : array<GlobalFragmentStructBuiltIn>;
 
 #redgpu_include depth.getLinearizeDepth
 

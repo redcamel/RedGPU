@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../README.md)
+[**RedGPU API v4.2.0-Alpha**](../../../README.md)
 
 ***
 
@@ -39,6 +39,7 @@
 - [BaseObject](namespaces/BaseObject/README.md)
 - [Bound](namespaces/Bound/README.md)
 - [Camera](namespaces/Camera/README.md)
+- [Charactor](namespaces/Charactor/README.md)
 - [Color](namespaces/Color/README.md)
 - [CommandEncoderManager](namespaces/CommandEncoderManager/README.md)
 - [Context](namespaces/Context/README.md)
@@ -59,6 +60,10 @@
 - [Shadow](namespaces/Shadow/README.md)
 - [ToneMapping](namespaces/ToneMapping/README.md)
 - [Util](namespaces/Util/README.md)
+- [AnimState](classes/AnimState.md)
+- [AnimStateMachine](classes/AnimStateMachine.md)
+- [ClipAnimState](classes/ClipAnimState.md)
+- [AnimTransition](interfaces/AnimTransition.md)
 
 ## Renderer
 
