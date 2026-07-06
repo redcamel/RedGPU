@@ -54,4 +54,5 @@ function convertHexToRgb(hex: string | number, returnArrayYn: boolean = false): 
     const b = hexNumber & 255;
     return returnArrayYn ? [r, g, b] : {r, g, b};
 }
+
 export default convertHexToRgb

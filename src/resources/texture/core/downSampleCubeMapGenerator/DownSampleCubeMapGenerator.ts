@@ -16,7 +16,7 @@ class DownSampleCubeMapGenerator extends RedGPUObject {
     #cubemapSampler: GPUSampler | null = null;
     #tempViewCache: Map<string, GPUTextureView> = new Map();
     #tempBindGroupCache: Map<string, GPUBindGroup> = new Map();
-    /** [KO] 밉 레벨별 독립적인 유니폼 버퍼 풀 [EN] Independent uniform buffer pool per mip level */
+    /** [KO] 밉 레벨별 독립적인 유니폼 버퍼 풀 [EN] Independent globalStruct buffer pool per mip level */
     #cubemapUniformBuffers: GPUBuffer[] = [];
 
     constructor(redGPUContext: RedGPUContext) {

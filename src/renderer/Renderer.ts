@@ -152,6 +152,11 @@ class Renderer {
             renderViewStateData,
         } = view
         const {
+            globalVertexSSBO,
+            globalFragmentSSBO_BuiltIn,
+            globalFragmentSSBO_PBR
+        } = redGPUContext
+        const {
             colorAttachment,
             depthStencilAttachment,
             gBufferNormalTextureAttachment,
@@ -164,6 +169,12 @@ class Renderer {
             depthStencilAttachment,
         }
 
+        // [KO] 상태 초기화 및 컬링 계산 전에 카메라 행렬을 최신 상태로 업데이트
+        if (pixelRectObject.width && pixelRectObject.height) {
+            // @ts-ignore
+            camera.update?.(view, redGPUContext.currentTime)
+        }
+
         // [KO] 상태 초기화 (인코더 의존성 제거됨)
         // [EN] Reset state (encoder dependency removed)
         view.renderViewStateData.reset()
@@ -174,6 +185,7 @@ class Renderer {
             if (lightManager.pointLightCount || lightManager.spotLightCount) {
                 view.clusterLightManager.updateClusterLights();
             }
+
             {
                 const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
                 drawBufferManager.flushAllCommands(renderViewStateData)
@@ -190,8 +202,6 @@ class Renderer {
                         }
                     }
                 }
-                // @ts-ignore
-                camera.update?.(view, redGPUContext.currentTime)
             }
 
             updateJitter(view)
@@ -215,7 +225,13 @@ class Renderer {
             renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
         }
 
-        processAnimationsAndSkinning(redGPUContext, renderViewStateData, this.#gltfAnimationLooperManager);
+        processAnimationsAndSkinning(redGPUContext, renderViewStateData, this.#gltfAnimationLooperManager, view);
+
+        {
+            globalVertexSSBO.flush()
+            globalFragmentSSBO_PBR.flush()
+            globalFragmentSSBO_BuiltIn.flush()
+        }
 
         view.renderViewStateData.viewRenderCPURecordingTime = (performance.now() - view.renderViewStateData.viewRenderStartTime);
         return {

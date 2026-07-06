@@ -6,6 +6,7 @@ import ClusterCellBoundsSource from "../../core/ClusterBoundsGrid.wgsl";
 import PassLightClustersSource from "./PassClustersLight.wgsl";
 import PassClustersLightHelper from "../../core/PassClustersLightHelper";
 import RedGPUObject from "../../../../base/RedGPUObject";
+import PassClusterLightBound from "../bound/PassClusterLightBound";
 
 const emptyArray = new Uint32Array([0, 0, 0, 0]);
 
@@ -27,6 +28,7 @@ class PassClustersLight extends RedGPUObject {
     #clusterLightBindGroup: GPUBindGroup
     #clusterLightPipeline: GPUComputePipeline
     #clusterLightsBuffer: GPUBuffer
+    #passClusterLightBound: PassClusterLightBound
 
     /**
      * [KO] PassClustersLight 인스턴스를 생성합니다.
@@ -37,10 +39,14 @@ class PassClustersLight extends RedGPUObject {
      * @param view -
      * [KO] View3D 인스턴스
      * [EN] View3D instance
+     * @param passClusterLightBound -
+     * [KO] PassClusterLightBound 인스턴스
+     * [EN] PassClusterLightBound instance
      */
-    constructor(redGPUContext: RedGPUContext, view: View3D,) {
+    constructor(redGPUContext: RedGPUContext, view: View3D, passClusterLightBound: PassClusterLightBound) {
         super(redGPUContext)
         this.#view = view;
+        this.#passClusterLightBound = passClusterLightBound;
         this.#initPipeLine();
         console.log(this);
     }
@@ -55,6 +61,7 @@ class PassClustersLight extends RedGPUObject {
     get clusterLightsBuffer(): GPUBuffer {
         return this.#clusterLightsBuffer;
     }
+
 
     /**
      * [KO] 클러스터 조명을 계산하는 컴퓨트 패스를 실행합니다.
@@ -98,7 +105,7 @@ class PassClustersLight extends RedGPUObject {
                 {
                     binding: 0,
                     resource: {
-                        buffer: this.#view.clusterLightManager.passClusterLightBound.clusterBoundBuffer
+                        buffer: this.#passClusterLightBound.clusterBoundBuffer
                     }
                 }
             ]

@@ -112,7 +112,10 @@ const GBufferItem = ({name, info, onPreview}: {
     return (
         <div
             style={textureItemStyle}
-            onClick={() => onPreview({texture: {gpuTexture: previewTex}, label: name}, 'bitmapTexture')}
+            onClick={() => info.resolveTexture ? onPreview({
+                texture: {gpuTexture: previewTex},
+                label: name
+            }, 'bitmapTexture') : {}}
         >
             <div style={detailHeaderStyle}>
                 <div style={detailLeftContainerStyle}>

@@ -4,6 +4,7 @@ struct InstanceUniforms {
     useDisplacementTexture: u32,
     displacementScale: f32,
     padding: vec2<f32>,
+    lodGlobalFragmentBufferSlotIndex: array<u32, 8>,
     instanceModelMatrixs: array<mat4x4<f32>, __INSTANCE_COUNT__>,
     instanceNormalModelMatrix: array<mat4x4<f32>, __INSTANCE_COUNT__>,
     instanceOpacity: array<f32, __INSTANCE_COUNT__>,
@@ -28,9 +29,14 @@ struct IndirectDrawArgs {
     firstInstance: u32,
 };
 
+struct VisibilityData {
+    instanceIdx: u32,
+    globalFragmentSlotIndex: u32,
+};
+
 @group(0) @binding(0) var<storage, read> instanceUniforms: InstanceUniforms;
 @group(0) @binding(1) var<storage, read> cullingUniforms: CullingUniforms;
-@group(0) @binding(2) var<storage, read_write> visibilityBuffer: array<u32>;
+@group(0) @binding(2) var<storage, read_write> visibilityBuffer: array<VisibilityData>;
 @group(0) @binding(3) var<storage, read_write> indirectDrawBuffer: array<IndirectDrawArgs>;
 
 const BOUNDING_RADIUS: f32 = 1.0;
@@ -93,6 +99,8 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
         let visibilityStride = cullingUniforms.stride;
 
         let aliveIndex = atomicAdd(&indirectDrawBuffer[lodLevel].instanceCount, 1u);
-        visibilityBuffer[visibilityStride * lodLevel + aliveIndex] = instanceIdx;
+        let writeIdx = visibilityStride * lodLevel + aliveIndex;
+        visibilityBuffer[writeIdx].instanceIdx = instanceIdx;
+        visibilityBuffer[writeIdx].globalFragmentSlotIndex = instanceUniforms.lodGlobalFragmentBufferSlotIndex[lodLevel];
     }
 }

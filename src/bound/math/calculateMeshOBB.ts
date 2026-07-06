@@ -26,6 +26,10 @@ const calculateMeshOBB = (mesh: Mesh): OBB => {
     // 메시나 지오메트리가 없는 경우 기본 OBB 반환
     if (!mesh || !mesh._geometry) {
         const identityMatrix = mat4.create();
+        if (mesh && mesh.modelMatrix) {
+            const m = mesh.modelMatrix;
+            return new OBB([m[12], m[13], m[14]], [0, 0, 0], identityMatrix);
+        }
         return new OBB([0, 0, 0], [0, 0, 0], identityMatrix);
     }
     const geometryVolume = mesh._geometry.volume;

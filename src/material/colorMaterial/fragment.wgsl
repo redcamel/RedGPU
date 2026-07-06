@@ -4,14 +4,6 @@
 #redgpu_include systemStruct.OutputFragment
 #redgpu_include math.getMotionVector
 
-struct Uniforms {
-    color:vec3<f32>,
-    //
-    opacity:f32,
-    useTint:u32,
-    tint:vec4<f32>,
-    tintBlendMode:u32,
-};
 // Input structure for model data
 struct InputData {
   // Built-in attributes
@@ -20,19 +12,21 @@ struct InputData {
 
   @location(7) currentClipPos: vec4<f32>,
   @location(8) prevClipPos: vec4<f32>,
+  @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
   @location(11) combinedOpacity: f32,
   //
   @location(12) motionVector: vec3<f32>,
   @location(15) @interpolate(flat) pickingId: vec4<f32>,
 }
 
-@group(2) @binding(0) var<uniform> uniforms: Uniforms;
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
-    var finalColor = vec4<f32>( uniforms.color.r , uniforms.color.g , uniforms.color.b , uniforms.opacity * inputData.combinedOpacity);
+    let globalFragmentData = globalFragmentSSBO_BuiltIn[inputData.globalFragmentSlotIndex];
+
+    var finalColor = vec4<f32>( globalFragmentData.color.r , globalFragmentData.color.g , globalFragmentData.color.b , globalFragmentData.opacity * inputData.combinedOpacity);
     #redgpu_if useTint
-        finalColor = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
+        finalColor = getTintBlendMode(finalColor, globalFragmentData.tintBlendMode, globalFragmentData.tint);
     #redgpu_endIf
 
     if (finalColor.a == 0.0) {

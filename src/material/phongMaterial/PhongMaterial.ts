@@ -152,7 +152,6 @@ interface PhongMaterial {
  */
 class PhongMaterial extends AUVTransformBaseMaterial {
 
-
     /**
      * [KO] PhongMaterial 생성자
      * [EN] PhongMaterial constructor
@@ -174,10 +173,7 @@ class PhongMaterial extends AUVTransformBaseMaterial {
             2
         )
         if (name) this.name = name
-        this.initGPURenderInfos()
-        this.color.setColorByHEX(color)
-        this.emissiveColor.setColorByHEX(this.emissiveColor.hex)
-        this.specularColor.setColorByHEX(this.specularColor.hex)
+
         this.diffuseTextureSampler = new Sampler(this.redGPUContext, {
             magFilter: 'linear',
             minFilter: 'linear',
@@ -186,6 +182,11 @@ class PhongMaterial extends AUVTransformBaseMaterial {
             addressModeV: 'repeat',
             addressModeW: 'repeat',
         })
+
+        this.initGPURenderInfos()
+        this.color.setColorByHEX(color)
+        this.emissiveColor.setColorByHEX(this.emissiveColor.hex)
+        this.specularColor.setColorByHEX(this.specularColor.hex)
     }
 
 
@@ -236,5 +237,9 @@ definePositiveNumber(PhongMaterial, [
     {key: 'metallic', value: 0, min: 0, max: 1},
     {key: 'roughness', value: 0, min: 0, max: 1}
 ])
+Object.defineProperty(PhongMaterial.prototype, 'isBuiltInMaterial', {
+    value: true,
+    writable: false
+});
 Object.freeze(PhongMaterial)
 export default PhongMaterial

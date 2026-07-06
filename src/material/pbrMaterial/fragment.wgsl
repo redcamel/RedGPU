@@ -18,58 +18,6 @@
 #redgpu_include math.tnb.getNormalFromNormalMap
 #redgpu_include skyAtmosphere.skyAtmosphereFn
 
-struct Uniforms {
-    useVertexColor: u32,
-    useCutOff: u32,
-    cutOff: f32,
-    alphaBlend: u32,
-    doubleSided: u32,
-    useVertexTangent: u32,
-    opacity: f32,
-    useTint: u32,
-    tint: vec4<f32>,
-    tintBlendMode: u32,
-    baseColorFactor: vec4<f32>,
-    emissiveFactor: vec3<f32>,
-    emissiveStrength: f32,
-    occlusionStrength: f32,
-    metallicFactor: f32,
-    roughnessFactor: f32,
-    normalScale: f32,
-    useKHR_materials_unlit: u32, 
-    KHR_materials_ior: f32,      
-    useKHR_materials_transmission: u32,
-    KHR_transmissionFactor: f32,
-    useKHR_materials_diffuse_transmission: u32,
-    KHR_diffuseTransmissionFactor: f32,
-    KHR_diffuseTransmissionColorFactor: vec3<f32>,
-    KHR_dispersion: f32,
-    useKHR_materials_volume: u32,
-    KHR_thicknessFactor: f32,
-    KHR_attenuationDistance: f32,
-    KHR_attenuationColor: vec3<f32>,
-    useKHR_materials_specular: u32,
-    KHR_specularFactor: f32,
-    KHR_specularColorFactor: vec3<f32>,
-    useKHR_materials_anisotropy: u32,
-    KHR_anisotropyStrength: f32,
-    KHR_anisotropyRotation: f32,
-    useKHR_materials_iridescence: u32,
-    KHR_iridescenceFactor: f32,
-    KHR_iridescenceIor: f32,
-    KHR_iridescenceThicknessMinimum: f32,
-    KHR_iridescenceThicknessMaximum: f32,
-    useKHR_materials_sheen: u32,
-    KHR_sheenColorFactor: vec3<f32>,
-    KHR_sheenRoughnessFactor: f32,
-    useKHR_materials_clearcoat: u32,
-    KHR_clearcoatFactor: f32,
-    KHR_clearcoatRoughnessFactor: f32,
-    KHR_clearcoatNormalScale: f32,
-    #redgpu_include KHR_texture_transform
-};
-
-@group(2) @binding(0) var<uniform> uniforms: Uniforms;
 @group(2) @binding(1) var baseColorTextureSampler: sampler;
 #redgpu_if baseColorTexture
 @group(2) @binding(2) var baseColorTexture: texture_2d<f32>;
@@ -116,6 +64,7 @@ struct InputData {
     @location(5) vertexTangent: vec4<f32>,
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
+    @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
     @location(10) localNodeScale_volumeScale: vec2<f32>,
     @location(11) combinedOpacity: f32,
     @location(12) motionVector: vec3<f32>,
@@ -249,6 +198,8 @@ fn getTransmissionRefraction(
 @fragment
 fn main(inputData:InputData) -> OutputFragment {
     var output: OutputFragment;
+    let uniforms = globalFragmentSSBO_PBR[inputData.globalFragmentSlotIndex];
+
     let input_vertexNormal = (inputData.vertexNormal.xyz);
     let input_vertexPosition = inputData.vertexPosition.xyz;
     let input_vertexColor_0 = inputData.vertexColor_0;
@@ -371,8 +322,12 @@ fn main(inputData:InputData) -> OutputFragment {
     // Shadow
     let receiveShadowYn = inputData.receiveShadow != 0.0;
     var visibility:f32 = 1.0;
-    visibility = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, systemUniforms.shadow.directionalShadowDepthTextureSize, systemUniforms.shadow.directionalShadowBias, inputData.shadowCoord);
-    if(!receiveShadowYn){ visibility = 1.0; }
+    visibility = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, systemUniforms.shadow.directionalShadowDepthTextureSize, systemUniforms.shadow.directionalShadowBias, systemUniforms.shadow.directionalShadowFilterScale, inputData.shadowCoord);
+    if(!receiveShadowYn){ 
+        visibility = 1.0; 
+    } else {
+        visibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, visibility);
+    }
 
     // Base Color & Alpha
     var baseColor = u_baseColorFactor;
@@ -415,18 +370,25 @@ fn main(inputData:InputData) -> OutputFragment {
     var clearcoatNormal:vec3<f32> = select(baseNormal, -baseNormal, backFaceYn);
     #redgpu_if useKHR_materials_clearcoat
     {
+        #redgpu_if useKHR_clearcoatTexture
+            let clearcoatSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatUV);
+        #redgpu_endIf
+        #redgpu_if useKHR_clearcoatRoughnessTexture
+            let clearcoatRoughnesstSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatRoughnessUV);
+        #redgpu_endIf
+        #redgpu_if useKHR_clearcoatNormalTexture
+            let clearcoatNormalSamplerColor = textureSample(KHR_clearcoatNormalTexture, baseColorTextureSampler, KHR_clearcoatNormalUV).rgb;
+        #redgpu_endIf
+
         if(clearcoatParameter > 0.0){
             #redgpu_if useKHR_clearcoatTexture
-                let clearcoatSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatUV);
                 clearcoatParameter *= clearcoatSample.r;
             #redgpu_endIf
             #redgpu_if useKHR_clearcoatRoughnessTexture
-                let clearcoatRoughnesstSample =  textureSample(packedKHR_clearcoatTexture_transmission, packedTextureSampler, KHR_clearcoatRoughnessUV);
                 clearcoatRoughnessParameter *= clearcoatRoughnesstSample.g;
             #redgpu_endIf
             #redgpu_if useKHR_clearcoatNormalTexture
             {
-                let clearcoatNormalSamplerColor = textureSample(KHR_clearcoatNormalTexture, baseColorTextureSampler, KHR_clearcoatNormalUV).rgb;
                 let texturedNormal = getNormalFromNormalMap(clearcoatNormalSamplerColor, tbn, u_KHR_clearcoatNormalScale);
                 clearcoatNormal = select(texturedNormal, -texturedNormal, backFaceYn);
             }
@@ -504,8 +466,8 @@ fn main(inputData:InputData) -> OutputFragment {
        let T = tbn[0];
        let B = tbn[1];
        var anisotropicDirection: vec2<f32> = vec2<f32>(1.0, 0.0);
+       let anisotropyTex = textureSample(KHR_anisotropyTexture, baseColorTextureSampler, KHR_anisotropyUV).rgb;
        if(u_useKHR_anisotropyTexture){
-           let anisotropyTex = textureSample(KHR_anisotropyTexture, baseColorTextureSampler, KHR_anisotropyUV).rgb;
            anisotropicDirection = anisotropyTex.rg * 2.0 - 1.0;
            anisotropy *= anisotropyTex.b;
        }

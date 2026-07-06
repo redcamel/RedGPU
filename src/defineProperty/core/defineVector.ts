@@ -3,7 +3,7 @@ import updateTargetUniform from "./updateTargetUniform";
 
 /**
  * [KO] 유니폼 버퍼에 데이터를 쓰는 세터(Setter) 함수를 생성합니다.
- * [EN] Creates a setter function that writes data to the uniform buffer.
+ * [EN] Creates a setter function that writes data to the globalStruct buffer.
  *
  * @param propertyKey - [KO] 속성 키 이름 [EN] Property key name
  * @param symbol - [KO] 내부 데이터를 저장할 심볼 [EN] Symbol to store internal data

@@ -28,6 +28,7 @@ import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVer
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 
+const GLOBAL_VERTEX_STRUCT = ResourceManager.GLOBAL_VERTEX_STRUCT
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -93,7 +94,7 @@ class Mesh extends MeshBase {
      * [KO] 프러스텀 컬링 통과 여부
      * [EN] Whether it passed frustum culling
      */
-    passFrustumCulling: boolean = true;
+    passFrustumCulling: boolean = true
     /**
      * [KO] 커스텀 버텍스 셰이더 모듈 생성 함수
      * [EN] Function to create custom vertex shader module
@@ -203,6 +204,16 @@ class Mesh extends MeshBase {
      */
     #ignoreFrustumCulling: boolean = false
     /**
+     * [KO] 투영 면적 Culling 사용 여부
+     * [EN] Whether to use screen space size culling
+     */
+    #useScreenSpaceSizeCulling: boolean = false
+    /**
+     * [KO] 투영 면적 Culling의 화면상 크기 비율 임계값
+     * [EN] Minimum size ratio threshold for screen space size culling
+     */
+    #minScreenSpaceSize: number = 0.01
+    /**
      * [KO] 메시 투명도
      * [EN] Mesh opacity
      */
@@ -263,6 +274,9 @@ class Mesh extends MeshBase {
     #LODManager: LODManager;
     #lodGPURenderInfoList: LODGPURenderInfo[] = [];
     #currentLODIndex: number = -1;
+    #interleavedCullingID: number = Math.floor(Math.random() * 4)
+    #globalVertexSlotIndex: number = -1;
+    #prevLodIDX: number;
 
     /**
      * [KO] Mesh 인스턴스를 생성합니다.
@@ -290,7 +304,18 @@ class Mesh extends MeshBase {
         this.#checkDrawCommandSlot();
         this.#LODManager = new LODManager(this, () => {
             this.dirtyLOD = true;
+            this.#prevLodIDX = -1
         });
+        const slot = redGPUContext.globalVertexSSBO.allocateSlot();
+        this.#globalVertexSlotIndex = slot.index;
+    }
+
+    /**
+     * [KO] 글로벌 버퍼 슬롯 인덱스를 반환합니다.
+     * [EN] Returns the global buffer slot index.
+     */
+    get globalVertexSlotIndex(): number {
+        return this.#globalVertexSlotIndex;
     }
 
     /**
@@ -333,6 +358,7 @@ class Mesh extends MeshBase {
     }
 
     _material;
+
     /**
      * [KO] 머티리얼을 반환합니다.
      * [EN] Returns the material.
@@ -359,6 +385,7 @@ class Mesh extends MeshBase {
     }
 
     _geometry: Geometry | Primitive;
+
     /**
      * [KO] 지오메트리를 반환합니다.
      * [EN] Returns the geometry.
@@ -418,6 +445,40 @@ class Mesh extends MeshBase {
      */
     set ignoreFrustumCulling(value: boolean) {
         this.#ignoreFrustumCulling = value;
+    }
+
+    /**
+     * [KO] 투영 면적 Culling 사용 여부를 반환합니다.
+     * [EN] Returns whether to use screen space size culling.
+     */
+    get useScreenSpaceSizeCulling(): boolean {
+        return this.#useScreenSpaceSizeCulling;
+    }
+
+    /**
+     * [KO] 투영 면적 Culling 사용 여부를 설정합니다.
+     * [EN] Sets whether to use screen space size culling.
+     * @param value - [KO] 사용 여부 [EN] Whether to use
+     */
+    set useScreenSpaceSizeCulling(value: boolean) {
+        this.#useScreenSpaceSizeCulling = value;
+    }
+
+    /**
+     * [KO] 투영 면적 Culling의 화면상 크기 비율 임계값을 반환합니다.
+     * [EN] Returns the minimum size ratio threshold for screen space size culling.
+     */
+    get minScreenSpaceSize(): number {
+        return this.#minScreenSpaceSize;
+    }
+
+    /**
+     * [KO] 투영 면적 Culling의 화면상 크기 비율 임계값을 설정합니다.
+     * [EN] Sets the minimum size ratio threshold for screen space size culling.
+     * @param value - [KO] 크기 비율 임계값 [EN] Size ratio threshold
+     */
+    set minScreenSpaceSize(value: number) {
+        this.#minScreenSpaceSize = value;
     }
 
     /**
@@ -765,6 +826,17 @@ class Mesh extends MeshBase {
     }
 
     /**
+     * [KO] 리소스를 해제합니다.
+     * [EN] Disposes of the resources.
+     */
+    dispose() {
+        if (this.#globalVertexSlotIndex !== -1) {
+            this.redGPUContext.globalVertexSSBO.freeSlot(this.#globalVertexSlotIndex);
+            this.#globalVertexSlotIndex = -1;
+        }
+    }
+
+    /**
      * [KO] 하위 계층의 모든 객체에 디버거 활성화 여부를 설정합니다.
      * [EN] Sets the debugger visibility for all objects in the hierarchy.
      * @param enableDebugger -
@@ -1002,7 +1074,11 @@ class Mesh extends MeshBase {
             dirtyVertexUniformFromMaterial,
             useDistanceCulling,
             cullingDistanceSquared,
+            interleavedCullingInfo,
         } = renderViewStateData
+        const {projectionScale, interleavedCullingCheckFrameIndex} = interleavedCullingInfo
+        const useScreenSpaceSizeCulling = this.#useScreenSpaceSizeCulling
+        const minScreenSpaceSize = this.#minScreenSpaceSize
         const {antialiasingManager, gpuDevice} = redGPUContext
         const {scene} = view
         const {shadowManager} = scene
@@ -1208,50 +1284,24 @@ class Mesh extends MeshBase {
                 // }
 
             }
-            if (!currentGeometry) this.#needUpdateMatrixUniform = false
+            // if (!currentGeometry) this.#needUpdateMatrixUniform = false
+
 
             this.dirtyTransform = false
             this.#cachedBoundingAABB = null
             this.#cachedBoundingOBB = null
         }
-        {
-            // 변경시만 이전 모델 메트릭스 업데이트
-            if (antialiasingManager.useTAA && this.#uniformDataMatrixList) {
 
-                const {gpuRenderInfo} = this
-                const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
-                const {members: vertexUniformInfoMembers} = vertexUniformInfo
-                const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
-                if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
-                    this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
-                    if (!this.#needUpdateMatrixUniform) {
-                        redGPUContext.gpuDevice.queue.writeBuffer(
-                            vertexUniformBuffer.gpuBuffer,
-                            vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset,
-                            this.#prevModelMatrix as BufferSource,
-                        )
-                    }
-                }
-                // 브랜치가 먼가 꼬였네
-                {
-                    if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
-                    const prev = this.#prevModelMatrix
-                    const current = this.modelMatrix
-                    prev[0] = current[0], prev[1] = current[1], prev[2] = current[2], prev[3] = current[3];
-                    prev[4] = current[4], prev[5] = current[5], prev[6] = current[6], prev[7] = current[7];
-                    prev[8] = current[8], prev[9] = current[9], prev[10] = current[10], prev[11] = current[11];
-                    prev[12] = current[12], prev[13] = current[13], prev[14] = current[14], prev[15] = current[15];
-                }
-            } else {
-                this.#prevModelMatrix = null
-            }
-        }
+
         // check distanceCulling
-        let passFrustumCulling = this.passFrustumCulling = true
+        const needCheckInterleavedCulling = dirtyTransformForChildren ||
+            (interleavedCullingInfo.forceCullingCheck || (this.#interleavedCullingID === interleavedCullingCheckFrameIndex))
+        let passFrustumCulling = this.passFrustumCulling
         let distanceSquared = 0
         const lodList = this.#LODManager.LODList;
         const lodLen = lodList.length;
-        if (useDistanceCulling && currentGeometry || this.#LODManager.LODList.length) {
+        distanceSquared = 0
+        if (useDistanceCulling && currentGeometry || lodLen) {
             const {rawCamera} = view
             const aabb = this.boundingAABB;
             // AABB 중심점과 카메라 위치 간의 거리 계산
@@ -1261,86 +1311,244 @@ class Mesh extends MeshBase {
             // 거리 제곱 계산
             distanceSquared = dx * dx + dy * dy + dz * dz;
         }
-        if (useDistanceCulling && currentGeometry) {
-            const geometryRadius = this.boundingAABB.geometryRadius;
-            // AABB의 반지름을 고려한 컬링 거리 계산
-            const cullingDistanceWithRadius = cullingDistanceSquared + (geometryRadius * geometryRadius);
-            if (distanceSquared > cullingDistanceWithRadius) {
-                passFrustumCulling = false;
+        if (needCheckInterleavedCulling) {
+            passFrustumCulling = true
+
+            if (useDistanceCulling && currentGeometry) {
+                const geometryRadius = this.boundingAABB.geometryRadius;
+                // AABB의 반지름을 고려한 컬링 거리 계산
+                const cullingDistanceWithRadius = cullingDistanceSquared + (geometryRadius * geometryRadius);
+                if (distanceSquared > cullingDistanceWithRadius) {
+                    passFrustumCulling = false;
+                }
             }
-        }
-        // check frustumCulling
-        if (frustumPlanes && passFrustumCulling && !this.#ignoreFrustumCulling) {
-            const {rawCamera} = view
-            const combinedAABB = this.boundingAABB;
+            // check frustumCulling
+            if (frustumPlanes && passFrustumCulling && !this.#ignoreFrustumCulling) {
+                const {rawCamera} = view
+                const combinedAABB = this.boundingAABB;
 
-            const isIsometricController = rawCamera.constructor.name === 'IsometricController';
+                const isIsometricController = rawCamera.constructor.name === 'IsometricController';
 
-            if (isIsometricController) {
-                // ==================== AABB 정보 추출 ====================
-                const {centerX, centerY, centerZ, geometryRadius: radius} = combinedAABB;
+                if (isIsometricController) {
+                    // ==================== AABB 정보 추출 ====================
+                    const {centerX, centerY, centerZ, geometryRadius: radius} = combinedAABB;
 
-                // ==================== 카메라 정보 추출 ====================
-                const orthoCamera = rawCamera as OrthographicCamera;
-                const {left, right, top, bottom, nearClipping: near, farClipping: far} = orthoCamera;
-                const {x: camX, y: camY, z: camZ} = orthoCamera;
+                    // ==================== 카메라 정보 추출 ====================
+                    const orthoCamera = rawCamera as OrthographicCamera;
+                    const {left, right, top, bottom, nearClipping: near, farClipping: far} = orthoCamera;
+                    const {x: camX, y: camY, z: camZ} = orthoCamera;
 
-                // ==================== 각도 기반 컬링 ====================
-                const cameraAngle = 45;
+                    // ==================== 각도 기반 컬링 ====================
+                    const cameraAngle = 45;
 
-                if (cameraAngle) {
-                    // 상대 좌표 계산
-                    const relX = centerX - camX;
-                    const relY = centerY - camY;
-                    const relZ = centerZ - camZ;
+                    if (cameraAngle) {
+                        // 상대 좌표 계산
+                        const relX = centerX - camX;
+                        const relY = centerY - camY;
+                        const relZ = centerZ - camZ;
 
-                    // 회전 적용
-                    const angleRad = cameraAngle * (Math.PI / 180);
-                    const cos = Math.cos(angleRad);
-                    const sin = Math.sin(angleRad);
+                        // 회전 적용
+                        const angleRad = cameraAngle * (Math.PI / 180);
+                        const cos = Math.cos(angleRad);
+                        const sin = Math.sin(angleRad);
 
-                    const rotatedX = relX * cos + relZ * sin;
-                    const rotatedZ = -relX * sin + relZ * cos;
+                        const rotatedX = relX * cos + relZ * sin;
+                        const rotatedZ = -relX * sin + relZ * cos;
 
-                    // 뷰 범위 확인
-                    if (rotatedX + radius < left || rotatedX - radius > right ||
-                        relY + radius < bottom || relY - radius > top ||
-                        rotatedZ + radius < near || rotatedZ - radius > far) {
-                        passFrustumCulling = false;
+                        // 뷰 범위 확인
+                        if (rotatedX + radius < left || rotatedX - radius > right ||
+                            relY + radius < bottom || relY - radius > top ||
+                            rotatedZ + radius < near || rotatedZ - radius > far) {
+                            passFrustumCulling = false;
+                        }
+                    } else {
+                        // 각도 없음 (기본 처리)
+                        if (centerX + radius < left || centerX - radius > right ||
+                            centerY + radius < bottom || centerY - radius > top ||
+                            centerZ + radius < near || centerZ - radius > far) {
+                            passFrustumCulling = false;
+                        }
                     }
                 } else {
-                    // 각도 없음 (기본 처리)
-                    if (centerX + radius < left || centerX - radius > right ||
-                        centerY + radius < bottom || centerY - radius > top ||
-                        centerZ + radius < near || centerZ - radius > far) {
+                    const centerX = combinedAABB.centerX;
+                    const centerY = combinedAABB.centerY;
+                    const centerZ = combinedAABB.centerZ;
+                    const radius = combinedAABB.geometryRadius;
+
+                    // ==================== 2차 필터: Early-Out (카메라 뒤쪽 판정) ====================
+                    // 카메라의 viewMatrix(column-major)에서 3번째 행(row) 벡터의 부호를 반전한 것이 월드 전방 방향 벡터가 됨
+                    const viewMatrix = rawCamera.viewMatrix;
+                    const camForwardX = -viewMatrix[2];
+                    const camForwardY = -viewMatrix[6];
+                    const camForwardZ = -viewMatrix[10];
+
+                    // 카메라로부터 메쉬 중심까지의 방향 벡터
+                    const dx = centerX - rawCamera.x;
+                    const dy = centerY - rawCamera.y;
+                    const dz = centerZ - rawCamera.z;
+
+                    // 내적 연산 (Dot Product)
+                    const dot = dx * camForwardX + dy * camForwardY + dz * camForwardZ;
+
+                    const bias = 1.0; // [KO] 원거리 정밀도 보정을 위한 여유값 [EN] Numerical bias for far distance precision
+
+                    // 카메라 뒤쪽이면 즉시 조기 탈락(Early-Out) 처리하여 6-Plane 연산 회피
+                    if (dot < -radius - bias) {
                         passFrustumCulling = false;
+                    } else {
+                        let passedScreenSpaceCulling = true;
+                        if (useScreenSpaceSizeCulling && dot > 0) {
+                            const screenRatio = (radius * 2.0 / dot) * projectionScale;
+                            if (screenRatio < minScreenSpaceSize) {
+                                passedScreenSpaceCulling = false;
+                                passFrustumCulling = false;
+                            }
+                        }
+
+                        if (passedScreenSpaceCulling) {
+                            const frustumPlanes0 = frustumPlanes[0];
+                            const frustumPlanes1 = frustumPlanes[1];
+                            const frustumPlanes2 = frustumPlanes[2];
+                            const frustumPlanes3 = frustumPlanes[3];
+                            const frustumPlanes4 = frustumPlanes[4];
+                            const frustumPlanes5 = frustumPlanes[5];
+
+                            frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius - bias ? passFrustumCulling = false
+                                : frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius - bias ? passFrustumCulling = false
+                                    : frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius - bias ? passFrustumCulling = false
+                                        : frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius - bias ? passFrustumCulling = false
+                                            : frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius - bias ? passFrustumCulling = false
+                                                : frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius - bias ? passFrustumCulling = false : 0;
+                        }
                     }
                 }
-            } else {
-                const frustumPlanes0 = frustumPlanes[0];
-                const frustumPlanes1 = frustumPlanes[1];
-                const frustumPlanes2 = frustumPlanes[2];
-                const frustumPlanes3 = frustumPlanes[3];
-                const frustumPlanes4 = frustumPlanes[4];
-                const frustumPlanes5 = frustumPlanes[5];
-
-                const centerX = combinedAABB.centerX;
-                const centerY = combinedAABB.centerY;
-                const centerZ = combinedAABB.centerZ;
-                const radius = combinedAABB.geometryRadius;
-
-                const bias = 1.0; // [KO] 원거리 정밀도 보정을 위한 여유값 [EN] Numerical bias for far distance precision
-
-                frustumPlanes0[0] * centerX + frustumPlanes0[1] * centerY + frustumPlanes0[2] * centerZ + frustumPlanes0[3] <= -radius - bias ? passFrustumCulling = false
-                    : frustumPlanes1[0] * centerX + frustumPlanes1[1] * centerY + frustumPlanes1[2] * centerZ + frustumPlanes1[3] <= -radius - bias ? passFrustumCulling = false
-                        : frustumPlanes2[0] * centerX + frustumPlanes2[1] * centerY + frustumPlanes2[2] * centerZ + frustumPlanes2[3] <= -radius - bias ? passFrustumCulling = false
-                            : frustumPlanes3[0] * centerX + frustumPlanes3[1] * centerY + frustumPlanes3[2] * centerZ + frustumPlanes3[3] <= -radius - bias ? passFrustumCulling = false
-                                : frustumPlanes4[0] * centerX + frustumPlanes4[1] * centerY + frustumPlanes4[2] * centerZ + frustumPlanes4[3] <= -radius - bias ? passFrustumCulling = false
-                                    : frustumPlanes5[0] * centerX + frustumPlanes5[1] * centerY + frustumPlanes5[2] * centerZ + frustumPlanes5[3] <= -radius - bias ? passFrustumCulling = false : 0;
-
             }
         }
+        // TODO - 일단 임시로 그림자 케스팅이 된녀석은 무조건 통과
+        if (this.castShadow) passFrustumCulling = true
         if (passFrustumCulling) {
+            {
+                // 변경시만 이전 모델 메트릭스 업데이트
+                if (antialiasingManager.useTAA && this.#uniformDataMatrixList) {
+
+                    const {redGPUContext} = this
+                    const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
+                    const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
+                    if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
+                        this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
+                        if (!this.#needUpdateMatrixUniform) {
+                            redGPUContext.globalVertexSSBO.updateFloatData(
+                                this.#globalVertexSlotIndex,
+                                this.#prevModelMatrix,
+                                vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffset / 4
+                            )
+                        }
+                    }
+                    // 브랜치가 먼가 꼬였네
+                    {
+                        if (!this.#prevModelMatrix) this.#prevModelMatrix = new Float32Array(16)
+                        const prev = this.#prevModelMatrix
+                        const current = this.modelMatrix
+                        prev[0] = current[0], prev[1] = current[1], prev[2] = current[2], prev[3] = current[3];
+                        prev[4] = current[4], prev[5] = current[5], prev[6] = current[6], prev[7] = current[7];
+                        prev[8] = current[8], prev[9] = current[9], prev[10] = current[10], prev[11] = current[11];
+                        prev[12] = current[12], prev[13] = current[13], prev[14] = current[14], prev[15] = current[15];
+                    }
+                } else {
+                    this.#prevModelMatrix = null
+                }
+                {
+                    const {redGPUContext} = this
+                    const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
+                    const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
+                    if (!this.#uniformDataMatrixList) {
+                        this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
+                    }
+
+                    if (this.#needUpdateMatrixUniform) {
+                        {
+                            const modelMatrix = (
+                                //TODO - Sprite2D떄문에 처리했지만 이거 일반화해야함
+                                // TODO - renderTextureWidth 이놈도 같이 처리해야할듯
+                                // @ts-ignore
+                                this.is2DMeshType ? mat4.multiply(
+                                    mat4.create(),
+                                    this.modelMatrix,
+                                    mat4.fromValues(
+                                        // @ts-ignore
+                                        this.width, 0, 0, 0, 0, this.height, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
+                                    ),
+                                ) : this.modelMatrix
+                            )
+                            //
+                            // gpuDevice.queue.writeBuffer(
+                            // 	vertexUniformGPUBuffer,
+                            // 	vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffset,
+                            // 	modelMatrix
+                            // )
+                            // keepLog(GLOBAL_VERTEX_STRUCT)
+                            this.#uniformDataMatrixList.set(modelMatrix, vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
+                        }
+                        {
+                            if (this.#needUpdateNormalMatrixUniform && vertexUniformInfoMatrixListMembers.normalModelMatrix) {
+                                this.#needUpdateNormalMatrixUniform = false
+                                // calculate NormalMatrix
+                                const m = this.modelMatrix;
+                                const n = this.normalModelMatrix;
+                                const a00 = m[0], a01 = m[1], a02 = m[2];
+                                const a10 = m[4], a11 = m[5], a12 = m[6];
+                                const a20 = m[8], a21 = m[9], a22 = m[10];
+                                const det = a00 * (a11 * a22 - a12 * a21) - a01 * (a10 * a22 - a12 * a20) + a02 * (a10 * a21 - a11 * a20);
+                                if (det === 0) {
+                                    // 역행렬 없음 → 단위 행렬로 대체
+                                    n[0] = 1, n[1] = 0, n[2] = 0, n[3] = 0, n[4] = 0, n[5] = 1, n[6] = 0, n[7] = 0, n[8] = 0, n[9] = 0, n[10] = 1, n[11] = 0, n[12] = 0, n[13] = 0, n[14] = 0, n[15] = 1;
+                                } else {
+                                    const invDet = 1 / det;
+                                    // 역행렬의 전치 (transpose of inverse)
+                                    n[0] = (a11 * a22 - a12 * a21) * invDet;
+                                    n[1] = (a12 * a20 - a10 * a22) * invDet;
+                                    n[2] = (a10 * a21 - a11 * a20) * invDet;
+                                    n[3] = 0;
+                                    n[4] = (a02 * a21 - a01 * a22) * invDet;
+                                    n[5] = (a00 * a22 - a02 * a20) * invDet;
+                                    n[6] = (a01 * a20 - a00 * a21) * invDet;
+                                    n[7] = 0;
+                                    n[8] = (a01 * a12 - a02 * a11) * invDet;
+                                    n[9] = (a02 * a10 - a00 * a12) * invDet;
+                                    n[10] = (a00 * a11 - a01 * a10) * invDet;
+                                    n[11] = 0;
+                                    // 하단 행은 단위 행렬처럼 설정
+                                    n[12] = 0, n[13] = 0, n[14] = 0, n[15] = 1;
+                                }
+                            }
+                            // gpuDevice.queue.writeBuffer(
+                            // 	vertexUniformGPUBuffer,
+                            // 	vertexUniformInfoMatrixListMembers.normalModelMatrix.uniformOffset,
+                            // 	// new vertexUniformInfoMatrixListMembers.normalModelMatrix.View(this.normalModelMatrix),
+                            // 	this.normalModelMatrix as Float32Array
+                            // )
+                            this.#uniformDataMatrixList.set(this.normalModelMatrix, vertexUniformInfoMatrixListMembers.normalModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
+                        }
+                        if (vertexUniformInfoMatrixListMembers.localMatrix) {
+                            // gpuDevice.queue.writeBuffer(
+                            // 	vertexUniformGPUBuffer,
+                            // 	vertexUniformInfoMatrixListMembers.localMatrix.uniformOffset,
+                            // 	// new vertexUniformInfoMatrixListMembers.localMatrix.View(this.localMatrix),
+                            // 	this.localMatrix as Float32Array
+                            // )
+                            this.#uniformDataMatrixList.set(this.localMatrix, vertexUniformInfoMatrixListMembers.localMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
+                        }
+                        dirtyTransformForChildren = true
+                        this.#needUpdateMatrixUniform = false
+                        // keepLog('진짜 버퍼업로드', this.name)
+                        redGPUContext.globalVertexSSBO.updateFloatData(
+                            this.#globalVertexSlotIndex,
+                            this.#uniformDataMatrixList,
+                            vertexUniformInfoMembers.matrixList.startOffset / 4
+                        )
+                    }
+                }
+            }
             if (this.gltfLoaderInfo?.activeAnimations?.length) {
                 renderViewStateData.animationList[renderViewStateData.animationList.length] = this.gltfLoaderInfo?.activeAnimations
             }
@@ -1383,10 +1591,8 @@ class Mesh extends MeshBase {
             }
 
             {
-                const {gpuRenderInfo} = this
-                const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
-                const {members: vertexUniformInfoMembers} = vertexUniformInfo
-                const {gpuBuffer: vertexUniformGPUBuffer} = vertexUniformBuffer
+                const {redGPUContext} = this
+                const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
                 if (!this.#uniformDataMatrixList) {
                     this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
                 }
@@ -1403,10 +1609,10 @@ class Mesh extends MeshBase {
                         tempFloat32_4[2] = scale[0];
                         tempFloat32_4[3] = scale[1];
 
-                        gpuDevice.queue.writeBuffer(
-                            vertexUniformGPUBuffer,
-                            vertexUniformInfoMembers.uvTransform.uniformOffset,
-                            tempFloat32_4
+                        redGPUContext.globalVertexSSBO.updateFloatData(
+                            this.#globalVertexSlotIndex,
+                            tempFloat32_4,
+                            vertexUniformInfoMembers.uvTransform.uniformOffset / 4
                         );
 
                         currentMaterial.dirtyTextureTransform = false
@@ -1417,15 +1623,11 @@ class Mesh extends MeshBase {
         } else {
             renderViewStateData.renderResults.num3DGroups++
         }
+
         if (currentGeometry && passFrustumCulling) {
-            const {gpuRenderInfo} = this
-            const {vertexUniformBuffer, vertexUniformInfo} = gpuRenderInfo
-            const {members: vertexUniformInfoMembers} = vertexUniformInfo
-            const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
-            const {gpuBuffer: vertexUniformGPUBuffer} = vertexUniformBuffer
-            if (!this.#uniformDataMatrixList) {
-                this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
-            }
+            const {redGPUContext} = this
+            const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
+
 
             {
                 if (vertexUniformInfoMembers.displacementScale !== undefined &&
@@ -1434,104 +1636,22 @@ class Mesh extends MeshBase {
                     this.#displacementScale = displacementScale
                     // keepLog('실행을 하나보네',displacementScale)
                     tempFloat32_1[0] = displacementScale
-                    gpuDevice.queue.writeBuffer(
-                        vertexUniformGPUBuffer,
-                        vertexUniformInfoMembers.displacementScale.uniformOffset,
-                        // new vertexUniformInfoMembers.displacementScale.View([displacementScale])
-                        tempFloat32_1
+                    redGPUContext.globalVertexSSBO.updateFloatData(
+                        this.#globalVertexSlotIndex,
+                        tempFloat32_1,
+                        vertexUniformInfoMembers.displacementScale.uniformOffset / 4
                     );
                 }
             }
-            if (this.#needUpdateMatrixUniform) {
-                {
-                    const modelMatrix = (
-                        //TODO - Sprite2D떄문에 처리했지만 이거 일반화해야함
-                        // TODO - renderTextureWidth 이놈도 같이 처리해야할듯
-                        // @ts-ignore
-                        this.is2DMeshType ? mat4.multiply(
-                            mat4.create(),
-                            this.modelMatrix,
-                            mat4.fromValues(
-                                // @ts-ignore
-                                this.width, 0, 0, 0, 0, this.height, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
-                            ),
-                        ) : this.modelMatrix
-                    )
-                    //
-                    // gpuDevice.queue.writeBuffer(
-                    // 	vertexUniformGPUBuffer,
-                    // 	vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffset,
-                    // 	modelMatrix
-                    // )
-                    this.#uniformDataMatrixList.set(modelMatrix, vertexUniformInfoMatrixListMembers.modelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
-                }
-                {
-                    if (this.#needUpdateNormalMatrixUniform && vertexUniformInfoMatrixListMembers.normalModelMatrix) {
-                        this.#needUpdateNormalMatrixUniform = false
-                        // calculate NormalMatrix
-                        const m = this.modelMatrix;
-                        const n = this.normalModelMatrix;
-                        const a00 = m[0], a01 = m[1], a02 = m[2];
-                        const a10 = m[4], a11 = m[5], a12 = m[6];
-                        const a20 = m[8], a21 = m[9], a22 = m[10];
-                        const det = a00 * (a11 * a22 - a12 * a21) - a01 * (a10 * a22 - a12 * a20) + a02 * (a10 * a21 - a11 * a20);
-                        if (det === 0) {
-                            // 역행렬 없음 → 단위 행렬로 대체
-                            n[0] = 1, n[1] = 0, n[2] = 0, n[3] = 0, n[4] = 0, n[5] = 1, n[6] = 0, n[7] = 0, n[8] = 0, n[9] = 0, n[10] = 1, n[11] = 0, n[12] = 0, n[13] = 0, n[14] = 0, n[15] = 1;
-                        } else {
-                            const invDet = 1 / det;
-                            // 역행렬의 전치 (transpose of inverse)
-                            n[0] = (a11 * a22 - a12 * a21) * invDet;
-                            n[1] = (a12 * a20 - a10 * a22) * invDet;
-                            n[2] = (a10 * a21 - a11 * a20) * invDet;
-                            n[3] = 0;
-                            n[4] = (a02 * a21 - a01 * a22) * invDet;
-                            n[5] = (a00 * a22 - a02 * a20) * invDet;
-                            n[6] = (a01 * a20 - a00 * a21) * invDet;
-                            n[7] = 0;
-                            n[8] = (a01 * a12 - a02 * a11) * invDet;
-                            n[9] = (a02 * a10 - a00 * a12) * invDet;
-                            n[10] = (a00 * a11 - a01 * a10) * invDet;
-                            n[11] = 0;
-                            // 하단 행은 단위 행렬처럼 설정
-                            n[12] = 0, n[13] = 0, n[14] = 0, n[15] = 1;
-                        }
-                    }
-                    // gpuDevice.queue.writeBuffer(
-                    // 	vertexUniformGPUBuffer,
-                    // 	vertexUniformInfoMatrixListMembers.normalModelMatrix.uniformOffset,
-                    // 	// new vertexUniformInfoMatrixListMembers.normalModelMatrix.View(this.normalModelMatrix),
-                    // 	this.normalModelMatrix as Float32Array
-                    // )
-                    this.#uniformDataMatrixList.set(this.normalModelMatrix, vertexUniformInfoMatrixListMembers.normalModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
-                }
-                if (vertexUniformInfoMatrixListMembers.localMatrix) {
-                    // gpuDevice.queue.writeBuffer(
-                    // 	vertexUniformGPUBuffer,
-                    // 	vertexUniformInfoMatrixListMembers.localMatrix.uniformOffset,
-                    // 	// new vertexUniformInfoMatrixListMembers.localMatrix.View(this.localMatrix),
-                    // 	this.localMatrix as Float32Array
-                    // )
-                    this.#uniformDataMatrixList.set(this.localMatrix, vertexUniformInfoMatrixListMembers.localMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
-                }
-                dirtyTransformForChildren = true
-                this.#needUpdateMatrixUniform = false
-                // keepLog('진짜 버퍼업로드', this.name)
-                gpuDevice.queue.writeBuffer(
-                    vertexUniformGPUBuffer,
-                    vertexUniformInfoMembers.matrixList.startOffset,
-                    this.#uniformDataMatrixList as BufferSource
-                )
-            }
+
             if (this.dirtyOpacity) {
                 dirtyOpacityForChildren = true
                 if (vertexUniformInfoMembers.combinedOpacity) {
                     tempFloat32_1[0] = this.getCombinedOpacity()
-                    gpuDevice.queue.writeBuffer(
-                        vertexUniformGPUBuffer,
-                        vertexUniformInfoMembers.combinedOpacity.uniformOffset,
-                        // new vertexUniformInfoMembers.combinedOpacity.View([this.getCombinedOpacity()])
-                        tempFloat32_1
+                    redGPUContext.globalVertexSSBO.updateFloatData(
+                        this.#globalVertexSlotIndex,
+                        tempFloat32_1,
+                        vertexUniformInfoMembers.combinedOpacity.uniformOffset / 4
                     );
                 }
                 this.dirtyOpacity = false
@@ -1553,6 +1673,8 @@ class Mesh extends MeshBase {
                         || this.#prevSystemBindGroupList[renderViewStateData.viewIndex] !== view.systemUniform_Vertex_UniformBindGroup
                         || this.dirtyLOD
                     ) {
+
+
                         this.#setRenderBundle(renderViewStateData)
                     }
 
@@ -1617,10 +1739,25 @@ class Mesh extends MeshBase {
                                         renderBundle = this.#renderBundle_LODList[newIdx];
                                     }
                                     // newIdx가 -1이면 기본 renderBundle 사용 (이미 설정됨)
+
                                 }
+
                             } else if (idx >= 0 && idx < lodLen) {
                                 // 현재 LOD 유지
                                 renderBundle = this.#renderBundle_LODList[idx];
+
+                            }
+                            let targetIdx = this.#renderBundle_LODList.indexOf(renderBundle)
+                            const lodMaterial = this.#LODManager.LODList[targetIdx]?.material || currentMaterial
+                            if (this.#prevLodIDX !== targetIdx && lodMaterial.globalFragmentSlotIndex !== undefined && lodMaterial.globalFragmentSlotIndex > -1) {
+
+                                redGPUContext.globalVertexSSBO.updateUintData(
+                                    this.#globalVertexSlotIndex,
+                                    new Uint32Array([lodMaterial.globalFragmentSlotIndex]),
+                                    ResourceManager.GLOBAL_VERTEX_STRUCT.members.globalFragmentSlotIndex.uniformOffset / 4
+                                );
+                                redGPUContext.globalVertexSSBO.flush();
+                                this.#prevLodIDX = targetIdx
                             }
                         }
                     }
@@ -1700,7 +1837,7 @@ class Mesh extends MeshBase {
         const {resourceManager} = redGPUContext
         this.#lodGPURenderInfoList.length = 0;
         const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
-            ResourceManager.PRESET_VERTEX_GPUBindGroupLayout,
+            ResourceManager.PRESET_GLOBAL_VERTEX_GPUBindGroupLayout,
         );
 
         this.LODManager.LODList.forEach((lod, index) => {
@@ -1742,6 +1879,17 @@ class Mesh extends MeshBase {
 
     #setRenderBundle(renderViewStateData: RenderViewStateData) {
         const {view} = renderViewStateData
+        const {redGPUContext} = this
+        const currentMaterial = this._material
+        if (currentMaterial.globalFragmentSlotIndex !== undefined && currentMaterial.globalFragmentSlotIndex > -1) {
+            redGPUContext.globalVertexSSBO.updateUintData(
+                this.#globalVertexSlotIndex,
+                new Uint32Array([currentMaterial.globalFragmentSlotIndex]),
+                ResourceManager.GLOBAL_VERTEX_STRUCT.members.globalFragmentSlotIndex.uniformOffset / 4
+            );
+            redGPUContext.globalVertexSSBO.flush();
+        }
+        this.#prevLodIDX = -1;
         this.#renderBundle = this.#createRenderBundle(view, this._geometry, this._material)
         if (this.dirtyLOD) {
             this.#updateLODPipeline()
@@ -1749,7 +1897,8 @@ class Mesh extends MeshBase {
         }
         this.#renderBundle_LODList.length = 0;
         this.LODManager.LODList.forEach((lod, index) => {
-            this.#renderBundle_LODList[index] = this.#createRenderBundle(view, lod.geometry, lod.material || this._material, index)
+            const currentMaterial = lod.material || this._material
+            this.#renderBundle_LODList[index] = this.#createRenderBundle(view, lod.geometry, currentMaterial, index)
         });
         // keepLog('렌더번들갱신', this.name)
         // keepLog(this.#renderBundle_LODList)
@@ -1835,9 +1984,9 @@ class Mesh extends MeshBase {
             // @ts-ignore
             if (this.particleBuffers) {
                 // @ts-ignore
-                drawBufferManager.setIndexedIndirectCommand(drawCommandSlot, indexCount, this.particleNum, 0, 0, 0)
+                drawBufferManager.setIndexedIndirectCommand(drawCommandSlot, indexCount, this.particleNum, 0, 0, this.#globalVertexSlotIndex)
             } else {
-                drawBufferManager.setIndexedIndirectCommand(drawCommandSlot, indexCount, 1, 0, 0, 0)
+                drawBufferManager.setIndexedIndirectCommand(drawCommandSlot, indexCount, 1, 0, 0, this.#globalVertexSlotIndex)
                 // {
                 //     const data = this.#drawCommandSlot.dataArray
                 //     const offset = this.#drawCommandSlot.commandOffset
@@ -1849,7 +1998,7 @@ class Mesh extends MeshBase {
             }
         } else {
             const {vertexCount} = vertexBuffer
-            drawBufferManager.setIndirectCommand(drawCommandSlot, vertexCount, 1, 0, 0)
+            drawBufferManager.setIndirectCommand(drawCommandSlot, vertexCount, 1, 0, this.#globalVertexSlotIndex)
         }
     }
 

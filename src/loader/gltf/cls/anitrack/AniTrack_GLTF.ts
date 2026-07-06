@@ -11,13 +11,24 @@ type MeshResources = {
 
 class AniTrack_GLTF {
     lastPrevIdx: number
-    key;
+    lastNextIdx: number
+    lastInterpolationValue: number
+
     timeAnimationInfo: AnimationData_GLTF;
     aniDataAnimationInfo: AnimationData_GLTF;
-    interpolation: "CUBICSPLINE" | "STEP" | "LINEAR" | string;
+
     weightMeshes: Mesh[];
     animationTargetMesh: Mesh;
     cacheTable = {};
+
+    // 마이크로 성능 최적화용 필드 추가
+    key;
+    keyType: number;            // 1: rotation, 2: translation, 3: scale, 4: weights
+    interpolation: "CUBICSPLINE" | "STEP" | "LINEAR" | string;
+    interpolationType: number;  // 0: STEP, 1: LINEAR, 2: CUBICSPLINE
+    lastCachedKey: number = -1;
+    lastCachedItem: Float32Array | null = null;
+
     #computeShader: GPUShaderModule;
     #computePipeline: GPUComputePipeline;
     #animationDataListBuffer: GPUBuffer;
@@ -33,6 +44,41 @@ class AniTrack_GLTF {
         this.animationTargetMesh = targetMesh
         this.weightMeshes = weightMeshes
         this.#uniformData = new Float32Array(8);
+
+        // keyType 정수 변환 캐싱 (1: rotation, 2: translation, 3: scale, 4: weights)
+        switch (key) {
+            case 'rotation':
+                this.keyType = 1;
+                break;
+            case 'translation':
+                this.keyType = 2;
+                break;
+            case 'scale':
+                this.keyType = 3;
+                break;
+            case 'weights':
+                this.keyType = 4;
+                break;
+            default:
+                this.keyType = 0;
+                break;
+        }
+
+        // interpolationType 정수 변환 캐싱 (0: STEP, 1: LINEAR, 2: CUBICSPLINE)
+        switch (interpolation) {
+            case 'STEP':
+                this.interpolationType = 0;
+                break;
+            case 'LINEAR':
+                this.interpolationType = 1;
+                break;
+            case 'CUBICSPLINE':
+                this.interpolationType = 2;
+                break;
+            default:
+                this.interpolationType = 1;
+                break;
+        }
     }
 
     async renderWeight(redGPUContext: RedGPUContext,

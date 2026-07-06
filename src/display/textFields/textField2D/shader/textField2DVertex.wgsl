@@ -1,31 +1,12 @@
 #redgpu_include SYSTEM_UNIFORM;
 
-/**
- * [KO] 행렬 목록 구조체 정의입니다.
- * [EN] Matrix list structure definition.
- */
-struct MatrixList{
-    modelMatrix: mat4x4<f32>,
-    normalModelMatrix: mat4x4<f32>,
-}
-
-/**
- * [KO] TextField2D를 위한 버텍스 유니폼 구조체입니다.
- * [EN] Vertex uniform structure for TextField2D.
- */
-struct VertexUniforms {
-    pickingId: u32,
-    matrixList: MatrixList,
-    combinedOpacity: f32,
-};
-
-@group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
 
 /**
  * [KO] 버텍스 입력 데이터 구조체입니다.
  * [EN] Vertex input data structure.
  */
 struct InputData {
+    @builtin(instance_index) globalVertexSlotIndex: u32,
     @location(0) position: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
@@ -40,6 +21,7 @@ struct VertexOutput {
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
+    @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
     @location(11) combinedOpacity: f32,
     @location(13) shadowCoord: vec3<f32>,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
@@ -55,15 +37,16 @@ struct VertexOutput {
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
 
+    let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
     // [KO] 시스템 유니폼 변수 가져오기
-    // [EN] Get system uniform variables
+    // [EN] Get system globalStruct variables
     let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
     let u_viewMatrix = systemUniforms.camera.viewMatrix;
 
     // [KO] 버텍스 유니폼 변수 가져오기
-    // [EN] Get vertex uniform variables
-    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
-    let u_normalModelMatrix = vertexUniforms.matrixList.normalModelMatrix;
+    // [EN] Get vertex globalStruct variables
+    let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
+    let u_normalModelMatrix = globalVertexData.matrixList.normalModelMatrix;
 
     // [KO] 입력 데이터 처리
     // [EN] Process input data
@@ -85,7 +68,7 @@ fn main(inputData: InputData) -> VertexOutput {
     output.vertexPosition = viewPos.xyz;
     output.vertexNormal = viewNormal.xyz;
     output.uv = input_uv;
-    output.combinedOpacity = vertexUniforms.combinedOpacity;
+    output.combinedOpacity = globalVertexData.combinedOpacity;
 
     return output;
 }
@@ -98,16 +81,17 @@ fn main(inputData: InputData) -> VertexOutput {
 fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
 
+    let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
     let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
     let u_viewMatrix = systemUniforms.camera.viewMatrix;
-    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
+    let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
 
     let viewPos = u_viewMatrix * u_modelMatrix * vec4<f32>(inputData.position, 1.0);
     output.position = u_projectionMatrix * viewPos;
 
     // [KO] 피킹 ID 설정
     // [EN] Set picking ID
-    output.pickingId = unpack4x8unorm(vertexUniforms.pickingId);
+    output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
 
     return output;
 }

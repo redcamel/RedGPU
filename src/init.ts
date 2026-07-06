@@ -91,7 +91,7 @@ const init = async (
             // "shader-f16",
             // "timestamp-query",
             // "depth-clip-control",
-            // "indirect-first-instance",
+            "indirect-first-instance",
             // "rg11b10ufloat-renderable",
             // "bgra8unorm-storage",
             // "float32-filterable"
@@ -176,31 +176,22 @@ const init = async (
                     }
                 }
                 window?.cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
-                redGPUContext.gpuDevice.destroy();
+                redGPUContext.destroy();
             }
-            // 페이지 종료 시 GPU 디바이스 정리
-            window?.addEventListener('beforeunload', () => {
-                if (redGPUContext && redGPUContext.gpuDevice) {
-                    keepLog('🧹 페이지 종료 시 GPU 디바이스 정리');
-                    clearDevice()
-                }
-            });
             // bfcache에서 복원 시 페이지 재로드 (뒤로가기 + 앞으로가기)
             window?.addEventListener('pageshow', (event) => {
                 if (event.persisted) {
                     // bfcache에서 복원된 경우
                     keepLog('🔄 bfcache에서 복원됨 (뒤로가기 또는 앞으로가기) - 페이지 재로드');
+                    clearDevice()
                     window.location.reload();
                 }
             });
-            // bfcache에 저장되기 전 정리
-            window?.addEventListener('pagehide', (event) => {
-                if (event.persisted) {
-                    // bfcache에 저장되는 경우
-                    keepLog('💾 bfcache에 저장됨');
-                    if (redGPUContext && redGPUContext.gpuDevice) {
-                        clearDevice()
-                    }
+            // [KO] 페이지 이동 시 항상 정리 (bfcache 저장 여부와 무관)
+            // [EN] Always clean up on page navigation (regardless of bfcache)
+            window?.addEventListener('pagehide', () => {
+                if (redGPUContext && redGPUContext.gpuDevice) {
+                    clearDevice()
                 }
             });
         } catch (e) {

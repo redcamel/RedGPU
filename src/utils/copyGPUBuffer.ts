@@ -20,6 +20,15 @@ const copyGPUBuffer = (
     srcBuffer: GPUBuffer,
     dstBuffer: GPUBuffer
 ) => {
+    if (!(commandEncoder instanceof GPUCommandEncoder)) {
+        throw new Error("[RedGPU] copyGPUBuffer: commandEncoder must be an instance of GPUCommandEncoder.");
+    }
+    if (!(srcBuffer instanceof GPUBuffer) || !(dstBuffer instanceof GPUBuffer)) {
+        throw new Error("[RedGPU] copyGPUBuffer: srcBuffer and dstBuffer must be instances of GPUBuffer.");
+    }
+    if (srcBuffer === dstBuffer) {
+        throw new Error("[RedGPU] copyGPUBuffer: Source and destination buffers must be different instances.");
+    }
     const minSize = Math.min(srcBuffer.size, dstBuffer.size);
     if (minSize % 4 !== 0) {
         throw new Error(`[RedGPU] copyGPUBuffer: Copy size (${minSize}) must be a multiple of 4 bytes.`);

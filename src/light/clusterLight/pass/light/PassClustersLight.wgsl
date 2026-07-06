@@ -2,26 +2,13 @@
 
 @group(1) @binding(0) var<storage> clusterBoundsGrid : ClusterBoundsGrid;
 
-fn pointLight_testSphereAABB(light:u32,  tile:u32) -> bool {
-   // 라이트와 타일의 정보를 한 번만 획득합니다.
-   let targetLight = clusterLightList.lights[light];
-   let targetTile = clusterBoundsGrid.cubeList[tile];
+// [KO] 조명 정보 캐싱을 위한 워크그룹 공유 메모리 (1024 * 16 bytes = 16 KB)
+// [EN] Workgroup shared memory for caching light data (1024 * 16 bytes = 16 KB)
+var<workgroup> sharedLights : array<vec4<f32>, 1024>;
 
-   // 라이트의 반지름과 위치를 획득하고, 위치는 World Space에서 View3D Space로 변환합니다.
-   let radius:f32 = targetLight.radius;
-   let position:vec3<f32> = targetLight.position;
-   let center:vec3<f32> = (systemUniforms.camera.viewMatrix *  vec4<f32>(position, 1.0)).xyz;
-
-   // AABB와 라이트 사이의 제곱 거리를 계산합니다.
-   let squaredDistance:f32 = pointLight_sqDistPointAABB(center, tile, targetTile.minAABB.xyz, targetTile.maxAABB.xyz);
-
-   return squaredDistance <= (radius * radius);
-}
-
-fn pointLight_sqDistPointAABB(targetPoint:vec3<f32>, tile:u32, minAABB:vec3<f32>, maxAABB:vec3<f32>) -> f32 {
+fn pointLight_sqDistPointAABB(targetPoint:vec3<f32>, minAABB:vec3<f32>, maxAABB:vec3<f32>) -> f32 {
     var sqDist = 0.0;
     for(var i = 0u; i < 3u; i = i + 1u) {
-      // 해당 축에 대한 좌표를 하나씩 확인합니다.
       let v = targetPoint[i];
       let _minAABB = minAABB[i];
       let _maxAABB = maxAABB[i];
@@ -33,37 +20,52 @@ fn pointLight_sqDistPointAABB(targetPoint:vec3<f32>, tile:u32, minAABB:vec3<f32>
         sqDist += (v - _maxAABB) * (v - _maxAABB);
       }
     }
-
     return sqDist;
 }
-// 스폿라이트용 구체-AABB 거리 체크 (포인트라이트와 동일)
-fn spotLight_testSphereAABB(light: u32, tile: u32) -> bool {
-    let targetLight = clusterLightList.lights[light];
-    let targetTile = clusterBoundsGrid.cubeList[tile];
 
-    let radius: f32 = targetLight.radius;
-    let position: vec3<f32> = targetLight.position;
-    let center: vec3<f32> = (systemUniforms.camera.viewMatrix * vec4<f32>(position, 1.0)).xyz;
-
-    // 포인트라이트와 똑같은 거리 계산
-    let squaredDistance: f32 = pointLight_sqDistPointAABB(center, tile, targetTile.minAABB.xyz, targetTile.maxAABB.xyz);
-
+// [KO] 온칩 캐싱된 라이트 위치/반지름 데이터를 이용해 AABB 영역 교차 여부 검사
+// [EN] Test for intersection against AABB using on-chip cached light position/radius data
+fn checkSphereAABB(position: vec3<f32>, radius: f32, tileIndex: u32) -> bool {
+    let targetTile = clusterBoundsGrid.cubeList[tileIndex];
+    let center = (systemUniforms.camera.viewMatrix * vec4<f32>(position, 1.0)).xyz;
+    let squaredDistance = pointLight_sqDistPointAABB(center, targetTile.minAABB.xyz, targetTile.maxAABB.xyz);
     return squaredDistance <= (radius * radius);
 }
 
-
-@compute @workgroup_size(REDGPU_DEFINE_WORKGROUP_SIZE_X,REDGPU_DEFINE_WORKGROUP_SIZE_Y, REDGPU_DEFINE_WORKGROUP_SIZE_Z)
-fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
+@compute @workgroup_size(REDGPU_DEFINE_WORKGROUP_SIZE_X, REDGPU_DEFINE_WORKGROUP_SIZE_Y, REDGPU_DEFINE_WORKGROUP_SIZE_Z)
+fn main(
+    @builtin(global_invocation_id) global_id : vec3<u32>,
+    @builtin(local_invocation_index) local_index : u32
+) {
     let tileIndex = global_id.x +
                     global_id.y * clusterLight_tileCount.x +
                     global_id.z * clusterLight_tileCount.x * clusterLight_tileCount.y;
+
+    let pointLightCount = u32(clusterLightList.count[0]);
+    let spotLightCount = u32(clusterLightList.count[1]);
+    let totalLightCount = pointLightCount + spotLightCount;
+
+    // [KO] 워크그룹 내 256개 스레드가 협력하여 전역 VRAM의 조명 데이터를 로컬 공유 메모리에 고속 로드
+    // [EN] 256 threads in the workgroup cooperatively load global light parameters into local shared memory
+    let workgroupSize = u32(REDGPU_DEFINE_WORKGROUP_SIZE_X) * u32(REDGPU_DEFINE_WORKGROUP_SIZE_Y) * u32(REDGPU_DEFINE_WORKGROUP_SIZE_Z);
+    for (var i = local_index; i < totalLightCount; i = i + workgroupSize) {
+        if (i < 1024u) {
+            let light = clusterLightList.lights[i];
+            sharedLights[i] = vec4<f32>(light.position, light.radius);
+        }
+    }
+
+    // [KO] 모든 스레드가 로드를 마칠 때까지 대기
+    // [EN] Wait for all threads to finish loading
+    workgroupBarrier();
 
     var clusterLightCount = 0u;
     var clusterLightIndices : array<u32, REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTERu>;
 
     // 포인트 라이트 처리
-    for (var i = 0u; i < u32(clusterLightList.count[0]); i = i + 1u) {
-        let lightInCluster = pointLight_testSphereAABB(i, tileIndex);
+    for (var i = 0u; i < pointLightCount; i = i + 1u) {
+        let lightData = sharedLights[i];
+        let lightInCluster = checkSphereAABB(lightData.xyz, lightData.w, tileIndex);
 
         if (lightInCluster) {
             clusterLightIndices[clusterLightCount] = i;
@@ -76,12 +78,11 @@ fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
     }
 
     // 스폿 라이트 처리
-    let spotLightStartIndex = u32(clusterLightList.count[0]);
-    for (var i = 0u; i < u32(clusterLightList.count[1]); i = i + 1u) {
+    let spotLightStartIndex = pointLightCount;
+    for (var i = 0u; i < spotLightCount; i = i + 1u) {
         let actualLightIndex = spotLightStartIndex + i;
-
-        // 포인트라이트와 동일한 방식
-        let sphereTest = spotLight_testSphereAABB(actualLightIndex, tileIndex);
+        let lightData = sharedLights[actualLightIndex];
+        let sphereTest = checkSphereAABB(lightData.xyz, lightData.w, tileIndex);
 
         if (sphereTest) {
             clusterLightIndices[clusterLightCount] = actualLightIndex;

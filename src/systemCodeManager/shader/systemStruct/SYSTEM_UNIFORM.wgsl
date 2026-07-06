@@ -54,6 +54,15 @@ struct SystemUniform {
 @group(0) @binding(15) var atmosphereIrradianceLUT: texture_cube<f32>;
 @group(0) @binding(16) var skyAtmosphere_prefilteredTexture: texture_cube<f32>;
 
+#redgpu_include systemStruct.globalVertexStruct;
+@group(0) @binding(17) var<storage> globalVertexSSBO : array<GlobalVertexStruct>;
+
+#redgpu_include systemStruct.globalFragmentStructPBR;
+@group(0) @binding(18) var<storage> globalFragmentSSBO_PBR : array<GlobalFragmentStructPBR>;
+
+#redgpu_include systemStruct.globalFragmentStructBuiltIn;
+@group(0) @binding(19) var<storage> globalFragmentSSBO_BuiltIn : array<GlobalFragmentStructBuiltIn>;
+
 #redgpu_include depth.getLinearizeDepth
 
 const clusterLight_indicesLength:u32 = u32(REDGPU_DEFINE_MAX_LIGHTS_PER_CLUSTERu * REDGPU_DEFINE_TOTAL_TILESu);

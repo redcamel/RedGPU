@@ -4,7 +4,7 @@ struct MatrixList{
     prevModelMatrix: mat4x4<f32>,
     normalModelMatrix: mat4x4<f32>,
 }
-struct VertexUniforms {
+struct GlobalVertexStruct {
     matrixList:MatrixList,
     pickingId: u32,
     receiveShadow: f32,
@@ -12,5 +12,6 @@ struct VertexUniforms {
     useDisplacementTexture: u32,
     displacementScale: f32,
     disableJitter: u32,
+    globalFragmentSlotIndex:u32,
     uvTransform: vec4<f32>,
 };

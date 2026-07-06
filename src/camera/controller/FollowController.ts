@@ -34,12 +34,12 @@ class FollowController extends AController {
      * [KO] 현재 거리값 (카메라에서 타겟까지의 거리)
      * [EN] Current distance value (distance from camera to target)
      */
-    #currentDistance: number = 10;
+    #currentDistance: number = 5;
     /**
      * [KO] 목표 거리값
      * [EN] Target distance value
      */
-    #targetDistance: number = 10;
+    #targetDistance: number = 5;
     /**
      * [KO] 거리 보간 계수 (0.01 ~ 1)
      * [EN] Distance interpolation factor (0.01 ~ 1)
@@ -50,12 +50,12 @@ class FollowController extends AController {
      * [KO] 현재 높이값
      * [EN] Current height value
      */
-    #currentHeight: number = 5;
+    #currentHeight: number = 1;
     /**
      * [KO] 목표 높이값
      * [EN] Target height value
      */
-    #targetHeight: number = 5;
+    #targetHeight: number = 1;
     /**
      * [KO] 높이 보간 계수 (0.01 ~ 1)
      * [EN] Height interpolation factor (0.01 ~ 1)
@@ -88,12 +88,12 @@ class FollowController extends AController {
      * [KO] 현재 틸트(세로 회전) 각도 (도 단위)
      * [EN] Current tilt (vertical rotation) angle (in degrees)
      */
-    #currentTilt: number = 20;
+    #currentTilt: number = 15;
     /**
      * [KO] 목표 틸트 각도
      * [EN] Target tilt angle
      */
-    #targetTilt: number = 20;
+    #targetTilt: number = 15;
     /**
      * [KO] 틸트 보간 계수 (0.01 ~ 1)
      * [EN] Tilt interpolation factor (0.01 ~ 1)
@@ -160,7 +160,7 @@ class FollowController extends AController {
                 this.#targetDistance -= scaleChange * this.#targetDistance;
             },
         });
-        this.targetMesh = targetMesh;
+        this.targetMesh = targetMesh || new Mesh(redGPUContext);
         this.#targetMesh.setIgnoreFrustumCullingRecursively(true);
 
     }

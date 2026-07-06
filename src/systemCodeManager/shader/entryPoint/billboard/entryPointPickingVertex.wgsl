@@ -9,7 +9,7 @@
 fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
     let u_resolution = systemUniforms.resolution;
-    
+     let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
     #redgpu_if disableJitter
         let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionMatrix;
     #redgpu_else
@@ -17,7 +17,7 @@ fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
     #redgpu_endIf
     
     let u_viewMatrix = systemUniforms.camera.viewMatrix;
-    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
+    let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
     let u_useBillboard = vertexUniforms.useBillboard;
     let u_usePixelSize = vertexUniforms.usePixelSize;
     let u_pixelSize = vertexUniforms.pixelSize;
@@ -51,6 +51,6 @@ fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
         output.position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * ratioScaleMatrix * vec4<f32>(inputData.position, 1.0);
     }
 
-    output.pickingId = unpack4x8unorm(vertexUniforms.pickingId);
+    output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
     return output;
 }

@@ -76,8 +76,8 @@ export const ExampleList: ExampleListType = [
                         name: 'FollowController',
                         path: '3d/controller/followController',
                         description: {
-                            ko: `FollowController는 타겟 메쉬를 따라다니는 3인칭 카메라 제어를 제공합니다.<br/> 부드러운 카메라 추적, 거리 및 높이 조절, 팬/틸트 제어, 타겟 회전 추적 및 휠/핀치 줌 기능을 포함합니다.<br/>3인칭 게임 및 객체 추적 시나리오에 적합합니다.`,
-                            en: `FollowController provides third-person camera control that follows a target mesh.<br/> Features include smooth camera following, customizable distance and height, pan/tilt control, target rotation tracking, and wheel/pinch zoom.<br/>Perfect for third-person games and object tracking scenarios.`
+                            ko: `FollowController는 타겟 메쉬를 따라다니는 3인칭 카메라 제어를 제공합니다.<br/> 부드러운 카메라 추적, 거리 및 높이 조절, 팬/틸트 제어, 타겟 회전 추적 및 휠/핀치 줌 기능을 포함합니다.<br/>일반적인 자유 시점 3인칭 게임보다는 카메라 자동 정렬이 필수적인 차량 레이싱, 비행 시뮬레이터, 3인칭 러너 게임 및 객체 추적 시나리오에 적합합니다.`,
+                            en: `FollowController provides third-person camera control that follows a target mesh.<br/> Features include smooth camera following, customizable distance and height, pan/tilt control, target rotation tracking, and wheel/pinch zoom.<br/>Suitable for object tracking scenarios and genres requiring automatic camera alignment (e.g., racing, flight simulators, third-person runners) rather than general free-look third-person games.`
                         },
                     },
                     {
@@ -1278,6 +1278,27 @@ export const ExampleList: ExampleListType = [
                         },
                     },
                     {
+                        name: 'Motion Blending',
+                        list: [
+                            {
+                                name: 'Motion Blending',
+                                path: 'gltf/animation/motionBlending',
+                                description: {
+                                    ko: `AnimStateMachine을 사용하여 여러 애니메이션 클립 간의 부드러운 모션 블렌딩(크로스페이드)을 구현하는 예제입니다.<br/>Idle, Walk, Run 상태 간의 전이 조건과 페이드 지속 시간을 실시간으로 조절할 수 있습니다.`,
+                                    en: `An example implementing smooth motion blending (crossfade) between multiple animation clips using AnimStateMachine.<br/>State transition conditions and fade duration between Idle, Walk, and Run states can be adjusted in real time.`
+                                },
+                            },
+                            {
+                                name: 'Keyboard Character Control',
+                                path: 'gltf/animation/keyboardCharacterControl',
+                                description: {
+                                    ko: `키보드(WASD / 방향키)로 캐릭터를 이동시키고 Shift로 달리기 전환하는 3인칭 캐릭터 컨트롤 예제입니다.<br/>AnimStateMachine으로 Idle / Walk / Run 애니메이션이 자동 전환되며, OrbitController 카메라가 캐릭터를 추적합니다.`,
+                                    en: `A third-person character control example where you move with WASD/Arrow keys and sprint by holding Shift.<br/>AnimStateMachine automatically blends Idle, Walk, and Run animations, while OrbitController tracks the character.`
+                                },
+                            },
+                        ]
+                    },
+                    {
                         name: 'Animation Performance Test',
                         list: [
                             {
@@ -1312,6 +1333,8 @@ Check performance limits on each device.`
                     },
                 ]
             },
+
+
             {
                 name: '3D Models',
                 list: [
@@ -2616,8 +2639,8 @@ Check performance limits on each device.`
                         name: 'Character Controller',
                         path: 'physics/characterController',
                         description: {
-                            ko: `지면을 걷고 계단을 오르는 1인칭/3인칭 캐릭터 이동의 기초를 구현합니다.`,
-                            en: `Implements the basics of 1st/3rd person character movement walking on the ground and climbing stairs.`
+                            ko: `Rapier 물리 엔진을 이용해 지면을 걷고 계단을 오르는 3인칭 캐릭터 이동을 구현합니다.<br/>반투명한 물리 충돌체 캡슐과 GLTF 캐릭터(Soldier) 모델링을 결합하여 동작 상태에 따른 런타임 애니메이션 블렌딩을 시연합니다.`,
+                            en: `Implements physics-based 3rd person character movement walking on the ground and climbing stairs using the Rapier physics engine.<br/>Integrates a translucent physical capsule collider with a GLTF character (Soldier) model, demonstrating runtime animation blending based on action states.`
                         },
                     },
                     {

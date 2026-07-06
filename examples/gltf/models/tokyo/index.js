@@ -11,6 +11,7 @@ RedGPU.init(
         // Setup camera or controller
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.tilt = 0;
+        controller.camera.nearClipping = 1
 
         // Create scene and view
         const scene = new RedGPU.Display.Scene();

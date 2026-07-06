@@ -12,6 +12,8 @@ import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroup
 import definePositiveNumber from "../../defineProperty/funcs/number/definePositiveNumber";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import defineColorRGBA from "../../defineProperty/funcs/color/defineColorRGBA";
+import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
+import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 
 
 interface ABaseMaterial {
@@ -38,7 +40,7 @@ interface ABaseMaterial {
  * [EN] Abstract class serving as a common base for various materials.
  *
  * [KO] 셰이더 정보, 유니폼/텍스처/샘플러 구조, 블렌드 상태 등 렌더 파이프라인의 핵심 속성을 관리합니다.
- * [EN] It manages core attributes of the render pipeline such as shader information, uniform/texture/sampler structures, and blend states.
+ * [EN] It manages core attributes of the render pipeline such as shader information, globalStruct/texture/sampler structures, and blend states.
  *
  * [KO] 머티리얼별로 GPU 파이프라인의 셰이더, 바인드 그룹, 블렌딩, 컬러/알파, 틴트, 투명도 등 다양한 렌더링 속성을 일관성 있게 제어할 수 있습니다.
  * [EN] It allows consistent control of various rendering attributes such as shader, bind group, blending, color/alpha, tint, and transparency of the GPU pipeline for each material.
@@ -144,6 +146,7 @@ abstract class ABaseMaterial extends ResourceBase {
      * [EN] Tint blend mode value
      */
     #tintBlendMode: number = TINT_BLEND_MODE.MULTIPLY;
+    #globalFragmentSlotIndex: number = -1
 
     /**
      * [KO] ABaseMaterial 생성자
@@ -232,7 +235,8 @@ abstract class ABaseMaterial extends ResourceBase {
         } else {
             throw new Error(`Invalid tint mode: ${value}`);
         }
-        fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members.tintBlendMode, valueIdx);
+        // fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members.tintBlendMode, valueIdx);
+        updateTargetUniform(this, 'tintBlendMode', valueIdx)
         this.#tintBlendMode = valueIdx;
     }
 
@@ -311,9 +315,14 @@ abstract class ABaseMaterial extends ResourceBase {
         this.#writeMaskState = value;
     }
 
+
+    get globalFragmentSlotIndex(): number {
+        return this.#globalFragmentSlotIndex;
+    }
+
     /**
      * [KO] GPU 렌더 파이프라인 정보 및 유니폼 버퍼를 초기화합니다.
-     * [EN] Initializes GPU render pipeline info and uniform buffer.
+     * [EN] Initializes GPU render pipeline info and globalStruct buffer.
      */
     initGPURenderInfos() {
         const {redGPUContext} = this
@@ -322,15 +331,26 @@ abstract class ABaseMaterial extends ResourceBase {
             this.#FRAGMENT_SHADER_MODULE_NAME,
             {code: this.#SHADER_INFO.defaultSource}
         )
+        if (this['isPBRMaterial']) {
+            const slot = redGPUContext.globalFragmentSSBO_PBR.allocateSlot();
+            this.#globalFragmentSlotIndex = slot.index;
+        } else if (this['isBuiltInMaterial']) {
+            const slot = redGPUContext.globalFragmentSSBO_BuiltIn.allocateSlot();
+            this.#globalFragmentSlotIndex = slot.index;
+        }
         // 데이터 작성
-        const uniformData = new ArrayBuffer(
-            Math.max(this.#UNIFORM_STRUCT.arrayBufferByteLength, 16)
-        )
-        const uniformBuffer = new UniformBuffer(
-            redGPUContext,
-            uniformData,
-            `UniformBuffer_${this.#MODULE_NAME}_${this.uuid}`
-        )
+        let uniformData, uniformBuffer
+        if (this.#UNIFORM_STRUCT) {
+            uniformData = new ArrayBuffer(
+                Math.max(this.#UNIFORM_STRUCT.arrayBufferByteLength, 16)
+            )
+            uniformBuffer = new UniformBuffer(
+                redGPUContext,
+                uniformData,
+                `UniformBuffer_${this.#MODULE_NAME}_${this.uuid}`
+            )
+        }
+
         this.gpuRenderInfo = new FragmentGPURenderInfo(
             shaderModule,
             this.#SHADER_INFO.shaderSourceVariant,
@@ -347,7 +367,7 @@ abstract class ABaseMaterial extends ResourceBase {
 
     /**
      * [KO] 프래그먼트 셰이더 바인드 그룹/유니폼/텍스처/샘플러 등의 상태를 갱신합니다.
-     * [EN] Updates fragment shader bind group/uniform/texture/sampler states.
+     * [EN] Updates fragment shader bind group/globalStruct/texture/sampler states.
      * @protected
      */
     _updateFragmentState() {
@@ -459,18 +479,18 @@ abstract class ABaseMaterial extends ResourceBase {
 
     /**
      * [KO] 머티리얼의 유니폼/컬러/틴트 등 기본 속성값을 유니폼 버퍼에 반영합니다.
-     * [EN] Reflects basic material properties such as uniforms/color/tint to the uniform buffer.
+     * [EN] Reflects basic material properties such as uniforms/color/tint to the globalStruct buffer.
      * @protected
      */
     _updateBaseProperty() {
-        const {fragmentUniformInfo, fragmentUniformBuffer} = this.gpuRenderInfo
-        const {members} = fragmentUniformInfo
+
+        const {members} = this['isPBRMaterial'] ? ResourceManager.GLOBAL_FRAGMENT_STRUCT_PBR : this['isBuiltInMaterial'] ? ResourceManager.GLOBAL_FRAGMENT_STRUCT_BUILT_IN : this.gpuRenderInfo.fragmentUniformInfo
         for (const k in members) {
             const property = this[k]
             if (property instanceof ColorRGBA) {
-                fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[k], property.rgbaNormalLinear)
+                updateTargetUniform(this, k, property.rgbaNormalLinear);
             } else if (property instanceof ColorRGB) {
-                fragmentUniformBuffer.writeOnlyBuffer(fragmentUniformInfo.members[k], property.rgbNormalLinear)
+                updateTargetUniform(this, k, property.rgbNormalLinear);
             } else {
                 if (!pattern.test(k)) this[k] = property
             }
