@@ -47,7 +47,7 @@ declare abstract class ANoiseTexture extends ManagementResourceBase {
     get animationY(): number;
     /** [KO] Y축 애니메이션 값을 설정합니다. [EN] Sets the animation Y value. */
     set animationY(value: number);
-    /** [KO] 유니폼 정보를 반환합니다. [EN] Returns the uniform information. */
+    /** [KO] 유니폼 정보를 반환합니다. [EN] Returns the globalStruct information. */
     get uniformInfo(): any;
     /** [KO] GPUTexture 객체를 반환합니다. [EN] Returns the GPUTexture object. */
     get gpuTexture(): GPUTexture;
@@ -55,9 +55,9 @@ declare abstract class ANoiseTexture extends ManagementResourceBase {
     get time(): number;
     /** [KO] 현재 시간을 설정합니다. [EN] Sets the current time. */
     set time(value: number);
-    /** [KO] 개별 유니폼 파라미터를 업데이트합니다. [EN] Updates an individual uniform parameter. */
+    /** [KO] 개별 유니폼 파라미터를 업데이트합니다. [EN] Updates an individual globalStruct parameter. */
     updateUniform(name: string, value: any): void;
-    /** [KO] 여러 유니폼 파라미터를 일괄 업데이트합니다. [EN] Updates multiple uniform parameters at once. */
+    /** [KO] 여러 유니폼 파라미터를 일괄 업데이트합니다. [EN] Updates multiple globalStruct parameters at once. */
     updateUniforms(uniforms: Record<string, any>): void;
     /** [KO] 지정된 시간으로 노이즈를 렌더링합니다. [EN] Renders noise at the specified time. */
     render(time: number): void;

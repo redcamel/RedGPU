@@ -67,17 +67,17 @@ declare class View3D extends AView {
     get viewRenderTextureManager(): ViewRenderTextureManager;
     /**
      * [KO] 시스템 버텍스 유니폼의 구조체 정보를 반환합니다.
-     * [EN] Returns the system vertex uniform structure information.
+     * [EN] Returns the system vertex globalStruct structure information.
      */
     get systemUniform_Vertex_StructInfo(): any;
     /**
      * [KO] 시스템 버텍스 유니폼 바인드 그룹을 반환합니다.
-     * [EN] Returns the system vertex uniform bind group.
+     * [EN] Returns the system vertex globalStruct bind group.
      */
     get systemUniform_Vertex_UniformBindGroup(): GPUBindGroup;
     /**
      * [KO] 시스템 버텍스 유니폼 버퍼를 반환합니다.
-     * [EN] Returns the system vertex uniform buffer.
+     * [EN] Returns the system vertex globalStruct buffer.
      */
     get systemUniform_Vertex_UniformBuffer(): UniformBuffer;
     /**
@@ -144,6 +144,11 @@ declare class View3D extends AView {
      * [EN] Returns the projection view matrix with jitter excluded.
      */
     get noneJitterProjectionViewMatrix(): mat4;
+    /**
+     * [KO] 이전 프레임의 지터가 적용되지 않은 투영 뷰 행렬을 반환합니다.
+     * [EN] Returns the projection view matrix from the previous frame with jitter excluded.
+     */
+    get prevNoneJitterProjectionViewMatrix(): mat4;
     /**
      * [KO] 매 프레임마다 뷰 및 라이팅 데이터를 업데이트합니다.
      * [EN] Updates view and lighting data every frame.

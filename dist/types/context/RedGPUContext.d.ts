@@ -5,6 +5,7 @@ import RedGPUContextDetector from "./core/RedGPUContextDetector";
 import RedGPUContextSizeManager, { IRedGPURectObject, RedResizeEvent } from "./core/RedGPUContextSizeManager";
 import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
 import CommandEncoderManager from "../commandEncoderManager/CommandEncoderManager";
+import GlobalStorageBufferManager from "../resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager";
 /**
  * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
  * [EN] The RedGPUContext class is the top-level context object provided after WebGPU initialization.
@@ -84,6 +85,17 @@ declare class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Returns the antialiasing manager.
      */
     get antialiasingManager(): AntialiasingManager;
+    /**
+     * [KO] 글로벌 SSAO 버텍스 버퍼 매니저를 반환합니다.
+     * [EN] Returns the global SSAO vertex buffer manager.
+     */
+    get globalVertexSSBO(): GlobalStorageBufferManager;
+    /**
+     * [KO] 글로벌 SSAO 프래그먼트 버퍼 매니저를 반환합니다.
+     * [EN] Returns the global SSAO fragment buffer manager.
+     */
+    get globalFragmentSSBO_PBR(): GlobalStorageBufferManager;
+    get globalFragmentSSBO_BuiltIn(): GlobalStorageBufferManager;
     /**
      * [KO] 배경색을 반환합니다.
      * [EN] Returns the background color.

@@ -1,6 +1,6 @@
 import { AnimationChannel, AnimationSampler, GLTF } from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
-import { GLTFParsedSingleClip } from "./parseAnimations";
+import { GLTFParsedSingleClip } from "./GLTFParsedSingleClip";
 /**
  * Parse a single animation channel for GLTF.
  *

@@ -2,7 +2,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import ABaseBuffer, { GPU_BUFFER_DATA_SYMBOL } from "./ABaseBuffer";
 /**
  * [KO] 유니폼 버퍼 리소스의 기본 추상 클래스입니다.
- * [EN] Abstract base class for uniform buffer resources.
+ * [EN] Abstract base class for globalStruct buffer resources.
  *
  * ::: warning
  * [KO] 이 클래스는 추상 클래스이므로 직접 인스턴스를 생성할 수 없습니다.<br/>'new' 키워드를 사용하여 직접 인스턴스를 생성하지 마십시오.
@@ -62,10 +62,10 @@ declare abstract class AUniformBaseBuffer extends ABaseBuffer {
     get uniformBufferDescriptor(): GPUBufferDescriptor;
     /**
      * [KO] 유니폼 버퍼에 데이터를 씁니다.
-     * [EN] Writes data to the uniform buffer.
+     * [EN] Writes data to the globalStruct buffer.
      * @param target -
      * [KO] 대상 유니폼 정보 (View 생성자 및 오프셋 포함)
-     * [EN] Target uniform information (including View constructor and offset)
+     * [EN] Target globalStruct information (including View constructor and offset)
      * @param value -
      * [KO] 쓸 값
      * [EN] Value to write

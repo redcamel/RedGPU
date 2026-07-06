@@ -49,7 +49,4 @@ declare class TextFieldMaterial extends ABitmapBaseMaterial {
      */
     constructor(redGPUContext: RedGPUContext, diffuseTexture?: BitmapTexture, name?: string);
 }
-/**
- * `TextFieldMaterial` 클래스를 기본 export로 내보냅니다.
- */
 export default TextFieldMaterial;

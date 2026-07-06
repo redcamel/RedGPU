@@ -25,7 +25,7 @@ export interface DefineColorRGBAInfo {
  * **[EN]**
  * - The getter returns a {@link ColorRGBA} instance.
  * - The setter accepts a hex color string (e.g. `#ff0000`) or a {@link ColorRGBA} instance.
- * - When the value changes, it automatically normalizes and writes to the GPU uniform buffer as linear RGBA values (rgbaNormalLinear).
+ * - When the value changes, it automatically normalizes and writes to the GPU globalStruct buffer as linear RGBA values (rgbaNormalLinear).
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
  * @param defineInfo - [KO] 단일 {@link DefineColorRGBAInfo} 설정 또는 그 배열 [EN] A single {@link DefineColorRGBAInfo} configuration or an array of configurations

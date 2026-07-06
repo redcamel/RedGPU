@@ -1,7 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Mesh from "../../display/mesh/Mesh";
 import { GLTF } from "./GLTF";
-import { GLTFParsedSingleClip } from "./parsers/animation/parseAnimations";
+import { ClipAnimState } from "./animationLooper/AnimStateMachine";
 import RedGPUObject from "../../base/RedGPUObject";
 /**
  * [KO] GLTF 파일 파싱 결과 정보를 담고 있는 타입입니다.
@@ -44,7 +44,7 @@ type GLTFParsingResult = {
      * [KO] GLTF 파일에 정의된 파싱된 애니메이션 클립 목록
      * [EN] The parsed animation clips defined in the GLTF file.
      */
-    animations: GLTFParsedSingleClip[];
+    animations: ClipAnimState[];
 };
 /**
  * [KO] GLTF 로딩 진행 상황 정보를 담고 있는 타입입니다.
@@ -200,11 +200,11 @@ declare class GLTFLoader extends RedGPUObject {
      * loader.playAnimation(clip);
      * ```
      *
-     * @param parsedSingleClip -
-     * [KO] 재생할 애니메이션 클립
-     * [EN] Animation clip to play
+     * @param clipState -
+     * [KO] 재생할 애니메이션 클립 상태
+     * [EN] Animation clip state to play
      */
-    playAnimation(parsedSingleClip: GLTFParsedSingleClip): void;
+    playAnimation(clipState: ClipAnimState): void;
 }
 export default GLTFLoader;
 /**
@@ -220,10 +220,17 @@ export declare class PlayAnimationInfo {
      */
     startTime: number;
     /**
-     * [KO] 재생 중인 GLTF 파싱 애니메이션 클립
-     * [EN] The parsed GLTF animation clip being played
+     * [KO] 재생 중인 애니메이션 클립 상태
+     * [EN] The animation clip state being played
      */
-    targetGLTFParsedSingleClip: GLTFParsedSingleClip;
+    targetGLTFParsedSingleClip: ClipAnimState;
+    isBlending?: boolean;
+    fromClip?: ClipAnimState;
+    toClip?: ClipAnimState;
+    blendWeight?: number;
+    startTimeFrom?: number;
+    startTimeTo?: number;
+    animStateMachine?: any;
     /**
      * [KO] PlayAnimationInfo 인스턴스를 생성합니다.
      * [EN] Creates a PlayAnimationInfo instance.
@@ -235,5 +242,5 @@ export declare class PlayAnimationInfo {
      * [KO] 대상 애니메이션 클립
      * [EN] Target animation clip
      */
-    constructor(startTime: number, targetAniTrackList: GLTFParsedSingleClip);
+    constructor(startTime: number, clipState: ClipAnimState);
 }

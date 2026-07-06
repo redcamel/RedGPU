@@ -67,7 +67,7 @@ declare abstract class ASinglePassPostEffect extends RedGPUObject {
     get shaderInfo(): any;
     /**
      * [KO] 이펙트 전용 유니폼 버퍼를 반환합니다.
-     * [EN] Returns the effect-specific uniform buffer.
+     * [EN] Returns the effect-specific globalStruct buffer.
      *
      * @returns
      * [KO] 유니폼 버퍼 인스턴스
@@ -76,7 +76,7 @@ declare abstract class ASinglePassPostEffect extends RedGPUObject {
     get uniformBuffer(): UniformBuffer;
     /**
      * [KO] 이펙트 전용 유니폼 구조 정보를 반환합니다.
-     * [EN] Returns the effect-specific uniform struct information.
+     * [EN] Returns the effect-specific globalStruct struct information.
      *
      * @returns
      * [KO] 유니폼 구조 정보
@@ -85,11 +85,11 @@ declare abstract class ASinglePassPostEffect extends RedGPUObject {
     get uniformsInfo(): any;
     /**
      * [KO] 시스템 공용 유니폼 구조 정보를 반환합니다.
-     * [EN] Returns the system common uniform struct information.
+     * [EN] Returns the system common globalStruct struct information.
      *
      * @returns
      * [KO] 시스템 유니폼 구조 정보
-     * [EN] System uniform structure info
+     * [EN] System globalStruct structure info
      */
     get systemUniformsInfo(): any;
     /**
@@ -135,7 +135,7 @@ declare abstract class ASinglePassPostEffect extends RedGPUObject {
     clear(): void;
     /**
      * [KO] 이펙트를 초기화합니다. 컴퓨트 셰이더 및 유니폼 버퍼를 생성합니다.
-     * [EN] Initializes the effect. Creates compute shaders and uniform buffers.
+     * [EN] Initializes the effect. Creates compute shaders and globalStruct buffers.
      *
      * @param redGPUContext -
      * [KO] RedGPU 컨텍스트
@@ -174,7 +174,7 @@ declare abstract class ASinglePassPostEffect extends RedGPUObject {
     render(view: View3D, width: number, height: number, ...sourceTextureInfo: IPostEffectResult[]): IPostEffectResult;
     /**
      * [KO] 특정 유니폼 값을 업데이트합니다.
-     * [EN] Updates a specific uniform value.
+     * [EN] Updates a specific globalStruct value.
      *
      * @param key -
      * [KO] 유니폼 키 이름
