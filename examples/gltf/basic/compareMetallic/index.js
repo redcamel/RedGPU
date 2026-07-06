@@ -1,5 +1,5 @@
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1783322366074";
-import * as RedGPU from "../../../../dist/index.js?t=1783322366074";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1783323470979";
+import * as RedGPU from "../../../../dist/index.js?t=1783323470979";
 /**
  * [KO] Compare Metallic 예제
  * [EN] Compare Metallic example
