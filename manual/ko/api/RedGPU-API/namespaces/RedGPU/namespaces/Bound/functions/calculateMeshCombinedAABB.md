@@ -1,4 +1,4 @@
-[**RedGPU API v4.2.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **calculateMeshCombinedAABB**(`mesh`): [`AABB`](../classes/AABB.md)
 
-Defined in: [src/bound/math/calculateMeshCombinedAABB.ts:24](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/bound/math/calculateMeshCombinedAABB.ts#L24)
+Defined in: [src/bound/math/calculateMeshCombinedAABB.ts:24](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/bound/math/calculateMeshCombinedAABB.ts#L24)
 
 메시와 모든 자식 메시의 AABB를 통합하여 계산합니다.
 

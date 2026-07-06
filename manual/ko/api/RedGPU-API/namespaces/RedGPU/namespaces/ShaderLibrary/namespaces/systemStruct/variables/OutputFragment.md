@@ -1,4 +1,4 @@
-[**RedGPU API v4.2.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **OutputFragment**: `string` = `OutputFragment_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2296](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/systemCodeManager/ShaderLibrary.ts#L2296)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2296](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/systemCodeManager/ShaderLibrary.ts#L2296)
 
 프래그먼트 출력(OutputFragment) 구조체 정의입니다.
 

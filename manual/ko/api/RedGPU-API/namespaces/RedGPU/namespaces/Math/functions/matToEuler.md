@@ -1,4 +1,4 @@
-[**RedGPU API v4.2.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **matToEuler**(`mat`, `dest`, `order?`): `any`
 
-Defined in: [src/math/mat4ToEuler.ts:24](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/math/mat4ToEuler.ts#L24)
+Defined in: [src/math/mat4ToEuler.ts:24](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/math/mat4ToEuler.ts#L24)
 
 4x4 행렬에서 오일러 각도를 추출합니다.
 

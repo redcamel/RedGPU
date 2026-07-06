@@ -1,4 +1,4 @@
-[**RedGPU API v4.2.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **defineSampler**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:59](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/defineProperty/funcs/texture/defineSampler.ts#L59)
+Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:59](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/defineProperty/funcs/texture/defineSampler.ts#L59)
 
 지정된 클래스의 프로토타입에 GPU와 연동되는 텍스처 샘플러(Sampler) 속성을 정의합니다.
 

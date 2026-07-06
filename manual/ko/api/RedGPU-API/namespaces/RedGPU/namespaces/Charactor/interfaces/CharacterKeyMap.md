@@ -1,4 +1,4 @@
-[**RedGPU API v4.2.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Interface: CharacterKeyMap
 
-Defined in: [src/charactor/SimpleCharacterController.ts:14](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/charactor/SimpleCharacterController.ts#L14)
+Defined in: [src/charactor/SimpleCharacterController.ts:14](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L14)
 
 Simple 캐릭터 컨트롤러의 키 매핑 규격 인터페이스입니다.
 
@@ -16,7 +16,7 @@ Simple 캐릭터 컨트롤러의 키 매핑 규격 인터페이스입니다.
 
 > `optional` **jump?**: `string`[]
 
-Defined in: [src/charactor/SimpleCharacterController.ts:21](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/charactor/SimpleCharacterController.ts#L21)
+Defined in: [src/charactor/SimpleCharacterController.ts:21](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L21)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:21](https://github.com/r
 
 > `optional` **moveBackward?**: `string`[]
 
-Defined in: [src/charactor/SimpleCharacterController.ts:16](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/charactor/SimpleCharacterController.ts#L16)
+Defined in: [src/charactor/SimpleCharacterController.ts:16](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L16)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:16](https://github.com/r
 
 > `optional` **moveForward?**: `string`[]
 
-Defined in: [src/charactor/SimpleCharacterController.ts:15](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/charactor/SimpleCharacterController.ts#L15)
+Defined in: [src/charactor/SimpleCharacterController.ts:15](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L15)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:15](https://github.com/r
 
 > `optional` **run?**: `string`[]
 
-Defined in: [src/charactor/SimpleCharacterController.ts:22](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/charactor/SimpleCharacterController.ts#L22)
+Defined in: [src/charactor/SimpleCharacterController.ts:22](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L22)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:22](https://github.com/r
 
 > `optional` **strafeLeft?**: `string`[]
 
-Defined in: [src/charactor/SimpleCharacterController.ts:17](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/charactor/SimpleCharacterController.ts#L17)
+Defined in: [src/charactor/SimpleCharacterController.ts:17](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L17)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:17](https://github.com/r
 
 > `optional` **strafeRight?**: `string`[]
 
-Defined in: [src/charactor/SimpleCharacterController.ts:18](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/charactor/SimpleCharacterController.ts#L18)
+Defined in: [src/charactor/SimpleCharacterController.ts:18](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L18)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:18](https://github.com/r
 
 > `optional` **turnLeft?**: `string`[]
 
-Defined in: [src/charactor/SimpleCharacterController.ts:19](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/charactor/SimpleCharacterController.ts#L19)
+Defined in: [src/charactor/SimpleCharacterController.ts:19](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L19)
 
 ***
 
@@ -72,4 +72,4 @@ Defined in: [src/charactor/SimpleCharacterController.ts:19](https://github.com/r
 
 > `optional` **turnRight?**: `string`[]
 
-Defined in: [src/charactor/SimpleCharacterController.ts:20](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/charactor/SimpleCharacterController.ts#L20)
+Defined in: [src/charactor/SimpleCharacterController.ts:20](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/charactor/SimpleCharacterController.ts#L20)

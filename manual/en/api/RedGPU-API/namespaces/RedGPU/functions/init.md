@@ -1,4 +1,4 @@
-[**RedGPU API v4.2.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **init**(`canvas`, `onWebGPUInitialized`, `onFailInitialized?`, `onDestroy?`, `alphaMode?`, `requestAdapterOptions?`): `Promise`\<`void`\>
 
-Defined in: [src/init.ts:49](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/init.ts#L49)
+Defined in: [src/init.ts:49](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/init.ts#L49)
 
 Asynchronously initializes WebGPU and creates a RedGPUContext.
 

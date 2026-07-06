@@ -1,4 +1,4 @@
-[**RedGPU API v4.2.0-Alpha**](../../../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getNDCFromDepth**: `string` = `getNDCFromDepth_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:681](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/systemCodeManager/ShaderLibrary.ts#L681)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:681](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/systemCodeManager/ShaderLibrary.ts#L681)
 
 Converts screen UV and depth values to standard WebGPU NDC (Normalized Device Coordinates).
 

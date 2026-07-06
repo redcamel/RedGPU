@@ -1,4 +1,4 @@
-[**RedGPU API v4.2.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: AnimStateMachine
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:65](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/loader/gltf/animationLooper/AnimStateMachine.ts#L65)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:65](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/loader/gltf/animationLooper/AnimStateMachine.ts#L65)
 
 애니메이션 상태를 관리하고 보간 가중치를 산출하는 상태 머신 엔진입니다.
 
@@ -16,7 +16,7 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:65](https://git
 
 > **new AnimStateMachine**(`initialState?`): `AnimStateMachine`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:73](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/loader/gltf/animationLooper/AnimStateMachine.ts#L73)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:73](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/loader/gltf/animationLooper/AnimStateMachine.ts#L73)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:73](https://git
 
 > **currentState**: [`AnimState`](AnimState.md) = `null`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:66](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/loader/gltf/animationLooper/AnimStateMachine.ts#L66)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:66](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/loader/gltf/animationLooper/AnimStateMachine.ts#L66)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:66](https://git
 
 > **targetState**: [`AnimState`](AnimState.md) = `null`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:67](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/loader/gltf/animationLooper/AnimStateMachine.ts#L67)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:67](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/loader/gltf/animationLooper/AnimStateMachine.ts#L67)
 
 ## Methods
 
@@ -50,7 +50,7 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:67](https://git
 
 > **addState**(`state`): `void`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:84](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/loader/gltf/animationLooper/AnimStateMachine.ts#L84)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:84](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/loader/gltf/animationLooper/AnimStateMachine.ts#L84)
 
 새로운 애니메이션 상태를 추가합니다.
 
@@ -70,7 +70,7 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:84](https://git
 
 > **addTransition**(`transition`): `void`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:92](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/loader/gltf/animationLooper/AnimStateMachine.ts#L92)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:92](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/loader/gltf/animationLooper/AnimStateMachine.ts#L92)
 
 상태 전이 조건을 추가합니다.
 
@@ -90,7 +90,7 @@ Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:92](https://git
 
 > **update**(`deltaTime`, `timestamp`, `playInfo`): `void`
 
-Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:100](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/loader/gltf/animationLooper/AnimStateMachine.ts#L100)
+Defined in: [src/loader/gltf/animationLooper/AnimStateMachine.ts:100](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/loader/gltf/animationLooper/AnimStateMachine.ts#L100)
 
 매 프레임 상태 머신을 업데이트하고 블렌딩 가중치를 제어합니다.
 

@@ -1,4 +1,4 @@
-[**RedGPU API v4.2.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: BlendState
 
-Defined in: [src/renderState/BlendState.ts:24](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/renderState/BlendState.ts#L24)
+Defined in: [src/renderState/BlendState.ts:24](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/renderState/BlendState.ts#L24)
 
 머티리얼의 색상 및 알파 블렌딩 동작을 제어하는 상태 클래스입니다.
 
@@ -26,7 +26,7 @@ blendState.dstFactor = RedGPU.GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
 
 > **new BlendState**(`targetMaterial`, `srcFactor?`, `dstFactor?`, `operation?`): `BlendState`
 
-Defined in: [src/renderState/BlendState.ts:52](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/renderState/BlendState.ts#L52)
+Defined in: [src/renderState/BlendState.ts:52](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/renderState/BlendState.ts#L52)
 
 BlendState 인스턴스를 생성합니다.
 
@@ -49,7 +49,7 @@ BlendState 인스턴스를 생성합니다.
 
 > **state**: `GPUBlendComponent`
 
-Defined in: [src/renderState/BlendState.ts:29](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/renderState/BlendState.ts#L29)
+Defined in: [src/renderState/BlendState.ts:29](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/renderState/BlendState.ts#L29)
 
 최종 GPUBlendComponent 상태 객체
 
@@ -61,7 +61,7 @@ Defined in: [src/renderState/BlendState.ts:29](https://github.com/redcamel/RedGP
 
 > **get** **dstFactor**(): `GPUBlendFactor`
 
-Defined in: [src/renderState/BlendState.ts:107](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/renderState/BlendState.ts#L107)
+Defined in: [src/renderState/BlendState.ts:107](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/renderState/BlendState.ts#L107)
 
 대상(Destination) 블렌드 팩터를 가져오거나 설정합니다.
 
@@ -75,7 +75,7 @@ Defined in: [src/renderState/BlendState.ts:107](https://github.com/redcamel/RedG
 
 > **set** **dstFactor**(`newDstFactor`): `void`
 
-Defined in: [src/renderState/BlendState.ts:111](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/renderState/BlendState.ts#L111)
+Defined in: [src/renderState/BlendState.ts:111](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/renderState/BlendState.ts#L111)
 
 ##### Parameters
 
@@ -95,7 +95,7 @@ Defined in: [src/renderState/BlendState.ts:111](https://github.com/redcamel/RedG
 
 > **get** **operation**(): `GPUBlendOperation`
 
-Defined in: [src/renderState/BlendState.ts:67](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/renderState/BlendState.ts#L67)
+Defined in: [src/renderState/BlendState.ts:67](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/renderState/BlendState.ts#L67)
 
 블렌드 연산 방식을 가져오거나 설정합니다.
 
@@ -109,7 +109,7 @@ Defined in: [src/renderState/BlendState.ts:67](https://github.com/redcamel/RedGP
 
 > **set** **operation**(`newOperation`): `void`
 
-Defined in: [src/renderState/BlendState.ts:71](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/renderState/BlendState.ts#L71)
+Defined in: [src/renderState/BlendState.ts:71](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/renderState/BlendState.ts#L71)
 
 ##### Parameters
 
@@ -129,7 +129,7 @@ Defined in: [src/renderState/BlendState.ts:71](https://github.com/redcamel/RedGP
 
 > **get** **srcFactor**(): `GPUBlendFactor`
 
-Defined in: [src/renderState/BlendState.ts:87](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/renderState/BlendState.ts#L87)
+Defined in: [src/renderState/BlendState.ts:87](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/renderState/BlendState.ts#L87)
 
 소스(Source) 블렌드 팩터를 가져오거나 설정합니다.
 
@@ -143,7 +143,7 @@ Defined in: [src/renderState/BlendState.ts:87](https://github.com/redcamel/RedGP
 
 > **set** **srcFactor**(`newSrcFactor`): `void`
 
-Defined in: [src/renderState/BlendState.ts:91](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/renderState/BlendState.ts#L91)
+Defined in: [src/renderState/BlendState.ts:91](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/renderState/BlendState.ts#L91)
 
 ##### Parameters
 

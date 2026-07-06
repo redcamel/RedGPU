@@ -1,4 +1,4 @@
-[**RedGPU API v4.2.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **createMeshVertexUniformBuffers**(`mesh`, `skin?`): `void`
 
-Defined in: [src/display/mesh/core/createMeshVertexUniformBuffers.ts:13](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/display/mesh/core/createMeshVertexUniformBuffers.ts#L13)
+Defined in: [src/display/mesh/core/createMeshVertexUniformBuffers.ts:13](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/display/mesh/core/createMeshVertexUniformBuffers.ts#L13)
 
 createMeshVertexUniformBuffers
 

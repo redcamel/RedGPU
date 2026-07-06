@@ -1,4 +1,4 @@
-[**RedGPU API v4.2.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **GPU\_STORE\_OP**: `object`
 
-Defined in: [src/gpuConst/GPU\_STORE\_OP.ts:10](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/gpuConst/GPU_STORE_OP.ts#L10)
+Defined in: [src/gpuConst/GPU\_STORE\_OP.ts:10](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/gpuConst/GPU_STORE_OP.ts#L10)
 
 렌더 패스 종료 시 어태치먼트의 내용을 저장하는 방식을 정의하는 상수군입니다.
 

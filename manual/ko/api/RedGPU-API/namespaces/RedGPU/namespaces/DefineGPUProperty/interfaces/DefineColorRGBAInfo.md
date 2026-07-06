@@ -1,4 +1,4 @@
-[**RedGPU API v4.2.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Interface: DefineColorRGBAInfo
 
-Defined in: [src/defineProperty/funcs/color/defineColorRGBA.ts:11](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/defineProperty/funcs/color/defineColorRGBA.ts#L11)
+Defined in: [src/defineProperty/funcs/color/defineColorRGBA.ts:11](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/defineProperty/funcs/color/defineColorRGBA.ts#L11)
 
 `defineColorRGBA` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
 
@@ -16,7 +16,7 @@ Defined in: [src/defineProperty/funcs/color/defineColorRGBA.ts:11](https://githu
 
 > **key**: `string`
 
-Defined in: [src/defineProperty/funcs/color/defineColorRGBA.ts:16](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/defineProperty/funcs/color/defineColorRGBA.ts#L16)
+Defined in: [src/defineProperty/funcs/color/defineColorRGBA.ts:16](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/defineProperty/funcs/color/defineColorRGBA.ts#L16)
 
 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
 
@@ -26,6 +26,6 @@ Defined in: [src/defineProperty/funcs/color/defineColorRGBA.ts:16](https://githu
 
 > `optional` **value?**: `string`
 
-Defined in: [src/defineProperty/funcs/color/defineColorRGBA.ts:21](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/defineProperty/funcs/color/defineColorRGBA.ts#L21)
+Defined in: [src/defineProperty/funcs/color/defineColorRGBA.ts:21](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/defineProperty/funcs/color/defineColorRGBA.ts#L21)
 
 초기 16진수 색상 코드값 (예: `#ff0000`). 지정하지 않을 경우 기본값은 `#fff`입니다.

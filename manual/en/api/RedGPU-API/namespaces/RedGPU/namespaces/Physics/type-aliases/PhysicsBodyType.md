@@ -1,4 +1,4 @@
-[**RedGPU API v4.2.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **PhysicsBodyType** = *typeof* [`PHYSICS_BODY_TYPE`](../variables/PHYSICS_BODY_TYPE.md)\[keyof *typeof* [`PHYSICS_BODY_TYPE`](../variables/PHYSICS_BODY_TYPE.md)\]
 
-Defined in: [src/physics/PhysicsBodyType.ts:45](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/physics/PhysicsBodyType.ts#L45)
+Defined in: [src/physics/PhysicsBodyType.ts:45](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/physics/PhysicsBodyType.ts#L45)
 
 **`Experimental`**
 

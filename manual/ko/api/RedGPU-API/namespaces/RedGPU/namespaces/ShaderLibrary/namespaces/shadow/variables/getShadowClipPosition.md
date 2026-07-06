@@ -1,4 +1,4 @@
-[**RedGPU API v4.2.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getShadowClipPosition**: `string` = `getShadowClipPosition_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:943](https://github.com/redcamel/RedGPU/blob/091a447ce4546f482b09304906702c57d6ea3b67/src/systemCodeManager/ShaderLibrary.ts#L943)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:943](https://github.com/redcamel/RedGPU/blob/3f2479cb923d5cf594209ed38cdda688909e57d0/src/systemCodeManager/ShaderLibrary.ts#L943)
 
 월드 좌표를 빛의 관점에서의 클립 공간(Clip Space) 좌표로 변환합니다. (Shadow Pass 전용)
 
