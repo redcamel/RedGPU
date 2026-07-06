@@ -515,7 +515,7 @@ export interface Node {
      */
     "rotation"?: number[];
     /**
-     * The node's non-uniform scale, given as the scaling factors along the x, y, and z axes.
+     * The node's non-globalStruct scale, given as the scaling factors along the x, y, and z axes.
      */
     "scale"?: number[];
     /**

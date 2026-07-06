@@ -121,7 +121,7 @@ declare class InstancingMeshObject3D {
     set rotation(value: number);
     /**
      * [KO] 인스턴스의 X, Y, Z축 스케일을 설정합니다. Y와 Z를 입력하지 않은 경우, X값과 동일하게 통일되어 적용됩니다.
-     * [EN] Sets the scale of the object along the X, Y, and Z axes. If Y and Z are omitted, they default to the value of X (uniform scaling).
+     * [EN] Sets the scale of the object along the X, Y, and Z axes. If Y and Z are omitted, they default to the value of X (globalStruct scaling).
      * @param x -
      * [KO] X축 스케일 값
      * [EN] Scale factor along the X-axis

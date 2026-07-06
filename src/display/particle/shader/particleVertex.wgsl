@@ -1,20 +1,15 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include math.billboard.getBillboardMatrix;
-struct MatrixList{
-    modelMatrix: mat4x4<f32>,
-    normalModelMatrix: mat4x4<f32>,
-}
-struct VertexUniforms {
-    matrixList:MatrixList,
-    pickingId:u32,
+
+struct ParticleVertexUniforms {
     useBillboardPerspective:u32,
     useBillboard:u32,
-    combinedOpacity:f32,
 };
 
-@group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
+@group(1) @binding(0) var<uniform> vertexUniforms: ParticleVertexUniforms;
 
 struct InputData {
+    @builtin(instance_index) globalVertexSlotIndex: u32,
     @location(0) a_position : vec3<f32>,
     @location(1) a_normal : vec3<f32>,
     @location(2) a_uv : vec2<f32>,
@@ -32,6 +27,7 @@ struct VertexOutput {
     //
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
+    @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
     @location(11) combinedOpacity: f32,
     //
     @location(12) motionVector: vec3<f32>,
@@ -140,8 +136,9 @@ fn main( inputData:InputData) -> VertexOutput {
   let u_viewMatrix = u_camera.viewMatrix;
   let u_cameraPosition = u_camera.cameraPosition;
   //
-  let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
-  let u_normalModelMatrix = vertexUniforms.matrixList.normalModelMatrix;
+  let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
+  let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
+  let u_normalModelMatrix = globalVertexData.matrixList.normalModelMatrix;
 //
   let u_useBillboardPerspective = vertexUniforms.useBillboardPerspective == 1u;
   let u_useBillboard = vertexUniforms.useBillboard == 1u;

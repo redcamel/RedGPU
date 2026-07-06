@@ -1904,7 +1904,7 @@ export declare namespace SkyAtmosphereLibrary {
      * #redgpu_include skyAtmosphere.skyAtmosphereFn
      *
      * @group(0) @binding(0) var transmittanceLUT: texture_storage_2d<rgba16float, write>;
-     * @group(0) @binding(1) var<uniform> params: SkyAtmosphere;
+     * @group(0) @binding(1) var<globalStruct> params: SkyAtmosphere;
      *
      * @compute @workgroup_size(16, 16)
      * fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
@@ -1967,14 +1967,15 @@ export declare namespace EntryPointLibrary {
          * fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
          *     var output: VertexOutput;
          *     let input_position = inputData.position;
-         *     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
+         *     let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
+         *     let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
          *     let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
          *     let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
          *     let u_camera = systemUniforms.camera;
          *     let u_viewMatrix = u_camera.viewMatrix;
          *     var position: vec4<f32> = u_modelMatrix * vec4<f32>(input_position, 1.0);
          *     output.position = u_projectionViewMatrix * position;
-         *     output.pickingId = unpack4x8unorm(vertexUniforms.pickingId);
+         *     output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
          *     return output;
          * }
          * ```
@@ -2073,7 +2074,7 @@ export declare namespace EntryPointLibrary {
          * fn entryPointPickingVertex(inputData: InputData) -> VertexOutput {
          *     var output: VertexOutput;
          *     let u_resolution = systemUniforms.resolution;
-         *
+         *      let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
          *     #redgpu_if disableJitter
          *         let u_projectionMatrix = systemUniforms.projection.noneJitterProjectionMatrix;
          *     #redgpu_else
@@ -2081,7 +2082,7 @@ export declare namespace EntryPointLibrary {
          *     #redgpu_endIf
          *
          *     let u_viewMatrix = systemUniforms.camera.viewMatrix;
-         *     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
+         *     let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
          *     let u_useBillboard = vertexUniforms.useBillboard;
          *     let u_usePixelSize = vertexUniforms.usePixelSize;
          *     let u_pixelSize = vertexUniforms.pixelSize;
@@ -2115,7 +2116,7 @@ export declare namespace EntryPointLibrary {
          *         output.position = u_projectionMatrix * u_viewMatrix * u_modelMatrix * ratioScaleMatrix * vec4<f32>(inputData.position, 1.0);
          *     }
          *
-         *     output.pickingId = unpack4x8unorm(vertexUniforms.pickingId);
+         *     output.pickingId = unpack4x8unorm(globalVertexData.pickingId);
          *     return output;
          * }
          * ```
@@ -2331,7 +2332,7 @@ export declare namespace SystemStructLibrary {
      *     prevModelMatrix: mat4x4<f32>,
      *     normalModelMatrix: mat4x4<f32>,
      * }
-     * struct VertexUniforms {
+     * struct GlobalVertexStruct {
      *     matrixList:MatrixList,
      *     pickingId: u32,
      *     receiveShadow: f32,
@@ -2343,7 +2344,13 @@ export declare namespace SystemStructLibrary {
      * };
      * ```
      */
-    const meshVertexBasicUniform: string;
+    const globalVertexStruct: string;
+    /**
+     * [KO] PBR 재질 유니폼 구조체 정의입니다.
+     * [EN] Definition of the PBR Material Uniforms structure.
+     */
+    const globalFragmentStructPBR: string;
+    const globalFragmentStructBuiltIn: string;
 }
 export declare namespace DisplacementLibrary {
     /**
@@ -2525,7 +2532,7 @@ export declare namespace ShaderLibrary {
      *
      * };
      *
-     * @group(0) @binding(0) var<uniform> systemUniforms: SystemUniform;
+     * @group(0) @binding(0) var<globalStruct> systemUniforms: SystemUniform;
      * @group(0) @binding(1) var directionalShadowMapSampler: sampler_comparison;
      * @group(0) @binding(2) var directionalShadowMap: texture_depth_2d;
      * @group(0) @binding(3) var prefilterTextureSampler: sampler;
@@ -2542,6 +2549,9 @@ export declare namespace ShaderLibrary {
      *
      * @group(0) @binding(15) var atmosphereIrradianceLUT: texture_cube<f32>;
      * @group(0) @binding(16) var skyAtmosphere_prefilteredTexture: texture_cube<f32>;
+     *
+     * #redgpu_include systemStruct.globalVertexStruct;
+     * @group(0) @binding(17) var<storage> globalVertexSSBO : array<GlobalVertexStruct>;
      *
      * #redgpu_include depth.getLinearizeDepth
      *
@@ -2632,7 +2642,7 @@ export declare namespace ShaderLibrary {
     const SYSTEM_UNIFORM: string;
     /**
      * // [KO] 포스트 이펙트 시스템 유니폼 구조체입니다.
-     * // [EN] Post effect system uniform structure.
+     * // [EN] Post effect system globalStruct structure.
      *
      *
      * ```wgsl
@@ -2651,7 +2661,7 @@ export declare namespace ShaderLibrary {
      *     skyAtmosphere:SkyAtmosphere,
      * };
      *
-     * @group(2) @binding(4) var<uniform> systemUniforms: SystemUniform;
+     * @group(2) @binding(4) var<globalStruct> systemUniforms: SystemUniform;
      * ```
      */
     const POST_EFFECT_SYSTEM_UNIFORM: string;

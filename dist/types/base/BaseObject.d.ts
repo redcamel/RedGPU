@@ -10,6 +10,11 @@
 declare abstract class BaseObject {
     #private;
     /**
+     * [KO] 클래스별 인스턴스 순번 ID
+     * [EN] Instance sequence ID per class
+     */
+    readonly instanceId: number;
+    /**
      * [KO] BaseObject 생성자입니다. (추상 클래스로 직접 인스턴스 생성은 불가합니다)
      * [EN] BaseObject constructor. (Abstract class, cannot be instantiated directly)
      */

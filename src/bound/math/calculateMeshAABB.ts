@@ -24,13 +24,16 @@ import AABB from "../AABB";
 const calculateMeshAABB = (mesh: Mesh): AABB => {
     // 메시나 지오메트리가 없는 경우
     if (!mesh || !mesh._geometry) {
-        // 모델 매트릭스에서 월드 위치 추출
-        const m = mesh.modelMatrix;
-        // const worldX = m[12];
-        // const worldY = m[13];
-        // const worldZ = m[14];
+        if (mesh && mesh.modelMatrix) {
+            // 모델 매트릭스에서 월드 위치 추출
+            const m = mesh.modelMatrix;
+            const worldX = m[12];
+            const worldY = m[13];
+            const worldZ = m[14];
 
-        // 점 AABB 반환 (크기가 0인 박스)
+            // 점 AABB 반환 (크기가 0인 박스)
+            return new AABB(worldX, worldX, worldY, worldY, worldZ, worldZ);
+        }
         return new AABB(0, 0, 0, 0, 0, 0);
     }
 

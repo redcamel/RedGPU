@@ -34,13 +34,13 @@ const renderListForLayer = (list, renderViewStateData: RenderViewStateData, pipe
                     const {indexBuffer} = currentGeometry
                     const {indexCount, triangleCount, gpuBuffer: indexGPUBuffer, format} = indexBuffer
                     currentRenderPassEncoder.setIndexBuffer(indexGPUBuffer, format)
-                    currentRenderPassEncoder.drawIndexed(indexCount, 1, 0, 0, 0);
+                    currentRenderPassEncoder.drawIndexed(indexCount, 1, 0, 0, target.globalVertexSlotIndex);
                     renderResults.numTriangles += triangleCount
                     renderResults.numPoints += indexCount
                 } else {
                     const {vertexBuffer} = currentGeometry
                     const {vertexCount, triangleCount} = vertexBuffer
-                    currentRenderPassEncoder.draw(vertexCount, 1, 0, 0);
+                    currentRenderPassEncoder.draw(vertexCount, 1, 0, target.globalVertexSlotIndex);
                     renderResults.numTriangles += triangleCount;
                     renderResults.numPoints += vertexCount
                 }

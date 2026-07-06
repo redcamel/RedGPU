@@ -54,6 +54,10 @@ class ColorMaterial extends ABaseMaterial {
     }
 }
 
+Object.defineProperty(ColorMaterial.prototype, 'isBuiltInMaterial', {
+    value: true,
+    writable: false
+});
 defineColorRGB(ColorMaterial, [
     {key: 'color'},
 ])

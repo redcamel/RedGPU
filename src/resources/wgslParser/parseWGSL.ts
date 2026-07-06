@@ -5,7 +5,7 @@ import WGSLUniformTypes from "./core/WGSLUniformTypes";
 
 /**
  * [KO] 개별 유니폼 멤버 정보를 생성합니다.
- * [EN] Creates individual uniform member information.
+ * [EN] Creates individual globalStruct member information.
  * @param curr -
  * [KO] 현재 멤버 정보
  * [EN] Current member information
@@ -17,7 +17,7 @@ import WGSLUniformTypes from "./core/WGSLUniformTypes";
  * [EN] Type name
  * @returns
  * [KO] 가공된 유니폼 멤버 정보
- * [EN] Processed uniform member information
+ * [EN] Processed globalStruct member information
  */
 const createUniformMember = (curr, start, typeName) => {
     const UniformTypeInfo = WGSLUniformTypes[typeName];
@@ -81,13 +81,13 @@ const processMembers = (members, start = 0, end = 0) => {
 
 /**
  * [KO] 유니폼 정보 배열을 처리하여 맵으로 반환합니다.
- * [EN] Processes an array of uniform information and returns it as a map.
+ * [EN] Processes an array of globalStruct information and returns it as a map.
  * @param uniforms -
  * [KO] 유니폼 배열
  * [EN] Uniforms array
  * @returns
  * [KO] 가공된 유니폼 정보 맵
- * [EN] Processed uniform information map
+ * [EN] Processed globalStruct information map
  */
 const processUniforms = (uniforms) => {
     return uniforms.reduce((prev, curr) => {
@@ -102,6 +102,21 @@ const processUniforms = (uniforms) => {
     }, {});
 };
 
+const convertMembersToKeyValue = (typeInfo) => {
+    if (!typeInfo) return typeInfo;
+    const newType = {...typeInfo};
+    if (Array.isArray(newType.members)) {
+        const processed = processMembers(newType.members);
+        newType.members = processed.members;
+    }
+    if (newType.format && Array.isArray(newType.format.members)) {
+        newType.format = {...newType.format};
+        const processed = processMembers(newType.format.members);
+        newType.format.members = processed.members;
+    }
+    return newType;
+};
+
 /**
  * [KO] 스토리지 정보 배열을 처리하여 맵으로 반환합니다.
  * [EN] Processes an array of storage information and returns it as a map.
@@ -114,13 +129,36 @@ const processUniforms = (uniforms) => {
  */
 const processStorages = (storage) => {
     return storage.reduce((prev, curr) => {
+        const typeInfo = convertMembersToKeyValue(curr.type);
         prev[curr.name] = {
             name: curr.name,
             ...processMembers(curr.members),
             arrayBufferByteLength: curr.size,
             stride: curr.stride,
             acccess: curr.access,
-            type: curr.type
+            type: typeInfo,
+        };
+        curr.attributes?.forEach(v => prev[curr.name][v.name] = +v.value);
+        return prev;
+    }, {});
+};
+
+/**
+ * [KO] 구조체 정보 배열을 처리하여 맵으로 반환합니다.
+ * [EN] Processes an array of struct information and returns it as a map.
+ * @param structs -
+ * [KO] 구조체 배열
+ * [EN] Structs array
+ * @returns
+ * [KO] 가공된 구조체 정보 맵
+ * [EN] Processed struct information map
+ */
+const processStructs = (structs) => {
+    return structs.reduce((prev, curr) => {
+        prev[curr.name] = {
+            name: curr.name,
+            ...processMembers(curr.members),
+            arrayBufferByteLength: curr.size,
         };
         curr.attributes?.forEach(v => prev[curr.name][v.name] = +v.value);
         return prev;
@@ -153,6 +191,7 @@ const reflectCache = new Map<string, any>();
 const parseWGSL = (sourceName: string, code: string, injectLibrary?: Record<string, string>): {
     uniforms: any;
     storage: any;
+    structs: any;
     samplers: any;
     textures: any;
     vertexEntries: string[];
@@ -183,6 +222,7 @@ const parseWGSL = (sourceName: string, code: string, injectLibrary?: Record<stri
         reflectResult = {
             uniforms: {...processUniforms(reflect.uniforms)},
             storage: {...processStorages(reflect.storage)},
+            structs: {...processStructs(reflect.structs)},
             samplers: reflect.samplers,
             textures: reflect.textures,
             vertexEntries: reflect.entry.vertex.map(v => v.name),
@@ -215,6 +255,15 @@ const parseWGSL = (sourceName: string, code: string, injectLibrary?: Record<stri
 
         reflectCache.set(cacheKey, reflectResult);
     }
+    // keepLog(
+    //     sourceName,
+    //     {
+    //         ...reflectResult,
+    //         defaultSource,
+    //         shaderSourceVariant,
+    //         conditionalBlocks: uniqueKeys
+    //     }
+    // )
     return {
         ...reflectResult,
         defaultSource,

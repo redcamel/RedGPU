@@ -128,7 +128,7 @@ declare class PostEffectManager {
     get ssr(): SSR;
     /**
      * [KO] 시스템 유니폼 버퍼를 반환합니다.
-     * [EN] Returns the system uniform buffer.
+     * [EN] Returns the system globalStruct buffer.
      *
      * @returns
      * [KO] UniformBuffer 인스턴스

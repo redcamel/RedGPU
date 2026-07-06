@@ -1,5 +1,5 @@
 import {mat4, vec3} from "gl-matrix";
-import Camera2D from "../../camera/camera/Camera2D";
+import PerspectiveCamera from "../../camera/camera/PerspectiveCamera";
 import View3D from "../../display/view/View3D";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import AmbientLight from "../lights/AmbientLight";
@@ -66,12 +66,8 @@ class LightManager {
      * @private
      */
     #ambientLight: AmbientLight
-    /**
-     * [KO] 방향성 조명의 투영 행렬 계산에 사용되는 내부 캐시 행렬입니다.
-     * [EN] Internal cache matrix used for calculating the projection matrix of directional lights.
-     * @private
-     */
-    #lightProjectionMatrix: mat4 = mat4.create()
+
+
 
     /**
      * [KO] 등록된 스포트 조명 배열을 반환합니다.
@@ -359,77 +355,187 @@ class LightManager {
      * @returns
      * [KO] mat4 투영-뷰 행렬
      * [EN] mat4 projection-view matrix
-     * @private
      */
     getDirectionalLightProjectionViewMatrix(view: View3D): mat4 {
-        return mat4.multiply(mat4.create(), this.getDirectionalLightProjectionMatrix(view), this.getDirectionalLightViewMatrix(view));
+        return this.#calculateDirectionalLightMatrices(view).projectionView;
     }
 
     /**
      * [KO] 방향성 조명의 투영(orthographic) 행렬을 계산하여 반환합니다.
      * [EN] Calculates and returns the projection (orthographic) matrix of the directional light.
      *
-     * [KO] 카메라 위치와의 거리를 기반으로 ortho 영역( left, right, bottom, top, near, far )을 결정합니다.
-     * [EN] Determines the ortho area (left, right, bottom, top, near, far) based on the distance from the camera position.
      * @param view -
      * [KO] View3D 인스턴스
      * [EN] View3D instance
      * @returns
      * [KO] mat4 투영 행렬
      * [EN] mat4 projection matrix
-     * @private
      */
     getDirectionalLightProjectionMatrix(view: View3D): mat4 {
-        const lightProjectionMatrix = mat4.create()
-        const cameraPosition = view.rawCamera instanceof Camera2D ? vec3.fromValues(0, 0, 0) : vec3.fromValues(
-            view.rawCamera.x,
-            view.rawCamera.y,
-            view.rawCamera.z
-        );
-        const distance = Math.max(vec3.distance(cameraPosition, vec3.create()), 1);
-        const left = -distance
-        const right = distance
-        const bottom = -distance;
-        const top = distance;
-        const near = -distance * 3;
-        const far = distance * 3;
-        mat4.ortho(lightProjectionMatrix, left, right, bottom, top, near, far);
-        return lightProjectionMatrix;
+        return this.#calculateDirectionalLightMatrices(view).projection;
     }
 
     /**
      * [KO] 메인 방향성 조명의 뷰(lookAt) 행렬을 계산하여 반환합니다.
      * [EN] Calculates and returns the view (lookAt) matrix of the main directional light.
      *
-     * [KO] 씬에서 첫 번째 DirectionalLight의 방향을 사용하여 라이트 위치를 계산하고, 원점(origin)을 바라보도록 합니다.
-     * [EN] Calculates the light position using the direction of the first DirectionalLight in the scene and makes it look at the origin.
      * @param view -
      * [KO] View3D 인스턴스
      * [EN] View3D instance
      * @returns
      * [KO] mat4 뷰 행렬
      * [EN] mat4 view matrix
-     * @private
      */
     getDirectionalLightViewMatrix(view: View3D): mat4 {
-        mat4.identity(this.#lightProjectionMatrix)
-        const cameraPosition = view.rawCamera instanceof Camera2D ? vec3.fromValues(0, 0, 0) : vec3.fromValues(
-            view.rawCamera.x,
-            view.rawCamera.y,
-            view.rawCamera.z
-        );
-        const distance = Math.max(vec3.distance(cameraPosition, vec3.create()), 1)
-        const upVector = vec3.fromValues(0, 1, 0);
-        const origin = vec3.fromValues(0, 0, 0);
-        const {directionalLights} = view.scene.lightManager
-        const lightPosition = directionalLights.length ? vec3.fromValues(
-            -directionalLights[0].direction[0] * distance,
-            -directionalLights[0].direction[1] * distance,
-            -directionalLights[0].direction[2] * distance
-        ) : vec3.create();
-        const lightViewMatrix = mat4.create()
-        mat4.lookAt(lightViewMatrix, lightPosition, origin, upVector);
-        return lightViewMatrix
+        return this.#calculateDirectionalLightMatrices(view).view;
+    }
+
+    /**
+     * [KO] 방향성 조명의 투영-뷰 행렬을 반환합니다.
+     * [EN] Returns the projection-view matrix of the directional light.
+     *
+     * @param view -
+     * [KO] View3D 인스턴스
+     * [EN] View3D instance
+     * @returns
+     * [KO] mat4 투영-뷰 행렬
+     * [EN] mat4 projection-view matrix
+     * @private
+     */
+    #calculateDirectionalLightMatrices(view: View3D): { projection: mat4, view: mat4, projectionView: mat4 } {
+        const {directionalLights} = this;
+        if (!directionalLights.length) {
+            return {
+                projection: mat4.create(),
+                view: mat4.create(),
+                projectionView: mat4.create()
+            };
+        }
+
+        const rawCamera = view.rawCamera;
+        if (!(rawCamera instanceof PerspectiveCamera)) {
+            return {
+                projection: mat4.create(),
+                view: mat4.create(),
+                projectionView: mat4.create()
+            };
+        }
+
+        const camViewMatrix = rawCamera.viewMatrix;
+        const invVM = mat4.create();
+        if (!mat4.invert(invVM, camViewMatrix)) {
+            return {
+                projection: mat4.create(),
+                view: mat4.create(),
+                projectionView: mat4.create()
+            };
+        }
+
+        // 1. 카메라 위치, 전방 벡터, 그리고 바라보는 지점까지의 거리(focusDistance) 계산
+        const camPos = vec3.fromValues(invVM[12], invVM[13], invVM[14]);
+        const camForward = vec3.fromValues(-invVM[8], -invVM[9], -invVM[10]);
+
+        let focusDistance = 100.0;
+        if (Math.abs(camForward[1]) > 0.01) {
+            const t = -camPos[1] / camForward[1];
+            if (t > 0) focusDistance = Math.max(t, 10.0);
+        }
+        // (TIP: OrbitControls 사용 시 vec3.distance(camPos, controls.target)을 쓰면 가장 정확합니다)
+
+        // [핵심 수정 1] 카메라가 실제로 시선을 두고 있는 3D 공간상의 '포커스 지점'을 정확히 구합니다.
+        const focusPoint = vec3.create();
+        vec3.scaleAndAdd(focusPoint, camPos, camForward, focusDistance);
+
+        // 2. 줌 거리에 연동하여 가시거리 제어 (배경 그림자를 위해 길게 잡아도 괜찮습니다)
+        const shadowFar = Math.min(rawCamera.farClipping, Math.max(focusDistance * 1.5, 300.0));
+
+        const fov = (Math.PI / 180) * rawCamera.fieldOfView;
+        const aspect = view.aspect;
+        const near = rawCamera.nearClipping;
+
+        const halfHN = Math.tan(fov / 2) * near;
+        const halfWN = halfHN * aspect;
+        const halfHF = Math.tan(fov / 2) * shadowFar;
+        const halfWF = halfHF * aspect;
+
+        const localCorners = [
+            vec3.fromValues(-halfWN, halfHN, -near),
+            vec3.fromValues(halfWN, halfHN, -near),
+            vec3.fromValues(halfWN, -halfHN, -near),
+            vec3.fromValues(-halfWN, -halfHN, -near),
+            vec3.fromValues(-halfWF, halfHF, -shadowFar),
+            vec3.fromValues(halfWF, halfHF, -shadowFar),
+            vec3.fromValues(halfWF, -halfHF, -shadowFar),
+            vec3.fromValues(-halfWF, -halfHF, -shadowFar)
+        ];
+
+        const worldCorners: vec3[] = [];
+        for (const localPt of localCorners) {
+            const worldPt = vec3.create();
+            vec3.transformMat4(worldPt, localPt, invVM);
+            worldCorners.push(worldPt);
+        }
+
+        // 실제 프러스텀이 포괄하는 최대 바운딩 반경 계산 (깊이 Z 범위 계산용)
+        let actualRadius = 0;
+        for (const corner of worldCorners) {
+            const d = vec3.distance(corner, focusPoint);
+            if (d > actualRadius) {
+                actualRadius = d;
+            }
+        }
+
+        const light = directionalLights[0];
+        const lightDir = vec3.fromValues(light.direction[0], light.direction[1], light.direction[2]);
+        vec3.normalize(lightDir, lightDir);
+
+        // 3. 가로/세로 영역(X, Y): 줌 거리(focusDistance)에 비례하여 그림자 상자 크기 설정
+        const shadowRadius = Math.min(actualRadius, Math.max(focusDistance * 1.5, 15.0));
+        const margin = shadowRadius * 0.20;
+        const left = -shadowRadius - margin;
+        const right = shadowRadius + margin;
+        const bottom = -shadowRadius - margin;
+        const top = shadowRadius + margin;
+
+        // [핵심 수정 2] 라이트 카메라의 타겟 중심을 허공(frustumCenter)이 아닌 실제 'focusPoint'로 지정!
+        // 이제 그림자 정사영 상자의 정중앙(0, 0)에 카메라가 보고 있는 피사체가 무조건 위치하게 됩니다.
+        const lightDistance = Math.max(actualRadius * 2.0, 500.0);
+        const lightPos = vec3.create();
+        vec3.scaleAndAdd(lightPos, focusPoint, lightDir, -lightDistance);
+
+        const up = vec3.fromValues(0, 1, 0);
+        if (Math.abs(vec3.dot(lightDir, up)) > 0.99) {
+            vec3.set(up, 0, 0, 1);
+        }
+
+        const lightView = mat4.create();
+        mat4.lookAt(lightView, lightPos, focusPoint, up); // 타겟을 focusPoint로 변경
+
+        // 4. 깊이 영역(Z): worldCorners를 lightView 공간으로 투영하여 앞뒤 잘림 없는 완벽한 Z 영역 도출
+        let minZ = Infinity, maxZ = -Infinity;
+        const p = vec3.create();
+        for (const pt of worldCorners) {
+            vec3.transformMat4(p, pt, lightView);
+            if (p[2] < minZ) minZ = p[2];
+            if (p[2] > maxZ) maxZ = p[2];
+        }
+
+        // 5. nearPlane / farPlane 도출 (오른손 좌표계 기준 -Z 전방)
+        const zMargin = actualRadius * 0.50;
+        const nearPlane = Math.max(0.1, -maxZ - zMargin);
+        const farPlane = -minZ + zMargin;
+
+        const lightProjection = mat4.create();
+        mat4.orthoZO(lightProjection, left, right, bottom, top, nearPlane, farPlane);
+
+        const lightProjectionView = mat4.create();
+        mat4.multiply(lightProjectionView, lightProjection, lightView);
+
+        return {
+            projection: lightProjection,
+            view: lightView,
+            projectionView: lightProjectionView
+        };
     }
 }
 

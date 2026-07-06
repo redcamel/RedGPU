@@ -4,7 +4,7 @@ struct VertexUniforms {
     modelMatrix: mat4x4<f32>,
 };
 
-// Global uniform variable of type VertexUniforms
+// Global globalStruct variable of type VertexUniforms
 @group(0) @binding(0)
 var<uniform> vertexUniforms: VertexUniforms;
 

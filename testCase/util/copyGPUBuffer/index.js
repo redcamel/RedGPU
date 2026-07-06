@@ -29,25 +29,40 @@ redUnit.testGroup(
             }, (err) => run(false, err));
         }, true);
 
-        runner.defineTest('Failure Test Test: Invalid size (not multiple of 4)', (run) => {
+        runner.defineTest('Failure Test Test: Pass fake objects instead of GPUBuffer', (run) => {
+            const canvas = document.createElement('canvas');
+            RedGPU.init(canvas, (redGPUContext) => {
+                try {
+                    const fakeSrc = { size: 3 };
+                    const fakeDst = { size: 3 };
+
+                    const encoder = redGPUContext.gpuDevice.createCommandEncoder();
+                    RedGPU.Util.copyGPUBuffer(encoder, fakeSrc, fakeDst);
+                    run(true);
+                } catch (e) {
+                    const isCorrectError = e.message.includes('must be instances of GPUBuffer');
+                    run(!isCorrectError, e);
+                } finally {
+                    redGPUContext.destroy();
+                }
+            }, (err) => run(false, err));
+        }, false);
+        runner.defineTest('Failure Test Test: Same buffer instances', (run) => {
             const canvas = document.createElement('canvas');
             RedGPU.init(canvas, (redGPUContext) => {
                 try {
                     const device = redGPUContext.gpuDevice;
-                    const srcBuffer = device.createBuffer({ size: 16, usage: GPUBufferUsage.COPY_SRC });
-                    // Even if minSize is 16, let's try a buffer with a size that forces minSize to not be multiple of 4 if possible,
-                    // but createBuffer might align sizes. WebGPU requires size to be multiple of 4.
-                    // Wait, WebGPU createBuffer size must be multiple of 4.
-                    // So we cannot easily create a buffer of size 3. 
-                    // Let's create an object that ducks types to test the error block
-                    const fakeSrc = { size: 3 };
-                    const fakeDst = { size: 3 };
+                    const srcBuffer = device.createBuffer({
+                        size: 16,
+                        usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
+                    });
                     
                     const encoder = device.createCommandEncoder();
-                    RedGPU.Util.copyGPUBuffer(encoder, fakeSrc, fakeDst);
+                    RedGPU.Util.copyGPUBuffer(encoder, srcBuffer, srcBuffer);
                     run(true);
                 } catch (e) {
-                    run(false, e);
+                    const isCorrectError = e.message.includes('different instances');
+                    run(!isCorrectError, e);
                 } finally {
                     redGPUContext.destroy();
                 }
@@ -59,7 +74,8 @@ redUnit.testGroup(
                 RedGPU.Util.copyGPUBuffer(null, null, null);
                 run(true);
             } catch (e) {
-                run(false, e);
+                const isCorrectError = e.message.includes('must be an instance of GPUCommandEncoder');
+                run(!isCorrectError, e);
             }
         }, false);
     }

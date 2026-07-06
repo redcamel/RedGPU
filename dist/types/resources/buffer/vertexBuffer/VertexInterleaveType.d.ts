@@ -30,10 +30,11 @@ declare class VertexInterleaveType {
      * [EN] float32x3 format (3 elements, 12 bytes)
      */
     static get float32x3(): TypeInterleave;
-    /**
-     * [KO] float32x4 형식 (요소 4개, 16바이트)
-     * [EN] float32x4 format (4 elements, 16 bytes)
-     */
     static get float32x4(): TypeInterleave;
+    /**
+     * [KO] uint32x4 형식 (요소 4개, 16바이트)
+     * [EN] uint32x4 format (4 elements, 16 bytes)
+     */
+    static get uint32x4(): TypeInterleave;
 }
 export default VertexInterleaveType;

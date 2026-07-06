@@ -98,11 +98,11 @@ class View3D extends AView {
     constructor(redGPUContext: RedGPUContext, scene: Scene, camera: PerspectiveCamera | OrthographicCamera | AController | Camera2D, name?: string) {
         super(redGPUContext, scene, camera, name)
         this.#init()
+        this.#clusterLightManager = new ClusterLightManager(this)
         this.#viewRenderTextureManager = new ViewRenderTextureManager(this)
         this.#renderViewStateData = new RenderViewStateData(this)
         this.#postEffectManager = new PostEffectManager(this)
         this.#toneMappingManager = new ToneMappingManager(redGPUContext)
-        this.#clusterLightManager = new ClusterLightManager(this)
         this.#uniformData = new ArrayBuffer(this.systemUniform_Vertex_StructInfo.endOffset)
         this.#uniformDataF32 = new Float32Array(this.#uniformData)
         this.#uniformDataU32 = new Uint32Array(this.#uniformData)
@@ -126,7 +126,7 @@ class View3D extends AView {
 
     /**
      * [KO] 시스템 버텍스 유니폼의 구조체 정보를 반환합니다.
-     * [EN] Returns the system vertex uniform structure information.
+     * [EN] Returns the system vertex globalStruct structure information.
      */
     get systemUniform_Vertex_StructInfo(): any {
         return this.#systemUniform_Vertex_StructInfo;
@@ -134,7 +134,7 @@ class View3D extends AView {
 
     /**
      * [KO] 시스템 버텍스 유니폼 바인드 그룹을 반환합니다.
-     * [EN] Returns the system vertex uniform bind group.
+     * [EN] Returns the system vertex globalStruct bind group.
      */
     get systemUniform_Vertex_UniformBindGroup(): GPUBindGroup {
         return this.#systemUniform_Vertex_UniformBindGroup;
@@ -142,7 +142,7 @@ class View3D extends AView {
 
     /**
      * [KO] 시스템 버텍스 유니폼 버퍼를 반환합니다.
-     * [EN] Returns the system vertex uniform buffer.
+     * [EN] Returns the system vertex globalStruct buffer.
      */
     get systemUniform_Vertex_UniformBuffer(): UniformBuffer {
         return this.#systemUniform_Vertex_UniformBuffer;
@@ -256,6 +256,14 @@ class View3D extends AView {
     }
 
     /**
+     * [KO] 이전 프레임의 지터가 적용되지 않은 투영 뷰 행렬을 반환합니다.
+     * [EN] Returns the projection view matrix from the previous frame with jitter excluded.
+     */
+    get prevNoneJitterProjectionViewMatrix(): mat4 {
+        return this.redGPUContext.antialiasingManager.useTAA ? this.taa.prevNoneJitterProjectionViewMatrix : this.#noneJitterProjectionViewMatrix;
+    }
+
+    /**
      * [KO] 매 프레임마다 뷰 및 라이팅 데이터를 업데이트합니다.
      * [EN] Updates view and lighting data every frame.
      * @param shadowRender -
@@ -287,6 +295,10 @@ class View3D extends AView {
             const skyAtmosphereReflectionLUT = skyAtmosphere?.skyAtmosphereReflectionLUT;
             const skyAtmosphereIrradianceLUT = skyAtmosphere?.skyAtmosphereIrradianceLUT;
 
+            const globalSSAOVertexGPUBuffer = redGPUContext.globalVertexSSBO.gpuBuffer;
+            const globalSSAOFragmentGPUBuffer = redGPUContext.globalFragmentSSBO_PBR.gpuBuffer;
+            const globalSSAOFragmentBuiltInGPUBuffer = redGPUContext.globalFragmentSSBO_BuiltIn.gpuBuffer;
+
             if (prevInfo) {
                 needResetBindGroup = (
                     prevInfo.ibl !== ibl ||
@@ -299,6 +311,9 @@ class View3D extends AView {
                     prevInfo.ibl_irradianceTexture !== ibl_irradianceTexture ||
                     prevInfo.renderPath1ResultTextureView !== renderPath1ResultTextureView ||
                     prevInfo.shadowDepthTextureView !== shadowDepthTextureView ||
+                    prevInfo.globalSSAOVertexGPUBuffer !== globalSSAOVertexGPUBuffer ||
+                    prevInfo.globalSSAOFragmentGPUBuffer !== globalSSAOFragmentGPUBuffer ||
+                    prevInfo.globalSSAOFragmentBuiltInGPUBuffer !== globalSSAOFragmentBuiltInGPUBuffer ||
                     !this.#clusterLightManager.passClustersLight
                 )
             }
@@ -316,6 +331,9 @@ class View3D extends AView {
                 ibl_irradianceTexture,
                 renderPath1ResultTextureView,
                 shadowDepthTextureView,
+                globalSSAOVertexGPUBuffer,
+                globalSSAOFragmentGPUBuffer,
+                globalSSAOFragmentBuiltInGPUBuffer,
                 vertexUniformBindGroup: this.#systemUniform_Vertex_UniformBindGroup
             }
         }
@@ -396,7 +414,7 @@ class View3D extends AView {
     }
 
     #createVertexUniformBindGroup(key: string, shadowDepthTextureView: GPUTextureView, ibl: IBL, renderPath1ResultTextureView: GPUTextureView) {
-        this.#clusterLightManager.updateClusterLights()
+
         const ibl_prefilterTexture = ibl?.prefilterTexture
         const ibl_irradianceTexture = ibl?.irradianceTexture
         const {redGPUContext} = this
@@ -463,9 +481,34 @@ class View3D extends AView {
                     binding: 16,
                     resource: resourceManager.getGPUResourceCubeTextureView(this.skyAtmosphere?.skyAtmosphereReflectionLUT, this.skyAtmosphere?.skyAtmosphereReflectionLUT?.viewDescriptor || CubeTexture.defaultViewDescriptor)
                 },
+                {
+                    binding: 17,
+                    resource: {
+                        buffer: redGPUContext.globalVertexSSBO.gpuBuffer,
+                        offset: 0,
+                        size: redGPUContext.globalVertexSSBO.gpuBuffer.size
+                    }
+                },
+                {
+                    binding: 18,
+                    resource: {
+                        buffer: redGPUContext.globalFragmentSSBO_PBR.gpuBuffer,
+                        offset: 0,
+                        size: redGPUContext.globalFragmentSSBO_PBR.gpuBuffer.size
+                    }
+                },
+                {
+                    binding: 19,
+                    resource: {
+                        buffer: redGPUContext.globalFragmentSSBO_BuiltIn.gpuBuffer,
+                        offset: 0,
+                        size: redGPUContext.globalFragmentSSBO_BuiltIn.gpuBuffer.size
+                    }
+                },
             ]
         }
         this.#systemUniform_Vertex_UniformBindGroup = gpuDevice.createBindGroup(systemUniform_Vertex_BindGroupDescriptor);
+
         this.#updateIBLResourceStates(resourceManager, ibl_prefilterTexture, ibl_irradianceTexture);
     }
 

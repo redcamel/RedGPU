@@ -78,7 +78,7 @@ function defineNumber_func(
  * **[EN]**
  * - Performs runtime type check via {@link validateNumber} upon setting value.
  * - If `min` and `max` are set, values out of bounds trigger `console.warn` and are clamped to the boundaries.
- * - Automatically updates the GPU uniform buffer on value change.
+ * - Automatically updates the GPU globalStruct buffer on value change.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
  * @param defineInfo - [KO] 단일 {@link DefineNumberInfo} 설정 또는 그 배열 [EN] A single {@link DefineNumberInfo} configuration or an array of configurations

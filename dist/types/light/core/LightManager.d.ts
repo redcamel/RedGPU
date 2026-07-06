@@ -229,37 +229,30 @@ declare class LightManager {
      * @returns
      * [KO] mat4 투영-뷰 행렬
      * [EN] mat4 projection-view matrix
-     * @private
      */
     getDirectionalLightProjectionViewMatrix(view: View3D): mat4;
     /**
      * [KO] 방향성 조명의 투영(orthographic) 행렬을 계산하여 반환합니다.
      * [EN] Calculates and returns the projection (orthographic) matrix of the directional light.
      *
-     * [KO] 카메라 위치와의 거리를 기반으로 ortho 영역( left, right, bottom, top, near, far )을 결정합니다.
-     * [EN] Determines the ortho area (left, right, bottom, top, near, far) based on the distance from the camera position.
      * @param view -
      * [KO] View3D 인스턴스
      * [EN] View3D instance
      * @returns
      * [KO] mat4 투영 행렬
      * [EN] mat4 projection matrix
-     * @private
      */
     getDirectionalLightProjectionMatrix(view: View3D): mat4;
     /**
      * [KO] 메인 방향성 조명의 뷰(lookAt) 행렬을 계산하여 반환합니다.
      * [EN] Calculates and returns the view (lookAt) matrix of the main directional light.
      *
-     * [KO] 씬에서 첫 번째 DirectionalLight의 방향을 사용하여 라이트 위치를 계산하고, 원점(origin)을 바라보도록 합니다.
-     * [EN] Calculates the light position using the direction of the first DirectionalLight in the scene and makes it look at the origin.
      * @param view -
      * [KO] View3D 인스턴스
      * [EN] View3D instance
      * @returns
      * [KO] mat4 뷰 행렬
      * [EN] mat4 view matrix
-     * @private
      */
     getDirectionalLightViewMatrix(view: View3D): mat4;
 }

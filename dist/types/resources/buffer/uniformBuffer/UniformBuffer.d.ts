@@ -2,7 +2,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import AUniformBaseBuffer from "../core/AUniformBaseBuffer";
 /**
  * [KO] Uniform 버퍼를 관리하는 클래스입니다.
- * [EN] Class that manages uniform buffers.
+ * [EN] Class that manages globalStruct buffers.
  *
  * * ### Example
  * ```typescript

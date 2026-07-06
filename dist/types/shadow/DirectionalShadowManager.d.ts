@@ -69,6 +69,42 @@ declare class DirectionalShadowManager {
      */
     set bias(value: number);
     /**
+     * [KO] 그림자의 세기(Strength) 값을 반환합니다.
+     * [EN] Returns the shadow strength value.
+     *
+     * @returns
+     * [KO] 세기 값 (0.0 ~ 1.0)
+     * [EN] Strength value (0.0 to 1.0)
+     */
+    get strength(): number;
+    /**
+     * [KO] 그림자의 세기(Strength) 값을 설정합니다. (0.0 ~ 1.0)
+     * [EN] Sets the shadow strength value. (0.0 to 1.0)
+     *
+     * @param value -
+     * [KO] 세기 값
+     * [EN] Strength value
+     */
+    set strength(value: number);
+    /**
+     * [KO] 그림자 필터 번짐 반경(Filter Scale) 값을 반환합니다.
+     * [EN] Returns the shadow filter scale value.
+     *
+     * @returns
+     * [KO] 필터 스케일 값 (기본값: 4.0)
+     * [EN] Filter scale value (default: 4.0)
+     */
+    get filterScale(): number;
+    /**
+     * [KO] 그림자 필터 번짐 반경(Filter Scale) 값을 설정합니다. (0.0 이상)
+     * [EN] Sets the shadow filter scale value. (0.0 or greater)
+     *
+     * @param value -
+     * [KO] 필터 스케일 값
+     * [EN] Filter scale value
+     */
+    set filterScale(value: number);
+    /**
      * [KO] 섀도우 뎁스 텍스처의 크기(해상도)를 반환합니다.
      * [EN] Returns the size (resolution) of the shadow depth texture.
      *

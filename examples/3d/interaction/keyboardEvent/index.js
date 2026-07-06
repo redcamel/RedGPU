@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1781144235516";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1781144235516";
+import * as RedGPU from "../../../../dist/index.js?t=1783322366074";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1783322366074";
 
 /**
  * [KO] 키보드 인터랙션 예제
@@ -44,9 +44,20 @@ RedGPU.init(
         box.material.color.setColorByHEX('#00CC99');
         scene.addChild(box);
 
-        // 4. 상태 변수 및 키 버퍼 설정
-        const speed = 0.1;
-        let lastTime = 0;
+        // 4. 캐릭터 컨트롤러 설정
+        const characterController = new RedGPU.Charactor.SimpleCharacterController(
+            redGPUContext,
+            box,
+            controller,
+            {
+                speed: 5.0,
+                runSpeed: 10.0,
+                rotationSpeed: 8.0,
+                floorHeight: 0.0,
+                gravity: 9.8,
+                jumpForce: 6.0
+            }
+        );
         const {keyboardKeyBuffer} = redGPUContext;
 
         // 실시간 키 상태 표시를 위한 객체
@@ -63,56 +74,8 @@ RedGPU.init(
 
         // 5. 렌더 루프 함수 정의
         const render = (time) => {
-            const deltaTime = lastTime ? Math.min((time - lastTime) / 16.666, 2) : 1;
-            lastTime = time;
-
-            // 카메라 각도에 따른 이동 방향 벡터 계산
-            const panRad = controller.pan * Math.PI / 180;
-            const forwardX = -Math.sin(panRad);
-            const forwardZ = -Math.cos(panRad);
-            const rightX = Math.cos(panRad);
-            const rightZ = -Math.sin(panRad);
-
-            let moveX = 0;
-            let moveZ = 0;
-
-            // 입력 처리
-            if (keyboardKeyBuffer['w'] || keyboardKeyBuffer['W'] || keyboardKeyBuffer['ArrowUp']) {
-                moveX += forwardX;
-                moveZ += forwardZ;
-            }
-            if (keyboardKeyBuffer['s'] || keyboardKeyBuffer['S'] || keyboardKeyBuffer['ArrowDown']) {
-                moveX -= forwardX;
-                moveZ -= forwardZ;
-            }
-            if (keyboardKeyBuffer['a'] || keyboardKeyBuffer['A'] || keyboardKeyBuffer['ArrowLeft']) {
-                moveX -= rightX;
-                moveZ -= rightZ;
-            }
-            if (keyboardKeyBuffer['d'] || keyboardKeyBuffer['D'] || keyboardKeyBuffer['ArrowRight']) {
-                moveX += rightX;
-                moveZ += rightZ;
-            }
-
-            // 이동 적용 (정규화 및 속도 반영)
-            const moveLen = Math.sqrt(moveX * moveX + moveZ * moveZ);
-            const currentSpeed = speed * deltaTime;
-            if (moveLen > 0) {
-                box.x += (moveX / moveLen) * currentSpeed;
-                box.z += (moveZ / moveLen) * currentSpeed;
-            }
-
-            // 상승/하강 (Space)
-            if (keyboardKeyBuffer[' ']) {
-                box.y += currentSpeed;
-            } else {
-                if (box.y > 0) box.y = Math.max(0, box.y - currentSpeed * 0.5);
-            }
-
-            // 회전 (Q, E)
-            const rotationAmount = 2 * deltaTime;
-            if (keyboardKeyBuffer['q'] || keyboardKeyBuffer['Q']) box.rotationY += rotationAmount;
-            if (keyboardKeyBuffer['e'] || keyboardKeyBuffer['E']) box.rotationY -= rotationAmount;
+            // 캐릭터 컨트롤러 업데이트 (이동, 회전, 중력 및 점프가 통합 연산됨)
+            characterController.update(view, time);
 
             // 카메라 추적
             controller.centerX = box.x;

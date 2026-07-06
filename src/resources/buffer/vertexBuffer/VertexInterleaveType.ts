@@ -35,12 +35,16 @@ class VertexInterleaveType {
         return {numElements: 3, stride: Float32Array.BYTES_PER_ELEMENT * 3, gpuVertexFormat: 'float32x3', offset: 0}
     }
 
-    /**
-     * [KO] float32x4 형식 (요소 4개, 16바이트)
-     * [EN] float32x4 format (4 elements, 16 bytes)
-     */
     static get float32x4(): TypeInterleave {
         return {numElements: 4, stride: Float32Array.BYTES_PER_ELEMENT * 4, gpuVertexFormat: 'float32x4', offset: 0}
+    }
+
+    /**
+     * [KO] uint32x4 형식 (요소 4개, 16바이트)
+     * [EN] uint32x4 format (4 elements, 16 bytes)
+     */
+    static get uint32x4(): TypeInterleave {
+        return {numElements: 4, stride: Uint32Array.BYTES_PER_ELEMENT * 4, gpuVertexFormat: 'uint32x4', offset: 0}
     }
 }
 

@@ -38,7 +38,7 @@ declare class SkyBox extends RedGPUObject {
     modelMatrix: mat4;
     /**
      * [KO] GPU 렌더링 및 유니폼 정보 객체
-     * [EN] GPU rendering and uniform information object
+     * [EN] GPU rendering and globalStruct information object
      */
     gpuRenderInfo: VertexGPURenderInfo;
     /**

@@ -39,7 +39,7 @@ declare class ShaderVariantGenerator {
     setBaseInfo(textures: any[], samplers: any[]): void;
     /**
      * [KO] 특정 유니폼 키에 연결된 텍스처 및 샘플러 정보를 추가합니다.
-     * [EN] Adds texture and sampler information associated with a specific uniform key.
+     * [EN] Adds texture and sampler information associated with a specific globalStruct key.
      * @param uniformName -
      * [KO] 유니폼 이름
      * [EN] Uniform name

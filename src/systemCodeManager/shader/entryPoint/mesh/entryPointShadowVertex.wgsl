@@ -12,6 +12,7 @@
 fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
     var output: OutputShadowData;
 
+    let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
     // 시스템 Uniform 변수 가져오기
     let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
     let u_camera = systemUniforms.camera;
@@ -19,7 +20,7 @@ fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
     let u_cameraPosition = u_camera.cameraPosition;
 
     // Vertex별 Uniform 변수 가져오기
-    let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
+    let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
 
     // 입력 데이터
     let input_position = inputData.position;
@@ -41,7 +42,7 @@ fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
             input_vertexNormal,
             displacementTexture,
             displacementTextureSampler,
-            vertexUniforms.displacementScale,
+            globalVertexData.displacementScale,
             input_uv,
             mipLevel
         );

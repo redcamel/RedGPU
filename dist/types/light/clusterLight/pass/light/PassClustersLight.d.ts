@@ -1,6 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import RedGPUObject from "../../../../base/RedGPUObject";
+import PassClusterLightBound from "../bound/PassClusterLightBound";
 /**
  * [KO] 각 클러스터에 영향을 주는 조명을 식별하는 컴퓨트 패스 클래스입니다.
  * [EN] Compute pass class that identifies lights affecting each cluster.
@@ -25,8 +26,11 @@ declare class PassClustersLight extends RedGPUObject {
      * @param view -
      * [KO] View3D 인스턴스
      * [EN] View3D instance
+     * @param passClusterLightBound -
+     * [KO] PassClusterLightBound 인스턴스
+     * [EN] PassClusterLightBound instance
      */
-    constructor(redGPUContext: RedGPUContext, view: View3D);
+    constructor(redGPUContext: RedGPUContext, view: View3D, passClusterLightBound: PassClusterLightBound);
     /**
      * [KO] 클러스터 조명 버퍼를 반환합니다.
      * [EN] Returns the cluster lights buffer.

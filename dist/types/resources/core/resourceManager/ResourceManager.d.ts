@@ -34,9 +34,13 @@ export type ResourceState = ResourceStateVertexBuffer | ResourceStateIndexBuffer
 declare class ResourceManager extends RedGPUObject {
     #private;
     static PRESET_GPUBindGroupLayout_System: string;
-    static PRESET_VERTEX_GPUBindGroupLayout_Instancing: string;
+    static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_Instancing: string;
+    static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout: string;
     static PRESET_VERTEX_GPUBindGroupLayout: string;
-    static PRESET_VERTEX_GPUBindGroupLayout_SKIN: string;
+    static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN: string;
+    static GLOBAL_VERTEX_STRUCT: any;
+    static GLOBAL_FRAGMENT_STRUCT_PBR: any;
+    static GLOBAL_FRAGMENT_STRUCT_BUILT_IN: any;
     /**
      * [KO] ResourceManager 인스턴스를 생성합니다. (내부 시스템 전용)
      * [EN] Creates a ResourceManager instance. (Internal system only)
@@ -191,11 +195,11 @@ declare class ResourceManager extends RedGPUObject {
     get managedHDRTextureState(): ResourceStatusInfo;
     /**
      * [KO] 유니폼 버퍼 관리 상태를 반환합니다.
-     * [EN] Returns the managed uniform buffer state.
+     * [EN] Returns the managed globalStruct buffer state.
      *
      * @returns
      * [KO] 유니폼 버퍼 관리 상태 정보 객체
-     * [EN] Managed uniform buffer status info object
+     * [EN] Managed globalStruct buffer status info object
      */
     get managedUniformBufferState(): ResourceStatusInfo;
     /**

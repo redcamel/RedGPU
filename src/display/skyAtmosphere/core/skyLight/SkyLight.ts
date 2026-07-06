@@ -30,7 +30,7 @@ class SkyLight extends RedGPUObject {
 
     /**
      * @param redGPUContext - [KO] RedGPU 컨텍스트 [EN] RedGPU Context
-     * @param sharedUniformBuffer - [KO] 공유 유니폼 버퍼 [EN] Shared uniform buffer
+     * @param sharedUniformBuffer - [KO] 공유 유니폼 버퍼 [EN] Shared globalStruct buffer
      * @param sampler - [KO] 대기 산란용 샘플러 [EN] Sampler for atmospheric scattering
      */
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler) {

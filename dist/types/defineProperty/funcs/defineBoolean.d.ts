@@ -3,7 +3,7 @@
  *
  * @remarks
  * [KO] GPU는 불리언(Boolean)을 직접 지원하지 않으므로, 유니폼 버퍼에 기록 시 정수 0 또는 1로 변환됩니다.
- * [EN] Since GPUs do not natively support booleans, they are converted to 0 or 1 integers when written to the uniform buffer.
+ * [EN] Since GPUs do not natively support booleans, they are converted to 0 or 1 integers when written to the globalStruct buffer.
  */
 export interface DefineBooleanInfo {
     /**

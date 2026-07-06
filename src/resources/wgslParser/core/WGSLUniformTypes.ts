@@ -8,7 +8,7 @@ export type TypedArrayConstructor =
     | Float32ArrayConstructor
     | Float64ArrayConstructor;
 
-/** [KO] 유니폼 타입 정보를 담는 타입 [EN] Type representing uniform type information */
+/** [KO] 유니폼 타입 정보를 담는 타입 [EN] Type representing globalStruct type information */
 export type TypeUniform = {
     numElements: number;
     align: number;
@@ -21,7 +21,7 @@ export type TypeUniform = {
 
 /**
  * [KO] WGSL 유니폼 타입을 정의하고 관련 정보를 제공하는 클래스입니다.
- * [EN] Class that defines WGSL uniform types and provides related information.
+ * [EN] Class that defines WGSL globalStruct types and provides related information.
  *
  * [KO] 각 타입별로 요소 개수, 정렬(align), 크기(size), 그리고 대응되는 TypedArray 생성자(View) 정보를 포함합니다.
  * [EN] Includes element count, alignment, size, and corresponding TypedArray constructor (View) for each type.

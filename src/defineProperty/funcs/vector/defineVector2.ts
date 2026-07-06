@@ -31,7 +31,7 @@ function defineVector2_func(propertyInfo: DefineVector2Info) {
  *
  * **[EN]**
  * - Handles a 2-tuple array (`[number, number]`).
- * - Automatically updates the GPU uniform buffer on value change.
+ * - Automatically updates the GPU globalStruct buffer on value change.
  *
  * @param target - [KO] 속성을 정의할 클래스 생성자 [EN] Class constructor to define properties on
  * @param defineInfo - [KO] 단일 {@link DefineVector2Info} 설정 또는 그 배열 [EN] A single {@link DefineVector2Info} configuration or an array of configurations

@@ -122,6 +122,9 @@ class RedGPUExampleHelper {
     }
 
     public destroy() {
+        useExampleHelperStore.getState().setRedGPUContext(null);
+        useExampleHelperStore.getState().setGuiConfig(null);
+        useExampleHelperStore.getState().setRedGPU(null);
         if (this.root) {
             this.root.unmount();
             this.root = null;

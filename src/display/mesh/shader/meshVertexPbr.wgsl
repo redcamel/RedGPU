@@ -2,9 +2,8 @@
 #redgpu_include shadow.getShadowCoord;
 #redgpu_include entryPoint.mesh.entryPointShadowVertex;
 #redgpu_include entryPoint.mesh.entryPointPickingVertex;
-#redgpu_include systemStruct.meshVertexBasicUniform;
+#redgpu_include systemStruct.globalVertexStruct;
 
-@group(1) @binding(0) var<uniform> vertexUniforms: VertexUniforms;
 @group(1) @binding(1) var displacementTextureSampler: sampler;
 @group(1) @binding(2) var displacementTexture: texture_2d<f32>;
 
@@ -13,50 +12,46 @@
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
 
+    let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
+    let su_projection = systemUniforms.projection;
+
     // Input data
-    let input_position = inputData.position;
-    let input_position_vec4 = vec4<f32>(input_position, 1.0);
+    let input_position_vec4 = vec4<f32>(inputData.position, 1.0);
     let input_vertexNormal = inputData.vertexNormal;
 
     // System uniforms
-    let u_projectionMatrix = systemUniforms.projection.projectionMatrix;
-    let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
-    let u_noneJitterProjectionViewMatrix = systemUniforms.projection.noneJitterProjectionViewMatrix;
-    let u_prevNoneJitterProjectionViewMatrix = systemUniforms.projection.prevNoneJitterProjectionViewMatrix;
-    let u_resolution = systemUniforms.resolution;
-    let u_camera = systemUniforms.camera;
-    let u_viewMatrix = u_camera.viewMatrix;
-    let u_cameraPosition = u_camera.cameraPosition;
+    let su_projectionViewMatrix = su_projection.projectionViewMatrix;
+
+    let su_viewMatrix = systemUniforms.camera.viewMatrix;
 
     // Vertex uniforms
-    let u_matrixList = vertexUniforms.matrixList;
-    let u_localMatrix = u_matrixList.localMatrix;
-    let u_modelMatrix = u_matrixList.modelMatrix;
-    let u_normalModelMatrix = u_matrixList.normalModelMatrix;
-    let u_prevModelMatrix = u_matrixList.prevModelMatrix;
-    let u_receiveShadow = vertexUniforms.receiveShadow;
+    let gu_matrixList = globalVertexData.matrixList;
+    let gu_uvTransform = globalVertexData.uvTransform;
 
-    // Light uniforms
-    let u_directionalLightCount = systemUniforms.directionalLightCount;
-    let u_directionalLights = systemUniforms.directionalLights;
-    let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
+    let gu_localMatrix = gu_matrixList.localMatrix;
+    let gu_modelMatrix = gu_matrixList.modelMatrix;
+    let gu_prevModelMatrix = gu_matrixList.prevModelMatrix;
+    let gu_normalModelMatrix = gu_matrixList.normalModelMatrix;
+
+
 
     // Position and normal calculation
     var position: vec4<f32>;
     var normalPosition: vec4<f32>;
 
-    position = u_modelMatrix * input_position_vec4;
-    normalPosition = u_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0);
+    position = gu_modelMatrix * input_position_vec4;
+    normalPosition = gu_normalModelMatrix * vec4<f32>(input_vertexNormal, 0.0);
 
     // Basic output assignments
-    output.position = u_projectionViewMatrix * position;
+    output.position = su_projectionViewMatrix * position;
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalize(normalPosition.xyz);
     output.uv = inputData.uv;
     output.uv1 = inputData.uv1;
     output.vertexColor_0 = inputData.vertexColor_0;
+    output.globalFragmentSlotIndex = globalVertexData.globalFragmentSlotIndex;
 
-    let transformedTangentXYZ = (u_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
+    let transformedTangentXYZ = (gu_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz;
     output.vertexTangent = vec4<f32>( normalize(transformedTangentXYZ), inputData.vertexTangent.w );
 
 
@@ -64,27 +59,26 @@ fn main(inputData: InputData) -> VertexOutput {
     // Shadow calculation
     #redgpu_if receiveShadow
     {
-        output.shadowCoord = getShadowCoord(position.xyz, u_directionalLightProjectionViewMatrix);
-        output.receiveShadow = vertexUniforms.receiveShadow;
+        output.shadowCoord = getShadowCoord(position.xyz, systemUniforms.directionalLightProjectionViewMatrix);
+        output.receiveShadow = globalVertexData.receiveShadow;
     }
     #redgpu_endIf
 
     // Motion vector calculation
     {
-        output.currentClipPos = u_noneJitterProjectionViewMatrix * position;
-        output.prevClipPos = u_prevNoneJitterProjectionViewMatrix * u_prevModelMatrix * input_position_vec4;
-
+        output.currentClipPos = su_projection.noneJitterProjectionViewMatrix * position;
+        output.prevClipPos = su_projection.prevNoneJitterProjectionViewMatrix * gu_prevModelMatrix * input_position_vec4;
     }
 
     // Scale calculations
-    let nodeScaleX = length(u_localMatrix[0].xyz);
-    let nodeScaleY = length(u_localMatrix[1].xyz);
-    let nodeScaleZ = length(u_localMatrix[2].xyz);
+    let nodeScaleX = length(gu_localMatrix[0].xyz);
+    let nodeScaleY = length(gu_localMatrix[1].xyz);
+    let nodeScaleZ = length(gu_localMatrix[2].xyz);
 
 
-    let volumeScaleX = length(u_modelMatrix[0].xyz);
-    let volumeScaleY = length(u_modelMatrix[1].xyz);
-    let volumeScaleZ = length(u_modelMatrix[2].xyz);
+    let volumeScaleX = length(gu_modelMatrix[0].xyz);
+    let volumeScaleY = length(gu_modelMatrix[1].xyz);
+    let volumeScaleZ = length(gu_modelMatrix[2].xyz);
     output.localNodeScale_volumeScale = vec2<f32>(
         pow(nodeScaleX * nodeScaleY * nodeScaleZ, 1.0 / 3.0),
         pow(volumeScaleX * volumeScaleY * volumeScaleZ, 1.0 / 3.0)

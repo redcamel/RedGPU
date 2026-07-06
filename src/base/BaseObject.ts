@@ -12,6 +12,11 @@ import InstanceIdGenerator from "../utils/uuid/InstanceIdGenerator";
  */
 abstract class BaseObject {
     /**
+     * [KO] 클래스별 인스턴스 순번 ID
+     * [EN] Instance sequence ID per class
+     */
+    readonly instanceId: number;
+    /**
      * [KO] 객체의 고유 식별자 (UUID)
      * [EN] Universally Unique Identifier (UUID) of the object
      */
@@ -21,18 +26,13 @@ abstract class BaseObject {
      * [EN] Name of the object
      */
     #name: string = '';
-    /**
-     * [KO] 클래스별 인스턴스 순번 ID
-     * [EN] Instance sequence ID per class
-     */
-    #instanceId: number;
 
     /**
      * [KO] BaseObject 생성자입니다. (추상 클래스로 직접 인스턴스 생성은 불가합니다)
      * [EN] BaseObject constructor. (Abstract class, cannot be instantiated directly)
      */
     protected constructor() {
-
+        this.instanceId = InstanceIdGenerator.getNextId(this.constructor);
     }
 
     /**
@@ -56,8 +56,7 @@ abstract class BaseObject {
      * [EN] Name of the object
      */
     get name(): string {
-        if (!this.#instanceId) this.#instanceId = InstanceIdGenerator.getNextId(this.constructor);
-        return this.#name || `${this.constructor.name} Instance ${this.#instanceId}`;
+        return this.#name || `${this.constructor.name} Instance ${this.instanceId}`;
     }
 
     /**

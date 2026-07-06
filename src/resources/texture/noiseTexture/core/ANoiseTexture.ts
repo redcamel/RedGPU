@@ -135,7 +135,7 @@ abstract class ANoiseTexture extends ManagementResourceBase {
         this.updateUniform('animationY', value);
     }
 
-    /** [KO] 유니폼 정보를 반환합니다. [EN] Returns the uniform information. */
+    /** [KO] 유니폼 정보를 반환합니다. [EN] Returns the globalStruct information. */
     get uniformInfo(): any {
         return this.#uniformInfo;
     }
@@ -157,7 +157,7 @@ abstract class ANoiseTexture extends ManagementResourceBase {
         this.updateUniform('time', value / 1000);
     }
 
-    /** [KO] 개별 유니폼 파라미터를 업데이트합니다. [EN] Updates an individual uniform parameter. */
+    /** [KO] 개별 유니폼 파라미터를 업데이트합니다. [EN] Updates an individual globalStruct parameter. */
     updateUniform(name: string, value: any) {
         if (this.#uniformInfo.members[name]) {
             this.#uniformBuffer.writeOnlyBuffer(this.#uniformInfo.members[name], value);
@@ -166,7 +166,7 @@ abstract class ANoiseTexture extends ManagementResourceBase {
         this.#executeComputePass();
     }
 
-    /** [KO] 여러 유니폼 파라미터를 일괄 업데이트합니다. [EN] Updates multiple uniform parameters at once. */
+    /** [KO] 여러 유니폼 파라미터를 일괄 업데이트합니다. [EN] Updates multiple globalStruct parameters at once. */
     updateUniforms(uniforms: Record<string, any>) {
         Object.entries(uniforms).forEach(([name, value]) => {
             if (this.#uniformInfo.members[name]) {

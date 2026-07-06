@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1781144235516";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1781144235516";
+import * as RedGPU from "../../../../dist/index.js?t=1783322366074";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1783322366074";
 
 /**
  * [KO] Directional Light 그림자 예제
@@ -148,9 +148,21 @@ const renderTestPane = (redGPUContext, scene) => {
             const folder = pane.addFolder({title: 'Directional Shadow', expanded: true});
             folder.addBinding(directionalShadowManager, 'shadowDepthTextureSize', {
                 min: 128,
-                max: 2048,
+                max: 4096,
                 step: 1,
                 label: 'Texture Size'
+            });
+            folder.addBinding(directionalShadowManager, 'strength', {
+                min: 0.0,
+                max: 1.0,
+                step: 0.01,
+                label: 'Shadow Strength'
+            });
+            folder.addBinding(directionalShadowManager, 'filterScale', {
+                min: 0.0,
+                max: 15.0,
+                step: 0.1,
+                label: 'Filter Scale'
             });
         }
     });

@@ -83,6 +83,11 @@ declare class Mesh extends MeshBase {
      */
     constructor(redGPUContext: RedGPUContext, geometry?: Geometry | Primitive, material?: any, name?: string);
     /**
+     * [KO] 글로벌 버퍼 슬롯 인덱스를 반환합니다.
+     * [EN] Returns the global buffer slot index.
+     */
+    get globalVertexSlotIndex(): number;
+    /**
      * [KO] LOD(Level of Detail) 매니저를 반환합니다.
      * [EN] Returns the LOD (Level of Detail) manager.
      * @returns
@@ -162,6 +167,28 @@ declare class Mesh extends MeshBase {
      * [EN] Whether to ignore
      */
     set ignoreFrustumCulling(value: boolean);
+    /**
+     * [KO] 투영 면적 Culling 사용 여부를 반환합니다.
+     * [EN] Returns whether to use screen space size culling.
+     */
+    get useScreenSpaceSizeCulling(): boolean;
+    /**
+     * [KO] 투영 면적 Culling 사용 여부를 설정합니다.
+     * [EN] Sets whether to use screen space size culling.
+     * @param value - [KO] 사용 여부 [EN] Whether to use
+     */
+    set useScreenSpaceSizeCulling(value: boolean);
+    /**
+     * [KO] 투영 면적 Culling의 화면상 크기 비율 임계값을 반환합니다.
+     * [EN] Returns the minimum size ratio threshold for screen space size culling.
+     */
+    get minScreenSpaceSize(): number;
+    /**
+     * [KO] 투영 면적 Culling의 화면상 크기 비율 임계값을 설정합니다.
+     * [EN] Sets the minimum size ratio threshold for screen space size culling.
+     * @param value - [KO] 크기 비율 임계값 [EN] Size ratio threshold
+     */
+    set minScreenSpaceSize(value: number);
     /**
      * [KO] 피킹 ID를 반환합니다.
      * [EN] Returns the picking ID.
@@ -379,6 +406,11 @@ declare class Mesh extends MeshBase {
      * [EN] Returns the combined AABB information including child objects.
      */
     get combinedBoundingAABB(): AABB;
+    /**
+     * [KO] 리소스를 해제합니다.
+     * [EN] Disposes of the resources.
+     */
+    dispose(): void;
     /**
      * [KO] 하위 계층의 모든 객체에 디버거 활성화 여부를 설정합니다.
      * [EN] Sets the debugger visibility for all objects in the hierarchy.

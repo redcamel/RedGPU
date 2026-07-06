@@ -1,16 +1,16 @@
 /**
  * [KO] 시스템 유니폼 데이터를 업데이트합니다.
- * [EN] Updates system uniform data.
+ * [EN] Updates system globalStruct data.
  *
  * @param targetMembers -
  * [KO] 대상 멤버 정보
  * [EN] Target member information
  * @param uniformDataF32 -
  * [KO] Float32 유니폼 데이터
- * [EN] Float32 uniform data
+ * [EN] Float32 globalStruct data
  * @param uniformDataU32 -
  * [KO] Uint32 유니폼 데이터
- * [EN] Uint32 uniform data
+ * [EN] Uint32 globalStruct data
  * @param valueList -
  * [KO] 업데이트할 값 리스트
  * [EN] List of values to update

@@ -35,7 +35,7 @@ declare class Group2D extends Group3D {
     set rotation(value: number);
     /**
      * [KO] 그룹의 2D 스케일을 일괄적으로 설정합니다. Y값을 생략하면 X값과 동일하게 통일되어 적용됩니다.
-     * [EN] Sets the 2D scale of the group. If Y is omitted, it defaults to the value of X (uniform scaling).
+     * [EN] Sets the 2D scale of the group. If Y is omitted, it defaults to the value of X (globalStruct scaling).
      * @param x -
      * [KO] X축 스케일 배율
      * [EN] Scale factor along the X-axis

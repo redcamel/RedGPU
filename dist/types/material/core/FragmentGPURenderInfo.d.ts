@@ -28,7 +28,7 @@ declare class FragmentGPURenderInfo {
     fragmentShaderVariantConditionalBlocks: string[];
     /**
      * [KO] 프래그먼트 유니폼 정보
-     * [EN] Fragment uniform information
+     * [EN] Fragment globalStruct information
      */
     fragmentUniformInfo: any;
     /**
@@ -38,12 +38,12 @@ declare class FragmentGPURenderInfo {
     fragmentBindGroupLayout: GPUBindGroupLayout;
     /**
      * [KO] 프래그먼트 유니폼 버퍼
-     * [EN] Fragment uniform buffer
+     * [EN] Fragment globalStruct buffer
      */
     fragmentUniformBuffer: UniformBuffer;
     /**
      * [KO] 프래그먼트 유니폼 바인드 그룹
-     * [EN] Fragment uniform bind group
+     * [EN] Fragment globalStruct bind group
      */
     fragmentUniformBindGroup: GPUBindGroup;
     /**
@@ -65,16 +65,16 @@ declare class FragmentGPURenderInfo {
      * [EN] List of fragment shader variant conditional blocks
      * @param fragmentUniformInfo -
      * [KO] 프래그먼트 유니폼 정보
-     * [EN] Fragment uniform information
+     * [EN] Fragment globalStruct information
      * @param fragmentBindGroupLayout -
      * [KO] 프래그먼트 바인드 그룹 레이아웃
      * [EN] Fragment bind group layout
      * @param fragmentUniformBuffer -
      * [KO] 프래그먼트 유니폼 버퍼
-     * [EN] Fragment uniform buffer
+     * [EN] Fragment globalStruct buffer
      * @param fragmentUniformBindGroup -
      * [KO] 프래그먼트 유니폼 바인드 그룹
-     * [EN] Fragment uniform bind group
+     * [EN] Fragment globalStruct bind group
      * @param fragmentState -
      * [KO] 프래그먼트 렌더 상태
      * [EN] Fragment render state

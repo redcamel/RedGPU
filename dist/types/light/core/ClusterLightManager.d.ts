@@ -19,15 +19,16 @@ import RedGPUObject from "../../base/RedGPUObject";
 declare class ClusterLightManager extends RedGPUObject {
     #private;
     /**
-     * [KO] ClusterLightManager 생성자
-     * [EN] ClusterLightManager constructor
+     * [KO] ClusterLightManager 인스턴스를 생성합니다.
+     * [EN] Creates a ClusterLightManager instance.
+     *
      * @param view -
-     * [KO] 연결할 View3D 인스턴스
-     * [EN] View3D instance to link
+     * [KO] 이 매니저가 속할 View3D 인스턴스
+     * [EN] The View3D instance this manager belongs to
      */
     constructor(view: View3D);
     /**
-     * [KO] 클러스터 라이트 경계 패스를 반환합니다.
+     * [KO] 클러스터 라이팅 경계 패스를 반환합니다.
      * [EN] Returns the cluster light boundary pass.
      */
     get passClusterLightBound(): PassClusterLightBound;

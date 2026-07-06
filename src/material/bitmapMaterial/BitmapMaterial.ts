@@ -47,7 +47,6 @@ interface BitmapMaterial {
  */
 class BitmapMaterial extends AUVTransformBaseMaterial {
 
-
     /**
      * [KO] BitmapMaterial 생성자
      * [EN] BitmapMaterial constructor
@@ -73,6 +72,7 @@ class BitmapMaterial extends AUVTransformBaseMaterial {
         this.diffuseTextureSampler = new Sampler(this.redGPUContext)
         this.initGPURenderInfos()
     }
+
 }
 
 defineSampler(BitmapMaterial, [
@@ -81,6 +81,9 @@ defineSampler(BitmapMaterial, [
 defineTexture(BitmapMaterial, [
     {key: 'diffuseTexture'}
 ])
-
+Object.defineProperty(BitmapMaterial.prototype, 'isBuiltInMaterial', {
+    value: true,
+    writable: false
+});
 Object.freeze(BitmapMaterial)
 export default BitmapMaterial

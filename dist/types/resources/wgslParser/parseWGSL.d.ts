@@ -22,6 +22,7 @@
 declare const parseWGSL: (sourceName: string, code: string, injectLibrary?: Record<string, string>) => {
     uniforms: any;
     storage: any;
+    structs: any;
     samplers: any;
     textures: any;
     vertexEntries: string[];

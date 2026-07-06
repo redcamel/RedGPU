@@ -329,6 +329,8 @@ class FreeController extends AController {
         const forward = vec3.fromValues(0, 0, -10);
         vec3.transformMat4(forward, forward, this.#tMTX0);
         this.camera.lookAt(forward[0], forward[1], forward[2]);
+        this.camera.rotationX = targetMesh.rotationX;
+        this.camera.rotationY = targetMesh.rotationY;
     }
 
     #checkKeyboardKeyBuffer(view: View3D, deltaTime: number): boolean {

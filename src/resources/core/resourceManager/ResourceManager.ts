@@ -21,6 +21,13 @@ import ResourceStateBitmapTexture from "./resourceState/texture/ResourceStateBit
 import ResourceStateCubeTexture from "./resourceState/texture/ResourceStateCubeTexture";
 import ResourceStateHDRTexture from "./resourceState/texture/ResourceStateHDRTexture";
 import RedGPUObject from "../../../base/RedGPUObject";
+import parseWGSL from "../../wgslParser/parseWGSL";
+import ShaderLibrary from "../../../systemCodeManager/ShaderLibrary";
+
+const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
+const GLOBAL_VERTEX_STRUCT = SHADER_INFO.storage.globalVertexSSBO.type.format;
+const GLOBAL_FRAGMENT_STRUCT_PBR = SHADER_INFO.storage.globalFragmentSSBO_PBR.type.format;
+const GLOBAL_FRAGMENT_STRUCT_BUILT_IN = SHADER_INFO.storage.globalFragmentSSBO_BuiltIn.type.format;
 
 enum ResourceType {
     GPUShaderModule = 'GPUShaderModule',
@@ -65,9 +72,13 @@ export type ResourceState = ResourceStateVertexBuffer
  */
 class ResourceManager extends RedGPUObject {
     static PRESET_GPUBindGroupLayout_System = 'PRESET_GPUBindGroupLayout_System'
-    static PRESET_VERTEX_GPUBindGroupLayout_Instancing = 'PRESET_VERTEX_GPUBindGroupLayout_Instancing'
+    static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_Instancing = 'PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_Instancing'
+    static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout = 'PRESET_GLOBAL_VERTEX_GPUBindGroupLayout'
     static PRESET_VERTEX_GPUBindGroupLayout = 'PRESET_VERTEX_GPUBindGroupLayout'
-    static PRESET_VERTEX_GPUBindGroupLayout_SKIN = 'PRESET_VERTEX_GPUBindGroupLayout_SKIN'
+    static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN = 'PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN'
+    static GLOBAL_VERTEX_STRUCT = GLOBAL_VERTEX_STRUCT
+    static GLOBAL_FRAGMENT_STRUCT_PBR = GLOBAL_FRAGMENT_STRUCT_PBR
+    static GLOBAL_FRAGMENT_STRUCT_BUILT_IN = GLOBAL_FRAGMENT_STRUCT_BUILT_IN
 
     #resources = new ImmutableKeyMap([
         [ResourceType.GPUShaderModule, new Map()],
@@ -312,11 +323,11 @@ class ResourceManager extends RedGPUObject {
 
     /**
      * [KO] 유니폼 버퍼 관리 상태를 반환합니다.
-     * [EN] Returns the managed uniform buffer state.
+     * [EN] Returns the managed globalStruct buffer state.
      *
      * @returns
      * [KO] 유니폼 버퍼 관리 상태 정보 객체
-     * [EN] Managed uniform buffer status info object
+     * [EN] Managed globalStruct buffer status info object
      */
     get managedUniformBufferState(): ResourceStatusInfo {
         return this.#managedUniformBufferState;
@@ -776,6 +787,31 @@ class ResourceManager extends RedGPUObject {
                         {binding: 14, visibility: GPUShaderStage.FRAGMENT, texture: {}},
                         {binding: 15, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
                         {binding: 16, visibility: GPUShaderStage.FRAGMENT, texture: {viewDimension: "cube"}},
+                        {
+                            binding: 17,
+                            visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
+                            buffer: {type: 'read-only-storage'}
+                        },
+                        {
+                            binding: 18,
+                            visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
+                            buffer: {type: 'read-only-storage'}
+                        },
+                        {
+                            binding: 19,
+                            visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE,
+                            buffer: {type: 'read-only-storage'}
+                        },
+                    ],
+                }
+            )
+            this.createBindGroupLayout(
+                ResourceManager.PRESET_GLOBAL_VERTEX_GPUBindGroupLayout,
+                {
+                    entries: [
+
+                        {binding: 1, visibility: GPUShaderStage.VERTEX, sampler: {type: 'filtering'}},
+                        {binding: 2, visibility: GPUShaderStage.VERTEX, texture: {}}
                     ],
                 }
             )
@@ -790,10 +826,9 @@ class ResourceManager extends RedGPUObject {
                 }
             )
             this.createBindGroupLayout(
-                ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_SKIN,
+                ResourceManager.PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN,
                 {
                     entries: [
-                        {binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {type: 'uniform'}},
                         {binding: 1, visibility: GPUShaderStage.VERTEX, sampler: {type: 'filtering'}},
                         {binding: 2, visibility: GPUShaderStage.VERTEX, texture: {}},
                         {binding: 3, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
@@ -802,7 +837,7 @@ class ResourceManager extends RedGPUObject {
                 }
             )
             this.createBindGroupLayout(
-                ResourceManager.PRESET_VERTEX_GPUBindGroupLayout_Instancing,
+                ResourceManager.PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_Instancing,
                 {
                     entries: [
                         {binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},

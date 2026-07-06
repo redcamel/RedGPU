@@ -1,11 +1,6 @@
 import { GLTF } from "../../GLTF";
 import GLTFLoader from "../../GLTFLoader";
-export interface GLTFParsedSingleClip {
-    minTime: number;
-    maxTime: number;
-    name: string;
-    [key: string]: any;
-}
+export { GLTFParsedSingleClip } from "./GLTFParsedSingleClip";
 /**
  * Parses animation data for a given GLTF scene.
  *

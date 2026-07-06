@@ -15,31 +15,6 @@
 
 const maxDistance: f32 = 1000.0;
 
-struct Uniforms {
-    color: vec3<f32>,
-    //
-    emissiveColor: vec3<f32>,
-    emissiveStrength:f32,
-    //
-    specularColor:vec3<f32>,
-    specularStrength:f32,
-    shininess: f32,
-    //
-    aoStrength:f32,
-    //
-    normalScale:f32,
-    displacementScale:f32,
-    //
-    opacity: f32,
-    useTint:u32,
-    tint:vec4<f32>,
-    tintBlendMode:u32,
-    //
-    useSSR:u32,
-    metallic:f32,
-    roughness:f32,
-    //
-};
 
 struct InputData {
     // Built-in attributes
@@ -54,6 +29,7 @@ struct InputData {
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
+    @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
 
     @location(11) combinedOpacity: f32,
     //
@@ -63,7 +39,6 @@ struct InputData {
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 }
 
-@group(2) @binding(0) var<uniform> uniforms: Uniforms;
 @group(2) @binding(1) var diffuseTextureSampler: sampler;
 @group(2) @binding(2) var diffuseTexture: texture_2d<f32>;
 @group(2) @binding(3) var alphaTextureSampler: sampler;
@@ -152,6 +127,7 @@ fn getSpecularBRDF(
 @fragment
 fn main(inputData:InputData) -> OutputFragment {
     var output: OutputFragment;
+    let globalFragmentData = globalFragmentSSBO_BuiltIn[inputData.globalFragmentSlotIndex];
 
     // [KO] 입력 데이터 추출 [EN] Extract input data
     let input_vertexNormal = inputData.vertexNormal.xyz;
@@ -171,15 +147,15 @@ fn main(inputData:InputData) -> OutputFragment {
     let u_cameraPosition = u_camera.cameraPosition;
 
     // Uniforms
-    let u_color = uniforms.color;
-    let u_aoStrength = uniforms.aoStrength;
-    let u_emissiveColor = uniforms.emissiveColor;
-    let u_emissiveStrength = uniforms.emissiveStrength;
-    let u_normalScale = uniforms.normalScale;
-    let u_specularColor = uniforms.specularColor;
-    let u_specularStrength = uniforms.specularStrength;
-    let u_shininess = uniforms.shininess;
-    let u_opacity = uniforms.opacity;
+    let u_color = globalFragmentData.color;
+    let u_aoStrength = globalFragmentData.aoStrength;
+    let u_emissiveColor = globalFragmentData.emissiveColor;
+    let u_emissiveStrength = globalFragmentData.emissiveStrength;
+    let u_normalScale = globalFragmentData.normalScale;
+    let u_specularColor = globalFragmentData.specularColor;
+    let u_specularStrength = globalFragmentData.specularStrength;
+    let u_shininess = globalFragmentData.shininess;
+    let u_opacity = globalFragmentData.opacity;
     let V = getViewDirection(input_vertexPosition, u_cameraPosition);
 
     // Shadow
@@ -197,7 +173,7 @@ fn main(inputData:InputData) -> OutputFragment {
             let tangentDisplacedNormal = getDisplacementNormal(
                 displacementTexture,
                 displacementTextureSampler,
-                uniforms.displacementScale,
+                globalFragmentData.displacementScale,
                 inputData.uv,
                 targetMipLevel
             );
@@ -233,11 +209,11 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_endIf
 
     // [KO] PBR 파라미터 매핑 [EN] Mapping PBR parameters
-    let metallicParameter = uniforms.metallic;
+    let metallicParameter = globalFragmentData.metallic;
     
     // [KO] shininess로부터 roughness 유도 (또는 직접 설정값 사용)
     // [EN] Derive roughness from shininess (or use explicitly set value)
-    var roughnessParameter = select(sqrt(2.0 / (u_shininess + 2.0)), uniforms.roughness, uniforms.roughness > 0.0);
+    var roughnessParameter = select(sqrt(2.0 / (u_shininess + 2.0)), globalFragmentData.roughness, globalFragmentData.roughness > 0.0);
     roughnessParameter = clamp(roughnessParameter, 0.045, 1.0);
 
     var specularSamplerValue:f32 = 1.0;
@@ -258,9 +234,14 @@ fn main(inputData:InputData) -> OutputFragment {
         directionalShadowMapSampler,
         u_directionalShadowDepthTextureSize,
         u_directionalShadowBias,
+        systemUniforms.shadow.directionalShadowFilterScale,
         inputData.shadowCoord
     );
-    if(!receiveShadowYn){ visibility = 1.0; }
+    if(!receiveShadowYn){ 
+        visibility = 1.0; 
+    } else {
+        visibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, visibility);
+    }
 
     var totalDirectLighting = vec3<f32>(0.0);
 
@@ -331,7 +312,7 @@ fn main(inputData:InputData) -> OutputFragment {
     let finalColor = vec4<f32>((mixColor * systemUniforms.preExposure) + emissiveColor, resultAlpha);
     
     #redgpu_if useTint
-        output.color = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
+        output.color = getTintBlendMode(finalColor, globalFragmentData.tintBlendMode, globalFragmentData.tint);
     #redgpu_else
         output.color = finalColor;
     #redgpu_endIf

@@ -106,6 +106,23 @@ declare class RenderViewStateData {
      */
     frameIndex: number;
     /**
+     * [KO] 인터리빙(분산) 콸링 처리를 위한 카메라 및 뷰포트 상태 추적 정보 객체입니다.
+     * [EN] Object tracking camera and viewport state for interleaved (distributed) culling processing.
+     */
+    interleavedCullingInfo: {
+        prevCameraX: number;
+        prevCameraY: number;
+        prevCameraZ: number;
+        prevCameraRotX: number;
+        prevCameraRotY: number;
+        prevCameraRotZ: number;
+        forceCullingCheck: boolean;
+        interleavedCullingCheckFrameIndex: number;
+        projectionScale: number;
+        prevViewportWidth: number;
+        prevViewportHeight: number;
+    };
+    /**
      * [KO] 현재 프레임의 절대 시간 (초)
      * [EN] Absolute time of the current frame (seconds)
      */

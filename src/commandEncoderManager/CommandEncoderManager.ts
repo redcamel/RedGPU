@@ -595,6 +595,10 @@ class CommandEncoderManager extends RedGPUObject {
     /**
      * [KO] 등록된 모든 지연 파괴 리소스를 파괴합니다.
      * [EN] Destroys all registered deferred destroy resources.
+     *
+     * @returns
+     * [KO] 이번 호출에서 파괴된 리소스의 개수
+     * [EN] Number of resources destroyed in this call
      */
     #processDeferredDestroys(): number {
         const len = this.#deferredDestroyList.length;
