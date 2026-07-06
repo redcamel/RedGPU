@@ -46,7 +46,7 @@
     "typescript": "^5.8.3",
     "vitepress": "^1.6.4",
     "vitepress-plugin-mermaid": "^2.0.17",
-    "vitepress-sidebar": "^1.7.5"
+    "vitepress-sidebar": "^1.36.1"
   },
   "dependencies": {
     "wgsl_reflect": "^1.4.0"
