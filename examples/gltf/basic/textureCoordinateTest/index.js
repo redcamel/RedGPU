@@ -1,5 +1,5 @@
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1783323704031";
-import * as RedGPU from "../../../../dist/index.js?t=1783323704031";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1783324689986";
+import * as RedGPU from "../../../../dist/index.js?t=1783324689986";
 /**
  * [KO] Texture Coordinate Test 예제
  * [EN] Texture Coordinate Test example

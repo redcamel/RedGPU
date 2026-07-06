@@ -873,45 +873,73 @@ export declare namespace ShadowLibrary {
      * // @param shadowCoord [KO] [0, 1] 범위로 변환된 그림자 좌표 (shadow.getShadowCoord 결과값) [EN] Shadow coordinates transformed to [0, 1] range (result of shadow.getShadowCoord)
      * // @returns [KO] 가시성 계수 (0.0 ~ 1.0) [EN] Visibility factor (0.0 ~ 1.0)
      *
+     * // 의사 난수(Pseudo-random) 회전 각도를 얻는 헬퍼 함수
      *
      * ```wgsl
+     * fn getShadowRandomAngle(co: vec2<f32>) -> f32 {
+     *     return fract(sin(dot(co, vec2<f32>(12.9898, 78.233))) * 43758.5453) * 6.28318530718;
+     * }
+     *
      * fn getDirectionalShadowVisibility(
      *    directionalShadowMap: texture_depth_2d,
      *    directionalShadowMapSampler: sampler_comparison,
      *    shadowDepthTextureSize: u32,
      *    bias: f32,
+     *    filterScale: f32,
      *    shadowCoord: vec3<f32>
      * ) -> f32 {
      *     let oneOverShadowDepthTextureSize = 1.0 / f32(shadowDepthTextureSize);
      *     let shadowDepth = clamp(shadowCoord.z, 0.0, 1.0);
      *
+     *     // 12-Sample Poisson Disk 패턴 선언
+     *     var poissonDisk = array<vec2<f32>, 12>(
+     *         vec2<f32>(-0.171104, -0.635832),
+     *         vec2<f32>(-0.580224, -0.171168),
+     *         vec2<f32>(-0.03816, -0.07152),
+     *         vec2<f32>(0.569424, -0.121344),
+     *         vec2<f32>(0.134016, 0.638592),
+     *         vec2<f32>(-0.320496, 0.490896),
+     *         vec2<f32>(-0.814272, 0.428544),
+     *         vec2<f32>(-0.18048, -0.960288),
+     *         vec2<f32>(0.395376, -0.612144),
+     *         vec2<f32>(0.741024, 0.421296),
+     *         vec2<f32>(0.320112, 0.175152),
+     *         vec2<f32>(-0.596064, -0.73032)
+     *     );
+     *
      *     var visibility: f32 = 0.0;
      *
-     *     // 3x3 PCF 필터링 적용 (Apply 3x3 PCF filtering)
-     *     for (var y = -1; y <= 1; y++) {
-     *         for (var x = -1; x <= 1; x++) {
-     *             let offset = vec2f(vec2(x, y)) * oneOverShadowDepthTextureSize;
-     *             let tUV = shadowCoord.xy + offset;
+     *     // 픽셀 스크린 공간 좌표 기반으로 무작위 회전 각도 계산
+     *     let randomAngle = getShadowRandomAngle(shadowCoord.xy * 1000.0);
+     *     let cosAngle = cos(randomAngle);
+     *     let sinAngle = sin(randomAngle);
+     *     let rotationMatrix = mat2x2<f32>(cosAngle, -sinAngle, sinAngle, cosAngle);
      *
-     *             let sampleVisibility = textureSampleCompare(
-     *                 directionalShadowMap,
-     *                 directionalShadowMapSampler,
-     *                 tUV,
-     *                 shadowDepth - bias
-     *             );
+     *     // Poisson Disk 샘플링 루프 순회
+     *     for (var i = 0; i < 12; i++) {
+     *         // 포아송 오프셋을 랜덤 각도로 회전
+     *         let rotatedOffset = rotationMatrix * poissonDisk[i];
+     *         let offset = rotatedOffset * oneOverShadowDepthTextureSize * filterScale;
+     *         let tUV = shadowCoord.xy + offset;
      *
-     *             // 텍스처 범위를 벗어난 경우 그림자가 없는 것으로 처리 (Visibility 1.0)
-     *             if (tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0) {
-     *                 visibility += 1.0;
-     *             } else {
-     *                 visibility += sampleVisibility;
-     *             }
-     *         }
+     *         // textureSampleCompare는 Uniform Control Flow 규격을 유지하기 위해 분기문 밖에서 실행
+     *         let sampleVisibility = textureSampleCompare(
+     *             directionalShadowMap,
+     *             directionalShadowMapSampler,
+     *             tUV,
+     *             shadowDepth - bias
+     *         );
+     *
+     *         // 범위 밖의 영역은 그림자 가시성을 1.0으로 고정 (select 함수 사용)
+     *         let outOfBounds = tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0;
+     *         visibility += select(sampleVisibility, 1.0, outOfBounds);
      *     }
      *
-     *     visibility /= 9.0;
+     *     visibility /= 12.0;
      *
-     *     return visibility;
+     *     // 라이트 프러스트럼 범위 밖(Near/Far plane 너머)인 경우 가시성 1.0 반환
+     *     let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
+     *     return select(visibility, 1.0, invalidDepth);
      * }
      * ```
      */
@@ -1904,7 +1932,7 @@ export declare namespace SkyAtmosphereLibrary {
      * #redgpu_include skyAtmosphere.skyAtmosphereFn
      *
      * @group(0) @binding(0) var transmittanceLUT: texture_storage_2d<rgba16float, write>;
-     * @group(0) @binding(1) var<globalStruct> params: SkyAtmosphere;
+     * @group(0) @binding(1) var<uniform> params: SkyAtmosphere;
      *
      * @compute @workgroup_size(16, 16)
      * fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
@@ -2014,6 +2042,7 @@ export declare namespace EntryPointLibrary {
          * fn entryPointShadowVertex(inputData: InputData) -> OutputShadowData {
          *     var output: OutputShadowData;
          *
+         *     let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
          *     // 시스템 Uniform 변수 가져오기
          *     let u_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
          *     let u_camera = systemUniforms.camera;
@@ -2021,7 +2050,7 @@ export declare namespace EntryPointLibrary {
          *     let u_cameraPosition = u_camera.cameraPosition;
          *
          *     // Vertex별 Uniform 변수 가져오기
-         *     let u_modelMatrix = vertexUniforms.matrixList.modelMatrix;
+         *     let u_modelMatrix = globalVertexData.matrixList.modelMatrix;
          *
          *     // 입력 데이터
          *     let input_position = inputData.position;
@@ -2043,7 +2072,7 @@ export declare namespace EntryPointLibrary {
          *             input_vertexNormal,
          *             displacementTexture,
          *             displacementTextureSampler,
-         *             vertexUniforms.displacementScale,
+         *             globalVertexData.displacementScale,
          *             input_uv,
          *             mipLevel
          *         );
@@ -2281,7 +2310,8 @@ export declare namespace SystemStructLibrary {
      * struct Shadow {
      *     directionalShadowDepthTextureSize: u32,
      *     directionalShadowBias: f32,
-     *     padding: vec2<f32> // [KO] 16바이트 정렬을 위한 패딩 [EN] Padding for 16-byte alignment
+     *     directionalShadowStrength: f32,
+     *     directionalShadowFilterScale: f32
      * };
      * ```
      */
@@ -2340,16 +2370,211 @@ export declare namespace SystemStructLibrary {
      *     useDisplacementTexture: u32,
      *     displacementScale: f32,
      *     disableJitter: u32,
+     *     globalFragmentSlotIndex:u32,
      *     uvTransform: vec4<f32>,
      * };
      * ```
      */
     const globalVertexStruct: string;
     /**
-     * [KO] PBR 재질 유니폼 구조체 정의입니다.
-     * [EN] Definition of the PBR Material Uniforms structure.
+     * ```wgsl
+     * struct GlobalFragmentStructPBR {
+     *     useVertexColor: u32,
+     *     useCutOff: u32,
+     *     cutOff: f32,
+     *     alphaBlend: u32,
+     *     doubleSided: u32,
+     *     useVertexTangent: u32,
+     *     opacity: f32,
+     *     useTint: u32,
+     *     tint: vec4<f32>,
+     *     tintBlendMode: u32,
+     *     baseColorFactor: vec4<f32>,
+     *     emissiveFactor: vec3<f32>,
+     *     emissiveStrength: f32,
+     *     occlusionStrength: f32,
+     *     metallicFactor: f32,
+     *     roughnessFactor: f32,
+     *     normalScale: f32,
+     *     useKHR_materials_unlit: u32,
+     *     KHR_materials_ior: f32,
+     *     useKHR_materials_transmission: u32,
+     *     KHR_transmissionFactor: f32,
+     *     useKHR_materials_diffuse_transmission: u32,
+     *     KHR_diffuseTransmissionFactor: f32,
+     *     KHR_diffuseTransmissionColorFactor: vec3<f32>,
+     *     KHR_dispersion: f32,
+     *     useKHR_materials_volume: u32,
+     *     KHR_thicknessFactor: f32,
+     *     KHR_attenuationDistance: f32,
+     *     KHR_attenuationColor: vec3<f32>,
+     *     useKHR_materials_specular: u32,
+     *     KHR_specularFactor: f32,
+     *     KHR_specularColorFactor: vec3<f32>,
+     *     useKHR_materials_anisotropy: u32,
+     *     KHR_anisotropyStrength: f32,
+     *     KHR_anisotropyRotation: f32,
+     *     useKHR_materials_iridescence: u32,
+     *     KHR_iridescenceFactor: f32,
+     *     KHR_iridescenceIor: f32,
+     *     KHR_iridescenceThicknessMinimum: f32,
+     *     KHR_iridescenceThicknessMaximum: f32,
+     *     useKHR_materials_sheen: u32,
+     *     KHR_sheenColorFactor: vec3<f32>,
+     *     KHR_sheenRoughnessFactor: f32,
+     *     useKHR_materials_clearcoat: u32,
+     *     KHR_clearcoatFactor: f32,
+     *     KHR_clearcoatRoughnessFactor: f32,
+     *     KHR_clearcoatNormalScale: f32,
+     * //    #redgpu_include KHR_texture_transform
+     *     useBaseColorTexture: u32,
+     *     baseColorTexture_texCoord_index: u32,
+     *     use_baseColorTexture_KHR_texture_transform: u32,
+     *     baseColorTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     baseColorTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     baseColorTexture_KHR_texture_transform_rotation: f32,
+     *     useNormalTexture: u32,
+     *     normalTexture_texCoord_index: u32,
+     *     use_normalTexture_KHR_texture_transform: u32,
+     *     normalTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     normalTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     normalTexture_KHR_texture_transform_rotation: f32,
+     *     useMetallicRoughnessTexture: u32,
+     *     metallicRoughnessTexture_texCoord_index: u32,
+     *     use_metallicRoughnessTexture_KHR_texture_transform: u32,
+     *     metallicRoughnessTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     metallicRoughnessTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     metallicRoughnessTexture_KHR_texture_transform_rotation: f32,
+     *     useEmissiveTexture: u32,
+     *     emissiveTexture_texCoord_index: u32,
+     *     use_emissiveTexture_KHR_texture_transform: u32,
+     *     emissiveTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     emissiveTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     emissiveTexture_KHR_texture_transform_rotation: f32,
+     *     useOcclusionTexture: u32,
+     *     occlusionTexture_texCoord_index: u32,
+     *     use_occlusionTexture_KHR_texture_transform: u32,
+     *     occlusionTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     occlusionTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     occlusionTexture_KHR_texture_transform_rotation: f32,
+     *     useKHR_clearcoatTexture: u32,
+     *     KHR_clearcoatTexture_texCoord_index: u32,
+     *     use_KHR_clearcoatTexture_KHR_texture_transform: u32,
+     *     KHR_clearcoatTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     KHR_clearcoatTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     KHR_clearcoatTexture_KHR_texture_transform_rotation: f32,
+     *     useKHR_clearcoatNormalTexture: u32,
+     *     KHR_clearcoatNormalTexture_texCoord_index: u32,
+     *     use_KHR_clearcoatNormalTexture_KHR_texture_transform: u32,
+     *     KHR_clearcoatNormalTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     KHR_clearcoatNormalTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     KHR_clearcoatNormalTexture_KHR_texture_transform_rotation: f32,
+     *     useKHR_clearcoatRoughnessTexture: u32,
+     *     KHR_clearcoatRoughnessTexture_texCoord_index: u32,
+     *     use_KHR_clearcoatRoughnessTexture_KHR_texture_transform: u32,
+     *     KHR_clearcoatRoughnessTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     KHR_clearcoatRoughnessTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     KHR_clearcoatRoughnessTexture_KHR_texture_transform_rotation: f32,
+     *     useKHR_sheenColorTexture: u32,
+     *     KHR_sheenColorTexture_texCoord_index: u32,
+     *     use_KHR_sheenColorTexture_KHR_texture_transform: u32,
+     *     KHR_sheenColorTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     KHR_sheenColorTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     KHR_sheenColorTexture_KHR_texture_transform_rotation: f32,
+     *     useKHR_sheenRoughnessTexture: u32,
+     *     KHR_sheenRoughnessTexture_texCoord_index: u32,
+     *     use_KHR_sheenRoughnessTexture_KHR_texture_transform: u32,
+     *     KHR_sheenRoughnessTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     KHR_sheenRoughnessTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     KHR_sheenRoughnessTexture_KHR_texture_transform_rotation: f32,
+     *     useKHR_specularTexture: u32,
+     *     KHR_specularTexture_texCoord_index: u32,
+     *     use_KHR_specularTexture_KHR_texture_transform: u32,
+     *     KHR_specularTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     KHR_specularTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     KHR_specularTexture_KHR_texture_transform_rotation: f32,
+     *     useKHR_specularColorTexture: u32,
+     *     KHR_specularColorTexture_texCoord_index: u32,
+     *     use_KHR_specularColorTexture_KHR_texture_transform: u32,
+     *     KHR_specularColorTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     KHR_specularColorTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     KHR_specularColorTexture_KHR_texture_transform_rotation: f32,
+     *     useKHR_transmissionTexture: u32,
+     *     KHR_transmissionTexture_texCoord_index: u32,
+     *     use_KHR_transmissionTexture_KHR_texture_transform: u32,
+     *     KHR_transmissionTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     KHR_transmissionTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     KHR_transmissionTexture_KHR_texture_transform_rotation: f32,
+     *     useKHR_thicknessTexture: u32,
+     *     KHR_thicknessTexture_texCoord_index: u32,
+     *     use_KHR_thicknessTexture_KHR_texture_transform: u32,
+     *     KHR_thicknessTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     KHR_thicknessTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     KHR_thicknessTexture_KHR_texture_transform_rotation: f32,
+     *     useKHR_diffuseTransmissionTexture: u32,
+     *     KHR_diffuseTransmissionTexture_texCoord_index: u32,
+     *     use_KHR_diffuseTransmissionTexture_KHR_texture_transform: u32,
+     *     KHR_diffuseTransmissionTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     KHR_diffuseTransmissionTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     KHR_diffuseTransmissionTexture_KHR_texture_transform_rotation: f32,
+     *     useKHR_diffuseTransmissionColorTexture: u32,
+     *     KHR_diffuseTransmissionColorTexture_texCoord_index: u32,
+     *     use_KHR_diffuseTransmissionColorTexture_KHR_texture_transform: u32,
+     *     KHR_diffuseTransmissionColorTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     KHR_diffuseTransmissionColorTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     KHR_diffuseTransmissionColorTexture_KHR_texture_transform_rotation: f32,
+     *     useKHR_anisotropyTexture: u32,
+     *     KHR_anisotropyTexture_texCoord_index: u32,
+     *     use_KHR_anisotropyTexture_KHR_texture_transform: u32,
+     *     KHR_anisotropyTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     KHR_anisotropyTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     KHR_anisotropyTexture_KHR_texture_transform_rotation: f32,
+     *     useKHR_iridescenceTexture: u32,
+     *     KHR_iridescenceTexture_texCoord_index: u32,
+     *     use_KHR_iridescenceTexture_KHR_texture_transform: u32,
+     *     KHR_iridescenceTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     KHR_iridescenceTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     KHR_iridescenceTexture_KHR_texture_transform_rotation: f32,
+     *     useKHR_iridescenceThicknessTexture: u32,
+     *     KHR_iridescenceThicknessTexture_texCoord_index: u32,
+     *     use_KHR_iridescenceThicknessTexture_KHR_texture_transform: u32,
+     *     KHR_iridescenceThicknessTexture_KHR_texture_transform_offset: vec2<f32>,
+     *     KHR_iridescenceThicknessTexture_KHR_texture_transform_scale: vec2<f32>,
+     *     KHR_iridescenceThicknessTexture_KHR_texture_transform_rotation: f32,
+     * };
+     * ```
      */
     const globalFragmentStructPBR: string;
+    /**
+     * ```wgsl
+     * struct GlobalFragmentStructBuiltIn {
+     *     // basic
+     *     opacity: f32,
+     *     useTint:u32,
+     *     tintBlendMode:u32,
+     *     tint:vec4<f32>,
+     *     // color
+     *     color: vec3<f32>,
+     *     // phong
+     *     emissiveColor: vec3<f32>,
+     *     emissiveStrength:f32,
+     *     //
+     *     specularColor:vec3<f32>,
+     *     specularStrength:f32,
+     *     shininess: f32,
+     *     //
+     *     aoStrength:f32,
+     *     //
+     *     normalScale:f32,
+     *     displacementScale:f32,
+     *     //
+     *     useSSR:u32,
+     *     metallic:f32,
+     *     roughness:f32,
+     *     //
+     * };
+     * ```
+     */
     const globalFragmentStructBuiltIn: string;
 }
 export declare namespace DisplacementLibrary {
@@ -2532,7 +2757,7 @@ export declare namespace ShaderLibrary {
      *
      * };
      *
-     * @group(0) @binding(0) var<globalStruct> systemUniforms: SystemUniform;
+     * @group(0) @binding(0) var<uniform> systemUniforms: SystemUniform;
      * @group(0) @binding(1) var directionalShadowMapSampler: sampler_comparison;
      * @group(0) @binding(2) var directionalShadowMap: texture_depth_2d;
      * @group(0) @binding(3) var prefilterTextureSampler: sampler;
@@ -2552,6 +2777,12 @@ export declare namespace ShaderLibrary {
      *
      * #redgpu_include systemStruct.globalVertexStruct;
      * @group(0) @binding(17) var<storage> globalVertexSSBO : array<GlobalVertexStruct>;
+     *
+     * #redgpu_include systemStruct.globalFragmentStructPBR;
+     * @group(0) @binding(18) var<storage> globalFragmentSSBO_PBR : array<GlobalFragmentStructPBR>;
+     *
+     * #redgpu_include systemStruct.globalFragmentStructBuiltIn;
+     * @group(0) @binding(19) var<storage> globalFragmentSSBO_BuiltIn : array<GlobalFragmentStructBuiltIn>;
      *
      * #redgpu_include depth.getLinearizeDepth
      *
@@ -2642,7 +2873,7 @@ export declare namespace ShaderLibrary {
     const SYSTEM_UNIFORM: string;
     /**
      * // [KO] 포스트 이펙트 시스템 유니폼 구조체입니다.
-     * // [EN] Post effect system globalStruct structure.
+     * // [EN] Post effect system uniform structure.
      *
      *
      * ```wgsl
@@ -2661,7 +2892,7 @@ export declare namespace ShaderLibrary {
      *     skyAtmosphere:SkyAtmosphere,
      * };
      *
-     * @group(2) @binding(4) var<globalStruct> systemUniforms: SystemUniform;
+     * @group(2) @binding(4) var<uniform> systemUniforms: SystemUniform;
      * ```
      */
     const POST_EFFECT_SYSTEM_UNIFORM: string;
