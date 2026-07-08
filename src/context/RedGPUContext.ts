@@ -140,6 +140,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
     #onKeyDown: ((e: KeyboardEvent) => void) | null = null
     #onKeyUp: ((e: KeyboardEvent) => void) | null = null
     #onBlur: (() => void) | null = null
+    #canvasListeners: { eventName: string, listener: (e: any) => void }[] = []
 
     /**
      * [KO] 캔버스 환경 변화 감지 옵저버
@@ -456,15 +457,28 @@ class RedGPUContext extends RedGPUContextViewContainer {
         window?.cancelAnimationFrame(this.currentRequestAnimationFrame)
         this.#observer?.destroy()
         this.#gpuDevice.destroy()
+        // clear Global SSBO
         this.#globalVertexSSBO.destroy()
         this.#globalFragmentSSBO_PBR.destroy()
         this.#globalFragmentSSBO_BuiltIn.destroy()
+        // clear Event
         if (this.#onKeyUp) window?.removeEventListener('keyup', this.#onKeyUp)
         if (this.#onKeyDown) window?.removeEventListener('keydown', this.#onKeyDown)
         if (this.#onBlur) window?.removeEventListener('blur', this.#onBlur)
         this.#onKeyUp = null
         this.#onKeyDown = null
         this.#onBlur = null
+
+        // Canvas 리스너 해제
+        this.#canvasListeners.forEach(({eventName, listener}) => {
+            this.#htmlCanvas.removeEventListener(eventName, listener);
+        });
+        this.#canvasListeners = [];
+
+        // 리소스 캐시 및 참조 끊기
+        this.removeAllViews();
+        this.onResize = null;
+        this.#keyboardKeyBuffer = {};
     }
 
     /**
@@ -529,7 +543,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
                         mouseup: PICKING_EVENT_TYPE.UP,
                     }
             )
-            this.#htmlCanvas.addEventListener(eventName, (e: MouseEvent) => {
+            const listener = (e: any) => {
                 const eventTypeForDevice = eventMap[e.type]
                 // console.log('eventTypeForDevice',e.type)
                 this.viewList.forEach((view: View3D) => {
@@ -548,7 +562,9 @@ class RedGPUContext extends RedGPUContextViewContainer {
                         view.pickingManager.lastMouseEvent = {...e, type: eventTypeForDevice}
                     }
                 })
-            })
+            }
+            this.#htmlCanvas.addEventListener(eventName, listener)
+            this.#canvasListeners.push({eventName, listener})
         })
         {
             // 키보드 이벤트 설정
