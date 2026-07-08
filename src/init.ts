@@ -167,15 +167,7 @@ const init = async (
                 if (info.reason === 'destroyed') onDestroy?.(info)
             })
             const clearDevice = () => {
-                if (redGPUContext.gpuContext) {
-                    try {
-                        redGPUContext.gpuContext.unconfigure();
-                        keepLog('🧹 Canvas Context unconfigure 완료');
-                    } catch (e) {
-                        keepLog('⚠️ Canvas Context unconfigure 실패:', e);
-                    }
-                }
-                window?.cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
+
                 redGPUContext.destroy();
             }
             // bfcache에서 복원 시 페이지 재로드 (뒤로가기 + 앞으로가기)

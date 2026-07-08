@@ -42,6 +42,11 @@ export default class RedGPUContextObserver extends RedGPUObject {
      * [EN] IntersectionObserver for detecting position and screen visibility changes
      */
     #intersectionObserver: IntersectionObserver | null = null;
+    /**
+     * [KO] 윈도우 리사이즈 이벤트 핸들러 참조
+     * [EN] Window resize event handler reference
+     */
+    #resizeHandler: (() => void) | null = null;
 
     /**
      * [KO] RedGPUContextObserver 생성자
@@ -61,13 +66,17 @@ export default class RedGPUContextObserver extends RedGPUObject {
     }
 
     /**
-     * [KO] 모든 옵저버 중지
-     * [EN] Stop all observers
+     * [KO] 모든 옵저버를 파기하고 이벤트를 해제합니다.
+     * [EN] Destroys all observers and removes event listeners.
      */
-    stop() {
+    destroy() {
         this.#mutationObserver?.disconnect();
         this.#resizeObserver?.disconnect();
         this.#intersectionObserver?.disconnect();
+        if (this.#resizeHandler) {
+            window.removeEventListener('resize', this.#resizeHandler);
+            this.#resizeHandler = null;
+        }
     }
 
     /**
@@ -106,7 +115,8 @@ export default class RedGPUContextObserver extends RedGPUObject {
 
         // [KO] 즉각적인 반응성을 위해 윈도우 리사이즈 및 스크롤 이벤트도 함께 사용합니다.
         // [EN] For immediate responsiveness, window resize and scroll events are also used.
-        window.addEventListener('resize', () => this.#handleLayoutChange());
+        this.#resizeHandler = () => this.#handleLayoutChange();
+        window.addEventListener('resize', this.#resizeHandler);
 
         this.#updateObservers();
     }

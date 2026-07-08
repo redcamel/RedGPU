@@ -10,6 +10,7 @@ import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
 import CommandEncoderManager from "../commandEncoderManager/CommandEncoderManager";
 import RedGPUContextObserver from "./core/RedGPUContextObserver";
 import GlobalStorageBufferManager from "../resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager";
+import {keepLog} from "../utils";
 
 /**
  * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
@@ -444,7 +445,16 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Destroys the GPU device and releases resources.
      */
     destroy() {
-        this.#observer?.stop()
+        if (this.#gpuContext) {
+            try {
+                this.gpuContext.unconfigure();
+                keepLog('🧹 Canvas Context unconfigure 완료');
+            } catch (e) {
+                keepLog('⚠️ Canvas Context unconfigure 실패:', e);
+            }
+        }
+        window?.cancelAnimationFrame(this.currentRequestAnimationFrame)
+        this.#observer?.destroy()
         this.#gpuDevice.destroy()
         this.#globalVertexSSBO.destroy()
         this.#globalFragmentSSBO_PBR.destroy()
