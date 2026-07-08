@@ -1296,7 +1296,7 @@ class Mesh extends MeshBase {
         // check distanceCulling
         const needCheckInterleavedCulling = dirtyTransformForChildren ||
             (interleavedCullingInfo.forceCullingCheck || (this.#interleavedCullingID === interleavedCullingCheckFrameIndex))
-        let passFrustumCulling = this.passFrustumCulling
+        let passFrustumCulling = this.passFrustumCulling = redGPUContext.viewList.length > 1 ? true : this.passFrustumCulling
         let distanceSquared = 0
         const lodList = this.#LODManager.LODList;
         const lodLen = lodList.length;
