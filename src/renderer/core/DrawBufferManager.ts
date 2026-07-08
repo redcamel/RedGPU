@@ -2,6 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import formatBytes from "../../utils/formatBytes";
 import RedGPUObject from "../../base/RedGPUObject";
+import {keepLog} from "../../utils";
 
 /**
  * WebGPU 드로우 커맨드를 효율적으로 관리하는 매니저 클래스
@@ -270,18 +271,18 @@ class DrawBufferManager extends RedGPUObject {
     // 	// 현재 프레임에서 사용되지 않은 버퍼들을 찾아서 제거
     // 	//TODO 드로우 버퍼 정리 (구현 예정)
     // }
-    //
-    // /**
-    //  * 매니저를 완전히 해제합니다.
-    //  */
-    // dispose(): void {
-    // 	this.#bufferPool.forEach(buffer => buffer.destroy())
-    // 	this.#bufferPool = []
-    // 	this.#dataPool = []
-    // 	this.#usedBufferIndices.clear()
-    // 	DrawBufferManager.#instance = null
-    // 	keepLog('🗑️ DrawBufferManager 해제됨')
-    // }
+
+    /**
+     * 매니저를 완전히 해제합니다.
+     */
+    destroy(): void {
+        this.#bufferPool.forEach(buffer => buffer.destroy())
+        this.#bufferPool = []
+        this.#dataPool = []
+        this.#usedBufferIndices.clear()
+        DrawBufferManager.#instance = null
+        keepLog('🗑️ DrawBufferManager 해제됨')
+    }
 }
 
 /**

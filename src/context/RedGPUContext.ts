@@ -11,6 +11,7 @@ import CommandEncoderManager from "../commandEncoderManager/CommandEncoderManage
 import RedGPUContextObserver from "./core/RedGPUContextObserver";
 import GlobalStorageBufferManager from "../resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager";
 import {keepLog} from "../utils";
+import DrawBufferManager from "../renderer/core/DrawBufferManager";
 
 /**
  * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
@@ -461,8 +462,11 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#globalVertexSSBO.destroy()
         this.#globalFragmentSSBO_PBR.destroy()
         this.#globalFragmentSSBO_BuiltIn.destroy()
+        // clear DrawBufferManager
+        DrawBufferManager.getInstance(this).destroy();
         // clear Event
         this.#clearEvent()
+
         // 리소스 캐시 및 참조 끊기
         this.removeAllViews();
     }
