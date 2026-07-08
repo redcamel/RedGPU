@@ -1,7 +1,6 @@
 import StorageBuffer from "../../../buffer/storageBuffer/StorageBuffer";
 
 class ResourceStateStorageBuffer {
-    static dirtyList = []
     buffer: StorageBuffer
     uuid: string | number
     #useNum: number = 0
@@ -17,7 +16,6 @@ class ResourceStateStorageBuffer {
 
     set useNum(value: number) {
         this.#useNum = value;
-        ResourceStateStorageBuffer.dirtyList.push(this)
     }
 }
 

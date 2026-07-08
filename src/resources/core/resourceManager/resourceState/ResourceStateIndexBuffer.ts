@@ -1,7 +1,6 @@
 import IndexBuffer from "../../../buffer/indexBuffer/IndexBuffer";
 
 class ResourceStateIndexBuffer {
-    static dirtyList = []
     buffer: IndexBuffer
     label: string | number
     uuid: string | number
@@ -19,7 +18,6 @@ class ResourceStateIndexBuffer {
 
     set useNum(value: number) {
         this.#useNum = value;
-        ResourceStateIndexBuffer.dirtyList.push(this)
     }
 }
 
