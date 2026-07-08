@@ -237,6 +237,16 @@ abstract class AController extends RedGPUObject {
         if (this.#initInfo.HD_Wheel) {
             htmlCanvas.removeEventListener('wheel', this.#HD_wheel);
         }
+        if (this.#initInfo.HD_TouchPinch) {
+            htmlCanvas.removeEventListener('touchmove', this.#HD_touchPinch);
+        }
+        if (AController.#globalKeyboardActiveController === this) {
+            AController.#globalKeyboardActiveController = null;
+        }
+        if (AController.#globalKeyboardActiveView && AController.#globalKeyboardActiveView.camera === this) {
+            AController.#globalKeyboardActiveView = null;
+        }
+        this.#hoveredView = null;
     }
 
     // ==================== Update ====================
