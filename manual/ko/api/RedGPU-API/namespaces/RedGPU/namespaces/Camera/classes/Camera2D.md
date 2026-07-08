@@ -6,7 +6,7 @@
 
 # Class: Camera2D
 
-Defined in: [src/camera/camera/Camera2D.ts:20](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/camera/Camera2D.ts#L20)
+Defined in: [src/camera/camera/Camera2D.ts:20](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/camera/Camera2D.ts#L20)
 
 2D 환경에서 객체를 관찰하는 카메라입니다.
 
@@ -30,7 +30,7 @@ camera.setPosition(200, 100);
 
 > **new Camera2D**(): `Camera2D`
 
-Defined in: [src/camera/camera/Camera2D.ts:54](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/camera/Camera2D.ts#L54)
+Defined in: [src/camera/camera/Camera2D.ts:54](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/camera/Camera2D.ts#L54)
 
 Camera2D 인스턴스를 생성합니다.
 
@@ -55,7 +55,7 @@ const camera = new RedGPU.Camera2D();
 
 > **get** **position**(): \[`number`, `number`\]
 
-Defined in: [src/camera/camera/Camera2D.ts:140](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/camera/Camera2D.ts#L140)
+Defined in: [src/camera/camera/Camera2D.ts:140](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/camera/Camera2D.ts#L140)
 
 카메라 위치 (x, y)를 반환합니다.
 
@@ -73,7 +73,7 @@ Defined in: [src/camera/camera/Camera2D.ts:140](https://github.com/redcamel/RedG
 
 > **get** **viewMatrix**(): [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/camera/camera/Camera2D.ts:66](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/camera/Camera2D.ts#L66)
+Defined in: [src/camera/camera/Camera2D.ts:66](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/camera/Camera2D.ts#L66)
 
 모델 행렬을 반환합니다.
 
@@ -91,7 +91,7 @@ Defined in: [src/camera/camera/Camera2D.ts:66](https://github.com/redcamel/RedGP
 
 > **get** **x**(): `number`
 
-Defined in: [src/camera/camera/Camera2D.ts:90](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/camera/Camera2D.ts#L90)
+Defined in: [src/camera/camera/Camera2D.ts:90](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/camera/Camera2D.ts#L90)
 
 X 좌표를 반환합니다.
 
@@ -105,7 +105,7 @@ X 좌표
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/camera/camera/Camera2D.ts:102](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/camera/Camera2D.ts#L102)
+Defined in: [src/camera/camera/Camera2D.ts:102](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/camera/Camera2D.ts#L102)
 
 X 좌표를 설정합니다.
 
@@ -127,7 +127,7 @@ X 좌표를 설정합니다.
 
 > **get** **y**(): `number`
 
-Defined in: [src/camera/camera/Camera2D.ts:115](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/camera/Camera2D.ts#L115)
+Defined in: [src/camera/camera/Camera2D.ts:115](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/camera/Camera2D.ts#L115)
 
 Y 좌표를 반환합니다.
 
@@ -141,7 +141,7 @@ Y 좌표
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/camera/camera/Camera2D.ts:127](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/camera/Camera2D.ts#L127)
+Defined in: [src/camera/camera/Camera2D.ts:127](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/camera/Camera2D.ts#L127)
 
 Y 좌표를 설정합니다.
 
@@ -163,7 +163,7 @@ Y 좌표를 설정합니다.
 
 > **get** **z**(): `number`
 
-Defined in: [src/camera/camera/Camera2D.ts:78](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/camera/Camera2D.ts#L78)
+Defined in: [src/camera/camera/Camera2D.ts:78](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/camera/Camera2D.ts#L78)
 
 Z 좌표를 반환합니다. (미사용)
 
@@ -179,7 +179,7 @@ Z 좌표
 
 > **setPosition**(`x`, `y?`): `void`
 
-Defined in: [src/camera/camera/Camera2D.ts:161](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/camera/Camera2D.ts#L161)
+Defined in: [src/camera/camera/Camera2D.ts:161](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/camera/Camera2D.ts#L161)
 
 카메라의 위치를 설정합니다.
 
@@ -214,7 +214,7 @@ camera.setPosition([100, 200, 0]);
 
 > `readonly` **instanceId**: `number`
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L18)
+Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L18)
 
 클래스별 인스턴스 순번 ID
 
@@ -228,7 +228,7 @@ Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/
 
 > `readonly` `static` **CALIBRATION\_CONSTANT**: `number` = `12.5`
 
-Defined in: [src/camera/core/ACamera.ts:19](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/ACamera.ts#L19)
+Defined in: [src/camera/core/ACamera.ts:19](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/ACamera.ts#L19)
 
 교정 상수 (Calibration Constant, K)
 
@@ -248,7 +248,7 @@ Defined in: [src/camera/core/ACamera.ts:19](https://github.com/redcamel/RedGPU/b
 
 > **get** **aperture**(): `number`
 
-Defined in: [src/camera/core/ACamera.ts:123](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/ACamera.ts#L123)
+Defined in: [src/camera/core/ACamera.ts:123](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/ACamera.ts#L123)
 
 조리개(f-stop) 값을 반환합니다.
 
@@ -262,7 +262,7 @@ Defined in: [src/camera/core/ACamera.ts:123](https://github.com/redcamel/RedGPU/
 
 > **set** **aperture**(`value`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:135](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/ACamera.ts#L135)
+Defined in: [src/camera/core/ACamera.ts:135](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/ACamera.ts#L135)
 
 조리개(f-stop) 값을 설정합니다.
 
@@ -288,7 +288,7 @@ Defined in: [src/camera/core/ACamera.ts:135](https://github.com/redcamel/RedGPU/
 
 > **get** **ev100**(): `number`
 
-Defined in: [src/camera/core/ACamera.ts:110](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/ACamera.ts#L110)
+Defined in: [src/camera/core/ACamera.ts:110](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/ACamera.ts#L110)
 
 물리적 노출 지수(EV100)를 반환합니다.
 
@@ -310,7 +310,7 @@ EV100 값
 
 > **get** **iso**(): `number`
 
-Defined in: [src/camera/core/ACamera.ts:177](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/ACamera.ts#L177)
+Defined in: [src/camera/core/ACamera.ts:177](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/ACamera.ts#L177)
 
 센서 감도(ISO)를 반환합니다.
 
@@ -324,7 +324,7 @@ ISO 감도
 
 > **set** **iso**(`value`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:189](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/ACamera.ts#L189)
+Defined in: [src/camera/core/ACamera.ts:189](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/ACamera.ts#L189)
 
 센서 감도(ISO)를 설정합니다.
 
@@ -350,7 +350,7 @@ Defined in: [src/camera/core/ACamera.ts:189](https://github.com/redcamel/RedGPU/
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L58)
 
 객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
 
@@ -364,7 +364,7 @@ Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L70)
 
 객체의 이름을 설정합니다.
 
@@ -390,7 +390,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **shutterSpeed**(): `number`
 
-Defined in: [src/camera/core/ACamera.ts:150](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/ACamera.ts#L150)
+Defined in: [src/camera/core/ACamera.ts:150](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/ACamera.ts#L150)
 
 셔터 속도(초 단위)를 반환합니다.
 
@@ -404,7 +404,7 @@ Defined in: [src/camera/core/ACamera.ts:150](https://github.com/redcamel/RedGPU/
 
 > **set** **shutterSpeed**(`value`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:162](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/ACamera.ts#L162)
+Defined in: [src/camera/core/ACamera.ts:162](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/ACamera.ts#L162)
 
 셔터 속도(초 단위)를 설정합니다.
 
@@ -430,7 +430,7 @@ Defined in: [src/camera/core/ACamera.ts:162](https://github.com/redcamel/RedGPU/
 
 > **get** **useAutoExposure**(): `boolean`
 
-Defined in: [src/camera/core/ACamera.ts:61](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/ACamera.ts#L61)
+Defined in: [src/camera/core/ACamera.ts:61](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/ACamera.ts#L61)
 
 자동 노출 사용 여부를 반환합니다.
 
@@ -444,7 +444,7 @@ Defined in: [src/camera/core/ACamera.ts:61](https://github.com/redcamel/RedGPU/b
 
 > **set** **useAutoExposure**(`value`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:73](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/ACamera.ts#L73)
+Defined in: [src/camera/core/ACamera.ts:73](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/ACamera.ts#L73)
 
 자동 노출 사용 여부를 설정합니다.
 
@@ -470,7 +470,7 @@ Defined in: [src/camera/core/ACamera.ts:73](https://github.com/redcamel/RedGPU/b
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L46)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 
@@ -490,7 +490,7 @@ UUID 문자열
 
 > **updateExposure**(`view?`): `void`
 
-Defined in: [src/camera/core/ACamera.ts:204](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/ACamera.ts#L204)
+Defined in: [src/camera/core/ACamera.ts:204](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/ACamera.ts#L204)
 
 노출 값을 업데이트합니다.
 

@@ -8,7 +8,7 @@
 
 > `const` **getTBNFromVertexTangent**: `string` = `getTBNFromVertexTangent_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:792](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/systemCodeManager/ShaderLibrary.ts#L792)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:792](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/systemCodeManager/ShaderLibrary.ts#L792)
 
 법선(Normal)과 버텍스 탄젠트(vec4)를 사용하여 TBN(Tangent, Bitangent, Normal) 행렬을 구축합니다.
 

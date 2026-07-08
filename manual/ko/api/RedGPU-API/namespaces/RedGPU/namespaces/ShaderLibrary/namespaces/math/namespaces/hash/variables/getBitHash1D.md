@@ -8,7 +8,7 @@
 
 > `const` **getBitHash1D**: `string` = `getBitHash1D_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:230](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/systemCodeManager/ShaderLibrary.ts#L230)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:230](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/systemCodeManager/ShaderLibrary.ts#L230)
 
 단일 시드값의 비트 구조를 보존하여 1D 난수(0.0 ~ 1.0)를 생성합니다. (초정밀)
 

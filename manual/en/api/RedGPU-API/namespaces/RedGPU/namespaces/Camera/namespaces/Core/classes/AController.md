@@ -6,7 +6,7 @@
 
 # Abstract Class: AController
 
-Defined in: [src/camera/core/AController.ts:29](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L29)
+Defined in: [src/camera/core/AController.ts:29](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L29)
 
 Abstract class for camera controllers.
 
@@ -33,7 +33,7 @@ This class is an abstract class, so you cannot create an instance directly.<br/>
 
 > `protected` **new AController**(`redGPUContext`, `initInfo`): `AController`
 
-Defined in: [src/camera/core/AController.ts:76](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L76)
+Defined in: [src/camera/core/AController.ts:76](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L76)
 
 Creates an instance of AController.
 
@@ -60,7 +60,7 @@ Creates an instance of AController.
 
 > **get** **camera**(): [`PerspectiveCamera`](../../../classes/PerspectiveCamera.md) \| [`OrthographicCamera`](../../../classes/OrthographicCamera.md)
 
-Defined in: [src/camera/core/AController.ts:100](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L100)
+Defined in: [src/camera/core/AController.ts:100](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L100)
 
 Returns the camera controlled by this controller.
 
@@ -78,7 +78,7 @@ Controlled camera (PerspectiveCamera or OrthographicCamera)
 
 > **get** **hoveredView**(): [`View3D`](../../../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:150](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L150)
+Defined in: [src/camera/core/AController.ts:150](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L150)
 
 **`Internal`**
 
@@ -98,7 +98,7 @@ Hovered View or null
 
 > **get** **isKeyboardActiveController**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:196](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L196)
+Defined in: [src/camera/core/AController.ts:196](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L196)
 
 **`Internal`**
 
@@ -118,7 +118,7 @@ Whether it is the keyboard active controller
 
 > **get** **keyboardActiveView**(): [`View3D`](../../../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:163](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L163)
+Defined in: [src/camera/core/AController.ts:163](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L163)
 
 **`Internal`**
 
@@ -134,7 +134,7 @@ Keyboard active View or null
 
 > **set** **keyboardActiveView**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:176](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L176)
+Defined in: [src/camera/core/AController.ts:176](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L176)
 
 **`Internal`**
 
@@ -158,7 +158,7 @@ Sets the View with active keyboard input.
 
 > **get** **keyboardProcessedThisFrame**(): `boolean`
 
-Defined in: [src/camera/core/AController.ts:209](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L209)
+Defined in: [src/camera/core/AController.ts:209](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L209)
 
 **`Internal`**
 
@@ -174,7 +174,7 @@ Processing status
 
 > **set** **keyboardProcessedThisFrame**(`value`): `void`
 
-Defined in: [src/camera/core/AController.ts:222](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L222)
+Defined in: [src/camera/core/AController.ts:222](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L222)
 
 **`Internal`**
 
@@ -198,7 +198,7 @@ Sets whether keyboard input has been processed in this frame.
 
 > **get** **x**(): `number`
 
-Defined in: [src/camera/core/AController.ts:112](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L112)
+Defined in: [src/camera/core/AController.ts:112](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L112)
 
 Gets the camera's current world X coordinate.
 
@@ -216,7 +216,7 @@ X coordinate
 
 > **get** **y**(): `number`
 
-Defined in: [src/camera/core/AController.ts:124](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L124)
+Defined in: [src/camera/core/AController.ts:124](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L124)
 
 Gets the camera's current world Y coordinate.
 
@@ -234,7 +234,7 @@ Y coordinate
 
 > **get** **z**(): `number`
 
-Defined in: [src/camera/core/AController.ts:136](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L136)
+Defined in: [src/camera/core/AController.ts:136](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L136)
 
 Gets the camera's current world Z coordinate.
 
@@ -250,7 +250,7 @@ Z coordinate
 
 > **checkKeyboardInput**\<`T`\>(`view`, `keyNameMapper`): `boolean`
 
-Defined in: [src/camera/core/AController.ts:286](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L286)
+Defined in: [src/camera/core/AController.ts:286](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L286)
 
 Checks for keyboard input and sets the active View.
 
@@ -279,7 +279,7 @@ True if keyboard input processing is possible, otherwise false
 
 > **destroy**(): `void`
 
-Defined in: [src/camera/core/AController.ts:230](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L230)
+Defined in: [src/camera/core/AController.ts:230](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L230)
 
 Destroys the controller and removes event listeners.
 
@@ -293,7 +293,7 @@ Destroys the controller and removes event listeners.
 
 > **findTargetViewByInputEvent**(`e`): [`View3D`](../../../../Display/classes/View3D.md)
 
-Defined in: [src/camera/core/AController.ts:369](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L369)
+Defined in: [src/camera/core/AController.ts:369](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L369)
 
 **`Internal`**
 
@@ -317,7 +317,7 @@ Corresponding View or null
 
 > **getCanvasEventPoint**(`e`, `redGPUContext`): `object`
 
-Defined in: [src/camera/core/AController.ts:333](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L333)
+Defined in: [src/camera/core/AController.ts:333](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L333)
 
 **`Internal`**
 
@@ -338,8 +338,8 @@ Gets the event coordinates on the canvas.
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `x` | `number` | [src/camera/core/AController.ts:352](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L352) |
-| `y` | `number` | [src/camera/core/AController.ts:353](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L353) |
+| `x` | `number` | [src/camera/core/AController.ts:352](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L352) |
+| `y` | `number` | [src/camera/core/AController.ts:353](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L353) |
 
 ***
 
@@ -347,7 +347,7 @@ Gets the event coordinates on the canvas.
 
 > **update**(`view`, `time`, `updateAnimation`): `void`
 
-Defined in: [src/camera/core/AController.ts:257](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/AController.ts#L257)
+Defined in: [src/camera/core/AController.ts:257](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/AController.ts#L257)
 
 Updates the controller state. Must be implemented in derived classes.
 
@@ -375,7 +375,7 @@ Updates the controller state. Must be implemented in derived classes.
 
 > `readonly` **instanceId**: `number`
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L18)
+Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L18)
 
 Instance sequence ID per class
 
@@ -391,7 +391,7 @@ Instance sequence ID per class
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L76)
 
 Returns the AntialiasingManager instance. (Short-cut path)
 
@@ -413,7 +413,7 @@ AntialiasingManager instance
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L88)
 
 Returns the CommandEncoderManager instance. (Short-cut path)
 
@@ -435,7 +435,7 @@ CommandEncoderManager instance
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L52)
 
 Returns the WebGPU device object. (Short-cut path)
 
@@ -457,7 +457,7 @@ GPUDevice instance
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L58)
 
 Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
 
@@ -471,7 +471,7 @@ Name of the object
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L70)
 
 Sets the name of the object.
 
@@ -497,7 +497,7 @@ Sets the name of the object.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L40)
 
 Returns the RedGPUContext instance.
 
@@ -519,7 +519,7 @@ RedGPUContext instance
 
 > **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L64)
 
 Returns the ResourceManager instance. (Short-cut path)
 
@@ -541,7 +541,7 @@ ResourceManager instance
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L46)
 
 Returns the universally unique identifier (UUID) of the object.
 

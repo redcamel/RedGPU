@@ -8,7 +8,7 @@
 
 > `const` **getTBNFromCotangent**: `string` = `getTBNFromCotangent_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:853](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/systemCodeManager/ShaderLibrary.ts#L853)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:853](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/systemCodeManager/ShaderLibrary.ts#L853)
 
 Dynamically calculates tangent and bitangent using pixel derivatives and constructs a TBN matrix.
 

@@ -6,7 +6,7 @@
 
 # Class: Line3D
 
-Defined in: [src/display/line/Line3D.ts:55](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L55)
+Defined in: [src/display/line/Line3D.ts:55](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L55)
 
 **`Experimental`**
 
@@ -47,7 +47,7 @@ scene.addChild(line);
 
 > **new Line3D**(`redGPUContext`, `type?`, `baseColor?`): `Line3D`
 
-Defined in: [src/display/line/Line3D.ts:110](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L110)
+Defined in: [src/display/line/Line3D.ts:110](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L110)
 
 **`Experimental`**
 
@@ -75,7 +75,7 @@ Line3D 인스턴스를 생성합니다.
 
 > **baseColor**: `any`
 
-Defined in: [src/display/line/Line3D.ts:60](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L60)
+Defined in: [src/display/line/Line3D.ts:60](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L60)
 
 **`Experimental`**
 
@@ -89,7 +89,7 @@ Defined in: [src/display/line/Line3D.ts:60](https://github.com/redcamel/RedGPU/b
 
 > **get** **distance**(): `number`
 
-Defined in: [src/display/line/Line3D.ts:186](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L186)
+Defined in: [src/display/line/Line3D.ts:186](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L186)
 
 **`Experimental`**
 
@@ -103,7 +103,7 @@ Defined in: [src/display/line/Line3D.ts:186](https://github.com/redcamel/RedGPU/
 
 > **set** **distance**(`value`): `void`
 
-Defined in: [src/display/line/Line3D.ts:190](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L190)
+Defined in: [src/display/line/Line3D.ts:190](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L190)
 
 **`Experimental`**
 
@@ -125,7 +125,7 @@ Defined in: [src/display/line/Line3D.ts:190](https://github.com/redcamel/RedGPU/
 
 > **get** **geometry**(): [`Geometry`](../../../classes/Geometry.md) \| [`Primitive`](../../Primitive/namespaces/Core/classes/Primitive.md)
 
-Defined in: [src/display/line/Line3D.ts:206](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L206)
+Defined in: [src/display/line/Line3D.ts:206](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L206)
 
 **`Experimental`**
 
@@ -139,7 +139,7 @@ geometry를 반환합니다. (생성 시 자동 할당, 변경 불가)
 
 > **set** **geometry**(`value`): `void`
 
-Defined in: [src/display/line/Line3D.ts:213](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L213)
+Defined in: [src/display/line/Line3D.ts:213](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L213)
 
 **`Experimental`**
 
@@ -167,7 +167,7 @@ geometry를 변경할 수 없습니다.
 
 > **get** **interleaveData**(): `number`[]
 
-Defined in: [src/display/line/Line3D.ts:153](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L153)
+Defined in: [src/display/line/Line3D.ts:153](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L153)
 
 **`Experimental`**
 
@@ -185,7 +185,7 @@ Defined in: [src/display/line/Line3D.ts:153](https://github.com/redcamel/RedGPU/
 
 > **get** **material**(): `any`
 
-Defined in: [src/display/line/Line3D.ts:220](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L220)
+Defined in: [src/display/line/Line3D.ts:220](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L220)
 
 **`Experimental`**
 
@@ -199,7 +199,7 @@ material을 반환합니다. (생성 시 자동 할당, 변경 불가)
 
 > **set** **material**(`value`): `void`
 
-Defined in: [src/display/line/Line3D.ts:227](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L227)
+Defined in: [src/display/line/Line3D.ts:227](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L227)
 
 **`Experimental`**
 
@@ -227,7 +227,7 @@ material을 변경할 수 없습니다.
 
 > **get** **numPoints**(): `number`
 
-Defined in: [src/display/line/Line3D.ts:199](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L199)
+Defined in: [src/display/line/Line3D.ts:199](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L199)
 
 **`Experimental`**
 
@@ -245,7 +245,7 @@ Defined in: [src/display/line/Line3D.ts:199](https://github.com/redcamel/RedGPU/
 
 > **get** **originalPoints**(): `LinePointWithInOut`[]
 
-Defined in: [src/display/line/Line3D.ts:134](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L134)
+Defined in: [src/display/line/Line3D.ts:134](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L134)
 
 **`Experimental`**
 
@@ -263,7 +263,7 @@ Defined in: [src/display/line/Line3D.ts:134](https://github.com/redcamel/RedGPU/
 
 > **get** **tension**(): `number`
 
-Defined in: [src/display/line/Line3D.ts:160](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L160)
+Defined in: [src/display/line/Line3D.ts:160](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L160)
 
 **`Experimental`**
 
@@ -277,7 +277,7 @@ Catmull-Rom 곡선의 텐션 값을 반환/설정합니다.
 
 > **set** **tension**(`value`): `void`
 
-Defined in: [src/display/line/Line3D.ts:164](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L164)
+Defined in: [src/display/line/Line3D.ts:164](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L164)
 
 **`Experimental`**
 
@@ -299,7 +299,7 @@ Defined in: [src/display/line/Line3D.ts:164](https://github.com/redcamel/RedGPU/
 
 > **get** **tolerance**(): `number`
 
-Defined in: [src/display/line/Line3D.ts:173](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L173)
+Defined in: [src/display/line/Line3D.ts:173](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L173)
 
 **`Experimental`**
 
@@ -313,7 +313,7 @@ Defined in: [src/display/line/Line3D.ts:173](https://github.com/redcamel/RedGPU/
 
 > **set** **tolerance**(`value`): `void`
 
-Defined in: [src/display/line/Line3D.ts:177](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L177)
+Defined in: [src/display/line/Line3D.ts:177](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L177)
 
 **`Experimental`**
 
@@ -335,7 +335,7 @@ Defined in: [src/display/line/Line3D.ts:177](https://github.com/redcamel/RedGPU/
 
 > **get** **type**(): [`LINE_TYPE`](../type-aliases/LINE_TYPE.md)
 
-Defined in: [src/display/line/Line3D.ts:141](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L141)
+Defined in: [src/display/line/Line3D.ts:141](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L141)
 
 **`Experimental`**
 
@@ -349,7 +349,7 @@ Defined in: [src/display/line/Line3D.ts:141](https://github.com/redcamel/RedGPU/
 
 > **set** **type**(`value`): `void`
 
-Defined in: [src/display/line/Line3D.ts:145](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L145)
+Defined in: [src/display/line/Line3D.ts:145](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L145)
 
 **`Experimental`**
 
@@ -369,7 +369,7 @@ Defined in: [src/display/line/Line3D.ts:145](https://github.com/redcamel/RedGPU/
 
 > **addPoint**(`x?`, `y?`, `z?`, `color?`, `colorAlpha?`, `inX?`, `inY?`, `inZ?`, `outX?`, `outY?`, `outZ?`): `void`
 
-Defined in: [src/display/line/Line3D.ts:253](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L253)
+Defined in: [src/display/line/Line3D.ts:253](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L253)
 
 **`Experimental`**
 
@@ -401,7 +401,7 @@ Defined in: [src/display/line/Line3D.ts:253](https://github.com/redcamel/RedGPU/
 
 > **addPointAt**(`index`, `x?`, `y?`, `z?`, `color?`, `colorAlpha?`, `inX?`, `inY?`, `inZ?`, `outX?`, `outY?`, `outZ?`): `void`
 
-Defined in: [src/display/line/Line3D.ts:286](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L286)
+Defined in: [src/display/line/Line3D.ts:286](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L286)
 
 **`Experimental`**
 
@@ -434,7 +434,7 @@ Defined in: [src/display/line/Line3D.ts:286](https://github.com/redcamel/RedGPU/
 
 > **createCustomMeshVertexShaderModule**(): `GPUShaderModule`
 
-Defined in: [src/display/line/Line3D.ts:235](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L235)
+Defined in: [src/display/line/Line3D.ts:235](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L235)
 
 **`Experimental`**
 
@@ -454,7 +454,7 @@ Defined in: [src/display/line/Line3D.ts:235](https://github.com/redcamel/RedGPU/
 
 > **removeAllPoint**(): `void`
 
-Defined in: [src/display/line/Line3D.ts:313](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L313)
+Defined in: [src/display/line/Line3D.ts:313](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L313)
 
 **`Experimental`**
 
@@ -470,7 +470,7 @@ Defined in: [src/display/line/Line3D.ts:313](https://github.com/redcamel/RedGPU/
 
 > **removePointAt**(`index`): `void`
 
-Defined in: [src/display/line/Line3D.ts:303](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/line/Line3D.ts#L303)
+Defined in: [src/display/line/Line3D.ts:303](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/line/Line3D.ts#L303)
 
 **`Experimental`**
 
@@ -500,7 +500,7 @@ Defined in: [src/display/line/Line3D.ts:303](https://github.com/redcamel/RedGPU/
 
 > **\_geometry**: [`Geometry`](../../../classes/Geometry.md) \| [`Primitive`](../../Primitive/namespaces/Core/classes/Primitive.md)
 
-Defined in: [src/display/mesh/Mesh.ts:387](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L387)
+Defined in: [src/display/mesh/Mesh.ts:387](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L387)
 
 **`Experimental`**
 
@@ -514,7 +514,7 @@ Defined in: [src/display/mesh/Mesh.ts:387](https://github.com/redcamel/RedGPU/bl
 
 > **\_material**: `any`
 
-Defined in: [src/display/mesh/Mesh.ts:360](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L360)
+Defined in: [src/display/mesh/Mesh.ts:360](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L360)
 
 **`Experimental`**
 
@@ -528,7 +528,7 @@ Defined in: [src/display/mesh/Mesh.ts:360](https://github.com/redcamel/RedGPU/bl
 
 > **animationInfo**: `object`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:32](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/MeshBase.ts#L32)
+Defined in: [src/display/mesh/core/MeshBase.ts:32](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/MeshBase.ts#L32)
 
 **`Experimental`**
 
@@ -562,7 +562,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:32](https://github.com/redcamel/R
 
 > **castShadow**: `boolean` = `false`
 
-Defined in: [src/display/mesh/Mesh.ts:87](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L87)
+Defined in: [src/display/mesh/Mesh.ts:87](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L87)
 
 **`Experimental`**
 
@@ -578,7 +578,7 @@ Defined in: [src/display/mesh/Mesh.ts:87](https://github.com/redcamel/RedGPU/blo
 
 > **dirtyLOD**: `boolean` = `false`
 
-Defined in: [src/display/mesh/Mesh.ts:92](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L92)
+Defined in: [src/display/mesh/Mesh.ts:92](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L92)
 
 **`Experimental`**
 
@@ -594,7 +594,7 @@ LOD 정보 변경 필요 여부
 
 > **dirtyOpacity**: `boolean` = `true`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:48](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/MeshBase.ts#L48)
+Defined in: [src/display/mesh/core/MeshBase.ts:48](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/MeshBase.ts#L48)
 
 **`Experimental`**
 
@@ -608,7 +608,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:48](https://github.com/redcamel/R
 
 > **dirtyPipeline**: `boolean` = `true`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:46](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/MeshBase.ts#L46)
+Defined in: [src/display/mesh/core/MeshBase.ts:46](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/MeshBase.ts#L46)
 
 **`Experimental`**
 
@@ -622,7 +622,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:46](https://github.com/redcamel/R
 
 > **dirtyTransform**: `boolean` = `true`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:47](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/MeshBase.ts#L47)
+Defined in: [src/display/mesh/core/MeshBase.ts:47](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/MeshBase.ts#L47)
 
 **`Experimental`**
 
@@ -636,7 +636,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:47](https://github.com/redcamel/R
 
 > **disableJitter**: `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:43](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L43)
+Defined in: [src/display/mesh/Mesh.ts:43](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L43)
 
 **`Experimental`**
 
@@ -650,7 +650,7 @@ Defined in: [src/display/mesh/Mesh.ts:43](https://github.com/redcamel/RedGPU/blo
 
 > **gltfLoaderInfo**: [`GLTFLoader`](../../../classes/GLTFLoader.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:45](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/MeshBase.ts#L45)
+Defined in: [src/display/mesh/core/MeshBase.ts:45](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/MeshBase.ts#L45)
 
 **`Experimental`**
 
@@ -664,7 +664,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:45](https://github.com/redcamel/R
 
 > **gpuRenderInfo**: [`VertexGPURenderInfo`](../namespaces/CoreMesh/classes/VertexGPURenderInfo.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:31](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/MeshBase.ts#L31)
+Defined in: [src/display/mesh/core/MeshBase.ts:31](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/MeshBase.ts#L31)
 
 **`Experimental`**
 
@@ -678,7 +678,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:31](https://github.com/redcamel/R
 
 > `readonly` **instanceId**: `number`
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L18)
+Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L18)
 
 **`Experimental`**
 
@@ -694,7 +694,7 @@ Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/
 
 > **isInstanceofMesh**: `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:45](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L45)
+Defined in: [src/display/mesh/Mesh.ts:45](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L45)
 
 **`Experimental`**
 
@@ -708,7 +708,7 @@ Defined in: [src/display/mesh/Mesh.ts:45](https://github.com/redcamel/RedGPU/blo
 
 > **localMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:50](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/MeshBase.ts#L50)
+Defined in: [src/display/mesh/core/MeshBase.ts:50](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/MeshBase.ts#L50)
 
 **`Experimental`**
 
@@ -722,7 +722,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:50](https://github.com/redcamel/R
 
 > **modelMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:49](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/MeshBase.ts#L49)
+Defined in: [src/display/mesh/core/MeshBase.ts:49](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/MeshBase.ts#L49)
 
 **`Experimental`**
 
@@ -738,7 +738,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:49](https://github.com/redcamel/R
 
 > **normalModelMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:51](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/MeshBase.ts#L51)
+Defined in: [src/display/mesh/core/MeshBase.ts:51](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/MeshBase.ts#L51)
 
 **`Experimental`**
 
@@ -752,7 +752,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:51](https://github.com/redcamel/R
 
 > **passFrustumCulling**: `boolean` = `true`
 
-Defined in: [src/display/mesh/Mesh.ts:97](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L97)
+Defined in: [src/display/mesh/Mesh.ts:97](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L97)
 
 **`Experimental`**
 
@@ -768,7 +768,7 @@ Defined in: [src/display/mesh/Mesh.ts:97](https://github.com/redcamel/RedGPU/blo
 
 > **receiveShadow**: `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:42](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L42)
+Defined in: [src/display/mesh/Mesh.ts:42](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L42)
 
 **`Experimental`**
 
@@ -782,7 +782,7 @@ Defined in: [src/display/mesh/Mesh.ts:42](https://github.com/redcamel/RedGPU/blo
 
 > **useDisplacementTexture**: `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:44](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L44)
+Defined in: [src/display/mesh/Mesh.ts:44](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L44)
 
 **`Experimental`**
 
@@ -798,7 +798,7 @@ Defined in: [src/display/mesh/Mesh.ts:44](https://github.com/redcamel/RedGPU/blo
 
 > **get** **boundingAABB**(): [`AABB`](../../Bound/classes/AABB.md)
 
-Defined in: [src/display/mesh/Mesh.ts:811](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L811)
+Defined in: [src/display/mesh/Mesh.ts:811](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L811)
 
 **`Experimental`**
 
@@ -820,7 +820,7 @@ AABB(Axis-Aligned Bounding Box) 정보를 반환합니다.
 
 > **get** **boundingOBB**(): [`OBB`](../../Bound/classes/OBB.md)
 
-Defined in: [src/display/mesh/Mesh.ts:798](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L798)
+Defined in: [src/display/mesh/Mesh.ts:798](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L798)
 
 **`Experimental`**
 
@@ -842,7 +842,7 @@ OBB(Oriented Bounding Box) 정보를 반환합니다.
 
 > **get** **children**(): [`Mesh`](Mesh.md)[]
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:44](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/Object3DContainer.ts#L44)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:44](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L44)
 
 **`Experimental`**
 
@@ -866,7 +866,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:44](https://github.com/r
 
 > **get** **combinedBoundingAABB**(): [`AABB`](../../Bound/classes/AABB.md)
 
-Defined in: [src/display/mesh/Mesh.ts:824](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L824)
+Defined in: [src/display/mesh/Mesh.ts:824](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L824)
 
 **`Experimental`**
 
@@ -888,7 +888,7 @@ Defined in: [src/display/mesh/Mesh.ts:824](https://github.com/redcamel/RedGPU/bl
 
 > **get** **currentShaderModuleName**(): `string`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:67](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/MeshBase.ts#L67)
+Defined in: [src/display/mesh/core/MeshBase.ts:67](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/MeshBase.ts#L67)
 
 **`Experimental`**
 
@@ -900,7 +900,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:67](https://github.com/redcamel/R
 
 > **set** **currentShaderModuleName**(`value`): `void`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:71](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/MeshBase.ts#L71)
+Defined in: [src/display/mesh/core/MeshBase.ts:71](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/MeshBase.ts#L71)
 
 **`Experimental`**
 
@@ -926,7 +926,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:71](https://github.com/redcamel/R
 
 > **get** **depthStencilState**(): [`DepthStencilState`](../../RenderState/classes/DepthStencilState.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:80](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/MeshBase.ts#L80)
+Defined in: [src/display/mesh/core/MeshBase.ts:80](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/MeshBase.ts#L80)
 
 **`Experimental`**
 
@@ -946,7 +946,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:80](https://github.com/redcamel/R
 
 > **get** **drawDebugger**(): [`DrawDebuggerMesh`](../namespaces/drawDebugger/classes/DrawDebuggerMesh.md)
 
-Defined in: [src/display/mesh/Mesh.ts:356](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L356)
+Defined in: [src/display/mesh/Mesh.ts:356](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L356)
 
 **`Experimental`**
 
@@ -968,7 +968,7 @@ Defined in: [src/display/mesh/Mesh.ts:356](https://github.com/redcamel/RedGPU/bl
 
 > **get** **enableDebugger**(): `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:336](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L336)
+Defined in: [src/display/mesh/Mesh.ts:336](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L336)
 
 **`Experimental`**
 
@@ -982,7 +982,7 @@ Defined in: [src/display/mesh/Mesh.ts:336](https://github.com/redcamel/RedGPU/bl
 
 > **set** **enableDebugger**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:347](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L347)
+Defined in: [src/display/mesh/Mesh.ts:347](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L347)
 
 **`Experimental`**
 
@@ -1010,7 +1010,7 @@ Defined in: [src/display/mesh/Mesh.ts:347](https://github.com/redcamel/RedGPU/bl
 
 > **get** **events**(): `any`
 
-Defined in: [src/display/mesh/Mesh.ts:496](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L496)
+Defined in: [src/display/mesh/Mesh.ts:496](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L496)
 
 **`Experimental`**
 
@@ -1032,7 +1032,7 @@ Defined in: [src/display/mesh/Mesh.ts:496](https://github.com/redcamel/RedGPU/bl
 
 > **get** **globalVertexSlotIndex**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:317](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L317)
+Defined in: [src/display/mesh/Mesh.ts:317](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L317)
 
 **`Experimental`**
 
@@ -1054,7 +1054,7 @@ Defined in: [src/display/mesh/Mesh.ts:317](https://github.com/redcamel/RedGPU/bl
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/display/mesh/core/MeshBase.ts:88](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/MeshBase.ts#L88)
+Defined in: [src/display/mesh/core/MeshBase.ts:88](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/MeshBase.ts#L88)
 
 **`Experimental`**
 
@@ -1078,7 +1078,7 @@ The GPU device.
 
 > **get** **ignoreFrustumCulling**(): `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:435](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L435)
+Defined in: [src/display/mesh/Mesh.ts:435](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L435)
 
 **`Experimental`**
 
@@ -1092,7 +1092,7 @@ Defined in: [src/display/mesh/Mesh.ts:435](https://github.com/redcamel/RedGPU/bl
 
 > **set** **ignoreFrustumCulling**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:446](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L446)
+Defined in: [src/display/mesh/Mesh.ts:446](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L446)
 
 **`Experimental`**
 
@@ -1120,7 +1120,7 @@ Defined in: [src/display/mesh/Mesh.ts:446](https://github.com/redcamel/RedGPU/bl
 
 > **get** **LODManager**(): [`LODManager`](../namespaces/CoreMesh/classes/LODManager.md)
 
-Defined in: [src/display/mesh/Mesh.ts:328](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L328)
+Defined in: [src/display/mesh/Mesh.ts:328](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L328)
 
 **`Experimental`**
 
@@ -1144,7 +1144,7 @@ LODManager 인스턴스
 
 > **get** **minScreenSpaceSize**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:471](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L471)
+Defined in: [src/display/mesh/Mesh.ts:471](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L471)
 
 **`Experimental`**
 
@@ -1158,7 +1158,7 @@ Defined in: [src/display/mesh/Mesh.ts:471](https://github.com/redcamel/RedGPU/bl
 
 > **set** **minScreenSpaceSize**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:480](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L480)
+Defined in: [src/display/mesh/Mesh.ts:480](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L480)
 
 **`Experimental`**
 
@@ -1186,7 +1186,7 @@ Defined in: [src/display/mesh/Mesh.ts:480](https://github.com/redcamel/RedGPU/bl
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L58)
 
 **`Experimental`**
 
@@ -1202,7 +1202,7 @@ Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L70)
 
 **`Experimental`**
 
@@ -1230,7 +1230,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **numChildren**(): `number`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:52](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/Object3DContainer.ts#L52)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:52](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L52)
 
 **`Experimental`**
 
@@ -1254,7 +1254,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:52](https://github.com/r
 
 > **get** **opacity**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:414](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L414)
+Defined in: [src/display/mesh/Mesh.ts:414](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L414)
 
 **`Experimental`**
 
@@ -1268,7 +1268,7 @@ Defined in: [src/display/mesh/Mesh.ts:414](https://github.com/redcamel/RedGPU/bl
 
 > **set** **opacity**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:425](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L425)
+Defined in: [src/display/mesh/Mesh.ts:425](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L425)
 
 **`Experimental`**
 
@@ -1296,7 +1296,7 @@ Defined in: [src/display/mesh/Mesh.ts:425](https://github.com/redcamel/RedGPU/bl
 
 > **get** **parent**(): [`Object3DContainer`](../namespaces/CoreMesh/classes/Object3DContainer.md)
 
-Defined in: [src/display/mesh/Mesh.ts:512](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L512)
+Defined in: [src/display/mesh/Mesh.ts:512](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L512)
 
 **`Experimental`**
 
@@ -1310,7 +1310,7 @@ Defined in: [src/display/mesh/Mesh.ts:512](https://github.com/redcamel/RedGPU/bl
 
 > **set** **parent**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:523](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L523)
+Defined in: [src/display/mesh/Mesh.ts:523](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L523)
 
 **`Experimental`**
 
@@ -1338,7 +1338,7 @@ Defined in: [src/display/mesh/Mesh.ts:523](https://github.com/redcamel/RedGPU/bl
 
 > **get** **pickingId**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:488](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L488)
+Defined in: [src/display/mesh/Mesh.ts:488](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L488)
 
 **`Experimental`**
 
@@ -1360,7 +1360,7 @@ Defined in: [src/display/mesh/Mesh.ts:488](https://github.com/redcamel/RedGPU/bl
 
 > **get** **pivotX**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:531](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L531)
+Defined in: [src/display/mesh/Mesh.ts:531](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L531)
 
 **`Experimental`**
 
@@ -1374,7 +1374,7 @@ Defined in: [src/display/mesh/Mesh.ts:531](https://github.com/redcamel/RedGPU/bl
 
 > **set** **pivotX**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:542](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L542)
+Defined in: [src/display/mesh/Mesh.ts:542](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L542)
 
 **`Experimental`**
 
@@ -1402,7 +1402,7 @@ Defined in: [src/display/mesh/Mesh.ts:542](https://github.com/redcamel/RedGPU/bl
 
 > **get** **pivotY**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:551](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L551)
+Defined in: [src/display/mesh/Mesh.ts:551](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L551)
 
 **`Experimental`**
 
@@ -1416,7 +1416,7 @@ Defined in: [src/display/mesh/Mesh.ts:551](https://github.com/redcamel/RedGPU/bl
 
 > **set** **pivotY**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:562](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L562)
+Defined in: [src/display/mesh/Mesh.ts:562](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L562)
 
 **`Experimental`**
 
@@ -1444,7 +1444,7 @@ Defined in: [src/display/mesh/Mesh.ts:562](https://github.com/redcamel/RedGPU/bl
 
 > **get** **pivotZ**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:571](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L571)
+Defined in: [src/display/mesh/Mesh.ts:571](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L571)
 
 **`Experimental`**
 
@@ -1458,7 +1458,7 @@ Defined in: [src/display/mesh/Mesh.ts:571](https://github.com/redcamel/RedGPU/bl
 
 > **set** **pivotZ**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:582](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L582)
+Defined in: [src/display/mesh/Mesh.ts:582](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L582)
 
 **`Experimental`**
 
@@ -1486,7 +1486,7 @@ Defined in: [src/display/mesh/Mesh.ts:582](https://github.com/redcamel/RedGPU/bl
 
 > **get** **position**(): `Float32Array`
 
-Defined in: [src/display/mesh/Mesh.ts:654](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L654)
+Defined in: [src/display/mesh/Mesh.ts:654](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L654)
 
 **`Experimental`**
 
@@ -1510,7 +1510,7 @@ Defined in: [src/display/mesh/Mesh.ts:654](https://github.com/redcamel/RedGPU/bl
 
 > **get** **primitiveState**(): [`PrimitiveState`](../../RenderState/classes/PrimitiveState.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:76](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/MeshBase.ts#L76)
+Defined in: [src/display/mesh/core/MeshBase.ts:76](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/MeshBase.ts#L76)
 
 **`Experimental`**
 
@@ -1530,7 +1530,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:76](https://github.com/redcamel/R
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/display/mesh/core/MeshBase.ts:97](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/MeshBase.ts#L97)
+Defined in: [src/display/mesh/core/MeshBase.ts:97](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/MeshBase.ts#L97)
 
 **`Experimental`**
 
@@ -1554,7 +1554,7 @@ The RedGPUContext instance.
 
 > **get** **rotation**(): `Float32Array`
 
-Defined in: [src/display/mesh/Mesh.ts:790](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L790)
+Defined in: [src/display/mesh/Mesh.ts:790](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L790)
 
 **`Experimental`**
 
@@ -1576,7 +1576,7 @@ Defined in: [src/display/mesh/Mesh.ts:790](https://github.com/redcamel/RedGPU/bl
 
 > **get** **rotationX**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:730](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L730)
+Defined in: [src/display/mesh/Mesh.ts:730](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L730)
 
 **`Experimental`**
 
@@ -1590,7 +1590,7 @@ X축 회전값을 반환합니다. (도)
 
 > **set** **rotationX**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:741](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L741)
+Defined in: [src/display/mesh/Mesh.ts:741](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L741)
 
 **`Experimental`**
 
@@ -1618,7 +1618,7 @@ X축 회전값을 설정합니다. (도)
 
 > **get** **rotationY**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:750](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L750)
+Defined in: [src/display/mesh/Mesh.ts:750](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L750)
 
 **`Experimental`**
 
@@ -1632,7 +1632,7 @@ Y축 회전값을 반환합니다. (도)
 
 > **set** **rotationY**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:761](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L761)
+Defined in: [src/display/mesh/Mesh.ts:761](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L761)
 
 **`Experimental`**
 
@@ -1660,7 +1660,7 @@ Y축 회전값을 설정합니다. (도)
 
 > **get** **rotationZ**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:770](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L770)
+Defined in: [src/display/mesh/Mesh.ts:770](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L770)
 
 **`Experimental`**
 
@@ -1674,7 +1674,7 @@ Z축 회전값을 반환합니다. (도)
 
 > **set** **rotationZ**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:781](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L781)
+Defined in: [src/display/mesh/Mesh.ts:781](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L781)
 
 **`Experimental`**
 
@@ -1702,7 +1702,7 @@ Z축 회전값을 설정합니다. (도)
 
 > **get** **scale**(): `Float32Array`
 
-Defined in: [src/display/mesh/Mesh.ts:722](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L722)
+Defined in: [src/display/mesh/Mesh.ts:722](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L722)
 
 **`Experimental`**
 
@@ -1724,7 +1724,7 @@ Defined in: [src/display/mesh/Mesh.ts:722](https://github.com/redcamel/RedGPU/bl
 
 > **get** **scaleX**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:662](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L662)
+Defined in: [src/display/mesh/Mesh.ts:662](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L662)
 
 **`Experimental`**
 
@@ -1738,7 +1738,7 @@ X축 스케일을 반환합니다.
 
 > **set** **scaleX**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:673](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L673)
+Defined in: [src/display/mesh/Mesh.ts:673](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L673)
 
 **`Experimental`**
 
@@ -1766,7 +1766,7 @@ X축 스케일을 설정합니다.
 
 > **get** **scaleY**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:682](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L682)
+Defined in: [src/display/mesh/Mesh.ts:682](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L682)
 
 **`Experimental`**
 
@@ -1780,7 +1780,7 @@ Y축 스케일을 반환합니다.
 
 > **set** **scaleY**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:693](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L693)
+Defined in: [src/display/mesh/Mesh.ts:693](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L693)
 
 **`Experimental`**
 
@@ -1808,7 +1808,7 @@ Y축 스케일을 설정합니다.
 
 > **get** **scaleZ**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:702](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L702)
+Defined in: [src/display/mesh/Mesh.ts:702](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L702)
 
 **`Experimental`**
 
@@ -1822,7 +1822,7 @@ Z축 스케일을 반환합니다.
 
 > **set** **scaleZ**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:713](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L713)
+Defined in: [src/display/mesh/Mesh.ts:713](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L713)
 
 **`Experimental`**
 
@@ -1850,7 +1850,7 @@ Z축 스케일을 설정합니다.
 
 > **get** **useScreenSpaceSizeCulling**(): `boolean`
 
-Defined in: [src/display/mesh/Mesh.ts:454](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L454)
+Defined in: [src/display/mesh/Mesh.ts:454](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L454)
 
 **`Experimental`**
 
@@ -1864,7 +1864,7 @@ Defined in: [src/display/mesh/Mesh.ts:454](https://github.com/redcamel/RedGPU/bl
 
 > **set** **useScreenSpaceSizeCulling**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:463](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L463)
+Defined in: [src/display/mesh/Mesh.ts:463](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L463)
 
 **`Experimental`**
 
@@ -1892,7 +1892,7 @@ Defined in: [src/display/mesh/Mesh.ts:463](https://github.com/redcamel/RedGPU/bl
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L46)
 
 **`Experimental`**
 
@@ -1916,7 +1916,7 @@ UUID 문자열
 
 > **get** **vertexStateBuffers**(): `GPUVertexBufferLayout`[]
 
-Defined in: [src/display/mesh/Mesh.ts:504](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L504)
+Defined in: [src/display/mesh/Mesh.ts:504](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L504)
 
 **`Experimental`**
 
@@ -1938,7 +1938,7 @@ Defined in: [src/display/mesh/Mesh.ts:504](https://github.com/redcamel/RedGPU/bl
 
 > **get** **x**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:591](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L591)
+Defined in: [src/display/mesh/Mesh.ts:591](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L591)
 
 **`Experimental`**
 
@@ -1952,7 +1952,7 @@ X 위치 좌표를 반환합니다.
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:602](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L602)
+Defined in: [src/display/mesh/Mesh.ts:602](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L602)
 
 **`Experimental`**
 
@@ -1980,7 +1980,7 @@ X 위치 좌표를 설정합니다.
 
 > **get** **y**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:611](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L611)
+Defined in: [src/display/mesh/Mesh.ts:611](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L611)
 
 **`Experimental`**
 
@@ -1994,7 +1994,7 @@ Y 위치 좌표를 반환합니다.
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:622](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L622)
+Defined in: [src/display/mesh/Mesh.ts:622](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L622)
 
 **`Experimental`**
 
@@ -2022,7 +2022,7 @@ Y 위치 좌표를 설정합니다.
 
 > **get** **z**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:631](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L631)
+Defined in: [src/display/mesh/Mesh.ts:631](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L631)
 
 **`Experimental`**
 
@@ -2036,7 +2036,7 @@ Z 위치 좌표를 반환합니다.
 
 > **set** **z**(`value`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:642](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L642)
+Defined in: [src/display/mesh/Mesh.ts:642](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L642)
 
 **`Experimental`**
 
@@ -2062,7 +2062,7 @@ Z 위치 좌표를 설정합니다.
 
 > **addChild**(`child`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:71](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/Object3DContainer.ts#L71)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:71](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L71)
 
 **`Experimental`**
 
@@ -2090,7 +2090,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:71](https://github.com/r
 
 > **addChildAt**(`child`, `index`): `Line3D`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/Object3DContainer.ts#L89)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L89)
 
 **`Experimental`**
 
@@ -2119,7 +2119,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/r
 
 > **addListener**(`eventName`, `callback`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:936](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L936)
+Defined in: [src/display/mesh/Mesh.ts:936](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L936)
 
 **`Experimental`**
 
@@ -2146,7 +2146,7 @@ Defined in: [src/display/mesh/Mesh.ts:936](https://github.com/redcamel/RedGPU/bl
 
 > **clone**(): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/Mesh.ts:1046](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L1046)
+Defined in: [src/display/mesh/Mesh.ts:1046](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L1046)
 
 **`Experimental`**
 
@@ -2168,7 +2168,7 @@ Defined in: [src/display/mesh/Mesh.ts:1046](https://github.com/redcamel/RedGPU/b
 
 > **contains**(`child`): `boolean`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:61](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/Object3DContainer.ts#L61)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:61](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L61)
 
 **`Experimental`**
 
@@ -2196,7 +2196,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:61](https://github.com/r
 
 > **createMeshVertexShaderModuleBASIC**(`VERTEX_SHADER_MODULE_NAME`, `SHADER_INFO`, `UNIFORM_STRUCT_BASIC`, `vertexModuleSource`): `GPUShaderModule`
 
-Defined in: [src/display/mesh/Mesh.ts:1818](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L1818)
+Defined in: [src/display/mesh/Mesh.ts:1818](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L1818)
 
 **`Experimental`**
 
@@ -2223,7 +2223,7 @@ Defined in: [src/display/mesh/Mesh.ts:1818](https://github.com/redcamel/RedGPU/b
 
 > **dispose**(): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:832](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L832)
+Defined in: [src/display/mesh/Mesh.ts:832](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L832)
 
 **`Experimental`**
 
@@ -2243,7 +2243,7 @@ Defined in: [src/display/mesh/Mesh.ts:832](https://github.com/redcamel/RedGPU/bl
 
 > **getChildAt**(`index`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:111](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/Object3DContainer.ts#L111)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:111](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L111)
 
 **`Experimental`**
 
@@ -2271,7 +2271,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:111](https://github.com/
 
 > **getChildIndex**(`child`): `number`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:125](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/Object3DContainer.ts#L125)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:125](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L125)
 
 **`Experimental`**
 
@@ -2299,7 +2299,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:125](https://github.com/
 
 > **getCombinedOpacity**(): `number`
 
-Defined in: [src/display/mesh/Mesh.ts:918](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L918)
+Defined in: [src/display/mesh/Mesh.ts:918](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L918)
 
 **`Experimental`**
 
@@ -2321,7 +2321,7 @@ Defined in: [src/display/mesh/Mesh.ts:918](https://github.com/redcamel/RedGPU/bl
 
 > **getScreenPoint**(`view`): \[`number`, `number`\]
 
-Defined in: [src/display/mesh/core/MeshBase.ts:109](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/MeshBase.ts#L109)
+Defined in: [src/display/mesh/core/MeshBase.ts:109](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/MeshBase.ts#L109)
 
 **`Experimental`**
 
@@ -2345,7 +2345,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:109](https://github.com/redcamel/
 
 > **initGPURenderInfos**(): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:1804](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L1804)
+Defined in: [src/display/mesh/Mesh.ts:1804](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L1804)
 
 **`Experimental`**
 
@@ -2363,7 +2363,7 @@ Defined in: [src/display/mesh/Mesh.ts:1804](https://github.com/redcamel/RedGPU/b
 
 > **localToWorld**(`x`, `y`, `z`): \[`number`, `number`, `number`\]
 
-Defined in: [src/display/mesh/core/MeshBase.ts:105](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/MeshBase.ts#L105)
+Defined in: [src/display/mesh/core/MeshBase.ts:105](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/MeshBase.ts#L105)
 
 **`Experimental`**
 
@@ -2389,7 +2389,7 @@ Defined in: [src/display/mesh/core/MeshBase.ts:105](https://github.com/redcamel/
 
 > **lookAt**(`targetX`, `targetY?`, `targetZ?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:954](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L954)
+Defined in: [src/display/mesh/Mesh.ts:954](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L954)
 
 **`Experimental`**
 
@@ -2417,7 +2417,7 @@ Defined in: [src/display/mesh/Mesh.ts:954](https://github.com/redcamel/RedGPU/bl
 
 > **removeAllChildren**(): `Line3D`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:234](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/Object3DContainer.ts#L234)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:234](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L234)
 
 **`Experimental`**
 
@@ -2439,7 +2439,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:234](https://github.com/
 
 > **removeChild**(`child`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:203](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/Object3DContainer.ts#L203)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:203](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L203)
 
 **`Experimental`**
 
@@ -2467,7 +2467,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:203](https://github.com/
 
 > **removeChildAt**(`index`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:219](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/Object3DContainer.ts#L219)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:219](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L219)
 
 **`Experimental`**
 
@@ -2495,7 +2495,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:219](https://github.com/
 
 > **render**(`renderViewStateData`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:1068](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L1068)
+Defined in: [src/display/mesh/Mesh.ts:1068](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L1068)
 
 **`Experimental`**
 
@@ -2521,7 +2521,7 @@ Defined in: [src/display/mesh/Mesh.ts:1068](https://github.com/redcamel/RedGPU/b
 
 > **setCastShadowRecursively**(`value?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:864](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L864)
+Defined in: [src/display/mesh/Mesh.ts:864](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L864)
 
 **`Experimental`**
 
@@ -2547,7 +2547,7 @@ Defined in: [src/display/mesh/Mesh.ts:864](https://github.com/redcamel/RedGPU/bl
 
 > **setChildIndex**(`child`, `index`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:140](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/Object3DContainer.ts#L140)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:140](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L140)
 
 **`Experimental`**
 
@@ -2574,7 +2574,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:140](https://github.com/
 
 > **setEnableDebuggerRecursively**(`enableDebugger?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:846](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L846)
+Defined in: [src/display/mesh/Mesh.ts:846](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L846)
 
 **`Experimental`**
 
@@ -2600,7 +2600,7 @@ Defined in: [src/display/mesh/Mesh.ts:846](https://github.com/redcamel/RedGPU/bl
 
 > **setIgnoreFrustumCullingRecursively**(`value?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:900](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L900)
+Defined in: [src/display/mesh/Mesh.ts:900](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L900)
 
 **`Experimental`**
 
@@ -2626,7 +2626,7 @@ Defined in: [src/display/mesh/Mesh.ts:900](https://github.com/redcamel/RedGPU/bl
 
 > **setPosition**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:1005](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L1005)
+Defined in: [src/display/mesh/Mesh.ts:1005](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L1005)
 
 **`Experimental`**
 
@@ -2654,7 +2654,7 @@ Defined in: [src/display/mesh/Mesh.ts:1005](https://github.com/redcamel/RedGPU/b
 
 > **setReceiveShadowRecursively**(`value?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:882](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L882)
+Defined in: [src/display/mesh/Mesh.ts:882](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L882)
 
 **`Experimental`**
 
@@ -2680,7 +2680,7 @@ Defined in: [src/display/mesh/Mesh.ts:882](https://github.com/redcamel/RedGPU/bl
 
 > **setRotation**(`rotationX`, `rotationY?`, `rotationZ?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:1028](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L1028)
+Defined in: [src/display/mesh/Mesh.ts:1028](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L1028)
 
 **`Experimental`**
 
@@ -2708,7 +2708,7 @@ Defined in: [src/display/mesh/Mesh.ts:1028](https://github.com/redcamel/RedGPU/b
 
 > **setScale**(`x`, `y?`, `z?`): `void`
 
-Defined in: [src/display/mesh/Mesh.ts:982](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/Mesh.ts#L982)
+Defined in: [src/display/mesh/Mesh.ts:982](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/Mesh.ts#L982)
 
 **`Experimental`**
 
@@ -2736,7 +2736,7 @@ Defined in: [src/display/mesh/Mesh.ts:982](https://github.com/redcamel/RedGPU/bl
 
 > **swapChildren**(`child1`, `child2`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/Object3DContainer.ts#L163)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L163)
 
 **`Experimental`**
 
@@ -2763,7 +2763,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/
 
 > **swapChildrenAt**(`index1`, `index2`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:183](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/Object3DContainer.ts#L183)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:183](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L183)
 
 **`Experimental`**
 
@@ -2790,7 +2790,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:183](https://github.com/
 
 > **worldToLocal**(`x`, `y`, `z`): \[`number`, `number`, `number`\]
 
-Defined in: [src/display/mesh/core/MeshBase.ts:101](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/mesh/core/MeshBase.ts#L101)
+Defined in: [src/display/mesh/core/MeshBase.ts:101](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/MeshBase.ts#L101)
 
 **`Experimental`**
 

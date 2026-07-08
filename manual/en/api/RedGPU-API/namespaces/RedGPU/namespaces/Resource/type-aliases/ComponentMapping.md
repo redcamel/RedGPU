@@ -8,7 +8,7 @@
 
 > **ComponentMapping** = `object`
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:9](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/resources/texture/packedTexture/PackedTexture.ts#L9)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:9](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/packedTexture/PackedTexture.ts#L9)
 
 Component mapping type definition
 
@@ -18,7 +18,7 @@ Component mapping type definition
 
 > `optional` **a?**: `"r"` \| `"g"` \| `"b"` \| `"a"`
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:13](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/resources/texture/packedTexture/PackedTexture.ts#L13)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:13](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/packedTexture/PackedTexture.ts#L13)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:13](https://gi
 
 > `optional` **b?**: `"r"` \| `"g"` \| `"b"` \| `"a"`
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:12](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/resources/texture/packedTexture/PackedTexture.ts#L12)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:12](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/packedTexture/PackedTexture.ts#L12)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:12](https://gi
 
 > `optional` **g?**: `"r"` \| `"g"` \| `"b"` \| `"a"`
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:11](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/resources/texture/packedTexture/PackedTexture.ts#L11)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:11](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/packedTexture/PackedTexture.ts#L11)
 
 ***
 
@@ -42,4 +42,4 @@ Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:11](https://gi
 
 > `optional` **r?**: `"r"` \| `"g"` \| `"b"` \| `"a"`
 
-Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:10](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/resources/texture/packedTexture/PackedTexture.ts#L10)
+Defined in: [src/resources/texture/packedTexture/PackedTexture.ts:10](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/packedTexture/PackedTexture.ts#L10)

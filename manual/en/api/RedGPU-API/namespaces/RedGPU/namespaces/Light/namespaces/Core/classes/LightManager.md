@@ -6,7 +6,7 @@
 
 # Class: LightManager
 
-Defined in: [src/light/core/LightManager.ts:30](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L30)
+Defined in: [src/light/core/LightManager.ts:30](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L30)
 
 Class that manages all lights within a scene.
 ::: warning
@@ -40,7 +40,7 @@ lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
 
 > **get** **ambientLight**(): [`AmbientLight`](../../../classes/AmbientLight.md)
 
-Defined in: [src/light/core/LightManager.ts:176](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L176)
+Defined in: [src/light/core/LightManager.ts:176](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L176)
 
 Returns the currently set AmbientLight.
 
@@ -54,7 +54,7 @@ AmbientLight instance or null
 
 > **set** **ambientLight**(`value`): `void`
 
-Defined in: [src/light/core/LightManager.ts:191](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L191)
+Defined in: [src/light/core/LightManager.ts:191](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L191)
 
 Sets the AmbientLight.
 
@@ -80,7 +80,7 @@ Throws an error if a value that is not an AmbientLight instance is passed.
 
 > **get** **directionalLightCount**(): `number`
 
-Defined in: [src/light/core/LightManager.ts:152](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L152)
+Defined in: [src/light/core/LightManager.ts:152](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L152)
 
 Returns the number of registered directional lights.
 
@@ -98,7 +98,7 @@ Number of directional lights
 
 > **get** **directionalLights**(): [`DirectionalLight`](../../../classes/DirectionalLight.md)[]
 
-Defined in: [src/light/core/LightManager.ts:164](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L164)
+Defined in: [src/light/core/LightManager.ts:164](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L164)
 
 Returns the array of registered directional lights.
 
@@ -116,7 +116,7 @@ Array of registered DirectionalLights
 
 > **get** **limitClusterLightCount**(): `number`
 
-Defined in: [src/light/core/LightManager.ts:104](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L104)
+Defined in: [src/light/core/LightManager.ts:104](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L104)
 
 Returns the maximum allowable count for cluster lights (Point + Spot).
 
@@ -134,7 +134,7 @@ Maximum number of cluster lights
 
 > **get** **limitDirectionalLightCount**(): `number`
 
-Defined in: [src/light/core/LightManager.ts:140](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L140)
+Defined in: [src/light/core/LightManager.ts:140](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L140)
 
 Returns the maximum allowable count for directional lights.
 
@@ -152,7 +152,7 @@ Maximum number of directional lights
 
 > **get** **pointLightCount**(): `number`
 
-Defined in: [src/light/core/LightManager.ts:128](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L128)
+Defined in: [src/light/core/LightManager.ts:128](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L128)
 
 Returns the number of registered point lights.
 
@@ -170,7 +170,7 @@ Number of point lights
 
 > **get** **pointLights**(): [`PointLight`](../../../classes/PointLight.md)[]
 
-Defined in: [src/light/core/LightManager.ts:116](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L116)
+Defined in: [src/light/core/LightManager.ts:116](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L116)
 
 Returns the array of registered point lights.
 
@@ -188,7 +188,7 @@ Array of registered PointLights
 
 > **get** **spotLightCount**(): `number`
 
-Defined in: [src/light/core/LightManager.ts:92](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L92)
+Defined in: [src/light/core/LightManager.ts:92](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L92)
 
 Returns the number of registered spot lights.
 
@@ -206,7 +206,7 @@ Number of spot lights
 
 > **get** **spotLights**(): [`SpotLight`](../../../classes/SpotLight.md)[]
 
-Defined in: [src/light/core/LightManager.ts:80](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L80)
+Defined in: [src/light/core/LightManager.ts:80](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L80)
 
 Returns the array of registered spot lights.
 
@@ -222,7 +222,7 @@ Array of registered SpotLights
 
 > **addDirectionalLight**(`value`): `void`
 
-Defined in: [src/light/core/LightManager.ts:262](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L262)
+Defined in: [src/light/core/LightManager.ts:262](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L262)
 
 Adds a DirectionalLight.
 
@@ -251,7 +251,7 @@ Throws an error if the maximum number of directional lights is exceeded.
 
 > **addPointLight**(`value`): `void`
 
-Defined in: [src/light/core/LightManager.ts:237](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L237)
+Defined in: [src/light/core/LightManager.ts:237](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L237)
 
 Adds a PointLight.
 
@@ -280,7 +280,7 @@ Throws an error if the total count combined with SpotLights exceeds the cluster 
 
 > **addSpotLight**(`value`): `void`
 
-Defined in: [src/light/core/LightManager.ts:212](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L212)
+Defined in: [src/light/core/LightManager.ts:212](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L212)
 
 Adds a SpotLight.
 
@@ -309,7 +309,7 @@ Throws an error if the total count combined with PointLights exceeds the cluster
 
 > **getDirectionalLightProjectionMatrix**(`view`): [`mat4`](../../../../Math/type-aliases/mat4.md)
 
-Defined in: [src/light/core/LightManager.ts:374](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L374)
+Defined in: [src/light/core/LightManager.ts:374](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L374)
 
 Calculates and returns the projection (orthographic) matrix of the directional light.
 
@@ -331,7 +331,7 @@ mat4 projection matrix
 
 > **getDirectionalLightProjectionViewMatrix**(`view`): [`mat4`](../../../../Math/type-aliases/mat4.md)
 
-Defined in: [src/light/core/LightManager.ts:359](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L359)
+Defined in: [src/light/core/LightManager.ts:359](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L359)
 
 Returns the projection-view matrix of the directional light.
 
@@ -353,7 +353,7 @@ mat4 projection-view matrix
 
 > **getDirectionalLightViewMatrix**(`view`): [`mat4`](../../../../Math/type-aliases/mat4.md)
 
-Defined in: [src/light/core/LightManager.ts:389](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L389)
+Defined in: [src/light/core/LightManager.ts:389](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L389)
 
 Calculates and returns the view (lookAt) matrix of the main directional light.
 
@@ -375,7 +375,7 @@ mat4 view matrix
 
 > **removeAllDirectionalLight**(): `void`
 
-Defined in: [src/light/core/LightManager.ts:330](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L330)
+Defined in: [src/light/core/LightManager.ts:330](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L330)
 
 Removes all DirectionalLights.
 
@@ -389,7 +389,7 @@ Removes all DirectionalLights.
 
 > **removeAllLight**(): `void`
 
-Defined in: [src/light/core/LightManager.ts:341](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L341)
+Defined in: [src/light/core/LightManager.ts:341](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L341)
 
 Removes all lights in the scene.
 
@@ -405,7 +405,7 @@ Removes all point, spot, and directional lights, and sets ambient light to null.
 
 > **removeAllPointLight**(): `void`
 
-Defined in: [src/light/core/LightManager.ts:322](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L322)
+Defined in: [src/light/core/LightManager.ts:322](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L322)
 
 Removes all PointLights.
 
@@ -419,7 +419,7 @@ Removes all PointLights.
 
 > **removeAllSpotLight**(): `void`
 
-Defined in: [src/light/core/LightManager.ts:314](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L314)
+Defined in: [src/light/core/LightManager.ts:314](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L314)
 
 Removes all SpotLights.
 
@@ -433,7 +433,7 @@ Removes all SpotLights.
 
 > **removeDirectionalLight**(`value`): `void`
 
-Defined in: [src/light/core/LightManager.ts:305](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L305)
+Defined in: [src/light/core/LightManager.ts:305](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L305)
 
 Removes a specific DirectionalLight.
 
@@ -453,7 +453,7 @@ Removes a specific DirectionalLight.
 
 > **removePointLight**(`value`): `void`
 
-Defined in: [src/light/core/LightManager.ts:292](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L292)
+Defined in: [src/light/core/LightManager.ts:292](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L292)
 
 Removes a specific PointLight.
 
@@ -473,7 +473,7 @@ Removes a specific PointLight.
 
 > **removeSpotLight**(`value`): `void`
 
-Defined in: [src/light/core/LightManager.ts:279](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/light/core/LightManager.ts#L279)
+Defined in: [src/light/core/LightManager.ts:279](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/light/core/LightManager.ts#L279)
 
 Removes a specific SpotLight.
 

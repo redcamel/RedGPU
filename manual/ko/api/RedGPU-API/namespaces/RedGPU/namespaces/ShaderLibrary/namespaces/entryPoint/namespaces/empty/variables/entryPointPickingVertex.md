@@ -8,7 +8,7 @@
 
 > `const` **entryPointPickingVertex**: `string` = `emptyEntryPointPickingVertex_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2259](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/systemCodeManager/ShaderLibrary.ts#L2259)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2259](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/systemCodeManager/ShaderLibrary.ts#L2259)
 
 비어있는 피킹 버텍스 셰이더 엔트리 포인트입니다.
 

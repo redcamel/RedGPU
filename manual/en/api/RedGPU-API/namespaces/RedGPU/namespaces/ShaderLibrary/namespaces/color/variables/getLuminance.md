@@ -8,7 +8,7 @@
 
 > `const` **getLuminance**: `string` = `getLuminance_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:1151](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/systemCodeManager/ShaderLibrary.ts#L1151)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:1151](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/systemCodeManager/ShaderLibrary.ts#L1151)
 
 Calculates the luminance of an RGB color. (Applying Rec. 709 standard weights)
 

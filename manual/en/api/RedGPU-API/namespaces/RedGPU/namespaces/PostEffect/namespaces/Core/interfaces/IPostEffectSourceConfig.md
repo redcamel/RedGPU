@@ -6,7 +6,7 @@
 
 # Interface: IPostEffectSourceConfig
 
-Defined in: [src/postEffect/core/types.ts:22](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/postEffect/core/types.ts#L22)
+Defined in: [src/postEffect/core/types.ts:22](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/core/types.ts#L22)
 
 Post-effect source texture configuration interface
 
@@ -16,7 +16,7 @@ Post-effect source texture configuration interface
 
 > `optional` **isSampled?**: `boolean`
 
-Defined in: [src/postEffect/core/types.ts:26](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/postEffect/core/types.ts#L26)
+Defined in: [src/postEffect/core/types.ts:26](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/core/types.ts#L26)
 
 Whether to use as a sampleable type (texture_2d)
 
@@ -26,6 +26,6 @@ Whether to use as a sampleable type (texture_2d)
 
 > **name**: `string`
 
-Defined in: [src/postEffect/core/types.ts:24](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/postEffect/core/types.ts#L24)
+Defined in: [src/postEffect/core/types.ts:24](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/core/types.ts#L24)
 
 Texture name

@@ -8,4 +8,4 @@
 
 > `const` **HPI**: `"const HPI: f32 = 1.5707963267948966;"` = `'const HPI: f32 = 1.5707963267948966;'`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:889](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/systemCodeManager/ShaderLibrary.ts#L889)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:889](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/systemCodeManager/ShaderLibrary.ts#L889)

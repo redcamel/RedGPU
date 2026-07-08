@@ -8,7 +8,7 @@
 
 > **getFragmentBindGroupLayoutDescriptorFromShaderInfo**(`SHADER_INFO`, `targetGroupIndex`): `object`
 
-Defined in: [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:118](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L118)
+Defined in: [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:118](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L118)
 
 Generates a fragment bind group layout descriptor from shader information.
 
@@ -25,4 +25,4 @@ Generates a fragment bind group layout descriptor from shader information.
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `entries` | `GPUBindGroupLayoutEntry`[] | [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:105](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L105) |
+| `entries` | `GPUBindGroupLayoutEntry`[] | [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:105](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L105) |

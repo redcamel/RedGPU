@@ -8,7 +8,7 @@
 
 > `const` **getRayDirection**: `string` = `getRayDirection_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:639](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/systemCodeManager/ShaderLibrary.ts#L639)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:639](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/systemCodeManager/ShaderLibrary.ts#L639)
 
 Calculates the normalized ray direction vector (vector toward the pixel) using camera position and world position.
 

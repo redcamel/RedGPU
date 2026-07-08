@@ -8,7 +8,7 @@
 
 > `const` **SYSTEM\_UNIFORM**: `string` = `SYSTEM_UNIFORM_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2963](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/systemCodeManager/ShaderLibrary.ts#L2963)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2963](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/systemCodeManager/ShaderLibrary.ts#L2963)
 
 엔진의 표준 시스템 유니폼 및 전역 바인딩 구조체 정의입니다.
 

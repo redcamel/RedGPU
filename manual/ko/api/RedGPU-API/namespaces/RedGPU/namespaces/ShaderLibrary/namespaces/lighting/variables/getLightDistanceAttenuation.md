@@ -8,7 +8,7 @@
 
 > `const` **getLightDistanceAttenuation**: `string` = `getLightDistanceAttenuation_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:1453](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/systemCodeManager/ShaderLibrary.ts#L1453)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:1453](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/systemCodeManager/ShaderLibrary.ts#L1453)
 
 물리적인 역제곱 법칙(Inverse Square Law)에 따른 광원 감쇄 계수를 계산합니다.
 

@@ -8,7 +8,7 @@
 
 > `const` **POST\_EFFECT\_SYSTEM\_UNIFORM**: `string` = `POST_EFFECT_SYSTEM_UNIFORM_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2988](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/systemCodeManager/ShaderLibrary.ts#L2988)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2988](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/systemCodeManager/ShaderLibrary.ts#L2988)
 
 포스트 이펙트 시스템 유니폼 구조체입니다.
 

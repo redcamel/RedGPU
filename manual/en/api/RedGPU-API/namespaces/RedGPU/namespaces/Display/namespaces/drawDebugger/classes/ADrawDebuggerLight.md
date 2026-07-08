@@ -6,7 +6,7 @@
 
 # Abstract Class: ADrawDebuggerLight\<T\>
 
-Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:34](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L34)
+Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:34](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L34)
 
 광원(Light) 디버거들의 조명 매개변수 및 시각 가이드를 그리기 위한 공통 추상 부모 클래스입니다.
 
@@ -40,7 +40,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > `protected` **new ADrawDebuggerLight**\<`T`\>(`redGPUContext`, `target`, `labelIcon`, `color`, `maxLines?`): `ADrawDebuggerLight`\<`T`\>
 
-Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:40](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L40)
+Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:40](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L40)
 
 #### Parameters
 
@@ -64,7 +64,7 @@ Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:40](https://gi
 
 > **get** **label**(): [`TextField3D`](../../../classes/TextField3D.md)
 
-Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:60](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L60)
+Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:60](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L60)
 
 ##### Returns
 
@@ -78,7 +78,7 @@ Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:60](https://gi
 
 > **get** **lightDebugMesh**(): [`Mesh`](../../../classes/Mesh.md)
 
-Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:64](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L64)
+Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:64](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L64)
 
 ##### Returns
 
@@ -92,7 +92,7 @@ Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:64](https://gi
 
 > **get** **target**(): `T`
 
-Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:56](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L56)
+Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:56](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L56)
 
 ##### Returns
 
@@ -104,7 +104,7 @@ Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:56](https://gi
 
 > `abstract` **render**(`renderViewStateData`): `void`
 
-Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:106](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L106)
+Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:106](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L106)
 
 #### Parameters
 
@@ -122,7 +122,7 @@ Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:106](https://g
 
 > **updateVertexBuffer**(`lines`, `vertexBuffer`): `void`
 
-Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:68](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L68)
+Defined in: [src/display/drawDebugger/light/ADrawDebuggerLight.ts:68](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/drawDebugger/light/ADrawDebuggerLight.ts#L68)
 
 #### Parameters
 

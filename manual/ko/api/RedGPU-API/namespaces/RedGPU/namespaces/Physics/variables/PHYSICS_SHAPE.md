@@ -8,7 +8,7 @@
 
 > `const` **PHYSICS\_SHAPE**: `object`
 
-Defined in: [src/physics/PhysicsShape.ts:13](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/physics/PhysicsShape.ts#L13)
+Defined in: [src/physics/PhysicsShape.ts:13](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/physics/PhysicsShape.ts#L13)
 
 **`Experimental`**
 

@@ -6,7 +6,7 @@
 
 # Class: AutoExposure
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:26](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L26)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:26](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L26)
 
 자동 노출(Auto-Exposure) 및 눈 적응(Eye Adaptation)을 수행하는 클래스입니다.
 
@@ -24,7 +24,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:26](https://github.com
 
 > **new AutoExposure**(`view`): `AutoExposure`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:65](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L65)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:65](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L65)
 
 #### Parameters
 
@@ -48,7 +48,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:65](https://github.com
 
 > **get** **adaptationSpeedDown**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:200](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L200)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:200](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L200)
 
 눈 적응 속도(어두워질 때)를 반환합니다.
 
@@ -62,7 +62,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:200](https://github.co
 
 > **set** **adaptationSpeedDown**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:212](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L212)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:212](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L212)
 
 눈 적응 속도(어두워질 때)를 설정합니다.
 
@@ -84,7 +84,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:212](https://github.co
 
 > **get** **adaptationSpeedUp**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:176](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L176)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:176](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L176)
 
 눈 적응 속도(밝아질 때)를 반환합니다.
 
@@ -98,7 +98,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:176](https://github.co
 
 > **set** **adaptationSpeedUp**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:188](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L188)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:188](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L188)
 
 눈 적응 속도(밝아질 때)를 설정합니다.
 
@@ -120,7 +120,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:188](https://github.co
 
 > **get** **adaptedLuminanceBuffer**(): [`StorageBuffer`](../../../../Resource/classes/StorageBuffer.md)
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:359](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L359)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:359](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L359)
 
 적응된 EV100 데이터가 저장되는 GPU 스토리지 버퍼를 반환합니다.
 
@@ -138,7 +138,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:359](https://github.co
 
 > **get** **currentAdaptedEV100**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:333](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L333)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:333](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L333)
 
 현재 적응된 EV100 값을 반환합니다.
 
@@ -152,7 +152,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:333](https://github.co
 
 > **set** **currentAdaptedEV100**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:345](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L345)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:345](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L345)
 
 현재 적응된 EV100 값을 설정합니다. (GPU 버퍼도 함께 갱신)
 
@@ -174,7 +174,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:345](https://github.co
 
 > **get** **exposureCompensation**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:80](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L80)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:80](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L80)
 
 노출 보정(Exposure Compensation) 값을 반환합니다.
 
@@ -188,7 +188,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:80](https://github.com
 
 > **set** **exposureCompensation**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:92](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L92)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:92](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L92)
 
 노출 보정(Exposure Compensation) 값을 설정합니다.
 
@@ -210,7 +210,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:92](https://github.com
 
 > **get** **highPercentile**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:248](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L248)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:248](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L248)
 
 히스토그램 분석 범위(상위 퍼센트 제외)를 반환합니다.
 
@@ -224,7 +224,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:248](https://github.co
 
 > **set** **highPercentile**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:260](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L260)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:260](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L260)
 
 히스토그램 분석 범위(상위 퍼센트 제외)를 설정합니다.
 
@@ -246,7 +246,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:260](https://github.co
 
 > **get** **lowPercentile**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:224](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L224)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:224](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L224)
 
 히스토그램 분석 범위(하위 퍼센트 제외)를 반환합니다.
 
@@ -260,7 +260,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:224](https://github.co
 
 > **set** **lowPercentile**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:236](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L236)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:236](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L236)
 
 히스토그램 분석 범위(하위 퍼센트 제외)를 설정합니다.
 
@@ -282,7 +282,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:236](https://github.co
 
 > **get** **maxEV100**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:152](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L152)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:152](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L152)
 
 자동 노출 최대 EV100을 반환합니다.
 
@@ -296,7 +296,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:152](https://github.co
 
 > **set** **maxEV100**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:164](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L164)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:164](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L164)
 
 자동 노출 최대 EV100을 설정합니다.
 
@@ -318,7 +318,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:164](https://github.co
 
 > **get** **maxExposureMultiplier**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:272](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L272)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:272](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L272)
 
 자동 노출의 최대 증폭 배율을 반환합니다.
 
@@ -332,7 +332,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:272](https://github.co
 
 > **set** **maxExposureMultiplier**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:284](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L284)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:284](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L284)
 
 자동 노출의 최대 증폭 배율을 설정합니다. (기본값: 16.0)
 
@@ -354,7 +354,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:284](https://github.co
 
 > **get** **meteringMode**(): [`METERING_MODE`](../enumerations/METERING_MODE.md)
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:296](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L296)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:296](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L296)
 
 자동 노출의 측광 모드(Metering Mode)를 반환합니다.
 
@@ -368,7 +368,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:296](https://github.co
 
 > **set** **meteringMode**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:308](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L308)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:308](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L308)
 
 자동 노출의 측광 모드(Metering Mode)를 설정합니다.
 
@@ -390,7 +390,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:308](https://github.co
 
 > **get** **minEV100**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:128](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L128)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:128](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L128)
 
 자동 노출 최소 EV100을 반환합니다.
 
@@ -404,7 +404,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:128](https://github.co
 
 > **set** **minEV100**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:140](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L140)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:140](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L140)
 
 자동 노출 최소 EV100을 설정합니다.
 
@@ -426,7 +426,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:140](https://github.co
 
 > **get** **preExposure**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:320](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L320)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:320](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L320)
 
 현재 적응된 노출 배율(preExposure)을 반환합니다.
 
@@ -444,7 +444,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:320](https://github.co
 
 > **get** **targetLuminance**(): `number`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:104](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L104)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:104](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L104)
 
 목표 휘도를 반환합니다.
 
@@ -458,7 +458,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:104](https://github.co
 
 > **set** **targetLuminance**(`value`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:116](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L116)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:116](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L116)
 
 목표 휘도를 설정합니다.
 
@@ -478,7 +478,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:116](https://github.co
 
 > **render**(`sourceTextureInfo`): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:371](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L371)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:371](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L371)
 
 자동 노출 처리를 수행합니다. (커맨드 기록)
 
@@ -498,7 +498,7 @@ Defined in: [src/camera/core/autoExposure/AutoExposure.ts:371](https://github.co
 
 > **resolveReadback**(): `void`
 
-Defined in: [src/camera/core/autoExposure/AutoExposure.ts:479](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/camera/core/autoExposure/AutoExposure.ts#L479)
+Defined in: [src/camera/core/autoExposure/AutoExposure.ts:479](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/camera/core/autoExposure/AutoExposure.ts#L479)
 
 GPU 작업 완료 후 데이터를 비동기적으로 읽어옵니다. (Renderer에서 호출)
 
@@ -518,7 +518,7 @@ GPU 작업 완료 후 데이터를 비동기적으로 읽어옵니다. (Renderer
 
 > `readonly` **instanceId**: `number`
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L18)
+Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L18)
 
 클래스별 인스턴스 순번 ID
 
@@ -534,7 +534,7 @@ Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L76)
 
 안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -556,7 +556,7 @@ AntialiasingManager 인스턴스
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L88)
 
 커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -578,7 +578,7 @@ CommandEncoderManager 인스턴스
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L52)
 
 WebGPU 디바이스 객체를 반환합니다. (단축 경로)
 
@@ -600,7 +600,7 @@ GPUDevice 인스턴스
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L58)
 
 객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
 
@@ -614,7 +614,7 @@ Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L70)
 
 객체의 이름을 설정합니다.
 
@@ -640,7 +640,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L40)
 
 RedGPUContext 인스턴스를 반환합니다.
 
@@ -662,7 +662,7 @@ RedGPUContext 인스턴스
 
 > **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L64)
 
 리소스 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -684,7 +684,7 @@ ResourceManager 인스턴스
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L46)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 

@@ -6,7 +6,7 @@
 
 # Interface: DefineSamplerInfo
 
-Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:8](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/defineProperty/funcs/texture/defineSampler.ts#L8)
+Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:8](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/defineProperty/funcs/texture/defineSampler.ts#L8)
 
 `defineSampler` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
 
@@ -16,6 +16,6 @@ Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:8](https://github
 
 > **key**: `string`
 
-Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:13](https://github.com/redcamel/RedGPU/blob/d8e9f05bb1256579c84cecea5c335fe1722c97f6/src/defineProperty/funcs/texture/defineSampler.ts#L13)
+Defined in: [src/defineProperty/funcs/texture/defineSampler.ts:13](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/defineProperty/funcs/texture/defineSampler.ts#L13)
 
 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
