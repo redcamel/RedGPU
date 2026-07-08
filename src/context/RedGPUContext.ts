@@ -447,6 +447,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Destroys the GPU device and releases resources.
      */
     destroy() {
+        window?.cancelAnimationFrame(this.currentRequestAnimationFrame)
         if (this.#gpuContext) {
             try {
                 this.gpuContext.unconfigure();
@@ -455,7 +456,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
                 keepLog('⚠️ Canvas Context unconfigure 실패:', e);
             }
         }
-        window?.cancelAnimationFrame(this.currentRequestAnimationFrame)
+
         this.#observer?.destroy()
         this.#gpuDevice.destroy()
         // clear Global SSBO
