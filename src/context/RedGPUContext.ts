@@ -462,6 +462,16 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#globalFragmentSSBO_PBR.destroy()
         this.#globalFragmentSSBO_BuiltIn.destroy()
         // clear Event
+        this.#clearEvent()
+        // 리소스 캐시 및 참조 끊기
+        this.removeAllViews();
+    }
+
+    /**
+     * [KO] 등록된 모든 이벤트 리스너를 해제합니다. (내부용)
+     * [EN] Removes all registered event listeners. (Internal use)
+     */
+    #clearEvent() {
         if (this.#onKeyUp) window?.removeEventListener('keyup', this.#onKeyUp)
         if (this.#onKeyDown) window?.removeEventListener('keydown', this.#onKeyDown)
         if (this.#onBlur) window?.removeEventListener('blur', this.#onBlur)
@@ -469,18 +479,14 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#onKeyDown = null
         this.#onBlur = null
 
-        // Canvas 리스너 해제
         this.#canvasListeners.forEach(({eventName, listener}) => {
             this.#htmlCanvas.removeEventListener(eventName, listener);
         });
         this.#canvasListeners = [];
 
-        // 리소스 캐시 및 참조 끊기
-        this.removeAllViews();
         this.onResize = null;
         this.#keyboardKeyBuffer = {};
     }
-
     /**
      * [KO] 컨텍스트의 크기를 설정합니다.
      * [EN] Sets the size of the context.
@@ -605,7 +611,9 @@ class RedGPUContext extends RedGPUContextViewContainer {
         console.log(`configurationDescription`, this.#configurationDescription);
         this.#gpuContext.configure(this.#configurationDescription);
     }
+
 }
+
 
 Object.freeze(RedGPUContext)
 export default RedGPUContext
