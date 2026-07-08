@@ -136,6 +136,10 @@ class RedGPUContext extends RedGPUContextViewContainer {
 
     #boundingClientRect: DOMRect
 
+    #onKeyDown: ((e: KeyboardEvent) => void) | null = null
+    #onKeyUp: ((e: KeyboardEvent) => void) | null = null
+    #onBlur: (() => void) | null = null
+
     /**
      * [KO] 캔버스 환경 변화 감지 옵저버
      * [EN] Canvas environment change detector observer
@@ -445,6 +449,12 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#globalVertexSSBO.destroy()
         this.#globalFragmentSSBO_PBR.destroy()
         this.#globalFragmentSSBO_BuiltIn.destroy()
+        if (this.#onKeyUp) window?.removeEventListener('keyup', this.#onKeyUp)
+        if (this.#onKeyDown) window?.removeEventListener('keydown', this.#onKeyDown)
+        if (this.#onBlur) window?.removeEventListener('blur', this.#onBlur)
+        this.#onKeyUp = null
+        this.#onKeyDown = null
+        this.#onBlur = null
     }
 
     /**
@@ -532,10 +542,10 @@ class RedGPUContext extends RedGPUContextViewContainer {
         })
         {
             // 키보드 이벤트 설정
-            const HD_keyDown = (e: KeyboardEvent) => {
+            this.#onKeyDown = (e: KeyboardEvent) => {
                 this.#keyboardKeyBuffer[e.key] = true
             };
-            const HD_keyUp = (e: KeyboardEvent) => {
+            this.#onKeyUp = (e: KeyboardEvent) => {
                 this.#keyboardKeyBuffer[e.key] = false;
                 const lower = e.key.toLowerCase();
                 const upper = e.key.toUpperCase();
@@ -544,14 +554,14 @@ class RedGPUContext extends RedGPUContextViewContainer {
                     this.#keyboardKeyBuffer[upper] = false;
                 }
             };
-            const HD_blur = () => {
+            this.#onBlur = () => {
                 for (const key in this.#keyboardKeyBuffer) {
                     delete this.#keyboardKeyBuffer[key];
                 }
             };
-            window?.addEventListener('keyup', HD_keyUp);
-            window?.addEventListener('keydown', HD_keyDown);
-            window?.addEventListener('blur', HD_blur);
+            window?.addEventListener('keyup', this.#onKeyUp);
+            window?.addEventListener('keydown', this.#onKeyDown);
+            window?.addEventListener('blur', this.#onBlur);
         }
     }
 
