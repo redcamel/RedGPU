@@ -66,7 +66,7 @@ class DrawDebuggerGrid extends BaseObject {
     constructor(redGPUContext: RedGPUContext) {
         super();
         validateRedGPUContext(redGPUContext)
-        this.#drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
+        this.#drawBufferManager = redGPUContext.drawBufferManager
         const {resourceManager, gpuDevice} = redGPUContext
         const moduleDescriptor: GPUShaderModuleDescriptor = {code: shaderSource}
         // const moduleDescriptor: GPUShaderModuleDescriptor = {code: SHADER_INFO.defaultSource}

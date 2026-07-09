@@ -9,7 +9,6 @@ import {keepLog} from "../../utils";
  * 동적 확장 가능한 버퍼 풀을 통해 무제한 드로우 커맨드를 지원합니다.
  */
 class DrawBufferManager extends RedGPUObject {
-    static #instance: DrawBufferManager
     // 드로우 커맨드 타입별 크기
     static readonly #INDEXED_COMMAND_SIZE = 5  // drawIndexedIndirect
 
@@ -24,16 +23,6 @@ class DrawBufferManager extends RedGPUObject {
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext)
         this.#initializeSystem()
-    }
-
-    /**
-     * DrawBufferManager 싱글톤 인스턴스를 가져옵니다.
-     */
-    static getInstance(redGPUContext: RedGPUContext): DrawBufferManager {
-        if (!DrawBufferManager.#instance) {
-            DrawBufferManager.#instance = new DrawBufferManager(redGPUContext)
-        }
-        return DrawBufferManager.#instance
     }
 
     /**
@@ -280,7 +269,6 @@ class DrawBufferManager extends RedGPUObject {
         this.#bufferPool = []
         this.#dataPool = []
         this.#usedBufferIndices.clear()
-        DrawBufferManager.#instance = null
         keepLog('🗑️ DrawBufferManager 해제됨')
     }
 }

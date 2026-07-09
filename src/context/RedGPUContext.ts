@@ -135,6 +135,11 @@ class RedGPUContext extends RedGPUContextViewContainer {
     #globalFragmentSSBO_PBR: GlobalStorageBufferManager
     #globalFragmentSSBO_BuiltIn: GlobalStorageBufferManager
 
+    /**
+     * [KO] 드로우 버퍼 매니저
+     * [EN] Draw buffer manager
+     */
+    readonly #drawBufferManager: DrawBufferManager
 
     #boundingClientRect: DOMRect
 
@@ -193,12 +198,21 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#resourceManager = new ResourceManager(this)
         this.#commandEncoderManager = new CommandEncoderManager(this)
         this.#antialiasingManager = new AntialiasingManager()
+        this.#drawBufferManager = new DrawBufferManager(this)
         // keepLog(ResourceManager.GLOBAL_FRAGMENT_PBR_STRUCT)
         // keepLog('ResourceManager.GLOBAL_VERTEX_STRUCT.size',ResourceManager.GLOBAL_VERTEX_STRUCT.size)
         this.#globalVertexSSBO = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_VERTEX_STRUCT.size, 2000, "GLOBAL_VERTEX_BUFFER")
         this.#globalFragmentSSBO_PBR = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_FRAGMENT_STRUCT_PBR.size, 1024, "GLOBAL_FRAGMENT_BUFFER")
         this.#globalFragmentSSBO_BuiltIn = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_FRAGMENT_STRUCT_BUILT_IN.size, 1024, "GLOBAL_FRAGMENT_BUILT_IN_BUFFER")
         this.#initialize()
+    }
+
+    /**
+     * [KO] 드로우 버퍼 매니저를 반환합니다.
+     * [EN] Returns the draw buffer manager.
+     */
+    get drawBufferManager(): DrawBufferManager {
+        return this.#drawBufferManager;
     }
 
     /**
@@ -479,7 +493,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#globalFragmentSSBO_PBR.destroy()
         this.#globalFragmentSSBO_BuiltIn.destroy()
         // clear DrawBufferManager
-        DrawBufferManager.getInstance(this).destroy();
+        this.#drawBufferManager.destroy();
         // clear Event
         this.#clearEvent()
 

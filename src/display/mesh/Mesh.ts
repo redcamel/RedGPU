@@ -300,7 +300,7 @@ class Mesh extends MeshBase {
         this._geometry = geometry;
         this._material = material;
         this.#pickingId = uuidToUint(this.uuid);
-        this.#drawBufferManager = DrawBufferManager.getInstance(redGPUContext);
+        this.#drawBufferManager = redGPUContext.drawBufferManager;
         this.#checkDrawCommandSlot();
         this.#LODManager = new LODManager(this, () => {
             this.dirtyLOD = true;

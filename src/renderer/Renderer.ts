@@ -3,7 +3,6 @@ import View3D from "../display/view/View3D";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnimationLooperManager";
-import DrawBufferManager from "./core/DrawBufferManager";
 import FinalRender from "./finalRender/FinalRender";
 import {COMMAND_ENCODER_TYPE} from "../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
@@ -187,7 +186,7 @@ class Renderer {
             }
 
             {
-                const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
+                const drawBufferManager = redGPUContext.drawBufferManager
                 drawBufferManager.flushAllCommands(renderViewStateData)
             }
             {
