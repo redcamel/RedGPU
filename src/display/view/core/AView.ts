@@ -308,6 +308,21 @@ abstract class AView extends ViewTransform {
         return (0 < mouseX && mouseX < pixelRectObject.width) &&
             (0 < mouseY && mouseY < pixelRectObject.height);
     }
+
+    destroy() {
+        if (this.camera) {
+            if (this.camera instanceof AController) {
+                this.camera.destroy();
+            }
+            this.camera = null;
+        }
+        this.#taa = null;
+        this.#fxaa = null;
+        this.#grid = null;
+        this.#axis = null;
+        this.#pickingManager = null;
+        this.#scene = null;
+    }
 }
 
 Object.freeze(AView);

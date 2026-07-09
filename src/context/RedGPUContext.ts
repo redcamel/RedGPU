@@ -497,6 +497,9 @@ class RedGPUContext extends RedGPUContextViewContainer {
         // clear Event
         this.#clearEvent()
 
+        this.viewList.forEach((view: View3D) => {
+            view.destroy()
+        })
         // 리소스 캐시 및 참조 끊기
         this.removeAllViews();
     }
