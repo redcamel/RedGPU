@@ -134,7 +134,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
      */
     #globalFragmentSSBO_PBR: GlobalStorageBufferManager
     #globalFragmentSSBO_BuiltIn: GlobalStorageBufferManager
-
+    #destroyed: boolean = false
     /**
      * [KO] 드로우 버퍼 매니저
      * [EN] Draw buffer manager
@@ -199,6 +199,10 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#globalFragmentSSBO_PBR = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_FRAGMENT_STRUCT_PBR.size, 1024, "GLOBAL_FRAGMENT_BUFFER")
         this.#globalFragmentSSBO_BuiltIn = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_FRAGMENT_STRUCT_BUILT_IN.size, 1024, "GLOBAL_FRAGMENT_BUILT_IN_BUFFER")
         this.#initialize()
+    }
+
+    get destroyed(): boolean {
+        return this.#destroyed;
     }
 
     /**
@@ -462,6 +466,8 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Destroys the GPU device and releases resources.
      */
     destroy() {
+        if (this.#destroyed) return
+        this.#destroyed = true
         window?.cancelAnimationFrame(this.currentRequestAnimationFrame)
         if (this.#gpuContext) {
             try {
