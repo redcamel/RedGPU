@@ -154,7 +154,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
      */
     #observer: RedGPUContextObserver
 
-    #onDestroy: (() => void) | null = null
 
     /**
      * [KO] RedGPUContext 생성자
@@ -174,17 +173,13 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * @param alphaMode -
      * [KO] 캔버스 알파 모드
      * [EN] Canvas alpha mode
-     * @param onDestroy -
-     * [KO] 컨텍스트 파괴 시 실행할 콜백 함수
-     * [EN] Callback function to execute when context is destroyed
      */
     constructor(
         htmlCanvas: HTMLCanvasElement,
         gpuAdapter: GPUAdapter,
         gpuDevice: GPUDevice,
         gpuContext: GPUCanvasContext,
-        alphaMode: GPUCanvasAlphaMode,
-        onDestroy?: () => void
+        alphaMode: GPUCanvasAlphaMode
     ) {
         super()
         this.#gpuAdapter = gpuAdapter
@@ -192,7 +187,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#gpuContext = gpuContext
         this.#alphaMode = alphaMode
         this.#htmlCanvas = htmlCanvas
-        if (onDestroy) this.#onDestroy = onDestroy
         this.#sizeManager = new RedGPUContextSizeManager(this)
         this.#detector = new RedGPUContextDetector(this)
         this.#resourceManager = new ResourceManager(this)
@@ -468,14 +462,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Destroys the GPU device and releases resources.
      */
     destroy() {
-        if (this.#onDestroy) {
-            try {
-                this.#onDestroy();
-            } catch (e) {
-                keepLog('⚠️ onDestroy callback failed:', e);
-            }
-            this.#onDestroy = null;
-        }
         window?.cancelAnimationFrame(this.currentRequestAnimationFrame)
         if (this.#gpuContext) {
             try {

@@ -185,11 +185,7 @@ const init = async (
             // [EN] Always clean up on page navigation (regardless of bfcache)
             window?.addEventListener('pagehide', pageHideHandler);
 
-            const redGPUContext: RedGPUContext = new RedGPUContext(canvas, adapter, device, context, alphaMode, () => {
-                window?.removeEventListener('pageshow', pageShowHandler);
-                window?.removeEventListener('pagehide', pageHideHandler);
-                device.removeEventListener('uncapturederror', uncapturedErrorHandler);
-            })
+            const redGPUContext: RedGPUContext = new RedGPUContext(canvas, adapter, device, context, alphaMode)
             onWebGPUInitialized(redGPUContext)
         } catch (e) {
             errorHandler(e, '')
