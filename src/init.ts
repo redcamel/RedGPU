@@ -167,26 +167,37 @@ const init = async (
                 if (info.reason === 'destroyed') onDestroy?.(info)
             })
 
+            const unloadHandler = () => {
+            };
             const pageShowHandler = (event: PageTransitionEvent) => {
                 if (event.persisted) {
                     // bfcache에서 복원된 경우
                     keepLog('🔄 bfcache에서 복원됨 (뒤로가기 또는 앞으로가기) - 페이지 재로드');
                     redGPUContext.destroy();
+                    redGPUContext = null
+                    window?.removeEventListener('pageshow', pageShowHandler);
+                    window?.removeEventListener('pagehide', pageHideHandler);
+                    window?.removeEventListener('unload', unloadHandler);
+                    device.removeEventListener('uncapturederror', uncapturedErrorHandler);
                     window.location.reload();
                 }
             };
             const pageHideHandler = () => {
                 if (redGPUContext && redGPUContext.gpuDevice) {
                     redGPUContext.destroy();
+                    redGPUContext = null;
                 }
+                window?.removeEventListener('unload', unloadHandler);
             };
+            // bfcache 방지용 unload 리스너 등록
+            window?.addEventListener('unload', unloadHandler);
             // bfcache에서 복원 시 페이지 재로드 (뒤로가기 + 앞으로가기)
             window?.addEventListener('pageshow', pageShowHandler);
             // [KO] 페이지 이동 시 항상 정리 (bfcache 저장 여부와 무관)
             // [EN] Always clean up on page navigation (regardless of bfcache)
             window?.addEventListener('pagehide', pageHideHandler);
 
-            const redGPUContext: RedGPUContext = new RedGPUContext(canvas, adapter, device, context, alphaMode)
+            let redGPUContext: RedGPUContext = new RedGPUContext(canvas, adapter, device, context, alphaMode)
             onWebGPUInitialized(redGPUContext)
         } catch (e) {
             errorHandler(e, '')
