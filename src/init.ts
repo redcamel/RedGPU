@@ -1,6 +1,5 @@
 import RedGPUContext from "./context/RedGPUContext";
 import ensureVertexIndexBuiltin from "./resources/wgslParser/core/ensureVertexIndexBuiltin";
-import {keepLog} from "./utils";
 
 /**
  * [KO] WebGPU를 비동기적으로 초기화하고 RedGPUContext를 생성합니다.
@@ -45,7 +44,7 @@ import {keepLog} from "./utils";
  * [KO] 초기화 프로세스 완료를 나타내는 Promise
  * [EN] Promise representing the completion of the initialization process
  * @category Core
- */
+ * */
 const init = async (
     canvas: HTMLCanvasElement,
     onWebGPUInitialized: (redGPUContext: RedGPUContext) => void,
@@ -57,8 +56,17 @@ const init = async (
         forceFallbackAdapter: false,
     },
 ) => {
+    const debugLog = (msg: string) => {
+        if (typeof window !== 'undefined') {
+            const c = window['console'];
+            if (c && typeof c['info'] === 'function') {
+                c['info'](msg);
+            }
+        }
+    };
+
     if (isSearchEngineBot()) {
-        keepLog('🤖 Search engine bot detected - skipping WebGPU initialization');
+        debugLog('🤖 Search engine bot detected - skipping WebGPU initialization');
         return;
     }
     const {gpu} = navigator
@@ -143,7 +151,7 @@ const init = async (
         const context = canvas.getContext('webgpu')
         if (!context) {
             errorHandler(new Error(`Failed to get context from canvas: ${canvas.id || canvas}`), 'Failed to get webgpu initialize from canvas');
-            return
+            return;
         }
         try {
             {
@@ -153,53 +161,56 @@ const init = async (
                     return originalCreateShaderModule(descriptor)
                 };
             }
+
+            const pageShowEventController = new AbortController();
+            const pageHideEventController = new AbortController();
+            const deviceEventController = new AbortController();
+
+            let redGPUContext: RedGPUContext = new RedGPUContext(canvas, adapter, device, context, alphaMode)
+
             const uncapturedErrorHandler = (event: GPUUncapturedErrorEvent) => {
                 console.warn('TODO A WebGPU error was not captured:', event);
                 console.warn(event.error?.message);
                 // onFailInitialized?.(errorMsg);
                 window.cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
             };
-            device.addEventListener('uncapturederror', uncapturedErrorHandler);
+            device.addEventListener('uncapturederror', uncapturedErrorHandler, {signal: deviceEventController.signal});
             device.lost.then((info: GPUDeviceLostInfo) => {
                 console.warn(info)
                 console.warn(`Device lost occurred: ${info.message}`)
-                device.removeEventListener('uncapturederror', uncapturedErrorHandler);
+                deviceEventController.abort();
                 if (info.reason === 'destroyed') onDestroy?.(info)
             })
 
-            const unloadHandler = () => {
-            };
             const pageShowHandler = (event: PageTransitionEvent) => {
+                debugLog(`pageshow 발동! persisted 여부: ${event.persisted}`);
                 if (event.persisted) {
                     // bfcache에서 복원된 경우
-                    keepLog('🔄 bfcache에서 복원됨 (뒤로가기 또는 앞으로가기) - 페이지 재로드');
+                    debugLog('🔄 bfcache에서 복원됨 (뒤로가기 또는 앞으로가기) - 페이지 재로드');
                     redGPUContext.destroy();
                     redGPUContext = null
-                    window?.removeEventListener('pageshow', pageShowHandler);
-                    window?.removeEventListener('pagehide', pageHideHandler);
-                    device.removeEventListener('uncapturederror', uncapturedErrorHandler);
-                    window?.removeEventListener('unload', unloadHandler);
+                    deviceEventController.abort();
+                    pageShowEventController.abort(); // 새로고침 직전에 pageshow 리스너 해제
+                    pageHideEventController.abort(); // 혹시 남아있을 수 있는 pagehide 리스너 해제
                     window.location.reload();
                 }
             };
-            const pageHideHandler = () => {
+            const pageHideHandler = (event: PageTransitionEvent) => {
+                debugLog(`pagehide 발동! persisted 여부: ${event.persisted}`);
+                // 어차피 pageshow에서 리로드하므로, 이탈 시점에는 persisted 여부와 관계없이 무조건 자원 해제
                 if (redGPUContext && redGPUContext.gpuDevice) {
                     redGPUContext.destroy();
                     redGPUContext = null;
                 }
-                window?.removeEventListener('pagehide', pageHideHandler);
-                device.removeEventListener('uncapturederror', uncapturedErrorHandler);
-                window?.removeEventListener('unload', unloadHandler);
+                deviceEventController.abort();    // 디바이스 리스너 즉시 해제
+                pageHideEventController.abort();  // pagehide가 발동했으므로 자기 자신 즉시 해제
             };
-            // bfcache 방지용 unload 리스너 등록
-            window?.addEventListener('unload', unloadHandler);
             // bfcache에서 복원 시 페이지 재로드 (뒤로가기 + 앞으로가기)
-            window?.addEventListener('pageshow', pageShowHandler);
-            // [KO] 페이지 이동 시 항상 정리 (bfcache 저장 여부와 무관)
-            // [EN] Always clean up on page navigation (regardless of bfcache)
-            window?.addEventListener('pagehide', pageHideHandler);
+            window?.addEventListener('pageshow', pageShowHandler, {signal: pageShowEventController.signal});
+            // [KO] 페이지 이동 시 정리 (bfcache 저장 여부에 따라 조건부 정리)
+            // [EN] Clean up on page navigation (conditional clean up based on bfcache storage)
+            window?.addEventListener('pagehide', pageHideHandler, {signal: pageHideEventController.signal});
 
-            let redGPUContext: RedGPUContext = new RedGPUContext(canvas, adapter, device, context, alphaMode)
             onWebGPUInitialized(redGPUContext)
         } catch (e) {
             errorHandler(e, '')
