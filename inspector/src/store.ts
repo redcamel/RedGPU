@@ -55,7 +55,7 @@ export interface InspectorState {
     drawCallHistory: number[];
     setStats: (stats: Partial<InspectorState>) => void;
     setUseDebugPanel: (value: boolean) => void;
-    setRedGPUContext: (value: RedGPUContext) => void;
+    setRedGPUContext: (value: RedGPUContext | null) => void;
     setCurrentTab: (tab: string) => void;
 }
 
