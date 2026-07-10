@@ -163,6 +163,7 @@ const init = async (
             device.lost.then((info: GPUDeviceLostInfo) => {
                 console.warn(info)
                 console.warn(`Device lost occurred: ${info.message}`)
+                device.removeEventListener('uncapturederror', uncapturedErrorHandler);
                 if (info.reason === 'destroyed') onDestroy?.(info)
             })
 
