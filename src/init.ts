@@ -177,8 +177,8 @@ const init = async (
                     redGPUContext = null
                     window?.removeEventListener('pageshow', pageShowHandler);
                     window?.removeEventListener('pagehide', pageHideHandler);
-                    window?.removeEventListener('unload', unloadHandler);
                     device.removeEventListener('uncapturederror', uncapturedErrorHandler);
+                    window?.removeEventListener('unload', unloadHandler);
                     window.location.reload();
                 }
             };
@@ -187,6 +187,8 @@ const init = async (
                     redGPUContext.destroy();
                     redGPUContext = null;
                 }
+                window?.removeEventListener('pagehide', pageHideHandler);
+                device.removeEventListener('uncapturederror', uncapturedErrorHandler);
                 window?.removeEventListener('unload', unloadHandler);
             };
             // bfcache 방지용 unload 리스너 등록
