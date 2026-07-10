@@ -63,7 +63,7 @@ class View3D extends AView {
     #skyAtmosphere: SkyAtmosphere
     #ibl: IBL
     readonly #renderViewStateData: RenderViewStateData
-    readonly #postEffectManager: PostEffectManager
+    #postEffectManager: PostEffectManager
     readonly #toneMappingManager: ToneMappingManager
     readonly #viewRenderTextureManager: ViewRenderTextureManager
     #prevInfoList = {}
@@ -106,6 +106,12 @@ class View3D extends AView {
         this.#uniformData = new ArrayBuffer(this.systemUniform_Vertex_StructInfo.endOffset)
         this.#uniformDataF32 = new Float32Array(this.#uniformData)
         this.#uniformDataU32 = new Uint32Array(this.#uniformData)
+    }
+
+    destroy() {
+        super.destroy();
+        this.#postEffectManager?.destroy()
+        this.#postEffectManager = null
     }
 
     /**

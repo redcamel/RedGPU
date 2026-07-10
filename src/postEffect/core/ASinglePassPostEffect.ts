@@ -67,7 +67,7 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     #bindGroupCache0 = new Map<string, GPUBindGroup>();
     #bindGroupCache1: GPUBindGroup;
     #bindGroupCache3 = new Map<number, GPUBindGroup>();
-
+    #destroyed: boolean = false
     /**
      * [KO] ASinglePassPostEffect 인스턴스를 생성합니다.
      * [EN] Creates an ASinglePassPostEffect instance.
@@ -219,6 +219,20 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         this.#bindGroupCache0.clear();
         this.#bindGroupCache1 = null;
         this.#bindGroupCache3.clear();
+    }
+
+    destroy() {
+        if (this.#destroyed) return;
+        this.#destroyed = true
+        this.clear()
+        this.#uniformBuffer?.destroy()
+        this.#uniformBuffer = null
+        this.#uniformsInfo = null
+        this.#systemUniformsInfo = null
+        this.#storageInfo = null
+        this.#name = null
+        this.#SHADER_INFO_MSAA = null
+        this.#SHADER_INFO_NON_MSAA = null
     }
 
     /**

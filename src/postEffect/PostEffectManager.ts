@@ -87,6 +87,7 @@ class PostEffectManager {
     #gbufferBindGroup_swap0: GPUBindGroup;
     #gbufferBindGroup_swap1: GPUBindGroup;
     #prevMSAAID_for_gbuffer: string;
+    #destroyed: boolean = false
 
     /**
      * [KO] PostEffectManager 인스턴스를 생성합니다.
@@ -101,6 +102,21 @@ class PostEffectManager {
         this.#texturePool = new PostEffectTexturePool(this.#view.redGPUContext);
         this.#init();
         this.#initGBufferLayouts();
+    }
+
+    destroy() {
+        if (this.#destroyed) return;
+        this.#destroyed = true
+        //
+        this.#postEffects.forEach(effect => {
+            effect.destroy()
+        })
+        this.#texturePool.clear();
+        this.#postEffects = null
+        this.#texturePool = null
+        //
+        this.#postEffectSystemUniformBuffer.destroy()
+        this.#postEffectSystemUniformBuffer = null
     }
 
     /**

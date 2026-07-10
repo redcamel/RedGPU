@@ -73,7 +73,7 @@ abstract class AView extends ViewTransform {
      * [EN] FXAA post-effect object
      */
     #fxaa: FXAA
-
+    #destroyed: boolean = false
     /**
      * [KO] AView 생성자
      * [EN] AView constructor
@@ -310,12 +310,15 @@ abstract class AView extends ViewTransform {
     }
 
     destroy() {
+        if (this.#destroyed) return;
+        this.#destroyed = true
         if (this.camera) {
             if (this.camera instanceof AController) {
                 this.camera.destroy();
             }
             this.camera = null;
         }
+
         this.#taa = null;
         this.#fxaa = null;
         this.#grid = null;
