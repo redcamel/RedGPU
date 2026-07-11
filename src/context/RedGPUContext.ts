@@ -492,12 +492,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#drawBufferManager.destroy();
         this.#drawBufferManager = null
 
-        // clear CommandEncoderManager
-        if (this.#commandEncoderManager) {
-            this.#commandEncoderManager.destroy();
-        }
-
-        
         // clear Event
         this.#clearEvent()
 
@@ -506,6 +500,12 @@ class RedGPUContext extends RedGPUContextViewContainer {
         })
         // 리소스 캐시 및 참조 끊기
         this.removeAllViews();
+
+        // clear CommandEncoderManager (뷰 소멸자 내부에서 적재한 지연 파괴 리소스들을 최종적으로 수거하기 위해 뒤로 이동)
+        if (this.#commandEncoderManager) {
+            this.#commandEncoderManager.destroy();
+            this.#commandEncoderManager = null;
+        }
 
         // clear ResourceManager
         if (this.#resourceManager) {

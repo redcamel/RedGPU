@@ -105,6 +105,19 @@ class ShadowManager {
     update(redGPUContext: RedGPUContext) {
         this.#directionalShadowManager.update(redGPUContext)
     }
+
+    /**
+     * [KO] 사용 중인 그림자 GPU 리소스를 해제합니다.
+     * [EN] Releases GPU resources in use for shadow rendering.
+     */
+    destroy() {
+        if (this.#directionalShadowManager) {
+            this.#directionalShadowManager.destroy();
+            this.#directionalShadowManager = null;
+        }
+        this.#shadowPassDescriptor = null;
+        console.log("🧹 ShadowManager destroy 완료");
+    }
 }
 
 Object.freeze(ShadowManager)
