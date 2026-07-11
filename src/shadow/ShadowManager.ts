@@ -8,6 +8,7 @@ import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import updateViewportAndScissor from "../renderer/helperFunc/updateViewportAndScissor";
 import renderShadowLayer from "../renderer/renderLayers/renderShadowLayer";
+import {keepLog} from "../utils";
 
 /**
  * [KO] 씬의 전체적인 그림자 렌더링을 총괄하는 관리자 클래스입니다.
@@ -116,7 +117,7 @@ class ShadowManager {
             this.#directionalShadowManager = null;
         }
         this.#shadowPassDescriptor = null;
-        console.log("🧹 ShadowManager destroy 완료");
+        keepLog("🧹 ShadowManager destroy 완료");
     }
 }
 
