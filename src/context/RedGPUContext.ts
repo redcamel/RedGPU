@@ -479,7 +479,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
         }
 
         this.#observer?.destroy()
-        this.#gpuDevice.destroy()
+
         // clear Global SSBO
         this.#globalVertexSSBO.destroy()
         this.#globalFragmentSSBO_PBR.destroy()
@@ -494,6 +494,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
         })
         // 리소스 캐시 및 참조 끊기
         this.removeAllViews();
+        this.#gpuDevice.destroy()
     }
 
     /**
