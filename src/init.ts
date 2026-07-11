@@ -162,54 +162,8 @@ const init = async (
                 };
             }
 
-            const pageShowEventController = new AbortController();
-            const pageHideEventController = new AbortController();
-            const deviceEventController = new AbortController();
+            const redGPUContext: RedGPUContext = new RedGPUContext(canvas, adapter, device, context, alphaMode, onDestroy)
 
-            let redGPUContext: RedGPUContext = new RedGPUContext(canvas, adapter, device, context, alphaMode)
-
-            const uncapturedErrorHandler = (event: GPUUncapturedErrorEvent) => {
-                console.warn('TODO A WebGPU error was not captured:', event);
-                console.warn(event.error?.message);
-                // onFailInitialized?.(errorMsg);
-                window.cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
-            };
-            device.addEventListener('uncapturederror', uncapturedErrorHandler, {signal: deviceEventController.signal});
-            device.lost.then((info: GPUDeviceLostInfo) => {
-                console.warn(info)
-                console.warn(`Device lost occurred: ${info.message}`)
-                deviceEventController.abort();
-                if (info.reason === 'destroyed') onDestroy?.(info)
-            })
-
-            const pageShowHandler = (event: PageTransitionEvent) => {
-                debugLog(`pageshow 발동! persisted 여부: ${event.persisted}`);
-                if (event.persisted) {
-                    // bfcache에서 복원된 경우
-                    debugLog('🔄 bfcache에서 복원됨 (뒤로가기 또는 앞으로가기) - 페이지 재로드');
-                    redGPUContext.destroy();
-                    redGPUContext = null
-                    deviceEventController.abort();
-                    pageShowEventController.abort(); // 새로고침 직전에 pageshow 리스너 해제
-                    pageHideEventController.abort(); // 혹시 남아있을 수 있는 pagehide 리스너 해제
-                    window.location.reload();
-                }
-            };
-            const pageHideHandler = (event: PageTransitionEvent) => {
-                debugLog(`pagehide 발동! persisted 여부: ${event.persisted}`);
-                // 어차피 pageshow에서 리로드하므로, 이탈 시점에는 persisted 여부와 관계없이 무조건 자원 해제
-                if (redGPUContext && redGPUContext.gpuDevice) {
-                    redGPUContext.destroy();
-                    redGPUContext = null;
-                }
-                deviceEventController.abort();    // 디바이스 리스너 즉시 해제
-                pageHideEventController.abort();  // pagehide가 발동했으므로 자기 자신 즉시 해제
-            };
-            // bfcache에서 복원 시 페이지 재로드 (뒤로가기 + 앞으로가기)
-            window?.addEventListener('pageshow', pageShowHandler, {signal: pageShowEventController.signal});
-            // [KO] 페이지 이동 시 정리 (bfcache 저장 여부에 따라 조건부 정리)
-            // [EN] Clean up on page navigation (conditional clean up based on bfcache storage)
-            window?.addEventListener('pagehide', pageHideHandler, {signal: pageHideEventController.signal});
 
             onWebGPUInitialized(redGPUContext)
         } catch (e) {
