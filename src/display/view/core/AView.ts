@@ -319,6 +319,8 @@ abstract class AView extends ViewTransform {
             this.camera = null;
         }
 
+        this.#scene.destroy();
+
         this.#taa = null;
         this.#fxaa = null;
         this.#grid = null;

@@ -49,6 +49,7 @@ class Scene extends Object3DContainer {
      * [EN] Physics simulation engine bound to the scene
      */
     #physicsEngine: IPhysicsEngine
+    #destroyed: boolean = false
 
     /**
      * [KO] Scene 인스턴스를 생성합니다.
@@ -66,6 +67,11 @@ class Scene extends Object3DContainer {
         if (name) this.name = name
     }
 
+    destroy() {
+        if (this.#destroyed) return
+        this.#destroyed = true
+        this.#shadowManager.destroy()
+    }
     /**
      * [KO] 씬 내의 모든 조명을 통합 관리하는 LightManager 인스턴스를 가져옵니다.
      * [EN] Gets the LightManager instance that manages all lights within the scene.

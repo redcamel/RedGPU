@@ -121,10 +121,7 @@ class View3D extends AView {
             this.#clusterLightManager = null;
         }
 
-        if (this.scene?.shadowManager) {
-            this.scene.shadowManager.destroy();
-        }
-        
+
         this.#postEffectManager?.destroy()
         this.#postEffectManager = null
         keepLog(`🧹 ${this.name} destroy 완료`)
