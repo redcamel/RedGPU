@@ -124,6 +124,11 @@ class View3D extends AView {
 
         this.#postEffectManager?.destroy()
         this.#postEffectManager = null
+
+        if (this.#toneMappingManager) {
+            this.#toneMappingManager.destroy();
+        }
+
         keepLog(`🧹 ${this.name} destroy 완료`)
     }
 
