@@ -27,6 +27,7 @@ import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 import SystemUniformUpdater from "../../renderer/helperFunc/SystemUniformUpdater";
 import updateSystemUniformData from "../../renderer/helperFunc/updateSystemUniformData";
 import ClusterLightManager from "../../light/core/ClusterLightManager";
+import {keepLog} from "../../utils";
 
 const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
 const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
@@ -112,6 +113,7 @@ class View3D extends AView {
         super.destroy();
         this.#postEffectManager?.destroy()
         this.#postEffectManager = null
+        keepLog(`🧹 ${this.name} destroy 완료`)
     }
 
     /**

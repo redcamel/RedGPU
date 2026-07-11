@@ -1,6 +1,7 @@
 import RedGPUContext from "../context/RedGPUContext";
 import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "./COMMAND_ENCODER_TYPE";
 import RedGPUObject from "../base/RedGPUObject";
+import {keepLog} from "../utils";
 
 /**
  * [KO] 단계별 통계 상세 정보 인터페이스
@@ -599,7 +600,7 @@ class CommandEncoderManager extends RedGPUObject {
     destroy(): void {
         this.resetAll();
         this.#deferredDestroyList.length = 0;
-        console.log("🧹 CommandEncoderManager destroy 완료");
+        keepLog("🧹 CommandEncoderManager destroy 완료");
     }
 
     /**

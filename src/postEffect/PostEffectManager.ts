@@ -14,6 +14,7 @@ import AutoExposure from "../camera/core/autoExposure/AutoExposure";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
 import PostEffectTexturePool from "./core/PostEffectTexturePool";
 import {IPostEffectResult} from "./core/types";
+import {keepLog} from "../utils";
 
 
 /**
@@ -117,6 +118,7 @@ class PostEffectManager {
         //
         this.#postEffectSystemUniformBuffer.destroy()
         this.#postEffectSystemUniformBuffer = null
+        keepLog(`🧹 ${this.view.name} PostEffectManager destroy 완료`)
     }
 
     /**

@@ -100,7 +100,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [KO] 리소스 매니저 (GPU 리소스 관리)
      * [EN] Resource manager (GPU resource management)
      */
-    readonly #resourceManager: ResourceManager
+    #resourceManager: ResourceManager
     /**
      * [KO] 커맨드 인코더 매니저 (GPU 커맨드 인코더 관리)
      * [EN] Command encoder manager (GPU command encoder management)
@@ -493,8 +493,10 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#drawBufferManager = null
 
         // clear CommandEncoderManager
-        this.#commandEncoderManager.destroy();
-        this.#commandEncoderManager = null
+        if (this.#commandEncoderManager) {
+            this.#commandEncoderManager.destroy();
+        }
+
         
         // clear Event
         this.#clearEvent()
@@ -504,6 +506,12 @@ class RedGPUContext extends RedGPUContextViewContainer {
         })
         // 리소스 캐시 및 참조 끊기
         this.removeAllViews();
+
+        // clear ResourceManager
+        if (this.#resourceManager) {
+            this.#resourceManager.destroy();
+            this.#resourceManager = null
+        }
         this.#gpuDevice.destroy()
     }
 

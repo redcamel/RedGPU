@@ -421,6 +421,49 @@ class ResourceManager extends RedGPUObject {
     }
 
     /**
+     * [KO] ResourceManager 인스턴스를 파기하고 캐싱된 모든 WebGPU 자원들을 물리적으로 해제합니다.
+     * [EN] Destroys the ResourceManager instance and physically releases all cached WebGPU resources.
+     */
+    destroy(): void {
+        // 1. 캐싱된 GPUBuffer들을 순회하며 명시적 destroy() 호출
+        const bufferMap = this.#resources.get(ResourceType.GPUBuffer);
+        if (bufferMap) {
+            bufferMap.forEach((buffer: GPUBuffer) => {
+                try {
+                    buffer.destroy();
+                } catch (e) {
+                    // 이미 해제되었거나 무효화된 상태 예외 처리
+                }
+            });
+            bufferMap.clear();
+        }
+
+        // 2. 다른 리소스 캐시 맵 비우기
+        this.#resources.get(ResourceType.GPUShaderModule)?.clear();
+        this.#resources.get(ResourceType.GPUBindGroupLayout)?.clear();
+        this.#resources.get(ResourceType.GPUPipelineLayout)?.clear();
+
+        // 3. 상태 관리 맵(ResourceStatusInfo) 비우기
+        this.#managedBitmapTextureState.table.clear();
+        this.#managedCubeTextureState.table.clear();
+        this.#managedHDRTextureState.table.clear();
+        this.#managedUniformBufferState.table.clear();
+        this.#managedVertexBufferState.table.clear();
+        this.#managedIndexBufferState.table.clear();
+        this.#managedStorageBufferState.table.clear();
+
+        // 4. 프리셋 및 제너레이터 등 참조 초기화
+        this.#basicSampler = null;
+        this.#basicDisplacementSampler = null;
+        this.#emptyBitmapTextureView = null;
+        this.#emptyCubeTextureView = null;
+        this.#emptyTexture3DView = null;
+        this.#emptyDepthTextureView = null;
+
+        keepLog("🧹 ResourceManager destroy 완료");
+    }
+
+    /**
      * [KO] GPU 텍스처를 생성하고 관리합니다.
      * [EN] Creates and manages a GPU texture.
      * @param desc -
