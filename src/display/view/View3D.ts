@@ -111,6 +111,11 @@ class View3D extends AView {
 
     destroy() {
         super.destroy();
+
+        if (this.#viewRenderTextureManager) {
+            this.#viewRenderTextureManager.destroy();
+        }
+        
         this.#postEffectManager?.destroy()
         this.#postEffectManager = null
         keepLog(`🧹 ${this.name} destroy 완료`)
