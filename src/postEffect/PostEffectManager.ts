@@ -108,14 +108,35 @@ class PostEffectManager {
     destroy() {
         if (this.#destroyed) return;
         this.#destroyed = true
-        //
+
+        // 1. 사용자 추가 이펙트들 파괴
         this.#postEffects.forEach(effect => {
             effect.destroy()
         })
-        this.#texturePool.clear();
         this.#postEffects = null
+
+        // 2. 내부 고정 멤버 필터들의 명시적 파괴 연동
+        if (this.#ssao) {
+            this.#ssao.destroy();
+            this.#ssao = null;
+        }
+        if (this.#ssr) {
+            this.#ssr.destroy();
+            this.#ssr = null;
+        }
+        if (this.#taaSharpenEffect) {
+            this.#taaSharpenEffect.destroy();
+            this.#taaSharpenEffect = null;
+        }
+        if (this.#autoExposure) {
+            this.#autoExposure.destroy();
+            this.#autoExposure = null;
+        }
+
+        // 3. 텍스처 풀 및 시스템 버퍼 파괴
+        this.#texturePool.clear();
         this.#texturePool = null
-        //
+
         this.#postEffectSystemUniformBuffer.destroy()
         this.#postEffectSystemUniformBuffer = null
         keepLog(`🧹 ${this.view.name} PostEffectManager destroy 완료`)

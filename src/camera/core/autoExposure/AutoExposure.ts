@@ -614,6 +614,39 @@ class AutoExposure extends RedGPUObject {
         this.#cachedDownsampleBindGroupLayouts.set(useMSAA, layout);
         return layout;
     }
+
+    /**
+     * [KO] AutoExposure 인스턴스를 파기하고 할당된 물리 GPU 버퍼들을 모두 소멸시킵니다.
+     * [EN] Destroys the AutoExposure instance and releases all allocated physical GPU buffers.
+     */
+    destroy() {
+        if (this.#adaptedEV100Buffer) {
+            this.#adaptedEV100Buffer.destroy();
+            this.#adaptedEV100Buffer = null;
+        }
+        if (this.#histogramBuffer) {
+            this.#histogramBuffer.destroy();
+            this.#histogramBuffer = null;
+        }
+        if (this.#uniformBuffer) {
+            this.#uniformBuffer.destroy();
+            this.#uniformBuffer = null;
+        }
+        if (this.#readBuffer) {
+            this.#readBuffer.destroy();
+            this.#readBuffer = null;
+        }
+
+        this.#adaptationPipeline = null;
+        this.#cachedDownsampleBindGroupLayouts.clear();
+        this.#cachedDownsamplePipelines.clear();
+        this.#downsampleBindGroupLayout1 = null;
+        this.#adaptationBindGroupLayout0 = null;
+        this.#downsampleBindGroup1 = null;
+        this.#adaptationBindGroup0 = null;
+
+        console.log("🧹 AutoExposure destroy 완료");
+    }
 }
 
 Object.freeze(AutoExposure)
