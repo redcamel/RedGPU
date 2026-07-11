@@ -289,6 +289,25 @@ class DrawDebuggerGrid extends BaseObject {
         }
         this.#uniformBuffer.writeOnlyBuffer(FRAGMENT_UNIFORM_STRUCT.members.lineColor, this.#lineColor.rgbaNormalLinear)
     }
+
+    /**
+     * [KO] DrawDebuggerGrid를 파기하고 드로우 커맨드 슬롯과 자원 참조를 해제합니다.
+     * [EN] Destroys the DrawDebuggerGrid and releases the draw command slot and resource references.
+     */
+    destroy() {
+        if (this.#drawCommandSlot) {
+            this.#drawBufferManager.setInstanceNum(this.#drawCommandSlot, 0);
+            this.#drawCommandSlot = null;
+        }
+        this.#vertexBuffer = null;
+        this.#indexBuffer = null;
+        this.#uniformBuffer = null;
+        this.#renderBundle = null;
+        this.#bundleEncoder = null;
+        this.#prevSystemUniform_Vertex_UniformBindGroup = null;
+        this.#drawBufferManager = null;
+        console.log("🧹 DrawDebuggerGrid destroy 완료");
+    }
 }
 
 Object.freeze(DrawDebuggerGrid)

@@ -143,6 +143,24 @@ class Geometry extends ResourceBase {
     #updateIndexBufferState() {
         this.notifyUpdate();
     }
+
+    /**
+     * [KO] Geometry 인스턴스를 파기하고 할당된 Vertex/Index 물리 GPU 버퍼를 해제합니다.
+     * [EN] Destroys the Geometry instance and releases the allocated Vertex/Index physical GPU buffers.
+     */
+    destroy() {
+        if (this.#vertexBuffer) {
+            this.#vertexBuffer.destroy();
+            this.#vertexBuffer = null;
+        }
+        if (this.#indexBuffer) {
+            this.#indexBuffer.destroy();
+            this.#indexBuffer = null;
+        }
+        this.gpuRenderInfo = null;
+        this.#volume = null;
+        console.log("🧹 Geometry destroy 완료");
+    }
 }
 
 Object.freeze(Geometry)

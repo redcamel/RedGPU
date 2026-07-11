@@ -321,11 +321,26 @@ abstract class AView extends ViewTransform {
 
         this.#scene.destroy();
 
-        this.#taa = null;
-        this.#fxaa = null;
-        this.#grid = null;
-        this.#axis = null;
-        this.#pickingManager = null;
+        if (this.#taa) {
+            this.#taa.destroy();
+            this.#taa = null;
+        }
+        if (this.#fxaa) {
+            this.#fxaa.destroy();
+            this.#fxaa = null;
+        }
+        if (this.#grid) {
+            this.#grid.destroy();
+            this.#grid = null;
+        }
+        if (this.#axis) {
+            this.#axis.destroy();
+            this.#axis = null;
+        }
+        if (this.#pickingManager) {
+            this.#pickingManager.destroy();
+            this.#pickingManager = null;
+        }
         this.#scene = null;
     }
 }

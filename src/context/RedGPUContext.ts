@@ -85,17 +85,17 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [KO] HTML 캔버스 요소 (렌더링 대상 DOM)
      * [EN] HTML Canvas element (Rendering target DOM)
      */
-    readonly #htmlCanvas: HTMLCanvasElement
+    #htmlCanvas: HTMLCanvasElement
     /**
      * [KO] 크기 관리 매니저 (캔버스/뷰 크기 관리)
      * [EN] Size manager (Canvas/View size management)
      */
-    readonly #sizeManager: RedGPUContextSizeManager
+    #sizeManager: RedGPUContextSizeManager
     /**
      * [KO] 디바이스/브라우저 환경 감지 매니저
      * [EN] Device/Browser environment detector manager
      */
-    readonly #detector: RedGPUContextDetector
+    #detector: RedGPUContextDetector
     /**
      * [KO] 리소스 매니저 (GPU 리소스 관리)
      * [EN] Resource manager (GPU resource management)
@@ -480,6 +480,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
      */
     destroy(isPageHide: boolean = false): void {
         window?.cancelAnimationFrame(this.currentRequestAnimationFrame)
+        this.#deviceEventController.abort();
         if (this.#destroyed) return;
         this.#destroyed = true;
         if (this.#gpuContext) {
@@ -490,17 +491,18 @@ class RedGPUContext extends RedGPUContextViewContainer {
                 keepLog('⚠️ Canvas Context unconfigure 실패:', e);
             }
         }
-
         this.#observer?.destroy()
         this.#observer = null
 
-        // clear Global SSBO
-        this.#globalVertexSSBO.destroy()
-        this.#globalVertexSSBO = null
-        this.#globalFragmentSSBO_PBR.destroy()
-        this.#globalFragmentSSBO_PBR = null
-        this.#globalFragmentSSBO_BuiltIn.destroy()
-        this.#globalFragmentSSBO_BuiltIn = null
+        this.#htmlCanvas.style.width = '1px'
+        this.#htmlCanvas.style.height = '1px'
+
+        this.#sizeManager.destroy()
+        this.#sizeManager = null
+
+
+
+
         // clear DrawBufferManager
         this.#drawBufferManager.destroy();
         this.#drawBufferManager = null
@@ -525,12 +527,24 @@ class RedGPUContext extends RedGPUContextViewContainer {
             this.#resourceManager.destroy();
             this.#resourceManager = null
         }
+        // clear Global SSBO
+        this.#globalVertexSSBO.destroy()
+        this.#globalVertexSSBO = null
+        this.#globalFragmentSSBO_PBR.destroy()
+        this.#globalFragmentSSBO_PBR = null
+        this.#globalFragmentSSBO_BuiltIn.destroy()
+        this.#globalFragmentSSBO_BuiltIn = null
+
         this.#deviceEventController.abort();
         this.#pageHideEventController.abort();
         if (!isPageHide) {
             this.#pageShowEventController.abort();
         }
+
         this.#onDestroy = null;
+        this.detector.destroy()
+        this.#detector = null
+
         this.#gpuDevice.destroy()
     }
 
@@ -578,14 +592,15 @@ class RedGPUContext extends RedGPUContextViewContainer {
             }
         };
         const pageHideHandler = () => {
+            this.#pageHideEventController.abort();
             this.destroy(true);
             this.htmlCanvas.remove();
-            this.#deviceEventController.abort();
-            this.#pageHideEventController.abort();
-        };
+            this.#htmlCanvas = null
 
-        window?.addEventListener('pagehide', pageHideHandler, {signal: this.#pageHideEventController.signal});
+        };
         window?.addEventListener('pageshow', pageShowHandler, {signal: this.#pageShowEventController.signal});
+        window?.addEventListener('pagehide', pageHideHandler, {signal: this.#pageHideEventController.signal});
+
     }
     /**
      * [KO] 컨텍스트의 크기를 설정합니다.

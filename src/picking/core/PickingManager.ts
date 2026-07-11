@@ -190,6 +190,10 @@ class PickingManager extends RedGPUObject {
             this.#pickingDepthGPUTexture = null
             this.#pickingDepthGPUTextureView = null
         }
+        if (this.#readPixelBuffer) {
+            this.#readPixelBuffer.destroy()
+            this.#readPixelBuffer = null;
+        }
     }
 
     /**

@@ -417,10 +417,9 @@ class ViewRenderTextureManager extends RedGPUObject {
      * [EN] Destroys the ViewRenderTextureManager instance and physically releases all G-Buffer and Depth textures held inside.
      */
     destroy(): void {
-        const keys = Array.from(this.#gBuffers.keys());
-        keys.forEach(key => {
+        for (const key of this.#gBuffers.keys()) {
             this.#destroyGBuffer(key as any);
-        });
+        }
         this.#gBuffers.clear();
         this.#view = null;
         console.log("🧹 ViewRenderTextureManager destroy 완료");

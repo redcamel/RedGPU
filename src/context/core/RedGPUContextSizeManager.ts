@@ -102,7 +102,7 @@ class RedGPUContextSizeManager extends RedGPUObject {
      * [KO] HTML 캔버스 요소
      * [EN] HTML Canvas element
      */
-    readonly #htmlCanvas: HTMLCanvasElement
+    #htmlCanvas: HTMLCanvasElement
     /**
      * [KO] 렌더링 스케일 배율
      * [EN] Rendering scale factor
@@ -130,6 +130,10 @@ class RedGPUContextSizeManager extends RedGPUObject {
         this.#htmlCanvas.style.verticalAlign = 'top'
         this.#width = width
         this.#height = height
+    }
+
+    destroy() {
+        this.#htmlCanvas = null
     }
 
     /**
