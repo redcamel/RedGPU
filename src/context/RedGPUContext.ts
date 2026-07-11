@@ -105,7 +105,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [KO] 커맨드 인코더 매니저 (GPU 커맨드 인코더 관리)
      * [EN] Command encoder manager (GPU command encoder management)
      */
-    readonly #commandEncoderManager: CommandEncoderManager
+    #commandEncoderManager: CommandEncoderManager
     /**
      * [KO] 안티앨리어싱 매니저
      * [EN] Antialiasing manager
@@ -139,7 +139,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [KO] 드로우 버퍼 매니저
      * [EN] Draw buffer manager
      */
-    readonly #drawBufferManager: DrawBufferManager
+    #drawBufferManager: DrawBufferManager
 
     #boundingClientRect: DOMRect
 
@@ -479,13 +479,23 @@ class RedGPUContext extends RedGPUContextViewContainer {
         }
 
         this.#observer?.destroy()
+        this.#observer = null
 
         // clear Global SSBO
         this.#globalVertexSSBO.destroy()
+        this.#globalVertexSSBO = null
         this.#globalFragmentSSBO_PBR.destroy()
+        this.#globalFragmentSSBO_PBR = null
         this.#globalFragmentSSBO_BuiltIn.destroy()
+        this.#globalFragmentSSBO_BuiltIn = null
         // clear DrawBufferManager
         this.#drawBufferManager.destroy();
+        this.#drawBufferManager = null
+
+        // clear CommandEncoderManager
+        this.#commandEncoderManager.destroy();
+        this.#commandEncoderManager = null
+        
         // clear Event
         this.#clearEvent()
 
