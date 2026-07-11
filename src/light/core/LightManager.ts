@@ -537,7 +537,36 @@ class LightManager {
             projectionView: lightProjectionView
         };
     }
+
+    /**
+     * [KO] LightManager 인스턴스를 파기하고 모든 조명 및 디버거 참조를 정리합니다.
+     * [EN] Destroys the LightManager instance and cleans up all lights and debuggers.
+     */
+    destroy() {
+
+
+        this.#directionalLights.forEach(cleanupLight);
+        this.#pointLights.forEach(cleanupLight);
+        this.#spotLights.forEach(cleanupLight);
+        cleanupLight(this.#ambientLight);
+
+        this.#directionalLights.length = 0;
+        this.#pointLights.length = 0;
+        this.#spotLights.length = 0;
+        this.#ambientLight = null;
+
+        console.log("🧹 LightManager destroy 완료");
+    }
 }
 
+const cleanupLight = (light: any) => {
+    if (light?.drawDebugger) {
+        try {
+            light.drawDebugger.destroy();
+        } catch (e) {
+        }
+        light.drawDebugger = null;
+    }
+};
 Object.freeze(LightManager)
 export default LightManager

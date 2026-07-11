@@ -68,9 +68,42 @@ class Scene extends Object3DContainer {
     }
 
     destroy() {
-        if (this.#destroyed) return
-        this.#destroyed = true
-        this.#shadowManager.destroy()
+        if (this.#destroyed) return;
+        this.#destroyed = true;
+
+        if (this.#shadowManager) {
+            this.#shadowManager.destroy();
+        }
+
+        if (this.#physicsEngine) {
+            try {
+                // @ts-ignore
+                if (typeof this.#physicsEngine.destroy === 'function') {
+                    // @ts-ignore
+                    this.#physicsEngine.destroy();
+                    // @ts-ignore
+                } else if (typeof this.#physicsEngine.free === 'function') {
+                    // @ts-ignore
+                    this.#physicsEngine.free();
+                }
+            } catch (e) {
+                // 예외 처리
+            }
+            this.#physicsEngine = null;
+        }
+
+        if (this.#lightManager) {
+            this.#lightManager.destroy();
+            this.#lightManager = null;
+        }
+        this.#backgroundColor = null;
+
+        this.children.forEach(child => {
+            if ('destroy' in child && typeof child.destroy === 'function') {
+                child.destroy();
+            }
+        });
+        this.children.length = 0;
     }
     /**
      * [KO] 씬 내의 모든 조명을 통합 관리하는 LightManager 인스턴스를 가져옵니다.
