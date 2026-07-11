@@ -127,6 +127,26 @@ class PassClustersLight extends RedGPUObject {
             }
         });
     }
+
+    /**
+     * [KO] PassClustersLight 인스턴스를 파기하고 할당된 GPUBuffer 및 파이프라인을 해제합니다.
+     * [EN] Destroys the PassClustersLight instance and releases allocated GPUBuffer and pipelines.
+     */
+    destroy(): void {
+        if (this.#clusterLightsBuffer) {
+            try {
+                this.#clusterLightsBuffer.destroy();
+            } catch (e) {
+                // 예외 처리
+            }
+            this.#clusterLightsBuffer = null;
+        }
+        this.#clusterLightBindGroup = null;
+        this.#clusterLightPipeline = null;
+        this.#passClusterLightBound = null;
+        this.#view = null;
+        console.log("🧹 PassClustersLight destroy 완료");
+    }
 }
 
 Object.freeze(PassClustersLight)

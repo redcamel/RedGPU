@@ -115,6 +115,11 @@ class View3D extends AView {
         if (this.#viewRenderTextureManager) {
             this.#viewRenderTextureManager.destroy();
         }
+
+        if (this.#clusterLightManager) {
+            this.#clusterLightManager.destroy();
+            this.#clusterLightManager = null;
+        }
         
         this.#postEffectManager?.destroy()
         this.#postEffectManager = null
