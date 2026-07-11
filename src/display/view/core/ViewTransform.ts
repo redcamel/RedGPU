@@ -111,6 +111,10 @@ class ViewTransform extends RedGPUObject {
      * [EN] Throws error if camera type is not supported
      */
     set camera(value: PerspectiveCamera | OrthographicCamera | AController | Camera2D) {
+        if (!value) {
+            this.#camera = value;
+            return
+        }
         if (!(value instanceof PerspectiveCamera) && !(value instanceof Camera2D) && !(value instanceof OrthographicCamera) && !(value instanceof AController)) consoleAndThrowError('allow PerspectiveCamera or OrthographicCamera or AController instance')
         this.#camera = value;
     }
