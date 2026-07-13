@@ -37,6 +37,8 @@ class Renderer {
     constructor() {
     }
 
+    #HD_render
+
     /**
      * [KO] 렌더링 루프를 시작합니다.
      * [EN] Starts the rendering loop.
@@ -56,16 +58,25 @@ class Renderer {
      * [EN] User-defined callback function to be executed every frame
      */
     start(redGPUContext: RedGPUContext, render: Function) {
+        redGPUContext.targetRenderer = this
         cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
-        const HD_render = (time: number) => {
+        this.#HD_render = (time: number) => {
             render?.(time)
             redGPUContext.currentTime = time
             this.renderFrame(redGPUContext, time)
-            redGPUContext.currentRequestAnimationFrame = requestAnimationFrame(HD_render)
+            redGPUContext.currentRequestAnimationFrame = requestAnimationFrame(this.#HD_render)
         }
-        redGPUContext.currentRequestAnimationFrame = requestAnimationFrame(HD_render)
+        redGPUContext.currentRequestAnimationFrame = requestAnimationFrame(this.#HD_render)
     }
 
+    destroy() {
+
+
+        this.#finalRender?.destroy()
+        this.#finalRender = null
+        this.#gltfAnimationLooperManager = null
+        this.#HD_render = null
+    }
     /**
      * [KO] 렌더링 루프를 정지합니다.
      * [EN] Stops the rendering loop.

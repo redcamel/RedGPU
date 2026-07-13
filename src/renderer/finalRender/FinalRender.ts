@@ -49,6 +49,41 @@ class FinalRender {
     constructor() {
     }
 
+    destroy(): void {
+        // 1. 생성된 모든 UniformBuffer들의 WebGPU 내부 자원 해제 및 배열 비우기
+        this.#vertexUniformBuffers.forEach(buffer => {
+            if (buffer) {
+                // UniformBuffer 클래스 내부에 자체 destroy가 있다면 호출, 없다면 gpuBuffer.destroy()
+                if (typeof buffer.destroy === 'function') buffer.destroy();
+                else if (buffer.gpuBuffer) buffer.gpuBuffer.destroy();
+            }
+        });
+        this.#vertexUniformBuffers = [];
+        this.#vertexUniformBindGroups = [];
+
+        // 2. Fragment Uniform Buffer(GPUBuffer) 해제 및 배열 비우기
+        this.#fragmentBuffer.forEach(buffer => {
+            if (buffer) buffer.destroy(); // WebGPU Buffer 명시적 파기
+        });
+        this.#fragmentBuffer = [];
+        this.#fragmentBufferData = [];
+
+        // 3. 내부 셰이더 모듈 및 파이프라인 참조 제거
+        this.#vertexShader = null;
+        this.#fragmentShader = null;
+        this.#pipeline = null;
+        this.#vertexState = null;
+
+        // 4. 레이아웃 및 샘플러 참조 해제
+        this.#vertexBindGroupLayout = null;
+        this.#fragmentBindGroupLayout = null;
+
+
+        // 5. WeakMap 캐시 배열 비우기
+        this.#fragmentBindGroupCache = [];
+
+        console.log('✅ FinalRender 인스턴스 자원 해제 완료');
+    }
     /**
      * Renders the given list of render passes to the specified canvas.
      *

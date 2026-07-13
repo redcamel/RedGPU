@@ -112,6 +112,8 @@ class View3D extends AView {
     destroy() {
         super.destroy();
 
+        this.#prevInfoList = []
+        this.#systemUniform_Vertex_UniformBindGroup = null
         if (this.#viewRenderTextureManager) {
             this.#viewRenderTextureManager.destroy();
         }

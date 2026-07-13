@@ -6,18 +6,6 @@ import WGSLUniformTypes from "./core/WGSLUniformTypes";
 /**
  * [KO] 개별 유니폼 멤버 정보를 생성합니다.
  * [EN] Creates individual globalStruct member information.
- * @param curr -
- * [KO] 현재 멤버 정보
- * [EN] Current member information
- * @param start -
- * [KO] 시작 오프셋
- * [EN] Start offset
- * @param typeName -
- * [KO] 타입 이름
- * [EN] Type name
- * @returns
- * [KO] 가공된 유니폼 멤버 정보
- * [EN] Processed globalStruct member information
  */
 const createUniformMember = (curr, start, typeName) => {
     const UniformTypeInfo = WGSLUniformTypes[typeName];
@@ -34,29 +22,21 @@ const createUniformMember = (curr, start, typeName) => {
 /**
  * [KO] 구조체 멤버들을 재귀적으로 처리합니다.
  * [EN] Recursively processes struct members.
- * @param members -
- * [KO] 구조체 멤버 배열
- * [EN] Struct members array
- * @param start -
- * [KO] 시작 오프셋 (기본값: 0)
- * [EN] Start offset (default: 0)
- * @param end -
- * [KO] 종료 오프셋 (기본값: 0)
- * [EN] End offset (default: 0)
- * @returns
- * [KO] 처리된 멤버 맵과 오프셋 정보
- * [EN] Processed members map and offset information
  */
 const processMembers = (members, start = 0, end = 0) => {
     let startOffset = 0;
     let endOffset = end;
-    const newMembers = members?.reduce((prev, curr, index) => {
+    const newMembers = members?.reduce((prev, curr) => {
         const {type, offset, size, stride, count, isArray} = curr;
         const {format} = type;
-        const typeName = type.name === 'array' ? `${format.name}${format.format ? `${format.format.name}` : ''}` : `${type.name}${format ? `${format.name}` : ''}`;
+        const typeName = type.name === 'array'
+            ? `${format.name}${format.format ? `${format.format.name}` : ''}`
+            : `${type.name}${format ? `${format.name}` : ''}`;
+
         startOffset = start;
         endOffset = offset + size;
         prev[curr.name] = createUniformMember(curr, start, typeName);
+
         if (isArray && format.members) {
             const preset = processMembers(format.members).members;
             prev[curr.name].memberList = Array.from({length: count}, (_, i) => {
@@ -67,11 +47,13 @@ const processMembers = (members, start = 0, end = 0) => {
                 }
                 return temp;
             });
+            // delete  prev[curr.name].memberList
         } else if (type.members) {
             prev[curr.name] = processMembers(type.members, offset + start, endOffset);
         }
         return prev;
     }, {});
+
     return {
         members: newMembers,
         startOffset,
@@ -82,15 +64,10 @@ const processMembers = (members, start = 0, end = 0) => {
 /**
  * [KO] 유니폼 정보 배열을 처리하여 맵으로 반환합니다.
  * [EN] Processes an array of globalStruct information and returns it as a map.
- * @param uniforms -
- * [KO] 유니폼 배열
- * [EN] Uniforms array
- * @returns
- * [KO] 가공된 유니폼 정보 맵
- * [EN] Processed globalStruct information map
  */
 const processUniforms = (uniforms) => {
     return uniforms.reduce((prev, curr) => {
+
         prev[curr.name] = {
             name: curr.name,
             ...processMembers(curr.members),
@@ -120,12 +97,6 @@ const convertMembersToKeyValue = (typeInfo) => {
 /**
  * [KO] 스토리지 정보 배열을 처리하여 맵으로 반환합니다.
  * [EN] Processes an array of storage information and returns it as a map.
- * @param storage -
- * [KO] 스토리지 배열
- * [EN] Storage array
- * @returns
- * [KO] 가공된 스토리지 정보 맵
- * [EN] Processed storage information map
  */
 const processStorages = (storage) => {
     return storage.reduce((prev, curr) => {
@@ -146,12 +117,6 @@ const processStorages = (storage) => {
 /**
  * [KO] 구조체 정보 배열을 처리하여 맵으로 반환합니다.
  * [EN] Processes an array of struct information and returns it as a map.
- * @param structs -
- * [KO] 구조체 배열
- * [EN] Structs array
- * @returns
- * [KO] 가공된 구조체 정보 맵
- * [EN] Processed struct information map
  */
 const processStructs = (structs) => {
     return structs.reduce((prev, curr) => {
@@ -165,27 +130,44 @@ const processStructs = (structs) => {
     }, {});
 };
 
+// 캐시 맵 선언 (const 유지 가능)
 const reflectCache = new Map<string, any>();
 
 /**
+ * [KO] WGSL 리플렉션 캐시를 명시적으로 비우고 자원을 해제합니다.
+ * [EN] Explicitly clears the WGSL reflection cache and releases resources.
+ * @category WGSL
+ */
+export const destroyReflectCache = (): void => {
+    if (reflectCache) {
+        // 캐시 내부의 거대한 인스턴스들이 물고 있는 참조를 먼저 끊어줍니다.
+        for (const [key, value] of reflectCache.entries()) {
+            if (value.shaderSourceVariant) {
+                try {
+                    value.shaderSourceVariant.destroy();
+                } catch (e) {
+                    // 예외 처리
+                }
+                value.shaderSourceVariant = null;
+            }
+            value.uniforms = null;
+            value.storage = null;
+            value.structs = null;
+            value.samplers = null;
+            value.textures = null;
+            value.vertexEntries = null;
+            value.computeEntries = null;
+            value.fragmentEntries = null;
+            // keepLog(key,value)
+        }
+
+        reflectCache.clear();
+        console.log('✨ Reflect Cache 완벽 해소 완료');
+    }
+};
+/**
  * [KO] WGSL 코드를 파싱하고 리플렉션 정보를 반환합니다.
  * [EN] Parses WGSL code and returns reflection information.
- *
- * [KO] 이 함수는 WGSL 소스 코드를 분석하여 유니폼, 스토리지, 샘플러, 텍스처 등의 정보를 추출하고, 조건부 컴파일(variant) 처리를 지원합니다.
- * [EN] This function analyzes WGSL source code to extract information about uniforms, storage, samplers, and textures, and supports conditional compilation (variant) processing.
- *
- * @param sourceName -
- * [KO] 셰이더 소스 식별 이름 (경고 출력용)
- * [EN] Shader source identifier name (for warnings)
- * @param code -
- * [KO] 파싱할 WGSL 셰이더 코드 문자열
- * [EN] WGSL shader code string to parse
- * @param injectLibrary -
- * [KO] 주입된 로컬 라이브러리 객체 (선택)
- * [EN] Injected local library object (optional)
- * @returns
- * [KO] 리플렉션 정보 및 전처리된 소스 코드를 포함하는 객체
- * [EN] An object containing reflection information and preprocessed source code
  * @category WGSL
  */
 const parseWGSL = (sourceName: string, code: string, injectLibrary?: Record<string, string>): {
@@ -204,21 +186,26 @@ const parseWGSL = (sourceName: string, code: string, injectLibrary?: Record<stri
     if (!sourceName) {
         throw new Error(`[parseWGSL] sourceName is required. (provided: ${sourceName})`);
     }
-    code = ensureVertexIndexBuiltin(code)
+
+    code = ensureVertexIndexBuiltin(code);
     const {
         defaultSource,
         shaderSourceVariant,
         conditionalBlocks: uniqueKeys,
         cacheKey
     } = preprocessWGSL(sourceName, code, injectLibrary);
+
     const cachedReflect = reflectCache.get(cacheKey);
     let reflectResult;
+
     if (cachedReflect) {
         console.log('🚀 캐시에서 리플렉트 로드:', cacheKey);
-        reflectResult = cachedReflect
+        // 캐시 데이터 오염 및 참조 꼬임을 막기 위해 얕은 복사본을 만들어 다룹니다.
+        reflectResult = {...cachedReflect};
     } else {
         console.log('🔄 리플렉트 파싱 시작:', cacheKey);
         const reflect = new WgslReflect(defaultSource);
+
         reflectResult = {
             uniforms: {...processUniforms(reflect.uniforms)},
             storage: {...processStorages(reflect.storage)},
@@ -231,11 +218,9 @@ const parseWGSL = (sourceName: string, code: string, injectLibrary?: Record<stri
         };
 
         // [KO] ShaderVariantGenerator에 기본 정보 설정
-        // [EN] Set base information in ShaderVariantGenerator
         shaderSourceVariant.setBaseInfo(reflectResult.textures, reflectResult.samplers);
 
         // [KO] 각 조건부 키별로 추가되는 텍스처/샘플러 수집
-        // [EN] Collect textures/samplers added for each conditional key
         uniqueKeys.forEach(key => {
             const variantSource = shaderSourceVariant.getVariant(key);
             const variantReflect = new WgslReflect(variantSource);
@@ -248,13 +233,16 @@ const parseWGSL = (sourceName: string, code: string, injectLibrary?: Record<stri
             shaderSourceVariant.addConditionalInfo(key, extraTextures, extraSamplers);
         });
 
-        // [KO] 모든 가능한 텍스처/샘플러의 합집합으로 reflectResult 업데이트 (바인드 그룹 레이아웃용)
-        // [EN] Update reflectResult with the union of all possible textures/samplers (for bind group layout)
+        // [KO] 모든 가능한 텍스처/샘플러의 합집합으로 reflectResult 업데이트
         reflectResult.textures = shaderSourceVariant.getUnionTextures();
         reflectResult.samplers = shaderSourceVariant.getUnionSamplers();
 
-        reflectCache.set(cacheKey, reflectResult);
+        // 캐시 맵에는 독립된 원본 객체 스냅샷 형태로 보관합니다.
+        reflectCache.set(cacheKey, {...reflectResult});
     }
+
+    // 최종 반환 시 내부 데이터 참조가 외부 컴포넌트에 단단히 결합하여 무덤까지 따라가는 것을 방지하기 위해
+    // 새로운 껍데기 객체로 매핑하여 내보냅니다.
     // keepLog(
     //     sourceName,
     //     {

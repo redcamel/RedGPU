@@ -12,6 +12,9 @@ import RedGPUContextObserver from "./core/RedGPUContextObserver";
 import GlobalStorageBufferManager from "../resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager";
 import {keepLog} from "../utils";
 import DrawBufferManager from "../renderer/core/DrawBufferManager";
+import {destroyReflectCache} from "../resources/wgslParser/parseWGSL";
+import {destroyPreprocessCache} from "../resources/wgslParser/core/preprocessWGSL";
+import Renderer from "../renderer/Renderer";
 
 /**
  * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
@@ -471,6 +474,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
         })
     }
 
+    targetRenderer: Renderer
     /**
      * [KO] RedGPUContext 인스턴스를 파기하고 모든 렌더러와 리소스를 해제합니다.
      * [EN] Destroys the RedGPUContext instance and releases all renderers and resources.
@@ -483,6 +487,9 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#deviceEventController.abort();
         if (this.#destroyed) return;
         this.#destroyed = true;
+        destroyReflectCache()
+        destroyPreprocessCache()
+        this.targetRenderer.destroy()
         if (this.#gpuContext) {
             try {
                 this.gpuContext.unconfigure();

@@ -27,6 +27,7 @@ class PassClustersLight extends RedGPUObject {
     #view: View3D
     #clusterLightBindGroup: GPUBindGroup
     #clusterLightPipeline: GPUComputePipeline
+    #clusterLightBindGroupLayout: GPUBindGroupLayout
     #clusterLightsBuffer: GPUBuffer
     #passClusterLightBound: PassClusterLightBound
 
@@ -82,51 +83,7 @@ class PassClustersLight extends RedGPUObject {
         }
     }
 
-    #initPipeLine() {
-        const {gpuDevice, resourceManager} = this;
-        const source = parseWGSL('PASS_CLUSTERS_LIGHT', ClusterCellBoundsSource + PassLightClustersSource).defaultSource;
-        this.#clusterLightsBuffer = resourceManager.createGPUBuffer(`PASS_CLUSTER_LIGHTS_BUFFER`, {
-            size: PassClustersLightHelper.getClusterLightsBufferSize(),
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
-        });
-        const clusterLightBindGroupLayout = gpuDevice.createBindGroupLayout({
-            entries: [
-                {
-                    binding: 0,
-                    visibility: GPUShaderStage.COMPUTE,
-                    buffer: {type: 'read-only-storage'}
-                }
-            ]
-        });
-        this.#clusterLightBindGroup = gpuDevice.createBindGroup({
-            label: 'CLUSTER_LIGHT_BIND_GROUP',
-            layout: clusterLightBindGroupLayout,
-            entries: [
-                {
-                    binding: 0,
-                    resource: {
-                        buffer: this.#passClusterLightBound.clusterBoundBuffer
-                    }
-                }
-            ]
-        });
-        this.#clusterLightPipeline = gpuDevice.createComputePipeline({
-            label: 'CLUSTER_LIGHT_PIPELINE',
-            layout: gpuDevice.createPipelineLayout({
-                label: 'CLUSTER_LIGHT_PIPELINE_LAYOUT',
-                bindGroupLayouts: [
-                    resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
-                    clusterLightBindGroupLayout
-                ]
-            }),
-            compute: {
-                module: resourceManager.createGPUShaderModule('CLUSTER_LIGHTS_SHADER', {
-                    code: source,
-                }),
-                entryPoint: 'main'
-            }
-        });
-    }
+    #source
 
     /**
      * [KO] PassClustersLight 인스턴스를 파기하고 할당된 GPUBuffer 및 파이프라인을 해제합니다.
@@ -144,8 +101,57 @@ class PassClustersLight extends RedGPUObject {
         this.#clusterLightBindGroup = null;
         this.#clusterLightPipeline = null;
         this.#passClusterLightBound = null;
+        this.#clusterLightBindGroupLayout = null
+        this.#source = null
         this.#view = null;
         console.log("🧹 PassClustersLight destroy 완료");
+    }
+
+    #initPipeLine() {
+        const {gpuDevice, resourceManager} = this;
+        this.#source = parseWGSL('PASS_CLUSTERS_LIGHT', ClusterCellBoundsSource + PassLightClustersSource).defaultSource;
+        // keepLog(this.#source )
+        this.#clusterLightsBuffer = resourceManager.createGPUBuffer(`PASS_CLUSTER_LIGHTS_BUFFER`, {
+            size: PassClustersLightHelper.getClusterLightsBufferSize(),
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+        });
+        this.#clusterLightBindGroupLayout = gpuDevice.createBindGroupLayout({
+            entries: [
+                {
+                    binding: 0,
+                    visibility: GPUShaderStage.COMPUTE,
+                    buffer: {type: 'read-only-storage'}
+                }
+            ]
+        });
+        this.#clusterLightBindGroup = gpuDevice.createBindGroup({
+            label: 'CLUSTER_LIGHT_BIND_GROUP',
+            layout: this.#clusterLightBindGroupLayout,
+            entries: [
+                {
+                    binding: 0,
+                    resource: {
+                        buffer: this.#passClusterLightBound.clusterBoundBuffer
+                    }
+                }
+            ]
+        });
+        this.#clusterLightPipeline = gpuDevice.createComputePipeline({
+            label: 'CLUSTER_LIGHT_PIPELINE',
+            layout: gpuDevice.createPipelineLayout({
+                label: 'CLUSTER_LIGHT_PIPELINE_LAYOUT',
+                bindGroupLayouts: [
+                    resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
+                    this.#clusterLightBindGroupLayout
+                ]
+            }),
+            compute: {
+                module: resourceManager.createGPUShaderModule('CLUSTER_LIGHTS_SHADER', {
+                    code: this.#source,
+                }),
+                entryPoint: 'main'
+            }
+        });
     }
 }
 

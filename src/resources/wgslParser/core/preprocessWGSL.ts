@@ -33,9 +33,35 @@ export interface PreprocessedWGSLResult {
     conditionalBlockInfos: ConditionalBlock[];
 }
 
-const preprocessCache = new Map<string, PreprocessedWGSLResult>();
-const sourceNameRegistry = new Map<string, string>();
+let preprocessCache = new Map<string, PreprocessedWGSLResult>();
+let sourceNameRegistry = new Map<string, string>();
+export const destroyPreprocessCache = (): void => {
+    for (const [key, value] of preprocessCache.entries()) {
+        if (value.shaderSourceVariant) {
+            try {
+                value.shaderSourceVariant.destroy();
+            } catch (e) {
+                // 예외 처리
+            }
+        }
+        value.cacheKey = null;
+        value.conditionalBlockInfos = null;
+        value.conditionalBlocks = null;
+        value.defaultSource = null;
+        value.shaderSourceVariant = null;
+        // keepLog(key,value)
+    }
+    // 1. 기존 맵 내부를 명시적으로 비움
+    // preprocessCache.clear();
+    sourceNameRegistry.clear();
 
+    // 2. null 대입 대신 '새로운 맵'을 할당하여 이전 맵의 힙(Heap) 메모리 연결고리를 완전히 끊음
+    // 이로 인해 런타임 에러를 방지하면서도 기존 메모리는 완벽하게 해소됩니다.
+    preprocessCache = new Map<string, PreprocessedWGSLResult>();
+    sourceNameRegistry = new Map<string, string>();
+
+    console.log('✨ Preprocess Cache 완벽 해소 완료 (안전 재할당)');
+};
 /**
  * [KO] 코드 해시를 생성합니다.
  * [EN] Generates a code hash.
@@ -300,6 +326,7 @@ const preprocessWGSL = (sourceName: string, code: string, injectLibrary?: Record
         conditionalBlocks: uniqueKeys,
         conditionalBlockInfos: conditionalBlocks,
     };
+    // keepLog(sourceName,result)
     const totalCombinations = Math.pow(2, uniqueKeys.length);
     preprocessCache.set(cacheKey, result);
     if (totalCombinations > 1) {
