@@ -130,6 +130,8 @@ const processStructs = (structs) => {
     }, {});
 };
 
+// 외부에 노출된 SHADER_INFO 결과 객체들을 담아두고 destroy 시 알맹이를 비웁니다.
+const activeParseResults: any[] = [];
 // 캐시 맵 선언 (const 유지 가능)
 const reflectCache = new Map<string, any>();
 
@@ -162,7 +164,31 @@ export const destroyReflectCache = (): void => {
         }
 
         reflectCache.clear();
-        console.log('✨ Reflect Cache 완벽 해소 완료');
+
+        // [KO] 외부 모듈의 전역 상수(SHADER_INFO)에 쥐어져 있는 껍데기 객체들의 내부 참조를 끊어 구조체(struct) 및 유니폼 정보 해소
+        for (const result of activeParseResults) {
+            result.uniforms = null;
+            result.storage = null;
+            result.structs = null;
+            result.samplers = null;
+            result.textures = null;
+            result.vertexEntries = null;
+            result.computeEntries = null;
+            result.fragmentEntries = null;
+            result.defaultSource = null;
+            if (result.shaderSourceVariant) {
+                try {
+                    result.shaderSourceVariant.destroy();
+                } catch (e) {
+                    // 예외 처리
+                }
+                result.shaderSourceVariant = null;
+            }
+            result.conditionalBlocks = null;
+        }
+        activeParseResults.length = 0;
+
+        console.log('✨ Reflect Cache 및 구조체(struct) 메모리 완벽 해소 완료');
     }
 };
 /**
@@ -252,12 +278,14 @@ const parseWGSL = (sourceName: string, code: string, injectLibrary?: Record<stri
     //         conditionalBlocks: uniqueKeys
     //     }
     // )
-    return {
+    const finalResult = {
         ...reflectResult,
         defaultSource,
         shaderSourceVariant,
         conditionalBlocks: uniqueKeys
     };
+    activeParseResults.push(finalResult);
+    return finalResult;
 };
 
 export default parseWGSL;
