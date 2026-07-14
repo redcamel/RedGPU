@@ -329,6 +329,36 @@ class SkyBox extends RedGPUObject {
         }
         return gpuDevice.createRenderPipeline(pipelineDescriptor)
     }
+
+    /**
+     * [KO] 스카이박스 인스턴스를 파기하고 할당된 자원을 즉시 해제합니다.
+     * [EN] Destroys the SkyBox instance and immediately releases the allocated resources.
+     */
+    destroy() {
+        if (this.gpuRenderInfo) {
+            if (this.gpuRenderInfo.vertexUniformBuffer) {
+                this.gpuRenderInfo.vertexUniformBuffer.destroy();
+            }
+            this.gpuRenderInfo = null;
+        }
+        if (this.#material) {
+            this.#material.destroy();
+            this.#material = null;
+        }
+        if (this.#geometry) {
+            // @ts-ignore
+            if (typeof this.#geometry.destroy === 'function') {
+                // @ts-ignore
+                this.#geometry.destroy();
+            }
+            this.#geometry = null;
+        }
+        this.#renderBundle = null;
+        this.#texture = null;
+        this.#transitionTexture = null;
+        this.#prevSystemUniform_Vertex_UniformBindGroup = null;
+        console.log(`🧹 SkyBox destroy 완료`);
+    }
 }
 
 Object.freeze(SkyBox)

@@ -136,6 +136,11 @@ class View3D extends AView {
             this.#toneMappingManager.destroy();
         }
 
+        if (this.#skybox) {
+            this.#skybox.destroy();
+            this.skybox = null;
+        }
+
         keepLog(`🧹 ${this.name} destroy 완료`)
     }
 
