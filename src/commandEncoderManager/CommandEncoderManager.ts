@@ -616,11 +616,14 @@ class CommandEncoderManager extends RedGPUObject {
         if (len > 0) {
             let i = 0;
             for (i; i < len; i++) {
-                // keepLog(this.#deferredDestroyList[i])
-                this.#deferredDestroyList[i].destroy();
+                try {
+                    this.#deferredDestroyList[i].destroy();
+                } catch (e) {
+                    // 예외 발생 시 에러는 기록하되 루프 붕괴는 원천 차단
+                    console.warn("⚠️ 지연 자원 소멸 실패:", e);
+                }
             }
             this.#deferredDestroyList.length = 0;
-            // console.log(`🗑️ [CommandEncoderManager] Destroyed ${len} deferred resource(s)`);
         }
         return len;
     }

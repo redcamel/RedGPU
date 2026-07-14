@@ -234,11 +234,13 @@ abstract class AController extends RedGPUObject {
         htmlCanvas.removeEventListener(moveKey, this.#HD_hover);
         htmlCanvas.removeEventListener(moveKey, this.#HD_Move);
         window.removeEventListener(upKey, this.#HD_up);
-        if (this.#initInfo.HD_Wheel) {
-            htmlCanvas.removeEventListener('wheel', this.#HD_wheel);
-        }
-        if (this.#initInfo.HD_TouchPinch) {
-            htmlCanvas.removeEventListener('touchmove', this.#HD_touchPinch);
+        if (this.#initInfo) {
+            if (this.#initInfo.HD_Wheel) {
+                htmlCanvas.removeEventListener('wheel', this.#HD_wheel);
+            }
+            if (this.#initInfo.HD_TouchPinch) {
+                htmlCanvas.removeEventListener('touchmove', this.#HD_touchPinch);
+            }
         }
         if (AController.#globalKeyboardActiveController === this) {
             AController.#globalKeyboardActiveController = null;
@@ -247,6 +249,9 @@ abstract class AController extends RedGPUObject {
             AController.#globalKeyboardActiveView = null;
         }
         this.#hoveredView = null;
+        this.#currentFrameViews.clear();
+        this.#initInfo = null;
+        console.log(`🧹 AController destroy 완료`);
     }
 
     // ==================== Update ====================
