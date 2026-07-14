@@ -15,6 +15,9 @@ import DrawBufferManager from "../renderer/core/DrawBufferManager";
 import {destroyReflectCache} from "../resources/wgslParser/parseWGSL";
 import {destroyPreprocessCache} from "../resources/wgslParser/core/preprocessWGSL";
 import Renderer from "../renderer/Renderer";
+import GLTFLoader from "../loader/gltf/GLTFLoader";
+import {destroyPackedTextureCache} from "../resources/texture/packedTexture/PackedTexture";
+import {destroySamplerCache} from "../resources/sampler/Sampler";
 
 /**
  * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
@@ -68,7 +71,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [KO] GPU 어댑터 (WebGPU 하드웨어 정보)
      * [EN] GPU Adapter (WebGPU hardware info)
      */
-    readonly #gpuAdapter: GPUAdapter
+    #gpuAdapter: GPUAdapter
     /**
      * [KO] 알파 모드 (WebGPU 캔버스 알파 설정)
      * [EN] Alpha mode (WebGPU canvas alpha setting)
@@ -78,12 +81,12 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [KO] GPU 캔버스 컨텍스트 (WebGPU 렌더링 대상)
      * [EN] GPU Canvas Context (WebGPU rendering target)
      */
-    readonly #gpuContext: GPUCanvasContext
+    #gpuContext: GPUCanvasContext
     /**
      * [KO] GPU 디바이스 (WebGPU 연산/리소스 관리)
      * [EN] GPU Device (WebGPU computation/resource management)
      */
-    readonly #gpuDevice: GPUDevice
+    #gpuDevice: GPUDevice
     /**
      * [KO] HTML 캔버스 요소 (렌더링 대상 DOM)
      * [EN] HTML Canvas element (Rendering target DOM)
@@ -482,14 +485,17 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [KO] pagehide 이벤트에 의해 임시로 소멸이 기동되었는지 여부 (bfcache 복원용 pageshow 리스너 보존을 위함)
      * [EN] Whether the destruction was temporarily triggered by a pagehide event (to preserve pageshow listener for bfcache restoration)
      */
-    destroy(isPageHide: boolean = false): void {
+    destroy(): void {
         window?.cancelAnimationFrame(this.currentRequestAnimationFrame)
         this.#deviceEventController.abort();
         if (this.#destroyed) return;
         this.#destroyed = true;
         destroyReflectCache()
         destroyPreprocessCache()
-        this.targetRenderer.destroy()
+        GLTFLoader.destroyGLTFCache();
+        destroyPackedTextureCache();
+        destroySamplerCache();
+        this.targetRenderer.destroy(this)
         if (this.#gpuContext) {
             try {
                 this.gpuContext.unconfigure();
@@ -500,59 +506,72 @@ class RedGPUContext extends RedGPUContextViewContainer {
         }
         this.#observer?.destroy()
         this.#observer = null
-
-        this.#htmlCanvas.style.width = '1px'
-        this.#htmlCanvas.style.height = '1px'
-
         this.#sizeManager.destroy()
         this.#sizeManager = null
+        if (this.#htmlCanvas) {
+            this.#htmlCanvas.width = 0;
+            this.#htmlCanvas.height = 0;
+            this.#htmlCanvas.style.width = '0px';
+            this.#htmlCanvas.style.height = '0px';
+
+            this.#htmlCanvas.remove();
+        }
 
 
-
-
-        // clear DrawBufferManager
-        this.#drawBufferManager.destroy();
-        this.#drawBufferManager = null
-
-        // clear Event
-        this.#clearEvent()
-
-        this.viewList.forEach((view: View3D) => {
-            view.destroy()
-        })
-        // 리소스 캐시 및 참조 끊기
+        // 1. 뷰 리스트 먼저 완전히 파괴 (G-Buffer 등 수집)
+        for (const view of this.viewList) {
+            view.destroy();
+        }
         this.removeAllViews();
 
-        // clear CommandEncoderManager (뷰 소멸자 내부에서 적재한 지연 파괴 리소스들을 최종적으로 수거하기 위해 뒤로 이동)
+        // 2. 드로우 버퍼 매니저 정리
+        if (this.#drawBufferManager) {
+            this.#drawBufferManager.destroy();
+            this.#drawBufferManager = null
+        }
+
+        // 3. 리소스 매니저 정리 (버퍼/텍스처 캐시를 지연 파괴 큐에 넣음)
+        if (this.#resourceManager) {
+            this.#resourceManager.destroy();
+            this.#resourceManager = null
+        }
+
+        // 4. 커맨드 엔코더 매니저 정리 (지연 파괴 큐의 모든 물리 자원 최종 소멸)
         if (this.#commandEncoderManager) {
             this.#commandEncoderManager.destroy();
             this.#commandEncoderManager = null;
         }
 
-        // clear ResourceManager
-        if (this.#resourceManager) {
-            this.#resourceManager.destroy();
-            this.#resourceManager = null
+        // 5. 글로벌 SSBO 소멸
+        if (this.#globalVertexSSBO) {
+            this.#globalVertexSSBO.destroy()
+            this.#globalVertexSSBO = null
         }
-        // clear Global SSBO
-        this.#globalVertexSSBO.destroy()
-        this.#globalVertexSSBO = null
-        this.#globalFragmentSSBO_PBR.destroy()
-        this.#globalFragmentSSBO_PBR = null
-        this.#globalFragmentSSBO_BuiltIn.destroy()
-        this.#globalFragmentSSBO_BuiltIn = null
+        if (this.#globalFragmentSSBO_PBR) {
+            this.#globalFragmentSSBO_PBR.destroy()
+            this.#globalFragmentSSBO_PBR = null
+        }
+        if (this.#globalFragmentSSBO_BuiltIn) {
+            this.#globalFragmentSSBO_BuiltIn.destroy()
+            this.#globalFragmentSSBO_BuiltIn = null
+        }
+
+        // clear Event
+        this.#clearEvent()
 
         this.#deviceEventController.abort();
         this.#pageHideEventController.abort();
-        if (!isPageHide) {
-            this.#pageShowEventController.abort();
-        }
+
 
         this.#onDestroy = null;
         this.detector.destroy()
         this.#detector = null
-
         this.#gpuDevice.destroy()
+        this.#gpuAdapter = null
+        this.#gpuDevice = null
+        this.#gpuContext = null
+        this.#configurationDescription = null
+        this.#htmlCanvas = null
     }
 
     /**
@@ -600,13 +619,17 @@ class RedGPUContext extends RedGPUContextViewContainer {
         };
         const pageHideHandler = () => {
             this.#pageHideEventController.abort();
-            this.destroy(true);
+            this.destroy();
             this.htmlCanvas.remove();
             this.#htmlCanvas = null
 
         };
+        const beforeUnloadHandler = () => {
+            this.destroy();
+        };
         window?.addEventListener('pageshow', pageShowHandler, {signal: this.#pageShowEventController.signal});
         window?.addEventListener('pagehide', pageHideHandler, {signal: this.#pageHideEventController.signal});
+        window?.addEventListener('beforeunload', beforeUnloadHandler, {signal: this.#pageHideEventController.signal});
 
     }
     /**
