@@ -371,6 +371,7 @@ abstract class ABaseMaterial extends ResourceBase {
      * @protected
      */
     _updateFragmentState() {
+        if (this.redGPUContext.destroyed) return;
         const {gpuDevice, resourceManager} = this.redGPUContext
         this.#checkVariant()
         const entries: GPUBindGroupEntry[] = []
@@ -483,7 +484,7 @@ abstract class ABaseMaterial extends ResourceBase {
      * @protected
      */
     _updateBaseProperty() {
-
+        if (this.redGPUContext.destroyed) return;
         const {members} = this['isPBRMaterial'] ? ResourceManager.GLOBAL_FRAGMENT_STRUCT_PBR : this['isBuiltInMaterial'] ? ResourceManager.GLOBAL_FRAGMENT_STRUCT_BUILT_IN : this.gpuRenderInfo.fragmentUniformInfo
         for (const k in members) {
             const property = this[k]
