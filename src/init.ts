@@ -55,15 +55,6 @@ const init = async (
         forceFallbackAdapter: false,
     },
 ) => {
-    const debugLog = (msg: string) => {
-        if (typeof window !== 'undefined') {
-            const c = window['console'];
-            if (c && typeof c['info'] === 'function') {
-                c['info'](msg);
-            }
-        }
-    };
-
     if (isSearchEngineBot()) {
         debugLog('🤖 Search engine bot detected - skipping WebGPU initialization');
         return;
@@ -90,53 +81,9 @@ const init = async (
         }
     }
     const validateAndRequestDevice = async (adapter: GPUAdapter) => {
-        const requiredFeatures: GPUFeatureName[] = [];
-        const featuresToRequest: GPUFeatureName[] = [
-            // "texture-compression-astc",
-            // "texture-compression-bc",
-            // "texture-compression-etc2",
-            // "shader-f16",
-            // "timestamp-query",
-            // "depth-clip-control",
-            "indirect-first-instance",
-            // "rg11b10ufloat-renderable",
-            // "bgra8unorm-storage",
-            // "float32-filterable"
-        ];
-
-        featuresToRequest.forEach(feature => {
-            if (adapter?.features.has(feature)) {
-                requiredFeatures.push(feature);
-            }
-        });
-        const requiredLimits: Record<string, number> = {};
-        const limitKeys = [
-            'maxBufferSize',
-            'maxStorageBufferBindingSize',
-            'maxSampledTexturesPerShaderStage',
-            'maxSamplersPerShaderStage',
-            'maxStorageBuffersPerShaderStage',
-            'maxStorageTexturesPerShaderStage',
-            'maxUniformBuffersPerShaderStage',
-            'maxUniformBufferBindingSize',
-            'maxBindGroups',
-            'maxVertexAttributes',
-            'maxVertexBuffers',
-            'maxInterStageShaderComponents',
-            'maxComputeWorkgroupStorageSize',
-            'maxComputeInvocationsPerWorkgroup',
-            'maxComputeWorkgroupSizeX',
-            'maxComputeWorkgroupSizeY',
-            'maxComputeWorkgroupSizeZ',
-            'maxComputeWorkgroupsPerDimension'
-        ];
-        limitKeys.forEach(key => {
-            if (adapter.limits[key]) requiredLimits[key] = adapter.limits[key];
-        });
-
         const gpuDeviceDescriptor: GPUDeviceDescriptor = {
-            requiredFeatures,
-            requiredLimits
+            requiredFeatures: getRequiredFeature(adapter),
+            requiredLimits: getRequiredLimits(adapter)
         };
         try {
             const device: GPUDevice = await adapter.requestDevice(gpuDeviceDescriptor)
@@ -160,10 +107,7 @@ const init = async (
                 //     return originalCreateShaderModule(descriptor)
                 // };
             }
-
             const redGPUContext: RedGPUContext = new RedGPUContext(canvas, adapter, device, context, alphaMode, onDestroy)
-
-
             onWebGPUInitialized(redGPUContext)
         } catch (e) {
             errorHandler(e, '')
@@ -188,6 +132,65 @@ const init = async (
     }
 }
 export default init
+const getRequiredFeature = (adapter: GPUAdapter): GPUFeatureName[] => {
+    const requiredFeatures: GPUFeatureName[] = [];
+    const featuresToRequest: GPUFeatureName[] = [
+        // "texture-compression-astc",
+        // "texture-compression-bc",
+        // "texture-compression-etc2",
+        // "shader-f16",
+        // "timestamp-query",
+        // "depth-clip-control",
+        "indirect-first-instance",
+        // "rg11b10ufloat-renderable",
+        // "bgra8unorm-storage",
+        // "float32-filterable"
+    ];
+
+    featuresToRequest.forEach(feature => {
+        if (adapter?.features.has(feature)) {
+            requiredFeatures.push(feature);
+        }
+    });
+    return requiredFeatures
+}
+const getRequiredLimits = (adapter: GPUAdapter): Record<string, number> => {
+    const requiredLimits: Record<string, number> = {};
+    const limitKeys: (keyof GPUSupportedLimits)[] = [
+        'maxBufferSize',
+        'maxStorageBufferBindingSize',
+        'maxSampledTexturesPerShaderStage',
+        'maxSamplersPerShaderStage',
+        'maxStorageBuffersPerShaderStage',
+        'maxStorageTexturesPerShaderStage',
+        'maxUniformBuffersPerShaderStage',
+        'maxUniformBufferBindingSize',
+        'maxBindGroups',
+        'maxVertexAttributes',
+        'maxVertexBuffers',
+        'maxInterStageShaderVariables',
+        'maxComputeWorkgroupStorageSize',
+        'maxComputeInvocationsPerWorkgroup',
+        'maxComputeWorkgroupSizeX',
+        'maxComputeWorkgroupSizeY',
+        'maxComputeWorkgroupSizeZ',
+        'maxComputeWorkgroupsPerDimension'
+    ];
+    limitKeys.forEach(key => {
+        if (key !== '__brand') {
+            if (adapter.limits[key]) requiredLimits[key] = adapter.limits[key];
+        }
+    });
+    return requiredLimits;
+}
+const debugLog = (msg: string) => {
+    if (typeof window !== 'undefined') {
+        const c = window['console'];
+        if (c && typeof c['info'] === 'function') {
+            c['info'](msg);
+        }
+    }
+};
 const generateErrorMessage = (e: any, defaultMsg: string): string => {
     let msg = defaultMsg;
     // Check if 'e' is an instance of Error
@@ -206,41 +209,6 @@ const isSearchEngineBot = (): boolean => {
         return true; // SSR 환경에서는 봇으로 간주
     }
     const userAgent = navigator.userAgent.toLowerCase();
-    const botPatterns = [
-        'googlebot',
-        'bingbot',
-        'slurp',
-        'duckduckbot',
-        'baiduspider',
-        'yandexbot',
-        'facebookexternalhit',
-        'twitterbot',
-        'rogerbot',
-        'linkedinbot',
-        'embedly',
-        'quora link preview',
-        'showyoubot',
-        'outbrain',
-        'pinterest/0.',
-        'developers.google.com/+/web/snippet',
-        'www.google.com/webmasters/tools/richsnippets',
-        'slackbot',
-        'vkshare',
-        'w3c_validator',
-        'redditbot',
-        'applebot',
-        'whatsapp',
-        'flipboard',
-        'tumblr',
-        'bitlybot',
-        'skypeuripreview',
-        'nuzzel',
-        'line',
-        'discordbot',
-        'telegrambot',
-        'crawler',
-        'spider',
-        'bot'
-    ];
-    return botPatterns.some(pattern => userAgent.includes(pattern));
+    const botPattern = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|twitterbot|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest\/0\.|developers\.google.com\/\+\/web\/snippet|www\.google\.com\/webmasters\/tools\/richsnippets|slackbot|vkshare|w3c_validator|redditbot|applebot|whatsapp|flipboard|tumblr|bitlybot|skypeuripreview|nuzzel|line|discordbot|telegrambot|crawler|spider|bot/;
+    return botPattern.test(userAgent);
 };
