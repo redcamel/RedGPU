@@ -432,6 +432,9 @@ class ATextField extends Mesh {
      * [EN] Destroys the ATextField instance and releases resources such as the DOM elements and Object URLs in use.
      */
     destroy() {
+        if (this.#currentRequestAnimationFrame) {
+            cancelAnimationFrame(this.#currentRequestAnimationFrame);
+        }
         if (this.material && this.material.diffuseTexture) {
             const prevSrc = this.material.diffuseTexture.src;
             const isObjectURL = typeof prevSrc === 'string' && prevSrc.startsWith('blob:');
@@ -453,9 +456,7 @@ class ATextField extends Mesh {
             }
             this.#svg = null;
         }
-        if (this.#currentRequestAnimationFrame) {
-            cancelAnimationFrame(this.#currentRequestAnimationFrame);
-        }
+
     }
 }
 
