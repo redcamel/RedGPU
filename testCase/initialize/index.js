@@ -11,8 +11,10 @@ redUnit.testGroup(
             RedGPU.init(
                 canvas,
                 (redGPUContext) => {
+                    console.log('111', redGPUContext)
                     try {
                         const isInstanceOf = redGPUContext instanceof RedGPU.Context.RedGPUContext;
+                        console.log(redGPUContext)
                         redGPUContext.destroy();
                         run(isInstanceOf);
                     } catch (e) {

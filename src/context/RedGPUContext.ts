@@ -495,7 +495,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
         GLTFLoader.destroyGLTFCache();
         destroyPackedTextureCache();
         destroySamplerCache();
-        this.targetRenderer.destroy(this)
+        this.targetRenderer?.destroy(this)
         if (this.#gpuContext) {
             try {
                 this.gpuContext.unconfigure();
