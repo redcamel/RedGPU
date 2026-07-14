@@ -2067,11 +2067,11 @@ class Mesh extends MeshBase {
      */
     destroy() {
         // 1. 자식 객체들 재귀 소멸
-        this.children.forEach(child => {
+        for (const child of this.children) {
             if ('destroy' in child && typeof child.destroy === 'function') {
                 child.destroy();
             }
-        });
+        }
         this.children.length = 0;
 
         // 2. 부모 컨테이너 연결 끊기
@@ -2092,11 +2092,11 @@ class Mesh extends MeshBase {
             this.#drawCommandSlot = null;
         }
         if (this.#drawCommandSlot_LODList && this.#drawBufferManager) {
-            this.#drawCommandSlot_LODList.forEach(slot => {
+            for (const slot of this.#drawCommandSlot_LODList) {
                 if (slot) {
                     this.#drawBufferManager.setInstanceNum(slot, 0);
                 }
-            });
+            }
             this.#drawCommandSlot_LODList = [];
         }
         this.#drawBufferManager = null;
