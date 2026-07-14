@@ -1,5 +1,4 @@
 import RedGPUContext from "./context/RedGPUContext";
-import ensureVertexIndexBuiltin from "./resources/wgslParser/core/ensureVertexIndexBuiltin";
 
 /**
  * [KO] WebGPU를 비동기적으로 초기화하고 RedGPUContext를 생성합니다.
@@ -155,11 +154,11 @@ const init = async (
         }
         try {
             {
-                const originalCreateShaderModule = device.createShaderModule.bind(device);
-                device.createShaderModule = function (descriptor) {
-                    descriptor.code = ensureVertexIndexBuiltin(descriptor.code)
-                    return originalCreateShaderModule(descriptor)
-                };
+                // const originalCreateShaderModule = device.createShaderModule.bind(device);
+                // device.createShaderModule = function (descriptor) {
+                //     descriptor.code = ensureVertexIndexBuiltin(descriptor.code)
+                //     return originalCreateShaderModule(descriptor)
+                // };
             }
 
             const redGPUContext: RedGPUContext = new RedGPUContext(canvas, adapter, device, context, alphaMode, onDestroy)

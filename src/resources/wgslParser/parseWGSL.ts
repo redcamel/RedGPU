@@ -1,5 +1,4 @@
 import {WgslReflect} from "wgsl_reflect";
-import ensureVertexIndexBuiltin from "./core/ensureVertexIndexBuiltin";
 import preprocessWGSL from "./core/preprocessWGSL";
 import WGSLUniformTypes from "./core/WGSLUniformTypes";
 
@@ -213,7 +212,7 @@ const parseWGSL = (sourceName: string, code: string, injectLibrary?: Record<stri
         throw new Error(`[parseWGSL] sourceName is required. (provided: ${sourceName})`);
     }
 
-    code = ensureVertexIndexBuiltin(code);
+    // code = ensureVertexIndexBuiltin(code);
     const {
         defaultSource,
         shaderSourceVariant,
