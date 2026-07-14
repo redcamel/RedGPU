@@ -428,13 +428,13 @@ class ResourceManager extends RedGPUObject {
         // 1. 캐싱된 GPUBuffer들을 순회하며 명시적 destroy() 호출
         const bufferMap = this.#resources.get(ResourceType.GPUBuffer);
         if (bufferMap) {
-            bufferMap.forEach((buffer: GPUBuffer) => {
+            for (const buffer of bufferMap.values()) {
                 try {
                     buffer.destroy();
                 } catch (e) {
                     // 이미 해제되었거나 무효화된 상태 예외 처리
                 }
-            });
+            }
             bufferMap.clear();
         }
 
@@ -443,13 +443,61 @@ class ResourceManager extends RedGPUObject {
         this.#resources.get(ResourceType.GPUBindGroupLayout)?.clear();
         this.#resources.get(ResourceType.GPUPipelineLayout)?.clear();
 
-        // 3. 상태 관리 맵(ResourceStatusInfo) 비우기
+        // 3. 상태 관리 맵(ResourceStatusInfo)의 각 리소스 인스턴스에 대해 명시적 destroy() 호출하여 GPU 자원 해제
+        for (const state of this.#managedBitmapTextureState.table.values()) {
+            try {
+                state.texture.destroy();
+            } catch (e) {
+            }
+        }
         this.#managedBitmapTextureState.table.clear();
+
+        for (const state of this.#managedCubeTextureState.table.values()) {
+            try {
+                state.texture.destroy();
+            } catch (e) {
+            }
+        }
         this.#managedCubeTextureState.table.clear();
+
+        for (const state of this.#managedHDRTextureState.table.values()) {
+            try {
+                state.texture.destroy();
+            } catch (e) {
+            }
+        }
         this.#managedHDRTextureState.table.clear();
+
+        for (const state of this.#managedUniformBufferState.table.values()) {
+            try {
+                state.buffer.destroy();
+            } catch (e) {
+            }
+        }
         this.#managedUniformBufferState.table.clear();
+
+        for (const state of this.#managedVertexBufferState.table.values()) {
+            try {
+                state.buffer.destroy();
+            } catch (e) {
+            }
+        }
         this.#managedVertexBufferState.table.clear();
+
+        for (const state of this.#managedIndexBufferState.table.values()) {
+            try {
+                state.buffer.destroy();
+            } catch (e) {
+            }
+        }
         this.#managedIndexBufferState.table.clear();
+
+        for (const state of this.#managedStorageBufferState.table.values()) {
+            try {
+                state.buffer.destroy();
+            } catch (e) {
+            }
+        }
         this.#managedStorageBufferState.table.clear();
 
         // 4. 프리셋 및 제너레이터 등 참조 초기화
