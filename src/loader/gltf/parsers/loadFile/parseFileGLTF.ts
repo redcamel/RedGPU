@@ -96,5 +96,9 @@ const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack, onProgress?: (inf
         parseGLTF(gltfLoader, gltfLoader.gltfData, callBack, onProgress);
     });
 };
+export const destroyFileGLTFCache = () => {
+    cacheMap.clear();
+    pendingMap.clear();
+};
 export default parseFileGLTF;
 
