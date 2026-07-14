@@ -1,6 +1,13 @@
 import RedGPUContext from "./context/RedGPUContext";
 import {keepLog} from "./utils";
 
+const DEFAULT_REQUEST_ADAPTER_OPTIONS: GPURequestAdapterOptions = {
+    powerPreference: "high-performance",
+    forceFallbackAdapter: false,
+};
+
+const BOT_PATTERN = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|twitterbot|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest\/0\.|developers\.google.com\/\+\/web\/snippet|www\.google\.com\/webmasters\/tools\/richsnippets|slackbot|vkshare|w3c_validator|redditbot|applebot|whatsapp|flipboard|tumblr|bitlybot|skypeuripreview|nuzzel|line|discordbot|telegrambot|crawler|spider|bot/;
+
 
 /**
  * [KO] WebGPU를 비동기적으로 초기화하고 RedGPUContext를 생성합니다.
@@ -52,16 +59,13 @@ const init = async (
     onFailInitialized?: (message?: string) => void,
     onDestroy?: (info: GPUDeviceLostInfo) => void,
     alphaMode: GPUCanvasAlphaMode = 'premultiplied',
-    requestAdapterOptions: GPURequestAdapterOptions = {
-        powerPreference: "high-performance",
-        forceFallbackAdapter: false,
-    },
+    requestAdapterOptions: GPURequestAdapterOptions = DEFAULT_REQUEST_ADAPTER_OPTIONS,
 ) => {
     if (isSearchEngineBot()) {
         keepLog('🤖 Search engine bot detected - skipping WebGPU initialization');
         return;
     }
-    const {gpu} = navigator;
+    const gpu = typeof navigator !== 'undefined' ? navigator.gpu : undefined;
     if (!gpu) {
         const msg = 'WebGPU is not supported in this browser. Please use a modern browser with WebGPU enabled.';
         onFailInitialized?.(msg);
@@ -188,6 +192,5 @@ const isSearchEngineBot = (): boolean => {
         return true; // SSR 환경에서는 봇으로 간주
     }
     const userAgent = navigator.userAgent.toLowerCase();
-    const botPattern = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|twitterbot|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest\/0\.|developers\.google.com\/\+\/web\/snippet|www\.google\.com\/webmasters\/tools\/richsnippets|slackbot|vkshare|w3c_validator|redditbot|applebot|whatsapp|flipboard|tumblr|bitlybot|skypeuripreview|nuzzel|line|discordbot|telegrambot|crawler|spider|bot/;
-    return botPattern.test(userAgent);
+    return BOT_PATTERN.test(userAgent);
 };
