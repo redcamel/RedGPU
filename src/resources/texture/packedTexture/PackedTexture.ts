@@ -336,4 +336,24 @@ class PackedTexture extends RedGPUObject {
     }
 }
 
+export const destroyPackedTextureCache = () => {
+    for (const [key, value] of cacheMap.entries()) {
+        try {
+            value.gpuTexture?.destroy();
+        } catch (e) {
+        }
+    }
+    cacheMap.clear();
+    if (mappingBuffer) {
+        try {
+            mappingBuffer.destroy();
+        } catch (e) {
+        }
+        mappingBuffer = null;
+    }
+    globalPipeline = null;
+    globalBindGroupLayout = null;
+    console.log('✨ PackedTexture 전역 캐시 및 물리 GPU 자원 완벽 해소 완료');
+};
+
 export default PackedTexture;
