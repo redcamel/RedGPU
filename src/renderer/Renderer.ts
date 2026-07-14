@@ -61,17 +61,20 @@ class Renderer {
         redGPUContext.targetRenderer = this
         cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
         this.#HD_render = (time: number) => {
+            if (redGPUContext.destroyed || !this.#HD_render) return;
             render?.(time)
             redGPUContext.currentTime = time
             this.renderFrame(redGPUContext, time)
+            if (redGPUContext.destroyed || !this.#HD_render) return;
             redGPUContext.currentRequestAnimationFrame = requestAnimationFrame(this.#HD_render)
         }
         redGPUContext.currentRequestAnimationFrame = requestAnimationFrame(this.#HD_render)
     }
 
-    destroy() {
-
-
+    destroy(redGPUContext?: RedGPUContext) {
+        if (redGPUContext) {
+            this.stop(redGPUContext);
+        }
         this.#finalRender?.destroy()
         this.#finalRender = null
         this.#gltfAnimationLooperManager = null
