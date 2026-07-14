@@ -152,24 +152,40 @@ const renderTestPane = (redGPUContext, targetView) => {
             });
 
             // 상태 모니터링 주기적 갱신
-            setInterval(() => {
+            let transitionTimer = null;
+            const triggerTransition = (target) => {
+                if (transitionTimer) clearTimeout(transitionTimer);
+
+                targetStateName = target;
                 if (stateMachine && stateMachine.currentState) {
-                    config.currentState = stateMachine.targetState
-                        ? `${stateMachine.currentState.name} ➔ ${stateMachine.targetState.name}`
-                        : stateMachine.currentState.name;
+                    if (stateMachine.currentState.name === target) {
+                        config.currentState = target;
+                        currentStateBinding.refresh();
+                        return;
+                    }
+
+                    config.currentState = `${stateMachine.currentState.name} ➔ ${target}`;
                     currentStateBinding.refresh();
+
+                    transitionTimer = setTimeout(() => {
+                        if (stateMachine && stateMachine.currentState) {
+                            config.currentState = stateMachine.currentState.name;
+                            currentStateBinding.refresh();
+                        }
+                        transitionTimer = null;
+                    }, config.fadeDuration * 1000);
                 }
-            }, 100);
+            };
 
             // 상태 전이 촉발 버튼
             f.addButton({title: 'Transition to Idle'}).on('click', () => {
-                targetStateName = 'Idle';
+                triggerTransition('Idle');
             });
             f.addButton({title: 'Transition to Walk'}).on('click', () => {
-                targetStateName = 'Walk';
+                triggerTransition('Walk');
             });
             f.addButton({title: 'Transition to Run'}).on('click', () => {
-                targetStateName = 'Run';
+                triggerTransition('Run');
             });
         },
         ibl: true,
