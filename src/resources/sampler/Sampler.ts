@@ -335,4 +335,9 @@ class Sampler extends ResourceBase {
 }
 
 Object.freeze(Sampler)
+export const destroySamplerCache = () => {
+    samplerCache.clear();
+    console.log('✨ Sampler 전역 캐시 완벽 해소 완료');
+};
+
 export default Sampler
