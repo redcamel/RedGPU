@@ -94,3 +94,7 @@ const arrayBufferLoader = (url: string, onSuccess, onError) => {
     pendingMap.set(url, promise);
     promise.then(data => onSuccess?.(data)).catch(err => onError?.(err));
 };
+export const destroyGLTFBuffersCache = () => {
+    cacheMap.clear();
+    pendingMap.clear();
+};
