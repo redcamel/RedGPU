@@ -204,3 +204,7 @@ const convertUint8ArrayToString = (array: Uint8Array): string => {
     }
     return str;
 };
+export const destroyFileGLBCache = () => {
+    cacheMap.clear();
+    pendingMap.clear();
+};
