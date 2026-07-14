@@ -1,4 +1,6 @@
 import RedGPUContext from "./context/RedGPUContext";
+import {keepLog} from "./utils";
+
 
 /**
  * [KO] WebGPU를 비동기적으로 초기화하고 RedGPUContext를 생성합니다.
@@ -56,7 +58,7 @@ const init = async (
     },
 ) => {
     if (isSearchEngineBot()) {
-        debugLog('🤖 Search engine bot detected - skipping WebGPU initialization');
+        keepLog('🤖 Search engine bot detected - skipping WebGPU initialization');
         return;
     }
     const {gpu} = navigator
@@ -183,14 +185,7 @@ const getRequiredLimits = (adapter: GPUAdapter): Record<string, number> => {
     });
     return requiredLimits;
 }
-const debugLog = (msg: string) => {
-    if (typeof window !== 'undefined') {
-        const c = window['console'];
-        if (c && typeof c['info'] === 'function') {
-            c['info'](msg);
-        }
-    }
-};
+
 const generateErrorMessage = (e: any, defaultMsg: string): string => {
     let msg = defaultMsg;
     // Check if 'e' is an instance of Error
