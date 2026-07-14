@@ -134,6 +134,17 @@ class RedGPUExampleHelper {
         window.removeEventListener('beforeunload', this.handleUnload);
         window.removeEventListener('pagehide', this.handleUnload);
 
+        // [KO] RedGPUContext의 실질적인 하드웨어 및 리소스 디스트로이 명시적 호출
+        // [EN] Explicitly call destroy on RedGPUContext to release GPU resources and device
+        const redGPUContext = useExampleHelperStore.getState().redGPUContext;
+        if (redGPUContext) {
+            try {
+                redGPUContext.destroy();
+            } catch (e) {
+                console.error("Failed to destroy RedGPUContext:", e);
+            }
+        }
+
         useExampleHelperStore.getState().setRedGPUContext(null);
         useExampleHelperStore.getState().setGuiConfig(null);
         useExampleHelperStore.getState().setRedGPU(null);
