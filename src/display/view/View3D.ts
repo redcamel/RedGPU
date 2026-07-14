@@ -112,6 +112,11 @@ class View3D extends AView {
     destroy() {
         super.destroy();
 
+        if (this.#systemUniform_Vertex_UniformBuffer) {
+            this.#systemUniform_Vertex_UniformBuffer.destroy();
+            this.#systemUniform_Vertex_UniformBuffer = null;
+        }
+
         this.#prevInfoList = []
         this.#systemUniform_Vertex_UniformBindGroup = null
         if (this.#viewRenderTextureManager) {
