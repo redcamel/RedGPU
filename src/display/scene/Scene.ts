@@ -98,11 +98,11 @@ class Scene extends Object3DContainer {
         }
         this.#backgroundColor = null;
 
-        this.children.forEach(child => {
+        for (const child of this.children) {
             if ('destroy' in child && typeof child.destroy === 'function') {
                 child.destroy();
             }
-        });
+        }
         this.children.length = 0;
     }
     /**
