@@ -457,6 +457,11 @@ class InstancingMeshObject3D {
             this.#instancingMesh.dirtyInstanceMeshObject3D = true
         }
     }
+
+    destroy() {
+        this.#instancingMesh = null;
+        this.#redGPUContext = null;
+    }
 }
 
 Object.freeze(InstancingMeshObject3D)

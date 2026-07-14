@@ -843,6 +843,58 @@ class InstancingMesh extends Mesh {
     #getCullingComputeSource(): string {
         return this.#injectInstanceCount(cullingComputeSource);
     }
+
+    /**
+     * [KO] InstancingMesh 인스턴스를 파기하고 할당된 인스턴싱 전용 GPU 버퍼 및 파이프라인 자원을 즉시 해제합니다.
+     * [EN] Destroys the InstancingMesh instance and immediately releases the allocated instancing-specific GPU buffers and pipeline resources.
+     */
+    destroy() {
+        super.destroy();
+
+        if (this.#indirectDrawBuffer) {
+            this.#redGPUContext.commandEncoderManager.addDeferredDestroy(this.#indirectDrawBuffer);
+            this.#indirectDrawBuffer = null;
+        }
+
+        if (this.#cullingUniformBuffer) {
+            this.#cullingUniformBuffer.destroy();
+            this.#cullingUniformBuffer = null;
+        }
+
+        if (this.#visibilityBuffer) {
+            this.#visibilityBuffer.destroy();
+            this.#visibilityBuffer = null;
+        }
+
+        if (this.gpuRenderInfo) {
+            if (this.gpuRenderInfo.vertexUniformBuffer) {
+                this.gpuRenderInfo.vertexUniformBuffer.destroy();
+                this.gpuRenderInfo.vertexUniformBuffer = null;
+            }
+            this.gpuRenderInfo.vertexShaderModule = null;
+            this.gpuRenderInfo.pipeline = null;
+            this.gpuRenderInfo.shadowPipeline = null;
+            this.gpuRenderInfo.vertexUniformBindGroup = null;
+        }
+
+        this.#cullingComputePipeline = null;
+        this.#cullingBindGroup = null;
+
+        this.#lodGPURenderInfoList.forEach(info => {
+            info.pipeline = null;
+            info.vertexUniformBindGroup = null;
+        });
+        this.#lodGPURenderInfoList = [];
+
+        this.#instanceChildren.forEach(child => {
+            if ('destroy' in child && typeof child.destroy === 'function') {
+                child.destroy();
+            }
+        });
+        this.#instanceChildren.length = 0;
+
+        console.log(`🧹 InstancingMesh destroy 완료: ${this.name || '무명'}`);
+    }
 }
 
 export default InstancingMesh;
