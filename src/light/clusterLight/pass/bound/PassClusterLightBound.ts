@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
-import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
+
 import ClusterCellBoundsSource from "../../core/ClusterBoundsGrid.wgsl";
 import PassLightClustersBoundSource from "./PassClusterLightBound.wgsl";
 import PassClustersLightHelper from "../../core/PassClustersLightHelper";
@@ -98,7 +98,7 @@ class PassClusterLightBound extends RedGPUObject {
 
     #initPipeLine() {
         const {gpuDevice, resourceManager} = this;
-        this.#source = parseWGSL('PASS_CLUSTER_LIGHT_BOUND', ClusterCellBoundsSource + PassLightClustersBoundSource).defaultSource;
+        this.#source = resourceManager.wgslParser.parse('PASS_CLUSTER_LIGHT_BOUND', ClusterCellBoundsSource + PassLightClustersBoundSource).defaultSource;
         this.#clusterBoundBuffer = resourceManager.createGPUBuffer(`PASS_CLUSTER_BOUND_BUFFER`, {
             size: PassClustersLightHelper.getTotalTileSize() * 32, // Cluster x, y, z size * 32 bytes per cluster. Why? It's to be verified.
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST

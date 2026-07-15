@@ -1,7 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
-import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import ClusterCellBoundsSource from "../../core/ClusterBoundsGrid.wgsl";
 import PassLightClustersSource from "./PassClustersLight.wgsl";
 import PassClustersLightHelper from "../../core/PassClustersLightHelper";
@@ -109,7 +108,7 @@ class PassClustersLight extends RedGPUObject {
 
     #initPipeLine() {
         const {gpuDevice, resourceManager} = this;
-        this.#source = parseWGSL('PASS_CLUSTERS_LIGHT', ClusterCellBoundsSource + PassLightClustersSource).defaultSource;
+        this.#source = resourceManager.wgslParser.parse('PASS_CLUSTERS_LIGHT', ClusterCellBoundsSource + PassLightClustersSource).defaultSource;
         // keepLog(this.#source )
         this.#clusterLightsBuffer = resourceManager.createGPUBuffer(`PASS_CLUSTER_LIGHTS_BUFFER`, {
             size: PassClustersLightHelper.getClusterLightsBufferSize(),
