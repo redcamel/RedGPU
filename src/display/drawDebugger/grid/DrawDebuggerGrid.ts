@@ -11,15 +11,12 @@ import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import ResourceManager from "../../../resources/core/resourceManager/ResourceManager";
-import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import validateRedGPUContext from "../../../runtimeChecker/validateFunc/validateRedGPUContext";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import shaderSource from './shader.wgsl'
 import BaseObject from "../../../base/BaseObject";
 
-const SHADER_INFO = parseWGSL('DRAW_DEBUGGER_GRID', shaderSource);
-const FRAGMENT_UNIFORM_STRUCT = SHADER_INFO.uniforms.gridArgs;
-console.log(SHADER_INFO)
+
 const SHADER_MODULE_NAME = 'VERTEX_MODULE_GRID'
 const FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME = 'FRAGMENT_BIND_GROUP_DESCRIPTOR_GRID'
 const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_GRID'
@@ -62,7 +59,7 @@ class DrawDebuggerGrid extends BaseObject {
     #renderBundle: GPURenderBundle
     #prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
     #lastUpdateMSAAID: string
-
+    #SHADER_INFO: any
     constructor(redGPUContext: RedGPUContext) {
         super();
         validateRedGPUContext(redGPUContext)
@@ -77,9 +74,13 @@ class DrawDebuggerGrid extends BaseObject {
         this.#lineColor = new ColorRGBA(128, 128, 128, 0.25)
         const vertexBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System)
         const layoutName = 'GRID_MATERIAL_BIND_GROUP_LAYOUT'
+
+
+        this.#SHADER_INFO = resourceManager.wgslParser.parse('DRAW_DEBUGGER_GRID', shaderSource);
+
         const fragmentBindGroupLayout = resourceManager.getGPUBindGroupLayout(layoutName) || resourceManager.createBindGroupLayout(
             layoutName,
-            getFragmentBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, 1)
+            getFragmentBindGroupLayoutDescriptorFromShaderInfo(this.#SHADER_INFO, 1)
         )
         this.#setBuffers(redGPUContext)
         this.#fragmentBindGroup = gpuDevice.createBindGroup({
@@ -239,10 +240,31 @@ class DrawDebuggerGrid extends BaseObject {
         return {interleaveData, indexData};
     }
 
+    /**
+     * [KO] DrawDebuggerGrid를 파기하고 드로우 커맨드 슬롯과 자원 참조를 해제합니다.
+     * [EN] Destroys the DrawDebuggerGrid and releases the draw command slot and resource references.
+     */
+    destroy() {
+        if (this.#drawCommandSlot) {
+            this.#drawBufferManager.setInstanceNum(this.#drawCommandSlot, 0);
+            this.#drawCommandSlot = null;
+        }
+        this.#SHADER_INFO = null
+        this.#vertexBuffer = null;
+        this.#indexBuffer = null;
+        this.#uniformBuffer = null;
+        this.#renderBundle = null;
+        this.#bundleEncoder = null;
+        this.#prevSystemUniform_Vertex_UniformBindGroup = null;
+        this.#drawBufferManager = null;
+        console.log("🧹 DrawDebuggerGrid destroy 완료");
+    }
+
     #setBuffers(redGPUContext: RedGPUContext) {
         const size = this.#size;
         const {resourceManager} = redGPUContext
         const {cachedBufferState} = resourceManager
+        const FRAGMENT_UNIFORM_STRUCT = this.#SHADER_INFO.uniforms.gridArgs;
         {
             const uniqueKey = `VertexBuffer_Grid_${size}`;
             let vertexBuffer = cachedBufferState[uniqueKey];
@@ -278,6 +300,7 @@ class DrawDebuggerGrid extends BaseObject {
             this.#indexBuffer = indexBuffer;
         }
         {
+
             const uniqueKey = `UniformBuffer_Grid`;
             let uniformBuffer = cachedBufferState[uniqueKey];
             if (!uniformBuffer) {
@@ -288,25 +311,6 @@ class DrawDebuggerGrid extends BaseObject {
             this.#uniformBuffer = uniformBuffer;
         }
         this.#uniformBuffer.writeOnlyBuffer(FRAGMENT_UNIFORM_STRUCT.members.lineColor, this.#lineColor.rgbaNormalLinear)
-    }
-
-    /**
-     * [KO] DrawDebuggerGrid를 파기하고 드로우 커맨드 슬롯과 자원 참조를 해제합니다.
-     * [EN] Destroys the DrawDebuggerGrid and releases the draw command slot and resource references.
-     */
-    destroy() {
-        if (this.#drawCommandSlot) {
-            this.#drawBufferManager.setInstanceNum(this.#drawCommandSlot, 0);
-            this.#drawCommandSlot = null;
-        }
-        this.#vertexBuffer = null;
-        this.#indexBuffer = null;
-        this.#uniformBuffer = null;
-        this.#renderBundle = null;
-        this.#bundleEncoder = null;
-        this.#prevSystemUniform_Vertex_UniformBindGroup = null;
-        this.#drawBufferManager = null;
-        console.log("🧹 DrawDebuggerGrid destroy 완료");
     }
 }
 
