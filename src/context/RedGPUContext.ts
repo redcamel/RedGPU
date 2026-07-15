@@ -16,7 +16,6 @@ import {destroyReflectCache} from "../resources/wgslParser/parseWGSL";
 import {destroyPreprocessCache} from "../resources/wgslParser/core/preprocessWGSL";
 import Renderer from "../renderer/Renderer";
 import GLTFLoader from "../loader/gltf/GLTFLoader";
-import {destroySamplerCache} from "../resources/sampler/Sampler";
 
 /**
  * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
@@ -204,6 +203,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#sizeManager = new RedGPUContextSizeManager(this)
         this.#detector = new RedGPUContextDetector(this)
         this.#resourceManager = new ResourceManager(this)
+        this.#resourceManager.initPresets()
         this.#commandEncoderManager = new CommandEncoderManager(this)
         this.#antialiasingManager = new AntialiasingManager()
         this.#drawBufferManager = new DrawBufferManager(this)
@@ -492,7 +492,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
         destroyReflectCache()
         destroyPreprocessCache()
         GLTFLoader.destroyGLTFCache();
-        destroySamplerCache();
         this.targetRenderer?.destroy(this)
         if (this.#gpuContext) {
             try {

@@ -99,13 +99,14 @@ class ResourceManager extends RedGPUObject {
     #emptyCubeTextureView: GPUTextureView
     #emptyTexture3DView: GPUTextureView
     #emptyDepthTextureView: GPUTextureView
-    readonly #mipmapGenerator: MipmapGenerator
-    readonly #downSampleCubeMapGenerator: DownSampleCubeMapGenerator
-    readonly #brdfGenerator: BRDFGenerator
-    readonly #irradianceGenerator: IrradianceGenerator
-    readonly #prefilterGenerator: PrefilterGenerator
-    readonly #equirectangularToCubeGenerator: EquirectangularToCubeGenerator
+    #mipmapGenerator: MipmapGenerator
+    #downSampleCubeMapGenerator: DownSampleCubeMapGenerator
+    #brdfGenerator: BRDFGenerator
+    #irradianceGenerator: IrradianceGenerator
+    #prefilterGenerator: PrefilterGenerator
+    #equirectangularToCubeGenerator: EquirectangularToCubeGenerator
     #packedTextureManager: PackedTextureManager
+    readonly #samplerCache: Map<string, GPUSampler> = new Map();
     #basicSampler: Sampler
     #basicDisplacementSampler: Sampler
     #bitmapTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
@@ -121,14 +122,6 @@ class ResourceManager extends RedGPUObject {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext)
-        this.#mipmapGenerator = new MipmapGenerator(redGPUContext)
-        this.#downSampleCubeMapGenerator = new DownSampleCubeMapGenerator(redGPUContext)
-        this.#brdfGenerator = new BRDFGenerator(redGPUContext)
-        this.#irradianceGenerator = new IrradianceGenerator(redGPUContext)
-        this.#prefilterGenerator = new PrefilterGenerator(redGPUContext)
-        this.#equirectangularToCubeGenerator = new EquirectangularToCubeGenerator(redGPUContext)
-        this.#packedTextureManager = new PackedTextureManager(redGPUContext)
-        this.#initPresets()
     }
 
 
@@ -210,6 +203,18 @@ class ResourceManager extends RedGPUObject {
      */
     get packedTextureManager(): PackedTextureManager {
         return this.#packedTextureManager;
+    }
+
+    /**
+     * [KO] 캐시에서 샘플러를 조회하거나 존재하지 않으면 새로 생성하여 반환합니다.
+     * [EN] Retrieves a sampler from cache, or creates and returns a new one if it does not exist.
+     */
+    createSampler(descriptorKey: string, samplerOptions: GPUSamplerDescriptor): GPUSampler {
+        if (!this.#samplerCache.has(descriptorKey)) {
+            const sampler = this.gpuDevice.createSampler(samplerOptions);
+            this.#samplerCache.set(descriptorKey, sampler);
+        }
+        return this.#samplerCache.get(descriptorKey)!;
     }
 
     /**
@@ -513,7 +518,8 @@ class ResourceManager extends RedGPUObject {
 
         // 4. 프리셋 및 제너레이터 등 참조 초기화
         this.#packedTextureManager.destroy();
-        this.#packedTextureManager = null
+        this.#samplerCache.clear();
+        this.#packedTextureManager = null;
         this.#basicSampler = null;
         this.#basicDisplacementSampler = null;
         this.#emptyBitmapTextureView = null;
@@ -790,8 +796,17 @@ class ResourceManager extends RedGPUObject {
      * [KO] 시스템 프리셋을 초기화합니다.
      * [EN] Initializes system presets.
      */
-    #initPresets() {
-        const {gpuDevice} = this.redGPUContext
+    initPresets() {
+        const redGPUContext = this.redGPUContext;
+        this.#mipmapGenerator = new MipmapGenerator(redGPUContext)
+        this.#downSampleCubeMapGenerator = new DownSampleCubeMapGenerator(redGPUContext)
+        this.#brdfGenerator = new BRDFGenerator(redGPUContext)
+        this.#irradianceGenerator = new IrradianceGenerator(redGPUContext)
+        this.#prefilterGenerator = new PrefilterGenerator(redGPUContext)
+        this.#equirectangularToCubeGenerator = new EquirectangularToCubeGenerator(redGPUContext)
+        this.#packedTextureManager = new PackedTextureManager(redGPUContext)
+
+        const {gpuDevice} = redGPUContext
         {
             const emptyBitmapTexture = gpuDevice.createTexture({
                 size: {width: 1, height: 1, depthOrArrayLayers: 1},
