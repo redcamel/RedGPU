@@ -7,7 +7,6 @@ import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
 import UniformBuffer from "../../../buffer/uniformBuffer/UniformBuffer";
 import ManagementResourceBase from "../../../core/ManagementResourceBase";
 import ResourceStateBitmapTexture from "../../../core/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
-import parseWGSL from "../../../wgslParser/parseWGSL";
 
 const MANAGED_STATE_KEY = 'managedBitmapTextureState';
 
@@ -207,7 +206,7 @@ abstract class ANoiseTexture extends ManagementResourceBase {
             this.#textureComputeShaderModule,
             this.#textureComputeBindGroupLayout
         );
-        const SHADER_INFO = parseWGSL('ANoiseTexture', textureComputeShader);
+        const SHADER_INFO = redGPUContext.resourceManager.wgslParser.parse(this.cacheKey, textureComputeShader);
         this.#uniformInfo = SHADER_INFO.uniforms.uniforms;
         const uniformData = new ArrayBuffer(this.#uniformInfo.arrayBufferByteLength);
         this.#uniformBuffer = new UniformBuffer(
