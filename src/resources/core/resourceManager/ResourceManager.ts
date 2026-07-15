@@ -24,6 +24,7 @@ import RedGPUObject from "../../../base/RedGPUObject";
 import parseWGSL from "../../wgslParser/parseWGSL";
 import ShaderLibrary from "../../../systemCodeManager/ShaderLibrary";
 import PackedTextureManager from "../../texture/packedTexture/PackedTextureManager";
+import GLTFCacheManager from "../../../loader/gltf/core/GLTFCacheManager";
 
 const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
 const GLOBAL_VERTEX_STRUCT = SHADER_INFO.storage.globalVertexSSBO.type.format;
@@ -106,6 +107,7 @@ class ResourceManager extends RedGPUObject {
     #prefilterGenerator: PrefilterGenerator
     #equirectangularToCubeGenerator: EquirectangularToCubeGenerator
     #packedTextureManager: PackedTextureManager
+    #gltfCacheManager: GLTFCacheManager
     readonly #samplerCache: Map<string, GPUSampler> = new Map();
     #basicSampler: Sampler
     #basicDisplacementSampler: Sampler
@@ -203,6 +205,14 @@ class ResourceManager extends RedGPUObject {
      */
     get packedTextureManager(): PackedTextureManager {
         return this.#packedTextureManager;
+    }
+
+    /**
+     * [KO] GLTF 캐시 매니저를 반환합니다.
+     * [EN] Returns the GLTF cache manager.
+     */
+    get gltfCacheManager(): GLTFCacheManager {
+        return this.#gltfCacheManager;
     }
 
     /**
@@ -518,8 +528,10 @@ class ResourceManager extends RedGPUObject {
 
         // 4. 프리셋 및 제너레이터 등 참조 초기화
         this.#packedTextureManager.destroy();
+        this.#gltfCacheManager.destroy();
         this.#samplerCache.clear();
         this.#packedTextureManager = null;
+        this.#gltfCacheManager = null;
         this.#basicSampler = null;
         this.#basicDisplacementSampler = null;
         this.#emptyBitmapTextureView = null;
@@ -805,6 +817,7 @@ class ResourceManager extends RedGPUObject {
         this.#prefilterGenerator = new PrefilterGenerator(redGPUContext)
         this.#equirectangularToCubeGenerator = new EquirectangularToCubeGenerator(redGPUContext)
         this.#packedTextureManager = new PackedTextureManager(redGPUContext)
+        this.#gltfCacheManager = new GLTFCacheManager(redGPUContext)
 
         const {gpuDevice} = redGPUContext
         {

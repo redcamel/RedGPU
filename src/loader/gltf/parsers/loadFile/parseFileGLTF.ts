@@ -5,8 +5,6 @@ import parseGLTF from "../parseGLTF";
 import formatBytes from "../../../../utils/formatBytes";
 import {keepLog} from "../../../../utils";
 
-const cacheMap: Map<string, GLTF> = new Map();
-const pendingMap: Map<string, Promise<object>> = new Map();
 const getData = (gltfData) => {
     return {
         ...gltfData,
@@ -15,12 +13,14 @@ const getData = (gltfData) => {
 }
 const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack, onProgress?: (info: GLTFLoadingProgressInfo) => void) => {
     const loadFilePath = getAbsoluteURL(window.location.href, gltfLoader.filePath + gltfLoader.fileName);
+    const {cache, pending} = gltfLoader.redGPUContext.resourceManager.gltfCacheManager.gltfCache;
+
     const cachedProgress = () => {
         if (onProgress) {
-            const buffer = cacheMap.get(loadFilePath);
+            const buffer = cache.get(loadFilePath);
             gltfLoader.loadingProgressInfo.model = {
-                loaded: buffer.byteLength,
-                total: buffer.byteLength,
+                loaded: (buffer as any)?.byteLength || 0,
+                total: (buffer as any)?.byteLength || 0,
                 lengthComputable: true,
                 percent: 100,
                 transferred: 'Cached',
@@ -30,8 +30,8 @@ const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack, onProgress?: (inf
         }
     }
     // 캐싱된 데이터가 있으면 바로 파싱
-    if (cacheMap.has(loadFilePath)) {
-        gltfLoader.gltfData = getData(cacheMap.get(loadFilePath))
+    if (cache.has(loadFilePath)) {
+        gltfLoader.gltfData = getData(cache.get(loadFilePath))
         cachedProgress()
         requestAnimationFrame(() => {
             parseGLTF(gltfLoader, gltfLoader.gltfData, callBack, onProgress);
@@ -39,10 +39,10 @@ const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack, onProgress?: (inf
         return;
     }
     // 진행 중 Promise 있으면 그것이 끝날 때까지 대기 후 파싱
-    if (pendingMap.has(loadFilePath)) {
-        await pendingMap.get(loadFilePath);
+    if (pending.has(loadFilePath)) {
+        await pending.get(loadFilePath);
         cachedProgress()
-        gltfLoader.gltfData = getData(cacheMap.get(loadFilePath))
+        gltfLoader.gltfData = getData(cache.get(loadFilePath))
         requestAnimationFrame(() => {
             parseGLTF(gltfLoader, gltfLoader.gltfData, callBack, onProgress);
         });
@@ -59,7 +59,7 @@ const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack, onProgress?: (inf
 
             keepLog(`전체 사이즈: ${totalSize} bytes`);
             const gltfData = await response.json();
-            cacheMap.set(loadFilePath, gltfData);
+            cache.set(loadFilePath, gltfData);
             gltfLoader.loadingProgressInfo.model = {
                 loaded: totalSize,
                 total: totalSize,
@@ -86,10 +86,10 @@ const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack, onProgress?: (inf
         } catch (e) {
             reject(e);
         } finally {
-            pendingMap.delete(loadFilePath);
+            pending.delete(loadFilePath);
         }
     });
-    pendingMap.set(loadFilePath, promise);
+    pending.set(loadFilePath, promise);
     const gltfData = await promise;
     gltfLoader.gltfData = getData(gltfData)
     requestAnimationFrame(() => {
@@ -97,8 +97,6 @@ const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack, onProgress?: (inf
     });
 };
 export const destroyFileGLTFCache = () => {
-    cacheMap.clear();
-    pendingMap.clear();
+    // [호환성 유지] 이제 GLTFCacheManager가 해제 관리하므로 본 전역 함수는 빈 함수로 동작합니다.
 };
 export default parseFileGLTF;
-

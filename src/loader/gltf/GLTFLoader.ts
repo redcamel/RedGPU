@@ -6,9 +6,8 @@ import getFileName from "../../utils/file/getFileName";
 import getFilePath from "../../utils/file/getFilePath";
 import {GLTF} from "./GLTF";
 import {ClipAnimState} from "./animationLooper/AnimStateMachine";
-import parseFileGLB, {destroyFileGLBCache} from "./parsers/loadFile/parseFileGLB";
-import parseFileGLTF, {destroyFileGLTFCache} from "./parsers/loadFile/parseFileGLTF";
-import {destroyGLTFBuffersCache} from "./core/getGLTFBuffersResources";
+import parseFileGLB from "./parsers/loadFile/parseFileGLB";
+import parseFileGLTF from "./parsers/loadFile/parseFileGLTF";
 import RedGPUObject from "../../base/RedGPUObject";
 
 /**
@@ -303,16 +302,7 @@ class GLTFLoader extends RedGPUObject {
         }
     }
 
-    /**
-     * [KO] 모든 전역 GLTF 파일 및 버퍼 캐시를 즉시 삭제하여 메모리를 해제합니다.
-     * [EN] Immediately clears all global GLTF file and buffer caches to release memory.
-     */
-    static destroyGLTFCache() {
-        destroyFileGLBCache();
-        destroyFileGLTFCache();
-        destroyGLTFBuffersCache();
-        console.log('✨ GLTF Loader 전역 캐시 완벽 해소 완료');
-    }
+
 }
 
 Object.freeze(GLTFLoader);
