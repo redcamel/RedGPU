@@ -25,6 +25,8 @@ import parseWGSL from "../../wgslParser/parseWGSL";
 import ShaderLibrary from "../../../systemCodeManager/ShaderLibrary";
 import PackedTextureManager from "../../texture/packedTexture/PackedTextureManager";
 import GLTFCacheManager from "../../../loader/gltf/core/GLTFCacheManager";
+import WGSLParser from "../../wgslParser/WGSLParser";
+
 
 const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
 const GLOBAL_VERTEX_STRUCT = SHADER_INFO.storage.globalVertexSSBO.type.format;
@@ -107,6 +109,7 @@ class ResourceManager extends RedGPUObject {
     #prefilterGenerator: PrefilterGenerator
     #equirectangularToCubeGenerator: EquirectangularToCubeGenerator
     #packedTextureManager: PackedTextureManager
+    #wgslParser: WGSLParser
     #gltfCacheManager: GLTFCacheManager
     readonly #samplerCache: Map<string, GPUSampler> = new Map();
     #basicSampler: Sampler
@@ -124,8 +127,13 @@ class ResourceManager extends RedGPUObject {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext)
+        this.#wgslParser = new WGSLParser();
     }
 
+
+    get wgslParser(): WGSLParser {
+        return this.#wgslParser;
+    }
 
     /**
      * [KO] 기본 샘플러를 반환합니다.
@@ -538,6 +546,8 @@ class ResourceManager extends RedGPUObject {
         this.#emptyCubeTextureView = null;
         this.#emptyTexture3DView = null;
         this.#emptyDepthTextureView = null;
+        this.#wgslParser.destroy()
+        this.#wgslParser = null
 
         keepLog("🧹 ResourceManager destroy 완료");
     }
