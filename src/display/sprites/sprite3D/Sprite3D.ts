@@ -4,7 +4,6 @@ import GPU_CULL_MODE from "../../../gpuConst/GPU_CULL_MODE";
 import BitmapMaterial from "../../../material/bitmapMaterial/BitmapMaterial";
 import Primitive from "../../../primitive/core/Primitive";
 import Plane from "../../../primitive/Plane";
-import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import Mesh from "../../mesh/Mesh";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import vertexModuleSource from "./shader/sprite3DVertex.wgsl";
@@ -14,10 +13,7 @@ import defineBoolean from "../../../defineProperty/funcs/defineBoolean";
 
 /** Sprite3D 전용 버텍스 셰이더 모듈 이름 */
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_3D'
-/** 파싱된 WGSL 셰이더 정보 */
-const SHADER_INFO = parseWGSL('SPRITE3D_VERTEX', vertexModuleSource);
-/** 버텍스 유니폼 구조체 정보 */
-const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
+
 
 /**
  * [KO] Sprite3D의 빌보드 관련 속성을 정의하는 인터페이스
@@ -215,6 +211,10 @@ class Sprite3D extends Mesh {
      * [EN] Created GPU shader module
      */
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
+        /** 파싱된 WGSL 셰이더 정보 */
+        const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('SPRITE3D_VERTEX', vertexModuleSource);
+        /** 버텍스 유니폼 구조체 정보 */
+        const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
         return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
     }
 

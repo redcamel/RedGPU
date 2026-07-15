@@ -11,7 +11,6 @@ import ResourceManager from "../../../resources/core/resourceManager/ResourceMan
 import CubeTexture from "../../../resources/texture/CubeTexture";
 import DirectCubeTexture from "../../../resources/texture/DirectCubeTexture";
 import ANoiseTexture from "../../../resources/texture/noiseTexture/core/ANoiseTexture";
-import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import VertexGPURenderInfo from "../../mesh/core/VertexGPURenderInfo";
@@ -20,10 +19,6 @@ import SkyBoxMaterial from "./core/SkyBoxMaterial";
 import vertexModuleSource from './shader/vertex.wgsl';
 import RedGPUObject from "../../../base/RedGPUObject";
 
-/** 파싱된 WGSL 셰이더 정보 */
-const SHADER_INFO = parseWGSL('SKYBOX_VERTEX', vertexModuleSource)
-/** 버텍스 유니폼 구조체 정보 */
-const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 /** 버텍스 셰이더 모듈 이름 */
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SKYBOX'
 /** 버텍스 바인드 그룹 디스크립터 이름 */
@@ -80,6 +75,7 @@ class SkyBox extends RedGPUObject {
     #prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
     #luminance: number = 25000.0;
     #lastUpdateMSAAID: string
+    #SHADER_INFO: any
 
     /**
      * [KO] SkyBox 인스턴스를 생성합니다.
@@ -270,71 +266,12 @@ class SkyBox extends RedGPUObject {
         }
     }
 
-    #initGPURenderInfos() {
-        const {resourceManager, redGPUContext} = this
-        const vertex_BindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout('SKYBOX_VERTEX_BIND_GROUP_LAYOUT') || resourceManager.createBindGroupLayout(
-            'SKYBOX_VERTEX_BIND_GROUP_LAYOUT',
-            getVertexBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, 1)
-        )
-        const vertexUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
-        const vertexUniformBuffer: UniformBuffer = new UniformBuffer(redGPUContext, vertexUniformData, 'SKYBOX_VERTEX_UNIFORM_BUFFER', 'SKYBOX_VERTEX_UNIFORM_BUFFER')
-        mat4.identity(this.modelMatrix);
-        vertexUniformBuffer.writeOnlyBuffer(UNIFORM_STRUCT.members.modelMatrix, this.modelMatrix)
-
-        const vertexBindGroupDescriptor: GPUBindGroupDescriptor = {
-            layout: vertex_BindGroupLayout,
-            label: VERTEX_BIND_GROUP_DESCRIPTOR_NAME,
-            entries: [{
-                binding: 0,
-                resource: {buffer: vertexUniformBuffer.gpuBuffer, offset: 0, size: vertexUniformBuffer.size},
-            }]
-        }
-        const vertexUniformBindGroup: GPUBindGroup = redGPUContext.gpuDevice.createBindGroup(vertexBindGroupDescriptor)
-        this.gpuRenderInfo = new VertexGPURenderInfo(
-            null, SHADER_INFO.shaderSourceVariant, SHADER_INFO.conditionalBlocks, UNIFORM_STRUCT,
-            vertex_BindGroupLayout, vertexUniformBuffer, vertexUniformBindGroup, this.#updatePipeline(),
-        )
-    }
-
-    #updatePipeline(): GPURenderPipeline {
-        const {resourceManager, gpuDevice, antialiasingManager} = this
-        const vertexShaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(
-            VERTEX_SHADER_MODULE_NAME, {code: vertexModuleSource}
-        )
-        const vertexState: GPUVertexState = {
-            module: vertexShaderModule,
-            entryPoint: 'main',
-            buffers: this.#geometry.gpuRenderInfo.buffers
-        }
-        const vertex_BindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout('SKYBOX_VERTEX_BIND_GROUP_LAYOUT') || resourceManager.createBindGroupLayout(
-            'SKYBOX_VERTEX_BIND_GROUP_LAYOUT',
-            getVertexBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, 1)
-        )
-        const bindGroupLayouts: GPUBindGroupLayout[] = [
-            resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
-            vertex_BindGroupLayout,
-            this.#material.gpuRenderInfo.fragmentBindGroupLayout
-        ]
-        const pipelineLayout: GPUPipelineLayout = resourceManager.createGPUPipelineLayout(
-            'SKYBOX_PIPELINE_LAYOUT', {bindGroupLayouts}
-        );
-        const pipelineDescriptor: GPURenderPipelineDescriptor = {
-            label: PIPELINE_DESCRIPTOR_LABEL,
-            layout: pipelineLayout,
-            vertex: vertexState,
-            fragment: this.#material.gpuRenderInfo.fragmentState,
-            primitive: this.#primitiveState.state,
-            depthStencil: this.#depthStencilState.state,
-            multisample: {count: antialiasingManager.useMSAA ? 4 : 1},
-        }
-        return gpuDevice.createRenderPipeline(pipelineDescriptor)
-    }
-
     /**
      * [KO] 스카이박스 인스턴스를 파기하고 할당된 자원을 즉시 해제합니다.
      * [EN] Destroys the SkyBox instance and immediately releases the allocated resources.
      */
     destroy() {
+        this.#SHADER_INFO = null
         if (this.gpuRenderInfo) {
             if (this.gpuRenderInfo.vertexUniformBuffer) {
                 this.gpuRenderInfo.vertexUniformBuffer.destroy();
@@ -358,6 +295,72 @@ class SkyBox extends RedGPUObject {
         this.#transitionTexture = null;
         this.#prevSystemUniform_Vertex_UniformBindGroup = null;
         console.log(`🧹 SkyBox destroy 완료`);
+    }
+
+    #initGPURenderInfos() {
+        const {resourceManager, redGPUContext} = this
+
+        /** 파싱된 WGSL 셰이더 정보 */
+        this.#SHADER_INFO = resourceManager.wgslParser.parse('SKYBOX_VERTEX', vertexModuleSource)
+        /** 버텍스 유니폼 구조체 정보 */
+        const UNIFORM_STRUCT = this.#SHADER_INFO.uniforms.vertexUniforms;
+        //
+        const vertex_BindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout('SKYBOX_VERTEX_BIND_GROUP_LAYOUT') || resourceManager.createBindGroupLayout(
+            'SKYBOX_VERTEX_BIND_GROUP_LAYOUT',
+            getVertexBindGroupLayoutDescriptorFromShaderInfo(this.#SHADER_INFO, 1)
+        )
+        const vertexUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
+        const vertexUniformBuffer: UniformBuffer = new UniformBuffer(redGPUContext, vertexUniformData, 'SKYBOX_VERTEX_UNIFORM_BUFFER', 'SKYBOX_VERTEX_UNIFORM_BUFFER')
+        mat4.identity(this.modelMatrix);
+        vertexUniformBuffer.writeOnlyBuffer(UNIFORM_STRUCT.members.modelMatrix, this.modelMatrix)
+
+        const vertexBindGroupDescriptor: GPUBindGroupDescriptor = {
+            layout: vertex_BindGroupLayout,
+            label: VERTEX_BIND_GROUP_DESCRIPTOR_NAME,
+            entries: [{
+                binding: 0,
+                resource: {buffer: vertexUniformBuffer.gpuBuffer, offset: 0, size: vertexUniformBuffer.size},
+            }]
+        }
+        const vertexUniformBindGroup: GPUBindGroup = redGPUContext.gpuDevice.createBindGroup(vertexBindGroupDescriptor)
+        this.gpuRenderInfo = new VertexGPURenderInfo(
+            null, this.#SHADER_INFO.shaderSourceVariant, this.#SHADER_INFO.conditionalBlocks, UNIFORM_STRUCT,
+            vertex_BindGroupLayout, vertexUniformBuffer, vertexUniformBindGroup, this.#updatePipeline(),
+        )
+    }
+
+    #updatePipeline(): GPURenderPipeline {
+        const {resourceManager, gpuDevice, antialiasingManager} = this
+        const vertexShaderModule: GPUShaderModule = resourceManager.createGPUShaderModule(
+            VERTEX_SHADER_MODULE_NAME, {code: vertexModuleSource}
+        )
+        const vertexState: GPUVertexState = {
+            module: vertexShaderModule,
+            entryPoint: 'main',
+            buffers: this.#geometry.gpuRenderInfo.buffers
+        }
+        const vertex_BindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout('SKYBOX_VERTEX_BIND_GROUP_LAYOUT') || resourceManager.createBindGroupLayout(
+            'SKYBOX_VERTEX_BIND_GROUP_LAYOUT',
+            getVertexBindGroupLayoutDescriptorFromShaderInfo(this.#SHADER_INFO, 1)
+        )
+        const bindGroupLayouts: GPUBindGroupLayout[] = [
+            resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
+            vertex_BindGroupLayout,
+            this.#material.gpuRenderInfo.fragmentBindGroupLayout
+        ]
+        const pipelineLayout: GPUPipelineLayout = resourceManager.createGPUPipelineLayout(
+            'SKYBOX_PIPELINE_LAYOUT', {bindGroupLayouts}
+        );
+        const pipelineDescriptor: GPURenderPipelineDescriptor = {
+            label: PIPELINE_DESCRIPTOR_LABEL,
+            layout: pipelineLayout,
+            vertex: vertexState,
+            fragment: this.#material.gpuRenderInfo.fragmentState,
+            primitive: this.#primitiveState.state,
+            depthStencil: this.#depthStencilState.state,
+            multisample: {count: antialiasingManager.useMSAA ? 4 : 1},
+        }
+        return gpuDevice.createRenderPipeline(pipelineDescriptor)
     }
 }
 
