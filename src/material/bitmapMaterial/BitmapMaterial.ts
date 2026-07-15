@@ -1,14 +1,10 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
-import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl';
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
 import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
 import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
-
-
-const SHADER_INFO = parseWGSL('BITMAP_MATERIAL', fragmentModuleSource)
 
 /**
  * [KO] 비트맵 텍스처 기반 머티리얼의 공통 속성 인터페이스
@@ -64,7 +60,7 @@ class BitmapMaterial extends AUVTransformBaseMaterial {
         super(
             redGPUContext,
             'BITMAP_MATERIAL',
-            SHADER_INFO,
+            fragmentModuleSource,
             2
         )
         if (name) this.name = name

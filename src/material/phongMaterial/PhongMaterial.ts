@@ -2,7 +2,6 @@ import ColorRGB from "../../color/ColorRGB";
 import RedGPUContext from "../../context/RedGPUContext";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
-import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl'
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
 import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
@@ -10,9 +9,6 @@ import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import definePositiveNumber from "../../defineProperty/funcs/number/definePositiveNumber";
 import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
 import defineColorRGB from "../../defineProperty/funcs/color/defineColorRGB";
-
-
-const SHADER_INFO = parseWGSL('PHONG_MATERIAL', fragmentModuleSource)
 
 /**
  * [KO] PhongMaterial의 공통 속성 인터페이스
@@ -169,7 +165,7 @@ class PhongMaterial extends AUVTransformBaseMaterial {
         super(
             redGPUContext,
             'PHONG_MATERIAL',
-            SHADER_INFO,
+            fragmentModuleSource,
             2
         )
         if (name) this.name = name

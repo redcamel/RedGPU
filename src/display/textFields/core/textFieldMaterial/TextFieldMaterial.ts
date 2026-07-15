@@ -2,13 +2,9 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import ABitmapBaseMaterial from "../../../../material/core/ABitmapBaseMaterial";
 import Sampler from "../../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../../resources/texture/BitmapTexture";
-import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl';
 import defineSampler from "../../../../defineProperty/funcs/texture/defineSampler";
 import defineTexture from "../../../../defineProperty/funcs/texture/defineTexture";
-
-
-const SHADER_INFO = parseWGSL('TEXTFIELD_MATERIAL', fragmentModuleSource)
 
 /**
  * [KO] 텍스트 필드 머티리얼 인터페이스
@@ -61,7 +57,7 @@ class TextFieldMaterial extends ABitmapBaseMaterial {
         super(
             redGPUContext,
             'TEXT_FIELD_MATERIAL',
-            SHADER_INFO,
+            fragmentModuleSource,
             2
         )
         if (name) this.name = name

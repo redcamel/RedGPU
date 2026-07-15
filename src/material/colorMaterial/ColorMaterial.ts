@@ -1,12 +1,8 @@
 import ColorRGB from "../../color/ColorRGB";
 import RedGPUContext from "../../context/RedGPUContext";
-import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import ABaseMaterial from "../core/ABaseMaterial";
 import fragmentModuleSource from './fragment.wgsl'
 import defineColorRGB from "../../defineProperty/funcs/color/defineColorRGB";
-
-
-const SHADER_INFO = parseWGSL('COLOR_MATERIAL', fragmentModuleSource)
 
 interface ColorMaterial {
     /**
@@ -46,7 +42,7 @@ class ColorMaterial extends ABaseMaterial {
         super(
             redGPUContext,
             'COLOR_MATERIAL',
-            SHADER_INFO,
+            fragmentModuleSource,
             2
         )
         this.initGPURenderInfos()

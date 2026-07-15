@@ -157,9 +157,9 @@ abstract class ABaseMaterial extends ResourceBase {
      * @param moduleName -
      * [KO] 머티리얼 모듈명
      * [EN] Material module name
-     * @param SHADER_INFO -
-     * [KO] 파싱된 WGSL 셰이더 정보
-     * [EN] Parsed WGSL shader info
+     * @param fragmentSource -
+     * [KO] 프래그먼트 셰이더 소스 문자열
+     * [EN] Fragment shader source string
      * @param targetGroupIndex -
      * [KO] 바인드 그룹 인덱스
      * [EN] Bind group index
@@ -167,11 +167,12 @@ abstract class ABaseMaterial extends ResourceBase {
     protected constructor(
         redGPUContext: RedGPUContext,
         moduleName: string,
-        SHADER_INFO: any,
+        fragmentSource: string,
         targetGroupIndex: number
     ) {
         super(redGPUContext)
         const {resourceManager} = redGPUContext
+        const SHADER_INFO = resourceManager.wgslParser.parse(moduleName, fragmentSource)
         // console.log('SHADER_INFO', moduleName, SHADER_INFO)
         this.#MODULE_NAME = moduleName
         this.#FRAGMENT_SHADER_MODULE_NAME = `FRAGMENT_MODULE_${this.#MODULE_NAME}`
