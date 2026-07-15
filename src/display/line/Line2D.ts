@@ -1,7 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Geometry from "../../geometry/Geometry";
 import Primitive from "../../primitive/core/Primitive";
-import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import LineMaterial from "./core/LineMaterial";
 import Line3D from "./Line3D";
@@ -9,8 +8,7 @@ import LINE_TYPE from "./LINE_TYPE";
 import vertexModuleSource from "./shader/lineVertex.wgsl";
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_LINE_2D'
-const SHADER_INFO = parseWGSL('LINE2D_VERTEX', vertexModuleSource);
-const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
+
 
 /**
  * [KO] 2D 공간에서 선(라인)을 표현하는 클래스입니다.
@@ -81,6 +79,8 @@ class Line2D extends Line3D {
      * @returns 생성된 셰이더 모듈
      */
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
+        const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('LINE2D_VERTEX', vertexModuleSource);
+        const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
         return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
     }
 
