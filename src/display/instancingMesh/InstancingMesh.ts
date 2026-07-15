@@ -4,7 +4,7 @@ import Geometry from "../../geometry/Geometry";
 import Primitive from "../../primitive/core/Primitive";
 import StorageBuffer from "../../resources/buffer/storageBuffer/StorageBuffer";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
-import parseWGSL from "../../resources/wgslParser/parseWGSL";
+
 import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRange";
 import createBasePipeline from "../mesh/core/pipeline/createBasePipeline";
 import PIPELINE_TYPE from "../mesh/core/pipeline/PIPELINE_TYPE";
@@ -160,7 +160,7 @@ class InstancingMesh extends Mesh {
         this.#instanceCount = Math.min(instanceCount, this.#maxInstanceCount);
 
         this.#init();
-        this.gpuRenderInfo.vertexUniformInfo = parseWGSL(`INSTANCING_MESH_VERTEX_${this.#maxInstanceCount}`, this.#getVertexModuleSource(this.geometry, this.material)).storage.instanceUniforms;
+        this.gpuRenderInfo.vertexUniformInfo = redGPUContext.resourceManager.wgslParser.parse(`INSTANCING_MESH_VERTEX_${this.#maxInstanceCount}_${this.uuid}`, this.#getVertexModuleSource(this.geometry, this.material)).storage.instanceUniforms;
         this.#rebuildInstanceUniformBuffer();
         this.#updateVisibilityStride();
         this.#initGPURenderInfos(this.#redGPUContext);
@@ -875,6 +875,7 @@ class InstancingMesh extends Mesh {
             this.gpuRenderInfo.pipeline = null;
             this.gpuRenderInfo.shadowPipeline = null;
             this.gpuRenderInfo.vertexUniformBindGroup = null;
+            this.gpuRenderInfo.vertexUniformInfo = null;
         }
 
         this.#cullingComputePipeline = null;
@@ -897,4 +898,5 @@ class InstancingMesh extends Mesh {
     }
 }
 
+Object.freeze(InstancingMesh)
 export default InstancingMesh;
