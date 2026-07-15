@@ -5,14 +5,12 @@ import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import Primitive from "../../../primitive/core/Primitive";
 import Plane from "../../../primitive/Plane";
-import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import {mixInMesh2D} from "../../mesh/core";
 import ATextField from "../core/ATextField";
 import vertexModuleSource from "./shader/textField2DVertex.wgsl";
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_TEXT_FIELD_2D'
-const SHADER_INFO = parseWGSL('TEXTFIELD2D_VERTEX', vertexModuleSource);
-const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
+
 const BaseTextField2D = mixInMesh2D(ATextField);
 
 /**
@@ -179,6 +177,8 @@ class TextField2D extends BaseTextField2D {
      * [EN] Created GPU shader module
      */
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
+        const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('TEXTFIELD2D_VERTEX', vertexModuleSource);
+        const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
         return this.createMeshVertexShaderModuleBASIC(
             VERTEX_SHADER_MODULE_NAME,
             SHADER_INFO,
