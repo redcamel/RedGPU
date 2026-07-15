@@ -12,8 +12,7 @@ import RedGPUContextObserver from "./core/RedGPUContextObserver";
 import GlobalStorageBufferManager from "../resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager";
 import {keepLog} from "../utils";
 import DrawBufferManager from "../renderer/core/DrawBufferManager";
-import {destroyReflectCache} from "../resources/wgslParser/parseWGSL";
-import {destroyPreprocessCache} from "../resources/wgslParser/core/preprocessWGSL";
+
 import Renderer from "../renderer/Renderer";
 
 /**
@@ -488,8 +487,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#deviceEventController.abort();
         if (this.#destroyed) return;
         this.#destroyed = true;
-        destroyReflectCache()
-        destroyPreprocessCache()
+
         this.targetRenderer?.destroy(this)
         if (this.#gpuContext) {
             try {

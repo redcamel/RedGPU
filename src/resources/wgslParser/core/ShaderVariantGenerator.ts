@@ -1,4 +1,4 @@
-import {ConditionalBlock} from "./preprocessWGSL";
+import {ConditionalBlock} from "../WGSLParser";
 
 /**
  * [KO] 조건부 블록과 define 문자열을 기반으로 WGSL 셰이더의 다양한 변형(variant) 코드를 생성하는 유틸리티 클래스입니다.

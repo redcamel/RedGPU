@@ -10,7 +10,7 @@ import {
 import DownSampleCubeMapGenerator from "../../texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
 import MipmapGenerator from "../../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../../texture/CubeTexture";
-import preprocessWGSL from "../../wgslParser/core/preprocessWGSL";
+
 import ManagementResourceBase from "../ManagementResourceBase";
 import ResourceStateIndexBuffer from "./resourceState/ResourceStateIndexBuffer";
 import ResourceStateStorageBuffer from "./resourceState/ResourceStateStorageBuffer";
@@ -1050,7 +1050,7 @@ class ResourceManager extends RedGPUObject {
 
     #createAndCacheModule(name: string, gpuShaderModuleDescriptor: GPUShaderModuleDescriptor) {
         const {code} = gpuShaderModuleDescriptor
-        const newCode = preprocessWGSL(name, code).defaultSource
+        const newCode = this.#wgslParser.parse(name, code).defaultSource
         const newModule: GPUShaderModule = this.redGPUContext.gpuDevice.createShaderModule({
             ...gpuShaderModuleDescriptor,
             code: newCode,
