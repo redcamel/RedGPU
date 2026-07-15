@@ -28,7 +28,6 @@ import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVer
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 
-const GLOBAL_VERTEX_STRUCT = ResourceManager.GLOBAL_VERTEX_STRUCT
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -1432,7 +1431,8 @@ class Mesh extends MeshBase {
                 if (antialiasingManager.useTAA && this.#uniformDataMatrixList) {
 
                     const {redGPUContext} = this
-                    const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
+                    const {resourceManager} = redGPUContext
+                    const {members: vertexUniformInfoMembers} = resourceManager.GLOBAL_VERTEX_STRUCT
                     const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
                     if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
                         this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
@@ -1459,7 +1459,8 @@ class Mesh extends MeshBase {
                 }
                 {
                     const {redGPUContext} = this
-                    const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
+                    const {resourceManager} = redGPUContext
+                    const {members: vertexUniformInfoMembers} = resourceManager.GLOBAL_VERTEX_STRUCT
                     const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
                     if (!this.#uniformDataMatrixList) {
                         this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
@@ -1592,7 +1593,8 @@ class Mesh extends MeshBase {
 
             {
                 const {redGPUContext} = this
-                const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
+                const {resourceManager} = redGPUContext
+                const {members: vertexUniformInfoMembers} = resourceManager.GLOBAL_VERTEX_STRUCT
                 if (!this.#uniformDataMatrixList) {
                     this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
                 }
@@ -1626,7 +1628,8 @@ class Mesh extends MeshBase {
 
         if (currentGeometry && passFrustumCulling) {
             const {redGPUContext} = this
-            const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
+            const {resourceManager} = redGPUContext
+            const {members: vertexUniformInfoMembers} = resourceManager.GLOBAL_VERTEX_STRUCT
 
 
             {
@@ -1754,7 +1757,7 @@ class Mesh extends MeshBase {
                                 redGPUContext.globalVertexSSBO.updateUintData(
                                     this.#globalVertexSlotIndex,
                                     new Uint32Array([lodMaterial.globalFragmentSlotIndex]),
-                                    ResourceManager.GLOBAL_VERTEX_STRUCT.members.globalFragmentSlotIndex.uniformOffset / 4
+                                    resourceManager.GLOBAL_VERTEX_STRUCT.members.globalFragmentSlotIndex.uniformOffset / 4
                                 );
                                 redGPUContext.globalVertexSSBO.flush();
                                 this.#prevLodIDX = targetIdx
@@ -1880,12 +1883,13 @@ class Mesh extends MeshBase {
     #setRenderBundle(renderViewStateData: RenderViewStateData) {
         const {view} = renderViewStateData
         const {redGPUContext} = this
+        const {resourceManager} = redGPUContext
         const currentMaterial = this._material
         if (currentMaterial.globalFragmentSlotIndex !== undefined && currentMaterial.globalFragmentSlotIndex > -1) {
             redGPUContext.globalVertexSSBO.updateUintData(
                 this.#globalVertexSlotIndex,
                 new Uint32Array([currentMaterial.globalFragmentSlotIndex]),
-                ResourceManager.GLOBAL_VERTEX_STRUCT.members.globalFragmentSlotIndex.uniformOffset / 4
+                resourceManager.GLOBAL_VERTEX_STRUCT.members.globalFragmentSlotIndex.uniformOffset / 4
             );
             redGPUContext.globalVertexSSBO.flush();
         }

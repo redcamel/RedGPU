@@ -21,17 +21,17 @@ import ResourceStateBitmapTexture from "./resourceState/texture/ResourceStateBit
 import ResourceStateCubeTexture from "./resourceState/texture/ResourceStateCubeTexture";
 import ResourceStateHDRTexture from "./resourceState/texture/ResourceStateHDRTexture";
 import RedGPUObject from "../../../base/RedGPUObject";
-import parseWGSL from "../../wgslParser/parseWGSL";
 import ShaderLibrary from "../../../systemCodeManager/ShaderLibrary";
 import PackedTextureManager from "../../texture/packedTexture/PackedTextureManager";
 import GLTFCacheManager from "../../../loader/gltf/core/GLTFCacheManager";
 import WGSLParser from "../../wgslParser/WGSLParser";
+import vertexSourcePbrInput from "../../../display/mesh/shader/meshVertexPbr_input.wgsl";
+import vertexSourcePbrOutput from "../../../display/mesh/shader/meshVertexPbr_output.wgsl";
+import vertexSourcePbr from "../../../display/mesh/shader/meshVertexPbr.wgsl";
+import vertexSourceInput from "../../../display/mesh/shader/meshVertex_input.wgsl";
+import vertexSourceOutput from "../../../display/mesh/shader/meshVertex_output.wgsl";
+import vertexSource from "../../../display/mesh/shader/meshVertex.wgsl";
 
-
-const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
-const GLOBAL_VERTEX_STRUCT = SHADER_INFO.storage.globalVertexSSBO.type.format;
-const GLOBAL_FRAGMENT_STRUCT_PBR = SHADER_INFO.storage.globalFragmentSSBO_PBR.type.format;
-const GLOBAL_FRAGMENT_STRUCT_BUILT_IN = SHADER_INFO.storage.globalFragmentSSBO_BuiltIn.type.format;
 
 enum ResourceType {
     GPUShaderModule = 'GPUShaderModule',
@@ -80,9 +80,7 @@ class ResourceManager extends RedGPUObject {
     static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout = 'PRESET_GLOBAL_VERTEX_GPUBindGroupLayout'
     static PRESET_VERTEX_GPUBindGroupLayout = 'PRESET_VERTEX_GPUBindGroupLayout'
     static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN = 'PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN'
-    static GLOBAL_VERTEX_STRUCT = GLOBAL_VERTEX_STRUCT
-    static GLOBAL_FRAGMENT_STRUCT_PBR = GLOBAL_FRAGMENT_STRUCT_PBR
-    static GLOBAL_FRAGMENT_STRUCT_BUILT_IN = GLOBAL_FRAGMENT_STRUCT_BUILT_IN
+
 
     #resources = new ImmutableKeyMap([
         [ResourceType.GPUShaderModule, new Map()],
@@ -117,6 +115,14 @@ class ResourceManager extends RedGPUObject {
     #bitmapTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
     #cubeTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
 
+    #MESH_SHADER_INFO_PBR: any
+    #MESH_SHADER_INFO_BASIC: any
+    #MESH_SHADER_INFO_ONLY_FRAGMENT_PBR: any
+    #MESH_SHADER_INFO_ONLY_VERTEX_PBR: any
+
+    #GLOBAL_VERTEX_STRUCT: any
+    #GLOBAL_FRAGMENT_STRUCT_PBR: any
+    #GLOBAL_FRAGMENT_STRUCT_BUILT_IN: any
 
     /**
      * [KO] ResourceManager 인스턴스를 생성합니다. (내부 시스템 전용)
@@ -128,8 +134,54 @@ class ResourceManager extends RedGPUObject {
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext)
         this.#wgslParser = new WGSLParser();
+
+        this.#MESH_SHADER_INFO_PBR = this.#wgslParser.parse('MESH_PBR', [
+            vertexSourcePbrInput, vertexSourcePbrOutput, vertexSourcePbr,].join("\n"));
+
+        this.#MESH_SHADER_INFO_BASIC = this.#wgslParser.parse('MESH_BASIC', [
+            vertexSourceInput, vertexSourceOutput, vertexSource
+        ].join("\n"));
+
+        this.#MESH_SHADER_INFO_ONLY_FRAGMENT_PBR = this.#wgslParser.parse('MESH_ONLY_FRAGMENT_PBR', [
+            vertexSourceInput, vertexSourcePbrOutput, vertexSource,].join("\n"));
+
+        this.#MESH_SHADER_INFO_ONLY_VERTEX_PBR = this.#wgslParser.parse('MESH_ONLY_VERTEX_PBR', [
+            vertexSourcePbrInput, vertexSourceOutput, vertexSource,].join("\n"));
+
+        const SHADER_INFO = this.#wgslParser.parse('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
+        this.#GLOBAL_VERTEX_STRUCT = SHADER_INFO.storage.globalVertexSSBO.type.format;
+        this.#GLOBAL_FRAGMENT_STRUCT_PBR = SHADER_INFO.storage.globalFragmentSSBO_PBR.type.format;
+        this.#GLOBAL_FRAGMENT_STRUCT_BUILT_IN = SHADER_INFO.storage.globalFragmentSSBO_BuiltIn.type.format;
     }
 
+
+    get GLOBAL_FRAGMENT_STRUCT_PBR(): any {
+        return this.#GLOBAL_FRAGMENT_STRUCT_PBR;
+    }
+
+    get GLOBAL_FRAGMENT_STRUCT_BUILT_IN(): any {
+        return this.#GLOBAL_FRAGMENT_STRUCT_BUILT_IN;
+    }
+
+    get GLOBAL_VERTEX_STRUCT(): any {
+        return this.#GLOBAL_VERTEX_STRUCT;
+    }
+
+    get SHADER_INFO_PBR(): any {
+        return this.#MESH_SHADER_INFO_PBR;
+    }
+
+    get SHADER_INFO_BASIC(): any {
+        return this.#MESH_SHADER_INFO_BASIC;
+    }
+
+    get SHADER_INFO_ONLY_FRAGMENT_PBR(): any {
+        return this.#MESH_SHADER_INFO_ONLY_FRAGMENT_PBR;
+    }
+
+    get SHADER_INFO_ONLY_VERTEX_PBR(): any {
+        return this.#MESH_SHADER_INFO_ONLY_VERTEX_PBR;
+    }
 
     get wgslParser(): WGSLParser {
         return this.#wgslParser;

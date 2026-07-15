@@ -12,7 +12,6 @@ import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroup
 import definePositiveNumber from "../../defineProperty/funcs/number/definePositiveNumber";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import defineColorRGBA from "../../defineProperty/funcs/color/defineColorRGBA";
-import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 
 
@@ -486,7 +485,8 @@ abstract class ABaseMaterial extends ResourceBase {
      */
     _updateBaseProperty() {
         if (this.redGPUContext.destroyed) return;
-        const {members} = this['isPBRMaterial'] ? ResourceManager.GLOBAL_FRAGMENT_STRUCT_PBR : this['isBuiltInMaterial'] ? ResourceManager.GLOBAL_FRAGMENT_STRUCT_BUILT_IN : this.gpuRenderInfo.fragmentUniformInfo
+        const {resourceManager} = this
+        const {members} = this['isPBRMaterial'] ? resourceManager.GLOBAL_FRAGMENT_STRUCT_PBR : this['isBuiltInMaterial'] ? resourceManager.GLOBAL_FRAGMENT_STRUCT_BUILT_IN : this.gpuRenderInfo.fragmentUniformInfo
         for (const k in members) {
             const property = this[k]
             if (property instanceof ColorRGBA) {
