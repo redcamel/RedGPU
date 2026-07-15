@@ -23,6 +23,7 @@ import ResourceStateHDRTexture from "./resourceState/texture/ResourceStateHDRTex
 import RedGPUObject from "../../../base/RedGPUObject";
 import parseWGSL from "../../wgslParser/parseWGSL";
 import ShaderLibrary from "../../../systemCodeManager/ShaderLibrary";
+import PackedTextureManager from "../../texture/packedTexture/PackedTextureManager";
 
 const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
 const GLOBAL_VERTEX_STRUCT = SHADER_INFO.storage.globalVertexSSBO.type.format;
@@ -104,6 +105,7 @@ class ResourceManager extends RedGPUObject {
     readonly #irradianceGenerator: IrradianceGenerator
     readonly #prefilterGenerator: PrefilterGenerator
     readonly #equirectangularToCubeGenerator: EquirectangularToCubeGenerator
+    #packedTextureManager: PackedTextureManager
     #basicSampler: Sampler
     #basicDisplacementSampler: Sampler
     #bitmapTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
@@ -125,6 +127,7 @@ class ResourceManager extends RedGPUObject {
         this.#irradianceGenerator = new IrradianceGenerator(redGPUContext)
         this.#prefilterGenerator = new PrefilterGenerator(redGPUContext)
         this.#equirectangularToCubeGenerator = new EquirectangularToCubeGenerator(redGPUContext)
+        this.#packedTextureManager = new PackedTextureManager(redGPUContext)
         this.#initPresets()
     }
 
@@ -199,6 +202,14 @@ class ResourceManager extends RedGPUObject {
      */
     get equirectangularToCubeGenerator(): EquirectangularToCubeGenerator {
         return this.#equirectangularToCubeGenerator;
+    }
+
+    /**
+     * [KO] 텍스처 패킹 매니저를 반환합니다.
+     * [EN] Returns the texture packing manager.
+     */
+    get packedTextureManager(): PackedTextureManager {
+        return this.#packedTextureManager;
     }
 
     /**
@@ -501,6 +512,8 @@ class ResourceManager extends RedGPUObject {
         this.#managedStorageBufferState.table.clear();
 
         // 4. 프리셋 및 제너레이터 등 참조 초기화
+        this.#packedTextureManager.destroy();
+        this.#packedTextureManager = null
         this.#basicSampler = null;
         this.#basicDisplacementSampler = null;
         this.#emptyBitmapTextureView = null;

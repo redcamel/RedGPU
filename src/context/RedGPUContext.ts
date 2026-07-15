@@ -16,7 +16,6 @@ import {destroyReflectCache} from "../resources/wgslParser/parseWGSL";
 import {destroyPreprocessCache} from "../resources/wgslParser/core/preprocessWGSL";
 import Renderer from "../renderer/Renderer";
 import GLTFLoader from "../loader/gltf/GLTFLoader";
-import {destroyPackedTextureCache} from "../resources/texture/packedTexture/PackedTexture";
 import {destroySamplerCache} from "../resources/sampler/Sampler";
 
 /**
@@ -493,7 +492,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
         destroyReflectCache()
         destroyPreprocessCache()
         GLTFLoader.destroyGLTFCache();
-        destroyPackedTextureCache();
         destroySamplerCache();
         this.targetRenderer?.destroy(this)
         if (this.#gpuContext) {
