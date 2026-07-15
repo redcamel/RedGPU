@@ -2,12 +2,10 @@ import RedGPUContext from "../../../../../context/RedGPUContext";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import DirectTexture from "../../../../../resources/texture/DirectTexture";
 import skyViewShaderCode_wgsl from "./skyViewShaderCode.wgsl";
-import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import createUUID from "../../../../../utils/uuid/createUUID";
 
-const SHADER_INFO = parseWGSL('SkyAtmosphere_SkyView_Generator', skyViewShaderCode_wgsl);
 
 /**
  * [KO] SkyViewGenerator는 스카이 뷰(Sky View) LUT를 생성합니다.
@@ -46,6 +44,7 @@ class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
     }
 
     #init(): void {
+        const SHADER_INFO = this.resourceManager.wgslParser.parse('SkyAtmosphere_SkyView_Generator', skyViewShaderCode_wgsl);
         this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_SkyView_LUTTexture_${createUUID()}`, this.createLUTTexture(false));
         this.#pipeline = this.createComputePipeline('SkyAtmosphere_SkyView_Pipeline', SHADER_INFO.defaultSource);
     }

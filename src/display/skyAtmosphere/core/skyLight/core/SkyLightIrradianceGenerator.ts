@@ -1,7 +1,6 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import irradianceShaderCode_wgsl from "./skyLightIrradianceShaderCode.wgsl";
-import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import DirectCubeTexture from "../../../../../resources/texture/DirectCubeTexture";
 import DirectTexture from "../../../../../resources/texture/DirectTexture";
@@ -10,7 +9,6 @@ import ASkyAtmosphereLUTGenerator from "../../generator/ASkyAtmosphereLUTGenerat
 import getMipLevelCount from "../../../../../utils/texture/getMipLevelCount";
 import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
-const IRRADIANCE_SHADER_INFO = parseWGSL('SkyLight_Irradiance_Generator', irradianceShaderCode_wgsl);
 
 /**
  * [KO] SkyLightIrradianceGenerator는 대기 산란 기반의 간접 디퓨즈 조명(Irradiance)을 생성합니다.
@@ -78,6 +76,7 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
     #init(): void {
         const {gpuDevice} = this.redGPUContext;
         const mipLevelCount = getMipLevelCount(this.width, this.height);
+        const IRRADIANCE_SHADER_INFO = this.resourceManager.wgslParser.parse('SkyLight_Irradiance_Generator', irradianceShaderCode_wgsl);
 
         this.#sourceCubeTexture = gpuDevice.createTexture({
             label: 'SkyLight_Irradiance_Source_CubeTexture',

@@ -2,7 +2,6 @@ import RedGPUContext from "../../../../../context/RedGPUContext";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import specularShaderCode_wgsl from "./skyLightReflectionShaderCode.wgsl";
-import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import DirectCubeTexture from "../../../../../resources/texture/DirectCubeTexture";
 import DirectTexture from "../../../../../resources/texture/DirectTexture";
@@ -10,7 +9,6 @@ import createUUID from "../../../../../utils/uuid/createUUID";
 import ASkyAtmosphereLUTGenerator from "../../generator/ASkyAtmosphereLUTGenerator";
 import getMipLevelCount from "../../../../../utils/texture/getMipLevelCount";
 
-const SPECULAR_SHADER_INFO = parseWGSL('SkyLight_Reflection_Generator', specularShaderCode_wgsl);
 
 /**
  * [KO] SkyLightReflectionGenerator는 대기 산란 기반의 간접 스펙큘러 조명(Reflection)을 생성합니다.
@@ -78,6 +76,7 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
     #init(): void {
         const {gpuDevice} = this.redGPUContext;
         const mipLevelCount = getMipLevelCount(this.width, this.height);
+        const SPECULAR_SHADER_INFO = this.resourceManager.wgslParser.parse('SkyLight_Reflection_Generator', specularShaderCode_wgsl);
 
         this.#sourceCubeTexture = gpuDevice.createTexture({
             label: 'SkyLight_Reflection_Source_CubeTexture',
