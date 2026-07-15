@@ -2,7 +2,6 @@ import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material/core";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
-import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import {IPostEffectResult} from "./types";
 import RedGPUObject from "../../base/RedGPUObject";
 
@@ -262,8 +261,8 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         this.#computeShaderNonMSAA = resourceManager.createGPUShaderModule(`${name}_NonMSAA`, {code: computeCodes.nonMsaa});
 
         // 셰이더 정보 파싱 (WGSL 분석)
-        this.#SHADER_INFO_MSAA = parseWGSL(`${name}_MSAA`, computeCodes.msaa);
-        this.#SHADER_INFO_NON_MSAA = parseWGSL(`${name}_NonMSAA`, computeCodes.nonMsaa);
+        this.#SHADER_INFO_MSAA = resourceManager.wgslParser.parse(`${name}_MSAA`, computeCodes.msaa);
+        this.#SHADER_INFO_NON_MSAA = resourceManager.wgslParser.parse(`${name}_NonMSAA`, computeCodes.nonMsaa);
 
         const {storage, uniforms} = this.#SHADER_INFO_MSAA;
         this.#storageInfo = storage;
