@@ -133,7 +133,7 @@ class Geometry extends ResourceBase {
      * @private
      */
     #updateVertexBufferState() {
-        this.notifyUpdate();
+        this?.notifyUpdate();
     }
 
     /**
@@ -141,7 +141,7 @@ class Geometry extends ResourceBase {
      * @private
      */
     #updateIndexBufferState() {
-        this.notifyUpdate();
+        this?.notifyUpdate();
     }
 
     /**

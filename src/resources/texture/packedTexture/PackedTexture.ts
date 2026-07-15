@@ -243,6 +243,7 @@ class PackedTexture extends RedGPUObject {
         mappingKey: string,
         commandEncoder?: GPUCommandEncoder
     ) {
+        if (this.redGPUContext.destroyed) return
         const textureDescriptor: GPUTextureDescriptor = {
             size: [width, height, 1],
             format: 'rgba8unorm',
