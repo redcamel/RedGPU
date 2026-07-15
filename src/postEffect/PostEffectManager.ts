@@ -1,7 +1,6 @@
 import {mat4} from "gl-matrix";
 import View3D from "../display/view/View3D";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
-import parseWGSL from "../resources/wgslParser/parseWGSL";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import ShaderLibrary from "../systemCodeManager/ShaderLibrary";
@@ -139,6 +138,7 @@ class PostEffectManager {
 
         this.#postEffectSystemUniformBuffer.destroy()
         this.#postEffectSystemUniformBuffer = null
+        this.#postEffectSystemUniformBufferStructInfo = null
         keepLog(`🧹 ${this.view.name} PostEffectManager destroy 완료`)
     }
 
@@ -718,7 +718,8 @@ class PostEffectManager {
 
     #init() {
         const {redGPUContext} = this.#view;
-        const SHADER_INFO = parseWGSL('POST_EFFECT_SYSTEM_UNIFORM', ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM)
+        const {resourceManager} = redGPUContext
+        const SHADER_INFO = resourceManager.wgslParser.parse('POST_EFFECT_SYSTEM_UNIFORM', ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM)
         const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
         const postEffectSystemUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
         this.#postEffectSystemUniformBufferStructInfo = UNIFORM_STRUCT;
