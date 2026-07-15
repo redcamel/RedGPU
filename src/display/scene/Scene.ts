@@ -98,12 +98,7 @@ class Scene extends Object3DContainer {
         }
         this.#backgroundColor = null;
 
-        for (const child of this.children) {
-            if ('destroy' in child && typeof child.destroy === 'function') {
-                child.destroy();
-            }
-        }
-        this.children.length = 0;
+        super.destroy();
     }
     /**
      * [KO] 씬 내의 모든 조명을 통합 관리하는 LightManager 인스턴스를 가져옵니다.

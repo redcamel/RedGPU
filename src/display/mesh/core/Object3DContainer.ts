@@ -251,6 +251,14 @@ class Object3DContainer extends BaseObject {
         }
     }
 
+    destroy() {
+        let i = this.#children.length;
+        while (i--) {
+            this.#children[i].destroy();
+        }
+        this.removeAllChildren();
+    }
+
     /**
      * 자식 객체를 현재 컨테이너에 할당합니다.
      * 기존 부모가 있다면 제거 후 재할당합니다.
@@ -271,7 +279,7 @@ class Object3DContainer extends BaseObject {
             child.parent = this;
             return true;
         }
-    }
+    };
 }
 
 export default Object3DContainer;

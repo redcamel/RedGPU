@@ -2067,12 +2067,7 @@ class Mesh extends MeshBase {
      */
     destroy() {
         // 1. 자식 객체들 재귀 소멸
-        for (const child of this.children) {
-            if ('destroy' in child && typeof child.destroy === 'function') {
-                child.destroy();
-            }
-        }
-        this.children.length = 0;
+        super.destroy();
 
         // 2. 부모 컨테이너 연결 끊기
         if (this.#parent) {
