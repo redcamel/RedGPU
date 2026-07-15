@@ -594,12 +594,10 @@ abstract class ABaseMaterial extends ResourceBase {
             this.#globalFragmentSlotIndex = -1;
         }
 
-        if (this.gpuRenderInfo?.fragmentUniformBuffer) {
-            this.gpuRenderInfo.fragmentUniformBuffer.destroy();
-            this.gpuRenderInfo.fragmentUniformBuffer = null;
+        if (this.gpuRenderInfo) {
+            this.gpuRenderInfo.destroy();
+            this.gpuRenderInfo = null;
         }
-
-        this.gpuRenderInfo = null;
         this.#TEXTURE_STRUCT = null;
         this.#SAMPLER_STRUCT = null;
         console.log(`🧹 ABaseMaterial destroy 완료: ${this.MODULE_NAME}`);

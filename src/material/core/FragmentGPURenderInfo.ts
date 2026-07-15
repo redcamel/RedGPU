@@ -100,6 +100,20 @@ class FragmentGPURenderInfo {
         this.fragmentUniformBindGroup = fragmentUniformBindGroup;
         this.fragmentState = fragmentState;
     }
+
+    destroy() {
+        if (this.fragmentUniformBuffer) {
+            this.fragmentUniformBuffer.destroy();
+            this.fragmentUniformBuffer = null;
+        }
+        this.fragmentShaderModule = null;
+        this.fragmentShaderSourceVariant = null;
+        this.fragmentShaderVariantConditionalBlocks = null;
+        this.fragmentUniformInfo = null;
+        this.fragmentBindGroupLayout = null;
+        this.fragmentUniformBindGroup = null;
+        this.fragmentState = null;
+    }
 }
 
 Object.freeze(FragmentGPURenderInfo)
