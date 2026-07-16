@@ -1907,6 +1907,10 @@ class Mesh extends MeshBase {
             this.animationInfo.animationsList = null;
             this.animationInfo.skinInfo = null;
         }
+        if (this.gltfLoaderInfo) {
+            this.gltfLoaderInfo.destroy();
+            this.gltfLoaderInfo = null;
+        }
 
         // 9. 이벤트 참조 해제
         this.#events = {};
