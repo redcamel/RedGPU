@@ -1557,7 +1557,7 @@ class Mesh extends MeshBase {
                 if (!this.currentShaderModuleName.includes(VERTEX_SHADER_MODULE_NAME_PBR_SKIN)) {
                     currentDirtyPipeline = true
                 }
-                if (this.currentShaderModuleName === `${VERTEX_SHADER_MODULE_NAME_PBR_SKIN}_${skinInfo.joints?.length}`) {
+                if (this.currentShaderModuleName === VERTEX_SHADER_MODULE_NAME_PBR_SKIN) {
                     renderViewStateData.skinList[renderViewStateData.skinList.length] = this
                     dirtyTransformForChildren = false
                 }
@@ -2103,20 +2103,10 @@ class Mesh extends MeshBase {
             let variantSource = this.gpuRenderInfo.vertexShaderSourceVariant.getVariant(currentVariantKey);
             if (variantSource) {
                 // keepLog('버텍스 바리안트 셰이더 모듈 생성:', currentVariantKey, variantShaderModuleName);
-                if (this.animationInfo?.skinInfo) {
-                    const jointNum = `${this.animationInfo.skinInfo.joints.length}`
-                    variantSource = variantSource.replaceAll('#JOINT_NUM', jointNum)
-                    this.gpuRenderInfo.vertexShaderSourceVariant.getVariant(currentVariantKey)
-                    targetShaderModule = resourceManager.createGPUShaderModule(
-                        `${variantShaderModuleName}_${jointNum}`,
-                        {code: variantSource}
-                    );
-                } else {
-                    targetShaderModule = resourceManager.createGPUShaderModule(
-                        variantShaderModuleName,
-                        {code: variantSource}
-                    );
-                }
+                targetShaderModule = resourceManager.createGPUShaderModule(
+                    `${variantShaderModuleName}`,
+                    {code: variantSource}
+                );
             } else {
                 console.warn('⚠️ 버텍스 바리안트 소스를 찾을 수 없음:', currentVariantKey);
                 targetShaderModule = this.gpuRenderInfo.vertexShaderModule; // 기본값 사용

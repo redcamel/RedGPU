@@ -10,18 +10,16 @@ const createMeshVertexShaderModulePBRSkin = (
     const {redGPUContext, currentShaderModuleName} = mesh
     const {resourceManager, gpuDevice} = redGPUContext
     const {gpuRenderInfo} = mesh
-    const jointNum = `${mesh.animationInfo.skinInfo.joints.length}`
-    const label = `${VERTEX_SHADER_MODULE_NAME_PBR_SKIN}_${jointNum}`
+    const label = `${VERTEX_SHADER_MODULE_NAME_PBR_SKIN}`
     const code = `${vertexModuleSourcePbrSkin}`
     const vModuleDescriptor: GPUShaderModuleDescriptor = {code}
     console.log('createMeshVertexShaderModulePBRSkin', currentShaderModuleName)
     if (currentShaderModuleName === label) return resourceManager.getGPUShaderModule(label,)
     else {
-        vModuleDescriptor.code = code.replaceAll('#JOINT_NUM', jointNum)
-        gpuRenderInfo.vertexUniformInfo = resourceManager.wgslParser.parse(`MESH_VERTEX_PBR_SKIN_JOINT_${jointNum}`, vModuleDescriptor.code).uniforms.vertexUniforms
+        gpuRenderInfo.vertexUniformInfo = resourceManager.wgslParser.parse(`MESH_VERTEX_PBR_SKIN_JOINT`, vModuleDescriptor.code).uniforms.vertexUniforms
         if (mesh.animationInfo.skinInfo) {
             createMeshVertexUniformBuffers(mesh, true)
-            mesh.animationInfo.skinInfo.vertexStorageInfo = resourceManager.wgslParser.parse(`MESH_VERTEX_PBR_SKIN_JOINT_${jointNum}`, vModuleDescriptor.code).storage.vertexStorages
+            mesh.animationInfo.skinInfo.vertexStorageInfo = resourceManager.wgslParser.parse(`MESH_VERTEX_PBR_SKIN_JOINT`, vModuleDescriptor.code).storage.vertexStorages
             // const newData = new ArrayBuffer(mesh.animationInfo.skinInfo.vertexStorageInfo.arrayBufferByteLength)
 
             mesh.animationInfo.skinInfo.vertexStorageBuffer = gpuDevice.createBuffer({
