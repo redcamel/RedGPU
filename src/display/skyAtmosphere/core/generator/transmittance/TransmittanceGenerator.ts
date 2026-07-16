@@ -46,6 +46,13 @@ class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
         this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_Transmittance_LUTTexture_${createUUID()}`, this.createLUTTexture());
         this.#pipeline = this.createComputePipeline('SkyAtmosphere_Transmittance_Pipeline', SHADER_INFO.defaultSource);
     }
+
+    destroy(): void {
+        super.destroy();
+        this.#lutTexture = null;
+        this.#bindGroup = null;
+        this.#pipeline = null;
+    }
 }
 
 Object.freeze(TransmittanceGenerator);

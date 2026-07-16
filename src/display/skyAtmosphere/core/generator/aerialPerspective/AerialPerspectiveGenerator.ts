@@ -63,6 +63,14 @@ class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
         this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_AerialPerspective_LUTTexture_${createUUID()}`, gpuTexture);
         this.#pipeline = this.createComputePipeline('SkyAtmosphere_AerialPerspective_Pipeline', SHADER_INFO.defaultSource);
     }
+
+    destroy(): void {
+        super.destroy();
+        this.#lutTexture = null;
+        this.#bindGroup = null;
+        this.#pipeline = null;
+        this.#prevSystemBuffer = null;
+    }
 }
 
 Object.freeze(AerialPerspectiveGenerator);

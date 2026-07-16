@@ -111,6 +111,15 @@ abstract class ASkyAtmosphereLUTGenerator extends RedGPUObject {
             entries
         });
     }
+
+    destroy(): void {
+        const texture = this.lutTexture;
+        if (texture) {
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(texture);
+        }
+        this.#sharedUniformBuffer = null;
+        this.#sampler = null;
+    }
 }
 
 Object.freeze(ASkyAtmosphereLUTGenerator);

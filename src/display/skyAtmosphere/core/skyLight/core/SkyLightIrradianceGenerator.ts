@@ -95,6 +95,21 @@ class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
         this.#pipeline = this.createComputePipeline('Base', IRRADIANCE_SHADER_INFO.defaultSource);
     }
 
+    destroy(): void {
+        super.destroy();
+        if (this.#sourceCubeTexture) {
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#sourceCubeTexture);
+        }
+        if (this.#prefilteredTexture) {
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#prefilteredTexture);
+        }
+        this.#sourceCubeTexture = null;
+        this.#sourceCubeTextureView = null;
+        this.#prefilteredTexture = null;
+        this.#pipeline = null;
+        this.#bindGroup = null;
+    }
+
     #computeRender(
         pipeline: GPUComputePipeline,
         bindGroup: GPUBindGroup,

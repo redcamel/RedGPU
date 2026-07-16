@@ -120,6 +120,15 @@ class SkyAtmosphereBackground extends RedGPUObject {
             multisample: {count: useMSAA ? 4 : 1}
         });
     }
+
+    destroy(): void {
+        this.#backgroundBindGroup2 = null;
+        this.#backgroundPipeline = null;
+        this.#backgroundRenderBundle = null;
+        this.#prevBackgroundSystemUniformBindGroup = null;
+        // @ts-ignore
+        this.#backgroundBindGroupLayout2 = null;
+    }
 }
 
 Object.freeze(SkyAtmosphereBackground);

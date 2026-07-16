@@ -96,6 +96,23 @@ class SkyLight extends RedGPUObject {
             this.dirty = false;
         }
     }
+
+    destroy(): void {
+        if (this.#irradianceLUT) {
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#irradianceLUT);
+        }
+        if (this.#reflectionGenerator) {
+            this.#reflectionGenerator.destroy();
+        }
+        if (this.#irradianceGenerator) {
+            this.#irradianceGenerator.destroy();
+        }
+        this.#irradianceLUT = null;
+        this.#reflectionGenerator = null;
+        this.#irradianceGenerator = null;
+        this.#sharedUniformBuffer = null;
+        this.#sampler = null;
+    }
 }
 
 Object.freeze(SkyLight);

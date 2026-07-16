@@ -213,7 +213,6 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
      * [EN] Clears the resources used by the effect.
      */
     clear() {
-        this.#outputTexture?.destroy()
         this.#outputTexture = null;
         this.#outputTextureView = null;
         this.#bindGroupCache0.clear();
