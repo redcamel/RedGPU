@@ -1554,12 +1554,12 @@ class Mesh extends MeshBase {
                 renderViewStateData.animationList[renderViewStateData.animationList.length] = this.gltfLoaderInfo?.activeAnimations
             }
             if (skinInfo) {
-                if (!this.currentShaderModuleName.includes(VERTEX_SHADER_MODULE_NAME_PBR_SKIN)) {
-                    currentDirtyPipeline = true
-                }
+            
                 if (this.currentShaderModuleName === VERTEX_SHADER_MODULE_NAME_PBR_SKIN) {
                     renderViewStateData.skinList[renderViewStateData.skinList.length] = this
                     dirtyTransformForChildren = false
+                } else if (!this.currentShaderModuleName.includes(VERTEX_SHADER_MODULE_NAME_PBR_SKIN)) {
+                    currentDirtyPipeline = true
                 }
             }
         } else {
