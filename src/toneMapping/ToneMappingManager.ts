@@ -94,7 +94,7 @@ class ToneMappingManager {
      */
     clear() {
         if (this.#toneMapping) {
-            this.#toneMapping.clear();
+            this.#toneMapping.destroy();
             this.#toneMapping = undefined;
         }
     }
