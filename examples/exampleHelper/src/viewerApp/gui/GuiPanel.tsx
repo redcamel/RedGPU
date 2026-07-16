@@ -63,9 +63,9 @@ const GuiPanel: React.FC = () => {
             {guiInstance && guiConfig.skybox && redGPUContext && redGPUContext.viewList[0] && (
                 <GuiSkyBoxHelper gui={guiInstance} view={redGPUContext.viewList[0]}/>
             )}
-            {/*{guiInstance && redGPUContext && (*/}
-            {/*    <GuiDestroyTest gui={guiInstance} redGPUContext={redGPUContext}/>*/}
-            {/*)}*/}
+            {guiInstance && redGPUContext && (
+                <GuiDestroyTest gui={guiInstance} redGPUContext={redGPUContext}/>
+            )}
         </>
     );
 };

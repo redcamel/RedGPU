@@ -992,6 +992,19 @@ export const ExampleList: ExampleListType = [
                     }
                 ]
             },
+            {
+                name: 'Multi Canvas',
+                list: [
+                    {
+                        name: 'Multi Canvas',
+                        path: '3d/multiCanvas',
+                        description: {
+                            ko: `독립적인 여러 개의 캔버스와 RedGPUContext 인스턴스를 사용하는 예제입니다.<br/>하나의 컨텍스트를 소멸(Destroy)시켜도 다른 활성 컨텍스트에 영향을 주지 않는 리소스 격리 기능을 검증합니다.`,
+                            en: `This example demonstrates the usage of multiple canvases and RedGPUContext instances.<br/>It validates that one context can be destroyed without affecting the other active contexts, ensuring robust resource isolation.`
+                        },
+                    }
+                ]
+            },
 
         ]
     },

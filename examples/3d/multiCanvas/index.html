@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Multi Canvas RedGPU</title>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="This example demonstrates the usage of multiple canvases and RedGPUContext instances. It validates that one context can be destroyed without affecting the other active contexts, ensuring robust resource isolation."
+          name="description">
+    <meta content="RedGPU, WebGPU, Graphics, 3D, Multi Canvas, Multiple Context, Destroy, Context Isolation"
+          name="keywords">
+    <link href="https://redcamel.github.io/RedGPU/examples/3d/multiCanvas/" rel="canonical">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Assets Preload -->
+    <link as="style" href="../../assets/css/example.css?t=1783326645983" rel="preload">
+    <link href="index.js?t=1783326645983" rel="modulepreload">
+
+    <!-- Assets -->
+    <link href="../../assets/css/example.css?t=1783326645983" rel="stylesheet">
+    <style>
+        .test-container {
+            display: flex;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            color: #fff;
+            font-size: 14px;
+            background: #0a0a0b;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #222;
+            position: relative;
+            background: #0f0f11;
+        }
+
+        .control-panel {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 12px 18px;
+            background: rgb(65 65 136 / 0.8);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .control-panel strong {
+            font-size: 13px;
+            font-weight: 600;
+            color: #e4e4e7;
+            letter-spacing: -0.2px;
+        }
+
+        .control-panel button {
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: inherit;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+            letter-spacing: 0.3px;
+        }
+
+        /* Destroy Button Style */
+        .control-panel button[id^="btnDestroy"] {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .control-panel button[id^="btnDestroy"]:hover {
+            background: #ef4444;
+            color: #fff;
+            border-color: #ef4444;
+            box-shadow: 0 0 14px rgba(239, 68, 68, 0.45);
+        }
+
+        .control-panel button[id^="btnDestroy"]:active {
+            transform: scale(0.96);
+        }
+
+        /* Recreate Button Style */
+        .control-panel button[id^="btnCreate"] {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .control-panel button[id^="btnCreate"]:hover {
+            background: #10b981;
+            color: #fff;
+            border-color: #10b981;
+            box-shadow: 0 0 14px rgba(16, 185, 129, 0.45);
+        }
+
+        .control-panel button[id^="btnCreate"]:active {
+            transform: scale(0.96);
+        }
+
+        .canvas-container canvas {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .status-msg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ef4444;
+            font-weight: 600;
+            background: rgba(15, 15, 17, 0.9);
+            padding: 12px 24px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 8px;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            letter-spacing: -0.1px;
+        }
+    </style>
+    <script src="index.js?t=1783326645983" type="module"></script>
+</head>
+<body>
+<h1 style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;">
+    Multi Canvas RedGPU</h1>
+<div class="test-container">
+
+    <div id="containerA" class="canvas-container">
+        <div class="control-panel">
+            <strong>Canvas A (Red Torus Knot)</strong>
+            <button id="btnDestroyA">Destroy</button>
+            <button id="btnCreateA" style="display: none;">Recreate</button>
+        </div>
+        <div id="statusA" class="status-msg" style="display: none;"> Context A Destroyed</div>
+    </div>
+
+    <div id="containerB" class="canvas-container">
+        <div class="control-panel">
+            <strong>Canvas B (Blue Torus Knot)</strong>
+            <button id="btnDestroyB">Destroy</button>
+            <button id="btnCreateB" style="display: none;">Recreate</button>
+        </div>
+        <div id="statusB" class="status-msg" style="display: none;"> Context B Destroyed</div>
+    </div>
+</div>
+
+</body>
+</html>
