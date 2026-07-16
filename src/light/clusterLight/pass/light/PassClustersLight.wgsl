@@ -51,7 +51,33 @@ fn main(
     for (var i = local_index; i < totalLightCount; i = i + workgroupSize) {
         if (i < 1024u) {
             let light = clusterLightList.lights[i];
-            sharedLights[i] = vec4<f32>(light.position, light.radius);
+            if (light.isSpotLight == 1.0) {
+                let V = light.position;
+                let dir = vec3<f32>(light.directionX, light.directionY, light.directionZ);
+                let lenSq = dot(dir, dir);
+                var center = V;
+                var radius = light.radius;
+                
+                if (lenSq > 0.0001) {
+                    let D = dir * inverseSqrt(lenSq);
+                    let L = light.radius;
+                    let theta = radians(light.outerCutoff);
+                    let cosTheta = cos(theta);
+                    let sinTheta = sin(theta);
+                    
+                    if (sinTheta * sinTheta <= 0.5) { // theta <= 45도
+                        let factor = L / (2.0 * cosTheta);
+                        center = V + D * factor;
+                        radius = factor;
+                    } else { // theta > 45도
+                        center = V + D * (L * cosTheta);
+                        radius = L * sinTheta;
+                    }
+                }
+                sharedLights[i] = vec4<f32>(center, radius);
+            } else {
+                sharedLights[i] = vec4<f32>(light.position, light.radius);
+            }
         }
     }
 

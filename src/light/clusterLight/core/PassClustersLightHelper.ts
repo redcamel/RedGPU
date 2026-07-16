@@ -41,7 +41,7 @@ const PassClustersLightHelper = {
      * [KO] 클러스터당 최대 조명 개수
      * [EN] Maximum number of lights per cluster
      */
-    MAX_LIGHTS_PER_CLUSTER: 64,
+    MAX_LIGHTS_PER_CLUSTER: 100,
     /**
      * [KO] 최대 클러스터 조명 개수
      * [EN] Maximum number of cluster lights
