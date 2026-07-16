@@ -33,11 +33,10 @@ import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
 class Renderer {
     #finalRender: FinalRender
     #gltfAnimationLooperManager: GltfAnimationLooperManager = new GltfAnimationLooperManager()
+    #HD_render
 
     constructor() {
     }
-
-    #HD_render
 
     /**
      * [KO] 렌더링 루프를 시작합니다.
@@ -80,6 +79,7 @@ class Renderer {
         this.#gltfAnimationLooperManager = null
         this.#HD_render = null
     }
+
     /**
      * [KO] 렌더링 루프를 정지합니다.
      * [EN] Stops the rendering loop.

@@ -92,6 +92,15 @@ abstract class ASkyAtmosphereLUTGenerator extends RedGPUObject {
         });
     }
 
+    destroy(): void {
+        const texture = this.lutTexture;
+        if (texture) {
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(texture);
+        }
+        this.#sharedUniformBuffer = null;
+        this.#sampler = null;
+    }
+
     protected createComputePipeline(label: string, shaderCode: string): GPUComputePipeline {
         const {gpuDevice} = this;
         return gpuDevice.createComputePipeline({
@@ -110,15 +119,6 @@ abstract class ASkyAtmosphereLUTGenerator extends RedGPUObject {
             layout: pipeline.getBindGroupLayout(0),
             entries
         });
-    }
-
-    destroy(): void {
-        const texture = this.lutTexture;
-        if (texture) {
-            this.redGPUContext.commandEncoderManager.addDeferredDestroy(texture);
-        }
-        this.#sharedUniformBuffer = null;
-        this.#sampler = null;
     }
 }
 

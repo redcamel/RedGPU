@@ -60,6 +60,7 @@ class DrawDebuggerGrid extends BaseObject {
     #prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
     #lastUpdateMSAAID: string
     #SHADER_INFO: any
+
     constructor(redGPUContext: RedGPUContext) {
         super();
         validateRedGPUContext(redGPUContext)
@@ -204,6 +205,26 @@ class DrawDebuggerGrid extends BaseObject {
         this.#prevSystemUniform_Vertex_UniformBindGroup = view.systemUniform_Vertex_UniformBindGroup
     }
 
+    /**
+     * [KO] DrawDebuggerGrid를 파기하고 드로우 커맨드 슬롯과 자원 참조를 해제합니다.
+     * [EN] Destroys the DrawDebuggerGrid and releases the draw command slot and resource references.
+     */
+    destroy() {
+        if (this.#drawCommandSlot) {
+            this.#drawBufferManager.setInstanceNum(this.#drawCommandSlot, 0);
+            this.#drawCommandSlot = null;
+        }
+        this.#SHADER_INFO = null
+        this.#vertexBuffer = null;
+        this.#indexBuffer = null;
+        this.#uniformBuffer = null;
+        this.#renderBundle = null;
+        this.#bundleEncoder = null;
+        this.#prevSystemUniform_Vertex_UniformBindGroup = null;
+        this.#drawBufferManager = null;
+        console.log("🧹 DrawDebuggerGrid destroy 완료");
+    }
+
     #makeGridLineData(size: number) {
         const interleaveData = [];
         const indexData = [];
@@ -238,26 +259,6 @@ class DrawDebuggerGrid extends BaseObject {
             vertexIndex += 2;
         }
         return {interleaveData, indexData};
-    }
-
-    /**
-     * [KO] DrawDebuggerGrid를 파기하고 드로우 커맨드 슬롯과 자원 참조를 해제합니다.
-     * [EN] Destroys the DrawDebuggerGrid and releases the draw command slot and resource references.
-     */
-    destroy() {
-        if (this.#drawCommandSlot) {
-            this.#drawBufferManager.setInstanceNum(this.#drawCommandSlot, 0);
-            this.#drawCommandSlot = null;
-        }
-        this.#SHADER_INFO = null
-        this.#vertexBuffer = null;
-        this.#indexBuffer = null;
-        this.#uniformBuffer = null;
-        this.#renderBundle = null;
-        this.#bundleEncoder = null;
-        this.#prevSystemUniform_Vertex_UniformBindGroup = null;
-        this.#drawBufferManager = null;
-        console.log("🧹 DrawDebuggerGrid destroy 완료");
     }
 
     #setBuffers(redGPUContext: RedGPUContext) {

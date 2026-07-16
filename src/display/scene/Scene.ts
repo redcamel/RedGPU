@@ -67,39 +67,6 @@ class Scene extends Object3DContainer {
         if (name) this.name = name
     }
 
-    destroy() {
-        if (this.#destroyed) return;
-        this.#destroyed = true;
-
-        if (this.#shadowManager) {
-            this.#shadowManager.destroy();
-        }
-
-        if (this.#physicsEngine) {
-            try {
-                // @ts-ignore
-                if (typeof this.#physicsEngine.destroy === 'function') {
-                    // @ts-ignore
-                    this.#physicsEngine.destroy();
-                    // @ts-ignore
-                } else if (typeof this.#physicsEngine.free === 'function') {
-                    // @ts-ignore
-                    this.#physicsEngine.free();
-                }
-            } catch (e) {
-                // 예외 처리
-            }
-            this.#physicsEngine = null;
-        }
-
-        if (this.#lightManager) {
-            this.#lightManager.destroy();
-            this.#lightManager = null;
-        }
-        this.#backgroundColor = null;
-
-        super.destroy();
-    }
     /**
      * [KO] 씬 내의 모든 조명을 통합 관리하는 LightManager 인스턴스를 가져옵니다.
      * [EN] Gets the LightManager instance that manages all lights within the scene.
@@ -151,6 +118,40 @@ class Scene extends Object3DContainer {
 
     set useBackgroundColor(value: boolean) {
         this.#useBackgroundColor = value;
+    }
+
+    destroy() {
+        if (this.#destroyed) return;
+        this.#destroyed = true;
+
+        if (this.#shadowManager) {
+            this.#shadowManager.destroy();
+        }
+
+        if (this.#physicsEngine) {
+            try {
+                // @ts-ignore
+                if (typeof this.#physicsEngine.destroy === 'function') {
+                    // @ts-ignore
+                    this.#physicsEngine.destroy();
+                    // @ts-ignore
+                } else if (typeof this.#physicsEngine.free === 'function') {
+                    // @ts-ignore
+                    this.#physicsEngine.free();
+                }
+            } catch (e) {
+                // 예외 처리
+            }
+            this.#physicsEngine = null;
+        }
+
+        if (this.#lightManager) {
+            this.#lightManager.destroy();
+            this.#lightManager = null;
+        }
+        this.#backgroundColor = null;
+
+        super.destroy();
     }
 }
 

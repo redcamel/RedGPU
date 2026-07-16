@@ -84,6 +84,15 @@ class SkyAtmosphereBackground extends RedGPUObject {
         currentRenderPassEncoder.executeBundles([this.#backgroundRenderBundle]);
     }
 
+    destroy(): void {
+        this.#backgroundBindGroup2 = null;
+        this.#backgroundPipeline = null;
+        this.#backgroundRenderBundle = null;
+        this.#prevBackgroundSystemUniformBindGroup = null;
+        // @ts-ignore
+        this.#backgroundBindGroupLayout2 = null;
+    }
+
     #updateBackgroundPipeline(useMSAA: boolean) {
         const {gpuDevice, resourceManager} = this;
         const vertexModule = resourceManager.createGPUShaderModule('SkyAtmosphere_Background_Vertex_ShaderModule', {code: backgroundVertexShaderCode_wgsl});
@@ -119,15 +128,6 @@ class SkyAtmosphereBackground extends RedGPUObject {
             },
             multisample: {count: useMSAA ? 4 : 1}
         });
-    }
-
-    destroy(): void {
-        this.#backgroundBindGroup2 = null;
-        this.#backgroundPipeline = null;
-        this.#backgroundRenderBundle = null;
-        this.#prevBackgroundSystemUniformBindGroup = null;
-        // @ts-ignore
-        this.#backgroundBindGroupLayout2 = null;
     }
 }
 

@@ -185,6 +185,17 @@ class DrawBufferManager extends RedGPUObject {
     }
 
     /**
+     * 매니저를 완전히 해제합니다.
+     */
+    destroy(): void {
+        this.#bufferPool.forEach(buffer => buffer.destroy())
+        this.#bufferPool = []
+        this.#dataPool = []
+        this.#usedBufferIndices.clear()
+        keepLog('🗑️ DrawBufferManager 해제됨')
+    }
+
+    /**
      * 드로우 버퍼 시스템을 초기화합니다.
      */
     #initializeSystem(): void {
@@ -196,6 +207,14 @@ class DrawBufferManager extends RedGPUObject {
         // 	estimatedCapacity: '무제한 (동적 확장)'
         // })
     }
+
+    // /**
+    //  * 다음 프레임을 위해 상태를 리셋합니다.
+    //  */
+    // resetForNextFrame(): void {
+    // 	this.#usedBufferIndices.clear()
+    // 	this.#currentBufferIndex = 0
+    // 	this.#currentCommandIndex = 0
 
     /**
      * 디바이스의 실제 버퍼 크기 제한을 계산합니다.
@@ -219,13 +238,6 @@ class DrawBufferManager extends RedGPUObject {
         console.log(`🚀 DrawBufferManager: Device Max Buffer Size: ${formatBytes(this.#deviceMaxBufferSize)}, Max Commands Per Buffer: ${this.#maxCommandsPerBuffer.toLocaleString()}`);
     }
 
-    // /**
-    //  * 다음 프레임을 위해 상태를 리셋합니다.
-    //  */
-    // resetForNextFrame(): void {
-    // 	this.#usedBufferIndices.clear()
-    // 	this.#currentBufferIndex = 0
-    // 	this.#currentCommandIndex = 0
     // }
     /**
      * 첫 번째 드로우 버퍼를 생성합니다.
@@ -233,6 +245,16 @@ class DrawBufferManager extends RedGPUObject {
     #createInitialBuffer(): void {
         this.#createNewBuffer()
     }
+
+    //
+    // /**
+    //  * 사용하지 않는 버퍼들을 정리합니다.
+    //  * (메모리 절약이 필요한 경우 호출)
+    //  */
+    // cleanup(): void {
+    // 	// 현재 프레임에서 사용되지 않은 버퍼들을 찾아서 제거
+    // 	//TODO 드로우 버퍼 정리 (구현 예정)
+    // }
 
     /**
      * 새로운 드로우 버퍼를 생성하고 풀에 추가합니다.
@@ -249,27 +271,6 @@ class DrawBufferManager extends RedGPUObject {
         this.#dataPool.push(data)
         console.log(`📦 새 드로우 버퍼 생성: #${this.#bufferPool.length - 1} (총 ${this.#bufferPool.length}개)`)
         return this.#bufferPool.length - 1
-    }
-
-    //
-    // /**
-    //  * 사용하지 않는 버퍼들을 정리합니다.
-    //  * (메모리 절약이 필요한 경우 호출)
-    //  */
-    // cleanup(): void {
-    // 	// 현재 프레임에서 사용되지 않은 버퍼들을 찾아서 제거
-    // 	//TODO 드로우 버퍼 정리 (구현 예정)
-    // }
-
-    /**
-     * 매니저를 완전히 해제합니다.
-     */
-    destroy(): void {
-        this.#bufferPool.forEach(buffer => buffer.destroy())
-        this.#bufferPool = []
-        this.#dataPool = []
-        this.#usedBufferIndices.clear()
-        keepLog('🗑️ DrawBufferManager 해제됨')
     }
 }
 

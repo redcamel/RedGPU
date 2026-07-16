@@ -68,7 +68,6 @@ class LightManager {
     #ambientLight: AmbientLight
 
 
-
     /**
      * [KO] 등록된 스포트 조명 배열을 반환합니다.
      * [EN] Returns the array of registered spot lights.
@@ -391,6 +390,26 @@ class LightManager {
     }
 
     /**
+     * [KO] LightManager 인스턴스를 파기하고 모든 조명 및 디버거 참조를 정리합니다.
+     * [EN] Destroys the LightManager instance and cleans up all lights and debuggers.
+     */
+    destroy() {
+
+
+        this.#directionalLights.forEach(cleanupLight);
+        this.#pointLights.forEach(cleanupLight);
+        this.#spotLights.forEach(cleanupLight);
+        cleanupLight(this.#ambientLight);
+
+        this.#directionalLights.length = 0;
+        this.#pointLights.length = 0;
+        this.#spotLights.length = 0;
+        this.#ambientLight = null;
+
+        console.log("🧹 LightManager destroy 완료");
+    }
+
+    /**
      * [KO] 방향성 조명의 투영-뷰 행렬을 반환합니다.
      * [EN] Returns the projection-view matrix of the directional light.
      *
@@ -536,26 +555,6 @@ class LightManager {
             view: lightView,
             projectionView: lightProjectionView
         };
-    }
-
-    /**
-     * [KO] LightManager 인스턴스를 파기하고 모든 조명 및 디버거 참조를 정리합니다.
-     * [EN] Destroys the LightManager instance and cleans up all lights and debuggers.
-     */
-    destroy() {
-
-
-        this.#directionalLights.forEach(cleanupLight);
-        this.#pointLights.forEach(cleanupLight);
-        this.#spotLights.forEach(cleanupLight);
-        cleanupLight(this.#ambientLight);
-
-        this.#directionalLights.length = 0;
-        this.#pointLights.length = 0;
-        this.#spotLights.length = 0;
-        this.#ambientLight = null;
-
-        console.log("🧹 LightManager destroy 완료");
     }
 }
 

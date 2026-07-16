@@ -240,6 +240,14 @@ class Object3DContainer extends BaseObject {
         return this;
     }
 
+    destroy() {
+        let i = this.#children.length;
+        while (i--) {
+            this.#children[i].destroy();
+        }
+        this.removeAllChildren();
+    }
+
     /**
      * 주어진 객체가 Object3DContainer의 인스턴스인지 확인합니다.
      * @param {MeshBase} target - 검사할 객체
@@ -249,14 +257,6 @@ class Object3DContainer extends BaseObject {
         if (!(target instanceof Object3DContainer)) {
             consoleAndThrowError('allow only Object3DContainer instance.');
         }
-    }
-
-    destroy() {
-        let i = this.#children.length;
-        while (i--) {
-            this.#children[i].destroy();
-        }
-        this.removeAllChildren();
     }
 
     /**

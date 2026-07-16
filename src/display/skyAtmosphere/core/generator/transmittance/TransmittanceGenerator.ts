@@ -40,18 +40,18 @@ class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
         this.executeComputePass(this.#pipeline, this.#bindGroup, [16, 16, 1]);
     }
 
-    #init(): void {
-        const SHADER_INFO = this.resourceManager.wgslParser.parse('SkyAtmosphere_Transmittance_Generator', transmittanceShaderCode_wgsl);
-
-        this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_Transmittance_LUTTexture_${createUUID()}`, this.createLUTTexture());
-        this.#pipeline = this.createComputePipeline('SkyAtmosphere_Transmittance_Pipeline', SHADER_INFO.defaultSource);
-    }
-
     destroy(): void {
         super.destroy();
         this.#lutTexture = null;
         this.#bindGroup = null;
         this.#pipeline = null;
+    }
+
+    #init(): void {
+        const SHADER_INFO = this.resourceManager.wgslParser.parse('SkyAtmosphere_Transmittance_Generator', transmittanceShaderCode_wgsl);
+
+        this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_Transmittance_LUTTexture_${createUUID()}`, this.createLUTTexture());
+        this.#pipeline = this.createComputePipeline('SkyAtmosphere_Transmittance_Pipeline', SHADER_INFO.defaultSource);
     }
 }
 

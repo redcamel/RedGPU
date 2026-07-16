@@ -109,41 +109,6 @@ class View3D extends AView {
         this.#uniformDataU32 = new Uint32Array(this.#uniformData)
     }
 
-    destroy() {
-        super.destroy();
-
-        if (this.#systemUniform_Vertex_UniformBuffer) {
-            this.#systemUniform_Vertex_UniformBuffer.destroy();
-            this.#systemUniform_Vertex_UniformBuffer = null;
-        }
-
-        this.#prevInfoList = []
-        this.#systemUniform_Vertex_UniformBindGroup = null
-        if (this.#viewRenderTextureManager) {
-            this.#viewRenderTextureManager.destroy();
-        }
-
-        if (this.#clusterLightManager) {
-            this.#clusterLightManager.destroy();
-            this.#clusterLightManager = null;
-        }
-
-
-        this.#postEffectManager?.destroy()
-        this.#postEffectManager = null
-
-        if (this.#toneMappingManager) {
-            this.#toneMappingManager.destroy();
-        }
-
-        if (this.#skybox) {
-            this.#skybox.destroy();
-            this.skybox = null;
-        }
-
-        keepLog(`🧹 ${this.name} destroy 완료`)
-    }
-
     /**
      * [KO] 클러스터 라이트 매니저를 반환합니다.
      * [EN] Returns the cluster light manager.
@@ -297,6 +262,41 @@ class View3D extends AView {
      */
     get prevNoneJitterProjectionViewMatrix(): mat4 {
         return this.redGPUContext.antialiasingManager.useTAA ? this.taa.prevNoneJitterProjectionViewMatrix : this.#noneJitterProjectionViewMatrix;
+    }
+
+    destroy() {
+        super.destroy();
+
+        if (this.#systemUniform_Vertex_UniformBuffer) {
+            this.#systemUniform_Vertex_UniformBuffer.destroy();
+            this.#systemUniform_Vertex_UniformBuffer = null;
+        }
+
+        this.#prevInfoList = []
+        this.#systemUniform_Vertex_UniformBindGroup = null
+        if (this.#viewRenderTextureManager) {
+            this.#viewRenderTextureManager.destroy();
+        }
+
+        if (this.#clusterLightManager) {
+            this.#clusterLightManager.destroy();
+            this.#clusterLightManager = null;
+        }
+
+
+        this.#postEffectManager?.destroy()
+        this.#postEffectManager = null
+
+        if (this.#toneMappingManager) {
+            this.#toneMappingManager.destroy();
+        }
+
+        if (this.#skybox) {
+            this.#skybox.destroy();
+            this.skybox = null;
+        }
+
+        keepLog(`🧹 ${this.name} destroy 완료`)
     }
 
     /**

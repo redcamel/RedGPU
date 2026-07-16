@@ -49,6 +49,21 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
         await this.#processPass(this.#pipeline, this.#bindGroup, this.#prefilteredTexture);
     }
 
+    destroy(): void {
+        super.destroy();
+        if (this.#sourceCubeTexture) {
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#sourceCubeTexture);
+        }
+        if (this.#prefilteredTexture) {
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#prefilteredTexture);
+        }
+        this.#sourceCubeTexture = null;
+        this.#sourceCubeTextureView = null;
+        this.#prefilteredTexture = null;
+        this.#pipeline = null;
+        this.#bindGroup = null;
+    }
+
     #createBindGroup(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): GPUBindGroup {
         return this.createBindGroup(`SkyLight_Reflection_BindGroup_${createUUID()}`, this.#pipeline, [
             {binding: 0, resource: this.#sourceCubeTextureView},
@@ -93,21 +108,6 @@ class SkyLightReflectionGenerator extends ASkyAtmosphereLUTGenerator {
 
         this.#prefilteredTexture = new DirectCubeTexture(this.redGPUContext, `SkyLight_Reflection_LUTTexture_${createUUID()}`);
         this.#pipeline = this.createComputePipeline('Base', SPECULAR_SHADER_INFO.defaultSource);
-    }
-
-    destroy(): void {
-        super.destroy();
-        if (this.#sourceCubeTexture) {
-            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#sourceCubeTexture);
-        }
-        if (this.#prefilteredTexture) {
-            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#prefilteredTexture);
-        }
-        this.#sourceCubeTexture = null;
-        this.#sourceCubeTextureView = null;
-        this.#prefilteredTexture = null;
-        this.#pipeline = null;
-        this.#bindGroup = null;
     }
 
     #computeRender(

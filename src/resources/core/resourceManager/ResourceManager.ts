@@ -276,18 +276,6 @@ class ResourceManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 캐시에서 샘플러를 조회하거나 존재하지 않으면 새로 생성하여 반환합니다.
-     * [EN] Retrieves a sampler from cache, or creates and returns a new one if it does not exist.
-     */
-    createSampler(descriptorKey: string, samplerOptions: GPUSamplerDescriptor): GPUSampler {
-        if (!this.#samplerCache.has(descriptorKey)) {
-            const sampler = this.gpuDevice.createSampler(samplerOptions);
-            this.#samplerCache.set(descriptorKey, sampler);
-        }
-        return this.#samplerCache.get(descriptorKey)!;
-    }
-
-    /**
      * [KO] 밉맵 생성기를 반환합니다.
      * [EN] Returns the mipmap generator.
      *
@@ -465,6 +453,18 @@ class ResourceManager extends RedGPUObject {
      */
     get resources(): ImmutableKeyMap {
         return this.#resources;
+    }
+
+    /**
+     * [KO] 캐시에서 샘플러를 조회하거나 존재하지 않으면 새로 생성하여 반환합니다.
+     * [EN] Retrieves a sampler from cache, or creates and returns a new one if it does not exist.
+     */
+    createSampler(descriptorKey: string, samplerOptions: GPUSamplerDescriptor): GPUSampler {
+        if (!this.#samplerCache.has(descriptorKey)) {
+            const sampler = this.gpuDevice.createSampler(samplerOptions);
+            this.#samplerCache.set(descriptorKey, sampler);
+        }
+        return this.#samplerCache.get(descriptorKey)!;
     }
 
     /**
@@ -844,29 +844,6 @@ class ResourceManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 텍스처 뷰 캐시를 정리합니다.
-     * [EN] Clears the texture view cache.
-     */
-    #clearTextureCache(texture: GPUTexture, desc: GPUTextureDescriptor) {
-        const cache = desc.dimension === '3d' ?
-            this.#cubeTextureViewCache :
-            this.#bitmapTextureViewCache;
-        cache.get(texture)?.clear();
-        if (cache.delete(texture)) {
-            // const type = desc.dimension === '3d' ? '🧊 큐브' : '🔷 비트맵';
-            // keepLog(`${type} 텍스처 뷰 캐시 정리:`, texture.label);
-        }
-    }
-
-    /**
-     * [KO] 디스크립터를 기반으로 캐시 키를 생성합니다.
-     * [EN] Creates a cache key based on the descriptor.
-     */
-    #createDescriptorKey(viewDescriptor?: GPUTextureViewDescriptor): string {
-        return viewDescriptor ? JSON.stringify(viewDescriptor) : 'default';
-    }
-
-    /**
      * [KO] 시스템 프리셋을 초기화합니다.
      * [EN] Initializes system presets.
      */
@@ -1042,6 +1019,29 @@ class ResourceManager extends RedGPUObject {
                 }
             )
         }
+    }
+
+    /**
+     * [KO] 텍스처 뷰 캐시를 정리합니다.
+     * [EN] Clears the texture view cache.
+     */
+    #clearTextureCache(texture: GPUTexture, desc: GPUTextureDescriptor) {
+        const cache = desc.dimension === '3d' ?
+            this.#cubeTextureViewCache :
+            this.#bitmapTextureViewCache;
+        cache.get(texture)?.clear();
+        if (cache.delete(texture)) {
+            // const type = desc.dimension === '3d' ? '🧊 큐브' : '🔷 비트맵';
+            // keepLog(`${type} 텍스처 뷰 캐시 정리:`, texture.label);
+        }
+    }
+
+    /**
+     * [KO] 디스크립터를 기반으로 캐시 키를 생성합니다.
+     * [EN] Creates a cache key based on the descriptor.
+     */
+    #createDescriptorKey(viewDescriptor?: GPUTextureViewDescriptor): string {
+        return viewDescriptor ? JSON.stringify(viewDescriptor) : 'default';
     }
 
     #getTargetMap(key: ResourceType) {

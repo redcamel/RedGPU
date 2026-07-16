@@ -29,6 +29,7 @@ class PassClustersLight extends RedGPUObject {
     #clusterLightBindGroupLayout: GPUBindGroupLayout
     #clusterLightsBuffer: GPUBuffer
     #passClusterLightBound: PassClusterLightBound
+    #source
 
     /**
      * [KO] PassClustersLight 인스턴스를 생성합니다.
@@ -62,7 +63,6 @@ class PassClustersLight extends RedGPUObject {
         return this.#clusterLightsBuffer;
     }
 
-
     /**
      * [KO] 클러스터 조명을 계산하는 컴퓨트 패스를 실행합니다.
      * [EN] Executes the compute pass to calculate cluster lights.
@@ -81,8 +81,6 @@ class PassClustersLight extends RedGPUObject {
             });
         }
     }
-
-    #source
 
     /**
      * [KO] PassClustersLight 인스턴스를 파기하고 할당된 GPUBuffer 및 파이프라인을 해제합니다.

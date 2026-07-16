@@ -9,8 +9,6 @@ const NAME_SHADER_ONLY_FRAGMENT_PBR = 'VERTEX_MODULE_MESH_ONLY_FRAGMENT_PBR';
 const NAME_SHADER_ONLY_VERTEX_PBR = 'VERTEX_MODULE_MESH_ONLY_VERTEX_PBR';
 
 
-
-
 const determineShaderConfig = (mesh: Mesh) => {
     const {geometry, material} = mesh;
 

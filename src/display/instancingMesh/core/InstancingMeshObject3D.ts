@@ -331,6 +331,11 @@ class InstancingMeshObject3D {
         this.#updateMatrix()
     }
 
+    destroy() {
+        this.#instancingMesh = null;
+        this.#redGPUContext = null;
+    }
+
     #updateMatrix() {
         // mat4.identity(this.localMatrix);
         // mat4.translate(this.localMatrix, this.localMatrix, [this.#x, this.#y, this.#z]);
@@ -456,11 +461,6 @@ class InstancingMeshObject3D {
             dataViewF32.set([this.opacity], (dateByLocation3.uniformOffset + dateByLocation3.stride * this.#location) / 4)
             this.#instancingMesh.dirtyInstanceMeshObject3D = true
         }
-    }
-
-    destroy() {
-        this.#instancingMesh = null;
-        this.#redGPUContext = null;
     }
 }
 

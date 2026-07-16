@@ -124,6 +124,7 @@ class SkyAtmosphere extends RedGPUObject {
     #lastUpdateFrame: number = -1;
     #prevCameraMatrix: mat4 = mat4.create();
     #UNIFORM_STRUCT: any
+
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
         const SHADER_INFO = redGPUContext.resourceManager.wgslParser.parse('SkyAtmosphere_Core', transmittanceShaderCode_wgsl);
@@ -410,6 +411,45 @@ class SkyAtmosphere extends RedGPUObject {
         this.#updateLUTs(view);
     }
 
+    destroy() {
+        if (this.#sharedUniformBuffer) {
+            this.#sharedUniformBuffer.destroy();
+        }
+        if (this.#transmittanceGenerator) {
+            this.#transmittanceGenerator.destroy();
+        }
+        if (this.#multiScatteringGenerator) {
+            this.#multiScatteringGenerator.destroy();
+        }
+        if (this.#skyViewGenerator) {
+            this.#skyViewGenerator.destroy();
+        }
+        if (this.#aerialPerspectiveGenerator) {
+            this.#aerialPerspectiveGenerator.destroy();
+        }
+        if (this.#skyLight) {
+            this.#skyLight.destroy();
+        }
+        if (this.#backgroundRenderer) {
+            this.#backgroundRenderer.destroy();
+        }
+        if (this.#postEffect) {
+            this.#postEffect.destroy();
+        }
+
+        this.#sharedUniformBuffer = null;
+        this.#sampler = null;
+        this.#transmittanceGenerator = null;
+        this.#multiScatteringGenerator = null;
+        this.#skyViewGenerator = null;
+        this.#aerialPerspectiveGenerator = null;
+        this.#skyLight = null;
+        this.#backgroundRenderer = null;
+        this.#postEffect = null;
+        this.#activeSunSource = null;
+        this.#prevSunSource = null;
+    }
+
     #markDirty(lut: boolean, skyView: boolean, ibl: boolean): void {
         this.#dirtyUniformBuffer = true;
         if (lut) this.#dirtyLUT = true;
@@ -530,45 +570,6 @@ class SkyAtmosphere extends RedGPUObject {
             }
         }
         this.redGPUContext.gpuDevice.queue.writeBuffer(this.#sharedUniformBuffer.gpuBuffer, 0, this.#sharedUniformBuffer.data);
-    }
-
-    destroy() {
-        if (this.#sharedUniformBuffer) {
-            this.#sharedUniformBuffer.destroy();
-        }
-        if (this.#transmittanceGenerator) {
-            this.#transmittanceGenerator.destroy();
-        }
-        if (this.#multiScatteringGenerator) {
-            this.#multiScatteringGenerator.destroy();
-        }
-        if (this.#skyViewGenerator) {
-            this.#skyViewGenerator.destroy();
-        }
-        if (this.#aerialPerspectiveGenerator) {
-            this.#aerialPerspectiveGenerator.destroy();
-        }
-        if (this.#skyLight) {
-            this.#skyLight.destroy();
-        }
-        if (this.#backgroundRenderer) {
-            this.#backgroundRenderer.destroy();
-        }
-        if (this.#postEffect) {
-            this.#postEffect.destroy();
-        }
-
-        this.#sharedUniformBuffer = null;
-        this.#sampler = null;
-        this.#transmittanceGenerator = null;
-        this.#multiScatteringGenerator = null;
-        this.#skyViewGenerator = null;
-        this.#aerialPerspectiveGenerator = null;
-        this.#skyLight = null;
-        this.#backgroundRenderer = null;
-        this.#postEffect = null;
-        this.#activeSunSource = null;
-        this.#prevSunSource = null;
     }
 }
 

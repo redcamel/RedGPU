@@ -25,6 +25,7 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
      */
     #videoMemorySize: number = 0
     #destroyed: boolean = false
+
     /**
      * [KO] AMultiPassPostEffect 인스턴스를 생성합니다.
      * [EN] Creates an AMultiPassPostEffect instance.
@@ -39,14 +40,6 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
     protected constructor(redGPUContext: RedGPUContext, passList: ASinglePassPostEffect[]) {
         super(redGPUContext);
         this.#passList.push(...passList);
-    }
-
-    destroy() {
-        if (this.#destroyed) return;
-        this.#destroyed = true
-        this.#passList.forEach(v => v.destroy());
-        this.#passList = null
-        super.destroy();
     }
 
     /**
@@ -72,6 +65,14 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
      */
     get passList(): ASinglePassPostEffect[] {
         return this.#passList;
+    }
+
+    destroy() {
+        if (this.#destroyed) return;
+        this.#destroyed = true
+        this.#passList.forEach(v => v.destroy());
+        this.#passList = null
+        super.destroy();
     }
 
     /**

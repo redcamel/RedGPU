@@ -43,17 +43,17 @@ class SkyViewGenerator extends ASkyAtmosphereLUTGenerator {
         this.executeComputePass(this.#pipeline, this.#bindGroup, [16, 16, 1]);
     }
 
-    #init(): void {
-        const SHADER_INFO = this.resourceManager.wgslParser.parse('SkyAtmosphere_SkyView_Generator', skyViewShaderCode_wgsl);
-        this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_SkyView_LUTTexture_${createUUID()}`, this.createLUTTexture(false));
-        this.#pipeline = this.createComputePipeline('SkyAtmosphere_SkyView_Pipeline', SHADER_INFO.defaultSource);
-    }
-
     destroy(): void {
         super.destroy();
         this.#lutTexture = null;
         this.#bindGroup = null;
         this.#pipeline = null;
+    }
+
+    #init(): void {
+        const SHADER_INFO = this.resourceManager.wgslParser.parse('SkyAtmosphere_SkyView_Generator', skyViewShaderCode_wgsl);
+        this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_SkyView_LUTTexture_${createUUID()}`, this.createLUTTexture(false));
+        this.#pipeline = this.createComputePipeline('SkyAtmosphere_SkyView_Pipeline', SHADER_INFO.defaultSource);
     }
 }
 

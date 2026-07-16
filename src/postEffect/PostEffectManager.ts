@@ -104,44 +104,6 @@ class PostEffectManager {
         this.#initGBufferLayouts();
     }
 
-    destroy() {
-        if (this.#destroyed) return;
-        this.#destroyed = true
-
-        // 1. 사용자 추가 이펙트들 파괴
-        this.#postEffects.forEach(effect => {
-            effect.destroy()
-        })
-        this.#postEffects = null
-
-        // 2. 내부 고정 멤버 필터들의 명시적 파괴 연동
-        if (this.#ssao) {
-            this.#ssao.destroy();
-            this.#ssao = null;
-        }
-        if (this.#ssr) {
-            this.#ssr.destroy();
-            this.#ssr = null;
-        }
-        if (this.#taaSharpenEffect) {
-            this.#taaSharpenEffect.destroy();
-            this.#taaSharpenEffect = null;
-        }
-        if (this.#autoExposure) {
-            this.#autoExposure.destroy();
-            this.#autoExposure = null;
-        }
-
-        // 3. 텍스처 풀 및 시스템 버퍼 파괴
-        this.#texturePool.clear();
-        this.#texturePool = null
-
-        this.#postEffectSystemUniformBuffer.destroy()
-        this.#postEffectSystemUniformBuffer = null
-        this.#postEffectSystemUniformBufferStructInfo = null
-        keepLog(`🧹 ${this.view.name} PostEffectManager destroy 완료`)
-    }
-
     /**
      * [KO] 현재 MSAA 상태에 맞는 표준 G-Buffer 바인드 그룹 레이아웃을 반환합니다.
      * [EN] Returns the standard G-Buffer bind group layout for the current MSAA state.
@@ -320,6 +282,44 @@ class PostEffectManager {
     get videoMemorySize(): number {
         this.#calcVideoMemory()
         return this.#videoMemorySize;
+    }
+
+    destroy() {
+        if (this.#destroyed) return;
+        this.#destroyed = true
+
+        // 1. 사용자 추가 이펙트들 파괴
+        this.#postEffects.forEach(effect => {
+            effect.destroy()
+        })
+        this.#postEffects = null
+
+        // 2. 내부 고정 멤버 필터들의 명시적 파괴 연동
+        if (this.#ssao) {
+            this.#ssao.destroy();
+            this.#ssao = null;
+        }
+        if (this.#ssr) {
+            this.#ssr.destroy();
+            this.#ssr = null;
+        }
+        if (this.#taaSharpenEffect) {
+            this.#taaSharpenEffect.destroy();
+            this.#taaSharpenEffect = null;
+        }
+        if (this.#autoExposure) {
+            this.#autoExposure.destroy();
+            this.#autoExposure = null;
+        }
+
+        // 3. 텍스처 풀 및 시스템 버퍼 파괴
+        this.#texturePool.clear();
+        this.#texturePool = null
+
+        this.#postEffectSystemUniformBuffer.destroy()
+        this.#postEffectSystemUniformBuffer = null
+        this.#postEffectSystemUniformBufferStructInfo = null
+        keepLog(`🧹 ${this.view.name} PostEffectManager destroy 완료`)
     }
 
     /**

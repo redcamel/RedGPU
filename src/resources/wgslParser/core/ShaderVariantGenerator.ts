@@ -188,6 +188,20 @@ class ShaderVariantGenerator {
     }
 
     /**
+     * [KO] 캐시된 변형 코드 및 내부 텍스처/샘플러 맵들의 참조를 명시적으로 해제합니다.
+     * [EN] Explicitly releases references to cached variant codes and internal texture/sampler maps.
+     */
+    destroy() {
+        this.#variantCache.clear();
+        this.#baseTextures = [];
+        this.#baseSamplers = [];
+        this.#texturesByUniformName.clear();
+        this.#samplersByUniformName.clear();
+        this.#defines = '';
+        this.#conditionalBlocks = [];
+    }
+
+    /**
      * [KO] 활성화된 키들을 기반으로 조건부 블록을 처리하여 WGSL 셰이더 코드를 생성합니다.
      * [EN] Generates WGSL shader code by processing conditional blocks based on activated keys.
      */
@@ -203,20 +217,6 @@ class ShaderVariantGenerator {
             }
         }
         return variantCode;
-    }
-
-    /**
-     * [KO] 캐시된 변형 코드 및 내부 텍스처/샘플러 맵들의 참조를 명시적으로 해제합니다.
-     * [EN] Explicitly releases references to cached variant codes and internal texture/sampler maps.
-     */
-    destroy() {
-        this.#variantCache.clear();
-        this.#baseTextures = [];
-        this.#baseSamplers = [];
-        this.#texturesByUniformName.clear();
-        this.#samplersByUniformName.clear();
-        this.#defines = '';
-        this.#conditionalBlocks = [];
     }
 }
 

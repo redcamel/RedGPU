@@ -74,6 +74,7 @@ abstract class AView extends ViewTransform {
      */
     #fxaa: FXAA
     #destroyed: boolean = false
+
     /**
      * [KO] AView 생성자
      * [EN] AView constructor

@@ -26,7 +26,7 @@ class PassClusterLightBound extends RedGPUObject {
     #clusterBoundBindGroupLayout: GPUBindGroupLayout
     #clusterBoundBindGroup: GPUBindGroup
     #clusterBoundPipeline: GPUComputePipeline
-
+    #source
 
     /**
      * [KO] PassClusterLightBound 인스턴스를 생성합니다.
@@ -72,8 +72,6 @@ class PassClusterLightBound extends RedGPUObject {
             });
         }
     }
-
-    #source
 
     /**
      * [KO] PassClusterLightBound 인스턴스를 파기하고 할당된 GPUBuffer 및 파이프라인을 해제합니다.

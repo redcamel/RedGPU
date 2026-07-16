@@ -42,17 +42,17 @@ class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
         this.executeComputePass(this.#pipeline, this.#bindGroup, [8, 8, 1]);
     }
 
-    #init(): void {
-        const SHADER_INFO = this.resourceManager.wgslParser.parse('SkyAtmosphere_MultiScattering_Generator', multiScatteringShaderCode_wgsl);
-        this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_MultiScat_LUTTexture_${createUUID()}`, this.createLUTTexture());
-        this.#pipeline = this.createComputePipeline('SkyAtmosphere_MultiScattering_Pipeline', SHADER_INFO.defaultSource);
-    }
-
     destroy(): void {
         super.destroy();
         this.#lutTexture = null;
         this.#bindGroup = null;
         this.#pipeline = null;
+    }
+
+    #init(): void {
+        const SHADER_INFO = this.resourceManager.wgslParser.parse('SkyAtmosphere_MultiScattering_Generator', multiScatteringShaderCode_wgsl);
+        this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_MultiScat_LUTTexture_${createUUID()}`, this.createLUTTexture());
+        this.#pipeline = this.createComputePipeline('SkyAtmosphere_MultiScattering_Pipeline', SHADER_INFO.defaultSource);
     }
 }
 

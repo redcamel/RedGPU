@@ -258,14 +258,6 @@ class SkyBox extends RedGPUObject {
         renderResults.numPoints += indexCount
     }
 
-    #updateMSAAStatus() {
-        const {msaaID} = this.antialiasingManager;
-        if (this.#lastUpdateMSAAID !== msaaID) {
-            this.#dirtyPipeline = true;
-            this.#lastUpdateMSAAID = msaaID;
-        }
-    }
-
     /**
      * [KO] 스카이박스 인스턴스를 파기하고 할당된 자원을 즉시 해제합니다.
      * [EN] Destroys the SkyBox instance and immediately releases the allocated resources.
@@ -295,6 +287,14 @@ class SkyBox extends RedGPUObject {
         this.#transitionTexture = null;
         this.#prevSystemUniform_Vertex_UniformBindGroup = null;
         console.log(`🧹 SkyBox destroy 완료`);
+    }
+
+    #updateMSAAStatus() {
+        const {msaaID} = this.antialiasingManager;
+        if (this.#lastUpdateMSAAID !== msaaID) {
+            this.#dirtyPipeline = true;
+            this.#lastUpdateMSAAID = msaaID;
+        }
     }
 
     #initGPURenderInfos() {

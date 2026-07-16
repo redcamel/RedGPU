@@ -67,6 +67,7 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     #bindGroupCache1: GPUBindGroup;
     #bindGroupCache3 = new Map<number, GPUBindGroup>();
     #destroyed: boolean = false
+
     /**
      * [KO] ASinglePassPostEffect 인스턴스를 생성합니다.
      * [EN] Creates an ASinglePassPostEffect instance.

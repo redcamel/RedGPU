@@ -58,6 +58,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Current time (frame based, ms)
      */
     currentTime: number
+    targetRenderer: Renderer
     /**ㄹ
      * [KO] GPU 캔버스 구성 정보 (WebGPU 설정용)
      * [EN] GPU canvas configuration info (for WebGPU setup)
@@ -123,13 +124,11 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Keyboard input buffer
      */
     #keyboardKeyBuffer: { [key: string]: boolean } = {}
-
     /**
      * [KO] 글로벌 SSAO 버텍스 버퍼 매니저
      * [EN] Global SSAO vertex buffer manager
      */
     #globalVertexSSBO: GlobalStorageBufferManager
-
     /**
      * [KO] 글로벌 SSAO 프래그먼트 버퍼 매니저
      * [EN] Global SSAO fragment buffer manager
@@ -146,20 +145,16 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Draw buffer manager
      */
     #drawBufferManager: DrawBufferManager
-
     #boundingClientRect: DOMRect
-
     #onKeyDown: ((e: KeyboardEvent) => void) | null = null
     #onKeyUp: ((e: KeyboardEvent) => void) | null = null
     #onBlur: (() => void) | null = null
     #canvasListeners: { eventName: string, listener: (e: any) => void }[] = []
-
     /**
      * [KO] 캔버스 환경 변화 감지 옵저버
      * [EN] Canvas environment change detector observer
      */
     #observer: RedGPUContextObserver
-
 
     /**
      * [KO] RedGPUContext 생성자
@@ -265,7 +260,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
     get globalFragmentSSBO_PBR(): GlobalStorageBufferManager {
         return this.#globalFragmentSSBO_PBR;
     }
-
 
     get globalFragmentSSBO_BuiltIn(): GlobalStorageBufferManager {
         return this.#globalFragmentSSBO_BuiltIn;
@@ -474,7 +468,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
         })
     }
 
-    targetRenderer: Renderer
     /**
      * [KO] RedGPUContext 인스턴스를 파기하고 모든 렌더러와 리소스를 해제합니다.
      * [EN] Destroys the RedGPUContext instance and releases all renderers and resources.
@@ -568,6 +561,20 @@ class RedGPUContext extends RedGPUContextViewContainer {
     }
 
     /**
+     * [KO] 컨텍스트의 크기를 설정합니다.
+     * [EN] Sets the size of the context.
+     * @param w -
+     * [KO] 너비 (기본값: 현재 width)
+     * [EN] Width (default: current width)
+     * @param h -
+     * [KO] 높이 (기본값: 현재 height)
+     * [EN] Height (default: current height)
+     */
+    setSize(w: string | number = this.width, h: string | number = this.height) {
+        this.sizeManager.setSize(w, h)
+    }
+
+    /**
      * [KO] 등록된 모든 이벤트 리스너를 해제합니다. (내부용)
      * [EN] Removes all registered event listeners. (Internal use)
      */
@@ -624,19 +631,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
         window?.addEventListener('pagehide', pageHideHandler, {signal: this.#pageHideEventController.signal});
         window?.addEventListener('beforeunload', beforeUnloadHandler, {signal: this.#pageHideEventController.signal});
 
-    }
-    /**
-     * [KO] 컨텍스트의 크기를 설정합니다.
-     * [EN] Sets the size of the context.
-     * @param w -
-     * [KO] 너비 (기본값: 현재 width)
-     * [EN] Width (default: current width)
-     * @param h -
-     * [KO] 높이 (기본값: 현재 height)
-     * [EN] Height (default: current height)
-     */
-    setSize(w: string | number = this.width, h: string | number = this.height) {
-        this.sizeManager.setSize(w, h)
     }
 
     /**

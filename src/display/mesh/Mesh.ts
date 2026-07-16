@@ -1833,6 +1833,87 @@ class Mesh extends MeshBase {
         return this.gpuRenderInfo.vertexShaderModule
     }
 
+    /**
+     * [KO] Mesh 인스턴스를 파기하고 할당된 드로우 커맨드 슬롯, 전역 버퍼 슬롯 및 리소스를 즉시 해제합니다.
+     * [EN] Destroys the Mesh instance and immediately releases the allocated draw command slots, global buffer slots, and resources.
+     */
+    destroy() {
+        // 1. 자식 객체들 재귀 소멸
+        super.destroy();
+
+        // 2. 부모 컨테이너 연결 끊기
+        if (this.#parent) {
+            this.#parent.removeChild(this);
+            this.#parent = null;
+        }
+
+        // 3. 글로벌 Vertex SSBO 버퍼 슬롯 해제
+        if (this.#globalVertexSlotIndex !== -1) {
+            this.redGPUContext.globalVertexSSBO.freeSlot(this.#globalVertexSlotIndex);
+            this.#globalVertexSlotIndex = -1;
+        }
+
+        // 4. 드로우 버퍼 매니저 슬롯 인스턴스 개수 0 무효화 및 해제
+        if (this.#drawCommandSlot && this.#drawBufferManager) {
+            this.#drawBufferManager.setInstanceNum(this.#drawCommandSlot, 0);
+            this.#drawCommandSlot = null;
+        }
+        if (this.#drawCommandSlot_LODList && this.#drawBufferManager) {
+            for (const slot of this.#drawCommandSlot_LODList) {
+                if (slot) {
+                    this.#drawBufferManager.setInstanceNum(slot, 0);
+                }
+            }
+            this.#drawCommandSlot_LODList = [];
+        }
+        this.#drawBufferManager = null;
+
+        // 5. 디버거 리소스 소멸
+        // if (this.#drawDebugger) {
+        //     this.#drawDebugger.destroy();
+        //     this.#drawDebugger = null;
+        // }
+
+        // 6. LOD 및 렌더 번들 참조 해제
+        this.#lodGPURenderInfoList = [];
+        this.#renderBundle = null;
+        this.#renderBundle_LODList = [];
+        this.#prevSystemBindGroupList = [];
+        this.#prevFragmentBindGroup = null;
+
+        // 7. 지오메트리 및 재질 참조 해제 및 파괴
+        if (this._geometry) {
+            // @ts-ignore
+            if (typeof this._geometry.destroy === 'function') {
+                // @ts-ignore
+                this._geometry.destroy();
+            }
+            this._geometry = null;
+        }
+        if (this._material) {
+            // @ts-ignore
+            if (typeof this._material.destroy === 'function') {
+                // @ts-ignore
+                this._material.destroy();
+            }
+            this._material = null;
+        }
+
+        // 8. GLTF 애니메이션 및 스킨 데이터 클리어
+        if (this.animationInfo) {
+            this.animationInfo.morphInfo = null;
+            this.animationInfo.weightBuffer = null;
+            this.animationInfo.jointBuffer = null;
+            this.animationInfo.animationsList = null;
+            this.animationInfo.skinInfo = null;
+        }
+
+        // 9. 이벤트 참조 해제
+        this.#events = {};
+        this.#eventsNum = 0;
+
+        console.log(`🧹 Mesh destroy 완료: ${this.name || '무명'}`);
+    }
 
     #updateLODPipeline = () => {
 
@@ -2063,88 +2144,6 @@ class Mesh extends MeshBase {
             console.log('선택된 바리안트:', variantKey, '(활성 기능:', Array.from(activeFeatures), ')');
         }
         return variantKey;
-    }
-
-    /**
-     * [KO] Mesh 인스턴스를 파기하고 할당된 드로우 커맨드 슬롯, 전역 버퍼 슬롯 및 리소스를 즉시 해제합니다.
-     * [EN] Destroys the Mesh instance and immediately releases the allocated draw command slots, global buffer slots, and resources.
-     */
-    destroy() {
-        // 1. 자식 객체들 재귀 소멸
-        super.destroy();
-
-        // 2. 부모 컨테이너 연결 끊기
-        if (this.#parent) {
-            this.#parent.removeChild(this);
-            this.#parent = null;
-        }
-
-        // 3. 글로벌 Vertex SSBO 버퍼 슬롯 해제
-        if (this.#globalVertexSlotIndex !== -1) {
-            this.redGPUContext.globalVertexSSBO.freeSlot(this.#globalVertexSlotIndex);
-            this.#globalVertexSlotIndex = -1;
-        }
-
-        // 4. 드로우 버퍼 매니저 슬롯 인스턴스 개수 0 무효화 및 해제
-        if (this.#drawCommandSlot && this.#drawBufferManager) {
-            this.#drawBufferManager.setInstanceNum(this.#drawCommandSlot, 0);
-            this.#drawCommandSlot = null;
-        }
-        if (this.#drawCommandSlot_LODList && this.#drawBufferManager) {
-            for (const slot of this.#drawCommandSlot_LODList) {
-                if (slot) {
-                    this.#drawBufferManager.setInstanceNum(slot, 0);
-                }
-            }
-            this.#drawCommandSlot_LODList = [];
-        }
-        this.#drawBufferManager = null;
-
-        // 5. 디버거 리소스 소멸
-        // if (this.#drawDebugger) {
-        //     this.#drawDebugger.destroy();
-        //     this.#drawDebugger = null;
-        // }
-
-        // 6. LOD 및 렌더 번들 참조 해제
-        this.#lodGPURenderInfoList = [];
-        this.#renderBundle = null;
-        this.#renderBundle_LODList = [];
-        this.#prevSystemBindGroupList = [];
-        this.#prevFragmentBindGroup = null;
-
-        // 7. 지오메트리 및 재질 참조 해제 및 파괴
-        if (this._geometry) {
-            // @ts-ignore
-            if (typeof this._geometry.destroy === 'function') {
-                // @ts-ignore
-                this._geometry.destroy();
-            }
-            this._geometry = null;
-        }
-        if (this._material) {
-            // @ts-ignore
-            if (typeof this._material.destroy === 'function') {
-                // @ts-ignore
-                this._material.destroy();
-            }
-            this._material = null;
-        }
-
-        // 8. GLTF 애니메이션 및 스킨 데이터 클리어
-        if (this.animationInfo) {
-            this.animationInfo.morphInfo = null;
-            this.animationInfo.weightBuffer = null;
-            this.animationInfo.jointBuffer = null;
-            this.animationInfo.animationsList = null;
-            this.animationInfo.skinInfo = null;
-        }
-
-        // 9. 이벤트 참조 해제
-        this.#events = {};
-        this.#eventsNum = 0;
-
-        console.log(`🧹 Mesh destroy 완료: ${this.name || '무명'}`);
     }
 }
 

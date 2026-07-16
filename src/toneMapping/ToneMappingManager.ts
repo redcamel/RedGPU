@@ -114,6 +114,16 @@ class ToneMappingManager {
     }
 
     /**
+     * [KO] ToneMappingManager 인스턴스를 파기하고 톤매핑 자원과 컨텍스트 참조를 해제합니다.
+     * [EN] Destroys the ToneMappingManager instance and releases tone mapping resources and context references.
+     */
+    destroy() {
+        this.clear();
+        this.#redGPUContext = null;
+        console.log("🧹 ToneMappingManager destroy 완료");
+    }
+
+    /**
      * [KO] 설정된 모드에 따라 톤 매핑 이펙트 인스턴스를 생성하고 파라미터를 동기화합니다.
      * [EN] Creates a tone mapping effect instance and synchronizes parameters according to the set mode.
      */
@@ -142,16 +152,6 @@ class ToneMappingManager {
             this.#toneMapping.contrast = this.#contrast;
             this.#toneMapping.brightness = this.#brightness;
         }
-    }
-
-    /**
-     * [KO] ToneMappingManager 인스턴스를 파기하고 톤매핑 자원과 컨텍스트 참조를 해제합니다.
-     * [EN] Destroys the ToneMappingManager instance and releases tone mapping resources and context references.
-     */
-    destroy() {
-        this.clear();
-        this.#redGPUContext = null;
-        console.log("🧹 ToneMappingManager destroy 완료");
     }
 }
 

@@ -46,6 +46,7 @@ class FinalRender {
     #VERTEX_SHADER_INFO: any
     #FRAGMENT_SHADER_INFO: any
     #VERTEX_UNIFORM_STRUCT: any
+
     constructor() {
     }
 
@@ -87,6 +88,7 @@ class FinalRender {
 
         console.log('✅ FinalRender 인스턴스 자원 해제 완료');
     }
+
     /**
      * Renders the given list of render passes to the specified canvas.
      *
