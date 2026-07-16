@@ -329,8 +329,6 @@ class Sampler extends ResourceBase {
 }
 
 Object.freeze(Sampler)
-export const destroySamplerCache = () => {
-    // [호환성 유지] 이제 샘플러 캐시는 ResourceManager가 해제 관리하므로 본 전역 함수는 빈 함수로 동작합니다.
-};
+
 
 export default Sampler

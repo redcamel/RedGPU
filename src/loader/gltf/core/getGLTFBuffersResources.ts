@@ -91,6 +91,4 @@ const arrayBufferLoader = (gltfLoader: GLTFLoader, url: string, onSuccess, onErr
     pending.set(url, promise);
     promise.then(data => onSuccess?.(data)).catch(err => onError?.(err));
 };
-export const destroyGLTFBuffersCache = () => {
-    // [호환성 유지] 이제 GLTFCacheManager가 해제 관리하므로 본 전역 함수는 빈 함수로 동작합니다.
-};
+

@@ -187,6 +187,4 @@ const convertUint8ArrayToString = (array: Uint8Array): string => {
     }
     return str;
 };
-export const destroyFileGLBCache = () => {
-    // [호환성 유지] 이제 GLTFCacheManager가 해제 관리하므로 본 전역 함수는 빈 함수로 동작합니다.
-};
+

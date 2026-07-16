@@ -96,7 +96,5 @@ const parseFileGLTF = async (gltfLoader: GLTFLoader, callBack, onProgress?: (inf
         parseGLTF(gltfLoader, gltfLoader.gltfData, callBack, onProgress);
     });
 };
-export const destroyFileGLTFCache = () => {
-    // [호환성 유지] 이제 GLTFCacheManager가 해제 관리하므로 본 전역 함수는 빈 함수로 동작합니다.
-};
+
 export default parseFileGLTF;
