@@ -587,6 +587,30 @@ class ResourceManager extends RedGPUObject {
         this.#managedStorageBufferState.table.clear();
 
         // 4. 프리셋 및 제너레이터 등 참조 초기화
+        if (this.#mipmapGenerator) {
+            this.#mipmapGenerator.destroy();
+            this.#mipmapGenerator = null;
+        }
+        if (this.#downSampleCubeMapGenerator) {
+            this.#downSampleCubeMapGenerator.destroy();
+            this.#downSampleCubeMapGenerator = null;
+        }
+        if (this.#brdfGenerator) {
+            this.#brdfGenerator.destroy();
+            this.#brdfGenerator = null;
+        }
+        if (this.#irradianceGenerator) {
+            this.#irradianceGenerator.destroy();
+            this.#irradianceGenerator = null;
+        }
+        if (this.#prefilterGenerator) {
+            this.#prefilterGenerator.destroy();
+            this.#prefilterGenerator = null;
+        }
+        if (this.#equirectangularToCubeGenerator) {
+            this.#equirectangularToCubeGenerator.destroy();
+            this.#equirectangularToCubeGenerator = null;
+        }
         this.#packedTextureManager.destroy();
         this.#gltfCacheManager.destroy();
         this.#samplerCache.clear();

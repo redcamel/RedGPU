@@ -196,6 +196,21 @@ class PrefilterGenerator extends RedGPUObject {
             new Float32Array([-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1])
         ];
     }
+
+    destroy() {
+        this.#uniformBuffers.forEach(buffer => {
+            if (buffer) {
+                try {
+                    buffer.destroy();
+                } catch (e) {
+                }
+            }
+        });
+        this.#uniformBuffers.length = 0;
+        this.#sampler = null;
+        this.#pipeline = null;
+        this.#shaderModule = null;
+    }
 }
 
 Object.freeze(PrefilterGenerator);

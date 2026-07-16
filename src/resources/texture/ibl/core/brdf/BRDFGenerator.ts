@@ -105,6 +105,18 @@ class BRDFGenerator extends RedGPUObject {
             }
         );
     }
+
+    destroy() {
+        if (this.#brdfLUTTexture) {
+            try {
+                this.#brdfLUTTexture.destroy();
+            } catch (e) {
+            }
+            this.#brdfLUTTexture = null;
+        }
+        this.#brdfShaderModule = null;
+        this.#pipeline = null;
+    }
 }
 
 Object.freeze(BRDFGenerator);
