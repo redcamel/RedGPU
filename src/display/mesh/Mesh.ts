@@ -1905,7 +1905,10 @@ class Mesh extends MeshBase {
             this.animationInfo.weightBuffer = null;
             this.animationInfo.jointBuffer = null;
             this.animationInfo.animationsList = null;
-            this.animationInfo.skinInfo = null;
+            if (this.animationInfo.skinInfo) {
+                this.animationInfo.skinInfo.destroy();
+                this.animationInfo.skinInfo = null;
+            }
         }
         if (this.gltfLoaderInfo) {
             this.gltfLoaderInfo.destroy();
