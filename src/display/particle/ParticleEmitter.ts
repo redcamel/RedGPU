@@ -903,6 +903,30 @@ class ParticleEmitter extends Mesh {
             computePass.dispatchWorkgroups(Math.ceil(this.#particleNum / 256));
         });
     }
+
+    destroy() {
+        super.destroy();
+        if (this.#simParamBuffer) {
+            try {
+                this.#simParamBuffer.destroy();
+            } catch (e) {
+            }
+            this.#simParamBuffer = null;
+        }
+        if (this.#particleBuffers) {
+            this.#particleBuffers.forEach(buffer => {
+                if (buffer) {
+                    try {
+                        buffer.destroy();
+                    } catch (e) {
+                    }
+                }
+            });
+            this.#particleBuffers = [];
+        }
+        this.#computeBindGroup = null;
+        this.#computePipeline = null;
+    }
 }
 
 Object.defineProperty(ParticleEmitter.prototype, 'isInstanceofParticle', {
