@@ -243,6 +243,38 @@ class ATextField extends Mesh {
         super.render(renderViewStateData);
     }
 
+    /**
+     * [KO] ATextField 인스턴스를 파괴하고 사용 중인 DOM 엘리먼트와 Object URL 등의 리소스를 해제합니다.
+     * [EN] Destroys the ATextField instance and releases resources such as the DOM elements and Object URLs in use.
+     */
+    destroy() {
+        if (this.#currentRequestAnimationFrame) {
+            cancelAnimationFrame(this.#currentRequestAnimationFrame);
+        }
+        if (this.material && this.material.diffuseTexture) {
+            const prevSrc = this.material.diffuseTexture.src;
+            const isObjectURL = typeof prevSrc === 'string' && prevSrc.startsWith('blob:');
+            this.material.diffuseTexture.destroy();
+            this.material.diffuseTexture = null;
+            if (isObjectURL) {
+                URL.revokeObjectURL(prevSrc);
+            }
+        }
+        if (this.#htmlElement) {
+            if (this.#htmlElement.parentNode) {
+                this.#htmlElement.parentNode.removeChild(this.#htmlElement);
+            }
+            this.#htmlElement = null;
+        }
+        if (this.#svg) {
+            if (this.#svg.parentNode) {
+                this.#svg.parentNode.removeChild(this.#svg);
+            }
+            this.#svg = null;
+        }
+
+    }
+
     #processText(input: string): string {
         return input.toString().replace(/\<br\/>/gi, '<div/>');
     }

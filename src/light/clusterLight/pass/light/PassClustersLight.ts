@@ -1,7 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
-import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import ClusterCellBoundsSource from "../../core/ClusterBoundsGrid.wgsl";
 import PassLightClustersSource from "./PassClustersLight.wgsl";
 import PassClustersLightHelper from "../../core/PassClustersLightHelper";
@@ -27,8 +26,10 @@ class PassClustersLight extends RedGPUObject {
     #view: View3D
     #clusterLightBindGroup: GPUBindGroup
     #clusterLightPipeline: GPUComputePipeline
+    #clusterLightBindGroupLayout: GPUBindGroupLayout
     #clusterLightsBuffer: GPUBuffer
     #passClusterLightBound: PassClusterLightBound
+    #source
 
     /**
      * [KO] PassClustersLight 인스턴스를 생성합니다.
@@ -62,7 +63,6 @@ class PassClustersLight extends RedGPUObject {
         return this.#clusterLightsBuffer;
     }
 
-
     /**
      * [KO] 클러스터 조명을 계산하는 컴퓨트 패스를 실행합니다.
      * [EN] Executes the compute pass to calculate cluster lights.
@@ -82,14 +82,37 @@ class PassClustersLight extends RedGPUObject {
         }
     }
 
+    /**
+     * [KO] PassClustersLight 인스턴스를 파기하고 할당된 GPUBuffer 및 파이프라인을 해제합니다.
+     * [EN] Destroys the PassClustersLight instance and releases allocated GPUBuffer and pipelines.
+     */
+    destroy(): void {
+        if (this.#clusterLightsBuffer) {
+            try {
+                this.#clusterLightsBuffer.destroy();
+            } catch (e) {
+                // 예외 처리
+            }
+            this.#clusterLightsBuffer = null;
+        }
+        this.#clusterLightBindGroup = null;
+        this.#clusterLightPipeline = null;
+        this.#passClusterLightBound = null;
+        this.#clusterLightBindGroupLayout = null
+        this.#source = null
+        this.#view = null;
+        console.log("🧹 PassClustersLight destroy 완료");
+    }
+
     #initPipeLine() {
         const {gpuDevice, resourceManager} = this;
-        const source = parseWGSL('PASS_CLUSTERS_LIGHT', ClusterCellBoundsSource + PassLightClustersSource).defaultSource;
+        this.#source = resourceManager.wgslParser.parse('PASS_CLUSTERS_LIGHT', ClusterCellBoundsSource + PassLightClustersSource).defaultSource;
+        // keepLog(this.#source )
         this.#clusterLightsBuffer = resourceManager.createGPUBuffer(`PASS_CLUSTER_LIGHTS_BUFFER`, {
             size: PassClustersLightHelper.getClusterLightsBufferSize(),
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
-        const clusterLightBindGroupLayout = gpuDevice.createBindGroupLayout({
+        this.#clusterLightBindGroupLayout = gpuDevice.createBindGroupLayout({
             entries: [
                 {
                     binding: 0,
@@ -100,7 +123,7 @@ class PassClustersLight extends RedGPUObject {
         });
         this.#clusterLightBindGroup = gpuDevice.createBindGroup({
             label: 'CLUSTER_LIGHT_BIND_GROUP',
-            layout: clusterLightBindGroupLayout,
+            layout: this.#clusterLightBindGroupLayout,
             entries: [
                 {
                     binding: 0,
@@ -116,12 +139,12 @@ class PassClustersLight extends RedGPUObject {
                 label: 'CLUSTER_LIGHT_PIPELINE_LAYOUT',
                 bindGroupLayouts: [
                     resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),
-                    clusterLightBindGroupLayout
+                    this.#clusterLightBindGroupLayout
                 ]
             }),
             compute: {
                 module: resourceManager.createGPUShaderModule('CLUSTER_LIGHTS_SHADER', {
-                    code: source,
+                    code: this.#source,
                 }),
                 entryPoint: 'main'
             }

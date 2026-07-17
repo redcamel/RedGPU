@@ -4,6 +4,7 @@ import createUUID from "../../../utils/uuid/createUUID";
 import Sampler from "../../sampler/Sampler";
 import computeShaderCode from "./computeShader.wgsl";
 import RedGPUObject from "../../../base/RedGPUObject";
+import PackedTextureManager from "./PackedTextureManager";
 
 /** [KO] 컴포넌트 매핑 타입 정의 [EN] Component mapping type definition */
 export type ComponentMapping = {
@@ -12,12 +13,6 @@ export type ComponentMapping = {
     b?: 'r' | 'g' | 'b' | 'a';
     a?: 'r' | 'g' | 'b' | 'a';
 };
-
-const cacheMap: Map<string, { gpuTexture: GPUTexture, useNum: number, mappingKey: string, uuid: string }> = new Map();
-const instanceMappingKeys: WeakMap<PackedTexture, string> = new WeakMap();
-let globalPipeline: GPURenderPipeline;
-let globalBindGroupLayout: GPUBindGroupLayout;
-let mappingBuffer: GPUBuffer;
 
 /**
  * [KO] 여러 텍스처의 채널을 조합해 하나의 텍스처로 패킹하는 유틸리티 클래스입니다.
@@ -37,8 +32,6 @@ let mappingBuffer: GPUBuffer;
  * @category Texture
  */
 class PackedTexture extends RedGPUObject {
-
-
     /** [KO] 샘플러 객체 [EN] Sampler object */
     #sampler: GPUSampler;
     /** [KO] 패킹 결과 GPUTexture 객체 [EN] Packed result GPUTexture object */
@@ -58,7 +51,6 @@ class PackedTexture extends RedGPUObject {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext)
-        this.#initializeGlobals();
         this.#sampler = this.#createSampler();
     }
 
@@ -72,18 +64,6 @@ class PackedTexture extends RedGPUObject {
      */
     get gpuTexture(): GPUTexture {
         return this.#gpuTexture;
-    }
-
-    /**
-     * [KO] 패킹 텍스처 캐시 맵을 반환합니다.
-     * [EN] Returns the packed texture cache map.
-     *
-     * @returns
-     * [KO] 캐시 맵 객체
-     * [EN] Cache map object
-     */
-    static getCacheMap() {
-        return cacheMap;
     }
 
     /**
@@ -126,61 +106,46 @@ class PackedTexture extends RedGPUObject {
         if (!textures.r && !textures.g && !textures.b && !textures.a) {
             return;
         }
-        this.#handleCacheManagement(mappingKey);
-        const currEntry = cacheMap.get(mappingKey);
+
+        const manager = this.redGPUContext.resourceManager.packedTextureManager;
+        this.#handleCacheManagement(mappingKey, manager);
+        const currEntry = manager.cacheMap.get(mappingKey);
         if (currEntry) {
             return;
         }
-        await this.#createPackedTexture(textures, width, height, label, mapping, mappingKey, commandEncoder);
+        await this.#createPackedTexture(textures, width, height, label, mapping, mappingKey, manager, commandEncoder);
     }
 
     /** [KO] 인스턴스를 파괴하고 캐시를 관리합니다. [EN] Destroys the instance and manages the cache. */
     destroy() {
-        const currentMappingKey = instanceMappingKeys.get(this);
+        const manager = this.redGPUContext.resourceManager.packedTextureManager;
+        if (!manager) return;
+
+        const currentMappingKey = manager.instanceMappingKeys.get(this);
         if (currentMappingKey) {
-            const entry = cacheMap.get(currentMappingKey);
+            const entry = manager.cacheMap.get(currentMappingKey);
             if (entry) {
                 entry.useNum--;
                 if (entry.useNum === 0) {
                     entry.gpuTexture?.destroy();
-                    cacheMap.delete(currentMappingKey);
+                    manager.cacheMap.delete(currentMappingKey);
                 }
             }
-            instanceMappingKeys.delete(this);
-        }
-    }
-
-    /** [KO] 전역 리소스를 초기화합니다. [EN] Initializes global resources. */
-    #initializeGlobals() {
-        const {resourceManager} = this;
-        mappingBuffer = resourceManager.createGPUBuffer('PACK_TEXTURE_MAPPING_BUFFER', {
-            size: 16,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-        });
-        if (!globalBindGroupLayout) {
-            globalBindGroupLayout = resourceManager.createBindGroupLayout(
-                'PACK_TEXTURE_BIND_GROUP_LAYOUT',
-                {
-                    entries: [
-                        {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {}},
-                        {binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: {}},
-                        {binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: {}},
-                        {binding: 3, visibility: GPUShaderStage.FRAGMENT, texture: {}},
-                        {binding: 4, visibility: GPUShaderStage.FRAGMENT, sampler: {}},
-                        {binding: 5, visibility: GPUShaderStage.FRAGMENT, buffer: {type: 'uniform'}}
-                    ]
-                }
-            );
-        }
-        if (!globalPipeline) {
-            globalPipeline = this.#createPipeline();
+            manager.instanceMappingKeys.delete(this);
         }
     }
 
     /** [KO] 바인드 그룹을 업데이트합니다. [EN] Updates the bind group. */
-    #updateBindGroup(textures: { r?: GPUTexture; g?: GPUTexture; b?: GPUTexture; a?: GPUTexture }) {
+    #updateBindGroup(textures: {
+        r?: GPUTexture;
+        g?: GPUTexture;
+        b?: GPUTexture;
+        a?: GPUTexture
+    }, manager: PackedTextureManager) {
         const textureKey = `${textures.r?.label || 'empty'}_${textures.g?.label || 'empty'}_${textures.b?.label || 'empty'}_${textures.a?.label || 'empty'}`;
         const {resourceManager, gpuDevice} = this
+        const {globalBindGroupLayout, mappingBuffer} = manager.getOrCreateResources(computeShaderCode);
+
         if (!this.#tempBindGroupCache.has(textureKey)) {
             const bindGroupEntries = [
                 {
@@ -213,24 +178,24 @@ class PackedTexture extends RedGPUObject {
     }
 
     /** [KO] 캐시 정책을 처리합니다. [EN] Handles cache policy. */
-    #handleCacheManagement(mappingKey: string) {
-        const prevMappingKey = instanceMappingKeys.get(this);
+    #handleCacheManagement(mappingKey: string, manager: PackedTextureManager) {
+        const prevMappingKey = manager.instanceMappingKeys.get(this);
         if (prevMappingKey && prevMappingKey !== mappingKey) {
-            const prevEntry = cacheMap.get(prevMappingKey);
+            const prevEntry = manager.cacheMap.get(prevMappingKey);
             if (prevEntry) {
                 prevEntry.useNum--;
                 if (prevEntry.useNum === 0) {
                     prevEntry.gpuTexture?.destroy();
-                    cacheMap.delete(prevMappingKey);
+                    manager.cacheMap.delete(prevMappingKey);
                 }
             }
         }
-        const currEntry = cacheMap.get(mappingKey);
+        const currEntry = manager.cacheMap.get(mappingKey);
         if (currEntry) {
             this.#gpuTexture = currEntry.gpuTexture;
             currEntry.useNum++;
         }
-        instanceMappingKeys.set(this, mappingKey);
+        manager.instanceMappingKeys.set(this, mappingKey);
     }
 
     /** [KO] 패킹 텍스처를 실제로 생성합니다. [EN] Actually creates the packed texture. */
@@ -241,8 +206,10 @@ class PackedTexture extends RedGPUObject {
         label: string | undefined,
         mapping: any,
         mappingKey: string,
+        manager: PackedTextureManager,
         commandEncoder?: GPUCommandEncoder
     ) {
+        if (this.redGPUContext.destroyed) return
         const textureDescriptor: GPUTextureDescriptor = {
             size: [width, height, 1],
             format: 'rgba8unorm',
@@ -261,15 +228,16 @@ class PackedTexture extends RedGPUObject {
             ['r', 'g', 'b', 'a'].indexOf(mapping.b),
             ['r', 'g', 'b', 'a'].indexOf(mapping.a),
         ]);
+        const {mappingBuffer} = manager.getOrCreateResources(computeShaderCode);
         gpuDevice.queue.writeBuffer(mappingBuffer, 0, mappingData);
-        this.#updateBindGroup(textures);
-        this.#executeRenderPass(packedTexture, commandEncoder);
+        this.#updateBindGroup(textures, manager);
+        this.#executeRenderPass(packedTexture, manager, commandEncoder);
         if (textureDescriptor.mipLevelCount > 1) {
             this.#gpuTexture = resourceManager.mipmapGenerator.generateMipmap(packedTexture, textureDescriptor, true,);
         } else {
             this.#gpuTexture = packedTexture;
         }
-        cacheMap.set(mappingKey, {
+        manager.cacheMap.set(mappingKey, {
             gpuTexture: this.#gpuTexture,
             useNum: 1,
             mappingKey,
@@ -279,8 +247,9 @@ class PackedTexture extends RedGPUObject {
     }
 
     /** [KO] 렌더 패스를 실행하여 패킹을 수행합니다. [EN] Executes the render pass to perform packing. */
-    #executeRenderPass(packedTexture: GPUTexture, commandEncoder?: GPUCommandEncoder) {
+    #executeRenderPass(packedTexture: GPUTexture, manager: PackedTextureManager, commandEncoder?: GPUCommandEncoder) {
         const {resourceManager, gpuDevice} = this;
+        const {globalPipeline} = manager.getOrCreateResources(computeShaderCode);
         const internalEncoder = commandEncoder || gpuDevice.createCommandEncoder({
             label: 'PackedTexture_CommandEncoder'
         });
@@ -304,30 +273,6 @@ class PackedTexture extends RedGPUObject {
         passEncoder.draw(6, 1, 0, 0);
         passEncoder.end();
         if (!commandEncoder) gpuDevice.queue.submit([internalEncoder.finish()]);
-    }
-
-    /** [KO] 패킹용 파이프라인을 생성합니다. [EN] Creates a pipeline for packing. */
-    #createPipeline(): GPURenderPipeline {
-        const shaderCode = computeShaderCode;
-        const {resourceManager, gpuDevice} = this;
-        const pipelineLayout = gpuDevice.createPipelineLayout({
-            label: 'PACK_TEXTURE_PIPELINE_LAYOUT',
-            bindGroupLayouts: [globalBindGroupLayout]
-        });
-        return gpuDevice.createRenderPipeline({
-            label: 'PACK_TEXTURE_PIPELINE',
-            layout: pipelineLayout,
-            vertex: {
-                module: resourceManager.createGPUShaderModule('PACK_TEXTURE_SHADER_MODULE', {code: shaderCode}),
-                entryPoint: 'vertexMain',
-            },
-            fragment: {
-                module: resourceManager.createGPUShaderModule('PACK_TEXTURE_SHADER_MODULE', {code: shaderCode}),
-                entryPoint: 'fragmentMain',
-                targets: [{format: 'rgba8unorm'}],
-            },
-            primitive: {topology: 'triangle-list'},
-        });
     }
 
     /** [KO] 샘플러를 생성합니다. [EN] Creates a sampler. */

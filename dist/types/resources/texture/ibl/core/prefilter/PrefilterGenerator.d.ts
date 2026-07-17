@@ -48,5 +48,6 @@ declare class PrefilterGenerator extends RedGPUObject {
      * [EN] Generated or updated Prefilter DirectCubeTexture
      */
     generate(sourceCubeTexture: GPUTexture, size?: number, destinationTexture?: GPUTexture | DirectCubeTexture, phase?: CommandEncoderType): Promise<DirectCubeTexture>;
+    destroy(): void;
 }
 export default PrefilterGenerator;

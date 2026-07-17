@@ -2,13 +2,13 @@ import RedGPUContext from "../../context/RedGPUContext";
 import RenderViewStateData from "../../display/view/core/RenderViewStateData";
 import formatBytes from "../../utils/formatBytes";
 import RedGPUObject from "../../base/RedGPUObject";
+import {keepLog} from "../../utils";
 
 /**
  * WebGPU 드로우 커맨드를 효율적으로 관리하는 매니저 클래스
  * 동적 확장 가능한 버퍼 풀을 통해 무제한 드로우 커맨드를 지원합니다.
  */
 class DrawBufferManager extends RedGPUObject {
-    static #instance: DrawBufferManager
     // 드로우 커맨드 타입별 크기
     static readonly #INDEXED_COMMAND_SIZE = 5  // drawIndexedIndirect
 
@@ -23,16 +23,6 @@ class DrawBufferManager extends RedGPUObject {
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext)
         this.#initializeSystem()
-    }
-
-    /**
-     * DrawBufferManager 싱글톤 인스턴스를 가져옵니다.
-     */
-    static getInstance(redGPUContext: RedGPUContext): DrawBufferManager {
-        if (!DrawBufferManager.#instance) {
-            DrawBufferManager.#instance = new DrawBufferManager(redGPUContext)
-        }
-        return DrawBufferManager.#instance
     }
 
     /**
@@ -195,6 +185,17 @@ class DrawBufferManager extends RedGPUObject {
     }
 
     /**
+     * 매니저를 완전히 해제합니다.
+     */
+    destroy(): void {
+        this.#bufferPool.forEach(buffer => buffer.destroy())
+        this.#bufferPool = []
+        this.#dataPool = []
+        this.#usedBufferIndices.clear()
+        keepLog('🗑️ DrawBufferManager 해제됨')
+    }
+
+    /**
      * 드로우 버퍼 시스템을 초기화합니다.
      */
     #initializeSystem(): void {
@@ -207,15 +208,23 @@ class DrawBufferManager extends RedGPUObject {
         // })
     }
 
+    // /**
+    //  * 다음 프레임을 위해 상태를 리셋합니다.
+    //  */
+    // resetForNextFrame(): void {
+    // 	this.#usedBufferIndices.clear()
+    // 	this.#currentBufferIndex = 0
+    // 	this.#currentCommandIndex = 0
+
     /**
      * 디바이스의 실제 버퍼 크기 제한을 계산합니다.
      */
     #calculateDeviceLimits(): void {
         const limits = this.redGPUContext.detector.activeLimits;
 
-        // [KO] 디바이스의 실제 한계치를 반영하되, 너무 비대해지지 않도록 최대 128MB로 제한합니다.
-        // [EN] Reflect the actual limits of the device, but cap it at 128MB to prevent excessive size.
-        const SAFE_MAX_SIZE = 134217728; // 128MB
+        // [KO] 디바이스의 실제 한계치를 반영하되, 초기 낭비를 줄이기 위해 버퍼당 최대 크기를 256KB(약 11,790개 드로우 커맨드 수용)로 제한합니다. 부족할 시 자동으로 추가 버퍼가 할당됩니다.
+        // [EN] Reflect device limits, but cap at 256KB to reduce initial footprint. Additional buffers allocate automatically if exceeded.
+        const SAFE_MAX_SIZE = 262144; // 256KB (약 11,790개 커맨드)
 
         this.#deviceMaxBufferSize = Math.floor(
             Math.min(limits.maxBufferSize, SAFE_MAX_SIZE) * 0.9
@@ -229,13 +238,6 @@ class DrawBufferManager extends RedGPUObject {
         console.log(`🚀 DrawBufferManager: Device Max Buffer Size: ${formatBytes(this.#deviceMaxBufferSize)}, Max Commands Per Buffer: ${this.#maxCommandsPerBuffer.toLocaleString()}`);
     }
 
-    // /**
-    //  * 다음 프레임을 위해 상태를 리셋합니다.
-    //  */
-    // resetForNextFrame(): void {
-    // 	this.#usedBufferIndices.clear()
-    // 	this.#currentBufferIndex = 0
-    // 	this.#currentCommandIndex = 0
     // }
     /**
      * 첫 번째 드로우 버퍼를 생성합니다.
@@ -243,6 +245,16 @@ class DrawBufferManager extends RedGPUObject {
     #createInitialBuffer(): void {
         this.#createNewBuffer()
     }
+
+    //
+    // /**
+    //  * 사용하지 않는 버퍼들을 정리합니다.
+    //  * (메모리 절약이 필요한 경우 호출)
+    //  */
+    // cleanup(): void {
+    // 	// 현재 프레임에서 사용되지 않은 버퍼들을 찾아서 제거
+    // 	//TODO 드로우 버퍼 정리 (구현 예정)
+    // }
 
     /**
      * 새로운 드로우 버퍼를 생성하고 풀에 추가합니다.
@@ -260,28 +272,6 @@ class DrawBufferManager extends RedGPUObject {
         console.log(`📦 새 드로우 버퍼 생성: #${this.#bufferPool.length - 1} (총 ${this.#bufferPool.length}개)`)
         return this.#bufferPool.length - 1
     }
-
-    //
-    // /**
-    //  * 사용하지 않는 버퍼들을 정리합니다.
-    //  * (메모리 절약이 필요한 경우 호출)
-    //  */
-    // cleanup(): void {
-    // 	// 현재 프레임에서 사용되지 않은 버퍼들을 찾아서 제거
-    // 	//TODO 드로우 버퍼 정리 (구현 예정)
-    // }
-    //
-    // /**
-    //  * 매니저를 완전히 해제합니다.
-    //  */
-    // dispose(): void {
-    // 	this.#bufferPool.forEach(buffer => buffer.destroy())
-    // 	this.#bufferPool = []
-    // 	this.#dataPool = []
-    // 	this.#usedBufferIndices.clear()
-    // 	DrawBufferManager.#instance = null
-    // 	keepLog('🗑️ DrawBufferManager 해제됨')
-    // }
 }
 
 /**

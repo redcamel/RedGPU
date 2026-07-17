@@ -8,6 +8,7 @@ import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import updateViewportAndScissor from "../renderer/helperFunc/updateViewportAndScissor";
 import renderShadowLayer from "../renderer/renderLayers/renderShadowLayer";
+import {keepLog} from "../utils";
 
 /**
  * [KO] 씬의 전체적인 그림자 렌더링을 총괄하는 관리자 클래스입니다.
@@ -104,6 +105,19 @@ class ShadowManager {
      */
     update(redGPUContext: RedGPUContext) {
         this.#directionalShadowManager.update(redGPUContext)
+    }
+
+    /**
+     * [KO] 사용 중인 그림자 GPU 리소스를 해제합니다.
+     * [EN] Releases GPU resources in use for shadow rendering.
+     */
+    destroy() {
+        if (this.#directionalShadowManager) {
+            this.#directionalShadowManager.destroy();
+            this.#directionalShadowManager = null;
+        }
+        this.#shadowPassDescriptor = null;
+        keepLog("🧹 ShadowManager destroy 완료");
     }
 }
 

@@ -11,7 +11,6 @@ import ResourceManager from "../../../resources/core/resourceManager/ResourceMan
 import CubeTexture from "../../../resources/texture/CubeTexture";
 import DirectCubeTexture from "../../../resources/texture/DirectCubeTexture";
 import ANoiseTexture from "../../../resources/texture/noiseTexture/core/ANoiseTexture";
-import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import consoleAndThrowError from "../../../utils/consoleAndThrowError";
 import VertexGPURenderInfo from "../../mesh/core/VertexGPURenderInfo";
@@ -20,10 +19,6 @@ import SkyBoxMaterial from "./core/SkyBoxMaterial";
 import vertexModuleSource from './shader/vertex.wgsl';
 import RedGPUObject from "../../../base/RedGPUObject";
 
-/** 파싱된 WGSL 셰이더 정보 */
-const SHADER_INFO = parseWGSL('SKYBOX_VERTEX', vertexModuleSource)
-/** 버텍스 유니폼 구조체 정보 */
-const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
 /** 버텍스 셰이더 모듈 이름 */
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SKYBOX'
 /** 버텍스 바인드 그룹 디스크립터 이름 */
@@ -80,6 +75,7 @@ class SkyBox extends RedGPUObject {
     #prevSystemUniform_Vertex_UniformBindGroup: GPUBindGroup
     #luminance: number = 25000.0;
     #lastUpdateMSAAID: string
+    #SHADER_INFO: any
 
     /**
      * [KO] SkyBox 인스턴스를 생성합니다.
@@ -262,6 +258,37 @@ class SkyBox extends RedGPUObject {
         renderResults.numPoints += indexCount
     }
 
+    /**
+     * [KO] 스카이박스 인스턴스를 파기하고 할당된 자원을 즉시 해제합니다.
+     * [EN] Destroys the SkyBox instance and immediately releases the allocated resources.
+     */
+    destroy() {
+        this.#SHADER_INFO = null
+        if (this.gpuRenderInfo) {
+            if (this.gpuRenderInfo.vertexUniformBuffer) {
+                this.gpuRenderInfo.vertexUniformBuffer.destroy();
+            }
+            this.gpuRenderInfo = null;
+        }
+        if (this.#material) {
+            this.#material.destroy();
+            this.#material = null;
+        }
+        if (this.#geometry) {
+            // @ts-ignore
+            if (typeof this.#geometry.destroy === 'function') {
+                // @ts-ignore
+                this.#geometry.destroy();
+            }
+            this.#geometry = null;
+        }
+        this.#renderBundle = null;
+        this.#texture = null;
+        this.#transitionTexture = null;
+        this.#prevSystemUniform_Vertex_UniformBindGroup = null;
+        console.log(`🧹 SkyBox destroy 완료`);
+    }
+
     #updateMSAAStatus() {
         const {msaaID} = this.antialiasingManager;
         if (this.#lastUpdateMSAAID !== msaaID) {
@@ -272,9 +299,15 @@ class SkyBox extends RedGPUObject {
 
     #initGPURenderInfos() {
         const {resourceManager, redGPUContext} = this
+
+        /** 파싱된 WGSL 셰이더 정보 */
+        this.#SHADER_INFO = resourceManager.wgslParser.parse('SKYBOX_VERTEX', vertexModuleSource)
+        /** 버텍스 유니폼 구조체 정보 */
+        const UNIFORM_STRUCT = this.#SHADER_INFO.uniforms.vertexUniforms;
+        //
         const vertex_BindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout('SKYBOX_VERTEX_BIND_GROUP_LAYOUT') || resourceManager.createBindGroupLayout(
             'SKYBOX_VERTEX_BIND_GROUP_LAYOUT',
-            getVertexBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, 1)
+            getVertexBindGroupLayoutDescriptorFromShaderInfo(this.#SHADER_INFO, 1)
         )
         const vertexUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
         const vertexUniformBuffer: UniformBuffer = new UniformBuffer(redGPUContext, vertexUniformData, 'SKYBOX_VERTEX_UNIFORM_BUFFER', 'SKYBOX_VERTEX_UNIFORM_BUFFER')
@@ -291,7 +324,7 @@ class SkyBox extends RedGPUObject {
         }
         const vertexUniformBindGroup: GPUBindGroup = redGPUContext.gpuDevice.createBindGroup(vertexBindGroupDescriptor)
         this.gpuRenderInfo = new VertexGPURenderInfo(
-            null, SHADER_INFO.shaderSourceVariant, SHADER_INFO.conditionalBlocks, UNIFORM_STRUCT,
+            null, this.#SHADER_INFO.shaderSourceVariant, this.#SHADER_INFO.conditionalBlocks, UNIFORM_STRUCT,
             vertex_BindGroupLayout, vertexUniformBuffer, vertexUniformBindGroup, this.#updatePipeline(),
         )
     }
@@ -308,7 +341,7 @@ class SkyBox extends RedGPUObject {
         }
         const vertex_BindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout('SKYBOX_VERTEX_BIND_GROUP_LAYOUT') || resourceManager.createBindGroupLayout(
             'SKYBOX_VERTEX_BIND_GROUP_LAYOUT',
-            getVertexBindGroupLayoutDescriptorFromShaderInfo(SHADER_INFO, 1)
+            getVertexBindGroupLayoutDescriptorFromShaderInfo(this.#SHADER_INFO, 1)
         )
         const bindGroupLayouts: GPUBindGroupLayout[] = [
             resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System),

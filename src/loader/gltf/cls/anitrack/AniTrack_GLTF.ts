@@ -166,6 +166,45 @@ class AniTrack_GLTF {
             morphInterleavedBuffer
         });
     }
+
+    destroy() {
+        if (this.#animationDataListBuffer) {
+            try {
+                this.#animationDataListBuffer.destroy();
+            } catch (e) {
+            }
+            this.#animationDataListBuffer = null;
+        }
+        if (this.#uniformBuffer) {
+            try {
+                this.#uniformBuffer.destroy();
+            } catch (e) {
+            }
+            this.#uniformBuffer = null;
+        }
+        for (const res of this.#meshResourcesMap.values()) {
+            if (res.originBuffer) {
+                try {
+                    res.originBuffer.destroy();
+                } catch (e) {
+                }
+            }
+            if (res.morphInterleavedBuffer) {
+                try {
+                    res.morphInterleavedBuffer.destroy();
+                } catch (e) {
+                }
+            }
+        }
+        this.#meshResourcesMap.clear();
+        this.weightMeshes = [];
+        this.animationTargetMesh = null;
+        this.#computeShader = null;
+        this.#computePipeline = null;
+        this.timeAnimationInfo = null;
+        this.aniDataAnimationInfo = null;
+        this.lastCachedItem = null;
+    }
 }
 
 export default AniTrack_GLTF

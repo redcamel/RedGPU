@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../dist/index.js?t=1783496184998";
-import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1783496184998";
+import * as RedGPU from "../../../dist/index.js?t=1784264152422";
+import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=1784264152422";
 
 /**
  * [KO] Indirect Draw 테스트 예제
@@ -34,6 +34,7 @@ RedGPU.init(
         const glbUrls = [
             'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/BoxVertexColors/glTF-Binary/BoxVertexColors.glb',
             'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMan/glTF/CesiumMan.gltf',
+            'https://redcamel.github.io/RedGL2/asset/glTF/breakDance/scene.gltf',
             'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/CesiumMilkTruck/glTF-Binary/CesiumMilkTruck.glb',
         ];
 
@@ -175,6 +176,8 @@ const loadGLTFGrid = (view, urls, gridSize = 3, spacing = 3) => {
             const col = index % gridSize;
             const x = col * spacing - totalWidth / 2;
             const z = row * spacing - totalDepth / 2;
+
+            if (url.includes('breakDance')) mesh.setScale(0.001)
 
             mesh.x = x;
             mesh.y = -0.5;

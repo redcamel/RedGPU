@@ -1,13 +1,11 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import multiScatteringShaderCode_wgsl from "./multiScatteringShaderCode.wgsl";
 import DirectTexture from "../../../../../resources/texture/DirectTexture";
-import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import createUUID from "../../../../../utils/uuid/createUUID";
 
-const SHADER_INFO = parseWGSL('SkyAtmosphere_MultiScattering_Generator', multiScatteringShaderCode_wgsl);
 
 /**
  * [KO] MultiScatteringGenerator는 다중 산란(Multi-Scattering) LUT를 생성합니다.
@@ -44,7 +42,15 @@ class MultiScatteringGenerator extends ASkyAtmosphereLUTGenerator {
         this.executeComputePass(this.#pipeline, this.#bindGroup, [8, 8, 1]);
     }
 
+    destroy(): void {
+        super.destroy();
+        this.#lutTexture = null;
+        this.#bindGroup = null;
+        this.#pipeline = null;
+    }
+
     #init(): void {
+        const SHADER_INFO = this.resourceManager.wgslParser.parse('SkyAtmosphere_MultiScattering_Generator', multiScatteringShaderCode_wgsl);
         this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_MultiScat_LUTTexture_${createUUID()}`, this.createLUTTexture());
         this.#pipeline = this.createComputePipeline('SkyAtmosphere_MultiScattering_Pipeline', SHADER_INFO.defaultSource);
     }

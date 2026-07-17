@@ -1,7 +1,6 @@
 import VertexBuffer from "../../../buffer/vertexBuffer/VertexBuffer";
 
 class ResourceStateVertexBuffer {
-    static dirtyList = []
     buffer: VertexBuffer
     label: string | number
     uuid: string | number
@@ -19,7 +18,6 @@ class ResourceStateVertexBuffer {
 
     set useNum(value: number) {
         this.#useNum = value;
-        ResourceStateVertexBuffer.dirtyList.push(this)
     }
 }
 

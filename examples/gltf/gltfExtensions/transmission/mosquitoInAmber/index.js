@@ -1,5 +1,6 @@
-import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1783496184998";
-import * as RedGPU from "../../../../../dist/index.js?t=1783496184998";
+import RedGPUExampleHelper from "../../../../exampleHelper/dist/index.js?t=1784264152422";
+import * as RedGPU from "../../../../../dist/index.js?t=1784264152422";
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -28,6 +29,7 @@ RedGPU.init(
 
         // Configure test panel
         renderTestPane(redGPUContext, view);
+        console.log(redGPUContext)
     },
     (failReason) => {
         console.error("Initialization failed:", failReason);

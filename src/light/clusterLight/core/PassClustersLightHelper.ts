@@ -11,17 +11,17 @@ const PassClustersLightHelper = {
      * [KO] X축 타일 개수
      * [EN] Number of tiles on the X-axis
      */
-    TILE_COUNT_X: 32,
+    TILE_COUNT_X: 16,
     /**
      * [KO] Y축 타일 개수
      * [EN] Number of tiles on the Y-axis
      */
-    TILE_COUNT_Y: 32,
+    TILE_COUNT_Y: 16,
     /**
      * [KO] Z축 타일 개수
      * [EN] Number of tiles on the Z-axis
      */
-    TILE_COUNT_Z: 48,
+    TILE_COUNT_Z: 64,
     /**
      * [KO] X축 워크그룹 크기
      * [EN] Workgroup size on the X-axis

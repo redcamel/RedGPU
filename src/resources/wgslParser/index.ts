@@ -3,9 +3,4 @@
  * [EN] Provides functionality to parse WGSL shader code and provide reflection information.
  * @packageDocumentation
  */
-import parseWGSL from "./parseWGSL";
-
 export * as CoreWGSLParser from './core'
-export {
-    parseWGSL,
-}

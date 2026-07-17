@@ -19,5 +19,6 @@ declare class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
     constructor(redGPUContext: RedGPUContext, sharedUniformBuffer: UniformBuffer, sampler: Sampler);
     get lutTexture(): DirectCubeTexture;
     render(view: View3D, transmittance: DirectTexture, multiScat: DirectTexture): void;
+    destroy(): void;
 }
 export default AerialPerspectiveGenerator;

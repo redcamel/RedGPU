@@ -234,6 +234,13 @@ class BitmapTexture extends ManagementResourceBase {
         this.#unregisterResource()
         this.cacheKey = null
         this.#src = null
+        if (this.#imgBitmap) {
+            try {
+                this.#imgBitmap.close();
+            } catch (e) {
+            }
+            this.#imgBitmap = null;
+        }
         if (temp) {
             this.redGPUContext.commandEncoderManager.addDeferredDestroy(temp)
         }

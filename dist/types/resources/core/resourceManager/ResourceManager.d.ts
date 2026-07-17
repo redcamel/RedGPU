@@ -13,6 +13,9 @@ import ResourceStateBitmapTexture from "./resourceState/texture/ResourceStateBit
 import ResourceStateCubeTexture from "./resourceState/texture/ResourceStateCubeTexture";
 import ResourceStateHDRTexture from "./resourceState/texture/ResourceStateHDRTexture";
 import RedGPUObject from "../../../base/RedGPUObject";
+import PackedTextureManager from "../../texture/packedTexture/PackedTextureManager";
+import GLTFCacheManager from "../../../loader/gltf/core/GLTFCacheManager";
+import WGSLParser from "../../wgslParser/WGSLParser";
 export type { ResourceStateIndexBuffer, ResourceStateStorageBuffer, ResourceStateUniformBuffer, ResourceStateVertexBuffer, ResourceStateBitmapTexture, ResourceStateCubeTexture, ResourceStateHDRTexture };
 export type ResourceState = ResourceStateVertexBuffer | ResourceStateIndexBuffer | ResourceStateUniformBuffer | ResourceStateStorageBuffer | ResourceStateCubeTexture | ResourceStateBitmapTexture | ResourceStateHDRTexture;
 /**
@@ -38,9 +41,6 @@ declare class ResourceManager extends RedGPUObject {
     static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout: string;
     static PRESET_VERTEX_GPUBindGroupLayout: string;
     static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN: string;
-    static GLOBAL_VERTEX_STRUCT: any;
-    static GLOBAL_FRAGMENT_STRUCT_PBR: any;
-    static GLOBAL_FRAGMENT_STRUCT_BUILT_IN: any;
     /**
      * [KO] ResourceManager 인스턴스를 생성합니다. (내부 시스템 전용)
      * [EN] Creates a ResourceManager instance. (Internal system only)
@@ -49,6 +49,14 @@ declare class ResourceManager extends RedGPUObject {
      * [EN] RedGPUContext instance
      */
     constructor(redGPUContext: RedGPUContext);
+    get GLOBAL_FRAGMENT_STRUCT_PBR(): any;
+    get GLOBAL_FRAGMENT_STRUCT_BUILT_IN(): any;
+    get GLOBAL_VERTEX_STRUCT(): any;
+    get SHADER_INFO_PBR(): any;
+    get SHADER_INFO_BASIC(): any;
+    get SHADER_INFO_ONLY_FRAGMENT_PBR(): any;
+    get SHADER_INFO_ONLY_VERTEX_PBR(): any;
+    get wgslParser(): WGSLParser;
     /**
      * [KO] 기본 샘플러를 반환합니다.
      * [EN] Returns the basic sampler.
@@ -103,6 +111,16 @@ declare class ResourceManager extends RedGPUObject {
      * [EN] EquirectangularToCubeGenerator instance
      */
     get equirectangularToCubeGenerator(): EquirectangularToCubeGenerator;
+    /**
+     * [KO] 텍스처 패킹 매니저를 반환합니다.
+     * [EN] Returns the texture packing manager.
+     */
+    get packedTextureManager(): PackedTextureManager;
+    /**
+     * [KO] GLTF 캐시 매니저를 반환합니다.
+     * [EN] Returns the GLTF cache manager.
+     */
+    get gltfCacheManager(): GLTFCacheManager;
     /**
      * [KO] 밉맵 생성기를 반환합니다.
      * [EN] Returns the mipmap generator.
@@ -239,6 +257,11 @@ declare class ResourceManager extends RedGPUObject {
      */
     get resources(): ImmutableKeyMap;
     /**
+     * [KO] 캐시에서 샘플러를 조회하거나 존재하지 않으면 새로 생성하여 반환합니다.
+     * [EN] Retrieves a sampler from cache, or creates and returns a new one if it does not exist.
+     */
+    createSampler(descriptorKey: string, samplerOptions: GPUSamplerDescriptor): GPUSampler;
+    /**
      * [KO] 리소스를 관리 대상으로 등록합니다.
      * [EN] Registers a resource for management.
      * @param target -
@@ -257,6 +280,11 @@ declare class ResourceManager extends RedGPUObject {
      * [EN] Target resource
      */
     unregisterManagementResource(target: ManagementResourceBase): void;
+    /**
+     * [KO] ResourceManager 인스턴스를 파기하고 캐싱된 모든 WebGPU 자원들을 물리적으로 해제합니다.
+     * [EN] Destroys the ResourceManager instance and physically releases all cached WebGPU resources.
+     */
+    destroy(): void;
     /**
      * [KO] GPU 텍스처를 생성하고 관리합니다.
      * [EN] Creates and manages a GPU texture.
@@ -390,6 +418,11 @@ declare class ResourceManager extends RedGPUObject {
      * [EN] Created GPUBuffer
      */
     createGPUBuffer(name: string, gpuBufferDescriptor: GPUBufferDescriptor): any;
+    /**
+     * [KO] 시스템 프리셋을 초기화합니다.
+     * [EN] Initializes system presets.
+     */
+    initPresets(): void;
 }
 export default ResourceManager;
 export declare class ImmutableKeyMap extends Map {

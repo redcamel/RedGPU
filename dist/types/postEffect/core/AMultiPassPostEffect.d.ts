@@ -43,6 +43,7 @@ declare abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
      * [EN] Array of internal single-pass post effects
      */
     get passList(): ASinglePassPostEffect[];
+    destroy(): void;
     /**
      * [KO] 등록된 모든 내부 패스의 리소스를 해제합니다.
      * [EN] Clears the resources of all registered internal passes.

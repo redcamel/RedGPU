@@ -10,7 +10,7 @@ import {
 import DownSampleCubeMapGenerator from "../../texture/core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
 import MipmapGenerator from "../../texture/core/mipmapGenerator/MipmapGenerator";
 import CubeTexture from "../../texture/CubeTexture";
-import preprocessWGSL from "../../wgslParser/core/preprocessWGSL";
+
 import ManagementResourceBase from "../ManagementResourceBase";
 import ResourceStateIndexBuffer from "./resourceState/ResourceStateIndexBuffer";
 import ResourceStateStorageBuffer from "./resourceState/ResourceStateStorageBuffer";
@@ -21,13 +21,17 @@ import ResourceStateBitmapTexture from "./resourceState/texture/ResourceStateBit
 import ResourceStateCubeTexture from "./resourceState/texture/ResourceStateCubeTexture";
 import ResourceStateHDRTexture from "./resourceState/texture/ResourceStateHDRTexture";
 import RedGPUObject from "../../../base/RedGPUObject";
-import parseWGSL from "../../wgslParser/parseWGSL";
 import ShaderLibrary from "../../../systemCodeManager/ShaderLibrary";
+import PackedTextureManager from "../../texture/packedTexture/PackedTextureManager";
+import GLTFCacheManager from "../../../loader/gltf/core/GLTFCacheManager";
+import WGSLParser from "../../wgslParser/WGSLParser";
+import vertexSourcePbrInput from "../../../display/mesh/shader/meshVertexPbr_input.wgsl";
+import vertexSourcePbrOutput from "../../../display/mesh/shader/meshVertexPbr_output.wgsl";
+import vertexSourcePbr from "../../../display/mesh/shader/meshVertexPbr.wgsl";
+import vertexSourceInput from "../../../display/mesh/shader/meshVertex_input.wgsl";
+import vertexSourceOutput from "../../../display/mesh/shader/meshVertex_output.wgsl";
+import vertexSource from "../../../display/mesh/shader/meshVertex.wgsl";
 
-const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
-const GLOBAL_VERTEX_STRUCT = SHADER_INFO.storage.globalVertexSSBO.type.format;
-const GLOBAL_FRAGMENT_STRUCT_PBR = SHADER_INFO.storage.globalFragmentSSBO_PBR.type.format;
-const GLOBAL_FRAGMENT_STRUCT_BUILT_IN = SHADER_INFO.storage.globalFragmentSSBO_BuiltIn.type.format;
 
 enum ResourceType {
     GPUShaderModule = 'GPUShaderModule',
@@ -76,9 +80,7 @@ class ResourceManager extends RedGPUObject {
     static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout = 'PRESET_GLOBAL_VERTEX_GPUBindGroupLayout'
     static PRESET_VERTEX_GPUBindGroupLayout = 'PRESET_VERTEX_GPUBindGroupLayout'
     static PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN = 'PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN'
-    static GLOBAL_VERTEX_STRUCT = GLOBAL_VERTEX_STRUCT
-    static GLOBAL_FRAGMENT_STRUCT_PBR = GLOBAL_FRAGMENT_STRUCT_PBR
-    static GLOBAL_FRAGMENT_STRUCT_BUILT_IN = GLOBAL_FRAGMENT_STRUCT_BUILT_IN
+
 
     #resources = new ImmutableKeyMap([
         [ResourceType.GPUShaderModule, new Map()],
@@ -98,17 +100,29 @@ class ResourceManager extends RedGPUObject {
     #emptyCubeTextureView: GPUTextureView
     #emptyTexture3DView: GPUTextureView
     #emptyDepthTextureView: GPUTextureView
-    readonly #mipmapGenerator: MipmapGenerator
-    readonly #downSampleCubeMapGenerator: DownSampleCubeMapGenerator
-    readonly #brdfGenerator: BRDFGenerator
-    readonly #irradianceGenerator: IrradianceGenerator
-    readonly #prefilterGenerator: PrefilterGenerator
-    readonly #equirectangularToCubeGenerator: EquirectangularToCubeGenerator
+    #mipmapGenerator: MipmapGenerator
+    #downSampleCubeMapGenerator: DownSampleCubeMapGenerator
+    #brdfGenerator: BRDFGenerator
+    #irradianceGenerator: IrradianceGenerator
+    #prefilterGenerator: PrefilterGenerator
+    #equirectangularToCubeGenerator: EquirectangularToCubeGenerator
+    #packedTextureManager: PackedTextureManager
+    #wgslParser: WGSLParser
+    #gltfCacheManager: GLTFCacheManager
+    readonly #samplerCache: Map<string, GPUSampler> = new Map();
     #basicSampler: Sampler
     #basicDisplacementSampler: Sampler
     #bitmapTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
     #cubeTextureViewCache: WeakMap<GPUTexture, Map<string, GPUTextureView>> = new WeakMap();
 
+    #MESH_SHADER_INFO_PBR: any
+    #MESH_SHADER_INFO_BASIC: any
+    #MESH_SHADER_INFO_ONLY_FRAGMENT_PBR: any
+    #MESH_SHADER_INFO_ONLY_VERTEX_PBR: any
+
+    #GLOBAL_VERTEX_STRUCT: any
+    #GLOBAL_FRAGMENT_STRUCT_PBR: any
+    #GLOBAL_FRAGMENT_STRUCT_BUILT_IN: any
 
     /**
      * [KO] ResourceManager 인스턴스를 생성합니다. (내부 시스템 전용)
@@ -119,15 +133,59 @@ class ResourceManager extends RedGPUObject {
      */
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext)
-        this.#mipmapGenerator = new MipmapGenerator(redGPUContext)
-        this.#downSampleCubeMapGenerator = new DownSampleCubeMapGenerator(redGPUContext)
-        this.#brdfGenerator = new BRDFGenerator(redGPUContext)
-        this.#irradianceGenerator = new IrradianceGenerator(redGPUContext)
-        this.#prefilterGenerator = new PrefilterGenerator(redGPUContext)
-        this.#equirectangularToCubeGenerator = new EquirectangularToCubeGenerator(redGPUContext)
-        this.#initPresets()
+        this.#wgslParser = new WGSLParser();
+
+        this.#MESH_SHADER_INFO_PBR = this.#wgslParser.parse('MESH_PBR', [
+            vertexSourcePbrInput, vertexSourcePbrOutput, vertexSourcePbr,].join("\n"));
+
+        this.#MESH_SHADER_INFO_BASIC = this.#wgslParser.parse('MESH_BASIC', [
+            vertexSourceInput, vertexSourceOutput, vertexSource
+        ].join("\n"));
+
+        this.#MESH_SHADER_INFO_ONLY_FRAGMENT_PBR = this.#wgslParser.parse('MESH_ONLY_FRAGMENT_PBR', [
+            vertexSourceInput, vertexSourcePbrOutput, vertexSource,].join("\n"));
+
+        this.#MESH_SHADER_INFO_ONLY_VERTEX_PBR = this.#wgslParser.parse('MESH_ONLY_VERTEX_PBR', [
+            vertexSourcePbrInput, vertexSourceOutput, vertexSource,].join("\n"));
+
+        const SHADER_INFO = this.#wgslParser.parse('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
+        this.#GLOBAL_VERTEX_STRUCT = SHADER_INFO.storage.globalVertexSSBO.type.format;
+        this.#GLOBAL_FRAGMENT_STRUCT_PBR = SHADER_INFO.storage.globalFragmentSSBO_PBR.type.format;
+        this.#GLOBAL_FRAGMENT_STRUCT_BUILT_IN = SHADER_INFO.storage.globalFragmentSSBO_BuiltIn.type.format;
     }
 
+
+    get GLOBAL_FRAGMENT_STRUCT_PBR(): any {
+        return this.#GLOBAL_FRAGMENT_STRUCT_PBR;
+    }
+
+    get GLOBAL_FRAGMENT_STRUCT_BUILT_IN(): any {
+        return this.#GLOBAL_FRAGMENT_STRUCT_BUILT_IN;
+    }
+
+    get GLOBAL_VERTEX_STRUCT(): any {
+        return this.#GLOBAL_VERTEX_STRUCT;
+    }
+
+    get SHADER_INFO_PBR(): any {
+        return this.#MESH_SHADER_INFO_PBR;
+    }
+
+    get SHADER_INFO_BASIC(): any {
+        return this.#MESH_SHADER_INFO_BASIC;
+    }
+
+    get SHADER_INFO_ONLY_FRAGMENT_PBR(): any {
+        return this.#MESH_SHADER_INFO_ONLY_FRAGMENT_PBR;
+    }
+
+    get SHADER_INFO_ONLY_VERTEX_PBR(): any {
+        return this.#MESH_SHADER_INFO_ONLY_VERTEX_PBR;
+    }
+
+    get wgslParser(): WGSLParser {
+        return this.#wgslParser;
+    }
 
     /**
      * [KO] 기본 샘플러를 반환합니다.
@@ -199,6 +257,22 @@ class ResourceManager extends RedGPUObject {
      */
     get equirectangularToCubeGenerator(): EquirectangularToCubeGenerator {
         return this.#equirectangularToCubeGenerator;
+    }
+
+    /**
+     * [KO] 텍스처 패킹 매니저를 반환합니다.
+     * [EN] Returns the texture packing manager.
+     */
+    get packedTextureManager(): PackedTextureManager {
+        return this.#packedTextureManager;
+    }
+
+    /**
+     * [KO] GLTF 캐시 매니저를 반환합니다.
+     * [EN] Returns the GLTF cache manager.
+     */
+    get gltfCacheManager(): GLTFCacheManager {
+        return this.#gltfCacheManager;
     }
 
     /**
@@ -382,6 +456,18 @@ class ResourceManager extends RedGPUObject {
     }
 
     /**
+     * [KO] 캐시에서 샘플러를 조회하거나 존재하지 않으면 새로 생성하여 반환합니다.
+     * [EN] Retrieves a sampler from cache, or creates and returns a new one if it does not exist.
+     */
+    createSampler(descriptorKey: string, samplerOptions: GPUSamplerDescriptor): GPUSampler {
+        if (!this.#samplerCache.has(descriptorKey)) {
+            const sampler = this.gpuDevice.createSampler(samplerOptions);
+            this.#samplerCache.set(descriptorKey, sampler);
+        }
+        return this.#samplerCache.get(descriptorKey)!;
+    }
+
+    /**
      * [KO] 리소스를 관리 대상으로 등록합니다.
      * [EN] Registers a resource for management.
      * @param target -
@@ -418,6 +504,128 @@ class ResourceManager extends RedGPUObject {
         }
         targetResourceManagedState.videoMemory -= (target as any).videoMemorySize;
         table.delete(cacheKey);
+    }
+
+    /**
+     * [KO] ResourceManager 인스턴스를 파기하고 캐싱된 모든 WebGPU 자원들을 물리적으로 해제합니다.
+     * [EN] Destroys the ResourceManager instance and physically releases all cached WebGPU resources.
+     */
+    destroy(): void {
+        // 1. 캐싱된 GPUBuffer들을 순회하며 명시적 destroy() 호출
+        const bufferMap = this.#resources.get(ResourceType.GPUBuffer);
+        if (bufferMap) {
+            for (const buffer of bufferMap.values()) {
+                try {
+                    buffer.destroy();
+                } catch (e) {
+                    // 이미 해제되었거나 무효화된 상태 예외 처리
+                }
+            }
+            bufferMap.clear();
+        }
+
+        // 2. 다른 리소스 캐시 맵 비우기
+        this.#resources.get(ResourceType.GPUShaderModule)?.clear();
+        this.#resources.get(ResourceType.GPUBindGroupLayout)?.clear();
+        this.#resources.get(ResourceType.GPUPipelineLayout)?.clear();
+
+        // 3. 상태 관리 맵(ResourceStatusInfo)의 각 리소스 인스턴스에 대해 명시적 destroy() 호출하여 GPU 자원 해제
+        for (const state of this.#managedBitmapTextureState.table.values()) {
+            try {
+                state.texture.destroy();
+            } catch (e) {
+            }
+        }
+        this.#managedBitmapTextureState.table.clear();
+
+        for (const state of this.#managedCubeTextureState.table.values()) {
+            try {
+                state.texture.destroy();
+            } catch (e) {
+            }
+        }
+        this.#managedCubeTextureState.table.clear();
+
+        for (const state of this.#managedHDRTextureState.table.values()) {
+            try {
+                state.texture.destroy();
+            } catch (e) {
+            }
+        }
+        this.#managedHDRTextureState.table.clear();
+
+        for (const state of this.#managedUniformBufferState.table.values()) {
+            try {
+                state.buffer.destroy();
+            } catch (e) {
+            }
+        }
+        this.#managedUniformBufferState.table.clear();
+
+        for (const state of this.#managedVertexBufferState.table.values()) {
+            try {
+                state.buffer.destroy();
+            } catch (e) {
+            }
+        }
+        this.#managedVertexBufferState.table.clear();
+
+        for (const state of this.#managedIndexBufferState.table.values()) {
+            try {
+                state.buffer.destroy();
+            } catch (e) {
+            }
+        }
+        this.#managedIndexBufferState.table.clear();
+
+        for (const state of this.#managedStorageBufferState.table.values()) {
+            try {
+                state.buffer.destroy();
+            } catch (e) {
+            }
+        }
+        this.#managedStorageBufferState.table.clear();
+
+        // 4. 프리셋 및 제너레이터 등 참조 초기화
+        if (this.#mipmapGenerator) {
+            this.#mipmapGenerator.destroy();
+            this.#mipmapGenerator = null;
+        }
+        if (this.#downSampleCubeMapGenerator) {
+            this.#downSampleCubeMapGenerator.destroy();
+            this.#downSampleCubeMapGenerator = null;
+        }
+        if (this.#brdfGenerator) {
+            this.#brdfGenerator.destroy();
+            this.#brdfGenerator = null;
+        }
+        if (this.#irradianceGenerator) {
+            this.#irradianceGenerator.destroy();
+            this.#irradianceGenerator = null;
+        }
+        if (this.#prefilterGenerator) {
+            this.#prefilterGenerator.destroy();
+            this.#prefilterGenerator = null;
+        }
+        if (this.#equirectangularToCubeGenerator) {
+            this.#equirectangularToCubeGenerator.destroy();
+            this.#equirectangularToCubeGenerator = null;
+        }
+        this.#packedTextureManager.destroy();
+        this.#gltfCacheManager.destroy();
+        this.#samplerCache.clear();
+        this.#packedTextureManager = null;
+        this.#gltfCacheManager = null;
+        this.#basicSampler = null;
+        this.#basicDisplacementSampler = null;
+        this.#emptyBitmapTextureView = null;
+        this.#emptyCubeTextureView = null;
+        this.#emptyTexture3DView = null;
+        this.#emptyDepthTextureView = null;
+        this.#wgslParser.destroy()
+        this.#wgslParser = null
+
+        keepLog("🧹 ResourceManager destroy 완료");
     }
 
     /**
@@ -660,34 +868,21 @@ class ResourceManager extends RedGPUObject {
     }
 
     /**
-     * [KO] 텍스처 뷰 캐시를 정리합니다.
-     * [EN] Clears the texture view cache.
-     */
-    #clearTextureCache(texture: GPUTexture, desc: GPUTextureDescriptor) {
-        const cache = desc.dimension === '3d' ?
-            this.#cubeTextureViewCache :
-            this.#bitmapTextureViewCache;
-        cache.get(texture)?.clear();
-        if (cache.delete(texture)) {
-            // const type = desc.dimension === '3d' ? '🧊 큐브' : '🔷 비트맵';
-            // keepLog(`${type} 텍스처 뷰 캐시 정리:`, texture.label);
-        }
-    }
-
-    /**
-     * [KO] 디스크립터를 기반으로 캐시 키를 생성합니다.
-     * [EN] Creates a cache key based on the descriptor.
-     */
-    #createDescriptorKey(viewDescriptor?: GPUTextureViewDescriptor): string {
-        return viewDescriptor ? JSON.stringify(viewDescriptor) : 'default';
-    }
-
-    /**
      * [KO] 시스템 프리셋을 초기화합니다.
      * [EN] Initializes system presets.
      */
-    #initPresets() {
-        const {gpuDevice} = this.redGPUContext
+    initPresets() {
+        const redGPUContext = this.redGPUContext;
+        this.#mipmapGenerator = new MipmapGenerator(redGPUContext)
+        this.#downSampleCubeMapGenerator = new DownSampleCubeMapGenerator(redGPUContext)
+        this.#brdfGenerator = new BRDFGenerator(redGPUContext)
+        this.#irradianceGenerator = new IrradianceGenerator(redGPUContext)
+        this.#prefilterGenerator = new PrefilterGenerator(redGPUContext)
+        this.#equirectangularToCubeGenerator = new EquirectangularToCubeGenerator(redGPUContext)
+        this.#packedTextureManager = new PackedTextureManager(redGPUContext)
+        this.#gltfCacheManager = new GLTFCacheManager(redGPUContext)
+
+        const {gpuDevice} = redGPUContext
         {
             const emptyBitmapTexture = gpuDevice.createTexture({
                 size: {width: 1, height: 1, depthOrArrayLayers: 1},
@@ -850,13 +1045,36 @@ class ResourceManager extends RedGPUObject {
         }
     }
 
+    /**
+     * [KO] 텍스처 뷰 캐시를 정리합니다.
+     * [EN] Clears the texture view cache.
+     */
+    #clearTextureCache(texture: GPUTexture, desc: GPUTextureDescriptor) {
+        const cache = desc.dimension === '3d' ?
+            this.#cubeTextureViewCache :
+            this.#bitmapTextureViewCache;
+        cache.get(texture)?.clear();
+        if (cache.delete(texture)) {
+            // const type = desc.dimension === '3d' ? '🧊 큐브' : '🔷 비트맵';
+            // keepLog(`${type} 텍스처 뷰 캐시 정리:`, texture.label);
+        }
+    }
+
+    /**
+     * [KO] 디스크립터를 기반으로 캐시 키를 생성합니다.
+     * [EN] Creates a cache key based on the descriptor.
+     */
+    #createDescriptorKey(viewDescriptor?: GPUTextureViewDescriptor): string {
+        return viewDescriptor ? JSON.stringify(viewDescriptor) : 'default';
+    }
+
     #getTargetMap(key: ResourceType) {
         return this.#resources.get(key);
     }
 
     #createAndCacheModule(name: string, gpuShaderModuleDescriptor: GPUShaderModuleDescriptor) {
         const {code} = gpuShaderModuleDescriptor
-        const newCode = preprocessWGSL(name, code).defaultSource
+        const newCode = this.#wgslParser.parse(name, code).defaultSource
         const newModule: GPUShaderModule = this.redGPUContext.gpuDevice.createShaderModule({
             ...gpuShaderModuleDescriptor,
             code: newCode,

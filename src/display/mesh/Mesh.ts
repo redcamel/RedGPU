@@ -28,7 +28,6 @@ import getBasicMeshVertexBindGroupDescriptor from "./core/shader/getBasicMeshVer
 import VertexGPURenderInfo from "./core/VertexGPURenderInfo";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 
-const GLOBAL_VERTEX_STRUCT = ResourceManager.GLOBAL_VERTEX_STRUCT
 
 const VERTEX_SHADER_MODULE_NAME_PBR_SKIN = 'VERTEX_MODULE_MESH_PBR_SKIN'
 const CONVERT_RADIAN = Math.PI / 180;
@@ -300,7 +299,7 @@ class Mesh extends MeshBase {
         this._geometry = geometry;
         this._material = material;
         this.#pickingId = uuidToUint(this.uuid);
-        this.#drawBufferManager = DrawBufferManager.getInstance(redGPUContext);
+        this.#drawBufferManager = redGPUContext.drawBufferManager;
         this.#checkDrawCommandSlot();
         this.#LODManager = new LODManager(this, () => {
             this.dirtyLOD = true;
@@ -1432,7 +1431,8 @@ class Mesh extends MeshBase {
                 if (antialiasingManager.useTAA && this.#uniformDataMatrixList) {
 
                     const {redGPUContext} = this
-                    const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
+                    const {resourceManager} = redGPUContext
+                    const {members: vertexUniformInfoMembers} = resourceManager.GLOBAL_VERTEX_STRUCT
                     const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
                     if (this.#prevModelMatrix && vertexUniformInfoMatrixListMembers.prevModelMatrix) {
                         this.#uniformDataMatrixList.set(this.#prevModelMatrix, vertexUniformInfoMatrixListMembers.prevModelMatrix.uniformOffsetForData / Float32Array.BYTES_PER_ELEMENT)
@@ -1459,7 +1459,8 @@ class Mesh extends MeshBase {
                 }
                 {
                     const {redGPUContext} = this
-                    const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
+                    const {resourceManager} = redGPUContext
+                    const {members: vertexUniformInfoMembers} = resourceManager.GLOBAL_VERTEX_STRUCT
                     const {members: vertexUniformInfoMatrixListMembers} = vertexUniformInfoMembers.matrixList
                     if (!this.#uniformDataMatrixList) {
                         this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
@@ -1553,12 +1554,12 @@ class Mesh extends MeshBase {
                 renderViewStateData.animationList[renderViewStateData.animationList.length] = this.gltfLoaderInfo?.activeAnimations
             }
             if (skinInfo) {
-                if (!this.currentShaderModuleName.includes(VERTEX_SHADER_MODULE_NAME_PBR_SKIN)) {
-                    currentDirtyPipeline = true
-                }
-                if (this.currentShaderModuleName === `${VERTEX_SHADER_MODULE_NAME_PBR_SKIN}_${skinInfo.joints?.length}`) {
+            
+                if (this.currentShaderModuleName === VERTEX_SHADER_MODULE_NAME_PBR_SKIN) {
                     renderViewStateData.skinList[renderViewStateData.skinList.length] = this
                     dirtyTransformForChildren = false
+                } else if (!this.currentShaderModuleName.includes(VERTEX_SHADER_MODULE_NAME_PBR_SKIN)) {
+                    currentDirtyPipeline = true
                 }
             }
         } else {
@@ -1592,7 +1593,8 @@ class Mesh extends MeshBase {
 
             {
                 const {redGPUContext} = this
-                const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
+                const {resourceManager} = redGPUContext
+                const {members: vertexUniformInfoMembers} = resourceManager.GLOBAL_VERTEX_STRUCT
                 if (!this.#uniformDataMatrixList) {
                     this.#uniformDataMatrixList = new Float32Array(vertexUniformInfoMembers.matrixList.endOffset / Float32Array.BYTES_PER_ELEMENT)
                 }
@@ -1626,7 +1628,8 @@ class Mesh extends MeshBase {
 
         if (currentGeometry && passFrustumCulling) {
             const {redGPUContext} = this
-            const {members: vertexUniformInfoMembers} = GLOBAL_VERTEX_STRUCT
+            const {resourceManager} = redGPUContext
+            const {members: vertexUniformInfoMembers} = resourceManager.GLOBAL_VERTEX_STRUCT
 
 
             {
@@ -1754,7 +1757,7 @@ class Mesh extends MeshBase {
                                 redGPUContext.globalVertexSSBO.updateUintData(
                                     this.#globalVertexSlotIndex,
                                     new Uint32Array([lodMaterial.globalFragmentSlotIndex]),
-                                    ResourceManager.GLOBAL_VERTEX_STRUCT.members.globalFragmentSlotIndex.uniformOffset / 4
+                                    resourceManager.GLOBAL_VERTEX_STRUCT.members.globalFragmentSlotIndex.uniformOffset / 4
                                 );
                                 redGPUContext.globalVertexSSBO.flush();
                                 this.#prevLodIDX = targetIdx
@@ -1830,6 +1833,94 @@ class Mesh extends MeshBase {
         return this.gpuRenderInfo.vertexShaderModule
     }
 
+    /**
+     * [KO] Mesh 인스턴스를 파기하고 할당된 드로우 커맨드 슬롯, 전역 버퍼 슬롯 및 리소스를 즉시 해제합니다.
+     * [EN] Destroys the Mesh instance and immediately releases the allocated draw command slots, global buffer slots, and resources.
+     */
+    destroy() {
+        // 1. 자식 객체들 재귀 소멸
+        super.destroy();
+
+        // 2. 부모 컨테이너 연결 끊기
+        if (this.#parent) {
+            this.#parent.removeChild(this);
+            this.#parent = null;
+        }
+
+        // 3. 글로벌 Vertex SSBO 버퍼 슬롯 해제
+        if (this.#globalVertexSlotIndex !== -1) {
+            this.redGPUContext.globalVertexSSBO.freeSlot(this.#globalVertexSlotIndex);
+            this.#globalVertexSlotIndex = -1;
+        }
+
+        // 4. 드로우 버퍼 매니저 슬롯 인스턴스 개수 0 무효화 및 해제
+        if (this.#drawCommandSlot && this.#drawBufferManager) {
+            this.#drawBufferManager.setInstanceNum(this.#drawCommandSlot, 0);
+            this.#drawCommandSlot = null;
+        }
+        if (this.#drawCommandSlot_LODList && this.#drawBufferManager) {
+            for (const slot of this.#drawCommandSlot_LODList) {
+                if (slot) {
+                    this.#drawBufferManager.setInstanceNum(slot, 0);
+                }
+            }
+            this.#drawCommandSlot_LODList = [];
+        }
+        this.#drawBufferManager = null;
+
+        // 5. 디버거 리소스 소멸
+        // if (this.#drawDebugger) {
+        //     this.#drawDebugger.destroy();
+        //     this.#drawDebugger = null;
+        // }
+
+        // 6. LOD 및 렌더 번들 참조 해제
+        this.#lodGPURenderInfoList = [];
+        this.#renderBundle = null;
+        this.#renderBundle_LODList = [];
+        this.#prevSystemBindGroupList = [];
+        this.#prevFragmentBindGroup = null;
+
+        // 7. 지오메트리 및 재질 참조 해제 및 파괴
+        if (this._geometry) {
+            // @ts-ignore
+            if (typeof this._geometry.destroy === 'function') {
+                // @ts-ignore
+                this._geometry.destroy();
+            }
+            this._geometry = null;
+        }
+        if (this._material) {
+            // @ts-ignore
+            if (typeof this._material.destroy === 'function') {
+                // @ts-ignore
+                this._material.destroy();
+            }
+            this._material = null;
+        }
+
+        // 8. GLTF 애니메이션 및 스킨 데이터 클리어
+        if (this.animationInfo) {
+            this.animationInfo.morphInfo = null;
+            this.animationInfo.weightBuffer = null;
+            this.animationInfo.jointBuffer = null;
+            this.animationInfo.animationsList = null;
+            if (this.animationInfo.skinInfo) {
+                this.animationInfo.skinInfo.destroy();
+                this.animationInfo.skinInfo = null;
+            }
+        }
+        if (this.gltfLoaderInfo) {
+            this.gltfLoaderInfo.destroy();
+            this.gltfLoaderInfo = null;
+        }
+
+        // 9. 이벤트 참조 해제
+        this.#events = {};
+        this.#eventsNum = 0;
+
+        console.log(`🧹 Mesh destroy 완료: ${this.name || '무명'}`);
+    }
 
     #updateLODPipeline = () => {
 
@@ -1880,12 +1971,13 @@ class Mesh extends MeshBase {
     #setRenderBundle(renderViewStateData: RenderViewStateData) {
         const {view} = renderViewStateData
         const {redGPUContext} = this
+        const {resourceManager} = redGPUContext
         const currentMaterial = this._material
         if (currentMaterial.globalFragmentSlotIndex !== undefined && currentMaterial.globalFragmentSlotIndex > -1) {
             redGPUContext.globalVertexSSBO.updateUintData(
                 this.#globalVertexSlotIndex,
                 new Uint32Array([currentMaterial.globalFragmentSlotIndex]),
-                ResourceManager.GLOBAL_VERTEX_STRUCT.members.globalFragmentSlotIndex.uniformOffset / 4
+                resourceManager.GLOBAL_VERTEX_STRUCT.members.globalFragmentSlotIndex.uniformOffset / 4
             );
             redGPUContext.globalVertexSSBO.flush();
         }
@@ -2014,20 +2106,10 @@ class Mesh extends MeshBase {
             let variantSource = this.gpuRenderInfo.vertexShaderSourceVariant.getVariant(currentVariantKey);
             if (variantSource) {
                 // keepLog('버텍스 바리안트 셰이더 모듈 생성:', currentVariantKey, variantShaderModuleName);
-                if (this.animationInfo?.skinInfo) {
-                    const jointNum = `${this.animationInfo.skinInfo.joints.length}`
-                    variantSource = variantSource.replaceAll('#JOINT_NUM', jointNum)
-                    this.gpuRenderInfo.vertexShaderSourceVariant.getVariant(currentVariantKey)
-                    targetShaderModule = resourceManager.createGPUShaderModule(
-                        `${variantShaderModuleName}_${jointNum}`,
-                        {code: variantSource}
-                    );
-                } else {
-                    targetShaderModule = resourceManager.createGPUShaderModule(
-                        variantShaderModuleName,
-                        {code: variantSource}
-                    );
-                }
+                targetShaderModule = resourceManager.createGPUShaderModule(
+                    `${variantShaderModuleName}`,
+                    {code: variantSource}
+                );
             } else {
                 console.warn('⚠️ 버텍스 바리안트 소스를 찾을 수 없음:', currentVariantKey);
                 targetShaderModule = this.gpuRenderInfo.vertexShaderModule; // 기본값 사용

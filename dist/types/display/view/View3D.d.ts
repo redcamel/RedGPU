@@ -149,6 +149,7 @@ declare class View3D extends AView {
      * [EN] Returns the projection view matrix from the previous frame with jitter excluded.
      */
     get prevNoneJitterProjectionViewMatrix(): mat4;
+    destroy(): void;
     /**
      * [KO] 매 프레임마다 뷰 및 라이팅 데이터를 업데이트합니다.
      * [EN] Updates view and lighting data every frame.

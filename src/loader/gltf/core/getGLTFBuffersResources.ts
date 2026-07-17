@@ -40,6 +40,7 @@ const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callbac
         function processNonArrayBuffer(uri: string) {
             const tSrc = uri.startsWith('data:') ? uri : gltfLoader.filePath + uri;
             arrayBufferLoader(
+                gltfLoader,
                 tSrc,
                 function (request) {
                     loadedBuffers++;
@@ -57,26 +58,22 @@ const getGLTFBuffersResources = (gltfLoader: GLTFLoader, gltfData: GLTF, callbac
             checkProgress(gltfLoader, gltfData, loadedBuffers)
             onProgress?.(gltfLoader.loadingProgressInfo);
             if (loadedBuffers === totalBuffers) {
-                // console.log(`redGLTFLoader['parsingResult']['uris']:`, uris);
-                // keepLog("uris 로딩현황", loadedBuffers, totalBuffers,JSON.parse(JSON.stringify(gltfLoader.loadingProgressInfo)));
                 if (callback) callback();
             }
         }
     });
 };
 export default getGLTFBuffersResources
-const cacheMap: Map<string, ArrayBuffer> = new Map();
-const pendingMap: Map<string, Promise<ArrayBuffer>> = new Map();
-const arrayBufferLoader = (url: string, onSuccess, onError) => {
+const arrayBufferLoader = (gltfLoader: GLTFLoader, url: string, onSuccess, onError) => {
+    const {cache, pending} = gltfLoader.redGPUContext.resourceManager.gltfCacheManager.bufferCache;
 
     url = getAbsoluteURL(window.location.href, url)
-    // keepLog(url,originURL)
-    if (cacheMap.has(url)) {
-        onSuccess?.(cacheMap.get(url)!);
+    if (cache.has(url)) {
+        onSuccess?.(cache.get(url)!);
         return;
     }
-    if (pendingMap.has(url)) {
-        pendingMap.get(url)!.then(data => onSuccess?.(data)).catch(err => onError?.(err));
+    if (pending.has(url)) {
+        pending.get(url)!.then(data => onSuccess?.(data)).catch(err => onError?.(err));
         return;
     }
     const promise = fetch(url)
@@ -85,12 +82,13 @@ const arrayBufferLoader = (url: string, onSuccess, onError) => {
             return response.arrayBuffer();
         })
         .then(data => {
-            cacheMap.set(url, data);
+            cache.set(url, data);
             return data;
         })
         .finally(() => {
-            pendingMap.delete(url);
+            pending.delete(url);
         });
-    pendingMap.set(url, promise);
+    pending.set(url, promise);
     promise.then(data => onSuccess?.(data)).catch(err => onError?.(err));
 };
+

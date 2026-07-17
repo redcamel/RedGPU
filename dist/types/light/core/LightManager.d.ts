@@ -255,5 +255,10 @@ declare class LightManager {
      * [EN] mat4 view matrix
      */
     getDirectionalLightViewMatrix(view: View3D): mat4;
+    /**
+     * [KO] LightManager 인스턴스를 파기하고 모든 조명 및 디버거 참조를 정리합니다.
+     * [EN] Destroys the LightManager instance and cleans up all lights and debuggers.
+     */
+    destroy(): void;
 }
 export default LightManager;

@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1783496184998";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1783496184998";
+import * as RedGPU from "../../../../dist/index.js?t=1784264152422";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264152422";
 
 /**
  * [KO] Follow Controller 예제
@@ -332,11 +332,6 @@ const renderTestPane = (redGPUContext, controller) => {
                 pane.refresh();
             });
 
-            const update = () => {
-                pane.refresh()
-                requestAnimationFrame(update);
-            }
-            requestAnimationFrame(update);
         }
     });
 };

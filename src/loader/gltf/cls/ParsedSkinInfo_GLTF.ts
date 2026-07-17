@@ -321,6 +321,45 @@ class ParsedSkinInfo_GLTF {
         });
         this.prevGlobalVertexSSBOBuffer = redGPUContext.globalVertexSSBO.gpuBuffer
     }
+
+    destroy() {
+        if (this.uniformBuffer) {
+            this.uniformBuffer.destroy();
+            this.uniformBuffer = null;
+        }
+        if (this.vertexStorageBuffer) {
+            this.vertexStorageBuffer.destroy();
+            this.vertexStorageBuffer = null;
+        }
+        if (this.prevVertexStorageBuffer) {
+            this.prevVertexStorageBuffer.destroy();
+            this.prevVertexStorageBuffer = null;
+        }
+        if (this.jointSlotIndicesBuffer) {
+            this.jointSlotIndicesBuffer.destroy();
+            this.jointSlotIndicesBuffer = null;
+        }
+        if (this.#geometry) {
+            // @ts-ignore
+            if (typeof this.#geometry.destroy === 'function') this.#geometry.destroy();
+            this.#geometry = null;
+        }
+        if (this.#material) {
+            this.#material.destroy();
+            this.#material = null;
+        }
+        this.computeShader = null;
+        this.computePipeline = null;
+        this.bindGroup = null;
+        this.skinnerBindGroupLayout = null;
+        this.prevGlobalVertexSSBOBuffer = null;
+
+        this.joints = [];
+        this.inverseBindMatrices = null;
+        this.skeletonMesh = null;
+        this.usedJoints = null;
+        this.jointData = null;
+    }
 }
 
 export default ParsedSkinInfo_GLTF;

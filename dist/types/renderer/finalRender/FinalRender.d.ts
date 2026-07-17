@@ -1,4 +1,8 @@
 import RedGPUContext from "../../context/RedGPUContext";
+export interface FinalRenderPassColorAttachment extends GPURenderPassColorAttachment {
+    postEffectView?: GPUTextureView;
+    pickingView?: GPUTextureView;
+}
 /**
  * Class representing the final rendering process.
  * @class
@@ -6,6 +10,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 declare class FinalRender {
     #private;
     constructor();
+    destroy(): void;
     /**
      * Renders the given list of render passes to the specified canvas.
      *

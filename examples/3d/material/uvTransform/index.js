@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1783496184998";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1783496184998";
+import * as RedGPU from "../../../../dist/index.js?t=1784264152422";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264152422";
 
 /**
  * [KO] UV Transform 예제
@@ -152,6 +152,7 @@ RedGPU.init(
         // 7. [KO] 테스트용 GUI 렌더링
         // [EN] Render Test GUI
         renderTestPane(redGPUContext, { materialTop, materialBottom, scrollInfo });
+        console.log(redGPUContext)
     },
     (failReason) => console.error(failReason)
 );
@@ -206,9 +207,15 @@ function renderTestPane(redGPUContext, testTarget) {
                 pane.refresh();
             });
 
-            // [KO] 자동 스크롤 시 UI 갱신 루프
-            // [EN] Refresh UI loop during Auto Scroll
-            setInterval(() => { if (scrollInfo.autoScroll) pane.refresh(); }, 100);
+            // [KO] 자동 스크롤 시 UI 갱신 루프 (자가 소멸 구조)
+            // [EN] Refresh UI loop during Auto Scroll (Self-destructive)
+            const timerId = setInterval(() => {
+                if (redGPUContext.destroyed) {
+                    clearInterval(timerId);
+                    return;
+                }
+                if (scrollInfo.autoScroll) pane.refresh();
+            }, 100);
         }
     });
 }

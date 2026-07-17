@@ -60,5 +60,6 @@ declare class IrradianceGenerator extends RedGPUObject {
      * [EN] Command encoder phase (default: RESOURCE)
      */
     render(sourceCubeTexture: GPUTexture, targetTexture: GPUTexture, phase?: CommandEncoderType): Promise<void>;
+    destroy(): void;
 }
 export default IrradianceGenerator;

@@ -105,10 +105,12 @@ const GuiRedGPUContext: React.FC<GuiRedGPUContextProps> = ({gui, redGPUContext})
 
         const RECT_DATA = {
             get screen() {
+                if (redGPUContext.destroyed) return 'RedGPUContext is destroyed';
                 const s = redGPUContext.screenRectObject;
                 return `x: ${s.x.toFixed(2)}, y: ${s.y.toFixed(2)}\nw: ${s.width.toFixed(2)}, h: ${s.height.toFixed(2)}`;
             },
             get pixel() {
+                if (redGPUContext.destroyed) return 'RedGPUContext is destroyed';
                 const p = redGPUContext.pixelRectObject;
                 return `x: ${p.x}, y: ${p.y}\nw: ${p.width}, h: ${p.height}`;
             }

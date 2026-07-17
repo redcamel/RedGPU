@@ -2,7 +2,6 @@ import RedGPUContext from "../../context/RedGPUContext";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import PackedTexture from "../../resources/texture/packedTexture/PackedTexture";
-import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from './fragment.wgsl';
 
 import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
@@ -174,10 +173,9 @@ const parseExtensionShaderCode = (source: string) => {
         return [textureDefine].join('\n')
     }).join('')
     const resultStr = source.replace(/#redgpu_include KHR_texture_transform/g, result)
-    // console.log('resultStr', resultStr)
     return resultStr
 }
-const SHADER_INFO = parseWGSL('PBR_MATERIAL', parseExtensionShaderCode(fragmentModuleSource))
+const FRAGMENT_SOURCE = parseExtensionShaderCode(fragmentModuleSource)
 
 /**
  * [KO] PBRMaterial 속성 인터페이스
@@ -711,7 +709,7 @@ class PBRMaterial extends AUVTransformBaseMaterial {
         super(
             redGPUContext,
             'PBR_MATERIAL',
-            SHADER_INFO,
+            FRAGMENT_SOURCE,
             2
         )
         this.initGPURenderInfos();

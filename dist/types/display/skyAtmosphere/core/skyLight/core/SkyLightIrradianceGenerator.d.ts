@@ -18,5 +18,6 @@ declare class SkyLightIrradianceGenerator extends ASkyAtmosphereLUTGenerator {
     get prefilteredTexture(): DirectCubeTexture;
     get lutTexture(): DirectCubeTexture;
     render(transmittance: DirectTexture, multiScat: DirectTexture, skyView: DirectTexture): Promise<void>;
+    destroy(): void;
 }
 export default SkyLightIrradianceGenerator;

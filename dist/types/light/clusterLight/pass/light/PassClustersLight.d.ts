@@ -44,5 +44,10 @@ declare class PassClustersLight extends RedGPUObject {
      * [EN] Executes the compute pass to calculate cluster lights.
      */
     render(): void;
+    /**
+     * [KO] PassClustersLight 인스턴스를 파기하고 할당된 GPUBuffer 및 파이프라인을 해제합니다.
+     * [EN] Destroys the PassClustersLight instance and releases allocated GPUBuffer and pipelines.
+     */
+    destroy(): void;
 }
 export default PassClustersLight;

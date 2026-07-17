@@ -3,19 +3,7 @@ import PBRMaterial from "../../../material/pbrMaterial/PBRMaterial";
 import Primitive from "../../../primitive/core/Primitive";
 import validatePositiveNumberRange from "../../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import ABaseMaterial from "../../../material/core/ABaseMaterial";
-import MESH_SHADER_INFO from "./shader/MESH_SHADER_INFO";
 
-const {
-    SHADER_INFO_PBR,
-    SHADER_INFO_BASIC,
-    SHADER_INFO_ONLY_FRAGMENT_PBR,
-    SHADER_INFO_ONLY_VERTEX_PBR,
-} = MESH_SHADER_INFO;
-
-const SOURCE_PBR = SHADER_INFO_PBR.shaderSourceVariant.getVariant('none')
-const SOURCE_BASIC = SHADER_INFO_BASIC.shaderSourceVariant.getVariant('none')
-const SOURCE_ONLY_FRAGMENT_PBR = SHADER_INFO_ONLY_FRAGMENT_PBR.shaderSourceVariant.getVariant('none')
-const SOURCE_ONLY_VERTEX_PBR = SHADER_INFO_ONLY_VERTEX_PBR.shaderSourceVariant.getVariant('none')
 /**
  * LOD에 사용되는 지오메트리 타입입니다.
  *
@@ -178,6 +166,19 @@ class LODManager {
     }
 
     #getLODVertexModuleSource(geometry: Geometry | Primitive, material: ABaseMaterial): string {
+
+        const {
+            SHADER_INFO_PBR,
+            SHADER_INFO_BASIC,
+            SHADER_INFO_ONLY_FRAGMENT_PBR,
+            SHADER_INFO_ONLY_VERTEX_PBR,
+        } = geometry.resourceManager;
+
+        const SOURCE_PBR = SHADER_INFO_PBR.shaderSourceVariant.getVariant('none')
+        const SOURCE_BASIC = SHADER_INFO_BASIC.shaderSourceVariant.getVariant('none')
+        const SOURCE_ONLY_FRAGMENT_PBR = SHADER_INFO_ONLY_FRAGMENT_PBR.shaderSourceVariant.getVariant('none')
+        const SOURCE_ONLY_VERTEX_PBR = SHADER_INFO_ONLY_VERTEX_PBR.shaderSourceVariant.getVariant('none')
+
         const isPbrVertex = geometry.vertexBuffer.interleavedStruct.label === 'PBR';
         const isPbrMaterial = material instanceof PBRMaterial;
         const isPBR = isPbrVertex && isPbrMaterial;

@@ -51,5 +51,10 @@ declare class ShadowManager {
      * [EN] RedGPUContext instance
      */
     update(redGPUContext: RedGPUContext): void;
+    /**
+     * [KO] 사용 중인 그림자 GPU 리소스를 해제합니다.
+     * [EN] Releases GPU resources in use for shadow rendering.
+     */
+    destroy(): void;
 }
 export default ShadowManager;

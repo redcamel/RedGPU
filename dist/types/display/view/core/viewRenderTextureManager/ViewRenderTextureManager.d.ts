@@ -140,5 +140,10 @@ declare class ViewRenderTextureManager extends RedGPUObject {
      * [EN] G-Buffer type constant
      */
     getGBufferResolveTextureView(type: GBUFFER_TYPE): GPUTextureView;
+    /**
+     * [KO] ViewRenderTextureManager 인스턴스를 파기하고 내부에 보관 중이던 G-Buffer 및 Depth 텍스처들을 물리적으로 해제합니다.
+     * [EN] Destroys the ViewRenderTextureManager instance and physically releases all G-Buffer and Depth textures held inside.
+     */
+    destroy(): void;
 }
 export default ViewRenderTextureManager;

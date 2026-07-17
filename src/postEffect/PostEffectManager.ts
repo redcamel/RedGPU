@@ -1,7 +1,6 @@
 import {mat4} from "gl-matrix";
 import View3D from "../display/view/View3D";
 import UniformBuffer from "../resources/buffer/uniformBuffer/UniformBuffer";
-import parseWGSL from "../resources/wgslParser/parseWGSL";
 import AMultiPassPostEffect from "./core/AMultiPassPostEffect";
 import ASinglePassPostEffect from "./core/ASinglePassPostEffect";
 import ShaderLibrary from "../systemCodeManager/ShaderLibrary";
@@ -14,6 +13,7 @@ import AutoExposure from "../camera/core/autoExposure/AutoExposure";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
 import PostEffectTexturePool from "./core/PostEffectTexturePool";
 import {IPostEffectResult} from "./core/types";
+import {keepLog} from "../utils";
 
 
 /**
@@ -87,6 +87,7 @@ class PostEffectManager {
     #gbufferBindGroup_swap0: GPUBindGroup;
     #gbufferBindGroup_swap1: GPUBindGroup;
     #prevMSAAID_for_gbuffer: string;
+    #destroyed: boolean = false
 
     /**
      * [KO] PostEffectManager 인스턴스를 생성합니다.
@@ -281,6 +282,44 @@ class PostEffectManager {
     get videoMemorySize(): number {
         this.#calcVideoMemory()
         return this.#videoMemorySize;
+    }
+
+    destroy() {
+        if (this.#destroyed) return;
+        this.#destroyed = true
+
+        // 1. 사용자 추가 이펙트들 파괴
+        this.#postEffects.forEach(effect => {
+            effect.destroy()
+        })
+        this.#postEffects = null
+
+        // 2. 내부 고정 멤버 필터들의 명시적 파괴 연동
+        if (this.#ssao) {
+            this.#ssao.destroy();
+            this.#ssao = null;
+        }
+        if (this.#ssr) {
+            this.#ssr.destroy();
+            this.#ssr = null;
+        }
+        if (this.#taaSharpenEffect) {
+            this.#taaSharpenEffect.destroy();
+            this.#taaSharpenEffect = null;
+        }
+        if (this.#autoExposure) {
+            this.#autoExposure.destroy();
+            this.#autoExposure = null;
+        }
+
+        // 3. 텍스처 풀 및 시스템 버퍼 파괴
+        this.#texturePool.clear();
+        this.#texturePool = null
+
+        this.#postEffectSystemUniformBuffer.destroy()
+        this.#postEffectSystemUniformBuffer = null
+        this.#postEffectSystemUniformBufferStructInfo = null
+        keepLog(`🧹 ${this.view.name} PostEffectManager destroy 완료`)
     }
 
     /**
@@ -679,7 +718,8 @@ class PostEffectManager {
 
     #init() {
         const {redGPUContext} = this.#view;
-        const SHADER_INFO = parseWGSL('POST_EFFECT_SYSTEM_UNIFORM', ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM)
+        const {resourceManager} = redGPUContext
+        const SHADER_INFO = resourceManager.wgslParser.parse('POST_EFFECT_SYSTEM_UNIFORM', ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM)
         const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
         const postEffectSystemUniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
         this.#postEffectSystemUniformBufferStructInfo = UNIFORM_STRUCT;

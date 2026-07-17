@@ -39,6 +39,7 @@ declare class Renderer {
      * [EN] User-defined callback function to be executed every frame
      */
     start(redGPUContext: RedGPUContext, render: Function): void;
+    destroy(redGPUContext?: RedGPUContext): void;
     /**
      * [KO] 렌더링 루프를 정지합니다.
      * [EN] Stops the rendering loop.

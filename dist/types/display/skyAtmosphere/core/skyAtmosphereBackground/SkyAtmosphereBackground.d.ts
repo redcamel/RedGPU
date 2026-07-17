@@ -14,5 +14,6 @@ declare class SkyAtmosphereBackground extends RedGPUObject {
     #private;
     constructor(redGPUContext: RedGPUContext);
     render(renderViewStateData: RenderViewStateData, transmittanceLUT: DirectTexture, multiScatLUT: DirectTexture, skyViewLUT: DirectTexture, sampler: Sampler): void;
+    destroy(): void;
 }
 export default SkyAtmosphereBackground;

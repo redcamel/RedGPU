@@ -1,7 +1,6 @@
 import IndexBuffer from "../../../buffer/indexBuffer/IndexBuffer";
 declare class ResourceStateIndexBuffer {
     #private;
-    static dirtyList: any[];
     buffer: IndexBuffer;
     label: string | number;
     uuid: string | number;

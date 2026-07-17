@@ -19,5 +19,6 @@ declare class AniTrack_GLTF {
     lastCachedItem: Float32Array | null;
     constructor(key: any, time: any, data: any, interpolation: any, targetMesh: Mesh, weightMeshes: any);
     renderWeight(redGPUContext: RedGPUContext, computePassEncoder: GPUComputePassEncoder, targetMesh: Mesh, interpolationValue: number, prevIDX: number, nextIDX: number): Promise<void>;
+    destroy(): void;
 }
 export default AniTrack_GLTF;

@@ -187,6 +187,35 @@ class ClusterLightManager extends RedGPUObject {
             this.#passClustersLight.render()
         }
     }
+
+    /**
+     * [KO] ClusterLightManager 인스턴스를 파기하고 버퍼 및 연산 서브 패스들을 정리합니다.
+     * [EN] Destroys the ClusterLightManager instance and cleans up buffers and computing sub-passes.
+     */
+    destroy(): void {
+        if (this.#clusterLightsBuffer) {
+            try {
+                this.#clusterLightsBuffer.destroy();
+            } catch (e) {
+                // 예외 처리
+            }
+            this.#clusterLightsBuffer = null;
+        }
+
+        if (this.#passClusterLightBound) {
+            this.#passClusterLightBound.destroy();
+            this.#passClusterLightBound = null;
+        }
+
+        if (this.#passClustersLight) {
+            this.#passClustersLight.destroy();
+            this.#passClustersLight = null;
+        }
+
+        this.#view = null;
+        this.#clusterLightsBufferData = null;
+        console.log("🧹 ClusterLightManager destroy 완료");
+    }
 }
 
 Object.freeze(ClusterLightManager)

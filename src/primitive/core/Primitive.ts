@@ -4,16 +4,17 @@ import IndexBuffer from "../../resources/buffer/indexBuffer/IndexBuffer";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexInterleavedStruct from "../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexInterleaveType from "../../resources/buffer/vertexBuffer/VertexInterleaveType";
-import validateRedGPUContext from "../../runtimeChecker/validateFunc/validateRedGPUContext";
 import AABB from "../../bound/AABB";
 import calculateGeometryAABB from "../../bound/math/calculateGeometryAABB";
 import GeometryGPURenderInfo from "./GeometryGPURenderInfo";
+import RedGPUObject from "../../base/RedGPUObject";
 
 /**
  * [KO] 모든 기본 도형(Primitive)의 기반이 되는 베이스 클래스입니다.
  * [EN] Base class for all primitive geometries.
  */
-class Primitive {
+class Primitive extends RedGPUObject {
+
     /**
      * [KO] 기본 정점 레이아웃 구조를 정적 상수로 캐싱합니다. (메모리 할당 최적화)
      */
@@ -32,7 +33,7 @@ class Primitive {
     #volume: AABB;
 
     constructor(redGPUContext: RedGPUContext, uniqueKey: string, makeData: () => Geometry) {
-        validateRedGPUContext(redGPUContext)
+        super(redGPUContext)
         const cachedBufferState = redGPUContext.resourceManager.cachedBufferState
         let geometry = cachedBufferState[uniqueKey]
         if (!geometry) {

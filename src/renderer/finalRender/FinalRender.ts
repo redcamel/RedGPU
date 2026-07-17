@@ -11,18 +11,21 @@ import {
 } from "../../material/core";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
 import Sampler from "../../resources/sampler/Sampler";
-import parseWGSL from "../../resources/wgslParser/parseWGSL";
+
 import fragmentModuleSource from './fragment.wgsl'
 import vertexModuleSource from './vertex.wgsl'
 
-const VERTEX_SHADER_INFO = parseWGSL('FINAL_RENDER_VERTEX', vertexModuleSource)
-const FRAGMENT_SHADER_INFO = parseWGSL('FINAL_RENDER_FRAGMENT', fragmentModuleSource)
-const VERTEX_UNIFORM_STRUCT = VERTEX_SHADER_INFO.uniforms.vertexUniforms
+
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_FINAL_RENDER'
 const FRAGMENT_SHADER_MODULE_NAME = 'FRAGMENT_MODULE_FINAL_RENDER'
 const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = 'VERTEX_BIND_GROUP_DESCRIPTOR_FINAL_RENDER'
 const FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME = 'FRAGMENT_BIND_GROUP_DESCRIPTOR_FINAL_RENDER'
 const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_FINAL_RENDER'
+
+export interface FinalRenderPassColorAttachment extends GPURenderPassColorAttachment {
+    postEffectView?: GPUTextureView;
+    pickingView?: GPUTextureView;
+}
 
 /**
  * Class representing the final rendering process.
@@ -45,8 +48,50 @@ class FinalRender {
     #fragmentBuffer: GPUBuffer[] = []
     #fragmentBufferData: Float32Array[] = []
     #lastUpdateMSAAID: string
+    #VERTEX_SHADER_INFO: any
+    #FRAGMENT_SHADER_INFO: any
+    #VERTEX_UNIFORM_STRUCT: any
 
     constructor() {
+    }
+
+    destroy(): void {
+        this.#FRAGMENT_SHADER_INFO = null
+        this.#VERTEX_SHADER_INFO = null
+        this.#VERTEX_UNIFORM_STRUCT = null
+        // 1. 생성된 모든 UniformBuffer들의 WebGPU 내부 자원 해제 및 배열 비우기
+        this.#vertexUniformBuffers.forEach(buffer => {
+            if (buffer) {
+                // UniformBuffer 클래스 내부에 자체 destroy가 있다면 호출, 없다면 gpuBuffer.destroy()
+                if (typeof buffer.destroy === 'function') buffer.destroy();
+                else if (buffer.gpuBuffer) buffer.gpuBuffer.destroy();
+            }
+        });
+        this.#vertexUniformBuffers = [];
+        this.#vertexUniformBindGroups = [];
+
+        // 2. Fragment Uniform Buffer(GPUBuffer) 해제 및 배열 비우기
+        this.#fragmentBuffer.forEach(buffer => {
+            if (buffer) buffer.destroy(); // WebGPU Buffer 명시적 파기
+        });
+        this.#fragmentBuffer = [];
+        this.#fragmentBufferData = [];
+
+        // 3. 내부 셰이더 모듈 및 파이프라인 참조 제거
+        this.#vertexShader = null;
+        this.#fragmentShader = null;
+        this.#pipeline = null;
+        this.#vertexState = null;
+
+        // 4. 레이아웃 및 샘플러 참조 해제
+        this.#vertexBindGroupLayout = null;
+        this.#fragmentBindGroupLayout = null;
+
+
+        // 5. WeakMap 캐시 배열 비우기
+        this.#fragmentBindGroupCache = [];
+
+        console.log('✅ FinalRender 인스턴스 자원 해제 완료');
     }
 
     /**
@@ -60,6 +105,8 @@ class FinalRender {
         const {msaaID,} = antialiasingManager
         const {pixelRectObject: canvasPixelRectObject} = sizeManager
         const {width: canvasW, height: canvasH} = canvasPixelRectObject
+
+
         if (canvasW === 0 || canvasH === 0) return
         //
         const dirtyMSAA = this.#lastUpdateMSAAID !== msaaID
@@ -76,8 +123,8 @@ class FinalRender {
                 redGPUContext,
                 finalRenderPassEnc,
                 viewList_renderPassDescriptorList.map((v: GPURenderPassDescriptor) => {
-                    const temp = v.colorAttachments[0]
-                    return temp.postEffectView || temp.pickingView || temp.resolveTarget || temp.view
+                    const temp = v.colorAttachments[0] as FinalRenderPassColorAttachment
+                    return (temp?.postEffectView || temp?.pickingView || temp?.resolveTarget || temp?.view) as GPUTextureView
                 }), canvasW, canvasH,
 
                 dirtyMSAA
@@ -143,8 +190,7 @@ class FinalRender {
             const vertexUniformBindGroup: GPUBindGroup = this.#vertexUniformBindGroups[index]
             gpuDevice.queue.writeBuffer(
                 vertexUniformBuffer.gpuBuffer,
-                VERTEX_UNIFORM_STRUCT.members.modelMatrix.uniformOffset,
-                // new VERTEX_UNIFORM_STRUCT.members.modelMatrix.View(projectionMatrix),
+                this.#VERTEX_UNIFORM_STRUCT.members.modelMatrix.uniformOffset,
                 projectionMatrix as Float32Array as BufferSource
             )
             //
@@ -190,16 +236,19 @@ class FinalRender {
      */
     #initGPUDetails(redGPUContext: RedGPUContext) {
         const {resourceManager,} = redGPUContext
+        this.#VERTEX_SHADER_INFO = resourceManager.wgslParser.parse('FINAL_RENDER_VERTEX', vertexModuleSource)
+        this.#FRAGMENT_SHADER_INFO = resourceManager.wgslParser.parse('FINAL_RENDER_FRAGMENT', fragmentModuleSource)
+        this.#VERTEX_UNIFORM_STRUCT = this.#VERTEX_SHADER_INFO.uniforms.vertexUniforms
         this.#vertexBindGroupLayout = resourceManager.createBindGroupLayout(
             'FINAL_RENDER_VERTEX_BIND_GROUP_LAYOUT',
-            getVertexBindGroupLayoutDescriptorFromShaderInfo(VERTEX_SHADER_INFO, 0)
+            getVertexBindGroupLayoutDescriptorFromShaderInfo(this.#VERTEX_SHADER_INFO, 0)
         )
         this.#vertexShader = resourceManager.createGPUShaderModule(VERTEX_SHADER_MODULE_NAME, {code: vertexModuleSource})
         this.#vertexState = {module: this.#vertexShader, entryPoint: 'main'}
         this.#fragmentShader = resourceManager.createGPUShaderModule(FRAGMENT_SHADER_MODULE_NAME, {code: fragmentModuleSource})
         this.#fragmentBindGroupLayout = resourceManager.createBindGroupLayout(
             'FINAL_RENDER_BIND_GROUP_LAYOUT',
-            getFragmentBindGroupLayoutDescriptorFromShaderInfo(FRAGMENT_SHADER_INFO, 1)
+            getFragmentBindGroupLayoutDescriptorFromShaderInfo(this.#FRAGMENT_SHADER_INFO, 1)
         )
         this.#sampler = new Sampler(redGPUContext, {minFilter: 'linear'})
     }
@@ -213,7 +262,7 @@ class FinalRender {
     #validateViewGpuDetails(redGPUContext: RedGPUContext, index: number) {
         const {gpuDevice} = redGPUContext
         if (!this.#vertexUniformBuffers[index]) {
-            const vertexUniformData = new ArrayBuffer(VERTEX_UNIFORM_STRUCT.arrayBufferByteLength)
+            const vertexUniformData = new ArrayBuffer(this.#VERTEX_UNIFORM_STRUCT.arrayBufferByteLength)
             const tVUniformBuffer: UniformBuffer = this.#vertexUniformBuffers[index] = new UniformBuffer(
                 redGPUContext,
                 vertexUniformData,

@@ -15,7 +15,6 @@ import ShaderLibrary from "../../systemCodeManager/ShaderLibrary";
 import CubeTexture from "../../resources/texture/CubeTexture";
 import DirectCubeTexture from "../../resources/texture/DirectCubeTexture";
 import IBL from "../../resources/texture/ibl/IBL";
-import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import DrawDebuggerDirectionalLight from "../drawDebugger/light/DrawDebuggerDirectionalLight";
 import Scene from "../scene/Scene";
 import SkyBox from "../skyboxs/skyBox/SkyBox";
@@ -27,9 +26,9 @@ import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 import SystemUniformUpdater from "../../renderer/helperFunc/SystemUniformUpdater";
 import updateSystemUniformData from "../../renderer/helperFunc/updateSystemUniformData";
 import ClusterLightManager from "../../light/core/ClusterLightManager";
+import {keepLog} from "../../utils";
 
-const SHADER_INFO = parseWGSL('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
-const UNIFORM_STRUCT = SHADER_INFO.uniforms.systemUniforms;
+
 let temp = mat4.create()
 let temp2 = mat4.create()
 let temp3 = mat4.create()
@@ -56,14 +55,14 @@ let temp3 = mat4.create()
  * @category View
  */
 class View3D extends AView {
-    #systemUniform_Vertex_StructInfo: any = UNIFORM_STRUCT;
+    #systemUniform_Vertex_StructInfo: any;
     #systemUniform_Vertex_UniformBindGroup: GPUBindGroup;
     #systemUniform_Vertex_UniformBuffer: UniformBuffer;
     #skybox: SkyBox
     #skyAtmosphere: SkyAtmosphere
     #ibl: IBL
     readonly #renderViewStateData: RenderViewStateData
-    readonly #postEffectManager: PostEffectManager
+    #postEffectManager: PostEffectManager
     readonly #toneMappingManager: ToneMappingManager
     readonly #viewRenderTextureManager: ViewRenderTextureManager
     #prevInfoList = {}
@@ -97,6 +96,8 @@ class View3D extends AView {
      */
     constructor(redGPUContext: RedGPUContext, scene: Scene, camera: PerspectiveCamera | OrthographicCamera | AController | Camera2D, name?: string) {
         super(redGPUContext, scene, camera, name)
+        const SHADER_INFO = this.resourceManager.wgslParser.parse('VIEW3D_SYSTEM_UNIFORM', ShaderLibrary.SYSTEM_UNIFORM)
+        this.#systemUniform_Vertex_StructInfo = SHADER_INFO.uniforms.systemUniforms
         this.#init()
         this.#clusterLightManager = new ClusterLightManager(this)
         this.#viewRenderTextureManager = new ViewRenderTextureManager(this)
@@ -261,6 +262,41 @@ class View3D extends AView {
      */
     get prevNoneJitterProjectionViewMatrix(): mat4 {
         return this.redGPUContext.antialiasingManager.useTAA ? this.taa.prevNoneJitterProjectionViewMatrix : this.#noneJitterProjectionViewMatrix;
+    }
+
+    destroy() {
+        super.destroy();
+
+        if (this.#systemUniform_Vertex_UniformBuffer) {
+            this.#systemUniform_Vertex_UniformBuffer.destroy();
+            this.#systemUniform_Vertex_UniformBuffer = null;
+        }
+
+        this.#prevInfoList = []
+        this.#systemUniform_Vertex_UniformBindGroup = null
+        if (this.#viewRenderTextureManager) {
+            this.#viewRenderTextureManager.destroy();
+        }
+
+        if (this.#clusterLightManager) {
+            this.#clusterLightManager.destroy();
+            this.#clusterLightManager = null;
+        }
+
+
+        this.#postEffectManager?.destroy()
+        this.#postEffectManager = null
+
+        if (this.#toneMappingManager) {
+            this.#toneMappingManager.destroy();
+        }
+
+        if (this.#skybox) {
+            this.#skybox.destroy();
+            this.skybox = null;
+        }
+
+        keepLog(`🧹 ${this.name} destroy 완료`)
     }
 
     /**
@@ -529,7 +565,7 @@ class View3D extends AView {
     }
 
     #init() {
-        const systemUniform_Vertex_UniformData = new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength)
+        const systemUniform_Vertex_UniformData = new ArrayBuffer(this.#systemUniform_Vertex_StructInfo.arrayBufferByteLength)
         this.#systemUniform_Vertex_UniformBuffer = new UniformBuffer(this.redGPUContext, systemUniform_Vertex_UniformData, 'SYSTEM_UNIFORM_BUFFER_VERTEX', 'SYSTEM_UNIFORM_BUFFER_VERTEX');
         this.#shadowDepthSampler = new Sampler(this.redGPUContext, {
             addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,

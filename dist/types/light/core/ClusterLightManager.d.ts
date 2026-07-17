@@ -54,5 +54,10 @@ declare class ClusterLightManager extends RedGPUObject {
      * [EN] Calculates PointLight and SpotLight data and uploads them to the GPU buffer.
      */
     updateClusterLights(): void;
+    /**
+     * [KO] ClusterLightManager 인스턴스를 파기하고 버퍼 및 연산 서브 패스들을 정리합니다.
+     * [EN] Destroys the ClusterLightManager instance and cleans up buffers and computing sub-passes.
+     */
+    destroy(): void;
 }
 export default ClusterLightManager;

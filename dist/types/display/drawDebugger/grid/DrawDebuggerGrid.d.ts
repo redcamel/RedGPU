@@ -29,5 +29,10 @@ declare class DrawDebuggerGrid extends BaseObject {
     set size(value: number);
     get lineColor(): ColorRGBA;
     render(renderViewStateData: RenderViewStateData): void;
+    /**
+     * [KO] DrawDebuggerGrid를 파기하고 드로우 커맨드 슬롯과 자원 참조를 해제합니다.
+     * [EN] Destroys the DrawDebuggerGrid and releases the draw command slot and resource references.
+     */
+    destroy(): void;
 }
 export default DrawDebuggerGrid;

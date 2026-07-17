@@ -1,5 +1,5 @@
-import * as RedGPU from "../../../../dist/index.js?t=1783496184998";
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1783496184998";
+import * as RedGPU from "../../../../dist/index.js?t=1784264152422";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264152422";
 
 /**
  * [KO] Distance Culling 예제
@@ -145,19 +145,11 @@ const renderTestPane = (redGPUContext, meshes, view) => {
             // [KO] 렌더링 통계
             // [EN] Rendering Statistics
             const statsFolder = pane.addFolder({title: 'Statistics', expanded: true});
-            const drawCallsBinding = statsFolder.addBinding(config, 'drawCalls', {
+            statsFolder.addBinding(view.renderViewStateData.renderResults, 'numDrawCalls', {
                 readonly: true,
+                interval: 100,
                 label: 'Current DrawCalls'
             });
-
-            // [KO] 실시간 드로우콜 모니터링
-            // [EN] Real-time draw call monitoring
-            const updateStats = () => {
-                config.drawCalls = view.renderViewStateData.renderResults.numDrawCalls;
-                drawCallsBinding.refresh();
-                requestAnimationFrame(updateStats);
-            };
-            updateStats();
 
             // [KO] 카메라 유틸리티
             // [EN] Camera Utilities

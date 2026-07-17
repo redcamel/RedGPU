@@ -1,7 +1,6 @@
 import UniformBuffer from "../../../buffer/uniformBuffer/UniformBuffer";
 
 class ResourceStateUniformBuffer {
-    static dirtyList = []
     buffer: UniformBuffer
     uuid: string | number
     #useNum: number = 0
@@ -17,7 +16,6 @@ class ResourceStateUniformBuffer {
 
     set useNum(value: number) {
         this.#useNum = value;
-        ResourceStateUniformBuffer.dirtyList.push(this)
     }
 }
 

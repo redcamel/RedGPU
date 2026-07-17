@@ -12,7 +12,6 @@ import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "./getBindGroup
 import definePositiveNumber from "../../defineProperty/funcs/number/definePositiveNumber";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import defineColorRGBA from "../../defineProperty/funcs/color/defineColorRGBA";
-import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
 import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 
 
@@ -157,9 +156,9 @@ abstract class ABaseMaterial extends ResourceBase {
      * @param moduleName -
      * [KO] 머티리얼 모듈명
      * [EN] Material module name
-     * @param SHADER_INFO -
-     * [KO] 파싱된 WGSL 셰이더 정보
-     * [EN] Parsed WGSL shader info
+     * @param fragmentSource -
+     * [KO] 프래그먼트 셰이더 소스 문자열
+     * [EN] Fragment shader source string
      * @param targetGroupIndex -
      * [KO] 바인드 그룹 인덱스
      * [EN] Bind group index
@@ -167,11 +166,12 @@ abstract class ABaseMaterial extends ResourceBase {
     protected constructor(
         redGPUContext: RedGPUContext,
         moduleName: string,
-        SHADER_INFO: any,
+        fragmentSource: string,
         targetGroupIndex: number
     ) {
         super(redGPUContext)
         const {resourceManager} = redGPUContext
+        const SHADER_INFO = resourceManager.wgslParser.parse(moduleName, fragmentSource)
         // console.log('SHADER_INFO', moduleName, SHADER_INFO)
         this.#MODULE_NAME = moduleName
         this.#FRAGMENT_SHADER_MODULE_NAME = `FRAGMENT_MODULE_${this.#MODULE_NAME}`
@@ -371,6 +371,7 @@ abstract class ABaseMaterial extends ResourceBase {
      * @protected
      */
     _updateFragmentState() {
+        if (this.redGPUContext.destroyed) return;
         const {gpuDevice, resourceManager} = this.redGPUContext
         this.#checkVariant()
         const entries: GPUBindGroupEntry[] = []
@@ -483,8 +484,9 @@ abstract class ABaseMaterial extends ResourceBase {
      * @protected
      */
     _updateBaseProperty() {
-
-        const {members} = this['isPBRMaterial'] ? ResourceManager.GLOBAL_FRAGMENT_STRUCT_PBR : this['isBuiltInMaterial'] ? ResourceManager.GLOBAL_FRAGMENT_STRUCT_BUILT_IN : this.gpuRenderInfo.fragmentUniformInfo
+        if (this.redGPUContext.destroyed) return;
+        const {resourceManager} = this
+        const {members} = this['isPBRMaterial'] ? resourceManager.GLOBAL_FRAGMENT_STRUCT_PBR : this['isBuiltInMaterial'] ? resourceManager.GLOBAL_FRAGMENT_STRUCT_BUILT_IN : this.gpuRenderInfo.fragmentUniformInfo
         for (const k in members) {
             const property = this[k]
             if (property instanceof ColorRGBA) {
@@ -509,6 +511,29 @@ abstract class ABaseMaterial extends ResourceBase {
      */
     getGPUResourceSampler(sampler: Sampler) {
         return sampler?.gpuSampler || this.#basicGPUSampler
+    }
+
+    /**
+     * [KO] ABaseMaterial 인스턴스를 파기하고 할당된 유니폼 버퍼 및 글로벌 프래그먼트 슬롯을 즉시 해제합니다.
+     * [EN] Destroys the ABaseMaterial instance and immediately releases the allocated uniform buffers and global fragment slots.
+     */
+    destroy() {
+        if (this.#globalFragmentSlotIndex !== -1) {
+            if (this['isPBRMaterial']) {
+                this.redGPUContext.globalFragmentSSBO_PBR.freeSlot(this.#globalFragmentSlotIndex);
+            } else if (this['isBuiltInMaterial']) {
+                this.redGPUContext.globalFragmentSSBO_BuiltIn.freeSlot(this.#globalFragmentSlotIndex);
+            }
+            this.#globalFragmentSlotIndex = -1;
+        }
+
+        if (this.gpuRenderInfo) {
+            this.gpuRenderInfo.destroy();
+            this.gpuRenderInfo = null;
+        }
+        this.#TEXTURE_STRUCT = null;
+        this.#SAMPLER_STRUCT = null;
+        console.log(`🧹 ABaseMaterial destroy 완료: ${this.MODULE_NAME}`);
     }
 
     /**
