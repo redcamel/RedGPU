@@ -8,7 +8,7 @@
 
 > `const` **getTBNFromCotangent**: `string` = `getTBNFromCotangent_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:853](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/systemCodeManager/ShaderLibrary.ts#L853)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:853](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/systemCodeManager/ShaderLibrary.ts#L853)
 
 픽셀의 미분(Derivatives)을 사용하여 탄젠트와 비탄젠트를 동적으로 계산하고 TBN 행렬을 구축합니다.
 

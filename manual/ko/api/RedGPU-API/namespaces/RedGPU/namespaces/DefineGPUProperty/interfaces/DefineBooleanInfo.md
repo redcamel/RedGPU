@@ -6,7 +6,7 @@
 
 # Interface: DefineBooleanInfo
 
-Defined in: [src/defineProperty/funcs/defineBoolean.ts:12](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/defineProperty/funcs/defineBoolean.ts#L12)
+Defined in: [src/defineProperty/funcs/defineBoolean.ts:12](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/defineProperty/funcs/defineBoolean.ts#L12)
 
 `defineBoolean` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
 
@@ -20,7 +20,7 @@ GPU는 불리언(Boolean)을 직접 지원하지 않으므로, 유니폼 버퍼�
 
 > **key**: `string`
 
-Defined in: [src/defineProperty/funcs/defineBoolean.ts:17](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/defineProperty/funcs/defineBoolean.ts#L17)
+Defined in: [src/defineProperty/funcs/defineBoolean.ts:17](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/defineProperty/funcs/defineBoolean.ts#L17)
 
 속성의 키 이름. 대상 객체 프로토타입에 이 이름으로 정의됩니다.
 
@@ -30,6 +30,6 @@ Defined in: [src/defineProperty/funcs/defineBoolean.ts:17](https://github.com/re
 
 > **value**: `boolean`
 
-Defined in: [src/defineProperty/funcs/defineBoolean.ts:22](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/defineProperty/funcs/defineBoolean.ts#L22)
+Defined in: [src/defineProperty/funcs/defineBoolean.ts:22](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/defineProperty/funcs/defineBoolean.ts#L22)
 
 속성의 초기 불리언 값.

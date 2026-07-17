@@ -10,8 +10,6 @@ Provides core functionalities of the WGSL parser (preprocessing, variant generat
 
 ## Other
 
-- [ConditionalBlock](interfaces/ConditionalBlock.md)
-- [PreprocessedWGSLResult](interfaces/PreprocessedWGSLResult.md)
 - [TypedArrayConstructor](type-aliases/TypedArrayConstructor.md)
 - [TypeUniform](type-aliases/TypeUniform.md)
 
@@ -19,5 +17,4 @@ Provides core functionalities of the WGSL parser (preprocessing, variant generat
 
 - [ShaderVariantGenerator](classes/ShaderVariantGenerator.md)
 - [WGSLUniformTypes](classes/WGSLUniformTypes.md)
-- [ensureVertexIndexBuiltin](functions/ensureVertexIndexBuiltin.md)
-- [preprocessWGSL](functions/preprocessWGSL.md)
+- [~~ensureVertexIndexBuiltin~~](functions/ensureVertexIndexBuiltin.md)

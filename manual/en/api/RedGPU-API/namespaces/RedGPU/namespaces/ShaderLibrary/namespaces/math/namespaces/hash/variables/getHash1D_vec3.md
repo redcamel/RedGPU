@@ -8,7 +8,7 @@
 
 > `const` **getHash1D\_vec3**: `string` = `getHash1D_vec3_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:136](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/systemCodeManager/ShaderLibrary.ts#L136)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:136](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/systemCodeManager/ShaderLibrary.ts#L136)
 
 Generates a 1D random number (0.0 ~ 1.0) by converting a 3D vector to integers. (Stable Grid-based)
 

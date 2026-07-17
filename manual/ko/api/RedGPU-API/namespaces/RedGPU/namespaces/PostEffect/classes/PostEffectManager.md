@@ -6,7 +6,7 @@
 
 # Class: PostEffectManager
 
-Defined in: [src/postEffect/PostEffectManager.ts:37](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L37)
+Defined in: [src/postEffect/PostEffectManager.ts:37](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L37)
 
 후처리 이펙트(PostEffect) 관리 클래스입니다.
 
@@ -27,7 +27,7 @@ view.postEffectManager.addEffect(effect);
 
 > **new PostEffectManager**(`view`): `PostEffectManager`
 
-Defined in: [src/postEffect/PostEffectManager.ts:99](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L99)
+Defined in: [src/postEffect/PostEffectManager.ts:100](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L100)
 
 PostEffectManager 인스턴스를 생성합니다.
 
@@ -49,7 +49,7 @@ PostEffectManager 인스턴스를 생성합니다.
 
 > **get** **autoExposure**(): [`AutoExposure`](../../Camera/namespaces/Core/classes/AutoExposure.md)
 
-Defined in: [src/postEffect/PostEffectManager.ts:150](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L150)
+Defined in: [src/postEffect/PostEffectManager.ts:151](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L151)
 
 자동 노출(Auto Exposure) 인스턴스를 반환합니다.
 
@@ -67,7 +67,7 @@ Defined in: [src/postEffect/PostEffectManager.ts:150](https://github.com/redcame
 
 > **get** **effectList**(): ([`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md) \| [`AMultiPassPostEffect`](../namespaces/Core/classes/AMultiPassPostEffect.md))[]
 
-Defined in: [src/postEffect/PostEffectManager.ts:269](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L269)
+Defined in: [src/postEffect/PostEffectManager.ts:270](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L270)
 
 등록된 이펙트 리스트를 반환합니다.
 
@@ -85,7 +85,7 @@ Defined in: [src/postEffect/PostEffectManager.ts:269](https://github.com/redcame
 
 > **get** **gbufferBindGroup**(): `GPUBindGroup`
 
-Defined in: [src/postEffect/PostEffectManager.ts:126](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L126)
+Defined in: [src/postEffect/PostEffectManager.ts:127](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L127)
 
 현재 스왑 인덱스에 맞는 공유 G-Buffer 바인드 그룹을 반환합니다.
 
@@ -103,7 +103,7 @@ Defined in: [src/postEffect/PostEffectManager.ts:126](https://github.com/redcame
 
 > **get** **gbufferBindGroupLayout**(): `GPUBindGroupLayout`
 
-Defined in: [src/postEffect/PostEffectManager.ts:114](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L114)
+Defined in: [src/postEffect/PostEffectManager.ts:115](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L115)
 
 현재 MSAA 상태에 맞는 표준 G-Buffer 바인드 그룹 레이아웃을 반환합니다.
 
@@ -121,7 +121,7 @@ G-Buffer 바인드 그룹 레이아웃
 
 > **get** **postEffectSystemUniformBuffer**(): [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/postEffect/PostEffectManager.ts:245](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L245)
+Defined in: [src/postEffect/PostEffectManager.ts:246](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L246)
 
 시스템 유니폼 버퍼를 반환합니다.
 
@@ -139,7 +139,7 @@ UniformBuffer 인스턴스
 
 > **get** **ssao**(): `SSAO`
 
-Defined in: [src/postEffect/PostEffectManager.ts:190](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L190)
+Defined in: [src/postEffect/PostEffectManager.ts:191](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L191)
 
 SSAO 이펙트 인스턴스를 반환합니다.
 
@@ -157,7 +157,7 @@ SSAO 인스턴스
 
 > **get** **ssr**(): `SSR`
 
-Defined in: [src/postEffect/PostEffectManager.ts:230](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L230)
+Defined in: [src/postEffect/PostEffectManager.ts:231](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L231)
 
 SSR 이펙트 인스턴스를 반환합니다.
 
@@ -175,7 +175,7 @@ SSR 인스턴스
 
 > **get** **texturePool**(): [`PostEffectTexturePool`](../namespaces/Core/classes/PostEffectTexturePool.md)
 
-Defined in: [src/postEffect/PostEffectManager.ts:138](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L138)
+Defined in: [src/postEffect/PostEffectManager.ts:139](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L139)
 
 텍스처 풀 인스턴스를 반환합니다.
 
@@ -193,7 +193,7 @@ Defined in: [src/postEffect/PostEffectManager.ts:138](https://github.com/redcame
 
 > **get** **useSSAO**(): `boolean`
 
-Defined in: [src/postEffect/PostEffectManager.ts:165](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L165)
+Defined in: [src/postEffect/PostEffectManager.ts:166](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L166)
 
 SSAO 사용 여부를 반환합니다.
 
@@ -207,7 +207,7 @@ SSAO 사용 여부
 
 > **set** **useSSAO**(`value`): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:177](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L177)
+Defined in: [src/postEffect/PostEffectManager.ts:178](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L178)
 
 SSAO 사용 여부를 설정합니다.
 
@@ -229,7 +229,7 @@ SSAO 사용 여부를 설정합니다.
 
 > **get** **useSSR**(): `boolean`
 
-Defined in: [src/postEffect/PostEffectManager.ts:205](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L205)
+Defined in: [src/postEffect/PostEffectManager.ts:206](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L206)
 
 SSR 사용 여부를 반환합니다.
 
@@ -243,7 +243,7 @@ SSR 사용 여부
 
 > **set** **useSSR**(`value`): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:217](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L217)
+Defined in: [src/postEffect/PostEffectManager.ts:218](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L218)
 
 SSR 사용 여부를 설정합니다.
 
@@ -265,7 +265,7 @@ SSR 사용 여부를 설정합니다.
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/postEffect/PostEffectManager.ts:281](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L281)
+Defined in: [src/postEffect/PostEffectManager.ts:282](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L282)
 
 비디오 메모리 사용량을 반환합니다.
 
@@ -283,7 +283,7 @@ Defined in: [src/postEffect/PostEffectManager.ts:281](https://github.com/redcame
 
 > **get** **view**(): [`View3D`](../../Display/classes/View3D.md)
 
-Defined in: [src/postEffect/PostEffectManager.ts:257](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L257)
+Defined in: [src/postEffect/PostEffectManager.ts:258](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L258)
 
 연결된 View3D 인스턴스를 반환합니다.
 
@@ -299,7 +299,7 @@ View3D 인스턴스
 
 > **addEffect**(`v`): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:299](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L299)
+Defined in: [src/postEffect/PostEffectManager.ts:338](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L338)
 
 이펙트를 추가합니다.
 
@@ -324,9 +324,21 @@ view.postEffectManager.addEffect(new RedGPU.PostEffect.Bloom(redGPUContext));
 
 > **clear**(): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:508](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L508)
+Defined in: [src/postEffect/PostEffectManager.ts:547](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L547)
 
 모든 이펙트 리소스를 정리합니다.
+
+#### Returns
+
+`void`
+
+***
+
+### destroy()
+
+> **destroy**(): `void`
+
+Defined in: [src/postEffect/PostEffectManager.ts:287](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L287)
 
 #### Returns
 
@@ -338,7 +350,7 @@ Defined in: [src/postEffect/PostEffectManager.ts:508](https://github.com/redcame
 
 > **getEffectAt**(`index`): [`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md) \| [`AMultiPassPostEffect`](../namespaces/Core/classes/AMultiPassPostEffect.md)
 
-Defined in: [src/postEffect/PostEffectManager.ts:314](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L314)
+Defined in: [src/postEffect/PostEffectManager.ts:353](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L353)
 
 특정 인덱스의 이펙트를 반환합니다.
 
@@ -360,7 +372,7 @@ Defined in: [src/postEffect/PostEffectManager.ts:314](https://github.com/redcame
 
 > **removeAllEffect**(): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:353](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L353)
+Defined in: [src/postEffect/PostEffectManager.ts:392](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L392)
 
 모든 이펙트를 제거합니다.
 
@@ -374,7 +386,7 @@ Defined in: [src/postEffect/PostEffectManager.ts:353](https://github.com/redcame
 
 > **removeEffect**(`v`): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:326](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L326)
+Defined in: [src/postEffect/PostEffectManager.ts:365](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L365)
 
 특정 이펙트를 제거합니다.
 
@@ -394,7 +406,7 @@ Defined in: [src/postEffect/PostEffectManager.ts:326](https://github.com/redcame
 
 > **removeEffectAt**(`index`): `void`
 
-Defined in: [src/postEffect/PostEffectManager.ts:342](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L342)
+Defined in: [src/postEffect/PostEffectManager.ts:381](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L381)
 
 특정 인덱스의 이펙트를 제거합니다.
 
@@ -414,7 +426,7 @@ Defined in: [src/postEffect/PostEffectManager.ts:342](https://github.com/redcame
 
 > **render**(): [`IPostEffectResult`](../namespaces/Core/interfaces/IPostEffectResult.md)
 
-Defined in: [src/postEffect/PostEffectManager.ts:368](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/postEffect/PostEffectManager.ts#L368)
+Defined in: [src/postEffect/PostEffectManager.ts:407](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/PostEffectManager.ts#L407)
 
 후처리 파이프라인을 렌더링합니다.
 

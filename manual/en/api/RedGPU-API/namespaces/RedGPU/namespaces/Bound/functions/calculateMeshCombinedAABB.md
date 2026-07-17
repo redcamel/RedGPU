@@ -8,7 +8,7 @@
 
 > **calculateMeshCombinedAABB**(`mesh`): [`AABB`](../classes/AABB.md)
 
-Defined in: [src/bound/math/calculateMeshCombinedAABB.ts:24](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/bound/math/calculateMeshCombinedAABB.ts#L24)
+Defined in: [src/bound/math/calculateMeshCombinedAABB.ts:24](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/math/calculateMeshCombinedAABB.ts#L24)
 
 Calculates a combined AABB encompassing the mesh and all its children.
 

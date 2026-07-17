@@ -8,7 +8,7 @@
 
 > `const` **getViewPositionFromDepth**: `string` = `getViewPositionFromDepth_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:731](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/systemCodeManager/ShaderLibrary.ts#L731)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:731](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/systemCodeManager/ShaderLibrary.ts#L731)
 
 Reconstructs view (camera) space position from depth information.
 

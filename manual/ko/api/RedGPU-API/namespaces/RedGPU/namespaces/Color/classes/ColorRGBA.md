@@ -6,7 +6,7 @@
 
 # Class: ColorRGBA
 
-Defined in: [src/color/ColorRGBA.ts:35](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGBA.ts#L35)
+Defined in: [src/color/ColorRGBA.ts:35](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGBA.ts#L35)
 
 빨강, 초록, 파랑, 알파(투명도) 값을 가진 색상을 나타내는 클래스입니다.
 
@@ -38,7 +38,7 @@ const normalized = color.rgbaNormal; // [1, 0.34, 0.2, 0.7]
 
 > **new ColorRGBA**(`r?`, `g?`, `b?`, `a?`, `onChange?`): `ColorRGBA`
 
-Defined in: [src/color/ColorRGBA.ts:66](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGBA.ts#L66)
+Defined in: [src/color/ColorRGBA.ts:66](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGBA.ts#L66)
 
 ColorRGBA 클래스의 새 인스턴스를 생성합니다.
 ```typescript
@@ -75,7 +75,7 @@ RGB 값이 0-255 범위를 벗어나거나 알파 값이 0-1 범위를 벗어나
 
 > **get** **a**(): `number`
 
-Defined in: [src/color/ColorRGBA.ts:84](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGBA.ts#L84)
+Defined in: [src/color/ColorRGBA.ts:84](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGBA.ts#L84)
 
 알파(투명도) 구성 요소를 가져옵니다.
 ```typescript
@@ -92,7 +92,7 @@ const a = color.a;
 
 > **set** **a**(`value`): `void`
 
-Defined in: [src/color/ColorRGBA.ts:102](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGBA.ts#L102)
+Defined in: [src/color/ColorRGBA.ts:102](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGBA.ts#L102)
 
 알파(투명도) 구성 요소를 설정합니다.
 ```typescript
@@ -121,7 +121,7 @@ color.a = 0.5;
 
 > **get** **rgba**(): `number`[]
 
-Defined in: [src/color/ColorRGBA.ts:120](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGBA.ts#L120)
+Defined in: [src/color/ColorRGBA.ts:120](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGBA.ts#L120)
 
 색상의 RGBA 값을 포함하는 배열을 반환합니다.
 ```typescript
@@ -143,7 +143,7 @@ console.log(color.rgba); // [255, 128, 0, 0.8]
 
 > **get** **rgbaNormal**(): `number`[]
 
-Defined in: [src/color/ColorRGBA.ts:139](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGBA.ts#L139)
+Defined in: [src/color/ColorRGBA.ts:139](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGBA.ts#L139)
 
 정규화된 RGBA 값을 배열로 반환합니다.
 
@@ -167,7 +167,7 @@ console.log(color.rgbaNormal); // [1, 0.501, 0, 0.8]
 
 > **get** **rgbaNormalLinear**(): `number`[]
 
-Defined in: [src/color/ColorRGBA.ts:155](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGBA.ts#L155)
+Defined in: [src/color/ColorRGBA.ts:155](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGBA.ts#L155)
 
 감마 보정된(Linear) 정규화된 RGBA 값을 배열로 반환합니다.
 ```typescript
@@ -187,7 +187,7 @@ console.log(color.rgbaNormalLinear);
 
 > **setColorByRGBA**(`r`, `g`, `b`, `a`): `void`
 
-Defined in: [src/color/ColorRGBA.ts:188](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGBA.ts#L188)
+Defined in: [src/color/ColorRGBA.ts:188](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGBA.ts#L188)
 
 RGBA 값을 사용하여 객체의 색상을 설정합니다.
 ```typescript
@@ -218,7 +218,7 @@ RGBA 색상 값이 유효하지 않으면 오류가 발생합니다.
 
 > **setColorByRGBAString**(`rgbaString`): `void`
 
-Defined in: [src/color/ColorRGBA.ts:214](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGBA.ts#L214)
+Defined in: [src/color/ColorRGBA.ts:214](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGBA.ts#L214)
 
 RGBA 문자열을 사용하여 객체의 색상을 설정합니다.
 ```typescript
@@ -258,7 +258,7 @@ color.setColorByRGBAString('rgba(255, 128, 0, .5)');
 
 > **get** **b**(): `number`
 
-Defined in: [src/color/ColorRGB.ts:154](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGB.ts#L154)
+Defined in: [src/color/ColorRGB.ts:154](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGB.ts#L154)
 
 파란색 구성 요소를 가져옵니다.
 ```typescript
@@ -275,7 +275,7 @@ const b = color.b;
 
 > **set** **b**(`value`): `void`
 
-Defined in: [src/color/ColorRGB.ts:172](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGB.ts#L172)
+Defined in: [src/color/ColorRGB.ts:172](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGB.ts#L172)
 
 파란색 구성 요소를 설정합니다.
 ```typescript
@@ -308,7 +308,7 @@ color.b = 255;
 
 > **get** **g**(): `number`
 
-Defined in: [src/color/ColorRGB.ts:119](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGB.ts#L119)
+Defined in: [src/color/ColorRGB.ts:119](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGB.ts#L119)
 
 초록색 구성 요소를 가져옵니다.
 ```typescript
@@ -325,7 +325,7 @@ const g = color.g;
 
 > **set** **g**(`value`): `void`
 
-Defined in: [src/color/ColorRGB.ts:137](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGB.ts#L137)
+Defined in: [src/color/ColorRGB.ts:137](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGB.ts#L137)
 
 초록색 구성 요소를 설정합니다.
 ```typescript
@@ -358,7 +358,7 @@ color.g = 255;
 
 > **get** **hex**(): `string`
 
-Defined in: [src/color/ColorRGB.ts:242](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGB.ts#L242)
+Defined in: [src/color/ColorRGB.ts:242](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGB.ts#L242)
 
 RGB 색상의 16진수 표현을 반환합니다.
 ```typescript
@@ -384,7 +384,7 @@ console.log(color.hex); // "#FF8000"
 
 > **get** **r**(): `number`
 
-Defined in: [src/color/ColorRGB.ts:84](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGB.ts#L84)
+Defined in: [src/color/ColorRGB.ts:84](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGB.ts#L84)
 
 빨간색 구성 요소를 가져옵니다.
 ```typescript
@@ -401,7 +401,7 @@ const r = color.r;
 
 > **set** **r**(`value`): `void`
 
-Defined in: [src/color/ColorRGB.ts:102](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGB.ts#L102)
+Defined in: [src/color/ColorRGB.ts:102](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGB.ts#L102)
 
 빨간색 구성 요소를 설정합니다.
 ```typescript
@@ -434,7 +434,7 @@ color.r = 255;
 
 > **get** **rgb**(): `number`[]
 
-Defined in: [src/color/ColorRGB.ts:190](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGB.ts#L190)
+Defined in: [src/color/ColorRGB.ts:190](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGB.ts#L190)
 
 색상의 RGB 값을 포함하는 배열을 반환합니다.
 ```typescript
@@ -460,7 +460,7 @@ console.log(color.rgb); // [255, 128, 0]
 
 > **get** **rgbNormal**(): `number`[]
 
-Defined in: [src/color/ColorRGB.ts:206](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGB.ts#L206)
+Defined in: [src/color/ColorRGB.ts:206](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGB.ts#L206)
 
 정규화된 RGB 값을 배열로 반환합니다. 각 값은 0에서 1 사이로 정규화됩니다.
 ```typescript
@@ -486,7 +486,7 @@ console.log(color.rgbNormal); // [1, 0.501, 0]
 
 > **get** **rgbNormalLinear**(): `number`[]
 
-Defined in: [src/color/ColorRGB.ts:222](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGB.ts#L222)
+Defined in: [src/color/ColorRGB.ts:222](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGB.ts#L222)
 
 감마 보정된(Linear) 정규화된 RGB 값을 배열로 반환합니다.
 ```typescript
@@ -510,7 +510,7 @@ console.log(color.rgbNormalLinear);
 
 > **setColorByHEX**(`hexColor`): `void`
 
-Defined in: [src/color/ColorRGB.ts:288](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGB.ts#L288)
+Defined in: [src/color/ColorRGB.ts:288](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGB.ts#L288)
 
 16진수 색상 코드를 사용하여 객체의 색상을 설정합니다.
 ```typescript
@@ -543,7 +543,7 @@ color.setColorByHEX(0xFF8000);
 
 > **setColorByRGB**(`r`, `g`, `b`): `void`
 
-Defined in: [src/color/ColorRGB.ts:267](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGB.ts#L267)
+Defined in: [src/color/ColorRGB.ts:267](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGB.ts#L267)
 
 제공된 RGB 값을 기반으로 객체의 색상을 설정합니다.
 ```typescript
@@ -577,7 +577,7 @@ RGB 값이 0-255 범위를 벗어나면 오류가 발생합니다.
 
 > **setColorByRGBString**(`rgbString`): `void`
 
-Defined in: [src/color/ColorRGB.ts:309](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/color/ColorRGB.ts#L309)
+Defined in: [src/color/ColorRGB.ts:309](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/color/ColorRGB.ts#L309)
 
 RGB 색상 값을 나타내는 문자열을 파싱하여 객체의 색상을 설정합니다.
 ```typescript

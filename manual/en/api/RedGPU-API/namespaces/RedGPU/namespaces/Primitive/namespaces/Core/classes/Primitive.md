@@ -6,9 +6,13 @@
 
 # Class: Primitive
 
-Defined in: [src/primitive/core/Primitive.ts:16](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/primitive/core/Primitive.ts#L16)
+Defined in: [src/primitive/core/Primitive.ts:16](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/primitive/core/Primitive.ts#L16)
 
 Base class for all primitive geometries.
+
+## Extends
+
+- [`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md)
 
 ## Extended by
 
@@ -31,7 +35,7 @@ Base class for all primitive geometries.
 
 > **new Primitive**(`redGPUContext`, `uniqueKey`, `makeData`): `Primitive`
 
-Defined in: [src/primitive/core/Primitive.ts:34](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/primitive/core/Primitive.ts#L34)
+Defined in: [src/primitive/core/Primitive.ts:35](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/primitive/core/Primitive.ts#L35)
 
 #### Parameters
 
@@ -45,7 +49,11 @@ Defined in: [src/primitive/core/Primitive.ts:34](https://github.com/redcamel/Red
 
 `Primitive`
 
-## Accessors
+#### Overrides
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`constructor`](../../../../BaseObject/classes/RedGPUObject.md#constructor)
+
+## Properties
 
 ### gpuRenderInfo
 
@@ -53,7 +61,7 @@ Defined in: [src/primitive/core/Primitive.ts:34](https://github.com/redcamel/Red
 
 > **get** **gpuRenderInfo**(): `object`
 
-Defined in: [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/primitive/core/Primitive.ts#L51)
+Defined in: [src/primitive/core/Primitive.ts:52](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/primitive/core/Primitive.ts#L52)
 
 ##### Returns
 
@@ -61,7 +69,7 @@ Defined in: [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/Red
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/primitive/core/Primitive.ts#L51) |
+| `buffers` | `GPUVertexBufferLayout`[] | [src/primitive/core/Primitive.ts:52](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/primitive/core/Primitive.ts#L52) |
 
 ***
 
@@ -71,7 +79,7 @@ Defined in: [src/primitive/core/Primitive.ts:51](https://github.com/redcamel/Red
 
 > **get** **indexBuffer**(): [`IndexBuffer`](../../../../Resource/classes/IndexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:59](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/primitive/core/Primitive.ts#L59)
+Defined in: [src/primitive/core/Primitive.ts:60](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/primitive/core/Primitive.ts#L60)
 
 ##### Returns
 
@@ -85,7 +93,7 @@ Defined in: [src/primitive/core/Primitive.ts:59](https://github.com/redcamel/Red
 
 > **get** **vertexBuffer**(): [`VertexBuffer`](../../../../Resource/classes/VertexBuffer.md)
 
-Defined in: [src/primitive/core/Primitive.ts:55](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/primitive/core/Primitive.ts#L55)
+Defined in: [src/primitive/core/Primitive.ts:56](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/primitive/core/Primitive.ts#L56)
 
 ##### Returns
 
@@ -99,7 +107,7 @@ Defined in: [src/primitive/core/Primitive.ts:55](https://github.com/redcamel/Red
 
 > **get** **volume**(): [`AABB`](../../../../Bound/classes/AABB.md)
 
-Defined in: [src/primitive/core/Primitive.ts:63](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/primitive/core/Primitive.ts#L63)
+Defined in: [src/primitive/core/Primitive.ts:64](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/primitive/core/Primitive.ts#L64)
 
 ##### Returns
 
@@ -113,7 +121,7 @@ Defined in: [src/primitive/core/Primitive.ts:63](https://github.com/redcamel/Red
 
 > **get** `static` **primitiveInterleaveStruct**(): [`VertexInterleavedStruct`](../../../../Resource/classes/VertexInterleavedStruct.md)
 
-Defined in: [src/primitive/core/Primitive.ts:47](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/primitive/core/Primitive.ts#L47)
+Defined in: [src/primitive/core/Primitive.ts:48](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/primitive/core/Primitive.ts#L48)
 
 
 ##### Returns
@@ -126,7 +134,7 @@ Defined in: [src/primitive/core/Primitive.ts:47](https://github.com/redcamel/Red
 
 > `static` **generateUniqueKey**(`name`, `params`): `string`
 
-Defined in: [src/primitive/core/Primitive.ts:68](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/primitive/core/Primitive.ts#L68)
+Defined in: [src/primitive/core/Primitive.ts:69](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/primitive/core/Primitive.ts#L69)
 
 #### Parameters
 
@@ -138,3 +146,200 @@ Defined in: [src/primitive/core/Primitive.ts:68](https://github.com/redcamel/Red
 #### Returns
 
 `string`
+
+
+***
+
+## Inherited Members
+
+<details>
+<summary>View inherited properties and methods (Click to expand)</summary>
+
+### instanceId
+
+> `readonly` **instanceId**: `number`
+
+Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L18)
+
+Instance sequence ID per class
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`instanceId`](../../../../BaseObject/classes/RedGPUObject.md#instanceid)
+
+## Accessors
+
+### antialiasingManager
+
+#### Get Signature
+
+> **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L76)
+
+Returns the AntialiasingManager instance. (Short-cut path)
+
+##### Returns
+
+[`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
+
+AntialiasingManager instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`antialiasingManager`](../../../../BaseObject/classes/RedGPUObject.md#antialiasingmanager)
+
+***
+
+### commandEncoderManager
+
+#### Get Signature
+
+> **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L88)
+
+Returns the CommandEncoderManager instance. (Short-cut path)
+
+##### Returns
+
+[`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
+
+CommandEncoderManager instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`commandEncoderManager`](../../../../BaseObject/classes/RedGPUObject.md#commandencodermanager)
+
+***
+
+### gpuDevice
+
+#### Get Signature
+
+> **get** **gpuDevice**(): `GPUDevice`
+
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L52)
+
+Returns the WebGPU device object. (Short-cut path)
+
+##### Returns
+
+`GPUDevice`
+
+GPUDevice instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`gpuDevice`](../../../../BaseObject/classes/RedGPUObject.md#gpudevice)
+
+***
+
+### name
+
+#### Get Signature
+
+> **get** **name**(): `string`
+
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L58)
+
+Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
+
+##### Returns
+
+`string`
+
+Name of the object
+
+#### Set Signature
+
+> **set** **name**(`value`): `void`
+
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L70)
+
+Sets the name of the object.
+
+##### Parameters
+
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `value` | `string` | Name of the object to set |
+
+##### Returns
+
+`void`
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`name`](../../../../BaseObject/classes/RedGPUObject.md#name)
+
+***
+
+### redGPUContext
+
+#### Get Signature
+
+> **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
+
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L40)
+
+Returns the RedGPUContext instance.
+
+##### Returns
+
+[`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
+
+RedGPUContext instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`redGPUContext`](../../../../BaseObject/classes/RedGPUObject.md#redgpucontext)
+
+***
+
+### resourceManager
+
+#### Get Signature
+
+> **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
+
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L64)
+
+Returns the ResourceManager instance. (Short-cut path)
+
+##### Returns
+
+[`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
+
+ResourceManager instance
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`resourceManager`](../../../../BaseObject/classes/RedGPUObject.md#resourcemanager)
+
+***
+
+### uuid
+
+#### Get Signature
+
+> **get** **uuid**(): `string`
+
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L46)
+
+Returns the universally unique identifier (UUID) of the object.
+
+##### Returns
+
+`string`
+
+UUID string
+
+#### Inherited from
+
+[`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`uuid`](../../../../BaseObject/classes/RedGPUObject.md#uuid)
+
+***
+
+
+</details>

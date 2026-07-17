@@ -6,7 +6,7 @@
 
 # Abstract Class: ANoiseTexture
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:38](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L38)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:37](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L37)
 
 **`Experimental`**
 
@@ -29,7 +29,7 @@ This class provides functionality to generate noise patterns in real-time using 
 
 > `protected` **new ANoiseTexture**(`redGPUContext`, `width?`, `height?`, `define`, `useMipmap?`): `ANoiseTexture`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:70](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L70)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:69](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L69)
 
 **`Experimental`**
 
@@ -59,7 +59,7 @@ Creates an ANoiseTexture instance.
 
 > **mipLevelCount**: `number` = `1`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:39](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L39)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:38](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L38)
 
 **`Experimental`**
 
@@ -69,7 +69,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:39](https:
 
 > **src**: `string`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:41](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L41)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:40](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L40)
 
 **`Experimental`**
 
@@ -79,7 +79,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:41](https:
 
 > **useMipmap**: `boolean` = `true`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:40](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L40)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:39](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L39)
 
 **`Experimental`**
 
@@ -91,7 +91,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:40](https:
 
 > **get** **animationSpeed**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:103](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L103)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:102](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L102)
 
 **`Experimental`**
 
@@ -105,7 +105,7 @@ Returns the animation speed.
 
 > **set** **animationSpeed**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:108](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L108)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:107](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L107)
 
 **`Experimental`**
 
@@ -129,7 +129,7 @@ Sets the animation speed.
 
 > **get** **animationX**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:115](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L115)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:114](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L114)
 
 **`Experimental`**
 
@@ -143,7 +143,7 @@ Returns the animation X value.
 
 > **set** **animationX**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:120](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L120)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:119](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L119)
 
 **`Experimental`**
 
@@ -167,7 +167,7 @@ Sets the animation X value.
 
 > **get** **animationY**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:127](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L127)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:126](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L126)
 
 **`Experimental`**
 
@@ -181,7 +181,7 @@ Returns the animation Y value.
 
 > **set** **animationY**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:132](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L132)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:131](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L131)
 
 **`Experimental`**
 
@@ -205,7 +205,7 @@ Sets the animation Y value.
 
 > **get** **gpuTexture**(): `GPUTexture`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:144](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L144)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:143](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L143)
 
 **`Experimental`**
 
@@ -223,7 +223,7 @@ Returns the GPUTexture object.
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:98](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L98)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:97](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L97)
 
 **`Experimental`**
 
@@ -245,7 +245,7 @@ Resource manager key
 
 > **get** **time**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:149](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L149)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:148](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L148)
 
 **`Experimental`**
 
@@ -259,7 +259,7 @@ Returns the current time.
 
 > **set** **time**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:154](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L154)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:153](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L153)
 
 **`Experimental`**
 
@@ -283,7 +283,7 @@ Sets the current time.
 
 > **get** **uniformInfo**(): `any`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:139](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L139)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:138](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L138)
 
 **`Experimental`**
 
@@ -301,7 +301,7 @@ Returns the globalStruct information.
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:93](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L93)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:92](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L92)
 
 **`Experimental`**
 
@@ -317,7 +317,7 @@ Video memory usage in bytes
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:186](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L186)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:185](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L185)
 
 **`Experimental`**
 
@@ -333,7 +333,7 @@ Destroys the resource.
 
 > **render**(`time`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:181](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L181)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:180](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L180)
 
 **`Experimental`**
 
@@ -355,7 +355,7 @@ Renders noise at the specified time.
 
 > **updateUniform**(`name`, `value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:161](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L161)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:160](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L160)
 
 **`Experimental`**
 
@@ -378,7 +378,7 @@ Updates an individual globalStruct parameter.
 
 > **updateUniforms**(`uniforms`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:170](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L170)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:169](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L169)
 
 **`Experimental`**
 
@@ -406,7 +406,7 @@ Updates multiple globalStruct parameters at once.
 
 > `readonly` **instanceId**: `number`
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L18)
+Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L18)
 
 **`Experimental`**
 
@@ -424,7 +424,7 @@ Instance sequence ID per class
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L76)
 
 **`Experimental`**
 
@@ -448,7 +448,7 @@ AntialiasingManager instance
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/ResourceBase.ts#L53)
+Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/ResourceBase.ts#L53)
 
 **`Experimental`**
 
@@ -462,7 +462,7 @@ Returns the cache key.
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/ResourceBase.ts#L61)
+Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/ResourceBase.ts#L61)
 
 **`Experimental`**
 
@@ -490,7 +490,7 @@ Sets the cache key.
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L88)
 
 **`Experimental`**
 
@@ -514,7 +514,7 @@ CommandEncoderManager instance
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/ResourceBase.ts#L77)
+Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/ResourceBase.ts#L77)
 
 **`Experimental`**
 
@@ -536,7 +536,7 @@ Returns the associated GPU device.
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L58)
 
 **`Experimental`**
 
@@ -552,7 +552,7 @@ Name of the object
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L70)
 
 **`Experimental`**
 
@@ -580,7 +580,7 @@ Sets the name of the object.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L40)
 
 **`Experimental`**
 
@@ -604,7 +604,7 @@ RedGPUContext instance
 
 > **get** **resourceManager**(): [`ResourceManager`](../../Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L64)
 
 **`Experimental`**
 
@@ -628,7 +628,7 @@ ResourceManager instance
 
 > **get** **revision**(): `number`
 
-Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/ResourceBase.ts#L45)
+Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/ResourceBase.ts#L45)
 
 **`Experimental`**
 
@@ -650,7 +650,7 @@ Returns the revision (update count) of the resource.
 
 > **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../../Core/classes/ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/ManagementResourceBase.ts#L45)
+Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/ManagementResourceBase.ts#L45)
 
 **`Experimental`**
 
@@ -672,7 +672,7 @@ Returns the managed state information of the resource.
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L46)
 
 **`Experimental`**
 
@@ -694,7 +694,7 @@ UUID string
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/ResourceBase.ts#L89)
+Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/ResourceBase.ts#L89)
 
 **`Experimental`**
 
@@ -720,7 +720,7 @@ Adds a listener function to be called when the pipeline becomes dirty.
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/ResourceBase.ts#L101)
+Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/ResourceBase.ts#L101)
 
 **`Experimental`**
 
@@ -746,7 +746,7 @@ Removes a resource update listener.
 
 > **notifyUpdate**(`resetList?`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/ResourceBase.ts#L116)
+Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/ResourceBase.ts#L116)
 
 **`Experimental`**
 

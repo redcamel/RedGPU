@@ -6,7 +6,7 @@
 
 # Class: RedGPUContextDetector
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:12](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L12)
+Defined in: [src/context/core/RedGPUContextDetector.ts:12](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L12)
 
 GPU 어댑터 및 브라우저 환경을 감지하고 분석하는 클래스입니다.
 
@@ -20,7 +20,7 @@ GPU 어댑터 및 브라우저 환경을 감지하고 분석하는 클래스입�
 
 > **new RedGPUContextDetector**(`redGPUContext`): `RedGPUContextDetector`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:38](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L38)
+Defined in: [src/context/core/RedGPUContextDetector.ts:38](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L38)
 
 RedGPUContextDetector 생성자
 
@@ -42,7 +42,7 @@ RedGPUContextDetector 생성자
 
 > **get** **activeFeatures**(): `Record`\<`string`, `boolean`\>
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:122](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L122)
+Defined in: [src/context/core/RedGPUContextDetector.ts:122](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L122)
 
 GPU 디바이스에 실제 활성화된 기능 목록의 키와 활성화 여부 맵을 반환합니다.
 
@@ -58,7 +58,7 @@ GPU 디바이스에 실제 활성화된 기능 목록의 키와 활성화 여부
 
 > **get** **activeLimits**(): `GPUSupportedLimits`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:138](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L138)
+Defined in: [src/context/core/RedGPUContextDetector.ts:138](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L138)
 
 GPU 디바이스의 한계 제한치(Limits)를 반환합니다.
 
@@ -74,7 +74,7 @@ GPU 디바이스의 한계 제한치(Limits)를 반환합니다.
 
 > **get** **adapterInfo**(): `GPUAdapterInfo`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:154](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L154)
+Defined in: [src/context/core/RedGPUContextDetector.ts:154](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L154)
 
 GPU 어댑터 정보를 반환합니다.
 
@@ -90,7 +90,7 @@ GPU 어댑터 정보를 반환합니다.
 
 > **get** **deviceMemory**(): `number`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:234](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L234)
+Defined in: [src/context/core/RedGPUContextDetector.ts:234](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L234)
 
 장치 메모리 용량을 대략적인 GB 단위로 반환합니다. (기본값: 4)
 
@@ -106,7 +106,7 @@ Defined in: [src/context/core/RedGPUContextDetector.ts:234](https://github.com/r
 
 > **get** **gpuAdapter**(): `GPUAdapter`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:146](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L146)
+Defined in: [src/context/core/RedGPUContextDetector.ts:146](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L146)
 
 GPU 어댑터 객체를 반환합니다.
 
@@ -122,7 +122,7 @@ GPU 어댑터 객체를 반환합니다.
 
 > **get** **hardwareConcurrency**(): `number`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:226](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L226)
+Defined in: [src/context/core/RedGPUContextDetector.ts:226](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L226)
 
 논리 프로세서 코어 개수를 반환합니다. (기본값: 4)
 
@@ -138,7 +138,7 @@ Defined in: [src/context/core/RedGPUContextDetector.ts:226](https://github.com/r
 
 > **get** **isAndroid**(): `boolean`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:194](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L194)
+Defined in: [src/context/core/RedGPUContextDetector.ts:194](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L194)
 
 Android 운영체제 여부를 반환합니다.
 
@@ -154,7 +154,7 @@ Android 운영체제 여부를 반환합니다.
 
 > **get** **isChromium**(): `boolean`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:202](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L202)
+Defined in: [src/context/core/RedGPUContextDetector.ts:202](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L202)
 
 Chromium 기반 브라우저 여부를 반환합니다.
 
@@ -170,7 +170,7 @@ Chromium 기반 브라우저 여부를 반환합니다.
 
 > **get** **isFallbackAdapter**(): `boolean`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:162](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L162)
+Defined in: [src/context/core/RedGPUContextDetector.ts:162](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L162)
 
 폴백 어댑터(Fallback Adapter) 여부를 반환합니다. (예: CPU 소프트웨어 렌더러)
 
@@ -186,7 +186,7 @@ Defined in: [src/context/core/RedGPUContextDetector.ts:162](https://github.com/r
 
 > **get** **isFirefox**(): `boolean`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:218](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L218)
+Defined in: [src/context/core/RedGPUContextDetector.ts:218](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L218)
 
 Firefox 브라우저 여부를 반환합니다.
 
@@ -202,7 +202,7 @@ Firefox 브라우저 여부를 반환합니다.
 
 > **get** **isIOS**(): `boolean`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:186](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L186)
+Defined in: [src/context/core/RedGPUContextDetector.ts:186](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L186)
 
 iOS 운영체제 여부를 반환합니다.
 
@@ -218,7 +218,7 @@ iOS 운영체제 여부를 반환합니다.
 
 > **get** **isMobile**(): `boolean`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:178](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L178)
+Defined in: [src/context/core/RedGPUContextDetector.ts:178](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L178)
 
 모바일 환경(스마트폰, 태블릿 등) 여부를 반환합니다.
 
@@ -234,7 +234,7 @@ Defined in: [src/context/core/RedGPUContextDetector.ts:178](https://github.com/r
 
 > **get** **isSafari**(): `boolean`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:210](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L210)
+Defined in: [src/context/core/RedGPUContextDetector.ts:210](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L210)
 
 Safari 브라우저 여부를 반환합니다.
 
@@ -250,7 +250,7 @@ Safari 브라우저 여부를 반환합니다.
 
 > **get** **supportedFeatures**(): `Record`\<`string`, `boolean`\>
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:114](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L114)
+Defined in: [src/context/core/RedGPUContextDetector.ts:114](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L114)
 
 GPU 어댑터가 지원하는 전체 기능 목록의 키와 지원 여부 맵을 반환합니다.
 
@@ -266,7 +266,7 @@ GPU 어댑터가 지원하는 전체 기능 목록의 키와 지원 여부 맵�
 
 > **get** **supportedLimits**(): `GPUSupportedLimits`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:130](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L130)
+Defined in: [src/context/core/RedGPUContextDetector.ts:130](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L130)
 
 GPU 어댑터의 한계 제한치(Limits)를 반환합니다.
 
@@ -282,7 +282,7 @@ GPU 어댑터의 한계 제한치(Limits)를 반환합니다.
 
 > **get** **userAgent**(): `string`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:170](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L170)
+Defined in: [src/context/core/RedGPUContextDetector.ts:170](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L170)
 
 브라우저의 UserAgent 문자열을 반환합니다.
 
@@ -292,11 +292,23 @@ Defined in: [src/context/core/RedGPUContextDetector.ts:170](https://github.com/r
 
 ## Methods
 
+### destroy()
+
+> **destroy**(): `void`
+
+Defined in: [src/context/core/RedGPUContextDetector.ts:238](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L238)
+
+#### Returns
+
+`void`
+
+***
+
 ### toReport()
 
 > **toReport**(): `object`
 
-Defined in: [src/context/core/RedGPUContextDetector.ts:245](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L245)
+Defined in: [src/context/core/RedGPUContextDetector.ts:260](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L260)
 
 모든 탐지된 정보를 리포트 객체로 반환합니다.
 
@@ -308,25 +320,25 @@ Defined in: [src/context/core/RedGPUContextDetector.ts:245](https://github.com/r
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `browser` | `object` | [src/context/core/RedGPUContextDetector.ts:253](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L253) |
-| `browser.isChromium` | `boolean` | [src/context/core/RedGPUContextDetector.ts:254](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L254) |
-| `browser.isFirefox` | `boolean` | [src/context/core/RedGPUContextDetector.ts:256](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L256) |
-| `browser.isSafari` | `boolean` | [src/context/core/RedGPUContextDetector.ts:255](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L255) |
-| `gpu` | `object` | [src/context/core/RedGPUContextDetector.ts:262](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L262) |
-| `gpu.activeFeatures` | `object` | [src/context/core/RedGPUContextDetector.ts:269](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L269) |
-| `gpu.activeLimits` | `Record`\<`string`, `number`\> | [src/context/core/RedGPUContextDetector.ts:271](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L271) |
-| `gpu.architecture` | `string` | [src/context/core/RedGPUContextDetector.ts:264](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L264) |
-| `gpu.description` | `string` | [src/context/core/RedGPUContextDetector.ts:266](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L266) |
-| `gpu.device` | `string` | [src/context/core/RedGPUContextDetector.ts:265](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L265) |
-| `gpu.isFallback` | `boolean` | [src/context/core/RedGPUContextDetector.ts:267](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L267) |
-| `gpu.supportedFeatures` | `object` | [src/context/core/RedGPUContextDetector.ts:268](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L268) |
-| `gpu.supportedLimits` | `Record`\<`string`, `number`\> | [src/context/core/RedGPUContextDetector.ts:270](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L270) |
-| `gpu.vendor` | `string` | [src/context/core/RedGPUContextDetector.ts:263](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L263) |
-| `hardware` | `object` | [src/context/core/RedGPUContextDetector.ts:258](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L258) |
-| `hardware.deviceMemory` | `number` | [src/context/core/RedGPUContextDetector.ts:260](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L260) |
-| `hardware.hardwareConcurrency` | `number` | [src/context/core/RedGPUContextDetector.ts:259](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L259) |
-| `platform` | `object` | [src/context/core/RedGPUContextDetector.ts:247](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L247) |
-| `platform.isAndroid` | `boolean` | [src/context/core/RedGPUContextDetector.ts:250](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L250) |
-| `platform.isIOS` | `boolean` | [src/context/core/RedGPUContextDetector.ts:249](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L249) |
-| `platform.isMobile` | `boolean` | [src/context/core/RedGPUContextDetector.ts:248](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L248) |
-| `platform.userAgent` | `string` | [src/context/core/RedGPUContextDetector.ts:251](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/context/core/RedGPUContextDetector.ts#L251) |
+| `browser` | `object` | [src/context/core/RedGPUContextDetector.ts:268](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L268) |
+| `browser.isChromium` | `boolean` | [src/context/core/RedGPUContextDetector.ts:269](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L269) |
+| `browser.isFirefox` | `boolean` | [src/context/core/RedGPUContextDetector.ts:271](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L271) |
+| `browser.isSafari` | `boolean` | [src/context/core/RedGPUContextDetector.ts:270](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L270) |
+| `gpu` | `object` | [src/context/core/RedGPUContextDetector.ts:277](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L277) |
+| `gpu.activeFeatures` | `object` | [src/context/core/RedGPUContextDetector.ts:284](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L284) |
+| `gpu.activeLimits` | `Record`\<`string`, `number`\> | [src/context/core/RedGPUContextDetector.ts:286](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L286) |
+| `gpu.architecture` | `string` | [src/context/core/RedGPUContextDetector.ts:279](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L279) |
+| `gpu.description` | `string` | [src/context/core/RedGPUContextDetector.ts:281](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L281) |
+| `gpu.device` | `string` | [src/context/core/RedGPUContextDetector.ts:280](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L280) |
+| `gpu.isFallback` | `boolean` | [src/context/core/RedGPUContextDetector.ts:282](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L282) |
+| `gpu.supportedFeatures` | `object` | [src/context/core/RedGPUContextDetector.ts:283](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L283) |
+| `gpu.supportedLimits` | `Record`\<`string`, `number`\> | [src/context/core/RedGPUContextDetector.ts:285](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L285) |
+| `gpu.vendor` | `string` | [src/context/core/RedGPUContextDetector.ts:278](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L278) |
+| `hardware` | `object` | [src/context/core/RedGPUContextDetector.ts:273](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L273) |
+| `hardware.deviceMemory` | `number` | [src/context/core/RedGPUContextDetector.ts:275](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L275) |
+| `hardware.hardwareConcurrency` | `number` | [src/context/core/RedGPUContextDetector.ts:274](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L274) |
+| `platform` | `object` | [src/context/core/RedGPUContextDetector.ts:262](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L262) |
+| `platform.isAndroid` | `boolean` | [src/context/core/RedGPUContextDetector.ts:265](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L265) |
+| `platform.isIOS` | `boolean` | [src/context/core/RedGPUContextDetector.ts:264](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L264) |
+| `platform.isMobile` | `boolean` | [src/context/core/RedGPUContextDetector.ts:263](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L263) |
+| `platform.userAgent` | `string` | [src/context/core/RedGPUContextDetector.ts:266](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/context/core/RedGPUContextDetector.ts#L266) |

@@ -66,7 +66,3 @@
 - [DirectTexture](classes/DirectTexture.md)
 - [HDRTexture](classes/HDRTexture.md)
 - [PackedTexture](classes/PackedTexture.md)
-
-## WGSL
-
-- [parseWGSL](functions/parseWGSL.md)

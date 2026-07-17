@@ -6,7 +6,7 @@
 
 # Class: ResourceManager
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:73](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L73)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:77](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L77)
 
 RedGPU의 모든 GPU 리소스를 통합 관리하는 핵심 클래스입니다.
 
@@ -30,7 +30,7 @@ const resourceManager = redGPUContext.resourceManager;
 
 > **new ResourceManager**(`redGPUContext`): `ResourceManager`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:120](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L120)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:134](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L134)
 
 ResourceManager 인스턴스를 생성합니다. (내부 시스템 전용)
 
@@ -50,35 +50,11 @@ ResourceManager 인스턴스를 생성합니다. (내부 시스템 전용)
 
 ## Properties
 
-### GLOBAL\_FRAGMENT\_STRUCT\_BUILT\_IN
-
-> `static` **GLOBAL\_FRAGMENT\_STRUCT\_BUILT\_IN**: `any`
-
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:81](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L81)
-
-***
-
-### GLOBAL\_FRAGMENT\_STRUCT\_PBR
-
-> `static` **GLOBAL\_FRAGMENT\_STRUCT\_PBR**: `any`
-
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:80](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L80)
-
-***
-
-### GLOBAL\_VERTEX\_STRUCT
-
-> `static` **GLOBAL\_VERTEX\_STRUCT**: `any`
-
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:79](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L79)
-
-***
-
 ### PRESET\_GLOBAL\_VERTEX\_GPUBindGroupLayout
 
 > `static` **PRESET\_GLOBAL\_VERTEX\_GPUBindGroupLayout**: `string` = `'PRESET_GLOBAL_VERTEX_GPUBindGroupLayout'`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:76](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L76)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:80](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L80)
 
 ***
 
@@ -86,7 +62,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:76](https://g
 
 > `static` **PRESET\_GLOBAL\_VERTEX\_GPUBindGroupLayout\_Instancing**: `string` = `'PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_Instancing'`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:75](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L75)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:79](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L79)
 
 ***
 
@@ -94,7 +70,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:75](https://g
 
 > `static` **PRESET\_GLOBAL\_VERTEX\_GPUBindGroupLayout\_SKIN**: `string` = `'PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN'`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:78](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L78)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:82](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L82)
 
 ***
 
@@ -102,7 +78,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:78](https://g
 
 > `static` **PRESET\_GPUBindGroupLayout\_System**: `string` = `'PRESET_GPUBindGroupLayout_System'`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:74](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L74)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:78](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L78)
 
 ***
 
@@ -110,7 +86,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:74](https://g
 
 > `static` **PRESET\_VERTEX\_GPUBindGroupLayout**: `string` = `'PRESET_VERTEX_GPUBindGroupLayout'`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:77](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L77)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:81](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L81)
 
 ## Accessors
 
@@ -120,7 +96,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:77](https://g
 
 > **get** **basicDisplacementSampler**(): [`Sampler`](../../../classes/Sampler.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:152](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L152)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:210](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L210)
 
 기본 디스플레이스먼트 맵용 샘플러를 반환합니다.
 
@@ -138,7 +114,7 @@ displacement Sampler 인스턴스
 
 > **get** **basicSampler**(): [`Sampler`](../../../classes/Sampler.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:140](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L140)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:198](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L198)
 
 기본 샘플러를 반환합니다.
 
@@ -156,7 +132,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:140](https://
 
 > **get** **brdfGenerator**(): [`BRDFGenerator`](../../CoreIBL/classes/BRDFGenerator.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:164](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L164)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:222](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L222)
 
 BRDF 생성기를 반환합니다.
 
@@ -174,7 +150,7 @@ BRDFGenerator 인스턴스
 
 > **get** **cachedBufferState**(): `any`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:236](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L236)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:310](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L310)
 
 캐시된 버퍼 상태를 반환합니다.
 
@@ -192,7 +168,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:236](https://
 
 > **get** **downSampleCubeMapGenerator**(): [`DownSampleCubeMapGenerator`](../../../classes/DownSampleCubeMapGenerator.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:224](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L224)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:298](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L298)
 
 큐브맵 다운샘플링 생성기를 반환합니다.
 
@@ -210,7 +186,7 @@ DownSampleCubeMapGenerator 인스턴스
 
 > **get** **emptyBitmapTextureView**(): `GPUTextureView`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:248](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L248)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:322](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L322)
 
 빈 비트맵 텍스처 뷰를 반환합니다.
 
@@ -228,7 +204,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:248](https://
 
 > **get** **emptyCubeTextureView**(): `GPUTextureView`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:260](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L260)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:334](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L334)
 
 빈 큐브 텍스처 뷰를 반환합니다.
 
@@ -246,7 +222,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:260](https://
 
 > **get** **emptyDepthTextureView**(): `GPUTextureView`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:284](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L284)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:358](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L358)
 
 빈 깊이 텍스처 뷰를 반환합니다.
 
@@ -264,7 +240,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:284](https://
 
 > **get** **emptyTexture3DView**(): `GPUTextureView`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:272](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L272)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:346](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L346)
 
 빈 3D 텍스처 뷰를 반환합니다.
 
@@ -282,7 +258,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:272](https://
 
 > **get** **equirectangularToCubeGenerator**(): [`EquirectangularToCubeGenerator`](../../CoreIBL/classes/EquirectangularToCubeGenerator.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:200](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L200)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:258](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L258)
 
 Equirectangular(2D)를 CubeMap으로 변환하는 생성기를 반환합니다.
 
@@ -294,13 +270,71 @@ EquirectangularToCubeGenerator 인스턴스
 
 ***
 
+### GLOBAL\_FRAGMENT\_STRUCT\_BUILT\_IN
+
+#### Get Signature
+
+> **get** **GLOBAL\_FRAGMENT\_STRUCT\_BUILT\_IN**(): `any`
+
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:162](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L162)
+
+##### Returns
+
+`any`
+
+***
+
+### GLOBAL\_FRAGMENT\_STRUCT\_PBR
+
+#### Get Signature
+
+> **get** **GLOBAL\_FRAGMENT\_STRUCT\_PBR**(): `any`
+
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:158](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L158)
+
+##### Returns
+
+`any`
+
+***
+
+### GLOBAL\_VERTEX\_STRUCT
+
+#### Get Signature
+
+> **get** **GLOBAL\_VERTEX\_STRUCT**(): `any`
+
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:166](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L166)
+
+##### Returns
+
+`any`
+
+***
+
+### gltfCacheManager
+
+#### Get Signature
+
+> **get** **gltfCacheManager**(): `GLTFCacheManager`
+
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:274](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L274)
+
+GLTF 캐시 매니저를 반환합니다.
+
+##### Returns
+
+`GLTFCacheManager`
+
+***
+
 ### irradianceGenerator
 
 #### Get Signature
 
 > **get** **irradianceGenerator**(): [`IrradianceGenerator`](../../CoreIBL/classes/IrradianceGenerator.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:176](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L176)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:234](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L234)
 
 Irradiance 생성기를 반환합니다.
 
@@ -318,7 +352,7 @@ IrradianceGenerator 인스턴스
 
 > **get** **managedBitmapTextureState**(): [`ResourceStatusInfo`](ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:296](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L296)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:370](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L370)
 
 비트맵 텍스처 관리 상태를 반환합니다.
 
@@ -336,7 +370,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:296](https://
 
 > **get** **managedCubeTextureState**(): [`ResourceStatusInfo`](ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:308](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L308)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:382](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L382)
 
 큐브 텍스처 관리 상태를 반환합니다.
 
@@ -354,7 +388,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:308](https://
 
 > **get** **managedHDRTextureState**(): [`ResourceStatusInfo`](ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:320](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L320)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:394](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L394)
 
 HDR 텍스처 관리 상태를 반환합니다.
 
@@ -372,7 +406,7 @@ HDR 텍스처 관리 상태 정보 객체
 
 > **get** **managedIndexBufferState**(): [`ResourceStatusInfo`](ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:356](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L356)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:430](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L430)
 
 인덱스 버퍼 관리 상태를 반환합니다.
 
@@ -390,7 +424,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:356](https://
 
 > **get** **managedStorageBufferState**(): [`ResourceStatusInfo`](ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:368](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L368)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:442](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L442)
 
 Storage 버퍼 관리 상태를 반환합니다.
 
@@ -408,7 +442,7 @@ Storage 버퍼 관리 상태를 반환합니다.
 
 > **get** **managedUniformBufferState**(): [`ResourceStatusInfo`](ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:332](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L332)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:406](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L406)
 
 유니폼 버퍼 관리 상태를 반환합니다.
 
@@ -426,7 +460,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:332](https://
 
 > **get** **managedVertexBufferState**(): [`ResourceStatusInfo`](ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:344](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L344)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:418](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L418)
 
 버텍스 버퍼 관리 상태를 반환합니다.
 
@@ -444,7 +478,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:344](https://
 
 > **get** **mipmapGenerator**(): [`MipmapGenerator`](../../../classes/MipmapGenerator.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:212](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L212)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:286](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L286)
 
 밉맵 생성기를 반환합니다.
 
@@ -456,13 +490,29 @@ MipmapGenerator 인스턴스
 
 ***
 
+### packedTextureManager
+
+#### Get Signature
+
+> **get** **packedTextureManager**(): `PackedTextureManager`
+
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:266](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L266)
+
+텍스처 패킹 매니저를 반환합니다.
+
+##### Returns
+
+`PackedTextureManager`
+
+***
+
 ### prefilterGenerator
 
 #### Get Signature
 
 > **get** **prefilterGenerator**(): [`PrefilterGenerator`](../../CoreIBL/classes/PrefilterGenerator.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:188](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L188)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:246](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L246)
 
 Prefilter 생성기를 반환합니다.
 
@@ -480,7 +530,7 @@ PrefilterGenerator 인스턴스
 
 > **get** **resources**(): [`ImmutableKeyMap`](ImmutableKeyMap.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:380](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L380)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:454](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L454)
 
 내부 리소스 맵을 반환합니다.
 
@@ -492,11 +542,81 @@ ImmutableKeyMap 기반 리소스 맵
 
 ***
 
+### SHADER\_INFO\_BASIC
+
+#### Get Signature
+
+> **get** **SHADER\_INFO\_BASIC**(): `any`
+
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:174](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L174)
+
+##### Returns
+
+`any`
+
+***
+
+### SHADER\_INFO\_ONLY\_FRAGMENT\_PBR
+
+#### Get Signature
+
+> **get** **SHADER\_INFO\_ONLY\_FRAGMENT\_PBR**(): `any`
+
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:178](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L178)
+
+##### Returns
+
+`any`
+
+***
+
+### SHADER\_INFO\_ONLY\_VERTEX\_PBR
+
+#### Get Signature
+
+> **get** **SHADER\_INFO\_ONLY\_VERTEX\_PBR**(): `any`
+
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:182](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L182)
+
+##### Returns
+
+`any`
+
+***
+
+### SHADER\_INFO\_PBR
+
+#### Get Signature
+
+> **get** **SHADER\_INFO\_PBR**(): `any`
+
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:170](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L170)
+
+##### Returns
+
+`any`
+
+***
+
+### wgslParser
+
+#### Get Signature
+
+> **get** **wgslParser**(): `WGSLParser`
+
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:186](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L186)
+
+##### Returns
+
+`WGSLParser`
+
+## Methods
+
 ### createBindGroupLayout()
 
 > **createBindGroupLayout**(`name`, `bindGroupLayoutDescriptor`): `GPUBindGroupLayout`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:587](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L587)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:795](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L795)
 
 GPUBindGroupLayout을 생성하고 캐싱합니다.
 
@@ -519,7 +639,7 @@ GPUBindGroupLayout
 
 > **createGPUBuffer**(`name`, `gpuBufferDescriptor`): `any`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:654](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L654)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:862](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L862)
 
 GPUBuffer를 생성하고 캐싱합니다.
 
@@ -542,7 +662,7 @@ GPUBuffer를 생성하고 캐싱합니다.
 
 > **createGPUPipelineLayout**(`name`, `gpuPipelineLayoutDescriptor`): `any`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:633](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L633)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:841](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L841)
 
 GPUPipelineLayout을 생성하고 캐싱합니다.
 
@@ -565,7 +685,7 @@ GPUPipelineLayout
 
 > **createGPUShaderModule**(`name`, `gpuShaderModuleDescriptor`): `any`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:543](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L543)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:751](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L751)
 
 GPUShaderModule을 생성하고 캐싱합니다.
 
@@ -588,7 +708,7 @@ GPUShaderModule을 생성하고 캐싱합니다.
 
 > **createManagedTexture**(`desc`): `GPUTexture`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:433](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L433)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:641](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L641)
 
 GPU 텍스처를 생성하고 관리합니다.
 
@@ -606,11 +726,32 @@ GPU 텍스처를 생성하고 관리합니다.
 
 ***
 
+### createSampler()
+
+> **createSampler**(`descriptorKey`, `samplerOptions`): `GPUSampler`
+
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:462](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L462)
+
+캐시에서 샘플러를 조회하거나 존재하지 않으면 새로 생성하여 반환합니다.
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `descriptorKey` | `string` |
+| `samplerOptions` | `GPUSamplerDescriptor` |
+
+#### Returns
+
+`GPUSampler`
+
+***
+
 ### deleteGPUBindGroupLayout()
 
 > **deleteGPUBindGroupLayout**(`name`): `void`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:616](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L616)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:824](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L824)
 
 GPUBindGroupLayout을 삭제합니다.
 
@@ -630,7 +771,7 @@ GPUBindGroupLayout을 삭제합니다.
 
 > **deleteGPUShaderModule**(`name`): `void`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:570](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L570)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:778](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L778)
 
 GPUShaderModule을 삭제합니다.
 
@@ -646,11 +787,25 @@ GPUShaderModule을 삭제합니다.
 
 ***
 
+### destroy()
+
+> **destroy**(): `void`
+
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:513](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L513)
+
+ResourceManager 인스턴스를 파기하고 캐싱된 모든 WebGPU 자원들을 물리적으로 해제합니다.
+
+#### Returns
+
+`void`
+
+***
+
 ### getGPUBindGroupLayout()
 
 > **getGPUBindGroupLayout**(`name`): `GPUBindGroupLayout`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:605](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L605)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:813](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L813)
 
 캐싱된 GPUBindGroupLayout을 반환합니다.
 
@@ -672,7 +827,7 @@ GPUBindGroupLayout
 
 > **getGPUResourceBitmapTextureView**(`texture`, `viewDescriptor?`): `GPUTextureView`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:456](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L456)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:664](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L664)
 
 비트맵 텍스처의 뷰를 캐시에서 가져오거나 새로 생성합니다.
 
@@ -695,7 +850,7 @@ GPUTextureView
 
 > **getGPUResourceCubeTextureView**(`cubeTexture`, `viewDescriptor?`): `GPUTextureView`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:500](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L500)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:708](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L708)
 
 큐브 텍스처의 뷰를 캐시에서 가져오거나 새로 생성합니다.
 
@@ -718,7 +873,7 @@ GPUTextureView
 
 > **getGPUShaderModule**(`name`): `GPUShaderModule`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:559](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L559)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:767](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L767)
 
 캐싱된 GPUShaderModule을 반환합니다.
 
@@ -736,11 +891,25 @@ GPUShaderModule
 
 ***
 
+### initPresets()
+
+> **initPresets**(): `void`
+
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:874](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L874)
+
+시스템 프리셋을 초기화합니다.
+
+#### Returns
+
+`void`
+
+***
+
 ### registerManagementResource()
 
 > **registerManagementResource**(`target`, `resourceState`): `void`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:394](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L394)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:480](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L480)
 
 리소스를 관리 대상으로 등록합니다.
 
@@ -761,7 +930,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:394](https://
 
 > **unregisterManagementResource**(`target`): `void`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:412](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/ResourceManager.ts#L412)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:498](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L498)
 
 리소스를 관리 대상에서 해제합니다.
 
@@ -787,7 +956,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:412](https://
 
 > `readonly` **instanceId**: `number`
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L18)
+Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L18)
 
 클래스별 인스턴스 순번 ID
 
@@ -803,7 +972,7 @@ Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L76)
 
 안티앨리어싱 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -825,7 +994,7 @@ AntialiasingManager 인스턴스
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L88)
 
 커맨드 인코더 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -847,7 +1016,7 @@ CommandEncoderManager 인스턴스
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L52)
 
 WebGPU 디바이스 객체를 반환합니다. (단축 경로)
 
@@ -869,7 +1038,7 @@ GPUDevice 인스턴스
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L58)
 
 객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
 
@@ -883,7 +1052,7 @@ Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L70)
 
 객체의 이름을 설정합니다.
 
@@ -909,7 +1078,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L40)
 
 RedGPUContext 인스턴스를 반환합니다.
 
@@ -931,7 +1100,7 @@ RedGPUContext 인스턴스
 
 > **get** **resourceManager**(): `ResourceManager`
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L64)
 
 리소스 매니저 인스턴스를 반환합니다. (단축 경로)
 
@@ -953,7 +1122,7 @@ ResourceManager 인스턴스
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L46)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 
@@ -967,7 +1136,7 @@ UUID 문자열
 
 [`RedGPUObject`](../../../../BaseObject/classes/RedGPUObject.md).[`uuid`](../../../../BaseObject/classes/RedGPUObject.md#uuid)
 
-## Methods
+***
 
 
 </details>

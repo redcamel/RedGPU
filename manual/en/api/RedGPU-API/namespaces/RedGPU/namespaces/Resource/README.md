@@ -66,7 +66,3 @@ Through each resource and utility, you can easily use various resource managemen
 - [DirectTexture](classes/DirectTexture.md)
 - [HDRTexture](classes/HDRTexture.md)
 - [PackedTexture](classes/PackedTexture.md)
-
-## WGSL
-
-- [parseWGSL](functions/parseWGSL.md)

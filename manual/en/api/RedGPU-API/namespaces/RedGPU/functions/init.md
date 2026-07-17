@@ -8,7 +8,7 @@
 
 > **init**(`canvas`, `onWebGPUInitialized`, `onFailInitialized?`, `onDestroy?`, `alphaMode?`, `requestAdapterOptions?`): `Promise`\<`void`\>
 
-Defined in: [src/init.ts:49](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/init.ts#L49)
+Defined in: [src/init.ts:56](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/init.ts#L56)
 
 Asynchronously initializes WebGPU and creates a RedGPUContext.
 
@@ -37,7 +37,7 @@ await RedGPU.init(
 | `onFailInitialized?` | (`message?`) => `void` | `undefined` | Optional callback function to be called on failure (error message is passed as an argument) |
 | `onDestroy?` | (`info`) => `void` | `undefined` | Optional callback function to be called when the device is lost |
 | `alphaMode?` | `GPUCanvasAlphaMode` | `'premultiplied'` | Canvas alpha mode (Default: 'premultiplied') |
-| `requestAdapterOptions?` | `GPURequestAdapterOptions` | `...` | Adapter request options (Default: high-performance setup) |
+| `requestAdapterOptions?` | `GPURequestAdapterOptions` | `DEFAULT_REQUEST_ADAPTER_OPTIONS` | Adapter request options (Default: high-performance setup) |
 
 ## Returns
 

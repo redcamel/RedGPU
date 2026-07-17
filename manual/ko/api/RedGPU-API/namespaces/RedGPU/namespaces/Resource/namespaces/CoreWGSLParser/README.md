@@ -10,8 +10,6 @@ WGSL 파서의 핵심 기능(전처리, 변형 생성, 타입 정의 등)을 제
 
 ## Other
 
-- [ConditionalBlock](interfaces/ConditionalBlock.md)
-- [PreprocessedWGSLResult](interfaces/PreprocessedWGSLResult.md)
 - [TypedArrayConstructor](type-aliases/TypedArrayConstructor.md)
 - [TypeUniform](type-aliases/TypeUniform.md)
 
@@ -19,5 +17,4 @@ WGSL 파서의 핵심 기능(전처리, 변형 생성, 타입 정의 등)을 제
 
 - [ShaderVariantGenerator](classes/ShaderVariantGenerator.md)
 - [WGSLUniformTypes](classes/WGSLUniformTypes.md)
-- [ensureVertexIndexBuiltin](functions/ensureVertexIndexBuiltin.md)
-- [preprocessWGSL](functions/preprocessWGSL.md)
+- [~~ensureVertexIndexBuiltin~~](functions/ensureVertexIndexBuiltin.md)

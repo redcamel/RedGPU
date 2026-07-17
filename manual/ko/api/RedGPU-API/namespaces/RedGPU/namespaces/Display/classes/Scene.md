@@ -6,7 +6,7 @@
 
 # Class: Scene
 
-Defined in: [src/display/scene/Scene.ts:26](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/scene/Scene.ts#L26)
+Defined in: [src/display/scene/Scene.ts:26](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/scene/Scene.ts#L26)
 
 View에서 렌더링할 장면(Scene) 공간을 정의하는 루트 컨테이너 클래스입니다.
 
@@ -31,7 +31,7 @@ scene.backgroundColor.setColorByRGBA(25, 25, 25, 1);
 
 > **new Scene**(`name?`): `Scene`
 
-Defined in: [src/display/scene/Scene.ts:64](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/scene/Scene.ts#L64)
+Defined in: [src/display/scene/Scene.ts:65](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/scene/Scene.ts#L65)
 
 Scene 인스턴스를 생성합니다.
 
@@ -63,7 +63,7 @@ const scene = new RedGPU.Display.Scene('MainScene');
 
 > **get** **backgroundColor**(): [`ColorRGBA`](../../Color/classes/ColorRGBA.md)
 
-Defined in: [src/display/scene/Scene.ts:101](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/scene/Scene.ts#L101)
+Defined in: [src/display/scene/Scene.ts:102](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/scene/Scene.ts#L102)
 
 씬 배경색(ColorRGBA) 인스턴스를 가져오거나 설정합니다. 반드시 ColorRGBA 인스턴스를 대입해야 합니다.
 
@@ -75,7 +75,7 @@ Defined in: [src/display/scene/Scene.ts:101](https://github.com/redcamel/RedGPU/
 
 > **set** **backgroundColor**(`value`): `void`
 
-Defined in: [src/display/scene/Scene.ts:105](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/scene/Scene.ts#L105)
+Defined in: [src/display/scene/Scene.ts:106](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/scene/Scene.ts#L106)
 
 ##### Parameters
 
@@ -95,7 +95,7 @@ Defined in: [src/display/scene/Scene.ts:105](https://github.com/redcamel/RedGPU/
 
 > **get** **lightManager**(): [`LightManager`](../../Light/namespaces/Core/classes/LightManager.md)
 
-Defined in: [src/display/scene/Scene.ts:73](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/scene/Scene.ts#L73)
+Defined in: [src/display/scene/Scene.ts:74](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/scene/Scene.ts#L74)
 
 씬 내의 모든 조명을 통합 관리하는 LightManager 인스턴스를 가져옵니다.
 
@@ -111,7 +111,7 @@ Defined in: [src/display/scene/Scene.ts:73](https://github.com/redcamel/RedGPU/b
 
 > **get** **physicsEngine**(): [`IPhysicsEngine`](../../Physics/interfaces/IPhysicsEngine.md)
 
-Defined in: [src/display/scene/Scene.ts:89](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/scene/Scene.ts#L89)
+Defined in: [src/display/scene/Scene.ts:90](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/scene/Scene.ts#L90)
 
 씬에 바인딩되어 실행 중인 물리 시뮬레이션 엔진 플러그인을 가져오거나 설정합니다.
 
@@ -123,7 +123,7 @@ Defined in: [src/display/scene/Scene.ts:89](https://github.com/redcamel/RedGPU/b
 
 > **set** **physicsEngine**(`value`): `void`
 
-Defined in: [src/display/scene/Scene.ts:93](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/scene/Scene.ts#L93)
+Defined in: [src/display/scene/Scene.ts:94](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/scene/Scene.ts#L94)
 
 ##### Parameters
 
@@ -143,7 +143,7 @@ Defined in: [src/display/scene/Scene.ts:93](https://github.com/redcamel/RedGPU/b
 
 > **get** **shadowManager**(): [`ShadowManager`](../../Shadow/classes/ShadowManager.md)
 
-Defined in: [src/display/scene/Scene.ts:81](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/scene/Scene.ts#L81)
+Defined in: [src/display/scene/Scene.ts:82](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/scene/Scene.ts#L82)
 
 씬 내의 모든 그림자 연산을 통합 제어하는 ShadowManager 인스턴스를 가져옵니다.
 
@@ -159,7 +159,7 @@ Defined in: [src/display/scene/Scene.ts:81](https://github.com/redcamel/RedGPU/b
 
 > **get** **useBackgroundColor**(): `boolean`
 
-Defined in: [src/display/scene/Scene.ts:114](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/scene/Scene.ts#L114)
+Defined in: [src/display/scene/Scene.ts:115](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/scene/Scene.ts#L115)
 
 씬 배경색 사용 여부를 가져오거나 설정합니다. true일 때 지정된 backgroundColor 수치로 지우기가 수행됩니다.
 
@@ -171,7 +171,7 @@ Defined in: [src/display/scene/Scene.ts:114](https://github.com/redcamel/RedGPU/
 
 > **set** **useBackgroundColor**(`value`): `void`
 
-Defined in: [src/display/scene/Scene.ts:118](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/scene/Scene.ts#L118)
+Defined in: [src/display/scene/Scene.ts:119](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/scene/Scene.ts#L119)
 
 ##### Parameters
 
@@ -182,6 +182,22 @@ Defined in: [src/display/scene/Scene.ts:118](https://github.com/redcamel/RedGPU/
 ##### Returns
 
 `void`
+
+***
+
+### destroy()
+
+> **destroy**(): `void`
+
+Defined in: [src/display/scene/Scene.ts:123](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/scene/Scene.ts#L123)
+
+#### Returns
+
+`void`
+
+#### Overrides
+
+[`Object3DContainer`](../namespaces/CoreMesh/classes/Object3DContainer.md).[`destroy`](../namespaces/CoreMesh/classes/Object3DContainer.md#destroy)
 
 ***
 
@@ -197,7 +213,7 @@ Defined in: [src/display/scene/Scene.ts:118](https://github.com/redcamel/RedGPU/
 
 > `readonly` **instanceId**: `number`
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L18)
+Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L18)
 
 클래스별 인스턴스 순번 ID
 
@@ -211,7 +227,7 @@ Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/
 
 > **modelMatrix**: [`mat4`](../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:26](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L26)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:26](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/Object3DContainer.ts#L26)
 
 이 객체의 모델 행렬입니다. 위치, 회전, 스케일 변환에 사용됩니다.
 
@@ -227,7 +243,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:26](https://github.com/r
 
 > **get** **children**(): [`Mesh`](Mesh.md)[]
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:44](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L44)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:44](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/Object3DContainer.ts#L44)
 
 현재 컨테이너에 포함된 자식 Mesh 배열을 반환합니다.
 
@@ -249,7 +265,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:44](https://github.com/r
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L58)
 
 객체의 이름을 반환합니다. 설정된 이름이 없으면 클래스명과 인스턴스 ID를 조합하여 자동으로 생성합니다.
 
@@ -263,7 +279,7 @@ Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L70)
 
 객체의 이름을 설정합니다.
 
@@ -289,7 +305,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **numChildren**(): `number`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:52](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L52)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:52](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/Object3DContainer.ts#L52)
 
 자식 객체의 개수를 반환합니다.
 
@@ -311,7 +327,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:52](https://github.com/r
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L46)
 
 객체의 고유 식별자(UUID)를 반환합니다.
 
@@ -331,7 +347,7 @@ UUID 문자열
 
 > **addChild**(`child`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:71](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L71)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:71](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/Object3DContainer.ts#L71)
 
 자식 Mesh를 컨테이너에 추가합니다.
 
@@ -357,7 +373,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:71](https://github.com/r
 
 > **addChildAt**(`child`, `index`): `Scene`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L89)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/Object3DContainer.ts#L89)
 
 자식 Mesh를 특정 인덱스에 추가합니다.
 
@@ -384,7 +400,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:89](https://github.com/r
 
 > **contains**(`child`): `boolean`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:61](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L61)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:61](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/Object3DContainer.ts#L61)
 
 특정 Mesh가 현재 컨테이너에 포함되어 있는지 확인합니다.
 
@@ -410,7 +426,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:61](https://github.com/r
 
 > **getChildAt**(`index`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:111](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L111)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:111](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/Object3DContainer.ts#L111)
 
 지정된 인덱스의 자식 Mesh를 반환합니다.
 
@@ -436,7 +452,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:111](https://github.com/
 
 > **getChildIndex**(`child`): `number`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:125](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L125)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:125](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/Object3DContainer.ts#L125)
 
 특정 자식 객체의 인덱스를 반환합니다.
 
@@ -462,7 +478,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:125](https://github.com/
 
 > **removeAllChildren**(): `Scene`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:234](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L234)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:234](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/Object3DContainer.ts#L234)
 
 모든 자식 객체를 제거합니다.
 
@@ -482,7 +498,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:234](https://github.com/
 
 > **removeChild**(`child`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:203](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L203)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:203](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/Object3DContainer.ts#L203)
 
 특정 자식 객체를 제거합니다.
 
@@ -508,7 +524,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:203](https://github.com/
 
 > **removeChildAt**(`index`): [`Mesh`](Mesh.md)
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:219](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L219)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:219](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/Object3DContainer.ts#L219)
 
 지정된 인덱스의 자식 객체를 제거합니다.
 
@@ -534,7 +550,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:219](https://github.com/
 
 > **setChildIndex**(`child`, `index`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:140](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L140)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:140](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/Object3DContainer.ts#L140)
 
 자식 객체의 위치를 변경합니다.
 
@@ -559,7 +575,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:140](https://github.com/
 
 > **swapChildren**(`child1`, `child2`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L163)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/Object3DContainer.ts#L163)
 
 두 자식 객체의 위치를 서로 바꿉니다.
 
@@ -584,7 +600,7 @@ Defined in: [src/display/mesh/core/Object3DContainer.ts:163](https://github.com/
 
 > **swapChildrenAt**(`index1`, `index2`): `void`
 
-Defined in: [src/display/mesh/core/Object3DContainer.ts:183](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/display/mesh/core/Object3DContainer.ts#L183)
+Defined in: [src/display/mesh/core/Object3DContainer.ts:183](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/Object3DContainer.ts#L183)
 
 두 인덱스의 자식 객체 위치를 서로 바꿉니다.
 

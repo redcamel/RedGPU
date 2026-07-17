@@ -8,6 +8,6 @@
 
 > **CubeSrcInfo** = `string`[] \| \{ `cacheKey`: `string`; `srcList`: `string`[]; \}
 
-Defined in: [src/resources/texture/CubeTexture.ts:14](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/texture/CubeTexture.ts#L14)
+Defined in: [src/resources/texture/CubeTexture.ts:14](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/CubeTexture.ts#L14)
 
 Cube texture source information type. Can be an array of image URLs or an object with srcList and cacheKey.

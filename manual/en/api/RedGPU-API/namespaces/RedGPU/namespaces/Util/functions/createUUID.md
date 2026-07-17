@@ -8,7 +8,7 @@
 
 > **createUUID**(): `string`
 
-Defined in: [src/utils/uuid/createUUID.ts:13](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/utils/uuid/createUUID.ts#L13)
+Defined in: [src/utils/uuid/createUUID.ts:13](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/utils/uuid/createUUID.ts#L13)
 
 Generates a random UUID (version 4) string.
 

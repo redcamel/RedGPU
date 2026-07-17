@@ -6,7 +6,7 @@
 
 # Class: ResourceStateStorageBuffer
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:3](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L3)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:3](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L3)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStora
 
 > **new ResourceStateStorageBuffer**(`buffer`): `ResourceStateStorageBuffer`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:9](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L9)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:8](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L8)
 
 #### Parameters
 
@@ -32,7 +32,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStora
 
 > **buffer**: [`StorageBuffer`](../../../classes/StorageBuffer.md)
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:5](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L5)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:4](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L4)
 
 ***
 
@@ -40,15 +40,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStora
 
 > **uuid**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:6](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L6)
-
-***
-
-### dirtyList
-
-> `static` **dirtyList**: `any`[] = `[]`
-
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:4](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L4)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:5](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L5)
 
 ## Accessors
 
@@ -58,7 +50,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStora
 
 > **get** **useNum**(): `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:14](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L14)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:13](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L13)
 
 ##### Returns
 
@@ -68,7 +60,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStora
 
 > **set** **useNum**(`value`): `void`
 
-Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:18](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L18)
+Defined in: [src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts:17](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/resourceState/ResourceStateStorageBuffer.ts#L17)
 
 ##### Parameters
 

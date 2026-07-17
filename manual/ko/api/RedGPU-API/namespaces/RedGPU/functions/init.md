@@ -8,7 +8,7 @@
 
 > **init**(`canvas`, `onWebGPUInitialized`, `onFailInitialized?`, `onDestroy?`, `alphaMode?`, `requestAdapterOptions?`): `Promise`\<`void`\>
 
-Defined in: [src/init.ts:49](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/init.ts#L49)
+Defined in: [src/init.ts:56](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/init.ts#L56)
 
 WebGPU를 비동기적으로 초기화하고 RedGPUContext를 생성합니다.
 
@@ -37,7 +37,7 @@ await RedGPU.init(
 | `onFailInitialized?` | (`message?`) => `void` | `undefined` | 실패 시 호출될 선택적 콜백 함수 (에러 메시지가 인자로 전달됨)
 | `onDestroy?` | (`info`) => `void` | `undefined` | 디바이스 유실 시 호출될 선택적 콜백 함수
 | `alphaMode?` | `GPUCanvasAlphaMode` | `'premultiplied'` | 캔버스 알파 모드 (기본값: 'premultiplied')
-| `requestAdapterOptions?` | `GPURequestAdapterOptions` | `...` | 어댑터 요청 옵션 (기본값: 고성능 설정)
+| `requestAdapterOptions?` | `GPURequestAdapterOptions` | `DEFAULT_REQUEST_ADAPTER_OPTIONS` | 어댑터 요청 옵션 (기본값: 고성능 설정)
 
 ## Returns
 

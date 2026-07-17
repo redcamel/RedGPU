@@ -8,7 +8,7 @@
 
 > **validateRedGPUContext**(`value`): `boolean`
 
-Defined in: [src/runtimeChecker/validateFunc/validateRedGPUContext.ts:26](https://github.com/redcamel/RedGPU/blob/f1f8a3916d21f1c1632cf87591e942c59ff251ca/src/runtimeChecker/validateFunc/validateRedGPUContext.ts#L26)
+Defined in: [src/runtimeChecker/validateFunc/validateRedGPUContext.ts:26](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/runtimeChecker/validateFunc/validateRedGPUContext.ts#L26)
 
 주어진 값이 RedGPUContext 인스턴스인지 검증합니다.
 
