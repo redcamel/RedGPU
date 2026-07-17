@@ -24,6 +24,7 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
      * [EN] Total accumulated video memory usage in bytes
      */
     #videoMemorySize: number = 0
+    #destroyed: boolean = false
 
     /**
      * [KO] AMultiPassPostEffect 인스턴스를 생성합니다.
@@ -64,6 +65,14 @@ abstract class AMultiPassPostEffect extends ASinglePassPostEffect {
      */
     get passList(): ASinglePassPostEffect[] {
         return this.#passList;
+    }
+
+    destroy() {
+        if (this.#destroyed) return;
+        this.#destroyed = true
+        this.#passList.forEach(v => v.destroy());
+        this.#passList = null
+        super.destroy();
     }
 
     /**

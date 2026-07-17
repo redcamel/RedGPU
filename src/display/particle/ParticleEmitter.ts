@@ -1,7 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import BitmapMaterial from "../../material/bitmapMaterial/BitmapMaterial";
 import Plane from "../../primitive/Plane";
-import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import copyGPUBuffer from "../../utils/copyGPUBuffer";
 import Mesh from "../mesh/Mesh";
 import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
@@ -12,8 +11,7 @@ import vertexModuleSource from "./shader/particleVertex.wgsl";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_PARTICLE_EMITTER'
-const SHADER_INFO = parseWGSL('PARTICLE_EMITTER_VERTEX', vertexModuleSource);
-const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
+
 
 interface ParticleEmitter {
     /**
@@ -713,6 +711,8 @@ class ParticleEmitter extends Mesh {
      * [EN] Compiled GPUShaderModule
      */
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
+        const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('PARTICLE_EMITTER_VERTEX', vertexModuleSource);
+        const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
         return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
     }
 
@@ -902,6 +902,30 @@ class ParticleEmitter extends Mesh {
             computePass.setBindGroup(0, this.#computeBindGroup);
             computePass.dispatchWorkgroups(Math.ceil(this.#particleNum / 256));
         });
+    }
+
+    destroy() {
+        super.destroy();
+        if (this.#simParamBuffer) {
+            try {
+                this.#simParamBuffer.destroy();
+            } catch (e) {
+            }
+            this.#simParamBuffer = null;
+        }
+        if (this.#particleBuffers) {
+            this.#particleBuffers.forEach(buffer => {
+                if (buffer) {
+                    try {
+                        buffer.destroy();
+                    } catch (e) {
+                    }
+                }
+            });
+            this.#particleBuffers = [];
+        }
+        this.#computeBindGroup = null;
+        this.#computePipeline = null;
     }
 }
 

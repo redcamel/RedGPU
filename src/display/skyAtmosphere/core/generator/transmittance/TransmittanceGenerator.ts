@@ -1,13 +1,11 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import transmittanceShaderCode_wgsl from "./transmittanceShaderCode.wgsl";
 import DirectTexture from "../../../../../resources/texture/DirectTexture";
-import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import createUUID from "../../../../../utils/uuid/createUUID";
 
-const SHADER_INFO = parseWGSL('SkyAtmosphere_Transmittance_Generator', transmittanceShaderCode_wgsl);
 
 /**
  * [KO] TransmittanceGenerator는 대기 투과율(Transmittance) LUT를 생성합니다.
@@ -42,7 +40,16 @@ class TransmittanceGenerator extends ASkyAtmosphereLUTGenerator {
         this.executeComputePass(this.#pipeline, this.#bindGroup, [16, 16, 1]);
     }
 
+    destroy(): void {
+        super.destroy();
+        this.#lutTexture = null;
+        this.#bindGroup = null;
+        this.#pipeline = null;
+    }
+
     #init(): void {
+        const SHADER_INFO = this.resourceManager.wgslParser.parse('SkyAtmosphere_Transmittance_Generator', transmittanceShaderCode_wgsl);
+
         this.#lutTexture = new DirectTexture(this.redGPUContext, `SkyAtmosphere_Transmittance_LUTTexture_${createUUID()}`, this.createLUTTexture());
         this.#pipeline = this.createComputePipeline('SkyAtmosphere_Transmittance_Pipeline', SHADER_INFO.defaultSource);
     }

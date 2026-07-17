@@ -331,6 +331,11 @@ class InstancingMeshObject3D {
         this.#updateMatrix()
     }
 
+    destroy() {
+        this.#instancingMesh = null;
+        this.#redGPUContext = null;
+    }
+
     #updateMatrix() {
         // mat4.identity(this.localMatrix);
         // mat4.translate(this.localMatrix, this.localMatrix, [this.#x, this.#y, this.#z]);

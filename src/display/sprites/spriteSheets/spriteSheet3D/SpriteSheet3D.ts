@@ -3,7 +3,6 @@ import Geometry from "../../../../geometry/Geometry";
 import Primitive from "../../../../primitive/core/Primitive";
 import Plane from "../../../../primitive/Plane";
 import BitmapTexture from "../../../../resources/texture/BitmapTexture";
-import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import consoleAndThrowError from "../../../../utils/consoleAndThrowError";
 import ASpriteSheet from "../core/ASpriteSheet";
 import SpriteSheetInfo from "../SpriteSheetInfo";
@@ -15,10 +14,7 @@ import defineBoolean from "../../../../defineProperty/funcs/defineBoolean";
 
 /** SpriteSheet3D 전용 버텍스 셰이더 모듈 이름 */
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_SPRITE_SHEET_3D'
-/** 파싱된 WGSL 셰이더 정보 */
-const SHADER_INFO = parseWGSL('SPRITE_SHEET_3D_VERTEX', vertexModuleSource);
-/** 버텍스 유니폼 구조체 정보 */
-const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
+
 
 /**
  * [KO] 3D 스프라이트 시트의 빌보드 및 렌더링 속성을 정의하는 인터페이스
@@ -266,6 +262,10 @@ class SpriteSheet3D extends ASpriteSheet {
      * [EN] Created GPU shader module
      */
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
+        /** 파싱된 WGSL 셰이더 정보 */
+        const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('SPRITE_SHEET_3D_VERTEX', vertexModuleSource);
+        /** 버텍스 유니폼 구조체 정보 */
+        const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
         return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
     }
 

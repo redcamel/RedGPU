@@ -16,6 +16,8 @@ class RedGPUInspector {
     private rafId: number | null = null;
     private redGPUContext: RedGPUContext | null = null;
     private fpsMeter: FPSMeter = new FPSMeter();
+    private unsubscribe: (() => void) | null = null;
+    private isDisposed = false;
 
 
     constructor(redGPUContext: RedGPUContext) {
@@ -27,7 +29,7 @@ class RedGPUInspector {
 
         // [KO] Zustand 스토어 상태 변화 구독 (패널 활성화/비활성화 감지)
         // [EN] Subscribe to Zustand store state changes (Detect panel activation/deactivation)
-        useInspectorStore.subscribe((state) => {
+        this.unsubscribe = useInspectorStore.subscribe((state) => {
             if (state.useDebugPanel) {
                 this.ensureMounted();
                 this.startLoop();
@@ -36,7 +38,44 @@ class RedGPUInspector {
                 this.unmount();
             }
         });
+
+        // [KO] 브라우징이 변경되거나 리로드/언로드될 때 자동으로 리소스 해제
+        // [EN] Automatically release resources when browsing changes or page reloads/unloads
+        window.addEventListener('beforeunload', this.handleUnload);
+        window.addEventListener('pagehide', this.handleUnload);
     }
+
+    public dispose() {
+        if (this.isDisposed) return;
+        this.isDisposed = true;
+
+        window.removeEventListener('beforeunload', this.handleUnload);
+        window.removeEventListener('pagehide', this.handleUnload);
+
+        this.stopLoop();
+        this.unmount();
+
+        if (this.unsubscribe) {
+            this.unsubscribe();
+            this.unsubscribe = null;
+        }
+
+        // [KO] Zustand 스토어의 Context 참조 제거
+        // [EN] Remove Context reference in Zustand store
+        useInspectorStore.getState().setRedGPUContext(null);
+
+        this.redGPUContext = null;
+
+        // [KO] 전역 변수 참조 제거
+        // [EN] Remove global variable reference
+        if ((window as any).redGPUInspector === this) {
+            (window as any).redGPUInspector = null;
+        }
+    }
+
+    private handleUnload = () => {
+        this.dispose();
+    };
 
     get useDebugPanel(): boolean {
         return useInspectorStore.getState().useDebugPanel;

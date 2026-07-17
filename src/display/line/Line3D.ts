@@ -5,7 +5,6 @@ import Primitive from "../../primitive/core/Primitive";
 import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
 import VertexInterleavedStruct from "../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexInterleaveType from "../../resources/buffer/vertexBuffer/VertexInterleaveType";
-import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import validatePositiveNumberRange from "../../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRange";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
@@ -21,8 +20,7 @@ import LINE_TYPE from "./LINE_TYPE";
 import vertexModuleSource from "./shader/lineVertex.wgsl";
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_LINE_3D'
-const SHADER_INFO = parseWGSL('LINE3D_VERTEX', vertexModuleSource);
-const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
+
 
 /**
  * [KO] 3D 공간에서 선(라인)을 표현하는 클래스입니다.
@@ -233,6 +231,8 @@ class Line3D extends Mesh {
      *
      */
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
+        const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('LINE3D_VERTEX', vertexModuleSource);
+        const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
         return this.createMeshVertexShaderModuleBASIC(VERTEX_SHADER_MODULE_NAME, SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource)
     }
 

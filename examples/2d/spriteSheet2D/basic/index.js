@@ -180,24 +180,12 @@ const renderTestPane = (scene, redGPUContext) => {
 
             const monitoringFolder = pane.addFolder({title: 'Monitoring', expanded: true});
 
-            monitoringFolder.addBinding(controls, 'state', {readonly: true});
-            monitoringFolder.addBinding(controls, 'currentIndex', {readonly: true});
-            monitoringFolder.addBinding(controls, 'totalFrame', {readonly: true});
-            monitoringFolder.addBinding(controls, 'segmentW', {readonly: true});
-            monitoringFolder.addBinding(controls, 'segmentH', {readonly: true});
-
-            const refreshMonitoringControls = () => {
-                const child = scene.children[0];
-                if (child) {
-                    controls.currentIndex = child.currentIndex;
-                    controls.totalFrame = child.totalFrame;
-                    controls.segmentW = child.segmentW;
-                    controls.segmentH = child.segmentH;
-                    controls.state = child.state;
-                }
-                requestAnimationFrame(refreshMonitoringControls);
-            };
-            requestAnimationFrame(refreshMonitoringControls);
+            const child = scene.children[0];
+            monitoringFolder.addBinding(child, 'state', {readonly: true, interval: 100});
+            monitoringFolder.addBinding(child, 'currentIndex', {readonly: true, interval: 100});
+            monitoringFolder.addBinding(child, 'totalFrame', {readonly: true, interval: 100});
+            monitoringFolder.addBinding(child, 'segmentW', {readonly: true, interval: 100});
+            monitoringFolder.addBinding(child, 'segmentH', {readonly: true, interval: 100});
 
             updateTestData();
         }

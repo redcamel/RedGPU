@@ -283,6 +283,12 @@ class MipmapGenerator extends RedGPUObject {
         // WeakMap은 자동으로 정리되므로 별도 처리 불필요
         // temp 캐시만 명시적으로 정리
         this.#clearTempCaches();
+        for (const key in this.#pipelines) {
+            delete this.#pipelines[key];
+        }
+        this.#pipelineLayout = null;
+        this.#bindGroupLayout = null;
+        this.#mipmapShaderModule = null;
     }
 
     #clearTempCaches() {

@@ -9,7 +9,6 @@ import AerialPerspectiveGenerator from "./core/generator/aerialPerspective/Aeria
 import transmittanceShaderCode_wgsl from "./core/generator/transmittance/transmittanceShaderCode.wgsl";
 import Sampler from "../../resources/sampler/Sampler";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
-import parseWGSL from "../../resources/wgslParser/parseWGSL";
 
 import DirectCubeTexture from "../../resources/texture/DirectCubeTexture";
 import DirectTexture from "../../resources/texture/DirectTexture";
@@ -23,8 +22,6 @@ import SkyAtmospherePostEffect from "./core/skyAtmospherePostEffect/SkyAtmospher
 import {IPostEffectResult} from "../../postEffect/core/types";
 import RedGPUObject from "../../base/RedGPUObject";
 
-const SHADER_INFO = parseWGSL('SkyAtmosphere_Core', transmittanceShaderCode_wgsl);
-const UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
 
 /**
  * [KO] SkyAtmosphere 클래스는 물리 기반 대기 산란(Atmospheric Scattering) 시뮬레이션 시스템입니다.
@@ -126,11 +123,13 @@ class SkyAtmosphere extends RedGPUObject {
 
     #lastUpdateFrame: number = -1;
     #prevCameraMatrix: mat4 = mat4.create();
+    #UNIFORM_STRUCT: any
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-
-        this.#sharedUniformBuffer = new UniformBuffer(this.redGPUContext, new ArrayBuffer(UNIFORM_STRUCT.arrayBufferByteLength), 'SkyAtmosphere_Shared_UniformBuffer');
+        const SHADER_INFO = redGPUContext.resourceManager.wgslParser.parse('SkyAtmosphere_Core', transmittanceShaderCode_wgsl);
+        this.#UNIFORM_STRUCT = SHADER_INFO.uniforms.params;
+        this.#sharedUniformBuffer = new UniformBuffer(this.redGPUContext, new ArrayBuffer(this.#UNIFORM_STRUCT.arrayBufferByteLength), 'SkyAtmosphere_Shared_UniformBuffer');
 
         this.#sampler = new Sampler(redGPUContext, {
             magFilter: 'linear',
@@ -412,6 +411,45 @@ class SkyAtmosphere extends RedGPUObject {
         this.#updateLUTs(view);
     }
 
+    destroy() {
+        if (this.#sharedUniformBuffer) {
+            this.#sharedUniformBuffer.destroy();
+        }
+        if (this.#transmittanceGenerator) {
+            this.#transmittanceGenerator.destroy();
+        }
+        if (this.#multiScatteringGenerator) {
+            this.#multiScatteringGenerator.destroy();
+        }
+        if (this.#skyViewGenerator) {
+            this.#skyViewGenerator.destroy();
+        }
+        if (this.#aerialPerspectiveGenerator) {
+            this.#aerialPerspectiveGenerator.destroy();
+        }
+        if (this.#skyLight) {
+            this.#skyLight.destroy();
+        }
+        if (this.#backgroundRenderer) {
+            this.#backgroundRenderer.destroy();
+        }
+        if (this.#postEffect) {
+            this.#postEffect.destroy();
+        }
+
+        this.#sharedUniformBuffer = null;
+        this.#sampler = null;
+        this.#transmittanceGenerator = null;
+        this.#multiScatteringGenerator = null;
+        this.#skyViewGenerator = null;
+        this.#aerialPerspectiveGenerator = null;
+        this.#skyLight = null;
+        this.#backgroundRenderer = null;
+        this.#postEffect = null;
+        this.#activeSunSource = null;
+        this.#prevSunSource = null;
+    }
+
     #markDirty(lut: boolean, skyView: boolean, ibl: boolean): void {
         this.#dirtyUniformBuffer = true;
         if (lut) this.#dirtyLUT = true;
@@ -514,7 +552,7 @@ class SkyAtmosphere extends RedGPUObject {
     }
 
     #updateSharedUniformBuffer(): void {
-        const {members} = UNIFORM_STRUCT;
+        const {members} = this.#UNIFORM_STRUCT;
         const dataViewF32 = this.#sharedUniformBuffer.dataViewF32;
         const dataViewU32 = this.#sharedUniformBuffer.dataViewU32;
 

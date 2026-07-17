@@ -1,6 +1,13 @@
 import RedGPUContext from "./context/RedGPUContext";
-import ensureVertexIndexBuiltin from "./resources/wgslParser/core/ensureVertexIndexBuiltin";
 import {keepLog} from "./utils";
+
+const DEFAULT_REQUEST_ADAPTER_OPTIONS: GPURequestAdapterOptions = {
+    powerPreference: "high-performance",
+    forceFallbackAdapter: false,
+};
+
+const BOT_PATTERN = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|facebookexternalhit|twitterbot|rogerbot|linkedinbot|embedly|quora link preview|showyoubot|outbrain|pinterest\/0\.|developers\.google.com\/\+\/web\/snippet|www\.google\.com\/webmasters\/tools\/richsnippets|slackbot|vkshare|w3c_validator|redditbot|applebot|whatsapp|flipboard|tumblr|bitlybot|skypeuripreview|nuzzel|line|discordbot|telegrambot|crawler|spider|bot/;
+
 
 /**
  * [KO] WebGPU를 비동기적으로 초기화하고 RedGPUContext를 생성합니다.
@@ -45,185 +52,135 @@ import {keepLog} from "./utils";
  * [KO] 초기화 프로세스 완료를 나타내는 Promise
  * [EN] Promise representing the completion of the initialization process
  * @category Core
- */
+ * */
 const init = async (
     canvas: HTMLCanvasElement,
     onWebGPUInitialized: (redGPUContext: RedGPUContext) => void,
     onFailInitialized?: (message?: string) => void,
     onDestroy?: (info: GPUDeviceLostInfo) => void,
     alphaMode: GPUCanvasAlphaMode = 'premultiplied',
-    requestAdapterOptions: GPURequestAdapterOptions = {
-        powerPreference: "high-performance",
-        forceFallbackAdapter: false,
-    },
+    requestAdapterOptions: GPURequestAdapterOptions = DEFAULT_REQUEST_ADAPTER_OPTIONS,
 ) => {
     if (isSearchEngineBot()) {
         keepLog('🤖 Search engine bot detected - skipping WebGPU initialization');
         return;
     }
-    const {gpu} = navigator
+    const gpu = typeof navigator !== 'undefined' ? navigator.gpu : undefined;
     if (!gpu) {
         const msg = 'WebGPU is not supported in this browser. Please use a modern browser with WebGPU enabled.';
         onFailInitialized?.(msg);
         return;
     }
-    const errorHandler = (e: Error, defaultMsg: string) => {
-        const msg = generateErrorMessage(e, defaultMsg);
+
+    const errorHandler = (e: unknown, defaultMsg: string) => {
+        const errorInstance = e instanceof Error ? e : new Error(defaultMsg);
+        const msg = generateErrorMessage(errorInstance, defaultMsg);
         console.error('\n============\n', msg, '\n============\n');
         onFailInitialized?.(msg);
     };
-    const validateAndRequestAdapter = async (targetGPU: GPU) => {
-        if (!targetGPU) errorHandler(null, `Cannot find navigator.gpu`)
-        try {
-            const adapter: GPUAdapter = await targetGPU.requestAdapter(requestAdapterOptions)
-            console.log('PASS adapter', adapter)
-            await validateAndRequestDevice(adapter)
-        } catch (e) {
-            errorHandler(e, `Failed to request adapter or validate device with target GPU: ${targetGPU}, error message is ${e.message}`);
-        }
-    }
-    const validateAndRequestDevice = async (adapter: GPUAdapter) => {
-        const requiredFeatures: GPUFeatureName[] = [];
-        const featuresToRequest: GPUFeatureName[] = [
-            // "texture-compression-astc",
-            // "texture-compression-bc",
-            // "texture-compression-etc2",
-            // "shader-f16",
-            // "timestamp-query",
-            // "depth-clip-control",
-            "indirect-first-instance",
-            // "rg11b10ufloat-renderable",
-            // "bgra8unorm-storage",
-            // "float32-filterable"
-        ];
 
-        featuresToRequest.forEach(feature => {
-            if (adapter?.features.has(feature)) {
-                requiredFeatures.push(feature);
-            }
-        });
-        const requiredLimits: Record<string, number> = {};
-        const limitKeys = [
-            'maxBufferSize',
-            'maxStorageBufferBindingSize',
-            'maxSampledTexturesPerShaderStage',
-            'maxSamplersPerShaderStage',
-            'maxStorageBuffersPerShaderStage',
-            'maxStorageTexturesPerShaderStage',
-            'maxUniformBuffersPerShaderStage',
-            'maxUniformBufferBindingSize',
-            'maxBindGroups',
-            'maxVertexAttributes',
-            'maxVertexBuffers',
-            'maxInterStageShaderComponents',
-            'maxComputeWorkgroupStorageSize',
-            'maxComputeInvocationsPerWorkgroup',
-            'maxComputeWorkgroupSizeX',
-            'maxComputeWorkgroupSizeY',
-            'maxComputeWorkgroupSizeZ',
-            'maxComputeWorkgroupsPerDimension'
-        ];
-        limitKeys.forEach(key => {
-            if (adapter.limits[key]) requiredLimits[key] = adapter.limits[key];
-        });
+    if (!(onWebGPUInitialized instanceof Function)) {
+        errorHandler(null, `Expected onWebGPUInitialized to be a function, but received: ${onWebGPUInitialized}`);
+        return;
+    }
 
-        const gpuDeviceDescriptor: GPUDeviceDescriptor = {
-            requiredFeatures,
-            requiredLimits
-        };
-        try {
-            const device: GPUDevice = await adapter.requestDevice(gpuDeviceDescriptor)
-            console.log('PASS device', device)
-            validateAndInitializeContext(canvas, adapter, device)
-        } catch (e) {
-            errorHandler(null, `Failed to request device. Adapter was ${adapter}, error message is ${e.message}`)
-        }
+    if (!(canvas instanceof HTMLCanvasElement)) {
+        errorHandler(null, `Expected canvas to be an HTMLCanvasElement, but received: ${canvas}`);
+        return;
     }
-    const validateAndInitializeContext = (canvas: HTMLCanvasElement, adapter: GPUAdapter, device: GPUDevice) => {
-        const context = canvas.getContext('webgpu')
-        if (!context) {
-            errorHandler(new Error(`Failed to get context from canvas: ${canvas.id || canvas}`), 'Failed to get webgpu initialize from canvas');
-            return
-        }
-        try {
-            {
-                const originalCreateShaderModule = device.createShaderModule.bind(device);
-                device.createShaderModule = function (descriptor) {
-                    descriptor.code = ensureVertexIndexBuiltin(descriptor.code)
-                    return originalCreateShaderModule(descriptor)
-                };
-            }
-            const redGPUContext: RedGPUContext = new RedGPUContext(canvas, adapter, device, context, alphaMode)
-            onWebGPUInitialized(redGPUContext)
-            device.addEventListener('uncapturederror', (event: GPUUncapturedErrorEvent) => {
-                console.warn('TODO A WebGPU error was not captured:', event);
-                console.warn(event.error?.message);
-                // onFailInitialized?.(errorMsg);
-                window.cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
-            });
-            device.lost.then((info: GPUDeviceLostInfo) => {
-                console.warn(info)
-                console.warn(`Device lost occurred: ${info.message}`)
-                if (info.reason === 'destroyed') onDestroy?.(info)
-            })
-            const clearDevice = () => {
-                if (redGPUContext.gpuContext) {
-                    try {
-                        redGPUContext.gpuContext.unconfigure();
-                        keepLog('🧹 Canvas Context unconfigure 완료');
-                    } catch (e) {
-                        keepLog('⚠️ Canvas Context unconfigure 실패:', e);
-                    }
-                }
-                window?.cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
-                redGPUContext.destroy();
-            }
-            // bfcache에서 복원 시 페이지 재로드 (뒤로가기 + 앞으로가기)
-            window?.addEventListener('pageshow', (event) => {
-                if (event.persisted) {
-                    // bfcache에서 복원된 경우
-                    keepLog('🔄 bfcache에서 복원됨 (뒤로가기 또는 앞으로가기) - 페이지 재로드');
-                    clearDevice()
-                    window.location.reload();
-                }
-            });
-            // [KO] 페이지 이동 시 항상 정리 (bfcache 저장 여부와 무관)
-            // [EN] Always clean up on page navigation (regardless of bfcache)
-            window?.addEventListener('pagehide', () => {
-                if (redGPUContext && redGPUContext.gpuDevice) {
-                    clearDevice()
-                }
-            });
-        } catch (e) {
-            errorHandler(e, '')
-            //TODO 이거 먼가 이상하다 확인해야함
-        }
-    }
-    const initializeWebGPU = async () => {
-        if (!(onWebGPUInitialized instanceof Function)) {
-            errorHandler(null, `Expected onWebGPUInitialized, but received : ${onWebGPUInitialized}`);
-            return
-        }
-        if (!(canvas instanceof HTMLCanvasElement)) {
-            errorHandler(null, `Expected HTMLCanvasElement, but received : ${canvas}`);
-            return;
-        }
-        await validateAndRequestAdapter(gpu);
-    }
+
     try {
-        await initializeWebGPU()
+        // 1. Request Adapter
+        const adapter = await gpu.requestAdapter(requestAdapterOptions);
+        if (!adapter) {
+            throw new Error("Failed to request WebGPU adapter. Check options or browser support.");
+        }
+        keepLog('PASS adapter', adapter);
+
+        // 2. Request Device
+        const gpuDeviceDescriptor: GPUDeviceDescriptor = {
+            requiredFeatures: getRequiredFeature(adapter),
+            requiredLimits: getRequiredLimits(adapter)
+        };
+        const device = await adapter.requestDevice(gpuDeviceDescriptor);
+        if (!device) {
+            throw new Error("Failed to request WebGPU device.");
+        }
+        keepLog('PASS device', device);
+
+        // 3. Initialize Context
+        const context = canvas.getContext('webgpu');
+        if (!context) {
+            throw new Error(`Failed to get WebGPU context from canvas: ${canvas.id || 'anonymous canvas'}`);
+        }
+
+        const redGPUContext: RedGPUContext = new RedGPUContext(canvas, adapter, device, context, alphaMode, onDestroy);
+        onWebGPUInitialized(redGPUContext);
+
     } catch (e) {
-        errorHandler(e, `Unexpected error occurred during WebGPU initialization: ${e.message}`);
+        errorHandler(e, `Unexpected error occurred during WebGPU initialization: ${e instanceof Error ? e.message : String(e)}`);
     }
-}
+};
 export default init
+const getRequiredFeature = (adapter: GPUAdapter): GPUFeatureName[] => {
+    const requiredFeatures: GPUFeatureName[] = [];
+    const featuresToRequest: GPUFeatureName[] = [
+        // "texture-compression-astc",
+        // "texture-compression-bc",
+        // "texture-compression-etc2",
+        // "shader-f16",
+        // "timestamp-query",
+        // "depth-clip-control",
+        "indirect-first-instance",
+        // "rg11b10ufloat-renderable",
+        // "bgra8unorm-storage",
+        // "float32-filterable"
+    ];
+
+    featuresToRequest.forEach(feature => {
+        if (adapter?.features.has(feature)) {
+            requiredFeatures.push(feature);
+        }
+    });
+    return requiredFeatures
+}
+const getRequiredLimits = (adapter: GPUAdapter): Record<string, number> => {
+    const requiredLimits: Record<string, number> = {};
+    const limitKeys: (keyof GPUSupportedLimits)[] = [
+        'maxBufferSize',
+        'maxStorageBufferBindingSize',
+        'maxSampledTexturesPerShaderStage',
+        'maxSamplersPerShaderStage',
+        'maxStorageBuffersPerShaderStage',
+        'maxStorageTexturesPerShaderStage',
+        'maxUniformBuffersPerShaderStage',
+        'maxUniformBufferBindingSize',
+        'maxBindGroups',
+        'maxVertexAttributes',
+        'maxVertexBuffers',
+        'maxInterStageShaderVariables',
+        'maxComputeWorkgroupStorageSize',
+        'maxComputeInvocationsPerWorkgroup',
+        'maxComputeWorkgroupSizeX',
+        'maxComputeWorkgroupSizeY',
+        'maxComputeWorkgroupSizeZ',
+        'maxComputeWorkgroupsPerDimension'
+    ];
+    limitKeys.forEach(key => {
+        if (key !== '__brand') {
+            if (adapter.limits[key]) requiredLimits[key] = adapter.limits[key];
+        }
+    });
+    return requiredLimits;
+}
+
 const generateErrorMessage = (e: any, defaultMsg: string): string => {
     let msg = defaultMsg;
     // Check if 'e' is an instance of Error
     if (e instanceof Error) {
         msg = e.message ?? defaultMsg;
         if (typeof e.stack === 'string') {
-            msg += `\nStack Trace: ${e.stack}`;
+            msg += `\n\nStack Trace: ${e.stack}`;
         }
     } else {
         console.warn('generateErrorMessage function expected an Error instance, but got: ', e);
@@ -235,41 +192,5 @@ const isSearchEngineBot = (): boolean => {
         return true; // SSR 환경에서는 봇으로 간주
     }
     const userAgent = navigator.userAgent.toLowerCase();
-    const botPatterns = [
-        'googlebot',
-        'bingbot',
-        'slurp',
-        'duckduckbot',
-        'baiduspider',
-        'yandexbot',
-        'facebookexternalhit',
-        'twitterbot',
-        'rogerbot',
-        'linkedinbot',
-        'embedly',
-        'quora link preview',
-        'showyoubot',
-        'outbrain',
-        'pinterest/0.',
-        'developers.google.com/+/web/snippet',
-        'www.google.com/webmasters/tools/richsnippets',
-        'slackbot',
-        'vkshare',
-        'w3c_validator',
-        'redditbot',
-        'applebot',
-        'whatsapp',
-        'flipboard',
-        'tumblr',
-        'bitlybot',
-        'skypeuripreview',
-        'nuzzel',
-        'line',
-        'discordbot',
-        'telegrambot',
-        'crawler',
-        'spider',
-        'bot'
-    ];
-    return botPatterns.some(pattern => userAgent.includes(pattern));
+    return BOT_PATTERN.test(userAgent);
 };

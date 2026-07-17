@@ -24,19 +24,12 @@
 
     <link href="https://redcamel.github.io/RedGPU/examples/" rel="canonical">
 
-
-    <!-- LCP Image Preloading (Default '3D' Tab) -->
-    <link rel="preload" as="image" href="./3d/helloWorld/thumb.webp" fetchpriority="high">
-    <link rel="preload" as="image" href="./3d/view/singleView/thumb.webp" fetchpriority="high">
-    <link rel="preload" as="image" href="./3d/view/multiView/thumb.webp" fetchpriority="high">
-    <link rel="preload" as="image" href="./3d/scene/thumb.webp" fetchpriority="high">
-
     <!-- JS Module Preloading (Resolve Critical Request Chain) -->
-    <link rel="modulepreload" href="./exampleHelper/dist/IconButton-CUfRcs6W.js?t=1783496184998">
-    <link rel="modulepreload" href="./exampleHelper/dist/exampleList-bbpKdocs.js?t=1783496184998">
-    <link rel="modulepreload" href="./exampleHelper/dist/rolldown-runtime-DdACKOZr.js?t=1783496184998">
-    <link rel="modulepreload" href="./exampleHelper/dist/store-pHgFDfml.js?t=1783496184998">
-    <link rel="modulepreload" href="./exampleHelper/dist/vendor-react-CvZjeOYY.js?t=1783496184998">
+    <link href="./exampleHelper/dist/IconButton-CUfRcs6W.js" rel="modulepreload">
+    <link href="./exampleHelper/dist/exampleList-D69Wkff_.js" rel="modulepreload">
+    <link href="./exampleHelper/dist/rolldown-runtime-DdACKOZr.js" rel="modulepreload">
+    <link href="./exampleHelper/dist/store-pHgFDfml.js" rel="modulepreload">
+    <link href="./exampleHelper/dist/vendor-react-CvZjeOYY.js" rel="modulepreload">
 
     <style>
         body {
@@ -60,8 +53,8 @@
 <body>
 <canvas id="bg-canvas"></canvas>
 <script type="module">
-    import * as RedGPU from '../dist/index.js?t=1783496184998';
-    import RedGPUExamples from './exampleHelper/dist/examples.js?t=1783496184998';
+    import * as RedGPU from '../dist/index.js?t=1783326645983';
+    import RedGPUExamples from './exampleHelper/dist/examples.js?t=1783326645983';
 
     new RedGPUExamples()
     const canvas = document.getElementById('bg-canvas');

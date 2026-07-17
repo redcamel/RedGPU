@@ -97,6 +97,11 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
             } // 5
         );
     }
+
+    destroy() {
+        super.destroy();
+        this.#skyAtmosphere = null;
+    }
 }
 
 Object.freeze(SkyAtmospherePostEffect);

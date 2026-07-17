@@ -73,6 +73,7 @@ abstract class AView extends ViewTransform {
      * [EN] FXAA post-effect object
      */
     #fxaa: FXAA
+    #destroyed: boolean = false
 
     /**
      * [KO] AView 생성자
@@ -307,6 +308,41 @@ abstract class AView extends ViewTransform {
         const {mouseX, mouseY} = pickingManager;
         return (0 < mouseX && mouseX < pixelRectObject.width) &&
             (0 < mouseY && mouseY < pixelRectObject.height);
+    }
+
+    destroy() {
+        if (this.#destroyed) return;
+        this.#destroyed = true
+        if (this.camera) {
+            if (this.camera instanceof AController) {
+                this.camera.destroy();
+            }
+            this.camera = null;
+        }
+
+        this.#scene.destroy();
+
+        if (this.#taa) {
+            this.#taa.destroy();
+            this.#taa = null;
+        }
+        if (this.#fxaa) {
+            this.#fxaa.destroy();
+            this.#fxaa = null;
+        }
+        if (this.#grid) {
+            this.#grid.destroy();
+            this.#grid = null;
+        }
+        if (this.#axis) {
+            this.#axis.destroy();
+            this.#axis = null;
+        }
+        if (this.#pickingManager) {
+            this.#pickingManager.destroy();
+            this.#pickingManager = null;
+        }
+        this.#scene = null;
     }
 }
 

@@ -2,14 +2,12 @@ import RedGPUContext from "../../../../../context/RedGPUContext";
 import Sampler from "../../../../../resources/sampler/Sampler";
 import DirectCubeTexture from "../../../../../resources/texture/DirectCubeTexture";
 import aerialPerspectiveShaderCode_wgsl from "./aerialPerspectiveShaderCode.wgsl";
-import parseWGSL from "../../../../../resources/wgslParser/parseWGSL";
 import UniformBuffer from "../../../../../resources/buffer/uniformBuffer/UniformBuffer";
 import DirectTexture from "../../../../../resources/texture/DirectTexture";
 import ASkyAtmosphereLUTGenerator from "../ASkyAtmosphereLUTGenerator";
 import createUUID from "../../../../../utils/uuid/createUUID";
 import View3D from "../../../../view/View3D";
 
-const SHADER_INFO = parseWGSL('SkyAtmosphere_AerialPerspective_Generator', aerialPerspectiveShaderCode_wgsl);
 
 /**
  * [KO] AerialPerspectiveGenerator는 에리얼 퍼스펙티브(Aerial Perspective) LUT를 생성합니다.
@@ -58,8 +56,18 @@ class AerialPerspectiveGenerator extends ASkyAtmosphereLUTGenerator {
         this.executeComputePass(this.#pipeline, this.#bindGroup, [8, 8, 4]);
     }
 
+    destroy(): void {
+        super.destroy();
+        this.#lutTexture = null;
+        this.#bindGroup = null;
+        this.#pipeline = null;
+        this.#prevSystemBuffer = null;
+    }
+
     #init(): void {
         const gpuTexture = this.createLUTTexture(true);
+        const SHADER_INFO = this.resourceManager.wgslParser.parse('SkyAtmosphere_AerialPerspective_Generator', aerialPerspectiveShaderCode_wgsl);
+
         this.#lutTexture = new DirectCubeTexture(this.redGPUContext, `SkyAtmosphere_AerialPerspective_LUTTexture_${createUUID()}`, gpuTexture);
         this.#pipeline = this.createComputePipeline('SkyAtmosphere_AerialPerspective_Pipeline', SHADER_INFO.defaultSource);
     }

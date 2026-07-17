@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import View3D from "../../../../display/view/View3D";
 import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
-import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
+
 import ClusterCellBoundsSource from "../../core/ClusterBoundsGrid.wgsl";
 import PassLightClustersBoundSource from "./PassClusterLightBound.wgsl";
 import PassClustersLightHelper from "../../core/PassClustersLightHelper";
@@ -26,7 +26,7 @@ class PassClusterLightBound extends RedGPUObject {
     #clusterBoundBindGroupLayout: GPUBindGroupLayout
     #clusterBoundBindGroup: GPUBindGroup
     #clusterBoundPipeline: GPUComputePipeline
-
+    #source
 
     /**
      * [KO] PassClusterLightBound 인스턴스를 생성합니다.
@@ -73,9 +73,30 @@ class PassClusterLightBound extends RedGPUObject {
         }
     }
 
+    /**
+     * [KO] PassClusterLightBound 인스턴스를 파기하고 할당된 GPUBuffer 및 파이프라인을 해제합니다.
+     * [EN] Destroys the PassClusterLightBound instance and releases allocated GPUBuffer and pipelines.
+     */
+    destroy(): void {
+        if (this.#clusterBoundBuffer) {
+            try {
+                this.#clusterBoundBuffer.destroy();
+            } catch (e) {
+                // 예외 처리
+            }
+            this.#clusterBoundBuffer = null;
+        }
+        this.#clusterBoundBindGroup = null;
+        this.#clusterBoundBindGroupLayout = null;
+        this.#clusterBoundPipeline = null;
+        this.#source = null;
+        this.#view = null;
+        console.log("🧹 PassClusterLightBound destroy 완료");
+    }
+
     #initPipeLine() {
         const {gpuDevice, resourceManager} = this;
-        const source = parseWGSL('PASS_CLUSTER_LIGHT_BOUND', ClusterCellBoundsSource + PassLightClustersBoundSource).defaultSource;
+        this.#source = resourceManager.wgslParser.parse('PASS_CLUSTER_LIGHT_BOUND', ClusterCellBoundsSource + PassLightClustersBoundSource).defaultSource;
         this.#clusterBoundBuffer = resourceManager.createGPUBuffer(`PASS_CLUSTER_BOUND_BUFFER`, {
             size: PassClustersLightHelper.getTotalTileSize() * 32, // Cluster x, y, z size * 32 bytes per cluster. Why? It's to be verified.
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
@@ -111,7 +132,7 @@ class PassClusterLightBound extends RedGPUObject {
             }),
             compute: {
                 module: resourceManager.createGPUShaderModule('CLUSTER_BOUND_SHADER', {
-                    code: source,
+                    code: this.#source,
                 }),
                 entryPoint: 'main',
             }

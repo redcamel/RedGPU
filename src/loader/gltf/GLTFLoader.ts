@@ -301,6 +301,35 @@ class GLTFLoader extends RedGPUObject {
             this.#onError?.(error);
         }
     }
+
+
+    destroy() {
+        this.stopAnimation();
+        if (this.parsingResult) {
+            if (this.parsingResult.animations) {
+                this.parsingResult.animations.forEach(clipState => {
+                    if (clipState.clip && clipState.clip.tracks) {
+                        clipState.clip.tracks.forEach(track => {
+                            if (typeof track.destroy === 'function') {
+                                track.destroy();
+                            }
+                        });
+                    }
+                });
+                this.parsingResult.animations = [];
+            }
+            this.parsingResult.groups = [];
+            this.parsingResult.materials = [];
+            this.parsingResult.uris.buffers = [];
+            this.parsingResult.textures = {};
+            this.parsingResult.textureRawList = [];
+            this.parsingResult.cameras = [];
+        }
+        if (this.resultMesh) {
+            this.resultMesh.gltfLoaderInfo = null;
+            this.resultMesh = null;
+        }
+    }
 }
 
 Object.freeze(GLTFLoader);

@@ -3,7 +3,6 @@ import View3D from "../display/view/View3D";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnimationLooperManager";
-import DrawBufferManager from "./core/DrawBufferManager";
 import FinalRender from "./finalRender/FinalRender";
 import {COMMAND_ENCODER_TYPE} from "../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
@@ -34,6 +33,7 @@ import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
 class Renderer {
     #finalRender: FinalRender
     #gltfAnimationLooperManager: GltfAnimationLooperManager = new GltfAnimationLooperManager()
+    #HD_render
 
     constructor() {
     }
@@ -57,14 +57,27 @@ class Renderer {
      * [EN] User-defined callback function to be executed every frame
      */
     start(redGPUContext: RedGPUContext, render: Function) {
+        redGPUContext.targetRenderer = this
         cancelAnimationFrame(redGPUContext.currentRequestAnimationFrame)
-        const HD_render = (time: number) => {
+        this.#HD_render = (time: number) => {
+            if (redGPUContext.destroyed || !this.#HD_render) return;
             render?.(time)
             redGPUContext.currentTime = time
             this.renderFrame(redGPUContext, time)
-            redGPUContext.currentRequestAnimationFrame = requestAnimationFrame(HD_render)
+            if (redGPUContext.destroyed || !this.#HD_render) return;
+            redGPUContext.currentRequestAnimationFrame = requestAnimationFrame(this.#HD_render)
         }
-        redGPUContext.currentRequestAnimationFrame = requestAnimationFrame(HD_render)
+        redGPUContext.currentRequestAnimationFrame = requestAnimationFrame(this.#HD_render)
+    }
+
+    destroy(redGPUContext?: RedGPUContext) {
+        if (redGPUContext) {
+            this.stop(redGPUContext);
+        }
+        this.#finalRender?.destroy()
+        this.#finalRender = null
+        this.#gltfAnimationLooperManager = null
+        this.#HD_render = null
     }
 
     /**
@@ -187,7 +200,7 @@ class Renderer {
             }
 
             {
-                const drawBufferManager = DrawBufferManager.getInstance(redGPUContext)
+                const drawBufferManager = redGPUContext.drawBufferManager
                 drawBufferManager.flushAllCommands(renderViewStateData)
             }
             {

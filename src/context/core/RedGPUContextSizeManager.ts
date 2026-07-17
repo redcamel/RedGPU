@@ -102,7 +102,7 @@ class RedGPUContextSizeManager extends RedGPUObject {
      * [KO] HTML 캔버스 요소
      * [EN] HTML Canvas element
      */
-    readonly #htmlCanvas: HTMLCanvasElement
+    #htmlCanvas: HTMLCanvasElement
     /**
      * [KO] 렌더링 스케일 배율
      * [EN] Rendering scale factor
@@ -276,6 +276,7 @@ class RedGPUContextSizeManager extends RedGPUObject {
                 break;
         }
     }
+
     /**
      * [KO] 입력값이 유효한 위치 값인지 검증합니다. (숫자, px, %)
      * [EN] Validates if the input value is a valid position value. (number, px, %)
@@ -340,6 +341,10 @@ class RedGPUContextSizeManager extends RedGPUObject {
         } else {
             return +value.replace('px', '')
         }
+    }
+
+    destroy() {
+        this.#htmlCanvas = null
     }
 
     /**

@@ -32,12 +32,12 @@ RedGPU.init(
         // 3. [KO] 32x32 그리드 형태의 스포트 라이트 생성 (총 1,024개)
         // [EN] Create 32x32 Grid of Spot Lights (Total 1,024)
         const gridSize = 32;
-        const spacing = 6;
+        const spacing = 15;
         const {lights, initialPositions} = createSpotLightGrid(scene, gridSize, spacing);
 
         // 4. [KO] 환경 구성 (바닥 및 구체 그리드)
         // [EN] Configure Environment (Ground and Sphere Grid)
-        createGround(redGPUContext, scene, 300);
+        createGround(redGPUContext, scene, 600);
         createMatchingMeshGrid(redGPUContext, scene, gridSize, spacing);
 
         // 5. [KO] 렌더러 생성 및 애니메이션 루프 시작
@@ -69,7 +69,7 @@ const createGround = (redGPUContext, scene, size) => {
     const mat = new RedGPU.Material.PBRMaterial(redGPUContext);
     // [KO] 어두운 색상의 재질을 사용하여 빛의 대비를 강조
     // [EN] Use dark material to emphasize light contrast
-    mat.baseColorFactor = [0.1, 0.1, 0.1, 1.0];
+    mat.baseColorFactor = [0.2, 0.2, 0.2, 1.0];
     mat.roughnessFactor = 0.4;
     mat.metallicFactor = 0.2;
 
@@ -103,10 +103,11 @@ const createSpotLightGrid = (scene, size, spacing) => {
                 Math.floor(Math.random() * 255),
                 Math.floor(Math.random() * 255)
             );
-            light.lumen = 4000;
-            light.radius = 20;
-            light.innerCutoff = 5;
+            light.lumen = 8000;
+            light.radius = 22;
+            light.innerCutoff = 15;
             light.outerCutoff = 25;
+            // light.enableDebugger = true
 
             const x = col * spacing - halfSize;
             const z = row * spacing - halfSize;
@@ -127,7 +128,7 @@ const createSpotLightGrid = (scene, size, spacing) => {
  * [EN] Creates a matching sphere grid below the lights.
  */
 const createMatchingMeshGrid = (redGPUContext, scene, size, spacing) => {
-    const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 1.5, 16, 16, 16);
+    const geometry = new RedGPU.Primitive.Sphere(redGPUContext, 3.5, 16, 16, 16);
     const halfSize = (size - 1) * spacing / 2;
     
     const materialPool = [];

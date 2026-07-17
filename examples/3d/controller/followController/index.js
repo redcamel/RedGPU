@@ -332,11 +332,6 @@ const renderTestPane = (redGPUContext, controller) => {
                 pane.refresh();
             });
 
-            const update = () => {
-                pane.refresh()
-                requestAnimationFrame(update);
-            }
-            requestAnimationFrame(update);
         }
     });
 };

@@ -182,6 +182,19 @@ class IrradianceGenerator extends RedGPUObject {
             new Float32Array([-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1])
         ];
     }
+
+    destroy() {
+        if (this.#uniformBuffer) {
+            try {
+                this.#uniformBuffer.destroy();
+            } catch (e) {
+            }
+            this.#uniformBuffer = null;
+        }
+        this.#sampler = null;
+        this.#pipeline = null;
+        this.#shaderModule = null;
+    }
 }
 
 Object.freeze(IrradianceGenerator);

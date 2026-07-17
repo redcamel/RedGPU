@@ -10,6 +10,10 @@ import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
 import CommandEncoderManager from "../commandEncoderManager/CommandEncoderManager";
 import RedGPUContextObserver from "./core/RedGPUContextObserver";
 import GlobalStorageBufferManager from "../resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager";
+import {keepLog} from "../utils";
+import DrawBufferManager from "../renderer/core/DrawBufferManager";
+
+import Renderer from "../renderer/Renderer";
 
 /**
  * [KO] RedGPUContext 클래스는 WebGPU 초기화 후 제공되는 최상위 컨텍스트 객체입니다.
@@ -54,6 +58,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Current time (frame based, ms)
      */
     currentTime: number
+    targetRenderer: Renderer
     /**ㄹ
      * [KO] GPU 캔버스 구성 정보 (WebGPU 설정용)
      * [EN] GPU canvas configuration info (for WebGPU setup)
@@ -63,7 +68,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [KO] GPU 어댑터 (WebGPU 하드웨어 정보)
      * [EN] GPU Adapter (WebGPU hardware info)
      */
-    readonly #gpuAdapter: GPUAdapter
+    #gpuAdapter: GPUAdapter
     /**
      * [KO] 알파 모드 (WebGPU 캔버스 알파 설정)
      * [EN] Alpha mode (WebGPU canvas alpha setting)
@@ -73,37 +78,37 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [KO] GPU 캔버스 컨텍스트 (WebGPU 렌더링 대상)
      * [EN] GPU Canvas Context (WebGPU rendering target)
      */
-    readonly #gpuContext: GPUCanvasContext
+    #gpuContext: GPUCanvasContext
     /**
      * [KO] GPU 디바이스 (WebGPU 연산/리소스 관리)
      * [EN] GPU Device (WebGPU computation/resource management)
      */
-    readonly #gpuDevice: GPUDevice
+    #gpuDevice: GPUDevice
     /**
      * [KO] HTML 캔버스 요소 (렌더링 대상 DOM)
      * [EN] HTML Canvas element (Rendering target DOM)
      */
-    readonly #htmlCanvas: HTMLCanvasElement
+    #htmlCanvas: HTMLCanvasElement
     /**
      * [KO] 크기 관리 매니저 (캔버스/뷰 크기 관리)
      * [EN] Size manager (Canvas/View size management)
      */
-    readonly #sizeManager: RedGPUContextSizeManager
+    #sizeManager: RedGPUContextSizeManager
     /**
      * [KO] 디바이스/브라우저 환경 감지 매니저
      * [EN] Device/Browser environment detector manager
      */
-    readonly #detector: RedGPUContextDetector
+    #detector: RedGPUContextDetector
     /**
      * [KO] 리소스 매니저 (GPU 리소스 관리)
      * [EN] Resource manager (GPU resource management)
      */
-    readonly #resourceManager: ResourceManager
+    #resourceManager: ResourceManager
     /**
      * [KO] 커맨드 인코더 매니저 (GPU 커맨드 인코더 관리)
      * [EN] Command encoder manager (GPU command encoder management)
      */
-    readonly #commandEncoderManager: CommandEncoderManager
+    #commandEncoderManager: CommandEncoderManager
     /**
      * [KO] 안티앨리어싱 매니저
      * [EN] Antialiasing manager
@@ -119,23 +124,32 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * [EN] Keyboard input buffer
      */
     #keyboardKeyBuffer: { [key: string]: boolean } = {}
-
     /**
      * [KO] 글로벌 SSAO 버텍스 버퍼 매니저
      * [EN] Global SSAO vertex buffer manager
      */
     #globalVertexSSBO: GlobalStorageBufferManager
-
     /**
      * [KO] 글로벌 SSAO 프래그먼트 버퍼 매니저
      * [EN] Global SSAO fragment buffer manager
      */
     #globalFragmentSSBO_PBR: GlobalStorageBufferManager
     #globalFragmentSSBO_BuiltIn: GlobalStorageBufferManager
-
-
+    #destroyed: boolean = false
+    #deviceEventController = new AbortController()
+    #pageShowEventController = new AbortController()
+    #pageHideEventController = new AbortController()
+    #onDestroy: ((info: GPUDeviceLostInfo) => void) | null = null
+    /**
+     * [KO] 드로우 버퍼 매니저
+     * [EN] Draw buffer manager
+     */
+    #drawBufferManager: DrawBufferManager
     #boundingClientRect: DOMRect
-
+    #onKeyDown: ((e: KeyboardEvent) => void) | null = null
+    #onKeyUp: ((e: KeyboardEvent) => void) | null = null
+    #onBlur: (() => void) | null = null
+    #canvasListeners: { eventName: string, listener: (e: any) => void }[] = []
     /**
      * [KO] 캔버스 환경 변화 감지 옵저버
      * [EN] Canvas environment change detector observer
@@ -160,13 +174,17 @@ class RedGPUContext extends RedGPUContextViewContainer {
      * @param alphaMode -
      * [KO] 캔버스 알파 모드
      * [EN] Canvas alpha mode
+     * @param onDestroy -
+     * [KO] 디바이스 유실 시 호출될 선택적 콜백 함수
+     * [EN] Optional callback function to be called when the device is lost
      */
     constructor(
         htmlCanvas: HTMLCanvasElement,
         gpuAdapter: GPUAdapter,
         gpuDevice: GPUDevice,
         gpuContext: GPUCanvasContext,
-        alphaMode: GPUCanvasAlphaMode
+        alphaMode: GPUCanvasAlphaMode,
+        onDestroy?: (info: GPUDeviceLostInfo) => void
     ) {
         super()
         this.#gpuAdapter = gpuAdapter
@@ -174,17 +192,33 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#gpuContext = gpuContext
         this.#alphaMode = alphaMode
         this.#htmlCanvas = htmlCanvas
+        if (onDestroy) this.#onDestroy = onDestroy
         this.#sizeManager = new RedGPUContextSizeManager(this)
         this.#detector = new RedGPUContextDetector(this)
         this.#resourceManager = new ResourceManager(this)
+        this.#resourceManager.initPresets()
         this.#commandEncoderManager = new CommandEncoderManager(this)
         this.#antialiasingManager = new AntialiasingManager()
+        this.#drawBufferManager = new DrawBufferManager(this)
         // keepLog(ResourceManager.GLOBAL_FRAGMENT_PBR_STRUCT)
         // keepLog('ResourceManager.GLOBAL_VERTEX_STRUCT.size',ResourceManager.GLOBAL_VERTEX_STRUCT.size)
-        this.#globalVertexSSBO = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_VERTEX_STRUCT.size, 2000, "GLOBAL_VERTEX_BUFFER")
-        this.#globalFragmentSSBO_PBR = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_FRAGMENT_STRUCT_PBR.size, 1024, "GLOBAL_FRAGMENT_BUFFER")
-        this.#globalFragmentSSBO_BuiltIn = new GlobalStorageBufferManager(this, ResourceManager.GLOBAL_FRAGMENT_STRUCT_BUILT_IN.size, 1024, "GLOBAL_FRAGMENT_BUILT_IN_BUFFER")
+        this.#globalVertexSSBO = new GlobalStorageBufferManager(this, this.#resourceManager.GLOBAL_VERTEX_STRUCT.size, 2000, "GLOBAL_VERTEX_BUFFER")
+        this.#globalFragmentSSBO_PBR = new GlobalStorageBufferManager(this, this.#resourceManager.GLOBAL_FRAGMENT_STRUCT_PBR.size, 1024, "GLOBAL_FRAGMENT_BUFFER")
+        this.#globalFragmentSSBO_BuiltIn = new GlobalStorageBufferManager(this, this.#resourceManager.GLOBAL_FRAGMENT_STRUCT_BUILT_IN.size, 1024, "GLOBAL_FRAGMENT_BUILT_IN_BUFFER")
+        this.#initializeLifecycleEvents()
         this.#initialize()
+    }
+
+    get destroyed(): boolean {
+        return this.#destroyed;
+    }
+
+    /**
+     * [KO] 드로우 버퍼 매니저를 반환합니다.
+     * [EN] Returns the draw buffer manager.
+     */
+    get drawBufferManager(): DrawBufferManager {
+        return this.#drawBufferManager;
     }
 
     /**
@@ -226,7 +260,6 @@ class RedGPUContext extends RedGPUContextViewContainer {
     get globalFragmentSSBO_PBR(): GlobalStorageBufferManager {
         return this.#globalFragmentSSBO_PBR;
     }
-
 
     get globalFragmentSSBO_BuiltIn(): GlobalStorageBufferManager {
         return this.#globalFragmentSSBO_BuiltIn;
@@ -436,15 +469,95 @@ class RedGPUContext extends RedGPUContextViewContainer {
     }
 
     /**
-     * [KO] GPU 디바이스를 파기하고 리소스를 해제합니다.
-     * [EN] Destroys the GPU device and releases resources.
+     * [KO] RedGPUContext 인스턴스를 파기하고 모든 렌더러와 리소스를 해제합니다.
+     * [EN] Destroys the RedGPUContext instance and releases all renderers and resources.
+     * @param isPageHide -
+     * [KO] pagehide 이벤트에 의해 임시로 소멸이 기동되었는지 여부 (bfcache 복원용 pageshow 리스너 보존을 위함)
+     * [EN] Whether the destruction was temporarily triggered by a pagehide event (to preserve pageshow listener for bfcache restoration)
      */
-    destroy() {
-        this.#observer?.stop()
+    destroy(): void {
+        window?.cancelAnimationFrame(this.currentRequestAnimationFrame)
+        this.#deviceEventController.abort();
+        if (this.#destroyed) return;
+        this.#destroyed = true;
+
+        this.targetRenderer?.destroy(this)
+        if (this.#gpuContext) {
+            try {
+                this.gpuContext.unconfigure();
+                keepLog('🧹 Canvas Context unconfigure 완료');
+            } catch (e) {
+                keepLog('⚠️ Canvas Context unconfigure 실패:', e);
+            }
+        }
+        this.#observer?.destroy()
+        this.#observer = null
+        this.#sizeManager.destroy()
+        this.#sizeManager = null
+        if (this.#htmlCanvas) {
+            this.#htmlCanvas.width = 0;
+            this.#htmlCanvas.height = 0;
+            this.#htmlCanvas.style.width = '0px';
+            this.#htmlCanvas.style.height = '0px';
+
+            this.#htmlCanvas.remove();
+        }
+
+
+        // 1. 뷰 리스트 먼저 완전히 파괴 (G-Buffer 등 수집)
+        for (const view of this.viewList) {
+            view.destroy();
+        }
+        this.removeAllViews();
+
+        // 2. 드로우 버퍼 매니저 정리
+        if (this.#drawBufferManager) {
+            this.#drawBufferManager.destroy();
+            this.#drawBufferManager = null
+        }
+
+        // 3. 리소스 매니저 정리 (버퍼/텍스처 캐시를 지연 파괴 큐에 넣음)
+        if (this.#resourceManager) {
+            this.#resourceManager.destroy();
+            this.#resourceManager = null
+        }
+
+        // 4. 커맨드 엔코더 매니저 정리 (지연 파괴 큐의 모든 물리 자원 최종 소멸)
+        if (this.#commandEncoderManager) {
+            this.#commandEncoderManager.destroy();
+            this.#commandEncoderManager = null;
+        }
+
+        // 5. 글로벌 SSBO 소멸
+        if (this.#globalVertexSSBO) {
+            this.#globalVertexSSBO.destroy()
+            this.#globalVertexSSBO = null
+        }
+        if (this.#globalFragmentSSBO_PBR) {
+            this.#globalFragmentSSBO_PBR.destroy()
+            this.#globalFragmentSSBO_PBR = null
+        }
+        if (this.#globalFragmentSSBO_BuiltIn) {
+            this.#globalFragmentSSBO_BuiltIn.destroy()
+            this.#globalFragmentSSBO_BuiltIn = null
+        }
+
+        // clear Event
+        this.#clearEvent()
+
+        this.#deviceEventController.abort();
+        this.#pageHideEventController.abort();
+
+
+        this.#onDestroy = null;
+        this.detector.destroy()
+        this.#detector = null
         this.#gpuDevice.destroy()
-        this.#globalVertexSSBO.destroy()
-        this.#globalFragmentSSBO_PBR.destroy()
-        this.#globalFragmentSSBO_BuiltIn.destroy()
+        this.#gpuAdapter = null
+        this.#gpuDevice = null
+        this.#gpuContext = null
+        this.#configurationDescription = null
+        this.#htmlCanvas = null
     }
 
     /**
@@ -459,6 +572,68 @@ class RedGPUContext extends RedGPUContextViewContainer {
      */
     setSize(w: string | number = this.width, h: string | number = this.height) {
         this.sizeManager.setSize(w, h)
+    }
+
+    /**
+     * [KO] 등록된 모든 이벤트 리스너를 해제합니다. (내부용)
+     * [EN] Removes all registered event listeners. (Internal use)
+     */
+    #clearEvent() {
+        if (this.#onKeyUp) window?.removeEventListener('keyup', this.#onKeyUp)
+        if (this.#onKeyDown) window?.removeEventListener('keydown', this.#onKeyDown)
+        if (this.#onBlur) window?.removeEventListener('blur', this.#onBlur)
+        this.#onKeyUp = null
+        this.#onKeyDown = null
+        this.#onBlur = null
+
+        this.#canvasListeners.forEach(({eventName, listener}) => {
+            this.#htmlCanvas.removeEventListener(eventName, listener);
+        });
+        this.#canvasListeners = [];
+
+        this.onResize = null;
+        this.#keyboardKeyBuffer = {};
+    }
+
+    #initializeLifecycleEvents() {
+        const device = this.#gpuDevice;
+        const uncapturedErrorHandler = (event: GPUUncapturedErrorEvent) => {
+            console.warn('TODO A WebGPU error was not captured:', event);
+            console.warn(event.error?.message);
+            window.cancelAnimationFrame(this.currentRequestAnimationFrame);
+        };
+        device.addEventListener('uncapturederror', uncapturedErrorHandler, {signal: this.#deviceEventController.signal});
+
+        device.lost.then((info: GPUDeviceLostInfo) => {
+            console.warn(info);
+            console.warn(`Device lost occurred: ${info.message}`);
+            this.#deviceEventController.abort();
+            if (info.reason === 'destroyed') this.#onDestroy?.(info);
+        });
+
+        const pageShowHandler = (event: PageTransitionEvent) => {
+            if (event.persisted) {
+                this.destroy();
+                this.#deviceEventController.abort();
+                this.#pageHideEventController.abort();
+                this.#pageShowEventController.abort();
+                window.location.reload();
+            }
+        };
+        const pageHideHandler = () => {
+            this.#pageHideEventController.abort();
+            this.destroy();
+            this.htmlCanvas.remove();
+            this.#htmlCanvas = null
+
+        };
+        const beforeUnloadHandler = () => {
+            this.destroy();
+        };
+        window?.addEventListener('pageshow', pageShowHandler, {signal: this.#pageShowEventController.signal});
+        window?.addEventListener('pagehide', pageHideHandler, {signal: this.#pageHideEventController.signal});
+        window?.addEventListener('beforeunload', beforeUnloadHandler, {signal: this.#pageHideEventController.signal});
+
     }
 
     /**
@@ -509,7 +684,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
                         mouseup: PICKING_EVENT_TYPE.UP,
                     }
             )
-            this.#htmlCanvas.addEventListener(eventName, (e: MouseEvent) => {
+            const listener = (e: any) => {
                 const eventTypeForDevice = eventMap[e.type]
                 // console.log('eventTypeForDevice',e.type)
                 this.viewList.forEach((view: View3D) => {
@@ -528,14 +703,16 @@ class RedGPUContext extends RedGPUContextViewContainer {
                         view.pickingManager.lastMouseEvent = {...e, type: eventTypeForDevice}
                     }
                 })
-            })
+            }
+            this.#htmlCanvas.addEventListener(eventName, listener)
+            this.#canvasListeners.push({eventName, listener})
         })
         {
             // 키보드 이벤트 설정
-            const HD_keyDown = (e: KeyboardEvent) => {
+            this.#onKeyDown = (e: KeyboardEvent) => {
                 this.#keyboardKeyBuffer[e.key] = true
             };
-            const HD_keyUp = (e: KeyboardEvent) => {
+            this.#onKeyUp = (e: KeyboardEvent) => {
                 this.#keyboardKeyBuffer[e.key] = false;
                 const lower = e.key.toLowerCase();
                 const upper = e.key.toUpperCase();
@@ -544,14 +721,14 @@ class RedGPUContext extends RedGPUContextViewContainer {
                     this.#keyboardKeyBuffer[upper] = false;
                 }
             };
-            const HD_blur = () => {
+            this.#onBlur = () => {
                 for (const key in this.#keyboardKeyBuffer) {
                     delete this.#keyboardKeyBuffer[key];
                 }
             };
-            window?.addEventListener('keyup', HD_keyUp);
-            window?.addEventListener('keydown', HD_keyDown);
-            window?.addEventListener('blur', HD_blur);
+            window?.addEventListener('keyup', this.#onKeyUp);
+            window?.addEventListener('keydown', this.#onKeyDown);
+            window?.addEventListener('blur', this.#onBlur);
         }
     }
 
@@ -569,7 +746,9 @@ class RedGPUContext extends RedGPUContextViewContainer {
         console.log(`configurationDescription`, this.#configurationDescription);
         this.#gpuContext.configure(this.#configurationDescription);
     }
+
 }
+
 
 Object.freeze(RedGPUContext)
 export default RedGPUContext

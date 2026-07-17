@@ -218,6 +218,17 @@ class CubeTexture extends ManagementResourceBase {
         this.#unregisterResource()
         this.#srcList = null
         this.cacheKey = null
+        if (this.#imgBitmaps) {
+            this.#imgBitmaps.forEach(imgBitmap => {
+                if (imgBitmap) {
+                    try {
+                        imgBitmap.close();
+                    } catch (e) {
+                    }
+                }
+            });
+            this.#imgBitmaps = null;
+        }
         if (temp) {
             this.redGPUContext.commandEncoderManager.addDeferredDestroy(temp)
         }

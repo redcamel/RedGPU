@@ -102,6 +102,7 @@ class RedGPUExampleHelper {
 
     private root: ReactDOM.Root | null = null;
     private domRoot: HTMLElement | null = null;
+    private isDestroyed = false;
 
     constructor(redGPUContext: RedGPUContext, guiConfig?: GuiConfig | ((gui: any) => void)) {
         useExampleHelperStore.getState().setRedGPUContext(redGPUContext);
@@ -119,9 +120,31 @@ class RedGPUExampleHelper {
         }
 
         this.init();
+
+        // [KO] 브라우징이 변경되거나 리로드/언로드될 때 자동으로 리소스 해제
+        // [EN] Automatically release resources when browsing changes or page reloads/unloads
+        window.addEventListener('beforeunload', this.handleUnload);
+        window.addEventListener('pagehide', this.handleUnload);
     }
 
     public destroy() {
+        if (this.isDestroyed) return;
+        this.isDestroyed = true;
+
+        window.removeEventListener('beforeunload', this.handleUnload);
+        window.removeEventListener('pagehide', this.handleUnload);
+
+        // [KO] RedGPUContext의 실질적인 하드웨어 및 리소스 디스트로이 명시적 호출
+        // [EN] Explicitly call destroy on RedGPUContext to release GPU resources and device
+        const redGPUContext = useExampleHelperStore.getState().redGPUContext;
+        if (redGPUContext) {
+            try {
+                redGPUContext.destroy();
+            } catch (e) {
+                console.error("Failed to destroy RedGPUContext:", e);
+            }
+        }
+
         useExampleHelperStore.getState().setRedGPUContext(null);
         useExampleHelperStore.getState().setGuiConfig(null);
         useExampleHelperStore.getState().setRedGPU(null);
@@ -134,6 +157,10 @@ class RedGPUExampleHelper {
             this.domRoot = null;
         }
     }
+
+    private handleUnload = () => {
+        this.destroy();
+    };
 
     private async init() {
         // 현재 예제 정보 설정

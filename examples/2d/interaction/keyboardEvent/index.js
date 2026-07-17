@@ -108,21 +108,21 @@ const renderTestPane = (redGPUContext, keyboardKeyBuffer) => {
 			});
 
 			const activeKeysFolder = pane.addFolder({ title: 'Active Keys' });
-			const activeKeysMonitor = activeKeysFolder.addBlade({
-				view: 'text',
-				label: 'Pressed',
-				value: '',
-				parse: (v) => v,
-				readonly: true
-			});
+			const MONITOR_DATA = {
+				get pressedKeys() {
+					const activeKeys = Object.entries(keyboardKeyBuffer)
+						.filter(([_, pressed]) => pressed)
+						.map(([key]) => key === ' ' ? 'Space' : key)
+						.join(', ');
+					return activeKeys || 'None';
+				}
+			};
 
-			setInterval(() => {
-				const activeKeys = Object.entries(keyboardKeyBuffer)
-					.filter(([key, pressed]) => pressed)
-					.map(([key]) => key === ' ' ? 'Space' : key)
-					.join(', ');
-				activeKeysMonitor.value = activeKeys || 'None';
-			}, 100);
+			activeKeysFolder.addBinding(MONITOR_DATA, 'pressedKeys', {
+				readonly: true,
+				label: 'Pressed',
+				interval: 100
+			});
 		}
 	});
 };

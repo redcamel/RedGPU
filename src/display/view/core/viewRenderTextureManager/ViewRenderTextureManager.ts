@@ -257,6 +257,19 @@ class ViewRenderTextureManager extends RedGPUObject {
         return this.#gBuffers.get(type)?.resolveTextureView;
     }
 
+    /**
+     * [KO] ViewRenderTextureManager 인스턴스를 파기하고 내부에 보관 중이던 G-Buffer 및 Depth 텍스처들을 물리적으로 해제합니다.
+     * [EN] Destroys the ViewRenderTextureManager instance and physically releases all G-Buffer and Depth textures held inside.
+     */
+    destroy(): void {
+        for (const key of this.#gBuffers.keys()) {
+            this.#destroyGBuffer(key as any);
+        }
+        this.#gBuffers.clear();
+        this.#view = null;
+        console.log("🧹 ViewRenderTextureManager destroy 완료");
+    }
+
     /* ----------------------------------------
      * Public getters (메모리/텍스처 접근)
      * ---------------------------------------- */

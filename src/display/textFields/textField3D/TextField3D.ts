@@ -2,7 +2,6 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import Geometry from "../../../geometry/Geometry";
 import Primitive from "../../../primitive/core/Primitive";
 import Plane from "../../../primitive/Plane";
-import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import ATextField from "../core/ATextField";
 import vertexModuleSource from "./shader/textField3DVertex.wgsl";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
@@ -38,8 +37,7 @@ interface TextField3D {
 }
 
 const VERTEX_SHADER_MODULE_NAME = 'VERTEX_MODULE_TEXT_FIELD_3D'
-const SHADER_INFO = parseWGSL('TEXTFIELD3D_VERTEX', vertexModuleSource);
-const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
+
 
 /**
  * [KO] 3D 공간에서 텍스트를 표현하는 클래스입니다.
@@ -249,6 +247,8 @@ class TextField3D extends ATextField {
      * [EN] Created GPU shader module
      */
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
+        const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('TEXTFIELD3D_VERTEX', vertexModuleSource);
+        const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
         return this.createMeshVertexShaderModuleBASIC(
             VERTEX_SHADER_MODULE_NAME,
             SHADER_INFO,

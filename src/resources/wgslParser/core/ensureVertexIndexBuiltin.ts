@@ -11,6 +11,7 @@
  * @returns
  * [KO] `vertex_index`가 보장된 셰이더 소스 코드
  * [EN] Shader source code with guaranteed `vertex_index`
+ * @deprecated
  * @category WGSL
  */
 function ensureVertexIndexBuiltin(shaderSource: string): string {

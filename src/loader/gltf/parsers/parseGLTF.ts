@@ -40,6 +40,13 @@ const parseGLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, callBack, onProgress?
                                             }
                                         })
                                     });
+                                    // [KO] 로딩 완료 후, 사용한 Object URL들을 메모리에서 즉시 해제합니다.
+                                    // [EN] After loading is complete, release the used Object URLs from memory immediately.
+                                    Object.values(gltfLoader.parsingResult.textureRawList).forEach((item: any) => {
+                                        if (typeof item.src === 'string' && item.src.startsWith('blob:')) {
+                                            URL.revokeObjectURL(item.src);
+                                        }
+                                    });
                                     parseAnimation_GLTF(gltfLoader, gltfData).then(_ => {
                                         if (callBack) callBack();
                                     });

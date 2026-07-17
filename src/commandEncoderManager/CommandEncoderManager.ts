@@ -1,6 +1,7 @@
 import RedGPUContext from "../context/RedGPUContext";
 import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "./COMMAND_ENCODER_TYPE";
 import RedGPUObject from "../base/RedGPUObject";
+import {keepLog} from "../utils";
 
 /**
  * [KO] 단계별 통계 상세 정보 인터페이스
@@ -593,6 +594,16 @@ class CommandEncoderManager extends RedGPUObject {
     }
 
     /**
+     * [KO] CommandEncoderManager 인스턴스를 파기하고 모든 커맨드 인코더 및 지연 리소스 참조를 정리합니다.
+     * [EN] Destroys the CommandEncoderManager instance and cleans up all command encoder and deferred resource references.
+     */
+    destroy(): void {
+        this.resetAll();
+        this.#deferredDestroyList.length = 0;
+        keepLog("🧹 CommandEncoderManager destroy 완료");
+    }
+
+    /**
      * [KO] 등록된 모든 지연 파괴 리소스를 파괴합니다.
      * [EN] Destroys all registered deferred destroy resources.
      *
@@ -605,11 +616,14 @@ class CommandEncoderManager extends RedGPUObject {
         if (len > 0) {
             let i = 0;
             for (i; i < len; i++) {
-                // keepLog(this.#deferredDestroyList[i])
-                this.#deferredDestroyList[i].destroy();
+                try {
+                    this.#deferredDestroyList[i].destroy();
+                } catch (e) {
+                    // 예외 발생 시 에러는 기록하되 루프 붕괴는 원천 차단
+                    console.warn("⚠️ 지연 자원 소멸 실패:", e);
+                }
             }
             this.#deferredDestroyList.length = 0;
-            // console.log(`🗑️ [CommandEncoderManager] Destroyed ${len} deferred resource(s)`);
         }
         return len;
     }

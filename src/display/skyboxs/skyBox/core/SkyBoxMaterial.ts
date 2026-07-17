@@ -5,14 +5,11 @@ import BitmapTexture from "../../../../resources/texture/BitmapTexture";
 import CubeTexture from "../../../../resources/texture/CubeTexture";
 import DirectCubeTexture from "../../../../resources/texture/DirectCubeTexture";
 import ANoiseTexture from "../../../../resources/texture/noiseTexture/core/ANoiseTexture";
-import parseWGSL from "../../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from "../shader/fragment.wgsl"
 import definePositiveNumber from "../../../../defineProperty/funcs/number/definePositiveNumber";
 import defineCubeTexture from "../../../../defineProperty/funcs/texture/defineCubeTexture";
 import defineTexture from "../../../../defineProperty/funcs/texture/defineTexture";
 import defineSampler from "../../../../defineProperty/funcs/texture/defineSampler";
-
-const SHADER_INFO = parseWGSL('SKYBOX_MATERIAL', fragmentModuleSource)
 
 interface SkyBoxMaterial {
     /**
@@ -85,7 +82,7 @@ class SkyBoxMaterial extends ABitmapBaseMaterial {
      * [EN] Initial cube texture object
      */
     constructor(redGPUContext: RedGPUContext, texture: CubeTexture | DirectCubeTexture) {
-        super(redGPUContext, 'SKYBOX_MATERIAL', SHADER_INFO, 2)
+        super(redGPUContext, 'SKYBOX_MATERIAL', fragmentModuleSource, 2)
         this.texture0 = texture;
         this.sampler0 = new Sampler(this.redGPUContext, {
             addressModeU: 'clamp-to-edge',

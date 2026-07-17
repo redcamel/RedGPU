@@ -1,16 +1,13 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import ABaseMaterial from "../../../material/core/ABaseMaterial";
-import parseWGSL from "../../../resources/wgslParser/parseWGSL";
 import fragmentModuleSource from '../shader/fragment.wgsl'
-
-const SHADER_INFO = parseWGSL('LINE_MATERIAL', fragmentModuleSource)
 
 class LineMaterial extends ABaseMaterial {
     constructor(redGPUContext: RedGPUContext, name?: string) {
         super(
             redGPUContext,
             'LINE_MATERIAL',
-            SHADER_INFO,
+            fragmentModuleSource,
             2
         )
         if (name) this.name = name

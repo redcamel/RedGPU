@@ -49,6 +49,7 @@ class Scene extends Object3DContainer {
      * [EN] Physics simulation engine bound to the scene
      */
     #physicsEngine: IPhysicsEngine
+    #destroyed: boolean = false
 
     /**
      * [KO] Scene 인스턴스를 생성합니다.
@@ -117,6 +118,40 @@ class Scene extends Object3DContainer {
 
     set useBackgroundColor(value: boolean) {
         this.#useBackgroundColor = value;
+    }
+
+    destroy() {
+        if (this.#destroyed) return;
+        this.#destroyed = true;
+
+        if (this.#shadowManager) {
+            this.#shadowManager.destroy();
+        }
+
+        if (this.#physicsEngine) {
+            try {
+                // @ts-ignore
+                if (typeof this.#physicsEngine.destroy === 'function') {
+                    // @ts-ignore
+                    this.#physicsEngine.destroy();
+                    // @ts-ignore
+                } else if (typeof this.#physicsEngine.free === 'function') {
+                    // @ts-ignore
+                    this.#physicsEngine.free();
+                }
+            } catch (e) {
+                // 예외 처리
+            }
+            this.#physicsEngine = null;
+        }
+
+        if (this.#lightManager) {
+            this.#lightManager.destroy();
+            this.#lightManager = null;
+        }
+        this.#backgroundColor = null;
+
+        super.destroy();
     }
 }
 

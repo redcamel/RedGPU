@@ -320,11 +320,6 @@ const renderTestPane = (redGPUContext, controller) => {
                 });
             }
 
-            const update = () => {
-                pane.refresh()
-                requestAnimationFrame(update);
-            }
-            requestAnimationFrame(update);
         }
     });
 };

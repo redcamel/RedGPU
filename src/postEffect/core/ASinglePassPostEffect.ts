@@ -2,7 +2,6 @@ import RedGPUContext from "../../context/RedGPUContext";
 import View3D from "../../display/view/View3D";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../material/core";
 import UniformBuffer from "../../resources/buffer/uniformBuffer/UniformBuffer";
-import parseWGSL from "../../resources/wgslParser/parseWGSL";
 import {IPostEffectResult} from "./types";
 import RedGPUObject from "../../base/RedGPUObject";
 
@@ -67,6 +66,7 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     #bindGroupCache0 = new Map<string, GPUBindGroup>();
     #bindGroupCache1: GPUBindGroup;
     #bindGroupCache3 = new Map<number, GPUBindGroup>();
+    #destroyed: boolean = false
 
     /**
      * [KO] ASinglePassPostEffect 인스턴스를 생성합니다.
@@ -221,6 +221,20 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         this.#bindGroupCache3.clear();
     }
 
+    destroy() {
+        if (this.#destroyed) return;
+        this.#destroyed = true
+        this.clear()
+        this.#uniformBuffer?.destroy()
+        this.#uniformBuffer = null
+        this.#uniformsInfo = null
+        this.#systemUniformsInfo = null
+        this.#storageInfo = null
+        this.#name = null
+        this.#SHADER_INFO_MSAA = null
+        this.#SHADER_INFO_NON_MSAA = null
+    }
+
     /**
      * [KO] 이펙트를 초기화합니다. 컴퓨트 셰이더 및 유니폼 버퍼를 생성합니다.
      * [EN] Initializes the effect. Creates compute shaders and globalStruct buffers.
@@ -247,8 +261,8 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         this.#computeShaderNonMSAA = resourceManager.createGPUShaderModule(`${name}_NonMSAA`, {code: computeCodes.nonMsaa});
 
         // 셰이더 정보 파싱 (WGSL 분석)
-        this.#SHADER_INFO_MSAA = parseWGSL(`${name}_MSAA`, computeCodes.msaa);
-        this.#SHADER_INFO_NON_MSAA = parseWGSL(`${name}_NonMSAA`, computeCodes.nonMsaa);
+        this.#SHADER_INFO_MSAA = resourceManager.wgslParser.parse(`${name}_MSAA`, computeCodes.msaa);
+        this.#SHADER_INFO_NON_MSAA = resourceManager.wgslParser.parse(`${name}_NonMSAA`, computeCodes.nonMsaa);
 
         const {storage, uniforms} = this.#SHADER_INFO_MSAA;
         this.#storageInfo = storage;

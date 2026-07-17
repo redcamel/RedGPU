@@ -4,17 +4,13 @@
  * @packageDocumentation
  */
 import ensureVertexIndexBuiltin from "./ensureVertexIndexBuiltin";
-import preprocessWGSL, {ConditionalBlock, PreprocessedWGSLResult} from "./preprocessWGSL";
 import ShaderVariantGenerator from "./ShaderVariantGenerator";
 import WGSLUniformTypes, {TypedArrayConstructor, TypeUniform} from "./WGSLUniformTypes";
 
 export {
-    preprocessWGSL,
     ensureVertexIndexBuiltin,
     ShaderVariantGenerator,
     WGSLUniformTypes,
-    ConditionalBlock,
-    PreprocessedWGSLResult,
     TypeUniform,
     TypedArrayConstructor
 };

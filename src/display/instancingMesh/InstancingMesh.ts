@@ -4,7 +4,7 @@ import Geometry from "../../geometry/Geometry";
 import Primitive from "../../primitive/core/Primitive";
 import StorageBuffer from "../../resources/buffer/storageBuffer/StorageBuffer";
 import ResourceManager from "../../resources/core/resourceManager/ResourceManager";
-import parseWGSL from "../../resources/wgslParser/parseWGSL";
+
 import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRange";
 import createBasePipeline from "../mesh/core/pipeline/createBasePipeline";
 import PIPELINE_TYPE from "../mesh/core/pipeline/PIPELINE_TYPE";
@@ -160,7 +160,7 @@ class InstancingMesh extends Mesh {
         this.#instanceCount = Math.min(instanceCount, this.#maxInstanceCount);
 
         this.#init();
-        this.gpuRenderInfo.vertexUniformInfo = parseWGSL(`INSTANCING_MESH_VERTEX_${this.#maxInstanceCount}`, this.#getVertexModuleSource(this.geometry, this.material)).storage.instanceUniforms;
+        this.gpuRenderInfo.vertexUniformInfo = redGPUContext.resourceManager.wgslParser.parse(`INSTANCING_MESH_VERTEX_${this.#maxInstanceCount}_${this.uuid}`, this.#getVertexModuleSource(this.geometry, this.material)).storage.instanceUniforms;
         this.#rebuildInstanceUniformBuffer();
         this.#updateVisibilityStride();
         this.#initGPURenderInfos(this.#redGPUContext);
@@ -321,6 +321,59 @@ class InstancingMesh extends Mesh {
         this.dirtyTransform = false;
     }
 
+    /**
+     * [KO] InstancingMesh 인스턴스를 파기하고 할당된 인스턴싱 전용 GPU 버퍼 및 파이프라인 자원을 즉시 해제합니다.
+     * [EN] Destroys the InstancingMesh instance and immediately releases the allocated instancing-specific GPU buffers and pipeline resources.
+     */
+    destroy() {
+        super.destroy();
+
+        if (this.#indirectDrawBuffer) {
+            this.#redGPUContext.commandEncoderManager.addDeferredDestroy(this.#indirectDrawBuffer);
+            this.#indirectDrawBuffer = null;
+        }
+
+        if (this.#cullingUniformBuffer) {
+            this.#cullingUniformBuffer.destroy();
+            this.#cullingUniformBuffer = null;
+        }
+
+        if (this.#visibilityBuffer) {
+            this.#visibilityBuffer.destroy();
+            this.#visibilityBuffer = null;
+        }
+
+        if (this.gpuRenderInfo) {
+            if (this.gpuRenderInfo.vertexUniformBuffer) {
+                this.gpuRenderInfo.vertexUniformBuffer.destroy();
+                this.gpuRenderInfo.vertexUniformBuffer = null;
+            }
+            this.gpuRenderInfo.vertexShaderModule = null;
+            this.gpuRenderInfo.pipeline = null;
+            this.gpuRenderInfo.shadowPipeline = null;
+            this.gpuRenderInfo.vertexUniformBindGroup = null;
+            this.gpuRenderInfo.vertexUniformInfo = null;
+        }
+
+        this.#cullingComputePipeline = null;
+        this.#cullingBindGroup = null;
+
+        this.#lodGPURenderInfoList.forEach(info => {
+            info.pipeline = null;
+            info.vertexUniformBindGroup = null;
+        });
+        this.#lodGPURenderInfoList = [];
+
+        this.#instanceChildren.forEach(child => {
+            if ('destroy' in child && typeof child.destroy === 'function') {
+                child.destroy();
+            }
+        });
+        this.#instanceChildren.length = 0;
+
+        console.log(`🧹 InstancingMesh destroy 완료: ${this.name || '무명'}`);
+    }
+
     #updateTransformMatrix(): void {
         mat4.identity(this.localMatrix);
         mat4.translate(this.localMatrix, this.localMatrix, [this.x, this.y, this.z]);
@@ -336,6 +389,8 @@ class InstancingMesh extends Mesh {
         }
     }
 
+    // ========== 지오메트리 렌더링 ==========
+
     #updatePipelineState(renderViewStateData: RenderViewStateData): void {
         this.dirtyTransform = true;
         if (this.material.dirtyPipeline) {
@@ -346,8 +401,6 @@ class InstancingMesh extends Mesh {
         this.dirtyPipeline = false;
         renderViewStateData.renderResults.numDirtyPipelines++;
     }
-
-    // ========== 지오메트리 렌더링 ==========
 
     #renderGeometry(
         renderViewStateData: RenderViewStateData,
@@ -436,6 +489,8 @@ class InstancingMesh extends Mesh {
         }
     }
 
+    // ========== GPU 리소스 초기화 ==========
+
     #updateInstanceUniforms(): void {
         const {vertexUniformBuffer, vertexUniformInfo} = this.gpuRenderInfo;
         const {gpuDevice} = this.#redGPUContext;
@@ -511,8 +566,6 @@ class InstancingMesh extends Mesh {
         }
     }
 
-    // ========== GPU 리소스 초기화 ==========
-
     #init(): void {
         const {gpuDevice} = this.#redGPUContext;
         this.gpuRenderInfo = new VertexGPURenderInfo(
@@ -539,6 +592,8 @@ class InstancingMesh extends Mesh {
         );
     }
 
+    // ========== Culling (Compute Shader) ==========
+
     #initGPURenderInfos(redGPUContext: RedGPUContext): void {
         this.dirtyPipeline = true;
         const visibilityData = new ArrayBuffer(
@@ -553,8 +608,6 @@ class InstancingMesh extends Mesh {
         this.#updatePipelines();
         this.#initGPUCulling(this.#redGPUContext);
     }
-
-    // ========== Culling (Compute Shader) ==========
 
     #initGPUCulling(redGPUContext: RedGPUContext): void {
         const {gpuDevice, resourceManager} = redGPUContext;
@@ -636,6 +689,8 @@ class InstancingMesh extends Mesh {
         );
     }
 
+    // ========== 파이프라인 설정 ==========
+
     #performGPUCulling(renderViewStateData: RenderViewStateData): void {
         const {gpuDevice, commandEncoderManager} = this.#redGPUContext;
         const {indexBuffer, vertexBuffer} = this.geometry
@@ -665,8 +720,6 @@ class InstancingMesh extends Mesh {
             computePass.dispatchWorkgroups(workgroupCount);
         });
     }
-
-    // ========== 파이프라인 설정 ==========
 
     #updatePipelines(): void {
         const {resourceManager, gpuDevice} = this.#redGPUContext;
@@ -731,6 +784,8 @@ class InstancingMesh extends Mesh {
         });
     }
 
+    // ========== Utility 메서드 ==========
+
     #getVertexBindGroupDescriptor(index: number = 0): GPUBindGroupDescriptor {
         const {resourceManager} = this.#redGPUContext;
         const {vertexUniformBuffer} = this.gpuRenderInfo;
@@ -780,8 +835,6 @@ class InstancingMesh extends Mesh {
             ],
         };
     }
-
-    // ========== Utility 메서드 ==========
 
     #updateVisibilityStride(): void {
         const rawStride = this.#maxInstanceCount * 8; // u32가 2개(instanceIdx, globalFragmentSlotIndex)이므로 8바이트
@@ -845,4 +898,5 @@ class InstancingMesh extends Mesh {
     }
 }
 
+Object.freeze(InstancingMesh)
 export default InstancingMesh;

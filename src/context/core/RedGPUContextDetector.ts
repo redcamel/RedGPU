@@ -235,6 +235,21 @@ class RedGPUContextDetector {
         return this.#deviceMemory;
     }
 
+    destroy(): void {
+        // WebGPU 네이티브 객체 참조 끊기 (타입 에러 방지를 위해 as any 사용 또는 null 허용 타입으로 변경)
+        this.#gpuAdapter = null as any;
+        this.#adapterInfo = null as any;
+        this.#supportedLimits = null as any;
+        this.#activeLimits = null as any;
+
+        // Record(객체) 참조 끊기
+        this.#supportedFeatures = {};
+        this.#activeFeatures = {};
+
+        // 문자열 캐시 정리 (선택 사항이나 GC에 도움됨)
+        this.#userAgent = '';
+    }
+
     /**
      * [KO] 모든 탐지된 정보를 리포트 객체로 반환합니다.
      * [EN] Returns all detected information as a report object.

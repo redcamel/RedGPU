@@ -6,7 +6,6 @@ import validateUintRange from "../../runtimeChecker/validateFunc/validateUintRan
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import ResourceBase from "../core/ResourceBase";
 
-const samplerCache: Map<string, GPUSampler> = new Map()
 const validFilters: GPUFilterMode[] = Object.values(GPU_FILTER_MODE);
 const validUVW: GPUAddressMode[] = Object.values(GPU_ADDRESS_MODE);
 const validMipmapFilters: GPUMipmapFilterMode[] = Object.values(GPU_MIPMAP_FILTER_MODE);
@@ -312,27 +311,24 @@ class Sampler extends ResourceBase {
             this.#maxAnisotropy = 1;
         }
         const descriptorKey = this.#getKey();
-        if (!samplerCache.has(descriptorKey)) {
-            let samplerOptions: GPUSamplerDescriptor = {};
-            if (this.#magFilter) samplerOptions.magFilter = this.#magFilter;
-            if (this.#minFilter) samplerOptions.minFilter = this.#minFilter;
-            if (this.#mipmapFilter) samplerOptions.mipmapFilter = this.#mipmapFilter;
-            if (this.#addressModeU) samplerOptions.addressModeU = this.#addressModeU;
-            if (this.#addressModeV) samplerOptions.addressModeV = this.#addressModeV;
-            if (this.#addressModeW) samplerOptions.addressModeW = this.#addressModeW;
-            if (this.#lodMinClamp !== undefined) samplerOptions.lodMinClamp = this.#lodMinClamp;
-            if (this.#lodMaxClamp !== undefined) samplerOptions.lodMaxClamp = this.#lodMaxClamp;
-            if (this.#compare) samplerOptions.compare = this.#compare;
-            if (this.#maxAnisotropy) samplerOptions.maxAnisotropy = this.#maxAnisotropy;
-            samplerCache.set(
-                descriptorKey,
-                this.redGPUContext.gpuDevice.createSampler(samplerOptions)
-            );
-        }
-        this.#gpuSampler = samplerCache.get(descriptorKey);
+        let samplerOptions: GPUSamplerDescriptor = {};
+        if (this.#magFilter) samplerOptions.magFilter = this.#magFilter;
+        if (this.#minFilter) samplerOptions.minFilter = this.#minFilter;
+        if (this.#mipmapFilter) samplerOptions.mipmapFilter = this.#mipmapFilter;
+        if (this.#addressModeU) samplerOptions.addressModeU = this.#addressModeU;
+        if (this.#addressModeV) samplerOptions.addressModeV = this.#addressModeV;
+        if (this.#addressModeW) samplerOptions.addressModeW = this.#addressModeW;
+        if (this.#lodMinClamp !== undefined) samplerOptions.lodMinClamp = this.#lodMinClamp;
+        if (this.#lodMaxClamp !== undefined) samplerOptions.lodMaxClamp = this.#lodMaxClamp;
+        if (this.#compare) samplerOptions.compare = this.#compare;
+        if (this.#maxAnisotropy) samplerOptions.maxAnisotropy = this.#maxAnisotropy;
+
+        this.#gpuSampler = this.redGPUContext.resourceManager.createSampler(descriptorKey, samplerOptions);
         this.#onGpuSamplerChanged();
     }
 }
 
 Object.freeze(Sampler)
+
+
 export default Sampler

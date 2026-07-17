@@ -28,6 +28,7 @@ const RUN_SPEED = 7.0;
 let stateMachine = null;   // AnimStateMachine
 let targetStateName = 'Idle';
 let lastTime = null;
+let updateState = null;
 
 // ──────────────────────────────────────────
 // RedGPU 초기화
@@ -59,6 +60,7 @@ RedGPU.init(
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, (timestamp) => {
             updateCharacter(timestamp, view, scene.getChildAt(0));
+            if (updateState) updateState();
         });
 
         // ── GUI ──────────────────────────────
@@ -203,14 +205,17 @@ function renderTestPane(redGPUContext, view) {
             const stateBinding = helpFolder.addBinding(config, 'state', {
                 readonly: true, label: 'Anim State'
             });
-            setInterval(() => {
+            updateState = () => {
                 if (stateMachine?.currentState) {
-                    config.state = stateMachine.targetState
+                    const nextState = stateMachine.targetState
                         ? `${stateMachine.currentState.name} ➔ ${stateMachine.targetState.name}`
                         : stateMachine.currentState.name;
-                    stateBinding.refresh();
+                    if (config.state !== nextState) {
+                        config.state = nextState;
+                        stateBinding.refresh();
+                    }
                 }
-            }, 100);
+            };
 
             // 카메라 설정
             const {camera} = view;

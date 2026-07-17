@@ -83,13 +83,14 @@ export async function float32ToFloat16Linear(
     console.log(`Float32 → Float16 변환 및 업로드 시작`);
     console.log(`총 픽셀 수: ${pixelCount.toLocaleString()}`);
 
+    let buffers: Float16ConversionBuffers | null = null;
     try {
         const computeShader = gpuDevice.createShaderModule({
             code: computeShaderCode,
             label: 'float16_linear_conversion_shader'
         });
 
-        const buffers = createBuffers(gpuDevice, float32Data, pixelCount);
+        buffers = createBuffers(gpuDevice, float32Data, pixelCount);
 
         // 상수 업로드 단순화
         gpuDevice.queue.writeBuffer(buffers.constantsBuffer, 0, new Uint32Array([width, height]));
@@ -110,8 +111,6 @@ export async function float32ToFloat16Linear(
             height,
         );
 
-        cleanupBuffers(buffers);
-
         const executionTime = performance.now() - startTime;
         console.log(`변환 및 업로드 완료: ${executionTime.toFixed(2)}ms`);
 
@@ -122,6 +121,10 @@ export async function float32ToFloat16Linear(
     } catch (error) {
         console.error('Float16 변환 실패:', error);
         throw error;
+    } finally {
+        if (buffers) {
+            cleanupBuffers(buffers);
+        }
     }
 }
 
