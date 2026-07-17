@@ -3,7 +3,7 @@ import View3D from "../display/view/View3D";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GltfAnimationLooperManager from "../loader/gltf/animationLooper/GltfAnimationLooperManager";
-import FinalRender from "./finalRender/FinalRender";
+import FinalRender, {FinalRenderPassColorAttachment} from "./finalRender/FinalRender";
 import {COMMAND_ENCODER_TYPE} from "../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import renderAlphaLayer from "./renderLayers/renderAlphaLayer";
 import renderBasicLayer from "./renderLayers/renderBasicLayer";
@@ -235,7 +235,7 @@ class Renderer {
         }
 
         {
-            renderPassDescriptor.colorAttachments[0].postEffectView = view.postEffectManager.render().textureView
+            (renderPassDescriptor.colorAttachments[0] as FinalRenderPassColorAttachment).postEffectView = view.postEffectManager.render().textureView
         }
 
         processAnimationsAndSkinning(redGPUContext, renderViewStateData, this.#gltfAnimationLooperManager, view);
