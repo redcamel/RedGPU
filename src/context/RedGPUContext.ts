@@ -207,6 +207,7 @@ class RedGPUContext extends RedGPUContextViewContainer {
         this.#globalFragmentSSBO_BuiltIn = new GlobalStorageBufferManager(this, this.#resourceManager.GLOBAL_FRAGMENT_STRUCT_BUILT_IN.size, 1024, "GLOBAL_FRAGMENT_BUILT_IN_BUFFER")
         this.#initializeLifecycleEvents()
         this.#initialize()
+        //test
     }
 
     get destroyed(): boolean {
