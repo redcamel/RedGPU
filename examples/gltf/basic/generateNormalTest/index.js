@@ -1,5 +1,5 @@
-import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264152422";
-import * as RedGPU from "../../../../dist/index.js?t=1784264152422";
+import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js?t=1784264851335";
+import * as RedGPU from "../../../../dist/index.js?t=1784264851335";
 /**
  * [KO] Generate Normal Test 예제
  * [EN] Generate Normal Test example
