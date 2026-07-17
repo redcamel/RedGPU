@@ -247,5 +247,10 @@ declare class AutoExposure extends RedGPUObject {
      * [EN] Asynchronously reads back data after GPU work completion. (Called by Renderer)
      */
     resolveReadback(): void;
+    /**
+     * [KO] AutoExposure 인스턴스를 파기하고 할당된 물리 GPU 버퍼들을 모두 소멸시킵니다.
+     * [EN] Destroys the AutoExposure instance and releases all allocated physical GPU buffers.
+     */
+    destroy(): void;
 }
 export default AutoExposure;

@@ -146,5 +146,6 @@ declare class SkyAtmosphere extends RedGPUObject {
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult): IPostEffectResult;
     update(view: View3D): void;
+    destroy(): void;
 }
 export default SkyAtmosphere;

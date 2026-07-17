@@ -133,6 +133,7 @@ declare abstract class ASinglePassPostEffect extends RedGPUObject {
      * [EN] Clears the resources used by the effect.
      */
     clear(): void;
+    destroy(): void;
     /**
      * [KO] 이펙트를 초기화합니다. 컴퓨트 셰이더 및 유니폼 버퍼를 생성합니다.
      * [EN] Initializes the effect. Creates compute shaders and globalStruct buffers.

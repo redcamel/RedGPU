@@ -537,5 +537,10 @@ declare class Mesh extends MeshBase {
     render(renderViewStateData: RenderViewStateData): void;
     initGPURenderInfos(): void;
     createMeshVertexShaderModuleBASIC: (VERTEX_SHADER_MODULE_NAME: any, SHADER_INFO: any, UNIFORM_STRUCT_BASIC: any, vertexModuleSource: any) => GPUShaderModule;
+    /**
+     * [KO] Mesh 인스턴스를 파기하고 할당된 드로우 커맨드 슬롯, 전역 버퍼 슬롯 및 리소스를 즉시 해제합니다.
+     * [EN] Destroys the Mesh instance and immediately releases the allocated draw command slots, global buffer slots, and resources.
+     */
+    destroy(): void;
 }
 export default Mesh;

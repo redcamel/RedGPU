@@ -162,6 +162,7 @@ declare class PostEffectManager {
      * [EN] Video memory usage (bytes)
      */
     get videoMemorySize(): number;
+    destroy(): void;
     /**
      * [KO] 이펙트를 추가합니다.
      * [EN] Adds an effect.

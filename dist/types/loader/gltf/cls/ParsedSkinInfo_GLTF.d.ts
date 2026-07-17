@@ -30,5 +30,6 @@ declare class ParsedSkinInfo_GLTF {
     getUsedJointIndices(mesh: Mesh): number[];
     createCompute(redGPUContext: RedGPUContext, device: GPUDevice, vertexBuffer: VertexBuffer, weightBuffer: VertexBuffer, jointBuffer: IndexBuffer, mesh: Mesh): void;
     updateBindGroup(redGPUContext: RedGPUContext, device: GPUDevice, vertexBuffer: VertexBuffer, weightBuffer: VertexBuffer, jointBuffer: IndexBuffer): void;
+    destroy(): void;
 }
 export default ParsedSkinInfo_GLTF;

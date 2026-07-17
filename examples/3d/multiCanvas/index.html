@@ -1,26 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Multi Canvas RedGPU</title>
+    <title>Multi Canvas</title>
     <meta charset="UTF-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <meta content="This example demonstrates the usage of multiple canvases and RedGPUContext instances. It validates that one context can be destroyed without affecting the other active contexts, ensuring robust resource isolation."
-          name="description">
-    <meta content="RedGPU, WebGPU, Graphics, 3D, Multi Canvas, Multiple Context, Destroy, Context Isolation"
-          name="keywords">
-    <link href="https://redcamel.github.io/RedGPU/examples/3d/multiCanvas/" rel="canonical">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="This example demonstrates the usage of multiple canvases and RedGPUContext instances. It validates that one context can be destroyed without affecting the other active contexts, ensuring robust resource isolation.">
+    <meta name="keywords" content="RedGPU, WebGPU, Graphics, 3D, 2D, JavaScript, TypeScript, Computer Graphics, multiCanvas, Multi Canvas">
+    <link rel="canonical" href="https://redcamel.github.io/RedGPU/examples/3d/multiCanvas/">
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com" rel="preconnect">
-    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://redcamel.github.io/RedGPU/examples/3d/multiCanvas/">
+    <meta property="og:title" content="Multi Canvas">
+    <meta property="og:description" content="This example demonstrates the usage of multiple canvases and RedGPUContext instances. It validates that one context can be destroyed without affecting the other active contexts, ensuring robust resource isolation.">
+    <meta property="og:image" content="https://redcamel.github.io/RedGPU/examples/3d/multiCanvas/thumb.webp">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://redcamel.github.io/RedGPU/examples/3d/multiCanvas/">
+    <meta property="twitter:title" content="Multi Canvas">
+    <meta property="twitter:description" content="This example demonstrates the usage of multiple canvases and RedGPUContext instances. It validates that one context can be destroyed without affecting the other active contexts, ensuring robust resource isolation.">
+    <meta property="twitter:image" content="https://redcamel.github.io/RedGPU/examples/3d/multiCanvas/thumb.webp">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Multi Canvas",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Web",
+  "description": "This example demonstrates the usage of multiple canvases and RedGPUContext instances. It validates that one context can be destroyed without affecting the other active contexts, ensuring robust resource isolation.",
+  "url": "https://redcamel.github.io/RedGPU/examples/3d/multiCanvas/",
+  "screenshot": "https://redcamel.github.io/RedGPU/examples/3d/multiCanvas/thumb.webp",
+  "author": {
+    "@type": "Person",
+    "name": "redcamel"
+  }
+}</script>
 
     <!-- Assets Preload -->
-    <link as="style" href="../../assets/css/example.css?t=1783326645983" rel="preload">
-    <link href="index.js?t=1783326645983" rel="modulepreload">
+    <link rel="preload" href="../../assets/css/example.css?t=1784264152422" as="style">
+    <link rel="modulepreload" href="index.js?t=1784264152422">
 
     <!-- Assets -->
-    <link href="../../assets/css/example.css?t=1783326645983" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/example.css?t=1784264152422">
+    <script src="index.js?t=1784264152422" type="module"></script>
+
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+
     <style>
         .test-container {
             display: flex;
@@ -202,11 +230,11 @@
             letter-spacing: -0.1px;
         }
     </style>
-    <script src="index.js?t=1783326645983" type="module"></script>
+    
 </head>
 <body>
-<h1 style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;">
-    Multi Canvas RedGPU</h1>
+<h1 style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;">Multi Canvas</h1>
+
 <div class="test-container">
 
     <div id="containerA" class="canvas-container">

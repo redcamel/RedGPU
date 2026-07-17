@@ -205,6 +205,7 @@ declare class GLTFLoader extends RedGPUObject {
      * [EN] Animation clip state to play
      */
     playAnimation(clipState: ClipAnimState): void;
+    destroy(): void;
 }
 export default GLTFLoader;
 /**

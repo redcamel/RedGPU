@@ -63,5 +63,6 @@ declare class Scene extends Object3DContainer {
      */
     get useBackgroundColor(): boolean;
     set useBackgroundColor(value: boolean);
+    destroy(): void;
 }
 export default Scene;

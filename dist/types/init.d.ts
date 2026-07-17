@@ -42,6 +42,6 @@ import RedGPUContext from "./context/RedGPUContext";
  * [KO] 초기화 프로세스 완료를 나타내는 Promise
  * [EN] Promise representing the completion of the initialization process
  * @category Core
- */
+ * */
 declare const init: (canvas: HTMLCanvasElement, onWebGPUInitialized: (redGPUContext: RedGPUContext) => void, onFailInitialized?: (message?: string) => void, onDestroy?: (info: GPUDeviceLostInfo) => void, alphaMode?: GPUCanvasAlphaMode, requestAdapterOptions?: GPURequestAdapterOptions) => Promise<void>;
 export default init;

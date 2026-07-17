@@ -30,5 +30,6 @@ declare class BRDFGenerator extends RedGPUObject {
      * ```
      */
     get brdfLUTTexture(): GPUTexture;
+    destroy(): void;
 }
 export default BRDFGenerator;

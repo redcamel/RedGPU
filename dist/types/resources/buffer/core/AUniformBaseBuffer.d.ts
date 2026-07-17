@@ -60,6 +60,7 @@ declare abstract class AUniformBaseBuffer extends ABaseBuffer {
      * [EN] Returns the `GPUBufferDescriptor`.
      */
     get uniformBufferDescriptor(): GPUBufferDescriptor;
+    destroy(): void;
     /**
      * [KO] 유니폼 버퍼에 데이터를 씁니다.
      * [EN] Writes data to the globalStruct buffer.

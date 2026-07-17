@@ -437,5 +437,10 @@ declare class CommandEncoderManager extends RedGPUObject {
      * ```
      */
     resetAll(): void;
+    /**
+     * [KO] CommandEncoderManager 인스턴스를 파기하고 모든 커맨드 인코더 및 지연 리소스 참조를 정리합니다.
+     * [EN] Destroys the CommandEncoderManager instance and cleans up all command encoder and deferred resource references.
+     */
+    destroy(): void;
 }
 export default CommandEncoderManager;

@@ -23,8 +23,8 @@ export default class RedGPUContextObserver extends RedGPUObject {
      */
     constructor(redGPUContext: RedGPUContext, updateCallback: () => void);
     /**
-     * [KO] 모든 옵저버 중지
-     * [EN] Stop all observers
+     * [KO] 모든 옵저버를 파기하고 이벤트를 해제합니다.
+     * [EN] Destroys all observers and removes event listeners.
      */
-    stop(): void;
+    destroy(): void;
 }

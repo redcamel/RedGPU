@@ -198,6 +198,7 @@ declare class RedGPUContextSizeManager extends RedGPUObject {
         width: number;
         height: number;
     }, key: string, value: string): number;
+    destroy(): void;
     /**
      * [KO] 요소의 크기를 설정하고 캔버스 스타일을 업데이트합니다.
      * [EN] Sets the size of the element and updates the canvas style.
