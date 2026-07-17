@@ -22,6 +22,11 @@ const VERTEX_BIND_GROUP_DESCRIPTOR_NAME = 'VERTEX_BIND_GROUP_DESCRIPTOR_FINAL_RE
 const FRAGMENT_BIND_GROUP_DESCRIPTOR_NAME = 'FRAGMENT_BIND_GROUP_DESCRIPTOR_FINAL_RENDER'
 const PIPELINE_DESCRIPTOR_LABEL = 'PIPELINE_DESCRIPTOR_FINAL_RENDER'
 
+export interface FinalRenderPassColorAttachment extends GPURenderPassColorAttachment {
+    postEffectView?: GPUTextureView;
+    pickingView?: GPUTextureView;
+}
+
 /**
  * Class representing the final rendering process.
  * @class
@@ -118,8 +123,8 @@ class FinalRender {
                 redGPUContext,
                 finalRenderPassEnc,
                 viewList_renderPassDescriptorList.map((v: GPURenderPassDescriptor) => {
-                    const temp = v.colorAttachments[0]
-                    return temp.postEffectView || temp.pickingView || temp.resolveTarget || temp.view
+                    const temp = v.colorAttachments[0] as FinalRenderPassColorAttachment
+                    return (temp?.postEffectView || temp?.pickingView || temp?.resolveTarget || temp?.view) as GPUTextureView
                 }), canvasW, canvasH,
 
                 dirtyMSAA
