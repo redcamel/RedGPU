@@ -613,6 +613,9 @@ class RedGPUContext extends RedGPUContextViewContainer {
 
         const pageShowHandler = (event: PageTransitionEvent) => {
             if (event.persisted) {
+                this.destroy();
+                this.#deviceEventController.abort();
+                this.#pageHideEventController.abort();
                 this.#pageShowEventController.abort();
                 window.location.reload();
             }
