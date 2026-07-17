@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: DirectionalShadowManager
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:20](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/DirectionalShadowManager.ts#L20)
+Defined in: [src/shadow/DirectionalShadowManager.ts:20](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/DirectionalShadowManager.ts#L20)
 
 직사광(Directional Light)의 그림자 뎁스 텍스처와 관련 설정을 관리하는 클래스입니다.
 
@@ -32,7 +32,7 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:20](https://github.com/redca
 
 > **get** **bias**(): `number`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:89](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/DirectionalShadowManager.ts#L89)
+Defined in: [src/shadow/DirectionalShadowManager.ts:89](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/DirectionalShadowManager.ts#L89)
 
 그림자 바이어스(Bias) 값을 반환합니다.
 
@@ -46,7 +46,7 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:89](https://github.com/redca
 
 > **set** **bias**(`value`): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:101](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/DirectionalShadowManager.ts#L101)
+Defined in: [src/shadow/DirectionalShadowManager.ts:101](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/DirectionalShadowManager.ts#L101)
 
 그림자 바이어스(Bias) 값을 설정합니다. (0.0 ~ 1.0)
 
@@ -68,7 +68,7 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:101](https://github.com/redc
 
 > **get** **castingList**(): ([`Mesh`](../../Display/classes/Mesh.md) \| [`InstancingMesh`](../../Display/classes/InstancingMesh.md))[]
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:53](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/DirectionalShadowManager.ts#L53)
+Defined in: [src/shadow/DirectionalShadowManager.ts:53](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/DirectionalShadowManager.ts#L53)
 
 그림자를 생성할 대상 객체 리스트를 반환합니다.
 
@@ -86,7 +86,7 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:53](https://github.com/redca
 
 > **get** **filterScale**(): `number`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:139](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/DirectionalShadowManager.ts#L139)
+Defined in: [src/shadow/DirectionalShadowManager.ts:139](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/DirectionalShadowManager.ts#L139)
 
 그림자 필터 번짐 반경(Filter Scale) 값을 반환합니다.
 
@@ -100,7 +100,7 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:139](https://github.com/redc
 
 > **set** **filterScale**(`value`): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:151](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/DirectionalShadowManager.ts#L151)
+Defined in: [src/shadow/DirectionalShadowManager.ts:151](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/DirectionalShadowManager.ts#L151)
 
 그림자 필터 번짐 반경(Filter Scale) 값을 설정합니다. (0.0 이상)
 
@@ -122,7 +122,7 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:151](https://github.com/redc
 
 > **get** **shadowDepthTextureSize**(): `number`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:165](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/DirectionalShadowManager.ts#L165)
+Defined in: [src/shadow/DirectionalShadowManager.ts:165](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/DirectionalShadowManager.ts#L165)
 
 섀도우 뎁스 텍스처의 크기(해상도)를 반환합니다.
 
@@ -136,7 +136,7 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:165](https://github.com/redc
 
 > **set** **shadowDepthTextureSize**(`value`): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:177](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/DirectionalShadowManager.ts#L177)
+Defined in: [src/shadow/DirectionalShadowManager.ts:177](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/DirectionalShadowManager.ts#L177)
 
 섀도우 뎁스 텍스처의 크기(해상도)를 설정합니다. (정수)
 
@@ -158,7 +158,7 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:177](https://github.com/redc
 
 > **get** **shadowDepthTextureView**(): `GPUTextureView`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:65](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/DirectionalShadowManager.ts#L65)
+Defined in: [src/shadow/DirectionalShadowManager.ts:65](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/DirectionalShadowManager.ts#L65)
 
 섀도우 뎁스 텍스처 뷰를 반환합니다.
 
@@ -176,7 +176,7 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:65](https://github.com/redca
 
 > **get** **shadowDepthTextureViewEmpty**(): `GPUTextureView`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:77](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/DirectionalShadowManager.ts#L77)
+Defined in: [src/shadow/DirectionalShadowManager.ts:77](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/DirectionalShadowManager.ts#L77)
 
 그림자가 없는 상태를 위한 빈(1x1) 뎁스 텍스처 뷰를 반환합니다.
 
@@ -194,7 +194,7 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:77](https://github.com/redca
 
 > **get** **strength**(): `number`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:114](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/DirectionalShadowManager.ts#L114)
+Defined in: [src/shadow/DirectionalShadowManager.ts:114](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/DirectionalShadowManager.ts#L114)
 
 그림자의 세기(Strength) 값을 반환합니다.
 
@@ -208,7 +208,7 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:114](https://github.com/redc
 
 > **set** **strength**(`value`): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:126](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/DirectionalShadowManager.ts#L126)
+Defined in: [src/shadow/DirectionalShadowManager.ts:126](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/DirectionalShadowManager.ts#L126)
 
 그림자의 세기(Strength) 값을 설정합니다. (0.0 ~ 1.0)
 
@@ -230,7 +230,7 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:126](https://github.com/redc
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:41](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/DirectionalShadowManager.ts#L41)
+Defined in: [src/shadow/DirectionalShadowManager.ts:41](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/DirectionalShadowManager.ts#L41)
 
 현재 섀도우 맵이 사용하는 비디오 메모리 크기(Bytes)를 반환합니다.
 
@@ -246,7 +246,7 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:41](https://github.com/redca
 
 > **destroy**(): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:215](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/DirectionalShadowManager.ts#L215)
+Defined in: [src/shadow/DirectionalShadowManager.ts:215](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/DirectionalShadowManager.ts#L215)
 
 사용 중인 GPU 리소스를 해제합니다.
 
@@ -260,7 +260,7 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:215](https://github.com/redc
 
 > **reset**(): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:186](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/DirectionalShadowManager.ts#L186)
+Defined in: [src/shadow/DirectionalShadowManager.ts:186](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/DirectionalShadowManager.ts#L186)
 
 매니저를 리셋하고 리소스를 파기합니다.
 
@@ -274,7 +274,7 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:186](https://github.com/redc
 
 > **resetCastingList**(): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:194](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/DirectionalShadowManager.ts#L194)
+Defined in: [src/shadow/DirectionalShadowManager.ts:194](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/DirectionalShadowManager.ts#L194)
 
 섀도우 캐스팅 대상 리스트를 초기화합니다.
 
@@ -288,7 +288,7 @@ Defined in: [src/shadow/DirectionalShadowManager.ts:194](https://github.com/redc
 
 > **update**(`redGPUContext`): `void`
 
-Defined in: [src/shadow/DirectionalShadowManager.ts:206](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/DirectionalShadowManager.ts#L206)
+Defined in: [src/shadow/DirectionalShadowManager.ts:206](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/DirectionalShadowManager.ts#L206)
 
 내부 상태를 업데이트합니다. (주로 해상도 변경 체크)
 

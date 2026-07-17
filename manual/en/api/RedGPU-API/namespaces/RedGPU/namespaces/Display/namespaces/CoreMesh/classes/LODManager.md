@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: LODManager
 
-Defined in: [src/display/mesh/core/LODManager.ts:52](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/LODManager.ts#L52)
+Defined in: [src/display/mesh/core/LODManager.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/LODManager.ts#L52)
 
 Manager class responsible for distance-based LOD (Level of Detail) management.
 
@@ -29,7 +29,7 @@ lodManager.addLOD(10, nearGeometry, material);
 
 > **new LODManager**(`owner`, `callback`): `LODManager`
 
-Defined in: [src/display/mesh/core/LODManager.ts:62](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/LODManager.ts#L62)
+Defined in: [src/display/mesh/core/LODManager.ts:62](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/LODManager.ts#L62)
 
 LODManager 인스턴스를 생성합니다.
 
@@ -52,7 +52,7 @@ LODManager 인스턴스를 생성합니다.
 
 > **get** **LODList**(): `LODEntry`[]
 
-Defined in: [src/display/mesh/core/LODManager.ts:78](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/LODManager.ts#L78)
+Defined in: [src/display/mesh/core/LODManager.ts:78](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/LODManager.ts#L78)
 
 현재 등록된 모든 LOD 레벨 목록을 반환합니다.
 
@@ -73,7 +73,7 @@ LOD 레벨 정보 배열(복사본)
 
 > **addLOD**(`distance`, `geometry`, `material`): `void`
 
-Defined in: [src/display/mesh/core/LODManager.ts:96](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/LODManager.ts#L96)
+Defined in: [src/display/mesh/core/LODManager.ts:96](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/LODManager.ts#L96)
 
 새로운 LOD 레벨을 추가합니다.
 
@@ -108,7 +108,7 @@ LOD 레벨이 8개를 초과하는 경우
 
 > **clearLOD**(): `void`
 
-Defined in: [src/display/mesh/core/LODManager.ts:163](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/LODManager.ts#L163)
+Defined in: [src/display/mesh/core/LODManager.ts:163](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/LODManager.ts#L163)
 
 모든 LOD 레벨을 제거합니다.
 
@@ -126,7 +126,7 @@ LOD 목록이 초기화된 후 콜백이 호출됩니다.
 
 > **getLOD**(`currentDistance`): `LODEntry`
 
-Defined in: [src/display/mesh/core/LODManager.ts:136](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/LODManager.ts#L136)
+Defined in: [src/display/mesh/core/LODManager.ts:136](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/LODManager.ts#L136)
 
 현재 거리 값에 대해 가장 적절한 LOD 엔트리를 반환합니다.
 
@@ -154,7 +154,7 @@ Defined in: [src/display/mesh/core/LODManager.ts:136](https://github.com/redcame
 
 > **removeLOD**(`distance`): `void`
 
-Defined in: [src/display/mesh/core/LODManager.ts:152](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/LODManager.ts#L152)
+Defined in: [src/display/mesh/core/LODManager.ts:152](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/LODManager.ts#L152)
 
 지정한 거리의 LOD 레벨을 제거합니다.
 

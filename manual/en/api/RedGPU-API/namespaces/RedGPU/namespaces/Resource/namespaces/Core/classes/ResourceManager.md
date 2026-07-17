@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: ResourceManager
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:77](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L77)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:77](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L77)
 
 The core class that integrates and manages all GPU resources in RedGPU.
 
@@ -30,7 +30,7 @@ const resourceManager = redGPUContext.resourceManager;
 
 > **new ResourceManager**(`redGPUContext`): `ResourceManager`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:134](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L134)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:134](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L134)
 
 Creates a ResourceManager instance. (Internal system only)
 
@@ -54,7 +54,7 @@ Creates a ResourceManager instance. (Internal system only)
 
 > `static` **PRESET\_GLOBAL\_VERTEX\_GPUBindGroupLayout**: `string` = `'PRESET_GLOBAL_VERTEX_GPUBindGroupLayout'`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:80](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L80)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:80](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L80)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:80](https://g
 
 > `static` **PRESET\_GLOBAL\_VERTEX\_GPUBindGroupLayout\_Instancing**: `string` = `'PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_Instancing'`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:79](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L79)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:79](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L79)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:79](https://g
 
 > `static` **PRESET\_GLOBAL\_VERTEX\_GPUBindGroupLayout\_SKIN**: `string` = `'PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN'`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:82](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L82)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:82](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L82)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:82](https://g
 
 > `static` **PRESET\_GPUBindGroupLayout\_System**: `string` = `'PRESET_GPUBindGroupLayout_System'`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:78](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L78)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:78](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L78)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:78](https://g
 
 > `static` **PRESET\_VERTEX\_GPUBindGroupLayout**: `string` = `'PRESET_VERTEX_GPUBindGroupLayout'`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:81](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L81)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:81](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L81)
 
 ## Accessors
 
@@ -96,7 +96,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:81](https://g
 
 > **get** **basicDisplacementSampler**(): [`Sampler`](../../../classes/Sampler.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:210](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L210)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:210](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L210)
 
 Returns the basic displacement sampler.
 
@@ -114,7 +114,7 @@ Displacement Sampler instance
 
 > **get** **basicSampler**(): [`Sampler`](../../../classes/Sampler.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:198](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L198)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:198](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L198)
 
 Returns the basic sampler.
 
@@ -132,7 +132,7 @@ Basic Sampler instance
 
 > **get** **brdfGenerator**(): [`BRDFGenerator`](../../CoreIBL/classes/BRDFGenerator.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:222](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L222)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:222](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L222)
 
 Returns the BRDF generator.
 
@@ -150,7 +150,7 @@ BRDFGenerator instance
 
 > **get** **cachedBufferState**(): `any`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:310](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L310)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:310](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L310)
 
 Returns the cached buffer state.
 
@@ -168,7 +168,7 @@ Cached buffer state object
 
 > **get** **downSampleCubeMapGenerator**(): [`DownSampleCubeMapGenerator`](../../../classes/DownSampleCubeMapGenerator.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:298](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L298)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:298](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L298)
 
 Returns the down-sample cube map generator.
 
@@ -186,7 +186,7 @@ DownSampleCubeMapGenerator instance
 
 > **get** **emptyBitmapTextureView**(): `GPUTextureView`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:322](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L322)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:322](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L322)
 
 Returns the empty bitmap texture view.
 
@@ -204,7 +204,7 @@ Empty bitmap GPUTextureView
 
 > **get** **emptyCubeTextureView**(): `GPUTextureView`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:334](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L334)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:334](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L334)
 
 Returns the empty cube texture view.
 
@@ -222,7 +222,7 @@ Empty cube GPUTextureView
 
 > **get** **emptyDepthTextureView**(): `GPUTextureView`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:358](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L358)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:358](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L358)
 
 Returns the empty depth texture view.
 
@@ -240,7 +240,7 @@ Empty depth GPUTextureView
 
 > **get** **emptyTexture3DView**(): `GPUTextureView`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:346](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L346)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:346](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L346)
 
 Returns the empty 3D texture view.
 
@@ -258,7 +258,7 @@ Empty 3D GPUTextureView
 
 > **get** **equirectangularToCubeGenerator**(): [`EquirectangularToCubeGenerator`](../../CoreIBL/classes/EquirectangularToCubeGenerator.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:258](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L258)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:258](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L258)
 
 Returns the generator that converts Equirectangular (2D) to CubeMap.
 
@@ -276,7 +276,7 @@ EquirectangularToCubeGenerator instance
 
 > **get** **GLOBAL\_FRAGMENT\_STRUCT\_BUILT\_IN**(): `any`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:162](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L162)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:162](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L162)
 
 ##### Returns
 
@@ -290,7 +290,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:162](https://
 
 > **get** **GLOBAL\_FRAGMENT\_STRUCT\_PBR**(): `any`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:158](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L158)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:158](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L158)
 
 ##### Returns
 
@@ -304,7 +304,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:158](https://
 
 > **get** **GLOBAL\_VERTEX\_STRUCT**(): `any`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:166](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L166)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:166](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L166)
 
 ##### Returns
 
@@ -318,7 +318,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:166](https://
 
 > **get** **gltfCacheManager**(): `GLTFCacheManager`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:274](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L274)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:274](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L274)
 
 Returns the GLTF cache manager.
 
@@ -334,7 +334,7 @@ Returns the GLTF cache manager.
 
 > **get** **irradianceGenerator**(): [`IrradianceGenerator`](../../CoreIBL/classes/IrradianceGenerator.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:234](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L234)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:234](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L234)
 
 Returns the Irradiance generator.
 
@@ -352,7 +352,7 @@ IrradianceGenerator instance
 
 > **get** **managedBitmapTextureState**(): [`ResourceStatusInfo`](ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:370](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L370)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:370](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L370)
 
 Returns the managed bitmap texture state.
 
@@ -370,7 +370,7 @@ Managed bitmap texture status info object
 
 > **get** **managedCubeTextureState**(): [`ResourceStatusInfo`](ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:382](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L382)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:382](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L382)
 
 Returns the managed cube texture state.
 
@@ -388,7 +388,7 @@ Managed cube texture status info object
 
 > **get** **managedHDRTextureState**(): [`ResourceStatusInfo`](ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:394](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L394)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:394](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L394)
 
 Returns the managed HDR texture state.
 
@@ -406,7 +406,7 @@ Managed HDR texture status info object
 
 > **get** **managedIndexBufferState**(): [`ResourceStatusInfo`](ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:430](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L430)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:430](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L430)
 
 Returns the managed index buffer state.
 
@@ -424,7 +424,7 @@ Managed index buffer status info object
 
 > **get** **managedStorageBufferState**(): [`ResourceStatusInfo`](ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:442](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L442)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:442](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L442)
 
 Returns the managed storage buffer state.
 
@@ -442,7 +442,7 @@ Managed storage buffer status info object
 
 > **get** **managedUniformBufferState**(): [`ResourceStatusInfo`](ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:406](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L406)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:406](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L406)
 
 Returns the managed globalStruct buffer state.
 
@@ -460,7 +460,7 @@ Managed globalStruct buffer status info object
 
 > **get** **managedVertexBufferState**(): [`ResourceStatusInfo`](ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:418](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L418)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:418](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L418)
 
 Returns the managed vertex buffer state.
 
@@ -478,7 +478,7 @@ Managed vertex buffer status info object
 
 > **get** **mipmapGenerator**(): [`MipmapGenerator`](../../../classes/MipmapGenerator.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:286](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L286)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:286](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L286)
 
 Returns the mipmap generator.
 
@@ -496,7 +496,7 @@ MipmapGenerator instance
 
 > **get** **packedTextureManager**(): `PackedTextureManager`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:266](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L266)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:266](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L266)
 
 Returns the texture packing manager.
 
@@ -512,7 +512,7 @@ Returns the texture packing manager.
 
 > **get** **prefilterGenerator**(): [`PrefilterGenerator`](../../CoreIBL/classes/PrefilterGenerator.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:246](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L246)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:246](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L246)
 
 Returns the Prefilter generator.
 
@@ -530,7 +530,7 @@ PrefilterGenerator instance
 
 > **get** **resources**(): [`ImmutableKeyMap`](ImmutableKeyMap.md)
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:454](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L454)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:454](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L454)
 
 Returns the internal resource map.
 
@@ -548,7 +548,7 @@ ImmutableKeyMap based resource map
 
 > **get** **SHADER\_INFO\_BASIC**(): `any`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:174](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L174)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:174](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L174)
 
 ##### Returns
 
@@ -562,7 +562,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:174](https://
 
 > **get** **SHADER\_INFO\_ONLY\_FRAGMENT\_PBR**(): `any`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:178](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L178)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:178](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L178)
 
 ##### Returns
 
@@ -576,7 +576,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:178](https://
 
 > **get** **SHADER\_INFO\_ONLY\_VERTEX\_PBR**(): `any`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:182](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L182)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:182](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L182)
 
 ##### Returns
 
@@ -590,7 +590,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:182](https://
 
 > **get** **SHADER\_INFO\_PBR**(): `any`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:170](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L170)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:170](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L170)
 
 ##### Returns
 
@@ -604,7 +604,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:170](https://
 
 > **get** **wgslParser**(): `WGSLParser`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:186](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L186)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:186](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L186)
 
 ##### Returns
 
@@ -616,7 +616,7 @@ Defined in: [src/resources/core/resourceManager/ResourceManager.ts:186](https://
 
 > **createBindGroupLayout**(`name`, `bindGroupLayoutDescriptor`): `GPUBindGroupLayout`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:795](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L795)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:795](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L795)
 
 Creates and caches a GPUBindGroupLayout.
 
@@ -639,7 +639,7 @@ GPUBindGroupLayout
 
 > **createGPUBuffer**(`name`, `gpuBufferDescriptor`): `any`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:862](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L862)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:862](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L862)
 
 Creates and caches a GPUBuffer.
 
@@ -662,7 +662,7 @@ Created GPUBuffer
 
 > **createGPUPipelineLayout**(`name`, `gpuPipelineLayoutDescriptor`): `any`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:841](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L841)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:841](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L841)
 
 Creates and caches a GPUPipelineLayout.
 
@@ -685,7 +685,7 @@ GPUPipelineLayout
 
 > **createGPUShaderModule**(`name`, `gpuShaderModuleDescriptor`): `any`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:751](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L751)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:751](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L751)
 
 Creates and caches a GPUShaderModule.
 
@@ -708,7 +708,7 @@ Created GPUShaderModule
 
 > **createManagedTexture**(`desc`): `GPUTexture`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:641](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L641)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:641](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L641)
 
 Creates and manages a GPU texture.
 
@@ -730,7 +730,7 @@ Created GPUTexture
 
 > **createSampler**(`descriptorKey`, `samplerOptions`): `GPUSampler`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:462](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L462)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:462](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L462)
 
 Retrieves a sampler from cache, or creates and returns a new one if it does not exist.
 
@@ -751,7 +751,7 @@ Retrieves a sampler from cache, or creates and returns a new one if it does not 
 
 > **deleteGPUBindGroupLayout**(`name`): `void`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:824](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L824)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:824](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L824)
 
 Deletes a GPUBindGroupLayout.
 
@@ -771,7 +771,7 @@ Deletes a GPUBindGroupLayout.
 
 > **deleteGPUShaderModule**(`name`): `void`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:778](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L778)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:778](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L778)
 
 Deletes a GPUShaderModule.
 
@@ -791,7 +791,7 @@ Deletes a GPUShaderModule.
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:513](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L513)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:513](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L513)
 
 Destroys the ResourceManager instance and physically releases all cached WebGPU resources.
 
@@ -805,7 +805,7 @@ Destroys the ResourceManager instance and physically releases all cached WebGPU 
 
 > **getGPUBindGroupLayout**(`name`): `GPUBindGroupLayout`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:813](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L813)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:813](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L813)
 
 Returns the cached GPUBindGroupLayout.
 
@@ -827,7 +827,7 @@ GPUBindGroupLayout
 
 > **getGPUResourceBitmapTextureView**(`texture`, `viewDescriptor?`): `GPUTextureView`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:664](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L664)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:664](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L664)
 
 Retrieves or creates a view for a bitmap texture from cache.
 
@@ -850,7 +850,7 @@ GPUTextureView
 
 > **getGPUResourceCubeTextureView**(`cubeTexture`, `viewDescriptor?`): `GPUTextureView`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:708](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L708)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:708](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L708)
 
 Retrieves or creates a view for a cube texture from cache.
 
@@ -873,7 +873,7 @@ GPUTextureView
 
 > **getGPUShaderModule**(`name`): `GPUShaderModule`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:767](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L767)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:767](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L767)
 
 Returns the cached GPUShaderModule.
 
@@ -895,7 +895,7 @@ GPUShaderModule
 
 > **initPresets**(): `void`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:874](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L874)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:874](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L874)
 
 Initializes system presets.
 
@@ -909,7 +909,7 @@ Initializes system presets.
 
 > **registerManagementResource**(`target`, `resourceState`): `void`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:480](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L480)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:480](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L480)
 
 Registers a resource for management.
 
@@ -930,7 +930,7 @@ Registers a resource for management.
 
 > **unregisterManagementResource**(`target`): `void`
 
-Defined in: [src/resources/core/resourceManager/ResourceManager.ts:498](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/ResourceManager.ts#L498)
+Defined in: [src/resources/core/resourceManager/ResourceManager.ts:498](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/ResourceManager.ts#L498)
 
 Unregisters a resource from management.
 
@@ -956,7 +956,7 @@ Unregisters a resource from management.
 
 > `readonly` **instanceId**: `number`
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L18)
+Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
 
 Instance sequence ID per class
 
@@ -972,7 +972,7 @@ Instance sequence ID per class
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
 
 Returns the AntialiasingManager instance. (Short-cut path)
 
@@ -994,7 +994,7 @@ AntialiasingManager instance
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
 
 Returns the CommandEncoderManager instance. (Short-cut path)
 
@@ -1016,7 +1016,7 @@ CommandEncoderManager instance
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L52)
 
 Returns the WebGPU device object. (Short-cut path)
 
@@ -1038,7 +1038,7 @@ GPUDevice instance
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
 
 Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
 
@@ -1052,7 +1052,7 @@ Name of the object
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
 
 Sets the name of the object.
 
@@ -1078,7 +1078,7 @@ Sets the name of the object.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
 
 Returns the RedGPUContext instance.
 
@@ -1100,7 +1100,7 @@ RedGPUContext instance
 
 > **get** **resourceManager**(): `ResourceManager`
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
 
 Returns the ResourceManager instance. (Short-cut path)
 
@@ -1122,7 +1122,7 @@ ResourceManager instance
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
 
 Returns the universally unique identifier (UUID) of the object.
 

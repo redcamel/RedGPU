@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: ResourceStateCubeTexture
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:4](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L4)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:4](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L4)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **new ResourceStateCubeTexture**(`cubeTexture`): `ResourceStateCubeTexture`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:11](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L11)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:11](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L11)
 
 #### Parameters
 
@@ -32,7 +32,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **cacheKey**: `string`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:7](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L7)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:7](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L7)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **srcList**: `string`[]
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:6](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L6)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:6](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L6)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **texture**: [`CubeTexture`](../../../classes/CubeTexture.md) \| [`DirectCubeTexture`](../../../classes/DirectCubeTexture.md)
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:5](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L5)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:5](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L5)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **useNum**: `number` = `0`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:8](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L8)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:8](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L8)
 
 ***
 
@@ -64,4 +64,4 @@ Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceSt
 
 > **uuid**: `string` \| `number`
 
-Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:9](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L9)
+Defined in: [src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts:9](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/resourceManager/resourceState/texture/ResourceStateCubeTexture.ts#L9)

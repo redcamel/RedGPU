@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: ShadowManager
 
-Defined in: [src/shadow/ShadowManager.ts:24](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/ShadowManager.ts#L24)
+Defined in: [src/shadow/ShadowManager.ts:24](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/ShadowManager.ts#L24)
 
 Manager class that oversees the overall shadow rendering of the scene.
 
@@ -20,7 +20,7 @@ This class is automatically created by the system.<br/>Do not create an instance
 
 > **new ShadowManager**(): `ShadowManager`
 
-Defined in: [src/shadow/ShadowManager.ts:28](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/ShadowManager.ts#L28)
+Defined in: [src/shadow/ShadowManager.ts:28](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/ShadowManager.ts#L28)
 
 #### Returns
 
@@ -34,7 +34,7 @@ Defined in: [src/shadow/ShadowManager.ts:28](https://github.com/redcamel/RedGPU/
 
 > **get** **directionalShadowManager**(): [`DirectionalShadowManager`](DirectionalShadowManager.md)
 
-Defined in: [src/shadow/ShadowManager.ts:39](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/ShadowManager.ts#L39)
+Defined in: [src/shadow/ShadowManager.ts:39](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/ShadowManager.ts#L39)
 
 Returns the DirectionalShadowManager.
 
@@ -52,7 +52,7 @@ DirectionalShadowManager instance
 
 > **get** **shadowPassDescriptor**(): `GPURenderPassDescriptor`
 
-Defined in: [src/shadow/ShadowManager.ts:51](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/ShadowManager.ts#L51)
+Defined in: [src/shadow/ShadowManager.ts:51](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/ShadowManager.ts#L51)
 
 Returns the shadow render pass descriptor.
 
@@ -68,7 +68,7 @@ GPURenderPassDescriptor object
 
 > **destroy**(): `void`
 
-Defined in: [src/shadow/ShadowManager.ts:114](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/ShadowManager.ts#L114)
+Defined in: [src/shadow/ShadowManager.ts:114](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/ShadowManager.ts#L114)
 
 Releases GPU resources in use for shadow rendering.
 
@@ -82,7 +82,7 @@ Releases GPU resources in use for shadow rendering.
 
 > **render**(`view`): `void`
 
-Defined in: [src/shadow/ShadowManager.ts:63](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/ShadowManager.ts#L63)
+Defined in: [src/shadow/ShadowManager.ts:63](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/ShadowManager.ts#L63)
 
 Performs shadow rendering.
 
@@ -102,7 +102,7 @@ Performs shadow rendering.
 
 > **update**(`redGPUContext`): `void`
 
-Defined in: [src/shadow/ShadowManager.ts:106](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/shadow/ShadowManager.ts#L106)
+Defined in: [src/shadow/ShadowManager.ts:106](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/shadow/ShadowManager.ts#L106)
 
 Updates the state of the manager.
 

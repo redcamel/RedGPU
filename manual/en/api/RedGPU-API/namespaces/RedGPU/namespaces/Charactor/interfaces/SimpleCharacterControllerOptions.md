@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Interface: SimpleCharacterControllerOptions
 
-Defined in: [src/charactor/SimpleCharacterController.ts:29](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L29)
+Defined in: [src/charactor/SimpleCharacterController.ts:29](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L29)
 
 Initialization options interface for SimpleCharacterController.
 
@@ -16,7 +16,7 @@ Initialization options interface for SimpleCharacterController.
 
 > `optional` **floorHeight?**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:41](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L41)
+Defined in: [src/charactor/SimpleCharacterController.ts:41](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L41)
 
 Floor Y-axis height (default: 0.0)
 
@@ -26,7 +26,7 @@ Floor Y-axis height (default: 0.0)
 
 > `optional` **gravity?**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:37](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L37)
+Defined in: [src/charactor/SimpleCharacterController.ts:37](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L37)
 
 Gravity acceleration (default: 9.8)
 
@@ -36,7 +36,7 @@ Gravity acceleration (default: 9.8)
 
 > `optional` **jumpForce?**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:39](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L39)
+Defined in: [src/charactor/SimpleCharacterController.ts:39](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L39)
 
 Jump force (default: 5.0)
 
@@ -46,7 +46,7 @@ Jump force (default: 5.0)
 
 > `optional` **keyMap?**: [`CharacterKeyMap`](CharacterKeyMap.md)
 
-Defined in: [src/charactor/SimpleCharacterController.ts:51](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L51)
+Defined in: [src/charactor/SimpleCharacterController.ts:51](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L51)
 
 Custom keyboard mapping configuration
 
@@ -56,7 +56,7 @@ Custom keyboard mapping configuration
 
 > `optional` **modelRotationOffset?**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:45](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L45)
+Defined in: [src/charactor/SimpleCharacterController.ts:45](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L45)
 
 Model's default rotation offset angle (in degrees, default: 0.0)
 
@@ -66,7 +66,7 @@ Model's default rotation offset angle (in degrees, default: 0.0)
 
 > `optional` **orientRotationToMovement?**: `boolean`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:49](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L49)
+Defined in: [src/charactor/SimpleCharacterController.ts:49](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L49)
 
 Whether to orient character rotation to movement direction (default: true)
 
@@ -76,7 +76,7 @@ Whether to orient character rotation to movement direction (default: true)
 
 > `optional` **rotationSpeed?**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:35](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L35)
+Defined in: [src/charactor/SimpleCharacterController.ts:35](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L35)
 
 Rotation interpolation speed (default: 8.0)
 
@@ -86,7 +86,7 @@ Rotation interpolation speed (default: 8.0)
 
 > `optional` **runSpeed?**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:33](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L33)
+Defined in: [src/charactor/SimpleCharacterController.ts:33](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L33)
 
 Run speed (default: 10.0)
 
@@ -96,7 +96,7 @@ Run speed (default: 10.0)
 
 > `optional` **speed?**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:31](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L31)
+Defined in: [src/charactor/SimpleCharacterController.ts:31](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L31)
 
 Movement speed (default: 5.0)
 
@@ -106,7 +106,7 @@ Movement speed (default: 5.0)
 
 > `optional` **useControllerRotationYaw?**: `boolean`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:47](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L47)
+Defined in: [src/charactor/SimpleCharacterController.ts:47](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L47)
 
 Whether to use controller rotation yaw (whether the character always aligns with camera direction, default: false)
 
@@ -116,6 +116,6 @@ Whether to use controller rotation yaw (whether the character always aligns with
 
 > `optional` **useKeyboard?**: `boolean`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:43](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L43)
+Defined in: [src/charactor/SimpleCharacterController.ts:43](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L43)
 
 Whether to enable keyboard control (default: true)

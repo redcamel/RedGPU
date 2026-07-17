@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **getFilePath**(`url`): `string`
 
-Defined in: [src/utils/file/getFilePath.ts:17](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/utils/file/getFilePath.ts#L17)
+Defined in: [src/utils/file/getFilePath.ts:17](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/utils/file/getFilePath.ts#L17)
 
 URL 또는 경로에서 파일이 포함된 디렉토리 경로를 추출합니다.
 

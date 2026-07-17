@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Abstract Class: ANoiseTexture
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:37](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L37)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:37](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L37)
 
 **`Experimental`**
 
@@ -29,7 +29,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:37](https:
 
 > `protected` **new ANoiseTexture**(`redGPUContext`, `width?`, `height?`, `define`, `useMipmap?`): `ANoiseTexture`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:69](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L69)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:69](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L69)
 
 **`Experimental`**
 
@@ -59,7 +59,7 @@ ANoiseTexture 인스턴스를 생성합니다.
 
 > **mipLevelCount**: `number` = `1`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:38](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L38)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:38](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L38)
 
 **`Experimental`**
 
@@ -69,7 +69,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:38](https:
 
 > **src**: `string`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:40](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L40)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L40)
 
 **`Experimental`**
 
@@ -79,7 +79,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:40](https:
 
 > **useMipmap**: `boolean` = `true`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:39](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L39)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:39](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L39)
 
 **`Experimental`**
 
@@ -91,7 +91,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:39](https:
 
 > **get** **animationSpeed**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:102](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L102)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:102](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L102)
 
 **`Experimental`**
 
@@ -105,7 +105,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:102](https
 
 > **set** **animationSpeed**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:107](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L107)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:107](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L107)
 
 **`Experimental`**
 
@@ -129,7 +129,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:107](https
 
 > **get** **animationX**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:114](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L114)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:114](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L114)
 
 **`Experimental`**
 
@@ -143,7 +143,7 @@ X축 애니메이션 값을 반환합니다.
 
 > **set** **animationX**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:119](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L119)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:119](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L119)
 
 **`Experimental`**
 
@@ -167,7 +167,7 @@ X축 애니메이션 값을 설정합니다.
 
 > **get** **animationY**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:126](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L126)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:126](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L126)
 
 **`Experimental`**
 
@@ -181,7 +181,7 @@ Y축 애니메이션 값을 반환합니다.
 
 > **set** **animationY**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:131](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L131)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:131](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L131)
 
 **`Experimental`**
 
@@ -205,7 +205,7 @@ Y축 애니메이션 값을 설정합니다.
 
 > **get** **gpuTexture**(): `GPUTexture`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:143](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L143)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:143](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L143)
 
 **`Experimental`**
 
@@ -223,7 +223,7 @@ GPUTexture 객체를 반환합니다.
 
 > **get** **resourceManagerKey**(): `string`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:97](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L97)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:97](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L97)
 
 **`Experimental`**
 
@@ -245,7 +245,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:97](https:
 
 > **get** **time**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:148](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L148)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:148](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L148)
 
 **`Experimental`**
 
@@ -259,7 +259,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:148](https
 
 > **set** **time**(`value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:153](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L153)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:153](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L153)
 
 **`Experimental`**
 
@@ -283,7 +283,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:153](https
 
 > **get** **uniformInfo**(): `any`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:138](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L138)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:138](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L138)
 
 **`Experimental`**
 
@@ -301,7 +301,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:138](https
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:92](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L92)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:92](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L92)
 
 **`Experimental`**
 
@@ -317,7 +317,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:92](https:
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:185](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L185)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:185](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L185)
 
 **`Experimental`**
 
@@ -333,7 +333,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:185](https
 
 > **render**(`time`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:180](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L180)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:180](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L180)
 
 **`Experimental`**
 
@@ -355,7 +355,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:180](https
 
 > **updateUniform**(`name`, `value`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:160](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L160)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:160](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L160)
 
 **`Experimental`**
 
@@ -378,7 +378,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:160](https
 
 > **updateUniforms**(`uniforms`): `void`
 
-Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:169](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L169)
+Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:169](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/noiseTexture/core/ANoiseTexture.ts#L169)
 
 **`Experimental`**
 
@@ -406,7 +406,7 @@ Defined in: [src/resources/texture/noiseTexture/core/ANoiseTexture.ts:169](https
 
 > `readonly` **instanceId**: `number`
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L18)
+Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
 
 **`Experimental`**
 
@@ -424,7 +424,7 @@ Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
 
 **`Experimental`**
 
@@ -448,7 +448,7 @@ AntialiasingManager 인스턴스
 
 > **get** **cacheKey**(): `string`
 
-Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/ResourceBase.ts#L53)
+Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L53)
 
 **`Experimental`**
 
@@ -462,7 +462,7 @@ Defined in: [src/resources/core/ResourceBase.ts:53](https://github.com/redcamel/
 
 > **set** **cacheKey**(`value`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/ResourceBase.ts#L61)
+Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L61)
 
 **`Experimental`**
 
@@ -490,7 +490,7 @@ Defined in: [src/resources/core/ResourceBase.ts:61](https://github.com/redcamel/
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
 
 **`Experimental`**
 
@@ -514,7 +514,7 @@ CommandEncoderManager 인스턴스
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/ResourceBase.ts#L77)
+Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L77)
 
 **`Experimental`**
 
@@ -536,7 +536,7 @@ Defined in: [src/resources/core/ResourceBase.ts:77](https://github.com/redcamel/
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
 
 **`Experimental`**
 
@@ -552,7 +552,7 @@ Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
 
 **`Experimental`**
 
@@ -580,7 +580,7 @@ Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
 
 **`Experimental`**
 
@@ -604,7 +604,7 @@ RedGPUContext 인스턴스
 
 > **get** **resourceManager**(): [`ResourceManager`](../../Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
 
 **`Experimental`**
 
@@ -628,7 +628,7 @@ ResourceManager 인스턴스
 
 > **get** **revision**(): `number`
 
-Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/ResourceBase.ts#L45)
+Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L45)
 
 **`Experimental`**
 
@@ -650,7 +650,7 @@ Defined in: [src/resources/core/ResourceBase.ts:45](https://github.com/redcamel/
 
 > **get** **targetResourceManagedState**(): [`ResourceStatusInfo`](../../Core/classes/ResourceStatusInfo.md)
 
-Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/ManagementResourceBase.ts#L45)
+Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ManagementResourceBase.ts#L45)
 
 **`Experimental`**
 
@@ -672,7 +672,7 @@ Defined in: [src/resources/core/ManagementResourceBase.ts:45](https://github.com
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
 
 **`Experimental`**
 
@@ -694,7 +694,7 @@ UUID 문자열
 
 > **\_\_addDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/ResourceBase.ts#L89)
+Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L89)
 
 **`Experimental`**
 
@@ -720,7 +720,7 @@ Defined in: [src/resources/core/ResourceBase.ts:89](https://github.com/redcamel/
 
 > **\_\_removeDirtyPipelineListener**(`listener`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/ResourceBase.ts#L101)
+Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L101)
 
 **`Experimental`**
 
@@ -746,7 +746,7 @@ Defined in: [src/resources/core/ResourceBase.ts:101](https://github.com/redcamel
 
 > **notifyUpdate**(`resetList?`): `void`
 
-Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/core/ResourceBase.ts#L116)
+Defined in: [src/resources/core/ResourceBase.ts:116](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/core/ResourceBase.ts#L116)
 
 **`Experimental`**
 

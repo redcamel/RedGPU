@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: Renderer
 
-Defined in: [src/renderer/Renderer.ts:33](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/renderer/Renderer.ts#L33)
+Defined in: [src/renderer/Renderer.ts:33](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/Renderer.ts#L33)
 
 The core renderer class of RedGPU.
 
@@ -26,7 +26,7 @@ renderer.start(redGPUContext, (time) => {
 
 > **new Renderer**(): `Renderer`
 
-Defined in: [src/renderer/Renderer.ts:38](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/renderer/Renderer.ts#L38)
+Defined in: [src/renderer/Renderer.ts:38](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/Renderer.ts#L38)
 
 #### Returns
 
@@ -38,7 +38,7 @@ Defined in: [src/renderer/Renderer.ts:38](https://github.com/redcamel/RedGPU/blo
 
 > **destroy**(`redGPUContext?`): `void`
 
-Defined in: [src/renderer/Renderer.ts:73](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/renderer/Renderer.ts#L73)
+Defined in: [src/renderer/Renderer.ts:73](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/Renderer.ts#L73)
 
 #### Parameters
 
@@ -56,7 +56,7 @@ Defined in: [src/renderer/Renderer.ts:73](https://github.com/redcamel/RedGPU/blo
 
 > **renderFrame**(`redGPUContext`, `time`): `void`
 
-Defined in: [src/renderer/Renderer.ts:112](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/renderer/Renderer.ts#L112)
+Defined in: [src/renderer/Renderer.ts:112](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/Renderer.ts#L112)
 
 Renders a single frame. (Called internally)
 
@@ -77,7 +77,7 @@ Renders a single frame. (Called internally)
 
 > **renderView**(`view`): `object`
 
-Defined in: [src/renderer/Renderer.ts:157](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/renderer/Renderer.ts#L157)
+Defined in: [src/renderer/Renderer.ts:157](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/Renderer.ts#L157)
 
 Renders a specific View3D.
 
@@ -95,7 +95,7 @@ Generated render pass descriptor
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `renderPassDescriptor` | `GPURenderPassDescriptor` | [src/renderer/Renderer.ts:158](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/renderer/Renderer.ts#L158) |
+| `renderPassDescriptor` | `GPURenderPassDescriptor` | [src/renderer/Renderer.ts:158](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/Renderer.ts#L158) |
 
 ***
 
@@ -103,7 +103,7 @@ Generated render pass descriptor
 
 > **start**(`redGPUContext`, `render`): `void`
 
-Defined in: [src/renderer/Renderer.ts:59](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/renderer/Renderer.ts#L59)
+Defined in: [src/renderer/Renderer.ts:59](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/Renderer.ts#L59)
 
 Starts the rendering loop.
 
@@ -131,7 +131,7 @@ renderer.start(redGPUContext, (time) => {
 
 > **stop**(`redGPUContext`): `void`
 
-Defined in: [src/renderer/Renderer.ts:96](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/renderer/Renderer.ts#L96)
+Defined in: [src/renderer/Renderer.ts:96](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/renderer/Renderer.ts#L96)
 
 Stops the rendering loop.
 

@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **COMMAND\_ENCODER\_TYPE**: `object`
 
-Defined in: [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:6](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L6)
+Defined in: [src/commandEncoderManager/COMMAND\_ENCODER\_TYPE.ts:6](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/COMMAND_ENCODER_TYPE.ts#L6)
 
 GPU 커맨드 인코더의 타입을 정의하는 상수 객체입니다.
 

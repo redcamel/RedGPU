@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **ensureVertexIndexBuiltin**(`shaderSource`): `string`
 
-Defined in: [src/resources/wgslParser/core/ensureVertexIndexBuiltin.ts:17](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/wgslParser/core/ensureVertexIndexBuiltin.ts#L17)
+Defined in: [src/resources/wgslParser/core/ensureVertexIndexBuiltin.ts:17](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/wgslParser/core/ensureVertexIndexBuiltin.ts#L17)
 
 WGSL 셰이더 코드에 `vertex_index` 빌트인 인자가 포함되어 있는지 확인하고, 없으면 자동으로 주입합니다.
 

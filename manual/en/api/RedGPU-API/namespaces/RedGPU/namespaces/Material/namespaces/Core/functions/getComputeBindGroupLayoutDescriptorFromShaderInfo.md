@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **getComputeBindGroupLayoutDescriptorFromShaderInfo**(`SHADER_INFO`, `targetGroupIndex`, `useMSAA`): `object`
 
-Defined in: [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:147](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L147)
+Defined in: [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:147](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L147)
 
 Generates a compute bind group layout descriptor from shader information.
 
@@ -26,4 +26,4 @@ Generates a compute bind group layout descriptor from shader information.
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `entries` | `GPUBindGroupLayoutEntry`[] | [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:105](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L105) |
+| `entries` | `GPUBindGroupLayoutEntry`[] | [src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts:105](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/material/core/getBindGroupLayoutDescriptorFromShaderInfo.ts#L105) |

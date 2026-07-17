@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Interface: BufferSlot
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:5](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L5)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:5](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L5)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBuffer
 
 > **byteOffset**: `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:7](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L7)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:7](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L7)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBuffer
 
 > **index**: `number`
 
-Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:6](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L6)
+Defined in: [src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts:6](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager.ts#L6)

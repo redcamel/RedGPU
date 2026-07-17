@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: ViewTransform
 
-Defined in: [src/display/view/core/ViewTransform.ts:26](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L26)
+Defined in: [src/display/view/core/ViewTransform.ts:26](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L26)
 
 Class that manages the size and position of View3D/View2D.
 
@@ -30,7 +30,7 @@ This class is a base class used internally by the system.<br/>Do not create inst
 
 > **new ViewTransform**(`redGPUContext`): `ViewTransform`
 
-Defined in: [src/display/view/core/ViewTransform.ts:90](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L90)
+Defined in: [src/display/view/core/ViewTransform.ts:90](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L90)
 
 Creates a new ViewTransform instance.
 
@@ -54,7 +54,7 @@ Creates a new ViewTransform instance.
 
 > **onResize**: (`event`) => `void` = `null`
 
-Defined in: [src/display/view/core/ViewTransform.ts:31](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L31)
+Defined in: [src/display/view/core/ViewTransform.ts:31](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L31)
 
 Callback function called when the view size changes
 
@@ -76,7 +76,7 @@ Callback function called when the view size changes
 
 > **get** **aspect**(): `number`
 
-Defined in: [src/display/view/core/ViewTransform.ts:236](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L236)
+Defined in: [src/display/view/core/ViewTransform.ts:236](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L236)
 
 Returns the aspect ratio (width/height) of the current view.
 
@@ -92,7 +92,7 @@ Returns the aspect ratio (width/height) of the current view.
 
 > **get** **camera**(): [`Camera2D`](../../../../Camera/classes/Camera2D.md) \| [`PerspectiveCamera`](../../../../Camera/classes/PerspectiveCamera.md) \| [`OrthographicCamera`](../../../../Camera/classes/OrthographicCamera.md) \| [`AController`](../../../../Camera/namespaces/Core/classes/AController.md)
 
-Defined in: [src/display/view/core/ViewTransform.ts:99](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L99)
+Defined in: [src/display/view/core/ViewTransform.ts:99](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L99)
 
 Returns the currently connected camera.
 
@@ -104,7 +104,7 @@ Returns the currently connected camera.
 
 > **set** **camera**(`value`): `void`
 
-Defined in: [src/display/view/core/ViewTransform.ts:113](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L113)
+Defined in: [src/display/view/core/ViewTransform.ts:113](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L113)
 
 Sets the camera. Must be one of PerspectiveCamera, OrthographicCamera, AController, or Camera2D.
 
@@ -130,7 +130,7 @@ Throws error if camera type is not supported
 
 > **get** **frustumPlanes**(): `number`[][]
 
-Defined in: [src/display/view/core/ViewTransform.ts:247](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L247)
+Defined in: [src/display/view/core/ViewTransform.ts:247](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L247)
 
 Calculates and returns the view frustum planes based on the current projection and camera view matrices.
 
@@ -148,7 +148,7 @@ Frustum planes array
 
 > **get** **height**(): `string` \| `number`
 
-Defined in: [src/display/view/core/ViewTransform.ts:183](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L183)
+Defined in: [src/display/view/core/ViewTransform.ts:183](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L183)
 
 Returns the height value of the view. (Pixels or percentage string)
 
@@ -160,7 +160,7 @@ Returns the height value of the view. (Pixels or percentage string)
 
 > **set** **height**(`value`): `void`
 
-Defined in: [src/display/view/core/ViewTransform.ts:194](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L194)
+Defined in: [src/display/view/core/ViewTransform.ts:194](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L194)
 
 Sets the height of the view.
 
@@ -182,7 +182,7 @@ Sets the height of the view.
 
 > **get** **inverseProjectionMatrix**(): [`mat4`](../../../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/view/core/ViewTransform.ts:334](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L334)
+Defined in: [src/display/view/core/ViewTransform.ts:334](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L334)
 
 Computes and returns the inverse projection matrix.
 
@@ -198,7 +198,7 @@ Computes and returns the inverse projection matrix.
 
 > **get** **jitterOffset**(): \[`number`, `number`\]
 
-Defined in: [src/display/view/core/ViewTransform.ts:342](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L342)
+Defined in: [src/display/view/core/ViewTransform.ts:342](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L342)
 
 Returns the currently configured jitter offset [offsetX, offsetY].
 
@@ -214,7 +214,7 @@ Returns the currently configured jitter offset [offsetX, offsetY].
 
 > **get** **noneJitterProjectionMatrix**(): [`mat4`](../../../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/view/core/ViewTransform.ts:267](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L267)
+Defined in: [src/display/view/core/ViewTransform.ts:267](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L267)
 
 Returns the original projection matrix with jitter excluded.
 
@@ -230,7 +230,7 @@ Returns the original projection matrix with jitter excluded.
 
 > **get** **pixelRectArray**(): \[`number`, `number`, `number`, `number`\]
 
-Defined in: [src/display/view/core/ViewTransform.ts:202](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L202)
+Defined in: [src/display/view/core/ViewTransform.ts:202](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L202)
 
 Returns the rectangle array in pixels. ([x, y, width, height])
 
@@ -246,7 +246,7 @@ Returns the rectangle array in pixels. ([x, y, width, height])
 
 > **get** **pixelRectObject**(): `object`
 
-Defined in: [src/display/view/core/ViewTransform.ts:210](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L210)
+Defined in: [src/display/view/core/ViewTransform.ts:210](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L210)
 
 Returns the pixel rectangle in object form. ({ x, y, width, height })
 
@@ -256,10 +256,10 @@ Returns the pixel rectangle in object form. ({ x, y, width, height })
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `height` | `number` | [src/display/view/core/ViewTransform.ts:215](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L215) |
-| `width` | `number` | [src/display/view/core/ViewTransform.ts:214](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L214) |
-| `x` | `number` | [src/display/view/core/ViewTransform.ts:212](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L212) |
-| `y` | `number` | [src/display/view/core/ViewTransform.ts:213](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L213) |
+| `height` | `number` | [src/display/view/core/ViewTransform.ts:215](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L215) |
+| `width` | `number` | [src/display/view/core/ViewTransform.ts:214](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L214) |
+| `x` | `number` | [src/display/view/core/ViewTransform.ts:212](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L212) |
+| `y` | `number` | [src/display/view/core/ViewTransform.ts:213](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L213) |
 
 ***
 
@@ -269,7 +269,7 @@ Returns the pixel rectangle in object form. ({ x, y, width, height })
 
 > **get** **projectionMatrix**(): [`mat4`](../../../../Math/type-aliases/mat4.md)
 
-Defined in: [src/display/view/core/ViewTransform.ts:312](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L312)
+Defined in: [src/display/view/core/ViewTransform.ts:312](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L312)
 
 Returns the final projection matrix reflecting the jitter offset. (Applied only to PerspectiveCamera when TAA is enabled)
 
@@ -285,7 +285,7 @@ Returns the final projection matrix reflecting the jitter offset. (Applied only 
 
 > **get** **rawCamera**(): [`Camera2D`](../../../../Camera/classes/Camera2D.md) \| [`PerspectiveCamera`](../../../../Camera/classes/PerspectiveCamera.md) \| [`OrthographicCamera`](../../../../Camera/classes/OrthographicCamera.md)
 
-Defined in: [src/display/view/core/ViewTransform.ts:259](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L259)
+Defined in: [src/display/view/core/ViewTransform.ts:259](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L259)
 
 Returns the raw camera instance referenced internally. (Returns internal camera if AController is linked)
 
@@ -301,7 +301,7 @@ Returns the raw camera instance referenced internally. (Returns internal camera 
 
 > **get** **screenRectObject**(): `object`
 
-Defined in: [src/display/view/core/ViewTransform.ts:223](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L223)
+Defined in: [src/display/view/core/ViewTransform.ts:223](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L223)
 
 Returns the screen-relative rectangle object scaled by dividing by devicePixelRatio.
 
@@ -311,10 +311,10 @@ Returns the screen-relative rectangle object scaled by dividing by devicePixelRa
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `height` | `number` | [src/display/view/core/ViewTransform.ts:228](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L228) |
-| `width` | `number` | [src/display/view/core/ViewTransform.ts:227](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L227) |
-| `x` | `number` | [src/display/view/core/ViewTransform.ts:225](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L225) |
-| `y` | `number` | [src/display/view/core/ViewTransform.ts:226](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L226) |
+| `height` | `number` | [src/display/view/core/ViewTransform.ts:228](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L228) |
+| `width` | `number` | [src/display/view/core/ViewTransform.ts:227](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L227) |
+| `x` | `number` | [src/display/view/core/ViewTransform.ts:225](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L225) |
+| `y` | `number` | [src/display/view/core/ViewTransform.ts:226](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L226) |
 
 ***
 
@@ -324,7 +324,7 @@ Returns the screen-relative rectangle object scaled by dividing by devicePixelRa
 
 > **get** **width**(): `string` \| `number`
 
-Defined in: [src/display/view/core/ViewTransform.ts:164](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L164)
+Defined in: [src/display/view/core/ViewTransform.ts:164](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L164)
 
 Returns the width value of the view. (Pixels or percentage string)
 
@@ -336,7 +336,7 @@ Returns the width value of the view. (Pixels or percentage string)
 
 > **set** **width**(`value`): `void`
 
-Defined in: [src/display/view/core/ViewTransform.ts:175](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L175)
+Defined in: [src/display/view/core/ViewTransform.ts:175](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L175)
 
 Sets the width of the view.
 
@@ -358,7 +358,7 @@ Sets the width of the view.
 
 > **get** **x**(): `string` \| `number`
 
-Defined in: [src/display/view/core/ViewTransform.ts:126](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L126)
+Defined in: [src/display/view/core/ViewTransform.ts:126](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L126)
 
 Returns the X position value of the view. (Pixels or percentage string)
 
@@ -370,7 +370,7 @@ Returns the X position value of the view. (Pixels or percentage string)
 
 > **set** **x**(`value`): `void`
 
-Defined in: [src/display/view/core/ViewTransform.ts:137](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L137)
+Defined in: [src/display/view/core/ViewTransform.ts:137](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L137)
 
 Sets the X position of the view.
 
@@ -392,7 +392,7 @@ Sets the X position of the view.
 
 > **get** **y**(): `string` \| `number`
 
-Defined in: [src/display/view/core/ViewTransform.ts:145](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L145)
+Defined in: [src/display/view/core/ViewTransform.ts:145](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L145)
 
 Returns the Y position value of the view. (Pixels or percentage string)
 
@@ -404,7 +404,7 @@ Returns the Y position value of the view. (Pixels or percentage string)
 
 > **set** **y**(`value`): `void`
 
-Defined in: [src/display/view/core/ViewTransform.ts:156](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L156)
+Defined in: [src/display/view/core/ViewTransform.ts:156](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L156)
 
 Sets the Y position of the view.
 
@@ -424,7 +424,7 @@ Sets the Y position of the view.
 
 > **clearJitterOffset**(): `void`
 
-Defined in: [src/display/view/core/ViewTransform.ts:365](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L365)
+Defined in: [src/display/view/core/ViewTransform.ts:365](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L365)
 
 Clears and resets the jitter offset to 0.
 
@@ -438,7 +438,7 @@ Clears and resets the jitter offset to 0.
 
 > **setJitterOffset**(`offsetX`, `offsetY`): `void`
 
-Defined in: [src/display/view/core/ViewTransform.ts:356](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L356)
+Defined in: [src/display/view/core/ViewTransform.ts:356](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L356)
 
 Sets the render pixel jitter offset for TAA calculations.
 
@@ -459,7 +459,7 @@ Sets the render pixel jitter offset for TAA calculations.
 
 > **setPosition**(`x?`, `y?`): `void`
 
-Defined in: [src/display/view/core/ViewTransform.ts:380](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L380)
+Defined in: [src/display/view/core/ViewTransform.ts:380](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L380)
 
 Sets the position (X, Y) of the view and updates physical pixel rectangle values considering DPI.
 
@@ -480,7 +480,7 @@ Sets the position (X, Y) of the view and updates physical pixel rectangle values
 
 > **setSize**(`w?`, `h?`): `void`
 
-Defined in: [src/display/view/core/ViewTransform.ts:403](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/view/core/ViewTransform.ts#L403)
+Defined in: [src/display/view/core/ViewTransform.ts:403](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/view/core/ViewTransform.ts#L403)
 
 Sets the size (width, height) of the view and updates internal physical pixel rectangle values. Triggers onResize callback if registered.
 
@@ -507,7 +507,7 @@ Sets the size (width, height) of the view and updates internal physical pixel re
 
 > `readonly` **instanceId**: `number`
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L18)
+Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
 
 Instance sequence ID per class
 
@@ -523,7 +523,7 @@ Instance sequence ID per class
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
 
 Returns the AntialiasingManager instance. (Short-cut path)
 
@@ -545,7 +545,7 @@ AntialiasingManager instance
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
 
 Returns the CommandEncoderManager instance. (Short-cut path)
 
@@ -567,7 +567,7 @@ CommandEncoderManager instance
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L52)
 
 Returns the WebGPU device object. (Short-cut path)
 
@@ -589,7 +589,7 @@ GPUDevice instance
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
 
 Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
 
@@ -603,7 +603,7 @@ Name of the object
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
 
 Sets the name of the object.
 
@@ -629,7 +629,7 @@ Sets the name of the object.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
 
 Returns the RedGPUContext instance.
 
@@ -651,7 +651,7 @@ RedGPUContext instance
 
 > **get** **resourceManager**(): [`ResourceManager`](../../../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
 
 Returns the ResourceManager instance. (Short-cut path)
 
@@ -673,7 +673,7 @@ ResourceManager instance
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
 
 Returns the universally unique identifier (UUID) of the object.
 

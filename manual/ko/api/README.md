@@ -1,8 +1,8 @@
-**RedGPU API v4.1.0-Alpha**
+**RedGPU API v4.3.0-Alpha**
 
 ***
 
-# RedGPU API v4.1.0-Alpha
+# RedGPU API v4.3.0-Alpha
 
 ## Namespaces
 

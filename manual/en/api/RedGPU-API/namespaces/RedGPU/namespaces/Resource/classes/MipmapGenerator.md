@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: MipmapGenerator
 
-Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:9](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts#L9)
+Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:9](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts#L9)
 
 Base class for all engine objects using GPU context.
 
@@ -22,7 +22,7 @@ Provides common access paths to RedGPUContext and related managers (ResourceMana
 
 > **new MipmapGenerator**(`redGPUContext`): `MipmapGenerator`
 
-Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:23](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts#L23)
+Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:23](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts#L23)
 
 #### Parameters
 
@@ -44,7 +44,7 @@ Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:23](h
 
 > **createBindGroup**(`texture`, `textureView`, `useCache?`): `GPUBindGroup`
 
-Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:71](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts#L71)
+Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:71](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts#L71)
 
 #### Parameters
 
@@ -64,7 +64,7 @@ Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:71](h
 
 > **createTextureView**(`texture`, `baseMipLevel`, `baseArrayLayer`, `useCache?`): `GPUTextureView`
 
-Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:29](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts#L29)
+Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:29](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts#L29)
 
 #### Parameters
 
@@ -85,7 +85,7 @@ Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:29](h
 
 > **destroy**(): `void`
 
-Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:282](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts#L282)
+Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:282](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts#L282)
 
 #### Returns
 
@@ -97,7 +97,7 @@ Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:282](
 
 > **generateMipmap**(`texture`, `textureDescriptor`, `useCache?`, `encoderType?`): `GPUTexture`
 
-Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:168](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts#L168)
+Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:168](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts#L168)
 
 밉맵 생성 메서드
 
@@ -120,7 +120,7 @@ Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:168](
 
 > **getMipmapPipeline**(`format`): `GPURenderPipeline`
 
-Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:122](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts#L122)
+Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:122](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts#L122)
 
 #### Parameters
 
@@ -144,7 +144,7 @@ Defined in: [src/resources/texture/core/mipmapGenerator/MipmapGenerator.ts:122](
 
 > `readonly` **instanceId**: `number`
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L18)
+Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
 
 Instance sequence ID per class
 
@@ -160,7 +160,7 @@ Instance sequence ID per class
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
 
 Returns the AntialiasingManager instance. (Short-cut path)
 
@@ -182,7 +182,7 @@ AntialiasingManager instance
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
 
 Returns the CommandEncoderManager instance. (Short-cut path)
 
@@ -204,7 +204,7 @@ CommandEncoderManager instance
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L52)
 
 Returns the WebGPU device object. (Short-cut path)
 
@@ -226,7 +226,7 @@ GPUDevice instance
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
 
 Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
 
@@ -240,7 +240,7 @@ Name of the object
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
 
 Sets the name of the object.
 
@@ -266,7 +266,7 @@ Sets the name of the object.
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
 
 Returns the RedGPUContext instance.
 
@@ -288,7 +288,7 @@ RedGPUContext instance
 
 > **get** **resourceManager**(): [`ResourceManager`](../namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
 
 Returns the ResourceManager instance. (Short-cut path)
 
@@ -310,7 +310,7 @@ ResourceManager instance
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
 
 Returns the universally unique identifier (UUID) of the object.
 

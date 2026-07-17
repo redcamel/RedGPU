@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: AABB
 
-Defined in: [src/bound/AABB.ts:18](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/AABB.ts#L18)
+Defined in: [src/bound/AABB.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/AABB.ts#L18)
 
 3차원 축 정렬 경계 상자(Axis-Aligned Bounding Box) 클래스입니다.
 
@@ -24,7 +24,7 @@ const intersects = aabb.intersects(otherAABB);
 
 > **new AABB**(`minX`, `maxX`, `minY`, `maxY`, `minZ`, `maxZ`): `AABB`
 
-Defined in: [src/bound/AABB.ts:108](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/AABB.ts#L108)
+Defined in: [src/bound/AABB.ts:108](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/AABB.ts#L108)
 
 AABB 인스턴스를 생성합니다.
 
@@ -49,7 +49,7 @@ AABB 인스턴스를 생성합니다.
 
 > `readonly` **centerX**: `number`
 
-Defined in: [src/bound/AABB.ts:53](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/AABB.ts#L53)
+Defined in: [src/bound/AABB.ts:53](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/AABB.ts#L53)
 
 X축 중심 좌표
 
@@ -59,7 +59,7 @@ X축 중심 좌표
 
 > `readonly` **centerY**: `number`
 
-Defined in: [src/bound/AABB.ts:58](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/AABB.ts#L58)
+Defined in: [src/bound/AABB.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/AABB.ts#L58)
 
 Y축 중심 좌표
 
@@ -69,7 +69,7 @@ Y축 중심 좌표
 
 > `readonly` **centerZ**: `number`
 
-Defined in: [src/bound/AABB.ts:63](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/AABB.ts#L63)
+Defined in: [src/bound/AABB.ts:63](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/AABB.ts#L63)
 
 Z축 중심 좌표
 
@@ -79,7 +79,7 @@ Z축 중심 좌표
 
 > `readonly` **geometryRadius**: `number`
 
-Defined in: [src/bound/AABB.ts:83](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/AABB.ts#L83)
+Defined in: [src/bound/AABB.ts:83](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/AABB.ts#L83)
 
 중심에서 꼭짓점까지의 거리(반지름)
 
@@ -89,7 +89,7 @@ Defined in: [src/bound/AABB.ts:83](https://github.com/redcamel/RedGPU/blob/302ea
 
 > `readonly` **maxX**: `number`
 
-Defined in: [src/bound/AABB.ts:28](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/AABB.ts#L28)
+Defined in: [src/bound/AABB.ts:28](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/AABB.ts#L28)
 
 X축 최대값
 
@@ -99,7 +99,7 @@ X축 최대값
 
 > `readonly` **maxY**: `number`
 
-Defined in: [src/bound/AABB.ts:38](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/AABB.ts#L38)
+Defined in: [src/bound/AABB.ts:38](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/AABB.ts#L38)
 
 Y축 최대값
 
@@ -109,7 +109,7 @@ Y축 최대값
 
 > `readonly` **maxZ**: `number`
 
-Defined in: [src/bound/AABB.ts:48](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/AABB.ts#L48)
+Defined in: [src/bound/AABB.ts:48](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/AABB.ts#L48)
 
 Z축 최대값
 
@@ -119,7 +119,7 @@ Z축 최대값
 
 > `readonly` **minX**: `number`
 
-Defined in: [src/bound/AABB.ts:23](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/AABB.ts#L23)
+Defined in: [src/bound/AABB.ts:23](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/AABB.ts#L23)
 
 X축 최소값
 
@@ -129,7 +129,7 @@ X축 최소값
 
 > `readonly` **minY**: `number`
 
-Defined in: [src/bound/AABB.ts:33](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/AABB.ts#L33)
+Defined in: [src/bound/AABB.ts:33](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/AABB.ts#L33)
 
 Y축 최소값
 
@@ -139,7 +139,7 @@ Y축 최소값
 
 > `readonly` **minZ**: `number`
 
-Defined in: [src/bound/AABB.ts:43](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/AABB.ts#L43)
+Defined in: [src/bound/AABB.ts:43](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/AABB.ts#L43)
 
 Z축 최소값
 
@@ -149,7 +149,7 @@ Z축 최소값
 
 > `readonly` **xSize**: `number`
 
-Defined in: [src/bound/AABB.ts:68](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/AABB.ts#L68)
+Defined in: [src/bound/AABB.ts:68](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/AABB.ts#L68)
 
 X축 크기
 
@@ -159,7 +159,7 @@ X축 크기
 
 > `readonly` **ySize**: `number`
 
-Defined in: [src/bound/AABB.ts:73](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/AABB.ts#L73)
+Defined in: [src/bound/AABB.ts:73](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/AABB.ts#L73)
 
 Y축 크기
 
@@ -169,7 +169,7 @@ Y축 크기
 
 > `readonly` **zSize**: `number`
 
-Defined in: [src/bound/AABB.ts:78](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/AABB.ts#L78)
+Defined in: [src/bound/AABB.ts:78](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/AABB.ts#L78)
 
 Z축 크기
 
@@ -179,7 +179,7 @@ Z축 크기
 
 > **clone**(): `AABB`
 
-Defined in: [src/bound/AABB.ts:189](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/AABB.ts#L189)
+Defined in: [src/bound/AABB.ts:189](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/AABB.ts#L189)
 
 AABB 인스턴스를 복제합니다.
 
@@ -195,7 +195,7 @@ AABB 인스턴스를 복제합니다.
 
 > **contains**(`pointOrX`, `y?`, `z?`): `boolean`
 
-Defined in: [src/bound/AABB.ts:168](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/AABB.ts#L168)
+Defined in: [src/bound/AABB.ts:168](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/AABB.ts#L168)
 
 점 또는 좌표가 AABB 내부에 포함되는지 여부를 반환합니다.
 
@@ -219,7 +219,7 @@ Defined in: [src/bound/AABB.ts:168](https://github.com/redcamel/RedGPU/blob/302e
 
 > **intersects**(`other`): `boolean`
 
-Defined in: [src/bound/AABB.ts:142](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/AABB.ts#L142)
+Defined in: [src/bound/AABB.ts:142](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/AABB.ts#L142)
 
 다른 AABB와의 교차 여부를 반환합니다.
 

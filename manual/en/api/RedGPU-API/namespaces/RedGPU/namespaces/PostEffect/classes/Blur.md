@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: Blur
 
-Defined in: [src/postEffect/effects/blur/Blur.ts:27](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/effects/blur/Blur.ts#L27)
+Defined in: [src/postEffect/effects/blur/Blur.ts:27](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/effects/blur/Blur.ts#L27)
 
 Convolution-based single-pass Blur post-processing effect.
 
@@ -32,7 +32,7 @@ view.postEffectManager.addEffect(new RedGPU.PostEffect.Blur(redGPUContext));
 
 > **new Blur**(`redGPUContext`): `Blur`
 
-Defined in: [src/postEffect/effects/blur/Blur.ts:40](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/effects/blur/Blur.ts#L40)
+Defined in: [src/postEffect/effects/blur/Blur.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/effects/blur/Blur.ts#L40)
 
 Creates a Blur instance.
 
@@ -56,7 +56,7 @@ Creates a Blur instance.
 
 > **render**(`view`, `width`, `height`, `sourceTextureInfo`): [`IPostEffectResult`](../namespaces/Core/interfaces/IPostEffectResult.md)
 
-Defined in: [src/postEffect/effects/blur/Blur.ts:61](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/effects/blur/Blur.ts#L61)
+Defined in: [src/postEffect/effects/blur/Blur.ts:61](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/effects/blur/Blur.ts#L61)
 
 Renders the blur effect.
 
@@ -93,7 +93,7 @@ Blurred texture result
 
 > `readonly` **instanceId**: `number`
 
-Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L18)
+Defined in: [src/base/BaseObject.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L18)
 
 Instance sequence ID per class
 
@@ -107,7 +107,7 @@ Instance sequence ID per class
 
 > **isInstanceofPostEffect**: `boolean`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:12](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/ASinglePassPostEffect.ts#L12)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:12](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L12)
 
 #### Inherited from
 
@@ -119,7 +119,7 @@ Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:12](https://github.com
 
 > **isLdr**: `boolean` = `false`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:29](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/ASinglePassPostEffect.ts#L29)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:29](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L29)
 
 Whether the effect operates in LDR (Low Dynamic Range) space
 
@@ -135,7 +135,7 @@ Whether the effect operates in LDR (Low Dynamic Range) space
 
 > **get** **antialiasingManager**(): [`AntialiasingManager`](../../Antialiasing/classes/AntialiasingManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L76)
+Defined in: [src/base/RedGPUObject.ts:76](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L76)
 
 Returns the AntialiasingManager instance. (Short-cut path)
 
@@ -157,7 +157,7 @@ AntialiasingManager instance
 
 > **get** **commandEncoderManager**(): [`CommandEncoderManager`](../../CommandEncoderManager/classes/CommandEncoderManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L88)
+Defined in: [src/base/RedGPUObject.ts:88](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L88)
 
 Returns the CommandEncoderManager instance. (Short-cut path)
 
@@ -179,7 +179,7 @@ CommandEncoderManager instance
 
 > **get** **gpuDevice**(): `GPUDevice`
 
-Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L52)
+Defined in: [src/base/RedGPUObject.ts:52](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L52)
 
 Returns the WebGPU device object. (Short-cut path)
 
@@ -201,7 +201,7 @@ GPUDevice instance
 
 > **get** **name**(): `string`
 
-Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L58)
+Defined in: [src/base/BaseObject.ts:58](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L58)
 
 Returns the name of the object. If no name is set, it is automatically generated by combining the class name and instance ID.
 
@@ -215,7 +215,7 @@ Name of the object
 
 > **set** **name**(`value`): `void`
 
-Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L70)
+Defined in: [src/base/BaseObject.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L70)
 
 Sets the name of the object.
 
@@ -241,7 +241,7 @@ Sets the name of the object.
 
 > **get** **outputTextureView**(): `GPUTextureView`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:208](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/ASinglePassPostEffect.ts#L208)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:208](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L208)
 
 Returns the currently allocated output texture view.
 
@@ -263,7 +263,7 @@ Output GPUTextureView
 
 > **get** **passList**(): [`ASinglePassPostEffect`](../namespaces/Core/classes/ASinglePassPostEffect.md)[]
 
-Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:66](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/AMultiPassPostEffect.ts#L66)
+Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:66](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/AMultiPassPostEffect.ts#L66)
 
 Returns the list of registered internal passes.
 
@@ -285,7 +285,7 @@ Array of internal single-pass post effects
 
 > **get** **redGPUContext**(): [`RedGPUContext`](../../Context/classes/RedGPUContext.md)
 
-Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L40)
+Defined in: [src/base/RedGPUObject.ts:40](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L40)
 
 Returns the RedGPUContext instance.
 
@@ -307,7 +307,7 @@ RedGPUContext instance
 
 > **get** **resourceManager**(): [`ResourceManager`](../../Resource/namespaces/Core/classes/ResourceManager.md)
 
-Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/RedGPUObject.ts#L64)
+Defined in: [src/base/RedGPUObject.ts:64](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/RedGPUObject.ts#L64)
 
 Returns the ResourceManager instance. (Short-cut path)
 
@@ -329,7 +329,7 @@ ResourceManager instance
 
 > **get** **shaderInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:124](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/ASinglePassPostEffect.ts#L124)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:124](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L124)
 
 Returns shader information based on the current MSAA state.
 
@@ -351,7 +351,7 @@ WGSL shader analysis info
 
 > **get** **storageInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:112](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/ASinglePassPostEffect.ts#L112)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:112](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L112)
 
 Returns storage info from the shader.
 
@@ -373,7 +373,7 @@ Storage structure information
 
 > **get** **systemUniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:160](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/ASinglePassPostEffect.ts#L160)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:160](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L160)
 
 Returns the system common globalStruct struct information.
 
@@ -395,7 +395,7 @@ System globalStruct structure info
 
 > **get** **uniformBuffer**(): [`UniformBuffer`](../../Resource/classes/UniformBuffer.md)
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:136](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/ASinglePassPostEffect.ts#L136)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:136](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L136)
 
 Returns the effect-specific globalStruct buffer.
 
@@ -417,7 +417,7 @@ Uniform buffer instance
 
 > **get** **uniformsInfo**(): `any`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:148](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/ASinglePassPostEffect.ts#L148)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:148](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L148)
 
 Returns the effect-specific globalStruct struct information.
 
@@ -439,7 +439,7 @@ Uniform structure info
 
 > **get** **uuid**(): `string`
 
-Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/base/BaseObject.ts#L46)
+Defined in: [src/base/BaseObject.ts:46](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/base/BaseObject.ts#L46)
 
 Returns the universally unique identifier (UUID) of the object.
 
@@ -461,7 +461,7 @@ UUID string
 
 > **get** **videoMemorySize**(): `number`
 
-Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:53](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/AMultiPassPostEffect.ts#L53)
+Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:53](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/AMultiPassPostEffect.ts#L53)
 
 Returns the sum of video memory usage of all internal passes.
 
@@ -483,7 +483,7 @@ Video memory usage in bytes
 
 > **get** **WORK\_SIZE\_X**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:172](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/ASinglePassPostEffect.ts#L172)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:172](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L172)
 
 Returns the workgroup size X.
 
@@ -505,7 +505,7 @@ Workgroup size X
 
 > **get** **WORK\_SIZE\_Y**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:184](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/ASinglePassPostEffect.ts#L184)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:184](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L184)
 
 Returns the workgroup size Y.
 
@@ -527,7 +527,7 @@ Workgroup size Y
 
 > **get** **WORK\_SIZE\_Z**(): `number`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:196](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/ASinglePassPostEffect.ts#L196)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:196](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L196)
 
 Returns the workgroup size Z.
 
@@ -547,7 +547,7 @@ Workgroup size Z
 
 > **clear**(): `void`
 
-Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:82](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/AMultiPassPostEffect.ts#L82)
+Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:82](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/AMultiPassPostEffect.ts#L82)
 
 Clears the resources of all registered internal passes.
 
@@ -565,7 +565,7 @@ Clears the resources of all registered internal passes.
 
 > **destroy**(): `void`
 
-Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:70](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/AMultiPassPostEffect.ts#L70)
+Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:70](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/AMultiPassPostEffect.ts#L70)
 
 #### Returns
 
@@ -581,7 +581,7 @@ Defined in: [src/postEffect/core/AMultiPassPostEffect.ts:70](https://github.com/
 
 > **init**(`redGPUContext`, `name`, `computeCodes`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:252](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/ASinglePassPostEffect.ts#L252)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:252](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L252)
 
 Initializes the effect. Creates compute shaders and globalStruct buffers.
 
@@ -609,7 +609,7 @@ Initializes the effect. Creates compute shaders and globalStruct buffers.
 
 > **updateUniform**(`key`, `value`): `void`
 
-Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:363](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/ASinglePassPostEffect.ts#L363)
+Defined in: [src/postEffect/core/ASinglePassPostEffect.ts:363](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/ASinglePassPostEffect.ts#L363)
 
 Updates a specific globalStruct value.
 

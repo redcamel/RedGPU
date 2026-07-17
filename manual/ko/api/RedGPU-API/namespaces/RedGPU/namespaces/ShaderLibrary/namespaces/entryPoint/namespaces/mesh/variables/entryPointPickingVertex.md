@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **entryPointPickingVertex**: `string` = `meshEntryPointPickingVertex_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:2096](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/systemCodeManager/ShaderLibrary.ts#L2096)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:2096](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L2096)
 
 메쉬 피킹 버텍스 셰이더 엔트리 포인트입니다.
 

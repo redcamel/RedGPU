@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **calculateNormals**(`vertexArray`, `indexArray`): `number`[]
 
-Defined in: [src/math/calculateNormals.ts:24](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/math/calculateNormals.ts#L24)
+Defined in: [src/math/calculateNormals.ts:24](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/calculateNormals.ts#L24)
 
 정점 배열과 인덱스 배열을 기반으로 노멀 벡터를 계산합니다.
 

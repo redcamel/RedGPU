@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **createBasicPostEffectCode**(`effect`, `code`, `uniformStruct?`, `sourceTextureConfigs?`): `object`
 
-Defined in: [src/postEffect/core/createBasicPostEffectCode.ts:92](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/createBasicPostEffectCode.ts#L92)
+Defined in: [src/postEffect/core/createBasicPostEffectCode.ts:92](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/createBasicPostEffectCode.ts#L92)
 
 High-level helper function to generate WGSL code for basic post-processing effects.
 
@@ -37,5 +37,5 @@ WGSL code objects generated for MSAA and Non-MSAA respectively
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `msaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:99](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/createBasicPostEffectCode.ts#L99) |
-| `nonMsaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:100](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/postEffect/core/createBasicPostEffectCode.ts#L100) |
+| `msaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:99](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/createBasicPostEffectCode.ts#L99) |
+| `nonMsaa` | `string` | [src/postEffect/core/createBasicPostEffectCode.ts:100](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/postEffect/core/createBasicPostEffectCode.ts#L100) |

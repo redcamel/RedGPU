@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **GPU\_PRIMITIVE\_TOPOLOGY**: `object`
 
-Defined in: [src/gpuConst/GPU\_PRIMITIVE\_TOPOLOGY.ts:10](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/gpuConst/GPU_PRIMITIVE_TOPOLOGY.ts#L10)
+Defined in: [src/gpuConst/GPU\_PRIMITIVE\_TOPOLOGY.ts:10](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_PRIMITIVE_TOPOLOGY.ts#L10)
 
 Constants defining how to interpret vertex data as geometric shapes.
 
@@ -18,8 +18,8 @@ Determines the rules by which vertices are connected and drawn.
 
 | Name | Type | Default value | Description | Defined in |
 | ------ | ------ | ------ | ------ | ------ |
-| <a id="property-line_list"></a> `LINE_LIST` | `"line-list"` | `'line-list'` | Connects two vertices to form an independent line segment. | [src/gpuConst/GPU\_PRIMITIVE\_TOPOLOGY.ts:20](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/gpuConst/GPU_PRIMITIVE_TOPOLOGY.ts#L20) |
-| <a id="property-line_strip"></a> `LINE_STRIP` | `"line-strip"` | `'line-strip'` | Connects consecutive vertices into a single continuous line. | [src/gpuConst/GPU\_PRIMITIVE\_TOPOLOGY.ts:25](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/gpuConst/GPU_PRIMITIVE_TOPOLOGY.ts#L25) |
-| <a id="property-point_list"></a> `POINT_LIST` | `"point-list"` | `'point-list'` | Renders each vertex as an independent point. | [src/gpuConst/GPU\_PRIMITIVE\_TOPOLOGY.ts:15](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/gpuConst/GPU_PRIMITIVE_TOPOLOGY.ts#L15) |
-| <a id="property-triangle_list"></a> `TRIANGLE_LIST` | `"triangle-list"` | `'triangle-list'` | Connects three vertices to form an independent triangle. | [src/gpuConst/GPU\_PRIMITIVE\_TOPOLOGY.ts:30](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/gpuConst/GPU_PRIMITIVE_TOPOLOGY.ts#L30) |
-| <a id="property-triangle_strip"></a> `TRIANGLE_STRIP` | `"triangle-strip"` | `'triangle-strip'` | Connects consecutive vertices to form a triangle strip. | [src/gpuConst/GPU\_PRIMITIVE\_TOPOLOGY.ts:35](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/gpuConst/GPU_PRIMITIVE_TOPOLOGY.ts#L35) |
+| <a id="property-line_list"></a> `LINE_LIST` | `"line-list"` | `'line-list'` | Connects two vertices to form an independent line segment. | [src/gpuConst/GPU\_PRIMITIVE\_TOPOLOGY.ts:20](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_PRIMITIVE_TOPOLOGY.ts#L20) |
+| <a id="property-line_strip"></a> `LINE_STRIP` | `"line-strip"` | `'line-strip'` | Connects consecutive vertices into a single continuous line. | [src/gpuConst/GPU\_PRIMITIVE\_TOPOLOGY.ts:25](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_PRIMITIVE_TOPOLOGY.ts#L25) |
+| <a id="property-point_list"></a> `POINT_LIST` | `"point-list"` | `'point-list'` | Renders each vertex as an independent point. | [src/gpuConst/GPU\_PRIMITIVE\_TOPOLOGY.ts:15](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_PRIMITIVE_TOPOLOGY.ts#L15) |
+| <a id="property-triangle_list"></a> `TRIANGLE_LIST` | `"triangle-list"` | `'triangle-list'` | Connects three vertices to form an independent triangle. | [src/gpuConst/GPU\_PRIMITIVE\_TOPOLOGY.ts:30](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_PRIMITIVE_TOPOLOGY.ts#L30) |
+| <a id="property-triangle_strip"></a> `TRIANGLE_STRIP` | `"triangle-strip"` | `'triangle-strip'` | Connects consecutive vertices to form a triangle strip. | [src/gpuConst/GPU\_PRIMITIVE\_TOPOLOGY.ts:35](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/gpuConst/GPU_PRIMITIVE_TOPOLOGY.ts#L35) |

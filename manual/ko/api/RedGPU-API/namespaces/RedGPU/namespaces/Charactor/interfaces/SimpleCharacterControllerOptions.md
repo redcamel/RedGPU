@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Interface: SimpleCharacterControllerOptions
 
-Defined in: [src/charactor/SimpleCharacterController.ts:29](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L29)
+Defined in: [src/charactor/SimpleCharacterController.ts:29](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L29)
 
 Simple 캐릭터 컨트롤러의 초기화 옵션 인터페이스입니다.
 
@@ -16,7 +16,7 @@ Simple 캐릭터 컨트롤러의 초기화 옵션 인터페이스입니다.
 
 > `optional` **floorHeight?**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:41](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L41)
+Defined in: [src/charactor/SimpleCharacterController.ts:41](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L41)
 
 바닥 Y축 높이 (기본값: 0.0)
 
@@ -26,7 +26,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:41](https://github.com/r
 
 > `optional` **gravity?**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:37](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L37)
+Defined in: [src/charactor/SimpleCharacterController.ts:37](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L37)
 
 중력 가속도 (기본값: 9.8)
 
@@ -36,7 +36,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:37](https://github.com/r
 
 > `optional` **jumpForce?**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:39](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L39)
+Defined in: [src/charactor/SimpleCharacterController.ts:39](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L39)
 
 점프 힘 (기본값: 5.0)
 
@@ -46,7 +46,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:39](https://github.com/r
 
 > `optional` **keyMap?**: [`CharacterKeyMap`](CharacterKeyMap.md)
 
-Defined in: [src/charactor/SimpleCharacterController.ts:51](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L51)
+Defined in: [src/charactor/SimpleCharacterController.ts:51](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L51)
 
 사용자 정의 키보드 매핑
 
@@ -56,7 +56,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:51](https://github.com/r
 
 > `optional` **modelRotationOffset?**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:45](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L45)
+Defined in: [src/charactor/SimpleCharacterController.ts:45](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L45)
 
 모델 자체의 기본 회전 오프셋 각도 (도 단위, 기본값: 0.0)
 
@@ -66,7 +66,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:45](https://github.com/r
 
 > `optional` **orientRotationToMovement?**: `boolean`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:49](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L49)
+Defined in: [src/charactor/SimpleCharacterController.ts:49](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L49)
 
 이동 방향으로 캐릭터 회전 정렬 여부 (기본값: true)
 
@@ -76,7 +76,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:49](https://github.com/r
 
 > `optional` **rotationSpeed?**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:35](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L35)
+Defined in: [src/charactor/SimpleCharacterController.ts:35](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L35)
 
 회전 보간 속도 (기본값: 8.0)
 
@@ -86,7 +86,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:35](https://github.com/r
 
 > `optional` **runSpeed?**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:33](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L33)
+Defined in: [src/charactor/SimpleCharacterController.ts:33](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L33)
 
 달리기 속도 (기본값: 10.0)
 
@@ -96,7 +96,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:33](https://github.com/r
 
 > `optional` **speed?**: `number`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:31](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L31)
+Defined in: [src/charactor/SimpleCharacterController.ts:31](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L31)
 
 이동 속도 (기본값: 5.0)
 
@@ -106,7 +106,7 @@ Defined in: [src/charactor/SimpleCharacterController.ts:31](https://github.com/r
 
 > `optional` **useControllerRotationYaw?**: `boolean`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:47](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L47)
+Defined in: [src/charactor/SimpleCharacterController.ts:47](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L47)
 
 컨트롤러 회전 사용 여부 (캐릭터가 카메라 방향을 항상 유지할지 여부, 기본값: false)
 
@@ -116,6 +116,6 @@ Defined in: [src/charactor/SimpleCharacterController.ts:47](https://github.com/r
 
 > `optional` **useKeyboard?**: `boolean`
 
-Defined in: [src/charactor/SimpleCharacterController.ts:43](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/charactor/SimpleCharacterController.ts#L43)
+Defined in: [src/charactor/SimpleCharacterController.ts:43](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/charactor/SimpleCharacterController.ts#L43)
 
 키보드 조작 활성화 여부 (기본값: true)

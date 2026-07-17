@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **mixInMesh2D**\<`TBase`\>(`Base`): \{(...`args`): `resultClass`; `prototype`: `resultClass`\<`any`\>; \} & `TBase`
 
-Defined in: [src/display/mesh/core/mixInMesh2D.ts:18](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/display/mesh/core/mixInMesh2D.ts#L18)
+Defined in: [src/display/mesh/core/mixInMesh2D.ts:18](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/display/mesh/core/mixInMesh2D.ts#L18)
 
 ## Type Parameters
 

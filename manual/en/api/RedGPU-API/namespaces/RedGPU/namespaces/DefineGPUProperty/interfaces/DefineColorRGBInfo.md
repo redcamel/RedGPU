@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Interface: DefineColorRGBInfo
 
-Defined in: [src/defineProperty/funcs/color/defineColorRGB.ts:11](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/defineProperty/funcs/color/defineColorRGB.ts#L11)
+Defined in: [src/defineProperty/funcs/color/defineColorRGB.ts:11](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/color/defineColorRGB.ts#L11)
 
 `defineColorRGB` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
 
@@ -16,7 +16,7 @@ Defined in: [src/defineProperty/funcs/color/defineColorRGB.ts:11](https://github
 
 > **key**: `string`
 
-Defined in: [src/defineProperty/funcs/color/defineColorRGB.ts:16](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/defineProperty/funcs/color/defineColorRGB.ts#L16)
+Defined in: [src/defineProperty/funcs/color/defineColorRGB.ts:16](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/color/defineColorRGB.ts#L16)
 
 Key name of the property. Defined on the target object's prototype under this name.
 
@@ -26,6 +26,6 @@ Key name of the property. Defined on the target object's prototype under this na
 
 > `optional` **value?**: `string`
 
-Defined in: [src/defineProperty/funcs/color/defineColorRGB.ts:21](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/defineProperty/funcs/color/defineColorRGB.ts#L21)
+Defined in: [src/defineProperty/funcs/color/defineColorRGB.ts:21](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/color/defineColorRGB.ts#L21)
 
 Initial hex color code (e.g., `#ff0000`). If not specified, defaults to `#fff`.

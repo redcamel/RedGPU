@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **defineNumber**(`target`, `defineInfo`): `void`
 
-Defined in: [src/defineProperty/funcs/number/defineNumber.ts:98](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/defineProperty/funcs/number/defineNumber.ts#L98)
+Defined in: [src/defineProperty/funcs/number/defineNumber.ts:98](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/defineProperty/funcs/number/defineNumber.ts#L98)
 
 지정된 클래스의 프로토타입에 GPU와 연동되는 일반 숫자(Number) 속성을 정의합니다.
 

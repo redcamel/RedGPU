@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Interface: CommandPhaseStats
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:10](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/commandEncoderManager/CommandEncoderManager.ts#L10)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:10](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L10)
 
 단계별 통계 상세 정보 인터페이스
 
@@ -16,7 +16,7 @@ Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:10](https://gith
 
 > **Command Buffers**: `number`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:20](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/commandEncoderManager/CommandEncoderManager.ts#L20)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:20](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L20)
 
 제출된 커맨드 버퍼의 개수
 
@@ -26,7 +26,7 @@ Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:20](https://gith
 
 > **Compute Passes**: `object`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:41](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/commandEncoderManager/CommandEncoderManager.ts#L41)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:41](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L41)
 
 컴퓨트 패스 정보
 
@@ -48,7 +48,7 @@ Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:41](https://gith
 
 > `optional` **Phase?**: [`CommandEncoderType`](../type-aliases/CommandEncoderType.md)
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:15](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/commandEncoderManager/CommandEncoderManager.ts#L15)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:15](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L15)
 
 인코더의 단계(Phase) 타입
 
@@ -58,7 +58,7 @@ Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:15](https://gith
 
 > **Raw Usages**: `number`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:57](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/commandEncoderManager/CommandEncoderManager.ts#L57)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:57](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L57)
 
 인코더를 직접 참조하여 기록한 수 (예: useEncoder 사용 횟수)
 
@@ -68,7 +68,7 @@ Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:57](https://gith
 
 > **Render Passes**: `object`
 
-Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:25](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/commandEncoderManager/CommandEncoderManager.ts#L25)
+Defined in: [src/commandEncoderManager/CommandEncoderManager.ts:25](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/commandEncoderManager/CommandEncoderManager.ts#L25)
 
 렌더 패스 정보
 

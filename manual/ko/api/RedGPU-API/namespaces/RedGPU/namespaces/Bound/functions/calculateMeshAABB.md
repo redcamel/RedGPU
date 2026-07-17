@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **calculateMeshAABB**(`mesh`): [`AABB`](../classes/AABB.md)
 
-Defined in: [src/bound/math/calculateMeshAABB.ts:24](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/bound/math/calculateMeshAABB.ts#L24)
+Defined in: [src/bound/math/calculateMeshAABB.ts:24](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/bound/math/calculateMeshAABB.ts#L24)
 
 메시의 로컬 AABB를 월드 공간 AABB로 변환하여 계산합니다.
 

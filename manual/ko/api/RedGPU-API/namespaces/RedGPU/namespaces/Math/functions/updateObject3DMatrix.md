@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **updateObject3DMatrix**(`targetMesh`, `view`): `void`
 
-Defined in: [src/math/updateObject3DMatrix.ts:29](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/math/updateObject3DMatrix.ts#L29)
+Defined in: [src/math/updateObject3DMatrix.ts:29](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/math/updateObject3DMatrix.ts#L29)
 
 Object3D(Mesh, Group3D)의 로컬 행렬과 모델 행렬을 업데이트합니다.
 

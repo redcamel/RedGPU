@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **formatBytes**(`bytes`, `decimals?`): `string`
 
-Defined in: [src/utils/formatBytes.ts:17](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/utils/formatBytes.ts#L17)
+Defined in: [src/utils/formatBytes.ts:17](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/utils/formatBytes.ts#L17)
 
 바이트 단위를 읽기 쉬운 문자열(KB, MB, GB 등)로 변환합니다.
 

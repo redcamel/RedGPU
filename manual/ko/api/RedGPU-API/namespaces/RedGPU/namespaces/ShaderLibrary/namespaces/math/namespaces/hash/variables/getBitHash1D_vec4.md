@@ -1,4 +1,4 @@
-[**RedGPU API v4.1.0-Alpha**](../../../../../../../../../../README.md)
+[**RedGPU API v4.3.0-Alpha**](../../../../../../../../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > `const` **getBitHash1D\_vec4**: `string` = `getBitHash1D_vec4_wgsl`
 
-Defined in: [src/systemCodeManager/ShaderLibrary.ts:293](https://github.com/redcamel/RedGPU/blob/302ea63caf5f5ecf51af7f70ca3a0940bde79a48/src/systemCodeManager/ShaderLibrary.ts#L293)
+Defined in: [src/systemCodeManager/ShaderLibrary.ts:293](https://github.com/redcamel/RedGPU/blob/183d0117087b28c3f28ce1934611cd3a1a56551b/src/systemCodeManager/ShaderLibrary.ts#L293)
 
 4D 벡터의 비트 구조를 보존하여 1D 난수(0.0 ~ 1.0)를 생성합니다. (초정밀)
 
