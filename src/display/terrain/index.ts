@@ -1,5 +1,7 @@
 import Terrain from "./Terrain";
+import TerrainMaterial from "./TerrainMaterial";
 
 export {
-    Terrain
+    Terrain,
+    TerrainMaterial
 }

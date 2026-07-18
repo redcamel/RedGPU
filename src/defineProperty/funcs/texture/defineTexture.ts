@@ -4,6 +4,7 @@ import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import ANoiseTexture from "../../../resources/texture/noiseTexture/core/ANoiseTexture";
 import HDRTexture from "../../../resources/texture/hdr/HDRTexture";
 import updateTargetUniform from "../../core/updateTargetUniform";
+import {keepLog} from "../../../utils";
 
 /**
  * `defineTexture` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
@@ -21,6 +22,7 @@ function createSetter(propertyKey: string, symbol: symbol) {
     return function (texture: BitmapTexture | ANoiseTexture | HDRTexture) {
         const prevTexture: BitmapTexture | ANoiseTexture | HDRTexture = this[symbol];
         this[symbol] = texture;
+        keepLog('test defineTexture')
         this.updateTexture(prevTexture, texture);
 
         if (useKey in this) {
