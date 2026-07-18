@@ -73,29 +73,29 @@ fn main(inputData: InputData) -> VertexOutput {
 
     // 2. heightTexture 샘플링으로 Y축 높이 결정 + 노말 계산 (Finite Difference)
     #redgpu_if heightTexture
-    let sampledHeight = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv, 0.0).r;
+        let sampledHeight = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv, 0.0).r;
 
-    // 주변 4방향 픽셀 높이 샘플링
-    let texSize  = vec2<f32>(textureDimensions(heightTexture, 0));
-    let texelSize = 1.0 / texSize;
-    let heightRange = vertexUniforms.maxHeight - vertexUniforms.minHeight;
+        // 주변 4방향 픽셀 높이 샘플링
+        let texSize  = vec2<f32>(textureDimensions(heightTexture, 0));
+        let texelSize = 1.0 / texSize;
+        let heightRange = vertexUniforms.maxHeight - vertexUniforms.minHeight;
 
-    let hL = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>(-texelSize.x, 0.0), 0.0).r;
-    let hR = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>( texelSize.x, 0.0), 0.0).r;
-    let hD = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>(0.0, -texelSize.y), 0.0).r;
-    let hU = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>(0.0,  texelSize.y), 0.0).r;
+        let hL = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>(-texelSize.x, 0.0), 0.0).r;
+        let hR = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>( texelSize.x, 0.0), 0.0).r;
+        let hD = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>(0.0, -texelSize.y), 0.0).r;
+        let hU = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>(0.0,  texelSize.y), 0.0).r;
 
-    // Finite Difference: X/Z 방향 접선 벡터 → 크로스 프로덕트로 노말 도출
-    let stepX = vertexUniforms.worldSize.x * texelSize.x * 2.0;
-    let stepZ = vertexUniforms.worldSize.y * texelSize.y * 2.0;
-    let tangentX = vec3<f32>(stepX, (hR - hL) * heightRange, 0.0);
-    let tangentZ = vec3<f32>(0.0,   (hU - hD) * heightRange, stepZ);
-    let computedNormal = normalize(cross(tangentX, tangentZ));
-    let worldTangentX = normalize((gu_normalModelMatrix * vec4<f32>(normalize(tangentX), 0.0)).xyz);
+        // Finite Difference: X/Z 방향 접선 벡터 → 크로스 프로덕트로 노말 도출
+        let stepX = vertexUniforms.worldSize.x * texelSize.x * 2.0;
+        let stepZ = vertexUniforms.worldSize.y * texelSize.y * 2.0;
+        let tangentX = vec3<f32>(stepX, (hR - hL) * heightRange, 0.0);
+        let tangentZ = vec3<f32>(0.0,   (hU - hD) * heightRange, -stepZ);
+        let computedNormal = normalize(cross(tangentX, tangentZ));
+        let worldTangentX = normalize((gu_normalModelMatrix * vec4<f32>(normalize(tangentX), 0.0)).xyz);
     #redgpu_else
-    let sampledHeight = 0.0;
-    let computedNormal = vec3<f32>(0.0, 1.0, 0.0);
-    let worldTangentX = normalize((gu_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz);
+        let sampledHeight = 0.0;
+        let computedNormal = vec3<f32>(0.0, 1.0, 0.0);
+        let worldTangentX = normalize((gu_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz);
     #redgpu_endIf
 
     let worldY = sampledHeight * (vertexUniforms.maxHeight - vertexUniforms.minHeight) + vertexUniforms.minHeight;

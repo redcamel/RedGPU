@@ -26,22 +26,17 @@ class TerrainMaterial extends PBRMaterial {
 
         // 지형은 비금속 (흙, 모래, 암석 등)
         // Terrain is non-metallic (dirt, sand, rock, etc.)
-        this.metallicFactor = 0.0;
+        this.metallicFactor = 0.01;
 
         // 지형 표면은 거칠다 (Unreal Landscape 기본 Roughness ≈ 0.85)
         // Terrain surface is rough (Unreal Landscape default Roughness ≈ 0.85)
-        this.roughnessFactor = 0.85;
+        this.roughnessFactor = 1.0;
 
         // 흙빛 베이스 컬러 (텍스처 미설정 시 기본 지면 색상)
         // Earthy base color (default ground color when no texture is assigned)
         this.baseColorFactor = [0.5, 0.45, 0.38, 1.0];
     }
 }
-
-Object.defineProperty(TerrainMaterial.prototype, 'isBuiltInMaterial', {
-    value: true,
-    writable: false
-});
 
 Object.freeze(TerrainMaterial);
 export default TerrainMaterial;
