@@ -18,7 +18,6 @@ struct TerrainUniforms {
 @group(1) @binding(2) var heightTexture: texture_2d<f32>;
 
 // TerrainGeometry 버텍스 레이아웃에 맞는 InputData
-// slot: 0=position, 1=normal, 2=uv, 3=tangent
 struct InputData {
     @builtin(instance_index) globalVertexSlotIndex: u32,
     @location(0) position: vec3<f32>,
@@ -58,7 +57,6 @@ fn main(inputData: InputData) -> VertexOutput {
     let su_projection = systemUniforms.projection;
 
     let input_vertexNormal = inputData.vertexNormal;
-
     let su_projectionViewMatrix = su_projection.projectionViewMatrix;
 
     let gu_matrixList = globalVertexData.matrixList;
@@ -67,13 +65,22 @@ fn main(inputData: InputData) -> VertexOutput {
     let gu_prevModelMatrix = gu_matrixList.prevModelMatrix;
     let gu_normalModelMatrix = gu_matrixList.normalModelMatrix;
 
-    // 1. XZ 좌표를 worldOffset + worldSize 로 월드 공간 맵핑
+    // 1. 모델 행렬의 축별 스케일 미리 추출 (상단에서 1회만 계산)
+    let modelScaleX = length(gu_modelMatrix[0].xyz);
+    let modelScaleY = length(gu_modelMatrix[1].xyz);
+    let modelScaleZ = length(gu_modelMatrix[2].xyz);
+
+    // XZ 좌표를 worldOffset + worldSize 로 월드 공간 맵핑
     let localXZ = vec2<f32>(inputData.position.x, inputData.position.z);
     let worldXZ = vertexUniforms.worldOffset + localXZ * vertexUniforms.worldSize;
 
     // 2. heightTexture 샘플링으로 Y축 높이 결정 + 노말 계산 (Finite Difference)
+    var computedNormal = vec3<f32>(0.0, 1.0, 0.0);
+    var worldTangentX = vec3<f32>(1.0, 0.0, 0.0);
+    var sampledHeight = 0.0;
+
     #redgpu_if heightTexture
-        let sampledHeight = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv, 0.0).r;
+        sampledHeight = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv, 0.0).r;
 
         // 주변 4방향 픽셀 높이 샘플링
         let texSize  = vec2<f32>(textureDimensions(heightTexture, 0));
@@ -82,20 +89,30 @@ fn main(inputData: InputData) -> VertexOutput {
 
         let hL = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>(-texelSize.x, 0.0), 0.0).r;
         let hR = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>( texelSize.x, 0.0), 0.0).r;
-        let hD = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>(0.0, -texelSize.y), 0.0).r;
-        let hU = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>(0.0,  texelSize.y), 0.0).r;
+        let hD = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>(0.0, -texelSize.y), 0.0).r; // 뒤 (-Z)
+        let hU = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>(0.0,  texelSize.y), 0.0).r; // 앞 (+Z)
 
-        // Finite Difference: X/Z 방향 접선 벡터 → 크로스 프로덕트로 노말 도출
+        // 가상 셰이더 공간 스텝 길이 계산
         let stepX = vertexUniforms.worldSize.x * texelSize.x * 2.0;
         let stepZ = vertexUniforms.worldSize.y * texelSize.y * 2.0;
+
+        // tangentZ 부호를 정방향(+stepZ)으로 수정
         let tangentX = vec3<f32>(stepX, (hR - hL) * heightRange, 0.0);
-        let tangentZ = vec3<f32>(0.0,   (hU - hD) * heightRange, -stepZ);
-        let computedNormal = normalize(cross(tangentX, tangentZ));
-        let worldTangentX = normalize((gu_normalModelMatrix * vec4<f32>(normalize(tangentX), 0.0)).xyz);
+        let tangentZ = vec3<f32>(0.0,   (hU - hD) * heightRange, stepZ);
+
+        // 오른손 법칙 방향 일치를 위해 Z x X 순서로 외적하여 +Y 노말 도출
+        let rawNormal = normalize(cross(tangentZ, tangentX));
+
+        // 모델 행렬의 비균등 스케일로 인한 노말 짜부러짐 보정에 상단 변수 재활용
+        computedNormal = normalize(vec3<f32>(
+            rawNormal.x / max(modelScaleX, 1e-5),
+            rawNormal.y / max(modelScaleY, 1e-5),
+            rawNormal.z / max(modelScaleZ, 1e-5)
+        ));
+
+        worldTangentX = normalize((gu_normalModelMatrix * vec4<f32>(normalize(tangentX), 0.0)).xyz);
     #redgpu_else
-        let sampledHeight = 0.0;
-        let computedNormal = vec3<f32>(0.0, 1.0, 0.0);
-        let worldTangentX = normalize((gu_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz);
+        worldTangentX = normalize((gu_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz);
     #redgpu_endIf
 
     let worldY = sampledHeight * (vertexUniforms.maxHeight - vertexUniforms.minHeight) + vertexUniforms.minHeight;
@@ -104,7 +121,7 @@ fn main(inputData: InputData) -> VertexOutput {
     let worldPos = vec4<f32>(worldXZ.x, worldY, worldXZ.y, 1.0);
     let position = gu_modelMatrix * worldPos;
 
-    // 높이맵으로 계산한 노말을 모델 행렬로 변환
+    // 계산 및 보정 완료된 로컬 노말을 노말 월드 행렬로 변환
     let normalPosition = gu_normalModelMatrix * vec4<f32>(computedNormal, 0.0);
 
     // 4. Output 할당
@@ -132,16 +149,14 @@ fn main(inputData: InputData) -> VertexOutput {
         output.prevClipPos = su_projection.prevNoneJitterProjectionViewMatrix * gu_prevModelMatrix * worldPos;
     }
 
-    // Scale
+    // Scale (상단에서 구한 modelScale 값들을 온전히 활용하여 중복 계산 최적화)
     let nodeScaleX = length(gu_localMatrix[0].xyz);
     let nodeScaleY = length(gu_localMatrix[1].xyz);
     let nodeScaleZ = length(gu_localMatrix[2].xyz);
-    let volumeScaleX = length(gu_modelMatrix[0].xyz);
-    let volumeScaleY = length(gu_modelMatrix[1].xyz);
-    let volumeScaleZ = length(gu_modelMatrix[2].xyz);
+
     output.localNodeScale_volumeScale = vec2<f32>(
         pow(nodeScaleX * nodeScaleY * nodeScaleZ, 1.0 / 3.0),
-        pow(volumeScaleX * volumeScaleY * volumeScaleZ, 1.0 / 3.0)
+        pow(modelScaleX * modelScaleY * modelScaleZ, 1.0 / 3.0)
     );
 
     return output;
