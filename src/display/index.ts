@@ -28,6 +28,7 @@ export * from "./sprites";
 export * from "./line";
 export * from "./textFields";
 export * from "./instancingMesh";
+export * from "./terrain";
 export * as DrawDebugger from "./drawDebugger";
 
 export * from "./view/core/GBUFFER_TYPE";
