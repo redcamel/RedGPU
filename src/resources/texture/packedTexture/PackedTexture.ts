@@ -127,7 +127,9 @@ class PackedTexture extends RedGPUObject {
             if (entry) {
                 entry.useNum--;
                 if (entry.useNum === 0) {
-                    entry.gpuTexture?.destroy();
+                    if (entry.gpuTexture) {
+                        this.redGPUContext.commandEncoderManager.addDeferredDestroy(entry.gpuTexture)
+                    }
                     manager.cacheMap.delete(currentMappingKey);
                 }
             }
