@@ -1,7 +1,10 @@
 #redgpu_include SYSTEM_UNIFORM;
+#redgpu_include shadow.getShadowCoord;
+#redgpu_include entryPoint.mesh.entryPointShadowVertex;
+#redgpu_include entryPoint.mesh.entryPointPickingVertex;
+#redgpu_include systemStruct.globalVertexStruct;
 
-
-// 지형 변위를 조절할 버텍스 레벨 유니폼 구조체
+// 지형(Terrain) 전용 버텍스 유니폼 (group 1, binding 0)
 struct TerrainUniforms {
     minHeight: f32,
     maxHeight: f32,
@@ -9,8 +12,13 @@ struct TerrainUniforms {
     worldSize: vec2<f32>,
 }
 @group(1) @binding(0) var<uniform> vertexUniforms: TerrainUniforms;
+
+// heightTexture 샘플러 및 텍스처 (group 1, binding 1, 2)
 @group(1) @binding(1) var heightTextureSampler: sampler;
 @group(1) @binding(2) var heightTexture: texture_2d<f32>;
+
+// TerrainGeometry 버텍스 레이아웃에 맞는 InputData
+// slot: 0=position, 1=normal, 2=uv, 3=tangent
 struct InputData {
     @builtin(instance_index) globalVertexSlotIndex: u32,
     @location(0) position: vec3<f32>,
@@ -19,64 +27,122 @@ struct InputData {
     @location(3) vertexTangent: vec4<f32>,
 };
 
+// PBR fragment shader 와 호환되는 VertexOutput
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
+    @location(3) uv1: vec2<f32>,
+    @location(4) vertexColor_0: vec4<f32>,
+    @location(5) vertexTangent: vec4<f32>,
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
-    @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
 
+    @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
+    @location(10) localNodeScale_volumeScale: vec2<f32>,
     @location(11) combinedOpacity: f32,
+
     @location(12) motionVector: vec3<f32>,
     @location(13) shadowCoord: vec3<f32>,
+    @location(14) @interpolate(flat) receiveShadow: f32,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
 @vertex
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
-    let u_projectionViewMatrix = systemUniforms.projection.projectionViewMatrix;
-    let u_noneJitterProjectionViewMatrix = systemUniforms.projection.noneJitterProjectionViewMatrix;
-    let u_prevNoneJitterProjectionViewMatrix = systemUniforms.projection.prevNoneJitterProjectionViewMatrix;
 
     let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
-    let u_matrixList = globalVertexData.matrixList;
-    let u_modelMatrix = u_matrixList.modelMatrix;
-    let u_prevModelMatrix = u_matrixList.prevModelMatrix;
+    let su_projection = systemUniforms.projection;
 
-    // 1. 2D 평면 오프셋 계산 (정밀 XZ 맵핑)
-    // 0.0 ~ 1.0의 로컬 XZ 좌표를 worldOffset과 worldSize에 따라 맵핑
+    let input_vertexNormal = inputData.vertexNormal;
+
+    let su_projectionViewMatrix = su_projection.projectionViewMatrix;
+
+    let gu_matrixList = globalVertexData.matrixList;
+    let gu_localMatrix = gu_matrixList.localMatrix;
+    let gu_modelMatrix = gu_matrixList.modelMatrix;
+    let gu_prevModelMatrix = gu_matrixList.prevModelMatrix;
+    let gu_normalModelMatrix = gu_matrixList.normalModelMatrix;
+
+    // 1. XZ 좌표를 worldOffset + worldSize 로 월드 공간 맵핑
     let localXZ = vec2<f32>(inputData.position.x, inputData.position.z);
     let worldXZ = vertexUniforms.worldOffset + localXZ * vertexUniforms.worldSize;
 
-    // 2. 높이맵 픽셀 샘플링 (Mipmap 0레벨 강제)
-    var sampledHeight = 0.0;
+    // 2. heightTexture 샘플링으로 Y축 높이 결정 + 노말 계산 (Finite Difference)
     #redgpu_if heightTexture
-    sampledHeight = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv, 0.0).r;
+    let sampledHeight = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv, 0.0).r;
+
+    // 주변 4방향 픽셀 높이 샘플링
+    let texSize  = vec2<f32>(textureDimensions(heightTexture, 0));
+    let texelSize = 1.0 / texSize;
+    let heightRange = vertexUniforms.maxHeight - vertexUniforms.minHeight;
+
+    let hL = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>(-texelSize.x, 0.0), 0.0).r;
+    let hR = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>( texelSize.x, 0.0), 0.0).r;
+    let hD = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>(0.0, -texelSize.y), 0.0).r;
+    let hU = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>(0.0,  texelSize.y), 0.0).r;
+
+    // Finite Difference: X/Z 방향 접선 벡터 → 크로스 프로덕트로 노말 도출
+    let stepX = vertexUniforms.worldSize.x * texelSize.x * 2.0;
+    let stepZ = vertexUniforms.worldSize.y * texelSize.y * 2.0;
+    let tangentX = vec3<f32>(stepX, (hR - hL) * heightRange, 0.0);
+    let tangentZ = vec3<f32>(0.0,   (hU - hD) * heightRange, stepZ);
+    let computedNormal = normalize(cross(tangentX, tangentZ));
+    let worldTangentX = normalize((gu_normalModelMatrix * vec4<f32>(normalize(tangentX), 0.0)).xyz);
+    #redgpu_else
+    let sampledHeight = 0.0;
+    let computedNormal = vec3<f32>(0.0, 1.0, 0.0);
+    let worldTangentX = normalize((gu_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz);
     #redgpu_endIf
 
-    // 3. Y축 입체 고도 복원
     let worldY = sampledHeight * (vertexUniforms.maxHeight - vertexUniforms.minHeight) + vertexUniforms.minHeight;
-    let worldPosVec4 = vec4<f32>(worldXZ.x, worldY, worldXZ.y, 1.0);
 
-    // 4. 월드 및 MVP 행렬 연산
-    let position = u_modelMatrix * worldPosVec4;
-    output.position = u_projectionViewMatrix * position;
+    // 3. 최종 월드 포지션 구성
+    let worldPos = vec4<f32>(worldXZ.x, worldY, worldXZ.y, 1.0);
+    let position = gu_modelMatrix * worldPos;
+
+    // 높이맵으로 계산한 노말을 모델 행렬로 변환
+    let normalPosition = gu_normalModelMatrix * vec4<f32>(computedNormal, 0.0);
+
+    // 4. Output 할당
+    output.position = su_projectionViewMatrix * position;
     output.vertexPosition = position.xyz;
+    output.vertexNormal = normalize(normalPosition.xyz);
     output.uv = inputData.uv;
-    output.vertexNormal = inputData.vertexNormal;
+    output.uv1 = inputData.uv;
+    output.vertexColor_0 = vec4<f32>(1.0, 1.0, 1.0, 1.0);
+    output.globalFragmentSlotIndex = globalVertexData.globalFragmentSlotIndex;
 
-    // Motion vector calculation
+    output.vertexTangent = vec4<f32>(worldTangentX, inputData.vertexTangent.w);
+
+    // Shadow
+    #redgpu_if receiveShadow
     {
-      output.currentClipPos = u_noneJitterProjectionViewMatrix * position;
-      output.prevClipPos = u_prevNoneJitterProjectionViewMatrix * u_prevModelMatrix * worldPosVec4;
+        output.shadowCoord = getShadowCoord(position.xyz, systemUniforms.directionalLightProjectionViewMatrix);
+        output.receiveShadow = globalVertexData.receiveShadow;
+    }
+    #redgpu_endIf
+
+    // Motion vector
+    {
+        output.currentClipPos = su_projection.noneJitterProjectionViewMatrix * position;
+        output.prevClipPos = su_projection.prevNoneJitterProjectionViewMatrix * gu_prevModelMatrix * worldPos;
     }
 
-    output.globalFragmentSlotIndex = globalVertexData.globalFragmentSlotIndex;
-    output.combinedOpacity = globalVertexData.combinedOpacity;
+    // Scale
+    let nodeScaleX = length(gu_localMatrix[0].xyz);
+    let nodeScaleY = length(gu_localMatrix[1].xyz);
+    let nodeScaleZ = length(gu_localMatrix[2].xyz);
+    let volumeScaleX = length(gu_modelMatrix[0].xyz);
+    let volumeScaleY = length(gu_modelMatrix[1].xyz);
+    let volumeScaleZ = length(gu_modelMatrix[2].xyz);
+    output.localNodeScale_volumeScale = vec2<f32>(
+        pow(nodeScaleX * nodeScaleY * nodeScaleZ, 1.0 / 3.0),
+        pow(volumeScaleX * volumeScaleY * volumeScaleZ, 1.0 / 3.0)
+    );
 
     return output;
 }
