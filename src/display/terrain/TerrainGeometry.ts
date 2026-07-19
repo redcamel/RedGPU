@@ -16,7 +16,7 @@ class TerrainGeometry extends Geometry {
      * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
      * @param resolution - [KO] 그리드 분할 정밀도 (기본값 64) [EN] Grid division resolution (default 64)
      */
-    constructor(redGPUContext: RedGPUContext, resolution: number = 128) {
+    constructor(redGPUContext: RedGPUContext, resolution: number = 64) {
         const interleaveData: number[] = [];
         const indexData: number[] = [];
 

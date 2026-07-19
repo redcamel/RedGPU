@@ -3,6 +3,10 @@ import Mesh from "../mesh/Mesh";
 import TerrainGeometry from "./TerrainGeometry";
 import TerrainMaterial from "./TerrainMaterial";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
+import Sampler from "../../resources/sampler/Sampler";
+import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
+import GPU_FILTER_MODE from "../../gpuConst/GPU_FILTER_MODE";
+import GPU_MIPMAP_FILTER_MODE from "../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import vertexModuleSource from "./vertex.wgsl";
 import defineNumber from "../../defineProperty/funcs/number/defineNumber";
 import defineVector2 from "../../defineProperty/funcs/vector/defineVector2";
@@ -43,6 +47,16 @@ class Terrain extends Mesh {
         this.maxHeight = 0.5; // 입체 높이 설정
         this.worldOffset = [0, 0];
         this.worldSize = [1, 1];
+
+        // 💡 지형 전용 고유의 Sampler 인스턴스를 실제로 생성하여 주입
+        // 이음새(Seam) 부근에서 반대편 픽셀 높이가 끌려와 찢어지는 현상을 방지하기 위해 'clamp-to-edge' 사용이 수학적으로 타당합니다.
+        this.heightTextureSampler = new Sampler(redGPUContext, {
+            magFilter: GPU_FILTER_MODE.LINEAR,
+            minFilter: GPU_FILTER_MODE.LINEAR,
+            mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
+            addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
+            addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE
+        });
 
         if (heightmapUrl) {
             this.heightTexture = new BitmapTexture(redGPUContext, heightmapUrl);

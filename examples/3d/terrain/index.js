@@ -14,6 +14,44 @@ const textureList = {
     'Github Logo': '../../assets/github.png',
     'Doc Body': '../../assets/documentBody.png'
 };
+
+// ──────────────────────────────────────────
+// 텍스처 픽셀 채널 정밀 분석 도구
+// ──────────────────────────────────────────
+function analyzeTextureChannel(url, name) {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+        const cvs = document.createElement('canvas');
+        cvs.width = img.width;
+        cvs.height = img.height;
+        const ctx = cvs.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const imgData = ctx.getImageData(0, 0, img.width, img.height).data;
+
+        let sumR = 0, sumG = 0, sumB = 0;
+        const totalPixels = img.width * img.height;
+        for (let i = 0; i < imgData.length; i += 4) {
+            sumR += imgData[i];
+            sumG += imgData[i + 1];
+            sumB += imgData[i + 2];
+        }
+
+        const avgR = (sumR / totalPixels).toFixed(1);
+        const avgG = (sumG / totalPixels).toFixed(1);
+        const avgB = (sumB / totalPixels).toFixed(1);
+
+        console.log(`📊 [에셋 분석] ${name} 텍스처 (크기: ${img.width}x${img.height}) => R(Occlusion 평균): ${avgR}, G(Roughness 평균): ${avgG}, B(Metallic 평균): ${avgB}`);
+    };
+    img.onerror = () => {
+        console.error(`[에셋 분석 실패] 텍스처 경로 확인 필요: ${url}`);
+    };
+    img.src = url;
+}
+
+analyzeTextureChannel("../../assets/terrain/terrainTest_001_metalicRoughness.jpg", "MetallicRoughness (기본)");
+analyzeTextureChannel("../../assets/terrain/terrainTest_001_ao.jpg", "Occlusion (AO)");
+
 RedGPU.init(
     canvas,
     (redGPUContext) => {
@@ -35,10 +73,10 @@ RedGPU.init(
         const terrain = new RedGPU.Display.Terrain(
             redGPUContext,
         );
+        terrain.material.baseColorTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../assets/terrain/terrainTest_001_diffuse.jpg");
         terrain.material.metallicRoughnessTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../assets/terrain/terrainTest_001_metalicRoughness.jpg");
         terrain.material.occlusionTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../assets/terrain/terrainTest_001_ao.jpg");
         terrain.heightTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, textureList['terrainTest_001']);
-        terrain.material.baseColorTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../assets/terrain/terrainTest_001_diffuse.jpg");
         scene.addChild(terrain);
 
         // 3단계 고저 변형 복원 검증을 위한 초기 스케일 셋업
