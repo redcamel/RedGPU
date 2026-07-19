@@ -64,7 +64,11 @@ class Terrain extends Mesh {
             entries: [
                 {binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {type: 'uniform'}},
                 {binding: 1, visibility: GPUShaderStage.VERTEX, sampler: {type: 'filtering'}},
-                {binding: 2, visibility: GPUShaderStage.VERTEX, texture: {}},
+                {
+                    binding: 2,
+                    visibility: GPUShaderStage.VERTEX,
+                    texture: {sampleType: 'float', viewDimension: '2d', multisampled: false}
+                },
                 {binding: 3, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
             ]
         });

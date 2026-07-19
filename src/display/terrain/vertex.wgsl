@@ -62,7 +62,6 @@ fn main(inputData: InputData) -> VertexOutput {
     let globalVertexData = globalVertexSSBO[baseSlotIndex];
     let su_projection = systemUniforms.projection;
 
-    let input_vertexNormal = inputData.vertexNormal;
     let su_projectionViewMatrix = su_projection.projectionViewMatrix;
 
     let gu_matrixList = globalVertexData.matrixList;
@@ -78,8 +77,6 @@ fn main(inputData: InputData) -> VertexOutput {
     let localInstanceIndex = inputData.globalVertexSlotIndex - baseSlotIndex;
     let instanceData = instanceBuffer[localInstanceIndex];
 
-    // 💡 Geometry가 -0.5 ~ 0.5 범위를 가지며, offset은 이제 청크의 '중심(Center)'입니다.
-    // 즉, localXZ * scale은 중앙에서 양방향으로 뻗어나가는 역할을 완벽히 수행합니다.
     let localXZ = vec2<f32>(inputData.position.x, inputData.position.z);
     let worldXZ = instanceData.offset + localXZ * instanceData.scale;
 
@@ -104,20 +101,26 @@ fn main(inputData: InputData) -> VertexOutput {
         let stepX = vertexUniforms.worldSize.x * texelSize.x * 2.0;
         let stepZ = vertexUniforms.worldSize.y * texelSize.y * 2.0;
 
-        let tangentX = vec3<f32>(stepX, (hR - hL) * heightRange, 0.0);
-        let tangentZ = vec3<f32>(0.0,   (hU - hD) * heightRange, stepZ);
+        // 💡 1. 로컬 공간(Local Space) 벡터 계산
+        let localTangentX = vec3<f32>(stepX, (hR - hL) * heightRange, 0.0);
+        let localTangentZ = vec3<f32>(0.0,   (hU - hD) * heightRange, stepZ);
 
-        let rawNormal = normalize(cross(tangentZ, tangentX));
+        let localNormal = normalize(cross(localTangentZ, localTangentX));
+        let localTangent = normalize(localTangentX);
 
-        computedNormal = normalize(vec3<f32>(
-            rawNormal.x / max(modelScaleX, 1e-5),
-            rawNormal.y / max(modelScaleY, 1e-5),
-            rawNormal.z / max(modelScaleZ, 1e-5)
-        ));
+        // 💡 2. 월드 공간(World Space) 변환 (올바른 행렬 사용)
+        let worldNormal = normalize((gu_normalModelMatrix * vec4<f32>(localNormal, 0.0)).xyz);
+        let worldTangent = normalize((gu_modelMatrix * vec4<f32>(localTangent, 0.0)).xyz);
 
-        worldTangentX = normalize((gu_normalModelMatrix * vec4<f32>(normalize(tangentX), 0.0)).xyz);
+        // 💡 3. 그람-슈미트 직교화 (Gram-Schmidt Orthogonalization)
+        let orthogonalTangent = normalize(worldTangent - dot(worldTangent, worldNormal) * worldNormal);
+
+        computedNormal = worldNormal;
+        worldTangentX = orthogonalTangent;
     #redgpu_else
-        worldTangentX = normalize((gu_normalModelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz);
+        // 💡 텍스처가 없을 때도 동일하게 월드 공간으로 변환
+        computedNormal = normalize((gu_normalModelMatrix * vec4<f32>(inputData.vertexNormal, 0.0)).xyz);
+        worldTangentX = normalize((gu_modelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz);
     #redgpu_endIf
 
     let worldY = sampledHeight * (vertexUniforms.maxHeight - vertexUniforms.minHeight) + vertexUniforms.minHeight;
@@ -125,17 +128,17 @@ fn main(inputData: InputData) -> VertexOutput {
     let worldPos = vec4<f32>(worldXZ.x, worldY, worldXZ.y, 1.0);
     let position = gu_modelMatrix * worldPos;
 
-    let normalPosition = gu_normalModelMatrix * vec4<f32>(computedNormal, 0.0);
-
     output.position = su_projectionViewMatrix * position;
     output.vertexPosition = position.xyz;
-    output.vertexNormal = normalize(normalPosition.xyz);
+
+    // 💡 위에서 이미 완벽한 월드 벡터로 계산했으므로 추가 행렬 곱셈 없이 그대로 내보냅니다.
+    output.vertexNormal = computedNormal;
+    output.vertexTangent = vec4<f32>(worldTangentX, inputData.vertexTangent.w);
+
     output.uv = worldUV;
     output.uv1 = worldUV;
     output.vertexColor_0 = vec4<f32>(1.0, 1.0, 1.0, 1.0);
     output.globalFragmentSlotIndex = globalVertexData.globalFragmentSlotIndex;
-
-    output.vertexTangent = vec4<f32>(worldTangentX, inputData.vertexTangent.w);
 
     #redgpu_if receiveShadow
     {

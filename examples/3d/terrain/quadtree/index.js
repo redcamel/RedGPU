@@ -14,7 +14,7 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 const WORLD_SIZE = 1024;   // 월드 가로세로 크기 (유닛)
 const MAX_LOD = 6;      // 최대 LOD 레벨 (2^6 = 64분할)
 const MIN_H = 0;
-const MAX_H = 300;    // 최대 높이 (유닛)
+const MAX_H = 100;    // 최대 높이 (유닛)
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -105,7 +105,8 @@ RedGPU.init(
             true,
             null,
             null,
-            'rgba16float',
+            // 'rgba16float',
+            'r16float',
         );
 
         // 3-2. PBR 머티리얼 텍스처
@@ -117,10 +118,7 @@ RedGPU.init(
             redGPUContext,
             '../../../assets/terrain/terrainTest_001_metalicRoughness.jpg',
         );
-        // terrain.material.occlusionTexture = new RedGPU.Resource.BitmapTexture(
-        //     redGPUContext,
-        //     '../../../assets/terrain/terrainTest_001_ao.jpg'
-        // );
+
 
         // 3-3. 지형 파라미터 — 거대 스케일 설정
         terrain.minHeight = MIN_H;
@@ -130,7 +128,6 @@ RedGPU.init(
         terrain.maxLOD = MAX_LOD;
 
         scene.addTerrain(terrain);
-        terrain.material.roughnessFactor = 2.5
 
         // 4. 렌더러 시작
         const renderer = new RedGPU.Renderer();
