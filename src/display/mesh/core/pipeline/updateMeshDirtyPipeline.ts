@@ -22,7 +22,8 @@ const updateMeshDirtyPipeline = (
     mesh.dirtyTransform = true
     if (material.dirtyPipeline) material._updateFragmentState()
     const vertexShader = createMeshVertexShaderModule(mesh)
-    const vertexBindGroupLayout: GPUBindGroupLayout = resourceManager.getGPUBindGroupLayout(
+    // @ts-ignore
+    const vertexBindGroupLayout: GPUBindGroupLayout = mesh.customVertexBindGroupLayout || resourceManager.getGPUBindGroupLayout(
         gpuRenderInfo.vertexStructInfo.uniforms.vertexUniforms ? ResourceManager.PRESET_VERTEX_GPUBindGroupLayout :
             mesh.animationInfo.skinInfo ? ResourceManager.PRESET_GLOBAL_VERTEX_GPUBindGroupLayout_SKIN : ResourceManager.PRESET_GLOBAL_VERTEX_GPUBindGroupLayout
     )

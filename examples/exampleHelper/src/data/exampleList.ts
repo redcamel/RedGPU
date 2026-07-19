@@ -2710,6 +2710,30 @@ Check performance limits on each device.`
                 ]
             },
         ]
+    },
+    {
+        name: 'Terrain',
+        experimental: true,
+        list: [
+            {
+                experimental: true,
+                name: 'CDLOD Heightmap Binding',
+                path: '3d/terrain',
+                description: {
+                    ko: `CDLOD 기반 지형 시스템의 1단계로, 높이맵 텍스처를 바인딩하여 지형을 생성하고 시각화합니다.`,
+                    en: `Step 1 of the CDLOD terrain system: loads a heightmap texture, binds it inside TerrainMaterial, and visualizes it.`
+                },
+            },
+            {
+                experimental: true,
+                name: 'CDLOD Quadtree Subdivision (거대 스케일)',
+                path: '3d/terrain/quadtree',
+                description: {
+                    ko: `CDLOD 4단계: 2000×2000 거대 지형에서 카메라 거리에 따라 쿼드트리가 실시간으로 분할/병합되며, Frustum Culling으로 시야 밖 노드를 제거합니다. GPU Instancing으로 단일 드로우콜 렌더링을 수행합니다.`,
+                    en: `CDLOD Step 4: On a 2000×2000 massive terrain, the quadtree dynamically splits/merges based on camera distance, removes off-screen nodes via Frustum Culling, and renders with a single draw call via GPU Instancing.`
+                },
+            },
+        ]
     }
 ]
 Object.freeze(ExampleList);

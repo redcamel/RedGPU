@@ -11,6 +11,7 @@ import processAnimationsAndSkinning from "./helperFunc/processAnimationsAndSkinn
 import updateJitter from "./helperFunc/updateJitter";
 import updateViewportAndScissor from "./helperFunc/updateViewportAndScissor";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
+import renderTerrainLayer from "./renderLayers/renderTerrainLayer";
 
 
 /**
@@ -195,8 +196,15 @@ class Renderer {
         if (pixelRectObject.width && pixelRectObject.height) {
             const {scene} = view
             const {lightManager, shadowManager} = scene
+
+
             if (lightManager.pointLightCount || lightManager.spotLightCount) {
                 view.clusterLightManager.updateClusterLights();
+            }
+            {
+                scene.terrainChildren.forEach(v => {
+                    v.checkQuadtree(renderViewStateData)
+                })
             }
 
             {
@@ -264,6 +272,7 @@ class Renderer {
             if (skybox) skybox.render(renderViewStateData)
             if (skyAtmosphere) skyAtmosphere.renderBackground(renderViewStateData)
             if (axis) axis.render(renderViewStateData)
+            renderTerrainLayer(view, viewRenderPassEncoder)
             renderBasicLayer(view, viewRenderPassEncoder)
             if (grid) grid.render(renderViewStateData)
             renderAlphaLayer(view, viewRenderPassEncoder)

@@ -254,6 +254,9 @@ class Object3DContainer extends BaseObject {
      * @private
      */
     #checkObject3DInstance(target: MeshBase) {
+        if (target.constructor.name === 'Terrain') {
+            consoleAndThrowError('not allow Terrain instance.');
+        }
         if (!(target instanceof Object3DContainer)) {
             consoleAndThrowError('allow only Object3DContainer instance.');
         }

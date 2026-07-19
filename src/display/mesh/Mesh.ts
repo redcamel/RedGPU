@@ -318,6 +318,22 @@ class Mesh extends MeshBase {
     }
 
     /**
+     * [KO] 드로우 커맨드 슬롯을 반환합니다.
+     * [EN] Returns the draw command slot.
+     */
+    get drawCommandSlot(): DrawCommandSlot | null {
+        return this.#drawCommandSlot;
+    }
+
+    /**
+     * [KO] 드로우 버퍼 매니저를 반환합니다.
+     * [EN] Returns the draw buffer manager.
+     */
+    get drawBufferManager(): DrawBufferManager | null {
+        return this.#drawBufferManager;
+    }
+
+    /**
      * [KO] LOD(Level of Detail) 매니저를 반환합니다.
      * [EN] Returns the LOD (Level of Detail) manager.
      * @returns
@@ -1664,7 +1680,8 @@ class Mesh extends MeshBase {
                 bundleListParticleLayer,
                 bundleListTransparentLayer,
                 bundleListAlphaLayer,
-                bundleListBasicList
+                bundleListBasicList,
+                bundleListTerrainList
             } = renderViewStateData.renderBundleResults
             {
                 {
@@ -1764,19 +1781,24 @@ class Mesh extends MeshBase {
                             }
                         }
                     }
-                    if (currentMaterial.use2PathRender) {
-                        bundleListRender2PathLayer[bundleListRender2PathLayer.length] = renderBundle
-                    } else if (this['isInstanceofParticle']) {
-                        bundleListParticleLayer[bundleListParticleLayer.length] = renderBundle
-                    } else if (currentMaterial.transparent) {
-                        bundleListTransparentLayer[bundleListTransparentLayer.length] = renderBundle
-                        // @ts-ignore
-                        renderBundle.mesh = this
-                    } else if (currentMaterial.alphaBlend === 2 || currentMaterial.opacity < 1 || !this.depthStencilState.depthWriteEnabled) {
-                        bundleListAlphaLayer[bundleListAlphaLayer.length] = renderBundle
+                    if (this['isTerrain']) {
+                        bundleListTerrainList[bundleListTerrainList.length] = renderBundle
                     } else {
-                        bundleListBasicList[bundleListBasicList.length] = renderBundle
+                        if (currentMaterial.use2PathRender) {
+                            bundleListRender2PathLayer[bundleListRender2PathLayer.length] = renderBundle
+                        } else if (this['isInstanceofParticle']) {
+                            bundleListParticleLayer[bundleListParticleLayer.length] = renderBundle
+                        } else if (currentMaterial.transparent) {
+                            bundleListTransparentLayer[bundleListTransparentLayer.length] = renderBundle
+                            // @ts-ignore
+                            renderBundle.mesh = this
+                        } else if (currentMaterial.alphaBlend === 2 || currentMaterial.opacity < 1 || !this.depthStencilState.depthWriteEnabled) {
+                            bundleListAlphaLayer[bundleListAlphaLayer.length] = renderBundle
+                        } else {
+                            bundleListBasicList[bundleListBasicList.length] = renderBundle
+                        }
                     }
+
                 }
             }
             {

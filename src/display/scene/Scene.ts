@@ -4,6 +4,7 @@ import ShadowManager from "../../shadow/ShadowManager";
 import {IPhysicsEngine} from "../../physics/IPhysicsEngine";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import Object3DContainer from "../mesh/core/Object3DContainer";
+import Terrain from "../terrain/Terrain";
 
 /**
  * [KO] View에서 렌더링할 장면(Scene) 공간을 정의하는 루트 컨테이너 클래스입니다.
@@ -51,6 +52,8 @@ class Scene extends Object3DContainer {
     #physicsEngine: IPhysicsEngine
     #destroyed: boolean = false
 
+    #terrainChildren: Terrain[] = []
+
     /**
      * [KO] Scene 인스턴스를 생성합니다.
      * [EN] Creates an instance of Scene.
@@ -65,6 +68,64 @@ class Scene extends Object3DContainer {
     constructor(name?: string) {
         super()
         if (name) this.name = name
+    }
+
+    get terrainChildren(): Terrain[] {
+        return this.#terrainChildren;
+    }
+
+    addTerrain(terrain: Terrain) {
+        this.#checkTerrainInstance(terrain);
+        if (this.#terrainChildren.includes(terrain)) return;
+        this.#terrainChildren.push(terrain);
+        terrain.dirtyTransform = true;
+    }
+
+    removeTerrain(terrain: Terrain) {
+        this.#checkTerrainInstance(terrain);
+        const index = this.#terrainChildren.indexOf(terrain);
+        if (index > -1) {
+            terrain.parent = null;
+            return this.#terrainChildren.splice(index, 1)[0];
+        } else {
+            consoleAndThrowError("Error: Child not found within parent.");
+        }
+    }
+
+    destroy() {
+        if (this.#destroyed) return;
+        this.#destroyed = true;
+
+        if (this.#shadowManager) {
+            this.#shadowManager.destroy();
+        }
+
+        if (this.#physicsEngine) {
+            try {
+                // @ts-ignore
+                if (typeof this.#physicsEngine.destroy === 'function') {
+                    // @ts-ignore
+                    this.#physicsEngine.destroy();
+                    // @ts-ignore
+                } else if (typeof this.#physicsEngine.free === 'function') {
+                    // @ts-ignore
+                    this.#physicsEngine.free();
+                }
+            } catch (e) {
+                // 예외 처리
+            }
+            this.#physicsEngine = null;
+        }
+
+        if (this.#lightManager) {
+            this.#lightManager.destroy();
+            this.#lightManager = null;
+        }
+        this.#backgroundColor = null;
+
+        this.#terrainChildren.forEach(v => v.destroy())
+
+        super.destroy();
     }
 
     /**
@@ -120,38 +181,10 @@ class Scene extends Object3DContainer {
         this.#useBackgroundColor = value;
     }
 
-    destroy() {
-        if (this.#destroyed) return;
-        this.#destroyed = true;
-
-        if (this.#shadowManager) {
-            this.#shadowManager.destroy();
+    #checkTerrainInstance(target: Terrain) {
+        if (!(target instanceof Terrain)) {
+            consoleAndThrowError('allow only Terrain instance.');
         }
-
-        if (this.#physicsEngine) {
-            try {
-                // @ts-ignore
-                if (typeof this.#physicsEngine.destroy === 'function') {
-                    // @ts-ignore
-                    this.#physicsEngine.destroy();
-                    // @ts-ignore
-                } else if (typeof this.#physicsEngine.free === 'function') {
-                    // @ts-ignore
-                    this.#physicsEngine.free();
-                }
-            } catch (e) {
-                // 예외 처리
-            }
-            this.#physicsEngine = null;
-        }
-
-        if (this.#lightManager) {
-            this.#lightManager.destroy();
-            this.#lightManager = null;
-        }
-        this.#backgroundColor = null;
-
-        super.destroy();
     }
 }
 

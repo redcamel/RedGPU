@@ -77,7 +77,7 @@ RedGPU.init(
         terrain.material.metallicRoughnessTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../assets/terrain/terrainTest_001_metalicRoughness.jpg");
         terrain.material.occlusionTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../assets/terrain/terrainTest_001_ao.jpg");
         terrain.heightTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, textureList['terrainTest_001']);
-        scene.addChild(terrain);
+        scene.addTerrain(terrain);
 
         // 3단계 고저 변형 복원 검증을 위한 초기 스케일 셋업
         terrain.minHeight = 0;

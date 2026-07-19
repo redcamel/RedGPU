@@ -5,9 +5,11 @@ const renderBasicLayer = (view: View3D, viewRenderPassEncoder: GPURenderPassEnco
     renderViewStateData.currentRenderPassEncoder = viewRenderPassEncoder
     const {children} = scene
     let i = 0
-    const len = children.length;
-    for (i; i < len; i++) {
-        children[i].render(renderViewStateData);
+    {
+        const len = children.length;
+        for (i; i < len; i++) {
+            children[i].render(renderViewStateData);
+        }
     }
     viewRenderPassEncoder.executeBundles(renderViewStateData.renderBundleResults.bundleListBasicList);
 }

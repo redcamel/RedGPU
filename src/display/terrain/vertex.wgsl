@@ -10,12 +10,22 @@ struct TerrainUniforms {
     maxHeight: f32,
     worldOffset: vec2<f32>,
     worldSize: vec2<f32>,
+    baseSlotIndex: f32,
+    maxLOD: f32,
 }
 @group(1) @binding(0) var<uniform> vertexUniforms: TerrainUniforms;
 
 // heightTexture 샘플러 및 텍스처 (group 1, binding 1, 2)
 @group(1) @binding(1) var heightTextureSampler: sampler;
 @group(1) @binding(2) var heightTexture: texture_2d<f32>;
+
+// 쿼드트리 노드 인스턴스 데이터 구조체 (group 1, binding 3)
+struct TerrainInstance {
+    offset: vec2<f32>,
+    scale: f32,
+    lod: f32,
+}
+@group(1) @binding(3) var<storage, read> instanceBuffer: array<TerrainInstance>;
 
 // TerrainGeometry 버텍스 레이아웃에 맞는 InputData
 struct InputData {
@@ -53,7 +63,9 @@ struct VertexOutput {
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
 
-    let globalVertexData = globalVertexSSBO[inputData.globalVertexSlotIndex];
+    // 💡 baseSlotIndex uniform에서 SSBO 접근을 위한 base slot 인덱스를 추출
+    let baseSlotIndex = u32(vertexUniforms.baseSlotIndex);
+    let globalVertexData = globalVertexSSBO[baseSlotIndex];
     let su_projection = systemUniforms.projection;
 
     let input_vertexNormal = inputData.vertexNormal;
@@ -65,14 +77,21 @@ fn main(inputData: InputData) -> VertexOutput {
     let gu_prevModelMatrix = gu_matrixList.prevModelMatrix;
     let gu_normalModelMatrix = gu_matrixList.normalModelMatrix;
 
-    // 1. 모델 행렬의 축별 스케일 미리 추출 (상단에서 1회만 계산)
+    // 1. 모델 행렬의 축별 스케일 미리 추출
     let modelScaleX = length(gu_modelMatrix[0].xyz);
     let modelScaleY = length(gu_modelMatrix[1].xyz);
     let modelScaleZ = length(gu_modelMatrix[2].xyz);
 
-    // XZ 좌표를 worldOffset + worldSize 로 월드 공간 맵핑
+    // 💡 로컬 인스턴스 인덱스 및 인스턴스 노드 정보 추출
+    let localInstanceIndex = inputData.globalVertexSlotIndex - baseSlotIndex;
+    let instanceData = instanceBuffer[localInstanceIndex];
+
+    // XZ 좌표를 인스턴스 Offset 및 Scale로 월드 공간 맵핑
     let localXZ = vec2<f32>(inputData.position.x, inputData.position.z);
-    let worldXZ = vertexUniforms.worldOffset + localXZ * vertexUniforms.worldSize;
+    let worldXZ = instanceData.offset + localXZ * instanceData.scale;
+
+    // 💡 전역 높이맵 투영을 위한 전역 UV 연산
+    let worldUV = (worldXZ - vertexUniforms.worldOffset) / vertexUniforms.worldSize;
 
     // 2. heightTexture 샘플링으로 Y축 높이 결정 + 노말 계산 (Finite Difference)
     var computedNormal = vec3<f32>(0.0, 1.0, 0.0);
@@ -80,17 +99,17 @@ fn main(inputData: InputData) -> VertexOutput {
     var sampledHeight = 0.0;
 
     #redgpu_if heightTexture
-        sampledHeight = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv, 0.0).r;
+        sampledHeight = textureSampleLevel(heightTexture, heightTextureSampler, worldUV, 0.0).r;
 
-        // 주변 4방향 픽셀 높이 샘플링
+        // 주변 4방향 픽셀 높이 샘플링 (전역 UV 기준)
         let texSize  = vec2<f32>(textureDimensions(heightTexture, 0));
         let texelSize = 1.0 / texSize;
         let heightRange = vertexUniforms.maxHeight - vertexUniforms.minHeight;
 
-        let hL = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>(-texelSize.x, 0.0), 0.0).r;
-        let hR = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>( texelSize.x, 0.0), 0.0).r;
-        let hD = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>(0.0, -texelSize.y), 0.0).r; // 뒤 (-Z)
-        let hU = textureSampleLevel(heightTexture, heightTextureSampler, inputData.uv + vec2<f32>(0.0,  texelSize.y), 0.0).r; // 앞 (+Z)
+        let hL = textureSampleLevel(heightTexture, heightTextureSampler, worldUV + vec2<f32>(-texelSize.x, 0.0), 0.0).r;
+        let hR = textureSampleLevel(heightTexture, heightTextureSampler, worldUV + vec2<f32>( texelSize.x, 0.0), 0.0).r;
+        let hD = textureSampleLevel(heightTexture, heightTextureSampler, worldUV + vec2<f32>(0.0, -texelSize.y), 0.0).r; // 뒤 (-Z)
+        let hU = textureSampleLevel(heightTexture, heightTextureSampler, worldUV + vec2<f32>(0.0,  texelSize.y), 0.0).r; // 앞 (+Z)
 
         // 가상 셰이더 공간 스텝 길이 계산
         let stepX = vertexUniforms.worldSize.x * texelSize.x * 2.0;
@@ -128,8 +147,8 @@ fn main(inputData: InputData) -> VertexOutput {
     output.position = su_projectionViewMatrix * position;
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalize(normalPosition.xyz);
-    output.uv = inputData.uv;
-    output.uv1 = inputData.uv;
+    output.uv = worldUV;
+    output.uv1 = worldUV;
     output.vertexColor_0 = vec4<f32>(1.0, 1.0, 1.0, 1.0);
     output.globalFragmentSlotIndex = globalVertexData.globalFragmentSlotIndex;
 
@@ -149,7 +168,7 @@ fn main(inputData: InputData) -> VertexOutput {
         output.prevClipPos = su_projection.prevNoneJitterProjectionViewMatrix * gu_prevModelMatrix * worldPos;
     }
 
-    // Scale (상단에서 구한 modelScale 값들을 온전히 활용하여 중복 계산 최적화)
+    // Scale
     let nodeScaleX = length(gu_localMatrix[0].xyz);
     let nodeScaleY = length(gu_localMatrix[1].xyz);
     let nodeScaleZ = length(gu_localMatrix[2].xyz);
