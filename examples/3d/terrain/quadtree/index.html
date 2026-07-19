@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>Terrain CDLOD Quadtree Subdivision - RedGPU</title>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="CDLOD 쿼드트리 가변 그리드 분할 예제 - 거대 지형 스케일에서 카메라 거리에 따라 LOD가 실시간으로 분할/병합됩니다."
+          name="description">
+    <meta content="RedGPU, WebGPU, Terrain, CDLOD, Quadtree, LOD, Subdivision, Javascript" name="keywords">
+
+    <!-- Assets Preload -->
+    <link as="style" href="../../../assets/css/example.css" rel="preload">
+    <link href="index.js" rel="modulepreload">
+
+    <!-- Assets -->
+    <link href="../../../assets/css/example.css" rel="stylesheet">
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #000 !important;
+        }
+
+        canvas {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+        }
+    </style>
+    <script src="index.js" type="module"></script>
+</head>
+<body>
+<h1 style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;">
+    Terrain CDLOD Quadtree Subdivision</h1>
+</body>
+</html>

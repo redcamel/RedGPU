@@ -9,7 +9,7 @@ import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=20260718_te
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 const textureList = {
-    'terrainTest_001': '../../assets/terrain/terrainTest_001.jpg',
+    'terrainTest_001': '../../assets/terrain/terrainTest_001_height.jpg',
     'UV Grid Map': '../../assets/UV_Grid_Sm.jpg',
     'Github Logo': '../../assets/github.png',
     'Doc Body': '../../assets/documentBody.png'
@@ -112,7 +112,7 @@ const renderTestPane = (redGPUContext, terrain) => {
 
 
             const state = {
-                textureSource: '../../assets/terrain/terrainTest_001.jpg',
+                textureSource: '../../assets/terrain/terrainTest_001_height.jpg',
                 wireframe: false,
                 minHeight: terrain.minHeight,
                 maxHeight: terrain.maxHeight,
