@@ -4,7 +4,6 @@
 #redgpu_include entryPoint.mesh.entryPointPickingVertex;
 #redgpu_include systemStruct.globalVertexStruct;
 
-// 지형(Terrain) 전용 버텍스 유니폼 (group 1, binding 0)
 struct TerrainUniforms {
     minHeight: f32,
     maxHeight: f32,
@@ -15,11 +14,9 @@ struct TerrainUniforms {
 }
 @group(1) @binding(0) var<uniform> vertexUniforms: TerrainUniforms;
 
-// heightTexture 샘플러 및 텍스처 (group 1, binding 1, 2)
 @group(1) @binding(1) var heightTextureSampler: sampler;
 @group(1) @binding(2) var heightTexture: texture_2d<f32>;
 
-// 쿼드트리 노드 인스턴스 데이터 구조체 (group 1, binding 3)
 struct TerrainInstance {
     offset: vec2<f32>,
     scale: f32,
@@ -27,7 +24,6 @@ struct TerrainInstance {
 }
 @group(1) @binding(3) var<storage, read> instanceBuffer: array<TerrainInstance>;
 
-// TerrainGeometry 버텍스 레이아웃에 맞는 InputData
 struct InputData {
     @builtin(instance_index) globalVertexSlotIndex: u32,
     @location(0) position: vec3<f32>,
@@ -36,7 +32,6 @@ struct InputData {
     @location(3) vertexTangent: vec4<f32>,
 };
 
-// PBR fragment shader 와 호환되는 VertexOutput
 struct VertexOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) vertexPosition: vec3<f32>,
@@ -63,7 +58,6 @@ struct VertexOutput {
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
 
-    // 💡 baseSlotIndex uniform에서 SSBO 접근을 위한 base slot 인덱스를 추출
     let baseSlotIndex = u32(vertexUniforms.baseSlotIndex);
     let globalVertexData = globalVertexSSBO[baseSlotIndex];
     let su_projection = systemUniforms.projection;
@@ -77,23 +71,20 @@ fn main(inputData: InputData) -> VertexOutput {
     let gu_prevModelMatrix = gu_matrixList.prevModelMatrix;
     let gu_normalModelMatrix = gu_matrixList.normalModelMatrix;
 
-    // 1. 모델 행렬의 축별 스케일 미리 추출
     let modelScaleX = length(gu_modelMatrix[0].xyz);
     let modelScaleY = length(gu_modelMatrix[1].xyz);
     let modelScaleZ = length(gu_modelMatrix[2].xyz);
 
-    // 💡 로컬 인스턴스 인덱스 및 인스턴스 노드 정보 추출
     let localInstanceIndex = inputData.globalVertexSlotIndex - baseSlotIndex;
     let instanceData = instanceBuffer[localInstanceIndex];
 
-    // XZ 좌표를 인스턴스 Offset 및 Scale로 월드 공간 맵핑
+    // 💡 Geometry가 -0.5 ~ 0.5 범위를 가지며, offset은 이제 청크의 '중심(Center)'입니다.
+    // 즉, localXZ * scale은 중앙에서 양방향으로 뻗어나가는 역할을 완벽히 수행합니다.
     let localXZ = vec2<f32>(inputData.position.x, inputData.position.z);
     let worldXZ = instanceData.offset + localXZ * instanceData.scale;
 
-    // 💡 전역 높이맵 투영을 위한 전역 UV 연산
     let worldUV = (worldXZ - vertexUniforms.worldOffset) / vertexUniforms.worldSize;
 
-    // 2. heightTexture 샘플링으로 Y축 높이 결정 + 노말 계산 (Finite Difference)
     var computedNormal = vec3<f32>(0.0, 1.0, 0.0);
     var worldTangentX = vec3<f32>(1.0, 0.0, 0.0);
     var sampledHeight = 0.0;
@@ -101,28 +92,23 @@ fn main(inputData: InputData) -> VertexOutput {
     #redgpu_if heightTexture
         sampledHeight = textureSampleLevel(heightTexture, heightTextureSampler, worldUV, 0.0).r;
 
-        // 주변 4방향 픽셀 높이 샘플링 (전역 UV 기준)
         let texSize  = vec2<f32>(textureDimensions(heightTexture, 0));
         let texelSize = 1.0 / texSize;
         let heightRange = vertexUniforms.maxHeight - vertexUniforms.minHeight;
 
         let hL = textureSampleLevel(heightTexture, heightTextureSampler, worldUV + vec2<f32>(-texelSize.x, 0.0), 0.0).r;
         let hR = textureSampleLevel(heightTexture, heightTextureSampler, worldUV + vec2<f32>( texelSize.x, 0.0), 0.0).r;
-        let hD = textureSampleLevel(heightTexture, heightTextureSampler, worldUV + vec2<f32>(0.0, -texelSize.y), 0.0).r; // 뒤 (-Z)
-        let hU = textureSampleLevel(heightTexture, heightTextureSampler, worldUV + vec2<f32>(0.0,  texelSize.y), 0.0).r; // 앞 (+Z)
+        let hD = textureSampleLevel(heightTexture, heightTextureSampler, worldUV + vec2<f32>(0.0, -texelSize.y), 0.0).r;
+        let hU = textureSampleLevel(heightTexture, heightTextureSampler, worldUV + vec2<f32>(0.0,  texelSize.y), 0.0).r;
 
-        // 가상 셰이더 공간 스텝 길이 계산
         let stepX = vertexUniforms.worldSize.x * texelSize.x * 2.0;
         let stepZ = vertexUniforms.worldSize.y * texelSize.y * 2.0;
 
-        // tangentZ 부호를 정방향(+stepZ)으로 수정
         let tangentX = vec3<f32>(stepX, (hR - hL) * heightRange, 0.0);
         let tangentZ = vec3<f32>(0.0,   (hU - hD) * heightRange, stepZ);
 
-        // 오른손 법칙 방향 일치를 위해 Z x X 순서로 외적하여 +Y 노말 도출
         let rawNormal = normalize(cross(tangentZ, tangentX));
 
-        // 모델 행렬의 비균등 스케일로 인한 노말 짜부러짐 보정에 상단 변수 재활용
         computedNormal = normalize(vec3<f32>(
             rawNormal.x / max(modelScaleX, 1e-5),
             rawNormal.y / max(modelScaleY, 1e-5),
@@ -136,14 +122,11 @@ fn main(inputData: InputData) -> VertexOutput {
 
     let worldY = sampledHeight * (vertexUniforms.maxHeight - vertexUniforms.minHeight) + vertexUniforms.minHeight;
 
-    // 3. 최종 월드 포지션 구성
     let worldPos = vec4<f32>(worldXZ.x, worldY, worldXZ.y, 1.0);
     let position = gu_modelMatrix * worldPos;
 
-    // 계산 및 보정 완료된 로컬 노말을 노말 월드 행렬로 변환
     let normalPosition = gu_normalModelMatrix * vec4<f32>(computedNormal, 0.0);
 
-    // 4. Output 할당
     output.position = su_projectionViewMatrix * position;
     output.vertexPosition = position.xyz;
     output.vertexNormal = normalize(normalPosition.xyz);
@@ -154,7 +137,6 @@ fn main(inputData: InputData) -> VertexOutput {
 
     output.vertexTangent = vec4<f32>(worldTangentX, inputData.vertexTangent.w);
 
-    // Shadow
     #redgpu_if receiveShadow
     {
         output.shadowCoord = getShadowCoord(position.xyz, systemUniforms.directionalLightProjectionViewMatrix);
@@ -162,13 +144,11 @@ fn main(inputData: InputData) -> VertexOutput {
     }
     #redgpu_endIf
 
-    // Motion vector
     {
         output.currentClipPos = su_projection.noneJitterProjectionViewMatrix * position;
         output.prevClipPos = su_projection.prevNoneJitterProjectionViewMatrix * gu_prevModelMatrix * worldPos;
     }
 
-    // Scale
     let nodeScaleX = length(gu_localMatrix[0].xyz);
     let nodeScaleY = length(gu_localMatrix[1].xyz);
     let nodeScaleZ = length(gu_localMatrix[2].xyz);

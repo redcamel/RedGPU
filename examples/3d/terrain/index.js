@@ -82,8 +82,8 @@ RedGPU.init(
         // 3단계 고저 변형 복원 검증을 위한 초기 스케일 셋업
         terrain.minHeight = 0;
         terrain.maxHeight = 0.2; // 입체 높이 설정
-        terrain.worldSize = [2.0, 2.0]; // 가로세로 스케일 확대
-        terrain.worldOffset = [-1.0, -1.0]; // 화면 정중앙 오프셋 정렬
+        terrain.worldSize = [1.0, 1.0]; // 가로세로 스케일 확대
+        terrain.worldOffset = [-0.5, -0.5]; // 화면 정중앙 오프셋 정렬
 
         // 4. 렌더러 생성 및 루프 구동
         const renderer = new RedGPU.Renderer();
