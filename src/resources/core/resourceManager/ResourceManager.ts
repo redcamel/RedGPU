@@ -89,6 +89,7 @@ class ResourceManager extends RedGPUObject {
         [ResourceType.GPUBuffer, new MemoryTrackingMap<string, GPUBuffer>()]
     ])
     #managedBitmapTextureState: ResourceStatusInfo = new ResourceStatusInfo()
+    #managedTextureArrayState: ResourceStatusInfo = new ResourceStatusInfo()
     #managedCubeTextureState: ResourceStatusInfo = new ResourceStatusInfo()
     #managedHDRTextureState: ResourceStatusInfo = new ResourceStatusInfo()
     #managedUniformBufferState: ResourceStatusInfo = new ResourceStatusInfo()
@@ -97,6 +98,7 @@ class ResourceManager extends RedGPUObject {
     #managedStorageBufferState: ResourceStatusInfo = new ResourceStatusInfo()
     #cachedBufferState: any = {}
     #emptyBitmapTextureView: GPUTextureView
+    #emptyTexture2DArrayView: GPUTextureView
     #emptyCubeTextureView: GPUTextureView
     #emptyTexture3DView: GPUTextureView
     #emptyDepthTextureView: GPUTextureView
@@ -324,6 +326,18 @@ class ResourceManager extends RedGPUObject {
     }
 
     /**
+     * [KO] 빈 2D 텍스처 배열 뷰를 반환합니다.
+     * [EN] Returns the empty 2D texture array view.
+     *
+     * @returns
+     * [KO] 빈 2D Array GPUTextureView
+     * [EN] Empty 2D Array GPUTextureView
+     */
+    get emptyTexture2DArrayView(): GPUTextureView {
+        return this.#emptyTexture2DArrayView;
+    }
+
+    /**
      * [KO] 빈 큐브 텍스처 뷰를 반환합니다.
      * [EN] Returns the empty cube texture view.
      *
@@ -369,6 +383,18 @@ class ResourceManager extends RedGPUObject {
      */
     get managedBitmapTextureState(): ResourceStatusInfo {
         return this.#managedBitmapTextureState;
+    }
+
+    /**
+     * [KO] 텍스처 어레이 관리 상태를 반환합니다.
+     * [EN] Returns the managed texture array state.
+     *
+     * @returns
+     * [KO] 텍스처 어레이 관리 상태 정보 객체
+     * [EN] Managed texture array status info object
+     */
+    get managedTextureArrayState(): ResourceStatusInfo {
+        return this.#managedTextureArrayState;
     }
 
     /**
@@ -538,6 +564,14 @@ class ResourceManager extends RedGPUObject {
         }
         this.#managedBitmapTextureState.table.clear();
 
+        for (const state of this.#managedTextureArrayState.table.values()) {
+            try {
+                state.texture.destroy();
+            } catch (e) {
+            }
+        }
+        this.#managedTextureArrayState.table.clear();
+
         for (const state of this.#managedCubeTextureState.table.values()) {
             try {
                 state.texture.destroy();
@@ -619,6 +653,7 @@ class ResourceManager extends RedGPUObject {
         this.#basicSampler = null;
         this.#basicDisplacementSampler = null;
         this.#emptyBitmapTextureView = null;
+        this.#emptyTexture2DArrayView = null;
         this.#emptyCubeTextureView = null;
         this.#emptyTexture3DView = null;
         this.#emptyDepthTextureView = null;
@@ -667,6 +702,9 @@ class ResourceManager extends RedGPUObject {
     ): GPUTextureView | null {
         const targetGPUTexture = texture instanceof GPUTexture ? texture : texture?.gpuTexture;
         if (!targetGPUTexture) {
+            if (viewDescriptor?.dimension === '2d-array') {
+                return this.#emptyTexture2DArrayView;
+            }
             return this.#emptyBitmapTextureView;
         }
         let textureViewMap = this.#bitmapTextureViewCache.get(targetGPUTexture);
@@ -894,6 +932,23 @@ class ResourceManager extends RedGPUObject {
             const transparentPixel = new Uint8Array([0, 0, 0, 0]);
             gpuDevice.queue.writeTexture(
                 {texture: emptyBitmapTexture},
+                transparentPixel,
+                {bytesPerRow: 4, rowsPerImage: 1},
+                {width: 1, height: 1, depthOrArrayLayers: 1}
+            );
+
+            const emptyTexture2DArray = gpuDevice.createTexture({
+                size: {width: 1, height: 1, depthOrArrayLayers: 1},
+                format: 'rgba8unorm',
+                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+                label: 'EMPTY_TEXTURE_2D_ARRAY',
+            });
+            this.#emptyTexture2DArrayView = emptyTexture2DArray.createView({
+                label: emptyTexture2DArray.label,
+                dimension: '2d-array'
+            });
+            gpuDevice.queue.writeTexture(
+                {texture: emptyTexture2DArray},
                 transparentPixel,
                 {bytesPerRow: 4, rowsPerImage: 1},
                 {width: 1, height: 1, depthOrArrayLayers: 1}

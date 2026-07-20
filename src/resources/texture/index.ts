@@ -11,6 +11,7 @@ import HDRTexture, {HDRSrcInfo} from "./hdr/HDRTexture";
 import PackedTexture, {ComponentMapping} from "./packedTexture/PackedTexture";
 import DownSampleCubeMapGenerator from "./core/downSampleCubeMapGenerator/DownSampleCubeMapGenerator";
 import MipmapGenerator from "./core/mipmapGenerator/MipmapGenerator";
+import TextureArray from "./TextureArray";
 
 export * from "./noiseTexture";
 export * from "./ibl";
@@ -26,5 +27,6 @@ export {
     DirectTexture,
     DirectCubeTexture,
     DownSampleCubeMapGenerator,
-    MipmapGenerator
+    MipmapGenerator,
+    TextureArray
 }

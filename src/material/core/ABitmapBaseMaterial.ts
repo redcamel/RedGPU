@@ -1,9 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Sampler from "../../resources/sampler/Sampler";
-import BitmapTexture from "../../resources/texture/BitmapTexture";
-import CubeTexture from "../../resources/texture/CubeTexture";
-import HDRTexture from "../../resources/texture/hdr/HDRTexture";
-import ANoiseTexture from "../../resources/texture/noiseTexture/core/ANoiseTexture";
 import ABaseMaterial from "./ABaseMaterial";
 
 /**
@@ -61,7 +57,7 @@ abstract class ABitmapBaseMaterial extends ABaseMaterial {
      * [KO] 새 텍스처 (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture)
      * [EN] New texture (BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture)
      */
-    updateTexture(prevTexture: BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture, texture: BitmapTexture | CubeTexture | ANoiseTexture | HDRTexture) {
+    updateTexture(prevTexture: any, texture: any) {
         if (prevTexture) prevTexture.__removeDirtyPipelineListener(this.#updateFragmentState);
         if (texture) texture.__addDirtyPipelineListener(this.#updateFragmentState);
         this.#updateFragmentState()
