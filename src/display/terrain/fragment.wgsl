@@ -18,7 +18,9 @@
 #redgpu_include math.tnb.getNormalFromNormalMap
 #redgpu_include skyAtmosphere.skyAtmosphereFn
 
+#redgpu_if splatMap
 @group(2) @binding(1) var splatMap: texture_2d<f32>;
+#redgpu_endIf
 @group(2) @binding(2) var diffuseArray: texture_2d_array<f32>;
 @group(2) @binding(3) var normalArray: texture_2d_array<f32>;
 @group(2) @binding(4) var textureSampler: sampler;
@@ -267,10 +269,15 @@ fn main(inputData:InputData) -> OutputFragment {
     }
 
     // 💡 지형 스플랫 마스크 및 가중치 정규화 연산
-    let splatMask = textureSample(splatMap, textureSampler, input_uv);
-    let weights = vec4<f32>(splatMask.r, splatMask.g, splatMask.b, splatMask.a);
-    let sumWeight = weights.r + weights.g + weights.b + weights.a;
-    let normWeights = weights / max(sumWeight, 0.0001);
+    var normWeights = vec4<f32>(1.0, 0.0, 0.0, 0.0);
+    #redgpu_if splatMap
+    {
+        let splatMask = textureSample(splatMap, textureSampler, input_uv);
+        let weights = vec4<f32>(splatMask.r, splatMask.g, splatMask.b, splatMask.a);
+        let sumWeight = weights.r + weights.g + weights.b + weights.a;
+        normWeights = weights / max(sumWeight, 0.0001);
+    }
+    #redgpu_endIf
 
     // 월드 공간 XZ 기반 타일링 UV
     let tileUV = input_vertexPosition.xz * 0.1;

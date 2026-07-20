@@ -117,7 +117,7 @@ RedGPU.init(
             terrain.material.splatMap = new RedGPU.Resource.BitmapTexture(
                 redGPUContext,
                 '../../../assets/terrain/terrainTest_001/splatMap.jpg',
-                false
+                true
             );
 
             terrain.material.diffuseArray = new RedGPU.Resource.TextureArray(

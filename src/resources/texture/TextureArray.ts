@@ -2,6 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import getAbsoluteURL from "../../utils/file/getAbsoluteURL";
 import imageBitmapToGPUTexture from "../../utils/texture/imageBitmapToGPUTexture";
 import loadAndCreateBitmapImage from "../../utils/texture/loadAndCreateBitmapImage";
+import getMipLevelCount from "../../utils/texture/getMipLevelCount";
 import ManagementResourceBase from "../core/ManagementResourceBase";
 import ResourceStateBitmapTexture from "../core/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 
@@ -19,15 +20,19 @@ class TextureArray extends ManagementResourceBase {
     #onError: (error: Error) => void;
     #width: number = 0;
     #height: number = 0;
+    #mipLevelCount: number = 1;
+    #useMipmap: boolean = true;
 
     constructor(
         redGPUContext: RedGPUContext,
         srcList: string[],
+        useMipMap: boolean = true,
         onLoad?: (textureInstance?: TextureArray) => void,
         onError?: (error: Error) => void,
         format?: GPUTextureFormat
     ) {
         super(redGPUContext, MANAGED_STATE_KEY);
+        this.#useMipmap = useMipMap;
         this.#onLoad = onLoad
         this.#onError = onError
         this.#srcList = srcList.map(src => getAbsoluteURL(window.location.href, src))
@@ -55,6 +60,14 @@ class TextureArray extends ManagementResourceBase {
 
     get gpuTexture(): GPUTexture {
         return this.#gpuTexture
+    }
+
+    get mipLevelCount(): number {
+        return this.#mipLevelCount
+    }
+
+    get useMipmap(): boolean {
+        return this.#useMipmap
     }
 
     #registerResource() {
@@ -87,14 +100,22 @@ class TextureArray extends ManagementResourceBase {
 
             return Promise.all(resizePromises);
         }).then((resizedBitmaps) => {
+            this.#mipLevelCount = this.#useMipmap ? getMipLevelCount(this.#width, this.#height) : 1;
             const textureDescriptor: GPUTextureDescriptor = {
                 size: [this.#width, this.#height, resizedBitmaps.length],
                 format: this.#format,
                 usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
                 label: `TextureArray_GPUTexture_${this.uuid}`
             };
+            if (this.#useMipmap) {
+                textureDescriptor.mipLevelCount = this.#mipLevelCount;
+            }
 
             this.#gpuTexture = imageBitmapToGPUTexture(gpuDevice, resizedBitmaps, textureDescriptor, false);
+
+            if (this.#useMipmap) {
+                this.redGPUContext.resourceManager.mipmapGenerator.generateMipmap(this.#gpuTexture, textureDescriptor);
+            }
 
             const {table} = this.targetResourceManagedState
             table.set(this.cacheKey, new ResourceStateBitmapTexture(this as any));

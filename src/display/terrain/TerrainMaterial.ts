@@ -10,6 +10,7 @@ import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
 import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
 import GPU_FILTER_MODE from "../../gpuConst/GPU_FILTER_MODE";
 import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
+import GPU_MIPMAP_FILTER_MODE from "../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 
 interface TerrainMaterial {
     metallicFactor: number;
@@ -38,10 +39,12 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
         (this as any).initGPURenderInfos();
 
-        // 💡 지형 타일링 텍스처의 반복(Repeat) 매핑을 위한 선형 필터링 샘플러 (밉맵 미사용)
+        // 💡 지형 타일링 텍스처의 반복(Repeat) 매핑을 위한 선형 필터링 샘플러 (밉맵 및 이방성 필터링 적용)
         this.textureSampler = new Sampler(redGPUContext, {
             magFilter: GPU_FILTER_MODE.LINEAR,
             minFilter: GPU_FILTER_MODE.LINEAR,
+            mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
+            maxAnisotropy: 16,
             addressModeU: GPU_ADDRESS_MODE.REPEAT,
             addressModeV: GPU_ADDRESS_MODE.REPEAT
         });
