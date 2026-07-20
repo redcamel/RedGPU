@@ -11,10 +11,10 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
  * - GPU Instancing으로 단일 드로우콜에서 전체 지형 렌더링
  */
 
-const WORLD_SIZE = 4096;   // 월드 가로세로 크기 (거대 영토로 변경)
-const MAX_LOD = 8;      // 최대 LOD 레벨 (2^8 = 256분할로 더 조밀하게 세분화)
+const WORLD_SIZE = 256;   // 월드 가로세로 크기 (256x256 기본 규격)
+const MAX_LOD = 4;      // 최대 LOD 레벨
 const MIN_H = 0;
-const MAX_H = 1200;    // 최대 높이 (1,200유닛의 거대한 고산지대)
+const MAX_H = 50;    // 최대 높이 (50유닛)
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -72,13 +72,13 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
 
-        // 1. 카메라 — 거대 스케일에 맞춰 멀리 배치하고, 시선을 대폭 낮춰 지면 근처에서 고산을 올려다보도록 앵글 구성
+        // 1. 카메라 — 256 스케일에 알맞은 거리와 이동 감도로 조정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.speedDistance = 200;
-        controller.distance = 3500;   // 웅장한 전경을 보기 위해 뒤로 물러남
-        controller.rotationX = 18;    // 18도 경사의 매우 낮은 부감으로 거대 산맥의 높이감을 시각적으로 극대화
+        controller.speedDistance = 20;
+        controller.distance = 250;
+        controller.rotationX = 25;    
         controller.rotationY = 45;
-        controller.camera.farClipping = 160000;
+        controller.camera.farClipping = 5000;
         controller.camera.nearClipping = 0.5;
 
         // 2. 씬 & 뷰
@@ -104,37 +104,9 @@ RedGPU.init(
         );
         {
             // // 3-1. 높이맵 텍스처
-            // terrain.heightTexture = new RedGPU.Resource.BitmapTexture(
-            //     redGPUContext,
-            //     '../../../assets/terrain/terrainTest_001/height.jpg',
-            //
-            //     true,
-            //     null,
-            //     null,
-            //     // 'rgba16float',
-            //     'r16float',
-            // );
-            //
-            // // 3-2. PBR 머티리얼 텍스처
-            // terrain.material.baseColorTexture = new RedGPU.Resource.BitmapTexture(
-            //     redGPUContext,
-            //     '../../../assets/terrain/terrainTest_001/baseColor.jpg'
-            // );
-            //
-            //
-            // // 3-3. PBR 디테일 노멀맵 텍스처 (타일링 설정으로 근접 디테일 극대화)
-            // terrain.material.normalTexture = new RedGPU.Resource.BitmapTexture(
-            //     redGPUContext,
-            //     '../../../assets/terrain/terrainTest_001/normal.jpg'
-            // );
-            // terrain.material.use_normalTexture_KHR_texture_transform = true;
-            // terrain.material.normalTexture_KHR_texture_transform_scale = [1024, 1024];
-        }
-        {
-            // 3-1. 높이맵 텍스처
             terrain.heightTexture = new RedGPU.Resource.BitmapTexture(
                 redGPUContext,
-                '../../../assets/terrain/terrainTest_002/height.jpeg',
+                '../../../assets/terrain/terrainTest_001/height.png',
 
                 true,
                 null,
@@ -146,11 +118,30 @@ RedGPU.init(
             // 3-2. PBR 머티리얼 텍스처
             terrain.material.baseColorTexture = new RedGPU.Resource.BitmapTexture(
                 redGPUContext,
-                '../../../assets/terrain/terrainTest_002/baseColor.jpg'
+                '../../../assets/terrain/terrainTest_001/baseColor.png'
             );
 
 
         }
+        // {
+        //     // 3-1. 높이맵 텍스처 (16비트 PNG 적용 예정)
+        //     terrain.heightTexture = new RedGPU.Resource.BitmapTexture(
+        //         redGPUContext,
+        //         '../../../assets/terrain/terrainTest_004/height.png',
+        //
+        //         true,
+        //         null,
+        //         null,
+        //         'r16float',
+        //         // 'r16float',
+        //     );
+        //
+        //     // 3-2. PBR 머티리얼 텍스처 (PNG 적용 예정)
+        //     terrain.material.baseColorTexture = new RedGPU.Resource.BitmapTexture(
+        //         redGPUContext,
+        //         '../../../assets/terrain/terrainTest_004/baseColor.png'
+        //     );
+        // }
         {
             // // // 3-1. 높이맵 텍스처
             // terrain.heightTexture = new RedGPU.Resource.BitmapTexture(
@@ -260,7 +251,7 @@ function buildGUI(redGPUContext, terrain, controller) {
 
             heightFolder.addBinding(state, 'maxHeight', {
                 label: '최대 높이',
-                min: 10, max: 2000, step: 10
+                min: 10, max: 500, step: 5
             }).on('change', (ev) => {
                 terrain.maxHeight = ev.value;
             });
@@ -269,14 +260,14 @@ function buildGUI(redGPUContext, terrain, controller) {
             const scaleFolder = terrainFolder.addFolder({title: '🌐 월드 크기', expanded: true});
             scaleFolder.addBinding(state, 'worldSizeX', {
                 label: 'Width (X)',
-                min: 100, max: 10000, step: 100
+                min: 10, max: 2048, step: 10
             }).on('change', (ev) => {
                 terrain.worldSize = [ev.value, terrain.worldSize[1]];
                 terrain.worldOffset = [-ev.value / 2, terrain.worldOffset[1]];
             });
             scaleFolder.addBinding(state, 'worldSizeZ', {
                 label: 'Depth (Z)',
-                min: 100, max: 10000, step: 100
+                min: 10, max: 2048, step: 10
             }).on('change', (ev) => {
                 terrain.worldSize = [terrain.worldSize[0], ev.value];
                 terrain.worldOffset = [terrain.worldOffset[0], -ev.value / 2];
