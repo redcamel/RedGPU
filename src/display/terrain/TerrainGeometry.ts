@@ -9,7 +9,7 @@ import Primitive from "../../primitive/core/Primitive";
  * [EN] 2D plane grid geometry class used for CDLOD terrain rendering.
  */
 class TerrainGeometry extends Geometry {
-    constructor(redGPUContext: RedGPUContext, resolution: number = 256) {
+    constructor(redGPUContext: RedGPUContext, resolution: number = 64) {
         const interleaveData: number[] = [];
         const indexData: number[] = [];
 

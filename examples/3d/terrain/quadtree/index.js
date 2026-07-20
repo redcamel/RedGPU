@@ -100,7 +100,7 @@ RedGPU.init(
         // 3-1. 높이맵 텍스처
         terrain.heightTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/terrain/terrainTest_001_height.jpg',
+            '../../../assets/terrain/terrainTest_002/height.jpeg',
 
             true,
             null,
@@ -112,12 +112,13 @@ RedGPU.init(
         // 3-2. PBR 머티리얼 텍스처
         terrain.material.baseColorTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
-            '../../../assets/terrain/terrainTest_001_diffuse.jpg'
+            '../../../assets/terrain/terrainTest_002/baseColor.jpg'
         );
-        terrain.material.metallicRoughnessTexture = new RedGPU.Resource.BitmapTexture(
-            redGPUContext,
-            '../../../assets/terrain/terrainTest_001_metalicRoughness.jpg',
-        );
+        // terrain.material.metallicRoughnessTexture = new RedGPU.Resource.BitmapTexture(
+        //     redGPUContext,
+        //     '../../../assets/terrain/terrainTest_002/terrainTest_001_metalicRoughness.jpg',
+        // );
+
 
 
         // 3-3. 지형 파라미터 — 거대 스케일 설정
