@@ -217,6 +217,7 @@ function buildGUI(redGPUContext, terrain, controller) {
 
             const state = {
                 wireframe: false,
+                useMorph: true,
                 maxLOD: MAX_LOD,
                 minHeight: MIN_H,
                 maxHeight: MAX_H,
@@ -230,6 +231,13 @@ function buildGUI(redGPUContext, terrain, controller) {
                 .on('change', (ev) => {
                     terrain.primitiveState.topology = ev.value ? 'line-list' : 'triangle-list';
                     terrain.dirtyPipeline = true;
+                });
+
+            // LOD 모핑 토글
+            terrainFolder.addBinding(state, 'useMorph', {label: 'LOD 모핑 (크랙 복구)'})
+                .on('change', (ev) => {
+                    terrain.useMorph = ev.value;
+                    console.log(`LOD Morphing & Crack Resolution: ${ev.value ? 'ON' : 'OFF'}`);
                 });
 
             // maxLOD

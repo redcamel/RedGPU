@@ -13,6 +13,8 @@ import defineVector2 from "../../defineProperty/funcs/vector/defineVector2";
 import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
 import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
 import {TerrainQuadtree} from "./TerrainQuadtree";
+import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
+import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 
 /**
  * [KO] CDLOD 기반 지형 시스템을 총괄하는 디스플레이 메시 객체 클래스입니다.
@@ -27,6 +29,8 @@ interface Terrain {
     heightTextureSampler: any;
     maxLOD: number;
     baseSlotIndex: number;
+    gridSize: number;
+    useMorph: boolean;
 }
 
 class Terrain extends Mesh {
@@ -35,6 +39,7 @@ class Terrain extends Mesh {
     public customVertexBindGroupLayout: GPUBindGroupLayout;
     #prevWorldSize: number = 0;
     #prevMaxLOD: number = 0;
+    #lodRanges: Float32Array = new Float32Array(32);
 
     constructor(redGPUContext: RedGPUContext, heightmapUrl?: string, name?: string) {
         const geometry = new TerrainGeometry(redGPUContext);
@@ -48,6 +53,8 @@ class Terrain extends Mesh {
         this.worldSize = [1, 1];
         this.maxLOD = 4;
         this.baseSlotIndex = 0;
+        this.gridSize = 64;
+        this.useMorph = true;
 
         this.ignoreFrustumCulling = true;
 
@@ -85,6 +92,15 @@ class Terrain extends Mesh {
         }
     }
 
+    get lodRanges(): Float32Array {
+        return this.#lodRanges;
+    }
+
+    set lodRanges(value: Float32Array) {
+        this.#lodRanges = value;
+        updateTargetUniform(this, 'lodRanges', value);
+    }
+
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
         const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('TERRAIN_VERTEX', vertexModuleSource);
         const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
@@ -103,6 +119,27 @@ class Terrain extends Mesh {
             this.quadtree = new TerrainQuadtree(currentWorldSize, this.maxLOD);
             this.#prevWorldSize = currentWorldSize;
             this.#prevMaxLOD = this.maxLOD;
+
+            // LOD별 모핑 범위 계산 (vec4 8개 크기)
+            const lodRanges = new Float32Array(32);
+            const lodThreshold = 1.5; // TerrainQuadtree update 시 사용하는 임계값 배율
+            const morphConstant = 0.5; // 자식 노드 크기 대비 모핑 구간 비율
+
+            for (let i = 0; i <= this.maxLOD; i++) {
+                const worldScale = currentWorldSize / Math.pow(2, i);
+
+                // 분할 임계 거리 (Morph가 완전히 끝나는 부모 매칭 거리)
+                const morphEnd = worldScale * lodThreshold;
+
+                // 모핑이 시작되는 거리
+                const morphStart = morphEnd - (worldScale * morphConstant);
+
+                lodRanges[i * 4 + 0] = morphStart;
+                lodRanges[i * 4 + 1] = morphEnd;
+                lodRanges[i * 4 + 2] = 0;
+                lodRanges[i * 4 + 3] = 0;
+            }
+            this.lodRanges = lodRanges;
         }
 
         this.baseSlotIndex = this.globalVertexSlotIndex;
@@ -225,11 +262,16 @@ defineNumber(Terrain, [
     {key: "minHeight", value: 0},
     {key: "maxHeight", value: 1},
     {key: "maxLOD", value: 4},
-    {key: "baseSlotIndex", value: 0}
+    {key: "baseSlotIndex", value: 0},
+    {key: "gridSize", value: 64}
 ]);
 defineVector2(Terrain, [
     {key: "worldOffset", value: [0, 0]},
     {key: "worldSize", value: [1, 1]}
+]);
+
+defineBoolean(Terrain, [
+    {key: "useMorph", value: true}
 ]);
 
 defineTexture(Terrain, [

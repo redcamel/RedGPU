@@ -11,6 +11,9 @@ struct TerrainUniforms {
     worldSize: vec2<f32>,
     baseSlotIndex: f32,
     maxLOD: f32,
+    gridSize: f32,
+    pad0: vec3<f32>,
+    lodRanges: array<vec4<f32>, 8>,
 }
 @group(1) @binding(0) var<uniform> vertexUniforms: TerrainUniforms;
 
@@ -54,6 +57,16 @@ struct VertexOutput {
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
+// 💡 카메라 거리에 비례한 Morph Factor 산출 함수
+fn calculateMorphFactor(worldPos: vec3<f32>, lod: f32) -> f32 {
+    let dist = distance(systemUniforms.camera.cameraPosition.xz, worldPos.xz);
+    let range = vertexUniforms.lodRanges[i32(lod)];
+    let morphStart = range.x;
+    let morphEnd = range.y;
+    let k = (dist - morphStart) / (morphEnd - morphStart);
+    return clamp(k, 0.0, 1.0);
+}
+
 @vertex
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
@@ -78,16 +91,43 @@ fn main(inputData: InputData) -> VertexOutput {
     let instanceData = instanceBuffer[localInstanceIndex];
 
     let localXZ = vec2<f32>(inputData.position.x, inputData.position.z);
+    
+    // 1. 기본 월드 XZ 좌표 계산
     let worldXZ = instanceData.offset + localXZ * instanceData.scale;
 
-    let worldUV = (worldXZ - vertexUniforms.worldOffset) / vertexUniforms.worldSize;
+    // 2. 카메라 거리 기반 Morph Factor 계산
+    var morphFactor = 0.0;
+    #redgpu_if useMorph
+        let tempWorldPos = vec3<f32>(worldXZ.x, 0.0, worldXZ.y);
+        morphFactor = calculateMorphFactor(tempWorldPos, instanceData.lod);
+    #redgpu_endIf
+
+    // 3. 부모 격자에 맞추기 위해 홀수 정점을 스냅하는 parentUV 및 parentWorldXZ 계산
+    let gridDim = vertexUniforms.gridSize; // TerrainGeometry의 resolution (기본 64.0)
+    let parentUV = floor(inputData.uv * (gridDim * 0.5)) / (gridDim * 0.5);
+    let parentLocalXZ = parentUV - vec2<f32>(0.5); // (-0.5 ~ 0.5 범위)
+    let parentWorldXZ = instanceData.offset + parentLocalXZ * instanceData.scale;
+
+    // XZ 좌표 선형 보간 (모핑 적용)
+    let finalWorldXZ = mix(worldXZ, parentWorldXZ, morphFactor);
+
+    // 4. 최종 UV 및 월드 UV 매핑 계산
+    let finalUV = mix(inputData.uv, parentUV, morphFactor);
+    let worldUV = (finalWorldXZ - vertexUniforms.worldOffset) / vertexUniforms.worldSize;
 
     var computedNormal = vec3<f32>(0.0, 1.0, 0.0);
     var worldTangentX = vec3<f32>(1.0, 0.0, 0.0);
     var sampledHeight = 0.0;
 
     #redgpu_if heightTexture
-        sampledHeight = textureSampleLevel(heightTexture, heightTextureSampler, worldUV, 0.0).r;
+        // 상세 높이 h0 및 부모 높이 h1 샘플링
+        let h0 = textureSampleLevel(heightTexture, heightTextureSampler, worldUV, 0.0).r;
+
+        let parentWorldUV = (parentWorldXZ - vertexUniforms.worldOffset) / vertexUniforms.worldSize;
+        let h1 = textureSampleLevel(heightTexture, heightTextureSampler, parentWorldUV, 0.0).r;
+
+        // 높이값 선형 보간 (모핑 적용)
+        sampledHeight = mix(h0, h1, morphFactor);
 
         let texSize  = vec2<f32>(textureDimensions(heightTexture, 0));
         let texelSize = 1.0 / texSize;
@@ -108,11 +148,11 @@ fn main(inputData: InputData) -> VertexOutput {
         let localNormal = normalize(cross(localTangentZ, localTangentX));
         let localTangent = normalize(localTangentX);
 
-        // 💡 2. 월드 공간(World Space) 변환 (올바른 행렬 사용)
+        // 💡 2. 월드 공간(World Space) 변환
         let worldNormal = normalize((gu_normalModelMatrix * vec4<f32>(localNormal, 0.0)).xyz);
         let worldTangent = normalize((gu_modelMatrix * vec4<f32>(localTangent, 0.0)).xyz);
 
-        // 💡 3. 그람-슈미트 직교화 (Gram-Schmidt Orthogonalization)
+        // 💡 3. 그람-슈미트 직교화
         let orthogonalTangent = normalize(worldTangent - dot(worldTangent, worldNormal) * worldNormal);
 
         computedNormal = worldNormal;
@@ -125,13 +165,12 @@ fn main(inputData: InputData) -> VertexOutput {
 
     let worldY = sampledHeight * (vertexUniforms.maxHeight - vertexUniforms.minHeight) + vertexUniforms.minHeight;
 
-    let worldPos = vec4<f32>(worldXZ.x, worldY, worldXZ.y, 1.0);
+    let worldPos = vec4<f32>(finalWorldXZ.x, worldY, finalWorldXZ.y, 1.0);
     let position = gu_modelMatrix * worldPos;
 
     output.position = su_projectionViewMatrix * position;
     output.vertexPosition = position.xyz;
 
-    // 💡 위에서 이미 완벽한 월드 벡터로 계산했으므로 추가 행렬 곱셈 없이 그대로 내보냅니다.
     output.vertexNormal = computedNormal;
     output.vertexTangent = vec4<f32>(worldTangentX, inputData.vertexTangent.w);
 
