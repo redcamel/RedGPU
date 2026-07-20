@@ -9,7 +9,7 @@ import RedGPUExampleHelper from "../../exampleHelper/dist/index.js?t=20260718_te
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 const textureList = {
-    'terrainTest_001': '../../assets/terrain/terrainTest_001_height.jpg',
+    'terrainTest_001': '../../assets/terrain/height.jpg',
     'UV Grid Map': '../../assets/UV_Grid_Sm.jpg',
     'Github Logo': '../../assets/github.png',
     'Doc Body': '../../assets/documentBody.png'
@@ -73,9 +73,9 @@ RedGPU.init(
         const terrain = new RedGPU.Display.Terrain(
             redGPUContext,
         );
-        terrain.material.baseColorTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../assets/terrain/terrainTest_001_diffuse.jpg");
+        terrain.material.baseColorTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../assets/terrain/baseColor.jpg");
         terrain.material.metallicRoughnessTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../assets/terrain/terrainTest_001_metalicRoughness.jpg");
-        terrain.material.occlusionTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../assets/terrain/terrainTest_001_ao.jpg");
+        terrain.material.occlusionTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, "../../assets/terrain/ao.jpg");
         terrain.heightTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, textureList['terrainTest_001']);
         scene.addTerrain(terrain);
 
@@ -112,7 +112,7 @@ const renderTestPane = (redGPUContext, terrain) => {
 
 
             const state = {
-                textureSource: '../../assets/terrain/terrainTest_001_height.jpg',
+                textureSource: '../../assets/terrain/height.jpg',
                 wireframe: false,
                 minHeight: terrain.minHeight,
                 maxHeight: terrain.maxHeight,

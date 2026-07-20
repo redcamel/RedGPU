@@ -11,10 +11,10 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
  * - GPU Instancing으로 단일 드로우콜에서 전체 지형 렌더링
  */
 
-const WORLD_SIZE = 1024;   // 월드 가로세로 크기 (유닛)
-const MAX_LOD = 6;      // 최대 LOD 레벨 (2^6 = 64분할)
+const WORLD_SIZE = 4096;   // 월드 가로세로 크기 (거대 영토로 변경)
+const MAX_LOD = 8;      // 최대 LOD 레벨 (2^8 = 256분할로 더 조밀하게 세분화)
 const MIN_H = 0;
-const MAX_H = 100;    // 최대 높이 (유닛)
+const MAX_H = 1200;    // 최대 높이 (1,200유닛의 거대한 고산지대)
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -72,19 +72,25 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
 
-        // 1. 카메라 — FPS 스타일 OrbitController, 거대 지형에 맞게 먼 거리 배치
+        // 1. 카메라 — 거대 스케일에 맞춰 멀리 배치하고, 시선을 대폭 낮춰 지면 근처에서 고산을 올려다보도록 앵글 구성
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.speedDistance = 100
-        controller.distance = 800;   // 초기 카메라 거리
-        controller.rotationX = 45;    // 부감(俯瞰) 각도
-        controller.camera.farClipping = 80000;
-        controller.camera.nearClipping = 0.1;
+        controller.speedDistance = 200;
+        controller.distance = 3500;   // 웅장한 전경을 보기 위해 뒤로 물러남
+        controller.rotationX = 18;    // 18도 경사의 매우 낮은 부감으로 거대 산맥의 높이감을 시각적으로 극대화
+        controller.rotationY = 45;
+        controller.camera.farClipping = 160000;
+        controller.camera.nearClipping = 0.5;
 
         // 2. 씬 & 뷰
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.grid = false;
         redGPUContext.addView(view);
+
+        // 2-1. 노을녘 태양광 (Directional Light) 추가 — 고도를 극도로 낮춰 매우 길고 거대한 골짜기 그림자 생성
+        const directionalLight = new RedGPU.Light.DirectionalLight([-0.8, -0.35, -0.5], '#ffe8d1');
+        directionalLight.intensity = 2.0; // 태양빛 강도 증폭
+        scene.lightManager.addDirectionalLight(directionalLight);
 
         // 💡 전체화면 크기 설정 및 창 리사이즈 대응
         redGPUContext.setSize('100%', '100%');
@@ -96,32 +102,83 @@ RedGPU.init(
             undefined,
             'CDLOD_Terrain'
         );
+        {
+            // // 3-1. 높이맵 텍스처
+            // terrain.heightTexture = new RedGPU.Resource.BitmapTexture(
+            //     redGPUContext,
+            //     '../../../assets/terrain/terrainTest_001/height.jpg',
+            //
+            //     true,
+            //     null,
+            //     null,
+            //     // 'rgba16float',
+            //     'r16float',
+            // );
+            //
+            // // 3-2. PBR 머티리얼 텍스처
+            // terrain.material.baseColorTexture = new RedGPU.Resource.BitmapTexture(
+            //     redGPUContext,
+            //     '../../../assets/terrain/terrainTest_001/baseColor.jpg'
+            // );
+            //
+            //
+            // // 3-3. PBR 디테일 노멀맵 텍스처 (타일링 설정으로 근접 디테일 극대화)
+            // terrain.material.normalTexture = new RedGPU.Resource.BitmapTexture(
+            //     redGPUContext,
+            //     '../../../assets/terrain/terrainTest_001/normal.jpg'
+            // );
+            // terrain.material.use_normalTexture_KHR_texture_transform = true;
+            // terrain.material.normalTexture_KHR_texture_transform_scale = [1024, 1024];
+        }
+        {
+            // 3-1. 높이맵 텍스처
+            terrain.heightTexture = new RedGPU.Resource.BitmapTexture(
+                redGPUContext,
+                '../../../assets/terrain/terrainTest_002/height.jpeg',
 
-        // 3-1. 높이맵 텍스처
-        terrain.heightTexture = new RedGPU.Resource.BitmapTexture(
-            redGPUContext,
-            '../../../assets/terrain/terrainTest_002/height.jpeg',
+                true,
+                null,
+                null,
+                // 'rgba16float',
+                'r16float',
+            );
 
-            true,
-            null,
-            null,
-            // 'rgba16float',
-            'r16float',
-        );
-
-        // 3-2. PBR 머티리얼 텍스처
-        terrain.material.baseColorTexture = new RedGPU.Resource.BitmapTexture(
-            redGPUContext,
-            '../../../assets/terrain/terrainTest_002/baseColor.jpg'
-        );
-        // terrain.material.metallicRoughnessTexture = new RedGPU.Resource.BitmapTexture(
-        //     redGPUContext,
-        //     '../../../assets/terrain/terrainTest_002/terrainTest_001_metalicRoughness.jpg',
-        // );
+            // 3-2. PBR 머티리얼 텍스처
+            terrain.material.baseColorTexture = new RedGPU.Resource.BitmapTexture(
+                redGPUContext,
+                '../../../assets/terrain/terrainTest_002/baseColor.jpg'
+            );
 
 
+        }
+        {
+            // // // 3-1. 높이맵 텍스처
+            // terrain.heightTexture = new RedGPU.Resource.BitmapTexture(
+            //     redGPUContext,
+            //     '../../../assets/terrain/terrainTest_003/height.jpg',
+            //     true,
+            //     null,
+            //     null,
+            //     // 'rgba16float',
+            //     'r16float',
+            // );
+            //
+            // // 3-2. PBR 머티리얼 텍스처
+            // terrain.material.baseColorTexture = new RedGPU.Resource.BitmapTexture(
+            //     redGPUContext,
+            //     '../../../assets/terrain/terrainTest_003/baseColor.jpg'
+            // );
+            //
+            //
+            // // 3-3. PBR 디테일 노멀맵 텍스처 (타일링 설정으로 근접 디테일 극대화)
+            // terrain.material.normalTexture = new RedGPU.Resource.BitmapTexture(
+            //     redGPUContext,
+            //     '../../../assets/terrain/terrainTest_003/normal.jpg'
+            // );
+        }
 
-        // 3-3. 지형 파라미터 — 거대 스케일 설정
+
+        // 3-5. 지형 파라미터 — 거대 스케일 설정
         terrain.minHeight = MIN_H;
         terrain.maxHeight = MAX_H;
         terrain.worldSize = [WORLD_SIZE, WORLD_SIZE];
@@ -209,7 +266,7 @@ function buildGUI(redGPUContext, terrain, controller) {
             });
 
             // 월드 스케일
-            const scaleFolder = terrainFolder.addFolder({title: '🌐 월드 크기', expanded: false});
+            const scaleFolder = terrainFolder.addFolder({title: '🌐 월드 크기', expanded: true});
             scaleFolder.addBinding(state, 'worldSizeX', {
                 label: 'Width (X)',
                 min: 100, max: 10000, step: 100
@@ -225,55 +282,8 @@ function buildGUI(redGPUContext, terrain, controller) {
                 terrain.worldOffset = [terrain.worldOffset[0], -ev.value / 2];
             });
 
-            // ── 카메라 설정 ──
-            const camFolder = pane.addFolder({title: '📷 카메라', expanded: true});
 
-            const camState = {
-                distance: 800,
-                rotX: 45,
-                farClip: 80000,
-            };
 
-            camFolder.addBinding(camState, 'distance', {
-                label: '거리',
-                min: 10, max: 8000, step: 10
-            }).on('change', (ev) => {
-                controller.distance = ev.value;
-            });
-
-            camFolder.addBinding(camState, 'rotX', {
-                label: '부감 각도',
-                min: 5, max: 89, step: 1
-            }).on('change', (ev) => {
-                controller.rotationX = ev.value;
-            });
-
-            camFolder.addBinding(camState, 'farClip', {
-                label: '원거리 클리핑',
-                min: 1000, max: 200000, step: 1000
-            }).on('change', (ev) => {
-                controller.farClipping = ev.value;
-            });
-
-            // ── 빠른 이동 프리셋 ──
-            const presetFolder = pane.addFolder({title: '🚀 카메라 프리셋', expanded: true});
-
-            const presets = [
-                {label: '🐦 조감뷰 (전체)', distance: 3000, rotX: 60},
-                {label: '🚁 헬리콥터 (중거리)', distance: 800, rotX: 45},
-                {label: '🏃 지면 근접 (저고도)', distance: 100, rotX: 15},
-                {label: '🔭 극저공 (최고 LOD)', distance: 20, rotX: 8},
-            ];
-
-            presets.forEach(({label, distance, rotX}) => {
-                presetFolder.addButton({title: label}).on('click', () => {
-                    controller.distance = distance;
-                    controller.rotationX = rotX;
-                    camState.distance = distance;
-                    camState.rotX = rotX;
-                    pane.refresh();
-                });
-            });
         }
     });
 }
