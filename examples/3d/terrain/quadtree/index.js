@@ -124,8 +124,8 @@ RedGPU.init(
                 redGPUContext,
                 [
                     '../../../assets/terrain/terrainTest_001/grass.jpg',
-                    '../../../assets/terrain/terrainTest_001/rock.jpg',
                     '../../../assets/terrain/terrainTest_001/sand.jpg',
+                    '../../../assets/terrain/terrainTest_001/rock.jpg',
                     '../../../assets/terrain/terrainTest_001/gravel.jpg'
                 ]
             );
@@ -133,10 +133,10 @@ RedGPU.init(
             terrain.material.normalArray = new RedGPU.Resource.TextureArray(
                 redGPUContext,
                 [
-                    '../../../assets/terrain/terrainTest_001/normal.jpg',
-                    '../../../assets/terrain/terrainTest_001/normal.jpg',
-                    '../../../assets/terrain/terrainTest_001/normal.jpg',
-                    '../../../assets/terrain/terrainTest_001/normal.jpg'
+                    '../../../assets/terrain/terrainTest_001/grass_normal.jpg',
+                    '../../../assets/terrain/terrainTest_001/sand_normal.jpg',
+                    '../../../assets/terrain/terrainTest_001/rock_normal.jpg',
+                    '../../../assets/terrain/terrainTest_001/gravel_normal.jpg'
                 ]
             );
         }

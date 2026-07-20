@@ -22,7 +22,9 @@
 @group(2) @binding(1) var splatMap: texture_2d<f32>;
 #redgpu_endIf
 @group(2) @binding(2) var diffuseArray: texture_2d_array<f32>;
+#redgpu_if normalArray
 @group(2) @binding(3) var normalArray: texture_2d_array<f32>;
+#redgpu_endIf
 @group(2) @binding(4) var textureSampler: sampler;
 
 struct InputData {
@@ -261,7 +263,11 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_endIf
     
     // Cache TBN if needed
+    #redgpu_if normalArray
     let tbnNeeded = true;
+    #redgpu_else
+    let tbnNeeded = false;
+    #redgpu_endIf
         
     var tbn: mat3x3<f32>;
     if (tbnNeeded) {
@@ -279,16 +285,42 @@ fn main(inputData:InputData) -> OutputFragment {
     }
     #redgpu_endIf
 
-    // 월드 공간 XZ 기반 타일링 UV
-    let tileUV = input_vertexPosition.xz * 0.1;
+    // 월드 UV(0~1) 기반 타일링 - worldSize와 무관하게 일정한 텍스처 밀도 유지
+    let tileUV  = input_uv * 50.0;   // 지형 전체에 50회 반복 (근접 디테일)
+    let macroUV = input_uv * 6.5;    // 지형 전체에 6.5회 반복 (원거리 패턴 분산)
+
+    // 정규화 UV 기반 노이즈 가중치 (월드 좌표 대신 0~1 UV 사용)
+    let nVal = sin(input_uv.x * 18.0) * cos(input_uv.y * 18.0) +
+               sin(input_uv.x * 67.0 + input_uv.y * 43.0) * 0.5;
+    let macroBlend = clamp(nVal * 0.5 + 0.5, 0.0, 1.0);
 
     // 💡 지형 스플랫 노멀 맵 믹스
-    let n0 = textureSample(normalArray, textureSampler, tileUV, 0i).rgb;
-    let n1 = textureSample(normalArray, textureSampler, tileUV, 1i).rgb;
-    let n2 = textureSample(normalArray, textureSampler, tileUV, 2i).rgb;
-    let n3 = textureSample(normalArray, textureSampler, tileUV, 3i).rgb;
-    let blendedNormalMap = n0 * normWeights.r + n1 * normWeights.g + n2 * normWeights.b + n3 * normWeights.a;
-    N = getNormalFromNormalMap(vec3<f32>(blendedNormalMap.r, 1.0 - blendedNormalMap.g, blendedNormalMap.b), tbn, u_normalScale );
+    #redgpu_if normalArray
+    {
+        let n0_detail = textureSample(normalArray, textureSampler, tileUV, 0i).rgb;
+        let n0_macro  = textureSample(normalArray, textureSampler, macroUV, 0i).rgb;
+        let n0 = mix(n0_detail, n0_macro, macroBlend);
+
+        let n1_detail = textureSample(normalArray, textureSampler, tileUV, 1i).rgb;
+        let n1_macro  = textureSample(normalArray, textureSampler, macroUV, 1i).rgb;
+        let n1 = mix(n1_detail, n1_macro, macroBlend);
+
+        let n2_detail = textureSample(normalArray, textureSampler, tileUV, 2i).rgb;
+        let n2_macro  = textureSample(normalArray, textureSampler, macroUV, 2i).rgb;
+        let n2 = mix(n2_detail, n2_macro, macroBlend);
+
+        let n3_detail = textureSample(normalArray, textureSampler, tileUV, 3i).rgb;
+        let n3_macro  = textureSample(normalArray, textureSampler, macroUV, 3i).rgb;
+        let n3 = mix(n3_detail, n3_macro, macroBlend);
+
+        let blendedNormalMap = n0 * normWeights.r + n1 * normWeights.g + n2 * normWeights.b + n3 * normWeights.a;
+        N = getNormalFromNormalMap(vec3<f32>(blendedNormalMap.r, 1.0 - blendedNormalMap.g, blendedNormalMap.b), tbn, u_normalScale );
+    }
+    #redgpu_else
+    {
+        N = baseNormal;
+    }
+    #redgpu_endIf
     if (backFaceYn) {
         N = -N;
     }
@@ -310,10 +342,22 @@ fn main(inputData:InputData) -> OutputFragment {
     var resultAlpha:f32 = u_opacity * baseColor.a;
     baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
     // 💡 지형 스플랫 알베도 블렌딩
-    let c0 = textureSample(diffuseArray, textureSampler, tileUV, 0i);
-    let c1 = textureSample(diffuseArray, textureSampler, tileUV, 1i);
-    let c2 = textureSample(diffuseArray, textureSampler, tileUV, 2i);
-    let c3 = textureSample(diffuseArray, textureSampler, tileUV, 3i);
+    let c0_detail = textureSample(diffuseArray, textureSampler, tileUV, 0i);
+    let c0_macro  = textureSample(diffuseArray, textureSampler, macroUV, 0i);
+    let c0 = mix(c0_detail, c0_macro, macroBlend);
+
+    let c1_detail = textureSample(diffuseArray, textureSampler, tileUV, 1i);
+    let c1_macro  = textureSample(diffuseArray, textureSampler, macroUV, 1i);
+    let c1 = mix(c1_detail, c1_macro, macroBlend);
+
+    let c2_detail = textureSample(diffuseArray, textureSampler, tileUV, 2i);
+    let c2_macro  = textureSample(diffuseArray, textureSampler, macroUV, 2i);
+    let c2 = mix(c2_detail, c2_macro, macroBlend);
+
+    let c3_detail = textureSample(diffuseArray, textureSampler, tileUV, 3i);
+    let c3_macro  = textureSample(diffuseArray, textureSampler, macroUV, 3i);
+    let c3 = mix(c3_detail, c3_macro, macroBlend);
+
     let diffuseSampleColor = c0 * normWeights.r + c1 * normWeights.g + c2 * normWeights.b + c3 * normWeights.a;
 
     baseColor *= diffuseSampleColor;
