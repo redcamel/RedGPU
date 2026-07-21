@@ -10,6 +10,7 @@ import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
 import GPU_FILTER_MODE from "../../gpuConst/GPU_FILTER_MODE";
 import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../gpuConst/GPU_MIPMAP_FILTER_MODE";
+import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 
 interface TerrainMaterial {
     metallicFactor: number;
@@ -22,6 +23,7 @@ interface TerrainMaterial {
     baseColorTexture: BitmapTexture;
     splatMap: BitmapTexture;
     diffuseArray: TextureArray;
+    heightArray: TextureArray;
     normalArray: TextureArray;
     textureSampler: Sampler;
     ormTexture: BitmapTexture;
@@ -67,6 +69,7 @@ Object.defineProperty(TerrainMaterial.prototype, 'isTerrainMaterial', {
 
 
 defineNumber(TerrainMaterial, [
+    {key: 'blendContrast', value: 0.5},
     {key: 'metallicFactor', value: 0},
     {key: 'roughnessFactor', value: 0.85},
     {key: 'normalScale', value: 1.0},
@@ -74,6 +77,9 @@ defineNumber(TerrainMaterial, [
     {key: 'macroScale', value: 1.0},
     {key: 'occlusionStrength', value: 1.0}
 ]);
+defineBoolean(TerrainMaterial, [
+    {key: 'debugSplatTexture', value: false}
+])
 
 defineColorRGBA(TerrainMaterial, [
     {key: 'baseColorFactor', value: '#7f7361'}
@@ -81,8 +87,10 @@ defineColorRGBA(TerrainMaterial, [
 
 defineTexture(TerrainMaterial, [
     {key: 'baseColorTexture'},
+
     {key: 'splatMap'},
     {key: 'diffuseArray'},
+    {key: 'heightArray'},
     {key: 'normalArray'},
     {key: 'ormTexture'}
 ]);

@@ -21,14 +21,16 @@
 struct TerrainUniforms {
     tileScale: f32,
     macroScale: f32,
+    blendContrast: f32,
+    debugSplatTexture: u32,
 }
 @group(2) @binding(0) var<uniform> uniforms: TerrainUniforms;
 
 #redgpu_if baseColorTexture
 @group(2) @binding(1) var baseColorTexture: texture_2d<f32>;
 #redgpu_endIf
-#redgpu_if splatMap
-@group(2) @binding(2) var splatMap: texture_2d<f32>;
+#redgpu_if splatTexture
+@group(2) @binding(2) var splatTexture: texture_2d<f32>;
 #redgpu_endIf
 @group(2) @binding(3) var diffuseArray: texture_2d_array<f32>;
 #redgpu_if normalArray
@@ -37,6 +39,11 @@ struct TerrainUniforms {
 @group(2) @binding(5) var textureSampler: sampler;
 #redgpu_if ormTexture
 @group(2) @binding(6) var ormTexture: texture_2d<f32>;
+#redgpu_endIf
+
+// 💡 디테일 Height 맵 배열 바인딩
+#redgpu_if heightArray
+@group(2) @binding(7) var heightArray: texture_2d_array<f32>;
 #redgpu_endIf
 
 struct InputData {
@@ -58,7 +65,21 @@ struct InputData {
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 }
 
-
+// =============================================================================
+// 💡 Height-Lerp Blending Function (높이 기반 블렌딩 가중치 계산)
+// =============================================================================
+fn getHeightBlendedWeights(
+    splatWeights: vec4<f32>,
+    layerHeights: vec4<f32>,
+    contrast: f32
+) -> vec4<f32> {
+    let combined = splatWeights + layerHeights;
+    let maxVal = max(combined.r, max(combined.g, max(combined.b, combined.a)));
+    let threshold = maxVal - contrast;
+    let blended = max(combined - vec4<f32>(threshold), vec4<f32>(0.0));
+    let sumVal = blended.r + blended.g + blended.b + blended.a;
+    return blended / max(sumVal, 0.0001);
+}
 
 @fragment
 fn main(inputData:InputData) -> OutputFragment {
@@ -74,13 +95,11 @@ fn main(inputData:InputData) -> OutputFragment {
     let input_uv1 = inputData.uv1;
     let u_camera = systemUniforms.camera;
     let u_cameraPosition = u_camera.cameraPosition;
-    
-    // Cache common system values
+
     let preExposure = systemUniforms.preExposure;
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
 
-    // Material Uniforms
     let u_opacity = pbrUniforms.opacity;
     let u_cutOff = pbrUniforms.cutOff;
     let u_useVertexColor = pbrUniforms.useVertexColor == 1u;
@@ -95,12 +114,8 @@ fn main(inputData:InputData) -> OutputFragment {
     let u_roughnessFactor = pbrUniforms.roughnessFactor;
     let u_normalScale = pbrUniforms.normalScale;
 
-
-
     let u_KHR_materials_ior = pbrUniforms.KHR_materials_ior;
 
-    
-    // Core Vectors
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
     let baseNormal:vec3<f32> = normalize(input_vertexNormal.xyz);
     var N:vec3<f32> = baseNormal;
@@ -112,40 +127,114 @@ fn main(inputData:InputData) -> OutputFragment {
         }
     }
     #redgpu_endIf
-    
-    // Cache TBN if needed
+
     #redgpu_if normalArray
     let tbnNeeded = true;
     #redgpu_else
     let tbnNeeded = false;
     #redgpu_endIf
-        
+
     var tbn: mat3x3<f32>;
     if (tbnNeeded) {
         tbn = getTBNFromVertexTangent(baseNormal, input_vertexTangent);
     }
 
-    // 💡 지형 스플랫 마스크 및 가중치 정규화 연산
-    var normWeights = vec4<f32>(1.0, 0.0, 0.0, 0.0);
-    #redgpu_if splatMap
-    {
-        let splatMask = textureSample(splatMap, textureSampler, input_uv);
-        let weights = vec4<f32>(splatMask.r, splatMask.g, splatMask.b, splatMask.a);
-        let sumWeight = weights.r + weights.g + weights.b + weights.a;
-        normWeights = weights / max(sumWeight, 0.0001);
-    }
-    #redgpu_endIf
+    // =============================================================================
+    // 💡 월드 UV(0~1) 기반 타일링 및 노이즈 연산
+    // =============================================================================
+    let tileUV  = input_uv * uniforms.tileScale;
+    let macroUV = input_uv * uniforms.macroScale;
 
-    // 월드 UV(0~1) 기반 타일링 - worldSize와 무관하게 일정한 텍스처 밀도 유지
-    let tileUV  = input_uv * uniforms.tileScale;   // 지형 전체에 반복 (근접 디테일)
-    let macroUV = input_uv * uniforms.macroScale;    // 지형 전체에 반복 (원거리 패턴 분산)
-
-    // 정규화 UV 기반 노이즈 가중치 (월드 좌표 대신 0~1 UV 사용)
     let nVal = sin(input_uv.x * 18.0) * cos(input_uv.y * 18.0) +
                sin(input_uv.x * 67.0 + input_uv.y * 43.0) * 0.5;
     let macroBlend = clamp(nVal * 0.5 + 0.5, 0.0, 1.0);
 
-    // 💡 지형 스플랫 노멀 맵 믹스 (0i: grass, 1i: sand, 2i: rock, 3i: gravel)
+    // =============================================================================
+    // 💡 지형 스플랫 알베도 샘플링
+    // =============================================================================
+    let grass_detail = textureSample(diffuseArray, textureSampler, tileUV, 0i);
+    let grass_macro  = textureSample(diffuseArray, textureSampler, macroUV, 0i);
+    let grass = mix(grass_detail, grass_macro, macroBlend);
+
+    let sand_detail = textureSample(diffuseArray, textureSampler, tileUV, 1i);
+    let sand_macro  = textureSample(diffuseArray, textureSampler, macroUV, 1i);
+    let sand = mix(sand_detail, sand_macro, macroBlend);
+
+    let rock_detail = textureSample(diffuseArray, textureSampler, tileUV, 2i);
+    let rock_macro  = textureSample(diffuseArray, textureSampler, macroUV, 2i);
+    let rock = mix(rock_detail, rock_macro, macroBlend);
+
+    let gravel_detail = textureSample(diffuseArray, textureSampler, tileUV, 3i);
+    let gravel_macro  = textureSample(diffuseArray, textureSampler, macroUV, 3i);
+    let gravel = mix(gravel_detail, gravel_macro, macroBlend);
+
+    // =============================================================================
+    // 💡 텍스처 배열(heightArray)에서 디테일 Height 맵 추출 및 명암 대비 강제 증폭
+    // =============================================================================
+    var layerHeights = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+    #redgpu_if heightArray
+    {
+        // 0i: 풀(Grass)
+        let h_grass_detail = textureSample(heightArray, textureSampler, tileUV, 0i).r;
+        let h_grass_macro  = textureSample(heightArray, textureSampler, macroUV, 0i).r;
+        let h_grass = mix(h_grass_detail, h_grass_macro, macroBlend);
+
+        // 1i: 모래(Sand)
+        let h_sand_detail = textureSample(heightArray, textureSampler, tileUV, 1i).r;
+        let h_sand_macro  = textureSample(heightArray, textureSampler, macroUV, 1i).r;
+        let h_sand = mix(h_sand_detail, h_sand_macro, macroBlend);
+
+        // 2i: 바위(Rock)
+        let h_rock_detail = textureSample(heightArray, textureSampler, tileUV, 2i).r;
+        let h_rock_macro  = textureSample(heightArray, textureSampler, macroUV, 2i).r;
+        let h_rock = mix(h_rock_detail, h_rock_macro, macroBlend);
+
+        // 3i: 자갈(Gravel)
+        let h_gravel_detail = textureSample(heightArray, textureSampler, tileUV, 3i).r;
+        let h_gravel_macro  = textureSample(heightArray, textureSampler, macroUV, 3i).r;
+        let h_gravel = mix(h_gravel_detail, h_gravel_macro, macroBlend);
+
+        // pow 지수 연산으로 칙칙한 회색 톤 높이맵의 윤곽 및 대비를 강제로 강조
+        let h_power = 3.0;
+        layerHeights = vec4<f32>(
+            pow(clamp(h_grass, 0.0, 1.0), h_power),
+            pow(clamp(h_sand, 0.0, 1.0), h_power),
+            pow(clamp(h_rock, 0.0, 1.0), h_power),
+            pow(clamp(h_gravel, 0.0, 1.0), h_power)
+        );
+    }
+    #redgpu_else
+    {
+        layerHeights = vec4<f32>(grass.a, sand.a, rock.a, gravel.a);
+    }
+    #redgpu_endIf
+
+    // =============================================================================
+    // 💡 지형 스플랫 마스크 및 Height-Lerp 기반 가중치 정규화 연산
+    // =============================================================================
+    var normWeights = vec4<f32>(1.0, 0.0, 0.0, 0.0);
+    #redgpu_if splatTexture
+    {
+        let splatMask = textureSample(splatTexture, textureSampler, input_uv);
+
+        // JPG 파일 등 Alpha 채널이 없는 경우를 고려하여 RGB 합을 기반으로 Alpha(자갈) 역산
+        let splatR = splatMask.r;
+        let splatG = splatMask.g;
+        let splatB = splatMask.b;
+        let splatA = select(splatMask.a, max(0.0, 1.0 - (splatR + splatG + splatB)), splatMask.a == 1.0);
+
+        let baseWeights = vec4<f32>(splatR, splatG, splatB, splatA);
+        normWeights = getHeightBlendedWeights(baseWeights, layerHeights, uniforms.blendContrast);
+        if(uniforms.debugSplatTexture == 1u){
+            output.color = splatMask;
+            return output;
+        }
+    }
+    #redgpu_endIf
+
+    // =============================================================================
+    // 💡 지형 스플랫 노멀 맵 믹스
+    // =============================================================================
     #redgpu_if normalArray
     {
         let grassNormal_detail = textureSample(normalArray, textureSampler, tileUV, 0i).rgb;
@@ -182,8 +271,8 @@ fn main(inputData:InputData) -> OutputFragment {
     let receiveShadowYn = inputData.receiveShadow != 0.0;
     var visibility:f32 = 1.0;
     visibility = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, systemUniforms.shadow.directionalShadowDepthTextureSize, systemUniforms.shadow.directionalShadowBias, systemUniforms.shadow.directionalShadowFilterScale, inputData.shadowCoord);
-    if(!receiveShadowYn){ 
-        visibility = 1.0; 
+    if(!receiveShadowYn){
+        visibility = 1.0;
     } else {
         visibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, visibility);
     }
@@ -193,32 +282,13 @@ fn main(inputData:InputData) -> OutputFragment {
     var resultAlpha:f32 = u_opacity * baseColor.a;
     baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
 
-    // 💡 글로벌 베이스 맵 믹싱 추가 (지형 전체를 1회 덮어 타일링 무늬를 분산시키고 거시적 톤 채색)
     var baseMapColor = vec4<f32>(1.0);
     #redgpu_if baseColorTexture
         baseMapColor = textureSample(baseColorTexture, textureSampler, input_uv);
     #redgpu_endIf
 
-    // 💡 지형 스플랫 알베도 블렌딩 (0i: grass, 1i: sand, 2i: rock, 3i: gravel)
-    let grass_detail = textureSample(diffuseArray, textureSampler, tileUV, 0i);
-    let grass_macro  = textureSample(diffuseArray, textureSampler, macroUV, 0i);
-    let grass = mix(grass_detail, grass_macro, macroBlend);
-
-    let sand_detail = textureSample(diffuseArray, textureSampler, tileUV, 1i);
-    let sand_macro  = textureSample(diffuseArray, textureSampler, macroUV, 1i);
-    let sand = mix(sand_detail, sand_macro, macroBlend);
-
-    let rock_detail = textureSample(diffuseArray, textureSampler, tileUV, 2i);
-    let rock_macro  = textureSample(diffuseArray, textureSampler, macroUV, 2i);
-    let rock = mix(rock_detail, rock_macro, macroBlend);
-
-    let gravel_detail = textureSample(diffuseArray, textureSampler, tileUV, 3i);
-    let gravel_macro  = textureSample(diffuseArray, textureSampler, macroUV, 3i);
-    let gravel = mix(gravel_detail, gravel_macro, macroBlend);
-
     let diffuseSampleColor = grass * normWeights.r + sand * normWeights.g + rock * normWeights.b + gravel * normWeights.a;
 
-    // Apply 2x Multiply blending if global base map is active to maintain overall brightness
     #redgpu_if baseColorTexture
         baseColor = baseColor * baseMapColor * diffuseSampleColor * 2.0;
         resultAlpha = resultAlpha * baseMapColor.a * diffuseSampleColor.a;
@@ -226,12 +296,9 @@ fn main(inputData:InputData) -> OutputFragment {
         baseColor *= diffuseSampleColor;
         resultAlpha *= diffuseSampleColor.a;
     #redgpu_endIf
-    
-
 
     let albedo:vec3<f32> = baseColor.rgb ;
     var ior:f32 = u_KHR_materials_ior;
-
 
     var metallicParameter: f32 = u_metallicFactor;
     var roughnessParameter: f32 = u_roughnessFactor;
@@ -243,16 +310,12 @@ fn main(inputData:InputData) -> OutputFragment {
     roughnessParameter = max(roughnessParameter, 0.04);
     if (abs(ior - 1.0) < EPSILON) { roughnessParameter = 0.0; }
 
-
-
-    // Fresnel F0
     let F0_dielectric_base = getDielectricF0(ior);
     let F0_dielectric = F0_dielectric_base;
     var F0_metal = albedo;
 
     let F0 = mix(F0_dielectric, F0_metal, metallicParameter);
 
-    // Final Orchestration
     let totalDirectLighting = getDirectPbrLighting(
         input_vertexPosition, inputData.position, visibility,
         N, V, NdotV,
@@ -270,7 +333,7 @@ fn main(inputData:InputData) -> OutputFragment {
         F0, F0_dielectric, F0_metal,
         occlusionParameter
     );
-    
+
     let finalColor = vec4<f32>(totalDirectLighting + indirectLighting, resultAlpha);
 
     #redgpu_if useCutOff
@@ -391,18 +454,9 @@ fn getDirectDiffuseBRDF(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albe
     return albedo * NdotL * lightScatter * viewScatter * energyFactor * INV_PI;
 }
 
-
-
 // =============================================================================
 // KHR Extensions (Sheen, Anisotropy, Clearcoat, Iridescence)
 // =============================================================================
-
-
-
-
-
-
-
 
 // =============================================================================
 // Main PBR Orchestration
@@ -483,7 +537,7 @@ fn getIndirectPbrLighting(
         let iblRoughness = *roughnessParameter;
         var iblDiffuseColor = vec3<f32>(0.0);
         var iblMipmapCount: f32 = 0.0;
-        
+
         if (u_usePrefilterTexture) {
             iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * preExposure * systemUniforms.iblIntensity;
         }
@@ -496,10 +550,10 @@ fn getIndirectPbrLighting(
             let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity * preExposure;
             iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
-        
+
         let envIBL_DIFFUSE = albedo * iblDiffuseColor * INV_PI * occlusionParameter;
         let dielectricPart_IBL = envIBL_DIFFUSE;
-        
+
         var metallicPart_IBL = vec3<f32>(0.0);
         if (metallicParameter > 0.0) {
             var reflectedColor = vec3<f32>(0.0);
@@ -522,19 +576,19 @@ fn getIndirectPbrLighting(
             let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, *roughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
             let energyCompensation = 1.0 + F0 * (1.0 / max(envBRDF.x + envBRDF.y, 1e-4) - 1.0);
             reflectedColor *= energyCompensation;
-            
+
             let horizonOcclusion = saturate(1.0 + 1.1 * dot(R, N));
-            reflectedColor *= horizonOcclusion * horizonOcclusion; 
-            
+            reflectedColor *= horizonOcclusion * horizonOcclusion;
+
             let fresnelPower = 5.0 - 2.0 * (*roughnessParameter);
             let fresnelTerm = pow(saturate(1.0 - NdotV_IBL), fresnelPower);
-            let FR_metal      = getIndirectFresnel(NdotV_IBL, F0_metal,      *roughnessParameter, fresnelTerm);        
+            let FR_metal      = getIndirectFresnel(NdotV_IBL, F0_metal,      *roughnessParameter, fresnelTerm);
             let F_IBL_metal      = FR_metal * envBRDF.x + envBRDF.y;
-            
+
             let specularOcclusion = saturate(pow(NdotV_IBL + occlusionParameter, exp2(-16.0 * (*roughnessParameter) - 1.0)) - 1.0 + occlusionParameter);
             metallicPart_IBL = reflectedColor * F_IBL_metal * specularOcclusion;
         }
-        
+
         let baseIndirect = mix(dielectricPart_IBL, metallicPart_IBL, metallicParameter);
         let indirectLighting = baseIndirect;
         return indirectLighting;
@@ -552,25 +606,25 @@ fn getDirectPbrLight(
     roughnessParameter:f32, metallicParameter:f32, albedo:vec3<f32>,
     F0_base:vec3<f32>, ior:f32
 ) -> vec3<f32>{
-    let dLight = lightColor; 
+    let dLight = lightColor;
     let NdotL_origin = dot(N, L);
     let NdotL = max(NdotL_origin, 0.0);
     let H = normalize(L + V);
     let NdotH = max(dot(N, H), 0.0);
     let LdotH = max(dot(L, H), 0.0);
     let VdotH = max(dot(V, H), 0.0);
-    
+
     // Dielectric specular is 0.0
     let diffuse_reflection = getDirectDiffuseBRDF(NdotL, VdotN, LdotH, roughnessParameter, albedo);
     let dielectricPart = diffuse_reflection;
-    
+
     // Metallic part still calculates specular BRDF
     let metal_f0 = albedo;
     var F = getFresnel(VdotH, metal_f0);
     if (abs(ior - 1.0) < EPSILON) { F = vec3<f32>(0.0); }
     let SPEC_BRDF = getDirectSpecularBRDF(F, roughnessParameter, NdotH, VdotN, NdotL);
     let metallicPart = SPEC_BRDF * NdotL;
-    
+
     let result = mix(dielectricPart, metallicPart, metallicParameter);
     return result * dLight;
 }

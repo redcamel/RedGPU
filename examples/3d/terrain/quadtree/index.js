@@ -131,7 +131,7 @@ RedGPU.init(
         terrain.material.tileScale = 75.0;
         terrain.material.macroScale = 10.0;
 
-        terrain.material.splatMap = new RedGPU.Resource.BitmapTexture(
+        terrain.material.splatTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/terrain/terrainTest_001/splatMap.jpg',
             true
@@ -156,6 +156,17 @@ RedGPU.init(
                 '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg'
             ]
         );
+
+        terrain.material.heightArray = new RedGPU.Resource.TextureArray(
+            redGPUContext,
+            [
+                '../../../assets/terrain/terrainTest_001/layer/grass_height.png',
+                '../../../assets/terrain/terrainTest_001/layer/sand_height.png',
+                '../../../assets/terrain/terrainTest_001/layer/rock_height.png',
+                '../../../assets/terrain/terrainTest_001/layer/gravel_height.png'
+            ]
+        );
+
 
 
         // 3-5. 지형 파라미터 — 거대 스케일 설정
@@ -218,6 +229,7 @@ function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, 
                 normalScale: 1.0,
                 roughnessFactor: 0.85,
                 occlusionStrength: 1.0,
+                blendContrast: 0.5,
                 useBaseColorTexture: true,
                 useOrmTexture: true,
             };
@@ -243,6 +255,13 @@ function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, 
             }).on('change', (ev) => {
                 terrain.maxLOD = ev.value;
             });
+            terrainFolder.addBinding(state, 'blendContrast', {
+
+                min: 0, max: 100, step: 0.01
+            }).on('change', (ev) => {
+                terrain.blendContrast = ev.value;
+            });
+            terrainFolder.addBinding(terrain.material, 'debugSplatTexture')
 
             // 높이 범위
             const heightFolder = terrainFolder.addFolder({title: '📐 높이 설정', expanded: true});
