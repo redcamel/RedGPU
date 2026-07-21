@@ -121,33 +121,33 @@ fn main(inputData:InputData) -> OutputFragment {
 
     // 월드 UV(0~1) 기반 타일링 - worldSize와 무관하게 일정한 텍스처 밀도 유지
     let tileUV  = input_uv * 50.0;   // 지형 전체에 50회 반복 (근접 디테일)
-    let macroUV = input_uv * 6.5;    // 지형 전체에 6.5회 반복 (원거리 패턴 분산)
+    let macroUV = input_uv * 26.5;    // 지형 전체에 6.5회 반복 (원거리 패턴 분산)
 
     // 정규화 UV 기반 노이즈 가중치 (월드 좌표 대신 0~1 UV 사용)
     let nVal = sin(input_uv.x * 18.0) * cos(input_uv.y * 18.0) +
                sin(input_uv.x * 67.0 + input_uv.y * 43.0) * 0.5;
     let macroBlend = clamp(nVal * 0.5 + 0.5, 0.0, 1.0);
 
-    // 💡 지형 스플랫 노멀 맵 믹스
+    // 💡 지형 스플랫 노멀 맵 믹스 (0i: grass, 1i: sand, 2i: rock, 3i: gravel)
     #redgpu_if normalArray
     {
-        let n0_detail = textureSample(normalArray, textureSampler, tileUV, 0i).rgb;
-        let n0_macro  = textureSample(normalArray, textureSampler, macroUV, 0i).rgb;
-        let n0 = mix(n0_detail, n0_macro, macroBlend);
+        let grassNormal_detail = textureSample(normalArray, textureSampler, tileUV, 0i).rgb;
+        let grassNormal_macro  = textureSample(normalArray, textureSampler, macroUV, 0i).rgb;
+        let grassNormal = mix(grassNormal_detail, grassNormal_macro, macroBlend);
 
-        let n1_detail = textureSample(normalArray, textureSampler, tileUV, 1i).rgb;
-        let n1_macro  = textureSample(normalArray, textureSampler, macroUV, 1i).rgb;
-        let n1 = mix(n1_detail, n1_macro, macroBlend);
+        let sandNormal_detail = textureSample(normalArray, textureSampler, tileUV, 1i).rgb;
+        let sandNormal_macro  = textureSample(normalArray, textureSampler, macroUV, 1i).rgb;
+        let sandNormal = mix(sandNormal_detail, sandNormal_macro, macroBlend);
 
-        let n2_detail = textureSample(normalArray, textureSampler, tileUV, 2i).rgb;
-        let n2_macro  = textureSample(normalArray, textureSampler, macroUV, 2i).rgb;
-        let n2 = mix(n2_detail, n2_macro, macroBlend);
+        let rockNormal_detail = textureSample(normalArray, textureSampler, tileUV, 2i).rgb;
+        let rockNormal_macro  = textureSample(normalArray, textureSampler, macroUV, 2i).rgb;
+        let rockNormal = mix(rockNormal_detail, rockNormal_macro, macroBlend);
 
-        let n3_detail = textureSample(normalArray, textureSampler, tileUV, 3i).rgb;
-        let n3_macro  = textureSample(normalArray, textureSampler, macroUV, 3i).rgb;
-        let n3 = mix(n3_detail, n3_macro, macroBlend);
+        let gravelNormal_detail = textureSample(normalArray, textureSampler, tileUV, 3i).rgb;
+        let gravelNormal_macro  = textureSample(normalArray, textureSampler, macroUV, 3i).rgb;
+        let gravelNormal = mix(gravelNormal_detail, gravelNormal_macro, macroBlend);
 
-        let blendedNormalMap = n0 * normWeights.r + n1 * normWeights.g + n2 * normWeights.b + n3 * normWeights.a;
+        let blendedNormalMap = grassNormal * normWeights.r + sandNormal * normWeights.g + rockNormal * normWeights.b + gravelNormal * normWeights.a;
         N = getNormalFromNormalMap(vec3<f32>(blendedNormalMap.r, 1.0 - blendedNormalMap.g, blendedNormalMap.b), tbn, u_normalScale );
     }
     #redgpu_else
@@ -175,24 +175,24 @@ fn main(inputData:InputData) -> OutputFragment {
     var baseColor = u_baseColorFactor;
     var resultAlpha:f32 = u_opacity * baseColor.a;
     baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
-    // 💡 지형 스플랫 알베도 블렌딩
-    let c0_detail = textureSample(diffuseArray, textureSampler, tileUV, 0i);
-    let c0_macro  = textureSample(diffuseArray, textureSampler, macroUV, 0i);
-    let c0 = mix(c0_detail, c0_macro, macroBlend);
+    // 💡 지형 스플랫 알베도 블렌딩 (0i: grass, 1i: sand, 2i: rock, 3i: gravel)
+    let grass_detail = textureSample(diffuseArray, textureSampler, tileUV, 0i);
+    let grass_macro  = textureSample(diffuseArray, textureSampler, macroUV, 0i);
+    let grass = mix(grass_detail, grass_macro, macroBlend);
 
-    let c1_detail = textureSample(diffuseArray, textureSampler, tileUV, 1i);
-    let c1_macro  = textureSample(diffuseArray, textureSampler, macroUV, 1i);
-    let c1 = mix(c1_detail, c1_macro, macroBlend);
+    let sand_detail = textureSample(diffuseArray, textureSampler, tileUV, 1i);
+    let sand_macro  = textureSample(diffuseArray, textureSampler, macroUV, 1i);
+    let sand = mix(sand_detail, sand_macro, macroBlend);
 
-    let c2_detail = textureSample(diffuseArray, textureSampler, tileUV, 2i);
-    let c2_macro  = textureSample(diffuseArray, textureSampler, macroUV, 2i);
-    let c2 = mix(c2_detail, c2_macro, macroBlend);
+    let rock_detail = textureSample(diffuseArray, textureSampler, tileUV, 2i);
+    let rock_macro  = textureSample(diffuseArray, textureSampler, macroUV, 2i);
+    let rock = mix(rock_detail, rock_macro, macroBlend);
 
-    let c3_detail = textureSample(diffuseArray, textureSampler, tileUV, 3i);
-    let c3_macro  = textureSample(diffuseArray, textureSampler, macroUV, 3i);
-    let c3 = mix(c3_detail, c3_macro, macroBlend);
+    let gravel_detail = textureSample(diffuseArray, textureSampler, tileUV, 3i);
+    let gravel_macro  = textureSample(diffuseArray, textureSampler, macroUV, 3i);
+    let gravel = mix(gravel_detail, gravel_macro, macroBlend);
 
-    let diffuseSampleColor = c0 * normWeights.r + c1 * normWeights.g + c2 * normWeights.b + c3 * normWeights.a;
+    let diffuseSampleColor = grass * normWeights.r + sand * normWeights.g + rock * normWeights.b + gravel * normWeights.a;
 
     baseColor *= diffuseSampleColor;
     resultAlpha *= diffuseSampleColor.a;

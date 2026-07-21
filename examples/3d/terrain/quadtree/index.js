@@ -106,7 +106,7 @@ RedGPU.init(
             // 3-1. 높이맵 텍스처
             terrain.heightTexture = new RedGPU.Resource.BitmapTexture(
                 redGPUContext,
-                '../../../assets/terrain/terrainTest_001/height.png',
+                '../../../assets/terrain/terrainTest_001/height2.png',
                 false,
                 null,
                 null,
