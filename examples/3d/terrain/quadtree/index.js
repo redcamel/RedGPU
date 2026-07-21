@@ -203,6 +203,8 @@ function buildGUI(redGPUContext, terrain, controller) {
                 worldSizeX: WORLD_SIZE,
                 worldSizeZ: WORLD_SIZE,
                 lodThreshold: 2.0,
+                tileScale: 50.0,
+                macroScale: 26.5,
             };
 
             // 와이어프레임
@@ -260,7 +262,20 @@ function buildGUI(redGPUContext, terrain, controller) {
                 terrain.worldOffset = [terrain.worldOffset[0], -ev.value / 2];
             });
 
-
+            // 텍스처 타일링 스케일
+            const tilingFolder = terrainFolder.addFolder({title: '🖼 텍스처 타일링', expanded: true});
+            tilingFolder.addBinding(state, 'tileScale', {
+                label: '디테일 타일링 (근거리)',
+                min: 1, max: 200, step: 0.5
+            }).on('change', (ev) => {
+                terrain.material.tileScale = ev.value;
+            });
+            tilingFolder.addBinding(state, 'macroScale', {
+                label: '매크로 타일링 (원거리)',
+                min: 1, max: 100, step: 0.5
+            }).on('change', (ev) => {
+                terrain.material.macroScale = ev.value;
+            });
 
         }
     });

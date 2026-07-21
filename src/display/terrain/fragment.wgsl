@@ -18,17 +18,23 @@
 #redgpu_include math.tnb.getNormalFromNormalMap
 #redgpu_include skyAtmosphere.skyAtmosphereFn
 
+struct TerrainUniforms {
+    tileScale: f32,
+    macroScale: f32,
+}
+@group(2) @binding(0) var<uniform> uniforms: TerrainUniforms;
+
 #redgpu_if baseColorTexture
-@group(2) @binding(0) var baseColorTexture: texture_2d<f32>;
+@group(2) @binding(1) var baseColorTexture: texture_2d<f32>;
 #redgpu_endIf
 #redgpu_if splatMap
-@group(2) @binding(1) var splatMap: texture_2d<f32>;
+@group(2) @binding(2) var splatMap: texture_2d<f32>;
 #redgpu_endIf
-@group(2) @binding(2) var diffuseArray: texture_2d_array<f32>;
+@group(2) @binding(3) var diffuseArray: texture_2d_array<f32>;
 #redgpu_if normalArray
-@group(2) @binding(3) var normalArray: texture_2d_array<f32>;
+@group(2) @binding(4) var normalArray: texture_2d_array<f32>;
 #redgpu_endIf
-@group(2) @binding(4) var textureSampler: sampler;
+@group(2) @binding(5) var textureSampler: sampler;
 
 struct InputData {
     @builtin(position) position : vec4<f32>,
@@ -54,7 +60,7 @@ struct InputData {
 @fragment
 fn main(inputData:InputData) -> OutputFragment {
     var output: OutputFragment;
-    let uniforms = globalFragmentSSBO_PBR[inputData.globalFragmentSlotIndex];
+    let pbrUniforms = globalFragmentSSBO_PBR[inputData.globalFragmentSlotIndex];
 
     let input_vertexNormal = (inputData.vertexNormal.xyz);
     let input_vertexPosition = inputData.vertexPosition.xyz;
@@ -72,23 +78,23 @@ fn main(inputData:InputData) -> OutputFragment {
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
 
     // Material Uniforms
-    let u_opacity = uniforms.opacity;
-    let u_cutOff = uniforms.cutOff;
-    let u_useVertexColor = uniforms.useVertexColor == 1u;
-    let u_useVertexTangent = uniforms.useVertexTangent == 1u;
+    let u_opacity = pbrUniforms.opacity;
+    let u_cutOff = pbrUniforms.cutOff;
+    let u_useVertexColor = pbrUniforms.useVertexColor == 1u;
+    let u_useVertexTangent = pbrUniforms.useVertexTangent == 1u;
 
     #redgpu_if baseColorTexture
         let u_baseColorFactor = vec4<f32>(1.0);
     #redgpu_else
-        let u_baseColorFactor = uniforms.baseColorFactor;
+        let u_baseColorFactor = pbrUniforms.baseColorFactor;
     #redgpu_endIf
-    let u_metallicFactor = uniforms.metallicFactor;
-    let u_roughnessFactor = uniforms.roughnessFactor;
-    let u_normalScale = uniforms.normalScale;
+    let u_metallicFactor = pbrUniforms.metallicFactor;
+    let u_roughnessFactor = pbrUniforms.roughnessFactor;
+    let u_normalScale = pbrUniforms.normalScale;
 
 
 
-    let u_KHR_materials_ior = uniforms.KHR_materials_ior;
+    let u_KHR_materials_ior = pbrUniforms.KHR_materials_ior;
 
     
     // Core Vectors
@@ -128,8 +134,8 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_endIf
 
     // 월드 UV(0~1) 기반 타일링 - worldSize와 무관하게 일정한 텍스처 밀도 유지
-    let tileUV  = input_uv * 50.0;   // 지형 전체에 50회 반복 (근접 디테일)
-    let macroUV = input_uv * 26.5;    // 지형 전체에 6.5회 반복 (원거리 패턴 분산)
+    let tileUV  = input_uv * uniforms.tileScale;   // 지형 전체에 반복 (근접 디테일)
+    let macroUV = input_uv * uniforms.macroScale;    // 지형 전체에 반복 (원거리 패턴 분산)
 
     // 정규화 UV 기반 노이즈 가중치 (월드 좌표 대신 0~1 UV 사용)
     let nVal = sin(input_uv.x * 18.0) * cos(input_uv.y * 18.0) +
@@ -262,7 +268,7 @@ fn main(inputData:InputData) -> OutputFragment {
         if (resultAlpha <= u_cutOff) { discard; }
     #redgpu_endIf
     #redgpu_if useTint
-        output.color = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
+        output.color = getTintBlendMode(finalColor, pbrUniforms.tintBlendMode, pbrUniforms.tint);
     #redgpu_else
         output.color = finalColor;
     #redgpu_endIf

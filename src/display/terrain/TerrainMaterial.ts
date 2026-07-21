@@ -17,6 +17,8 @@ interface TerrainMaterial {
     metallicFactor: number;
     roughnessFactor: number;
     normalScale: number;
+    tileScale: number;
+    macroScale: number;
     baseColorFactor: [number, number, number, number];
     baseColorTexture: BitmapTexture;
     useBaseColorTexture: boolean;
@@ -63,7 +65,9 @@ Object.defineProperty(TerrainMaterial.prototype, 'isPBRMaterial', {
 defineNumber(TerrainMaterial, [
     {key: 'metallicFactor', value: 0},
     {key: 'roughnessFactor', value: 0.85},
-    {key: 'normalScale', value: 1.0}
+    {key: 'normalScale', value: 1.0},
+    {key: 'tileScale', value: 50.0},
+    {key: 'macroScale', value: 26.5}
 ]);
 
 defineBoolean(TerrainMaterial, [
