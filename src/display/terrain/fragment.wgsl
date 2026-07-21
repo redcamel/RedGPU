@@ -18,6 +18,9 @@
 #redgpu_include math.tnb.getNormalFromNormalMap
 #redgpu_include skyAtmosphere.skyAtmosphereFn
 
+#redgpu_if baseColorTexture
+@group(2) @binding(0) var baseColorTexture: texture_2d<f32>;
+#redgpu_endIf
 #redgpu_if splatMap
 @group(2) @binding(1) var splatMap: texture_2d<f32>;
 #redgpu_endIf
@@ -73,7 +76,12 @@ fn main(inputData:InputData) -> OutputFragment {
     let u_cutOff = uniforms.cutOff;
     let u_useVertexColor = uniforms.useVertexColor == 1u;
     let u_useVertexTangent = uniforms.useVertexTangent == 1u;
-    let u_baseColorFactor = uniforms.baseColorFactor;
+
+    #redgpu_if baseColorTexture
+        let u_baseColorFactor = vec4<f32>(1.0);
+    #redgpu_else
+        let u_baseColorFactor = uniforms.baseColorFactor;
+    #redgpu_endIf
     let u_metallicFactor = uniforms.metallicFactor;
     let u_roughnessFactor = uniforms.roughnessFactor;
     let u_normalScale = uniforms.normalScale;
@@ -175,6 +183,13 @@ fn main(inputData:InputData) -> OutputFragment {
     var baseColor = u_baseColorFactor;
     var resultAlpha:f32 = u_opacity * baseColor.a;
     baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
+
+    // 💡 글로벌 베이스 맵 믹싱 추가 (지형 전체를 1회 덮어 타일링 무늬를 분산시키고 거시적 톤 채색)
+    var baseMapColor = vec4<f32>(1.0);
+    #redgpu_if baseColorTexture
+        baseMapColor = textureSample(baseColorTexture, textureSampler, input_uv);
+    #redgpu_endIf
+
     // 💡 지형 스플랫 알베도 블렌딩 (0i: grass, 1i: sand, 2i: rock, 3i: gravel)
     let grass_detail = textureSample(diffuseArray, textureSampler, tileUV, 0i);
     let grass_macro  = textureSample(diffuseArray, textureSampler, macroUV, 0i);
@@ -194,8 +209,14 @@ fn main(inputData:InputData) -> OutputFragment {
 
     let diffuseSampleColor = grass * normWeights.r + sand * normWeights.g + rock * normWeights.b + gravel * normWeights.a;
 
-    baseColor *= diffuseSampleColor;
-    resultAlpha *= diffuseSampleColor.a;
+    // Apply 2x Multiply blending if global base map is active to maintain overall brightness
+    #redgpu_if baseColorTexture
+        baseColor = baseColor * baseMapColor * diffuseSampleColor * 2.0;
+        resultAlpha = resultAlpha * baseMapColor.a * diffuseSampleColor.a;
+    #redgpu_else
+        baseColor *= diffuseSampleColor;
+        resultAlpha *= diffuseSampleColor.a;
+    #redgpu_endIf
     
 
 

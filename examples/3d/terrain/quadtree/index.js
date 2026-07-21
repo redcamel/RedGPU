@@ -106,7 +106,7 @@ RedGPU.init(
             // 3-1. 높이맵 텍스처
             terrain.heightTexture = new RedGPU.Resource.BitmapTexture(
                 redGPUContext,
-                '../../../assets/terrain/terrainTest_001/height2.png',
+                '../../../assets/terrain/terrainTest_001/height.jpg',
                 false,
                 null,
                 null,
@@ -114,6 +114,12 @@ RedGPU.init(
             );
 
             // 3-2. PBR 지형 스플랫 페인팅 리소스 설정
+            terrain.material.baseColorTexture = new RedGPU.Resource.BitmapTexture(
+                redGPUContext,
+                '../../../assets/terrain/terrainTest_001/diffuse.jpg',
+                true
+            );
+
             terrain.material.splatMap = new RedGPU.Resource.BitmapTexture(
                 redGPUContext,
                 '../../../assets/terrain/terrainTest_001/splatMap.jpg',
@@ -123,66 +129,22 @@ RedGPU.init(
             terrain.material.diffuseArray = new RedGPU.Resource.TextureArray(
                 redGPUContext,
                 [
-                    '../../../assets/terrain/terrainTest_001/grass.jpg',
-                    '../../../assets/terrain/terrainTest_001/sand.jpg',
-                    '../../../assets/terrain/terrainTest_001/rock.jpg',
-                    '../../../assets/terrain/terrainTest_001/gravel.jpg'
+                    '../../../assets/terrain/terrainTest_001/layer/grass.jpg',
+                    '../../../assets/terrain/terrainTest_001/layer/sand.jpg',
+                    '../../../assets/terrain/terrainTest_001/layer/rock.jpg',
+                    '../../../assets/terrain/terrainTest_001/layer/gravel.jpg'
                 ]
             );
 
             terrain.material.normalArray = new RedGPU.Resource.TextureArray(
                 redGPUContext,
                 [
-                    '../../../assets/terrain/terrainTest_001/grass_normal.jpg',
-                    '../../../assets/terrain/terrainTest_001/sand_normal.jpg',
-                    '../../../assets/terrain/terrainTest_001/rock_normal.jpg',
-                    '../../../assets/terrain/terrainTest_001/gravel_normal.jpg'
+                    '../../../assets/terrain/terrainTest_001/layer/grass_normal.jpg',
+                    '../../../assets/terrain/terrainTest_001/layer/sand_normal.jpg',
+                    '../../../assets/terrain/terrainTest_001/layer/rock_normal.jpg',
+                    '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg'
                 ]
             );
-        }
-        // {
-        //     // 3-1. 높이맵 텍스처 (16비트 PNG 적용 예정)
-        //     terrain.heightTexture = new RedGPU.Resource.BitmapTexture(
-        //         redGPUContext,
-        //         '../../../assets/terrain/terrainTest_004/height.png',
-        //
-        //         true,
-        //         null,
-        //         null,
-        //         'r16float',
-        //         // 'r16float',
-        //     );
-        //
-        //     // 3-2. PBR 머티리얼 텍스처 (PNG 적용 예정)
-        //     terrain.material.baseColorTexture = new RedGPU.Resource.BitmapTexture(
-        //         redGPUContext,
-        //         '../../../assets/terrain/terrainTest_004/baseColor.png'
-        //     );
-        // }
-        {
-            // // // 3-1. 높이맵 텍스처
-            // terrain.heightTexture = new RedGPU.Resource.BitmapTexture(
-            //     redGPUContext,
-            //     '../../../assets/terrain/terrainTest_003/height.jpg',
-            //     true,
-            //     null,
-            //     null,
-            //     // 'rgba16float',
-            //     'r16float',
-            // );
-            //
-            // // 3-2. PBR 머티리얼 텍스처
-            // terrain.material.baseColorTexture = new RedGPU.Resource.BitmapTexture(
-            //     redGPUContext,
-            //     '../../../assets/terrain/terrainTest_003/baseColor.jpg'
-            // );
-            //
-            //
-            // // 3-3. PBR 디테일 노멀맵 텍스처 (타일링 설정으로 근접 디테일 극대화)
-            // terrain.material.normalTexture = new RedGPU.Resource.BitmapTexture(
-            //     redGPUContext,
-            //     '../../../assets/terrain/terrainTest_003/normal.jpg'
-            // );
         }
 
 

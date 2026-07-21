@@ -5,6 +5,7 @@ import TextureArray from "../../resources/texture/TextureArray";
 import ABitmapBaseMaterial from "../../material/core/ABitmapBaseMaterial";
 import fragmentModuleSource from './fragment.wgsl';
 import defineNumber from "../../defineProperty/funcs/number/defineNumber";
+import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import defineColorRGBA from "../../defineProperty/funcs/color/defineColorRGBA";
 import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
 import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
@@ -17,6 +18,8 @@ interface TerrainMaterial {
     roughnessFactor: number;
     normalScale: number;
     baseColorFactor: [number, number, number, number];
+    baseColorTexture: BitmapTexture;
+    useBaseColorTexture: boolean;
     splatMap: BitmapTexture;
     diffuseArray: TextureArray;
     normalArray: TextureArray;
@@ -37,23 +40,18 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         );
         if (name) (this as any).name = name;
 
-        (this as any).initGPURenderInfos();
+        this.initGPURenderInfos();
 
         // 💡 지형 타일링 텍스처의 반복(Repeat) 매핑을 위한 선형 필터링 샘플러 (밉맵 및 이방성 필터링 적용)
         this.textureSampler = new Sampler(redGPUContext, {
             magFilter: GPU_FILTER_MODE.LINEAR,
             minFilter: GPU_FILTER_MODE.LINEAR,
             mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
-            maxAnisotropy: 16,
             addressModeU: GPU_ADDRESS_MODE.REPEAT,
             addressModeV: GPU_ADDRESS_MODE.REPEAT
         });
 
-        // Unreal Engine Landscape 기본값 기반 설정
-        this.metallicFactor = 0.0;
-        this.roughnessFactor = 0.85;
-        this.normalScale = 1.0;
-        this.baseColorFactor = [0.5, 0.45, 0.38, 1.0];
+
     }
 }
 
@@ -68,11 +66,16 @@ defineNumber(TerrainMaterial, [
     {key: 'normalScale', value: 1.0}
 ]);
 
+defineBoolean(TerrainMaterial, [
+    {key: 'useBaseColorTexture', value: false}
+]);
+
 defineColorRGBA(TerrainMaterial, [
     {key: 'baseColorFactor', value: '#7f7361'}
 ]);
 
 defineTexture(TerrainMaterial, [
+    {key: 'baseColorTexture'},
     {key: 'splatMap'},
     {key: 'diffuseArray'},
     {key: 'normalArray'}
