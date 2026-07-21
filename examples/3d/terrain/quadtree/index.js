@@ -102,50 +102,56 @@ RedGPU.init(
             undefined,
             'CDLOD_Terrain'
         );
-        {
-            // 3-1. 높이맵 텍스처
-            terrain.heightTexture = new RedGPU.Resource.BitmapTexture(
-                redGPUContext,
-                '../../../assets/terrain/terrainTest_001/height.jpg',
-                false,
-                null,
-                null,
-                'r16float',
-            );
+        // 3-1. 높이맵 텍스처
+        terrain.heightTexture = new RedGPU.Resource.BitmapTexture(
+            redGPUContext,
+            '../../../assets/terrain/terrainTest_001/height.jpg',
+            false,
+            null,
+            null,
+            'r16float',
+        );
 
-            // 3-2. PBR 지형 스플랫 페인팅 리소스 설정
-            terrain.material.baseColorTexture = new RedGPU.Resource.BitmapTexture(
-                redGPUContext,
-                '../../../assets/terrain/terrainTest_001/diffuse.jpg',
-                true
-            );
+        // 3-2. PBR 지형 스플랫 페인팅 리소스 설정
+        const baseColorTextureInstance = new RedGPU.Resource.BitmapTexture(
+            redGPUContext,
+            '../../../assets/terrain/terrainTest_001/diffuse.jpg',
+            true
+        );
+        terrain.material.baseColorTexture = baseColorTextureInstance;
 
-            terrain.material.splatMap = new RedGPU.Resource.BitmapTexture(
-                redGPUContext,
-                '../../../assets/terrain/terrainTest_001/splatMap.jpg',
-                true
-            );
+        const ormTextureInstance = new RedGPU.Resource.BitmapTexture(
+            redGPUContext,
+            '../../../assets/terrain/terrainTest_001/orm.jpg',
+            true
+        );
+        terrain.material.ormTexture = ormTextureInstance;
 
-            terrain.material.diffuseArray = new RedGPU.Resource.TextureArray(
-                redGPUContext,
-                [
-                    '../../../assets/terrain/terrainTest_001/layer/grass.jpg',
-                    '../../../assets/terrain/terrainTest_001/layer/sand.jpg',
-                    '../../../assets/terrain/terrainTest_001/layer/rock.jpg',
-                    '../../../assets/terrain/terrainTest_001/layer/gravel.jpg'
-                ]
-            );
+        terrain.material.splatMap = new RedGPU.Resource.BitmapTexture(
+            redGPUContext,
+            '../../../assets/terrain/terrainTest_001/splatMap.jpg',
+            true
+        );
 
-            terrain.material.normalArray = new RedGPU.Resource.TextureArray(
-                redGPUContext,
-                [
-                    '../../../assets/terrain/terrainTest_001/layer/grass_normal.jpg',
-                    '../../../assets/terrain/terrainTest_001/layer/sand_normal.jpg',
-                    '../../../assets/terrain/terrainTest_001/layer/rock_normal.jpg',
-                    '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg'
-                ]
-            );
-        }
+        terrain.material.diffuseArray = new RedGPU.Resource.TextureArray(
+            redGPUContext,
+            [
+                '../../../assets/terrain/terrainTest_001/layer/grass.jpg',
+                '../../../assets/terrain/terrainTest_001/layer/sand.jpg',
+                '../../../assets/terrain/terrainTest_001/layer/rock.jpg',
+                '../../../assets/terrain/terrainTest_001/layer/gravel.jpg'
+            ]
+        );
+
+        terrain.material.normalArray = new RedGPU.Resource.TextureArray(
+            redGPUContext,
+            [
+                '../../../assets/terrain/terrainTest_001/layer/grass_normal.jpg',
+                '../../../assets/terrain/terrainTest_001/layer/sand_normal.jpg',
+                '../../../assets/terrain/terrainTest_001/layer/rock_normal.jpg',
+                '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg'
+            ]
+        );
 
 
         // 3-5. 지형 파라미터 — 거대 스케일 설정
@@ -172,7 +178,7 @@ RedGPU.init(
         requestAnimationFrame(hudLoop);
 
         // 6. GUI 패널
-        buildGUI(redGPUContext, terrain, controller);
+        buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, ormTextureInstance);
     },
     (failReason) => {
         console.error('RedGPU 초기화 실패:', failReason);
@@ -184,7 +190,7 @@ RedGPU.init(
 );
 
 // ─── GUI 패널 ──────────────────────────────────────────────────────────────────
-function buildGUI(redGPUContext, terrain, controller) {
+function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, ormTextureInstance) {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
         ibl: true,
@@ -203,8 +209,13 @@ function buildGUI(redGPUContext, terrain, controller) {
                 worldSizeX: WORLD_SIZE,
                 worldSizeZ: WORLD_SIZE,
                 lodThreshold: 2.0,
-                tileScale: 50.0,
-                macroScale: 26.5,
+                tileScale: 1.0,
+                macroScale: 1.0,
+                normalScale: 1.0,
+                roughnessFactor: 0.85,
+                occlusionStrength: 1.0,
+                useBaseColorTexture: true,
+                useOrmTexture: true,
             };
 
             // 와이어프레임
@@ -262,19 +273,47 @@ function buildGUI(redGPUContext, terrain, controller) {
                 terrain.worldOffset = [terrain.worldOffset[0], -ev.value / 2];
             });
 
-            // 텍스처 타일링 스케일
-            const tilingFolder = terrainFolder.addFolder({title: '🖼 텍스처 타일링', expanded: true});
-            tilingFolder.addBinding(state, 'tileScale', {
+            // 텍스처 타일링 및 PBR 재질 설정
+            const materialFolder = terrainFolder.addFolder({title: '🎨 재질 및 타일링 설정', expanded: true});
+            materialFolder.addBinding(state, 'tileScale', {
                 label: '디테일 타일링 (근거리)',
-                min: 1, max: 200, step: 0.5
+                min: 1.0, max: 50.0, step: 0.01
             }).on('change', (ev) => {
                 terrain.material.tileScale = ev.value;
             });
-            tilingFolder.addBinding(state, 'macroScale', {
+            materialFolder.addBinding(state, 'macroScale', {
                 label: '매크로 타일링 (원거리)',
-                min: 1, max: 100, step: 0.5
+                min: 1.0, max: 50.0, step: 0.01
             }).on('change', (ev) => {
                 terrain.material.macroScale = ev.value;
+            });
+            materialFolder.addBinding(state, 'normalScale', {
+                label: '노멀 맵 강도',
+                min: 0, max: 3, step: 0.1
+            }).on('change', (ev) => {
+                terrain.material.normalScale = ev.value;
+            });
+            materialFolder.addBinding(state, 'roughnessFactor', {
+                label: '거칠기 (Roughness)',
+                min: 0, max: 1, step: 0.05
+            }).on('change', (ev) => {
+                terrain.material.roughnessFactor = ev.value;
+            });
+            materialFolder.addBinding(state, 'occlusionStrength', {
+                label: '오클루전 강도 (AO)',
+                min: 0, max: 2, step: 0.05
+            }).on('change', (ev) => {
+                terrain.material.occlusionStrength = ev.value;
+            });
+            materialFolder.addBinding(state, 'useBaseColorTexture', {
+                label: '베이스 컬러 사용'
+            }).on('change', (ev) => {
+                terrain.material.baseColorTexture = ev.value ? baseColorTextureInstance : null;
+            });
+            materialFolder.addBinding(state, 'useOrmTexture', {
+                label: 'ORM 사용 (AO/R/M)'
+            }).on('change', (ev) => {
+                terrain.material.ormTexture = ev.value ? ormTextureInstance : null;
             });
 
         }

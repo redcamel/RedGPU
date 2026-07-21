@@ -1071,9 +1071,5 @@ defineBoolean(PBRMaterial, [
     //
     {key: 'useSSR', value: true}
 ])
-Object.defineProperty(PBRMaterial.prototype, 'isPBRMaterial', {
-    value: true,
-    writable: false
-});
 Object.freeze(PBRMaterial)
 export default PBRMaterial

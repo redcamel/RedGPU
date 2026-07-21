@@ -1,11 +1,9 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
-import TextureArray from "../../resources/texture/TextureArray";
-import ABitmapBaseMaterial from "../../material/core/ABitmapBaseMaterial";
 import fragmentModuleSource from './fragment.wgsl';
+import ABitmapBaseMaterial from "../../material/core/ABitmapBaseMaterial";
 import defineNumber from "../../defineProperty/funcs/number/defineNumber";
-import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import defineColorRGBA from "../../defineProperty/funcs/color/defineColorRGBA";
 import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
 import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
@@ -19,14 +17,17 @@ interface TerrainMaterial {
     normalScale: number;
     tileScale: number;
     macroScale: number;
+    occlusionStrength: number;
     baseColorFactor: [number, number, number, number];
     baseColorTexture: BitmapTexture;
-    useBaseColorTexture: boolean;
     splatMap: BitmapTexture;
     diffuseArray: TextureArray;
     normalArray: TextureArray;
     textureSampler: Sampler;
+    ormTexture: BitmapTexture;
 }
+
+type TextureArray = any;
 
 /**
  * [KO] CDLOD 지형 렌더링에 사용되는 전용 물리 기반(PBR) 머티리얼 클래스입니다.
@@ -52,8 +53,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
             addressModeU: GPU_ADDRESS_MODE.REPEAT,
             addressModeV: GPU_ADDRESS_MODE.REPEAT
         });
-
-
     }
 }
 
@@ -61,17 +60,19 @@ Object.defineProperty(TerrainMaterial.prototype, 'isPBRMaterial', {
     value: true,
     writable: false
 });
+Object.defineProperty(TerrainMaterial.prototype, 'isTerrainMaterial', {
+    value: true,
+    writable: false
+});
+
 
 defineNumber(TerrainMaterial, [
-    {key: 'metallicFactor', value: 0},
+    {key: 'metallicFactor', value: 0.04},
     {key: 'roughnessFactor', value: 0.85},
     {key: 'normalScale', value: 1.0},
-    {key: 'tileScale', value: 50.0},
-    {key: 'macroScale', value: 26.5}
-]);
-
-defineBoolean(TerrainMaterial, [
-    {key: 'useBaseColorTexture', value: false}
+    {key: 'tileScale', value: 1.0},
+    {key: 'macroScale', value: 1.0},
+    {key: 'occlusionStrength', value: 1.0}
 ]);
 
 defineColorRGBA(TerrainMaterial, [
@@ -82,12 +83,12 @@ defineTexture(TerrainMaterial, [
     {key: 'baseColorTexture'},
     {key: 'splatMap'},
     {key: 'diffuseArray'},
-    {key: 'normalArray'}
+    {key: 'normalArray'},
+    {key: 'ormTexture'}
 ]);
 
 defineSampler(TerrainMaterial, [
     {key: 'textureSampler'}
 ]);
-
 Object.freeze(TerrainMaterial);
 export default TerrainMaterial;

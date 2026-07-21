@@ -35,6 +35,9 @@ struct TerrainUniforms {
 @group(2) @binding(4) var normalArray: texture_2d_array<f32>;
 #redgpu_endIf
 @group(2) @binding(5) var textureSampler: sampler;
+#redgpu_if ormTexture
+@group(2) @binding(6) var ormTexture: texture_2d<f32>;
+#redgpu_endIf
 
 struct InputData {
     @builtin(position) position : vec4<f32>,
@@ -232,10 +235,10 @@ fn main(inputData:InputData) -> OutputFragment {
 
     var metallicParameter: f32 = u_metallicFactor;
     var roughnessParameter: f32 = u_roughnessFactor;
-    #redgpu_if useMetallicRoughnessTexture
-        let metallicRoughnessSample = (textureSample(packedORMTexture, packedTextureSampler, metallicRoughnessUV));
-        metallicParameter *= metallicRoughnessSample.b;
-        roughnessParameter *= metallicRoughnessSample.g;
+    #redgpu_if ormTexture
+        let ormSample = textureSample(ormTexture, packedTextureSampler, inputData.uv);
+        metallicParameter *= ormSample.b;
+        roughnessParameter *= ormSample.g;
     #redgpu_endIf
     roughnessParameter = max(roughnessParameter, 0.04);
     if (abs(ior - 1.0) < EPSILON) { roughnessParameter = 0.0; }
@@ -256,10 +259,16 @@ fn main(inputData:InputData) -> OutputFragment {
         roughnessParameter, metallicParameter, albedo,
         F0_dielectric_base, ior
     );
+    var occlusionParameter: f32 = 1.0;
+    #redgpu_if ormTexture
+        occlusionParameter = textureSample(ormTexture, packedTextureSampler, inputData.uv).r * pbrUniforms.occlusionStrength;
+    #redgpu_endIf
+
     let indirectLighting = getIndirectPbrLighting(
         N, V, NdotV,
         albedo, &roughnessParameter, metallicParameter,
-        F0, F0_dielectric, F0_metal
+        F0, F0_dielectric, F0_metal,
+        occlusionParameter
     );
     
     let finalColor = vec4<f32>(totalDirectLighting + indirectLighting, resultAlpha);
@@ -462,7 +471,8 @@ fn getDirectPbrLighting(
 fn getIndirectPbrLighting(
     N: vec3<f32>, V: vec3<f32>, NdotV: f32,
     albedo: vec3<f32>, roughnessParameter: ptr<function, f32>, metallicParameter: f32,
-    F0: vec3<f32>, F0_dielectric: vec3<f32>, F0_metal: vec3<f32>
+    F0: vec3<f32>, F0_dielectric: vec3<f32>, F0_metal: vec3<f32>,
+    occlusionParameter: f32
 ) -> vec3<f32> {
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
@@ -487,7 +497,7 @@ fn getIndirectPbrLighting(
             iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
         
-        let envIBL_DIFFUSE = albedo * iblDiffuseColor * INV_PI;
+        let envIBL_DIFFUSE = albedo * iblDiffuseColor * INV_PI * occlusionParameter;
         let dielectricPart_IBL = envIBL_DIFFUSE;
         
         var metallicPart_IBL = vec3<f32>(0.0);
@@ -520,14 +530,16 @@ fn getIndirectPbrLighting(
             let fresnelTerm = pow(saturate(1.0 - NdotV_IBL), fresnelPower);
             let FR_metal      = getIndirectFresnel(NdotV_IBL, F0_metal,      *roughnessParameter, fresnelTerm);        
             let F_IBL_metal      = FR_metal * envBRDF.x + envBRDF.y;
-            metallicPart_IBL = reflectedColor * F_IBL_metal;
+            
+            let specularOcclusion = saturate(pow(NdotV_IBL + occlusionParameter, exp2(-16.0 * (*roughnessParameter) - 1.0)) - 1.0 + occlusionParameter);
+            metallicPart_IBL = reflectedColor * F_IBL_metal * specularOcclusion;
         }
         
         let baseIndirect = mix(dielectricPart_IBL, metallicPart_IBL, metallicParameter);
         let indirectLighting = baseIndirect;
         return indirectLighting;
     } else {
-        let ambientContribution = albedo * systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure * INV_PI;
+        let ambientContribution = albedo * systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * occlusionParameter * preExposure * INV_PI;
         var indirectLighting = ambientContribution;
         return indirectLighting;
     }

@@ -499,6 +499,21 @@ abstract class ABaseMaterial extends ResourceBase {
                 if (!pattern.test(k)) this[k] = property
             }
         }
+
+        // 2. 머티리얼 개별(로컬) 유니폼 버퍼 구조체 초기값 동기화
+        const localMembers = this.gpuRenderInfo?.fragmentUniformInfo?.members;
+        if (localMembers) {
+            for (const k in localMembers) {
+                const property = this[k];
+                if (property instanceof ColorRGBA) {
+                    updateTargetUniform(this, k, property.rgbaNormalLinear);
+                } else if (property instanceof ColorRGB) {
+                    updateTargetUniform(this, k, property.rgbNormalLinear);
+                } else {
+                    if (!pattern.test(k)) this[k] = property;
+                }
+            }
+        }
     }
 
     /**
