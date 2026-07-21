@@ -11,10 +11,10 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
  * - GPU Instancing으로 단일 드로우콜에서 전체 지형 렌더링
  */
 
-const WORLD_SIZE = 256;   // 월드 가로세로 크기 (256x256 기본 규격)
-const MAX_LOD = 4;      // 최대 LOD 레벨
-const MIN_H = 0;
-const MAX_H = 50;    // 최대 높이 (50유닛)
+const WORLD_SIZE = 1000.0;   // 월드 가로세로 크기 (1000x1000 거대 지형 규격)
+const MAX_LOD = 5;         // 최대 LOD 레벨 (쿼드트리 세분화 깊이)
+const MIN_H = 0.0;
+const MAX_H = 150.0;       // 최대 높이 (완만한 산봉우리 스케일)
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -72,10 +72,10 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
 
-        // 1. 카메라 — 256 스케일에 알맞은 거리와 이동 감도로 조정
+        // 1. 카메라 — 1000m 스케일에 알맞은 웅장한 기본 주시 거리와 이동 감도로 조정
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.speedDistance = 20;
-        controller.distance = 250;
+        controller.distance = 650;
         controller.rotationX = 25;    
         controller.rotationY = 45;
         controller.camera.farClipping = 5000;
@@ -126,6 +126,10 @@ RedGPU.init(
             true
         );
         terrain.material.ormTexture = ormTextureInstance;
+
+        // 💡 2000m 거대 월드에 어울리는 최적의 텍스처 타일링 값 수동 기입
+        terrain.material.tileScale = 75.0;
+        terrain.material.macroScale = 10.0;
 
         terrain.material.splatMap = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
@@ -209,8 +213,8 @@ function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, 
                 worldSizeX: WORLD_SIZE,
                 worldSizeZ: WORLD_SIZE,
                 lodThreshold: 2.0,
-                tileScale: 1.0,
-                macroScale: 1.0,
+                tileScale: 150.0,
+                macroScale: 20.0,
                 normalScale: 1.0,
                 roughnessFactor: 0.85,
                 occlusionStrength: 1.0,

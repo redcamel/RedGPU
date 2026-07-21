@@ -67,7 +67,7 @@ Object.defineProperty(TerrainMaterial.prototype, 'isTerrainMaterial', {
 
 
 defineNumber(TerrainMaterial, [
-    {key: 'metallicFactor', value: 0.04},
+    {key: 'metallicFactor', value: 0},
     {key: 'roughnessFactor', value: 0.85},
     {key: 'normalScale', value: 1.0},
     {key: 'tileScale', value: 1.0},
