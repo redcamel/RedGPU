@@ -116,17 +116,12 @@ RedGPU.init(
         const baseColorTextureInstance = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/terrain/terrainTest_001/diffuse.jpg',
-            true
         );
         terrain.material.baseColorTexture = baseColorTextureInstance;
 
         const ormTextureInstance = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/terrain/terrainTest_001/orm.jpg',
-            true,
-            null,
-            null,
-            'rgba8unorm-srgb'
         );
         terrain.material.ormTexture = ormTextureInstance;
 
@@ -137,7 +132,6 @@ RedGPU.init(
         terrain.material.splatTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/terrain/terrainTest_001/splatMap.jpg',
-            true
         );
 
         terrain.material.diffuseArray = new RedGPU.Resource.TextureArray(

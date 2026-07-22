@@ -75,13 +75,14 @@ fn getHeightBlendedWeights(
 ) -> vec4<f32> {
     let combined = splatWeights + layerHeights;
     let maxVal = max(combined.r, max(combined.g, max(combined.b, combined.a)));
-    // 💡 언리얼 엔진과 일치화: 1.0일 때 칼 경계(Sharp), 0.0일 때 부드러운 블렌딩(Blurry)
-    // 수학적으로 (1.0 - contrast)로 연산 방향을 뒤집고, 0.05의 오차 마진을 적용
-    let safeContrast = max(1.0 - contrast, 0.05);
+    // 💡 아티스트 감도 완화 곡선 (Power Curve) 적용
+    // 슬라이더를 0.0~0.7까지 조작할 때는 넓고 풍부한 부드러운 전이를 보장하고, 0.85가 넘어가면서 칼선으로 수렴하게 설계
+    let contrastPower = pow(contrast, 3.0);
+    let safeContrast = max(1.0 - contrastPower, 0.02) * 2.0;
     let threshold = maxVal - safeContrast;
     let blended = max(combined - vec4<f32>(threshold), vec4<f32>(0.0));
     let sumVal = blended.r + blended.g + blended.b + blended.a;
-    // 💡 만약 극한의 연산 오차로 합이 0에 가깝다면, 지형 소실 방지를 위해 원래의 스플랫 가중치로 안전 폴백
+    // 💡 가중치 소실 방지 안전 폴백
     if (sumVal <= 0.0001) {
         return splatWeights;
     }
@@ -271,10 +272,16 @@ fn main(inputData:InputData) -> OutputFragment {
                         xy_gravel * normWeights.a;
 
         // 4. 노멀 스케일(강도) 적용
-        let scaledXY = blendedXY * u_normalScale;
+        var scaledXY = blendedXY * u_normalScale;
+        
+        // 💡 [안전 조치] XY 벡터의 길이가 1.0을 초과하여 Z 성분이 0으로 찌그러지며 검은 멍이 맺히는 현상 방지
+        let lenSq = dot(scaledXY, scaledXY);
+        if (lenSq > 0.98) {
+            scaledXY = normalize(scaledXY) * 0.98;
+        }
 
-        // 5. RedGPU 표준 Z-Reconstruction: 강도가 적용된 XY 면적에 비례해 Z 높이 복원
-        let reconstructedZ = sqrt(max(0.0, 1.0 - dot(scaledXY, scaledXY)));
+        // 5. RedGPU 표준 Z-Reconstruction: 강도가 적용된 XY 면적에 비례해 Z 높이 복원 (최소 0.2의 하늘 방향 법선 확보)
+        let reconstructedZ = sqrt(max(0.001, 1.0 - dot(scaledXY, scaledXY)));
 
         // 6. 완성된 탄젠트 공간 노멀을 TBN 행렬을 통해 월드 공간으로 변환 후 최종 정규화
         N = normalize(tbn * vec3<f32>(scaledXY, reconstructedZ));
