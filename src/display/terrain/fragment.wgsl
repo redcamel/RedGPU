@@ -71,23 +71,23 @@ fn getHeightBlendedWeights(
     layerHeights: vec4<f32>,
     contrast: f32
 ) -> vec4<f32> {
-    let combined = splatWeights + layerHeights;
+    // 💡 [언리얼 엔진 표준 공식] (Height + 1.0) * Weight 곱셈 결합
+    // 곱셈을 통해 가중치(Weight)가 0인 레이어는 높이값과 무관하게 100% 완벽히 소거되어 누수가 원천 차단됩니다.
+    let combined = (layerHeights + vec4<f32>(1.0)) * splatWeights;
     let maxVal = max(combined.r, max(combined.g, max(combined.b, combined.a)));
+    
     // 💡 아티스트 감도 완화 곡선 (Power Curve) 적용
-    // 슬라이더를 0.0~0.7까지 조작할 때는 넓고 풍부한 부드러운 전이를 보장하고, 0.85가 넘어가면서 칼선으로 수렴하게 설계
     let contrastPower = pow(contrast, 3.0);
     let safeContrast = max(1.0 - contrastPower, 0.02) * 2.0;
     let threshold = maxVal - safeContrast;
     let blended = max(combined - vec4<f32>(threshold), vec4<f32>(0.0));
     
-    // 💡 [블리딩 방지 필터] 원래 스플랫 가중치가 0.001 이하인 채널은 높이 편차와 무관하게 완전히 차단(0.0)
-    let filteredBlended = blended * step(vec4<f32>(0.001), splatWeights);
-    let sumVal = filteredBlended.r + filteredBlended.g + filteredBlended.b + filteredBlended.a;
+    let sumVal = blended.r + blended.g + blended.b + blended.a;
     // 💡 가중치 소실 방지 안전 폴백
     if (sumVal <= 0.0001) {
         return splatWeights;
     }
-    return filteredBlended / sumVal;
+    return blended / sumVal;
 }
 
 @fragment
@@ -150,17 +150,20 @@ fn main(inputData:InputData) -> OutputFragment {
     }
 
     // =============================================================================
-    // 💡 월드 UV(0~1) 기반 타일링 및 노이즈 연산
+    // =============================================================================
+    // 💡 [언리얼 표준] 카메라 거리 기반 타일링 블렌딩 (Distance-based Tiling Blend)
     // =============================================================================
     let tileUV  = input_uv * uniforms.tileScale;
     let macroUV = input_uv * uniforms.macroScale;
 
-    let nVal = sin(input_uv.x * 18.0) * cos(input_uv.y * 18.0) +
-               sin(input_uv.x * 67.0 + input_uv.y * 43.0) * 0.5;
-    let macroBlend = clamp(nVal * 0.5 + 0.5, 0.0, 1.0);
+    // 💡 카메라와 프래그먼트 정점 간의 실제 3D 거리 연산
+    let dist = distance(systemUniforms.camera.cameraPosition, inputData.vertexPosition);
+    
+    // 💡 근거리(40m) 이하에서는 tileScale 100% 사용, 원거리(180m) 이상에서는 macroScale 100%로 스무스하게 전이
+    let macroBlend = clamp((dist - 40.0) / (180.0 - 40.0), 0.0, 1.0);
 
     // =============================================================================
-    // 💡 지형 스플랫 알베도 샘플링
+    // 💡 지형 스플랫 알베도 샘플링 (거리 기반 블렌드 적용)
     // =============================================================================
     let grass_detail = textureSample(diffuseArray, textureSampler, tileUV, 0i);
     let grass_macro  = textureSample(diffuseArray, textureSampler, macroUV, 0i);
@@ -229,9 +232,10 @@ fn main(inputData:InputData) -> OutputFragment {
 
     var baseWeights = vec4<f32>(splatR, splatG, splatB, splatMask.a);
 
-    // 💡 [언리얼 표준 폴백] 스플랫 맵이 없거나 꺼져서 1x1 투명 검은색 텍스처가 매핑되면
-    // R채널(0번째 Grass 레이어)에 100% 가중치를 주어 지형 전체를 덮도록 동작
-    if (splatR + splatG + splatB <= 0.01) {
+    // 💡 [안전 폴백 및 언리얼 표준] 스플랫 맵이 없거나 꺼져서 1x1 투명 검은색 텍스처가 매핑되면
+    // R채널(0번째 Grass 레이어)에 100% 가중치를 주어 지형 전체를 덮도록 동작.
+    // 💡 밉맵 필터링 노이즈(부동소수점 오차)에 의한 오작동 방지를 위해 임계치 기준을 0.1로 넉넉하게 확장
+    if (splatR + splatG + splatB <= 0.1) {
         baseWeights = vec4<f32>(1.0, 0.0, 0.0, 0.0);
     } else {
         let splatA = select(splatMask.a, max(0.0, 1.0 - (splatR + splatG + splatB)), splatMask.a == 1.0);
