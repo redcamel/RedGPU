@@ -23,6 +23,7 @@ struct TerrainUniforms {
     macroScale: f32,
     blendContrast: f32,
     debugSplatTexture: u32,
+    specularFactor: f32,
 }
 @group(2) @binding(0) var<uniform> uniforms: TerrainUniforms;
 
@@ -42,6 +43,11 @@ struct TerrainUniforms {
 // 💡 디테일 Height 맵 배열 바인딩
 #redgpu_if heightArray
 @group(2) @binding(7) var heightArray: texture_2d_array<f32>;
+#redgpu_endIf
+
+// 💡 디테일 ORM (Occlusion, Roughness, Metalness) 맵 배열 바인딩
+#redgpu_if ormArray
+@group(2) @binding(8) var ormArray: texture_2d_array<f32>;
 #redgpu_endIf
 
 struct InputData {
@@ -343,12 +349,52 @@ fn main(inputData:InputData) -> OutputFragment {
 
     var metallicParameter: f32 = u_metallicFactor;
     var roughnessParameter: f32 = u_roughnessFactor;
+    var occlusionParameter: f32 = 1.0;
+
+    // 💡 1. 베이스 매크로 ORM 텍스처 누적 적용
     #redgpu_if ormTexture
+    {
         let ormSample = textureSample(ormTexture, textureSampler, inputData.uv);
+        occlusionParameter *= ormSample.r;
         metallicParameter *= ormSample.b;
-        roughnessParameter *= ormSample.g;
+        roughnessParameter = max(roughnessParameter * ormSample.g, 0.45);
+    }
     #redgpu_endIf
-    roughnessParameter = max(roughnessParameter, 0.04);
+
+    // 💡 2. 디테일 4종 레이어 ORM 텍스처 어레이 누적 적용
+    #redgpu_if ormArray
+    {
+        let orm_grass_detail = textureSample(ormArray, textureSampler, tileUV, 0i);
+        let orm_grass_macro  = textureSample(ormArray, textureSampler, macroUV, 0i);
+        let orm_grass = mix(orm_grass_detail, orm_grass_macro, macroBlend);
+
+        let orm_sand_detail = textureSample(ormArray, textureSampler, tileUV, 1i);
+        let orm_sand_macro  = textureSample(ormArray, textureSampler, macroUV, 1i);
+        let orm_sand = mix(orm_sand_detail, orm_sand_macro, macroBlend);
+
+        let orm_rock_detail = textureSample(ormArray, textureSampler, tileUV, 2i);
+        let orm_rock_macro  = textureSample(ormArray, textureSampler, macroUV, 2i);
+        let orm_rock = mix(orm_rock_detail, orm_rock_macro, macroBlend);
+
+        let orm_gravel_detail = textureSample(ormArray, textureSampler, tileUV, 3i);
+        let orm_gravel_macro  = textureSample(ormArray, textureSampler, macroUV, 3i);
+        let orm_gravel = mix(orm_gravel_detail, orm_gravel_macro, macroBlend);
+
+        let blendedORM = orm_grass * normWeights.r + 
+                         orm_sand * normWeights.g + 
+                         orm_rock * normWeights.b + 
+                         orm_gravel * normWeights.a;
+
+        occlusionParameter *= blendedORM.r;
+        roughnessParameter = max(roughnessParameter * blendedORM.g, 0.45);
+        metallicParameter *= blendedORM.b;
+    }
+    #redgpu_endIf
+
+    // 💡 3. 최종 오클루전 강도 보정
+    occlusionParameter *= pbrUniforms.occlusionStrength;
+
+    roughnessParameter = max(roughnessParameter, 0.45);
     if (abs(ior - 1.0) < EPSILON) { roughnessParameter = 0.0; }
 
     let F0_dielectric_base = getDielectricF0(ior);
@@ -361,16 +407,12 @@ fn main(inputData:InputData) -> OutputFragment {
         input_vertexPosition, inputData.position, visibility,
         N, V, NdotV,
         roughnessParameter, metallicParameter, albedo,
-        F0_dielectric_base, ior
+        F0_dielectric_base, ior, uniforms.specularFactor
     );
-    var occlusionParameter: f32 = 1.0;
-    #redgpu_if ormTexture
-        occlusionParameter = textureSample(ormTexture, textureSampler, inputData.uv).r * pbrUniforms.occlusionStrength;
-    #redgpu_endIf
 
     let indirectLighting = getIndirectPbrLighting(
         N, V, NdotV,
-        albedo, &roughnessParameter, metallicParameter,
+        albedo, roughnessParameter, metallicParameter,
         F0, F0_dielectric, F0_metal,
         occlusionParameter
     );
@@ -508,7 +550,7 @@ fn getDirectPbrLighting(
     visibility: f32,
     N: vec3<f32>, V: vec3<f32>, NdotV: f32,
     roughnessParameter: f32, metallicParameter: f32, albedo: vec3<f32>,
-    F0_dielectric_base: vec3<f32>, ior: f32
+    F0_dielectric_base: vec3<f32>, ior: f32, specularFactor: f32
 ) -> vec3<f32> {
     var totalDirectLighting = vec3<f32>(0.0);
     let u_directionalLightCount = systemUniforms.directionalLightCount;
@@ -527,7 +569,7 @@ fn getDirectPbrLighting(
             finalLightColor,
             N, V, L, NdotV,
             roughnessParameter, metallicParameter, albedo,
-            F0_dielectric_base, ior
+            F0_dielectric_base, ior, specularFactor
         );
     }
     {
@@ -556,7 +598,7 @@ fn getDirectPbrLighting(
                 finalLightColor,
                 N, V, L, NdotV,
                 roughnessParameter, metallicParameter, albedo,
-                F0_dielectric_base, ior
+                F0_dielectric_base, ior, specularFactor
             );
         }
     }
@@ -565,7 +607,7 @@ fn getDirectPbrLighting(
 
 fn getIndirectPbrLighting(
     N: vec3<f32>, V: vec3<f32>, NdotV: f32,
-    albedo: vec3<f32>, roughnessParameter: ptr<function, f32>, metallicParameter: f32,
+    albedo: vec3<f32>, roughnessParameter: f32, metallicParameter: f32,
     F0: vec3<f32>, F0_dielectric: vec3<f32>, F0_metal: vec3<f32>,
     occlusionParameter: f32
 ) -> vec3<f32> {
@@ -575,13 +617,14 @@ fn getIndirectPbrLighting(
     if (u_usePrefilterTexture || u_useSkyAtmosphere) {
         let R = getReflectionVectorFromViewDirection(V, N);
         let NdotV_IBL = max(abs(dot(N, V)), 0.04);
-        let iblRoughness = *roughnessParameter;
+        let iblRoughness = roughnessParameter;
         var reflectedColor = vec3<f32>(0.0);
         var iblDiffuseColor = vec3<f32>(0.0);
         var iblMipmapCount: f32 = 0.0;
 
         if (u_usePrefilterTexture) {
-            iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
+            let levels = textureNumLevels(ibl_prefilterTexture);
+            iblMipmapCount = select(9.0, f32(levels - 1u), levels > 1u);
             var mipLevel = iblRoughness * iblMipmapCount;
             reflectedColor = textureSampleLevel( ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel ).rgb * preExposure * systemUniforms.iblIntensity;
             iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * preExposure * systemUniforms.iblIntensity;
@@ -592,7 +635,8 @@ fn getIndirectPbrLighting(
             let atmH = u_atmo.atmosphereHeight;
             let skyIntensity = u_atmo.sunIntensity;
             let specTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, R.y, atmH);
-            let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
+            let levelsAtmo = textureNumLevels(skyAtmosphere_prefilteredTexture);
+            let atmoMipCount = select(9.0, f32(levelsAtmo - 1u), levelsAtmo > 1u);
             let atmoMipLevel = iblRoughness * atmoMipCount;
             let specSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb * skyIntensity * preExposure;
             reflectedColor = (reflectedColor * specTrans) + specSkyScat;
@@ -600,27 +644,27 @@ fn getIndirectPbrLighting(
             let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity * preExposure;
             iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
-        let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, *roughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
+        let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, roughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
         let energyCompensation = 1.0 + F0 * (1.0 / max(envBRDF.x + envBRDF.y, 1e-4) - 1.0);
         reflectedColor *= energyCompensation;
 
-        let fresnelPower = 5.0 - 2.0 * (*roughnessParameter);
+        let fresnelPower = 5.0 - 2.0 * (roughnessParameter);
         let fresnelTerm = pow(saturate(1.0 - NdotV_IBL), fresnelPower);
-        let FR_dielectric = getIndirectFresnel(NdotV_IBL, F0_dielectric, *roughnessParameter, fresnelTerm);
-        let FR_metal      = getIndirectFresnel(NdotV_IBL, F0_metal,      *roughnessParameter, fresnelTerm);
+        let FR_dielectric = getIndirectFresnel(NdotV_IBL, F0_dielectric, roughnessParameter, fresnelTerm);
+        let FR_metal      = getIndirectFresnel(NdotV_IBL, F0_metal,      roughnessParameter, fresnelTerm);
 
         let horizonOcclusion = saturate(1.0 + 1.1 * dot(R, N));
         reflectedColor *= horizonOcclusion * horizonOcclusion;
 
         let F_IBL_dielectric = FR_dielectric * envBRDF.x + envBRDF.y;
         let F_IBL_metal      = FR_metal * envBRDF.x + envBRDF.y;
-        let F_IBL_dielectric_weight = F_IBL_dielectric * 1.0; // TerrainMaterial default specularParameter: 1.0
+        let F_IBL_dielectric_weight = F_IBL_dielectric * uniforms.specularFactor;
 
-        let specularOcclusion = saturate(pow(NdotV_IBL + occlusionParameter, exp2(-16.0 * (*roughnessParameter) - 1.0)) - 1.0 + occlusionParameter);
+        let specularOcclusion = saturate(pow(NdotV_IBL + occlusionParameter, exp2(-16.0 * (roughnessParameter) - 1.0)) - 1.0 + occlusionParameter);
 
-        // 💡 수직 입사 기반 반사총량(specularAlbedo_IBL)과 디퓨즈 에너지 감쇄 가중치(diffuseWeight_IBL) 공식 교정
+        // 💡 수직 입사 기반 반사총량(specularAlbedo_IBL)과 디퓨즈 에너지 감쇄 가중치(diffuseWeight_IBL) 공식 복원
         let specularAlbedo_IBL = saturate(F0_dielectric * envBRDF.x + envBRDF.y);
-        let diffuseWeight_IBL = saturate(vec3<f32>(1.0) - specularAlbedo_IBL * 1.0); // specularParameter fallback: 1.0
+        let diffuseWeight_IBL = saturate(vec3<f32>(1.0) - specularAlbedo_IBL * uniforms.specularFactor);
 
         let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric_weight * specularOcclusion;
         let envIBL_DIFFUSE = albedo * iblDiffuseColor * diffuseWeight_IBL * INV_PI * occlusionParameter;
@@ -642,7 +686,7 @@ fn getDirectPbrLight(
     N:vec3<f32>, V:vec3<f32>, L:vec3<f32>,
     VdotN:f32,
     roughnessParameter:f32, metallicParameter:f32, albedo:vec3<f32>,
-    F0_base:vec3<f32>, ior:f32
+    F0_base:vec3<f32>, ior:f32, specularFactor:f32
 ) -> vec3<f32>{
     let dLight = lightColor;
     let NdotL_origin = dot(N, L);
@@ -660,8 +704,8 @@ fn getDirectPbrLight(
     let SPEC_BRDF = getDirectSpecularBRDF(F, roughnessParameter, NdotH, VdotN, NdotL);
     let diffuse_reflection = getDirectDiffuseBRDF(NdotL, VdotN, LdotH, roughnessParameter, albedo);
 
-    let specular_weight = F * 1.0; // TerrainMaterial default specularParameter: 1.0
-    let dielectricPart = (SPEC_BRDF * 1.0 * NdotL) + (vec3<f32>(1.0) - specular_weight) * diffuse_reflection;
+    let specular_weight = F * specularFactor;
+    let dielectricPart = (SPEC_BRDF * specularFactor * NdotL) + (vec3<f32>(1.0) - specular_weight) * diffuse_reflection;
 
     let metallicPart = SPEC_BRDF * NdotL;
 

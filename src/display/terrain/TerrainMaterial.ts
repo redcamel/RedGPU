@@ -25,6 +25,7 @@ interface TerrainMaterial {
     diffuseArray: TextureArray;
     heightArray: TextureArray;
     normalArray: TextureArray;
+    ormArray: TextureArray;
     textureSampler: Sampler;
     ormTexture: BitmapTexture;
 }
@@ -62,6 +63,11 @@ Object.defineProperty(TerrainMaterial.prototype, 'isPBRMaterial', {
     value: true,
     writable: false
 });
+Object.defineProperty(TerrainMaterial.prototype, 'isTerrainMaterial', {
+    value: true,
+    writable: false
+});
+
 
 defineNumber(TerrainMaterial, [
     {key: 'metallicFactor', value: 0},
@@ -70,7 +76,8 @@ defineNumber(TerrainMaterial, [
     {key: 'tileScale', value: 1.0},
     {key: 'macroScale', value: 1.0},
     {key: 'occlusionStrength', value: 1.0},
-    {key: 'blendContrast', value: 0.0}
+    {key: 'blendContrast', value: 0.0},
+    {key: 'specularFactor', value: 0.15}
 ]);
 defineBoolean(TerrainMaterial, [
     {key: 'debugSplatTexture', value: false}
@@ -87,6 +94,7 @@ defineTexture(TerrainMaterial, [
     {key: 'diffuseArray'},
     {key: 'heightArray'},
     {key: 'normalArray'},
+    {key: 'ormArray'},
     {key: 'ormTexture'}
 ]);
 
