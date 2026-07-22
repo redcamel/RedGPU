@@ -77,7 +77,11 @@ defineNumber(TerrainMaterial, [
     {key: 'macroScale', value: 1.0},
     {key: 'occlusionStrength', value: 1.0},
     {key: 'blendContrast', value: 0.0},
-    {key: 'specularFactor', value: 0.15}
+    //
+    {key: 'grassRoughnessFactor', value: 0.85},
+    {key: 'sandRoughnessFactor', value: 0.80},
+    {key: 'rockRoughnessFactor', value: 0.65},
+    {key: 'gravelRoughnessFactor', value: 0.70},
 ]);
 defineBoolean(TerrainMaterial, [
     {key: 'debugSplatTexture', value: false}
