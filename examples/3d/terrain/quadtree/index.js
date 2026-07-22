@@ -88,8 +88,8 @@ RedGPU.init(
         redGPUContext.addView(view);
 
         // 2-1. 노을녘 태양광 (Directional Light) 추가 — 고도를 극도로 낮춰 매우 길고 거대한 골짜기 그림자 생성
-        const directionalLight = new RedGPU.Light.DirectionalLight([-0.8, -0.35, -0.5], '#ffe8d1');
-        directionalLight.intensity = 2.0; // 태양빛 강도 증폭
+        const directionalLight = new RedGPU.Light.DirectionalLight();
+
         scene.lightManager.addDirectionalLight(directionalLight);
 
         // 💡 전체화면 크기 설정 및 창 리사이즈 대응
@@ -123,7 +123,10 @@ RedGPU.init(
         const ormTextureInstance = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/terrain/terrainTest_001/orm.jpg',
-            true
+            true,
+            null,
+            null,
+            'rgba8unorm-srgb'
         );
         terrain.material.ormTexture = ormTextureInstance;
 
@@ -154,10 +157,15 @@ RedGPU.init(
                 '../../../assets/terrain/terrainTest_001/layer/sand_normal.jpg',
                 '../../../assets/terrain/terrainTest_001/layer/rock_normal.jpg',
                 '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg'
-            ]
+            ],
+            true,
+            null,
+            null,
+            'rgba8unorm' // 💡 노멀 맵의 감마 보정 왜곡 방지를 위해 Non-sRGB 포맷 지정
         );
 
-
+        // 💡 지형 베이스 필터 색상을 흰색으로 초기화하여 텍스처 본연의 밝기와 태양광 반사를 그대로 표현
+        terrain.material.baseColorFactor = '#ffffff';
 
         // 3-5. 지형 파라미터 — 거대 스케일 설정
         terrain.minHeight = MIN_H;

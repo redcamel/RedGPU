@@ -241,11 +241,11 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_endIf
 
     // =============================================================================
-    // 💡 지형 스플랫 노멀 맵 믹스 (올바른 탄젠트 공간 복원 후 보간)
+    // 💡 지형 스플랫 노멀 맵 믹스 (표준 Z-Reconstruction 기반 정밀 연산)
     // =============================================================================
     #redgpu_if normalArray
     {
-        // 각 레이어의 노멀 맵 원시 RGB 샘플링
+        // 1. 각 레이어의 노멀 맵 원시 RGB 샘플링
         let n_grass = textureSample(normalArray, textureSampler, tileUV, 0i).rgb;
         let grassNormal_detail = mix(n_grass, textureSample(normalArray, textureSampler, macroUV, 0i).rgb, macroBlend);
 
@@ -258,22 +258,26 @@ fn main(inputData:InputData) -> OutputFragment {
         let n_gravel = textureSample(normalArray, textureSampler, tileUV, 3i).rgb;
         let gravelNormal_detail = mix(n_gravel, textureSample(normalArray, textureSampler, macroUV, 3i).rgb, macroBlend);
 
-        // 💡 1. 믹싱 전 각 채널을 탄젠트 벡터(-1.0 ~ 1.0) 공간으로 각각 개별 언팩
-        let v_grass  = vec3<f32>(grassNormal_detail.r * 2.0 - 1.0,  1.0 - grassNormal_detail.g * 2.0,  grassNormal_detail.b * 2.0 - 1.0);
-        let v_sand   = vec3<f32>(sandNormal_detail.r * 2.0 - 1.0,   1.0 - sandNormal_detail.g * 2.0,   sandNormal_detail.b * 2.0 - 1.0);
-        let v_rock   = vec3<f32>(rockNormal_detail.r * 2.0 - 1.0,   1.0 - rockNormal_detail.g * 2.0,   rockNormal_detail.b * 2.0 - 1.0);
-        let v_gravel = vec3<f32>(gravelNormal_detail.r * 2.0 - 1.0, 1.0 - gravelNormal_detail.g * 2.0, gravelNormal_detail.b * 2.0 - 1.0);
+        // 2. 믹싱 전 각 채널의 XY(Raw) 데이터를 [-1.0, 1.0] 탄젠트 평면으로 변환 및 WebGPU 규격 V축 반전 적용
+        let xy_grass  = vec2<f32>(grassNormal_detail.r * 2.0 - 1.0,  -(grassNormal_detail.g * 2.0 - 1.0));
+        let xy_sand   = vec2<f32>(sandNormal_detail.r * 2.0 - 1.0,   -(sandNormal_detail.g * 2.0 - 1.0));
+        let xy_rock   = vec2<f32>(rockNormal_detail.r * 2.0 - 1.0,   -(rockNormal_detail.g * 2.0 - 1.0));
+        let xy_gravel = vec2<f32>(gravelNormal_detail.r * 2.0 - 1.0, -(gravelNormal_detail.g * 2.0 - 1.0));
 
-        // 💡 2. 탄젠트 3D 벡터 상태에서 정밀하게 가중치 합산 수행
-        let blendedTangentNormal = normalize(
-            v_grass * normWeights.r + 
-            v_sand * normWeights.g + 
-            v_rock * normWeights.b + 
-            v_gravel * normWeights.a
-        );
+        // 3. XY 탄젠트 벡터 상태에서 정량 가중치 블렌딩 수행
+        let blendedXY = xy_grass * normWeights.r + 
+                        xy_sand * normWeights.g + 
+                        xy_rock * normWeights.b + 
+                        xy_gravel * normWeights.a;
 
-        // 💡 3. 합산되고 탄탄하게 정규화된 탄젠트 노멀을 최종 월드 공간 법선 벡터(N)로 전달
-        N = normalize(tbn * vec3<f32>(blendedTangentNormal.x * u_normalScale, blendedTangentNormal.y * u_normalScale, blendedTangentNormal.z));
+        // 4. 노멀 스케일(강도) 적용
+        let scaledXY = blendedXY * u_normalScale;
+
+        // 5. RedGPU 표준 Z-Reconstruction: 강도가 적용된 XY 면적에 비례해 Z 높이 복원
+        let reconstructedZ = sqrt(max(0.0, 1.0 - dot(scaledXY, scaledXY)));
+
+        // 6. 완성된 탄젠트 공간 노멀을 TBN 행렬을 통해 월드 공간으로 변환 후 최종 정규화
+        N = normalize(tbn * vec3<f32>(scaledXY, reconstructedZ));
     }
     #redgpu_else
     {
@@ -322,7 +326,7 @@ fn main(inputData:InputData) -> OutputFragment {
     var metallicParameter: f32 = u_metallicFactor;
     var roughnessParameter: f32 = u_roughnessFactor;
     #redgpu_if ormTexture
-        let ormSample = textureSample(ormTexture, packedTextureSampler, inputData.uv);
+        let ormSample = textureSample(ormTexture, textureSampler, inputData.uv);
         metallicParameter *= ormSample.b;
         roughnessParameter *= ormSample.g;
     #redgpu_endIf
@@ -343,7 +347,7 @@ fn main(inputData:InputData) -> OutputFragment {
     );
     var occlusionParameter: f32 = 1.0;
     #redgpu_if ormTexture
-        occlusionParameter = textureSample(ormTexture, packedTextureSampler, inputData.uv).r * pbrUniforms.occlusionStrength;
+        occlusionParameter = textureSample(ormTexture, textureSampler, inputData.uv).r * pbrUniforms.occlusionStrength;
     #redgpu_endIf
 
     let indirectLighting = getIndirectPbrLighting(
