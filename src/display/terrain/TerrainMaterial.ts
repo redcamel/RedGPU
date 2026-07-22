@@ -62,11 +62,6 @@ Object.defineProperty(TerrainMaterial.prototype, 'isPBRMaterial', {
     value: true,
     writable: false
 });
-Object.defineProperty(TerrainMaterial.prototype, 'isTerrainMaterial', {
-    value: true,
-    writable: false
-});
-
 
 defineNumber(TerrainMaterial, [
     {key: 'metallicFactor', value: 0},

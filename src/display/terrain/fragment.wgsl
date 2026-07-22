@@ -337,6 +337,9 @@ fn main(inputData:InputData) -> OutputFragment {
 
     let albedo:vec3<f32> = baseColor.rgb ;
     var ior:f32 = u_KHR_materials_ior;
+    if (ior <= 0.0) {
+        ior = 1.5;
+    }
 
     var metallicParameter: f32 = u_metallicFactor;
     var roughnessParameter: f32 = u_roughnessFactor;
@@ -573,10 +576,14 @@ fn getIndirectPbrLighting(
         let R = getReflectionVectorFromViewDirection(V, N);
         let NdotV_IBL = max(abs(dot(N, V)), 0.04);
         let iblRoughness = *roughnessParameter;
+        var reflectedColor = vec3<f32>(0.0);
         var iblDiffuseColor = vec3<f32>(0.0);
         var iblMipmapCount: f32 = 0.0;
 
         if (u_usePrefilterTexture) {
+            iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
+            var mipLevel = iblRoughness * iblMipmapCount;
+            reflectedColor = textureSampleLevel( ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel ).rgb * preExposure * systemUniforms.iblIntensity;
             iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * preExposure * systemUniforms.iblIntensity;
         }
         if (u_useSkyAtmosphere) {
@@ -584,48 +591,41 @@ fn getIndirectPbrLighting(
             let camH = u_atmo.cameraHeight;
             let atmH = u_atmo.atmosphereHeight;
             let skyIntensity = u_atmo.sunIntensity;
+            let specTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, R.y, atmH);
+            let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
+            let atmoMipLevel = iblRoughness * atmoMipCount;
+            let specSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb * skyIntensity * preExposure;
+            reflectedColor = (reflectedColor * specTrans) + specSkyScat;
             let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
             let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity * preExposure;
             iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
+        let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, *roughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
+        let energyCompensation = 1.0 + F0 * (1.0 / max(envBRDF.x + envBRDF.y, 1e-4) - 1.0);
+        reflectedColor *= energyCompensation;
 
-        let envIBL_DIFFUSE = albedo * iblDiffuseColor * INV_PI * occlusionParameter;
-        let dielectricPart_IBL = envIBL_DIFFUSE;
+        let fresnelPower = 5.0 - 2.0 * (*roughnessParameter);
+        let fresnelTerm = pow(saturate(1.0 - NdotV_IBL), fresnelPower);
+        let FR_dielectric = getIndirectFresnel(NdotV_IBL, F0_dielectric, *roughnessParameter, fresnelTerm);
+        let FR_metal      = getIndirectFresnel(NdotV_IBL, F0_metal,      *roughnessParameter, fresnelTerm);
 
-        var metallicPart_IBL = vec3<f32>(0.0);
-        if (metallicParameter > 0.0) {
-            var reflectedColor = vec3<f32>(0.0);
-            if (u_usePrefilterTexture) {
-                iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
-                var mipLevel = iblRoughness * iblMipmapCount;
-                reflectedColor = textureSampleLevel( ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel ).rgb * preExposure * systemUniforms.iblIntensity;
-            }
-            if (u_useSkyAtmosphere) {
-                let u_atmo = systemUniforms.skyAtmosphere;
-                let camH = u_atmo.cameraHeight;
-                let atmH = u_atmo.atmosphereHeight;
-                let skyIntensity = u_atmo.sunIntensity;
-                let specTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, R.y, atmH);
-                let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
-                let atmoMipLevel = iblRoughness * atmoMipCount;
-                let specSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb * skyIntensity * preExposure;
-                reflectedColor = (reflectedColor * specTrans) + specSkyScat;
-            }
-            let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, *roughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
-            let energyCompensation = 1.0 + F0 * (1.0 / max(envBRDF.x + envBRDF.y, 1e-4) - 1.0);
-            reflectedColor *= energyCompensation;
+        let horizonOcclusion = saturate(1.0 + 1.1 * dot(R, N));
+        reflectedColor *= horizonOcclusion * horizonOcclusion;
 
-            let horizonOcclusion = saturate(1.0 + 1.1 * dot(R, N));
-            reflectedColor *= horizonOcclusion * horizonOcclusion;
+        let F_IBL_dielectric = FR_dielectric * envBRDF.x + envBRDF.y;
+        let F_IBL_metal      = FR_metal * envBRDF.x + envBRDF.y;
+        let F_IBL_dielectric_weight = F_IBL_dielectric * 1.0; // TerrainMaterial default specularParameter: 1.0
 
-            let fresnelPower = 5.0 - 2.0 * (*roughnessParameter);
-            let fresnelTerm = pow(saturate(1.0 - NdotV_IBL), fresnelPower);
-            let FR_metal      = getIndirectFresnel(NdotV_IBL, F0_metal,      *roughnessParameter, fresnelTerm);
-            let F_IBL_metal      = FR_metal * envBRDF.x + envBRDF.y;
+        let specularOcclusion = saturate(pow(NdotV_IBL + occlusionParameter, exp2(-16.0 * (*roughnessParameter) - 1.0)) - 1.0 + occlusionParameter);
 
-            let specularOcclusion = saturate(pow(NdotV_IBL + occlusionParameter, exp2(-16.0 * (*roughnessParameter) - 1.0)) - 1.0 + occlusionParameter);
-            metallicPart_IBL = reflectedColor * F_IBL_metal * specularOcclusion;
-        }
+        // 💡 수직 입사 기반 반사총량(specularAlbedo_IBL)과 디퓨즈 에너지 감쇄 가중치(diffuseWeight_IBL) 공식 교정
+        let specularAlbedo_IBL = saturate(F0_dielectric * envBRDF.x + envBRDF.y);
+        let diffuseWeight_IBL = saturate(vec3<f32>(1.0) - specularAlbedo_IBL * 1.0); // specularParameter fallback: 1.0
+
+        let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric_weight * specularOcclusion;
+        let envIBL_DIFFUSE = albedo * iblDiffuseColor * diffuseWeight_IBL * INV_PI * occlusionParameter;
+        let dielectricPart_IBL = ibl_specular_dielectric + envIBL_DIFFUSE;
+        let metallicPart_IBL = reflectedColor * F_IBL_metal * specularOcclusion;
 
         let baseIndirect = mix(dielectricPart_IBL, metallicPart_IBL, metallicParameter);
         let indirectLighting = baseIndirect;
@@ -652,15 +652,17 @@ fn getDirectPbrLight(
     let LdotH = max(dot(L, H), 0.0);
     let VdotH = max(dot(V, H), 0.0);
 
-    // Dielectric specular is 0.0
-    let diffuse_reflection = getDirectDiffuseBRDF(NdotL, VdotN, LdotH, roughnessParameter, albedo);
-    let dielectricPart = diffuse_reflection;
-
-    // Metallic part still calculates specular BRDF
-    let metal_f0 = albedo;
-    var F = getFresnel(VdotH, metal_f0);
+    // 💡 [PBR 표준 복원] 비금속(Dielectric)에 대해서도 스펙큘러 직접광 반사율과 에너지 보존을 적용합니다.
+    let combined_f0 = mix(F0_base, albedo, metallicParameter);
+    var F = getFresnel(VdotH, combined_f0);
     if (abs(ior - 1.0) < EPSILON) { F = vec3<f32>(0.0); }
+
     let SPEC_BRDF = getDirectSpecularBRDF(F, roughnessParameter, NdotH, VdotN, NdotL);
+    let diffuse_reflection = getDirectDiffuseBRDF(NdotL, VdotN, LdotH, roughnessParameter, albedo);
+
+    let specular_weight = F * 1.0; // TerrainMaterial default specularParameter: 1.0
+    let dielectricPart = (SPEC_BRDF * 1.0 * NdotL) + (vec3<f32>(1.0) - specular_weight) * diffuse_reflection;
+
     let metallicPart = SPEC_BRDF * NdotL;
 
     let result = mix(dielectricPart, metallicPart, metallicParameter);
