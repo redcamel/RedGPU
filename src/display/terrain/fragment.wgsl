@@ -29,9 +29,7 @@ struct TerrainUniforms {
 #redgpu_if baseColorTexture
 @group(2) @binding(1) var baseColorTexture: texture_2d<f32>;
 #redgpu_endIf
-#redgpu_if splatTexture
 @group(2) @binding(2) var splatTexture: texture_2d<f32>;
-#redgpu_endIf
 @group(2) @binding(3) var diffuseArray: texture_2d_array<f32>;
 #redgpu_if normalArray
 @group(2) @binding(4) var normalArray: texture_2d_array<f32>;
@@ -81,12 +79,15 @@ fn getHeightBlendedWeights(
     let safeContrast = max(1.0 - contrastPower, 0.02) * 2.0;
     let threshold = maxVal - safeContrast;
     let blended = max(combined - vec4<f32>(threshold), vec4<f32>(0.0));
-    let sumVal = blended.r + blended.g + blended.b + blended.a;
+    
+    // 💡 [블리딩 방지 필터] 원래 스플랫 가중치가 0.001 이하인 채널은 높이 편차와 무관하게 완전히 차단(0.0)
+    let filteredBlended = blended * step(vec4<f32>(0.001), splatWeights);
+    let sumVal = filteredBlended.r + filteredBlended.g + filteredBlended.b + filteredBlended.a;
     // 💡 가중치 소실 방지 안전 폴백
     if (sumVal <= 0.0001) {
         return splatWeights;
     }
-    return blended / sumVal;
+    return filteredBlended / sumVal;
 }
 
 @fragment
@@ -219,34 +220,36 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_endIf
 
     // =============================================================================
-    // 💡 지형 스플랫 마스크 및 Height-Lerp 기반 가중치 정규화 연산
+    // 💡 지형 스플랫 마스크 및 Height-Lerp 기반 가중치 정규화 연산 (언리얼 표준 방식)
     // =============================================================================
-    var normWeights = vec4<f32>(1.0, 0.0, 0.0, 0.0);
-    #redgpu_if splatTexture
-    {
-        let splatMask = textureSample(splatTexture, textureSampler, input_uv);
+    let splatMask = textureSample(splatTexture, textureSampler, input_uv);
+    let splatR = splatMask.r;
+    let splatG = splatMask.g;
+    let splatB = splatMask.b;
 
-        // JPG 파일 등 Alpha 채널이 없는 경우를 고려하여 RGB 합을 기반으로 Alpha(자갈) 역산
-        let splatR = splatMask.r;
-        let splatG = splatMask.g;
-        let splatB = splatMask.b;
+    var baseWeights = vec4<f32>(splatR, splatG, splatB, splatMask.a);
+
+    // 💡 [언리얼 표준 폴백] 스플랫 맵이 없거나 꺼져서 1x1 투명 검은색 텍스처가 매핑되면
+    // R채널(0번째 Grass 레이어)에 100% 가중치를 주어 지형 전체를 덮도록 동작
+    if (splatR + splatG + splatB <= 0.01) {
+        baseWeights = vec4<f32>(1.0, 0.0, 0.0, 0.0);
+    } else {
         let splatA = select(splatMask.a, max(0.0, 1.0 - (splatR + splatG + splatB)), splatMask.a == 1.0);
-
-        let baseWeights = vec4<f32>(splatR, splatG, splatB, splatA);
-        normWeights = getHeightBlendedWeights(baseWeights, layerHeights, uniforms.blendContrast);
-        if(uniforms.debugSplatTexture == 1u){
-            output.color = splatMask;
-            return output;
-        }
+        baseWeights = vec4<f32>(splatR, splatG, splatB, splatA);
     }
-    #redgpu_endIf
+
+    let normWeights = getHeightBlendedWeights(baseWeights, layerHeights, uniforms.blendContrast);
+    if(uniforms.debugSplatTexture == 1u){
+        output.color = splatMask;
+        return output;
+    }
 
     // =============================================================================
     // 💡 지형 스플랫 노멀 맵 믹스 (표준 Z-Reconstruction 기반 정밀 연산)
     // =============================================================================
     #redgpu_if normalArray
     {
-        // 1. 각 레이어의 노멀 맵 원시 RGB 샘플링
+        // 1. 각 레이어의 노멀 맵 원시 RGB 샘플링 (조건문 밖에서 무조건 실행하여 Uniform Control Flow 보장)
         let n_grass = textureSample(normalArray, textureSampler, tileUV, 0i).rgb;
         let grassNormal_detail = mix(n_grass, textureSample(normalArray, textureSampler, macroUV, 0i).rgb, macroBlend);
 
@@ -317,14 +320,15 @@ fn main(inputData:InputData) -> OutputFragment {
         baseMapColor = textureSample(baseColorTexture, textureSampler, input_uv);
     #redgpu_endIf
 
+    // 💡 [최적화] 162라인에서 이미 샘플링된 grass, sand, rock, gravel 변수를 재사용하여 텍스처 대역폭 낭비와 중복 선언 에러를 해결
     let diffuseSampleColor = grass * normWeights.r + sand * normWeights.g + rock * normWeights.b + gravel * normWeights.a;
 
     #redgpu_if baseColorTexture
-        baseColor = baseColor * baseMapColor * diffuseSampleColor * 2.0;
+        baseColor = baseColor * baseMapColor * diffuseSampleColor;
         resultAlpha = resultAlpha * baseMapColor.a * diffuseSampleColor.a;
     #redgpu_else
-        baseColor *= diffuseSampleColor;
-        resultAlpha *= diffuseSampleColor.a;
+        baseColor = baseColor * diffuseSampleColor;
+        resultAlpha = resultAlpha * diffuseSampleColor.a;
     #redgpu_endIf
 
     let albedo:vec3<f32> = baseColor.rgb ;

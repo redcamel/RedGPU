@@ -21,7 +21,7 @@ interface TerrainMaterial {
     occlusionStrength: number;
     baseColorFactor: [number, number, number, number];
     baseColorTexture: BitmapTexture;
-    splatMap: BitmapTexture;
+    splatTexture: BitmapTexture;
     diffuseArray: TextureArray;
     heightArray: TextureArray;
     normalArray: TextureArray;
@@ -82,13 +82,13 @@ defineBoolean(TerrainMaterial, [
 ])
 
 defineColorRGBA(TerrainMaterial, [
-    {key: 'baseColorFactor', value: '#a5957e'}
+    {key: 'baseColorFactor', value: '#ffffff'}
 ]);
 
 defineTexture(TerrainMaterial, [
     {key: 'baseColorTexture'},
 
-    {key: 'splatMap'},
+    {key: 'splatTexture'},
     {key: 'diffuseArray'},
     {key: 'heightArray'},
     {key: 'normalArray'},

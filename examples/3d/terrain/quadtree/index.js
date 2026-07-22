@@ -129,10 +129,11 @@ RedGPU.init(
         terrain.material.tileScale = 75.0;
         terrain.material.macroScale = 10.0;
 
-        terrain.material.splatTexture = new RedGPU.Resource.BitmapTexture(
+        const splatTextureInstance = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/terrain/terrainTest_001/splatMap.jpg',
         );
+        terrain.material.splatTexture = splatTextureInstance;
 
         terrain.material.diffuseArray = new RedGPU.Resource.TextureArray(
             redGPUContext,
@@ -185,7 +186,7 @@ RedGPU.init(
         requestAnimationFrame(hudLoop);
 
         // 6. GUI 패널
-        buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, ormTextureInstance);
+        buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, ormTextureInstance, splatTextureInstance);
     },
     (failReason) => {
         console.error('RedGPU 초기화 실패:', failReason);
@@ -197,7 +198,7 @@ RedGPU.init(
 );
 
 // ─── GUI 패널 ──────────────────────────────────────────────────────────────────
-function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, ormTextureInstance) {
+function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, ormTextureInstance, splatTextureInstance) {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
         ibl: true,
@@ -224,6 +225,7 @@ function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, 
                 blendContrast: 0.0,
                 useBaseColorTexture: true,
                 useOrmTexture: true,
+                useSplatTexture: true,
             };
 
             // 와이어프레임
@@ -327,6 +329,11 @@ function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, 
                 label: 'ORM 사용 (AO/R/M)'
             }).on('change', (ev) => {
                 terrain.material.ormTexture = ev.value ? ormTextureInstance : null;
+            });
+            materialFolder.addBinding(state, 'useSplatTexture', {
+                label: '스플랫 맵 사용 (Splat Map)'
+            }).on('change', (ev) => {
+                terrain.material.splatTexture = ev.value ? splatTextureInstance : null;
             });
 
         }
