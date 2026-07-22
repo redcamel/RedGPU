@@ -235,7 +235,7 @@ fn main(inputData:InputData) -> OutputFragment {
     // 💡 [안전 폴백 및 언리얼 표준] 스플랫 맵이 없거나 꺼져서 1x1 투명 검은색 텍스처가 매핑되면
     // R채널(0번째 Grass 레이어)에 100% 가중치를 주어 지형 전체를 덮도록 동작.
     // 💡 밉맵 필터링 노이즈(부동소수점 오차)에 의한 오작동 방지를 위해 임계치 기준을 0.1로 넉넉하게 확장
-    if (splatR + splatG + splatB <= 0.1) {
+    if (splatR + splatG + splatB + splatMask.a <= 0.1) {
         baseWeights = vec4<f32>(1.0, 0.0, 0.0, 0.0);
     } else {
         let splatA = select(splatMask.a, max(0.0, 1.0 - (splatR + splatG + splatB)), splatMask.a == 1.0);
