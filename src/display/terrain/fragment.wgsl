@@ -75,16 +75,24 @@ fn getHeightBlendedWeights(
 ) -> vec4<f32> {
     let combined = splatWeights + layerHeights;
     let maxVal = max(combined.r, max(combined.g, max(combined.b, combined.a)));
-    let threshold = maxVal - contrast;
+    // 💡 언리얼 엔진과 일치화: 1.0일 때 칼 경계(Sharp), 0.0일 때 부드러운 블렌딩(Blurry)
+    // 수학적으로 (1.0 - contrast)로 연산 방향을 뒤집고, 0.05의 오차 마진을 적용
+    let safeContrast = max(1.0 - contrast, 0.05);
+    let threshold = maxVal - safeContrast;
     let blended = max(combined - vec4<f32>(threshold), vec4<f32>(0.0));
     let sumVal = blended.r + blended.g + blended.b + blended.a;
-    return blended / max(sumVal, 0.0001);
+    // 💡 만약 극한의 연산 오차로 합이 0에 가깝다면, 지형 소실 방지를 위해 원래의 스플랫 가중치로 안전 폴백
+    if (sumVal <= 0.0001) {
+        return splatWeights;
+    }
+    return blended / sumVal;
 }
 
 @fragment
 fn main(inputData:InputData) -> OutputFragment {
     var output: OutputFragment;
     let pbrUniforms = globalFragmentSSBO_PBR[inputData.globalFragmentSlotIndex];
+
 
     let input_vertexNormal = (inputData.vertexNormal.xyz);
     let input_vertexPosition = inputData.vertexPosition.xyz;
@@ -233,28 +241,39 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_endIf
 
     // =============================================================================
-    // 💡 지형 스플랫 노멀 맵 믹스
+    // 💡 지형 스플랫 노멀 맵 믹스 (올바른 탄젠트 공간 복원 후 보간)
     // =============================================================================
     #redgpu_if normalArray
     {
-        let grassNormal_detail = textureSample(normalArray, textureSampler, tileUV, 0i).rgb;
-        let grassNormal_macro  = textureSample(normalArray, textureSampler, macroUV, 0i).rgb;
-        let grassNormal = mix(grassNormal_detail, grassNormal_macro, macroBlend);
+        // 각 레이어의 노멀 맵 원시 RGB 샘플링
+        let n_grass = textureSample(normalArray, textureSampler, tileUV, 0i).rgb;
+        let grassNormal_detail = mix(n_grass, textureSample(normalArray, textureSampler, macroUV, 0i).rgb, macroBlend);
 
-        let sandNormal_detail = textureSample(normalArray, textureSampler, tileUV, 1i).rgb;
-        let sandNormal_macro  = textureSample(normalArray, textureSampler, macroUV, 1i).rgb;
-        let sandNormal = mix(sandNormal_detail, sandNormal_macro, macroBlend);
+        let n_sand = textureSample(normalArray, textureSampler, tileUV, 1i).rgb;
+        let sandNormal_detail = mix(n_sand, textureSample(normalArray, textureSampler, macroUV, 1i).rgb, macroBlend);
 
-        let rockNormal_detail = textureSample(normalArray, textureSampler, tileUV, 2i).rgb;
-        let rockNormal_macro  = textureSample(normalArray, textureSampler, macroUV, 2i).rgb;
-        let rockNormal = mix(rockNormal_detail, rockNormal_macro, macroBlend);
+        let n_rock = textureSample(normalArray, textureSampler, tileUV, 2i).rgb;
+        let rockNormal_detail = mix(n_rock, textureSample(normalArray, textureSampler, macroUV, 2i).rgb, macroBlend);
 
-        let gravelNormal_detail = textureSample(normalArray, textureSampler, tileUV, 3i).rgb;
-        let gravelNormal_macro  = textureSample(normalArray, textureSampler, macroUV, 3i).rgb;
-        let gravelNormal = mix(gravelNormal_detail, gravelNormal_macro, macroBlend);
+        let n_gravel = textureSample(normalArray, textureSampler, tileUV, 3i).rgb;
+        let gravelNormal_detail = mix(n_gravel, textureSample(normalArray, textureSampler, macroUV, 3i).rgb, macroBlend);
 
-        let blendedNormalMap = grassNormal * normWeights.r + sandNormal * normWeights.g + rockNormal * normWeights.b + gravelNormal * normWeights.a;
-        N = getNormalFromNormalMap(vec3<f32>(blendedNormalMap.r, 1.0 - blendedNormalMap.g, blendedNormalMap.b), tbn, u_normalScale );
+        // 💡 1. 믹싱 전 각 채널을 탄젠트 벡터(-1.0 ~ 1.0) 공간으로 각각 개별 언팩
+        let v_grass  = vec3<f32>(grassNormal_detail.r * 2.0 - 1.0,  1.0 - grassNormal_detail.g * 2.0,  grassNormal_detail.b * 2.0 - 1.0);
+        let v_sand   = vec3<f32>(sandNormal_detail.r * 2.0 - 1.0,   1.0 - sandNormal_detail.g * 2.0,   sandNormal_detail.b * 2.0 - 1.0);
+        let v_rock   = vec3<f32>(rockNormal_detail.r * 2.0 - 1.0,   1.0 - rockNormal_detail.g * 2.0,   rockNormal_detail.b * 2.0 - 1.0);
+        let v_gravel = vec3<f32>(gravelNormal_detail.r * 2.0 - 1.0, 1.0 - gravelNormal_detail.g * 2.0, gravelNormal_detail.b * 2.0 - 1.0);
+
+        // 💡 2. 탄젠트 3D 벡터 상태에서 정밀하게 가중치 합산 수행
+        let blendedTangentNormal = normalize(
+            v_grass * normWeights.r + 
+            v_sand * normWeights.g + 
+            v_rock * normWeights.b + 
+            v_gravel * normWeights.a
+        );
+
+        // 💡 3. 합산되고 탄탄하게 정규화된 탄젠트 노멀을 최종 월드 공간 법선 벡터(N)로 전달
+        N = normalize(tbn * vec3<f32>(blendedTangentNormal.x * u_normalScale, blendedTangentNormal.y * u_normalScale, blendedTangentNormal.z));
     }
     #redgpu_else
     {

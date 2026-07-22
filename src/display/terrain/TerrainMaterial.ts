@@ -69,20 +69,20 @@ Object.defineProperty(TerrainMaterial.prototype, 'isTerrainMaterial', {
 
 
 defineNumber(TerrainMaterial, [
-    {key: 'blendContrast', value: 0.5},
     {key: 'metallicFactor', value: 0},
     {key: 'roughnessFactor', value: 0.85},
     {key: 'normalScale', value: 1.0},
     {key: 'tileScale', value: 1.0},
     {key: 'macroScale', value: 1.0},
-    {key: 'occlusionStrength', value: 1.0}
+    {key: 'occlusionStrength', value: 1.0},
+    {key: 'blendContrast', value: 0.0}
 ]);
 defineBoolean(TerrainMaterial, [
     {key: 'debugSplatTexture', value: false}
 ])
 
 defineColorRGBA(TerrainMaterial, [
-    {key: 'baseColorFactor', value: '#7f7361'}
+    {key: 'baseColorFactor', value: '#a5957e'}
 ]);
 
 defineTexture(TerrainMaterial, [

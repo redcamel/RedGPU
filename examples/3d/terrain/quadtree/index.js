@@ -157,16 +157,6 @@ RedGPU.init(
             ]
         );
 
-        terrain.material.heightArray = new RedGPU.Resource.TextureArray(
-            redGPUContext,
-            [
-                '../../../assets/terrain/terrainTest_001/layer/grass_height.png',
-                '../../../assets/terrain/terrainTest_001/layer/sand_height.png',
-                '../../../assets/terrain/terrainTest_001/layer/rock_height.png',
-                '../../../assets/terrain/terrainTest_001/layer/gravel_height.png'
-            ]
-        );
-
 
 
         // 3-5. 지형 파라미터 — 거대 스케일 설정
@@ -229,7 +219,7 @@ function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, 
                 normalScale: 1.0,
                 roughnessFactor: 0.85,
                 occlusionStrength: 1.0,
-                blendContrast: 0.5,
+                blendContrast: 0.0,
                 useBaseColorTexture: true,
                 useOrmTexture: true,
             };
@@ -255,12 +245,10 @@ function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, 
             }).on('change', (ev) => {
                 terrain.maxLOD = ev.value;
             });
-            terrainFolder.addBinding(state, 'blendContrast', {
-
-                min: 0, max: 100, step: 0.01
-            }).on('change', (ev) => {
-                terrain.blendContrast = ev.value;
-            });
+            terrainFolder.addBinding(terrain.material, 'blendContrast', {
+                label: '블렌드 대비 (Contrast)',
+                min: 0, max: 1.0, step: 0.00001
+            })
             terrainFolder.addBinding(terrain.material, 'debugSplatTexture')
 
             // 높이 범위
@@ -300,7 +288,7 @@ function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, 
             const materialFolder = terrainFolder.addFolder({title: '🎨 재질 및 타일링 설정', expanded: true});
             materialFolder.addBinding(state, 'tileScale', {
                 label: '디테일 타일링 (근거리)',
-                min: 1.0, max: 50.0, step: 0.01
+                min: 1.0, max: 150.0, step: 0.01
             }).on('change', (ev) => {
                 terrain.material.tileScale = ev.value;
             });
