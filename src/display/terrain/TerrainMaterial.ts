@@ -23,19 +23,6 @@ export interface TerrainLayerConfig {
     roughnessFactor?: number;
 }
 
-export interface TerrainMaterialSetupOptions {
-    splatTexture?: string | BitmapTexture;
-    baseColorTexture?: string | BitmapTexture;
-    ormTexture?: string | BitmapTexture;
-    tileScale?: number;
-    macroScale?: number;
-    blendContrast?: number;
-    normalScale?: number;
-    roughnessFactor?: number;
-    occlusionStrength?: number;
-    layers?: TerrainLayerConfig[];
-}
-
 interface TerrainMaterial {
     metallicFactor: number;
     roughnessFactor: number;
@@ -137,37 +124,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
             return true;
         }
         return false;
-    }
-
-    /**
-     * [KO] 디테일 레이어 목록을 일괄 설정합니다. (최대 4개)
-     * [EN] Sets the detail layer list at once. (Maximum 4)
-     */
-    public setLayers(configs: TerrainLayerConfig[]): void {
-        if (configs.length > 4) {
-            consoleAndThrowError("TerrainMaterial supports a maximum of 4 layers.");
-        }
-        this.#layers = [...configs.slice(0, 4)];
-        this.#rebuildLayerTextureArrays();
-    }
-
-    /**
-     * [KO] 스플랫 맵, 글로벌 텍스처, 타일링 및 레이어 구성을 한 번에 초기화합니다.
-     * [EN] Initializes splat map, global textures, tiling, and layer configurations at once.
-     */
-    public setup(options: TerrainMaterialSetupOptions): void {
-        if (options.splatTexture !== undefined) this.splatTexture = options.splatTexture as any;
-        if (options.baseColorTexture !== undefined) this.baseColorTexture = options.baseColorTexture as any;
-        if (options.ormTexture !== undefined) this.ormTexture = options.ormTexture as any;
-        if (options.tileScale !== undefined) this.tileScale = options.tileScale;
-        if (options.macroScale !== undefined) this.macroScale = options.macroScale;
-        if (options.blendContrast !== undefined) this.blendContrast = options.blendContrast;
-        if (options.normalScale !== undefined) this.normalScale = options.normalScale;
-        if (options.roughnessFactor !== undefined) this.roughnessFactor = options.roughnessFactor;
-        if (options.occlusionStrength !== undefined) this.occlusionStrength = options.occlusionStrength;
-        if (options.layers) {
-            this.setLayers(options.layers);
-        }
     }
 
     #rebuildLayerTextureArrays(): void {
