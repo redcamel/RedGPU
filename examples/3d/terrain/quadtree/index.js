@@ -76,10 +76,8 @@ RedGPU.init(
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
         controller.speedDistance = 20;
         controller.distance = 650;
-        controller.rotationX = 25;    
-        controller.rotationY = 45;
-        controller.camera.farClipping = 5000;
-        controller.camera.nearClipping = 0.5;
+        // controller.camera.farClipping = 20000;
+        // controller.camera.nearClipping = 0.5;
 
         // 2. 씬 & 뷰
         const scene = new RedGPU.Display.Scene();
@@ -87,16 +85,10 @@ RedGPU.init(
         view.grid = false;
         redGPUContext.addView(view);
 
-        // 2-1. 노을녘 태양광 (Directional Light) 추가 — 고도를 극도로 낮춰 매우 길고 거대한 골짜기 그림자 생성
-        const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.elevation = 45
-        directionalLight.enableDebugger = true
 
-        scene.lightManager.addDirectionalLight(directionalLight);
+        // const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
+        // view.skyAtmosphere = skyAtmosphere;
 
-        // 💡 전체화면 크기 설정 및 창 리사이즈 대응
-        redGPUContext.setSize('100%', '100%');
-        window.addEventListener('resize', () => redGPUContext.setSize('100%', '100%'));
 
         // 3. 거대 Terrain 생성
         const terrain = new RedGPU.Display.Terrain(
@@ -311,14 +303,14 @@ function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, 
             const scaleFolder = terrainFolder.addFolder({title: '🌐 월드 크기', expanded: true});
             scaleFolder.addBinding(state, 'worldSizeX', {
                 label: 'Width (X)',
-                min: 10, max: 2048, step: 10
+                min: 10, max: 9192, step: 10
             }).on('change', (ev) => {
                 terrain.worldSize = [ev.value, terrain.worldSize[1]];
                 terrain.worldOffset = [-ev.value / 2, terrain.worldOffset[1]];
             });
             scaleFolder.addBinding(state, 'worldSizeZ', {
                 label: 'Depth (Z)',
-                min: 10, max: 2048, step: 10
+                min: 10, max: 9192, step: 10
             }).on('change', (ev) => {
                 terrain.worldSize = [terrain.worldSize[0], ev.value];
                 terrain.worldOffset = [terrain.worldOffset[0], -ev.value / 2];
