@@ -137,55 +137,35 @@ RedGPU.init(
         );
         terrain.material.splatTexture = splatTextureInstance;
 
-        terrain.material.diffuseArray = new RedGPU.Resource.TextureArray(
-            redGPUContext,
-            [
-                '../../../assets/terrain/terrainTest_001/layer/grass.jpg',
-                '../../../assets/terrain/terrainTest_001/layer/sand.jpg',
-                '../../../assets/terrain/terrainTest_001/layer/rock.jpg',
-                '../../../assets/terrain/terrainTest_001/layer/gravel.jpg'
-            ]
-        );
-
-        terrain.material.normalArray = new RedGPU.Resource.TextureArray(
-            redGPUContext,
-            [
-                '../../../assets/terrain/terrainTest_001/layer/grass_normal.jpg',
-                '../../../assets/terrain/terrainTest_001/layer/sand_normal.jpg',
-                '../../../assets/terrain/terrainTest_001/layer/rock_normal.jpg',
-                '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg'
-            ],
-            true,
-            null,
-            null,
-            'rgba8unorm'
-        );
-        terrain.material.heightArray = new RedGPU.Resource.TextureArray(
-            redGPUContext,
-            [
-                '../../../assets/terrain/terrainTest_001/layer/grass_height.jpg',
-                '../../../assets/terrain/terrainTest_001/layer/sand_height.jpg',
-                '../../../assets/terrain/terrainTest_001/layer/rock_height.jpg',
-                '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg'
-            ],
-            true,
-            null,
-            null,
-            'rgba8unorm'
-        );
-        terrain.material.ormArray = new RedGPU.Resource.TextureArray(
-            redGPUContext,
-            [
-                '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg', // grass 임시 비금속 ORM 폴백
-                '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg',
-                '../../../assets/terrain/terrainTest_001/layer/rock_orm.jpg',
-                '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg'  // gravel 임시 비금속 ORM 폴백
-            ],
-            true,
-            null,
-            null,
-            'rgba8unorm'
-        );
+        // 💡 신규 레이어 추가 API (addLayer)를 활용하여 디테일 레이어 4종 등록
+        terrain.material.addLayer({
+            name: 'Grass',
+            diffuse: '../../../assets/terrain/terrainTest_001/layer/grass.jpg',
+            normal: '../../../assets/terrain/terrainTest_001/layer/grass_normal.jpg',
+            height: '../../../assets/terrain/terrainTest_001/layer/grass_height.jpg',
+            orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg'
+        });
+        terrain.material.addLayer({
+            name: 'Sand',
+            diffuse: '../../../assets/terrain/terrainTest_001/layer/sand.jpg',
+            normal: '../../../assets/terrain/terrainTest_001/layer/sand_normal.jpg',
+            height: '../../../assets/terrain/terrainTest_001/layer/sand_height.jpg',
+            orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg'
+        });
+        terrain.material.addLayer({
+            name: 'Rock',
+            diffuse: '../../../assets/terrain/terrainTest_001/layer/rock.jpg',
+            normal: '../../../assets/terrain/terrainTest_001/layer/rock_normal.jpg',
+            height: '../../../assets/terrain/terrainTest_001/layer/rock_height.jpg',
+            orm: '../../../assets/terrain/terrainTest_001/layer/rock_orm.jpg'
+        });
+        terrain.material.addLayer({
+            name: 'Gravel',
+            diffuse: '../../../assets/terrain/terrainTest_001/layer/gravel.jpg',
+            normal: '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg',
+            height: '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg',
+            orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg'
+        });
 
         // 💡 지형 베이스 필터 색상을 흰색으로 초기화하여 텍스처 본연의 밝기와 태양광 반사를 그대로 표현
         terrain.material.baseColorFactor = '#ffffff';
