@@ -166,7 +166,7 @@ fn main(inputData:InputData) -> OutputFragment {
     let macroBlend = clamp((dist - 40.0) / (180.0 - 40.0), 0.0, 1.0);
 
     // =============================================================================
-    // 💡 지형 스플랫 알베도 샘플링 (거리 기반 블렌드 적용)
+    // 💡 [고품질 복원] 하드웨어 자동 Mipmap & Anisotropic Filtering 적용 (선명함 100% 보장)
     // =============================================================================
     let grass_detail = textureSample(diffuseArray, textureSampler, tileUV, 0i);
     let grass_macro  = textureSample(diffuseArray, textureSampler, macroUV, 0i);
@@ -315,10 +315,9 @@ fn main(inputData:InputData) -> OutputFragment {
 
     #redgpu_if baseColorTexture
         baseColor = baseColor * baseMapColor * diffuseSampleColor;
-        resultAlpha = resultAlpha * baseMapColor.a * diffuseSampleColor.a;
+        resultAlpha = resultAlpha * baseMapColor.a;
     #redgpu_else
         baseColor = baseColor * diffuseSampleColor;
-        resultAlpha = resultAlpha * diffuseSampleColor.a;
     #redgpu_endIf
 
     let albedo:vec3<f32> = baseColor.rgb ;
