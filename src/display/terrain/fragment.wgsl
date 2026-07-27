@@ -30,6 +30,8 @@ struct TerrainUniforms {
 }
 @group(2) @binding(0) var<uniform> uniforms: TerrainUniforms;
 
+// 💡 (참고) 레이어 바인딩 슬롯 레이아웃 유지를 위해 선언부는 남겨둡니다.
+// 실제 연산에는 샘플링되지 않으므로 성능에 영향을 주지 않습니다.
 #redgpu_if baseColorTexture
 @group(2) @binding(1) var baseColorTexture: texture_2d<f32>;
 #redgpu_endIf
@@ -42,16 +44,19 @@ struct TerrainUniforms {
 #redgpu_if ormTexture
 @group(2) @binding(6) var ormTexture: texture_2d<f32>;
 #redgpu_endIf
-
-// 💡 디테일 Height 맵 배열 바인딩
 #redgpu_if heightArray
 @group(2) @binding(7) var heightArray: texture_2d_array<f32>;
 #redgpu_endIf
-
-// 💡 디테일 ORM (Occlusion, Roughness, Metalness) 맵 배열 바인딩
 #redgpu_if ormArray
 @group(2) @binding(8) var ormArray: texture_2d_array<f32>;
 #redgpu_endIf
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 💡 RVT (Runtime Virtual Texture) 아틀라스 바인딩 — 무조건 사용
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+@group(2) @binding(9)  var rvtAlbedoTexture:    texture_2d<f32>;
+@group(2) @binding(10) var rvtNormalORMTexture:  texture_2d<f32>;
+@group(2) @binding(11) var rvtSampler:           sampler;
 
 struct InputData {
     @builtin(position) position : vec4<f32>,
@@ -72,32 +77,6 @@ struct InputData {
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 }
 
-// =============================================================================
-// 💡 Height-Lerp Blending Function (높이 기반 블렌딩 가중치 계산)
-// =============================================================================
-fn getHeightBlendedWeights(
-    splatWeights: vec4<f32>,
-    layerHeights: vec4<f32>,
-    contrast: f32
-) -> vec4<f32> {
-    // 💡 [언리얼 엔진 표준 공식] (Height + 1.0) * Weight 곱셈 결합
-    let combined = (layerHeights + vec4<f32>(1.0)) * splatWeights;
-    let maxVal = max(combined.r, max(combined.g, max(combined.b, combined.a)));
-
-    // 💡 아티스트 감도 완화 곡선 (Power Curve) 적용
-    let contrastPower = pow(contrast, 3.0);
-    let safeContrast = max(1.0 - contrastPower, 0.02) * 2.0;
-    let threshold = maxVal - safeContrast;
-    let blended = max(combined - vec4<f32>(threshold), vec4<f32>(0.0));
-
-    let sumVal = blended.r + blended.g + blended.b + blended.a;
-    // 💡 가중치 소실 방지 안전 폴백
-    if (sumVal <= 0.0001) {
-        return splatWeights;
-    }
-    return blended / sumVal;
-}
-
 @fragment
 fn main(inputData:InputData) -> OutputFragment {
     var output: OutputFragment;
@@ -109,34 +88,26 @@ fn main(inputData:InputData) -> OutputFragment {
     let input_vertexTangent = inputData.vertexTangent;
     let input_ndcPosition = inputData.position.xyz / inputData.position.w ;
     let input_uv = inputData.uv;
-    let input_uv1 = inputData.uv1;
     let u_camera = systemUniforms.camera;
     let u_cameraPosition = u_camera.cameraPosition;
-
-    let preExposure = systemUniforms.preExposure;
-    let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
-    let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
 
     let u_opacity = pbrUniforms.opacity;
     let u_cutOff = pbrUniforms.cutOff;
     let u_useVertexColor = pbrUniforms.useVertexColor == 1u;
-    let u_useVertexTangent = pbrUniforms.useVertexTangent == 1u;
 
     #redgpu_if baseColorTexture
         let u_baseColorFactor = vec4<f32>(1.0);
     #redgpu_else
         let u_baseColorFactor = pbrUniforms.baseColorFactor;
     #redgpu_endIf
-    let u_metallicFactor = pbrUniforms.metallicFactor;
-    let u_roughnessFactor = pbrUniforms.roughnessFactor;
     let u_normalScale = pbrUniforms.normalScale;
-
     let u_KHR_materials_ior = pbrUniforms.KHR_materials_ior;
 
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
     let baseNormal:vec3<f32> = normalize(input_vertexNormal.xyz);
     var N:vec3<f32> = baseNormal;
     var backFaceYn:bool = false;
+
     #redgpu_if doubleSided
     {
         if (dot(baseNormal, V) < 0.0) {
@@ -145,292 +116,97 @@ fn main(inputData:InputData) -> OutputFragment {
     }
     #redgpu_endIf
 
-    #redgpu_if normalArray
-    let tbnNeeded = true;
-    #redgpu_else
-    let tbnNeeded = false;
-    #redgpu_endIf
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 💡 TBN: RVT 모드에서는 항상 노멀 맵이 적용되므로 무조건 계산
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    let tbn = getTBNFromVertexTangent(baseNormal, input_vertexTangent);
 
-    var tbn: mat3x3<f32>;
-    if (tbnNeeded) {
-        tbn = getTBNFromVertexTangent(baseNormal, input_vertexTangent);
-    }
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // 💡 RVT 전용 단일 샘플링 로직
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    let rvt_albedo = textureSample(rvtAlbedoTexture, rvtSampler, input_uv);
+    let rvt_normalORM = textureSample(rvtNormalORMTexture, rvtSampler, input_uv);
 
-    // =============================================================================
-    // 💡 [언리얼 표준] 카메라 거리 기반 타일링 블렌딩 (Distance-based Tiling Blend)
-    // =============================================================================
-    let tileUV  = input_uv * uniforms.tileScale;
-    let macroUV = input_uv * uniforms.macroScale;
+    let rvt_normalXY = rvt_normalORM.rg;
+    let rvt_roughness = rvt_normalORM.b;
+    let rvt_occlusion = rvt_normalORM.a;
 
-    let dist = distance(systemUniforms.camera.cameraPosition, inputData.vertexPosition);
-    let macroBlend = clamp((dist - 40.0) / (180.0 - 40.0), 0.0, 1.0);
-
-    // =============================================================================
-    // 💡 [고품질 복원] 하드웨어 자동 Mipmap & Anisotropic Filtering 적용 (선명함 100% 보장)
-    // =============================================================================
-    let grass_detail = textureSample(diffuseArray, textureSampler, tileUV, 0i);
-    let grass_macro  = textureSample(diffuseArray, textureSampler, macroUV, 0i);
-    let grass = mix(grass_detail, grass_macro, macroBlend);
-
-    let sand_detail = textureSample(diffuseArray, textureSampler, tileUV, 1i);
-    let sand_macro  = textureSample(diffuseArray, textureSampler, macroUV, 1i);
-    let sand = mix(sand_detail, sand_macro, macroBlend);
-
-    let rock_detail = textureSample(diffuseArray, textureSampler, tileUV, 2i);
-    let rock_macro  = textureSample(diffuseArray, textureSampler, macroUV, 2i);
-    let rock = mix(rock_detail, rock_macro, macroBlend);
-
-    let gravel_detail = textureSample(diffuseArray, textureSampler, tileUV, 3i);
-    let gravel_macro  = textureSample(diffuseArray, textureSampler, macroUV, 3i);
-    let gravel = mix(gravel_detail, gravel_macro, macroBlend);
-
-    // =============================================================================
-    // 💡 텍스처 배열(heightArray)에서 디테일 Height 맵 추출 및 명암 대비 강제 증폭
-    // =============================================================================
-    var layerHeights = vec4<f32>(0.0, 0.0, 0.0, 0.0);
-    #redgpu_if heightArray
-    {
-        let h_grass_detail = textureSample(heightArray, textureSampler, tileUV, 0i).r;
-        let h_grass_macro  = textureSample(heightArray, textureSampler, macroUV, 0i).r;
-        let h_grass = mix(h_grass_detail, h_grass_macro, macroBlend);
-
-        let h_sand_detail = textureSample(heightArray, textureSampler, tileUV, 1i).r;
-        let h_sand_macro  = textureSample(heightArray, textureSampler, macroUV, 1i).r;
-        let h_sand = mix(h_sand_detail, h_sand_macro, macroBlend);
-
-        let h_rock_detail = textureSample(heightArray, textureSampler, tileUV, 2i).r;
-        let h_rock_macro  = textureSample(heightArray, textureSampler, macroUV, 2i).r;
-        let h_rock = mix(h_rock_detail, h_rock_macro, macroBlend);
-
-        let h_gravel_detail = textureSample(heightArray, textureSampler, tileUV, 3i).r;
-        let h_gravel_macro  = textureSample(heightArray, textureSampler, macroUV, 3i).r;
-        let h_gravel = mix(h_gravel_detail, h_gravel_macro, macroBlend);
-
-        let h_power = 3.0;
-        layerHeights = vec4<f32>(
-            pow(clamp(h_grass, 0.0, 1.0), h_power),
-            pow(clamp(h_sand, 0.0, 1.0), h_power),
-            pow(clamp(h_rock, 0.0, 1.0), h_power),
-            pow(clamp(h_gravel, 0.0, 1.0), h_power)
-        );
-    }
-    #redgpu_else
-    {
-        layerHeights = vec4<f32>(grass.a, sand.a, rock.a, gravel.a);
-    }
-    #redgpu_endIf
-
-    // =============================================================================
-    // 💡 지형 스플랫 마스크 및 Height-Lerp 기반 가중치 정규화 연산 (언리얼 표준 방식)
-    // =============================================================================
-    let splatMask = textureSample(splatTexture, textureSampler, input_uv);
-    let splatR = splatMask.r;
-    let splatG = splatMask.g;
-    let splatB = splatMask.b;
-
-    var baseWeights = vec4<f32>(splatR, splatG, splatB, splatMask.a);
-
-    if (splatR + splatG + splatB + splatMask.a <= 0.1) {
-        baseWeights = vec4<f32>(1.0, 0.0, 0.0, 0.0);
-    } else {
-        let splatA = select(splatMask.a, max(0.0, 1.0 - (splatR + splatG + splatB)), splatMask.a == 1.0);
-        baseWeights = vec4<f32>(splatR, splatG, splatB, splatA);
-    }
-
-    let normWeights = getHeightBlendedWeights(baseWeights, layerHeights, uniforms.blendContrast);
-    if(uniforms.debugSplatTexture == 1u){
-        output.color = splatMask;
+    // debugSplatTexture 모드 지원
+    if (uniforms.debugSplatTexture == 1u) {
+        output.color = rvt_albedo;
         return output;
     }
 
-    // =============================================================================
-    // 💡 지형 스플랫 노멀 맵 믹스 (표준 Z-Reconstruction 기반 정밀 연산)
-    // =============================================================================
-    #redgpu_if normalArray
-    {
-        let n_grass = textureSample(normalArray, textureSampler, tileUV, 0i).rgb;
-        let grassNormal_detail = mix(n_grass, textureSample(normalArray, textureSampler, macroUV, 0i).rgb, macroBlend);
+    // NormalMap 복원 (XY octahedral → world space)
+    let xy_rvt = vec2<f32>(rvt_normalXY.r * 2.0 - 1.0, -(rvt_normalXY.g * 2.0 - 1.0));
+    var scaled_rvt = xy_rvt * u_normalScale;
+    let lenSq_rvt = dot(scaled_rvt, scaled_rvt);
+    if (lenSq_rvt > 0.98) { scaled_rvt = normalize(scaled_rvt) * 0.98; }
+    let recon_z_rvt = sqrt(max(0.001, 1.0 - dot(scaled_rvt, scaled_rvt)));
+    N = normalize(tbn * vec3<f32>(scaled_rvt, recon_z_rvt));
 
-        let n_sand = textureSample(normalArray, textureSampler, tileUV, 1i).rgb;
-        let sandNormal_detail = mix(n_sand, textureSample(normalArray, textureSampler, macroUV, 1i).rgb, macroBlend);
-
-        let n_rock = textureSample(normalArray, textureSampler, tileUV, 2i).rgb;
-        let rockNormal_detail = mix(n_rock, textureSample(normalArray, textureSampler, macroUV, 2i).rgb, macroBlend);
-
-        let n_gravel = textureSample(normalArray, textureSampler, tileUV, 3i).rgb;
-        let gravelNormal_detail = mix(n_gravel, textureSample(normalArray, textureSampler, macroUV, 3i).rgb, macroBlend);
-
-        let xy_grass  = vec2<f32>(grassNormal_detail.r * 2.0 - 1.0,  -(grassNormal_detail.g * 2.0 - 1.0));
-        let xy_sand   = vec2<f32>(sandNormal_detail.r * 2.0 - 1.0,   -(sandNormal_detail.g * 2.0 - 1.0));
-        let xy_rock   = vec2<f32>(rockNormal_detail.r * 2.0 - 1.0,   -(rockNormal_detail.g * 2.0 - 1.0));
-        let xy_gravel = vec2<f32>(gravelNormal_detail.r * 2.0 - 1.0, -(gravelNormal_detail.g * 2.0 - 1.0));
-
-        let blendedXY = xy_grass * normWeights.r +
-                        xy_sand * normWeights.g +
-                        xy_rock * normWeights.b +
-                        xy_gravel * normWeights.a;
-
-        var scaledXY = blendedXY * u_normalScale;
-
-        let lenSq = dot(scaledXY, scaledXY);
-        if (lenSq > 0.98) {
-            scaledXY = normalize(scaledXY) * 0.98;
-        }
-
-        let reconstructedZ = sqrt(max(0.001, 1.0 - dot(scaledXY, scaledXY)));
-        N = normalize(tbn * vec3<f32>(scaledXY, reconstructedZ));
-    }
-    #redgpu_else
-    {
-        N = baseNormal;
-    }
-    #redgpu_endIf
-    if (backFaceYn) {
-        N = -N;
-    }
+    if (backFaceYn) { N = -N; }
     N = normalize(N);
-    let NdotV = max(abs(dot(N, V)), 0.04);
+    let NdotV_rvt = max(abs(dot(N, V)), 0.04);
 
     // Shadow
-    let receiveShadowYn = inputData.receiveShadow != 0.0;
-    var visibility:f32 = 1.0;
-    visibility = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, systemUniforms.shadow.directionalShadowDepthTextureSize, systemUniforms.shadow.directionalShadowBias, systemUniforms.shadow.directionalShadowFilterScale, inputData.shadowCoord);
-    if(!receiveShadowYn){
-        visibility = 1.0;
+    let receiveShadowYn_rvt = inputData.receiveShadow != 0.0;
+    var visibility_rvt: f32 = 1.0;
+    visibility_rvt = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, systemUniforms.shadow.directionalShadowDepthTextureSize, systemUniforms.shadow.directionalShadowBias, systemUniforms.shadow.directionalShadowFilterScale, inputData.shadowCoord);
+    if (!receiveShadowYn_rvt) {
+        visibility_rvt = 1.0;
     } else {
-        visibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, visibility);
+        visibility_rvt = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, visibility_rvt);
     }
 
-    // Base Color & Alpha
-    var baseColor = u_baseColorFactor;
-    var resultAlpha:f32 = u_opacity * baseColor.a;
-    baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
+    var baseColor_rvt = u_baseColorFactor;
+    var resultAlpha_rvt: f32 = u_opacity * baseColor_rvt.a;
+    baseColor_rvt *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
+    baseColor_rvt = baseColor_rvt * rvt_albedo;
+    let albedo_rvt: vec3<f32> = baseColor_rvt.rgb;
 
-    var baseMapColor = vec4<f32>(1.0);
-    #redgpu_if baseColorTexture
-        baseMapColor = textureSample(baseColorTexture, textureSampler, input_uv);
-    #redgpu_endIf
+    var ior_rvt: f32 = u_KHR_materials_ior;
+    if (ior_rvt <= 0.0) { ior_rvt = 1.5; }
 
-    let diffuseSampleColor = grass * normWeights.r + sand * normWeights.g + rock * normWeights.b + gravel * normWeights.a;
+    let occlusionParameter_rvt = rvt_occlusion * pbrUniforms.occlusionStrength;
+    let roughnessParameter_rvt = max(rvt_roughness, 0.04);
+    let metallicParameter_rvt: f32 = 0.0;
 
-    #redgpu_if baseColorTexture
-        baseColor = baseColor * baseMapColor * diffuseSampleColor;
-        resultAlpha = resultAlpha * baseMapColor.a;
-    #redgpu_else
-        baseColor = baseColor * diffuseSampleColor;
-    #redgpu_endIf
+    let F0_dielectric_base_rvt = getDielectricF0(ior_rvt);
+    let F0_rvt = F0_dielectric_base_rvt;
 
-    let albedo:vec3<f32> = baseColor.rgb ;
-    var ior:f32 = u_KHR_materials_ior;
-    if (ior <= 0.0) {
-        ior = 1.5;
-    }
-
-    // =============================================================================
-    // 💡 레이어별 Roughness Factor 가중치 믹스 연산
-    // =============================================================================
-    let baseLayerRoughnessFactor =
-        uniforms.grassRoughnessFactor  * normWeights.r +
-        uniforms.sandRoughnessFactor   * normWeights.g +
-        uniforms.rockRoughnessFactor   * normWeights.b +
-        uniforms.gravelRoughnessFactor * normWeights.a;
-
-    var metallicParameter: f32 = u_metallicFactor;
-    var occlusionParameter: f32 = 1.0;
-    var roughnessParameter: f32 = u_roughnessFactor;
-
-    // 💡 1. 베이스 매크로 ORM 텍스처 누적 적용
-    #redgpu_if ormTexture
-    {
-        let ormSample = textureSample(ormTexture, textureSampler, inputData.uv);
-        occlusionParameter *= ormSample.r;
-        metallicParameter *= ormSample.b;
-        roughnessParameter *= ormSample.g;
-    }
-    #redgpu_endIf
-
-    // 💡 2. 디테일 4종 레이어 ORM 텍스처 어레이 누적 적용
-    #redgpu_if ormArray
-    {
-        let orm_grass_detail = textureSample(ormArray, textureSampler, tileUV, 0i);
-        let orm_grass_macro  = textureSample(ormArray, textureSampler, macroUV, 0i);
-        let orm_grass = mix(orm_grass_detail, orm_grass_macro, macroBlend);
-
-        let orm_sand_detail = textureSample(ormArray, textureSampler, tileUV, 1i);
-        let orm_sand_macro  = textureSample(ormArray, textureSampler, macroUV, 1i);
-        let orm_sand = mix(orm_sand_detail, orm_sand_macro, macroBlend);
-
-        let orm_rock_detail = textureSample(ormArray, textureSampler, tileUV, 2i);
-        let orm_rock_macro  = textureSample(ormArray, textureSampler, macroUV, 2i);
-        let orm_rock = mix(orm_rock_detail, orm_rock_macro, macroBlend);
-
-        let orm_gravel_detail = textureSample(ormArray, textureSampler, tileUV, 3i);
-        let orm_gravel_macro  = textureSample(ormArray, textureSampler, macroUV, 3i);
-        let orm_gravel = mix(orm_gravel_detail, orm_gravel_macro, macroBlend);
-
-        let blendedORM = orm_grass * normWeights.r +
-                         orm_sand * normWeights.g +
-                         orm_rock * normWeights.b +
-                         orm_gravel * normWeights.a;
-
-        occlusionParameter *= blendedORM.r;
-
-        // 💡 [해결 1] 텍스처 노이즈로 인해 지형이 금속(Metal)으로 취급되는 현상 차단
-        metallicParameter = 0.0;
-
-        roughnessParameter = max(roughnessParameter * blendedORM.g, baseLayerRoughnessFactor);
-    }
-    #redgpu_else
-    {
-        // 💡 [해결 2] ORM 텍스처가 없을 때 거칠기가 비정상적으로 훅 떨어지던 중복 곱셈 제거
-        metallicParameter = 0.0;
-        roughnessParameter = baseLayerRoughnessFactor;
-    }
-    #redgpu_endIf
-
-    // 💡 3. 최종 오클루전 강도 보정
-    occlusionParameter *= pbrUniforms.occlusionStrength;
-
-    roughnessParameter = max(roughnessParameter, 0.04);
-    if (abs(ior - 1.0) < EPSILON) { roughnessParameter = 0.0; }
-
-    let F0_dielectric_base = getDielectricF0(ior);
-    let F0_dielectric = F0_dielectric_base;
-    var F0_metal = albedo;
-
-    let F0 = mix(F0_dielectric, F0_metal, metallicParameter);
-
-    let totalDirectLighting = getDirectPbrLighting(
-        input_vertexPosition, inputData.position, visibility,
-        N, V, NdotV,
-        roughnessParameter, metallicParameter, albedo,
-        F0_dielectric_base, ior
+    let totalDirect_rvt = getDirectPbrLighting(
+        input_vertexPosition, inputData.position, visibility_rvt,
+        N, V, NdotV_rvt,
+        roughnessParameter_rvt, metallicParameter_rvt, albedo_rvt,
+        F0_dielectric_base_rvt, ior_rvt
+    );
+    let indirect_rvt = getIndirectPbrLighting(
+        N, V, NdotV_rvt,
+        albedo_rvt, roughnessParameter_rvt, metallicParameter_rvt,
+        F0_rvt, F0_dielectric_base_rvt, albedo_rvt,
+        occlusionParameter_rvt
     );
 
-    let indirectLighting = getIndirectPbrLighting(
-        N, V, NdotV,
-        albedo, roughnessParameter, metallicParameter,
-        F0, F0_dielectric, F0_metal,
-        occlusionParameter
-    );
-
-    let finalColor = vec4<f32>(totalDirectLighting + indirectLighting, resultAlpha);
+    let finalColor_rvt = vec4<f32>(totalDirect_rvt + indirect_rvt, resultAlpha_rvt);
 
     #redgpu_if useCutOff
-        if (resultAlpha <= u_cutOff) { discard; }
+        if (resultAlpha_rvt <= u_cutOff) { discard; }
     #redgpu_endIf
     #redgpu_if useTint
-        output.color = getTintBlendMode(finalColor, pbrUniforms.tintBlendMode, pbrUniforms.tint);
+        output.color = getTintBlendMode(finalColor_rvt, pbrUniforms.tintBlendMode, pbrUniforms.tint);
     #redgpu_else
-        output.color = finalColor;
+        output.color = finalColor_rvt;
     #redgpu_endIf
+
     {
-        let smoothness = 1.0 - roughnessParameter;
-        let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
-        let baseReflectionStrength = smoothnessCurved * (0.04 + 0.96 * metallicParameter * metallicParameter);
-        output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
+        let smoothness_rvt = 1.0 - roughnessParameter_rvt;
+        let sc_rvt = smoothness_rvt * smoothness_rvt * (3.0 - 2.0 * smoothness_rvt);
+        output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, sc_rvt * (0.04 + 0.96 * metallicParameter_rvt * metallicParameter_rvt));
     }
-    output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0 );
+
+    output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
+
     return output;
 }
 
@@ -526,10 +302,6 @@ fn getDirectSpecularBRDF(
 fn getDirectDiffuseBRDF(NdotL: f32, albedo: vec3<f32>) -> vec3<f32> {
     return albedo * NdotL * INV_PI;
 }
-
-// =============================================================================
-// KHR Extensions (Sheen, Anisotropy, Clearcoat, Iridescence)
-// =============================================================================
 
 // =============================================================================
 // Main PBR Orchestration
@@ -677,9 +449,6 @@ fn getIndirectPbrLighting(
     }
 }
 
-// =============================================================================
-// 💡 [해결 3] 직사광 계산 시 프레넬 감쇠 및 정반사(Specular) 약화 로직이 적용된 함수
-// =============================================================================
 fn getDirectPbrLight(
     lightColor:vec3<f32>,
     N:vec3<f32>, V:vec3<f32>, L:vec3<f32>,
@@ -691,7 +460,6 @@ fn getDirectPbrLight(
     let NdotL_origin = dot(N, L);
     let NdotL = max(NdotL_origin, 0.0);
 
-    // 빛을 받지 못하는 뒷면은 연산 종료
     if (NdotL <= 0.0) {
         return vec3<f32>(0.0);
     }
@@ -702,21 +470,14 @@ fn getDirectPbrLight(
     let VdotH = max(dot(V, H), 0.0);
 
     let combined_f0 = mix(F0_base, albedo, metallicParameter);
-
-    // 빗각에서 프레넬 반사율이 무조건 1.0(거울)까지 치솟아 비닐처럼 빛나는 현상 물리적 억제
     let fresnelTerm = pow(clamp(1.0 - VdotH, 0.0, 1.0), 5.0);
     let F = combined_f0 + (max(vec3<f32>(1.0 - roughnessParameter), combined_f0) - combined_f0) * fresnelTerm;
 
     let SPEC_BRDF = getDirectSpecularBRDF(F, roughnessParameter, NdotH, VdotN, NdotL);
-
-    // 거칠기가 높을수록 정반사(Specular) 강도를 강제로 물리적 감쇠시킴
     let specularAttenuation = clamp(1.0 - roughnessParameter, 0.0, 1.0);
     let specularPart = SPEC_BRDF * NdotL * specularAttenuation;
 
-    // 에너지 보존 법칙
     let kD = vec3<f32>(1.0) - F;
-
-    // 디즈니 디퓨즈 적용
     let Fd90 = 0.5 + 2.0 * LdotH * LdotH * roughnessParameter;
     let lightScatter = 1.0 + (Fd90 - 1.0) * pow(clamp(1.0 - NdotL, 0.0, 1.0), 5.0);
     let viewScatter = 1.0 + (Fd90 - 1.0) * pow(clamp(1.0 - VdotN, 0.0, 1.0), 5.0);

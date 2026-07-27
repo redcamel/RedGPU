@@ -1,6 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Sampler from "../../resources/sampler/Sampler";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
+import DirectTexture from "../../resources/texture/DirectTexture";
 import TextureArray from "../../resources/texture/TextureArray";
 import fragmentModuleSource from './fragment.wgsl';
 import ABitmapBaseMaterial from "../../material/core/ABitmapBaseMaterial";
@@ -13,6 +14,8 @@ import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
+import TerrainRVT from "./TerrainRVT";
+import {keepLog} from "../../utils";
 
 export interface TerrainLayerConfig {
     name?: string;
@@ -45,6 +48,10 @@ interface TerrainMaterial {
     ormArray: TextureArray;
     textureSampler: Sampler;
     ormTexture: BitmapTexture;
+    // RVT 전용 바인딩 슬롯
+    rvtAlbedoTexture: DirectTexture;
+    rvtNormalORMTexture: DirectTexture;
+    rvtSampler: Sampler;
 }
 
 /**
@@ -53,7 +60,7 @@ interface TerrainMaterial {
  */
 class TerrainMaterial extends ABitmapBaseMaterial {
     #layers: TerrainLayerConfig[] = [];
-
+    #rvt: TerrainRVT
     constructor(redGPUContext: RedGPUContext, name?: string) {
         super(
             redGPUContext,
@@ -73,6 +80,21 @@ class TerrainMaterial extends ABitmapBaseMaterial {
             addressModeU: GPU_ADDRESS_MODE.REPEAT,
             addressModeV: GPU_ADDRESS_MODE.REPEAT
         });
+
+        // 💡 RVT 아틀라스 텍스처용 선형 필터링 샘플러 (클램프 모드, 아틀라스 경계 보호)
+        this.rvtSampler = new Sampler(redGPUContext, {
+            magFilter: GPU_FILTER_MODE.LINEAR,
+            minFilter: GPU_FILTER_MODE.LINEAR,
+            mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
+            addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
+            addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE
+        });
+
+        this.#rvt = new TerrainRVT(redGPUContext, {atlasSize: 2048});
+        ;
+
+        this.rvtAlbedoTexture = this.#rvt.albedoDirectTexture
+        this.rvtNormalORMTexture = this.#rvt.normalORMDirectTexture
     }
 
     get layers(): TerrainLayerConfig[] {
@@ -173,12 +195,18 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         });
 
         const ctx = this.redGPUContext;
+        const onLoad = (v) => {
+            keepLog('오긴오냐', this.uuid)
+            this.#rvt.bake(this)
+        }
         // 💡 Diffuse(Albedo)는 sRGB 포맷, 데이터 맵(Normal/Height/ORM)은 Linear(rgba8unorm) 포맷으로 내부 자동 설정
-        this.diffuseArray = new TextureArray(ctx, diffuseSrcs, true, undefined, undefined, 'rgba8unorm-srgb');
-        this.normalArray = new TextureArray(ctx, normalSrcs, true, undefined, undefined, 'rgba8unorm');
-        this.heightArray = new TextureArray(ctx, heightSrcs, true, undefined, undefined, 'rgba8unorm');
-        this.ormArray = new TextureArray(ctx, ormSrcs, true, undefined, undefined, 'rgba8unorm');
+        this.diffuseArray = new TextureArray(ctx, diffuseSrcs, true, onLoad, undefined, 'rgba8unorm-srgb');
+        this.normalArray = new TextureArray(ctx, normalSrcs, true, onLoad, undefined, 'rgba8unorm');
+        this.heightArray = new TextureArray(ctx, heightSrcs, true, onLoad, undefined, 'rgba8unorm');
+        this.ormArray = new TextureArray(ctx, ormSrcs, true, onLoad, undefined, 'rgba8unorm');
+
     }
+
 }
 
 Object.defineProperty(TerrainMaterial.prototype, 'isPBRMaterial', {
@@ -201,7 +229,7 @@ defineNumber(TerrainMaterial, [
     {key: 'gravelRoughnessFactor', value: 0.70},
 ]);
 defineBoolean(TerrainMaterial, [
-    {key: 'debugSplatTexture', value: false}
+    {key: 'debugSplatTexture', value: false},
 ]);
 
 defineColorRGBA(TerrainMaterial, [
@@ -215,11 +243,15 @@ defineTexture(TerrainMaterial, [
     {key: 'heightArray'},
     {key: 'normalArray'},
     {key: 'ormArray'},
-    {key: 'ormTexture'}
+    {key: 'ormTexture'},
+    // RVT 아틀라스 텍스처 슬롯
+    {key: 'rvtAlbedoTexture'},
+    {key: 'rvtNormalORMTexture'},
 ]);
 
 defineSampler(TerrainMaterial, [
-    {key: 'textureSampler'}
+    {key: 'textureSampler'},
+    {key: 'rvtSampler'},
 ]);
 Object.freeze(TerrainMaterial);
 export default TerrainMaterial;

@@ -70,7 +70,7 @@ class TextureArray extends ManagementResourceBase {
         return this.#useMipmap
     }
 
-    #registerResource() {
+    async #registerResource() {
         const {redGPUContext} = this
         const {gpuDevice} = redGPUContext
 
@@ -115,6 +115,10 @@ class TextureArray extends ManagementResourceBase {
 
             if (this.#useMipmap) {
                 this.redGPUContext.resourceManager.mipmapGenerator.generateMipmap(this.#gpuTexture, textureDescriptor);
+                requestAnimationFrame(() => {
+                    this.notifyUpdate(true);
+                    this.#onLoad?.(this);
+                })
             }
 
             const {table} = this.targetResourceManagedState

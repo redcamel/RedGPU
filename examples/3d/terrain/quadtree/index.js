@@ -179,11 +179,18 @@ RedGPU.init(
 
         scene.addTerrain(terrain);
 
-        // 4. 렌더러 시작
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // 4. RVT (Runtime Virtual Texture) 생성 및 Terrain에 연결
+        //    - 4종 레이어 Height-Blend 결과를 오프스크린으로 GPU 베이킹
+        //    - 이후 셰이더는 단 2회 텍스처 페치로 지형 렌더링 (기존 30회+ → 2회)
+        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+        // 5. 렌더러 시작
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext);
 
-        // 5. HUD 루프 (rAF)
+        // 6. HUD 루프 (rAF)
         const rawCam = controller;
 
         function hudLoop() {
@@ -193,8 +200,8 @@ RedGPU.init(
 
         requestAnimationFrame(hudLoop);
 
-        // 6. GUI 패널
-        buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, ormTextureInstance, splatTextureInstance);
+        // 7. GUI 패널
+        buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, ormTextureInstance, splatTextureInstance, terrain.rvt);
     },
     (failReason) => {
         console.error('RedGPU 초기화 실패:', failReason);
@@ -206,14 +213,54 @@ RedGPU.init(
 );
 
 // ─── GUI 패널 ──────────────────────────────────────────────────────────────────
-function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, ormTextureInstance, splatTextureInstance) {
+function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, ormTextureInstance, splatTextureInstance, rvt) {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
         ibl: true,
         skybox: true,
         gui: (pane) => {
 
-            // ── Terrain 설정 ──
+            // ── RVT 설정 ──────────────────────────────────────────────────────
+            const rvtFolder = pane.addFolder({title: '⚡ RVT (Runtime Virtual Texture)', expanded: true});
+
+            const rvtState = {
+                useRVT: true,
+                atlasSize: rvt ? rvt.atlasSize : 2048,
+            };
+
+            rvtFolder.addBinding(rvtState, 'useRVT', {label: 'RVT 활성화'})
+                .on('change', (ev) => {
+                    if (ev.value) {
+                        // RVT 활성화: terrain.rvt를 재연결
+                        if (rvt) {
+                            terrain.rvt = rvt;
+                            console.log('✅ RVT 활성화 — 단 2회 텍스처 페치 모드');
+                        }
+                    } else {
+                        // RVT 비활성화: material에서 RVT 텍스처 제거
+                        terrain.material.rvtAlbedoTexture = null;
+                        terrain.material.rvtNormalORMTexture = null;
+                        terrain.rvt = null;
+                        terrain.dirtyPipeline = true;
+                        console.log('⚠ RVT 비활성화 — 기존 레이어 블렌딩 모드');
+                    }
+                });
+
+            rvtFolder.addButton({title: '🔄 RVT 재베이킹 (Rebake)'})
+                .on('click', () => {
+                    if (rvt) {
+                        rvt.markDirty();
+                        console.log('🔄 RVT 재베이킹 예약됨 — 다음 프레임에 실행');
+                    }
+                });
+
+            rvtFolder.addBinding(rvtState, 'atlasSize', {
+                label: '아틀라스 해상도',
+                readonly: true
+            });
+
+
+            // ── Terrain 설정 ──────────────────────────────────────────────────
             const terrainFolder = pane.addFolder({title: '🌍 Terrain (거대 스케일)', expanded: true});
 
             const state = {
@@ -260,6 +307,8 @@ function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, 
             terrainFolder.addBinding(terrain.material, 'blendContrast', {
                 label: '블렌드 대비 (Contrast)',
                 min: 0, max: 1.0, step: 0.00001
+            }).on('change', () => {
+                if (rvt) rvt.markDirty();  // RVT 재베이킹 예약
             })
             terrainFolder.addBinding(terrain.material, 'debugSplatTexture')
 
@@ -303,12 +352,14 @@ function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, 
                 min: 1.0, max: 150.0, step: 0.01
             }).on('change', (ev) => {
                 terrain.material.tileScale = ev.value;
+                if (rvt) rvt.markDirty();  // RVT 재베이킹 예약
             });
             materialFolder.addBinding(state, 'macroScale', {
                 label: '매크로 타일링 (원거리)',
                 min: 1.0, max: 50.0, step: 0.01
             }).on('change', (ev) => {
                 terrain.material.macroScale = ev.value;
+                if (rvt) rvt.markDirty();  // RVT 재베이킹 예약
             });
             materialFolder.addBinding(state, 'normalScale', {
                 label: '노멀 맵 강도',

@@ -41,6 +41,7 @@ class Terrain extends Mesh {
     #prevMaxLOD: number = 0;
     #lodRanges: Float32Array = new Float32Array(32);
 
+
     constructor(redGPUContext: RedGPUContext, heightmapUrl?: string, name?: string) {
         const geometry = new TerrainGeometry(redGPUContext);
         const material = new TerrainMaterial(redGPUContext);
@@ -188,8 +189,12 @@ class Terrain extends Mesh {
     }
 
     render(renderViewStateData: any) {
+        // RVT 자동 베이킹: 더티 새로울 때마다 실행되지 않고 isDirty일 때만 실행
+        // this.#rvt.checkAndBake(this.material)
+
         super.render(renderViewStateData);
     }
+
 
     updateTexture(prevTexture: any, texture: any) {
         if (prevTexture) {
