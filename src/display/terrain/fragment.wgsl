@@ -28,6 +28,9 @@ struct TerrainUniforms {
 #redgpu_if baseColorTexture
 @group(2) @binding(1) var baseColorTexture: texture_2d<f32>;
 #redgpu_endIf
+#redgpu_if splatTexture
+@group(2) @binding(2) var splatTexture: texture_2d<f32>;
+#redgpu_endIf
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 💡 RVT (Runtime Virtual Texture) 아틀라스 바인딩 — 무조건 사용
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -108,9 +111,13 @@ fn main(inputData:InputData) -> OutputFragment {
     let rvt_roughness = rvt_normalORM.b;
     let rvt_occlusion = rvt_normalORM.a;
 
-    // debugSplatTexture 모드 지원
+    // debugSplatTexture 모드 지원 (실제 스플랫 맵 RGBA 가중치 채널 출력)
     if (uniforms.debugSplatTexture == 1u) {
-        output.color = rvt_albedo;
+        #redgpu_if splatTexture
+            output.color = textureSample(splatTexture, rvtSampler, input_uv);
+        #redgpu_else
+            output.color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+        #redgpu_endIf
         return output;
     }
 
