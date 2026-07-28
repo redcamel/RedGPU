@@ -25,6 +25,7 @@ struct RVTBakeUniforms {
     occlusionStrength: f32,
     baseColorWeight: f32,
     baseColorBlendMode: u32, // 0: mix (Direct Mix), 1: multiply (Tint Multiply)
+    useAutoSplat: u32,       // 0: 유저 splatTexture 사용, 1: 경사도/고도 기반 자동 생성
 }
 
 @group(0) @binding(0) var<uniform> bakeUniforms: RVTBakeUniforms;
@@ -36,9 +37,10 @@ struct RVTBakeUniforms {
 @group(0) @binding(6) var texSampler:    sampler;
 @group(0) @binding(7) var baseColorTexture: texture_2d<f32>;
 @group(0) @binding(8) var ormTexture:       texture_2d<f32>;
+@group(0) @binding(9) var heightTexture:    texture_2d<f32>; // 자동 Splat 계산용 높이맵 텍스처
 
-@group(0) @binding(9)  var albedoOutput:    texture_storage_2d<rgba8unorm, write>;
-@group(0) @binding(10) var normalORMOutput: texture_storage_2d<rgba8unorm, write>;
+@group(0) @binding(10) var albedoOutput:    texture_storage_2d<rgba8unorm, write>;
+@group(0) @binding(11) var normalORMOutput: texture_storage_2d<rgba8unorm, write>;
 
 // ─── Height-Blend helper (Unreal Engine 5 Landscape HeightBlend Official Source) ─
 fn getHeightBlendedWeights(
@@ -102,14 +104,36 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let h3 = pow(clamp(textureSampleLevel(heightArray, texSampler, tileUV, 3i, bakeMip).r, 0.0, 1.0), 3.0);
     let layerHeights = vec4<f32>(h0, h1, h2, h3);
 
-    let splat = textureSampleLevel(splatTexture, texSampler, wUV, 0.0);
-    // 💡 JPG splatMap 호환: A 채널을 1-(R+G+B) 잔여 가중치로 유도
-    //    (PNG splatMap 사용 시에도 합산이 1.0을 초과하지 않으면 동일하게 작동)
-    let splat3Sum = clamp(splat.r + splat.g + splat.b, 0.0, 1.0);
-    var sw = vec4<f32>(splat.r, splat.g, splat.b, max(0.0, 1.0 - splat3Sum));
+    var sw = vec4<f32>(0.0);
+
+    if (bakeUniforms.useAutoSplat == 1u) {
+        // ⛰️ 경사도(Slope) & 고도(Altitude) 기반 4채널 자동 SplatMap 베이킹
+        let texDim = vec2<f32>(textureDimensions(heightTexture));
+        let texelSize = 1.0 / max(texDim, vec2<f32>(1.0));
+
+        let hCenter = textureSampleLevel(heightTexture, texSampler, wUV, 0.0).r;
+        let hRight  = textureSampleLevel(heightTexture, texSampler, wUV + vec2<f32>(texelSize.x, 0.0), 0.0).r;
+        let hUp     = textureSampleLevel(heightTexture, texSampler, wUV + vec2<f32>(0.0, texelSize.y), 0.0).r;
+
+        let dhX = (hRight - hCenter) * 40.0;
+        let dhZ = (hUp - hCenter) * 40.0;
+        let slope = clamp(sqrt(dhX * dhX + dhZ * dhZ), 0.0, 1.0);
+
+        let rockWeight = smoothstep(0.18, 0.45, slope); // 절벽 (Rock)
+        let sandWeight = select(0.0, 1.0 - smoothstep(0.02, 0.08, hCenter), slope < 0.2); // 수변/모래 (Sand)
+        let gravelWeight = select(0.0, smoothstep(0.5, 0.8, hCenter), slope >= 0.1 && slope <= 0.4); // 고산지대 자갈 (Gravel)
+        let grassWeight = max(0.0, 1.0 - (rockWeight + sandWeight + gravelWeight)); // 평지 잔디 (Grass)
+
+        sw = vec4<f32>(grassWeight, rockWeight, gravelWeight, sandWeight);
+    } else {
+        let splat = textureSampleLevel(splatTexture, texSampler, wUV, 0.0);
+        let splat3Sum = clamp(splat.r + splat.g + splat.b, 0.0, 1.0);
+        sw = vec4<f32>(splat.r, splat.g, splat.b, max(0.0, 1.0 - splat3Sum));
+    }
+
     let totalWeightAlbedo = sw.r + sw.g + sw.b + sw.a;
     if (totalWeightAlbedo <= 0.001) {
-        sw = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+        sw = vec4<f32>(1.0, 0.0, 0.0, 0.0);
     } else {
         sw = sw / totalWeightAlbedo;
     }

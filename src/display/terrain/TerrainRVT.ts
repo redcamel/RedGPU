@@ -55,6 +55,7 @@ class TerrainRVT {
         const ormGPUView = this.#getArrayTextureView(mat.ormArray);
         const baseColorGPUView = this.#getTextureView(mat.baseColorTexture);
         const ormTextureGPUView = this.#getTextureView(mat.ormTexture);
+        const heightmapGPUView = this.#getTextureView(mat.targetTerrain?.heightTexture);
 
         keepLog('RVT 컴퓨트 셰이더 베이킹 실행');
         const device = this.#redGPUContext.gpuDevice;
@@ -82,6 +83,9 @@ class TerrainRVT {
         uData[17] = mat.occlusionStrength ?? 1.0;
         uData[18] = mat.baseColorWeight ?? 0.5;
         uData[19] = mat.baseColorBlendMode === 'multiply' ? 1.0 : 0.0;
+        // 💡 splatTexture가 없거나 undefined인 경우 경사도/고도 기반 자동 베이킹(1.0) 가동
+        const isAutoSplat = !mat.splatTexture || mat.useAutoSplat === true;
+        uData[20] = isAutoSplat ? 1.0 : 0.0;
 
         device.queue.writeBuffer(this.#uniformBuffer!, 0, uData);
 
@@ -96,6 +100,7 @@ class TerrainRVT {
         const resolvedORM = ormGPUView ?? emptyArrayView;
         const resolvedBaseColor = baseColorGPUView ?? emptyView;
         const resolvedORMTexture = ormTextureGPUView ?? emptyView;
+        const resolvedHeightmap = heightmapGPUView ?? emptyView;
 
         const albedoStorageView = this.#albedoAtlasGPU!.createView();
         const normalORMStorageView = this.#normalORMAtlasGPU!.createView();
@@ -113,8 +118,9 @@ class TerrainRVT {
                 {binding: 6, resource: this.#sampler!},
                 {binding: 7, resource: resolvedBaseColor},
                 {binding: 8, resource: resolvedORMTexture},
-                {binding: 9, resource: albedoStorageView},
-                {binding: 10, resource: normalORMStorageView},
+                {binding: 9, resource: resolvedHeightmap},
+                {binding: 10, resource: albedoStorageView},
+                {binding: 11, resource: normalORMStorageView},
             ]
         });
 
@@ -198,13 +204,14 @@ class TerrainRVT {
                 {binding: 6, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
                 {binding: 7, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
                 {binding: 8, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
+                {binding: 9, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
                 {
-                    binding: 9,
+                    binding: 10,
                     visibility: GPUShaderStage.COMPUTE,
                     storageTexture: {access: 'write-only', format: 'rgba8unorm', viewDimension: '2d'}
                 },
                 {
-                    binding: 10,
+                    binding: 11,
                     visibility: GPUShaderStage.COMPUTE,
                     storageTexture: {access: 'write-only', format: 'rgba8unorm', viewDimension: '2d'}
                 },

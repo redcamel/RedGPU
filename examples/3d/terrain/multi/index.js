@@ -12,9 +12,9 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
  */
 
 const WORLD_SIZE = 10000.0;  // 월드 가로세로 크기 (10000x10000 = 10km 거대 지형 규격)
-const MAX_LOD = 7;          // 최대 LOD 레벨 (10km 스케일을 위한 쿼드트리 세분화 깊이)
+const MAX_LOD = 8;          // 최대 LOD 레벨 (10km 원경 지평선 끝까지 촘촘히 연결되도록 8단계 세분화)
 const MIN_H = 0.0;
-const MAX_H = 1200.0;       // 최대 높이 (10km 거대 산맥 스케일 높이감 극대화)
+const MAX_H = 800.0;        // 하이랄 스케일 고도 (800m)
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -176,7 +176,7 @@ RedGPU.init(
         controller.moveSpeed = 3000;              // 10km 지형 시원한 비행 속도
         controller.mouseSensitivity = 0.2;       // 마우스 시선 회전 감도
         controller.x = 0;                        // 지형 X
-        controller.y = 400;                      // 지상 400m 상공 (체감 스케일 극대화)
+        controller.y = 1000;                      // 지상 400m 상공 (체감 스케일 극대화)
         controller.z = -2000;                    // 중심부 남쪽 위치
         controller.tilt = -12;                   // 지평선과 아득한 산맥을 웅장하게 바라보는 각도
         controller.pan = 0;
@@ -192,6 +192,12 @@ RedGPU.init(
         const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
         view.skyAtmosphere = skyAtmosphere;
 
+        // 원경 지평선 끝자락 4km~8km 구간을 하늘색 대기와 부드럽게 감싸주는 원경 대기 안개
+        const heightFog = new RedGPU.PostEffect.HeightFog(redGPUContext);
+        heightFog.fogColor.setColorByRGB(180, 215, 245);
+        heightFog.thickness = 500;
+        view.postEffectManager.addEffect(heightFog);
+
 
         // 3. 거대 Terrain 생성
         const terrain = new RedGPU.Display.Terrain(
@@ -200,12 +206,12 @@ RedGPU.init(
             'CDLOD_Terrain'
         );
 
-        // 3-2. 텍스처 일괄 설정 — 각 텍스처 타입의 GPU 포맷·밉맵 옵션은 내부에서 자동 적용
+        // 3-2. 텍스처 일괄 설정 — splat 미지정 시 Heightmap 경사도/고도 기반 100% 자동 SplatMap 베이킹 가동!
         terrain.setup({
             height: '../../../assets/terrain/terrainTest_001/height.jpg',
             baseColor: '../../../assets/terrain/terrainTest_001/diffuse.jpg',
             orm: '../../../assets/terrain/terrainTest_001/orm.jpg',
-            splat: '../../../assets/terrain/terrainTest_001/splatMap.jpg',
+            splat: '../../../assets/terrain/terrainTest_001/splatMap.jpg', // 주석 처리 시 Auto Slope/Altitude 모드 가동!
         });
 
 
