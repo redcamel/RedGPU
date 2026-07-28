@@ -68,7 +68,7 @@ class TerrainRVT {
         uData[5] = 0.0;
         uData[6] = 1.0;
         uData[7] = 1.0;
-        const baseRoughness = mat.roughnessFactor ?? 0.85;
+        const baseRoughness = mat.roughnessFactor ?? 1.0;
         uData[8] = mat.tileScale ?? 16.0;
         uData[9] = mat.macroScale ?? 2.0;
         uData[10] = mat.blendContrast ?? 0.5;

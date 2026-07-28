@@ -97,7 +97,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
     }
 
     #metallicFactor: number = 0;
-    #roughnessFactor: number = 0.85;
+    #roughnessFactor: number = 1.0;
     #normalScale: number = 1.0;
     #occlusionStrength: number = 1.0;
     #grassRoughnessFactor: number = 0.85;
