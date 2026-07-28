@@ -55,6 +55,8 @@ class TerrainRVT {
         const normalGPUView = this.#getArrayTextureView(mat.normalArray);
         const heightGPUView = this.#getArrayTextureView(mat.heightArray);
         const ormGPUView = this.#getArrayTextureView(mat.ormArray);
+        const baseColorGPUView = this.#getTextureView(mat.baseColorTexture);
+        const ormTextureGPUView = this.#getTextureView(mat.ormTexture);
 
         if (!splatGPUView || !diffuseGPUView) {
             return; // 텍스처 로드 중이면 스킵 (다음 프레임에 재시도)
@@ -92,6 +94,8 @@ class TerrainRVT {
         const resolvedNormal = normalGPUView ?? emptyArrayView;
         const resolvedHeight = heightGPUView ?? emptyArrayView;
         const resolvedORM = ormGPUView ?? emptyArrayView;
+        const resolvedBaseColor = baseColorGPUView ?? emptyView;
+        const resolvedORMTexture = ormTextureGPUView ?? emptyView;
 
         const bindGroup = device.createBindGroup({
             label: 'RVT_BakeBindGroup',
@@ -104,6 +108,8 @@ class TerrainRVT {
                 {binding: 4, resource: resolvedHeight},
                 {binding: 5, resource: resolvedORM},
                 {binding: 6, resource: this.#sampler!},
+                {binding: 7, resource: resolvedBaseColor},
+                {binding: 8, resource: resolvedORMTexture},
             ]
         });
 
@@ -211,6 +217,8 @@ class TerrainRVT {
                     texture: {sampleType: 'float', viewDimension: '2d-array'}
                 },
                 {binding: 6, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
+                {binding: 7, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float', viewDimension: '2d'}},
+                {binding: 8, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float', viewDimension: '2d'}},
             ]
         });
 

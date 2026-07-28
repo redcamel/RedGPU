@@ -30,6 +30,8 @@ struct RVTBakeUniforms {
 @group(0) @binding(4) var heightArray:   texture_2d_array<f32>;
 @group(0) @binding(5) var ormArray:      texture_2d_array<f32>;
 @group(0) @binding(6) var texSampler:    sampler;
+@group(0) @binding(7) var baseColorTexture: texture_2d<f32>;
+@group(0) @binding(8) var ormTexture:       texture_2d<f32>;
 
 // ─── Outputs ──────────────────────────────────────────────────────────────────
 struct BakeOutput {
@@ -118,7 +120,8 @@ fn fs_albedo(in: BakeOutput) -> AlbedoOutput {
     }
 
     let w = getHeightBlendedWeights(sw, layerHeights, bakeUniforms.blendContrast);
-    let finalAlbedo = d0 * w.r + d1 * w.g + d2 * w.b + d3 * w.a;
+    let baseColorSample = textureSample(baseColorTexture, texSampler, wUV);
+    let finalAlbedo = (d0 * w.r + d1 * w.g + d2 * w.b + d3 * w.a) * baseColorSample;
 
     var out: AlbedoOutput;
     out.albedo = finalAlbedo;
@@ -173,8 +176,9 @@ fn fs_normal_orm(in: BakeOutput) -> NormalORMOutput {
         bakeUniforms.rockRoughnessFactor   * w.b +
         bakeUniforms.gravelRoughnessFactor * w.a;
 
-    let finalRoughness  = max(blendedORM.g * layerRoughness, layerRoughness * 0.5);
-    let finalOcclusion  = blendedORM.r;
+    let globalORM = textureSample(ormTexture, texSampler, wUV);
+    let finalRoughness  = max(blendedORM.g * layerRoughness, layerRoughness * 0.5) * globalORM.g;
+    let finalOcclusion  = blendedORM.r * globalORM.r;
 
     var out: NormalORMOutput;
     // RG = blended normal XY (encoded 0~1), B = roughness, A = occlusion
