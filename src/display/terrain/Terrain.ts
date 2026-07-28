@@ -185,6 +185,14 @@ class Terrain extends Mesh {
         this.material.blendContrast = value;
     }
 
+    get baseColorWeight(): number {
+        return this.material.baseColorWeight;
+    }
+
+    set baseColorWeight(value: number) {
+        this.material.baseColorWeight = value;
+    }
+
     get layers(): TerrainLayerConfig[] {
         return this.material.layers || [];
     }

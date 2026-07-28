@@ -16,13 +16,14 @@ struct RVTBakeUniforms {
     macroScale: f32,
     blendContrast: f32,
     roughnessFactor: f32,
-    // 레이어별 roughnessFactor
-    grassRoughnessFactor:  f32,
-    sandRoughnessFactor:   f32,
-    rockRoughnessFactor:   f32,
-    gravelRoughnessFactor: f32,
+    // 레이어별 roughnessFactor (Layer 0~3)
+    layer0RoughnessFactor: f32,
+    layer1RoughnessFactor: f32,
+    layer2RoughnessFactor: f32,
+    layer3RoughnessFactor: f32,
     normalScale: f32,
     occlusionStrength: f32,
+    baseColorWeight: f32,
 }
 
 @group(0) @binding(0) var<uniform> bakeUniforms: RVTBakeUniforms;
@@ -118,7 +119,8 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         baseColorSample = vec4<f32>(1.0, 1.0, 1.0, 1.0);
     }
 
-    var finalAlbedo = layerAlbedo * baseColorSample;
+    let tintedAlbedo = layerAlbedo * baseColorSample;
+    var finalAlbedo = mix(layerAlbedo, tintedAlbedo, clamp(bakeUniforms.baseColorWeight, 0.0, 1.0));
     finalAlbedo.a = 1.0;
 
     // 2. Normal & ORM 연산
@@ -142,10 +144,10 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     if (o3.a <= 0.01 || (o3.r <= 0.001 && o3.g <= 0.001)) { o3 = vec4<f32>(1.0); }
 
     let globalRoughnessMult = bakeUniforms.roughnessFactor;
-    let r0 = o0.g * bakeUniforms.grassRoughnessFactor * globalRoughnessMult;
-    let r1 = o1.g * bakeUniforms.sandRoughnessFactor * globalRoughnessMult;
-    let r2 = o2.g * bakeUniforms.rockRoughnessFactor * globalRoughnessMult;
-    let r3 = o3.g * bakeUniforms.gravelRoughnessFactor * globalRoughnessMult;
+    let r0 = o0.g * bakeUniforms.layer0RoughnessFactor * globalRoughnessMult;
+    let r1 = o1.g * bakeUniforms.layer1RoughnessFactor * globalRoughnessMult;
+    let r2 = o2.g * bakeUniforms.layer2RoughnessFactor * globalRoughnessMult;
+    let r3 = o3.g * bakeUniforms.layer3RoughnessFactor * globalRoughnessMult;
 
     let blendedRoughness = r0 * w.r + r1 * w.g + r2 * w.b + r3 * w.a;
     let blendedOcclusion = o0.r * w.r + o1.r * w.g + o2.r * w.b + o3.r * w.a;

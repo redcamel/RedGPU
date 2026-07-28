@@ -138,20 +138,13 @@ RedGPU.init(
         terrain.splatTexture = splatTextureInstance;
 
         // 💡 디테일 레이어 4종 등록
-        // terrain.addLayer({
-        //     name: 'Grass',
-        //     diffuse: '../../../assets/terrain/terrainTest_001/layer/grass.jpg',
-        //     normal: '../../../assets/terrain/terrainTest_001/layer/grass_normal.jpg',
-        //     height: '../../../assets/terrain/terrainTest_001/layer/grass_height.jpg',
-        //     orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg',
-        //     roughnessFactor: 0.85
-        // });
+
         terrain.addLayer({
-            name: 'Sand',
-            diffuse: '../../../assets/terrain/terrainTest_001/layer/sand.jpg',
-            normal: '../../../assets/terrain/terrainTest_001/layer/sand_normal.jpg',
-            height: '../../../assets/terrain/terrainTest_001/layer/sand_height.jpg',
-            orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg',
+            name: 'Leaves',
+            diffuse: '../../../assets/terrain/terrainTest_001/layer/leave.jpg',
+            normal: '../../../assets/terrain/terrainTest_001/layer/leave_normal.jpg',
+            height: '../../../assets/terrain/terrainTest_001/layer/leave_height.jpg',
+            orm: '../../../assets/terrain/terrainTest_001/layer/leave_orm.jpg',
             roughnessFactor: 0.85
         });
         terrain.addLayer({
@@ -162,15 +155,22 @@ RedGPU.init(
             orm: '../../../assets/terrain/terrainTest_001/layer/rock_orm.jpg',
             roughnessFactor: 0.90
         });
-        // terrain.addLayer({
-        //     name: 'Gravel',
-        //     diffuse: '../../../assets/terrain/terrainTest_001/layer/gravel.jpg',
-        //     normal: '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg',
-        //     height: '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg',
-        //     orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg',
-        //     roughnessFactor: 0.85
-        // });
-
+        terrain.addLayer({
+            name: 'Gravel',
+            diffuse: '../../../assets/terrain/terrainTest_001/layer/gravel.jpg',
+            normal: '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg',
+            height: '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg',
+            orm: '../../../assets/terrain/terrainTest_001/layer/gravel_orm.jpg',
+            roughnessFactor: 0.85
+        });
+        terrain.addLayer({
+            name: 'Grass',
+            diffuse: '../../../assets/terrain/terrainTest_001/layer/grass.jpg',
+            normal: '../../../assets/terrain/terrainTest_001/layer/grass_normal.jpg',
+            height: '../../../assets/terrain/terrainTest_001/layer/grass_height.jpg',
+            orm: '../../../assets/terrain/terrainTest_001/layer/grass_orm.jpg',
+            roughnessFactor: 0.85
+        });
         // 💡 지형 베이스 필터 색상을 흰색으로 초기화하여 텍스처 본연의 밝기와 태양광 반사를 그대로 표현
         terrain.material.baseColorFactor = '#ffffff';
 
@@ -225,10 +225,15 @@ function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, 
             // ── 1. RVT (Runtime Virtual Texture) 설정 ───────────────────────────
             const rvtFolder = pane.addFolder({title: '⚡ RVT (Runtime Virtual Texture)', expanded: true});
 
-            rvtFolder.addButton({title: '🔄 RVT 재베이킹 (Rebake)'})
+            rvtFolder.addButton({title: '🔄 RVT 수동 재베이킹 (Rebake)'})
                 .on('click', () => {
-                    console.log('🔄 RVT 재베이킹 실행');
+                    console.log('🔄 RVT 수동 재베이킹 실행');
+                    terrain.material.bakeRVT();
                 });
+
+            rvtFolder.addBinding(terrain.material, 'debugSplatTexture', {
+                label: '디버그: Splat 맵 채널 보기'
+            });
 
             // ── 2. Terrain 기본 & LOD 설정 ──────────────────────────────────────
             const terrainFolder = pane.addFolder({title: '🌍 Terrain (기본 & LOD)', expanded: true});
@@ -296,43 +301,86 @@ function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, 
                 terrain.worldOffset = [terrain.worldOffset[0], -ev.value / 2];
             });
 
-            // ── 3. 타일링 및 PBR 재질 설정 ──────────────────────────────────────
-            const materialFolder = pane.addFolder({title: '🎨 타일링 및 PBR 재질', expanded: true});
+            // ── 3. 타일링 & 블렌딩 설정 ──────────────────────────────────────────
+            const tilingFolder = pane.addFolder({title: '🎨 타일링 및 혼합 (Tiling & Blending)', expanded: true});
 
-            materialFolder.addBinding(terrain, 'tileScale', {
+            tilingFolder.addBinding(terrain, 'tileScale', {
                 label: '디테일 타일링 (근거리)',
                 min: 1.0, max: 64.0, step: 0.1
             });
-            materialFolder.addBinding(terrain, 'macroScale', {
+            tilingFolder.addBinding(terrain, 'macroScale', {
                 label: '매크로 타일링 (원거리)',
                 min: 0.1, max: 10.0, step: 0.1
             });
-            materialFolder.addBinding(terrain, 'blendContrast', {
-                label: '블렌드 대비 (Contrast)',
+            tilingFolder.addBinding(terrain, 'blendContrast', {
+                label: '높이 블렌드 대비 (Contrast)',
                 min: 0, max: 1.0, step: 0.01
             });
-            materialFolder.addBinding(terrain, 'normalScale', {
+            tilingFolder.addBinding(terrain, 'baseColorWeight', {
+                label: '베이스 컬러 맵 혼합 비율',
+                min: 0, max: 1.0, step: 0.05
+            });
+
+            // ── 4. PBR 재질 & 음영 설정 ──────────────────────────────────────────
+            const pbrFolder = pane.addFolder({title: '✨ PBR 재질 & 음영 (PBR & Lighting)', expanded: true});
+
+            pbrFolder.addBinding(terrain, 'roughnessFactor', {
+                label: '글로벌 거칠기 배율 (Global Roughness)',
+                min: 0, max: 1, step: 0.05
+            });
+            pbrFolder.addBinding(terrain, 'normalScale', {
                 label: '노멀 맵 강도',
                 min: 0, max: 3, step: 0.1
             });
-            materialFolder.addBinding(terrain, 'roughnessFactor', {
-                label: '거칠기 (Roughness)',
-                min: 0, max: 1, step: 0.05
-            });
-            materialFolder.addBinding(terrain, 'metallicFactor', {
-                label: '금속성 (Metallic)',
-                min: 0, max: 1, step: 0.05
-            });
-            materialFolder.addBinding(terrain, 'occlusionStrength', {
+            pbrFolder.addBinding(terrain, 'occlusionStrength', {
                 label: '오클루전 강도 (AO)',
                 min: 0, max: 2, step: 0.05
             });
-            materialFolder.addBinding(terrain.material, 'debugSplatTexture', {
-                label: '디버그: Splat 맵 보기'
+            pbrFolder.addBinding(terrain, 'metallicFactor', {
+                label: '금속성 (Metallic)',
+                min: 0, max: 1, step: 0.05
             });
 
-            // ── 4. 지형 텍스처 관리 ────────────────────────────────────────────
-            const textureFolder = pane.addFolder({title: '🖼️ 지형 텍스처 (Terrain Textures)', expanded: true});
+            // ── 5. 개별 레이어 거칠기 설정 ─────────────────────────────────────
+            const layerFolder = pane.addFolder({title: '🌱 개별 레이어 거칠기 (Layer Roughness)', expanded: true});
+
+            const layerState = {
+                leavesRoughness: terrain.material.layers[0]?.roughnessFactor ?? 0.85,
+                rockRoughness: terrain.material.layers[1]?.roughnessFactor ?? 0.90,
+                gravelRoughness: terrain.material.layers[2]?.roughnessFactor ?? 0.85,
+                grassRoughness: terrain.material.layers[3]?.roughnessFactor ?? 0.85,
+            };
+
+            layerFolder.addBinding(layerState, 'leavesRoughness', {
+                label: 'Layer 0: Leaves (낙엽)',
+                min: 0, max: 1, step: 0.05
+            }).on('change', (ev) => {
+                terrain.material.updateLayer(0, {roughnessFactor: ev.value});
+            });
+
+            layerFolder.addBinding(layerState, 'rockRoughness', {
+                label: 'Layer 1: Rock (바위)',
+                min: 0, max: 1, step: 0.05
+            }).on('change', (ev) => {
+                terrain.material.updateLayer(1, {roughnessFactor: ev.value});
+            });
+
+            layerFolder.addBinding(layerState, 'gravelRoughness', {
+                label: 'Layer 2: Gravel (자갈)',
+                min: 0, max: 1, step: 0.05
+            }).on('change', (ev) => {
+                terrain.material.updateLayer(2, {roughnessFactor: ev.value});
+            });
+
+            layerFolder.addBinding(layerState, 'grassRoughness', {
+                label: 'Layer 3: Grass (잔디)',
+                min: 0, max: 1, step: 0.05
+            }).on('change', (ev) => {
+                terrain.material.updateLayer(3, {roughnessFactor: ev.value});
+            });
+
+            // ── 6. 글로벌 지형 텍스처 관리 ────────────────────────────────────────
+            const textureFolder = pane.addFolder({title: '🖼️ 글로벌 지형 텍스처 (Global Textures)', expanded: true});
 
             textureFolder.addBinding(state, 'useBaseColorTexture', {
                 label: '베이스 컬러 맵 사용'

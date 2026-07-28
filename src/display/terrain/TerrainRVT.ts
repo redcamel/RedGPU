@@ -59,7 +59,7 @@ class TerrainRVT {
         keepLog('RVT 컴퓨트 셰이더 베이킹 실행');
         const device = this.#redGPUContext.gpuDevice;
 
-        const uData = new Float32Array(20);
+        const uData = new Float32Array(24);
         uData[0] = 0.0;
         uData[1] = 0.0;
         uData[2] = 1.0;
@@ -68,17 +68,19 @@ class TerrainRVT {
         uData[5] = 0.0;
         uData[6] = 1.0;
         uData[7] = 1.0;
+        const layers = mat.layers || [];
         const baseRoughness = mat.roughnessFactor ?? 1.0;
         uData[8] = mat.tileScale ?? 16.0;
         uData[9] = mat.macroScale ?? 2.0;
         uData[10] = mat.blendContrast ?? 0.5;
         uData[11] = baseRoughness;
-        uData[12] = mat.grassRoughnessFactor ?? baseRoughness;
-        uData[13] = mat.sandRoughnessFactor ?? baseRoughness;
-        uData[14] = mat.rockRoughnessFactor ?? baseRoughness;
-        uData[15] = mat.gravelRoughnessFactor ?? baseRoughness;
+        uData[12] = layers[0]?.roughnessFactor ?? 0.85;
+        uData[13] = layers[1]?.roughnessFactor ?? 0.85;
+        uData[14] = layers[2]?.roughnessFactor ?? 0.90;
+        uData[15] = layers[3]?.roughnessFactor ?? 0.85;
         uData[16] = mat.normalScale ?? 1.0;
         uData[17] = mat.occlusionStrength ?? 1.0;
+        uData[18] = mat.baseColorWeight ?? 1.0;
 
         device.queue.writeBuffer(this.#uniformBuffer!, 0, uData);
 
@@ -156,7 +158,7 @@ class TerrainRVT {
         this.#normalORMDirectTexture = new DirectTexture(this.#redGPUContext, `RVT_NormalORM_${uid}`, this.#normalORMAtlasGPU);
 
         this.#uniformBuffer = device.createBuffer({
-            label: 'RVT_BakeUniform', size: 20 * 4, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+            label: 'RVT_BakeUniform', size: 24 * 4, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
 
         this.#sampler = device.createSampler({

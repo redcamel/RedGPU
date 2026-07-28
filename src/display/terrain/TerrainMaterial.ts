@@ -100,13 +100,19 @@ class TerrainMaterial extends ABitmapBaseMaterial {
     #roughnessFactor: number = 1.0;
     #normalScale: number = 1.0;
     #occlusionStrength: number = 1.0;
-    #grassRoughnessFactor: number = 0.85;
-    #sandRoughnessFactor: number = 0.85;
-    #rockRoughnessFactor: number = 0.90;
-    #gravelRoughnessFactor: number = 0.85;
+    #baseColorWeight: number = 1.0;
 
     get rvt(): TerrainRVT {
         return this.#rvt;
+    }
+
+    get baseColorWeight(): number {
+        return this.#baseColorWeight;
+    }
+
+    set baseColorWeight(v: number) {
+        this.#baseColorWeight = v;
+        this.bakeRVT();
     }
 
     get metallicFactor(): number {
@@ -169,42 +175,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set blendContrast(v: number) {
         this.#blendContrast = v;
-        this.bakeRVT();
-    }
-
-    get grassRoughnessFactor(): number {
-        return this.#grassRoughnessFactor;
-    }
-
-    set grassRoughnessFactor(v: number) {
-        this.#grassRoughnessFactor = v;
-        this.bakeRVT();
-    }
-
-    get sandRoughnessFactor(): number {
-        return this.#sandRoughnessFactor;
-    }
-
-    set sandRoughnessFactor(v: number) {
-        this.#sandRoughnessFactor = v;
-        this.bakeRVT();
-    }
-
-    get rockRoughnessFactor(): number {
-        return this.#rockRoughnessFactor;
-    }
-
-    set rockRoughnessFactor(v: number) {
-        this.#rockRoughnessFactor = v;
-        this.bakeRVT();
-    }
-
-    get gravelRoughnessFactor(): number {
-        return this.#gravelRoughnessFactor;
-    }
-
-    set gravelRoughnessFactor(v: number) {
-        this.#gravelRoughnessFactor = v;
         this.bakeRVT();
     }
 
@@ -303,22 +273,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
             const oSrc = extractSrc(layer.orm) || dSrc;
             ormSrcs.push(oSrc);
 
-            if (layer.roughnessFactor !== undefined) {
-                switch (idx) {
-                    case 0:
-                        this.grassRoughnessFactor = layer.roughnessFactor;
-                        break;
-                    case 1:
-                        this.sandRoughnessFactor = layer.roughnessFactor;
-                        break;
-                    case 2:
-                        this.rockRoughnessFactor = layer.roughnessFactor;
-                        break;
-                    case 3:
-                        this.gravelRoughnessFactor = layer.roughnessFactor;
-                        break;
-                }
-            }
         });
 
         const ctx = this.redGPUContext;
