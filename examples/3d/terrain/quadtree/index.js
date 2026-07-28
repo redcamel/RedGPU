@@ -138,34 +138,34 @@ RedGPU.init(
         terrain.splatTexture = splatTextureInstance;
 
         // 💡 신규 레이어 추가 API (terrain.addLayer)를 활용하여 디테일 레이어 4종 등록
-        terrain.addLayer({
-            name: 'Grass',
-            diffuse: '../../../assets/terrain/terrainTest_001/layer/grass.jpg',
-            normal: '../../../assets/terrain/terrainTest_001/layer/grass_normal.jpg',
-            height: '../../../assets/terrain/terrainTest_001/layer/grass_height.jpg',
-            orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg'
-        });
-        terrain.addLayer({
-            name: 'Sand',
-            diffuse: '../../../assets/terrain/terrainTest_001/layer/sand.jpg',
-            normal: '../../../assets/terrain/terrainTest_001/layer/sand_normal.jpg',
-            height: '../../../assets/terrain/terrainTest_001/layer/sand_height.jpg',
-            orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg'
-        });
-        terrain.addLayer({
-            name: 'Rock',
-            diffuse: '../../../assets/terrain/terrainTest_001/layer/rock.jpg',
-            normal: '../../../assets/terrain/terrainTest_001/layer/rock_normal.jpg',
-            height: '../../../assets/terrain/terrainTest_001/layer/rock_height.jpg',
-            orm: '../../../assets/terrain/terrainTest_001/layer/rock_orm.jpg'
-        });
-        terrain.addLayer({
-            name: 'Gravel',
-            diffuse: '../../../assets/terrain/terrainTest_001/layer/gravel.jpg',
-            normal: '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg',
-            height: '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg',
-            orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg'
-        });
+        // terrain.addLayer({
+        //     name: 'Grass',
+        //     diffuse: '../../../assets/terrain/terrainTest_001/layer/grass.jpg',
+        //     normal: '../../../assets/terrain/terrainTest_001/layer/grass_normal.jpg',
+        //     height: '../../../assets/terrain/terrainTest_001/layer/grass_height.jpg',
+        //     orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg'
+        // });
+        // terrain.addLayer({
+        //     name: 'Sand',
+        //     diffuse: '../../../assets/terrain/terrainTest_001/layer/sand.jpg',
+        //     normal: '../../../assets/terrain/terrainTest_001/layer/sand_normal.jpg',
+        //     height: '../../../assets/terrain/terrainTest_001/layer/sand_height.jpg',
+        //     orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg'
+        // });
+        // terrain.addLayer({
+        //     name: 'Rock',
+        //     diffuse: '../../../assets/terrain/terrainTest_001/layer/rock.jpg',
+        //     normal: '../../../assets/terrain/terrainTest_001/layer/rock_normal.jpg',
+        //     height: '../../../assets/terrain/terrainTest_001/layer/rock_height.jpg',
+        //     orm: '../../../assets/terrain/terrainTest_001/layer/rock_orm.jpg'
+        // });
+        // terrain.addLayer({
+        //     name: 'Gravel',
+        //     diffuse: '../../../assets/terrain/terrainTest_001/layer/gravel.jpg',
+        //     normal: '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg',
+        //     height: '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg',
+        //     orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg'
+        // });
 
         // 💡 지형 베이스 필터 색상을 흰색으로 초기화하여 텍스처 본연의 밝기와 태양광 반사를 그대로 표현
         terrain.material.baseColorFactor = '#ffffff';

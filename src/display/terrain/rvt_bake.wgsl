@@ -120,10 +120,14 @@ fn fs_albedo(in: BakeOutput) -> AlbedoOutput {
     // 언리얼 엔진 HeightBlend 가중치 연산
     let w = getHeightBlendedWeights(sw, layerHeights, bakeUniforms.blendContrast);
 
-    // 언리얼 엔진 표준 레이어 알베도 합산
-    let layerAlbedo = d0 * w.r + d1 * w.g + d2 * w.b + d3 * w.a;
+    // 디테일 레이어 알베도 샘플링
+    var layerAlbedo = d0 * w.r + d1 * w.g + d2 * w.b + d3 * w.a;
+    // 디테일 레이어가 없거나 emptyArray인 경우 (baseColorTexture 100% 사용을 위해 (1,1,1,1) 폴백)
+    if (layerAlbedo.a <= 0.01 || (layerAlbedo.r <= 0.001 && layerAlbedo.g <= 0.001 && layerAlbedo.b <= 0.001)) {
+        layerAlbedo = vec4<f32>(1.0, 1.0, 1.0, 1.0);
+    }
 
-    // baseColorTexture (지형 전체 글로벌 Color/Tint 맵 안전 적용)
+    // baseColorTexture (지형 전체 기본/글로벌 텍스처)
     var baseColorSample = textureSample(baseColorTexture, texSampler, wUV);
     if (baseColorSample.a <= 0.01 || (baseColorSample.r <= 0.001 && baseColorSample.g <= 0.001 && baseColorSample.b <= 0.001)) {
         baseColorSample = vec4<f32>(1.0, 1.0, 1.0, 1.0);
@@ -169,14 +173,21 @@ fn fs_normal_orm(in: BakeOutput) -> NormalORMOutput {
     let n1 = textureSample(normalArray, texSampler, tileUV, 1i).rg;
     let n2 = textureSample(normalArray, texSampler, tileUV, 2i).rg;
     let n3 = textureSample(normalArray, texSampler, tileUV, 3i).rg;
-    let blendedNormal = n0 * w.r + n1 * w.g + n2 * w.b + n3 * w.a;
+    var blendedNormal = n0 * w.r + n1 * w.g + n2 * w.b + n3 * w.a;
+    // 디테일 레이어 노멀이 없는 경우 기본 평평한 노멀 (0.5, 0.5)
+    if (blendedNormal.r <= 0.001 && blendedNormal.g <= 0.001) {
+        blendedNormal = vec2<f32>(0.5, 0.5);
+    }
 
     // ORM 블렌딩
     let o0 = textureSample(ormArray, texSampler, tileUV, 0i);
     let o1 = textureSample(ormArray, texSampler, tileUV, 1i);
     let o2 = textureSample(ormArray, texSampler, tileUV, 2i);
     let o3 = textureSample(ormArray, texSampler, tileUV, 3i);
-    let blendedORM = o0 * w.r + o1 * w.g + o2 * w.b + o3 * w.a;
+    var blendedORM = o0 * w.r + o1 * w.g + o2 * w.b + o3 * w.a;
+    if (blendedORM.a <= 0.01 || (blendedORM.r <= 0.001 && blendedORM.g <= 0.001)) {
+        blendedORM = vec4<f32>(1.0, 1.0, 1.0, 1.0);
+    }
 
     let layerRoughness =
         bakeUniforms.grassRoughnessFactor  * w.r +
@@ -190,8 +201,8 @@ fn fs_normal_orm(in: BakeOutput) -> NormalORMOutput {
         globalORM = vec4<f32>(1.0, 1.0, 1.0, 1.0);
     }
 
-    let finalRoughness = blendedORM.g * layerRoughness * globalORM.g;
-    let finalOcclusion = blendedORM.r * globalORM.r;
+    let finalRoughness = clamp(blendedORM.g * layerRoughness * globalORM.g, 0.04, 1.0);
+    let finalOcclusion = clamp(blendedORM.r * globalORM.r, 0.0, 1.0);
 
     var out: NormalORMOutput;
     out.normalORM = vec4<f32>(blendedNormal, finalRoughness, finalOcclusion);

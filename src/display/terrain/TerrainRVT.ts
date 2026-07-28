@@ -58,10 +58,6 @@ class TerrainRVT {
         const baseColorGPUView = this.#getTextureView(mat.baseColorTexture);
         const ormTextureGPUView = this.#getTextureView(mat.ormTexture);
 
-        if (!splatGPUView || !diffuseGPUView) {
-            return; // 텍스처 로드 중이면 스킵 (다음 프레임에 재시도)
-        }
-
         keepLog('베이킹')
         const device = this.#redGPUContext.gpuDevice;
 

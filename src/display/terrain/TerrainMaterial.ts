@@ -85,10 +85,13 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         });
 
         this.#rvt = new TerrainRVT(redGPUContext, {atlasSize: 2048});
-        ;
 
         this.rvtAlbedoTexture = this.#rvt.albedoDirectTexture
         this.rvtNormalORMTexture = this.#rvt.normalORMDirectTexture
+
+        if (!this.__packingList) this.__packingList = [];
+        this.__packingList.push(this.bakeRVT);
+        this.bakeRVT();
     }
 
     #tileScale: number = 1.0;
