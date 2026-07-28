@@ -18,8 +18,7 @@ class TerrainRVT {
     #albedoDirectTexture: DirectTexture | null = null;
     #normalORMDirectTexture: DirectTexture | null = null;
 
-    #albedoPipeline: GPURenderPipeline | null = null;
-    #normalORMPipeline: GPURenderPipeline | null = null;
+    #computePipeline: GPUComputePipeline | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
     #uniformBuffer: GPUBuffer | null = null;
 
@@ -46,8 +45,7 @@ class TerrainRVT {
     }
 
     public bake(material: TerrainMaterial): void {
-
-        if (!this.#albedoPipeline || !this.#normalORMPipeline) return;
+        if (!this.#computePipeline) return;
 
         const mat = material as any;
         const splatGPUView = this.#getTextureView(mat.splatTexture);
@@ -58,7 +56,7 @@ class TerrainRVT {
         const baseColorGPUView = this.#getTextureView(mat.baseColorTexture);
         const ormTextureGPUView = this.#getTextureView(mat.ormTexture);
 
-        keepLog('베이킹')
+        keepLog('RVT 컴퓨트 셰이더 베이킹 실행');
         const device = this.#redGPUContext.gpuDevice;
 
         const uData = new Float32Array(16);
@@ -71,9 +69,9 @@ class TerrainRVT {
         uData[6] = 1.0;
         uData[7] = 1.0;
         const baseRoughness = mat.roughnessFactor ?? 0.85;
-        uData[8] = mat.tileScale ?? 75.0;
-        uData[9] = mat.macroScale ?? 10.0;
-        uData[10] = mat.blendContrast ?? 0.0;
+        uData[8] = mat.tileScale ?? 16.0;
+        uData[9] = mat.macroScale ?? 2.0;
+        uData[10] = mat.blendContrast ?? 0.5;
         uData[11] = baseRoughness;
         uData[12] = mat.grassRoughnessFactor ?? baseRoughness;
         uData[13] = mat.sandRoughnessFactor ?? baseRoughness;
@@ -94,8 +92,11 @@ class TerrainRVT {
         const resolvedBaseColor = baseColorGPUView ?? emptyView;
         const resolvedORMTexture = ormTextureGPUView ?? emptyView;
 
+        const albedoStorageView = this.#albedoAtlasGPU!.createView();
+        const normalORMStorageView = this.#normalORMAtlasGPU!.createView();
+
         const bindGroup = device.createBindGroup({
-            label: 'RVT_BakeBindGroup',
+            label: 'RVT_ComputeBakeBindGroup',
             layout: this.#bindGroupLayout!,
             entries: [
                 {binding: 0, resource: {buffer: this.#uniformBuffer!}},
@@ -107,44 +108,20 @@ class TerrainRVT {
                 {binding: 6, resource: this.#sampler!},
                 {binding: 7, resource: resolvedBaseColor},
                 {binding: 8, resource: resolvedORMTexture},
+                {binding: 9, resource: albedoStorageView},
+                {binding: 10, resource: normalORMStorageView},
             ]
         });
 
-        const encoder = device.createCommandEncoder({label: 'RVT_BakeEncoder'});
-
-        {
-            const pass = encoder.beginRenderPass({
-                label: 'RVT_AlbedoBakePass',
-                colorAttachments: [{
-                    view: this.#albedoAtlasGPU!.createView(),
-                    loadOp: 'clear', storeOp: 'store',
-                    clearValue: {r: 0, g: 0, b: 0, a: 1}
-                }]
-            });
-            pass.setPipeline(this.#albedoPipeline!);
-            pass.setBindGroup(0, bindGroup);
-            pass.draw(3, 1, 0, 0);
-            pass.end();
-        }
-
-        {
-            const pass = encoder.beginRenderPass({
-                label: 'RVT_NormalORMBakePass',
-                colorAttachments: [{
-                    view: this.#normalORMAtlasGPU!.createView(),
-                    loadOp: 'clear', storeOp: 'store',
-                    clearValue: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-                }]
-            });
-            pass.setPipeline(this.#normalORMPipeline!);
-            pass.setBindGroup(0, bindGroup);
-            pass.draw(3, 1, 0, 0);
-            pass.end();
-        }
+        const encoder = device.createCommandEncoder({label: 'RVT_ComputeBakeEncoder'});
+        const pass = encoder.beginComputePass({label: 'RVT_ComputeBakePass'});
+        pass.setPipeline(this.#computePipeline);
+        pass.setBindGroup(0, bindGroup);
+        const workgroups = Math.ceil(this.#atlasSize / 16);
+        pass.dispatchWorkgroups(workgroups, workgroups);
+        pass.end();
 
         device.queue.submit([encoder.finish()]);
-
-        this.#refreshDirectTextures();
     }
 
     public destroy(): void {
@@ -164,12 +141,12 @@ class TerrainRVT {
 
         this.#albedoAtlasGPU = device.createTexture({
             label: 'RVT_AlbedoAtlas', size: [size, size, 1], format: 'rgba8unorm',
-            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
+            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
         });
 
         this.#normalORMAtlasGPU = device.createTexture({
             label: 'RVT_NormalORMAtlas', size: [size, size, 1], format: 'rgba8unorm',
-            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
+            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
         });
 
         const uid = Math.random().toString(36).slice(2);
@@ -189,53 +166,55 @@ class TerrainRVT {
     #initPipeline(): void {
         const device = this.#redGPUContext.gpuDevice;
         this.#bindGroupLayout = device.createBindGroupLayout({
-            label: 'RVT_BakeBindGroupLayout',
+            label: 'RVT_ComputeBakeBindGroupLayout',
             entries: [
-                {binding: 0, visibility: GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX, buffer: {type: 'uniform'}},
-                {binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float', viewDimension: '2d'}},
+                {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
+                {binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
                 {
                     binding: 2,
-                    visibility: GPUShaderStage.FRAGMENT,
+                    visibility: GPUShaderStage.COMPUTE,
                     texture: {sampleType: 'float', viewDimension: '2d-array'}
                 },
                 {
                     binding: 3,
-                    visibility: GPUShaderStage.FRAGMENT,
+                    visibility: GPUShaderStage.COMPUTE,
                     texture: {sampleType: 'float', viewDimension: '2d-array'}
                 },
                 {
                     binding: 4,
-                    visibility: GPUShaderStage.FRAGMENT,
+                    visibility: GPUShaderStage.COMPUTE,
                     texture: {sampleType: 'float', viewDimension: '2d-array'}
                 },
                 {
                     binding: 5,
-                    visibility: GPUShaderStage.FRAGMENT,
+                    visibility: GPUShaderStage.COMPUTE,
                     texture: {sampleType: 'float', viewDimension: '2d-array'}
                 },
-                {binding: 6, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
-                {binding: 7, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float', viewDimension: '2d'}},
-                {binding: 8, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float', viewDimension: '2d'}},
+                {binding: 6, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
+                {binding: 7, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
+                {binding: 8, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
+                {
+                    binding: 9,
+                    visibility: GPUShaderStage.COMPUTE,
+                    storageTexture: {access: 'write-only', format: 'rgba8unorm', viewDimension: '2d'}
+                },
+                {
+                    binding: 10,
+                    visibility: GPUShaderStage.COMPUTE,
+                    storageTexture: {access: 'write-only', format: 'rgba8unorm', viewDimension: '2d'}
+                },
             ]
         });
 
         const pipelineLayout = device.createPipelineLayout({
-            label: 'RVT_BakePipelineLayout', bindGroupLayouts: [this.#bindGroupLayout]
+            label: 'RVT_ComputeBakePipelineLayout', bindGroupLayouts: [this.#bindGroupLayout]
         });
 
-        const shaderModule = device.createShaderModule({label: 'RVT_BakeShader', code: bakeSrc});
-        const vertexState: GPUVertexState = {module: shaderModule, entryPoint: 'vs_main'};
+        const shaderModule = device.createShaderModule({label: 'RVT_ComputeBakeShader', code: bakeSrc});
 
-        this.#albedoPipeline = device.createRenderPipeline({
-            label: 'RVT_AlbedoBakePipeline', layout: pipelineLayout, vertex: vertexState,
-            fragment: {module: shaderModule, entryPoint: 'fs_albedo', targets: [{format: 'rgba8unorm'}]},
-            primitive: {topology: 'triangle-list'},
-        });
-
-        this.#normalORMPipeline = device.createRenderPipeline({
-            label: 'RVT_NormalORMBakePipeline', layout: pipelineLayout, vertex: vertexState,
-            fragment: {module: shaderModule, entryPoint: 'fs_normal_orm', targets: [{format: 'rgba8unorm'}]},
-            primitive: {topology: 'triangle-list'},
+        this.#computePipeline = device.createComputePipeline({
+            label: 'RVT_ComputeBakePipeline', layout: pipelineLayout,
+            compute: {module: shaderModule, entryPoint: 'cs_main'}
         });
     }
 
@@ -257,9 +236,6 @@ class TerrainRVT {
             });
         }
         return this.#emptyArrayGPUTexture.createView({dimension: '2d-array', arrayLayerCount: 4, baseArrayLayer: 0});
-    }
-
-    #refreshDirectTextures(): void {
     }
 }
 

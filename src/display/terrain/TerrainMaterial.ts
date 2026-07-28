@@ -89,9 +89,9 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         this.bakeRVT();
     }
 
-    #tileScale: number = 1.0;
-    #macroScale: number = 1.0;
-    #blendContrast: number = 0.0;
+    #tileScale: number = 16.0;
+    #macroScale: number = 2.0;
+    #blendContrast: number = 0.5;
 
     get layers(): TerrainLayerConfig[] {
         return [...this.#layers];
@@ -102,9 +102,9 @@ class TerrainMaterial extends ABitmapBaseMaterial {
     #normalScale: number = 1.0;
     #occlusionStrength: number = 1.0;
     #grassRoughnessFactor: number = 0.85;
-    #sandRoughnessFactor: number = 0.80;
-    #rockRoughnessFactor: number = 0.65;
-    #gravelRoughnessFactor: number = 0.70;
+    #sandRoughnessFactor: number = 0.85;
+    #rockRoughnessFactor: number = 0.90;
+    #gravelRoughnessFactor: number = 0.85;
 
     get rvt(): TerrainRVT {
         return this.#rvt;
@@ -220,10 +220,16 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         this.bakeRVT();
     }
 
+    #bakeTimer: any = null;
+
     bakeRVT = () => {
-        if (this.#rvt) {
-            this.#rvt.bake(this);
-        }
+        if (this.#bakeTimer) return;
+        this.#bakeTimer = requestAnimationFrame(() => {
+            this.#bakeTimer = null;
+            if (this.#rvt) {
+                this.#rvt.bake(this);
+            }
+        });
     };
 
     override updateTexture(prevTexture: any, texture: any) {

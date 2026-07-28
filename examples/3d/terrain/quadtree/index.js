@@ -123,9 +123,9 @@ RedGPU.init(
         );
         terrain.ormTexture = ormTextureInstance;
 
-        // 💡 2000m 거대 월드에 어울리는 최적의 텍스처 타일링 값 수동 기입
-        terrain.tileScale = 75.0;
-        terrain.macroScale = 10.0;
+        // 💡 1000m 월드에 어울리는 언리얼 엔진 랜드스케이프 표준 텍스처 타일링 값
+        terrain.tileScale = 16.0;
+        terrain.macroScale = 2.0;
 
         const splatTextureInstance = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
@@ -137,35 +137,39 @@ RedGPU.init(
         );
         terrain.splatTexture = splatTextureInstance;
 
-        // 💡 신규 레이어 추가 API (terrain.addLayer)를 활용하여 디테일 레이어 4종 등록
-        // terrain.addLayer({
-        //     name: 'Grass',
-        //     diffuse: '../../../assets/terrain/terrainTest_001/layer/grass.jpg',
-        //     normal: '../../../assets/terrain/terrainTest_001/layer/grass_normal.jpg',
-        //     height: '../../../assets/terrain/terrainTest_001/layer/grass_height.jpg',
-        //     orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg'
-        // });
-        // terrain.addLayer({
-        //     name: 'Sand',
-        //     diffuse: '../../../assets/terrain/terrainTest_001/layer/sand.jpg',
-        //     normal: '../../../assets/terrain/terrainTest_001/layer/sand_normal.jpg',
-        //     height: '../../../assets/terrain/terrainTest_001/layer/sand_height.jpg',
-        //     orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg'
-        // });
-        // terrain.addLayer({
-        //     name: 'Rock',
-        //     diffuse: '../../../assets/terrain/terrainTest_001/layer/rock.jpg',
-        //     normal: '../../../assets/terrain/terrainTest_001/layer/rock_normal.jpg',
-        //     height: '../../../assets/terrain/terrainTest_001/layer/rock_height.jpg',
-        //     orm: '../../../assets/terrain/terrainTest_001/layer/rock_orm.jpg'
-        // });
-        // terrain.addLayer({
-        //     name: 'Gravel',
-        //     diffuse: '../../../assets/terrain/terrainTest_001/layer/gravel.jpg',
-        //     normal: '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg',
-        //     height: '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg',
-        //     orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg'
-        // });
+        // 💡 디테일 레이어 4종 등록
+        terrain.addLayer({
+            name: 'Grass',
+            diffuse: '../../../assets/terrain/terrainTest_001/layer/grass.jpg',
+            normal: '../../../assets/terrain/terrainTest_001/layer/grass_normal.jpg',
+            height: '../../../assets/terrain/terrainTest_001/layer/grass_height.jpg',
+            orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg',
+            roughnessFactor: 0.85
+        });
+        terrain.addLayer({
+            name: 'Sand',
+            diffuse: '../../../assets/terrain/terrainTest_001/layer/sand.jpg',
+            normal: '../../../assets/terrain/terrainTest_001/layer/sand_normal.jpg',
+            height: '../../../assets/terrain/terrainTest_001/layer/sand_height.jpg',
+            orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg',
+            roughnessFactor: 0.85
+        });
+        terrain.addLayer({
+            name: 'Rock',
+            diffuse: '../../../assets/terrain/terrainTest_001/layer/rock.jpg',
+            normal: '../../../assets/terrain/terrainTest_001/layer/rock_normal.jpg',
+            height: '../../../assets/terrain/terrainTest_001/layer/rock_height.jpg',
+            orm: '../../../assets/terrain/terrainTest_001/layer/rock_orm.jpg',
+            roughnessFactor: 0.90
+        });
+        terrain.addLayer({
+            name: 'Gravel',
+            diffuse: '../../../assets/terrain/terrainTest_001/layer/gravel.jpg',
+            normal: '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg',
+            height: '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg',
+            orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg',
+            roughnessFactor: 0.85
+        });
 
         // 💡 지형 베이스 필터 색상을 흰색으로 초기화하여 텍스처 본연의 밝기와 태양광 반사를 그대로 표현
         terrain.material.baseColorFactor = '#ffffff';
@@ -297,11 +301,11 @@ function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, 
 
             materialFolder.addBinding(terrain, 'tileScale', {
                 label: '디테일 타일링 (근거리)',
-                min: 1.0, max: 150.0, step: 0.01
+                min: 1.0, max: 64.0, step: 0.1
             });
             materialFolder.addBinding(terrain, 'macroScale', {
                 label: '매크로 타일링 (원거리)',
-                min: 1.0, max: 50.0, step: 0.01
+                min: 0.1, max: 10.0, step: 0.1
             });
             materialFolder.addBinding(terrain, 'blendContrast', {
                 label: '블렌드 대비 (Contrast)',
