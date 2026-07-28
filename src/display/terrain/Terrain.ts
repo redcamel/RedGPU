@@ -97,14 +97,20 @@ class Terrain extends Mesh {
         }
     }
 
+    override get material(): TerrainMaterial {
+        return super.material as TerrainMaterial;
+    }
+
+    override set material(val: any) {
+        throw new Error('Terrain.material is read-only and cannot be reassigned.');
+    }
+
     get baseColorTexture(): BitmapTexture {
         return this.material.baseColorTexture;
     }
 
     set baseColorTexture(texture: BitmapTexture) {
-        if (this.material) {
-            this.material.baseColorTexture = texture;
-        }
+        this.material.baseColorTexture = texture;
     }
 
     get ormTexture(): BitmapTexture {
@@ -112,9 +118,7 @@ class Terrain extends Mesh {
     }
 
     set ormTexture(texture: BitmapTexture) {
-        if (this.material) {
-            this.material.ormTexture = texture;
-        }
+        this.material.ormTexture = texture;
     }
 
     get splatTexture(): BitmapTexture {
@@ -122,79 +126,63 @@ class Terrain extends Mesh {
     }
 
     set splatTexture(texture: BitmapTexture) {
-        if (this.material) {
-            this.material.splatTexture = texture;
-        }
+        this.material.splatTexture = texture;
     }
 
     get tileScale(): number {
-        return this.material.tileScale ?? 1.0;
+        return this.material.tileScale;
     }
 
     set tileScale(value: number) {
-        if (this.material) {
-            this.material.tileScale = value;
-        }
+        this.material.tileScale = value;
     }
 
     get macroScale(): number {
-        return this.material.macroScale ?? 1.0;
+        return this.material.macroScale;
     }
 
     set macroScale(value: number) {
-        if (this.material) {
-            this.material.macroScale = value;
-        }
+        this.material.macroScale = value;
     }
 
     get metallicFactor(): number {
-        return this.material.metallicFactor ?? 0.0;
+        return this.material.metallicFactor;
     }
 
     set metallicFactor(value: number) {
-        if (this.material) {
-            this.material.metallicFactor = value;
-        }
+        this.material.metallicFactor = value;
     }
 
     get roughnessFactor(): number {
-        return this.material.roughnessFactor ?? 0.85;
+        return this.material.roughnessFactor;
     }
 
     set roughnessFactor(value: number) {
-        if (this.material) {
-            this.material.roughnessFactor = value;
-        }
+        this.material.roughnessFactor = value;
     }
 
     get normalScale(): number {
-        return this.material.normalScale ?? 1.0;
+        return this.material.normalScale;
     }
 
     set normalScale(value: number) {
-        if (this.material) {
-            this.material.normalScale = value;
-        }
+        this.material.normalScale = value;
     }
 
     get occlusionStrength(): number {
-        return this.material.occlusionStrength ?? 1.0;
+        return this.material.occlusionStrength;
     }
 
     set occlusionStrength(value: number) {
-        if (this.material) {
-            this.material.occlusionStrength = value;
-        }
+        this.material.occlusionStrength = value;
     }
 
     get blendContrast(): number {
-        return this.material.blendContrast ?? 0.0;
+        return this.material.blendContrast;
     }
 
     set blendContrast(value: number) {
-        if (this.material) {
-            this.material.blendContrast = value;
-        }
+        this.material.blendContrast = value;
     }
 
     get layers(): TerrainLayerConfig[] {

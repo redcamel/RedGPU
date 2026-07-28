@@ -122,8 +122,7 @@ fn main(inputData:InputData) -> OutputFragment {
     }
 
     // NormalMap 복원 (XY octahedral → world space)
-    let xy_rvt = vec2<f32>(rvt_normalXY.r * 2.0 - 1.0, -(rvt_normalXY.g * 2.0 - 1.0));
-    var scaled_rvt = xy_rvt * u_normalScale;
+    var scaled_rvt = vec2<f32>(rvt_normalXY.r * 2.0 - 1.0, -(rvt_normalXY.g * 2.0 - 1.0));
     let lenSq_rvt = dot(scaled_rvt, scaled_rvt);
     if (lenSq_rvt > 0.98) { scaled_rvt = normalize(scaled_rvt) * 0.98; }
     let recon_z_rvt = sqrt(max(0.001, 1.0 - dot(scaled_rvt, scaled_rvt)));
@@ -152,7 +151,7 @@ fn main(inputData:InputData) -> OutputFragment {
     var ior_rvt: f32 = u_KHR_materials_ior;
     if (ior_rvt <= 0.0) { ior_rvt = 1.5; }
 
-    let occlusionParameter_rvt = rvt_occlusion * pbrUniforms.occlusionStrength;
+    let occlusionParameter_rvt = clamp(rvt_occlusion, 0.0, 1.0);
     let roughnessParameter_rvt = max(rvt_roughness, 0.04);
     let metallicParameter_rvt: f32 = 0.0;
 

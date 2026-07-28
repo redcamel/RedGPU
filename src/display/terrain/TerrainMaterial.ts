@@ -14,7 +14,6 @@ import GPU_MIPMAP_FILTER_MODE from "../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import TerrainRVT from "./TerrainRVT";
-import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 import {keepLog} from "../../utils";
 
 export interface TerrainLayerConfig {
@@ -116,7 +115,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set metallicFactor(v: number) {
         this.#metallicFactor = v;
-        updateTargetUniform(this, 'metallicFactor', v);
         this.bakeRVT();
     }
 
@@ -126,7 +124,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set roughnessFactor(v: number) {
         this.#roughnessFactor = v;
-        updateTargetUniform(this, 'roughnessFactor', v);
         this.bakeRVT();
     }
 
@@ -136,7 +133,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set normalScale(v: number) {
         this.#normalScale = v;
-        updateTargetUniform(this, 'normalScale', v);
         this.bakeRVT();
     }
 
@@ -146,7 +142,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set occlusionStrength(v: number) {
         this.#occlusionStrength = v;
-        updateTargetUniform(this, 'occlusionStrength', v);
         this.bakeRVT();
     }
 
@@ -156,7 +151,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set tileScale(v: number) {
         this.#tileScale = v;
-        updateTargetUniform(this, 'tileScale', v);
         this.bakeRVT();
     }
 
@@ -166,7 +160,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set macroScale(v: number) {
         this.#macroScale = v;
-        updateTargetUniform(this, 'macroScale', v);
         this.bakeRVT();
     }
 
@@ -176,7 +169,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set blendContrast(v: number) {
         this.#blendContrast = v;
-        updateTargetUniform(this, 'blendContrast', v);
         this.bakeRVT();
     }
 
@@ -186,7 +178,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set grassRoughnessFactor(v: number) {
         this.#grassRoughnessFactor = v;
-        updateTargetUniform(this, 'grassRoughnessFactor', v);
         this.bakeRVT();
     }
 
@@ -196,7 +187,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set sandRoughnessFactor(v: number) {
         this.#sandRoughnessFactor = v;
-        updateTargetUniform(this, 'sandRoughnessFactor', v);
         this.bakeRVT();
     }
 
@@ -206,7 +196,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set rockRoughnessFactor(v: number) {
         this.#rockRoughnessFactor = v;
-        updateTargetUniform(this, 'rockRoughnessFactor', v);
         this.bakeRVT();
     }
 
@@ -216,7 +205,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set gravelRoughnessFactor(v: number) {
         this.#gravelRoughnessFactor = v;
-        updateTargetUniform(this, 'gravelRoughnessFactor', v);
         this.bakeRVT();
     }
 

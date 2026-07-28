@@ -21,6 +21,8 @@ struct RVTBakeUniforms {
     sandRoughnessFactor:   f32,
     rockRoughnessFactor:   f32,
     gravelRoughnessFactor: f32,
+    normalScale: f32,
+    occlusionStrength: f32,
 }
 
 @group(0) @binding(0) var<uniform> bakeUniforms: RVTBakeUniforms;
@@ -53,11 +55,15 @@ fn getHeightBlendedWeights(
     return blended / sumVal;
 }
 
-// ─── Explicit Compute MipLevel Helper (근접 100% 선명도 우대 & 원거리 지글거림 방지) ────────
+// ─── Explicit Compute MipLevel Helper (언리얼 엔진 RVT Mipmap Baking 규격) ─────
 fn getBakeMipLevel(tileScale: f32, textureSize: f32, atlasSize: f32) -> f32 {
     let texelsPerAtlasPixel = (tileScale * textureSize) / atlasSize;
-    // 근접 구역은 0.0 레벨(원본 100% 최고 해상도)을 보장하고, 극심한 고밀도 타일링에서만 밉맵 적용
-    let mip = log2(max(texelsPerAtlasPixel, 1.0)) - 0.75;
+    // 근접 구역 (1px당 텍셀 1개 이하) -> 100% Mip 0 (원본 텍스처 칼 같은 선명도 보장)
+    if (texelsPerAtlasPixel <= 1.0) {
+        return 0.0;
+    }
+    // 원거리 / 고밀도 타일링 구역 -> 지글거림(Aliasing) 방지를 위한 적정 MipLevel 산출
+    let mip = log2(texelsPerAtlasPixel) - 0.5;
     return clamp(mip, 0.0, 3.0);
 }
 
@@ -124,6 +130,7 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     if (blendedNormal.r <= 0.001 && blendedNormal.g <= 0.001) {
         blendedNormal = vec2<f32>(0.5, 0.5);
     }
+    let scaledNormal = clamp((blendedNormal - vec2<f32>(0.5)) * bakeUniforms.normalScale + vec2<f32>(0.5), vec2<f32>(0.0), vec2<f32>(1.0));
 
     var o0 = textureSampleLevel(ormArray, texSampler, tileUV, 0i, bakeMip);
     var o1 = textureSampleLevel(ormArray, texSampler, tileUV, 1i, bakeMip);
@@ -134,10 +141,11 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     if (o2.a <= 0.01 || (o2.r <= 0.001 && o2.g <= 0.001)) { o2 = vec4<f32>(1.0); }
     if (o3.a <= 0.01 || (o3.r <= 0.001 && o3.g <= 0.001)) { o3 = vec4<f32>(1.0); }
 
-    let r0 = o0.g * bakeUniforms.grassRoughnessFactor;
-    let r1 = o1.g * bakeUniforms.sandRoughnessFactor;
-    let r2 = o2.g * bakeUniforms.rockRoughnessFactor;
-    let r3 = o3.g * bakeUniforms.gravelRoughnessFactor;
+    let globalRoughnessMult = bakeUniforms.roughnessFactor;
+    let r0 = o0.g * bakeUniforms.grassRoughnessFactor * globalRoughnessMult;
+    let r1 = o1.g * bakeUniforms.sandRoughnessFactor * globalRoughnessMult;
+    let r2 = o2.g * bakeUniforms.rockRoughnessFactor * globalRoughnessMult;
+    let r3 = o3.g * bakeUniforms.gravelRoughnessFactor * globalRoughnessMult;
 
     let blendedRoughness = r0 * w.r + r1 * w.g + r2 * w.b + r3 * w.a;
     let blendedOcclusion = o0.r * w.r + o1.r * w.g + o2.r * w.b + o3.r * w.a;
@@ -148,8 +156,8 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     let finalRoughness = clamp(blendedRoughness * globalORM.g, 0.04, 1.0);
-    let finalOcclusion = clamp(blendedOcclusion * globalORM.r, 0.0, 1.0);
+    let finalOcclusion = clamp(blendedOcclusion * globalORM.r * bakeUniforms.occlusionStrength, 0.0, 1.0);
 
     textureStore(albedoOutput, coords, finalAlbedo);
-    textureStore(normalORMOutput, coords, vec4<f32>(blendedNormal, finalRoughness, finalOcclusion));
+    textureStore(normalORMOutput, coords, vec4<f32>(scaledNormal, finalRoughness, finalOcclusion));
 }
