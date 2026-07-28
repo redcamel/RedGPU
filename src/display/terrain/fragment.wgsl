@@ -19,14 +19,7 @@
 #redgpu_include skyAtmosphere.skyAtmosphereFn
 
 struct TerrainUniforms {
-    tileScale: f32,
-    macroScale: f32,
-    blendContrast: f32,
     debugSplatTexture: u32,
-    grassRoughnessFactor:f32,
-    sandRoughnessFactor:f32,
-    rockRoughnessFactor:f32,
-    gravelRoughnessFactor:f32,
 }
 @group(2) @binding(0) var<uniform> uniforms: TerrainUniforms;
 
@@ -35,22 +28,6 @@ struct TerrainUniforms {
 #redgpu_if baseColorTexture
 @group(2) @binding(1) var baseColorTexture: texture_2d<f32>;
 #redgpu_endIf
-@group(2) @binding(2) var splatTexture: texture_2d<f32>;
-@group(2) @binding(3) var diffuseArray: texture_2d_array<f32>;
-#redgpu_if normalArray
-@group(2) @binding(4) var normalArray: texture_2d_array<f32>;
-#redgpu_endIf
-@group(2) @binding(5) var textureSampler: sampler;
-#redgpu_if ormTexture
-@group(2) @binding(6) var ormTexture: texture_2d<f32>;
-#redgpu_endIf
-#redgpu_if heightArray
-@group(2) @binding(7) var heightArray: texture_2d_array<f32>;
-#redgpu_endIf
-#redgpu_if ormArray
-@group(2) @binding(8) var ormArray: texture_2d_array<f32>;
-#redgpu_endIf
-
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // 💡 RVT (Runtime Virtual Texture) 아틀라스 바인딩 — 무조건 사용
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

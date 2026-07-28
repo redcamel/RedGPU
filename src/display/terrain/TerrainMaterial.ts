@@ -5,7 +5,6 @@ import DirectTexture from "../../resources/texture/DirectTexture";
 import TextureArray from "../../resources/texture/TextureArray";
 import fragmentModuleSource from './fragment.wgsl';
 import ABitmapBaseMaterial from "../../material/core/ABitmapBaseMaterial";
-import defineNumber from "../../defineProperty/funcs/number/defineNumber";
 import defineColorRGBA from "../../defineProperty/funcs/color/defineColorRGBA";
 import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
 import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
@@ -28,10 +27,6 @@ export interface TerrainLayerConfig {
 }
 
 interface TerrainMaterial {
-    metallicFactor: number;
-    roughnessFactor: number;
-    normalScale: number;
-    occlusionStrength: number;
     debugSplatTexture: boolean;
     baseColorFactor: [number, number, number, number] | string;
     baseColorTexture: BitmapTexture;
@@ -101,6 +96,11 @@ class TerrainMaterial extends ABitmapBaseMaterial {
     get layers(): TerrainLayerConfig[] {
         return [...this.#layers];
     }
+
+    #metallicFactor: number = 0;
+    #roughnessFactor: number = 0.85;
+    #normalScale: number = 1.0;
+    #occlusionStrength: number = 1.0;
     #grassRoughnessFactor: number = 0.85;
     #sandRoughnessFactor: number = 0.80;
     #rockRoughnessFactor: number = 0.65;
@@ -108,6 +108,46 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     get rvt(): TerrainRVT {
         return this.#rvt;
+    }
+
+    get metallicFactor(): number {
+        return this.#metallicFactor;
+    }
+
+    set metallicFactor(v: number) {
+        this.#metallicFactor = v;
+        updateTargetUniform(this, 'metallicFactor', v);
+        this.bakeRVT();
+    }
+
+    get roughnessFactor(): number {
+        return this.#roughnessFactor;
+    }
+
+    set roughnessFactor(v: number) {
+        this.#roughnessFactor = v;
+        updateTargetUniform(this, 'roughnessFactor', v);
+        this.bakeRVT();
+    }
+
+    get normalScale(): number {
+        return this.#normalScale;
+    }
+
+    set normalScale(v: number) {
+        this.#normalScale = v;
+        updateTargetUniform(this, 'normalScale', v);
+        this.bakeRVT();
+    }
+
+    get occlusionStrength(): number {
+        return this.#occlusionStrength;
+    }
+
+    set occlusionStrength(v: number) {
+        this.#occlusionStrength = v;
+        updateTargetUniform(this, 'occlusionStrength', v);
+        this.bakeRVT();
     }
 
     get tileScale(): number {
@@ -306,12 +346,6 @@ Object.defineProperty(TerrainMaterial.prototype, 'isPBRMaterial', {
     writable: false
 });
 
-defineNumber(TerrainMaterial, [
-    {key: 'metallicFactor', value: 0},
-    {key: 'roughnessFactor', value: 0.85},
-    {key: 'normalScale', value: 1.0},
-    {key: 'occlusionStrength', value: 1.0},
-]);
 defineBoolean(TerrainMaterial, [
     {key: 'debugSplatTexture', value: false},
 ]);
@@ -323,10 +357,6 @@ defineColorRGBA(TerrainMaterial, [
 defineTexture(TerrainMaterial, [
     {key: 'baseColorTexture'},
     {key: 'splatTexture'},
-    {key: 'diffuseArray'},
-    {key: 'heightArray'},
-    {key: 'normalArray'},
-    {key: 'ormArray'},
     {key: 'ormTexture'},
     // RVT 아틀라스 텍스처 슬롯
     {key: 'rvtAlbedoTexture'},
@@ -334,7 +364,6 @@ defineTexture(TerrainMaterial, [
 ]);
 
 defineSampler(TerrainMaterial, [
-    {key: 'textureSampler'},
     {key: 'rvtSampler'},
 ]);
 

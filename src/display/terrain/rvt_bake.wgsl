@@ -15,7 +15,7 @@ struct RVTBakeUniforms {
     tileScale:  f32,
     macroScale: f32,
     blendContrast: f32,
-    pad0: f32,
+    roughnessFactor: f32,
     // 레이어별 roughnessFactor
     grassRoughnessFactor:  f32,
     sandRoughnessFactor:   f32,
@@ -189,11 +189,12 @@ fn fs_normal_orm(in: BakeOutput) -> NormalORMOutput {
         blendedORM = vec4<f32>(1.0, 1.0, 1.0, 1.0);
     }
 
-    let layerRoughness =
+    let layerRoughness = (
         bakeUniforms.grassRoughnessFactor  * w.r +
         bakeUniforms.sandRoughnessFactor   * w.g +
         bakeUniforms.rockRoughnessFactor   * w.b +
-        bakeUniforms.gravelRoughnessFactor * w.a;
+        bakeUniforms.gravelRoughnessFactor * w.a
+    ) * bakeUniforms.roughnessFactor;
 
     // ormTexture (지형 전체 글로벌 ORM/AO 맵 안전 적용)
     var globalORM = textureSample(ormTexture, texSampler, wUV);

@@ -70,14 +70,15 @@ class TerrainRVT {
         uData[5] = 0.0;
         uData[6] = 1.0;
         uData[7] = 1.0;
+        const baseRoughness = mat.roughnessFactor ?? 0.85;
         uData[8] = mat.tileScale ?? 75.0;
         uData[9] = mat.macroScale ?? 10.0;
         uData[10] = mat.blendContrast ?? 0.0;
-        uData[11] = 0.0;
-        uData[12] = mat.grassRoughnessFactor ?? 0.85;
-        uData[13] = mat.sandRoughnessFactor ?? 0.80;
-        uData[14] = mat.rockRoughnessFactor ?? 0.65;
-        uData[15] = mat.gravelRoughnessFactor ?? 0.70;
+        uData[11] = baseRoughness;
+        uData[12] = mat.grassRoughnessFactor ?? baseRoughness;
+        uData[13] = mat.sandRoughnessFactor ?? baseRoughness;
+        uData[14] = mat.rockRoughnessFactor ?? baseRoughness;
+        uData[15] = mat.gravelRoughnessFactor ?? baseRoughness;
 
         device.queue.writeBuffer(this.#uniformBuffer!, 0, uData);
 
