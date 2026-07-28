@@ -90,7 +90,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     #tileScale: number = 16.0;
     #macroScale: number = 2.0;
-    #blendContrast: number = 0.5;
+    #blendContrast: number = 0.0;
 
     get layers(): TerrainLayerConfig[] {
         return [...this.#layers];

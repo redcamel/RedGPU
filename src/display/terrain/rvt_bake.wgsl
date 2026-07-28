@@ -40,19 +40,22 @@ struct RVTBakeUniforms {
 @group(0) @binding(9)  var albedoOutput:    texture_storage_2d<rgba8unorm, write>;
 @group(0) @binding(10) var normalORMOutput: texture_storage_2d<rgba8unorm, write>;
 
-// ─── Height-Blend helper (Unreal Engine Landscape HeightBlend Standard) ───────
+// ─── Height-Blend helper (Unreal Engine 5 Landscape HeightBlend Official Source) ─
 fn getHeightBlendedWeights(
     splatWeights: vec4<f32>,
     layerHeights: vec4<f32>,
     contrast: f32
 ) -> vec4<f32> {
-    // 언리얼 엔진 Landscape HeightBlend: Combined = (Height + 1.0) * Weight
+    // 언리얼 엔진 5 Landscape 공식 수식: Combined = (Height + 1.0) * Weight
     let combined = (layerHeights + vec4<f32>(1.0)) * splatWeights;
     let maxVal   = max(combined.r, max(combined.g, max(combined.b, combined.a)));
-    let transition = max(0.02, 1.0 - pow(clamp(contrast, 0.0, 1.0), 2.0));
+    if (maxVal <= 0.0001) { return splatWeights; }
+
+    // 언리얼 엔진 5 공식 Transition 범위 산출
+    let transition = max(0.005, (1.0 - clamp(contrast, 0.0, 1.0)) * 0.5);
     let threshold  = maxVal - transition;
-    let blended   = max(combined - vec4<f32>(threshold), vec4<f32>(0.0));
-    let sumVal    = blended.r + blended.g + blended.b + blended.a;
+    let blended    = max(combined - vec4<f32>(threshold), vec4<f32>(0.0));
+    let sumVal     = blended.r + blended.g + blended.b + blended.a;
     if (sumVal <= 0.0001) { return splatWeights; }
     return blended / sumVal;
 }
@@ -133,16 +136,15 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
     finalAlbedo.a = 1.0;
 
-    // 2. Normal & ORM 연산
-    let n0 = textureSampleLevel(normalArray, texSampler, tileUV, 0i, bakeMip).rg;
-    let n1 = textureSampleLevel(normalArray, texSampler, tileUV, 1i, bakeMip).rg;
-    let n2 = textureSampleLevel(normalArray, texSampler, tileUV, 2i, bakeMip).rg;
-    let n3 = textureSampleLevel(normalArray, texSampler, tileUV, 3i, bakeMip).rg;
-    var blendedNormal = n0 * w.r + n1 * w.g + n2 * w.b + n3 * w.a;
-    if (blendedNormal.r <= 0.001 && blendedNormal.g <= 0.001) {
-        blendedNormal = vec2<f32>(0.5, 0.5);
-    }
-    let scaledNormal = clamp((blendedNormal - vec2<f32>(0.5)) * bakeUniforms.normalScale + vec2<f32>(0.5), vec2<f32>(0.0), vec2<f32>(1.0));
+    // 2. Normal & ORM 연산 (언리얼 엔진 Landscape Tangent Space Blend)
+    let n0_raw = (textureSampleLevel(normalArray, texSampler, tileUV, 0i, bakeMip).rg * 2.0 - vec2<f32>(1.0));
+    let n1_raw = (textureSampleLevel(normalArray, texSampler, tileUV, 1i, bakeMip).rg * 2.0 - vec2<f32>(1.0));
+    let n2_raw = (textureSampleLevel(normalArray, texSampler, tileUV, 2i, bakeMip).rg * 2.0 - vec2<f32>(1.0));
+    let n3_raw = (textureSampleLevel(normalArray, texSampler, tileUV, 3i, bakeMip).rg * 2.0 - vec2<f32>(1.0));
+
+    var blendedNormalXY = n0_raw * w.r + n1_raw * w.g + n2_raw * w.b + n3_raw * w.a;
+    blendedNormalXY = blendedNormalXY * bakeUniforms.normalScale;
+    let scaledNormal = clamp(blendedNormalXY * 0.5 + vec2<f32>(0.5), vec2<f32>(0.0), vec2<f32>(1.0));
 
     var o0 = textureSampleLevel(ormArray, texSampler, tileUV, 0i, bakeMip);
     var o1 = textureSampleLevel(ormArray, texSampler, tileUV, 1i, bakeMip);

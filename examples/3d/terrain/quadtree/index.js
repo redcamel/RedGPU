@@ -138,15 +138,6 @@ RedGPU.init(
         terrain.splatTexture = splatTextureInstance;
 
         // 💡 디테일 레이어 4종 등록
-
-        terrain.addLayer({
-            name: 'Leaves',
-            diffuse: '../../../assets/terrain/terrainTest_001/layer/leave.jpg',
-            normal: '../../../assets/terrain/terrainTest_001/layer/leave_normal.jpg',
-            height: '../../../assets/terrain/terrainTest_001/layer/leave_height.jpg',
-            orm: '../../../assets/terrain/terrainTest_001/layer/leave_orm.jpg',
-            roughnessFactor: 0.85
-        });
         terrain.addLayer({
             name: 'Rock',
             diffuse: '../../../assets/terrain/terrainTest_001/layer/rock.jpg',
@@ -155,6 +146,7 @@ RedGPU.init(
             orm: '../../../assets/terrain/terrainTest_001/layer/rock_orm.jpg',
             roughnessFactor: 0.90
         });
+
         terrain.addLayer({
             name: 'Gravel',
             diffuse: '../../../assets/terrain/terrainTest_001/layer/gravel.jpg',
@@ -163,6 +155,15 @@ RedGPU.init(
             orm: '../../../assets/terrain/terrainTest_001/layer/gravel_orm.jpg',
             roughnessFactor: 0.85
         });
+        terrain.addLayer({
+            name: 'Leaves',
+            diffuse: '../../../assets/terrain/terrainTest_001/layer/leave.jpg',
+            normal: '../../../assets/terrain/terrainTest_001/layer/leave_normal.jpg',
+            height: '../../../assets/terrain/terrainTest_001/layer/leave_height.jpg',
+            orm: '../../../assets/terrain/terrainTest_001/layer/leave_orm.jpg',
+            roughnessFactor: 0.85
+        });
+
         terrain.addLayer({
             name: 'Grass',
             diffuse: '../../../assets/terrain/terrainTest_001/layer/grass.jpg',
