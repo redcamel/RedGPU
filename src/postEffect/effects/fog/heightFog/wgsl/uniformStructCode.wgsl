@@ -7,9 +7,10 @@ struct Uniforms {
     baseHeight: f32,
     thickness: f32,
     falloff: f32,
+    startDepth: f32,
+    endDepth: f32,
     fogColor: vec3<f32>,
     padding1: f32,
-    padding2: f32,
 };
 
 fn isFiniteValue(value: f32) -> bool {
@@ -29,17 +30,31 @@ fn calculateHeightFogFactor(screenCoord: vec2<f32>, depth: f32) -> f32 {
     let backgroundThreshold = 1.0 - 1e-5;
     let isBackground = depth >= backgroundThreshold;
 
+    var pixelWorldPos: vec3<f32>;
     var pixelWorldHeight: f32;
+    var camDistance: f32 = 0.0;
 
     if (isBackground) {
         let rayDirection = getRayDirectionMaxPrecision(screenCoord);
         pixelWorldHeight = getSkyboxHeightMaxPrecision(rayDirection);
+        camDistance = uniforms.endDepth + 1000.0;
     } else {
         let worldPos = reconstructWorldPositionUltraPrecise(screenCoord, depth);
         pixelWorldHeight = worldPos.y;
+        camDistance = length(worldPos - systemUniforms.camera.cameraPosition);
     }
 
-    return calculateAbsoluteHeightFogMaxPrecision(pixelWorldHeight);
+    let heightFogVal = calculateAbsoluteHeightFogMaxPrecision(pixelWorldHeight);
+
+    // 💡 startDepth & endDepth 거리 안개 계산 (endDepth > 0.0 일 때만 원거리 제약 적용)
+    var distFactor: f32 = 1.0;
+    if (uniforms.endDepth > 0.0 && uniforms.endDepth > uniforms.startDepth + 1.0) {
+        distFactor = clamp((camDistance - uniforms.startDepth) / (uniforms.endDepth - uniforms.startDepth), 0.0, 1.0);
+    }
+
+    // 높이 안개와 거리 안개의 최적 결합 (startDepth 이내의 근경은 안개 0%)
+    let rawFogFactor = clamp((1.0 - heightFogVal) * distFactor, 0.0, 1.0);
+    return 1.0 - rawFogFactor;
 }
 
 fn getSkyboxHeightMaxPrecision(rayDirection: vec3<f32>) -> f32 {
@@ -125,8 +140,8 @@ fn calculateAbsoluteHeightFogMaxPrecision(worldHeight: f32) -> f32 {
     }
 
     let densityWithEdge = fogDensity * edgeFactor;
-    let safeDensity = clamp(u_density, 0.0, 4.0);
-    let finalFogAmount = fma(densityWithEdge, safeDensity, 0.0) * 0.42;
+    let safeDensity = clamp(u_density, 0.0, 5.0);
+    let finalFogAmount = clamp(densityWithEdge * safeDensity, 0.0, 1.0);
 
     let result = clamp(1.0 - finalFogAmount, 0.0, 1.0);
 

@@ -11,10 +11,10 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
  * - GPU Instancing으로 단일 드로우콜에서 전체 지형 렌더링
  */
 
-const WORLD_SIZE = 10000.0;  // 월드 가로세로 크기 (10000x10000 = 10km 거대 지형 규격)
-const MAX_LOD = 8;          // 최대 LOD 레벨 (10km 원경 지평선 끝까지 촘촘히 연결되도록 8단계 세분화)
+const WORLD_SIZE = 20000.0;  // 월드 가로세로 크기 (20000x20000 = 20km 초대형 거대 월드 규격: 400km²)
+const MAX_LOD = 8;          // 최대 LOD 레벨 (20km 원경 지평선까지 쿼드트리 세분화 8단계)
 const MIN_H = 0.0;
-const MAX_H = 800.0;        // 하이랄 스케일 고도 (800m)
+const MAX_H = 1500.0;       // 최대 높이 (20km 초대형 거대 산맥 스케일 고도: 1.5km)
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -171,16 +171,16 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
 
-        // 1. 카메라 — 10km 스케일감을 느낄 수 있는 지상 400m 비행 시점
+        // 1. 카메라 — 20km 초대형 거대 월드 비행 전용 FreeController 설정
         const controller = new RedGPU.Camera.FreeController(redGPUContext);
-        controller.moveSpeed = 3000;              // 10km 지형 시원한 비행 속도
+        controller.moveSpeed = 5000;              // 20km 초대형 월드를 시원하게 누비는 비행 속도
         controller.mouseSensitivity = 0.2;       // 마우스 시선 회전 감도
         controller.x = 0;                        // 지형 X
-        controller.y = 1000;                      // 지상 400m 상공 (체감 스케일 극대화)
-        controller.z = -2000;                    // 중심부 남쪽 위치
-        controller.tilt = -12;                   // 지평선과 아득한 산맥을 웅장하게 바라보는 각도
+        controller.y = 1000;                     // 20km 스케일을 바라보는 1km 상공 시점
+        controller.z = -4000;                    // 중심부 남쪽 시점
+        controller.tilt = -15;                   // 20km 아득한 산맥 지평선을 내려다보는 각도
         controller.pan = 0;
-        controller.camera.farClipping = 50000;   // 10km 원경 끝까지 보이도록 Far Clip 확장
+        controller.camera.farClipping = 100000;  // 20km 원경 끝까지 잘림 없이 시원하게 보이도록 확장
         controller.camera.nearClipping = 1.0;
 
         const scene = new RedGPU.Display.Scene();
@@ -192,10 +192,13 @@ RedGPU.init(
         const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
         view.skyAtmosphere = skyAtmosphere;
 
-        // 원경 지평선 끝자락 4km~8km 구간을 하늘색 대기와 부드럽게 감싸주는 원경 대기 안개
+        // 💡 5km 이내 근경은 맑고 또렷하게 보장하고, 5km~20km 원경 지평선만 대기와 어우러지는 원경 대기 안개
         const heightFog = new RedGPU.PostEffect.HeightFog(redGPUContext);
-        heightFog.fogColor.setColorByRGB(180, 215, 245);
-        heightFog.thickness = 500;
+        heightFog.fogColor.setColorByRGB(160, 192, 224); // SkyAtmosphere 대기 산란 지평선 톤과 조화로운 Haze Blue
+        heightFog.thickness = 500;               // 수직 안개 두께를 낮게 유지 (근경 지면 뽀얗게 되는 현상 완전 방지)
+        heightFog.startDepth = 5000;             // 5km 이내 근경 지면은 안개 0% (맑고 칼같은 디테일)
+        heightFog.endDepth = 20000;              // 5km ~ 20km 원경 구간에서만 지평선 대기와 은은하게 믹싱
+        heightFog.density = 1;
         view.postEffectManager.addEffect(heightFog);
 
 
@@ -254,18 +257,18 @@ RedGPU.init(
         });
 
 
-        // 3-5. 지형 파라미터 — 거대 스케일 설정 및 언리얼 스타일 공간 그리드 스트리밍 활성화
+        // 3-5. 지형 파라미터 — 20km 초대형 스케일 설정 및 언리얼 스타일 공간 그리드 스트리밍 활성화
         terrain.minHeight = MIN_H;
         terrain.maxHeight = MAX_H;
         terrain.worldSize = [WORLD_SIZE, WORLD_SIZE];
         terrain.worldOffset = [-WORLD_SIZE / 2, -WORLD_SIZE / 2]; // 원점 중앙 정렬
         terrain.maxLOD = MAX_LOD;
-        terrain.tileScale = 200.0;                 // 10km 거대 스케일에 맞춘 텍스처 밀도 타일링 비율
+        terrain.tileScale = 400.0;                 // 20km 초대형 스케일에 맞춘 촘촘한 텍스처 밀도 타일링 비율
 
         // 🛰️ 카메라 중심 공간 그리드 스트리밍 설정 (월드 파티션)
         terrain.enableStreaming = true;
         terrain.spatialGrid.cellSize = 512;        // 512m 단위 셀 분할
-        terrain.spatialGrid.loadingRadius = 2500;  // 반경 2.5km 동적 로딩
+        terrain.spatialGrid.loadingRadius = 3500;  // 반경 3.5km 동적 로딩
 
         terrain.setOnTileLoad((tile) => {
             // console.log(`📥 [Streaming Load] Cell (${tile.gridX}, ${tile.gridZ}) | 거리: ${tile.distanceToCamera.toFixed(0)}m`);
@@ -400,7 +403,7 @@ function buildGUI(redGPUContext, terrain, controller) {
 
             tilingFolder.addBinding(terrain, 'tileScale', {
                 label: '디테일 타일링 (근거리)',
-                min: 1.0, max: 64.0, step: 0.1
+                min: 1.0, max: 1000.0, step: 1.0
             });
             tilingFolder.addBinding(terrain, 'macroScale', {
                 label: '매크로 타일링 (원거리)',
