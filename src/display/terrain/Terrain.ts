@@ -97,6 +97,58 @@ class Terrain extends Mesh {
         }
     }
 
+    /**
+     * [KO] Terrain 텍스처를 URL 문자열만으로 간편하게 일괄 설정합니다.
+     * 각 텍스처 타입에 맞는 GPU 포맷·밉맵 옵션을 내부에서 자동으로 적용합니다.
+     *
+     * [EN] Convenience method to set all terrain textures by URL.
+     * Correct GPU format and mipmap options are applied internally for each texture type.
+     *
+     * @example
+     * ```js
+     * terrain.setup({
+     *     height:    'path/to/height.jpg',
+     *     baseColor: 'path/to/diffuse.jpg',
+     *     orm:       'path/to/orm.jpg',
+     *     splat:     'path/to/splatMap.jpg',
+     * });
+     * ```
+     */
+    setup(options: {
+        /** [KO] 높이맵 URL — 밉맵 없음, r16float 포맷으로 자동 로딩 */
+        height?: string;
+        /** [KO] 글로벌 베이스 컬러(Diffuse) URL — sRGB 포맷으로 자동 로딩 */
+        baseColor?: string;
+        /** [KO] 글로벌 ORM 텍스처 URL — Linear(rgba8unorm) 포맷으로 자동 로딩 */
+        orm?: string;
+        /** [KO] 스플랫 맵 URL — Linear(rgba8unorm) 포맷으로 자동 로딩 */
+        splat?: string;
+    }): this {
+        const ctx = this.redGPUContext;
+
+        if (options.height) {
+            // 💡 높이맵: 밉맵 불필요(CDLOD Morph가 LOD 처리), r16float 정밀도 포맷
+            this.heightTexture = new BitmapTexture(ctx, options.height, false, null, null, 'r16float');
+        }
+
+        if (options.baseColor) {
+            // 💡 베이스 컬러: sRGB 감마 정정 포맷 (BitmapTexture 기본값 = srgb, 명시 생략)
+            this.material.baseColorTexture = new BitmapTexture(ctx, options.baseColor);
+        }
+
+        if (options.orm) {
+            // 💡 ORM: Linear 포맷 필수 (감마 보정 없이 R=AO, G=Roughness, B=Metallic 수치 그대로)
+            this.material.ormTexture = new BitmapTexture(ctx, options.orm, true, null, null, 'rgba8unorm');
+        }
+
+        if (options.splat) {
+            // 💡 스플랫 맵: Linear 포맷 필수 (R,G,B,A 채널을 가중치 수치 그대로 샘플링)
+            this.material.splatTexture = new BitmapTexture(ctx, options.splat, true, null, null, 'rgba8unorm');
+        }
+
+        return this;
+    }
+
     override get material(): TerrainMaterial {
         return super.material as TerrainMaterial;
     }

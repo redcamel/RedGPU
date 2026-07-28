@@ -97,46 +97,15 @@ RedGPU.init(
             undefined,
             'CDLOD_Terrain'
         );
-        // 3-1. 높이맵 텍스처
-        terrain.heightTexture = new RedGPU.Resource.BitmapTexture(
-            redGPUContext,
-            '../../../assets/terrain/terrainTest_001/height.jpg',
-            false,
-            null,
-            null,
-            'r16float',
-        );
 
-        // 3-2. PBR 지형 스플랫 페인팅 리소스 설정
-        const baseColorTextureInstance = new RedGPU.Resource.BitmapTexture(
-            redGPUContext,
-            '../../../assets/terrain/terrainTest_001/diffuse.jpg',
-        );
-        terrain.baseColorTexture = baseColorTextureInstance;
+        // 3-2. 텍스처 일괄 설정 — 각 텍스처 타입의 GPU 포맷·밉맵 옵션은 내부에서 자동 적용
+        terrain.setup({
+            height: '../../../assets/terrain/terrainTest_001/height.jpg',
+            baseColor: '../../../assets/terrain/terrainTest_001/diffuse.jpg',
+            orm: '../../../assets/terrain/terrainTest_001/orm.jpg',
+            splat: '../../../assets/terrain/terrainTest_001/splatMap.jpg',
+        });
 
-        const ormTextureInstance = new RedGPU.Resource.BitmapTexture(
-            redGPUContext,
-            '../../../assets/terrain/terrainTest_001/orm.jpg',
-            true,
-            null,
-            null,
-            'rgba8unorm'
-        );
-        terrain.ormTexture = ormTextureInstance;
-
-        // 💡 1000m 월드에 어울리는 언리얼 엔진 랜드스케이프 표준 텍스처 타일링 값
-        terrain.tileScale = 16.0;
-        terrain.macroScale = 2.0;
-
-        const splatTextureInstance = new RedGPU.Resource.BitmapTexture(
-            redGPUContext,
-            '../../../assets/terrain/terrainTest_001/splatMap.jpg',
-            true,
-            null,
-            null,
-            'rgba8unorm'
-        );
-        terrain.splatTexture = splatTextureInstance;
 
         // 💡 디테일 레이어 4종 등록
         terrain.addLayer({
@@ -206,7 +175,7 @@ RedGPU.init(
 
 
         // 7. GUI 패널
-        buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, ormTextureInstance, splatTextureInstance);
+        buildGUI(redGPUContext, terrain, controller);
     },
     (failReason) => {
         console.error('RedGPU 초기화 실패:', failReason);
@@ -218,7 +187,7 @@ RedGPU.init(
 );
 
 // ─── GUI 패널 ──────────────────────────────────────────────────────────────────
-function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, ormTextureInstance, splatTextureInstance) {
+function buildGUI(redGPUContext, terrain, controller) {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
         ibl: true,
