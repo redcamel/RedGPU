@@ -86,7 +86,12 @@ RedGPU.init(
         redGPUContext.addView(view);
 
         scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight())
+        const heightFog = new RedGPU.PostEffect.HeightFog(redGPUContext)
+        view.postEffectManager.addEffect(heightFog)
 
+        heightFog.fogColor.setColorByRGB(255, 245, 220);
+
+        heightFog.thickness = 75;
         const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
         view.skyAtmosphere = skyAtmosphere;
 

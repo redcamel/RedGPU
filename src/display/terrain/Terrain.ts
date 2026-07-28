@@ -13,6 +13,7 @@ import defineVector2 from "../../defineProperty/funcs/vector/defineVector2";
 import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
 import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
 import {TerrainQuadtree} from "./TerrainQuadtree";
+import {SpatialTileInfo, TerrainSpatialGrid} from "./TerrainSpatialGrid";
 import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 
@@ -30,27 +31,32 @@ interface Terrain {
     heightTexture: BitmapTexture;
     heightTextureSampler: any;
 
-
     maxLOD: number;
     baseSlotIndex: number;
     gridSize: number;
     useMorph: boolean;
+    enableStreaming: boolean;
 }
 
 class Terrain extends Mesh {
     quadtree: TerrainQuadtree;
+    spatialGrid: TerrainSpatialGrid;
     instanceBuffer: GPUBuffer;
     customVertexBindGroupLayout: GPUBindGroupLayout;
     #prevWorldSize: number = 0;
     #prevMaxLOD: number = 0;
     #lodRanges: Float32Array = new Float32Array(32);
-
+    #onTileLoadCallback?: (tile: SpatialTileInfo) => void;
+    #onTileUnloadCallback?: (tile: SpatialTileInfo) => void;
 
     constructor(redGPUContext: RedGPUContext, heightmapUrl?: string, name?: string) {
         const geometry = new TerrainGeometry(redGPUContext);
         const material = new TerrainMaterial(redGPUContext);
 
         super(redGPUContext, geometry, material, name);
+
+        this.spatialGrid = new TerrainSpatialGrid(512, 2500);
+        this.enableStreaming = false;
 
         this.minHeight = 0;
         this.maxHeight = 0.5;
@@ -339,6 +345,23 @@ class Terrain extends Mesh {
         const localCamZ = camera.z - this.worldOffset[1];
         const cameraPos: [number, number, number] = [localCamX, localCamY, localCamZ];
 
+        // 스트리밍 옵션이 활성화된 경우 카메라 위치에 따라 동적 그리드 타일 갱신
+        if (this.enableStreaming && this.spatialGrid) {
+            const minX = this.worldOffset[0];
+            const minZ = this.worldOffset[1];
+            const maxX = minX + this.worldSize[0];
+            const maxZ = minZ + this.worldSize[1];
+            this.spatialGrid.setTerrainBounds(minX, minZ, maxX, maxZ);
+
+            const {toLoad, toUnload} = this.spatialGrid.update([camera.x, camera.y, camera.z]);
+            if (toLoad.length > 0 && this.#onTileLoadCallback) {
+                toLoad.forEach(tile => this.#onTileLoadCallback!(tile));
+            }
+            if (toUnload.length > 0 && this.#onTileUnloadCallback) {
+                toUnload.forEach(tile => this.#onTileUnloadCallback!(tile));
+            }
+        }
+
         const planes = renderViewStateData.frustumPlanes;
 
         this.quadtree.update(
@@ -416,6 +439,14 @@ class Terrain extends Mesh {
             this.dirtyPipeline = true
         }
     }
+
+    setOnTileLoad(callback: (tile: SpatialTileInfo) => void) {
+        this.#onTileLoadCallback = callback;
+    }
+
+    setOnTileUnload(callback: (tile: SpatialTileInfo) => void) {
+        this.#onTileUnloadCallback = callback;
+    }
 }
 
 const getTerrainVertexBindGroupDescriptor = (mesh: Terrain) => {
@@ -464,7 +495,8 @@ defineVector2(Terrain, [
 ]);
 
 defineBoolean(Terrain, [
-    {key: "useMorph", value: true}
+    {key: "useMorph", value: true},
+    {key: "enableStreaming", value: false}
 ]);
 
 defineTexture(Terrain, [
