@@ -320,6 +320,13 @@ function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, 
                 label: '베이스 컬러 맵 혼합 비율',
                 min: 0, max: 1.0, step: 0.05
             });
+            tilingFolder.addBinding(terrain, 'baseColorBlendMode', {
+                label: '베이스 컬러 혼합 모드',
+                options: {
+                    '직접 혼합 (Mix / Lerp)': 'mix',
+                    '곱셈 틴트 (Multiply)': 'multiply'
+                }
+            });
 
             // ── 4. PBR 재질 & 음영 설정 ──────────────────────────────────────────
             const pbrFolder = pane.addFolder({title: '✨ PBR 재질 & 음영 (PBR & Lighting)', expanded: true});

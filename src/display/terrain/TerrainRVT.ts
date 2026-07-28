@@ -81,6 +81,7 @@ class TerrainRVT {
         uData[16] = mat.normalScale ?? 1.0;
         uData[17] = mat.occlusionStrength ?? 1.0;
         uData[18] = mat.baseColorWeight ?? 1.0;
+        uData[19] = mat.baseColorBlendMode === 'multiply' ? 1.0 : 0.0;
 
         device.queue.writeBuffer(this.#uniformBuffer!, 0, uData);
 

@@ -193,6 +193,14 @@ class Terrain extends Mesh {
         this.material.baseColorWeight = value;
     }
 
+    get baseColorBlendMode(): 'mix' | 'multiply' {
+        return this.material.baseColorBlendMode;
+    }
+
+    set baseColorBlendMode(value: 'mix' | 'multiply') {
+        this.material.baseColorBlendMode = value;
+    }
+
     get layers(): TerrainLayerConfig[] {
         return this.material.layers || [];
     }

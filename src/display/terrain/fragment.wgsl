@@ -440,8 +440,7 @@ fn getDirectPbrLight(
     F0_base:vec3<f32>, ior:f32
 ) -> vec3<f32>{
     let dLight = lightColor;
-    let NdotL_origin = dot(N, L);
-    let NdotL = max(NdotL_origin, 0.0);
+    let NdotL = max(dot(N, L), 0.0);
 
     if (NdotL <= 0.0) {
         return vec3<f32>(0.0);
@@ -452,24 +451,25 @@ fn getDirectPbrLight(
     let LdotH = max(dot(L, H), 0.0);
     let VdotH = max(dot(V, H), 0.0);
 
+    let roughness = max(roughnessParameter, 0.04);
     let combined_f0 = mix(F0_base, albedo, metallicParameter);
-    let fresnelTerm = pow(clamp(1.0 - VdotH, 0.0, 1.0), 5.0);
-    let F = combined_f0 + (max(vec3<f32>(1.0 - roughnessParameter), combined_f0) - combined_f0) * fresnelTerm;
+    let F = getFresnel(VdotH, combined_f0);
 
-    let SPEC_BRDF = getDirectSpecularBRDF(F, roughnessParameter, NdotH, VdotN, NdotL);
-    let specularAttenuation = clamp(1.0 - roughnessParameter, 0.0, 1.0);
-    let specularPart = SPEC_BRDF * NdotL * specularAttenuation;
+    // Specular Cook-Torrance BRDF (정통 PBR 에너지 보존)
+    let SPEC_BRDF = getDirectSpecularBRDF(F, roughness, NdotH, VdotN, NdotL);
 
-    let kD = vec3<f32>(1.0) - F;
-    let Fd90 = 0.5 + 2.0 * LdotH * LdotH * roughnessParameter;
+    // 거칠기 1.0(무광 지형)일 때 유전체 표면의 직사광 잔여 스펙큘러 하이라이트 번들거림 100% 완전 소멸
+    let specFade = 1.0 - pow(clamp(roughness, 0.0, 1.0), 2.0);
+    let specularPart = SPEC_BRDF * NdotL * mix(1.0, specFade, 1.0 - metallicParameter);
+
+    // Disney Diffuse BRDF (거칠기 반응 미세 산란)
+    let kD = (vec3<f32>(1.0) - F) * (1.0 - metallicParameter);
+    let Fd90 = 0.5 + 2.0 * LdotH * LdotH * roughness;
     let lightScatter = 1.0 + (Fd90 - 1.0) * pow(clamp(1.0 - NdotL, 0.0, 1.0), 5.0);
-    let viewScatter = 1.0 + (Fd90 - 1.0) * pow(clamp(1.0 - VdotN, 0.0, 1.0), 5.0);
+    let viewScatter  = 1.0 + (Fd90 - 1.0) * pow(clamp(1.0 - VdotN, 0.0, 1.0), 5.0);
 
     let diffusePart = albedo * (lightScatter * viewScatter) * NdotL * INV_PI * kD;
 
-    let dielectricPart = specularPart + diffusePart;
-    let metallicPart = specularPart;
-
-    let result = mix(dielectricPart, metallicPart, metallicParameter);
+    let result = specularPart + diffusePart;
     return result * dLight;
 }

@@ -101,10 +101,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
     #normalScale: number = 1.0;
     #occlusionStrength: number = 1.0;
     #baseColorWeight: number = 1.0;
-
-    get rvt(): TerrainRVT {
-        return this.#rvt;
-    }
+    #baseColorBlendMode: 'mix' | 'multiply' = 'multiply';
 
     get baseColorWeight(): number {
         return this.#baseColorWeight;
@@ -112,6 +109,15 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set baseColorWeight(v: number) {
         this.#baseColorWeight = v;
+        this.bakeRVT();
+    }
+
+    get baseColorBlendMode(): 'mix' | 'multiply' {
+        return this.#baseColorBlendMode;
+    }
+
+    set baseColorBlendMode(v: 'mix' | 'multiply') {
+        this.#baseColorBlendMode = v;
         this.bakeRVT();
     }
 

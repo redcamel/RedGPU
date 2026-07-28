@@ -24,6 +24,7 @@ struct RVTBakeUniforms {
     normalScale: f32,
     occlusionStrength: f32,
     baseColorWeight: f32,
+    baseColorBlendMode: u32, // 0: mix (Direct Mix), 1: multiply (Tint Multiply)
 }
 
 @group(0) @binding(0) var<uniform> bakeUniforms: RVTBakeUniforms;
@@ -119,8 +120,17 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         baseColorSample = vec4<f32>(1.0, 1.0, 1.0, 1.0);
     }
 
-    let tintedAlbedo = layerAlbedo * baseColorSample;
-    var finalAlbedo = mix(layerAlbedo, tintedAlbedo, clamp(bakeUniforms.baseColorWeight, 0.0, 1.0));
+    let weight = clamp(bakeUniforms.baseColorWeight, 0.0, 1.0);
+    var finalAlbedo = layerAlbedo;
+
+    if (bakeUniforms.baseColorBlendMode == 0u) {
+        // Direct Mix Mode (Lerp)
+        finalAlbedo = mix(layerAlbedo, baseColorSample, weight);
+    } else {
+        // Multiply Mode (Tint)
+        let tintedAlbedo = layerAlbedo * baseColorSample;
+        finalAlbedo = mix(layerAlbedo, tintedAlbedo, weight);
+    }
     finalAlbedo.a = 1.0;
 
     // 2. Normal & ORM 연산
@@ -138,10 +148,10 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var o1 = textureSampleLevel(ormArray, texSampler, tileUV, 1i, bakeMip);
     var o2 = textureSampleLevel(ormArray, texSampler, tileUV, 2i, bakeMip);
     var o3 = textureSampleLevel(ormArray, texSampler, tileUV, 3i, bakeMip);
-    if (o0.a <= 0.01 || (o0.r <= 0.001 && o0.g <= 0.001)) { o0 = vec4<f32>(1.0); }
-    if (o1.a <= 0.01 || (o1.r <= 0.001 && o1.g <= 0.001)) { o1 = vec4<f32>(1.0); }
-    if (o2.a <= 0.01 || (o2.r <= 0.001 && o2.g <= 0.001)) { o2 = vec4<f32>(1.0); }
-    if (o3.a <= 0.01 || (o3.r <= 0.001 && o3.g <= 0.001)) { o3 = vec4<f32>(1.0); }
+    if (o0.a <= 0.01 || (o0.r <= 0.001 && o0.g <= 0.001 && o0.b <= 0.001)) { o0 = vec4<f32>(1.0, 1.0, 1.0, 1.0); }
+    if (o1.a <= 0.01 || (o1.r <= 0.001 && o1.g <= 0.001 && o1.b <= 0.001)) { o1 = vec4<f32>(1.0, 1.0, 1.0, 1.0); }
+    if (o2.a <= 0.01 || (o2.r <= 0.001 && o2.g <= 0.001 && o2.b <= 0.001)) { o2 = vec4<f32>(1.0, 1.0, 1.0, 1.0); }
+    if (o3.a <= 0.01 || (o3.r <= 0.001 && o3.g <= 0.001 && o3.b <= 0.001)) { o3 = vec4<f32>(1.0, 1.0, 1.0, 1.0); }
 
     let globalRoughnessMult = bakeUniforms.roughnessFactor;
     let r0 = o0.g * bakeUniforms.layer0RoughnessFactor * globalRoughnessMult;
@@ -153,12 +163,15 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let blendedOcclusion = o0.r * w.r + o1.r * w.g + o2.r * w.b + o3.r * w.a;
 
     var globalORM = textureSampleLevel(ormTexture, texSampler, wUV, 0.0);
-    if (globalORM.a <= 0.01 || (globalORM.r <= 0.001 && globalORM.g <= 0.001 && globalORM.b <= 0.001)) {
-        globalORM = vec4<f32>(1.0, 1.0, 1.0, 1.0);
-    }
+    let hasGlobalORM = select(1.0, 0.0, globalORM.a <= 0.01 || (globalORM.r <= 0.001 && globalORM.g <= 0.001 && globalORM.b <= 0.001));
 
-    let finalRoughness = clamp(blendedRoughness * globalORM.g, 0.04, 1.0);
-    let finalOcclusion = clamp(blendedOcclusion * globalORM.r * bakeUniforms.occlusionStrength, 0.0, 1.0);
+    // 언리얼 엔진 Landscape Macro Variation 표준 공식 (0.5 중립 기반 부드러운 매크로 변형)
+    // globalORM.g 수치에 따른 무분별한 거칠기 붕괴(번들거림) 방지
+    let macroRoughnessVariation = (globalORM.g - 0.5) * 0.4 * hasGlobalORM;
+    let finalRoughness = clamp(blendedRoughness + macroRoughnessVariation, 0.04, 1.0);
+
+    let globalAO = select(1.0, globalORM.r, hasGlobalORM > 0.5);
+    let finalOcclusion = clamp(blendedOcclusion * globalAO * bakeUniforms.occlusionStrength, 0.0, 1.0);
 
     textureStore(albedoOutput, coords, finalAlbedo);
     textureStore(normalORMOutput, coords, vec4<f32>(scaledNormal, finalRoughness, finalOcclusion));
