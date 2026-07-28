@@ -83,52 +83,61 @@ fn vs_main(@builtin(vertex_index) vi: u32) -> BakeOutput {
     return out;
 }
 
-// ─── Albedo bake fragment shader ──────────────────────────────────────────────
+// ─── Albedo bake fragment shader (Unreal Engine Landscape LayerBlend 방식) ────
 struct AlbedoOutput {
     @location(0) albedo: vec4<f32>,
 }
 
 @fragment
 fn fs_albedo(in: BakeOutput) -> AlbedoOutput {
-    let wUV      = in.worldUV;
-    let tileUV   = wUV * bakeUniforms.tileScale;
-    let macroUV  = wUV * bakeUniforms.macroScale;
+    let wUV     = in.worldUV;
+    let tileUV  = wUV * bakeUniforms.tileScale;
 
-    // 카메라-독립 매크로 블렌드: 베이킹 시에는 항상 중간값(0.5)으로 고정
-    let macroBlend = 0.5;
+    // 언리얼 엔진 랜드스케이프 디테일 레이어 텍스처 샘플링 (sRGB Diffuse)
+    let d0 = textureSample(diffuseArray, texSampler, tileUV, 0i);
+    let d1 = textureSample(diffuseArray, texSampler, tileUV, 1i);
+    let d2 = textureSample(diffuseArray, texSampler, tileUV, 2i);
+    let d3 = textureSample(diffuseArray, texSampler, tileUV, 3i);
 
-    // Diffuse 샘플링
-    let d0 = mix(textureSample(diffuseArray, texSampler, tileUV, 0i), textureSample(diffuseArray, texSampler, macroUV, 0i), macroBlend);
-    let d1 = mix(textureSample(diffuseArray, texSampler, tileUV, 1i), textureSample(diffuseArray, texSampler, macroUV, 1i), macroBlend);
-    let d2 = mix(textureSample(diffuseArray, texSampler, tileUV, 2i), textureSample(diffuseArray, texSampler, macroUV, 2i), macroBlend);
-    let d3 = mix(textureSample(diffuseArray, texSampler, tileUV, 3i), textureSample(diffuseArray, texSampler, macroUV, 3i), macroBlend);
-
-    // Height 샘플링
-    let h0 = pow(clamp(mix(textureSample(heightArray, texSampler, tileUV, 0i).r, textureSample(heightArray, texSampler, macroUV, 0i).r, macroBlend), 0.0, 1.0), 3.0);
-    let h1 = pow(clamp(mix(textureSample(heightArray, texSampler, tileUV, 1i).r, textureSample(heightArray, texSampler, macroUV, 1i).r, macroBlend), 0.0, 1.0), 3.0);
-    let h2 = pow(clamp(mix(textureSample(heightArray, texSampler, tileUV, 2i).r, textureSample(heightArray, texSampler, macroUV, 2i).r, macroBlend), 0.0, 1.0), 3.0);
-    let h3 = pow(clamp(mix(textureSample(heightArray, texSampler, tileUV, 3i).r, textureSample(heightArray, texSampler, macroUV, 3i).r, macroBlend), 0.0, 1.0), 3.0);
+    // Height 샘플링 (HeightBlend 용)
+    let h0 = pow(clamp(textureSample(heightArray, texSampler, tileUV, 0i).r, 0.0, 1.0), 3.0);
+    let h1 = pow(clamp(textureSample(heightArray, texSampler, tileUV, 1i).r, 0.0, 1.0), 3.0);
+    let h2 = pow(clamp(textureSample(heightArray, texSampler, tileUV, 2i).r, 0.0, 1.0), 3.0);
+    let h3 = pow(clamp(textureSample(heightArray, texSampler, tileUV, 3i).r, 0.0, 1.0), 3.0);
     let layerHeights = vec4<f32>(h0, h1, h2, h3);
 
-    // Splat 가중치
+    // Splat 가중치 (언리얼 엔진 Landscape WeightBlend 방식과 100% 호환)
     let splat = textureSample(splatTexture, texSampler, wUV);
     var sw = vec4<f32>(splat.r, splat.g, splat.b, splat.a);
-    if (sw.r + sw.g + sw.b + sw.a <= 0.1) { sw = vec4<f32>(1.0, 0.0, 0.0, 0.0); }
-    else {
-        let sa = select(splat.a, max(0.0, 1.0 - (splat.r + splat.g + splat.b)), splat.a == 1.0);
-        sw = vec4<f32>(splat.r, splat.g, splat.b, sa);
+    let totalWeightAlbedo = sw.r + sw.g + sw.b + sw.a;
+    if (totalWeightAlbedo <= 0.001) {
+        // 스플랫 맵 데이터 미선언/미칠해짐 구역 -> 언리얼 엔진과 동일하게 Layer 0 (Base Layer) 100%
+        sw = vec4<f32>(1.0, 0.0, 0.0, 0.0);
+    } else {
+        sw = sw / totalWeightAlbedo;
     }
 
+    // 언리얼 엔진 HeightBlend 가중치 연산
     let w = getHeightBlendedWeights(sw, layerHeights, bakeUniforms.blendContrast);
-    let baseColorSample = textureSample(baseColorTexture, texSampler, wUV);
-    let finalAlbedo = (d0 * w.r + d1 * w.g + d2 * w.b + d3 * w.a) * baseColorSample;
+
+    // 언리얼 엔진 표준 레이어 알베도 합산
+    let layerAlbedo = d0 * w.r + d1 * w.g + d2 * w.b + d3 * w.a;
+
+    // baseColorTexture (지형 전체 글로벌 Color/Tint 맵 안전 적용)
+    var baseColorSample = textureSample(baseColorTexture, texSampler, wUV);
+    if (baseColorSample.a <= 0.01 || (baseColorSample.r <= 0.001 && baseColorSample.g <= 0.001 && baseColorSample.b <= 0.001)) {
+        baseColorSample = vec4<f32>(1.0, 1.0, 1.0, 1.0);
+    }
+
+    var finalAlbedo = layerAlbedo * baseColorSample;
+    finalAlbedo.a = 1.0;
 
     var out: AlbedoOutput;
     out.albedo = finalAlbedo;
     return out;
 }
 
-// ─── Normal/ORM bake fragment shader ─────────────────────────────────────────
+// ─── Normal/ORM bake fragment shader (Unreal Engine Landscape Standard) ──────
 struct NormalORMOutput {
     @location(0) normalORM: vec4<f32>,  // xy=normal(oct), z=roughness, w=occlusion
 }
@@ -137,37 +146,36 @@ struct NormalORMOutput {
 fn fs_normal_orm(in: BakeOutput) -> NormalORMOutput {
     let wUV     = in.worldUV;
     let tileUV  = wUV * bakeUniforms.tileScale;
-    let macroUV = wUV * bakeUniforms.macroScale;
-    let macroBlend = 0.5;
 
     // Height 샘플링 (가중치 계산용)
-    let h0 = pow(clamp(mix(textureSample(heightArray, texSampler, tileUV, 0i).r, textureSample(heightArray, texSampler, macroUV, 0i).r, macroBlend), 0.0, 1.0), 3.0);
-    let h1 = pow(clamp(mix(textureSample(heightArray, texSampler, tileUV, 1i).r, textureSample(heightArray, texSampler, macroUV, 1i).r, macroBlend), 0.0, 1.0), 3.0);
-    let h2 = pow(clamp(mix(textureSample(heightArray, texSampler, tileUV, 2i).r, textureSample(heightArray, texSampler, macroUV, 2i).r, macroBlend), 0.0, 1.0), 3.0);
-    let h3 = pow(clamp(mix(textureSample(heightArray, texSampler, tileUV, 3i).r, textureSample(heightArray, texSampler, macroUV, 3i).r, macroBlend), 0.0, 1.0), 3.0);
+    let h0 = pow(clamp(textureSample(heightArray, texSampler, tileUV, 0i).r, 0.0, 1.0), 3.0);
+    let h1 = pow(clamp(textureSample(heightArray, texSampler, tileUV, 1i).r, 0.0, 1.0), 3.0);
+    let h2 = pow(clamp(textureSample(heightArray, texSampler, tileUV, 2i).r, 0.0, 1.0), 3.0);
+    let h3 = pow(clamp(textureSample(heightArray, texSampler, tileUV, 3i).r, 0.0, 1.0), 3.0);
     let layerHeights = vec4<f32>(h0, h1, h2, h3);
 
     let splat = textureSample(splatTexture, texSampler, wUV);
     var sw = vec4<f32>(splat.r, splat.g, splat.b, splat.a);
-    if (sw.r + sw.g + sw.b + sw.a <= 0.1) { sw = vec4<f32>(1.0, 0.0, 0.0, 0.0); }
-    else {
-        let sa = select(splat.a, max(0.0, 1.0 - (splat.r + splat.g + splat.b)), splat.a == 1.0);
-        sw = vec4<f32>(splat.r, splat.g, splat.b, sa);
+    let totalWeightNormal = sw.r + sw.g + sw.b + sw.a;
+    if (totalWeightNormal <= 0.001) {
+        sw = vec4<f32>(1.0, 0.0, 0.0, 0.0);
+    } else {
+        sw = sw / totalWeightNormal;
     }
     let w = getHeightBlendedWeights(sw, layerHeights, bakeUniforms.blendContrast);
 
-    // Normal 블렌딩 (XY octahedral 방식으로 저장)
-    let n0 = mix(textureSample(normalArray, texSampler, tileUV, 0i).rg, textureSample(normalArray, texSampler, macroUV, 0i).rg, macroBlend);
-    let n1 = mix(textureSample(normalArray, texSampler, tileUV, 1i).rg, textureSample(normalArray, texSampler, macroUV, 1i).rg, macroBlend);
-    let n2 = mix(textureSample(normalArray, texSampler, tileUV, 2i).rg, textureSample(normalArray, texSampler, macroUV, 2i).rg, macroBlend);
-    let n3 = mix(textureSample(normalArray, texSampler, tileUV, 3i).rg, textureSample(normalArray, texSampler, macroUV, 3i).rg, macroBlend);
+    // Normal 블렌딩 (언리얼 규격 Octahedral Normal / Tangent Normal Blend)
+    let n0 = textureSample(normalArray, texSampler, tileUV, 0i).rg;
+    let n1 = textureSample(normalArray, texSampler, tileUV, 1i).rg;
+    let n2 = textureSample(normalArray, texSampler, tileUV, 2i).rg;
+    let n3 = textureSample(normalArray, texSampler, tileUV, 3i).rg;
     let blendedNormal = n0 * w.r + n1 * w.g + n2 * w.b + n3 * w.a;
 
     // ORM 블렌딩
-    let o0 = mix(textureSample(ormArray, texSampler, tileUV, 0i), textureSample(ormArray, texSampler, macroUV, 0i), macroBlend);
-    let o1 = mix(textureSample(ormArray, texSampler, tileUV, 1i), textureSample(ormArray, texSampler, macroUV, 1i), macroBlend);
-    let o2 = mix(textureSample(ormArray, texSampler, tileUV, 2i), textureSample(ormArray, texSampler, macroUV, 2i), macroBlend);
-    let o3 = mix(textureSample(ormArray, texSampler, tileUV, 3i), textureSample(ormArray, texSampler, macroUV, 3i), macroBlend);
+    let o0 = textureSample(ormArray, texSampler, tileUV, 0i);
+    let o1 = textureSample(ormArray, texSampler, tileUV, 1i);
+    let o2 = textureSample(ormArray, texSampler, tileUV, 2i);
+    let o3 = textureSample(ormArray, texSampler, tileUV, 3i);
     let blendedORM = o0 * w.r + o1 * w.g + o2 * w.b + o3 * w.a;
 
     let layerRoughness =
@@ -176,12 +184,16 @@ fn fs_normal_orm(in: BakeOutput) -> NormalORMOutput {
         bakeUniforms.rockRoughnessFactor   * w.b +
         bakeUniforms.gravelRoughnessFactor * w.a;
 
-    let globalORM = textureSample(ormTexture, texSampler, wUV);
-    let finalRoughness  = max(blendedORM.g * layerRoughness, layerRoughness * 0.5) * globalORM.g;
-    let finalOcclusion  = blendedORM.r * globalORM.r;
+    // ormTexture (지형 전체 글로벌 ORM/AO 맵 안전 적용)
+    var globalORM = textureSample(ormTexture, texSampler, wUV);
+    if (globalORM.a <= 0.01 || (globalORM.r <= 0.001 && globalORM.g <= 0.001 && globalORM.b <= 0.001)) {
+        globalORM = vec4<f32>(1.0, 1.0, 1.0, 1.0);
+    }
+
+    let finalRoughness = blendedORM.g * layerRoughness * globalORM.g;
+    let finalOcclusion = blendedORM.r * globalORM.r;
 
     var out: NormalORMOutput;
-    // RG = blended normal XY (encoded 0~1), B = roughness, A = occlusion
     out.normalORM = vec4<f32>(blendedNormal, finalRoughness, finalOcclusion);
     return out;
 }

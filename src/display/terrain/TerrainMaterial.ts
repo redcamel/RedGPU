@@ -15,6 +15,7 @@ import GPU_MIPMAP_FILTER_MODE from "../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import TerrainRVT from "./TerrainRVT";
+import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 import {keepLog} from "../../utils";
 
 export interface TerrainLayerConfig {
@@ -30,14 +31,7 @@ interface TerrainMaterial {
     metallicFactor: number;
     roughnessFactor: number;
     normalScale: number;
-    tileScale: number;
-    macroScale: number;
     occlusionStrength: number;
-    blendContrast: number;
-    grassRoughnessFactor: number;
-    sandRoughnessFactor: number;
-    rockRoughnessFactor: number;
-    gravelRoughnessFactor: number;
     debugSplatTexture: boolean;
     baseColorFactor: [number, number, number, number] | string;
     baseColorTexture: BitmapTexture;
@@ -97,8 +91,101 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         this.rvtNormalORMTexture = this.#rvt.normalORMDirectTexture
     }
 
+    #tileScale: number = 1.0;
+    #macroScale: number = 1.0;
+    #blendContrast: number = 0.0;
+
     get layers(): TerrainLayerConfig[] {
         return [...this.#layers];
+    }
+    #grassRoughnessFactor: number = 0.85;
+    #sandRoughnessFactor: number = 0.80;
+    #rockRoughnessFactor: number = 0.65;
+    #gravelRoughnessFactor: number = 0.70;
+
+    get rvt(): TerrainRVT {
+        return this.#rvt;
+    }
+
+    get tileScale(): number {
+        return this.#tileScale;
+    }
+
+    set tileScale(v: number) {
+        this.#tileScale = v;
+        updateTargetUniform(this, 'tileScale', v);
+        this.bakeRVT();
+    }
+
+    get macroScale(): number {
+        return this.#macroScale;
+    }
+
+    set macroScale(v: number) {
+        this.#macroScale = v;
+        updateTargetUniform(this, 'macroScale', v);
+        this.bakeRVT();
+    }
+
+    get blendContrast(): number {
+        return this.#blendContrast;
+    }
+
+    set blendContrast(v: number) {
+        this.#blendContrast = v;
+        updateTargetUniform(this, 'blendContrast', v);
+        this.bakeRVT();
+    }
+
+    get grassRoughnessFactor(): number {
+        return this.#grassRoughnessFactor;
+    }
+
+    set grassRoughnessFactor(v: number) {
+        this.#grassRoughnessFactor = v;
+        updateTargetUniform(this, 'grassRoughnessFactor', v);
+        this.bakeRVT();
+    }
+
+    get sandRoughnessFactor(): number {
+        return this.#sandRoughnessFactor;
+    }
+
+    set sandRoughnessFactor(v: number) {
+        this.#sandRoughnessFactor = v;
+        updateTargetUniform(this, 'sandRoughnessFactor', v);
+        this.bakeRVT();
+    }
+
+    get rockRoughnessFactor(): number {
+        return this.#rockRoughnessFactor;
+    }
+
+    set rockRoughnessFactor(v: number) {
+        this.#rockRoughnessFactor = v;
+        updateTargetUniform(this, 'rockRoughnessFactor', v);
+        this.bakeRVT();
+    }
+
+    get gravelRoughnessFactor(): number {
+        return this.#gravelRoughnessFactor;
+    }
+
+    set gravelRoughnessFactor(v: number) {
+        this.#gravelRoughnessFactor = v;
+        updateTargetUniform(this, 'gravelRoughnessFactor', v);
+        this.bakeRVT();
+    }
+
+    bakeRVT = () => {
+        if (this.#rvt) {
+            this.#rvt.bake(this);
+        }
+    };
+
+    override updateTexture(prevTexture: any, texture: any) {
+        super.updateTexture(prevTexture, texture);
+        this.bakeRVT();
     }
 
     /**
@@ -111,6 +198,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         }
         this.#layers.push(config);
         this.#rebuildLayerTextureArrays();
+        this.bakeRVT();
         return this.#layers.length - 1;
     }
 
@@ -126,6 +214,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         if (targetIndex >= 0 && targetIndex < this.#layers.length) {
             this.#layers.splice(targetIndex, 1);
             this.#rebuildLayerTextureArrays();
+            this.bakeRVT();
             return true;
         }
         return false;
@@ -143,6 +232,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         if (targetIndex >= 0 && targetIndex < this.#layers.length) {
             this.#layers[targetIndex] = {...this.#layers[targetIndex], ...partialConfig};
             this.#rebuildLayerTextureArrays();
+            this.bakeRVT();
             return true;
         }
         return false;
@@ -197,7 +287,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         const ctx = this.redGPUContext;
         const onLoad = (v) => {
             keepLog('오긴오냐', this.uuid)
-            this.#rvt.bake(this)
+            this.bakeRVT();
         }
         // 💡 Diffuse(Albedo)는 sRGB 포맷, 데이터 맵(Normal/Height/ORM)은 Linear(rgba8unorm) 포맷으로 내부 자동 설정
         this.diffuseArray = new TextureArray(ctx, diffuseSrcs, true, onLoad, undefined, 'rgba8unorm-srgb');
@@ -206,7 +296,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         this.ormArray = new TextureArray(ctx, ormSrcs, true, onLoad, undefined, 'rgba8unorm');
 
     }
-
 }
 
 Object.defineProperty(TerrainMaterial.prototype, 'isPBRMaterial', {
@@ -218,15 +307,7 @@ defineNumber(TerrainMaterial, [
     {key: 'metallicFactor', value: 0},
     {key: 'roughnessFactor', value: 0.85},
     {key: 'normalScale', value: 1.0},
-    {key: 'tileScale', value: 1.0},
-    {key: 'macroScale', value: 1.0},
     {key: 'occlusionStrength', value: 1.0},
-    {key: 'blendContrast', value: 0.0},
-    //
-    {key: 'grassRoughnessFactor', value: 0.85},
-    {key: 'sandRoughnessFactor', value: 0.80},
-    {key: 'rockRoughnessFactor', value: 0.65},
-    {key: 'gravelRoughnessFactor', value: 0.70},
 ]);
 defineBoolean(TerrainMaterial, [
     {key: 'debugSplatTexture', value: false},
@@ -253,6 +334,7 @@ defineSampler(TerrainMaterial, [
     {key: 'textureSampler'},
     {key: 'rvtSampler'},
 ]);
+
 Object.freeze(TerrainMaterial);
 export default TerrainMaterial;
 

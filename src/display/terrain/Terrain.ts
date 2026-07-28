@@ -1,7 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Mesh from "../mesh/Mesh";
 import TerrainGeometry from "./TerrainGeometry";
-import TerrainMaterial from "./TerrainMaterial";
+import TerrainMaterial, {TerrainLayerConfig} from "./TerrainMaterial";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import Sampler from "../../resources/sampler/Sampler";
 import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
@@ -16,6 +16,8 @@ import {TerrainQuadtree} from "./TerrainQuadtree";
 import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 
+export type {TerrainLayerConfig};
+
 /**
  * [KO] CDLOD 기반 지형 시스템을 총괄하는 디스플레이 메시 객체 클래스입니다.
  * [EN] Display mesh object class that manages the CDLOD-based terrain system.
@@ -27,6 +29,8 @@ interface Terrain {
     worldSize: [number, number];
     heightTexture: BitmapTexture;
     heightTextureSampler: any;
+
+
     maxLOD: number;
     baseSlotIndex: number;
     gridSize: number;
@@ -34,9 +38,9 @@ interface Terrain {
 }
 
 class Terrain extends Mesh {
-    public quadtree: TerrainQuadtree;
-    public instanceBuffer: GPUBuffer;
-    public customVertexBindGroupLayout: GPUBindGroupLayout;
+    quadtree: TerrainQuadtree;
+    instanceBuffer: GPUBuffer;
+    customVertexBindGroupLayout: GPUBindGroupLayout;
     #prevWorldSize: number = 0;
     #prevMaxLOD: number = 0;
     #lodRanges: Float32Array = new Float32Array(32);
@@ -91,6 +95,134 @@ class Terrain extends Mesh {
         if (heightmapUrl) {
             this.heightTexture = new BitmapTexture(redGPUContext, heightmapUrl);
         }
+    }
+
+    get baseColorTexture(): BitmapTexture {
+        return this.material.baseColorTexture;
+    }
+
+    set baseColorTexture(texture: BitmapTexture) {
+        if (this.material) {
+            this.material.baseColorTexture = texture;
+        }
+    }
+
+    get ormTexture(): BitmapTexture {
+        return this.material.ormTexture;
+    }
+
+    set ormTexture(texture: BitmapTexture) {
+        if (this.material) {
+            this.material.ormTexture = texture;
+        }
+    }
+
+    get splatTexture(): BitmapTexture {
+        return this.material.splatTexture;
+    }
+
+    set splatTexture(texture: BitmapTexture) {
+        if (this.material) {
+            this.material.splatTexture = texture;
+        }
+    }
+
+    get tileScale(): number {
+        return this.material.tileScale ?? 1.0;
+    }
+
+    set tileScale(value: number) {
+        if (this.material) {
+            this.material.tileScale = value;
+        }
+    }
+
+    get macroScale(): number {
+        return this.material.macroScale ?? 1.0;
+    }
+
+    set macroScale(value: number) {
+        if (this.material) {
+            this.material.macroScale = value;
+        }
+    }
+
+    get metallicFactor(): number {
+        return this.material.metallicFactor ?? 0.0;
+    }
+
+    set metallicFactor(value: number) {
+        if (this.material) {
+            this.material.metallicFactor = value;
+        }
+    }
+
+    get roughnessFactor(): number {
+        return this.material.roughnessFactor ?? 0.85;
+    }
+
+    set roughnessFactor(value: number) {
+        if (this.material) {
+            this.material.roughnessFactor = value;
+        }
+    }
+
+    get normalScale(): number {
+        return this.material.normalScale ?? 1.0;
+    }
+
+    set normalScale(value: number) {
+        if (this.material) {
+            this.material.normalScale = value;
+        }
+    }
+
+    get occlusionStrength(): number {
+        return this.material.occlusionStrength ?? 1.0;
+    }
+
+    set occlusionStrength(value: number) {
+        if (this.material) {
+            this.material.occlusionStrength = value;
+        }
+    }
+
+    get blendContrast(): number {
+        return this.material.blendContrast ?? 0.0;
+    }
+
+    set blendContrast(value: number) {
+        if (this.material) {
+            this.material.blendContrast = value;
+        }
+    }
+
+    get layers(): TerrainLayerConfig[] {
+        return this.material.layers || [];
+    }
+
+    /**
+     * [KO] 단일 지형 디테일 레이어를 추가합니다. (최대 4개)
+     * [EN] Adds a single terrain detail layer. (Maximum 4)
+     */
+    addLayer(config: TerrainLayerConfig): number {
+        return this.material.addLayer(config);
+    }
+
+    /**
+     * [KO] 인덱스 또는 이름을 기준으로 특정 레이어를 제거합니다.
+     * [EN] Removes a specific layer by index or name.
+     */
+    removeLayer(indexOrName: number | string): boolean {
+        return this.material.removeLayer(indexOrName);
+    }
+
+    /**
+     * [KO] 인덱스 또는 이름을 기준으로 특정 레이어의 속성을 부분 수정합니다.
+     * [EN] Partially updates properties of a specific layer by index or name.
+     */
+    updateLayer(indexOrName: number | string, partialConfig: Partial<TerrainLayerConfig>): boolean {
+        return this.material.updateLayer(indexOrName, partialConfig);
     }
 
     get lodRanges(): Float32Array {

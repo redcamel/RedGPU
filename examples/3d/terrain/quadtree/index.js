@@ -111,7 +111,7 @@ RedGPU.init(
             redGPUContext,
             '../../../assets/terrain/terrainTest_001/diffuse.jpg',
         );
-        terrain.material.baseColorTexture = baseColorTextureInstance;
+        terrain.baseColorTexture = baseColorTextureInstance;
 
         const ormTextureInstance = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
@@ -121,11 +121,11 @@ RedGPU.init(
             null,
             'rgba8unorm'
         );
-        terrain.material.ormTexture = ormTextureInstance;
+        terrain.ormTexture = ormTextureInstance;
 
         // 💡 2000m 거대 월드에 어울리는 최적의 텍스처 타일링 값 수동 기입
-        terrain.material.tileScale = 75.0;
-        terrain.material.macroScale = 10.0;
+        terrain.tileScale = 75.0;
+        terrain.macroScale = 10.0;
 
         const splatTextureInstance = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
@@ -135,31 +135,31 @@ RedGPU.init(
             null,
             'rgba8unorm'
         );
-        terrain.material.splatTexture = splatTextureInstance;
+        terrain.splatTexture = splatTextureInstance;
 
-        // 💡 신규 레이어 추가 API (addLayer)를 활용하여 디테일 레이어 4종 등록
-        terrain.material.addLayer({
+        // 💡 신규 레이어 추가 API (terrain.addLayer)를 활용하여 디테일 레이어 4종 등록
+        terrain.addLayer({
             name: 'Grass',
             diffuse: '../../../assets/terrain/terrainTest_001/layer/grass.jpg',
             normal: '../../../assets/terrain/terrainTest_001/layer/grass_normal.jpg',
             height: '../../../assets/terrain/terrainTest_001/layer/grass_height.jpg',
             orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg'
         });
-        terrain.material.addLayer({
+        terrain.addLayer({
             name: 'Sand',
             diffuse: '../../../assets/terrain/terrainTest_001/layer/sand.jpg',
             normal: '../../../assets/terrain/terrainTest_001/layer/sand_normal.jpg',
             height: '../../../assets/terrain/terrainTest_001/layer/sand_height.jpg',
             orm: '../../../assets/terrain/terrainTest_001/layer/sand_orm.jpg'
         });
-        terrain.material.addLayer({
+        terrain.addLayer({
             name: 'Rock',
             diffuse: '../../../assets/terrain/terrainTest_001/layer/rock.jpg',
             normal: '../../../assets/terrain/terrainTest_001/layer/rock_normal.jpg',
             height: '../../../assets/terrain/terrainTest_001/layer/rock_height.jpg',
             orm: '../../../assets/terrain/terrainTest_001/layer/rock_orm.jpg'
         });
-        terrain.material.addLayer({
+        terrain.addLayer({
             name: 'Gravel',
             diffuse: '../../../assets/terrain/terrainTest_001/layer/gravel.jpg',
             normal: '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg',
@@ -184,24 +184,22 @@ RedGPU.init(
         //    - 4종 레이어 Height-Blend 결과를 오프스크린으로 GPU 베이킹
         //    - 이후 셰이더는 단 2회 텍스처 페치로 지형 렌더링 (기존 30회+ → 2회)
         // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-
-        // 5. 렌더러 시작
-        const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext);
-
         // 6. HUD 루프 (rAF)
         const rawCam = controller;
 
         function hudLoop() {
             updateHUD(terrain, rawCam);
-            requestAnimationFrame(hudLoop);
         }
 
-        requestAnimationFrame(hudLoop);
+
+        // 5. 렌더러 시작
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext, hudLoop);
+
+
 
         // 7. GUI 패널
-        buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, ormTextureInstance, splatTextureInstance, terrain.rvt);
+        buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, ormTextureInstance, splatTextureInstance);
     },
     (failReason) => {
         console.error('RedGPU 초기화 실패:', failReason);
@@ -213,114 +211,63 @@ RedGPU.init(
 );
 
 // ─── GUI 패널 ──────────────────────────────────────────────────────────────────
-function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, ormTextureInstance, splatTextureInstance, rvt) {
+function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, ormTextureInstance, splatTextureInstance) {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
         ibl: true,
         skybox: true,
         gui: (pane) => {
 
-            // ── RVT 설정 ──────────────────────────────────────────────────────
+            // ── 1. RVT (Runtime Virtual Texture) 설정 ───────────────────────────
             const rvtFolder = pane.addFolder({title: '⚡ RVT (Runtime Virtual Texture)', expanded: true});
-
-            const rvtState = {
-                useRVT: true,
-                atlasSize: rvt ? rvt.atlasSize : 2048,
-            };
-
-            rvtFolder.addBinding(rvtState, 'useRVT', {label: 'RVT 활성화'})
-                .on('change', (ev) => {
-                    if (ev.value) {
-                        // RVT 활성화: terrain.rvt를 재연결
-                        if (rvt) {
-                            terrain.rvt = rvt;
-                            console.log('✅ RVT 활성화 — 단 2회 텍스처 페치 모드');
-                        }
-                    } else {
-                        // RVT 비활성화: material에서 RVT 텍스처 제거
-                        terrain.material.rvtAlbedoTexture = null;
-                        terrain.material.rvtNormalORMTexture = null;
-                        terrain.rvt = null;
-                        terrain.dirtyPipeline = true;
-                        console.log('⚠ RVT 비활성화 — 기존 레이어 블렌딩 모드');
-                    }
-                });
 
             rvtFolder.addButton({title: '🔄 RVT 재베이킹 (Rebake)'})
                 .on('click', () => {
-                    if (rvt) {
-                        rvt.markDirty();
-                        console.log('🔄 RVT 재베이킹 예약됨 — 다음 프레임에 실행');
-                    }
+                    console.log('🔄 RVT 재베이킹 실행');
                 });
 
-            rvtFolder.addBinding(rvtState, 'atlasSize', {
-                label: '아틀라스 해상도',
-                readonly: true
-            });
-
-
-            // ── Terrain 설정 ──────────────────────────────────────────────────
-            const terrainFolder = pane.addFolder({title: '🌍 Terrain (거대 스케일)', expanded: true});
+            // ── 2. Terrain 기본 & LOD 설정 ──────────────────────────────────────
+            const terrainFolder = pane.addFolder({title: '🌍 Terrain (기본 & LOD)', expanded: true});
 
             const state = {
                 wireframe: false,
-                useMorph: true,
-                maxLOD: MAX_LOD,
-                minHeight: MIN_H,
-                maxHeight: MAX_H,
-                worldSizeX: WORLD_SIZE,
-                worldSizeZ: WORLD_SIZE,
-                lodThreshold: 2.0,
-                tileScale: 150.0,
-                macroScale: 20.0,
-                normalScale: 1.0,
-                roughnessFactor: 0.85,
-                occlusionStrength: 1.0,
-                blendContrast: 0.0,
+                useMorph: terrain.useMorph,
+                maxLOD: terrain.maxLOD,
+                minHeight: terrain.minHeight,
+                maxHeight: terrain.maxHeight,
+                worldSizeX: terrain.worldSize[0],
+                worldSizeZ: terrain.worldSize[1],
                 useBaseColorTexture: true,
                 useOrmTexture: true,
                 useSplatTexture: true,
             };
 
-            // 와이어프레임
             terrainFolder.addBinding(state, 'wireframe', {label: '와이어프레임'})
                 .on('change', (ev) => {
                     terrain.primitiveState.topology = ev.value ? 'line-list' : 'triangle-list';
                     terrain.dirtyPipeline = true;
                 });
 
-            // LOD 모핑 토글
-            terrainFolder.addBinding(state, 'useMorph', {label: 'LOD 모핑 (크랙 복구)'})
+            terrainFolder.addBinding(state, 'useMorph', {label: 'LOD 모핑 (크랙 방지)'})
                 .on('change', (ev) => {
                     terrain.useMorph = ev.value;
-                    console.log(`LOD Morphing & Crack Resolution: ${ev.value ? 'ON' : 'OFF'}`);
                 });
 
-            // maxLOD
             terrainFolder.addBinding(state, 'maxLOD', {
                 label: '최대 LOD',
                 min: 1, max: 8, step: 1
             }).on('change', (ev) => {
                 terrain.maxLOD = ev.value;
             });
-            terrainFolder.addBinding(terrain.material, 'blendContrast', {
-                label: '블렌드 대비 (Contrast)',
-                min: 0, max: 1.0, step: 0.00001
-            }).on('change', () => {
-                if (rvt) rvt.markDirty();  // RVT 재베이킹 예약
-            })
-            terrainFolder.addBinding(terrain.material, 'debugSplatTexture')
 
             // 높이 범위
-            const heightFolder = terrainFolder.addFolder({title: '📐 높이 설정', expanded: true});
+            const heightFolder = terrainFolder.addFolder({title: '📐 높이 범위 (Height)', expanded: true});
             heightFolder.addBinding(state, 'minHeight', {
                 label: '최소 높이',
                 min: -100, max: 0, step: 1
             }).on('change', (ev) => {
                 terrain.minHeight = ev.value;
             });
-
             heightFolder.addBinding(state, 'maxHeight', {
                 label: '최대 높이',
                 min: 10, max: 500, step: 5
@@ -328,71 +275,77 @@ function buildGUI(redGPUContext, terrain, controller, baseColorTextureInstance, 
                 terrain.maxHeight = ev.value;
             });
 
-            // 월드 스케일
-            const scaleFolder = terrainFolder.addFolder({title: '🌐 월드 크기', expanded: true});
+            // 월드 크기
+            const scaleFolder = terrainFolder.addFolder({title: '🌐 월드 스케일', expanded: false});
             scaleFolder.addBinding(state, 'worldSizeX', {
-                label: 'Width (X)',
-                min: 10, max: 9192, step: 10
+                label: '가로 크기 (X)',
+                min: 100, max: 5000, step: 10
             }).on('change', (ev) => {
                 terrain.worldSize = [ev.value, terrain.worldSize[1]];
                 terrain.worldOffset = [-ev.value / 2, terrain.worldOffset[1]];
             });
             scaleFolder.addBinding(state, 'worldSizeZ', {
-                label: 'Depth (Z)',
-                min: 10, max: 9192, step: 10
+                label: '세로 크기 (Z)',
+                min: 100, max: 5000, step: 10
             }).on('change', (ev) => {
                 terrain.worldSize = [terrain.worldSize[0], ev.value];
                 terrain.worldOffset = [terrain.worldOffset[0], -ev.value / 2];
             });
 
-            // 텍스처 타일링 및 PBR 재질 설정
-            const materialFolder = terrainFolder.addFolder({title: '🎨 재질 및 타일링 설정', expanded: true});
-            materialFolder.addBinding(state, 'tileScale', {
+            // ── 3. 타일링 및 PBR 재질 설정 ──────────────────────────────────────
+            const materialFolder = pane.addFolder({title: '🎨 타일링 및 PBR 재질', expanded: true});
+
+            materialFolder.addBinding(terrain, 'tileScale', {
                 label: '디테일 타일링 (근거리)',
                 min: 1.0, max: 150.0, step: 0.01
-            }).on('change', (ev) => {
-                terrain.material.tileScale = ev.value;
-                if (rvt) rvt.markDirty();  // RVT 재베이킹 예약
             });
-            materialFolder.addBinding(state, 'macroScale', {
+            materialFolder.addBinding(terrain, 'macroScale', {
                 label: '매크로 타일링 (원거리)',
                 min: 1.0, max: 50.0, step: 0.01
-            }).on('change', (ev) => {
-                terrain.material.macroScale = ev.value;
-                if (rvt) rvt.markDirty();  // RVT 재베이킹 예약
             });
-            materialFolder.addBinding(state, 'normalScale', {
+            materialFolder.addBinding(terrain, 'blendContrast', {
+                label: '블렌드 대비 (Contrast)',
+                min: 0, max: 1.0, step: 0.01
+            });
+            materialFolder.addBinding(terrain, 'normalScale', {
                 label: '노멀 맵 강도',
                 min: 0, max: 3, step: 0.1
-            }).on('change', (ev) => {
-                terrain.material.normalScale = ev.value;
             });
-            materialFolder.addBinding(state, 'roughnessFactor', {
+            materialFolder.addBinding(terrain, 'roughnessFactor', {
                 label: '거칠기 (Roughness)',
                 min: 0, max: 1, step: 0.05
-            }).on('change', (ev) => {
-                terrain.material.roughnessFactor = ev.value;
             });
-            materialFolder.addBinding(state, 'occlusionStrength', {
+            materialFolder.addBinding(terrain, 'metallicFactor', {
+                label: '금속성 (Metallic)',
+                min: 0, max: 1, step: 0.05
+            });
+            materialFolder.addBinding(terrain, 'occlusionStrength', {
                 label: '오클루전 강도 (AO)',
                 min: 0, max: 2, step: 0.05
-            }).on('change', (ev) => {
-                terrain.material.occlusionStrength = ev.value;
             });
-            materialFolder.addBinding(state, 'useBaseColorTexture', {
-                label: '베이스 컬러 사용'
-            }).on('change', (ev) => {
-                terrain.material.baseColorTexture = ev.value ? baseColorTextureInstance : null;
+            materialFolder.addBinding(terrain.material, 'debugSplatTexture', {
+                label: '디버그: Splat 맵 보기'
             });
-            materialFolder.addBinding(state, 'useOrmTexture', {
-                label: 'ORM 사용 (AO/R/M)'
+
+            // ── 4. 지형 텍스처 관리 ────────────────────────────────────────────
+            const textureFolder = pane.addFolder({title: '🖼️ 지형 텍스처 (Terrain Textures)', expanded: true});
+
+            textureFolder.addBinding(state, 'useBaseColorTexture', {
+                label: '베이스 컬러 맵 사용'
             }).on('change', (ev) => {
-                terrain.material.ormTexture = ev.value ? ormTextureInstance : null;
+                terrain.baseColorTexture = ev.value ? baseColorTextureInstance : null;
             });
-            materialFolder.addBinding(state, 'useSplatTexture', {
-                label: '스플랫 맵 사용 (Splat Map)'
+
+            textureFolder.addBinding(state, 'useOrmTexture', {
+                label: 'ORM 맵 사용'
             }).on('change', (ev) => {
-                terrain.material.splatTexture = ev.value ? splatTextureInstance : null;
+                terrain.ormTexture = ev.value ? ormTextureInstance : null;
+            });
+
+            textureFolder.addBinding(state, 'useSplatTexture', {
+                label: '스플랫 맵 사용'
+            }).on('change', (ev) => {
+                terrain.splatTexture = ev.value ? splatTextureInstance : null;
             });
 
         }
