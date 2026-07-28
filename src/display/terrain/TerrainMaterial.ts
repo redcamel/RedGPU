@@ -100,7 +100,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
     #roughnessFactor: number = 1.0;
     #normalScale: number = 1.0;
     #occlusionStrength: number = 1.0;
-    #baseColorWeight: number = 1.0;
+    #baseColorWeight: number = 0.5;
     #baseColorBlendMode: 'mix' | 'multiply' = 'multiply';
 
     get baseColorWeight(): number {

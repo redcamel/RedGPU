@@ -85,9 +85,10 @@ RedGPU.init(
         view.grid = false;
         redGPUContext.addView(view);
 
+        scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight())
 
-        // const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
-        // view.skyAtmosphere = skyAtmosphere;
+        const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
+        view.skyAtmosphere = skyAtmosphere;
 
 
         // 3. 거대 Terrain 생성
@@ -139,6 +140,15 @@ RedGPU.init(
 
         // 💡 디테일 레이어 4종 등록
         terrain.addLayer({
+            name: 'Leaves',
+            diffuse: '../../../assets/terrain/terrainTest_001/layer/leave.jpg',
+            normal: '../../../assets/terrain/terrainTest_001/layer/leave_normal.jpg',
+            height: '../../../assets/terrain/terrainTest_001/layer/leave_height.jpg',
+            orm: '../../../assets/terrain/terrainTest_001/layer/leave_orm.jpg',
+            roughnessFactor: 0.85
+        });
+
+        terrain.addLayer({
             name: 'Rock',
             diffuse: '../../../assets/terrain/terrainTest_001/layer/rock.jpg',
             normal: '../../../assets/terrain/terrainTest_001/layer/rock_normal.jpg',
@@ -147,20 +157,13 @@ RedGPU.init(
             roughnessFactor: 0.90
         });
 
+
         terrain.addLayer({
             name: 'Gravel',
             diffuse: '../../../assets/terrain/terrainTest_001/layer/gravel.jpg',
             normal: '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg',
-            height: '../../../assets/terrain/terrainTest_001/layer/gravel_normal.jpg',
+            height: '../../../assets/terrain/terrainTest_001/layer/gravel_height.jpg',
             orm: '../../../assets/terrain/terrainTest_001/layer/gravel_orm.jpg',
-            roughnessFactor: 0.85
-        });
-        terrain.addLayer({
-            name: 'Leaves',
-            diffuse: '../../../assets/terrain/terrainTest_001/layer/leave.jpg',
-            normal: '../../../assets/terrain/terrainTest_001/layer/leave_normal.jpg',
-            height: '../../../assets/terrain/terrainTest_001/layer/leave_height.jpg',
-            orm: '../../../assets/terrain/terrainTest_001/layer/leave_orm.jpg',
             roughnessFactor: 0.85
         });
 
@@ -172,8 +175,7 @@ RedGPU.init(
             orm: '../../../assets/terrain/terrainTest_001/layer/grass_orm.jpg',
             roughnessFactor: 0.85
         });
-        // 💡 지형 베이스 필터 색상을 흰색으로 초기화하여 텍스처 본연의 밝기와 태양광 반사를 그대로 표현
-        terrain.material.baseColorFactor = '#ffffff';
+
 
         // 3-5. 지형 파라미터 — 거대 스케일 설정
         terrain.minHeight = MIN_H;

@@ -103,10 +103,13 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let layerHeights = vec4<f32>(h0, h1, h2, h3);
 
     let splat = textureSampleLevel(splatTexture, texSampler, wUV, 0.0);
-    var sw = vec4<f32>(splat.r, splat.g, splat.b, splat.a);
+    // 💡 JPG splatMap 호환: A 채널을 1-(R+G+B) 잔여 가중치로 유도
+    //    (PNG splatMap 사용 시에도 합산이 1.0을 초과하지 않으면 동일하게 작동)
+    let splat3Sum = clamp(splat.r + splat.g + splat.b, 0.0, 1.0);
+    var sw = vec4<f32>(splat.r, splat.g, splat.b, max(0.0, 1.0 - splat3Sum));
     let totalWeightAlbedo = sw.r + sw.g + sw.b + sw.a;
     if (totalWeightAlbedo <= 0.001) {
-        sw = vec4<f32>(1.0, 0.0, 0.0, 0.0);
+        sw = vec4<f32>(0.0, 0.0, 0.0, 1.0);
     } else {
         sw = sw / totalWeightAlbedo;
     }
