@@ -5,6 +5,7 @@ import loadAndCreateBitmapImage from "../../utils/texture/loadAndCreateBitmapIma
 import getMipLevelCount from "../../utils/texture/getMipLevelCount";
 import ManagementResourceBase from "../core/ManagementResourceBase";
 import ResourceStateBitmapTexture from "../core/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
+import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 const MANAGED_STATE_KEY = 'managedTextureArrayState'
 
@@ -114,11 +115,12 @@ class TextureArray extends ManagementResourceBase {
             this.#gpuTexture = imageBitmapToGPUTexture(gpuDevice, resizedBitmaps, textureDescriptor, false);
 
             if (this.#useMipmap) {
-                this.redGPUContext.resourceManager.mipmapGenerator.generateMipmap(this.#gpuTexture, textureDescriptor);
-                requestAnimationFrame(() => {
-                    this.notifyUpdate(true);
-                    this.#onLoad?.(this);
-                })
+                this.redGPUContext.resourceManager.mipmapGenerator.generateMipmap(
+                    this.#gpuTexture,
+                    textureDescriptor,
+                    false,
+                    COMMAND_ENCODER_TYPE.IMMEDIATE
+                );
             }
 
             const {table} = this.targetResourceManagedState

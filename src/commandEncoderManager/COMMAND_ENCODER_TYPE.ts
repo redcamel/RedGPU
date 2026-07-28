@@ -24,6 +24,11 @@ export const COMMAND_ENCODER_TYPE = {
      * [EN] Post-processing phase (apply post-processing effects like blur, tonemapping)
      */
     POST_PROCESS: 'POST_PROCESS',
+    /**
+     * [KO] 즉시 제출 단계 (독립적인 커맨드 인코더로 즉시 queue.submit 실행)
+     * [EN] Immediate submission phase (immediately run queue.submit with an independent command encoder)
+     */
+    IMMEDIATE: 'IMMEDIATE',
 } as const;
 
 /**

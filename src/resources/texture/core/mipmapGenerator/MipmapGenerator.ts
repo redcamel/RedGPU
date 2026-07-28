@@ -200,6 +200,9 @@ class MipmapGenerator extends RedGPUObject {
             mipTexture = resourceManager.createManagedTexture(mipTextureDescriptor);
         }
 
+        const isImmediate = encoderType === COMMAND_ENCODER_TYPE.IMMEDIATE;
+        const immediateEncoder = isImmediate ? this.gpuDevice.createCommandEncoder({label: 'MipmapGenerator_ImmediateEncoder'}) : null;
+
         for (let arrayLayer = 0; arrayLayer < arrayLayerCount; ++arrayLayer) {
             let srcView: GPUTextureView = this.createTextureView(texture, 0, arrayLayer, useCache);
             let dstMipLevel = renderToSource ? 1 : 0;
@@ -218,7 +221,13 @@ class MipmapGenerator extends RedGPUObject {
                     }],
                 }
 
-                if (encoderType === COMMAND_ENCODER_TYPE.RESOURCE) {
+                if (isImmediate) {
+                    const passEncoder = immediateEncoder.beginRenderPass(passDescriptor);
+                    passEncoder.setPipeline(pipeline);
+                    passEncoder.setBindGroup(0, bindGroup);
+                    passEncoder.draw(3, 1, 0, 0);
+                    passEncoder.end();
+                } else if (encoderType === COMMAND_ENCODER_TYPE.RESOURCE) {
                     commandEncoderManager.addResourceRenderPass(passDescriptor, (passEncoder) => {
                         passEncoder.setPipeline(pipeline);
                         passEncoder.setBindGroup(0, bindGroup);
@@ -248,7 +257,8 @@ class MipmapGenerator extends RedGPUObject {
             }
         }
         if (!renderToSource) {
-            commandEncoderManager.useEncoder(encoderType, encoder => {
+            const copyTargetEncoder = isImmediate ? immediateEncoder : null;
+            const recordCopy = (encoder: GPUCommandEncoder) => {
                 const mipLevelSize = {
                     width: Math.max(1, W >>> 1),
                     height: Math.max(1, H >>> 1),
@@ -265,7 +275,17 @@ class MipmapGenerator extends RedGPUObject {
                     mipLevelSize.width = Math.max(1, mipLevelSize.width >>> 1);
                     mipLevelSize.height = Math.max(1, mipLevelSize.height >>> 1);
                 }
-            });
+            };
+
+            if (isImmediate) {
+                recordCopy(copyTargetEncoder);
+            } else {
+                commandEncoderManager.useEncoder(encoderType, recordCopy);
+            }
+        }
+
+        if (isImmediate) {
+            this.gpuDevice.queue.submit([immediateEncoder.finish()]);
         }
 
         if (!renderToSource) {
