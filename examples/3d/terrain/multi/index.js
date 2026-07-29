@@ -14,7 +14,7 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 const WORLD_SIZE = 20000.0;  // 월드 가로세로 크기 (20000x20000 = 20km 초대형 거대 월드 규격: 400km²)
 const MAX_LOD = 8;          // 최대 LOD 레벨 (20km 원경 지평선까지 쿼드트리 세분화 8단계)
 const MIN_H = 0.0;
-const MAX_H = 1500.0;       // 최대 높이 (20km 초대형 거대 산맥 스케일 고도: 1.5km)
+const MAX_H = 450.0;        // 최대 높이 (20km 스케일에 가장 입체적이고 완만한 최적 고도: 450m)
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -186,8 +186,8 @@ RedGPU.init(
         controller.moveSpeed = 5000;              // 20km 초대형 월드를 시원하게 누비는 비행 속도
         controller.mouseSensitivity = 0.2;       // 마우스 시선 회전 감도
         controller.x = 0;                        // 지형 X
-        controller.y = 1500;                     // 20km 스케일을 바라보는 1km 상공 시점
-        controller.z = 0;                    // 중심부 남쪽 시점
+        controller.y = 800;                      // 20km 스케일을 시원하게 감상하는 800m 상공 시점
+        controller.z = 0;                        // 중심부 남쪽 시점
         controller.tilt = -15;                   // 20km 아득한 산맥 지평선을 내려다보는 각도
         controller.pan = 0;
         controller.camera.farClipping = 100000;  // 20km 원경 끝까지 잘림 없이 시원하게 보이도록 확장
@@ -211,7 +211,6 @@ RedGPU.init(
         heightFog.density = 1;
         view.postEffectManager.addEffect(heightFog);
 
-
         // 3. 거대 Terrain 생성
         const terrain = new RedGPU.Display.Terrain(
             redGPUContext,
@@ -219,14 +218,13 @@ RedGPU.init(
             'CDLOD_Terrain'
         );
 
-        // 3-2. 텍스처 일괄 설정 — splat 미지정 시 Heightmap 경사도/고도 기반 100% 자동 SplatMap 베이킹 가동!
+        // 3-2. 텍스처 일괄 설정 — 16-bit PNG 정밀 높이맵(z-heightmap.png) 적용
         terrain.setup({
-            height: '../../../assets/terrain/terrainTest_001/height.jpg',
+            height: '../../../assets/terrain/terrainTest_001/z-heightmap.png',
             baseColor: '../../../assets/terrain/terrainTest_001/diffuse.jpg',
             orm: '../../../assets/terrain/terrainTest_001/orm.jpg',
-            splat: '../../../assets/terrain/terrainTest_001/splatMap.jpg', // 주석 처리 시 Auto Slope/Altitude 모드 가동!
+            splat: '../../../assets/terrain/terrainTest_001/splatMap.jpg',
         });
-
 
         // 💡 디테일 레이어 4종 등록
         terrain.addLayer({
@@ -247,7 +245,6 @@ RedGPU.init(
             roughnessFactor: 0.90
         });
 
-
         terrain.addLayer({
             name: 'Gravel',
             diffuse: '../../../assets/terrain/terrainTest_001/layer/gravel.jpg',
@@ -266,7 +263,6 @@ RedGPU.init(
             roughnessFactor: 0.85
         });
 
-
         // 3-5. 지형 파라미터 — 20km 초대형 스케일 설정 및 언리얼 스타일 공간 그리드 스트리밍 활성화
         terrain.minHeight = MIN_H;
         terrain.maxHeight = MAX_H;
@@ -280,12 +276,60 @@ RedGPU.init(
         terrain.spatialGrid.cellSize = 512;        // 512m 단위 셀 분할
         terrain.spatialGrid.loadingRadius = 3500;  // 반경 3.5km 동적 로딩
 
+        const loadedTileTextures = new Map();
+
         terrain.setOnTileLoad((tile) => {
             frameLoadCount++;
+
+            // 16x16 타일 (00~15) 그리드 좌표 매핑
+            const tileCount = 16;
+            const normX = ((tile.gridX % tileCount) + tileCount) % tileCount;
+            const normZ = ((tile.gridZ % tileCount) + tileCount) % tileCount;
+
+            const strX = String(normX).padStart(2, '0');
+            const strZ = String(normZ).padStart(2, '0');
+            const key = `${tile.gridX}_${tile.gridZ}`;
+
+            // 경계 엣지 타일 규격 대응 (normX=15 -> 512_449, normZ=15 -> 449_512, 둘다15 -> 449_449)
+            let fileName;
+            if (normX === 15 && normZ === 15) {
+                fileName = `28_134_86_730_13_449_449_16bit_tile_15_15.png`;
+            } else if (normX === 15) {
+                fileName = `28_134_86_730_13_512_449_16bit_tile_15_${strZ}.png`;
+            } else if (normZ === 15) {
+                fileName = `28_134_86_730_13_449_512_16bit_tile_${strX}_15.png`;
+            } else {
+                fileName = `28_134_86_730_13_512_512_16bit_tile_${strX}_${strZ}.png`;
+            }
+
+            const tileUrl = `../../../assets/terrain/terrainTest_001/tile/${fileName}`;
+
+            // 💡 16-bit PNG Heightmap 타일 동적 로딩 (개별 셀 파티션 스트리밍)
+            const tileTexture = new RedGPU.Resource.BitmapTexture(
+                redGPUContext,
+                tileUrl,
+                false,
+                null,
+                null,
+                'rgba8unorm'
+            );
+
+            loadedTileTextures.set(key, tileTexture);
+            console.log(`[Tile Streamer 📥] Load Tile (${tile.gridX}, ${tile.gridZ}) → ${fileName}`);
         });
 
         terrain.setOnTileUnload((tile) => {
             frameUnloadCount++;
+            const key = `${tile.gridX}_${tile.gridZ}`;
+
+            if (loadedTileTextures.has(key)) {
+                const tex = loadedTileTextures.get(key);
+                if (tex && typeof tex.destroy === 'function') {
+                    tex.destroy();
+                }
+                loadedTileTextures.delete(key);
+                console.log(`[Tile Streamer 📤] Unload Tile (${tile.gridX}, ${tile.gridZ})`);
+            }
         });
 
         scene.addTerrain(terrain);

@@ -417,6 +417,7 @@ class Terrain extends Mesh {
         if (texture) {
             texture.__addDirtyPipelineListener(this.#dirtyPipelineListener);
         }
+        this.#dirtyPipelineListener();
     }
 
     updateSampler(prevSampler: any, sampler: any) {
