@@ -17,7 +17,7 @@ import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import {keepLog} from "../../utils";
-import TerrainMaterialBind from "./core/TerrainMaterialBind";
+import TerrainTileSystem from "./core/TerrainTileSystem";
 
 export type {TerrainLayerConfig};
 
@@ -40,7 +40,7 @@ interface Terrain {
     enableStreaming: boolean;
 }
 
-class Terrain extends TerrainMaterialBind {
+class Terrain extends TerrainTileSystem {
     quadtree: TerrainQuadtree;
     spatialGrid: TerrainSpatialGrid;
     instanceBuffer: GPUBuffer;
@@ -432,12 +432,6 @@ class Terrain extends TerrainMaterialBind {
         }
     }
 
-    render(renderViewStateData: any) {
-        // RVT 자동 베이킹: 더티 새로울 때마다 실행되지 않고 isDirty일 때만 실행
-        // this.#rvt.checkAndBake(this.material)
-
-        super.render(renderViewStateData);
-    }
 
 
     updateTexture(prevTexture: any, texture: any) {
