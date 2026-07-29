@@ -27,7 +27,7 @@ struct RVTBakeUniforms {
 @group(0) @binding(6) var texSampler:    sampler;
 @group(0) @binding(7) var baseColorTexture: texture_2d<f32>;
 @group(0) @binding(8) var ormTexture:       texture_2d<f32>;
-@group(0) @binding(9) var heightTexture:    texture_2d<f32>;
+@group(0) @binding(9) var heightmapAtlasTexture: texture_2d<f32>;
 
 @group(0) @binding(10) var albedoOutput:    texture_storage_2d<rgba8unorm, write>;
 @group(0) @binding(11) var normalORMOutput: texture_storage_2d<rgba8unorm, write>;
@@ -88,12 +88,12 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var sw = vec4<f32>(0.0);
 
     if (bakeUniforms.useAutoSplat == 1u) {
-        let texDim = vec2<f32>(textureDimensions(heightTexture));
+        let texDim = vec2<f32>(textureDimensions(heightmapAtlasTexture));
         let texelSize = 1.0 / max(texDim, vec2<f32>(1.0));
 
-        let hCenter = textureSampleLevel(heightTexture, texSampler, wUV, 0.0).r;
-        let hRight  = textureSampleLevel(heightTexture, texSampler, wUV + vec2<f32>(texelSize.x, 0.0), 0.0).r;
-        let hUp     = textureSampleLevel(heightTexture, texSampler, wUV + vec2<f32>(0.0, texelSize.y), 0.0).r;
+        let hCenter = textureSampleLevel(heightmapAtlasTexture, texSampler, wUV, 0.0).r;
+        let hRight  = textureSampleLevel(heightmapAtlasTexture, texSampler, wUV + vec2<f32>(texelSize.x, 0.0), 0.0).r;
+        let hUp     = textureSampleLevel(heightmapAtlasTexture, texSampler, wUV + vec2<f32>(0.0, texelSize.y), 0.0).r;
 
         let dhX = (hRight - hCenter) * 40.0;
         let dhZ = (hUp - hCenter) * 40.0;

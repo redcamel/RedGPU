@@ -17,8 +17,8 @@ struct TerrainUniforms {
 }
 @group(1) @binding(0) var<uniform> vertexUniforms: TerrainUniforms;
 
-@group(1) @binding(1) var heightTextureSampler: sampler;
-@group(1) @binding(2) var heightTexture: texture_2d<f32>;
+@group(1) @binding(1) var heightmapSampler: sampler;
+@group(1) @binding(2) var heightmapAtlasTexture: texture_2d<f32>;
 
 struct TerrainInstance {
     offset: vec2<f32>,
@@ -116,8 +116,8 @@ fn main(inputData: InputData) -> VertexOutput {
     var worldTangentX = vec3<f32>(1.0, 0.0, 0.0);
     var sampledHeight = 0.0;
 
-    #redgpu_if heightTexture
-        let texSize  = vec2<f32>(textureDimensions(heightTexture, 0));
+    #redgpu_if heightmapAtlasTexture
+        let texSize  = vec2<f32>(textureDimensions(heightmapAtlasTexture, 0));
         let texelSize = 1.0 / texSize;
         let halfTexel = 0.5 * texelSize;
 
@@ -127,17 +127,17 @@ fn main(inputData: InputData) -> VertexOutput {
         let clampedWorldUV = clamp(worldUV, halfTexel, vec2<f32>(1.0) - halfTexel);
         let clampedParentUV = clamp(parentWorldUV, halfTexel, vec2<f32>(1.0) - halfTexel);
 
-        let h0 = textureSampleLevel(heightTexture, heightTextureSampler, clampedWorldUV, 0.0).r;
-        let h1 = textureSampleLevel(heightTexture, heightTextureSampler, clampedParentUV, 0.0).r;
+        let h0 = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clampedWorldUV, 0.0).r;
+        let h1 = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clampedParentUV, 0.0).r;
 
         sampledHeight = mix(h0, h1, morphFactor);
 
         let heightRange = vertexUniforms.maxHeight - vertexUniforms.minHeight;
 
-        let hL = textureSampleLevel(heightTexture, heightTextureSampler, clamp(clampedWorldUV + vec2<f32>(-texelSize.x, 0.0), halfTexel, vec2<f32>(1.0) - halfTexel), 0.0).r;
-        let hR = textureSampleLevel(heightTexture, heightTextureSampler, clamp(clampedWorldUV + vec2<f32>( texelSize.x, 0.0), halfTexel, vec2<f32>(1.0) - halfTexel), 0.0).r;
-        let hD = textureSampleLevel(heightTexture, heightTextureSampler, clamp(clampedWorldUV + vec2<f32>(0.0, -texelSize.y), halfTexel, vec2<f32>(1.0) - halfTexel), 0.0).r;
-        let hU = textureSampleLevel(heightTexture, heightTextureSampler, clamp(clampedWorldUV + vec2<f32>(0.0,  texelSize.y), halfTexel, vec2<f32>(1.0) - halfTexel), 0.0).r;
+        let hL = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clamp(clampedWorldUV + vec2<f32>(-texelSize.x, 0.0), halfTexel, vec2<f32>(1.0) - halfTexel), 0.0).r;
+        let hR = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clamp(clampedWorldUV + vec2<f32>( texelSize.x, 0.0), halfTexel, vec2<f32>(1.0) - halfTexel), 0.0).r;
+        let hD = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clamp(clampedWorldUV + vec2<f32>(0.0, -texelSize.y), halfTexel, vec2<f32>(1.0) - halfTexel), 0.0).r;
+        let hU = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clamp(clampedWorldUV + vec2<f32>(0.0,  texelSize.y), halfTexel, vec2<f32>(1.0) - halfTexel), 0.0).r;
 
         let stepX = vertexUniforms.worldSize.x * texelSize.x * 2.0;
         let stepZ = vertexUniforms.worldSize.y * texelSize.y * 2.0;

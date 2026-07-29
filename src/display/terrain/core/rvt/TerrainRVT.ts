@@ -55,7 +55,7 @@ class TerrainRVT {
         const ormGPUView = this.#getArrayTextureView(mat.ormArray);
         const baseColorGPUView = this.#getTextureView(mat.baseColorTexture);
         const ormTextureGPUView = this.#getTextureView(mat.ormTexture);
-        const heightmapGPUView = this.#getTextureView(mat.targetTerrain?.heightTexture);
+        const heightmapGPUView = this.#getTextureView(mat.targetTerrain?.heightmapAtlasTexture);
 
         keepLog('RVT 컴퓨트 셰이더 베이킹 실행');
         const device = this.#redGPUContext.gpuDevice;

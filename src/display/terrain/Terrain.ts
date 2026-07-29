@@ -6,11 +6,12 @@ import GPU_FILTER_MODE from "../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import vertexModuleSource from "./vertex.wgsl";
 import TerrainTileSystem from "./core/TerrainTileSystem";
+import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
 
 export type {TerrainLayerConfig};
 
 interface Terrain {
-
+    heightmapSampler: Sampler;
 }
 
 class Terrain extends TerrainTileSystem {
@@ -22,7 +23,7 @@ class Terrain extends TerrainTileSystem {
             this.name = name
         }
         this.ignoreFrustumCulling = true;
-        this.heightTextureSampler = new Sampler(redGPUContext, {
+        this.heightmapSampler = new Sampler(redGPUContext, {
             magFilter: GPU_FILTER_MODE.LINEAR,
             minFilter: GPU_FILTER_MODE.LINEAR,
             mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
@@ -75,8 +76,8 @@ class Terrain extends TerrainTileSystem {
     }
 
     destroy() {
-        if (this.heightTexture) {
-            this.heightTexture.__removeDirtyPipelineListener(this.#dirtyPipelineListener);
+        if (this.heightmapAtlasTexture) {
+            this.heightmapAtlasTexture.__removeDirtyPipelineListener(this.#dirtyPipelineListener);
         }
         super.destroy();
     }
@@ -110,11 +111,11 @@ const getTerrainVertexBindGroupDescriptor = (mesh: Terrain) => {
             },
             {
                 binding: 1,
-                resource: mesh.heightTextureSampler?.gpuSampler || resourceManager.basicDisplacementSampler.gpuSampler
+                resource: mesh.heightmapSampler?.gpuSampler || resourceManager.basicDisplacementSampler.gpuSampler
             },
             {
                 binding: 2,
-                resource: resourceManager.getGPUResourceBitmapTextureView(mesh.heightTexture) || resourceManager.emptyBitmapTextureView
+                resource: resourceManager.getGPUResourceBitmapTextureView(mesh.heightmapAtlasTexture) || resourceManager.emptyBitmapTextureView
             },
             {
                 binding: 3,
@@ -130,5 +131,8 @@ Object.defineProperty(Terrain.prototype, 'isTerrain', {
     value: true,
     writable: false
 });
+defineSampler(Terrain, [
+    {key: "heightmapSampler"}
+]);
 Object.freeze(Terrain);
 export default Terrain;
