@@ -56,6 +56,167 @@ class Terrain extends Mesh {
     #atlasTileCountX: number = 16;
     #atlasTileCountZ: number = 16;
     #atlasTileSize: number = 512;
+    #loadedTileTextures: Map<string, any> = new Map();
+    #synthesizedTilesSet: Set<string> = new Set();
+    #tileImageCache: Map<string, any> = new Map();
+
+    #frameLoadCount: number = 0;
+    #frameUnloadCount: number = 0;
+    #lastFrameLoadCount: number = 0;
+    #lastFrameUnloadCount: number = 0;
+    #lastMetricsResetTime: number = typeof performance !== 'undefined' ? performance.now() : Date.now();
+
+    /** [KO] 누적 타일 로드 카운트 [EN] Cumulative tile load count */
+    get frameLoadCount(): number {
+        return this.#frameLoadCount;
+    }
+
+    /** [KO] 누적 타일 언로드 카운트 [EN] Cumulative tile unload count */
+    get frameUnloadCount(): number {
+        return this.#frameUnloadCount;
+    }
+
+    /** [KO] 최근 1초간 초당 타일 로드 속도 (Loads/sec) [EN] Tile load rate for the last 1 second (Loads/sec) */
+    get lastFrameLoadCount(): number {
+        return this.#lastFrameLoadCount;
+    }
+
+    /** [KO] 최근 1초간 초당 타일 언로드 속도 (Unloads/sec) [EN] Tile unload rate for the last 1 second (Unloads/sec) */
+    get lastFrameUnloadCount(): number {
+        return this.#lastFrameUnloadCount;
+    }
+
+    /**
+     * [KO] 현재 GPU Heightmap Atlas에 복사/합성 완료된 타일의 총 개수를 반환합니다.
+     * [EN] Returns the total number of tiles copied/synthesized into the GPU Heightmap Atlas.
+     */
+    get synthesizedTileCount(): number {
+        return this.#synthesizedTilesSet.size;
+    }
+
+    /**
+     * [KO] 디버그/미리보기용 타일 2D 이미지 자원을 엔진 내부에 등록 보관합니다.
+     * [EN] Registers and stores tile 2D image resources for debug/preview inside the engine.
+     */
+    registerTileImage(tile: SpatialTileInfo | string, image: any) {
+        const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
+        this.#tileImageCache.set(key, image);
+    }
+
+    /**
+     * [KO] 등록된 타일 2D 이미지 자원을 가져옵니다.
+     * [EN] Gets the registered tile 2D image resource.
+     */
+    getTileImage(tile: SpatialTileInfo | string): any {
+        const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
+        return this.#tileImageCache.get(key);
+    }
+
+    /**
+     * [KO] 2D Canvas Context에 16x16 아틀라스 타일 이미지들을 자동 모달 프리뷰로 드로잉합니다.
+     * [EN] Automatically renders 16x16 atlas tile images onto a 2D Canvas Context for modal preview.
+     */
+    renderAtlasPreview(ctx: CanvasRenderingContext2D, width: number = 512, height: number = 512) {
+        if (!ctx) return;
+        const curDpr = window.devicePixelRatio || 1;
+        ctx.setTransform(curDpr, 0, 0, curDpr, 0, 0);
+        ctx.imageSmoothingEnabled = false;
+
+        const countX = this.#atlasTileCountX;
+        const countZ = this.#atlasTileCountZ;
+        const cellW = width / countX;
+        const cellH = height / countZ;
+
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, width, height);
+
+        for (let x = 0; x < countX; x++) {
+            for (let z = 0; z < countZ; z++) {
+                const px = x * cellW;
+                const py = z * cellH;
+
+                ctx.fillStyle = 'rgba(30, 41, 59, 0.8)';
+                ctx.fillRect(px, py, cellW, cellH);
+
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                ctx.strokeRect(px, py, cellW, cellH);
+
+                const key = `${x}_${z}`;
+                if (this.#tileImageCache.has(key)) {
+                    const img = this.#tileImageCache.get(key);
+                    try {
+                        ctx.drawImage(img, px, py, cellW, cellH);
+                    } catch (e) {
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * [KO] 해당 타일이 이미 GPU Heightmap Atlas에 복사/합성 완료되었는지 여부를 반환합니다.
+     * [EN] Returns whether the specified tile has already been copied/synthesized into the GPU Heightmap Atlas.
+     */
+    isTileSynthesized(tile: SpatialTileInfo | string): boolean {
+        const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
+        return this.#synthesizedTilesSet.has(key);
+    }
+
+    /**
+     * [KO] 해당 타일을 GPU Heightmap Atlas 복사/합성 완료 상태로 표시합니다.
+     * [EN] Marks the specified tile as copied/synthesized in the GPU Heightmap Atlas.
+     */
+    markTileSynthesized(tile: SpatialTileInfo | string) {
+        const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
+        this.#synthesizedTilesSet.add(key);
+    }
+
+    /**
+     * [KO] 합성 완료된 타일 기록을 초기화합니다.
+     * [EN] Clears the record of synthesized tiles.
+     */
+    clearSynthesizedTiles() {
+        this.#synthesizedTilesSet.clear();
+    }
+
+    /**
+     * [KO] 로드된 타일 텍스처 자원을 엔진 내부에서 자동 보관 및 관리합니다.
+     * [EN] Automatically stores and manages loaded tile texture resources inside the engine.
+     */
+    registerTileTexture(tile: SpatialTileInfo, texture: any) {
+        const key = tile.cellKey || `${tile.gridX}_${tile.gridZ}`;
+        if (this.#loadedTileTextures.has(key)) {
+            const oldTex = this.#loadedTileTextures.get(key);
+            if (oldTex && typeof oldTex.destroy === 'function') {
+                oldTex.destroy();
+            }
+        }
+        this.#loadedTileTextures.set(key, texture);
+    }
+
+    /**
+     * [KO] 해당 타일 텍스처가 엔진 내부에 로드되어 관리 중인지 여부를 반환합니다.
+     * [EN] Returns whether the specified tile texture is loaded and managed inside the engine.
+     */
+    hasTileTexture(tile: SpatialTileInfo | string): boolean {
+        const key = typeof tile === 'string' ? tile : (tile.cellKey || `${tile.gridX}_${tile.gridZ}`);
+        return this.#loadedTileTextures.has(key);
+    }
+
+    /**
+     * [KO] 언로드된 타일 텍스처 자원을 엔진 내부에서 자동 파기 및 해제합니다.
+     * [EN] Automatically destroys and releases unloaded tile texture resources inside the engine.
+     */
+    unregisterTileTexture(tile: SpatialTileInfo) {
+        const key = tile.cellKey || `${tile.gridX}_${tile.gridZ}`;
+        if (this.#loadedTileTextures.has(key)) {
+            const tex = this.#loadedTileTextures.get(key);
+            if (tex && typeof tex.destroy === 'function') {
+                tex.destroy();
+            }
+            this.#loadedTileTextures.delete(key);
+        }
+    }
 
     constructor(redGPUContext: RedGPUContext, heightmapUrl?: string, name?: string) {
         const geometry = new TerrainGeometry(redGPUContext);
@@ -365,11 +526,55 @@ class Terrain extends Mesh {
             const camDir: [number, number, number] | undefined = camFwd ? [camFwd[0], camFwd[1], camFwd[2]] : undefined;
 
             const {toLoad, toUnload} = this.spatialGrid.update([camera.x, camera.y, camera.z], camDir);
-            if (toLoad.length > 0 && this.#onTileLoadCallback) {
-                toLoad.forEach(tile => this.#onTileLoadCallback!(tile));
+
+            const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+            if (now - this.#lastMetricsResetTime >= 1000) {
+                this.#lastFrameLoadCount = this.#frameLoadCount;
+                this.#lastFrameUnloadCount = this.#frameUnloadCount;
+                this.#frameLoadCount = 0;
+                this.#frameUnloadCount = 0;
+                this.#lastMetricsResetTime = now;
             }
-            if (toUnload.length > 0 && this.#onTileUnloadCallback) {
-                toUnload.forEach(tile => this.#onTileUnloadCallback!(tile));
+
+            const enrichTileInfo = (tile: SpatialTileInfo) => {
+                tile.cellKey = `${tile.gridX}_${tile.gridZ}`;
+                const [tbMinX, tbMinZ, tbMaxX, tbMaxZ] = tile.worldBounds;
+                const tileCenterX = (tbMinX + tbMaxX) * 0.5;
+                const tileCenterZ = (tbMinZ + tbMaxZ) * 0.5;
+
+                const worldW = this.worldSize[0];
+                const worldH = this.worldSize[1];
+                const tileSpanX = worldW / this.#atlasTileCountX;
+                const tileSpanZ = worldH / this.#atlasTileCountZ;
+
+                const gridX = Math.max(0, Math.min(this.#atlasTileCountX - 1, Math.floor((tileCenterX - this.worldOffset[0]) / tileSpanX)));
+                const gridZ = Math.max(0, Math.min(this.#atlasTileCountZ - 1, Math.floor((tileCenterZ - this.worldOffset[1]) / tileSpanZ)));
+
+                tile.tileCol = gridX;
+                tile.tileRow = (this.#atlasTileCountZ - 1) - gridZ;
+                tile.atlasKey = `${tile.tileCol}_${tile.tileRow}`;
+                tile.tileColStr = String(tile.tileCol).padStart(2, '0');
+                tile.tileRowStr = String(tile.tileRow).padStart(2, '0');
+            };
+
+            if (toLoad.length > 0) {
+                this.#frameLoadCount += toLoad.length;
+                if (this.#onTileLoadCallback) {
+                    toLoad.forEach(tile => {
+                        enrichTileInfo(tile);
+                        this.#onTileLoadCallback!(tile);
+                    });
+                }
+            }
+            if (toUnload.length > 0) {
+                this.#frameUnloadCount += toUnload.length;
+                toUnload.forEach(tile => {
+                    enrichTileInfo(tile);
+                    this.unregisterTileTexture(tile);
+                    if (this.#onTileUnloadCallback) {
+                        this.#onTileUnloadCallback!(tile);
+                    }
+                });
             }
         }
 
@@ -501,7 +706,25 @@ class Terrain extends Mesh {
      * [KO] 스트리밍 수신된 단일 타일 높이맵 텍스처를 GPU Heightmap Tile Atlas의 지정 좌표에 부분 복사(copyTextureToTexture)합니다.
      * [EN] Copies a single streamed tile heightmap texture to the specified region of the GPU Heightmap Tile Atlas.
      */
-    updateTileHeightmap(tileX: number, tileZ: number, sourceTexture: BitmapTexture) {
+    updateTileHeightmap(tileOrCol: SpatialTileInfo | number, tileRowOrTexture?: number | BitmapTexture, srcTexture?: BitmapTexture) {
+        let tileX: number;
+        let tileZ: number;
+        let sourceTexture: BitmapTexture;
+
+        if (typeof tileOrCol === 'object' && tileOrCol !== null) {
+            const tile = tileOrCol as SpatialTileInfo;
+            tileX = tile.tileCol ?? 0;
+            tileZ = tile.tileRow ?? 0;
+            sourceTexture = tileRowOrTexture as BitmapTexture;
+            if (sourceTexture) {
+                this.registerTileTexture(tile, sourceTexture);
+            }
+        } else {
+            tileX = tileOrCol as number;
+            tileZ = tileRowOrTexture as number;
+            sourceTexture = srcTexture as BitmapTexture;
+        }
+
         if (!this.#heightmapAtlasGPUTexture) {
             this.createHeightmapTileAtlas(16, 16, 512);
         }
@@ -567,6 +790,7 @@ class Terrain extends Mesh {
         }
 
         device.queue.submit([encoder.finish()]);
+        this.markTileSynthesized(`${tileX}_${tileZ}`);
 
         // 3. 💡 높이맵 타일이 갱신되는 즉시 RVT (Runtime Virtual Texture) 베이커를 가동하여 표면 텍스처 재베이킹!
         if (this.material && typeof (this.material as any).bakeRVT === 'function') {

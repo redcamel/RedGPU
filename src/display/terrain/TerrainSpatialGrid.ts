@@ -15,6 +15,19 @@ export interface SpatialTileInfo {
     distanceToCamera: number;
     priority: number;
     state: TileState;
+
+    /** [KO] 256m 공간 셀 키 (예: "0_1") [EN] 256m spatial cell key */
+    cellKey?: string;
+    /** [KO] 16x16 아틀라스 타일 열 (0 ~ 15) [EN] 16x16 atlas tile column */
+    tileCol?: number;
+    /** [KO] 16x16 아틀라스 타일 행 (0 ~ 15) [EN] 16x16 atlas tile row */
+    tileRow?: number;
+    /** [KO] 16x16 아틀라스 타일 키 (예: "0_15") [EN] 16x16 atlas tile key */
+    atlasKey?: string;
+    /** [KO] 두 자리 포맷팅된 타일 열 문자열 (예: "00" ~ "15") [EN] 2-digit formatted tile column string */
+    tileColStr?: string;
+    /** [KO] 두 자리 포맷팅된 타일 행 문자열 (예: "00" ~ "15") [EN] 2-digit formatted tile row string */
+    tileRowStr?: string;
 }
 
 /**

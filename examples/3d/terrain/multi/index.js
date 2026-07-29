@@ -11,10 +11,10 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
  * - GPU Instancing으로 단일 드로우콜에서 전체 지형 렌더링
  */
 
-const WORLD_SIZE = 20000.0;  // 월드 가로세로 크기 (20000x20000 = 20km 초대형 거대 월드 규격: 400km²)
-const MAX_LOD = 8;          // 최대 LOD 레벨 (20km 원경 지평선까지 쿼드트리 세분화 8단계)
+const WORLD_SIZE = 8192.0;   // 월드 가로세로 크기 (8192m × 8192m = 8.2km 표준 오픈월드 규격, 1 Pixel = 1 Meter 1:1 정밀 해상도)
+const MAX_LOD = 7;          // 최대 LOD 레벨 (8.2km 지평선 세분화 7단계)
 const MIN_H = 0.0;
-const MAX_H = 450.0;        // 최대 높이 (20km 스케일에 가장 입체적이고 완만한 최적 고도: 450m)
+const MAX_H = 300.0;        // 최대 높이 (8.2km 스케일에 입체적이고 또렷한 최적 고도: 300m)
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -161,53 +161,12 @@ hmAtlasCanvas.onclick = () => {
     renderAtlasModalPreview();
 };
 
-const synthesizedTilesSet = new Set();
-const tileImageCache = new Map();
-
-function renderAtlasModalPreview() {
-    if (!modalCtx) return;
-    const curDpr = window.devicePixelRatio || 1;
-    modalCtx.setTransform(curDpr, 0, 0, curDpr, 0, 0); // 💡 DPR 고해상도 픽셀 변환
-    modalCtx.imageSmoothingEnabled = false;
-    const w = 512;
-    const h = 512;
-
-    modalCtx.fillStyle = '#0f172a';
-    modalCtx.fillRect(0, 0, w, h);
-
-    // 1. 💡 격자 디버그 라인 및 셀 배경을 먼저 드로잉
-    for (let x = 0; x < 16; x++) {
-        for (let z = 0; z < 16; z++) {
-            const px = x * 32;
-            const py = z * 32;
-
-            modalCtx.fillStyle = 'rgba(30, 41, 59, 0.8)';
-            modalCtx.fillRect(px, py, 32, 32);
-
-            modalCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-            modalCtx.strokeRect(px, py, 32, 32);
-        }
-    }
-
-    // 2. 💡 로드된 타일 이미지가 격자 라인 위를 덮어쓰도록 렌더링!
-    for (let x = 0; x < 16; x++) {
-        for (let z = 0; z < 16; z++) {
-            const key = `${x}_${z}`;
-            const px = x * 32;
-            const py = z * 32;
-
-            if (tileImageCache.has(key)) {
-                const img = tileImageCache.get(key);
-                try {
-                    modalCtx.drawImage(img, px, py, 32, 32);
-                } catch (e) {
-                }
-            }
-        }
-    }
+function renderAtlasModalPreview(terrainInstance) {
+    if (!modalCtx || !terrainInstance) return;
+    terrainInstance.renderAtlasPreview(modalCtx, 512, 512);
 }
 
-function updateHeightmapAtlas2DDebugger() {
+function updateHeightmapAtlas2DDebugger(terrainInstance) {
     if (!hmAtlasCtx) return;
     const w = hmAtlasCanvas.width;
     const h = hmAtlasCanvas.height;
@@ -233,7 +192,7 @@ function updateHeightmapAtlas2DDebugger() {
             const px = x * tileSize;
             const py = z * tileSize;
 
-            if (synthesizedTilesSet.has(key)) {
+            if (terrainInstance && terrainInstance.isTileSynthesized(key)) {
                 hmAtlasCtx.fillStyle = 'rgba(74, 222, 128, 0.65)';
                 hmAtlasCtx.fillRect(px, py, tileSize, tileSize);
             }
@@ -241,12 +200,13 @@ function updateHeightmapAtlas2DDebugger() {
     }
 
     // 디버그 제목
+    const count = terrainInstance ? terrainInstance.synthesizedTileCount : 0;
     hmAtlasCtx.fillStyle = '#4ade80';
     hmAtlasCtx.font = '10px monospace';
-    hmAtlasCtx.fillText(`Atlas 16x16 (${synthesizedTilesSet.size}/256)`, 4, 12);
+    hmAtlasCtx.fillText(`Atlas 16x16 (${count}/256)`, 4, 12);
 
     if (previewModal.style.display !== 'none') {
-        renderAtlasModalPreview();
+        renderAtlasModalPreview(terrainInstance);
     }
 }
 
@@ -321,11 +281,6 @@ function updateSpatialGrid2DDebugger(terrain, camera) {
     debugCtx.stroke();
 }
 
-let frameLoadCount = 0;
-let frameUnloadCount = 0;
-let lastFrameLoadCount = 0;
-let lastFrameUnloadCount = 0;
-
 function updateHUD(terrain, camera) {
     const leafCount = terrain.quadtree ? terrain.quadtree.leafNodes.length : 0;
     const streamedTileCount = terrain.spatialGrid ? terrain.spatialGrid.activeTiles.size : 0;
@@ -343,9 +298,9 @@ function updateHUD(terrain, camera) {
         <span style="color:#94a3b8;">──────────────────</span><br>
         🗂 활성 CDLOD 노드 : <b style="color:#4ade80;">${leafCount}</b><br>
         🛰 활성 스트리밍 셀 : <b style="color:#38bdf8;">${streamedTileCount}</b>개 (반경 ${(terrain.spatialGrid.loadingRadius / 1000).toFixed(2)}km)<br>
-        📥 프레임당 로드 (toLoad)   : <b style="color:#4ade80;">${lastFrameLoadCount}</b>개 (예산: ${maxBudget > 0 ? maxBudget + '개/프레임' : '제한없음'})<br>
+        📥 프레임당 로드 (toLoad)   : <b style="color:#4ade80;">${terrain.lastFrameLoadCount}</b>개 (예산: ${maxBudget > 0 ? maxBudget + '개/프레임' : '제한없음'})<br>
         ⏳ 로딩 대기 큐 (Pending)   : <b style="color:#fbbf24;">${pendingQueueCount}</b>개<br>
-        📤 프레임당 언로드 (toUnload) : <b style="color:#f87171;">${lastFrameUnloadCount}</b>개<br>
+        📤 프레임당 언로드 (toUnload) : <b style="color:#f87171;">${terrain.lastFrameUnloadCount}</b>개<br>
         🎯 중심 셀 위치     : <b style="color:#a7f3d0;">Cell(${centerGridX}, ${centerGridZ})</b><br>
         📐 월드 스케일     : <b style="color:#fbbf24;">${WORLD_SIZE} × ${WORLD_SIZE}</b><br>
         🏔 최대 높이       : <b style="color:#f87171;">${MAX_H}</b><br>
@@ -456,46 +411,30 @@ RedGPU.init(
         terrain.worldSize = [WORLD_SIZE, WORLD_SIZE];
         terrain.worldOffset = [-WORLD_SIZE / 2, -WORLD_SIZE / 2]; // 원점 중앙 정렬
         terrain.maxLOD = MAX_LOD;
-        terrain.tileScale = 400.0;                 // 20km 초대형 스케일에 맞춘 촘촘한 텍스처 밀도 타일링 비율
+        terrain.tileScale = 200.0;                 // 8.2km 규격에 맞춘 촘촘하고 선명한 텍스처 밀도 타일링 비율
 
         // 🛰️ 언리얼 엔진 5 표준 월드 파티션 공간 그리드 스트리밍 설정
         terrain.enableStreaming = true;
         terrain.spatialGrid.cellSize = 256;        // 256m 단위 셀 분할 (25,600 Unreal Units)
         terrain.spatialGrid.loadingRadius = 2560;  // 반경 2.56km 동적 로딩 (256,000 Unreal Units)
 
-        const loadedTileTextures = new Map();
-
         terrain.setOnTileLoad((tile) => {
-            frameLoadCount++;
+            // 💡 1. 엔진 내부에 이미 보존/합성 완료된 타일은 0ms 중복 로딩 스킵!
+            if (terrain.isTileSynthesized(tile) || terrain.hasTileTexture(tile)) {
+                return;
+            }
 
-            // 💡 월드 좌표(-10000~+10000) 기준 16x16 타일 인덱스(00~15) 정밀 변환
-            const [minX, minZ, maxX, maxZ] = tile.worldBounds;
-            const tileCenterX = (minX + maxX) * 0.5;
-            const tileCenterZ = (minZ + maxZ) * 0.5;
 
-            const tileSpan = WORLD_SIZE / 16; // 1250m 당 1타일
-            const gridX = Math.max(0, Math.min(15, Math.floor((tileCenterX + WORLD_SIZE / 2) / tileSpan)));
-            const gridZ = Math.max(0, Math.min(15, Math.floor((tileCenterZ + WORLD_SIZE / 2) / tileSpan)));
-
-            // 💡 2D 이미지/아틀라스 행렬 좌표계 (Col: 0~15 서->동, Row: 0~15 북->남 상하 반전)
-            const tileCol = gridX;
-            const tileRow = 15 - gridZ;
-
-            const colStr = String(tileCol).padStart(2, '0');
-            const rowStr = String(tileRow).padStart(2, '0');
-            const cellKey = `${tile.gridX}_${tile.gridZ}`;
-            const atlasKey = `${tileCol}_${tileRow}`;
-
-            // 💡 파일명 인덱스 규격 (Row: rowStr, Col: colStr) 및 엣지 해상도 정밀 교정
+            // 💡 파일명 인덱스 규격 (Row: tile.tileRowStr, Col: tile.tileColStr) 및 엣지 해상도 정밀 교정
             let fileName;
-            if (tileCol === 15 && tileRow === 15) {
+            if (tile.tileCol === 15 && tile.tileRow === 15) {
                 fileName = `28_134_86_730_13_449_449_16bit_tile_15_15.png`;
-            } else if (tileCol === 15) {
-                fileName = `28_134_86_730_13_449_512_16bit_tile_${rowStr}_15.png`;
-            } else if (tileRow === 15) {
-                fileName = `28_134_86_730_13_512_449_16bit_tile_15_${colStr}.png`;
+            } else if (tile.tileCol === 15) {
+                fileName = `28_134_86_730_13_449_512_16bit_tile_${tile.tileRowStr}_15.png`;
+            } else if (tile.tileRow === 15) {
+                fileName = `28_134_86_730_13_512_449_16bit_tile_15_${tile.tileColStr}.png`;
             } else {
-                fileName = `28_134_86_730_13_512_512_16bit_tile_${rowStr}_${colStr}.png`;
+                fileName = `28_134_86_730_13_512_512_16bit_tile_${tile.tileRowStr}_${tile.tileColStr}.png`;
             }
 
             const tileUrl = `../../../assets/terrain/terrainTest_001/tile/${fileName}`;
@@ -503,42 +442,30 @@ RedGPU.init(
             const tileImg = new Image();
             tileImg.src = tileUrl;
             tileImg.onload = () => {
-                tileImageCache.set(atlasKey, tileImg);
+                terrain.registerTileImage(tile, tileImg);
                 if (previewModal.style.display !== 'none') {
-                    renderAtlasModalPreview();
+                    renderAtlasModalPreview(terrain);
                 }
             };
 
-            // 💡 16-bit PNG Heightmap 타일 동적 로딩 (완전 타일 스트리밍 구조)
-            const tileTexture = new RedGPU.Resource.BitmapTexture(
+            // 💡 16-bit PNG Heightmap 타일 동적 로딩 (엔진 내부 자원 수명주기 100% 자동 관리)
+            new RedGPU.Resource.BitmapTexture(
                 redGPUContext,
                 tileUrl,
                 false,
                 (tex) => {
-                    // 💡 로드 완료 시 GPU Heightmap Atlas (tileCol, tileRow) 슬롯 위치에 1:1 부분 복사!
-                    terrain.updateTileHeightmap(tileCol, tileRow, tex);
-                    synthesizedTilesSet.add(atlasKey);
+                    // 💡 로드 완료 시 GPU Heightmap Atlas 부분 복사 + 엔진 내 합성 상태 보관 자동화!
+                    terrain.updateTileHeightmap(tile, tex);
                 },
                 null,
                 'rgba8unorm'
             );
 
-            loadedTileTextures.set(cellKey, tileTexture);
-            console.log(`[Tile Streamer 📥] Load Cell(${tile.gridX}, ${tile.gridZ}) → Tile[${colStr}, ${rowStr}] (${fileName})`);
+            console.log(`[Tile Streamer 📥] Load Cell(${tile.gridX}, ${tile.gridZ}) → Tile[${tile.tileColStr}, ${tile.tileRowStr}] (${fileName})`);
         });
 
         terrain.setOnTileUnload((tile) => {
-            frameUnloadCount++;
-            const cellKey = `${tile.gridX}_${tile.gridZ}`;
-
-            if (loadedTileTextures.has(cellKey)) {
-                const tex = loadedTileTextures.get(cellKey);
-                if (tex && typeof tex.destroy === 'function') {
-                    tex.destroy();
-                }
-                loadedTileTextures.delete(cellKey);
-                console.log(`[Tile Streamer 📤] Unload Tile (${tile.gridX}, ${tile.gridZ})`);
-            }
+            console.log(`[Tile Streamer 📤] Unload Tile (${tile.gridX}, ${tile.gridZ})`);
         });
 
         scene.addTerrain(terrain);
@@ -552,14 +479,9 @@ RedGPU.init(
         const rawCam = controller;
 
         function hudLoop() {
-            lastFrameLoadCount = frameLoadCount;
-            lastFrameUnloadCount = frameUnloadCount;
-            frameLoadCount = 0;
-            frameUnloadCount = 0;
-
             updateHUD(terrain, rawCam);
             updateSpatialGrid2DDebugger(terrain, rawCam);
-            updateHeightmapAtlas2DDebugger();
+            updateHeightmapAtlas2DDebugger(terrain);
         }
 
 
