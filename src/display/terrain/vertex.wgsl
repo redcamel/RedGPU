@@ -116,9 +116,10 @@ fn main(inputData: InputData) -> VertexOutput {
     // XZ 좌표 선형 보간 (모핑 적용)
     let finalWorldXZ = mix(worldXZ, parentWorldXZ, morphFactor);
 
-    // 4. 최종 UV 및 월드 UV 매핑 계산
+    // 4. 최종 UV 및 월드 UV 매핑 계산 (Top-to-Bottom 타일 아틀라스 수직 축 매핑: V = 1.0 - V)
     let finalUV = mix(inputData.uv, parentUV, morphFactor);
-    let worldUV = (finalWorldXZ - vertexUniforms.worldOffset) / vertexUniforms.worldSize;
+    let rawWorldUV = (finalWorldXZ - vertexUniforms.worldOffset) / vertexUniforms.worldSize;
+    let worldUV = vec2<f32>(rawWorldUV.x, 1.0 - rawWorldUV.y);
 
     var computedNormal = vec3<f32>(0.0, 1.0, 0.0);
     var worldTangentX = vec3<f32>(1.0, 0.0, 0.0);
@@ -129,7 +130,8 @@ fn main(inputData: InputData) -> VertexOutput {
         let texelSize = 1.0 / texSize;
         let halfTexel = 0.5 * texelSize;
 
-        let parentWorldUV = (parentWorldXZ - vertexUniforms.worldOffset) / vertexUniforms.worldSize;
+        let rawParentWorldUV = (parentWorldXZ - vertexUniforms.worldOffset) / vertexUniforms.worldSize;
+        let parentWorldUV = vec2<f32>(rawParentWorldUV.x, 1.0 - rawParentWorldUV.y);
 
         // 💡 타일 경계선 번짐/단차(Seam/Bleeding) 방지를 위한 Half-Texel Clamp
         let clampedWorldUV = clamp(worldUV, halfTexel, vec2<f32>(1.0) - halfTexel);

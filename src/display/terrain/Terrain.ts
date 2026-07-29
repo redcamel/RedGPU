@@ -531,18 +531,22 @@ class Terrain extends Mesh {
         const padH = this.#atlasTileSize - srcH;
 
         if (padW > 0) {
-            encoder.copyTextureToTexture(
-                {texture: sourceTexture.gpuTexture, origin: [srcW - 1, 0, 0]},
-                {texture: this.#heightmapAtlasGPUTexture!, origin: [destX + srcW, destZ, 0]},
-                [padW, srcH, 1]
-            );
+            for (let p = 0; p < padW; p++) {
+                encoder.copyTextureToTexture(
+                    {texture: sourceTexture.gpuTexture, origin: [srcW - 1, 0, 0]},
+                    {texture: this.#heightmapAtlasGPUTexture!, origin: [destX + srcW + p, destZ, 0]},
+                    [1, srcH, 1]
+                );
+            }
         }
         if (padH > 0) {
-            encoder.copyTextureToTexture(
-                {texture: sourceTexture.gpuTexture, origin: [0, srcH - 1, 0]},
-                {texture: this.#heightmapAtlasGPUTexture!, origin: [destX, destZ + srcH, 0]},
-                [srcW, padH, 1]
-            );
+            for (let p = 0; p < padH; p++) {
+                encoder.copyTextureToTexture(
+                    {texture: sourceTexture.gpuTexture, origin: [0, srcH - 1, 0]},
+                    {texture: this.#heightmapAtlasGPUTexture!, origin: [destX, destZ + srcH + p, 0]},
+                    [srcW, 1, 1]
+                );
+            }
         }
 
         // 3. 💡 언리얼 엔진 5 스타일 Tile Edge Stitching Pass (이웃 타일 접합선 1px 오버랩 스티칭)

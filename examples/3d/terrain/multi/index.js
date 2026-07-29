@@ -474,27 +474,28 @@ RedGPU.init(
             const tileCenterZ = (minZ + maxZ) * 0.5;
 
             const tileSpan = WORLD_SIZE / 16; // 1250m 당 1타일
-            const normX = Math.max(0, Math.min(15, Math.floor((tileCenterX + WORLD_SIZE / 2) / tileSpan)));
-            const normZ = Math.max(0, Math.min(15, Math.floor((tileCenterZ + WORLD_SIZE / 2) / tileSpan)));
+            const gridX = Math.max(0, Math.min(15, Math.floor((tileCenterX + WORLD_SIZE / 2) / tileSpan)));
+            const gridZ = Math.max(0, Math.min(15, Math.floor((tileCenterZ + WORLD_SIZE / 2) / tileSpan)));
 
-            // 💡 가로축(X) 원복 및 세로축(Z) 상하 반전 교정
-            const colX = normX;
-            const rowZ = 15 - normZ;
+            // 💡 2D 이미지/아틀라스 행렬 좌표계 (Col: 0~15 서->동, Row: 0~15 북->남 상하 반전)
+            const tileCol = gridX;
+            const tileRow = 15 - gridZ;
 
-            const strX = String(colX).padStart(2, '0');
-            const strZ = String(rowZ).padStart(2, '0');
-            const key = `${tile.gridX}_${tile.gridZ}`;
+            const colStr = String(tileCol).padStart(2, '0');
+            const rowStr = String(tileRow).padStart(2, '0');
+            const cellKey = `${tile.gridX}_${tile.gridZ}`;
+            const atlasKey = `${tileCol}_${tileRow}`;
 
-            // 💡 파일명 인덱스 규격 (Row: strZ, Col: strX) 및 엣지 해상도 정밀 교정
+            // 💡 파일명 인덱스 규격 (Row: rowStr, Col: colStr) 및 엣지 해상도 정밀 교정
             let fileName;
-            if (colX === 15 && rowZ === 15) {
+            if (tileCol === 15 && tileRow === 15) {
                 fileName = `28_134_86_730_13_449_449_16bit_tile_15_15.png`;
-            } else if (colX === 15) {
-                fileName = `28_134_86_730_13_449_512_16bit_tile_${strZ}_15.png`;
-            } else if (rowZ === 15) {
-                fileName = `28_134_86_730_13_512_449_16bit_tile_15_${strX}.png`;
+            } else if (tileCol === 15) {
+                fileName = `28_134_86_730_13_449_512_16bit_tile_${rowStr}_15.png`;
+            } else if (tileRow === 15) {
+                fileName = `28_134_86_730_13_512_449_16bit_tile_15_${colStr}.png`;
             } else {
-                fileName = `28_134_86_730_13_512_512_16bit_tile_${strZ}_${strX}.png`;
+                fileName = `28_134_86_730_13_512_512_16bit_tile_${rowStr}_${colStr}.png`;
             }
 
             const tileUrl = `../../../assets/terrain/terrainTest_001/tile/${fileName}`;
@@ -502,7 +503,7 @@ RedGPU.init(
             const tileImg = new Image();
             tileImg.src = tileUrl;
             tileImg.onload = () => {
-                tileImageCache.set(`${colX}_${rowZ}`, tileImg);
+                tileImageCache.set(atlasKey, tileImg);
                 if (previewModal.style.display !== 'none') {
                     renderAtlasModalPreview();
                 }
@@ -514,28 +515,28 @@ RedGPU.init(
                 tileUrl,
                 false,
                 (tex) => {
-                    // 💡 로드 완료 시 카메라 반경 중심 타일 좌표(colX, rowZ)에 부분 복사!
-                    terrain.updateTileHeightmap(colX, rowZ, tex);
-                    synthesizedTilesSet.add(`${colX}_${rowZ}`);
+                    // 💡 로드 완료 시 GPU Heightmap Atlas (tileCol, tileRow) 슬롯 위치에 1:1 부분 복사!
+                    terrain.updateTileHeightmap(tileCol, tileRow, tex);
+                    synthesizedTilesSet.add(atlasKey);
                 },
                 null,
                 'rgba8unorm'
             );
 
-            loadedTileTextures.set(key, tileTexture);
-            console.log(`[Tile Streamer 📥] Load Cell(${tile.gridX}, ${tile.gridZ}) → Tile[${strX}, ${strZ}] (${fileName})`);
+            loadedTileTextures.set(cellKey, tileTexture);
+            console.log(`[Tile Streamer 📥] Load Cell(${tile.gridX}, ${tile.gridZ}) → Tile[${colStr}, ${rowStr}] (${fileName})`);
         });
 
         terrain.setOnTileUnload((tile) => {
             frameUnloadCount++;
-            const key = `${tile.gridX}_${tile.gridZ}`;
+            const cellKey = `${tile.gridX}_${tile.gridZ}`;
 
-            if (loadedTileTextures.has(key)) {
-                const tex = loadedTileTextures.get(key);
+            if (loadedTileTextures.has(cellKey)) {
+                const tex = loadedTileTextures.get(cellKey);
                 if (tex && typeof tex.destroy === 'function') {
                     tex.destroy();
                 }
-                loadedTileTextures.delete(key);
+                loadedTileTextures.delete(cellKey);
                 console.log(`[Tile Streamer 📤] Unload Tile (${tile.gridX}, ${tile.gridZ})`);
             }
         });
