@@ -48,7 +48,7 @@ class Terrain extends Mesh {
     #prevWorldSize: number = 0;
     #prevMaxLOD: number = 0;
     #lodRanges: Float32Array = new Float32Array(32);
-    #onTileLoadCallback?: (tile: SpatialTileInfo) => void;
+    #tileUrlResolver?: (tile: SpatialTileInfo) => string | void;
     #onTileUnloadCallback?: (tile: SpatialTileInfo) => void;
 
     #heightmapAtlasGPUTexture: GPUTexture | null = null;
@@ -151,6 +151,39 @@ class Terrain extends Mesh {
                 }
             }
         }
+    }
+
+    /**
+     * [KO] URL에서 타일 Heightmap을 비동기로 로드하여 GPU Atlas에 자동 합성합니다.
+     *       2D 미리보기 이미지 등록 + BitmapTexture GPU 로딩 + Atlas 합성 + 로그 출력을 자동화합니다.
+     * [EN] Asynchronously loads a tile heightmap from a URL and synthesizes it into the GPU Atlas.
+     *       Automates 2D preview image registration, BitmapTexture GPU loading, Atlas synthesis, and logging.
+     * @param tile      - 로드할 SpatialTileInfo 타일 정보
+     * @param url       - 타일 이미지 파일의 URL
+     * @param format    - GPU 텍스처 포맷 (기본값: 'rgba8unorm')
+     */
+    loadTileFromUrl(tile: SpatialTileInfo, url: string, format: GPUTextureFormat = 'rgba8unorm') {
+        // 1. 💡 2D 미리보기용 이미지 비동기 로딩 & 엔진 내부 캐시 등록
+        const img = new Image();
+        img.src = url;
+        img.onload = () => {
+            this.registerTileImage(tile, img);
+        };
+
+        // 2. 💡 GPU Heightmap BitmapTexture 로딩 → Atlas 합성 자동화
+        new BitmapTexture(
+            this.redGPUContext,
+            url,
+            false,
+            (tex: BitmapTexture) => {
+                this.updateTileHeightmap(tile, tex);
+            },
+            null,
+            format
+        );
+
+        // 3. 💡 타일 스트리밍 로그
+        console.log(`[Tile Streamer 📥] Load Cell(${tile.gridX}, ${tile.gridZ}) → Tile[${tile.tileColStr}, ${tile.tileRowStr}] (${url})`);
     }
 
     /**
@@ -558,11 +591,17 @@ class Terrain extends Mesh {
             };
 
             if (toLoad.length > 0) {
-                this.#frameLoadCount += toLoad.length;
-                if (this.#onTileLoadCallback) {
+                if (this.#tileUrlResolver) {
                     toLoad.forEach(tile => {
                         enrichTileInfo(tile);
-                        this.#onTileLoadCallback!(tile);
+                        // 💡 이미 GPU Atlas에 합성 완료되었거나 텍스처가 로딩된 타일은 콜백 호출 자체를 스킵
+                        if (this.isTileSynthesized(tile) || this.hasTileTexture(tile)) return;
+                        this.#frameLoadCount++;
+                        const result = this.#tileUrlResolver!(tile);
+                        // 💡 URL 문자열을 반환하면 자동으로 loadTileFromUrl 호출
+                        if (typeof result === 'string') {
+                            this.loadTileFromUrl(tile, result);
+                        }
                     });
                 }
             }
@@ -657,8 +696,16 @@ class Terrain extends Mesh {
         }
     }
 
-    setOnTileLoad(callback: (tile: SpatialTileInfo) => void) {
-        this.#onTileLoadCallback = callback;
+    /**
+     * [KO] 타일별 로드 URL을 결정하는 Resolver 함수를 등록합니다.
+     *       함수에서 URL 문자열을 반환하면 엔진이 자동으로 loadTileFromUrl을 호출합니다.
+     *       void를 반환하면 수동 제어 모드로 동작합니다.
+     * [EN] Registers a resolver function that determines the load URL for each tile.
+     *       If the function returns a URL string, the engine automatically calls loadTileFromUrl.
+     *       If void is returned, manual control mode is used.
+     */
+    setTileUrlResolver(resolver: (tile: SpatialTileInfo) => string | void) {
+        this.#tileUrlResolver = resolver;
     }
 
     setOnTileUnload(callback: (tile: SpatialTileInfo) => void) {

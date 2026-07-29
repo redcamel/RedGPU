@@ -16,6 +16,8 @@ const MAX_LOD = 7;          // 최대 LOD 레벨 (8.2km 지평선 세분화 7단
 const MIN_H = 0.0;
 const MAX_H = 300.0;        // 최대 높이 (8.2km 스케일에 입체적이고 또렷한 최적 고도: 300m)
 
+let terrain = null; // 💡 모듈 전역 스코프 - 헬퍼 함수들이 직접 참조 가능
+
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
@@ -158,12 +160,13 @@ const modalCtx = previewCanvas.getContext('2d');
 
 hmAtlasCanvas.onclick = () => {
     previewModal.style.setProperty('display', 'flex', 'important');
-    renderAtlasModalPreview();
+    renderAtlasModalPreview(terrain);
 };
 
 function renderAtlasModalPreview(terrainInstance) {
-    if (!modalCtx || !terrainInstance) return;
-    terrainInstance.renderAtlasPreview(modalCtx, 512, 512);
+    const t = terrainInstance || terrain;
+    if (!modalCtx || !t) return;
+    t.renderAtlasPreview(modalCtx, 512, 512);
 }
 
 function updateHeightmapAtlas2DDebugger(terrainInstance) {
@@ -349,7 +352,7 @@ RedGPU.init(
         view.postEffectManager.addEffect(heightFog);
 
         // 3. 거대 Terrain 생성
-        const terrain = new RedGPU.Display.Terrain(
+        terrain = new RedGPU.Display.Terrain(
             redGPUContext,
             undefined,
             'CDLOD_Terrain'
@@ -418,50 +421,17 @@ RedGPU.init(
         terrain.spatialGrid.cellSize = 256;        // 256m 단위 셀 분할 (25,600 Unreal Units)
         terrain.spatialGrid.loadingRadius = 2560;  // 반경 2.56km 동적 로딩 (256,000 Unreal Units)
 
-        terrain.setOnTileLoad((tile) => {
-            // 💡 1. 엔진 내부에 이미 보존/합성 완료된 타일은 0ms 중복 로딩 스킵!
-            if (terrain.isTileSynthesized(tile) || terrain.hasTileTexture(tile)) {
-                return;
-            }
-
-
+        terrain.setTileUrlResolver((tile) => {
             // 💡 파일명 인덱스 규격 (Row: tile.tileRowStr, Col: tile.tileColStr) 및 엣지 해상도 정밀 교정
-            let fileName;
             if (tile.tileCol === 15 && tile.tileRow === 15) {
-                fileName = `28_134_86_730_13_449_449_16bit_tile_15_15.png`;
+                return `../../../assets/terrain/terrainTest_001/tile/28_134_86_730_13_449_449_16bit_tile_15_15.png`;
             } else if (tile.tileCol === 15) {
-                fileName = `28_134_86_730_13_449_512_16bit_tile_${tile.tileRowStr}_15.png`;
+                return `../../../assets/terrain/terrainTest_001/tile/28_134_86_730_13_449_512_16bit_tile_${tile.tileRowStr}_15.png`;
             } else if (tile.tileRow === 15) {
-                fileName = `28_134_86_730_13_512_449_16bit_tile_15_${tile.tileColStr}.png`;
+                return `../../../assets/terrain/terrainTest_001/tile/28_134_86_730_13_512_449_16bit_tile_15_${tile.tileColStr}.png`;
             } else {
-                fileName = `28_134_86_730_13_512_512_16bit_tile_${tile.tileRowStr}_${tile.tileColStr}.png`;
+                return `../../../assets/terrain/terrainTest_001/tile/28_134_86_730_13_512_512_16bit_tile_${tile.tileRowStr}_${tile.tileColStr}.png`;
             }
-
-            const tileUrl = `../../../assets/terrain/terrainTest_001/tile/${fileName}`;
-
-            const tileImg = new Image();
-            tileImg.src = tileUrl;
-            tileImg.onload = () => {
-                terrain.registerTileImage(tile, tileImg);
-                if (previewModal.style.display !== 'none') {
-                    renderAtlasModalPreview(terrain);
-                }
-            };
-
-            // 💡 16-bit PNG Heightmap 타일 동적 로딩 (엔진 내부 자원 수명주기 100% 자동 관리)
-            new RedGPU.Resource.BitmapTexture(
-                redGPUContext,
-                tileUrl,
-                false,
-                (tex) => {
-                    // 💡 로드 완료 시 GPU Heightmap Atlas 부분 복사 + 엔진 내 합성 상태 보관 자동화!
-                    terrain.updateTileHeightmap(tile, tex);
-                },
-                null,
-                'rgba8unorm'
-            );
-
-            console.log(`[Tile Streamer 📥] Load Cell(${tile.gridX}, ${tile.gridZ}) → Tile[${tile.tileColStr}, ${tile.tileRowStr}] (${fileName})`);
         });
 
         terrain.setOnTileUnload((tile) => {
