@@ -22,9 +22,9 @@ export interface SpatialTileInfo {
  * [EN] Unreal Engine style camera-centric spatial grid streaming manager class.
  */
 export class TerrainSpatialGrid {
-    #cellSize: number = 512;          // 셀 하나의 가로세로 크기 (m)
-    #loadingRadius: number = 2500;     // 카메라 기준 활성 스트리밍 반경 (m)
-    #maxLoadsPerFrame: number = 2;     // 프레임당 최대 로드 수 (0: 제한 없음)
+    #cellSize: number = 256;          // 셀 하나의 가로세로 크기 (25,600 Unreal Units = 256m)
+    #loadingRadius: number = 2560;     // 카메라 기준 활성 스트리밍 반경 (256,000 Unreal Units = 2.56km)
+    #maxLoadsPerFrame: number = 2;     // 프레임당 최대 로드 수 (언리얼 기본 I/O 예산: 2개/프레임)
     #activeTiles: Map<string, SpatialTileInfo> = new Map();
     #pendingQueue: Map<string, SpatialTileInfo> = new Map(); // 로딩 대기 큐 (key -> tile)
     #lastCameraGridX: number = NaN;
@@ -32,7 +32,7 @@ export class TerrainSpatialGrid {
 
     #terrainBounds: [number, number, number, number] | null = [-5000, -5000, 5000, 5000]; // [minX, minZ, maxX, maxZ]
 
-    constructor(cellSize: number = 512, loadingRadius: number = 2500) {
+    constructor(cellSize: number = 256, loadingRadius: number = 2560) {
         this.#cellSize = cellSize;
         this.#loadingRadius = loadingRadius;
     }

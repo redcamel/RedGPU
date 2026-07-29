@@ -3,6 +3,7 @@ import Mesh from "../mesh/Mesh";
 import TerrainGeometry from "./TerrainGeometry";
 import TerrainMaterial, {TerrainLayerConfig} from "./material/TerrainMaterial";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
+import DirectTexture from "../../resources/texture/DirectTexture";
 import Sampler from "../../resources/sampler/Sampler";
 import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_FILTER_MODE from "../../gpuConst/GPU_FILTER_MODE";
@@ -16,6 +17,7 @@ import {TerrainQuadtree} from "./TerrainQuadtree";
 import {SpatialTileInfo, TerrainSpatialGrid} from "./TerrainSpatialGrid";
 import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
+import {keepLog} from "../../utils";
 
 export type {TerrainLayerConfig};
 
@@ -28,7 +30,7 @@ interface Terrain {
     maxHeight: number;
     worldOffset: [number, number];
     worldSize: [number, number];
-    heightTexture: BitmapTexture;
+    heightTexture: any;
     heightTextureSampler: any;
 
     maxLOD: number;
@@ -49,13 +51,19 @@ class Terrain extends Mesh {
     #onTileLoadCallback?: (tile: SpatialTileInfo) => void;
     #onTileUnloadCallback?: (tile: SpatialTileInfo) => void;
 
+    #heightmapAtlasGPUTexture: GPUTexture | null = null;
+    #heightmapAtlasDirectTexture: DirectTexture | null = null;
+    #atlasTileCountX: number = 16;
+    #atlasTileCountZ: number = 16;
+    #atlasTileSize: number = 512;
+
     constructor(redGPUContext: RedGPUContext, heightmapUrl?: string, name?: string) {
         const geometry = new TerrainGeometry(redGPUContext);
         const material = new TerrainMaterial(redGPUContext);
 
         super(redGPUContext, geometry, material, name);
 
-        this.spatialGrid = new TerrainSpatialGrid(512, 2500);
+        this.spatialGrid = new TerrainSpatialGrid(256, 2560);
         this.enableStreaming = false;
 
         this.minHeight = 0;
@@ -450,6 +458,93 @@ class Terrain extends Mesh {
 
     setOnTileUnload(callback: (tile: SpatialTileInfo) => void) {
         this.#onTileUnloadCallback = callback;
+    }
+
+    get heightmapAtlasDirectTexture(): DirectTexture | null {
+        return this.#heightmapAtlasDirectTexture;
+    }
+
+    get heightmapAtlasGPUTexture(): GPUTexture | null {
+        return this.#heightmapAtlasGPUTexture;
+    }
+
+    /**
+     * [KO] 타일 높이맵 스트리밍을 위한 GPU 높이맵 아틀라스 텍스처를 생성합니다.
+     * [EN] Creates a GPU heightmap atlas texture for tile heightmap streaming.
+     */
+    createHeightmapTileAtlas(tileCountX: number = 16, tileCountZ: number = 16, tileSize: number = 512) {
+        const device = this.redGPUContext.gpuDevice;
+        this.#atlasTileCountX = tileCountX;
+        this.#atlasTileCountZ = tileCountZ;
+        this.#atlasTileSize = tileSize;
+
+        const atlasWidth = tileCountX * tileSize;
+        const atlasHeight = tileCountZ * tileSize;
+        keepLog('Terrain_HeightmapTileAtlasGPUTexture', atlasWidth, atlasHeight)
+        this.#heightmapAtlasGPUTexture = device.createTexture({
+            label: 'Terrain_HeightmapTileAtlasGPUTexture',
+            size: [atlasWidth, atlasHeight, 1],
+            format: 'rgba8unorm',
+            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
+        });
+
+        this.#heightmapAtlasDirectTexture = new DirectTexture(
+            this.redGPUContext,
+            'Terrain_HeightmapTileAtlasDirectTexture',
+            this.#heightmapAtlasGPUTexture
+        );
+
+        this.heightTexture = this.#heightmapAtlasDirectTexture as any;
+    }
+
+    /**
+     * [KO] 스트리밍 수신된 단일 타일 높이맵 텍스처를 GPU Heightmap Tile Atlas의 지정 좌표에 부분 복사(copyTextureToTexture)합니다.
+     * [EN] Copies a single streamed tile heightmap texture to the specified region of the GPU Heightmap Tile Atlas.
+     */
+    updateTileHeightmap(tileX: number, tileZ: number, sourceTexture: BitmapTexture) {
+        if (!this.#heightmapAtlasGPUTexture) {
+            this.createHeightmapTileAtlas(16, 16, 512);
+        }
+        if (!sourceTexture || !sourceTexture.gpuTexture) return;
+
+        const device = this.redGPUContext.gpuDevice;
+        const encoder = device.createCommandEncoder({label: 'Terrain_CopyTileHeightmapEncoder'});
+
+        const destX = tileX * this.#atlasTileSize;
+        const destZ = tileZ * this.#atlasTileSize;
+
+        const srcW = Math.min(this.#atlasTileSize, sourceTexture.gpuTexture.width);
+        const srcH = Math.min(this.#atlasTileSize, sourceTexture.gpuTexture.height);
+
+        // 1. 주 타일 픽셀 영역 복사
+        encoder.copyTextureToTexture(
+            {texture: sourceTexture.gpuTexture},
+            {texture: this.#heightmapAtlasGPUTexture!, origin: [destX, destZ, 0]},
+            [srcW, srcH, 1]
+        );
+
+        // 2. 💡 타일 해상도가 512px보다 작을 경우 (예: 449px 엣지 타일) 여백 픽셀에 엣지 색상 패딩 복사로 경계선(Seam) 완전 차단!
+        if (srcW < this.#atlasTileSize) {
+            encoder.copyTextureToTexture(
+                {texture: sourceTexture.gpuTexture, origin: [srcW - 1, 0, 0]},
+                {texture: this.#heightmapAtlasGPUTexture!, origin: [destX + srcW, destZ, 0]},
+                [this.#atlasTileSize - srcW, srcH, 1]
+            );
+        }
+        if (srcH < this.#atlasTileSize) {
+            encoder.copyTextureToTexture(
+                {texture: sourceTexture.gpuTexture, origin: [0, srcH - 1, 0]},
+                {texture: this.#heightmapAtlasGPUTexture!, origin: [destX, destZ + srcH, 0]},
+                [srcW, this.#atlasTileSize - srcH, 1]
+            );
+        }
+
+        device.queue.submit([encoder.finish()]);
+
+        // 3. 💡 높이맵 타일이 갱신되는 즉시 RVT (Runtime Virtual Texture) 베이커를 가동하여 표면 텍스처 재베이킹!
+        if (this.material && typeof (this.material as any).bakeRVT === 'function') {
+            (this.material as any).bakeRVT();
+        }
     }
 }
 

@@ -120,23 +120,29 @@ fn main(inputData: InputData) -> VertexOutput {
     var sampledHeight = 0.0;
 
     #redgpu_if heightTexture
-        // 상세 높이 h0 및 부모 높이 h1 샘플링
-        let h0 = textureSampleLevel(heightTexture, heightTextureSampler, worldUV, 0.0).r;
+        let texSize  = vec2<f32>(textureDimensions(heightTexture, 0));
+        let texelSize = 1.0 / texSize;
+        let halfTexel = 0.5 * texelSize;
 
         let parentWorldUV = (parentWorldXZ - vertexUniforms.worldOffset) / vertexUniforms.worldSize;
-        let h1 = textureSampleLevel(heightTexture, heightTextureSampler, parentWorldUV, 0.0).r;
+
+        // 💡 타일 경계선 번짐/단차(Seam/Bleeding) 방지를 위한 Half-Texel Clamp
+        let clampedWorldUV = clamp(worldUV, halfTexel, vec2<f32>(1.0) - halfTexel);
+        let clampedParentUV = clamp(parentWorldUV, halfTexel, vec2<f32>(1.0) - halfTexel);
+
+        // 상세 높이 h0 및 부모 높이 h1 샘플링
+        let h0 = textureSampleLevel(heightTexture, heightTextureSampler, clampedWorldUV, 0.0).r;
+        let h1 = textureSampleLevel(heightTexture, heightTextureSampler, clampedParentUV, 0.0).r;
 
         // 높이값 선형 보간 (모핑 적용)
         sampledHeight = mix(h0, h1, morphFactor);
 
-        let texSize  = vec2<f32>(textureDimensions(heightTexture, 0));
-        let texelSize = 1.0 / texSize;
         let heightRange = vertexUniforms.maxHeight - vertexUniforms.minHeight;
 
-        let hL = textureSampleLevel(heightTexture, heightTextureSampler, worldUV + vec2<f32>(-texelSize.x, 0.0), 0.0).r;
-        let hR = textureSampleLevel(heightTexture, heightTextureSampler, worldUV + vec2<f32>( texelSize.x, 0.0), 0.0).r;
-        let hD = textureSampleLevel(heightTexture, heightTextureSampler, worldUV + vec2<f32>(0.0, -texelSize.y), 0.0).r;
-        let hU = textureSampleLevel(heightTexture, heightTextureSampler, worldUV + vec2<f32>(0.0,  texelSize.y), 0.0).r;
+        let hL = textureSampleLevel(heightTexture, heightTextureSampler, clamp(clampedWorldUV + vec2<f32>(-texelSize.x, 0.0), halfTexel, vec2<f32>(1.0) - halfTexel), 0.0).r;
+        let hR = textureSampleLevel(heightTexture, heightTextureSampler, clamp(clampedWorldUV + vec2<f32>( texelSize.x, 0.0), halfTexel, vec2<f32>(1.0) - halfTexel), 0.0).r;
+        let hD = textureSampleLevel(heightTexture, heightTextureSampler, clamp(clampedWorldUV + vec2<f32>(0.0, -texelSize.y), halfTexel, vec2<f32>(1.0) - halfTexel), 0.0).r;
+        let hU = textureSampleLevel(heightTexture, heightTextureSampler, clamp(clampedWorldUV + vec2<f32>(0.0,  texelSize.y), halfTexel, vec2<f32>(1.0) - halfTexel), 0.0).r;
 
         let stepX = vertexUniforms.worldSize.x * texelSize.x * 2.0;
         let stepZ = vertexUniforms.worldSize.y * texelSize.y * 2.0;

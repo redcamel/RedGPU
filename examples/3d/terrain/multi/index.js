@@ -64,9 +64,154 @@ debugCanvas.style.setProperty('border', '1px solid rgba(56, 189, 248, 0.4)', 'im
 debugCanvas.style.setProperty('border-radius', '6px', 'important');
 debugCanvas.style.setProperty('pointer-events', 'none', 'important');
 debugCanvas.style.setProperty('z-index', '99999', 'important');
+
+// ─── 16x16 Heightmap Atlas 2D 합성 디버그 캔버스 ────────────────────────────
+const hmAtlasCanvas = document.createElement('canvas');
+hmAtlasCanvas.id = 'heightmap-atlas-debug-canvas';
+hmAtlasCanvas.width = 160;
+hmAtlasCanvas.height = 160;
+hmAtlasCanvas.style.setProperty('position', 'fixed', 'important');
+hmAtlasCanvas.style.setProperty('left', '124px', 'important');
+hmAtlasCanvas.style.setProperty('bottom', '100px', 'important');
+hmAtlasCanvas.style.setProperty('top', 'auto', 'important');
+hmAtlasCanvas.style.setProperty('width', '100px', 'important');
+hmAtlasCanvas.style.setProperty('height', '100px', 'important');
+hmAtlasCanvas.style.setProperty('background', 'rgba(15, 23, 42, 0.85)', 'important');
+hmAtlasCanvas.style.setProperty('border', '1px solid rgba(74, 222, 128, 0.5)', 'important');
+hmAtlasCanvas.style.setProperty('border-radius', '6px', 'important');
+hmAtlasCanvas.style.setProperty('pointer-events', 'auto', 'important');
+hmAtlasCanvas.style.setProperty('cursor', 'pointer', 'important');
+hmAtlasCanvas.style.setProperty('z-index', '99999', 'important');
+hmAtlasCanvas.title = '클릭하여 실제 GPU 합성 높이맵 아틀라스 미리보기';
+
+// 화면 정중앙 512x512 미리보기 팝업 모달
+const previewModal = document.createElement('div');
+previewModal.style.setProperty('position', 'fixed', 'important');
+previewModal.style.setProperty('top', '50%', 'important');
+previewModal.style.setProperty('left', '50%', 'important');
+previewModal.style.setProperty('transform', 'translate(-50%, -50%)', 'important');
+previewModal.style.setProperty('width', '512px', 'important');
+previewModal.style.setProperty('height', '512px', 'important');
+previewModal.style.setProperty('max-width', '512px', 'important');
+previewModal.style.setProperty('max-height', '512px', 'important');
+previewModal.style.setProperty('background', 'rgba(15, 23, 42, 0.95)', 'important');
+previewModal.style.setProperty('backdrop-filter', 'blur(12px)', 'important');
+previewModal.style.setProperty('border', '2px solid rgba(74, 222, 128, 0.8)', 'important');
+previewModal.style.setProperty('border-radius', '12px', 'important');
+previewModal.style.setProperty('z-index', '100000', 'important');
+previewModal.style.setProperty('display', 'none', 'important');
+previewModal.style.setProperty('box-shadow', '0 25px 50px rgba(0,0,0,0.9)', 'important');
+previewModal.style.setProperty('cursor', 'pointer', 'important');
+previewModal.style.setProperty('box-sizing', 'border-box', 'important');
+previewModal.style.setProperty('overflow', 'hidden', 'important');
+previewModal.title = '클릭하면 닫힙니다';
+
+const dpr = window.devicePixelRatio || 1;
+
+const previewCanvas = document.createElement('canvas');
+previewCanvas.width = 512 * dpr;
+previewCanvas.height = 512 * dpr;
+previewCanvas.style.setProperty('width', '512px', 'important');
+previewCanvas.style.setProperty('height', '512px', 'important');
+previewCanvas.style.setProperty('max-width', '512px', 'important');
+previewCanvas.style.setProperty('max-height', '512px', 'important');
+previewCanvas.style.setProperty('display', 'block', 'important');
+previewCanvas.style.setProperty('image-rendering', 'pixelated', 'important');
+previewCanvas.style.setProperty('margin', '0', 'important');
+previewCanvas.style.setProperty('padding', '0', 'important');
+previewCanvas.style.setProperty('border', 'none', 'important');
+
+previewModal.appendChild(previewCanvas);
+document.body.appendChild(previewModal);
+
+// 모달 영역 누르면 즉시 닫기
+previewModal.onclick = () => {
+    previewModal.style.setProperty('display', 'none', 'important');
+};
+
 document.body.appendChild(hud);
 document.body.appendChild(debugCanvas);
+document.body.appendChild(hmAtlasCanvas);
 const debugCtx = debugCanvas.getContext('2d');
+const hmAtlasCtx = hmAtlasCanvas.getContext('2d');
+const modalCtx = previewCanvas.getContext('2d');
+
+hmAtlasCanvas.onclick = () => {
+    previewModal.style.setProperty('display', 'flex', 'important');
+    renderAtlasModalPreview();
+};
+
+const synthesizedTilesSet = new Set();
+const tileImageCache = new Map();
+
+function renderAtlasModalPreview() {
+    if (!modalCtx) return;
+    const curDpr = window.devicePixelRatio || 1;
+    modalCtx.setTransform(curDpr, 0, 0, curDpr, 0, 0); // 💡 DPR 고해상도 픽셀 변환
+    modalCtx.imageSmoothingEnabled = false;
+    const w = 512;
+    const h = 512;
+
+    modalCtx.fillStyle = '#0f172a';
+    modalCtx.fillRect(0, 0, w, h);
+
+    // 💡 512x512 모달 캔버스 정밀 16x16 아틀라스 타일 드로잉 (DPR 연동 1:1 선명도 보장)
+    for (let x = 0; x < 16; x++) {
+        for (let z = 0; z < 16; z++) {
+            const key = `${x}_${z}`;
+            const px = x * 32;
+            const py = (15 - z) * 32;
+
+            if (tileImageCache.has(key)) {
+                const img = tileImageCache.get(key);
+                try {
+                    modalCtx.drawImage(img, px, py, 32, 32);
+                } catch (e) {
+                }
+            } else {
+                modalCtx.fillStyle = 'rgba(30, 41, 59, 0.8)';
+                modalCtx.fillRect(px, py, 32, 32);
+            }
+
+            modalCtx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+            modalCtx.strokeRect(px, py, 32, 32);
+        }
+    }
+}
+
+function updateHeightmapAtlas2DDebugger() {
+    if (!hmAtlasCtx) return;
+    const w = hmAtlasCanvas.width;
+    const h = hmAtlasCanvas.height;
+    const tileSize = w / 16;
+
+    hmAtlasCtx.clearRect(0, 0, w, h);
+
+    // 16x16 아틀라스 격자 및 합성된 타일 표시
+    for (let x = 0; x < 16; x++) {
+        for (let z = 0; z < 16; z++) {
+            const key = `${x}_${z}`;
+            const px = x * tileSize;
+            const py = (15 - z) * tileSize; // 2D Y축 반전
+
+            if (synthesizedTilesSet.has(key)) {
+                hmAtlasCtx.fillStyle = 'rgba(74, 222, 128, 0.65)';
+                hmAtlasCtx.fillRect(px, py, tileSize, tileSize);
+            }
+            hmAtlasCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            hmAtlasCtx.strokeRect(px, py, tileSize, tileSize);
+        }
+    }
+
+    // 디버그 제목
+    hmAtlasCtx.fillStyle = '#4ade80';
+    hmAtlasCtx.font = '10px monospace';
+    hmAtlasCtx.fillText(`Atlas 16x16 (${synthesizedTilesSet.size}/256)`, 4, 12);
+
+    if (previewModal.style.display !== 'none') {
+        renderAtlasModalPreview();
+    }
+}
 
 function updateSpatialGrid2DDebugger(terrain, camera) {
     if (!debugCtx || !terrain.spatialGrid) return;
@@ -160,7 +305,7 @@ function updateHUD(terrain, camera) {
         <b style="color:#7dd3fc;font-size:14px;">🌍 CDLOD Quadtree & World Partition</b><br>
         <span style="color:#94a3b8;">──────────────────</span><br>
         🗂 활성 CDLOD 노드 : <b style="color:#4ade80;">${leafCount}</b><br>
-        🛰 활성 스트리밍 셀 : <b style="color:#38bdf8;">${streamedTileCount}</b>개 (반경 3.5km)<br>
+        🛰 활성 스트리밍 셀 : <b style="color:#38bdf8;">${streamedTileCount}</b>개 (반경 ${(terrain.spatialGrid.loadingRadius / 1000).toFixed(2)}km)<br>
         📥 프레임당 로드 (toLoad)   : <b style="color:#4ade80;">${lastFrameLoadCount}</b>개 (예산: ${maxBudget > 0 ? maxBudget + '개/프레임' : '제한없음'})<br>
         ⏳ 로딩 대기 큐 (Pending)   : <b style="color:#fbbf24;">${pendingQueueCount}</b>개<br>
         📤 프레임당 언로드 (toUnload) : <b style="color:#f87171;">${lastFrameUnloadCount}</b>개<br>
@@ -218,9 +363,8 @@ RedGPU.init(
             'CDLOD_Terrain'
         );
 
-        // 3-2. 텍스처 일괄 설정 — 16-bit PNG 정밀 높이맵(z-heightmap.png) 적용
+        // 3-2. 텍스처 일괄 설정 — 완전 타일 스트리밍 모드 (setup 통 높이맵 무필요!)
         terrain.setup({
-            height: '../../../assets/terrain/terrainTest_001/z-heightmap.png',
             baseColor: '../../../assets/terrain/terrainTest_001/diffuse.jpg',
             orm: '../../../assets/terrain/terrainTest_001/orm.jpg',
             splat: '../../../assets/terrain/terrainTest_001/splatMap.jpg',
@@ -271,20 +415,24 @@ RedGPU.init(
         terrain.maxLOD = MAX_LOD;
         terrain.tileScale = 400.0;                 // 20km 초대형 스케일에 맞춘 촘촘한 텍스처 밀도 타일링 비율
 
-        // 🛰️ 카메라 중심 공간 그리드 스트리밍 설정 (월드 파티션)
+        // 🛰️ 언리얼 엔진 5 표준 월드 파티션 공간 그리드 스트리밍 설정
         terrain.enableStreaming = true;
-        terrain.spatialGrid.cellSize = 512;        // 512m 단위 셀 분할
-        terrain.spatialGrid.loadingRadius = 3500;  // 반경 3.5km 동적 로딩
+        terrain.spatialGrid.cellSize = 256;        // 256m 단위 셀 분할 (25,600 Unreal Units)
+        terrain.spatialGrid.loadingRadius = 2560;  // 반경 2.56km 동적 로딩 (256,000 Unreal Units)
 
         const loadedTileTextures = new Map();
 
         terrain.setOnTileLoad((tile) => {
             frameLoadCount++;
 
-            // 16x16 타일 (00~15) 그리드 좌표 매핑
-            const tileCount = 16;
-            const normX = ((tile.gridX % tileCount) + tileCount) % tileCount;
-            const normZ = ((tile.gridZ % tileCount) + tileCount) % tileCount;
+            // 💡 월드 좌표(-10000~+10000) 기준 16x16 타일 인덱스(00~15) 정밀 변환
+            const [minX, minZ, maxX, maxZ] = tile.worldBounds;
+            const tileCenterX = (minX + maxX) * 0.5;
+            const tileCenterZ = (minZ + maxZ) * 0.5;
+
+            const tileSpan = WORLD_SIZE / 16; // 1250m 당 1타일
+            const normX = Math.max(0, Math.min(15, Math.floor((tileCenterX + WORLD_SIZE / 2) / tileSpan)));
+            const normZ = Math.max(0, Math.min(15, Math.floor((tileCenterZ + WORLD_SIZE / 2) / tileSpan)));
 
             const strX = String(normX).padStart(2, '0');
             const strZ = String(normZ).padStart(2, '0');
@@ -304,18 +452,31 @@ RedGPU.init(
 
             const tileUrl = `../../../assets/terrain/terrainTest_001/tile/${fileName}`;
 
-            // 💡 16-bit PNG Heightmap 타일 동적 로딩 (개별 셀 파티션 스트리밍)
+            const tileImg = new Image();
+            tileImg.src = tileUrl;
+            tileImg.onload = () => {
+                tileImageCache.set(`${normX}_${normZ}`, tileImg);
+                if (previewModal.style.display !== 'none') {
+                    renderAtlasModalPreview();
+                }
+            };
+
+            // 💡 16-bit PNG Heightmap 타일 동적 로딩 (완전 타일 스트리밍 구조)
             const tileTexture = new RedGPU.Resource.BitmapTexture(
                 redGPUContext,
                 tileUrl,
                 false,
-                null,
+                (tex) => {
+                    // 💡 로드 완료 시 카메라 반경 중심 타일 좌표(normX, normZ)에 부분 복사!
+                    terrain.updateTileHeightmap(normX, normZ, tex);
+                    synthesizedTilesSet.add(`${normX}_${normZ}`);
+                },
                 null,
                 'rgba8unorm'
             );
 
             loadedTileTextures.set(key, tileTexture);
-            console.log(`[Tile Streamer 📥] Load Tile (${tile.gridX}, ${tile.gridZ}) → ${fileName}`);
+            console.log(`[Tile Streamer 📥] Load Cell(${tile.gridX}, ${tile.gridZ}) → Tile[${strX}, ${strZ}] (${fileName})`);
         });
 
         terrain.setOnTileUnload((tile) => {
@@ -350,6 +511,7 @@ RedGPU.init(
 
             updateHUD(terrain, rawCam);
             updateSpatialGrid2DDebugger(terrain, rawCam);
+            updateHeightmapAtlas2DDebugger();
         }
 
 
