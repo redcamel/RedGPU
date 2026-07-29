@@ -26,9 +26,28 @@ interface TerrainTileSystem {
     baseSlotIndex: number;
 }
 
+class TileStreamMetrics {
+    frameLoadCount: number = 0;
+    frameUnloadCount: number = 0;
+    lastFrameLoadCount: number = 0;
+    lastFrameUnloadCount: number = 0;
+    lastMetricsResetTime: number = performance.now();
+
+    update() {
+        const now = performance.now();
+        if (now - this.lastMetricsResetTime >= 1000) {
+            this.lastFrameLoadCount = this.frameLoadCount;
+            this.lastFrameUnloadCount = this.frameUnloadCount;
+            this.frameLoadCount = 0;
+            this.frameUnloadCount = 0;
+            this.lastMetricsResetTime = now;
+        }
+    }
+}
+
 class TerrainTileSystem extends TerrainMaterialBind {
-    spatialGrid: TerrainSpatialGrid;
-    quadtree: TerrainQuadtree;
+    #spatialGrid: TerrainSpatialGrid;
+    #quadtree: TerrainQuadtree;
     #instanceBuffer: GPUBuffer;
     #synthesizedTilesSet: Set<string> = new Set();
     #tileImageCache: Map<string, any> = new Map();
@@ -40,23 +59,19 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #atlasTileCountX: number = 16;
     #atlasTileCountZ: number = 16;
     #atlasTileSize: number = 512;
-    #frameLoadCount: number = 0;
-    #frameUnloadCount: number = 0;
-    #lastFrameLoadCount: number = 0;
-    #lastFrameUnloadCount: number = 0;
-    #lastMetricsResetTime: number = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    #tileStreamMetrics = new TileStreamMetrics();
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
-        this.spatialGrid = new TerrainSpatialGrid(256, 2560);
+        this.#spatialGrid = new TerrainSpatialGrid(256, 2560);
         this.minHeight = 0;
         this.maxHeight = 0.5;
         this.worldOffset = [-0.5, -0.5];
         this.worldSize = [1, 1];
         this.maxLOD = 4;
         this.baseSlotIndex = 0;
-
         this.gridSize = 64;
+
         const maxInstances = 4096;
         this.#instanceBuffer = redGPUContext.gpuDevice.createBuffer({
             size: maxInstances * 16,
@@ -95,12 +110,16 @@ class TerrainTileSystem extends TerrainMaterialBind {
         return this.#atlasTileSize;
     }
 
-    get lastFrameLoadCount(): number {
-        return this.#lastFrameLoadCount;
+    get spatialGrid(): TerrainSpatialGrid {
+        return this.#spatialGrid;
     }
 
-    get lastFrameUnloadCount(): number {
-        return this.#lastFrameUnloadCount;
+    get quadtree(): TerrainQuadtree {
+        return this.#quadtree;
+    }
+
+    get tileStreamMetrics(): TileStreamMetrics {
+        return this.#tileStreamMetrics;
     }
 
     get synthesizedTileCount(): number {
@@ -109,8 +128,8 @@ class TerrainTileSystem extends TerrainMaterialBind {
 
     checkQuadtree(renderViewStateData: any) {
         const currentWorldSize = this.worldSize[0];
-        if (!this.quadtree || this.#prevWorldSize !== currentWorldSize || this.#prevMaxLOD !== this.maxLOD) {
-            this.quadtree = new TerrainQuadtree(currentWorldSize, this.maxLOD);
+        if (!this.#quadtree || this.#prevWorldSize !== currentWorldSize || this.#prevMaxLOD !== this.maxLOD) {
+            this.#quadtree = new TerrainQuadtree(currentWorldSize, this.maxLOD);
             this.#prevWorldSize = currentWorldSize;
             this.#prevMaxLOD = this.maxLOD;
 
@@ -141,33 +160,26 @@ class TerrainTileSystem extends TerrainMaterialBind {
         const localCamZ = camera.z - this.worldOffset[1];
         const cameraPos: [number, number, number] = [localCamX, localCamY, localCamZ];
 
-        if (this.spatialGrid) {
+        if (this.#spatialGrid) {
             const minX = this.worldOffset[0];
             const minZ = this.worldOffset[1];
             const maxX = minX + this.worldSize[0];
             const maxZ = minZ + this.worldSize[1];
-            this.spatialGrid.setTerrainBounds(minX, minZ, maxX, maxZ);
+            this.#spatialGrid.setTerrainBounds(minX, minZ, maxX, maxZ);
 
             const camFwd = camera.cameraVector ? camera.cameraVector.forward : undefined;
             const camDir: [number, number, number] | undefined = camFwd ? [camFwd[0], camFwd[1], camFwd[2]] : undefined;
 
-            const {toLoad, toUnload} = this.spatialGrid.update([camera.x, camera.y, camera.z], camDir);
+            const {toLoad, toUnload} = this.#spatialGrid.update([camera.x, camera.y, camera.z], camDir);
 
-            const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
-            if (now - this.#lastMetricsResetTime >= 1000) {
-                this.#lastFrameLoadCount = this.#frameLoadCount;
-                this.#lastFrameUnloadCount = this.#frameUnloadCount;
-                this.#frameLoadCount = 0;
-                this.#frameUnloadCount = 0;
-                this.#lastMetricsResetTime = now;
-            }
+            this.#tileStreamMetrics.update();
 
             if (toLoad.length > 0) {
                 if (this.#tileUrlResolver) {
                     toLoad.forEach(tile => {
                         this.#enrichTileInfo(tile);
                         if (this.isTileSynthesized(tile)) return;
-                        this.#frameLoadCount++;
+                        this.#tileStreamMetrics.frameLoadCount++;
                         const result = this.#tileUrlResolver!(tile);
                         if (typeof result === 'string') {
                             this.#loadTileFromUrl(tile, result);
@@ -176,7 +188,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
                 }
             }
             if (toUnload.length > 0) {
-                this.#frameUnloadCount += toUnload.length;
+                this.#tileStreamMetrics.frameUnloadCount += toUnload.length;
                 toUnload.forEach(tile => {
                     this.#enrichTileInfo(tile);
                     if (this.#onTileUnloadCallback) {
@@ -188,7 +200,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
 
         const planes = renderViewStateData.frustumPlanes;
 
-        this.quadtree.update(
+        this.#quadtree.update(
             cameraPos,
             planes,
             this.minHeight,
@@ -198,7 +210,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
             1.5
         );
 
-        const leafNodes = this.quadtree.leafNodes;
+        const leafNodes = this.#quadtree.leafNodes;
         const count = leafNodes.length;
 
         if (count > 0) {

@@ -301,9 +301,9 @@ function updateHUD(terrain, camera) {
         <span style="color:#94a3b8;">──────────────────</span><br>
         🗂 활성 CDLOD 노드 : <b style="color:#4ade80;">${leafCount}</b><br>
         🛰 활성 스트리밍 셀 : <b style="color:#38bdf8;">${streamedTileCount}</b>개 (반경 ${(terrain.spatialGrid.loadingRadius / 1000).toFixed(2)}km)<br>
-        📥 프레임당 로드 (toLoad)   : <b style="color:#4ade80;">${terrain.lastFrameLoadCount}</b>개 (예산: ${maxBudget > 0 ? maxBudget + '개/프레임' : '제한없음'})<br>
+        📥 프레임당 로드 (toLoad)   : <b style="color:#4ade80;">${terrain.tileStreamMetrics.lastFrameLoadCount}</b>개 (예산: ${maxBudget > 0 ? maxBudget + '개/프레임' : '제한없음'})<br>
         ⏳ 로딩 대기 큐 (Pending)   : <b style="color:#fbbf24;">${pendingQueueCount}</b>개<br>
-        📤 프레임당 언로드 (toUnload) : <b style="color:#f87171;">${terrain.lastFrameUnloadCount}</b>개<br>
+        📤 프레임당 언로드 (toUnload) : <b style="color:#f87171;">${terrain.tileStreamMetrics.lastFrameUnloadCount}</b>개<br>
         🎯 중심 셀 위치     : <b style="color:#a7f3d0;">Cell(${centerGridX}, ${centerGridZ})</b><br>
         📐 월드 스케일     : <b style="color:#fbbf24;">${WORLD_SIZE} × ${WORLD_SIZE}</b><br>
         🏔 최대 높이       : <b style="color:#f87171;">${MAX_H}</b><br>
