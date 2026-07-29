@@ -155,7 +155,21 @@ function renderAtlasModalPreview() {
     modalCtx.fillStyle = '#0f172a';
     modalCtx.fillRect(0, 0, w, h);
 
-    // 💡 512x512 모달 캔버스 정밀 16x16 아틀라스 타일 드로잉 (DPR 연동 1:1 선명도 보장)
+    // 1. 💡 격자 디버그 라인 및 셀 배경을 먼저 드로잉
+    for (let x = 0; x < 16; x++) {
+        for (let z = 0; z < 16; z++) {
+            const px = x * 32;
+            const py = (15 - z) * 32;
+
+            modalCtx.fillStyle = 'rgba(30, 41, 59, 0.8)';
+            modalCtx.fillRect(px, py, 32, 32);
+
+            modalCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            modalCtx.strokeRect(px, py, 32, 32);
+        }
+    }
+
+    // 2. 💡 로드된 타일 이미지가 격자 라인 위를 덮어쓰도록 렌더링!
     for (let x = 0; x < 16; x++) {
         for (let z = 0; z < 16; z++) {
             const key = `${x}_${z}`;
@@ -168,13 +182,7 @@ function renderAtlasModalPreview() {
                     modalCtx.drawImage(img, px, py, 32, 32);
                 } catch (e) {
                 }
-            } else {
-                modalCtx.fillStyle = 'rgba(30, 41, 59, 0.8)';
-                modalCtx.fillRect(px, py, 32, 32);
             }
-
-            modalCtx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-            modalCtx.strokeRect(px, py, 32, 32);
         }
     }
 }
@@ -187,19 +195,28 @@ function updateHeightmapAtlas2DDebugger() {
 
     hmAtlasCtx.clearRect(0, 0, w, h);
 
-    // 16x16 아틀라스 격자 및 합성된 타일 표시
+    // 1. 💡 격자 디버그 라인을 먼저 드로잉
+    for (let x = 0; x < 16; x++) {
+        for (let z = 0; z < 16; z++) {
+            const px = x * tileSize;
+            const py = (15 - z) * tileSize;
+
+            hmAtlasCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            hmAtlasCtx.strokeRect(px, py, tileSize, tileSize);
+        }
+    }
+
+    // 2. 💡 합성 완료된 활성 타일 영역이 격자 라인 위를 덮어쓰도록 드로잉
     for (let x = 0; x < 16; x++) {
         for (let z = 0; z < 16; z++) {
             const key = `${x}_${z}`;
             const px = x * tileSize;
-            const py = (15 - z) * tileSize; // 2D Y축 반전
+            const py = (15 - z) * tileSize;
 
             if (synthesizedTilesSet.has(key)) {
                 hmAtlasCtx.fillStyle = 'rgba(74, 222, 128, 0.65)';
                 hmAtlasCtx.fillRect(px, py, tileSize, tileSize);
             }
-            hmAtlasCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-            hmAtlasCtx.strokeRect(px, py, tileSize, tileSize);
         }
     }
 
@@ -434,20 +451,24 @@ RedGPU.init(
             const normX = Math.max(0, Math.min(15, Math.floor((tileCenterX + WORLD_SIZE / 2) / tileSpan)));
             const normZ = Math.max(0, Math.min(15, Math.floor((tileCenterZ + WORLD_SIZE / 2) / tileSpan)));
 
-            const strX = String(normX).padStart(2, '0');
-            const strZ = String(normZ).padStart(2, '0');
+            // 💡 가로축(X) 원복 및 세로축(Z) 상하 반전 교정
+            const colX = normX;
+            const rowZ = 15 - normZ;
+
+            const strX = String(colX).padStart(2, '0');
+            const strZ = String(rowZ).padStart(2, '0');
             const key = `${tile.gridX}_${tile.gridZ}`;
 
-            // 경계 엣지 타일 규격 대응 (normX=15 -> 512_449, normZ=15 -> 449_512, 둘다15 -> 449_449)
+            // 💡 파일명 인덱스 규격 (Row: strZ, Col: strX) 및 엣지 해상도 정밀 교정
             let fileName;
-            if (normX === 15 && normZ === 15) {
+            if (colX === 15 && rowZ === 15) {
                 fileName = `28_134_86_730_13_449_449_16bit_tile_15_15.png`;
-            } else if (normX === 15) {
-                fileName = `28_134_86_730_13_512_449_16bit_tile_15_${strZ}.png`;
-            } else if (normZ === 15) {
-                fileName = `28_134_86_730_13_449_512_16bit_tile_${strX}_15.png`;
+            } else if (colX === 15) {
+                fileName = `28_134_86_730_13_449_512_16bit_tile_${strZ}_15.png`;
+            } else if (rowZ === 15) {
+                fileName = `28_134_86_730_13_512_449_16bit_tile_15_${strX}.png`;
             } else {
-                fileName = `28_134_86_730_13_512_512_16bit_tile_${strX}_${strZ}.png`;
+                fileName = `28_134_86_730_13_512_512_16bit_tile_${strZ}_${strX}.png`;
             }
 
             const tileUrl = `../../../assets/terrain/terrainTest_001/tile/${fileName}`;

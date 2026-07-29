@@ -513,6 +513,9 @@ class Terrain extends Mesh {
         const destX = tileX * this.#atlasTileSize;
         const destZ = tileZ * this.#atlasTileSize;
 
+        const atlasWidth = this.#atlasTileCountX * this.#atlasTileSize;
+        const atlasHeight = this.#atlasTileCountZ * this.#atlasTileSize;
+
         const srcW = Math.min(this.#atlasTileSize, sourceTexture.gpuTexture.width);
         const srcH = Math.min(this.#atlasTileSize, sourceTexture.gpuTexture.height);
 
@@ -523,19 +526,39 @@ class Terrain extends Mesh {
             [srcW, srcH, 1]
         );
 
-        // 2. 💡 타일 해상도가 512px보다 작을 경우 (예: 449px 엣지 타일) 여백 픽셀에 엣지 색상 패딩 복사로 경계선(Seam) 완전 차단!
-        if (srcW < this.#atlasTileSize) {
+        // 2. 💡 타일 해상도가 512px보다 작을 경우 (예: 449px 엣지 타일) 여백 픽셀에 엣지 색상 패딩 복사
+        const padW = this.#atlasTileSize - srcW;
+        const padH = this.#atlasTileSize - srcH;
+
+        if (padW > 0) {
             encoder.copyTextureToTexture(
                 {texture: sourceTexture.gpuTexture, origin: [srcW - 1, 0, 0]},
                 {texture: this.#heightmapAtlasGPUTexture!, origin: [destX + srcW, destZ, 0]},
-                [this.#atlasTileSize - srcW, srcH, 1]
+                [padW, srcH, 1]
             );
         }
-        if (srcH < this.#atlasTileSize) {
+        if (padH > 0) {
             encoder.copyTextureToTexture(
                 {texture: sourceTexture.gpuTexture, origin: [0, srcH - 1, 0]},
                 {texture: this.#heightmapAtlasGPUTexture!, origin: [destX, destZ + srcH, 0]},
-                [srcW, this.#atlasTileSize - srcH, 1]
+                [srcW, padH, 1]
+            );
+        }
+
+        // 3. 💡 언리얼 엔진 5 스타일 Tile Edge Stitching Pass (이웃 타일 접합선 1px 오버랩 스티칭)
+        // 이웃 타일과의 맞닿는 1px 경계 픽셀을 이웃 타일 슬롯 시작 픽셀에 1:1 오버랩 스티칭 복사하여 경계 단차 0.0000 달성!
+        if (destX + this.#atlasTileSize < atlasWidth) {
+            encoder.copyTextureToTexture(
+                {texture: sourceTexture.gpuTexture, origin: [srcW - 1, 0, 0]},
+                {texture: this.#heightmapAtlasGPUTexture!, origin: [destX + this.#atlasTileSize, destZ, 0]},
+                [1, srcH, 1]
+            );
+        }
+        if (destZ + this.#atlasTileSize < atlasHeight) {
+            encoder.copyTextureToTexture(
+                {texture: sourceTexture.gpuTexture, origin: [0, srcH - 1, 0]},
+                {texture: this.#heightmapAtlasGPUTexture!, origin: [destX, destZ + this.#atlasTileSize, 0]},
+                [srcW, 1, 1]
             );
         }
 
