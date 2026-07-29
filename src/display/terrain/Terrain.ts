@@ -82,15 +82,6 @@ class Terrain extends TerrainTileSystem {
         super.destroy();
     }
 
-    #dirtyPipelineListener = () => {
-        if (this.gpuRenderInfo && this.redGPUContext) {
-            this.gpuRenderInfo.vertexUniformBindGroup = this.redGPUContext.gpuDevice.createBindGroup(
-                getTerrainVertexBindGroupDescriptor(this)
-            );
-            this.dirtyPipeline = true
-        }
-    }
-
     async downloadHeightmapAtlasAsPNG(fileName: string = 'Terrain_HeightmapTileAtlasGPUTexture.png') {
         const gpuTexture = this.heightmapAtlasTexture?.gpuTexture;
         if (!gpuTexture) {
@@ -200,6 +191,15 @@ class Terrain extends TerrainTileSystem {
                     }
                 }
             }
+        }
+    }
+
+    #dirtyPipelineListener = () => {
+        if (this.gpuRenderInfo && this.redGPUContext) {
+            this.gpuRenderInfo.vertexUniformBindGroup = this.redGPUContext.gpuDevice.createBindGroup(
+                getTerrainVertexBindGroupDescriptor(this)
+            );
+            this.dirtyPipeline = true
         }
     }
 

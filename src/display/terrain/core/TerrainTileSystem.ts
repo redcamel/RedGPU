@@ -32,11 +32,6 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #instanceBuffer: GPUBuffer;
     #synthesizedTilesSet: Set<string> = new Set();
     #tileImageCache: Map<string, any> = new Map();
-
-    get tileImageCache(): Map<string, any> {
-        return this.#tileImageCache;
-    }
-
     #tileUrlResolver?: (tile: SpatialTileInfo) => string | void;
     #onTileUnloadCallback?: (tile: SpatialTileInfo) => void;
     #prevWorldSize: number = 0;
@@ -69,6 +64,10 @@ class TerrainTileSystem extends TerrainMaterialBind {
             label: 'TerrainInstanceBuffer'
         });
 
+    }
+
+    get tileImageCache(): Map<string, any> {
+        return this.#tileImageCache;
     }
 
     get instanceBuffer(): GPUBuffer {
@@ -106,29 +105,6 @@ class TerrainTileSystem extends TerrainMaterialBind {
 
     get synthesizedTileCount(): number {
         return this.#synthesizedTilesSet.size;
-    }
-
-    #createHeightmapTileAtlas(tileCountX: number = 16, tileCountZ: number = 16, tileSize: number = 512) {
-        const device = this.redGPUContext.gpuDevice;
-        this.#atlasTileCountX = tileCountX;
-        this.#atlasTileCountZ = tileCountZ;
-        this.#atlasTileSize = tileSize;
-
-        const atlasWidth = tileCountX * tileSize;
-        const atlasHeight = tileCountZ * tileSize;
-        keepLog('Terrain_HeightmapTileAtlasGPUTexture', atlasWidth, atlasHeight)
-        const gpuTexture = device.createTexture({
-            label: 'Terrain_HeightmapTileAtlasGPUTexture',
-            size: [atlasWidth, atlasHeight, 1],
-            format: 'rgba8unorm',
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
-        });
-
-        this.heightmapAtlasTexture = new DirectTexture(
-            this.redGPUContext,
-            'Terrain_HeightmapTileAtlasDirectTexture',
-            gpuTexture
-        );
     }
 
     checkQuadtree(renderViewStateData: any) {
@@ -186,31 +162,10 @@ class TerrainTileSystem extends TerrainMaterialBind {
                 this.#lastMetricsResetTime = now;
             }
 
-            const enrichTileInfo = (tile: SpatialTileInfo) => {
-                tile.cellKey = `${tile.gridX}_${tile.gridZ}`;
-                const [tbMinX, tbMinZ, tbMaxX, tbMaxZ] = tile.worldBounds;
-                const tileCenterX = (tbMinX + tbMaxX) * 0.5;
-                const tileCenterZ = (tbMinZ + tbMaxZ) * 0.5;
-
-                const worldW = this.worldSize[0];
-                const worldH = this.worldSize[1];
-                const tileSpanX = worldW / this.atlasTileCountX;
-                const tileSpanZ = worldH / this.atlasTileCountZ;
-
-                const gridX = Math.max(0, Math.min(this.atlasTileCountX - 1, Math.floor((tileCenterX - this.worldOffset[0]) / tileSpanX)));
-                const gridZ = Math.max(0, Math.min(this.atlasTileCountZ - 1, Math.floor((tileCenterZ - this.worldOffset[1]) / tileSpanZ)));
-
-                tile.tileCol = gridX;
-                tile.tileRow = (this.atlasTileCountZ - 1) - gridZ;
-                tile.atlasKey = `${tile.tileCol}_${tile.tileRow}`;
-                tile.tileColStr = String(tile.tileCol).padStart(2, '0');
-                tile.tileRowStr = String(tile.tileRow).padStart(2, '0');
-            };
-
             if (toLoad.length > 0) {
                 if (this.#tileUrlResolver) {
                     toLoad.forEach(tile => {
-                        enrichTileInfo(tile);
+                        this.#enrichTileInfo(tile);
                         if (this.isTileSynthesized(tile)) return;
                         this.#frameLoadCount++;
                         const result = this.#tileUrlResolver!(tile);
@@ -223,7 +178,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
             if (toUnload.length > 0) {
                 this.#frameUnloadCount += toUnload.length;
                 toUnload.forEach(tile => {
-                    enrichTileInfo(tile);
+                    this.#enrichTileInfo(tile);
                     if (this.#onTileUnloadCallback) {
                         this.#onTileUnloadCallback!(tile);
                     }
@@ -277,6 +232,37 @@ class TerrainTileSystem extends TerrainMaterialBind {
 
     setOnTileUnload(callback: (tile: SpatialTileInfo) => void) {
         this.#onTileUnloadCallback = callback;
+    }
+
+    destroy() {
+        if (this.#instanceBuffer) {
+            this.#instanceBuffer.destroy();
+            this.#instanceBuffer = null;
+        }
+        super.destroy();
+    }
+
+    #createHeightmapTileAtlas(tileCountX: number = 16, tileCountZ: number = 16, tileSize: number = 512) {
+        const device = this.redGPUContext.gpuDevice;
+        this.#atlasTileCountX = tileCountX;
+        this.#atlasTileCountZ = tileCountZ;
+        this.#atlasTileSize = tileSize;
+
+        const atlasWidth = tileCountX * tileSize;
+        const atlasHeight = tileCountZ * tileSize;
+        keepLog('Terrain_HeightmapTileAtlasGPUTexture', atlasWidth, atlasHeight)
+        const gpuTexture = device.createTexture({
+            label: 'Terrain_HeightmapTileAtlasGPUTexture',
+            size: [atlasWidth, atlasHeight, 1],
+            format: 'rgba8unorm',
+            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
+        });
+
+        this.heightmapAtlasTexture = new DirectTexture(
+            this.redGPUContext,
+            'Terrain_HeightmapTileAtlasDirectTexture',
+            gpuTexture
+        );
     }
 
     #updateTileHeightmap(tile: SpatialTileInfo, sourceTexture: BitmapTexture) {
@@ -354,6 +340,27 @@ class TerrainTileSystem extends TerrainMaterialBind {
         }
     }
 
+    #enrichTileInfo(tile: SpatialTileInfo) {
+        tile.cellKey = `${tile.gridX}_${tile.gridZ}`;
+        const [tbMinX, tbMinZ, tbMaxX, tbMaxZ] = tile.worldBounds;
+        const tileCenterX = (tbMinX + tbMaxX) * 0.5;
+        const tileCenterZ = (tbMinZ + tbMaxZ) * 0.5;
+
+        const worldW = this.worldSize[0];
+        const worldH = this.worldSize[1];
+        const tileSpanX = worldW / this.atlasTileCountX;
+        const tileSpanZ = worldH / this.atlasTileCountZ;
+
+        const gridX = Math.max(0, Math.min(this.atlasTileCountX - 1, Math.floor((tileCenterX - this.worldOffset[0]) / tileSpanX)));
+        const gridZ = Math.max(0, Math.min(this.atlasTileCountZ - 1, Math.floor((tileCenterZ - this.worldOffset[1]) / tileSpanZ)));
+
+        tile.tileCol = gridX;
+        tile.tileRow = (this.atlasTileCountZ - 1) - gridZ;
+        tile.atlasKey = `${tile.tileCol}_${tile.tileRow}`;
+        tile.tileColStr = String(tile.tileCol).padStart(2, '0');
+        tile.tileRowStr = String(tile.tileRow).padStart(2, '0');
+    }
+
     #markTileSynthesized(tile: SpatialTileInfo | string) {
         const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
         this.#synthesizedTilesSet.add(key);
@@ -383,14 +390,6 @@ class TerrainTileSystem extends TerrainMaterialBind {
         );
 
         console.log(`[Tile Streamer 📥] Load Cell(${tile.gridX}, ${tile.gridZ}) → Tile[${tile.tileColStr}, ${tile.tileRowStr}] (${url})`);
-    }
-
-    destroy() {
-        if (this.#instanceBuffer) {
-            this.#instanceBuffer.destroy();
-            this.#instanceBuffer = null;
-        }
-        super.destroy();
     }
 }
 
