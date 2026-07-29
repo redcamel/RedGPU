@@ -32,6 +32,11 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #instanceBuffer: GPUBuffer;
     #synthesizedTilesSet: Set<string> = new Set();
     #tileImageCache: Map<string, any> = new Map();
+
+    get tileImageCache(): Map<string, any> {
+        return this.#tileImageCache;
+    }
+
     #tileUrlResolver?: (tile: SpatialTileInfo) => string | void;
     #onTileUnloadCallback?: (tile: SpatialTileInfo) => void;
     #prevWorldSize: number = 0;
@@ -40,7 +45,6 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #atlasTileCountX: number = 16;
     #atlasTileCountZ: number = 16;
     #atlasTileSize: number = 512;
-    #heightmapAtlasDirectTexture: DirectTexture | null = null;
     #frameLoadCount: number = 0;
     #frameUnloadCount: number = 0;
     #lastFrameLoadCount: number = 0;
@@ -84,24 +88,12 @@ class TerrainTileSystem extends TerrainMaterialBind {
         return this.#atlasTileCountX;
     }
 
-    set atlasTileCountX(value: number) {
-        this.#atlasTileCountX = value;
-    }
-
     get atlasTileCountZ(): number {
         return this.#atlasTileCountZ;
     }
 
-    set atlasTileCountZ(value: number) {
-        this.#atlasTileCountZ = value;
-    }
-
     get atlasTileSize(): number {
         return this.#atlasTileSize;
-    }
-
-    set atlasTileSize(value: number) {
-        this.#atlasTileSize = value;
     }
 
     get lastFrameLoadCount(): number {
@@ -116,11 +108,11 @@ class TerrainTileSystem extends TerrainMaterialBind {
         return this.#synthesizedTilesSet.size;
     }
 
-    createHeightmapTileAtlas(tileCountX: number = 16, tileCountZ: number = 16, tileSize: number = 512) {
+    #createHeightmapTileAtlas(tileCountX: number = 16, tileCountZ: number = 16, tileSize: number = 512) {
         const device = this.redGPUContext.gpuDevice;
-        this.atlasTileCountX = tileCountX;
-        this.atlasTileCountZ = tileCountZ;
-        this.atlasTileSize = tileSize;
+        this.#atlasTileCountX = tileCountX;
+        this.#atlasTileCountZ = tileCountZ;
+        this.#atlasTileSize = tileSize;
 
         const atlasWidth = tileCountX * tileSize;
         const atlasHeight = tileCountZ * tileSize;
@@ -132,13 +124,11 @@ class TerrainTileSystem extends TerrainMaterialBind {
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
         });
 
-        this.#heightmapAtlasDirectTexture = new DirectTexture(
+        this.heightmapAtlasTexture = new DirectTexture(
             this.redGPUContext,
             'Terrain_HeightmapTileAtlasDirectTexture',
             gpuTexture
         );
-
-        this.heightmapAtlasTexture = this.#heightmapAtlasDirectTexture;
     }
 
     checkQuadtree(renderViewStateData: any) {
@@ -289,24 +279,12 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.#onTileUnloadCallback = callback;
     }
 
-    updateTileHeightmap(tileOrCol: SpatialTileInfo | number, tileRowOrTexture?: number | BitmapTexture, srcTexture?: BitmapTexture) {
-        let tileX: number;
-        let tileZ: number;
-        let sourceTexture: BitmapTexture;
-
-        if (typeof tileOrCol === 'object' && tileOrCol !== null) {
-            const tile = tileOrCol as SpatialTileInfo;
-            tileX = tile.tileCol ?? 0;
-            tileZ = tile.tileRow ?? 0;
-            sourceTexture = tileRowOrTexture as BitmapTexture;
-        } else {
-            tileX = tileOrCol as number;
-            tileZ = tileRowOrTexture as number;
-            sourceTexture = srcTexture as BitmapTexture;
-        }
+    #updateTileHeightmap(tile: SpatialTileInfo, sourceTexture: BitmapTexture) {
+        const tileX = tile.tileCol ?? 0;
+        const tileZ = tile.tileRow ?? 0;
 
         if (!this.heightmapAtlasTexture) {
-            this.createHeightmapTileAtlas(16, 16, 512);
+            this.#createHeightmapTileAtlas(16, 16, 512);
         }
         const gpuTexture = this.heightmapAtlasTexture?.gpuTexture;
         if (!sourceTexture || !sourceTexture.gpuTexture || !gpuTexture) return;
@@ -376,81 +354,6 @@ class TerrainTileSystem extends TerrainMaterialBind {
         }
     }
 
-    async downloadHeightmapAtlasAsPNG(fileName: string = 'Terrain_HeightmapTileAtlasGPUTexture.png') {
-        const gpuTexture = this.heightmapAtlasTexture?.gpuTexture;
-        if (!gpuTexture) {
-            console.warn('downloadHeightmapAtlasAsPNG: heightmapAtlasTexture가 생성되지 않았습니다.');
-            return;
-        }
-
-        const device = this.redGPUContext.gpuDevice;
-        const width = gpuTexture.width;
-        const height = gpuTexture.height;
-
-        const bytesPerPixel = 4;
-        const unpaddedBytesPerRow = width * bytesPerPixel;
-        const align = 256;
-        const paddedBytesPerRow = Math.ceil(unpaddedBytesPerRow / align) * align;
-        const bufferSize = paddedBytesPerRow * height;
-
-        const readBuffer = device.createBuffer({
-            label: 'Terrain_DownloadAtlasReadBuffer',
-            size: bufferSize,
-            usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
-        });
-
-        const commandEncoder = device.createCommandEncoder({
-            label: 'Terrain_DownloadAtlasEncoder'
-        });
-
-        commandEncoder.copyTextureToBuffer(
-            {texture: gpuTexture},
-            {
-                buffer: readBuffer,
-                bytesPerRow: paddedBytesPerRow,
-                rowsPerImage: height
-            },
-            [width, height, 1]
-        );
-
-        device.queue.submit([commandEncoder.finish()]);
-
-        await readBuffer.mapAsync(GPUMapMode.READ);
-        const copyArrayBuffer = readBuffer.getMappedRange();
-        const data = new Uint8Array(copyArrayBuffer);
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        const imageData = ctx.createImageData(width, height);
-        const imgData = imageData.data;
-
-        for (let y = 0; y < height; y++) {
-            const srcRowOffset = y * paddedBytesPerRow;
-            const dstRowOffset = y * width * 4;
-            for (let x = 0; x < width * 4; x++) {
-                imgData[dstRowOffset + x] = data[srcRowOffset + x];
-            }
-        }
-
-        ctx.putImageData(imageData, 0, 0);
-        readBuffer.unmap();
-        readBuffer.destroy();
-
-        canvas.toBlob((blob) => {
-            if (!blob) return;
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            a.click();
-            URL.revokeObjectURL(url);
-        }, 'image/png');
-    }
-
     #markTileSynthesized(tile: SpatialTileInfo | string) {
         const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
         this.#synthesizedTilesSet.add(key);
@@ -459,43 +362,6 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #registerTileImage(tile: SpatialTileInfo | string, image: any) {
         const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
         this.#tileImageCache.set(key, image);
-    }
-
-    renderAtlasPreview(ctx: CanvasRenderingContext2D, width: number = 512, height: number = 512) {
-        if (!ctx) return;
-        const curDpr = window.devicePixelRatio || 1;
-        ctx.setTransform(curDpr, 0, 0, curDpr, 0, 0);
-        ctx.imageSmoothingEnabled = false;
-
-        const countX = this.atlasTileCountX;
-        const countZ = this.atlasTileCountZ;
-        const cellW = width / countX;
-        const cellH = height / countZ;
-
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(0, 0, width, height);
-
-        for (let x = 0; x < countX; x++) {
-            for (let z = 0; z < countZ; z++) {
-                const px = x * cellW;
-                const py = z * cellH;
-
-                ctx.fillStyle = 'rgba(30, 41, 59, 0.8)';
-                ctx.fillRect(px, py, cellW, cellH);
-
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-                ctx.strokeRect(px, py, cellW, cellH);
-
-                const key = `${x}_${z}`;
-                if (this.#tileImageCache.has(key)) {
-                    const img = this.#tileImageCache.get(key);
-                    try {
-                        ctx.drawImage(img, px, py, cellW, cellH);
-                    } catch (e) {
-                    }
-                }
-            }
-        }
     }
 
     #loadTileFromUrl(tile: SpatialTileInfo, url: string, format: GPUTextureFormat = 'rgba8unorm') {
@@ -510,7 +376,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
             url,
             false,
             (tex: BitmapTexture) => {
-                this.updateTileHeightmap(tile, tex);
+                this.#updateTileHeightmap(tile, tex);
             },
             null,
             format
@@ -527,6 +393,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
         super.destroy();
     }
 }
+
 defineNumber(TerrainTileSystem, [
     {key: "maxLOD", value: 4},
     {key: "baseSlotIndex", value: 0},

@@ -91,6 +91,118 @@ class Terrain extends TerrainTileSystem {
         }
     }
 
+    async downloadHeightmapAtlasAsPNG(fileName: string = 'Terrain_HeightmapTileAtlasGPUTexture.png') {
+        const gpuTexture = this.heightmapAtlasTexture?.gpuTexture;
+        if (!gpuTexture) {
+            console.warn('downloadHeightmapAtlasAsPNG: heightmapAtlasTexture가 생성되지 않았습니다.');
+            return;
+        }
+
+        const device = this.redGPUContext.gpuDevice;
+        const width = gpuTexture.width;
+        const height = gpuTexture.height;
+
+        const bytesPerPixel = 4;
+        const unpaddedBytesPerRow = width * bytesPerPixel;
+        const align = 256;
+        const paddedBytesPerRow = Math.ceil(unpaddedBytesPerRow / align) * align;
+        const bufferSize = paddedBytesPerRow * height;
+
+        const readBuffer = device.createBuffer({
+            label: 'Terrain_DownloadAtlasReadBuffer',
+            size: bufferSize,
+            usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
+        });
+
+        const commandEncoder = device.createCommandEncoder({
+            label: 'Terrain_DownloadAtlasEncoder'
+        });
+
+        commandEncoder.copyTextureToBuffer(
+            {texture: gpuTexture},
+            {
+                buffer: readBuffer,
+                bytesPerRow: paddedBytesPerRow,
+                rowsPerImage: height
+            },
+            [width, height, 1]
+        );
+
+        device.queue.submit([commandEncoder.finish()]);
+
+        await readBuffer.mapAsync(GPUMapMode.READ);
+        const copyArrayBuffer = readBuffer.getMappedRange();
+        const data = new Uint8Array(copyArrayBuffer);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const imageData = ctx.createImageData(width, height);
+        const imgData = imageData.data;
+
+        for (let y = 0; y < height; y++) {
+            const srcRowOffset = y * paddedBytesPerRow;
+            const dstRowOffset = y * width * 4;
+            for (let x = 0; x < width * 4; x++) {
+                imgData[dstRowOffset + x] = data[srcRowOffset + x];
+            }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+        readBuffer.unmap();
+        readBuffer.destroy();
+
+        canvas.toBlob((blob) => {
+            if (!blob) return;
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(url);
+        }, 'image/png');
+    }
+
+    renderAtlasPreview(ctx: CanvasRenderingContext2D, width: number = 512, height: number = 512) {
+        if (!ctx) return;
+        const curDpr = window.devicePixelRatio || 1;
+        ctx.setTransform(curDpr, 0, 0, curDpr, 0, 0);
+        ctx.imageSmoothingEnabled = false;
+
+        const countX = this.atlasTileCountX;
+        const countZ = this.atlasTileCountZ;
+        const cellW = width / countX;
+        const cellH = height / countZ;
+
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, width, height);
+
+        for (let x = 0; x < countX; x++) {
+            for (let z = 0; z < countZ; z++) {
+                const px = x * cellW;
+                const py = z * cellH;
+
+                ctx.fillStyle = 'rgba(30, 41, 59, 0.8)';
+                ctx.fillRect(px, py, cellW, cellH);
+
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                ctx.strokeRect(px, py, cellW, cellH);
+
+                const key = `${x}_${z}`;
+                if (this.tileImageCache.has(key)) {
+                    const img = this.tileImageCache.get(key);
+                    try {
+                        ctx.drawImage(img, px, py, cellW, cellH);
+                    } catch (e) {
+                    }
+                }
+            }
+        }
+    }
+
 
 }
 
