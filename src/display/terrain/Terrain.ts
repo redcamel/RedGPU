@@ -1,7 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import Mesh from "../mesh/Mesh";
-import TerrainGeometry from "./TerrainGeometry";
-import TerrainMaterial, {TerrainLayerConfig} from "./material/TerrainMaterial";
+import {TerrainLayerConfig} from "./material/TerrainMaterial";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import DirectTexture from "../../resources/texture/DirectTexture";
 import Sampler from "../../resources/sampler/Sampler";
@@ -19,6 +17,7 @@ import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import {keepLog} from "../../utils";
+import TerrainLayerSystem from "./TerrainLayerSystem";
 
 export type {TerrainLayerConfig};
 
@@ -41,7 +40,7 @@ interface Terrain {
     enableStreaming: boolean;
 }
 
-class Terrain extends Mesh {
+class Terrain extends TerrainLayerSystem {
     quadtree: TerrainQuadtree;
     spatialGrid: TerrainSpatialGrid;
     instanceBuffer: GPUBuffer;
@@ -215,10 +214,7 @@ class Terrain extends Mesh {
 
 
     constructor(redGPUContext: RedGPUContext, heightmapUrl?: string, name?: string) {
-        const geometry = new TerrainGeometry(redGPUContext);
-        const material = new TerrainMaterial(redGPUContext);
-
-        super(redGPUContext, geometry, material, name);
+        super(redGPUContext);
 
         this.spatialGrid = new TerrainSpatialGrid(256, 2560);
         this.enableStreaming = false;
@@ -320,13 +316,6 @@ class Terrain extends Mesh {
         return this;
     }
 
-    override get material(): TerrainMaterial {
-        return super.material as TerrainMaterial;
-    }
-
-    override set material(val: any) {
-        throw new Error('Terrain.material is read-only and cannot be reassigned.');
-    }
 
     get baseColorTexture(): BitmapTexture {
         return this.material.baseColorTexture;
@@ -424,33 +413,6 @@ class Terrain extends Mesh {
         this.material.baseColorBlendMode = value;
     }
 
-    get layers(): TerrainLayerConfig[] {
-        return this.material.layers || [];
-    }
-
-    /**
-     * [KO] 단일 지형 디테일 레이어를 추가합니다. (최대 4개)
-     * [EN] Adds a single terrain detail layer. (Maximum 4)
-     */
-    addLayer(config: TerrainLayerConfig): number {
-        return this.material.addLayer(config);
-    }
-
-    /**
-     * [KO] 인덱스 또는 이름을 기준으로 특정 레이어를 제거합니다.
-     * [EN] Removes a specific layer by index or name.
-     */
-    removeLayer(indexOrName: number | string): boolean {
-        return this.material.removeLayer(indexOrName);
-    }
-
-    /**
-     * [KO] 인덱스 또는 이름을 기준으로 특정 레이어의 속성을 부분 수정합니다.
-     * [EN] Partially updates properties of a specific layer by index or name.
-     */
-    updateLayer(indexOrName: number | string, partialConfig: Partial<TerrainLayerConfig>): boolean {
-        return this.material.updateLayer(indexOrName, partialConfig);
-    }
 
     get lodRanges(): Float32Array {
         return this.#lodRanges;
