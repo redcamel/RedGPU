@@ -9,10 +9,6 @@ import TerrainTileSystem from "./core/TerrainTileSystem";
 
 export type {TerrainLayerConfig};
 
-/**
- * [KO] CDLOD 기반 지형 시스템을 총괄하는 디스플레이 메시 객체 클래스입니다.
- * [EN] Display mesh object class that manages the CDLOD-based terrain system.
- */
 interface Terrain {
 
 }

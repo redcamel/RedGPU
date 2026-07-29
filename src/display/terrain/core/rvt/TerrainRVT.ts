@@ -83,7 +83,6 @@ class TerrainRVT {
         uData[17] = mat.occlusionStrength ?? 1.0;
         uData[18] = mat.baseColorWeight ?? 0.5;
         uData[19] = mat.baseColorBlendMode === 'multiply' ? 1.0 : 0.0;
-        // 💡 splatTexture가 없거나 undefined인 경우 경사도/고도 기반 자동 베이킹(1.0) 가동
         const isAutoSplat = !mat.splatTexture || mat.useAutoSplat === true;
         uData[20] = isAutoSplat ? 1.0 : 0.0;
 

@@ -57,7 +57,6 @@ struct VertexOutput {
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
-// 💡 카메라 거리에 비례한 Morph Factor 산출 함수
 fn calculateMorphFactor(worldPos: vec3<f32>, lod: f32) -> f32 {
     let dist = distance(systemUniforms.camera.cameraPosition.xz, worldPos.xz);
     let range = vertexUniforms.lodRanges[i32(lod)];
@@ -92,29 +91,23 @@ fn main(inputData: InputData) -> VertexOutput {
 
     let localXZ = vec2<f32>(inputData.position.x, inputData.position.z);
     
-    // 1. 기본 월드 XZ 좌표 계산
     let worldXZ = instanceData.offset + localXZ * instanceData.scale;
 
-    // 2. 카메라 거리 기반 Morph Factor 계산
     var morphFactor = 0.0;
     let tempWorldPos = vec3<f32>(worldXZ.x, 0.0, worldXZ.y);
     morphFactor = calculateMorphFactor(tempWorldPos, instanceData.lod);
 
-    // 3. 부모 격자에 맞추기 위해 홀수 정점을 스냅하는 parentUV 및 parentWorldXZ 계산
-    let gridDim = vertexUniforms.gridSize; // TerrainGeometry의 resolution (기본 64.0)
+    let gridDim = vertexUniforms.gridSize;
     let gridPos = inputData.uv * gridDim;
-    let gridIdx = floor(gridPos + 0.5); // 0 ~ gridDim 정수 격자 인덱스
+    let gridIdx = floor(gridPos + 0.5);
     
-    // 짝수 격자 인덱스로 스냅 (홀수 인덱스 1, 3, 5... -> 짝수 0, 2, 4...)
     let parentGridIdx = floor(gridIdx * 0.5) * 2.0;
     let parentUV = parentGridIdx / gridDim;
-    let parentLocalXZ = parentUV - vec2<f32>(0.5); // (-0.5 ~ 0.5 범위)
+    let parentLocalXZ = parentUV - vec2<f32>(0.5);
     let parentWorldXZ = instanceData.offset + parentLocalXZ * instanceData.scale;
 
-    // XZ 좌표 선형 보간 (모핑 적용)
     let finalWorldXZ = mix(worldXZ, parentWorldXZ, morphFactor);
 
-    // 4. 최종 UV 및 월드 UV 매핑 계산 (Top-to-Bottom 타일 아틀라스 수직 축 매핑: V = 1.0 - V)
     let finalUV = mix(inputData.uv, parentUV, morphFactor);
     let rawWorldUV = (finalWorldXZ - vertexUniforms.worldOffset) / vertexUniforms.worldSize;
     let worldUV = vec2<f32>(rawWorldUV.x, 1.0 - rawWorldUV.y);
@@ -131,15 +124,12 @@ fn main(inputData: InputData) -> VertexOutput {
         let rawParentWorldUV = (parentWorldXZ - vertexUniforms.worldOffset) / vertexUniforms.worldSize;
         let parentWorldUV = vec2<f32>(rawParentWorldUV.x, 1.0 - rawParentWorldUV.y);
 
-        // 💡 타일 경계선 번짐/단차(Seam/Bleeding) 방지를 위한 Half-Texel Clamp
         let clampedWorldUV = clamp(worldUV, halfTexel, vec2<f32>(1.0) - halfTexel);
         let clampedParentUV = clamp(parentWorldUV, halfTexel, vec2<f32>(1.0) - halfTexel);
 
-        // 상세 높이 h0 및 부모 높이 h1 샘플링
         let h0 = textureSampleLevel(heightTexture, heightTextureSampler, clampedWorldUV, 0.0).r;
         let h1 = textureSampleLevel(heightTexture, heightTextureSampler, clampedParentUV, 0.0).r;
 
-        // 높이값 선형 보간 (모핑 적용)
         sampledHeight = mix(h0, h1, morphFactor);
 
         let heightRange = vertexUniforms.maxHeight - vertexUniforms.minHeight;
@@ -152,24 +142,20 @@ fn main(inputData: InputData) -> VertexOutput {
         let stepX = vertexUniforms.worldSize.x * texelSize.x * 2.0;
         let stepZ = vertexUniforms.worldSize.y * texelSize.y * 2.0;
 
-        // 💡 1. 로컬 공간(Local Space) 벡터 계산
         let localTangentX = vec3<f32>(stepX, (hR - hL) * heightRange, 0.0);
         let localTangentZ = vec3<f32>(0.0,   (hU - hD) * heightRange, stepZ);
 
         let localNormal = normalize(cross(localTangentZ, localTangentX));
         let localTangent = normalize(localTangentX);
 
-        // 💡 2. 월드 공간(World Space) 변환
         let worldNormal = normalize((gu_normalModelMatrix * vec4<f32>(localNormal, 0.0)).xyz);
         let worldTangent = normalize((gu_modelMatrix * vec4<f32>(localTangent, 0.0)).xyz);
 
-        // 💡 3. 그람-슈미트 직교화
         let orthogonalTangent = normalize(worldTangent - dot(worldTangent, worldNormal) * worldNormal);
 
         computedNormal = worldNormal;
         worldTangentX = orthogonalTangent;
     #redgpu_else
-        // 💡 텍스처가 없을 때도 동일하게 월드 공간으로 변환
         computedNormal = normalize((gu_normalModelMatrix * vec4<f32>(inputData.vertexNormal, 0.0)).xyz);
         worldTangentX = normalize((gu_modelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz);
     #redgpu_endIf

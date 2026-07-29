@@ -11,39 +11,29 @@ export type TileState = 'UNLOADED' | 'LOADING' | 'LOADED';
 export interface SpatialTileInfo {
     gridX: number;
     gridZ: number;
-    worldBounds: [number, number, number, number]; // [minX, minZ, maxX, maxZ]
+    worldBounds: [number, number, number, number];
     distanceToCamera: number;
     priority: number;
     state: TileState;
 
-    /** [KO] 256m 공간 셀 키 (예: "0_1") [EN] 256m spatial cell key */
     cellKey?: string;
-    /** [KO] 16x16 아틀라스 타일 열 (0 ~ 15) [EN] 16x16 atlas tile column */
     tileCol?: number;
-    /** [KO] 16x16 아틀라스 타일 행 (0 ~ 15) [EN] 16x16 atlas tile row */
     tileRow?: number;
-    /** [KO] 16x16 아틀라스 타일 키 (예: "0_15") [EN] 16x16 atlas tile key */
     atlasKey?: string;
-    /** [KO] 두 자리 포맷팅된 타일 열 문자열 (예: "00" ~ "15") [EN] 2-digit formatted tile column string */
     tileColStr?: string;
-    /** [KO] 두 자리 포맷팅된 타일 행 문자열 (예: "00" ~ "15") [EN] 2-digit formatted tile row string */
     tileRowStr?: string;
 }
 
-/**
- * [KO] 언리얼 엔진 스타일 카메라 중심 공간 그리드 스트리밍 관리자 클래스입니다.
- * [EN] Unreal Engine style camera-centric spatial grid streaming manager class.
- */
 export class TerrainSpatialGrid {
-    #cellSize: number = 256;          // 셀 하나의 가로세로 크기 (25,600 Unreal Units = 256m)
-    #loadingRadius: number = 2560;     // 카메라 기준 활성 스트리밍 반경 (256,000 Unreal Units = 2.56km)
-    #maxLoadsPerFrame: number = 2;     // 프레임당 최대 로드 수 (언리얼 기본 I/O 예산: 2개/프레임)
+    #cellSize: number = 256;
+    #loadingRadius: number = 2560;
+    #maxLoadsPerFrame: number = 2;
     #activeTiles: Map<string, SpatialTileInfo> = new Map();
-    #pendingQueue: Map<string, SpatialTileInfo> = new Map(); // 로딩 대기 큐 (key -> tile)
+    #pendingQueue: Map<string, SpatialTileInfo> = new Map();
     #lastCameraGridX: number = NaN;
     #lastCameraGridZ: number = NaN;
 
-    #terrainBounds: [number, number, number, number] | null = [-5000, -5000, 5000, 5000]; // [minX, minZ, maxX, maxZ]
+    #terrainBounds: [number, number, number, number] | null = [-5000, -5000, 5000, 5000];
 
     constructor(cellSize: number = 256, loadingRadius: number = 2560) {
         this.#cellSize = cellSize;
@@ -90,10 +80,6 @@ export class TerrainSpatialGrid {
         this.#terrainBounds = [minX, minZ, maxX, maxZ];
     }
 
-    /**
-     * [KO] 매 프레임 카메라 위치 및 시선 방향을 기준으로 그리드 세포의 로딩/언로딩 상태를 갱신합니다.
-     * [EN] Updates the loading/unloading state of grid cells based on camera position and view direction every frame.
-     */
     update(cameraPosition: [number, number, number] | vec3, cameraDirection?: [number, number, number]): {
         toLoad: SpatialTileInfo[];
         toUnload: SpatialTileInfo[];
@@ -108,7 +94,6 @@ export class TerrainSpatialGrid {
         const toLoad: SpatialTileInfo[] = [];
         const toUnload: SpatialTileInfo[] = [];
 
-        // 카메라 중심 cell 좌표가 변경되었을 때 전체 원형 스트리밍 구역 갱신
         if (centerGridX !== this.#lastCameraGridX || centerGridZ !== this.#lastCameraGridZ) {
             this.#lastCameraGridX = centerGridX;
             this.#lastCameraGridZ = centerGridZ;
@@ -119,7 +104,6 @@ export class TerrainSpatialGrid {
 
         const [tbMinX, tbMinZ, tbMaxX, tbMaxZ] = this.#terrainBounds || [-Infinity, -Infinity, Infinity, Infinity];
 
-        // 카메라 정면 벡터 (존재하는 경우)
         let dirX = 0, dirZ = 0;
         let hasDir = false;
         if (cameraDirection) {
@@ -138,7 +122,6 @@ export class TerrainSpatialGrid {
                 const maxX = minX + this.#cellSize;
                 const maxZ = minZ + this.#cellSize;
 
-                // 지형 경계(Terrain World Bounds)를 벗어난 세포는 스트리밍 대상에서 제외
                 if (maxX < tbMinX || minX > tbMaxX || maxZ < tbMinZ || minZ > tbMaxZ) {
                     continue;
                 }
@@ -154,13 +137,12 @@ export class TerrainSpatialGrid {
                     const key = `${gx}_${gz}`;
                     currentFrameKeys.add(key);
 
-                    // 우선순위 계산: 거리 가중치 + (시선 방향 내적 가중치)
                     let dotWeight = 1.0;
                     if (hasDir && dist > 0.0001) {
                         const nx = toTileX / dist;
                         const nz = toTileZ / dist;
-                        const dot = nx * dirX + nz * dirZ; // -1 ~ 1
-                        dotWeight = Math.max(0.1, (dot + 1.0) * 0.5); // 0.1 ~ 1.0
+                        const dot = nx * dirX + nz * dirZ;
+                        dotWeight = Math.max(0.1, (dot + 1.0) * 0.5);
                     }
                     const priority = dotWeight / (dist + 1.0);
 
@@ -173,7 +155,6 @@ export class TerrainSpatialGrid {
                         existingPending.distanceToCamera = dist;
                         existingPending.priority = priority;
                     } else {
-                        // 새로운 로딩 대상 타일을 대기 큐에 등록
                         const tileInfo: SpatialTileInfo = {
                             gridX: gx,
                             gridZ: gz,
@@ -188,8 +169,6 @@ export class TerrainSpatialGrid {
             }
         }
 
-        // 반경을 벗어난 타일 처리
-        // 1) 활성 타일 중 반경 밖으로 벗어난 경우 Unload
         for (const [key, tile] of this.#activeTiles.entries()) {
             if (!currentFrameKeys.has(key)) {
                 tile.state = 'UNLOADED';
@@ -198,18 +177,15 @@ export class TerrainSpatialGrid {
             }
         }
 
-        // 2) 대기 큐 타일 중 반경 밖으로 벗어난 경우 큐에서 제거
         for (const [key] of this.#pendingQueue.entries()) {
             if (!currentFrameKeys.has(key)) {
                 this.#pendingQueue.delete(key);
             }
         }
 
-        // 대기 큐 타일들을 우선순위(Priority) 내림차순 정렬 (시선 정면에 가깝고 가까운 타일 우선)
         const pendingArray = Array.from(this.#pendingQueue.values());
         pendingArray.sort((a, b) => b.priority - a.priority);
 
-        // maxLoadsPerFrame (Frame Budgeting) 수량만큼 대기 큐에서 꺼내어 활성화(Load)
         const loadBudget = this.#maxLoadsPerFrame > 0 ? this.#maxLoadsPerFrame : pendingArray.length;
         const tilesToProcess = pendingArray.slice(0, loadBudget);
 

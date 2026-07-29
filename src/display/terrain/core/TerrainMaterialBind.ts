@@ -105,27 +105,21 @@ class TerrainMaterialBind extends TerrainLayerSystem {
     }
 
     setup(options: {
-        /** [KO] 글로벌 베이스 컬러(Diffuse) URL — sRGB 포맷으로 자동 로딩 */
         baseColor?: string;
-        /** [KO] 글로벌 ORM 텍스처 URL — Linear(rgba8unorm) 포맷으로 자동 로딩 */
         orm?: string;
-        /** [KO] 스플랫 맵 URL — Linear(rgba8unorm) 포맷으로 자동 로딩 */
         splat?: string;
     }): this {
         const ctx = this.redGPUContext;
 
         if (options.baseColor) {
-            // 💡 베이스 컬러: sRGB 감마 정정 포맷 (BitmapTexture 기본값 = srgb, 명시 생략)
             this.material.baseColorTexture = new BitmapTexture(ctx, options.baseColor);
         }
 
         if (options.orm) {
-            // 💡 ORM: Linear 포맷 필수 (감마 보정 없이 R=AO, G=Roughness, B=Metallic 수치 그대로)
             this.material.ormTexture = new BitmapTexture(ctx, options.orm, true, null, null, 'rgba8unorm');
         }
 
         if (options.splat) {
-            // 💡 스플랫 맵: Linear 포맷 필수 (R,G,B,A 채널을 가중치 수치 그대로 샘플링)
             this.material.splatTexture = new BitmapTexture(ctx, options.splat, true, null, null, 'rgba8unorm');
         }
 

@@ -23,17 +23,12 @@ struct TerrainUniforms {
 }
 @group(2) @binding(0) var<uniform> uniforms: TerrainUniforms;
 
-// 💡 (참고) 레이어 바인딩 슬롯 레이아웃 유지를 위해 선언부는 남겨둡니다.
-// 실제 연산에는 샘플링되지 않으므로 성능에 영향을 주지 않습니다.
 #redgpu_if baseColorTexture
 @group(2) @binding(1) var baseColorTexture: texture_2d<f32>;
 #redgpu_endIf
 #redgpu_if splatTexture
 @group(2) @binding(2) var splatTexture: texture_2d<f32>;
 #redgpu_endIf
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// 💡 RVT (Runtime Virtual Texture) 아틀라스 바인딩 — 무조건 사용
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 @group(2) @binding(9)  var rvtAlbedoTexture:    texture_2d<f32>;
 @group(2) @binding(10) var rvtNormalORMTexture:  texture_2d<f32>;
 @group(2) @binding(11) var rvtSampler:           sampler;
@@ -96,14 +91,8 @@ fn main(inputData:InputData) -> OutputFragment {
     }
     #redgpu_endIf
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 💡 TBN: RVT 모드에서는 항상 노멀 맵이 적용되므로 무조건 계산
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     let tbn = getTBNFromVertexTangent(baseNormal, input_vertexTangent);
 
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // 💡 RVT 전용 단일 샘플링 로직
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     let rvt_albedo = textureSample(rvtAlbedoTexture, rvtSampler, input_uv);
     let rvt_normalORM = textureSample(rvtNormalORMTexture, rvtSampler, input_uv);
 
@@ -111,7 +100,6 @@ fn main(inputData:InputData) -> OutputFragment {
     let rvt_roughness = rvt_normalORM.b;
     let rvt_occlusion = rvt_normalORM.a;
 
-    // debugSplatTexture 모드 지원 (실제 스플랫 맵 RGBA 가중치 채널 출력)
     if (uniforms.debugSplatTexture == 1u) {
         #redgpu_if splatTexture
             output.color = textureSample(splatTexture, rvtSampler, input_uv);
@@ -121,7 +109,6 @@ fn main(inputData:InputData) -> OutputFragment {
         return output;
     }
 
-    // NormalMap 복원 (XY octahedral → world space)
     var scaled_rvt = vec2<f32>(rvt_normalXY.r * 2.0 - 1.0, -(rvt_normalXY.g * 2.0 - 1.0));
     let lenSq_rvt = dot(scaled_rvt, scaled_rvt);
     if (lenSq_rvt > 0.98) { scaled_rvt = normalize(scaled_rvt) * 0.98; }
@@ -132,7 +119,6 @@ fn main(inputData:InputData) -> OutputFragment {
     N = normalize(N);
     let NdotV_rvt = max(abs(dot(N, V)), 0.04);
 
-    // Shadow
     let receiveShadowYn_rvt = inputData.receiveShadow != 0.0;
     var visibility_rvt: f32 = 1.0;
     visibility_rvt = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, systemUniforms.shadow.directionalShadowDepthTextureSize, systemUniforms.shadow.directionalShadowBias, systemUniforms.shadow.directionalShadowFilterScale, inputData.shadowCoord);
@@ -193,9 +179,6 @@ fn main(inputData:InputData) -> OutputFragment {
     return output;
 }
 
-// =============================================================================
-// Texture & UV Helpers
-// =============================================================================
 fn getTextureTransformUV(
     input_uv: vec2<f32>,
     input_uv1: vec2<f32>,
@@ -230,9 +213,6 @@ fn getTextureTransformUV(
     return result_uv;
 }
 
-// =============================================================================
-// Common Math & BRDF Utilities
-// =============================================================================
 fn getDielectricF0(ior: f32) -> vec3<f32> {
     let f0_factor = (ior - 1.0) / (ior + 1.0);
     return vec3<f32>(f0_factor * f0_factor);
@@ -267,9 +247,6 @@ fn getIndirectFresnel(cosTheta: f32, F0: vec3<f32>, roughness: f32, fresnelTerm:
     return F0 + (F90 - F0) * fresnelTerm;
 }
 
-// =============================================================================
-// Core Lighting Functions (Diffuse, Specular, Transmission)
-// =============================================================================
 fn getDirectSpecularBRDF(
     F: vec3<f32>,
     roughness: f32,
@@ -286,9 +263,6 @@ fn getDirectDiffuseBRDF(NdotL: f32, albedo: vec3<f32>) -> vec3<f32> {
     return albedo * NdotL * INV_PI;
 }
 
-// =============================================================================
-// Main PBR Orchestration
-// =============================================================================
 fn getDirectPbrLighting(
     input_vertexPosition: vec3<f32>,
     inputData_position: vec4<f32>,
@@ -455,14 +429,11 @@ fn getDirectPbrLight(
     let combined_f0 = mix(F0_base, albedo, metallicParameter);
     let F = getFresnel(VdotH, combined_f0);
 
-    // Specular Cook-Torrance BRDF (정통 PBR 에너지 보존)
     let SPEC_BRDF = getDirectSpecularBRDF(F, roughness, NdotH, VdotN, NdotL);
 
-    // 거칠기 1.0(무광 지형)일 때 유전체 표면의 직사광 잔여 스펙큘러 하이라이트 번들거림 100% 완전 소멸
     let specFade = 1.0 - pow(clamp(roughness, 0.0, 1.0), 2.0);
     let specularPart = SPEC_BRDF * NdotL * mix(1.0, specFade, 1.0 - metallicParameter);
 
-    // Disney Diffuse BRDF (거칠기 반응 미세 산란)
     let kD = (vec3<f32>(1.0) - F) * (1.0 - metallicParameter);
     let Fd90 = 0.5 + 2.0 * LdotH * LdotH * roughness;
     let lightScatter = 1.0 + (Fd90 - 1.0) * pow(clamp(1.0 - NdotL, 0.0, 1.0), 5.0);

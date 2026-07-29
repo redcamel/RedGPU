@@ -1,22 +1,12 @@
-// ============================================================================
-// TerrainRVT Compute Bake Shader
-// [KO] 4종 레이어 Height-Blend 결과를 Compute Shader 기반으로 RVT 아틀라스 타일에 베이킹하는 셰이더
-// [EN] Dedicated Compute Shader for baking 4-layer Height-Blend result into RVT atlas tiles
-// ============================================================================
-
 struct RVTBakeUniforms {
-    // 타일 UV 범위 (아틀라스 내 이 타일의 위치)
-    tileUVOffset: vec2<f32>,  // 아틀라스 UV 시작점
-    tileUVScale:  vec2<f32>,  // 아틀라스 UV 크기
-    // 월드 UV 범위 (지형 전체에서 이 타일의 위치)
+    tileUVOffset: vec2<f32>,
+    tileUVScale:  vec2<f32>,
     worldUVOffset: vec2<f32>,
     worldUVScale:  vec2<f32>,
-    // 텍스처 타일링
     tileScale:  f32,
     macroScale: f32,
     blendContrast: f32,
     roughnessFactor: f32,
-    // 레이어별 roughnessFactor (Layer 0~3)
     layer0RoughnessFactor: f32,
     layer1RoughnessFactor: f32,
     layer2RoughnessFactor: f32,
@@ -24,8 +14,8 @@ struct RVTBakeUniforms {
     normalScale: f32,
     occlusionStrength: f32,
     baseColorWeight: f32,
-    baseColorBlendMode: u32, // 0: mix (Direct Mix), 1: multiply (Tint Multiply)
-    useAutoSplat: u32,       // 0: 유저 splatTexture 사용, 1: 경사도/고도 기반 자동 생성
+    baseColorBlendMode: u32,
+    useAutoSplat: u32,
 }
 
 @group(0) @binding(0) var<uniform> bakeUniforms: RVTBakeUniforms;
@@ -37,23 +27,20 @@ struct RVTBakeUniforms {
 @group(0) @binding(6) var texSampler:    sampler;
 @group(0) @binding(7) var baseColorTexture: texture_2d<f32>;
 @group(0) @binding(8) var ormTexture:       texture_2d<f32>;
-@group(0) @binding(9) var heightTexture:    texture_2d<f32>; // 자동 Splat 계산용 높이맵 텍스처
+@group(0) @binding(9) var heightTexture:    texture_2d<f32>;
 
 @group(0) @binding(10) var albedoOutput:    texture_storage_2d<rgba8unorm, write>;
 @group(0) @binding(11) var normalORMOutput: texture_storage_2d<rgba8unorm, write>;
 
-// ─── Height-Blend helper (Unreal Engine 5 Landscape HeightBlend Official Source) ─
 fn getHeightBlendedWeights(
     splatWeights: vec4<f32>,
     layerHeights: vec4<f32>,
     contrast: f32
 ) -> vec4<f32> {
-    // 언리얼 엔진 5 Landscape 공식 수식: Combined = (Height + 1.0) * Weight
     let combined = (layerHeights + vec4<f32>(1.0)) * splatWeights;
     let maxVal   = max(combined.r, max(combined.g, max(combined.b, combined.a)));
     if (maxVal <= 0.0001) { return splatWeights; }
 
-    // 언리얼 엔진 5 공식 Transition 범위 산출
     let transition = max(0.005, (1.0 - clamp(contrast, 0.0, 1.0)) * 0.5);
     let threshold  = maxVal - transition;
     let blended    = max(combined - vec4<f32>(threshold), vec4<f32>(0.0));
@@ -62,19 +49,15 @@ fn getHeightBlendedWeights(
     return blended / sumVal;
 }
 
-// ─── Explicit Compute MipLevel Helper (언리얼 엔진 RVT Mipmap Baking 규격) ─────
 fn getBakeMipLevel(tileScale: f32, textureSize: f32, atlasSize: f32) -> f32 {
     let texelsPerAtlasPixel = (tileScale * textureSize) / atlasSize;
-    // 근접 구역 (1px당 텍셀 1개 이하) -> 100% Mip 0 (원본 텍스처 칼 같은 선명도 보장)
     if (texelsPerAtlasPixel <= 1.0) {
         return 0.0;
     }
-    // 원거리 / 고밀도 타일링 구역 -> 지글거림(Aliasing) 방지를 위한 적정 MipLevel 산출
     let mip = log2(texelsPerAtlasPixel) - 0.5;
     return clamp(mip, 0.0, 3.0);
 }
 
-// ─── Compute Shader Execution ────────────────────────────────────────────────
 @compute @workgroup_size(16, 16)
 fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let outputDim = textureDimensions(albedoOutput);
@@ -89,10 +72,8 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let tileUV = wUV * bakeUniforms.tileScale;
     let macroUV = wUV * bakeUniforms.macroScale;
 
-    // 타일링 밀도와 아틀라스 해상도 비례에 알맞은 최적 MipLevel 산출 (지글거림 방지)
     let bakeMip = getBakeMipLevel(bakeUniforms.tileScale, 1024.0, f32(outputDim.x));
 
-    // 1. Albedo & Height 샘플링 (적정 MipLevel 적용)
     let d0 = textureSampleLevel(diffuseArray, texSampler, tileUV, 0i, bakeMip);
     let d1 = textureSampleLevel(diffuseArray, texSampler, tileUV, 1i, bakeMip);
     let d2 = textureSampleLevel(diffuseArray, texSampler, tileUV, 2i, bakeMip);
@@ -107,7 +88,6 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var sw = vec4<f32>(0.0);
 
     if (bakeUniforms.useAutoSplat == 1u) {
-        // ⛰️ 경사도(Slope) & 고도(Altitude) 기반 4채널 자동 SplatMap 베이킹
         let texDim = vec2<f32>(textureDimensions(heightTexture));
         let texelSize = 1.0 / max(texDim, vec2<f32>(1.0));
 
@@ -119,10 +99,10 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let dhZ = (hUp - hCenter) * 40.0;
         let slope = clamp(sqrt(dhX * dhX + dhZ * dhZ), 0.0, 1.0);
 
-        let rockWeight = smoothstep(0.18, 0.45, slope); // 절벽 (Rock)
-        let sandWeight = select(0.0, 1.0 - smoothstep(0.02, 0.08, hCenter), slope < 0.2); // 수변/모래 (Sand)
-        let gravelWeight = select(0.0, smoothstep(0.5, 0.8, hCenter), slope >= 0.1 && slope <= 0.4); // 고산지대 자갈 (Gravel)
-        let grassWeight = max(0.0, 1.0 - (rockWeight + sandWeight + gravelWeight)); // 평지 잔디 (Grass)
+        let rockWeight = smoothstep(0.18, 0.45, slope);
+        let sandWeight = select(0.0, 1.0 - smoothstep(0.02, 0.08, hCenter), slope < 0.2);
+        let gravelWeight = select(0.0, smoothstep(0.5, 0.8, hCenter), slope >= 0.1 && slope <= 0.4);
+        let grassWeight = max(0.0, 1.0 - (rockWeight + sandWeight + gravelWeight));
 
         sw = vec4<f32>(grassWeight, rockWeight, gravelWeight, sandWeight);
     } else {
@@ -154,16 +134,13 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var finalAlbedo = layerAlbedo;
 
     if (bakeUniforms.baseColorBlendMode == 0u) {
-        // Direct Mix Mode (Lerp)
         finalAlbedo = mix(layerAlbedo, baseColorSample, weight);
     } else {
-        // Multiply Mode (Tint)
         let tintedAlbedo = layerAlbedo * baseColorSample;
         finalAlbedo = mix(layerAlbedo, tintedAlbedo, weight);
     }
     finalAlbedo.a = 1.0;
 
-    // 2. Normal & ORM 연산 (언리얼 엔진 Landscape Tangent Space Blend)
     let n0_raw = (textureSampleLevel(normalArray, texSampler, tileUV, 0i, bakeMip).rg * 2.0 - vec2<f32>(1.0));
     let n1_raw = (textureSampleLevel(normalArray, texSampler, tileUV, 1i, bakeMip).rg * 2.0 - vec2<f32>(1.0));
     let n2_raw = (textureSampleLevel(normalArray, texSampler, tileUV, 2i, bakeMip).rg * 2.0 - vec2<f32>(1.0));
@@ -194,8 +171,6 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var globalORM = textureSampleLevel(ormTexture, texSampler, wUV, 0.0);
     let hasGlobalORM = select(1.0, 0.0, globalORM.a <= 0.01 || (globalORM.r <= 0.001 && globalORM.g <= 0.001 && globalORM.b <= 0.001));
 
-    // 언리얼 엔진 Landscape Macro Variation 표준 공식 (0.5 중립 기반 부드러운 매크로 변형)
-    // globalORM.g 수치에 따른 무분별한 거칠기 붕괴(번들거림) 방지
     let macroRoughnessVariation = (globalORM.g - 0.5) * 0.4 * hasGlobalORM;
     let finalRoughness = clamp(blendedRoughness + macroRoughnessVariation, 0.04, 1.0);
 

@@ -36,16 +36,11 @@ interface TerrainMaterial {
     ormArray: TextureArray;
     textureSampler: Sampler;
     ormTexture: BitmapTexture;
-    // RVT 전용 바인딩 슬롯
     rvtAlbedoTexture: DirectTexture;
     rvtNormalORMTexture: DirectTexture;
     rvtSampler: Sampler;
 }
 
-/**
- * [KO] CDLOD 지형 렌더링에 사용되는 전용 물리 기반(PBR) 머티리얼 클래스입니다.
- * [EN] Dedicated physical-based (PBR) material class used for CDLOD terrain rendering.
- */
 class TerrainMaterial extends ABitmapBaseMaterial {
     #layers: TerrainLayerConfig[] = [];
     #rvt: TerrainRVT
@@ -71,7 +66,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
         this.initGPURenderInfos();
 
-        // 💡 지형 타일링 텍스처의 반복(Repeat) 매핑을 위한 선형 필터링 샘플러 (밉맵 및 이방성 필터링 적용)
         this.textureSampler = new Sampler(redGPUContext, {
             magFilter: GPU_FILTER_MODE.LINEAR,
             minFilter: GPU_FILTER_MODE.LINEAR,
@@ -80,7 +74,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
             addressModeV: GPU_ADDRESS_MODE.REPEAT
         });
 
-        // 💡 RVT 아틀라스 텍스처용 선형 필터링 샘플러 (클램프 모드, 아틀라스 경계 보호)
         this.rvtSampler = new Sampler(redGPUContext, {
             magFilter: GPU_FILTER_MODE.LINEAR,
             minFilter: GPU_FILTER_MODE.LINEAR,
@@ -199,10 +192,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         this.bakeRVT();
     }
 
-    /**
-     * [KO] 단일 지형 디테일 레이어를 추가합니다. (최대 4개)
-     * [EN] Adds a single terrain detail layer. (Maximum 4)
-     */
     public addLayer(config: TerrainLayerConfig): number {
         if (this.#layers.length >= 4) {
             consoleAndThrowError("TerrainMaterial supports a maximum of 4 layers.");
@@ -213,10 +202,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         return this.#layers.length - 1;
     }
 
-    /**
-     * [KO] 인덱스 또는 이름을 기준으로 특정 레이어를 제거합니다.
-     * [EN] Removes a specific layer by index or name.
-     */
     public removeLayer(indexOrName: number | string): boolean {
         const targetIndex = typeof indexOrName === 'string'
             ? this.#layers.findIndex(l => l.name === indexOrName)
@@ -231,10 +216,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         return false;
     }
 
-    /**
-     * [KO] 인덱스 또는 이름을 기준으로 특정 레이어의 속성을 부분 수정합니다.
-     * [EN] Partially updates properties of a specific layer by index or name.
-     */
     public updateLayer(indexOrName: number | string, partialConfig: Partial<TerrainLayerConfig>): boolean {
         const targetIndex = typeof indexOrName === 'string'
             ? this.#layers.findIndex(l => l.name === indexOrName)
@@ -284,7 +265,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
             keepLog('오긴오냐', this.uuid)
             this.bakeRVT();
         }
-        // 💡 Diffuse(Albedo)는 sRGB 포맷, 데이터 맵(Normal/Height/ORM)은 Linear(rgba8unorm) 포맷으로 내부 자동 설정
         this.diffuseArray = new TextureArray(ctx, diffuseSrcs, true, onLoad, undefined, 'rgba8unorm-srgb');
         this.normalArray = new TextureArray(ctx, normalSrcs, true, onLoad, undefined, 'rgba8unorm');
         this.heightArray = new TextureArray(ctx, heightSrcs, true, onLoad, undefined, 'rgba8unorm');
@@ -310,7 +290,6 @@ defineTexture(TerrainMaterial, [
     {key: 'baseColorTexture'},
     {key: 'splatTexture'},
     {key: 'ormTexture'},
-    // RVT 아틀라스 텍스처 슬롯
     {key: 'rvtAlbedoTexture'},
     {key: 'rvtNormalORMTexture'},
 ]);
@@ -321,4 +300,3 @@ defineSampler(TerrainMaterial, [
 
 Object.freeze(TerrainMaterial);
 export default TerrainMaterial;
-
