@@ -1,5 +1,3 @@
-import {vec3} from "gl-matrix";
-
 export interface TerrainTileKey {
     gridX: number;
     gridZ: number;
@@ -72,17 +70,26 @@ export class TerrainSpatialGrid {
         return this.#activeTiles;
     }
 
-    setTerrainBounds(minX: number, minZ: number, maxX: number, maxZ: number) {
-        this.#terrainBounds = [minX, minZ, maxX, maxZ];
-    }
 
-    update(cameraPosition: [number, number, number] | vec3, cameraDirection?: [number, number, number]): {
+    update(
+        camera: any,
+        worldOffset?: [number, number],
+        worldSize?: [number, number]
+    ): {
         toLoad: SpatialTileInfo[];
         toUnload: SpatialTileInfo[];
     } {
-        const camX = cameraPosition[0];
-        const camY = cameraPosition[1];
-        const camZ = cameraPosition[2];
+        if (worldOffset && worldSize) {
+            const minX = worldOffset[0];
+            const minZ = worldOffset[1];
+            const maxX = minX + worldSize[0];
+            const maxZ = minZ + worldSize[1];
+            this.#terrainBounds = [minX, minZ, maxX, maxZ];
+        }
+
+        const camX = camera.x;
+        const camY = camera.y;
+        const camZ = camera.z;
 
         const centerGridX = Math.floor(camX / this.#cellSize);
         const centerGridZ = Math.floor(camZ / this.#cellSize);
@@ -102,11 +109,14 @@ export class TerrainSpatialGrid {
 
         let dirX = 0, dirZ = 0;
         let hasDir = false;
-        if (cameraDirection) {
-            const len = Math.hypot(cameraDirection[0], cameraDirection[2]);
+        if (camera?.viewMatrix) {
+            const vm = camera.viewMatrix;
+            const fx = -vm[2];
+            const fz = -vm[10];
+            const len = Math.hypot(fx, fz);
             if (len > 0.0001) {
-                dirX = cameraDirection[0] / len;
-                dirZ = cameraDirection[2] / len;
+                dirX = fx / len;
+                dirZ = fz / len;
                 hasDir = true;
             }
         }

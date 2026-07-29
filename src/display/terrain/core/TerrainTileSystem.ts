@@ -183,17 +183,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
         const cameraPos: [number, number, number] = [localCamX, localCamY, localCamZ];
 
         if (this.#spatialGrid) {
-            const minX = this.worldOffset[0];
-            const minZ = this.worldOffset[1];
-            const maxX = minX + this.worldSize[0];
-            const maxZ = minZ + this.worldSize[1];
-            this.#spatialGrid.setTerrainBounds(minX, minZ, maxX, maxZ);
-
-            const camFwd = camera.cameraVector ? camera.cameraVector.forward : undefined;
-            const camDir: [number, number, number] | undefined = camFwd ? [camFwd[0], camFwd[1], camFwd[2]] : undefined;
-
-            const {toLoad, toUnload} = this.#spatialGrid.update([camera.x, camera.y, camera.z], camDir);
-
+            const {toLoad, toUnload} = this.#spatialGrid.update(camera, this.worldOffset, this.worldSize);
             this.#tileStreamMetrics.update();
 
             if (toLoad.length > 0) {
