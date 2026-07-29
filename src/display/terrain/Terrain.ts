@@ -56,7 +56,7 @@ class Terrain extends Mesh {
     #atlasTileCountX: number = 16;
     #atlasTileCountZ: number = 16;
     #atlasTileSize: number = 512;
-    #loadedTileTextures: Map<string, any> = new Map();
+    #loadedTileTextures: Map<string, any> = new Map(); // 외부 API 호환성 유지용 (내부적으로는 미사용)
     #synthesizedTilesSet: Set<string> = new Set();
     #tileImageCache: Map<string, any> = new Map();
 
@@ -212,44 +212,6 @@ class Terrain extends Mesh {
         this.#synthesizedTilesSet.clear();
     }
 
-    /**
-     * [KO] 로드된 타일 텍스처 자원을 엔진 내부에서 자동 보관 및 관리합니다.
-     * [EN] Automatically stores and manages loaded tile texture resources inside the engine.
-     */
-    registerTileTexture(tile: SpatialTileInfo, texture: any) {
-        const key = tile.cellKey || `${tile.gridX}_${tile.gridZ}`;
-        if (this.#loadedTileTextures.has(key)) {
-            const oldTex = this.#loadedTileTextures.get(key);
-            if (oldTex && typeof oldTex.destroy === 'function') {
-                oldTex.destroy();
-            }
-        }
-        this.#loadedTileTextures.set(key, texture);
-    }
-
-    /**
-     * [KO] 해당 타일 텍스처가 엔진 내부에 로드되어 관리 중인지 여부를 반환합니다.
-     * [EN] Returns whether the specified tile texture is loaded and managed inside the engine.
-     */
-    hasTileTexture(tile: SpatialTileInfo | string): boolean {
-        const key = typeof tile === 'string' ? tile : (tile.cellKey || `${tile.gridX}_${tile.gridZ}`);
-        return this.#loadedTileTextures.has(key);
-    }
-
-    /**
-     * [KO] 언로드된 타일 텍스처 자원을 엔진 내부에서 자동 파기 및 해제합니다.
-     * [EN] Automatically destroys and releases unloaded tile texture resources inside the engine.
-     */
-    unregisterTileTexture(tile: SpatialTileInfo) {
-        const key = tile.cellKey || `${tile.gridX}_${tile.gridZ}`;
-        if (this.#loadedTileTextures.has(key)) {
-            const tex = this.#loadedTileTextures.get(key);
-            if (tex && typeof tex.destroy === 'function') {
-                tex.destroy();
-            }
-            this.#loadedTileTextures.delete(key);
-        }
-    }
 
     constructor(redGPUContext: RedGPUContext, heightmapUrl?: string, name?: string) {
         const geometry = new TerrainGeometry(redGPUContext);
@@ -594,8 +556,8 @@ class Terrain extends Mesh {
                 if (this.#tileUrlResolver) {
                     toLoad.forEach(tile => {
                         enrichTileInfo(tile);
-                        // 💡 이미 GPU Atlas에 합성 완료되었거나 텍스처가 로딩된 타일은 콜백 호출 자체를 스킵
-                        if (this.isTileSynthesized(tile) || this.hasTileTexture(tile)) return;
+                        // 💡 이미 GPU Atlas에 합성 완료된 타일은 콜백 호출 자체를 스킵
+                        if (this.isTileSynthesized(tile)) return;
                         this.#frameLoadCount++;
                         const result = this.#tileUrlResolver!(tile);
                         // 💡 URL 문자열을 반환하면 자동으로 loadTileFromUrl 호출
@@ -609,7 +571,6 @@ class Terrain extends Mesh {
                 this.#frameUnloadCount += toUnload.length;
                 toUnload.forEach(tile => {
                     enrichTileInfo(tile);
-                    this.unregisterTileTexture(tile);
                     if (this.#onTileUnloadCallback) {
                         this.#onTileUnloadCallback!(tile);
                     }
@@ -763,9 +724,6 @@ class Terrain extends Mesh {
             tileX = tile.tileCol ?? 0;
             tileZ = tile.tileRow ?? 0;
             sourceTexture = tileRowOrTexture as BitmapTexture;
-            if (sourceTexture) {
-                this.registerTileTexture(tile, sourceTexture);
-            }
         } else {
             tileX = tileOrCol as number;
             tileZ = tileRowOrTexture as number;
@@ -838,6 +796,11 @@ class Terrain extends Mesh {
 
         device.queue.submit([encoder.finish()]);
         this.markTileSynthesized(`${tileX}_${tileZ}`);
+
+        // 💡 GPU Atlas 복사 완료 즉시 중간 BitmapTexture(CPU 디코딩 버퍼) 파기 → VRAM/RAM 즉시 반환
+        if (sourceTexture && typeof sourceTexture.destroy === 'function') {
+            sourceTexture.destroy();
+        }
 
         // 3. 💡 높이맵 타일이 갱신되는 즉시 RVT (Runtime Virtual Texture) 베이커를 가동하여 표면 텍스처 재베이킹!
         if (this.material && typeof (this.material as any).bakeRVT === 'function') {
