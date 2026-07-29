@@ -577,6 +577,7 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
 
             const state = {
                 wireframe: false,
+                gridSize: terrain.gridSize,
                 maxLOD: terrain.maxLOD,
                 minHeight: terrain.minHeight,
                 maxHeight: terrain.maxHeight,
@@ -592,6 +593,18 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
                     terrain.primitiveState.topology = ev.value ? 'line-list' : 'triangle-list';
                     terrain.dirtyPipeline = true;
                 });
+
+            terrainFolder.addBinding(state, 'gridSize', {
+                label: '패치 격자 분할 수 (gridSize)',
+                options: {
+                    '16 x 16': 16,
+                    '32 x 32': 32,
+                    '64 x 64': 64,
+                    '128 x 128': 128
+                }
+            }).on('change', (ev) => {
+                terrain.gridSize = ev.value;
+            });
 
 
             terrainFolder.addBinding(state, 'maxLOD', {

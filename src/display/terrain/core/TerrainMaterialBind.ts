@@ -4,8 +4,8 @@ import BitmapTexture from "../../../resources/texture/BitmapTexture";
 
 class TerrainMaterialBind extends TerrainLayerSystem {
 
-    constructor(redGPUContext: RedGPUContext) {
-        super(redGPUContext);
+    constructor(redGPUContext: RedGPUContext, gridSize: number = 64) {
+        super(redGPUContext, gridSize);
     }
 
     get baseColorTexture(): BitmapTexture {

@@ -10,6 +10,7 @@ import defineVector2 from "../../../defineProperty/funcs/vector/defineVector2";
 import {TerrainQuadtree} from "./TerrainQuadtree";
 import defineNumber from "../../../defineProperty/funcs/number/defineNumber";
 import updateTargetUniform from "../../../defineProperty/core/updateTargetUniform";
+import TerrainGeometry from "./TerrainGeometry";
 
 interface TerrainTileSystem {
     heightmapAtlasTexture: DirectTexture | BitmapTexture | null;
@@ -21,7 +22,6 @@ interface TerrainTileSystem {
     maxHeight: number;
 
     maxLOD: number;
-    gridSize: number;
 
     baseSlotIndex: number;
 }
@@ -48,6 +48,7 @@ class TileStreamMetrics {
 export interface TerrainOptions {
     cellSize?: number;
     loadingRadius?: number;
+    gridSize?: number;
 }
 
 class TerrainTileSystem extends TerrainMaterialBind {
@@ -64,10 +65,12 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #atlasTileCountX: number = 16;
     #atlasTileCountZ: number = 16;
     #atlasTileSize: number = 512;
+    #gridSize: number = 64;
     #tileStreamMetrics = new TileStreamMetrics();
 
     constructor(redGPUContext: RedGPUContext, options?: TerrainOptions) {
-        super(redGPUContext);
+        const gridSize = options?.gridSize ?? 64;
+        super(redGPUContext, gridSize);
         const cellSize = options?.cellSize ?? 256;
         const loadingRadius = options?.loadingRadius ?? 2560;
         this.#spatialGrid = new TerrainSpatialGrid(cellSize, loadingRadius);
@@ -77,7 +80,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.worldSize = [1, 1];
         this.maxLOD = 4;
         this.baseSlotIndex = 0;
-        this.gridSize = 64;
+        this.#gridSize = gridSize;
 
         const maxInstances = 4096;
         this.#instanceBuffer = redGPUContext.gpuDevice.createBuffer({
@@ -103,6 +106,16 @@ class TerrainTileSystem extends TerrainMaterialBind {
     set lodRanges(value: Float32Array) {
         this.#lodRanges = value;
         updateTargetUniform(this, 'lodRanges', value);
+    }
+
+    get gridSize(): number {
+        return this.#gridSize;
+    }
+
+    set gridSize(value: number) {
+        this.geometry = new TerrainGeometry(this.redGPUContext, value);
+        this.#gridSize = value;
+        updateTargetUniform(this, 'gridSize', value);
     }
 
     get atlasTileCountX(): number {
@@ -416,9 +429,7 @@ defineNumber(TerrainTileSystem, [
     {key: "maxLOD", value: 4},
     {key: "baseSlotIndex", value: 0},
     {key: "minHeight", value: 0},
-    {key: "maxHeight", value: 1},
-    {key: "gridSize", value: 64}
-
+    {key: "maxHeight", value: 1}
 ])
 defineVector2(TerrainTileSystem, [
     {key: "worldOffset", value: [0, 0]},

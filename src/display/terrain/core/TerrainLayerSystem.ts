@@ -4,8 +4,8 @@ import TerrainGeometry from "./TerrainGeometry";
 import TerrainMaterial, {TerrainLayerConfig} from "./material/TerrainMaterial";
 
 class TerrainLayerSystem extends Mesh {
-    constructor(redGPUContext: RedGPUContext) {
-        const geometry = new TerrainGeometry(redGPUContext);
+    constructor(redGPUContext: RedGPUContext, gridSize: number = 64) {
+        const geometry = new TerrainGeometry(redGPUContext, gridSize);
         const material = new TerrainMaterial(redGPUContext);
         super(redGPUContext, geometry, material);
     }
