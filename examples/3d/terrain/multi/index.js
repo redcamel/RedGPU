@@ -117,7 +117,7 @@ function updateSpatialGrid2DDebugger(terrain, camera) {
         debugCtx.strokeRect(cx0, cy0, tw, th);
     });
 
-    // 4. 카메라 감지 반경 원 (2.5km Circle)
+    // 4. 카메라 감지 반경 원
     const [camCanvasX, camCanvasY] = worldToCanvas(camera.x, camera.z);
     const radiusPixels = (terrain.spatialGrid.loadingRadius / WORLD_SIZE) * mapDrawSize;
 
@@ -139,9 +139,16 @@ function updateSpatialGrid2DDebugger(terrain, camera) {
     debugCtx.stroke();
 }
 
+let frameLoadCount = 0;
+let frameUnloadCount = 0;
+let lastFrameLoadCount = 0;
+let lastFrameUnloadCount = 0;
+
 function updateHUD(terrain, camera) {
     const leafCount = terrain.quadtree ? terrain.quadtree.leafNodes.length : 0;
     const streamedTileCount = terrain.spatialGrid ? terrain.spatialGrid.activeTiles.size : 0;
+    const pendingQueueCount = terrain.spatialGrid ? terrain.spatialGrid.pendingQueueSize : 0;
+    const maxBudget = terrain.spatialGrid ? terrain.spatialGrid.maxLoadsPerFrame : 2;
     const cellSize = terrain.spatialGrid ? terrain.spatialGrid.cellSize : 512;
     const centerGridX = Math.floor(camera.x / cellSize);
     const centerGridZ = Math.floor(camera.z / cellSize);
@@ -153,7 +160,10 @@ function updateHUD(terrain, camera) {
         <b style="color:#7dd3fc;font-size:14px;">🌍 CDLOD Quadtree & World Partition</b><br>
         <span style="color:#94a3b8;">──────────────────</span><br>
         🗂 활성 CDLOD 노드 : <b style="color:#4ade80;">${leafCount}</b><br>
-        🛰 활성 스트리밍 셀 : <b style="color:#38bdf8;">${streamedTileCount}</b>개 (반경 2.5km)<br>
+        🛰 활성 스트리밍 셀 : <b style="color:#38bdf8;">${streamedTileCount}</b>개 (반경 3.5km)<br>
+        📥 프레임당 로드 (toLoad)   : <b style="color:#4ade80;">${lastFrameLoadCount}</b>개 (예산: ${maxBudget > 0 ? maxBudget + '개/프레임' : '제한없음'})<br>
+        ⏳ 로딩 대기 큐 (Pending)   : <b style="color:#fbbf24;">${pendingQueueCount}</b>개<br>
+        📤 프레임당 언로드 (toUnload) : <b style="color:#f87171;">${lastFrameUnloadCount}</b>개<br>
         🎯 중심 셀 위치     : <b style="color:#a7f3d0;">Cell(${centerGridX}, ${centerGridZ})</b><br>
         📐 월드 스케일     : <b style="color:#fbbf24;">${WORLD_SIZE} × ${WORLD_SIZE}</b><br>
         🏔 최대 높이       : <b style="color:#f87171;">${MAX_H}</b><br>
@@ -176,8 +186,8 @@ RedGPU.init(
         controller.moveSpeed = 5000;              // 20km 초대형 월드를 시원하게 누비는 비행 속도
         controller.mouseSensitivity = 0.2;       // 마우스 시선 회전 감도
         controller.x = 0;                        // 지형 X
-        controller.y = 1000;                     // 20km 스케일을 바라보는 1km 상공 시점
-        controller.z = -4000;                    // 중심부 남쪽 시점
+        controller.y = 1500;                     // 20km 스케일을 바라보는 1km 상공 시점
+        controller.z = 0;                    // 중심부 남쪽 시점
         controller.tilt = -15;                   // 20km 아득한 산맥 지평선을 내려다보는 각도
         controller.pan = 0;
         controller.camera.farClipping = 100000;  // 20km 원경 끝까지 잘림 없이 시원하게 보이도록 확장
@@ -271,11 +281,11 @@ RedGPU.init(
         terrain.spatialGrid.loadingRadius = 3500;  // 반경 3.5km 동적 로딩
 
         terrain.setOnTileLoad((tile) => {
-            // console.log(`📥 [Streaming Load] Cell (${tile.gridX}, ${tile.gridZ}) | 거리: ${tile.distanceToCamera.toFixed(0)}m`);
+            frameLoadCount++;
         });
 
         terrain.setOnTileUnload((tile) => {
-            // console.log(`📤 [Streaming Unload] Cell (${tile.gridX}, ${tile.gridZ})`);
+            frameUnloadCount++;
         });
 
         scene.addTerrain(terrain);
@@ -289,6 +299,11 @@ RedGPU.init(
         const rawCam = controller;
 
         function hudLoop() {
+            lastFrameLoadCount = frameLoadCount;
+            lastFrameUnloadCount = frameUnloadCount;
+            frameLoadCount = 0;
+            frameUnloadCount = 0;
+
             updateHUD(terrain, rawCam);
             updateSpatialGrid2DDebugger(terrain, rawCam);
         }
@@ -300,7 +315,7 @@ RedGPU.init(
 
 
         // 7. GUI 패널
-        buildGUI(redGPUContext, terrain, controller);
+        buildGUI(redGPUContext, terrain, controller, view, heightFog);
     },
     (failReason) => {
         console.error('RedGPU 초기화 실패:', failReason);
@@ -312,12 +327,87 @@ RedGPU.init(
 );
 
 // ─── GUI 패널 ──────────────────────────────────────────────────────────────────
-function buildGUI(redGPUContext, terrain, controller) {
+function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
+    // 텍스처 켜기/끄기 토글용 원본 텍스처 인스턴스 백업 참조
+    const baseColorTextureInstance = terrain.baseColorTexture;
+    const ormTextureInstance = terrain.ormTexture;
+    const splatTextureInstance = terrain.splatTexture;
+
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
         ibl: true,
         skybox: true,
         gui: (pane) => {
+
+            // ── 0. HeightFog (대기 안개) 설정 ────────────────────────────────────
+            const fogFolder = pane.addFolder({title: '🌫️ HeightFog (대기 안개)', expanded: true});
+
+            const fogState = {
+                enabled: true,
+                fogColor: {
+                    r: heightFog.fogColor.r,
+                    g: heightFog.fogColor.g,
+                    b: heightFog.fogColor.b
+                }
+            };
+
+            fogFolder.addBinding(fogState, 'enabled', {label: '안개 사용 (ON/OFF)'})
+                .on('change', (ev) => {
+                    if (ev.value) {
+                        view.postEffectManager.addEffect(heightFog);
+                    } else {
+                        view.postEffectManager.removeEffect(heightFog);
+                    }
+                });
+
+            fogFolder.addBinding(heightFog, 'density', {
+                label: '안개 밀도 (Density)',
+                min: 0, max: 5, step: 0.05
+            });
+
+            fogFolder.addBinding(heightFog, 'thickness', {
+                label: '안개 두께 (Thickness)',
+                min: 10, max: 3000, step: 10
+            });
+
+            fogFolder.addBinding(heightFog, 'startDepth', {
+                label: '시작 거리 (Start Depth)',
+                min: 0, max: 30000, step: 100
+            });
+
+            fogFolder.addBinding(heightFog, 'endDepth', {
+                label: '최대 거리 (End Depth)',
+                min: 1000, max: 50000, step: 500
+            });
+
+            fogFolder.addBinding(heightFog, 'baseHeight', {
+                label: '기본 높이 (Base Height)',
+                min: -1000, max: 2000, step: 10
+            });
+
+            fogFolder.addBinding(fogState, 'fogColor', {
+                label: '안개 색상 (Fog Color)',
+                color: {type: 'float'}
+            }).on('change', (ev) => {
+                heightFog.fogColor.setColorByRGB(
+                    Math.round(ev.value.r * 255),
+                    Math.round(ev.value.g * 255),
+                    Math.round(ev.value.b * 255)
+                );
+            });
+
+            // ── 0.5. 공간 그리드 스트리밍 & 프레임 예산 ─────────────────────────
+            const streamingFolder = pane.addFolder({title: '🛰️ 공간 그리드 스트리밍 & 프레임 예산', expanded: true});
+
+            streamingFolder.addBinding(terrain.spatialGrid, 'maxLoadsPerFrame', {
+                label: '프레임당 최대 로드 예산',
+                min: 0, max: 10, step: 1
+            });
+
+            streamingFolder.addBinding(terrain.spatialGrid, 'loadingRadius', {
+                label: '스트리밍 로딩 반경 (m)',
+                min: 1000, max: 10000, step: 250
+            });
 
             // ── 1. RVT (Runtime Virtual Texture) 설정 ───────────────────────────
             const rvtFolder = pane.addFolder({title: '⚡ RVT (Runtime Virtual Texture)', expanded: true});
@@ -490,20 +580,24 @@ function buildGUI(redGPUContext, terrain, controller) {
                 label: '베이스 컬러 맵 사용'
             }).on('change', (ev) => {
                 terrain.baseColorTexture = ev.value ? baseColorTextureInstance : null;
+                terrain.material.bakeRVT();
             });
 
             textureFolder.addBinding(state, 'useOrmTexture', {
                 label: 'ORM 맵 사용'
             }).on('change', (ev) => {
                 terrain.ormTexture = ev.value ? ormTextureInstance : null;
+                terrain.material.bakeRVT();
             });
 
             textureFolder.addBinding(state, 'useSplatTexture', {
                 label: '스플랫 맵 사용'
             }).on('change', (ev) => {
                 terrain.splatTexture = ev.value ? splatTextureInstance : null;
+                terrain.material.bakeRVT();
             });
 
         }
     });
 }
+

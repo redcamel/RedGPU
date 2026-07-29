@@ -13,6 +13,7 @@ export interface SpatialTileInfo {
     gridZ: number;
     worldBounds: [number, number, number, number]; // [minX, minZ, maxX, maxZ]
     distanceToCamera: number;
+    priority: number;
     state: TileState;
 }
 
@@ -23,7 +24,9 @@ export interface SpatialTileInfo {
 export class TerrainSpatialGrid {
     #cellSize: number = 512;          // 셀 하나의 가로세로 크기 (m)
     #loadingRadius: number = 2500;     // 카메라 기준 활성 스트리밍 반경 (m)
+    #maxLoadsPerFrame: number = 2;     // 프레임당 최대 로드 수 (0: 제한 없음)
     #activeTiles: Map<string, SpatialTileInfo> = new Map();
+    #pendingQueue: Map<string, SpatialTileInfo> = new Map(); // 로딩 대기 큐 (key -> tile)
     #lastCameraGridX: number = NaN;
     #lastCameraGridZ: number = NaN;
 
@@ -54,6 +57,18 @@ export class TerrainSpatialGrid {
         this.#loadingRadius = val;
     }
 
+    get maxLoadsPerFrame(): number {
+        return this.#maxLoadsPerFrame;
+    }
+
+    set maxLoadsPerFrame(val: number) {
+        this.#maxLoadsPerFrame = val;
+    }
+
+    get pendingQueueSize(): number {
+        return this.#pendingQueue.size;
+    }
+
     get activeTiles(): Map<string, SpatialTileInfo> {
         return this.#activeTiles;
     }
@@ -63,14 +78,15 @@ export class TerrainSpatialGrid {
     }
 
     /**
-     * [KO] 매 프레임 카메라 위치를 기준으로 그리드 세포의 로딩/언로딩 상태를 갱신합니다.
-     * [EN] Updates the loading/unloading state of grid cells based on camera position every frame.
+     * [KO] 매 프레임 카메라 위치 및 시선 방향을 기준으로 그리드 세포의 로딩/언로딩 상태를 갱신합니다.
+     * [EN] Updates the loading/unloading state of grid cells based on camera position and view direction every frame.
      */
-    update(cameraPosition: [number, number, number] | vec3): {
+    update(cameraPosition: [number, number, number] | vec3, cameraDirection?: [number, number, number]): {
         toLoad: SpatialTileInfo[];
         toUnload: SpatialTileInfo[];
     } {
         const camX = cameraPosition[0];
+        const camY = cameraPosition[1];
         const camZ = cameraPosition[2];
 
         const centerGridX = Math.floor(camX / this.#cellSize);
@@ -90,6 +106,18 @@ export class TerrainSpatialGrid {
 
         const [tbMinX, tbMinZ, tbMaxX, tbMaxZ] = this.#terrainBounds || [-Infinity, -Infinity, Infinity, Infinity];
 
+        // 카메라 정면 벡터 (존재하는 경우)
+        let dirX = 0, dirZ = 0;
+        let hasDir = false;
+        if (cameraDirection) {
+            const len = Math.hypot(cameraDirection[0], cameraDirection[2]);
+            if (len > 0.0001) {
+                dirX = cameraDirection[0] / len;
+                dirZ = cameraDirection[2] / len;
+                hasDir = true;
+            }
+        }
+
         for (let gx = centerGridX - radiusInCells; gx <= centerGridX + radiusInCells; gx++) {
             for (let gz = centerGridZ - radiusInCells; gz <= centerGridZ + radiusInCells; gz++) {
                 const minX = gx * this.#cellSize;
@@ -104,31 +132,51 @@ export class TerrainSpatialGrid {
 
                 const tileCenterX = minX + this.#cellSize * 0.5;
                 const tileCenterZ = minZ + this.#cellSize * 0.5;
-                const distSq = (tileCenterX - camX) ** 2 + (tileCenterZ - camZ) ** 2;
+                const toTileX = tileCenterX - camX;
+                const toTileZ = tileCenterZ - camZ;
+                const distSq = toTileX ** 2 + toTileZ ** 2;
+                const dist = Math.sqrt(distSq);
 
-                if (distSq <= this.#loadingRadius ** 2) {
+                if (dist <= this.#loadingRadius) {
                     const key = `${gx}_${gz}`;
                     currentFrameKeys.add(key);
 
-                    if (!this.#activeTiles.has(key)) {
+                    // 우선순위 계산: 거리 가중치 + (시선 방향 내적 가중치)
+                    let dotWeight = 1.0;
+                    if (hasDir && dist > 0.0001) {
+                        const nx = toTileX / dist;
+                        const nz = toTileZ / dist;
+                        const dot = nx * dirX + nz * dirZ; // -1 ~ 1
+                        dotWeight = Math.max(0.1, (dot + 1.0) * 0.5); // 0.1 ~ 1.0
+                    }
+                    const priority = dotWeight / (dist + 1.0);
+
+                    if (this.#activeTiles.has(key)) {
+                        const existing = this.#activeTiles.get(key)!;
+                        existing.distanceToCamera = dist;
+                        existing.priority = priority;
+                    } else if (this.#pendingQueue.has(key)) {
+                        const existingPending = this.#pendingQueue.get(key)!;
+                        existingPending.distanceToCamera = dist;
+                        existingPending.priority = priority;
+                    } else {
+                        // 새로운 로딩 대상 타일을 대기 큐에 등록
                         const tileInfo: SpatialTileInfo = {
                             gridX: gx,
                             gridZ: gz,
                             worldBounds: [minX, minZ, maxX, maxZ],
-                            distanceToCamera: Math.sqrt(distSq),
+                            distanceToCamera: dist,
+                            priority,
                             state: 'LOADING'
                         };
-                        this.#activeTiles.set(key, tileInfo);
-                        toLoad.push(tileInfo);
-                    } else {
-                        const existing = this.#activeTiles.get(key)!;
-                        existing.distanceToCamera = Math.sqrt(distSq);
+                        this.#pendingQueue.set(key, tileInfo);
                     }
                 }
             }
         }
 
-        // 반경을 벗어난 타일 Unload 수집
+        // 반경을 벗어난 타일 처리
+        // 1) 활성 타일 중 반경 밖으로 벗어난 경우 Unload
         for (const [key, tile] of this.#activeTiles.entries()) {
             if (!currentFrameKeys.has(key)) {
                 tile.state = 'UNLOADED';
@@ -137,8 +185,28 @@ export class TerrainSpatialGrid {
             }
         }
 
-        // 카메라 거리에 따라 로딩 우선순위 정렬 (가까운 타일 우선)
-        toLoad.sort((a, b) => a.distanceToCamera - b.distanceToCamera);
+        // 2) 대기 큐 타일 중 반경 밖으로 벗어난 경우 큐에서 제거
+        for (const [key] of this.#pendingQueue.entries()) {
+            if (!currentFrameKeys.has(key)) {
+                this.#pendingQueue.delete(key);
+            }
+        }
+
+        // 대기 큐 타일들을 우선순위(Priority) 내림차순 정렬 (시선 정면에 가깝고 가까운 타일 우선)
+        const pendingArray = Array.from(this.#pendingQueue.values());
+        pendingArray.sort((a, b) => b.priority - a.priority);
+
+        // maxLoadsPerFrame (Frame Budgeting) 수량만큼 대기 큐에서 꺼내어 활성화(Load)
+        const loadBudget = this.#maxLoadsPerFrame > 0 ? this.#maxLoadsPerFrame : pendingArray.length;
+        const tilesToProcess = pendingArray.slice(0, loadBudget);
+
+        for (const tile of tilesToProcess) {
+            const key = `${tile.gridX}_${tile.gridZ}`;
+            tile.state = 'LOADED';
+            this.#pendingQueue.delete(key);
+            this.#activeTiles.set(key, tile);
+            toLoad.push(tile);
+        }
 
         return {toLoad, toUnload};
     }
