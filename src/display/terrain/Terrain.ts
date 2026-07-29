@@ -1,5 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import {TerrainLayerConfig} from "./material/TerrainMaterial";
+import {TerrainLayerConfig} from "./core/material/TerrainMaterial";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import DirectTexture from "../../resources/texture/DirectTexture";
 import Sampler from "../../resources/sampler/Sampler";
@@ -11,13 +11,13 @@ import defineNumber from "../../defineProperty/funcs/number/defineNumber";
 import defineVector2 from "../../defineProperty/funcs/vector/defineVector2";
 import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
 import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
-import {TerrainQuadtree} from "./TerrainQuadtree";
-import {SpatialTileInfo, TerrainSpatialGrid} from "./TerrainSpatialGrid";
+import {TerrainQuadtree} from "./core/TerrainQuadtree";
+import {SpatialTileInfo, TerrainSpatialGrid} from "./core/TerrainSpatialGrid";
 import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import {keepLog} from "../../utils";
-import TerrainLayerSystem from "./TerrainLayerSystem";
+import TerrainMaterialBind from "./core/TerrainMaterialBind";
 
 export type {TerrainLayerConfig};
 
@@ -40,7 +40,7 @@ interface Terrain {
     enableStreaming: boolean;
 }
 
-class Terrain extends TerrainLayerSystem {
+class Terrain extends TerrainMaterialBind {
     quadtree: TerrainQuadtree;
     spatialGrid: TerrainSpatialGrid;
     instanceBuffer: GPUBuffer;
@@ -213,9 +213,12 @@ class Terrain extends TerrainLayerSystem {
     }
 
 
-    constructor(redGPUContext: RedGPUContext, heightmapUrl?: string, name?: string) {
-        super(redGPUContext);
+    constructor(redGPUContext: RedGPUContext, name?: string) {
 
+        super(redGPUContext);
+        if (name) {
+            this.name = name
+        }
         this.spatialGrid = new TerrainSpatialGrid(256, 2560);
         this.enableStreaming = false;
 
@@ -259,159 +262,10 @@ class Terrain extends TerrainLayerSystem {
             label: 'TerrainInstanceBuffer'
         });
 
-        if (heightmapUrl) {
-            this.heightTexture = new BitmapTexture(redGPUContext, heightmapUrl);
-        }
-    }
-
-    /**
-     * [KO] Terrain 텍스처를 URL 문자열만으로 간편하게 일괄 설정합니다.
-     * 각 텍스처 타입에 맞는 GPU 포맷·밉맵 옵션을 내부에서 자동으로 적용합니다.
-     *
-     * [EN] Convenience method to set all terrain textures by URL.
-     * Correct GPU format and mipmap options are applied internally for each texture type.
-     *
-     * @example
-     * ```js
-     * terrain.setup({
-     *     height:    'path/to/height.jpg',
-     *     baseColor: 'path/to/diffuse.jpg',
-     *     orm:       'path/to/orm.jpg',
-     *     splat:     'path/to/splatMap.jpg',
-     * });
-     * ```
-     */
-    setup(options: {
-        /** [KO] 높이맵 URL — 밉맵 없음, r16float 포맷으로 자동 로딩 */
-        height?: string;
-        /** [KO] 글로벌 베이스 컬러(Diffuse) URL — sRGB 포맷으로 자동 로딩 */
-        baseColor?: string;
-        /** [KO] 글로벌 ORM 텍스처 URL — Linear(rgba8unorm) 포맷으로 자동 로딩 */
-        orm?: string;
-        /** [KO] 스플랫 맵 URL — Linear(rgba8unorm) 포맷으로 자동 로딩 */
-        splat?: string;
-    }): this {
-        const ctx = this.redGPUContext;
-
-        if (options.height) {
-            // 💡 높이맵: 밉맵 불필요(CDLOD Morph가 LOD 처리), r16float 정밀도 포맷
-            this.heightTexture = new BitmapTexture(ctx, options.height, false, null, null, 'r16float');
-        }
-
-        if (options.baseColor) {
-            // 💡 베이스 컬러: sRGB 감마 정정 포맷 (BitmapTexture 기본값 = srgb, 명시 생략)
-            this.material.baseColorTexture = new BitmapTexture(ctx, options.baseColor);
-        }
-
-        if (options.orm) {
-            // 💡 ORM: Linear 포맷 필수 (감마 보정 없이 R=AO, G=Roughness, B=Metallic 수치 그대로)
-            this.material.ormTexture = new BitmapTexture(ctx, options.orm, true, null, null, 'rgba8unorm');
-        }
-
-        if (options.splat) {
-            // 💡 스플랫 맵: Linear 포맷 필수 (R,G,B,A 채널을 가중치 수치 그대로 샘플링)
-            this.material.splatTexture = new BitmapTexture(ctx, options.splat, true, null, null, 'rgba8unorm');
-        }
-
-        return this;
     }
 
 
-    get baseColorTexture(): BitmapTexture {
-        return this.material.baseColorTexture;
-    }
 
-    set baseColorTexture(texture: BitmapTexture) {
-        this.material.baseColorTexture = texture;
-    }
-
-    get ormTexture(): BitmapTexture {
-        return this.material.ormTexture;
-    }
-
-    set ormTexture(texture: BitmapTexture) {
-        this.material.ormTexture = texture;
-    }
-
-    get splatTexture(): BitmapTexture {
-        return this.material.splatTexture;
-    }
-
-    set splatTexture(texture: BitmapTexture) {
-        this.material.splatTexture = texture;
-    }
-
-    get tileScale(): number {
-        return this.material.tileScale;
-    }
-
-    set tileScale(value: number) {
-        this.material.tileScale = value;
-    }
-
-    get macroScale(): number {
-        return this.material.macroScale;
-    }
-
-    set macroScale(value: number) {
-        this.material.macroScale = value;
-    }
-
-    get metallicFactor(): number {
-        return this.material.metallicFactor;
-    }
-
-    set metallicFactor(value: number) {
-        this.material.metallicFactor = value;
-    }
-
-    get roughnessFactor(): number {
-        return this.material.roughnessFactor;
-    }
-
-    set roughnessFactor(value: number) {
-        this.material.roughnessFactor = value;
-    }
-
-    get normalScale(): number {
-        return this.material.normalScale;
-    }
-
-    set normalScale(value: number) {
-        this.material.normalScale = value;
-    }
-
-    get occlusionStrength(): number {
-        return this.material.occlusionStrength;
-    }
-
-    set occlusionStrength(value: number) {
-        this.material.occlusionStrength = value;
-    }
-
-    get blendContrast(): number {
-        return this.material.blendContrast;
-    }
-
-    set blendContrast(value: number) {
-        this.material.blendContrast = value;
-    }
-
-    get baseColorWeight(): number {
-        return this.material.baseColorWeight;
-    }
-
-    set baseColorWeight(value: number) {
-        this.material.baseColorWeight = value;
-    }
-
-    get baseColorBlendMode(): 'mix' | 'multiply' {
-        return this.material.baseColorBlendMode;
-    }
-
-    set baseColorBlendMode(value: 'mix' | 'multiply') {
-        this.material.baseColorBlendMode = value;
-    }
 
 
     get lodRanges(): Float32Array {

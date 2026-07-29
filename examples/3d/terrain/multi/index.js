@@ -354,7 +354,6 @@ RedGPU.init(
         // 3. 거대 Terrain 생성
         terrain = new RedGPU.Display.Terrain(
             redGPUContext,
-            undefined,
             'CDLOD_Terrain'
         );
 

@@ -1,7 +1,7 @@
 import Terrain, {TerrainLayerConfig} from "./Terrain";
-import TerrainMaterial from "./material/TerrainMaterial";
-import TerrainRVT from "./rvt/TerrainRVT";
-import {SpatialTileInfo, TerrainSpatialGrid} from "./TerrainSpatialGrid";
+import TerrainMaterial from "./core/material/TerrainMaterial";
+import TerrainRVT from "./core/rvt/TerrainRVT";
+import {SpatialTileInfo, TerrainSpatialGrid} from "./core/TerrainSpatialGrid";
 
 export {
     Terrain,

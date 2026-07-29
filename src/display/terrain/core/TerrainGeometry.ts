@@ -1,8 +1,8 @@
-import RedGPUContext from "../../context/RedGPUContext";
-import Geometry from "../../geometry/Geometry";
-import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
-import IndexBuffer from "../../resources/buffer/indexBuffer/IndexBuffer";
-import Primitive from "../../primitive/core/Primitive";
+import RedGPUContext from "../../../context/RedGPUContext";
+import Geometry from "../../../geometry/Geometry";
+import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
+import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
+import Primitive from "../../../primitive/core/Primitive";
 
 /**
  * [KO] CDLOD 지형 렌더링에 사용되는 2D 평면 그리드 지오메트리 클래스입니다.

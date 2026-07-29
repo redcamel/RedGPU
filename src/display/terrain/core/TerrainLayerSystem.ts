@@ -1,5 +1,5 @@
-import Mesh from "../mesh/Mesh";
-import RedGPUContext from "../../context/RedGPUContext";
+import Mesh from "../../mesh/Mesh";
+import RedGPUContext from "../../../context/RedGPUContext";
 import TerrainGeometry from "./TerrainGeometry";
 import TerrainMaterial, {TerrainLayerConfig} from "./material/TerrainMaterial";
 
