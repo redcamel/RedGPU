@@ -129,9 +129,29 @@ previewModal.onclick = () => {
     previewModal.style.setProperty('display', 'none', 'important');
 };
 
+const downloadBtn = document.createElement('button');
+downloadBtn.id = 'download-atlas-png-btn';
+downloadBtn.innerHTML = '💾 Atlas PNG 다운로드';
+downloadBtn.style.setProperty('position', 'fixed', 'important');
+downloadBtn.style.setProperty('left', '230px', 'important');
+downloadBtn.style.setProperty('bottom', '100px', 'important');
+downloadBtn.style.setProperty('height', '32px', 'important');
+downloadBtn.style.setProperty('padding', '0 12px', 'important');
+downloadBtn.style.setProperty('background', 'rgba(15, 23, 42, 0.85)', 'important');
+downloadBtn.style.setProperty('border', '1px solid rgba(74, 222, 128, 0.8)', 'important');
+downloadBtn.style.setProperty('border-radius', '6px', 'important');
+downloadBtn.style.setProperty('color', '#4ade80', 'important');
+downloadBtn.style.setProperty('font-family', 'monospace', 'important');
+downloadBtn.style.setProperty('font-weight', 'bold', 'important');
+downloadBtn.style.setProperty('font-size', '12px', 'important');
+downloadBtn.style.setProperty('cursor', 'pointer', 'important');
+downloadBtn.style.setProperty('z-index', '99999', 'important');
+downloadBtn.title = 'Terrain_HeightmapTileAtlasGPUTexture 를 PNG로 다운로드';
+
 document.body.appendChild(hud);
 document.body.appendChild(debugCanvas);
 document.body.appendChild(hmAtlasCanvas);
+document.body.appendChild(downloadBtn);
 const debugCtx = debugCanvas.getContext('2d');
 const hmAtlasCtx = hmAtlasCanvas.getContext('2d');
 const modalCtx = previewCanvas.getContext('2d');
@@ -159,7 +179,7 @@ function renderAtlasModalPreview() {
     for (let x = 0; x < 16; x++) {
         for (let z = 0; z < 16; z++) {
             const px = x * 32;
-            const py = (15 - z) * 32;
+            const py = z * 32;
 
             modalCtx.fillStyle = 'rgba(30, 41, 59, 0.8)';
             modalCtx.fillRect(px, py, 32, 32);
@@ -174,7 +194,7 @@ function renderAtlasModalPreview() {
         for (let z = 0; z < 16; z++) {
             const key = `${x}_${z}`;
             const px = x * 32;
-            const py = (15 - z) * 32;
+            const py = z * 32;
 
             if (tileImageCache.has(key)) {
                 const img = tileImageCache.get(key);
@@ -199,7 +219,7 @@ function updateHeightmapAtlas2DDebugger() {
     for (let x = 0; x < 16; x++) {
         for (let z = 0; z < 16; z++) {
             const px = x * tileSize;
-            const py = (15 - z) * tileSize;
+            const py = z * tileSize;
 
             hmAtlasCtx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
             hmAtlasCtx.strokeRect(px, py, tileSize, tileSize);
@@ -211,7 +231,7 @@ function updateHeightmapAtlas2DDebugger() {
         for (let z = 0; z < 16; z++) {
             const key = `${x}_${z}`;
             const px = x * tileSize;
-            const py = (15 - z) * tileSize;
+            const py = z * tileSize;
 
             if (synthesizedTilesSet.has(key)) {
                 hmAtlasCtx.fillStyle = 'rgba(74, 222, 128, 0.65)';
@@ -380,6 +400,12 @@ RedGPU.init(
             'CDLOD_Terrain'
         );
 
+        if (downloadBtn) {
+            downloadBtn.onclick = () => {
+                terrain.downloadHeightmapAtlasAsPNG();
+            };
+        }
+
         // 3-2. 텍스처 일괄 설정 — 완전 타일 스트리밍 모드 (setup 통 높이맵 무필요!)
         terrain.setup({
             baseColor: '../../../assets/terrain/terrainTest_001/diffuse.jpg',
@@ -476,7 +502,7 @@ RedGPU.init(
             const tileImg = new Image();
             tileImg.src = tileUrl;
             tileImg.onload = () => {
-                tileImageCache.set(`${normX}_${normZ}`, tileImg);
+                tileImageCache.set(`${colX}_${rowZ}`, tileImg);
                 if (previewModal.style.display !== 'none') {
                     renderAtlasModalPreview();
                 }
@@ -488,9 +514,9 @@ RedGPU.init(
                 tileUrl,
                 false,
                 (tex) => {
-                    // 💡 로드 완료 시 카메라 반경 중심 타일 좌표(normX, normZ)에 부분 복사!
-                    terrain.updateTileHeightmap(normX, normZ, tex);
-                    synthesizedTilesSet.add(`${normX}_${normZ}`);
+                    // 💡 로드 완료 시 카메라 반경 중심 타일 좌표(colX, rowZ)에 부분 복사!
+                    terrain.updateTileHeightmap(colX, rowZ, tex);
+                    synthesizedTilesSet.add(`${colX}_${rowZ}`);
                 },
                 null,
                 'rgba8unorm'
@@ -635,6 +661,12 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
                 label: '스트리밍 로딩 반경 (m)',
                 min: 1000, max: 10000, step: 250
             });
+
+            streamingFolder.addButton({title: '💾 Heightmap Atlas PNG 다운로드'})
+                .on('click', () => {
+                    console.log('💾 Heightmap Tile Atlas PNG 다운로드 시작');
+                    terrain.downloadHeightmapAtlasAsPNG();
+                });
 
             // ── 1. RVT (Runtime Virtual Texture) 설정 ───────────────────────────
             const rvtFolder = pane.addFolder({title: '⚡ RVT (Runtime Virtual Texture)', expanded: true});

@@ -331,10 +331,10 @@ class Terrain extends Mesh {
             for (let i = 0; i <= this.maxLOD; i++) {
                 const worldScale = currentWorldSize / Math.pow(2, i);
 
-                // 분할 임계 거리 (Morph가 완전히 끝나는 부모 매칭 거리)
+                // 분할 임계 거리 (Morph가 1.0으로 완전히 완료되어 부모 노드 정점과 1:1 일치하는 거리)
                 const morphEnd = worldScale * lodThreshold;
 
-                // 모핑이 시작되는 거리
+                // 모핑이 시작되는 거리 (패치 크기의 0.5배 영역 동안 부드럽게 모핑 진행)
                 const morphStart = morphEnd - (worldScale * morphConstant);
 
                 lodRanges[i * 4 + 0] = morphStart;
@@ -485,7 +485,7 @@ class Terrain extends Mesh {
             label: 'Terrain_HeightmapTileAtlasGPUTexture',
             size: [atlasWidth, atlasHeight, 1],
             format: 'rgba8unorm',
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT
+            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
         });
 
         this.#heightmapAtlasDirectTexture = new DirectTexture(
@@ -568,6 +568,85 @@ class Terrain extends Mesh {
         if (this.material && typeof (this.material as any).bakeRVT === 'function') {
             (this.material as any).bakeRVT();
         }
+    }
+
+    /**
+     * [KO] GPU Heightmap Tile Atlas 텍스처를 PNG 이미지 파일로 다운로드합니다.
+     * [EN] Downloads the GPU Heightmap Tile Atlas texture as a PNG image file.
+     */
+    async downloadHeightmapAtlasAsPNG(fileName: string = 'Terrain_HeightmapTileAtlasGPUTexture.png') {
+        const gpuTexture = this.#heightmapAtlasGPUTexture;
+        if (!gpuTexture) {
+            console.warn('downloadHeightmapAtlasAsPNG: heightmapAtlasGPUTexture가 생성되지 않았습니다.');
+            return;
+        }
+
+        const device = this.redGPUContext.gpuDevice;
+        const width = gpuTexture.width;
+        const height = gpuTexture.height;
+
+        const bytesPerPixel = 4; // rgba8unorm
+        const unpaddedBytesPerRow = width * bytesPerPixel;
+        const align = 256;
+        const paddedBytesPerRow = Math.ceil(unpaddedBytesPerRow / align) * align;
+        const bufferSize = paddedBytesPerRow * height;
+
+        const readBuffer = device.createBuffer({
+            label: 'Terrain_DownloadAtlasReadBuffer',
+            size: bufferSize,
+            usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
+        });
+
+        const commandEncoder = device.createCommandEncoder({
+            label: 'Terrain_DownloadAtlasEncoder'
+        });
+
+        commandEncoder.copyTextureToBuffer(
+            {texture: gpuTexture},
+            {
+                buffer: readBuffer,
+                bytesPerRow: paddedBytesPerRow,
+                rowsPerImage: height
+            },
+            [width, height, 1]
+        );
+
+        device.queue.submit([commandEncoder.finish()]);
+
+        await readBuffer.mapAsync(GPUMapMode.READ);
+        const copyArrayBuffer = readBuffer.getMappedRange();
+        const data = new Uint8Array(copyArrayBuffer);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        const imageData = ctx.createImageData(width, height);
+        const imgData = imageData.data;
+
+        for (let y = 0; y < height; y++) {
+            const srcRowOffset = y * paddedBytesPerRow;
+            const dstRowOffset = y * width * 4;
+            for (let x = 0; x < width * 4; x++) {
+                imgData[dstRowOffset + x] = data[srcRowOffset + x];
+            }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+        readBuffer.unmap();
+        readBuffer.destroy();
+
+        canvas.toBlob((blob) => {
+            if (!blob) return;
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+            URL.revokeObjectURL(url);
+        }, 'image/png');
     }
 }
 

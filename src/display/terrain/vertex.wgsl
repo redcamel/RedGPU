@@ -104,7 +104,12 @@ fn main(inputData: InputData) -> VertexOutput {
 
     // 3. 부모 격자에 맞추기 위해 홀수 정점을 스냅하는 parentUV 및 parentWorldXZ 계산
     let gridDim = vertexUniforms.gridSize; // TerrainGeometry의 resolution (기본 64.0)
-    let parentUV = floor(inputData.uv * (gridDim * 0.5)) / (gridDim * 0.5);
+    let gridPos = inputData.uv * gridDim;
+    let gridIdx = floor(gridPos + 0.5); // 0 ~ gridDim 정수 격자 인덱스
+    
+    // 짝수 격자 인덱스로 스냅 (홀수 인덱스 1, 3, 5... -> 짝수 0, 2, 4...)
+    let parentGridIdx = floor(gridIdx * 0.5) * 2.0;
+    let parentUV = parentGridIdx / gridDim;
     let parentLocalXZ = parentUV - vec2<f32>(0.5); // (-0.5 ~ 0.5 범위)
     let parentWorldXZ = instanceData.offset + parentLocalXZ * instanceData.scale;
 
