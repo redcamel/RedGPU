@@ -579,6 +579,7 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
                 wireframe: false,
                 gridSize: terrain.gridSize,
                 maxLOD: terrain.maxLOD,
+                lodThreshold: terrain.lodThreshold,
                 minHeight: terrain.minHeight,
                 maxHeight: terrain.maxHeight,
                 worldSizeX: terrain.worldSize[0],
@@ -611,6 +612,13 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
                 min: 1, max: 8, step: 1
             }).on('change', (ev) => {
                 terrain.maxLOD = ev.value;
+            });
+
+            terrainFolder.addBinding(state, 'lodThreshold', {
+                label: 'LOD 분할 임계거리 (lodThreshold)',
+                min: 1.0, max: 4.0, step: 0.1
+            }).on('change', (ev) => {
+                terrain.lodThreshold = ev.value;
             });
 
             // 높이 범위

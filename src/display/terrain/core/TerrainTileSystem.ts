@@ -49,6 +49,7 @@ export interface TerrainOptions {
     cellSize?: number;
     loadingRadius?: number;
     gridSize?: number;
+    lodThreshold?: number;
 }
 
 class TerrainTileSystem extends TerrainMaterialBind {
@@ -61,7 +62,9 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #onTileUnloadCallback?: (tile: SpatialTileInfo) => void;
     #prevWorldSize: number = 0;
     #prevMaxLOD: number = 0;
+    #prevLodThreshold: number = 0;
     #lodRanges: Float32Array = new Float32Array(32);
+    #lodThreshold: number = 2.0;
     #atlasTileCountX: number = 16;
     #atlasTileCountZ: number = 16;
     #atlasTileSize: number = 512;
@@ -74,6 +77,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
         super(redGPUContext, gridSize);
         const cellSize = options?.cellSize ?? 256;
         const loadingRadius = options?.loadingRadius ?? 2560;
+        this.#lodThreshold = options?.lodThreshold ?? 2.0;
         this.#spatialGrid = new TerrainSpatialGrid(cellSize, loadingRadius);
         this.minHeight = 0;
         this.maxHeight = 0.5;
@@ -148,15 +152,29 @@ class TerrainTileSystem extends TerrainMaterialBind {
         return this.#synthesizedTilesSet.size;
     }
 
+    get lodThreshold(): number {
+        return this.#lodThreshold;
+    }
+
+    set lodThreshold(value: number) {
+        this.#lodThreshold = value;
+    }
+
     checkQuadtree(renderViewStateData: any) {
         const currentWorldSize = this.worldSize[0];
-        if (!this.#quadtree || this.#prevWorldSize !== currentWorldSize || this.#prevMaxLOD !== this.maxLOD) {
+        if (
+            !this.#quadtree ||
+            this.#prevWorldSize !== currentWorldSize ||
+            this.#prevMaxLOD !== this.maxLOD ||
+            this.#prevLodThreshold !== this.#lodThreshold
+        ) {
             this.#quadtree = new TerrainQuadtree(currentWorldSize, this.maxLOD);
             this.#prevWorldSize = currentWorldSize;
             this.#prevMaxLOD = this.maxLOD;
+            this.#prevLodThreshold = this.#lodThreshold;
 
             const lodRanges = new Float32Array(32);
-            const lodThreshold = 1.5;
+            const lodThreshold = this.lodThreshold;
             const morphConstant = 0.5;
 
             for (let i = 0; i <= this.maxLOD; i++) {
@@ -184,6 +202,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
 
         if (this.#spatialGrid) {
             const {toLoad, toUnload} = this.#spatialGrid.update(camera, this.worldOffset, this.worldSize);
+
             this.#tileStreamMetrics.update();
 
             if (toLoad.length > 0) {
@@ -210,16 +229,14 @@ class TerrainTileSystem extends TerrainMaterialBind {
             }
         }
 
-        const planes = renderViewStateData.frustumPlanes;
-
         this.#quadtree.update(
             cameraPos,
-            planes,
+            renderViewStateData.frustumPlanes,
             this.minHeight,
             this.maxHeight,
             this.worldOffset[0],
             this.worldOffset[1],
-            1.5
+            this.#lodThreshold
         );
 
         const leafNodes = this.#quadtree.leafNodes;

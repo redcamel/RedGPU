@@ -80,7 +80,7 @@ export class TerrainQuadtree {
 
     update(
         cameraPos: [number, number, number],
-        planes: number[][] | null,
+        frustumPlanes: number[][] | null,
         minHeight: number,
         maxHeight: number,
         worldOffsetX: number = 0,
@@ -88,7 +88,7 @@ export class TerrainQuadtree {
         lodThreshold: number = 1.5
     ) {
         this.leafNodes = [];
-        this.#traverse(this.rootNode, cameraPos, planes, minHeight, maxHeight, worldOffsetX, worldOffsetZ, lodThreshold);
+        this.#traverse(this.rootNode, cameraPos, frustumPlanes, minHeight, maxHeight, worldOffsetX, worldOffsetZ, lodThreshold);
     }
 
     #traverse(
