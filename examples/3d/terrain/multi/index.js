@@ -416,7 +416,7 @@ RedGPU.init(
         terrain.tileScale = 200.0;                 // 8.2km 규격에 맞춘 촘촘하고 선명한 텍스처 밀도 타일링 비율
 
         // 🛰️ 언리얼 엔진 5 표준 월드 파티션 공간 그리드 스트리밍 설정
-        terrain.enableStreaming = true;
+
         terrain.spatialGrid.cellSize = 256;        // 256m 단위 셀 분할 (25,600 Unreal Units)
         terrain.spatialGrid.loadingRadius = 2560;  // 반경 2.56km 동적 로딩 (256,000 Unreal Units)
 
