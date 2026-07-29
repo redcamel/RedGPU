@@ -5,10 +5,10 @@ import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_FILTER_MODE from "../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import vertexModuleSource from "./vertex.wgsl";
-import TerrainTileSystem from "./core/TerrainTileSystem";
+import TerrainTileSystem, {TerrainOptions} from "./core/TerrainTileSystem";
 import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
 
-export type {TerrainLayerConfig};
+export type {TerrainLayerConfig, TerrainOptions};
 
 interface Terrain {
     heightmapSampler: Sampler;
@@ -17,8 +17,8 @@ interface Terrain {
 class Terrain extends TerrainTileSystem {
     customVertexBindGroupLayout: GPUBindGroupLayout;
 
-    constructor(redGPUContext: RedGPUContext, name?: string) {
-        super(redGPUContext);
+    constructor(redGPUContext: RedGPUContext, options?: TerrainOptions, name?: string) {
+        super(redGPUContext, options);
         if (name) {
             this.name = name
         }

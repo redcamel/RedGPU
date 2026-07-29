@@ -417,7 +417,6 @@ RedGPU.init(
 
         // 🛰️ 언리얼 엔진 5 표준 월드 파티션 공간 그리드 스트리밍 설정
 
-        terrain.spatialGrid.cellSize = 256;        // 256m 단위 셀 분할 (25,600 Unreal Units)
         terrain.spatialGrid.loadingRadius = 2560;  // 반경 2.56km 동적 로딩 (256,000 Unreal Units)
 
         terrain.setTileUrlResolver((tile) => {

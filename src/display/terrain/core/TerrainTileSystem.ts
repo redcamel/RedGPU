@@ -45,6 +45,11 @@ class TileStreamMetrics {
     }
 }
 
+export interface TerrainOptions {
+    cellSize?: number;
+    loadingRadius?: number;
+}
+
 class TerrainTileSystem extends TerrainMaterialBind {
     #spatialGrid: TerrainSpatialGrid;
     #quadtree: TerrainQuadtree;
@@ -61,9 +66,11 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #atlasTileSize: number = 512;
     #tileStreamMetrics = new TileStreamMetrics();
 
-    constructor(redGPUContext: RedGPUContext) {
+    constructor(redGPUContext: RedGPUContext, options?: TerrainOptions) {
         super(redGPUContext);
-        this.#spatialGrid = new TerrainSpatialGrid(256, 2560);
+        const cellSize = options?.cellSize ?? 256;
+        const loadingRadius = options?.loadingRadius ?? 2560;
+        this.#spatialGrid = new TerrainSpatialGrid(cellSize, loadingRadius);
         this.minHeight = 0;
         this.maxHeight = 0.5;
         this.worldOffset = [-0.5, -0.5];
