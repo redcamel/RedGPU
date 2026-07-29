@@ -6,7 +6,6 @@ import GPU_FILTER_MODE from "../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import vertexModuleSource from "./vertex.wgsl";
 import defineNumber from "../../defineProperty/funcs/number/defineNumber";
-import defineBoolean from "../../defineProperty/funcs/defineBoolean";
 import TerrainTileSystem from "./core/TerrainTileSystem";
 
 export type {TerrainLayerConfig};
@@ -17,7 +16,6 @@ export type {TerrainLayerConfig};
  */
 interface Terrain {
     gridSize: number;
-    useMorph: boolean;
 }
 
 class Terrain extends TerrainTileSystem {
@@ -31,15 +29,7 @@ class Terrain extends TerrainTileSystem {
             this.name = name
         }
 
-
-        this.minHeight = 0;
-        this.maxHeight = 0.5;
-        this.worldOffset = [-0.5, -0.5];
-        this.worldSize = [1, 1];
-        this.maxLOD = 4;
-        this.baseSlotIndex = 0;
         this.gridSize = 64;
-        this.useMorph = true;
 
         this.ignoreFrustumCulling = true;
 
@@ -162,10 +152,6 @@ defineNumber(Terrain, [
     {key: "gridSize", value: 64}
 ]);
 
-
-defineBoolean(Terrain, [
-    {key: "useMorph", value: true},
-]);
 
 
 Object.defineProperty(Terrain.prototype, 'isTerrain', {

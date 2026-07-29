@@ -97,10 +97,8 @@ fn main(inputData: InputData) -> VertexOutput {
 
     // 2. 카메라 거리 기반 Morph Factor 계산
     var morphFactor = 0.0;
-    #redgpu_if useMorph
-        let tempWorldPos = vec3<f32>(worldXZ.x, 0.0, worldXZ.y);
-        morphFactor = calculateMorphFactor(tempWorldPos, instanceData.lod);
-    #redgpu_endIf
+    let tempWorldPos = vec3<f32>(worldXZ.x, 0.0, worldXZ.y);
+    morphFactor = calculateMorphFactor(tempWorldPos, instanceData.lod);
 
     // 3. 부모 격자에 맞추기 위해 홀수 정점을 스냅하는 parentUV 및 parentWorldXZ 계산
     let gridDim = vertexUniforms.gridSize; // TerrainGeometry의 resolution (기본 64.0)

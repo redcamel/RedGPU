@@ -60,6 +60,12 @@ class TerrainTileSystem extends TerrainMaterialBind {
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext);
         this.spatialGrid = new TerrainSpatialGrid(256, 2560);
+        this.minHeight = 0;
+        this.maxHeight = 0.5;
+        this.worldOffset = [-0.5, -0.5];
+        this.worldSize = [1, 1];
+        this.maxLOD = 4;
+        this.baseSlotIndex = 0;
     }
 
     get lodRanges(): Float32Array {

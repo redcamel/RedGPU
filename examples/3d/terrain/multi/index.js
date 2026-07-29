@@ -578,7 +578,6 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
 
             const state = {
                 wireframe: false,
-                useMorph: terrain.useMorph,
                 maxLOD: terrain.maxLOD,
                 minHeight: terrain.minHeight,
                 maxHeight: terrain.maxHeight,
@@ -595,10 +594,6 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
                     terrain.dirtyPipeline = true;
                 });
 
-            terrainFolder.addBinding(state, 'useMorph', {label: 'LOD 모핑 (크랙 방지)'})
-                .on('change', (ev) => {
-                    terrain.useMorph = ev.value;
-                });
 
             terrainFolder.addBinding(state, 'maxLOD', {
                 label: '최대 LOD',
