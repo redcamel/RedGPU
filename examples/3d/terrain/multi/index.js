@@ -600,7 +600,6 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
                     '16 x 16': 16,
                     '32 x 32': 32,
                     '64 x 64': 64,
-                    '128 x 128': 128
                 }
             }).on('change', (ev) => {
                 terrain.gridSize = ev.value;

@@ -66,6 +66,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #atlasTileCountZ: number = 16;
     #atlasTileSize: number = 512;
     #gridSize: number = 64;
+    #maxInstances: number = 65536;
     #tileStreamMetrics = new TileStreamMetrics();
 
     constructor(redGPUContext: RedGPUContext, options?: TerrainOptions) {
@@ -82,7 +83,8 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.baseSlotIndex = 0;
         this.#gridSize = gridSize;
 
-        const maxInstances = 4096;
+        const maxInstances = 65536; // 65,536 인스턴스 (65,536 * 16 bytes = 1MB VRAM) - 32K 대형 지형 및 고해상도 LOD 대비
+        this.#maxInstances = maxInstances;
         this.#instanceBuffer = redGPUContext.gpuDevice.createBuffer({
             size: maxInstances * 16,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
@@ -231,7 +233,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
         );
 
         const leafNodes = this.#quadtree.leafNodes;
-        const count = leafNodes.length;
+        const count = Math.min(leafNodes.length, this.#maxInstances);
 
         if (count > 0) {
             const arrayBuffer = new Float32Array(count * 4);
