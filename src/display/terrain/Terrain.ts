@@ -17,6 +17,7 @@ import {TerrainQuadtree} from "./TerrainQuadtree";
 import {SpatialTileInfo, TerrainSpatialGrid} from "./TerrainSpatialGrid";
 import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 import defineBoolean from "../../defineProperty/funcs/defineBoolean";
+import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import {keepLog} from "../../utils";
 
 export type {TerrainLayerConfig};
@@ -735,8 +736,6 @@ class Terrain extends Mesh {
         }
         if (!sourceTexture || !sourceTexture.gpuTexture) return;
 
-        const device = this.redGPUContext.gpuDevice;
-        const encoder = device.createCommandEncoder({label: 'Terrain_CopyTileHeightmapEncoder'});
 
         const destX = tileX * this.#atlasTileSize;
         const destZ = tileZ * this.#atlasTileSize;
@@ -747,54 +746,54 @@ class Terrain extends Mesh {
         const srcW = Math.min(this.#atlasTileSize, sourceTexture.gpuTexture.width);
         const srcH = Math.min(this.#atlasTileSize, sourceTexture.gpuTexture.height);
 
-        // 1. 주 타일 픽셀 영역 복사
-        encoder.copyTextureToTexture(
-            {texture: sourceTexture.gpuTexture},
-            {texture: this.#heightmapAtlasGPUTexture!, origin: [destX, destZ, 0]},
-            [srcW, srcH, 1]
-        );
+        this.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (encoder) => {
+            // 1. 주 타일 픽셀 영역 복사
+            encoder.copyTextureToTexture(
+                {texture: sourceTexture.gpuTexture},
+                {texture: this.#heightmapAtlasGPUTexture!, origin: [destX, destZ, 0]},
+                [srcW, srcH, 1]
+            );
 
-        // 2. 💡 타일 해상도가 512px보다 작을 경우 (예: 449px 엣지 타일) 여백 픽셀에 엣지 색상 패딩 복사
-        const padW = this.#atlasTileSize - srcW;
-        const padH = this.#atlasTileSize - srcH;
+            // 2. 💡 타일 해상도가 512px보다 작을 경우 (예: 449px 엣지 타일) 여백 픽셀에 엣지 색상 패딩 복사
+            const padW = this.#atlasTileSize - srcW;
+            const padH = this.#atlasTileSize - srcH;
 
-        if (padW > 0) {
-            for (let p = 0; p < padW; p++) {
+            if (padW > 0) {
+                for (let p = 0; p < padW; p++) {
+                    encoder.copyTextureToTexture(
+                        {texture: sourceTexture.gpuTexture, origin: [srcW - 1, 0, 0]},
+                        {texture: this.#heightmapAtlasGPUTexture!, origin: [destX + srcW + p, destZ, 0]},
+                        [1, srcH, 1]
+                    );
+                }
+            }
+            if (padH > 0) {
+                for (let p = 0; p < padH; p++) {
+                    encoder.copyTextureToTexture(
+                        {texture: sourceTexture.gpuTexture, origin: [0, srcH - 1, 0]},
+                        {texture: this.#heightmapAtlasGPUTexture!, origin: [destX, destZ + srcH + p, 0]},
+                        [srcW, 1, 1]
+                    );
+                }
+            }
+
+            // 3. 💡 언리얼 엔진 5 스타일 Tile Edge Stitching Pass (이웃 타일 접합선 1px 오버랩 스티칭)
+            if (destX + this.#atlasTileSize < atlasWidth) {
                 encoder.copyTextureToTexture(
                     {texture: sourceTexture.gpuTexture, origin: [srcW - 1, 0, 0]},
-                    {texture: this.#heightmapAtlasGPUTexture!, origin: [destX + srcW + p, destZ, 0]},
+                    {texture: this.#heightmapAtlasGPUTexture!, origin: [destX + this.#atlasTileSize, destZ, 0]},
                     [1, srcH, 1]
                 );
             }
-        }
-        if (padH > 0) {
-            for (let p = 0; p < padH; p++) {
+            if (destZ + this.#atlasTileSize < atlasHeight) {
                 encoder.copyTextureToTexture(
                     {texture: sourceTexture.gpuTexture, origin: [0, srcH - 1, 0]},
-                    {texture: this.#heightmapAtlasGPUTexture!, origin: [destX, destZ + srcH + p, 0]},
+                    {texture: this.#heightmapAtlasGPUTexture!, origin: [destX, destZ + this.#atlasTileSize, 0]},
                     [srcW, 1, 1]
                 );
             }
-        }
+        });
 
-        // 3. 💡 언리얼 엔진 5 스타일 Tile Edge Stitching Pass (이웃 타일 접합선 1px 오버랩 스티칭)
-        // 이웃 타일과의 맞닿는 1px 경계 픽셀을 이웃 타일 슬롯 시작 픽셀에 1:1 오버랩 스티칭 복사하여 경계 단차 0.0000 달성!
-        if (destX + this.#atlasTileSize < atlasWidth) {
-            encoder.copyTextureToTexture(
-                {texture: sourceTexture.gpuTexture, origin: [srcW - 1, 0, 0]},
-                {texture: this.#heightmapAtlasGPUTexture!, origin: [destX + this.#atlasTileSize, destZ, 0]},
-                [1, srcH, 1]
-            );
-        }
-        if (destZ + this.#atlasTileSize < atlasHeight) {
-            encoder.copyTextureToTexture(
-                {texture: sourceTexture.gpuTexture, origin: [0, srcH - 1, 0]},
-                {texture: this.#heightmapAtlasGPUTexture!, origin: [destX, destZ + this.#atlasTileSize, 0]},
-                [srcW, 1, 1]
-            );
-        }
-
-        device.queue.submit([encoder.finish()]);
         this.markTileSynthesized(`${tileX}_${tileZ}`);
 
         // 💡 GPU Atlas 복사 완료 즉시 중간 BitmapTexture(CPU 디코딩 버퍼) 파기 → VRAM/RAM 즉시 반환
