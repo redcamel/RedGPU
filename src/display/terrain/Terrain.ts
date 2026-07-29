@@ -5,7 +5,6 @@ import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_FILTER_MODE from "../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import vertexModuleSource from "./vertex.wgsl";
-import defineNumber from "../../defineProperty/funcs/number/defineNumber";
 import TerrainTileSystem from "./core/TerrainTileSystem";
 
 export type {TerrainLayerConfig};
@@ -15,24 +14,18 @@ export type {TerrainLayerConfig};
  * [EN] Display mesh object class that manages the CDLOD-based terrain system.
  */
 interface Terrain {
-    gridSize: number;
+
 }
 
 class Terrain extends TerrainTileSystem {
     customVertexBindGroupLayout: GPUBindGroupLayout;
 
-
     constructor(redGPUContext: RedGPUContext, name?: string) {
-
         super(redGPUContext);
         if (name) {
             this.name = name
         }
-
-        this.gridSize = 64;
-
         this.ignoreFrustumCulling = true;
-
         this.heightTextureSampler = new Sampler(redGPUContext, {
             magFilter: GPU_FILTER_MODE.LINEAR,
             minFilter: GPU_FILTER_MODE.LINEAR,
@@ -55,12 +48,6 @@ class Terrain extends TerrainTileSystem {
             ]
         });
 
-        const maxInstances = 4096;
-        this.instanceBuffer = redGPUContext.gpuDevice.createBuffer({
-            size: maxInstances * 16,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-            label: 'TerrainInstanceBuffer'
-        });
 
     }
 
@@ -94,10 +81,6 @@ class Terrain extends TerrainTileSystem {
     destroy() {
         if (this.heightTexture) {
             this.heightTexture.__removeDirtyPipelineListener(this.#dirtyPipelineListener);
-        }
-        if (this.instanceBuffer) {
-            this.instanceBuffer.destroy();
-            this.instanceBuffer = null;
         }
         super.destroy();
     }
@@ -146,13 +129,6 @@ const getTerrainVertexBindGroupDescriptor = (mesh: Terrain) => {
         ]
     };
 };
-
-defineNumber(Terrain, [
-
-    {key: "gridSize", value: 64}
-]);
-
-
 
 Object.defineProperty(Terrain.prototype, 'isTerrain', {
     value: true,

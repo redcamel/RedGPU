@@ -12,6 +12,7 @@ import {TerrainQuadtree} from "./TerrainQuadtree";
 import defineNumber from "../../../defineProperty/funcs/number/defineNumber";
 import updateTargetUniform from "../../../defineProperty/core/updateTargetUniform";
 
+
 interface TerrainTileSystem {
     heightTexture: any;
     heightTextureSampler: any;
@@ -23,16 +24,17 @@ interface TerrainTileSystem {
     maxHeight: number;
 
     maxLOD: number;
+    gridSize: number;
 
     baseSlotIndex: number;
 }
 
 class TerrainTileSystem extends TerrainMaterialBind {
     //
-    instanceBuffer: GPUBuffer;
-    //
     spatialGrid: TerrainSpatialGrid;
     quadtree: TerrainQuadtree;
+    //
+    #instanceBuffer: GPUBuffer;
     #synthesizedTilesSet: Set<string> = new Set();
     #tileImageCache: Map<string, any> = new Map();
     //
@@ -66,6 +68,20 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.worldSize = [1, 1];
         this.maxLOD = 4;
         this.baseSlotIndex = 0;
+
+        this.gridSize = 64;
+        const maxInstances = 4096;
+        this.#instanceBuffer = redGPUContext.gpuDevice.createBuffer({
+            size: maxInstances * 16,
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+            label: 'TerrainInstanceBuffer'
+        });
+
+    }
+
+
+    get instanceBuffer(): GPUBuffer {
+        return this.#instanceBuffer;
     }
 
     get lodRanges(): Float32Array {
@@ -354,7 +370,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
                 arrayBuffer[i * 4 + 2] = node.scale;
                 arrayBuffer[i * 4 + 3] = node.lod;
             }
-            this.redGPUContext.gpuDevice.queue.writeBuffer(this.instanceBuffer, 0, arrayBuffer, 0, count * 4);
+            this.redGPUContext.gpuDevice.queue.writeBuffer(this.#instanceBuffer, 0, arrayBuffer, 0, count * 4);
         }
 
         if (this.gpuRenderInfo && this.drawCommandSlot && this.drawBufferManager) {
@@ -569,13 +585,22 @@ class TerrainTileSystem extends TerrainMaterialBind {
             URL.revokeObjectURL(url);
         }, 'image/png');
     }
-};
+
+    destroy() {
+
+        if (this.#instanceBuffer) {
+            this.#instanceBuffer.destroy();
+            this.#instanceBuffer = null;
+        }
+        super.destroy();
+    }
+}
 defineNumber(TerrainTileSystem, [
     {key: "maxLOD", value: 4},
     {key: "baseSlotIndex", value: 0},
     {key: "minHeight", value: 0},
     {key: "maxHeight", value: 1},
-
+    {key: "gridSize", value: 64}
 
 ])
 defineVector2(TerrainTileSystem, [

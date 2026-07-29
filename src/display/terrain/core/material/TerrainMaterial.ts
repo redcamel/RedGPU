@@ -49,6 +49,17 @@ interface TerrainMaterial {
 class TerrainMaterial extends ABitmapBaseMaterial {
     #layers: TerrainLayerConfig[] = [];
     #rvt: TerrainRVT
+    #tileScale: number = 16.0;
+    #macroScale: number = 2.0;
+    #blendContrast: number = 0.0;
+    #metallicFactor: number = 0;
+    #roughnessFactor: number = 1.0;
+    #normalScale: number = 1.0;
+    #occlusionStrength: number = 1.0;
+    #baseColorWeight: number = 0.5;
+    #baseColorBlendMode: 'mix' | 'multiply' = 'multiply';
+    #bakeTimer: any = null;
+
     constructor(redGPUContext: RedGPUContext, name?: string) {
         super(
             redGPUContext,
@@ -88,20 +99,9 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         this.bakeRVT();
     }
 
-    #tileScale: number = 16.0;
-    #macroScale: number = 2.0;
-    #blendContrast: number = 0.0;
-
     get layers(): TerrainLayerConfig[] {
         return [...this.#layers];
     }
-
-    #metallicFactor: number = 0;
-    #roughnessFactor: number = 1.0;
-    #normalScale: number = 1.0;
-    #occlusionStrength: number = 1.0;
-    #baseColorWeight: number = 0.5;
-    #baseColorBlendMode: 'mix' | 'multiply' = 'multiply';
 
     get baseColorWeight(): number {
         return this.#baseColorWeight;
@@ -183,8 +183,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         this.#blendContrast = v;
         this.bakeRVT();
     }
-
-    #bakeTimer: any = null;
 
     bakeRVT = () => {
         if (this.#bakeTimer) return;
