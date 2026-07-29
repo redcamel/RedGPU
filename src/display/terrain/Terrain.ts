@@ -1,7 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import Mesh from "../mesh/Mesh";
 import TerrainGeometry from "./TerrainGeometry";
-import TerrainMaterial, {TerrainLayerConfig} from "./TerrainMaterial";
+import TerrainMaterial, {TerrainLayerConfig} from "./material/TerrainMaterial";
 import BitmapTexture from "../../resources/texture/BitmapTexture";
 import Sampler from "../../resources/sampler/Sampler";
 import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
@@ -353,7 +353,10 @@ class Terrain extends Mesh {
             const maxZ = minZ + this.worldSize[1];
             this.spatialGrid.setTerrainBounds(minX, minZ, maxX, maxZ);
 
-            const {toLoad, toUnload} = this.spatialGrid.update([camera.x, camera.y, camera.z]);
+            const camFwd = camera.cameraVector ? camera.cameraVector.forward : undefined;
+            const camDir: [number, number, number] | undefined = camFwd ? [camFwd[0], camFwd[1], camFwd[2]] : undefined;
+
+            const {toLoad, toUnload} = this.spatialGrid.update([camera.x, camera.y, camera.z], camDir);
             if (toLoad.length > 0 && this.#onTileLoadCallback) {
                 toLoad.forEach(tile => this.#onTileLoadCallback!(tile));
             }
