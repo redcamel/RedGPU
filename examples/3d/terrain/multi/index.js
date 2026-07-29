@@ -483,7 +483,217 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
         skybox: true,
         gui: (pane) => {
 
-            // ── 0. HeightFog (대기 안개) 설정 ────────────────────────────────────
+            // ── 1. 🌍 Terrain (기본 & LOD) ──────────────────────────────────────────
+            const terrainFolder = pane.addFolder({title: '🌍 Terrain (기본 & LOD)', expanded: true});
+
+            const state = {
+                wireframe: false,
+                gridSize: terrain.gridSize,
+                maxLOD: terrain.maxLOD,
+                lodThreshold: terrain.lodThreshold,
+                minHeight: terrain.minHeight,
+                maxHeight: terrain.maxHeight,
+                worldSizeX: terrain.worldSize[0],
+                worldSizeZ: terrain.worldSize[1],
+                useBaseColorTexture: true,
+                useOrmTexture: true,
+                useSplatTexture: true,
+            };
+
+            terrainFolder.addBinding(state, 'wireframe', {label: '와이어프레임 (Wireframe)'})
+                .on('change', (ev) => {
+                    terrain.primitiveState.topology = ev.value ? 'line-list' : 'triangle-list';
+                    terrain.dirtyPipeline = true;
+                });
+
+            terrainFolder.addBinding(state, 'gridSize', {
+                label: '패치 격자 분할 수 (gridSize)',
+                options: {
+                    '16 x 16': 16,
+                    '32 x 32': 32,
+                    '64 x 64': 64,
+                }
+            }).on('change', (ev) => {
+                terrain.gridSize = ev.value;
+            });
+
+            terrainFolder.addBinding(state, 'maxLOD', {
+                label: '최대 LOD (Max LOD)',
+                min: 1, max: 8, step: 1
+            }).on('change', (ev) => {
+                terrain.maxLOD = ev.value;
+            });
+
+            terrainFolder.addBinding(state, 'lodThreshold', {
+                label: 'LOD 분할 임계거리 (lodThreshold)',
+                min: 1.0, max: 4.0, step: 0.1
+            }).on('change', (ev) => {
+                terrain.lodThreshold = ev.value;
+            });
+
+            // ── 2. 📐 높이 & 월드 규격 (Height & World Bounds) ────────────────────────
+            const boundsFolder = pane.addFolder({title: '📐 높이 & 월드 규격 (Height & Bounds)', expanded: true});
+
+            boundsFolder.addBinding(state, 'minHeight', {
+                label: '최소 높이 (Min Height)',
+                min: -500, max: 0, step: 5
+            }).on('change', (ev) => {
+                terrain.minHeight = ev.value;
+            });
+
+            boundsFolder.addBinding(state, 'maxHeight', {
+                label: '최대 높이 (Max Height)',
+                min: 10, max: 3000, step: 10
+            }).on('change', (ev) => {
+                terrain.maxHeight = ev.value;
+            });
+
+            boundsFolder.addBinding(state, 'worldSizeX', {
+                label: '가로 크기 (World Size X)',
+                min: 1000, max: 50000, step: 100
+            }).on('change', (ev) => {
+                terrain.worldSize = [ev.value, terrain.worldSize[1]];
+                terrain.worldOffset = [-ev.value / 2, terrain.worldOffset[1]];
+            });
+
+            boundsFolder.addBinding(state, 'worldSizeZ', {
+                label: '세로 크기 (World Size Z)',
+                min: 1000, max: 50000, step: 100
+            }).on('change', (ev) => {
+                terrain.worldSize = [terrain.worldSize[0], ev.value];
+                terrain.worldOffset = [terrain.worldOffset[0], -ev.value / 2];
+            });
+
+            // ── 3. 🛰️ 공간 그리드 스트리밍 ──────────────────────────────────────────
+            const streamingFolder = pane.addFolder({title: '🛰️ 공간 그리드 스트리밍 (Spatial Streaming)', expanded: true});
+
+            streamingFolder.addBinding(terrain.spatialGrid, 'maxLoadsPerFrame', {
+                label: '프레임당 최대 로드 예산',
+                min: 0, max: 10, step: 1
+            });
+
+            streamingFolder.addBinding(terrain.spatialGrid, 'loadingRadius', {
+                label: '스트리밍 로딩 반경 (m)',
+                min: 1000, max: 10000, step: 250
+            });
+
+            // ── 4. 🎨 타일링 및 혼합 (Tiling & Blending) ───────────────────────────
+            const tilingFolder = pane.addFolder({title: '🎨 타일링 및 혼합 (Tiling & Blending)', expanded: true});
+
+            tilingFolder.addBinding(terrain, 'tileScale', {
+                label: '디테일 타일링 (근거리)',
+                min: 1.0, max: 1000.0, step: 1.0
+            });
+            tilingFolder.addBinding(terrain, 'macroScale', {
+                label: '매크로 타일링 (원거리)',
+                min: 0.1, max: 10.0, step: 0.1
+            });
+            tilingFolder.addBinding(terrain, 'blendContrast', {
+                label: '높이 블렌드 대비 (Contrast)',
+                min: 0, max: 1.0, step: 0.01
+            });
+            tilingFolder.addBinding(terrain, 'baseColorWeight', {
+                label: '베이스 컬러 맵 혼합 비율',
+                min: 0, max: 1.0, step: 0.05
+            });
+            tilingFolder.addBinding(terrain, 'baseColorBlendMode', {
+                label: '베이스 컬러 혼합 모드',
+                options: {
+                    '직접 혼합 (Mix / Lerp)': 'mix',
+                    '곱셈 틴트 (Multiply)': 'multiply'
+                }
+            });
+
+            // ── 5. ✨ PBR 재질 & 음영 (PBR & Lighting) ─────────────────────────────
+            const pbrFolder = pane.addFolder({title: '✨ PBR 재질 & 음영 (PBR & Lighting)', expanded: true});
+
+            pbrFolder.addBinding(terrain, 'roughnessFactor', {
+                label: '글로벌 거칠기 배율 (Global Roughness)',
+                min: 0, max: 1, step: 0.05
+            });
+            pbrFolder.addBinding(terrain, 'normalScale', {
+                label: '노멀 맵 강도 (Normal Scale)',
+                min: 0, max: 3, step: 0.1
+            });
+            pbrFolder.addBinding(terrain, 'occlusionStrength', {
+                label: '오클루전 강도 (AO Strength)',
+                min: 0, max: 2, step: 0.05
+            });
+            pbrFolder.addBinding(terrain, 'metallicFactor', {
+                label: '금속성 (Metallic)',
+                min: 0, max: 1, step: 0.05
+            });
+
+            // ── 6. 🌱 개별 레이어 거칠기 (Layer Roughness) ──────────────────────────
+            const layerFolder = pane.addFolder({title: '🌱 개별 레이어 거칠기 (Layer Roughness)', expanded: true});
+
+            const layerState = {
+                leavesRoughness: terrain.material.layers[0]?.roughnessFactor ?? 0.85,
+                rockRoughness: terrain.material.layers[1]?.roughnessFactor ?? 0.90,
+                gravelRoughness: terrain.material.layers[2]?.roughnessFactor ?? 0.85,
+                grassRoughness: terrain.material.layers[3]?.roughnessFactor ?? 0.85,
+            };
+
+            layerFolder.addBinding(layerState, 'leavesRoughness', {
+                label: 'Layer 0: Leaves (낙엽)',
+                min: 0, max: 1, step: 0.05
+            }).on('change', (ev) => {
+                terrain.material.updateLayer(0, {roughnessFactor: ev.value});
+            });
+
+            layerFolder.addBinding(layerState, 'rockRoughness', {
+                label: 'Layer 1: Rock (바위)',
+                min: 0, max: 1, step: 0.05
+            }).on('change', (ev) => {
+                terrain.material.updateLayer(1, {roughnessFactor: ev.value});
+            });
+
+            layerFolder.addBinding(layerState, 'gravelRoughness', {
+                label: 'Layer 2: Gravel (자갈)',
+                min: 0, max: 1, step: 0.05
+            }).on('change', (ev) => {
+                terrain.material.updateLayer(2, {roughnessFactor: ev.value});
+            });
+
+            layerFolder.addBinding(layerState, 'grassRoughness', {
+                label: 'Layer 3: Grass (잔디)',
+                min: 0, max: 1, step: 0.05
+            }).on('change', (ev) => {
+                terrain.material.updateLayer(3, {roughnessFactor: ev.value});
+            });
+
+            // ── 7. 🖼️ 글로벌 지형 텍스처 (Global Textures) ──────────────────────────
+            const textureFolder = pane.addFolder({title: '🖼️ 글로벌 지형 텍스처 (Global Textures)', expanded: true});
+
+            textureFolder.addBinding(state, 'useBaseColorTexture', {
+                label: '베이스 컬러 맵 사용'
+            }).on('change', (ev) => {
+                terrain.baseColorTexture = ev.value ? baseColorTextureInstance : null;
+                terrain.material.bakeRVT();
+            });
+
+            textureFolder.addBinding(state, 'useOrmTexture', {
+                label: 'ORM 맵 사용'
+            }).on('change', (ev) => {
+                terrain.ormTexture = ev.value ? ormTextureInstance : null;
+                terrain.material.bakeRVT();
+            });
+
+            textureFolder.addBinding(state, 'useSplatTexture', {
+                label: '스플랫 맵 사용'
+            }).on('change', (ev) => {
+                terrain.splatTexture = ev.value ? splatTextureInstance : null;
+                terrain.material.bakeRVT();
+            });
+
+            // ── 8. ⚡ RVT 디버그 ──────────────────────────────────────────────────
+            const rvtFolder = pane.addFolder({title: '⚡ RVT (Runtime Virtual Texture)', expanded: true});
+
+            rvtFolder.addBinding(terrain.material, 'debugSplatTexture', {
+                label: '디버그: Splat 맵 채널 보기'
+            });
+
+            // ── 9. 🌫️ HeightFog (대기 안개) ───────────────────────────────────────
             const fogFolder = pane.addFolder({title: '🌫️ HeightFog (대기 안개)', expanded: true});
 
             const fogState = {
@@ -538,228 +748,6 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
                     Math.round(ev.value.g * 255),
                     Math.round(ev.value.b * 255)
                 );
-            });
-
-            // ── 0.5. 공간 그리드 스트리밍 & 프레임 예산 ─────────────────────────
-            const streamingFolder = pane.addFolder({title: '🛰️ 공간 그리드 스트리밍 & 프레임 예산', expanded: true});
-
-            streamingFolder.addBinding(terrain.spatialGrid, 'maxLoadsPerFrame', {
-                label: '프레임당 최대 로드 예산',
-                min: 0, max: 10, step: 1
-            });
-
-            streamingFolder.addBinding(terrain.spatialGrid, 'loadingRadius', {
-                label: '스트리밍 로딩 반경 (m)',
-                min: 1000, max: 10000, step: 250
-            });
-
-            streamingFolder.addButton({title: '💾 Heightmap Atlas PNG 다운로드'})
-                .on('click', () => {
-                    console.log('💾 Heightmap Tile Atlas PNG 다운로드 시작');
-                    terrain.downloadHeightmapAtlasAsPNG();
-                });
-
-            // ── 1. RVT (Runtime Virtual Texture) 설정 ───────────────────────────
-            const rvtFolder = pane.addFolder({title: '⚡ RVT (Runtime Virtual Texture)', expanded: true});
-
-            rvtFolder.addButton({title: '🔄 RVT 수동 재베이킹 (Rebake)'})
-                .on('click', () => {
-                    console.log('🔄 RVT 수동 재베이킹 실행');
-                    terrain.material.bakeRVT();
-                });
-
-            rvtFolder.addBinding(terrain.material, 'debugSplatTexture', {
-                label: '디버그: Splat 맵 채널 보기'
-            });
-
-            // ── 2. Terrain 기본 & LOD 설정 ──────────────────────────────────────
-            const terrainFolder = pane.addFolder({title: '🌍 Terrain (기본 & LOD)', expanded: true});
-
-            const state = {
-                wireframe: false,
-                gridSize: terrain.gridSize,
-                maxLOD: terrain.maxLOD,
-                lodThreshold: terrain.lodThreshold,
-                minHeight: terrain.minHeight,
-                maxHeight: terrain.maxHeight,
-                worldSizeX: terrain.worldSize[0],
-                worldSizeZ: terrain.worldSize[1],
-                useBaseColorTexture: true,
-                useOrmTexture: true,
-                useSplatTexture: true,
-            };
-
-            terrainFolder.addBinding(state, 'wireframe', {label: '와이어프레임'})
-                .on('change', (ev) => {
-                    terrain.primitiveState.topology = ev.value ? 'line-list' : 'triangle-list';
-                    terrain.dirtyPipeline = true;
-                });
-
-            terrainFolder.addBinding(state, 'gridSize', {
-                label: '패치 격자 분할 수 (gridSize)',
-                options: {
-                    '16 x 16': 16,
-                    '32 x 32': 32,
-                    '64 x 64': 64,
-                }
-            }).on('change', (ev) => {
-                terrain.gridSize = ev.value;
-            });
-
-
-            terrainFolder.addBinding(state, 'maxLOD', {
-                label: '최대 LOD',
-                min: 1, max: 8, step: 1
-            }).on('change', (ev) => {
-                terrain.maxLOD = ev.value;
-            });
-
-            terrainFolder.addBinding(state, 'lodThreshold', {
-                label: 'LOD 분할 임계거리 (lodThreshold)',
-                min: 1.0, max: 4.0, step: 0.1
-            }).on('change', (ev) => {
-                terrain.lodThreshold = ev.value;
-            });
-
-            // 높이 범위
-            const heightFolder = terrainFolder.addFolder({title: '📐 높이 범위 (Height)', expanded: true});
-            heightFolder.addBinding(state, 'minHeight', {
-                label: '최소 높이',
-                min: -500, max: 0, step: 5
-            }).on('change', (ev) => {
-                terrain.minHeight = ev.value;
-            });
-            heightFolder.addBinding(state, 'maxHeight', {
-                label: '최대 높이',
-                min: 10, max: 3000, step: 10
-            }).on('change', (ev) => {
-                terrain.maxHeight = ev.value;
-            });
-
-            // 월드 크기
-            const scaleFolder = terrainFolder.addFolder({title: '🌐 월드 스케일', expanded: false});
-            scaleFolder.addBinding(state, 'worldSizeX', {
-                label: '가로 크기 (X)',
-                min: 1000, max: 50000, step: 100
-            }).on('change', (ev) => {
-                terrain.worldSize = [ev.value, terrain.worldSize[1]];
-                terrain.worldOffset = [-ev.value / 2, terrain.worldOffset[1]];
-            });
-            scaleFolder.addBinding(state, 'worldSizeZ', {
-                label: '세로 크기 (Z)',
-                min: 1000, max: 50000, step: 100
-            }).on('change', (ev) => {
-                terrain.worldSize = [terrain.worldSize[0], ev.value];
-                terrain.worldOffset = [terrain.worldOffset[0], -ev.value / 2];
-            });
-
-            // ── 3. 타일링 & 블렌딩 설정 ──────────────────────────────────────────
-            const tilingFolder = pane.addFolder({title: '🎨 타일링 및 혼합 (Tiling & Blending)', expanded: true});
-
-            tilingFolder.addBinding(terrain, 'tileScale', {
-                label: '디테일 타일링 (근거리)',
-                min: 1.0, max: 1000.0, step: 1.0
-            });
-            tilingFolder.addBinding(terrain, 'macroScale', {
-                label: '매크로 타일링 (원거리)',
-                min: 0.1, max: 10.0, step: 0.1
-            });
-            tilingFolder.addBinding(terrain, 'blendContrast', {
-                label: '높이 블렌드 대비 (Contrast)',
-                min: 0, max: 1.0, step: 0.01
-            });
-            tilingFolder.addBinding(terrain, 'baseColorWeight', {
-                label: '베이스 컬러 맵 혼합 비율',
-                min: 0, max: 1.0, step: 0.05
-            });
-            tilingFolder.addBinding(terrain, 'baseColorBlendMode', {
-                label: '베이스 컬러 혼합 모드',
-                options: {
-                    '직접 혼합 (Mix / Lerp)': 'mix',
-                    '곱셈 틴트 (Multiply)': 'multiply'
-                }
-            });
-
-            // ── 4. PBR 재질 & 음영 설정 ──────────────────────────────────────────
-            const pbrFolder = pane.addFolder({title: '✨ PBR 재질 & 음영 (PBR & Lighting)', expanded: true});
-
-            pbrFolder.addBinding(terrain, 'roughnessFactor', {
-                label: '글로벌 거칠기 배율 (Global Roughness)',
-                min: 0, max: 1, step: 0.05
-            });
-            pbrFolder.addBinding(terrain, 'normalScale', {
-                label: '노멀 맵 강도',
-                min: 0, max: 3, step: 0.1
-            });
-            pbrFolder.addBinding(terrain, 'occlusionStrength', {
-                label: '오클루전 강도 (AO)',
-                min: 0, max: 2, step: 0.05
-            });
-            pbrFolder.addBinding(terrain, 'metallicFactor', {
-                label: '금속성 (Metallic)',
-                min: 0, max: 1, step: 0.05
-            });
-
-            // ── 5. 개별 레이어 거칠기 설정 ─────────────────────────────────────
-            const layerFolder = pane.addFolder({title: '🌱 개별 레이어 거칠기 (Layer Roughness)', expanded: true});
-
-            const layerState = {
-                leavesRoughness: terrain.material.layers[0]?.roughnessFactor ?? 0.85,
-                rockRoughness: terrain.material.layers[1]?.roughnessFactor ?? 0.90,
-                gravelRoughness: terrain.material.layers[2]?.roughnessFactor ?? 0.85,
-                grassRoughness: terrain.material.layers[3]?.roughnessFactor ?? 0.85,
-            };
-
-            layerFolder.addBinding(layerState, 'leavesRoughness', {
-                label: 'Layer 0: Leaves (낙엽)',
-                min: 0, max: 1, step: 0.05
-            }).on('change', (ev) => {
-                terrain.material.updateLayer(0, {roughnessFactor: ev.value});
-            });
-
-            layerFolder.addBinding(layerState, 'rockRoughness', {
-                label: 'Layer 1: Rock (바위)',
-                min: 0, max: 1, step: 0.05
-            }).on('change', (ev) => {
-                terrain.material.updateLayer(1, {roughnessFactor: ev.value});
-            });
-
-            layerFolder.addBinding(layerState, 'gravelRoughness', {
-                label: 'Layer 2: Gravel (자갈)',
-                min: 0, max: 1, step: 0.05
-            }).on('change', (ev) => {
-                terrain.material.updateLayer(2, {roughnessFactor: ev.value});
-            });
-
-            layerFolder.addBinding(layerState, 'grassRoughness', {
-                label: 'Layer 3: Grass (잔디)',
-                min: 0, max: 1, step: 0.05
-            }).on('change', (ev) => {
-                terrain.material.updateLayer(3, {roughnessFactor: ev.value});
-            });
-
-            // ── 6. 글로벌 지형 텍스처 관리 ────────────────────────────────────────
-            const textureFolder = pane.addFolder({title: '🖼️ 글로벌 지형 텍스처 (Global Textures)', expanded: true});
-
-            textureFolder.addBinding(state, 'useBaseColorTexture', {
-                label: '베이스 컬러 맵 사용'
-            }).on('change', (ev) => {
-                terrain.baseColorTexture = ev.value ? baseColorTextureInstance : null;
-                terrain.material.bakeRVT();
-            });
-
-            textureFolder.addBinding(state, 'useOrmTexture', {
-                label: 'ORM 맵 사용'
-            }).on('change', (ev) => {
-                terrain.ormTexture = ev.value ? ormTextureInstance : null;
-                terrain.material.bakeRVT();
-            });
-
-            textureFolder.addBinding(state, 'useSplatTexture', {
-                label: '스플랫 맵 사용'
-            }).on('change', (ev) => {
-                terrain.splatTexture = ev.value ? splatTextureInstance : null;
-                terrain.material.bakeRVT();
             });
 
         }
