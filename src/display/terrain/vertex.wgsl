@@ -11,7 +11,7 @@ struct TerrainUniforms {
     worldSize: vec2<f32>,
     baseSlotIndex: f32,
     maxLOD: f32,
-    gridSize: f32,
+    verticesPerSide: f32,
     pad0: vec3<f32>,
     lodRanges: array<vec4<f32>, 8>,
 }
@@ -97,17 +97,23 @@ fn main(inputData: InputData) -> VertexOutput {
     let tempWorldPos = vec3<f32>(worldXZ.x, 0.0, worldXZ.y);
     morphFactor = calculateMorphFactor(tempWorldPos, instanceData.lod);
 
-    let gridDim = vertexUniforms.gridSize;
+    let gridDim = vertexUniforms.verticesPerSide - 1.0;
     let gridPos = inputData.uv * gridDim;
     let gridIdx = floor(gridPos + 0.5);
-    
-    let parentGridIdx = floor(gridIdx * 0.5) * 2.0;
+
+    var parentGridIdx = floor(gridIdx * 0.5) * 2.0;
+    if (gridIdx.x >= gridDim - 0.1) {
+        parentGridIdx.x = gridDim;
+    }
+    if (gridIdx.y >= gridDim - 0.1) {
+        parentGridIdx.y = gridDim;
+    }
+
     let parentUV = parentGridIdx / gridDim;
     let parentLocalXZ = parentUV - vec2<f32>(0.5);
     let parentWorldXZ = instanceData.offset + parentLocalXZ * instanceData.scale;
 
     let finalWorldXZ = mix(worldXZ, parentWorldXZ, morphFactor);
-
     let finalUV = mix(inputData.uv, parentUV, morphFactor);
     let rawWorldUV = (finalWorldXZ - vertexUniforms.worldOffset) / vertexUniforms.worldSize;
     let worldUV = vec2<f32>(rawWorldUV.x, 1.0 - rawWorldUV.y);

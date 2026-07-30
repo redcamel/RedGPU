@@ -488,7 +488,7 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
 
             const state = {
                 wireframe: false,
-                gridSize: terrain.gridSize,
+                verticesPerSide: terrain.verticesPerSide,
                 maxLOD: terrain.maxLOD,
                 lodThreshold: terrain.lodThreshold,
                 minHeight: terrain.minHeight,
@@ -506,15 +506,15 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
                     terrain.dirtyPipeline = true;
                 });
 
-            terrainFolder.addBinding(state, 'gridSize', {
-                label: '패치 격자 분할 수 (gridSize)',
+            terrainFolder.addBinding(state, 'verticesPerSide', {
+                label: '한 변당 정점 수 (verticesPerSide)',
                 options: {
-                    '64 x 64': 64,
-                    '32 x 32': 32,
-                    '16 x 16': 16,
+                    '64 (63x63 quads)': 64,
+                    '32 (31x31 quads)': 32,
+                    '16 (15x15 quads)': 16,
                 }
             }).on('change', (ev) => {
-                terrain.gridSize = ev.value;
+                terrain.verticesPerSide = ev.value;
             });
 
             terrainFolder.addBinding(state, 'maxLOD', {

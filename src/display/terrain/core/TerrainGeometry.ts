@@ -5,18 +5,18 @@ import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import Primitive from "../../../primitive/core/Primitive";
 
 class TerrainGeometry extends Geometry {
-    constructor(redGPUContext: RedGPUContext, resolution: number = 64) {
+    constructor(redGPUContext: RedGPUContext, verticesPerSide: number = 64) {
         const interleaveData: number[] = [];
         const indexData: number[] = [];
+        const quadsPerSide = verticesPerSide - 1;
 
-        for (let iy = 0; iy <= resolution; iy++) {
-            const ratioZ = iy / resolution;
+        for (let iy = 0; iy < verticesPerSide; iy++) {
+            const ratioZ = iy / quadsPerSide;
             const z = ratioZ - 0.5;
-
             const v = ratioZ;
 
-            for (let ix = 0; ix <= resolution; ix++) {
-                const ratioX = ix / resolution;
+            for (let ix = 0; ix < verticesPerSide; ix++) {
+                const ratioX = ix / quadsPerSide;
                 const x = ratioX - 0.5;
                 const u = ratioX;
 
@@ -29,12 +29,12 @@ class TerrainGeometry extends Geometry {
             }
         }
 
-        for (let iy = 0; iy < resolution; iy++) {
-            for (let ix = 0; ix < resolution; ix++) {
-                const a = ix + (resolution + 1) * iy;
-                const b = ix + (resolution + 1) * (iy + 1);
-                const c = (ix + 1) + (resolution + 1) * (iy + 1);
-                const d = (ix + 1) + (resolution + 1) * iy;
+        for (let iy = 0; iy < quadsPerSide; iy++) {
+            for (let ix = 0; ix < quadsPerSide; ix++) {
+                const a = ix + verticesPerSide * iy;
+                const b = ix + verticesPerSide * (iy + 1);
+                const c = (ix + 1) + verticesPerSide * (iy + 1);
+                const d = (ix + 1) + verticesPerSide * iy;
                 indexData.push(a, b, c, a, c, d);
             }
         }

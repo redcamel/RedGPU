@@ -48,7 +48,7 @@ class TileStreamMetrics {
 export interface TerrainOptions {
     cellSize?: number;
     loadingRadius?: number;
-    gridSize?: number;
+    verticesPerSide?: number;
     lodThreshold?: number;
 }
 
@@ -68,13 +68,13 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #atlasTileCountX: number = 16;
     #atlasTileCountZ: number = 16;
     #atlasTileSize: number = 512;
-    #gridSize: number = 64;
+    #verticesPerSide: number = 64;
     #maxInstances: number = 65536;
     #tileStreamMetrics = new TileStreamMetrics();
 
     constructor(redGPUContext: RedGPUContext, options?: TerrainOptions) {
-        const gridSize = options?.gridSize ?? 64;
-        super(redGPUContext, gridSize);
+        const verticesPerSide = options?.verticesPerSide ?? 64;
+        super(redGPUContext, verticesPerSide);
         const cellSize = options?.cellSize ?? 256;
         const loadingRadius = options?.loadingRadius ?? 2560;
         this.#lodThreshold = options?.lodThreshold ?? 2.0;
@@ -85,7 +85,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.worldSize = [1, 1];
         this.maxLOD = 4;
         this.baseSlotIndex = 0;
-        this.#gridSize = gridSize;
+        this.#verticesPerSide = verticesPerSide;
 
         const maxInstances = 65536; // 65,536 인스턴스 (65,536 * 16 bytes = 1MB VRAM) - 32K 대형 지형 및 고해상도 LOD 대비
         this.#maxInstances = maxInstances;
@@ -114,14 +114,18 @@ class TerrainTileSystem extends TerrainMaterialBind {
         updateTargetUniform(this, 'lodRanges', value);
     }
 
-    get gridSize(): number {
-        return this.#gridSize;
+    get verticesPerSide(): number {
+        return this.#verticesPerSide;
     }
 
-    set gridSize(value: number) {
+    set verticesPerSide(value: number) {
         this.geometry = new TerrainGeometry(this.redGPUContext, value);
-        this.#gridSize = value;
-        updateTargetUniform(this, 'gridSize', value);
+        this.#verticesPerSide = value;
+        updateTargetUniform(this, 'verticesPerSide', value);
+    }
+
+    get quadsPerSide(): number {
+        return this.#verticesPerSide - 1;
     }
 
     get atlasTileCountX(): number {
