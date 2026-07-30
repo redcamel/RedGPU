@@ -44,7 +44,31 @@ class TerrainRVT {
         return this.#normalORMDirectTexture;
     }
 
-    public bake(material: TerrainMaterial): void {
+
+    public bakeTile(
+        material: TerrainMaterial,
+        tileCol: number,
+        tileRow: number,
+        tileCountX: number = 16,
+        tileCountZ: number = 16
+    ): void {
+        const tileSizeX = this.#atlasSize / tileCountX;
+        const tileSizeZ = this.#atlasSize / tileCountZ;
+        const pixelX = Math.floor(tileCol * tileSizeX);
+        const pixelY = Math.floor(tileRow * tileSizeZ);
+        const width = Math.ceil(tileSizeX);
+        const height = Math.ceil(tileSizeZ);
+
+        this.bakeTileRect(material, pixelX, pixelY, width, height);
+    }
+
+    public bakeTileRect(
+        material: TerrainMaterial,
+        pixelX: number,
+        pixelY: number,
+        width: number,
+        height: number
+    ): void {
         if (!this.#computePipeline) return;
 
         const mat = material as any;
@@ -57,10 +81,12 @@ class TerrainRVT {
         const ormTextureGPUView = this.#getTextureView(mat.ormTexture);
         const heightmapGPUView = this.#getTextureView(mat.targetTerrain?.heightmapAtlasTexture);
 
-        keepLog('RVT 컴퓨트 셰이더 베이킹 실행');
+        keepLog(`RVT 컴퓨트 셰이더 타일 베이킹 실행: rect(${pixelX}, ${pixelY}, ${width}, ${height})`);
         const device = this.#redGPUContext.gpuDevice;
 
-        const uData = new Float32Array(24);
+        const uData = new Float32Array(28);
+        const uDataU32 = new Uint32Array(uData.buffer);
+
         uData[0] = 0.0;
         uData[1] = 0.0;
         uData[2] = 1.0;
@@ -69,22 +95,29 @@ class TerrainRVT {
         uData[5] = 0.0;
         uData[6] = 1.0;
         uData[7] = 1.0;
+
+        uData[8] = pixelX;
+        uData[9] = pixelY;
+        uData[10] = width;
+        uData[11] = height;
+
         const layers = mat.layers || [];
         const baseRoughness = mat.roughnessFactor ?? 1.0;
-        uData[8] = mat.tileScale ?? 16.0;
-        uData[9] = mat.macroScale ?? 2.0;
-        uData[10] = mat.blendContrast ?? 0.0;
-        uData[11] = baseRoughness;
-        uData[12] = layers[0]?.roughnessFactor ?? 0.85;
-        uData[13] = layers[1]?.roughnessFactor ?? 0.85;
-        uData[14] = layers[2]?.roughnessFactor ?? 0.90;
-        uData[15] = layers[3]?.roughnessFactor ?? 0.85;
-        uData[16] = mat.normalScale ?? 1.0;
-        uData[17] = mat.occlusionStrength ?? 1.0;
-        uData[18] = mat.baseColorWeight ?? 0.5;
-        uData[19] = mat.baseColorBlendMode === 'multiply' ? 1.0 : 0.0;
+        uData[12] = mat.tileScale ?? 16.0;
+        uData[13] = mat.macroScale ?? 2.0;
+        uData[14] = mat.blendContrast ?? 0.0;
+        uData[15] = baseRoughness;
+        uData[16] = layers[0]?.roughnessFactor ?? 0.85;
+        uData[17] = layers[1]?.roughnessFactor ?? 0.85;
+        uData[18] = layers[2]?.roughnessFactor ?? 0.90;
+        uData[19] = layers[3]?.roughnessFactor ?? 0.85;
+        uData[20] = mat.normalScale ?? 1.0;
+        uData[21] = mat.occlusionStrength ?? 1.0;
+        uData[22] = mat.baseColorWeight ?? 0.5;
+
+        uDataU32[23] = mat.baseColorBlendMode === 'multiply' ? 1 : 0;
         const isAutoSplat = !mat.splatTexture || mat.useAutoSplat === true;
-        uData[20] = isAutoSplat ? 1.0 : 0.0;
+        uDataU32[24] = isAutoSplat ? 1 : 0;
 
         device.queue.writeBuffer(this.#uniformBuffer!, 0, uData);
 
@@ -127,8 +160,10 @@ class TerrainRVT {
         const pass = encoder.beginComputePass({label: 'RVT_ComputeBakePass'});
         pass.setPipeline(this.#computePipeline);
         pass.setBindGroup(0, bindGroup);
-        const workgroups = Math.ceil(this.#atlasSize / 16);
-        pass.dispatchWorkgroups(workgroups, workgroups);
+
+        const workgroupsX = Math.ceil(width / 16);
+        const workgroupsY = Math.ceil(height / 16);
+        pass.dispatchWorkgroups(workgroupsX, workgroupsY);
         pass.end();
 
         device.queue.submit([encoder.finish()]);
@@ -164,7 +199,7 @@ class TerrainRVT {
         this.#normalORMDirectTexture = new DirectTexture(this.#redGPUContext, `RVT_NormalORM_${uid}`, this.#normalORMAtlasGPU);
 
         this.#uniformBuffer = device.createBuffer({
-            label: 'RVT_BakeUniform', size: 24 * 4, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+            label: 'RVT_BakeUniform', size: 28 * 4, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
 
         this.#sampler = device.createSampler({

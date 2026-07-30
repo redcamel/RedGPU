@@ -3,6 +3,7 @@ struct RVTBakeUniforms {
     tileUVScale:  vec2<f32>,
     worldUVOffset: vec2<f32>,
     worldUVScale:  vec2<f32>,
+    tileRect: vec4<f32>, // (destPixelX, destPixelY, pixelWidth, pixelHeight)
     tileScale:  f32,
     macroScale: f32,
     blendContrast: f32,
@@ -16,6 +17,9 @@ struct RVTBakeUniforms {
     baseColorWeight: f32,
     baseColorBlendMode: u32,
     useAutoSplat: u32,
+    padding0: u32,
+    padding1: u32,
+    padding2: u32,
 }
 
 @group(0) @binding(0) var<uniform> bakeUniforms: RVTBakeUniforms;
@@ -61,12 +65,23 @@ fn getBakeMipLevel(tileScale: f32, textureSize: f32, atlasSize: f32) -> f32 {
 @compute @workgroup_size(16, 16)
 fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let outputDim = textureDimensions(albedoOutput);
-    if (global_id.x >= outputDim.x || global_id.y >= outputDim.y) {
+    let tileWidth = u32(bakeUniforms.tileRect.z);
+    let tileHeight = u32(bakeUniforms.tileRect.w);
+
+    if (global_id.x >= tileWidth || global_id.y >= tileHeight) {
         return;
     }
 
-    let coords = vec2<i32>(global_id.xy);
-    let rawUV = (vec2<f32>(global_id.xy) + vec2<f32>(0.5)) / vec2<f32>(outputDim);
+    let destCoords = vec2<i32>(
+        i32(u32(bakeUniforms.tileRect.x) + global_id.x),
+        i32(u32(bakeUniforms.tileRect.y) + global_id.y)
+    );
+
+    if (destCoords.x >= i32(outputDim.x) || destCoords.y >= i32(outputDim.y)) {
+        return;
+    }
+
+    let rawUV = (vec2<f32>(destCoords) + vec2<f32>(0.5)) / vec2<f32>(outputDim);
 
     let wUV = bakeUniforms.worldUVOffset + rawUV * bakeUniforms.worldUVScale;
     let tileUV = wUV * bakeUniforms.tileScale;
@@ -177,6 +192,7 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let globalAO = select(1.0, globalORM.r, hasGlobalORM > 0.5);
     let finalOcclusion = clamp(blendedOcclusion * globalAO * bakeUniforms.occlusionStrength, 0.0, 1.0);
 
-    textureStore(albedoOutput, coords, finalAlbedo);
-    textureStore(normalORMOutput, coords, vec4<f32>(scaledNormal, finalRoughness, finalOcclusion));
+    textureStore(albedoOutput, destCoords, finalAlbedo);
+    textureStore(normalORMOutput, destCoords, vec4<f32>(scaledNormal, finalRoughness, finalOcclusion));
 }
+

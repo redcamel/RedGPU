@@ -376,8 +376,11 @@ class TerrainTileSystem extends TerrainMaterialBind {
             sourceTexture.destroy();
         }
 
-        if (this.material && typeof (this.material as any).bakeRVT === 'function') {
-            (this.material as any).bakeRVT();
+        if (this.material) {
+            const mat = this.material as any;
+            if (typeof mat.bakeRVTTile === 'function') {
+                mat.bakeRVTTile(tileX, tileZ, this.atlasTileCountX, this.atlasTileCountZ);
+            }
         }
     }
 

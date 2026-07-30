@@ -88,8 +88,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         this.rvtNormalORMTexture = this.#rvt.normalORMDirectTexture
 
         if (!this.__packingList) this.__packingList = [];
-        this.__packingList.push(this.bakeRVT);
-        this.bakeRVT();
+        this.__packingList.push(this.bakeAllRVTTiles);
     }
 
     get layers(): TerrainLayerConfig[] {
@@ -102,7 +101,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set baseColorWeight(v: number) {
         this.#baseColorWeight = v;
-        this.bakeRVT();
+        this.bakeAllRVTTiles();
     }
 
     get baseColorBlendMode(): 'mix' | 'multiply' {
@@ -111,7 +110,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set baseColorBlendMode(v: 'mix' | 'multiply') {
         this.#baseColorBlendMode = v;
-        this.bakeRVT();
+        this.bakeAllRVTTiles();
     }
 
     get metallicFactor(): number {
@@ -120,7 +119,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set metallicFactor(v: number) {
         this.#metallicFactor = v;
-        this.bakeRVT();
+        this.bakeAllRVTTiles();
     }
 
     get roughnessFactor(): number {
@@ -129,7 +128,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set roughnessFactor(v: number) {
         this.#roughnessFactor = v;
-        this.bakeRVT();
+        this.bakeAllRVTTiles();
     }
 
     get normalScale(): number {
@@ -138,7 +137,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set normalScale(v: number) {
         this.#normalScale = v;
-        this.bakeRVT();
+        this.bakeAllRVTTiles();
     }
 
     get occlusionStrength(): number {
@@ -147,7 +146,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set occlusionStrength(v: number) {
         this.#occlusionStrength = v;
-        this.bakeRVT();
+        this.bakeAllRVTTiles();
     }
 
     get tileScale(): number {
@@ -156,7 +155,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set tileScale(v: number) {
         this.#tileScale = v;
-        this.bakeRVT();
+        this.bakeAllRVTTiles();
     }
 
     get macroScale(): number {
@@ -165,7 +164,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set macroScale(v: number) {
         this.#macroScale = v;
-        this.bakeRVT();
+        this.bakeAllRVTTiles();
     }
 
     get blendContrast(): number {
@@ -174,22 +173,27 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
     set blendContrast(v: number) {
         this.#blendContrast = v;
-        this.bakeRVT();
+        this.bakeAllRVTTiles();
     }
 
-    bakeRVT = () => {
-        if (this.#bakeTimer) return;
-        this.#bakeTimer = requestAnimationFrame(() => {
-            this.#bakeTimer = null;
-            if (this.#rvt) {
-                this.#rvt.bake(this);
+    public bakeAllRVTTiles = (tileCountX: number = 16, tileCountZ: number = 16): void => {
+        if (!this.#rvt) return;
+        for (let row = 0; row < tileCountZ; row++) {
+            for (let col = 0; col < tileCountX; col++) {
+                this.#rvt.bakeTile(this, col, row, tileCountX, tileCountZ);
             }
-        });
+        }
     };
+
+    public bakeRVTTile(tileCol: number, tileRow: number, tileCountX: number = 16, tileCountZ: number = 16): void {
+        if (this.#rvt) {
+            this.#rvt.bakeTile(this, tileCol, tileRow, tileCountX, tileCountZ);
+        }
+    }
 
     override updateTexture(prevTexture: any, texture: any) {
         super.updateTexture(prevTexture, texture);
-        this.bakeRVT();
+        this.bakeAllRVTTiles();
     }
 
     public addLayer(config: TerrainLayerConfig): number {
@@ -198,7 +202,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         }
         this.#layers.push(config);
         this.#rebuildLayerTextureArrays();
-        this.bakeRVT();
+        this.bakeAllRVTTiles();
         return this.#layers.length - 1;
     }
 
@@ -210,7 +214,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         if (targetIndex >= 0 && targetIndex < this.#layers.length) {
             this.#layers.splice(targetIndex, 1);
             this.#rebuildLayerTextureArrays();
-            this.bakeRVT();
+            this.bakeAllRVTTiles();
             return true;
         }
         return false;
@@ -224,7 +228,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         if (targetIndex >= 0 && targetIndex < this.#layers.length) {
             this.#layers[targetIndex] = {...this.#layers[targetIndex], ...partialConfig};
             this.#rebuildLayerTextureArrays();
-            this.bakeRVT();
+            this.bakeAllRVTTiles();
             return true;
         }
         return false;
@@ -263,7 +267,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         const ctx = this.redGPUContext;
         const onLoad = (v) => {
             keepLog('오긴오냐', this.uuid)
-            this.bakeRVT();
+            this.bakeAllRVTTiles();
         }
         this.diffuseArray = new TextureArray(ctx, diffuseSrcs, true, onLoad, undefined, 'rgba8unorm-srgb');
         this.normalArray = new TextureArray(ctx, normalSrcs, true, onLoad, undefined, 'rgba8unorm');
