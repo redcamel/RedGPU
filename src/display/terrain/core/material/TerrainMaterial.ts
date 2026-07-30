@@ -82,7 +82,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
             addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE
         });
 
-        this.#rvt = new TerrainRVT(redGPUContext, {atlasSize: 2048});
+        this.#rvt = new TerrainRVT(redGPUContext, {atlasSize: 4096});
 
         this.rvtAlbedoTexture = this.#rvt.albedoDirectTexture
         this.rvtNormalORMTexture = this.#rvt.normalORMDirectTexture
