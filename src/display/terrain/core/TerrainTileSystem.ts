@@ -52,6 +52,17 @@ export interface TerrainOptions {
     lodThreshold?: number;
 }
 
+function sanitizeVerticesPerSide(val: number): number {
+    const minVal = 16;
+    const maxVal = 512;
+    const clamped = Math.max(minVal, Math.min(maxVal, val));
+    const powerOfTwo = Math.pow(2, Math.round(Math.log2(clamped)));
+    if (powerOfTwo !== val) {
+        console.warn(`[RedGPU Terrain] verticesPerSide는 2의 거듭제곱(16, 32, 64, 128...)이어야 합니다. (${val} -> ${powerOfTwo}로 자동 보정됨)`);
+    }
+    return powerOfTwo;
+}
+
 class TerrainTileSystem extends TerrainMaterialBind {
     #spatialGrid: TerrainSpatialGrid;
     #quadtree: TerrainQuadtree;
@@ -73,7 +84,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #tileStreamMetrics = new TileStreamMetrics();
 
     constructor(redGPUContext: RedGPUContext, options?: TerrainOptions) {
-        const verticesPerSide = options?.verticesPerSide ?? 64;
+        const verticesPerSide = sanitizeVerticesPerSide(options?.verticesPerSide ?? 64);
         super(redGPUContext, verticesPerSide);
         const cellSize = options?.cellSize ?? 256;
         const loadingRadius = options?.loadingRadius ?? 2560;
@@ -119,9 +130,10 @@ class TerrainTileSystem extends TerrainMaterialBind {
     }
 
     set verticesPerSide(value: number) {
-        this.geometry = new TerrainGeometry(this.redGPUContext, value);
-        this.#verticesPerSide = value;
-        updateTargetUniform(this, 'verticesPerSide', value);
+        const safeValue = sanitizeVerticesPerSide(value);
+        this.geometry = new TerrainGeometry(this.redGPUContext, safeValue);
+        this.#verticesPerSide = safeValue;
+        updateTargetUniform(this, 'verticesPerSide', safeValue);
     }
 
     get quadsPerSide(): number {

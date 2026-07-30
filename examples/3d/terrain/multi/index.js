@@ -350,11 +350,12 @@ RedGPU.init(
         heightFog.endDepth = 20000;              // 5km ~ 20km 원경 구간에서만 지평선 대기와 은은하게 믹싱
         heightFog.density = 1;
         view.postEffectManager.addEffect(heightFog);
-
-        // 3. 거대 Terrain 생성
+        console.log(RedGPU)
+        // 3. 거대 Terrain 생성 (verticesPerSide = 64 표준 규격 적용)
         terrain = new RedGPU.Display.Terrain(
             redGPUContext,
-            'CDLOD_Terrain'
+            'CDLOD_Terrain',
+
         );
 
         if (downloadBtn) {
@@ -509,9 +510,11 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
             terrainFolder.addBinding(state, 'verticesPerSide', {
                 label: '한 변당 정점 수 (verticesPerSide)',
                 options: {
-                    '64 (63x63 quads)': 64,
-                    '32 (31x31 quads)': 32,
-                    '16 (15x15 quads)': 16,
+                    '256 (255x255 quads)': RedGPU.Display.TERRAIN_VERTICES_PER_SIDE.SIZE_256,
+                    '128 (127x127 quads)': RedGPU.Display.TERRAIN_VERTICES_PER_SIDE.SIZE_128,
+                    '64 (63x63 quads - 기본)': RedGPU.Display.TERRAIN_VERTICES_PER_SIDE.SIZE_64,
+                    '32 (31x31 quads)': RedGPU.Display.TERRAIN_VERTICES_PER_SIDE.SIZE_32,
+                    '16 (15x15 quads)': RedGPU.Display.TERRAIN_VERTICES_PER_SIDE.SIZE_16,
                 }
             }).on('change', (ev) => {
                 terrain.verticesPerSide = ev.value;
