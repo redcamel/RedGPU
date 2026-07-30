@@ -295,7 +295,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
         const gpuTexture = device.createTexture({
             label: 'Terrain_HeightmapTileAtlasGPUTexture',
             size: [atlasWidth, atlasHeight, 1],
-            format: 'rgba8unorm',
+            format: 'r16float',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
         });
 
@@ -412,7 +412,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.#tileImageCache.set(key, image);
     }
 
-    #loadTileFromUrl(tile: SpatialTileInfo, url: string, format: GPUTextureFormat = 'rgba8unorm') {
+    #loadTileFromUrl(tile: SpatialTileInfo, url: string, format: GPUTextureFormat = 'r16float') {
         const img = new Image();
         img.src = url;
         img.onload = () => {

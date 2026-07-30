@@ -509,9 +509,9 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
             terrainFolder.addBinding(state, 'gridSize', {
                 label: '패치 격자 분할 수 (gridSize)',
                 options: {
-                    '16 x 16': 16,
-                    '32 x 32': 32,
                     '64 x 64': 64,
+                    '32 x 32': 32,
+                    '16 x 16': 16,
                 }
             }).on('change', (ev) => {
                 terrain.gridSize = ev.value;
