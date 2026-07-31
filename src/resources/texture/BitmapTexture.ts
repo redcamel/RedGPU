@@ -7,6 +7,10 @@ import convertSvgToImageBitmap from "../../utils/texture/textureParser/imageBitm
 import imageBitmapToGPUTexture from "../../utils/texture/textureParser/imageBitmap/imageBitmapToGPUTexture";
 import ManagementResourceBase from "../core/ManagementResourceBase";
 import ResourceStateBitmapTexture from "../core/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
+import getFileExtension from "../../utils/file/getFileExtension";
+import keepLog from "../../utils/keepLog";
+import {KTX2Container, read} from "ktx-parse";
+import {createGPUTextureFromKTX2} from "../../utils/texture/textureParser/createGPUTextureFromKTX2";
 
 const MANAGED_STATE_KEY = 'managedBitmapTextureState'
 /**
@@ -43,7 +47,8 @@ class BitmapTexture extends ManagementResourceBase {
     /** [KO] 프리멀티플 알파 사용 여부 [EN] Whether to use premultiplied alpha */
     #usePremultiplyAlpha: boolean = true
     /** [KO] 텍스처 포맷 [EN] Texture format */
-    readonly #format: GPUTextureFormat
+    #format: GPUTextureFormat
+    readonly #userSpecifiedFormat: boolean = false;
     /** [KO] 로드 완료 콜백 [EN] Load complete callback */
     readonly #onLoad: (textureInstance: BitmapTexture) => void;
     /** [KO] 에러 콜백 [EN] Error callback */
@@ -89,6 +94,7 @@ class BitmapTexture extends ManagementResourceBase {
         this.#onError = onError
         this.#usePremultiplyAlpha = usePremultiplyAlpha
         this.#useMipmap = useMipMap
+        this.#userSpecifiedFormat = !!format;
         this.#format = format || `${navigator.gpu.getPreferredCanvasFormat()}-srgb` as GPUTextureFormat
         if (src) {
             this.#src = this.#getParsedSrc(src);
@@ -344,19 +350,76 @@ class BitmapTexture extends ManagementResourceBase {
         try {
             let imgBitmap: ImageBitmap;
             const premultiplyAlpha = this.#usePremultiplyAlpha ? 'premultiply' : 'none';
-            if (src.endsWith(".svg")) {
+            const ext = getFileExtension(src).toLowerCase();
+            if (ext === "svg" || src.endsWith(".svg")) {
                 imgBitmap = await convertSvgToImageBitmap(src, premultiplyAlpha);
+            } else if (ext === "ktx2" || src.endsWith(".ktx2")) {
+                const {container} = await loadKtx2Container(src);
+                keepLog(container);
+
+                if (this.#gpuTexture) {
+                    this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuTexture);
+                    this.#gpuTexture = null;
+                }
+                this.targetResourceManagedState.videoMemory -= this.#videoMemorySize;
+                this.#videoMemorySize = 0;
+
+                const newGPUTexture = await createGPUTextureFromKTX2({
+                    device: this.gpuDevice,
+                    container: container,
+                    overrideFormat: this.#userSpecifiedFormat ? this.#format : undefined,
+                });
+
+                this.#format = newGPUTexture.format;
+                this.#width = container.pixelWidth;
+                this.#height = container.pixelHeight;
+                this.#mipLevelCount = Math.max(1, container.levels.length);
+                this.#videoMemorySize = calculateTextureByteSize(newGPUTexture);
+                this.targetResourceManagedState.videoMemory += this.#videoMemorySize;
+
+                this.#setGpuTexture(newGPUTexture);
             } else {
                 imgBitmap = await loadImageToImageBitmap(src, "none", premultiplyAlpha);
             }
-            this.#createGPUTextureFromImageBitmap(imgBitmap);
+            if (imgBitmap) {
+                this.#createGPUTextureFromImageBitmap(imgBitmap);
+            }
+
             this.#onLoad?.(this);
         } catch (error) {
             console.error(error);
             this.#onError?.(error);
         }
     }
+
 }
 
+export interface KTX2ParseResult {
+    container: KTX2Container;
+    arrayBuffer: ArrayBuffer;
+}
+
+export async function loadKtx2Container(src: string): Promise<KTX2ParseResult> {
+    const response = await fetch(src);
+    if (!response.ok) {
+        throw new Error(`[loadKtx2Container ❌] Failed to fetch KTX2 from ${src}: ${response.status} ${response.statusText}`);
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    const uint8 = new Uint8Array(arrayBuffer);
+
+    // KTX2 Magic Identifier 검사: AB 4B 54 58 20 32 30 BB 0D 0A 1A 0A
+    if (uint8.length < 12 || uint8[0] !== 0xAB || uint8[1] !== 0x4B || uint8[2] !== 0x54 || uint8[3] !== 0x58) {
+        throw new Error(`[loadKtx2Container ❌] Invalid KTX2 magic identifier: ${src}. (Pointer text or non-binary file)`);
+    }
+
+    const container = read(uint8);
+
+    if (!container || container.pixelWidth <= 0 || container.pixelHeight <= 0) {
+        throw new Error(`[loadKtx2Container ❌] Invalid KTX2 header dimensions: ${src}`);
+    }
+
+    return {container, arrayBuffer};
+}
 Object.freeze(BitmapTexture)
 export default BitmapTexture

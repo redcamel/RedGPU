@@ -3,6 +3,7 @@ import loadImageToImageBitmap from "./imageBitmap/loadImageToImageBitmap";
 import convertSvgToImageBitmap from "./imageBitmap/convertSvgToImageBitmap";
 import imageBitmapToGPUTexture from "./imageBitmap/imageBitmapToGPUTexture";
 import RedGPUContext from "../../../context/RedGPUContext";
+import {createGPUTextureFromKTX2} from "./createGPUTextureFromKTX2";
 
 export {ParsedImageData};
 
@@ -55,7 +56,7 @@ export const TextureParser = {
      * [EN] Converts and uploads ImageBitmap to WebGPU GPUTexture.
      */
     imageBitmapToGPUTexture,
-
+    createGPUTextureFromKTX2,
     /**
      * [KO] 바이너리 헤더의 Magic Number를 분석하여 포맷을 자동 감지 후 이미지 데이터 정보(ParsedImageData)를 파싱하여 반환합니다. 지원되지 않는 포맷일 경우 명시적 에러를 발생시킵니다.
      * [EN] Analyzes binary header Magic Number to auto-detect format and parses image data info (ParsedImageData). Throws explicit error for unsupported formats.

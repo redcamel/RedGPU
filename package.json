@@ -49,6 +49,8 @@
     "vitepress-sidebar": "^1.33.1"
   },
   "dependencies": {
+    "fzstd": "^0.1.1",
+    "ktx-parse": "^1.1.0",
     "wgsl_reflect": "^1.5.0"
   },
   "overrides": {

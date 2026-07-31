@@ -41,6 +41,8 @@ function getTextureFormatByteSize(format: GPUTextureFormat): number {
         case 'r16uint':
         case 'r16sint':
         case 'r16float':
+        case 'r16unorm':
+        case 'r16snorm':
         case 'rg8unorm':
         case 'rg8snorm':
         case 'rg8uint':
@@ -52,6 +54,8 @@ function getTextureFormatByteSize(format: GPUTextureFormat): number {
         case 'rg16uint':
         case 'rg16sint':
         case 'rg16float':
+        case 'rg16unorm':
+        case 'rg16snorm':
         case 'rgba8unorm':
         case 'rgba8unorm-srgb':
         case 'rgba8snorm':
@@ -59,6 +63,8 @@ function getTextureFormatByteSize(format: GPUTextureFormat): number {
         case 'rgba8sint':
         case 'bgra8unorm':
         case 'bgra8unorm-srgb':
+        case 'rgb9e5ufloat':
+        case 'rg11b10ufloat':
             return 4;
         case 'rg32uint':
         case 'rg32sint':
@@ -66,6 +72,8 @@ function getTextureFormatByteSize(format: GPUTextureFormat): number {
         case 'rgba16uint':
         case 'rgba16sint':
         case 'rgba16float':
+        case 'rgba16unorm':
+        case 'rgba16snorm':
             return 8;
         case 'rgba32uint':
         case 'rgba32sint':
@@ -77,6 +85,13 @@ function getTextureFormatByteSize(format: GPUTextureFormat): number {
         case 'depth32float':
             return 4;
         default:
+            // BC / ETC2 / ASTC 등의 블록 압축 포맷
+            if (format.startsWith('bc1') || format.startsWith('bc4') || format.startsWith('etc2-rgb8')) {
+                return 0.5; // 8 bytes / 16 texels
+            }
+            if (format.startsWith('bc') || format.startsWith('etc') || format.startsWith('astc')) {
+                return 1; // 16 bytes / 16 texels
+            }
             throw new Error(`Unrecognized texture format: ${format}`);
     }
 }

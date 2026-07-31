@@ -125,9 +125,9 @@ export default init
 const getRequiredFeature = (adapter: GPUAdapter): GPUFeatureName[] => {
     const requiredFeatures: GPUFeatureName[] = [];
     const featuresToRequest: GPUFeatureName[] = [
-        // "texture-compression-astc",
-        // "texture-compression-bc",
-        // "texture-compression-etc2",
+        "texture-compression-astc",
+        "texture-compression-bc",
+        "texture-compression-etc2",
         // "shader-f16",
         // "timestamp-query",
         // "depth-clip-control",
