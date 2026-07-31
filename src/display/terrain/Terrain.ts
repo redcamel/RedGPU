@@ -204,11 +204,16 @@ class Terrain extends TerrainTileSystem {
                 ctx.strokeRect(px, py, cellW, cellH);
 
                 const key = `${x}_${z}`;
-                if (this.tileImageCache.has(key)) {
-                    const img = this.tileImageCache.get(key);
-                    try {
-                        ctx.drawImage(img, px, py, cellW, cellH);
-                    } catch (e) {
+                if (this.tileDataCache.has(key)) {
+                    const data = this.tileDataCache.get(key);
+                    if (data instanceof HTMLImageElement || data instanceof ImageBitmap) {
+                        try {
+                            ctx.drawImage(data as CanvasImageSource, px, py, cellW, cellH);
+                        } catch (e) {
+                        }
+                    } else {
+                        ctx.fillStyle = 'rgba(34, 197, 94, 0.4)';
+                        ctx.fillRect(px + 2, py + 2, cellW - 4, cellH - 4);
                     }
                 }
             }
