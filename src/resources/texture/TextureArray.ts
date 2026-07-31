@@ -1,7 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import getAbsoluteURL from "../../utils/file/getAbsoluteURL";
 import imageBitmapToGPUTexture from "../../utils/texture/imageBitmapToGPUTexture";
-import loadAndCreateBitmapImage from "../../utils/texture/loadAndCreateBitmapImage";
+import TextureParser from "../../utils/texture/TextureParser";
 import getMipLevelCount from "../../utils/texture/getMipLevelCount";
 import ManagementResourceBase from "../core/ManagementResourceBase";
 import ResourceStateBitmapTexture from "../core/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
@@ -75,7 +75,7 @@ class TextureArray extends ManagementResourceBase {
         const {redGPUContext} = this
         const {gpuDevice} = redGPUContext
 
-        const loadPromises = this.#srcList.map(src => loadAndCreateBitmapImage(src));
+        const loadPromises = this.#srcList.map(src => TextureParser.loadAndCreateBitmapImage(src));
 
         Promise.all(loadPromises).then((bitmaps) => {
             if (bitmaps.length === 0) {

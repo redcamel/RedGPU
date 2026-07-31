@@ -3,7 +3,7 @@ import getAbsoluteURL from "../../utils/file/getAbsoluteURL";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/texture/getMipLevelCount";
 import imageBitmapToGPUTexture from "../../utils/texture/imageBitmapToGPUTexture";
-import loadAndCreateBitmapImage from "../../utils/texture/loadAndCreateBitmapImage";
+import TextureParser from "../../utils/texture/TextureParser";
 import ManagementResourceBase from "../core/ManagementResourceBase";
 import ResourceStateBitmapTexture from "../core/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 
@@ -375,7 +375,7 @@ class BitmapTexture extends ManagementResourceBase {
             if (src.endsWith(".svg")) {
                 imgBitmap = await this.#convertSvgToImageBitmap(src);
             } else {
-                imgBitmap = await loadAndCreateBitmapImage(src, "none", this.#usePremultiplyAlpha ? 'premultiply' : 'none');
+                imgBitmap = await TextureParser.loadAndCreateBitmapImage(src, "none", this.#usePremultiplyAlpha ? 'premultiply' : 'none');
             }
             this.#createGPUTextureFromImageBitmap(imgBitmap);
             this.#onLoad?.(this);

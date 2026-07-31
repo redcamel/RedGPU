@@ -2,7 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/texture/getMipLevelCount";
 import imageBitmapToGPUTexture from "../../utils/texture/imageBitmapToGPUTexture";
-import loadAndCreateBitmapImage from "../../utils/texture/loadAndCreateBitmapImage";
+import TextureParser from "../../utils/texture/TextureParser";
 import ManagementResourceBase from "../core/ManagementResourceBase";
 import ResourceStateCubeTexture from "../core/resourceManager/resourceState/texture/ResourceStateCubeTexture";
 
@@ -373,6 +373,6 @@ export default CubeTexture
  * [EN] Promise containing an array of ImageBitmaps
  */
 async function loadAndCreateBitmapImages(srcList: string[]): Promise<ImageBitmap[]> {
-    const promises = srcList.map(src => loadAndCreateBitmapImage(src));
+    const promises = srcList.map(src => TextureParser.loadAndCreateBitmapImage(src));
     return await Promise.all(promises)
 }

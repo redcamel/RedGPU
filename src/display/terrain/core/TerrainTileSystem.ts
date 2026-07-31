@@ -5,12 +5,13 @@ import defineTexture from "../../../defineProperty/funcs/texture/defineTexture";
 import DirectTexture from "../../../resources/texture/DirectTexture";
 import {SpatialTileInfo, TerrainSpatialGrid} from "./TerrainSpatialGrid";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
-import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager";
 import defineVector2 from "../../../defineProperty/funcs/vector/defineVector2";
 import {TerrainQuadtree} from "./TerrainQuadtree";
 import defineNumber from "../../../defineProperty/funcs/number/defineNumber";
 import updateTargetUniform from "../../../defineProperty/core/updateTargetUniform";
 import TerrainGeometry from "./TerrainGeometry";
+import TextureParser from "../../../utils/texture/TextureParser";
+import TerrainHeightmapProcessor from "./TerrainHeightmapProcessor";
 
 interface TerrainTileSystem {
     heightmapAtlasTexture: DirectTexture | BitmapTexture | null;
@@ -318,7 +319,6 @@ class TerrainTileSystem extends TerrainMaterialBind {
             gpuTexture
         );
     }
-    #computeBindGroupLayout: GPUBindGroupLayout | null = null;
 
     get tileDataCache(): Map<string, ArrayBufferView | ArrayBuffer> {
         return this.#tileDataCache;
@@ -330,117 +330,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
         console.log(`[Tile Streamer 📥] Load 16-bit Buffer Cell(${tile.gridX}, ${tile.gridZ}) → Tile[${tile.tileColStr}, ${tile.tileRowStr}]`);
     }
 
-    #initComputePipeline() {
-        if (this.#computePipeline) return;
-        const device = this.redGPUContext.gpuDevice;
 
-        const wgslCode = `
-            @group(0) @binding(0) var<storage, read> rawDataBuffer: array<u32>;
-            @group(0) @binding(1) var<storage, read_write> outputBuffer: array<u32>;
-
-            struct TileUniforms {
-                targetTileSize: u32,
-                dataWidth: u32,
-                dataHeight: u32,
-                dataType: u32, // 0 = Uint16, 1 = Float32
-            };
-            @group(0) @binding(2) var<uniform> uniforms: TileUniforms;
-
-            fn getRawHeight(sampleIndex: u32) -> f32 {
-                if (uniforms.dataType == 1u) {
-                    // Float32 Buffer
-                    let valF32 = bitcast<f32>(rawDataBuffer[sampleIndex]);
-                    return clamp(valF32, 0.0, 1.0) * 65535.0;
-                } else {
-                    // Uint16 Packed Buffer (2 samples per u32)
-                    let u32Index = sampleIndex / 2u;
-                    let isOdd = sampleIndex % 2u;
-                    let packedU32 = rawDataBuffer[u32Index];
-                    var raw16: u32 = 0u;
-                    if (isOdd == 0u) {
-                        raw16 = packedU32 & 0xFFFFu;
-                    } else {
-                        raw16 = (packedU32 >> 16u) & 0xFFFFu;
-                    }
-                    return f32(raw16);
-                }
-            }
-
-            @compute @workgroup_size(16, 16)
-            fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-                let x = global_id.x;
-                let z = global_id.y;
-
-                let targetSize = uniforms.targetTileSize;
-                if (x >= targetSize || z >= targetSize) {
-                    return;
-                }
-
-                let dWidth = f32(uniforms.dataWidth);
-                let dHeight = f32(uniforms.dataHeight);
-                let tSize = f32(targetSize);
-
-                // Map target (0~511) to data (0~dataWidth-1) continuously
-                let srcX = (f32(x) / (tSize - 1.0)) * (dWidth - 1.0);
-                let srcZ = (f32(z) / (tSize - 1.0)) * (dHeight - 1.0);
-
-                let x0 = u32(floor(srcX));
-                let z0 = u32(floor(srcZ));
-                let x1 = min(x0 + 1u, uniforms.dataWidth - 1u);
-                let z1 = min(z0 + 1u, uniforms.dataHeight - 1u);
-
-                let fx = srcX - f32(x0);
-                let fz = srcZ - f32(z0);
-
-                // Sample 4 neighbor pixels
-                let val00 = getRawHeight(z0 * uniforms.dataWidth + x0);
-                let val10 = getRawHeight(z0 * uniforms.dataWidth + x1);
-                let val01 = getRawHeight(z1 * uniforms.dataWidth + x0);
-                let val11 = getRawHeight(z1 * uniforms.dataWidth + x1);
-
-                // Bilinear Interpolation
-                let top = mix(val00, val10, fx);
-                let bottom = mix(val01, val11, fx);
-                let interpolatedRaw = mix(top, bottom, fz);
-
-                let normalizedHeight = interpolatedRaw / 65535.0;
-
-                let packedF16Pair = pack2x16float(vec2<f32>(normalizedHeight, 0.0));
-
-                let targetIndex = z * targetSize + x;
-                let outU32Index = targetIndex / 2u;
-                let isOdd = targetIndex % 2u;
-
-                let f16Bits = packedF16Pair & 0xFFFFu;
-
-                if (isOdd == 0u) {
-                    outputBuffer[outU32Index] = (outputBuffer[outU32Index] & 0xFFFF0000u) | f16Bits;
-                } else {
-                    outputBuffer[outU32Index] = (outputBuffer[outU32Index] & 0x0000FFFFu) | (f16Bits << 16u);
-                }
-            }
-        `;
-
-        const shaderModule = device.createShaderModule({
-            label: 'TerrainTile_16bitComputeShader',
-            code: wgslCode
-        });
-
-        this.#computeBindGroupLayout = device.createBindGroupLayout({
-            label: 'TerrainTile_ComputeBindGroupLayout',
-            entries: [
-                {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
-                {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
-                {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}}
-            ]
-        });
-
-        this.#computePipeline = device.createComputePipeline({
-            label: 'TerrainTile_16bitComputePipeline',
-            layout: device.createPipelineLayout({bindGroupLayouts: [this.#computeBindGroupLayout]}),
-            compute: {module: shaderModule, entryPoint: 'main'}
-        });
-    }
 
     #enrichTileInfo(tile: SpatialTileInfo) {
         tile.cellKey = `${tile.gridX}_${tile.gridZ}`;
@@ -468,6 +358,8 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.#synthesizedTilesSet.add(key);
     }
 
+    #processor: TerrainHeightmapProcessor;
+
     #updateTileHeightmapFromBuffer(tile: SpatialTileInfo, data: ArrayBuffer | Uint16Array | Float32Array, width: number, height: number, format: GPUTextureFormat = 'r16float') {
         const tileX = tile.tileCol ?? 0;
         const tileZ = tile.tileRow ?? 0;
@@ -478,82 +370,23 @@ class TerrainTileSystem extends TerrainMaterialBind {
         const gpuTexture = this.heightmapAtlasTexture?.gpuTexture;
         if (!gpuTexture) return;
 
-        const device = this.redGPUContext.gpuDevice;
-        this.#initComputePipeline();
+        if (!this.#processor) {
+            this.#processor = new TerrainHeightmapProcessor(this.redGPUContext);
+        }
 
         const destX = tileX * this.atlasTileSize;
         const destZ = tileZ * this.atlasTileSize;
-        const targetTileSize = this.atlasTileSize;
 
-        let rawBufferView: Uint8Array;
-        let dataType = 0; // 0 = Uint16, 1 = Float32
-
-        if (data instanceof Float32Array) {
-            rawBufferView = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
-            dataType = 1;
-        } else if (data instanceof Uint16Array) {
-            rawBufferView = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
-            dataType = 0;
-        } else {
-            const buf = data instanceof ArrayBuffer ? data : (data as any).buffer;
-            rawBufferView = new Uint8Array(buf);
-            dataType = 0;
-        }
-
-        const alignedSize = Math.max(16, Math.ceil(rawBufferView.byteLength / 4) * 4);
-        const inputStorageBuffer = device.createBuffer({
-            label: 'TerrainTile_RawStorageBuffer',
-            size: alignedSize,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
-        });
-        device.queue.writeBuffer(inputStorageBuffer, 0, rawBufferView.buffer, rawBufferView.byteOffset, rawBufferView.byteLength);
-
-        const targetPixelCount = targetTileSize * targetTileSize;
-        const outputStorageBuffer = device.createBuffer({
-            label: 'TerrainTile_OutputStorageBuffer',
-            size: targetPixelCount * 2,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
-        });
-
-        const uniformsArray = new Uint32Array([targetTileSize, width, height, dataType]);
-        const uniformBuffer = device.createBuffer({
-            label: 'TerrainTile_UniformBuffer',
-            size: 16,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-        });
-        device.queue.writeBuffer(uniformBuffer, 0, uniformsArray);
-
-        const bindGroup = device.createBindGroup({
-            label: 'TerrainTile_ComputeBindGroup',
-            layout: this.#computeBindGroupLayout!,
-            entries: [
-                {binding: 0, resource: {buffer: inputStorageBuffer}},
-                {binding: 1, resource: {buffer: outputStorageBuffer}},
-                {binding: 2, resource: {buffer: uniformBuffer}}
-            ]
-        });
-
-        this.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (encoder) => {
-            const pass = encoder.beginComputePass({label: 'TerrainTile_ComputePass'});
-            pass.setPipeline(this.#computePipeline!);
-            pass.setBindGroup(0, bindGroup);
-            pass.dispatchWorkgroups(Math.ceil(targetTileSize / 16), Math.ceil(targetTileSize / 16));
-            pass.end();
-
-            const bytesPerRow = targetTileSize * 2;
-            encoder.copyBufferToTexture(
-                {
-                    buffer: outputStorageBuffer,
-                    bytesPerRow: bytesPerRow,
-                    rowsPerImage: targetTileSize
-                },
-                {
-                    texture: gpuTexture,
-                    origin: [destX, destZ, 0]
-                },
-                [targetTileSize, targetTileSize, 1]
-            );
-        });
+        this.#processor.processAndUploadTile(
+            destX,
+            destZ,
+            data,
+            width,
+            height,
+            gpuTexture,
+            this.atlasTileSize,
+            format
+        );
 
         this.#markTileSynthesized(`${tileX}_${tileZ}`);
 
@@ -570,138 +403,6 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.#tileDataCache.set(key, data);
     }
 
-    async #parse16BitPngBuffer(buffer: ArrayBuffer): Promise<{
-        pixels: Uint16Array,
-        width: number,
-        height: number
-    } | null> {
-        try {
-            const view = new DataView(buffer);
-            if (view.getUint32(0) !== 0x89504E47 || view.getUint32(4) !== 0x0D0A1A0A) {
-                return null;
-            }
-            let offset = 8;
-            let width = 0;
-            let height = 0;
-            let bitDepth = 0;
-            let colorType = 0;
-            const idatChunks: Uint8Array[] = [];
-
-            while (offset < buffer.byteLength) {
-                const length = view.getUint32(offset);
-                const type = view.getUint32(offset + 4);
-                if (type === 0x49484452) { // IHDR
-                    width = view.getUint32(offset + 8);
-                    height = view.getUint32(offset + 12);
-                    bitDepth = view.getUint8(offset + 16);
-                    colorType = view.getUint8(offset + 17);
-                } else if (type === 0x49444154) { // IDAT
-                    idatChunks.push(new Uint8Array(buffer, offset + 8, length));
-                } else if (type === 0x49454E44) { // IEND
-                    break;
-                }
-                offset += 12 + length;
-            }
-
-            if (bitDepth !== 16 || idatChunks.length === 0 || width === 0 || height === 0) {
-                return null;
-            }
-
-            let totalIdatLength = 0;
-            for (const chunk of idatChunks) totalIdatLength += chunk.length;
-            const combinedIdat = new Uint8Array(totalIdatLength);
-            let currentOffset = 0;
-            for (const chunk of idatChunks) {
-                combinedIdat.set(chunk, currentOffset);
-                currentOffset += chunk.length;
-            }
-
-            let decompressedData: Uint8Array;
-            if (typeof DecompressionStream !== 'undefined') {
-                try {
-                    const ds = new DecompressionStream('deflate');
-                    const writer = ds.writable.getWriter();
-                    writer.write(combinedIdat);
-                    writer.close();
-                    const response = new Response(ds.readable);
-                    const decompressedBuffer = await response.arrayBuffer();
-                    decompressedData = new Uint8Array(decompressedBuffer);
-                } catch (zlibErr) {
-                    const dsRaw = new DecompressionStream('deflate-raw');
-                    const rawData = (combinedIdat.length > 2 && (combinedIdat[0] & 0x0F) === 8)
-                        ? combinedIdat.subarray(2, combinedIdat.length - 4)
-                        : combinedIdat;
-                    const writer = dsRaw.writable.getWriter();
-                    writer.write(rawData);
-                    writer.close();
-                    const response = new Response(dsRaw.readable);
-                    const decompressedBuffer = await response.arrayBuffer();
-                    decompressedData = new Uint8Array(decompressedBuffer);
-                }
-            } else {
-                return null;
-            }
-
-            const channels = (colorType === 0) ? 1 : (colorType === 2) ? 3 : (colorType === 4) ? 2 : (colorType === 6) ? 4 : 1;
-            const bytesPerPixel = channels * 2;
-            const stride = 1 + width * bytesPerPixel;
-            const outPixels = new Uint16Array(width * height);
-
-            let prevRow = new Uint8Array(width * bytesPerPixel);
-
-            for (let y = 0; y < height; y++) {
-                const rowStart = y * stride;
-                const filterType = decompressedData[rowStart];
-                const rowData = decompressedData.subarray(rowStart + 1, rowStart + stride);
-                const unfilteredRow = new Uint8Array(width * bytesPerPixel);
-
-                for (let i = 0; i < rowData.length; i++) {
-                    const x = rowData[i];
-                    const a = i >= bytesPerPixel ? unfilteredRow[i - bytesPerPixel] : 0;
-                    const b = prevRow[i];
-                    const c = i >= bytesPerPixel ? prevRow[i - bytesPerPixel] : 0;
-
-                    let reconstructed = 0;
-                    if (filterType === 0) { // None
-                        reconstructed = x;
-                    } else if (filterType === 1) { // Sub
-                        reconstructed = (x + a);
-                    } else if (filterType === 2) { // Up
-                        reconstructed = (x + b);
-                    } else if (filterType === 3) { // Average
-                        reconstructed = (x + Math.floor((a + b) / 2));
-                    } else if (filterType === 4) { // Paeth
-                        const p = a + b - c;
-                        const pa = Math.abs(p - a);
-                        const pb = Math.abs(p - b);
-                        const pc = Math.abs(p - c);
-                        let pr = c;
-                        if (pa <= pb && pa <= pc) pr = a;
-                        else if (pb <= pc) pr = b;
-                        reconstructed = (x + pr);
-                    }
-                    unfilteredRow[i] = reconstructed & 0xFF;
-                }
-
-                prevRow = unfilteredRow;
-
-                // Extract 16-bit values and normalize/pack to 16-bit format
-                for (let x = 0; x < width; x++) {
-                    const sampleIdx = x * bytesPerPixel;
-                    const highByte = unfilteredRow[sampleIdx];
-                    const lowByte = unfilteredRow[sampleIdx + 1];
-                    // PNG 16-bit is Big-Endian: (highByte << 8) | lowByte
-                    outPixels[y * width + x] = (highByte << 8) | lowByte;
-                }
-            }
-
-            return {pixels: outPixels, width, height};
-        } catch (e) {
-            console.warn('[Tile Streamer ⚠️] Native 16-bit PNG decoding fallback:', e);
-            return null;
-        }
-    }
-
     #loadTileFromUrl(tile: SpatialTileInfo, url: string, format: GPUTextureFormat = 'r16float') {
         fetch(url)
             .then(res => {
@@ -709,7 +410,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
                 return res.arrayBuffer();
             })
             .then(async (buffer) => {
-                const parsed16Bit = await this.#parse16BitPngBuffer(buffer);
+                const parsed16Bit = await TextureParser.parse16BitPngBuffer(buffer);
                 if (parsed16Bit) {
                     this.loadTileFrom16BitBuffer(tile, parsed16Bit.pixels, parsed16Bit.width, parsed16Bit.height, format);
                 } else {
