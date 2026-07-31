@@ -33,8 +33,10 @@ class BitmapTexture extends ManagementResourceBase {
     #mipLevelCount: number
     /** [KO] 밉맵 사용 여부 [EN] Whether to use mipmaps */
     #useMipmap: boolean
-    /** [KO] 이미지 비트맵 객체 [EN] Image bitmap object */
-    #imgBitmap: ImageBitmap
+    /** [KO] 텍스처 가로 크기 (픽셀) [EN] Texture width in pixels */
+    #width: number = 0
+    /** [KO] 텍스처 세로 크기 (픽셀) [EN] Texture height in pixels */
+    #height: number = 0
     /** [KO] 비디오 메모리 사용량(byte) [EN] Video memory usage in bytes */
     #videoMemorySize: number = 0
     /** [KO] 프리멀티플 알파 사용 여부 [EN] Whether to use premultiplied alpha */
@@ -112,7 +114,7 @@ class BitmapTexture extends ManagementResourceBase {
      * [EN] Width in pixels
      */
     get width(): number {
-        return this.#imgBitmap?.width || 0
+        return this.#width
     }
 
     /**
@@ -124,7 +126,7 @@ class BitmapTexture extends ManagementResourceBase {
      * [EN] Height in pixels
      */
     get height(): number {
-        return this.#imgBitmap?.height || 0
+        return this.#height
     }
 
     /**
@@ -222,8 +224,9 @@ class BitmapTexture extends ManagementResourceBase {
      * [EN] Whether to use mipmaps
      */
     set useMipmap(value: boolean) {
+        if (this.#useMipmap === value) return;
         this.#useMipmap = value;
-        this.#createGPUTexture()
+        if (this.#src) this.#loadBitmapTexture(this.#src);
     }
 
     /** [KO] 텍스처 리소스를 파괴합니다. [EN] Destroys the texture resource. */
@@ -234,13 +237,6 @@ class BitmapTexture extends ManagementResourceBase {
         this.#unregisterResource()
         this.cacheKey = null
         this.#src = null
-        if (this.#imgBitmap) {
-            try {
-                this.#imgBitmap.close();
-            } catch (e) {
-            }
-            this.#imgBitmap = null;
-        }
         if (temp) {
             this.redGPUContext.commandEncoderManager.addDeferredDestroy(temp)
         }
@@ -275,7 +271,6 @@ class BitmapTexture extends ManagementResourceBase {
      */
     #setGpuTexture(value: GPUTexture) {
         this.#gpuTexture = value;
-        if (!value) this.#imgBitmap = null
         this.notifyUpdate();
     }
 
@@ -296,10 +291,10 @@ class BitmapTexture extends ManagementResourceBase {
     }
 
     /**
-     * [KO] GPUTexture 객체를 실제로 생성합니다.
-     * [EN] Actually creates the GPUTexture object.
+     * [KO] ImageBitmap으로부터 GPUTexture 객체를 생성합니다.
+     * [EN] Creates a GPUTexture object from an ImageBitmap.
      */
-    #createGPUTexture() {
+    #createGPUTextureFromImageBitmap(imgBitmap: ImageBitmap) {
         const {gpuDevice, resourceManager} = this.redGPUContext
         const {mipmapGenerator} = resourceManager
         if (this.#gpuTexture) {
@@ -308,7 +303,10 @@ class BitmapTexture extends ManagementResourceBase {
         }
         this.targetResourceManagedState.videoMemory -= this.#videoMemorySize
         this.#videoMemorySize = 0
-        const {width: W, height: H} = this.#imgBitmap
+        this.#width = imgBitmap.width
+        this.#height = imgBitmap.height
+        const W = this.#width
+        const H = this.#height
         this.#mipLevelCount = 1
         const textureDescriptor: GPUTextureDescriptor = {
             size: [W, H],
@@ -321,12 +319,17 @@ class BitmapTexture extends ManagementResourceBase {
             textureDescriptor.mipLevelCount = this.#mipLevelCount
             textureDescriptor.usage |= GPUTextureUsage.RENDER_ATTACHMENT;
         }
-        const newGPUTexture = imageBitmapToGPUTexture(gpuDevice, [this.#imgBitmap], textureDescriptor, this.#usePremultiplyAlpha)
+        const newGPUTexture = imageBitmapToGPUTexture(gpuDevice, [imgBitmap], textureDescriptor, this.#usePremultiplyAlpha)
         // keepLog(newGPUTexture)
         this.#videoMemorySize = calculateTextureByteSize(newGPUTexture)
         this.targetResourceManagedState.videoMemory += this.#videoMemorySize
         if (this.#useMipmap) mipmapGenerator.generateMipmap(newGPUTexture, textureDescriptor)
         this.#setGpuTexture(newGPUTexture)
+
+        try {
+            imgBitmap.close();
+        } catch (e) {
+        }
     }
 
     /**
@@ -368,12 +371,13 @@ class BitmapTexture extends ManagementResourceBase {
      */
     async #loadBitmapTexture(src: string) {
         try {
+            let imgBitmap: ImageBitmap;
             if (src.endsWith(".svg")) {
-                this.#imgBitmap = await this.#convertSvgToImageBitmap(src);
+                imgBitmap = await this.#convertSvgToImageBitmap(src);
             } else {
-                this.#imgBitmap = await loadAndCreateBitmapImage(src, "none", this.#usePremultiplyAlpha ? 'premultiply' : 'none');
+                imgBitmap = await loadAndCreateBitmapImage(src, "none", this.#usePremultiplyAlpha ? 'premultiply' : 'none');
             }
-            this.#createGPUTexture();
+            this.#createGPUTextureFromImageBitmap(imgBitmap);
             this.#onLoad?.(this);
         } catch (error) {
             console.error(error);

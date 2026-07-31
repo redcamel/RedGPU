@@ -123,6 +123,14 @@ class TextureArray extends ManagementResourceBase {
                 );
             }
 
+            // ImageBitmap 최적화: 사용 완료된 비트맵 객체 메모리 해제
+            resizedBitmaps.forEach((bitmap) => {
+                try {
+                    bitmap?.close();
+                } catch (e) {
+                }
+            });
+
             const {table} = this.targetResourceManagedState
             table.set(this.cacheKey, new ResourceStateBitmapTexture(this as any));
 

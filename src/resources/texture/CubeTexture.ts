@@ -45,8 +45,6 @@ class CubeTexture extends ManagementResourceBase {
     #mipLevelCount: number
     /** [KO] 밉맵 사용 여부 [EN] Whether to use mipmaps */
     #useMipmap: boolean
-    /** [KO] 이미지 비트맵 객체 리스트 [EN] List of image bitmap objects */
-    #imgBitmaps: ImageBitmap[]
     /** [KO] 비디오 메모리 사용량(byte) [EN] Video memory usage in bytes */
     #videoMemorySize: number = 0
     /** [KO] 텍스처 포맷 [EN] Texture format */
@@ -206,8 +204,9 @@ class CubeTexture extends ManagementResourceBase {
      * [EN] Whether to use mipmaps
      */
     set useMipmap(value: boolean) {
+        if (this.#useMipmap === value) return;
         this.#useMipmap = value;
-        this.#createGPUTexture()
+        if (this.#srcList) this.#loadBitmapTexture(this.#srcList);
     }
 
     /** [KO] 텍스처 리소스를 파괴합니다. [EN] Destroys the texture resource. */
@@ -218,17 +217,6 @@ class CubeTexture extends ManagementResourceBase {
         this.#unregisterResource()
         this.#srcList = null
         this.cacheKey = null
-        if (this.#imgBitmaps) {
-            this.#imgBitmaps.forEach(imgBitmap => {
-                if (imgBitmap) {
-                    try {
-                        imgBitmap.close();
-                    } catch (e) {
-                    }
-                }
-            });
-            this.#imgBitmaps = null;
-        }
         if (temp) {
             this.redGPUContext.commandEncoderManager.addDeferredDestroy(temp)
         }
@@ -293,7 +281,6 @@ class CubeTexture extends ManagementResourceBase {
      */
     #setGpuTexture(value: GPUTexture) {
         this.#gpuTexture = value;
-        if (!value) this.#imgBitmaps = null
         this.notifyUpdate();
     }
 
@@ -314,10 +301,10 @@ class CubeTexture extends ManagementResourceBase {
     }
 
     /**
-     * [KO] GPUTexture 객체를 생성합니다.
-     * [EN] Creates the GPUTexture object.
+     * [KO] ImageBitmap 배열로부터 GPUTexture 객체를 생성합니다.
+     * [EN] Creates a GPUTexture object from an array of ImageBitmaps.
      */
-    #createGPUTexture() {
+    #createGPUTextureFromImageBitmaps(imgBitmaps: ImageBitmap[]) {
         const {gpuDevice, resourceManager} = this.redGPUContext
         const {mipmapGenerator} = resourceManager
         if (this.#gpuTexture) {
@@ -326,7 +313,6 @@ class CubeTexture extends ManagementResourceBase {
         }
         this.#mipLevelCount = 1;
         {
-            const imgBitmaps = this.#imgBitmaps
             const firstImgBitmap = imgBitmaps[0]
             const {width: W, height: H} = firstImgBitmap
             const depthOrArrayLayers = 6
@@ -347,6 +333,13 @@ class CubeTexture extends ManagementResourceBase {
             this.targetResourceManagedState.videoMemory += this.#videoMemorySize
             if (this.#useMipmap) mipmapGenerator.generateMipmap(newGPUTexture, textureDescriptor)
             this.#setGpuTexture(newGPUTexture)
+
+            imgBitmaps.forEach(bitmap => {
+                try {
+                    bitmap?.close();
+                } catch (e) {
+                }
+            });
         }
     }
 
@@ -355,9 +348,9 @@ class CubeTexture extends ManagementResourceBase {
      * [EN] Loads cube texture images asynchronously.
      */
     async #loadBitmapTexture(srcList: string[]) {
-        this.#imgBitmaps = await loadAndCreateBitmapImages(srcList);
         try {
-            this.#createGPUTexture()
+            const imgBitmaps = await loadAndCreateBitmapImages(srcList);
+            this.#createGPUTextureFromImageBitmaps(imgBitmaps)
             this.#onLoad?.(this)
         } catch (error) {
             console.error(error);

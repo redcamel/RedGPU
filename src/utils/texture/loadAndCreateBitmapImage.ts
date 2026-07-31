@@ -19,6 +19,9 @@ async function loadAndCreateBitmapImage(
     premultiplyAlpha: PremultiplyAlpha = 'premultiply'
 ): Promise<ImageBitmap> {
     const response = await fetch(src);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch image '${src}': ${response.status} ${response.statusText}`);
+    }
     const blob = await response.blob();
     return createImageBitmap(blob, {
         colorSpaceConversion,
