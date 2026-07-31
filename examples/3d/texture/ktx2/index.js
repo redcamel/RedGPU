@@ -26,24 +26,24 @@ RedGPU.init(
 
         // Three.js 샘플 18개 전수 KTX2 텍스처 리스트
         const testKTX2Files = [
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba8.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba8_linear.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba16_linear.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba16unorm_linear.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba32_linear.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgb9e5_linear.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_r11g11b10_linear.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_astc4x4.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc1.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc2.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc1.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc3.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc4.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc5.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc7.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc1s.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba8.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba8_linear.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba16_linear.ktx2"},
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba16unorm_linear.ktx2"}, //TODO - 이거 파싱확인
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba32_linear.ktx2"}, //TODO - 이거 파싱확인
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgb9e5_linear.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_r11g11b10_linear.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_astc4x4.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc1.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc2.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc1.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc3.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc4.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc5.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc7.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc1s.ktx2"},
             {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_uastc.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_uastc_hdr4x4.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_uastc_hdr4x4.ktx2"},
 // {
 //     "name": "[1.기초 Raw] cyan_rgb_reference_uastc",
 //     "path": "../../../assets/ktx2TestImages/cyan_rgb_reference_uastc.ktx2"

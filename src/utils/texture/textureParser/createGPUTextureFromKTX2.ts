@@ -28,13 +28,13 @@ const VK_FORMAT_TO_WEBGPU: Record<number, GPUTextureFormat> = {
     44: 'bgra8unorm', // VK_FORMAT_B8G8R8A8_UNORM
     50: 'bgra8unorm-srgb', // VK_FORMAT_B8G8R8A8_SRGB
 
-    // 16-bit Unorm
+    // 16-bit Unorm / Snorm (texture-formats-tier1 피처 필요)
     23: 'r16unorm', // VK_FORMAT_R16_UNORM
+    29: 'rgba8unorm-srgb',   // VK_FORMAT_R16G16_UNORM
     30: 'rg16unorm', // VK_FORMAT_R16G16_UNORM
-    42: 'rgba16float', // VK_FORMAT_R16G16B16A16_UNORM (WebGPU Core 호환)
+    91: 'rgba16unorm', // VK_FORMAT_R16G16B16A16_UNORM
 
     // Packed Float & Special Float Formats
-    91: 'rgba16unorm', // VK_FORMAT_E5B9G9R9_UFLOAT_PACK32 / VK_FORMAT_B9G9R9E5_UFLOAT_PACK32
     122: 'rg11b10ufloat', // VK_FORMAT_B10G11R11_UFLOAT_PACK32
     123: 'rgb9e5ufloat', // VK_FORMAT_E5B9G9R9_UFLOAT_PACK32
 
@@ -44,9 +44,9 @@ const VK_FORMAT_TO_WEBGPU: Record<number, GPUTextureFormat> = {
     97: 'rgba16float', // VK_FORMAT_R16G16B16A16_SFLOAT
     100: 'r32float', // VK_FORMAT_R32_SFLOAT
     103: 'rg32float', // VK_FORMAT_R32G32_SFLOAT
-    109: 'rgba16float', // VK_FORMAT_R32G32B32A32_SFLOAT (FilterableFloat 호환성을 위해 rgba16float로 트랜스코딩)
+    109: 'rgba32float', // VK_FORMAT_R32G32B32A32_SFLOAT
 
-    // Block Compression (BC)
+    // Block Compression - BC (texture-compression-bc 피처 필요)
     131: 'bc1-rgba-unorm', // VK_FORMAT_BC1_RGB_UNORM_BLOCK
     132: 'bc1-rgba-unorm-srgb', // VK_FORMAT_BC1_RGB_SRGB_BLOCK
     133: 'bc1-rgba-unorm', // VK_FORMAT_BC1_RGBA_UNORM_BLOCK
@@ -61,23 +61,24 @@ const VK_FORMAT_TO_WEBGPU: Record<number, GPUTextureFormat> = {
     142: 'bc5-rg-snorm', // VK_FORMAT_BC5_SNORM_BLOCK
     143: 'bc6h-rgb-ufloat', // VK_FORMAT_BC6H_UFLOAT_BLOCK
     144: 'bc6h-rgb-float', // VK_FORMAT_BC6H_SFLOAT_BLOCK
-    147: 'bc7-rgba-unorm', // VK_FORMAT_BC7_UNORM_BLOCK
-    148: 'etc2-rgb8unorm', // VK_FORMAT_BC7_SRGB_BLOCK
+    145: 'bc7-rgba-unorm', // VK_FORMAT_BC7_UNORM_BLOCK
+    146: 'bc7-rgba-unorm-srgb', // VK_FORMAT_BC7_SRGB_BLOCK
 
-    // ETC2 / EAC
-    146: 'bc7-rgba-unorm-srgb', // VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK
-    149: 'etc2-rgb8a1unorm-srgb', // VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK
-    150: 'etc2-rgba8unorm', // VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK
-    151: 'etc2-rgba8unorm-srgb', // VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK
-    152: 'eac-r11unorm', // VK_FORMAT_EAC_R11_UNORM_BLOCK
-    153: 'eac-r11snorm', // VK_FORMAT_EAC_R11_SNORM_BLOCK
-    154: 'eac-rg11unorm', // VK_FORMAT_EAC_R11G11_UNORM_BLOCK
-    155: 'eac-rg11snorm', // VK_FORMAT_EAC_R11G11_SNORM_BLOCK
+    // Block Compression - ETC2 / EAC (texture-compression-etc2 피처 필요)
+    147: 'etc2-rgb8unorm', // VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK
+    148: 'etc2-rgb8unorm-srgb', // VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK
+    149: 'etc2-rgb8a1unorm', // VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK
+    150: 'etc2-rgb8a1unorm-srgb', // VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK
+    151: 'etc2-rgba8unorm', // VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK
+    152: 'etc2-rgba8unorm-srgb', // VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK
+    153: 'eac-r11unorm', // VK_FORMAT_EAC_R11_UNORM_BLOCK
+    154: 'eac-r11snorm', // VK_FORMAT_EAC_R11_SNORM_BLOCK
+    155: 'eac-rg11unorm', // VK_FORMAT_EAC_R11G11_UNORM_BLOCK
+    156: 'eac-rg11snorm', // VK_FORMAT_EAC_R11G11_SNORM_BLOCK
 
-    // ASTC 2D
+    // Block Compression - ASTC 2D (texture-compression-astc 피처 필요)
     157: 'astc-4x4-unorm', // VK_FORMAT_ASTC_4x4_UNORM_BLOCK
     158: 'astc-4x4-unorm-srgb', // VK_FORMAT_ASTC_4x4_SRGB_BLOCK
-    1000066000: 'astc-4x4-unorm', // VK_FORMAT_ASTC_4x4_SFLOAT_BLOCK_EXT
     159: 'astc-5x4-unorm', // VK_FORMAT_ASTC_5x4_UNORM_BLOCK
     160: 'astc-5x4-unorm-srgb', // VK_FORMAT_ASTC_5x4_SRGB_BLOCK
     161: 'astc-5x5-unorm', // VK_FORMAT_ASTC_5x5_UNORM_BLOCK
@@ -104,6 +105,7 @@ const VK_FORMAT_TO_WEBGPU: Record<number, GPUTextureFormat> = {
     182: 'astc-12x10-unorm-srgb', // VK_FORMAT_ASTC_12x10_SRGB_BLOCK
     183: 'astc-12x12-unorm', // VK_FORMAT_ASTC_12x12_UNORM_BLOCK
     184: 'astc-12x12-unorm-srgb', // VK_FORMAT_ASTC_12x12_SRGB_BLOCK
+    1000066000: 'astc-4x4-unorm', // VK_FORMAT_ASTC_4x4_SFLOAT_BLOCK_EXT (SFloat는 WebGPU unorm으로 대체)
 };
 
 /** 포맷별 픽셀/블록 단위 크기 정보 (Uncompressed 픽셀당 바이트 수) */
