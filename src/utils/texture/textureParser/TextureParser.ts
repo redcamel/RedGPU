@@ -1,7 +1,8 @@
 import parse16BitPngBuffer, {parse16BitPngBufferToGPUTexture, ParsedImageData} from "./parse16BitPngBuffer";
-import loadAndCreateBitmapImage from "./loadAndCreateBitmapImage";
-import convertSvgToImageBitmap from "./convertSvgToImageBitmap";
-import RedGPUContext from "../../context/RedGPUContext";
+import loadImageToImageBitmap from "./imageBitmap/loadImageToImageBitmap";
+import convertSvgToImageBitmap from "./imageBitmap/convertSvgToImageBitmap";
+import imageBitmapToGPUTexture from "./imageBitmap/imageBitmapToGPUTexture";
+import RedGPUContext from "../../../context/RedGPUContext";
 
 export {ParsedImageData};
 
@@ -11,7 +12,7 @@ export {ParsedImageData};
  *
  * * ### Example
  * ```typescript
- * const parsed = await TextureParser.parse16BitPngBuffer(arrayBuffer);
+ * const parsed = await TextureParser.parseImageData(arrayBuffer);
  * ```
  * @category Texture
  */
@@ -38,16 +39,22 @@ export const TextureParser = {
     },
 
     /**
-     * [KO] 일반 2D 이미지 URL로부터 ImageBitmap을 생성합니다.
-     * [EN] Creates ImageBitmap from general 2D image URL.
+     * [KO] 일반 2D 이미지 URL로부터 ImageBitmap을 로드하고 생성합니다.
+     * [EN] Loads and creates ImageBitmap from general 2D image URL.
      */
-    loadAndCreateBitmapImage,
+    loadImageToImageBitmap,
 
     /**
      * [KO] SVG 이미지 소스/URL을 ImageBitmap으로 변환합니다.
      * [EN] Converts SVG image source/URL to ImageBitmap.
      */
     convertSvgToImageBitmap,
+
+    /**
+     * [KO] ImageBitmap을 WebGPU GPUTexture로 변환 및 업로드합니다.
+     * [EN] Converts and uploads ImageBitmap to WebGPU GPUTexture.
+     */
+    imageBitmapToGPUTexture,
 
     /**
      * [KO] 바이너리 헤더의 Magic Number를 분석하여 포맷을 자동 감지 후 이미지 데이터 정보(ParsedImageData)를 파싱하여 반환합니다. 지원되지 않는 포맷일 경우 명시적 에러를 발생시킵니다.

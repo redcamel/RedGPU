@@ -2,8 +2,7 @@ import RedGPUContext from "../../context/RedGPUContext";
 import getAbsoluteURL from "../../utils/file/getAbsoluteURL";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/texture/getMipLevelCount";
-import imageBitmapToGPUTexture from "../../utils/texture/imageBitmapToGPUTexture";
-import TextureParser from "../../utils/texture/TextureParser";
+import TextureParser from "../../utils/texture/textureParser/TextureParser";
 import ManagementResourceBase from "../core/ManagementResourceBase";
 import ResourceStateBitmapTexture from "../core/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 
@@ -319,7 +318,7 @@ class BitmapTexture extends ManagementResourceBase {
             textureDescriptor.mipLevelCount = this.#mipLevelCount
             textureDescriptor.usage |= GPUTextureUsage.RENDER_ATTACHMENT;
         }
-        const newGPUTexture = imageBitmapToGPUTexture(gpuDevice, [imgBitmap], textureDescriptor, this.#usePremultiplyAlpha)
+        const newGPUTexture = TextureParser.imageBitmapToGPUTexture(gpuDevice, [imgBitmap], textureDescriptor, this.#usePremultiplyAlpha)
         // keepLog(newGPUTexture)
         this.#videoMemorySize = calculateTextureByteSize(newGPUTexture)
         this.targetResourceManagedState.videoMemory += this.#videoMemorySize
@@ -346,7 +345,7 @@ class BitmapTexture extends ManagementResourceBase {
             if (src.endsWith(".svg")) {
                 imgBitmap = await TextureParser.convertSvgToImageBitmap(src, premultiplyAlpha);
             } else {
-                imgBitmap = await TextureParser.loadAndCreateBitmapImage(src, "none", premultiplyAlpha);
+                imgBitmap = await TextureParser.loadImageToImageBitmap(src, "none", premultiplyAlpha);
             }
             this.#createGPUTextureFromImageBitmap(imgBitmap);
             this.#onLoad?.(this);

@@ -1,8 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/texture/getMipLevelCount";
-import imageBitmapToGPUTexture from "../../utils/texture/imageBitmapToGPUTexture";
-import TextureParser from "../../utils/texture/TextureParser";
+import TextureParser from "../../utils/texture/textureParser/TextureParser";
 import ManagementResourceBase from "../core/ManagementResourceBase";
 import ResourceStateCubeTexture from "../core/resourceManager/resourceState/texture/ResourceStateCubeTexture";
 
@@ -327,7 +326,7 @@ class CubeTexture extends ManagementResourceBase {
                 textureDescriptor.mipLevelCount = this.#mipLevelCount
                 textureDescriptor.usage |= GPUTextureUsage.RENDER_ATTACHMENT;
             }
-            const newGPUTexture = imageBitmapToGPUTexture(gpuDevice, imgBitmaps, textureDescriptor)
+            const newGPUTexture = TextureParser.imageBitmapToGPUTexture(gpuDevice, imgBitmaps, textureDescriptor)
             this.targetResourceManagedState.videoMemory -= this.#videoMemorySize
             this.#videoMemorySize = calculateTextureByteSize(newGPUTexture)
             this.targetResourceManagedState.videoMemory += this.#videoMemorySize
@@ -373,6 +372,6 @@ export default CubeTexture
  * [EN] Promise containing an array of ImageBitmaps
  */
 async function loadAndCreateBitmapImages(srcList: string[]): Promise<ImageBitmap[]> {
-    const promises = srcList.map(src => TextureParser.loadAndCreateBitmapImage(src));
+    const promises = srcList.map(src => TextureParser.loadImageToImageBitmap(src));
     return await Promise.all(promises)
 }

@@ -10,7 +10,7 @@ import {TerrainQuadtree} from "./TerrainQuadtree";
 import defineNumber from "../../../defineProperty/funcs/number/defineNumber";
 import updateTargetUniform from "../../../defineProperty/core/updateTargetUniform";
 import TerrainGeometry from "./TerrainGeometry";
-import TextureParser from "../../../utils/texture/TextureParser";
+import TextureParser from "../../../utils/texture/textureParser/TextureParser";
 import TerrainHeightmapProcessor from "./TerrainHeightmapProcessor";
 
 interface TerrainTileSystem {

@@ -21,7 +21,7 @@ export class TerrainHeightmapProcessor {
     processAndUploadTile(
         destX: number,
         destZ: number,
-        data: ArrayBuffer | Uint16Array | Float32Array,
+        data: ArrayBuffer | ArrayBufferView,
         width: number,
         height: number,
         targetGPUTexture: GPUTexture,
@@ -39,7 +39,7 @@ export class TerrainHeightmapProcessor {
         if (data instanceof Float32Array) {
             srcByteArray = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
             dataType = 1;
-        } else if (data instanceof Uint16Array) {
+        } else if (ArrayBuffer.isView(data)) {
             srcByteArray = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
             dataType = 0;
         } else {

@@ -1,4 +1,4 @@
-import RedGPUContext from "../../context/RedGPUContext";
+import RedGPUContext from "../../../../context/RedGPUContext";
 
 /**
  * [KO] 이미지 파싱 결과 데이터 정보 타입입니다.
