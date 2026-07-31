@@ -324,7 +324,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
         return this.#tileDataCache;
     }
 
-    loadTileFrom16BitBuffer(tile: SpatialTileInfo, data: ArrayBuffer | Uint16Array | Float32Array, width: number, height: number, format: GPUTextureFormat = 'r16float') {
+    loadTileFrom16BitBuffer(tile: SpatialTileInfo, data: ArrayBuffer | ArrayBufferView, width: number, height: number, format: GPUTextureFormat = 'r16float') {
         this.#registerTileData(tile, data);
         this.#updateTileHeightmapFromBuffer(tile, data, width, height, format);
         console.log(`[Tile Streamer 📥] Load 16-bit Buffer Cell(${tile.gridX}, ${tile.gridZ}) → Tile[${tile.tileColStr}, ${tile.tileRowStr}]`);
@@ -360,7 +360,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
 
     #processor: TerrainHeightmapProcessor;
 
-    #updateTileHeightmapFromBuffer(tile: SpatialTileInfo, data: ArrayBuffer | Uint16Array | Float32Array, width: number, height: number, format: GPUTextureFormat = 'r16float') {
+    #updateTileHeightmapFromBuffer(tile: SpatialTileInfo, data: ArrayBuffer | ArrayBufferView, width: number, height: number, format: GPUTextureFormat = 'r16float') {
         const tileX = tile.tileCol ?? 0;
         const tileZ = tile.tileRow ?? 0;
 
@@ -410,12 +410,8 @@ class TerrainTileSystem extends TerrainMaterialBind {
                 return res.arrayBuffer();
             })
             .then(async (buffer) => {
-                const parsed16Bit = await TextureParser.parse16BitPngBuffer(buffer);
-                if (parsed16Bit) {
-                    this.loadTileFrom16BitBuffer(tile, parsed16Bit.pixels, parsed16Bit.width, parsed16Bit.height, format);
-                } else {
-                    this.loadTileFrom16BitBuffer(tile, buffer, this.atlasTileSize, this.atlasTileSize, format);
-                }
+                const parsed = await TextureParser.parseImageData(buffer);
+                this.loadTileFrom16BitBuffer(tile, parsed.pixels, parsed.width, parsed.height, format);
             })
             .catch(err => {
                 console.error(`[Tile Streamer ❌] Failed to load 16-bit tile from ${url}`, err);

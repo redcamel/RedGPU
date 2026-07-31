@@ -1,12 +1,12 @@
 import RedGPUContext from "../../context/RedGPUContext";
 
 /**
- * [KO] 16비트 PNG 디코딩 결과 타입입니다.
- * [EN] 16-bit PNG decoding result type.
+ * [KO] 이미지 파싱 결과 데이터 정보 타입입니다.
+ * [EN] Image parsing result data info type.
  */
-export interface Parsed16BitPng {
-    /** [KO] 16비트 픽셀 데이터 [EN] 16-bit pixel data */
-    pixels: Uint16Array;
+export interface ParsedImageData {
+    /** [KO] 픽셀 데이터 [EN] Pixel data */
+    pixels: Uint16Array | Float32Array | Uint8Array | Uint8ClampedArray;
     /** [KO] 이미지 가로 크기 [EN] Image width */
     width: number;
     /** [KO] 이미지 세로 크기 [EN] Image height */
@@ -22,7 +22,7 @@ export interface Parsed16BitPng {
  * @returns [KO] 디코딩된 픽셀 정보 객체 또는 실패 시 null [EN] Decoded pixel info object or null on failure
  * @category Texture
  */
-export async function parse16BitPngBuffer(buffer: ArrayBuffer, flipY: boolean = false): Promise<Parsed16BitPng | null> {
+export async function parse16BitPngBuffer(buffer: ArrayBuffer, flipY: boolean = false): Promise<ParsedImageData | null> {
     try {
         const view = new DataView(buffer);
         if (view.getUint32(0) !== 0x89504E47 || view.getUint32(4) !== 0x0D0A1A0A) {

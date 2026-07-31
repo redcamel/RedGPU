@@ -335,36 +335,6 @@ class BitmapTexture extends ManagementResourceBase {
     /**
      * [KO] SVG 이미지를 ImageBitmap으로 변환합니다.
      * [EN] Converts an SVG image to an ImageBitmap.
-     */
-    async #convertSvgToImageBitmap(src: string): Promise<ImageBitmap> {
-        return new Promise((resolve, reject) => {
-            const svgImage = new Image();
-            svgImage.src = src;
-            svgImage.onload = () => {
-                const canvas = document.createElement("canvas");
-                canvas.width = svgImage.width || 512;
-                canvas.height = svgImage.height || 512;
-                const ctx = canvas.getContext("2d");
-                if (!ctx) {
-                    reject(new Error("Canvas context could not be created."));
-                    return;
-                }
-                ctx.fillStyle = 'rgba(0, 0, 0, 0)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(svgImage, 0, 0, canvas.width, canvas.height);
-                createImageBitmap(canvas, {
-                    colorSpaceConversion: 'none',
-                    premultiplyAlpha: this.#usePremultiplyAlpha ? 'premultiply' : 'none'
-                })
-                    .then(resolve)
-                    .catch(reject);
-            };
-            svgImage.onerror = (error) => {
-                reject(new Error(`Failed to load SVG: ${error}`));
-            };
-        });
-    }
-
     /**
      * [KO] 비트맵 이미지를 비동기로 로드합니다.
      * [EN] Loads a bitmap image asynchronously.
@@ -372,10 +342,11 @@ class BitmapTexture extends ManagementResourceBase {
     async #loadBitmapTexture(src: string) {
         try {
             let imgBitmap: ImageBitmap;
+            const premultiplyAlpha = this.#usePremultiplyAlpha ? 'premultiply' : 'none';
             if (src.endsWith(".svg")) {
-                imgBitmap = await this.#convertSvgToImageBitmap(src);
+                imgBitmap = await TextureParser.convertSvgToImageBitmap(src, premultiplyAlpha);
             } else {
-                imgBitmap = await TextureParser.loadAndCreateBitmapImage(src, "none", this.#usePremultiplyAlpha ? 'premultiply' : 'none');
+                imgBitmap = await TextureParser.loadAndCreateBitmapImage(src, "none", premultiplyAlpha);
             }
             this.#createGPUTextureFromImageBitmap(imgBitmap);
             this.#onLoad?.(this);
