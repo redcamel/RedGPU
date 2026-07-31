@@ -128,6 +128,7 @@ const getRequiredFeature = (adapter: GPUAdapter): GPUFeatureName[] => {
         "texture-compression-astc",
         "texture-compression-bc",
         "texture-compression-etc2",
+        "texture-formats-tier1",
         // "shader-f16",
         // "timestamp-query",
         // "depth-clip-control",

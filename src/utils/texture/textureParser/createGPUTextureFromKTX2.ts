@@ -1,5 +1,6 @@
 import {KTX2Container, read} from 'ktx-parse';
 import {decompress as decompressZstd} from 'fzstd';
+import keepLog from "../../keepLog";
 
 export interface CreateKTX2Options {
     device: GPUDevice;
@@ -33,7 +34,7 @@ const VK_FORMAT_TO_WEBGPU: Record<number, GPUTextureFormat> = {
     42: 'rgba16float', // VK_FORMAT_R16G16B16A16_UNORM (WebGPU Core 호환)
 
     // Packed Float & Special Float Formats
-    91: 'rgb9e5ufloat', // VK_FORMAT_E5B9G9R9_UFLOAT_PACK32 / VK_FORMAT_B9G9R9E5_UFLOAT_PACK32
+    91: 'rgba16unorm', // VK_FORMAT_E5B9G9R9_UFLOAT_PACK32 / VK_FORMAT_B9G9R9E5_UFLOAT_PACK32
     122: 'rg11b10ufloat', // VK_FORMAT_B10G11R11_UFLOAT_PACK32
     123: 'rgb9e5ufloat', // VK_FORMAT_E5B9G9R9_UFLOAT_PACK32
 
@@ -61,10 +62,10 @@ const VK_FORMAT_TO_WEBGPU: Record<number, GPUTextureFormat> = {
     143: 'bc6h-rgb-ufloat', // VK_FORMAT_BC6H_UFLOAT_BLOCK
     144: 'bc6h-rgb-float', // VK_FORMAT_BC6H_SFLOAT_BLOCK
     147: 'bc7-rgba-unorm', // VK_FORMAT_BC7_UNORM_BLOCK
-    148: 'bc7-rgba-unorm-srgb', // VK_FORMAT_BC7_SRGB_BLOCK
+    148: 'etc2-rgb8unorm', // VK_FORMAT_BC7_SRGB_BLOCK
 
     // ETC2 / EAC
-    146: 'etc2-rgb8unorm', // VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK
+    146: 'bc7-rgba-unorm-srgb', // VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK
     149: 'etc2-rgb8a1unorm-srgb', // VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK
     150: 'etc2-rgba8unorm', // VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK
     151: 'etc2-rgba8unorm-srgb', // VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK
@@ -126,6 +127,7 @@ const FORMAT_BYTES_PER_PIXEL: Partial<Record<GPUTextureFormat, number>> = {
 };
 
 function createFallbackGPUTexture(device: GPUDevice, label?: string): GPUTexture {
+    keepLog('createFallbackGPUTexture', label)
     const fallbackTex = device.createTexture({
         label: label ? `${label}_fallback` : 'KTX2_Fallback_Texture',
         size: {width: 1, height: 1, depthOrArrayLayers: 1},
@@ -133,7 +135,7 @@ function createFallbackGPUTexture(device: GPUDevice, label?: string): GPUTexture
         format: 'rgba8unorm',
         usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
     });
-    const pixel = new Uint8Array([255, 0, 255, 255]);
+    const pixel = new Uint8Array([0, 0, 0, 255]);
     device.queue.writeTexture(
         {texture: fallbackTex},
         pixel,
@@ -188,37 +190,16 @@ export async function createGPUTextureFromKTX2({
             );
         }
 
-        // Three.js KTX2Loader 호환: 8-bit RGBA 컬러 텍스처는 기본 sRGB 감마 포맷(rgba8unorm-srgb)으로 처리
-        if (mappedFormat === 'rgba8unorm') {
-            mappedFormat = 'rgba8unorm-srgb';
-        }
-
         // DFD(Data Format Descriptor) bytesPlane 검사로 16-bit 4채널(8 bytes/pixel) 텍스처 보정 (WebGPU 코어 호환 rgba16float 지정)
         const dfdBytes = dfdList?.[0]?.bytesPlane?.[0];
-        if (dfdBytes === 8 && mappedFormat !== 'rgba16float') {
-            mappedFormat = 'rgba16float';
-        }
+        // if (dfdBytes === 8 && mappedFormat !== 'rgba16float') {
+        //     mappedFormat = 'rgba16float';
+        // }
 
-        if (isSRGB && !mappedFormat.endsWith('-srgb')) {
-            const candidate = `${mappedFormat}-srgb` as GPUTextureFormat;
-            // WebGPU에서 -srgb 변형을 지원하는 텍스처 포맷만 결합
-            const validSRGBFormats = new Set<string>([
-                'rgba8unorm-srgb',
-                'bgra8unorm-srgb',
-                'bc1-rgba-unorm-srgb',
-                'bc2-rgba-unorm-srgb',
-                'bc3-rgba-unorm-srgb',
-                'bc7-rgba-unorm-srgb',
-                'etc2-rgb8unorm-srgb',
-                'etc2-rgb8a1unorm-srgb',
-                'etc2-rgba8unorm-srgb',
-            ]);
-            if (validSRGBFormats.has(candidate) || candidate.startsWith('astc-')) {
-                mappedFormat = candidate;
-            }
-        }
+
         format = mappedFormat;
     }
+    keepLog(container, format)
 
     // 3. GPU device feature 지원 여부 검증 (미지원 시 경고 후 Fallback 텍스처 반환)
     let missingFeature = '';
