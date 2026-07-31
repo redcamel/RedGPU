@@ -416,20 +416,23 @@ RedGPU.init(
         terrain.maxLOD = MAX_LOD;
         terrain.tileScale = 200.0;                 // 8.2km 규격에 맞춘 촘촘하고 선명한 텍스처 밀도 타일링 비율
 
-        // 🛰️ 언리얼 엔진 5 표준 월드 파티션 공간 그리드 스트리밍 설정
-
-        terrain.spatialGrid.loadingRadius = 2560;  // 반경 2.56km 동적 로딩 (256,000 Unreal Units)
+        // 🛰️ 언리얼 엔진 5 표준 월드 파티션 공간 그리드 스트리밍 설정 (카메라 주변 동적 시야 로딩 반경)
+        terrain.spatialGrid.loadingRadius = 2560;  // 카메라 시야 반경 2.56km 동적 로딩
+        terrain.spatialGrid.maxLoadsPerFrame = 2;   // 프레임당 스트리밍 예산
 
         terrain.setTileUrlResolver((tile) => {
-            // 💡 파일명 인덱스 규격 (Row: tile.tileRowStr, Col: tile.tileColStr) 및 엣지 해상도 정밀 교정
-            if (tile.tileCol === 15 && tile.tileRow === 15) {
+            const rStr = tile.tileRowStr;
+            const cStr = tile.tileColStr;
+
+            // 💡 16x16 그리드 상에서 (row 15, col 15) 코너 타일 및 엣지 타일 100% 매칭
+            if (tile.tileRow === 15 && tile.tileCol === 15) {
                 return `../../../assets/terrain/terrainTest_001/tile/28_134_86_730_13_449_449_16bit_tile_15_15.png`;
-            } else if (tile.tileCol === 15) {
-                return `../../../assets/terrain/terrainTest_001/tile/28_134_86_730_13_449_512_16bit_tile_${tile.tileRowStr}_15.png`;
             } else if (tile.tileRow === 15) {
-                return `../../../assets/terrain/terrainTest_001/tile/28_134_86_730_13_512_449_16bit_tile_15_${tile.tileColStr}.png`;
+                return `../../../assets/terrain/terrainTest_001/tile/28_134_86_730_13_512_449_16bit_tile_15_${cStr}.png`;
+            } else if (tile.tileCol === 15) {
+                return `../../../assets/terrain/terrainTest_001/tile/28_134_86_730_13_449_512_16bit_tile_${rStr}_15.png`;
             } else {
-                return `../../../assets/terrain/terrainTest_001/tile/28_134_86_730_13_512_512_16bit_tile_${tile.tileRowStr}_${tile.tileColStr}.png`;
+                return `../../../assets/terrain/terrainTest_001/tile/28_134_86_730_13_512_512_16bit_tile_${rStr}_${cStr}.png`;
             }
         });
 

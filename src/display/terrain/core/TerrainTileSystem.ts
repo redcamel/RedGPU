@@ -335,35 +335,81 @@ class TerrainTileSystem extends TerrainMaterialBind {
         const device = this.redGPUContext.gpuDevice;
 
         const wgslCode = `
-            @group(0) @binding(0) var<storage, read> raw16Buffer: array<u32>;
+            @group(0) @binding(0) var<storage, read> rawDataBuffer: array<u32>;
             @group(0) @binding(1) var<storage, read_write> outputBuffer: array<u32>;
 
             struct TileUniforms {
-                width: u32,
-                height: u32,
+                targetTileSize: u32,
+                dataWidth: u32,
+                dataHeight: u32,
+                dataType: u32, // 0 = Uint16, 1 = Float32
             };
             @group(0) @binding(2) var<uniform> uniforms: TileUniforms;
+
+            fn getRawHeight(sampleIndex: u32) -> f32 {
+                if (uniforms.dataType == 1u) {
+                    // Float32 Buffer
+                    let valF32 = bitcast<f32>(rawDataBuffer[sampleIndex]);
+                    return clamp(valF32, 0.0, 1.0) * 65535.0;
+                } else {
+                    // Uint16 Packed Buffer (2 samples per u32)
+                    let u32Index = sampleIndex / 2u;
+                    let isOdd = sampleIndex % 2u;
+                    let packedU32 = rawDataBuffer[u32Index];
+                    var raw16: u32 = 0u;
+                    if (isOdd == 0u) {
+                        raw16 = packedU32 & 0xFFFFu;
+                    } else {
+                        raw16 = (packedU32 >> 16u) & 0xFFFFu;
+                    }
+                    return f32(raw16);
+                }
+            }
 
             @compute @workgroup_size(16, 16)
             fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                 let x = global_id.x;
                 let z = global_id.y;
 
-                if (x >= uniforms.width || z >= uniforms.height) {
+                let targetSize = uniforms.targetTileSize;
+                if (x >= targetSize || z >= targetSize) {
                     return;
                 }
 
-                let pixelIndex = z * uniforms.width + x;
+                let dWidth = f32(uniforms.dataWidth);
+                let dHeight = f32(uniforms.dataHeight);
+                let tSize = f32(targetSize);
 
-                // raw16Buffer contains Uint16 stored as Uint32 per pixel (0 ~ 65535)
-                let raw16 = raw16Buffer[pixelIndex];
-                let normalizedHeight = f32(raw16) / 65535.0;
+                // Map target (0~511) to data (0~dataWidth-1) continuously
+                let srcX = (f32(x) / (tSize - 1.0)) * (dWidth - 1.0);
+                let srcZ = (f32(z) / (tSize - 1.0)) * (dHeight - 1.0);
 
-                // pack2x16float is WebGPU Built-in: packs 2x float32 into 2x float16 (32-bit uint)
+                let x0 = u32(floor(srcX));
+                let z0 = u32(floor(srcZ));
+                let x1 = min(x0 + 1u, uniforms.dataWidth - 1u);
+                let z1 = min(z0 + 1u, uniforms.dataHeight - 1u);
+
+                let fx = srcX - f32(x0);
+                let fz = srcZ - f32(z0);
+
+                // Sample 4 neighbor pixels
+                let val00 = getRawHeight(z0 * uniforms.dataWidth + x0);
+                let val10 = getRawHeight(z0 * uniforms.dataWidth + x1);
+                let val01 = getRawHeight(z1 * uniforms.dataWidth + x0);
+                let val11 = getRawHeight(z1 * uniforms.dataWidth + x1);
+
+                // Bilinear Interpolation
+                let top = mix(val00, val10, fx);
+                let bottom = mix(val01, val11, fx);
+                let interpolatedRaw = mix(top, bottom, fz);
+
+                let normalizedHeight = interpolatedRaw / 65535.0;
+
                 let packedF16Pair = pack2x16float(vec2<f32>(normalizedHeight, 0.0));
 
-                let outU32Index = pixelIndex / 2u;
-                let isOdd = pixelIndex % 2u;
+                let targetIndex = z * targetSize + x;
+                let outU32Index = targetIndex / 2u;
+                let isOdd = targetIndex % 2u;
 
                 let f16Bits = packedF16Pair & 0xFFFFu;
 
@@ -437,39 +483,39 @@ class TerrainTileSystem extends TerrainMaterialBind {
 
         const destX = tileX * this.atlasTileSize;
         const destZ = tileZ * this.atlasTileSize;
+        const targetTileSize = this.atlasTileSize;
 
-        const pixelCount = width * height;
-        const u32InputBuffer = new Uint32Array(pixelCount);
+        let rawBufferView: Uint8Array;
+        let dataType = 0; // 0 = Uint16, 1 = Float32
 
-        if (data instanceof Uint16Array) {
-            for (let i = 0; i < pixelCount; i++) {
-                u32InputBuffer[i] = data[i];
-            }
-        } else if (data instanceof Float32Array) {
-            for (let i = 0; i < pixelCount; i++) {
-                u32InputBuffer[i] = Math.floor(Math.max(0, Math.min(1, data[i])) * 65535);
-            }
+        if (data instanceof Float32Array) {
+            rawBufferView = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+            dataType = 1;
+        } else if (data instanceof Uint16Array) {
+            rawBufferView = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+            dataType = 0;
         } else {
-            const raw16 = new Uint16Array(data);
-            for (let i = 0; i < pixelCount; i++) {
-                u32InputBuffer[i] = raw16[i] || 0;
-            }
+            const buf = data instanceof ArrayBuffer ? data : (data as any).buffer;
+            rawBufferView = new Uint8Array(buf);
+            dataType = 0;
         }
 
+        const alignedSize = Math.max(16, Math.ceil(rawBufferView.byteLength / 4) * 4);
         const inputStorageBuffer = device.createBuffer({
             label: 'TerrainTile_RawStorageBuffer',
-            size: pixelCount * 4,
+            size: alignedSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
-        device.queue.writeBuffer(inputStorageBuffer, 0, u32InputBuffer);
+        device.queue.writeBuffer(inputStorageBuffer, 0, rawBufferView.buffer, rawBufferView.byteOffset, rawBufferView.byteLength);
 
+        const targetPixelCount = targetTileSize * targetTileSize;
         const outputStorageBuffer = device.createBuffer({
             label: 'TerrainTile_OutputStorageBuffer',
-            size: pixelCount * 2,
+            size: targetPixelCount * 2,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC
         });
 
-        const uniformsArray = new Uint32Array([width, height]);
+        const uniformsArray = new Uint32Array([targetTileSize, width, height, dataType]);
         const uniformBuffer = device.createBuffer({
             label: 'TerrainTile_UniformBuffer',
             size: 16,
@@ -491,21 +537,21 @@ class TerrainTileSystem extends TerrainMaterialBind {
             const pass = encoder.beginComputePass({label: 'TerrainTile_ComputePass'});
             pass.setPipeline(this.#computePipeline!);
             pass.setBindGroup(0, bindGroup);
-            pass.dispatchWorkgroups(Math.ceil(width / 16), Math.ceil(height / 16));
+            pass.dispatchWorkgroups(Math.ceil(targetTileSize / 16), Math.ceil(targetTileSize / 16));
             pass.end();
 
-            const bytesPerRow = width * 2;
+            const bytesPerRow = targetTileSize * 2;
             encoder.copyBufferToTexture(
                 {
                     buffer: outputStorageBuffer,
                     bytesPerRow: bytesPerRow,
-                    rowsPerImage: height
+                    rowsPerImage: targetTileSize
                 },
                 {
                     texture: gpuTexture,
                     origin: [destX, destZ, 0]
                 },
-                [Math.min(width, this.atlasTileSize), Math.min(height, this.atlasTileSize), 1]
+                [targetTileSize, targetTileSize, 1]
             );
         });
 
@@ -524,7 +570,11 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.#tileDataCache.set(key, data);
     }
 
-    async #parse16BitPngBuffer(buffer: ArrayBuffer): Promise<Uint16Array | null> {
+    async #parse16BitPngBuffer(buffer: ArrayBuffer): Promise<{
+        pixels: Uint16Array,
+        width: number,
+        height: number
+    } | null> {
         try {
             const view = new DataView(buffer);
             if (view.getUint32(0) !== 0x89504E47 || view.getUint32(4) !== 0x0D0A1A0A) {
@@ -553,7 +603,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
                 offset += 12 + length;
             }
 
-            if (bitDepth !== 16 || idatChunks.length === 0) {
+            if (bitDepth !== 16 || idatChunks.length === 0 || width === 0 || height === 0) {
                 return null;
             }
 
@@ -641,12 +691,11 @@ class TerrainTileSystem extends TerrainMaterialBind {
                     const highByte = unfilteredRow[sampleIdx];
                     const lowByte = unfilteredRow[sampleIdx + 1];
                     // PNG 16-bit is Big-Endian: (highByte << 8) | lowByte
-                    const valUint16 = (highByte << 8) | lowByte;
-                    outPixels[y * width + x] = valUint16;
+                    outPixels[y * width + x] = (highByte << 8) | lowByte;
                 }
             }
 
-            return outPixels;
+            return {pixels: outPixels, width, height};
         } catch (e) {
             console.warn('[Tile Streamer ⚠️] Native 16-bit PNG decoding fallback:', e);
             return null;
@@ -662,7 +711,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
             .then(async (buffer) => {
                 const parsed16Bit = await this.#parse16BitPngBuffer(buffer);
                 if (parsed16Bit) {
-                    this.loadTileFrom16BitBuffer(tile, parsed16Bit, this.atlasTileSize, this.atlasTileSize, format);
+                    this.loadTileFrom16BitBuffer(tile, parsed16Bit.pixels, parsed16Bit.width, parsed16Bit.height, format);
                 } else {
                     this.loadTileFrom16BitBuffer(tile, buffer, this.atlasTileSize, this.atlasTileSize, format);
                 }
