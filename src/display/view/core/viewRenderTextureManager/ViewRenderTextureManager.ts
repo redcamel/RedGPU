@@ -1,4 +1,4 @@
-import {keepLog} from "../../../../utils";
+import keepLog from "../../../../utils/keepLog";
 import calculateTextureByteSize from "../../../../utils/texture/calculateTextureByteSize";
 import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
 import View3D from "../../View3D";

@@ -26,7 +26,7 @@ import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 import SystemUniformUpdater from "../../renderer/helperFunc/SystemUniformUpdater";
 import updateSystemUniformData from "../../renderer/helperFunc/updateSystemUniformData";
 import ClusterLightManager from "../../light/core/ClusterLightManager";
-import {keepLog} from "../../utils";
+import keepLog from "../../utils/keepLog";
 
 
 let temp = mat4.create()

@@ -4,7 +4,7 @@ import Mesh from "../display/mesh/Mesh";
 import validatePositiveNumberRange from "../runtimeChecker/validateFunc/validatePositiveNumberRange";
 import validateUintRange from "../runtimeChecker/validateFunc/validateUintRange";
 import calculateTextureByteSize from "../utils/texture/calculateTextureByteSize";
-import {keepLog} from "../utils";
+import keepLog from "../utils/keepLog";
 
 /**
  * [KO] 직사광(Directional Light)의 그림자 뎁스 텍스처와 관련 설정을 관리하는 클래스입니다.

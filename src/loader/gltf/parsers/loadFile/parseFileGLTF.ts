@@ -3,7 +3,7 @@ import {GLTF} from "../../GLTF";
 import GLTFLoader, {GLTFLoadingProgressInfo} from "../../GLTFLoader";
 import parseGLTF from "../parseGLTF";
 import formatBytes from "../../../../utils/formatBytes";
-import {keepLog} from "../../../../utils";
+import keepLog from "../../../../utils/keepLog";
 
 const getData = (gltfData) => {
     return {

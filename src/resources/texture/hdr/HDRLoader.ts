@@ -1,4 +1,4 @@
-import {keepLog} from "../../../utils";
+import keepLog from "../../../utils/keepLog";
 
 /**
  * [KO] HDR 텍스처 데이터를 나타내는 인터페이스입니다.

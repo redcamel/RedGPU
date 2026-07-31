@@ -1,7 +1,7 @@
 import PerspectiveCamera from "../../../camera/camera/PerspectiveCamera";
 import {GLTF} from "../GLTF";
 import GLTFLoader from "../GLTFLoader";
-import {keepLog} from "../../../utils";
+import keepLog from "../../../utils/keepLog";
 
 const parseCameras_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF) => {
     const {cameras} = gltfData

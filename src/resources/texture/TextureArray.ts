@@ -1,6 +1,7 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import getAbsoluteURL from "../../utils/file/getAbsoluteURL";
-import TextureParser from "../../utils/texture/textureParser/TextureParser";
+import loadImageToImageBitmap from "../../utils/texture/textureParser/imageBitmap/loadImageToImageBitmap";
+import imageBitmapToGPUTexture from "../../utils/texture/textureParser/imageBitmap/imageBitmapToGPUTexture";
 import getMipLevelCount from "../../utils/texture/getMipLevelCount";
 import ManagementResourceBase from "../core/ManagementResourceBase";
 import ResourceStateBitmapTexture from "../core/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
@@ -74,7 +75,7 @@ class TextureArray extends ManagementResourceBase {
         const {redGPUContext} = this
         const {gpuDevice} = redGPUContext
 
-        const loadPromises = this.#srcList.map(src => TextureParser.loadImageToImageBitmap(src));
+        const loadPromises = this.#srcList.map(src => loadImageToImageBitmap(src));
 
         Promise.all(loadPromises).then((bitmaps) => {
             if (bitmaps.length === 0) {
@@ -111,7 +112,7 @@ class TextureArray extends ManagementResourceBase {
                 textureDescriptor.mipLevelCount = this.#mipLevelCount;
             }
 
-            this.#gpuTexture = TextureParser.imageBitmapToGPUTexture(gpuDevice, resizedBitmaps, textureDescriptor, false);
+            this.#gpuTexture = imageBitmapToGPUTexture(gpuDevice, resizedBitmaps, textureDescriptor, false);
 
             if (this.#useMipmap) {
                 this.redGPUContext.resourceManager.mipmapGenerator.generateMipmap(

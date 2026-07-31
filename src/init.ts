@@ -1,5 +1,5 @@
 import RedGPUContext from "./context/RedGPUContext";
-import {keepLog} from "./utils";
+import keepLog from "./utils/keepLog";
 
 const DEFAULT_REQUEST_ADAPTER_OPTIONS: GPURequestAdapterOptions = {
     powerPreference: "high-performance",

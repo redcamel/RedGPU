@@ -1,4 +1,4 @@
-import {keepLog} from "../../../../utils";
+import keepLog from "../../../../utils/keepLog";
 import getAbsoluteURL from "../../../../utils/file/getAbsoluteURL";
 import getArrayBufferFromSrc from "../../core/getArrayBufferFromSrc";
 import {GLTF} from "../../GLTF";

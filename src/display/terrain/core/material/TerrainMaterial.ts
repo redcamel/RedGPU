@@ -14,7 +14,7 @@ import GPU_MIPMAP_FILTER_MODE from "../../../../gpuConst/GPU_MIPMAP_FILTER_MODE"
 import defineBoolean from "../../../../defineProperty/funcs/defineBoolean";
 import consoleAndThrowError from "../../../../utils/consoleAndThrowError";
 import TerrainRVT from "../rvt/TerrainRVT";
-import {keepLog} from "../../../../utils";
+import keepLog from "../../../../utils/keepLog";
 
 export interface TerrainLayerConfig {
     name?: string;

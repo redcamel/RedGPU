@@ -10,7 +10,7 @@ import RedGPUContextViewContainer from "./core/RedGPUContextViewContainer";
 import CommandEncoderManager from "../commandEncoderManager/CommandEncoderManager";
 import RedGPUContextObserver from "./core/RedGPUContextObserver";
 import GlobalStorageBufferManager from "../resources/buffer/globalStorageBufferManager/GlobalStorageBufferManager";
-import {keepLog} from "../utils";
+import keepLog from "../utils/keepLog";
 import DrawBufferManager from "../renderer/core/DrawBufferManager";
 
 import Renderer from "../renderer/Renderer";

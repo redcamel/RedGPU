@@ -1,7 +1,7 @@
 import RedGPUContext from "../context/RedGPUContext";
 import {COMMAND_ENCODER_TYPE, CommandEncoderType} from "./COMMAND_ENCODER_TYPE";
 import RedGPUObject from "../base/RedGPUObject";
-import {keepLog} from "../utils";
+import keepLog from "../utils/keepLog";
 
 /**
  * [KO] 단계별 통계 상세 정보 인터페이스

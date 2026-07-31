@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import {keepLog} from "../../../utils";
+import keepLog from "../../../utils/keepLog";
 import Sampler from "../../sampler/Sampler";
 import {
     BRDFGenerator,

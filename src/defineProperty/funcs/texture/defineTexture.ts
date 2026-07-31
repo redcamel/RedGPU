@@ -4,7 +4,7 @@ import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import ANoiseTexture from "../../../resources/texture/noiseTexture/core/ANoiseTexture";
 import HDRTexture from "../../../resources/texture/hdr/HDRTexture";
 import updateTargetUniform from "../../core/updateTargetUniform";
-import {keepLog} from "../../../utils";
+import keepLog from "../../../utils/keepLog";
 
 /**
  * `defineTexture` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.

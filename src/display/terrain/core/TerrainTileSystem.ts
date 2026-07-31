@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import TerrainMaterialBind from "./TerrainMaterialBind";
-import {keepLog} from "../../../utils";
+import keepLog from "../../../utils/keepLog";
 import defineTexture from "../../../defineProperty/funcs/texture/defineTexture";
 import DirectTexture from "../../../resources/texture/DirectTexture";
 import {SpatialTileInfo, TerrainSpatialGrid} from "./TerrainSpatialGrid";
@@ -10,7 +10,7 @@ import {TerrainQuadtree} from "./TerrainQuadtree";
 import defineNumber from "../../../defineProperty/funcs/number/defineNumber";
 import updateTargetUniform from "../../../defineProperty/core/updateTargetUniform";
 import TerrainGeometry from "./TerrainGeometry";
-import TextureParser from "../../../utils/texture/textureParser/TextureParser";
+import parse16BitPngBuffer from "../../../utils/texture/textureParser/parse16BitPngBuffer";
 import TerrainHeightmapProcessor from "./TerrainHeightmapProcessor";
 
 interface TerrainTileSystem {
@@ -410,8 +410,12 @@ class TerrainTileSystem extends TerrainMaterialBind {
                 return res.arrayBuffer();
             })
             .then(async (buffer) => {
-                const parsed = await TextureParser.parseImageData(buffer);
-                this.loadTileFrom16BitBuffer(tile, parsed.pixels, parsed.width, parsed.height, format);
+                const parsed = await parse16BitPngBuffer(buffer);
+                if (parsed) {
+                    this.loadTileFrom16BitBuffer(tile, parsed.pixels, parsed.width, parsed.height, format);
+                } else {
+                    this.loadTileFrom16BitBuffer(tile, buffer, this.atlasTileSize, this.atlasTileSize, format);
+                }
             })
             .catch(err => {
                 console.error(`[Tile Streamer ❌] Failed to load 16-bit tile from ${url}`, err);

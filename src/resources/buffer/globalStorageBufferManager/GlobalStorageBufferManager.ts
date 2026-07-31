@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import RedGPUObject from "../../../base/RedGPUObject";
-import {keepLog} from "../../../utils";
+import keepLog from "../../../utils/keepLog";
 
 interface BufferSlot {
     index: number;

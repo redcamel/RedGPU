@@ -2,7 +2,7 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
 import bakeSrc from "./rvt_bake.wgsl";
 import TerrainMaterial from "../material/TerrainMaterial";
-import {keepLog} from "../../../../utils";
+import keepLog from "../../../../utils/keepLog";
 
 export interface TerrainRVTOptions {
     atlasSize?: number;

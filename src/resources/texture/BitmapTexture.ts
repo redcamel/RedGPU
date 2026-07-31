@@ -2,7 +2,9 @@ import RedGPUContext from "../../context/RedGPUContext";
 import getAbsoluteURL from "../../utils/file/getAbsoluteURL";
 import calculateTextureByteSize from "../../utils/texture/calculateTextureByteSize";
 import getMipLevelCount from "../../utils/texture/getMipLevelCount";
-import TextureParser from "../../utils/texture/textureParser/TextureParser";
+import loadImageToImageBitmap from "../../utils/texture/textureParser/imageBitmap/loadImageToImageBitmap";
+import convertSvgToImageBitmap from "../../utils/texture/textureParser/imageBitmap/convertSvgToImageBitmap";
+import imageBitmapToGPUTexture from "../../utils/texture/textureParser/imageBitmap/imageBitmapToGPUTexture";
 import ManagementResourceBase from "../core/ManagementResourceBase";
 import ResourceStateBitmapTexture from "../core/resourceManager/resourceState/texture/ResourceStateBitmapTexture";
 
@@ -318,7 +320,7 @@ class BitmapTexture extends ManagementResourceBase {
             textureDescriptor.mipLevelCount = this.#mipLevelCount
             textureDescriptor.usage |= GPUTextureUsage.RENDER_ATTACHMENT;
         }
-        const newGPUTexture = TextureParser.imageBitmapToGPUTexture(gpuDevice, [imgBitmap], textureDescriptor, this.#usePremultiplyAlpha)
+        const newGPUTexture = imageBitmapToGPUTexture(gpuDevice, [imgBitmap], textureDescriptor, this.#usePremultiplyAlpha)
         // keepLog(newGPUTexture)
         this.#videoMemorySize = calculateTextureByteSize(newGPUTexture)
         this.targetResourceManagedState.videoMemory += this.#videoMemorySize
@@ -343,9 +345,9 @@ class BitmapTexture extends ManagementResourceBase {
             let imgBitmap: ImageBitmap;
             const premultiplyAlpha = this.#usePremultiplyAlpha ? 'premultiply' : 'none';
             if (src.endsWith(".svg")) {
-                imgBitmap = await TextureParser.convertSvgToImageBitmap(src, premultiplyAlpha);
+                imgBitmap = await convertSvgToImageBitmap(src, premultiplyAlpha);
             } else {
-                imgBitmap = await TextureParser.loadImageToImageBitmap(src, "none", premultiplyAlpha);
+                imgBitmap = await loadImageToImageBitmap(src, "none", premultiplyAlpha);
             }
             this.#createGPUTextureFromImageBitmap(imgBitmap);
             this.#onLoad?.(this);

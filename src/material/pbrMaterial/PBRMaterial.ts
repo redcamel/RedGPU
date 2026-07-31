@@ -13,7 +13,7 @@ import defineUint from "../../defineProperty/funcs/number/defineUint";
 import defineVector2 from "../../defineProperty/funcs/vector/defineVector2";
 import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
 import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
-import {keepLog} from "../../utils";
+import keepLog from "../../utils/keepLog";
 
 
 const EXTENSION_LIST: {

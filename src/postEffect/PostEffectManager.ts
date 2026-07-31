@@ -13,7 +13,7 @@ import AutoExposure from "../camera/core/autoExposure/AutoExposure";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
 import PostEffectTexturePool from "./core/PostEffectTexturePool";
 import {IPostEffectResult} from "./core/types";
-import {keepLog} from "../utils";
+import keepLog from "../utils/keepLog";
 
 
 /**
