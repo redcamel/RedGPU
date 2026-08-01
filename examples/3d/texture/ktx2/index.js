@@ -23,24 +23,25 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         // view.grid = true;
         redGPUContext.addView(view);
+        console.log(redGPUContext.detector)
 
         // Three.js 샘플 18개 전수 KTX2 텍스처 리스트
         const testKTX2Files = [
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba8.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba8_linear.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba16_linear.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba16unorm_linear.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba32_linear.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgb9e5_linear.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_r11g11b10_linear.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_astc4x4.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc1.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc2.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc1.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc3.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc4.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc5.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc7.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba8.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba8_linear.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba16_linear.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba16unorm_linear.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba32_linear.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgb9e5_linear.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_r11g11b10_linear.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_astc4x4.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc1.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc2.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc1.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc3.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc4.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc5.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc7.ktx2"},
             {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc1s.ktx2"}, // TODO - 트랜스코딩필요
             {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_uastc.ktx2"}, // TODO - 트랜스코딩필요
             {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_uastc_hdr4x4.ktx2"}, // TODO - 트랜스코딩필요
@@ -490,15 +491,19 @@ RedGPU.init(
                 const updateStatusText = (tex) => {
                     const targetTexture = tex || texture;
                     const gpuTex = targetTexture ? targetTexture.gpuTexture : null;
+
+
                     const fmt = gpuTex ? gpuTex.format : 'unknown';
                     const w = gpuTex ? gpuTex.width : 0;
                     const h = gpuTex ? gpuTex.height : 0;
                     const isFallback = gpuTex && gpuTex.label && gpuTex.label.includes('fallback');
+                    const vkFormat = gpuTex ? gpuTex.ktxInfo.vkFormat : null;
+                    const vkFormatName = gpuTex ? gpuTex.ktxInfo.vkFormatName : null;
 
                     if (isFallback) {
                         labelField.text = `<div style="text-align:center; padding: 6px 12px; background: rgba(0,0,0,0.7); border-radius: 6px; font-size: 22px;"><b>${fileName}</b><br/><span style="color:#ff9800; font-size: 18px;">⚠️ Fallback (GPU Feature Missing)</span></div>`;
                     } else {
-                        labelField.text = `<div style="text-align:center; padding: 6px 12px; background: rgba(0,0,0,0.7); border-radius: 6px; font-size: 22px;"><b>${fileName}</b><br/><span style="color:#4caf50; font-size: 18px;">✅ SUCCESS</span><br/><span style="color:#ddd; font-size: 18px; font-weight: bold;">(${fmt}, ${w}x${h})</span></div>`;
+                        labelField.text = `<div style="text-align:center; padding: 6px 12px; background: rgba(0,0,0,0.7); border-radius: 6px; font-size: 22px;"><b>${fileName}</b><br/><span style="color:#4caf50; font-size: 18px;">✅ SUCCESS</span><br/><span style="color:#ddd; font-size: 18px; font-weight: bold;">(${fmt}, ${w}x${h})</span><br/><span style="color:#ddd; font-size: 18px; font-weight: bold;">(${vkFormat}, ${vkFormatName})</span></div>`;
                     }
                 };
 

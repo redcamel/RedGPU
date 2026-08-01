@@ -1,7 +1,6 @@
 import Sampler from "../../../resources/sampler/Sampler";
 import applyProperties from "../../core/applyProperties";
 import defineProperty_SETTING from "../../core/defineProperty_SETTING";
-import keepLog from "../../../utils/keepLog";
 
 /**
  * `defineSampler` 함수에 전달할 설정 옵션을 정의하는 인터페이스입니다.
@@ -24,7 +23,6 @@ function defineSampler_func(propertyInfo: DefineSamplerInfo) {
         set: function (sampler: Sampler) {
             const prevSampler: Sampler = this[symbol];
             this[symbol] = sampler;
-            keepLog('test updateSampler')
             this.updateSampler(prevSampler, sampler);
         },
         ...defineProperty_SETTING,

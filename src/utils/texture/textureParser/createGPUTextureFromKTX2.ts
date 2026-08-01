@@ -23,6 +23,20 @@ export interface CreateKTX2Options {
 let basisTranscoderPromise: Promise<any> | null = null;
 let basisModule: any = null;
 
+// ✨ Basis Universal C++ 내부 열거형(Enum) 상수 하드코딩
+// (JS 바인딩 오류로 인한 undefined 강제 0(ETC1) 변환 방지)
+const BASIS_FORMAT = {
+    ETC1_RGB: 0,
+    ETC2_RGBA: 1,
+    BC1_RGB: 2,
+    BC3_RGBA: 3,
+    BC4_R: 4,
+    BC5_RG: 5,
+    BC7_RGBA: 6,
+    ASTC_4x4_RGBA: 9,
+    RGBA32: 13
+};
+
 async function initBasisTranscoder(): Promise<any> {
     if (basisModule) return basisModule;
     if (!basisTranscoderPromise) {
@@ -217,7 +231,7 @@ export async function createGPUTextureFromKTX2({
     let rawBuffer: Uint8Array | null = null;
     let container: KTX2Container;
 
-    // ✨ 1. 사전처리: 독립된 순수 ArrayBuffer 사본 분리 추출 (Offset 오염 방지)
+    // 1. 순수 바이너리 사본 안전 분리
     if (typeof inputContainer === 'string') {
         const response = await fetch(inputContainer);
         if (!response.ok) {
@@ -230,17 +244,21 @@ export async function createGPUTextureFromKTX2({
         rawBuffer = new Uint8Array(inputContainer.slice(0));
         container = read(rawBuffer);
     } else if (inputContainer instanceof Uint8Array) {
-        // Uint8Array의 Subarray/View 오프셋을 잘라내어 0부터 시작하는 사본 생성
-        rawBuffer = inputContainer.slice(0);
+        rawBuffer = new Uint8Array(inputContainer.buffer, inputContainer.byteOffset, inputContainer.byteLength).slice(0);
         container = read(rawBuffer);
     } else {
         container = inputContainer;
         if ((container as any)._rawBuffer) {
             const b = (container as any)._rawBuffer;
-            const srcView = new Uint8Array(b.buffer || b, b.byteOffset || 0, b.byteLength);
-            rawBuffer = srcView.slice(0);
+            if (b instanceof Uint8Array) {
+                rawBuffer = new Uint8Array(b.buffer, b.byteOffset, b.byteLength).slice(0);
+            } else if (b instanceof ArrayBuffer) {
+                rawBuffer = new Uint8Array(b.slice(0));
+            } else {
+                rawBuffer = new Uint8Array(b).slice(0);
+            }
         } else {
-            throw new Error('[KTX2 Loader ❌] KTX2Container 파싱용 rawBuffer가 필요합니다.');
+            throw new Error('[KTX2 Loader ❌] KTX2Container 파싱용 _rawBuffer가 존재하지 않습니다.');
         }
     }
 
@@ -258,11 +276,10 @@ export async function createGPUTextureFromKTX2({
     let ktx2FileInstance: any = null;
     let basisTargetFormatEnum: number = 0;
 
-    // 2. Format 판단 및 Basis WASM 초기화
+    // 2. Format 판단 및 Basis WASM 초기화 (vkFormat === 0 분기)
     if (container.vkFormat === 0) {
         const Module = await initBasisTranscoder();
 
-        // 파싱 전용 완전한 독립 rawBuffer 넘기기
         ktx2FileInstance = new Module.KTX2File(rawBuffer);
 
         if (!ktx2FileInstance.isValid() || !ktx2FileInstance.startTranscoding()) {
@@ -270,11 +287,13 @@ export async function createGPUTextureFromKTX2({
                 ktx2FileInstance.close();
                 ktx2FileInstance.delete();
             }
-            throw new Error('[KTX2 Loader ❌] Basis Transcoder 초기화 실패');
+            throw new Error('[KTX2 Loader ❌] Basis Transcoder 초기화 실패 (Invalid KTX2 Header)');
         }
 
         const isUASTC = ktx2FileInstance.isUASTC();
+        const isHDR = typeof ktx2FileInstance.isHDR === 'function' ? ktx2FileInstance.isHDR() : false;
         const hasAlpha = ktx2FileInstance.getHasAlpha();
+
         const isSRGB = typeof ktx2FileInstance.isSRGB === 'function'
             ? ktx2FileInstance.isSRGB()
             : (Array.isArray(dfdList) && dfdList[0] && dfdList[0].transferFunction === 1);
@@ -283,45 +302,48 @@ export async function createGPUTextureFromKTX2({
         const hasBC = device.features.has('texture-compression-bc');
         const hasETC2 = device.features.has('texture-compression-etc2');
 
-        // Three.js 스펙 타겟 선택
-        if (isUASTC) {
+        // ✨ 하드코딩된 정수 포맷 적용 (undefined가 0으로 형변환되는 버그 완벽 차단)
+        if (isHDR) {
+            format = 'rgba8unorm';
+            basisTargetFormatEnum = BASIS_FORMAT.RGBA32;
+        } else if (isUASTC) {
             if (hasASTC) {
                 format = isSRGB ? 'astc-4x4-unorm-srgb' : 'astc-4x4-unorm';
-                basisTargetFormatEnum = Module.transcoder_texture_format.cTFASTC_4x4;
+                basisTargetFormatEnum = BASIS_FORMAT.ASTC_4x4_RGBA;
             } else if (hasBC) {
                 format = isSRGB ? 'bc7-rgba-unorm-srgb' : 'bc7-rgba-unorm';
-                basisTargetFormatEnum = Module.transcoder_texture_format.cTFBC7_M5;
+                basisTargetFormatEnum = BASIS_FORMAT.BC7_RGBA;
             } else if (hasETC2) {
                 format = isSRGB ? 'etc2-rgba8unorm-srgb' : 'etc2-rgba8unorm';
-                basisTargetFormatEnum = Module.transcoder_texture_format.cTFETC2_RGBA;
+                basisTargetFormatEnum = BASIS_FORMAT.ETC2_RGBA;
             } else {
                 format = isSRGB ? 'rgba8unorm-srgb' : 'rgba8unorm';
-                basisTargetFormatEnum = Module.transcoder_texture_format.cTFRGBA32;
+                basisTargetFormatEnum = BASIS_FORMAT.RGBA32;
             }
         } else {
-            // ETC1S (2d_etc1s.ktx2)
+            // ETC1S (2d_etc1s.ktx2) 트랜스코딩 타겟
             if (hasASTC) {
                 format = isSRGB ? 'astc-4x4-unorm-srgb' : 'astc-4x4-unorm';
-                basisTargetFormatEnum = Module.transcoder_texture_format.cTFASTC_4x4;
+                basisTargetFormatEnum = BASIS_FORMAT.ASTC_4x4_RGBA;
             } else if (hasBC) {
                 if (hasAlpha) {
                     format = isSRGB ? 'bc3-rgba-unorm-srgb' : 'bc3-rgba-unorm';
-                    basisTargetFormatEnum = Module.transcoder_texture_format.cTFBC3;
+                    basisTargetFormatEnum = BASIS_FORMAT.BC3_RGBA;
                 } else {
                     format = isSRGB ? 'bc1-rgba-unorm-srgb' : 'bc1-rgba-unorm';
-                    basisTargetFormatEnum = Module.transcoder_texture_format.cTFBC1;
+                    basisTargetFormatEnum = BASIS_FORMAT.BC1_RGB;
                 }
             } else if (hasETC2) {
                 if (hasAlpha) {
                     format = isSRGB ? 'etc2-rgba8unorm-srgb' : 'etc2-rgba8unorm';
-                    basisTargetFormatEnum = Module.transcoder_texture_format.cTFETC2_RGBA;
+                    basisTargetFormatEnum = BASIS_FORMAT.ETC2_RGBA;
                 } else {
                     format = isSRGB ? 'etc2-rgb8unorm-srgb' : 'etc2-rgb8unorm';
-                    basisTargetFormatEnum = Module.transcoder_texture_format.cTFETC1;
+                    basisTargetFormatEnum = BASIS_FORMAT.ETC1_RGB;
                 }
             } else {
                 format = isSRGB ? 'rgba8unorm-srgb' : 'rgba8unorm';
-                basisTargetFormatEnum = Module.transcoder_texture_format.cTFRGBA32;
+                basisTargetFormatEnum = BASIS_FORMAT.RGBA32;
             }
         }
 
@@ -396,7 +418,9 @@ export async function createGPUTextureFromKTX2({
                         layerIdx,
                         faceIdx,
                         basisTargetFormatEnum,
-                        0, -1, -1
+                        0,
+                        -1,
+                        -1
                     );
 
                     if (!success) {
@@ -414,18 +438,24 @@ export async function createGPUTextureFromKTX2({
                             blockHeight = parseInt(dims[1], 10);
                         }
 
-                        const blocksWide = Math.ceil(mipWidth / blockWidth);
-                        const blocksHigh = Math.ceil(mipHeight / blockHeight);
+                        const blocksWide = Math.max(1, Math.ceil(mipWidth / blockWidth));
+                        const blocksHigh = Math.max(1, Math.ceil(mipHeight / blockHeight));
 
-                        const bytesPerBlock = (format.startsWith('bc1') || format.startsWith('bc4')) ? 8 : 16;
+                        // 패딩 용량 정밀 계산 지원
+                        let bytesPerBlock = 16;
+                        if (format.startsWith('bc1') || format.startsWith('bc4') ||
+                            format === 'etc2-rgb8unorm' || format === 'etc2-rgb8unorm-srgb' ||
+                            format === 'eac-r11unorm' || format === 'eac-r11snorm') {
+                            bytesPerBlock = 8;
+                        }
+
                         const bytesPerRow = blocksWide * bytesPerBlock;
                         const requiredSize = bytesPerRow * blocksHigh;
 
                         let uploadBuffer = transcodedBuffer;
                         if (transcodedBuffer.byteLength < requiredSize) {
-                            const paddedBuf = new Uint8Array(requiredSize);
-                            paddedBuf.set(transcodedBuffer);
-                            uploadBuffer = paddedBuf;
+                            uploadBuffer = new Uint8Array(requiredSize);
+                            uploadBuffer.set(transcodedBuffer);
                         }
 
                         device.queue.writeTexture(
@@ -447,58 +477,42 @@ export async function createGPUTextureFromKTX2({
                             }
                         );
                     } else {
-                        // RGBA32 Uncompressed 업로드
+                        // Uncompressed (RGBA32) 업로드
                         const unpaddedBytesPerRow = mipWidth * 4;
                         const paddedBytesPerRow = (unpaddedBytesPerRow + 255) & ~255;
 
-                        if (unpaddedBytesPerRow % 256 === 0 || mipHeight === 1) {
-                            device.queue.writeTexture(
-                                {
-                                    texture,
-                                    mipLevel,
-                                    origin: {x: 0, y: 0, z: slice}
-                                },
-                                transcodedBuffer,
-                                {
-                                    offset: 0,
-                                    bytesPerRow: unpaddedBytesPerRow,
-                                    rowsPerImage: mipHeight
-                                },
-                                {
-                                    width: mipWidth,
-                                    height: mipHeight,
-                                    depthOrArrayLayers: 1
-                                }
-                            );
-                        } else {
+                        let uploadBuffer = transcodedBuffer;
+                        if (unpaddedBytesPerRow % 256 !== 0 && mipHeight > 1) {
                             const paddedBuffer = new Uint8Array(paddedBytesPerRow * mipHeight);
                             for (let row = 0; row < mipHeight; row++) {
                                 const srcRow = transcodedBuffer.subarray(row * unpaddedBytesPerRow, (row + 1) * unpaddedBytesPerRow);
                                 paddedBuffer.set(srcRow, row * paddedBytesPerRow);
                             }
-                            device.queue.writeTexture(
-                                {
-                                    texture,
-                                    mipLevel,
-                                    origin: {x: 0, y: 0, z: slice}
-                                },
-                                paddedBuffer,
-                                {
-                                    offset: 0,
-                                    bytesPerRow: paddedBytesPerRow,
-                                    rowsPerImage: mipHeight
-                                },
-                                {
-                                    width: mipWidth,
-                                    height: mipHeight,
-                                    depthOrArrayLayers: 1
-                                }
-                            );
+                            uploadBuffer = paddedBuffer;
                         }
+
+                        device.queue.writeTexture(
+                            {
+                                texture,
+                                mipLevel,
+                                origin: {x: 0, y: 0, z: slice}
+                            },
+                            uploadBuffer,
+                            {
+                                offset: 0,
+                                bytesPerRow: (unpaddedBytesPerRow % 256 === 0 || mipHeight === 1) ? unpaddedBytesPerRow : paddedBytesPerRow,
+                                rowsPerImage: mipHeight
+                            },
+                            {
+                                width: mipWidth,
+                                height: mipHeight,
+                                depthOrArrayLayers: 1
+                            }
+                        );
                     }
                 }
             } else {
-                // Raw KTX2 (사전 압축 / 비압축 KTX2) 사전처리
+                // Raw KTX2 (사전 압축 / 비압축 KTX2) 처리
                 const levelInfo = container.levels[mipLevel];
                 let levelDataView = new Uint8Array(
                     levelInfo.levelData.buffer,
@@ -506,7 +520,6 @@ export async function createGPUTextureFromKTX2({
                     levelInfo.levelData.byteLength
                 );
 
-                // ✨ 사전처리: Zstandard 수퍼컴프레션 사전 디코딩
                 if (container.supercompressionScheme === 2) {
                     try {
                         levelDataView = decompressZstd(levelDataView);
@@ -526,10 +539,16 @@ export async function createGPUTextureFromKTX2({
                         blockHeight = parseInt(dims[1], 10);
                     }
 
-                    const blocksWide = Math.ceil(mipWidth / blockWidth);
-                    const blocksHigh = Math.ceil(mipHeight / blockHeight);
+                    const blocksWide = Math.max(1, Math.ceil(mipWidth / blockWidth));
+                    const blocksHigh = Math.max(1, Math.ceil(mipHeight / blockHeight));
 
-                    const bytesPerBlock = (format.startsWith('bc1') || format.startsWith('bc4')) ? 8 : 16;
+                    let bytesPerBlock = 16;
+                    if (format.startsWith('bc1') || format.startsWith('bc4') ||
+                        format === 'etc2-rgb8unorm' || format === 'etc2-rgb8unorm-srgb' ||
+                        format === 'eac-r11unorm' || format === 'eac-r11snorm') {
+                        bytesPerBlock = 8;
+                    }
+
                     const bytesPerRow = blocksWide * bytesPerBlock;
                     const bytesPerImage = bytesPerRow * blocksHigh;
 
@@ -565,7 +584,6 @@ export async function createGPUTextureFromKTX2({
                         );
                     }
                 } else {
-                    // ✨ 사전처리: RGB -> RGBA 4채널 보정
                     if (container.vkFormat === 23 || container.vkFormat === 29) {
                         const totalPixels = mipWidth * mipHeight * totalLayers;
                         const rgbaView = new Uint8Array(totalPixels * 4);
@@ -582,7 +600,6 @@ export async function createGPUTextureFromKTX2({
                         levelDataView = rgbaView;
                     }
 
-                    // Float16/32 변환 사전처리
                     if (container.vkFormat === 91 || container.vkFormat === 109) {
                         const dv = new DataView(levelDataView.buffer, levelDataView.byteOffset, levelDataView.byteLength);
                         const numFloats = Math.floor(levelDataView.byteLength / (container.vkFormat === 91 ? 2 : 4));
