@@ -48,7 +48,6 @@ class BitmapTexture extends ManagementResourceBase {
     #usePremultiplyAlpha: boolean = true
     /** [KO] 텍스처 포맷 [EN] Texture format */
     #format: GPUTextureFormat
-    readonly #userSpecifiedFormat: boolean = false;
     /** [KO] 로드 완료 콜백 [EN] Load complete callback */
     readonly #onLoad: (textureInstance: BitmapTexture) => void;
     /** [KO] 에러 콜백 [EN] Error callback */
@@ -94,7 +93,6 @@ class BitmapTexture extends ManagementResourceBase {
         this.#onError = onError
         this.#usePremultiplyAlpha = usePremultiplyAlpha
         this.#useMipmap = useMipMap
-        this.#userSpecifiedFormat = !!format;
         this.#format = format || `${navigator.gpu.getPreferredCanvasFormat()}-srgb` as GPUTextureFormat
         if (src) {
             this.#src = this.#getParsedSrc(src);
@@ -367,7 +365,6 @@ class BitmapTexture extends ManagementResourceBase {
                 const newGPUTexture = await createGPUTextureFromKTX2({
                     device: this.gpuDevice,
                     container: container,
-                    overrideFormat: this.#userSpecifiedFormat ? this.#format : undefined,
                 });
 
                 this.#format = newGPUTexture.format;
@@ -398,7 +395,6 @@ export interface KTX2ParseResult {
     container: KTX2Container;
     arrayBuffer: ArrayBuffer;
 }
-
 export async function loadKtx2Container(src: string): Promise<KTX2ParseResult> {
     const response = await fetch(src);
     if (!response.ok) {
@@ -418,6 +414,9 @@ export async function loadKtx2Container(src: string): Promise<KTX2ParseResult> {
     if (!container || container.pixelWidth <= 0 || container.pixelHeight <= 0) {
         throw new Error(`[loadKtx2Container ❌] Invalid KTX2 header dimensions: ${src}`);
     }
+
+    // ✨ WASM 트랜스코더를 위해 container 객체 내부에 원본 바이너리 참조 연결
+    (container as any)._rawBuffer = uint8;
 
     return {container, arrayBuffer};
 }

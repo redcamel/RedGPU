@@ -21,29 +21,29 @@ RedGPU.init(
         scene.backgroundColor.setColorByHEX('#1b1c2b');
 
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view.grid = true;
+        // view.grid = true;
         redGPUContext.addView(view);
 
         // Three.js 샘플 18개 전수 KTX2 텍스처 리스트
         const testKTX2Files = [
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba8.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba8_linear.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba16_linear.ktx2"},
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba16unorm_linear.ktx2"}, //TODO - 이거 파싱확인
-            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba32_linear.ktx2"}, //TODO - 이거 파싱확인
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgb9e5_linear.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_r11g11b10_linear.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_astc4x4.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc1.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc2.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc1.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc3.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc4.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc5.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc7.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc1s.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_uastc.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_uastc_hdr4x4.ktx2"},
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba8.ktx2"},
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba8_linear.ktx2"},
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba16_linear.ktx2"},
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba16unorm_linear.ktx2"},
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba32_linear.ktx2"},
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgb9e5_linear.ktx2"},
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_r11g11b10_linear.ktx2"},
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_astc4x4.ktx2"},
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc1.ktx2"},
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc2.ktx2"},
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc1.ktx2"},
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc3.ktx2"},
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc4.ktx2"},
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc5.ktx2"},
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc7.ktx2"},
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc1s.ktx2"}, // TODO - 트랜스코딩필요
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_uastc.ktx2"}, // TODO - 트랜스코딩필요
+            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_uastc_hdr4x4.ktx2"}, // TODO - 트랜스코딩필요
 // {
 //     "name": "[1.기초 Raw] cyan_rgb_reference_uastc",
 //     "path": "../../../assets/ktx2TestImages/cyan_rgb_reference_uastc.ktx2"
@@ -53,62 +53,77 @@ RedGPU.init(
 //     "path": "../../../assets/ktx2TestImages/cyan_rgba_reference_u.ktx2"
 // },
 // {
+//     //TODO - 이거 확인못했음
 //     "name": "[1.기초 Raw] green_rgb_reference_u",
 //     "path": "../../../assets/ktx2TestImages/green_rgb_reference_u.ktx2"
 // },
 // {
+//     //TODO - vkFormat: 0,
 //     "name": "[1.기초 Raw] luminance_alpha_reference_basis",
 //     "path": "../../../assets/ktx2TestImages/luminance_alpha_reference_basis.ktx2"
 // },
 // {
+//     //TODO - 이거 확인못했음
 //     "name": "[1.기초 Raw] luminance_alpha_reference_u",
 //     "path": "../../../assets/ktx2TestImages/luminance_alpha_reference_u.ktx2"
 // },
 // {
+//     //TODO - vkFormat: 0,
 //     "name": "[1.기초 Raw] luminance_alpha_reference_uastc",
 //     "path": "../../../assets/ktx2TestImages/luminance_alpha_reference_uastc.ktx2"
 // },
 // {
+//     //TODO - vkFormat: 0,
 //     "name": "[1.기초 Raw] luminance_reference_basis",
 //     "path": "../../../assets/ktx2TestImages/luminance_reference_basis.ktx2"
 // },
 // {
+//     //TODO - 이거 확인못했음
 //     "name": "[1.기초 Raw] luminance_reference_u",
 //     "path": "../../../assets/ktx2TestImages/luminance_reference_u.ktx2"
 // },
 // {
+//     //TODO - vkFormat: 0,
 //     "name": "[1.기초 Raw] luminance_reference_uastc",
 //     "path": "../../../assets/ktx2TestImages/luminance_reference_uastc.ktx2"
 // },
 // {
+//     //TODO - vkFormat: 0,
 //     "name": "[1.기초 Raw] r_reference_basis",
 //     "path": "../../../assets/ktx2TestImages/r_reference_basis.ktx2"
 // },
 // {
+//     //TODO - 이거 확인못했음
 //     "name": "[1.기초 Raw] r_reference_u",
 //     "path": "../../../assets/ktx2TestImages/r_reference_u.ktx2"
 // },
 // {
+//     //TODO - vkFormat: 0,
 //     "name": "[1.기초 Raw] r_reference_uastc",
 //     "path": "../../../assets/ktx2TestImages/r_reference_uastc.ktx2"
 // },
 // {
+//     //TODO - vkFormat: 0,
 //     "name": "[1.기초 Raw] rg_reference_basis",
 //     "path": "../../../assets/ktx2TestImages/rg_reference_basis.ktx2"
 // },
 // {
+//     //TODO 격자로 보여야하는데 격자로 안보임
 //     "name": "[1.기초 Raw] rg_reference_u",
 //     "path": "../../../assets/ktx2TestImages/rg_reference_u.ktx2"
 // },
 // {
+//     //TODO - vkFormat: 0,
 //     "name": "[1.기초 Raw] rg_reference_uastc",
 //     "path": "../../../assets/ktx2TestImages/rg_reference_uastc.ktx2"
 // },
 // {
+//     //TODO - 밉맵은 추후에
 //     "name": "[1.기초 Raw] rgb-mipmap-reference-u",
 //     "path": "../../../assets/ktx2TestImages/rgb-mipmap-reference-u.ktx2"
 // },
 // {
+//     //TODO - 밉맵은 추후에
 //     "name": "[1.기초 Raw] rgba-mipmap-reference-basis",
 //     "path": "../../../assets/ktx2TestImages/rgba-mipmap-reference-basis.ktx2"
 // },
@@ -216,34 +231,40 @@ RedGPU.init(
 //           "name": "[2.중급 Block] astc_mipmap_ldr_8x8_posx",
 //           "path": "../../../assets/ktx2TestImages/astc_mipmap_ldr_8x8_posx.ktx2"
 // },
-// {
-//           "name": "[2.중급 Block] camera_camera_BaseColor_uastc",
-//           "path": "../../../assets/ktx2TestImages/camera_camera_BaseColor_uastc.ktx2"
-// },
+//             {
+//                 //TODO - vkFormat: 0,
+//                 "name": "[2.중급 Block] camera_camera_BaseColor_uastc",
+//                 "path": "../../../assets/ktx2TestImages/camera_camera_BaseColor_uastc.ktx2"
+//             },
 // {
 //           "name": "[2.중급 Block] ccwn2c08",
 //           "path": "../../../assets/ktx2TestImages/ccwn2c08.ktx2"
 // },
-// {
-//           "name": "[2.중급 Block] CesiumLogoFlat",
-//           "path": "../../../assets/ktx2TestImages/CesiumLogoFlat.ktx2"
-// },
-// {
-//           "name": "[2.중급 Block] cimg5293_uastc_zstd",
-//           "path": "../../../assets/ktx2TestImages/cimg5293_uastc_zstd.ktx2"
-// },
-// {
-//           "name": "[2.중급 Block] cimg5293_uastc",
-//           "path": "../../../assets/ktx2TestImages/cimg5293_uastc.ktx2"
-// },
-// {
-//           "name": "[2.중급 Block] color_grid_uastc_zstd",
-//           "path": "../../../assets/ktx2TestImages/color_grid_uastc_zstd.ktx2"
-// },
-// {
-//           "name": "[2.중급 Block] color_grid_uastc",
-//           "path": "../../../assets/ktx2TestImages/color_grid_uastc.ktx2"
-// },
+//             {
+//                 //TODO - vkFormat: 0,
+//                 "name": "[2.중급 Block] CesiumLogoFlat",
+//                 "path": "../../../assets/ktx2TestImages/CesiumLogoFlat.ktx2"
+//             },
+//             {
+//                 //TODO - vkFormat: 0,
+//                 "name": "[2.중급 Block] cimg5293_uastc_zstd",
+//                 "path": "../../../assets/ktx2TestImages/cimg5293_uastc_zstd.ktx2"
+//             },
+//             {
+//                 //TODO - vkFormat: 0,
+//                 "name": "[2.중급 Block] cimg5293_uastc",
+//                 "path": "../../../assets/ktx2TestImages/cimg5293_uastc.ktx2"
+//             },
+//             {
+//                 //TODO - vkFormat: 0,
+//                 "name": "[2.중급 Block] color_grid_uastc_zstd",
+//                 "path": "../../../assets/ktx2TestImages/color_grid_uastc_zstd.ktx2"
+//             },
+//             {
+//                 //TODO - vkFormat: 0,
+//                 "name": "[2.중급 Block] color_grid_uastc",
+//                 "path": "../../../assets/ktx2TestImages/color_grid_uastc.ktx2"
+//             },
 // {
 //           "name": "[2.중급 Block] g03n2c08",
 //           "path": "../../../assets/ktx2TestImages/g03n2c08.ktx2"
@@ -438,18 +459,20 @@ RedGPU.init(
 // }
         ];
 
-        // XY 수직 평면 그리드 배치 (6열 x 3행)
+        // XY 수직 평면 중앙 정렬 그리드 배치
         const cols = 6;
         const totalRows = Math.ceil(testKTX2Files.length / cols);
-        const spacingX = 5.0;
-        const spacingY = 5.0;
+        const spacingX = 4.5;
+        const spacingY = 4.8;
         const geometry = new RedGPU.Primitive.Plane(redGPUContext, 2.5, 2.5);
 
         testKTX2Files.forEach((item, index) => {
             const row = Math.floor(index / cols);
             const col = index % cols;
 
-            const posX = (col - (cols - 1) / 2) * spacingX;
+            // 해당 행(row)에 실제로 들어가는 아이템 수 계산하여 중앙 정렬
+            const itemsInThisRow = Math.min(cols, testKTX2Files.length - row * cols);
+            const posX = (col - (itemsInThisRow - 1) / 2) * spacingX;
             const posY = ((totalRows - 1) / 2 - row) * spacingY;
 
             try {
@@ -489,7 +512,12 @@ RedGPU.init(
                     }
                 );
 
-                const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture);
+                const nearestSampler = new RedGPU.Resource.Sampler(redGPUContext, {
+                    magFilter: 'nearest',
+                    minFilter: 'nearest'
+                });
+
+                const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture, nearestSampler);
 
                 const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
                 mesh.setPosition(posX, posY, 0); // XY 평면 정렬
