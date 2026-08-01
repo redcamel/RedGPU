@@ -190,12 +190,18 @@ export async function createGPUTextureFromKTX2({
         return createFallbackGPUTexture(device, label);
     }
 
-    const mappedFormat = overrideFormat ?? VK_FORMAT_TO_WEBGPU[container.vkFormat];
+    let mappedFormat = overrideFormat ?? VK_FORMAT_TO_WEBGPU[container.vkFormat];
     if (!mappedFormat) {
         throw new Error(
             `[KTX2 Loader ❌] 지원하지 않거나 매핑되지 않은 Vulkan Format (vkFormat: ${container.vkFormat}).`
         );
     }
+
+    // device가 float32-filterable을 지원하지 않고 format이 rgba32float이면 안전하게 rgba16float로 대치
+    if (mappedFormat === 'rgba32float' && !device.features.has('float32-filterable')) {
+        mappedFormat = 'rgba16float';
+    }
+
     format = mappedFormat;
     keepLog(container, format);
 
@@ -299,6 +305,8 @@ export async function createGPUTextureFromKTX2({
                 );
             }
         } else {
+
+
             // vkFormat === 23, 29 (VK_FORMAT_R8G8B8_UNORM / VK_FORMAT_R8G8B8_SRGB 3-byte RGB -> 4-byte RGBA, A=255)
             if (container.vkFormat === 23 || container.vkFormat === 29) {
                 const totalPixels = mipWidth * mipHeight * totalLayers;
@@ -339,8 +347,8 @@ export async function createGPUTextureFromKTX2({
                 levelDataView = new Uint8Array(h16View.buffer, h16View.byteOffset, h16View.byteLength);
             }
 
-            // vkFormat === 109 (VK_FORMAT_R32G32B32A32_SFLOAT -> rgba16float) Float32 to Float16 실시간 변환
-            if (container.vkFormat === 109) {
+            // vkFormat === 109 (VK_FORMAT_R32G32B32A32_SFLOAT) -> target이 rgba16float일 때만 Float32 to Float16 실시간 변환
+            if (container.vkFormat === 109 && format === 'rgba16float') {
                 const dv = new DataView(levelDataView.buffer, levelDataView.byteOffset, levelDataView.byteLength);
                 const numFloats = Math.floor(levelDataView.byteLength / 4);
                 const h16View = new Uint16Array(numFloats);
