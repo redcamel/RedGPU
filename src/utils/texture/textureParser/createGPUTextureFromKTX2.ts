@@ -99,7 +99,7 @@ const VK_FORMAT_TO_WEBGPU: Record<number, GPUTextureFormat> = {
     97: 'rgba16float',
     100: 'r32float',
     103: 'rg32float',
-    109: 'rgba32float',
+    109: 'rgba16float',
 
     // Block Compression - BC
     131: 'bc1-rgba-unorm',
@@ -182,7 +182,7 @@ const FORMAT_BYTES_PER_PIXEL: Partial<Record<GPUTextureFormat, number>> = {
     'rgb9e5ufloat': 4,
 };
 
-function createFallbackGPUTexture(device: GPUDevice, label?: string): GPUTexture {
+function createFallbackGPUTexture(device: GPUDevice, label?: string, vkFormat?: any): GPUTexture {
     keepLog('createFallbackGPUTexture', label);
     const fallbackTex = device.createTexture({
         label: label ? `${label}_fallback` : 'KTX2_Fallback_Texture',
@@ -198,6 +198,11 @@ function createFallbackGPUTexture(device: GPUDevice, label?: string): GPUTexture
         {bytesPerRow: 4},
         {width: 1, height: 1}
     );
+    //@ts-ignore
+    fallbackTex.ktxInfo = {
+        vkFormat: vkFormat,
+        vkFormatName: VK_FORMAT_TO_WEBGPU[vkFormat ?? 0],
+    };
     return fallbackTex;
 }
 
@@ -350,7 +355,7 @@ export async function createGPUTextureFromKTX2({
             ktx2FileInstance.close();
             ktx2FileInstance.delete();
         }
-        return createFallbackGPUTexture(device, label);
+        return createFallbackGPUTexture(device, label, container.vkFormat);
     }
 
     // 4. GPUTexture 생성
@@ -694,5 +699,10 @@ export async function createGPUTextureFromKTX2({
         }
     }
 
+    //@ts-ignore
+    texture.ktxInfo = {
+        vkFormat: container.vkFormat,
+        vkFormatName: VK_FORMAT_TO_WEBGPU[container.vkFormat ?? 0],
+    };
     return texture;
 }
