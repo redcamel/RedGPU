@@ -23,23 +23,24 @@ const VK_FORMAT_TO_WEBGPU: Record<number, GPUTextureFormat> = {
     // 8-bit Unorm / Srgb
     9: 'r8unorm', // VK_FORMAT_R8_UNORM
     16: 'rg8unorm', // VK_FORMAT_R8G8_UNORM
+    23: 'rgba8unorm', // VK_FORMAT_R8G8B8_UNORM (RGB -> RGBA padding)
+    29: 'rgba8unorm-srgb', // VK_FORMAT_R8G8B8_SRGB (RGB -> RGBA padding)
     37: 'rgba8unorm', // VK_FORMAT_R8G8B8A8_UNORM
     43: 'rgba8unorm-srgb', // VK_FORMAT_R8G8B8A8_SRGB
     44: 'bgra8unorm', // VK_FORMAT_B8G8R8A8_UNORM
     50: 'bgra8unorm-srgb', // VK_FORMAT_B8G8R8A8_SRGB
 
     // 16-bit Unorm / Snorm (texture-formats-tier1 피처 필요)
-    23: 'r16unorm', // VK_FORMAT_R16_UNORM
-    29: 'rgba8unorm-srgb',   // VK_FORMAT_R16G16_UNORM
-    30: 'rg16unorm', // VK_FORMAT_R16G16_UNORM
-    91: 'rgba16unorm', // VK_FORMAT_R16G16B16A16_UNORM
+    70: 'r16snorm', // VK_FORMAT_R16_SNORM
+    76: 'r16float', // VK_FORMAT_R16_SFLOAT
+    77: 'rg16unorm', // VK_FORMAT_R16G16_UNORM
+    91: 'rgba16float', // VK_FORMAT_R16G16B16A16_UNORM (mapped to rgba16float for WebGPU filterable float support)
 
     // Packed Float & Special Float Formats
     122: 'rg11b10ufloat', // VK_FORMAT_B10G11R11_UFLOAT_PACK32
     123: 'rgb9e5ufloat', // VK_FORMAT_E5B9G9R9_UFLOAT_PACK32
 
     // 16-bit / 32-bit Float
-    76: 'r16float', // VK_FORMAT_R16_SFLOAT
     83: 'rg16float', // VK_FORMAT_R16G16_SFLOAT
     97: 'rgba16float', // VK_FORMAT_R16G16B16A16_SFLOAT
     100: 'r32float', // VK_FORMAT_R32_SFLOAT
@@ -183,25 +184,20 @@ export async function createGPUTextureFromKTX2({
     let format: GPUTextureFormat;
 
     if (container.vkFormat === 0) {
-        format = overrideFormat ?? (isSRGB ? 'rgba8unorm-srgb' : 'rgba8unorm');
-    } else {
-        let mappedFormat = overrideFormat ?? VK_FORMAT_TO_WEBGPU[container.vkFormat];
-        if (!mappedFormat) {
-            throw new Error(
-                `[KTX2 Loader ❌] 지원하지 않거나 매핑되지 않은 Vulkan Format (vkFormat: ${container.vkFormat}).`
-            );
-        }
-
-        // DFD(Data Format Descriptor) bytesPlane 검사로 16-bit 4채널(8 bytes/pixel) 텍스처 보정 (WebGPU 코어 호환 rgba16float 지정)
-        const dfdBytes = dfdList?.[0]?.bytesPlane?.[0];
-        // if (dfdBytes === 8 && mappedFormat !== 'rgba16float') {
-        //     mappedFormat = 'rgba16float';
-        // }
-
-
-        format = mappedFormat;
+        console.warn(
+            `[KTX2 Loader ⚠️] vkFormat === 0 (Basis Universal / UASTC) 포맷은 해석하지 않고 폴백(Fallback) 텍스처를 반환합니다. (label: ${label})`
+        );
+        return createFallbackGPUTexture(device, label);
     }
-    keepLog(container, format)
+
+    const mappedFormat = overrideFormat ?? VK_FORMAT_TO_WEBGPU[container.vkFormat];
+    if (!mappedFormat) {
+        throw new Error(
+            `[KTX2 Loader ❌] 지원하지 않거나 매핑되지 않은 Vulkan Format (vkFormat: ${container.vkFormat}).`
+        );
+    }
+    format = mappedFormat;
+    keepLog(container, format);
 
     // 3. GPU device feature 지원 여부 검증 (미지원 시 경고 후 Fallback 텍스처 반환)
     let missingFeature = '';
@@ -257,10 +253,7 @@ export async function createGPUTextureFromKTX2({
             }
         }
 
-        // vkFormat === 0 (Basis Universal ETC1S / UASTC) 실시간 Pure JS 디코딩 수행
-        if (container.vkFormat === 0 && !isCompressed) {
-            levelDataView = realTimePureJSTranscodeBasis(levelDataView, mipWidth, mipHeight, container.supercompressionScheme);
-        }
+
 
         if (isCompressed) {
             const blockWidth = 4;
@@ -306,6 +299,46 @@ export async function createGPUTextureFromKTX2({
                 );
             }
         } else {
+            // vkFormat === 23, 29 (VK_FORMAT_R8G8B8_UNORM / VK_FORMAT_R8G8B8_SRGB 3-byte RGB -> 4-byte RGBA, A=255)
+            if (container.vkFormat === 23 || container.vkFormat === 29) {
+                const totalPixels = mipWidth * mipHeight * totalLayers;
+                const rgbaView = new Uint8Array(totalPixels * 4);
+                for (let i = 0; i < totalPixels; i++) {
+                    const srcIdx = i * 3;
+                    const dstIdx = i * 4;
+                    if (srcIdx + 2 < levelDataView.byteLength) {
+                        rgbaView[dstIdx + 0] = levelDataView[srcIdx + 0];
+                        rgbaView[dstIdx + 1] = levelDataView[srcIdx + 1];
+                        rgbaView[dstIdx + 2] = levelDataView[srcIdx + 2];
+                        rgbaView[dstIdx + 3] = 255;
+                    }
+                }
+                levelDataView = rgbaView;
+            }
+
+            // vkFormat === 91 (VK_FORMAT_R16G16B16A16_UNORM -> rgba16float) Uint16 UNORM to Float16 실시간 변환
+            if (container.vkFormat === 91) {
+                const u16View = new Uint16Array(levelDataView.buffer, levelDataView.byteOffset, levelDataView.byteLength / 2);
+                const h16View = new Uint16Array(u16View.length);
+
+                for (let i = 0; i < u16View.length; i++) {
+                    const normVal = u16View[i] / 65535.0; // 0.0 ~ 1.0
+                    const f32 = new Float32Array([normVal]);
+                    const u32 = new Uint32Array(f32.buffer)[0];
+                    const sign = (u32 >> 16) & 0x8000;
+                    let exponent = ((u32 >> 23) & 0xff) - 127 + 15;
+                    let mantissa = u32 & 0x007fffff;
+                    if (exponent <= 0) {
+                        h16View[i] = sign;
+                    } else if (exponent >= 31) {
+                        h16View[i] = sign | 0x7c00;
+                    } else {
+                        h16View[i] = sign | (exponent << 10) | (mantissa >> 13);
+                    }
+                }
+                levelDataView = new Uint8Array(h16View.buffer, h16View.byteOffset, h16View.byteLength);
+            }
+
             // vkFormat === 109 (VK_FORMAT_R32G32B32A32_SFLOAT -> rgba16float) Float32 to Float16 실시간 변환
             if (container.vkFormat === 109) {
                 const dv = new DataView(levelDataView.buffer, levelDataView.byteOffset, levelDataView.byteLength);
@@ -338,7 +371,7 @@ export async function createGPUTextureFromKTX2({
                 const sliceOffset = slice * bytesPerImageUnpadded;
                 if (sliceOffset >= levelDataView.byteLength && slice > 0) break;
 
-                if (paddedBytesPerRow === unpaddedBytesPerRow || mipHeight === 1) {
+                if (unpaddedBytesPerRow % 256 === 0 || mipHeight === 1) {
                     const endOffset = Math.min(levelDataView.byteLength, sliceOffset + bytesPerImageUnpadded);
                     const sliceSub = levelDataView.subarray(sliceOffset, endOffset);
 
