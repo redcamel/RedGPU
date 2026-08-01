@@ -10,8 +10,9 @@ import {TerrainQuadtree} from "./TerrainQuadtree";
 import defineNumber from "../../../defineProperty/funcs/number/defineNumber";
 import updateTargetUniform from "../../../defineProperty/core/updateTargetUniform";
 import TerrainGeometry from "./TerrainGeometry";
-import parse16BitPngBuffer from "../../../utils/texture/textureParser/parse16BitPngBuffer";
+
 import TerrainHeightmapProcessor from "./terrainHeightmapProcessor/TerrainHeightmapProcessor";
+import parse16BitPngBuffer from "../../../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
 
 interface TerrainTileSystem {
     heightmapAtlasTexture: DirectTexture | BitmapTexture | null;

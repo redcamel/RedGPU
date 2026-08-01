@@ -1,7 +1,3 @@
-import TextureParser, {ParsedImageData} from "./TextureParser";
-
-export {
-    ParsedImageData
-};
+import TextureParser from "./TextureParser";
 
 export default TextureParser;
