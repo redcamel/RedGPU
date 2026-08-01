@@ -23,8 +23,8 @@ export interface CreateKTX2Options {
 let basisTranscoderPromise: Promise<any> | null = null;
 let basisModule: any = null;
 
-// ✨ Basis Universal C++ 내부 열거형(Enum) 상수 하드코딩
-// (JS 바인딩 오류로 인한 undefined 강제 0(ETC1) 변환 방지)
+// ✨ Basis Universal C++ 내부 열거형(Enum) 상수 하드코딩 (HDR 포맷 BC6H, RGBA16F 포함)
+// https://github.com/BinomialLLC/basis_universal/blob/master/transcoder/basisu_transcoder.h
 const BASIS_FORMAT = {
     ETC1_RGB: 0,
     ETC2_RGBA: 1,
@@ -33,8 +33,15 @@ const BASIS_FORMAT = {
     BC4_R: 4,
     BC5_RG: 5,
     BC7_RGBA: 6,
-    ASTC_4x4_RGBA: 9,
-    RGBA32: 13
+    PVRTC1_4_RGBA: 9,
+    ASTC_4x4_RGBA: 10,        // ✅ 9 → 10 수정
+    RGBA32: 13,
+    ETC2_EAC_RG11: 21,
+    BC6H: 22,                  // ✅ 21 → 22 수정
+    ASTC_HDR_4x4_RGBA: 23,
+    RGB_HALF: 24,
+    RGBA_HALF: 25,             // ✅ 22 → 25 수정 (RGBA16F는 RGBA_HALF)
+    RGB_9E5: 26
 };
 
 async function initBasisTranscoder(): Promise<any> {
@@ -75,7 +82,36 @@ async function initBasisTranscoder(): Promise<any> {
                     return path;
                 }
             });
+            //
+            // 트랜스코더 포맷 enum 출력
+            keepLog('모든 Module 속성:', module);
 
+            // 혹은 직접 값 테스트
+            const fmt = module.transcoder_texture_format;
+
+            keepLog('Key values:');
+            keepLog('cTFETC1_RGB:', fmt.cTFETC1_RGB);
+            keepLog('cTFBC1_RGB:', fmt.cTFBC1_RGB);
+            keepLog('cTFBC3_RGBA:', fmt.cTFBC3_RGBA);
+            keepLog('cTFBC7_RGBA:', fmt.cTFBC7_RGBA);
+            keepLog('cTFPVRTC1_4_RGBA:', fmt.cTFPVRTC1_4_RGBA);
+            keepLog('cTFASTC_LDR_4x4_RGBA:', fmt.cTFASTC_LDR_4x4_RGBA);
+            keepLog('cTFRGBA32:', fmt.cTFRGBA32);
+            keepLog('cTFETC2_EAC_RG11:', fmt.cTFETC2_EAC_RG11);
+            keepLog('cTFBC6H:', fmt.cTFBC6H);
+            keepLog('cTFASTC_HDR_4x4_RGBA:', fmt.cTFASTC_HDR_4x4_RGBA);
+            keepLog('cTFRGB_HALF:', fmt.cTFRGB_HALF);
+            keepLog('cTFRGBA_HALF:', fmt.cTFRGBA_HALF);
+            keepLog('cTFRGB_9E5:', fmt.cTFRGB_9E5);
+
+
+            // 모든 ASTC 관련 항목 찾기
+            keepLog('ASTC 4x4 후보들:');
+            keepLog('cTFASTC_4x4:', fmt.cTFASTC_4x4);
+            keepLog('cTFASTC_4x4_RGBA:', fmt.cTFASTC_4x4_RGBA);
+            //@ts-ignore
+            keepLog('Value 10:', Object.entries(fmt).find(([k, v]) => v?.value === 10 || v === 10));
+            //
             module.initializeBasis();
             basisModule = module;
             return module;
@@ -86,6 +122,7 @@ async function initBasisTranscoder(): Promise<any> {
 
 /**
  * Vulkan Format ID -> WebGPU GPUTextureFormat 매핑 테이블
+ *
  */
 const VK_FORMAT_TO_WEBGPU: Record<number, GPUTextureFormat> = {
     // 8-bit Unorm / Srgb
@@ -276,8 +313,12 @@ export async function createGPUTextureFromKTX2({
     let ktx2FileInstance: any = null;
     let basisTargetFormatEnum: number = 0;
 
-    // 2. Format 판단 및 Basis WASM 초기화 (vkFormat === 0 분기)
-    if (container.vkFormat === 0) {
+    // ✨ 핵심 수정: vkFormat이 0이거나, HDR ASTC 포맷(1000066000)이거나, DFD 컬러 모델이 UASTC(166)/ETC1S(163)인 경우 Basis 트랜스코더 진입
+    const colorModel = (dfdList && dfdList[0]) ? dfdList[0].colorModel : null;
+    const isBasisContainer = container.vkFormat === 0 || container.vkFormat === 1000066000 || colorModel === 166 || colorModel === 163;
+
+    // 2. Format 판단 및 Basis WASM 초기화
+    if (isBasisContainer) {
         const Module = await initBasisTranscoder();
 
         ktx2FileInstance = new Module.KTX2File(rawBuffer);
@@ -302,10 +343,17 @@ export async function createGPUTextureFromKTX2({
         const hasBC = device.features.has('texture-compression-bc');
         const hasETC2 = device.features.has('texture-compression-etc2');
 
-        // ✨ 하드코딩된 정수 포맷 적용 (undefined가 0으로 형변환되는 버그 완벽 차단)
+
+        // ✨ HDR 및 범용 KTX2 포맷 대응 매핑 분기
         if (isHDR) {
-            format = 'rgba8unorm';
-            basisTargetFormatEnum = BASIS_FORMAT.RGBA32;
+            if (hasBC) {
+                format = 'bc6h-rgb-float';
+                basisTargetFormatEnum = BASIS_FORMAT.BC6H;
+            } else {
+                format = 'rgba16float';
+                basisTargetFormatEnum = BASIS_FORMAT.RGBA_HALF;
+                console.warn('[KTX2 Loader] BC6H not supported, using RGBA16F instead')
+            }
         } else if (isUASTC) {
             if (hasASTC) {
                 format = isSRGB ? 'astc-4x4-unorm-srgb' : 'astc-4x4-unorm';
@@ -321,7 +369,7 @@ export async function createGPUTextureFromKTX2({
                 basisTargetFormatEnum = BASIS_FORMAT.RGBA32;
             }
         } else {
-            // ETC1S (2d_etc1s.ktx2) 트랜스코딩 타겟
+            // ETC1S 트랜스코딩 타겟
             if (hasASTC) {
                 format = isSRGB ? 'astc-4x4-unorm-srgb' : 'astc-4x4-unorm';
                 basisTargetFormatEnum = BASIS_FORMAT.ASTC_4x4_RGBA;
@@ -410,6 +458,17 @@ export async function createGPUTextureFromKTX2({
                     const imageSize = ktx2FileInstance.getImageTranscodedSizeInBytes(
                         mipLevel, layerIdx, faceIdx, basisTargetFormatEnum
                     );
+
+                    {
+                        keepLog(`[KTX2 Transcode] mipLevel=${mipLevel}, mipSize=${mipWidth}x${mipHeight}, imageSize=${imageSize}`);
+
+                        if (!imageSize || imageSize <= 0) {
+                            console.error(`[ERROR] Invalid imageSize=${imageSize} at mipLevel=${mipLevel}`);
+                            throw new Error(`Invalid imageSize: ${imageSize}`);
+                        }
+
+                    }
+
                     const transcodedBuffer = new Uint8Array(imageSize);
 
                     const success = ktx2FileInstance.transcodeImage(
@@ -422,7 +481,7 @@ export async function createGPUTextureFromKTX2({
                         -1,
                         -1
                     );
-
+                    keepLog(transcodedBuffer)
                     if (!success) {
                         throw new Error(`[KTX2 Transcode ❌] Mip: ${mipLevel}, Slice: ${slice} 트랜스코딩 실패.`);
                     }
@@ -441,12 +500,12 @@ export async function createGPUTextureFromKTX2({
                         const blocksWide = Math.max(1, Math.ceil(mipWidth / blockWidth));
                         const blocksHigh = Math.max(1, Math.ceil(mipHeight / blockHeight));
 
-                        // 패딩 용량 정밀 계산 지원
                         let bytesPerBlock = 16;
                         if (format.startsWith('bc1') || format.startsWith('bc4') ||
                             format === 'etc2-rgb8unorm' || format === 'etc2-rgb8unorm-srgb' ||
-                            format === 'eac-r11unorm' || format === 'eac-r11snorm') {
-                            bytesPerBlock = 8;
+                            format === 'eac-r11unorm' || format === 'eac-r11snorm' ||
+                            format === 'bc6h-rgb-ufloat' || format === 'bc6h-rgb-float') { // BC6H 블록 바이트 수 대응 (16바이트)
+                            bytesPerBlock = format.startsWith('bc6h') ? 16 : 8; // BC6H는 픽셀 블록 당 16바이트
                         }
 
                         const bytesPerRow = blocksWide * bytesPerBlock;
@@ -477,8 +536,8 @@ export async function createGPUTextureFromKTX2({
                             }
                         );
                     } else {
-                        // Uncompressed (RGBA32) 업로드
-                        const unpaddedBytesPerRow = mipWidth * 4;
+                        // 비압축 포맷 (RGBA16F 등) 처리
+                        const unpaddedBytesPerRow = mipWidth * bytesPerPixel;
                         const paddedBytesPerRow = (unpaddedBytesPerRow + 255) & ~255;
 
                         let uploadBuffer = transcodedBuffer;
