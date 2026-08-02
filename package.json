@@ -34,7 +34,7 @@
     "cross-env": "^10.1.0",
     "gl-matrix": "^3.4.3",
     "mermaid": "^11.12.2",
-    "postcss": "^8.5.14",
+    "postcss": "^8.5.25",
     "rollup": "^4.60.4",
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-string": "^3.0.0",
