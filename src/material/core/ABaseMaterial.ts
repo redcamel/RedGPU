@@ -397,7 +397,7 @@ abstract class ABaseMaterial extends ResourceBase {
             } else if (this[name] instanceof PackedTexture) {
                 resource = resourceManager.getGPUResourceBitmapTextureView(this[name])
             } else {
-                resource = resourceManager.getGPUResourceBitmapTextureView(this[name]) || this.#emptyBitmapGPUTextureView
+                resource = resourceManager.getGPUResourceBitmapTextureView(this[name]) || this.#emptyBitmapGPUTextureView;
             }
             if (group === 2) {
                 entries.push(

@@ -712,12 +712,24 @@ class ResourceManager extends RedGPUObject {
             textureViewMap = new Map();
             this.#bitmapTextureViewCache.set(targetGPUTexture, textureViewMap);
         }
-        const cacheKey = this.#createDescriptorKey(viewDescriptor);
+        let effectiveDescriptor: GPUTextureViewDescriptor | undefined = viewDescriptor;
+        if (!effectiveDescriptor && targetGPUTexture) {
+            if (targetGPUTexture.depthOrArrayLayers > 1) {
+                effectiveDescriptor = {
+                    dimension: '2d',
+                    baseArrayLayer: 0,
+                    arrayLayerCount: 1,
+                    baseMipLevel: 0,
+                    mipLevelCount: targetGPUTexture.mipLevelCount,
+                };
+            }
+        }
+        const cacheKey = this.#createDescriptorKey(effectiveDescriptor);
         let cachedView = textureViewMap.get(cacheKey);
         if (!cachedView) {
-            const targetDescriptor = viewDescriptor ? {
-                ...viewDescriptor,
-                label: viewDescriptor.label || targetGPUTexture.label
+            const targetDescriptor = effectiveDescriptor ? {
+                ...effectiveDescriptor,
+                label: effectiveDescriptor.label || targetGPUTexture.label
             } : {
                 label: targetGPUTexture.label
             };

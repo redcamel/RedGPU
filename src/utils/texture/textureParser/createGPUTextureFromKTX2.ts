@@ -602,6 +602,7 @@ export async function createGPUTextureFromKTX2({
             height: textureHeight,
             depthOrArrayLayers: totalLayers
         },
+        dimension: '2d',
         mipLevelCount,
         format,
         usage,
@@ -615,7 +616,7 @@ export async function createGPUTextureFromKTX2({
 
             if (isBasisTranscoded) {
                 for (let slice = 0; slice < totalLayers; slice++) {
-                    const layerIdx = depth > 1 ? 0 : slice;
+                    const layerIdx = faceCount === 6 ? Math.floor(slice / 6) : (depth > 1 ? 0 : slice);
                     const faceIdx = faceCount === 6 ? slice % 6 : 0;
 
                     const imageSize = ktx2FileInstance.getImageTranscodedSizeInBytes(
