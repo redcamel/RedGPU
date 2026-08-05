@@ -32,7 +32,7 @@ export function createKTX2TestTile(redGPUContext, scene, geometry, linearSampler
         const isLegacy1stGen = !!(gpuTex && gpuTex.ktxInfo && gpuTex.ktxInfo.isLegacy);
         const legacyReason = (gpuTex && gpuTex.ktxInfo && gpuTex.ktxInfo.legacyReason) ? gpuTex.ktxInfo.legacyReason : '';
         const legacyReasonBox = (isLegacy1stGen && legacyReason)
-            ? `<div style="margin-top:18px; margin-bottom:6px;"><span style="color:#ffab91; font-size:32px; font-weight:bold; display:inline-block; background:rgba(255,87,34,0.22); padding:6px 16px; border-radius:8px; border:1px solid rgba(255,87,34,0.5);">💡 ${legacyReason}</span></div>`
+            ? `<div style="margin-top:18px; margin-bottom:6px;"><span style="color:#ffab91;line-height: 1.6; font-size:62px; font-weight:bold; display:inline-block; background:rgba(255,87,34,0.22); padding:6px 16px; border-radius:8px; border:1px solid rgba(255,87,34,0.5);">💡 ${legacyReason}</span></div>`
             : '';
 
         if (w > 0 && h > 0 && mesh) {
