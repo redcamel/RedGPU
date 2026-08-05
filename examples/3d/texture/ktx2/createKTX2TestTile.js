@@ -1,4 +1,4 @@
-import * as RedGPU from '../../../../dist/index.js?t=1785971559678';
+import * as RedGPU from '../../../../dist/index.js?t=1785971869723';
 
 /**
  * [KO] 현재 GPU 디바이스 지원 압축 포맷 피처 및 트랜스코드 타겟 현황을 exampleHelper 디자인 테마에 완벽히 맞추어 표시합니다.
@@ -11,28 +11,30 @@ export function createKTX2DeviceInfoHUD(redGPUContext) {
     const hasASTC = device.features.has('texture-compression-astc');
     const hasETC2 = device.features.has('texture-compression-etc2');
 
-    let activeTranscodeTarget = 'RGBA8 Uncompressed (Fallback)';
+    let activeTranscodeTarget = 'RGBA8 Uncompressed';
     if (hasASTC) activeTranscodeTarget = 'ASTC (4x4 LDR / HDR)';
-    else if (hasBC) activeTranscodeTarget = 'BC1 / BC3 / BC7 / BC6H (Desktop)';
-    else if (hasETC2) activeTranscodeTarget = 'ETC2 / EAC (Mobile)';
+    else if (hasBC) activeTranscodeTarget = 'BC1 / BC3 / BC7 / BC6H';
+    else if (hasETC2) activeTranscodeTarget = 'ETC2 / EAC';
 
-    // exampleHelper 모바일 반응형 미디어 쿼리 스타일 주입
+    // exampleHelper 모바일/isNarrow 반응형 미디어 쿼리 스타일 주입
     if (!document.getElementById('ktx2-hud-responsive-style')) {
         const styleEl = document.createElement('style');
         styleEl.id = 'ktx2-hud-responsive-style';
         styleEl.textContent = `
-            @media (max-width: 600px) {
+            @media (max-width: 768px) {
                 #ktx2-device-info-hud {
-                    bottom: 10px !important;
-                    left: 10px !important;
-                    right: 10px !important;
-                    max-width: none !important;
-                    padding: 5px 8px !important;
-                    font-size: 9px !important;
+                    top: auto !important;
+                    bottom: 160px !important;
+                    left: 50% !important;
+                    transform: translateX(-50%) !important;
+                    width: fit-content !important;
+                    max-width: calc(100vw - 20px) !important;
+                    padding: 5px 9px !important;
+                    font-size: 10px !important;
                 }
                 #ktx2-device-info-hud .badge-item {
-                    font-size: 8px !important;
-                    padding: 1px 4px !important;
+                    font-size: 9px !important;
+                    padding: 1px 5px !important;
                 }
             }
         `;
@@ -43,38 +45,40 @@ export function createKTX2DeviceInfoHUD(redGPUContext) {
     container.id = 'ktx2-device-info-hud';
     container.style.cssText = `
         position: fixed;
-        bottom: 14px;
-        left: 14px;
-        z-index: 10005;
-        background-color: rgba(17, 17, 18, 0.92);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 4px;
-        padding: 6px 10px;
-        color: #eee;
+        bottom: 58px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 20000;
+        background-color: rgba(248, 250, 252, 0.96);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(0, 0, 0, 0.16);
+        border-radius: 5px;
+        padding: 5px 12px;
+        color: #0f172a;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        font-size: 10px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-        max-width: calc(100vw - 28px);
+        font-size: 10.5px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
         width: fit-content;
+        max-width: calc(100vw - 20px);
         box-sizing: border-box;
         pointer-events: auto;
         user-select: none;
+        white-space: nowrap;
     `;
 
-    const badge = (label, active, color) => `
+    const badge = (label, active, color, bgColor) => `
         <span class="badge-item" style="
             display: inline-flex;
             align-items: center;
             gap: 2px;
-            padding: 1px 5px;
+            padding: 1.5px 6px;
             border-radius: 3px;
-            font-size: 9px;
-            font-weight: 600;
-            background: ${active ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)'};
-            color: ${active ? color : '#666'};
-            border: 1px solid ${active ? color + '44' : 'rgba(255,255,255,0.05)'};
+            font-size: 9.5px;
+            font-weight: 700;
+            background: ${active ? bgColor : 'rgba(0,0,0,0.04)'};
+            color: ${active ? color : '#94a3b8'};
+            border: 1px solid ${active ? color + '66' : 'rgba(0,0,0,0.08)'};
             white-space: nowrap;
         ">
             ${active ? '✓' : '✗'} ${label}
@@ -82,17 +86,16 @@ export function createKTX2DeviceInfoHUD(redGPUContext) {
     `;
 
     container.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <div style="display: flex; align-items: center; gap: 4px;">
-                <span style="font-size: 9px; color: #888; font-weight: 600; text-transform: uppercase;">Features:</span>
-                ${badge('BC', hasBC, '#4caf50')}
-                ${badge('ASTC', hasASTC, '#b388ff')}
-                ${badge('ETC2', hasETC2, '#ff9800')}
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: nowrap; white-space: nowrap; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
+                ${badge('BC', hasBC, '#15803d', 'rgba(22, 163, 74, 0.12)')}
+                ${badge('ASTC', hasASTC, '#7e22ce', 'rgba(168, 85, 247, 0.12)')}
+                ${badge('ETC2', hasETC2, '#c2410c', 'rgba(234, 88, 12, 0.12)')}
             </div>
-            <div style="width: 1px; height: 12px; background: rgba(255,255,255,0.15);"></div>
-            <div style="display: flex; align-items: center; gap: 4px;">
-                <span style="font-size: 9px; color: #888; font-weight: 600; text-transform: uppercase;">Target:</span>
-                <span style="font-size: 10px; font-weight: 700; color: #00e5ff;">${activeTranscodeTarget}</span>
+            <div style="width: 1px; height: 13px; background: rgba(0,0,0,0.15); flex-shrink: 0;"></div>
+            <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
+                <span style="font-size: 9.5px; color: #475569; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;">Target:</span>
+                <span style="font-size: 10.5px; font-weight: 800; color: #0369a1; white-space: nowrap;">${activeTranscodeTarget}</span>
             </div>
         </div>
     `;
@@ -100,35 +103,6 @@ export function createKTX2DeviceInfoHUD(redGPUContext) {
     document.body.appendChild(container);
 }
 
-/**
- * [KO] PC와 모바일 환경을 감지하여 텍스처 타일 그리드를 분기 배치하고 카메라 거리를 조절합니다.
- */
-export function layoutKTX2TestTiles(redGPUContext, scene, geometry, linearSampler, testKTX2Files, controller) {
-    const isMobile = redGPUContext.detector.isMobile || window.innerWidth <= 768;
-    const isNarrowMobile = window.innerWidth <= 480;
-
-    // PC: 5~6열 / 모바일: 2~3열
-    const cols = isMobile ? (isNarrowMobile ? 2 : 3) : Math.min(6, Math.max(4, Math.ceil(Math.sqrt(testKTX2Files.length))));
-    const totalRows = Math.ceil(testKTX2Files.length / cols);
-
-    const spacingX = isMobile ? (isNarrowMobile ? 7.2 : 7.8) : 8.5;
-    const spacingY = isMobile ? (isNarrowMobile ? 7.8 : 8.2) : 8.0;
-
-    if (controller) {
-        const baseDist = isMobile ? (isNarrowMobile ? 28 : 24) : 22;
-        controller.distance = baseDist + totalRows * (isMobile ? 5.5 : 2.5);
-    }
-
-    testKTX2Files.forEach((item, index) => {
-        const row = Math.floor(index / cols);
-        const col = index % cols;
-        const itemsInThisRow = Math.min(cols, testKTX2Files.length - row * cols);
-        const posX = (col - (itemsInThisRow - 1) / 2) * spacingX;
-        const posY = ((totalRows - 1) / 2 - row) * spacingY;
-
-        createKTX2TestTile(redGPUContext, scene, geometry, linearSampler, item, posX, posY);
-    });
-}
 
 /**
  * [KO] KTX2 테스트 텍스처 타일 및 라벨 생성 공용 헬퍼 함수

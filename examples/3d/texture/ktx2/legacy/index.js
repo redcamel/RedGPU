@@ -1,6 +1,6 @@
-import * as RedGPU from '../../../../../dist/index.js?t=1785971559678';
-import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1785971559678';
-import {createKTX2TestTile} from '../createKTX2TestTile.js?t=1785971559678';
+import * as RedGPU from '../../../../../dist/index.js?t=1785971869723';
+import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1785971869723';
+import {createKTX2TestTile} from '../createKTX2TestTile.js?t=1785971869723';
 
 /**
  * [KO] KTX2 Legacy 예제 - 1세대 구형 KTX2 레퍼런스 리스트 전용 (GitHub Pages 호스팅 자산)
@@ -12,8 +12,9 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        const isNarrow = window.innerWidth <= 768;
+
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = redGPUContext.detector.isMobile ? 60 : 28;
         controller.tilt = 0;
 
         const scene = new RedGPU.Display.Scene();
@@ -1562,11 +1563,13 @@ RedGPU.init(
             {"path": BASE_URL + "rgba-reference-u.ktx2"}
         ];
 
-        // XY 수직 평면 중앙 정렬 그리드 배치
-        const cols = 6;
+        // isNarrow (window.innerWidth <= 768)일 땐 3열, 넓을 땐 화면 크기(window.innerWidth)에 따라 가로 열 수 넓게 채움
+        const cols = isNarrow ? 3 : Math.max(4, Math.floor(window.innerWidth / 150));
         const totalRows = Math.ceil(testKTX2Files.length / cols);
-        const spacingX = 8.5;
-        const spacingY = 11.0;
+        const spacingX = isNarrow ? 9.5 : 8.5;
+        const spacingY = isNarrow ? 13.0 : 11.0;
+
+        controller.distance = isNarrow ? 35 + totalRows * 5.5 : Math.max(40, 15 + cols * 2.5 + totalRows * 3.0);
         const geometry = new RedGPU.Primitive.Plane(redGPUContext, 2.5, 2.5);
 
         const linearSampler = new RedGPU.Resource.Sampler(redGPUContext, {

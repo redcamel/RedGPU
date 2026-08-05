@@ -1,6 +1,6 @@
-import * as RedGPU from '../../../../../dist/index.js?t=1785971559678';
-import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1785971559678';
-import {layoutKTX2TestTiles} from '../createKTX2TestTile.js?t=1785971559678';
+import * as RedGPU from '../../../../../dist/index.js?t=1785971869723';
+import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1785971869723';
+import {createKTX2TestTile} from '../createKTX2TestTile.js?t=1785971869723';
 
 /**
  * [KO] KTX2 Transcode 예제 - Basis Universal 런타임 트랜스코딩 리스트 (GitHub Pages 호스팅 자산)
@@ -12,9 +12,11 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
+        const isNarrow = window.innerWidth <= 768;
+
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = redGPUContext.detector.isMobile ? 40 : 28;
-        controller.tilt = 0;
+        controller.speedDistance = 1.0;
+        controller.tilt = -0.6;
 
         const scene = new RedGPU.Display.Scene();
         scene.useBackgroundColor = true;
@@ -38,6 +40,13 @@ RedGPU.init(
             {"path": BASE_URL + "StainedGlassLamp_basis.ktx2"}
         ];
 
+        const cols = isNarrow ? 3 : Math.max(4, Math.floor(window.innerWidth / 150));
+        const totalRows = Math.ceil(testKTX2Files.length / cols);
+        const spacingX = isNarrow ? 9.5 : 8.5;
+        const spacingY = isNarrow ? 10.5 : 8.0;
+
+        controller.distance = isNarrow ? 28 + totalRows * 4.5 : Math.max(25, 12 + cols * 2.2 + totalRows * 2.5);
+
         const geometry = new RedGPU.Primitive.Plane(redGPUContext, 2.5, 2.5);
         const linearSampler = new RedGPU.Resource.Sampler(redGPUContext, {
             magFilter: 'linear',
@@ -45,8 +54,15 @@ RedGPU.init(
             mipmapFilter: 'linear'
         });
 
-        // PC / 모바일 분기 그리드 배치
-        layoutKTX2TestTiles(redGPUContext, scene, geometry, linearSampler, testKTX2Files, controller);
+        testKTX2Files.forEach((item, index) => {
+            const row = Math.floor(index / cols);
+            const col = index % cols;
+            const itemsInThisRow = Math.min(cols, testKTX2Files.length - row * cols);
+            const posX = (col - (itemsInThisRow - 1) / 2) * spacingX;
+            const posY = ((totalRows - 1) / 2 - row) * spacingY;
+
+            createKTX2TestTile(redGPUContext, scene, geometry, linearSampler, item, posX, posY);
+        });
 
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
