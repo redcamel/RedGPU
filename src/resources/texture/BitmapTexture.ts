@@ -48,36 +48,16 @@ class BitmapTexture extends ManagementResourceBase {
     #usePremultiplyAlpha: boolean = true
     /** [KO] 텍스처 포맷 [EN] Texture format */
     #format: GPUTextureFormat
-    /** [KO] 로드 완료 콜백 [EN] Load complete callback */
-    readonly #onLoad: (textureInstance: BitmapTexture) => void;
-    /** [KO] 에러 콜백 [EN] Error callback */
-    readonly #onError: (error: Error) => void;
+    /** [KO] 로드 완료 리스너 배열 [EN] Load complete listeners array */
+    #onLoadListeners: Array<(textureInstance: BitmapTexture) => void> = [];
+    /** [KO] 에러 리스너 배열 [EN] Error listeners array */
+    #onErrorListeners: Array<(error: Error) => void> = [];
+    #isLoaded: boolean = false;
+    #loadError: Error | null = null;
 
     /**
      * [KO] BitmapTexture 인스턴스를 생성합니다.
      * [EN] Creates a BitmapTexture instance.
-     *
-     * @param redGPUContext -
-     * [KO] RedGPUContext 인스턴스
-     * [EN] RedGPUContext instance
-     * @param src -
-     * [KO] 텍스처 소스 정보 (URL 또는 객체)
-     * [EN] Texture source information (URL or object)
-     * @param useMipMap -
-     * [KO] 밉맵 사용 여부 (기본값: true)
-     * [EN] Whether to use mipmaps (default: true)
-     * @param onLoad -
-     * [KO] 로드 완료 콜백
-     * [EN] Load complete callback
-     * @param onError -
-     * [KO] 에러 콜백
-     * [EN] Error callback
-     * @param format -
-     * [KO] 텍스처 포맷 (선택)
-     * [EN] Texture format (optional)
-     * @param usePremultiplyAlpha -
-     * [KO] 프리멀티플 알파 사용 여부 (기본값: false)
-     * [EN] Whether to use premultiplied alpha (default: false)
      */
     constructor(
         redGPUContext: RedGPUContext,
@@ -89,8 +69,8 @@ class BitmapTexture extends ManagementResourceBase {
         usePremultiplyAlpha: boolean = false
     ) {
         super(redGPUContext, MANAGED_STATE_KEY);
-        this.#onLoad = onLoad
-        this.#onError = onError
+        if (onLoad) this.#onLoadListeners.push(onLoad);
+        if (onError) this.#onErrorListeners.push(onError);
         this.#usePremultiplyAlpha = usePremultiplyAlpha
         this.#useMipmap = useMipMap
         this.#format = format || `${navigator.gpu.getPreferredCanvasFormat()}-srgb` as GPUTextureFormat
@@ -101,12 +81,29 @@ class BitmapTexture extends ManagementResourceBase {
             let target: ResourceStateBitmapTexture = table.get(this.cacheKey)
             if (target) {
                 const targetTexture = target.texture as BitmapTexture
-                this.#onLoad?.(targetTexture)
+                if (onLoad || onError) {
+                    targetTexture.addLoadListeners(onLoad, onError);
+                }
                 return targetTexture
             } else {
                 this.src = src;
                 this.#registerResource()
             }
+        }
+    }
+
+    /**
+     * [KO] 로드 완료 및 에러 리스너를 추가합니다.
+     * [EN] Adds load complete and error listeners.
+     */
+    addLoadListeners(onLoad?: (textureInstance: BitmapTexture) => void, onError?: (error: Error) => void) {
+        if (this.#isLoaded || !!this.#gpuTexture) {
+            if (onLoad) queueMicrotask(() => onLoad(this));
+        } else if (this.#loadError) {
+            if (onError) queueMicrotask(() => onError(this.#loadError!));
+        } else {
+            if (onLoad) this.#onLoadListeners.push(onLoad);
+            if (onError) this.#onErrorListeners.push(onError);
         }
     }
 
@@ -353,7 +350,7 @@ class BitmapTexture extends ManagementResourceBase {
                 imgBitmap = await convertSvgToImageBitmap(src, premultiplyAlpha);
             } else if (ext === "ktx2" || src.endsWith(".ktx2")) {
                 const {container} = await loadKtx2Container(src);
-                keepLog(container);
+
 
                 if (this.#gpuTexture) {
                     this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuTexture);
@@ -382,10 +379,14 @@ class BitmapTexture extends ManagementResourceBase {
                 this.#createGPUTextureFromImageBitmap(imgBitmap);
             }
 
-            this.#onLoad?.(this);
+            this.#isLoaded = true;
+            const listeners = [...this.#onLoadListeners];
+            listeners.forEach(cb => cb(this));
         } catch (error) {
             console.error(error);
-            this.#onError?.(error);
+            this.#loadError = error as Error;
+            const listeners = [...this.#onErrorListeners];
+            listeners.forEach(cb => cb(error as Error));
         }
     }
 

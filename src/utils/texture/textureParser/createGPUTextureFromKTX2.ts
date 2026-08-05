@@ -1,6 +1,5 @@
 import {KTX2Container, read} from 'ktx-parse';
 import {decompress as decompressZstd} from 'fzstd';
-import keepLog from "../../keepLog";
 
 const BASIS_JS_CDN_URL = 'https://unpkg.com/three@latest/examples/jsm/libs/basis/basis_transcoder.js';
 const BASIS_WASM_CDN_URL = 'https://unpkg.com/three@latest/examples/jsm/libs/basis/basis_transcoder.wasm';
@@ -300,7 +299,7 @@ const FORMAT_BYTES_PER_PIXEL: Partial<Record<GPUTextureFormat, number>> = {
 };
 
 function createFallbackGPUTexture(device: GPUDevice, label?: string, vkFormat?: any): GPUTexture {
-    keepLog('createFallbackGPUTexture', label);
+    // keepLog('createFallbackGPUTexture', label);
     const fallbackTex = device.createTexture({
         label: label ? `${label}_fallback` : 'KTX2_Fallback_Texture',
         size: {width: 1, height: 1, depthOrArrayLayers: 1},
@@ -423,7 +422,7 @@ export async function createGPUTextureFromKTX2({
             }
         } else if (isUASTC) {
             if (hasASTC) {
-                keepLog('isSRGB', isSRGB)
+
                 format = isSRGB ? 'astc-4x4-unorm-srgb' : 'astc-4x4-unorm';
                 basisTargetFormatEnum = BASIS_FORMAT.ASTC_4x4_RGBA;
             } else if (hasBC) {
@@ -482,7 +481,7 @@ export async function createGPUTextureFromKTX2({
         }
     }
 
-    keepLog(isBasisTranscoded, container, format, basisTargetFormatEnum);
+    // keepLog(isBasisTranscoded, container, format, basisTargetFormatEnum);
 
     // 3. GPU device feature 검증
     let missingFeature = '';
