@@ -135,6 +135,7 @@ const getRequiredFeature = (adapter: GPUAdapter): GPUFeatureName[] => {
         "indirect-first-instance",
         // "rg11b10ufloat-renderable",
         // "bgra8unorm-storage",
+
         "float32-filterable"
     ];
 

@@ -1,5 +1,5 @@
-import * as RedGPU from '../../../../dist/index.js?t=1783326645983';
-import RedGPUExampleHelper from '../../../exampleHelper/dist/index.js?t=1783326645983';
+import * as RedGPU from '../../../../dist/index.js?t=1783327300000';
+import RedGPUExampleHelper from '../../../exampleHelper/dist/index.js?t=1783327300000';
 
 /**
  * [KO] KTX2 테스트 텍스처 (초급 Raw만 활성화, 중급/상급/최심화는 주석 처리)
@@ -12,7 +12,7 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 42;
+        controller.distance = 25;
         controller.speedDistance = 1.0;
         controller.tilt = -0.6;
 
@@ -27,24 +27,42 @@ RedGPU.init(
 
         // Three.js 샘플 18개 전수 KTX2 텍스처 리스트
         const testKTX2Files = [
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba8.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba8_linear.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba16_linear.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba16unorm_linear.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba32_linear.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgb9e5_linear.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_r11g11b10_linear.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_astc4x4.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc1.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc2.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc1.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc3.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc4.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc5.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc7.ktx2"},
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc1s.ktx2"}, // TODO - 트랜스코딩필요
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_uastc.ktx2"}, // TODO - 트랜스코딩필요
-            {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_uastc_hdr4x4.ktx2"}, // TODO - 트랜스코딩필요
+            // // [Raw 비압축] RGBA8 sRGB - 가장 기본적인 비압축 포맷. VK_FORMAT_R8G8B8A8_SRGB(43) → rgba8unorm-srgb
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba8.ktx2"},
+            // // [Raw 비압축] RGBA8 Linear - sRGB 감마 없는 선형 색공간. VK_FORMAT_R8G8B8A8_UNORM(37) → rgba8unorm
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba8_linear.ktx2"},
+            // // [Raw 비압축] RGBA16 Float Linear - 16비트 부동소수점 HDR. VK_FORMAT_R16G16B16A16_SFLOAT(97) → rgba16float
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba16_linear.ktx2"},
+            // // [Raw 비압축] RGBA16 UNorm Linear - 16비트 정규화 정수. VK_FORMAT_R16G16B16A16_UNORM(91) → rgba16float(변환)
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba16unorm_linear.ktx2"},
+            // // [Raw 비압축] RGBA32 Float Linear - 32비트 고정밀 HDR. VK_FORMAT_R32G32B32A32_SFLOAT(109) → rgba16float(변환)
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgba32_linear.ktx2"},
+            // // [Raw 비압축] RGB9E5 공유지수 Float - 특수 HDR 포맷. VK_FORMAT_E5B9G9R9_UFLOAT_PACK32(123) → rgb9e5ufloat
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_rgb9e5_linear.ktx2"},
+            // // [Raw 비압축] R11G11B10 Float - 11/10비트 압축 HDR. VK_FORMAT_B10G11R11_UFLOAT_PACK32(122) → rg11b10ufloat
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_r11g11b10_linear.ktx2"},
+            // // [Raw 블록압축 - 모바일/ARM] ASTC 4x4 - 트랜스코딩 없이 직접 업로드. 윈도우 PC GPU 미지원 → Fallback
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_astc4x4.ktx2"},
+            // // [Raw 블록압축 - 모바일] ETC1 (RGB) - 트랜스코딩 없이 직접 업로드. 윈도우 PC GPU 미지원 → Fallback
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc1.ktx2"},
+            // // [Raw 블록압축 - 모바일] ETC2 (RGBA) - 트랜스코딩 없이 직접 업로드. 윈도우 PC GPU 미지원 → Fallback
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc2.ktx2"},
+            // // [Raw 블록압축 - PC/콘솔] BC1 (DXT1, RGB) - 트랜스코딩 없이 직접 업로드. 윈도우 PC GPU 지원 → 정상
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc1.ktx2"},
+            // // [Raw 블록압축 - PC/콘솔] BC3 (DXT5, RGBA) - 트랜스코딩 없이 직접 업로드. 윈도우 PC GPU 지원 → 정상
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc3.ktx2"},
+            // // [Raw 블록압축 - PC/콘솔] BC4 (R 단채널) - 트랜스코딩 없이 직접 업로드. 윈도우 PC GPU 지원 → 정상
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc4.ktx2"},
+            // // [Raw 블록압축 - PC/콘솔] BC5 (RG 2채널, 노말맵) - 트랜스코딩 없이 직접 업로드. 윈도우 PC GPU 지원 → 정상
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc5.ktx2"},
+            // // [Raw 블록압축 - PC/콘솔] BC7 (고품질 RGBA) - 트랜스코딩 없이 직접 업로드. 윈도우 PC GPU 지원 → 정상
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_bc7.ktx2"},
+            // // [Basis Universal 트랜스코딩] ETC1S (colorModel=163, vkFormat=0) - 런타임 트랜스코딩: 윈도우→BC1/BC3, 모바일→ETC2, 범용→RGBA32
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_etc1s.ktx2"},
+            // // [Basis Universal 트랜스코딩] UASTC LDR (colorModel=166, vkFormat=0) - 런타임 트랜스코딩: 윈도우→BC7, 모바일/Mac→ASTC4x4, 범용→RGBA32
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_uastc.ktx2"},
+            // // [Basis Universal 트랜스코딩] UASTC HDR (isHDR=true, vkFormat=0) - 런타임 트랜스코딩: 윈도우→BC6H, 범용→RGBA16F
+            // {"path": "../../../assets/ktx2TestImages/threejs_samples/2d_uastc_hdr4x4.ktx2"},
 // {
 //     "name": "[1.기초 Raw] cyan_rgb_reference_uastc",
 //     "path": "../../../assets/ktx2TestImages/cyan_rgb_reference_uastc.ktx2"
@@ -59,7 +77,7 @@ RedGPU.init(
 //     "path": "../../../assets/ktx2TestImages/green_rgb_reference_u.ktx2"
 // },
 // {
-//     //TODO - vkFormat: 0,
+//
 //     "name": "[1.기초 Raw] luminance_alpha_reference_basis",
 //     "path": "../../../assets/ktx2TestImages/luminance_alpha_reference_basis.ktx2"
 // },
@@ -69,62 +87,60 @@ RedGPU.init(
 //     "path": "../../../assets/ktx2TestImages/luminance_alpha_reference_u.ktx2"
 // },
 // {
-//     //TODO - vkFormat: 0,
+//
 //     "name": "[1.기초 Raw] luminance_alpha_reference_uastc",
 //     "path": "../../../assets/ktx2TestImages/luminance_alpha_reference_uastc.ktx2"
 // },
 // {
-//     //TODO - vkFormat: 0,
+//
 //     "name": "[1.기초 Raw] luminance_reference_basis",
 //     "path": "../../../assets/ktx2TestImages/luminance_reference_basis.ktx2"
 // },
 // {
-//     //TODO - 이거 확인못했음
 //     "name": "[1.기초 Raw] luminance_reference_u",
 //     "path": "../../../assets/ktx2TestImages/luminance_reference_u.ktx2"
 // },
 // {
-//     //TODO - vkFormat: 0,
+//
 //     "name": "[1.기초 Raw] luminance_reference_uastc",
 //     "path": "../../../assets/ktx2TestImages/luminance_reference_uastc.ktx2"
 // },
 // {
-//     //TODO - vkFormat: 0,
+//
 //     "name": "[1.기초 Raw] r_reference_basis",
 //     "path": "../../../assets/ktx2TestImages/r_reference_basis.ktx2"
 // },
 // {
-//     //TODO - 이거 확인못했음
+//
 //     "name": "[1.기초 Raw] r_reference_u",
 //     "path": "../../../assets/ktx2TestImages/r_reference_u.ktx2"
 // },
 // {
-//     //TODO - vkFormat: 0,
+//
 //     "name": "[1.기초 Raw] r_reference_uastc",
 //     "path": "../../../assets/ktx2TestImages/r_reference_uastc.ktx2"
 // },
 // {
-//     //TODO - vkFormat: 0,
+//
 //     "name": "[1.기초 Raw] rg_reference_basis",
 //     "path": "../../../assets/ktx2TestImages/rg_reference_basis.ktx2"
 // },
 // {
-//     //TODO 격자로 보여야하는데 격자로 안보임
+//
 //     "name": "[1.기초 Raw] rg_reference_u",
 //     "path": "../../../assets/ktx2TestImages/rg_reference_u.ktx2"
 // },
 // {
-//     //TODO - vkFormat: 0,
+//
 //     "name": "[1.기초 Raw] rg_reference_uastc",
 //     "path": "../../../assets/ktx2TestImages/rg_reference_uastc.ktx2"
 // },
 // {
-//     //TODO - 밉맵은 추후에
+//
 //     "name": "[1.기초 Raw] rgb-mipmap-reference-u",
 //     "path": "../../../assets/ktx2TestImages/rgb-mipmap-reference-u.ktx2"
 // },
 // {
-//     //TODO - 밉맵은 추후에
 //     "name": "[1.기초 Raw] rgba-mipmap-reference-basis",
 //     "path": "../../../assets/ktx2TestImages/rgba-mipmap-reference-basis.ktx2"
 // },
@@ -233,19 +249,19 @@ RedGPU.init(
 //           "path": "../../../assets/ktx2TestImages/astc_mipmap_ldr_8x8_posx.ktx2"
 // },
 //             {
-//                 //TODO - vkFormat: 0,
+//
 //                 "name": "[2.중급 Block] camera_camera_BaseColor_uastc",
 //                 "path": "../../../assets/ktx2TestImages/camera_camera_BaseColor_uastc.ktx2"
 //             },
-// {
-//           "name": "[2.중급 Block] ccwn2c08",
-//           "path": "../../../assets/ktx2TestImages/ccwn2c08.ktx2"
-// },
-//             {
-//                 //TODO - vkFormat: 0,
-//                 "name": "[2.중급 Block] CesiumLogoFlat",
-//                 "path": "../../../assets/ktx2TestImages/CesiumLogoFlat.ktx2"
-//             },
+            {
+                "name": "[2.중급 Block] ccwn2c08",
+                "path": "../../../assets/ktx2TestImages/ccwn2c08.ktx2"
+            },
+            {
+
+                "name": "[2.중급 Block] CesiumLogoFlat",
+                "path": "../../../assets/ktx2TestImages/CesiumLogoFlat.ktx2"
+            },
 //             {
 //                 //TODO - vkFormat: 0,
 //                 "name": "[2.중급 Block] cimg5293_uastc_zstd",
@@ -463,8 +479,8 @@ RedGPU.init(
         // XY 수직 평면 중앙 정렬 그리드 배치
         const cols = 6;
         const totalRows = Math.ceil(testKTX2Files.length / cols);
-        const spacingX = 4.5;
-        const spacingY = 4.8;
+        const spacingX = 7.0;
+        const spacingY = 7.0;
         const geometry = new RedGPU.Primitive.Plane(redGPUContext, 2.5, 2.5);
 
         testKTX2Files.forEach((item, index) => {
@@ -482,28 +498,42 @@ RedGPU.init(
                 // 텍스처 하단 표기용 TextField3D 생성
                 const labelField = new RedGPU.Display.TextField3D(redGPUContext);
                 labelField.useBillboard = true;
-                labelField.fontSize = 28;
+                labelField.worldSize = 2.2;
+                labelField.fontSize = 64;
                 labelField.color = '#ffffff';
-                labelField.setPosition(posX, posY - 1.9, 0.1);
-                labelField.text = `<div style="text-align:center; padding: 6px 12px; background: rgba(0,0,0,0.7); border-radius: 6px; font-size: 22px;"><b>${fileName}</b><br/><span style="color:#ffc107; font-size: 18px;">⏳ Loading...</span></div>`;
+                labelField.padding = 20;
+                labelField.background = 'rgba(0,0,0,0.85)';
+                labelField.border = '3px solid rgba(255,255,255,0.3)';
+                labelField.borderRadius = 12;
+                labelField.setPosition(posX, posY - 2.8, 0.1);
+                labelField.text = `<div style="text-align:center;"><b style="font-size:48px; color:#ffffff;">${fileName}</b><br/><span style="color:#ffc107; font-size:40px;">⏳ Loading...</span></div>`;
                 scene.addChild(labelField);
 
-                const updateStatusText = (tex) => {
-                    const targetTexture = tex || texture;
-                    const gpuTex = targetTexture ? targetTexture.gpuTexture : null;
+                let mesh;
 
+                const updateStatusText = (tex) => {
+                    const targetTexture = tex;
+                    const gpuTex = targetTexture ? targetTexture.gpuTexture : null;
 
                     const fmt = gpuTex ? gpuTex.format : 'unknown';
                     const w = gpuTex ? gpuTex.width : 0;
                     const h = gpuTex ? gpuTex.height : 0;
                     const isFallback = gpuTex && gpuTex.label && gpuTex.label.includes('fallback');
-                    const vkFormat = gpuTex ? gpuTex.ktxInfo.vkFormat : null;
-                    const vkFormatName = gpuTex ? gpuTex.ktxInfo.vkFormatName : null;
+                    const vkFormat = gpuTex && gpuTex.ktxInfo ? gpuTex.ktxInfo.vkFormat : 'N/A';
+
+                    if (w > 0 && h > 0 && mesh) {
+                        mesh.scaleX = w / h;
+                        mesh.scaleY = 1.0;
+                    }
 
                     if (isFallback) {
-                        labelField.text = `<div style="text-align:center; padding: 6px 12px; background: rgba(0,0,0,0.7); border-radius: 6px; font-size: 22px;"><b>${fileName}</b><br/><span style="color:#ff9800; font-size: 18px;">⚠️ Fallback (GPU Feature Missing)</span></div>`;
+                        labelField.background = 'rgba(20,10,0,0.92)';
+                        labelField.border = '3px solid rgba(255,152,0,0.8)';
+                        labelField.text = `<div style="text-align:center;"><b style="font-size:44px; color:#ffffff;">${fileName}</b><br/><span style="color:#ffeb3b; font-size:56px; font-weight:900; background:rgba(255,152,0,0.3); padding:4px 12px; border-radius:6px;">vkFormat: ${vkFormat}</span><br/><span style="color:#ff9800; font-size:38px; font-weight:bold;">⚠️ Fallback</span><br/><span style="color:#b9f6ca; font-size:32px;">${fmt} (${w}x${h})</span></div>`;
                     } else {
-                        labelField.text = `<div style="text-align:center; padding: 6px 12px; background: rgba(0,0,0,0.7); border-radius: 6px; font-size: 22px;"><b>${fileName}</b><br/><span style="color:#4caf50; font-size: 18px;">✅ SUCCESS</span><br/><span style="color:#ddd; font-size: 18px; font-weight: bold;">(${fmt}, ${w}x${h})</span><br/><span style="color:#ddd; font-size: 18px; font-weight: bold;">(${vkFormat}, ${vkFormatName})</span></div>`;
+                        labelField.background = 'rgba(0,20,8,0.92)';
+                        labelField.border = '3px solid rgba(76,175,80,0.8)';
+                        labelField.text = `<div style="text-align:center;"><b style="font-size:44px; color:#ffffff;">${fileName}</b><br/><span style="color:#ffeb3b; font-size:56px; font-weight:900; background:rgba(76,175,80,0.25); padding:4px 12px; border-radius:6px;">vkFormat: ${vkFormat}</span><br/><span style="color:#69f0ae; font-size:38px; font-weight:bold;">✅ ${fmt}</span><br/><span style="color:#aaaaaa; font-size:30px;">${w}x${h}</span></div>`;
                     }
                 };
 
@@ -513,18 +543,22 @@ RedGPU.init(
                     true,
                     (tex) => updateStatusText(tex),
                     (err) => {
-                        labelField.text = `<div style="text-align:center; padding: 6px 12px; background: rgba(0,0,0,0.7); border-radius: 6px; font-size: 22px;"><b>${fileName}</b><br/><span style="color:#f44336; font-size: 18px;">❌ LOAD FAILED</span></div>`;
+                        console.error(`[KTX2 Test] Load failed for ${fileName}:`, err);
+                        labelField.background = 'rgba(30,0,0,0.92)';
+                        labelField.border = '2px solid rgba(244,67,54,0.7)';
+                        labelField.text = `<div style="text-align:center;"><b style="font-size:48px; color:#ffffff;">${fileName}</b><br/><span style="color:#ff5252; font-size:40px; font-weight:bold;">❌ LOAD FAILED</span><br/><span style="color:#ff8a80; font-size:28px;">${err?.message || 'Error'}</span></div>`;
                     }
                 );
 
-                const nearestSampler = new RedGPU.Resource.Sampler(redGPUContext, {
-                    magFilter: 'nearest',
-                    minFilter: 'nearest'
+                const linearSampler = new RedGPU.Resource.Sampler(redGPUContext, {
+                    magFilter: 'linear',
+                    minFilter: 'linear',
+                    mipmapFilter: 'linear'
                 });
 
-                const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture, nearestSampler);
+                const material = new RedGPU.Material.BitmapMaterial(redGPUContext, texture, linearSampler);
 
-                const mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
+                mesh = new RedGPU.Display.Mesh(redGPUContext, geometry, material);
                 mesh.setPosition(posX, posY, 0); // XY 평면 정렬
                 mesh.primitiveState.cullMode = RedGPU.GPU_CULL_MODE.NONE;
 
@@ -539,12 +573,7 @@ RedGPU.init(
         renderer.start(redGPUContext, () => {
         });
 
-        new RedGPUExampleHelper(redGPUContext, {
-            gui: (pane) => {
-                const folder = pane.addFolder({title: 'KTX2 Formats (초급만 활성화)'});
-                folder.addBinding({count: testKTX2Files.length}, 'count', {readonly: true, label: 'Active Files'});
-            }
-        });
+        new RedGPUExampleHelper(redGPUContext);
     },
     (failReason) => {
         console.error('Initialization failed:', failReason);

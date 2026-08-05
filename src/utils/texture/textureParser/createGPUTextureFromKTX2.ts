@@ -422,7 +422,6 @@ export async function createGPUTextureFromKTX2({
             }
         } else if (isUASTC) {
             if (hasASTC) {
-
                 format = isSRGB ? 'astc-4x4-unorm-srgb' : 'astc-4x4-unorm';
                 basisTargetFormatEnum = BASIS_FORMAT.ASTC_4x4_RGBA;
             } else if (hasBC) {
@@ -584,11 +583,19 @@ export async function createGPUTextureFromKTX2({
                             bytesPerBlock = format.startsWith('bc6h') ? 16 : 8; // BC6H는 픽셀 블록 당 16바이트
                         }
 
-                        const bytesPerRow = blocksWide * bytesPerBlock;
-                        const requiredSize = bytesPerRow * blocksHigh;
+                        const unpaddedBytesPerRow = blocksWide * bytesPerBlock;
+                        const paddedBytesPerRow = (unpaddedBytesPerRow + 255) & ~255;
+                        const requiredSize = unpaddedBytesPerRow * blocksHigh;
 
                         let uploadBuffer = transcodedBuffer;
-                        if (transcodedBuffer.byteLength < requiredSize) {
+                        if (unpaddedBytesPerRow % 256 !== 0 && blocksHigh > 1) {
+                            const paddedBuffer = new Uint8Array(paddedBytesPerRow * blocksHigh);
+                            for (let row = 0; row < blocksHigh; row++) {
+                                const srcRow = transcodedBuffer.subarray(row * unpaddedBytesPerRow, Math.min(transcodedBuffer.byteLength, (row + 1) * unpaddedBytesPerRow));
+                                paddedBuffer.set(srcRow, row * paddedBytesPerRow);
+                            }
+                            uploadBuffer = paddedBuffer;
+                        } else if (transcodedBuffer.byteLength < requiredSize) {
                             uploadBuffer = new Uint8Array(requiredSize);
                             uploadBuffer.set(transcodedBuffer);
                         }
@@ -599,10 +606,10 @@ export async function createGPUTextureFromKTX2({
                                 mipLevel,
                                 origin: {x: 0, y: 0, z: slice}
                             },
-                            uploadBuffer,
+                            uploadBuffer as BufferSource,
                             {
                                 offset: 0,
-                                bytesPerRow: bytesPerRow,
+                                bytesPerRow: (unpaddedBytesPerRow % 256 === 0 || blocksHigh === 1) ? unpaddedBytesPerRow : paddedBytesPerRow,
                                 rowsPerImage: blocksHigh
                             },
                             {
@@ -632,7 +639,7 @@ export async function createGPUTextureFromKTX2({
                                 mipLevel,
                                 origin: {x: 0, y: 0, z: slice}
                             },
-                            uploadBuffer,
+                            uploadBuffer as BufferSource,
                             {
                                 offset: 0,
                                 bytesPerRow: (unpaddedBytesPerRow % 256 === 0 || mipHeight === 1) ? unpaddedBytesPerRow : paddedBytesPerRow,
@@ -684,8 +691,9 @@ export async function createGPUTextureFromKTX2({
                         bytesPerBlock = 8;
                     }
 
-                    const bytesPerRow = blocksWide * bytesPerBlock;
-                    const bytesPerImage = bytesPerRow * blocksHigh;
+                    const unpaddedBytesPerRow = blocksWide * bytesPerBlock;
+                    const paddedBytesPerRow = (unpaddedBytesPerRow + 255) & ~255;
+                    const bytesPerImage = unpaddedBytesPerRow * blocksHigh;
 
                     for (let slice = 0; slice < totalLayers; slice++) {
                         const sliceOffset = slice * bytesPerImage;
@@ -696,8 +704,18 @@ export async function createGPUTextureFromKTX2({
                             Math.min(levelDataView.byteLength, sliceOffset + bytesPerImage)
                         );
 
-                        const uploadBuf = new Uint8Array(bytesPerImage);
-                        uploadBuf.set(sliceSub);
+                        let uploadBuf = sliceSub;
+                        if (unpaddedBytesPerRow % 256 !== 0 && blocksHigh > 1) {
+                            const paddedBuf = new Uint8Array(paddedBytesPerRow * blocksHigh);
+                            for (let row = 0; row < blocksHigh; row++) {
+                                const srcRow = sliceSub.subarray(row * unpaddedBytesPerRow, Math.min(sliceSub.byteLength, (row + 1) * unpaddedBytesPerRow));
+                                paddedBuf.set(srcRow, row * paddedBytesPerRow);
+                            }
+                            uploadBuf = paddedBuf;
+                        } else {
+                            uploadBuf = new Uint8Array(bytesPerImage);
+                            uploadBuf.set(sliceSub);
+                        }
 
                         device.queue.writeTexture(
                             {
@@ -705,10 +723,10 @@ export async function createGPUTextureFromKTX2({
                                 mipLevel,
                                 origin: {x: 0, y: 0, z: slice}
                             },
-                            uploadBuf,
+                            uploadBuf as BufferSource,
                             {
                                 offset: 0,
-                                bytesPerRow: bytesPerRow,
+                                bytesPerRow: (unpaddedBytesPerRow % 256 === 0 || blocksHigh === 1) ? unpaddedBytesPerRow : paddedBytesPerRow,
                                 rowsPerImage: blocksHigh
                             },
                             {
@@ -736,6 +754,7 @@ export async function createGPUTextureFromKTX2({
                     }
 
                     if (container.vkFormat === 91 || container.vkFormat === 109) {
+
                         const dv = new DataView(levelDataView.buffer, levelDataView.byteOffset, levelDataView.byteLength);
                         const numFloats = Math.floor(levelDataView.byteLength / (container.vkFormat === 91 ? 2 : 4));
                         const h16View = new Uint16Array(numFloats);

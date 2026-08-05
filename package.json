@@ -29,7 +29,7 @@
     "@rollup/plugin-terser": "^1.0.0",
     "@rollup/plugin-typescript": "^12.1.4",
     "@rollup/pluginutils": "^5.2.0",
-    "@webgpu/types": "^0.1.70",
+    "@webgpu/types": "^0.1.71",
     "concurrently": "^10.0.3",
     "cross-env": "^10.1.0",
     "gl-matrix": "^3.4.3",
