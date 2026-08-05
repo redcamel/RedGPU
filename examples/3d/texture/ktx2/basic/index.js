@@ -1,4 +1,4 @@
-import * as RedGPU from '../../../../../dist/index.js?t=1783327300000';
+import * as RedGPU from '../../../../../dist/index.js?t=1783327399999';
 import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1783327300000';
 import {createKTX2TestTile} from '../createKTX2TestTile.js';
 
@@ -13,7 +13,7 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 25;
+        controller.distance = 28;
         controller.speedDistance = 1.0;
         controller.tilt = -0.6;
 
@@ -67,8 +67,8 @@ RedGPU.init(
         // XY 수직 평면 중앙 정렬 그리드 배치
         const cols = 6;
         const totalRows = Math.ceil(testKTX2Files.length / cols);
-        const spacingX = 7.0;
-        const spacingY = 7.0;
+        const spacingX = 8.5;
+        const spacingY = 8.0;
         const geometry = new RedGPU.Primitive.Plane(redGPUContext, 2.5, 2.5);
 
         const linearSampler = new RedGPU.Resource.Sampler(redGPUContext, {

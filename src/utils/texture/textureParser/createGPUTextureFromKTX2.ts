@@ -113,6 +113,90 @@ function parseKTX2Metadata(container: KTX2Container): KTX2Metadata {
     };
 }
 
+/**
+ * KTXwriter 문자열에서 주 버전(Major) 및 부 버전(Minor) 번호를 수치(Number)로 스마트하게 파싱합니다.
+ * 예: "toktx v4.0.__default__" → { major: 4, minor: 0 }
+ *     "BasisU v1.12" → { major: 1, minor: 12 }
+ */
+function parseWriterVersion(writerStr?: string): { name: string; major: number; minor: number } | null {
+    if (!writerStr) return null;
+    const match = writerStr.match(/(toktx|libktx|basisu)\s+v?(\d+)\.(\d+)/i);
+    if (!match) return null;
+    return {
+        name: match[1].toLowerCase(),
+        major: parseInt(match[2], 10),
+        minor: parseInt(match[3], 10)
+    };
+}
+
+/**
+ * [KO] KTX2 바이너리 메타데이터(DFD, KTXwriter 버저닝, swizzle 등)를 분석하여
+ * 1세대 구형(Legacy) 텍스처 여부와 판별 원인을 스마트하게 정밀 파싱합니다.
+ */
+function detectIsLegacyKTX2(container: KTX2Container, metadata: KTX2Metadata): {
+    isLegacy: boolean;
+    legacyReason?: string
+} {
+    const dfdList = (container as any).dataFormatDescriptor || (container as any).dfd;
+    const dfd = Array.isArray(dfdList) ? dfdList[0] : dfdList;
+
+    // 1. KTXwriter 생성자 시만틱 버저닝(SemVer) 수치 정밀 검사
+    if (metadata.writer) {
+        const ver = parseWriterVersion(metadata.writer);
+        if (ver) {
+            // toktx / libktx 인코더: v4.1.0 미만 (v3.x 또는 v4.0 과도기 초창기 빌드)
+            if ((ver.name === 'toktx' || ver.name === 'libktx') && (ver.major < 4 || (ver.major === 4 && ver.minor === 0))) {
+                return {
+                    isLegacy: true,
+                    legacyReason: `구형 1세대 인코더 버전<br/>(KTXwriter: ${metadata.writer} < v4.1)`
+                };
+            }
+            // basisu 독립 인코더: v1.12 미만 1세대 초기 빌드
+            if (ver.name === 'basisu' && (ver.major < 1 || (ver.major === 1 && ver.minor < 12))) {
+                return {
+                    isLegacy: true,
+                    legacyReason: `1세대 BasisU 인코더 버전<br/>(KTXwriter: ${metadata.writer} < v1.12)`
+                };
+            }
+        }
+    } else {
+        // KTXwriter 메타데이터 헤더가 누락된 1세대 초창기 Khronos Reference Suite 자산
+        return {
+            isLegacy: true,
+            legacyReason: `Khronos 1세대 초기 Reference 자산<br/>(KTXwriter 메타데이터 누락)`
+        };
+    }
+
+    // 2. 레거시 swizzle 매핑 구조적 검사 (r001, rrr1, rrrg, rrra 등 1세대 휘도/단채널 스위즐)
+    if (metadata.swizzle && (metadata.swizzle.includes('r0') || metadata.swizzle === 'rrr1' || metadata.swizzle === 'rrrg' || metadata.swizzle === 'rrra')) {
+        return {
+            isLegacy: true,
+            legacyReason: `폐기된 휘도/단채널 Swizzle 채널 매핑<br/>(KTXswizzle: "${metadata.swizzle}")`
+        };
+    }
+
+    // 3. Transcodable (vkFormat === 0) 텍스처 중 DFD colorModel이 미지정이거나 163(ETC1S)/166(UASTC) 외 비표준 포맷인 경우
+    if (container.vkFormat === 0) {
+        const colorModel = dfd?.colorModel;
+        if (colorModel === undefined || (colorModel !== 163 && colorModel !== 166)) {
+            return {
+                isLegacy: true,
+                legacyReason: `비표준 DFD colorModel<br/>(${colorModel ?? '미지정'} ≠ 163(ETC1S) / 166(UASTC))`
+            };
+        }
+    }
+
+    // 4. DFD transferFunction 감마 스펙 수치 미지정(0/Undefined) 검사
+    if (!dfd || dfd.transferFunction === 0 || dfd.transferFunction === undefined) {
+        return {
+            isLegacy: true,
+            legacyReason: `DFD transferFunction 감마 스펙 미지정 (0/Undefined)`
+        };
+    }
+
+    return {isLegacy: false};
+}
+
 /** Basis Universal WASM Singleton 인스턴스 관리 */
 let basisTranscoderPromise: Promise<any> | null = null;
 let basisModule: any = null;
@@ -887,11 +971,16 @@ export async function createGPUTextureFromKTX2({
     }
 
     const metadata = parseKTX2Metadata(container);
+    const legacyInfo = detectIsLegacyKTX2(container, metadata);
 
     //@ts-ignore
     texture.ktxInfo = {
         vkFormat: container.vkFormat,
         vkFormatName: VK_FORMAT_TO_WEBGPU[container.vkFormat ?? 0],
+        /** 1세대 구형(Legacy) KTX2 텍스처 여부 */
+        isLegacy: legacyInfo.isLegacy,
+        /** 1세대 구형(Legacy) 판별 구체적 기술적 원인 */
+        legacyReason: legacyInfo.legacyReason,
         // KTX2 keyValue 메타데이터
         writer: metadata.writer,
         orientation: metadata.orientation,

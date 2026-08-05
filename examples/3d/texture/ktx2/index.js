@@ -1,4 +1,4 @@
-import * as RedGPU from '../../../../dist/index.js?t=1783327300000';
+import * as RedGPU from '../../../../dist/index.js?t=1783327399999';
 import RedGPUExampleHelper from '../../../exampleHelper/dist/index.js?t=1783327300000';
 import {createKTX2TestTile} from './createKTX2TestTile.js';
 

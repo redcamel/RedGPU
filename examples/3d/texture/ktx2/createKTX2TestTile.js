@@ -1,4 +1,4 @@
-import * as RedGPU from '../../../../dist/index.js?t=1783327300000';
+import * as RedGPU from '../../../../dist/index.js?t=1783327399999';
 
 /**
  * [KO] KTX2 테스트 텍스처 타일 및 라벨 생성 공용 헬퍼 함수
@@ -11,18 +11,15 @@ export function createKTX2TestTile(redGPUContext, scene, geometry, linearSampler
     labelField.worldSize = 2.2;
     labelField.fontSize = 64;
     labelField.color = '#ffffff';
-    labelField.padding = 20;
-    labelField.background = 'rgba(0,0,0,0.85)';
+    labelField.padding = 28;
+    labelField.background = 'rgba(0,0,0,0.88)';
     labelField.border = '3px solid rgba(255,255,255,0.3)';
-    labelField.borderRadius = 12;
-    labelField.setPosition(posX, posY - 2.8, 0.1);
-    labelField.text = `<div style="text-align:center;"><b style="font-size:48px; color:#ffffff;">${fileName}</b><br/><span style="color:#ffc107; font-size:40px;">⏳ Loading...</span></div>`;
+    labelField.borderRadius = 16;
+    labelField.setPosition(posX, posY - 3.1, 0.1);
+    labelField.text = `<div style="text-align:center; padding: 6px 12px; line-height: 1.35;"><b style="font-size:46px; color:#ffffff;">${fileName}</b><br/><span style="color:#ffc107; font-size:38px; display:inline-block; margin-top:8px;">⏳ Loading...</span></div>`;
     scene.addChild(labelField);
 
     let mesh;
-
-    const isLegacy1stGen = !!item.isLegacy;
-    const legacyBadge = isLegacy1stGen ? `<br/><span style="color:#ff7043; font-size:32px; font-weight:bold; background:rgba(255,87,34,0.25); padding:2px 8px; border-radius:4px;">[1세대 구형]</span>` : '';
 
     const handleSuccess = (tex) => {
         const gpuTex = tex ? tex.gpuTexture : null;
@@ -32,27 +29,51 @@ export function createKTX2TestTile(redGPUContext, scene, geometry, linearSampler
         const isFallback = gpuTex && gpuTex.label && gpuTex.label.includes('fallback');
         const vkFormat = gpuTex && gpuTex.ktxInfo ? gpuTex.ktxInfo.vkFormat : 'N/A';
 
+        const isLegacy1stGen = !!(gpuTex && gpuTex.ktxInfo && gpuTex.ktxInfo.isLegacy);
+        const legacyReason = (gpuTex && gpuTex.ktxInfo && gpuTex.ktxInfo.legacyReason) ? gpuTex.ktxInfo.legacyReason : '';
+        const legacyReasonBox = (isLegacy1stGen && legacyReason)
+            ? `<div style="margin-top:18px; margin-bottom:6px;"><span style="color:#ffab91; font-size:32px; font-weight:bold; display:inline-block; background:rgba(255,87,34,0.22); padding:6px 16px; border-radius:8px; border:1px solid rgba(255,87,34,0.5);">💡 ${legacyReason}</span></div>`
+            : '';
+
         if (w > 0 && h > 0 && mesh) {
             mesh.scaleX = w / h;
             mesh.scaleY = 1.0;
         }
 
         if (isFallback) {
-            labelField.background = 'rgba(20,10,0,0.92)';
-            labelField.border = '3px solid rgba(255,152,0,0.8)';
-            labelField.text = `<div style="text-align:center;"><b style="font-size:44px; color:#ffffff;">${fileName}</b>${legacyBadge}<br/><span style="color:#ffeb3b; font-size:56px; font-weight:900; background:rgba(255,152,0,0.3); padding:4px 12px; border-radius:6px;">vkFormat: ${vkFormat}</span><br/><span style="color:#ff9800; font-size:38px; font-weight:bold;">⚠️ Fallback</span><br/><span style="color:#b9f6ca; font-size:32px;">${fmt} (${w}x${h})</span></div>`;
+            labelField.background = 'rgba(24,12,0,0.94)';
+            labelField.border = '3px solid rgba(255,152,0,0.85)';
+            labelField.text = `<div style="text-align:center; padding: 6px 10px; line-height: 1.35;">
+                <b style="font-size:44px; color:#ffffff; display:block; margin-bottom:8px;">${fileName}</b>
+                <div style="margin-top:6px; margin-bottom:4px;">
+                    <span style="color:#ffeb3b; font-size:40px; font-weight:900; background:rgba(255,152,0,0.3); padding:4px 12px; border-radius:8px; border:1px solid rgba(255,235,59,0.4);">vkFormat: ${vkFormat}</span>
+                    <span style="color:#ff9800; font-size:40px; font-weight:bold; margin-left:6px;">⚠️ ${fmt} (Fallback)</span>
+                </div>
+                ${legacyReasonBox}
+            </div>`;
         } else {
-            labelField.background = 'rgba(0,20,8,0.92)';
-            labelField.border = '3px solid rgba(76,175,80,0.8)';
-            labelField.text = `<div style="text-align:center;"><b style="font-size:44px; color:#ffffff;">${fileName}</b>${legacyBadge}<br/><span style="color:#ffeb3b; font-size:56px; font-weight:900; background:rgba(76,175,80,0.25); padding:4px 12px; border-radius:6px;">vkFormat: ${vkFormat}</span><br/><span style="color:#69f0ae; font-size:38px; font-weight:bold;">✅ ${fmt}</span><br/><span style="color:#aaaaaa; font-size:30px;">${w}x${h}</span></div>`;
+            labelField.background = 'rgba(0,24,10,0.94)';
+            labelField.border = '3px solid rgba(76,175,80,0.85)';
+            labelField.text = `<div style="text-align:center; padding: 6px 10px; line-height: 1.35;">
+                <b style="font-size:44px; color:#ffffff; display:block; margin-bottom:8px;">${fileName}</b>
+                <div style="margin-top:6px; margin-bottom:4px;">
+                    <span style="color:#ffeb3b; font-size:40px; font-weight:900; background:rgba(76,175,80,0.3); padding:4px 12px; border-radius:8px; border:1px solid rgba(255,235,59,0.4);">vkFormat: ${vkFormat}</span>
+                    <span style="color:#69f0ae; font-size:40px; font-weight:bold; margin-left:6px;"> ${fmt}</span>
+                </div>
+                ${legacyReasonBox}
+            </div>`;
         }
     };
 
     const handleError = (err) => {
         console.error(`[KTX2 Test] Load failed for ${fileName}:`, err);
-        labelField.background = 'rgba(30,0,0,0.92)';
-        labelField.border = '2px solid rgba(244,67,54,0.7)';
-        labelField.text = `<div style="text-align:center;"><b style="font-size:48px; color:#ffffff;">${fileName}</b>${legacyBadge}<br/><span style="color:#ff5252; font-size:40px; font-weight:bold;">❌ LOAD FAILED</span><br/><span style="color:#ff8a80; font-size:28px;">${err?.message || 'Error'}</span></div>`;
+        labelField.background = 'rgba(35,0,0,0.94)';
+        labelField.border = '3px solid rgba(244,67,54,0.85)';
+        labelField.text = `<div style="text-align:center; padding: 6px 10px; line-height: 1.35;">
+            <b style="font-size:46px; color:#ffffff; display:block; margin-bottom:6px;">${fileName}</b>
+            <div style="color:#ff5252; font-size:40px; font-weight:bold; margin-top:8px;">❌ LOAD FAILED</div>
+            <div style="color:#ff8a80; font-size:28px; margin-top:4px;">${err?.message || 'Error'}</div>
+        </div>`;
     };
 
     const texture = new RedGPU.Resource.BitmapTexture(redGPUContext, item.path, true, handleSuccess, handleError);
