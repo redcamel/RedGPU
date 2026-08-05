@@ -503,21 +503,37 @@ export async function createGPUTextureFromKTX2({
         return createFallbackGPUTexture(device, label, container.vkFormat);
     }
 
+    const isCompressed = format.startsWith('bc') || format.startsWith('etc') || format.startsWith('astc') || format.startsWith('eac');
+    const bytesPerPixel = FORMAT_BYTES_PER_PIXEL[format] ?? 4;
+
+    let textureWidth = width;
+    let textureHeight = height;
+
+    if (isCompressed) {
+        let blockWidth = 4;
+        let blockHeight = 4;
+        if (format.startsWith('astc-')) {
+            const parts = format.split('-');
+            const dims = parts[1].split('x');
+            blockWidth = parseInt(dims[0], 10);
+            blockHeight = parseInt(dims[1], 10);
+        }
+        textureWidth = Math.ceil(width / blockWidth) * blockWidth;
+        textureHeight = Math.ceil(height / blockHeight) * blockHeight;
+    }
+
     // 4. GPUTexture 생성
     const texture = device.createTexture({
         label: label ?? `KTX2_Texture_${width}x${height}`,
         size: {
-            width,
-            height,
+            width: textureWidth,
+            height: textureHeight,
             depthOrArrayLayers: totalLayers
         },
         mipLevelCount,
         format,
         usage,
     });
-
-    const isCompressed = format.startsWith('bc') || format.startsWith('etc') || format.startsWith('astc') || format.startsWith('eac');
-    const bytesPerPixel = FORMAT_BYTES_PER_PIXEL[format] ?? 4;
 
     try {
         // 5. Mipmap & Layer 업로드
