@@ -155,6 +155,7 @@ class ATextField extends Mesh {
     #redGPUContext: RedGPUContext
     #currentRequestAnimationFrame: number;
     #needsUpdate: boolean = false; // 업데이트 플래그
+    #updateVersion: number = 0; // 비동기 경쟁 상태 방지용 버전 번호
     #renderWidth: number = 1
     #renderHeight: number = 1
 
@@ -225,7 +226,8 @@ class ATextField extends Mesh {
         const processedText = this.#processText(text)
         this.#htmlElement.innerHTML = processedText;
         htmlContainer.innerHTML = processedText;
-        this.#needsUpdate = true
+        this.#needsUpdate = true;
+        this.#updateVersion++;
     }
 
     /**
@@ -315,7 +317,7 @@ class ATextField extends Mesh {
         };
     }
 
-    #setSvgToImg() {
+    #setSvgToImg(requestVersion: number) {
         // SVG 업데이트 작업
         const svg = this.#svg;
         const foreignObject = svg.querySelector('foreignObject');
@@ -333,18 +335,22 @@ class ATextField extends Mesh {
         this.#textureImg.src =
             "data:image/svg+xml;charset=utf-8," +
             encodeURIComponent(svg.outerHTML);
-        // 디버깅 정보 출력
-        console.log("Final SVG and ForeignObject Sizes:", {
-            svgWidth: svg.getAttribute('width'),
-            svgHeight: svg.getAttribute('height'),
-            padding: foreignObject.style.padding,
-        });
+
+        // 현재 이미지 로딩 버전 기록
+        (this.#textureImg as any)._requestVersion = requestVersion;
     }
 
     #setImgElement() {
         this.#textureImg = new Image();
         this.#textureImg.style.cssText = 'position:absolute;bottom:0px;left:0;'
         this.#textureImg.onload = _ => {
+            const requestVersion = (this.#textureImg as any)._requestVersion;
+            // 만약 현재 완결된 이미지 생성이 최신 요청 버전과 다르면 무시
+            if (requestVersion !== this.#updateVersion) {
+                if (this.#needsUpdate) this.#updateTexture();
+                return;
+            }
+
             let tW: number, tH: number;
             const {width, height} = this.#getRenderHtmlSize();
             const multiple = window.devicePixelRatio === 1 ? 2 : window.devicePixelRatio;
@@ -371,6 +377,10 @@ class ATextField extends Mesh {
             this.dirtyTransform = true;
             // Blob으로 변환하여 처리
             const callback = (blob: Blob | MediaSource) => {
+                if (requestVersion !== this.#updateVersion) {
+                    if (this.#needsUpdate) this.#updateTexture();
+                    return;
+                }
                 if (this.material.diffuseTexture) {
                     const prevSrc = this.material.diffuseTexture.src
                     const isObjectURL = typeof prevSrc === 'string' && prevSrc?.startsWith?.('blob:');
@@ -381,8 +391,15 @@ class ATextField extends Mesh {
                     }
                 }
                 this.material.diffuseTexture = new BitmapTexture(this.#redGPUContext, URL.createObjectURL(blob), true, () => {
-                    this.#renderWidth = width
-                    this.#renderHeight = height
+                    if (requestVersion !== this.#updateVersion) {
+                        if (this.#needsUpdate) this.#updateTexture();
+                        return;
+                    }
+                    this.#renderWidth = width;
+                    this.#renderHeight = height;
+                    if (this.#needsUpdate) {
+                        this.#updateTexture();
+                    }
                 }, null, null, true);
             };
             if (this.#textureCvs instanceof OffscreenCanvas) {
@@ -395,12 +412,13 @@ class ATextField extends Mesh {
 
     #updateTexture() {
         if (this.#needsUpdate) {
-            if (this.#currentRequestAnimationFrame) cancelAnimationFrame(this.#currentRequestAnimationFrame)
+            this.#needsUpdate = false;
+            const currentVersion = this.#updateVersion;
+            if (this.#currentRequestAnimationFrame) cancelAnimationFrame(this.#currentRequestAnimationFrame);
             this.#currentRequestAnimationFrame = requestAnimationFrame(() => {
-                this.#setSvgToImg();
-            })
+                this.#setSvgToImg(currentVersion);
+            });
         }
-        this.#needsUpdate = false
     }
 
     #setStyle = (key: string, baseValue: number | string) => {
@@ -424,7 +442,10 @@ class ATextField extends Mesh {
                 tStyle[key] = processedValue;
                 tStyle2[key] = processedValue;
                 // 값이 변경된 경우에만 텍스처 업데이트
-                if (oldValue !== value) this.#needsUpdate = true
+                if (oldValue !== value) {
+                    this.#needsUpdate = true;
+                    this.#updateVersion++;
+                }
             },
             configurable: true
         });
