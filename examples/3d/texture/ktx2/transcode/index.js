@@ -1,0 +1,73 @@
+import * as RedGPU from '../../../../../dist/index.js?t=1783327399999';
+import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1783327399999';
+import {createKTX2TestTile} from '../createKTX2TestTile.js';
+
+/**
+ * [KO] KTX2 Basis Universal 런타임 트랜스코딩 전용 예제 (Transcode - ETC1S, UASTC, ZSTD)
+ */
+
+const canvas = document.createElement('canvas');
+document.body.appendChild(canvas);
+
+RedGPU.init(
+    canvas,
+    (redGPUContext) => {
+        const controller = new RedGPU.Camera.OrbitController(redGPUContext);
+        controller.distance = 25;
+        controller.speedDistance = 1.0;
+        controller.tilt = -0.6;
+
+        const scene = new RedGPU.Display.Scene();
+        scene.useBackgroundColor = true;
+        scene.backgroundColor.setColorByHEX('#1b1c2b');
+
+        const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
+        redGPUContext.addView(view);
+
+        // [Basis Universal ETC1S / UASTC 런타임 트랜스코딩 텍스처 리스트]
+        const testKTX2Files = [
+            {"path": "../../../../assets/ktx2TestImages/alpha_simple_basis.ktx2"},
+            {"path": "../../../../assets/ktx2TestImages/camera_camera_BaseColor_basis.ktx2"},
+            {"path": "../../../../assets/ktx2TestImages/color_grid_basis.ktx2"},
+            {"path": "../../../../assets/ktx2TestImages/color_grid_zstd.ktx2"},
+            {"path": "../../../../assets/ktx2TestImages/cyan_rgb_reference_basis.ktx2"},
+            {"path": "../../../../assets/ktx2TestImages/etc1s_Iron_Bars_001_normal.ktx2"},
+            {"path": "../../../../assets/ktx2TestImages/FlightHelmet_baseColor_basis.ktx2"},
+            {"path": "../../../../assets/ktx2TestImages/kodim17_basis.ktx2"},
+            {"path": "../../../../assets/ktx2TestImages/ktx_document_basis.ktx2"},
+            {"path": "../../../../assets/ktx2TestImages/StainedGlassLamp_basis.ktx2"}
+        ];
+
+        // XY 수직 평면 중앙 정렬 그리드 배치
+        const cols = 5;
+        const totalRows = Math.ceil(testKTX2Files.length / cols);
+        const spacingX = 8.5;
+        const spacingY = 8.0;
+        const geometry = new RedGPU.Primitive.Plane(redGPUContext, 2.5, 2.5);
+
+        const linearSampler = new RedGPU.Resource.Sampler(redGPUContext, {
+            magFilter: 'linear',
+            minFilter: 'linear',
+            mipmapFilter: 'linear'
+        });
+
+        testKTX2Files.forEach((item, index) => {
+            const row = Math.floor(index / cols);
+            const col = index % cols;
+            const itemsInThisRow = Math.min(cols, testKTX2Files.length - row * cols);
+            const posX = (col - (itemsInThisRow - 1) / 2) * spacingX;
+            const posY = ((totalRows - 1) / 2 - row) * spacingY;
+
+            createKTX2TestTile(redGPUContext, scene, geometry, linearSampler, item, posX, posY);
+        });
+
+        const renderer = new RedGPU.Renderer();
+        renderer.start(redGPUContext, () => {
+        });
+
+        new RedGPUExampleHelper(redGPUContext);
+    },
+    (failReason) => {
+        console.error('Initialization failed:', failReason);
+    }
+);
