@@ -1,6 +1,6 @@
-import * as RedGPU from '../../../../../dist/index.js?t=1783327399999';
-import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1783327399999';
-import {createKTX2TestTile} from '../createKTX2TestTile.js';
+import * as RedGPU from '../../../../../dist/index.js?t=1785971559678';
+import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1785971559678';
+import {createKTX2TestTile} from '../createKTX2TestTile.js?t=1785971559678';
 
 /**
  * [KO] KTX2 ZSTD 예제 - ZSTD 초고압축 텍스처 리스트 (GitHub Pages 호스팅 자산)
@@ -13,9 +13,8 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 28;
-        controller.speedDistance = 1.0;
-        controller.tilt = -0.6;
+        controller.distance = redGPUContext.detector.isMobile ? 40 : 28;
+        controller.tilt = 0;
 
         const scene = new RedGPU.Display.Scene();
         scene.useBackgroundColor = true;

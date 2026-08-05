@@ -1,6 +1,6 @@
-import * as RedGPU from '../../../../../dist/index.js?t=1783327399999';
-import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1783327399999';
-import {createKTX2TestTile} from '../createKTX2TestTile.js';
+import * as RedGPU from '../../../../../dist/index.js?t=1785971559678';
+import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1785971559678';
+import {createKTX2TestTile} from '../createKTX2TestTile.js?t=1785971559678';
 
 /**
  * [KO] KTX2 Basic 예제 - Three.js 18개 표준 실무 샘플 전수 리스트 (GitHub Pages 호스팅 자산)
@@ -13,9 +13,8 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 28;
-        controller.speedDistance = 1.0;
-        controller.tilt = -0.6;
+        controller.distance = redGPUContext.detector.isMobile ? 40 : 28;
+        controller.tilt = 0;
 
         const scene = new RedGPU.Display.Scene();
         scene.useBackgroundColor = true;
@@ -24,7 +23,7 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        const BASE_URL = 'https://redcamel.github.io/testAsset/ktx2TestImages/terrain/tile_001/';
+        const BASE_URL = 'https://redcamel.github.io/testAsset/ktx2TestImages/threejs_samples/';
         const testKTX2Files = [
             {"path": BASE_URL + "2d_rgba8.ktx2"},
             {"path": BASE_URL + "2d_rgba8_linear.ktx2"},

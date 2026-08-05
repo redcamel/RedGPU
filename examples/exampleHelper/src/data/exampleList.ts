@@ -454,14 +454,14 @@ export const ExampleList: ExampleListType = [
                             en: `Test example for ZSTD supercompressed textures and block compressed 2D textures.`
                         }
                     },
-                    // {
-                    //     name: 'ArrayCube3D (3D / Array / Cubemap)',
-                    //     path: '3d/texture/ktx2/arrayCube3d',
-                    //     description: {
-                    //         ko: `3D 볼륨 텍스처, 텍스처 어레이, 큐브맵, 스카이박스 최심화 KTX2 테스트 예제입니다.`,
-                    //         en: `Test example for 3D Volume textures, Texture Arrays, Cubemaps, and Skyboxes.`
-                    //     }
-                    // }
+                    {
+                        name: 'ArrayCube3D (3D / Array / Cubemap)',
+                        path: '3d/texture/ktx2/arrayCube3d',
+                        description: {
+                            ko: `3D 볼륨 텍스처, 텍스처 어레이, 큐브맵, 스카이박스 최심화 KTX2 테스트 예제입니다.`,
+                            en: `Test example for 3D Volume textures, Texture Arrays, Cubemaps, and Skyboxes.`
+                        }
+                    }
                 ]
             },
             {

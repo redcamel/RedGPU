@@ -1,6 +1,6 @@
-import * as RedGPU from '../../../../../dist/index.js?t=1783327399999';
-import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1783327399999';
-import {createKTX2TestTile} from '../createKTX2TestTile.js';
+import * as RedGPU from '../../../../../dist/index.js?t=1785971559678';
+import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1785971559678';
+import {layoutKTX2TestTiles} from '../createKTX2TestTile.js?t=1785971559678';
 
 /**
  * [KO] KTX2 Transcode 예제 - Basis Universal 런타임 트랜스코딩 리스트 (GitHub Pages 호스팅 자산)
@@ -13,9 +13,8 @@ RedGPU.init(
     canvas,
     (redGPUContext) => {
         const controller = new RedGPU.Camera.OrbitController(redGPUContext);
-        controller.distance = 25;
-        controller.speedDistance = 1.0;
-        controller.tilt = -0.6;
+        controller.distance = redGPUContext.detector.isMobile ? 40 : 28;
+        controller.tilt = 0;
 
         const scene = new RedGPU.Display.Scene();
         scene.useBackgroundColor = true;
@@ -39,28 +38,15 @@ RedGPU.init(
             {"path": BASE_URL + "StainedGlassLamp_basis.ktx2"}
         ];
 
-        // XY 수직 평면 중앙 정렬 그리드 배치
-        const cols = 5;
-        const totalRows = Math.ceil(testKTX2Files.length / cols);
-        const spacingX = 8.5;
-        const spacingY = 8.0;
         const geometry = new RedGPU.Primitive.Plane(redGPUContext, 2.5, 2.5);
-
         const linearSampler = new RedGPU.Resource.Sampler(redGPUContext, {
             magFilter: 'linear',
             minFilter: 'linear',
             mipmapFilter: 'linear'
         });
 
-        testKTX2Files.forEach((item, index) => {
-            const row = Math.floor(index / cols);
-            const col = index % cols;
-            const itemsInThisRow = Math.min(cols, testKTX2Files.length - row * cols);
-            const posX = (col - (itemsInThisRow - 1) / 2) * spacingX;
-            const posY = ((totalRows - 1) / 2 - row) * spacingY;
-
-            createKTX2TestTile(redGPUContext, scene, geometry, linearSampler, item, posX, posY);
-        });
+        // PC / 모바일 분기 그리드 배치
+        layoutKTX2TestTiles(redGPUContext, scene, geometry, linearSampler, testKTX2Files, controller);
 
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
