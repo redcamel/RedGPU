@@ -3,7 +3,7 @@ import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=17833
 import {createKTX2TestTile} from '../createKTX2TestTile.js';
 
 /**
- * [KO] KTX2 순수 ASTC 전용 텍스처 예제 (Mobile / Apple Silicon GPU 전용 포맷전수)
+ * [KO] KTX2 ASTC 예제 - 순수 ASTC 텍스처 전수 리스트 (GitHub Pages 호스팅 자산)
  */
 
 const canvas = document.createElement('canvas');
@@ -25,36 +25,37 @@ RedGPU.init(
         redGPUContext.addView(view);
 
         // [순수 ASTC 텍스처 전용 전수 리스트]
+        const BASE_URL = 'https://redcamel.github.io/testAsset/ktx2TestImages/';
         const testKTX2Files = [
-            {"path": "../../../../assets/ktx2TestImages/threejs_samples/2d_astc4x4.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_ldr_4x4_FlightHelmet_baseColor.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_ldr_5x4_Iron_Bars_001_normal.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_ldr_6x5_FlightHelmet_baseColor.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_ldr_6x6_3dtex_7.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_ldr_6x6_Iron_Bars_001_normal.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_ldr_6x6_arraytex_7.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_ldr_6x6_arraytex_7_mipmap.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_ldr_6x6_posx.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_ldr_8x6_FlightHelmet_baseColor.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_ldr_8x8_FlightHelmet_baseColor.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_ldr_10x5_FlightHelmet_baseColor.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_ldr_12x10_FlightHelmet_baseColor.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_ldr_12x12_FlightHelmet_baseColor.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_ldr_cubemap_6x6.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_mipmap_ldr_4x4_posx.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_mipmap_ldr_6x5_posx.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_mipmap_ldr_6x6_kodim17_fast.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_mipmap_ldr_6x6_kodim17_fastest.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_mipmap_ldr_6x6_kodim17_medium.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_mipmap_ldr_6x6_posx.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_mipmap_ldr_6x6_posy.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_mipmap_ldr_6x6_posz.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_mipmap_ldr_8x6_posx.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_mipmap_ldr_8x8_posx.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_mipmap_ldr_10x5_posx.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_mipmap_ldr_12x10_posx.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_mipmap_ldr_12x12_posx.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_mipmap_ldr_cubemap_6x6.ktx2"}
+            {"path": BASE_URL + "threejs_samples/2d_astc4x4.ktx2"},
+            {"path": BASE_URL + "astc_ldr_4x4_FlightHelmet_baseColor.ktx2"},
+            {"path": BASE_URL + "astc_ldr_5x4_Iron_Bars_001_normal.ktx2"},
+            {"path": BASE_URL + "astc_ldr_6x5_FlightHelmet_baseColor.ktx2"},
+            {"path": BASE_URL + "astc_ldr_6x6_3dtex_7.ktx2"},
+            {"path": BASE_URL + "astc_ldr_6x6_Iron_Bars_001_normal.ktx2"},
+            {"path": BASE_URL + "astc_ldr_6x6_arraytex_7.ktx2"},
+            {"path": BASE_URL + "astc_ldr_6x6_arraytex_7_mipmap.ktx2"},
+            {"path": BASE_URL + "astc_ldr_6x6_posx.ktx2"},
+            {"path": BASE_URL + "astc_ldr_8x6_FlightHelmet_baseColor.ktx2"},
+            {"path": BASE_URL + "astc_ldr_8x8_FlightHelmet_baseColor.ktx2"},
+            {"path": BASE_URL + "astc_ldr_10x5_FlightHelmet_baseColor.ktx2"},
+            {"path": BASE_URL + "astc_ldr_12x10_FlightHelmet_baseColor.ktx2"},
+            {"path": BASE_URL + "astc_ldr_12x12_FlightHelmet_baseColor.ktx2"},
+            {"path": BASE_URL + "astc_ldr_cubemap_6x6.ktx2"},
+            {"path": BASE_URL + "astc_mipmap_ldr_4x4_posx.ktx2"},
+            {"path": BASE_URL + "astc_mipmap_ldr_6x5_posx.ktx2"},
+            {"path": BASE_URL + "astc_mipmap_ldr_6x6_kodim17_fast.ktx2"},
+            {"path": BASE_URL + "astc_mipmap_ldr_6x6_kodim17_fastest.ktx2"},
+            {"path": BASE_URL + "astc_mipmap_ldr_6x6_kodim17_medium.ktx2"},
+            {"path": BASE_URL + "astc_mipmap_ldr_6x6_posx.ktx2"},
+            {"path": BASE_URL + "astc_mipmap_ldr_6x6_posy.ktx2"},
+            {"path": BASE_URL + "astc_mipmap_ldr_6x6_posz.ktx2"},
+            {"path": BASE_URL + "astc_mipmap_ldr_8x6_posx.ktx2"},
+            {"path": BASE_URL + "astc_mipmap_ldr_8x8_posx.ktx2"},
+            {"path": BASE_URL + "astc_mipmap_ldr_10x5_posx.ktx2"},
+            {"path": BASE_URL + "astc_mipmap_ldr_12x10_posx.ktx2"},
+            {"path": BASE_URL + "astc_mipmap_ldr_12x12_posx.ktx2"},
+            {"path": BASE_URL + "astc_mipmap_ldr_cubemap_6x6.ktx2"}
         ];
 
         // XY 수직 평면 중앙 정렬 그리드 배치

@@ -3,7 +3,7 @@ import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=17833
 import {createKTX2TestTile} from '../createKTX2TestTile.js';
 
 /**
- * [KO] KTX2 3D 볼륨, 텍스처 어레이, 큐브맵 특수 텍스처 전용 예제 (ArrayCube3D)
+ * [KO] KTX2 ArrayCube3D 예제 - 3D Volume, Array, Cubemap 리스트 (GitHub Pages 호스팅 자산)
  */
 
 const canvas = document.createElement('canvas');
@@ -25,24 +25,25 @@ RedGPU.init(
         redGPUContext.addView(view);
 
         // [3D Volume / Texture Array / Cubemap / Skybox 텍스처 리스트]
+        const BASE_URL = 'https://redcamel.github.io/testAsset/ktx2TestImages/';
         const testKTX2Files = [
-            {"path": "../../../../assets/ktx2TestImages/3dtex_1_reference_u.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/3dtex_7_reference_u.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/arraytex_1_reference_u.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/arraytex_7_mipmap_reference_u.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/arraytex_7_reference_u.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_ldr_6x6_3dtex_7.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_ldr_6x6_arraytex_7_mipmap.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_ldr_6x6_arraytex_7.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_ldr_cubemap_6x6.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/astc_mipmap_ldr_cubemap_6x6.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/cubemap_goldengate_uastc_rdo4_zstd5_rd.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/cubemap_yokohama_basis_rd.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/skybox_zstd.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/skybox.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/texturearray_astc_8x8_unorm.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/texturearray_bc3_unorm.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/texturearray_etc2_unorm.ktx2"}
+            {"path": BASE_URL + "3dtex_1_reference_u.ktx2"},
+            {"path": BASE_URL + "3dtex_7_reference_u.ktx2"},
+            {"path": BASE_URL + "arraytex_1_reference_u.ktx2"},
+            {"path": BASE_URL + "arraytex_7_mipmap_reference_u.ktx2"},
+            {"path": BASE_URL + "arraytex_7_reference_u.ktx2"},
+            {"path": BASE_URL + "astc_ldr_6x6_3dtex_7.ktx2"},
+            {"path": BASE_URL + "astc_ldr_6x6_arraytex_7_mipmap.ktx2"},
+            {"path": BASE_URL + "astc_ldr_6x6_arraytex_7.ktx2"},
+            {"path": BASE_URL + "astc_ldr_cubemap_6x6.ktx2"},
+            {"path": BASE_URL + "astc_mipmap_ldr_cubemap_6x6.ktx2"},
+            {"path": BASE_URL + "cubemap_goldengate_uastc_rdo4_zstd5_rd.ktx2"},
+            {"path": BASE_URL + "cubemap_yokohama_basis_rd.ktx2"},
+            {"path": BASE_URL + "skybox_zstd.ktx2"},
+            {"path": BASE_URL + "skybox.ktx2"},
+            {"path": BASE_URL + "texturearray_astc_8x8_unorm.ktx2"},
+            {"path": BASE_URL + "texturearray_bc3_unorm.ktx2"},
+            {"path": BASE_URL + "texturearray_etc2_unorm.ktx2"}
         ];
 
         // XY 수직 평면 중앙 정렬 그리드 배치

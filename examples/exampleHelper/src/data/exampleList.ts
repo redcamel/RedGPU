@@ -407,59 +407,61 @@ export const ExampleList: ExampleListType = [
                             en: `example showing the Anisotropy option for a texture.`
                         },
                     },
+
+                ],
+
+            },
+            {
+                name: 'KTX2 Texture',
+                list: [
                     {
-                        name: 'KTX2 Texture',
-                        list: [
-                            {
-                                name: 'Basic (Three.js 18 Standard)',
-                                path: '3d/texture/ktx2/basic',
-                                description: {
-                                    ko: `Three.js 18개 표준 실무 KTX2 텍스처(Raw/블록압축/Basis 트랜스코딩) 테스트 예제입니다.`,
-                                    en: `Test example for Three.js 18 standard production KTX2 textures.`
-                                }
-                            },
-                            {
-                                name: 'Legacy (1st Gen Reference)',
-                                path: '3d/texture/ktx2/legacy',
-                                description: {
-                                    ko: `Khronos 1세대 구형 레퍼런스 KTX2 자산 전용 테스트 예제입니다. (파서 메타데이터 분석 기반 자동 판별)`,
-                                    en: `Test example for Khronos 1st generation legacy reference KTX2 assets.`
-                                }
-                            },
-                            {
-                                name: 'Transcode (Basis Universal ETC1S / UASTC)',
-                                path: '3d/texture/ktx2/transcode',
-                                description: {
-                                    ko: `Basis Universal ETC1S 및 UASTC 런타임 트랜스코딩 2D 텍스처 전용 테스트 예제입니다.`,
-                                    en: `Test example for Basis Universal ETC1S & UASTC runtime transcoding 2D textures.`
-                                }
-                            },
-                            {
-                                name: 'ASTC (Mobile / Apple Silicon Only)',
-                                path: '3d/texture/ktx2/astc',
-                                description: {
-                                    ko: `Apple Silicon(Mac/iOS) 및 Android GPU 전용 ASTC 텍스처 테스트 예제입니다. (Windows PC는 소프트웨어 Fallback 테스트)`,
-                                    en: `Test example for Apple Silicon (Mac/iOS) and Android GPU dedicated ASTC textures.`
-                                }
-                            },
-                            {
-                                name: 'ZSTD (Supercompressed & Block)',
-                                path: '3d/texture/ktx2/zstd',
-                                description: {
-                                    ko: `ZSTD 초고압축 텍스처 및 블록 압축/다국어 2D 텍스처 전용 테스트 예제입니다.`,
-                                    en: `Test example for ZSTD supercompressed textures and block compressed 2D textures.`
-                                }
-                            },
-                            {
-                                name: 'ArrayCube3D (3D / Array / Cubemap)',
-                                path: '3d/texture/ktx2/arrayCube3d',
-                                description: {
-                                    ko: `3D 볼륨 텍스처, 텍스처 어레이, 큐브맵, 스카이박스 최심화 KTX2 테스트 예제입니다.`,
-                                    en: `Test example for 3D Volume textures, Texture Arrays, Cubemaps, and Skyboxes.`
-                                }
-                            }
-                        ]
+                        name: 'Basic (Three.js 18 Standard)',
+                        path: '3d/texture/ktx2/basic',
+                        description: {
+                            ko: `Three.js 18개 표준 실무 KTX2 텍스처(Raw/블록압축/Basis 트랜스코딩) 테스트 예제입니다.`,
+                            en: `Test example for Three.js 18 standard production KTX2 textures.`
+                        }
                     },
+                    {
+                        name: 'Legacy (1st Gen Reference)',
+                        path: '3d/texture/ktx2/legacy',
+                        description: {
+                            ko: `Khronos 1세대 구형 레퍼런스 KTX2 자산 전용 테스트 예제입니다. (파서 메타데이터 분석 기반 자동 판별)`,
+                            en: `Test example for Khronos 1st generation legacy reference KTX2 assets.`
+                        }
+                    },
+                    {
+                        name: 'Transcode (Basis Universal ETC1S / UASTC)',
+                        path: '3d/texture/ktx2/transcode',
+                        description: {
+                            ko: `Basis Universal ETC1S 및 UASTC 런타임 트랜스코딩 2D 텍스처 전용 테스트 예제입니다.`,
+                            en: `Test example for Basis Universal ETC1S & UASTC runtime transcoding 2D textures.`
+                        }
+                    },
+                    {
+                        name: 'ASTC (Mobile / Apple Silicon Only)',
+                        path: '3d/texture/ktx2/astc',
+                        description: {
+                            ko: `Apple Silicon(Mac/iOS) 및 Android GPU 전용 ASTC 텍스처 테스트 예제입니다. (Windows PC는 소프트웨어 Fallback 테스트)`,
+                            en: `Test example for Apple Silicon (Mac/iOS) and Android GPU dedicated ASTC textures.`
+                        }
+                    },
+                    {
+                        name: 'ZSTD (Supercompressed & Block)',
+                        path: '3d/texture/ktx2/zstd',
+                        description: {
+                            ko: `ZSTD 초고압축 텍스처 및 블록 압축/다국어 2D 텍스처 전용 테스트 예제입니다.`,
+                            en: `Test example for ZSTD supercompressed textures and block compressed 2D textures.`
+                        }
+                    },
+                    // {
+                    //     name: 'ArrayCube3D (3D / Array / Cubemap)',
+                    //     path: '3d/texture/ktx2/arrayCube3d',
+                    //     description: {
+                    //         ko: `3D 볼륨 텍스처, 텍스처 어레이, 큐브맵, 스카이박스 최심화 KTX2 테스트 예제입니다.`,
+                    //         en: `Test example for 3D Volume textures, Texture Arrays, Cubemaps, and Skyboxes.`
+                    //     }
+                    // }
                 ]
             },
             {

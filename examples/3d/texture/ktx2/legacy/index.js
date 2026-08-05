@@ -1,9 +1,9 @@
 import * as RedGPU from '../../../../../dist/index.js?t=1783327399999';
-import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1783327300000';
+import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=1783327399999';
 import {createKTX2TestTile} from '../createKTX2TestTile.js';
 
 /**
- * [KO] 1세대 구형 / 레퍼런스 Raw KTX2 전용 예제 (Legacy)
+ * [KO] KTX2 Legacy 예제 - 1세대 구형 KTX2 레퍼런스 리스트 전용 (GitHub Pages 호스팅 자산)
  */
 
 const canvas = document.createElement('canvas');
@@ -24,26 +24,27 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        // [1.기초 Raw / 레퍼런스] 1세대 구형 KTX2 텍스처 리스트 전용
+        // [1.기초 Raw / 레퍼런스] 1세대 구형 KTX2 텍스처 리스트 전용 (https://redcamel.github.io/testAsset/ktx2TestImages/ 호스팅 자산)
+        const BASE_URL = 'https://redcamel.github.io/testAsset/ktx2TestImages/';
         const testKTX2Files = [
-            {"path": "../../../../assets/ktx2TestImages/cyan_rgb_reference_uastc.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/cyan_rgba_reference_u.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/green_rgb_reference_u.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/luminance_alpha_reference_basis.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/luminance_alpha_reference_u.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/luminance_alpha_reference_uastc.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/luminance_reference_basis.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/luminance_reference_u.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/luminance_reference_uastc.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/r_reference_basis.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/r_reference_u.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/r_reference_uastc.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/rg_reference_basis.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/rg_reference_u.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/rg_reference_uastc.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/rgb-mipmap-reference-u.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/rgba-mipmap-reference-basis.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/rgba-reference-u.ktx2"}
+            {"path": BASE_URL + "cyan_rgb_reference_uastc.ktx2"},
+            {"path": BASE_URL + "cyan_rgba_reference_u.ktx2"},
+            {"path": BASE_URL + "green_rgb_reference_u.ktx2"},
+            {"path": BASE_URL + "luminance_alpha_reference_basis.ktx2"},
+            {"path": BASE_URL + "luminance_alpha_reference_u.ktx2"},
+            {"path": BASE_URL + "luminance_alpha_reference_uastc.ktx2"},
+            {"path": BASE_URL + "luminance_reference_basis.ktx2"},
+            {"path": BASE_URL + "luminance_reference_u.ktx2"},
+            {"path": BASE_URL + "luminance_reference_uastc.ktx2"},
+            {"path": BASE_URL + "r_reference_basis.ktx2"},
+            {"path": BASE_URL + "r_reference_u.ktx2"},
+            {"path": BASE_URL + "r_reference_uastc.ktx2"},
+            {"path": BASE_URL + "rg_reference_basis.ktx2"},
+            {"path": BASE_URL + "rg_reference_u.ktx2"},
+            {"path": BASE_URL + "rg_reference_uastc.ktx2"},
+            {"path": BASE_URL + "rgb-mipmap-reference-u.ktx2"},
+            {"path": BASE_URL + "rgba-mipmap-reference-basis.ktx2"},
+            {"path": BASE_URL + "rgba-reference-u.ktx2"}
         ];
 
         // XY 수직 평면 중앙 정렬 그리드 배치

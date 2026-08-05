@@ -3,7 +3,7 @@ import RedGPUExampleHelper from '../../../../exampleHelper/dist/index.js?t=17833
 import {createKTX2TestTile} from '../createKTX2TestTile.js';
 
 /**
- * [KO] KTX2 ZSTD 초고압축 및 블록 압축 전용 예제 (ZSTD - Supercompressed 2D & Multilingual)
+ * [KO] KTX2 ZSTD 예제 - ZSTD 초고압축 텍스처 리스트 (GitHub Pages 호스팅 자산)
  */
 
 const canvas = document.createElement('canvas');
@@ -24,38 +24,39 @@ RedGPU.init(
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         redGPUContext.addView(view);
 
-        // [ZSTD Supercompressed / BC / UASTC 2D 텍스처 리스트]
+        // [2.중급 Block / ZSTD / BC / UASTC 2D 전수 리스트]
+        const BASE_URL = 'https://redcamel.github.io/testAsset/ktx2TestImages/';
         const testKTX2Files = [
-            {"path": "../../../../assets/ktx2TestImages/camera_camera_BaseColor_uastc.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/ccwn2c08.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/CesiumLogoFlat.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/cimg5293_uastc.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/cimg5293_uastc_zstd.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/color_grid_uastc.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/color_grid_uastc_zstd.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/g03n2c08.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/hűtő.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/hűtő_zstd.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/ktx_app-u.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/ktx_document_uastc_rdo4_zstd5.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/orient-down-metadata-u.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/orient-up-metadata.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/orient-up-metadata-u.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/pattern_02_bc2.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/StainedGlassLamp_base.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/StainedGlassLamp_normal.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/tbrn2c08.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/tbyn3p08.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/tm3n3p02.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/uastc_Iron_Bars_001_normal.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/نَسِيج.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/نَسِيج_zstd.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/テクスチャ.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/テクスチャ_zstd.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/质地.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/质地_zstd.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/조직.ktx2"},
-            {"path": "../../../../assets/ktx2TestImages/조직_zstd.ktx2"}
+            {"path": BASE_URL + "camera_camera_BaseColor_uastc.ktx2"},
+            {"path": BASE_URL + "ccwn2c08.ktx2"},
+            {"path": BASE_URL + "CesiumLogoFlat.ktx2"},
+            {"path": BASE_URL + "cimg5293_uastc.ktx2"},
+            {"path": BASE_URL + "cimg5293_uastc_zstd.ktx2"},
+            {"path": BASE_URL + "color_grid_uastc.ktx2"},
+            {"path": BASE_URL + "color_grid_uastc_zstd.ktx2"},
+            {"path": BASE_URL + "g03n2c08.ktx2"},
+            {"path": BASE_URL + "hűtő.ktx2"},
+            {"path": BASE_URL + "hűtő_zstd.ktx2"},
+            {"path": BASE_URL + "ktx_app-u.ktx2"},
+            {"path": BASE_URL + "ktx_document_uastc_rdo4_zstd5.ktx2"},
+            {"path": BASE_URL + "orient-down-metadata-u.ktx2"},
+            {"path": BASE_URL + "orient-up-metadata.ktx2"},
+            {"path": BASE_URL + "orient-up-metadata-u.ktx2"},
+            {"path": BASE_URL + "pattern_02_bc2.ktx2"},
+            {"path": BASE_URL + "StainedGlassLamp_base.ktx2"},
+            {"path": BASE_URL + "StainedGlassLamp_normal.ktx2"},
+            {"path": BASE_URL + "tbrn2c08.ktx2"},
+            {"path": BASE_URL + "tbyn3p08.ktx2"},
+            {"path": BASE_URL + "tm3n3p02.ktx2"},
+            {"path": BASE_URL + "uastc_Iron_Bars_001_normal.ktx2"},
+            {"path": BASE_URL + "نَسِيج.ktx2"},
+            {"path": BASE_URL + "نَسِيج_zstd.ktx2"},
+            {"path": BASE_URL + "テクスチャ.ktx2"},
+            {"path": BASE_URL + "テクスチャ_zstd.ktx2"},
+            {"path": BASE_URL + "质地.ktx2"},
+            {"path": BASE_URL + "质地_zstd.ktx2"},
+            {"path": BASE_URL + "조직.ktx2"},
+            {"path": BASE_URL + "조직_zstd.ktx2"}
         ];
 
         // XY 수직 평면 중앙 정렬 그리드 배치
