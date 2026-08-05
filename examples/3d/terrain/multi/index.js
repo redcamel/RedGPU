@@ -425,14 +425,15 @@ RedGPU.init(
             const cStr = tile.tileColStr;
 
             // 💡 16x16 그리드 상에서 (row 15, col 15) 코너 타일 및 엣지 타일 100% 매칭
+            const BASE_URL = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
             if (tile.tileRow === 15 && tile.tileCol === 15) {
-                return `../../../assets/terrain/terrainTest_001/tile/28_134_86_730_13_449_449_16bit_tile_15_15.png`;
+                return BASE_URL + `28_134_86_730_13_449_449_16bit_tile_15_15.png`;
             } else if (tile.tileRow === 15) {
-                return `../../../assets/terrain/terrainTest_001/tile/28_134_86_730_13_512_449_16bit_tile_15_${cStr}.png`;
+                return BASE_URL + `28_134_86_730_13_512_449_16bit_tile_15_${cStr}.png`;
             } else if (tile.tileCol === 15) {
-                return `../../../assets/terrain/terrainTest_001/tile/28_134_86_730_13_449_512_16bit_tile_${rStr}_15.png`;
+                return BASE_URL + `28_134_86_730_13_449_512_16bit_tile_${rStr}_15.png`;
             } else {
-                return `../../../assets/terrain/terrainTest_001/tile/28_134_86_730_13_512_512_16bit_tile_${rStr}_${cStr}.png`;
+                return BASE_URL + `28_134_86_730_13_512_512_16bit_tile_${rStr}_${cStr}.png`;
             }
         });
 
