@@ -72,6 +72,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #synthesizedTilesSet: Set<string> = new Set();
     #tileDataCache: Map<string, ArrayBufferView | ArrayBuffer> = new Map();
     #tileUrlResolver?: (tile: SpatialTileInfo) => string | void;
+    #onTileLoadCallback?: (tile: SpatialTileInfo) => void;
     #onTileUnloadCallback?: (tile: SpatialTileInfo) => void;
     #prevWorldSize: number = 0;
     #prevMaxLOD: number = 0;
@@ -286,6 +287,10 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.#tileUrlResolver = resolver;
     }
 
+    setOnTileLoad(callback: (tile: SpatialTileInfo) => void) {
+        this.#onTileLoadCallback = callback;
+    }
+
     setOnTileUnload(callback: (tile: SpatialTileInfo) => void) {
         this.#onTileUnloadCallback = callback;
     }
@@ -390,6 +395,10 @@ class TerrainTileSystem extends TerrainMaterialBind {
         );
 
         this.#markTileSynthesized(`${tileX}_${tileZ}`);
+
+        if (this.#onTileLoadCallback) {
+            this.#onTileLoadCallback(tile);
+        }
 
         if (this.material) {
             const mat = this.material as any;
