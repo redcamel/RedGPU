@@ -182,7 +182,20 @@ RedGPU.init(
         scene.addTerrain(terrain);
 
         // 3. 🌲 새로 추가된 3D 전나무 모델 (spruce_tree.glb) GLTFLoader 로드 & 식생 연동
-        const treeUrl = '../../../assets/terrain/spruce_tree.glb';
+        // const treeUrl = '../../../assets/terrain/spruce_tree.glb';
+        const treeUrl = '../../../assets/terrain/test.glb';
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            treeUrl,
+            (v) => {
+                const mesh = v['resultMesh'];
+
+                scene.addChild(mesh);
+                mesh.y = 300
+                mesh.setScale(100)
+                console.log('mesh', mesh)
+            }
+        );
         new RedGPU.GLTFLoader(redGPUContext, treeUrl, (result) => {
             console.log('🌲 spruce_tree.glb 3D 모델 로드 완료:', result);
 
@@ -192,10 +205,10 @@ RedGPU.init(
             treeFoliageMesh = new RedGPU.Display.VegetationMesh(redGPUContext, terrain, {
                 count: 100000,
                 gltfMesh: resultMesh,
-                baseScale: 30.0,
+                baseScale: 5.0,
                 splatUrl: '../../../assets/terrain/terrainTest_001/splatMap.jpg',
                 maskChannel: 'g',
-                maskThreshold: 0.15
+                maskThreshold: 0
             });
             scene.addChild(treeFoliageMesh);
 
@@ -275,12 +288,26 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
                 },
                 set maskThreshold(v) {
                     if (treeFoliageMesh) treeFoliageMesh.maskThreshold = v;
+                },
+                get meshRotationX() {
+                    return treeFoliageMesh ? treeFoliageMesh.meshRotationOffset[0] : 0;
+                },
+                set meshRotationX(v) {
+                    if (treeFoliageMesh) {
+                        const cur = treeFoliageMesh.meshRotationOffset;
+                        treeFoliageMesh.meshRotationOffset = [v, cur[1], cur[2]];
+                    }
                 }
             };
 
             treeFolder.addBinding(treeState, 'activeCount', {
                 label: '총 활성 식생 수',
                 readonly: true
+            });
+
+            treeFolder.addBinding(treeState, 'meshRotationX', {
+                label: '모델 세우기 회전 (Rotation X)',
+                min: -180, max: 180, step: 1
             });
 
             treeFolder.addBinding(treeState, 'maxDistance', {
