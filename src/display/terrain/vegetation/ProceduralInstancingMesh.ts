@@ -52,6 +52,7 @@ abstract class ProceduralInstancingMesh extends Mesh {
         this.#maxInstanceCount = maxInstanceCount;
         this.#geometry = geometry;
         this.#material = material;
+        this.#material.transparent = true
         this.#initBuffers();
     }
 
