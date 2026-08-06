@@ -190,12 +190,23 @@ RedGPU.init(
 
             // 🌲 식생 전용 VegetationMesh 사용 (Zero-GC, 얇은 TypedArray 인스턴싱)
             treeFoliageMesh = new RedGPU.Display.VegetationMesh(redGPUContext, terrain, {
-                count: 15000,
+                count: 100000,
                 gltfMesh: resultMesh,
-                baseScale: 10.0
+                baseScale: 30.0,
+                splatUrl: '../../../assets/terrain/terrainTest_001/splatMap.jpg',
+                maskChannel: 'g',
+                maskThreshold: 0.15
             });
             scene.addChild(treeFoliageMesh);
 
+            // 이미 활성화되어 있는 지형 타일들에 대해 즉시 3D 전나무 활성화
+            if (terrain.spatialGrid && terrain.spatialGrid.activeTiles) {
+                terrain.spatialGrid.activeTiles.forEach((tile) => {
+                    treeFoliageMesh.onTileLoaded(tile);
+                });
+            }
+
+            treeFoliageMesh.forceUpdate();
 
             // 지형 타일 비동기 로드/언로드 시 3D 전나무 식생 동적 스트리밍 이벤트 구독
             terrain.setOnTileLoad((tile) => {
@@ -229,20 +240,75 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
         ibl: true,
         skybox: true,
         gui: (pane) => {
-            const treeFolder = pane.addFolder({title: '🌲 3D 전나무 (Spruce Tree)', expanded: true});
+            const treeFolder = pane.addFolder({title: '🌲 식생 컨트롤 (Foliage System)', expanded: true});
 
             const treeState = {
                 get activeCount() {
                     return treeFoliageMesh ? treeFoliageMesh.instanceCount : 0;
+                },
+                get maxDistance() {
+                    return treeFoliageMesh ? treeFoliageMesh.maxDistance : 1500;
+                },
+                set maxDistance(v) {
+                    if (treeFoliageMesh) treeFoliageMesh.maxDistance = v;
+                },
+                get startFadeDistance() {
+                    return treeFoliageMesh ? treeFoliageMesh.startFadeDistance : 1200;
+                },
+                set startFadeDistance(v) {
+                    if (treeFoliageMesh) treeFoliageMesh.startFadeDistance = v;
+                },
+                get windStrength() {
+                    return treeFoliageMesh ? treeFoliageMesh.windStrength : 0.08;
+                },
+                set windStrength(v) {
+                    if (treeFoliageMesh) treeFoliageMesh.windStrength = v;
+                },
+                get windMaxDistance() {
+                    return treeFoliageMesh ? treeFoliageMesh.windMaxDistance : 300;
+                },
+                set windMaxDistance(v) {
+                    if (treeFoliageMesh) treeFoliageMesh.windMaxDistance = v;
+                },
+                get maskThreshold() {
+                    return treeFoliageMesh ? treeFoliageMesh.maskThreshold : 0.15;
+                },
+                set maskThreshold(v) {
+                    if (treeFoliageMesh) treeFoliageMesh.maskThreshold = v;
                 }
             };
 
             treeFolder.addBinding(treeState, 'activeCount', {
-                label: '현재 활성 3D 전나무 수',
+                label: '총 활성 식생 수',
                 readonly: true
             });
 
-            const terrainFolder = pane.addFolder({title: '🌍 Terrain (지형)', expanded: true});
+            treeFolder.addBinding(treeState, 'maxDistance', {
+                label: '최대 가시거리 (Max Distance)',
+                min: 100, max: 5000, step: 50
+            });
+
+            treeFolder.addBinding(treeState, 'startFadeDistance', {
+                label: 'Fade 시작 거리 (Start Fade)',
+                min: 50, max: 4500, step: 50
+            });
+
+            treeFolder.addBinding(treeState, 'windStrength', {
+                label: '바람 애니메이션 (Wind WPO)',
+                min: 0.0, max: 0.5, step: 0.01
+            });
+
+            treeFolder.addBinding(treeState, 'windMaxDistance', {
+                label: '바람 적용 거리 (Wind Distance)',
+                min: 50, max: 1000, step: 10
+            });
+
+            treeFolder.addBinding(treeState, 'maskThreshold', {
+                label: 'Splatmap 토질 마스킹 (Threshold)',
+                min: 0.0, max: 1.0, step: 0.01
+            });
+
+            const terrainFolder = pane.addFolder({title: '🌍 Terrain (지형)', expanded: false});
 
             terrainFolder.addBinding(terrain, 'maxHeight', {
                 label: '최대 높이 (Max Height)',
