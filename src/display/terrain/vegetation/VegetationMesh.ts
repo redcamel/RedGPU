@@ -71,7 +71,7 @@ class VegetationMesh extends ProceduralInstancingMesh {
     #cullBindGroupLayout: GPUBindGroupLayout;
     #cullUniformBuffer: StorageBuffer;
     #frustumPlanesBuffer: StorageBuffer;
-    #cullUniformData: Float32Array = new Float32Array(8);
+    #cullUniformData: Float32Array = new Float32Array(6);
     #frustumPlanesData: Float32Array = new Float32Array(24); // 6 planes * vec4
 
     #windStrength: number = 0.08;
@@ -147,24 +147,34 @@ class VegetationMesh extends ProceduralInstancingMesh {
         this.windMaxDistance = options.windMaxDistance ?? 300;
         this.#baseScale = baseScale;
 
-        // 지오메트리 원본 반경 및 baseScale 기반 boundingRadius 동적 자동 산출
+        // 지오메트리 원본 반경 및 relativeMatrix Offset, baseScale 기반 boundingRadius 동적 자동 산출
         if (options.boundingRadius !== undefined) {
             this.boundingRadius = options.boundingRadius;
         } else {
             let maxGeomRadius = 0;
-            const targetGeoms = subMeshList.length > 0 ? subMeshList.map(s => s.geometry) : (geometry ? [geometry] : []);
-            for (const g of targetGeoms) {
-                if (g) {
-                    const vol = (g as any).volume;
+            const subItems = subMeshList.length > 0 ? subMeshList : [{
+                node: null,
+                geometry,
+                material: null,
+                relativeMatrix: null
+            }];
+            for (const item of subItems) {
+                if (item && item.geometry) {
+                    const vol = (item.geometry as any).volume;
                     if (vol) {
+                        const relMat = item.relativeMatrix;
+                        let nodeOffset = 0;
+                        if (relMat) {
+                            nodeOffset = Math.hypot(relMat[12] || 0, relMat[13] || 0, relMat[14] || 0);
+                        }
                         const centerDist = Math.hypot(vol.centerX || 0, vol.centerY || 0, vol.centerZ || 0);
-                        const r = (vol.geometryRadius || 0) + centerDist;
+                        const r = (vol.geometryRadius || 0) + centerDist + nodeOffset;
                         if (r > maxGeomRadius) maxGeomRadius = r;
                     }
                 }
             }
-            // 기본 지오메트리 반경에 baseScale과 최대 인스턴스 스케일 안전 마진(1.5배)을 반영
-            const computedRadius = maxGeomRadius > 0 ? maxGeomRadius * baseScale * 1.5 : 3.0;
+            // 기본 지오메트리 반경에 baseScale과 최대 인스턴스 스케일 안전 마진(1.8배) 반영
+            const computedRadius = maxGeomRadius > 0 ? maxGeomRadius * baseScale * 1.8 : 4.0;
             this.boundingRadius = computedRadius;
         }
 
@@ -181,6 +191,7 @@ class VegetationMesh extends ProceduralInstancingMesh {
                     subItem.material,
                     this
                 );
+                subInstMesh.boundingRadius = this.boundingRadius;
                 this.#subVegetationMeshes.push(subInstMesh);
                 this.addChild(subInstMesh);
             }
@@ -476,12 +487,10 @@ class VegetationMesh extends ProceduralInstancingMesh {
         const u = this.#cullUniformData;
         u[0] = this.instanceCount;
         u[1] = this.maxDistance * this.maxDistance;
-        u[2] = this.boundingRadius * 2.0; // 화면 경계 잘림 방지를 위한 2.0배 여유 반경
-        u[3] = this.#terrain.minHeight - 50.0; // 하단 50m 안전 마진
-        u[4] = this.#terrain.maxHeight + 50.0; // 상단 50m 안전 마진
-        u[5] = camera.x;
-        u[6] = camera.y;
-        u[7] = camera.z;
+        u[2] = this.boundingRadius;
+        u[3] = camera.x;
+        u[4] = camera.y;
+        u[5] = camera.z;
 
         this.redGPUContext.gpuDevice.queue.writeBuffer(
             this.#cullUniformBuffer.gpuBuffer,
@@ -523,6 +532,15 @@ class VegetationMesh extends ProceduralInstancingMesh {
                 const subGeo = subMesh.geometry as any;
                 const subIndexCount = subGeo.indexBuffer?.count ?? subGeo.indexBuffer?.indexCount ?? 0;
                 subMesh.resetIndirectArgs(subIndexCount);
+
+                const subCullBuffer = (subMesh as any).cullUniformBuffer;
+                if (subCullBuffer) {
+                    this.redGPUContext.gpuDevice.queue.writeBuffer(
+                        subCullBuffer.gpuBuffer,
+                        0,
+                        u.buffer as ArrayBuffer
+                    );
+                }
 
                 const subCullBG = (subMesh as any).cullBindGroup;
                 if (subCullBG) {

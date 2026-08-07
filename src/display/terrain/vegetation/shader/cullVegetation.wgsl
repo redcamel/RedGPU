@@ -10,8 +10,6 @@ struct CullUniforms {
     maxInstanceCount: u32,
     maxDistanceSq: f32,
     boundingRadius: f32,
-    minHeight: f32,
-    maxHeight: f32,
     cameraPosX: f32,
     cameraPosY: f32,
     cameraPosZ: f32,
@@ -36,6 +34,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let instanceMatrix = rawInstanceMatrices[index];
     let instX = instanceMatrix[3][0];
+    let instY = instanceMatrix[3][1];
     let instZ = instanceMatrix[3][2];
 
     // 1. Distance Culling 판정
@@ -47,10 +46,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     // 2. Frustum Culling 판정 (카메라 반경 30m 안전지대는 절두체 검사 무조건 통과하여 팝인 방지)
-    let NEAR_SAFE_DISTANCE_SQ: f32 = 1800.0; // 30m 반경 (30^2 = 900)
+    let NEAR_SAFE_DISTANCE_SQ: f32 = 900.0; // 30m 반경 (30^2 = 900)
     if (distSq > NEAR_SAFE_DISTANCE_SQ) {
-        let midY = (cullUniforms.minHeight + cullUniforms.maxHeight) * 0.5;
-        let centerPos = vec3<f32>(instX, midY, instZ);
+        let centerPos = vec3<f32>(instX, instY, instZ);
         let radius = cullUniforms.boundingRadius;
 
         for (var i = 0u; i < 6u; i++) {
