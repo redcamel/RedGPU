@@ -45,6 +45,23 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         return;
     }
 
+    // 1-1. 거리 기반 식생 밀도 솎아내기 (Distance-based Density Thinning)
+    // 원거리(최대 가시거리의 70% 이상): 75% 솎아내기 (4개 중 1개만 통과)
+    let farThresholdSq = cullUniforms.maxDistanceSq * 0.49;
+    if (distSq > farThresholdSq) {
+        if ((index & 3u) != 0u) {
+            return;
+        }
+    } else {
+        // 중거리(최대 가시거리의 45% 이상): 50% 솎아내기 (2개 중 1개만 통과)
+        let midThresholdSq = cullUniforms.maxDistanceSq * 0.2025;
+        if (distSq > midThresholdSq) {
+            if ((index & 1u) != 0u) {
+                return;
+            }
+        }
+    }
+
     // 2. Frustum Culling 판정 (카메라 반경 30m 안전지대는 절두체 검사 무조건 통과하여 팝인 방지)
     let NEAR_SAFE_DISTANCE_SQ: f32 = 900.0; // 30m 반경 (30^2 = 900)
     if (distSq > NEAR_SAFE_DISTANCE_SQ) {
