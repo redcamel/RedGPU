@@ -88,7 +88,7 @@ fn main(inputData: InputData) -> VertexOutput {
     let worldPos4 = instanceMatrix * vec4<f32>(inputData.position, 1.0);
     let worldPos = worldPos4.xyz;
 
-    output.position = systemUniforms.projection.projectionViewMatrix * worldPos4;
+    output.position = systemUniforms.projection.noneJitterProjectionViewMatrix * worldPos4;
     output.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * worldPos4;
     output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * worldPos4;
     output.vertexPosition = worldPos;
@@ -108,7 +108,7 @@ fn main(inputData: InputData) -> VertexOutput {
     output.localNodeScale = vec2<f32>(1.0);
     output.localNodeScale_volumeScale = vec2<f32>(1.0);
     output.instanceOpacity = 1.0;
-    output.motionVector = vec3<f32>(0.0);
+    output.motionVector = vec3<f32>(0.0, 0.0, 1.0); // TAA 인스턴싱 지터링 떨림 방지 가드 (z = 1.0)
     output.shadowCoord = vec3<f32>(0.0);
     output.receiveShadow = 0.0;
     output.pickingId = vec4<f32>(0.0);
