@@ -95,28 +95,60 @@ abstract class ProceduralInstancingMesh extends Mesh {
         return this.#material;
     }
 
+    #dirtyStartIndex: number = -1;
+    #dirtyEndIndex: number = -1;
+    #indirectArgsData: Uint32Array = new Uint32Array(5);
+    #vertexUniformBufferData: ArrayBuffer = new ArrayBuffer(VERTEX_UNIFORM_BYTES);
+    #vertexUniformUintView: Uint32Array = new Uint32Array(this.#vertexUniformBufferData);
+    #vertexUniformFloatView: Float32Array = new Float32Array(this.#vertexUniformBufferData);
+
     flushInstanceData(): void {
-        this.redGPUContext.gpuDevice.queue.writeBuffer(
-            this.#instanceMatrixBuffer.gpuBuffer,
-            0,
-            this.#instanceMatrixData.buffer as ArrayBuffer,
-            0,
-            this.#instanceCount * INSTANCE_MATRIX_FLOATS * 4
-        );
+        if (!this.#instanceDataDirty) return;
+        const start = this.#dirtyStartIndex >= 0 ? this.#dirtyStartIndex : 0;
+        const end = this.#dirtyEndIndex >= 0 ? Math.min(this.#dirtyEndIndex, this.#instanceCount) : this.#instanceCount;
+        if (end > start) {
+            const byteOffset = start * INSTANCE_MATRIX_FLOATS * 4;
+            const byteLength = (end - start) * INSTANCE_MATRIX_FLOATS * 4;
+            this.redGPUContext.gpuDevice.queue.writeBuffer(
+                this.#instanceMatrixBuffer.gpuBuffer,
+                byteOffset,
+                this.#instanceMatrixData.buffer as ArrayBuffer,
+                byteOffset,
+                byteLength
+            );
+        }
+        this.#dirtyStartIndex = -1;
+        this.#dirtyEndIndex = -1;
         this.#instanceDataDirty = false;
     }
 
-    markInstanceDataDirty(): void {
+    markInstanceDataDirty(startInstanceIndex?: number, count?: number): void {
         this.#instanceDataDirty = true;
+        if (startInstanceIndex !== undefined && count !== undefined && count > 0) {
+            if (this.#dirtyStartIndex < 0) {
+                this.#dirtyStartIndex = startInstanceIndex;
+                this.#dirtyEndIndex = startInstanceIndex + count;
+            } else {
+                this.#dirtyStartIndex = Math.min(this.#dirtyStartIndex, startInstanceIndex);
+                this.#dirtyEndIndex = Math.max(this.#dirtyEndIndex, startInstanceIndex + count);
+            }
+        } else {
+            this.#dirtyStartIndex = 0;
+            this.#dirtyEndIndex = this.#maxInstanceCount;
+        }
     }
 
     /** Compute Pass 실행 전 Indirect Buffer 초기화 */
     resetIndirectArgs(indexCount: number): void {
-        const initialArgs = new Uint32Array([indexCount, 0, 0, 0, 0]);
+        this.#indirectArgsData[0] = indexCount;
+        this.#indirectArgsData[1] = 0;
+        this.#indirectArgsData[2] = 0;
+        this.#indirectArgsData[3] = 0;
+        this.#indirectArgsData[4] = 0;
         this.redGPUContext.gpuDevice.queue.writeBuffer(
             this.#indirectBuffer,
             0,
-            initialArgs.buffer
+            this.#indirectArgsData.buffer
         );
     }
 
@@ -137,6 +169,7 @@ abstract class ProceduralInstancingMesh extends Mesh {
 
         if (this.#material.dirtyPipeline) {
             this.#material._updateFragmentState();
+            this.#initRenderPipeline();
         }
 
         const fragmentUniformBindGroup = this.#material.gpuRenderInfo?.fragmentUniformBindGroup;
@@ -144,14 +177,39 @@ abstract class ProceduralInstancingMesh extends Mesh {
 
         this.#updateVertexUniforms();
 
-        currentRenderPassEncoder.setPipeline(this.#renderPipeline);
-        currentRenderPassEncoder.setBindGroup(0, view.systemUniform_Vertex_UniformBindGroup);
-        currentRenderPassEncoder.setBindGroup(1, this.#vertexBindGroup);
-        currentRenderPassEncoder.setBindGroup(2, fragmentUniformBindGroup);
+        const encoder = currentRenderPassEncoder as any;
+        if (!encoder._boundBindGroups) {
+            encoder._boundBindGroups = [];
+        }
+
+        if (encoder._lastPipeline !== this.#renderPipeline) {
+            currentRenderPassEncoder.setPipeline(this.#renderPipeline);
+            encoder._lastPipeline = this.#renderPipeline;
+        }
+
+        const sysBG = view.systemUniform_Vertex_UniformBindGroup;
+        if (encoder._boundBindGroups[0] !== sysBG) {
+            currentRenderPassEncoder.setBindGroup(0, sysBG);
+            encoder._boundBindGroups[0] = sysBG;
+        }
+
+        if (encoder._boundBindGroups[1] !== this.#vertexBindGroup) {
+            currentRenderPassEncoder.setBindGroup(1, this.#vertexBindGroup);
+            encoder._boundBindGroups[1] = this.#vertexBindGroup;
+        }
+
+        if (encoder._boundBindGroups[2] !== fragmentUniformBindGroup) {
+            currentRenderPassEncoder.setBindGroup(2, fragmentUniformBindGroup);
+            encoder._boundBindGroups[2] = fragmentUniformBindGroup;
+        }
 
         const extraGroups = this.getExtraBindGroups();
         for (let i = 0; i < extraGroups.length; i++) {
-            currentRenderPassEncoder.setBindGroup(3 + i, extraGroups[i]);
+            const slot = 3 + i;
+            if (encoder._boundBindGroups[slot] !== extraGroups[i]) {
+                currentRenderPassEncoder.setBindGroup(slot, extraGroups[i]);
+                encoder._boundBindGroups[slot] = extraGroups[i];
+            }
         }
 
         const geo = this.#geometry as any;
@@ -289,19 +347,15 @@ abstract class ProceduralInstancingMesh extends Mesh {
     }
 
     #updateVertexUniforms(): void {
-        const buffer = new ArrayBuffer(VERTEX_UNIFORM_BYTES);
-        const uintView = new Uint32Array(buffer);
-        const floatView = new Float32Array(buffer);
-
-        uintView[0] = this.#material.globalFragmentSlotIndex ?? 0;
-        floatView[1] = this.maxDistance * this.maxDistance;
-        floatView[2] = this.startFadeDistance * this.startFadeDistance;
-        floatView[3] = this.windMaxDistance * this.windMaxDistance;
+        this.#vertexUniformUintView[0] = this.#material.globalFragmentSlotIndex ?? 0;
+        this.#vertexUniformFloatView[1] = this.maxDistance * this.maxDistance;
+        this.#vertexUniformFloatView[2] = this.startFadeDistance * this.startFadeDistance;
+        this.#vertexUniformFloatView[3] = this.windMaxDistance * this.windMaxDistance;
 
         this.redGPUContext.gpuDevice.queue.writeBuffer(
             this.#vertexUniformBuffer.gpuBuffer,
             0,
-            buffer
+            this.#vertexUniformBufferData
         );
     }
 }

@@ -81,53 +81,33 @@ fn main(inputData: InputData) -> VertexOutput {
     let sampledRatio = textureSampleLevel(heightAtlasTexture, heightmapSampler, terrainUV, 0.0).r;
     let terrainY = vegetationUniforms.minHeight + sampledRatio * (vegetationUniforms.maxHeight - vegetationUniforms.minHeight);
 
-    // translation column의 Y에 terrainY 적용
-    instanceMatrix[3][1] = terrainY;
+    // translation column의 Y에 terrainY 추가 적용
+    instanceMatrix[3][1] += terrainY;
 
     // 최종 월드 위치: InstancingMesh와 동일하게 instanceMatrix * vertex
     let worldPos4 = instanceMatrix * vec4<f32>(inputData.position, 1.0);
-    var worldPos = worldPos4.xyz;
+    let worldPos = worldPos4.xyz;
 
-    // 카메라 거리 (바람/fade용)
-    let dx = instX - systemUniforms.camera.cameraPosition.x;
-    let dz = instZ - systemUniforms.camera.cameraPosition.z;
-    let distSq = dx * dx + dz * dz;
-
-    // 바람 애니메이션 (근거리만)
-    if (distSq <= proceduralUniforms.windMaxDistanceSq && inputData.position.y > 0.0) {
-        let windPhase = vegetationUniforms.time * 2.5 + instX * 0.07 + instZ * 0.05;
-        let windFactor = vegetationUniforms.windStrength * inputData.position.y;
-        worldPos.x += sin(windPhase) * windFactor;
-        worldPos.z += cos(windPhase * 0.7) * windFactor * 0.4;
-    }
-
-    let projView = systemUniforms.projection.projectionViewMatrix;
-    let finalClip = projView * vec4<f32>(worldPos, 1.0);
-
-    output.position = finalClip;
-    output.currentClipPos = finalClip;
-    output.prevClipPos = finalClip;
+    output.position = systemUniforms.projection.projectionViewMatrix * worldPos4;
+    output.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * worldPos4;
+    output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * worldPos4;
     output.vertexPosition = worldPos;
 
-    // 노말 변환
-    let rawNormal = instanceMatrix * vec4<f32>(inputData.vertexNormal, 0.0);
-    output.vertexNormal = normalize(rawNormal.xyz);
+    // 노말 변환 (스케일에 의한 노말 왜곡 및 조명 어두워짐 방지)
+    let normalMatrix = mat3x3<f32>(
+        normalize(instanceMatrix[0].xyz),
+        normalize(instanceMatrix[1].xyz),
+        normalize(instanceMatrix[2].xyz)
+    );
+    output.vertexNormal = normalize(normalMatrix * inputData.vertexNormal);
     output.uv = inputData.uv;
     output.uv1 = inputData.uv;
     output.vertexTangent = inputData.vertexTangent;
     output.vertexColor_0 = vec4<f32>(1.0);
 
-    // Distance Fade Out
-    var fade: f32 = 1.0;
-    if (proceduralUniforms.maxDistanceSq > proceduralUniforms.startFadeDistanceSq) {
-        let t = (distSq - proceduralUniforms.startFadeDistanceSq)
-              / (proceduralUniforms.maxDistanceSq - proceduralUniforms.startFadeDistanceSq);
-        fade = 1.0 - clamp(t, 0.0, 1.0);
-    }
-
     output.localNodeScale = vec2<f32>(1.0);
     output.localNodeScale_volumeScale = vec2<f32>(1.0);
-    output.instanceOpacity = fade;
+    output.instanceOpacity = 1.0;
     output.motionVector = vec3<f32>(0.0);
     output.shadowCoord = vec3<f32>(0.0);
     output.receiveShadow = 0.0;

@@ -29,6 +29,8 @@ export interface VegetationMeshOptions {
     windMaxDistance?: number;
     boundingRadius?: number;
     meshRotationOffset?: [number, number, number];
+    alphaCutoff?: number;
+    cutOff?: number;
 }
 
 interface RawCandidate {
@@ -45,9 +47,7 @@ interface SubMeshData {
     node: any;
     geometry: Geometry | Primitive;
     material: any;
-    offsetX: number;
-    offsetY: number;
-    offsetZ: number;
+    relativeMatrix: Float32Array;
 }
 
 class VegetationMesh extends ProceduralInstancingMesh {
@@ -88,6 +88,21 @@ class VegetationMesh extends ProceduralInstancingMesh {
         1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1
     ]);
 
+    #pvMatrixTemp: mat4 = mat4.create();
+    #tempCandMat: mat4 = mat4.create();
+    #tempFinalMat: mat4 = mat4.create();
+
+    render(renderViewStateData: RenderViewStateData, shadowRender: boolean = false): void {
+        this.#updateVegetationUniforms();
+
+        // 렌더 패스 진입 직전 Compute Culling Dispatch 수행
+        if (this.instanceCount > 0) {
+            this.#dispatchCullCompute(renderViewStateData);
+        }
+
+        super.render(renderViewStateData, shadowRender);
+    }
+
     constructor(redGPUContext: RedGPUContext, terrain: Terrain, countOrOptions: number | VegetationMeshOptions = 20000) {
         const options: VegetationMeshOptions = typeof countOrOptions === 'number' ? {count: countOrOptions} : countOrOptions;
         const totalCount = options.count ?? 20000;
@@ -109,7 +124,15 @@ class VegetationMesh extends ProceduralInstancingMesh {
         if (!geometry) geometry = new Plane(redGPUContext, grassSize[0], grassSize[1]);
         if (!material) material = new PBRMaterial(redGPUContext);
 
-        VegetationMesh.#setupVegetationMaterial(material);
+        const alphaCutoff = options.alphaCutoff ?? options.cutOff ?? 0.01;
+        if (subMeshList.length > 0) {
+            for (const subItem of subMeshList) {
+                VegetationMesh.#setupVegetationMaterial(subItem.material, alphaCutoff);
+            }
+        }
+        if (material) {
+            VegetationMesh.#setupVegetationMaterial(material, alphaCutoff);
+        }
 
         super(redGPUContext, totalCount, geometry, material);
 
@@ -126,6 +149,21 @@ class VegetationMesh extends ProceduralInstancingMesh {
         this.#meshRotationOffset = options.meshRotationOffset ?? [0, 0, 0];
         this.#baseScale = baseScale;
         this.#totalCount = totalCount;
+
+        if (subMeshList.length > 1) {
+            for (let i = 1; i < subMeshList.length; i++) {
+                const subItem = subMeshList[i];
+                const subInstMesh = new SubVegetationMesh(
+                    redGPUContext,
+                    totalCount,
+                    subItem.geometry,
+                    subItem.material,
+                    this
+                );
+                this.#subVegetationMeshes.push(subInstMesh);
+                this.addChild(subInstMesh);
+            }
+        }
 
         const targetNode = subMeshList.length > 0 ? subMeshList[0].node : options.gltfMesh;
         if (targetNode) {
@@ -163,43 +201,73 @@ class VegetationMesh extends ProceduralInstancingMesh {
         this.#rebuildCandidates();
     }
 
+    static #getNodeLocalMatrix(node: any): mat4 {
+        const out = mat4.create();
+        const RADIAN = Math.PI / 180;
+        const x = node.x || 0;
+        const y = node.y || 0;
+        const z = node.z || 0;
+        const rx = (node.rotationX || 0) * RADIAN;
+        const ry = (node.rotationY || 0) * RADIAN;
+        const rz = (node.rotationZ || 0) * RADIAN;
+        const sx = node.scaleX ?? 1;
+        const sy = node.scaleY ?? 1;
+        const sz = node.scaleZ ?? 1;
+
+        mat4.translate(out, out, [x, y, z]);
+        if (rx) mat4.rotateX(out, out, rx);
+        if (ry) mat4.rotateY(out, out, ry);
+        if (rz) mat4.rotateZ(out, out, rz);
+        if (sx !== 1 || sy !== 1 || sz !== 1) mat4.scale(out, out, [sx, sy, sz]);
+
+        return out;
+    }
+
     static #extractGLTFSubMeshes(
         node: any,
         outList: SubMeshData[],
-        parentX = 0, parentY = 0, parentZ = 0
+        parentMatrix?: mat4
     ) {
         if (!node) return;
-        const curX = parentX + (node.x || 0);
-        const curY = parentY + (node.y || 0);
-        const curZ = parentZ + (node.z || 0);
+
+        const localMat = VegetationMesh.#getNodeLocalMatrix(node);
+        const worldMat = mat4.create();
+        if (parentMatrix) {
+            mat4.multiply(worldMat, parentMatrix, localMat);
+        } else {
+            mat4.copy(worldMat, localMat);
+        }
 
         if (node.geometry && node.material) {
             outList.push({
                 node,
                 geometry: node.geometry,
                 material: node.material,
-                offsetX: curX,
-                offsetY: curY,
-                offsetZ: curZ,
+                relativeMatrix: new Float32Array(worldMat),
             });
         }
 
         if (node.children && Array.isArray(node.children)) {
             for (const child of node.children) {
-                VegetationMesh.#extractGLTFSubMeshes(child, outList, curX, curY, curZ);
+                VegetationMesh.#extractGLTFSubMeshes(child, outList, worldMat);
             }
         }
     }
 
-    render(renderViewStateData: RenderViewStateData, shadowRender: boolean = false): void {
-        this.#updateVegetationUniforms();
-
-        // 렌더 패스 진입 직전 Compute Culling Dispatch 수행
-        if (this.instanceCount > 0) {
-            this.#dispatchCullCompute(renderViewStateData);
+    static #setupVegetationMaterial(mat: any, cutoff: number = 0.3) {
+        if (!mat) return;
+        if ('useCutOff' in mat) {
+            mat.useCutOff = true;
+            if (mat.cutOff === undefined || mat.cutOff === 0) {
+                mat.cutOff = cutoff;
+            }
         }
-
-        super.render(renderViewStateData, shadowRender);
+        if ('alphaBlend' in mat) {
+            mat.alphaBlend = 1; // 1 = MASK (Alpha Cutoff Mode)
+        }
+        if ('transparent' in mat) mat.transparent = false;
+        if ('cullMode' in mat) mat.cullMode = 'none';
+        if ('doubleSided' in mat) mat.doubleSided = true;
     }
 
     #initCullResources(redGPUContext: RedGPUContext): void {
@@ -248,102 +316,23 @@ class VegetationMesh extends ProceduralInstancingMesh {
             }
         });
 
-        this.#cullBindGroup = gpuDevice.createBindGroup({
-            label: `VegetationCullBG_${this.uuid}`,
-            layout: this.#cullBindGroupLayout,
-            entries: [
-                {binding: 0, resource: {buffer: this.rawInstanceMatrixBuffer.gpuBuffer}},
-                {binding: 1, resource: {buffer: this.culledInstanceMatrixBuffer.gpuBuffer}},
-                {binding: 2, resource: {buffer: this.indirectBuffer}},
-                {binding: 3, resource: {buffer: this.#cullUniformBuffer.gpuBuffer}},
-                {binding: 4, resource: {buffer: this.#frustumPlanesBuffer.gpuBuffer}},
-            ]
-        });
-    }
+        const createCullBindGroup = (targetMesh: ProceduralInstancingMesh, labelName: string) => {
+            return gpuDevice.createBindGroup({
+                label: labelName,
+                layout: this.#cullBindGroupLayout,
+                entries: [
+                    {binding: 0, resource: {buffer: targetMesh.rawInstanceMatrixBuffer.gpuBuffer}},
+                    {binding: 1, resource: {buffer: targetMesh.culledInstanceMatrixBuffer.gpuBuffer}},
+                    {binding: 2, resource: {buffer: targetMesh.indirectBuffer}},
+                    {binding: 3, resource: {buffer: this.#cullUniformBuffer.gpuBuffer}},
+                    {binding: 4, resource: {buffer: this.#frustumPlanesBuffer.gpuBuffer}},
+                ]
+            });
+        };
 
-    #dispatchCullCompute(renderViewStateData: RenderViewStateData): void {
-        const {view} = renderViewStateData;
-        const camera = view.rawCamera;
-
-        // 1. Cull Uniform 갱신
-        const u = this.#cullUniformData;
-        u[0] = this.instanceCount;
-        u[1] = this.maxDistance * this.maxDistance;
-        u[2] = this.boundingRadius;
-        u[3] = this.#terrain.minHeight;
-        u[4] = this.#terrain.maxHeight;
-        u[5] = camera.x;
-        u[6] = camera.y;
-        u[7] = camera.z;
-
-        this.redGPUContext.gpuDevice.queue.writeBuffer(
-            this.#cullUniformBuffer.gpuBuffer,
-            0,
-            u.buffer as ArrayBuffer
-        );
-
-        // 2. Projection-View 행렬로부터 절두체 6개 평면 추출
-        const test = mat4.create()
-        mat4.multiply(test, view.projectionMatrix, view.rawCamera.viewMatrix)
-        this.#extractFrustumPlanes(test as Float32Array);
-        this.redGPUContext.gpuDevice.queue.writeBuffer(
-            this.#frustumPlanesBuffer.gpuBuffer,
-            0,
-            this.#frustumPlanesData.buffer as ArrayBuffer
-        );
-
-        // 3. Indirect Buffer instanceCount 카운터 0으로 리셋
-        const geo = this.geometry as any;
-        const indexCount = geo.indexBuffer?.count ?? geo.indexBuffer?.indexCount ?? 0;
-        this.resetIndirectArgs(indexCount);
-
-        // 4. Compute Pass 실행
-        const commandEncoder = this.redGPUContext.gpuDevice.createCommandEncoder({
-            label: `VegetationCullCommandEncoder_${this.uuid}`
-        });
-        const computePass = commandEncoder.beginComputePass({
-            label: `VegetationCullComputePass_${this.uuid}`
-        });
-
-        computePass.setPipeline(this.#cullPipeline);
-        computePass.setBindGroup(0, this.#cullBindGroup);
-        const workgroupCount = Math.ceil(this.instanceCount / 64);
-        computePass.dispatchWorkgroups(workgroupCount);
-        computePass.end();
-
-        this.redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()]);
-    }
-
-    static #setupVegetationMaterial(mat: any) {
-        if (!mat) return;
-        if ('useAlphaMode' in mat) mat.useAlphaMode = true;
-        if ('alphaCutoff' in mat && (mat.alphaCutoff === undefined || mat.alphaCutoff === 0)) mat.alphaCutoff = 0.3;
-        if ('cullMode' in mat) mat.cullMode = 'none';
-        if ('doubleSided' in mat) mat.doubleSided = true;
-    }
-
-    #extractFrustumPlanes(pvMatrix: Float32Array): void {
-        const m = pvMatrix;
-        const p = this.#frustumPlanesData;
-
-        // Left, Right, Bottom, Top, Near, Far planes 추출 및 정규화
-        const rawPlanes = [
-            [m[3] + m[0], m[7] + m[4], m[11] + m[8], m[15] + m[12]],  // Left
-            [m[3] - m[0], m[7] - m[4], m[11] - m[8], m[15] - m[12]],  // Right
-            [m[3] + m[1], m[7] + m[5], m[11] + m[9], m[15] + m[13]],  // Bottom
-            [m[3] - m[1], m[7] - m[5], m[11] - m[9], m[15] - m[13]],  // Top
-            [m[2], m[6], m[10], m[14]],         // Near (WebGPU 0..1 Z)
-            [m[3] - m[2], m[7] - m[6], m[11] - m[10], m[15] - m[14]], // Far
-        ];
-
-        for (let i = 0; i < 6; i++) {
-            const pl = rawPlanes[i];
-            const len = Math.hypot(pl[0], pl[1], pl[2]);
-            const invLen = len > 0 ? 1.0 / len : 0;
-            p[i * 4 + 0] = pl[0] * invLen;
-            p[i * 4 + 1] = pl[1] * invLen;
-            p[i * 4 + 2] = pl[2] * invLen;
-            p[i * 4 + 3] = pl[3] * invLen;
+        this.#cullBindGroup = createCullBindGroup(this, `VegetationCullBG_${this.uuid}`);
+        for (const subMesh of this.#subVegetationMeshes) {
+            (subMesh as any).cullBindGroup = createCullBindGroup(subMesh, `VegetationCullBG_Sub_${subMesh.uuid}`);
         }
     }
 
@@ -458,51 +447,72 @@ class VegetationMesh extends ProceduralInstancingMesh {
         return this.#splatImageData.data[idx + channelIdx] / 255.0;
     }
 
-    #rebuildCandidates(): void {
-        this.#rawCandidatePool = [];
-        this.#tileToCandidateMap.clear();
+    #dispatchCullCompute(renderViewStateData: RenderViewStateData): void {
+        const {view} = renderViewStateData;
+        const camera = view.rawCamera;
 
-        const [worldW, worldH] = this.#terrain.worldSize;
-        const [offX, offZ] = this.#terrain.worldOffset;
-        let created = 0, attempts = 0;
-        const maxAttempts = this.#totalCount * 10;
+        // 1. Cull Uniform 갱신
+        const u = this.#cullUniformData;
+        u[0] = this.instanceCount;
+        u[1] = this.maxDistance * this.maxDistance;
+        u[2] = this.boundingRadius * 2.0; // 화면 경계 잘림 방지를 위한 2.0배 여유 반경
+        u[3] = this.#terrain.minHeight - 50.0; // 하단 50m 안전 마진
+        u[4] = this.#terrain.maxHeight + 50.0; // 상단 50m 안전 마진
+        u[5] = camera.x;
+        u[6] = camera.y;
+        u[7] = camera.z;
 
-        while (created < this.#totalCount && attempts < maxAttempts) {
-            attempts++;
-            const x = offX + Math.random() * worldW;
-            const z = offZ + Math.random() * worldH;
+        this.redGPUContext.gpuDevice.queue.writeBuffer(
+            this.#cullUniformBuffer.gpuBuffer,
+            0,
+            u.buffer as ArrayBuffer
+        );
 
-            if (this.#splatImageData && this.#getMaskValueAt(x, z) < this.#maskThreshold) {
-                continue;
+        // 2. Projection-View 행렬로부터 절두체 6개 평면 추출
+        mat4.multiply(this.#pvMatrixTemp, view.projectionMatrix, view.rawCamera.viewMatrix);
+        this.#extractFrustumPlanes(this.#pvMatrixTemp as Float32Array);
+        this.redGPUContext.gpuDevice.queue.writeBuffer(
+            this.#frustumPlanesBuffer.gpuBuffer,
+            0,
+            this.#frustumPlanesData.buffer as ArrayBuffer
+        );
+
+        // 3. Indirect Buffer instanceCount 카운터 0으로 리셋 및 Compute Pass 준비
+        const commandEncoder = this.redGPUContext.gpuDevice.createCommandEncoder({
+            label: `VegetationCullCommandEncoder_${this.uuid}`
+        });
+        const computePass = commandEncoder.beginComputePass({
+            label: `VegetationCullComputePass_${this.uuid}`
+        });
+
+        computePass.setPipeline(this.#cullPipeline);
+        const workgroupCount = Math.ceil(this.instanceCount / 64);
+
+        // 메인 메쉬 컬링
+        const geo = this.geometry as any;
+        const indexCount = geo.indexBuffer?.count ?? geo.indexBuffer?.indexCount ?? 0;
+        this.resetIndirectArgs(indexCount);
+
+        computePass.setBindGroup(0, this.#cullBindGroup);
+        computePass.dispatchWorkgroups(workgroupCount);
+
+        // 서브 메쉬들 컬링
+        for (const subMesh of this.#subVegetationMeshes) {
+            if (subMesh.instanceCount > 0) {
+                const subGeo = subMesh.geometry as any;
+                const subIndexCount = subGeo.indexBuffer?.count ?? subGeo.indexBuffer?.indexCount ?? 0;
+                subMesh.resetIndirectArgs(subIndexCount);
+
+                const subCullBG = (subMesh as any).cullBindGroup;
+                if (subCullBG) {
+                    computePass.setBindGroup(0, subCullBG);
+                    computePass.dispatchWorkgroups(workgroupCount);
+                }
             }
-
-            const u = Math.max(0, Math.min(1, (x - offX) / worldW));
-            const v = Math.max(0, Math.min(1, (z - offZ) / worldH));
-            const tileCol = Math.max(0, Math.min(15, Math.floor(u * 16)));
-            const tileRow = Math.max(0, Math.min(15, Math.floor((1 - v) * 16)));
-            const tileKey = `${tileCol}_${tileRow}`;
-
-            const rotY = Math.random() * Math.PI * 2;
-            const s = (0.8 + Math.random() * 0.5) * this.#baseScale;
-
-            const cand: RawCandidate = {
-                x, z, rotY,
-                scaleXZ: s,
-                scaleY: s * (0.85 + Math.random() * 0.4),
-                windOffset: Math.random() * Math.PI * 2,
-                tileKey
-            };
-
-            this.#rawCandidatePool.push(cand);
-
-            let tileList = this.#tileToCandidateMap.get(tileKey);
-            if (!tileList) {
-                tileList = [];
-                this.#tileToCandidateMap.set(tileKey, tileList);
-            }
-            tileList.push(cand);
-            created++;
         }
+
+        computePass.end();
+        this.redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()]);
     }
 
     #initVegetationBindGroup(redGPUContext: RedGPUContext): void {
@@ -570,6 +580,105 @@ class VegetationMesh extends ProceduralInstancingMesh {
         );
     }
 
+    #extractFrustumPlanes(pvMatrix: Float32Array): void {
+        const m = pvMatrix;
+        const p = this.#frustumPlanesData;
+
+        // Left, Right, Bottom, Top, Near, Far planes
+        p[0] = m[3] + m[0];
+        p[1] = m[7] + m[4];
+        p[2] = m[11] + m[8];
+        p[3] = m[15] + m[12];
+        p[4] = m[3] - m[0];
+        p[5] = m[7] - m[4];
+        p[6] = m[11] - m[8];
+        p[7] = m[15] - m[12];
+        p[8] = m[3] + m[1];
+        p[9] = m[7] + m[5];
+        p[10] = m[11] + m[9];
+        p[11] = m[15] + m[13];
+        p[12] = m[3] - m[1];
+        p[13] = m[7] - m[5];
+        p[14] = m[11] - m[9];
+        p[15] = m[15] - m[13];
+        p[16] = m[2];
+        p[17] = m[6];
+        p[18] = m[10];
+        p[19] = m[14];
+        p[20] = m[3] - m[2];
+        p[21] = m[7] - m[6];
+        p[22] = m[11] - m[10];
+        p[23] = m[15] - m[14];
+
+        for (let i = 0; i < 6; i++) {
+            const idx = i * 4;
+            const len = Math.hypot(p[idx], p[idx + 1], p[idx + 2]);
+            const invLen = len > 0 ? 1.0 / len : 0;
+            p[idx] *= invLen;
+            p[idx + 1] *= invLen;
+            p[idx + 2] *= invLen;
+            p[idx + 3] *= invLen;
+        }
+    }
+
+    #rebuildCandidates(): void {
+        this.#rawCandidatePool = [];
+        this.#tileToCandidateMap.clear();
+
+        const [worldW, worldH] = this.#terrain.worldSize;
+        const [offX, offZ] = this.#terrain.worldOffset;
+        let created = 0, attempts = 0;
+        const maxAttempts = this.#totalCount * 10;
+
+        // Fast Mulberry32 PRNG for zero-GC procedural placement
+        let seed = 1337;
+        const prng = () => {
+            let t = seed += 0x6D2B79F5;
+            t = Math.imul(t ^ t >>> 15, t | 1);
+            t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        };
+
+        while (created < this.#totalCount && attempts < maxAttempts) {
+            attempts++;
+            const rx = prng();
+            const rz = prng();
+            const x = offX + rx * worldW;
+            const z = offZ + rz * worldH;
+
+            if (this.#splatImageData && this.#getMaskValueAt(x, z) < this.#maskThreshold) {
+                continue;
+            }
+
+            const u = Math.max(0, Math.min(1, (x - offX) / worldW));
+            const v = Math.max(0, Math.min(1, (z - offZ) / worldH));
+            const tileCol = Math.max(0, Math.min(15, Math.floor(u * 16)));
+            const tileRow = Math.max(0, Math.min(15, Math.floor((1 - v) * 16)));
+            const tileKey = `${tileCol}_${tileRow}`;
+
+            const rotY = prng() * Math.PI * 2;
+            const s = (0.8 + prng() * 0.5) * this.#baseScale;
+
+            const cand: RawCandidate = {
+                x, z, rotY,
+                scaleXZ: s,
+                scaleY: s * (0.85 + prng() * 0.4),
+                windOffset: prng() * Math.PI * 2,
+                tileKey
+            };
+
+            this.#rawCandidatePool.push(cand);
+
+            let tileList = this.#tileToCandidateMap.get(tileKey);
+            if (!tileList) {
+                tileList = [];
+                this.#tileToCandidateMap.set(tileKey, tileList);
+            }
+            tileList.push(cand);
+            created++;
+        }
+    }
+
     #appendTileInstances(candidates: RawCandidate[]): void {
         const startIndex = this.#activeCandidates.length;
         for (let i = 0; i < candidates.length; i++) {
@@ -577,39 +686,83 @@ class VegetationMesh extends ProceduralInstancingMesh {
         }
 
         const newTotal = this.#activeCandidates.length;
-        this.instanceCount = newTotal;
+        const subCount = Math.max(1, this.#subMeshDataList.length);
+        const RADIAN = Math.PI / 180;
+        const meshRotX = this.#meshRotationOffset[0] * RADIAN;
+        const meshRotY = this.#meshRotationOffset[1] * RADIAN;
+        const meshRotZ = this.#meshRotationOffset[2] * RADIAN;
 
-        const mainData = this.instanceData;
-        const mainSubData = this.#subMeshDataList[0];
-        const mainOffX = mainSubData ? mainSubData.offsetX : 0;
-        const mainOffZ = mainSubData ? mainSubData.offsetZ : 0;
+        for (let sIdx = 0; sIdx < subCount; sIdx++) {
+            const subData = this.#subMeshDataList[sIdx];
+            const targetMesh: ProceduralInstancingMesh = sIdx === 0 ? this : this.#subVegetationMeshes[sIdx - 1];
+            if (!targetMesh) continue;
 
-        for (let i = startIndex; i < newTotal; i++) {
-            const cand = this.#activeCandidates[i];
-            const s = cand.scaleXZ;
-            const sy = cand.scaleY;
-            const bm = this.#baseModelMatrix;
+            targetMesh.instanceCount = newTotal;
+            const mainData = targetMesh.instanceData;
+            const subRelMat = subData ? subData.relativeMatrix : null;
 
-            const offset = i * 16;
-            mainData[offset + 0] = bm[0] * s;
-            mainData[offset + 1] = bm[1] * s;
-            mainData[offset + 2] = bm[2] * s;
-            mainData[offset + 3] = bm[3] * s;
-            mainData[offset + 4] = bm[4] * sy;
-            mainData[offset + 5] = bm[5] * sy;
-            mainData[offset + 6] = bm[6] * sy;
-            mainData[offset + 7] = bm[7] * sy;
-            mainData[offset + 8] = bm[8] * s;
-            mainData[offset + 9] = bm[9] * s;
-            mainData[offset + 10] = bm[10] * s;
-            mainData[offset + 11] = bm[11] * s;
-            mainData[offset + 12] = cand.x + mainOffX;
-            mainData[offset + 13] = 0;
-            mainData[offset + 14] = cand.z + mainOffZ;
-            mainData[offset + 15] = 1.0;
+            for (let i = startIndex; i < newTotal; i++) {
+                const cand = this.#activeCandidates[i];
+
+                mat4.identity(this.#tempCandMat);
+                mat4.translate(this.#tempCandMat, this.#tempCandMat, [cand.x, 0, cand.z]);
+                mat4.rotateY(this.#tempCandMat, this.#tempCandMat, cand.rotY);
+                if (meshRotX) mat4.rotateX(this.#tempCandMat, this.#tempCandMat, meshRotX);
+                if (meshRotY) mat4.rotateY(this.#tempCandMat, this.#tempCandMat, meshRotY);
+                if (meshRotZ) mat4.rotateZ(this.#tempCandMat, this.#tempCandMat, meshRotZ);
+                mat4.scale(this.#tempCandMat, this.#tempCandMat, [cand.scaleXZ, cand.scaleY, cand.scaleXZ]);
+
+                if (subRelMat) {
+                    mat4.multiply(this.#tempFinalMat, this.#tempCandMat, subRelMat as mat4);
+                } else {
+                    mat4.copy(this.#tempFinalMat, this.#tempCandMat);
+                }
+
+                const offset = i * 16;
+                mainData.set(this.#tempFinalMat, offset);
+            }
+
+            targetMesh.markInstanceDataDirty(startIndex, newTotal - startIndex);
         }
+    }
+}
 
-        this.markInstanceDataDirty();
+class SubVegetationMesh extends ProceduralInstancingMesh {
+    #parentVegetation: VegetationMesh;
+
+    constructor(
+        redGPUContext: RedGPUContext,
+        totalCount: number,
+        geometry: Geometry | Primitive,
+        material: any,
+        parentVegetation: VegetationMesh
+    ) {
+        super(redGPUContext, totalCount, geometry, material);
+        this.#parentVegetation = parentVegetation;
+    }
+
+    protected getVertexShaderSource(): string {
+        return vegetationVertexSource;
+    }
+
+    protected getExtraBindGroupLayouts(): GPUBindGroupLayout[] {
+        return (this.#parentVegetation as any).getExtraBindGroupLayouts();
+    }
+
+    protected getExtraBindGroups(): GPUBindGroup[] {
+        return (this.#parentVegetation as any).getExtraBindGroups();
+    }
+
+    protected getHeightmapTexture(): any {
+        return null;
+    }
+
+    protected getHeightmapSampler(): any {
+        return null;
+    }
+
+    protected getSplatTexture(): any {
+        return null;
     }
 }
 
