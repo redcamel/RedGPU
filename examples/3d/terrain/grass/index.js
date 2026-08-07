@@ -81,10 +81,10 @@ RedGPU.init(
 
         // 1. 카메라 설정 — 800m 비행 시점 설정
         const controller = new RedGPU.Camera.FreeController(redGPUContext);
-        controller.moveSpeed = 5000;
+        controller.moveSpeed = 1000;
         controller.mouseSensitivity = 0.2;
         controller.x = 0;
-        controller.y = 800;
+        controller.y = 500;
         controller.z = 0;
         controller.tilt = -15;
         controller.pan = 0;
@@ -183,25 +183,19 @@ RedGPU.init(
 
         // 3. 🌲 새로 추가된 3D 전나무 모델 (spruce_tree.glb) GLTFLoader 로드 & 식생 연동
         // const treeUrl = '../../../assets/terrain/spruce_tree.glb';
-        const treeUrl = '../../../assets/terrain/test.glb';
+        // const treeUrl = '../../../assets/terrain/test.glb';
+        const treeUrl = '../../../assets/terrain/oak_trees.glb';
 
         new RedGPU.GLTFLoader(redGPUContext, treeUrl, (result) => {
             console.log('🌲 spruce_tree.glb 3D 모델 로드 완료:', result);
 
             const resultMesh = result.resultMesh;
-            {
-                const mesh = result['resultMesh'];
 
-                scene.addChild(mesh);
-                mesh.y = 300
-                mesh.setScale(100)
-                console.log('mesh', mesh)
-            }
             // 🌲 식생 전용 VegetationMesh 사용 (Zero-GC, 얇은 TypedArray 인스턴싱)
             treeFoliageMesh = new RedGPU.Display.VegetationMesh(redGPUContext, terrain, {
-                count: 100000,
+                count: 50000,
                 gltfMesh: resultMesh,
-                baseScale: 5.0,
+                baseScale: 15.0,
                 splatUrl: '../../../assets/terrain/terrainTest_001/splatMap.jpg',
                 maskChannel: 'g',
                 maskThreshold: 0

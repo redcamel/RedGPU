@@ -47,7 +47,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     // 2. Frustum Culling 판정 (카메라 반경 30m 안전지대는 절두체 검사 무조건 통과하여 팝인 방지)
-    let NEAR_SAFE_DISTANCE_SQ: f32 = 900.0; // 30m 반경 (30^2 = 900)
+    let NEAR_SAFE_DISTANCE_SQ: f32 = 1800.0; // 30m 반경 (30^2 = 900)
     if (distSq > NEAR_SAFE_DISTANCE_SQ) {
         let midY = (cullUniforms.minHeight + cullUniforms.maxHeight) * 0.5;
         let centerPos = vec3<f32>(instX, midY, instZ);

@@ -145,9 +145,30 @@ class VegetationMesh extends ProceduralInstancingMesh {
         this.maxDistance = options.maxDistance ?? 1500;
         this.startFadeDistance = options.startFadeDistance ?? (this.maxDistance * 0.8);
         this.windMaxDistance = options.windMaxDistance ?? 300;
-        this.boundingRadius = options.boundingRadius ?? 3.0;
-        this.#meshRotationOffset = options.meshRotationOffset ?? [0, 0, 0];
         this.#baseScale = baseScale;
+
+        // 지오메트리 원본 반경 및 baseScale 기반 boundingRadius 동적 자동 산출
+        if (options.boundingRadius !== undefined) {
+            this.boundingRadius = options.boundingRadius;
+        } else {
+            let maxGeomRadius = 0;
+            const targetGeoms = subMeshList.length > 0 ? subMeshList.map(s => s.geometry) : (geometry ? [geometry] : []);
+            for (const g of targetGeoms) {
+                if (g) {
+                    const vol = (g as any).volume;
+                    if (vol) {
+                        const centerDist = Math.hypot(vol.centerX || 0, vol.centerY || 0, vol.centerZ || 0);
+                        const r = (vol.geometryRadius || 0) + centerDist;
+                        if (r > maxGeomRadius) maxGeomRadius = r;
+                    }
+                }
+            }
+            // 기본 지오메트리 반경에 baseScale과 최대 인스턴스 스케일 안전 마진(1.5배)을 반영
+            const computedRadius = maxGeomRadius > 0 ? maxGeomRadius * baseScale * 1.5 : 3.0;
+            this.boundingRadius = computedRadius;
+        }
+
+        this.#meshRotationOffset = options.meshRotationOffset ?? [0, 0, 0];
         this.#totalCount = totalCount;
 
         if (subMeshList.length > 1) {
