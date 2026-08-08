@@ -72,15 +72,12 @@ class VegetationMesh extends ProceduralInstancingMesh {
     #cullBindGroupLayout: GPUBindGroupLayout;
     #cullUniformBuffer: StorageBuffer;
     #frustumPlanesBuffer: StorageBuffer;
-    #cullUniformData: Float32Array = new Float32Array(6);
+    #cullUniformData: Float32Array = new Float32Array(8);
     #frustumPlanesData: Float32Array = new Float32Array(24); // 6 planes * vec4
 
     #windStrength: number = 0.08;
     #maskChannel: 'r' | 'g' | 'b' | 'a' = 'g';
     #maskThreshold: number = 0.2;
-    #splatImageData: ImageData | null = null;
-    #splatWidth: number = 0;
-    #splatHeight: number = 0;
     #baseScale: number = 1.0;
     #totalCount: number = 20000;
     #startTime: number = performance.now();
@@ -219,8 +216,7 @@ class VegetationMesh extends ProceduralInstancingMesh {
             this.#baseModelMatrix = new Float32Array(rotMat);
         }
 
-        const splatUrl = options.splatUrl || '../../../assets/terrain/terrainTest_001/splatMap.jpg';
-        if (splatUrl) this.#initSplatImage(splatUrl);
+        // splatUrl은 더이상 CPU에서 로드하지 않고 GPU 쉐이더로 바인딩하여 처리하므로 로컬 이미지는 생성하지 않음.
 
         this.#vegetationUniformData = new Float32Array(24);
         this.#vegetationUniformBuffer = new StorageBuffer(
@@ -335,6 +331,8 @@ class VegetationMesh extends ProceduralInstancingMesh {
                 {binding: 6, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
                 {binding: 7, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
                 {binding: 8, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
+                {binding: 9, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
+                {binding: 10, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
             ]
         });
 
@@ -353,6 +351,7 @@ class VegetationMesh extends ProceduralInstancingMesh {
         });
 
         const createCullBindGroup = (targetMesh: ProceduralInstancingMesh, labelName: string) => {
+            const splatTex = (this.#terrain?.material as any)?.splatTexture;
             return gpuDevice.createBindGroup({
                 label: labelName,
                 layout: this.#cullBindGroupLayout,
@@ -373,6 +372,15 @@ class VegetationMesh extends ProceduralInstancingMesh {
                         binding: 8,
                         resource: resourceManager.getGPUResourceBitmapTextureView(this.#terrain.heightmapAtlasTexture)
                             || resourceManager.emptyBitmapTextureView
+                    },
+                    {
+                        binding: 9,
+                        resource: this.#terrain.heightmapSampler?.gpuSampler
+                            || resourceManager.basicDisplacementSampler.gpuSampler
+                    },
+                    {
+                        binding: 10,
+                        resource: splatTex ? resourceManager.getGPUResourceBitmapTextureView(splatTex) : resourceManager.emptyBitmapTextureView
                     },
                 ]
             });
@@ -447,56 +455,18 @@ class VegetationMesh extends ProceduralInstancingMesh {
         }
     }
 
-    #initSplatImage(url: string) {
-        if (typeof window === 'undefined' || !url) return;
-        const img = new Image();
-        img.crossOrigin = 'Anonymous';
-        img.onload = () => {
-            try {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext('2d');
-                if (ctx) {
-                    ctx.drawImage(img, 0, 0);
-                    this.#splatImageData = ctx.getImageData(0, 0, img.width, img.height);
-                    this.#splatWidth = img.width;
-                    this.#splatHeight = img.height;
-                    this.#rebuildCandidates();
-                    this.forceUpdate();
-                }
-            } catch (e) {
-                console.warn('[VegetationMesh] splatMap 디코딩 실패:', e);
-            }
-        };
-        img.src = url;
-    }
-
-    #getMaskValueAt(x: number, z: number): number {
-        if (!this.#splatImageData) return 1.0;
-        const [worldW, worldH] = this.#terrain.worldSize;
-        const [offX, offZ] = this.#terrain.worldOffset;
-
-        const u = Math.max(0, Math.min(1, (x - offX) / worldW));
-        const v = Math.max(0, Math.min(1, (z - offZ) / worldH));
-
-        const px = Math.max(0, Math.min(this.#splatWidth - 1, Math.floor(u * this.#splatWidth)));
-        const py = Math.max(0, Math.min(this.#splatHeight - 1, Math.floor(v * this.#splatHeight)));
-
-        const idx = (py * this.#splatWidth + px) * 4;
-        let channelIdx = 1;
-        if (this.#maskChannel === 'r') channelIdx = 0;
-        else if (this.#maskChannel === 'b') channelIdx = 2;
-        else if (this.#maskChannel === 'a') channelIdx = 3;
-
-        return this.#splatImageData.data[idx + channelIdx] / 255.0;
-    }
+    // splatImage 및 getMaskValueAt 메서드 제거됨 (GPU 마스킹 이관)
 
     #dispatchCullCompute(renderViewStateData: RenderViewStateData): void {
         const {view} = renderViewStateData;
         const camera = view.rawCamera;
 
         // 1. Cull Uniform 갱신
+        let channelNum = 1; // default 'g'
+        if (this.#maskChannel === 'r') channelNum = 0;
+        else if (this.#maskChannel === 'b') channelNum = 2;
+        else if (this.#maskChannel === 'a') channelNum = 3;
+
         const u = this.#cullUniformData;
         u[0] = this.instanceCount;
         u[1] = this.maxDistance * this.maxDistance;
@@ -504,6 +474,8 @@ class VegetationMesh extends ProceduralInstancingMesh {
         u[3] = camera.x;
         u[4] = camera.y;
         u[5] = camera.z;
+        u[6] = this.#maskThreshold;
+        u[7] = channelNum;
 
         this.redGPUContext.gpuDevice.queue.writeBuffer(
             this.#cullUniformBuffer.gpuBuffer,
@@ -686,16 +658,11 @@ class VegetationMesh extends ProceduralInstancingMesh {
             return ((t ^ t >>> 14) >>> 0) / 4294967296;
         };
 
-        while (created < this.#totalCount && attempts < maxAttempts) {
-            attempts++;
+        while (created < this.#totalCount) {
             const rx = prng();
             const rz = prng();
             const x = offX + rx * worldW;
             const z = offZ + rz * worldH;
-
-            if (this.#splatImageData && this.#getMaskValueAt(x, z) < this.#maskThreshold) {
-                continue;
-            }
 
             const u = Math.max(0, Math.min(1, (x - offX) / worldW));
             const v = Math.max(0, Math.min(1, (z - offZ) / worldH));

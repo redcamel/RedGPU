@@ -13,6 +13,8 @@ struct CullUniforms {
     cameraPosX: f32,
     cameraPosY: f32,
     cameraPosZ: f32,
+    maskThreshold: f32,
+    maskChannel: u32,
 };
 
 struct FrustumPlanes {
@@ -38,6 +40,8 @@ struct VegetationUniforms {
 @group(0) @binding(6) var<storage, read> vegetationUniforms: VegetationUniforms;
 @group(0) @binding(7) var heightmapSampler: sampler;
 @group(0) @binding(8) var heightAtlasTexture: texture_2d<f32>;
+@group(0) @binding(9) var splatSampler: sampler;
+@group(0) @binding(10) var splatTexture: texture_2d<f32>;
 
 @compute @workgroup_size(64)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
@@ -50,6 +54,30 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let instX = instanceMatrix[3][0];
     let instY = instanceMatrix[3][1];
     let instZ = instanceMatrix[3][2];
+
+    // 0. Splatmap 토질 마스크 검사 (GPU Culling)
+    let splatUV = clamp(
+        vec2<f32>(
+            (instX - vegetationUniforms.worldOffset.x) / vegetationUniforms.worldSize.x,
+            1.0 - (instZ - vegetationUniforms.worldOffset.y) / vegetationUniforms.worldSize.y
+        ),
+        vec2<f32>(0.0), vec2<f32>(1.0)
+    );
+    let splatColor = textureSampleLevel(splatTexture, splatSampler, splatUV, 0.0);
+    var maskVal: f32 = 0.0;
+    if (cullUniforms.maskChannel == 0u) {
+        maskVal = splatColor.r;
+    } else if (cullUniforms.maskChannel == 1u) {
+        maskVal = splatColor.g;
+    } else if (cullUniforms.maskChannel == 2u) {
+        maskVal = splatColor.b;
+    } else {
+        maskVal = splatColor.a;
+    }
+
+    if (maskVal < cullUniforms.maskThreshold) {
+        return;
+    }
 
     // 1. Distance Culling 판정
     let dx = instX - cullUniforms.cameraPosX;
