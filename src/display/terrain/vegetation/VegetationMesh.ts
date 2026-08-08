@@ -328,9 +328,12 @@ class VegetationMesh extends ProceduralInstancingMesh {
                 {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
                 {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
                 {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
-                // {binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
                 {binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
                 {binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
+                {binding: 5, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
+                {binding: 6, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
+                {binding: 7, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
+                {binding: 8, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
             ]
         });
 
@@ -358,14 +361,23 @@ class VegetationMesh extends ProceduralInstancingMesh {
                     {binding: 2, resource: {buffer: targetMesh.indirectBuffer}},
                     {binding: 3, resource: {buffer: this.#cullUniformBuffer.gpuBuffer}},
                     {binding: 4, resource: {buffer: this.#frustumPlanesBuffer.gpuBuffer}},
+                    {binding: 5, resource: {buffer: targetMesh.culledInstanceHeightBuffer.gpuBuffer}},
+                    {binding: 6, resource: {buffer: this.#vegetationUniformBuffer.gpuBuffer}},
+                    {
+                        binding: 7,
+                        resource: this.#terrain.heightmapSampler?.gpuSampler
+                            || resourceManager.basicDisplacementSampler.gpuSampler
+                    },
+                    {
+                        binding: 8,
+                        resource: resourceManager.getGPUResourceBitmapTextureView(this.#terrain.heightmapAtlasTexture)
+                            || resourceManager.emptyBitmapTextureView
+                    },
                 ]
             });
         };
 
         this.#cullBindGroup = createCullBindGroup(this, `VegetationCullBG_${this.uuid}`);
-        for (const subMesh of this.#subVegetationMeshes) {
-            (subMesh as any).cullBindGroup = createCullBindGroup(subMesh, `VegetationCullBG_Sub_${subMesh.uuid}`);
-        }
     }
 
     onTileLoaded(tile: SpatialTileInfo): void {
@@ -771,16 +783,37 @@ class SubVegetationMesh extends ProceduralInstancingMesh {
         material: any,
         parentVegetation: VegetationMesh
     ) {
-        super(redGPUContext, totalCount, geometry, material);
+        // 자체 메모리 중복 할당 방지를 위해 super 생성자에는 최소 크기(1)만 전달
+        super(redGPUContext, 1, geometry, material);
         this.#parentVegetation = parentVegetation;
+    }
+
+    get maxInstanceCount(): number {
+        return this.#parentVegetation ? this.#parentVegetation.maxInstanceCount : 1;
+    }
+
+    get rawInstanceMatrixBuffer(): StorageBuffer {
+        return this.#parentVegetation ? this.#parentVegetation.rawInstanceMatrixBuffer : super.rawInstanceMatrixBuffer;
+    }
+
+    get instanceData(): Float32Array {
+        return this.#parentVegetation ? this.#parentVegetation.instanceData : super.instanceData;
     }
 
     get culledInstanceIndexBuffer(): StorageBuffer {
         return this.#parentVegetation ? this.#parentVegetation.culledInstanceIndexBuffer : super.culledInstanceIndexBuffer;
     }
 
+    get culledInstanceHeightBuffer(): StorageBuffer {
+        return this.#parentVegetation ? this.#parentVegetation.culledInstanceHeightBuffer : super.culledInstanceHeightBuffer;
+    }
+
     get vertexBindGroup(): GPUBindGroup {
         return this.#parentVegetation ? this.#parentVegetation.vertexBindGroup : super.vertexBindGroup;
+    }
+
+    flushInstanceData(): void {
+        // 자식 메쉬는 자체 버퍼를 flush하지 않고 부모가 이미 업로드한 데이터를 공유하므로 스킵합니다.
     }
 
     protected getVertexShaderSource(): string {

@@ -50,14 +50,13 @@ struct VertexOutput {
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
-// group(1): instanceMatrix 배열 + culledInstanceIndices + vertex uniforms
+// group(1): instanceMatrix 배열 + culledInstanceIndices + culledInstanceHeights + vertex uniforms
 @group(1) @binding(0) var<storage, read> instanceMatrices: array<mat4x4<f32>>;
 @group(1) @binding(1) var<storage, read> culledInstanceIndices: array<u32>;
-@group(1) @binding(2) var<storage, read> proceduralUniforms: ProceduralVertexUniforms;
+@group(1) @binding(2) var<storage, read> culledInstanceHeights: array<f32>;
+@group(1) @binding(3) var<storage, read> proceduralUniforms: ProceduralVertexUniforms;
 
 @group(3) @binding(0) var<storage, read> vegetationUniforms: VegetationUniforms;
-@group(3) @binding(1) var heightmapSampler: sampler;
-@group(3) @binding(2) var heightAtlasTexture: texture_2d<f32>;
 
 @vertex
 fn main(inputData: InputData) -> VertexOutput {
@@ -68,20 +67,8 @@ fn main(inputData: InputData) -> VertexOutput {
     let rawInstanceIdx = culledInstanceIndices[inputData.instanceIdx];
     var instanceMatrix = instanceMatrices[rawInstanceIdx];
 
-    // 인스턴스 월드 XZ 위치 (translation column에서 추출)
-    let instX = instanceMatrix[3][0];
-    let instZ = instanceMatrix[3][2];
-
-    // Heightmap UV 및 Y 샘플링
-    let terrainUV = clamp(
-        vec2<f32>(
-            (instX - vegetationUniforms.worldOffset.x) / vegetationUniforms.worldSize.x,
-            1.0 - (instZ - vegetationUniforms.worldOffset.y) / vegetationUniforms.worldSize.y
-        ),
-        vec2<f32>(0.0), vec2<f32>(1.0)
-    );
-    let sampledRatio = textureSampleLevel(heightAtlasTexture, heightmapSampler, terrainUV, 0.0).r;
-    let terrainY = vegetationUniforms.minHeight + sampledRatio * (vegetationUniforms.maxHeight - vegetationUniforms.minHeight);
+    // Compute Shader에서 미리 계산된 terrainY를 직접 참조 (텍스처 샘플링 제거)
+    let terrainY = culledInstanceHeights[inputData.instanceIdx];
 
     // translation column의 Y에 terrainY 추가 적용
     instanceMatrix[3][1] += terrainY;

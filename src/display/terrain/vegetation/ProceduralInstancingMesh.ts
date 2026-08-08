@@ -28,6 +28,7 @@ abstract class ProceduralInstancingMesh extends Mesh {
 
     #instanceMatrixBuffer: StorageBuffer;       // CPU 데이터 업로드용 Raw Storage Buffer
     #culledInstanceIndexBuffer: StorageBuffer; // Compute Shader 컬링 결과 저장용 Storage Buffer (u32 인덱스)
+    #culledInstanceHeightBuffer: StorageBuffer; // Compute Shader 컬링 결과 높이 저장용 Storage Buffer (f32 높이)
     #instanceMatrixData: Float32Array;
     #vertexUniformBuffer: StorageBuffer;
     #indirectBuffer: GPUBuffer;                 // drawIndexedIndirect / drawIndirect 전용 버퍼
@@ -65,10 +66,11 @@ abstract class ProceduralInstancingMesh extends Mesh {
     }
 
     set instanceCount(count: number) {
-        if (count > this.#maxInstanceCount) {
-            console.warn(`[ProceduralInstancingMesh] instanceCount(${count}) > max(${this.#maxInstanceCount}), clamped.`);
+        const maxCount = this.maxInstanceCount;
+        if (count > maxCount) {
+            console.warn(`[ProceduralInstancingMesh] instanceCount(${count}) > max(${maxCount}), clamped.`);
         }
-        this.#instanceCount = Math.min(count, this.#maxInstanceCount);
+        this.#instanceCount = Math.min(count, maxCount);
     }
 
     get instanceData(): Float32Array {
@@ -81,6 +83,10 @@ abstract class ProceduralInstancingMesh extends Mesh {
 
     get culledInstanceIndexBuffer(): StorageBuffer {
         return this.#culledInstanceIndexBuffer;
+    }
+
+    get culledInstanceHeightBuffer(): StorageBuffer {
+        return this.#culledInstanceHeightBuffer;
     }
 
     get indirectBuffer(): GPUBuffer {
@@ -262,6 +268,13 @@ abstract class ProceduralInstancingMesh extends Mesh {
             `ProceduralCulledInstanceIndices_${this.uuid}`
         );
 
+        // 컬링된 결과 높이 저장용 버퍼 (f32 height array)
+        this.#culledInstanceHeightBuffer = new StorageBuffer(
+            this.redGPUContext,
+            new ArrayBuffer(this.#maxInstanceCount * 4), // 4 bytes per height (f32)
+            `ProceduralCulledInstanceHeights_${this.uuid}`
+        );
+
         // Indirect Draw Argument Buffer (5 * u32 = 20 Bytes)
         this.#indirectBuffer = gpuDevice.createBuffer({
             label: `ProceduralIndirectBuffer_${this.uuid}`,
@@ -292,13 +305,14 @@ abstract class ProceduralInstancingMesh extends Mesh {
             {code: vertexSource}
         );
 
-        // group(1): instanceMatrices + culledInstanceIndices + vertexUniformBuffer
+        // group(1): instanceMatrices + culledInstanceIndices + culledInstanceHeights + vertexUniformBuffer
         this.#vertexBindGroupLayout = gpuDevice.createBindGroupLayout({
             label: `ProceduralVertexBGL_${this.uuid}`,
             entries: [
                 {binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
                 {binding: 1, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
                 {binding: 2, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
+                {binding: 3, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
             ]
         });
 
@@ -340,14 +354,15 @@ abstract class ProceduralInstancingMesh extends Mesh {
             multisample: {count: 1},
         });
 
-        // Vertex Shader에는 원본 버퍼, 컬링 인덱스 버퍼, 유니폼 바인딩
+        // Vertex Shader에는 원본 버퍼, 컬링 인덱스 버퍼, 컬링 높이 버퍼, 유니폼 바인딩
         this.#vertexBindGroup = gpuDevice.createBindGroup({
             label: `ProceduralVertexBG_${this.uuid}`,
             layout: this.#vertexBindGroupLayout,
             entries: [
                 {binding: 0, resource: {buffer: this.#instanceMatrixBuffer.gpuBuffer}},
                 {binding: 1, resource: {buffer: this.#culledInstanceIndexBuffer.gpuBuffer}},
-                {binding: 2, resource: {buffer: this.#vertexUniformBuffer.gpuBuffer}},
+                {binding: 2, resource: {buffer: this.#culledInstanceHeightBuffer.gpuBuffer}},
+                {binding: 3, resource: {buffer: this.#vertexUniformBuffer.gpuBuffer}},
             ]
         });
 

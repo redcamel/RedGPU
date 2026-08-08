@@ -19,11 +19,25 @@ struct FrustumPlanes {
     planes: array<vec4<f32>, 6>,
 };
 
+struct VegetationUniforms {
+    worldSize: vec2<f32>,
+    worldOffset: vec2<f32>,
+    maxHeight: f32,
+    minHeight: f32,
+    time: f32,
+    windStrength: f32,
+    baseModelMatrix: mat4x4<f32>,
+};
+
 @group(0) @binding(0) var<storage, read> rawInstanceMatrices: array<mat4x4<f32>>;
 @group(0) @binding(1) var<storage, read_write> culledInstanceIndices: array<u32>;
 @group(0) @binding(2) var<storage, read_write> indirectArgs: DrawIndexedIndirectArgs;
 @group(0) @binding(3) var<storage, read> cullUniforms: CullUniforms;
 @group(0) @binding(4) var<storage, read> frustumPlanes: FrustumPlanes;
+@group(0) @binding(5) var<storage, read_write> culledInstanceHeights: array<f32>;
+@group(0) @binding(6) var<storage, read> vegetationUniforms: VegetationUniforms;
+@group(0) @binding(7) var heightmapSampler: sampler;
+@group(0) @binding(8) var heightAtlasTexture: texture_2d<f32>;
 
 @compute @workgroup_size(64)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
@@ -77,7 +91,19 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         }
     }
 
-    // 3. 컬링 통과 인스턴스 저장 및 indirect count 증가
+    // Heightmap UV 및 Y 샘플링
+    let terrainUV = clamp(
+        vec2<f32>(
+            (instX - vegetationUniforms.worldOffset.x) / vegetationUniforms.worldSize.x,
+            1.0 - (instZ - vegetationUniforms.worldOffset.y) / vegetationUniforms.worldSize.y
+        ),
+        vec2<f32>(0.0), vec2<f32>(1.0)
+    );
+    let sampledRatio = textureSampleLevel(heightAtlasTexture, heightmapSampler, terrainUV, 0.0).r;
+    let terrainY = vegetationUniforms.minHeight + sampledRatio * (vegetationUniforms.maxHeight - vegetationUniforms.minHeight);
+
+    // 3. 컬링 통과 인스턴스 저장, Y 높이 저장 및 indirect count 증가
     let slot = atomicAdd(&indirectArgs.instanceCount, 1u);
     culledInstanceIndices[slot] = index;
+    culledInstanceHeights[slot] = terrainY;
 }
