@@ -88,7 +88,6 @@ export class TerrainSpatialGrid {
         }
 
         const camX = camera.x;
-        const camY = camera.y;
         const camZ = camera.z;
 
         const centerGridX = Math.floor(camX / this.#cellSize);

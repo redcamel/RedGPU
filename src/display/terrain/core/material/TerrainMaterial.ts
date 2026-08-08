@@ -53,7 +53,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
     #occlusionStrength: number = 1.0;
     #baseColorWeight: number = 0.5;
     #baseColorBlendMode: 'mix' | 'multiply' = 'multiply';
-    #bakeTimer: any = null;
 
     constructor(redGPUContext: RedGPUContext, name?: string) {
         super(
@@ -265,7 +264,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         });
 
         const ctx = this.redGPUContext;
-        const onLoad = (v) => {
+        const onLoad = () => {
             keepLog('오긴오냐', this.uuid)
             this.bakeAllRVTTiles();
         }

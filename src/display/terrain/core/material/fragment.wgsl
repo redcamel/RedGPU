@@ -61,7 +61,6 @@ fn main(inputData:InputData) -> OutputFragment {
     let input_vertexPosition = inputData.vertexPosition.xyz;
     let input_vertexColor_0 = inputData.vertexColor_0;
     let input_vertexTangent = inputData.vertexTangent;
-    let input_ndcPosition = inputData.position.xyz / inputData.position.w ;
     let input_uv = inputData.uv;
     let u_camera = systemUniforms.camera;
     let u_cameraPosition = u_camera.cameraPosition;
@@ -75,7 +74,6 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_else
         let u_baseColorFactor = pbrUniforms.baseColorFactor;
     #redgpu_endIf
-    let u_normalScale = pbrUniforms.normalScale;
     let u_KHR_materials_ior = pbrUniforms.KHR_materials_ior;
 
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
@@ -177,40 +175,6 @@ fn main(inputData:InputData) -> OutputFragment {
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
 
     return output;
-}
-
-fn getTextureTransformUV(
-    input_uv: vec2<f32>,
-    input_uv1: vec2<f32>,
-    texCoord_index: u32,
-    use_transform: u32,
-    transform_offset: vec2<f32>,
-    transform_rotation: f32,
-    transform_scale: vec2<f32>
-) -> vec2<f32> {
-    var result_uv = select(input_uv, input_uv1, texCoord_index == 1u);
-    if (use_transform == 1u) {
-        let translation = mat3x3<f32>(
-            1.0, 0.0, 0.0,
-            0.0, 1.0, 0.0,
-            transform_offset.x, transform_offset.y, 1.0
-        );
-        let cos_rot = cos(transform_rotation);
-        let sin_rot = sin(transform_rotation);
-        let rotation_matrix = mat3x3<f32>(
-            cos_rot, -sin_rot, 0.0,
-            sin_rot, cos_rot, 0.0,
-            0.0, 0.0, 1.0
-        );
-        let scale_matrix = mat3x3<f32>(
-            transform_scale.x, 0.0, 0.0,
-            0.0, transform_scale.y, 0.0,
-            0.0, 0.0, 1.0
-        );
-        let result_matrix = translation * rotation_matrix * scale_matrix;
-        result_uv = (result_matrix * vec3<f32>(result_uv, 1.0)).xy;
-    }
-    return result_uv;
 }
 
 fn getDielectricF0(ior: f32) -> vec3<f32> {

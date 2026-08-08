@@ -101,16 +101,14 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.baseSlotIndex = 0;
         this.#verticesPerSide = verticesPerSide;
 
-        const maxInstances = 65536; // 65,536 인스턴스 (65,536 * 16 bytes = 1MB VRAM) - 32K 대형 지형 및 고해상도 LOD 대비
-        this.#maxInstances = maxInstances;
+        this.#maxInstances = 65536;
         this.#instanceBuffer = redGPUContext.gpuDevice.createBuffer({
-            size: maxInstances * 16,
+            size: 65536 * 16,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
             label: 'TerrainInstanceBuffer'
         });
 
     }
-    #computePipeline: GPUComputePipeline | null = null;
 
     get instanceBuffer(): GPUBuffer {
         return this.#instanceBuffer;
@@ -330,9 +328,9 @@ class TerrainTileSystem extends TerrainMaterialBind {
         return this.#tileDataCache;
     }
 
-    loadTileFrom16BitBuffer(tile: SpatialTileInfo, data: ArrayBuffer | ArrayBufferView, width: number, height: number, format: GPUTextureFormat = 'r16float') {
+    loadTileFrom16BitBuffer(tile: SpatialTileInfo, data: ArrayBuffer | ArrayBufferView, width: number, height: number) {
         this.#registerTileData(tile, data);
-        this.#updateTileHeightmapFromBuffer(tile, data, width, height, format);
+        this.#updateTileHeightmapFromBuffer(tile, data, width, height);
         console.log(`[Tile Streamer 📥] Load 16-bit Buffer Cell(${tile.gridX}, ${tile.gridZ}) → Tile[${tile.tileColStr}, ${tile.tileRowStr}]`);
     }
 
@@ -366,7 +364,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
 
     #processor: TerrainHeightmapProcessor;
 
-    #updateTileHeightmapFromBuffer(tile: SpatialTileInfo, data: ArrayBuffer | ArrayBufferView, width: number, height: number, format: GPUTextureFormat = 'r16float') {
+    #updateTileHeightmapFromBuffer(tile: SpatialTileInfo, data: ArrayBuffer | ArrayBufferView, width: number, height: number) {
         const tileX = tile.tileCol ?? 0;
         const tileZ = tile.tileRow ?? 0;
 
@@ -390,8 +388,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
             width,
             height,
             gpuTexture,
-            this.atlasTileSize,
-            format
+            this.atlasTileSize
         );
 
         this.#markTileSynthesized(`${tileX}_${tileZ}`);
@@ -413,7 +410,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.#tileDataCache.set(key, data);
     }
 
-    #loadTileFromUrl(tile: SpatialTileInfo, url: string, format: GPUTextureFormat = 'r16float') {
+    #loadTileFromUrl(tile: SpatialTileInfo, url: string) {
         fetch(url)
             .then(res => {
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
@@ -422,9 +419,9 @@ class TerrainTileSystem extends TerrainMaterialBind {
             .then(async (buffer) => {
                 const parsed = await parse16BitPngBuffer(buffer);
                 if (parsed) {
-                    this.loadTileFrom16BitBuffer(tile, parsed.pixels, parsed.width, parsed.height, format);
+                    this.loadTileFrom16BitBuffer(tile, parsed.pixels, parsed.width, parsed.height);
                 } else {
-                    this.loadTileFrom16BitBuffer(tile, buffer, this.atlasTileSize, this.atlasTileSize, format);
+                    this.loadTileFrom16BitBuffer(tile, buffer, this.atlasTileSize, this.atlasTileSize);
                 }
             })
             .catch(err => {

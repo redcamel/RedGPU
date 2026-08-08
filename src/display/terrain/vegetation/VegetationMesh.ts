@@ -646,8 +646,7 @@ class VegetationMesh extends ProceduralInstancingMesh {
 
         const [worldW, worldH] = this.#terrain.worldSize;
         const [offX, offZ] = this.#terrain.worldOffset;
-        let created = 0, attempts = 0;
-        const maxAttempts = this.#totalCount * 10;
+        let created = 0;
 
         // Fast Mulberry32 PRNG for zero-GC procedural placement
         let seed = 1337;

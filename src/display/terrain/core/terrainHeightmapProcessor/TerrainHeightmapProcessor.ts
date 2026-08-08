@@ -26,8 +26,7 @@ export class TerrainHeightmapProcessor {
         width: number,
         height: number,
         targetGPUTexture: GPUTexture,
-        atlasTileSize: number,
-        format: GPUTextureFormat = 'r16float'
+        atlasTileSize: number
     ) {
         if (!this.#computePipeline || !this.#computeBindGroupLayout) return;
 

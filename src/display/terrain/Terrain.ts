@@ -71,7 +71,7 @@ class Terrain extends TerrainTileSystem {
         this.#dirtyPipelineListener();
     }
 
-    updateSampler(prevSampler: any, sampler: any) {
+    updateSampler() {
         this.#dirtyPipelineListener()
     }
 

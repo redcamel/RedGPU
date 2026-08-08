@@ -85,7 +85,6 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let wUV = bakeUniforms.worldUVOffset + rawUV * bakeUniforms.worldUVScale;
     let tileUV = wUV * bakeUniforms.tileScale;
-    let macroUV = wUV * bakeUniforms.macroScale;
 
     let bakeMip = getBakeMipLevel(bakeUniforms.tileScale, 1024.0, f32(outputDim.x));
 
