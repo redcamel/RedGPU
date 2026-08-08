@@ -354,7 +354,7 @@ class VegetationMesh extends ProceduralInstancingMesh {
                 layout: this.#cullBindGroupLayout,
                 entries: [
                     {binding: 0, resource: {buffer: targetMesh.rawInstanceMatrixBuffer.gpuBuffer}},
-                    {binding: 1, resource: {buffer: targetMesh.culledInstanceMatrixBuffer.gpuBuffer}},
+                    {binding: 1, resource: {buffer: targetMesh.culledInstanceIndexBuffer.gpuBuffer}},
                     {binding: 2, resource: {buffer: targetMesh.indirectBuffer}},
                     {binding: 3, resource: {buffer: this.#cullUniformBuffer.gpuBuffer}},
                     {binding: 4, resource: {buffer: this.#frustumPlanesBuffer.gpuBuffer}},
@@ -518,7 +518,7 @@ class VegetationMesh extends ProceduralInstancingMesh {
         computePass.setPipeline(this.#cullPipeline);
         const workgroupCount = Math.ceil(this.instanceCount / 64);
 
-        // 메인 메쉬 컬링
+        // 메인 메쉬 컬링 (1회 실행으로 최종 개수 산출)
         const geo = this.geometry as any;
         const indexCount = geo.indexBuffer?.count ?? geo.indexBuffer?.indexCount ?? 0;
         this.resetIndirectArgs(indexCount);
@@ -526,31 +526,26 @@ class VegetationMesh extends ProceduralInstancingMesh {
         computePass.setBindGroup(0, this.#cullBindGroup);
         computePass.dispatchWorkgroups(workgroupCount);
 
-        // 서브 메쉬들 컬링
+        computePass.end();
+
+        // 4. 서브 메쉬들의 indirectBuffer.instanceCount 필드를 부모의 결과값으로 복사하여 컬링 패스 완전 스킵
         for (const subMesh of this.#subVegetationMeshes) {
             if (subMesh.instanceCount > 0) {
                 const subGeo = subMesh.geometry as any;
                 const subIndexCount = subGeo.indexBuffer?.count ?? subGeo.indexBuffer?.indexCount ?? 0;
                 subMesh.resetIndirectArgs(subIndexCount);
 
-                const subCullBuffer = (subMesh as any).cullUniformBuffer;
-                if (subCullBuffer) {
-                    this.redGPUContext.gpuDevice.queue.writeBuffer(
-                        subCullBuffer.gpuBuffer,
-                        0,
-                        u.buffer as ArrayBuffer
-                    );
-                }
-
-                const subCullBG = (subMesh as any).cullBindGroup;
-                if (subCullBG) {
-                    computePass.setBindGroup(0, subCullBG);
-                    computePass.dispatchWorkgroups(workgroupCount);
-                }
+                // 부모의 indirectBuffer[4..7] (instanceCount)를 자식의 indirectBuffer[4..7]로 직접 복사
+                commandEncoder.copyBufferToBuffer(
+                    this.indirectBuffer,
+                    4,
+                    subMesh.indirectBuffer,
+                    4,
+                    4
+                );
             }
         }
 
-        computePass.end();
         this.redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()]);
     }
 
@@ -778,6 +773,14 @@ class SubVegetationMesh extends ProceduralInstancingMesh {
     ) {
         super(redGPUContext, totalCount, geometry, material);
         this.#parentVegetation = parentVegetation;
+    }
+
+    get culledInstanceIndexBuffer(): StorageBuffer {
+        return this.#parentVegetation ? this.#parentVegetation.culledInstanceIndexBuffer : super.culledInstanceIndexBuffer;
+    }
+
+    get vertexBindGroup(): GPUBindGroup {
+        return this.#parentVegetation ? this.#parentVegetation.vertexBindGroup : super.vertexBindGroup;
     }
 
     protected getVertexShaderSource(): string {

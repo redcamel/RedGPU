@@ -27,7 +27,7 @@ abstract class ProceduralInstancingMesh extends Mesh {
     boundingRadius: number = 5.0;
 
     #instanceMatrixBuffer: StorageBuffer;       // CPU 데이터 업로드용 Raw Storage Buffer
-    #culledInstanceMatrixBuffer: StorageBuffer; // Compute Shader 컬링 결과 저장용 Storage Buffer
+    #culledInstanceIndexBuffer: StorageBuffer; // Compute Shader 컬링 결과 저장용 Storage Buffer (u32 인덱스)
     #instanceMatrixData: Float32Array;
     #vertexUniformBuffer: StorageBuffer;
     #indirectBuffer: GPUBuffer;                 // drawIndexedIndirect / drawIndirect 전용 버퍼
@@ -79,8 +79,8 @@ abstract class ProceduralInstancingMesh extends Mesh {
         return this.#instanceMatrixBuffer;
     }
 
-    get culledInstanceMatrixBuffer(): StorageBuffer {
-        return this.#culledInstanceMatrixBuffer;
+    get culledInstanceIndexBuffer(): StorageBuffer {
+        return this.#culledInstanceIndexBuffer;
     }
 
     get indirectBuffer(): GPUBuffer {
@@ -152,6 +152,10 @@ abstract class ProceduralInstancingMesh extends Mesh {
         );
     }
 
+    get vertexBindGroup(): GPUBindGroup {
+        return this.#vertexBindGroup;
+    }
+
     render(renderViewStateData: RenderViewStateData, _shadowRender: boolean = false): void {
         if (this.#instanceCount === 0) return;
 
@@ -193,9 +197,10 @@ abstract class ProceduralInstancingMesh extends Mesh {
             encoder._boundBindGroups[0] = sysBG;
         }
 
-        if (encoder._boundBindGroups[1] !== this.#vertexBindGroup) {
-            currentRenderPassEncoder.setBindGroup(1, this.#vertexBindGroup);
-            encoder._boundBindGroups[1] = this.#vertexBindGroup;
+        const vertexBG = this.vertexBindGroup;
+        if (encoder._boundBindGroups[1] !== vertexBG) {
+            currentRenderPassEncoder.setBindGroup(1, vertexBG);
+            encoder._boundBindGroups[1] = vertexBG;
         }
 
         if (encoder._boundBindGroups[2] !== fragmentUniformBindGroup) {
@@ -218,11 +223,12 @@ abstract class ProceduralInstancingMesh extends Mesh {
             currentRenderPassEncoder.setVertexBuffer(0, vertexBuffer.gpuBuffer ?? vertexBuffer);
         }
 
+        const indirectBuffer = this.indirectBuffer;
         if (indexBuffer?.gpuBuffer) {
             currentRenderPassEncoder.setIndexBuffer(indexBuffer.gpuBuffer, indexBuffer.format ?? 'uint16');
-            currentRenderPassEncoder.drawIndexedIndirect(this.#indirectBuffer, 0);
+            currentRenderPassEncoder.drawIndexedIndirect(indirectBuffer, 0);
         } else {
-            currentRenderPassEncoder.drawIndirect(this.#indirectBuffer, 0);
+            currentRenderPassEncoder.drawIndirect(indirectBuffer, 0);
         }
 
         this.children?.forEach((child: any) => {
@@ -249,18 +255,18 @@ abstract class ProceduralInstancingMesh extends Mesh {
             `ProceduralInstanceMatrix_${this.uuid}`
         );
 
-        // 컬링된 결과 저장용 버퍼
-        this.#culledInstanceMatrixBuffer = new StorageBuffer(
+        // 컬링된 결과 저장용 버퍼 (u32 index array)
+        this.#culledInstanceIndexBuffer = new StorageBuffer(
             this.redGPUContext,
-            this.#instanceMatrixData.buffer as ArrayBuffer,
-            `ProceduralCulledInstanceMatrix_${this.uuid}`
+            new ArrayBuffer(this.#maxInstanceCount * 4), // 4 bytes per index
+            `ProceduralCulledInstanceIndices_${this.uuid}`
         );
 
         // Indirect Draw Argument Buffer (5 * u32 = 20 Bytes)
         this.#indirectBuffer = gpuDevice.createBuffer({
             label: `ProceduralIndirectBuffer_${this.uuid}`,
             size: 5 * Uint32Array.BYTES_PER_ELEMENT,
-            usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+            usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.COPY_SRC,
         });
 
         const vertexUniformData = new Uint32Array(VERTEX_UNIFORM_BYTES / 4);
@@ -286,12 +292,13 @@ abstract class ProceduralInstancingMesh extends Mesh {
             {code: vertexSource}
         );
 
-        // group(1): culledInstanceMatrixBuffer + vertexUniformBuffer
+        // group(1): instanceMatrices + culledInstanceIndices + vertexUniformBuffer
         this.#vertexBindGroupLayout = gpuDevice.createBindGroupLayout({
             label: `ProceduralVertexBGL_${this.uuid}`,
             entries: [
                 {binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
                 {binding: 1, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
+                {binding: 2, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
             ]
         });
 
@@ -333,13 +340,14 @@ abstract class ProceduralInstancingMesh extends Mesh {
             multisample: {count: 1},
         });
 
-        // Vertex Shader에는 컬링 통과 버퍼(#culledInstanceMatrixBuffer) 바인딩
+        // Vertex Shader에는 원본 버퍼, 컬링 인덱스 버퍼, 유니폼 바인딩
         this.#vertexBindGroup = gpuDevice.createBindGroup({
             label: `ProceduralVertexBG_${this.uuid}`,
             layout: this.#vertexBindGroupLayout,
             entries: [
-                {binding: 0, resource: {buffer: this.#culledInstanceMatrixBuffer.gpuBuffer}},
-                {binding: 1, resource: {buffer: this.#vertexUniformBuffer.gpuBuffer}},
+                {binding: 0, resource: {buffer: this.#instanceMatrixBuffer.gpuBuffer}},
+                {binding: 1, resource: {buffer: this.#culledInstanceIndexBuffer.gpuBuffer}},
+                {binding: 2, resource: {buffer: this.#vertexUniformBuffer.gpuBuffer}},
             ]
         });
 

@@ -50,9 +50,10 @@ struct VertexOutput {
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
-// group(1): instanceMatrix 배열 + vertex uniforms
+// group(1): instanceMatrix 배열 + culledInstanceIndices + vertex uniforms
 @group(1) @binding(0) var<storage, read> instanceMatrices: array<mat4x4<f32>>;
-@group(1) @binding(1) var<storage, read> proceduralUniforms: ProceduralVertexUniforms;
+@group(1) @binding(1) var<storage, read> culledInstanceIndices: array<u32>;
+@group(1) @binding(2) var<storage, read> proceduralUniforms: ProceduralVertexUniforms;
 
 @group(3) @binding(0) var<storage, read> vegetationUniforms: VegetationUniforms;
 @group(3) @binding(1) var heightmapSampler: sampler;
@@ -63,8 +64,9 @@ fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
     output.globalFragmentSlotIndex = proceduralUniforms.globalFragmentSlotIndex;
 
-    // CPU에서 미리 계산된 T(x,0,z) × baseModelMatrix × S 행렬
-    var instanceMatrix = instanceMatrices[inputData.instanceIdx];
+    // 인디렉션을 통해 실제 원본 인스턴스 인덱스 획득
+    let rawInstanceIdx = culledInstanceIndices[inputData.instanceIdx];
+    var instanceMatrix = instanceMatrices[rawInstanceIdx];
 
     // 인스턴스 월드 XZ 위치 (translation column에서 추출)
     let instX = instanceMatrix[3][0];

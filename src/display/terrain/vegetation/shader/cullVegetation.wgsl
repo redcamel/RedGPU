@@ -20,7 +20,7 @@ struct FrustumPlanes {
 };
 
 @group(0) @binding(0) var<storage, read> rawInstanceMatrices: array<mat4x4<f32>>;
-@group(0) @binding(1) var<storage, read_write> culledInstanceMatrices: array<mat4x4<f32>>;
+@group(0) @binding(1) var<storage, read_write> culledInstanceIndices: array<u32>;
 @group(0) @binding(2) var<storage, read_write> indirectArgs: DrawIndexedIndirectArgs;
 @group(0) @binding(3) var<storage, read> cullUniforms: CullUniforms;
 @group(0) @binding(4) var<storage, read> frustumPlanes: FrustumPlanes;
@@ -79,5 +79,5 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     // 3. 컬링 통과 인스턴스 저장 및 indirect count 증가
     let slot = atomicAdd(&indirectArgs.instanceCount, 1u);
-    culledInstanceMatrices[slot] = instanceMatrix;
+    culledInstanceIndices[slot] = index;
 }
