@@ -12,6 +12,7 @@ import StorageBuffer from "../../../resources/buffer/storageBuffer/StorageBuffer
 import vegetationVertexSource from "./shader/vegetationVertex.wgsl";
 import cullVegetationSource from "./shader/cullVegetation.wgsl";
 import {mat4} from "gl-matrix";
+import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 export interface VegetationMeshOptions {
     count?: number;
@@ -519,46 +520,46 @@ class VegetationMesh extends ProceduralInstancingMesh {
             this.#frustumPlanesData.buffer as ArrayBuffer
         );
 
-        // 3. Indirect Buffer instanceCount 카운터 0으로 리셋 및 Compute Pass 준비
-        const commandEncoder = this.redGPUContext.gpuDevice.createCommandEncoder({
-            label: `VegetationCullCommandEncoder_${this.uuid}`
-        });
-        const computePass = commandEncoder.beginComputePass({
-            label: `VegetationCullComputePass_${this.uuid}`
-        });
+        // 3. CommandEncoderManager를 사용하여 메인 인코더 파이프라인에 병합
+        this.redGPUContext.commandEncoderManager.useEncoder(
+            COMMAND_ENCODER_TYPE.PRE_PROCESS,
+            (commandEncoder) => {
+                const computePass = commandEncoder.beginComputePass({
+                    label: `VegetationCullComputePass_${this.uuid}`
+                });
 
-        computePass.setPipeline(this.#cullPipeline);
-        const workgroupCount = Math.ceil(this.instanceCount / 64);
+                computePass.setPipeline(this.#cullPipeline);
+                const workgroupCount = Math.ceil(this.instanceCount / 64);
 
-        // 메인 메쉬 컬링 (1회 실행으로 최종 개수 산출)
-        const geo = this.geometry as any;
-        const indexCount = geo.indexBuffer?.count ?? geo.indexBuffer?.indexCount ?? 0;
-        this.resetIndirectArgs(indexCount);
+                // 메인 메쉬 컬링 (1회 실행으로 최종 개수 산출)
+                const geo = this.geometry as any;
+                const indexCount = geo.indexBuffer?.count ?? geo.indexBuffer?.indexCount ?? 0;
+                this.resetIndirectArgs(indexCount);
 
-        computePass.setBindGroup(0, this.#cullBindGroup);
-        computePass.dispatchWorkgroups(workgroupCount);
+                computePass.setBindGroup(0, this.#cullBindGroup);
+                computePass.dispatchWorkgroups(workgroupCount);
 
-        computePass.end();
+                computePass.end();
 
-        // 4. 서브 메쉬들의 indirectBuffer.instanceCount 필드를 부모의 결과값으로 복사하여 컬링 패스 완전 스킵
-        for (const subMesh of this.#subVegetationMeshes) {
-            if (subMesh.instanceCount > 0) {
-                const subGeo = subMesh.geometry as any;
-                const subIndexCount = subGeo.indexBuffer?.count ?? subGeo.indexBuffer?.indexCount ?? 0;
-                subMesh.resetIndirectArgs(subIndexCount);
+                // 4. 서브 메쉬들의 indirectBuffer.instanceCount 필드를 부모의 결과값으로 복사하여 컬링 패스 완전 스킵
+                for (const subMesh of this.#subVegetationMeshes) {
+                    if (subMesh.instanceCount > 0) {
+                        const subGeo = subMesh.geometry as any;
+                        const subIndexCount = subGeo.indexBuffer?.count ?? subGeo.indexBuffer?.indexCount ?? 0;
+                        subMesh.resetIndirectArgs(subIndexCount);
 
-                // 부모의 indirectBuffer[4..7] (instanceCount)를 자식의 indirectBuffer[4..7]로 직접 복사
-                commandEncoder.copyBufferToBuffer(
-                    this.indirectBuffer,
-                    4,
-                    subMesh.indirectBuffer,
-                    4,
-                    4
-                );
+                        // 부모의 indirectBuffer[4..7] (instanceCount)를 자식의 indirectBuffer[4..7]로 직접 복사
+                        commandEncoder.copyBufferToBuffer(
+                            this.indirectBuffer,
+                            4,
+                            subMesh.indirectBuffer,
+                            4,
+                            4
+                        );
+                    }
+                }
             }
-        }
-
-        this.redGPUContext.gpuDevice.queue.submit([commandEncoder.finish()]);
+        );
     }
 
     #initVegetationBindGroup(redGPUContext: RedGPUContext): void {
