@@ -1,8 +1,8 @@
 // terrainHeightmapProcessor.wgsl
-// Dedicated WebGPU Compute Shader for Terrain Heightmap Packing and Bilinear Resampling
+// Dedicated WebGPU Compute Shader for Terrain Heightmap Packing, Bilinear Resampling, and Normal map baking
 
 @group(0) @binding(0) var<storage, read> rawDataBuffer: array<u32>;
-@group(0) @binding(1) var<storage, read_write> outputBuffer: array<u32>;
+@group(0) @binding(1) var<storage, read_write> outputBuffer: array<vec2<u32>>; // rgba16float 버퍼 (픽셀당 8바이트, u32 2개)
 
 struct TileUniforms {
     targetTileSize: u32,
@@ -30,6 +30,35 @@ fn getRawHeight(sampleIndex: u32) -> f32 {
     }
 }
 
+// 특정 (x, z) 픽셀의 보간된 높이값 계산 헬퍼 함수
+fn getInterpolatedHeightAt(pixelX: f32, pixelZ: f32, targetSize: f32) -> f32 {
+    let dWidth = f32(uniforms.dataWidth);
+    let dHeight = f32(uniforms.dataHeight);
+
+    let srcX = (pixelX / (targetSize - 1.0)) * (dWidth - 1.0);
+    let srcZ = (pixelZ / (targetSize - 1.0)) * (dHeight - 1.0);
+
+    let clampedX = clamp(srcX, 0.0, dWidth - 1.0);
+    let clampedZ = clamp(srcZ, 0.0, dHeight - 1.0);
+
+    let x0 = u32(floor(clampedX));
+    let z0 = u32(floor(clampedZ));
+    let x1 = min(x0 + 1u, uniforms.dataWidth - 1u);
+    let z1 = min(z0 + 1u, uniforms.dataHeight - 1u);
+
+    let fx = clampedX - f32(x0);
+    let fz = clampedZ - f32(z0);
+
+    let val00 = getRawHeight(z0 * uniforms.dataWidth + x0);
+    let val10 = getRawHeight(z0 * uniforms.dataWidth + x1);
+    let val01 = getRawHeight(z1 * uniforms.dataWidth + x0);
+    let val11 = getRawHeight(z1 * uniforms.dataWidth + x1);
+
+    let top = mix(val00, val10, fx);
+    let bottom = mix(val01, val11, fx);
+    return mix(top, bottom, fz) / 65535.0;
+}
+
 @compute @workgroup_size(16, 16)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let x = global_id.x;
@@ -40,42 +69,34 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         return;
     }
 
-    let dWidth = f32(uniforms.dataWidth);
-    let dHeight = f32(uniforms.dataHeight);
     let tSize = f32(targetSize);
+    
+    // 1. 현재 중심 높이값
+    let hCenter = getInterpolatedHeightAt(f32(x), f32(z), tSize);
 
-    let srcX = (f32(x) / (tSize - 1.0)) * (dWidth - 1.0);
-    let srcZ = (f32(z) / (tSize - 1.0)) * (dHeight - 1.0);
+    // 2. 주변 4방향 높이값 계산 (경사도 연산용)
+    let hL = getInterpolatedHeightAt(max(f32(x) - 1.0, 0.0), f32(z), tSize);
+    let hR = getInterpolatedHeightAt(min(f32(x) + 1.0, tSize - 1.0), f32(z), tSize);
+    let hD = getInterpolatedHeightAt(f32(x), max(f32(z) - 1.0, 0.0), tSize);
+    let hU = getInterpolatedHeightAt(f32(x), min(f32(z) + 1.0, tSize - 1.0), tSize);
 
-    let x0 = u32(floor(srcX));
-    let z0 = u32(floor(srcZ));
-    let x1 = min(x0 + 1u, uniforms.dataWidth - 1u);
-    let z1 = min(z0 + 1u, uniforms.dataHeight - 1u);
+    // 지형의 경사 스케일 인자 (가상 크기)
+    let stepX = 2.0 / tSize;
+    let stepZ = 2.0 / tSize;
+    
+    // 높이의 정규 경사 범위를 0~1에서 적절한 스케일로 적용
+    let heightRange = 0.5; 
 
-    let fx = srcX - f32(x0);
-    let fz = srcZ - f32(z0);
+    let tangentX = vec3<f32>(stepX, (hR - hL) * heightRange, 0.0);
+    let tangentZ = vec3<f32>(0.0, (hD - hU) * heightRange, stepZ);
 
-    let val00 = getRawHeight(z0 * uniforms.dataWidth + x0);
-    let val10 = getRawHeight(z0 * uniforms.dataWidth + x1);
-    let val01 = getRawHeight(z1 * uniforms.dataWidth + x0);
-    let val11 = getRawHeight(z1 * uniforms.dataWidth + x1);
+    // 외적을 통해 법선(Normal) 벡터 추출
+    let normal = normalize(cross(tangentZ, tangentX));
 
-    let top = mix(val00, val10, fx);
-    let bottom = mix(val01, val11, fx);
-    let interpolatedRaw = mix(top, bottom, fz);
-
-    let normalizedHeight = interpolatedRaw / 65535.0;
-    let packedF16Pair = pack2x16float(vec2<f32>(normalizedHeight, 0.0));
+    // 3. rgba16float 포맷 팩킹 (4개의 16비트 float 값을 2개의 u32(8Bytes)로 압축)
+    let packed0 = pack2x16float(vec2<f32>(hCenter, normal.x));
+    let packed1 = pack2x16float(vec2<f32>(normal.y, normal.z));
 
     let targetIndex = z * targetSize + x;
-    let outU32Index = targetIndex / 2u;
-    let isOdd = targetIndex % 2u;
-
-    let f16Bits = packedF16Pair & 0xFFFFu;
-
-    if (isOdd == 0u) {
-        outputBuffer[outU32Index] = (outputBuffer[outU32Index] & 0xFFFF0000u) | f16Bits;
-    } else {
-        outputBuffer[outU32Index] = (outputBuffer[outU32Index] & 0x0000FFFFu) | (f16Bits << 16u);
-    }
+    outputBuffer[targetIndex] = vec2<u32>(packed0, packed1);
 }

@@ -349,7 +349,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
         const gpuTexture = device.createTexture({
             label: 'Terrain_HeightmapTileAtlasGPUTexture',
             size: [atlasWidth, atlasHeight, 1],
-            format: 'r16float',
+            format: 'rgba16float', // r16float 대신 rgba16float로 확장
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
         });
 

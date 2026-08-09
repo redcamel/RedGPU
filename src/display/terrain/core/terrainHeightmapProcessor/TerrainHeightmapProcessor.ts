@@ -56,7 +56,7 @@ export class TerrainHeightmapProcessor {
         inputBuffer.unmap();
 
         const outputPixelCount = targetTileSize * targetTileSize;
-        const outputByteSize = Math.max(16, outputPixelCount * 2);
+        const outputByteSize = Math.max(16, outputPixelCount * 8); // rgba16float = 8 bytes per pixel
         const outputBuffer = device.createBuffer({
             size: outputByteSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
@@ -75,7 +75,7 @@ export class TerrainHeightmapProcessor {
         uniformBuffer.unmap();
 
         const bindGroup = device.createBindGroup({
-            layout: this.#computeBindGroupLayout,
+            layout: this.#computeBindGroupLayout!,
             entries: [
                 {binding: 0, resource: {buffer: inputBuffer}},
                 {binding: 1, resource: {buffer: outputBuffer}},
@@ -85,13 +85,13 @@ export class TerrainHeightmapProcessor {
 
         const commandEncoder = device.createCommandEncoder({label: 'TerrainTile_ComputeEncoder'});
         const passEncoder = commandEncoder.beginComputePass();
-        passEncoder.setPipeline(this.#computePipeline);
+        passEncoder.setPipeline(this.#computePipeline!);
         passEncoder.setBindGroup(0, bindGroup);
         passEncoder.dispatchWorkgroups(Math.ceil(targetTileSize / 16), Math.ceil(targetTileSize / 16));
         passEncoder.end();
 
         commandEncoder.copyBufferToTexture(
-            {buffer: outputBuffer, bytesPerRow: targetTileSize * 2, rowsPerImage: targetTileSize},
+            {buffer: outputBuffer, bytesPerRow: targetTileSize * 8, rowsPerImage: targetTileSize}, // rgba16float = 8 bytes
             {
                 texture: targetGPUTexture,
                 origin: [destX, destZ, 0]

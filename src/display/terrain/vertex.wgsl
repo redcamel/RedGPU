@@ -136,30 +136,32 @@ fn main(inputData: InputData) -> VertexOutput {
         let clampedWorldUV = clamp(worldUV, halfTexel, vec2<f32>(1.0) - halfTexel);
         let clampedParentUV = clamp(parentWorldUV, halfTexel, vec2<f32>(1.0) - halfTexel);
 
-        let h0 = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clampedWorldUV, 0.0).r;
-        let h1 = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clampedParentUV, 0.0).r;
+        // 높이와 미리 구워진 노멀 벡터를 한 번에 획득 (RGBA 채널)
+        let sampledData0 = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clampedWorldUV, 0.0);
+        let sampledData1 = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clampedParentUV, 0.0);
+
+        let h0 = sampledData0.r;
+        var normal0 = sampledData0.gba;
+
+        let h1 = sampledData1.r;
+        var normal1 = sampledData1.gba;
+
+        // 노멀 값이 아직 업데이트되지 않은 경우(길이가 0) 하늘 방향인 vec3(0, 1, 0)으로 폴백
+        if (length(normal0) < 0.01) {
+            normal0 = vec3<f32>(0.0, 1.0, 0.0);
+        }
+        if (length(normal1) < 0.01) {
+            normal1 = vec3<f32>(0.0, 1.0, 0.0);
+        }
 
         sampledHeight = mix(h0, h1, morphFactor);
-
-        let heightRange = vertexUniforms.maxHeight - vertexUniforms.minHeight;
-
-        let hL = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clamp(clampedWorldUV + vec2<f32>(-texelSize.x, 0.0), halfTexel, vec2<f32>(1.0) - halfTexel), 0.0).r;
-        let hR = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clamp(clampedWorldUV + vec2<f32>( texelSize.x, 0.0), halfTexel, vec2<f32>(1.0) - halfTexel), 0.0).r;
-        let hD = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clamp(clampedWorldUV + vec2<f32>(0.0, -texelSize.y), halfTexel, vec2<f32>(1.0) - halfTexel), 0.0).r;
-        let hU = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clamp(clampedWorldUV + vec2<f32>(0.0,  texelSize.y), halfTexel, vec2<f32>(1.0) - halfTexel), 0.0).r;
-
-        let stepX = vertexUniforms.worldSize.x * texelSize.x * 2.0;
-        let stepZ = vertexUniforms.worldSize.y * texelSize.y * 2.0;
-
-        let localTangentX = vec3<f32>(stepX, (hR - hL) * heightRange, 0.0);
-        let localTangentZ = vec3<f32>(0.0,   (hD - hU) * heightRange, stepZ);
-
-        let localNormal = normalize(cross(localTangentZ, localTangentX));
-        let localTangent = normalize(localTangentX);
+        let localNormal = mix(normal0, normal1, morphFactor);
 
         let worldNormal = normalize((gu_normalModelMatrix * vec4<f32>(localNormal, 0.0)).xyz);
-        let worldTangent = normalize((gu_modelMatrix * vec4<f32>(localTangent, 0.0)).xyz);
-
+        
+        // 가상 경사면의 기본 탄젠트 방향
+        let localTangentX = vec3<f32>(1.0, 0.0, 0.0);
+        let worldTangent = normalize((gu_modelMatrix * vec4<f32>(localTangentX, 0.0)).xyz);
         let orthogonalTangent = normalize(worldTangent - dot(worldTangent, worldNormal) * worldNormal);
 
         computedNormal = worldNormal;

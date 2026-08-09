@@ -167,7 +167,8 @@ class Terrain extends TerrainTileSystem {
         const width = gpuTexture.width;
         const height = gpuTexture.height;
 
-        const bytesPerPixel = gpuTexture.format === 'r16float' ? 2 : 4;
+        const format = gpuTexture.format;
+        const bytesPerPixel = format === 'rgba16float' ? 8 : (format === 'r16float' ? 2 : 4);
         const unpaddedBytesPerRow = width * bytesPerPixel;
         const align = 256;
         const paddedBytesPerRow = Math.ceil(unpaddedBytesPerRow / align) * align;
@@ -207,13 +208,14 @@ class Terrain extends TerrainTileSystem {
         const imageData = ctx.createImageData(width, height);
         const imgData = imageData.data;
 
-        if (gpuTexture.format === 'r16float') {
+        if (format === 'rgba16float' || format === 'r16float') {
             const dataView = new DataView(copyArrayBuffer);
+            const offsetMultiplier = format === 'rgba16float' ? 8 : 2;
             for (let y = 0; y < height; y++) {
                 const srcRowOffset = y * paddedBytesPerRow;
                 const dstRowOffset = y * width * 4;
                 for (let x = 0; x < width; x++) {
-                    const u16 = dataView.getUint16(srcRowOffset + x * 2, true);
+                    const u16 = dataView.getUint16(srcRowOffset + x * offsetMultiplier, true);
                     let exp = (u16 & 0x7C00) >> 10;
                     let frac = u16 & 0x03FF;
                     let val = (exp === 0) ? (frac / 1024) * Math.pow(2, -14) : (1 + frac / 1024) * Math.pow(2, exp - 15);
