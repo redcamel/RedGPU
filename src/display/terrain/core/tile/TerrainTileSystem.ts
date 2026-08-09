@@ -72,6 +72,10 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #instanceArrayBuffer: Float32Array; // CPU 인스턴싱 캐시 버퍼 (GC 방지)
     #tileSpanX: number = 0;
     #tileSpanZ: number = 0;
+
+    // 2번 최적화: 1차원 플랫 높이 데이터 버퍼 (8192 * 8192 * 2 Bytes = 128MB)
+    #flatHeightmapData: Uint16Array;
+
     #synthesizedTilesSet: Set<string> = new Set();
     #tileDataCache: Map<string, ArrayBufferView | ArrayBuffer> = new Map();
     #tileUrlResolver?: (tile: SpatialTileInfo) => string | void;
@@ -105,11 +109,15 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.#verticesPerSide = verticesPerSide;
 
         this.#maxInstances = 65536;
+
         this.#instanceBuffer = redGPUContext.gpuDevice.createBuffer({
             size: 65536 * 16,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
             label: 'TerrainInstanceBuffer'
         });
+
+        // 2번 최적화: 8192x8192 해상도 아틀라스용 플랫 버퍼 미리 1회 할당
+        this.#flatHeightmapData = new Uint16Array(8192 * 8192);
 
         // 최대 인스턴스 크기만큼의 Float32Array 사전 대용량 할당 (GC 부하 제거)
         this.#instanceArrayBuffer = new Float32Array(65536 * 4);
@@ -178,6 +186,10 @@ class TerrainTileSystem extends TerrainMaterialBind {
 
     set lodThreshold(value: number) {
         this.#lodThreshold = value;
+    }
+
+    get flatHeightmapData(): Uint16Array {
+        return this.#flatHeightmapData;
     }
 
     checkQuadtree(renderViewStateData: any) {
@@ -269,6 +281,41 @@ class TerrainTileSystem extends TerrainMaterialBind {
         }
     }
 
+    destroy() {
+        if (this.#instanceBuffer) {
+            this.#instanceBuffer.destroy();
+            this.#instanceBuffer = null as any;
+        }
+        if (this.heightmapAtlasTexture) {
+            this.heightmapAtlasTexture.destroy();
+            this.heightmapAtlasTexture = null;
+        }
+        this.#tileDataCache.clear();
+        this.#synthesizedTilesSet.clear();
+        if (this.#processor) {
+            this.#processor.destroy();
+            this.#processor = null;
+        }
+        super.destroy();
+    }
+
+    isTileSynthesized(tile: SpatialTileInfo | string): boolean {
+        const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
+        return this.#synthesizedTilesSet.has(key);
+    }
+
+    setTileUrlResolver(resolver: (tile: SpatialTileInfo) => string | void) {
+        this.#tileUrlResolver = resolver;
+    }
+
+    setOnTileLoad(callback: (tile: SpatialTileInfo) => void) {
+        this.#onTileLoadCallback = callback;
+    }
+
+    setOnTileUnload(callback: (tile: SpatialTileInfo) => void) {
+        this.#onTileUnloadCallback = callback;
+    }
+
     #updateInstanceRenderBuffer(cameraPos: [number, number, number], renderViewStateData: any) {
         this.#quadtree.update(
             cameraPos,
@@ -296,47 +343,13 @@ class TerrainTileSystem extends TerrainMaterialBind {
                 arrayBuffer[i * 4 + 2] = node.worldScale;
                 arrayBuffer[i * 4 + 3] = node.lodLevel;
             }
-            // 실제로 갱신된 필요한 바이트 크기만큼만 GPU에 전송
+            // 원래의 단일 안전 버퍼에 기록
             this.redGPUContext.gpuDevice.queue.writeBuffer(this.#instanceBuffer, 0, arrayBuffer as BufferSource, 0, count * 4);
         }
 
         if (this.gpuRenderInfo && this.drawCommandSlot && this.drawBufferManager) {
             this.drawBufferManager.setInstanceNum(this.drawCommandSlot, count);
         }
-    }
-
-    isTileSynthesized(tile: SpatialTileInfo | string): boolean {
-        const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
-        return this.#synthesizedTilesSet.has(key);
-    }
-
-    setTileUrlResolver(resolver: (tile: SpatialTileInfo) => string | void) {
-        this.#tileUrlResolver = resolver;
-    }
-
-    setOnTileLoad(callback: (tile: SpatialTileInfo) => void) {
-        this.#onTileLoadCallback = callback;
-    }
-
-    setOnTileUnload(callback: (tile: SpatialTileInfo) => void) {
-        this.#onTileUnloadCallback = callback;
-    }
-
-    destroy() {
-        if (this.#instanceBuffer) {
-            this.#instanceBuffer.destroy();
-            this.#instanceBuffer = null;
-        }
-        if (this.heightmapAtlasTexture) {
-            this.heightmapAtlasTexture.destroy();
-            this.heightmapAtlasTexture = null;
-        }
-        this.#tileDataCache.clear();
-        this.#synthesizedTilesSet.clear();
-        if (this.#processor) {
-            this.#processor = null;
-        }
-        super.destroy();
     }
 
     #createHeightmapTileAtlas(tileCountX: number = 16, tileCountZ: number = 16, tileSize: number = 512) {
@@ -371,8 +384,6 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.#updateTileHeightmapFromBuffer(tile, data, width, height);
         console.log(`[Tile Streamer 📥] Load 16-bit Buffer Cell(${tile.gridX}, ${tile.gridZ}) → Tile[${tile.tileColStr}, ${tile.tileRowStr}]`);
     }
-
-
 
     #enrichTileInfo(tile: SpatialTileInfo) {
         tile.cellKey = `${tile.gridX}_${tile.gridZ}`;
@@ -439,6 +450,46 @@ class TerrainTileSystem extends TerrainMaterialBind {
         }
     }
 
+    // 2번 최적화: 새로 로딩된 16비트 높이맵 버퍼 구역을 1차원 거대 플랫 버퍼에 실시간 복사
+    #updateFlatHeightmapSector(key: string, data: any) {
+        const parts = key.split('_');
+        const tileCol = parseInt(parts[0], 10);
+        const tileRow = parseInt(parts[1], 10);
+
+        const tileSize = this.atlasTileSize;
+        const totalWidth = this.atlasTileCountX * tileSize; // 8192
+
+        // 캐시 데이터 규격에 맞는 TypedArray 획득
+        let tileData: Uint16Array;
+        if (data instanceof Float32Array) {
+            tileData = new Uint16Array(data.length);
+            for (let i = 0; i < data.length; i++) tileData[i] = data[i] * 65535.0;
+        } else if (data instanceof Uint16Array) {
+            tileData = data;
+        } else if (data instanceof ArrayBuffer) {
+            tileData = new Uint16Array(data);
+        } else if (ArrayBuffer.isView(data)) {
+            tileData = new Uint16Array(data.buffer, data.byteOffset, data.byteLength / 2);
+        } else {
+            return;
+        }
+
+        const startX = tileCol * tileSize;
+        const startZ = tileRow * tileSize;
+
+        // 2D 텍셀 구역을 1차원 거대 플랫 메모리로 타일 단위 복사
+        for (let tz = 0; tz < tileSize; tz++) {
+            const srcOffset = tz * tileSize;
+            const dstOffset = (startZ + tz) * totalWidth + startX;
+
+            // 한 번에 한 스캔라인(512개)씩 빠르게 일괄 메모리 복사
+            this.#flatHeightmapData.set(
+                tileData.subarray(srcOffset, srcOffset + tileSize),
+                dstOffset
+            );
+        }
+    }
+
     #registerTileData(tile: SpatialTileInfo | string, data: any) {
         const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
 
@@ -447,6 +498,9 @@ class TerrainTileSystem extends TerrainMaterialBind {
         }
         
         this.#tileDataCache.set(key, data);
+
+        // 2번 최적화: 높이맵 평탄화 버퍼 실시간 갱신 실행
+        this.#updateFlatHeightmapSector(key, data);
 
         // 캐시 한도 초과 시 가장 오래된 자원 방출 (Max Limit: 128)
         // 단, 현재 공간 그리드에서 활성화된(사용 중인) 타일은 방출 대상에서 절대 보호함

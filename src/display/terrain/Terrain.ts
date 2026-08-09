@@ -87,9 +87,9 @@ class Terrain extends TerrainTileSystem {
         const u = Math.max(0, Math.min(1, (x - offX) / worldW));
         const v = Math.max(0, Math.min(1, (z - offZ) / worldH));
 
-        // 전체 아틀라스 해상도 규격 (타일 개수 * 타일당 픽셀 크기)
-        const totalResolution = tileCount * tileSize;
-        const maxPixelIdx = totalResolution - 1;
+        // 전체 아틀라스 해상도 규격 (타일 개수 * 타일당 픽셀 크기) - 예: 16 * 512 = 8192
+        const totalWidth = tileCount * tileSize;
+        const maxPixelIdx = totalWidth - 1;
 
         // 실수형 픽셀 좌표 계산 (v는 높이맵 텍스처 기준 뒤집음)
         const tx = u * maxPixelIdx;
@@ -105,46 +105,13 @@ class Terrain extends TerrainTileSystem {
         const fx = tx - x0;
         const fz = tz - z0;
 
-        // 특정 픽셀 위치의 16비트 높이 데이터 추출 헬퍼
+        const flatData = this.flatHeightmapData;
+
+        // 2번 최적화: Map lookup 및 분기를 100% 제거한 단일 1차원 플랫 메모리 룩업 (O(1))
         const getVal = (px: number, pz: number): number => {
-            const col = Math.max(0, Math.min(tileCount - 1, Math.floor(px / tileSize)));
-            const row = Math.max(0, Math.min(tileCount - 1, Math.floor(pz / tileSize)));
-            const key = `${col}_${row}`;
-
-            const cachedData = this.tileDataCache.get(key);
-            if (!cachedData) return 0;
-
-            // [LRU Touch] CPU 높이 조회가 발생한 자원은 가장 최신 사용으로 순서 갱신
-            this.tileDataCache.delete(key);
-            this.tileDataCache.set(key, cachedData);
-
-            const localX = Math.max(0, Math.min(tileSize - 1, Math.floor(px % tileSize)));
-            const localY = Math.max(0, Math.min(tileSize - 1, Math.floor(pz % tileSize)));
-            const arrayIndex = localY * tileSize + localX;
-
-            // 1. Float32Array 캐시 데이터인 경우 (0.0 ~ 1.0 범위)
-            if (cachedData instanceof Float32Array) {
-                const valF32 = cachedData[arrayIndex];
-                return valF32 !== undefined ? valF32 * 65535.0 : 0.0;
-            }
-
-            // 2. Uint16Array 캐시 데이터인 경우
-            if (cachedData instanceof Uint16Array) {
-                const valU16 = cachedData[arrayIndex];
-                return valU16 !== undefined ? valU16 : 0.0;
-            }
-
-            // 3. ArrayBuffer 또는 다른 View인 경우 변환
-            let tileData: Uint16Array;
-            if (cachedData instanceof ArrayBuffer) {
-                tileData = new Uint16Array(cachedData);
-            } else if (ArrayBuffer.isView(cachedData)) {
-                tileData = new Uint16Array(cachedData.buffer, cachedData.byteOffset, cachedData.byteLength / 2);
-            } else {
-                return 0;
-            }
-
-            const val = tileData[arrayIndex];
+            const ix = Math.max(0, Math.min(maxPixelIdx, Math.floor(px)));
+            const iz = Math.max(0, Math.min(maxPixelIdx, Math.floor(pz)));
+            const val = flatData[iz * totalWidth + ix];
             return val !== undefined ? val : 0;
         };
 

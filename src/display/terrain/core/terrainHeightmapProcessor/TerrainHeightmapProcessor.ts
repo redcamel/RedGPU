@@ -135,6 +135,11 @@ export class TerrainHeightmapProcessor {
             compute: {module: shaderModule, entryPoint: 'main'}
         });
     }
+
+    destroy(): void {
+        this.#computePipeline = null;
+        this.#computeBindGroupLayout = null;
+    }
 }
 
 export default TerrainHeightmapProcessor;
