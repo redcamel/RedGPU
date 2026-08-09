@@ -1,5 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import wgslCode from "./terrainHeightmapProcessor.wgsl";
+import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 /**
  * [KO] Terrain 높이맵 타일 데이터의 Compute Shader 기반 변환 및 패킹을 전담하는 프로세서 유틸리티입니다.
@@ -47,6 +48,7 @@ export class TerrainHeightmapProcessor {
             dataType = 0;
         }
 
+        // 동시성 오염을 방지하기 위해 각 타일별 독립적인 임시 버퍼 생성 (동작 안정성 100% 보장)
         const inputBuffer = device.createBuffer({
             size: Math.max(16, Math.ceil(srcByteArray.byteLength / 4) * 4),
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
@@ -83,27 +85,30 @@ export class TerrainHeightmapProcessor {
             ]
         });
 
-        const commandEncoder = device.createCommandEncoder({label: 'TerrainTile_ComputeEncoder'});
-        const passEncoder = commandEncoder.beginComputePass();
-        passEncoder.setPipeline(this.#computePipeline!);
-        passEncoder.setBindGroup(0, bindGroup);
-        passEncoder.dispatchWorkgroups(Math.ceil(targetTileSize / 16), Math.ceil(targetTileSize / 16));
-        passEncoder.end();
+        // CommandEncoderManager를 통해 연산 버퍼들이 순차 인코딩된 후 안전한 시점에 큐 제출되도록 조율
+        const commandEncoderManager = this.#redGPUContext.commandEncoderManager;
 
-        commandEncoder.copyBufferToTexture(
-            {buffer: outputBuffer, bytesPerRow: targetTileSize * 8, rowsPerImage: targetTileSize}, // rgba16float = 8 bytes
-            {
-                texture: targetGPUTexture,
-                origin: [destX, destZ, 0]
-            },
-            [targetTileSize, targetTileSize, 1]
-        );
+        commandEncoderManager.addResourceComputePass('TerrainTile_ComputePass', (passEncoder) => {
+            passEncoder.setPipeline(this.#computePipeline!);
+            passEncoder.setBindGroup(0, bindGroup);
+            passEncoder.dispatchWorkgroups(Math.ceil(targetTileSize / 16), Math.ceil(targetTileSize / 16));
+        });
 
-        device.queue.submit([commandEncoder.finish()]);
+        commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (encoder) => {
+            encoder.copyBufferToTexture(
+                {buffer: outputBuffer, bytesPerRow: targetTileSize * 8, rowsPerImage: targetTileSize},
+                {
+                    texture: targetGPUTexture,
+                    origin: [destX, destZ, 0]
+                },
+                [targetTileSize, targetTileSize, 1]
+            );
+        });
 
-        inputBuffer.destroy();
-        outputBuffer.destroy();
-        uniformBuffer.destroy();
+        // 큐 제출이 완료된 뒤 안전한 시점에 임시 버퍼들을 파괴하도록 매니저에 지연 등록
+        commandEncoderManager.addDeferredDestroy(inputBuffer);
+        commandEncoderManager.addDeferredDestroy(outputBuffer);
+        commandEncoderManager.addDeferredDestroy(uniformBuffer);
     }
 
     #initComputePipeline() {
