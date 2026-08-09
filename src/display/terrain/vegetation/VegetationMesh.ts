@@ -5,7 +5,7 @@ import PBRMaterial from "../../../material/pbrMaterial/PBRMaterial";
 import Geometry from "../../../geometry/Geometry";
 import Primitive from "../../../primitive/core/Primitive";
 import Terrain from "../Terrain";
-import {SpatialTileInfo} from "../core/TerrainSpatialGrid";
+import {SpatialTileInfo} from "../core/tile/TerrainSpatialGrid";
 import Mesh from "../../mesh/Mesh";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import StorageBuffer from "../../../resources/buffer/storageBuffer/StorageBuffer";

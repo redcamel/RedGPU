@@ -1,7 +1,7 @@
 import Terrain, {TerrainLayerConfig} from "./Terrain";
 import TerrainMaterial from "./core/material/TerrainMaterial";
 import TerrainRVT from "./core/rvt/TerrainRVT";
-import {SpatialTileInfo, TerrainSpatialGrid} from "./core/TerrainSpatialGrid";
+import {SpatialTileInfo, TerrainSpatialGrid} from "./core/tile/TerrainSpatialGrid";
 import TERRAIN_VERTICES_PER_SIDE, {TerrainVerticesPerSide} from "./const/TERRAIN_VERTICES_PER_SIDE";
 import VegetationMesh from "./vegetation/VegetationMesh";
 

@@ -5,7 +5,7 @@ import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_FILTER_MODE from "../../gpuConst/GPU_FILTER_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import vertexModuleSource from "./vertex.wgsl";
-import TerrainTileSystem, {TerrainOptions} from "./core/TerrainTileSystem";
+import TerrainTileSystem, {TerrainOptions} from "./core/tile/TerrainTileSystem";
 import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
 import DirectTexture from "../../resources/texture/DirectTexture";
 import BitmapTexture from "../../resources/texture/BitmapTexture";

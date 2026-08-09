@@ -1,18 +1,18 @@
-import RedGPUContext from "../../../context/RedGPUContext";
-import TerrainMaterialBind from "./TerrainMaterialBind";
-import keepLog from "../../../utils/keepLog";
-import defineTexture from "../../../defineProperty/funcs/texture/defineTexture";
-import DirectTexture from "../../../resources/texture/DirectTexture";
+import RedGPUContext from "../../../../context/RedGPUContext";
+import TerrainMaterialBind from "../TerrainMaterialBind";
+import keepLog from "../../../../utils/keepLog";
+import defineTexture from "../../../../defineProperty/funcs/texture/defineTexture";
+import DirectTexture from "../../../../resources/texture/DirectTexture";
 import {SpatialTileInfo, TerrainSpatialGrid} from "./TerrainSpatialGrid";
-import BitmapTexture from "../../../resources/texture/BitmapTexture";
-import defineVector2 from "../../../defineProperty/funcs/vector/defineVector2";
+import BitmapTexture from "../../../../resources/texture/BitmapTexture";
+import defineVector2 from "../../../../defineProperty/funcs/vector/defineVector2";
 import {TerrainQuadtree} from "./TerrainQuadtree";
-import defineNumber from "../../../defineProperty/funcs/number/defineNumber";
-import updateTargetUniform from "../../../defineProperty/core/updateTargetUniform";
-import TerrainGeometry from "./TerrainGeometry";
+import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
+import updateTargetUniform from "../../../../defineProperty/core/updateTargetUniform";
+import TerrainGeometry from "../TerrainGeometry";
 
-import TerrainHeightmapProcessor from "./terrainHeightmapProcessor/TerrainHeightmapProcessor";
-import parse16BitPngBuffer from "../../../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
+import TerrainHeightmapProcessor from "../terrainHeightmapProcessor/TerrainHeightmapProcessor";
+import parse16BitPngBuffer from "../../../../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
 
 interface TerrainTileSystem {
     heightmapAtlasTexture: DirectTexture | BitmapTexture | null;
@@ -264,13 +264,13 @@ class TerrainTileSystem extends TerrainMaterialBind {
             const arrayBuffer = new Float32Array(count * 4);
             for (let i = 0; i < count; i++) {
                 const node = leafNodes[i];
-                const centerX = node.offset[0] + (node.scale * 0.5);
-                const centerZ = node.offset[1] + (node.scale * 0.5);
+                const centerX = node.worldOffset[0] + (node.worldScale * 0.5);
+                const centerZ = node.worldOffset[1] + (node.worldScale * 0.5);
 
                 arrayBuffer[i * 4 + 0] = this.worldOffset[0] + centerX;
                 arrayBuffer[i * 4 + 1] = this.worldOffset[1] + centerZ;
-                arrayBuffer[i * 4 + 2] = node.scale;
-                arrayBuffer[i * 4 + 3] = node.lod;
+                arrayBuffer[i * 4 + 2] = node.worldScale;
+                arrayBuffer[i * 4 + 3] = node.lodLevel;
             }
             this.redGPUContext.gpuDevice.queue.writeBuffer(this.#instanceBuffer, 0, arrayBuffer, 0, count * 4);
         }

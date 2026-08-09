@@ -41,15 +41,18 @@ export class QuadtreeNode {
         const centerY = (minY + maxY) * 0.5;
         const centerZ = (minZ + maxZ) * 0.5;
 
+        // AABB 반경 계산 (제곱근 없음)
         const ex = (maxX - minX) * 0.5;
         const ey = (maxY - minY) * 0.5;
         const ez = (maxZ - minZ) * 0.5;
-        const radius = Math.sqrt(ex * ex + ey * ey + ez * ez);
 
         for (let i = 0; i < 6; i++) {
             const p = planes[i];
             const dist = p[0] * centerX + p[1] * centerY + p[2] * centerZ + p[3];
-            if (dist <= -radius) return false;
+
+            // AABB 투영 크기 계산 (정확한 AABB 판정)
+            const r = ex * Math.abs(p[0]) + ey * Math.abs(p[1]) + ez * Math.abs(p[2]);
+            if (dist <= -r) return false;
         }
         return true;
     }
@@ -64,14 +67,16 @@ export class QuadtreeNode {
 
         const dx = Math.max(minX - cameraPos[0], 0, cameraPos[0] - maxX);
         const dz = Math.max(minZ - cameraPos[2], 0, cameraPos[2] - maxZ);
-        const distXZ = Math.sqrt(dx * dx + dz * dz);
 
-        return distXZ < this.worldScale * lodThreshold;
+        // 제곱근 연산 제거
+        const distSq = dx * dx + dz * dz;
+        const threshold = this.worldScale * lodThreshold;
+        return distSq < threshold * threshold;
     }
 }
 
 export class TerrainQuadtree {
-    public leafNodes: Array<{ offset: [number, number], scale: number, lod: number }> = [];
+    public leafNodes: QuadtreeNode[] = [];
     private rootNode: QuadtreeNode;
 
     constructor(worldSize: number, maxLOD: number) {
@@ -108,11 +113,8 @@ export class TerrainQuadtree {
                 this.#traverse(child, cameraPos, planes, minHeight, maxHeight, worldOffsetX, worldOffsetZ, lodThreshold);
             }
         } else {
-            this.leafNodes.push({
-                offset: node.worldOffset,
-                scale: node.worldScale,
-                lod: node.lodLevel
-            });
+            // 새 객체를 힙에 할당하지 않고 기존 노드 인스턴스를 바로 등록 (GC 억제)
+            this.leafNodes.push(node);
         }
     }
 }
