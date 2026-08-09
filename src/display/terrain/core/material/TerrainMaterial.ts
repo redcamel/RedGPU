@@ -175,13 +175,27 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         this.bakeAllRVTTiles();
     }
 
+    #bakePromise: Promise<void> | null = null;
+    #latestTileCountX = 16;
+    #latestTileCountZ = 16;
+
     public bakeAllRVTTiles = (tileCountX: number = 16, tileCountZ: number = 16): void => {
-        if (!this.#rvt) return;
-        for (let row = 0; row < tileCountZ; row++) {
-            for (let col = 0; col < tileCountX; col++) {
-                this.#rvt.bakeTile(this, col, row, tileCountX, tileCountZ);
+        this.#latestTileCountX = tileCountX;
+        this.#latestTileCountZ = tileCountZ;
+
+        if (this.#bakePromise) return;
+
+        this.#bakePromise = Promise.resolve().then(() => {
+            this.#bakePromise = null;
+            if (!this.#rvt) return;
+            const cx = this.#latestTileCountX;
+            const cz = this.#latestTileCountZ;
+            for (let row = 0; row < cz; row++) {
+                for (let col = 0; col < cx; col++) {
+                    this.#rvt.bakeTile(this, col, row, cx, cz);
+                }
             }
-        }
+        });
     };
 
     public bakeRVTTile(tileCol: number, tileRow: number, tileCountX: number = 16, tileCountZ: number = 16): void {
