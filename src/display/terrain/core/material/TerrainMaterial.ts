@@ -76,9 +76,9 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         this.rvtSampler = new Sampler(redGPUContext, {
             magFilter: GPU_FILTER_MODE.LINEAR,
             minFilter: GPU_FILTER_MODE.LINEAR,
-            mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
             addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
-            addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE
+            addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
+            maxAnisotropy: 16
         });
 
         this.#rvt = new TerrainRVT(redGPUContext, {atlasSize: 4096});
