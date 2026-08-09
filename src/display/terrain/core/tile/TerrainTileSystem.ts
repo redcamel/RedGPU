@@ -438,7 +438,22 @@ class TerrainTileSystem extends TerrainMaterialBind {
 
     #registerTileData(tile: SpatialTileInfo | string, data: any) {
         const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
+
+        // LRU 순서 갱신을 위해 기존 키 삭제 후 재등록
+        if (this.#tileDataCache.has(key)) {
+            this.#tileDataCache.delete(key);
+        }
+        
         this.#tileDataCache.set(key, data);
+
+        // 캐시 한도 초과 시 가장 오래된 자원 방출 (Max Limit: 128)
+        const MAX_CACHE_SIZE = 128;
+        if (this.#tileDataCache.size > MAX_CACHE_SIZE) {
+            const oldestKey = this.#tileDataCache.keys().next().value;
+            if (oldestKey !== undefined) {
+                this.#tileDataCache.delete(oldestKey);
+            }
+        }
     }
 
     #loadTileFromUrl(tile: SpatialTileInfo, url: string) {
