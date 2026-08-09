@@ -25,6 +25,8 @@ abstract class ProceduralInstancingMesh extends Mesh {
     startFadeDistance: number = 1200;
     windMaxDistance: number = 300;
     boundingRadius: number = 5.0;
+    aabbMin: Float32Array = new Float32Array([-1, -1, -1]);
+    aabbMax: Float32Array = new Float32Array([1, 1, 1]);
 
     #instanceMatrixBuffer: StorageBuffer;       // CPU 데이터 업로드용 Raw Storage Buffer
     #culledInstanceIndexBuffer: StorageBuffer; // Compute Shader 컬링 결과 저장용 Storage Buffer (u32 인덱스)

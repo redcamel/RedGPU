@@ -72,7 +72,7 @@ class VegetationMesh extends ProceduralInstancingMesh {
     #cullBindGroupLayout: GPUBindGroupLayout;
     #cullUniformBuffer: StorageBuffer;
     #frustumPlanesBuffer: StorageBuffer;
-    #cullUniformData: Float32Array = new Float32Array(8);
+    #cullUniformData: Float32Array = new Float32Array(16);
     #frustumPlanesData: Float32Array = new Float32Array(24); // 6 planes * vec4
 
     #windStrength: number = 0.08;
@@ -145,36 +145,80 @@ class VegetationMesh extends ProceduralInstancingMesh {
         this.windMaxDistance = options.windMaxDistance ?? 300;
         this.#baseScale = baseScale;
 
-        // 지오메트리 원본 반경 및 relativeMatrix Offset, baseScale 기반 boundingRadius 동적 자동 산출
-        if (options.boundingRadius !== undefined) {
-            this.boundingRadius = options.boundingRadius;
-        } else {
-            let maxGeomRadius = 0;
-            const subItems = subMeshList.length > 0 ? subMeshList : [{
-                node: null,
-                geometry,
-                material: null,
-                relativeMatrix: null
-            }];
-            for (const item of subItems) {
-                if (item && item.geometry) {
-                    const vol = (item.geometry as any).volume;
-                    if (vol) {
-                        const relMat = item.relativeMatrix;
-                        let nodeOffset = 0;
-                        if (relMat) {
-                            nodeOffset = Math.hypot(relMat[12] || 0, relMat[13] || 0, relMat[14] || 0);
+        // 지오메트리 로컬 AABB 자동 산출
+        let localMinX = Infinity;
+        let localMaxX = -Infinity;
+        let localMinY = Infinity;
+        let localMaxY = -Infinity;
+        let localMinZ = Infinity;
+        let localMaxZ = -Infinity;
+
+        const subItems = subMeshList.length > 0 ? subMeshList : [{
+            node: null,
+            geometry,
+            material: null,
+            relativeMatrix: null
+        }];
+
+        for (const item of subItems) {
+            if (item && item.geometry) {
+                const vol = (item.geometry as any).volume;
+                if (vol) {
+                    const relMat = item.relativeMatrix;
+                    if (relMat) {
+                        const corners = [
+                            [vol.minX, vol.minY, vol.minZ],
+                            [vol.maxX, vol.minY, vol.minZ],
+                            [vol.minX, vol.maxY, vol.minZ],
+                            [vol.maxX, vol.maxY, vol.minZ],
+                            [vol.minX, vol.minY, vol.maxZ],
+                            [vol.maxX, vol.minY, vol.maxZ],
+                            [vol.minX, vol.maxY, vol.maxZ],
+                            [vol.maxX, vol.maxY, vol.maxZ]
+                        ];
+                        for (const c of corners) {
+                            const rx = relMat[0] * c[0] + relMat[4] * c[1] + relMat[8] * c[2] + relMat[12];
+                            const ry = relMat[1] * c[0] + relMat[5] * c[1] + relMat[9] * c[2] + relMat[13];
+                            const rz = relMat[2] * c[0] + relMat[6] * c[1] + relMat[10] * c[2] + relMat[14];
+                            if (rx < localMinX) localMinX = rx;
+                            if (rx > localMaxX) localMaxX = rx;
+                            if (ry < localMinY) localMinY = ry;
+                            if (ry > localMaxY) localMaxY = ry;
+                            if (rz < localMinZ) localMinZ = rz;
+                            if (rz > localMaxZ) localMaxZ = rz;
                         }
-                        const centerDist = Math.hypot(vol.centerX || 0, vol.centerY || 0, vol.centerZ || 0);
-                        const r = (vol.geometryRadius || 0) + centerDist + nodeOffset;
-                        if (r > maxGeomRadius) maxGeomRadius = r;
+                    } else {
+                        if (vol.minX < localMinX) localMinX = vol.minX;
+                        if (vol.maxX > localMaxX) localMaxX = vol.maxX;
+                        if (vol.minY < localMinY) localMinY = vol.minY;
+                        if (vol.maxY > localMaxY) localMaxY = vol.maxY;
+                        if (vol.minZ < localMinZ) localMinZ = vol.minZ;
+                        if (vol.maxZ > localMaxZ) localMaxZ = vol.maxZ;
                     }
                 }
             }
-            // 기본 지오메트리 반경에 baseScale과 최대 인스턴스 스케일 안전 마진(1.8배) 반영
-            const computedRadius = maxGeomRadius > 0 ? maxGeomRadius * baseScale * 1.8 : 4.0;
-            this.boundingRadius = computedRadius;
         }
+
+        if (localMinX === Infinity) {
+            localMinX = -2;
+            localMaxX = 2;
+            localMinY = 0;
+            localMaxY = 4;
+            localMinZ = -2;
+            localMaxZ = 2;
+        }
+
+        const scaleMargin = 1.1;
+        this.aabbMin = new Float32Array([
+            localMinX * baseScale * scaleMargin,
+            localMinY * baseScale * scaleMargin,
+            localMinZ * baseScale * scaleMargin
+        ]);
+        this.aabbMax = new Float32Array([
+            localMaxX * baseScale * scaleMargin,
+            localMaxY * baseScale * scaleMargin,
+            localMaxZ * baseScale * scaleMargin
+        ]);
 
         this.#meshRotationOffset = options.meshRotationOffset ?? [0, 0, 0];
         this.#totalCount = totalCount;
@@ -189,7 +233,8 @@ class VegetationMesh extends ProceduralInstancingMesh {
                     subItem.material,
                     this
                 );
-                subInstMesh.boundingRadius = this.boundingRadius;
+                subInstMesh.aabbMin = this.aabbMin;
+                subInstMesh.aabbMax = this.aabbMax;
                 this.#subVegetationMeshes.push(subInstMesh);
                 this.addChild(subInstMesh);
             }
@@ -470,12 +515,20 @@ class VegetationMesh extends ProceduralInstancingMesh {
         const u = this.#cullUniformData;
         u[0] = this.instanceCount;
         u[1] = this.maxDistance * this.maxDistance;
-        u[2] = this.boundingRadius;
-        u[3] = camera.x;
-        u[4] = camera.y;
-        u[5] = camera.z;
-        u[6] = this.#maskThreshold;
-        u[7] = channelNum;
+        u[2] = this.#maskThreshold;
+        u[3] = channelNum;
+        u[4] = camera.x;
+        u[5] = camera.y;
+        u[6] = camera.z;
+        u[7] = 0;
+        u[8] = this.aabbMin[0];
+        u[9] = this.aabbMin[1];
+        u[10] = this.aabbMin[2];
+        u[11] = 0;
+        u[12] = this.aabbMax[0];
+        u[13] = this.aabbMax[1];
+        u[14] = this.aabbMax[2];
+        u[15] = 0;
 
         this.redGPUContext.gpuDevice.queue.writeBuffer(
             this.#cullUniformBuffer.gpuBuffer,

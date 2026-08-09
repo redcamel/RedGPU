@@ -181,10 +181,8 @@ RedGPU.init(
 
         scene.addTerrain(terrain);
 
-        // 3. 🌲 새로 추가된 3D 전나무 모델 (spruce_tree.glb) GLTFLoader 로드 & 식생 연동
+        const treeUrl = '../../../assets/terrain/test.glb';
         // const treeUrl = '../../../assets/terrain/spruce_tree.glb';
-        // const treeUrl = '../../../assets/terrain/test.glb';
-        const treeUrl = '../../../assets/terrain/oak_trees.glb';
 
         new RedGPU.GLTFLoader(redGPUContext, treeUrl, (result) => {
             console.log('🌲 spruce_tree.glb 3D 모델 로드 완료:', result);
@@ -195,10 +193,10 @@ RedGPU.init(
             treeFoliageMesh = new RedGPU.Display.VegetationMesh(redGPUContext, terrain, {
                 count: 50000,
                 gltfMesh: resultMesh,
-                baseScale: 15.0,
+                baseScale: 0.2,
                 splatUrl: '../../../assets/terrain/terrainTest_001/splatMap.jpg',
                 maskChannel: 'g',
-                maskThreshold: 0
+                maskThreshold: 0.2
             });
             scene.addChild(treeFoliageMesh);
 

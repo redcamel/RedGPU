@@ -9,12 +9,14 @@ struct DrawIndexedIndirectArgs {
 struct CullUniforms {
     maxInstanceCount: u32,
     maxDistanceSq: f32,
-    boundingRadius: f32,
-    cameraPosX: f32,
-    cameraPosY: f32,
-    cameraPosZ: f32,
     maskThreshold: f32,
     maskChannel: u32,
+    cameraPos: vec3<f32>,
+    _pad1: f32,
+    aabbMin: vec3<f32>,
+    _pad2: f32,
+    aabbMax: vec3<f32>,
+    _pad3: f32,
 };
 
 struct FrustumPlanes {
@@ -80,8 +82,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     // 1. Distance Culling 판정
-    let dx = instX - cullUniforms.cameraPosX;
-    let dz = instZ - cullUniforms.cameraPosZ;
+    let dx = instX - cullUniforms.cameraPos.x;
+    let dz = instZ - cullUniforms.cameraPos.z;
     let distSq = dx * dx + dz * dz;
     if (distSq > cullUniforms.maxDistanceSq) {
         return;
@@ -104,17 +106,41 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         }
     }
 
-    // 2. Frustum Culling 판정 (카메라 반경 30m 안전지대는 절두체 검사 무조건 통과하여 팝인 방지)
+    // 2. Frustum Culling 판정 (AABB/OBB 방식)
     let NEAR_SAFE_DISTANCE_SQ: f32 = 900.0; // 30m 반경 (30^2 = 900)
     if (distSq > NEAR_SAFE_DISTANCE_SQ) {
-        let centerPos = vec3<f32>(instX, instY, instZ);
-        let radius = cullUniforms.boundingRadius;
+        let minP = cullUniforms.aabbMin;
+        let maxP = cullUniforms.aabbMax;
 
-        for (var i = 0u; i < 6u; i++) {
+        let corners = array<vec4<f32>, 8>(
+            vec4<f32>(minP.x, minP.y, minP.z, 1.0),
+            vec4<f32>(maxP.x, minP.y, minP.z, 1.0),
+            vec4<f32>(minP.x, maxP.y, minP.z, 1.0),
+            vec4<f32>(maxP.x, maxP.y, minP.z, 1.0),
+            vec4<f32>(minP.x, minP.y, maxP.z, 1.0),
+            vec4<f32>(maxP.x, minP.y, maxP.z, 1.0),
+            vec4<f32>(minP.x, maxP.y, maxP.z, 1.0),
+            vec4<f32>(maxP.x, maxP.y, maxP.z, 1.0)
+        );
+
+        var worldCorners: array<vec3<f32>, 8>;
+        for (var c = 0u; c < 8u; c = c + 1u) {
+            let wPos = instanceMatrix * corners[c];
+            worldCorners[c] = wPos.xyz;
+        }
+
+        for (var i = 0u; i < 6u; i = i + 1u) {
             let plane = frustumPlanes.planes[i];
-            let dist = dot(plane.xyz, centerPos) + plane.w;
-            if (dist < -radius) {
-                return; // 절두체 외부
+            var allOutside = true;
+            for (var c = 0u; c < 8u; c = c + 1u) {
+                let dist = dot(plane.xyz, worldCorners[c]) + plane.w;
+                if (dist >= 0.0) {
+                    allOutside = false;
+                    break;
+                }
+            }
+            if (allOutside) {
+                return; // 8개 점이 특정 평면 바깥에 모두 위치함
             }
         }
     }
