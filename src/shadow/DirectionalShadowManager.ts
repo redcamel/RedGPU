@@ -20,7 +20,7 @@ import keepLog from "../utils/keepLog";
 class DirectionalShadowManager {
     #shadowDepthTextureSize: number = 4096
     #bias: number = 0.00017
-    #strength: number = 0.7
+    #strength: number = 0.8
     #filterScale: number = 2.0
     #shadowDepthTexture: GPUTexture
     #shadowDepthTextureView: GPUTextureView

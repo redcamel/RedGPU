@@ -302,6 +302,13 @@ class TerrainTileSystem extends TerrainMaterialBind {
             this.#instanceBuffer.destroy();
             this.#instanceBuffer = null;
         }
+        if (this.heightmapAtlasTexture) {
+            this.heightmapAtlasTexture.destroy();
+            this.heightmapAtlasTexture = null;
+        }
+        this.#tileDataCache.clear();
+        this.#synthesizedTilesSet.clear();
+        this.#processor = null;
         super.destroy();
     }
 
