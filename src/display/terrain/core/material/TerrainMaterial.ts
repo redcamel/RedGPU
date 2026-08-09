@@ -25,6 +25,10 @@ export interface TerrainLayerConfig {
     roughnessFactor?: number;
 }
 
+export interface TerrainMaterialOptions {
+    atlasSize?: number;
+}
+
 interface TerrainMaterial {
     debugSplatTexture: boolean;
     baseColorFactor: [number, number, number, number] | string;
@@ -54,13 +58,28 @@ class TerrainMaterial extends ABitmapBaseMaterial {
     #baseColorWeight: number = 0.5;
     #baseColorBlendMode: 'mix' | 'multiply' = 'multiply';
 
-    constructor(redGPUContext: RedGPUContext, name?: string) {
+    constructor(
+        redGPUContext: RedGPUContext,
+        nameOrOptions?: string | TerrainMaterialOptions,
+        options?: TerrainMaterialOptions
+    ) {
         super(
             redGPUContext,
             'TERRAIN_MATERIAL',
             fragmentModuleSource,
             2
         );
+
+        let name: string | undefined;
+        let finalOptions: TerrainMaterialOptions = {};
+
+        if (typeof nameOrOptions === 'string') {
+            name = nameOrOptions;
+            if (options) finalOptions = options;
+        } else if (nameOrOptions && typeof nameOrOptions === 'object') {
+            finalOptions = nameOrOptions;
+        }
+
         if (name) (this as any).name = name;
 
         this.initGPURenderInfos();
@@ -81,7 +100,8 @@ class TerrainMaterial extends ABitmapBaseMaterial {
             maxAnisotropy: 16
         });
 
-        this.#rvt = new TerrainRVT(redGPUContext, {atlasSize: 4096});
+        const atlasSize = finalOptions.atlasSize ?? (4096 * 2);
+        this.#rvt = new TerrainRVT(redGPUContext, {atlasSize});
 
         this.rvtAlbedoTexture = this.#rvt.albedoDirectTexture
         this.rvtNormalORMTexture = this.#rvt.normalORMDirectTexture

@@ -52,6 +52,10 @@ export interface TerrainOptions {
     loadingRadius?: number;
     verticesPerSide?: number;
     lodThreshold?: number;
+    atlasSize?: number;
+    atlasTileCountX?: number;
+    atlasTileCountZ?: number;
+    atlasTileSize?: number;
 }
 
 function sanitizeVerticesPerSide(val: number): number {
@@ -73,7 +77,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #tileSpanX: number = 0;
     #tileSpanZ: number = 0;
 
-    // 2번 최적화: 1차원 플랫 높이 데이터 버퍼 (8192 * 8192 * 2 Bytes = 128MB)
+    // 2번 최적화: 1차원 플랫 높이 데이터 버퍼
     #flatHeightmapData: Uint16Array;
 
     #synthesizedTilesSet: Set<string> = new Set();
@@ -95,7 +99,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
 
     constructor(redGPUContext: RedGPUContext, options?: TerrainOptions) {
         const verticesPerSide = sanitizeVerticesPerSide(options?.verticesPerSide ?? 64);
-        super(redGPUContext, verticesPerSide);
+        super(redGPUContext, verticesPerSide, options);
         const cellSize = options?.cellSize ?? 256;
         const loadingRadius = options?.loadingRadius ?? 2560;
         this.#lodThreshold = options?.lodThreshold ?? 2.0;
@@ -108,6 +112,10 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.baseSlotIndex = 0;
         this.#verticesPerSide = verticesPerSide;
 
+        this.#atlasTileCountX = options?.atlasTileCountX ?? 16;
+        this.#atlasTileCountZ = options?.atlasTileCountZ ?? 16;
+        this.#atlasTileSize = options?.atlasTileSize ?? 512;
+
         this.#maxInstances = 65536;
 
         this.#instanceBuffer = redGPUContext.gpuDevice.createBuffer({
@@ -116,8 +124,9 @@ class TerrainTileSystem extends TerrainMaterialBind {
             label: 'TerrainInstanceBuffer'
         });
 
-        // 2번 최적화: 8192x8192 해상도 아틀라스용 플랫 버퍼 미리 1회 할당
-        this.#flatHeightmapData = new Uint16Array(8192 * 8192);
+        // 동적 설정에 기초하여 플랫 버퍼 크기를 1회 할당
+        const totalHeightmapDataSize = (this.#atlasTileCountX * this.#atlasTileSize) * (this.#atlasTileCountZ * this.#atlasTileSize);
+        this.#flatHeightmapData = new Uint16Array(totalHeightmapDataSize);
 
         // 최대 인스턴스 크기만큼의 Float32Array 사전 대용량 할당 (GC 부하 제거)
         this.#instanceArrayBuffer = new Float32Array(65536 * 4);
@@ -414,7 +423,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
         const tileZ = tile.tileRow ?? 0;
 
         if (!this.heightmapAtlasTexture) {
-            this.#createHeightmapTileAtlas(16, 16, 512);
+            this.#createHeightmapTileAtlas(this.#atlasTileCountX, this.#atlasTileCountZ, this.#atlasTileSize);
         }
         const gpuTexture = this.heightmapAtlasTexture?.gpuTexture;
         if (!gpuTexture) return;
