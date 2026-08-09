@@ -124,6 +124,8 @@ export class TerrainSpatialGrid {
             }
         }
 
+        const loadingRadiusSq = this.#loadingRadius * this.#loadingRadius;
+
         for (let gx = centerGridX - radiusInCells; gx <= centerGridX + radiusInCells; gx++) {
             for (let gz = centerGridZ - radiusInCells; gz <= centerGridZ + radiusInCells; gz++) {
                 const minX = gx * this.#cellSize;
@@ -139,12 +141,15 @@ export class TerrainSpatialGrid {
                 const tileCenterZ = minZ + this.#cellSize * 0.5;
                 const toTileX = tileCenterX - camX;
                 const toTileZ = tileCenterZ - camZ;
-                const distSq = toTileX ** 2 + toTileZ ** 2;
-                const dist = Math.sqrt(distSq);
+                const distSq = toTileX * toTileX + toTileZ * toTileZ;
 
-                if (dist <= this.#loadingRadius) {
+                // 제곱근 연산 없이 범위 판정
+                if (distSq <= loadingRadiusSq) {
                     const key = `${gx}_${gz}`;
                     currentFrameKeys.add(key);
+
+                    // 범위 내에 있을 때만 필요에 의해 제곱근 연산 실행
+                    const dist = Math.sqrt(distSq);
 
                     let dotWeight = 1.0;
                     if (hasDir && dist > 0.0001) {
