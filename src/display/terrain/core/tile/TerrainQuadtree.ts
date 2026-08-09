@@ -2,21 +2,30 @@ export class QuadtreeNode {
     public children: QuadtreeNode[] = [];
     public hasChildren: boolean = false;
 
+    // X, Z 축 반경(Extent) 캐싱
+    private readonly halfScale: number;
+
     constructor(
         public worldOffset: [number, number],
         public worldScale: number,
         public lodLevel: number,
         public maxLOD: number
     ) {
+        this.halfScale = worldScale * 0.5;
         if (this.lodLevel < this.maxLOD) {
             this.hasChildren = true;
-            const halfScale = worldScale * 0.5;
-            const nextLOD = lodLevel + 1;
+        }
+    }
+
+    // 자식 노드가 필요할 때 동적으로 지연 생성 (Lazy creation)
+    public split() {
+        if (this.children.length === 0 && this.hasChildren) {
+            const nextLOD = this.lodLevel + 1;
             this.children = [
-                new QuadtreeNode([worldOffset[0], worldOffset[1]], halfScale, nextLOD, maxLOD),
-                new QuadtreeNode([worldOffset[0] + halfScale, worldOffset[1]], halfScale, nextLOD, maxLOD),
-                new QuadtreeNode([worldOffset[0], worldOffset[1] + halfScale], halfScale, nextLOD, maxLOD),
-                new QuadtreeNode([worldOffset[0] + halfScale, worldOffset[1] + halfScale], halfScale, nextLOD, maxLOD)
+                new QuadtreeNode([this.worldOffset[0], this.worldOffset[1]], this.halfScale, nextLOD, this.maxLOD),
+                new QuadtreeNode([this.worldOffset[0] + this.halfScale, this.worldOffset[1]], this.halfScale, nextLOD, this.maxLOD),
+                new QuadtreeNode([this.worldOffset[0], this.worldOffset[1] + this.halfScale], this.halfScale, nextLOD, this.maxLOD),
+                new QuadtreeNode([this.worldOffset[0] + this.halfScale, this.worldOffset[1] + this.halfScale], this.halfScale, nextLOD, this.maxLOD)
             ];
         }
     }
@@ -34,17 +43,15 @@ export class QuadtreeNode {
         const maxX = this.worldOffset[0] + this.worldScale + worldOffsetX;
         const minZ = this.worldOffset[1] + worldOffsetZ;
         const maxZ = this.worldOffset[1] + this.worldScale + worldOffsetZ;
-        const minY = minHeight;
-        const maxY = maxHeight;
 
         const centerX = (minX + maxX) * 0.5;
-        const centerY = (minY + maxY) * 0.5;
+        const centerY = (minHeight + maxHeight) * 0.5;
         const centerZ = (minZ + maxZ) * 0.5;
 
-        // AABB 반경 계산 (제곱근 없음)
-        const ex = (maxX - minX) * 0.5;
-        const ey = (maxY - minY) * 0.5;
-        const ez = (maxZ - minZ) * 0.5;
+        // 미리 캐싱된 반경(extent) 값을 활용하여 연산 오버헤드 축소
+        const ex = this.halfScale;
+        const ey = (maxHeight - minHeight) * 0.5;
+        const ez = this.halfScale;
 
         for (let i = 0; i < 6; i++) {
             const p = planes[i];
@@ -109,6 +116,8 @@ export class TerrainQuadtree {
         if (!node.isInFrustum(planes, minHeight, maxHeight, worldOffsetX, worldOffsetZ)) return;
 
         if (node.shouldSplit(cameraPos, lodThreshold) && node.hasChildren) {
+            // 실제로 하위 노드로 분할되어 들어갈 때만 자식 노드들을 동적 지연 생성
+            node.split();
             for (const child of node.children) {
                 this.#traverse(child, cameraPos, planes, minHeight, maxHeight, worldOffsetX, worldOffsetZ, lodThreshold);
             }
