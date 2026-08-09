@@ -140,16 +140,14 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var sw = vec4<f32>(0.0);
 
     if (bakeUniforms.useAutoSplat == 1u) {
-        let texDim = vec2<f32>(textureDimensions(heightmapAtlasTexture));
-        let texelSize = 1.0 / max(texDim, vec2<f32>(1.0));
+        // 단 1회의 샘플링으로 높이와 사전 베이킹된 노멀 벡터를 동시에 획득
+        let heightmapData = textureSampleLevel(heightmapAtlasTexture, texSampler, wUV, 0.0);
+        let hCenter = heightmapData.r;
+        let normal = heightmapData.gba;
 
-        let hCenter = textureSampleLevel(heightmapAtlasTexture, texSampler, wUV, 0.0).r;
-        let hRight  = textureSampleLevel(heightmapAtlasTexture, texSampler, wUV + vec2<f32>(texelSize.x, 0.0), 0.0).r;
-        let hUp     = textureSampleLevel(heightmapAtlasTexture, texSampler, wUV + vec2<f32>(0.0, texelSize.y), 0.0).r;
-
-        let dhX = (hRight - hCenter) * 40.0;
-        let dhZ = (hUp - hCenter) * 40.0;
-        let slope = clamp(sqrt(dhX * dhX + dhZ * dhZ), 0.0, 1.0);
+        // 경사(Slope)를 노멀 벡터의 수직성분(y)을 이용하여 제곱근 없이 선형 근사
+        // 하늘을 수직으로 볼수록 (y가 1에 가까울수록) 경사도는 0, 평평해질수록 (y가 0에 가까울수록) 경사도는 1
+        let slope = clamp(1.0 - normal.y, 0.0, 1.0);
 
         let rockWeight = smoothstep(0.18, 0.45, slope);
         let sandWeight = select(0.0, 1.0 - smoothstep(0.02, 0.08, hCenter), slope < 0.2);

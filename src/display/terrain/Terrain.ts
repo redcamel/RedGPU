@@ -80,12 +80,15 @@ class Terrain extends TerrainTileSystem {
         const [worldW, worldH] = this.worldSize;
         const [offX, offZ] = this.worldOffset;
 
+        const tileSize = this.atlasTileSize;
+        const tileCount = this.atlasTileCountX;
+
         // 1. [0, 1] 범위의 normalized UV 좌표 구하기
         const u = Math.max(0, Math.min(1, (x - offX) / worldW));
         const v = Math.max(0, Math.min(1, (z - offZ) / worldH));
 
-        // 전체 아틀라스 해상도 규격 (16개 타일 * 타일당 512 픽셀)
-        const totalResolution = 16 * 512;
+        // 전체 아틀라스 해상도 규격 (타일 개수 * 타일당 픽셀 크기)
+        const totalResolution = tileCount * tileSize;
         const maxPixelIdx = totalResolution - 1;
 
         // 실수형 픽셀 좌표 계산 (v는 높이맵 텍스처 기준 뒤집음)
@@ -102,32 +105,47 @@ class Terrain extends TerrainTileSystem {
         const fx = tx - x0;
         const fz = tz - z0;
 
-        // 타일 데이터 조회를 최소화하기 위한 로컬 캐시 변수
-        let lastCol = -1;
-        let lastRow = -1;
-        let lastTileData: any = null;
-
-        // 특정 픽셀 위치의 16비트 높이 데이터 추출 헬퍼 람다 (Memoized)
+        // 특정 픽셀 위치의 16비트 높이 데이터 추출 헬퍼
         const getVal = (px: number, pz: number): number => {
-            const col = Math.max(0, Math.min(15, Math.floor(px / 512)));
-            const row = Math.max(0, Math.min(15, Math.floor(pz / 512)));
+            const col = Math.max(0, Math.min(tileCount - 1, Math.floor(px / tileSize)));
+            const row = Math.max(0, Math.min(tileCount - 1, Math.floor(pz / tileSize)));
+            const key = `${col}_${row}`;
 
-            let tileData = lastTileData;
-            if (col !== lastCol || row !== lastRow) {
-                lastCol = col;
-                lastRow = row;
-                const key = `${col}_${row}`;
-                tileData = this.tileDataCache.get(key);
-                lastTileData = tileData;
+            const cachedData = this.tileDataCache.get(key);
+            if (!cachedData) return 0;
+
+            // [LRU Touch] CPU 높이 조회가 발생한 자원은 가장 최신 사용으로 순서 갱신
+            this.tileDataCache.delete(key);
+            this.tileDataCache.set(key, cachedData);
+
+            const localX = Math.max(0, Math.min(tileSize - 1, Math.floor(px % tileSize)));
+            const localY = Math.max(0, Math.min(tileSize - 1, Math.floor(pz % tileSize)));
+            const arrayIndex = localY * tileSize + localX;
+
+            // 1. Float32Array 캐시 데이터인 경우 (0.0 ~ 1.0 범위)
+            if (cachedData instanceof Float32Array) {
+                const valF32 = cachedData[arrayIndex];
+                return valF32 !== undefined ? valF32 * 65535.0 : 0.0;
             }
 
-            if (!tileData) return 0;
+            // 2. Uint16Array 캐시 데이터인 경우
+            if (cachedData instanceof Uint16Array) {
+                const valU16 = cachedData[arrayIndex];
+                return valU16 !== undefined ? valU16 : 0.0;
+            }
 
-            const localX = Math.max(0, Math.min(511, Math.floor(px % 512)));
-            const localY = Math.max(0, Math.min(511, Math.floor(pz % 512)));
+            // 3. ArrayBuffer 또는 다른 View인 경우 변환
+            let tileData: Uint16Array;
+            if (cachedData instanceof ArrayBuffer) {
+                tileData = new Uint16Array(cachedData);
+            } else if (ArrayBuffer.isView(cachedData)) {
+                tileData = new Uint16Array(cachedData.buffer, cachedData.byteOffset, cachedData.byteLength / 2);
+            } else {
+                return 0;
+            }
 
-            const u16 = tileData[localY * 512 + localX];
-            return u16 !== undefined ? u16 : 0;
+            const val = tileData[arrayIndex];
+            return val !== undefined ? val : 0;
         };
 
         // 4개의 인접 픽셀 값 샘플링

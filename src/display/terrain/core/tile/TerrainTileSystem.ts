@@ -440,7 +440,6 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #registerTileData(tile: SpatialTileInfo | string, data: any) {
         const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
 
-        // LRU 순서 갱신을 위해 기존 키 삭제 후 재등록
         if (this.#tileDataCache.has(key)) {
             this.#tileDataCache.delete(key);
         }
@@ -448,11 +447,21 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.#tileDataCache.set(key, data);
 
         // 캐시 한도 초과 시 가장 오래된 자원 방출 (Max Limit: 128)
+        // 단, 현재 공간 그리드에서 활성화된(사용 중인) 타일은 방출 대상에서 절대 보호함
         const MAX_CACHE_SIZE = 128;
         if (this.#tileDataCache.size > MAX_CACHE_SIZE) {
-            const oldestKey = this.#tileDataCache.keys().next().value;
-            if (oldestKey !== undefined) {
-                this.#tileDataCache.delete(oldestKey);
+            const keysIterator = this.#tileDataCache.keys();
+            for (const oldestKey of keysIterator) {
+                // 1. 활성 렌더링 리스트(activeTiles)에 있는지 검사
+                const isActive = this.#spatialGrid &&
+                    (this.#spatialGrid.activeTiles.has(oldestKey) ||
+                        Array.from(this.#spatialGrid.activeTiles.values()).some(t => t.atlasKey === oldestKey));
+
+                // 2. 활성 타일이 아니라면 안전하게 캐시에서 제거 후 루프 종료
+                if (!isActive) {
+                    this.#tileDataCache.delete(oldestKey);
+                    break;
+                }
             }
         }
     }
