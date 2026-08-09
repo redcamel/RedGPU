@@ -333,7 +333,9 @@ class TerrainTileSystem extends TerrainMaterialBind {
         }
         this.#tileDataCache.clear();
         this.#synthesizedTilesSet.clear();
-        this.#processor = null;
+        if (this.#processor) {
+            this.#processor = null;
+        }
         super.destroy();
     }
 
