@@ -14,6 +14,8 @@ class TerrainRVT {
 
     #albedoAtlasGPU: GPUTexture | null = null;
     #normalORMAtlasGPU: GPUTexture | null = null;
+    #albedoStorageView: GPUTextureView | null = null;
+    #normalORMStorageView: GPUTextureView | null = null;
 
     #albedoDirectTexture: DirectTexture | null = null;
     #normalORMDirectTexture: DirectTexture | null = null;
@@ -24,6 +26,10 @@ class TerrainRVT {
 
     #sampler: GPUSampler | null = null;
     #emptyArrayGPUTexture: GPUTexture | null = null;
+    #emptyArrayView: GPUTextureView | null = null;
+
+    readonly #uData = new Float32Array(28);
+    readonly #uDataU32 = new Uint32Array(this.#uData.buffer);
 
     constructor(redGPUContext: RedGPUContext, options: TerrainRVTOptions = {}) {
         this.#redGPUContext = redGPUContext;
@@ -84,8 +90,8 @@ class TerrainRVT {
         keepLog(`RVT 컴퓨트 셰이더 타일 베이킹 실행: rect(${pixelX}, ${pixelY}, ${width}, ${height})`);
         const device = this.#redGPUContext.gpuDevice;
 
-        const uData = new Float32Array(28);
-        const uDataU32 = new Uint32Array(uData.buffer);
+        const uData = this.#uData;
+        const uDataU32 = this.#uDataU32;
 
         uData[0] = 0.0;
         uData[1] = 0.0;
@@ -134,8 +140,8 @@ class TerrainRVT {
         const resolvedORMTexture = ormTextureGPUView ?? emptyView;
         const resolvedHeightmap = heightmapGPUView ?? emptyView;
 
-        const albedoStorageView = this.#albedoAtlasGPU!.createView();
-        const normalORMStorageView = this.#normalORMAtlasGPU!.createView();
+        const albedoStorageView = this.#albedoStorageView!;
+        const normalORMStorageView = this.#normalORMStorageView!;
 
         const bindGroup = device.createBindGroup({
             label: 'RVT_ComputeBakeBindGroup',
@@ -172,9 +178,14 @@ class TerrainRVT {
     public destroy(): void {
         this.#albedoAtlasGPU?.destroy();
         this.#normalORMAtlasGPU?.destroy();
+        this.#emptyArrayGPUTexture?.destroy();
         this.#uniformBuffer?.destroy();
         this.#albedoAtlasGPU = null;
         this.#normalORMAtlasGPU = null;
+        this.#albedoStorageView = null;
+        this.#normalORMStorageView = null;
+        this.#emptyArrayGPUTexture = null;
+        this.#emptyArrayView = null;
         this.#uniformBuffer = null;
         this.#albedoDirectTexture = null;
         this.#normalORMDirectTexture = null;
@@ -193,6 +204,9 @@ class TerrainRVT {
             label: 'RVT_NormalORMAtlas', size: [size, size, 1], format: 'rgba8unorm',
             usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
         });
+
+        this.#albedoStorageView = this.#albedoAtlasGPU.createView();
+        this.#normalORMStorageView = this.#normalORMAtlasGPU.createView();
 
         const uid = Math.random().toString(36).slice(2);
         this.#albedoDirectTexture = new DirectTexture(this.#redGPUContext, `RVT_Albedo_${uid}`, this.#albedoAtlasGPU);
@@ -280,8 +294,13 @@ class TerrainRVT {
                 label: 'RVT_EmptyArray', size: [1, 1, 4], format: 'rgba8unorm',
                 usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
             });
+            this.#emptyArrayView = this.#emptyArrayGPUTexture.createView({
+                dimension: '2d-array',
+                arrayLayerCount: 4,
+                baseArrayLayer: 0
+            });
         }
-        return this.#emptyArrayGPUTexture.createView({dimension: '2d-array', arrayLayerCount: 4, baseArrayLayer: 0});
+        return this.#emptyArrayView!;
     }
 }
 
