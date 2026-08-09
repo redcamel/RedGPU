@@ -149,7 +149,7 @@ fn main(inputData: InputData) -> VertexOutput {
         let stepZ = vertexUniforms.worldSize.y * texelSize.y * 2.0;
 
         let localTangentX = vec3<f32>(stepX, (hR - hL) * heightRange, 0.0);
-        let localTangentZ = vec3<f32>(0.0,   (hU - hD) * heightRange, stepZ);
+        let localTangentZ = vec3<f32>(0.0,   (hD - hU) * heightRange, stepZ);
 
         let localNormal = normalize(cross(localTangentZ, localTangentX));
         let localTangent = normalize(localTangentX);
