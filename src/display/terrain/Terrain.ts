@@ -75,6 +75,37 @@ class Terrain extends TerrainTileSystem {
         this.#dirtyPipelineListener()
     }
 
+    getTerrainHeight(x: number, z: number): number {
+        const [worldW, worldH] = this.worldSize;
+        const [offX, offZ] = this.worldOffset;
+
+        // 1. [0, 1] 범위의 normalized UV 좌표 구하기
+        const u = Math.max(0, Math.min(1, (x - offX) / worldW));
+        const v = Math.max(0, Math.min(1, (z - offZ) / worldH));
+
+        // 2. 16x16 격자 내의 타일 컬럼, 로우 계산 (높이맵 Y축은 보통 v를 뒤집음)
+        const col = Math.max(0, Math.min(15, Math.floor(u * 16)));
+        const row = Math.max(0, Math.min(15, Math.floor((1 - v) * 16)));
+        const key = `${col}_${row}`;
+
+        const tileData = this.tileDataCache.get(key) as any;
+        if (!tileData) return this.minHeight; // 아직 타일이 로드되지 않았으면 최소 높이 반환
+
+        // 3. 타일 내 상대적 UV 좌표
+        const tu = (u * 16) - col;
+        const tv = ((1 - v) * 16) - row;
+
+        // 4. 512x512 픽셀 중 가장 가까운 픽셀 인덱스 구하기
+        const px = Math.max(0, Math.min(511, Math.floor(tu * 512)));
+        const py = Math.max(0, Math.min(511, Math.floor(tv * 512)));
+
+        const u16 = tileData[py * 512 + px];
+        if (u16 === undefined) return this.minHeight;
+
+        const ratio = u16 / 65535.0;
+        return this.minHeight + ratio * (this.maxHeight - this.minHeight);
+    }
+
     destroy() {
         if (this.heightmapAtlasTexture) {
             this.heightmapAtlasTexture.__removeDirtyPipelineListener(this.#dirtyPipelineListener);
