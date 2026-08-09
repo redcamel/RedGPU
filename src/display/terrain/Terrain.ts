@@ -7,6 +7,8 @@ import GPU_MIPMAP_FILTER_MODE from "../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import vertexModuleSource from "./vertex.wgsl";
 import TerrainTileSystem, {TerrainOptions} from "./core/TerrainTileSystem";
 import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
+import DirectTexture from "../../resources/texture/DirectTexture";
+import BitmapTexture from "../../resources/texture/BitmapTexture";
 
 export type {TerrainLayerConfig, TerrainOptions};
 
@@ -15,12 +17,12 @@ interface Terrain {
 }
 
 class Terrain extends TerrainTileSystem {
-    customVertexBindGroupLayout: GPUBindGroupLayout;
+    customVertexBindGroupLayout!: GPUBindGroupLayout;
 
     constructor(redGPUContext: RedGPUContext, options?: TerrainOptions, name?: string) {
         super(redGPUContext, options);
         if (name) {
-            this.name = name
+            this.name = name;
         }
         this.ignoreFrustumCulling = true;
         this.heightmapSampler = new Sampler(redGPUContext, {
@@ -30,38 +32,37 @@ class Terrain extends TerrainTileSystem {
             addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
             addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE
         });
-
-        this.customVertexBindGroupLayout = redGPUContext.gpuDevice.createBindGroupLayout({
-            label: 'TERRAIN_VERTEX_GPUBindGroupLayout',
-            entries: [
-                {binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {type: 'uniform'}},
-                {binding: 1, visibility: GPUShaderStage.VERTEX, sampler: {type: 'filtering'}},
-                {
-                    binding: 2,
-                    visibility: GPUShaderStage.VERTEX,
-                    texture: {sampleType: 'float', viewDimension: '2d', multisampled: false}
-                },
-                {binding: 3, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
-            ]
-        });
-
-
     }
 
     createCustomMeshVertexShaderModule = (): GPUShaderModule => {
+        if (!this.customVertexBindGroupLayout) {
+            this.customVertexBindGroupLayout = this.redGPUContext.gpuDevice.createBindGroupLayout({
+                label: 'TERRAIN_VERTEX_GPUBindGroupLayout',
+                entries: [
+                    {binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {type: 'uniform'}},
+                    {binding: 1, visibility: GPUShaderStage.VERTEX, sampler: {type: 'filtering'}},
+                    {
+                        binding: 2,
+                        visibility: GPUShaderStage.VERTEX,
+                        texture: {sampleType: 'float', viewDimension: '2d', multisampled: false}
+                    },
+                    {binding: 3, visibility: GPUShaderStage.VERTEX, buffer: {type: 'read-only-storage'}},
+                ]
+            });
+        }
         const SHADER_INFO = this.redGPUContext.resourceManager.wgslParser.parse('TERRAIN_VERTEX', vertexModuleSource);
         const UNIFORM_STRUCT = SHADER_INFO.uniforms.vertexUniforms;
         const shaderModule = this.createMeshVertexShaderModuleBASIC('TERRAIN_VERTEX', SHADER_INFO, UNIFORM_STRUCT, vertexModuleSource);
 
         this.gpuRenderInfo.vertexUniformBindGroup = this.redGPUContext.gpuDevice.createBindGroup(
-            getTerrainVertexBindGroupDescriptor(this)
+            getTerrainVertexBindGroupDescriptor(this, this.customVertexBindGroupLayout)
         );
 
         return shaderModule;
     }
 
 
-    updateTexture(prevTexture: any, texture: any) {
+    updateTexture(prevTexture: DirectTexture | BitmapTexture | null, texture: DirectTexture | BitmapTexture | null) {
         if (prevTexture) {
             prevTexture.__removeDirtyPipelineListener(this.#dirtyPipelineListener);
         }
@@ -72,7 +73,7 @@ class Terrain extends TerrainTileSystem {
     }
 
     updateSampler() {
-        this.#dirtyPipelineListener()
+        this.#dirtyPipelineListener();
     }
 
     getTerrainHeight(x: number, z: number): number {
@@ -101,13 +102,25 @@ class Terrain extends TerrainTileSystem {
         const fx = tx - x0;
         const fz = tz - z0;
 
-        // 특정 픽셀 위치의 16비트 높이 데이터 추출 헬퍼 람다
+        // 타일 데이터 조회를 최소화하기 위한 로컬 캐시 변수
+        let lastCol = -1;
+        let lastRow = -1;
+        let lastTileData: any = null;
+
+        // 특정 픽셀 위치의 16비트 높이 데이터 추출 헬퍼 람다 (Memoized)
         const getVal = (px: number, pz: number): number => {
             const col = Math.max(0, Math.min(15, Math.floor(px / 512)));
             const row = Math.max(0, Math.min(15, Math.floor(pz / 512)));
-            const key = `${col}_${row}`;
 
-            const tileData = this.tileDataCache.get(key) as any;
+            let tileData = lastTileData;
+            if (col !== lastCol || row !== lastRow) {
+                lastCol = col;
+                lastRow = row;
+                const key = `${col}_${row}`;
+                tileData = this.tileDataCache.get(key);
+                lastTileData = tileData;
+            }
+
             if (!tileData) return 0;
 
             const localX = Math.max(0, Math.min(511, Math.floor(px % 512)));
@@ -134,6 +147,9 @@ class Terrain extends TerrainTileSystem {
     }
 
     destroy() {
+        if (this.heightmapSampler) {
+            this.heightmapSampler = null
+        }
         if (this.heightmapAtlasTexture) {
             this.heightmapAtlasTexture.__removeDirtyPipelineListener(this.#dirtyPipelineListener);
         }
@@ -279,21 +295,20 @@ class Terrain extends TerrainTileSystem {
     }
 
     #dirtyPipelineListener = () => {
-        if (this.gpuRenderInfo && this.redGPUContext) {
+        if (this.gpuRenderInfo && this.redGPUContext && this.customVertexBindGroupLayout) {
             this.gpuRenderInfo.vertexUniformBindGroup = this.redGPUContext.gpuDevice.createBindGroup(
-                getTerrainVertexBindGroupDescriptor(this)
+                getTerrainVertexBindGroupDescriptor(this, this.customVertexBindGroupLayout)
             );
-            this.dirtyPipeline = true
+            this.dirtyPipeline = true;
         }
     }
 
 
 }
 
-const getTerrainVertexBindGroupDescriptor = (mesh: Terrain) => {
+const getTerrainVertexBindGroupDescriptor = (mesh: Terrain, layout: GPUBindGroupLayout) => {
     const {redGPUContext} = mesh;
     const {resourceManager} = redGPUContext;
-    const layout = mesh.customVertexBindGroupLayout;
 
     return {
         label: `TERRAIN_VERTEX_GPUBindGroup`,
