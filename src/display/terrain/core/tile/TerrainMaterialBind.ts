@@ -1,6 +1,6 @@
-import RedGPUContext from "../../../context/RedGPUContext";
-import TerrainLayerSystem from "./TerrainLayerSystem";
-import BitmapTexture from "../../../resources/texture/BitmapTexture";
+import RedGPUContext from "../../../../context/RedGPUContext";
+import TerrainLayerSystem from "../TerrainLayerSystem";
+import BitmapTexture from "../../../../resources/texture/BitmapTexture";
 
 class TerrainMaterialBind extends TerrainLayerSystem {
 

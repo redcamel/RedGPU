@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import TerrainMaterialBind from "../TerrainMaterialBind";
+import TerrainMaterialBind from "./TerrainMaterialBind";
 import keepLog from "../../../../utils/keepLog";
 import defineTexture from "../../../../defineProperty/funcs/texture/defineTexture";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
@@ -69,6 +69,9 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #spatialGrid: TerrainSpatialGrid;
     #quadtree: TerrainQuadtree;
     #instanceBuffer: GPUBuffer;
+    #instanceArrayBuffer: Float32Array; // CPU 인스턴싱 캐시 버퍼 (GC 방지)
+    #tileSpanX: number = 0;
+    #tileSpanZ: number = 0;
     #synthesizedTilesSet: Set<string> = new Set();
     #tileDataCache: Map<string, ArrayBufferView | ArrayBuffer> = new Map();
     #tileUrlResolver?: (tile: SpatialTileInfo) => string | void;
@@ -108,6 +111,9 @@ class TerrainTileSystem extends TerrainMaterialBind {
             label: 'TerrainInstanceBuffer'
         });
 
+        // 최대 인스턴스 크기만큼의 Float32Array 사전 대용량 할당 (GC 부하 제거)
+        this.#instanceArrayBuffer = new Float32Array(65536 * 4);
+        this.#updateCachedTileSpans();
     }
 
     get instanceBuffer(): GPUBuffer {
@@ -176,6 +182,29 @@ class TerrainTileSystem extends TerrainMaterialBind {
 
     checkQuadtree(renderViewStateData: any) {
         const currentWorldSize = this.worldSize[0];
+        this.#updateCachedTileSpans(); // 캐싱 스팬 동기화
+        this.#updateLODRanges(currentWorldSize);
+
+        this.baseSlotIndex = this.globalVertexSlotIndex;
+
+        const camera = renderViewStateData.view.rawCamera;
+        const localCamX = camera.x - this.worldOffset[0];
+        const localCamY = camera.y;
+        const localCamZ = camera.z - this.worldOffset[1];
+        const cameraPos: [number, number, number] = [localCamX, localCamY, localCamZ];
+
+        this.#processTileStreaming(camera);
+        this.#updateInstanceRenderBuffer(cameraPos, renderViewStateData);
+    }
+
+    #updateCachedTileSpans() {
+        const worldW = this.worldSize[0];
+        const worldH = this.worldSize[1];
+        this.#tileSpanX = worldW / this.atlasTileCountX;
+        this.#tileSpanZ = worldH / this.atlasTileCountZ;
+    }
+
+    #updateLODRanges(currentWorldSize: number) {
         if (
             !this.#quadtree ||
             this.#prevWorldSize !== currentWorldSize ||
@@ -197,9 +226,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
 
             for (let i = 0; i <= this.maxLOD; i++) {
                 const worldScale = currentWorldSize / Math.pow(2, i);
-
                 const morphEnd = worldScale * lodThreshold;
-
                 const morphStart = morphEnd - (worldScale * morphConstant);
 
                 lodRanges[i * 4 + 0] = morphStart;
@@ -209,44 +236,39 @@ class TerrainTileSystem extends TerrainMaterialBind {
             }
             this.lodRanges = lodRanges;
         }
+    }
 
-        this.baseSlotIndex = this.globalVertexSlotIndex;
+    #processTileStreaming(camera: any) {
+        if (!this.#spatialGrid) return;
 
-        const camera = renderViewStateData.view.rawCamera;
-        const localCamX = camera.x - this.worldOffset[0];
-        const localCamY = camera.y;
-        const localCamZ = camera.z - this.worldOffset[1];
-        const cameraPos: [number, number, number] = [localCamX, localCamY, localCamZ];
+        const {toLoad, toUnload} = this.#spatialGrid.update(camera, this.worldOffset, this.worldSize);
+        this.#tileStreamMetrics.update();
 
-        if (this.#spatialGrid) {
-            const {toLoad, toUnload} = this.#spatialGrid.update(camera, this.worldOffset, this.worldSize);
-
-            this.#tileStreamMetrics.update();
-
-            if (toLoad.length > 0) {
-                if (this.#tileUrlResolver) {
-                    toLoad.forEach(tile => {
-                        this.#enrichTileInfo(tile);
-                        if (this.isTileSynthesized(tile)) return;
-                        this.#tileStreamMetrics.frameLoadCount++;
-                        const result = this.#tileUrlResolver!(tile);
-                        if (typeof result === 'string') {
-                            this.#loadTileFromUrl(tile, result);
-                        }
-                    });
-                }
-            }
-            if (toUnload.length > 0) {
-                this.#tileStreamMetrics.frameUnloadCount += toUnload.length;
-                toUnload.forEach(tile => {
+        if (toLoad.length > 0) {
+            if (this.#tileUrlResolver) {
+                toLoad.forEach(tile => {
                     this.#enrichTileInfo(tile);
-                    if (this.#onTileUnloadCallback) {
-                        this.#onTileUnloadCallback!(tile);
+                    if (this.isTileSynthesized(tile)) return;
+                    this.#tileStreamMetrics.frameLoadCount++;
+                    const result = this.#tileUrlResolver!(tile);
+                    if (typeof result === 'string') {
+                        this.#loadTileFromUrl(tile, result);
                     }
                 });
             }
         }
+        if (toUnload.length > 0) {
+            this.#tileStreamMetrics.frameUnloadCount += toUnload.length;
+            toUnload.forEach(tile => {
+                this.#enrichTileInfo(tile);
+                if (this.#onTileUnloadCallback) {
+                    this.#onTileUnloadCallback!(tile);
+                }
+            });
+        }
+    }
 
+    #updateInstanceRenderBuffer(cameraPos: [number, number, number], renderViewStateData: any) {
         this.#quadtree.update(
             cameraPos,
             renderViewStateData.frustumPlanes,
@@ -261,18 +283,20 @@ class TerrainTileSystem extends TerrainMaterialBind {
         const count = Math.min(leafNodes.length, this.#maxInstances);
 
         if (count > 0) {
-            const arrayBuffer = new Float32Array(count * 4);
+            const arrayBuffer = this.#instanceArrayBuffer;
             for (let i = 0; i < count; i++) {
                 const node = leafNodes[i];
                 const centerX = node.worldOffset[0] + (node.worldScale * 0.5);
                 const centerZ = node.worldOffset[1] + (node.worldScale * 0.5);
 
+                // 매 프레임 Float32Array를 힙에 인스턴스화하지 않고 기존 버퍼의 인덱스만 덮어씀 (GC 0)
                 arrayBuffer[i * 4 + 0] = this.worldOffset[0] + centerX;
                 arrayBuffer[i * 4 + 1] = this.worldOffset[1] + centerZ;
                 arrayBuffer[i * 4 + 2] = node.worldScale;
                 arrayBuffer[i * 4 + 3] = node.lodLevel;
             }
-            this.redGPUContext.gpuDevice.queue.writeBuffer(this.#instanceBuffer, 0, arrayBuffer, 0, count * 4);
+            // 실제로 갱신된 필요한 바이트 크기만큼만 GPU에 전송
+            this.redGPUContext.gpuDevice.queue.writeBuffer(this.#instanceBuffer, 0, arrayBuffer as BufferSource, 0, count * 4);
         }
 
         if (this.gpuRenderInfo && this.drawCommandSlot && this.drawBufferManager) {
@@ -353,13 +377,9 @@ class TerrainTileSystem extends TerrainMaterialBind {
         const tileCenterX = (tbMinX + tbMaxX) * 0.5;
         const tileCenterZ = (tbMinZ + tbMaxZ) * 0.5;
 
-        const worldW = this.worldSize[0];
-        const worldH = this.worldSize[1];
-        const tileSpanX = worldW / this.atlasTileCountX;
-        const tileSpanZ = worldH / this.atlasTileCountZ;
-
-        const gridX = Math.max(0, Math.min(this.atlasTileCountX - 1, Math.floor((tileCenterX - this.worldOffset[0]) / tileSpanX)));
-        const gridZ = Math.max(0, Math.min(this.atlasTileCountZ - 1, Math.floor((tileCenterZ - this.worldOffset[1]) / tileSpanZ)));
+        // 나눗셈을 중복 계산하지 않고 캐싱된 스팬 상수로 최적화
+        const gridX = Math.max(0, Math.min(this.atlasTileCountX - 1, Math.floor((tileCenterX - this.worldOffset[0]) / this.#tileSpanX)));
+        const gridZ = Math.max(0, Math.min(this.atlasTileCountZ - 1, Math.floor((tileCenterZ - this.worldOffset[1]) / this.#tileSpanZ)));
 
         tile.tileCol = gridX;
         tile.tileRow = (this.atlasTileCountZ - 1) - gridZ;
@@ -422,12 +442,19 @@ class TerrainTileSystem extends TerrainMaterialBind {
     }
 
     #loadTileFromUrl(tile: SpatialTileInfo, url: string) {
+        const key = `${tile.gridX}_${tile.gridZ}`;
         fetch(url)
             .then(res => {
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 return res.arrayBuffer();
             })
             .then(async (buffer) => {
+                // [Race Condition Guard] 데이터 다운로드가 완료된 시점에 이 타일 격자가 여전히 대기열이나 활성 타일 내에 유효한지 체크
+                if (!this.#spatialGrid.activeTiles.has(key) && !this.#spatialGrid.activeTiles.has(tile.atlasKey || '')) {
+                    // 카메라가 이미 이 영역을 벗어났다면 버림
+                    return;
+                }
+
                 const parsed = await parse16BitPngBuffer(buffer);
                 if (parsed) {
                     this.loadTileFrom16BitBuffer(tile, parsed.pixels, parsed.width, parsed.height);
