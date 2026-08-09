@@ -187,6 +187,10 @@ class TerrainTileSystem extends TerrainMaterialBind {
             this.#prevMaxLOD = this.maxLOD;
             this.#prevLodThreshold = this.#lodThreshold;
 
+            if (this.#spatialGrid) {
+                this.#spatialGrid.cellSize = currentWorldSize / this.atlasTileCountX;
+            }
+
             const lodRanges = new Float32Array(32);
             const lodThreshold = this.lodThreshold;
             const morphConstant = 0.5;

@@ -46,6 +46,10 @@ export class TerrainSpatialGrid {
         return this.#cellSize;
     }
 
+    set cellSize(val: number) {
+        this.#cellSize = val;
+    }
+
     get loadingRadius(): number {
         return this.#loadingRadius;
     }

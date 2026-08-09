@@ -83,26 +83,53 @@ class Terrain extends TerrainTileSystem {
         const u = Math.max(0, Math.min(1, (x - offX) / worldW));
         const v = Math.max(0, Math.min(1, (z - offZ) / worldH));
 
-        // 2. 16x16 격자 내의 타일 컬럼, 로우 계산 (높이맵 Y축은 보통 v를 뒤집음)
-        const col = Math.max(0, Math.min(15, Math.floor(u * 16)));
-        const row = Math.max(0, Math.min(15, Math.floor((1 - v) * 16)));
-        const key = `${col}_${row}`;
+        // 전체 아틀라스 해상도 규격 (16개 타일 * 타일당 512 픽셀)
+        const totalResolution = 16 * 512;
+        const maxPixelIdx = totalResolution - 1;
 
-        const tileData = this.tileDataCache.get(key) as any;
-        if (!tileData) return this.minHeight; // 아직 타일이 로드되지 않았으면 최소 높이 반환
+        // 실수형 픽셀 좌표 계산 (v는 높이맵 텍스처 기준 뒤집음)
+        const tx = u * maxPixelIdx;
+        const tz = (1.0 - v) * maxPixelIdx;
 
-        // 3. 타일 내 상대적 UV 좌표
-        const tu = (u * 16) - col;
-        const tv = ((1 - v) * 16) - row;
+        // 주변 4개 정수 픽셀 좌표
+        const x0 = Math.floor(tx);
+        const x1 = Math.min(maxPixelIdx, x0 + 1);
+        const z0 = Math.floor(tz);
+        const z1 = Math.min(maxPixelIdx, z0 + 1);
 
-        // 4. 512x512 픽셀 중 가장 가까운 픽셀 인덱스 구하기
-        const px = Math.max(0, Math.min(511, Math.floor(tu * 512)));
-        const py = Math.max(0, Math.min(511, Math.floor(tv * 512)));
+        // 가중치(소수점 이하 비율)
+        const fx = tx - x0;
+        const fz = tz - z0;
 
-        const u16 = tileData[py * 512 + px];
-        if (u16 === undefined) return this.minHeight;
+        // 특정 픽셀 위치의 16비트 높이 데이터 추출 헬퍼 람다
+        const getVal = (px: number, pz: number): number => {
+            const col = Math.max(0, Math.min(15, Math.floor(px / 512)));
+            const row = Math.max(0, Math.min(15, Math.floor(pz / 512)));
+            const key = `${col}_${row}`;
 
-        const ratio = u16 / 65535.0;
+            const tileData = this.tileDataCache.get(key) as any;
+            if (!tileData) return 0;
+
+            const localX = Math.max(0, Math.min(511, Math.floor(px % 512)));
+            const localY = Math.max(0, Math.min(511, Math.floor(pz % 512)));
+
+            const u16 = tileData[localY * 512 + localX];
+            return u16 !== undefined ? u16 : 0;
+        };
+
+        // 4개의 인접 픽셀 값 샘플링
+        const q00 = getVal(x0, z0);
+        const q10 = getVal(x1, z0);
+        const q01 = getVal(x0, z1);
+        const q11 = getVal(x1, z1);
+
+        // 쌍선형 보간 (Bilinear Interpolation)
+        const val = (1.0 - fx) * (1.0 - fz) * q00 +
+            fx * (1.0 - fz) * q10 +
+            (1.0 - fx) * fz * q01 +
+            fx * fz * q11;
+
+        const ratio = val / 65535.0;
         return this.minHeight + ratio * (this.maxHeight - this.minHeight);
     }
 

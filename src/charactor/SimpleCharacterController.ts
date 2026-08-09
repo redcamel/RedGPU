@@ -381,6 +381,14 @@ class SimpleCharacterController extends RedGPUObject {
             this.#targetMesh.y = this.floorHeight;
             this.#velocityY = 0;
             this.#isGrounded = true;
+        } else if (this.#isGrounded) {
+            // 접지 상태(isGrounded = true)로 지상 이동 중인데 지면이 낮아진 경우(내리막길 등)
+            // 공중에 띄우지 않고 지면에 즉시 밀착(Snap to Ground)시킵니다.
+            this.#targetMesh.y = this.floorHeight;
+            this.#velocityY = 0;
+        } else if (this.#velocityY <= 0) {
+            // 실제로 점프하여 공중에 뜬 상태에서 하강 중인 경우
+            this.#isGrounded = false;
         }
     }
 }
