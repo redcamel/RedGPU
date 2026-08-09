@@ -58,11 +58,14 @@ struct VertexOutput {
 };
 
 fn calculateMorphFactor(worldPos: vec3<f32>, lod: f32) -> f32 {
-    let dist = distance(systemUniforms.camera.cameraPosition.xz, worldPos.xz);
+    let diff = systemUniforms.camera.cameraPosition.xz - worldPos.xz;
+    let distSq = dot(diff, diff);
+    
     let range = vertexUniforms.lodRanges[i32(lod)];
-    let morphStart = range.x;
-    let morphEnd = range.y;
-    let k = (dist - morphStart) / (morphEnd - morphStart);
+    let morphStartSq = range.x;
+    let morphEndSq = range.y;
+    
+    let k = (distSq - morphStartSq) / (morphEndSq - morphStartSq);
     return clamp(k, 0.0, 1.0);
 }
 

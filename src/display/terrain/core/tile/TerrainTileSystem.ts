@@ -229,8 +229,9 @@ class TerrainTileSystem extends TerrainMaterialBind {
                 const morphEnd = worldScale * lodThreshold;
                 const morphStart = morphEnd - (worldScale * morphConstant);
 
-                lodRanges[i * 4 + 0] = morphStart;
-                lodRanges[i * 4 + 1] = morphEnd;
+                // 모핑 시작 및 끝 범위를 제곱하여 GPU로 전송 (셰이더에서 제곱근 제거 목적)
+                lodRanges[i * 4 + 0] = morphStart * morphStart;
+                lodRanges[i * 4 + 1] = morphEnd * morphEnd;
                 lodRanges[i * 4 + 2] = 0;
                 lodRanges[i * 4 + 3] = 0;
             }
