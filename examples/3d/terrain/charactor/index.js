@@ -372,8 +372,6 @@ RedGPU.init(
             splat: '../../../assets/terrain/terrainTest_001/splatMap.jpg',
         });
 
-        terrain.material.detailAlbedoTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/grass.jpg');
-        terrain.material.detailNormalTexture = new RedGPU.Resource.BitmapTexture(redGPUContext, '../../../assets/terrain/terrainTest_001/layer/grass_normal.jpg');
 
         // 💡 디테일 레이어 4종 등록
         terrain.addLayer({
