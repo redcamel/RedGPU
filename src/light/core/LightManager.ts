@@ -508,9 +508,10 @@ class LightManager {
         const lightDir = vec3.fromValues(light.direction[0], light.direction[1], light.direction[2]);
         vec3.normalize(lightDir, lightDir);
 
-        // 3. 가로/세로 영역(X, Y): 줌 거리(focusDistance)에 비례하여 그림자 상자 크기 설정
-        const shadowRadius = Math.min(actualRadius, Math.max(focusDistance * 1.5, 15.0));
-        const margin = shadowRadius * 0.20;
+        // 3. 가로/세로 영역(X, Y): maxShadowDistance를 상한 캡(Cap)으로 씌워 근경 텍셀 해상도(Crisp Shadow) 보장
+        const maxDist = view.scene.shadowManager.directionalShadowManager.maxShadowDistance ?? 150.0;
+        const shadowRadius = Math.min(actualRadius, Math.min(Math.max(focusDistance * 1.2, 15.0), maxDist));
+        const margin = shadowRadius * 0.10;
         const left = -shadowRadius - margin;
         const right = shadowRadius + margin;
         const bottom = -shadowRadius - margin;

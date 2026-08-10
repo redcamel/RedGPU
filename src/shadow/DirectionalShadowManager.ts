@@ -128,6 +128,25 @@ class DirectionalShadowManager {
         this.#strength = value;
     }
 
+    #maxShadowDistance: number = 150;
+
+    /**
+     * [KO] 그림자 최대 캡쳐 거리(Max Shadow Distance, m)를 반환합니다.
+     * [EN] Returns the maximum shadow distance (in meters).
+     */
+    get maxShadowDistance(): number {
+        return this.#maxShadowDistance;
+    }
+
+    /**
+     * [KO] 그림자 최대 캡쳐 거리(Max Shadow Distance, m)를 설정합니다.
+     * [EN] Sets the maximum shadow distance (in meters).
+     */
+    set maxShadowDistance(value: number) {
+        validatePositiveNumberRange(value, 1);
+        this.#maxShadowDistance = value;
+    }
+
     /**
      * [KO] 그림자 필터 번짐 반경(Filter Scale) 값을 반환합니다.
      * [EN] Returns the shadow filter scale value.

@@ -337,7 +337,10 @@ RedGPU.init(
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.grid = false;
-        scene.shadowManager.directionalShadowManager.strength = 0.95;
+        scene.shadowManager.directionalShadowManager.strength = 0.98;
+        scene.shadowManager.directionalShadowManager.maxShadowDistance = 150;
+        scene.shadowManager.directionalShadowManager.filterScale = 0.8;
+        scene.shadowManager.directionalShadowManager.bias = 0.0002;
         redGPUContext.addView(view);
 
         scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight())
