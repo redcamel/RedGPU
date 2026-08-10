@@ -100,75 +100,83 @@ fn main(inputData: InputData) -> VertexOutput {
     let tempWorldPos = vec3<f32>(worldXZ.x, 0.0, worldXZ.y);
     morphFactor = calculateMorphFactor(tempWorldPos, instanceData.lod);
 
-    let gridDim = vertexUniforms.verticesPerSide - 1.0;
-    let gridPos = inputData.uv * gridDim;
-    let gridIdx = floor(gridPos + 0.5);
+    var finalWorldXZ  = worldXZ;
+    var parentWorldXZ = worldXZ;
 
-    var parentGridIdx = floor(gridIdx * 0.5) * 2.0;
-    if (gridIdx.x >= gridDim - 0.1) {
-        parentGridIdx.x = gridDim;
+    if (morphFactor > 0.001) {
+        let gridDim = vertexUniforms.verticesPerSide - 1.0;
+        let gridPos = inputData.uv * gridDim;
+        let gridIdx = floor(gridPos + 0.5);
+
+        var parentGridIdx = floor(gridIdx * 0.5) * 2.0;
+        if (gridIdx.x >= gridDim - 0.1) {
+            parentGridIdx.x = gridDim;
+        }
+        if (gridIdx.y >= gridDim - 0.1) {
+            parentGridIdx.y = gridDim;
+        }
+
+        let parentUV = parentGridIdx / gridDim;
+        let parentLocalXZ = parentUV - vec2<f32>(0.5);
+        parentWorldXZ = instanceData.offset + parentLocalXZ * instanceData.scale;
+
+        finalWorldXZ = mix(worldXZ, parentWorldXZ, morphFactor);
     }
-    if (gridIdx.y >= gridDim - 0.1) {
-        parentGridIdx.y = gridDim;
-    }
 
-    let parentUV = parentGridIdx / gridDim;
-    let parentLocalXZ = parentUV - vec2<f32>(0.5);
-    let parentWorldXZ = instanceData.offset + parentLocalXZ * instanceData.scale;
-
-    let finalWorldXZ = mix(worldXZ, parentWorldXZ, morphFactor);
-    let finalUV = mix(inputData.uv, parentUV, morphFactor);
     let rawWorldUV = (finalWorldXZ - vertexUniforms.worldOffset) / vertexUniforms.worldSize;
     let worldUV = vec2<f32>(rawWorldUV.x, 1.0 - rawWorldUV.y);
 
     var computedNormal = vec3<f32>(0.0, 1.0, 0.0);
-    var worldTangentX = vec3<f32>(1.0, 0.0, 0.0);
-    var sampledHeight = 0.0;
+    var worldTangentX  = vec3<f32>(1.0, 0.0, 0.0);
+    var sampledHeight  = 0.0;
 
     #redgpu_if heightmapAtlasTexture
-        let texSize  = vec2<f32>(textureDimensions(heightmapAtlasTexture, 0));
+        let texSize   = vec2<f32>(textureDimensions(heightmapAtlasTexture, 0));
         let texelSize = 1.0 / texSize;
         let halfTexel = 0.5 * texelSize;
 
-        let rawParentWorldUV = (parentWorldXZ - vertexUniforms.worldOffset) / vertexUniforms.worldSize;
-        let parentWorldUV = vec2<f32>(rawParentWorldUV.x, 1.0 - rawParentWorldUV.y);
-
         let clampedWorldUV = clamp(worldUV, halfTexel, vec2<f32>(1.0) - halfTexel);
-        let clampedParentUV = clamp(parentWorldUV, halfTexel, vec2<f32>(1.0) - halfTexel);
 
-        // 높이와 미리 구워진 노멀 벡터를 한 번에 획득 (RGBA 채널)
+        // 현재 LOD 수준의 높이와 노멀 데이터 획득 (단일 1회 샘플링)
         let sampledData0 = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clampedWorldUV, 0.0);
-        let sampledData1 = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clampedParentUV, 0.0);
 
-        let h0 = sampledData0.r;
-        var normal0 = sampledData0.gba;
+        sampledHeight   = sampledData0.r;
+        var localNormal = sampledData0.gba;
 
-        let h1 = sampledData1.r;
-        var normal1 = sampledData1.gba;
-
-        // 노멀 값이 아직 업데이트되지 않은 경우(길이가 0) 하늘 방향인 vec3(0, 1, 0)으로 폴백
-        if (length(normal0) < 0.01) {
-            normal0 = vec3<f32>(0.0, 1.0, 0.0);
-        }
-        if (length(normal1) < 0.01) {
-            normal1 = vec3<f32>(0.0, 1.0, 0.0);
+        if (dot(localNormal, localNormal) < 0.0001) {
+            localNormal = vec3<f32>(0.0, 1.0, 0.0);
         }
 
-        sampledHeight = mix(h0, h1, morphFactor);
-        let localNormal = mix(normal0, normal1, morphFactor);
+        // morphFactor > 0.001 인 모핑 전이 영역에서만 부모 타일 텍스처 이중 샘플링 및 보간 수행
+        if (morphFactor > 0.001) {
+            let rawParentWorldUV = (parentWorldXZ - vertexUniforms.worldOffset) / vertexUniforms.worldSize;
+            let parentWorldUV    = vec2<f32>(rawParentWorldUV.x, 1.0 - rawParentWorldUV.y);
+            let clampedParentUV  = clamp(parentWorldUV, halfTexel, vec2<f32>(1.0) - halfTexel);
+
+            let sampledData1 = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clampedParentUV, 0.0);
+
+            let h1 = sampledData1.r;
+            var normal1 = sampledData1.gba;
+
+            if (dot(normal1, normal1) < 0.0001) {
+                normal1 = vec3<f32>(0.0, 1.0, 0.0);
+            }
+
+            sampledHeight = mix(sampledHeight, h1, morphFactor);
+            localNormal   = mix(localNormal, normal1, morphFactor);
+        }
 
         let worldNormal = normalize((gu_normalModelMatrix * vec4<f32>(localNormal, 0.0)).xyz);
         
-        // 가상 경사면의 기본 탄젠트 방향
-        let localTangentX = vec3<f32>(1.0, 0.0, 0.0);
-        let worldTangent = normalize((gu_modelMatrix * vec4<f32>(localTangentX, 0.0)).xyz);
+        // 가상 경사면의 기본 탄젠트 방향 (gu_modelMatrix * vec4(1,0,0,0) -> gu_modelMatrix[0].xyz 컬럼 대입)
+        let worldTangent = normalize(gu_modelMatrix[0].xyz);
         let orthogonalTangent = normalize(worldTangent - dot(worldTangent, worldNormal) * worldNormal);
 
         computedNormal = worldNormal;
-        worldTangentX = orthogonalTangent;
+        worldTangentX  = orthogonalTangent;
     #redgpu_else
         computedNormal = normalize((gu_normalModelMatrix * vec4<f32>(inputData.vertexNormal, 0.0)).xyz);
-        worldTangentX = normalize((gu_modelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz);
+        worldTangentX  = normalize((gu_modelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz);
     #redgpu_endIf
 
     let heightRange = vertexUniforms.maxHeight - vertexUniforms.minHeight;
