@@ -53,13 +53,19 @@ fn getHeightBlendedWeights(
     return blended / sumVal;
 }
 
-fn getBakeMipLevel(tileScale: f32, textureSize: f32, atlasSize: f32) -> f32 {
-    let texelsPerAtlasPixel = (tileScale * textureSize) / atlasSize;
+fn getBakeMipLevel(scale: f32, textureSize: f32, worldUVScaleX: f32, outputWidth: f32) -> f32 {
+    // 1 World UV당 아틀라스가 갖는 픽셀 수
+    let atlasPixelsPerWorldUV = outputWidth / max(0.00001, worldUVScaleX);
+    // 1 World UV당 디테일 레이어 텍스처가 갖는 텍셀 수
+    let layerTexelsPerWorldUV = scale * textureSize;
+    // 아틀라스 1픽셀당 텍셀 비중
+    let texelsPerAtlasPixel = layerTexelsPerWorldUV / max(0.00001, atlasPixelsPerWorldUV);
+    
     if (texelsPerAtlasPixel <= 1.0) {
         return 0.0;
     }
-    let mip = log2(texelsPerAtlasPixel) - 0.5;
-    return clamp(mip, 0.0, 3.0);
+    // 아틀라스 픽셀 해상도 한계에 맞춰 선명도를 최대한 유지하는 유동적 Mipmap 계산
+    return log2(texelsPerAtlasPixel);
 }
 
 @compute @workgroup_size(16, 16)
@@ -87,8 +93,8 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let macroUV = wUV * bakeUniforms.macroScale;
 
     let texSize = f32(textureDimensions(diffuseArray).x);
-    let tileMip = getBakeMipLevel(bakeUniforms.tileScale, texSize, f32(outputDim.x));
-    let macroMip = getBakeMipLevel(bakeUniforms.macroScale, texSize, f32(outputDim.x));
+    let tileMip = getBakeMipLevel(bakeUniforms.tileScale, texSize, bakeUniforms.worldUVScale.x, f32(outputDim.x));
+    let macroMip = getBakeMipLevel(bakeUniforms.macroScale, texSize, bakeUniforms.worldUVScale.x, f32(outputDim.x));
 
     // 디퓨즈 혼합
     let d0 = mix(

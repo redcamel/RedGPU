@@ -48,7 +48,7 @@ interface TerrainMaterial {
 class TerrainMaterial extends ABitmapBaseMaterial {
     #layers: TerrainLayerConfig[] = [];
     #rvt: TerrainRVT
-    #tileScale: number = 16.0;
+    #tileScale: number = 32.0;
     #macroScale: number = 2.0;
     #blendContrast: number = 0.0;
     #metallicFactor: number = 0;
@@ -89,7 +89,8 @@ class TerrainMaterial extends ABitmapBaseMaterial {
             minFilter: GPU_FILTER_MODE.LINEAR,
             mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
             addressModeU: GPU_ADDRESS_MODE.REPEAT,
-            addressModeV: GPU_ADDRESS_MODE.REPEAT
+            addressModeV: GPU_ADDRESS_MODE.REPEAT,
+            maxAnisotropy: 16
         });
 
         this.rvtSampler = new Sampler(redGPUContext, {

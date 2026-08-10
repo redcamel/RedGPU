@@ -414,7 +414,7 @@ RedGPU.init(
         terrain.worldSize = [WORLD_SIZE, WORLD_SIZE];
         terrain.worldOffset = [-WORLD_SIZE / 2, -WORLD_SIZE / 2]; // 원점 중앙 정렬
         terrain.maxLOD = MAX_LOD;
-        terrain.tileScale = 200.0;                 // 8.2km 규격에 맞춘 촘촘하고 선명한 텍스처 밀도 타일링 비율
+        terrain.tileScale = 32.0;                  // 1K 레이어 텍스처 질감과 노멀이 가장 쨍하고 정교하게 표현되는 최적 타일링 배율 (32.0)
 
         // 🛰️ 언리얼 엔진 5 표준 월드 파티션 공간 그리드 스트리밍 설정 (카메라 주변 동적 시야 로딩 반경)
         terrain.spatialGrid.loadingRadius = 2560;  // 카메라 시야 반경 2.56km 동적 로딩

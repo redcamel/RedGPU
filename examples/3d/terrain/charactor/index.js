@@ -371,7 +371,14 @@ RedGPU.init(
             orm: '../../../assets/terrain/terrainTest_001/orm.jpg',
             splat: '../../../assets/terrain/terrainTest_001/splatMap.jpg',
         });
-
+        terrain.addLayer({
+            name: 'Grass',
+            diffuse: '../../../assets/terrain/terrainTest_001/layer/grass.jpg',
+            normal: '../../../assets/terrain/terrainTest_001/layer/grass_normal.jpg',
+            height: '../../../assets/terrain/terrainTest_001/layer/grass_height.jpg',
+            orm: '../../../assets/terrain/terrainTest_001/layer/grass_orm.jpg',
+            roughnessFactor: 0.85
+        });
 
         // 💡 디테일 레이어 4종 등록
         terrain.addLayer({
@@ -401,14 +408,7 @@ RedGPU.init(
             roughnessFactor: 0.85
         });
 
-        terrain.addLayer({
-            name: 'Grass',
-            diffuse: '../../../assets/terrain/terrainTest_001/layer/grass.jpg',
-            normal: '../../../assets/terrain/terrainTest_001/layer/grass_normal.jpg',
-            height: '../../../assets/terrain/terrainTest_001/layer/grass_height.jpg',
-            orm: '../../../assets/terrain/terrainTest_001/layer/grass_orm.jpg',
-            roughnessFactor: 0.85
-        });
+
 
         // 3-5. 지형 파라미터 — 20km 초대형 스케일 설정 및 언리얼 스타일 공간 그리드 스트리밍 활성화
         terrain.minHeight = MIN_H;
@@ -416,7 +416,7 @@ RedGPU.init(
         terrain.worldSize = [WORLD_SIZE, WORLD_SIZE];
         terrain.worldOffset = [-WORLD_SIZE / 2, -WORLD_SIZE / 2]; // 원점 중앙 정렬
         terrain.maxLOD = MAX_LOD;
-        terrain.tileScale = 1500.0;                 // 디테일 텍스처를 훨씬 더 촘촘하고 세밀하게 설정 (200.0 -> 1500.0)
+        terrain.tileScale = 32.0;                  // 1K 레이어 텍스처 질감과 노멀이 가장 쨍하고 정교하게 표현되는 최적 타일링 배율 (32.0)
 
         // 🛰️ 언리얼 엔진 5 표준 월드 파티션 공간 그리드 스트리밍 설정 (카메라 주변 동적 시야 로딩 반경)
         terrain.spatialGrid.loadingRadius = 2560;  // 카메라 시야 반경 2.56km 동적 로딩
