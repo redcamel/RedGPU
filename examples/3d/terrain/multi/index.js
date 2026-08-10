@@ -338,7 +338,9 @@ RedGPU.init(
         view.grid = false;
         redGPUContext.addView(view);
 
-        scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight())
+        const directionalLight = new RedGPU.Light.DirectionalLight([-0.5, -1.0, -0.5], '#ffffff', 100000);
+        scene.lightManager.addDirectionalLight(directionalLight);
+
         const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
         view.skyAtmosphere = skyAtmosphere;
 
@@ -409,6 +411,7 @@ RedGPU.init(
         });
 
         // 3-5. 지형 파라미터 — 20km 초대형 스케일 설정 및 언리얼 스타일 공간 그리드 스트리밍 활성화
+        terrain.receiveShadow = true;               // 💡 지형이 그림자를 받도록 활성화 (receiveShadow = true)
         terrain.minHeight = MIN_H;
         terrain.maxHeight = MAX_H;
         terrain.worldSize = [WORLD_SIZE, WORLD_SIZE];
@@ -416,6 +419,10 @@ RedGPU.init(
         terrain.maxLOD = MAX_LOD;
         terrain.tileScale = 32.0;                  // 1K 레이어 텍스처 질감과 노멀이 가장 쨍하고 정교하게 표현되는 최적 타일링 배율 (32.0)
         terrain.blendContrast = 0.85;              // 입체적인 Height-Based Blending 콘트라스트 강도 (0.85)
+
+        // 💡 8.2km 거대 지형 스케일에 맞는 섀도우 최대 렌더링 거리 확장 및 그림자 강도 1.0 설정
+        scene.shadowManager.directionalShadowManager.maxShadowDistance = 3000;
+        scene.shadowManager.directionalShadowManager.strength = 1.0;
 
         // 🛰️ 언리얼 엔진 5 표준 월드 파티션 공간 그리드 스트리밍 설정 (카메라 주변 동적 시야 로딩 반경)
         terrain.spatialGrid.loadingRadius = 2560;  // 카메라 시야 반경 2.56km 동적 로딩
@@ -444,20 +451,59 @@ RedGPU.init(
 
         scene.addTerrain(terrain);
 
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 4. RVT (Runtime Virtual Texture) 생성 및 Terrain에 연결
-        //    - 4종 레이어 Height-Blend 결과를 오프스크린으로 GPU 베이킹
-        //    - 이후 셰이더는 단 2회 텍스처 페치로 지형 렌더링 (기존 30회+ → 2회)
-        // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-        // 6. HUD 루프 (rAF)
+        // 📦 PhongMaterial을 적용한 100개의 3D 박스 생성 및 지형 위 적절한 높이에 배치 (castShadow = true)
+        const boxes = [];
+        const boxCount = 100;
+        const colorPalette = ['#ff3366', '#38bdf8', '#4ade80', '#fbbf24', '#a855f7', '#ec4899', '#f97316', '#06b6d4', '#eab308'];
+
+        for (let i = 0; i < boxCount; i++) {
+            const sizeX = 30 + Math.random() * 70;
+            const sizeY = 30 + Math.random() * 90;
+            const sizeZ = 30 + Math.random() * 70;
+
+            const boxGeometry = new RedGPU.Primitive.Box(redGPUContext, sizeX, sizeY, sizeZ);
+            const hexColor = colorPalette[i % colorPalette.length];
+            const boxMaterial = new RedGPU.Material.PhongMaterial(redGPUContext, hexColor);
+            boxMaterial.shininess = 32;
+
+            const boxMesh = new RedGPU.Display.Mesh(redGPUContext, boxGeometry, boxMaterial);
+
+            // 월드 중심 -2500m ~ +2500m 위치에 분포
+            const rx = (Math.random() - 0.5) * 5000;
+            const rz = (Math.random() - 0.5) * 5000;
+            const baseTerrainH = terrain.getTerrainHeight(rx, rz);
+
+            boxMesh.x = rx;
+            boxMesh.y = baseTerrainH + sizeY * 0.5 + 150 + Math.random() * 350; // 지형 고도 상공 150m~650m 시원하게 높여 띄움
+            boxMesh.z = rz;
+            boxMesh.castShadow = true;
+
+            // 회전 속도 및 부유 주기를 개별 지정
+            boxMesh.__rotSpeedX = (Math.random() - 0.5) * 1.5;
+            boxMesh.__rotSpeedY = (Math.random() - 0.5) * 2.0;
+            boxMesh.__baseY = boxMesh.y;
+            boxMesh.__floatFreq = 0.001 + Math.random() * 0.002;
+
+            scene.addChild(boxMesh);
+            boxes.push(boxMesh);
+        }
+
+        // 6. HUD 및 박스 애니메이션 통합 루프
         const rawCam = controller;
 
-        function hudLoop() {
+        function hudLoop(time) {
+            const now = performance.now();
+            const len = boxes.length;
+            for (let i = 0; i < len; i++) {
+                const b = boxes[i];
+                b.rotationX += b.__rotSpeedX;
+                b.rotationY += b.__rotSpeedY;
+                b.y = b.__baseY + Math.sin(now * b.__floatFreq + i) * 60;
+            }
             updateHUD(terrain, rawCam);
             updateSpatialGrid2DDebugger(terrain, rawCam);
             updateHeightmapAtlas2DDebugger(terrain);
         }
-
 
         // 5. 렌더러 시작
         const renderer = new RedGPU.Renderer();
