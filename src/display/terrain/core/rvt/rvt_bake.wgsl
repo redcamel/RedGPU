@@ -81,8 +81,8 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         return;
     }
 
-    let tileLocalUV = (vec2<f32>(f32(global_id.x), f32(global_id.y)) + vec2<f32>(0.5)) / bakeUniforms.tileRect.zw;
-    let wUV = bakeUniforms.worldUVOffset + tileLocalUV * bakeUniforms.worldUVScale;
+    let rawUV = (vec2<f32>(destCoords) + vec2<f32>(0.5)) / vec2<f32>(outputDim);
+    let wUV = bakeUniforms.worldUVOffset + rawUV * bakeUniforms.worldUVScale;
     let tileUV = wUV * bakeUniforms.tileScale;
     let macroUV = wUV * bakeUniforms.macroScale;
 
@@ -159,8 +159,10 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         sw = vec4<f32>(grassWeight, rockWeight, gravelWeight, sandWeight);
     } else {
         let splat = textureSampleLevel(splatTexture, texSampler, wUV, 0.0);
-        let splat3Sum = clamp(splat.r + splat.g + splat.b, 0.0, 1.0);
-        sw = vec4<f32>(splat.r, splat.g, splat.b, max(0.0, 1.0 - splat3Sum));
+        let splat3Sum = splat.r + splat.g + splat.b;
+        // Use splat.a if alpha channel contains valid weight, otherwise fall back to 1.0 - splat3Sum
+        let layer3Weight = select(max(0.0, 1.0 - splat3Sum), splat.a, splat.a > 0.001 && (splat3Sum + splat.a) <= 1.05);
+        sw = vec4<f32>(splat.r, splat.g, splat.b, layer3Weight);
     }
 
     let totalWeightAlbedo = sw.r + sw.g + sw.b + sw.a;

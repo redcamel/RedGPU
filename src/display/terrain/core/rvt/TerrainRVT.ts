@@ -60,10 +60,10 @@ class TerrainRVT {
     ): void {
         const tileSizeX = this.#atlasSize / tileCountX;
         const tileSizeZ = this.#atlasSize / tileCountZ;
-        const pixelX = Math.floor(tileCol * tileSizeX);
-        const pixelY = Math.floor(tileRow * tileSizeZ);
-        const width = Math.ceil(tileSizeX);
-        const height = Math.ceil(tileSizeZ);
+        const pixelX = Math.round(tileCol * tileSizeX);
+        const pixelY = Math.round(tileRow * tileSizeZ);
+        const width = Math.round((tileCol + 1) * tileSizeX) - pixelX;
+        const height = Math.round((tileRow + 1) * tileSizeZ) - pixelY;
 
         this.bakeTileRect(material, pixelX, pixelY, width, height);
     }
