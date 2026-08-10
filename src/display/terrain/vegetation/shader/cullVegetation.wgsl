@@ -57,7 +57,60 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let instY = instanceMatrix[3][1];
     let instZ = instanceMatrix[3][2];
 
-    // 0. Splatmap 토질 마스크 검사 (GPU Culling)
+    // 1. Distance Culling 판정 (가장 빠름 - ALU 단 3회로 시야 밖 70%+ 조기 탈락)
+    let dx = instX - cullUniforms.cameraPos.x;
+    let dz = instZ - cullUniforms.cameraPos.z;
+    let distSq = dx * dx + dz * dz;
+    if (distSq > cullUniforms.maxDistanceSq) {
+        return;
+    }
+
+    // 1-1. 거리 기반 식생 밀도 솎아내기 (Distance-based Density Thinning)
+    let farThresholdSq = cullUniforms.maxDistanceSq * 0.49;
+    if (distSq > farThresholdSq) {
+        if ((index & 3u) != 0u) {
+            return;
+        }
+    } else {
+        let midThresholdSq = cullUniforms.maxDistanceSq * 0.2025;
+        if (distSq > midThresholdSq) {
+            if ((index & 1u) != 0u) {
+                return;
+            }
+        }
+    }
+
+    // 2. Frustum Culling 판정 (1-Center AABB 반경 절두체 판정식: 12회 ALU로 화면 밖 탈락)
+    let NEAR_SAFE_DISTANCE_SQ: f32 = 900.0; // 30m 반경 (30^2 = 900)
+    if (distSq > NEAR_SAFE_DISTANCE_SQ) {
+        let minP = cullUniforms.aabbMin;
+        let maxP = cullUniforms.aabbMax;
+
+        let localCenter = (minP + maxP) * 0.5;
+        let localExtent = (maxP - minP) * 0.5;
+
+        // 인스턴스 중심점 1개 변환
+        let worldCenter = (instanceMatrix * vec4<f32>(localCenter, 1.0)).xyz;
+
+        // 월드 공간 AABB Half-Extent 산출
+        let worldExtent = vec3<f32>(
+            abs(instanceMatrix[0].x) * localExtent.x + abs(instanceMatrix[1].x) * localExtent.y + abs(instanceMatrix[2].x) * localExtent.z,
+            abs(instanceMatrix[0].y) * localExtent.x + abs(instanceMatrix[1].y) * localExtent.y + abs(instanceMatrix[2].y) * localExtent.z,
+            abs(instanceMatrix[0].z) * localExtent.x + abs(instanceMatrix[1].z) * localExtent.y + abs(instanceMatrix[2].z) * localExtent.z
+        );
+
+        // 6개 절두체 평면에 대해 반경 r 판정
+        for (var i = 0u; i < 6u; i = i + 1u) {
+            let plane = frustumPlanes.planes[i];
+            let dist = dot(plane.xyz, worldCenter) + plane.w;
+            let r = dot(abs(plane.xyz), worldExtent);
+            if (dist < -r) {
+                return; // 절두체 외곽 탈락
+            }
+        }
+    }
+
+    // 3. Splatmap 토질 마스크 검사 (거리/밀도/절두체 컬링을 통과한 인스턴스에 대해서만 지연 텍스처 샘플링!)
     let splatUV = clamp(
         vec2<f32>(
             (instX - vegetationUniforms.worldOffset.x) / vegetationUniforms.worldSize.x,
@@ -81,71 +134,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         return;
     }
 
-    // 1. Distance Culling 판정
-    let dx = instX - cullUniforms.cameraPos.x;
-    let dz = instZ - cullUniforms.cameraPos.z;
-    let distSq = dx * dx + dz * dz;
-    if (distSq > cullUniforms.maxDistanceSq) {
-        return;
-    }
-
-    // 1-1. 거리 기반 식생 밀도 솎아내기 (Distance-based Density Thinning)
-    // 원거리(최대 가시거리의 70% 이상): 75% 솎아내기 (4개 중 1개만 통과)
-    let farThresholdSq = cullUniforms.maxDistanceSq * 0.49;
-    if (distSq > farThresholdSq) {
-        if ((index & 3u) != 0u) {
-            return;
-        }
-    } else {
-        // 중거리(최대 가시거리의 45% 이상): 50% 솎아내기 (2개 중 1개만 통과)
-        let midThresholdSq = cullUniforms.maxDistanceSq * 0.2025;
-        if (distSq > midThresholdSq) {
-            if ((index & 1u) != 0u) {
-                return;
-            }
-        }
-    }
-
-    // 2. Frustum Culling 판정 (AABB/OBB 방식)
-    let NEAR_SAFE_DISTANCE_SQ: f32 = 900.0; // 30m 반경 (30^2 = 900)
-    if (distSq > NEAR_SAFE_DISTANCE_SQ) {
-        let minP = cullUniforms.aabbMin;
-        let maxP = cullUniforms.aabbMax;
-
-        let corners = array<vec4<f32>, 8>(
-            vec4<f32>(minP.x, minP.y, minP.z, 1.0),
-            vec4<f32>(maxP.x, minP.y, minP.z, 1.0),
-            vec4<f32>(minP.x, maxP.y, minP.z, 1.0),
-            vec4<f32>(maxP.x, maxP.y, minP.z, 1.0),
-            vec4<f32>(minP.x, minP.y, maxP.z, 1.0),
-            vec4<f32>(maxP.x, minP.y, maxP.z, 1.0),
-            vec4<f32>(minP.x, maxP.y, maxP.z, 1.0),
-            vec4<f32>(maxP.x, maxP.y, maxP.z, 1.0)
-        );
-
-        var worldCorners: array<vec3<f32>, 8>;
-        for (var c = 0u; c < 8u; c = c + 1u) {
-            let wPos = instanceMatrix * corners[c];
-            worldCorners[c] = wPos.xyz;
-        }
-
-        for (var i = 0u; i < 6u; i = i + 1u) {
-            let plane = frustumPlanes.planes[i];
-            var allOutside = true;
-            for (var c = 0u; c < 8u; c = c + 1u) {
-                let dist = dot(plane.xyz, worldCorners[c]) + plane.w;
-                if (dist >= 0.0) {
-                    allOutside = false;
-                    break;
-                }
-            }
-            if (allOutside) {
-                return; // 8개 점이 특정 평면 바깥에 모두 위치함
-            }
-        }
-    }
-
-    // Heightmap UV 및 Y 샘플링
+    // 4. Heightmap UV 및 Y 샘플링
     let terrainUV = clamp(
         vec2<f32>(
             (instX - vegetationUniforms.worldOffset.x) / vegetationUniforms.worldSize.x,
@@ -156,7 +145,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let sampledRatio = textureSampleLevel(heightAtlasTexture, heightmapSampler, terrainUV, 0.0).r;
     let terrainY = vegetationUniforms.minHeight + sampledRatio * (vegetationUniforms.maxHeight - vegetationUniforms.minHeight);
 
-    // 3. 컬링 통과 인스턴스 저장, Y 높이 저장 및 indirect count 증가
+    // 5. 컬링 통과 인스턴스 저장, Y 높이 저장 및 indirect count 증가
     let slot = atomicAdd(&indirectArgs.instanceCount, 1u);
     culledInstanceIndices[slot] = index;
     culledInstanceHeights[slot] = terrainY;
