@@ -59,44 +59,79 @@ fn getInterpolatedHeightAt(pixelX: f32, pixelZ: f32, targetSize: f32) -> f32 {
     return mix(top, bottom, fz) / 65535.0;
 }
 
+// 18x18 Workgroup Shared Memory (LDS) 캐시 (16x16 타일 + 외곽 1픽셀 패딩)
+var<workgroup> tileHeightCache: array<array<f32, 18>, 18>;
+
 @compute @workgroup_size(16, 16)
-fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
+fn main(
+    @builtin(global_invocation_id) global_id: vec3<u32>,
+    @builtin(local_invocation_id) local_id: vec3<u32>,
+    @builtin(workgroup_id) workgroup_id: vec3<u32>
+) {
+    let linearId = local_id.y * 16u + local_id.x;
+    let targetSize = uniforms.targetTileSize;
+    let targetSizeI32 = i32(targetSize);
+
+    // 1. 256개 스레드가 협력하여 18x18 (총 324개) 캐시 셀을 Shared Memory에 로드 (스레드당 1~2개 로드)
+    // 1차 바운드: linearId 0..255 (256개 셀)
+    if (linearId < 324u) {
+        let cacheZ = linearId / 18u;
+        let cacheX = linearId % 18u;
+
+        let targetX = clamp(i32(workgroup_id.x * 16u + cacheX) - 1, 0, targetSizeI32 - 1);
+        let targetZ = clamp(i32(workgroup_id.y * 16u + cacheZ) - 1, 0, targetSizeI32 - 1);
+
+        tileHeightCache[cacheZ][cacheX] = getInterpolatedHeightAt(f32(targetX), f32(targetZ), f32(targetSize));
+    }
+
+    // 2차 바운드: linearId + 256 (남은 68개 셀: 256..323)
+    let secondId = linearId + 256u;
+    if (secondId < 324u) {
+        let cacheZ = secondId / 18u;
+        let cacheX = secondId % 18u;
+
+        let targetX = clamp(i32(workgroup_id.x * 16u + cacheX) - 1, 0, targetSizeI32 - 1);
+        let targetZ = clamp(i32(workgroup_id.y * 16u + cacheZ) - 1, 0, targetSizeI32 - 1);
+
+        tileHeightCache[cacheZ][cacheX] = getInterpolatedHeightAt(f32(targetX), f32(targetZ), f32(targetSize));
+    }
+
+    // 모든 스레드의 Shared Memory 로드가 완료될 때까지 동기화
+    workgroupBarrier();
+
+    // 2. 바운드 타일 범위를 벗어난 스레드는 종료
     let x = global_id.x;
     let z = global_id.y;
-
-    let targetSize = uniforms.targetTileSize;
     if (x >= targetSize || z >= targetSize) {
         return;
     }
 
+    // 3. Shared Memory(LDS)에서 O(1) 초고속 샘플링 (SSBO 무작위 탐색 20회 -> 0회)
+    let cz = local_id.y + 1u;
+    let cx = local_id.x + 1u;
+
+    let hCenter = tileHeightCache[cz][cx];
+    let hL      = tileHeightCache[cz][cx - 1u];
+    let hR      = tileHeightCache[cz][cx + 1u];
+    let hD      = tileHeightCache[cz - 1u][cx];
+    let hU      = tileHeightCache[cz + 1u][cx];
+
+    // 4. 지형 경사도 계산 및 노멀 벡터 복원 (cross 외적식 간소화)
     let tSize = f32(targetSize);
-    
-    // 1. 현재 중심 높이값
-    let hCenter = getInterpolatedHeightAt(f32(x), f32(z), tSize);
-
-    // 2. 주변 4방향 높이값 계산 (경사도 연산용)
-    let hL = getInterpolatedHeightAt(max(f32(x) - 1.0, 0.0), f32(z), tSize);
-    let hR = getInterpolatedHeightAt(min(f32(x) + 1.0, tSize - 1.0), f32(z), tSize);
-    let hD = getInterpolatedHeightAt(f32(x), max(f32(z) - 1.0, 0.0), tSize);
-    let hU = getInterpolatedHeightAt(f32(x), min(f32(z) + 1.0, tSize - 1.0), tSize);
-
-    // 지형의 경사 스케일 인자 (가상 크기)
     let stepX = 2.0 / tSize;
     let stepZ = 2.0 / tSize;
-    
-    // 높이의 정규 경사 범위를 0~1에서 적절한 스케일로 적용
-    let heightRange = 0.5; 
+    let heightRange = 0.5;
 
-    let tangentX = vec3<f32>(stepX, (hR - hL) * heightRange, 0.0);
-    let tangentZ = vec3<f32>(0.0, (hD - hU) * heightRange, stepZ);
+    let dhx = (hR - hL) * heightRange / stepX;
+    let dhz = (hD - hU) * heightRange / stepZ;
 
-    // 외적을 통해 법선(Normal) 벡터 추출
-    let normal = normalize(cross(tangentZ, tangentX));
+    let normal = normalize(vec3<f32>(-dhx, 1.0, -dhz));
 
-    // 3. rgba16float 포맷 팩킹 (4개의 16비트 float 값을 2개의 u32(8Bytes)로 압축)
+    // 5. rgba16float 포맷 팩킹 (4개의 16비트 float 값을 2개의 u32(8Bytes)로 압축하여 출력)
     let packed0 = pack2x16float(vec2<f32>(hCenter, normal.x));
     let packed1 = pack2x16float(vec2<f32>(normal.y, normal.z));
 
     let targetIndex = z * targetSize + x;
     outputBuffer[targetIndex] = vec2<u32>(packed0, packed1);
 }
+

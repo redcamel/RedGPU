@@ -81,7 +81,7 @@ RedGPU.init(
 
         // 1. 카메라 설정 — 800m 비행 시점 설정
         const controller = new RedGPU.Camera.FreeController(redGPUContext);
-        controller.moveSpeed = 1000;
+        controller.moveSpeed = 2000;
         controller.mouseSensitivity = 0.2;
         controller.x = 0;
         controller.y = 500;
