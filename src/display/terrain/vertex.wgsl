@@ -193,7 +193,7 @@ fn main(inputData: InputData) -> VertexOutput {
 
     #redgpu_if receiveShadow
     {
-        output.shadowCoord = getShadowCoord(position.xyz, systemUniforms.directionalLightProjectionViewMatrix);
+        output.shadowCoord = getShadowCoord(worldPos.xyz, systemUniforms.directionalLightProjectionViewMatrix);
         output.receiveShadow = globalVertexData.receiveShadow;
     }
     #redgpu_endIf

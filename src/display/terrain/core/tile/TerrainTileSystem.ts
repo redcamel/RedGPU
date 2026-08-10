@@ -97,6 +97,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #tileStreamMetrics = new TileStreamMetrics();
 
     // 1순위 최적화: Quadtree Dirty Checking 상태 변수
+    #currentInstanceCount: number = 0;
     #isDirty: boolean = true;
     #lastCamX: number = NaN;
     #lastCamY: number = NaN;
@@ -263,6 +264,9 @@ class TerrainTileSystem extends TerrainMaterialBind {
             this.#isDirty = false;
 
             this.#updateInstanceRenderBuffer(cameraPos, renderViewStateData);
+        } else if (this.gpuRenderInfo && this.drawCommandSlot && this.drawBufferManager) {
+            // 💡 1순위 최적화 보정: Dirty 스킵 시에도 드로우 인스턴스 수 동기화를 매 프레임 보장하여 깜빡임(Flickering) 100% 차단
+            this.drawBufferManager.setInstanceNum(this.drawCommandSlot, this.#currentInstanceCount);
         }
     }
 
@@ -388,6 +392,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
 
         const leafNodes = this.#quadtree.leafNodes;
         const count = Math.min(leafNodes.length, this.#maxInstances);
+        this.#currentInstanceCount = count;
 
         if (count > 0) {
             const arrayBuffer = this.#instanceArrayBuffer;

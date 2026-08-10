@@ -25,6 +25,7 @@ class Terrain extends TerrainTileSystem {
             this.name = name;
         }
         this.ignoreFrustumCulling = true;
+        this.receiveShadow = true;
         this.heightmapSampler = new Sampler(redGPUContext, {
             magFilter: GPU_FILTER_MODE.LINEAR,
             minFilter: GPU_FILTER_MODE.LINEAR,

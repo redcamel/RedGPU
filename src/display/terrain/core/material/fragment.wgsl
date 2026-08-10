@@ -243,7 +243,9 @@ fn getDirectPbrLighting(
     for (var i = 0u; i < u_directionalLightCount; i++) {
         let lightIntensity = u_directionalLights[i].intensity;
         let L = -normalize(u_directionalLights[i].direction);
-        var finalLightColor = u_directionalLights[i].color * lightIntensity * systemUniforms.preExposure * visibility;
+        let NdotL_raw = dot(N, L);
+        let selfShadowFactor = smoothstep(-0.02, 0.12, NdotL_raw);
+        var finalLightColor = u_directionalLights[i].color * lightIntensity * systemUniforms.preExposure * visibility * selfShadowFactor;
         if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
             let u_atmo = systemUniforms.skyAtmosphere;
             let surfaceHeightKm = max(0.0, input_vertexPosition.y / 1000.0);

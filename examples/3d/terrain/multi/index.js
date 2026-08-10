@@ -344,14 +344,7 @@ RedGPU.init(
         const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
         view.skyAtmosphere = skyAtmosphere;
 
-        // 💡 5km 이내 근경은 맑고 또렷하게 보장하고, 5km~20km 원경 지평선만 대기와 어우러지는 원경 대기 안개
-        const heightFog = new RedGPU.PostEffect.HeightFog(redGPUContext);
-        heightFog.fogColor.setColorByRGB(160, 192, 224); // SkyAtmosphere 대기 산란 지평선 톤과 조화로운 Haze Blue
-        heightFog.thickness = 500;               // 수직 안개 두께를 낮게 유지 (근경 지면 뽀얗게 되는 현상 완전 방지)
-        heightFog.startDepth = 5000;             // 5km 이내 근경 지면은 안개 0% (맑고 칼같은 디테일)
-        heightFog.endDepth = 20000;              // 5km ~ 20km 원경 구간에서만 지평선 대기와 은은하게 믹싱
-        heightFog.density = 1;
-        view.postEffectManager.addEffect(heightFog);
+
         console.log(RedGPU)
         // 3. 거대 Terrain 생성 (verticesPerSide = 64 표준 규격 적용)
         terrain = new RedGPU.Display.Terrain(
@@ -511,7 +504,7 @@ RedGPU.init(
 
 
         // 7. GUI 패널
-        buildGUI(redGPUContext, terrain, controller, view, heightFog);
+        buildGUI(redGPUContext, terrain, controller, view, directionalLight);
     },
     (failReason) => {
         console.error('RedGPU 초기화 실패:', failReason);
@@ -523,7 +516,7 @@ RedGPU.init(
 );
 
 // ─── GUI 패널 ──────────────────────────────────────────────────────────────────
-function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
+function buildGUI(redGPUContext, terrain, controller, view, directionalLight) {
     // 텍스처 켜기/끄기 토글용 원본 텍스처 인스턴스 백업 참조
     const baseColorTextureInstance = terrain.baseColorTexture;
     const ormTextureInstance = terrain.ormTexture;
@@ -534,6 +527,49 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
         ibl: true,
         skybox: true,
         gui: (pane) => {
+
+            // ── 0. ☀️ 태양 조명 & 그림자 (Light & Shadow) ─────────────────────────
+            const lightFolder = pane.addFolder({title: '☀️ 태양 조명 & 그림자 (Light & Shadow)', expanded: true});
+            const shadowManager = view.scene.shadowManager.directionalShadowManager;
+
+            const lightState = {
+                elevation: directionalLight.elevation,
+                azimuth: directionalLight.azimuth,
+                shadowStrength: shadowManager.strength
+            };
+
+            lightFolder.addBinding(lightState, 'elevation', {
+                label: '태양 고도각 (Elevation °)',
+                min: 1.0,
+                max: 90.0,
+                step: 1.0
+            })
+                .on('change', (ev) => {
+                    directionalLight.elevation = ev.value;
+                    terrain.markDirty();
+                });
+
+            lightFolder.addBinding(lightState, 'azimuth', {
+                label: '태양 방위각 (Azimuth °)',
+                min: 0.0,
+                max: 360.0,
+                step: 1.0
+            })
+                .on('change', (ev) => {
+                    directionalLight.azimuth = ev.value;
+                    terrain.markDirty();
+                });
+
+            lightFolder.addBinding(lightState, 'shadowStrength', {
+                label: '그림자 강도 (Strength)',
+                min: 0.0,
+                max: 1.0,
+                step: 0.05
+            })
+                .on('change', (ev) => {
+                    shadowManager.strength = ev.value;
+                    terrain.markDirty();
+                });
 
             // ── 1. 🌍 Terrain (기본 & LOD) ──────────────────────────────────────────
             const terrainFolder = pane.addFolder({title: '🌍 Terrain (기본 & LOD)', expanded: true});
@@ -746,64 +782,6 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
             rvtFolder.addBinding(terrain.material, 'debugSplatTexture', {
                 label: '디버그: Splat 맵 채널 보기'
             });
-
-            // ── 9. 🌫️ HeightFog (대기 안개) ───────────────────────────────────────
-            const fogFolder = pane.addFolder({title: '🌫️ HeightFog (대기 안개)', expanded: true});
-
-            const fogState = {
-                enabled: true,
-                fogColor: {
-                    r: heightFog.fogColor.r,
-                    g: heightFog.fogColor.g,
-                    b: heightFog.fogColor.b
-                }
-            };
-
-            fogFolder.addBinding(fogState, 'enabled', {label: '안개 사용 (ON/OFF)'})
-                .on('change', (ev) => {
-                    if (ev.value) {
-                        view.postEffectManager.addEffect(heightFog);
-                    } else {
-                        view.postEffectManager.removeEffect(heightFog);
-                    }
-                });
-
-            fogFolder.addBinding(heightFog, 'density', {
-                label: '안개 밀도 (Density)',
-                min: 0, max: 5, step: 0.05
-            });
-
-            fogFolder.addBinding(heightFog, 'thickness', {
-                label: '안개 두께 (Thickness)',
-                min: 10, max: 3000, step: 10
-            });
-
-            fogFolder.addBinding(heightFog, 'startDepth', {
-                label: '시작 거리 (Start Depth)',
-                min: 0, max: 30000, step: 100
-            });
-
-            fogFolder.addBinding(heightFog, 'endDepth', {
-                label: '최대 거리 (End Depth)',
-                min: 1000, max: 50000, step: 500
-            });
-
-            fogFolder.addBinding(heightFog, 'baseHeight', {
-                label: '기본 높이 (Base Height)',
-                min: -1000, max: 2000, step: 10
-            });
-
-            fogFolder.addBinding(fogState, 'fogColor', {
-                label: '안개 색상 (Fog Color)',
-                color: {type: 'float'}
-            }).on('change', (ev) => {
-                heightFog.fogColor.setColorByRGB(
-                    Math.round(ev.value.r * 255),
-                    Math.round(ev.value.g * 255),
-                    Math.round(ev.value.b * 255)
-                );
-            });
-
         }
     });
 }
