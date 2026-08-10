@@ -218,6 +218,10 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         });
     };
 
+    public bakeRVT = (tileCountX: number = 16, tileCountZ: number = 16): void => {
+        this.bakeAllRVTTiles(tileCountX, tileCountZ);
+    };
+
     public bakeRVTTile(tileCol: number, tileRow: number, tileCountX: number = 16, tileCountZ: number = 16): void {
         if (this.#rvt) {
             this.#rvt.bakeTile(this, tileCol, tileRow, tileCountX, tileCountZ);

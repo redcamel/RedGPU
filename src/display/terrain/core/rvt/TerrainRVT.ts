@@ -201,7 +201,7 @@ class TerrainRVT {
         });
 
         this.#normalORMAtlasGPU = device.createTexture({
-            label: 'RVT_NormalORMAtlas', size: [size, size, 1], format: 'rgba8unorm',
+            label: 'RVT_NormalORMAtlas', size: [size, size, 1], format: 'rgba16float',
             usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
         });
 
@@ -261,7 +261,7 @@ class TerrainRVT {
                 {
                     binding: 11,
                     visibility: GPUShaderStage.COMPUTE,
-                    storageTexture: {access: 'write-only', format: 'rgba8unorm', viewDimension: '2d'}
+                    storageTexture: {access: 'write-only', format: 'rgba16float', viewDimension: '2d'}
                 },
             ]
         });

@@ -34,7 +34,7 @@ struct RVTBakeUniforms {
 @group(0) @binding(9) var heightmapAtlasTexture: texture_2d<f32>;
 
 @group(0) @binding(10) var albedoOutput:    texture_storage_2d<rgba8unorm, write>;
-@group(0) @binding(11) var normalORMOutput: texture_storage_2d<rgba8unorm, write>;
+@group(0) @binding(11) var normalORMOutput: texture_storage_2d<rgba16float, write>;
 
 fn getHeightBlendedWeights(
     splatWeights: vec4<f32>,
@@ -81,8 +81,8 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         return;
     }
 
-    let rawUV = (vec2<f32>(destCoords) + vec2<f32>(0.5)) / vec2<f32>(outputDim);
-    let wUV = bakeUniforms.worldUVOffset + rawUV * bakeUniforms.worldUVScale;
+    let tileLocalUV = (vec2<f32>(f32(global_id.x), f32(global_id.y)) + vec2<f32>(0.5)) / bakeUniforms.tileRect.zw;
+    let wUV = bakeUniforms.worldUVOffset + tileLocalUV * bakeUniforms.worldUVScale;
     let tileUV = wUV * bakeUniforms.tileScale;
     let macroUV = wUV * bakeUniforms.macroScale;
 

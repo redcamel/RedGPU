@@ -107,7 +107,13 @@ fn main(inputData:InputData) -> OutputFragment {
         return output;
     }
 
-    var scaled_rvt = vec2<f32>(rvt_normalXY.r * 2.0 - 1.0, -(rvt_normalXY.g * 2.0 - 1.0));
+    // Calculate camera distance for unreal-style near-field micro detail overlay
+    let distToCamera = length(u_cameraPosition - input_vertexPosition);
+    let nearFactor = 1.0 - clamp((distToCamera - 5.0) / 45.0, 0.0, 1.0);
+
+    // Unpack tangent-space normal XY stored in RVT Atlas
+    var scaled_rvt = vec2<f32>(rvt_normalXY.r * 2.0 - 1.0, rvt_normalXY.g * 2.0 - 1.0);
+
     let lenSq_rvt = dot(scaled_rvt, scaled_rvt);
     if (lenSq_rvt > 0.98) { scaled_rvt = normalize(scaled_rvt) * 0.98; }
     let recon_z_rvt = sqrt(max(0.001, 1.0 - dot(scaled_rvt, scaled_rvt)));
@@ -136,7 +142,7 @@ fn main(inputData:InputData) -> OutputFragment {
     if (ior_rvt <= 0.0) { ior_rvt = 1.5; }
 
     let occlusionParameter_rvt = clamp(rvt_occlusion, 0.0, 1.0);
-    let roughnessParameter_rvt = max(rvt_roughness, 0.04);
+    let roughnessParameter_rvt = max(rvt_roughness, 0.001);
     let metallicParameter_rvt: f32 = 0.0;
 
     let F0_dielectric_base_rvt = getDielectricF0(ior_rvt);

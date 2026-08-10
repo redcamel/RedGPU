@@ -107,14 +107,16 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.minHeight = 0;
         this.maxHeight = 0.5;
         this.worldOffset = [-0.5, -0.5];
-        this.worldSize = [1, 1];
-        this.maxLOD = 4;
-        this.baseSlotIndex = 0;
-        this.#verticesPerSide = verticesPerSide;
 
         this.#atlasTileCountX = options?.atlasTileCountX ?? 16;
         this.#atlasTileCountZ = options?.atlasTileCountZ ?? 16;
         this.#atlasTileSize = options?.atlasTileSize ?? 512;
+
+        // worldSize를 하드코딩 [1, 1] 대신 cellSize * atlasTileCount로 동적 유도하여 설정
+        this.worldSize = [cellSize * this.#atlasTileCountX, cellSize * this.#atlasTileCountZ];
+        this.maxLOD = 4;
+        this.baseSlotIndex = 0;
+        this.#verticesPerSide = verticesPerSide;
 
         this.#maxInstances = 65536;
 
