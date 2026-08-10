@@ -69,6 +69,22 @@ fn calculateMorphFactor(worldPos: vec3<f32>, lod: f32) -> f32 {
     return clamp(k, 0.0, 1.0);
 }
 
+fn decodeOctahedronNormal(oct: vec2<f32>) -> vec3<f32> {
+    if (oct.x == 0.0 && oct.y == 0.0) {
+        return vec3<f32>(0.0, 1.0, 0.0);
+    }
+    let f = oct * 2.0 - 1.0;
+    var n = vec3<f32>(f.x, 1.0 - abs(f.x) - abs(f.y), f.y);
+    let t = clamp(-n.y, 0.0, 1.0);
+    n.x += select(t, -t, n.x >= 0.0);
+    n.z += select(t, -t, n.z >= 0.0);
+    let norm = normalize(n);
+    if (norm.y < 0.0) {
+        return vec3<f32>(0.0, 1.0, 0.0);
+    }
+    return norm;
+}
+
 @vertex
 fn main(inputData: InputData) -> VertexOutput {
     var output: VertexOutput;
@@ -138,7 +154,7 @@ fn main(inputData: InputData) -> VertexOutput {
         let sampledData0 = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clampedWorldUV, 0.0);
 
         sampledHeight   = sampledData0.r;
-        var localNormal = sampledData0.gba;
+        var localNormal = decodeOctahedronNormal(sampledData0.gb);
 
         if (dot(localNormal, localNormal) < 0.0001) {
             localNormal = vec3<f32>(0.0, 1.0, 0.0);
@@ -153,7 +169,7 @@ fn main(inputData: InputData) -> VertexOutput {
             let sampledData1 = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clampedParentUV, 0.0);
 
             let h1 = sampledData1.r;
-            var normal1 = sampledData1.gba;
+            var normal1 = decodeOctahedronNormal(sampledData1.gb);
 
             if (dot(normal1, normal1) < 0.0001) {
                 normal1 = vec3<f32>(0.0, 1.0, 0.0);

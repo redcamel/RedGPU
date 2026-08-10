@@ -62,6 +62,15 @@ fn getInterpolatedHeightAt(pixelX: f32, pixelZ: f32, targetSize: f32) -> f32 {
 // 18x18 Workgroup Shared Memory (LDS) 캐시 (16x16 타일 + 외곽 1픽셀 패딩)
 var<workgroup> tileHeightCache: array<array<f32, 18>, 18>;
 
+fn encodeOctahedronNormal(n: vec3<f32>) -> vec2<f32> {
+    let l1norm = abs(n.x) + abs(n.y) + abs(n.z);
+    var p = n.xz / select(l1norm, 1.0, l1norm == 0.0);
+    if (n.y < 0.0) {
+        p = (1.0 - abs(p.yx)) * select(vec2<f32>(-1.0), vec2<f32>(1.0), p >= vec2<f32>(0.0));
+    }
+    return p * 0.5 + 0.5;
+}
+
 @compute @workgroup_size(16, 16)
 fn main(
     @builtin(global_invocation_id) global_id: vec3<u32>,
@@ -73,7 +82,6 @@ fn main(
     let targetSizeI32 = i32(targetSize);
 
     // 1. 256개 스레드가 협력하여 18x18 (총 324개) 캐시 셀을 Shared Memory에 로드 (스레드당 1~2개 로드)
-    // 1차 바운드: linearId 0..255 (256개 셀)
     if (linearId < 324u) {
         let cacheZ = linearId / 18u;
         let cacheX = linearId % 18u;
@@ -84,7 +92,6 @@ fn main(
         tileHeightCache[cacheZ][cacheX] = getInterpolatedHeightAt(f32(targetX), f32(targetZ), f32(targetSize));
     }
 
-    // 2차 바운드: linearId + 256 (남은 68개 셀: 256..323)
     let secondId = linearId + 256u;
     if (secondId < 324u) {
         let cacheZ = secondId / 18u;
@@ -96,7 +103,6 @@ fn main(
         tileHeightCache[cacheZ][cacheX] = getInterpolatedHeightAt(f32(targetX), f32(targetZ), f32(targetSize));
     }
 
-    // 모든 스레드의 Shared Memory 로드가 완료될 때까지 동기화
     workgroupBarrier();
 
     // 2. 바운드 타일 범위를 벗어난 스레드는 종료
@@ -106,7 +112,7 @@ fn main(
         return;
     }
 
-    // 3. Shared Memory(LDS)에서 O(1) 초고속 샘플링 (SSBO 무작위 탐색 20회 -> 0회)
+    // 3. Shared Memory(LDS)에서 O(1) 초고속 샘플링
     let cz = local_id.y + 1u;
     let cx = local_id.x + 1u;
 
@@ -116,7 +122,7 @@ fn main(
     let hD      = tileHeightCache[cz - 1u][cx];
     let hU      = tileHeightCache[cz + 1u][cx];
 
-    // 4. 지형 경사도 계산 및 노멀 벡터 복원 (cross 외적식 간소화)
+    // 4. 지형 경사도 계산 및 노멀 벡터 복원
     let tSize = f32(targetSize);
     let stepX = 2.0 / tSize;
     let stepZ = 2.0 / tSize;
@@ -126,10 +132,11 @@ fn main(
     let dhz = (hD - hU) * heightRange / stepZ;
 
     let normal = normalize(vec3<f32>(-dhx, 1.0, -dhz));
+    let octNormal = encodeOctahedronNormal(normal);
 
-    // 5. rgba16float 포맷 팩킹 (4개의 16비트 float 값을 2개의 u32(8Bytes)로 압축하여 출력)
-    let packed0 = pack2x16float(vec2<f32>(hCenter, normal.x));
-    let packed1 = pack2x16float(vec2<f32>(normal.y, normal.z));
+    // 5. Octahedron Normal 팩킹 (R: Height, G: OctNormal.x, B: OctNormal.y)
+    let packed0 = pack2x16float(vec2<f32>(hCenter, octNormal.x));
+    let packed1 = pack2x16float(vec2<f32>(octNormal.y, 1.0));
 
     let targetIndex = z * targetSize + x;
     outputBuffer[targetIndex] = vec2<u32>(packed0, packed1);

@@ -74,6 +74,22 @@ fn getBakeMipLevel(scale: f32, textureSize: f32, worldUVScaleX: f32, outputWidth
     return log2(texelsPerAtlasPixel);
 }
 
+fn decodeOctahedronNormal(oct: vec2<f32>) -> vec3<f32> {
+    if (oct.x == 0.0 && oct.y == 0.0) {
+        return vec3<f32>(0.0, 1.0, 0.0);
+    }
+    let f = oct * 2.0 - 1.0;
+    var n = vec3<f32>(f.x, 1.0 - abs(f.x) - abs(f.y), f.y);
+    let t = clamp(-n.y, 0.0, 1.0);
+    n.x += select(t, -t, n.x >= 0.0);
+    n.z += select(t, -t, n.z >= 0.0);
+    let norm = normalize(n);
+    if (norm.y < 0.0) {
+        return vec3<f32>(0.0, 1.0, 0.0);
+    }
+    return norm;
+}
+
 @compute @workgroup_size(16, 16)
 fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let outputDim = textureDimensions(albedoOutput);
@@ -162,10 +178,10 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var sw = vec4<f32>(0.0);
 
     if (bakeUniforms.useAutoSplat == 1u) {
-        // 단 1회의 샘플링으로 높이와 사전 베이킹된 노멀 벡터를 동시에 획득
+        // 단 1회의 샘플링으로 높이와 사전 베이킹된 노멀 벡터를 동시에 획득 (Octahedron Decoding)
         let heightmapData = textureSampleLevel(heightmapAtlasTexture, texSampler, wUV, 0.0);
         let hCenter = heightmapData.r;
-        let normal = heightmapData.gba;
+        let normal = decodeOctahedronNormal(heightmapData.gb);
 
         // 경사(Slope)를 노멀 벡터의 수직성분(y)을 이용하여 제곱근 없이 선형 근사
         // 하늘을 수직으로 볼수록 (y가 1에 가까울수록) 경사도는 0, 평평해질수록 (y가 0에 가까울수록) 경사도는 1
