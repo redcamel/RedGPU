@@ -5,7 +5,7 @@ import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
 import Primitive from "../../../primitive/core/Primitive";
 
 class TerrainGeometry extends Geometry {
-    constructor(redGPUContext: RedGPUContext, verticesPerSide: number = 64, skirtDepth: number = 0.05) {
+    constructor(redGPUContext: RedGPUContext, verticesPerSide: number = 64, skirtDepth: number = 0.1) {
         const interleaveData: number[] = [];
         const indexData: number[] = [];
         const quadsPerSide = verticesPerSide - 1;

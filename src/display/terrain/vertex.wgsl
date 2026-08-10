@@ -171,7 +171,9 @@ fn main(inputData: InputData) -> VertexOutput {
         worldTangentX = normalize((gu_modelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz);
     #redgpu_endIf
 
-    let worldY = sampledHeight * (vertexUniforms.maxHeight - vertexUniforms.minHeight) + vertexUniforms.minHeight;
+    let heightRange = vertexUniforms.maxHeight - vertexUniforms.minHeight;
+    let skirtOffset = inputData.position.y * heightRange;
+    let worldY = sampledHeight * heightRange + vertexUniforms.minHeight + skirtOffset;
 
     let worldPos = vec4<f32>(finalWorldXZ.x, worldY, finalWorldXZ.y, 1.0);
     let position = gu_modelMatrix * worldPos;
