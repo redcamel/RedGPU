@@ -1,6 +1,8 @@
 export class QuadtreeNode {
     public children: QuadtreeNode[] = [];
     public hasChildren: boolean = false;
+    public customMinY: number | null = null;
+    public customMaxY: number | null = null;
 
     // X, Z 축 반경(Extent) 캐싱
     private readonly halfScale: number;
@@ -21,12 +23,23 @@ export class QuadtreeNode {
     public split() {
         if (this.children.length === 0 && this.hasChildren) {
             const nextLOD = this.lodLevel + 1;
-            this.children = [
-                new QuadtreeNode([this.worldOffset[0], this.worldOffset[1]], this.halfScale, nextLOD, this.maxLOD),
-                new QuadtreeNode([this.worldOffset[0] + this.halfScale, this.worldOffset[1]], this.halfScale, nextLOD, this.maxLOD),
-                new QuadtreeNode([this.worldOffset[0], this.worldOffset[1] + this.halfScale], this.halfScale, nextLOD, this.maxLOD),
-                new QuadtreeNode([this.worldOffset[0] + this.halfScale, this.worldOffset[1] + this.halfScale], this.halfScale, nextLOD, this.maxLOD)
-            ];
+            const c0 = new QuadtreeNode([this.worldOffset[0], this.worldOffset[1]], this.halfScale, nextLOD, this.maxLOD);
+            const c1 = new QuadtreeNode([this.worldOffset[0] + this.halfScale, this.worldOffset[1]], this.halfScale, nextLOD, this.maxLOD);
+            const c2 = new QuadtreeNode([this.worldOffset[0], this.worldOffset[1] + this.halfScale], this.halfScale, nextLOD, this.maxLOD);
+            const c3 = new QuadtreeNode([this.worldOffset[0] + this.halfScale, this.worldOffset[1] + this.halfScale], this.halfScale, nextLOD, this.maxLOD);
+
+            if (this.customMinY !== null && this.customMaxY !== null) {
+                c0.customMinY = this.customMinY;
+                c0.customMaxY = this.customMaxY;
+                c1.customMinY = this.customMinY;
+                c1.customMaxY = this.customMaxY;
+                c2.customMinY = this.customMinY;
+                c2.customMaxY = this.customMaxY;
+                c3.customMinY = this.customMinY;
+                c3.customMaxY = this.customMaxY;
+            }
+
+            this.children = [c0, c1, c2, c3];
         }
     }
 
@@ -39,18 +52,21 @@ export class QuadtreeNode {
     ): boolean {
         if (!planes) return true;
 
+        const nodeMinY = this.customMinY !== null ? this.customMinY : minHeight;
+        const nodeMaxY = this.customMaxY !== null ? this.customMaxY : maxHeight;
+
         const minX = this.worldOffset[0] + worldOffsetX;
         const maxX = this.worldOffset[0] + this.worldScale + worldOffsetX;
         const minZ = this.worldOffset[1] + worldOffsetZ;
         const maxZ = this.worldOffset[1] + this.worldScale + worldOffsetZ;
 
         const centerX = (minX + maxX) * 0.5;
-        const centerY = (minHeight + maxHeight) * 0.5;
+        const centerY = (nodeMinY + nodeMaxY) * 0.5;
         const centerZ = (minZ + maxZ) * 0.5;
 
-        // 미리 캐싱된 반경(extent) 값을 활용하여 연산 오버헤드 축소
+        // 미리 캐싱된 반경(extent) 및 노드 정밀 Height 반경(ey)을 활용하여 AABB 연산 정확도 극대화
         const ex = this.halfScale;
-        const ey = (maxHeight - minHeight) * 0.5;
+        const ey = (nodeMaxY - nodeMinY) * 0.5;
         const ez = this.halfScale;
 
         for (let i = 0; i < 6; i++) {

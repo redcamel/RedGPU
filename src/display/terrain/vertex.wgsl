@@ -85,9 +85,6 @@ fn main(inputData: InputData) -> VertexOutput {
     let gu_prevModelMatrix = gu_matrixList.prevModelMatrix;
     let gu_normalModelMatrix = gu_matrixList.normalModelMatrix;
 
-    let modelScaleX = length(gu_modelMatrix[0].xyz);
-    let modelScaleY = length(gu_modelMatrix[1].xyz);
-    let modelScaleZ = length(gu_modelMatrix[2].xyz);
 
     let localInstanceIndex = inputData.globalVertexSlotIndex - baseSlotIndex;
     let instanceData = instanceBuffer[localInstanceIndex];
@@ -209,14 +206,11 @@ fn main(inputData: InputData) -> VertexOutput {
         output.prevClipPos = su_projection.prevNoneJitterProjectionViewMatrix * gu_prevModelMatrix * worldPos;
     }
 
-    let nodeScaleX = length(gu_localMatrix[0].xyz);
-    let nodeScaleY = length(gu_localMatrix[1].xyz);
-    let nodeScaleZ = length(gu_localMatrix[2].xyz);
+    // Volume scale calculation optimization (removing 6x vector length & 2x pow 1/3 per vertex)
+    let nodeVolumeScale  = length(gu_localMatrix[0].xyz);
+    let modelVolumeScale = length(gu_modelMatrix[0].xyz);
 
-    output.localNodeScale_volumeScale = vec2<f32>(
-        pow(nodeScaleX * nodeScaleY * nodeScaleZ, 1.0 / 3.0),
-        pow(modelScaleX * modelScaleY * modelScaleZ, 1.0 / 3.0)
-    );
+    output.localNodeScale_volumeScale = vec2<f32>(nodeVolumeScale, modelVolumeScale);
 
     return output;
 }

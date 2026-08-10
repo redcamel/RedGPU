@@ -124,31 +124,39 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         0.3
     );
 
-    // 하이트 혼합
+    // 하이트 혼합 (pow 3.0 부동소수점 함수 대신 h_c * h_c * h_c 직접 곱셈으로 연산 고속화)
     let h0_raw = mix(
         textureSampleLevel(heightArray, texSampler, tileUV, 0i, tileMip).r,
         textureSampleLevel(heightArray, texSampler, macroUV, 0i, macroMip).r,
         0.3
     );
-    let h0 = pow(clamp(h0_raw, 0.0, 1.0), 3.0);
+    let h0_c = clamp(h0_raw, 0.0, 1.0);
+    let h0 = h0_c * h0_c * h0_c;
+
     let h1_raw = mix(
         textureSampleLevel(heightArray, texSampler, tileUV, 1i, tileMip).r,
         textureSampleLevel(heightArray, texSampler, macroUV, 1i, macroMip).r,
         0.3
     );
-    let h1 = pow(clamp(h1_raw, 0.0, 1.0), 3.0);
+    let h1_c = clamp(h1_raw, 0.0, 1.0);
+    let h1 = h1_c * h1_c * h1_c;
+
     let h2_raw = mix(
         textureSampleLevel(heightArray, texSampler, tileUV, 2i, tileMip).r,
         textureSampleLevel(heightArray, texSampler, macroUV, 2i, macroMip).r,
         0.3
     );
-    let h2 = pow(clamp(h2_raw, 0.0, 1.0), 3.0);
+    let h2_c = clamp(h2_raw, 0.0, 1.0);
+    let h2 = h2_c * h2_c * h2_c;
+
     let h3_raw = mix(
         textureSampleLevel(heightArray, texSampler, tileUV, 3i, tileMip).r,
         textureSampleLevel(heightArray, texSampler, macroUV, 3i, macroMip).r,
         0.3
     );
-    let h3 = pow(clamp(h3_raw, 0.0, 1.0), 3.0);
+    let h3_c = clamp(h3_raw, 0.0, 1.0);
+    let h3 = h3_c * h3_c * h3_c;
+
     let layerHeights = vec4<f32>(h0, h1, h2, h3);
 
     var sw = vec4<f32>(0.0);
