@@ -16,7 +16,7 @@ struct ProceduralVertexUniforms {
     globalFragmentSlotIndex: u32,
     maxDistanceSq: f32,
     startFadeDistanceSq: f32,
-    windMaxDistanceSq: f32,
+    _padWindMaxDistSq: f32,
     _p0: u32, _p1: u32, _p2: u32, _p3: u32,
 };
 
@@ -26,7 +26,7 @@ struct VegetationUniforms {
     maxHeight: f32,
     minHeight: f32,
     time: f32,
-    windStrength: f32,
+    _padWind: f32,
     baseModelMatrix: mat4x4<f32>,
 };
 

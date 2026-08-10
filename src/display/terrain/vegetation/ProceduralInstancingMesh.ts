@@ -23,7 +23,6 @@ abstract class ProceduralInstancingMesh extends Mesh {
     maskThreshold: number = 0.15;
     maxDistance: number = 1500;
     startFadeDistance: number = 1200;
-    windMaxDistance: number = 300;
     boundingRadius: number = 5.0;
     aabbMin: Float32Array = new Float32Array([-1, -1, -1]);
     aabbMax: Float32Array = new Float32Array([1, 1, 1]);
@@ -375,7 +374,7 @@ abstract class ProceduralInstancingMesh extends Mesh {
         this.#vertexUniformUintView[0] = this.#material.globalFragmentSlotIndex ?? 0;
         this.#vertexUniformFloatView[1] = this.maxDistance * this.maxDistance;
         this.#vertexUniformFloatView[2] = this.startFadeDistance * this.startFadeDistance;
-        this.#vertexUniformFloatView[3] = this.windMaxDistance * this.windMaxDistance;
+        this.#vertexUniformFloatView[3] = 0; // padding
 
         this.redGPUContext.gpuDevice.queue.writeBuffer(
             this.#vertexUniformBuffer.gpuBuffer,

@@ -29,7 +29,7 @@ struct VegetationUniforms {
     maxHeight: f32,
     minHeight: f32,
     time: f32,
-    windStrength: f32,
+    _padWind: f32,
     baseModelMatrix: mat4x4<f32>,
 };
 

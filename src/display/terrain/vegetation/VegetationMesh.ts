@@ -21,13 +21,11 @@ export interface VegetationMeshOptions {
     material?: any;
     baseScale?: number;
     gltfMesh?: Mesh | any;
-    windStrength?: number;
     maskChannel?: 'r' | 'g' | 'b' | 'a';
     maskThreshold?: number;
     splatUrl?: string;
     maxDistance?: number;
     startFadeDistance?: number;
-    windMaxDistance?: number;
     boundingRadius?: number;
     meshRotationOffset?: [number, number, number];
     alphaCutoff?: number;
@@ -40,7 +38,6 @@ interface RawCandidate {
     rotY: number;
     scaleXZ: number;
     scaleY: number;
-    windOffset: number;
     tileKey: string;
 }
 
@@ -75,7 +72,6 @@ class VegetationMesh extends ProceduralInstancingMesh {
     #cullUniformData: Float32Array = new Float32Array(16);
     #frustumPlanesData: Float32Array = new Float32Array(24); // 6 planes * vec4
 
-    #windStrength: number = 0.08;
     #maskChannel: 'r' | 'g' | 'b' | 'a' = 'g';
     #maskThreshold: number = 0.2;
     #baseScale: number = 1.0;
@@ -137,12 +133,10 @@ class VegetationMesh extends ProceduralInstancingMesh {
 
         this.#terrain = terrain;
         this.#subMeshDataList = subMeshList;
-        this.#windStrength = options.windStrength ?? 0.08;
         this.#maskChannel = options.maskChannel ?? 'g';
         this.#maskThreshold = options.maskThreshold ?? 0.2;
         this.maxDistance = options.maxDistance ?? 1500;
         this.startFadeDistance = options.startFadeDistance ?? (this.maxDistance * 0.8);
-        this.windMaxDistance = options.windMaxDistance ?? 300;
         this.#baseScale = baseScale;
 
         // 지오메트리 로컬 AABB 자동 산출
@@ -640,7 +634,7 @@ class VegetationMesh extends ProceduralInstancingMesh {
         d[4] = terrain.maxHeight;
         d[5] = terrain.minHeight;
         d[6] = time;
-        d[7] = this.#windStrength;
+        d[7] = 0.0; // padding
         d.set(this.#baseModelMatrix, 8);
 
         this.redGPUContext.gpuDevice.queue.writeBuffer(
@@ -729,7 +723,6 @@ class VegetationMesh extends ProceduralInstancingMesh {
                 x, z, rotY,
                 scaleXZ: s,
                 scaleY: s * (0.85 + prng() * 0.4),
-                windOffset: prng() * Math.PI * 2,
                 tileKey
             };
 
