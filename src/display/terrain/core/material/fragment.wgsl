@@ -107,10 +107,6 @@ fn main(inputData:InputData) -> OutputFragment {
         return output;
     }
 
-    // Calculate camera distance for unreal-style near-field micro detail overlay
-    let distToCamera = length(u_cameraPosition - input_vertexPosition);
-    let nearFactor = 1.0 - clamp((distToCamera - 5.0) / 45.0, 0.0, 1.0);
-
     // Unpack tangent-space normal XY stored in RVT Atlas
     var scaled_rvt = vec2<f32>(rvt_normalXY.r * 2.0 - 1.0, rvt_normalXY.g * 2.0 - 1.0);
 

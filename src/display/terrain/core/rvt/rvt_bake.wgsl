@@ -86,52 +86,54 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let tileUV = wUV * bakeUniforms.tileScale;
     let macroUV = wUV * bakeUniforms.macroScale;
 
-    let bakeMip = getBakeMipLevel(bakeUniforms.tileScale, 1024.0, f32(outputDim.x));
+    let texSize = f32(textureDimensions(diffuseArray).x);
+    let tileMip = getBakeMipLevel(bakeUniforms.tileScale, texSize, f32(outputDim.x));
+    let macroMip = getBakeMipLevel(bakeUniforms.macroScale, texSize, f32(outputDim.x));
 
     // 디퓨즈 혼합
     let d0 = mix(
-        textureSampleLevel(diffuseArray, texSampler, tileUV, 0i, bakeMip),
-        textureSampleLevel(diffuseArray, texSampler, macroUV, 0i, bakeMip),
+        textureSampleLevel(diffuseArray, texSampler, tileUV, 0i, tileMip),
+        textureSampleLevel(diffuseArray, texSampler, macroUV, 0i, macroMip),
         0.3
     );
     let d1 = mix(
-        textureSampleLevel(diffuseArray, texSampler, tileUV, 1i, bakeMip),
-        textureSampleLevel(diffuseArray, texSampler, macroUV, 1i, bakeMip),
+        textureSampleLevel(diffuseArray, texSampler, tileUV, 1i, tileMip),
+        textureSampleLevel(diffuseArray, texSampler, macroUV, 1i, macroMip),
         0.3
     );
     let d2 = mix(
-        textureSampleLevel(diffuseArray, texSampler, tileUV, 2i, bakeMip),
-        textureSampleLevel(diffuseArray, texSampler, macroUV, 2i, bakeMip),
+        textureSampleLevel(diffuseArray, texSampler, tileUV, 2i, tileMip),
+        textureSampleLevel(diffuseArray, texSampler, macroUV, 2i, macroMip),
         0.3
     );
     let d3 = mix(
-        textureSampleLevel(diffuseArray, texSampler, tileUV, 3i, bakeMip),
-        textureSampleLevel(diffuseArray, texSampler, macroUV, 3i, bakeMip),
+        textureSampleLevel(diffuseArray, texSampler, tileUV, 3i, tileMip),
+        textureSampleLevel(diffuseArray, texSampler, macroUV, 3i, macroMip),
         0.3
     );
 
     // 하이트 혼합
     let h0_raw = mix(
-        textureSampleLevel(heightArray, texSampler, tileUV, 0i, bakeMip).r,
-        textureSampleLevel(heightArray, texSampler, macroUV, 0i, bakeMip).r,
+        textureSampleLevel(heightArray, texSampler, tileUV, 0i, tileMip).r,
+        textureSampleLevel(heightArray, texSampler, macroUV, 0i, macroMip).r,
         0.3
     );
     let h0 = pow(clamp(h0_raw, 0.0, 1.0), 3.0);
     let h1_raw = mix(
-        textureSampleLevel(heightArray, texSampler, tileUV, 1i, bakeMip).r,
-        textureSampleLevel(heightArray, texSampler, macroUV, 1i, bakeMip).r,
+        textureSampleLevel(heightArray, texSampler, tileUV, 1i, tileMip).r,
+        textureSampleLevel(heightArray, texSampler, macroUV, 1i, macroMip).r,
         0.3
     );
     let h1 = pow(clamp(h1_raw, 0.0, 1.0), 3.0);
     let h2_raw = mix(
-        textureSampleLevel(heightArray, texSampler, tileUV, 2i, bakeMip).r,
-        textureSampleLevel(heightArray, texSampler, macroUV, 2i, bakeMip).r,
+        textureSampleLevel(heightArray, texSampler, tileUV, 2i, tileMip).r,
+        textureSampleLevel(heightArray, texSampler, macroUV, 2i, macroMip).r,
         0.3
     );
     let h2 = pow(clamp(h2_raw, 0.0, 1.0), 3.0);
     let h3_raw = mix(
-        textureSampleLevel(heightArray, texSampler, tileUV, 3i, bakeMip).r,
-        textureSampleLevel(heightArray, texSampler, macroUV, 3i, bakeMip).r,
+        textureSampleLevel(heightArray, texSampler, tileUV, 3i, tileMip).r,
+        textureSampleLevel(heightArray, texSampler, macroUV, 3i, macroMip).r,
         0.3
     );
     let h3 = pow(clamp(h3_raw, 0.0, 1.0), 3.0);
@@ -193,23 +195,23 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     // 노멀 혼합
     let n0_raw = mix(
-        (textureSampleLevel(normalArray, texSampler, tileUV, 0i, bakeMip).rg * 2.0 - vec2<f32>(1.0)),
-        (textureSampleLevel(normalArray, texSampler, macroUV, 0i, bakeMip).rg * 2.0 - vec2<f32>(1.0)),
+        (textureSampleLevel(normalArray, texSampler, tileUV, 0i, tileMip).rg * 2.0 - vec2<f32>(1.0)),
+        (textureSampleLevel(normalArray, texSampler, macroUV, 0i, macroMip).rg * 2.0 - vec2<f32>(1.0)),
         0.3
     );
     let n1_raw = mix(
-        (textureSampleLevel(normalArray, texSampler, tileUV, 1i, bakeMip).rg * 2.0 - vec2<f32>(1.0)),
-        (textureSampleLevel(normalArray, texSampler, macroUV, 1i, bakeMip).rg * 2.0 - vec2<f32>(1.0)),
+        (textureSampleLevel(normalArray, texSampler, tileUV, 1i, tileMip).rg * 2.0 - vec2<f32>(1.0)),
+        (textureSampleLevel(normalArray, texSampler, macroUV, 1i, macroMip).rg * 2.0 - vec2<f32>(1.0)),
         0.3
     );
     let n2_raw = mix(
-        (textureSampleLevel(normalArray, texSampler, tileUV, 2i, bakeMip).rg * 2.0 - vec2<f32>(1.0)),
-        (textureSampleLevel(normalArray, texSampler, macroUV, 2i, bakeMip).rg * 2.0 - vec2<f32>(1.0)),
+        (textureSampleLevel(normalArray, texSampler, tileUV, 2i, tileMip).rg * 2.0 - vec2<f32>(1.0)),
+        (textureSampleLevel(normalArray, texSampler, macroUV, 2i, macroMip).rg * 2.0 - vec2<f32>(1.0)),
         0.3
     );
     let n3_raw = mix(
-        (textureSampleLevel(normalArray, texSampler, tileUV, 3i, bakeMip).rg * 2.0 - vec2<f32>(1.0)),
-        (textureSampleLevel(normalArray, texSampler, macroUV, 3i, bakeMip).rg * 2.0 - vec2<f32>(1.0)),
+        (textureSampleLevel(normalArray, texSampler, tileUV, 3i, tileMip).rg * 2.0 - vec2<f32>(1.0)),
+        (textureSampleLevel(normalArray, texSampler, macroUV, 3i, macroMip).rg * 2.0 - vec2<f32>(1.0)),
         0.3
     );
 
@@ -219,23 +221,23 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     // ORM 혼합
     var o0 = mix(
-        textureSampleLevel(ormArray, texSampler, tileUV, 0i, bakeMip),
-        textureSampleLevel(ormArray, texSampler, macroUV, 0i, bakeMip),
+        textureSampleLevel(ormArray, texSampler, tileUV, 0i, tileMip),
+        textureSampleLevel(ormArray, texSampler, macroUV, 0i, macroMip),
         0.3
     );
     var o1 = mix(
-        textureSampleLevel(ormArray, texSampler, tileUV, 1i, bakeMip),
-        textureSampleLevel(ormArray, texSampler, macroUV, 1i, bakeMip),
+        textureSampleLevel(ormArray, texSampler, tileUV, 1i, tileMip),
+        textureSampleLevel(ormArray, texSampler, macroUV, 1i, macroMip),
         0.3
     );
     var o2 = mix(
-        textureSampleLevel(ormArray, texSampler, tileUV, 2i, bakeMip),
-        textureSampleLevel(ormArray, texSampler, macroUV, 2i, bakeMip),
+        textureSampleLevel(ormArray, texSampler, tileUV, 2i, tileMip),
+        textureSampleLevel(ormArray, texSampler, macroUV, 2i, macroMip),
         0.3
     );
     var o3 = mix(
-        textureSampleLevel(ormArray, texSampler, tileUV, 3i, bakeMip),
-        textureSampleLevel(ormArray, texSampler, macroUV, 3i, bakeMip),
+        textureSampleLevel(ormArray, texSampler, tileUV, 3i, tileMip),
+        textureSampleLevel(ormArray, texSampler, macroUV, 3i, macroMip),
         0.3
     );
     if (o0.a <= 0.01 || (o0.r <= 0.001 && o0.g <= 0.001 && o0.b <= 0.001)) { o0 = vec4<f32>(1.0, 1.0, 1.0, 1.0); }
