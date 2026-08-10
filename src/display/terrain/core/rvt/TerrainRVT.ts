@@ -2,7 +2,6 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
 import bakeSrc from "./rvt_bake.wgsl";
 import TerrainMaterial from "../material/TerrainMaterial";
-import keepLog from "../../../../utils/keepLog";
 
 export interface TerrainRVTOptions {
     atlasSize?: number;
@@ -91,7 +90,6 @@ class TerrainRVT {
         const ormTextureGPUView = this.#getTextureView(mat.ormTexture);
         const heightmapGPUView = this.#getTextureView(mat.targetTerrain?.heightmapAtlasTexture);
 
-        keepLog(`RVT 컴퓨트 셰이더 타일 베이킹 실행: rect(${pixelX}, ${pixelY}, ${width}, ${height})`);
         const device = this.#redGPUContext.gpuDevice;
 
         const uData = this.#uData;

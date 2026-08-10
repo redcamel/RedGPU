@@ -1,6 +1,5 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import TerrainMaterialBind from "./TerrainMaterialBind";
-import keepLog from "../../../../utils/keepLog";
 import defineTexture from "../../../../defineProperty/funcs/texture/defineTexture";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
 import {SpatialTileInfo, TerrainSpatialGrid} from "./TerrainSpatialGrid";
@@ -371,7 +370,6 @@ class TerrainTileSystem extends TerrainMaterialBind {
 
         const atlasWidth = tileCountX * tileSize;
         const atlasHeight = tileCountZ * tileSize;
-        keepLog('Terrain_HeightmapTileAtlasGPUTexture', atlasWidth, atlasHeight)
         const gpuTexture = device.createTexture({
             label: 'Terrain_HeightmapTileAtlasGPUTexture',
             size: [atlasWidth, atlasHeight, 1],
@@ -393,7 +391,6 @@ class TerrainTileSystem extends TerrainMaterialBind {
     loadTileFrom16BitBuffer(tile: SpatialTileInfo, data: ArrayBuffer | ArrayBufferView, width: number, height: number) {
         this.#registerTileData(tile, data);
         this.#updateTileHeightmapFromBuffer(tile, data, width, height);
-        console.log(`[Tile Streamer 📥] Load 16-bit Buffer Cell(${tile.gridX}, ${tile.gridZ}) → Tile[${tile.tileColStr}, ${tile.tileRowStr}]`);
     }
 
     #enrichTileInfo(tile: SpatialTileInfo) {
@@ -557,8 +554,6 @@ class TerrainTileSystem extends TerrainMaterialBind {
             .catch(err => {
                 console.error(`[Tile Streamer ❌] Failed to load 16-bit tile from ${url}`, err);
             });
-
-        console.log(`[Tile Streamer 📥] Fetching 16-bit Tile Cell(${tile.gridX}, ${tile.gridZ}) → Tile[${tile.tileColStr}, ${tile.tileRowStr}] (${url})`);
     }
 }
 
