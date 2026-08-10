@@ -50,7 +50,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
     #rvt: TerrainRVT
     #tileScale: number = 32.0;
     #macroScale: number = 2.0;
-    #blendContrast: number = 0.0;
+    #blendContrast: number = 0.85;
     #metallicFactor: number = 0;
     #roughnessFactor: number = 1.0;
     #normalScale: number = 1.0;

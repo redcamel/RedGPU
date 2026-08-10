@@ -41,14 +41,20 @@ fn getHeightBlendedWeights(
     layerHeights: vec4<f32>,
     contrast: f32
 ) -> vec4<f32> {
-    let combined = (layerHeights + vec4<f32>(1.0)) * splatWeights;
-    let maxVal   = max(combined.r, max(combined.g, max(combined.b, combined.a)));
-    if (maxVal <= 0.0001) { return splatWeights; }
-
-    let transition = max(0.005, (1.0 - clamp(contrast, 0.0, 1.0)) * 0.5);
-    let threshold  = maxVal - transition;
-    let blended    = max(combined - vec4<f32>(threshold), vec4<f32>(0.0));
-    let sumVal     = blended.r + blended.g + blended.b + blended.a;
+    let mask = vec4<f32>(
+        select(0.0, 1.0, splatWeights.r > 0.001),
+        select(0.0, 1.0, splatWeights.g > 0.001),
+        select(0.0, 1.0, splatWeights.b > 0.001),
+        select(0.0, 1.0, splatWeights.a > 0.001)
+    );
+    let heightScores = splatWeights + layerHeights * mask;
+    let maxHeight = max(heightScores.r, max(heightScores.g, max(heightScores.b, heightScores.a)));
+    
+    let transition = max(0.001, (1.0 - clamp(contrast, 0.0, 0.99)) * 0.4);
+    let threshold = maxHeight - transition;
+    let blended = max(heightScores - vec4<f32>(threshold), vec4<f32>(0.0)) * splatWeights;
+    
+    let sumVal = blended.r + blended.g + blended.b + blended.a;
     if (sumVal <= 0.0001) { return splatWeights; }
     return blended / sumVal;
 }
