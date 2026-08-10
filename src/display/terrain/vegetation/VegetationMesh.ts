@@ -30,6 +30,8 @@ export interface VegetationMeshOptions {
     meshRotationOffset?: [number, number, number];
     alphaCutoff?: number;
     cutOff?: number;
+    roughnessFactor?: number;
+    metallicFactor?: number;
 }
 
 interface RawCandidate {
@@ -322,7 +324,7 @@ class VegetationMesh extends ProceduralInstancingMesh {
         }
     }
 
-    static #setupVegetationMaterial(mat: any, cutoff: number = 0.3) {
+    static #setupVegetationMaterial(mat: any, cutoff: number = 0.3, overrideRoughness?: number, overrideMetallic?: number) {
         if (!mat) return;
         if ('useCutOff' in mat) {
             mat.useCutOff = true;
@@ -336,6 +338,18 @@ class VegetationMesh extends ProceduralInstancingMesh {
         if ('transparent' in mat) mat.transparent = false;
         if ('cullMode' in mat) mat.cullMode = 'none';
         if ('doubleSided' in mat) mat.doubleSided = true;
+
+        // 🌲 식생 PBR 재질 보정: 식생은 비금속(metallic = 0.0)이어야 하며, 잎사귀/나무의 빛 반사를 억제하도록 roughness 보정
+        if ('metallicFactor' in mat) {
+            mat.metallicFactor = overrideMetallic ?? 0.0;
+        }
+        if ('roughnessFactor' in mat) {
+            if (overrideRoughness !== undefined) {
+                mat.roughnessFactor = overrideRoughness;
+            } else if (!mat.metallicRoughnessTexture || mat.roughnessFactor === 1.0 || mat.roughnessFactor === undefined) {
+                mat.roughnessFactor = 0.85;
+            }
+        }
     }
 
     #initCullResources(redGPUContext: RedGPUContext): void {

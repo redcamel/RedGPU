@@ -191,12 +191,14 @@ RedGPU.init(
 
             // 🌲 식생 전용 VegetationMesh 사용 (Zero-GC, 얇은 TypedArray 인스턴싱)
             treeFoliageMesh = new RedGPU.Display.VegetationMesh(redGPUContext, terrain, {
-                count: 50000,
+                count: 5000,
                 gltfMesh: resultMesh,
-                baseScale: 0.2,
+                baseScale: 1,
                 splatUrl: '../../../assets/terrain/terrainTest_001/splatMap.jpg',
                 maskChannel: 'g',
-                maskThreshold: 0.2
+                maskThreshold: 0.2,
+                roughnessFactor: 0.9,
+                metallicFactor: 0.0
             });
             scene.addChild(treeFoliageMesh);
 
