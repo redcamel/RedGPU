@@ -14,7 +14,6 @@ import GPU_MIPMAP_FILTER_MODE from "../../../../gpuConst/GPU_MIPMAP_FILTER_MODE"
 import defineBoolean from "../../../../defineProperty/funcs/defineBoolean";
 import consoleAndThrowError from "../../../../utils/consoleAndThrowError";
 import TerrainRVT from "../rvt/TerrainRVT";
-import keepLog from "../../../../utils/keepLog";
 
 export interface TerrainLayerConfig {
     name?: string;
@@ -209,13 +208,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         this.#bakePromise = Promise.resolve().then(() => {
             this.#bakePromise = null;
             if (!this.#rvt) return;
-            const cx = this.#latestTileCountX;
-            const cz = this.#latestTileCountZ;
-            for (let row = 0; row < cz; row++) {
-                for (let col = 0; col < cx; col++) {
-                    this.#rvt.bakeTile(this, col, row, cx, cz);
-                }
-            }
+            this.#rvt.bakeAll(this);
         });
     };
 
@@ -272,8 +265,50 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         return false;
     }
 
+    override destroy(): void {
+        if (this.#rvt) {
+            this.#rvt.destroy();
+            this.#rvt = null as any;
+        }
+        if (this.diffuseArray && typeof (this.diffuseArray as any).destroy === 'function') {
+            (this.diffuseArray as any).destroy();
+        }
+        if (this.normalArray && typeof (this.normalArray as any).destroy === 'function') {
+            (this.normalArray as any).destroy();
+        }
+        if (this.heightArray && typeof (this.heightArray as any).destroy === 'function') {
+            (this.heightArray as any).destroy();
+        }
+        if (this.ormArray && typeof (this.ormArray as any).destroy === 'function') {
+            (this.ormArray as any).destroy();
+        }
+        this.diffuseArray = null as any;
+        this.normalArray = null as any;
+        this.heightArray = null as any;
+        this.ormArray = null as any;
+        super.destroy();
+    }
+
     #rebuildLayerTextureArrays(): void {
         if (this.#layers.length === 0) return;
+
+        // 기존 TextureArray 자원 해제 (VRAM 메모리 누수 방지 - 런타임 안전성 확보)
+        if (this.diffuseArray && typeof (this.diffuseArray as any).destroy === 'function') {
+            (this.diffuseArray as any).destroy();
+        }
+        if (this.normalArray && typeof (this.normalArray as any).destroy === 'function') {
+            (this.normalArray as any).destroy();
+        }
+        if (this.heightArray && typeof (this.heightArray as any).destroy === 'function') {
+            (this.heightArray as any).destroy();
+        }
+        if (this.ormArray && typeof (this.ormArray as any).destroy === 'function') {
+            (this.ormArray as any).destroy();
+        }
+        this.diffuseArray = null as any;
+        this.normalArray = null as any;
+        this.heightArray = null as any;
+        this.ormArray = null as any;
 
         const extractSrc = (val: string | BitmapTexture | undefined): string => {
             if (!val) return '';
@@ -287,7 +322,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         const heightSrcs: string[] = [];
         const ormSrcs: string[] = [];
 
-        this.#layers.forEach((layer, idx) => {
+        this.#layers.forEach((layer) => {
             const dSrc = extractSrc(layer.diffuse);
             diffuseSrcs.push(dSrc);
 
@@ -299,19 +334,17 @@ class TerrainMaterial extends ABitmapBaseMaterial {
 
             const oSrc = extractSrc(layer.orm) || dSrc;
             ormSrcs.push(oSrc);
-
         });
 
         const ctx = this.redGPUContext;
         const onLoad = () => {
-            keepLog('오긴오냐', this.uuid)
             this.bakeAllRVTTiles();
-        }
+        };
+
         this.diffuseArray = new TextureArray(ctx, diffuseSrcs, true, onLoad, undefined, 'rgba8unorm-srgb');
         this.normalArray = new TextureArray(ctx, normalSrcs, true, onLoad, undefined, 'rgba8unorm');
         this.heightArray = new TextureArray(ctx, heightSrcs, true, onLoad, undefined, 'rgba8unorm');
         this.ormArray = new TextureArray(ctx, ormSrcs, true, onLoad, undefined, 'rgba8unorm');
-
     }
 }
 

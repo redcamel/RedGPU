@@ -141,6 +141,13 @@ class TextureArray extends ManagementResourceBase {
             this.#onError?.(err);
         });
     }
+
+    destroy() {
+        if (this.#gpuTexture) {
+            this.#gpuTexture.destroy();
+            this.#gpuTexture = null as any;
+        }
+    }
 }
 
 export default TextureArray;

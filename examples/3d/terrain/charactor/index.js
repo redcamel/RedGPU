@@ -371,6 +371,7 @@ RedGPU.init(
             orm: '../../../assets/terrain/terrainTest_001/orm.jpg',
             splat: '../../../assets/terrain/terrainTest_001/splatMap.jpg',
         });
+        // 💡 디테일 레이어 4종 등록
         terrain.addLayer({
             name: 'Grass',
             diffuse: '../../../assets/terrain/terrainTest_001/layer/grass.jpg',
@@ -380,7 +381,7 @@ RedGPU.init(
             roughnessFactor: 0.85
         });
 
-        // 💡 디테일 레이어 4종 등록
+
         terrain.addLayer({
             name: 'Leaves',
             diffuse: '../../../assets/terrain/terrainTest_001/layer/leave.jpg',
@@ -389,6 +390,7 @@ RedGPU.init(
             orm: '../../../assets/terrain/terrainTest_001/layer/leave_orm.jpg',
             roughnessFactor: 0.85
         });
+
 
         terrain.addLayer({
             name: 'Rock',
@@ -409,7 +411,6 @@ RedGPU.init(
         });
 
 
-
         // 3-5. 지형 파라미터 — 20km 초대형 스케일 설정 및 언리얼 스타일 공간 그리드 스트리밍 활성화
         terrain.minHeight = MIN_H;
         terrain.maxHeight = MAX_H;
@@ -417,6 +418,7 @@ RedGPU.init(
         terrain.worldOffset = [-WORLD_SIZE / 2, -WORLD_SIZE / 2]; // 원점 중앙 정렬
         terrain.maxLOD = MAX_LOD;
         terrain.tileScale = 32.0;                  // 1K 레이어 텍스처 질감과 노멀이 가장 쨍하고 정교하게 표현되는 최적 타일링 배율 (32.0)
+        terrain.blendContrast = 0.85;              // 입체적인 Height-Based Blending 콘트라스트 강도 (0.85)
 
         // 🛰️ 언리얼 엔진 5 표준 월드 파티션 공간 그리드 스트리밍 설정 (카메라 주변 동적 시야 로딩 반경)
         terrain.spatialGrid.loadingRadius = 2560;  // 카메라 시야 반경 2.56km 동적 로딩

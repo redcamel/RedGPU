@@ -51,6 +51,10 @@ class TerrainRVT {
     }
 
 
+    public bakeAll(material: TerrainMaterial): void {
+        this.bakeTileRect(material, 0, 0, this.#atlasSize, this.#atlasSize);
+    }
+
     public bakeTile(
         material: TerrainMaterial,
         tileCol: number,
