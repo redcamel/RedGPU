@@ -96,6 +96,19 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #maxInstances: number = 65536;
     #tileStreamMetrics = new TileStreamMetrics();
 
+    // 1순위 최적화: Quadtree Dirty Checking 상태 변수
+    #isDirty: boolean = true;
+    #lastCamX: number = NaN;
+    #lastCamY: number = NaN;
+    #lastCamZ: number = NaN;
+    #lastCamRotX: number = NaN;
+    #lastCamRotY: number = NaN;
+    #lastCamRotZ: number = NaN;
+
+    markDirty() {
+        this.#isDirty = true;
+    }
+
     constructor(redGPUContext: RedGPUContext, options?: TerrainOptions) {
         const verticesPerSide = sanitizeVerticesPerSide(options?.verticesPerSide ?? 64);
         super(redGPUContext, verticesPerSide, options);
@@ -205,7 +218,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
     checkQuadtree(renderViewStateData: any) {
         const currentWorldSize = this.worldSize[0];
         this.#updateCachedTileSpans(); // 캐싱 스팬 동기화
-        this.#updateLODRanges(currentWorldSize);
+        const lodRangesChanged = this.#updateLODRanges(currentWorldSize);
 
         this.baseSlotIndex = this.globalVertexSlotIndex;
 
@@ -216,7 +229,41 @@ class TerrainTileSystem extends TerrainMaterialBind {
         const cameraPos: [number, number, number] = [localCamX, localCamY, localCamZ];
 
         this.#processTileStreaming(camera);
-        this.#updateInstanceRenderBuffer(cameraPos, renderViewStateData);
+
+        // 1순위 최적화: Quadtree Dirty Checking
+        // 카메라 위치 델타(0.05 unit 초과) 및 회전 델타(0.001 rad 초과) 또는 dirty 상태일 때만 쿼드트리 버퍼 갱신
+        const camRotX = camera.rotationX ?? 0;
+        const camRotY = camera.rotationY ?? 0;
+        const camRotZ = camera.rotationZ ?? 0;
+
+        const dx = localCamX - this.#lastCamX;
+        const dy = localCamY - this.#lastCamY;
+        const dz = localCamZ - this.#lastCamZ;
+        const distSq = dx * dx + dy * dy + dz * dz;
+
+        const dRotX = Math.abs(camRotX - this.#lastCamRotX);
+        const dRotY = Math.abs(camRotY - this.#lastCamRotY);
+        const dRotZ = Math.abs(camRotZ - this.#lastCamRotZ);
+        const rotDiff = dRotX + dRotY + dRotZ;
+
+        const shouldUpdate =
+            this.#isDirty ||
+            lodRangesChanged ||
+            isNaN(distSq) ||
+            distSq > 0.0025 || // 0.05 * 0.05
+            rotDiff > 0.001;
+
+        if (shouldUpdate) {
+            this.#lastCamX = localCamX;
+            this.#lastCamY = localCamY;
+            this.#lastCamZ = localCamZ;
+            this.#lastCamRotX = camRotX;
+            this.#lastCamRotY = camRotY;
+            this.#lastCamRotZ = camRotZ;
+            this.#isDirty = false;
+
+            this.#updateInstanceRenderBuffer(cameraPos, renderViewStateData);
+        }
     }
 
     #updateCachedTileSpans() {
@@ -226,7 +273,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.#tileSpanZ = worldH / this.atlasTileCountZ;
     }
 
-    #updateLODRanges(currentWorldSize: number) {
+    #updateLODRanges(currentWorldSize: number): boolean {
         if (
             !this.#quadtree ||
             this.#prevWorldSize !== currentWorldSize ||
@@ -258,7 +305,9 @@ class TerrainTileSystem extends TerrainMaterialBind {
                 lodRanges[i * 4 + 3] = 0;
             }
             this.lodRanges = lodRanges;
+            return true;
         }
+        return false;
     }
 
     #processTileStreaming(camera: any) {
@@ -445,6 +494,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
         );
 
         this.#markTileSynthesized(`${tileX}_${tileZ}`);
+        this.markDirty();
 
         if (this.#onTileLoadCallback) {
             this.#onTileLoadCallback(tile);

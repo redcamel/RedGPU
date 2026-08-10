@@ -97,7 +97,10 @@ RedGPU.init(
         redGPUContext.addView(view);
 
         // 조명 & 대기 환경 (SkyAtmosphere + HeightFog)
-        scene.lightManager.addDirectionalLight(new RedGPU.Light.DirectionalLight());
+        const directionalLight = new RedGPU.Light.DirectionalLight([-1.0, -0.35, -0.5], '#ffffff', 100000);
+        scene.lightManager.addDirectionalLight(directionalLight);
+        scene.shadowManager.directionalShadowManager.maxShadowDistance = 3000;
+        scene.shadowManager.directionalShadowManager.bias = 0.00005;
         const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
         view.skyAtmosphere = skyAtmosphere;
 
@@ -191,9 +194,9 @@ RedGPU.init(
 
             // 🌲 식생 전용 VegetationMesh 사용 (Zero-GC, 얇은 TypedArray 인스턴싱)
             treeFoliageMesh = new RedGPU.Display.VegetationMesh(redGPUContext, terrain, {
-                count: 5000,
+                count: 10000,
                 gltfMesh: resultMesh,
-                baseScale: 1,
+                baseScale: 0.4,
                 splatUrl: '../../../assets/terrain/terrainTest_001/splatMap.jpg',
                 maskChannel: 'g',
                 maskThreshold: 0.2,
@@ -323,6 +326,77 @@ function buildGUI(redGPUContext, terrain, controller, view, heightFog) {
             treeFolder.addBinding(treeState, 'maskThreshold', {
                 label: 'Splatmap 토질 마스킹 (Threshold)',
                 min: 0.0, max: 1.0, step: 0.01
+            });
+
+            const shadowFolder = pane.addFolder({title: '🌑 그림자 설정 (Shadow System)', expanded: true});
+
+            const shadowState = {
+                get castShadow() {
+                    return treeFoliageMesh ? treeFoliageMesh.castShadow : true;
+                },
+                set castShadow(v) {
+                    if (treeFoliageMesh) treeFoliageMesh.setCastShadowRecursively(v);
+                },
+                get terrainCastShadow() {
+                    return terrain ? terrain.castShadow : true;
+                },
+                set terrainCastShadow(v) {
+                    if (terrain) terrain.castShadow = v;
+                },
+                get receiveShadow() {
+                    return terrain ? terrain.receiveShadow : true;
+                },
+                set receiveShadow(v) {
+                    if (terrain) terrain.receiveShadow = v;
+                },
+                get lightDirY() {
+                    return directionalLight ? directionalLight.direction[1] : -0.35;
+                },
+                set lightDirY(v) {
+                    if (directionalLight) {
+                        const dir = directionalLight.direction;
+                        directionalLight.direction = [dir[0], v, dir[2]];
+                    }
+                },
+                get bias() {
+                    return view.scene.shadowManager.directionalShadowManager.bias;
+                },
+                set bias(v) {
+                    view.scene.shadowManager.directionalShadowManager.bias = v;
+                },
+                get maxShadowDistance() {
+                    return view.scene.shadowManager.directionalShadowManager.maxShadowDistance;
+                },
+                set maxShadowDistance(v) {
+                    view.scene.shadowManager.directionalShadowManager.maxShadowDistance = v;
+                }
+            };
+
+            shadowFolder.addBinding(shadowState, 'castShadow', {
+                label: '🌲 식생 그림자 생성 (Cast Shadow)'
+            });
+
+            shadowFolder.addBinding(shadowState, 'terrainCastShadow', {
+                label: '🏔 지형 산/언덕 자가 그림자 (Self-Shadow)'
+            });
+
+            shadowFolder.addBinding(shadowState, 'receiveShadow', {
+                label: '🏔 지형 그림자 수신 (Receive Shadow)'
+            });
+
+            shadowFolder.addBinding(shadowState, 'lightDirY', {
+                label: '☀️ 태양 고도 (Light Dir Y)',
+                min: -1.0, max: -0.05, step: 0.01
+            });
+
+            shadowFolder.addBinding(shadowState, 'bias', {
+                label: '그림자 바이어스 (Bias)',
+                min: 0.00001, max: 0.0005, step: 0.00001
+            });
+
+            shadowFolder.addBinding(shadowState, 'maxShadowDistance', {
+                label: '그림자 최대 가시거리',
+                min: 100, max: 5000, step: 100
             });
 
             const terrainFolder = pane.addFolder({title: '🌍 Terrain (지형)', expanded: false});
