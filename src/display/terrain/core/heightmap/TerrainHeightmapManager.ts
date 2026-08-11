@@ -1,7 +1,4 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import DirectTexture from "../../../../resources/texture/DirectTexture";
-import BitmapTexture from "../../../../resources/texture/BitmapTexture";
-import TerrainHeightmapProcessor from "./processor/TerrainHeightmapProcessor";
 import {SpatialTileInfo} from "../tile/TerrainSpatialGrid";
 
 export interface TerrainHeightmapOptions {
@@ -12,15 +9,13 @@ export interface TerrainHeightmapOptions {
 
 export default class TerrainHeightmapManager {
     readonly redGPUContext: RedGPUContext;
-    heightmapAtlasTexture: DirectTexture | BitmapTexture | null = null;
-    onAtlasTextureCreated?: (texture: DirectTexture | BitmapTexture) => void;
     #atlasTileCountX: number = 16;
     #atlasTileCountZ: number = 16;
     #atlasTileSize: number = 512;
+
     #flatHeightmapData: Uint16Array;
     #tileDataCache: Map<string, ArrayBufferView | ArrayBuffer> = new Map();
     #synthesizedTilesSet: Set<string> = new Set();
-    #processor: TerrainHeightmapProcessor | null = null;
 
     constructor(redGPUContext: RedGPUContext, options?: TerrainHeightmapOptions) {
         this.redGPUContext = redGPUContext;
@@ -120,19 +115,7 @@ export default class TerrainHeightmapManager {
         return minHeight + ratio * (maxHeight - minHeight);
     }
 
-    loadTileFrom16BitBuffer(
-        tile: SpatialTileInfo,
-        data: ArrayBuffer | ArrayBufferView,
-        width: number,
-        height: number,
-        activeTilesSet?: { has(key: string): boolean },
-        onProcessed?: (tileX: number, tileZ: number, countX: number, countZ: number) => void
-    ): void {
-        this.registerTileData(tile, data, activeTilesSet);
-        this.updateTileHeightmapFromBuffer(tile, data, width, height, onProcessed);
-    }
-
-    registerTileData(tile: SpatialTileInfo | string, data: any, activeTilesSet?: { has(key: string): boolean }): void {
+    registerTileData(tile: SpatialTileInfo | string, data: any, activeTilesCheck?: (key: string) => boolean): void {
         const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
 
         if (this.#tileDataCache.has(key)) {
@@ -140,13 +123,13 @@ export default class TerrainHeightmapManager {
         }
 
         this.#tileDataCache.set(key, data);
-        this.#updateFlatHeightmapSector(key, data);
+        this.updateFlatHeightmapSector(key, data);
 
         const MAX_CACHE_SIZE = 128;
         if (this.#tileDataCache.size > MAX_CACHE_SIZE) {
             const keysIterator = this.#tileDataCache.keys();
             for (const oldestKey of keysIterator) {
-                const isActive = activeTilesSet && activeTilesSet.has(oldestKey);
+                const isActive = activeTilesCheck ? activeTilesCheck(oldestKey) : false;
                 if (!isActive) {
                     this.#tileDataCache.delete(oldestKey);
                     break;
@@ -155,86 +138,7 @@ export default class TerrainHeightmapManager {
         }
     }
 
-    updateTileHeightmapFromBuffer(
-        tile: SpatialTileInfo,
-        data: ArrayBuffer | ArrayBufferView,
-        width: number,
-        height: number,
-        onProcessed?: (tileX: number, tileZ: number, countX: number, countZ: number) => void
-    ): void {
-        const tileX = tile.tileCol ?? 0;
-        const tileZ = tile.tileRow ?? 0;
-
-        if (!this.heightmapAtlasTexture) {
-            this.#createHeightmapTileAtlas(this.#atlasTileCountX, this.#atlasTileCountZ, this.#atlasTileSize);
-        }
-        const gpuTexture = this.heightmapAtlasTexture?.gpuTexture;
-        if (!gpuTexture) return;
-
-        if (!this.#processor) {
-            this.#processor = new TerrainHeightmapProcessor(this.redGPUContext);
-        }
-
-        const destX = tileX * this.#atlasTileSize;
-        const destZ = tileZ * this.#atlasTileSize;
-
-        this.#processor.processAndUploadTile(
-            destX,
-            destZ,
-            data,
-            width,
-            height,
-            gpuTexture,
-            this.#atlasTileSize
-        );
-
-        this.markTileSynthesized(`${tileX}_${tileZ}`);
-
-        if (onProcessed) {
-            onProcessed(tileX, tileZ, this.#atlasTileCountX, this.#atlasTileCountZ);
-        }
-    }
-
-    destroy(): void {
-        if (this.heightmapAtlasTexture) {
-            this.heightmapAtlasTexture.destroy();
-            this.heightmapAtlasTexture = null;
-        }
-        this.#tileDataCache.clear();
-        this.#synthesizedTilesSet.clear();
-        if (this.#processor) {
-            this.#processor.destroy();
-            this.#processor = null;
-        }
-    }
-
-    #createHeightmapTileAtlas(tileCountX: number = 16, tileCountZ: number = 16, tileSize: number = 512): void {
-        const device = this.redGPUContext.gpuDevice;
-        this.#atlasTileCountX = tileCountX;
-        this.#atlasTileCountZ = tileCountZ;
-        this.#atlasTileSize = tileSize;
-
-        const atlasWidth = tileCountX * tileSize;
-        const atlasHeight = tileCountZ * tileSize;
-        const gpuTexture = device.createTexture({
-            label: 'Terrain_HeightmapTileAtlasGPUTexture',
-            size: [atlasWidth, atlasHeight, 1],
-            format: 'rgba16float',
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
-        });
-
-        this.heightmapAtlasTexture = new DirectTexture(
-            this.redGPUContext,
-            'Terrain_HeightmapTileAtlasDirectTexture',
-            gpuTexture
-        );
-
-        if (this.onAtlasTextureCreated) {
-            this.onAtlasTextureCreated(this.heightmapAtlasTexture);
-        }
-    }
-
-    #updateFlatHeightmapSector(key: string, data: any): void {
+    updateFlatHeightmapSector(key: string, data: any): void {
         const parts = key.split('_');
         const tileCol = parseInt(parts[0], 10);
         const tileRow = parseInt(parts[1], 10);
@@ -267,5 +171,10 @@ export default class TerrainHeightmapManager {
                 dstOffset
             );
         }
+    }
+
+    destroy(): void {
+        this.#tileDataCache.clear();
+        this.#synthesizedTilesSet.clear();
     }
 }

@@ -78,60 +78,7 @@ class Terrain extends TerrainTileSystem {
         this.#dirtyPipelineListener();
     }
 
-    getTerrainHeight(x: number, z: number): number {
-        const [worldW, worldH] = this.worldSize;
-        const [offX, offZ] = this.worldOffset;
 
-        const tileSize = this.atlasTileSize;
-        const tileCount = this.atlasTileCountX;
-
-        // 1. [0, 1] 범위의 normalized UV 좌표 구하기
-        const u = Math.max(0, Math.min(1, (x - offX) / worldW));
-        const v = Math.max(0, Math.min(1, (z - offZ) / worldH));
-
-        // 전체 아틀라스 해상도 규격 (타일 개수 * 타일당 픽셀 크기) - 예: 16 * 512 = 8192
-        const totalWidth = tileCount * tileSize;
-        const maxPixelIdx = totalWidth - 1;
-
-        // 실수형 픽셀 좌표 계산 (v는 높이맵 텍스처 기준 뒤집음)
-        const tx = u * maxPixelIdx;
-        const tz = (1.0 - v) * maxPixelIdx;
-
-        // 주변 4개 정수 픽셀 좌표
-        const x0 = Math.floor(tx);
-        const x1 = Math.min(maxPixelIdx, x0 + 1);
-        const z0 = Math.floor(tz);
-        const z1 = Math.min(maxPixelIdx, z0 + 1);
-
-        // 가중치(소수점 이하 비율)
-        const fx = tx - x0;
-        const fz = tz - z0;
-
-        const flatData = this.flatHeightmapData;
-
-        // 2번 최적화: Map lookup 및 분기를 100% 제거한 단일 1차원 플랫 메모리 룩업 (O(1))
-        const getVal = (px: number, pz: number): number => {
-            const ix = Math.max(0, Math.min(maxPixelIdx, Math.floor(px)));
-            const iz = Math.max(0, Math.min(maxPixelIdx, Math.floor(pz)));
-            const val = flatData[iz * totalWidth + ix];
-            return val !== undefined ? val : 0;
-        };
-
-        // 4개의 인접 픽셀 값 샘플링
-        const q00 = getVal(x0, z0);
-        const q10 = getVal(x1, z0);
-        const q01 = getVal(x0, z1);
-        const q11 = getVal(x1, z1);
-
-        // 쌍선형 보간 (Bilinear Interpolation)
-        const val = (1.0 - fx) * (1.0 - fz) * q00 +
-            fx * (1.0 - fz) * q10 +
-            (1.0 - fx) * fz * q01 +
-            fx * fz * q11;
-
-        const ratio = val / 65535.0;
-        return this.minHeight + ratio * (this.maxHeight - this.minHeight);
-    }
 
     destroy() {
         if (this.heightmapSampler) {

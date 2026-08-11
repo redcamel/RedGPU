@@ -21,7 +21,7 @@ export {
     VegetationMesh,
     GrassMesh
 };
-export type {TerrainLayerConfig, SpatialTileInfo, TerrainVerticesPerSide};
 
+export type {TerrainLayerConfig, SpatialTileInfo, TerrainVerticesPerSide};
 
 

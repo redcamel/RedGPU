@@ -11,6 +11,7 @@ import updateTargetUniform from "../../../../defineProperty/core/updateTargetUni
 import TerrainGeometry from "../TerrainGeometry";
 
 import TerrainHeightmapProcessor from "../heightmap/processor/TerrainHeightmapProcessor";
+import TerrainHeightmapManager from "../heightmap/TerrainHeightmapManager";
 import parse16BitPngBuffer from "../../../../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
 
 interface TerrainTileSystem {
@@ -76,6 +77,8 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #tileSpanX: number = 0;
     #tileSpanZ: number = 0;
 
+    #heightmapManager: TerrainHeightmapManager;
+
     // 2번 최적화: 1차원 플랫 높이 데이터 버퍼
     #flatHeightmapData: Uint16Array;
 
@@ -124,6 +127,12 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.#atlasTileCountX = options?.atlasTileCountX ?? 16;
         this.#atlasTileCountZ = options?.atlasTileCountZ ?? 16;
         this.#atlasTileSize = options?.atlasTileSize ?? 512;
+
+        this.#heightmapManager = new TerrainHeightmapManager(redGPUContext, {
+            atlasTileCountX: this.#atlasTileCountX,
+            atlasTileCountZ: this.#atlasTileCountZ,
+            atlasTileSize: this.#atlasTileSize
+        });
 
         // worldSize를 하드코딩 [1, 1] 대신 cellSize * atlasTileCount로 동적 유도하여 설정
         this.worldSize = [cellSize * this.#atlasTileCountX, cellSize * this.#atlasTileCountZ];
@@ -201,7 +210,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
     }
 
     get synthesizedTileCount(): number {
-        return this.#synthesizedTilesSet.size;
+        return this.#heightmapManager ? this.#heightmapManager.synthesizedTileCount : this.#synthesizedTilesSet.size;
     }
 
     get lodThreshold(): number {
@@ -213,7 +222,13 @@ class TerrainTileSystem extends TerrainMaterialBind {
     }
 
     get flatHeightmapData(): Uint16Array {
-        return this.#flatHeightmapData;
+        return this.#heightmapManager ? this.#heightmapManager.flatHeightmapData : this.#flatHeightmapData;
+    }
+
+    getTerrainHeight(x: number, z: number): number {
+        return this.#heightmapManager ? this.#heightmapManager.getTerrainHeight(
+            x, z, this.worldOffset, this.worldSize, this.minHeight, this.maxHeight
+        ) : 0;
     }
 
     checkQuadtree(renderViewStateData: any) {
