@@ -8,6 +8,8 @@ import DirectTexture from "../../../../resources/texture/DirectTexture";
 
 export interface TerrainMaterialBind {
     heightmapAtlasTexture: DirectTexture | BitmapTexture | null;
+
+    markDirty(): void;
 }
 
 export class TerrainMaterialBind extends Mesh {
@@ -169,15 +171,21 @@ export class TerrainMaterialBind extends Mesh {
     }
 
     addLayer(config: TerrainLayerConfig): number {
-        return this.material.addLayer(config);
+        const index = this.material.addLayer(config);
+        this.markDirty?.();
+        return index;
     }
 
     removeLayer(indexOrName: number | string): boolean {
-        return this.material.removeLayer(indexOrName);
+        const result = this.material.removeLayer(indexOrName);
+        this.markDirty?.();
+        return result;
     }
 
     updateLayer(indexOrName: number | string, partialConfig: Partial<TerrainLayerConfig>): boolean {
-        return this.material.updateLayer(indexOrName, partialConfig);
+        const result = this.material.updateLayer(indexOrName, partialConfig);
+        this.markDirty?.();
+        return result;
     }
 }
 
