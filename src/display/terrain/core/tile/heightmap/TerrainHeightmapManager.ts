@@ -1,6 +1,8 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import {SpatialTileInfo} from "../TerrainSpatialGrid";
 
+const INV_65535 = 1.0 / 65535.0;
+
 export interface TerrainHeightmapOptions {
     atlasTileCountX?: number;
     atlasTileCountZ?: number;
@@ -12,6 +14,8 @@ export default class TerrainHeightmapManager {
     #atlasTileCountX: number = 16;
     #atlasTileCountZ: number = 16;
     #atlasTileSize: number = 512;
+    #totalWidthCache: number = 8192;
+    #maxPixelIdxCache: number = 8191;
 
     #flatHeightmapData: Uint16Array;
     #tileDataCache: Map<string, ArrayBufferView | ArrayBuffer> = new Map();
@@ -23,8 +27,61 @@ export default class TerrainHeightmapManager {
         this.#atlasTileCountZ = options?.atlasTileCountZ ?? 16;
         this.#atlasTileSize = options?.atlasTileSize ?? 512;
 
-        const totalHeightmapDataSize = (this.#atlasTileCountX * this.#atlasTileSize) * (this.#atlasTileCountZ * this.#atlasTileSize);
-        this.#flatHeightmapData = new Uint16Array(totalHeightmapDataSize);
+        this.#updateDimensionsCache();
+
+        const totalWidth = this.#totalWidthCache;
+        const totalHeight = this.#atlasTileCountZ * this.#atlasTileSize;
+        this.#flatHeightmapData = new Uint16Array(totalWidth * totalHeight);
+    }
+
+    getTerrainHeight(
+        x: number,
+        z: number,
+        worldOffset: [number, number],
+        worldSize: [number, number],
+        minHeight: number,
+        maxHeight: number
+    ): number {
+        const invWorldW = 1.0 / worldSize[0];
+        const invWorldH = 1.0 / worldSize[1];
+        const [offX, offZ] = worldOffset;
+
+        const u = Math.max(0, Math.min(1, (x - offX) * invWorldW));
+        const v = Math.max(0, Math.min(1, (z - offZ) * invWorldH));
+
+        const maxPixelIdx = this.#maxPixelIdxCache;
+        const totalWidth = this.#totalWidthCache;
+
+        const tx = u * maxPixelIdx;
+        const tz = (1.0 - v) * maxPixelIdx;
+
+        const x0 = Math.floor(tx);
+        const x1 = Math.min(maxPixelIdx, x0 + 1);
+        const z0 = Math.floor(tz);
+        const z1 = Math.min(maxPixelIdx, z0 + 1);
+
+        const fx = tx - x0;
+        const fz = tz - z0;
+
+        const flatData = this.#flatHeightmapData;
+
+        const ix0 = Math.max(0, Math.min(maxPixelIdx, x0));
+        const ix1 = Math.max(0, Math.min(maxPixelIdx, x1));
+        const iz0 = Math.max(0, Math.min(maxPixelIdx, z0));
+        const iz1 = Math.max(0, Math.min(maxPixelIdx, z1));
+
+        const q00 = flatData[iz0 * totalWidth + ix0] || 0;
+        const q10 = flatData[iz0 * totalWidth + ix1] || 0;
+        const q01 = flatData[iz1 * totalWidth + ix0] || 0;
+        const q11 = flatData[iz1 * totalWidth + ix1] || 0;
+
+        const val = (1.0 - fx) * (1.0 - fz) * q00 +
+            fx * (1.0 - fz) * q10 +
+            (1.0 - fx) * fz * q01 +
+            fx * fz * q11;
+
+        const ratio = val * INV_65535;
+        return minHeight + ratio * (maxHeight - minHeight);
     }
 
     get atlasTileCountX(): number {
@@ -61,58 +118,9 @@ export default class TerrainHeightmapManager {
         this.#synthesizedTilesSet.add(key);
     }
 
-    getTerrainHeight(
-        x: number,
-        z: number,
-        worldOffset: [number, number],
-        worldSize: [number, number],
-        minHeight: number,
-        maxHeight: number
-    ): number {
-        const [worldW, worldH] = worldSize;
-        const [offX, offZ] = worldOffset;
-
-        const tileSize = this.#atlasTileSize;
-        const tileCount = this.#atlasTileCountX;
-
-        const u = Math.max(0, Math.min(1, (x - offX) / worldW));
-        const v = Math.max(0, Math.min(1, (z - offZ) / worldH));
-
-        const totalWidth = tileCount * tileSize;
-        const maxPixelIdx = totalWidth - 1;
-
-        const tx = u * maxPixelIdx;
-        const tz = (1.0 - v) * maxPixelIdx;
-
-        const x0 = Math.floor(tx);
-        const x1 = Math.min(maxPixelIdx, x0 + 1);
-        const z0 = Math.floor(tz);
-        const z1 = Math.min(maxPixelIdx, z0 + 1);
-
-        const fx = tx - x0;
-        const fz = tz - z0;
-
-        const flatData = this.#flatHeightmapData;
-
-        const getVal = (px: number, pz: number): number => {
-            const ix = Math.max(0, Math.min(maxPixelIdx, Math.floor(px)));
-            const iz = Math.max(0, Math.min(maxPixelIdx, Math.floor(pz)));
-            const val = flatData[iz * totalWidth + ix];
-            return val !== undefined ? val : 0;
-        };
-
-        const q00 = getVal(x0, z0);
-        const q10 = getVal(x1, z0);
-        const q01 = getVal(x0, z1);
-        const q11 = getVal(x1, z1);
-
-        const val = (1.0 - fx) * (1.0 - fz) * q00 +
-            fx * (1.0 - fz) * q10 +
-            (1.0 - fx) * fz * q01 +
-            fx * fz * q11;
-
-        const ratio = val / 65535.0;
-        return minHeight + ratio * (maxHeight - minHeight);
+    #updateDimensionsCache() {
+        this.#totalWidthCache = this.#atlasTileCountX * this.#atlasTileSize;
+        this.#maxPixelIdxCache = this.#totalWidthCache - 1;
     }
 
     registerTileData(tile: SpatialTileInfo | string, data: any, spatialGrid?: any): void {

@@ -4,7 +4,9 @@ export class QuadtreeNode {
     public customMinY: number | null = null;
     public customMaxY: number | null = null;
 
-    // X, Z 축 반경(Extent) 캐싱
+    public readonly localCenterX: number;
+    public readonly localCenterZ: number;
+    // X, Z 축 반경(Extent) 및 중심점 캐싱
     private readonly halfScale: number;
 
     constructor(
@@ -14,6 +16,8 @@ export class QuadtreeNode {
         public maxLOD: number
     ) {
         this.halfScale = worldScale * 0.5;
+        this.localCenterX = worldOffset[0] + this.halfScale;
+        this.localCenterZ = worldOffset[1] + this.halfScale;
         if (this.lodLevel < this.maxLOD) {
             this.hasChildren = true;
         }
@@ -50,19 +54,14 @@ export class QuadtreeNode {
         worldOffsetX: number,
         worldOffsetZ: number
     ): boolean {
-        if (!planes) return true;
+        if (!planes || planes.length < 6) return true;
 
         const nodeMinY = this.customMinY !== null ? this.customMinY : minHeight;
         const nodeMaxY = this.customMaxY !== null ? this.customMaxY : maxHeight;
 
-        const minX = this.worldOffset[0] + worldOffsetX;
-        const maxX = this.worldOffset[0] + this.worldScale + worldOffsetX;
-        const minZ = this.worldOffset[1] + worldOffsetZ;
-        const maxZ = this.worldOffset[1] + this.worldScale + worldOffsetZ;
-
-        const centerX = (minX + maxX) * 0.5;
+        const centerX = this.localCenterX + worldOffsetX;
         const centerY = (nodeMinY + nodeMaxY) * 0.5;
-        const centerZ = (minZ + maxZ) * 0.5;
+        const centerZ = this.localCenterZ + worldOffsetZ;
 
         // 미리 캐싱된 반경(extent) 및 노드 정밀 Height 반경(ey)을 활용하여 AABB 연산 정확도 극대화
         const ex = this.halfScale;
@@ -115,7 +114,7 @@ export class TerrainQuadtree {
         worldOffsetZ: number = 0,
         lodThreshold: number = 1.5
     ) {
-        this.leafNodes = [];
+        this.leafNodes.length = 0;
         this.#traverse(this.rootNode, cameraPos, frustumPlanes, minHeight, maxHeight, worldOffsetX, worldOffsetZ, lodThreshold);
     }
 

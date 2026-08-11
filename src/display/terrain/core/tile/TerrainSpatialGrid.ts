@@ -28,6 +28,7 @@ export class TerrainSpatialGrid {
     #maxLoadsPerFrame: number = 2;
     #activeTiles: Map<string, SpatialTileInfo> = new Map();
     #pendingQueue: Map<string, SpatialTileInfo> = new Map();
+    #pendingBuffer: SpatialTileInfo[] = [];
     #lastCameraGridX: number = NaN;
     #lastCameraGridZ: number = NaN;
 
@@ -197,13 +198,20 @@ export class TerrainSpatialGrid {
             }
         }
 
-        const pendingArray = Array.from(this.#pendingQueue.values());
-        pendingArray.sort((a, b) => b.priority - a.priority);
+        const pendingBuffer = this.#pendingBuffer;
+        pendingBuffer.length = 0;
+        for (const tile of this.#pendingQueue.values()) {
+            pendingBuffer.push(tile);
+        }
+        pendingBuffer.sort((a, b) => b.priority - a.priority);
 
-        const loadBudget = this.#maxLoadsPerFrame > 0 ? this.#maxLoadsPerFrame : pendingArray.length;
-        const tilesToProcess = pendingArray.slice(0, loadBudget);
+        const pendingCount = pendingBuffer.length;
+        const loadBudget = (this.#maxLoadsPerFrame > 0 && this.#maxLoadsPerFrame < pendingCount)
+            ? this.#maxLoadsPerFrame
+            : pendingCount;
 
-        for (const tile of tilesToProcess) {
+        for (let i = 0; i < loadBudget; i++) {
+            const tile = pendingBuffer[i];
             const key = `${tile.gridX}_${tile.gridZ}`;
             tile.state = 'LOADED';
             this.#pendingQueue.delete(key);
@@ -217,5 +225,6 @@ export class TerrainSpatialGrid {
     destroy(): void {
         this.#activeTiles.clear();
         this.#pendingQueue.clear();
+        this.#pendingBuffer.length = 0;
     }
 }
