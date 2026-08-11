@@ -233,7 +233,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         }
         this.#layers.push(config);
         this.#rebuildLayerTextureArrays();
-        this.bakeAllRVTTiles();
         return this.#layers.length - 1;
     }
 
@@ -245,7 +244,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         if (targetIndex >= 0 && targetIndex < this.#layers.length) {
             this.#layers.splice(targetIndex, 1);
             this.#rebuildLayerTextureArrays();
-            this.bakeAllRVTTiles();
             return true;
         }
         return false;
@@ -259,7 +257,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         if (targetIndex >= 0 && targetIndex < this.#layers.length) {
             this.#layers[targetIndex] = {...this.#layers[targetIndex], ...partialConfig};
             this.#rebuildLayerTextureArrays();
-            this.bakeAllRVTTiles();
             return true;
         }
         return false;
@@ -327,25 +324,29 @@ class TerrainMaterial extends ABitmapBaseMaterial {
             const dSrc = extractSrc(layer.diffuse);
             diffuseSrcs.push(dSrc);
 
-            const nSrc = extractSrc(layer.normal) || dSrc;
+            const nSrc = extractSrc(layer.normal);
             normalSrcs.push(nSrc);
 
-            const hSrc = extractSrc(layer.height) || dSrc;
+            const hSrc = extractSrc(layer.height);
             heightSrcs.push(hSrc);
 
-            const oSrc = extractSrc(layer.orm) || dSrc;
+            const oSrc = extractSrc(layer.orm);
             ormSrcs.push(oSrc);
         });
 
         const ctx = this.redGPUContext;
-        const onLoad = () => {
-            this.bakeAllRVTTiles();
+        let loadedCount = 0;
+        const checkAllLoaded = () => {
+            loadedCount++;
+            if (loadedCount >= 4) {
+                this.bakeAllRVTTiles();
+            }
         };
 
-        this.diffuseArray = new TextureArray(ctx, diffuseSrcs, true, onLoad, undefined, 'rgba8unorm-srgb');
-        this.normalArray = new TextureArray(ctx, normalSrcs, true, onLoad, undefined, 'rgba8unorm');
-        this.heightArray = new TextureArray(ctx, heightSrcs, true, onLoad, undefined, 'rgba8unorm');
-        this.ormArray = new TextureArray(ctx, ormSrcs, true, onLoad, undefined, 'rgba8unorm');
+        this.diffuseArray = new TextureArray(ctx, diffuseSrcs, true, checkAllLoaded, undefined, 'rgba8unorm-srgb');
+        this.normalArray = new TextureArray(ctx, normalSrcs, true, checkAllLoaded, undefined, 'rgba8unorm');
+        this.heightArray = new TextureArray(ctx, heightSrcs, true, checkAllLoaded, undefined, 'rgba8unorm');
+        this.ormArray = new TextureArray(ctx, ormSrcs, true, checkAllLoaded, undefined, 'rgba8unorm');
     }
 }
 

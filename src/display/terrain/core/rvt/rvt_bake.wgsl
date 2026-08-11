@@ -118,56 +118,67 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let tileMip = getBakeMipLevel(bakeUniforms.tileScale, texSize, bakeUniforms.worldUVScale.x, f32(outputDim.x));
     let macroMip = getBakeMipLevel(bakeUniforms.macroScale, texSize, bakeUniforms.worldUVScale.x, f32(outputDim.x));
 
-    // 디퓨즈 혼합
-    let d0 = mix(
-        textureSampleLevel(diffuseArray, texSampler, tileUV, 0i, tileMip),
-        textureSampleLevel(diffuseArray, texSampler, macroUV, 0i, macroMip),
-        0.3
-    );
-    let d1 = mix(
-        textureSampleLevel(diffuseArray, texSampler, tileUV, 1i, tileMip),
-        textureSampleLevel(diffuseArray, texSampler, macroUV, 1i, macroMip),
-        0.3
-    );
-    let d2 = mix(
-        textureSampleLevel(diffuseArray, texSampler, tileUV, 2i, tileMip),
-        textureSampleLevel(diffuseArray, texSampler, macroUV, 2i, macroMip),
-        0.3
-    );
-    let d3 = mix(
-        textureSampleLevel(diffuseArray, texSampler, tileUV, 3i, tileMip),
-        textureSampleLevel(diffuseArray, texSampler, macroUV, 3i, macroMip),
-        0.3
+    // 디퓨즈 혼합 (미지정 텍스처 시 vec4(1.0) 기본 흰색 대입)
+    let d0_s = textureSampleLevel(diffuseArray, texSampler, tileUV, 0i, tileMip);
+    let d0 = select(
+        mix(d0_s, textureSampleLevel(diffuseArray, texSampler, macroUV, 0i, macroMip), 0.3),
+        vec4<f32>(1.0, 1.0, 1.0, 1.0),
+        d0_s.a <= 0.01 || (d0_s.r <= 0.001 && d0_s.g <= 0.001 && d0_s.b <= 0.001)
     );
 
-    // 하이트 혼합 (pow 3.0 부동소수점 함수 대신 h_c * h_c * h_c 직접 곱셈으로 연산 고속화)
+    let d1_s = textureSampleLevel(diffuseArray, texSampler, tileUV, 1i, tileMip);
+    let d1 = select(
+        mix(d1_s, textureSampleLevel(diffuseArray, texSampler, macroUV, 1i, macroMip), 0.3),
+        vec4<f32>(1.0, 1.0, 1.0, 1.0),
+        d1_s.a <= 0.01 || (d1_s.r <= 0.001 && d1_s.g <= 0.001 && d1_s.b <= 0.001)
+    );
+
+    let d2_s = textureSampleLevel(diffuseArray, texSampler, tileUV, 2i, tileMip);
+    let d2 = select(
+        mix(d2_s, textureSampleLevel(diffuseArray, texSampler, macroUV, 2i, macroMip), 0.3),
+        vec4<f32>(1.0, 1.0, 1.0, 1.0),
+        d2_s.a <= 0.01 || (d2_s.r <= 0.001 && d2_s.g <= 0.001 && d2_s.b <= 0.001)
+    );
+
+    let d3_s = textureSampleLevel(diffuseArray, texSampler, tileUV, 3i, tileMip);
+    let d3 = select(
+        mix(d3_s, textureSampleLevel(diffuseArray, texSampler, macroUV, 3i, macroMip), 0.3),
+        vec4<f32>(1.0, 1.0, 1.0, 1.0),
+        d3_s.a <= 0.01 || (d3_s.r <= 0.001 && d3_s.g <= 0.001 && d3_s.b <= 0.001)
+    );
+
+    // 하이트 혼합
+    let h0_s = textureSampleLevel(heightArray, texSampler, tileUV, 0i, tileMip);
     let h0_raw = mix(
-        textureSampleLevel(heightArray, texSampler, tileUV, 0i, tileMip).r,
-        textureSampleLevel(heightArray, texSampler, macroUV, 0i, macroMip).r,
+        select(h0_s.r, 0.5, h0_s.a <= 0.01),
+        select(textureSampleLevel(heightArray, texSampler, macroUV, 0i, macroMip).r, 0.5, h0_s.a <= 0.01),
         0.3
     );
     let h0_c = clamp(h0_raw, 0.0, 1.0);
     let h0 = h0_c * h0_c * h0_c;
 
+    let h1_s = textureSampleLevel(heightArray, texSampler, tileUV, 1i, tileMip);
     let h1_raw = mix(
-        textureSampleLevel(heightArray, texSampler, tileUV, 1i, tileMip).r,
-        textureSampleLevel(heightArray, texSampler, macroUV, 1i, macroMip).r,
+        select(h1_s.r, 0.5, h1_s.a <= 0.01),
+        select(textureSampleLevel(heightArray, texSampler, macroUV, 1i, macroMip).r, 0.5, h1_s.a <= 0.01),
         0.3
     );
     let h1_c = clamp(h1_raw, 0.0, 1.0);
     let h1 = h1_c * h1_c * h1_c;
 
+    let h2_s = textureSampleLevel(heightArray, texSampler, tileUV, 2i, tileMip);
     let h2_raw = mix(
-        textureSampleLevel(heightArray, texSampler, tileUV, 2i, tileMip).r,
-        textureSampleLevel(heightArray, texSampler, macroUV, 2i, macroMip).r,
+        select(h2_s.r, 0.5, h2_s.a <= 0.01),
+        select(textureSampleLevel(heightArray, texSampler, macroUV, 2i, macroMip).r, 0.5, h2_s.a <= 0.01),
         0.3
     );
     let h2_c = clamp(h2_raw, 0.0, 1.0);
     let h2 = h2_c * h2_c * h2_c;
 
+    let h3_s = textureSampleLevel(heightArray, texSampler, tileUV, 3i, tileMip);
     let h3_raw = mix(
-        textureSampleLevel(heightArray, texSampler, tileUV, 3i, tileMip).r,
-        textureSampleLevel(heightArray, texSampler, macroUV, 3i, macroMip).r,
+        select(h3_s.r, 0.5, h3_s.a <= 0.01),
+        select(textureSampleLevel(heightArray, texSampler, macroUV, 3i, macroMip).r, 0.5, h3_s.a <= 0.01),
         0.3
     );
     let h3_c = clamp(h3_raw, 0.0, 1.0);
@@ -231,26 +242,33 @@ fn cs_main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
     finalAlbedo.a = 1.0;
 
-    // 노멀 혼합
-    let n0_raw = mix(
-        (textureSampleLevel(normalArray, texSampler, tileUV, 0i, tileMip).rg * 2.0 - vec2<f32>(1.0)),
-        (textureSampleLevel(normalArray, texSampler, macroUV, 0i, macroMip).rg * 2.0 - vec2<f32>(1.0)),
-        0.3
+    // 노멀 혼합 (미지정 텍스처 시 Flat Normal vec2(0.0) 자동 대입)
+    let n0_s = textureSampleLevel(normalArray, texSampler, tileUV, 0i, tileMip);
+    let n0_raw = select(
+        mix(n0_s.rg * 2.0 - vec2<f32>(1.0), textureSampleLevel(normalArray, texSampler, macroUV, 0i, macroMip).rg * 2.0 - vec2<f32>(1.0), 0.3),
+        vec2<f32>(0.0),
+        n0_s.a <= 0.01 || (n0_s.r <= 0.001 && n0_s.g <= 0.001 && n0_s.b <= 0.001)
     );
-    let n1_raw = mix(
-        (textureSampleLevel(normalArray, texSampler, tileUV, 1i, tileMip).rg * 2.0 - vec2<f32>(1.0)),
-        (textureSampleLevel(normalArray, texSampler, macroUV, 1i, macroMip).rg * 2.0 - vec2<f32>(1.0)),
-        0.3
+
+    let n1_s = textureSampleLevel(normalArray, texSampler, tileUV, 1i, tileMip);
+    let n1_raw = select(
+        mix(n1_s.rg * 2.0 - vec2<f32>(1.0), textureSampleLevel(normalArray, texSampler, macroUV, 1i, macroMip).rg * 2.0 - vec2<f32>(1.0), 0.3),
+        vec2<f32>(0.0),
+        n1_s.a <= 0.01 || (n1_s.r <= 0.001 && n1_s.g <= 0.001 && n1_s.b <= 0.001)
     );
-    let n2_raw = mix(
-        (textureSampleLevel(normalArray, texSampler, tileUV, 2i, tileMip).rg * 2.0 - vec2<f32>(1.0)),
-        (textureSampleLevel(normalArray, texSampler, macroUV, 2i, macroMip).rg * 2.0 - vec2<f32>(1.0)),
-        0.3
+
+    let n2_s = textureSampleLevel(normalArray, texSampler, tileUV, 2i, tileMip);
+    let n2_raw = select(
+        mix(n2_s.rg * 2.0 - vec2<f32>(1.0), textureSampleLevel(normalArray, texSampler, macroUV, 2i, macroMip).rg * 2.0 - vec2<f32>(1.0), 0.3),
+        vec2<f32>(0.0),
+        n2_s.a <= 0.01 || (n2_s.r <= 0.001 && n2_s.g <= 0.001 && n2_s.b <= 0.001)
     );
-    let n3_raw = mix(
-        (textureSampleLevel(normalArray, texSampler, tileUV, 3i, tileMip).rg * 2.0 - vec2<f32>(1.0)),
-        (textureSampleLevel(normalArray, texSampler, macroUV, 3i, macroMip).rg * 2.0 - vec2<f32>(1.0)),
-        0.3
+
+    let n3_s = textureSampleLevel(normalArray, texSampler, tileUV, 3i, tileMip);
+    let n3_raw = select(
+        mix(n3_s.rg * 2.0 - vec2<f32>(1.0), textureSampleLevel(normalArray, texSampler, macroUV, 3i, macroMip).rg * 2.0 - vec2<f32>(1.0), 0.3),
+        vec2<f32>(0.0),
+        n3_s.a <= 0.01 || (n3_s.r <= 0.001 && n3_s.g <= 0.001 && n3_s.b <= 0.001)
     );
 
     var blendedNormalXY = n0_raw * w.r + n1_raw * w.g + n2_raw * w.b + n3_raw * w.a;
