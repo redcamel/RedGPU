@@ -335,18 +335,35 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         });
 
         const ctx = this.redGPUContext;
-        let loadedCount = 0;
-        const checkAllLoaded = () => {
-            loadedCount++;
-            if (loadedCount >= 4) {
-                this.bakeAllRVTTiles();
-            }
+
+        const createTextureArrayPromise = (srcs: string[], format: GPUTextureFormat): Promise<TextureArray | null> => {
+            const hasValidSrc = srcs.some(src => !!src && src.trim() !== '');
+            if (!hasValidSrc) return Promise.resolve(null);
+
+            return new Promise((resolve) => {
+                const instance: TextureArray = new TextureArray(
+                    ctx,
+                    srcs,
+                    true,
+                    () => resolve(instance),
+                    () => resolve(null),
+                    format
+                );
+            });
         };
 
-        this.diffuseArray = new TextureArray(ctx, diffuseSrcs, true, checkAllLoaded, undefined, 'rgba8unorm-srgb');
-        this.normalArray = new TextureArray(ctx, normalSrcs, true, checkAllLoaded, undefined, 'rgba8unorm');
-        this.heightArray = new TextureArray(ctx, heightSrcs, true, checkAllLoaded, undefined, 'rgba8unorm');
-        this.ormArray = new TextureArray(ctx, ormSrcs, true, checkAllLoaded, undefined, 'rgba8unorm');
+        Promise.all([
+            createTextureArrayPromise(diffuseSrcs, 'rgba8unorm-srgb'),
+            createTextureArrayPromise(normalSrcs, 'rgba8unorm'),
+            createTextureArrayPromise(heightSrcs, 'rgba8unorm'),
+            createTextureArrayPromise(ormSrcs, 'rgba8unorm')
+        ]).then(([dArr, nArr, hArr, oArr]) => {
+            this.diffuseArray = dArr!;
+            this.normalArray = nArr!;
+            this.heightArray = hArr!;
+            this.ormArray = oArr!;
+            this.bakeAllRVTTiles();
+        });
     }
 }
 
