@@ -113,28 +113,22 @@ fn main(inputData: InputData) -> VertexOutput {
     let tempWorldPos = vec3<f32>(worldXZ.x, 0.0, worldXZ.y);
     morphFactor = calculateMorphFactor(tempWorldPos, instanceData.lod);
 
-    var finalWorldXZ  = worldXZ;
-    var parentWorldXZ = worldXZ;
+    let gridDim = vertexUniforms.verticesPerSide - 1.0;
+    let gridPos = inputData.uv * gridDim;
+    let gridIdx = floor(gridPos + 0.5);
 
-    if (morphFactor > 0.001) {
-        let gridDim = vertexUniforms.verticesPerSide - 1.0;
-        let gridPos = inputData.uv * gridDim;
-        let gridIdx = floor(gridPos + 0.5);
+    let clampGridIdx = min(floor(gridIdx * 0.5) * 2.0, vec2<f32>(gridDim));
+    let parentGridIdx = vec2<f32>(
+        select(clampGridIdx.x, gridDim, gridIdx.x >= gridDim - 0.1),
+        select(clampGridIdx.y, gridDim, gridIdx.y >= gridDim - 0.1)
+    );
 
-        var parentGridIdx = floor(gridIdx * 0.5) * 2.0;
-        if (gridIdx.x >= gridDim - 0.1) {
-            parentGridIdx.x = gridDim;
-        }
-        if (gridIdx.y >= gridDim - 0.1) {
-            parentGridIdx.y = gridDim;
-        }
+    let parentUV = parentGridIdx / gridDim;
+    let parentLocalXZ = parentUV - vec2<f32>(0.5);
+    let parentWorldXZ = instanceData.offset + parentLocalXZ * instanceData.scale;
 
-        let parentUV = parentGridIdx / gridDim;
-        let parentLocalXZ = parentUV - vec2<f32>(0.5);
-        parentWorldXZ = instanceData.offset + parentLocalXZ * instanceData.scale;
-
-        finalWorldXZ = mix(worldXZ, parentWorldXZ, morphFactor);
-    }
+    // Branchless interpolation based on morphFactor
+    let finalWorldXZ = mix(worldXZ, parentWorldXZ, morphFactor);
 
     let rawWorldUV = (finalWorldXZ - vertexUniforms.worldOffset) / vertexUniforms.worldSize;
     let worldUV = vec2<f32>(rawWorldUV.x, 1.0 - rawWorldUV.y);
