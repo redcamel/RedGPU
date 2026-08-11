@@ -91,13 +91,6 @@ fn main(inputData:InputData) -> OutputFragment {
 
     let tbn = getTBNFromVertexTangent(baseNormal, input_vertexTangent);
 
-    let rvt_albedo = textureSample(rvtAlbedoTexture, rvtSampler, input_uv);
-    let rvt_normalORM = textureSample(rvtNormalORMTexture, rvtSampler, input_uv);
-
-    let rvt_normalXY = rvt_normalORM.rg;
-    let rvt_roughness = rvt_normalORM.b;
-    let rvt_occlusion = rvt_normalORM.a;
-
     if (uniforms.debugSplatTexture == 1u) {
         #redgpu_if splatTexture
             output.color = textureSample(splatTexture, rvtSampler, input_uv);
@@ -106,6 +99,13 @@ fn main(inputData:InputData) -> OutputFragment {
         #redgpu_endIf
         return output;
     }
+
+    let rvt_albedo = textureSample(rvtAlbedoTexture, rvtSampler, input_uv);
+    let rvt_normalORM = textureSample(rvtNormalORMTexture, rvtSampler, input_uv);
+
+    let rvt_normalXY = rvt_normalORM.rg;
+    let rvt_roughness = rvt_normalORM.b;
+    let rvt_occlusion = rvt_normalORM.a;
 
     // Unpack tangent-space normal XY stored in RVT Atlas
     var scaled_rvt = vec2<f32>(rvt_normalXY.r * 2.0 - 1.0, rvt_normalXY.g * 2.0 - 1.0);
@@ -205,7 +205,9 @@ fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
 }
 
 fn getFresnel(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
-    return F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+    let f = clamp(1.0 - cosTheta, 0.0, 1.0);
+    let f2 = f * f;
+    return F0 + (vec3<f32>(1.0) - F0) * (f2 * f2 * f);
 }
 
 fn getIndirectFresnel(cosTheta: f32, F0: vec3<f32>, roughness: f32, fresnelTerm: f32) -> vec3<f32> {
