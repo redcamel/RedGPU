@@ -7,6 +7,7 @@
  * @param newValue - [KO] 버퍼에 기록할 새 값 [EN] New value to write to the buffer
  */
 const updateTargetUniform = (target: any, propertyKey: string, newValue: any) => {
+    //TODO 힙안생기게... 보강해야함
     let targetUniformInfo;
     let targetUniformBuffer;
     const {gpuRenderInfo, redGPUContext} = target
