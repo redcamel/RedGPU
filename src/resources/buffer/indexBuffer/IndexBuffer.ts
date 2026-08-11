@@ -8,7 +8,7 @@ const MANAGED_STATE_KEY = 'managedIndexBufferState'
  * [KO] 인덱스 버퍼 데이터 타입입니다.
  * [EN] Index buffer data type.
  */
-export type NumberArray = Array<number> | Uint32Array;
+export type NumberArray = Array<number> | Uint32Array | Uint16Array;
 
 /**
  * [KO] 인덱스 버퍼를 관리하는 클래스입니다.
@@ -25,7 +25,7 @@ class IndexBuffer extends ABaseBuffer {
      * [KO] 인덱스 데이터가 저장되는 내부 버퍼입니다.
      * [EN] Internal buffer where index data is stored.
      */
-    [GPU_BUFFER_DATA_SYMBOL]: Uint32Array
+    [GPU_BUFFER_DATA_SYMBOL]: Uint32Array | Uint16Array
     /**
      * [KO] 인덱스 개수입니다.
      * [EN] Number of indices.
@@ -36,7 +36,6 @@ class IndexBuffer extends ABaseBuffer {
      * [EN] Number of triangles.
      */
     #triangleCount: number = 0
-    #format: GPUIndexFormat = GPU_INDEX_FORMAT.UINT32
 
     /**
      * [KO] IndexBuffer 인스턴스를 생성합니다.
@@ -51,8 +50,8 @@ class IndexBuffer extends ABaseBuffer {
      * [KO] RedGPUContext 인스턴스
      * [EN] RedGPUContext instance
      * @param data -
-     * [KO] 인덱스 데이터 (`Array<number>` 또는 `Uint32Array`)
-     * [EN] Index data (`Array<number>` or `Uint32Array`)
+     * [KO] 인덱스 데이터 (`Array<number>`, `Uint32Array` 또는 `Uint16Array`)
+     * [EN] Index data (`Array<number>`, `Uint32Array` or `Uint16Array`)
      * @param usage -
      * [KO] GPUBufferUsageFlags (기본값: `GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST`)
      * [EN] GPUBufferUsageFlags (default: `GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST`)
@@ -86,11 +85,14 @@ class IndexBuffer extends ABaseBuffer {
      * [EN] Returns the GPU index format.
      *
      * @returns
-     * [KO] GPUIndexFormat (기본값: 'uint32')
-     * [EN] GPUIndexFormat (Default: 'uint32')
+     * [KO] GPUIndexFormat ('uint16' 또는 'uint32')
+     * [EN] GPUIndexFormat ('uint16' or 'uint32')
      */
     get format(): GPUIndexFormat {
-        return this.#format;
+        if (this[GPU_BUFFER_DATA_SYMBOL] instanceof Uint16Array) {
+            return GPU_INDEX_FORMAT.UINT16;
+        }
+        return GPU_INDEX_FORMAT.UINT32;
     }
 
     /**

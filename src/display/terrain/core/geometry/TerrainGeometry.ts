@@ -106,7 +106,7 @@ class TerrainGeometry extends Geometry {
 
         const indexBuffer = new IndexBuffer(
             redGPUContext,
-            new Uint32Array(indexData),
+            new Uint16Array(indexData),
             undefined,
             `IndexBuffer_TerrainGeometry`
         );
