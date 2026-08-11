@@ -62,10 +62,7 @@ export class TerrainTileManager {
     #tileSpanZ: number = 0;
 
     #heightmapManager: TerrainHeightmapManager;
-    #flatHeightmapData: Uint16Array;
 
-    #synthesizedTilesSet: Set<string> = new Set();
-    #tileDataCache: Map<string, ArrayBufferView | ArrayBuffer> = new Map();
     #tileUrlResolver?: (tile: SpatialTileInfo) => string | void;
     #onTileLoadCallback?: (tile: SpatialTileInfo) => void;
     #onTileUnloadCallback?: (tile: SpatialTileInfo) => void;
@@ -112,9 +109,7 @@ export class TerrainTileManager {
             atlasTileSize: this.#atlasTileSize
         });
 
-        // worldSize 기본값 동적 설정
         this.#terrain.worldSize = [cellSize * this.#atlasTileCountX, cellSize * this.#atlasTileCountZ];
-
         this.#maxInstances = 65536;
 
         this.#instanceBuffer = redGPUContext.gpuDevice.createBuffer({
@@ -123,11 +118,12 @@ export class TerrainTileManager {
             label: 'TerrainInstanceBuffer'
         });
 
-        const totalHeightmapDataSize = (this.#atlasTileCountX * this.#atlasTileSize) * (this.#atlasTileCountZ * this.#atlasTileSize);
-        this.#flatHeightmapData = new Uint16Array(totalHeightmapDataSize);
         this.#instanceArrayBuffer = new Float32Array(65536 * 4);
-
         this.#updateCachedTileSpans();
+    }
+
+    get synthesizedTileCount(): number {
+        return this.#heightmapManager.synthesizedTileCount;
     }
 
     get instanceBuffer(): GPUBuffer {
@@ -158,8 +154,8 @@ export class TerrainTileManager {
         return this.#tileStreamMetrics;
     }
 
-    get synthesizedTileCount(): number {
-        return this.#heightmapManager ? this.#heightmapManager.synthesizedTileCount : this.#synthesizedTilesSet.size;
+    get flatHeightmapData(): Uint16Array {
+        return this.#heightmapManager.flatHeightmapData;
     }
 
     get lodThreshold(): number {
@@ -170,12 +166,8 @@ export class TerrainTileManager {
         this.#lodThreshold = value;
     }
 
-    get flatHeightmapData(): Uint16Array {
-        return this.#heightmapManager ? this.#heightmapManager.flatHeightmapData : this.#flatHeightmapData;
-    }
-
     get tileDataCache(): Map<string, ArrayBufferView | ArrayBuffer> {
-        return this.#tileDataCache;
+        return this.#heightmapManager.tileDataCache;
     }
 
     markDirty() {
@@ -183,9 +175,9 @@ export class TerrainTileManager {
     }
 
     getTerrainHeight(x: number, z: number): number {
-        return this.#heightmapManager ? this.#heightmapManager.getTerrainHeight(
+        return this.#heightmapManager.getTerrainHeight(
             x, z, this.#terrain.worldOffset, this.#terrain.worldSize, this.#terrain.minHeight, this.#terrain.maxHeight
-        ) : 0;
+        );
     }
 
     checkQuadtree(renderViewStateData: any) {
@@ -237,45 +229,6 @@ export class TerrainTileManager {
         } else if (this.#terrain.gpuRenderInfo && this.#terrain.drawCommandSlot && this.#terrain.drawBufferManager) {
             this.#terrain.drawBufferManager.setInstanceNum(this.#terrain.drawCommandSlot, this.#currentInstanceCount);
         }
-    }
-
-    destroy() {
-        if (this.#instanceBuffer) {
-            this.#instanceBuffer.destroy();
-            this.#instanceBuffer = null as any;
-        }
-        if (this.#terrain.heightmapAtlasTexture) {
-            this.#terrain.heightmapAtlasTexture.destroy();
-            this.#terrain.heightmapAtlasTexture = null;
-        }
-        this.#tileDataCache.clear();
-        this.#synthesizedTilesSet.clear();
-        if (this.#processor) {
-            this.#processor.destroy();
-            this.#processor = null;
-        }
-    }
-
-    isTileSynthesized(tile: SpatialTileInfo | string): boolean {
-        const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
-        return this.#synthesizedTilesSet.has(key);
-    }
-
-    setTileUrlResolver(resolver: (tile: SpatialTileInfo) => string | void) {
-        this.#tileUrlResolver = resolver;
-    }
-
-    setOnTileLoad(callback: (tile: SpatialTileInfo) => void) {
-        this.#onTileLoadCallback = callback;
-    }
-
-    setOnTileUnload(callback: (tile: SpatialTileInfo) => void) {
-        this.#onTileUnloadCallback = callback;
-    }
-
-    loadTileFrom16BitBuffer(tile: SpatialTileInfo, data: ArrayBuffer | ArrayBufferView, width: number, height: number) {
-        this.#registerTileData(tile, data);
-        this.#updateTileHeightmapFromBuffer(tile, data, width, height);
     }
 
     #updateCachedTileSpans() {
@@ -351,6 +304,40 @@ export class TerrainTileManager {
         }
     }
 
+    destroy() {
+        if (this.#instanceBuffer) {
+            this.#instanceBuffer.destroy();
+            this.#instanceBuffer = null as any;
+        }
+        if (this.#terrain.heightmapAtlasTexture) {
+            this.#terrain.heightmapAtlasTexture.destroy();
+            this.#terrain.heightmapAtlasTexture = null;
+        }
+        if (this.#heightmapManager) {
+            this.#heightmapManager.destroy();
+        }
+        if (this.#processor) {
+            this.#processor.destroy();
+            this.#processor = null;
+        }
+    }
+
+    isTileSynthesized(tile: SpatialTileInfo | string): boolean {
+        return this.#heightmapManager.isTileSynthesized(tile);
+    }
+
+    setTileUrlResolver(resolver: (tile: SpatialTileInfo) => string | void) {
+        this.#tileUrlResolver = resolver;
+    }
+
+    setOnTileLoad(callback: (tile: SpatialTileInfo) => void) {
+        this.#onTileLoadCallback = callback;
+    }
+
+    setOnTileUnload(callback: (tile: SpatialTileInfo) => void) {
+        this.#onTileUnloadCallback = callback;
+    }
+
     #updateInstanceRenderBuffer(cameraPos: [number, number, number], renderViewStateData: any) {
         this.#quadtree.update(
             cameraPos,
@@ -408,6 +395,11 @@ export class TerrainTileManager {
         );
     }
 
+    loadTileFrom16BitBuffer(tile: SpatialTileInfo, data: ArrayBuffer | ArrayBufferView, width: number, height: number) {
+        this.#heightmapManager.registerTileData(tile, data, this.#spatialGrid);
+        this.#updateTileHeightmapFromBuffer(tile, data, width, height);
+    }
+
     #enrichTileInfo(tile: SpatialTileInfo) {
         tile.cellKey = `${tile.gridX}_${tile.gridZ}`;
         const [tbMinX, tbMinZ, tbMaxX, tbMaxZ] = tile.worldBounds;
@@ -422,11 +414,6 @@ export class TerrainTileManager {
         tile.atlasKey = `${tile.tileCol}_${tile.tileRow}`;
         tile.tileColStr = String(tile.tileCol).padStart(2, '0');
         tile.tileRowStr = String(tile.tileRow).padStart(2, '0');
-    }
-
-    #markTileSynthesized(tile: SpatialTileInfo | string) {
-        const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
-        this.#synthesizedTilesSet.add(key);
     }
 
     #updateTileHeightmapFromBuffer(tile: SpatialTileInfo, data: ArrayBuffer | ArrayBufferView, width: number, height: number) {
@@ -456,7 +443,7 @@ export class TerrainTileManager {
             this.#atlasTileSize
         );
 
-        this.#markTileSynthesized(`${tileX}_${tileZ}`);
+        this.#heightmapManager.markTileSynthesized(`${tileX}_${tileZ}`);
         this.markDirty();
 
         if (this.#onTileLoadCallback) {
@@ -467,69 +454,6 @@ export class TerrainTileManager {
             const mat = this.#terrain.material as any;
             if (typeof mat.bakeRVTTile === 'function') {
                 mat.bakeRVTTile(tileX, tileZ, this.#atlasTileCountX, this.#atlasTileCountZ);
-            }
-        }
-    }
-
-    #updateFlatHeightmapSector(key: string, data: any) {
-        const parts = key.split('_');
-        const tileCol = parseInt(parts[0], 10);
-        const tileRow = parseInt(parts[1], 10);
-
-        const tileSize = this.#atlasTileSize;
-        const totalWidth = this.#atlasTileCountX * tileSize;
-
-        let tileData: Uint16Array;
-        if (data instanceof Float32Array) {
-            tileData = new Uint16Array(data.length);
-            for (let i = 0; i < data.length; i++) tileData[i] = data[i] * 65535.0;
-        } else if (data instanceof Uint16Array) {
-            tileData = data;
-        } else if (data instanceof ArrayBuffer) {
-            tileData = new Uint16Array(data);
-        } else if (ArrayBuffer.isView(data)) {
-            tileData = new Uint16Array(data.buffer, data.byteOffset, data.byteLength / 2);
-        } else {
-            return;
-        }
-
-        const startX = tileCol * tileSize;
-        const startZ = tileRow * tileSize;
-
-        for (let tz = 0; tz < tileSize; tz++) {
-            const srcOffset = tz * tileSize;
-            const dstOffset = (startZ + tz) * totalWidth + startX;
-
-            this.#flatHeightmapData.set(
-                tileData.subarray(srcOffset, srcOffset + tileSize),
-                dstOffset
-            );
-        }
-    }
-
-    #registerTileData(tile: SpatialTileInfo | string, data: any) {
-        const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
-
-        if (this.#tileDataCache.has(key)) {
-            this.#tileDataCache.delete(key);
-        }
-
-        this.#tileDataCache.set(key, data);
-
-        this.#updateFlatHeightmapSector(key, data);
-
-        const MAX_CACHE_SIZE = 128;
-        if (this.#tileDataCache.size > MAX_CACHE_SIZE) {
-            const keysIterator = this.#tileDataCache.keys();
-            for (const oldestKey of keysIterator) {
-                const isActive = this.#spatialGrid &&
-                    (this.#spatialGrid.activeTiles.has(oldestKey) ||
-                        Array.from(this.#spatialGrid.activeTiles.values()).some(t => t.atlasKey === oldestKey));
-
-                if (!isActive) {
-                    this.#tileDataCache.delete(oldestKey);
-                    break;
-                }
             }
         }
     }
@@ -560,4 +484,3 @@ export class TerrainTileManager {
 }
 
 export default TerrainTileManager;
-

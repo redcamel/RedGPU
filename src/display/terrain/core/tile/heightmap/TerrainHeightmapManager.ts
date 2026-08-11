@@ -115,7 +115,7 @@ export default class TerrainHeightmapManager {
         return minHeight + ratio * (maxHeight - minHeight);
     }
 
-    registerTileData(tile: SpatialTileInfo | string, data: any, activeTilesCheck?: (key: string) => boolean): void {
+    registerTileData(tile: SpatialTileInfo | string, data: any, spatialGrid?: any): void {
         const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
 
         if (this.#tileDataCache.has(key)) {
@@ -129,7 +129,10 @@ export default class TerrainHeightmapManager {
         if (this.#tileDataCache.size > MAX_CACHE_SIZE) {
             const keysIterator = this.#tileDataCache.keys();
             for (const oldestKey of keysIterator) {
-                const isActive = activeTilesCheck ? activeTilesCheck(oldestKey) : false;
+                const isActive = spatialGrid &&
+                    (spatialGrid.activeTiles.has(oldestKey) ||
+                        Array.from(spatialGrid.activeTiles.values()).some((t: any) => t.atlasKey === oldestKey));
+
                 if (!isActive) {
                     this.#tileDataCache.delete(oldestKey);
                     break;
