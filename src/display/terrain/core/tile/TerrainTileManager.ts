@@ -1,34 +1,15 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import TerrainMaterialBind from "./TerrainMaterialBind";
-import defineTexture from "../../../../defineProperty/funcs/texture/defineTexture";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
 import {SpatialTileInfo, TerrainSpatialGrid} from "./TerrainSpatialGrid";
-import BitmapTexture from "../../../../resources/texture/BitmapTexture";
-import defineVector2 from "../../../../defineProperty/funcs/vector/defineVector2";
 import {TerrainQuadtree} from "./TerrainQuadtree";
-import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
-import updateTargetUniform from "../../../../defineProperty/core/updateTargetUniform";
-import TerrainGeometry from "../TerrainGeometry";
-
-import TerrainHeightmapProcessor from "../heightmap/processor/TerrainHeightmapProcessor";
 import TerrainHeightmapManager from "../heightmap/TerrainHeightmapManager";
+import TerrainHeightmapProcessor from "../heightmap/processor/TerrainHeightmapProcessor";
 import parse16BitPngBuffer from "../../../../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
+import type Terrain from "../../Terrain";
 
-interface TerrainTileSystem {
-    heightmapAtlasTexture: DirectTexture | BitmapTexture | null;
+export type {SpatialTileInfo};
 
-    worldOffset: [number, number];
-    worldSize: [number, number];
-
-    minHeight: number;
-    maxHeight: number;
-
-    maxLOD: number;
-
-    baseSlotIndex: number;
-}
-
-class TileStreamMetrics {
+export class TileStreamMetrics {
     frameLoadCount: number = 0;
     frameUnloadCount: number = 0;
     lastFrameLoadCount: number = 0;
@@ -58,7 +39,7 @@ export interface TerrainOptions {
     atlasTileSize?: number;
 }
 
-function sanitizeVerticesPerSide(val: number): number {
+export function sanitizeVerticesPerSide(val: number): number {
     const minVal = 16;
     const maxVal = 512;
     const clamped = Math.max(minVal, Math.min(maxVal, val));
@@ -69,17 +50,18 @@ function sanitizeVerticesPerSide(val: number): number {
     return powerOfTwo;
 }
 
-class TerrainTileSystem extends TerrainMaterialBind {
+export class TerrainTileManager {
+    #terrain: Terrain;
+    #redGPUContext: RedGPUContext;
+
     #spatialGrid: TerrainSpatialGrid;
-    #quadtree: TerrainQuadtree;
+    #quadtree!: TerrainQuadtree;
     #instanceBuffer: GPUBuffer;
-    #instanceArrayBuffer: Float32Array; // CPU 인스턴싱 캐시 버퍼 (GC 방지)
+    #instanceArrayBuffer: Float32Array;
     #tileSpanX: number = 0;
     #tileSpanZ: number = 0;
 
     #heightmapManager: TerrainHeightmapManager;
-
-    // 2번 최적화: 1차원 플랫 높이 데이터 버퍼
     #flatHeightmapData: Uint16Array;
 
     #synthesizedTilesSet: Set<string> = new Set();
@@ -87,19 +69,18 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #tileUrlResolver?: (tile: SpatialTileInfo) => string | void;
     #onTileLoadCallback?: (tile: SpatialTileInfo) => void;
     #onTileUnloadCallback?: (tile: SpatialTileInfo) => void;
+
     #prevWorldSize: number = 0;
     #prevMaxLOD: number = 0;
     #prevLodThreshold: number = 0;
-    #lodRanges: Float32Array = new Float32Array(32);
     #lodThreshold: number = 2.0;
+
     #atlasTileCountX: number = 16;
     #atlasTileCountZ: number = 16;
     #atlasTileSize: number = 512;
-    #verticesPerSide: number = 64;
     #maxInstances: number = 65536;
     #tileStreamMetrics = new TileStreamMetrics();
 
-    // 1순위 최적화: Quadtree Dirty Checking 상태 변수
     #currentInstanceCount: number = 0;
     #isDirty: boolean = true;
     #lastCamX: number = NaN;
@@ -109,20 +90,17 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #lastCamRotY: number = NaN;
     #lastCamRotZ: number = NaN;
 
-    markDirty() {
-        this.#isDirty = true;
-    }
+    #processor?: TerrainHeightmapProcessor | null;
 
-    constructor(redGPUContext: RedGPUContext, options?: TerrainOptions) {
-        const verticesPerSide = sanitizeVerticesPerSide(options?.verticesPerSide ?? 64);
-        super(redGPUContext, verticesPerSide, options);
+    constructor(terrain: Terrain, redGPUContext: RedGPUContext, options?: TerrainOptions) {
+        this.#terrain = terrain;
+        this.#redGPUContext = redGPUContext;
+
         const cellSize = options?.cellSize ?? 256;
         const loadingRadius = options?.loadingRadius ?? 2560;
         this.#lodThreshold = options?.lodThreshold ?? 2.0;
+
         this.#spatialGrid = new TerrainSpatialGrid(cellSize, loadingRadius);
-        this.minHeight = 0;
-        this.maxHeight = 0.5;
-        this.worldOffset = [-0.5, -0.5];
 
         this.#atlasTileCountX = options?.atlasTileCountX ?? 16;
         this.#atlasTileCountZ = options?.atlasTileCountZ ?? 16;
@@ -134,11 +112,8 @@ class TerrainTileSystem extends TerrainMaterialBind {
             atlasTileSize: this.#atlasTileSize
         });
 
-        // worldSize를 하드코딩 [1, 1] 대신 cellSize * atlasTileCount로 동적 유도하여 설정
-        this.worldSize = [cellSize * this.#atlasTileCountX, cellSize * this.#atlasTileCountZ];
-        this.maxLOD = 4;
-        this.baseSlotIndex = 0;
-        this.#verticesPerSide = verticesPerSide;
+        // worldSize 기본값 동적 설정
+        this.#terrain.worldSize = [cellSize * this.#atlasTileCountX, cellSize * this.#atlasTileCountZ];
 
         this.#maxInstances = 65536;
 
@@ -148,41 +123,15 @@ class TerrainTileSystem extends TerrainMaterialBind {
             label: 'TerrainInstanceBuffer'
         });
 
-        // 동적 설정에 기초하여 플랫 버퍼 크기를 1회 할당
         const totalHeightmapDataSize = (this.#atlasTileCountX * this.#atlasTileSize) * (this.#atlasTileCountZ * this.#atlasTileSize);
         this.#flatHeightmapData = new Uint16Array(totalHeightmapDataSize);
-
-        // 최대 인스턴스 크기만큼의 Float32Array 사전 대용량 할당 (GC 부하 제거)
         this.#instanceArrayBuffer = new Float32Array(65536 * 4);
+
         this.#updateCachedTileSpans();
     }
 
     get instanceBuffer(): GPUBuffer {
         return this.#instanceBuffer;
-    }
-
-    get lodRanges(): Float32Array {
-        return this.#lodRanges;
-    }
-
-    set lodRanges(value: Float32Array) {
-        this.#lodRanges = value;
-        updateTargetUniform(this, 'lodRanges', value);
-    }
-
-    get verticesPerSide(): number {
-        return this.#verticesPerSide;
-    }
-
-    set verticesPerSide(value: number) {
-        const safeValue = sanitizeVerticesPerSide(value);
-        this.geometry = new TerrainGeometry(this.redGPUContext, safeValue);
-        this.#verticesPerSide = safeValue;
-        updateTargetUniform(this, 'verticesPerSide', safeValue);
-    }
-
-    get quadsPerSide(): number {
-        return this.#verticesPerSide - 1;
     }
 
     get atlasTileCountX(): number {
@@ -225,29 +174,35 @@ class TerrainTileSystem extends TerrainMaterialBind {
         return this.#heightmapManager ? this.#heightmapManager.flatHeightmapData : this.#flatHeightmapData;
     }
 
+    get tileDataCache(): Map<string, ArrayBufferView | ArrayBuffer> {
+        return this.#tileDataCache;
+    }
+
+    markDirty() {
+        this.#isDirty = true;
+    }
+
     getTerrainHeight(x: number, z: number): number {
         return this.#heightmapManager ? this.#heightmapManager.getTerrainHeight(
-            x, z, this.worldOffset, this.worldSize, this.minHeight, this.maxHeight
+            x, z, this.#terrain.worldOffset, this.#terrain.worldSize, this.#terrain.minHeight, this.#terrain.maxHeight
         ) : 0;
     }
 
     checkQuadtree(renderViewStateData: any) {
-        const currentWorldSize = this.worldSize[0];
-        this.#updateCachedTileSpans(); // 캐싱 스팬 동기화
+        const currentWorldSize = this.#terrain.worldSize[0];
+        this.#updateCachedTileSpans();
         const lodRangesChanged = this.#updateLODRanges(currentWorldSize);
 
-        this.baseSlotIndex = this.globalVertexSlotIndex;
+        this.#terrain.baseSlotIndex = this.#terrain.globalVertexSlotIndex;
 
         const camera = renderViewStateData.view.rawCamera;
-        const localCamX = camera.x - this.worldOffset[0];
+        const localCamX = camera.x - this.#terrain.worldOffset[0];
         const localCamY = camera.y;
-        const localCamZ = camera.z - this.worldOffset[1];
+        const localCamZ = camera.z - this.#terrain.worldOffset[1];
         const cameraPos: [number, number, number] = [localCamX, localCamY, localCamZ];
 
         this.#processTileStreaming(camera);
 
-        // 1순위 최적화: Quadtree Dirty Checking
-        // 카메라 위치 델타(0.05 unit 초과) 및 회전 델타(0.001 rad 초과) 또는 dirty 상태일 때만 쿼드트리 버퍼 갱신
         const camRotX = camera.rotationX ?? 0;
         const camRotY = camera.rotationY ?? 0;
         const camRotZ = camera.rotationZ ?? 0;
@@ -266,7 +221,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
             this.#isDirty ||
             lodRangesChanged ||
             isNaN(distSq) ||
-            distSq > 0.0025 || // 0.05 * 0.05
+            distSq > 0.0025 ||
             rotDiff > 0.001;
 
         if (shouldUpdate) {
@@ -279,51 +234,88 @@ class TerrainTileSystem extends TerrainMaterialBind {
             this.#isDirty = false;
 
             this.#updateInstanceRenderBuffer(cameraPos, renderViewStateData);
-        } else if (this.gpuRenderInfo && this.drawCommandSlot && this.drawBufferManager) {
-            // 💡 1순위 최적화 보정: Dirty 스킵 시에도 드로우 인스턴스 수 동기화를 매 프레임 보장하여 깜빡임(Flickering) 100% 차단
-            this.drawBufferManager.setInstanceNum(this.drawCommandSlot, this.#currentInstanceCount);
+        } else if (this.#terrain.gpuRenderInfo && this.#terrain.drawCommandSlot && this.#terrain.drawBufferManager) {
+            this.#terrain.drawBufferManager.setInstanceNum(this.#terrain.drawCommandSlot, this.#currentInstanceCount);
         }
     }
 
+    destroy() {
+        if (this.#instanceBuffer) {
+            this.#instanceBuffer.destroy();
+            this.#instanceBuffer = null as any;
+        }
+        if (this.#terrain.heightmapAtlasTexture) {
+            this.#terrain.heightmapAtlasTexture.destroy();
+            this.#terrain.heightmapAtlasTexture = null;
+        }
+        this.#tileDataCache.clear();
+        this.#synthesizedTilesSet.clear();
+        if (this.#processor) {
+            this.#processor.destroy();
+            this.#processor = null;
+        }
+    }
+
+    isTileSynthesized(tile: SpatialTileInfo | string): boolean {
+        const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
+        return this.#synthesizedTilesSet.has(key);
+    }
+
+    setTileUrlResolver(resolver: (tile: SpatialTileInfo) => string | void) {
+        this.#tileUrlResolver = resolver;
+    }
+
+    setOnTileLoad(callback: (tile: SpatialTileInfo) => void) {
+        this.#onTileLoadCallback = callback;
+    }
+
+    setOnTileUnload(callback: (tile: SpatialTileInfo) => void) {
+        this.#onTileUnloadCallback = callback;
+    }
+
+    loadTileFrom16BitBuffer(tile: SpatialTileInfo, data: ArrayBuffer | ArrayBufferView, width: number, height: number) {
+        this.#registerTileData(tile, data);
+        this.#updateTileHeightmapFromBuffer(tile, data, width, height);
+    }
+
     #updateCachedTileSpans() {
-        const worldW = this.worldSize[0];
-        const worldH = this.worldSize[1];
-        this.#tileSpanX = worldW / this.atlasTileCountX;
-        this.#tileSpanZ = worldH / this.atlasTileCountZ;
+        const worldW = this.#terrain.worldSize[0];
+        const worldH = this.#terrain.worldSize[1];
+        this.#tileSpanX = worldW / this.#atlasTileCountX;
+        this.#tileSpanZ = worldH / this.#atlasTileCountZ;
     }
 
     #updateLODRanges(currentWorldSize: number): boolean {
         if (
             !this.#quadtree ||
             this.#prevWorldSize !== currentWorldSize ||
-            this.#prevMaxLOD !== this.maxLOD ||
+            this.#prevMaxLOD !== this.#terrain.maxLOD ||
             this.#prevLodThreshold !== this.#lodThreshold
         ) {
-            this.#quadtree = new TerrainQuadtree(currentWorldSize, this.maxLOD);
+            this.#quadtree = new TerrainQuadtree(currentWorldSize, this.#terrain.maxLOD);
             this.#prevWorldSize = currentWorldSize;
-            this.#prevMaxLOD = this.maxLOD;
+            this.#prevMaxLOD = this.#terrain.maxLOD;
             this.#prevLodThreshold = this.#lodThreshold;
 
             if (this.#spatialGrid) {
-                this.#spatialGrid.cellSize = currentWorldSize / this.atlasTileCountX;
+                this.#spatialGrid.cellSize = currentWorldSize / this.#atlasTileCountX;
             }
 
             const lodRanges = new Float32Array(32);
             const lodThreshold = this.lodThreshold;
             const morphConstant = 0.5;
 
-            for (let i = 0; i <= this.maxLOD; i++) {
+            for (let i = 0; i <= this.#terrain.maxLOD; i++) {
                 const worldScale = currentWorldSize / Math.pow(2, i);
                 const morphEnd = worldScale * lodThreshold;
                 const morphStart = morphEnd - (worldScale * morphConstant);
 
-                // 모핑 시작 및 끝 범위를 제곱하여 GPU로 전송 (셰이더에서 제곱근 제거 목적)
                 lodRanges[i * 4 + 0] = morphStart * morphStart;
                 lodRanges[i * 4 + 1] = morphEnd * morphEnd;
                 lodRanges[i * 4 + 2] = 0;
                 lodRanges[i * 4 + 3] = 0;
             }
-            this.lodRanges = lodRanges;
+            this.#terrain.lodRanges = lodRanges;
             return true;
         }
         return false;
@@ -332,7 +324,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
     #processTileStreaming(camera: any) {
         if (!this.#spatialGrid) return;
 
-        const {toLoad, toUnload} = this.#spatialGrid.update(camera, this.worldOffset, this.worldSize);
+        const {toLoad, toUnload} = this.#spatialGrid.update(camera, this.#terrain.worldOffset, this.#terrain.worldSize);
         this.#tileStreamMetrics.update();
 
         if (toLoad.length > 0) {
@@ -359,49 +351,14 @@ class TerrainTileSystem extends TerrainMaterialBind {
         }
     }
 
-    destroy() {
-        if (this.#instanceBuffer) {
-            this.#instanceBuffer.destroy();
-            this.#instanceBuffer = null as any;
-        }
-        if (this.heightmapAtlasTexture) {
-            this.heightmapAtlasTexture.destroy();
-            this.heightmapAtlasTexture = null;
-        }
-        this.#tileDataCache.clear();
-        this.#synthesizedTilesSet.clear();
-        if (this.#processor) {
-            this.#processor.destroy();
-            this.#processor = null;
-        }
-        super.destroy();
-    }
-
-    isTileSynthesized(tile: SpatialTileInfo | string): boolean {
-        const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
-        return this.#synthesizedTilesSet.has(key);
-    }
-
-    setTileUrlResolver(resolver: (tile: SpatialTileInfo) => string | void) {
-        this.#tileUrlResolver = resolver;
-    }
-
-    setOnTileLoad(callback: (tile: SpatialTileInfo) => void) {
-        this.#onTileLoadCallback = callback;
-    }
-
-    setOnTileUnload(callback: (tile: SpatialTileInfo) => void) {
-        this.#onTileUnloadCallback = callback;
-    }
-
     #updateInstanceRenderBuffer(cameraPos: [number, number, number], renderViewStateData: any) {
         this.#quadtree.update(
             cameraPos,
             renderViewStateData.frustumPlanes,
-            this.minHeight,
-            this.maxHeight,
-            this.worldOffset[0],
-            this.worldOffset[1],
+            this.#terrain.minHeight,
+            this.#terrain.maxHeight,
+            this.#terrain.worldOffset[0],
+            this.#terrain.worldOffset[1],
             this.#lodThreshold
         );
 
@@ -416,23 +373,21 @@ class TerrainTileSystem extends TerrainMaterialBind {
                 const centerX = node.worldOffset[0] + (node.worldScale * 0.5);
                 const centerZ = node.worldOffset[1] + (node.worldScale * 0.5);
 
-                // 매 프레임 Float32Array를 힙에 인스턴스화하지 않고 기존 버퍼의 인덱스만 덮어씀 (GC 0)
-                arrayBuffer[i * 4 + 0] = this.worldOffset[0] + centerX;
-                arrayBuffer[i * 4 + 1] = this.worldOffset[1] + centerZ;
+                arrayBuffer[i * 4 + 0] = this.#terrain.worldOffset[0] + centerX;
+                arrayBuffer[i * 4 + 1] = this.#terrain.worldOffset[1] + centerZ;
                 arrayBuffer[i * 4 + 2] = node.worldScale;
                 arrayBuffer[i * 4 + 3] = node.lodLevel;
             }
-            // 원래의 단일 안전 버퍼에 기록
-            this.redGPUContext.gpuDevice.queue.writeBuffer(this.#instanceBuffer, 0, arrayBuffer as BufferSource, 0, count * 4);
+            this.#redGPUContext.gpuDevice.queue.writeBuffer(this.#instanceBuffer, 0, arrayBuffer as BufferSource, 0, count * 4);
         }
 
-        if (this.gpuRenderInfo && this.drawCommandSlot && this.drawBufferManager) {
-            this.drawBufferManager.setInstanceNum(this.drawCommandSlot, count);
+        if (this.#terrain.gpuRenderInfo && this.#terrain.drawCommandSlot && this.#terrain.drawBufferManager) {
+            this.#terrain.drawBufferManager.setInstanceNum(this.#terrain.drawCommandSlot, count);
         }
     }
 
     #createHeightmapTileAtlas(tileCountX: number = 16, tileCountZ: number = 16, tileSize: number = 512) {
-        const device = this.redGPUContext.gpuDevice;
+        const device = this.#redGPUContext.gpuDevice;
         this.#atlasTileCountX = tileCountX;
         this.#atlasTileCountZ = tileCountZ;
         this.#atlasTileSize = tileSize;
@@ -442,24 +397,15 @@ class TerrainTileSystem extends TerrainMaterialBind {
         const gpuTexture = device.createTexture({
             label: 'Terrain_HeightmapTileAtlasGPUTexture',
             size: [atlasWidth, atlasHeight, 1],
-            format: 'rgba16float', // r16float 대신 rgba16float로 확장
+            format: 'rgba16float',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
         });
 
-        this.heightmapAtlasTexture = new DirectTexture(
-            this.redGPUContext,
+        this.#terrain.heightmapAtlasTexture = new DirectTexture(
+            this.#redGPUContext,
             'Terrain_HeightmapTileAtlasDirectTexture',
             gpuTexture
         );
-    }
-
-    get tileDataCache(): Map<string, ArrayBufferView | ArrayBuffer> {
-        return this.#tileDataCache;
-    }
-
-    loadTileFrom16BitBuffer(tile: SpatialTileInfo, data: ArrayBuffer | ArrayBufferView, width: number, height: number) {
-        this.#registerTileData(tile, data);
-        this.#updateTileHeightmapFromBuffer(tile, data, width, height);
     }
 
     #enrichTileInfo(tile: SpatialTileInfo) {
@@ -468,12 +414,11 @@ class TerrainTileSystem extends TerrainMaterialBind {
         const tileCenterX = (tbMinX + tbMaxX) * 0.5;
         const tileCenterZ = (tbMinZ + tbMaxZ) * 0.5;
 
-        // 나눗셈을 중복 계산하지 않고 캐싱된 스팬 상수로 최적화
-        const gridX = Math.max(0, Math.min(this.atlasTileCountX - 1, Math.floor((tileCenterX - this.worldOffset[0]) / this.#tileSpanX)));
-        const gridZ = Math.max(0, Math.min(this.atlasTileCountZ - 1, Math.floor((tileCenterZ - this.worldOffset[1]) / this.#tileSpanZ)));
+        const gridX = Math.max(0, Math.min(this.#atlasTileCountX - 1, Math.floor((tileCenterX - this.#terrain.worldOffset[0]) / this.#tileSpanX)));
+        const gridZ = Math.max(0, Math.min(this.#atlasTileCountZ - 1, Math.floor((tileCenterZ - this.#terrain.worldOffset[1]) / this.#tileSpanZ)));
 
         tile.tileCol = gridX;
-        tile.tileRow = (this.atlasTileCountZ - 1) - gridZ;
+        tile.tileRow = (this.#atlasTileCountZ - 1) - gridZ;
         tile.atlasKey = `${tile.tileCol}_${tile.tileRow}`;
         tile.tileColStr = String(tile.tileCol).padStart(2, '0');
         tile.tileRowStr = String(tile.tileRow).padStart(2, '0');
@@ -484,24 +429,22 @@ class TerrainTileSystem extends TerrainMaterialBind {
         this.#synthesizedTilesSet.add(key);
     }
 
-    #processor: TerrainHeightmapProcessor;
-
     #updateTileHeightmapFromBuffer(tile: SpatialTileInfo, data: ArrayBuffer | ArrayBufferView, width: number, height: number) {
         const tileX = tile.tileCol ?? 0;
         const tileZ = tile.tileRow ?? 0;
 
-        if (!this.heightmapAtlasTexture) {
+        if (!this.#terrain.heightmapAtlasTexture) {
             this.#createHeightmapTileAtlas(this.#atlasTileCountX, this.#atlasTileCountZ, this.#atlasTileSize);
         }
-        const gpuTexture = this.heightmapAtlasTexture?.gpuTexture;
+        const gpuTexture = this.#terrain.heightmapAtlasTexture?.gpuTexture;
         if (!gpuTexture) return;
 
         if (!this.#processor) {
-            this.#processor = new TerrainHeightmapProcessor(this.redGPUContext);
+            this.#processor = new TerrainHeightmapProcessor(this.#redGPUContext);
         }
 
-        const destX = tileX * this.atlasTileSize;
-        const destZ = tileZ * this.atlasTileSize;
+        const destX = tileX * this.#atlasTileSize;
+        const destZ = tileZ * this.#atlasTileSize;
 
         this.#processor.processAndUploadTile(
             destX,
@@ -510,7 +453,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
             width,
             height,
             gpuTexture,
-            this.atlasTileSize
+            this.#atlasTileSize
         );
 
         this.#markTileSynthesized(`${tileX}_${tileZ}`);
@@ -520,24 +463,22 @@ class TerrainTileSystem extends TerrainMaterialBind {
             this.#onTileLoadCallback(tile);
         }
 
-        if (this.material) {
-            const mat = this.material as any;
+        if (this.#terrain.material) {
+            const mat = this.#terrain.material as any;
             if (typeof mat.bakeRVTTile === 'function') {
-                mat.bakeRVTTile(tileX, tileZ, this.atlasTileCountX, this.atlasTileCountZ);
+                mat.bakeRVTTile(tileX, tileZ, this.#atlasTileCountX, this.#atlasTileCountZ);
             }
         }
     }
 
-    // 2번 최적화: 새로 로딩된 16비트 높이맵 버퍼 구역을 1차원 거대 플랫 버퍼에 실시간 복사
     #updateFlatHeightmapSector(key: string, data: any) {
         const parts = key.split('_');
         const tileCol = parseInt(parts[0], 10);
         const tileRow = parseInt(parts[1], 10);
 
-        const tileSize = this.atlasTileSize;
-        const totalWidth = this.atlasTileCountX * tileSize; // 8192
+        const tileSize = this.#atlasTileSize;
+        const totalWidth = this.#atlasTileCountX * tileSize;
 
-        // 캐시 데이터 규격에 맞는 TypedArray 획득
         let tileData: Uint16Array;
         if (data instanceof Float32Array) {
             tileData = new Uint16Array(data.length);
@@ -555,12 +496,10 @@ class TerrainTileSystem extends TerrainMaterialBind {
         const startX = tileCol * tileSize;
         const startZ = tileRow * tileSize;
 
-        // 2D 텍셀 구역을 1차원 거대 플랫 메모리로 타일 단위 복사
         for (let tz = 0; tz < tileSize; tz++) {
             const srcOffset = tz * tileSize;
             const dstOffset = (startZ + tz) * totalWidth + startX;
 
-            // 한 번에 한 스캔라인(512개)씩 빠르게 일괄 메모리 복사
             this.#flatHeightmapData.set(
                 tileData.subarray(srcOffset, srcOffset + tileSize),
                 dstOffset
@@ -574,24 +513,19 @@ class TerrainTileSystem extends TerrainMaterialBind {
         if (this.#tileDataCache.has(key)) {
             this.#tileDataCache.delete(key);
         }
-        
+
         this.#tileDataCache.set(key, data);
 
-        // 2번 최적화: 높이맵 평탄화 버퍼 실시간 갱신 실행
         this.#updateFlatHeightmapSector(key, data);
 
-        // 캐시 한도 초과 시 가장 오래된 자원 방출 (Max Limit: 128)
-        // 단, 현재 공간 그리드에서 활성화된(사용 중인) 타일은 방출 대상에서 절대 보호함
         const MAX_CACHE_SIZE = 128;
         if (this.#tileDataCache.size > MAX_CACHE_SIZE) {
             const keysIterator = this.#tileDataCache.keys();
             for (const oldestKey of keysIterator) {
-                // 1. 활성 렌더링 리스트(activeTiles)에 있는지 검사
                 const isActive = this.#spatialGrid &&
                     (this.#spatialGrid.activeTiles.has(oldestKey) ||
                         Array.from(this.#spatialGrid.activeTiles.values()).some(t => t.atlasKey === oldestKey));
 
-                // 2. 활성 타일이 아니라면 안전하게 캐시에서 제거 후 루프 종료
                 if (!isActive) {
                     this.#tileDataCache.delete(oldestKey);
                     break;
@@ -608,9 +542,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
                 return res.arrayBuffer();
             })
             .then(async (buffer) => {
-                // [Race Condition Guard] 데이터 다운로드가 완료된 시점에 이 타일 격자가 여전히 대기열이나 활성 타일 내에 유효한지 체크
                 if (!this.#spatialGrid.activeTiles.has(key) && !this.#spatialGrid.activeTiles.has(tile.atlasKey || '')) {
-                    // 카메라가 이미 이 영역을 벗어났다면 버림
                     return;
                 }
 
@@ -618,7 +550,7 @@ class TerrainTileSystem extends TerrainMaterialBind {
                 if (parsed) {
                     this.loadTileFrom16BitBuffer(tile, parsed.pixels, parsed.width, parsed.height);
                 } else {
-                    this.loadTileFrom16BitBuffer(tile, buffer, this.atlasTileSize, this.atlasTileSize);
+                    this.loadTileFrom16BitBuffer(tile, buffer, this.#atlasTileSize, this.#atlasTileSize);
                 }
             })
             .catch(err => {
@@ -627,18 +559,5 @@ class TerrainTileSystem extends TerrainMaterialBind {
     }
 }
 
-defineNumber(TerrainTileSystem, [
-    {key: "maxLOD", value: 4},
-    {key: "baseSlotIndex", value: 0},
-    {key: "minHeight", value: 0},
-    {key: "maxHeight", value: 1}
-])
-defineVector2(TerrainTileSystem, [
-    {key: "worldOffset", value: [0, 0]},
-    {key: "worldSize", value: [1, 1]},
-]);
-defineTexture(TerrainTileSystem, [
-    {key: "heightmapAtlasTexture"}
-]);
-Object.freeze(TerrainTileSystem);
-export default TerrainTileSystem;
+export default TerrainTileManager;
+
