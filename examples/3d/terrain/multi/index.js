@@ -524,6 +524,8 @@ function buildGUI(redGPUContext, terrain, controller, view, directionalLight) {
 
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
+        view,
+        controller,
         ibl: true,
         skybox: true,
         gui: (pane) => {
@@ -717,39 +719,40 @@ function buildGUI(redGPUContext, terrain, controller, view, directionalLight) {
             // ── 6. 🌱 개별 레이어 거칠기 (Layer Roughness) ──────────────────────────
             const layerFolder = pane.addFolder({title: '🌱 개별 레이어 거칠기 (Layer Roughness)', expanded: true});
 
+            const currentLayers = terrain.layers;
             const layerState = {
-                leavesRoughness: terrain.material.layers[0]?.roughnessFactor ?? 0.85,
-                rockRoughness: terrain.material.layers[1]?.roughnessFactor ?? 0.90,
-                gravelRoughness: terrain.material.layers[2]?.roughnessFactor ?? 0.85,
-                grassRoughness: terrain.material.layers[3]?.roughnessFactor ?? 0.85,
+                leavesRoughness: currentLayers[0]?.roughnessFactor ?? 0.85,
+                rockRoughness: currentLayers[1]?.roughnessFactor ?? 0.90,
+                gravelRoughness: currentLayers[2]?.roughnessFactor ?? 0.85,
+                grassRoughness: currentLayers[3]?.roughnessFactor ?? 0.85,
             };
 
             layerFolder.addBinding(layerState, 'leavesRoughness', {
                 label: 'Layer 0: Leaves (낙엽)',
                 min: 0, max: 1, step: 0.05
             }).on('change', (ev) => {
-                terrain.material.updateLayer(0, {roughnessFactor: ev.value});
+                terrain.updateLayer(0, {roughnessFactor: ev.value});
             });
 
             layerFolder.addBinding(layerState, 'rockRoughness', {
                 label: 'Layer 1: Rock (바위)',
                 min: 0, max: 1, step: 0.05
             }).on('change', (ev) => {
-                terrain.material.updateLayer(1, {roughnessFactor: ev.value});
+                terrain.updateLayer(1, {roughnessFactor: ev.value});
             });
 
             layerFolder.addBinding(layerState, 'gravelRoughness', {
                 label: 'Layer 2: Gravel (자갈)',
                 min: 0, max: 1, step: 0.05
             }).on('change', (ev) => {
-                terrain.material.updateLayer(2, {roughnessFactor: ev.value});
+                terrain.updateLayer(2, {roughnessFactor: ev.value});
             });
 
             layerFolder.addBinding(layerState, 'grassRoughness', {
                 label: 'Layer 3: Grass (잔디)',
                 min: 0, max: 1, step: 0.05
             }).on('change', (ev) => {
-                terrain.material.updateLayer(3, {roughnessFactor: ev.value});
+                terrain.updateLayer(3, {roughnessFactor: ev.value});
             });
 
             // ── 7. 🖼️ 글로벌 지형 텍스처 (Global Textures) ──────────────────────────
@@ -759,21 +762,21 @@ function buildGUI(redGPUContext, terrain, controller, view, directionalLight) {
                 label: '베이스 컬러 맵 사용'
             }).on('change', (ev) => {
                 terrain.baseColorTexture = ev.value ? baseColorTextureInstance : null;
-                terrain.material.bakeRVT();
+                terrain.material.bakeAllRVTTiles();
             });
 
             textureFolder.addBinding(state, 'useOrmTexture', {
                 label: 'ORM 맵 사용'
             }).on('change', (ev) => {
                 terrain.ormTexture = ev.value ? ormTextureInstance : null;
-                terrain.material.bakeRVT();
+                terrain.material.bakeAllRVTTiles();
             });
 
             textureFolder.addBinding(state, 'useSplatTexture', {
                 label: '스플랫 맵 사용'
             }).on('change', (ev) => {
                 terrain.splatTexture = ev.value ? splatTextureInstance : null;
-                terrain.material.bakeRVT();
+                terrain.material.bakeAllRVTTiles();
             });
 
             // ── 8. ⚡ RVT 디버그 ──────────────────────────────────────────────────
@@ -781,6 +784,8 @@ function buildGUI(redGPUContext, terrain, controller, view, directionalLight) {
 
             rvtFolder.addBinding(terrain.material, 'debugSplatTexture', {
                 label: '디버그: Splat 맵 채널 보기'
+            }).on('change', () => {
+                terrain.dirtyPipeline = true;
             });
         }
     });
