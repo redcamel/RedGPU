@@ -1,6 +1,6 @@
-import RedGPUContext from "../../../../context/RedGPUContext";
+import RedGPUContext from "../../../../../context/RedGPUContext";
 import wgslCode from "./terrainHeightmapProcessor.wgsl";
-import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 /**
  * [KO] Terrain 높이맵 타일 데이터의 Compute Shader 기반 변환 및 패킹을 전담하는 프로세서 유틸리티입니다.
