@@ -323,11 +323,14 @@ export class TerrainTileManager {
     destroy() {
         if (this.#instanceBuffer) {
             this.#instanceBuffer.destroy();
-            this.#instanceBuffer = null as any;
+            this.#instanceBuffer = null!;
         }
-        if (this.#terrain.heightmapAtlasTexture) {
+        if (this.#terrain && this.#terrain.heightmapAtlasTexture) {
             this.#terrain.heightmapAtlasTexture.destroy();
             this.#terrain.heightmapAtlasTexture = null;
+        }
+        if (this.#spatialGrid) {
+            this.#spatialGrid.destroy();
         }
         if (this.#heightmapManager) {
             this.#heightmapManager.destroy();
@@ -336,6 +339,11 @@ export class TerrainTileManager {
             this.#processor.destroy();
             this.#processor = null;
         }
+        this.#onTileLoadCallback = undefined;
+        this.#onTileUnloadCallback = undefined;
+        this.#tileUrlResolver = undefined;
+        this.#instanceArrayBuffer = null!;
+        this.#terrain = null!;
     }
 
     isTileSynthesized(tile: SpatialTileInfo | string): boolean {

@@ -88,6 +88,9 @@ class Terrain extends TerrainTileBind {
         if (this.heightmapAtlasTexture) {
             this.heightmapAtlasTexture.__removeDirtyPipelineListener(this.#dirtyPipelineListener);
         }
+        if (this.customVertexBindGroupLayout) {
+            this.customVertexBindGroupLayout = null!;
+        }
         super.destroy();
     }
 

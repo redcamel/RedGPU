@@ -268,52 +268,53 @@ class TerrainMaterial extends ABitmapBaseMaterial {
     override destroy(): void {
         if (this.#rvt) {
             this.#rvt.destroy();
-            this.#rvt = null as any;
+            this.#rvt = null!;
         }
-        if (this.diffuseArray && typeof (this.diffuseArray as any).destroy === 'function') {
-            (this.diffuseArray as any).destroy();
+        if (this.diffuseArray) {
+            this.diffuseArray.destroy();
+            this.diffuseArray = null!;
         }
-        if (this.normalArray && typeof (this.normalArray as any).destroy === 'function') {
-            (this.normalArray as any).destroy();
+        if (this.normalArray) {
+            this.normalArray.destroy();
+            this.normalArray = null!;
         }
-        if (this.heightArray && typeof (this.heightArray as any).destroy === 'function') {
-            (this.heightArray as any).destroy();
+        if (this.heightArray) {
+            this.heightArray.destroy();
+            this.heightArray = null!;
         }
-        if (this.ormArray && typeof (this.ormArray as any).destroy === 'function') {
-            (this.ormArray as any).destroy();
+        if (this.ormArray) {
+            this.ormArray.destroy();
+            this.ormArray = null!;
         }
-        this.diffuseArray = null as any;
-        this.normalArray = null as any;
-        this.heightArray = null as any;
-        this.ormArray = null as any;
         super.destroy();
     }
 
     #rebuildLayerTextureArrays(): void {
         if (this.#layers.length === 0) return;
 
-        // 기존 TextureArray 자원 해제 (VRAM 메모리 누수 방지 - 런타임 안전성 확보)
-        if (this.diffuseArray && typeof (this.diffuseArray as any).destroy === 'function') {
-            (this.diffuseArray as any).destroy();
+        if (this.diffuseArray) {
+            this.diffuseArray.destroy();
+            this.diffuseArray = null!;
         }
-        if (this.normalArray && typeof (this.normalArray as any).destroy === 'function') {
-            (this.normalArray as any).destroy();
+        if (this.normalArray) {
+            this.normalArray.destroy();
+            this.normalArray = null!;
         }
-        if (this.heightArray && typeof (this.heightArray as any).destroy === 'function') {
-            (this.heightArray as any).destroy();
+        if (this.heightArray) {
+            this.heightArray.destroy();
+            this.heightArray = null!;
         }
-        if (this.ormArray && typeof (this.ormArray as any).destroy === 'function') {
-            (this.ormArray as any).destroy();
+        if (this.ormArray) {
+            this.ormArray.destroy();
+            this.ormArray = null!;
         }
-        this.diffuseArray = null as any;
-        this.normalArray = null as any;
-        this.heightArray = null as any;
-        this.ormArray = null as any;
 
         const extractSrc = (val: string | BitmapTexture | undefined): string => {
             if (!val) return '';
             if (typeof val === 'string') return val;
-            if ('src' in val && typeof (val as any).src === 'string') return (val as any).src;
+            if (val instanceof BitmapTexture || ('src' in val && typeof (val as any).src === 'string')) {
+                return (val as BitmapTexture).src;
+            }
             return '';
         };
 

@@ -213,4 +213,9 @@ export class TerrainSpatialGrid {
 
         return {toLoad, toUnload};
     }
+
+    destroy(): void {
+        this.#activeTiles.clear();
+        this.#pendingQueue.clear();
+    }
 }
