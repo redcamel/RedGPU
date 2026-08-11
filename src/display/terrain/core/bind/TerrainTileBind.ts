@@ -43,7 +43,7 @@ class TerrainTileBind extends TerrainMaterialBind {
         this.maxLOD = 4;
         this.baseSlotIndex = 0;
 
-        this.#tileManager = new TerrainTileManager(this as any, redGPUContext, options);
+        this.#tileManager = new TerrainTileManager(this, redGPUContext, options);
     }
 
     get tileManager(): TerrainTileManager {

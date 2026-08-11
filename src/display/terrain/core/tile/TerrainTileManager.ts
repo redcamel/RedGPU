@@ -1,11 +1,11 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
+import BitmapTexture from "../../../../resources/texture/BitmapTexture";
 import {SpatialTileInfo, TerrainSpatialGrid} from "./TerrainSpatialGrid";
 import {TerrainQuadtree} from "./TerrainQuadtree";
 import TerrainHeightmapManager from "./heightmap/TerrainHeightmapManager";
 import TerrainHeightmapProcessor from "./heightmap/processor/TerrainHeightmapProcessor";
 import parse16BitPngBuffer from "../../../../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
-import type Terrain from "../../Terrain";
 
 export type {SpatialTileInfo};
 
@@ -50,8 +50,24 @@ export function sanitizeVerticesPerSide(val: number): number {
     return powerOfTwo;
 }
 
+export interface ITerrainTarget {
+    worldOffset: [number, number];
+    worldSize: [number, number];
+    minHeight: number;
+    maxHeight: number;
+    maxLOD: number;
+    baseSlotIndex: number;
+    globalVertexSlotIndex: number;
+    lodRanges: Float32Array;
+    heightmapAtlasTexture: DirectTexture | BitmapTexture | null;
+    material: any;
+    gpuRenderInfo: any;
+    drawCommandSlot: any;
+    drawBufferManager: any;
+}
+
 export class TerrainTileManager {
-    #terrain: Terrain;
+    #terrain: ITerrainTarget;
     #redGPUContext: RedGPUContext;
 
     #spatialGrid: TerrainSpatialGrid;
@@ -89,7 +105,7 @@ export class TerrainTileManager {
 
     #processor?: TerrainHeightmapProcessor | null;
 
-    constructor(terrain: Terrain, redGPUContext: RedGPUContext, options?: TerrainOptions) {
+    constructor(terrain: ITerrainTarget, redGPUContext: RedGPUContext, options?: TerrainOptions) {
         this.#terrain = terrain;
         this.#redGPUContext = redGPUContext;
 

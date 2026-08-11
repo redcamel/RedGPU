@@ -83,7 +83,7 @@ class Terrain extends TerrainTileBind {
 
     override destroy() {
         if (this.heightmapSampler) {
-            this.heightmapSampler = null as any;
+            this.heightmapSampler = null!;
         }
         if (this.heightmapAtlasTexture) {
             this.heightmapAtlasTexture.__removeDirtyPipelineListener(this.#dirtyPipelineListener);

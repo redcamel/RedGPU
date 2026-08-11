@@ -352,94 +352,12 @@ class VegetationMesh extends ProceduralInstancingMesh {
         }
     }
 
-    #initCullResources(redGPUContext: RedGPUContext): void {
-        const {gpuDevice, resourceManager} = redGPUContext;
-
-        this.#cullUniformBuffer = new StorageBuffer(
-            redGPUContext,
-            this.#cullUniformData.buffer as ArrayBuffer,
-            `VegetationCullUniform_${this.uuid}`
-        );
-
-        this.#frustumPlanesBuffer = new StorageBuffer(
-            redGPUContext,
-            this.#frustumPlanesData.buffer as ArrayBuffer,
-            `VegetationFrustumPlanes_${this.uuid}`
-        );
-
-        const cullShaderModule = resourceManager.createGPUShaderModule(
-            `VegetationCullModule_${this.uuid}`,
-            {code: cullVegetationSource}
-        );
-
-        this.#cullBindGroupLayout = gpuDevice.createBindGroupLayout({
-            label: `VegetationCullBGL_${this.uuid}`,
-            entries: [
-                {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
-                {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
-                {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
-                {binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
-                {binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
-                {binding: 5, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
-                {binding: 6, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
-                {binding: 7, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
-                {binding: 8, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
-                {binding: 9, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
-                {binding: 10, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
-            ]
-        });
-
-        const pipelineLayout = gpuDevice.createPipelineLayout({
-            label: `VegetationCullPipelineLayout_${this.uuid}`,
-            bindGroupLayouts: [this.#cullBindGroupLayout]
-        });
-
-        this.#cullPipeline = gpuDevice.createComputePipeline({
-            label: `VegetationCullPipeline_${this.uuid}`,
-            layout: pipelineLayout,
-            compute: {
-                module: cullShaderModule,
-                entryPoint: 'main',
-            }
-        });
-
-        const createCullBindGroup = (targetMesh: ProceduralInstancingMesh, labelName: string) => {
-            const splatTex = (this.#terrain?.material as any)?.splatTexture;
-            return gpuDevice.createBindGroup({
-                label: labelName,
-                layout: this.#cullBindGroupLayout,
-                entries: [
-                    {binding: 0, resource: {buffer: targetMesh.rawInstanceMatrixBuffer.gpuBuffer}},
-                    {binding: 1, resource: {buffer: targetMesh.culledInstanceIndexBuffer.gpuBuffer}},
-                    {binding: 2, resource: {buffer: targetMesh.indirectBuffer}},
-                    {binding: 3, resource: {buffer: this.#cullUniformBuffer.gpuBuffer}},
-                    {binding: 4, resource: {buffer: this.#frustumPlanesBuffer.gpuBuffer}},
-                    {binding: 5, resource: {buffer: targetMesh.culledInstanceHeightBuffer.gpuBuffer}},
-                    {binding: 6, resource: {buffer: this.#vegetationUniformBuffer.gpuBuffer}},
-                    {
-                        binding: 7,
-                        resource: this.#terrain.heightmapSampler?.gpuSampler
-                            || resourceManager.basicDisplacementSampler.gpuSampler
-                    },
-                    {
-                        binding: 8,
-                        resource: resourceManager.getGPUResourceBitmapTextureView(this.#terrain.heightmapAtlasTexture)
-                            || resourceManager.emptyBitmapTextureView
-                    },
-                    {
-                        binding: 9,
-                        resource: this.#terrain.heightmapSampler?.gpuSampler
-                            || resourceManager.basicDisplacementSampler.gpuSampler
-                    },
-                    {
-                        binding: 10,
-                        resource: splatTex ? resourceManager.getGPUResourceBitmapTextureView(splatTex) : resourceManager.emptyBitmapTextureView
-                    },
-                ]
-            });
-        };
-
-        this.#cullBindGroup = createCullBindGroup(this, `VegetationCullBG_${this.uuid}`);
+    protected getSplatTexture(): any {
+        try {
+            return this.#terrain?.splatTexture ?? null;
+        } catch (e) {
+            return null;
+        }
     }
 
     onTileLoaded(tile: SpatialTileInfo): void {
@@ -500,12 +418,94 @@ class VegetationMesh extends ProceduralInstancingMesh {
         }
     }
 
-    protected getSplatTexture(): any {
-        try {
-            return (this.#terrain?.material as any)?.splatTexture ?? null;
-        } catch (e) {
-            return null;
-        }
+    #initCullResources(redGPUContext: RedGPUContext): void {
+        const {gpuDevice, resourceManager} = redGPUContext;
+
+        this.#cullUniformBuffer = new StorageBuffer(
+            redGPUContext,
+            this.#cullUniformData.buffer as ArrayBuffer,
+            `VegetationCullUniform_${this.uuid}`
+        );
+
+        this.#frustumPlanesBuffer = new StorageBuffer(
+            redGPUContext,
+            this.#frustumPlanesData.buffer as ArrayBuffer,
+            `VegetationFrustumPlanes_${this.uuid}`
+        );
+
+        const cullShaderModule = resourceManager.createGPUShaderModule(
+            `VegetationCullModule_${this.uuid}`,
+            {code: cullVegetationSource}
+        );
+
+        this.#cullBindGroupLayout = gpuDevice.createBindGroupLayout({
+            label: `VegetationCullBGL_${this.uuid}`,
+            entries: [
+                {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
+                {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
+                {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
+                {binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
+                {binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
+                {binding: 5, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
+                {binding: 6, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
+                {binding: 7, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
+                {binding: 8, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
+                {binding: 9, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
+                {binding: 10, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
+            ]
+        });
+
+        const pipelineLayout = gpuDevice.createPipelineLayout({
+            label: `VegetationCullPipelineLayout_${this.uuid}`,
+            bindGroupLayouts: [this.#cullBindGroupLayout]
+        });
+
+        this.#cullPipeline = gpuDevice.createComputePipeline({
+            label: `VegetationCullPipeline_${this.uuid}`,
+            layout: pipelineLayout,
+            compute: {
+                module: cullShaderModule,
+                entryPoint: 'main',
+            }
+        });
+
+        const createCullBindGroup = (targetMesh: ProceduralInstancingMesh, labelName: string) => {
+            const splatTex = this.#terrain?.splatTexture;
+            return gpuDevice.createBindGroup({
+                label: labelName,
+                layout: this.#cullBindGroupLayout,
+                entries: [
+                    {binding: 0, resource: {buffer: targetMesh.rawInstanceMatrixBuffer.gpuBuffer}},
+                    {binding: 1, resource: {buffer: targetMesh.culledInstanceIndexBuffer.gpuBuffer}},
+                    {binding: 2, resource: {buffer: targetMesh.indirectBuffer}},
+                    {binding: 3, resource: {buffer: this.#cullUniformBuffer.gpuBuffer}},
+                    {binding: 4, resource: {buffer: this.#frustumPlanesBuffer.gpuBuffer}},
+                    {binding: 5, resource: {buffer: targetMesh.culledInstanceHeightBuffer.gpuBuffer}},
+                    {binding: 6, resource: {buffer: this.#vegetationUniformBuffer.gpuBuffer}},
+                    {
+                        binding: 7,
+                        resource: this.#terrain.heightmapSampler?.gpuSampler
+                            || resourceManager.basicDisplacementSampler.gpuSampler
+                    },
+                    {
+                        binding: 8,
+                        resource: resourceManager.getGPUResourceBitmapTextureView(this.#terrain.heightmapAtlasTexture)
+                            || resourceManager.emptyBitmapTextureView
+                    },
+                    {
+                        binding: 9,
+                        resource: this.#terrain.heightmapSampler?.gpuSampler
+                            || resourceManager.basicDisplacementSampler.gpuSampler
+                    },
+                    {
+                        binding: 10,
+                        resource: splatTex ? resourceManager.getGPUResourceBitmapTextureView(splatTex) : resourceManager.emptyBitmapTextureView
+                    },
+                ]
+            });
+        };
+
+        this.#cullBindGroup = createCullBindGroup(this, `VegetationCullBG_${this.uuid}`);
     }
 
     // splatImage 및 getMaskValueAt 메서드 제거됨 (GPU 마스킹 이관)

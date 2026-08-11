@@ -4,8 +4,15 @@ import TerrainGeometry from "../geometry/TerrainGeometry";
 import TerrainMaterial, {TerrainLayerConfig} from "../material/TerrainMaterial";
 import BitmapTexture from "../../../../resources/texture/BitmapTexture";
 import {sanitizeVerticesPerSide, TerrainOptions} from "../tile/TerrainTileManager";
+import DirectTexture from "../../../../resources/texture/DirectTexture";
+
+export interface TerrainMaterialBind {
+    heightmapAtlasTexture: DirectTexture | BitmapTexture | null;
+}
 
 export class TerrainMaterialBind extends Mesh {
+    heightmapAtlasTexture: DirectTexture | BitmapTexture | null = null;
+
     constructor(redGPUContext: RedGPUContext, options?: TerrainOptions) {
         const verticesPerSide = sanitizeVerticesPerSide(options?.verticesPerSide ?? 64);
         const geometry = new TerrainGeometry(redGPUContext, verticesPerSide);
@@ -143,7 +150,7 @@ export class TerrainMaterialBind extends Mesh {
         const ctx = this.redGPUContext;
 
         if (options.height) {
-            (this as any).heightmapAtlasTexture = new BitmapTexture(ctx, options.height, false, null, null, 'r16float');
+            this.heightmapAtlasTexture = new BitmapTexture(ctx, options.height, false, null, null, 'r16float');
         }
 
         if (options.baseColor) {
