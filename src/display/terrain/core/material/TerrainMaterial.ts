@@ -255,8 +255,22 @@ class TerrainMaterial extends ABitmapBaseMaterial {
             : indexOrName;
 
         if (targetIndex >= 0 && targetIndex < this.#layers.length) {
-            this.#layers[targetIndex] = {...this.#layers[targetIndex], ...partialConfig};
-            this.#rebuildLayerTextureArrays();
+            const oldLayer = this.#layers[targetIndex];
+            const newLayer = {...oldLayer, ...partialConfig};
+
+            const isTextureChanged =
+                ('diffuse' in partialConfig && extractSrc(oldLayer.diffuse) !== extractSrc(newLayer.diffuse)) ||
+                ('normal' in partialConfig && extractSrc(oldLayer.normal) !== extractSrc(newLayer.normal)) ||
+                ('height' in partialConfig && extractSrc(oldLayer.height) !== extractSrc(newLayer.height)) ||
+                ('orm' in partialConfig && extractSrc(oldLayer.orm) !== extractSrc(newLayer.orm));
+
+            this.#layers[targetIndex] = newLayer;
+
+            if (isTextureChanged) {
+                this.#rebuildLayerTextureArrays();
+            } else {
+                this.bakeAllRVTTiles();
+            }
             return true;
         }
         return false;
@@ -301,20 +315,6 @@ class TerrainMaterial extends ABitmapBaseMaterial {
             this.heightArray.destroy();
             this.heightArray = null!;
         }
-        if (this.ormArray) {
-            this.ormArray.destroy();
-            this.ormArray = null!;
-        }
-
-        const extractSrc = (val: string | BitmapTexture | undefined): string => {
-            if (!val) return '';
-            if (typeof val === 'string') return val;
-            if (val instanceof BitmapTexture || ('src' in val && typeof (val as any).src === 'string')) {
-                return (val as BitmapTexture).src;
-            }
-            return '';
-        };
-
         const diffuseSrcs: string[] = [];
         const normalSrcs: string[] = [];
         const heightSrcs: string[] = [];
@@ -341,7 +341,8 @@ class TerrainMaterial extends ABitmapBaseMaterial {
             if (!hasValidSrc) return Promise.resolve(null);
 
             return new Promise((resolve) => {
-                const instance: TextureArray = new TextureArray(
+                let instance: TextureArray;
+                instance = new TextureArray(
                     ctx,
                     srcs,
                     true,
@@ -391,6 +392,15 @@ defineTexture(TerrainMaterial, [
 defineSampler(TerrainMaterial, [
     {key: 'rvtSampler'},
 ]);
+
+const extractSrc = (val: string | BitmapTexture | undefined): string => {
+    if (!val) return '';
+    if (typeof val === 'string') return val;
+    if (val instanceof BitmapTexture || ('src' in val && typeof (val as any).src === 'string')) {
+        return (val as BitmapTexture).src;
+    }
+    return '';
+};
 
 Object.freeze(TerrainMaterial);
 export default TerrainMaterial;
