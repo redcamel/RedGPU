@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import Mesh from "../../../mesh/Mesh";
-import TerrainGeometry from "../TerrainGeometry";
-import TerrainMaterial, {TerrainLayerConfig} from "./TerrainMaterial";
+import TerrainGeometry from "../geometry/TerrainGeometry";
+import TerrainMaterial, {TerrainLayerConfig} from "../material/TerrainMaterial";
 import BitmapTexture from "../../../../resources/texture/BitmapTexture";
 import {sanitizeVerticesPerSide, TerrainOptions} from "../tile/TerrainTileManager";
 

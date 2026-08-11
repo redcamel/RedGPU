@@ -2,8 +2,8 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
 import {SpatialTileInfo, TerrainSpatialGrid} from "./TerrainSpatialGrid";
 import {TerrainQuadtree} from "./TerrainQuadtree";
-import TerrainHeightmapManager from "../heightmap/TerrainHeightmapManager";
-import TerrainHeightmapProcessor from "../heightmap/processor/TerrainHeightmapProcessor";
+import TerrainHeightmapManager from "./heightmap/TerrainHeightmapManager";
+import TerrainHeightmapProcessor from "./heightmap/processor/TerrainHeightmapProcessor";
 import parse16BitPngBuffer from "../../../../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
 import type Terrain from "../../Terrain";
 

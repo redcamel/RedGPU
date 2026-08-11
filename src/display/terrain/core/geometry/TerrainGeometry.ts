@@ -1,8 +1,8 @@
-import RedGPUContext from "../../../context/RedGPUContext";
-import Geometry from "../../../geometry/Geometry";
-import VertexBuffer from "../../../resources/buffer/vertexBuffer/VertexBuffer";
-import IndexBuffer from "../../../resources/buffer/indexBuffer/IndexBuffer";
-import Primitive from "../../../primitive/core/Primitive";
+import RedGPUContext from "../../../../context/RedGPUContext";
+import Geometry from "../../../../geometry/Geometry";
+import VertexBuffer from "../../../../resources/buffer/vertexBuffer/VertexBuffer";
+import IndexBuffer from "../../../../resources/buffer/indexBuffer/IndexBuffer";
+import Primitive from "../../../../primitive/core/Primitive";
 
 class TerrainGeometry extends Geometry {
     constructor(redGPUContext: RedGPUContext, verticesPerSide: number = 64, skirtDepth: number = 0.1) {

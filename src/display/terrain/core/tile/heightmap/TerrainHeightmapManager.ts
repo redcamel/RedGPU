@@ -1,5 +1,5 @@
-import RedGPUContext from "../../../../context/RedGPUContext";
-import {SpatialTileInfo} from "../tile/TerrainSpatialGrid";
+import RedGPUContext from "../../../../../context/RedGPUContext";
+import {SpatialTileInfo} from "../TerrainSpatialGrid";
 
 export interface TerrainHeightmapOptions {
     atlasTileCountX?: number;

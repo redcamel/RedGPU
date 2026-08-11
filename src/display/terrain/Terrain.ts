@@ -1,5 +1,5 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import TerrainTileBind from "./core/tile/TerrainTileBind";
+import TerrainTileBind from "./core/bind/TerrainTileBind";
 import {TerrainLayerConfig} from "./core/material/TerrainMaterial";
 import TerrainExporter from "./core/exporter/TerrainExporter";
 import {TerrainOptions} from "./core/tile/TerrainTileManager";

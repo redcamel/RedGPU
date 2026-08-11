@@ -1,20 +1,20 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import TerrainMaterialBind from "../material/TerrainMaterialBind";
-import TerrainGeometry from "../TerrainGeometry";
+import TerrainMaterialBind from "./TerrainMaterialBind";
+import TerrainGeometry from "../geometry/TerrainGeometry";
 import TerrainTileManager, {
     sanitizeVerticesPerSide,
     SpatialTileInfo,
     TerrainOptions,
     TileStreamMetrics
-} from "./TerrainTileManager";
+} from "../tile/TerrainTileManager";
 import defineTexture from "../../../../defineProperty/funcs/texture/defineTexture";
 import defineVector2 from "../../../../defineProperty/funcs/vector/defineVector2";
 import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
 import updateTargetUniform from "../../../../defineProperty/core/updateTargetUniform";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
 import BitmapTexture from "../../../../resources/texture/BitmapTexture";
-import {TerrainSpatialGrid} from "./TerrainSpatialGrid";
-import {TerrainQuadtree} from "./TerrainQuadtree";
+import {TerrainSpatialGrid} from "../tile/TerrainSpatialGrid";
+import {TerrainQuadtree} from "../tile/TerrainQuadtree";
 
 interface TerrainTileBind {
     heightmapAtlasTexture: DirectTexture | BitmapTexture | null;
