@@ -74,6 +74,7 @@ export class TerrainTileManager {
     #quadtree!: TerrainQuadtree;
     #instanceBuffer: GPUBuffer;
     #instanceArrayBuffer: Float32Array;
+    #cachedLodRanges: Float32Array = new Float32Array(32);
 
     #heightmapManager: TerrainHeightmapManager;
 
@@ -264,7 +265,7 @@ export class TerrainTileManager {
                 this.#spatialGrid.cellSize = this.tileSpanX;
             }
 
-            const lodRanges = new Float32Array(32);
+            const lodRanges = this.#cachedLodRanges;
             const lodThreshold = this.lodThreshold;
             const morphConstant = 0.5;
 
@@ -373,13 +374,17 @@ export class TerrainTileManager {
 
         if (count > 0) {
             const arrayBuffer = this.#instanceArrayBuffer;
+            const worldOffsetX = this.#terrain.worldOffset[0];
+            const worldOffsetZ = this.#terrain.worldOffset[1];
+
             for (let i = 0; i < count; i++) {
                 const node = leafNodes[i];
-                const centerX = node.worldOffset[0] + (node.worldScale * 0.5);
-                const centerZ = node.worldOffset[1] + (node.worldScale * 0.5);
+                const halfScale = node.worldScale * 0.5;
+                const centerX = node.worldOffset[0] + halfScale;
+                const centerZ = node.worldOffset[1] + halfScale;
 
-                arrayBuffer[i * 4 + 0] = this.#terrain.worldOffset[0] + centerX;
-                arrayBuffer[i * 4 + 1] = this.#terrain.worldOffset[1] + centerZ;
+                arrayBuffer[i * 4 + 0] = worldOffsetX + centerX;
+                arrayBuffer[i * 4 + 1] = worldOffsetZ + centerZ;
                 arrayBuffer[i * 4 + 2] = node.worldScale;
                 arrayBuffer[i * 4 + 3] = node.lodLevel;
             }
