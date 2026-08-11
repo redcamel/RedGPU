@@ -479,14 +479,14 @@ export class TerrainTileManager {
     }
 
     #loadTileFromUrl(tile: SpatialTileInfo, url: string) {
-        const key = `${tile.gridX}_${tile.gridZ}`;
+        const key = ((tile.gridX + 32768) << 16) | ((tile.gridZ + 32768) & 0xFFFF);
         fetch(url)
             .then(res => {
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 return res.arrayBuffer();
             })
             .then(async (buffer) => {
-                if (!this.#spatialGrid.activeTiles.has(key) && !this.#spatialGrid.activeTiles.has(tile.atlasKey || '')) {
+                if (!this.#spatialGrid.activeTiles.has(key)) {
                     return;
                 }
 

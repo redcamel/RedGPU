@@ -22,12 +22,16 @@ export interface SpatialTileInfo {
     tileRowStr?: string;
 }
 
+export function getSpatialTileHash(gridX: number, gridZ: number): number {
+    return ((gridX + 32768) << 16) | ((gridZ + 32768) & 0xFFFF);
+}
+
 export class TerrainSpatialGrid {
     #cellSize: number = 256;
     #loadingRadius: number = 2560;
     #maxLoadsPerFrame: number = 2;
-    #activeTiles: Map<string, SpatialTileInfo> = new Map();
-    #pendingQueue: Map<string, SpatialTileInfo> = new Map();
+    #activeTiles: Map<number, SpatialTileInfo> = new Map();
+    #pendingQueue: Map<number, SpatialTileInfo> = new Map();
     #pendingBuffer: SpatialTileInfo[] = [];
     #lastCameraGridX: number = NaN;
     #lastCameraGridZ: number = NaN;
@@ -71,7 +75,7 @@ export class TerrainSpatialGrid {
         return this.#pendingQueue.size;
     }
 
-    get activeTiles(): Map<string, SpatialTileInfo> {
+    get activeTiles(): Map<number, SpatialTileInfo> {
         return this.#activeTiles;
     }
 
@@ -107,7 +111,7 @@ export class TerrainSpatialGrid {
         }
 
         const radiusInCells = Math.ceil(this.#loadingRadius / this.#cellSize);
-        const currentFrameKeys = new Set<string>();
+        const currentFrameKeys = new Set<number>();
 
         const [tbMinX, tbMinZ, tbMaxX, tbMaxZ] = this.#terrainBounds || [-Infinity, -Infinity, Infinity, Infinity];
 
@@ -146,7 +150,7 @@ export class TerrainSpatialGrid {
 
                 // 제곱근 연산 없이 범위 판정
                 if (distSq <= loadingRadiusSq) {
-                    const key = `${gx}_${gz}`;
+                    const key = ((gx + 32768) << 16) | ((gz + 32768) & 0xFFFF);
                     currentFrameKeys.add(key);
 
                     // 범위 내에 있을 때만 필요에 의해 제곱근 연산 실행
@@ -212,7 +216,7 @@ export class TerrainSpatialGrid {
 
         for (let i = 0; i < loadBudget; i++) {
             const tile = pendingBuffer[i];
-            const key = `${tile.gridX}_${tile.gridZ}`;
+            const key = ((tile.gridX + 32768) << 16) | ((tile.gridZ + 32768) & 0xFFFF);
             tile.state = 'LOADED';
             this.#pendingQueue.delete(key);
             this.#activeTiles.set(key, tile);
