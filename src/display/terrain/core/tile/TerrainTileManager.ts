@@ -74,8 +74,6 @@ export class TerrainTileManager {
     #quadtree!: TerrainQuadtree;
     #instanceBuffer: GPUBuffer;
     #instanceArrayBuffer: Float32Array;
-    #tileSpanX: number = 0;
-    #tileSpanZ: number = 0;
 
     #heightmapManager: TerrainHeightmapManager;
 
@@ -88,9 +86,6 @@ export class TerrainTileManager {
     #prevLodThreshold: number = 0;
     #lodThreshold: number = 2.0;
 
-    #atlasTileCountX: number = 16;
-    #atlasTileCountZ: number = 16;
-    #atlasTileSize: number = 512;
     #maxInstances: number = 65536;
     #tileStreamMetrics = new TileStreamMetrics();
 
@@ -115,17 +110,17 @@ export class TerrainTileManager {
 
         this.#spatialGrid = new TerrainSpatialGrid(cellSize, loadingRadius);
 
-        this.#atlasTileCountX = options?.atlasTileCountX ?? 16;
-        this.#atlasTileCountZ = options?.atlasTileCountZ ?? 16;
-        this.#atlasTileSize = options?.atlasTileSize ?? 512;
+        const atlasTileCountX = options?.atlasTileCountX ?? 16;
+        const atlasTileCountZ = options?.atlasTileCountZ ?? 16;
+        const atlasTileSize = options?.atlasTileSize ?? 512;
 
         this.#heightmapManager = new TerrainHeightmapManager(redGPUContext, {
-            atlasTileCountX: this.#atlasTileCountX,
-            atlasTileCountZ: this.#atlasTileCountZ,
-            atlasTileSize: this.#atlasTileSize
+            atlasTileCountX,
+            atlasTileCountZ,
+            atlasTileSize
         });
 
-        this.#terrain.worldSize = [cellSize * this.#atlasTileCountX, cellSize * this.#atlasTileCountZ];
+        this.#terrain.worldSize = [cellSize * atlasTileCountX, cellSize * atlasTileCountZ];
         this.#maxInstances = 65536;
 
         this.#instanceBuffer = redGPUContext.gpuDevice.createBuffer({
@@ -135,7 +130,6 @@ export class TerrainTileManager {
         });
 
         this.#instanceArrayBuffer = new Float32Array(65536 * 4);
-        this.#updateCachedTileSpans();
     }
 
     get synthesizedTileCount(): number {
@@ -147,15 +141,15 @@ export class TerrainTileManager {
     }
 
     get atlasTileCountX(): number {
-        return this.#atlasTileCountX;
+        return this.#heightmapManager.atlasTileCountX;
     }
 
     get atlasTileCountZ(): number {
-        return this.#atlasTileCountZ;
+        return this.#heightmapManager.atlasTileCountZ;
     }
 
     get atlasTileSize(): number {
-        return this.#atlasTileSize;
+        return this.#heightmapManager.atlasTileSize;
     }
 
     get spatialGrid(): TerrainSpatialGrid {
@@ -198,7 +192,6 @@ export class TerrainTileManager {
 
     checkQuadtree(renderViewStateData: any) {
         const currentWorldSize = this.#terrain.worldSize[0];
-        this.#updateCachedTileSpans();
         const lodRangesChanged = this.#updateLODRanges(currentWorldSize);
 
         this.#terrain.baseSlotIndex = this.#terrain.globalVertexSlotIndex;
@@ -247,11 +240,12 @@ export class TerrainTileManager {
         }
     }
 
-    #updateCachedTileSpans() {
-        const worldW = this.#terrain.worldSize[0];
-        const worldH = this.#terrain.worldSize[1];
-        this.#tileSpanX = worldW / this.#atlasTileCountX;
-        this.#tileSpanZ = worldH / this.#atlasTileCountZ;
+    get tileSpanX(): number {
+        return this.#terrain.worldSize[0] / this.atlasTileCountX;
+    }
+
+    get tileSpanZ(): number {
+        return this.#terrain.worldSize[1] / this.atlasTileCountZ;
     }
 
     #updateLODRanges(currentWorldSize: number): boolean {
@@ -267,7 +261,7 @@ export class TerrainTileManager {
             this.#prevLodThreshold = this.#lodThreshold;
 
             if (this.#spatialGrid) {
-                this.#spatialGrid.cellSize = currentWorldSize / this.#atlasTileCountX;
+                this.#spatialGrid.cellSize = this.tileSpanX;
             }
 
             const lodRanges = new Float32Array(32);
@@ -399,9 +393,6 @@ export class TerrainTileManager {
 
     #createHeightmapTileAtlas(tileCountX: number = 16, tileCountZ: number = 16, tileSize: number = 512) {
         const device = this.#redGPUContext.gpuDevice;
-        this.#atlasTileCountX = tileCountX;
-        this.#atlasTileCountZ = tileCountZ;
-        this.#atlasTileSize = tileSize;
 
         const atlasWidth = tileCountX * tileSize;
         const atlasHeight = tileCountZ * tileSize;
@@ -430,11 +421,11 @@ export class TerrainTileManager {
         const tileCenterX = (tbMinX + tbMaxX) * 0.5;
         const tileCenterZ = (tbMinZ + tbMaxZ) * 0.5;
 
-        const gridX = Math.max(0, Math.min(this.#atlasTileCountX - 1, Math.floor((tileCenterX - this.#terrain.worldOffset[0]) / this.#tileSpanX)));
-        const gridZ = Math.max(0, Math.min(this.#atlasTileCountZ - 1, Math.floor((tileCenterZ - this.#terrain.worldOffset[1]) / this.#tileSpanZ)));
+        const gridX = Math.max(0, Math.min(this.atlasTileCountX - 1, Math.floor((tileCenterX - this.#terrain.worldOffset[0]) / this.tileSpanX)));
+        const gridZ = Math.max(0, Math.min(this.atlasTileCountZ - 1, Math.floor((tileCenterZ - this.#terrain.worldOffset[1]) / this.tileSpanZ)));
 
         tile.tileCol = gridX;
-        tile.tileRow = (this.#atlasTileCountZ - 1) - gridZ;
+        tile.tileRow = (this.atlasTileCountZ - 1) - gridZ;
         tile.atlasKey = `${tile.tileCol}_${tile.tileRow}`;
         tile.tileColStr = String(tile.tileCol).padStart(2, '0');
         tile.tileRowStr = String(tile.tileRow).padStart(2, '0');
@@ -445,7 +436,7 @@ export class TerrainTileManager {
         const tileZ = tile.tileRow ?? 0;
 
         if (!this.#terrain.heightmapAtlasTexture) {
-            this.#createHeightmapTileAtlas(this.#atlasTileCountX, this.#atlasTileCountZ, this.#atlasTileSize);
+            this.#createHeightmapTileAtlas(this.atlasTileCountX, this.atlasTileCountZ, this.atlasTileSize);
         }
         const gpuTexture = this.#terrain.heightmapAtlasTexture?.gpuTexture;
         if (!gpuTexture) return;
@@ -454,8 +445,8 @@ export class TerrainTileManager {
             this.#processor = new TerrainHeightmapProcessor(this.#redGPUContext);
         }
 
-        const destX = tileX * this.#atlasTileSize;
-        const destZ = tileZ * this.#atlasTileSize;
+        const destX = tileX * this.atlasTileSize;
+        const destZ = tileZ * this.atlasTileSize;
 
         this.#processor.processAndUploadTile(
             destX,
@@ -464,7 +455,7 @@ export class TerrainTileManager {
             width,
             height,
             gpuTexture,
-            this.#atlasTileSize
+            this.atlasTileSize
         );
 
         this.#heightmapManager.markTileSynthesized(`${tileX}_${tileZ}`);
@@ -477,7 +468,7 @@ export class TerrainTileManager {
         if (this.#terrain.material) {
             const mat = this.#terrain.material as any;
             if (typeof mat.bakeRVTTile === 'function') {
-                mat.bakeRVTTile(tileX, tileZ, this.#atlasTileCountX, this.#atlasTileCountZ);
+                mat.bakeRVTTile(tileX, tileZ, this.atlasTileCountX, this.atlasTileCountZ);
             }
         }
     }
@@ -498,7 +489,7 @@ export class TerrainTileManager {
                 if (parsed) {
                     this.loadTileFrom16BitBuffer(tile, parsed.pixels, parsed.width, parsed.height);
                 } else {
-                    this.loadTileFrom16BitBuffer(tile, buffer, this.#atlasTileSize, this.#atlasTileSize);
+                    this.loadTileFrom16BitBuffer(tile, buffer, this.atlasTileSize, this.atlasTileSize);
                 }
             })
             .catch(err => {
