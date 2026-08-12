@@ -197,7 +197,7 @@ export class TerrainTileManager {
         const localCamX = camera.x - this.#terrain.worldOffset[0];
         const localCamY = camera.y;
         const localCamZ = camera.z - this.#terrain.worldOffset[1];
-        const streamingChanged = this.#processTileStreaming(camera);
+        const streamingChanged = this.#processTileStreaming(camera, renderViewStateData);
 
         const camRotX = camera.rotationX ?? 0;
         const camRotY = camera.rotationY ?? 0;
@@ -293,10 +293,17 @@ export class TerrainTileManager {
         return false;
     }
 
-    #processTileStreaming(camera: any): boolean {
+    #processTileStreaming(camera: any, renderViewStateData?: any): boolean {
         if (!this.#spatialGrid) return false;
 
-        const {toLoad, toUnload} = this.#spatialGrid.update(camera, this.#terrain.worldOffset, this.#terrain.worldSize);
+        const {toLoad, toUnload} = this.#spatialGrid.update(
+            camera,
+            this.#terrain.worldOffset,
+            this.#terrain.worldSize,
+            renderViewStateData,
+            this.#terrain.minHeight,
+            this.#terrain.maxHeight
+        );
         this.#tileStreamMetrics.update();
 
         const hasChanges = toLoad.length > 0 || toUnload.length > 0;
@@ -384,54 +391,53 @@ export class TerrainTileManager {
     }
 
     #updateInstanceRenderBuffer(cameraPos: [number, number, number], renderViewStateData: any) {
-        // TerrainSpatialGrid 기반 1차 공간 인스턴스 데이터 추출 (Zero-Allocation)
+        // TerrainSpatialGrid 기반 1차 공간 인스턴스 데이터 추출 (Frustum Culling 적용, Zero-Allocation)
         const activeTiles = this.#spatialGrid ? this.#spatialGrid.activeTileList : [];
-        const count = Math.min(activeTiles.length, this.#maxInstances);
-        this.#currentInstanceCount = count;
+        const totalActive = activeTiles.length;
+        const arrayBuffer = this.#instanceArrayBuffer;
+        const device = this.#redGPUContext.gpuDevice;
+        const scale = this.#spatialGrid ? this.#spatialGrid.cellSize : 256;
+        const halfScale = scale * 0.5;
 
-        if (count > 0) {
-            const arrayBuffer = this.#instanceArrayBuffer;
-            const worldOffsetX = this.#terrain.worldOffset[0];
-            const worldOffsetZ = this.#terrain.worldOffset[1];
-            const device = this.#redGPUContext.gpuDevice;
+        let visibleCount = 0;
 
-            for (let i = 0; i < count; i++) {
-                const tile = activeTiles[i];
-                const scale = this.#spatialGrid.cellSize;
-                const halfScale = scale * 0.5;
+        for (let i = 0; i < totalActive; i++) {
+            const tile = activeTiles[i];
+            if (tile.inFrustum === false) continue;
+            if (visibleCount >= this.#maxInstances) break;
 
-                // tile.worldBounds[0]은 이미 절대 월드 좌표(minX)이므로 worldOffset 중복 합산 제거
-                const posX = tile.worldBounds[0] + halfScale;
-                const posZ = tile.worldBounds[1] + halfScale;
-                const lod = tile.lodLevel ?? 0;
+            const posX = tile.worldBounds[0] + halfScale;
+            const posZ = tile.worldBounds[1] + halfScale;
+            const lod = tile.lodLevel ?? 0;
 
-                const idx = i * 4;
-                const isNodeChanged =
-                    arrayBuffer[idx + 0] !== posX ||
-                    arrayBuffer[idx + 1] !== posZ ||
-                    arrayBuffer[idx + 2] !== scale ||
-                    arrayBuffer[idx + 3] !== lod;
+            const idx = visibleCount * 4;
+            const isNodeChanged =
+                arrayBuffer[idx + 0] !== posX ||
+                arrayBuffer[idx + 1] !== posZ ||
+                arrayBuffer[idx + 2] !== scale ||
+                arrayBuffer[idx + 3] !== lod;
 
-                if (isNodeChanged) {
-                    arrayBuffer[idx + 0] = posX;
-                    arrayBuffer[idx + 1] = posZ;
-                    arrayBuffer[idx + 2] = scale;
-                    arrayBuffer[idx + 3] = lod;
+            if (isNodeChanged) {
+                arrayBuffer[idx + 0] = posX;
+                arrayBuffer[idx + 1] = posZ;
+                arrayBuffer[idx + 2] = scale;
+                arrayBuffer[idx + 3] = lod;
 
-                    const slotByteOffset = idx * 4;
-                    device.queue.writeBuffer(
-                        this.#instanceBuffer,
-                        slotByteOffset,
-                        arrayBuffer as BufferSource,
-                        idx,
-                        4
-                    );
-                }
+                const slotByteOffset = idx * 4;
+                device.queue.writeBuffer(
+                    this.#instanceBuffer,
+                    slotByteOffset,
+                    arrayBuffer as BufferSource,
+                    idx,
+                    4
+                );
             }
+            visibleCount++;
         }
+        this.#currentInstanceCount = visibleCount;
 
         if (this.#terrain.gpuRenderInfo && this.#terrain.drawCommandSlot && this.#terrain.drawBufferManager) {
-            this.#terrain.drawBufferManager.setInstanceNum(this.#terrain.drawCommandSlot, count);
+            this.#terrain.drawBufferManager.setInstanceNum(this.#terrain.drawCommandSlot, visibleCount);
         }
     }
 

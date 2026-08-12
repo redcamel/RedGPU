@@ -113,7 +113,10 @@ export class TerrainSpatialGrid {
     update(
         camera: any,
         worldOffset?: [number, number],
-        worldSize?: [number, number]
+        worldSize?: [number, number],
+        renderViewStateData?: any,
+        minY: number = -100,
+        maxY: number = 1000
     ): {
         toLoad: SpatialTileInfo[];
         toUnload: SpatialTileInfo[];
@@ -128,6 +131,10 @@ export class TerrainSpatialGrid {
 
         const camX = camera.x;
         const camZ = camera.z;
+
+        const frustumPlanes = renderViewStateData?.frustumPlanes || renderViewStateData?.view?.frustumPlanes;
+        const paddedMinY = minY - 50.0;
+        const paddedMaxY = maxY + 50.0;
 
         const centerGridX = Math.floor(camX / this.#cellSize);
         const centerGridZ = Math.floor(camZ / this.#cellSize);
@@ -182,6 +189,8 @@ export class TerrainSpatialGrid {
 
                 // 제곱근 연산 없이 범위 판정
                 if (distSq <= loadingRadiusSq) {
+                    const inFrustum = this.#checkAABBInFrustum(minX, paddedMinY, minZ, maxX, paddedMaxY, maxZ, frustumPlanes);
+
                     const key = ((gx + 32768) << 16) | ((gz + 32768) & 0xFFFF);
                     currentFrameKeys.add(key);
 
@@ -203,15 +212,18 @@ export class TerrainSpatialGrid {
                         existingActive.distanceToCamera = dist;
                         existingActive.priority = priority;
                         existingActive.lodLevel = lodLevel;
+                        existingActive.inFrustum = inFrustum;
                     } else {
                         const existingPending = this.#pendingQueue.get(key);
                         if (existingPending) {
                             existingPending.distanceToCamera = dist;
                             existingPending.priority = priority;
                             existingPending.lodLevel = lodLevel;
+                            existingPending.inFrustum = inFrustum;
                         } else {
                             const tileInfo = this.#acquireTileInfo(gx, gz, minX, minZ, maxX, maxZ, dist, priority);
                             tileInfo.lodLevel = lodLevel;
+                            tileInfo.inFrustum = inFrustum;
                             this.#pendingQueue.set(key, tileInfo);
                         }
                     }
@@ -274,6 +286,31 @@ export class TerrainSpatialGrid {
         }
 
         return this.#result;
+    }
+
+    #checkAABBInFrustum(
+        minX: number, minY: number, minZ: number,
+        maxX: number, maxY: number, maxZ: number,
+        frustumPlanes: any
+    ): boolean {
+        if (!frustumPlanes || frustumPlanes.length < 6) return true;
+
+        for (let i = 0; i < 6; i++) {
+            const plane = frustumPlanes[i];
+            const a = plane[0];
+            const b = plane[1];
+            const c = plane[2];
+            const d = plane[3];
+
+            const pX = a > 0 ? maxX : minX;
+            const pY = b > 0 ? maxY : minY;
+            const pZ = c > 0 ? maxZ : minZ;
+
+            if (a * pX + b * pY + c * pZ + d < 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     destroy(): void {
