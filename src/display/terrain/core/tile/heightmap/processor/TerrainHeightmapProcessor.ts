@@ -15,7 +15,7 @@ export class TerrainHeightmapProcessor {
     #outputBufferPool: GPUBuffer[] = [];
     #uniformBufferPool: GPUBuffer[] = [];
     #staticPaddingBuffer: Uint8Array | null = null;
-    #bindGroupCache: Map<string, GPUBindGroup> = new Map();
+    #bindGroupCache: Map<number, GPUBindGroup> = new Map();
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
@@ -145,7 +145,7 @@ export class TerrainHeightmapProcessor {
         const layout = this.#computeBindGroupLayout;
         if (!layout) return null;
 
-        const key = `${getBindId(inputBuffer)}_${getBindId(outputBuffer)}_${getBindId(uniformBuffer)}`;
+        const key = (getBindId(inputBuffer) * 1000000) + (getBindId(outputBuffer) * 1000) + getBindId(uniformBuffer);
         let bindGroup = this.#bindGroupCache.get(key);
         if (!bindGroup) {
             bindGroup = this.#redGPUContext.gpuDevice.createBindGroup({
