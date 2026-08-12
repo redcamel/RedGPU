@@ -129,8 +129,8 @@ class TerrainRVT {
         for (let i = 0; i < activeTiles.length; i++) {
             if (batchRequests.length >= maxBakesPerFrame) break;
             const tile = activeTiles[i];
-            const vX = tile.tileCol ?? (tile.gridX + (tileCountX >> 1));
-            const vZ = tile.tileRow ?? (tile.gridZ + (tileCountZ >> 1));
+            const vX = tile.tileCol as number;
+            const vZ = tile.tileRow as number;
 
             if (vX >= 0 && vX < tileCountX && vZ >= 0 && vZ < tileCountZ) {
                 const entry = this.#pageTable.getEntry(vX, vZ);
