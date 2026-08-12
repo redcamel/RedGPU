@@ -20,6 +20,7 @@
 
 struct TerrainUniforms {
     debugSplatTexture: u32,
+    invAtlasDim: f32,
 }
 @group(2) @binding(0) var<uniform> uniforms: TerrainUniforms;
 
@@ -118,7 +119,7 @@ fn main(inputData:InputData) -> OutputFragment {
             let slotX = floor(pageEntry.r * 255.0 + 0.5);
             let slotY = floor(pageEntry.g * 255.0 + 0.5);
             let slotPos = vec2<f32>(slotX, slotY);
-            let invAtlasDim = 1.0 / f32(textureDimensions(rvtAlbedoTexture).x);
+            let invAtlasDim = select(1.0 / f32(textureDimensions(rvtAlbedoTexture).x), uniforms.invAtlasDim, uniforms.invAtlasDim > 0.0);
             sampleUV = (slotPos * 136.0 + vec2<f32>(4.0) + virtualTileUV * 128.0) * invAtlasDim;
         }
         var rvt_albedo = textureSampleGrad(rvtAlbedoTexture, rvtSampler, sampleUV, ddx, ddy);

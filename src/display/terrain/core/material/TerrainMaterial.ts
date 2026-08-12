@@ -12,6 +12,7 @@ import GPU_FILTER_MODE from "../../../../gpuConst/GPU_FILTER_MODE";
 import GPU_ADDRESS_MODE from "../../../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import defineBoolean from "../../../../defineProperty/funcs/defineBoolean";
+import defineNumber from "../../../../defineProperty/funcs/number/defineNumber";
 import consoleAndThrowError from "../../../../utils/consoleAndThrowError";
 import TerrainRVT from "../rvt/TerrainRVT";
 
@@ -29,6 +30,7 @@ export interface TerrainMaterialOptions {
 }
 
 interface TerrainMaterial {
+    invAtlasDim: number;
     targetTerrain?: any;
     debugSplatTexture: boolean;
     baseColorFactor: [number, number, number, number] | string;
@@ -104,6 +106,7 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         });
 
         const atlasSize = finalOptions.atlasSize ?? (4096 * 2);
+        this.invAtlasDim = 1.0 / atlasSize;
         this.#rvt = new TerrainRVT(redGPUContext, {atlasSize});
 
         this.rvtAlbedoTexture = this.#rvt.albedoDirectTexture!;
@@ -379,6 +382,10 @@ Object.defineProperty(TerrainMaterial.prototype, 'isPBRMaterial', {
 
 defineBoolean(TerrainMaterial, [
     {key: 'debugSplatTexture', value: false},
+]);
+
+defineNumber(TerrainMaterial, [
+    {key: 'invAtlasDim', value: 1.0 / 8192.0},
 ]);
 
 defineColorRGBA(TerrainMaterial, [

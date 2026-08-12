@@ -34,6 +34,7 @@ export class TerrainSpatialGrid {
     #activeTileList: SpatialTileInfo[] = [];
     #pendingQueue: Map<number, SpatialTileInfo> = new Map();
     #pendingBuffer: SpatialTileInfo[] = [];
+    readonly #buckets: SpatialTileInfo[][] = Array.from({length: 64}, () => []);
     #lastCameraGridX: number = NaN;
     #lastCameraGridZ: number = NaN;
 
@@ -213,10 +214,23 @@ export class TerrainSpatialGrid {
 
         const pendingBuffer = this.#pendingBuffer;
         pendingBuffer.length = 0;
-        for (const tile of this.#pendingQueue.values()) {
-            pendingBuffer.push(tile);
+
+        const buckets = this.#buckets;
+        for (let i = 0; i < 64; i++) {
+            buckets[i].length = 0;
         }
-        pendingBuffer.sort((a, b) => b.priority - a.priority);
+
+        for (const tile of this.#pendingQueue.values()) {
+            const bIdx = Math.max(0, Math.min(63, Math.floor(tile.priority)));
+            buckets[bIdx].push(tile);
+        }
+
+        for (let b = 63; b >= 0; b--) {
+            const bucket = buckets[b];
+            for (let i = 0; i < bucket.length; i++) {
+                pendingBuffer.push(bucket[i]);
+            }
+        }
 
         const pendingCount = pendingBuffer.length;
         const loadBudget = (this.#maxLoadsPerFrame > 0 && this.#maxLoadsPerFrame < pendingCount)
@@ -241,5 +255,8 @@ export class TerrainSpatialGrid {
         this.#activeTileList.length = 0;
         this.#pendingQueue.clear();
         this.#pendingBuffer.length = 0;
+        for (let i = 0; i < 64; i++) {
+            this.#buckets[i].length = 0;
+        }
     }
 }
