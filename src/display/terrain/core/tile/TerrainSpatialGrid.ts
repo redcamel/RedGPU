@@ -49,6 +49,7 @@ export class TerrainSpatialGrid {
     #activeTiles: Map<number, SpatialTileInfo> = new Map();
     #activeTileList: SpatialTileInfo[] = [];
     #pendingQueue: Map<number, SpatialTileInfo> = new Map();
+    #pendingTileList: SpatialTileInfo[] = [];
     #pendingBuffer: SpatialTileInfo[] = [];
     readonly #buckets: SpatialTileInfo[][] = Array.from({length: 64}, () => []);
     #tileInfoPool: SpatialTileInfo[] = [];
@@ -224,14 +225,14 @@ export class TerrainSpatialGrid {
                             const tileInfo = this.#acquireTileInfo(gx, gz, minX, minZ, maxX, maxZ, dist, priority);
                             tileInfo.lodLevel = lodLevel;
                             tileInfo.inFrustum = inFrustum;
-                            this.#pendingQueue.set(key, tileInfo);
+                            this.#addToPending(key, tileInfo);
                         }
                     }
                 }
             }
         }
 
-        // Iterator 없이 고정 배열 #activeTileList에서 언로드 대상 탐색 및 제거
+        // Iterator 없이 고정 배열 #activeTileList에서 언로드 대상 탐색 및 O(1) Swap-Remove
         for (let i = this.#activeTileList.length - 1; i >= 0; i--) {
             const tile = this.#activeTileList[i];
             const key = ((tile.gridX + 32768) << 16) | ((tile.gridZ + 32768) & 0xFFFF);
@@ -239,14 +240,28 @@ export class TerrainSpatialGrid {
                 tile.state = 'UNLOADED';
                 toUnload.push(tile);
                 this.#activeTiles.delete(key);
-                this.#activeTileList.splice(i, 1);
+
+                const lastIdx = this.#activeTileList.length - 1;
+                if (i < lastIdx) {
+                    this.#activeTileList[i] = this.#activeTileList[lastIdx];
+                }
+                this.#activeTileList.pop();
             }
         }
 
-        for (const [key, pendingTile] of this.#pendingQueue.entries()) {
+        // Iterator 없이 #pendingTileList 고정 배열에서 해제 대상 탐색 및 O(1) Swap-Remove
+        for (let i = this.#pendingTileList.length - 1; i >= 0; i--) {
+            const pendingTile = this.#pendingTileList[i];
+            const key = ((pendingTile.gridX + 32768) << 16) | ((pendingTile.gridZ + 32768) & 0xFFFF);
             if (!currentFrameKeys.has(key)) {
                 this.#pendingQueue.delete(key);
                 this.#recycleTileInfo(pendingTile);
+
+                const lastIdx = this.#pendingTileList.length - 1;
+                if (i < lastIdx) {
+                    this.#pendingTileList[i] = this.#pendingTileList[lastIdx];
+                }
+                this.#pendingTileList.pop();
             }
         }
 
@@ -258,7 +273,10 @@ export class TerrainSpatialGrid {
             buckets[i].length = 0;
         }
 
-        for (const tile of this.#pendingQueue.values()) {
+        // Iterator 없이 인덱스 기반 버킷 정렬
+        const pendingTileCount = this.#pendingTileList.length;
+        for (let i = 0; i < pendingTileCount; i++) {
+            const tile = this.#pendingTileList[i];
             const bIdx = Math.max(0, Math.min(63, Math.floor(tile.priority)));
             buckets[bIdx].push(tile);
         }
@@ -279,13 +297,33 @@ export class TerrainSpatialGrid {
             const tile = pendingBuffer[i];
             const key = ((tile.gridX + 32768) << 16) | ((tile.gridZ + 32768) & 0xFFFF);
             tile.state = 'LOADED';
-            this.#pendingQueue.delete(key);
+            this.#removeFromPending(key);
             this.#activeTiles.set(key, tile);
             this.#activeTileList.push(tile);
             toLoad.push(tile);
         }
 
         return this.#result;
+    }
+
+    destroy(): void {
+        this.#activeTiles.clear();
+        this.#activeTileList.length = 0;
+        this.#pendingQueue.clear();
+        this.#pendingTileList.length = 0;
+        this.#pendingBuffer.length = 0;
+        this.#tileInfoPool.length = 0;
+        this.#currentFrameKeys.clear();
+        this.#toLoadBuffer.length = 0;
+        this.#toUnloadBuffer.length = 0;
+        for (let i = 0; i < 64; i++) {
+            this.#buckets[i].length = 0;
+        }
+    }
+
+    #addToPending(key: number, tileInfo: SpatialTileInfo) {
+        this.#pendingQueue.set(key, tileInfo);
+        this.#pendingTileList.push(tileInfo);
     }
 
     #checkAABBInFrustum(
@@ -313,17 +351,18 @@ export class TerrainSpatialGrid {
         return true;
     }
 
-    destroy(): void {
-        this.#activeTiles.clear();
-        this.#activeTileList.length = 0;
-        this.#pendingQueue.clear();
-        this.#pendingBuffer.length = 0;
-        this.#tileInfoPool.length = 0;
-        this.#currentFrameKeys.clear();
-        this.#toLoadBuffer.length = 0;
-        this.#toUnloadBuffer.length = 0;
-        for (let i = 0; i < 64; i++) {
-            this.#buckets[i].length = 0;
+    #removeFromPending(key: number) {
+        const tile = this.#pendingQueue.get(key);
+        if (tile) {
+            this.#pendingQueue.delete(key);
+            const idx = this.#pendingTileList.indexOf(tile);
+            if (idx !== -1) {
+                const lastIdx = this.#pendingTileList.length - 1;
+                if (idx < lastIdx) {
+                    this.#pendingTileList[idx] = this.#pendingTileList[lastIdx];
+                }
+                this.#pendingTileList.pop();
+            }
         }
     }
 
