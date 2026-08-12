@@ -161,14 +161,17 @@ class TerrainTileBind extends TerrainMaterialBind {
 }
 
 defineNumber(TerrainTileBind, [
-    {key: "maxLOD", value: 4},
-    {key: "baseSlotIndex", value: 0},
     {key: "minHeight", value: 0},
-    {key: "maxHeight", value: 1}
+    {key: "maxHeight", value: 1},
 ]);
 defineVector2(TerrainTileBind, [
     {key: "worldOffset", value: [0, 0]},
     {key: "worldSize", value: [1, 1]},
+]);
+defineNumber(TerrainTileBind, [
+    {key: "baseSlotIndex", value: 0},
+    {key: "maxLOD", value: 4},
+    {key: "verticesPerSide", value: 64},
 ]);
 defineTexture(TerrainTileBind, [
     {key: "heightmapAtlasTexture"}

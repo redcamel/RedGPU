@@ -12,7 +12,8 @@ struct TerrainUniforms {
     baseSlotIndex: f32,
     maxLOD: f32,
     verticesPerSide: f32,
-    pad0: vec3<f32>,
+    pad0: f32,
+    pad1: vec2<f32>,
     lodRanges: array<vec4<f32>, 8>,
 }
 @group(1) @binding(0) var<uniform> vertexUniforms: TerrainUniforms;

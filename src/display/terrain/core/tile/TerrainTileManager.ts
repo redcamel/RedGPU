@@ -1,7 +1,7 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
 import BitmapTexture from "../../../../resources/texture/BitmapTexture";
-import {SpatialTileInfo, TerrainSpatialGrid} from "./TerrainSpatialGrid";
+import {getSpatialTileHash, SpatialTileInfo, TerrainSpatialGrid} from "./TerrainSpatialGrid";
 import TerrainHeightmapManager from "./heightmap/TerrainHeightmapManager";
 import TerrainHeightmapProcessor from "./heightmap/processor/TerrainHeightmapProcessor";
 import parse16BitPngBuffer from "../../../../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
@@ -63,6 +63,7 @@ export interface ITerrainTarget {
     gpuRenderInfo: any;
     drawCommandSlot: any;
     drawBufferManager: any;
+    updateTexture?: (prevTexture: DirectTexture | BitmapTexture | null, texture: DirectTexture | BitmapTexture | null) => void;
 }
 
 export class TerrainTileManager {
@@ -188,6 +189,14 @@ export class TerrainTileManager {
     }
 
     updateTiles(renderViewStateData: any) {
+        if (this.#spatialGrid && (this.#terrain.worldSize[0] <= 1 || this.#terrain.worldSize[1] <= 1)) {
+            const bounds = this.#spatialGrid.terrainBounds || [-5000, -5000, 5000, 5000];
+            const width = bounds[2] - bounds[0];
+            const depth = bounds[3] - bounds[1];
+            this.#terrain.worldOffset = [bounds[0], bounds[1]];
+            this.#terrain.worldSize = [width, depth];
+        }
+
         const currentWorldSize = this.#terrain.worldSize[0];
         const lodRangesChanged = this.#updateLODRanges(currentWorldSize);
 
@@ -395,9 +404,6 @@ export class TerrainTileManager {
         const activeTiles = this.#spatialGrid ? this.#spatialGrid.activeTileList : [];
         const totalActive = activeTiles.length;
         const arrayBuffer = this.#instanceArrayBuffer;
-        const device = this.#redGPUContext.gpuDevice;
-        const scale = this.#spatialGrid ? this.#spatialGrid.cellSize : 256;
-        const halfScale = scale * 0.5;
 
         let visibleCount = 0;
         let minDirtyIdx = Infinity;
@@ -408,8 +414,9 @@ export class TerrainTileManager {
             if (tile.inFrustum === false) continue;
             if (visibleCount >= this.#maxInstances) break;
 
-            const posX = tile.worldBounds[0] + halfScale;
-            const posZ = tile.worldBounds[1] + halfScale;
+            const scale = tile.worldBounds[2] - tile.worldBounds[0];
+            const posX = (tile.worldBounds[0] + tile.worldBounds[2]) * 0.5;
+            const posZ = (tile.worldBounds[1] + tile.worldBounds[3]) * 0.5;
             const lod = tile.lodLevel ?? 0;
 
             const idx = visibleCount * 4;
@@ -443,6 +450,7 @@ export class TerrainTileManager {
         if (minDirtyIdx < maxDirtyIdx) {
             const slotByteOffset = minDirtyIdx * 4;
             const elementCount = maxDirtyIdx - minDirtyIdx;
+            const device = this.#redGPUContext.gpuDevice;
 
             device.queue.writeBuffer(
                 this.#instanceBuffer,
@@ -470,11 +478,13 @@ export class TerrainTileManager {
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
         });
 
-        this.#terrain.heightmapAtlasTexture = new DirectTexture(
+        const texture = new DirectTexture(
             this.#redGPUContext,
             'Terrain_HeightmapTileAtlasDirectTexture',
             gpuTexture
         );
+        this.#terrain.updateTexture?.(this.#terrain.heightmapAtlasTexture, texture);
+        this.#terrain.heightmapAtlasTexture = texture;
     }
 
     loadTileFrom16BitBuffer(tile: SpatialTileInfo, data: ArrayBuffer | ArrayBufferView, width: number, height: number) {
@@ -487,8 +497,13 @@ export class TerrainTileManager {
 
         const countX = this.atlasTileCountX;
         const countZ = this.atlasTileCountZ;
-        const col = Math.max(0, Math.min(countX - 1, tile.gridX + (countX >> 1)));
-        const rawRow = Math.max(0, Math.min(countZ - 1, tile.gridZ + (countZ >> 1)));
+        const cellSize = this.#spatialGrid ? this.#spatialGrid.cellSize : 256;
+
+        const baseGridX = Math.floor(tile.worldBounds[0] / cellSize);
+        const baseGridZ = Math.floor(tile.worldBounds[1] / cellSize);
+
+        const col = Math.max(0, Math.min(countX - 1, baseGridX + (countX >> 1)));
+        const rawRow = Math.max(0, Math.min(countZ - 1, baseGridZ + (countZ >> 1)));
         const row = (countZ - 1) - rawRow;
 
         tile.tileCol = col;
@@ -514,6 +529,11 @@ export class TerrainTileManager {
 
         const destX = tileX * this.atlasTileSize;
         const destZ = tileZ * this.atlasTileSize;
+        const lod = tile.lodLevel ?? 0;
+        const span = 1 << lod;
+        const maxSpanX = (this.atlasTileCountX - tileX) * this.atlasTileSize;
+        const maxSpanZ = (this.atlasTileCountZ - tileZ) * this.atlasTileSize;
+        const targetUploadSize = Math.max(this.atlasTileSize, Math.min(this.atlasTileSize * span, maxSpanX, maxSpanZ));
 
         this.#processor.processAndUploadTile(
             destX,
@@ -522,11 +542,12 @@ export class TerrainTileManager {
             width,
             height,
             gpuTexture,
-            this.atlasTileSize
+            targetUploadSize
         );
 
         this.#heightmapManager.markTileSynthesized(`${tileX}_${tileZ}`);
         this.markDirty();
+        this.#terrain.updateTexture?.(null, this.#terrain.heightmapAtlasTexture);
 
         if (this.#onTileLoadCallback) {
             this.#onTileLoadCallback(tile);
@@ -541,7 +562,7 @@ export class TerrainTileManager {
     }
 
     #loadTileFromUrl(tile: SpatialTileInfo, url: string) {
-        const key = ((tile.gridX + 32768) << 16) | ((tile.gridZ + 32768) & 0xFFFF);
+        const key = getSpatialTileHash(tile.lodLevel ?? 0, tile.gridX, tile.gridZ);
         fetch(url)
             .then(res => {
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);

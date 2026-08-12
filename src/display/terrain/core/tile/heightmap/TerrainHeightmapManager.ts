@@ -206,16 +206,27 @@ export default class TerrainHeightmapManager {
             return;
         }
 
-        const startX = tileCol * tileSize;
-        const startZ = tileRow * tileSize;
+        const lod = typeof key === 'object' ? (key.lodLevel ?? 0) : 0;
+        const span = 1 << lod;
 
-        for (let tz = 0; tz < tileSize; tz++) {
-            const srcOffset = tz * tileSize;
-            const dstOffset = (startZ + tz) * totalWidth + startX;
-            this.#flatHeightmapData.set(
-                tileData.subarray(srcOffset, srcOffset + tileSize),
-                dstOffset
-            );
+        for (let sz = 0; sz < span; sz++) {
+            for (let sx = 0; sx < span; sx++) {
+                const curCol = tileCol + sx;
+                const curRow = tileRow + sz;
+                if (curCol >= this.#atlasTileCountX || curRow >= this.#atlasTileCountZ) continue;
+
+                const startX = curCol * tileSize;
+                const startZ = curRow * tileSize;
+
+                for (let tz = 0; tz < tileSize; tz++) {
+                    const srcOffset = tz * tileSize;
+                    const dstOffset = (startZ + tz) * totalWidth + startX;
+                    this.#flatHeightmapData.set(
+                        tileData.subarray(srcOffset, srcOffset + tileSize),
+                        dstOffset
+                    );
+                }
+            }
         }
     }
 

@@ -38,8 +38,8 @@ export interface SpatialTileInfo {
     tileRowStr?: string;
 }
 
-export function getSpatialTileHash(gridX: number, gridZ: number): number {
-    return ((gridX + 32768) << 16) | ((gridZ + 32768) & 0xFFFF);
+export function getSpatialTileHash(lodLevel: number, gridX: number, gridZ: number): number {
+    return ((lodLevel & 0xF) << 28) | ((gridX + 8192) << 14) | ((gridZ + 8192) & 0x3FFF);
 }
 
 export class TerrainSpatialGrid {
@@ -151,7 +151,6 @@ export class TerrainSpatialGrid {
             this.#lastCameraGridZ = centerGridZ;
         }
 
-        const radiusInCells = Math.ceil(this.#loadingRadius / this.#cellSize);
         const currentFrameKeys = this.#currentFrameKeys;
         currentFrameKeys.clear();
 
@@ -173,31 +172,55 @@ export class TerrainSpatialGrid {
             }
         }
 
-        const loadingRadiusSq = this.#loadingRadius * this.#loadingRadius;
         const baseCellSize = this.#cellSize;
         const tileCenterY = (minY + maxY) * 0.5;
+        const maxLOD = 4;
 
-        for (let gx = centerGridX - radiusInCells; gx <= centerGridX + radiusInCells; gx++) {
-            for (let gz = centerGridZ - radiusInCells; gz <= centerGridZ + radiusInCells; gz++) {
-                const minX = gx * baseCellSize;
-                const minZ = gz * baseCellSize;
-                const maxX = minX + baseCellSize;
-                const maxZ = minZ + baseCellSize;
+        for (let lodLevel = 0; lodLevel <= maxLOD; lodLevel++) {
+            const scaleFactor = 1 << lodLevel;
+            const curCellSize = baseCellSize * scaleFactor;
 
-                if (maxX < tbMinX || minX > tbMaxX || maxZ < tbMinZ || minZ > tbMaxZ) {
-                    continue;
-                }
+            const centerGX = Math.floor(camX / curCellSize);
+            const centerGZ = Math.floor(camZ / curCellSize);
 
-                const tileCenterX = minX + baseCellSize * 0.5;
-                const tileCenterZ = minZ + baseCellSize * 0.5;
-                const toTileX = tileCenterX - camX;
-                const toTileZ = tileCenterZ - camZ;
-                const distSq = toTileX * toTileX + toTileZ * toTileZ;
+            let minCellR = 0;
+            let maxCellR = 2;
 
-                // 제곱근 연산 없이 범위 판정
-                if (distSq <= loadingRadiusSq) {
+            if (lodLevel === 0) {
+                minCellR = 0;
+                maxCellR = 2;
+            } else if (lodLevel < maxLOD) {
+                minCellR = 1;
+                maxCellR = 2;
+            } else {
+                minCellR = 1;
+                maxCellR = Math.max(2, Math.ceil(this.#loadingRadius / curCellSize));
+            }
+
+            for (let gx = centerGX - maxCellR; gx <= centerGX + maxCellR; gx++) {
+                for (let gz = centerGZ - maxCellR; gz <= centerGZ + maxCellR; gz++) {
+                    const absDx = Math.abs(gx - centerGX);
+                    const absDz = Math.abs(gz - centerGZ);
+
+                    if (lodLevel > 0 && absDx < minCellR && absDz < minCellR) {
+                        continue;
+                    }
+
+                    const minX = gx * curCellSize;
+                    const minZ = gz * curCellSize;
+                    const maxX = minX + curCellSize;
+                    const maxZ = minZ + curCellSize;
+
+                    if (maxX < tbMinX || minX > tbMaxX || maxZ < tbMinZ || minZ > tbMaxZ) {
+                        continue;
+                    }
+
+                    const tileCenterX = minX + curCellSize * 0.5;
+                    const tileCenterZ = minZ + curCellSize * 0.5;
+                    const toTileX = tileCenterX - camX;
+                    const toTileZ = tileCenterZ - camZ;
+                    const distSq = toTileX * toTileX + toTileZ * toTileZ;
                     const dist = Math.sqrt(distSq);
-                    const lodLevel = Math.min(4, Math.max(0, Math.floor(dist / (baseCellSize * 2.0))));
 
                     const inFrustum = this.#checkAABBInFrustum(
                         minX, paddedMinY, minZ,
@@ -205,7 +228,7 @@ export class TerrainSpatialGrid {
                         frustumPlanes
                     );
 
-                    const key = ((gx + 32768) << 16) | ((gz + 32768) & 0xFFFF);
+                    const key = getSpatialTileHash(lodLevel, gx, gz);
                     currentFrameKeys.add(key);
 
                     const toTileY = tileCenterY - camera.y;
@@ -224,8 +247,7 @@ export class TerrainSpatialGrid {
                                 viewFocusFactor = dot3D * dot3D * dot3D * dot3D;
                             }
                         }
-                        // Screen-Space Error (SSE) 기반 시선 중앙 집중형 우선순위 연산식 (중앙 타일 로딩 반응속도 200% 이상 향상)
-                        priority = (baseCellSize / dist3D) * (1.0 + 10.0 * viewFocusFactor) * 10.0;
+                        priority = (curCellSize / dist3D) * (1.0 + 10.0 * viewFocusFactor) * 10.0;
                     }
 
                     const existingActive = this.#activeTiles.get(key);
@@ -234,6 +256,10 @@ export class TerrainSpatialGrid {
                         existingActive.priority = priority;
                         existingActive.lodLevel = lodLevel;
                         existingActive.inFrustum = inFrustum;
+                        existingActive.worldBounds[0] = minX;
+                        existingActive.worldBounds[1] = minZ;
+                        existingActive.worldBounds[2] = maxX;
+                        existingActive.worldBounds[3] = maxZ;
                     } else {
                         const existingPending = this.#pendingQueue.get(key);
                         if (existingPending) {
@@ -241,8 +267,13 @@ export class TerrainSpatialGrid {
                             existingPending.priority = priority;
                             existingPending.lodLevel = lodLevel;
                             existingPending.inFrustum = inFrustum;
+                            existingPending.worldBounds[0] = minX;
+                            existingPending.worldBounds[1] = minZ;
+                            existingPending.worldBounds[2] = maxX;
+                            existingPending.worldBounds[3] = maxZ;
                         } else {
                             const tileInfo = this.#acquireTileInfo(
+                                lodLevel,
                                 gx, gz,
                                 minX, minZ,
                                 maxX, maxZ,
@@ -260,7 +291,7 @@ export class TerrainSpatialGrid {
         // Iterator 없이 고정 배열 #activeTileList에서 언로드 대상 탐색 및 O(1) Swap-Remove
         for (let i = this.#activeTileList.length - 1; i >= 0; i--) {
             const tile = this.#activeTileList[i];
-            const key = ((tile.gridX + 32768) << 16) | ((tile.gridZ + 32768) & 0xFFFF);
+            const key = getSpatialTileHash(tile.lodLevel ?? 0, tile.gridX, tile.gridZ);
             if (!currentFrameKeys.has(key)) {
                 tile.state = 'UNLOADED';
                 toUnload.push(tile);
@@ -277,7 +308,7 @@ export class TerrainSpatialGrid {
         // Iterator 없이 #pendingTileList 고정 배열에서 해제 대상 탐색 및 O(1) Swap-Remove
         for (let i = this.#pendingTileList.length - 1; i >= 0; i--) {
             const pendingTile = this.#pendingTileList[i];
-            const key = ((pendingTile.gridX + 32768) << 16) | ((pendingTile.gridZ + 32768) & 0xFFFF);
+            const key = getSpatialTileHash(pendingTile.lodLevel ?? 0, pendingTile.gridX, pendingTile.gridZ);
             if (!currentFrameKeys.has(key)) {
                 this.#pendingQueue.delete(key);
                 this.#recycleTileInfo(pendingTile);
@@ -320,7 +351,7 @@ export class TerrainSpatialGrid {
 
         for (let i = 0; i < loadBudget; i++) {
             const tile = pendingBuffer[i];
-            const key = ((tile.gridX + 32768) << 16) | ((tile.gridZ + 32768) & 0xFFFF);
+            const key = getSpatialTileHash(tile.lodLevel ?? 0, tile.gridX, tile.gridZ);
             tile.state = 'LOADED';
             this.#removeFromPending(key);
             this.#activeTiles.set(key, tile);
@@ -392,6 +423,7 @@ export class TerrainSpatialGrid {
     }
 
     #acquireTileInfo(
+        lodLevel: number,
         gx: number,
         gz: number,
         minX: number,
@@ -401,13 +433,16 @@ export class TerrainSpatialGrid {
         dist: number,
         priority: number
     ): SpatialTileInfo {
-        const tileCol = gx + 16;
-        const tileRow = gz + 16;
+        const baseGridX = Math.floor(minX / this.#cellSize);
+        const baseGridZ = Math.floor(minZ / this.#cellSize);
+        const tileCol = baseGridX + 16;
+        const tileRow = baseGridZ + 16;
         const atlasKey = `${tileCol}_${tileRow}`;
 
         const pool = this.#tileInfoPool;
         if (pool.length > 0) {
             const tile = pool.pop() as SpatialTileInfo;
+            tile.lodLevel = lodLevel;
             tile.gridX = gx;
             tile.gridZ = gz;
             tile.worldBounds[0] = minX;
@@ -425,6 +460,7 @@ export class TerrainSpatialGrid {
             return tile;
         }
         return {
+            lodLevel,
             gridX: gx,
             gridZ: gz,
             worldBounds: [minX, minZ, maxX, maxZ],

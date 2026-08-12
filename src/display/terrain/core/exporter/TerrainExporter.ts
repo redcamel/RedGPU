@@ -1,10 +1,12 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
 import BitmapTexture from "../../../../resources/texture/BitmapTexture";
+import {getSpatialTileHash} from "../tile/TerrainSpatialGrid";
 
 export default class TerrainExporter {
     /**
      * [KO] Heightmap Atlas GPU Texture를 PNG 이미지 파일로 다운로드합니다.
+     * [EN] Downloads Heightmap Atlas GPU Texture as a PNG image file.
      */
     static async downloadHeightmapAtlasAsPNG(
         redGPUContext: RedGPUContext,
@@ -34,79 +36,84 @@ export default class TerrainExporter {
             usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ
         });
 
-        const commandEncoder = device.createCommandEncoder({
-            label: 'Terrain_DownloadAtlasEncoder'
-        });
+        try {
+            const commandEncoder = device.createCommandEncoder({
+                label: 'Terrain_DownloadAtlasEncoder'
+            });
 
-        commandEncoder.copyTextureToBuffer(
-            {texture: gpuTexture},
-            {
-                buffer: readBuffer,
-                bytesPerRow: paddedBytesPerRow,
-                rowsPerImage: height
-            },
-            [width, height, 1]
-        );
+            commandEncoder.copyTextureToBuffer(
+                {texture: gpuTexture},
+                {
+                    buffer: readBuffer,
+                    bytesPerRow: paddedBytesPerRow,
+                    rowsPerImage: height
+                },
+                [width, height, 1]
+            );
 
-        device.queue.submit([commandEncoder.finish()]);
+            device.queue.submit([commandEncoder.finish()]);
 
-        await readBuffer.mapAsync(GPUMapMode.READ);
-        const copyArrayBuffer = readBuffer.getMappedRange();
+            await readBuffer.mapAsync(GPUMapMode.READ);
+            const copyArrayBuffer = readBuffer.getMappedRange();
 
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
 
-        const imageData = ctx.createImageData(width, height);
-        const imgData32 = new Uint32Array(imageData.data.buffer);
+            const imageData = ctx.createImageData(width, height);
+            const imgData32 = new Uint32Array(imageData.data.buffer);
 
-        if (format === 'rgba16float' || format === 'r16float') {
-            const dataView = new DataView(copyArrayBuffer);
-            const offsetMultiplier = format === 'rgba16float' ? 8 : 2;
-            for (let y = 0; y < height; y++) {
-                const srcRowOffset = y * paddedBytesPerRow;
-                const dstRowIdx = y * width;
-                for (let x = 0; x < width; x++) {
-                    const u16 = dataView.getUint16(srcRowOffset + x * offsetMultiplier, true);
-                    const exp = (u16 & 0x7C00) >> 10;
-                    const frac = u16 & 0x03FF;
-                    const val = (exp === 0) ? (frac / 1024) * Math.pow(2, -14) : (1 + frac / 1024) * Math.pow(2, exp - 15);
-                    const byteVal = Math.min(255, Math.max(0, Math.round(val * 255)));
+            if (format === 'rgba16float' || format === 'r16float') {
+                const u16View = new Uint16Array(copyArrayBuffer);
+                const strideU16 = paddedBytesPerRow >> 1;
+                const offsetU16PerPixel = format === 'rgba16float' ? 4 : 1;
 
-                    // ABGR Little-Endian 32-bit direct packing (4 byte writes -> 1 32-bit write)
-                    imgData32[dstRowIdx + x] = 0xFF000000 | (byteVal << 16) | (byteVal << 8) | byteVal;
+                for (let y = 0; y < height; y++) {
+                    const srcRowIdx = y * strideU16;
+                    const dstRowIdx = y * width;
+                    for (let x = 0; x < width; x++) {
+                        const u16 = u16View[srcRowIdx + x * offsetU16PerPixel];
+                        const exp = (u16 & 0x7C00) >> 10;
+                        const frac = u16 & 0x03FF;
+                        const val = (exp === 0) ? (frac / 1024) * 6.103515625e-5 : (1 + frac / 1024) * Math.pow(2, exp - 15);
+                        const byteVal = Math.min(255, Math.max(0, Math.round(val * 255)));
+
+                        // ABGR Little-Endian 32-bit direct packing
+                        imgData32[dstRowIdx + x] = 0xFF000000 | (byteVal << 16) | (byteVal << 8) | byteVal;
+                    }
+                }
+            } else {
+                const srcData = new Uint8Array(copyArrayBuffer);
+                const dstData = new Uint8Array(imageData.data.buffer);
+                const rowBytes = width * 4;
+                for (let y = 0; y < height; y++) {
+                    const srcRowOffset = y * paddedBytesPerRow;
+                    const dstRowOffset = y * rowBytes;
+                    dstData.set(srcData.subarray(srcRowOffset, srcRowOffset + rowBytes), dstRowOffset);
                 }
             }
-        } else {
-            const srcData = new Uint8Array(copyArrayBuffer);
-            const dstData = new Uint8Array(imageData.data.buffer);
-            const rowBytes = width * 4;
-            for (let y = 0; y < height; y++) {
-                const srcRowOffset = y * paddedBytesPerRow;
-                const dstRowOffset = y * rowBytes;
-                dstData.set(srcData.subarray(srcRowOffset, srcRowOffset + rowBytes), dstRowOffset);
-            }
+
+            ctx.putImageData(imageData, 0, 0);
+
+            canvas.toBlob((blob) => {
+                if (!blob) return;
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                a.click();
+                URL.revokeObjectURL(url);
+            }, 'image/png');
+        } finally {
+            readBuffer.unmap();
+            readBuffer.destroy();
         }
-
-        ctx.putImageData(imageData, 0, 0);
-        readBuffer.unmap();
-        readBuffer.destroy();
-
-        canvas.toBlob((blob) => {
-            if (!blob) return;
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            a.click();
-            URL.revokeObjectURL(url);
-        }, 'image/png');
     }
 
     /**
-     * [KO] 2D CanvasContext에 현재 지형 타일 아틀라스 렌더링 현황을 실제 지형 이미지 프리뷰로 시각화합니다.
+     * [KO] 2D CanvasContext에 현재 지형 타일 아틀라스 렌더링 현황 및 멀티 레벨 LOD 상태를 시각화합니다.
      */
     static renderAtlasPreview(
         ctx: CanvasRenderingContext2D,
@@ -143,15 +150,24 @@ export default class TerrainExporter {
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
                 ctx.strokeRect(px, py, cellW, cellH);
 
-                const intKey = ((x + 32768) << 16) | ((z + 32768) & 0xFFFF);
                 const strKey = `${x}_${z}`;
-                const data = tileDataCache.get(intKey) || tileDataCache.get(strKey);
+                const legacyIntKey = ((x + 32768) << 16) | ((z + 32768) & 0xFFFF);
+
+                let data = tileDataCache.get(strKey) || tileDataCache.get(legacyIntKey);
+                if (!data) {
+                    for (let lod = 0; lod <= 4; lod++) {
+                        const lodHash = getSpatialTileHash(lod, x - (countX >> 1), z - (countZ >> 1));
+                        data = tileDataCache.get(lodHash);
+                        if (data) break;
+                    }
+                }
 
                 if (data) {
                     if (data instanceof HTMLImageElement || data instanceof ImageBitmap || data instanceof HTMLCanvasElement) {
                         try {
                             ctx.drawImage(data as CanvasImageSource, px, py, cellW, cellH);
                         } catch (e) {
+                            // Suppress canvas draw errors for unloaded elements
                         }
                     } else if (ArrayBuffer.isView(data)) {
                         try {

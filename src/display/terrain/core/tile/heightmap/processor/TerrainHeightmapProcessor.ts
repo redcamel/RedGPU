@@ -103,16 +103,21 @@ export class TerrainHeightmapProcessor {
             passEncoder.dispatchWorkgroups(Math.ceil(targetTileSize / 16), Math.ceil(targetTileSize / 16));
         });
 
-        commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (encoder) => {
-            encoder.copyBufferToTexture(
-                {buffer: outputBuffer, bytesPerRow: targetTileSize * 8, rowsPerImage: targetTileSize},
-                {
-                    texture: targetGPUTexture,
-                    origin: [destX, destZ, 0]
-                },
-                [targetTileSize, targetTileSize, 1]
-            );
-        });
+        const copyWidth = Math.min(targetTileSize, targetGPUTexture.width - destX);
+        const copyHeight = Math.min(targetTileSize, targetGPUTexture.height - destZ);
+
+        if (copyWidth > 0 && copyHeight > 0) {
+            commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (encoder) => {
+                encoder.copyBufferToTexture(
+                    {buffer: outputBuffer, bytesPerRow: targetTileSize * 8, rowsPerImage: targetTileSize},
+                    {
+                        texture: targetGPUTexture,
+                        origin: [destX, destZ, 0]
+                    },
+                    [copyWidth, copyHeight, 1]
+                );
+            });
+        }
 
         // 큐 제출이 완료된 뒤 안전한 시점에 임시 버퍼들을 파괴하는 대신 풀로 반납하도록 리사이클러 지연 등록
         commandEncoderManager.addDeferredDestroy({
