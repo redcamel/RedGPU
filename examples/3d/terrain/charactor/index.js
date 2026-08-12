@@ -285,7 +285,7 @@ function updateSpatialGrid2DDebugger(terrain, camera) {
 }
 
 function updateHUD(terrain, camera) {
-    const leafCount = terrain.quadtree ? terrain.quadtree.leafNodes.length : 0;
+    const leafCount = terrain.spatialGrid ? terrain.spatialGrid.activeTileList.length : 0;
     const streamedTileCount = terrain.spatialGrid ? terrain.spatialGrid.activeTiles.size : 0;
     const pendingQueueCount = terrain.spatialGrid ? terrain.spatialGrid.pendingQueueSize : 0;
     const maxBudget = terrain.spatialGrid ? terrain.spatialGrid.maxLoadsPerFrame : 2;
@@ -297,9 +297,9 @@ function updateHUD(terrain, camera) {
     const cy = camera.y.toFixed(1);
     const cz = camera.z.toFixed(1);
     hud.innerHTML = `
-        <b style="color:#7dd3fc;font-size:14px;">🌍 CDLOD Quadtree & World Partition</b><br>
+        <b style="color:#7dd3fc;font-size:14px;">🌍 Terrain & World Partition</b><br>
         <span style="color:#94a3b8;">──────────────────</span><br>
-        🗂 활성 CDLOD 노드 : <b style="color:#4ade80;">${leafCount}</b><br>
+        🗂 활성 타일 노드 : <b style="color:#4ade80;">${leafCount}</b><br>
         🛰 활성 스트리밍 셀 : <b style="color:#38bdf8;">${streamedTileCount}</b>개 (반경 ${(terrain.spatialGrid.loadingRadius / 1000).toFixed(2)}km)<br>
         📥 프레임당 로드 (toLoad)   : <b style="color:#4ade80;">${terrain.tileStreamMetrics.lastFrameLoadCount}</b>개 (예산: ${maxBudget > 0 ? maxBudget + '개/프레임' : '제한없음'})<br>
         ⏳ 로딩 대기 큐 (Pending)   : <b style="color:#fbbf24;">${pendingQueueCount}</b>개<br>

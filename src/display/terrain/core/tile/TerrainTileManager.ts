@@ -187,7 +187,7 @@ export class TerrainTileManager {
         );
     }
 
-    checkQuadtree(renderViewStateData: any) {
+    updateTiles(renderViewStateData: any) {
         const currentWorldSize = this.#terrain.worldSize[0];
         const lodRangesChanged = this.#updateLODRanges(currentWorldSize);
 

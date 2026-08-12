@@ -124,8 +124,8 @@ class TerrainTileBind extends TerrainMaterialBind {
         return this.#tileManager.getTerrainHeight(x, z);
     }
 
-    checkQuadtree(renderViewStateData: any) {
-        this.#tileManager.checkQuadtree(renderViewStateData);
+    updateTiles(renderViewStateData: any) {
+        this.#tileManager.updateTiles(renderViewStateData);
     }
 
     isTileSynthesized(tile: SpatialTileInfo | string): boolean {

@@ -11,10 +11,10 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
  * - GPU Instancing으로 단일 드로우콜에서 전체 지형 렌더링
  */
 
-const WORLD_SIZE = 8192.0;   // 월드 가로세로 크기 (8192m × 8192m = 8.2km 표준 오픈월드 규격, 1 Pixel = 1 Meter 1:1 정밀 해상도)
-const MAX_LOD = 7;          // 최대 LOD 레벨 (8.2km 지평선 세분화 7단계)
+const WORLD_SIZE = 10000.0;  // 언리얼엔진 5 오픈월드 규격 (10km × 10km)
+const MAX_LOD = 6;          // UE5 표준 6단계 Max LOD
 const MIN_H = 0.0;
-const MAX_H = 300.0;        // 최대 높이 (8.2km 스케일에 입체적이고 또렷한 최적 고도: 300m)
+const MAX_H = 500.0;        // UE5 Z-Scale 표준 500m 고도범위
 
 let terrain = null; // 💡 모듈 전역 스코프 - 헬퍼 함수들이 직접 참조 가능
 
@@ -285,7 +285,7 @@ function updateSpatialGrid2DDebugger(terrain, camera) {
 }
 
 function updateHUD(terrain, camera) {
-    const leafCount = terrain.quadtree ? terrain.quadtree.leafNodes.length : 0;
+    const leafCount = terrain.spatialGrid ? terrain.spatialGrid.activeTileList.length : 0;
     const streamedTileCount = terrain.spatialGrid ? terrain.spatialGrid.activeTiles.size : 0;
     const pendingQueueCount = terrain.spatialGrid ? terrain.spatialGrid.pendingQueueSize : 0;
     const maxBudget = terrain.spatialGrid ? terrain.spatialGrid.maxLoadsPerFrame : 2;
@@ -297,9 +297,9 @@ function updateHUD(terrain, camera) {
     const cy = camera.y.toFixed(1);
     const cz = camera.z.toFixed(1);
     hud.innerHTML = `
-        <b style="color:#7dd3fc;font-size:14px;">🌍 CDLOD Quadtree & World Partition</b><br>
+        <b style="color:#7dd3fc;font-size:14px;">🌍 UE5 World Partition & SpatialGrid</b><br>
         <span style="color:#94a3b8;">──────────────────</span><br>
-        🗂 활성 CDLOD 노드 : <b style="color:#4ade80;">${leafCount}</b><br>
+        🗂 활성 지형 인스턴스 : <b style="color:#4ade80;">${leafCount}</b><br>
         🛰 활성 스트리밍 셀 : <b style="color:#38bdf8;">${streamedTileCount}</b>개 (반경 ${(terrain.spatialGrid.loadingRadius / 1000).toFixed(2)}km)<br>
         📥 프레임당 로드 (toLoad)   : <b style="color:#4ade80;">${terrain.tileStreamMetrics.lastFrameLoadCount}</b>개 (예산: ${maxBudget > 0 ? maxBudget + '개/프레임' : '제한없음'})<br>
         ⏳ 로딩 대기 큐 (Pending)   : <b style="color:#fbbf24;">${pendingQueueCount}</b>개<br>
@@ -494,8 +494,8 @@ RedGPU.init(
                 b.y = b.__baseY + Math.sin(now * b.__floatFreq + i) * 60;
             }
             updateHUD(terrain, rawCam);
-            // updateSpatialGrid2DDebugger(terrain, rawCam);
-            // updateHeightmapAtlas2DDebugger(terrain);
+            updateSpatialGrid2DDebugger(terrain, rawCam);
+            updateHeightmapAtlas2DDebugger(terrain);
         }
 
         // 5. 렌더러 시작
@@ -666,7 +666,7 @@ function buildGUI(redGPUContext, terrain, controller, view, directionalLight) {
 
             streamingFolder.addBinding(terrain.spatialGrid, 'loadingRadius', {
                 label: '스트리밍 로딩 반경 (m)',
-                min: 1000, max: 10000, step: 250
+                min: 1000, max: 20000, step: 500
             });
 
             // ── 4. 🎨 타일링 및 혼합 (Tiling & Blending) ───────────────────────────

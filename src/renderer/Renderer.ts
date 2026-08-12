@@ -203,7 +203,7 @@ class Renderer {
             }
             {
                 scene.terrainChildren.forEach(v => {
-                    v.checkQuadtree(renderViewStateData)
+                    v.updateTiles(renderViewStateData)
                 })
             }
 

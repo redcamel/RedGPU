@@ -51,7 +51,7 @@ Object.assign(hud.style, {
 document.body.appendChild(hud);
 
 function updateHUD(terrainInstance, camera) {
-    const leafCount = terrainInstance.quadtree ? terrainInstance.quadtree.leafNodes.length : 0;
+    const leafCount = terrainInstance.spatialGrid ? terrainInstance.spatialGrid.activeTileList.length : 0;
     const streamedTileCount = terrainInstance.spatialGrid ? terrainInstance.spatialGrid.activeTiles.size : 0;
     const treeCount = treeFoliageMesh ? treeFoliageMesh.instanceCount : 0;
 
@@ -62,7 +62,7 @@ function updateHUD(terrainInstance, camera) {
         <b style="color:#4ade80;font-size:14px;">🌲 3D Spruce Tree Streaming</b><br>
         <span style="color:#94a3b8;">──────────────────</span><br>
         🌲 활성 3D 전나무 수 : <b style="color:#4ade80;">${treeCount.toLocaleString()}</b> 그루 (spruce_tree.glb)<br>
-        🗂 활성 CDLOD 노드   : <b style="color:#7dd3fc;">${leafCount}</b><br>
+        🗂 활성 타일 노드   : <b style="color:#7dd3fc;">${leafCount}</b><br>
         🛰 활성 스트리밍 셀   : <b style="color:#38bdf8;">${streamedTileCount}</b> 개<br>
         📐 월드 스케일       : <b style="color:#fbbf24;">${WORLD_SIZE} × ${WORLD_SIZE}</b><br>
         🏔 최대 높이         : <b style="color:#f87171;">${MAX_H}m</b><br>
