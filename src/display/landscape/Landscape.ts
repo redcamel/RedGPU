@@ -3,12 +3,22 @@ import Ground from "../../primitive/Ground.js";
 import ColorMaterial from "../../material/colorMaterial/ColorMaterial.js";
 import InstancingMesh from "../instancingMesh/InstancingMesh.js";
 import {LandscapeLODManager} from "./core/LandscapeLODManager.js";
+import {
+    LandscapeHeightTileManager,
+    LandscapeHeightTileManagerOptions
+} from "./core/tile/heightmap/LandscapeHeightTileManager.js";
+import {LandscapeMaterial} from "./material/LandscapeMaterial.js";
 
 export interface LandscapeOptions {
     worldSize?: number;
     chunkSize?: number;
     maxLOD?: number;
     maxChunks?: number;
+    minHeight?: number;
+    maxHeight?: number;
+    wireframe?: boolean;
+    material?: any;
+    tileOptions?: LandscapeHeightTileManagerOptions;
 }
 
 // LOD Level별 디버그 와이어프레임 색상 표 (LOD 0 = 빨강 ~ LOD 5+ = 보라)
@@ -27,11 +37,24 @@ const LOD_COLORS: string[] = [
  * [EN] Landscape (New Terrain System Display Class)
  *
  * 카메라 위치 변화에 따라 LandscapeLODManager를 호출하여 지오메트리 청크 그리드의 LOD 분할 및 조성을 제어하고,
- * LOD 레벨별 색상이 다변화된 InstancingMesh 레이어를 통해 와이어프레임 지오메트리를 시각화합니다.
+ * 높이맵 타일 매니저(LandscapeHeightTileManager)를 통합하여 실시간 3D 지형 높이 변위(Displacement) 및 텍스처 표면 렌더링을 제공합니다.
  */
 export class Landscape {
     readonly lodManager: LandscapeLODManager;
-    #lodMeshes: InstancingMesh[] = [];
+    readonly heightTileManager: LandscapeHeightTileManager;
+    minHeight: number = 0.0;
+    maxHeight: number = 500.0;
+
+    #wireframe: boolean = false;
+    #customMaterial: any = null;
+
+    #colorMaterials: ColorMaterial[] = [];
+    #textureMaterials: LandscapeMaterial[] = [];
+
+    #lodSolidMeshes: InstancingMesh[] = [];
+    #lodWireframeMeshes: InstancingMesh[] = [];
+    #allMeshes: InstancingMesh[] = [];
+
     #lodChunkCounts: Int32Array;
     #lodCursorIndex: Int32Array;
     #redGPUContext: RedGPUContext | null = null;
@@ -41,10 +64,20 @@ export class Landscape {
             worldSize = 10000.0,
             chunkSize = 64.0,
             maxLOD = 5,
-            maxChunks = 2048
+            maxChunks = 2048,
+            minHeight = 0.0,
+            maxHeight = 500.0,
+            wireframe = false,
+            material = null,
+            tileOptions
         } = options;
 
+        this.minHeight = minHeight;
+        this.maxHeight = maxHeight;
+        this.#wireframe = wireframe;
+        this.#customMaterial = material;
         this.lodManager = new LandscapeLODManager(worldSize, chunkSize, maxLOD, maxChunks);
+        this.heightTileManager = new LandscapeHeightTileManager(redGPUContext ?? null, tileOptions);
         this.#lodChunkCounts = new Int32Array(maxLOD + 2);
         this.#lodCursorIndex = new Int32Array(maxLOD + 2);
 
@@ -53,8 +86,16 @@ export class Landscape {
         }
     }
 
+    get wireframe(): boolean {
+        return this.#wireframe;
+    }
+
+    set wireframe(value: boolean) {
+        this.#wireframe = value;
+    }
+
     get meshes(): InstancingMesh[] {
-        return this.#lodMeshes;
+        return this.#allMeshes;
     }
 
     /**
@@ -62,7 +103,10 @@ export class Landscape {
      */
     initMesh(redGPUContext: RedGPUContext): void {
         this.#redGPUContext = redGPUContext;
-        this.#lodMeshes = [];
+        this.#lodSolidMeshes = [];
+        this.#lodWireframeMeshes = [];
+        this.#colorMaterials = [];
+        this.#textureMaterials = [];
 
         const maxLOD = this.lodManager.maxLOD;
 
@@ -75,21 +119,41 @@ export class Landscape {
             16
         );
 
-        // 2. LOD 레벨별 InstancingMesh 레이어 구별 생성
+        const hTex = this.heightTileManager.heightmapTexture;
+
+        // 2. LOD 레벨별 InstancingMesh 레이어 구별 생성 (Solid용 & Wireframe용 독립 생성)
         for (let lod = 0; lod <= maxLOD; lod++) {
             const colorHex = LOD_COLORS[lod] || '#ffffff';
-            const material = new ColorMaterial(redGPUContext, colorHex);
+            const colorMat = new ColorMaterial(redGPUContext, colorHex);
+            const texMat = this.#customMaterial ?? new LandscapeMaterial(redGPUContext, hTex);
 
-            const mesh = new InstancingMesh(
+            this.#colorMaterials.push(colorMat);
+            this.#textureMaterials.push(texMat);
+
+            // Solid Layer (triangle-list)
+            const solidMesh = new InstancingMesh(
                 redGPUContext,
                 this.lodManager.maxChunks,
                 1,
                 geometry,
-                material
+                texMat
             );
-            mesh.primitiveState.topology = 'line-list';
-            this.#lodMeshes.push(mesh);
+            solidMesh.primitiveState.topology = 'triangle-list';
+            this.#lodSolidMeshes.push(solidMesh);
+
+            // Wireframe Layer (line-list)
+            const wireframeMesh = new InstancingMesh(
+                redGPUContext,
+                this.lodManager.maxChunks,
+                1,
+                geometry,
+                colorMat
+            );
+            wireframeMesh.primitiveState.topology = 'line-list';
+            this.#lodWireframeMeshes.push(wireframeMesh);
         }
+
+        this.#allMeshes = [...this.#lodSolidMeshes, ...this.#lodWireframeMeshes];
     }
 
     /**
@@ -111,11 +175,23 @@ export class Landscape {
         // 1. LOD Manager 계산 (GC-Free)
         this.lodManager.update(camX, camY, camZ);
 
-        if (this.#lodMeshes.length === 0) return;
+        if (this.#allMeshes.length === 0) return;
+
+        // 통합 높이맵 텍스처를 지형 3D 표면 재질 텍스처로 자동 바인딩
+        const currentHTex = this.heightTileManager.heightmapTexture;
+        if (currentHTex) {
+            for (const mat of this.#textureMaterials) {
+                if (mat && (mat as any).diffuseTexture !== currentHTex) {
+                    (mat as any).diffuseTexture = currentHTex;
+                }
+            }
+        }
 
         const activeCount = this.lodManager.activeChunkCount;
         const buffer = this.lodManager.instanceBuffer;
         const maxLOD = this.lodManager.maxLOD;
+        const worldSize = this.lodManager.worldSize;
+        const halfWorldSize = worldSize * 0.5;
 
         // [Pass 1] 각 LOD 레벨별 총 청크 수 집계
         this.#lodChunkCounts.fill(0);
@@ -125,11 +201,16 @@ export class Landscape {
             this.#lodChunkCounts[lodLevel]++;
         }
 
-        // [Pass 2] InstancingMesh의 instanceCount 사전 세팅 (자식 인스턴스 배열 크기 확정)
+        // [Pass 2] 활성 레이어와 비활성 레이어의 instanceCount 지정
+        const activeMeshes = this.#wireframe ? this.#lodWireframeMeshes : this.#lodSolidMeshes;
+        const inactiveMeshes = this.#wireframe ? this.#lodSolidMeshes : this.#lodWireframeMeshes;
+
         for (let lod = 0; lod <= maxLOD; lod++) {
-            const mesh = this.#lodMeshes[lod];
-            if (mesh) {
-                mesh.instanceCount = Math.max(0, this.#lodChunkCounts[lod]);
+            if (inactiveMeshes[lod]) {
+                inactiveMeshes[lod].instanceCount = 0;
+            }
+            if (activeMeshes[lod]) {
+                activeMeshes[lod].instanceCount = Math.max(0, this.#lodChunkCounts[lod]);
             }
         }
 
@@ -142,12 +223,22 @@ export class Landscape {
             const scale = buffer[offset + 2];
             const lodLevel = Math.min(Math.floor(buffer[offset + 3]), maxLOD);
 
-            const mesh = this.#lodMeshes[lodLevel];
+            const mesh = activeMeshes[lodLevel];
             if (mesh) {
                 const curIdx = this.#lodCursorIndex[lodLevel];
                 const child = mesh.instanceChildren[curIdx];
                 if (child) {
-                    child.setPosition(posX, 0, posZ);
+                    // 높이맵 타일 통합 데이터에서 실제 3D 지형 높이(Y) 샘플링 적용
+                    const heightY = this.heightTileManager.getLandscapeHeight(
+                        posX,
+                        posZ,
+                        [-halfWorldSize, -halfWorldSize],
+                        [worldSize, worldSize],
+                        this.minHeight,
+                        this.maxHeight
+                    );
+
+                    child.setPosition(posX, heightY, posZ);
                     child.setScale(scale);
                 }
                 this.#lodCursorIndex[lodLevel]++;
