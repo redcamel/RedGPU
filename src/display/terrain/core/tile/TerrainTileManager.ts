@@ -391,7 +391,7 @@ export class TerrainTileManager {
     }
 
     #updateInstanceRenderBuffer(cameraPos: [number, number, number], renderViewStateData: any) {
-        // TerrainSpatialGrid 기반 1차 공간 인스턴스 데이터 추출 (Frustum Culling 적용, Zero-Allocation)
+        // TerrainSpatialGrid 기반 1차 공간 인스턴스 데이터 추출 (Frustum Culling 적용, Zero-Allocation, Batch Write)
         const activeTiles = this.#spatialGrid ? this.#spatialGrid.activeTileList : [];
         const totalActive = activeTiles.length;
         const arrayBuffer = this.#instanceArrayBuffer;
@@ -400,6 +400,8 @@ export class TerrainTileManager {
         const halfScale = scale * 0.5;
 
         let visibleCount = 0;
+        let minDirtyIdx = Infinity;
+        let maxDirtyIdx = -1;
 
         for (let i = 0; i < totalActive; i++) {
             const tile = activeTiles[i];
@@ -423,18 +425,33 @@ export class TerrainTileManager {
                 arrayBuffer[idx + 2] = scale;
                 arrayBuffer[idx + 3] = lod;
 
-                const slotByteOffset = idx * 4;
-                device.queue.writeBuffer(
-                    this.#instanceBuffer,
-                    slotByteOffset,
-                    arrayBuffer as BufferSource,
-                    idx,
-                    4
-                );
+                if (idx < minDirtyIdx) minDirtyIdx = idx;
+                if (idx + 4 > maxDirtyIdx) maxDirtyIdx = idx + 4;
             }
             visibleCount++;
         }
+
+        const prevCount = this.#currentInstanceCount;
         this.#currentInstanceCount = visibleCount;
+
+        if (prevCount !== visibleCount) {
+            minDirtyIdx = 0;
+            maxDirtyIdx = Math.max(prevCount, visibleCount) * 4;
+        }
+
+        // 변경된 Dirty 영역이 존재하면 단 1회의 writeBuffer (1 Batch Call)로 통합 전송
+        if (minDirtyIdx < maxDirtyIdx) {
+            const slotByteOffset = minDirtyIdx * 4;
+            const elementCount = maxDirtyIdx - minDirtyIdx;
+
+            device.queue.writeBuffer(
+                this.#instanceBuffer,
+                slotByteOffset,
+                arrayBuffer as BufferSource,
+                minDirtyIdx,
+                elementCount
+            );
+        }
 
         if (this.#terrain.gpuRenderInfo && this.#terrain.drawCommandSlot && this.#terrain.drawBufferManager) {
             this.#terrain.drawBufferManager.setInstanceNum(this.#terrain.drawCommandSlot, visibleCount);
