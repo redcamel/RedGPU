@@ -13,7 +13,7 @@ struct TerrainUniforms {
     maxLOD: f32,
     verticesPerSide: f32,
     pad0: f32,
-    pad1: vec2<f32>,
+    atlasTileCount: vec2<f32>,
     lodRanges: array<vec4<f32>, 8>,
 }
 @group(1) @binding(0) var<uniform> vertexUniforms: TerrainUniforms;
@@ -44,6 +44,7 @@ struct VertexOutput {
     @location(3) uv1: vec2<f32>,
     @location(4) vertexColor_0: vec4<f32>,
     @location(5) vertexTangent: vec4<f32>,
+    @location(6) vertexHeight: f32,
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
@@ -59,6 +60,10 @@ struct VertexOutput {
 };
 
 fn calculateMorphFactor(worldPos: vec3<f32>, lod: f32) -> f32 {
+    if (lod <= 0.0) {
+        return 0.0;
+    }
+
     let diff = systemUniforms.camera.cameraPosition.xz - worldPos.xz;
     let distSq = dot(diff, diff);
     
@@ -142,34 +147,35 @@ fn main(inputData: InputData) -> VertexOutput {
     var sampledHeight  = 0.0;
 
     #redgpu_if heightmapAtlasTexture
-        if (isSynthesizedTile) {
-            let texSize   = vec2<f32>(textureDimensions(heightmapAtlasTexture, 0));
-            let texelSize = 1.0 / texSize;
-            let halfTexel = 0.5 * texelSize;
+        let texSize   = vec2<f32>(textureDimensions(heightmapAtlasTexture, 0));
+        let texelSize = 1.0 / texSize;
+        let countX = max(1.0, vertexUniforms.atlasTileCount.x);
+        let countZ = max(1.0, vertexUniforms.atlasTileCount.y);
+        let tileCol = clamp(floor(rawWorldUV.x * countX), 0.0, countX - 1.0);
+        let tileRow = clamp(floor((1.0 - rawWorldUV.y) * countZ), 0.0, countZ - 1.0);
 
-            let clampedWorldUV = clamp(worldUV, halfTexel, vec2<f32>(1.0) - halfTexel);
+        let halfTexel = 0.5 * texelSize;
+        let slotMinUV = vec2<f32>(tileCol / countX, tileRow / countZ) + halfTexel;
+        let slotMaxUV = vec2<f32>((tileCol + 1.0) / countX, (tileRow + 1.0) / countZ) - halfTexel;
 
-            let sampledData0 = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clampedWorldUV, 0.0);
+        let clampedWorldUV = clamp(worldUV, slotMinUV, slotMaxUV);
 
-            sampledHeight   = sampledData0.r;
-            var localNormal = decodeOctahedronNormal(sampledData0.gb);
+        let sampledData0 = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clampedWorldUV, 0.0);
 
-            if (dot(localNormal, localNormal) < 0.0001) {
-                localNormal = vec3<f32>(0.0, 1.0, 0.0);
-            }
+        sampledHeight   = sampledData0.r;
+        var localNormal = decodeOctahedronNormal(sampledData0.gb);
 
-            let worldNormal = normalize((gu_normalModelMatrix * vec4<f32>(localNormal, 0.0)).xyz);
-            
-            let worldTangent = normalize(gu_modelMatrix[0].xyz);
-            let orthogonalTangent = normalize(worldTangent - dot(worldTangent, worldNormal) * worldNormal);
-
-            computedNormal = worldNormal;
-            worldTangentX  = orthogonalTangent;
-        } else {
-            sampledHeight = 0.0;
-            computedNormal = normalize((gu_normalModelMatrix * vec4<f32>(vec3<f32>(0.0, 1.0, 0.0), 0.0)).xyz);
-            worldTangentX  = normalize((gu_modelMatrix * vec4<f32>(vec3<f32>(1.0, 0.0, 0.0), 0.0)).xyz);
+        if (dot(localNormal, localNormal) < 0.0001) {
+            localNormal = vec3<f32>(0.0, 1.0, 0.0);
         }
+
+        let worldNormal = normalize((gu_normalModelMatrix * vec4<f32>(localNormal, 0.0)).xyz);
+        
+        let worldTangent = normalize(gu_modelMatrix[0].xyz);
+        let orthogonalTangent = normalize(worldTangent - dot(worldTangent, worldNormal) * worldNormal);
+
+        computedNormal = worldNormal;
+        worldTangentX  = orthogonalTangent;
     #redgpu_else
         computedNormal = normalize((gu_normalModelMatrix * vec4<f32>(inputData.vertexNormal, 0.0)).xyz);
         worldTangentX  = normalize((gu_modelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz);
@@ -187,6 +193,7 @@ fn main(inputData: InputData) -> VertexOutput {
 
     output.vertexNormal = computedNormal;
     output.vertexTangent = vec4<f32>(worldTangentX, inputData.vertexTangent.w);
+    output.vertexHeight = sampledHeight;
 
     output.uv = worldUV;
     output.uv1 = worldUV;

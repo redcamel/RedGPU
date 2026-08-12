@@ -109,13 +109,24 @@ export default class TerrainHeightmapManager {
     }
 
     isTileSynthesized(tile: SpatialTileInfo | string): boolean {
-        const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
+        const key = this.#getTileCacheKey(tile);
         return this.#synthesizedTilesSet.has(key);
     }
 
     markTileSynthesized(tile: SpatialTileInfo | string): void {
-        const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
+        const key = this.#getTileCacheKey(tile);
         this.#synthesizedTilesSet.add(key);
+    }
+
+    unregisterTileSynthesized(tile: SpatialTileInfo | string): void {
+        const key = this.#getTileCacheKey(tile);
+        this.#synthesizedTilesSet.delete(key);
+    }
+
+    #getTileCacheKey(tile: SpatialTileInfo | string): string {
+        if (typeof tile === 'string') return tile;
+        const lod = tile.lodLevel ?? 0;
+        return `${lod}_${tile.gridX}_${tile.gridZ}`;
     }
 
     #updateDimensionsCache() {

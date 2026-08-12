@@ -20,6 +20,7 @@
 
 struct TerrainUniforms {
     debugSplatTexture: u32,
+    debugHeightTexture: u32,
     invAtlasDim: f32,
 }
 @group(2) @binding(0) var<uniform> uniforms: TerrainUniforms;
@@ -45,6 +46,7 @@ struct InputData {
     @location(3) uv1: vec2<f32>,
     @location(4) vertexColor_0: vec4<f32>,
     @location(5) vertexTangent: vec4<f32>,
+    @location(6) vertexHeight: f32,
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
     @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
@@ -101,6 +103,11 @@ fn main(inputData:InputData) -> OutputFragment {
         #redgpu_else
             output.color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
         #redgpu_endIf
+        return output;
+    }
+
+    if (uniforms.debugHeightTexture == 1u) {
+        output.color = vec4<f32>(vec3<f32>(inputData.vertexHeight), 1.0);
         return output;
     }
 

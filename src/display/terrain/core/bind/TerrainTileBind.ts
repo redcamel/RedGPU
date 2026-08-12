@@ -23,6 +23,7 @@ interface TerrainTileBind {
     maxHeight: number;
     maxLOD: number;
     baseSlotIndex: number;
+    atlasTileCount: [number, number];
 }
 
 class TerrainTileBind extends TerrainMaterialBind {
@@ -39,8 +40,9 @@ class TerrainTileBind extends TerrainMaterialBind {
         this.minHeight = 0;
         this.maxHeight = 0.5;
         this.worldOffset = [-0.5, -0.5];
-        this.maxLOD = 4;
+        this.maxLOD = options?.maxLOD ?? 4;
         this.baseSlotIndex = 0;
+        this.atlasTileCount = [options?.atlasTileCountX ?? 16, options?.atlasTileCountZ ?? 16];
 
         this.#tileManager = new TerrainTileManager(this, redGPUContext, options);
     }
@@ -172,6 +174,9 @@ defineNumber(TerrainTileBind, [
     {key: "baseSlotIndex", value: 0},
     {key: "maxLOD", value: 4},
     {key: "verticesPerSide", value: 64},
+]);
+defineVector2(TerrainTileBind, [
+    {key: "atlasTileCount", value: [16, 16]},
 ]);
 defineTexture(TerrainTileBind, [
     {key: "heightmapAtlasTexture"}

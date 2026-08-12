@@ -36,6 +36,7 @@ export interface TerrainOptions {
     atlasTileCountX?: number;
     atlasTileCountZ?: number;
     atlasTileSize?: number;
+    maxLOD?: number;
 }
 
 export function sanitizeVerticesPerSide(val: number): number {
@@ -55,6 +56,8 @@ export interface ITerrainTarget {
     minHeight: number;
     maxHeight: number;
     maxLOD: number;
+    verticesPerSide?: number;
+    atlasTileCount?: [number, number];
     baseSlotIndex: number;
     globalVertexSlotIndex: number;
     lodRanges: Float32Array;
@@ -280,15 +283,19 @@ export class TerrainTileManager {
 
             if (this.#spatialGrid) {
                 this.#spatialGrid.cellSize = this.tileSpanX;
+                this.#spatialGrid.maxLOD = this.#terrain.maxLOD;
             }
+            this.#terrain.atlasTileCount = [this.atlasTileCountX, this.atlasTileCountZ];
 
             const lodRanges = this.#cachedLodRanges;
             const baseCellSize = this.tileSpanX || 256;
+            const vSide = Math.max(8, this.#terrain.verticesPerSide || 64);
+            const gridStepRatio = 1.0 / (vSide - 1);
 
             for (let i = 0; i <= this.#terrain.maxLOD; i++) {
                 const levelScale = baseCellSize * (1 << i);
-                const morphStart = levelScale * 1.2;
-                const morphEnd = levelScale * 2.0;
+                const morphStart = levelScale * (1.0 + gridStepRatio * 4.0);
+                const morphEnd = levelScale * (1.0 + gridStepRatio * 16.0);
 
                 lodRanges[i * 4 + 0] = morphStart * morphStart;
                 lodRanges[i * 4 + 1] = morphEnd * morphEnd;
@@ -322,6 +329,9 @@ export class TerrainTileManager {
                 for (let i = 0; i < len; i++) {
                     const tile = toLoad[i];
                     this.#enrichTileInfo(tile);
+                    if (tile.tileCol === undefined || tile.tileCol < 0 || tile.tileRow === undefined || tile.tileRow < 0 || tile.tileColStr === undefined) {
+                        continue;
+                    }
                     if (this.isTileSynthesized(tile)) continue;
                     this.#tileStreamMetrics.frameLoadCount++;
                     const result = this.#tileUrlResolver!(tile);
@@ -340,15 +350,25 @@ export class TerrainTileManager {
             const len = toUnload.length;
             for (let i = 0; i < len; i++) {
                 const tile = toUnload[i];
+                this.#heightmapManager.unregisterTileSynthesized(tile);
                 const cb = this.#onTileUnloadCallback;
                 if (cb) {
                     cb(tile);
                 }
                 if (rvt) {
-                    const vX = tile.tileCol ?? (tile.gridX + (tileCountX >> 1));
-                    const vZ = tile.tileRow ?? (tile.gridZ + (tileCountZ >> 1));
-                    if (vX >= 0 && vX < tileCountX && vZ >= 0 && vZ < tileCountZ) {
-                        rvt.pageTable.clearEntry(vX, vZ);
+                    const lod = tile.lodLevel ?? 0;
+                    const span = 1 << lod;
+                    const startVX = tile.tileCol ?? (tile.gridX + (tileCountX >> 1));
+                    const startVZ = tile.tileRow ?? (tile.gridZ + (tileCountZ >> 1));
+
+                    for (let dz = 0; dz < span; dz++) {
+                        for (let dx = 0; dx < span; dx++) {
+                            const vX = startVX + dx;
+                            const vZ = startVZ + dz;
+                            if (vX >= 0 && vX < tileCountX && vZ >= 0 && vZ < tileCountZ) {
+                                rvt.pageTable.clearEntry(vX, vZ);
+                            }
+                        }
                     }
                 }
             }
@@ -416,10 +436,7 @@ export class TerrainTileManager {
             const scale = tile.worldBounds[2] - tile.worldBounds[0];
             const posX = (tile.worldBounds[0] + tile.worldBounds[2]) * 0.5;
             const posZ = (tile.worldBounds[1] + tile.worldBounds[3]) * 0.5;
-            const isValidTileRange = (tile.tileCol !== undefined && tile.tileCol >= 0) && (tile.tileRow !== undefined && tile.tileRow >= 0);
-            const isSynthesized = isValidTileRange && this.#heightmapManager.isTileSynthesized(tile);
-            const rawLod = tile.lodLevel ?? 0;
-            const lod = isSynthesized ? rawLod : -(rawLod + 1.0);
+            const lod = tile.lodLevel ?? 0;
 
             const idx = visibleCount * 4;
             const isNodeChanged =
@@ -514,23 +531,18 @@ export class TerrainTileManager {
 
         const countX = this.atlasTileCountX;
         const countZ = this.atlasTileCountZ;
-        const cellSize = this.#spatialGrid ? this.#spatialGrid.cellSize : 256;
 
-        const baseGridX = Math.floor(tile.worldBounds[0] / cellSize);
-        const baseGridZ = Math.floor(tile.worldBounds[1] / cellSize);
+        const worldOffset = this.#terrain.worldOffset;
+        const worldSize = this.#terrain.worldSize;
 
-        const rawCol = baseGridX + (countX >> 1);
-        const rawRow = baseGridZ + (countZ >> 1);
+        const normX = (tile.worldBounds[0] - worldOffset[0]) / worldSize[0];
+        const normZ = (tile.worldBounds[3] - worldOffset[1]) / worldSize[1];
 
-        if (rawCol < 0 || rawCol >= countX || rawRow < 0 || rawRow >= countZ) {
-            tile.tileCol = -1;
-            tile.tileRow = -1;
-            tile.atlasKey = `invalid`;
-            return;
-        }
+        const rawCol = Math.floor(normX * countX);
+        const rawRow = Math.floor((1.0 - normZ) * countZ);
 
-        const col = rawCol;
-        const row = (countZ - 1) - rawRow;
+        const col = Math.max(0, Math.min(countX - 1, rawCol));
+        const row = Math.max(0, Math.min(countZ - 1, rawRow));
 
         tile.tileCol = col;
         tile.tileRow = row;
@@ -553,13 +565,15 @@ export class TerrainTileManager {
             this.#processor = new TerrainHeightmapProcessor(this.#redGPUContext);
         }
 
-        const destX = tileX * this.atlasTileSize;
-        const destZ = tileZ * this.atlasTileSize;
         const lod = tile.lodLevel ?? 0;
         const span = 1 << lod;
-        const maxSpanX = (this.atlasTileCountX - tileX) * this.atlasTileSize;
-        const maxSpanZ = (this.atlasTileCountZ - tileZ) * this.atlasTileSize;
-        const targetUploadSize = Math.max(this.atlasTileSize, Math.min(this.atlasTileSize * span, maxSpanX, maxSpanZ));
+
+        const destX = tileX * this.atlasTileSize;
+        const destZ = tileZ * this.atlasTileSize;
+
+        const maxAvailW = Math.max(1, (this.atlasTileCountX - tileX) * this.atlasTileSize);
+        const maxAvailH = Math.max(1, (this.atlasTileCountZ - tileZ) * this.atlasTileSize);
+        const targetUploadSize = Math.max(this.atlasTileSize, Math.min(this.atlasTileSize * span, maxAvailW, maxAvailH));
 
         this.#processor.processAndUploadTile(
             destX,
@@ -571,7 +585,7 @@ export class TerrainTileManager {
             targetUploadSize
         );
 
-        this.#heightmapManager.markTileSynthesized(`${tileX}_${tileZ}`);
+        this.#heightmapManager.markTileSynthesized(tile);
         this.markDirty();
         this.#terrain.updateTexture?.(null, this.#terrain.heightmapAtlasTexture);
 

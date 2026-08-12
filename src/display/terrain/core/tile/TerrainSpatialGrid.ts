@@ -39,7 +39,7 @@ export interface SpatialTileInfo {
 }
 
 export function getSpatialTileHash(lodLevel: number, gridX: number, gridZ: number): number {
-    return ((lodLevel & 0xF) << 28) | ((gridX + 8192) << 14) | ((gridZ + 8192) & 0x3FFF);
+    return ((lodLevel & 0xF) << 28) | (((gridX + 8192) & 0x3FFF) << 14) | ((gridZ + 8192) & 0x3FFF);
 }
 
 export class TerrainSpatialGrid {
@@ -65,9 +65,19 @@ export class TerrainSpatialGrid {
 
     #terrainBounds: [number, number, number, number] | null = [-5000, -5000, 5000, 5000];
 
+    #maxLOD: number = 4;
+
     constructor(cellSize: number = 256, loadingRadius: number = 2560) {
         this.#cellSize = cellSize;
         this.#loadingRadius = loadingRadius;
+    }
+
+    get maxLOD(): number {
+        return this.#maxLOD;
+    }
+
+    set maxLOD(val: number) {
+        this.#maxLOD = val;
     }
 
     get terrainBounds(): [number, number, number, number] | null {
@@ -174,117 +184,28 @@ export class TerrainSpatialGrid {
 
         const baseCellSize = this.#cellSize;
         const tileCenterY = (minY + maxY) * 0.5;
-        const maxLOD = 4;
+        const maxLOD = Math.max(0, Math.min(7, this.#maxLOD));
+        const rootCellSize = baseCellSize * (1 << maxLOD);
 
-        for (let lodLevel = 0; lodLevel <= maxLOD; lodLevel++) {
-            const scaleFactor = 1 << lodLevel;
-            const curCellSize = baseCellSize * scaleFactor;
+        const startGX = Math.floor(tbMinX / rootCellSize);
+        const endGX = Math.ceil(tbMaxX / rootCellSize);
+        const startGZ = Math.floor(tbMinZ / rootCellSize);
+        const endGZ = Math.ceil(tbMaxZ / rootCellSize);
 
-            const centerGX = Math.floor(camX / curCellSize);
-            const centerGZ = Math.floor(camZ / curCellSize);
-
-            let minCellR = 0;
-            let maxCellR = 2;
-
-            if (lodLevel === 0) {
-                minCellR = 0;
-                maxCellR = 2;
-            } else if (lodLevel < maxLOD) {
-                minCellR = 1;
-                maxCellR = 2;
-            } else {
-                minCellR = 1;
-                maxCellR = Math.max(2, Math.ceil(this.#loadingRadius / curCellSize));
-            }
-
-            for (let gx = centerGX - maxCellR; gx <= centerGX + maxCellR; gx++) {
-                for (let gz = centerGZ - maxCellR; gz <= centerGZ + maxCellR; gz++) {
-                    const absDx = Math.abs(gx - centerGX);
-                    const absDz = Math.abs(gz - centerGZ);
-
-                    if (lodLevel > 0 && absDx < minCellR && absDz < minCellR) {
-                        continue;
-                    }
-
-                    const minX = gx * curCellSize;
-                    const minZ = gz * curCellSize;
-                    const maxX = minX + curCellSize;
-                    const maxZ = minZ + curCellSize;
-
-                    if (maxX < tbMinX || minX > tbMaxX || maxZ < tbMinZ || minZ > tbMaxZ) {
-                        continue;
-                    }
-
-                    const tileCenterX = minX + curCellSize * 0.5;
-                    const tileCenterZ = minZ + curCellSize * 0.5;
-                    const toTileX = tileCenterX - camX;
-                    const toTileZ = tileCenterZ - camZ;
-                    const distSq = toTileX * toTileX + toTileZ * toTileZ;
-                    const dist = Math.sqrt(distSq);
-
-                    const inFrustum = this.#checkAABBInFrustum(
-                        minX, paddedMinY, minZ,
-                        maxX, paddedMaxY, maxZ,
-                        frustumPlanes
-                    );
-
-                    const key = getSpatialTileHash(lodLevel, gx, gz);
-                    currentFrameKeys.add(key);
-
-                    const toTileY = tileCenterY - camera.y;
-                    const dist3D = Math.sqrt(distSq + toTileY * toTileY);
-
-                    let priority = 0;
-                    if (dist3D > 0.0001) {
-                        const nx = toTileX / dist3D;
-                        const ny = toTileY / dist3D;
-                        const nz = toTileZ / dist3D;
-
-                        let viewFocusFactor = 0.0;
-                        if (hasDir) {
-                            const dot3D = nx * dirX + ny * dirY + nz * dirZ;
-                            if (dot3D > 0.0) {
-                                viewFocusFactor = dot3D * dot3D * dot3D * dot3D;
-                            }
-                        }
-                        priority = (curCellSize / dist3D) * (1.0 + 10.0 * viewFocusFactor) * 10.0;
-                    }
-
-                    const existingActive = this.#activeTiles.get(key);
-                    if (existingActive) {
-                        existingActive.distanceToCamera = dist;
-                        existingActive.priority = priority;
-                        existingActive.lodLevel = lodLevel;
-                        existingActive.inFrustum = inFrustum;
-                        existingActive.worldBounds[0] = minX;
-                        existingActive.worldBounds[1] = minZ;
-                        existingActive.worldBounds[2] = maxX;
-                        existingActive.worldBounds[3] = maxZ;
-                    } else {
-                        const existingPending = this.#pendingQueue.get(key);
-                        if (existingPending) {
-                            existingPending.distanceToCamera = dist;
-                            existingPending.priority = priority;
-                            existingPending.lodLevel = lodLevel;
-                            existingPending.inFrustum = inFrustum;
-                            existingPending.worldBounds[0] = minX;
-                            existingPending.worldBounds[1] = minZ;
-                            existingPending.worldBounds[2] = maxX;
-                            existingPending.worldBounds[3] = maxZ;
-                        } else {
-                            const tileInfo = this.#acquireTileInfo(
-                                lodLevel,
-                                gx, gz,
-                                minX, minZ,
-                                maxX, maxZ,
-                                dist, priority
-                            );
-                            tileInfo.lodLevel = lodLevel;
-                            tileInfo.inFrustum = inFrustum;
-                            this.#addToPending(key, tileInfo);
-                        }
-                    }
-                }
+        for (let gx = startGX; gx <= endGX; gx++) {
+            for (let gz = startGZ; gz <= endGZ; gz++) {
+                this.#evaluateQuadtreeNode(
+                    maxLOD,
+                    gx, gz,
+                    camX, camZ,
+                    camera,
+                    frustumPlanes,
+                    paddedMinY, paddedMaxY,
+                    hasDir, dirX, dirY, dirZ,
+                    currentFrameKeys,
+                    tbMinX, tbMinZ, tbMaxX, tbMaxZ,
+                    tileCenterY
+                );
             }
         }
 
@@ -405,6 +326,116 @@ export class TerrainSpatialGrid {
             }
         }
         return true;
+    }
+
+    #evaluateQuadtreeNode(
+        lodLevel: number,
+        gx: number,
+        gz: number,
+        camX: number,
+        camZ: number,
+        camera: any,
+        frustumPlanes: any[],
+        paddedMinY: number,
+        paddedMaxY: number,
+        hasDir: boolean,
+        dirX: number, dirY: number, dirZ: number,
+        currentFrameKeys: Set<number>,
+        tbMinX: number, tbMinZ: number, tbMaxX: number, tbMaxZ: number,
+        tileCenterY: number
+    ): void {
+        const curCellSize = this.#cellSize * (1 << lodLevel);
+        const minX = gx * curCellSize;
+        const minZ = gz * curCellSize;
+        const maxX = minX + curCellSize;
+        const maxZ = minZ + curCellSize;
+
+        if (maxX < tbMinX || minX > tbMaxX || maxZ < tbMinZ || minZ > tbMaxZ) {
+            return;
+        }
+
+        const tileCenterX = (minX + maxX) * 0.5;
+        const tileCenterZ = (minZ + maxZ) * 0.5;
+        const toTileX = tileCenterX - camX;
+        const toTileZ = tileCenterZ - camZ;
+        const distSq = toTileX * toTileX + toTileZ * toTileZ;
+
+        const splitDist = curCellSize * 1.75;
+        if (lodLevel > 0 && distSq < splitDist * splitDist) {
+            const childLod = lodLevel - 1;
+            const childGx = gx * 2;
+            const childGz = gz * 2;
+
+            this.#evaluateQuadtreeNode(childLod, childGx, childGz, camX, camZ, camera, frustumPlanes, paddedMinY, paddedMaxY, hasDir, dirX, dirY, dirZ, currentFrameKeys, tbMinX, tbMinZ, tbMaxX, tbMaxZ, tileCenterY);
+            this.#evaluateQuadtreeNode(childLod, childGx + 1, childGz, camX, camZ, camera, frustumPlanes, paddedMinY, paddedMaxY, hasDir, dirX, dirY, dirZ, currentFrameKeys, tbMinX, tbMinZ, tbMaxX, tbMaxZ, tileCenterY);
+            this.#evaluateQuadtreeNode(childLod, childGx, childGz + 1, camX, camZ, camera, frustumPlanes, paddedMinY, paddedMaxY, hasDir, dirX, dirY, dirZ, currentFrameKeys, tbMinX, tbMinZ, tbMaxX, tbMaxZ, tileCenterY);
+            this.#evaluateQuadtreeNode(childLod, childGx + 1, childGz + 1, camX, camZ, camera, frustumPlanes, paddedMinY, paddedMaxY, hasDir, dirX, dirY, dirZ, currentFrameKeys, tbMinX, tbMinZ, tbMaxX, tbMaxZ, tileCenterY);
+            return;
+        }
+
+        const dist = Math.sqrt(distSq);
+        const inFrustum = this.#checkAABBInFrustum(
+            minX, paddedMinY, minZ,
+            maxX, paddedMaxY, maxZ,
+            frustumPlanes
+        );
+
+        const key = getSpatialTileHash(lodLevel, gx, gz);
+        currentFrameKeys.add(key);
+
+        const toTileY = tileCenterY - camera.y;
+        const dist3D = Math.sqrt(distSq + toTileY * toTileY);
+
+        let priority = 0;
+        if (dist3D > 0.0001) {
+            const nx = toTileX / dist3D;
+            const ny = toTileY / dist3D;
+            const nz = toTileZ / dist3D;
+
+            let viewFocusFactor = 0.0;
+            if (hasDir) {
+                const dot3D = nx * dirX + ny * dirY + nz * dirZ;
+                if (dot3D > 0.0) {
+                    viewFocusFactor = dot3D * dot3D * dot3D * dot3D;
+                }
+            }
+            priority = (curCellSize / dist3D) * (1.0 + 10.0 * viewFocusFactor) * 10.0;
+        }
+
+        const existingActive = this.#activeTiles.get(key);
+        if (existingActive) {
+            existingActive.distanceToCamera = dist;
+            existingActive.priority = priority;
+            existingActive.lodLevel = lodLevel;
+            existingActive.inFrustum = inFrustum;
+            existingActive.worldBounds[0] = minX;
+            existingActive.worldBounds[1] = minZ;
+            existingActive.worldBounds[2] = maxX;
+            existingActive.worldBounds[3] = maxZ;
+        } else {
+            const existingPending = this.#pendingQueue.get(key);
+            if (existingPending) {
+                existingPending.distanceToCamera = dist;
+                existingPending.priority = priority;
+                existingPending.lodLevel = lodLevel;
+                existingPending.inFrustum = inFrustum;
+                existingPending.worldBounds[0] = minX;
+                existingPending.worldBounds[1] = minZ;
+                existingPending.worldBounds[2] = maxX;
+                existingPending.worldBounds[3] = maxZ;
+            } else {
+                const tileInfo = this.#acquireTileInfo(
+                    lodLevel,
+                    gx, gz,
+                    minX, minZ,
+                    maxX, maxZ,
+                    dist, priority
+                );
+                tileInfo.lodLevel = lodLevel;
+                tileInfo.inFrustum = inFrustum;
+                this.#addToPending(key, tileInfo);
+            }
+        }
     }
 
     #removeFromPending(key: number) {

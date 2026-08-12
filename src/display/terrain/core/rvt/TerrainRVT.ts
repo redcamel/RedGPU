@@ -42,6 +42,10 @@ class TerrainRVT {
     readonly #uDataBatch = new Float32Array(32 * 28);
     readonly #uDataBatchU32 = new Uint32Array(this.#uDataBatch.buffer);
 
+    readonly #batchRequests: TileBakeRequest[] = [];
+    readonly #pageTableSetups: Array<{ vX: number; vZ: number; slotX: number; slotY: number; mip: number }> = [];
+    readonly #pageTableSetupPool: Array<{ vX: number; vZ: number; slotX: number; slotY: number; mip: number }> = [];
+
     constructor(redGPUContext: RedGPUContext, options: TerrainRVTOptions = {}) {
         this.#redGPUContext = redGPUContext;
 
@@ -119,27 +123,61 @@ class TerrainRVT {
         const activeTiles = spatialGrid?.activeTileList;
         if (!activeTiles || activeTiles.length === 0) return;
 
-        const batchRequests: TileBakeRequest[] = [];
-        const pageTableSetups: Array<{ vX: number; vZ: number; slotX: number; slotY: number; mip: number }> = [];
+        const batchRequests = this.#batchRequests;
+        batchRequests.length = 0;
+
+        const setups = this.#pageTableSetups;
+        const pool = this.#pageTableSetupPool;
+        const setupsLen = setups.length;
+        for (let i = 0; i < setupsLen; i++) {
+            pool.push(setups[i]);
+        }
+        setups.length = 0;
 
         const tileCountX = this.#pageTable.virtualCountX;
         const tileCountZ = this.#pageTable.virtualCountZ;
         const tileSize = this.#physicalPagePool.tileSizeWithBorder;
 
-        for (let i = 0; i < activeTiles.length; i++) {
+        const activeTilesLen = activeTiles.length;
+        for (let i = 0; i < activeTilesLen; i++) {
             if (batchRequests.length >= maxBakesPerFrame) break;
             const tile = activeTiles[i];
             const vX = tile.tileCol as number;
             const vZ = tile.tileRow as number;
 
             if (vX >= 0 && vX < tileCountX && vZ >= 0 && vZ < tileCountZ) {
-                const entry = this.#pageTable.getEntry(vX, vZ);
-                if (!entry || entry.state !== TerrainPageState.Ready) {
+                const lod = tile.lodLevel ?? 0;
+                const span = 1 << lod;
+
+                let needsUpdate = false;
+                for (let dz = 0; dz < span; dz++) {
+                    for (let dx = 0; dx < span; dx++) {
+                        const targetVX = vX + dx;
+                        const targetVZ = vZ + dz;
+                        if (targetVX >= 0 && targetVX < tileCountX && targetVZ >= 0 && targetVZ < tileCountZ) {
+                            const entry = this.#pageTable.getEntry(targetVX, targetVZ);
+                            if (!entry || entry.state !== TerrainPageState.Ready || entry.mip !== lod) {
+                                needsUpdate = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (needsUpdate) break;
+                }
+
+                if (needsUpdate) {
                     const virtualKey = `${vX}_${vZ}`;
                     const slot = this.#physicalPagePool.allocatePage(virtualKey, vX, vZ);
 
                     if (slot.isEvicted && slot.evictedVX >= 0 && slot.evictedVZ >= 0) {
-                        this.#pageTable.clearEntry(slot.evictedVX, slot.evictedVZ);
+                        const prevEntry = this.#pageTable.getEntry(slot.evictedVX, slot.evictedVZ);
+                        const prevLod = prevEntry ? prevEntry.mip : 0;
+                        const prevSpan = 1 << prevLod;
+                        for (let dz = 0; dz < prevSpan; dz++) {
+                            for (let dx = 0; dx < prevSpan; dx++) {
+                                this.#pageTable.clearEntry(slot.evictedVX + dx, slot.evictedVZ + dz);
+                            }
+                        }
                     }
 
                     batchRequests.push({
@@ -151,20 +189,28 @@ class TerrainRVT {
                         tileCountX, tileCountZ
                     });
 
-                    pageTableSetups.push({
-                        vX, vZ,
-                        slotX: slot.slotX,
-                        slotY: slot.slotY,
-                        mip: 0
-                    });
+                    for (let dz = 0; dz < span; dz++) {
+                        for (let dx = 0; dx < span; dx++) {
+                            const targetVX = vX + dx;
+                            const targetVZ = vZ + dz;
+                            if (targetVX >= 0 && targetVX < tileCountX && targetVZ >= 0 && targetVZ < tileCountZ) {
+                                setups.push(this.#getSetupObject(
+                                    targetVX, targetVZ,
+                                    slot.slotX, slot.slotY,
+                                    lod
+                                ));
+                            }
+                        }
+                    }
                 }
             }
         }
 
         if (batchRequests.length > 0) {
             this.bakeBatch(material, batchRequests, true);
-            for (let i = 0; i < pageTableSetups.length; i++) {
-                const setup = pageTableSetups[i];
+            const setupsCount = setups.length;
+            for (let i = 0; i < setupsCount; i++) {
+                const setup = setups[i];
                 this.#pageTable.setEntry(
                     setup.vX, setup.vZ,
                     setup.slotX, setup.slotY,
@@ -174,6 +220,25 @@ class TerrainRVT {
                 );
             }
         }
+    }
+
+    #getSetupObject(vX: number, vZ: number, slotX: number, slotY: number, mip: number): {
+        vX: number;
+        vZ: number;
+        slotX: number;
+        slotY: number;
+        mip: number
+    } {
+        const obj = this.#pageTableSetupPool.pop();
+        if (obj) {
+            obj.vX = vX;
+            obj.vZ = vZ;
+            obj.slotX = slotX;
+            obj.slotY = slotY;
+            obj.mip = mip;
+            return obj;
+        }
+        return {vX, vZ, slotX, slotY, mip};
     }
 
     public bakeAll(material: TerrainMaterial): void {

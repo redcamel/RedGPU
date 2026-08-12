@@ -787,6 +787,12 @@ function buildGUI(redGPUContext, terrain, controller, view, directionalLight) {
             }).on('change', () => {
                 terrain.dirtyPipeline = true;
             });
+
+            rvtFolder.addBinding(terrain.material, 'debugHeightTexture', {
+                label: '디버그: Height 맵 채널 보기'
+            }).on('change', () => {
+                terrain.dirtyPipeline = true;
+            });
         }
     });
 }

@@ -33,6 +33,7 @@ interface TerrainMaterial {
     invAtlasDim: number;
     targetTerrain?: any;
     debugSplatTexture: boolean;
+    debugHeightTexture: boolean;
     baseColorFactor: [number, number, number, number] | string;
     baseColorTexture: BitmapTexture;
     splatTexture: BitmapTexture;
@@ -382,6 +383,7 @@ Object.defineProperty(TerrainMaterial.prototype, 'isPBRMaterial', {
 
 defineBoolean(TerrainMaterial, [
     {key: 'debugSplatTexture', value: false},
+    {key: 'debugHeightTexture', value: false},
 ]);
 
 defineNumber(TerrainMaterial, [

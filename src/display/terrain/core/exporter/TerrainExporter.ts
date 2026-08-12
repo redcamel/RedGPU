@@ -147,27 +147,26 @@ export default class TerrainExporter {
                 ctx.fillStyle = 'rgba(30, 41, 59, 0.8)';
                 ctx.fillRect(px, py, cellW, cellH);
 
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-                ctx.strokeRect(px, py, cellW, cellH);
-
                 const strKey = `${x}_${z}`;
-                const legacyIntKey = ((x + 32768) << 16) | ((z + 32768) & 0xFFFF);
+                let data = tileDataCache.get(strKey);
 
-                let data = tileDataCache.get(strKey) || tileDataCache.get(legacyIntKey);
                 if (!data) {
-                    for (let lod = 0; lod <= 4; lod++) {
+                    for (let lod = 0; lod <= 7; lod++) {
                         const lodHash = getSpatialTileHash(lod, x - (countX >> 1), z - (countZ >> 1));
-                        data = tileDataCache.get(lodHash);
+                        data = tileDataCache.get(lodHash) || tileDataCache.get(`${lod}_${x - (countX >> 1)}_${z - (countZ >> 1)}`);
                         if (data) break;
                     }
                 }
 
                 if (data) {
+                    ctx.fillStyle = 'rgba(34, 197, 94, 0.45)';
+                    ctx.fillRect(px + 2, py + 2, cellW - 4, cellH - 4);
+
                     if (data instanceof HTMLImageElement || data instanceof ImageBitmap || data instanceof HTMLCanvasElement) {
                         try {
                             ctx.drawImage(data as CanvasImageSource, px, py, cellW, cellH);
                         } catch (e) {
-                            // Suppress canvas draw errors for unloaded elements
+                            // Suppress canvas draw errors
                         }
                     } else if (ArrayBuffer.isView(data)) {
                         try {
@@ -197,12 +196,8 @@ export default class TerrainExporter {
                                 }
                             }
                         } catch (e) {
-                            ctx.fillStyle = 'rgba(34, 197, 94, 0.4)';
-                            ctx.fillRect(px + 2, py + 2, cellW - 4, cellH - 4);
+                            // Fallback to green box
                         }
-                    } else {
-                        ctx.fillStyle = 'rgba(34, 197, 94, 0.4)';
-                        ctx.fillRect(px + 2, py + 2, cellW - 4, cellH - 4);
                     }
                 }
             }
