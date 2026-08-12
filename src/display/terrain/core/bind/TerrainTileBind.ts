@@ -14,7 +14,6 @@ import updateTargetUniform from "../../../../defineProperty/core/updateTargetUni
 import DirectTexture from "../../../../resources/texture/DirectTexture";
 import BitmapTexture from "../../../../resources/texture/BitmapTexture";
 import {TerrainSpatialGrid} from "../tile/TerrainSpatialGrid";
-import {TerrainQuadtree} from "../tile/TerrainQuadtree";
 
 interface TerrainTileBind {
     heightmapAtlasTexture: DirectTexture | BitmapTexture | null;
@@ -95,10 +94,6 @@ class TerrainTileBind extends TerrainMaterialBind {
 
     get spatialGrid(): TerrainSpatialGrid {
         return this.#tileManager.spatialGrid;
-    }
-
-    get quadtree(): TerrainQuadtree {
-        return this.#tileManager.quadtree;
     }
 
     get tileStreamMetrics(): TileStreamMetrics {

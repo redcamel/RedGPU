@@ -2,7 +2,6 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
 import BitmapTexture from "../../../../resources/texture/BitmapTexture";
 import {SpatialTileInfo, TerrainSpatialGrid} from "./TerrainSpatialGrid";
-import {TerrainQuadtree} from "./TerrainQuadtree";
 import TerrainHeightmapManager from "./heightmap/TerrainHeightmapManager";
 import TerrainHeightmapProcessor from "./heightmap/processor/TerrainHeightmapProcessor";
 import parse16BitPngBuffer from "../../../../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
@@ -71,7 +70,6 @@ export class TerrainTileManager {
     #redGPUContext: RedGPUContext;
 
     #spatialGrid: TerrainSpatialGrid;
-    #quadtree!: TerrainQuadtree;
     #instanceBuffer: GPUBuffer;
     #instanceArrayBuffer: Float32Array;
     #cachedLodRanges: Float32Array = new Float32Array(32);
@@ -157,10 +155,6 @@ export class TerrainTileManager {
 
     get spatialGrid(): TerrainSpatialGrid {
         return this.#spatialGrid;
-    }
-
-    get quadtree(): TerrainQuadtree {
-        return this.#quadtree;
     }
 
     get tileStreamMetrics(): TileStreamMetrics {
@@ -267,12 +261,10 @@ export class TerrainTileManager {
 
     #updateLODRanges(currentWorldSize: number): boolean {
         if (
-            !this.#quadtree ||
             this.#prevWorldSize !== currentWorldSize ||
             this.#prevMaxLOD !== this.#terrain.maxLOD ||
             this.#prevLodThreshold !== this.#lodThreshold
         ) {
-            this.#quadtree = new TerrainQuadtree(currentWorldSize, this.#terrain.maxLOD);
             this.#prevWorldSize = currentWorldSize;
             this.#prevMaxLOD = this.#terrain.maxLOD;
             this.#prevLodThreshold = this.#lodThreshold;
@@ -392,18 +384,9 @@ export class TerrainTileManager {
     }
 
     #updateInstanceRenderBuffer(cameraPos: [number, number, number], renderViewStateData: any) {
-        this.#quadtree.update(
-            cameraPos,
-            renderViewStateData.frustumPlanes,
-            this.#terrain.minHeight,
-            this.#terrain.maxHeight,
-            this.#terrain.worldOffset[0],
-            this.#terrain.worldOffset[1],
-            this.#lodThreshold
-        );
-
-        const leafNodes = this.#quadtree.leafNodes;
-        const count = Math.min(leafNodes.length, this.#maxInstances);
+        // TerrainSpatialGrid 기반 1차 공간 인스턴스 데이터 추출 (Zero-Allocation)
+        const activeTiles = this.#spatialGrid ? this.#spatialGrid.activeTileList : [];
+        const count = Math.min(activeTiles.length, this.#maxInstances);
         this.#currentInstanceCount = count;
 
         if (count > 0) {
@@ -413,17 +396,15 @@ export class TerrainTileManager {
             const device = this.#redGPUContext.gpuDevice;
 
             for (let i = 0; i < count; i++) {
-                const node = leafNodes[i];
-                const halfScale = node.worldScale * 0.5;
-                const centerX = node.worldOffset[0] + halfScale;
-                const centerZ = node.worldOffset[1] + halfScale;
+                const tile = activeTiles[i];
+                const scale = this.#spatialGrid.cellSize;
+                const halfScale = scale * 0.5;
 
-                const posX = worldOffsetX + centerX;
-                const posZ = worldOffsetZ + centerZ;
-                const scale = node.worldScale;
-                const lod = node.lodLevel;
+                // tile.worldBounds[0]은 이미 절대 월드 좌표(minX)이므로 worldOffset 중복 합산 제거
+                const posX = tile.worldBounds[0] + halfScale;
+                const posZ = tile.worldBounds[1] + halfScale;
+                const lod = tile.lodLevel ?? 0;
 
-                // 고정 타일 공간 슬롯 인덱스 계산 (255 고정 공간 슬롯 핀포인트 타겟팅)
                 const idx = i * 4;
                 const isNodeChanged =
                     arrayBuffer[idx + 0] !== posX ||
@@ -437,7 +418,6 @@ export class TerrainTileManager {
                     arrayBuffer[idx + 2] = scale;
                     arrayBuffer[idx + 3] = lod;
 
-                    // 정확히 LOD가 변경된 해당 타일 슬롯(16 Bytes)만 핀포인트 writeBuffer 부분 갱신!
                     const slotByteOffset = idx * 4;
                     device.queue.writeBuffer(
                         this.#instanceBuffer,

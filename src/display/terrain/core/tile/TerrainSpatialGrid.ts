@@ -6,6 +6,15 @@ export interface TerrainTileKey {
 
 export type TileState = 'UNLOADED' | 'LOADING' | 'LOADED';
 
+/**
+ * Terrain GPU 인스턴싱 버퍼 레이아웃 명세 (Float32Array 16개 = 64 Bytes per Instance)
+ * [0..3]   : worldMinX, worldMinZ, scaleX, scaleZ
+ * [4..7]   : atlasTileCol, atlasTileRow, lodLevel, rvtPageIndex
+ * [8..11]  : minY, maxY, distanceToCamera, priority
+ * [12..15] : reserved / flags (padded for 16-float GPU alignment)
+ */
+export const TERRAIN_INSTANCE_FLOAT_STRIDE = 16;
+
 export interface SpatialTileInfo {
     gridX: number;
     gridZ: number;
@@ -13,6 +22,13 @@ export interface SpatialTileInfo {
     distanceToCamera: number;
     priority: number;
     state: TileState;
+
+    // LOD & RVT & Culling 속성 (Primary Tile)
+    lodLevel?: number;
+    rvtPageIndex?: number;
+    minY?: number;
+    maxY?: number;
+    inFrustum?: boolean;
 
     cellKey?: string;
     tileCol?: number;
@@ -171,6 +187,7 @@ export class TerrainSpatialGrid {
 
                     // 범위 내에 있을 때만 필요에 의해 제곱근 연산 실행
                     const dist = Math.sqrt(distSq);
+                    const lodLevel = Math.max(0, Math.floor(dist / (this.#cellSize * 2.0)));
 
                     let dotWeight = 1.0;
                     if (hasDir && dist > 0.0001) {
@@ -185,13 +202,16 @@ export class TerrainSpatialGrid {
                     if (existingActive) {
                         existingActive.distanceToCamera = dist;
                         existingActive.priority = priority;
+                        existingActive.lodLevel = lodLevel;
                     } else {
                         const existingPending = this.#pendingQueue.get(key);
                         if (existingPending) {
                             existingPending.distanceToCamera = dist;
                             existingPending.priority = priority;
+                            existingPending.lodLevel = lodLevel;
                         } else {
                             const tileInfo = this.#acquireTileInfo(gx, gz, minX, minZ, maxX, maxZ, dist, priority);
+                            tileInfo.lodLevel = lodLevel;
                             this.#pendingQueue.set(key, tileInfo);
                         }
                     }
