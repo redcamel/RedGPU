@@ -59,7 +59,15 @@ export class TerrainHeightmapProcessor {
             GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
             'TerrainTile_PooledInputBuffer'
         );
-        device.queue.writeBuffer(inputBuffer, 0, srcByteArray as BufferSource);
+
+        let uploadData: BufferSource = srcByteArray as BufferSource;
+        if (srcByteArray.byteLength % 4 !== 0) {
+            const padded = new Uint8Array(reqInputSize);
+            padded.set(srcByteArray);
+            uploadData = padded as BufferSource;
+        }
+
+        device.queue.writeBuffer(inputBuffer, 0, uploadData);
 
         const outputPixelCount = targetTileSize * targetTileSize;
         const outputByteSize = Math.max(16, outputPixelCount * 8); // rgba16float = 8 bytes per pixel
