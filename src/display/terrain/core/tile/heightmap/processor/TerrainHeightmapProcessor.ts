@@ -14,6 +14,7 @@ export class TerrainHeightmapProcessor {
     #inputBufferPool: GPUBuffer[] = [];
     #outputBufferPool: GPUBuffer[] = [];
     #uniformBufferPool: GPUBuffer[] = [];
+    #staticPaddingBuffer: Uint8Array | null = null;
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
@@ -62,9 +63,11 @@ export class TerrainHeightmapProcessor {
 
         let uploadData: BufferSource = srcByteArray as BufferSource;
         if (srcByteArray.byteLength % 4 !== 0) {
-            const padded = new Uint8Array(reqInputSize);
-            padded.set(srcByteArray);
-            uploadData = padded as BufferSource;
+            if (!this.#staticPaddingBuffer || this.#staticPaddingBuffer.byteLength < reqInputSize) {
+                this.#staticPaddingBuffer = new Uint8Array(Math.max(reqInputSize, 1024 * 1024));
+            }
+            this.#staticPaddingBuffer.set(srcByteArray);
+            uploadData = new Uint8Array(this.#staticPaddingBuffer.buffer as ArrayBuffer, 0, reqInputSize);
         }
 
         device.queue.writeBuffer(inputBuffer, 0, uploadData);
@@ -135,6 +138,7 @@ export class TerrainHeightmapProcessor {
         this.#inputBufferPool = [];
         this.#outputBufferPool = [];
         this.#uniformBufferPool = [];
+        this.#staticPaddingBuffer = null;
     }
 
     #acquireBuffer(
