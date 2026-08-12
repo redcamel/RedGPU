@@ -93,6 +93,7 @@ export class TerrainTileManager {
     #currentInstanceCount: number = 0;
     #prevInstanceCount: number = -1;
     #isDirty: boolean = true;
+    #cameraPosBuffer: [number, number, number] = [0, 0, 0];
     #lastCamX: number = NaN;
     #lastCamY: number = NaN;
     #lastCamZ: number = NaN;
@@ -227,7 +228,9 @@ export class TerrainTileManager {
             rotDiff > 0.001;
 
         if (shouldUpdate) {
-            const cameraPos: [number, number, number] = [localCamX, localCamY, localCamZ];
+            this.#cameraPosBuffer[0] = localCamX;
+            this.#cameraPosBuffer[1] = localCamY;
+            this.#cameraPosBuffer[2] = localCamZ;
             this.#lastCamX = localCamX;
             this.#lastCamY = localCamY;
             this.#lastCamZ = localCamZ;
@@ -236,7 +239,7 @@ export class TerrainTileManager {
             this.#lastCamRotZ = camRotZ;
             this.#isDirty = false;
 
-            this.#updateInstanceRenderBuffer(cameraPos, renderViewStateData);
+            this.#updateInstanceRenderBuffer(this.#cameraPosBuffer, renderViewStateData);
         } else if (this.#terrain.gpuRenderInfo && this.#terrain.drawCommandSlot && this.#terrain.drawBufferManager) {
             this.#terrain.drawBufferManager.setInstanceNum(this.#terrain.drawCommandSlot, this.#currentInstanceCount);
         }

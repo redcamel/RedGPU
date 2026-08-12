@@ -136,15 +136,10 @@ class TerrainRVT {
                 const entry = this.#pageTable.getEntry(vX, vZ);
                 if (!entry || entry.state !== TerrainPageState.Ready) {
                     const virtualKey = `${vX}_${vZ}`;
-                    const slot = this.#physicalPagePool.allocatePage(virtualKey);
+                    const slot = this.#physicalPagePool.allocatePage(virtualKey, vX, vZ);
 
-                    if (slot.isEvicted && slot.evictedVirtualKey) {
-                        const idx = slot.evictedVirtualKey.indexOf('_');
-                        if (idx !== -1) {
-                            const evX = parseInt(slot.evictedVirtualKey.substring(0, idx), 10);
-                            const evZ = parseInt(slot.evictedVirtualKey.substring(idx + 1), 10);
-                            this.#pageTable.clearEntry(evX, evZ);
-                        }
+                    if (slot.isEvicted && slot.evictedVX >= 0 && slot.evictedVZ >= 0) {
+                        this.#pageTable.clearEntry(slot.evictedVX, slot.evictedVZ);
                     }
 
                     batchRequests.push({

@@ -15,6 +15,8 @@ export interface TerrainPageSlotInfo {
     pixelY: number;
     isEvicted: boolean;
     evictedVirtualKey: string | null;
+    evictedVX: number;
+    evictedVZ: number;
 }
 
 export class TerrainPhysicalPagePool {
@@ -36,6 +38,8 @@ export class TerrainPhysicalPagePool {
 
     readonly #virtualToSlotMap = new Map<string, number>();
     readonly #slotToVirtualMap = new Map<number, string>();
+    readonly #slotToVXMap = new Map<number, number>();
+    readonly #slotToVZMap = new Map<number, number>();
     readonly #lruList: number[] = [];
 
     constructor(redGPUContext: RedGPUContext, options: TerrainPhysicalPagePoolOptions = {}) {
@@ -106,11 +110,11 @@ export class TerrainPhysicalPagePool {
         return this.#createSlotInfo(slotIndex, false, null);
     }
 
-    public allocatePage(virtualKey: string): TerrainPageSlotInfo {
+    public allocatePage(virtualKey: string, vX: number = -1, vZ: number = -1): TerrainPageSlotInfo {
         const existingSlot = this.#virtualToSlotMap.get(virtualKey);
         if (existingSlot !== undefined) {
             this.touchPage(virtualKey);
-            return this.#createSlotInfo(existingSlot, false, null);
+            return this.#createSlotInfo(existingSlot, false, null, -1, -1);
         }
 
         const slotIndex = this.#lruList.shift() ?? 0;
@@ -118,18 +122,24 @@ export class TerrainPhysicalPagePool {
 
         let isEvicted = false;
         let evictedVirtualKey: string | null = null;
+        let evictedVX = -1;
+        let evictedVZ = -1;
 
         const oldVirtualKey = this.#slotToVirtualMap.get(slotIndex);
         if (oldVirtualKey !== undefined) {
             this.#virtualToSlotMap.delete(oldVirtualKey);
             isEvicted = true;
             evictedVirtualKey = oldVirtualKey;
+            evictedVX = this.#slotToVXMap.get(slotIndex) ?? -1;
+            evictedVZ = this.#slotToVZMap.get(slotIndex) ?? -1;
         }
 
         this.#virtualToSlotMap.set(virtualKey, slotIndex);
         this.#slotToVirtualMap.set(slotIndex, virtualKey);
+        this.#slotToVXMap.set(slotIndex, vX);
+        this.#slotToVZMap.set(slotIndex, vZ);
 
-        return this.#createSlotInfo(slotIndex, isEvicted, evictedVirtualKey);
+        return this.#createSlotInfo(slotIndex, isEvicted, evictedVirtualKey, evictedVX, evictedVZ);
     }
 
     public touchPage(virtualKey: string): void {
@@ -145,6 +155,8 @@ export class TerrainPhysicalPagePool {
     public clear(): void {
         this.#virtualToSlotMap.clear();
         this.#slotToVirtualMap.clear();
+        this.#slotToVXMap.clear();
+        this.#slotToVZMap.clear();
         this.#lruList.length = 0;
         for (let i = 0; i < this.#totalSlots; i++) {
             this.#lruList.push(i);
@@ -163,12 +175,18 @@ export class TerrainPhysicalPagePool {
         this.clear();
     }
 
-    #createSlotInfo(slotIndex: number, isEvicted: boolean, evictedVirtualKey: string | null): TerrainPageSlotInfo {
+    #createSlotInfo(
+        slotIndex: number,
+        isEvicted: boolean,
+        evictedVirtualKey: string | null,
+        evictedVX: number = -1,
+        evictedVZ: number = -1
+    ): TerrainPageSlotInfo {
         const slotX = slotIndex % this.#tilesPerRow;
         const slotY = Math.floor(slotIndex / this.#tilesPerRow);
         const pixelX = slotX * this.#tileSizeWithBorder;
         const pixelY = slotY * this.#tileSizeWithBorder;
-        return {slotIndex, slotX, slotY, pixelX, pixelY, isEvicted, evictedVirtualKey};
+        return {slotIndex, slotX, slotY, pixelX, pixelY, isEvicted, evictedVirtualKey, evictedVX, evictedVZ};
     }
 
     #initTextures(): void {
