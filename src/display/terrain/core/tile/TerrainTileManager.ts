@@ -307,10 +307,22 @@ export class TerrainTileManager {
         }
         if (toUnload.length > 0) {
             this.#tileStreamMetrics.frameUnloadCount += toUnload.length;
+            const rvt = this.#terrain.material?.rvt;
+            const tileCountX = rvt ? rvt.pageTable.virtualCountX : 32;
+            const tileCountZ = rvt ? rvt.pageTable.virtualCountZ : 32;
+
             toUnload.forEach(tile => {
                 this.#enrichTileInfo(tile);
-                if (this.#onTileUnloadCallback) {
-                    this.#onTileUnloadCallback!(tile);
+                const cb = this.#onTileUnloadCallback;
+                if (cb) {
+                    cb(tile);
+                }
+                if (rvt) {
+                    const vX = tile.tileCol ?? (tile.gridX + (tileCountX >> 1));
+                    const vZ = tile.tileRow ?? (tile.gridZ + (tileCountZ >> 1));
+                    if (vX >= 0 && vX < tileCountX && vZ >= 0 && vZ < tileCountZ) {
+                        rvt.pageTable.clearEntry(vX, vZ);
+                    }
                 }
             });
         }

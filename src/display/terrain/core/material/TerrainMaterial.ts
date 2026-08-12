@@ -109,9 +109,9 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         this.invAtlasDim = 1.0 / atlasSize;
         this.#rvt = new TerrainRVT(redGPUContext, {atlasSize});
 
-        this.rvtAlbedoTexture = this.#rvt.albedoDirectTexture!;
-        this.rvtNormalORMTexture = this.#rvt.normalORMDirectTexture!;
-        this.rvtPageTableTexture = this.#rvt.pageTableDirectTexture!;
+        this.rvtAlbedoTexture = this.#rvt.albedoDirectTexture as DirectTexture;
+        this.rvtNormalORMTexture = this.#rvt.normalORMDirectTexture as DirectTexture;
+        this.rvtPageTableTexture = this.#rvt.pageTableDirectTexture as DirectTexture;
 
         if (!this.__packingList) this.__packingList = [];
         this.__packingList.push(this.bakeAllRVTTiles);

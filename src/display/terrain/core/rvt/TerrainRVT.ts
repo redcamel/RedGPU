@@ -1,8 +1,8 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
 import TerrainMaterial from "../material/TerrainMaterial";
-import PhysicalPagePool from "./PhysicalPagePool";
-import PageTable, {PageState} from "./PageTable";
+import TerrainPhysicalPagePool from "./TerrainPhysicalPagePool";
+import TerrainPageTable, {TerrainPageState} from "../tile/TerrainPageTable";
 import bakeSrc from "./rvt_bake.wgsl";
 
 export interface TerrainRVTOptions {
@@ -26,8 +26,8 @@ export interface TileBakeRequest {
 
 class TerrainRVT {
     readonly #redGPUContext: RedGPUContext;
-    readonly #physicalPagePool: PhysicalPagePool;
-    readonly #pageTable: PageTable;
+    readonly #physicalPagePool: TerrainPhysicalPagePool;
+    readonly #pageTable: TerrainPageTable;
 
     #computePipeline: GPUComputePipeline | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
@@ -45,13 +45,13 @@ class TerrainRVT {
     constructor(redGPUContext: RedGPUContext, options: TerrainRVTOptions = {}) {
         this.#redGPUContext = redGPUContext;
 
-        this.#physicalPagePool = new PhysicalPagePool(redGPUContext, {
+        this.#physicalPagePool = new TerrainPhysicalPagePool(redGPUContext, {
             atlasSize: options.atlasSize ?? 4096,
             tileSize: options.tileSize ?? 128,
             borderSize: options.borderSize ?? 4,
         });
 
-        this.#pageTable = new PageTable(redGPUContext, {
+        this.#pageTable = new TerrainPageTable(redGPUContext, {
             virtualCountX: options.virtualCountX ?? 32,
             virtualCountZ: options.virtualCountZ ?? 32,
         });
@@ -59,11 +59,11 @@ class TerrainRVT {
         this.#initPipeline();
     }
 
-    get physicalPagePool(): PhysicalPagePool {
+    get physicalPagePool(): TerrainPhysicalPagePool {
         return this.#physicalPagePool;
     }
 
-    get pageTable(): PageTable {
+    get pageTable(): TerrainPageTable {
         return this.#pageTable;
     }
 
@@ -109,7 +109,7 @@ class TerrainRVT {
             vX, vZ,
             slot.slotX, slot.slotY,
             mip,
-            PageState.Ready,
+            TerrainPageState.Ready,
             this.#physicalPagePool.tilesPerRow
         );
     }
@@ -134,7 +134,7 @@ class TerrainRVT {
 
             if (vX >= 0 && vX < tileCountX && vZ >= 0 && vZ < tileCountZ) {
                 const entry = this.#pageTable.getEntry(vX, vZ);
-                if (!entry || entry.state !== PageState.Ready) {
+                if (!entry || entry.state !== TerrainPageState.Ready) {
                     const virtualKey = `${vX}_${vZ}`;
                     const slot = this.#physicalPagePool.allocatePage(virtualKey);
 
@@ -174,7 +174,7 @@ class TerrainRVT {
                     setup.vX, setup.vZ,
                     setup.slotX, setup.slotY,
                     setup.mip,
-                    PageState.Ready,
+                    TerrainPageState.Ready,
                     this.#physicalPagePool.tilesPerRow
                 );
             }

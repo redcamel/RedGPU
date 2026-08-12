@@ -1,19 +1,19 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
 
-export interface PageTableOptions {
+export interface TerrainPageTableOptions {
     virtualCountX?: number;
     virtualCountZ?: number;
     maxMipLevel?: number;
 }
 
-export enum PageState {
+export enum TerrainPageState {
     Unallocated = 0,
     Baking = 128,
     Ready = 255,
 }
 
-export class PageTable {
+export class TerrainPageTable {
     readonly #redGPUContext: RedGPUContext;
     readonly #virtualCountX: number;
     readonly #virtualCountZ: number;
@@ -23,7 +23,7 @@ export class PageTable {
     #pageTableDirectTexture: DirectTexture | null = null;
     #pageTableData: Uint8Array;
 
-    constructor(redGPUContext: RedGPUContext, options: PageTableOptions = {}) {
+    constructor(redGPUContext: RedGPUContext, options: TerrainPageTableOptions = {}) {
         this.#redGPUContext = redGPUContext;
         this.#virtualCountX = options.virtualCountX ?? 32;
         this.#virtualCountZ = options.virtualCountZ ?? 32;
@@ -59,7 +59,7 @@ export class PageTable {
         slotX: number,
         slotY: number,
         mip: number = 0,
-        state: PageState = PageState.Ready,
+        state: TerrainPageState = TerrainPageState.Ready,
         tilesPerRow: number = 32
     ): void {
         if (vX < 0 || vX >= this.#virtualCountX || vZ < 0 || vZ >= this.#virtualCountZ) return;
@@ -74,14 +74,19 @@ export class PageTable {
         this.#flushEntryToGPU(vX, vZ);
     }
 
-    public getEntry(vX: number, vZ: number): { slotX: number; slotY: number; mip: number; state: PageState } | null {
+    public getEntry(vX: number, vZ: number): {
+        slotX: number;
+        slotY: number;
+        mip: number;
+        state: TerrainPageState
+    } | null {
         if (vX < 0 || vX >= this.#virtualCountX || vZ < 0 || vZ >= this.#virtualCountZ) return null;
         const index = (vZ * this.#virtualCountX + vX) * 4;
         return {
             slotX: this.#pageTableData[index],
             slotY: this.#pageTableData[index + 1],
             mip: this.#pageTableData[index + 2],
-            state: this.#pageTableData[index + 3] as PageState,
+            state: this.#pageTableData[index + 3] as TerrainPageState,
         };
     }
 
@@ -92,7 +97,7 @@ export class PageTable {
         this.#pageTableData[index] = 0;
         this.#pageTableData[index + 1] = 0;
         this.#pageTableData[index + 2] = 0;
-        this.#pageTableData[index + 3] = PageState.Unallocated;
+        this.#pageTableData[index + 3] = TerrainPageState.Unallocated;
 
         this.#flushEntryToGPU(vX, vZ);
     }
@@ -150,5 +155,5 @@ export class PageTable {
     }
 }
 
-Object.freeze(PageTable);
-export default PageTable;
+Object.freeze(TerrainPageTable);
+export default TerrainPageTable;

@@ -1,13 +1,13 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
 
-export interface PhysicalPagePoolOptions {
+export interface TerrainPhysicalPagePoolOptions {
     tileSize?: number;
     borderSize?: number;
     atlasSize?: number;
 }
 
-export interface PageSlotInfo {
+export interface TerrainPageSlotInfo {
     slotIndex: number;
     slotX: number;
     slotY: number;
@@ -17,7 +17,7 @@ export interface PageSlotInfo {
     evictedVirtualKey: string | null;
 }
 
-export class PhysicalPagePool {
+export class TerrainPhysicalPagePool {
     readonly #redGPUContext: RedGPUContext;
     readonly #tileSize: number;
     readonly #borderSize: number;
@@ -38,7 +38,7 @@ export class PhysicalPagePool {
     readonly #slotToVirtualMap = new Map<number, string>();
     readonly #lruList: number[] = [];
 
-    constructor(redGPUContext: RedGPUContext, options: PhysicalPagePoolOptions = {}) {
+    constructor(redGPUContext: RedGPUContext, options: TerrainPhysicalPagePoolOptions = {}) {
         this.#redGPUContext = redGPUContext;
         this.#tileSize = options.tileSize ?? 128;
         this.#borderSize = options.borderSize ?? 4;
@@ -99,21 +99,21 @@ export class PhysicalPagePool {
         return this.#normalORMStorageView;
     }
 
-    public getSlotForVirtualKey(virtualKey: string): PageSlotInfo | null {
+    public getSlotForVirtualKey(virtualKey: string): TerrainPageSlotInfo | null {
         const slotIndex = this.#virtualToSlotMap.get(virtualKey);
         if (slotIndex === undefined) return null;
         this.touchPage(virtualKey);
         return this.#createSlotInfo(slotIndex, false, null);
     }
 
-    public allocatePage(virtualKey: string): PageSlotInfo {
+    public allocatePage(virtualKey: string): TerrainPageSlotInfo {
         const existingSlot = this.#virtualToSlotMap.get(virtualKey);
         if (existingSlot !== undefined) {
             this.touchPage(virtualKey);
             return this.#createSlotInfo(existingSlot, false, null);
         }
 
-        const slotIndex = this.#lruList.shift()!;
+        const slotIndex = this.#lruList.shift() ?? 0;
         this.#lruList.push(slotIndex);
 
         let isEvicted = false;
@@ -163,7 +163,7 @@ export class PhysicalPagePool {
         this.clear();
     }
 
-    #createSlotInfo(slotIndex: number, isEvicted: boolean, evictedVirtualKey: string | null): PageSlotInfo {
+    #createSlotInfo(slotIndex: number, isEvicted: boolean, evictedVirtualKey: string | null): TerrainPageSlotInfo {
         const slotX = slotIndex % this.#tilesPerRow;
         const slotY = Math.floor(slotIndex / this.#tilesPerRow);
         const pixelX = slotX * this.#tileSizeWithBorder;
@@ -198,5 +198,5 @@ export class PhysicalPagePool {
     }
 }
 
-Object.freeze(PhysicalPagePool);
-export default PhysicalPagePool;
+Object.freeze(TerrainPhysicalPagePool);
+export default TerrainPhysicalPagePool;

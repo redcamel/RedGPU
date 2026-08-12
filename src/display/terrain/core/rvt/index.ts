@@ -1,16 +1,16 @@
 import TerrainRVT from "./TerrainRVT";
-import PhysicalPagePool from "./PhysicalPagePool";
-import PageTable, {PageState} from "./PageTable";
+import TerrainPhysicalPagePool from "./TerrainPhysicalPagePool";
+import TerrainPageTable, {TerrainPageState} from "../tile/TerrainPageTable";
 
 export type {TerrainRVTOptions} from "./TerrainRVT";
-export type {PhysicalPagePoolOptions, PageSlotInfo} from "./PhysicalPagePool";
-export type {PageTableOptions} from "./PageTable";
+export type {TerrainPhysicalPagePoolOptions, TerrainPageSlotInfo} from "./TerrainPhysicalPagePool";
+export type {TerrainPageTableOptions} from "../tile/TerrainPageTable";
 
 export {
     TerrainRVT,
-    PhysicalPagePool,
-    PageTable,
-    PageState
+    TerrainPhysicalPagePool,
+    TerrainPageTable,
+    TerrainPageState
 };
 
 export default TerrainRVT;

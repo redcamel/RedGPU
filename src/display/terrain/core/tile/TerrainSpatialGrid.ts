@@ -35,6 +35,7 @@ export class TerrainSpatialGrid {
     #pendingQueue: Map<number, SpatialTileInfo> = new Map();
     #pendingBuffer: SpatialTileInfo[] = [];
     readonly #buckets: SpatialTileInfo[][] = Array.from({length: 64}, () => []);
+    #tileInfoPool: SpatialTileInfo[] = [];
     #lastCameraGridX: number = NaN;
     #lastCameraGridZ: number = NaN;
 
@@ -171,24 +172,19 @@ export class TerrainSpatialGrid {
                     }
                     const priority = dotWeight / (dist + 1.0);
 
-                    if (this.#activeTiles.has(key)) {
-                        const existing = this.#activeTiles.get(key)!;
-                        existing.distanceToCamera = dist;
-                        existing.priority = priority;
-                    } else if (this.#pendingQueue.has(key)) {
-                        const existingPending = this.#pendingQueue.get(key)!;
-                        existingPending.distanceToCamera = dist;
-                        existingPending.priority = priority;
+                    const existingActive = this.#activeTiles.get(key);
+                    if (existingActive) {
+                        existingActive.distanceToCamera = dist;
+                        existingActive.priority = priority;
                     } else {
-                        const tileInfo: SpatialTileInfo = {
-                            gridX: gx,
-                            gridZ: gz,
-                            worldBounds: [minX, minZ, maxX, maxZ],
-                            distanceToCamera: dist,
-                            priority,
-                            state: 'LOADING'
-                        };
-                        this.#pendingQueue.set(key, tileInfo);
+                        const existingPending = this.#pendingQueue.get(key);
+                        if (existingPending) {
+                            existingPending.distanceToCamera = dist;
+                            existingPending.priority = priority;
+                        } else {
+                            const tileInfo = this.#acquireTileInfo(gx, gz, minX, minZ, maxX, maxZ, dist, priority);
+                            this.#pendingQueue.set(key, tileInfo);
+                        }
                     }
                 }
             }
@@ -206,9 +202,10 @@ export class TerrainSpatialGrid {
             }
         }
 
-        for (const [key] of this.#pendingQueue.entries()) {
+        for (const [key, pendingTile] of this.#pendingQueue.entries()) {
             if (!currentFrameKeys.has(key)) {
                 this.#pendingQueue.delete(key);
+                this.#recycleTileInfo(pendingTile);
             }
         }
 
@@ -255,8 +252,53 @@ export class TerrainSpatialGrid {
         this.#activeTileList.length = 0;
         this.#pendingQueue.clear();
         this.#pendingBuffer.length = 0;
+        this.#tileInfoPool.length = 0;
         for (let i = 0; i < 64; i++) {
             this.#buckets[i].length = 0;
         }
+    }
+
+    #acquireTileInfo(
+        gx: number,
+        gz: number,
+        minX: number,
+        minZ: number,
+        maxX: number,
+        maxZ: number,
+        dist: number,
+        priority: number
+    ): SpatialTileInfo {
+        const pool = this.#tileInfoPool;
+        if (pool.length > 0) {
+            const tile = pool.pop() as SpatialTileInfo;
+            tile.gridX = gx;
+            tile.gridZ = gz;
+            tile.worldBounds[0] = minX;
+            tile.worldBounds[1] = minZ;
+            tile.worldBounds[2] = maxX;
+            tile.worldBounds[3] = maxZ;
+            tile.distanceToCamera = dist;
+            tile.priority = priority;
+            tile.state = 'LOADING';
+            tile.tileCol = undefined;
+            tile.tileRow = undefined;
+            tile.atlasKey = undefined;
+            tile.tileColStr = undefined;
+            tile.tileRowStr = undefined;
+            return tile;
+        }
+        return {
+            gridX: gx,
+            gridZ: gz,
+            worldBounds: [minX, minZ, maxX, maxZ],
+            distanceToCamera: dist,
+            priority,
+            state: 'LOADING'
+        };
+    }
+
+    #recycleTileInfo(tile: SpatialTileInfo): void {
+        if (!tile || this.#tileInfoPool.length >= 256) return;
+        this.#tileInfoPool.push(tile);
     }
 }
