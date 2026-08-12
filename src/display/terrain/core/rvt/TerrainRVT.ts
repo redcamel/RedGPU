@@ -202,125 +202,7 @@ class TerrainRVT {
         this.requestVirtualPage(material, vX, vZ);
     }
 
-    public bakeBatch(
-        material: TerrainMaterial,
-        requests: TileBakeRequest[],
-        useDeferred: boolean = false
-    ): void {
-        if (!this.#computePipeline || requests.length === 0) return;
-
-        const count = Math.min(requests.length, 32);
-        const mat = material as any;
-        const splatGPUView = this.#getTextureView(mat.splatTexture);
-        const diffuseGPUView = this.#getArrayTextureView(mat.diffuseArray);
-        const normalGPUView = this.#getArrayTextureView(mat.normalArray);
-        const heightGPUView = this.#getArrayTextureView(mat.heightArray);
-        const ormGPUView = this.#getArrayTextureView(mat.ormArray);
-        const baseColorGPUView = this.#getTextureView(mat.baseColorTexture);
-        const ormTextureGPUView = this.#getTextureView(mat.ormTexture);
-        const heightmapGPUView = this.#getTextureView(mat.targetTerrain?.heightmapAtlasTexture);
-
-        const device = this.#redGPUContext.gpuDevice;
-
-        const layers = mat.layers || [];
-        const baseRoughness = mat.roughnessFactor ?? 1.0;
-        const defaultTileCountX = this.#pageTable.virtualCountX;
-        const defaultTileCountZ = this.#pageTable.virtualCountZ;
-
-        for (let i = 0; i < count; i++) {
-            const req = requests[i];
-            const tileCountX = req.tileCountX ?? defaultTileCountX;
-            const tileCountZ = req.tileCountZ ?? defaultTileCountZ;
-            const offset = i * 28;
-
-            this.#uDataBatch[offset + 0] = req.vX / tileCountX;
-            this.#uDataBatch[offset + 1] = req.vZ / tileCountZ;
-            this.#uDataBatch[offset + 2] = 1.0 / tileCountX;
-            this.#uDataBatch[offset + 3] = 1.0 / tileCountZ;
-            this.#uDataBatch[offset + 4] = req.vX / tileCountX;
-            this.#uDataBatch[offset + 5] = req.vZ / tileCountZ;
-            this.#uDataBatch[offset + 6] = 1.0 / tileCountX;
-            this.#uDataBatch[offset + 7] = 1.0 / tileCountZ;
-
-            this.#uDataBatch[offset + 8] = req.pixelX;
-            this.#uDataBatch[offset + 9] = req.pixelY;
-            this.#uDataBatch[offset + 10] = req.width;
-            this.#uDataBatch[offset + 11] = req.height;
-
-            this.#uDataBatch[offset + 12] = mat.tileScale ?? 16.0;
-            this.#uDataBatch[offset + 13] = mat.macroScale ?? 2.0;
-            this.#uDataBatch[offset + 14] = mat.blendContrast ?? 0.0;
-            this.#uDataBatch[offset + 15] = baseRoughness;
-            this.#uDataBatch[offset + 16] = layers[0]?.roughnessFactor ?? 0.85;
-            this.#uDataBatch[offset + 17] = layers[1]?.roughnessFactor ?? 0.85;
-            this.#uDataBatch[offset + 18] = layers[2]?.roughnessFactor ?? 0.90;
-            this.#uDataBatch[offset + 19] = layers[3]?.roughnessFactor ?? 0.85;
-            this.#uDataBatch[offset + 20] = mat.normalScale ?? 1.0;
-            this.#uDataBatch[offset + 21] = mat.occlusionStrength ?? 1.0;
-            this.#uDataBatch[offset + 22] = mat.baseColorWeight ?? 0.5;
-
-            this.#uDataBatchU32[offset + 23] = mat.baseColorBlendMode === 'multiply' ? 1 : 0;
-            const isAutoSplat = !mat.splatTexture || mat.useAutoSplat === true;
-            this.#uDataBatchU32[offset + 24] = isAutoSplat ? 1 : 0;
-            this.#uDataBatchU32[offset + 25] = 0;
-            this.#uDataBatchU32[offset + 26] = 0;
-            this.#uDataBatchU32[offset + 27] = 0;
-        }
-
-        device.queue.writeBuffer(this.#storageBuffer!, 0, this.#uDataBatch.subarray(0, count * 28));
-
-        const empty2DView = this.#getOrCreateEmpty2DView();
-        const emptyArrayView = this.#getOrCreateEmptyArrayView();
-
-        const resolvedSplat = splatGPUView ?? empty2DView;
-        const resolvedDiffuse = diffuseGPUView ?? emptyArrayView;
-        const resolvedNormal = normalGPUView ?? emptyArrayView;
-        const resolvedHeight = heightGPUView ?? emptyArrayView;
-        const resolvedORM = ormGPUView ?? emptyArrayView;
-        const resolvedBaseColor = baseColorGPUView ?? empty2DView;
-        const resolvedORMTexture = ormTextureGPUView ?? empty2DView;
-        const resolvedHeightmap = heightmapGPUView ?? empty2DView;
-
-        const albedoStorageView = this.#physicalPagePool.albedoStorageView!;
-        const normalORMStorageView = this.#physicalPagePool.normalORMStorageView!;
-
-        const bindGroup = device.createBindGroup({
-            label: 'RVT_ComputeBakeBindGroup',
-            layout: this.#bindGroupLayout!,
-            entries: [
-                {binding: 0, resource: {buffer: this.#storageBuffer!}},
-                {binding: 1, resource: resolvedSplat},
-                {binding: 2, resource: resolvedDiffuse},
-                {binding: 3, resource: resolvedNormal},
-                {binding: 4, resource: resolvedHeight},
-                {binding: 5, resource: resolvedORM},
-                {binding: 6, resource: this.#sampler!},
-                {binding: 7, resource: resolvedBaseColor},
-                {binding: 8, resource: resolvedORMTexture},
-                {binding: 9, resource: resolvedHeightmap},
-                {binding: 10, resource: albedoStorageView},
-                {binding: 11, resource: normalORMStorageView},
-            ]
-        });
-
-        const commandEncoderManager = this.#redGPUContext.commandEncoderManager;
-        const passRecord = (pass: GPUComputePassEncoder) => {
-            pass.setPipeline(this.#computePipeline!);
-            pass.setBindGroup(0, bindGroup);
-            const req0 = requests[0];
-            pass.dispatchWorkgroups(
-                Math.ceil(req0.width / 16),
-                Math.ceil(req0.height / 16),
-                count
-            );
-        };
-
-        if (useDeferred) {
-            commandEncoderManager.addResourceComputePass({label: 'RVT_ComputeBakePass'}, passRecord);
-        } else {
-            commandEncoderManager.immediateComputePass({label: 'RVT_ComputeBakePass'}, passRecord);
-        }
-    }
+    #cachedBindGroup: GPUBindGroup | null = null;
 
     public bakeTileRect(
         material: TerrainMaterial,
@@ -338,20 +220,7 @@ class TerrainRVT {
             vX, vZ, pixelX, pixelY, width, height, tileCountX, tileCountZ
         }], useDeferred);
     }
-
-    public destroy(): void {
-        this.#physicalPagePool.destroy();
-        this.#pageTable.destroy();
-        this.#feedbackBuffer.destroy();
-        this.#empty2DGPUTexture?.destroy();
-        this.#emptyArrayGPUTexture?.destroy();
-        this.#storageBuffer?.destroy();
-        this.#empty2DGPUTexture = null;
-        this.#empty2DView = null;
-        this.#emptyArrayGPUTexture = null;
-        this.#emptyArrayView = null;
-        this.#storageBuffer = null;
-    }
+    #cachedBindGroupKey: string = '';
 
     #initPipeline(): void {
         const device = this.#redGPUContext.gpuDevice;
@@ -437,6 +306,187 @@ class TerrainRVT {
         const gpuTex = textureArray.gpuTexture ?? textureArray.texture;
         if (gpuTex instanceof GPUTexture) return gpuTex.createView({dimension: '2d-array'});
         return this.#redGPUContext.resourceManager.getGPUResourceBitmapTextureView(textureArray, {dimension: '2d-array'}) ?? null;
+    }
+
+    public bakeBatch(
+        material: TerrainMaterial,
+        requests: TileBakeRequest[],
+        useDeferred: boolean = false
+    ): void {
+        if (!this.#computePipeline || requests.length === 0) return;
+
+        const count = Math.min(requests.length, 32);
+        const mat = material as any;
+        const splatGPUView = this.#getTextureView(mat.splatTexture);
+        const diffuseGPUView = this.#getArrayTextureView(mat.diffuseArray);
+        const normalGPUView = this.#getArrayTextureView(mat.normalArray);
+        const heightGPUView = this.#getArrayTextureView(mat.heightArray);
+        const ormGPUView = this.#getArrayTextureView(mat.ormArray);
+        const baseColorGPUView = this.#getTextureView(mat.baseColorTexture);
+        const ormTextureGPUView = this.#getTextureView(mat.ormTexture);
+        const heightmapGPUView = this.#getTextureView(mat.targetTerrain?.heightmapAtlasTexture);
+
+        const device = this.#redGPUContext.gpuDevice;
+
+        const layers = mat.layers || [];
+        const baseRoughness = mat.roughnessFactor ?? 1.0;
+        const defaultTileCountX = this.#pageTable.virtualCountX;
+        const defaultTileCountZ = this.#pageTable.virtualCountZ;
+
+        for (let i = 0; i < count; i++) {
+            const req = requests[i];
+            const tileCountX = req.tileCountX ?? defaultTileCountX;
+            const tileCountZ = req.tileCountZ ?? defaultTileCountZ;
+            const offset = i * 28;
+
+            this.#uDataBatch[offset + 0] = req.vX / tileCountX;
+            this.#uDataBatch[offset + 1] = req.vZ / tileCountZ;
+            this.#uDataBatch[offset + 2] = 1.0 / tileCountX;
+            this.#uDataBatch[offset + 3] = 1.0 / tileCountZ;
+            this.#uDataBatch[offset + 4] = req.vX / tileCountX;
+            this.#uDataBatch[offset + 5] = req.vZ / tileCountZ;
+            this.#uDataBatch[offset + 6] = 1.0 / tileCountX;
+            this.#uDataBatch[offset + 7] = 1.0 / tileCountZ;
+
+            this.#uDataBatch[offset + 8] = req.pixelX;
+            this.#uDataBatch[offset + 9] = req.pixelY;
+            this.#uDataBatch[offset + 10] = req.width;
+            this.#uDataBatch[offset + 11] = req.height;
+
+            this.#uDataBatch[offset + 12] = mat.tileScale ?? 16.0;
+            this.#uDataBatch[offset + 13] = mat.macroScale ?? 2.0;
+            this.#uDataBatch[offset + 14] = mat.blendContrast ?? 0.0;
+            this.#uDataBatch[offset + 15] = baseRoughness;
+            this.#uDataBatch[offset + 16] = layers[0]?.roughnessFactor ?? 0.85;
+            this.#uDataBatch[offset + 17] = layers[1]?.roughnessFactor ?? 0.85;
+            this.#uDataBatch[offset + 18] = layers[2]?.roughnessFactor ?? 0.90;
+            this.#uDataBatch[offset + 19] = layers[3]?.roughnessFactor ?? 0.85;
+            this.#uDataBatch[offset + 20] = mat.normalScale ?? 1.0;
+            this.#uDataBatch[offset + 21] = mat.occlusionStrength ?? 1.0;
+            this.#uDataBatch[offset + 22] = mat.baseColorWeight ?? 0.5;
+
+            this.#uDataBatchU32[offset + 23] = mat.baseColorBlendMode === 'multiply' ? 1 : 0;
+            const isAutoSplat = !mat.splatTexture || mat.useAutoSplat === true;
+            this.#uDataBatchU32[offset + 24] = isAutoSplat ? 1 : 0;
+            this.#uDataBatchU32[offset + 25] = 0;
+            this.#uDataBatchU32[offset + 26] = 0;
+            this.#uDataBatchU32[offset + 27] = 0;
+        }
+
+        device.queue.writeBuffer(this.#storageBuffer!, 0, this.#uDataBatch.subarray(0, count * 28));
+
+        const empty2DView = this.#getOrCreateEmpty2DView();
+        const emptyArrayView = this.#getOrCreateEmptyArrayView();
+
+        const resolvedSplat = splatGPUView ?? empty2DView;
+        const resolvedDiffuse = diffuseGPUView ?? emptyArrayView;
+        const resolvedNormal = normalGPUView ?? emptyArrayView;
+        const resolvedHeight = heightGPUView ?? emptyArrayView;
+        const resolvedORM = ormGPUView ?? emptyArrayView;
+        const resolvedBaseColor = baseColorGPUView ?? empty2DView;
+        const resolvedORMTexture = ormTextureGPUView ?? empty2DView;
+        const resolvedHeightmap = heightmapGPUView ?? empty2DView;
+
+        const albedoStorageView = this.#physicalPagePool.albedoStorageView!;
+        const normalORMStorageView = this.#physicalPagePool.normalORMStorageView!;
+
+        const bindGroup = this.#getOrCreateBakeBindGroup(
+            resolvedSplat,
+            resolvedDiffuse,
+            resolvedNormal,
+            resolvedHeight,
+            resolvedORM,
+            resolvedBaseColor,
+            resolvedORMTexture,
+            resolvedHeightmap,
+            albedoStorageView,
+            normalORMStorageView
+        );
+
+        const commandEncoderManager = this.#redGPUContext.commandEncoderManager;
+        const passRecord = (pass: GPUComputePassEncoder) => {
+            pass.setPipeline(this.#computePipeline!);
+            pass.setBindGroup(0, bindGroup);
+            const req0 = requests[0];
+            pass.dispatchWorkgroups(
+                Math.ceil(req0.width / 16),
+                Math.ceil(req0.height / 16),
+                count
+            );
+        };
+
+        if (useDeferred) {
+            commandEncoderManager.addResourceComputePass({label: 'RVT_ComputeBakePass'}, passRecord);
+        } else {
+            commandEncoderManager.immediateComputePass({label: 'RVT_ComputeBakePass'}, passRecord);
+        }
+    }
+
+    public destroy(): void {
+        this.#physicalPagePool.destroy();
+        this.#pageTable.destroy();
+        this.#feedbackBuffer.destroy();
+        this.#empty2DGPUTexture?.destroy();
+        this.#emptyArrayGPUTexture?.destroy();
+        this.#storageBuffer?.destroy();
+        this.#empty2DGPUTexture = null;
+        this.#empty2DView = null;
+        this.#emptyArrayGPUTexture = null;
+        this.#emptyArrayView = null;
+        this.#storageBuffer = null;
+        this.#cachedBindGroup = null;
+        this.#cachedBindGroupKey = '';
+    }
+
+    #getOrCreateBakeBindGroup(
+        resolvedSplat: GPUTextureView,
+        resolvedDiffuse: GPUTextureView,
+        resolvedNormal: GPUTextureView,
+        resolvedHeight: GPUTextureView,
+        resolvedORM: GPUTextureView,
+        resolvedBaseColor: GPUTextureView,
+        resolvedORMTexture: GPUTextureView,
+        resolvedHeightmap: GPUTextureView,
+        albedoStorageView: GPUTextureView,
+        normalORMStorageView: GPUTextureView
+    ): GPUBindGroup {
+        const getObjId = (obj: any): string => {
+            if (!obj) return 'null';
+            if (!obj.__bindId) {
+                obj.__bindId = Math.random().toString(36).substring(2, 9);
+            }
+            return obj.__bindId;
+        };
+
+        const key = `${getObjId(resolvedSplat)}_${getObjId(resolvedDiffuse)}_${getObjId(resolvedNormal)}_${getObjId(resolvedHeight)}_${getObjId(resolvedORM)}_${getObjId(resolvedBaseColor)}_${getObjId(resolvedORMTexture)}_${getObjId(resolvedHeightmap)}_${getObjId(albedoStorageView)}_${getObjId(normalORMStorageView)}`;
+
+        if (this.#cachedBindGroup && this.#cachedBindGroupKey === key) {
+            return this.#cachedBindGroup;
+        }
+
+        const device = this.#redGPUContext.gpuDevice;
+        const bindGroup = device.createBindGroup({
+            label: 'RVT_ComputeBakeBindGroup',
+            layout: this.#bindGroupLayout!,
+            entries: [
+                {binding: 0, resource: {buffer: this.#storageBuffer!}},
+                {binding: 1, resource: resolvedSplat},
+                {binding: 2, resource: resolvedDiffuse},
+                {binding: 3, resource: resolvedNormal},
+                {binding: 4, resource: resolvedHeight},
+                {binding: 5, resource: resolvedORM},
+                {binding: 6, resource: this.#sampler!},
+                {binding: 7, resource: resolvedBaseColor},
+                {binding: 8, resource: resolvedORMTexture},
+                {binding: 9, resource: resolvedHeightmap},
+                {binding: 10, resource: albedoStorageView},
+                {binding: 11, resource: normalORMStorageView},
+            ]
+        });
+
+        this.#cachedBindGroup = bindGroup;
+        this.#cachedBindGroupKey = key;
+        return bindGroup;
     }
 
     #getOrCreateEmpty2DView(): GPUTextureView {
