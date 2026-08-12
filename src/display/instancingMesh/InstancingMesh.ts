@@ -712,13 +712,17 @@ class InstancingMesh extends Mesh {
         });
 
         // Compute Pass 실행
-        commandEncoderManager.addPreProcessComputePass('InstancingMesh_GPUCulling_ComputePass', (computePass) => {
-            computePass.setPipeline(this.#cullingComputePipeline);
-            computePass.setBindGroup(0, this.#cullingBindGroup);
-            const workgroupSize = 64;
-            const workgroupCount = Math.ceil(this.#instanceCount / workgroupSize);
-            computePass.dispatchWorkgroups(workgroupCount);
-        });
+        if (this.#instanceCount > 0) {
+            commandEncoderManager.addPreProcessComputePass('InstancingMesh_GPUCulling_ComputePass', (computePass) => {
+                computePass.setPipeline(this.#cullingComputePipeline);
+                computePass.setBindGroup(0, this.#cullingBindGroup);
+                const workgroupSize = 64;
+                const workgroupCount = Math.ceil(this.#instanceCount / workgroupSize);
+                if (workgroupCount > 0) {
+                    computePass.dispatchWorkgroups(workgroupCount);
+                }
+            });
+        }
     }
 
     #updatePipelines(): void {
