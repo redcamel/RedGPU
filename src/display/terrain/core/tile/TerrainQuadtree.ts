@@ -1,36 +1,92 @@
+export class QuadtreeNodePool {
+    private static pool: QuadtreeNode[] = [];
+
+    public static acquire(
+        worldOffset: [number, number],
+        worldScale: number,
+        lodLevel: number,
+        maxLOD: number
+    ): QuadtreeNode {
+        let node: QuadtreeNode;
+        if (this.pool.length > 0) {
+            node = this.pool.pop()!;
+            node.reset(worldOffset, worldScale, lodLevel, maxLOD);
+        } else {
+            node = new QuadtreeNode(worldOffset, worldScale, lodLevel, maxLOD);
+        }
+        return node;
+    }
+
+    public static release(node: QuadtreeNode) {
+        node.collapse();
+        node.customMinY = null;
+        node.customMaxY = null;
+        this.pool.push(node);
+    }
+}
+
 export class QuadtreeNode {
     public children: QuadtreeNode[] = [];
     public hasChildren: boolean = false;
     public customMinY: number | null = null;
     public customMaxY: number | null = null;
 
-    public readonly localCenterX: number;
-    public readonly localCenterZ: number;
-    // X, Z 축 반경(Extent) 및 중심점 캐싱
-    private readonly halfScale: number;
+    public worldOffset: [number, number] = [0, 0];
+    public worldScale: number = 0;
+    public lodLevel: number = 0;
+    public maxLOD: number = 0;
+
+    public localCenterX: number = 0;
+    public localCenterZ: number = 0;
+    private halfScale: number = 0;
 
     constructor(
-        public worldOffset: [number, number],
-        public worldScale: number,
-        public lodLevel: number,
-        public maxLOD: number
+        worldOffset: [number, number],
+        worldScale: number,
+        lodLevel: number,
+        maxLOD: number
     ) {
+        this.reset(worldOffset, worldScale, lodLevel, maxLOD);
+    }
+
+    public reset(
+        worldOffset: [number, number],
+        worldScale: number,
+        lodLevel: number,
+        maxLOD: number
+    ) {
+        this.worldOffset = worldOffset;
+        this.worldScale = worldScale;
+        this.lodLevel = lodLevel;
+        this.maxLOD = maxLOD;
+
         this.halfScale = worldScale * 0.5;
         this.localCenterX = worldOffset[0] + this.halfScale;
         this.localCenterZ = worldOffset[1] + this.halfScale;
-        if (this.lodLevel < this.maxLOD) {
-            this.hasChildren = true;
+        this.hasChildren = this.lodLevel < this.maxLOD;
+        this.customMinY = null;
+        this.customMaxY = null;
+
+        this.collapse();
+    }
+
+    public collapse() {
+        if (this.children.length > 0) {
+            for (let i = 0; i < this.children.length; i++) {
+                QuadtreeNodePool.release(this.children[i]);
+            }
+            this.children.length = 0;
         }
     }
 
-    // 자식 노드가 필요할 때 동적으로 지연 생성 (Lazy creation)
+    // 자식 노드가 필요할 때 오브젝트 풀에서 재사용 (Lazy creation via Pool)
     public split() {
         if (this.children.length === 0 && this.hasChildren) {
             const nextLOD = this.lodLevel + 1;
-            const c0 = new QuadtreeNode([this.worldOffset[0], this.worldOffset[1]], this.halfScale, nextLOD, this.maxLOD);
-            const c1 = new QuadtreeNode([this.worldOffset[0] + this.halfScale, this.worldOffset[1]], this.halfScale, nextLOD, this.maxLOD);
-            const c2 = new QuadtreeNode([this.worldOffset[0], this.worldOffset[1] + this.halfScale], this.halfScale, nextLOD, this.maxLOD);
-            const c3 = new QuadtreeNode([this.worldOffset[0] + this.halfScale, this.worldOffset[1] + this.halfScale], this.halfScale, nextLOD, this.maxLOD);
+            const c0 = QuadtreeNodePool.acquire([this.worldOffset[0], this.worldOffset[1]], this.halfScale, nextLOD, this.maxLOD);
+            const c1 = QuadtreeNodePool.acquire([this.worldOffset[0] + this.halfScale, this.worldOffset[1]], this.halfScale, nextLOD, this.maxLOD);
+            const c2 = QuadtreeNodePool.acquire([this.worldOffset[0], this.worldOffset[1] + this.halfScale], this.halfScale, nextLOD, this.maxLOD);
+            const c3 = QuadtreeNodePool.acquire([this.worldOffset[0] + this.halfScale, this.worldOffset[1] + this.halfScale], this.halfScale, nextLOD, this.maxLOD);
 
             if (this.customMinY !== null && this.customMaxY !== null) {
                 c0.customMinY = this.customMinY;
@@ -43,7 +99,10 @@ export class QuadtreeNode {
                 c3.customMaxY = this.customMaxY;
             }
 
-            this.children = [c0, c1, c2, c3];
+            this.children[0] = c0;
+            this.children[1] = c1;
+            this.children[2] = c2;
+            this.children[3] = c3;
         }
     }
 
@@ -63,7 +122,6 @@ export class QuadtreeNode {
         const centerY = (nodeMinY + nodeMaxY) * 0.5;
         const centerZ = this.localCenterZ + worldOffsetZ;
 
-        // 미리 캐싱된 반경(extent) 및 노드 정밀 Height 반경(ey)을 활용하여 AABB 연산 정확도 극대화
         const ex = this.halfScale;
         const ey = (nodeMaxY - nodeMinY) * 0.5;
         const ez = this.halfScale;
@@ -72,7 +130,6 @@ export class QuadtreeNode {
             const p = planes[i];
             const dist = p[0] * centerX + p[1] * centerY + p[2] * centerZ + p[3];
 
-            // AABB 투영 크기 계산 (정확한 AABB 판정)
             const r = ex * Math.abs(p[0]) + ey * Math.abs(p[1]) + ez * Math.abs(p[2]);
             if (dist <= -r) return false;
         }
@@ -90,7 +147,6 @@ export class QuadtreeNode {
         const dx = Math.max(minX - cameraPos[0], 0, cameraPos[0] - maxX);
         const dz = Math.max(minZ - cameraPos[2], 0, cameraPos[2] - maxZ);
 
-        // 제곱근 연산 제거
         const distSq = dx * dx + dz * dz;
         const threshold = this.worldScale * lodThreshold;
         return distSq < threshold * threshold;
@@ -102,7 +158,7 @@ export class TerrainQuadtree {
     private rootNode: QuadtreeNode;
 
     constructor(worldSize: number, maxLOD: number) {
-        this.rootNode = new QuadtreeNode([0, 0], worldSize, 0, maxLOD);
+        this.rootNode = QuadtreeNodePool.acquire([0, 0], worldSize, 0, maxLOD);
     }
 
     update(
@@ -128,16 +184,18 @@ export class TerrainQuadtree {
         worldOffsetZ: number,
         lodThreshold: number
     ) {
-        if (!node.isInFrustum(planes, minHeight, maxHeight, worldOffsetX, worldOffsetZ)) return;
+        if (!node.isInFrustum(planes, minHeight, maxHeight, worldOffsetX, worldOffsetZ)) {
+            node.collapse();
+            return;
+        }
 
         if (node.shouldSplit(cameraPos, lodThreshold) && node.hasChildren) {
-            // 실제로 하위 노드로 분할되어 들어갈 때만 자식 노드들을 동적 지연 생성
             node.split();
             for (const child of node.children) {
                 this.#traverse(child, cameraPos, planes, minHeight, maxHeight, worldOffsetX, worldOffsetZ, lodThreshold);
             }
         } else {
-            // 새 객체를 힙에 할당하지 않고 기존 노드 인스턴스를 바로 등록 (GC 억제)
+            node.collapse();
             this.leafNodes.push(node);
         }
     }
