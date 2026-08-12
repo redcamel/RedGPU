@@ -9,7 +9,7 @@ export class QuadtreeNodePool {
     ): QuadtreeNode {
         let node: QuadtreeNode;
         if (this.pool.length > 0) {
-            node = this.pool.pop()!;
+            node = this.pool.pop() as QuadtreeNode;
             node.reset(worldOffset, worldScale, lodLevel, maxLOD);
         } else {
             node = new QuadtreeNode(worldOffset, worldScale, lodLevel, maxLOD);
@@ -140,16 +140,18 @@ export class QuadtreeNode {
         if (this.lodLevel >= this.maxLOD) return false;
 
         const minX = this.worldOffset[0];
-        const maxX = this.worldOffset[0] + this.worldScale;
+        const maxX = minX + this.worldScale;
         const minZ = this.worldOffset[1];
-        const maxZ = this.worldOffset[1] + this.worldScale;
+        const maxZ = minZ + this.worldScale;
 
-        const dx = Math.max(minX - cameraPos[0], 0, cameraPos[0] - maxX);
-        const dz = Math.max(minZ - cameraPos[2], 0, cameraPos[2] - maxZ);
+        const camX = cameraPos[0];
+        const camZ = cameraPos[2];
 
-        const distSq = dx * dx + dz * dz;
+        const dx = camX < minX ? minX - camX : (camX > maxX ? camX - maxX : 0);
+        const dz = camZ < minZ ? minZ - camZ : (camZ > maxZ ? camZ - maxZ : 0);
+
         const threshold = this.worldScale * lodThreshold;
-        return distSq < threshold * threshold;
+        return (dx * dx + dz * dz) < (threshold * threshold);
     }
 }
 

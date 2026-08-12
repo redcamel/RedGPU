@@ -268,6 +268,10 @@ export class TerrainSpatialGrid {
         dist: number,
         priority: number
     ): SpatialTileInfo {
+        const tileCol = gx + 16;
+        const tileRow = gz + 16;
+        const atlasKey = `${tileCol}_${tileRow}`;
+
         const pool = this.#tileInfoPool;
         if (pool.length > 0) {
             const tile = pool.pop() as SpatialTileInfo;
@@ -280,9 +284,9 @@ export class TerrainSpatialGrid {
             tile.distanceToCamera = dist;
             tile.priority = priority;
             tile.state = 'LOADING';
-            tile.tileCol = undefined;
-            tile.tileRow = undefined;
-            tile.atlasKey = undefined;
+            tile.tileCol = tileCol;
+            tile.tileRow = tileRow;
+            tile.atlasKey = atlasKey;
             tile.tileColStr = undefined;
             tile.tileRowStr = undefined;
             return tile;
@@ -293,7 +297,10 @@ export class TerrainSpatialGrid {
             worldBounds: [minX, minZ, maxX, maxZ],
             distanceToCamera: dist,
             priority,
-            state: 'LOADING'
+            state: 'LOADING',
+            tileCol,
+            tileRow,
+            atlasKey
         };
     }
 

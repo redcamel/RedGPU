@@ -202,9 +202,7 @@ export class TerrainTileManager {
         const localCamX = camera.x - this.#terrain.worldOffset[0];
         const localCamY = camera.y;
         const localCamZ = camera.z - this.#terrain.worldOffset[1];
-        const cameraPos: [number, number, number] = [localCamX, localCamY, localCamZ];
-
-        this.#processTileStreaming(camera);
+        const streamingChanged = this.#processTileStreaming(camera);
 
         const camRotX = camera.rotationX ?? 0;
         const camRotY = camera.rotationY ?? 0;
@@ -223,11 +221,13 @@ export class TerrainTileManager {
         const shouldUpdate =
             this.#isDirty ||
             lodRangesChanged ||
+            streamingChanged ||
             isNaN(distSq) ||
             distSq > 0.0025 ||
             rotDiff > 0.001;
 
         if (shouldUpdate) {
+            const cameraPos: [number, number, number] = [localCamX, localCamY, localCamZ];
             this.#lastCamX = localCamX;
             this.#lastCamY = localCamY;
             this.#lastCamZ = localCamZ;
@@ -286,11 +286,13 @@ export class TerrainTileManager {
         return false;
     }
 
-    #processTileStreaming(camera: any) {
-        if (!this.#spatialGrid) return;
+    #processTileStreaming(camera: any): boolean {
+        if (!this.#spatialGrid) return false;
 
         const {toLoad, toUnload} = this.#spatialGrid.update(camera, this.#terrain.worldOffset, this.#terrain.worldSize);
         this.#tileStreamMetrics.update();
+
+        const hasChanges = toLoad.length > 0 || toUnload.length > 0;
 
         if (toLoad.length > 0) {
             if (this.#tileUrlResolver) {
@@ -312,7 +314,6 @@ export class TerrainTileManager {
             const tileCountZ = rvt ? rvt.pageTable.virtualCountZ : 32;
 
             toUnload.forEach(tile => {
-                this.#enrichTileInfo(tile);
                 const cb = this.#onTileUnloadCallback;
                 if (cb) {
                     cb(tile);
@@ -326,6 +327,7 @@ export class TerrainTileManager {
                 }
             });
         }
+        return hasChanges;
     }
 
     destroy() {
@@ -459,19 +461,19 @@ export class TerrainTileManager {
     }
 
     #enrichTileInfo(tile: SpatialTileInfo) {
-        tile.cellKey = `${tile.gridX}_${tile.gridZ}`;
-        const [tbMinX, tbMinZ, tbMaxX, tbMaxZ] = tile.worldBounds;
-        const tileCenterX = (tbMinX + tbMaxX) * 0.5;
-        const tileCenterZ = (tbMinZ + tbMaxZ) * 0.5;
+        if (tile.tileColStr !== undefined && tile.tileRowStr !== undefined) return;
 
-        const gridX = Math.max(0, Math.min(this.atlasTileCountX - 1, Math.floor((tileCenterX - this.#terrain.worldOffset[0]) / this.tileSpanX)));
-        const gridZ = Math.max(0, Math.min(this.atlasTileCountZ - 1, Math.floor((tileCenterZ - this.#terrain.worldOffset[1]) / this.tileSpanZ)));
+        const countX = this.atlasTileCountX;
+        const countZ = this.atlasTileCountZ;
+        const col = Math.max(0, Math.min(countX - 1, tile.gridX + (countX >> 1)));
+        const rawRow = Math.max(0, Math.min(countZ - 1, tile.gridZ + (countZ >> 1)));
+        const row = (countZ - 1) - rawRow;
 
-        tile.tileCol = gridX;
-        tile.tileRow = (this.atlasTileCountZ - 1) - gridZ;
-        tile.atlasKey = `${tile.tileCol}_${tile.tileRow}`;
-        tile.tileColStr = String(tile.tileCol).padStart(2, '0');
-        tile.tileRowStr = String(tile.tileRow).padStart(2, '0');
+        tile.tileCol = col;
+        tile.tileRow = row;
+        tile.atlasKey = `${col}_${row}`;
+        tile.tileColStr = col < 10 ? `0${col}` : `${col}`;
+        tile.tileRowStr = row < 10 ? `0${row}` : `${row}`;
     }
 
     #updateTileHeightmapFromBuffer(tile: SpatialTileInfo, data: ArrayBuffer | ArrayBufferView, width: number, height: number) {
