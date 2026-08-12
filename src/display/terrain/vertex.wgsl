@@ -110,9 +110,12 @@ fn main(inputData: InputData) -> VertexOutput {
     
     let worldXZ = instanceData.offset + localXZ * instanceData.scale;
 
+    let isSynthesizedTile = (instanceData.lod >= 0.0);
+    let actualLOD = select(-instanceData.lod - 1.0, instanceData.lod, isSynthesizedTile);
+
     var morphFactor = 0.0;
     let tempWorldPos = vec3<f32>(worldXZ.x, 0.0, worldXZ.y);
-    morphFactor = calculateMorphFactor(tempWorldPos, instanceData.lod);
+    morphFactor = calculateMorphFactor(tempWorldPos, actualLOD);
 
     let gridDim = vertexUniforms.verticesPerSide - 1.0;
     let gridPos = inputData.uv * gridDim;
@@ -139,30 +142,34 @@ fn main(inputData: InputData) -> VertexOutput {
     var sampledHeight  = 0.0;
 
     #redgpu_if heightmapAtlasTexture
-        let texSize   = vec2<f32>(textureDimensions(heightmapAtlasTexture, 0));
-        let texelSize = 1.0 / texSize;
-        let halfTexel = 0.5 * texelSize;
+        if (isSynthesizedTile) {
+            let texSize   = vec2<f32>(textureDimensions(heightmapAtlasTexture, 0));
+            let texelSize = 1.0 / texSize;
+            let halfTexel = 0.5 * texelSize;
 
-        let clampedWorldUV = clamp(worldUV, halfTexel, vec2<f32>(1.0) - halfTexel);
+            let clampedWorldUV = clamp(worldUV, halfTexel, vec2<f32>(1.0) - halfTexel);
 
-        // 💡 6순위 최적화: 버텍스당 텍스처 샘플링을 단 1회로 축소 (2회 페치 제거로 Vertex Shader 속도 40~60% 향상)
-        let sampledData0 = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clampedWorldUV, 0.0);
+            let sampledData0 = textureSampleLevel(heightmapAtlasTexture, heightmapSampler, clampedWorldUV, 0.0);
 
-        sampledHeight   = sampledData0.r;
-        var localNormal = decodeOctahedronNormal(sampledData0.gb);
+            sampledHeight   = sampledData0.r;
+            var localNormal = decodeOctahedronNormal(sampledData0.gb);
 
-        if (dot(localNormal, localNormal) < 0.0001) {
-            localNormal = vec3<f32>(0.0, 1.0, 0.0);
+            if (dot(localNormal, localNormal) < 0.0001) {
+                localNormal = vec3<f32>(0.0, 1.0, 0.0);
+            }
+
+            let worldNormal = normalize((gu_normalModelMatrix * vec4<f32>(localNormal, 0.0)).xyz);
+            
+            let worldTangent = normalize(gu_modelMatrix[0].xyz);
+            let orthogonalTangent = normalize(worldTangent - dot(worldTangent, worldNormal) * worldNormal);
+
+            computedNormal = worldNormal;
+            worldTangentX  = orthogonalTangent;
+        } else {
+            sampledHeight = 0.0;
+            computedNormal = normalize((gu_normalModelMatrix * vec4<f32>(vec3<f32>(0.0, 1.0, 0.0), 0.0)).xyz);
+            worldTangentX  = normalize((gu_modelMatrix * vec4<f32>(vec3<f32>(1.0, 0.0, 0.0), 0.0)).xyz);
         }
-
-        let worldNormal = normalize((gu_normalModelMatrix * vec4<f32>(localNormal, 0.0)).xyz);
-        
-        // 가상 경사면의 기본 탄젠트 방향 (gu_modelMatrix * vec4(1,0,0,0) -> gu_modelMatrix[0].xyz 컬럼 대입)
-        let worldTangent = normalize(gu_modelMatrix[0].xyz);
-        let orthogonalTangent = normalize(worldTangent - dot(worldTangent, worldNormal) * worldNormal);
-
-        computedNormal = worldNormal;
-        worldTangentX  = orthogonalTangent;
     #redgpu_else
         computedNormal = normalize((gu_normalModelMatrix * vec4<f32>(inputData.vertexNormal, 0.0)).xyz);
         worldTangentX  = normalize((gu_modelMatrix * vec4<f32>(inputData.vertexTangent.xyz, 0.0)).xyz);

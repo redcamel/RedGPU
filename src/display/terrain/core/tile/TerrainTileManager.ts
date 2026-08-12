@@ -416,7 +416,10 @@ export class TerrainTileManager {
             const scale = tile.worldBounds[2] - tile.worldBounds[0];
             const posX = (tile.worldBounds[0] + tile.worldBounds[2]) * 0.5;
             const posZ = (tile.worldBounds[1] + tile.worldBounds[3]) * 0.5;
-            const lod = tile.lodLevel ?? 0;
+            const isValidTileRange = (tile.tileCol !== undefined && tile.tileCol >= 0) && (tile.tileRow !== undefined && tile.tileRow >= 0);
+            const isSynthesized = isValidTileRange && this.#heightmapManager.isTileSynthesized(tile);
+            const rawLod = tile.lodLevel ?? 0;
+            const lod = isSynthesized ? rawLod : -(rawLod + 1.0);
 
             const idx = visibleCount * 4;
             const isNodeChanged =
@@ -477,6 +480,21 @@ export class TerrainTileManager {
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC
         });
 
+        // 💡 아직 안 불려온 구역은 0.0 (minHeight)으로 깨끗하게 초기화!
+        const commandEncoder = device.createCommandEncoder();
+        const renderPass = commandEncoder.beginRenderPass({
+            colorAttachments: [
+                {
+                    view: gpuTexture.createView(),
+                    clearValue: {r: 0, g: 0, b: 0, a: 1},
+                    loadOp: 'clear',
+                    storeOp: 'store'
+                }
+            ]
+        });
+        renderPass.end();
+        device.queue.submit([commandEncoder.finish()]);
+
         const texture = new DirectTexture(
             this.#redGPUContext,
             'Terrain_HeightmapTileAtlasDirectTexture',
@@ -501,8 +519,17 @@ export class TerrainTileManager {
         const baseGridX = Math.floor(tile.worldBounds[0] / cellSize);
         const baseGridZ = Math.floor(tile.worldBounds[1] / cellSize);
 
-        const col = Math.max(0, Math.min(countX - 1, baseGridX + (countX >> 1)));
-        const rawRow = Math.max(0, Math.min(countZ - 1, baseGridZ + (countZ >> 1)));
+        const rawCol = baseGridX + (countX >> 1);
+        const rawRow = baseGridZ + (countZ >> 1);
+
+        if (rawCol < 0 || rawCol >= countX || rawRow < 0 || rawRow >= countZ) {
+            tile.tileCol = -1;
+            tile.tileRow = -1;
+            tile.atlasKey = `invalid`;
+            return;
+        }
+
+        const col = rawCol;
         const row = (countZ - 1) - rawRow;
 
         tile.tileCol = col;
