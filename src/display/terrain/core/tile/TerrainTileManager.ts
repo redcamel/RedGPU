@@ -311,15 +311,17 @@ export class TerrainTileManager {
 
         if (toLoad.length > 0) {
             if (this.#tileUrlResolver) {
-                toLoad.forEach(tile => {
+                const len = toLoad.length;
+                for (let i = 0; i < len; i++) {
+                    const tile = toLoad[i];
                     this.#enrichTileInfo(tile);
-                    if (this.isTileSynthesized(tile)) return;
+                    if (this.isTileSynthesized(tile)) continue;
                     this.#tileStreamMetrics.frameLoadCount++;
                     const result = this.#tileUrlResolver!(tile);
                     if (typeof result === 'string') {
                         this.#loadTileFromUrl(tile, result);
                     }
-                });
+                }
             }
         }
         if (toUnload.length > 0) {
@@ -328,7 +330,9 @@ export class TerrainTileManager {
             const tileCountX = rvt ? rvt.pageTable.virtualCountX : 32;
             const tileCountZ = rvt ? rvt.pageTable.virtualCountZ : 32;
 
-            toUnload.forEach(tile => {
+            const len = toUnload.length;
+            for (let i = 0; i < len; i++) {
+                const tile = toUnload[i];
                 const cb = this.#onTileUnloadCallback;
                 if (cb) {
                     cb(tile);
@@ -340,7 +344,7 @@ export class TerrainTileManager {
                         rvt.pageTable.clearEntry(vX, vZ);
                     }
                 }
-            });
+            }
         }
         return hasChanges;
     }

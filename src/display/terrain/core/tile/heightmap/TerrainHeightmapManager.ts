@@ -130,11 +130,19 @@ export default class TerrainHeightmapManager {
 
         if (typeof tile === 'string') {
             key = tile;
-            const underscoreIdx = key.indexOf('_');
-            if (underscoreIdx !== -1) {
-                tileCol = parseInt(key.substring(0, underscoreIdx), 10);
-                tileRow = parseInt(key.substring(underscoreIdx + 1), 10);
+            let c = 0, r = 0, parsingCol = true;
+            const len = key.length;
+            for (let i = 0; i < len; i++) {
+                const code = key.charCodeAt(i);
+                if (code === 95) {
+                    parsingCol = false;
+                } else if (code >= 48 && code <= 57) {
+                    if (parsingCol) c = c * 10 + (code - 48);
+                    else r = r * 10 + (code - 48);
+                }
             }
+            tileCol = c;
+            tileRow = r;
         } else {
             key = tile.atlasKey;
             tileCol = tile.tileCol;
