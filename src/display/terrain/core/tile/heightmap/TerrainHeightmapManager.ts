@@ -124,22 +124,35 @@ export default class TerrainHeightmapManager {
     }
 
     registerTileData(tile: SpatialTileInfo | string, data: any, spatialGrid?: any): void {
-        const key = typeof tile === 'string' ? tile : (tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`);
+        let key: string;
+        let tileCol = -1;
+        let tileRow = -1;
+
+        if (typeof tile === 'string') {
+            key = tile;
+            const underscoreIdx = key.indexOf('_');
+            if (underscoreIdx !== -1) {
+                tileCol = parseInt(key.substring(0, underscoreIdx), 10);
+                tileRow = parseInt(key.substring(underscoreIdx + 1), 10);
+            }
+        } else {
+            key = tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`;
+            tileCol = tile.tileCol;
+            tileRow = tile.tileRow;
+        }
 
         if (this.#tileDataCache.has(key)) {
             this.#tileDataCache.delete(key);
         }
 
         this.#tileDataCache.set(key, data);
-        this.updateFlatHeightmapSector(key, data);
+        this.updateFlatHeightmapSector(key, data, tileCol, tileRow);
 
         const MAX_CACHE_SIZE = 128;
         if (this.#tileDataCache.size > MAX_CACHE_SIZE) {
             const keysIterator = this.#tileDataCache.keys();
             for (const oldestKey of keysIterator) {
-                const isActive = spatialGrid &&
-                    (spatialGrid.activeTiles.has(oldestKey) ||
-                        Array.from(spatialGrid.activeTiles.values()).some((t: any) => t.atlasKey === oldestKey));
+                const isActive = spatialGrid && spatialGrid.activeTiles && spatialGrid.activeTiles.has(oldestKey);
 
                 if (!isActive) {
                     this.#tileDataCache.delete(oldestKey);
@@ -149,24 +162,38 @@ export default class TerrainHeightmapManager {
         }
     }
 
-    updateFlatHeightmapSector(key: string, data: any): void {
-        const parts = key.split('_');
-        const tileCol = parseInt(parts[0], 10);
-        const tileRow = parseInt(parts[1], 10);
+    updateFlatHeightmapSector(key: string | SpatialTileInfo, data: any, directCol?: number, directRow?: number): void {
+        let tileCol = directCol ?? -1;
+        let tileRow = directRow ?? -1;
+
+        if (tileCol < 0 || tileRow < 0) {
+            if (typeof key === 'string') {
+                const idx = key.indexOf('_');
+                if (idx !== -1) {
+                    tileCol = parseInt(key.substring(0, idx), 10);
+                    tileRow = parseInt(key.substring(idx + 1), 10);
+                }
+            } else {
+                tileCol = key.tileCol;
+                tileRow = key.tileRow;
+            }
+        }
+
+        if (tileCol < 0 || tileRow < 0) return;
 
         const tileSize = this.#atlasTileSize;
         const totalWidth = this.#atlasTileCountX * tileSize;
 
         let tileData: Uint16Array;
-        if (data instanceof Float32Array) {
+        if (data instanceof Uint16Array) {
+            tileData = data;
+        } else if (data instanceof Float32Array) {
             tileData = new Uint16Array(data.length);
             for (let i = 0; i < data.length; i++) tileData[i] = data[i] * 65535.0;
-        } else if (data instanceof Uint16Array) {
-            tileData = data;
         } else if (data instanceof ArrayBuffer) {
             tileData = new Uint16Array(data);
         } else if (ArrayBuffer.isView(data)) {
-            tileData = new Uint16Array(data.buffer, data.byteOffset, data.byteLength / 2);
+            tileData = new Uint16Array(data.buffer, data.byteOffset, Math.floor(data.byteLength / 2));
         } else {
             return;
         }
