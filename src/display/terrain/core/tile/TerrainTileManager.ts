@@ -91,6 +91,7 @@ export class TerrainTileManager {
     #tileStreamMetrics = new TileStreamMetrics();
 
     #currentInstanceCount: number = 0;
+    #prevInstanceCount: number = -1;
     #isDirty: boolean = true;
     #lastCamX: number = NaN;
     #lastCamY: number = NaN;
@@ -376,6 +377,7 @@ export class TerrainTileManager {
             const arrayBuffer = this.#instanceArrayBuffer;
             const worldOffsetX = this.#terrain.worldOffset[0];
             const worldOffsetZ = this.#terrain.worldOffset[1];
+            const device = this.#redGPUContext.gpuDevice;
 
             for (let i = 0; i < count; i++) {
                 const node = leafNodes[i];
@@ -383,12 +385,36 @@ export class TerrainTileManager {
                 const centerX = node.worldOffset[0] + halfScale;
                 const centerZ = node.worldOffset[1] + halfScale;
 
-                arrayBuffer[i * 4 + 0] = worldOffsetX + centerX;
-                arrayBuffer[i * 4 + 1] = worldOffsetZ + centerZ;
-                arrayBuffer[i * 4 + 2] = node.worldScale;
-                arrayBuffer[i * 4 + 3] = node.lodLevel;
+                const posX = worldOffsetX + centerX;
+                const posZ = worldOffsetZ + centerZ;
+                const scale = node.worldScale;
+                const lod = node.lodLevel;
+
+                // 고정 타일 공간 슬롯 인덱스 계산 (255 고정 공간 슬롯 핀포인트 타겟팅)
+                const idx = i * 4;
+                const isNodeChanged =
+                    arrayBuffer[idx + 0] !== posX ||
+                    arrayBuffer[idx + 1] !== posZ ||
+                    arrayBuffer[idx + 2] !== scale ||
+                    arrayBuffer[idx + 3] !== lod;
+
+                if (isNodeChanged) {
+                    arrayBuffer[idx + 0] = posX;
+                    arrayBuffer[idx + 1] = posZ;
+                    arrayBuffer[idx + 2] = scale;
+                    arrayBuffer[idx + 3] = lod;
+
+                    // 정확히 LOD가 변경된 해당 타일 슬롯(16 Bytes)만 핀포인트 writeBuffer 부분 갱신!
+                    const slotByteOffset = idx * 4;
+                    device.queue.writeBuffer(
+                        this.#instanceBuffer,
+                        slotByteOffset,
+                        arrayBuffer as BufferSource,
+                        idx,
+                        4
+                    );
+                }
             }
-            this.#redGPUContext.gpuDevice.queue.writeBuffer(this.#instanceBuffer, 0, arrayBuffer as BufferSource, 0, count * 4);
         }
 
         if (this.#terrain.gpuRenderInfo && this.#terrain.drawCommandSlot && this.#terrain.drawBufferManager) {
