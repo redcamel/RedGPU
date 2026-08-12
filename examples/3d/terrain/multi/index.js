@@ -494,8 +494,8 @@ RedGPU.init(
                 b.y = b.__baseY + Math.sin(now * b.__floatFreq + i) * 60;
             }
             updateHUD(terrain, rawCam);
-            updateSpatialGrid2DDebugger(terrain, rawCam);
-            updateHeightmapAtlas2DDebugger(terrain);
+            // updateSpatialGrid2DDebugger(terrain, rawCam);
+            // updateHeightmapAtlas2DDebugger(terrain);
         }
 
         // 5. 렌더러 시작

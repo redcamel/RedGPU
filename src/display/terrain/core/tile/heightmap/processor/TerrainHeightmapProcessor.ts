@@ -15,6 +15,7 @@ export class TerrainHeightmapProcessor {
     #outputBufferPool: GPUBuffer[] = [];
     #uniformBufferPool: GPUBuffer[] = [];
     #staticPaddingBuffer: Uint8Array | null = null;
+    #bindGroupCache: Map<string, GPUBindGroup> = new Map();
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
@@ -90,14 +91,8 @@ export class TerrainHeightmapProcessor {
         const u32Array = new Uint32Array([targetTileSize, width, height, dataType]);
         device.queue.writeBuffer(uniformBuffer, 0, u32Array);
 
-        const bindGroup = device.createBindGroup({
-            layout: this.#computeBindGroupLayout!,
-            entries: [
-                {binding: 0, resource: {buffer: inputBuffer}},
-                {binding: 1, resource: {buffer: outputBuffer}},
-                {binding: 2, resource: {buffer: uniformBuffer}}
-            ]
-        });
+        const bindGroup = this.#getOrCreateBindGroup(inputBuffer, outputBuffer, uniformBuffer);
+        if (!bindGroup) return;
 
         // CommandEncoderManager를 통해 연산 버퍼들이 순차 인코딩된 후 안전한 시점에 큐 제출되도록 조율
         const commandEncoderManager = this.#redGPUContext.commandEncoderManager;
@@ -139,6 +134,32 @@ export class TerrainHeightmapProcessor {
         this.#outputBufferPool = [];
         this.#uniformBufferPool = [];
         this.#staticPaddingBuffer = null;
+        this.#bindGroupCache.clear();
+    }
+
+    #getOrCreateBindGroup(
+        inputBuffer: GPUBuffer,
+        outputBuffer: GPUBuffer,
+        uniformBuffer: GPUBuffer
+    ): GPUBindGroup | null {
+        const layout = this.#computeBindGroupLayout;
+        if (!layout) return null;
+
+        const key = `${getBindId(inputBuffer)}_${getBindId(outputBuffer)}_${getBindId(uniformBuffer)}`;
+        let bindGroup = this.#bindGroupCache.get(key);
+        if (!bindGroup) {
+            bindGroup = this.#redGPUContext.gpuDevice.createBindGroup({
+                label: 'TerrainTile_ComputeBindGroup_Cached',
+                layout,
+                entries: [
+                    {binding: 0, resource: {buffer: inputBuffer}},
+                    {binding: 1, resource: {buffer: outputBuffer}},
+                    {binding: 2, resource: {buffer: uniformBuffer}}
+                ]
+            });
+            this.#bindGroupCache.set(key, bindGroup);
+        }
+        return bindGroup;
     }
 
     #acquireBuffer(
@@ -194,5 +215,14 @@ export class TerrainHeightmapProcessor {
         }
     }
 }
+
+let bindGroupIdSeed = 0;
+const getBindId = (obj: any): number => {
+    if (!obj) return 0;
+    if (!obj.__bindId) {
+        obj.__bindId = ++bindGroupIdSeed;
+    }
+    return obj.__bindId;
+};
 
 export default TerrainHeightmapProcessor;
