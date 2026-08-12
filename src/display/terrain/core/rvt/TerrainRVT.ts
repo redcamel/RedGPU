@@ -3,7 +3,6 @@ import DirectTexture from "../../../../resources/texture/DirectTexture";
 import TerrainMaterial from "../material/TerrainMaterial";
 import PhysicalPagePool from "./PhysicalPagePool";
 import PageTable, {PageState} from "./PageTable";
-import FeedbackBuffer from "./FeedbackBuffer";
 import bakeSrc from "./rvt_bake.wgsl";
 
 export interface TerrainRVTOptions {
@@ -29,7 +28,6 @@ class TerrainRVT {
     readonly #redGPUContext: RedGPUContext;
     readonly #physicalPagePool: PhysicalPagePool;
     readonly #pageTable: PageTable;
-    readonly #feedbackBuffer: FeedbackBuffer;
 
     #computePipeline: GPUComputePipeline | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
@@ -58,10 +56,6 @@ class TerrainRVT {
             virtualCountZ: options.virtualCountZ ?? 32,
         });
 
-        this.#feedbackBuffer = new FeedbackBuffer(redGPUContext, {
-            maxRequests: 256,
-        });
-
         this.#initPipeline();
     }
 
@@ -71,10 +65,6 @@ class TerrainRVT {
 
     get pageTable(): PageTable {
         return this.#pageTable;
-    }
-
-    get feedbackBuffer(): FeedbackBuffer {
-        return this.#feedbackBuffer;
     }
 
     get atlasSize(): number {
@@ -125,61 +115,70 @@ class TerrainRVT {
     }
 
     public update(material: TerrainMaterial, commandEncoder?: GPUCommandEncoder, maxBakesPerFrame: number = 8): void {
-        this.#feedbackBuffer.requestReadback((keys) => {
-            const batchRequests: TileBakeRequest[] = [];
-            const pageTableSetups: Array<{ vX: number; vZ: number; slotX: number; slotY: number; mip: number }> = [];
+        const spatialGrid = material.targetTerrain?.spatialGrid;
+        const activeTiles = spatialGrid?.activeTileList;
+        if (!activeTiles || activeTiles.length === 0) return;
 
-            const tileCountX = this.#pageTable.virtualCountX;
-            const tileCountZ = this.#pageTable.virtualCountZ;
-            const tileSize = this.#physicalPagePool.tileSizeWithBorder;
+        const batchRequests: TileBakeRequest[] = [];
+        const pageTableSetups: Array<{ vX: number; vZ: number; slotX: number; slotY: number; mip: number }> = [];
 
-            for (const key of keys) {
-                if (batchRequests.length >= maxBakesPerFrame) break;
-                const [vX, vZ] = key.split('_').map(Number);
-                if (!isNaN(vX) && !isNaN(vZ)) {
-                    const entry = this.#pageTable.getEntry(vX, vZ);
-                    if (!entry || entry.state !== PageState.Ready) {
-                        const virtualKey = `${vX}_${vZ}`;
-                        const slot = this.#physicalPagePool.allocatePage(virtualKey);
+        const tileCountX = this.#pageTable.virtualCountX;
+        const tileCountZ = this.#pageTable.virtualCountZ;
+        const tileSize = this.#physicalPagePool.tileSizeWithBorder;
 
-                        if (slot.isEvicted && slot.evictedVirtualKey) {
-                            const [evX, evZ] = slot.evictedVirtualKey.split('_').map(Number);
+        for (let i = 0; i < activeTiles.length; i++) {
+            if (batchRequests.length >= maxBakesPerFrame) break;
+            const tile = activeTiles[i];
+            const vX = tile.tileCol ?? (tile.gridX + (tileCountX >> 1));
+            const vZ = tile.tileRow ?? (tile.gridZ + (tileCountZ >> 1));
+
+            if (vX >= 0 && vX < tileCountX && vZ >= 0 && vZ < tileCountZ) {
+                const entry = this.#pageTable.getEntry(vX, vZ);
+                if (!entry || entry.state !== PageState.Ready) {
+                    const virtualKey = `${vX}_${vZ}`;
+                    const slot = this.#physicalPagePool.allocatePage(virtualKey);
+
+                    if (slot.isEvicted && slot.evictedVirtualKey) {
+                        const idx = slot.evictedVirtualKey.indexOf('_');
+                        if (idx !== -1) {
+                            const evX = parseInt(slot.evictedVirtualKey.substring(0, idx), 10);
+                            const evZ = parseInt(slot.evictedVirtualKey.substring(idx + 1), 10);
                             this.#pageTable.clearEntry(evX, evZ);
                         }
-
-                        batchRequests.push({
-                            vX, vZ,
-                            pixelX: slot.pixelX,
-                            pixelY: slot.pixelY,
-                            width: tileSize,
-                            height: tileSize,
-                            tileCountX, tileCountZ
-                        });
-
-                        pageTableSetups.push({
-                            vX, vZ,
-                            slotX: slot.slotX,
-                            slotY: slot.slotY,
-                            mip: 0
-                        });
                     }
-                }
-            }
 
-            if (batchRequests.length > 0) {
-                this.bakeBatch(material, batchRequests, true);
-                for (const setup of pageTableSetups) {
-                    this.#pageTable.setEntry(
-                        setup.vX, setup.vZ,
-                        setup.slotX, setup.slotY,
-                        setup.mip,
-                        PageState.Ready,
-                        this.#physicalPagePool.tilesPerRow
-                    );
+                    batchRequests.push({
+                        vX, vZ,
+                        pixelX: slot.pixelX,
+                        pixelY: slot.pixelY,
+                        width: tileSize,
+                        height: tileSize,
+                        tileCountX, tileCountZ
+                    });
+
+                    pageTableSetups.push({
+                        vX, vZ,
+                        slotX: slot.slotX,
+                        slotY: slot.slotY,
+                        mip: 0
+                    });
                 }
             }
-        }, commandEncoder);
-        this.#feedbackBuffer.resetBuffer(commandEncoder);
+        }
+
+        if (batchRequests.length > 0) {
+            this.bakeBatch(material, batchRequests, true);
+            for (let i = 0; i < pageTableSetups.length; i++) {
+                const setup = pageTableSetups[i];
+                this.#pageTable.setEntry(
+                    setup.vX, setup.vZ,
+                    setup.slotX, setup.slotY,
+                    setup.mip,
+                    PageState.Ready,
+                    this.#physicalPagePool.tilesPerRow
+                );
+            }
+        }
     }
 
     public bakeAll(material: TerrainMaterial): void {
@@ -373,7 +372,14 @@ class TerrainRVT {
             this.#uDataBatchU32[offset + 27] = 0;
         }
 
-        device.queue.writeBuffer(this.#storageBuffer!, 0, this.#uDataBatch.subarray(0, count * 28));
+        const storageBuf = this.#storageBuffer;
+        const pipeline = this.#computePipeline;
+        const albedoStorageView = this.#physicalPagePool.albedoStorageView;
+        const normalORMStorageView = this.#physicalPagePool.normalORMStorageView;
+
+        if (!storageBuf || !pipeline || !albedoStorageView || !normalORMStorageView) return;
+
+        device.queue.writeBuffer(storageBuf, 0, this.#uDataBatch.subarray(0, count * 28));
 
         const empty2DView = this.#getOrCreateEmpty2DView();
         const emptyArrayView = this.#getOrCreateEmptyArrayView();
@@ -386,9 +392,6 @@ class TerrainRVT {
         const resolvedBaseColor = baseColorGPUView ?? empty2DView;
         const resolvedORMTexture = ormTextureGPUView ?? empty2DView;
         const resolvedHeightmap = heightmapGPUView ?? empty2DView;
-
-        const albedoStorageView = this.#physicalPagePool.albedoStorageView!;
-        const normalORMStorageView = this.#physicalPagePool.normalORMStorageView!;
 
         const bindGroup = this.#getOrCreateBakeBindGroup(
             resolvedSplat,
@@ -403,9 +406,11 @@ class TerrainRVT {
             normalORMStorageView
         );
 
+        if (!bindGroup) return;
+
         const commandEncoderManager = this.#redGPUContext.commandEncoderManager;
         const passRecord = (pass: GPUComputePassEncoder) => {
-            pass.setPipeline(this.#computePipeline!);
+            pass.setPipeline(pipeline);
             pass.setBindGroup(0, bindGroup);
             const req0 = requests[0];
             pass.dispatchWorkgroups(
@@ -425,7 +430,6 @@ class TerrainRVT {
     public destroy(): void {
         this.#physicalPagePool.destroy();
         this.#pageTable.destroy();
-        this.#feedbackBuffer.destroy();
         this.#empty2DGPUTexture?.destroy();
         this.#emptyArrayGPUTexture?.destroy();
         this.#storageBuffer?.destroy();
@@ -464,18 +468,23 @@ class TerrainRVT {
             return this.#cachedBindGroup;
         }
 
+        const layout = this.#bindGroupLayout;
+        const storageBuf = this.#storageBuffer;
+        const sampler = this.#sampler;
+        if (!layout || !storageBuf || !sampler) return null;
+
         const device = this.#redGPUContext.gpuDevice;
         const bindGroup = device.createBindGroup({
             label: 'RVT_ComputeBakeBindGroup',
-            layout: this.#bindGroupLayout!,
+            layout,
             entries: [
-                {binding: 0, resource: {buffer: this.#storageBuffer!}},
+                {binding: 0, resource: {buffer: storageBuf}},
                 {binding: 1, resource: resolvedSplat},
                 {binding: 2, resource: resolvedDiffuse},
                 {binding: 3, resource: resolvedNormal},
                 {binding: 4, resource: resolvedHeight},
                 {binding: 5, resource: resolvedORM},
-                {binding: 6, resource: this.#sampler!},
+                {binding: 6, resource: sampler},
                 {binding: 7, resource: resolvedBaseColor},
                 {binding: 8, resource: resolvedORMTexture},
                 {binding: 9, resource: resolvedHeightmap},
@@ -490,7 +499,7 @@ class TerrainRVT {
     }
 
     #getOrCreateEmpty2DView(): GPUTextureView {
-        if (!this.#empty2DGPUTexture) {
+        if (!this.#empty2DGPUTexture || !this.#empty2DView) {
             this.#empty2DGPUTexture = this.#redGPUContext.gpuDevice.createTexture({
                 label: 'RVT_Empty2D',
                 size: [1, 1, 1],
@@ -499,11 +508,11 @@ class TerrainRVT {
             });
             this.#empty2DView = this.#empty2DGPUTexture.createView();
         }
-        return this.#empty2DView!;
+        return this.#empty2DView;
     }
 
     #getOrCreateEmptyArrayView(): GPUTextureView {
-        if (!this.#emptyArrayGPUTexture) {
+        if (!this.#emptyArrayGPUTexture || !this.#emptyArrayView) {
             this.#emptyArrayGPUTexture = this.#redGPUContext.gpuDevice.createTexture({
                 label: 'RVT_EmptyArray',
                 size: [1, 1, 4],
@@ -516,7 +525,7 @@ class TerrainRVT {
                 baseArrayLayer: 0
             });
         }
-        return this.#emptyArrayView!;
+        return this.#emptyArrayView;
     }
 }
 

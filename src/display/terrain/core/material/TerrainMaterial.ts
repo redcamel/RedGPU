@@ -29,6 +29,7 @@ export interface TerrainMaterialOptions {
 }
 
 interface TerrainMaterial {
+    targetTerrain?: any;
     debugSplatTexture: boolean;
     baseColorFactor: [number, number, number, number] | string;
     baseColorTexture: BitmapTexture;
@@ -46,6 +47,7 @@ interface TerrainMaterial {
 }
 
 class TerrainMaterial extends ABitmapBaseMaterial {
+    targetTerrain?: any;
     #layers: TerrainLayerConfig[] = [];
     #rvt: TerrainRVT
     #tileScale: number = 32.0;
