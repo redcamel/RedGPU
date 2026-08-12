@@ -11,6 +11,10 @@ export class TerrainHeightmapProcessor {
     #computePipeline: GPUComputePipeline | null = null;
     #computeBindGroupLayout: GPUBindGroupLayout | null = null;
 
+    #inputBufferPool: GPUBuffer[] = [];
+    #outputBufferPool: GPUBuffer[] = [];
+    #uniformBufferPool: GPUBuffer[] = [];
+
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
         this.#initComputePipeline();
@@ -48,33 +52,32 @@ export class TerrainHeightmapProcessor {
             dataType = 0;
         }
 
-        // 동시성 오염을 방지하기 위해 각 타일별 독립적인 임시 버퍼 생성 (동작 안정성 100% 보장)
-        const inputBuffer = device.createBuffer({
-            size: Math.max(16, Math.ceil(srcByteArray.byteLength / 4) * 4),
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-            mappedAtCreation: true
-        });
-        new Uint8Array(inputBuffer.getMappedRange()).set(srcByteArray);
-        inputBuffer.unmap();
+        const reqInputSize = Math.max(16, Math.ceil(srcByteArray.byteLength / 4) * 4);
+        const inputBuffer = this.#acquireBuffer(
+            this.#inputBufferPool,
+            reqInputSize,
+            GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+            'TerrainTile_PooledInputBuffer'
+        );
+        device.queue.writeBuffer(inputBuffer, 0, srcByteArray as BufferSource);
 
         const outputPixelCount = targetTileSize * targetTileSize;
         const outputByteSize = Math.max(16, outputPixelCount * 8); // rgba16float = 8 bytes per pixel
-        const outputBuffer = device.createBuffer({
-            size: outputByteSize,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST
-        });
+        const outputBuffer = this.#acquireBuffer(
+            this.#outputBufferPool,
+            outputByteSize,
+            GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+            'TerrainTile_PooledOutputBuffer'
+        );
 
-        const uniformBuffer = device.createBuffer({
-            size: 16,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-            mappedAtCreation: true
-        });
-        const u32View = new Uint32Array(uniformBuffer.getMappedRange());
-        u32View[0] = targetTileSize;
-        u32View[1] = width;
-        u32View[2] = height;
-        u32View[3] = dataType;
-        uniformBuffer.unmap();
+        const uniformBuffer = this.#acquireBuffer(
+            this.#uniformBufferPool,
+            16,
+            GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+            'TerrainTile_PooledUniformBuffer'
+        );
+        const u32Array = new Uint32Array([targetTileSize, width, height, dataType]);
+        device.queue.writeBuffer(uniformBuffer, 0, u32Array);
 
         const bindGroup = device.createBindGroup({
             layout: this.#computeBindGroupLayout!,
@@ -105,10 +108,44 @@ export class TerrainHeightmapProcessor {
             );
         });
 
-        // 큐 제출이 완료된 뒤 안전한 시점에 임시 버퍼들을 파괴하도록 매니저에 지연 등록
-        commandEncoderManager.addDeferredDestroy(inputBuffer);
-        commandEncoderManager.addDeferredDestroy(outputBuffer);
-        commandEncoderManager.addDeferredDestroy(uniformBuffer);
+        // 큐 제출이 완료된 뒤 안전한 시점에 임시 버퍼들을 파괴하는 대신 풀로 반납하도록 리사이클러 지연 등록
+        commandEncoderManager.addDeferredDestroy({
+            destroy: () => {
+                this.#recycleBuffer(this.#inputBufferPool, inputBuffer);
+                this.#recycleBuffer(this.#outputBufferPool, outputBuffer);
+                this.#recycleBuffer(this.#uniformBufferPool, uniformBuffer);
+            }
+        });
+    }
+
+    destroy(): void {
+        this.#computePipeline = null;
+        this.#computeBindGroupLayout = null;
+        this.#inputBufferPool.forEach(b => b.destroy());
+        this.#outputBufferPool.forEach(b => b.destroy());
+        this.#uniformBufferPool.forEach(b => b.destroy());
+        this.#inputBufferPool = [];
+        this.#outputBufferPool = [];
+        this.#uniformBufferPool = [];
+    }
+
+    #acquireBuffer(
+        pool: GPUBuffer[],
+        minSize: number,
+        usage: GPUBufferUsageFlags,
+        label: string
+    ): GPUBuffer {
+        const device = this.#redGPUContext.gpuDevice;
+        for (let i = 0; i < pool.length; i++) {
+            if (pool[i].size >= minSize) {
+                return pool.splice(i, 1)[0];
+            }
+        }
+        return device.createBuffer({
+            label,
+            size: minSize,
+            usage
+        });
     }
 
     #initComputePipeline() {
@@ -136,9 +173,13 @@ export class TerrainHeightmapProcessor {
         });
     }
 
-    destroy(): void {
-        this.#computePipeline = null;
-        this.#computeBindGroupLayout = null;
+    #recycleBuffer(pool: GPUBuffer[], buffer: GPUBuffer, maxSize: number = 8 * 1024 * 1024) {
+        if (!buffer) return;
+        if (buffer.size > maxSize || pool.length >= 32) {
+            buffer.destroy();
+        } else {
+            pool.push(buffer);
+        }
     }
 }
 
