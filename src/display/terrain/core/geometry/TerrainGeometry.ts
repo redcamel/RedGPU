@@ -17,7 +17,7 @@ class TerrainGeometry extends Geometry {
         const totalIndices = mainIndicesCount + skirtIndicesCount;
 
         const interleaveData = new Float32Array(totalVertexFloats);
-        const indexData = new Uint16Array(totalIndices);
+        const indexData = new Uint32Array(totalIndices);
 
         let vOffset = 0;
         let iOffset = 0;
