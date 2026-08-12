@@ -31,7 +31,10 @@ struct TerrainUniforms {
 #redgpu_endIf
 @group(2) @binding(9)  var rvtAlbedoTexture:    texture_2d<f32>;
 @group(2) @binding(10) var rvtNormalORMTexture:  texture_2d<f32>;
-@group(2) @binding(11) var rvtSampler:           sampler;
+#redgpu_if rvtPageTableTexture
+@group(2) @binding(11) var rvtPageTableTexture:  texture_2d<f32>;
+#redgpu_endIf
+@group(2) @binding(12) var rvtSampler:           sampler;
 
 struct InputData {
     @builtin(position) position : vec4<f32>,
@@ -100,8 +103,34 @@ fn main(inputData:InputData) -> OutputFragment {
         return output;
     }
 
-    let rvt_albedo = textureSample(rvtAlbedoTexture, rvtSampler, input_uv);
-    let rvt_normalORM = textureSample(rvtNormalORMTexture, rvtSampler, input_uv);
+    let rawWorldUV = vec2<f32>(input_uv.x, 1.0 - input_uv.y);
+    let ddx = dpdx(rawWorldUV);
+    let ddy = dpdy(rawWorldUV);
+
+    #redgpu_if rvtPageTableTexture
+        let pageTableDim = vec2<f32>(textureDimensions(rvtPageTableTexture));
+        let pageCoords = vec2<i32>(clamp(rawWorldUV * pageTableDim, vec2<f32>(0.0), pageTableDim - vec2<f32>(1.0)));
+        let pageEntry = textureLoad(rvtPageTableTexture, pageCoords, 0);
+
+        var sampleUV = rawWorldUV;
+        if (pageEntry.a > 0.01) {
+            let virtualTileUV = fract(rawWorldUV * pageTableDim);
+            let slotX = floor(pageEntry.r * 255.0 + 0.5);
+            let slotY = floor(pageEntry.g * 255.0 + 0.5);
+            let slotPos = vec2<f32>(slotX, slotY);
+            let atlasDim = f32(textureDimensions(rvtAlbedoTexture).x);
+            sampleUV = (slotPos * 136.0 + vec2<f32>(4.0) + virtualTileUV * 128.0) / atlasDim;
+        }
+        var rvt_albedo = textureSampleGrad(rvtAlbedoTexture, rvtSampler, sampleUV, ddx, ddy);
+        var rvt_normalORM = textureSampleGrad(rvtNormalORMTexture, rvtSampler, sampleUV, ddx, ddy);
+    #redgpu_else
+        var rvt_albedo = textureSampleGrad(rvtAlbedoTexture, rvtSampler, rawWorldUV, ddx, ddy);
+        var rvt_normalORM = textureSampleGrad(rvtNormalORMTexture, rvtSampler, rawWorldUV, ddx, ddy);
+    #redgpu_endIf
+
+    if (rvt_albedo.a < 0.01) {
+        rvt_albedo = vec4<f32>(0.5, 0.5, 0.5, 1.0);
+    }
 
     let rvt_normalXY = rvt_normalORM.rg;
     let rvt_roughness = rvt_normalORM.b;

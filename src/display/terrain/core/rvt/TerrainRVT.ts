@@ -1,29 +1,32 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
-import bakeSrc from "./rvt_bake.wgsl";
 import TerrainMaterial from "../material/TerrainMaterial";
+import PhysicalPagePool from "./PhysicalPagePool";
+import PageTable, {PageState} from "./PageTable";
+import FeedbackBuffer from "./FeedbackBuffer";
+import bakeSrc from "./rvt_bake.wgsl";
 
 export interface TerrainRVTOptions {
     atlasSize?: number;
+    tileSize?: number;
+    borderSize?: number;
+    virtualCountX?: number;
+    virtualCountZ?: number;
 }
 
 class TerrainRVT {
     readonly #redGPUContext: RedGPUContext;
-    readonly #atlasSize: number;
-
-    #albedoAtlasGPU: GPUTexture | null = null;
-    #normalORMAtlasGPU: GPUTexture | null = null;
-    #albedoStorageView: GPUTextureView | null = null;
-    #normalORMStorageView: GPUTextureView | null = null;
-
-    #albedoDirectTexture: DirectTexture | null = null;
-    #normalORMDirectTexture: DirectTexture | null = null;
+    readonly #physicalPagePool: PhysicalPagePool;
+    readonly #pageTable: PageTable;
+    readonly #feedbackBuffer: FeedbackBuffer;
 
     #computePipeline: GPUComputePipeline | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
     #uniformBuffer: GPUBuffer | null = null;
 
     #sampler: GPUSampler | null = null;
+    #empty2DGPUTexture: GPUTexture | null = null;
+    #empty2DView: GPUTextureView | null = null;
     #emptyArrayGPUTexture: GPUTexture | null = null;
     #emptyArrayView: GPUTextureView | null = null;
 
@@ -32,43 +35,120 @@ class TerrainRVT {
 
     constructor(redGPUContext: RedGPUContext, options: TerrainRVTOptions = {}) {
         this.#redGPUContext = redGPUContext;
-        this.#atlasSize = options.atlasSize ?? 2048;
-        this.#initAtlas();
+
+        this.#physicalPagePool = new PhysicalPagePool(redGPUContext, {
+            atlasSize: options.atlasSize ?? 4096,
+            tileSize: options.tileSize ?? 128,
+            borderSize: options.borderSize ?? 4,
+        });
+
+        this.#pageTable = new PageTable(redGPUContext, {
+            virtualCountX: options.virtualCountX ?? 32,
+            virtualCountZ: options.virtualCountZ ?? 32,
+        });
+
+        this.#feedbackBuffer = new FeedbackBuffer(redGPUContext, {
+            maxRequests: 256,
+        });
+
         this.#initPipeline();
     }
 
+    get physicalPagePool(): PhysicalPagePool {
+        return this.#physicalPagePool;
+    }
+
+    get pageTable(): PageTable {
+        return this.#pageTable;
+    }
+
+    get feedbackBuffer(): FeedbackBuffer {
+        return this.#feedbackBuffer;
+    }
+
     get atlasSize(): number {
-        return this.#atlasSize;
+        return this.#physicalPagePool.atlasSize;
     }
 
     get albedoDirectTexture(): DirectTexture | null {
-        return this.#albedoDirectTexture;
+        return this.#physicalPagePool.albedoDirectTexture;
     }
 
     get normalORMDirectTexture(): DirectTexture | null {
-        return this.#normalORMDirectTexture;
+        return this.#physicalPagePool.normalORMDirectTexture;
     }
 
+    get pageTableDirectTexture(): DirectTexture | null {
+        return this.#pageTable.pageTableDirectTexture;
+    }
+
+    public requestVirtualPage(material: TerrainMaterial, vX: number, vZ: number, mip: number = 0, useDeferred: boolean = false): void {
+        const virtualKey = `${vX}_${vZ}`;
+        const slot = this.#physicalPagePool.allocatePage(virtualKey);
+
+        if (slot.isEvicted && slot.evictedVirtualKey) {
+            const [evX, evZ] = slot.evictedVirtualKey.split('_').map(Number);
+            this.#pageTable.clearEntry(evX, evZ);
+        }
+
+        const tileCountX = this.#pageTable.virtualCountX;
+        const tileCountZ = this.#pageTable.virtualCountZ;
+
+        this.bakeTileRect(
+            material,
+            slot.pixelX,
+            slot.pixelY,
+            this.#physicalPagePool.tileSizeWithBorder,
+            this.#physicalPagePool.tileSizeWithBorder,
+            vX, vZ, tileCountX, tileCountZ,
+            useDeferred
+        );
+
+        this.#pageTable.setEntry(
+            vX, vZ,
+            slot.slotX, slot.slotY,
+            mip,
+            PageState.Ready,
+            this.#physicalPagePool.tilesPerRow
+        );
+    }
+
+    public update(material: TerrainMaterial, commandEncoder?: GPUCommandEncoder, maxBakesPerFrame: number = 8): void {
+        this.#feedbackBuffer.requestReadback((keys) => {
+            let bakedCount = 0;
+            for (const key of keys) {
+                if (bakedCount >= maxBakesPerFrame) break;
+                const [vX, vZ] = key.split('_').map(Number);
+                if (!isNaN(vX) && !isNaN(vZ)) {
+                    const entry = this.#pageTable.getEntry(vX, vZ);
+                    if (!entry || entry.state !== PageState.Ready) {
+                        this.requestVirtualPage(material, vX, vZ, 0, true);
+                        bakedCount++;
+                    }
+                }
+            }
+        }, commandEncoder);
+        this.#feedbackBuffer.resetBuffer(commandEncoder);
+    }
 
     public bakeAll(material: TerrainMaterial): void {
-        this.bakeTileRect(material, 0, 0, this.#atlasSize, this.#atlasSize);
+        const countX = this.#pageTable.virtualCountX;
+        const countZ = this.#pageTable.virtualCountZ;
+        for (let vZ = 0; vZ < countZ; vZ++) {
+            for (let vX = 0; vX < countX; vX++) {
+                this.requestVirtualPage(material, vX, vZ);
+            }
+        }
     }
 
     public bakeTile(
         material: TerrainMaterial,
-        tileCol: number,
-        tileRow: number,
-        tileCountX: number = 16,
-        tileCountZ: number = 16
+        vX: number,
+        vZ: number,
+        tileCountX: number = 32,
+        tileCountZ: number = 32
     ): void {
-        const tileSizeX = this.#atlasSize / tileCountX;
-        const tileSizeZ = this.#atlasSize / tileCountZ;
-        const pixelX = Math.round(tileCol * tileSizeX);
-        const pixelY = Math.round(tileRow * tileSizeZ);
-        const width = Math.round((tileCol + 1) * tileSizeX) - pixelX;
-        const height = Math.round((tileRow + 1) * tileSizeZ) - pixelY;
-
-        this.bakeTileRect(material, pixelX, pixelY, width, height);
+        this.requestVirtualPage(material, vX, vZ);
     }
 
     public bakeTileRect(
@@ -76,7 +156,12 @@ class TerrainRVT {
         pixelX: number,
         pixelY: number,
         width: number,
-        height: number
+        height: number,
+        vX: number = 0,
+        vZ: number = 0,
+        tileCountX: number = 1,
+        tileCountZ: number = 1,
+        useDeferred: boolean = false
     ): void {
         if (!this.#computePipeline) return;
 
@@ -95,14 +180,14 @@ class TerrainRVT {
         const uData = this.#uData;
         const uDataU32 = this.#uDataU32;
 
-        uData[0] = 0.0;
-        uData[1] = 0.0;
-        uData[2] = 1.0;
-        uData[3] = 1.0;
-        uData[4] = 0.0;
-        uData[5] = 0.0;
-        uData[6] = 1.0;
-        uData[7] = 1.0;
+        uData[0] = vX / tileCountX;
+        uData[1] = vZ / tileCountZ;
+        uData[2] = 1.0 / tileCountX;
+        uData[3] = 1.0 / tileCountZ;
+        uData[4] = vX / tileCountX;
+        uData[5] = vZ / tileCountZ;
+        uData[6] = 1.0 / tileCountX;
+        uData[7] = 1.0 / tileCountZ;
 
         uData[8] = pixelX;
         uData[9] = pixelY;
@@ -127,23 +212,32 @@ class TerrainRVT {
         const isAutoSplat = !mat.splatTexture || mat.useAutoSplat === true;
         uDataU32[24] = isAutoSplat ? 1 : 0;
 
-        device.queue.writeBuffer(this.#uniformBuffer!, 0, uData);
+        let buffer = this.#uniformBuffer;
+        if (!buffer) {
+            buffer = device.createBuffer({
+                label: 'RVT_BakeUniformBuffer',
+                size: this.#uData.byteLength,
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+            });
+            this.#uniformBuffer = buffer;
+        }
 
-        const rm = this.#redGPUContext.resourceManager;
-        const emptyView = rm.emptyBitmapTextureView;
+        device.queue.writeBuffer(buffer, 0, uData);
+
+        const empty2DView = this.#getOrCreateEmpty2DView();
         const emptyArrayView = this.#getOrCreateEmptyArrayView();
 
-        const resolvedSplat = splatGPUView ?? emptyView;
+        const resolvedSplat = splatGPUView ?? empty2DView;
         const resolvedDiffuse = diffuseGPUView ?? emptyArrayView;
         const resolvedNormal = normalGPUView ?? emptyArrayView;
         const resolvedHeight = heightGPUView ?? emptyArrayView;
         const resolvedORM = ormGPUView ?? emptyArrayView;
-        const resolvedBaseColor = baseColorGPUView ?? emptyView;
-        const resolvedORMTexture = ormTextureGPUView ?? emptyView;
-        const resolvedHeightmap = heightmapGPUView ?? emptyView;
+        const resolvedBaseColor = baseColorGPUView ?? empty2DView;
+        const resolvedORMTexture = ormTextureGPUView ?? empty2DView;
+        const resolvedHeightmap = heightmapGPUView ?? empty2DView;
 
-        const albedoStorageView = this.#albedoStorageView!;
-        const normalORMStorageView = this.#normalORMStorageView!;
+        const albedoStorageView = this.#physicalPagePool.albedoStorageView!;
+        const normalORMStorageView = this.#physicalPagePool.normalORMStorageView!;
 
         const bindGroup = device.createBindGroup({
             label: 'RVT_ComputeBakeBindGroup',
@@ -164,55 +258,39 @@ class TerrainRVT {
             ]
         });
 
-        const encoder = device.createCommandEncoder({label: 'RVT_ComputeBakeEncoder'});
-        const pass = encoder.beginComputePass({label: 'RVT_ComputeBakePass'});
-        pass.setPipeline(this.#computePipeline);
-        pass.setBindGroup(0, bindGroup);
+        const commandEncoderManager = this.#redGPUContext.commandEncoderManager;
+        const passRecord = (pass: GPUComputePassEncoder) => {
+            pass.setPipeline(this.#computePipeline!);
+            pass.setBindGroup(0, bindGroup);
 
-        const workgroupsX = Math.ceil(width / 16);
-        const workgroupsY = Math.ceil(height / 16);
-        pass.dispatchWorkgroups(workgroupsX, workgroupsY);
-        pass.end();
+            const workgroupsX = Math.ceil(width / 16);
+            const workgroupsY = Math.ceil(height / 16);
+            pass.dispatchWorkgroups(workgroupsX, workgroupsY);
+        };
 
-        device.queue.submit([encoder.finish()]);
+        if (useDeferred) {
+            commandEncoderManager.addResourceComputePass({label: 'RVT_ComputeBakePass'}, passRecord);
+        } else {
+            commandEncoderManager.immediateComputePass({label: 'RVT_ComputeBakePass'}, passRecord);
+        }
     }
 
     public destroy(): void {
-        this.#albedoAtlasGPU?.destroy();
-        this.#normalORMAtlasGPU?.destroy();
+        this.#physicalPagePool.destroy();
+        this.#pageTable.destroy();
+        this.#feedbackBuffer.destroy();
+        this.#empty2DGPUTexture?.destroy();
         this.#emptyArrayGPUTexture?.destroy();
         this.#uniformBuffer?.destroy();
-        this.#albedoAtlasGPU = null;
-        this.#normalORMAtlasGPU = null;
-        this.#albedoStorageView = null;
-        this.#normalORMStorageView = null;
+        this.#empty2DGPUTexture = null;
+        this.#empty2DView = null;
         this.#emptyArrayGPUTexture = null;
         this.#emptyArrayView = null;
         this.#uniformBuffer = null;
-        this.#albedoDirectTexture = null;
-        this.#normalORMDirectTexture = null;
     }
 
-    #initAtlas(): void {
+    #initPipeline(): void {
         const device = this.#redGPUContext.gpuDevice;
-        const size = this.#atlasSize;
-
-        this.#albedoAtlasGPU = device.createTexture({
-            label: 'RVT_AlbedoAtlas', size: [size, size, 1], format: 'rgba8unorm',
-            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
-        });
-
-        this.#normalORMAtlasGPU = device.createTexture({
-            label: 'RVT_NormalORMAtlas', size: [size, size, 1], format: 'rgba16float',
-            usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
-        });
-
-        this.#albedoStorageView = this.#albedoAtlasGPU.createView();
-        this.#normalORMStorageView = this.#normalORMAtlasGPU.createView();
-
-        const uid = Math.random().toString(36).slice(2);
-        this.#albedoDirectTexture = new DirectTexture(this.#redGPUContext, `RVT_Albedo_${uid}`, this.#albedoAtlasGPU);
-        this.#normalORMDirectTexture = new DirectTexture(this.#redGPUContext, `RVT_NormalORM_${uid}`, this.#normalORMAtlasGPU);
 
         this.#uniformBuffer = device.createBuffer({
             label: 'RVT_BakeUniform', size: 28 * 4, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
@@ -222,10 +300,7 @@ class TerrainRVT {
             label: 'RVT_BakeSampler', magFilter: 'linear', minFilter: 'linear', mipmapFilter: 'linear',
             addressModeU: 'repeat', addressModeV: 'repeat',
         });
-    }
 
-    #initPipeline(): void {
-        const device = this.#redGPUContext.gpuDevice;
         this.#bindGroupLayout = device.createBindGroupLayout({
             label: 'RVT_ComputeBakeBindGroupLayout',
             entries: [
@@ -282,18 +357,41 @@ class TerrainRVT {
 
     #getTextureView(texture: any): GPUTextureView | null {
         if (!texture) return null;
+        if (texture instanceof GPUTextureView) return texture;
+        if (texture instanceof GPUTexture) return texture.createView();
+        const gpuTex = texture.gpuTexture ?? texture.texture;
+        if (gpuTex instanceof GPUTexture) return gpuTex.createView();
         return this.#redGPUContext.resourceManager.getGPUResourceBitmapTextureView(texture) ?? null;
     }
 
     #getArrayTextureView(textureArray: any): GPUTextureView | null {
         if (!textureArray) return null;
+        if (textureArray instanceof GPUTextureView) return textureArray;
+        if (textureArray instanceof GPUTexture) return textureArray.createView({dimension: '2d-array'});
+        const gpuTex = textureArray.gpuTexture ?? textureArray.texture;
+        if (gpuTex instanceof GPUTexture) return gpuTex.createView({dimension: '2d-array'});
         return this.#redGPUContext.resourceManager.getGPUResourceBitmapTextureView(textureArray, {dimension: '2d-array'}) ?? null;
+    }
+
+    #getOrCreateEmpty2DView(): GPUTextureView {
+        if (!this.#empty2DGPUTexture) {
+            this.#empty2DGPUTexture = this.#redGPUContext.gpuDevice.createTexture({
+                label: 'RVT_Empty2D',
+                size: [1, 1, 1],
+                format: 'rgba8unorm',
+                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+            });
+            this.#empty2DView = this.#empty2DGPUTexture.createView();
+        }
+        return this.#empty2DView!;
     }
 
     #getOrCreateEmptyArrayView(): GPUTextureView {
         if (!this.#emptyArrayGPUTexture) {
             this.#emptyArrayGPUTexture = this.#redGPUContext.gpuDevice.createTexture({
-                label: 'RVT_EmptyArray', size: [1, 1, 4], format: 'rgba8unorm',
+                label: 'RVT_EmptyArray',
+                size: [1, 1, 4],
+                format: 'rgba8unorm',
                 usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
             });
             this.#emptyArrayView = this.#emptyArrayGPUTexture.createView({

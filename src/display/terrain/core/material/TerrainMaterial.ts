@@ -41,6 +41,7 @@ interface TerrainMaterial {
     ormTexture: BitmapTexture;
     rvtAlbedoTexture: DirectTexture;
     rvtNormalORMTexture: DirectTexture;
+    rvtPageTableTexture: DirectTexture;
     rvtSampler: Sampler;
 }
 
@@ -103,8 +104,9 @@ class TerrainMaterial extends ABitmapBaseMaterial {
         const atlasSize = finalOptions.atlasSize ?? (4096 * 2);
         this.#rvt = new TerrainRVT(redGPUContext, {atlasSize});
 
-        this.rvtAlbedoTexture = this.#rvt.albedoDirectTexture
-        this.rvtNormalORMTexture = this.#rvt.normalORMDirectTexture
+        this.rvtAlbedoTexture = this.#rvt.albedoDirectTexture!;
+        this.rvtNormalORMTexture = this.#rvt.normalORMDirectTexture!;
+        this.rvtPageTableTexture = this.#rvt.pageTableDirectTexture!;
 
         if (!this.__packingList) this.__packingList = [];
         this.__packingList.push(this.bakeAllRVTTiles);
@@ -387,6 +389,7 @@ defineTexture(TerrainMaterial, [
     {key: 'ormTexture'},
     {key: 'rvtAlbedoTexture'},
     {key: 'rvtNormalORMTexture'},
+    {key: 'rvtPageTableTexture'},
 ]);
 
 defineSampler(TerrainMaterial, [
