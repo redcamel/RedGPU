@@ -194,7 +194,7 @@ export class TerrainSpatialGrid {
 
         for (let gx = startGX; gx <= endGX; gx++) {
             for (let gz = startGZ; gz <= endGZ; gz++) {
-                this.#evaluateQuadtreeNode(
+                this.#evaluateLODNode(
                     maxLOD,
                     gx, gz,
                     camX, camZ,
@@ -328,7 +328,7 @@ export class TerrainSpatialGrid {
         return true;
     }
 
-    #evaluateQuadtreeNode(
+    #evaluateLODNode(
         lodLevel: number,
         gx: number,
         gz: number,
@@ -366,10 +366,10 @@ export class TerrainSpatialGrid {
             const childGx = gx * 2;
             const childGz = gz * 2;
 
-            this.#evaluateQuadtreeNode(childLod, childGx, childGz, camX, camZ, camera, frustumPlanes, paddedMinY, paddedMaxY, hasDir, dirX, dirY, dirZ, currentFrameKeys, tbMinX, tbMinZ, tbMaxX, tbMaxZ, tileCenterY);
-            this.#evaluateQuadtreeNode(childLod, childGx + 1, childGz, camX, camZ, camera, frustumPlanes, paddedMinY, paddedMaxY, hasDir, dirX, dirY, dirZ, currentFrameKeys, tbMinX, tbMinZ, tbMaxX, tbMaxZ, tileCenterY);
-            this.#evaluateQuadtreeNode(childLod, childGx, childGz + 1, camX, camZ, camera, frustumPlanes, paddedMinY, paddedMaxY, hasDir, dirX, dirY, dirZ, currentFrameKeys, tbMinX, tbMinZ, tbMaxX, tbMaxZ, tileCenterY);
-            this.#evaluateQuadtreeNode(childLod, childGx + 1, childGz + 1, camX, camZ, camera, frustumPlanes, paddedMinY, paddedMaxY, hasDir, dirX, dirY, dirZ, currentFrameKeys, tbMinX, tbMinZ, tbMaxX, tbMaxZ, tileCenterY);
+            this.#evaluateLODNode(childLod, childGx, childGz, camX, camZ, camera, frustumPlanes, paddedMinY, paddedMaxY, hasDir, dirX, dirY, dirZ, currentFrameKeys, tbMinX, tbMinZ, tbMaxX, tbMaxZ, tileCenterY);
+            this.#evaluateLODNode(childLod, childGx + 1, childGz, camX, camZ, camera, frustumPlanes, paddedMinY, paddedMaxY, hasDir, dirX, dirY, dirZ, currentFrameKeys, tbMinX, tbMinZ, tbMaxX, tbMaxZ, tileCenterY);
+            this.#evaluateLODNode(childLod, childGx, childGz + 1, camX, camZ, camera, frustumPlanes, paddedMinY, paddedMaxY, hasDir, dirX, dirY, dirZ, currentFrameKeys, tbMinX, tbMinZ, tbMaxX, tbMaxZ, tileCenterY);
+            this.#evaluateLODNode(childLod, childGx + 1, childGz + 1, camX, camZ, camera, frustumPlanes, paddedMinY, paddedMaxY, hasDir, dirX, dirY, dirZ, currentFrameKeys, tbMinX, tbMinZ, tbMaxX, tbMaxZ, tileCenterY);
             return;
         }
 
