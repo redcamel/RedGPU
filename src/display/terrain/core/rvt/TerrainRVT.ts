@@ -114,7 +114,7 @@ class TerrainRVT {
         );
     }
 
-    public update(material: TerrainMaterial, commandEncoder?: GPUCommandEncoder, maxBakesPerFrame: number = 8): void {
+    public update(material: TerrainMaterial, commandEncoder?: GPUCommandEncoder, maxBakesPerFrame: number = 1): void {
         const spatialGrid = material.targetTerrain?.spatialGrid;
         const activeTiles = spatialGrid?.activeTileList;
         if (!activeTiles || activeTiles.length === 0) return;
