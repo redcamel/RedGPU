@@ -70,19 +70,15 @@ fn calculateMorphFactor(worldPos: vec3<f32>, lod: f32) -> f32 {
 }
 
 fn decodeOctahedronNormal(oct: vec2<f32>) -> vec3<f32> {
-    if (oct.x == 0.0 && oct.y == 0.0) {
-        return vec3<f32>(0.0, 1.0, 0.0);
-    }
+    let isZero = (oct.x == 0.0 && oct.y == 0.0);
     let f = oct * 2.0 - 1.0;
     var n = vec3<f32>(f.x, 1.0 - abs(f.x) - abs(f.y), f.y);
     let t = clamp(-n.y, 0.0, 1.0);
     n.x += select(t, -t, n.x >= 0.0);
     n.z += select(t, -t, n.z >= 0.0);
     let norm = normalize(n);
-    if (norm.y < 0.0) {
-        return vec3<f32>(0.0, 1.0, 0.0);
-    }
-    return norm;
+    let validNorm = select(norm, vec3<f32>(0.0, 1.0, 0.0), norm.y < 0.0);
+    return select(validNorm, vec3<f32>(0.0, 1.0, 0.0), isZero);
 }
 
 @vertex
