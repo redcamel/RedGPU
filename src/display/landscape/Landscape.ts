@@ -8,6 +8,7 @@ import {
     LandscapeHeightTileManagerOptions
 } from "./core/tile/heightmap/LandscapeHeightTileManager.js";
 import {LandscapeMaterial} from "./material/LandscapeMaterial.js";
+import {LANDSCAPE_MODE} from "./const/LANDSCAPE_MODE.js";
 
 export interface LandscapeOptions {
     worldSize?: number;
@@ -16,6 +17,7 @@ export interface LandscapeOptions {
     maxChunks?: number;
     minHeight?: number;
     maxHeight?: number;
+    mode?: LANDSCAPE_MODE;
     wireframe?: boolean;
     material?: any;
     tileOptions?: LandscapeHeightTileManagerOptions;
@@ -37,7 +39,7 @@ const LOD_COLORS: string[] = [
  * [EN] Landscape (New Terrain System Display Class)
  *
  * 카메라 위치 변화에 따라 LandscapeLODManager를 호출하여 지오메트리 청크 그리드의 LOD 분할 및 조성을 제어하고,
- * 높이맵 타일 매니저(LandscapeHeightTileManager)를 통합하여 실시간 3D 지형 높이 변위(Displacement) 및 텍스처 표면 렌더링을 제공합니다.
+ * LANDSCAPE_MODE 상수 규격에 따라 DEBUG_WIRE_FRAME, DEBUG_HEIGHT_TEXTURE, NORMAL 모드별 실시간 3D 지형 렌더링을 분기합니다.
  */
 export class Landscape {
     readonly lodManager: LandscapeLODManager;
@@ -45,7 +47,7 @@ export class Landscape {
     minHeight: number = 0.0;
     maxHeight: number = 500.0;
 
-    #wireframe: boolean = false;
+    #mode: LANDSCAPE_MODE = LANDSCAPE_MODE.DEBUG_HEIGHT_TEXTURE;
     #customMaterial: any = null;
 
     #colorMaterials: ColorMaterial[] = [];
@@ -67,14 +69,15 @@ export class Landscape {
             maxChunks = 2048,
             minHeight = 0.0,
             maxHeight = 500.0,
-            wireframe = false,
+            mode = LANDSCAPE_MODE.DEBUG_HEIGHT_TEXTURE,
+            wireframe,
             material = null,
             tileOptions
         } = options;
 
         this.minHeight = minHeight;
         this.maxHeight = maxHeight;
-        this.#wireframe = wireframe;
+        this.#mode = wireframe ? LANDSCAPE_MODE.DEBUG_WIRE_FRAME : mode;
         this.#customMaterial = material;
         this.lodManager = new LandscapeLODManager(worldSize, chunkSize, maxLOD, maxChunks);
         this.heightTileManager = new LandscapeHeightTileManager(redGPUContext ?? null, tileOptions);
@@ -86,12 +89,24 @@ export class Landscape {
         }
     }
 
+    get mode(): LANDSCAPE_MODE {
+        return this.#mode;
+    }
+
+    set mode(value: LANDSCAPE_MODE) {
+        if (!Object.values(LANDSCAPE_MODE).includes(value)) {
+            console.warn(`[RedGPU Landscape] 유효하지 않은 LANDSCAPE_MODE 값입니다: ${value}`);
+            return;
+        }
+        this.#mode = value;
+    }
+
     get wireframe(): boolean {
-        return this.#wireframe;
+        return this.#mode === LANDSCAPE_MODE.DEBUG_WIRE_FRAME;
     }
 
     set wireframe(value: boolean) {
-        this.#wireframe = value;
+        this.mode = value ? LANDSCAPE_MODE.DEBUG_WIRE_FRAME : LANDSCAPE_MODE.DEBUG_HEIGHT_TEXTURE;
     }
 
     get meshes(): InstancingMesh[] {
@@ -202,8 +217,9 @@ export class Landscape {
         }
 
         // [Pass 2] 활성 레이어와 비활성 레이어의 instanceCount 지정
-        const activeMeshes = this.#wireframe ? this.#lodWireframeMeshes : this.#lodSolidMeshes;
-        const inactiveMeshes = this.#wireframe ? this.#lodSolidMeshes : this.#lodWireframeMeshes;
+        const isWireMode = (this.#mode === LANDSCAPE_MODE.DEBUG_WIRE_FRAME);
+        const activeMeshes = isWireMode ? this.#lodWireframeMeshes : this.#lodSolidMeshes;
+        const inactiveMeshes = isWireMode ? this.#lodSolidMeshes : this.#lodWireframeMeshes;
 
         for (let lod = 0; lod <= maxLOD; lod++) {
             if (inactiveMeshes[lod]) {
