@@ -242,12 +242,24 @@ export class TerrainTileManager {
         }
     }
 
+    #tileSpanX: number = 0;
+    #tileSpanZ: number = 0;
+
     get tileSpanX(): number {
-        return this.#terrain.worldSize[0] / this.atlasTileCountX;
+        if (this.#tileSpanX === 0) this.#recalculateTileSpan();
+        return this.#tileSpanX;
     }
 
     get tileSpanZ(): number {
-        return this.#terrain.worldSize[1] / this.atlasTileCountZ;
+        if (this.#tileSpanZ === 0) this.#recalculateTileSpan();
+        return this.#tileSpanZ;
+    }
+
+    #recalculateTileSpan() {
+        const countX = this.atlasTileCountX || 16;
+        const countZ = this.atlasTileCountZ || 16;
+        this.#tileSpanX = this.#terrain.worldSize[0] / countX;
+        this.#tileSpanZ = this.#terrain.worldSize[1] / countZ;
     }
 
     #updateLODRanges(currentWorldSize: number): boolean {

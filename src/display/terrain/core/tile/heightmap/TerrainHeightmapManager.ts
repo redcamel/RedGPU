@@ -136,7 +136,7 @@ export default class TerrainHeightmapManager {
                 tileRow = parseInt(key.substring(underscoreIdx + 1), 10);
             }
         } else {
-            key = tile.atlasKey || `${tile.tileCol}_${tile.tileRow}`;
+            key = tile.atlasKey;
             tileCol = tile.tileCol;
             tileRow = tile.tileRow;
         }

@@ -36,6 +36,13 @@ export class TerrainSpatialGrid {
     #pendingBuffer: SpatialTileInfo[] = [];
     readonly #buckets: SpatialTileInfo[][] = Array.from({length: 64}, () => []);
     #tileInfoPool: SpatialTileInfo[] = [];
+    readonly #currentFrameKeys: Set<number> = new Set();
+    readonly #toLoadBuffer: SpatialTileInfo[] = [];
+    readonly #toUnloadBuffer: SpatialTileInfo[] = [];
+    readonly #result: { toLoad: SpatialTileInfo[]; toUnload: SpatialTileInfo[] } = {
+        toLoad: this.#toLoadBuffer,
+        toUnload: this.#toUnloadBuffer
+    };
     #lastCameraGridX: number = NaN;
     #lastCameraGridZ: number = NaN;
 
@@ -108,9 +115,10 @@ export class TerrainSpatialGrid {
 
         const centerGridX = Math.floor(camX / this.#cellSize);
         const centerGridZ = Math.floor(camZ / this.#cellSize);
-
-        const toLoad: SpatialTileInfo[] = [];
-        const toUnload: SpatialTileInfo[] = [];
+        const toLoad = this.#toLoadBuffer;
+        const toUnload = this.#toUnloadBuffer;
+        toLoad.length = 0;
+        toUnload.length = 0;
 
         if (centerGridX !== this.#lastCameraGridX || centerGridZ !== this.#lastCameraGridZ) {
             this.#lastCameraGridX = centerGridX;
@@ -118,7 +126,8 @@ export class TerrainSpatialGrid {
         }
 
         const radiusInCells = Math.ceil(this.#loadingRadius / this.#cellSize);
-        const currentFrameKeys = new Set<number>();
+        const currentFrameKeys = this.#currentFrameKeys;
+        currentFrameKeys.clear();
 
         const [tbMinX, tbMinZ, tbMaxX, tbMaxZ] = this.#terrainBounds || [-Infinity, -Infinity, Infinity, Infinity];
 
@@ -244,7 +253,7 @@ export class TerrainSpatialGrid {
             toLoad.push(tile);
         }
 
-        return {toLoad, toUnload};
+        return this.#result;
     }
 
     destroy(): void {
@@ -253,6 +262,9 @@ export class TerrainSpatialGrid {
         this.#pendingQueue.clear();
         this.#pendingBuffer.length = 0;
         this.#tileInfoPool.length = 0;
+        this.#currentFrameKeys.clear();
+        this.#toLoadBuffer.length = 0;
+        this.#toUnloadBuffer.length = 0;
         for (let i = 0; i < 64; i++) {
             this.#buckets[i].length = 0;
         }
