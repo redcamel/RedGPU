@@ -31,6 +31,7 @@ export class TerrainSpatialGrid {
     #loadingRadius: number = 2560;
     #maxLoadsPerFrame: number = 2;
     #activeTiles: Map<number, SpatialTileInfo> = new Map();
+    #activeTileList: SpatialTileInfo[] = [];
     #pendingQueue: Map<number, SpatialTileInfo> = new Map();
     #pendingBuffer: SpatialTileInfo[] = [];
     #lastCameraGridX: number = NaN;
@@ -77,6 +78,10 @@ export class TerrainSpatialGrid {
 
     get activeTiles(): Map<number, SpatialTileInfo> {
         return this.#activeTiles;
+    }
+
+    get activeTileList(): readonly SpatialTileInfo[] {
+        return this.#activeTileList;
     }
 
 
@@ -188,11 +193,15 @@ export class TerrainSpatialGrid {
             }
         }
 
-        for (const [key, tile] of this.#activeTiles.entries()) {
+        // Iterator 없이 고정 배열 #activeTileList에서 언로드 대상 탐색 및 제거
+        for (let i = this.#activeTileList.length - 1; i >= 0; i--) {
+            const tile = this.#activeTileList[i];
+            const key = ((tile.gridX + 32768) << 16) | ((tile.gridZ + 32768) & 0xFFFF);
             if (!currentFrameKeys.has(key)) {
                 tile.state = 'UNLOADED';
                 toUnload.push(tile);
                 this.#activeTiles.delete(key);
+                this.#activeTileList.splice(i, 1);
             }
         }
 
@@ -220,6 +229,7 @@ export class TerrainSpatialGrid {
             tile.state = 'LOADED';
             this.#pendingQueue.delete(key);
             this.#activeTiles.set(key, tile);
+            this.#activeTileList.push(tile);
             toLoad.push(tile);
         }
 
@@ -228,6 +238,7 @@ export class TerrainSpatialGrid {
 
     destroy(): void {
         this.#activeTiles.clear();
+        this.#activeTileList.length = 0;
         this.#pendingQueue.clear();
         this.#pendingBuffer.length = 0;
     }
