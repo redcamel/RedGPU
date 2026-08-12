@@ -62,12 +62,16 @@ fn calculateMorphFactor(worldPos: vec3<f32>, lod: f32) -> f32 {
     let diff = systemUniforms.camera.cameraPosition.xz - worldPos.xz;
     let distSq = dot(diff, diff);
     
-    let range = vertexUniforms.lodRanges[i32(lod)];
+    let range = vertexUniforms.lodRanges[i32(clamp(lod, 0.0, 7.0))];
     let morphStartSq = range.x;
     let morphEndSq = range.y;
     
-    let k = (distSq - morphStartSq) / (morphEndSq - morphStartSq);
-    return clamp(k, 0.0, 1.0);
+    if (morphEndSq <= morphStartSq) {
+        return 0.0;
+    }
+    
+    let k = clamp((distSq - morphStartSq) / (morphEndSq - morphStartSq), 0.0, 1.0);
+    return k * k * (3.0 - 2.0 * k);
 }
 
 fn decodeOctahedronNormal(oct: vec2<f32>) -> vec3<f32> {

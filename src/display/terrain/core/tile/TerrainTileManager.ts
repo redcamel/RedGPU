@@ -283,13 +283,12 @@ export class TerrainTileManager {
             }
 
             const lodRanges = this.#cachedLodRanges;
-            const lodThreshold = this.lodThreshold;
-            const morphConstant = 0.5;
+            const baseCellSize = this.tileSpanX || 256;
 
             for (let i = 0; i <= this.#terrain.maxLOD; i++) {
-                const worldScale = currentWorldSize / Math.pow(2, i);
-                const morphEnd = worldScale * lodThreshold;
-                const morphStart = morphEnd - (worldScale * morphConstant);
+                const levelScale = baseCellSize * (1 << i);
+                const morphStart = levelScale * 1.2;
+                const morphEnd = levelScale * 2.0;
 
                 lodRanges[i * 4 + 0] = morphStart * morphStart;
                 lodRanges[i * 4 + 1] = morphEnd * morphEnd;
