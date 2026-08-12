@@ -134,8 +134,10 @@ export class TerrainSpatialGrid {
         const camZ = camera.z;
 
         const frustumPlanes = renderViewStateData?.frustumPlanes || renderViewStateData?.view?.frustumPlanes;
-        const paddedMinY = minY - 50.0;
-        const paddedMaxY = maxY + 50.0;
+        const heightRange = Math.abs(maxY - minY);
+        const heightPadding = Math.max(20.0, heightRange * 0.1);
+        const paddedMinY = minY - heightPadding;
+        const paddedMaxY = maxY + heightPadding;
 
         const centerGridX = Math.floor(camX / this.#cellSize);
         const centerGridZ = Math.floor(camZ / this.#cellSize);
@@ -170,34 +172,38 @@ export class TerrainSpatialGrid {
         }
 
         const loadingRadiusSq = this.#loadingRadius * this.#loadingRadius;
+        const baseCellSize = this.#cellSize;
 
         for (let gx = centerGridX - radiusInCells; gx <= centerGridX + radiusInCells; gx++) {
             for (let gz = centerGridZ - radiusInCells; gz <= centerGridZ + radiusInCells; gz++) {
-                const minX = gx * this.#cellSize;
-                const minZ = gz * this.#cellSize;
-                const maxX = minX + this.#cellSize;
-                const maxZ = minZ + this.#cellSize;
+                const minX = gx * baseCellSize;
+                const minZ = gz * baseCellSize;
+                const maxX = minX + baseCellSize;
+                const maxZ = minZ + baseCellSize;
 
                 if (maxX < tbMinX || minX > tbMaxX || maxZ < tbMinZ || minZ > tbMaxZ) {
                     continue;
                 }
 
-                const tileCenterX = minX + this.#cellSize * 0.5;
-                const tileCenterZ = minZ + this.#cellSize * 0.5;
+                const tileCenterX = minX + baseCellSize * 0.5;
+                const tileCenterZ = minZ + baseCellSize * 0.5;
                 const toTileX = tileCenterX - camX;
                 const toTileZ = tileCenterZ - camZ;
                 const distSq = toTileX * toTileX + toTileZ * toTileZ;
 
                 // 제곱근 연산 없이 범위 판정
                 if (distSq <= loadingRadiusSq) {
-                    const inFrustum = this.#checkAABBInFrustum(minX, paddedMinY, minZ, maxX, paddedMaxY, maxZ, frustumPlanes);
+                    const dist = Math.sqrt(distSq);
+                    const lodLevel = Math.min(4, Math.max(0, Math.floor(dist / (baseCellSize * 2.0))));
+
+                    const inFrustum = this.#checkAABBInFrustum(
+                        minX, paddedMinY, minZ,
+                        maxX, paddedMaxY, maxZ,
+                        frustumPlanes
+                    );
 
                     const key = ((gx + 32768) << 16) | ((gz + 32768) & 0xFFFF);
                     currentFrameKeys.add(key);
-
-                    // 범위 내에 있을 때만 필요에 의해 제곱근 연산 실행
-                    const dist = Math.sqrt(distSq);
-                    const lodLevel = Math.max(0, Math.floor(dist / (this.#cellSize * 2.0)));
 
                     let dotWeight = 1.0;
                     if (hasDir && dist > 0.0001) {
@@ -222,7 +228,12 @@ export class TerrainSpatialGrid {
                             existingPending.lodLevel = lodLevel;
                             existingPending.inFrustum = inFrustum;
                         } else {
-                            const tileInfo = this.#acquireTileInfo(gx, gz, minX, minZ, maxX, maxZ, dist, priority);
+                            const tileInfo = this.#acquireTileInfo(
+                                gx, gz,
+                                minX, minZ,
+                                maxX, maxZ,
+                                dist, priority
+                            );
                             tileInfo.lodLevel = lodLevel;
                             tileInfo.inFrustum = inFrustum;
                             this.#addToPending(key, tileInfo);
