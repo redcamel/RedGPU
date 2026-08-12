@@ -128,9 +128,12 @@ export class QuadtreeNode {
 
         for (let i = 0; i < 6; i++) {
             const p = planes[i];
-            const dist = p[0] * centerX + p[1] * centerY + p[2] * centerZ + p[3];
-
-            const r = ex * Math.abs(p[0]) + ey * Math.abs(p[1]) + ez * Math.abs(p[2]);
+            const px = p[0], py = p[1], pz = p[2];
+            const dist = px * centerX + py * centerY + pz * centerZ + p[3];
+            const absX = px < 0 ? -px : px;
+            const absY = py < 0 ? -py : py;
+            const absZ = pz < 0 ? -pz : pz;
+            const r = ex * absX + ey * absY + ez * absZ;
             if (dist <= -r) return false;
         }
         return true;
