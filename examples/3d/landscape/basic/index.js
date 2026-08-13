@@ -2,11 +2,11 @@ import * as RedGPU from "../../../../dist/index.js";
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
- * [KO] Landscape Basic & SkyAtmosphere 예제
- * [EN] Landscape Basic & SkyAtmosphere example
+ * [KO] Landscape Basic LOD 테스트 예제
+ * [EN] Landscape Basic LOD Test Example
  *
- * [KO] 신규 Landscape 지형 시스템 개발을 위한 SkyAtmosphere 기반 기본 3D 씬 예제입니다.
- * [EN] Basic 3D scene example with SkyAtmosphere for developing the new Landscape terrain system.
+ * [KO] 신규 Landscape 지형 시스템의 기본 LOD 처리 및 거리 기반 시각화 검증 예제입니다.
+ * [EN] Basic LOD processing and distance-based visualization test example for the new Landscape terrain system.
  */
 
 const canvas = document.createElement('canvas');
@@ -15,12 +15,12 @@ document.body.appendChild(canvas);
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 설정 (FreeController - 6자유도 자유 탐색)
+        // 1. 카메라 설정 (FreeController - 자유 관람 및 탐색)
         const controller = new RedGPU.Camera.FreeController(redGPUContext);
         controller.x = 0;
-        controller.y = 150;
-        controller.z = 300;
-        controller.moveSpeed = 5000;
+        controller.y = 300;
+        controller.z = 800;
+        controller.moveSpeed = 3000;
 
         // 2. Scene & View3D 초기화
         const scene = new RedGPU.Display.Scene();
@@ -30,111 +30,89 @@ RedGPU.init(
 
         // 3. 태양 광원 (Directional Light)
         const directionalLight = new RedGPU.Light.DirectionalLight();
-        directionalLight.elevation = 25;
+        directionalLight.elevation = 45;
         directionalLight.azimuth = 45;
         directionalLight.intensity = 1.5;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 4. SkyAtmosphere (스카이 아트모스피어) 생성 및 바인딩
-        const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
-        view.skyAtmosphere = skyAtmosphere;
-
-        // 5. Landscape 인스턴스 초기화 (10km x 10km, maxLOD 5)
+        // 4. 신규 Landscape 인스턴스 생성 (동적 gridSize 및 lodCount 수용)
         const landscape = new RedGPU.Display.Landscape(redGPUContext, {
-            worldSize: 10000.0,
-            chunkSize: 64.0,
-            maxLOD: 5
+            gridSize: 64,
+            lodCount: 4,
+            wireframe: true,
+            debugLODColorMode: true
         });
-        landscape.meshes.forEach(mesh => scene.addChild(mesh));
 
-        // 6. HUD 상태 창 생성
+        if (scene.addLandscape) {
+            scene.addLandscape(landscape);
+        } else {
+            scene.addChild(landscape);
+        }
+
+        // 5. 예제 조작 GUI 패널 구축
+        const exampleHelper = new RedGPUExampleHelper(redGPUContext);
+        exampleHelper.init();
+
+        const gui = exampleHelper.gui;
+        if (gui && landscape) {
+            const landscapeFolder = gui.addFolder('Landscape Test Panel');
+            landscapeFolder.open();
+
+            if ('wireframe' in landscape) {
+                landscapeFolder.add(landscape, 'wireframe').name('Wireframe Mode');
+            }
+            if ('debugLODColorMode' in landscape) {
+                landscapeFolder.add(landscape, 'debugLODColorMode').name('LOD Color Overlay');
+            }
+        }
+
+        // 6. 실시간 HUD 데이터 모니터링 패널
         const hud = document.createElement('div');
         Object.assign(hud.style, {
-            position: 'fixed', top: '100px', left: '12px', bottom: 'auto',
-            padding: '12px 18px',
-            background: 'rgba(15,23,42,0.75)',
+            position: 'fixed',
+            top: '16px',
+            left: '12px',
+            padding: '14px 18px',
+            background: 'rgba(15, 23, 42, 0.9)',
             backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(56,189,248,0.3)',
+            border: '1px solid rgba(56, 189, 248, 0.4)',
             borderRadius: '10px',
             color: '#e2e8f0',
             fontFamily: 'monospace',
             fontSize: '13px',
-            lineHeight: '1.7',
-            pointerEvents: 'none',
-            zIndex: '9999'
+            lineHeight: '1.8',
+            zIndex: '99999',
+            minWidth: '280px'
         });
+
+        hud.innerHTML = `
+            <div style="font-weight: bold; color: #38bdf8; font-size: 14px; margin-bottom: 6px;">
+                🏞️ Landscape Basic Test Panel
+            </div>
+            <div style="font-size: 12px; color: #94a3b8; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 6px;">
+                <b>LOD Level Status:</b><br>
+                🟢 <span style="color:#00ff00">LOD 0</span>: <span id="countLOD0" style="color:#fff; font-weight:bold;">-</span><br>
+                🟡 <span style="color:#ffff00">LOD 1</span>: <span id="countLOD1" style="color:#fff; font-weight:bold;">-</span><br>
+                🟠 <span style="color:#ff8800">LOD 2</span>: <span id="countLOD2" style="color:#fff; font-weight:bold;">-</span><br>
+                🔴 <span style="color:#ff0000">LOD 3</span>: <span id="countLOD3" style="color:#fff; font-weight:bold;">-</span>
+            </div>
+            <div id="statInfo" style="margin-top: 10px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.1); font-weight: bold; color: #f8fafc;"></div>
+        `;
         document.body.appendChild(hud);
 
-        // 7. 렌더러 시작 및 매 프레임 LOD 갱신
+        const statInfo = document.getElementById('statInfo');
+
+        // 7. 렌더러 루프 및 매 프레임 위치 및 상태 추적
         const renderer = new RedGPU.Renderer();
-        renderer.start(redGPUContext, (time) => {
-            // 카메라 위치로 Landscape LOD 계산 업데이트 (GC-Free)
-            landscape.update([controller.x, controller.y, controller.z]);
+        renderer.start(redGPUContext, () => {
+            if (landscape && typeof landscape.update === 'function') {
+                landscape.update(controller);
+            }
 
-            // HUD UI 정보 갱신 (LOD 레벨별 디버그 색상 범례 포함)
-            hud.innerHTML = `
-                <b style="color:#38bdf8;">[Landscape Dynamic LOD Visualizer]</b><br/>
-                - Cam Pos : [${controller.x.toFixed(1)}, ${controller.y.toFixed(1)}, ${controller.z.toFixed(1)}]<br/>
-                - Active Chunks : <b style="color:#facc15;">${landscape.lodManager.activeChunkCount}</b> / ${landscape.lodManager.maxChunks}<br/>
-                - World Size : ${landscape.lodManager.worldSize}m | Max LOD: ${landscape.lodManager.maxLOD}<br/>
-                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.15); margin:6px 0;"/>
-                <b>LOD Level Color Legend:</b><br/>
-                <span style="color:#ff3333;">■ LOD 0 (High)</span> | 
-                <span style="color:#ff9933;">■ LOD 1</span> | 
-                <span style="color:#ffff33;">■ LOD 2</span><br/>
-                <span style="color:#33ff33;">■ LOD 3</span> | 
-                <span style="color:#3399ff;">■ LOD 4</span> | 
-                <span style="color:#cc33ff;">■ LOD 5 (Low)</span>
-            `;
+            if (statInfo) {
+                statInfo.textContent = `Cam Pos: [X: ${Math.round(controller.x)}, Y: ${Math.round(controller.y)}, Z: ${Math.round(controller.z)}]`;
+            }
         });
-
-        // 8. GUI 컨트롤 설정
-        renderTestPane(view, skyAtmosphere, directionalLight, landscape);
-    },
-    (failReason) => {
-        console.error("Initialization failed:", failReason);
     }
 );
 
-const renderTestPane = (targetView, skyAtmosphere, sunSource, landscape) => {
-    new RedGPUExampleHelper(targetView.redGPUContext, {
-        gui: (pane) => {
-            // -------------------------------------------------------------------------
-            // 0. Landscape Settings
-            // -------------------------------------------------------------------------
-            const f_land = pane.addFolder({title: 'Landscape LOD System', expanded: true});
-            f_land.addBinding(landscape.lodManager, 'worldSize', {min: 1000, max: 50000, step: 500});
-            f_land.addBinding(landscape.lodManager, 'chunkSize', {min: 16, max: 256, step: 16});
-            f_land.addBinding(landscape.lodManager, 'maxLOD', {min: 1, max: 8, step: 1});
-            f_land.addBinding(landscape.lodManager, 'lodDistanceRatio', {min: 0.5, max: 10.0, step: 0.1});
-
-            // -------------------------------------------------------------------------
-            // FreeController Settings
-            // -------------------------------------------------------------------------
-            const f_cam = pane.addFolder({title: 'FreeController (Camera)', expanded: true});
-            f_cam.addBinding(targetView.camera, 'moveSpeed', {min: 100, max: 20000, step: 100});
-
-            // -------------------------------------------------------------------------
-            // 1. Sun (Directional Light)
-            // -------------------------------------------------------------------------
-            const f_sun = pane.addFolder({title: 'Sun (DirectionalLight)', expanded: false});
-            f_sun.addBinding(sunSource, 'elevation', {min: -90, max: 90, step: 0.1});
-            f_sun.addBinding(sunSource, 'azimuth', {min: -360, max: 360, step: 0.1});
-            f_sun.addBinding(sunSource, 'intensity', {min: 0, max: 5, step: 0.1});
-
-            // -------------------------------------------------------------------------
-            // 2. SkyAtmosphere
-            // -------------------------------------------------------------------------
-            const f_atmo = pane.addFolder({title: 'SkyAtmosphere', expanded: false});
-            f_atmo.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01});
-            f_atmo.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01});
-
-            // Clouds
-            const f_clouds = f_atmo.addFolder({title: 'Clouds', expanded: true});
-            f_clouds.addBinding(skyAtmosphere, 'cloudCoverage', {min: 0, max: 1, step: 0.01});
-            f_clouds.addBinding(skyAtmosphere, 'cloudDensity', {min: 0, max: 1, step: 0.01});
-            f_clouds.addBinding(skyAtmosphere, 'cloudHeight', {min: 0.1, max: 20, step: 0.1});
-            f_clouds.addBinding(skyAtmosphere, 'cloudTimeMultiplier', {min: -10000, max: 10000, step: 0.01});
-        }
-    });
-};
