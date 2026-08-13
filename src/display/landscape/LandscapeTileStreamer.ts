@@ -31,6 +31,12 @@ export class LandscapeTileStreamer {
         this.#loadingRadius = loadingRadius;
     }
 
+    resetTileState(): void {
+        this.#loadingMap.clear();
+        this.#loadedMap.clear();
+        this.#pendingQueue.length = 0;
+    }
+
     get vhtAtlasTexture(): GPUTexture | null {
         return this.#vhtAtlasTexture;
     }
@@ -136,20 +142,25 @@ export class LandscapeTileStreamer {
 
                 if (this.#vhtAtlasTexture) {
                     const {gpuDevice} = this.#redGPUContext;
-                    const commandEncoder = gpuDevice.createCommandEncoder({label: `VHT_SubRegion_Copy_${key}`});
                     const targetX = comp.componentX * parsed.width;
                     const targetZ = comp.componentZ * parsed.height;
 
-                    commandEncoder.copyTextureToTexture(
-                        {texture: parsed.gpuTexture},
-                        {
-                            texture: this.#vhtAtlasTexture,
-                            origin: [targetX, targetZ, 0]
-                        },
-                        [parsed.width, parsed.height, 1]
-                    );
-                    gpuDevice.queue.submit([commandEncoder.finish()]);
-                    console.log(`[LandscapeTileStreamer ⛰️] VHT Atlas Sub-region (${key}) copied at [${targetX}, ${targetZ}]`);
+                    if (
+                        targetX + parsed.width <= this.#vhtAtlasTexture.width &&
+                        targetZ + parsed.height <= this.#vhtAtlasTexture.height
+                    ) {
+                        const commandEncoder = gpuDevice.createCommandEncoder({label: `VHT_SubRegion_Copy_${key}`});
+                        commandEncoder.copyTextureToTexture(
+                            {texture: parsed.gpuTexture},
+                            {
+                                texture: this.#vhtAtlasTexture,
+                                origin: [targetX, targetZ, 0]
+                            },
+                            [parsed.width, parsed.height, 1]
+                        );
+                        gpuDevice.queue.submit([commandEncoder.finish()]);
+                        console.log(`[LandscapeTileStreamer ⛰️] VHT Atlas Sub-region (${key}) copied at [${targetX}, ${targetZ}]`);
+                    }
                 }
             }
         } catch (e) {

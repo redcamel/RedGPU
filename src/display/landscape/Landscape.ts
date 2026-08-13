@@ -88,8 +88,8 @@ export class Landscape {
 
         let [worldSizeX, worldSizeZ] = parseValue(options.worldSize, 8000);
         let [rawComponentCountX, rawComponentCountZ] = parseValue(options.componentCount, 8);
-        let componentCountX = Landscape.#clampComponentCount(rawComponentCountX);
-        let componentCountZ = Landscape.#clampComponentCount(rawComponentCountZ);
+        let componentCountX = this.#clampComponentCount(rawComponentCountX);
+        let componentCountZ = this.#clampComponentCount(rawComponentCountZ);
 
         let [tileSizeX, tileSizeZ] = [worldSizeX / componentCountX, worldSizeZ / componentCountZ];
 
@@ -204,10 +204,10 @@ export class Landscape {
         let tcX = this.#componentCountX;
         let tcZ = this.#componentCountZ;
         if (Array.isArray(value)) {
-            tcX = Landscape.#clampComponentCount(value[0]);
-            tcZ = Landscape.#clampComponentCount(value[1]);
+            tcX = this.#clampComponentCount(value[0]);
+            tcZ = this.#clampComponentCount(value[1]);
         } else if (typeof value === 'number') {
-            const count = Landscape.#clampComponentCount(value);
+            const count = this.#clampComponentCount(value);
             tcX = count;
             tcZ = count;
         }
@@ -325,10 +325,13 @@ export class Landscape {
     }
 
     /**
-     * [KO] 언리얼 엔진 5 표준 타일 개수 클램핑 헬퍼 (최소 1개, 최대 32개 타일)
+     * [KO] 언리얼 엔진 5 및 WebGPU GPUDevice 하드웨어 maxTextureDimension2D 한계 기반 타일 개수 클램핑 헬퍼
      */
-    static #clampComponentCount(val: number): number {
-        return Math.min(32, Math.max(1, Math.round(val)));
+    #clampComponentCount(val: number): number {
+        const maxTextureDim = this.#redGPUContext?.gpuDevice?.limits?.maxTextureDimension2D ?? 8192;
+        const maxTilesForHardware = Math.floor(maxTextureDim / 512);
+        const maxAllowed = Math.min(32, Math.max(1, maxTilesForHardware));
+        return Math.min(maxAllowed, Math.max(1, Math.round(val)));
     }
 
     get tileStreamer(): LandscapeTileStreamer {
@@ -642,9 +645,37 @@ export class Landscape {
         const tileSizeZ = this.#tileSizeZ;
         const targetCount = componentCountX * componentCountZ;
 
-        if (this.#instanceBuffer.maxComponentCount < targetCount || this.#instanceBuffer.maxLODLevel !== this.#maxLODLevel) {
-            this.#instanceBuffer.destroy();
+        const targetAtlasW = componentCountX * 512;
+        const targetAtlasH = componentCountZ * 512;
+        let needRebuildBindGroup = false;
+
+        if (!this.#vhtAtlasTexture || this.#vhtAtlasTexture.width !== targetAtlasW || this.#vhtAtlasTexture.height !== targetAtlasH) {
+            if (this.#vhtAtlasTexture) {
+                this.#vhtAtlasTexture.destroy();
+            }
+            this.#vhtAtlasTexture = this.#redGPUContext.gpuDevice.createTexture({
+                size: [targetAtlasW, targetAtlasH],
+                format: 'r16unorm',
+                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
+                label: 'Landscape_VHT_Atlas_Texture'
+            });
+            if (this.#tileStreamer) {
+                this.#tileStreamer.vhtAtlasTexture = this.#vhtAtlasTexture;
+                this.#tileStreamer.resetTileState();
+            }
+            needRebuildBindGroup = true;
+        }
+
+        if (!this.#instanceBuffer || this.#instanceBuffer.maxComponentCount < targetCount || this.#instanceBuffer.maxLODLevel !== this.#maxLODLevel) {
+            if (this.#instanceBuffer) {
+                this.#instanceBuffer.destroy();
+            }
             this.#instanceBuffer = new LandscapeInstanceBuffer(this.#redGPUContext, targetCount, this.#maxLODLevel);
+            needRebuildBindGroup = true;
+        }
+
+        if (needRebuildBindGroup && this.#vhtSampler && this.#vhtAtlasTexture) {
+            this.#instanceBuffer.updateBindGroup(this.#vhtSampler, this.#vhtAtlasTexture.createView());
         }
 
         while (this.#landscapeComponents.length > targetCount) {

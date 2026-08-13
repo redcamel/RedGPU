@@ -156,11 +156,18 @@ RedGPU.init(
             `;
         };
 
-        // 5-1. 정식 RedGPU 디버거 클래스 (LandscapeSpatialGridDebugger) 인스턴스 생성
+        // 5-1. 정식 RedGPU 디버거 클래스 인스턴스 생성 (2D SpatialGrid 및 VHT Heightmap Atlas 디버거)
         const spatialGridDebugger = new RedGPU.Display.LandscapeSpatialGridDebugger(landscape, controller, {
             width: 100,
             height: 100,
             left: 12,
+            bottom: 12
+        });
+
+        const vhtDebugger = new RedGPU.Display.LandscapeVHTDebugger(landscape, {
+            width: 100,
+            height: 100,
+            left: 120,
             bottom: 12
         });
 
@@ -170,6 +177,7 @@ RedGPU.init(
             landscape.update(controller);
             updateHUD();
             spatialGridDebugger.update();
+            vhtDebugger.update();
         };
         renderer.start(redGPUContext, render);
 
@@ -252,9 +260,11 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
                 }
             });
 
+            const maxTilesAllowed = Math.floor((redGPUContext.gpuDevice?.limits?.maxTextureDimension2D ?? 8192) / 512);
+
             folderDimensions.addBinding(config, 'componentCountX', {
                 min: 1,
-                max: 32,
+                max: maxTilesAllowed,
                 step: 1
             }).on('change', (ev) => {
                 config.componentCountX = ev.value;
@@ -266,7 +276,7 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
 
             folderDimensions.addBinding(config, 'componentCountZ', {
                 min: 1,
-                max: 32,
+                max: maxTilesAllowed,
                 step: 1
             }).on('change', (ev) => {
                 config.componentCountZ = ev.value;

@@ -6,7 +6,8 @@ import LandscapeOptions from "./LandscapeOptions";
 import LandscapeSharedGeometry from "./LandscapeSharedGeometry";
 import LandscapeSpatialGrid from "./LandscapeSpatialGrid";
 import LandscapeTileStreamer from "./LandscapeTileStreamer";
-import LandscapeSpatialGridDebugger from "./debugger/LandscapeSpatialGridDebugger";
+import LandscapeSpatialGridDebugger from "./LandscapeSpatialGridDebugger";
+import LandscapeVHTDebugger from "./LandscapeVHTDebugger";
 import LANDSCAPE_BASE_GRID_SIZE from "./LANDSCAPE_BASE_GRID_SIZE";
 
 export {
@@ -18,6 +19,7 @@ export {
     LandscapeSharedGeometry,
     LandscapeSpatialGrid,
     LandscapeSpatialGridDebugger,
+    LandscapeVHTDebugger,
     LandscapeTileStreamer,
     LANDSCAPE_BASE_GRID_SIZE
 };

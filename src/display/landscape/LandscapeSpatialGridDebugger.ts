@@ -1,4 +1,4 @@
-import Landscape from "../Landscape";
+import Landscape from "./Landscape";
 
 /**
  * [KO] Landscape 지형 시스템의 2D SpatialGrid 타일 상태 및 카메라 시야 반경(loadingRadius)을 2D 캔버스 오버레이로 시각화하는 디버거 클래스입니다.
@@ -29,6 +29,7 @@ export class LandscapeSpatialGridDebugger {
         canvas.id = 'landscape-spatial-grid-debugger-canvas';
         canvas.width = w;
         canvas.height = h;
+
         // 외부 전역 CSS 규칙 (예: canvas { width: 100vw !important; })으로부터 100% 완전 격리
         canvas.style.setProperty('all', 'initial', 'important');
         canvas.style.setProperty('position', 'fixed', 'important');
