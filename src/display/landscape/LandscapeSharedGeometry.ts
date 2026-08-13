@@ -7,7 +7,8 @@ import Plane from "../../primitive/Plane";
  */
 export class LandscapeSharedGeometry {
     #redGPUContext: RedGPUContext;
-    #tileSize: number;
+    #tileSizeX: number;
+    #tileSizeZ: number;
     #gridSize: number;
     #lodCount: number;
     #geometries: Plane[] = [];
@@ -17,13 +18,15 @@ export class LandscapeSharedGeometry {
      * [EN] Creates an instance of LandscapeSharedGeometry.
      *
      * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
-     * @param tileSize - [KO] 타일 크기 [EN] Tile size
+     * @param tileSizeX - [KO] 타일 X 크기 [EN] Tile X size
+     * @param tileSizeZ - [KO] 타일 Z 크기 [EN] Tile Z size
      * @param gridSize - [KO] 타일당 최고 LOD 쿼드 해상도 (기본 64) [EN] Base grid quad resolution for LOD 0 (default 64)
      * @param lodCount - [KO] LOD 단계 수 [EN] Number of LOD levels
      */
-    constructor(redGPUContext: RedGPUContext, tileSize: number, gridSize: number, lodCount: number) {
+    constructor(redGPUContext: RedGPUContext, tileSizeX: number, tileSizeZ: number, gridSize: number, lodCount: number) {
         this.#redGPUContext = redGPUContext;
-        this.#tileSize = tileSize;
+        this.#tileSizeX = tileSizeX;
+        this.#tileSizeZ = tileSizeZ;
         this.#gridSize = gridSize;
         this.#lodCount = lodCount;
 
@@ -38,8 +41,8 @@ export class LandscapeSharedGeometry {
         return this.#geometries;
     }
 
-    public get tileSize(): number {
-        return this.#tileSize;
+    public get tileSizeX(): number {
+        return this.#tileSizeX;
     }
 
     /**
@@ -53,15 +56,18 @@ export class LandscapeSharedGeometry {
         return this.#geometries[index];
     }
 
+    public get tileSizeZ(): number {
+        return this.#tileSizeZ;
+    }
+
     /**
-     * [KO] 타일 크기(tileSize)가 동적 변경되었을 때 공유 지오메트리 버퍼들을 새로 재생성합니다.
-     * [EN] Recreates shared geometry buffers when the tileSize changes dynamically.
-     *
-     * @param newTileSize - [KO] 새로운 타일 크기 [EN] New tile size
+     * [KO] 타일 크기(tileSizeX, tileSizeZ)가 동적 변경되었을 때 공유 지오메트리 버퍼들을 새로 재생성합니다.
+     * [EN] Recreates shared geometry buffers when the tile sizes change dynamically.
      */
-    public updateTileSize(newTileSize: number): void {
-        if (newTileSize > 0 && this.#tileSize !== newTileSize) {
-            this.#tileSize = newTileSize;
+    public updateTileSize(newTileSizeX: number, newTileSizeZ: number): void {
+        if (newTileSizeX > 0 && newTileSizeZ > 0 && (this.#tileSizeX !== newTileSizeX || this.#tileSizeZ !== newTileSizeZ)) {
+            this.#tileSizeX = newTileSizeX;
+            this.#tileSizeZ = newTileSizeZ;
             this.#buildGeometries();
         }
     }
@@ -70,8 +76,8 @@ export class LandscapeSharedGeometry {
         this.#geometries.length = 0;
         for (let level = 0; level < this.#lodCount; level++) {
             const quadRes = Math.max(1, Math.floor(this.#gridSize / Math.pow(2, level)));
-            // XZ 평면(지형)에 맞게 렌더링되도록 Plane 지오메트리 생성
-            const plane = new Plane(this.#redGPUContext, this.#tileSize, this.#tileSize, quadRes, quadRes);
+            // XZ 평면에 맞게 tileSizeX, tileSizeZ 크기로 Plane 지오메트리 생성
+            const plane = new Plane(this.#redGPUContext, this.#tileSizeX, this.#tileSizeZ, quadRes, quadRes);
             this.#geometries.push(plane);
         }
     }

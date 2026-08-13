@@ -3,21 +3,21 @@
  * [EN] Options interface for configuring the Landscape terrain system.
  */
 export interface LandscapeOptions {
-    /** [KO] 전체 지형의 월드 공간 크기 (예: 3000 -> 3,000m x 3,000m) [EN] World space size of the entire terrain */
-    worldSize?: number;
-    /** [KO] 전체 지형의 가로/세로 타일 개수 (기본값 4 -> 4x4 타일) [EN] Number of tiles per row/column (default 4) */
-    tileCount?: number;
-    /** [KO] 단일 타일 크기 (worldSize가 지정된 경우 worldSize / tileCount 로 자동 산출) [EN] Size of a single tile */
-    tileSize?: number;
-    /** [KO] 타일당 기본 격자 갯수 (기본값 64 -> 64x64 Quads) [EN] Base grid size per tile (default 64) */
+    /** [Primary] 전체 지형의 월드 공간 크기 (단일 수치 또는 [worldSizeX, worldSizeZ] 배열 지정 가능) */
+    worldSize?: number | [number, number];
+    /** [Primary] 전체 지형의 가로/세로 타일 분할 개수 (단일 수치 또는 [tileCountX, tileCountZ] 배열 지정 가능, 기본값 4) */
+    tileCount?: number | [number, number];
+    /** [Derived Readonly] 단일 타일 크기 (worldSize / tileCount 로 자동 산출되는 파생 수치) */
+    tileSize?: number | [number, number];
+    /** 타일당 기본 격자 갯수 (기본값 64 -> 64x64 Quads) */
     gridSize?: number;
-    /** [KO] 전체 LOD 단계 수 (기본값 4 -> LOD 0 ~ LOD 3) [EN] Total number of LOD levels (default 4) */
+    /** 전체 LOD 단계 수 (기본값 4 -> LOD 0 ~ LOD 3) */
     lodCount?: number;
-    /** [KO] 각 LOD 레벨별 전환 임계 거리 배열 (월드 공간 단위) [EN] Array of distance thresholds for LOD transitions */
+    /** 각 LOD 레벨별 전환 임계 거리 배열 */
     lodDistances?: number[];
-    /** [KO] 와이어프레임 렌더링 여부 (기본값 false) [EN] Whether wireframe mode is enabled (default false) */
+    /** 와이어프레임 렌더링 여부 (기본값 false) */
     wireframe?: boolean;
-    /** [KO] LOD 레벨별 시각화 색상 오버레이 디버그 모드 여부 (기본값 false) [EN] Whether LOD color overlay debug mode is enabled (default false) */
+    /** LOD 레벨별 시각화 색상 오버레이 디버그 모드 여부 (기본값 false) */
     debugLODColorMode?: boolean;
 }
 
