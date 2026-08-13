@@ -1,26 +1,28 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import RenderViewStateData from "../view/core/RenderViewStateData";
+import landscapeVertexSource from "./shader/landscapeVertex.wgsl";
 import LandscapeMaterial from "./LandscapeMaterial";
 import LandscapeSharedGeometry from "./LandscapeSharedGeometry";
-import landscapeVertexSource from "./shader/landscapeVertex.wgsl";
 
 /**
- * [KO] 단일 지형 타일 인스턴스 전용 순수 데이터 & 렌더 디스패치 클래스입니다 (Mesh 미상속 / Zero-Weight 경량 객체).
- * [EN] Pure data & render dispatch class dedicated to single terrain tile instance (Non-Mesh inheritance / Zero-Weight lightweight object).
+ * [KO] SpatialGrid의 단일 공간 셀(타일) 단위를 렌더링 디스패치하는 내부 렌더링 컴포넌트 클래스입니다 (Multi-LOD Batching 전담).
+ * [EN] Internal rendering component class that dispatches rendering for a single spatial cell (tile) unit of SpatialGrid (Dedicated to Multi-LOD Batching).
  */
 export class LandscapeComponent {
     #redGPUContext: RedGPUContext;
     #sharedGeometry: LandscapeSharedGeometry;
     #tileX: number = 0;
     #tileZ: number = 0;
+    #prevTileX: number = 0;
+    #prevTileZ: number = 0;
     #lodLevel: number = 0;
     #material: LandscapeMaterial;
     #wireframe: boolean = false;
     #topology: GPUPrimitiveTopology = GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
 
-    #renderPipelineCache: Map<string, GPURenderPipeline> = new Map();
     #vertexShaderModule: GPUShaderModule;
+    #renderPipelineCache: Map<string, GPURenderPipeline> = new Map();
     #lastUpdateMSAAID: string = '';
 
     /**
@@ -39,10 +41,12 @@ export class LandscapeComponent {
         this.#sharedGeometry = sharedGeometry;
         this.#tileX = tileX;
         this.#tileZ = tileZ;
+        this.#prevTileX = tileX;
+        this.#prevTileZ = tileZ;
         this.#material = material;
-        this.wireframe = wireframe;
+        this.#wireframe = wireframe;
+        this.#topology = wireframe ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
 
-        // WGSL 버텍스 셰이더 모듈 취득
         const resourceManager = redGPUContext.resourceManager;
         let vModule = resourceManager.getGPUShaderModule('LandscapeFullCompatibleFlatVertexShaderModule');
         if (!vModule) {
@@ -53,28 +57,26 @@ export class LandscapeComponent {
         this.#vertexShaderModule = vModule;
     }
 
-    updateSharedGeometry(sharedGeometry: LandscapeSharedGeometry): void {
-        this.#sharedGeometry = sharedGeometry;
+    set x(val: number) {
+        this.#prevTileX = this.#tileX;
+        this.#tileX = val;
     }
 
     get x(): number {
         return this.#tileX;
     }
 
-    set x(val: number) {
-        this.#tileX = val;
-    }
-
-    get y(): number {
-        return 0;
+    set z(val: number) {
+        this.#prevTileZ = this.#tileZ;
+        this.#tileZ = val;
     }
 
     get z(): number {
         return this.#tileZ;
     }
 
-    set z(val: number) {
-        this.#tileZ = val;
+    get prevTileX(): number {
+        return this.#prevTileX;
     }
 
     get tileX(): number {
@@ -83,6 +85,23 @@ export class LandscapeComponent {
 
     get tileZ(): number {
         return this.#tileZ;
+    }
+
+    get prevTileZ(): number {
+        return this.#prevTileZ;
+    }
+
+    updateSharedGeometry(sharedGeometry: LandscapeSharedGeometry): void {
+        this.#sharedGeometry = sharedGeometry;
+        this.#renderPipelineCache.clear();
+    }
+
+    /**
+     * [KO] 프레임 종료 후 이전 타일 위치를 현재 위치로 안전하게 업데이트합니다 (Mesh prevModelMatrix 동기화와 100% 동일).
+     */
+    updatePrevPosition(): void {
+        this.#prevTileX = this.#tileX;
+        this.#prevTileZ = this.#tileZ;
     }
 
     get lodLevel(): number {
@@ -145,10 +164,10 @@ export class LandscapeComponent {
             renderPassEncoder.setBindGroup(0, systemBG);
         }
 
-        // 3. Material fragmentUniformBindGroup (1번) 세팅
-        const matBG = this.#material?.gpuRenderInfo?.fragmentUniformBindGroup;
-        if (matBG) {
-            renderPassEncoder.setBindGroup(1, matBG);
+        // 3. Material fragmentUniformBindGroup (1번 - Material Uniform) 세팅
+        const matUniformBG = this.#material?.gpuRenderInfo?.fragmentUniformBindGroup;
+        if (matUniformBG) {
+            renderPassEncoder.setBindGroup(1, matUniformBG);
         }
 
         // 4. 전체 타일 GPU StorageBuffer (2번) 세팅
@@ -207,11 +226,11 @@ export class LandscapeComponent {
         try {
             const resourceManager = this.#redGPUContext.resourceManager;
             const systemBGLayout = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');
-            const fragBGLayout = material.gpuRenderInfo.fragmentBindGroupLayout;
+            const fragUniformBGLayout = material.gpuRenderInfo.fragmentBindGroupLayout;
 
             const pipelineLayout = gpuDevice.createPipelineLayout({
                 label: `LandscapePipelineLayout_${key}`,
-                bindGroupLayouts: [systemBGLayout, fragBGLayout, storageBGLayout]
+                bindGroupLayouts: [systemBGLayout, fragUniformBGLayout, storageBGLayout]
             });
 
             const vertexBuffers: GPUVertexBufferLayout[] = [{
@@ -239,12 +258,12 @@ export class LandscapeComponent {
                 depthStencil: {
                     format: 'depth32float',
                     depthWriteEnabled: true,
-                    depthCompare: 'less',
+                    depthCompare: 'less-equal', // RedGPU 3D 표준 정동기화 (less -> less-equal Z-Fighting 소멸)
                 },
                 multisample: {count: sampleCount}
             });
 
-            this.#lastUpdateMSAAID = msaaID;
+            this.#lastUpdateMSAAID = String(msaaID);
             this.#renderPipelineCache.set(key, pipeline);
             return pipeline;
         } catch (e) {

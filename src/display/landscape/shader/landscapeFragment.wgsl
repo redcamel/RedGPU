@@ -1,6 +1,7 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include shadow.getDirectionalShadowVisibility;
 #redgpu_include systemStruct.OutputFragment;
+#redgpu_include math.getMotionVector;
 
 struct InputData {
     @builtin(position) position: vec4<f32>,
@@ -26,5 +27,7 @@ struct MaterialUniforms {
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
     output.color = inputData.instanceColor;
+    // TAA (Temporal Anti-Aliasing) & Motion Blur 대응 G-Buffer Motion Vector 출력
+    output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
     return output;
 }

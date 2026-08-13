@@ -35,7 +35,7 @@ RedGPU.init(
         directionalLight.intensity = 1.5;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 4. 신규 Landscape 인스턴스 생성 (언리얼 5 공식 기본값: 월드 크기 [8000, 8000]m, 타일 개수 [8, 8], gridSize 63 -> 63x63 Quads)
+        // 4. 신규 Landscape 인스턴스 생성 (디버그 모드 기본 활성화: wireframe true, lodColoration true)
         const landscape = new RedGPU.Display.Landscape(redGPUContext, {
             worldSize: [8000, 8000],
             tileCount: [8, 8],
@@ -154,7 +154,7 @@ RedGPU.init(
         };
         renderer.start(redGPUContext, render);
 
-        // 7. Landscape 모든 get/set 속성 전면 제어 테스트 패널 렌더링 (RedGPU 표준 인라인 컬러 피커 탑재)
+        // 7. Landscape 모든 get/set 속성 전면 제어 테스트 패널 렌더링
         renderTestPane(redGPUContext, landscape, controller);
     }
 );
@@ -183,14 +183,6 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
         wireframe: landscape ? landscape.wireframe : true,
         lodColoration: landscape ? landscape.lodColoration : true,
         moveSpeed: controller ? controller.moveSpeed : 3000
-    };
-
-    const materialColorParams = {
-        color: {
-            r: landscape?.material?.color?.r ?? 56,
-            g: landscape?.material?.color?.g ?? 125,
-            b: landscape?.material?.color?.b ?? 66
-        }
     };
 
     let activePane = null;
@@ -295,8 +287,8 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
                 }
             });
 
-            // Folder 3: Render & Material Options (wireframe, lodColoration, material.color)
-            const folderDisplay = pane.addFolder({title: '🎨 Render & Material Options (get / set)', expanded: true});
+            // Folder 3: Render Options (wireframe, lodColoration)
+            const folderDisplay = pane.addFolder({title: '🎨 Render Options (get / set)', expanded: true});
 
             folderDisplay.addBinding(config, 'wireframe').on('change', (ev) => {
                 if (landscape) landscape.wireframe = ev.value;
@@ -305,7 +297,6 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
             folderDisplay.addBinding(config, 'lodColoration').on('change', (ev) => {
                 if (landscape) landscape.lodColoration = ev.value;
             });
-
 
             // Folder 4: Camera Controls (moveSpeed)
             if (controller) {

@@ -3,7 +3,12 @@
 struct TileInstance {
     tileX: f32,
     tileZ: f32,
+    prevTileX: f32,
+    prevTileZ: f32,
     lodLevel: u32,
+    pad0: f32,
+    pad1: f32,
+    pad2: f32,
     color: vec4<f32>,
 };
 
@@ -34,27 +39,38 @@ struct OutputData {
 fn main(input: InputData) -> OutputData {
     var output: OutputData;
     
-    // 단 1개의 거대 StorageBuffer에서 현재 인스턴스의 타일 데이터 읽기 (Zero-CPU Overhead)
     let instanceData = tileInstances[input.instanceIdx];
 
-    let worldPos = vec3<f32>(
+    let worldPos4 = vec4<f32>(
         input.position.x + instanceData.tileX,
         input.position.z,
-        input.position.y + instanceData.tileZ
+        input.position.y + instanceData.tileZ,
+        1.0
     );
 
-    let clipPos = systemUniforms.projection.projectionViewMatrix * vec4<f32>(worldPos, 1.0);
+    let prevWorldPos4 = vec4<f32>(
+        input.position.x + instanceData.prevTileX,
+        input.position.z,
+        input.position.y + instanceData.prevTileZ,
+        1.0
+    );
+
+    // 1. 화면 렌더링용 정점 (Mesh 표준)
+    let clipPos = systemUniforms.projection.projectionViewMatrix * worldPos4;
 
     output.position = clipPos;
-    output.vertexPosition = worldPos;
+    output.vertexPosition = worldPos4.xyz;
     output.vertexNormal = vec3<f32>(0.0, 1.0, 0.0);
     output.uv = input.uv;
     output.uv1 = input.uv;
     output.vertexColor_0 = vec4<f32>(1.0, 1.0, 1.0, 1.0);
     output.vertexTangent = vec4<f32>(1.0, 0.0, 0.0, 1.0);
     output.vertexHeight = input.position.z;
-    output.currentClipPos = clipPos;
-    output.prevClipPos = clipPos;
+
+    // 2. TAA & Motion Vector (Mesh 표준 noneJitter 연산)
+    output.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * worldPos4;
+    output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * prevWorldPos4;
+
     output.instanceColor = instanceData.color;
 
     return output;
