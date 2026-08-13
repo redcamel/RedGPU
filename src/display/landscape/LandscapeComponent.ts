@@ -12,10 +12,12 @@ import LandscapeSharedGeometry from "./LandscapeSharedGeometry";
 export class LandscapeComponent {
     #redGPUContext: RedGPUContext;
     #sharedGeometry: LandscapeSharedGeometry;
-    #tileX: number = 0;
-    #tileZ: number = 0;
-    #prevTileX: number = 0;
-    #prevTileZ: number = 0;
+    #worldX: number = 0;
+    #worldZ: number = 0;
+    #prevWorldX: number = 0;
+    #prevWorldZ: number = 0;
+    #componentX: number = 0;
+    #componentZ: number = 0;
     #lodLevel: number = 0;
     #material: LandscapeMaterial;
     #wireframe: boolean = false;
@@ -32,17 +34,21 @@ export class LandscapeComponent {
     constructor(
         redGPUContext: RedGPUContext,
         sharedGeometry: LandscapeSharedGeometry,
-        tileX: number,
-        tileZ: number,
+        worldX: number,
+        worldZ: number,
         material: LandscapeMaterial,
-        wireframe: boolean = false
+        wireframe: boolean = false,
+        componentX: number = 0,
+        componentZ: number = 0
     ) {
         this.#redGPUContext = redGPUContext;
         this.#sharedGeometry = sharedGeometry;
-        this.#tileX = tileX;
-        this.#tileZ = tileZ;
-        this.#prevTileX = tileX;
-        this.#prevTileZ = tileZ;
+        this.#worldX = worldX;
+        this.#worldZ = worldZ;
+        this.#prevWorldX = worldX;
+        this.#prevWorldZ = worldZ;
+        this.#componentX = componentX;
+        this.#componentZ = componentZ;
         this.#material = material;
         this.#wireframe = wireframe;
         this.#topology = wireframe ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
@@ -57,38 +63,46 @@ export class LandscapeComponent {
         this.#vertexShaderModule = vModule;
     }
 
-    set x(val: number) {
-        this.#prevTileX = this.#tileX;
-        this.#tileX = val;
+    get worldX(): number {
+        return this.#worldX;
     }
 
-    get x(): number {
-        return this.#tileX;
+    set worldX(val: number) {
+        this.#prevWorldX = this.#worldX;
+        this.#worldX = val;
     }
 
-    set z(val: number) {
-        this.#prevTileZ = this.#tileZ;
-        this.#tileZ = val;
+    get worldZ(): number {
+        return this.#worldZ;
     }
 
-    get z(): number {
-        return this.#tileZ;
+    set worldZ(val: number) {
+        this.#prevWorldZ = this.#worldZ;
+        this.#worldZ = val;
     }
 
-    get prevTileX(): number {
-        return this.#prevTileX;
+    get prevWorldX(): number {
+        return this.#prevWorldX;
     }
 
-    get tileX(): number {
-        return this.#tileX;
+    get prevWorldZ(): number {
+        return this.#prevWorldZ;
     }
 
-    get tileZ(): number {
-        return this.#tileZ;
+    get componentX(): number {
+        return this.#componentX;
     }
 
-    get prevTileZ(): number {
-        return this.#prevTileZ;
+    set componentX(val: number) {
+        this.#componentX = val;
+    }
+
+    get componentZ(): number {
+        return this.#componentZ;
+    }
+
+    set componentZ(val: number) {
+        this.#componentZ = val;
     }
 
     updateSharedGeometry(sharedGeometry: LandscapeSharedGeometry): void {
@@ -97,11 +111,11 @@ export class LandscapeComponent {
     }
 
     /**
-     * [KO] 프레임 종료 후 이전 타일 위치를 현재 위치로 안전하게 업데이트합니다 (Mesh prevModelMatrix 동기화와 100% 동일).
+     * [KO] 프레임 종료 후 이전 월드 위치를 현재 위치로 안전하게 업데이트합니다 (Mesh prevModelMatrix 동기화와 100% 동일).
      */
     updatePrevPosition(): void {
-        this.#prevTileX = this.#tileX;
-        this.#prevTileZ = this.#tileZ;
+        this.#prevWorldX = this.#worldX;
+        this.#prevWorldZ = this.#worldZ;
     }
 
     get lodLevel(): number {

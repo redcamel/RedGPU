@@ -105,63 +105,13 @@ export class Landscape {
         this.#rebuildTiles();
     }
 
-    #rebuildLODStructures(userColors?: string[], userMultipliers?: number[], userDistances?: number[]): void {
-        this.#lodColorsRGBA.length = 0;
-        this.#lodMultipliers.length = 0;
-
-        const defaultColors: [number, number, number, number][] = [
-            [0.18, 0.8, 0.44, 1.0],  // LOD 0: Green
-            [0.95, 0.77, 0.06, 1.0], // LOD 1: Yellow
-            [0.9, 0.49, 0.13, 1.0],  // LOD 2: Orange
-            [0.91, 0.3, 0.24, 1.0],  // LOD 3: Red
-            [0.61, 0.35, 0.71, 1.0], // LOD 4: Purple
-            [0.1, 0.74, 0.61, 1.0],  // LOD 5: Cyan
-            [0.2, 0.6, 0.86, 1.0],   // LOD 6: Blue
-            [0.93, 0.94, 0.95, 1.0]  // LOD 7: White
-        ];
-
-        for (let i = 0; i < this.#lodCount; i++) {
-            this.#lodColorsRGBA.push(defaultColors[i % defaultColors.length]);
-        }
-
-        const defaultMultipliers = [1.25, 2.5, 4.25, 7.0, 11.0, 16.0, 24.0];
-        const multipliers = userMultipliers ?? defaultMultipliers;
-
-        for (let i = 0; i < this.#lodCount - 1; i++) {
-            this.#lodMultipliers.push(multipliers[i] ?? (1.25 * Math.pow(1.8, i)));
-        }
-
-        if (userDistances && userDistances.length > 0) {
-            this.#lodDistancesSq = userDistances.map(d => d * d);
-        } else {
-            this.#updateLODDistances();
-        }
-    }
-
-    #updateLODDistances(): void {
-        this.#lodDistancesSq.length = 0;
-        const tileSizeMax = Math.max(this.#tileSizeX, this.#tileSizeZ);
-        const count = this.#lodMultipliers.length;
-
-        for (let i = 0; i < count; i++) {
-            const dist = tileSizeMax * this.#lodMultipliers[i];
-            this.#lodDistancesSq.push(dist * dist);
-        }
-    }
-
-    /**
-     * [KO] 언리얼 엔진 5 표준 타일 개수 클램핑 헬퍼 (최소 1개, 최대 32개 타일)
-     */
-    static #clampTileCount(val: number): number {
-        return Math.min(32, Math.max(1, Math.round(val)));
-    }
-
     update(camera: any): void {
         if (!camera) return;
 
-        const camX = camera.x ?? 0;
-        const camY = camera.y ?? 0;
-        const camZ = camera.z ?? 0;
+        // 카메라 및 컨트롤러 유형에 관계없이 3D 월드 위치(camX, camY, camZ) 안전 추출
+        const camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
+        const camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
+        const camZ = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
 
         this.#spatialGrid.getCellCoordinates(camX, camZ, this.#tempCellBuffer);
         const camYSq = camY * camY;
@@ -176,8 +126,8 @@ export class Landscape {
 
         for (let i = 0; i < count; i++) {
             const comp = components[i];
-            const dx = comp.x - camX;
-            const dz = comp.z - camZ;
+            const dx = comp.worldX - camX;
+            const dz = comp.worldZ - camZ;
             const distSq = dx * dx + dz * dz + camYSq;
 
             let lod = lodLimit;
@@ -212,10 +162,10 @@ export class Landscape {
 
             instanceBuf.writeLODInstanceData(
                 activeLOD,
-                comp.x,
-                comp.z,
-                comp.prevTileX,
-                comp.prevTileZ,
+                comp.worldX,
+                comp.worldZ,
+                comp.prevWorldX,
+                comp.prevWorldZ,
                 colorRGBA[0],
                 colorRGBA[1],
                 colorRGBA[2],
@@ -228,6 +178,57 @@ export class Landscape {
 
         // 4. GPU 버퍼 동기화 제출
         instanceBuf.flushToGPU();
+    }
+
+    #updateLODDistances(): void {
+        this.#lodDistancesSq.length = 0;
+        const tileSizeMax = Math.max(this.#tileSizeX, this.#tileSizeZ);
+        const count = this.#lodMultipliers.length;
+
+        for (let i = 0; i < count; i++) {
+            const dist = tileSizeMax * this.#lodMultipliers[i];
+            this.#lodDistancesSq.push(dist * dist);
+        }
+    }
+
+    /**
+     * [KO] 언리얼 엔진 5 표준 타일 개수 클램핑 헬퍼 (최소 1개, 최대 32개 타일)
+     */
+    static #clampTileCount(val: number): number {
+        return Math.min(32, Math.max(1, Math.round(val)));
+    }
+
+    #rebuildLODStructures(userColors?: string[], userMultipliers?: number[], userDistances?: number[]): void {
+        this.#lodColorsRGBA.length = 0;
+        this.#lodMultipliers.length = 0;
+
+        const defaultColors: [number, number, number, number][] = [
+            [0.18, 0.8, 0.44, 1.0],  // LOD 0: Green
+            [0.95, 0.77, 0.06, 1.0], // LOD 1: Yellow
+            [0.9, 0.49, 0.13, 1.0],  // LOD 2: Orange
+            [0.91, 0.3, 0.24, 1.0],  // LOD 3: Red
+            [0.61, 0.35, 0.71, 1.0], // LOD 4: Purple
+            [0.1, 0.74, 0.61, 1.0],  // LOD 5: Cyan
+            [0.2, 0.6, 0.86, 1.0],   // LOD 6: Blue
+            [0.93, 0.94, 0.95, 1.0]  // LOD 7: White
+        ];
+
+        for (let i = 0; i < this.#lodCount; i++) {
+            this.#lodColorsRGBA.push(defaultColors[i % defaultColors.length]);
+        }
+
+        const defaultMultipliers = [1.0, 2.0, 3.5, 6.0, 9.5, 14.0, 20.0];
+        const multipliers = userMultipliers ?? defaultMultipliers;
+
+        for (let i = 0; i < this.#lodCount - 1; i++) {
+            this.#lodMultipliers.push(multipliers[i] ?? (1.0 * Math.pow(1.8, i)));
+        }
+
+        if (userDistances && userDistances.length > 0) {
+            this.#lodDistancesSq = userDistances.map(d => d * d);
+        } else {
+            this.#updateLODDistances();
+        }
     }
 
     #rebuildTiles(): void {
@@ -260,8 +261,10 @@ export class Landscape {
 
                 if (index < this.#components.length) {
                     const comp = this.#components[index];
-                    comp.x = posX;
-                    comp.z = posZ;
+                    comp.worldX = posX;
+                    comp.worldZ = posZ;
+                    comp.componentX = col;
+                    comp.componentZ = row;
                     comp.updateSharedGeometry(this.#sharedGeometry);
                     this.#spatialGrid.registerTile(row, col, comp);
                 } else {
@@ -271,7 +274,9 @@ export class Landscape {
                         posX,
                         posZ,
                         this.#baseMaterial,
-                        this.#wireframe
+                        this.#wireframe,
+                        col,
+                        row
                     );
                     this.#components.push(comp);
                     this.#spatialGrid.registerTile(row, col, comp);

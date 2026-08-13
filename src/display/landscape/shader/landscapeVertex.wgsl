@@ -1,10 +1,10 @@
 #redgpu_include SYSTEM_UNIFORM;
 
 struct TileInstance {
-    tileX: f32,
-    tileZ: f32,
-    prevTileX: f32,
-    prevTileZ: f32,
+    worldX: f32,
+    worldZ: f32,
+    prevWorldX: f32,
+    prevWorldZ: f32,
     lodLevel: u32,
     pad0: f32,
     pad1: f32,
@@ -42,16 +42,16 @@ fn main(input: InputData) -> OutputData {
     let instanceData = tileInstances[input.instanceIdx];
 
     let worldPos4 = vec4<f32>(
-        input.position.x + instanceData.tileX,
+        input.position.x + instanceData.worldX,
         input.position.z,
-        input.position.y + instanceData.tileZ,
+        input.position.y + instanceData.worldZ,
         1.0
     );
 
     let prevWorldPos4 = vec4<f32>(
-        input.position.x + instanceData.prevTileX,
+        input.position.x + instanceData.prevWorldX,
         input.position.z,
-        input.position.y + instanceData.prevTileZ,
+        input.position.y + instanceData.prevWorldZ,
         1.0
     );
 

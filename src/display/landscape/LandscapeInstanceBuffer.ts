@@ -15,7 +15,7 @@ export class LandscapeInstanceBuffer {
 
     #indirectCommandBuffer: GPUBuffer | null = null;
 
-    // 타일당 48 bytes (tileX, tileZ, prevTileX, prevTileZ, lodLevel, pad0, pad1, pad2, color r,g,b,a)
+    // 컴포넌트 타일당 48 bytes (worldX, worldZ, prevWorldX, prevWorldZ, lodLevel, pad0, pad1, pad2, color r,g,b,a)
     #instanceFloatData: Float32Array;
     #instanceUintData: Uint32Array;
 
@@ -75,14 +75,14 @@ export class LandscapeInstanceBuffer {
     }
 
     /**
-     * [KO] 특정 LOD 그룹 내의 타일 인스턴스 데이터 (현재/이전 위치)를 StorageBuffer 메모리에 작성합니다 (Zero-GC).
+     * [KO] 특정 LOD 그룹 내의 타일 인스턴스 데이터 (현재/이전 월드 위치)를 StorageBuffer 메모리에 작성합니다 (Zero-GC).
      */
     writeLODInstanceData(
         lodLevel: number,
-        tileX: number,
-        tileZ: number,
-        prevTileX: number,
-        prevTileZ: number,
+        worldX: number,
+        worldZ: number,
+        prevWorldX: number,
+        prevWorldZ: number,
         r: number,
         g: number,
         b: number,
@@ -91,10 +91,10 @@ export class LandscapeInstanceBuffer {
         const targetIndex = this.#lodCursorList[lodLevel]++;
         const offset = targetIndex * 12; // 12 floats stride (48 bytes)
 
-        this.#instanceFloatData[offset] = tileX;
-        this.#instanceFloatData[offset + 1] = tileZ;
-        this.#instanceFloatData[offset + 2] = prevTileX;
-        this.#instanceFloatData[offset + 3] = prevTileZ;
+        this.#instanceFloatData[offset] = worldX;
+        this.#instanceFloatData[offset + 1] = worldZ;
+        this.#instanceFloatData[offset + 2] = prevWorldX;
+        this.#instanceFloatData[offset + 3] = prevWorldZ;
 
         this.#instanceUintData[offset + 4] = lodLevel;
         this.#instanceFloatData[offset + 5] = 0; // pad0
