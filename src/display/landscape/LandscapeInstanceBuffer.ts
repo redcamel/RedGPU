@@ -1,8 +1,8 @@
 import RedGPUContext from "../../context/RedGPUContext";
 
 /**
- * [KO] Landscape Multi-LOD Batching Instanced Rendering 전용 GPU Storage Buffer & Indirect Buffer 관리 클래스입니다.
- * [EN] GPU Storage Buffer & Indirect Buffer management class dedicated to Landscape Multi-LOD Batching Instanced Rendering.
+ * [KO] Landscape Multi-LOD Batching Instanced Rendering 전용 GPU Storage Buffer & VHT BindGroup 관리 클래스입니다.
+ * [EN] GPU Storage Buffer & VHT BindGroup management class dedicated to Landscape Multi-LOD Batching Instanced Rendering.
  */
 export class LandscapeInstanceBuffer {
     #redGPUContext: RedGPUContext;
@@ -13,7 +13,7 @@ export class LandscapeInstanceBuffer {
     #instanceStorageBindGroup: GPUBindGroup | null = null;
     #instanceStorageBindGroupLayout: GPUBindGroupLayout | null = null;
 
-    // 컴포넌트 타일당 48 bytes (worldX, worldZ, prevWorldX, prevWorldZ, lodLevel, pad0, pad1, pad2, color r,g,b,a)
+    // 컴포넌트 타일당 48 bytes (worldX, worldZ, prevWorldX, prevWorldZ, lodLevel, heightScale, worldSizeX, worldSizeZ, color r,g,b,a)
     #instanceFloatData: Float32Array;
     #instanceUintData: Uint32Array;
 
@@ -73,7 +73,7 @@ export class LandscapeInstanceBuffer {
     }
 
     /**
-     * [KO] 특정 LOD 그룹 내의 타일 인스턴스 데이터 (현재/이전 월드 위치)를 StorageBuffer 메모리에 작성합니다 (Zero-GC).
+     * [KO] 특정 LOD 그룹 내의 타일 인스턴스 데이터 (위치, LOD, heightScale, worldSizeX/Z, 색상)를 StorageBuffer 메모리에 작성합니다 (Zero-GC).
      */
     writeLODInstanceData(
         lodLevel: number,
@@ -84,7 +84,10 @@ export class LandscapeInstanceBuffer {
         r: number,
         g: number,
         b: number,
-        a: number = 1.0
+        a: number = 1.0,
+        heightScale: number = 500.0,
+        worldSizeX: number = 8000.0,
+        worldSizeZ: number = 8000.0
     ): void {
         const targetIndex = this.#lodCursorList[lodLevel]++;
         const offset = targetIndex * 12; // 12 floats stride (48 bytes)
@@ -95,9 +98,9 @@ export class LandscapeInstanceBuffer {
         this.#instanceFloatData[offset + 3] = prevWorldZ;
 
         this.#instanceUintData[offset + 4] = lodLevel;
-        this.#instanceFloatData[offset + 5] = 0; // pad0
-        this.#instanceFloatData[offset + 6] = 0; // pad1
-        this.#instanceFloatData[offset + 7] = 0; // pad2
+        this.#instanceFloatData[offset + 5] = heightScale;
+        this.#instanceFloatData[offset + 6] = worldSizeX;
+        this.#instanceFloatData[offset + 7] = worldSizeZ;
 
         this.#instanceFloatData[offset + 8] = r;
         this.#instanceFloatData[offset + 9] = g;
@@ -129,6 +132,35 @@ export class LandscapeInstanceBuffer {
         );
     }
 
+    /**
+     * [KO] VHT 텍스처 및 샘플러를 수신하여 @group(2) GPUBindGroup을 생성/갱신합니다.
+     */
+    updateBindGroup(vhtSampler: GPUSampler, vhtTextureView: GPUTextureView): void {
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (!gpuDevice || !this.#instanceStorageBindGroupLayout || !this.#instanceStorageBuffer) return;
+
+        this.#instanceStorageBindGroup = gpuDevice.createBindGroup({
+            label: 'LandscapeInstanceStorageBindGroup',
+            layout: this.#instanceStorageBindGroupLayout,
+            entries: [
+                {
+                    binding: 0,
+                    resource: {
+                        buffer: this.#instanceStorageBuffer
+                    }
+                },
+                {
+                    binding: 1,
+                    resource: vhtSampler
+                },
+                {
+                    binding: 2,
+                    resource: vhtTextureView
+                }
+            ]
+        });
+    }
+
     destroy(): void {
         if (this.#instanceStorageBuffer) {
             this.#instanceStorageBuffer.destroy();
@@ -140,7 +172,7 @@ export class LandscapeInstanceBuffer {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice) return;
 
-        // 1. GPUBindGroupLayout 생성 (StorageBuffer - ReadOnlyStorage - 2번 바인딩 인덱스)
+        // 1. GPUBindGroupLayout 생성 (@group(2): StorageBuffer, Sampler, VHT Texture_2D)
         this.#instanceStorageBindGroupLayout = gpuDevice.createBindGroupLayout({
             label: 'LandscapeInstanceStorageBindGroupLayout',
             entries: [
@@ -149,6 +181,21 @@ export class LandscapeInstanceBuffer {
                     visibility: GPUShaderStage.VERTEX,
                     buffer: {
                         type: 'read-only-storage'
+                    }
+                },
+                {
+                    binding: 1,
+                    visibility: GPUShaderStage.VERTEX,
+                    sampler: {
+                        type: 'non-filtering'
+                    }
+                },
+                {
+                    binding: 2,
+                    visibility: GPUShaderStage.VERTEX,
+                    texture: {
+                        sampleType: 'unfilterable-float',
+                        viewDimension: '2d'
                     }
                 }
             ]
@@ -159,20 +206,6 @@ export class LandscapeInstanceBuffer {
             label: 'LandscapeInstanceStorageBuffer',
             size: Math.max(128, this.#maxComponentCount * 48),
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
-        });
-
-        // 3. GPUBindGroup 생성
-        this.#instanceStorageBindGroup = gpuDevice.createBindGroup({
-            label: 'LandscapeInstanceStorageBindGroup',
-            layout: this.#instanceStorageBindGroupLayout,
-            entries: [
-                {
-                    binding: 0,
-                    resource: {
-                        buffer: this.#instanceStorageBuffer
-                    }
-                }
-            ]
         });
     }
 }

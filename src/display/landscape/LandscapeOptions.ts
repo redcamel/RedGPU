@@ -60,6 +60,12 @@ export interface LandscapeOptions {
     landscapeMaterial?: LandscapeMaterial;
 
     /**
+     * [KO] UE5 공식 지형 고도 변위 스케일 (미터 단위, 기본값: 500.0)
+     * [EN] UE5 official height displacement scale in meters (default: 500.0)
+     */
+    heightScale?: number;
+
+    /**
      * [KO] 타일 URL 생성기 콜백 함수
      * [EN] Tile URL resolver callback function
      */

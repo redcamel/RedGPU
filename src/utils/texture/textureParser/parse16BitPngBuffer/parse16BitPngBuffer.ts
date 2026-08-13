@@ -202,7 +202,7 @@ export async function parse16BitPngBufferToGPUTexture(
     const gpuTexture = gpuDevice.createTexture({
         size: [width, height],
         format,
-        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
+        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT,
         label: `16BitPng_GPUTexture_${format}`
     });
 

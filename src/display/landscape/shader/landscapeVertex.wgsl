@@ -6,13 +6,15 @@ struct TileInstance {
     prevWorldX: f32,
     prevWorldZ: f32,
     lodLevel: u32,
-    pad0: f32,
-    pad1: f32,
-    pad2: f32,
+    heightScale: f32,
+    worldSizeX: f32,
+    worldSizeZ: f32,
     color: vec4<f32>,
 };
 
 @group(2) @binding(0) var<storage, read> tileInstances: array<TileInstance>;
+@group(2) @binding(1) var heightMapSampler: sampler;
+@group(2) @binding(2) var heightMapTexture: texture_2d<f32>;
 
 struct InputData {
     @location(0) position: vec3<f32>,
@@ -41,19 +43,34 @@ fn main(input: InputData) -> OutputData {
     
     let instanceData = tileInstances[input.instanceIdx];
 
-    let worldPos4 = vec4<f32>(
-        input.position.x + instanceData.worldX,
-        input.position.z,
-        input.position.y + instanceData.worldZ,
-        1.0
+    let worldX = input.position.x + instanceData.worldX;
+    let worldZ = input.position.y + instanceData.worldZ;
+    let prevWorldX = input.position.x + instanceData.prevWorldX;
+    let prevWorldZ = input.position.y + instanceData.prevWorldZ;
+
+    // VHT 오픈월드 Global UV 계산 (0.0 ~ 1.0)
+    let globalUV = vec2<f32>(
+        (worldX + instanceData.worldSizeX * 0.5) / instanceData.worldSizeX,
+        (worldZ + instanceData.worldSizeZ * 0.5) / instanceData.worldSizeZ
+    );
+    let prevGlobalUV = vec2<f32>(
+        (prevWorldX + instanceData.worldSizeX * 0.5) / instanceData.worldSizeX,
+        (prevWorldZ + instanceData.worldSizeZ * 0.5) / instanceData.worldSizeZ
     );
 
-    let prevWorldPos4 = vec4<f32>(
-        input.position.x + instanceData.prevWorldX,
-        input.position.z,
-        input.position.y + instanceData.prevWorldZ,
-        1.0
-    );
+    // VHT Atlas Texture (@group(2)) 16비트 고도 샘플링 (textureLoad: UnfilterableFloat 대응)
+    let texSize = vec2<f32>(textureDimensions(heightMapTexture));
+    let texCoord = vec2<i32>(clamp(globalUV * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+    let prevTexCoord = vec2<i32>(clamp(prevGlobalUV * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+
+    let heightValue = textureLoad(heightMapTexture, texCoord, 0).r;
+    let prevHeightValue = textureLoad(heightMapTexture, prevTexCoord, 0).r;
+
+    let worldY = heightValue * instanceData.heightScale;
+    let prevWorldY = prevHeightValue * instanceData.heightScale;
+
+    let worldPos4 = vec4<f32>(worldX, worldY, worldZ, 1.0);
+    let prevWorldPos4 = vec4<f32>(prevWorldX, prevWorldY, prevWorldZ, 1.0);
 
     // 1. 화면 렌더링용 정점 (Mesh 표준)
     let clipPos = systemUniforms.projection.projectionViewMatrix * worldPos4;
@@ -61,11 +78,11 @@ fn main(input: InputData) -> OutputData {
     output.position = clipPos;
     output.vertexPosition = worldPos4.xyz;
     output.vertexNormal = vec3<f32>(0.0, 1.0, 0.0);
-    output.uv = input.uv;
-    output.uv1 = input.uv;
+    output.uv = globalUV;
+    output.uv1 = globalUV;
     output.vertexColor_0 = vec4<f32>(1.0, 1.0, 1.0, 1.0);
     output.vertexTangent = vec4<f32>(1.0, 0.0, 0.0, 1.0);
-    output.vertexHeight = input.position.z;
+    output.vertexHeight = worldY;
 
     // 2. TAA & Motion Vector (Mesh 표준 noneJitter 연산)
     output.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * worldPos4;

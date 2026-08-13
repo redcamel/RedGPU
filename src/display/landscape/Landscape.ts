@@ -40,7 +40,10 @@ export class Landscape {
 
     #wireframe: boolean = false;
     #lodColoration: boolean = false;
+    #heightScale: number = 500.0;
     #tileStreamer: LandscapeTileStreamer;
+    #vhtAtlasTexture: GPUTexture | null = null;
+    #vhtSampler: GPUSampler | null = null;
 
     #worldSizeX: number;
     #worldSizeZ: number;
@@ -124,7 +127,29 @@ export class Landscape {
             this.#tileStreamer.tileUrlResolver = options.tileUrlResolver;
         }
 
+        this.#heightScale = options.heightScale ?? 500.0;
         this.#updateTuples();
+
+        // 1. Virtual Heightfield Texture (VHT) 아틀라스 GPUTexture 생성 (8x8 * 512 = 4096x4096, r16unorm)
+        const atlasWidth = componentCountX * 512;
+        const atlasHeight = componentCountZ * 512;
+        const vhtAtlasTexture = redGPUContext.gpuDevice.createTexture({
+            size: [atlasWidth, atlasHeight],
+            format: 'r16unorm',
+            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
+            label: 'Landscape_VHT_Atlas_Texture'
+        });
+        const vhtSampler = redGPUContext.gpuDevice.createSampler({
+            magFilter: 'nearest',
+            minFilter: 'nearest',
+            addressModeU: 'clamp-to-edge',
+            addressModeV: 'clamp-to-edge',
+            label: 'Landscape_VHT_Sampler'
+        });
+
+        this.#vhtAtlasTexture = vhtAtlasTexture;
+        this.#vhtSampler = vhtSampler;
+        this.#tileStreamer.vhtAtlasTexture = vhtAtlasTexture;
 
         const resourceManager = redGPUContext.resourceManager;
         let vModule = resourceManager.getGPUShaderModule('LandscapeFullCompatibleFlatVertexShaderModule');
@@ -137,8 +162,9 @@ export class Landscape {
 
         this.#lodCountsBuffer = new Int32Array(maxLODLevel);
 
-        // WebGPU Multi-LOD Indirect & Instance Buffer 생성
+        // WebGPU Multi-LOD Indirect & Instance Buffer 생성 (@group(2): StorageBuffer, Sampler, VHT Texture_2D)
         this.#instanceBuffer = new LandscapeInstanceBuffer(redGPUContext, componentCountX * componentCountZ, maxLODLevel);
+        this.#instanceBuffer.updateBindGroup(vhtSampler, vhtAtlasTexture.createView());
 
         this.#rebuildLODStructures(options.lodColors, options.lodMultipliers, options.lodDistances);
         this.#rebuildTiles();
@@ -240,6 +266,20 @@ export class Landscape {
     /** [KO] UE5 공식 메인 지형 머티리얼 (LandscapeMaterial) */
     get landscapeMaterial(): LandscapeMaterial {
         return this.#landscapeMaterial;
+    }
+
+    /** [KO] UE5 공식 지형 고도 변위 스케일 (미터 단위, heightScale) */
+    get heightScale(): number {
+        return this.#heightScale;
+    }
+
+    set heightScale(val: number) {
+        this.#heightScale = val;
+    }
+
+    /** [KO] Virtual Heightfield Texture (VHT) 아틀라스 GPUTexture */
+    get vhtAtlasTexture(): GPUTexture | null {
+        return this.#vhtAtlasTexture;
     }
 
     set landscapeMaterial(val: LandscapeMaterial) {
@@ -571,7 +611,10 @@ export class Landscape {
                 colorRGBA[0],
                 colorRGBA[1],
                 colorRGBA[2],
-                colorRGBA[3]
+                colorRGBA[3],
+                this.#heightScale,
+                this.#worldSizeX,
+                this.#worldSizeZ
             );
 
             // 프레임 위치 동기화 완료 후 이전 위치 갱신

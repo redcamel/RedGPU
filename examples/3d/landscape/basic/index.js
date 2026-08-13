@@ -317,13 +317,22 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
                 if (landscape) landscape.lodColoration = ev.value;
             });
 
-            // Folder 4: Tile Streaming Controls (loadingRadius, maxLoadsPerFrame)
+            // Folder 4: Tile Streaming & VHT Controls (loadingRadius, heightScale, maxLoadsPerFrame)
             if (landscape) {
                 const streamConfig = {
                     loadingRadius: landscape.loadingRadius,
+                    heightScale: landscape.heightScale,
                     maxLoadsPerFrame: landscape.maxLoadsPerFrame
                 };
-                const folderStream = pane.addFolder({title: '🛰️ Tile Streaming & Radius', expanded: true});
+                const folderStream = pane.addFolder({title: '⛰️ VHT Heightfield & Streaming', expanded: true});
+
+                folderStream.addBinding(streamConfig, 'heightScale', {
+                    min: 0,
+                    max: 2000,
+                    step: 50
+                }).on('change', (ev) => {
+                    if (landscape) landscape.heightScale = ev.value;
+                });
 
                 folderStream.addBinding(streamConfig, 'loadingRadius', {
                     min: 500,

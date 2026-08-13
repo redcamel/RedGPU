@@ -13,8 +13,8 @@ interface LandscapeMaterial {
 }
 
 /**
- * [KO] Landscape 지형 시스템 전용 단일 머티리얼 클래스입니다 (지형 컬러, LOD 디버그, 높이맵 파이프라인 원스톱 전담).
- * [EN] Single material class dedicated to Landscape terrain system (One-stop for terrain color, LOD debug, heightmap pipeline).
+ * [KO] Landscape 지형 시스템 전용 단일 머티리얼 클래스입니다 (지형 컬러, LOD 디버그, 셰이더 바인딩 전담).
+ * [EN] Single material class dedicated to Landscape terrain system (One-stop for terrain color, LOD debug, shader binding).
  */
 class LandscapeMaterial extends ABitmapBaseMaterial {
     #textureSampler: Sampler;
@@ -33,9 +33,8 @@ class LandscapeMaterial extends ABitmapBaseMaterial {
             magFilter: GPU_FILTER_MODE.LINEAR,
             minFilter: GPU_FILTER_MODE.LINEAR,
             mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
-            addressModeU: GPU_ADDRESS_MODE.REPEAT,
-            addressModeV: GPU_ADDRESS_MODE.REPEAT,
-            maxAnisotropy: 16
+            addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
+            addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE
         });
 
         this.color.setColorByHEX(colorHex);

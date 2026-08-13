@@ -18,6 +18,7 @@ export class LandscapeTileStreamer {
     #loadingRadius: number = 2500.0;
     #maxLoadsPerFrame: number = 2;
     #tileUrlResolver: LandscapeTileUrlResolver | null = null;
+    #vhtAtlasTexture: GPUTexture | null = null;
 
     #activeComponentsBuffer: LandscapeComponent[] = [];
     #pendingQueue: LandscapeComponent[] = [];
@@ -28,6 +29,14 @@ export class LandscapeTileStreamer {
         this.#redGPUContext = redGPUContext;
         this.#spatialGrid = spatialGrid;
         this.#loadingRadius = loadingRadius;
+    }
+
+    get vhtAtlasTexture(): GPUTexture | null {
+        return this.#vhtAtlasTexture;
+    }
+
+    set vhtAtlasTexture(texture: GPUTexture | null) {
+        this.#vhtAtlasTexture = texture;
     }
 
     get spatialGrid(): LandscapeSpatialGrid {
@@ -124,6 +133,24 @@ export class LandscapeTileStreamer {
             if (parsed) {
                 console.log(`[LandscapeTileStreamer ✅] Tile (${key}) loaded successfully! (${parsed.width}x${parsed.height})`);
                 this.#loadedMap.set(key, parsed.gpuTexture);
+
+                if (this.#vhtAtlasTexture) {
+                    const {gpuDevice} = this.#redGPUContext;
+                    const commandEncoder = gpuDevice.createCommandEncoder({label: `VHT_SubRegion_Copy_${key}`});
+                    const targetX = comp.componentX * parsed.width;
+                    const targetZ = comp.componentZ * parsed.height;
+
+                    commandEncoder.copyTextureToTexture(
+                        {texture: parsed.gpuTexture},
+                        {
+                            texture: this.#vhtAtlasTexture,
+                            origin: [targetX, targetZ, 0]
+                        },
+                        [parsed.width, parsed.height, 1]
+                    );
+                    gpuDevice.queue.submit([commandEncoder.finish()]);
+                    console.log(`[LandscapeTileStreamer ⛰️] VHT Atlas Sub-region (${key}) copied at [${targetX}, ${targetZ}]`);
+                }
             }
         } catch (e) {
             console.warn(`[LandscapeTileStreamer ⚠️] Tile (${key}) load failed:`, e);
