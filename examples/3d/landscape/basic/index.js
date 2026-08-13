@@ -181,8 +181,8 @@ RedGPU.init(
         };
         renderer.start(redGPUContext, render);
 
-        // 7. Landscape 모든 get/set 속성 전면 제어 테스트 패널 렌더링
-        renderTestPane(redGPUContext, landscape, controller);
+        // 7. Landscape 모든 get/set 속성 및 2D 디버거 전면 제어 테스트 패널 렌더링
+        renderTestPane(redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger);
     }
 );
 
@@ -192,8 +192,10 @@ RedGPU.init(
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.Landscape} landscape
  * @param {RedGPU.Camera.FreeController} controller
+ * @param {RedGPU.Display.LandscapeSpatialGridDebugger} spatialGridDebugger
+ * @param {RedGPU.Display.LandscapeVHTDebugger} vhtDebugger
  */
-const renderTestPane = (redGPUContext, landscape, controller) => {
+const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger) => {
     const [wsX, wsZ] = landscape ? landscape.worldSize : [8000, 8000];
     const [tcX, tcZ] = landscape ? landscape.componentCount : [8, 8];
     const [tsX, tsZ] = landscape ? landscape.tileSize : [1000, 1000];
@@ -372,6 +374,38 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
                     controller.moveSpeed = ev.value;
                 });
             }
+
+            // Folder 6: 2D Debuggers (Visibility & Box Size)
+            const folderDebuggers = pane.addFolder({title: '🔍 2D Debuggers', expanded: true});
+            const debuggerConfig = {
+                spatialGridVisible: true,
+                vhtDebuggerVisible: true,
+                boxSize: 100
+            };
+
+            folderDebuggers.addBinding(debuggerConfig, 'spatialGridVisible', {label: 'SpatialGrid Mini-Map'}).on('change', (ev) => {
+                if (spatialGridDebugger) spatialGridDebugger.visible = ev.value;
+            });
+
+            folderDebuggers.addBinding(debuggerConfig, 'vhtDebuggerVisible', {label: 'VHT Heightmap Atlas'}).on('change', (ev) => {
+                if (vhtDebugger) vhtDebugger.visible = ev.value;
+            });
+
+            folderDebuggers.addBinding(debuggerConfig, 'boxSize', {
+                label: 'Debugger Box Size',
+                min: 60,
+                max: 300,
+                step: 10
+            }).on('change', (ev) => {
+                const sz = ev.value;
+                if (spatialGridDebugger) {
+                    spatialGridDebugger.setSize(sz, sz);
+                }
+                if (vhtDebugger) {
+                    vhtDebugger.setSize(sz, sz);
+                    vhtDebugger.setPosition(12 + sz + 10, 12);
+                }
+            });
         }
     });
 };

@@ -15,6 +15,11 @@ export class LandscapeVHTDebugger {
     #visible: boolean = true;
     #canvasFormat: GPUTextureFormat = 'bgra8unorm';
 
+    #width: number = 100;
+    #height: number = 100;
+    #left: number = 120;
+    #bottom: number = 12;
+
     constructor(landscape: Landscape, options: {
         width?: number,
         height?: number,
@@ -60,6 +65,10 @@ export class LandscapeVHTDebugger {
 
         document.body.appendChild(canvas);
         this.#canvas = canvas;
+        this.#width = w;
+        this.#height = h;
+        this.#left = left;
+        this.#bottom = bottom;
 
         this.#initWebGPUContext();
     }
@@ -71,6 +80,59 @@ export class LandscapeVHTDebugger {
     set visible(val: boolean) {
         this.#visible = val;
         this.#canvas.style.setProperty('display', val ? 'block' : 'none', 'important');
+    }
+
+    get width(): number {
+        return this.#width;
+    }
+
+    set width(w: number) {
+        this.setSize(w, this.#height);
+    }
+
+    get height(): number {
+        return this.#height;
+    }
+
+    set height(h: number) {
+        this.setSize(this.#width, h);
+    }
+
+    get left(): number {
+        return this.#left;
+    }
+
+    set left(l: number) {
+        this.setPosition(l, this.#bottom);
+    }
+
+    get bottom(): number {
+        return this.#bottom;
+    }
+
+    set bottom(b: number) {
+        this.setPosition(this.#left, b);
+    }
+
+    setSize(w: number, h: number): void {
+        this.#width = Math.max(20, w);
+        this.#height = Math.max(20, h);
+        this.#canvas.width = this.#width;
+        this.#canvas.height = this.#height;
+
+        this.#canvas.style.setProperty('width', `${this.#width}px`, 'important');
+        this.#canvas.style.setProperty('height', `${this.#height}px`, 'important');
+        this.#canvas.style.setProperty('min-width', `${this.#width}px`, 'important');
+        this.#canvas.style.setProperty('min-height', `${this.#height}px`, 'important');
+        this.#canvas.style.setProperty('max-width', `${this.#width}px`, 'important');
+        this.#canvas.style.setProperty('max-height', `${this.#height}px`, 'important');
+    }
+
+    setPosition(left: number, bottom: number): void {
+        this.#left = left;
+        this.#bottom = bottom;
+        this.#canvas.style.setProperty('left', `${left}px`, 'important');
+        this.#canvas.style.setProperty('bottom', `${bottom}px`, 'important');
     }
 
     update(): void {
