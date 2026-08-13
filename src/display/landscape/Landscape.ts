@@ -206,8 +206,8 @@ export class Landscape {
 
         // LOD 레벨별 Multi-LOD Indirect Draw Command 작성 (Draw Call = LOD Count)
         for (let lod = 0; lod < this.#lodCount; lod++) {
-            const geom = this.#sharedGeometry.getGeometry(lod);
-            const indexCount = geom?.indexBuffer?.indexCount ?? 0;
+            const lodRange = this.#sharedGeometry.getLODRange(lod);
+            const indexCount = lodRange?.indexCount ?? 0;
             instanceBuf.writeIndirectCommand(lod, indexCount, lodInstanceCounts[lod]);
         }
 

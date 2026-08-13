@@ -69,12 +69,18 @@ export class LandscapeComponent {
         this.#vertexShaderModule = vModule;
     }
 
-    public get x(): number {
-        return this.#tileX;
+    #updateTileUniform(): void {
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (!gpuDevice || !this.#tileUniformBuffer) return;
+
+        this.#tileUniformData[0] = this.#tileX;
+        this.#tileUniformData[1] = this.#tileZ;
+
+        gpuDevice.queue.writeBuffer(this.#tileUniformBuffer, 0, this.#tileUniformData.buffer as ArrayBuffer, 0, 8);
     }
 
-    public updateSharedGeometry(sharedGeometry: LandscapeSharedGeometry): void {
-        this.#sharedGeometry = sharedGeometry;
+    public get x(): number {
+        return this.#tileX;
     }
 
     public set x(val: number) {
@@ -128,22 +134,25 @@ export class LandscapeComponent {
         this.#topology = val ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
     }
 
+    public updateSharedGeometry(sharedGeometry: LandscapeSharedGeometry): void {
+        this.#sharedGeometry = sharedGeometry;
+    }
+
     /**
-     * [KO] Render Pass Encoder에 현재 타일 지오메트리 및 머티리얼 렌더 커맨드를 디스패치합니다.
+     * [KO] 단일 거대 통합 GPU 버퍼에서 현재 LOD 오프셋을 선택하여 Render Pass Encoder에 렌더 커맨드를 디스패치합니다.
      */
     public render(renderViewStateData: RenderViewStateData): void {
         const passEncoder = renderViewStateData.currentRenderPassEncoder;
         if (!passEncoder) return;
 
-        const geom = this.#sharedGeometry.getGeometry(this.#lodLevel);
-        if (!geom) return;
+        const combinedVB = this.#sharedGeometry.combinedVertexBuffer;
+        const combinedIB = this.#sharedGeometry.combinedIndexBuffer;
+        if (!combinedVB || !combinedIB) return;
 
-        const vertexBuffer = geom.vertexBuffer;
-        const indexBuffer = geom.indexBuffer;
-        if (!vertexBuffer || !indexBuffer) return;
+        const lodRange = this.#sharedGeometry.getLODRange(this.#lodLevel);
 
         // 1. GPURenderPipeline 취득 및 세팅
-        const pipeline = this.#getOrCreateRenderPipeline(geom);
+        const pipeline = this.#getOrCreateRenderPipeline(combinedVB);
         if (!pipeline) return;
 
         passEncoder.setPipeline(pipeline);
@@ -166,22 +175,12 @@ export class LandscapeComponent {
             passEncoder.setBindGroup(2, this.#tileBindGroup);
         }
 
-        // 5. Vertex & Index Buffer 바인딩
-        passEncoder.setVertexBuffer(0, vertexBuffer.gpuBuffer);
-        passEncoder.setIndexBuffer(indexBuffer.gpuBuffer, 'uint32');
+        // 5. 단일 거대 통합 Vertex & Index Buffer 바인딩
+        passEncoder.setVertexBuffer(0, combinedVB.gpuBuffer);
+        passEncoder.setIndexBuffer(combinedIB.gpuBuffer, 'uint32');
 
-        // 6. Draw Call 발사
-        passEncoder.drawIndexed(indexBuffer.indexCount, 1, 0, 0, 0);
-    }
-
-    #updateTileUniform(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (!gpuDevice || !this.#tileUniformBuffer) return;
-
-        this.#tileUniformData[0] = this.#tileX;
-        this.#tileUniformData[1] = this.#tileZ;
-
-        gpuDevice.queue.writeBuffer(this.#tileUniformBuffer, 0, this.#tileUniformData.buffer as ArrayBuffer, 0, 8);
+        // 6. LOD 오프셋 선택 Draw Call 발사 (firstIndex 선택)
+        passEncoder.drawIndexed(lodRange.indexCount, 1, lodRange.firstIndex, 0, 0);
     }
 
     #getOrCreateRenderPipeline(geom: any): GPURenderPipeline | null {
@@ -225,8 +224,8 @@ export class LandscapeComponent {
             });
 
             const vertexBuffers: GPUVertexBufferLayout[] = [{
-                arrayStride: geom.vertexBuffer?.interleavedStruct?.arrayStride ?? 32,
-                attributes: geom.vertexBuffer?.interleavedStruct?.attributes ?? [
+                arrayStride: geom?.interleavedStruct?.arrayStride ?? 32,
+                attributes: geom?.interleavedStruct?.attributes ?? [
                     {shaderLocation: 0, offset: 0, format: 'float32x3'},
                     {shaderLocation: 1, offset: 12, format: 'float32x3'},
                     {shaderLocation: 2, offset: 24, format: 'float32x2'}

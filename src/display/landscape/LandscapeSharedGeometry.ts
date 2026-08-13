@@ -1,9 +1,19 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import Plane from "../../primitive/Plane";
+import IndexBuffer from "../../resources/buffer/indexBuffer/IndexBuffer";
+import VertexBuffer from "../../resources/buffer/vertexBuffer/VertexBuffer";
+import VertexInterleavedStruct from "../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
+import VertexInterleaveType from "../../resources/buffer/vertexBuffer/VertexInterleaveType";
+
+export interface LandscapeLODGeometryRange {
+    lodLevel: number;
+    firstIndex: number;
+    indexCount: number;
+    baseVertex: number;
+}
 
 /**
- * [KO] Landscape LOD 0 ~ LOD N 단계별 공유 Plane 지오메트리를 사전 생성 및 보관하는 클래스입니다.
- * [EN] Class that pre-creates and retains shared Plane geometries for Landscape LOD levels 0 to N.
+ * [KO] Landscape LOD 0 ~ LOD N 전체 단계 지오메트리를 단 하나의 거대한 GPU 통합 버퍼(Combined Buffer)로 보관 및 관리하는 클래스입니다.
+ * [EN] Class that retains and manages Landscape LOD 0 ~ LOD N geometries as a single giant GPU Combined Buffer.
  */
 export class LandscapeSharedGeometry {
     #redGPUContext: RedGPUContext;
@@ -11,17 +21,14 @@ export class LandscapeSharedGeometry {
     #tileSizeZ: number;
     #gridSize: number;
     #lodCount: number;
-    #geometries: Plane[] = [];
+
+    #combinedVertexBuffer: VertexBuffer | null = null;
+    #combinedIndexBuffer: IndexBuffer | null = null;
+    #lodRanges: LandscapeLODGeometryRange[] = [];
 
     /**
      * [KO] LandscapeSharedGeometry 인스턴스를 생성합니다.
      * [EN] Creates an instance of LandscapeSharedGeometry.
-     *
-     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
-     * @param tileSizeX - [KO] 타일 X 크기 [EN] Tile X size
-     * @param tileSizeZ - [KO] 타일 Z 크기 [EN] Tile Z size
-     * @param gridSize - [KO] 타일당 최고 LOD 쿼드 해상도 (기본 64) [EN] Base grid quad resolution for LOD 0 (default 64)
-     * @param lodCount - [KO] LOD 단계 수 [EN] Number of LOD levels
      */
     constructor(redGPUContext: RedGPUContext, tileSizeX: number, tileSizeZ: number, gridSize: number, lodCount: number) {
         this.#redGPUContext = redGPUContext;
@@ -30,56 +37,129 @@ export class LandscapeSharedGeometry {
         this.#gridSize = gridSize;
         this.#lodCount = lodCount;
 
-        this.#buildGeometries();
+        this.#buildCombinedGeometry();
     }
 
-    /**
-     * [KO] 전체 사전 생성된 지오메트리 리스트를 반환합니다.
-     * [EN] Returns the entire list of pre-created geometries.
-     */
-    public get geometries(): Plane[] {
-        return this.#geometries;
+    /** [KO] 거대 단일 통합 VertexBuffer 반환 */
+    public get combinedVertexBuffer(): VertexBuffer | null {
+        return this.#combinedVertexBuffer;
     }
 
-    public get tileSizeX(): number {
-        return this.#tileSizeX;
+    /** [KO] 거대 단일 통합 IndexBuffer 반환 */
+    public get combinedIndexBuffer(): IndexBuffer | null {
+        return this.#combinedIndexBuffer;
     }
 
-    /**
-     * [KO] 지정된 LOD 레벨에 해당하는 공유 지오메트리를 반환합니다.
-     * [EN] Returns the shared geometry corresponding to the specified LOD level.
-     *
-     * @param lodLevel - [KO] LOD 레벨 번호 [EN] LOD level index
-     */
-    public getGeometry(lodLevel: number): Plane {
-        const index = Math.min(Math.max(0, lodLevel), this.#geometries.length - 1);
-        return this.#geometries[index];
+    public get lodRanges(): LandscapeLODGeometryRange[] {
+        return this.#lodRanges;
     }
 
-    public get tileSizeZ(): number {
-        return this.#tileSizeZ;
+    public get lodCount(): number {
+        return this.#lodCount;
     }
 
-    /**
-     * [KO] 타일 크기(tileSizeX, tileSizeZ)가 동적 변경되었을 때 공유 지오메트리 버퍼들을 새로 재생성합니다.
-     * [EN] Recreates shared geometry buffers when the tile sizes change dynamically.
-     */
-    public updateTileSize(newTileSizeX: number, newTileSizeZ: number): void {
-        if (newTileSizeX > 0 && newTileSizeZ > 0 && (this.#tileSizeX !== newTileSizeX || this.#tileSizeZ !== newTileSizeZ)) {
-            this.#tileSizeX = newTileSizeX;
-            this.#tileSizeZ = newTileSizeZ;
-            this.#buildGeometries();
+    public updateTileSize(tileSizeX: number, tileSizeZ: number): void {
+        if (this.#tileSizeX !== tileSizeX || this.#tileSizeZ !== tileSizeZ) {
+            this.#tileSizeX = tileSizeX;
+            this.#tileSizeZ = tileSizeZ;
+            this.#buildCombinedGeometry();
         }
     }
 
-    #buildGeometries(): void {
-        this.#geometries.length = 0;
-        for (let level = 0; level < this.#lodCount; level++) {
-            const quadRes = Math.max(1, Math.floor(this.#gridSize / Math.pow(2, level)));
-            // XZ 평면에 맞게 tileSizeX, tileSizeZ 크기로 Plane 지오메트리 생성
-            const plane = new Plane(this.#redGPUContext, this.#tileSizeX, this.#tileSizeZ, quadRes, quadRes);
-            this.#geometries.push(plane);
+    /** [KO] 지정된 LOD 레벨의 오프셋 범위를 반환합니다. */
+    public getLODRange(lodLevel: number): LandscapeLODGeometryRange {
+        const index = Math.min(Math.max(0, lodLevel), this.#lodRanges.length - 1);
+        return this.#lodRanges[index];
+    }
+
+    /**
+     * [KO] 전체 LOD 단계 지오메트리를 단 하나의 거대 GPU 버퍼로 결합 생성합니다.
+     */
+    #buildCombinedGeometry(): void {
+        const lodCount = this.#lodCount;
+        const baseGridSize = this.#gridSize;
+        const halfSizeX = this.#tileSizeX / 2;
+        const halfSizeZ = this.#tileSizeZ / 2;
+
+        const allInterleavedData: number[] = [];
+        const allIndices: number[] = [];
+        this.#lodRanges.length = 0;
+
+        let totalVertexOffset = 0;
+        let totalIndexOffset = 0;
+
+        for (let lod = 0; lod < lodCount; lod++) {
+            const step = Math.pow(2, lod);
+            const segmentsX = Math.max(1, Math.floor(baseGridSize / step));
+            const segmentsZ = Math.max(1, Math.floor(baseGridSize / step));
+
+            const vertexCount = (segmentsX + 1) * (segmentsZ + 1);
+            const indexCount = segmentsX * segmentsZ * 6;
+            const baseVertex = totalVertexOffset;
+            const firstIndex = totalIndexOffset;
+
+            // 버텍스 생성 (Interleaved: position x,y,z, normal x,y,z, uv u,v)
+            for (let z = 0; z <= segmentsZ; z++) {
+                const percentZ = z / segmentsZ;
+                const posZ = percentZ * this.#tileSizeZ - halfSizeZ;
+
+                for (let x = 0; x <= segmentsX; x++) {
+                    const percentX = x / segmentsX;
+                    const posX = percentX * this.#tileSizeX - halfSizeX;
+
+                    // Position (x, y, z)
+                    allInterleavedData.push(posX, posZ, 0);
+                    // Normal (x, y, z)
+                    allInterleavedData.push(0, 1, 0);
+                    // UV (u, v)
+                    allInterleavedData.push(percentX, percentZ);
+                }
+            }
+
+            // 인덱스 생성
+            for (let z = 0; z < segmentsZ; z++) {
+                for (let x = 0; x < segmentsX; x++) {
+                    const row1 = baseVertex + z * (segmentsX + 1);
+                    const row2 = baseVertex + (z + 1) * (segmentsX + 1);
+
+                    const a = row1 + x;
+                    const b = row1 + x + 1;
+                    const c = row2 + x;
+                    const d = row2 + x + 1;
+
+                    allIndices.push(a, c, b);
+                    allIndices.push(b, c, d);
+                }
+            }
+
+            this.#lodRanges.push({
+                lodLevel: lod,
+                firstIndex: firstIndex,
+                indexCount: indexCount,
+                baseVertex: baseVertex
+            });
+
+            totalVertexOffset += vertexCount;
+            totalIndexOffset += indexCount;
         }
+
+        // 단 1개의 거대한 GPU VertexBuffer & IndexBuffer 생성
+        const vertexStruct = new VertexInterleavedStruct({
+            aVertexPosition: VertexInterleaveType.float32x3,
+            aVertexNormal: VertexInterleaveType.float32x3,
+            aTexcoord: VertexInterleaveType.float32x2
+        });
+
+        this.#combinedVertexBuffer = new VertexBuffer(
+            this.#redGPUContext,
+            new Float32Array(allInterleavedData),
+            vertexStruct
+        );
+
+        this.#combinedIndexBuffer = new IndexBuffer(
+            this.#redGPUContext,
+            new Uint32Array(allIndices)
+        );
     }
 }
 
