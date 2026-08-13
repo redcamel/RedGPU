@@ -2,11 +2,11 @@ import * as RedGPU from "../../../../dist/index.js";
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
 /**
- * [KO] Landscape Basic LOD 테스트 예제
- * [EN] Landscape Basic LOD Test Example
+ * [KO] Landscape Basic LOD & Full Feature 테스트 예제
+ * [EN] Landscape Basic LOD & Full Feature Test Example
  *
- * [KO] 신규 Landscape 지형 시스템의 기본 LOD 처리 및 거리 기반 시각화 검증 예제입니다.
- * [EN] Basic LOD processing and distance-based visualization test example for the new Landscape terrain system.
+ * [KO] 신규 Landscape 지형 시스템의 모든 get/set 속성 실시간 검증 예제입니다.
+ * [EN] Real-time test example for all get/set properties of the new Landscape terrain system.
  */
 
 const canvas = document.createElement('canvas');
@@ -114,8 +114,8 @@ RedGPU.init(
                     <span>⛰️ Landscape Real-time Engine Monitor</span>
                     <span style="font-size:11px; background:#0284c7; color:#fff; padding:2px 6px; border-radius:4px;">UE5 Spec</span>
                 </div>
-                <div>World Size: <b style="color:#f1f5f9;">${wsX}m × ${wsZ}m</b> | Tile Count: <b style="color:#f1f5f9;">${tcX} × ${tcZ} (${tcX * tcZ} Tiles)</b></div>
-                <div>Tile Size: <b style="color:#f1f5f9;">${Math.round(tsX)}m × ${Math.round(tsZ)}m</b> | Base Res: <b style="color:#f1f5f9;">${gs} × ${gs} Quads</b></div>
+                <div>worldSize: <b style="color:#f1f5f9;">[${wsX}, ${wsZ}]m</b> | tileCount: <b style="color:#f1f5f9;">[${tcX}, ${tcZ}] (${tcX * tcZ} Tiles)</b></div>
+                <div>tileSize: <b style="color:#f1f5f9;">[${Math.round(tsX)}, ${Math.round(tsZ)}]m</b> | gridSize: <b style="color:#f1f5f9;">${gs} Quads</b></div>
                 
                 <div style="margin-top:8px; font-weight:bold; color:#cbd5e1; border-bottom:1px dashed rgba(255,255,255,0.15); padding-bottom:3px;">
                     📊 Active LOD Instances & Geometry (Real-time):
@@ -154,14 +154,14 @@ RedGPU.init(
         };
         renderer.start(redGPUContext, render);
 
-        // 7. 테스트 GUI 패널 렌더링
+        // 7. Landscape 모든 get/set 속성 전면 제어 테스트 패널 렌더링 (RedGPU 표준 인라인 컬러 피커 탑재)
         renderTestPane(redGPUContext, landscape, controller);
     }
 );
 
 /**
- * [KO] 100% 완벽 동기화 테스트 패널(GUI)을 렌더링합니다.
- * [EN] Renders a 100% perfectly synchronized test panel (GUI).
+ * [KO] Landscape 모든 get/set 속성 전면 제어 테스트 패널(GUI)을 렌더링합니다.
+ * [EN] Renders a test panel (GUI) for full control of all get/set properties of Landscape.
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.Landscape} landscape
  * @param {RedGPU.Camera.FreeController} controller
@@ -177,13 +177,20 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
         tileCountX: tcX,
         tileCountZ: tcZ,
         totalTiles: tcX * tcZ,
-        tileSizeXStr: `${Math.round(tsX)}m`,
-        tileSizeZStr: `${Math.round(tsZ)}m`,
+        tileSizeStr: `[${Math.round(tsX)}, ${Math.round(tsZ)}]m`,
         gridSize: RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_63,
         lodCount: 4,
         wireframe: landscape ? landscape.wireframe : true,
         lodColoration: landscape ? landscape.lodColoration : true,
         moveSpeed: controller ? controller.moveSpeed : 3000
+    };
+
+    const materialColorParams = {
+        color: {
+            r: landscape?.material?.color?.r ?? 56,
+            g: landscape?.material?.color?.g ?? 125,
+            b: landscape?.material?.color?.b ?? 66
+        }
     };
 
     let activePane = null;
@@ -198,8 +205,7 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
             config.tileCountX = tX;
             config.tileCountZ = tZ;
             config.totalTiles = tX * tZ;
-            config.tileSizeXStr = `${Math.round(sX)}m`;
-            config.tileSizeZStr = `${Math.round(sZ)}m`;
+            config.tileSizeStr = `[${Math.round(sX)}, ${Math.round(sZ)}]m`;
             if (activePane) activePane.refresh();
         }
     };
@@ -208,8 +214,8 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
         gui: (pane) => {
             activePane = pane;
 
-            // Folder 1: Terrain Dimensions
-            const folderDimensions = pane.addFolder({title: '📐 Terrain Dimensions', expanded: true});
+            // Folder 1: Terrain Dimensions (worldSize, tileCount, tileSize)
+            const folderDimensions = pane.addFolder({title: '📐 Terrain Dimensions (get / set)', expanded: true});
 
             folderDimensions.addBinding(config, 'worldSizeX', {
                 min: 1000,
@@ -259,12 +265,11 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
                 }
             });
 
-            folderDimensions.addBinding(config, 'tileSizeXStr', {readonly: true});
-            folderDimensions.addBinding(config, 'tileSizeZStr', {readonly: true});
+            folderDimensions.addBinding(config, 'tileSizeStr', {readonly: true});
             folderDimensions.addBinding(config, 'totalTiles', {readonly: true});
 
-            // Folder 2: Mesh & LOD Specs
-            const folderSpecs = pane.addFolder({title: '🧩 Mesh & LOD Specs', expanded: true});
+            // Folder 2: Mesh & LOD Specs (gridSize, lodCount)
+            const folderSpecs = pane.addFolder({title: '🧩 Mesh & LOD Specs (get / set)', expanded: true});
 
             folderSpecs.addBinding(config, 'gridSize', {
                 options: {
@@ -290,8 +295,8 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
                 }
             });
 
-            // Folder 3: Render & Debug Controls
-            const folderDisplay = pane.addFolder({title: '🎨 Render & Debug Controls', expanded: true});
+            // Folder 3: Render & Material Options (wireframe, lodColoration, material.color)
+            const folderDisplay = pane.addFolder({title: '🎨 Render & Material Options (get / set)', expanded: true});
 
             folderDisplay.addBinding(config, 'wireframe').on('change', (ev) => {
                 if (landscape) landscape.wireframe = ev.value;
@@ -301,7 +306,8 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
                 if (landscape) landscape.lodColoration = ev.value;
             });
 
-            // Folder 4: Camera Controls
+
+            // Folder 4: Camera Controls (moveSpeed)
             if (controller) {
                 const folderCam = pane.addFolder({title: '🎮 Camera Controls', expanded: true});
                 folderCam.addBinding(config, 'moveSpeed', {
