@@ -20,6 +20,7 @@ export class Landscape {
     #lodDistancesSq: number[] = [];
     #lodMultipliers: number[] = [];
     #lodColorsRGBA: [number, number, number, number][] = [];
+    #defaultTerrainColorRGBA: [number, number, number, number] = [0.22, 0.49, 0.26, 1.0];
     #baseMaterial: LandscapeMaterial;
 
     #wireframe: boolean = false;
@@ -37,6 +38,11 @@ export class Landscape {
     // 매 프레임 카메라 Cell 및 LOD 카운팅 재사용 버퍼 (Zero-GC)
     #tempCellBuffer: Int32Array = new Int32Array(2);
     #lodCountsBuffer: Int32Array;
+
+    /** [KO] RedGPUContext 인스턴스를 반환합니다. */
+    get redGPUContext(): RedGPUContext {
+        return this.#redGPUContext;
+    }
 
     /**
      * [KO] Landscape 인스턴스를 생성합니다 (언리얼 엔진 5 공식 기본값: worldSize 8000m, tileCount 8x8, gridSize 63 [63x63 Quads, 4096 Vertices], lodCount 4).
@@ -100,11 +106,6 @@ export class Landscape {
         this.#rebuildTiles();
     }
 
-    /** [KO] RedGPUContext 인스턴스를 반환합니다. */
-    public get redGPUContext(): RedGPUContext {
-        return this.#redGPUContext;
-    }
-
     /**
      * [KO] LOD 팔레트 및 거리 임계 배열 재구축 헬퍼
      */
@@ -152,11 +153,11 @@ export class Landscape {
         }
     }
 
-    public get worldSize(): [number, number] {
+    get worldSize(): [number, number] {
         return [this.#worldSizeX, this.#worldSizeZ];
     }
 
-    public set worldSize(value: number | [number, number]) {
+    set worldSize(value: number | [number, number]) {
         let wx = this.#worldSizeX;
         let wz = this.#worldSizeZ;
         if (Array.isArray(value)) {
@@ -176,11 +177,11 @@ export class Landscape {
         }
     }
 
-    public get tileCount(): [number, number] {
+    get tileCount(): [number, number] {
         return [this.#tileCountX, this.#tileCountZ];
     }
 
-    public set tileCount(value: number | [number, number]) {
+    set tileCount(value: number | [number, number]) {
         let tcX = this.#tileCountX;
         let tcZ = this.#tileCountZ;
         if (Array.isArray(value)) {
@@ -201,11 +202,11 @@ export class Landscape {
         }
     }
 
-    public get gridSize(): number {
+    get gridSize(): number {
         return this.#gridSize;
     }
 
-    public set gridSize(value: number) {
+    set gridSize(value: number) {
         if (value > 0 && this.#gridSize !== value) {
             this.#gridSize = value;
             this.#sharedGeometry = new LandscapeSharedGeometry(
@@ -219,11 +220,11 @@ export class Landscape {
         }
     }
 
-    public get lodCount(): number {
+    get lodCount(): number {
         return this.#lodCount;
     }
 
-    public set lodCount(value: number) {
+    set lodCount(value: number) {
         const count = Math.min(8, Math.max(1, Math.round(value)));
         if (this.#lodCount !== count) {
             this.#lodCount = count;
@@ -240,15 +241,15 @@ export class Landscape {
         }
     }
 
-    public get tileSize(): [number, number] {
+    get tileSize(): [number, number] {
         return [this.#tileSizeX, this.#tileSizeZ];
     }
 
-    public get wireframe(): boolean {
+    get wireframe(): boolean {
         return this.#wireframe;
     }
 
-    public set wireframe(value: boolean) {
+    set wireframe(value: boolean) {
         if (this.#wireframe !== value) {
             this.#wireframe = value;
             const count = this.#components.length;
@@ -262,21 +263,21 @@ export class Landscape {
      * [KO] 언리얼 엔진 5 표준 Landscape LOD Coloration 디버그 뷰 모드 활성화 여부
      * [EN] UE5 standard Landscape LOD Coloration debug view mode enabled state
      */
-    public get lodColoration(): boolean {
+    get lodColoration(): boolean {
         return this.#lodColoration;
     }
 
-    public set lodColoration(value: boolean) {
+    set lodColoration(value: boolean) {
         if (this.#lodColoration !== value) {
             this.#lodColoration = value;
         }
     }
 
-    public get material(): LandscapeMaterial {
+    get material(): LandscapeMaterial {
         return this.#baseMaterial;
     }
 
-    public set material(val: LandscapeMaterial) {
+    set material(val: LandscapeMaterial) {
         this.#baseMaterial = val;
         const count = this.#components.length;
         for (let i = 0; i < count; i++) {
@@ -285,12 +286,20 @@ export class Landscape {
     }
 
     /** [KO] GPU Indirect Buffer 객체를 반환합니다. */
-    public get instanceBuffer(): LandscapeInstanceBuffer {
+    get instanceBuffer(): LandscapeInstanceBuffer {
         return this.#instanceBuffer;
     }
 
-    public get sharedGeometry(): LandscapeSharedGeometry {
+    get sharedGeometry(): LandscapeSharedGeometry {
         return this.#sharedGeometry;
+    }
+
+    get spatialGrid(): LandscapeSpatialGrid {
+        return this.#spatialGrid;
+    }
+
+    get components(): LandscapeComponent[] {
+        return this.#components;
     }
 
     /**
@@ -306,7 +315,7 @@ export class Landscape {
      *
      * @param camera - [KO] 현재 뷰의 카메라 객체 [EN] Current view camera object
      */
-    public update(camera: any): void {
+    update(camera: any): void {
         if (!camera) return;
 
         const camX = camera.x ?? 0;
@@ -347,15 +356,19 @@ export class Landscape {
         const instanceBuf = this.#instanceBuffer;
         instanceBuf.prepareLODAllocation(this.#lodCountsBuffer);
 
-        // 3. 패스: LOD 그룹별로 정렬하여 인스턴스 데이터 작성 (Zero-GC)
+        // 3. 패스: LOD 그룹별로 정렬하여 인스턴스 데이터 작성 (Zero-GC 재사용 버퍼 타격)
+        const lodColorationActive = this.#lodColoration;
+        const lodColorsRGBA = this.#lodColorsRGBA;
+        const defaultColor = this.#defaultTerrainColorRGBA;
+
         for (let i = 0; i < count; i++) {
             const comp = components[i];
             const activeLOD = comp.lodLevel;
 
-            // UE5 표준 lodColoration 디버그 색상 결정
-            const colorRGBA = this.#lodColoration
-                ? this.#lodColorsRGBA[activeLOD]
-                : [0.22, 0.49, 0.26, 1.0];
+            // 매 프레임 객체 생성 방지를 위한 재사용 색상 참조 (Zero-GC)
+            const colorRGBA = lodColorationActive
+                ? lodColorsRGBA[activeLOD]
+                : defaultColor;
 
             instanceBuf.writeLODInstanceData(
                 activeLOD,
@@ -421,14 +434,6 @@ export class Landscape {
                 index++;
             }
         }
-    }
-
-    public get spatialGrid(): LandscapeSpatialGrid {
-        return this.#spatialGrid;
-    }
-
-    public get components(): LandscapeComponent[] {
-        return this.#components;
     }
 }
 

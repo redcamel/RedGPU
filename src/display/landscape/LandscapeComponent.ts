@@ -52,67 +52,67 @@ export class LandscapeComponent {
         this.#vertexShaderModule = vModule;
     }
 
-    public updateSharedGeometry(sharedGeometry: LandscapeSharedGeometry): void {
-        this.#sharedGeometry = sharedGeometry;
-    }
-
-    public get x(): number {
+    get x(): number {
         return this.#tileX;
     }
 
-    public set x(val: number) {
+    set x(val: number) {
         this.#tileX = val;
     }
 
-    public get y(): number {
+    get y(): number {
         return 0;
     }
 
-    public get z(): number {
+    get z(): number {
         return this.#tileZ;
     }
 
-    public set z(val: number) {
+    set z(val: number) {
         this.#tileZ = val;
     }
 
-    public get tileX(): number {
+    get tileX(): number {
         return this.#tileX;
     }
 
-    public get tileZ(): number {
+    get tileZ(): number {
         return this.#tileZ;
     }
 
-    public get lodLevel(): number {
+    get lodLevel(): number {
         return this.#lodLevel;
     }
 
-    public set lodLevel(val: number) {
+    set lodLevel(val: number) {
         this.#lodLevel = val;
     }
 
-    public get material(): LandscapeMaterial {
+    get material(): LandscapeMaterial {
         return this.#material;
     }
 
-    public set material(val: LandscapeMaterial) {
+    set material(val: LandscapeMaterial) {
         this.#material = val;
     }
 
-    public get wireframe(): boolean {
+    get wireframe(): boolean {
         return this.#wireframe;
     }
 
-    public set wireframe(val: boolean) {
+    set wireframe(val: boolean) {
         this.#wireframe = val;
         this.#topology = val ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
     }
 
+    updateSharedGeometry(sharedGeometry: LandscapeSharedGeometry): void {
+        this.#sharedGeometry = sharedGeometry;
+    }
+
     /**
-     * [KO] Multi-LOD Batching 인스턴싱으로 64개 전체 지형 타일을 디스패치하고 RenderViewStateData 통계를 기록합니다.
+     * [KO] Multi-LOD Batching 인스턴싱으로 64개 전체 지형 타일을 디스패치하고 RenderViewStateData 통계를 기록합니다 (Zero-GC).
      */
-    public render(view: any, passEncoder?: GPURenderPassEncoder): void {
+    render(view: any, passEncoder?: GPURenderPassEncoder): void {
         const renderPassEncoder = passEncoder || view?.currentRenderPassEncoder || view?.renderPassEncoder;
         const view3D = view?.view || view;
         if (!renderPassEncoder) return;
@@ -160,7 +160,7 @@ export class LandscapeComponent {
         // 6. RenderViewStateData 통계 집계 참조
         const renderResults = (view as RenderViewStateData)?.renderResults || (view3D as any)?.renderViewStateData?.renderResults;
 
-        // 7. LOD 단계별 Multi-LOD Batching 드로우 디스패치 (baseVertex 오프셋 정밀 수술)
+        // 7. LOD 단계별 Multi-LOD Batching 드로우 디스패치
         const lodCount = sharedGeometry.lodCount;
         for (let lod = 0; lod < lodCount; lod++) {
             const instanceCount = instanceBuffer.getLODInstanceCount(lod);
@@ -169,7 +169,6 @@ export class LandscapeComponent {
             const lodRange = sharedGeometry.getLODRange(lod);
             const firstInstance = instanceBuffer.getLODFirstInstance(lod);
 
-            // baseVertex 오프셋으로 lodRange.baseVertex를 명시 전달하여 각 LOD별 세분화 격자가 차등 적용되도록 완벽 수술!
             renderPassEncoder.drawIndexed(
                 lodRange.indexCount,
                 instanceCount,

@@ -41,24 +41,24 @@ export class LandscapeSharedGeometry {
     }
 
     /** [KO] 거대 단일 통합 VertexBuffer 반환 */
-    public get combinedVertexBuffer(): VertexBuffer | null {
+    get combinedVertexBuffer(): VertexBuffer | null {
         return this.#combinedVertexBuffer;
     }
 
     /** [KO] 거대 단일 통합 IndexBuffer 반환 */
-    public get combinedIndexBuffer(): IndexBuffer | null {
+    get combinedIndexBuffer(): IndexBuffer | null {
         return this.#combinedIndexBuffer;
     }
 
-    public get lodRanges(): LandscapeLODGeometryRange[] {
+    get lodRanges(): LandscapeLODGeometryRange[] {
         return this.#lodRanges;
     }
 
-    public get lodCount(): number {
+    get lodCount(): number {
         return this.#lodCount;
     }
 
-    public updateTileSize(tileSizeX: number, tileSizeZ: number): void {
+    updateTileSize(tileSizeX: number, tileSizeZ: number): void {
         if (this.#tileSizeX !== tileSizeX || this.#tileSizeZ !== tileSizeZ) {
             this.#tileSizeX = tileSizeX;
             this.#tileSizeZ = tileSizeZ;
@@ -67,7 +67,7 @@ export class LandscapeSharedGeometry {
     }
 
     /** [KO] 지정된 LOD 레벨의 오프셋 범위를 반환합니다. */
-    public getLODRange(lodLevel: number): LandscapeLODGeometryRange {
+    getLODRange(lodLevel: number): LandscapeLODGeometryRange {
         const index = Math.min(Math.max(0, lodLevel), this.#lodRanges.length - 1);
         return this.#lodRanges[index];
     }

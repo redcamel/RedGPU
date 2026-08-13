@@ -40,30 +40,30 @@ export class LandscapeInstanceBuffer {
         this.#createGPUResources();
     }
 
-    public get instanceStorageBuffer(): GPUBuffer | null {
+    get instanceStorageBuffer(): GPUBuffer | null {
         return this.#instanceStorageBuffer;
     }
 
-    public get instanceStorageBindGroup(): GPUBindGroup | null {
+    get instanceStorageBindGroup(): GPUBindGroup | null {
         return this.#instanceStorageBindGroup;
     }
 
-    public get instanceStorageBindGroupLayout(): GPUBindGroupLayout | null {
+    get instanceStorageBindGroupLayout(): GPUBindGroupLayout | null {
         return this.#instanceStorageBindGroupLayout;
     }
 
-    public get maxTileCount(): number {
+    get maxTileCount(): number {
         return this.#maxTileCount;
     }
 
-    public get lodCount(): number {
+    get lodCount(): number {
         return this.#lodCount;
     }
 
     /**
      * [KO] 매 프레임 LOD별 인스턴스 카운트 할당을 초기화합니다 (Zero-GC).
      */
-    public prepareLODAllocation(lodCounts: Int32Array): void {
+    prepareLODAllocation(lodCounts: Int32Array): void {
         let cursor = 0;
         for (let lod = 0; lod < this.#lodCount; lod++) {
             const count = lodCounts[lod] ?? 0;
@@ -77,7 +77,7 @@ export class LandscapeInstanceBuffer {
     /**
      * [KO] 특정 LOD 그룹 내의 타일 인스턴스 데이터를 StorageBuffer 메모리에 작성합니다 (Zero-GC).
      */
-    public writeLODInstanceData(
+    writeLODInstanceData(
         lodLevel: number,
         tileX: number,
         tileZ: number,
@@ -100,18 +100,18 @@ export class LandscapeInstanceBuffer {
         this.#instanceFloatData[offset + 7] = a;
     }
 
-    public getLODFirstInstance(lodLevel: number): number {
+    getLODFirstInstance(lodLevel: number): number {
         return this.#lodFirstInstanceList[lodLevel] ?? 0;
     }
 
-    public getLODInstanceCount(lodLevel: number): number {
+    getLODInstanceCount(lodLevel: number): number {
         return this.#lodInstanceCountList[lodLevel] ?? 0;
     }
 
     /**
      * [KO] CPU 버퍼 데이터를 GPU StorageBuffer로 플러시합니다.
      */
-    public flushToGPU(): void {
+    flushToGPU(): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#instanceStorageBuffer) return;
 
@@ -124,7 +124,7 @@ export class LandscapeInstanceBuffer {
         );
     }
 
-    public destroy(): void {
+    destroy(): void {
         if (this.#instanceStorageBuffer) {
             this.#instanceStorageBuffer.destroy();
             this.#instanceStorageBuffer = null;

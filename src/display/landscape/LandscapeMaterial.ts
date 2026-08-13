@@ -41,11 +41,11 @@ class LandscapeMaterial extends ABitmapBaseMaterial {
         this.color.setColorByHEX(colorHex);
     }
 
-    public get textureSampler(): Sampler {
+    get textureSampler(): Sampler {
         return this.#textureSampler;
     }
 
-    public set textureSampler(val: Sampler) {
+    set textureSampler(val: Sampler) {
         this.#textureSampler = val;
     }
 }
