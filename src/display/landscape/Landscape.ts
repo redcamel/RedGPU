@@ -30,28 +30,28 @@ export class Landscape {
     #sharedGeometry: LandscapeSharedGeometry;
     #spatialGrid: LandscapeSpatialGrid;
     #instanceBuffer: LandscapeInstanceBuffer;
-    #components: LandscapeComponent[] = [];
+    #landscapeComponents: LandscapeComponent[] = [];
     #lodDistancesSq: number[] = [];
     #lodMultipliers: number[] = [];
     #lodColorsRGBA: [number, number, number, number][] = [];
     #defaultTerrainColorRGBA: [number, number, number, number] = [0.22, 0.49, 0.26, 1.0];
-    #baseMaterial: LandscapeMaterial;
+    #landscapeMaterial: LandscapeMaterial;
 
     #wireframe: boolean = false;
     #lodColoration: boolean = false;
 
     #worldSizeX: number;
     #worldSizeZ: number;
-    #tileCountX: number;
-    #tileCountZ: number;
+    #componentCountX: number;
+    #componentCountZ: number;
     #tileSizeX: number;
     #tileSizeZ: number;
-    #lodCount: number;
-    #gridSize: number;
+    #maxLODLevel: number;
+    #componentSizeQuads: number;
 
     // Zero-GC Getter 재사용 튜플 버퍼
     #worldSizeTuple: [number, number] = [0, 0];
-    #tileCountTuple: [number, number] = [0, 0];
+    #componentCountTuple: [number, number] = [0, 0];
     #tileSizeTuple: [number, number] = [0, 0];
 
     // 매 프레임 카메라 Cell 및 LOD 카운팅 재사용 버퍼 (Zero-GC)
@@ -66,8 +66,8 @@ export class Landscape {
     }
 
     /**
-     * [KO] Landscape 인스턴스를 생성합니다 (언리얼 엔진 5 공식 기본값: worldSize 8000m, tileCount 8x8, gridSize 63 [63x63 Quads, 4096 Vertices], lodCount 4).
-     * [EN] Creates an instance of Landscape (Unreal Engine 5 official defaults: worldSize 8000m, tileCount 8x8, gridSize 63 [63x63 Quads, 4096 Vertices], lodCount 4).
+     * [KO] Landscape 인스턴스를 생성합니다 (언리얼 엔진 5 공식 기본값: worldSize 8000m, componentCount 8x8, componentSizeQuads 63 [63x63 Quads, 4096 Vertices], maxLODLevel 4).
+     * [EN] Creates an instance of Landscape (Unreal Engine 5 official defaults: worldSize 8000m, componentCount 8x8, componentSizeQuads 63 [63x63 Quads, 4096 Vertices], maxLODLevel 4).
      *
      * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
      * @param options - [KO] Landscape 설정 옵션 [EN] Landscape configuration options
@@ -82,39 +82,39 @@ export class Landscape {
         };
 
         let [worldSizeX, worldSizeZ] = parseValue(options.worldSize, 8000);
-        let [rawTileCountX, rawTileCountZ] = parseValue(options.tileCount, 8);
-        let tileCountX = Landscape.#clampTileCount(rawTileCountX);
-        let tileCountZ = Landscape.#clampTileCount(rawTileCountZ);
+        let [rawComponentCountX, rawComponentCountZ] = parseValue(options.componentCount, 8);
+        let componentCountX = Landscape.#clampComponentCount(rawComponentCountX);
+        let componentCountZ = Landscape.#clampComponentCount(rawComponentCountZ);
 
-        let [tileSizeX, tileSizeZ] = [worldSizeX / tileCountX, worldSizeZ / tileCountZ];
+        let [tileSizeX, tileSizeZ] = [worldSizeX / componentCountX, worldSizeZ / componentCountZ];
 
         if (options.tileSize !== undefined) {
             const [tsX, tsZ] = parseValue(options.tileSize, 1000);
             tileSizeX = tsX;
             tileSizeZ = tsZ;
             if (options.worldSize === undefined) {
-                worldSizeX = tileSizeX * tileCountX;
-                worldSizeZ = tileSizeZ * tileCountZ;
+                worldSizeX = tileSizeX * componentCountX;
+                worldSizeZ = tileSizeZ * componentCountZ;
             }
         }
 
-        const gridSize = options.gridSize ?? LANDSCAPE_BASE_GRID_SIZE.QUAD_63;
-        const lodCount = Math.min(8, Math.max(1, options.lodCount ?? 4));
+        const componentSizeQuads = options.componentSizeQuads ?? LANDSCAPE_BASE_GRID_SIZE.QUAD_63;
+        const maxLODLevel = Math.min(8, Math.max(1, options.maxLODLevel ?? 4));
 
-        const baseMaterial = options.material || new LandscapeMaterial(redGPUContext, '#387d42');
-        const sharedGeometry = new LandscapeSharedGeometry(redGPUContext, tileSizeX, tileSizeZ, gridSize, lodCount);
+        const landscapeMaterial = options.landscapeMaterial || new LandscapeMaterial(redGPUContext, '#387d42');
+        const sharedGeometry = new LandscapeSharedGeometry(redGPUContext, tileSizeX, tileSizeZ, componentSizeQuads, maxLODLevel);
 
-        this.#spatialGrid = new LandscapeSpatialGrid(tileCountX, tileCountZ, tileSizeX, tileSizeZ);
+        this.#spatialGrid = new LandscapeSpatialGrid(componentCountX, componentCountZ, tileSizeX, tileSizeZ);
         this.#sharedGeometry = sharedGeometry;
-        this.#baseMaterial = baseMaterial;
+        this.#landscapeMaterial = landscapeMaterial;
         this.#worldSizeX = worldSizeX;
         this.#worldSizeZ = worldSizeZ;
-        this.#tileCountX = tileCountX;
-        this.#tileCountZ = tileCountZ;
+        this.#componentCountX = componentCountX;
+        this.#componentCountZ = componentCountZ;
         this.#tileSizeX = tileSizeX;
         this.#tileSizeZ = tileSizeZ;
-        this.#gridSize = gridSize;
-        this.#lodCount = lodCount;
+        this.#componentSizeQuads = componentSizeQuads;
+        this.#maxLODLevel = maxLODLevel;
         this.#wireframe = options.wireframe ?? false;
         this.#lodColoration = options.lodColoration ?? false;
 
@@ -129,10 +129,10 @@ export class Landscape {
         }
         this.#vertexShaderModule = vModule;
 
-        this.#lodCountsBuffer = new Int32Array(lodCount);
+        this.#lodCountsBuffer = new Int32Array(maxLODLevel);
 
         // WebGPU Multi-LOD Indirect & Instance Buffer 생성
-        this.#instanceBuffer = new LandscapeInstanceBuffer(redGPUContext, tileCountX * tileCountZ, lodCount);
+        this.#instanceBuffer = new LandscapeInstanceBuffer(redGPUContext, componentCountX * componentCountZ, maxLODLevel);
 
         this.#rebuildLODStructures(options.lodColors, options.lodMultipliers, options.lodDistances);
         this.#rebuildTiles();
@@ -140,6 +140,149 @@ export class Landscape {
 
     get worldSize(): [number, number] {
         return this.#worldSizeTuple;
+    }
+
+    set worldSize(value: number | [number, number]) {
+        let wx = this.#worldSizeX;
+        let wz = this.#worldSizeZ;
+        if (Array.isArray(value)) {
+            wx = value[0];
+            wz = value[1];
+        } else if (typeof value === 'number') {
+            wx = value;
+            wz = value;
+        }
+
+        if (wx > 0 && wz > 0 && (this.#worldSizeX !== wx || this.#worldSizeZ !== wz)) {
+            this.#worldSizeX = wx;
+            this.#worldSizeZ = wz;
+            this.#tileSizeX = wx / this.#componentCountX;
+            this.#tileSizeZ = wz / this.#componentCountZ;
+            this.#updateTuples();
+            this.#rebuildTiles();
+        }
+    }
+
+    /** [KO] UE5 공식 컴포넌트 타일 개수 (ComponentCountX / ComponentCountY) */
+    get componentCount(): [number, number] {
+        return this.#componentCountTuple;
+    }
+
+    set componentCount(value: number | [number, number]) {
+        let tcX = this.#componentCountX;
+        let tcZ = this.#componentCountZ;
+        if (Array.isArray(value)) {
+            tcX = Landscape.#clampComponentCount(value[0]);
+            tcZ = Landscape.#clampComponentCount(value[1]);
+        } else if (typeof value === 'number') {
+            const count = Landscape.#clampComponentCount(value);
+            tcX = count;
+            tcZ = count;
+        }
+
+        if (this.#componentCountX !== tcX || this.#componentCountZ !== tcZ) {
+            this.#componentCountX = tcX;
+            this.#componentCountZ = tcZ;
+            this.#tileSizeX = this.#worldSizeX / tcX;
+            this.#tileSizeZ = this.#worldSizeZ / tcZ;
+            this.#updateTuples();
+            this.#rebuildTiles();
+        }
+    }
+
+    /** [KO] UE5 공식 컴포넌트 쿼드 그리드 해상도 (ComponentSizeQuads) */
+    get componentSizeQuads(): number {
+        return this.#componentSizeQuads;
+    }
+
+    set componentSizeQuads(value: number) {
+        if (value > 0 && this.#componentSizeQuads !== value) {
+            this.#componentSizeQuads = value;
+            this.#sharedGeometry = new LandscapeSharedGeometry(
+                this.#redGPUContext,
+                this.#tileSizeX,
+                this.#tileSizeZ,
+                value,
+                this.#maxLODLevel
+            );
+            this.#rebuildTiles();
+        }
+    }
+
+    /** [KO] UE5 공식 최대 LOD 레벨 단계 수 (MaxLODLevel) */
+    get maxLODLevel(): number {
+        return this.#maxLODLevel;
+    }
+
+    set maxLODLevel(value: number) {
+        const count = Math.min(8, Math.max(1, Math.round(value)));
+        if (this.#maxLODLevel !== count) {
+            this.#maxLODLevel = count;
+            this.#lodCountsBuffer = new Int32Array(count);
+            this.#sharedGeometry = new LandscapeSharedGeometry(
+                this.#redGPUContext,
+                this.#tileSizeX,
+                this.#tileSizeZ,
+                this.#componentSizeQuads,
+                count
+            );
+            this.#rebuildLODStructures();
+            this.#rebuildTiles();
+        }
+    }
+
+    /** [KO] UE5 공식 메인 지형 머티리얼 (LandscapeMaterial) */
+    get landscapeMaterial(): LandscapeMaterial {
+        return this.#landscapeMaterial;
+    }
+
+    set landscapeMaterial(val: LandscapeMaterial) {
+        if (this.#landscapeMaterial !== val) {
+            this.#landscapeMaterial = val;
+            this.#renderPipelineCache.clear();
+        }
+    }
+
+    // =========================================================================
+    // UE5 (Unreal Engine 5) Official Primary Properties
+    // =========================================================================
+
+    /** [KO] 와이어프레임 표시 플래그 (wireframe) */
+    get wireframe(): boolean {
+        return this.#wireframe;
+    }
+
+    set wireframe(value: boolean) {
+        if (this.#wireframe !== value) {
+            this.#wireframe = value;
+        }
+    }
+
+    /** [KO] LOD 색상 디버그 플래그 (lodColoration) */
+    get lodColoration(): boolean {
+        return this.#lodColoration;
+    }
+
+    set lodColoration(value: boolean) {
+        if (this.#lodColoration !== value) {
+            this.#lodColoration = value;
+        }
+    }
+
+    /** [KO] UE5 공식 컴포넌트 타일 리스트 (LandscapeComponents) */
+    get landscapeComponents(): LandscapeComponent[] {
+        return this.#landscapeComponents;
+    }
+
+    get tileSize(): [number, number] {
+        return this.#tileSizeTuple;
+    }
+
+    /**
+     * [KO] 언리얼 엔진 5 표준 타일 개수 클램핑 헬퍼 (최소 1개, 최대 32개 타일)
+     */
+    static #clampComponentCount(val: number): number {
+        return Math.min(32, Math.max(1, Math.round(val)));
     }
 
     update(camera: any): void {
@@ -158,7 +301,7 @@ export class Landscape {
         const distSqList = this.#lodDistancesSq;
         const lodLimit = distSqList.length;
 
-        // 1. 패스: 각 타일별 LOD 계산 및 LOD 그룹별 타일 개수 집계
+        // 1. 패스: 각 컴포넌트별 LOD 계산 및 LOD 그룹별 개수 집계
         this.#lodCountsBuffer.fill(0);
 
         for (let i = 0; i < count; i++) {
@@ -175,7 +318,7 @@ export class Landscape {
                 }
             }
 
-            const activeLOD = Math.min(lod, this.#lodCount - 1);
+            const activeLOD = Math.min(lod, this.#maxLODLevel - 1);
             comp.lodLevel = activeLOD;
             this.#lodCountsBuffer[activeLOD]++;
         }
@@ -217,82 +360,6 @@ export class Landscape {
         instanceBuf.flushToGPU();
     }
 
-    set worldSize(value: number | [number, number]) {
-        let wx = this.#worldSizeX;
-        let wz = this.#worldSizeZ;
-        if (Array.isArray(value)) {
-            wx = value[0];
-            wz = value[1];
-        } else if (typeof value === 'number') {
-            wx = value;
-            wz = value;
-        }
-
-        if (wx > 0 && wz > 0 && (this.#worldSizeX !== wx || this.#worldSizeZ !== wz)) {
-            this.#worldSizeX = wx;
-            this.#worldSizeZ = wz;
-            this.#tileSizeX = wx / this.#tileCountX;
-            this.#tileSizeZ = wz / this.#tileCountZ;
-            this.#updateTuples();
-            this.#rebuildTiles();
-        }
-    }
-
-    get tileCount(): [number, number] {
-        return this.#tileCountTuple;
-    }
-
-    #updateLODDistances(): void {
-        this.#lodDistancesSq.length = 0;
-        const tileSizeMax = Math.max(this.#tileSizeX, this.#tileSizeZ);
-        const count = this.#lodMultipliers.length;
-
-        for (let i = 0; i < count; i++) {
-            const dist = tileSizeMax * this.#lodMultipliers[i];
-            this.#lodDistancesSq.push(dist * dist);
-        }
-    }
-
-    /**
-     * [KO] 언리얼 엔진 5 표준 타일 개수 클램핑 헬퍼 (최소 1개, 최대 32개 타일)
-     */
-    static #clampTileCount(val: number): number {
-        return Math.min(32, Math.max(1, Math.round(val)));
-    }
-
-    set tileCount(value: number | [number, number]) {
-        let tcX = this.#tileCountX;
-        let tcZ = this.#tileCountZ;
-        if (Array.isArray(value)) {
-            tcX = Landscape.#clampTileCount(value[0]);
-            tcZ = Landscape.#clampTileCount(value[1]);
-        } else if (typeof value === 'number') {
-            const count = Landscape.#clampTileCount(value);
-            tcX = count;
-            tcZ = count;
-        }
-
-        if (this.#tileCountX !== tcX || this.#tileCountZ !== tcZ) {
-            this.#tileCountX = tcX;
-            this.#tileCountZ = tcZ;
-            this.#tileSizeX = this.#worldSizeX / tcX;
-            this.#tileSizeZ = this.#worldSizeZ / tcZ;
-            this.#updateTuples();
-            this.#rebuildTiles();
-        }
-    }
-
-    get tileSize(): [number, number] {
-        return this.#tileSizeTuple;
-    }
-
-    set material(val: LandscapeMaterial) {
-        if (this.#baseMaterial !== val) {
-            this.#baseMaterial = val;
-            this.#renderPipelineCache.clear();
-        }
-    }
-
     /**
      * [KO] Multi-LOD Batching 인스턴싱으로 전체 지형 타일을 디스패치하고 RenderViewStateData 통계를 기록합니다 (Zero-GC).
      */
@@ -322,7 +389,7 @@ export class Landscape {
             renderPassEncoder.setBindGroup(0, systemBG);
         }
 
-        const matUniformBG = this.#baseMaterial?.gpuRenderInfo?.fragmentUniformBindGroup;
+        const matUniformBG = this.#landscapeMaterial?.gpuRenderInfo?.fragmentUniformBindGroup;
         if (matUniformBG) {
             renderPassEncoder.setBindGroup(1, matUniformBG);
         }
@@ -333,8 +400,8 @@ export class Landscape {
 
         const renderResults = (view as RenderViewStateData)?.renderResults || (view3D as any)?.renderViewStateData?.renderResults;
 
-        const lodCount = sharedGeometry.lodCount;
-        for (let lod = 0; lod < lodCount; lod++) {
+        const maxLODLevel = sharedGeometry.maxLODLevel;
+        for (let lod = 0; lod < maxLODLevel; lod++) {
             const instanceCount = instanceBuffer.getLODInstanceCount(lod);
             if (instanceCount === 0) continue;
 
@@ -361,15 +428,15 @@ export class Landscape {
     #updateTuples(): void {
         this.#worldSizeTuple[0] = this.#worldSizeX;
         this.#worldSizeTuple[1] = this.#worldSizeZ;
-        this.#tileCountTuple[0] = this.#tileCountX;
-        this.#tileCountTuple[1] = this.#tileCountZ;
+        this.#componentCountTuple[0] = this.#componentCountX;
+        this.#componentCountTuple[1] = this.#componentCountZ;
         this.#tileSizeTuple[0] = this.#tileSizeX;
         this.#tileSizeTuple[1] = this.#tileSizeZ;
     }
 
     #getOrCreateRenderPipeline(geom: any, storageBGLayout: GPUBindGroupLayout): GPURenderPipeline | null {
         const gpuDevice = this.#redGPUContext.gpuDevice;
-        const material = this.#baseMaterial;
+        const material = this.#landscapeMaterial;
         if (!gpuDevice || !material || !material.gpuRenderInfo) return null;
 
         const antialiasingManager = this.#redGPUContext.antialiasingManager;
@@ -431,42 +498,14 @@ export class Landscape {
         }
     }
 
-    get gridSize(): number {
-        return this.#gridSize;
-    }
+    #updateLODDistances(): void {
+        this.#lodDistancesSq.length = 0;
+        const tileSizeMax = Math.max(this.#tileSizeX, this.#tileSizeZ);
+        const count = this.#lodMultipliers.length;
 
-    set gridSize(value: number) {
-        if (value > 0 && this.#gridSize !== value) {
-            this.#gridSize = value;
-            this.#sharedGeometry = new LandscapeSharedGeometry(
-                this.#redGPUContext,
-                this.#tileSizeX,
-                this.#tileSizeZ,
-                value,
-                this.#lodCount
-            );
-            this.#rebuildTiles();
-        }
-    }
-
-    get lodCount(): number {
-        return this.#lodCount;
-    }
-
-    set lodCount(value: number) {
-        const count = Math.min(8, Math.max(1, Math.round(value)));
-        if (this.#lodCount !== count) {
-            this.#lodCount = count;
-            this.#lodCountsBuffer = new Int32Array(count);
-            this.#sharedGeometry = new LandscapeSharedGeometry(
-                this.#redGPUContext,
-                this.#tileSizeX,
-                this.#tileSizeZ,
-                this.#gridSize,
-                count
-            );
-            this.#rebuildLODStructures();
-            this.#rebuildTiles();
+        for (let i = 0; i < count; i++) {
+            const dist = tileSizeMax * this.#lodMultipliers[i];
+            this.#lodDistancesSq.push(dist * dist);
         }
     }
 
@@ -474,14 +513,14 @@ export class Landscape {
         this.#lodColorsRGBA.length = 0;
         this.#lodMultipliers.length = 0;
 
-        for (let i = 0; i < this.#lodCount; i++) {
+        for (let i = 0; i < this.#maxLODLevel; i++) {
             this.#lodColorsRGBA.push(DEFAULT_LOD_COLORS[i % DEFAULT_LOD_COLORS.length]);
         }
 
         const defaultMultipliers = [1.0, 2.0, 3.5, 6.0, 9.5, 14.0, 20.0];
         const multipliers = userMultipliers ?? defaultMultipliers;
 
-        for (let i = 0; i < this.#lodCount - 1; i++) {
+        for (let i = 0; i < this.#maxLODLevel - 1; i++) {
             this.#lodMultipliers.push(multipliers[i] ?? (1.0 * Math.pow(1.8, i)));
         }
 
@@ -492,79 +531,50 @@ export class Landscape {
         }
     }
 
-    get wireframe(): boolean {
-        return this.#wireframe;
-    }
-
-    set wireframe(value: boolean) {
-        if (this.#wireframe !== value) {
-            this.#wireframe = value;
-        }
-    }
-
-    get lodColoration(): boolean {
-        return this.#lodColoration;
-    }
-
-    set lodColoration(value: boolean) {
-        if (this.#lodColoration !== value) {
-            this.#lodColoration = value;
-        }
-    }
-
-    get material(): LandscapeMaterial {
-        return this.#baseMaterial;
-    }
-
     #rebuildTiles(): void {
-        this.#spatialGrid = new LandscapeSpatialGrid(this.#tileCountX, this.#tileCountZ, this.#tileSizeX, this.#tileSizeZ);
+        this.#spatialGrid = new LandscapeSpatialGrid(this.#componentCountX, this.#componentCountZ, this.#tileSizeX, this.#tileSizeZ);
         this.#sharedGeometry.updateTileSize(this.#tileSizeX, this.#tileSizeZ);
         this.#updateLODDistances();
         this.#renderPipelineCache.clear();
 
         const halfSizeX = this.#worldSizeX / 2;
         const halfSizeZ = this.#worldSizeZ / 2;
-        const tileCountX = this.#tileCountX;
-        const tileCountZ = this.#tileCountZ;
+        const componentCountX = this.#componentCountX;
+        const componentCountZ = this.#componentCountZ;
         const tileSizeX = this.#tileSizeX;
         const tileSizeZ = this.#tileSizeZ;
-        const targetCount = tileCountX * tileCountZ;
+        const targetCount = componentCountX * componentCountZ;
 
-        if (this.#instanceBuffer.maxTileCount < targetCount || this.#instanceBuffer.lodCount !== this.#lodCount) {
+        if (this.#instanceBuffer.maxComponentCount < targetCount || this.#instanceBuffer.maxLODLevel !== this.#maxLODLevel) {
             this.#instanceBuffer.destroy();
-            this.#instanceBuffer = new LandscapeInstanceBuffer(this.#redGPUContext, targetCount, this.#lodCount);
+            this.#instanceBuffer = new LandscapeInstanceBuffer(this.#redGPUContext, targetCount, this.#maxLODLevel);
         }
 
-        while (this.#components.length > targetCount) {
-            this.#components.pop();
+        while (this.#landscapeComponents.length > targetCount) {
+            this.#landscapeComponents.pop();
         }
 
         let index = 0;
-        for (let row = 0; row < tileCountZ; row++) {
-            for (let col = 0; col < tileCountX; col++) {
+        for (let row = 0; row < componentCountZ; row++) {
+            for (let col = 0; col < componentCountX; col++) {
                 const posX = col * tileSizeX - halfSizeX + tileSizeX / 2;
                 const posZ = row * tileSizeZ - halfSizeZ + tileSizeZ / 2;
 
-                if (index < this.#components.length) {
-                    const comp = this.#components[index];
+                if (index < this.#landscapeComponents.length) {
+                    const comp = this.#landscapeComponents[index];
                     comp.worldX = posX;
                     comp.worldZ = posZ;
                     comp.componentX = col;
                     comp.componentZ = row;
-                    comp.updateSharedGeometry(this.#sharedGeometry);
                     this.#spatialGrid.registerTile(row, col, comp);
                 } else {
                     const comp = new LandscapeComponent(
-                        this.#redGPUContext,
-                        this.#sharedGeometry,
                         posX,
                         posZ,
-                        this.#baseMaterial,
-                        this.#wireframe,
                         col,
                         row
                     );
-                    this.#components.push(comp);
+                    this.#landscapeComponents.push(comp);
                     this.#spatialGrid.registerTile(row, col, comp);
                 }
                 index++;
@@ -582,10 +592,6 @@ export class Landscape {
 
     get spatialGrid(): LandscapeSpatialGrid {
         return this.#spatialGrid;
-    }
-
-    get components(): LandscapeComponent[] {
-        return this.#components;
     }
 }
 

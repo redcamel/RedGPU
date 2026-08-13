@@ -35,12 +35,12 @@ RedGPU.init(
         directionalLight.intensity = 1.5;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 4. 신규 Landscape 인스턴스 생성 (디버그 모드 기본 활성화: wireframe true, lodColoration true)
+        // 4. 신규 Landscape 인스턴스 생성 (UE5 공식 프로퍼티 명칭 사용, 디버그 모드 기본 활성화)
         const landscape = new RedGPU.Display.Landscape(redGPUContext, {
             worldSize: [8000, 8000],
-            tileCount: [8, 8],
-            gridSize: 63,
-            lodCount: 4,
+            componentCount: [8, 8],
+            componentSizeQuads: 63,
+            maxLODLevel: 4,
             wireframe: true,
             lodColoration: true
         });
@@ -63,7 +63,7 @@ RedGPU.init(
             fontSize: '12px',
             lineHeight: '1.7',
             zIndex: '99999',
-            minWidth: '420px'
+            minWidth: '440px'
         });
 
         const lodColors = [
@@ -73,10 +73,10 @@ RedGPU.init(
         const updateHUD = () => {
             if (!landscape) return;
             const [wsX, wsZ] = landscape.worldSize;
-            const [tcX, tcZ] = landscape.tileCount;
+            const [tcX, tcZ] = landscape.componentCount;
             const [tsX, tsZ] = landscape.tileSize;
-            const gs = landscape.gridSize;
-            const lodCount = landscape.lodCount;
+            const gs = landscape.componentSizeQuads;
+            const lodCount = landscape.maxLODLevel;
             const instanceBuffer = landscape.instanceBuffer;
 
             let lodListHTML = '';
@@ -102,7 +102,7 @@ RedGPU.init(
                 lodListHTML += `
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
                         <span><span style="display:inline-block; width:10px; height:10px; background:${color}; margin-right:6px; border-radius:2px;"></span><b>LOD ${i}</b> (${segs}x${segs} quads):</span>
-                        <span style="color:#38bdf8;"><b>${tileCountForLOD} Tiles</b> (${lodVerts.toLocaleString()} v / ${lodTris.toLocaleString()} t)</span>
+                        <span style="color:#38bdf8;"><b>${tileCountForLOD} Components</b> (${lodVerts.toLocaleString()} v / ${lodTris.toLocaleString()} t)</span>
                     </div>
                 `;
             }
@@ -110,12 +110,12 @@ RedGPU.init(
             const sysDrawCalls = view?.renderViewStateData?.renderResults?.numDrawCalls ?? activeDrawCalls;
 
             hud.innerHTML = `
-                <div style="font-weight:bold; font-size:14px; margin-bottom:8px; color:#38bdf8; border-bottom:1px solid rgba(56, 189, 248, 0.3); padding-bottom:4px; display:flex; justify-space-between; align-items:center;">
+                <div style="font-weight:bold; font-size:14px; margin-bottom:8px; color:#38bdf8; border-bottom:1px solid rgba(56, 189, 248, 0.3); padding-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
                     <span>⛰️ Landscape Real-time Engine Monitor</span>
                     <span style="font-size:11px; background:#0284c7; color:#fff; padding:2px 6px; border-radius:4px;">UE5 Spec</span>
                 </div>
-                <div>worldSize: <b style="color:#f1f5f9;">[${wsX}, ${wsZ}]m</b> | tileCount: <b style="color:#f1f5f9;">[${tcX}, ${tcZ}] (${tcX * tcZ} Tiles)</b></div>
-                <div>tileSize: <b style="color:#f1f5f9;">[${Math.round(tsX)}, ${Math.round(tsZ)}]m</b> | gridSize: <b style="color:#f1f5f9;">${gs} Quads</b></div>
+                <div>worldSize: <b style="color:#f1f5f9;">[${wsX}, ${wsZ}]m</b> | componentCount: <b style="color:#f1f5f9;">[${tcX}, ${tcZ}] (${tcX * tcZ} Components)</b></div>
+                <div>tileSize: <b style="color:#f1f5f9;">[${Math.round(tsX)}, ${Math.round(tsZ)}]m</b> | componentSizeQuads: <b style="color:#f1f5f9;">${gs} Quads</b></div>
                 
                 <div style="margin-top:8px; font-weight:bold; color:#cbd5e1; border-bottom:1px dashed rgba(255,255,255,0.15); padding-bottom:3px;">
                     📊 Active LOD Instances & Geometry (Real-time):
@@ -160,26 +160,26 @@ RedGPU.init(
 );
 
 /**
- * [KO] Landscape 모든 get/set 속성 전면 제어 테스트 패널(GUI)을 렌더링합니다.
- * [EN] Renders a test panel (GUI) for full control of all get/set properties of Landscape.
+ * [KO] Landscape 모든 UE5 get/set 속성 전면 제어 테스트 패널(GUI)을 렌더링합니다.
+ * [EN] Renders a test panel (GUI) for full control of all UE5 get/set properties of Landscape.
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.Landscape} landscape
  * @param {RedGPU.Camera.FreeController} controller
  */
 const renderTestPane = (redGPUContext, landscape, controller) => {
     const [wsX, wsZ] = landscape ? landscape.worldSize : [8000, 8000];
-    const [tcX, tcZ] = landscape ? landscape.tileCount : [8, 8];
+    const [tcX, tcZ] = landscape ? landscape.componentCount : [8, 8];
     const [tsX, tsZ] = landscape ? landscape.tileSize : [1000, 1000];
 
     const config = {
         worldSizeX: wsX,
         worldSizeZ: wsZ,
-        tileCountX: tcX,
-        tileCountZ: tcZ,
-        totalTiles: tcX * tcZ,
+        componentCountX: tcX,
+        componentCountZ: tcZ,
+        totalComponents: tcX * tcZ,
         tileSizeStr: `[${Math.round(tsX)}, ${Math.round(tsZ)}]m`,
-        gridSize: RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_63,
-        lodCount: 4,
+        componentSizeQuads: RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_63,
+        maxLODLevel: 4,
         wireframe: landscape ? landscape.wireframe : true,
         lodColoration: landscape ? landscape.lodColoration : true,
         moveSpeed: controller ? controller.moveSpeed : 3000
@@ -190,13 +190,13 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
     const updateConfigValues = () => {
         if (landscape) {
             const [wX, wZ] = landscape.worldSize;
-            const [tX, tZ] = landscape.tileCount;
+            const [tX, tZ] = landscape.componentCount;
             const [sX, sZ] = landscape.tileSize;
             config.worldSizeX = wX;
             config.worldSizeZ = wZ;
-            config.tileCountX = tX;
-            config.tileCountZ = tZ;
-            config.totalTiles = tX * tZ;
+            config.componentCountX = tX;
+            config.componentCountZ = tZ;
+            config.totalComponents = tX * tZ;
             config.tileSizeStr = `[${Math.round(sX)}, ${Math.round(sZ)}]m`;
             if (activePane) activePane.refresh();
         }
@@ -206,8 +206,8 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
         gui: (pane) => {
             activePane = pane;
 
-            // Folder 1: Terrain Dimensions (worldSize, tileCount, tileSize)
-            const folderDimensions = pane.addFolder({title: '📐 Terrain Dimensions (get / set)', expanded: true});
+            // Folder 1: Terrain Dimensions (worldSize, componentCount, tileSize)
+            const folderDimensions = pane.addFolder({title: '📐 Terrain Dimensions (UE5 Specs)', expanded: true});
 
             folderDimensions.addBinding(config, 'worldSizeX', {
                 min: 1000,
@@ -233,37 +233,37 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
                 }
             });
 
-            folderDimensions.addBinding(config, 'tileCountX', {
+            folderDimensions.addBinding(config, 'componentCountX', {
                 min: 1,
                 max: 32,
                 step: 1
             }).on('change', (ev) => {
-                config.tileCountX = ev.value;
+                config.componentCountX = ev.value;
                 if (landscape) {
-                    landscape.tileCount = [config.tileCountX, config.tileCountZ];
+                    landscape.componentCount = [config.componentCountX, config.componentCountZ];
                     updateConfigValues();
                 }
             });
 
-            folderDimensions.addBinding(config, 'tileCountZ', {
+            folderDimensions.addBinding(config, 'componentCountZ', {
                 min: 1,
                 max: 32,
                 step: 1
             }).on('change', (ev) => {
-                config.tileCountZ = ev.value;
+                config.componentCountZ = ev.value;
                 if (landscape) {
-                    landscape.tileCount = [config.tileCountX, config.tileCountZ];
+                    landscape.componentCount = [config.componentCountX, config.componentCountZ];
                     updateConfigValues();
                 }
             });
 
             folderDimensions.addBinding(config, 'tileSizeStr', {readonly: true});
-            folderDimensions.addBinding(config, 'totalTiles', {readonly: true});
+            folderDimensions.addBinding(config, 'totalComponents', {readonly: true});
 
-            // Folder 2: Mesh & LOD Specs (gridSize, lodCount)
-            const folderSpecs = pane.addFolder({title: '🧩 Mesh & LOD Specs (get / set)', expanded: true});
+            // Folder 2: Mesh & LOD Specs (componentSizeQuads, maxLODLevel)
+            const folderSpecs = pane.addFolder({title: '🧩 Component & LOD Specs (UE5)', expanded: true});
 
-            folderSpecs.addBinding(config, 'gridSize', {
+            folderSpecs.addBinding(config, 'componentSizeQuads', {
                 options: {
                     '15 × 15 Quads (256 Vertices)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_15,
                     '31 × 31 Quads (1,024 Vertices)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_31,
@@ -273,22 +273,22 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
                 }
             }).on('change', (ev) => {
                 if (landscape) {
-                    landscape.gridSize = ev.value;
+                    landscape.componentSizeQuads = ev.value;
                 }
             });
 
-            folderSpecs.addBinding(config, 'lodCount', {
+            folderSpecs.addBinding(config, 'maxLODLevel', {
                 min: 1,
                 max: 6,
                 step: 1
             }).on('change', (ev) => {
                 if (landscape) {
-                    landscape.lodCount = ev.value;
+                    landscape.maxLODLevel = ev.value;
                 }
             });
 
             // Folder 3: Render Options (wireframe, lodColoration)
-            const folderDisplay = pane.addFolder({title: '🎨 Render Options (get / set)', expanded: true});
+            const folderDisplay = pane.addFolder({title: '🎨 Render Options', expanded: true});
 
             folderDisplay.addBinding(config, 'wireframe').on('change', (ev) => {
                 if (landscape) landscape.wireframe = ev.value;
@@ -312,3 +312,5 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
         }
     });
 };
+
+

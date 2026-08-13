@@ -1,6 +1,3 @@
-import RedGPUContext from "../../context/RedGPUContext";
-import LandscapeSharedGeometry from "./LandscapeSharedGeometry";
-
 /**
  * [KO] SpatialGrid의 단일 공간 셀(타일) 단위를 관리하는 경량 공간 데이터 클래스입니다.
  * [EN] Lightweight spatial data class managing a single spatial cell (tile) unit of SpatialGrid.
@@ -19,12 +16,8 @@ export class LandscapeComponent {
      * [EN] Creates an instance of LandscapeComponent.
      */
     constructor(
-        redGPUContext: RedGPUContext,
-        sharedGeometry: LandscapeSharedGeometry,
-        worldX: number,
-        worldZ: number,
-        material: any,
-        wireframe: boolean = false,
+        worldX: number = 0,
+        worldZ: number = 0,
         componentX: number = 0,
         componentZ: number = 0
     ) {
@@ -76,10 +69,6 @@ export class LandscapeComponent {
 
     set componentZ(val: number) {
         this.#componentZ = val;
-    }
-
-    updateSharedGeometry(sharedGeometry: LandscapeSharedGeometry): void {
-        // Shared geometry update notification if needed
     }
 
     /**

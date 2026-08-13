@@ -6,14 +6,12 @@ import RedGPUContext from "../../context/RedGPUContext";
  */
 export class LandscapeInstanceBuffer {
     #redGPUContext: RedGPUContext;
-    #maxTileCount: number;
-    #lodCount: number;
+    #maxComponentCount: number;
+    #maxLODLevel: number;
 
     #instanceStorageBuffer: GPUBuffer | null = null;
     #instanceStorageBindGroup: GPUBindGroup | null = null;
     #instanceStorageBindGroupLayout: GPUBindGroupLayout | null = null;
-
-    #indirectCommandBuffer: GPUBuffer | null = null;
 
     // 컴포넌트 타일당 48 bytes (worldX, worldZ, prevWorldX, prevWorldZ, lodLevel, pad0, pad1, pad2, color r,g,b,a)
     #instanceFloatData: Float32Array;
@@ -24,18 +22,18 @@ export class LandscapeInstanceBuffer {
     #lodInstanceCountList: Int32Array;
     #lodCursorList: Int32Array;
 
-    constructor(redGPUContext: RedGPUContext, maxTileCount: number, lodCount: number) {
+    constructor(redGPUContext: RedGPUContext, maxComponentCount: number, maxLODLevel: number) {
         this.#redGPUContext = redGPUContext;
-        this.#maxTileCount = maxTileCount;
-        this.#lodCount = lodCount;
+        this.#maxComponentCount = maxComponentCount;
+        this.#maxLODLevel = maxLODLevel;
 
-        const tileFloatSize = maxTileCount * 12; // 12 floats per tile (48 bytes)
+        const tileFloatSize = maxComponentCount * 12; // 12 floats per tile (48 bytes)
         this.#instanceFloatData = new Float32Array(tileFloatSize);
         this.#instanceUintData = new Uint32Array(this.#instanceFloatData.buffer);
 
-        this.#lodFirstInstanceList = new Int32Array(lodCount);
-        this.#lodInstanceCountList = new Int32Array(lodCount);
-        this.#lodCursorList = new Int32Array(lodCount);
+        this.#lodFirstInstanceList = new Int32Array(maxLODLevel);
+        this.#lodInstanceCountList = new Int32Array(maxLODLevel);
+        this.#lodCursorList = new Int32Array(maxLODLevel);
 
         this.#createGPUResources();
     }
@@ -52,12 +50,12 @@ export class LandscapeInstanceBuffer {
         return this.#instanceStorageBindGroupLayout;
     }
 
-    get maxTileCount(): number {
-        return this.#maxTileCount;
+    get maxComponentCount(): number {
+        return this.#maxComponentCount;
     }
 
-    get lodCount(): number {
-        return this.#lodCount;
+    get maxLODLevel(): number {
+        return this.#maxLODLevel;
     }
 
     /**
@@ -65,7 +63,7 @@ export class LandscapeInstanceBuffer {
      */
     prepareLODAllocation(lodCounts: Int32Array): void {
         let cursor = 0;
-        for (let lod = 0; lod < this.#lodCount; lod++) {
+        for (let lod = 0; lod < this.#maxLODLevel; lod++) {
             const count = lodCounts[lod] ?? 0;
             this.#lodFirstInstanceList[lod] = cursor;
             this.#lodInstanceCountList[lod] = count;
@@ -127,7 +125,7 @@ export class LandscapeInstanceBuffer {
             0,
             this.#instanceFloatData.buffer,
             0,
-            this.#maxTileCount * 48
+            this.#maxComponentCount * 48
         );
     }
 
@@ -135,10 +133,6 @@ export class LandscapeInstanceBuffer {
         if (this.#instanceStorageBuffer) {
             this.#instanceStorageBuffer.destroy();
             this.#instanceStorageBuffer = null;
-        }
-        if (this.#indirectCommandBuffer) {
-            this.#indirectCommandBuffer.destroy();
-            this.#indirectCommandBuffer = null;
         }
     }
 
@@ -163,7 +157,7 @@ export class LandscapeInstanceBuffer {
         // 2. GPUBuffer 생성 (48 bytes per tile)
         this.#instanceStorageBuffer = gpuDevice.createBuffer({
             label: 'LandscapeInstanceStorageBuffer',
-            size: Math.max(128, this.#maxTileCount * 48),
+            size: Math.max(128, this.#maxComponentCount * 48),
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
 

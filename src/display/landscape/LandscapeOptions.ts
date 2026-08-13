@@ -1,8 +1,8 @@
 import LandscapeMaterial from "./LandscapeMaterial";
 
 /**
- * [KO] Landscape 지형 생성 옵션 인터페이스입니다.
- * [EN] Landscape terrain creation options interface.
+ * [KO] Landscape 지형 생성 옵션 인터페이스입니다 (UE5 공식 프로퍼티 표준 단일 적용).
+ * [EN] Landscape terrain creation options interface (Strict UE5 official property standard).
  */
 export interface LandscapeOptions {
     /**
@@ -12,28 +12,28 @@ export interface LandscapeOptions {
     worldSize?: number | [number, number];
 
     /**
-     * [KO] 타일 개수 (기본값: 8x8). 단일 수치 또는 [tileCountX, tileCountZ] 배열 형태 (최소 1, 최대 32 타일)
-     * [EN] Tile count (default: 8x8). Single number or [tileCountX, tileCountZ] array (min 1, max 32 tiles)
+     * [KO] UE5 공식 컴포넌트 개수 (기본값: 8x8). 단일 수치 또는 [countX, countZ] 배열 형태 (최소 1, 최대 32 컴포넌트)
+     * [EN] UE5 official component count (default: 8x8). Single number or [countX, countZ] array (min 1, max 32 components)
      */
-    tileCount?: number | [number, number];
+    componentCount?: number | [number, number];
 
     /**
-     * [KO] 단일 타일 XZ 크기. 지정 시 worldSize 자동 계산
-     * [EN] Single tile XZ size. If specified, worldSize is calculated automatically
+     * [KO] 단일 컴포넌트 XZ 크기. 지정 시 worldSize 자동 계산
+     * [EN] Single component XZ size. If specified, worldSize is calculated automatically
      */
     tileSize?: number | [number, number];
 
     /**
-     * [KO] 타일 당 최고 해상도 Quad Grid 크기 (기본값: LANDSCAPE_BASE_GRID_SIZE.QUAD_63)
-     * [EN] Base Quad Grid size per tile for LOD 0 (default: LANDSCAPE_BASE_GRID_SIZE.QUAD_63)
+     * [KO] UE5 공식 컴포넌트 쿼드 그리드 해상도 (기본값: LANDSCAPE_BASE_GRID_SIZE.QUAD_63)
+     * [EN] UE5 official component quad grid size (default: LANDSCAPE_BASE_GRID_SIZE.QUAD_63)
      */
-    gridSize?: number;
+    componentSizeQuads?: number;
 
     /**
-     * [KO] LOD 레벨 단계 수 (기본값: 4, 최소 1 ~ 최대 8)
-     * [EN] Number of LOD levels (default: 4, min 1 to max 8)
+     * [KO] UE5 공식 최대 LOD 레벨 단계 수 (기본값: 4, 최소 1 ~ 최대 8)
+     * [EN] UE5 official max LOD level count (default: 4, min 1 to max 8)
      */
-    lodCount?: number;
+    maxLODLevel?: number;
 
     /**
      * [KO] LOD 디버그 표시용 HEX 색상 코드 팔레트 배열
@@ -54,20 +54,20 @@ export interface LandscapeOptions {
     lodDistances?: number[];
 
     /**
-     * [KO] 지형 전용 머티리얼 (기본값: 기본 녹색 LandscapeMaterial)
-     * [EN] Terrain material (default: default green LandscapeMaterial)
+     * [KO] UE5 공식 지형 머티리얼 (기본값: 기본 녹색 LandscapeMaterial)
+     * [EN] UE5 official landscape material (default: default green LandscapeMaterial)
      */
-    material?: LandscapeMaterial;
+    landscapeMaterial?: LandscapeMaterial;
 
     /**
      * [KO] 와이어프레임 표시 여부 (기본값: false)
-     * [EN] Whether to display wireframe (default: false)
+     * [EN] Wireframe display flag (default: false)
      */
     wireframe?: boolean;
 
     /**
-     * [KO] UE5 표준 LOD 색상 디버그 모드 활성화 여부 (기본값: false)
-     * [EN] Whether to enable UE5 standard LOD Coloration mode (default: false)
+     * [KO] LOD 색상 디버그 모드 활성화 여부 (기본값: false)
+     * [EN] LOD Coloration mode flag (default: false)
      */
     lodColoration?: boolean;
 }

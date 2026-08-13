@@ -19,8 +19,8 @@ export class LandscapeSharedGeometry {
     #redGPUContext: RedGPUContext;
     #tileSizeX: number;
     #tileSizeZ: number;
-    #gridSize: number;
-    #lodCount: number;
+    #componentSizeQuads: number;
+    #maxLODLevel: number;
 
     #combinedVertexBuffer: VertexBuffer | null = null;
     #combinedIndexBuffer: IndexBuffer | null = null;
@@ -30,12 +30,12 @@ export class LandscapeSharedGeometry {
      * [KO] LandscapeSharedGeometry 인스턴스를 생성합니다.
      * [EN] Creates an instance of LandscapeSharedGeometry.
      */
-    constructor(redGPUContext: RedGPUContext, tileSizeX: number, tileSizeZ: number, gridSize: number, lodCount: number) {
+    constructor(redGPUContext: RedGPUContext, tileSizeX: number, tileSizeZ: number, componentSizeQuads: number, maxLODLevel: number) {
         this.#redGPUContext = redGPUContext;
         this.#tileSizeX = tileSizeX;
         this.#tileSizeZ = tileSizeZ;
-        this.#gridSize = gridSize;
-        this.#lodCount = lodCount;
+        this.#componentSizeQuads = componentSizeQuads;
+        this.#maxLODLevel = maxLODLevel;
 
         this.#buildCombinedGeometry();
     }
@@ -54,8 +54,12 @@ export class LandscapeSharedGeometry {
         return this.#lodRanges;
     }
 
-    get lodCount(): number {
-        return this.#lodCount;
+    get maxLODLevel(): number {
+        return this.#maxLODLevel;
+    }
+
+    get componentSizeQuads(): number {
+        return this.#componentSizeQuads;
     }
 
     updateTileSize(tileSizeX: number, tileSizeZ: number): void {
@@ -76,8 +80,8 @@ export class LandscapeSharedGeometry {
      * [KO] 전체 LOD 단계 지오메트리를 단 하나의 거대 GPU 버퍼로 결합 생성합니다.
      */
     #buildCombinedGeometry(): void {
-        const lodCount = this.#lodCount;
-        const baseGridSize = this.#gridSize;
+        const maxLODLevel = this.#maxLODLevel;
+        const baseComponentSizeQuads = this.#componentSizeQuads;
         const halfSizeX = this.#tileSizeX / 2;
         const halfSizeZ = this.#tileSizeZ / 2;
 
@@ -88,10 +92,10 @@ export class LandscapeSharedGeometry {
         let totalVertexOffset = 0;
         let totalIndexOffset = 0;
 
-        for (let lod = 0; lod < lodCount; lod++) {
+        for (let lod = 0; lod < maxLODLevel; lod++) {
             const step = Math.pow(2, lod);
-            const segmentsX = Math.max(1, Math.floor(baseGridSize / step));
-            const segmentsZ = Math.max(1, Math.floor(baseGridSize / step));
+            const segmentsX = Math.max(1, Math.floor(baseComponentSizeQuads / step));
+            const segmentsZ = Math.max(1, Math.floor(baseComponentSizeQuads / step));
 
             const vertexCount = (segmentsX + 1) * (segmentsZ + 1);
             const indexCount = segmentsX * segmentsZ * 6;
