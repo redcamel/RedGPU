@@ -23,7 +23,7 @@ export class Landscape {
     #baseMaterial: LandscapeMaterial;
 
     #wireframe: boolean = false;
-    #debugLODColorMode: boolean = false;
+    #lodColoration: boolean = false;
 
     #worldSizeX: number;
     #worldSizeZ: number;
@@ -89,7 +89,7 @@ export class Landscape {
         this.#gridSize = gridSize;
         this.#lodCount = lodCount;
         this.#wireframe = options.wireframe ?? false;
-        this.#debugLODColorMode = options.debugLODColorMode ?? false;
+        this.#lodColoration = options.lodColoration ?? false;
 
         this.#lodCountsBuffer = new Int32Array(lodCount);
 
@@ -105,52 +105,50 @@ export class Landscape {
         return this.#redGPUContext;
     }
 
-    public set gridSize(value: number) {
-        if (value > 0 && this.#gridSize !== value) {
-            this.#gridSize = value;
-            this.#sharedGeometry = new LandscapeSharedGeometry(
-                this.#redGPUContext,
-                this.#tileSizeX,
-                this.#tileSizeZ,
-                value,
-                this.#lodCount
-            );
-            this.#rebuildTiles();
+    /**
+     * [KO] LOD 팔레트 및 거리 임계 배열 재구축 헬퍼
+     */
+    #rebuildLODStructures(userColors?: string[], userMultipliers?: number[], userDistances?: number[]): void {
+        this.#lodColorsRGBA.length = 0;
+        this.#lodMultipliers.length = 0;
+
+        const defaultColors: [number, number, number, number][] = [
+            [0.18, 0.8, 0.44, 1.0],  // LOD 0: Green
+            [0.95, 0.77, 0.06, 1.0], // LOD 1: Yellow
+            [0.9, 0.49, 0.13, 1.0],  // LOD 2: Orange
+            [0.91, 0.3, 0.24, 1.0],  // LOD 3: Red
+            [0.61, 0.35, 0.71, 1.0], // LOD 4: Purple
+            [0.1, 0.74, 0.61, 1.0],  // LOD 5: Cyan
+            [0.2, 0.6, 0.86, 1.0],   // LOD 6: Blue
+            [0.93, 0.94, 0.95, 1.0]  // LOD 7: White
+        ];
+
+        for (let i = 0; i < this.#lodCount; i++) {
+            this.#lodColorsRGBA.push(defaultColors[i % defaultColors.length]);
+        }
+
+        const defaultMultipliers = [1.25, 2.5, 4.25, 7.0, 11.0, 16.0, 24.0];
+        const multipliers = userMultipliers ?? defaultMultipliers;
+
+        for (let i = 0; i < this.#lodCount - 1; i++) {
+            this.#lodMultipliers.push(multipliers[i] ?? (1.25 * Math.pow(1.8, i)));
+        }
+
+        if (userDistances && userDistances.length > 0) {
+            this.#lodDistancesSq = userDistances.map(d => d * d);
+        } else {
+            this.#updateLODDistances();
         }
     }
 
-    public set lodCount(value: number) {
-        const count = Math.min(8, Math.max(1, Math.round(value)));
-        if (this.#lodCount !== count) {
-            this.#lodCount = count;
-            this.#lodCountsBuffer = new Int32Array(count);
-            this.#sharedGeometry = new LandscapeSharedGeometry(
-                this.#redGPUContext,
-                this.#tileSizeX,
-                this.#tileSizeZ,
-                this.#gridSize,
-                count
-            );
-            this.#rebuildLODStructures();
-            this.#rebuildTiles();
-        }
-    }
+    #updateLODDistances(): void {
+        this.#lodDistancesSq.length = 0;
+        const tileSizeMax = Math.max(this.#tileSizeX, this.#tileSizeZ);
+        const count = this.#lodMultipliers.length;
 
-    public set debugLODColorMode(value: boolean) {
-        if (this.#debugLODColorMode !== value) {
-            this.#debugLODColorMode = value;
-        }
-    }
-
-    public get material(): LandscapeMaterial {
-        return this.#baseMaterial;
-    }
-
-    public set material(val: LandscapeMaterial) {
-        this.#baseMaterial = val;
-        const count = this.#components.length;
         for (let i = 0; i < count; i++) {
-            this.#components[i].material = val;
+            const dist = tileSizeMax * this.#lodMultipliers[i];
+            this.#lodDistancesSq.push(dist * dist);
         }
     }
 
@@ -207,17 +205,39 @@ export class Landscape {
         return this.#gridSize;
     }
 
-    /** [KO] GPU Indirect Buffer 객체를 반환합니다. */
-    public get instanceBuffer(): LandscapeInstanceBuffer {
-        return this.#instanceBuffer;
+    public set gridSize(value: number) {
+        if (value > 0 && this.#gridSize !== value) {
+            this.#gridSize = value;
+            this.#sharedGeometry = new LandscapeSharedGeometry(
+                this.#redGPUContext,
+                this.#tileSizeX,
+                this.#tileSizeZ,
+                value,
+                this.#lodCount
+            );
+            this.#rebuildTiles();
+        }
     }
 
     public get lodCount(): number {
         return this.#lodCount;
     }
 
-    public get sharedGeometry(): LandscapeSharedGeometry {
-        return this.#sharedGeometry;
+    public set lodCount(value: number) {
+        const count = Math.min(8, Math.max(1, Math.round(value)));
+        if (this.#lodCount !== count) {
+            this.#lodCount = count;
+            this.#lodCountsBuffer = new Int32Array(count);
+            this.#sharedGeometry = new LandscapeSharedGeometry(
+                this.#redGPUContext,
+                this.#tileSizeX,
+                this.#tileSizeZ,
+                this.#gridSize,
+                count
+            );
+            this.#rebuildLODStructures();
+            this.#rebuildTiles();
+        }
     }
 
     public get tileSize(): [number, number] {
@@ -238,8 +258,39 @@ export class Landscape {
         }
     }
 
-    public get debugLODColorMode(): boolean {
-        return this.#debugLODColorMode;
+    /**
+     * [KO] 언리얼 엔진 5 표준 Landscape LOD Coloration 디버그 뷰 모드 활성화 여부
+     * [EN] UE5 standard Landscape LOD Coloration debug view mode enabled state
+     */
+    public get lodColoration(): boolean {
+        return this.#lodColoration;
+    }
+
+    public set lodColoration(value: boolean) {
+        if (this.#lodColoration !== value) {
+            this.#lodColoration = value;
+        }
+    }
+
+    public get material(): LandscapeMaterial {
+        return this.#baseMaterial;
+    }
+
+    public set material(val: LandscapeMaterial) {
+        this.#baseMaterial = val;
+        const count = this.#components.length;
+        for (let i = 0; i < count; i++) {
+            this.#components[i].material = val;
+        }
+    }
+
+    /** [KO] GPU Indirect Buffer 객체를 반환합니다. */
+    public get instanceBuffer(): LandscapeInstanceBuffer {
+        return this.#instanceBuffer;
+    }
+
+    public get sharedGeometry(): LandscapeSharedGeometry {
+        return this.#sharedGeometry;
     }
 
     /**
@@ -301,8 +352,8 @@ export class Landscape {
             const comp = components[i];
             const activeLOD = comp.lodLevel;
 
-            // 디버그 색상 결정
-            const colorRGBA = this.#debugLODColorMode
+            // UE5 표준 lodColoration 디버그 색상 결정
+            const colorRGBA = this.#lodColoration
                 ? this.#lodColorsRGBA[activeLOD]
                 : [0.22, 0.49, 0.26, 1.0];
 
@@ -319,53 +370,6 @@ export class Landscape {
 
         // 4. GPU 버퍼 동기화 제출
         instanceBuf.flushToGPU();
-    }
-
-    /**
-     * [KO] LOD 팔레트 및 거리 임계 배열 재구축 헬퍼
-     */
-    #rebuildLODStructures(userColors?: string[], userMultipliers?: number[], userDistances?: number[]): void {
-        this.#lodColorsRGBA.length = 0;
-        this.#lodMultipliers.length = 0;
-
-        const defaultColors: [number, number, number, number][] = [
-            [0.18, 0.8, 0.44, 1.0],  // LOD 0: Green
-            [0.95, 0.77, 0.06, 1.0], // LOD 1: Yellow
-            [0.9, 0.49, 0.13, 1.0],  // LOD 2: Orange
-            [0.91, 0.3, 0.24, 1.0],  // LOD 3: Red
-            [0.61, 0.35, 0.71, 1.0], // LOD 4: Purple
-            [0.1, 0.74, 0.61, 1.0],  // LOD 5: Cyan
-            [0.2, 0.6, 0.86, 1.0],   // LOD 6: Blue
-            [0.93, 0.94, 0.95, 1.0]  // LOD 7: White
-        ];
-
-        for (let i = 0; i < this.#lodCount; i++) {
-            this.#lodColorsRGBA.push(defaultColors[i % defaultColors.length]);
-        }
-
-        const defaultMultipliers = [1.25, 2.5, 4.25, 7.0, 11.0, 16.0, 24.0];
-        const multipliers = userMultipliers ?? defaultMultipliers;
-
-        for (let i = 0; i < this.#lodCount - 1; i++) {
-            this.#lodMultipliers.push(multipliers[i] ?? (1.25 * Math.pow(1.8, i)));
-        }
-
-        if (userDistances && userDistances.length > 0) {
-            this.#lodDistancesSq = userDistances.map(d => d * d);
-        } else {
-            this.#updateLODDistances();
-        }
-    }
-
-    #updateLODDistances(): void {
-        this.#lodDistancesSq.length = 0;
-        const tileSizeMax = Math.max(this.#tileSizeX, this.#tileSizeZ);
-        const count = this.#lodMultipliers.length;
-
-        for (let i = 0; i < count; i++) {
-            const dist = tileSizeMax * this.#lodMultipliers[i];
-            this.#lodDistancesSq.push(dist * dist);
-        }
     }
 
     #rebuildTiles(): void {

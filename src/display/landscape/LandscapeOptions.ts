@@ -66,10 +66,10 @@ export interface LandscapeOptions {
     wireframe?: boolean;
 
     /**
-     * [KO] LOD 디버그 색상 모드 활성화 여부 (기본값: false)
-     * [EN] Whether to enable LOD debug color mode (default: false)
+     * [KO] UE5 표준 LOD 색상 디버그 모드 활성화 여부 (기본값: false)
+     * [EN] Whether to enable UE5 standard LOD Coloration mode (default: false)
      */
-    debugLODColorMode?: boolean;
+    lodColoration?: boolean;
 }
 
 export default LandscapeOptions;
