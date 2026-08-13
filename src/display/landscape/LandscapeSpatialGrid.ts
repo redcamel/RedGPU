@@ -12,7 +12,6 @@ export class LandscapeSpatialGrid {
     #halfWorldSizeX: number;
     #halfWorldSizeZ: number;
 
-    #cells: LandscapeComponent[][];
     #flatCells: LandscapeComponent[] = [];
 
     /**
@@ -26,8 +25,6 @@ export class LandscapeSpatialGrid {
         this.#tileSizeZ = tileSizeZ;
         this.#halfWorldSizeX = (tileCountX * tileSizeX) / 2;
         this.#halfWorldSizeZ = (tileCountZ * tileSizeZ) / 2;
-
-        this.#cells = Array.from({length: tileCountZ}, () => []);
     }
 
     /** [KO] 2D 평탄화된 타일 컴포넌트 리스트를 반환합니다. */
@@ -56,7 +53,6 @@ export class LandscapeSpatialGrid {
      */
     registerTile(row: number, col: number, component: LandscapeComponent): void {
         if (row >= 0 && row < this.#tileCountZ && col >= 0 && col < this.#tileCountX) {
-            this.#cells[row][col] = component;
             this.#flatCells.push(component);
         }
     }
