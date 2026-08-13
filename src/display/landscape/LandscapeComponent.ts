@@ -22,11 +22,6 @@ export class LandscapeComponent {
     #renderPipelineCache: Map<string, GPURenderPipeline> = new Map();
     #vertexShaderModule: GPUShaderModule;
 
-    // 타일 위치 오프셋 전달용 GPU UniformBuffer & BindGroup (Zero-GC)
-    #tileUniformBuffer: GPUBuffer | null = null;
-    #tileBindGroup: GPUBindGroup | null = null;
-    #tileUniformData: Float32Array = new Float32Array(2);
-
     /**
      * [KO] LandscapeComponent 인스턴스를 생성합니다.
      * [EN] Creates an instance of LandscapeComponent.
@@ -46,18 +41,6 @@ export class LandscapeComponent {
         this.#material = material;
         this.wireframe = wireframe;
 
-        const gpuDevice = redGPUContext.gpuDevice;
-
-        // 타일 유니폼 버퍼 생성 (tileX, tileZ)
-        if (gpuDevice) {
-            this.#tileUniformBuffer = gpuDevice.createBuffer({
-                size: 16,
-                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-                label: `LandscapeTileUniformBuffer_${tileX}_${tileZ}`
-            });
-            this.#updateTileUniform();
-        }
-
         // WGSL 버텍스 셰이더 모듈 취득
         const resourceManager = redGPUContext.resourceManager;
         let vModule = resourceManager.getGPUShaderModule('LandscapeFullCompatibleFlatVertexShaderModule');
@@ -69,14 +52,8 @@ export class LandscapeComponent {
         this.#vertexShaderModule = vModule;
     }
 
-    #updateTileUniform(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (!gpuDevice || !this.#tileUniformBuffer) return;
-
-        this.#tileUniformData[0] = this.#tileX;
-        this.#tileUniformData[1] = this.#tileZ;
-
-        gpuDevice.queue.writeBuffer(this.#tileUniformBuffer, 0, this.#tileUniformData.buffer as ArrayBuffer, 0, 8);
+    public updateSharedGeometry(sharedGeometry: LandscapeSharedGeometry): void {
+        this.#sharedGeometry = sharedGeometry;
     }
 
     public get x(): number {
@@ -85,7 +62,6 @@ export class LandscapeComponent {
 
     public set x(val: number) {
         this.#tileX = val;
-        this.#updateTileUniform();
     }
 
     public get y(): number {
@@ -98,7 +74,6 @@ export class LandscapeComponent {
 
     public set z(val: number) {
         this.#tileZ = val;
-        this.#updateTileUniform();
     }
 
     public get tileX(): number {
@@ -134,56 +109,85 @@ export class LandscapeComponent {
         this.#topology = val ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
     }
 
-    public updateSharedGeometry(sharedGeometry: LandscapeSharedGeometry): void {
-        this.#sharedGeometry = sharedGeometry;
-    }
-
     /**
-     * [KO] 단일 거대 통합 GPU 버퍼에서 현재 LOD 오프셋을 선택하여 Render Pass Encoder에 렌더 커맨드를 디스패치합니다.
+     * [KO] Multi-LOD Batching 인스턴싱으로 64개 전체 지형 타일을 디스패치하고 RenderViewStateData 통계를 기록합니다.
      */
-    public render(renderViewStateData: RenderViewStateData): void {
-        const passEncoder = renderViewStateData.currentRenderPassEncoder;
-        if (!passEncoder) return;
+    public render(view: any, passEncoder?: GPURenderPassEncoder): void {
+        const renderPassEncoder = passEncoder || view?.currentRenderPassEncoder || view?.renderPassEncoder;
+        const view3D = view?.view || view;
+        if (!renderPassEncoder) return;
 
-        const combinedVB = this.#sharedGeometry.combinedVertexBuffer;
-        const combinedIB = this.#sharedGeometry.combinedIndexBuffer;
-        if (!combinedVB || !combinedIB) return;
+        const scene = view3D?.rawScene || view3D?.scene;
+        const landscape = (scene as any)?.landscapeChildren?.[0];
+        if (!landscape) return;
 
-        const lodRange = this.#sharedGeometry.getLODRange(this.#lodLevel);
+        const instanceBuffer = landscape.instanceBuffer;
+        const sharedGeometry = landscape.sharedGeometry;
+        const combinedVB = sharedGeometry?.combinedVertexBuffer;
+        const combinedIB = sharedGeometry?.combinedIndexBuffer;
+
+        if (!instanceBuffer || !combinedVB || !combinedIB) return;
+
+        const storageBG = instanceBuffer.instanceStorageBindGroup;
+        const storageBGLayout = instanceBuffer.instanceStorageBindGroupLayout;
+        if (!storageBG || !storageBGLayout) return;
 
         // 1. GPURenderPipeline 취득 및 세팅
-        const pipeline = this.#getOrCreateRenderPipeline(combinedVB);
+        const pipeline = this.#getOrCreateRenderPipeline(combinedVB, storageBGLayout);
         if (!pipeline) return;
 
-        passEncoder.setPipeline(pipeline);
+        renderPassEncoder.setPipeline(pipeline);
 
         // 2. RedGPU 표준 systemUniform_Vertex_UniformBindGroup (0번) 세팅
-        const view = renderViewStateData.view as any;
-        const systemBG = view?.systemUniform_Vertex_UniformBindGroup;
+        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup;
         if (systemBG) {
-            passEncoder.setBindGroup(0, systemBG);
+            renderPassEncoder.setBindGroup(0, systemBG);
         }
 
         // 3. Material fragmentUniformBindGroup (1번) 세팅
         const matBG = this.#material?.gpuRenderInfo?.fragmentUniformBindGroup;
         if (matBG) {
-            passEncoder.setBindGroup(1, matBG);
+            renderPassEncoder.setBindGroup(1, matBG);
         }
 
-        // 4. Tile UniformBindGroup (2번) 세팅
-        if (this.#tileBindGroup) {
-            passEncoder.setBindGroup(2, this.#tileBindGroup);
+        // 4. 전체 타일 GPU StorageBuffer (2번) 세팅
+        renderPassEncoder.setBindGroup(2, storageBG);
+
+        // 5. 단일 거대 통합 Vertex & Index Buffer 바인딩 (Zero-Rebind)
+        renderPassEncoder.setVertexBuffer(0, combinedVB.gpuBuffer);
+        renderPassEncoder.setIndexBuffer(combinedIB.gpuBuffer, 'uint32');
+
+        // 6. RenderViewStateData 통계 집계 참조
+        const renderResults = (view as RenderViewStateData)?.renderResults || (view3D as any)?.renderViewStateData?.renderResults;
+
+        // 7. LOD 단계별 Multi-LOD Batching 드로우 디스패치 및 통계 집계
+        const lodCount = sharedGeometry.lodCount;
+        for (let lod = 0; lod < lodCount; lod++) {
+            const instanceCount = instanceBuffer.getLODInstanceCount(lod);
+            if (instanceCount === 0) continue;
+
+            const lodRange = sharedGeometry.getLODRange(lod);
+            const firstInstance = instanceBuffer.getLODFirstInstance(lod);
+
+            renderPassEncoder.drawIndexed(
+                lodRange.indexCount,
+                instanceCount,
+                lodRange.firstIndex,
+                0,
+                firstInstance
+            );
+
+            // RenderViewStateData 통계 집계 누적 기록
+            if (renderResults) {
+                renderResults.numDrawCalls++;
+                renderResults.numInstances += instanceCount;
+                renderResults.num3DObjects += instanceCount;
+                renderResults.numTriangles += (lodRange.indexCount / 3) * instanceCount;
+            }
         }
-
-        // 5. 단일 거대 통합 Vertex & Index Buffer 바인딩
-        passEncoder.setVertexBuffer(0, combinedVB.gpuBuffer);
-        passEncoder.setIndexBuffer(combinedIB.gpuBuffer, 'uint32');
-
-        // 6. LOD 오프셋 선택 Draw Call 발사 (firstIndex 선택)
-        passEncoder.drawIndexed(lodRange.indexCount, 1, lodRange.firstIndex, 0, 0);
     }
 
-    #getOrCreateRenderPipeline(geom: any): GPURenderPipeline | null {
+    #getOrCreateRenderPipeline(geom: any, storageBGLayout: GPUBindGroupLayout): GPURenderPipeline | null {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         const material = this.#material;
         if (!gpuDevice || !material || !material.gpuRenderInfo) return null;
@@ -198,29 +202,9 @@ export class LandscapeComponent {
             const systemBGLayout = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');
             const fragBGLayout = material.gpuRenderInfo.fragmentBindGroupLayout;
 
-            const tileBGLayout = gpuDevice.createBindGroupLayout({
-                label: `LandscapeTileBGLayout`,
-                entries: [{
-                    binding: 0,
-                    visibility: GPUShaderStage.VERTEX,
-                    buffer: {type: 'uniform'}
-                }]
-            });
-
-            if (this.#tileUniformBuffer) {
-                this.#tileBindGroup = gpuDevice.createBindGroup({
-                    label: `LandscapeTileBindGroup_${this.#tileX}_${this.#tileZ}`,
-                    layout: tileBGLayout,
-                    entries: [{
-                        binding: 0,
-                        resource: {buffer: this.#tileUniformBuffer}
-                    }]
-                });
-            }
-
             const pipelineLayout = gpuDevice.createPipelineLayout({
                 label: `LandscapePipelineLayout_${key}`,
-                bindGroupLayouts: [systemBGLayout, fragBGLayout, tileBGLayout]
+                bindGroupLayouts: [systemBGLayout, fragBGLayout, storageBGLayout]
             });
 
             const vertexBuffers: GPUVertexBufferLayout[] = [{

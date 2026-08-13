@@ -1,16 +1,19 @@
 #redgpu_include SYSTEM_UNIFORM;
 
-struct TileUniform {
+struct TileInstance {
     tileX: f32,
     tileZ: f32,
+    lodLevel: u32,
+    color: vec4<f32>,
 };
 
-@group(2) @binding(0) var<uniform> tileUniform: TileUniform;
+@group(2) @binding(0) var<storage, read> tileInstances: array<TileInstance>;
 
 struct InputData {
     @location(0) position: vec3<f32>,
     @location(1) normal: vec3<f32>,
     @location(2) uv: vec2<f32>,
+    @builtin(instance_index) instanceIdx: u32,
 };
 
 struct OutputData {
@@ -24,24 +27,27 @@ struct OutputData {
     @location(6) vertexHeight: f32,
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
+    @location(9) instanceColor: vec4<f32>,
 };
 
 @vertex
 fn main(input: InputData) -> OutputData {
     var output: OutputData;
     
-    // XY 세워진 평면을 XZ 바닥 대지로 눕히고 타일 오프셋 반영
+    // 단 1개의 거대 StorageBuffer에서 현재 인스턴스의 타일 데이터 읽기 (Zero-CPU Overhead)
+    let instanceData = tileInstances[input.instanceIdx];
+
     let worldPos = vec3<f32>(
-        input.position.x + tileUniform.tileX,
+        input.position.x + instanceData.tileX,
         input.position.z,
-        input.position.y + tileUniform.tileZ
+        input.position.y + instanceData.tileZ
     );
 
     let clipPos = systemUniforms.projection.projectionViewMatrix * vec4<f32>(worldPos, 1.0);
 
     output.position = clipPos;
     output.vertexPosition = worldPos;
-    output.vertexNormal = vec3<f32>(0.0, 1.0, 0.0); // 바닥 윗방향 수직 법선
+    output.vertexNormal = vec3<f32>(0.0, 1.0, 0.0);
     output.uv = input.uv;
     output.uv1 = input.uv;
     output.vertexColor_0 = vec4<f32>(1.0, 1.0, 1.0, 1.0);
@@ -49,6 +55,7 @@ fn main(input: InputData) -> OutputData {
     output.vertexHeight = input.position.z;
     output.currentClipPos = clipPos;
     output.prevClipPos = clipPos;
+    output.instanceColor = instanceData.color;
 
     return output;
 }

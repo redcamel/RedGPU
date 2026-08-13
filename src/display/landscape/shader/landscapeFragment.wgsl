@@ -13,6 +13,7 @@ struct InputData {
     @location(6) vertexHeight: f32,
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
+    @location(9) instanceColor: vec4<f32>,
 };
 
 struct MaterialUniforms {
@@ -24,6 +25,6 @@ struct MaterialUniforms {
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
-    output.color = uniforms.color;
+    output.color = inputData.instanceColor;
     return output;
 }
