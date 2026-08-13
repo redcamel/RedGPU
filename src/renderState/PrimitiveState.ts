@@ -87,11 +87,11 @@ class PrimitiveState {
         return this.#stripIndexFormat;
     }
 
-    set stripIndexFormat(format: GPUIndexFormat) {
-        if (validateStripIndex.includes(format)) {
+    set stripIndexFormat(format: GPUIndexFormat | undefined) {
+        if (format === undefined || validateStripIndex.includes(format)) {
             this.#stripIndexFormat = format;
             this.#update();
-        } else consoleAndThrowError(`Invalid value for stripIndexFormat. Received ${format}. Expected one of: ${validateStripIndex.join(", ")}`);
+        } else consoleAndThrowError(`Invalid value for stripIndexFormat. Received ${format}. Expected one of: undefined, ${validateStripIndex.join(", ")}`);
     }
 
     /**
