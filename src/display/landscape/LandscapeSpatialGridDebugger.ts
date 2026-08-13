@@ -63,10 +63,9 @@ export class LandscapeSpatialGridDebugger {
         document.body.appendChild(canvas);
         this.#canvas = canvas;
         this.#ctx = canvas.getContext('2d');
-        this.#width = w;
-        this.#height = h;
-        this.#left = left;
-        this.#bottom = bottom;
+
+        this.setPosition(left, bottom);
+        this.setSize(w, h);
     }
 
     get visible(): boolean {
@@ -113,8 +112,10 @@ export class LandscapeSpatialGridDebugger {
     setSize(w: number, h: number): void {
         this.#width = Math.max(20, w);
         this.#height = Math.max(20, h);
-        this.#canvas.width = this.#width;
-        this.#canvas.height = this.#height;
+
+        const dpr = window.devicePixelRatio || 1;
+        this.#canvas.width = Math.floor(this.#width * dpr);
+        this.#canvas.height = Math.floor(this.#height * dpr);
 
         this.#canvas.style.setProperty('width', `${this.#width}px`, 'important');
         this.#canvas.style.setProperty('height', `${this.#height}px`, 'important');
@@ -133,10 +134,16 @@ export class LandscapeSpatialGridDebugger {
 
     update(): void {
         if (!this.#visible || !this.#ctx || !this.#landscape) return;
-        const w = this.#canvas.width;
-        const h = this.#canvas.height;
+
+        const dpr = window.devicePixelRatio || 1;
+        const w = this.#width;
+        const h = this.#height;
         const padding = 5;
-        const mapDrawSize = w - padding * 2;
+        const mapDrawWidth = w - padding * 2;
+        const mapDrawHeight = h - padding * 2;
+
+        this.#ctx.save();
+        this.#ctx.scale(dpr, dpr);
         this.#ctx.clearRect(0, 0, w, h);
 
         const [worldSizeX, worldSizeZ] = this.#landscape.worldSize;
@@ -147,29 +154,29 @@ export class LandscapeSpatialGridDebugger {
             const nx = (wx - worldMinX) / worldSizeX;
             const nz = (wz - worldMinZ) / worldSizeZ;
             return [
-                padding + Math.max(0, Math.min(1, nx)) * mapDrawSize,
-                padding + (1 - Math.max(0, Math.min(1, nz))) * mapDrawSize
+                padding + Math.max(0, Math.min(1, nx)) * mapDrawWidth,
+                padding + (1 - Math.max(0, Math.min(1, nz))) * mapDrawHeight
             ];
         };
 
         // 1. World Outer Boundary
         this.#ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
         this.#ctx.lineWidth = 1;
-        this.#ctx.strokeRect(padding, padding, mapDrawSize, mapDrawSize);
+        this.#ctx.strokeRect(padding, padding, mapDrawWidth, mapDrawHeight);
 
         // 2. Component Grid Tiles
         const components = this.#landscape.landscapeComponents || [];
         const [tcX, tcZ] = this.#landscape.componentCount;
-        const cellW = mapDrawSize / tcX;
-        const cellH = mapDrawSize / tcZ;
+        const cellW = mapDrawWidth / tcX;
+        const cellH = mapDrawHeight / tcZ;
 
         const activeCount = components.length;
         for (let i = 0; i < activeCount; i++) {
             const comp = components[i];
             const nx = (comp.worldX - worldMinX) / worldSizeX;
             const nz = (comp.worldZ - worldMinZ) / worldSizeZ;
-            const cx = padding + nx * mapDrawSize - cellW / 2;
-            const cy = padding + (1 - nz) * mapDrawSize - cellH / 2;
+            const cx = padding + nx * mapDrawWidth - cellW / 2;
+            const cy = padding + (1 - nz) * mapDrawHeight - cellH / 2;
 
             const isLoaded = this.#landscape.tileStreamer && this.#landscape.tileStreamer.loadedTileCount > 0;
             this.#ctx.fillStyle = isLoaded ? 'rgba(56, 189, 248, 0.35)' : 'rgba(255, 255, 255, 0.05)';
@@ -183,7 +190,7 @@ export class LandscapeSpatialGridDebugger {
         const camX = camera ? (camera.x ?? camera.position?.[0] ?? 0) : 0;
         const camZ = camera ? (camera.z ?? camera.position?.[2] ?? 0) : 0;
         const [camCanvasX, camCanvasY] = worldToCanvas(camX, camZ);
-        const radiusPixels = (this.#landscape.loadingRadius / worldSizeX) * mapDrawSize;
+        const radiusPixels = (this.#landscape.loadingRadius / worldSizeX) * mapDrawWidth;
 
         this.#ctx.beginPath();
         this.#ctx.arc(camCanvasX, camCanvasY, radiusPixels, 0, Math.PI * 2);
@@ -201,6 +208,8 @@ export class LandscapeSpatialGridDebugger {
         this.#ctx.strokeStyle = '#ffffff';
         this.#ctx.lineWidth = 1;
         this.#ctx.stroke();
+
+        this.#ctx.restore();
     }
 
     destroy(): void {
