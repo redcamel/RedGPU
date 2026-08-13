@@ -21,6 +21,7 @@ export class LandscapeComponent {
 
     #renderPipelineCache: Map<string, GPURenderPipeline> = new Map();
     #vertexShaderModule: GPUShaderModule;
+    #lastUpdateMSAAID: string = '';
 
     /**
      * [KO] LandscapeComponent 인스턴스를 생성합니다.
@@ -50,6 +51,10 @@ export class LandscapeComponent {
             });
         }
         this.#vertexShaderModule = vModule;
+    }
+
+    updateSharedGeometry(sharedGeometry: LandscapeSharedGeometry): void {
+        this.#sharedGeometry = sharedGeometry;
     }
 
     get x(): number {
@@ -105,10 +110,6 @@ export class LandscapeComponent {
         this.#topology = val ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
     }
 
-    updateSharedGeometry(sharedGeometry: LandscapeSharedGeometry): void {
-        this.#sharedGeometry = sharedGeometry;
-    }
-
     /**
      * [KO] Multi-LOD Batching 인스턴싱으로 64개 전체 지형 타일을 디스패치하고 RenderViewStateData 통계를 기록합니다 (Zero-GC).
      */
@@ -132,7 +133,7 @@ export class LandscapeComponent {
         const storageBGLayout = instanceBuffer.instanceStorageBindGroupLayout;
         if (!storageBG || !storageBGLayout) return;
 
-        // 1. GPURenderPipeline 취득 및 세팅
+        // 1. GPURenderPipeline 취득 및 세팅 (RedGPU 표준 msaaID 정동기화)
         const pipeline = this.#getOrCreateRenderPipeline(combinedVB, storageBGLayout);
         if (!pipeline) return;
 
@@ -192,7 +193,13 @@ export class LandscapeComponent {
         const material = this.#material;
         if (!gpuDevice || !material || !material.gpuRenderInfo) return null;
 
-        const key = `${this.#lodLevel}_${this.#topology}_${material.uuid}`;
+        // RedGPU 표준 msaaID 기반 안티앨리어싱 상태 추적 및 파이프라인 캐싱
+        const antialiasingManager = this.#redGPUContext.antialiasingManager;
+        const msaaID = antialiasingManager.msaaID;
+        const useMSAA = antialiasingManager.useMSAA;
+        const sampleCount = useMSAA ? 4 : 1;
+        const key = `${this.#lodLevel}_${this.#topology}_${material.uuid}_${msaaID}`;
+
         if (this.#renderPipelineCache.has(key)) {
             return this.#renderPipelineCache.get(key);
         }
@@ -234,9 +241,10 @@ export class LandscapeComponent {
                     depthWriteEnabled: true,
                     depthCompare: 'less',
                 },
-                multisample: {count: 1}
+                multisample: {count: sampleCount}
             });
 
+            this.#lastUpdateMSAAID = msaaID;
             this.#renderPipelineCache.set(key, pipeline);
             return pipeline;
         } catch (e) {
