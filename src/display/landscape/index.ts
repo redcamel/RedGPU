@@ -6,11 +6,13 @@ import LandscapeOptions from "./LandscapeOptions";
 import LandscapeSharedGeometry from "./LandscapeSharedGeometry";
 import LandscapeSpatialGrid from "./LandscapeSpatialGrid";
 import LandscapeTileStreamer from "./LandscapeTileStreamer";
+import ALandscapeDebugger from "./ALandscapeDebugger";
 import LandscapeSpatialGridDebugger from "./LandscapeSpatialGridDebugger";
 import LandscapeVHTDebugger from "./LandscapeVHTDebugger";
 import LANDSCAPE_BASE_GRID_SIZE from "./LANDSCAPE_BASE_GRID_SIZE";
 
 export {
+    ALandscapeDebugger,
     Landscape,
     LandscapeComponent,
     LandscapeInstanceBuffer,

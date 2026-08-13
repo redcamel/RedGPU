@@ -70,8 +70,8 @@ RedGPU.init(
             fontSize: '12px',
             lineHeight: '1.7',
             zIndex: '99999',
-            minWidth: '440px'
         });
+        document.body.appendChild(hud);
 
         const lodColors = [
             '#2ecc71', '#f1c40f', '#e67e22', '#e74c3c', '#9b59b6', '#1abc9c', '#3498db', '#ecf0f1'

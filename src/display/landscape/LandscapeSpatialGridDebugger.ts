@@ -1,152 +1,43 @@
+import ALandscapeDebugger from "./ALandscapeDebugger";
 import Landscape from "./Landscape";
 
 /**
  * [KO] Landscape 지형 시스템의 2D SpatialGrid 타일 상태 및 카메라 시야 반경(loadingRadius)을 2D 캔버스 오버레이로 시각화하는 디버거 클래스입니다.
  * [EN] Debugger class visualizing the 2D SpatialGrid tile states and camera loading radius of Landscape terrain system via 2D canvas overlay.
  */
-export class LandscapeSpatialGridDebugger {
-    #landscape: Landscape;
+export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
     #camera: any;
-    #canvas: HTMLCanvasElement;
     #ctx: CanvasRenderingContext2D | null;
-    #visible: boolean = true;
 
-    #width: number = 100;
-    #height: number = 100;
-    #left: number = 12;
-    #bottom: number = 12;
-
-    constructor(landscape: Landscape, camera: any, options: {
-        width?: number,
-        height?: number,
-        left?: number,
-        bottom?: number
-    } = {}) {
-        this.#landscape = landscape;
+    constructor(
+        landscape: Landscape,
+        camera: any,
+        options: {
+            width?: number,
+            height?: number,
+            left?: number,
+            bottom?: number
+        } = {}
+    ) {
+        super(landscape, 'landscape-spatial-grid-debugger-canvas', options);
         this.#camera = camera;
-
-        const w = options.width ?? 100;
-        const h = options.height ?? 100;
-        const left = options.left ?? 12;
-        const bottom = options.bottom ?? 12;
-
-        const canvas = document.createElement('canvas');
-        canvas.id = 'landscape-spatial-grid-debugger-canvas';
-        canvas.width = w;
-        canvas.height = h;
-
-        // 외부 전역 CSS 규칙 (예: canvas { width: 100vw !important; })으로부터 100% 완전 격리
-        canvas.style.setProperty('all', 'initial', 'important');
-        canvas.style.setProperty('position', 'fixed', 'important');
-        canvas.style.setProperty('left', `${left}px`, 'important');
-        canvas.style.setProperty('bottom', `${bottom}px`, 'important');
-        canvas.style.setProperty('top', 'auto', 'important');
-        canvas.style.setProperty('right', 'auto', 'important');
-        canvas.style.setProperty('width', `${w}px`, 'important');
-        canvas.style.setProperty('height', `${h}px`, 'important');
-        canvas.style.setProperty('min-width', `${w}px`, 'important');
-        canvas.style.setProperty('min-height', `${h}px`, 'important');
-        canvas.style.setProperty('max-width', `${w}px`, 'important');
-        canvas.style.setProperty('max-height', `${h}px`, 'important');
-        canvas.style.setProperty('box-sizing', 'border-box', 'important');
-        canvas.style.setProperty('margin', '0', 'important');
-        canvas.style.setProperty('padding', '0', 'important');
-        canvas.style.setProperty('transform', 'none', 'important');
-        canvas.style.setProperty('background', 'rgba(15, 23, 42, 0.85)', 'important');
-        canvas.style.setProperty('backdrop-filter', 'blur(6px)', 'important');
-        canvas.style.setProperty('border', '1px solid rgba(56, 189, 248, 0.35)', 'important');
-        canvas.style.setProperty('border-radius', '6px', 'important');
-        canvas.style.setProperty('pointer-events', 'none', 'important');
-        canvas.style.setProperty('z-index', '99999', 'important');
-        canvas.style.setProperty('display', 'block', 'important');
-
-        document.body.appendChild(canvas);
-        this.#canvas = canvas;
-        this.#ctx = canvas.getContext('2d');
-
-        this.setPosition(left, bottom);
-        this.setSize(w, h);
-    }
-
-    get visible(): boolean {
-        return this.#visible;
-    }
-
-    set visible(val: boolean) {
-        this.#visible = val;
-        this.#canvas.style.setProperty('display', val ? 'block' : 'none', 'important');
-    }
-
-    get width(): number {
-        return this.#width;
-    }
-
-    set width(w: number) {
-        this.setSize(w, this.#height);
-    }
-
-    get height(): number {
-        return this.#height;
-    }
-
-    set height(h: number) {
-        this.setSize(this.#width, h);
-    }
-
-    get left(): number {
-        return this.#left;
-    }
-
-    set left(l: number) {
-        this.setPosition(l, this.#bottom);
-    }
-
-    get bottom(): number {
-        return this.#bottom;
-    }
-
-    set bottom(b: number) {
-        this.setPosition(this.#left, b);
-    }
-
-    setSize(w: number, h: number): void {
-        this.#width = Math.max(20, w);
-        this.#height = Math.max(20, h);
-
-        const dpr = window.devicePixelRatio || 1;
-        this.#canvas.width = Math.floor(this.#width * dpr);
-        this.#canvas.height = Math.floor(this.#height * dpr);
-
-        this.#canvas.style.setProperty('width', `${this.#width}px`, 'important');
-        this.#canvas.style.setProperty('height', `${this.#height}px`, 'important');
-        this.#canvas.style.setProperty('min-width', `${this.#width}px`, 'important');
-        this.#canvas.style.setProperty('min-height', `${this.#height}px`, 'important');
-        this.#canvas.style.setProperty('max-width', `${this.#width}px`, 'important');
-        this.#canvas.style.setProperty('max-height', `${this.#height}px`, 'important');
-    }
-
-    setPosition(left: number, bottom: number): void {
-        this.#left = left;
-        this.#bottom = bottom;
-        this.#canvas.style.setProperty('left', `${left}px`, 'important');
-        this.#canvas.style.setProperty('bottom', `${bottom}px`, 'important');
+        this.#ctx = this.canvas.getContext('2d');
     }
 
     update(): void {
-        if (!this.#visible || !this.#ctx || !this.#landscape) return;
+        if (!this.visible || !this.#ctx || !this.landscape) return;
 
-        const dpr = window.devicePixelRatio || 1;
-        const w = this.#width;
-        const h = this.#height;
+        const w = this.canvas.width;
+        const h = this.canvas.height;
         const padding = 5;
         const mapDrawWidth = w - padding * 2;
         const mapDrawHeight = h - padding * 2;
 
-        this.#ctx.save();
-        this.#ctx.scale(dpr, dpr);
         this.#ctx.clearRect(0, 0, w, h);
 
-        const [worldSizeX, worldSizeZ] = this.#landscape.worldSize;
+        this.#ctx.save();
+
+        const [worldSizeX, worldSizeZ] = this.landscape.worldSize;
         const worldMinX = -worldSizeX / 2;
         const worldMinZ = -worldSizeZ / 2;
 
@@ -165,8 +56,8 @@ export class LandscapeSpatialGridDebugger {
         this.#ctx.strokeRect(padding, padding, mapDrawWidth, mapDrawHeight);
 
         // 2. Component Grid Tiles
-        const components = this.#landscape.landscapeComponents || [];
-        const [tcX, tcZ] = this.#landscape.componentCount;
+        const components = this.landscape.landscapeComponents || [];
+        const [tcX, tcZ] = this.landscape.componentCount;
         const cellW = mapDrawWidth / tcX;
         const cellH = mapDrawHeight / tcZ;
 
@@ -178,7 +69,7 @@ export class LandscapeSpatialGridDebugger {
             const cx = padding + nx * mapDrawWidth - cellW / 2;
             const cy = padding + (1 - nz) * mapDrawHeight - cellH / 2;
 
-            const isLoaded = this.#landscape.tileStreamer && this.#landscape.tileStreamer.loadedTileCount > 0;
+            const isLoaded = this.landscape.tileStreamer && this.landscape.tileStreamer.loadedTileCount > 0;
             this.#ctx.fillStyle = isLoaded ? 'rgba(56, 189, 248, 0.35)' : 'rgba(255, 255, 255, 0.05)';
             this.#ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
             this.#ctx.fillRect(cx, cy, cellW, cellH);
@@ -190,7 +81,7 @@ export class LandscapeSpatialGridDebugger {
         const camX = camera ? (camera.x ?? camera.position?.[0] ?? 0) : 0;
         const camZ = camera ? (camera.z ?? camera.position?.[2] ?? 0) : 0;
         const [camCanvasX, camCanvasY] = worldToCanvas(camX, camZ);
-        const radiusPixels = (this.#landscape.loadingRadius / worldSizeX) * mapDrawWidth;
+        const radiusPixels = (this.landscape.loadingRadius / worldSizeX) * mapDrawWidth;
 
         this.#ctx.beginPath();
         this.#ctx.arc(camCanvasX, camCanvasY, radiusPixels, 0, Math.PI * 2);
@@ -210,12 +101,6 @@ export class LandscapeSpatialGridDebugger {
         this.#ctx.stroke();
 
         this.#ctx.restore();
-    }
-
-    destroy(): void {
-        if (this.#canvas && this.#canvas.parentNode) {
-            this.#canvas.parentNode.removeChild(this.#canvas);
-        }
     }
 }
 

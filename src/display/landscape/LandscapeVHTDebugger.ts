@@ -1,148 +1,40 @@
+import ALandscapeDebugger from "./ALandscapeDebugger";
 import Landscape from "./Landscape";
 
 /**
- * [KO] Landscape 지형 시스템의 16비트 Virtual Heightfield Texture (VHT) 아틀라스 GPU 텍스처 합성 상태를 실시간 시각화하는 WebGPU 디버거 클래스입니다.
- * [EN] WebGPU debugger class visualizing the 16-bit Virtual Heightfield Texture (VHT) atlas GPU texture synthesis state of Landscape terrain system in real-time.
+ * [KO] Landscape 지형 시스템의 16비트 VHT (Virtual Heightfield Texture) 아틀라스 텍스처를 WebGPU Canvas Context를 통해 60fps 실시간 오버레이로 시각화하는 디버거 클래스입니다.
+ * [EN] Debugger class visualizing the 16-bit VHT (Virtual Heightfield Texture) atlas texture of Landscape terrain system via WebGPU Canvas Context 60fps real-time overlay.
  */
-export class LandscapeVHTDebugger {
-    #landscape: Landscape;
-    #canvas: HTMLCanvasElement;
+export class LandscapeVHTDebugger extends ALandscapeDebugger {
     #context: GPUCanvasContext | null = null;
     #pipeline: GPURenderPipeline | null = null;
     #bindGroup: GPUBindGroup | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
     #lastBoundTexture: GPUTexture | null = null;
-    #visible: boolean = true;
     #canvasFormat: GPUTextureFormat = 'bgra8unorm';
 
-    #width: number = 100;
-    #height: number = 100;
-    #left: number = 120;
-    #bottom: number = 12;
-
-    constructor(landscape: Landscape, options: {
-        width?: number,
-        height?: number,
-        left?: number,
-        bottom?: number
-    } = {}) {
-        this.#landscape = landscape;
-
-        const w = options.width ?? 100;
-        const h = options.height ?? 100;
+    constructor(
+        landscape: Landscape,
+        options: {
+            width?: number,
+            height?: number,
+            left?: number,
+            bottom?: number
+        } = {}
+    ) {
         const left = options.left ?? 120;
-        const bottom = options.bottom ?? 12;
-
-        const canvas = document.createElement('canvas');
-        canvas.id = 'landscape-vht-debugger-canvas';
-        canvas.width = w;
-        canvas.height = h;
-
-        // 외부 전역 CSS 규칙 완전 차단 (CSS Isolation)
-        canvas.style.setProperty('all', 'initial', 'important');
-        canvas.style.setProperty('position', 'fixed', 'important');
-        canvas.style.setProperty('left', `${left}px`, 'important');
-        canvas.style.setProperty('bottom', `${bottom}px`, 'important');
-        canvas.style.setProperty('top', 'auto', 'important');
-        canvas.style.setProperty('right', 'auto', 'important');
-        canvas.style.setProperty('width', `${w}px`, 'important');
-        canvas.style.setProperty('height', `${h}px`, 'important');
-        canvas.style.setProperty('min-width', `${w}px`, 'important');
-        canvas.style.setProperty('min-height', `${h}px`, 'important');
-        canvas.style.setProperty('max-width', `${w}px`, 'important');
-        canvas.style.setProperty('max-height', `${h}px`, 'important');
-        canvas.style.setProperty('box-sizing', 'border-box', 'important');
-        canvas.style.setProperty('margin', '0', 'important');
-        canvas.style.setProperty('padding', '0', 'important');
-        canvas.style.setProperty('transform', 'none', 'important');
-        canvas.style.setProperty('background', 'rgba(15, 23, 42, 0.85)', 'important');
-        canvas.style.setProperty('backdrop-filter', 'blur(6px)', 'important');
-        canvas.style.setProperty('border', '1px solid rgba(56, 189, 248, 0.35)', 'important');
-        canvas.style.setProperty('border-radius', '6px', 'important');
-        canvas.style.setProperty('pointer-events', 'none', 'important');
-        canvas.style.setProperty('z-index', '99999', 'important');
-        canvas.style.setProperty('display', 'block', 'important');
-
-        document.body.appendChild(canvas);
-        this.#canvas = canvas;
-        this.#width = w;
-        this.#height = h;
-        this.#left = left;
-        this.#bottom = bottom;
-
+        super(landscape, 'landscape-vht-debugger-canvas', {...options, left});
         this.#initWebGPUContext();
     }
 
-    get visible(): boolean {
-        return this.#visible;
-    }
-
-    set visible(val: boolean) {
-        this.#visible = val;
-        this.#canvas.style.setProperty('display', val ? 'block' : 'none', 'important');
-    }
-
-    get width(): number {
-        return this.#width;
-    }
-
-    set width(w: number) {
-        this.setSize(w, this.#height);
-    }
-
-    get height(): number {
-        return this.#height;
-    }
-
-    set height(h: number) {
-        this.setSize(this.#width, h);
-    }
-
-    get left(): number {
-        return this.#left;
-    }
-
-    set left(l: number) {
-        this.setPosition(l, this.#bottom);
-    }
-
-    get bottom(): number {
-        return this.#bottom;
-    }
-
-    set bottom(b: number) {
-        this.setPosition(this.#left, b);
-    }
-
-    setSize(w: number, h: number): void {
-        this.#width = Math.max(20, w);
-        this.#height = Math.max(20, h);
-        this.#canvas.width = this.#width;
-        this.#canvas.height = this.#height;
-
-        this.#canvas.style.setProperty('width', `${this.#width}px`, 'important');
-        this.#canvas.style.setProperty('height', `${this.#height}px`, 'important');
-        this.#canvas.style.setProperty('min-width', `${this.#width}px`, 'important');
-        this.#canvas.style.setProperty('min-height', `${this.#height}px`, 'important');
-        this.#canvas.style.setProperty('max-width', `${this.#width}px`, 'important');
-        this.#canvas.style.setProperty('max-height', `${this.#height}px`, 'important');
-    }
-
-    setPosition(left: number, bottom: number): void {
-        this.#left = left;
-        this.#bottom = bottom;
-        this.#canvas.style.setProperty('left', `${left}px`, 'important');
-        this.#canvas.style.setProperty('bottom', `${bottom}px`, 'important');
-    }
-
     update(): void {
-        if (!this.#visible || !this.#context) return;
+        if (!this.visible || !this.#context) return;
 
-        const redGPUContext = (this.#landscape as any)?.redGPUContext;
+        const redGPUContext = (this.landscape as any)?.redGPUContext;
         const gpuDevice: GPUDevice = redGPUContext?.gpuDevice;
         if (!gpuDevice) return;
 
-        const vhtTexture = this.#landscape.vhtAtlasTexture;
+        const vhtTexture = this.landscape.vhtAtlasTexture;
         if (!vhtTexture) return;
 
         // 지형 텍스처 변경 감지 시 GPUBindGroup 재할당
@@ -189,22 +81,16 @@ export class LandscapeVHTDebugger {
         }
     }
 
-    destroy(): void {
-        if (this.#canvas && this.#canvas.parentNode) {
-            this.#canvas.parentNode.removeChild(this.#canvas);
-        }
-    }
-
     #initWebGPUContext(): void {
         const gpu = navigator.gpu;
         if (!gpu) return;
 
         this.#canvasFormat = gpu.getPreferredCanvasFormat ? gpu.getPreferredCanvasFormat() : 'bgra8unorm';
-        const ctx = this.#canvas.getContext('webgpu') as GPUCanvasContext | null;
+        const ctx = this.canvas.getContext('webgpu') as GPUCanvasContext | null;
         if (!ctx) return;
         this.#context = ctx;
 
-        const redGPUContext = (this.#landscape as any)?.redGPUContext;
+        const redGPUContext = (this.landscape as any)?.redGPUContext;
         const gpuDevice: GPUDevice = redGPUContext?.gpuDevice;
         if (!gpuDevice) return;
 
