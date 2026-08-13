@@ -5,6 +5,7 @@ import {IPhysicsEngine} from "../../physics/IPhysicsEngine";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import Object3DContainer from "../mesh/core/Object3DContainer";
 import Terrain from "../terrain/Terrain";
+import Landscape from "../landscape/Landscape";
 
 /**
  * [KO] View에서 렌더링할 장면(Scene) 공간을 정의하는 루트 컨테이너 클래스입니다.
@@ -179,6 +180,30 @@ class Scene extends Object3DContainer {
 
     set useBackgroundColor(value: boolean) {
         this.#useBackgroundColor = value;
+    }
+
+    /**
+     * [KO] Landscape 지형 객체를 씬 자식으로 추가합니다.
+     * [EN] Adds a Landscape terrain object as a child of the scene.
+     */
+    addLandscape(landscape: Landscape): void {
+        this.#checkLandscapeInstance(landscape);
+        this.addChild(landscape);
+    }
+
+    /**
+     * [KO] 씬에서 Landscape 지형 객체를 제거합니다.
+     * [EN] Removes a Landscape terrain object from the scene.
+     */
+    removeLandscape(landscape: Landscape): void {
+        this.#checkLandscapeInstance(landscape);
+        this.removeChild(landscape);
+    }
+
+    #checkLandscapeInstance(target: Landscape) {
+        if (!(target instanceof Landscape)) {
+            consoleAndThrowError('allow only Landscape instance.');
+        }
     }
 
     #checkTerrainInstance(target: Terrain) {
