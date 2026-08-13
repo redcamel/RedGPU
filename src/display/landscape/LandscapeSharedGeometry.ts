@@ -116,11 +116,11 @@ export class LandscapeSharedGeometry {
                 }
             }
 
-            // 인덱스 생성
+            // 인덱스 생성 (drawIndexed의 baseVertex 오프셋과 연동되는 0 기반 상대 인덱스 생성)
             for (let z = 0; z < segmentsZ; z++) {
                 for (let x = 0; x < segmentsX; x++) {
-                    const row1 = baseVertex + z * (segmentsX + 1);
-                    const row2 = baseVertex + (z + 1) * (segmentsX + 1);
+                    const row1 = z * (segmentsX + 1);
+                    const row2 = (z + 1) * (segmentsX + 1);
 
                     const a = row1 + x;
                     const b = row1 + x + 1;

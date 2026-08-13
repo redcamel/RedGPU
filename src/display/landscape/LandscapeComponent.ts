@@ -160,7 +160,7 @@ export class LandscapeComponent {
         // 6. RenderViewStateData 통계 집계 참조
         const renderResults = (view as RenderViewStateData)?.renderResults || (view3D as any)?.renderViewStateData?.renderResults;
 
-        // 7. LOD 단계별 Multi-LOD Batching 드로우 디스패치 및 통계 집계
+        // 7. LOD 단계별 Multi-LOD Batching 드로우 디스패치 (baseVertex 오프셋 정밀 수술)
         const lodCount = sharedGeometry.lodCount;
         for (let lod = 0; lod < lodCount; lod++) {
             const instanceCount = instanceBuffer.getLODInstanceCount(lod);
@@ -169,11 +169,12 @@ export class LandscapeComponent {
             const lodRange = sharedGeometry.getLODRange(lod);
             const firstInstance = instanceBuffer.getLODFirstInstance(lod);
 
+            // baseVertex 오프셋으로 lodRange.baseVertex를 명시 전달하여 각 LOD별 세분화 격자가 차등 적용되도록 완벽 수술!
             renderPassEncoder.drawIndexed(
                 lodRange.indexCount,
                 instanceCount,
                 lodRange.firstIndex,
-                0,
+                lodRange.baseVertex,
                 firstInstance
             );
 
