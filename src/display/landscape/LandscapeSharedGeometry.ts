@@ -6,6 +6,10 @@ import Plane from "../../primitive/Plane";
  * [EN] Class that pre-creates and retains shared Plane geometries for Landscape LOD levels 0 to N.
  */
 export class LandscapeSharedGeometry {
+    #redGPUContext: RedGPUContext;
+    #tileSize: number;
+    #gridSize: number;
+    #lodCount: number;
     #geometries: Plane[] = [];
 
     /**
@@ -18,12 +22,12 @@ export class LandscapeSharedGeometry {
      * @param lodCount - [KO] LOD 단계 수 [EN] Number of LOD levels
      */
     constructor(redGPUContext: RedGPUContext, tileSize: number, gridSize: number, lodCount: number) {
-        for (let level = 0; level < lodCount; level++) {
-            const quadRes = Math.max(1, Math.floor(gridSize / Math.pow(2, level)));
-            // XZ 평면(지형)에 맞게 렌더링되도록 Plane 지오메트리 생성
-            const plane = new Plane(redGPUContext, tileSize, tileSize, quadRes, quadRes);
-            this.#geometries.push(plane);
-        }
+        this.#redGPUContext = redGPUContext;
+        this.#tileSize = tileSize;
+        this.#gridSize = gridSize;
+        this.#lodCount = lodCount;
+
+        this.#buildGeometries();
     }
 
     /**
@@ -32,6 +36,10 @@ export class LandscapeSharedGeometry {
      */
     public get geometries(): Plane[] {
         return this.#geometries;
+    }
+
+    public get tileSize(): number {
+        return this.#tileSize;
     }
 
     /**
@@ -43,6 +51,29 @@ export class LandscapeSharedGeometry {
     public getGeometry(lodLevel: number): Plane {
         const index = Math.min(Math.max(0, lodLevel), this.#geometries.length - 1);
         return this.#geometries[index];
+    }
+
+    /**
+     * [KO] 타일 크기(tileSize)가 동적 변경되었을 때 공유 지오메트리 버퍼들을 새로 재생성합니다.
+     * [EN] Recreates shared geometry buffers when the tileSize changes dynamically.
+     *
+     * @param newTileSize - [KO] 새로운 타일 크기 [EN] New tile size
+     */
+    public updateTileSize(newTileSize: number): void {
+        if (newTileSize > 0 && this.#tileSize !== newTileSize) {
+            this.#tileSize = newTileSize;
+            this.#buildGeometries();
+        }
+    }
+
+    #buildGeometries(): void {
+        this.#geometries.length = 0;
+        for (let level = 0; level < this.#lodCount; level++) {
+            const quadRes = Math.max(1, Math.floor(this.#gridSize / Math.pow(2, level)));
+            // XZ 평면(지형)에 맞게 렌더링되도록 Plane 지오메트리 생성
+            const plane = new Plane(this.#redGPUContext, this.#tileSize, this.#tileSize, quadRes, quadRes);
+            this.#geometries.push(plane);
+        }
     }
 }
 

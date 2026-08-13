@@ -1,5 +1,4 @@
 import RedGPUContext from "../../context/RedGPUContext";
-import GPU_INDEX_FORMAT from "../../gpuConst/GPU_INDEX_FORMAT";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import ColorMaterial from "../../material/colorMaterial/ColorMaterial";
 import Mesh from "../mesh/Mesh";
@@ -49,8 +48,8 @@ export class LandscapeComponent extends Mesh {
     }
 
     /**
-     * [KO] 와이어프레임 렌더링 모드 설정 (WebGPU 토폴로지 & stripIndexFormat 규격 적용)
-     * [EN] Sets wireframe rendering mode (applies WebGPU topology & stripIndexFormat spec)
+     * [KO] 와이어프레임 렌더링 모드 설정 (LINE_LIST 및 WebGPU stripIndexFormat undefined 규격 적용)
+     * [EN] Sets wireframe rendering mode (applies LINE_LIST & WebGPU stripIndexFormat undefined spec)
      */
     public get wireframe(): boolean {
         return this.#wireframe;
@@ -59,14 +58,19 @@ export class LandscapeComponent extends Mesh {
     public set wireframe(value: boolean) {
         this.#wireframe = value;
         if (value) {
-            // Strip 토폴로지 적용 시에는 stripIndexFormat이 필수
-            this.primitiveState.stripIndexFormat = GPU_INDEX_FORMAT.UINT32;
-            this.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_STRIP;
+            this.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
         } else {
-            // Non-Strip 토폴로지 적용 시에는 stripIndexFormat이 반드시 undefined이어야 함
-            this.primitiveState.stripIndexFormat = undefined;
             this.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
         }
+    }
+
+    /**
+     * [KO] 공유 LOD 지오메트리가 동적 갱신되었을 때 현재 타일의 지오메트리를 재바인딩합니다.
+     * [EN] Rebinds the current tile's geometry when shared LOD geometry is updated dynamically.
+     */
+    public updateSharedGeometry(sharedGeometry: LandscapeSharedGeometry): void {
+        this.#sharedGeometry = sharedGeometry;
+        this.geometry = sharedGeometry.getGeometry(this.#lodLevel);
     }
 
     /**

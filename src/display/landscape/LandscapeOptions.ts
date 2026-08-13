@@ -3,9 +3,11 @@
  * [EN] Options interface for configuring the Landscape terrain system.
  */
 export interface LandscapeOptions {
+    /** [KO] 전체 지형의 월드 공간 크기 (예: 3000 -> 3,000m x 3,000m) [EN] World space size of the entire terrain */
+    worldSize?: number;
     /** [KO] 전체 지형의 가로/세로 타일 개수 (기본값 4 -> 4x4 타일) [EN] Number of tiles per row/column (default 4) */
     tileCount?: number;
-    /** [KO] 단일 타일 크기 (월드 공간 단위, 기본값 1000) [EN] Size of a single tile in world units (default 1000) */
+    /** [KO] 단일 타일 크기 (worldSize가 지정된 경우 worldSize / tileCount 로 자동 산출) [EN] Size of a single tile */
     tileSize?: number;
     /** [KO] 타일당 기본 격자 갯수 (기본값 64 -> 64x64 Quads) [EN] Base grid size per tile (default 64) */
     gridSize?: number;
