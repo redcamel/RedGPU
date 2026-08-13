@@ -8,6 +8,8 @@ export interface LandscapeLODGeometryRange {
     lodLevel: number;
     firstIndex: number;
     indexCount: number;
+    wireframeFirstIndex: number;
+    wireframeIndexCount: number;
     baseVertex: number;
 }
 
@@ -24,6 +26,7 @@ export class LandscapeSharedGeometry {
 
     #combinedVertexBuffer: VertexBuffer | null = null;
     #combinedIndexBuffer: IndexBuffer | null = null;
+    #combinedWireframeIndexBuffer: IndexBuffer | null = null;
     #lodRanges: LandscapeLODGeometryRange[] = [];
 
     /**
@@ -48,6 +51,11 @@ export class LandscapeSharedGeometry {
     /** [KO] 거대 단일 통합 IndexBuffer 반환 */
     get combinedIndexBuffer(): IndexBuffer | null {
         return this.#combinedIndexBuffer;
+    }
+
+    /** [KO] 와이어프레임(LINE_LIST 2개 삼각형 대각선 포함) 전용 통합 IndexBuffer 반환 */
+    get combinedWireframeIndexBuffer(): IndexBuffer | null {
+        return this.#combinedWireframeIndexBuffer;
     }
 
     get lodRanges(): LandscapeLODGeometryRange[] {
@@ -87,10 +95,12 @@ export class LandscapeSharedGeometry {
 
         const allInterleavedData: number[] = [];
         const allIndices: number[] = [];
+        const allWireframeIndices: number[] = [];
         this.#lodRanges.length = 0;
 
         let totalVertexOffset = 0;
         let totalIndexOffset = 0;
+        let totalWireframeIndexOffset = 0;
 
         for (let lod = 0; lod < maxLODLevel; lod++) {
             const step = Math.pow(2, lod);
@@ -99,8 +109,10 @@ export class LandscapeSharedGeometry {
 
             const vertexCount = (segmentsX + 1) * (segmentsZ + 1);
             const indexCount = segmentsX * segmentsZ * 6;
+            const wireframeIndexCount = segmentsX * segmentsZ * 12; // 쿼드당 2개 삼각형 (6개 선 = 12개 인덱스)
             const baseVertex = totalVertexOffset;
             const firstIndex = totalIndexOffset;
+            const wireframeFirstIndex = totalWireframeIndexOffset;
 
             // 버텍스 생성 (Interleaved: position x,y,z, normal x,y,z, uv u,v)
             for (let z = 0; z <= segmentsZ; z++) {
@@ -120,7 +132,7 @@ export class LandscapeSharedGeometry {
                 }
             }
 
-            // 인덱스 생성 (drawIndexed의 baseVertex 오프셋과 연동되는 0 기반 상대 인덱스 생성)
+            // 인덱스 생성
             for (let z = 0; z < segmentsZ; z++) {
                 for (let x = 0; x < segmentsX; x++) {
                     const row1 = z * (segmentsX + 1);
@@ -131,8 +143,15 @@ export class LandscapeSharedGeometry {
                     const c = row2 + x;
                     const d = row2 + x + 1;
 
+                    // 1. TRIANGLE_LIST 전용 (솔리드 면)
                     allIndices.push(a, c, b);
                     allIndices.push(b, c, d);
+
+                    // 2. LINE_LIST 전용 (와이어프레임 2개 삼각형 대각선 완전 선)
+                    // 삼각형 1 (a, c, b) -> 선: a-c, c-b, b-a
+                    allWireframeIndices.push(a, c, c, b, b, a);
+                    // 삼각형 2 (b, c, d) -> 선: b-c, c-d, d-b
+                    allWireframeIndices.push(b, c, c, d, d, b);
                 }
             }
 
@@ -140,11 +159,14 @@ export class LandscapeSharedGeometry {
                 lodLevel: lod,
                 firstIndex: firstIndex,
                 indexCount: indexCount,
+                wireframeFirstIndex: wireframeFirstIndex,
+                wireframeIndexCount: wireframeIndexCount,
                 baseVertex: baseVertex
             });
 
             totalVertexOffset += vertexCount;
             totalIndexOffset += indexCount;
+            totalWireframeIndexOffset += wireframeIndexCount;
         }
 
         // 단 1개의 거대한 GPU VertexBuffer & IndexBuffer 생성
@@ -163,6 +185,11 @@ export class LandscapeSharedGeometry {
         this.#combinedIndexBuffer = new IndexBuffer(
             this.#redGPUContext,
             new Uint32Array(allIndices)
+        );
+
+        this.#combinedWireframeIndexBuffer = new IndexBuffer(
+            this.#redGPUContext,
+            new Uint32Array(allWireframeIndices)
         );
     }
 }

@@ -371,7 +371,8 @@ export class Landscape {
         const instanceBuffer = this.#instanceBuffer;
         const sharedGeometry = this.#sharedGeometry;
         const combinedVB = sharedGeometry?.combinedVertexBuffer;
-        const combinedIB = sharedGeometry?.combinedIndexBuffer;
+        const isWireframe = this.#wireframe;
+        const combinedIB = isWireframe ? sharedGeometry?.combinedWireframeIndexBuffer : sharedGeometry?.combinedIndexBuffer;
 
         if (!instanceBuffer || !combinedVB || !combinedIB) return;
 
@@ -408,10 +409,13 @@ export class Landscape {
             const lodRange = sharedGeometry.getLODRange(lod);
             const firstInstance = instanceBuffer.getLODFirstInstance(lod);
 
+            const indexCount = isWireframe ? lodRange.wireframeIndexCount : lodRange.indexCount;
+            const firstIndex = isWireframe ? lodRange.wireframeFirstIndex : lodRange.firstIndex;
+
             renderPassEncoder.drawIndexed(
-                lodRange.indexCount,
+                indexCount,
                 instanceCount,
-                lodRange.firstIndex,
+                firstIndex,
                 lodRange.baseVertex,
                 firstInstance
             );
