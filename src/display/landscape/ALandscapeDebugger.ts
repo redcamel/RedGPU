@@ -16,13 +16,13 @@ export abstract class ALandscapeDebugger {
 
     constructor(
         landscape: Landscape,
-        canvasId: string,
         options: {
             width?: number,
             height?: number,
             left?: number,
             bottom?: number
-        } = {}
+        } = {},
+        canvasId?: string
     ) {
         this.#landscape = landscape;
 
@@ -37,7 +37,9 @@ export abstract class ALandscapeDebugger {
         this.#bottom = bottom;
 
         const canvas = document.createElement('canvas');
-        canvas.id = canvasId;
+        if (canvasId) {
+            canvas.id = canvasId;
+        }
         canvas.width = w;
         canvas.height = h;
 

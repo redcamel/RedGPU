@@ -19,7 +19,7 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
             bottom?: number
         } = {}
     ) {
-        super(landscape, 'landscape-spatial-grid-debugger-canvas', options);
+        super(landscape, options);
         this.#camera = camera;
         this.#ctx = this.canvas.getContext('2d');
     }

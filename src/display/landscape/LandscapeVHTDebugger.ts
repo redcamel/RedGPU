@@ -23,7 +23,7 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
         } = {}
     ) {
         const left = options.left ?? 120;
-        super(landscape, 'landscape-vht-debugger-canvas', {...options, left});
+        super(landscape, {...options, left});
         this.#initWebGPUContext();
     }
 
