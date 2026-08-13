@@ -1,113 +1,264 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
-import ABaseMaterial from "../../material/core/ABaseMaterial";
-import Mesh from "../mesh/Mesh";
+import RenderViewStateData from "../view/core/RenderViewStateData";
+import LandscapeMaterial from "./LandscapeMaterial";
 import LandscapeSharedGeometry from "./LandscapeSharedGeometry";
+import landscapeVertexSource from "./shader/landscapeVertex.wgsl";
 
 /**
- * [KO] 단일 지형 타일 컴포넌트 클래스입니다.
- * [EN] Single terrain tile component class.
+ * [KO] 단일 지형 타일 인스턴스 전용 순수 데이터 & 렌더 디스패치 클래스입니다 (Mesh 미상속 / Zero-Weight 경량 객체).
+ * [EN] Pure data & render dispatch class dedicated to single terrain tile instance (Non-Mesh inheritance / Zero-Weight lightweight object).
  */
-export class LandscapeComponent extends Mesh {
-    #lodLevel: number = 0;
+export class LandscapeComponent {
+    #redGPUContext: RedGPUContext;
+    #sharedGeometry: LandscapeSharedGeometry;
     #tileX: number = 0;
     #tileZ: number = 0;
+    #lodLevel: number = 0;
+    #material: LandscapeMaterial;
     #wireframe: boolean = false;
-    #sharedGeometry: LandscapeSharedGeometry;
+    #topology: GPUPrimitiveTopology = GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
+
+    #renderPipelineCache: Map<string, GPURenderPipeline> = new Map();
+    #vertexShaderModule: GPUShaderModule;
+
+    // 타일 위치 오프셋 전달용 GPU UniformBuffer & BindGroup (Zero-GC)
+    #tileUniformBuffer: GPUBuffer | null = null;
+    #tileBindGroup: GPUBindGroup | null = null;
+    #tileUniformData: Float32Array = new Float32Array(2);
 
     /**
      * [KO] LandscapeComponent 인스턴스를 생성합니다.
      * [EN] Creates an instance of LandscapeComponent.
-     *
-     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
-     * @param sharedGeometry - [KO] 공유 LOD 지오메트리 객체 [EN] Shared LOD geometry manager
-     * @param tileX - [KO] 월드 X 위치 [EN] World X position
-     * @param tileZ - [KO] 월드 Z 위치 [EN] World Z position
-     * @param material - [KO] 타일 머티리얼 [EN] Tile material
-     * @param wireframe - [KO] 와이어프레임 적용 여부 [EN] Whether wireframe mode is enabled
      */
     constructor(
         redGPUContext: RedGPUContext,
         sharedGeometry: LandscapeSharedGeometry,
         tileX: number,
         tileZ: number,
-        material: ABaseMaterial,
+        material: LandscapeMaterial,
         wireframe: boolean = false
     ) {
-        super(redGPUContext, sharedGeometry.getGeometry(0), material);
-
+        this.#redGPUContext = redGPUContext;
         this.#sharedGeometry = sharedGeometry;
         this.#tileX = tileX;
         this.#tileZ = tileZ;
-        this.x = tileX;
-        this.z = tileZ;
-        this.rotationX = -90; // XZ 지형 평면 배치
-
+        this.#material = material;
         this.wireframe = wireframe;
-    }
 
-    public set wireframe(value: boolean) {
-        this.#wireframe = value;
-        if (value) {
-            // LINE_LIST는 Non-strip topology이므로 stripIndexFormat이 반드시 undefined이어야 함
-            this.primitiveState.stripIndexFormat = undefined;
-            this.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
-        } else {
-            // TRIANGLE_LIST도 Non-strip topology이므로 stripIndexFormat이 반드시 undefined이어야 함
-            this.primitiveState.stripIndexFormat = undefined;
-            this.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
+        const gpuDevice = redGPUContext.gpuDevice;
+
+        // 타일 유니폼 버퍼 생성 (tileX, tileZ)
+        if (gpuDevice) {
+            this.#tileUniformBuffer = gpuDevice.createBuffer({
+                size: 16,
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+                label: `LandscapeTileUniformBuffer_${tileX}_${tileZ}`
+            });
+            this.#updateTileUniform();
         }
+
+        // WGSL 버텍스 셰이더 모듈 취득
+        const resourceManager = redGPUContext.resourceManager;
+        let vModule = resourceManager.getGPUShaderModule('LandscapeFullCompatibleFlatVertexShaderModule');
+        if (!vModule) {
+            vModule = resourceManager.createGPUShaderModule('LandscapeFullCompatibleFlatVertexShaderModule', {
+                code: landscapeVertexSource
+            });
+        }
+        this.#vertexShaderModule = vModule;
     }
 
-    /**
-     * [KO] 와이어프레임 렌더링 모드 설정 (LINE_LIST 및 WebGPU stripIndexFormat undefined 규격 적용)
-     * [EN] Sets wireframe rendering mode (applies LINE_LIST & WebGPU stripIndexFormat undefined spec)
-     */
-    public get wireframe(): boolean {
-        return this.#wireframe;
+    public get x(): number {
+        return this.#tileX;
     }
 
-    /**
-     * [KO] 공유 LOD 지오메트리가 동적 갱신되었을 때 현재 타일의 지오메트리를 재바인딩합니다.
-     * [EN] Rebinds the current tile's geometry when shared LOD geometry is updated dynamically.
-     */
     public updateSharedGeometry(sharedGeometry: LandscapeSharedGeometry): void {
         this.#sharedGeometry = sharedGeometry;
-        this.geometry = sharedGeometry.getGeometry(this.#lodLevel);
     }
 
-    /**
-     * [KO] 타일의 월드 X 위치를 반환합니다.
-     * [EN] Returns the tile's world X position.
-     */
+    public set x(val: number) {
+        this.#tileX = val;
+        this.#updateTileUniform();
+    }
+
+    public get y(): number {
+        return 0;
+    }
+
+    public get z(): number {
+        return this.#tileZ;
+    }
+
+    public set z(val: number) {
+        this.#tileZ = val;
+        this.#updateTileUniform();
+    }
+
     public get tileX(): number {
         return this.#tileX;
     }
 
-    /**
-     * [KO] 타일의 월드 Z 위치를 반환합니다.
-     * [EN] Returns the tile's world Z position.
-     */
     public get tileZ(): number {
         return this.#tileZ;
     }
 
-    /**
-     * [KO] 현재 타일의 LOD 레벨을 반환합니다.
-     * [EN] Returns the tile's current LOD level.
-     */
     public get lodLevel(): number {
         return this.#lodLevel;
     }
 
+    public set lodLevel(val: number) {
+        this.#lodLevel = val;
+    }
+
+    public get material(): LandscapeMaterial {
+        return this.#material;
+    }
+
+    public set material(val: LandscapeMaterial) {
+        this.#material = val;
+    }
+
+    public get wireframe(): boolean {
+        return this.#wireframe;
+    }
+
+    public set wireframe(val: boolean) {
+        this.#wireframe = val;
+        this.#topology = val ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
+    }
+
     /**
-     * [KO] 타일의 LOD 레벨을 변경하며 지오메트리를 자동으로 교체 바인딩합니다.
-     * [EN] Sets the tile's LOD level and automatically swaps the bound geometry.
+     * [KO] Render Pass Encoder에 현재 타일 지오메트리 및 머티리얼 렌더 커맨드를 디스패치합니다.
      */
-    public set lodLevel(value: number) {
-        if (this.#lodLevel !== value) {
-            this.#lodLevel = value;
-            this.geometry = this.#sharedGeometry.getGeometry(value);
+    public render(renderViewStateData: RenderViewStateData): void {
+        const passEncoder = renderViewStateData.currentRenderPassEncoder;
+        if (!passEncoder) return;
+
+        const geom = this.#sharedGeometry.getGeometry(this.#lodLevel);
+        if (!geom) return;
+
+        const vertexBuffer = geom.vertexBuffer;
+        const indexBuffer = geom.indexBuffer;
+        if (!vertexBuffer || !indexBuffer) return;
+
+        // 1. GPURenderPipeline 취득 및 세팅
+        const pipeline = this.#getOrCreateRenderPipeline(geom);
+        if (!pipeline) return;
+
+        passEncoder.setPipeline(pipeline);
+
+        // 2. RedGPU 표준 systemUniform_Vertex_UniformBindGroup (0번) 세팅
+        const view = renderViewStateData.view as any;
+        const systemBG = view?.systemUniform_Vertex_UniformBindGroup;
+        if (systemBG) {
+            passEncoder.setBindGroup(0, systemBG);
+        }
+
+        // 3. Material fragmentUniformBindGroup (1번) 세팅
+        const matBG = this.#material?.gpuRenderInfo?.fragmentUniformBindGroup;
+        if (matBG) {
+            passEncoder.setBindGroup(1, matBG);
+        }
+
+        // 4. Tile UniformBindGroup (2번) 세팅
+        if (this.#tileBindGroup) {
+            passEncoder.setBindGroup(2, this.#tileBindGroup);
+        }
+
+        // 5. Vertex & Index Buffer 바인딩
+        passEncoder.setVertexBuffer(0, vertexBuffer.gpuBuffer);
+        passEncoder.setIndexBuffer(indexBuffer.gpuBuffer, 'uint32');
+
+        // 6. Draw Call 발사
+        passEncoder.drawIndexed(indexBuffer.indexCount, 1, 0, 0, 0);
+    }
+
+    #updateTileUniform(): void {
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (!gpuDevice || !this.#tileUniformBuffer) return;
+
+        this.#tileUniformData[0] = this.#tileX;
+        this.#tileUniformData[1] = this.#tileZ;
+
+        gpuDevice.queue.writeBuffer(this.#tileUniformBuffer, 0, this.#tileUniformData.buffer as ArrayBuffer, 0, 8);
+    }
+
+    #getOrCreateRenderPipeline(geom: any): GPURenderPipeline | null {
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const material = this.#material;
+        if (!gpuDevice || !material || !material.gpuRenderInfo) return null;
+
+        const key = `${this.#lodLevel}_${this.#topology}_${material.uuid}`;
+        if (this.#renderPipelineCache.has(key)) {
+            return this.#renderPipelineCache.get(key);
+        }
+
+        try {
+            const resourceManager = this.#redGPUContext.resourceManager;
+            const systemBGLayout = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');
+            const fragBGLayout = material.gpuRenderInfo.fragmentBindGroupLayout;
+
+            const tileBGLayout = gpuDevice.createBindGroupLayout({
+                label: `LandscapeTileBGLayout`,
+                entries: [{
+                    binding: 0,
+                    visibility: GPUShaderStage.VERTEX,
+                    buffer: {type: 'uniform'}
+                }]
+            });
+
+            if (this.#tileUniformBuffer) {
+                this.#tileBindGroup = gpuDevice.createBindGroup({
+                    label: `LandscapeTileBindGroup_${this.#tileX}_${this.#tileZ}`,
+                    layout: tileBGLayout,
+                    entries: [{
+                        binding: 0,
+                        resource: {buffer: this.#tileUniformBuffer}
+                    }]
+                });
+            }
+
+            const pipelineLayout = gpuDevice.createPipelineLayout({
+                label: `LandscapePipelineLayout_${key}`,
+                bindGroupLayouts: [systemBGLayout, fragBGLayout, tileBGLayout]
+            });
+
+            const vertexBuffers: GPUVertexBufferLayout[] = [{
+                arrayStride: geom.vertexBuffer?.interleavedStruct?.arrayStride ?? 32,
+                attributes: geom.vertexBuffer?.interleavedStruct?.attributes ?? [
+                    {shaderLocation: 0, offset: 0, format: 'float32x3'},
+                    {shaderLocation: 1, offset: 12, format: 'float32x3'},
+                    {shaderLocation: 2, offset: 24, format: 'float32x2'}
+                ]
+            }];
+
+            const pipeline = gpuDevice.createRenderPipeline({
+                label: `LandscapeRenderPipeline_${key}`,
+                layout: pipelineLayout,
+                vertex: {
+                    module: this.#vertexShaderModule,
+                    entryPoint: 'main',
+                    buffers: vertexBuffers,
+                },
+                fragment: material.gpuRenderInfo.fragmentState,
+                primitive: {
+                    topology: this.#topology,
+                    cullMode: 'none'
+                },
+                depthStencil: {
+                    format: 'depth32float',
+                    depthWriteEnabled: true,
+                    depthCompare: 'less',
+                },
+                multisample: {count: 1}
+            });
+
+            this.#renderPipelineCache.set(key, pipeline);
+            return pipeline;
+        } catch (e) {
+            console.warn('Failed to create Landscape RenderPipeline:', e);
+            return null;
         }
     }
 }

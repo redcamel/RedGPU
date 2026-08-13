@@ -12,6 +12,7 @@ import updateJitter from "./helperFunc/updateJitter";
 import updateViewportAndScissor from "./helperFunc/updateViewportAndScissor";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
 import renderTerrainLayer from "./renderLayers/renderTerrainLayer";
+import renderLandscapeLayer from "./renderLayers/renderLandscapeLayer";
 
 
 /**
@@ -205,6 +206,9 @@ class Renderer {
                 scene.terrainChildren.forEach(v => {
                     v.updateTiles(renderViewStateData)
                 })
+                scene.landscapeChildren.forEach(v => {
+                    v.update(view.camera)
+                })
             }
 
             {
@@ -273,6 +277,7 @@ class Renderer {
             if (skyAtmosphere) skyAtmosphere.renderBackground(renderViewStateData)
             if (axis) axis.render(renderViewStateData)
             renderTerrainLayer(view, viewRenderPassEncoder)
+            renderLandscapeLayer(view, viewRenderPassEncoder)
             renderBasicLayer(view, viewRenderPassEncoder)
             if (grid) grid.render(renderViewStateData)
             renderAlphaLayer(view, viewRenderPassEncoder)
