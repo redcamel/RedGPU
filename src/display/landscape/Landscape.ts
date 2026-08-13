@@ -9,6 +9,7 @@ import LandscapeMaterial from "./LandscapeMaterial";
 import LandscapeOptions from "./LandscapeOptions";
 import LandscapeSharedGeometry from "./LandscapeSharedGeometry";
 import LandscapeSpatialGrid from "./LandscapeSpatialGrid";
+import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "./LandscapeTileStreamer";
 
 const DEFAULT_LOD_COLORS: [number, number, number, number][] = [
     [0.18, 0.8, 0.44, 1.0],  // LOD 0: Green
@@ -39,6 +40,7 @@ export class Landscape {
 
     #wireframe: boolean = false;
     #lodColoration: boolean = false;
+    #tileStreamer: LandscapeTileStreamer;
 
     #worldSizeX: number;
     #worldSizeZ: number;
@@ -117,6 +119,10 @@ export class Landscape {
         this.#maxLODLevel = maxLODLevel;
         this.#wireframe = options.wireframe ?? false;
         this.#lodColoration = options.lodColoration ?? false;
+        this.#tileStreamer = new LandscapeTileStreamer(redGPUContext, this.#spatialGrid, options.loadingRadius ?? 2500.0);
+        if (options.tileUrlResolver) {
+            this.#tileStreamer.tileUrlResolver = options.tileUrlResolver;
+        }
 
         this.#updateTuples();
 
@@ -285,79 +291,8 @@ export class Landscape {
         return Math.min(32, Math.max(1, Math.round(val)));
     }
 
-    update(camera: any): void {
-        if (!camera) return;
-
-        // 카메라 및 컨트롤러 유형에 관계없이 3D 월드 위치(camX, camY, camZ) 안전 추출
-        const camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
-        const camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
-        const camZ = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
-
-        this.#spatialGrid.getCellCoordinates(camX, camZ, this.#tempCellBuffer);
-        const camYSq = camY * camY;
-
-        const components = this.#spatialGrid.flatCells;
-        const count = components.length;
-        const distSqList = this.#lodDistancesSq;
-        const lodLimit = distSqList.length;
-
-        // 1. 패스: 각 컴포넌트별 LOD 계산 및 LOD 그룹별 개수 집계
-        this.#lodCountsBuffer.fill(0);
-
-        for (let i = 0; i < count; i++) {
-            const comp = components[i];
-            const dx = comp.worldX - camX;
-            const dz = comp.worldZ - camZ;
-            const distSq = dx * dx + dz * dz + camYSq;
-
-            let lod = lodLimit;
-            for (let j = 0; j < lodLimit; j++) {
-                if (distSq < distSqList[j]) {
-                    lod = j;
-                    break;
-                }
-            }
-
-            const activeLOD = Math.min(lod, this.#maxLODLevel - 1);
-            comp.lodLevel = activeLOD;
-            this.#lodCountsBuffer[activeLOD]++;
-        }
-
-        // 2. 패스: InstanceBuffer에 LOD 그룹 오프셋 할당
-        const instanceBuf = this.#instanceBuffer;
-        instanceBuf.prepareLODAllocation(this.#lodCountsBuffer);
-
-        // 3. 패스: LOD 그룹별로 정렬하여 인스턴스 데이터 작성 (Zero-GC 재사용 버퍼 타격 + Mesh 표준 prevTileX/Z 100% 동기화)
-        const lodColorationActive = this.#lodColoration;
-        const lodColorsRGBA = this.#lodColorsRGBA;
-        const defaultColor = this.#defaultTerrainColorRGBA;
-
-        for (let i = 0; i < count; i++) {
-            const comp = components[i];
-            const activeLOD = comp.lodLevel;
-
-            const colorRGBA = lodColorationActive
-                ? lodColorsRGBA[activeLOD]
-                : defaultColor;
-
-            instanceBuf.writeLODInstanceData(
-                activeLOD,
-                comp.worldX,
-                comp.worldZ,
-                comp.prevWorldX,
-                comp.prevWorldZ,
-                colorRGBA[0],
-                colorRGBA[1],
-                colorRGBA[2],
-                colorRGBA[3]
-            );
-
-            // 프레임 위치 동기화 완료 후 이전 위치 갱신
-            comp.updatePrevPosition();
-        }
-
-        // 4. GPU 버퍼 동기화 제출
-        instanceBuf.flushToGPU();
+    get tileStreamer(): LandscapeTileStreamer {
+        return this.#tileStreamer;
     }
 
     /**
@@ -535,8 +470,123 @@ export class Landscape {
         }
     }
 
+    get loadingRadius(): number {
+        return this.#tileStreamer.loadingRadius;
+    }
+
+    get instanceBuffer(): LandscapeInstanceBuffer {
+        return this.#instanceBuffer;
+    }
+
+    get sharedGeometry(): LandscapeSharedGeometry {
+        return this.#sharedGeometry;
+    }
+
+    get spatialGrid(): LandscapeSpatialGrid {
+        return this.#spatialGrid;
+    }
+
+    set loadingRadius(value: number) {
+        this.#tileStreamer.loadingRadius = value;
+    }
+
+    get maxLoadsPerFrame(): number {
+        return this.#tileStreamer.maxLoadsPerFrame;
+    }
+
+    set maxLoadsPerFrame(value: number) {
+        this.#tileStreamer.maxLoadsPerFrame = value;
+    }
+
+    get tileUrlResolver(): LandscapeTileUrlResolver | null {
+        return this.#tileStreamer.tileUrlResolver;
+    }
+
+    set tileUrlResolver(resolver: LandscapeTileUrlResolver | null) {
+        this.#tileStreamer.tileUrlResolver = resolver;
+    }
+
+    update(camera: any): void {
+        if (!camera) return;
+
+        // 카메라 및 컨트롤러 유형에 관계없이 3D 월드 위치(camX, camY, camZ) 안전 추출
+        const camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
+        const camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
+        const camZ = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
+
+        this.#spatialGrid.getCellCoordinates(camX, camZ, this.#tempCellBuffer);
+        this.#tileStreamer.update(camX, camZ);
+        const camYSq = camY * camY;
+
+        const components = this.#spatialGrid.flatCells;
+        const count = components.length;
+        const distSqList = this.#lodDistancesSq;
+        const lodLimit = distSqList.length;
+
+        // 1. 패스: 각 컴포넌트별 LOD 계산 및 LOD 그룹별 개수 집계
+        this.#lodCountsBuffer.fill(0);
+
+        for (let i = 0; i < count; i++) {
+            const comp = components[i];
+            const dx = comp.worldX - camX;
+            const dz = comp.worldZ - camZ;
+            const distSq = dx * dx + dz * dz + camYSq;
+
+            let lod = lodLimit;
+            for (let j = 0; j < lodLimit; j++) {
+                if (distSq < distSqList[j]) {
+                    lod = j;
+                    break;
+                }
+            }
+
+            const activeLOD = Math.min(lod, this.#maxLODLevel - 1);
+            comp.lodLevel = activeLOD;
+            this.#lodCountsBuffer[activeLOD]++;
+        }
+
+        // 2. 패스: InstanceBuffer에 LOD 그룹 오프셋 할당
+        const instanceBuf = this.#instanceBuffer;
+        instanceBuf.prepareLODAllocation(this.#lodCountsBuffer);
+
+        // 3. 패스: LOD 그룹별로 정렬하여 인스턴스 데이터 작성 (Zero-GC 재사용 버퍼 타격 + Mesh 표준 prevTileX/Z 100% 동기화)
+        const lodColorationActive = this.#lodColoration;
+        const lodColorsRGBA = this.#lodColorsRGBA;
+        const defaultColor = this.#defaultTerrainColorRGBA;
+
+        for (let i = 0; i < count; i++) {
+            const comp = components[i];
+            const activeLOD = comp.lodLevel;
+
+            const colorRGBA = lodColorationActive
+                ? lodColorsRGBA[activeLOD]
+                : defaultColor;
+
+            instanceBuf.writeLODInstanceData(
+                activeLOD,
+                comp.worldX,
+                comp.worldZ,
+                comp.prevWorldX,
+                comp.prevWorldZ,
+                colorRGBA[0],
+                colorRGBA[1],
+                colorRGBA[2],
+                colorRGBA[3]
+            );
+
+            // 프레임 위치 동기화 완료 후 이전 위치 갱신
+            comp.updatePrevPosition();
+        }
+
+        // 4. GPU 버퍼 동기화 제출
+        instanceBuf.flushToGPU();
+    }
+
     #rebuildTiles(): void {
         this.#spatialGrid = new LandscapeSpatialGrid(this.#componentCountX, this.#componentCountZ, this.#tileSizeX, this.#tileSizeZ);
+        if (this.#tileStreamer) {
+            this.#tileStreamer.spatialGrid = this.#spatialGrid;
+        }
         this.#sharedGeometry.updateTileSize(this.#tileSizeX, this.#tileSizeZ);
         this.#updateLODDistances();
         this.#renderPipelineCache.clear();
@@ -557,6 +607,8 @@ export class Landscape {
         while (this.#landscapeComponents.length > targetCount) {
             this.#landscapeComponents.pop();
         }
+
+        this.#spatialGrid.clearTiles();
 
         let index = 0;
         for (let row = 0; row < componentCountZ; row++) {
@@ -584,18 +636,6 @@ export class Landscape {
                 index++;
             }
         }
-    }
-
-    get instanceBuffer(): LandscapeInstanceBuffer {
-        return this.#instanceBuffer;
-    }
-
-    get sharedGeometry(): LandscapeSharedGeometry {
-        return this.#sharedGeometry;
-    }
-
-    get spatialGrid(): LandscapeSpatialGrid {
-        return this.#spatialGrid;
     }
 }
 

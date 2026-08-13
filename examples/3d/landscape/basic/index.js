@@ -45,6 +45,13 @@ RedGPU.init(
             lodColoration: true
         });
 
+        landscape.tileUrlResolver = (row, col) => {
+            const BASE_HOST = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
+            const rStr = String(row).padStart(2, '0');
+            const cStr = String(col).padStart(2, '0');
+            return `${BASE_HOST}28_134_86_730_13_512_512_16bit_tile_${rStr}_${cStr}.png`;
+        };
+
         scene.addLandscape(landscape);
 
         // 5. 실시간 HUD 데이터 모니터링 패널 구축
@@ -137,6 +144,10 @@ RedGPU.init(
                         <span>🔺 Total Active Triangles:</span>
                         <span style="color:#facc15; font-weight:bold;">${activeTotalTris.toLocaleString()} Triangles</span>
                     </div>
+                    <div style="display:flex; justify-content:space-between; margin-top:2px;">
+                        <span>🛰️ Streamed Host Tiles:</span>
+                        <span style="color:#38bdf8; font-weight:bold;">${landscape.tileStreamer ? landscape.tileStreamer.loadedTileCount : 0} Loaded <span style="font-size:10px; color:#cbd5e1;">(Queue: ${landscape.tileStreamer ? landscape.tileStreamer.pendingQueueSize : 0})</span></span>
+                    </div>
                 </div>
 
                 <div id="statInfo" style="margin-top:6px; font-size:11px; color:#94a3b8; border-top:1px solid rgba(255,255,255,0.1); padding-top:4px;">
@@ -145,12 +156,20 @@ RedGPU.init(
             `;
         };
 
-        document.body.appendChild(hud);
+        // 5-1. 정식 RedGPU 디버거 클래스 (LandscapeSpatialGridDebugger) 인스턴스 생성
+        const spatialGridDebugger = new RedGPU.Display.LandscapeSpatialGridDebugger(landscape, controller, {
+            width: 100,
+            height: 100,
+            left: 12,
+            bottom: 12
+        });
 
         // 6. RedGPU 정식 Renderer 생성 및 매 프레임 실시간 HUD 추적 렌더 루프 시작 (60fps Real-time Tracking)
         const renderer = new RedGPU.Renderer();
         const render = (time) => {
+            landscape.update(controller);
             updateHUD();
+            spatialGridDebugger.update();
         };
         renderer.start(redGPUContext, render);
 
@@ -298,7 +317,32 @@ const renderTestPane = (redGPUContext, landscape, controller) => {
                 if (landscape) landscape.lodColoration = ev.value;
             });
 
-            // Folder 4: Camera Controls (moveSpeed)
+            // Folder 4: Tile Streaming Controls (loadingRadius, maxLoadsPerFrame)
+            if (landscape) {
+                const streamConfig = {
+                    loadingRadius: landscape.loadingRadius,
+                    maxLoadsPerFrame: landscape.maxLoadsPerFrame
+                };
+                const folderStream = pane.addFolder({title: '🛰️ Tile Streaming & Radius', expanded: true});
+
+                folderStream.addBinding(streamConfig, 'loadingRadius', {
+                    min: 500,
+                    max: 8000,
+                    step: 100
+                }).on('change', (ev) => {
+                    if (landscape) landscape.loadingRadius = ev.value;
+                });
+
+                folderStream.addBinding(streamConfig, 'maxLoadsPerFrame', {
+                    min: 1,
+                    max: 10,
+                    step: 1
+                }).on('change', (ev) => {
+                    if (landscape) landscape.maxLoadsPerFrame = ev.value;
+                });
+            }
+
+            // Folder 5: Camera Controls (moveSpeed)
             if (controller) {
                 const folderCam = pane.addFolder({title: '🎮 Camera Controls', expanded: true});
                 folderCam.addBinding(config, 'moveSpeed', {

@@ -49,6 +49,13 @@ export class LandscapeSpatialGrid {
     }
 
     /**
+     * [KO] 타일 등록을 초기화합니다.
+     */
+    clearTiles(): void {
+        this.#flatCells.length = 0;
+    }
+
+    /**
      * [KO] 특정 행, 열 위치에 타일 컴포넌트를 등록합니다.
      */
     registerTile(row: number, col: number, component: LandscapeComponent): void {
@@ -66,6 +73,26 @@ export class LandscapeSpatialGrid {
 
         outBuffer[0] = Math.min(Math.max(0, col), this.#tileCountX - 1);
         outBuffer[1] = Math.min(Math.max(0, row), this.#tileCountZ - 1);
+    }
+
+    /**
+     * [KO] 카메라 위치 (camX, camZ)와 시야 반경(loadingRadius) 내의 컴포넌트 타일들을 재사용 배열(outArray)에 작성합니다 (Zero-GC).
+     * @returns 반경 내 활성 컴포넌트 타일 수
+     */
+    getActiveComponentsInRadius(camX: number, camZ: number, loadingRadius: number, outArray: LandscapeComponent[]): number {
+        outArray.length = 0;
+        const radiusSq = loadingRadius * loadingRadius;
+        const count = this.#flatCells.length;
+
+        for (let i = 0; i < count; i++) {
+            const comp = this.#flatCells[i];
+            const dx = comp.worldX - camX;
+            const dz = comp.worldZ - camZ;
+            if (dx * dx + dz * dz <= radiusSq) {
+                outArray.push(comp);
+            }
+        }
+        return outArray.length;
     }
 }
 

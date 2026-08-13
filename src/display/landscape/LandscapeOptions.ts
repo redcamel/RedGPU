@@ -60,6 +60,18 @@ export interface LandscapeOptions {
     landscapeMaterial?: LandscapeMaterial;
 
     /**
+     * [KO] 타일 URL 생성기 콜백 함수
+     * [EN] Tile URL resolver callback function
+     */
+    tileUrlResolver?: (row: number, col: number) => string;
+
+    /**
+     * [KO] 동적 타일 로딩 시야 반경 (미터 단위, 기본값: 2500.0)
+     * [EN] Dynamic tile loading radius in meters (default: 2500.0)
+     */
+    loadingRadius?: number;
+
+    /**
      * [KO] 와이어프레임 표시 여부 (기본값: false)
      * [EN] Wireframe display flag (default: false)
      */

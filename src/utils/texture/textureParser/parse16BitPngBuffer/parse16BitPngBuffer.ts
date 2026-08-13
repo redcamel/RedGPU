@@ -157,7 +157,7 @@ export async function parse16BitPngBuffer(buffer: ArrayBuffer, flipY: boolean = 
 export async function parse16BitPngBufferToGPUTexture(
     redGPUContext: RedGPUContext,
     buffer: ArrayBuffer,
-    format: GPUTextureFormat = 'rgba16float',
+    format: GPUTextureFormat = 'r16unorm',
     flipY: boolean = false
 ): Promise<{ gpuTexture: GPUTexture, width: number, height: number } | null> {
     const parsed = await parse16BitPngBuffer(buffer, flipY);
@@ -165,6 +165,39 @@ export async function parse16BitPngBufferToGPUTexture(
 
     const {pixels, width, height} = parsed;
     const {gpuDevice} = redGPUContext;
+
+    let bytesPerPixel = 2;
+    let uploadBuffer: ArrayBufferView = pixels;
+
+    if (format === 'rgba16float') {
+        bytesPerPixel = 8;
+        const count = width * height;
+        const rgba = new Uint16Array(count * 4);
+        for (let i = 0; i < count; i++) {
+            const val = pixels[i];
+            const i4 = i * 4;
+            rgba[i4] = val;
+            rgba[i4 + 1] = val;
+            rgba[i4 + 2] = val;
+            rgba[i4 + 3] = 65535;
+        }
+        uploadBuffer = rgba;
+    } else if (format === 'rgba8unorm') {
+        bytesPerPixel = 4;
+        const count = width * height;
+        const rgba = new Uint8Array(count * 4);
+        for (let i = 0; i < count; i++) {
+            const val = pixels[i] >> 8;
+            const i4 = i * 4;
+            rgba[i4] = val;
+            rgba[i4 + 1] = val;
+            rgba[i4 + 2] = val;
+            rgba[i4 + 3] = 255;
+        }
+        uploadBuffer = rgba;
+    }
+
+    const bytesPerRow = width * bytesPerPixel;
 
     const gpuTexture = gpuDevice.createTexture({
         size: [width, height],
@@ -175,8 +208,8 @@ export async function parse16BitPngBufferToGPUTexture(
 
     gpuDevice.queue.writeTexture(
         {texture: gpuTexture},
-        pixels.buffer,
-        {bytesPerRow: width * 2},
+        uploadBuffer.buffer,
+        {bytesPerRow},
         [width, height]
     );
 
