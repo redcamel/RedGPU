@@ -49,7 +49,18 @@ RedGPU.init(
             const BASE_HOST = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
             const rStr = String(row).padStart(2, '0');
             const cStr = String(col).padStart(2, '0');
-            return `${BASE_HOST}28_134_86_730_13_512_512_16bit_tile_${rStr}_${cStr}.png`;
+
+            // [KO] tile_001 에셋의 외곽(15번째) 타일 해상도 파일명 처리
+            let sizeStr = '512_512';
+            if (row === 15 && col === 15) {
+                sizeStr = '449_449';
+            } else if (col === 15) {
+                sizeStr = '449_512';
+            } else if (row === 15) {
+                sizeStr = '512_449';
+            }
+
+            return `${BASE_HOST}28_134_86_730_13_${sizeStr}_16bit_tile_${rStr}_${cStr}.png`;
         };
 
         scene.addLandscape(landscape);

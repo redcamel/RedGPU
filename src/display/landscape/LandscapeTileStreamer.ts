@@ -24,6 +24,7 @@ export class LandscapeTileStreamer {
     #pendingQueue: LandscapeComponent[] = [];
     #loadingMap: Map<string, boolean> = new Map();
     #loadedMap: Map<string, any> = new Map();
+    #failedMap: Map<string, number> = new Map(); // key -> last failed timestamp (ms)
 
     constructor(redGPUContext: RedGPUContext, spatialGrid: LandscapeSpatialGrid, loadingRadius: number = 2500.0) {
         this.#redGPUContext = redGPUContext;
@@ -34,6 +35,7 @@ export class LandscapeTileStreamer {
     resetTileState(): void {
         this.#loadingMap.clear();
         this.#loadedMap.clear();
+        this.#failedMap.clear();
         this.#pendingQueue.length = 0;
     }
 
@@ -101,15 +103,19 @@ export class LandscapeTileStreamer {
             this.#activeComponentsBuffer
         );
 
-        // 2. 미로딩 컴포넌트 스트리밍 큐에 추가
+        // 2. 미로딩 컴포넌트 스트리밍 큐에 추가 (실패 타일은 5초 쿨다운 후 재시도하여 60fps 재요청 폭풍 방지)
+        const now = performance.now();
         const activeLen = this.#activeComponentsBuffer.length;
         for (let i = 0; i < activeLen; i++) {
             const comp = this.#activeComponentsBuffer[i];
             const key = `${comp.componentZ}_${comp.componentX}`;
 
             if (!this.#loadedMap.has(key) && !this.#loadingMap.has(key)) {
-                this.#loadingMap.set(key, true);
-                this.#pendingQueue.push(comp);
+                const lastFailed = this.#failedMap.get(key);
+                if (!lastFailed || (now - lastFailed > 5000)) {
+                    this.#loadingMap.set(key, true);
+                    this.#pendingQueue.push(comp);
+                }
             }
         }
 
@@ -139,6 +145,7 @@ export class LandscapeTileStreamer {
             if (parsed) {
                 console.log(`[LandscapeTileStreamer ✅] Tile (${key}) loaded successfully! (${parsed.width}x${parsed.height})`);
                 this.#loadedMap.set(key, parsed.gpuTexture);
+                this.#failedMap.delete(key);
 
                 if (this.#vhtAtlasTexture) {
                     const {gpuDevice} = this.#redGPUContext;
@@ -165,6 +172,7 @@ export class LandscapeTileStreamer {
             }
         } catch (e) {
             console.warn(`[LandscapeTileStreamer ⚠️] Tile (${key}) load failed:`, e);
+            this.#failedMap.set(key, performance.now());
         } finally {
             this.#loadingMap.delete(key);
         }
