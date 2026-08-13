@@ -1,6 +1,6 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
-import ColorMaterial from "../../material/colorMaterial/ColorMaterial";
+import ABaseMaterial from "../../material/core/ABaseMaterial";
 import Mesh from "../mesh/Mesh";
 import LandscapeSharedGeometry from "./LandscapeSharedGeometry";
 
@@ -23,7 +23,7 @@ export class LandscapeComponent extends Mesh {
      * @param sharedGeometry - [KO] 공유 LOD 지오메트리 객체 [EN] Shared LOD geometry manager
      * @param tileX - [KO] 월드 X 위치 [EN] World X position
      * @param tileZ - [KO] 월드 Z 위치 [EN] World Z position
-     * @param material - [KO] 머티리얼 (선택) [EN] Material (optional)
+     * @param material - [KO] 타일 머티리얼 [EN] Tile material
      * @param wireframe - [KO] 와이어프레임 적용 여부 [EN] Whether wireframe mode is enabled
      */
     constructor(
@@ -31,11 +31,10 @@ export class LandscapeComponent extends Mesh {
         sharedGeometry: LandscapeSharedGeometry,
         tileX: number,
         tileZ: number,
-        material?: any,
+        material: ABaseMaterial,
         wireframe: boolean = false
     ) {
-        const defaultMaterial = material || new ColorMaterial(redGPUContext, '#338833');
-        super(redGPUContext, sharedGeometry.getGeometry(0), defaultMaterial);
+        super(redGPUContext, sharedGeometry.getGeometry(0), material);
 
         this.#sharedGeometry = sharedGeometry;
         this.#tileX = tileX;
@@ -47,21 +46,25 @@ export class LandscapeComponent extends Mesh {
         this.wireframe = wireframe;
     }
 
+    public set wireframe(value: boolean) {
+        this.#wireframe = value;
+        if (value) {
+            // LINE_LIST는 Non-strip topology이므로 stripIndexFormat이 반드시 undefined이어야 함
+            this.primitiveState.stripIndexFormat = undefined;
+            this.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
+        } else {
+            // TRIANGLE_LIST도 Non-strip topology이므로 stripIndexFormat이 반드시 undefined이어야 함
+            this.primitiveState.stripIndexFormat = undefined;
+            this.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
+        }
+    }
+
     /**
      * [KO] 와이어프레임 렌더링 모드 설정 (LINE_LIST 및 WebGPU stripIndexFormat undefined 규격 적용)
      * [EN] Sets wireframe rendering mode (applies LINE_LIST & WebGPU stripIndexFormat undefined spec)
      */
     public get wireframe(): boolean {
         return this.#wireframe;
-    }
-
-    public set wireframe(value: boolean) {
-        this.#wireframe = value;
-        if (value) {
-            this.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.LINE_LIST;
-        } else {
-            this.primitiveState.topology = GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
-        }
     }
 
     /**

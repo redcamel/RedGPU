@@ -1,13 +1,15 @@
 import RedGPUContext from "../../context/RedGPUContext";
 import ColorMaterial from "../../material/colorMaterial/ColorMaterial";
+import ABaseMaterial from "../../material/core/ABaseMaterial";
 import Mesh from "../mesh/Mesh";
+import LANDSCAPE_BASE_GRID_SIZE from "./LANDSCAPE_BASE_GRID_SIZE";
 import LandscapeComponent from "./LandscapeComponent";
 import LandscapeOptions from "./LandscapeOptions";
 import LandscapeSharedGeometry from "./LandscapeSharedGeometry";
 import LandscapeSpatialGrid from "./LandscapeSpatialGrid";
 
 /**
- * [KO] SpatialGrid $O(1)$ 공간 변환 및 언리얼 엔진 5 규격 파라미터 제어(worldSize, tileCount 주도 & tileSize 읽기전용) 기반 Landscape 지형 시스템 클래스입니다.
+ * [KO] SpatialGrid $O(1)$ 공간 변환 및 언리얼 엔진 5 규격 파라미터 제어 기반 Landscape 지형 시스템 클래스입니다.
  * [EN] Landscape terrain system class based on SpatialGrid O(1) spatial transformation and Unreal Engine 5 spec parameter controls.
  */
 export class Landscape extends Mesh {
@@ -17,7 +19,7 @@ export class Landscape extends Mesh {
     #lodDistancesSq: number[] = [];
     #lodMultipliers: number[] = [];
     #lodMaterials: ColorMaterial[] = [];
-    #baseMaterial: ColorMaterial;
+    #baseMaterial: ABaseMaterial;
 
     #wireframe: boolean = false;
     #debugLODColorMode: boolean = false;
@@ -35,8 +37,8 @@ export class Landscape extends Mesh {
     #tempCellBuffer: Int32Array = new Int32Array(2);
 
     /**
-     * [KO] Landscape 인스턴스를 생성합니다 (언리얼 엔진 5 공식 기본값: worldSize 8000m, tileCount 8x8, gridSize 64, lodCount 4).
-     * [EN] Creates an instance of Landscape (Unreal Engine 5 official defaults: worldSize 8000m, tileCount 8x8, gridSize 64, lodCount 4).
+     * [KO] Landscape 인스턴스를 생성합니다 (언리얼 엔진 5 공식 기본값: worldSize 8000m, tileCount 8x8, gridSize 63 [63x63 Quads, 4096 Vertices], lodCount 4).
+     * [EN] Creates an instance of Landscape (Unreal Engine 5 official defaults: worldSize 8000m, tileCount 8x8, gridSize 63 [63x63 Quads, 4096 Vertices], lodCount 4).
      *
      * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
      * @param options - [KO] Landscape 설정 옵션 [EN] Landscape configuration options
@@ -66,17 +68,20 @@ export class Landscape extends Mesh {
             }
         }
 
-        const gridSize = options.gridSize ?? 64;
-        const lodCount = options.lodCount ?? 4;
+        // 언리얼 엔진 5 공식 정석 베이스 쿼드 기본값: LANDSCAPE_BASE_GRID_SIZE.QUAD_63 (63x63 Quads)
+        const gridSize = options.gridSize ?? LANDSCAPE_BASE_GRID_SIZE.QUAD_63;
+        const lodCount = Math.min(8, Math.max(1, options.lodCount ?? 4));
 
-        // 2. 지형 공유 지오메트리 사전 생성 (LOD 0: gridSize -> LOD N: 1/2씩 감축)
+        // 2. 기본 머티리얼 옵션 수용 (옵션 미지정 시 기본 ColorMaterial 자동 할당)
+        const baseMaterial = options.material || new ColorMaterial(redGPUContext, '#3a7d44');
+
+        // 3. 지형 공유 지오메트리 사전 생성 (LOD 0: gridSize -> LOD N: 1/2씩 감축)
         const sharedGeometry = new LandscapeSharedGeometry(redGPUContext, tileSizeX, tileSizeZ, gridSize, lodCount);
-        const baseMaterial = new ColorMaterial(redGPUContext, '#3a7d44');
 
         // 메인 컨테이너 역할용 루트 메시 초기화 (자신의 geometry는 null로 세팅하여 중복 렌더링 방지)
         super(redGPUContext, null, baseMaterial);
 
-        // 3. 2D SpatialGrid 공간 관할 객체 생성
+        // 4. 2D SpatialGrid 공간 관할 객체 생성
         this.#spatialGrid = new LandscapeSpatialGrid(tileCountX, tileCountZ, tileSizeX, tileSizeZ);
         this.#sharedGeometry = sharedGeometry;
         this.#baseMaterial = baseMaterial;
@@ -91,30 +96,8 @@ export class Landscape extends Mesh {
         this.#wireframe = options.wireframe ?? false;
         this.#debugLODColorMode = options.debugLODColorMode ?? false;
 
-        // 4. LOD 시각화 팔레트 사전 할당 (Zero-GC)
-        const defaultColors = [
-            '#00ff00', // LOD 0: 초록 (고해상도)
-            '#ffff00', // LOD 1: 노랑
-            '#ff8800', // LOD 2: 주황
-            '#ff0000', // LOD 3: 빨강 (저해상도)
-            '#8800ff', // LOD 4: 보라
-            '#00ffff'  // LOD 5+: 청록
-        ];
-
-        for (let i = 0; i < lodCount; i++) {
-            const colorHex = defaultColors[i % defaultColors.length];
-            const mat = new ColorMaterial(redGPUContext, colorHex);
-            this.#lodMaterials.push(mat);
-        }
-
-        // 5. tileSize에 비례하는 상대적 LOD 전환 배율 지정
-        const defaultMultipliers = [1.25, 2.5, 4.25, 7.0, 11.0];
-        for (let i = 0; i < lodCount - 1; i++) {
-            this.#lodMultipliers.push(defaultMultipliers[i] ?? (1.25 * Math.pow(1.8, i)));
-        }
-
-        // LOD 제곱 임계 거리 갱신 연산
-        this.#updateLODDistances();
+        // 5. LOD 시각화 팔레트 및 배율 초기화
+        this.#rebuildLODStructures(options.lodColors, options.lodMultipliers, options.lodDistances);
 
         // 6. SpatialGrid 및 타일(LandscapeComponent) 격자 배치 생성
         this.#rebuildTiles();
@@ -154,6 +137,27 @@ export class Landscape extends Mesh {
      */
     public get tileCount(): [number, number] {
         return [this.#tileCountX, this.#tileCountZ];
+    }
+
+    public set tileCount(value: number | [number, number]) {
+        let tcX = this.#tileCountX;
+        let tcZ = this.#tileCountZ;
+        if (Array.isArray(value)) {
+            tcX = Landscape.#clampTileCount(value[0]);
+            tcZ = Landscape.#clampTileCount(value[1]);
+        } else if (typeof value === 'number') {
+            const count = Landscape.#clampTileCount(value);
+            tcX = count;
+            tcZ = count;
+        }
+
+        if (this.#tileCountX !== tcX || this.#tileCountZ !== tcZ) {
+            this.#tileCountX = tcX;
+            this.#tileCountZ = tcZ;
+            this.#tileSizeX = this.#worldSizeX / tcX;
+            this.#tileSizeZ = this.#worldSizeZ / tcZ;
+            this.#rebuildTiles();
+        }
     }
 
     /**
@@ -204,33 +208,50 @@ export class Landscape extends Mesh {
         }
     }
 
-    public set tileCount(value: number | [number, number]) {
-        let tcX = this.#tileCountX;
-        let tcZ = this.#tileCountZ;
-        if (Array.isArray(value)) {
-            tcX = Landscape.#clampTileCount(value[0]);
-            tcZ = Landscape.#clampTileCount(value[1]);
-        } else if (typeof value === 'number') {
-            const count = Landscape.#clampTileCount(value);
-            tcX = count;
-            tcZ = count;
-        }
+    /**
+     * [KO] 타일당 최고 LOD 쿼드 해상도를 반환하거나 동적으로 변경합니다 (LANDSCAPE_BASE_GRID_SIZE).
+     * [EN] Gets or sets the base grid quad resolution per tile dynamically (LANDSCAPE_BASE_GRID_SIZE).
+     */
+    public get gridSize(): number {
+        return this.#gridSize;
+    }
 
-        if (this.#tileCountX !== tcX || this.#tileCountZ !== tcZ) {
-            this.#tileCountX = tcX;
-            this.#tileCountZ = tcZ;
-            this.#tileSizeX = this.#worldSizeX / tcX;
-            this.#tileSizeZ = this.#worldSizeZ / tcZ;
+    public set gridSize(value: number) {
+        if (value > 0 && this.#gridSize !== value) {
+            this.#gridSize = value;
+            this.#sharedGeometry = new LandscapeSharedGeometry(
+                this.redGPUContext,
+                this.#tileSizeX,
+                this.#tileSizeZ,
+                value,
+                this.#lodCount
+            );
             this.#rebuildTiles();
         }
     }
 
     /**
-     * [KO] 단일 타일 크기를 반환합니다 (언리얼 엔진 5 표준: [tileSizeX, tileSizeZ] 파생 읽기 전용 값).
-     * [EN] Returns the size of a single tile (Unreal Engine 5 standard: derived readonly value of [tileSizeX, tileSizeZ]).
+     * [KO] 지형의 최고 LOD 단계 수를 반환하거나 동적으로 변경합니다 (최소 1단계 ~ 최대 8단계).
+     * [EN] Gets or sets the maximum number of LOD levels dynamically (min 1 to max 8 levels).
      */
-    public get tileSize(): [number, number] {
-        return [this.#tileSizeX, this.#tileSizeZ];
+    public get lodCount(): number {
+        return this.#lodCount;
+    }
+
+    public set lodCount(value: number) {
+        const count = Math.min(8, Math.max(1, Math.round(value)));
+        if (this.#lodCount !== count) {
+            this.#lodCount = count;
+            this.#sharedGeometry = new LandscapeSharedGeometry(
+                this.redGPUContext,
+                this.#tileSizeX,
+                this.#tileSizeZ,
+                this.#gridSize,
+                count
+            );
+            this.#rebuildLODStructures();
+            this.#rebuildTiles();
+        }
     }
 
     /**
@@ -238,6 +259,44 @@ export class Landscape extends Mesh {
      */
     static #clampTileCount(val: number): number {
         return Math.min(32, Math.max(1, Math.round(val)));
+    }
+
+    /**
+     * [KO] LOD 팔레트 및 거리 임계 배열 재구축 헬퍼
+     */
+    #rebuildLODStructures(userColors?: string[], userMultipliers?: number[], userDistances?: number[]): void {
+        this.#lodMaterials.length = 0;
+        this.#lodMultipliers.length = 0;
+
+        const defaultColors = [
+            '#00ff00', // LOD 0: 초록
+            '#ffff00', // LOD 1: 노랑
+            '#ff8800', // LOD 2: 주황
+            '#ff0000', // LOD 3: 빨강
+            '#8800ff', // LOD 4: 보라
+            '#00ffff', // LOD 5: 청록
+            '#ff00ff', // LOD 6: 마젠타
+            '#ffffff'  // LOD 7: 흰색
+        ];
+        const colors = userColors ?? defaultColors;
+
+        for (let i = 0; i < this.#lodCount; i++) {
+            const colorHex = colors[i % colors.length];
+            this.#lodMaterials.push(new ColorMaterial(this.redGPUContext, colorHex));
+        }
+
+        const defaultMultipliers = [1.25, 2.5, 4.25, 7.0, 11.0, 16.0, 24.0];
+        const multipliers = userMultipliers ?? defaultMultipliers;
+
+        for (let i = 0; i < this.#lodCount - 1; i++) {
+            this.#lodMultipliers.push(multipliers[i] ?? (1.25 * Math.pow(1.8, i)));
+        }
+
+        if (userDistances && userDistances.length > 0) {
+            this.#lodDistancesSq = userDistances.map(d => d * d);
+        } else {
+            this.#updateLODDistances();
+        }
     }
 
     /**
@@ -303,6 +362,14 @@ export class Landscape extends Mesh {
                 index++;
             }
         }
+    }
+
+    /**
+     * [KO] 단일 타일 크기를 반환합니다 (언리얼 엔진 5 표준: [tileSizeX, tileSizeZ] 파생 읽기 전용 값).
+     * [EN] Returns the size of a single tile (Unreal Engine 5 standard: derived readonly value of [tileSizeX, tileSizeZ]).
+     */
+    public get tileSize(): [number, number] {
+        return [this.#tileSizeX, this.#tileSizeZ];
     }
 
     /**
