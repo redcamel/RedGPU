@@ -30,6 +30,9 @@ struct MaterialUniforms {
     metallicFactor: f32,
 };
 
+@group(1) @binding(1) var vhtSampler: sampler;
+@group(1) @binding(3) var vntNormalTexture: texture_2d<f32>;
+
 @group(2) @binding(0) var<uniform> uniforms: MaterialUniforms;
 @group(2) @binding(1) var baseColorTextureSampler: sampler;
 
@@ -41,13 +44,17 @@ struct MaterialUniforms {
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
     
-    let input_vertexNormal = inputData.vertexNormal;
     let input_vertexPosition = inputData.vertexPosition;
     let u_cameraPosition = systemUniforms.camera.cameraPosition;
     let preExposure = systemUniforms.preExposure;
 
     let u_metallicFactor = uniforms.metallicFactor;
     let u_roughnessFactor = uniforms.roughnessFactor;
+
+    // RVT 노멀 아틀라스(@group(1) @binding(3)) 픽셀 샘플링 및 복원
+    let encodedNormal = textureSampleLevel(vntNormalTexture, vhtSampler, inputData.uv1, 0.0).rgb;
+    let sampledNormal = normalize(encodedNormal * 2.0 - vec3<f32>(1.0));
+    let N: vec3<f32> = select(sampledNormal, vec3<f32>(0.0, 1.0, 0.0), length(encodedNormal) <= 0.001);
 
     // Base Color & Albedo
     var baseColor = uniforms.color;
@@ -66,7 +73,6 @@ fn main(inputData: InputData) -> OutputFragment {
 
     // Core Vectors
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
-    let N: vec3<f32> = normalize(input_vertexNormal);
     let NdotV = max(abs(dot(N, V)), 0.04);
 
     // Fresnel F0

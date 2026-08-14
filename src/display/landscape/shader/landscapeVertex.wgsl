@@ -66,27 +66,6 @@ fn main(input: InputData) -> OutputData {
     let heightValue = textureLoad(heightMapTexture, texCoord, 0).r;
     let prevHeightValue = textureLoad(heightMapTexture, prevTexCoord, 0).r;
 
-    // --- 동적 중앙 차분법(Central Difference) 법선(Normal) 및 접선(Tangent) 연산 ---
-    let coordL = vec2<i32>(clamp((globalUV - vec2<f32>(1.0 / texSize.x, 0.0)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-    let coordR = vec2<i32>(clamp((globalUV + vec2<f32>(1.0 / texSize.x, 0.0)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-    let coordT = vec2<i32>(clamp((globalUV - vec2<f32>(0.0, 1.0 / texSize.y)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-    let coordB = vec2<i32>(clamp((globalUV + vec2<f32>(0.0, 1.0 / texSize.y)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-
-    let hL = textureLoad(heightMapTexture, coordL, 0).r * instanceData.heightScale;
-    let hR = textureLoad(heightMapTexture, coordR, 0).r * instanceData.heightScale;
-    let hT = textureLoad(heightMapTexture, coordT, 0).r * instanceData.heightScale;
-    let hB = textureLoad(heightMapTexture, coordB, 0).r * instanceData.heightScale;
-
-    // 월드 그리드 1셀 단위 거리 (x, z)
-    let gridStepX = (instanceData.worldSizeX / texSize.x) * 2.0;
-    let gridStepZ = (instanceData.worldSizeZ / texSize.y) * 2.0;
-
-    let tangentX = vec3<f32>(gridStepX, hR - hL, 0.0);
-    let bitangentZ = vec3<f32>(0.0, hB - hT, gridStepZ);
-
-    let calculatedNormal = normalize(cross(bitangentZ, tangentX));
-    let calculatedTangent = normalize(tangentX);
-
     let worldY = heightValue * instanceData.heightScale + input.position.z;
     let prevWorldY = prevHeightValue * instanceData.heightScale + input.position.z;
 
@@ -98,11 +77,11 @@ fn main(input: InputData) -> OutputData {
 
     output.position = clipPos;
     output.vertexPosition = worldPos4.xyz;
-    output.vertexNormal = calculatedNormal;
+    output.vertexNormal = vec3<f32>(0.0, 1.0, 0.0);
     output.uv = input.uv;
     output.uv1 = globalUV;
     output.vertexColor_0 = vec4<f32>(1.0, 1.0, 1.0, 1.0);
-    output.vertexTangent = vec4<f32>(calculatedTangent, 1.0);
+    output.vertexTangent = vec4<f32>(1.0, 0.0, 0.0, 1.0);
     output.vertexHeight = worldY;
 
     // 2. TAA & Motion Vector (Mesh 표준 noneJitter 연산)

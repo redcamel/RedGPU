@@ -177,7 +177,7 @@ RedGPU.init(
             `;
         };
 
-        // 5-1. 정식 RedGPU 디버거 클래스 인스턴스 생성 (2D SpatialGrid 및 VHT Heightmap Atlas 디버거)
+        // 5-1. 정식 RedGPU 디버거 클래스 인스턴스 생성 (2D SpatialGrid, VHT Heightmap, VNT Normal Atlas 디버거)
         const spatialGridDebugger = new RedGPU.Display.LandscapeSpatialGridDebugger(landscape, controller, {
             width: 100,
             height: 100,
@@ -192,6 +192,13 @@ RedGPU.init(
             bottom: 12
         });
 
+        const vntDebugger = new RedGPU.Display.LandscapeVNTDebugger(landscape, controller, {
+            width: 100,
+            height: 100,
+            left: 228,
+            bottom: 12
+        });
+
         // 6. RedGPU 정식 Renderer 생성 및 매 프레임 실시간 HUD 추적 렌더 루프 시작 (60fps Real-time Tracking)
         const renderer = new RedGPU.Renderer();
         const render = (time) => {
@@ -199,11 +206,12 @@ RedGPU.init(
             updateHUD();
             spatialGridDebugger.update();
             vhtDebugger.update();
+            vntDebugger.update();
         };
         renderer.start(redGPUContext, render);
 
         // 7. Landscape 모든 get/set 속성 및 2D 디버거 전면 제어 테스트 패널 렌더링
-        renderTestPane(redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger, groundTexture, directionalLight);
+        renderTestPane(redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, directionalLight);
     }
 );
 
@@ -215,10 +223,11 @@ RedGPU.init(
  * @param {RedGPU.Camera.FreeController} controller
  * @param {RedGPU.Display.LandscapeSpatialGridDebugger} spatialGridDebugger
  * @param {RedGPU.Display.LandscapeVHTDebugger} vhtDebugger
+ * @param {RedGPU.Display.LandscapeVNTDebugger} vntDebugger
  * @param {RedGPU.Resource.BitmapTexture} groundTexture
  * @param {RedGPU.Light.DirectionalLight} directionalLight
  */
-const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger, groundTexture, directionalLight) => {
+const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, directionalLight) => {
     const [wsX, wsZ] = landscape ? landscape.worldSize : [8000, 8000];
     const [tcX, tcZ] = landscape ? landscape.componentCount : [8, 8];
     const [tsX, tsZ] = landscape ? landscape.tileSize : [1000, 1000];
@@ -267,6 +276,7 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
         // 7. Debuggers
         spatialGridVisible: true,
         vhtDebuggerVisible: true,
+        vntDebuggerVisible: true,
         boxSize: 100
     };
 
@@ -546,7 +556,7 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
             }
 
             // Folder 7: 2D Debuggers (Visibility & Box Size)
-            const folderDebuggers = pane.addFolder({title: '🔍 2D Debuggers (SpatialGrid & VHT)', expanded: true});
+            const folderDebuggers = pane.addFolder({title: '🔍 2D Debuggers (SpatialGrid, VHT & VNT)', expanded: true});
 
             folderDebuggers.addBinding(config, 'spatialGridVisible').on('change', (ev) => {
                 if (spatialGridDebugger) spatialGridDebugger.visible = ev.value;
@@ -554,6 +564,10 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
 
             folderDebuggers.addBinding(config, 'vhtDebuggerVisible').on('change', (ev) => {
                 if (vhtDebugger) vhtDebugger.visible = ev.value;
+            });
+
+            folderDebuggers.addBinding(config, 'vntDebuggerVisible').on('change', (ev) => {
+                if (vntDebugger) vntDebugger.visible = ev.value;
             });
 
             folderDebuggers.addBinding(config, 'boxSize', {
@@ -568,6 +582,10 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
                 if (vhtDebugger) {
                     vhtDebugger.setSize(sz, sz);
                     vhtDebugger.setPosition(12 + sz + 10, 12);
+                }
+                if (vntDebugger) {
+                    vntDebugger.setSize(sz, sz);
+                    vntDebugger.setPosition(12 + (sz + 10) * 2, 12);
                 }
             });
         }

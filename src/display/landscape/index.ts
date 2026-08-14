@@ -9,6 +9,7 @@ import LandscapeTileStreamer from "./LandscapeTileStreamer";
 import ALandscapeDebugger from "./ALandscapeDebugger";
 import LandscapeSpatialGridDebugger from "./LandscapeSpatialGridDebugger";
 import LandscapeVHTDebugger from "./LandscapeVHTDebugger";
+import LandscapeVNTDebugger from "./LandscapeVNTDebugger";
 import LANDSCAPE_BASE_GRID_SIZE from "./LANDSCAPE_BASE_GRID_SIZE";
 
 export {
@@ -22,6 +23,7 @@ export {
     LandscapeSpatialGrid,
     LandscapeSpatialGridDebugger,
     LandscapeVHTDebugger,
+    LandscapeVNTDebugger,
     LandscapeTileStreamer,
     LANDSCAPE_BASE_GRID_SIZE
 };

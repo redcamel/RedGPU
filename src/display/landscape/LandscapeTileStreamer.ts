@@ -6,6 +6,7 @@ import {
 } from "../../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
 import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import DirectTexture from "../../resources/texture/DirectTexture";
+import LandscapeVNTGenerator from "./LandscapeVNTGenerator";
 
 /**
  * [KO] 타일별 커스텀 URL 생성 리졸버 함수 타입입니다. (row, col 인자 제공)
@@ -14,8 +15,8 @@ import DirectTexture from "../../resources/texture/DirectTexture";
 export type LandscapeTileUrlResolver = (row: number, col: number, comp?: LandscapeComponent) => string;
 
 /**
- * [KO] SpatialGrid 카메라 수평 조망 거리 기반 16비트 고도맵 VHT 아틀라스 스트리머 클래스입니다 (Real-time Tile Streaming Manager).
- * [EN] 16-bit Heightmap VHT Atlas Streamer class based on SpatialGrid camera horizontal viewing distance.
+ * [KO] SpatialGrid 카메라 수평 조망 거리 기반 16비트 고도맵 VHT 아틀라스 & VNT 노멀 아틀라스 스트리머 클래스입니다 (Real-time Tile Streaming Manager).
+ * [EN] 16-bit Heightmap VHT Atlas & VNT Normal Atlas Streamer class based on SpatialGrid camera horizontal viewing distance.
  */
 export class LandscapeTileStreamer {
     #redGPUContext: RedGPUContext;
@@ -24,7 +25,14 @@ export class LandscapeTileStreamer {
     #loadingRadius: number = 2500.0;
     #maxLoadsPerFrame: number = 2;
     #tileUrlResolver: LandscapeTileUrlResolver | null = null;
+
     #vhtAtlasTexture: DirectTexture | null = null;
+    #vntAtlasTexture: DirectTexture | null = null;
+    #vntGenerator: LandscapeVNTGenerator | null = null;
+
+    #heightScale: number = 500.0;
+    #worldSizeX: number = 8000.0;
+    #componentCountX: number = 8;
 
     #activeComponentsBuffer: LandscapeComponent[] = [];
     #pendingQueue: LandscapeComponent[] = [];
@@ -53,105 +61,135 @@ export class LandscapeTileStreamer {
         this.#vhtAtlasTexture = texture;
     }
 
-    get spatialGrid(): LandscapeSpatialGrid {
-        return this.#spatialGrid;
+    get vntAtlasTexture(): DirectTexture | null {
+        return this.#vntAtlasTexture;
+    }
+
+    set vntAtlasTexture(texture: DirectTexture | null) {
+        this.#vntAtlasTexture = texture;
+    }
+
+    get vntGenerator(): LandscapeVNTGenerator | null {
+        return this.#vntGenerator;
+    }
+
+    set vntGenerator(generator: LandscapeVNTGenerator | null) {
+        this.#vntGenerator = generator;
     }
 
     set spatialGrid(grid: LandscapeSpatialGrid) {
         this.#spatialGrid = grid;
+        this.resetTileState();
+    }
+
+    get spatialGrid(): LandscapeSpatialGrid {
+        return this.#spatialGrid;
+    }
+
+    set loadingRadius(val: number) {
+        this.#loadingRadius = Math.max(100, val);
     }
 
     get loadingRadius(): number {
         return this.#loadingRadius;
     }
 
-    set loadingRadius(val: number) {
-        this.#loadingRadius = val;
+    set maxLoadsPerFrame(val: number) {
+        this.#maxLoadsPerFrame = Math.max(1, val);
     }
 
     get maxLoadsPerFrame(): number {
         return this.#maxLoadsPerFrame;
     }
 
-    set maxLoadsPerFrame(val: number) {
-        this.#maxLoadsPerFrame = val;
-    }
-
-    get pendingQueueSize(): number {
-        return this.#pendingQueue.length;
-    }
-
-    get loadedTileCount(): number {
-        return this.#loadedMap.size;
+    set tileUrlResolver(resolver: LandscapeTileUrlResolver | null) {
+        this.#tileUrlResolver = resolver;
+        this.resetTileState();
     }
 
     get tileUrlResolver(): LandscapeTileUrlResolver | null {
         return this.#tileUrlResolver;
     }
 
-    set tileUrlResolver(resolver: LandscapeTileUrlResolver | null) {
-        this.#tileUrlResolver = resolver;
-        if (resolver) {
-            console.log('[LandscapeTileStreamer 🛰️] Tile URL Resolver registered successfully!');
-        }
+    setTerrainConfig(heightScale: number, worldSizeX: number, componentCountX: number): void {
+        this.#heightScale = heightScale;
+        this.#worldSizeX = worldSizeX;
+        this.#componentCountX = componentCountX;
     }
 
-    /**
-     * [KO] 매 프레임 카메라 위치를 기준으로 시야 반경 내 타일을 추적하고 동적 로딩을 수행합니다 (Zero-GC).
-     */
-    update(camX: number, camZ: number): void {
-        if (!this.#tileUrlResolver) return;
-        // 1. 시야 반경 내 활성 컴포넌트 목록 수집 (Zero-GC 재사용 버퍼)
-        this.#spatialGrid.getActiveComponentsInRadius(
-            camX,
-            camZ,
-            this.#loadingRadius,
-            this.#activeComponentsBuffer
-        );
-
-        // 2. 미로딩 컴포넌트 스트리밍 큐에 추가 (실패 타일은 5초 쿨다운 후 재시도하여 60fps 재요청 폭풍 방지)
-        const now = performance.now();
-        const activeLen = this.#activeComponentsBuffer.length;
-        for (let i = 0; i < activeLen; i++) {
-            const comp = this.#activeComponentsBuffer[i];
-            const key = `${comp.componentZ}_${comp.componentX}`;
-
-            if (!this.#loadedMap.has(key) && !this.#loadingMap.has(key)) {
-                const lastFailed = this.#failedMap.get(key);
-                if (!lastFailed || (now - lastFailed > 5000)) {
-                    this.#loadingMap.set(key, true);
-                    this.#pendingQueue.push(comp);
-                }
-            }
-        }
-
-        // 3. 프레임당 로딩 예산(maxLoadsPerFrame)만큼 큐 처리
-        let loadsThisFrame = 0;
-        while (this.#pendingQueue.length > 0 && loadsThisFrame < this.#maxLoadsPerFrame) {
-            const comp = this.#pendingQueue.shift();
-            if (comp) {
-                loadsThisFrame++;
-                this.#loadTile(comp);
-            }
-        }
+    setTileUrlResolver(resolver?: LandscapeTileUrlResolver): void {
+        this.#tileUrlResolver = resolver ?? null;
+        this.resetTileState();
     }
 
     isTileLoaded(row: number, col: number): boolean {
         return this.#loadedMap.has(`${row}_${col}`);
     }
 
-    async #loadTile(comp: LandscapeComponent): Promise<void> {
-        if (!this.#tileUrlResolver) return;
+    update(cameraX: number, cameraZ: number): void {
+        const radius = this.#loadingRadius;
+        const grid = this.#spatialGrid;
+        if (!grid) return;
+
+        const activeBuffer = this.#activeComponentsBuffer;
+        grid.getTilesInRadiusZeroGC(cameraX, cameraZ, radius, activeBuffer);
+
+        const now = performance.now();
+        const RETRY_INTERVAL_MS = 10000;
+
+        const pending = this.#pendingQueue;
+        pending.length = 0;
+
+        for (let i = 0; i < activeBuffer.length; i++) {
+            const comp = activeBuffer[i];
+            const key = `${comp.componentZ}_${comp.componentX}`;
+
+            if (this.#loadedMap.has(key) || this.#loadingMap.has(key)) {
+                continue;
+            }
+
+            const lastFailedTime = this.#failedMap.get(key);
+            if (lastFailedTime !== undefined && now - lastFailedTime < RETRY_INTERVAL_MS) {
+                continue;
+            }
+
+            pending.push(comp);
+        }
+
+        if (pending.length > 1) {
+            pending.sort((a, b) => {
+                const da = (a.worldX - cameraX) * (a.worldX - cameraX) + (a.worldZ - cameraZ) * (a.worldZ - cameraZ);
+                const db = (b.worldX - cameraX) * (b.worldX - cameraX) + (b.worldZ - cameraZ) * (b.worldZ - cameraZ);
+                return da - db;
+            });
+        }
+
+        const loadCount = Math.min(pending.length, this.#maxLoadsPerFrame);
+        for (let i = 0; i < loadCount; i++) {
+            const comp = pending[i];
+            this.#loadTileAsync(comp);
+        }
+    }
+
+    async #loadTileAsync(comp: LandscapeComponent): Promise<void> {
         const key = `${comp.componentZ}_${comp.componentX}`;
-        const url = this.#tileUrlResolver(comp.componentZ, comp.componentX);
+        this.#loadingMap.set(key, true);
 
         try {
-            console.log(`[LandscapeTileStreamer 🛰️] Loading tile (${key}) from:`, url);
+            let url: string;
+            if (this.#tileUrlResolver) {
+                url = this.#tileUrlResolver(comp.componentZ, comp.componentX, comp);
+            } else {
+                const rowStr = String(comp.componentZ).padStart(2, '0');
+                const colStr = String(comp.componentX).padStart(2, '0');
+                url = `https://redcamel.github.io/testAsset/terrain/tile_001/28_134_86_730_13_512_512_16bit_tile_${rowStr}_${colStr}.png`;
+            }
+
             const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const buffer = await response.arrayBuffer();
-
             const parsed = await parse16BitPngBufferToGPUTexture(this.#redGPUContext, buffer);
+
             if (parsed) {
                 console.log(`[LandscapeTileStreamer ✅] Tile (${key}) loaded successfully! (${parsed.width}x${parsed.height})`);
                 this.#loadedMap.set(key, parsed.gpuTexture);
@@ -180,6 +218,21 @@ export class LandscapeTileStreamer {
                             );
                         });
                         console.log(`[LandscapeTileStreamer ⛰️] VHT Atlas Sub-region (${key}) queued to RESOURCE encoder at [${targetX}, ${targetZ}]`);
+
+                        // 🌀 GPU VNT (Virtual Normal Texture) Compute Pass 노멀 베이킹 트리거
+                        if (this.#vntAtlasTexture && this.#vntGenerator) {
+                            this.#vntGenerator.bakeTileRegion(
+                                this.#vhtAtlasTexture,
+                                this.#vntAtlasTexture,
+                                targetX,
+                                targetZ,
+                                copyW,
+                                copyH,
+                                this.#heightScale,
+                                this.#worldSizeX,
+                                this.#componentCountX
+                            );
+                        }
                     }
                 }
             }

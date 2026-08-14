@@ -11,7 +11,9 @@ import LandscapeSharedGeometry from "./LandscapeSharedGeometry";
 import LandscapeSpatialGrid from "./LandscapeSpatialGrid";
 import DirectTexture from "../../resources/texture/DirectTexture";
 import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "./LandscapeTileStreamer";
+import LandscapeVNTGenerator from "./LandscapeVNTGenerator";
 import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
+import Object3DContainer from "../mesh/core/Object3DContainer";
 
 const DEFAULT_LOD_COLORS: [number, number, number, number][] = [
     [0.18, 0.8, 0.44, 1.0],  // LOD 0: Green
@@ -28,7 +30,7 @@ const DEFAULT_LOD_COLORS: [number, number, number, number][] = [
  * [KO] SpatialGrid $O(1)$ 공간 변환 및 Multi-LOD Batching Instanced Rendering 지원 기반 Landscape 지형 시스템 클래스입니다 (Pure Terrain System Manager).
  * [EN] Landscape terrain system class based on SpatialGrid O(1) spatial transformation and Multi-LOD Batching Instanced Rendering (Pure Terrain System Manager).
  */
-export class Landscape {
+export class Landscape extends Object3DContainer {
     #redGPUContext: RedGPUContext;
     #sharedGeometry: LandscapeSharedGeometry;
     #spatialGrid: LandscapeSpatialGrid;
@@ -45,6 +47,8 @@ export class Landscape {
     #heightScale: number = 500.0;
     #tileStreamer: LandscapeTileStreamer;
     #vhtAtlasTexture: DirectTexture | null = null;
+    #vntAtlasTexture: DirectTexture | null = null;
+    #vntGenerator: LandscapeVNTGenerator;
     #vhtSampler: GPUSampler | null = null;
 
     #worldSizeX: number;
@@ -80,6 +84,7 @@ export class Landscape {
      * @param options - [KO] Landscape 설정 옵션 [EN] Landscape configuration options
      */
     constructor(redGPUContext: RedGPUContext, options: LandscapeOptions = {}) {
+        super();
         this.#redGPUContext = redGPUContext;
 
         const parseValue = (val: number | [number, number] | undefined, defaultVal: number): [number, number] => {
@@ -132,7 +137,7 @@ export class Landscape {
         this.#heightScale = options.heightScale ?? 500.0;
         this.#updateTuples();
 
-        // 1. Virtual Heightfield Texture (VHT) 아틀라스 GPUTexture 생성 (8x8 * 512 = 4096x4096, r16unorm)
+        // 1. RVT 이중 아틀라스 (VHT Height r16unorm + VNT Normal rgba8unorm) GPUTexture 생성 및 DirectTexture 래핑
         const atlasWidth = componentCountX * 512;
         const atlasHeight = componentCountZ * 512;
         const rawAtlasTexture = redGPUContext.gpuDevice.createTexture({
@@ -142,6 +147,15 @@ export class Landscape {
             label: 'Landscape_VHT_Atlas_Texture'
         });
         const vhtAtlasTexture = new DirectTexture(redGPUContext, 'Landscape_VHT_Atlas_Texture', rawAtlasTexture);
+
+        const rawVntTexture = redGPUContext.gpuDevice.createTexture({
+            size: [atlasWidth, atlasHeight],
+            format: 'rgba8unorm',
+            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
+            label: 'Landscape_VNT_Atlas_Texture'
+        });
+        const vntAtlasTexture = new DirectTexture(redGPUContext, 'Landscape_VNT_Atlas_Texture', rawVntTexture);
+
         const vhtSampler = redGPUContext.gpuDevice.createSampler({
             magFilter: 'nearest',
             minFilter: 'nearest',
@@ -151,8 +165,14 @@ export class Landscape {
         });
 
         this.#vhtAtlasTexture = vhtAtlasTexture;
+        this.#vntAtlasTexture = vntAtlasTexture;
+        this.#vntGenerator = new LandscapeVNTGenerator(redGPUContext);
         this.#vhtSampler = vhtSampler;
+
         this.#tileStreamer.vhtAtlasTexture = vhtAtlasTexture;
+        this.#tileStreamer.vntAtlasTexture = vntAtlasTexture;
+        this.#tileStreamer.vntGenerator = this.#vntGenerator;
+        this.#tileStreamer.setTerrainConfig(this.#heightScale, this.#worldSizeX, this.#componentCountX);
 
         const resourceManager = redGPUContext.resourceManager;
         let vModule = resourceManager.getGPUShaderModule('LandscapeFullCompatibleFlatVertexShaderModule');
@@ -165,9 +185,9 @@ export class Landscape {
 
         this.#lodCountsBuffer = new Int32Array(maxLODLevel);
 
-        // WebGPU Multi-LOD Indirect & Instance Buffer 생성 (@group(2): StorageBuffer, Sampler, VHT Texture_2D)
+        // WebGPU Multi-LOD Indirect & Instance Buffer 생성 (@group(2): StorageBuffer, Sampler, VHT Height, VNT Normal)
         this.#instanceBuffer = new LandscapeInstanceBuffer(redGPUContext, componentCountX * componentCountZ, maxLODLevel);
-        this.#instanceBuffer.updateBindGroup(vhtSampler, vhtAtlasTexture.gpuTextureView);
+        this.#instanceBuffer.updateBindGroup(vhtSampler, vhtAtlasTexture.gpuTextureView, vntAtlasTexture.gpuTextureView);
 
         this.#rebuildLODStructures(options.lodColors, options.lodMultipliers, options.lodDistances);
         this.#rebuildTiles();
@@ -283,6 +303,11 @@ export class Landscape {
     /** [KO] Virtual Heightfield Texture (VHT) 아틀라스 DirectTexture 레퍼런스 */
     get vhtAtlasTexture(): DirectTexture | null {
         return this.#vhtAtlasTexture;
+    }
+
+    /** [KO] Virtual Normal Texture (VNT) 아틀라스 DirectTexture 레퍼런스 */
+    get vntAtlasTexture(): DirectTexture | null {
+        return this.#vntAtlasTexture;
     }
 
     set landscapeMaterial(val: LandscapeMaterial) {
@@ -679,6 +704,9 @@ export class Landscape {
             if (this.#vhtAtlasTexture) {
                 this.#vhtAtlasTexture.destroy();
             }
+            if (this.#vntAtlasTexture) {
+                this.#vntAtlasTexture.destroy();
+            }
             const rawGpuTexture = this.#redGPUContext.gpuDevice.createTexture({
                 size: [targetAtlasW, targetAtlasH],
                 format: 'r16unorm',
@@ -686,8 +714,20 @@ export class Landscape {
                 label: 'Landscape_VHT_Atlas_Texture'
             });
             this.#vhtAtlasTexture = new DirectTexture(this.#redGPUContext, 'Landscape_VHT_Atlas_Texture', rawGpuTexture);
+
+            const rawVntTexture = this.#redGPUContext.gpuDevice.createTexture({
+                size: [targetAtlasW, targetAtlasH],
+                format: 'rgba8unorm',
+                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
+                label: 'Landscape_VNT_Atlas_Texture'
+            });
+            this.#vntAtlasTexture = new DirectTexture(this.#redGPUContext, 'Landscape_VNT_Atlas_Texture', rawVntTexture);
+
             if (this.#tileStreamer) {
                 this.#tileStreamer.vhtAtlasTexture = this.#vhtAtlasTexture;
+                this.#tileStreamer.vntAtlasTexture = this.#vntAtlasTexture;
+                this.#tileStreamer.vntGenerator = this.#vntGenerator;
+                this.#tileStreamer.setTerrainConfig(this.#heightScale, this.#worldSizeX, this.#componentCountX);
                 this.#tileStreamer.resetTileState();
             }
             needRebuildBindGroup = true;
@@ -701,8 +741,8 @@ export class Landscape {
             needRebuildBindGroup = true;
         }
 
-        if (needRebuildBindGroup && this.#vhtSampler && this.#vhtAtlasTexture) {
-            this.#instanceBuffer.updateBindGroup(this.#vhtSampler, this.#vhtAtlasTexture.gpuTextureView);
+        if (needRebuildBindGroup && this.#vhtSampler && this.#vhtAtlasTexture && this.#vntAtlasTexture) {
+            this.#instanceBuffer.updateBindGroup(this.#vhtSampler, this.#vhtAtlasTexture.gpuTextureView, this.#vntAtlasTexture.gpuTextureView);
         }
 
         while (this.#landscapeComponents.length > targetCount) {

@@ -1,8 +1,8 @@
 import RedGPUContext from "../../context/RedGPUContext";
 
 /**
- * [KO] Landscape Multi-LOD Batching Instanced Rendering 전용 GPU Storage Buffer & VHT BindGroup 관리 클래스입니다.
- * [EN] GPU Storage Buffer & VHT BindGroup management class dedicated to Landscape Multi-LOD Batching Instanced Rendering.
+ * [KO] Landscape Multi-LOD Batching Instanced Rendering 전용 GPU Storage Buffer & RVT (VHT+VNT) BindGroup 관리 클래스입니다.
+ * [EN] GPU Storage Buffer & RVT (VHT+VNT) BindGroup management class dedicated to Landscape Multi-LOD Batching Instanced Rendering.
  */
 export class LandscapeInstanceBuffer {
     #redGPUContext: RedGPUContext;
@@ -116,10 +116,7 @@ export class LandscapeInstanceBuffer {
         return this.#lodInstanceCountList[lodLevel] ?? 0;
     }
 
-    /**
-     * [KO] CPU 버퍼 데이터를 GPU StorageBuffer로 플러시합니다.
-     */
-    flushToGPU(): void {
+    uploadToGPU(): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#instanceStorageBuffer) return;
 
@@ -132,32 +129,51 @@ export class LandscapeInstanceBuffer {
         );
     }
 
+    flushToGPU(): void {
+        this.uploadToGPU();
+    }
+
     /**
-     * [KO] VHT 텍스처 및 샘플러를 수신하여 @group(2) GPUBindGroup을 생성/갱신합니다.
+     * [KO] RVT (VHT 고도맵 + VNT 노멀맵) 텍스처 및 샘플러를 수신하여 @group(2) GPUBindGroup을 생성/갱신합니다.
      */
-    updateBindGroup(vhtSampler: GPUSampler, vhtTextureView: GPUTextureView): void {
+    updateBindGroup(vhtSampler: GPUSampler, vhtTextureView: GPUTextureView, vntTextureView?: GPUTextureView): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#instanceStorageBindGroupLayout || !this.#instanceStorageBuffer) return;
+
+        const entries: GPUBindGroupEntry[] = [
+            {
+                binding: 0,
+                resource: {
+                    buffer: this.#instanceStorageBuffer
+                }
+            },
+            {
+                binding: 1,
+                resource: vhtSampler
+            },
+            {
+                binding: 2,
+                resource: vhtTextureView
+            }
+        ];
+
+        if (vntTextureView) {
+            entries.push({
+                binding: 3,
+                resource: vntTextureView
+            });
+        } else {
+            // fallback to vhtTextureView if vntTextureView is missing
+            entries.push({
+                binding: 3,
+                resource: vhtTextureView
+            });
+        }
 
         this.#instanceStorageBindGroup = gpuDevice.createBindGroup({
             label: 'LandscapeInstanceStorageBindGroup',
             layout: this.#instanceStorageBindGroupLayout,
-            entries: [
-                {
-                    binding: 0,
-                    resource: {
-                        buffer: this.#instanceStorageBuffer
-                    }
-                },
-                {
-                    binding: 1,
-                    resource: vhtSampler
-                },
-                {
-                    binding: 2,
-                    resource: vhtTextureView
-                }
-            ]
+            entries: entries
         });
     }
 
@@ -172,39 +188,47 @@ export class LandscapeInstanceBuffer {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice) return;
 
-        // 1. GPUBindGroupLayout 생성 (@group(2): StorageBuffer, Sampler, VHT Texture_2D)
+        // 1. GPUBindGroupLayout 생성 (@group(2): StorageBuffer, Sampler, VHT Height, VNT Normal)
         this.#instanceStorageBindGroupLayout = gpuDevice.createBindGroupLayout({
             label: 'LandscapeInstanceStorageBindGroupLayout',
             entries: [
                 {
                     binding: 0,
-                    visibility: GPUShaderStage.VERTEX,
+                    visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
                     buffer: {
                         type: 'read-only-storage'
                     }
                 },
                 {
                     binding: 1,
-                    visibility: GPUShaderStage.VERTEX,
+                    visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
                     sampler: {
                         type: 'non-filtering'
                     }
                 },
                 {
                     binding: 2,
-                    visibility: GPUShaderStage.VERTEX,
+                    visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
                     texture: {
                         sampleType: 'unfilterable-float',
+                        viewDimension: '2d'
+                    }
+                },
+                {
+                    binding: 3,
+                    visibility: GPUShaderStage.FRAGMENT,
+                    texture: {
+                        sampleType: 'float',
                         viewDimension: '2d'
                     }
                 }
             ]
         });
 
-        // 2. GPUBuffer 생성 (48 bytes per tile)
+        // 2. StorageBuffer 생성
         this.#instanceStorageBuffer = gpuDevice.createBuffer({
             label: 'LandscapeInstanceStorageBuffer',
-            size: Math.max(128, this.#maxComponentCount * 48),
+            size: this.#maxComponentCount * 48,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
     }
