@@ -12,6 +12,7 @@ import LandscapeSpatialGrid from "./LandscapeSpatialGrid";
 import DirectTexture from "../../resources/texture/DirectTexture";
 import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "./LandscapeTileStreamer";
 import LandscapeVNTGenerator from "./LandscapeVNTGenerator";
+import LandscapeVHTGenerator from "./LandscapeVHTGenerator";
 import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 import Object3DContainer from "../mesh/core/Object3DContainer";
 
@@ -48,6 +49,7 @@ export class Landscape extends Object3DContainer {
     #tileStreamer: LandscapeTileStreamer;
     #vhtAtlasTexture: DirectTexture | null = null;
     #vntAtlasTexture: DirectTexture | null = null;
+    #vhtGenerator: LandscapeVHTGenerator;
     #vntGenerator: LandscapeVNTGenerator;
     #vhtSampler: GPUSampler | null = null;
 
@@ -140,13 +142,13 @@ export class Landscape extends Object3DContainer {
         this.#heightScale = options.heightScale ?? 500.0;
         this.#updateTuples();
 
-        // 1. RVT 이중 아틀라스 (VHT Height r16unorm + VNT Normal rgba8unorm) GPUTexture 생성 및 DirectTexture 래핑
+        // 1. RVT 이중 아틀라스 (VHT Height r32float + VNT Normal rgba8unorm) GPUTexture 생성 및 DirectTexture 래핑
         const atlasWidth = componentCountX * 512;
         const atlasHeight = componentCountZ * 512;
         const rawAtlasTexture = redGPUContext.gpuDevice.createTexture({
             size: [atlasWidth, atlasHeight],
-            format: 'r16unorm',
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
+            format: 'r32float',
+            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
             label: 'Landscape_VHT_Atlas_Texture'
         });
         const vhtAtlasTexture = new DirectTexture(redGPUContext, 'Landscape_VHT_Atlas_Texture', rawAtlasTexture);
@@ -169,11 +171,13 @@ export class Landscape extends Object3DContainer {
 
         this.#vhtAtlasTexture = vhtAtlasTexture;
         this.#vntAtlasTexture = vntAtlasTexture;
+        this.#vhtGenerator = new LandscapeVHTGenerator(redGPUContext);
         this.#vntGenerator = new LandscapeVNTGenerator(redGPUContext);
         this.#vhtSampler = vhtSampler;
 
         this.#tileStreamer.vhtAtlasTexture = vhtAtlasTexture;
         this.#tileStreamer.vntAtlasTexture = vntAtlasTexture;
+        this.#tileStreamer.vhtGenerator = this.#vhtGenerator;
         this.#tileStreamer.vntGenerator = this.#vntGenerator;
         this.#tileStreamer.setTerrainConfig(this.#heightScale, this.#worldSizeX, this.#componentCountX);
 
@@ -791,8 +795,8 @@ export class Landscape extends Object3DContainer {
             }
             const rawGpuTexture = this.#redGPUContext.gpuDevice.createTexture({
                 size: [targetAtlasW, targetAtlasH],
-                format: 'r16unorm',
-                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
+                format: 'r32float',
+                usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
                 label: 'Landscape_VHT_Atlas_Texture'
             });
             this.#vhtAtlasTexture = new DirectTexture(this.#redGPUContext, 'Landscape_VHT_Atlas_Texture', rawGpuTexture);
@@ -808,6 +812,7 @@ export class Landscape extends Object3DContainer {
             if (this.#tileStreamer) {
                 this.#tileStreamer.vhtAtlasTexture = this.#vhtAtlasTexture;
                 this.#tileStreamer.vntAtlasTexture = this.#vntAtlasTexture;
+                this.#tileStreamer.vhtGenerator = this.#vhtGenerator;
                 this.#tileStreamer.vntGenerator = this.#vntGenerator;
                 this.#tileStreamer.setTerrainConfig(this.#heightScale, this.#worldSizeX, this.#componentCountX);
                 this.#tileStreamer.resetTileState();

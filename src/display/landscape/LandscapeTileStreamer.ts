@@ -8,6 +8,8 @@ import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_
 import DirectTexture from "../../resources/texture/DirectTexture";
 import LandscapeVNTGenerator from "./LandscapeVNTGenerator";
 
+import LandscapeVHTGenerator from "./LandscapeVHTGenerator";
+
 /**
  * [KO] 타일별 커스텀 URL 생성 리졸버 함수 타입입니다. (row, col 인자 제공)
  * [EN] Tile custom URL resolver function type. (provides row, col parameters)
@@ -28,6 +30,7 @@ export class LandscapeTileStreamer {
 
     #vhtAtlasTexture: DirectTexture | null = null;
     #vntAtlasTexture: DirectTexture | null = null;
+    #vhtGenerator: LandscapeVHTGenerator | null = null;
     #vntGenerator: LandscapeVNTGenerator | null = null;
 
     #heightScale: number = 500.0;
@@ -67,6 +70,14 @@ export class LandscapeTileStreamer {
 
     set vntAtlasTexture(texture: DirectTexture | null) {
         this.#vntAtlasTexture = texture;
+    }
+
+    get vhtGenerator(): LandscapeVHTGenerator | null {
+        return this.#vhtGenerator;
+    }
+
+    set vhtGenerator(generator: LandscapeVHTGenerator | null) {
+        this.#vhtGenerator = generator;
     }
 
     get vntGenerator(): LandscapeVNTGenerator | null {
@@ -207,17 +218,29 @@ export class LandscapeTileStreamer {
                         targetX + copyW <= rawAtlasTexture.width &&
                         targetZ + copyH <= rawAtlasTexture.height
                     ) {
-                        this.#redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (commandEncoder) => {
-                            commandEncoder.copyTextureToTexture(
-                                {texture: parsed.gpuTexture},
-                                {
-                                    texture: rawAtlasTexture,
-                                    origin: [targetX, targetZ, 0]
-                                },
-                                [copyW, copyH, 1]
+                        if (this.#vhtGenerator) {
+                            // ⚡ GPU Compute r32float VHT Height Baking
+                            this.#vhtGenerator.bakeTileRegion(
+                                parsed.gpuTexture,
+                                this.#vhtAtlasTexture,
+                                targetX,
+                                targetZ,
+                                copyW,
+                                copyH
                             );
-                        });
-                        console.log(`[LandscapeTileStreamer ⛰️] VHT Atlas Sub-region (${key}) queued to RESOURCE encoder at [${targetX}, ${targetZ}]`);
+                        } else {
+                            this.#redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (commandEncoder) => {
+                                commandEncoder.copyTextureToTexture(
+                                    {texture: parsed.gpuTexture},
+                                    {
+                                        texture: rawAtlasTexture,
+                                        origin: [targetX, targetZ, 0]
+                                    },
+                                    [copyW, copyH, 1]
+                                );
+                            });
+                        }
+                        console.log(`[LandscapeTileStreamer ⛰️] r32float VHT Atlas Sub-region (${key}) baked via GPU Compute Shader at [${targetX}, ${targetZ}]`);
 
                         // 🌀 GPU VNT (Virtual Normal Texture) Compute Pass 노멀 베이킹 트리거
                         if (this.#vntAtlasTexture && this.#vntGenerator) {
