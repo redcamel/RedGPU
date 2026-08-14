@@ -300,6 +300,9 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
     };
 
     new RedGPUExampleHelper(redGPUContext, {
+        RedGPU,
+        ibl: true,
+        skybox: true,
         gui: (pane) => {
             activePane = pane;
 
