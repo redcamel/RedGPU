@@ -1,16 +1,16 @@
-import ColorRGBA from "../../color/ColorRGBA";
-import RedGPUContext from "../../context/RedGPUContext";
-import AUVTransformBaseMaterial from "../../material/core/AUVTransformBaseMaterial";
-import Sampler from "../../resources/sampler/Sampler";
-import BitmapTexture from "../../resources/texture/BitmapTexture";
-import GPU_FILTER_MODE from "../../gpuConst/GPU_FILTER_MODE";
-import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
-import GPU_MIPMAP_FILTER_MODE from "../../gpuConst/GPU_MIPMAP_FILTER_MODE";
-import landscapeFragmentSource from "./shader/landscapeFragment.wgsl";
-import defineColorRGBA from "../../defineProperty/funcs/color/defineColorRGBA";
-import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
-import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
-import defineNumber from "../../defineProperty/funcs/number/defineNumber";
+import ColorRGBA from "../../../color/ColorRGBA";
+import RedGPUContext from "../../../context/RedGPUContext";
+import AUVTransformBaseMaterial from "../../../material/core/AUVTransformBaseMaterial";
+import Sampler from "../../../resources/sampler/Sampler";
+import BitmapTexture from "../../../resources/texture/BitmapTexture";
+import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
+import GPU_ADDRESS_MODE from "../../../gpuConst/GPU_ADDRESS_MODE";
+import GPU_MIPMAP_FILTER_MODE from "../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
+import landscapeFragmentSource from "../shader/landscapeFragment.wgsl";
+import defineColorRGBA from "../../../defineProperty/funcs/color/defineColorRGBA";
+import defineSampler from "../../../defineProperty/funcs/texture/defineSampler";
+import defineTexture from "../../../defineProperty/funcs/texture/defineTexture";
+import defineNumber from "../../../defineProperty/funcs/number/defineNumber";
 
 interface LandscapeMaterial {
     color: ColorRGBA;

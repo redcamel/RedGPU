@@ -1,4 +1,4 @@
-import LandscapeMaterial from "./LandscapeMaterial";
+import LandscapeMaterial from "../material/LandscapeMaterial";
 
 /**
  * [KO] Landscape 지형 생성 옵션 인터페이스입니다 (UE5 공식 프로퍼티 표준 단일 적용).

@@ -80,130 +80,14 @@ RedGPU.init(
 
         scene.addLandscape(landscape);
 
-        // 5. 실시간 HUD 데이터 모니터링 패널 구축
-        const hud = document.createElement('div');
-        Object.assign(hud.style, {
-            position: 'fixed',
-            top: '16px',
-            left: '12px',
-            padding: '14px 18px',
-            background: 'rgba(15, 23, 42, 0.94)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(56, 189, 248, 0.4)',
-            borderRadius: '10px',
-            color: '#e2e8f0',
-            fontFamily: 'monospace',
-            fontSize: '12px',
-            lineHeight: '1.7',
-            zIndex: '99999',
+
+        // 5-1. 정식 RedGPU 디버거 클래스 인스턴스 생성 (2D SpatialGrid, VHT Heightmap, VNT Normal Atlas, HUD 디버거)
+        const hudDebugger = new RedGPU.Display.LandscapeHUDDebugger(landscape, controller, {
+            width: 320,
+            left: 12,
+            bottom: 120
         });
-        document.body.appendChild(hud);
 
-        const lodColors = [
-            '#2ecc71', '#f1c40f', '#e67e22', '#e74c3c', '#9b59b6', '#1abc9c', '#3498db', '#ecf0f1'
-        ];
-
-        const updateHUD = () => {
-            if (!landscape) return;
-            const [wsX, wsZ] = landscape.worldSize;
-            const [tcX, tcZ] = landscape.componentCount;
-            const [tsX, tsZ] = landscape.tileSize;
-            const gs = landscape.componentSizeQuads;
-            const lodCount = landscape.maxLODLevel;
-            const instanceBuffer = landscape.instanceBuffer;
-
-            let lodListHTML = '';
-            let activeTotalVerts = 0;
-            let activeTotalTris = 0;
-            let activeDrawCalls = 0;
-
-            for (let i = 0; i < lodCount; i++) {
-                const step = Math.pow(2, i);
-                const segs = Math.max(1, Math.floor(gs / step));
-                const vertsPerTile = (segs + 1) * (segs + 1);
-                const trisPerTile = segs * segs * 2;
-
-                const tileCountForLOD = instanceBuffer ? instanceBuffer.getLODInstanceCount(i) : 0;
-                if (tileCountForLOD > 0) activeDrawCalls++;
-
-                const lodVerts = tileCountForLOD * vertsPerTile;
-                const lodTris = tileCountForLOD * trisPerTile;
-                activeTotalVerts += lodVerts;
-                activeTotalTris += lodTris;
-
-                const color = lodColors[i % lodColors.length];
-                lodListHTML += `
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
-                        <span><span style="display:inline-block; width:10px; height:10px; background:${color}; margin-right:6px; border-radius:2px;"></span><b>LOD ${i}</b> (${segs}x${segs} quads):</span>
-                        <span style="color:#38bdf8;"><b>${tileCountForLOD} Components</b> (${lodVerts.toLocaleString()} v / ${lodTris.toLocaleString()} t)</span>
-                    </div>
-                `;
-            }
-
-            const totalCompCount = tcX * tcZ;
-            const visCompCount = landscape.visibleComponentCount ?? totalCompCount;
-            const culledCompCount = landscape.culledComponentCount ?? 0;
-            const culledPercent = totalCompCount > 0 ? ((culledCompCount / totalCompCount) * 100).toFixed(1) : '0.0';
-            const frustumActive = landscape.frustumCullingActive;
-
-            const sysDrawCalls = view?.renderViewStateData?.renderResults?.numDrawCalls ?? activeDrawCalls;
-
-            hud.innerHTML = `
-                <div style="font-weight:bold; font-size:14px; margin-bottom:8px; color:#38bdf8; border-bottom:1px solid rgba(56, 189, 248, 0.3); padding-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
-                    <span>⛰️ Landscape Real-time Engine Monitor</span>
-                    <span style="font-size:11px; background:#0284c7; color:#fff; padding:2px 6px; border-radius:4px;">UE5 Spec</span>
-                </div>
-                <div>worldSize: <b style="color:#f1f5f9;">[${wsX}, ${wsZ}]m</b> | componentCount: <b style="color:#f1f5f9;">[${tcX}, ${tcZ}] (${totalCompCount} Components)</b></div>
-                <div>tileSize: <b style="color:#f1f5f9;">[${Math.round(tsX)}, ${Math.round(tsZ)}]m</b> | componentSizeQuads: <b style="color:#f1f5f9;">${gs} Quads</b></div>
-                
-                <div style="margin-top:8px; font-weight:bold; color:#cbd5e1; border-bottom:1px dashed rgba(255,255,255,0.15); padding-bottom:3px; display:flex; justify-content:space-between;">
-                    <span>🎯 Camera Frustum & Spatial Culling:</span>
-                    <span style="font-size:11px; color:${frustumActive ? '#4ade80' : '#f43f5e'};">● ${frustumActive ? 'Frustum Culling Active (6 Planes)' : 'Culling Disabled'}</span>
-                </div>
-                <div style="margin-top:4px; font-size:11px; background:rgba(30, 41, 59, 0.7); padding:6px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.08);">
-                    <div style="display:flex; justify-content:space-between;">
-                        <span>👁️ Visible Components (In View):</span>
-                        <span style="color:#38bdf8; font-weight:bold;">${visCompCount} / ${totalCompCount} <span style="color:#cbd5e1; font-weight:normal;">(${((visCompCount / totalCompCount) * 100).toFixed(1)}%)</span></span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-top:2px;">
-                        <span>🚫 Culled Components (Skipped):</span>
-                        <span style="color:#f43f5e; font-weight:bold;">${culledCompCount} <span style="color:#fb7185; font-weight:normal;">(${culledPercent}% GPU saved)</span></span>
-                    </div>
-                </div>
-
-                <div style="margin-top:8px; font-weight:bold; color:#cbd5e1; border-bottom:1px dashed rgba(255,255,255,0.15); padding-bottom:3px;">
-                    📊 Active LOD Instances & Geometry (Real-time):
-                </div>
-                <div style="margin-top:4px;">
-                    ${lodListHTML}
-                </div>
-
-                <div style="margin-top:8px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.15);">
-                    <div style="display:flex; justify-content:space-between;">
-                        <span>🚀 Total Active Draw Calls:</span>
-                        <span style="color:#f43f5e; font-weight:bold;">${sysDrawCalls} Calls <span style="font-size:10px; color:#94a3b8;">(Multi-LOD Batching)</span></span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-top:2px;">
-                        <span>📐 Total Active Vertices:</span>
-                        <span style="color:#4ade80; font-weight:bold;">${activeTotalVerts.toLocaleString()} Vertices</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-top:2px;">
-                        <span>🔺 Total Active Triangles:</span>
-                        <span style="color:#facc15; font-weight:bold;">${activeTotalTris.toLocaleString()} Triangles</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-top:2px;">
-                        <span>🛰️ Streamed Host Tiles:</span>
-                        <span style="color:#38bdf8; font-weight:bold;">${landscape.tileStreamer ? landscape.tileStreamer.loadedTileCount : 0} Loaded <span style="font-size:10px; color:#cbd5e1;">(Queue: ${landscape.tileStreamer ? landscape.tileStreamer.pendingQueueSize : 0})</span></span>
-                    </div>
-                </div>
-
-                <div id="statInfo" style="margin-top:6px; font-size:11px; color:#94a3b8; border-top:1px solid rgba(255,255,255,0.1); padding-top:4px;">
-                    Cam Pos: [X: ${Math.round(controller?.x ?? 0)}, Y: ${Math.round(controller?.y ?? 0)}, Z: ${Math.round(controller?.z ?? 0)}]
-                </div>
-            `;
-        };
-
-        // 5-1. 정식 RedGPU 디버거 클래스 인스턴스 생성 (2D SpatialGrid, VHT Heightmap, VNT Normal Atlas 디버거)
         const spatialGridDebugger = new RedGPU.Display.LandscapeSpatialGridDebugger(landscape, controller, {
             width: 100,
             height: 100,
@@ -229,7 +113,7 @@ RedGPU.init(
         const renderer = new RedGPU.Renderer();
         const render = (time) => {
             landscape.update(controller, view.renderViewStateData);
-            updateHUD();
+            hudDebugger.update(view.renderViewStateData);
             spatialGridDebugger.update();
             vhtDebugger.update();
             vntDebugger.update();
@@ -237,7 +121,7 @@ RedGPU.init(
         renderer.start(redGPUContext, render);
 
         // 7. Landscape 모든 get/set 속성 및 2D 디버거 전면 제어 테스트 패널 렌더링
-        renderTestPane(redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight);
+        renderTestPane(redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight);
     }
 );
 
@@ -247,6 +131,7 @@ RedGPU.init(
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.Landscape} landscape
  * @param {RedGPU.Camera.FreeController} controller
+ * @param {RedGPU.Display.LandscapeHUDDebugger} hudDebugger
  * @param {RedGPU.Display.LandscapeSpatialGridDebugger} spatialGridDebugger
  * @param {RedGPU.Display.LandscapeVHTDebugger} vhtDebugger
  * @param {RedGPU.Display.LandscapeVNTDebugger} vntDebugger
@@ -254,7 +139,7 @@ RedGPU.init(
  * @param {RedGPU.Resource.BitmapTexture} ormTexture
  * @param {RedGPU.Light.DirectionalLight} directionalLight
  */
-const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight) => {
+const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight) => {
     const [wsX, wsZ] = landscape ? landscape.worldSize : [8000, 8000];
     const [tcX, tcZ] = landscape ? landscape.componentCount : [8, 8];
     const [tsX, tsZ] = landscape ? landscape.tileSize : [1000, 1000];
@@ -600,18 +485,30 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
                 });
             }
 
-            // Folder 7: 2D Debuggers (Visibility & Box Size)
-            const folderDebuggers = pane.addFolder({title: '🔍 2D Debuggers (SpatialGrid, VHT & VNT)', expanded: true});
+            // Folder 7: Debugger Controls (HUD, SpatialGrid, VHT & VNT)
+            const folderDebuggers = pane.addFolder({
+                title: '🔍 Debugger Controls (HUD, SpatialGrid, VHT & VNT)',
+                expanded: true
+            });
 
-            folderDebuggers.addBinding(config, 'spatialGridVisible').on('change', (ev) => {
+            if (!('hudDebuggerVisible' in config)) config.hudDebuggerVisible = true;
+            config.spatialGridVisible = spatialGridDebugger ? spatialGridDebugger.visible : true;
+            config.vhtDebuggerVisible = vhtDebugger ? vhtDebugger.visible : true;
+            config.vntDebuggerVisible = vntDebugger ? vntDebugger.visible : true;
+
+            folderDebuggers.addBinding(config, 'hudDebuggerVisible', {label: 'Show HUD Monitor'}).on('change', (ev) => {
+                if (hudDebugger) hudDebugger.visible = ev.value;
+            });
+
+            folderDebuggers.addBinding(config, 'spatialGridVisible', {label: 'Show 2D SpatialGrid'}).on('change', (ev) => {
                 if (spatialGridDebugger) spatialGridDebugger.visible = ev.value;
             });
 
-            folderDebuggers.addBinding(config, 'vhtDebuggerVisible').on('change', (ev) => {
+            folderDebuggers.addBinding(config, 'vhtDebuggerVisible', {label: 'Show VHT Atlas'}).on('change', (ev) => {
                 if (vhtDebugger) vhtDebugger.visible = ev.value;
             });
 
-            folderDebuggers.addBinding(config, 'vntDebuggerVisible').on('change', (ev) => {
+            folderDebuggers.addBinding(config, 'vntDebuggerVisible', {label: 'Show VNT Normal Atlas'}).on('change', (ev) => {
                 if (vntDebugger) vntDebugger.visible = ev.value;
             });
 

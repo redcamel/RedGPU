@@ -5,7 +5,7 @@ import {IPhysicsEngine} from "../../physics/IPhysicsEngine";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import Object3DContainer from "../mesh/core/Object3DContainer";
 import Terrain from "../terrain/Terrain";
-import Landscape from "../landscape/Landscape";
+import Landscape from "../landscape/core/Landscape";
 
 /**
  * [KO] View에서 렌더링할 장면(Scene) 공간을 정의하는 루트 컨테이너 클래스입니다.

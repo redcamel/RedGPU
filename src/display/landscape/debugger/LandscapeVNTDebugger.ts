@@ -1,6 +1,6 @@
 import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "./ALandscapeDebugger";
-import Landscape from "./Landscape";
-import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import Landscape from "../core/Landscape";
+import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 /**
  * [KO] Landscape 지형 시스템의 실시간 GPU 런타임 베이킹된 VNT (Virtual Normal Texture) 아틀라스 텍스처와 카메라 시선/FOV/로딩반경을 WebGPU Canvas 60fps 오버레이로 시각화하는 디버거 클래스입니다.

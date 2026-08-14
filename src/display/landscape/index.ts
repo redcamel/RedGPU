@@ -1,18 +1,19 @@
-import Landscape from "./Landscape";
-import LandscapeComponent from "./LandscapeComponent";
-import LandscapeInstanceBuffer from "./LandscapeInstanceBuffer";
-import LandscapeMaterial from "./LandscapeMaterial";
-import LandscapeOptions from "./LandscapeOptions";
-import LandscapeSharedGeometry from "./LandscapeSharedGeometry";
-import LandscapeSpatialGrid from "./LandscapeSpatialGrid";
-import LandscapeTileStreamer from "./LandscapeTileStreamer";
-import ALandscapeDebugger from "./ALandscapeDebugger";
-import LandscapeSpatialGridDebugger from "./LandscapeSpatialGridDebugger";
-import LandscapeVHTDebugger from "./LandscapeVHTDebugger";
-import LandscapeVNTDebugger from "./LandscapeVNTDebugger";
-import LandscapeVHTGenerator from "./LandscapeVHTGenerator";
-import LandscapeVNTGenerator from "./LandscapeVNTGenerator";
-import LANDSCAPE_BASE_GRID_SIZE from "./LANDSCAPE_BASE_GRID_SIZE";
+import Landscape from "./core/Landscape";
+import LandscapeOptions from "./core/LandscapeOptions";
+import LANDSCAPE_BASE_GRID_SIZE from "./core/LANDSCAPE_BASE_GRID_SIZE";
+import LandscapeComponent from "./spatial/LandscapeComponent";
+import LandscapeInstanceBuffer from "./spatial/LandscapeInstanceBuffer";
+import LandscapeSharedGeometry from "./spatial/LandscapeSharedGeometry";
+import LandscapeSpatialGrid from "./spatial/LandscapeSpatialGrid";
+import LandscapeTileStreamer from "./spatial/LandscapeTileStreamer";
+import LandscapeMaterial from "./material/LandscapeMaterial";
+import LandscapeVHTGenerator from "./generator/LandscapeVHTGenerator";
+import LandscapeVNTGenerator from "./generator/LandscapeVNTGenerator";
+import ALandscapeDebugger from "./debugger/ALandscapeDebugger";
+import LandscapeSpatialGridDebugger from "./debugger/LandscapeSpatialGridDebugger";
+import LandscapeVHTDebugger from "./debugger/LandscapeVHTDebugger";
+import LandscapeVNTDebugger from "./debugger/LandscapeVNTDebugger";
+import LandscapeHUDDebugger from "./debugger/LandscapeHUDDebugger";
 
 export {
     ALandscapeDebugger,
@@ -26,6 +27,7 @@ export {
     LandscapeSpatialGridDebugger,
     LandscapeVHTDebugger,
     LandscapeVNTDebugger,
+    LandscapeHUDDebugger,
     LandscapeVHTGenerator,
     LandscapeVNTGenerator,
     LandscapeTileStreamer,

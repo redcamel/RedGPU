@@ -1,4 +1,4 @@
-import Landscape from "./Landscape";
+import Landscape from "../core/Landscape";
 
 export interface ALandscapeDebuggerOptions {
     width?: number;
@@ -136,6 +136,19 @@ export abstract class ALandscapeDebugger {
     set visible(val: boolean) {
         this.#visible = val;
         this.#canvas.style.setProperty('display', val ? 'block' : 'none', 'important');
+    }
+
+    show(): void {
+        this.visible = true;
+    }
+
+    hide(): void {
+        this.visible = false;
+    }
+
+    toggle(): boolean {
+        this.visible = !this.visible;
+        return this.visible;
     }
 
     get camera(): any {

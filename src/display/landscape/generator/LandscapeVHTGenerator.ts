@@ -1,7 +1,7 @@
-import RedGPUContext from "../../context/RedGPUContext";
-import DirectTexture from "../../resources/texture/DirectTexture";
-import vhtShaderCode from "./shader/landscapeVHTBake.wgsl";
-import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import RedGPUContext from "../../../context/RedGPUContext";
+import DirectTexture from "../../../resources/texture/DirectTexture";
+import vhtShaderCode from "../shader/landscapeVHTBake.wgsl";
+import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 /**
  * [KO] 16비트 고도맵 타일 텍스처로부터 GPU Compute Shader 기반 r32float VHT (Virtual Heightfield Texture) 아틀라스로 고도를 베이킹하는 매니저 클래스입니다.

@@ -1,5 +1,5 @@
 import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "./ALandscapeDebugger";
-import Landscape from "./Landscape";
+import Landscape from "../core/Landscape";
 
 /**
  * [KO] Landscape 지형 시스템의 2D SpatialGrid 타일 상태, 카메라 시야 반경(loadingRadius) 및 시선 방향/FOV 시야각을 2D 캔버스 오버레이로 실시간 시각화하는 디버거 클래스입니다 (ALandscapeDebugger 공통 메소드 기반).

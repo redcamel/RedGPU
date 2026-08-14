@@ -1,4 +1,4 @@
-import RedGPUContext from "../../context/RedGPUContext";
+import RedGPUContext from "../../../context/RedGPUContext";
 
 /**
  * [KO] Landscape Multi-LOD Batching Instanced Rendering 전용 GPU Storage Buffer & RVT (VHT+VNT) BindGroup 관리 클래스입니다.

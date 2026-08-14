@@ -1,14 +1,13 @@
-import RedGPUContext from "../../context/RedGPUContext";
+import RedGPUContext from "../../../context/RedGPUContext";
 import LandscapeComponent from "./LandscapeComponent";
 import LandscapeSpatialGrid from "./LandscapeSpatialGrid";
 import {
     parse16BitPngBufferToGPUTexture
-} from "../../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
-import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
-import DirectTexture from "../../resources/texture/DirectTexture";
-import LandscapeVNTGenerator from "./LandscapeVNTGenerator";
-
-import LandscapeVHTGenerator from "./LandscapeVHTGenerator";
+} from "../../../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
+import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import DirectTexture from "../../../resources/texture/DirectTexture";
+import LandscapeVNTGenerator from "../generator/LandscapeVNTGenerator";
+import LandscapeVHTGenerator from "../generator/LandscapeVHTGenerator";
 
 /**
  * [KO] 타일별 커스텀 URL 생성 리졸버 함수 타입입니다. (row, col 인자 제공)
@@ -120,6 +119,14 @@ export class LandscapeTileStreamer {
 
     get tileUrlResolver(): LandscapeTileUrlResolver | null {
         return this.#tileUrlResolver;
+    }
+
+    get loadedTileCount(): number {
+        return this.#loadedMap.size;
+    }
+
+    get pendingQueueSize(): number {
+        return this.#pendingQueue.length;
     }
 
     setTerrainConfig(heightScale: number, worldSizeX: number, componentCountX: number): void {

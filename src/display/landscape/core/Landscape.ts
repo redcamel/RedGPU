@@ -1,20 +1,20 @@
-import RedGPUContext from "../../context/RedGPUContext";
-import GPU_PRIMITIVE_TOPOLOGY from "../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
-import RenderViewStateData from "../view/core/RenderViewStateData";
-import landscapeVertexSource from "./shader/landscapeVertex.wgsl";
+import RedGPUContext from "../../../context/RedGPUContext";
+import GPU_PRIMITIVE_TOPOLOGY from "../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
+import RenderViewStateData from "../../view/core/RenderViewStateData";
+import landscapeVertexSource from "../shader/landscapeVertex.wgsl";
 import LANDSCAPE_BASE_GRID_SIZE from "./LANDSCAPE_BASE_GRID_SIZE";
-import LandscapeComponent from "./LandscapeComponent";
-import LandscapeInstanceBuffer from "./LandscapeInstanceBuffer";
-import LandscapeMaterial from "./LandscapeMaterial";
+import LandscapeComponent from "../spatial/LandscapeComponent";
+import LandscapeInstanceBuffer from "../spatial/LandscapeInstanceBuffer";
+import LandscapeMaterial from "../material/LandscapeMaterial";
 import LandscapeOptions from "./LandscapeOptions";
-import LandscapeSharedGeometry from "./LandscapeSharedGeometry";
-import LandscapeSpatialGrid from "./LandscapeSpatialGrid";
-import DirectTexture from "../../resources/texture/DirectTexture";
-import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "./LandscapeTileStreamer";
-import LandscapeVNTGenerator from "./LandscapeVNTGenerator";
-import LandscapeVHTGenerator from "./LandscapeVHTGenerator";
-import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
-import Object3DContainer from "../mesh/core/Object3DContainer";
+import LandscapeSharedGeometry from "../spatial/LandscapeSharedGeometry";
+import LandscapeSpatialGrid from "../spatial/LandscapeSpatialGrid";
+import DirectTexture from "../../../resources/texture/DirectTexture";
+import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "../spatial/LandscapeTileStreamer";
+import LandscapeVNTGenerator from "../generator/LandscapeVNTGenerator";
+import LandscapeVHTGenerator from "../generator/LandscapeVHTGenerator";
+import updateTargetUniform from "../../../defineProperty/core/updateTargetUniform";
+import Object3DContainer from "../../mesh/core/Object3DContainer";
 
 const DEFAULT_LOD_COLORS: [number, number, number, number][] = [
     [0.18, 0.8, 0.44, 1.0],  // LOD 0: Green
@@ -420,6 +420,14 @@ export class Landscape extends Object3DContainer {
 
     get frustumCullingActive(): boolean {
         return this.#frustumCullingActive;
+    }
+
+    get lodCountsBuffer(): Int32Array {
+        return this.#lodCountsBuffer;
+    }
+
+    get lodColors(): [number, number, number, number][] {
+        return this.#lodColorsRGBA;
     }
 
     get tileUrlResolver(): LandscapeTileUrlResolver | null {

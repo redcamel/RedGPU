@@ -1,7 +1,7 @@
-import RedGPUContext from "../../context/RedGPUContext";
-import DirectTexture from "../../resources/texture/DirectTexture";
-import vntBakeShaderCode from "./shader/landscapeVNTBake.wgsl";
-import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import RedGPUContext from "../../../context/RedGPUContext";
+import DirectTexture from "../../../resources/texture/DirectTexture";
+import vntBakeShaderCode from "../shader/landscapeVNTBake.wgsl";
+import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 /**
  * [KO] 16비트 고도맵 VHT 아틀라스로부터 GPU Compute Shader 기반 실시간 픽셀 노멀 VNT 아틀라스를 베이킹하는 매니저 클래스입니다.

@@ -1,6 +1,6 @@
 import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "./ALandscapeDebugger";
-import Landscape from "./Landscape";
-import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import Landscape from "../core/Landscape";
+import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 /**
  * [KO] Landscape 지형 시스템의 16비트 VHT (Virtual Heightfield Texture) 아틀라스 텍스처와 카메라 시선/FOV/로딩반경을 WebGPU Canvas 60fps 오버레이로 시각화하는 디버거 클래스입니다 (ALandscapeDebugger 기반 GPU-Native).
