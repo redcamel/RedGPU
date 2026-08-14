@@ -439,6 +439,9 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                 folderGrass.addBinding(grassLayer, 'roughness', {min: 0, max: 1, step: 0.01});
                 folderGrass.addBinding(grassLayer, 'metallic', {min: 0, max: 1, step: 0.01});
                 folderGrass.addBinding(grassLayer, 'normalIntensity', {min: 0, max: 2, step: 0.01});
+                folderGrass.addBinding(grassLayer, 'aoIntensity', {min: 0, max: 2, step: 0.01});
+                folderGrass.addBinding(grassLayer, 'heightOffset', {min: -500, max: 500, step: 0.1});
+                folderGrass.addBinding(grassLayer, 'heightContrast', {min: 0, max: 5, step: 0.1});
 
                 const layerScaleData = {uvScale: grassLayer.uvScale[0]};
                 folderGrass.addBinding(layerScaleData, 'uvScale', {min: 1, max: 500, step: 1}).on('change', (e) => {

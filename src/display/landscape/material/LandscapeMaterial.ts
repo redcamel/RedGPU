@@ -48,8 +48,8 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     // 텍스처 비동기 로딩 갱신 시 파괴된 텍스처 복사 제출 방지용 버저닝 가드
     #textureArrayVersion: number = 0;
 
-    // Zero-GC 재사용 TypedArray Uniform 구조체 (WGSL 16-byte alignment 규칙 준수: 총 576 bytes = 144 float32 elements)
-    #uniformFloatArray: Float32Array = new Float32Array(144);
+    // Zero-GC 재사용 TypedArray Uniform 구조체 (WGSL 16-byte alignment 규칙 준수: 총 704 bytes = 176 float32 elements)
+    #uniformFloatArray: Float32Array = new Float32Array(176);
     #uniformUintArray: Uint32Array;
 
     constructor(redGPUContext: RedGPUContext, colorHex: string = '#ffffff', baseColorTexture?: BitmapTexture) {
@@ -199,10 +199,15 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                 floatBuf[offset + 13] = layer.metallic;
                 floatBuf[offset + 14] = layer.normalIntensity;
                 floatBuf[offset + 15] = layer.enabled ? 1.0 : 0.0; // enabled
+
+                floatBuf[offset + 16] = layer.aoIntensity;
+                floatBuf[offset + 17] = layer.heightOffset;
+                floatBuf[offset + 18] = layer.heightContrast;
+                floatBuf[offset + 19] = 0.0; // pad0
             } else {
-                floatBuf.fill(0, offset, offset + 16);
+                floatBuf.fill(0, offset, offset + 20);
             }
-            offset += 16;
+            offset += 20;
         }
 
         const fragRenderInfo = this.gpuRenderInfo;

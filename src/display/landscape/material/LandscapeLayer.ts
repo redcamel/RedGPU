@@ -41,6 +41,12 @@ export interface LandscapeLayerOptions {
     normalIntensity?: number;
     /** Legacy alias: Normal Scale */
     normalScale?: number;
+    /** UE5 Standard: Ambient Occlusion Intensity (0.0 ~ 2.0) */
+    aoIntensity?: number;
+    /** UE5 Standard: Height Offset for Height Blend Mode */
+    heightOffset?: number;
+    /** UE5 Standard: Height Contrast for Micro Detail Blend Mode */
+    heightContrast?: number;
     tintColor?: ColorRGBA | string;
 }
 
@@ -74,6 +80,13 @@ export class LandscapeLayer {
     metallic: number = 0.0;
     /** UE5 Standard: Normal Intensity */
     normalIntensity: number = 1.0;
+    /** UE5 Standard: Ambient Occlusion Intensity */
+    aoIntensity: number = 1.0;
+
+    /** UE5 Standard: Height Offset */
+    heightOffset: number = 0.0;
+    /** UE5 Standard: Height Contrast */
+    heightContrast: number = 1.0;
 
     tintColor: ColorRGBA = new ColorRGBA(255, 255, 255, 1);
 
@@ -110,6 +123,10 @@ export class LandscapeLayer {
 
         const nIntensity = options.normalIntensity ?? options.normalScale;
         if (nIntensity !== undefined) this.normalIntensity = nIntensity;
+
+        if (options.aoIntensity !== undefined) this.aoIntensity = options.aoIntensity;
+        if (options.heightOffset !== undefined) this.heightOffset = options.heightOffset;
+        if (options.heightContrast !== undefined) this.heightContrast = options.heightContrast;
 
         if (options.tintColor) {
             if (typeof options.tintColor === 'string') {

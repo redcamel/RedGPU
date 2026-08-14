@@ -34,6 +34,10 @@ struct LandscapeLayerParams {
     metallic: f32,
     normalIntensity: f32,
     enabled: f32, // 1.0 or 0.0
+    aoIntensity: f32,
+    heightOffset: f32,
+    heightContrast: f32,
+    pad0: f32,
 };
 
 struct MaterialUniforms {
@@ -76,7 +80,7 @@ fn computeLayerRawWeight(layer: LandscapeLayerParams, worldNormalY: f32, vertexH
         let slopeRad = acos(clamp(worldNormalY, -1.0, 1.0));
         val = slopeRad * 57.295779513;
     } else if (blendMode < 1.5) {
-        val = vertexHeight;
+        val = vertexHeight + layer.heightOffset;
     } else {
         return 1.0;
     }
@@ -167,7 +171,7 @@ fn main(inputData: InputData) -> OutputFragment {
             let layerAlbedo = layerAlbedoSample.rgb * layerParams.tintColor.rgb;
             let layerRoughness = layerParams.roughness * layerORMSample.g;
             let layerMetallic = layerParams.metallic * layerORMSample.b;
-            let layerAO = clamp(pow(max(0.001, layerORMSample.r), max(0.0, uniforms.occlusionStrength * 2.0)), 0.0, 1.0);
+            let layerAO = clamp(pow(max(0.001, layerORMSample.r * layerParams.aoIntensity), max(0.0, uniforms.occlusionStrength * 2.0)), 0.0, 1.0);
 
             blendedAlbedo += layerAlbedo * layerW;
             blendedNormal += layerNormalSample * layerW;
