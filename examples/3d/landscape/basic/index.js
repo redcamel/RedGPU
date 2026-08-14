@@ -46,7 +46,7 @@ RedGPU.init(
             loadingRadius: 4000
         });
 
-        // 4-1. 기본 지형 PBR 텍스처(baseColorTexture: diffuse.jpg / ormTexture: orm.jpg) 및 UV 스케일링 설정
+        // 4-1. 기본 지형 PBR 텍스처 (baseColor / orm)
         const groundTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/terrain/terrainTest_001/diffuse.jpg'
@@ -60,8 +60,10 @@ RedGPU.init(
         landscape.landscapeMaterial.color.setColorByHEX('#ffffff');
         landscape.landscapeMaterial.textureScale = [160, 160];
 
-        // Multi-Layer PBR 지형 레이어 (Grass) 등록 (UE5 표준 프로퍼티 명칭 사용)
+        // Multi-Layer PBR 지형 레이어 4종 (Grass, Rock, Gravel, Leave) 등록
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
+
+        // 1. Grass (풀 레이어)
         const grassLayer = new RedGPU.LandscapeLayer({
             name: 'Grass',
             baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass.jpg`),
@@ -70,14 +72,69 @@ RedGPU.init(
             uvScale: [160, 160],
             blendMode: 'SLOPE',
             minVal: 0,
-            maxVal: 90,
-            blendFalloff: 5,
+            maxVal: 35,
+            blendFalloff: 10,
             roughness: 1.0,
             metallic: 0.0,
             normalIntensity: 1.0,
             tintColor: '#ffffff'
         });
+
+        // 2. Rock (암벽/바위 레이어)
+        const rockLayer = new RedGPU.LandscapeLayer({
+            name: 'Rock',
+            baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock.jpg`),
+            normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock_normal.jpg`),
+            ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock_orm.jpg`),
+            uvScale: [120, 120],
+            blendMode: 'SLOPE',
+            minVal: 25,
+            maxVal: 90,
+            blendFalloff: 15,
+            roughness: 0.9,
+            metallic: 0.0,
+            normalIntensity: 1.2,
+            tintColor: '#ffffff'
+        });
+
+        // 3. Gravel (자갈/흙 레이어)
+        const gravelLayer = new RedGPU.LandscapeLayer({
+            name: 'Gravel',
+            baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}gravel.jpg`),
+            normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}gravel_normal.jpg`),
+            ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}gravel_orm.jpg`),
+            uvScale: [140, 140],
+            blendMode: 'HEIGHT',
+            minVal: -500,
+            maxVal: 250,
+            blendFalloff: 50,
+            roughness: 0.95,
+            metallic: 0.0,
+            normalIntensity: 1.0,
+            tintColor: '#ffffff'
+        });
+
+        // 4. Leave (낙엽/숲속 레이어)
+        const leaveLayer = new RedGPU.LandscapeLayer({
+            name: 'Leave',
+            baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}leave.jpg`),
+            normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}leave_normal.jpg`),
+            ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}leave_orm.jpg`),
+            uvScale: [100, 100],
+            blendMode: 'HEIGHT',
+            minVal: 200,
+            maxVal: 1200,
+            blendFalloff: 80,
+            roughness: 1.0,
+            metallic: 0.0,
+            normalIntensity: 1.0,
+            tintColor: '#ffffff'
+        });
+
         landscape.landscapeMaterial.addLayer(grassLayer);
+        landscape.landscapeMaterial.addLayer(rockLayer);
+        landscape.landscapeMaterial.addLayer(gravelLayer);
+        landscape.landscapeMaterial.addLayer(leaveLayer);
 
         landscape.tileUrlResolver = (row, col) => {
             const BASE_HOST = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
@@ -140,7 +197,7 @@ RedGPU.init(
         renderer.start(redGPUContext, render);
 
         // 7. Landscape 모든 get/set 속성 및 2D 디버거 전면 제어 테스트 패널 렌더링
-        renderTestPane(redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight, grassLayer);
+        renderTestPane(redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight, [grassLayer, rockLayer, gravelLayer, leaveLayer]);
     }
 );
 
@@ -157,9 +214,9 @@ RedGPU.init(
  * @param {RedGPU.Resource.BitmapTexture} groundTexture
  * @param {RedGPU.Resource.BitmapTexture} ormTexture
  * @param {RedGPU.Light.DirectionalLight} directionalLight
- * @param {RedGPU.LandscapeLayer} grassLayer
+ * @param {Array<RedGPU.LandscapeLayer>} layers
  */
-const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight, grassLayer) => {
+const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight, layers) => {
     const [wsX, wsZ] = landscape ? landscape.worldSize : [8000, 8000];
     const [tcX, tcZ] = landscape ? landscape.componentCount : [8, 8];
     const [tsX, tsZ] = landscape ? landscape.tileSize : [1000, 1000];
@@ -423,29 +480,36 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                 }
             });
 
-            // Folder 4-1: Grass Layer Controls (UE5 Specs)
-            if (grassLayer) {
-                const folderGrass = pane.addFolder({title: 'Grass Layer', expanded: true});
+            // Folder 4-1: Multi-Layer PBR Controls (Grass, Rock, Gravel, Leave)
+            if (layers && layers.length) {
+                const folderLayers = pane.addFolder({title: '🌿 Multi-Layer PBR (UE5 Specs)', expanded: true});
 
-                folderGrass.addBinding(grassLayer, 'enabled');
-                folderGrass.addBinding(grassLayer, 'blendMode', {
-                    options: {SLOPE: 'SLOPE', HEIGHT: 'HEIGHT', WEIGHT_MAP: 'WEIGHT_MAP'}
-                });
+                layers.forEach((layer) => {
+                    const subFolder = folderLayers.addFolder({
+                        title: `Layer: ${layer.name}`,
+                        expanded: layer.name === 'Grass'
+                    });
 
-                folderGrass.addBinding(grassLayer, 'minVal', {min: -500, max: 500, step: 0.1});
-                folderGrass.addBinding(grassLayer, 'maxVal', {min: -500, max: 500, step: 0.1});
-                folderGrass.addBinding(grassLayer, 'blendFalloff', {min: 0.1, max: 50, step: 0.1});
+                    subFolder.addBinding(layer, 'enabled');
+                    subFolder.addBinding(layer, 'blendMode', {
+                        options: {SLOPE: 'SLOPE', HEIGHT: 'HEIGHT', WEIGHT_MAP: 'WEIGHT_MAP'}
+                    });
 
-                folderGrass.addBinding(grassLayer, 'roughness', {min: 0, max: 1, step: 0.01});
-                folderGrass.addBinding(grassLayer, 'metallic', {min: 0, max: 1, step: 0.01});
-                folderGrass.addBinding(grassLayer, 'normalIntensity', {min: 0, max: 2, step: 0.01});
-                folderGrass.addBinding(grassLayer, 'aoIntensity', {min: 0, max: 2, step: 0.01});
-                folderGrass.addBinding(grassLayer, 'heightOffset', {min: -500, max: 500, step: 0.1});
-                folderGrass.addBinding(grassLayer, 'heightContrast', {min: 0, max: 5, step: 0.1});
+                    subFolder.addBinding(layer, 'minVal', {min: -500, max: 500, step: 0.1});
+                    subFolder.addBinding(layer, 'maxVal', {min: -500, max: 500, step: 0.1});
+                    subFolder.addBinding(layer, 'blendFalloff', {min: 0.1, max: 50, step: 0.1});
 
-                const layerScaleData = {uvScale: grassLayer.uvScale[0]};
-                folderGrass.addBinding(layerScaleData, 'uvScale', {min: 1, max: 500, step: 1}).on('change', (e) => {
-                    grassLayer.uvScale = [e.value, e.value];
+                    subFolder.addBinding(layer, 'roughness', {min: 0, max: 1, step: 0.01});
+                    subFolder.addBinding(layer, 'metallic', {min: 0, max: 1, step: 0.01});
+                    subFolder.addBinding(layer, 'normalIntensity', {min: 0, max: 2, step: 0.01});
+                    subFolder.addBinding(layer, 'aoIntensity', {min: 0, max: 2, step: 0.01});
+                    subFolder.addBinding(layer, 'heightOffset', {min: -500, max: 500, step: 0.1});
+                    subFolder.addBinding(layer, 'heightContrast', {min: 0, max: 5, step: 0.1});
+
+                    const layerScaleData = {uvScale: layer.uvScale[0]};
+                    subFolder.addBinding(layerScaleData, 'uvScale', {min: 1, max: 500, step: 1}).on('change', (e) => {
+                        layer.uvScale = [e.value, e.value];
+                    });
                 });
             }
 

@@ -171,7 +171,8 @@ fn main(inputData: InputData) -> OutputFragment {
             let layerAlbedo = layerAlbedoSample.rgb * layerParams.tintColor.rgb;
             let layerRoughness = layerParams.roughness * layerORMSample.g;
             let layerMetallic = layerParams.metallic * layerORMSample.b;
-            let layerAO = clamp(pow(max(0.001, layerORMSample.r * layerParams.aoIntensity), max(0.0, uniforms.occlusionStrength * 2.0)), 0.0, 1.0);
+            let rawAO = select(1.0, layerORMSample.r, layerORMSample.r > 0.001);
+            let layerAO = clamp(mix(1.0, rawAO, layerParams.aoIntensity), 0.2, 1.0);
 
             blendedAlbedo += layerAlbedo * layerW;
             blendedNormal += layerNormalSample * layerW;
@@ -183,16 +184,21 @@ fn main(inputData: InputData) -> OutputFragment {
         }
 
         if (totalLayerWeight > 0.0001) {
-            let baseWeight = clamp(1.0 - totalLayerWeight, 0.0, 1.0);
-            let scaleFactor = select(1.0, 1.0 / totalLayerWeight, totalLayerWeight > 1.0);
+            let layerBlendAlbedo = blendedAlbedo / totalLayerWeight;
+            let layerBlendNormal = blendedNormal / totalLayerWeight;
+            let layerBlendRoughness = blendedRoughness / totalLayerWeight;
+            let layerBlendMetallic = blendedMetallic / totalLayerWeight;
+            let layerBlendAO = blendedAO / totalLayerWeight;
 
-            albedo = baseAlbedo * baseWeight + blendedAlbedo * scaleFactor * (1.0 - baseWeight);
-            if (length(blendedNormal) > 0.001) {
-                N = normalize(N + blendedNormal * (1.0 - baseWeight));
+            let alpha = clamp(totalLayerWeight, 0.0, 1.0);
+
+            albedo = mix(baseAlbedo, layerBlendAlbedo, alpha);
+            if (length(layerBlendNormal) > 0.001) {
+                N = normalize(mix(N, N + layerBlendNormal, alpha));
             }
-            u_roughnessFactor = baseRoughness * baseWeight + blendedRoughness * scaleFactor * (1.0 - baseWeight);
-            u_metallicFactor = baseMetallic * baseWeight + blendedMetallic * scaleFactor * (1.0 - baseWeight);
-            ambientOcclusion = baseAO * baseWeight + blendedAO * scaleFactor * (1.0 - baseWeight);
+            u_roughnessFactor = mix(baseRoughness, layerBlendRoughness, alpha);
+            u_metallicFactor = mix(baseMetallic, layerBlendMetallic, alpha);
+            ambientOcclusion = mix(baseAO, layerBlendAO, alpha);
         }
     }
 
