@@ -53,9 +53,20 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
             const cx = padding + nx * mapDrawWidth - cellW / 2;
             const cy = padding + nz * mapDrawHeight - cellH / 2;
 
+            const isCulled = comp.lodLevel < 0;
             const isLoaded = this.landscape.tileStreamer && this.landscape.tileStreamer.isTileLoaded(comp.componentZ, comp.componentX);
-            this.#ctx.fillStyle = isLoaded ? 'rgba(56, 189, 248, 0.35)' : 'rgba(255, 255, 255, 0.05)';
-            this.#ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+
+            if (isCulled) {
+                this.#ctx.fillStyle = 'rgba(239, 68, 68, 0.25)'; // Frustum Culled (Red)
+                this.#ctx.strokeStyle = 'rgba(239, 68, 68, 0.5)';
+            } else if (isLoaded) {
+                this.#ctx.fillStyle = 'rgba(56, 189, 248, 0.35)'; // Active Loaded (Blue)
+                this.#ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+            } else {
+                this.#ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+                this.#ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+            }
+
             this.#ctx.fillRect(cx, cy, cellW, cellH);
             this.#ctx.strokeRect(cx, cy, cellW, cellH);
         }

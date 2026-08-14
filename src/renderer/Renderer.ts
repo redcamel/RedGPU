@@ -207,7 +207,7 @@ class Renderer {
                     v.updateTiles(renderViewStateData)
                 })
                 scene.landscapeChildren.forEach(v => {
-                    v.update(view.camera)
+                    v.update(view.camera, renderViewStateData)
                 })
             }
 

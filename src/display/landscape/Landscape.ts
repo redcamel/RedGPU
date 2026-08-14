@@ -68,6 +68,9 @@ export class Landscape extends Object3DContainer {
     // 매 프레임 카메라 Cell 및 LOD 카운팅 재사용 버퍼 (Zero-GC)
     #tempCellBuffer: Int32Array = new Int32Array(2);
     #lodCountsBuffer: Int32Array;
+    #visibleComponentCount: number = 0;
+    #culledComponentCount: number = 0;
+    #frustumCullingActive: boolean = false;
 
     #vertexShaderModule: GPUShaderModule;
     #renderPipelineCache: Map<string, GPURenderPipeline> = new Map();
@@ -403,6 +406,18 @@ export class Landscape extends Object3DContainer {
         this.#tileStreamer.maxLoadsPerFrame = value;
     }
 
+    get visibleComponentCount(): number {
+        return this.#visibleComponentCount;
+    }
+
+    get culledComponentCount(): number {
+        return this.#culledComponentCount;
+    }
+
+    get frustumCullingActive(): boolean {
+        return this.#frustumCullingActive;
+    }
+
     get tileUrlResolver(): LandscapeTileUrlResolver | null {
         return this.#tileStreamer.tileUrlResolver;
     }
@@ -500,13 +515,20 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    update(camera: any): void {
+    update(camera: any, renderViewStateData?: any): void {
         if (!camera) return;
 
         // 카메라 및 컨트롤러 유형에 관계없이 3D 월드 위치(camX, camY, camZ) 안전 추출
         const camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
         const camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
         const camZ = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
+
+        // 절두체 평면(Frustum Planes) 수집
+        const frustumPlanes: number[][] | null = renderViewStateData?.frustumPlanes
+            ?? renderViewStateData?.view?.frustumPlanes
+            ?? camera?.frustumPlanes
+            ?? camera?.camera?.frustumPlanes
+            ?? null;
 
         this.#spatialGrid.getCellCoordinates(camX, camZ, this.#tempCellBuffer);
         this.#tileStreamer.update(camX, camZ);
@@ -517,13 +539,38 @@ export class Landscape extends Object3DContainer {
         const distSqList = this.#lodDistancesSq;
         const lodLimit = distSqList.length;
 
-        // 1. 패스: 각 컴포넌트별 LOD 계산 및 LOD 그룹별 개수 집계
+        const halfTileSizeX = this.#tileSizeX * 0.5;
+        const halfTileSizeZ = this.#tileSizeZ * 0.5;
+        const heightScale = this.#heightScale;
+        const minY = -Math.max(50.0, heightScale * 0.1);
+        const maxY = heightScale + Math.max(50.0, heightScale * 0.1);
+
+        // 1. 패스: 각 컴포넌트별 Frustum Culling 검사 및 LOD 계산/집계
         this.#lodCountsBuffer.fill(0);
+        let culledCount = 0;
+        this.#frustumCullingActive = !!frustumPlanes;
 
         for (let i = 0; i < count; i++) {
             const comp = components[i];
-            const dx = comp.worldX - camX;
-            const dz = comp.worldZ - camZ;
+            const tileWorldX = comp.worldX;
+            const tileWorldZ = comp.worldZ;
+
+            // 카메라 시야 절두체 AABB 컬링 검사 (Zero-GC P-Vertex)
+            if (frustumPlanes) {
+                const minX = tileWorldX - halfTileSizeX;
+                const maxX = tileWorldX + halfTileSizeX;
+                const minZ = tileWorldZ - halfTileSizeZ;
+                const maxZ = tileWorldZ + halfTileSizeZ;
+
+                if (!this.#checkAABBInFrustum(minX, minY, minZ, maxX, maxY, maxZ, frustumPlanes)) {
+                    comp.lodLevel = -1; // Frustum Cull됨
+                    culledCount++;
+                    continue;
+                }
+            }
+
+            const dx = tileWorldX - camX;
+            const dz = tileWorldZ - camZ;
             const distSq = dx * dx + dz * dz + camYSq;
 
             let lod = lodLimit;
@@ -539,6 +586,9 @@ export class Landscape extends Object3DContainer {
             this.#lodCountsBuffer[activeLOD]++;
         }
 
+        this.#culledComponentCount = culledCount;
+        this.#visibleComponentCount = count - culledCount;
+
         // 2. 패스: InstanceBuffer에 LOD 그룹 오프셋 할당
         const instanceBuf = this.#instanceBuffer;
         instanceBuf.prepareLODAllocation(this.#lodCountsBuffer);
@@ -546,13 +596,17 @@ export class Landscape extends Object3DContainer {
         // 3. 패스: LOD 그룹별로 정렬하여 인스턴스 데이터 작성 (Zero-GC 재사용 버퍼 타격 + Mesh 표준 prevTileX/Z 100% 동기화)
         const lodColorationActive = this.#lodColoration;
         const lodColorsRGBA = this.#lodColorsRGBA;
-        const defaultColor = this.#defaultTerrainColorRGBA;
 
         const ZERO_COLOR: [number, number, number, number] = [0, 0, 0, 0];
 
         for (let i = 0; i < count; i++) {
             const comp = components[i];
             const activeLOD = comp.lodLevel;
+
+            // Frustum Cull된 타일 스킵
+            if (activeLOD < 0) {
+                continue;
+            }
 
             const colorRGBA = lodColorationActive
                 ? lodColorsRGBA[activeLOD]
@@ -579,6 +633,34 @@ export class Landscape extends Object3DContainer {
 
         // 4. GPU 버퍼 동기화 제출
         instanceBuf.flushToGPU();
+    }
+
+    /**
+     * [KO] 타일 AABB 범위와 6개 절두체 평면 간의 교차 여부를 검사합니다 (Zero-GC P-Vertex 검사).
+     */
+    #checkAABBInFrustum(
+        minX: number, minY: number, minZ: number,
+        maxX: number, maxY: number, maxZ: number,
+        frustumPlanes: number[][] | Float32Array[]
+    ): boolean {
+        if (!frustumPlanes || frustumPlanes.length < 6) return true;
+
+        for (let i = 0; i < 6; i++) {
+            const plane = frustumPlanes[i];
+            const a = plane[0];
+            const b = plane[1];
+            const c = plane[2];
+            const d = plane[3];
+
+            const pX = a > 0 ? maxX : minX;
+            const pY = b > 0 ? maxY : minY;
+            const pZ = c > 0 ? maxZ : minZ;
+
+            if (a * pX + b * pY + c * pZ + d < 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     #updateLODDistances(): void {
