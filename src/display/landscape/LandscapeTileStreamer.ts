@@ -130,6 +130,10 @@ export class LandscapeTileStreamer {
         }
     }
 
+    isTileLoaded(row: number, col: number): boolean {
+        return this.#loadedMap.has(`${row}_${col}`);
+    }
+
     async #loadTile(comp: LandscapeComponent): Promise<void> {
         if (!this.#tileUrlResolver) return;
         const key = `${comp.componentZ}_${comp.componentX}`;
@@ -149,12 +153,15 @@ export class LandscapeTileStreamer {
 
                 if (this.#vhtAtlasTexture) {
                     const {gpuDevice} = this.#redGPUContext;
-                    const targetX = comp.componentX * parsed.width;
-                    const targetZ = comp.componentZ * parsed.height;
+                    const TILE_PIXEL_SIZE = 512;
+                    const targetX = comp.componentX * TILE_PIXEL_SIZE;
+                    const targetZ = comp.componentZ * TILE_PIXEL_SIZE;
+                    const copyW = Math.min(parsed.width, TILE_PIXEL_SIZE);
+                    const copyH = Math.min(parsed.height, TILE_PIXEL_SIZE);
 
                     if (
-                        targetX + parsed.width <= this.#vhtAtlasTexture.width &&
-                        targetZ + parsed.height <= this.#vhtAtlasTexture.height
+                        targetX + copyW <= this.#vhtAtlasTexture.width &&
+                        targetZ + copyH <= this.#vhtAtlasTexture.height
                     ) {
                         const commandEncoder = gpuDevice.createCommandEncoder({label: `VHT_SubRegion_Copy_${key}`});
                         commandEncoder.copyTextureToTexture(
@@ -163,7 +170,7 @@ export class LandscapeTileStreamer {
                                 texture: this.#vhtAtlasTexture,
                                 origin: [targetX, targetZ, 0]
                             },
-                            [parsed.width, parsed.height, 1]
+                            [copyW, copyH, 1]
                         );
                         gpuDevice.queue.submit([commandEncoder.finish()]);
                         console.log(`[LandscapeTileStreamer ⛰️] VHT Atlas Sub-region (${key}) copied at [${targetX}, ${targetZ}]`);

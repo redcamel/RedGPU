@@ -69,7 +69,7 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
             const cx = padding + nx * mapDrawWidth - cellW / 2;
             const cy = padding + (1 - nz) * mapDrawHeight - cellH / 2;
 
-            const isLoaded = this.landscape.tileStreamer && this.landscape.tileStreamer.loadedTileCount > 0;
+            const isLoaded = this.landscape.tileStreamer && this.landscape.tileStreamer.isTileLoaded(comp.componentZ, comp.componentX);
             this.#ctx.fillStyle = isLoaded ? 'rgba(56, 189, 248, 0.35)' : 'rgba(255, 255, 255, 0.05)';
             this.#ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
             this.#ctx.fillRect(cx, cy, cellW, cellH);
