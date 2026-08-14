@@ -1,56 +1,59 @@
 import ColorRGBA from "../../color/ColorRGBA";
 import RedGPUContext from "../../context/RedGPUContext";
-import ABitmapBaseMaterial from "../../material/core/ABitmapBaseMaterial";
+import AUVTransformBaseMaterial from "../../material/core/AUVTransformBaseMaterial";
 import Sampler from "../../resources/sampler/Sampler";
+import BitmapTexture from "../../resources/texture/BitmapTexture";
 import GPU_FILTER_MODE from "../../gpuConst/GPU_FILTER_MODE";
 import GPU_ADDRESS_MODE from "../../gpuConst/GPU_ADDRESS_MODE";
 import GPU_MIPMAP_FILTER_MODE from "../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 import landscapeFragmentSource from "./shader/landscapeFragment.wgsl";
 import defineColorRGBA from "../../defineProperty/funcs/color/defineColorRGBA";
+import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
+import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
 
 interface LandscapeMaterial {
     color: ColorRGBA;
+    baseColorTexture: BitmapTexture;
+    baseColorTextureSampler: Sampler;
 }
 
 /**
- * [KO] Landscape 지형 시스템 전용 단일 머티리얼 클래스입니다 (지형 컬러, LOD 디버그, 셰이더 바인딩 전담).
- * [EN] Single material class dedicated to Landscape terrain system (One-stop for terrain color, LOD debug, shader binding).
+ * [KO] Landscape 지형 시스템 전용 머티리얼 클래스입니다 (RedGPU PBRMaterial 네이밍 표준 및 @group(2) 규격 완전 준수).
+ * [EN] Material class dedicated to Landscape terrain system (Fully compliant with RedGPU PBRMaterial naming standard & @group(2) material group).
  */
-class LandscapeMaterial extends ABitmapBaseMaterial {
-    #textureSampler: Sampler;
-
-    constructor(redGPUContext: RedGPUContext, colorHex: string = '#387d42') {
+class LandscapeMaterial extends AUVTransformBaseMaterial {
+    constructor(redGPUContext: RedGPUContext, colorHex: string = '#ffffff', baseColorTexture?: BitmapTexture) {
         super(
             redGPUContext,
             'LANDSCAPE_MATERIAL',
             landscapeFragmentSource,
-            1
+            2 // RedGPU 표준 머티리얼 그룹 인덱스 2
         );
 
-        this.initGPURenderInfos();
-
-        this.textureSampler = new Sampler(redGPUContext, {
+        this.baseColorTextureSampler = new Sampler(redGPUContext, {
             magFilter: GPU_FILTER_MODE.LINEAR,
             minFilter: GPU_FILTER_MODE.LINEAR,
             mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
-            addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
-            addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE
+            addressModeU: GPU_ADDRESS_MODE.REPEAT,
+            addressModeV: GPU_ADDRESS_MODE.REPEAT
         });
 
+        this.baseColorTexture = baseColorTexture;
         this.color.setColorByHEX(colorHex);
-    }
-
-    get textureSampler(): Sampler {
-        return this.#textureSampler;
-    }
-
-    set textureSampler(val: Sampler) {
-        this.#textureSampler = val;
+        this.initGPURenderInfos();
     }
 }
 
 defineColorRGBA(LandscapeMaterial, [
     {key: 'color'}
+]);
+
+defineSampler(LandscapeMaterial, [
+    {key: 'baseColorTextureSampler'}
+]);
+
+defineTexture(LandscapeMaterial, [
+    {key: 'baseColorTexture'}
 ]);
 
 export {LandscapeMaterial};

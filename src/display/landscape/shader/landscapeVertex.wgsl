@@ -12,9 +12,9 @@ struct TileInstance {
     color: vec4<f32>,
 };
 
-@group(2) @binding(0) var<storage, read> tileInstances: array<TileInstance>;
-@group(2) @binding(1) var heightMapSampler: sampler;
-@group(2) @binding(2) var heightMapTexture: texture_2d<f32>;
+@group(1) @binding(0) var<storage, read> tileInstances: array<TileInstance>;
+@group(1) @binding(1) var heightMapSampler: sampler;
+@group(1) @binding(2) var heightMapTexture: texture_2d<f32>;
 
 struct InputData {
     @location(0) position: vec3<f32>,
@@ -58,7 +58,7 @@ fn main(input: InputData) -> OutputData {
         (prevWorldZ + instanceData.worldSizeZ * 0.5) / instanceData.worldSizeZ
     );
 
-    // VHT Atlas Texture (@group(2)) 16비트 고도 샘플링 (textureLoad: UnfilterableFloat 대응)
+    // VHT Atlas Texture (@group(1)) 16비트 고도 샘플링 (textureLoad: UnfilterableFloat 대응)
     let texSize = vec2<f32>(textureDimensions(heightMapTexture));
     let texCoord = vec2<i32>(clamp(globalUV * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
     let prevTexCoord = vec2<i32>(clamp(prevGlobalUV * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
@@ -78,7 +78,7 @@ fn main(input: InputData) -> OutputData {
     output.position = clipPos;
     output.vertexPosition = worldPos4.xyz;
     output.vertexNormal = vec3<f32>(0.0, 1.0, 0.0);
-    output.uv = globalUV;
+    output.uv = input.uv;
     output.uv1 = globalUV;
     output.vertexColor_0 = vec4<f32>(1.0, 1.0, 1.0, 1.0);
     output.vertexTangent = vec4<f32>(1.0, 0.0, 0.0, 1.0);

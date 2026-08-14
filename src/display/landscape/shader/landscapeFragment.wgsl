@@ -19,14 +19,34 @@ struct InputData {
 
 struct MaterialUniforms {
     color: vec4<f32>,
+    textureOffset: vec2<f32>,
+    textureScale: vec2<f32>,
 };
 
-@group(1) @binding(0) var<uniform> uniforms: MaterialUniforms;
+@group(2) @binding(0) var<uniform> uniforms: MaterialUniforms;
+@group(2) @binding(1) var baseColorTextureSampler: sampler;
+
+#redgpu_if baseColorTexture
+@group(2) @binding(2) var baseColorTexture: texture_2d<f32>;
+#redgpu_endIf
 
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
-    output.color = inputData.instanceColor;
+    
+    var finalColor: vec4<f32> = uniforms.color;
+
+    #redgpu_if baseColorTexture
+    let transformedUV = inputData.uv * uniforms.textureScale + uniforms.textureOffset;
+    let texColor = textureSample(baseColorTexture, baseColorTextureSampler, transformedUV);
+    finalColor = texColor * uniforms.color;
+    #redgpu_endIf
+
+    if (inputData.instanceColor.a > 0.0) {
+//        finalColor = mix(finalColor, inputData.instanceColor, 0.5);
+    }
+
+    output.color = finalColor;
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
     return output;
 }

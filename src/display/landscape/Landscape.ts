@@ -10,6 +10,7 @@ import LandscapeOptions from "./LandscapeOptions";
 import LandscapeSharedGeometry from "./LandscapeSharedGeometry";
 import LandscapeSpatialGrid from "./LandscapeSpatialGrid";
 import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "./LandscapeTileStreamer";
+import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 
 const DEFAULT_LOD_COLORS: [number, number, number, number][] = [
     [0.18, 0.8, 0.44, 1.0],  // LOD 0: Green
@@ -338,6 +339,51 @@ export class Landscape {
         return this.#tileStreamer;
     }
 
+    get loadingRadius(): number {
+        return this.#tileStreamer.loadingRadius;
+    }
+
+    #updateTuples(): void {
+        this.#worldSizeTuple[0] = this.#worldSizeX;
+        this.#worldSizeTuple[1] = this.#worldSizeZ;
+        this.#componentCountTuple[0] = this.#componentCountX;
+        this.#componentCountTuple[1] = this.#componentCountZ;
+        this.#tileSizeTuple[0] = this.#tileSizeX;
+        this.#tileSizeTuple[1] = this.#tileSizeZ;
+    }
+
+    set loadingRadius(value: number) {
+        this.#tileStreamer.loadingRadius = value;
+    }
+
+    get instanceBuffer(): LandscapeInstanceBuffer {
+        return this.#instanceBuffer;
+    }
+
+    get sharedGeometry(): LandscapeSharedGeometry {
+        return this.#sharedGeometry;
+    }
+
+    get spatialGrid(): LandscapeSpatialGrid {
+        return this.#spatialGrid;
+    }
+
+    get maxLoadsPerFrame(): number {
+        return this.#tileStreamer.maxLoadsPerFrame;
+    }
+
+    set maxLoadsPerFrame(value: number) {
+        this.#tileStreamer.maxLoadsPerFrame = value;
+    }
+
+    get tileUrlResolver(): LandscapeTileUrlResolver | null {
+        return this.#tileStreamer.tileUrlResolver;
+    }
+
+    set tileUrlResolver(resolver: LandscapeTileUrlResolver | null) {
+        this.#tileStreamer.tileUrlResolver = resolver;
+    }
+
     /**
      * [KO] Multi-LOD Batching 인스턴싱으로 전체 지형 타일을 디스패치하고 RenderViewStateData 통계를 기록합니다 (Zero-GC).
      */
@@ -345,6 +391,28 @@ export class Landscape {
         const renderPassEncoder = passEncoder || view?.currentRenderPassEncoder || view?.renderPassEncoder;
         const view3D = view?.view || view;
         if (!renderPassEncoder) return;
+
+        const material = this.#landscapeMaterial;
+        const renderResults = (view as RenderViewStateData)?.renderResults || (view3D as any)?.renderViewStateData?.renderResults;
+
+        // [KO] 머티리얼 텍스처/옵션 변경 시 바리안트 셰이더 갱신 및 파이프라인 캐시 무효화 (RedGPU 표준)
+        if (material) {
+            if (material.dirtyPipeline) {
+                material._updateFragmentState();
+                material.dirtyPipeline = false;
+                this.#renderPipelineCache.clear();
+                if (renderResults) {
+                    renderResults.numDirtyPipelines++;
+                }
+            }
+
+            // [KO] Mesh 표준: 텍스처 트랜스폼(Offset, Scale) 변경 시 GPU 유니폼 동기화 및 dirty 플래그 초기화
+            if (material.dirtyTextureTransform) {
+                updateTargetUniform(material, 'textureOffset', material.textureOffset || [0, 0]);
+                updateTargetUniform(material, 'textureScale', material.textureScale || [1, 1]);
+                material.dirtyTextureTransform = false;
+            }
+        }
 
         const instanceBuffer = this.#instanceBuffer;
         const sharedGeometry = this.#sharedGeometry;
@@ -368,16 +436,14 @@ export class Landscape {
             renderPassEncoder.setBindGroup(0, systemBG);
         }
 
+        renderPassEncoder.setBindGroup(1, storageBG);
+
         const matUniformBG = this.#landscapeMaterial?.gpuRenderInfo?.fragmentUniformBindGroup;
         if (matUniformBG) {
-            renderPassEncoder.setBindGroup(1, matUniformBG);
+            renderPassEncoder.setBindGroup(2, matUniformBG);
         }
-
-        renderPassEncoder.setBindGroup(2, storageBG);
         renderPassEncoder.setVertexBuffer(0, combinedVB.gpuBuffer);
         renderPassEncoder.setIndexBuffer(combinedIB.gpuBuffer, 'uint32');
-
-        const renderResults = (view as RenderViewStateData)?.renderResults || (view3D as any)?.renderViewStateData?.renderResults;
 
         const maxLODLevel = sharedGeometry.maxLODLevel;
         for (let lod = 0; lod < maxLODLevel; lod++) {
@@ -405,148 +471,6 @@ export class Landscape {
                 renderResults.numTriangles += (lodRange.indexCount / 3) * instanceCount;
             }
         }
-    }
-
-    #updateTuples(): void {
-        this.#worldSizeTuple[0] = this.#worldSizeX;
-        this.#worldSizeTuple[1] = this.#worldSizeZ;
-        this.#componentCountTuple[0] = this.#componentCountX;
-        this.#componentCountTuple[1] = this.#componentCountZ;
-        this.#tileSizeTuple[0] = this.#tileSizeX;
-        this.#tileSizeTuple[1] = this.#tileSizeZ;
-    }
-
-    #getOrCreateRenderPipeline(geom: any, storageBGLayout: GPUBindGroupLayout): GPURenderPipeline | null {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        const material = this.#landscapeMaterial;
-        if (!gpuDevice || !material || !material.gpuRenderInfo) return null;
-
-        const antialiasingManager = this.#redGPUContext.antialiasingManager;
-        const msaaID = antialiasingManager.msaaID;
-        const useMSAA = antialiasingManager.useMSAA;
-        const sampleCount = useMSAA ? 4 : 1;
-        const topology = this.#wireframe ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
-        const key = `${topology}_${material.uuid}_${msaaID}`;
-
-        if (this.#renderPipelineCache.has(key)) {
-            return this.#renderPipelineCache.get(key);
-        }
-
-        try {
-            const resourceManager = this.#redGPUContext.resourceManager;
-            const systemBGLayout = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');
-            const fragUniformBGLayout = material.gpuRenderInfo.fragmentBindGroupLayout;
-
-            const pipelineLayout = gpuDevice.createPipelineLayout({
-                label: `LandscapePipelineLayout_${key}`,
-                bindGroupLayouts: [systemBGLayout, fragUniformBGLayout, storageBGLayout]
-            });
-
-            const vertexBuffers: GPUVertexBufferLayout[] = [{
-                arrayStride: geom?.interleavedStruct?.arrayStride ?? 32,
-                attributes: geom?.interleavedStruct?.attributes ?? [
-                    {shaderLocation: 0, offset: 0, format: 'float32x3'},
-                    {shaderLocation: 1, offset: 12, format: 'float32x3'},
-                    {shaderLocation: 2, offset: 24, format: 'float32x2'}
-                ]
-            }];
-
-            const pipeline = gpuDevice.createRenderPipeline({
-                label: `LandscapeRenderPipeline_${key}`,
-                layout: pipelineLayout,
-                vertex: {
-                    module: this.#vertexShaderModule,
-                    entryPoint: 'main',
-                    buffers: vertexBuffers,
-                },
-                fragment: material.gpuRenderInfo.fragmentState,
-                primitive: {
-                    topology: topology,
-                    cullMode: 'none'
-                },
-                depthStencil: {
-                    format: 'depth32float',
-                    depthWriteEnabled: true,
-                    depthCompare: 'less-equal',
-                },
-                multisample: {count: sampleCount}
-            });
-
-            this.#renderPipelineCache.set(key, pipeline);
-            return pipeline;
-        } catch (e) {
-            console.warn('Failed to create Landscape RenderPipeline:', e);
-            return null;
-        }
-    }
-
-    #updateLODDistances(): void {
-        this.#lodDistancesSq.length = 0;
-        const tileSizeMax = Math.max(this.#tileSizeX, this.#tileSizeZ);
-        const count = this.#lodMultipliers.length;
-
-        for (let i = 0; i < count; i++) {
-            const dist = tileSizeMax * this.#lodMultipliers[i];
-            this.#lodDistancesSq.push(dist * dist);
-        }
-    }
-
-    #rebuildLODStructures(userColors?: string[], userMultipliers?: number[], userDistances?: number[]): void {
-        this.#lodColorsRGBA.length = 0;
-        this.#lodMultipliers.length = 0;
-
-        for (let i = 0; i < this.#maxLODLevel; i++) {
-            this.#lodColorsRGBA.push(DEFAULT_LOD_COLORS[i % DEFAULT_LOD_COLORS.length]);
-        }
-
-        const defaultMultipliers = [1.0, 2.0, 3.5, 6.0, 9.5, 14.0, 20.0];
-        const multipliers = userMultipliers ?? defaultMultipliers;
-
-        for (let i = 0; i < this.#maxLODLevel - 1; i++) {
-            this.#lodMultipliers.push(multipliers[i] ?? (1.0 * Math.pow(1.8, i)));
-        }
-
-        if (userDistances && userDistances.length > 0) {
-            this.#lodDistancesSq = userDistances.map(d => d * d);
-        } else {
-            this.#updateLODDistances();
-        }
-    }
-
-    get loadingRadius(): number {
-        return this.#tileStreamer.loadingRadius;
-    }
-
-    get instanceBuffer(): LandscapeInstanceBuffer {
-        return this.#instanceBuffer;
-    }
-
-    get sharedGeometry(): LandscapeSharedGeometry {
-        return this.#sharedGeometry;
-    }
-
-    get spatialGrid(): LandscapeSpatialGrid {
-        return this.#spatialGrid;
-    }
-
-    set loadingRadius(value: number) {
-        this.#tileStreamer.loadingRadius = value;
-    }
-
-    get maxLoadsPerFrame(): number {
-        return this.#tileStreamer.maxLoadsPerFrame;
-    }
-
-    set maxLoadsPerFrame(value: number) {
-        this.#tileStreamer.maxLoadsPerFrame = value;
-    }
-
-    get tileUrlResolver(): LandscapeTileUrlResolver | null {
-        return this.#tileStreamer.tileUrlResolver;
-    }
-
-    set tileUrlResolver(resolver: LandscapeTileUrlResolver | null) {
-        this.#tileStreamer.tileUrlResolver = resolver;
     }
 
     update(camera: any): void {
@@ -597,13 +521,15 @@ export class Landscape {
         const lodColorsRGBA = this.#lodColorsRGBA;
         const defaultColor = this.#defaultTerrainColorRGBA;
 
+        const ZERO_COLOR: [number, number, number, number] = [0, 0, 0, 0];
+
         for (let i = 0; i < count; i++) {
             const comp = components[i];
             const activeLOD = comp.lodLevel;
 
             const colorRGBA = lodColorationActive
                 ? lodColorsRGBA[activeLOD]
-                : defaultColor;
+                : ZERO_COLOR;
 
             instanceBuf.writeLODInstanceData(
                 activeLOD,
@@ -626,6 +552,104 @@ export class Landscape {
 
         // 4. GPU 버퍼 동기화 제출
         instanceBuf.flushToGPU();
+    }
+
+    #updateLODDistances(): void {
+        this.#lodDistancesSq.length = 0;
+        const tileSizeMax = Math.max(this.#tileSizeX, this.#tileSizeZ);
+        const count = this.#lodMultipliers.length;
+
+        for (let i = 0; i < count; i++) {
+            const dist = tileSizeMax * this.#lodMultipliers[i];
+            this.#lodDistancesSq.push(dist * dist);
+        }
+    }
+
+    #rebuildLODStructures(userColors?: string[], userMultipliers?: number[], userDistances?: number[]): void {
+        this.#lodColorsRGBA.length = 0;
+        this.#lodMultipliers.length = 0;
+
+        for (let i = 0; i < this.#maxLODLevel; i++) {
+            this.#lodColorsRGBA.push(DEFAULT_LOD_COLORS[i % DEFAULT_LOD_COLORS.length]);
+        }
+
+        const defaultMultipliers = [1.0, 2.0, 3.5, 6.0, 9.5, 14.0, 20.0];
+        const multipliers = userMultipliers ?? defaultMultipliers;
+
+        for (let i = 0; i < this.#maxLODLevel - 1; i++) {
+            this.#lodMultipliers.push(multipliers[i] ?? (1.0 * Math.pow(1.8, i)));
+        }
+
+        if (userDistances && userDistances.length > 0) {
+            this.#lodDistancesSq = userDistances.map(d => d * d);
+        } else {
+            this.#updateLODDistances();
+        }
+    }
+
+    #getOrCreateRenderPipeline(geom: any, storageBGLayout: GPUBindGroupLayout): GPURenderPipeline | null {
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        const material = this.#landscapeMaterial;
+        if (!gpuDevice || !material || !material.gpuRenderInfo) return null;
+
+        const antialiasingManager = this.#redGPUContext.antialiasingManager;
+        const msaaID = antialiasingManager.msaaID;
+        const useMSAA = antialiasingManager.useMSAA;
+        const sampleCount = useMSAA ? 4 : 1;
+        const topology = this.#wireframe ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
+        const variantKey = (material.gpuRenderInfo.fragmentShaderModule as any)?.label || 'default';
+        const key = `${topology}_${material.uuid}_${variantKey}_${msaaID}`;
+
+        if (this.#renderPipelineCache.has(key)) {
+            return this.#renderPipelineCache.get(key);
+        }
+
+        try {
+            const resourceManager = this.#redGPUContext.resourceManager;
+            const systemBGLayout = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');
+            const fragUniformBGLayout = material.gpuRenderInfo.fragmentBindGroupLayout;
+
+            const pipelineLayout = gpuDevice.createPipelineLayout({
+                label: `LandscapePipelineLayout_${key}`,
+                bindGroupLayouts: [systemBGLayout, storageBGLayout, fragUniformBGLayout]
+            });
+
+            const vertexBuffers: GPUVertexBufferLayout[] = [{
+                arrayStride: geom?.interleavedStruct?.arrayStride ?? 32,
+                attributes: geom?.interleavedStruct?.attributes ?? [
+                    {shaderLocation: 0, offset: 0, format: 'float32x3'},
+                    {shaderLocation: 1, offset: 12, format: 'float32x3'},
+                    {shaderLocation: 2, offset: 24, format: 'float32x2'}
+                ]
+            }];
+
+            const pipeline = gpuDevice.createRenderPipeline({
+                label: `LandscapeRenderPipeline_${key}`,
+                layout: pipelineLayout,
+                vertex: {
+                    module: this.#vertexShaderModule,
+                    entryPoint: 'main',
+                    buffers: vertexBuffers,
+                },
+                fragment: material.gpuRenderInfo.fragmentState,
+                primitive: {
+                    topology: topology,
+                    cullMode: 'none'
+                },
+                depthStencil: {
+                    format: 'depth32float',
+                    depthWriteEnabled: true,
+                    depthCompare: 'less-equal',
+                },
+                multisample: {count: sampleCount}
+            });
+
+            this.#renderPipelineCache.set(key, pipeline);
+            return pipeline;
+        } catch (e) {
+            console.warn('Failed to create Landscape RenderPipeline:', e);
+            return null;
+        }
     }
 
     #rebuildTiles(): void {

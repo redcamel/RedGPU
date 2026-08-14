@@ -41,10 +41,19 @@ RedGPU.init(
             componentCount: [16, 16],
             componentSizeQuads: 63,
             maxLODLevel: 5,
-            wireframe: true,
-            lodColoration: true,
+            wireframe: false,
+            lodColoration: false,
             loadingRadius: 4000
         });
+
+        // 4-1. 기본 지형 PBR 텍스처(baseColorTexture: terrainTest_001/diffuse.jpg) 및 UV 스케일링 설정
+        const groundTexture = new RedGPU.Resource.BitmapTexture(
+            redGPUContext,
+            '../../../assets/terrain/terrainTest_001/diffuse.jpg'
+        );
+        landscape.landscapeMaterial.baseColorTexture = groundTexture;
+        landscape.landscapeMaterial.color.setColorByHEX('#ffffff');
+        landscape.landscapeMaterial.textureScale = [1, 1];
 
         landscape.tileUrlResolver = (row, col) => {
             const BASE_HOST = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
@@ -194,7 +203,7 @@ RedGPU.init(
         renderer.start(redGPUContext, render);
 
         // 7. Landscape 모든 get/set 속성 및 2D 디버거 전면 제어 테스트 패널 렌더링
-        renderTestPane(redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger);
+        renderTestPane(redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger, groundTexture);
     }
 );
 
@@ -206,8 +215,9 @@ RedGPU.init(
  * @param {RedGPU.Camera.FreeController} controller
  * @param {RedGPU.Display.LandscapeSpatialGridDebugger} spatialGridDebugger
  * @param {RedGPU.Display.LandscapeVHTDebugger} vhtDebugger
+ * @param {RedGPU.Resource.BitmapTexture} groundTexture
  */
-const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger) => {
+const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger, groundTexture) => {
     const [wsX, wsZ] = landscape ? landscape.worldSize : [8000, 8000];
     const [tcX, tcZ] = landscape ? landscape.componentCount : [8, 8];
     const [tsX, tsZ] = landscape ? landscape.tileSize : [1000, 1000];
@@ -231,9 +241,12 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
         heightScale: landscape ? landscape.heightScale : 500,
 
         // 4. Render Options & Material
-        wireframe: landscape ? landscape.wireframe : true,
-        lodColoration: landscape ? landscape.lodColoration : true,
-        terrainColor: '#387d42',
+        wireframe: landscape ? landscape.wireframe : false,
+        lodColoration: landscape ? landscape.lodColoration : false,
+        terrainColor: '#ffffff',
+        useDiffuseTexture: true,
+        textureScaleU: 1,
+        textureScaleV: 1,
 
         // 5. Tile Streaming & VHT
         loadingRadius: landscape ? landscape.loadingRadius : 2500,
@@ -394,9 +407,39 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
                 if (landscape) landscape.lodColoration = ev.value;
             });
 
-            folderDisplay.addBinding(config, 'terrainColor', {label: 'Terrain Base Color'}).on('change', (ev) => {
+            folderDisplay.addBinding(config, 'terrainColor', {label: 'Terrain Tint Color'}).on('change', (ev) => {
                 if (landscape && landscape.landscapeMaterial) {
                     landscape.landscapeMaterial.color.setColorByHEX(ev.value);
+                }
+            });
+
+            folderDisplay.addBinding(config, 'useDiffuseTexture', {label: 'Base Color Texture'}).on('change', (ev) => {
+                if (landscape && landscape.landscapeMaterial) {
+                    landscape.landscapeMaterial.baseColorTexture = ev.value ? groundTexture : null;
+                }
+            });
+
+            folderDisplay.addBinding(config, 'textureScaleU', {
+                label: 'Texture Scale U (Tiling)',
+                min: 1,
+                max: 100,
+                step: 1
+            }).on('change', (ev) => {
+                if (landscape && landscape.landscapeMaterial) {
+                    const [, scV] = landscape.landscapeMaterial.textureScale;
+                    landscape.landscapeMaterial.textureScale = [ev.value, scV];
+                }
+            });
+
+            folderDisplay.addBinding(config, 'textureScaleV', {
+                label: 'Texture Scale V (Tiling)',
+                min: 1,
+                max: 100,
+                step: 1
+            }).on('change', (ev) => {
+                if (landscape && landscape.landscapeMaterial) {
+                    const [scU] = landscape.landscapeMaterial.textureScale;
+                    landscape.landscapeMaterial.textureScale = [scU, ev.value];
                 }
             });
 
