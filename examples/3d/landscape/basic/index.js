@@ -60,6 +60,20 @@ RedGPU.init(
         landscape.landscapeMaterial.color.setColorByHEX('#ffffff');
         landscape.landscapeMaterial.textureScale = [160, 160];
 
+        // Multi-Layer PBR 지형 레이어 (Grass) 등록
+        const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
+        const grassLayer = new RedGPU.LandscapeLayer({
+            name: 'Grass',
+            baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass.jpg`),
+            normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass_normal.jpg`),
+            ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass_orm.jpg`),
+            textureScale: [160, 160],
+            blendType: 'SLOPE',
+            blendParams: {minVal: 0, maxVal: 90, blendFalloff: 5},
+            tintColor: '#ffffff'
+        });
+        landscape.landscapeMaterial.addLayer(grassLayer);
+
         landscape.tileUrlResolver = (row, col) => {
             const BASE_HOST = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
             const rStr = String(row).padStart(2, '0');

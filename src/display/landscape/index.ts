@@ -7,6 +7,7 @@ import LandscapeSharedGeometry from "./spatial/LandscapeSharedGeometry";
 import LandscapeSpatialGrid from "./spatial/LandscapeSpatialGrid";
 import LandscapeTileStreamer from "./spatial/LandscapeTileStreamer";
 import LandscapeMaterial from "./material/LandscapeMaterial";
+import LandscapeLayer from "./material/LandscapeLayer";
 import LandscapeVHTGenerator from "./generator/LandscapeVHTGenerator";
 import LandscapeVNTGenerator from "./generator/LandscapeVNTGenerator";
 import ALandscapeDebugger from "./debugger/ALandscapeDebugger";
@@ -21,6 +22,7 @@ export {
     LandscapeComponent,
     LandscapeInstanceBuffer,
     LandscapeMaterial,
+    LandscapeLayer,
     LandscapeOptions,
     LandscapeSharedGeometry,
     LandscapeSpatialGrid,
