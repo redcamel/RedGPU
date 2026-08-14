@@ -18,8 +18,8 @@ RedGPU.init(
         // 1. 카메라 설정 (FreeController - 자유 관람 및 탐색)
         const controller = new RedGPU.Camera.FreeController(redGPUContext);
         controller.x = 0;
-        controller.y = 300;
-        controller.z = 800;
+        controller.y = 350;
+        controller.z = 0;
         controller.moveSpeed = 5000;
 
         // 2. Scene & View3D 초기화
@@ -185,7 +185,7 @@ RedGPU.init(
             bottom: 12
         });
 
-        const vhtDebugger = new RedGPU.Display.LandscapeVHTDebugger(landscape, {
+        const vhtDebugger = new RedGPU.Display.LandscapeVHTDebugger(landscape, controller, {
             width: 100,
             height: 100,
             left: 120,

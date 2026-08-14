@@ -3,29 +3,47 @@ import Landscape from "./Landscape";
 import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 /**
- * [KO] Landscape 지형 시스템의 16비트 VHT (Virtual Heightfield Texture) 아틀라스 텍스처를 WebGPU Canvas Context를 통해 60fps 실시간 오버레이로 시각화하는 디버거 클래스입니다.
- * [EN] Debugger class visualizing the 16-bit VHT (Virtual Heightfield Texture) atlas texture of Landscape terrain system via WebGPU Canvas Context 60fps real-time overlay.
+ * [KO] Landscape 지형 시스템의 16비트 VHT (Virtual Heightfield Texture) 아틀라스 텍스처와 카메라 시선/FOV/로딩반경을 WebGPU Canvas 60fps 오버레이로 시각화하는 디버거 클래스입니다 (GPU-Native).
+ * [EN] Debugger class visualizing the 16-bit VHT (Virtual Heightfield Texture) atlas texture, camera view direction, FOV, and loading radius of Landscape terrain system via WebGPU Canvas 60fps overlay (GPU-Native).
  */
 export class LandscapeVHTDebugger extends ALandscapeDebugger {
     #context: GPUCanvasContext | null = null;
     #pipeline: GPURenderPipeline | null = null;
     #bindGroup: GPUBindGroup | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
+    #cameraUniformBuffer: GPUBuffer | null = null;
+    #cameraDataArray: Float32Array = new Float32Array(8); // Reusable Float32Array (Zero-GC)
+
     #lastBoundTexture: GPUTexture | null = null;
     #canvasFormat: GPUTextureFormat = 'bgra8unorm';
+    #camera: any = null;
 
     constructor(
         landscape: Landscape,
-        options: {
+        cameraOrOptions?: any,
+        options?: {
             width?: number,
             height?: number,
             left?: number,
             bottom?: number
-        } = {}
+        }
     ) {
-        const left = options.left ?? 120;
-        super(landscape, {...options, left});
+        let opts = options;
+        let cam = cameraOrOptions;
+
+        if (cameraOrOptions && (cameraOrOptions.width !== undefined || cameraOrOptions.left !== undefined || cameraOrOptions.bottom !== undefined)) {
+            opts = cameraOrOptions;
+            cam = null;
+        }
+
+        const left = opts?.left ?? 120;
+        super(landscape, {...opts, left});
+        this.#camera = cam;
         this.#initWebGPUContext();
+    }
+
+    setCamera(camera: any): void {
+        this.#camera = camera;
     }
 
     update(): void {
@@ -39,7 +57,7 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
         if (!vhtTexture) return;
 
         // 지형 텍스처 변경 감지 시 GPUBindGroup 재할당
-        if (this.#lastBoundTexture !== vhtTexture && this.#bindGroupLayout) {
+        if ((this.#lastBoundTexture !== vhtTexture || !this.#bindGroup) && this.#bindGroupLayout && this.#cameraUniformBuffer) {
             this.#lastBoundTexture = vhtTexture;
             this.#bindGroup = gpuDevice.createBindGroup({
                 label: 'VHTDebuggerBindGroup',
@@ -48,12 +66,46 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
                     {
                         binding: 0,
                         resource: vhtTexture.createView()
+                    },
+                    {
+                        binding: 1,
+                        resource: {buffer: this.#cameraUniformBuffer}
                     }
                 ]
             });
         }
 
-        if (!this.#pipeline || !this.#bindGroup) return;
+        if (!this.#pipeline || !this.#bindGroup || !this.#cameraUniformBuffer) return;
+
+        // 카메라 및 지형 파라미터 업데이트 (Zero-GC 버퍼 갱신)
+        const camera = this.#camera || (this.landscape as any)?.camera || (this.landscape as any)?.controller;
+        const camX = camera ? (camera.x ?? camera.position?.[0] ?? 0) : 0;
+        const camZ = camera ? (camera.z ?? camera.position?.[2] ?? 0) : 0;
+        const pan = camera ? (camera.pan ?? 0) : 0;
+        const fov = camera ? (camera.fov ?? 60) : 60;
+
+        const [worldSizeX, worldSizeZ] = this.landscape.worldSize;
+        const worldMinX = -worldSizeX / 2;
+        const worldMinZ = -worldSizeZ / 2;
+
+        const camNormX = (camX - worldMinX) / worldSizeX;
+        const camNormZ = (camZ - worldMinZ) / worldSizeZ;
+        const radiusUV = (this.landscape.loadingRadius / worldSizeX);
+
+        const panRad = (pan * Math.PI) / 180.0;
+        const fovRad = (fov * Math.PI) / 180.0;
+
+        // cameraParams Float32Array (8 floats)
+        this.#cameraDataArray[0] = Math.max(0, Math.min(1, camNormX));
+        this.#cameraDataArray[1] = Math.max(0, Math.min(1, camNormZ));
+        this.#cameraDataArray[2] = worldSizeX;
+        this.#cameraDataArray[3] = worldSizeZ;
+        this.#cameraDataArray[4] = panRad;
+        this.#cameraDataArray[5] = fovRad;
+        this.#cameraDataArray[6] = radiusUV;
+        this.#cameraDataArray[7] = 0.0;
+
+        gpuDevice.queue.writeBuffer(this.#cameraUniformBuffer, 0, this.#cameraDataArray.buffer as ArrayBuffer);
 
         try {
             const currentTexture = this.#context.getCurrentTexture();
@@ -81,6 +133,14 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
         }
     }
 
+    override destroy(): void {
+        super.destroy();
+        if (this.#cameraUniformBuffer) {
+            this.#cameraUniformBuffer.destroy();
+            this.#cameraUniformBuffer = null;
+        }
+    }
+
     #initWebGPUContext(): void {
         const gpu = navigator.gpu;
         if (!gpu) return;
@@ -100,7 +160,14 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
             alphaMode: 'premultiplied'
         });
 
-        // VHT 프리뷰어 전용 바인드 그룹 레이아웃 (@binding(0): unfilterable-float VHT texture_2d)
+        // 카메라 유니폼 버퍼 생성 (32 bytes)
+        this.#cameraUniformBuffer = gpuDevice.createBuffer({
+            label: 'VHTDebuggerCameraUniformBuffer',
+            size: 32,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+        });
+
+        // VHT 프리뷰어 전용 바인드 그룹 레이아웃 (@binding(0): VHT texture, @binding(1): CameraParams)
         const bindGroupLayout = gpuDevice.createBindGroupLayout({
             label: 'VHTDebuggerBindGroupLayout',
             entries: [
@@ -111,18 +178,31 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
                         sampleType: 'unfilterable-float',
                         viewDimension: '2d'
                     }
+                },
+                {
+                    binding: 1,
+                    visibility: GPUShaderStage.FRAGMENT,
+                    buffer: {
+                        type: 'uniform'
+                    }
                 }
             ]
         });
         this.#bindGroupLayout = bindGroupLayout;
 
-        // VHT 렌더 셰이더 모듈
+        // VHT 렌더 셰이더 모듈 (GPU-Native 카메라 FOV & 시선 표출)
         const shaderModule = gpuDevice.createShaderModule({
             label: 'VHTDebuggerShaderModule',
             code: `
                 struct VertexOutput {
                     @builtin(position) position: vec4<f32>,
                     @location(0) uv: vec2<f32>,
+                };
+
+                struct CameraParams {
+                    camUV: vec2<f32>,
+                    worldSize: vec2<f32>,
+                    panFovRadius: vec4<f32>,
                 };
 
                 @vertex
@@ -146,6 +226,7 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
                 }
 
                 @group(0) @binding(0) var vhtTexture: texture_2d<f32>;
+                @group(0) @binding(1) var<uniform> camera: CameraParams;
 
                 @fragment
                 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
@@ -153,12 +234,54 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
                     let texCoord = vec2<i32>(clamp(in.uv * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
                     let h = textureLoad(vhtTexture, texCoord, 0).r;
                     
-                    // 그리드 라인 오버레이 (8x8 타일 경계선 보정)
+                    // 1. 타일 경계선 그리드 (8x8 아틀라스 셀)
                     let tileGrid = step(vec2<f32>(0.98), fract(in.uv * 8.0));
                     let isGrid = max(tileGrid.x, tileGrid.y);
-                    let finalColor = mix(vec3<f32>(h, h * 0.9 + 0.1, h * 0.8), vec3<f32>(0.22, 0.74, 0.97), isGrid * 0.6);
+                    var baseColor = mix(vec3<f32>(h, h * 0.9 + 0.1, h * 0.8), vec3<f32>(0.22, 0.74, 0.97), isGrid * 0.6);
 
-                    return vec4<f32>(finalColor, 1.0);
+                    // 2. 카메라 시야/FOV/시선/로딩반경 픽셀 오버레이
+                    let camUV = camera.camUV;
+                    let diff = in.uv - camUV;
+                    let distUV = length(diff);
+
+                    let radiusUV = camera.panFovRadius.z;
+                    let panRad = camera.panFovRadius.x;
+                    let halfFovRad = camera.panFovRadius.y * 0.5;
+
+                    // 로딩 반경 점선 링 (Emerald Green)
+                    let ringDist = abs(distUV - radiusUV);
+                    if (ringDist < 0.007 && distUV <= radiusUV + 0.007) {
+                        let angleDash = sin(atan2(diff.y, diff.x) * 24.0);
+                        if (angleDash > 0.0) {
+                            baseColor = mix(baseColor, vec3<f32>(0.2, 0.83, 0.6), 0.85);
+                        }
+                    }
+
+                    // FOV 시야 부채꼴 (Amber Gold)
+                    let centerRad = atan2(-cos(panRad), sin(panRad));
+                    let pixelAngle = atan2(diff.y, diff.x);
+                    let angleDiff = abs(atan2(sin(pixelAngle - centerRad), cos(pixelAngle - centerRad)));
+
+                    let maxWedgeRadius = min(radiusUV, 0.28);
+                    if (distUV < maxWedgeRadius && angleDiff < halfFovRad) {
+                        baseColor = mix(baseColor, vec3<f32>(0.98, 0.75, 0.14), 0.45);
+                    }
+
+                    // 시선 중심 가이드 레이 (Coral Red)
+                    if (distUV < maxWedgeRadius + 0.06 && angleDiff < 0.02) {
+                        baseColor = mix(baseColor, vec3<f32>(0.93, 0.27, 0.27), 0.95);
+                    }
+
+                    // 카메라 원점 점 (White Dot with Coral Red Ring)
+                    if (distUV < 0.014) {
+                        if (distUV < 0.008) {
+                            baseColor = vec3<f32>(1.0, 1.0, 1.0);
+                        } else {
+                            baseColor = vec3<f32>(0.93, 0.27, 0.27);
+                        }
+                    }
+
+                    return vec4<f32>(baseColor, 1.0);
                 }
             `
         });
