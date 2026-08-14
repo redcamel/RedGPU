@@ -13,8 +13,9 @@ import DirectTexture from "../../../resources/texture/DirectTexture";
 import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "../spatial/LandscapeTileStreamer";
 import LandscapeVNTGenerator from "../generator/LandscapeVNTGenerator";
 import LandscapeVHTGenerator from "../generator/LandscapeVHTGenerator";
-import updateTargetUniform from "../../../defineProperty/core/updateTargetUniform";
 import Object3DContainer from "../../mesh/core/Object3DContainer";
+import updateTargetUniform from "../../../defineProperty/core/updateTargetUniform";
+import {LandscapeFoliageManager} from "../foliage/LandscapeFoliageManager";
 
 const DEFAULT_LOD_COLORS: [number, number, number, number][] = [
     [0.18, 0.8, 0.44, 1.0],  // LOD 0: Green
@@ -42,6 +43,7 @@ export class Landscape extends Object3DContainer {
     #lodColorsRGBA: [number, number, number, number][] = [];
     #defaultTerrainColorRGBA: [number, number, number, number] = [0.22, 0.49, 0.26, 1.0];
     #landscapeMaterial: LandscapeMaterial;
+    #foliageManager: LandscapeFoliageManager;
 
     #wireframe: boolean = false;
     #lodColoration: boolean = false;
@@ -179,25 +181,109 @@ export class Landscape extends Object3DContainer {
         this.#tileStreamer.vntAtlasTexture = vntAtlasTexture;
         this.#tileStreamer.vhtGenerator = this.#vhtGenerator;
         this.#tileStreamer.vntGenerator = this.#vntGenerator;
-        this.#tileStreamer.setTerrainConfig(this.#heightScale, this.#worldSizeX, this.#componentCountX);
 
-        const resourceManager = redGPUContext.resourceManager;
-        let vModule = resourceManager.getGPUShaderModule('LandscapeFullCompatibleFlatVertexShaderModule');
-        if (!vModule) {
-            vModule = resourceManager.createGPUShaderModule('LandscapeFullCompatibleFlatVertexShaderModule', {
-                code: landscapeVertexSource
-            });
+        this.initSystems(redGPUContext, options, componentCountX, componentCountZ, maxLODLevel, vhtSampler, vhtAtlasTexture, vntAtlasTexture);
+        this.#foliageManager = new LandscapeFoliageManager(this);
+    }
+
+    /**
+     * [KO] Landscape 지형 연동 식생 관리자를 반환합니다.
+     * [EN] Returns the Landscape Foliage Manager.
+     */
+    get foliageManager(): LandscapeFoliageManager {
+        return this.#foliageManager;
+    }
+
+    /**
+     * [KO] Multi-LOD Batching 인스턴싱으로 전체 지형 타일을 디스패치하고 RenderViewStateData 통계를 기록합니다 (Zero-GC).
+     */
+    render(view: any, passEncoder?: GPURenderPassEncoder): void {
+        const renderPassEncoder = passEncoder || view?.currentRenderPassEncoder || view?.renderPassEncoder;
+        const view3D = view?.view || view;
+        if (!renderPassEncoder) return;
+
+        const material = this.#landscapeMaterial;
+        const renderResults = (view as RenderViewStateData)?.renderResults || (view3D as any)?.renderViewStateData?.renderResults;
+
+        // [KO] 머티리얼 텍스처/옵션 변경 시 바리안트 셰이더 갱신 및 파이프라인 캐시 무효화 (RedGPU 표준)
+        if (material) {
+            if (material.dirtyPipeline) {
+                material._updateFragmentState();
+                material.dirtyPipeline = false;
+                this.#renderPipelineCache.clear();
+                if (renderResults) {
+                    renderResults.numDirtyPipelines++;
+                }
+            }
+
+            // [KO] Mesh 표준: 텍스처 트랜스폼(Offset, Scale) 변경 시 GPU 유니폼 동기화 및 dirty 플래그 초기화
+            if (material.dirtyTextureTransform) {
+                updateTargetUniform(material, 'textureOffset', material.textureOffset || [0, 0]);
+                updateTargetUniform(material, 'textureScale', material.textureScale || [1, 1]);
+                material.dirtyTextureTransform = false;
+            }
         }
-        this.#vertexShaderModule = vModule;
 
-        this.#lodCountsBuffer = new Int32Array(maxLODLevel);
+        const instanceBuffer = this.#instanceBuffer;
+        const sharedGeometry = this.#sharedGeometry;
+        const combinedVB = sharedGeometry?.combinedVertexBuffer;
+        const isWireframe = this.#wireframe;
+        const combinedIB = isWireframe ? sharedGeometry?.combinedWireframeIndexBuffer : sharedGeometry?.combinedIndexBuffer;
 
-        // WebGPU Multi-LOD Indirect & Instance Buffer 생성 (@group(2): StorageBuffer, Sampler, VHT Height, VNT Normal)
-        this.#instanceBuffer = new LandscapeInstanceBuffer(redGPUContext, componentCountX * componentCountZ, maxLODLevel);
-        this.#instanceBuffer.updateBindGroup(vhtSampler, vhtAtlasTexture.gpuTextureView, vntAtlasTexture.gpuTextureView);
+        if (!instanceBuffer || !combinedVB || !combinedIB) return;
 
-        this.#rebuildLODStructures(options.lodColors, options.lodMultipliers, options.lodDistances);
-        this.#rebuildTiles();
+        const storageBG = instanceBuffer.instanceStorageBindGroup;
+        const storageBGLayout = instanceBuffer.instanceStorageBindGroupLayout;
+        if (!storageBG || !storageBGLayout) return;
+
+        const pipeline = this.#getOrCreateRenderPipeline(combinedVB, storageBGLayout);
+        if (!pipeline) return;
+
+        renderPassEncoder.setPipeline(pipeline);
+
+        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup;
+        if (systemBG) {
+            renderPassEncoder.setBindGroup(0, systemBG);
+        }
+
+        renderPassEncoder.setBindGroup(1, storageBG);
+
+        const matUniformBG = this.#landscapeMaterial?.gpuRenderInfo?.fragmentUniformBindGroup;
+        if (matUniformBG) {
+            renderPassEncoder.setBindGroup(2, matUniformBG);
+        }
+        renderPassEncoder.setVertexBuffer(0, combinedVB.gpuBuffer);
+        renderPassEncoder.setIndexBuffer(combinedIB.gpuBuffer, 'uint32');
+
+        const maxLODLevel = sharedGeometry.maxLODLevel;
+        for (let lod = 0; lod < maxLODLevel; lod++) {
+            const instanceCount = instanceBuffer.getLODInstanceCount(lod);
+            if (instanceCount === 0) continue;
+
+            const lodRange = sharedGeometry.getLODRange(lod);
+            const firstInstance = instanceBuffer.getLODFirstInstance(lod);
+
+            const indexCount = isWireframe ? lodRange.wireframeIndexCount : lodRange.indexCount;
+            const firstIndex = isWireframe ? lodRange.wireframeFirstIndex : lodRange.firstIndex;
+
+            renderPassEncoder.drawIndexed(
+                indexCount,
+                instanceCount,
+                firstIndex,
+                lodRange.baseVertex,
+                firstInstance
+            );
+
+            if (renderResults) {
+                renderResults.numDrawCalls++;
+                renderResults.numInstances += instanceCount;
+                renderResults.num3DObjects += instanceCount;
+                renderResults.numTriangles += (lodRange.indexCount / 3) * instanceCount;
+            }
+        }
+
+        // [KO] 지형 드로우콜 완료 후 식생 인스턴스 렌더링 디스패치
+        this.#foliageManager?.render(view, renderPassEncoder);
     }
 
     get worldSize(): [number, number] {
@@ -438,95 +524,6 @@ export class Landscape extends Object3DContainer {
         this.#tileStreamer.tileUrlResolver = resolver;
     }
 
-    /**
-     * [KO] Multi-LOD Batching 인스턴싱으로 전체 지형 타일을 디스패치하고 RenderViewStateData 통계를 기록합니다 (Zero-GC).
-     */
-    render(view: any, passEncoder?: GPURenderPassEncoder): void {
-        const renderPassEncoder = passEncoder || view?.currentRenderPassEncoder || view?.renderPassEncoder;
-        const view3D = view?.view || view;
-        if (!renderPassEncoder) return;
-
-        const material = this.#landscapeMaterial;
-        const renderResults = (view as RenderViewStateData)?.renderResults || (view3D as any)?.renderViewStateData?.renderResults;
-
-        // [KO] 머티리얼 텍스처/옵션 변경 시 바리안트 셰이더 갱신 및 파이프라인 캐시 무효화 (RedGPU 표준)
-        if (material) {
-            if (material.dirtyPipeline) {
-                material._updateFragmentState();
-                material.dirtyPipeline = false;
-                this.#renderPipelineCache.clear();
-                if (renderResults) {
-                    renderResults.numDirtyPipelines++;
-                }
-            }
-
-            // [KO] Mesh 표준: 텍스처 트랜스폼(Offset, Scale) 변경 시 GPU 유니폼 동기화 및 dirty 플래그 초기화
-            if (material.dirtyTextureTransform) {
-                updateTargetUniform(material, 'textureOffset', material.textureOffset || [0, 0]);
-                updateTargetUniform(material, 'textureScale', material.textureScale || [1, 1]);
-                material.dirtyTextureTransform = false;
-            }
-        }
-
-        const instanceBuffer = this.#instanceBuffer;
-        const sharedGeometry = this.#sharedGeometry;
-        const combinedVB = sharedGeometry?.combinedVertexBuffer;
-        const isWireframe = this.#wireframe;
-        const combinedIB = isWireframe ? sharedGeometry?.combinedWireframeIndexBuffer : sharedGeometry?.combinedIndexBuffer;
-
-        if (!instanceBuffer || !combinedVB || !combinedIB) return;
-
-        const storageBG = instanceBuffer.instanceStorageBindGroup;
-        const storageBGLayout = instanceBuffer.instanceStorageBindGroupLayout;
-        if (!storageBG || !storageBGLayout) return;
-
-        const pipeline = this.#getOrCreateRenderPipeline(combinedVB, storageBGLayout);
-        if (!pipeline) return;
-
-        renderPassEncoder.setPipeline(pipeline);
-
-        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup;
-        if (systemBG) {
-            renderPassEncoder.setBindGroup(0, systemBG);
-        }
-
-        renderPassEncoder.setBindGroup(1, storageBG);
-
-        const matUniformBG = this.#landscapeMaterial?.gpuRenderInfo?.fragmentUniformBindGroup;
-        if (matUniformBG) {
-            renderPassEncoder.setBindGroup(2, matUniformBG);
-        }
-        renderPassEncoder.setVertexBuffer(0, combinedVB.gpuBuffer);
-        renderPassEncoder.setIndexBuffer(combinedIB.gpuBuffer, 'uint32');
-
-        const maxLODLevel = sharedGeometry.maxLODLevel;
-        for (let lod = 0; lod < maxLODLevel; lod++) {
-            const instanceCount = instanceBuffer.getLODInstanceCount(lod);
-            if (instanceCount === 0) continue;
-
-            const lodRange = sharedGeometry.getLODRange(lod);
-            const firstInstance = instanceBuffer.getLODFirstInstance(lod);
-
-            const indexCount = isWireframe ? lodRange.wireframeIndexCount : lodRange.indexCount;
-            const firstIndex = isWireframe ? lodRange.wireframeFirstIndex : lodRange.firstIndex;
-
-            renderPassEncoder.drawIndexed(
-                indexCount,
-                instanceCount,
-                firstIndex,
-                lodRange.baseVertex,
-                firstInstance
-            );
-
-            if (renderResults) {
-                renderResults.numDrawCalls++;
-                renderResults.numInstances += instanceCount;
-                renderResults.num3DObjects += instanceCount;
-                renderResults.numTriangles += (lodRange.indexCount / 3) * instanceCount;
-            }
-        }
-    }
-
     update(camera: any, renderViewStateData?: any): void {
         if (!camera) return;
 
@@ -545,6 +542,9 @@ export class Landscape extends Object3DContainer {
             ?? camera?.frustumPlanes
             ?? camera?.camera?.frustumPlanes
             ?? null;
+
+        // 식생 시스템 Culling & FadeFactor 매 프레임 실시간 갱신
+        this.#foliageManager?.update([camX, camY, camZ]);
 
         this.#spatialGrid.getCellCoordinates(camX, camZ, this.#tempCellBuffer);
         this.#tileStreamer.update(camX, camZ);
@@ -649,6 +649,37 @@ export class Landscape extends Object3DContainer {
 
         // 4. GPU 버퍼 동기화 제출
         instanceBuf.flushToGPU();
+    }
+
+    private initSystems(
+        redGPUContext: RedGPUContext,
+        options: LandscapeOptions,
+        componentCountX: number,
+        componentCountZ: number,
+        maxLODLevel: number,
+        vhtSampler: GPUSampler,
+        vhtAtlasTexture: DirectTexture,
+        vntAtlasTexture: DirectTexture
+    ) {
+        this.#tileStreamer.setTerrainConfig(this.#heightScale, this.#worldSizeX, this.#componentCountX);
+
+        const resourceManager = redGPUContext.resourceManager;
+        let vModule = resourceManager.getGPUShaderModule('LandscapeFullCompatibleFlatVertexShaderModule');
+        if (!vModule) {
+            vModule = resourceManager.createGPUShaderModule('LandscapeFullCompatibleFlatVertexShaderModule', {
+                code: landscapeVertexSource
+            });
+        }
+        this.#vertexShaderModule = vModule;
+
+        this.#lodCountsBuffer = new Int32Array(maxLODLevel);
+
+        // WebGPU Multi-LOD Indirect & Instance Buffer 생성 (@group(2): StorageBuffer, Sampler, VHT Height, VNT Normal)
+        this.#instanceBuffer = new LandscapeInstanceBuffer(redGPUContext, componentCountX * componentCountZ, maxLODLevel);
+        this.#instanceBuffer.updateBindGroup(vhtSampler, vhtAtlasTexture.gpuTextureView, vntAtlasTexture.gpuTextureView);
+
+        this.#rebuildLODStructures(options.lodColors, options.lodMultipliers, options.lodDistances);
+        this.#rebuildTiles();
     }
 
     /**

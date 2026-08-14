@@ -33,7 +33,12 @@ export class LandscapeVNTDebugger extends ALandscapeDebugger {
     }
 
     update(): void {
-        if (!this.visible || !this.#context) return;
+        if (!this.visible) return;
+
+        if (!this.#context || !this.#pipeline) {
+            this.#initWebGPUContext();
+            if (!this.#context || !this.#pipeline) return;
+        }
 
         const state = this.getCameraState();
         if (!state) return;
@@ -45,23 +50,29 @@ export class LandscapeVNTDebugger extends ALandscapeDebugger {
         const vntTexture = this.landscape.vntAtlasTexture;
         if (!vntTexture || !vntTexture.gpuTexture) return;
 
-        // 지형 텍스처 변경 감지 시 GPUBindGroup 재할당
+        // 지형 텍스처 변경 감지 시 GPUBindGroup 재할당 (실패 시 다음 프레임 재시도 방어)
         if ((this.#lastBoundTexture !== vntTexture.gpuTexture || !this.#bindGroup) && this.#bindGroupLayout && this.#cameraUniformBuffer) {
-            this.#lastBoundTexture = vntTexture.gpuTexture;
-            this.#bindGroup = gpuDevice.createBindGroup({
-                label: 'VNTDebuggerBindGroup',
-                layout: this.#bindGroupLayout,
-                entries: [
-                    {
-                        binding: 0,
-                        resource: vntTexture.gpuTextureView
-                    },
-                    {
-                        binding: 1,
-                        resource: {buffer: this.#cameraUniformBuffer}
-                    }
-                ]
-            });
+            try {
+                this.#bindGroup = gpuDevice.createBindGroup({
+                    label: 'VNTDebuggerBindGroup',
+                    layout: this.#bindGroupLayout,
+                    entries: [
+                        {
+                            binding: 0,
+                            resource: vntTexture.gpuTextureView
+                        },
+                        {
+                            binding: 1,
+                            resource: {buffer: this.#cameraUniformBuffer}
+                        }
+                    ]
+                });
+                this.#lastBoundTexture = vntTexture.gpuTexture;
+            } catch (e) {
+                this.#lastBoundTexture = null;
+                this.#bindGroup = null;
+                return;
+            }
         }
 
         if (!this.#pipeline || !this.#bindGroup || !this.#cameraUniformBuffer) return;

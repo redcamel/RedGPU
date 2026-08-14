@@ -15,6 +15,9 @@ import LandscapeSpatialGridDebugger from "./debugger/LandscapeSpatialGridDebugge
 import LandscapeVHTDebugger from "./debugger/LandscapeVHTDebugger";
 import LandscapeVNTDebugger from "./debugger/LandscapeVNTDebugger";
 import LandscapeHUDDebugger from "./debugger/LandscapeHUDDebugger";
+import {LandscapeFoliageManager} from "./foliage/LandscapeFoliageManager";
+import {FoliageType, FoliageTypeOptions} from "./foliage/FoliageType";
+import {FoliageInstanceBuffer} from "./foliage/FoliageInstanceBuffer";
 
 export {
     ALandscapeDebugger,
@@ -33,5 +36,9 @@ export {
     LandscapeVHTGenerator,
     LandscapeVNTGenerator,
     LandscapeTileStreamer,
-    LANDSCAPE_BASE_GRID_SIZE
+    LANDSCAPE_BASE_GRID_SIZE,
+    LandscapeFoliageManager,
+    FoliageType,
+    FoliageTypeOptions,
+    FoliageInstanceBuffer
 };
