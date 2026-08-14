@@ -1,10 +1,10 @@
-import ALandscapeDebugger from "./ALandscapeDebugger";
+import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "./ALandscapeDebugger";
 import Landscape from "./Landscape";
 import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 /**
- * [KO] Landscape 지형 시스템의 16비트 VHT (Virtual Heightfield Texture) 아틀라스 텍스처와 카메라 시선/FOV/로딩반경을 WebGPU Canvas 60fps 오버레이로 시각화하는 디버거 클래스입니다 (GPU-Native).
- * [EN] Debugger class visualizing the 16-bit VHT (Virtual Heightfield Texture) atlas texture, camera view direction, FOV, and loading radius of Landscape terrain system via WebGPU Canvas 60fps overlay (GPU-Native).
+ * [KO] Landscape 지형 시스템의 16비트 VHT (Virtual Heightfield Texture) 아틀라스 텍스처와 카메라 시선/FOV/로딩반경을 WebGPU Canvas 60fps 오버레이로 시각화하는 디버거 클래스입니다 (ALandscapeDebugger 기반 GPU-Native).
+ * [EN] Debugger class visualizing the 16-bit VHT (Virtual Heightfield Texture) atlas texture, camera view direction, FOV, and loading radius of Landscape terrain system via WebGPU Canvas 60fps overlay (ALandscapeDebugger based GPU-Native).
  */
 export class LandscapeVHTDebugger extends ALandscapeDebugger {
     #context: GPUCanvasContext | null = null;
@@ -16,38 +16,27 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
 
     #lastBoundTexture: GPUTexture | null = null;
     #canvasFormat: GPUTextureFormat = 'bgra8unorm';
-    #camera: any = null;
 
     constructor(
         landscape: Landscape,
         cameraOrOptions?: any,
-        options?: {
-            width?: number,
-            height?: number,
-            left?: number,
-            bottom?: number
-        }
+        options?: ALandscapeDebuggerOptions
     ) {
         let opts = options;
-        let cam = cameraOrOptions;
-
         if (cameraOrOptions && (cameraOrOptions.width !== undefined || cameraOrOptions.left !== undefined || cameraOrOptions.bottom !== undefined)) {
             opts = cameraOrOptions;
-            cam = null;
         }
 
         const left = opts?.left ?? 120;
-        super(landscape, {...opts, left});
-        this.#camera = cam;
+        super(landscape, cameraOrOptions, {...opts, left});
         this.#initWebGPUContext();
-    }
-
-    setCamera(camera: any): void {
-        this.#camera = camera;
     }
 
     update(): void {
         if (!this.visible || !this.#context) return;
+
+        const state = this.getCameraState();
+        if (!state) return;
 
         const redGPUContext = (this.landscape as any)?.redGPUContext;
         const gpuDevice: GPUDevice = redGPUContext?.gpuDevice;
@@ -78,31 +67,17 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
         if (!this.#pipeline || !this.#bindGroup || !this.#cameraUniformBuffer) return;
 
         // 카메라 및 지형 파라미터 업데이트 (Zero-GC 버퍼 갱신)
-        const camera = this.#camera || (this.landscape as any)?.camera || (this.landscape as any)?.controller;
-        const camX = camera ? (camera.x ?? camera.position?.[0] ?? 0) : 0;
-        const camZ = camera ? (camera.z ?? camera.position?.[2] ?? 0) : 0;
-        const pan = camera ? (camera.pan ?? 0) : 0;
-        const fov = camera ? (camera.fov ?? 60) : 60;
-
-        const [worldSizeX, worldSizeZ] = this.landscape.worldSize;
-        const worldMinX = -worldSizeX / 2;
-        const worldMinZ = -worldSizeZ / 2;
-
-        const camNormX = (camX - worldMinX) / worldSizeX;
-        const camNormZ = (camZ - worldMinZ) / worldSizeZ;
-        const radiusUV = (this.landscape.loadingRadius / worldSizeX);
-
-        const panRad = (pan * Math.PI) / 180.0;
+        const {camNormX, camNormZ, worldSizeX, worldSizeZ, effPanRad, fov, loadingRadiusUV} = state;
         const fovRad = (fov * Math.PI) / 180.0;
 
         // cameraParams Float32Array (8 floats)
-        this.#cameraDataArray[0] = Math.max(0, Math.min(1, camNormX));
-        this.#cameraDataArray[1] = Math.max(0, Math.min(1, camNormZ));
+        this.#cameraDataArray[0] = camNormX;
+        this.#cameraDataArray[1] = camNormZ;
         this.#cameraDataArray[2] = worldSizeX;
         this.#cameraDataArray[3] = worldSizeZ;
-        this.#cameraDataArray[4] = panRad;
+        this.#cameraDataArray[4] = effPanRad;
         this.#cameraDataArray[5] = fovRad;
-        this.#cameraDataArray[6] = radiusUV;
+        this.#cameraDataArray[6] = loadingRadiusUV;
         this.#cameraDataArray[7] = 0.0;
 
         gpuDevice.queue.writeBuffer(this.#cameraUniformBuffer, 0, this.#cameraDataArray.buffer as ArrayBuffer);
@@ -130,14 +105,6 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
             });
         } catch (e) {
             // 프레임 스킵 안전 예외 처리
-        }
-    }
-
-    override destroy(): void {
-        super.destroy();
-        if (this.#cameraUniformBuffer) {
-            this.#cameraUniformBuffer.destroy();
-            this.#cameraUniformBuffer = null;
         }
     }
 
@@ -307,6 +274,14 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
                 topology: 'triangle-strip'
             }
         });
+    }
+
+    override destroy(): void {
+        super.destroy();
+        if (this.#cameraUniformBuffer) {
+            this.#cameraUniformBuffer.destroy();
+            this.#cameraUniformBuffer = null;
+        }
     }
 }
 

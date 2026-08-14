@@ -1,35 +1,84 @@
 import Landscape from "./Landscape";
 
+export interface ALandscapeDebuggerOptions {
+    width?: number;
+    height?: number;
+    left?: number;
+    bottom?: number;
+}
+
+export interface LandscapeDebuggerCameraState {
+    camX: number;
+    camZ: number;
+    pan: number;
+    fov: number;
+    effPanRad: number;
+    halfFovRad: number;
+    centerRad: number;
+    camNormX: number;
+    camNormZ: number;
+    loadingRadiusUV: number;
+    worldSizeX: number;
+    worldSizeZ: number;
+    worldMinX: number;
+    worldMinZ: number;
+}
+
 /**
- * [KO] Landscape 2D 디버거 시스템들의 공통 캔버스 조작, CSS 격리, 크기/위치 상태를 관리하는 추상 기반 클래스입니다.
- * [EN] Abstract base class managing common canvas manipulation, CSS isolation, and size/position state for Landscape 2D debugger systems.
+ * [KO] Landscape 2D 디버거 시스템들의 공통 캔버스 조작, CSS 격리, 크기/위치 상태, 카메라 파라미터 및 공통 FOV 시야 부채꼴 드로잉을 관리하는 추상 기반 클래스입니다.
+ * [EN] Abstract base class managing common canvas manipulation, CSS isolation, size/position state, camera parameters, and shared FOV frustum wedge drawing for Landscape 2D debugger systems.
  */
 export abstract class ALandscapeDebugger {
     #landscape: Landscape;
     #canvas: HTMLCanvasElement;
     #visible: boolean = true;
+    #camera: any = null;
 
     #width: number;
     #height: number;
     #left: number;
     #bottom: number;
 
+    // Zero-GC 재사용 카메라 상태 구조체
+    #cameraState: LandscapeDebuggerCameraState = {
+        camX: 0,
+        camZ: 0,
+        pan: 0,
+        fov: 60,
+        effPanRad: 0,
+        halfFovRad: 0,
+        centerRad: 0,
+        camNormX: 0,
+        camNormZ: 0,
+        loadingRadiusUV: 0,
+        worldSizeX: 1000,
+        worldSizeZ: 1000,
+        worldMinX: -500,
+        worldMinZ: -500
+    };
+
     constructor(
         landscape: Landscape,
-        options: {
-            width?: number,
-            height?: number,
-            left?: number,
-            bottom?: number
-        } = {},
+        cameraOrOptions?: any,
+        options?: ALandscapeDebuggerOptions,
         canvasId?: string
     ) {
         this.#landscape = landscape;
 
-        const w = options.width ?? 100;
-        const h = options.height ?? 100;
-        const left = options.left ?? 12;
-        const bottom = options.bottom ?? 12;
+        let opts = options;
+        let cam = cameraOrOptions;
+
+        if (cameraOrOptions && (cameraOrOptions.width !== undefined || cameraOrOptions.left !== undefined || cameraOrOptions.bottom !== undefined)) {
+            opts = cameraOrOptions;
+            cam = null;
+        }
+
+        this.#camera = cam;
+
+        const w = opts?.width ?? 100;
+        const h = opts?.height ?? 100;
+        const left = opts?.left ?? 12;
+        const bottom = opts?.bottom ?? 12;
 
         this.#width = w;
         this.#height = h;
@@ -43,7 +92,7 @@ export abstract class ALandscapeDebugger {
         canvas.width = w;
         canvas.height = h;
 
-        // 외부 전역 CSS 규칙 (예: canvas { width: 100vw !important; })으로부터 100% 완전 격리
+        // 외부 전역 CSS 규칙으로부터 100% 완전 격리
         canvas.style.setProperty('all', 'initial', 'important');
         canvas.style.setProperty('position', 'fixed', 'important');
         canvas.style.setProperty('left', `${left}px`, 'important');
@@ -89,6 +138,18 @@ export abstract class ALandscapeDebugger {
         this.#canvas.style.setProperty('display', val ? 'block' : 'none', 'important');
     }
 
+    get camera(): any {
+        return this.#camera;
+    }
+
+    set camera(cam: any) {
+        this.#camera = cam;
+    }
+
+    set bottom(b: number) {
+        this.setPosition(this.#left, b);
+    }
+
     get width(): number {
         return this.#width;
     }
@@ -117,8 +178,115 @@ export abstract class ALandscapeDebugger {
         return this.#bottom;
     }
 
-    set bottom(b: number) {
-        this.setPosition(this.#left, b);
+    setCamera(cam: any): void {
+        this.#camera = cam;
+    }
+
+    /**
+     * [KO] 매 프레임 카메라 위치, 방위각, 시야각 및 월드 좌표 파라미터를 추출하여 갱신합니다 (Zero-GC 재사용 객체 리턴).
+     * [EN] Extracts and updates camera position, azimuth, FOV, and world coordinates every frame (Zero-GC reusable object returned).
+     */
+    getCameraState(): LandscapeDebuggerCameraState | null {
+        if (!this.#landscape) return null;
+
+        const camera = this.#camera || (this.#landscape as any)?.camera || (this.#landscape as any)?.controller;
+        const camX = camera ? (camera.x ?? camera.position?.[0] ?? 0) : 0;
+        const camZ = camera ? (camera.z ?? camera.position?.[2] ?? 0) : 0;
+        const rawPan = camera ? (camera.pan ?? 0) : 0;
+        const fov = camera ? (camera.fov ?? 60) : 60;
+
+        const [worldSizeX, worldSizeZ] = this.#landscape.worldSize;
+        const worldMinX = -worldSizeX / 2;
+        const worldMinZ = -worldSizeZ / 2;
+
+        const camNormX = Math.max(0, Math.min(1, (camX - worldMinX) / worldSizeX));
+        const camNormZ = Math.max(0, Math.min(1, (camZ - worldMinZ) / worldSizeZ));
+        const loadingRadiusUV = this.#landscape.loadingRadius / worldSizeX;
+
+        const effPanRad = (-rawPan * Math.PI) / 180;
+        const halfFovRad = ((fov / 2) * Math.PI) / 180;
+        const centerRad = Math.atan2(-Math.cos(effPanRad), Math.sin(effPanRad));
+
+        const state = this.#cameraState;
+        state.camX = camX;
+        state.camZ = camZ;
+        state.pan = rawPan;
+        state.fov = fov;
+        state.effPanRad = effPanRad;
+        state.halfFovRad = halfFovRad;
+        state.centerRad = centerRad;
+        state.camNormX = camNormX;
+        state.camNormZ = camNormZ;
+        state.loadingRadiusUV = loadingRadiusUV;
+        state.worldSizeX = worldSizeX;
+        state.worldSizeZ = worldSizeZ;
+        state.worldMinX = worldMinX;
+        state.worldMinZ = worldMinZ;
+
+        return state;
+    }
+
+    /**
+     * [KO] 공통 2D 캔버스 기반 카메라 시야 부채꼴, 시선 레이, 로딩 반경 및 카메라 위치 점을 렌더링하는 전용 헬퍼 메소드입니다.
+     * [EN] Dedicated helper method rendering the common 2D canvas based camera FOV frustum wedge, heading ray, loading radius, and camera position dot.
+     */
+    drawCameraOverlay2D(
+        ctx: CanvasRenderingContext2D,
+        state: LandscapeDebuggerCameraState,
+        canvasWidth: number,
+        canvasHeight: number,
+        padding: number = 5
+    ): void {
+        const {camNormX, camNormZ, effPanRad, halfFovRad, centerRad, loadingRadiusUV} = state;
+        const mapDrawWidth = canvasWidth - padding * 2;
+        const mapDrawHeight = canvasHeight - padding * 2;
+
+        const camCanvasX = padding + camNormX * mapDrawWidth;
+        const camCanvasY = padding + camNormZ * mapDrawHeight;
+        const radiusPixels = loadingRadiusUV * mapDrawWidth;
+
+        // 1. Loading Radius Circle (Bright Emerald Green)
+        ctx.beginPath();
+        ctx.arc(camCanvasX, camCanvasY, radiusPixels, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(52, 211, 153, 0.85)';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 3]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // 2. FOV Frustum Wedge (Amber Gold Fill & Stroke)
+        const startAngle = centerRad - halfFovRad;
+        const endAngle = centerRad + halfFovRad;
+        const wedgeRadius = Math.max(16, Math.min(radiusPixels, 36));
+
+        ctx.beginPath();
+        ctx.moveTo(camCanvasX, camCanvasY);
+        ctx.arc(camCanvasX, camCanvasY, wedgeRadius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(251, 191, 36, 0.45)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(251, 191, 36, 0.95)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // 3. Heading Ray Line (Coral Red)
+        const dirX = Math.sin(effPanRad) * (wedgeRadius + 10);
+        const dirY = -Math.cos(effPanRad) * (wedgeRadius + 10);
+        ctx.beginPath();
+        ctx.moveTo(camCanvasX, camCanvasY);
+        ctx.lineTo(camCanvasX + dirX, camCanvasY + dirY);
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 2.0;
+        ctx.stroke();
+
+        // 4. Camera Position Dot (Glowing White Dot with Coral Red Ring)
+        ctx.beginPath();
+        ctx.arc(camCanvasX, camCanvasY, 4.0, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
     }
 
     setSize(w: number, h: number): void {
