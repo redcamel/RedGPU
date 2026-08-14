@@ -63,68 +63,70 @@ RedGPU.init(
         // Multi-Layer PBR 지형 레이어 4종 (Grass, Rock, Gravel, Leave) 등록
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
 
-        // 1. Grass (풀 레이어)
+        // UE5 표준: 1장의 Channel-Packed Splatmap 텍스처 (R: Layer0, G: Layer1, B: Layer2, A: Layer3)
+        const sharedSplatMap = new RedGPU.Resource.BitmapTexture(
+            redGPUContext,
+            '../../../assets/terrain/terrainTest_001/splatMap.jpg'
+        );
+
+        // 1. Grass (풀 레이어 - R 채널: weightChannel = 'R')
         const grassLayer = new RedGPU.LandscapeLayer({
             name: 'Grass',
             baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass.jpg`),
             normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass_normal.jpg`),
             ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass_orm.jpg`),
+            weightTexture: sharedSplatMap,
+            weightChannel: 'R',
             uvScale: [160, 160],
-            blendMode: 'SLOPE',
-            minVal: 0,
-            maxVal: 35,
-            blendFalloff: 10,
+            blendMode: 'WEIGHT_MAP',
             roughness: 1.0,
             metallic: 0.0,
             normalIntensity: 1.0,
             tintColor: '#ffffff'
         });
 
-        // 2. Rock (암벽/바위 레이어)
+        // 2. Rock (암벽/바위 레이어 - G 채널: weightChannel = 'G')
         const rockLayer = new RedGPU.LandscapeLayer({
             name: 'Rock',
             baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock.jpg`),
             normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock_normal.jpg`),
             ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock_orm.jpg`),
+            weightTexture: sharedSplatMap,
+            weightChannel: 'G',
             uvScale: [120, 120],
-            blendMode: 'SLOPE',
-            minVal: 25,
-            maxVal: 90,
-            blendFalloff: 15,
+            blendMode: 'WEIGHT_MAP',
             roughness: 0.9,
             metallic: 0.0,
             normalIntensity: 1.2,
             tintColor: '#ffffff'
         });
 
-        // 3. Gravel (자갈/흙 레이어)
+        // 3. Gravel (자갈/흙 레이어 - B 채널: weightChannel = 'B')
         const gravelLayer = new RedGPU.LandscapeLayer({
             name: 'Gravel',
             baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}gravel.jpg`),
             normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}gravel_normal.jpg`),
             ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}gravel_orm.jpg`),
+            weightTexture: sharedSplatMap,
+            weightChannel: 'B',
             uvScale: [140, 140],
-            blendMode: 'HEIGHT',
-            minVal: -500,
-            maxVal: 250,
-            blendFalloff: 50,
+            blendMode: 'WEIGHT_MAP',
             roughness: 0.95,
             metallic: 0.0,
             normalIntensity: 1.0,
             tintColor: '#ffffff'
         });
 
-        // 4. Leave (낙엽/숲속 레이어)
+        // 4. Leave (낙엽/숲속 레이어 - A 채널: weightChannel = 'A')
         const leaveLayer = new RedGPU.LandscapeLayer({
             name: 'Leave',
             baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}leave.jpg`),
             normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}leave_normal.jpg`),
             ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}leave_orm.jpg`),
+            weightTexture: sharedSplatMap,
+            weightChannel: 'A',
             uvScale: [100, 100],
-            blendMode: 'HEIGHT',
-            minVal: 200,
-            maxVal: 1200,
-            blendFalloff: 80,
+            blendMode: 'WEIGHT_MAP',
             roughness: 1.0,
             metallic: 0.0,
             normalIntensity: 1.0,
@@ -493,6 +495,9 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                     subFolder.addBinding(layer, 'enabled');
                     subFolder.addBinding(layer, 'blendMode', {
                         options: {SLOPE: 'SLOPE', HEIGHT: 'HEIGHT', WEIGHT_MAP: 'WEIGHT_MAP'}
+                    });
+                    subFolder.addBinding(layer, 'weightChannel', {
+                        options: {R: 'R', G: 'G', B: 'B', A: 'A'}
                     });
 
                     subFolder.addBinding(layer, 'minVal', {min: -500, max: 500, step: 0.1});

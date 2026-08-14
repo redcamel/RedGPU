@@ -37,7 +37,7 @@ struct LandscapeLayerParams {
     aoIntensity: f32,
     heightOffset: f32,
     heightContrast: f32,
-    pad0: f32,
+    weightMapChannelIndex: f32, // 0: R, 1: G, 2: B, 3: A
 };
 
 struct MaterialUniforms {
@@ -68,6 +68,7 @@ struct MaterialUniforms {
 @group(2) @binding(4) var layerBaseColorArray: texture_2d_array<f32>;
 @group(2) @binding(5) var layerNormalArray: texture_2d_array<f32>;
 @group(2) @binding(6) var layerORMArray: texture_2d_array<f32>;
+@group(2) @binding(7) var layerWeightMapArray: texture_2d_array<f32>;
 
 fn computeLayerRawWeight(layer: LandscapeLayerParams, worldNormalY: f32, vertexHeight: f32) -> f32 {
     let blendMode = layer.blendMode;
@@ -154,14 +155,25 @@ fn main(inputData: InputData) -> OutputFragment {
             let layerParams = uniforms.layers[i];
             if (layerParams.enabled <= 0.5) { continue; }
 
-            let layerW = computeLayerRawWeight(layerParams, N.y, inputData.vertexHeight);
-            if (layerW <= 0.0001) { continue; }
+            var layerW = computeLayerRawWeight(layerParams, N.y, inputData.vertexHeight);
 
             let layerUV = inputData.uv * layerParams.uvScale + layerParams.uvOffset;
             let layerIdx = i32(i);
 
             let uvDx = baseUvDx * layerParams.uvScale;
             let uvDy = baseUvDy * layerParams.uvScale;
+
+            if (layerParams.blendMode >= 1.5) {
+                let weightMapSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, inputData.uv, layerIdx, baseUvDx, baseUvDy);
+                let chIdx = u32(layerParams.weightMapChannelIndex + 0.5);
+                var weightVal = weightMapSample.r;
+                if (chIdx == 1u) { weightVal = weightMapSample.g; }
+                else if (chIdx == 2u) { weightVal = weightMapSample.b; }
+                else if (chIdx == 3u) { weightVal = weightMapSample.a; }
+                layerW = clamp(weightVal, 0.0, 1.0);
+            }
+
+            if (layerW <= 0.0001) { continue; }
 
             let layerAlbedoSample = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, layerUV, layerIdx, uvDx, uvDy);
             let layerNormalRaw = textureSampleGrad(layerNormalArray, baseColorTextureSampler, layerUV, layerIdx, uvDx, uvDy).rgb * 2.0 - vec3<f32>(1.0);

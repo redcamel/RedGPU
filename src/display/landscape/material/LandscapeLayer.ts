@@ -5,12 +5,20 @@ export type LandscapeLayerBlendMode = 'SLOPE' | 'HEIGHT' | 'WEIGHT_MAP';
 /** @deprecated Use LandscapeLayerBlendMode */
 export type LandscapeLayerBlendType = LandscapeLayerBlendMode;
 
+export type LandscapeWeightMapChannel = 'R' | 'G' | 'B' | 'A' | 'r' | 'g' | 'b' | 'a' | 0 | 1 | 2 | 3;
+
 export interface LandscapeLayerOptions {
     name: string;
     enabled?: boolean;
     baseColorTexture?: BitmapTexture;
     normalTexture?: BitmapTexture;
     ormTexture?: BitmapTexture;
+    /** Weight Mask Texture (Splatmap) for WEIGHT_MAP Blend Mode */
+    weightTexture?: BitmapTexture;
+    /** Legacy alias for weightTexture */
+    weightMapTexture?: BitmapTexture;
+    /** Legacy alias for weightTexture */
+    splatTexture?: BitmapTexture;
     /** UE5 Standard: UV Scale [U, V] */
     uvScale?: [number, number];
     /** Legacy alias: Texture Scale [U, V] */
@@ -23,6 +31,14 @@ export interface LandscapeLayerOptions {
     blendMode?: LandscapeLayerBlendMode;
     /** Legacy alias: Layer Blend Type */
     blendType?: LandscapeLayerBlendMode;
+    /** UE5 Standard: Weight Channel ('R' | 'G' | 'B' | 'A') */
+    weightChannel?: LandscapeWeightMapChannel;
+    /** Legacy alias: Weight Map Channel */
+    weightMapChannel?: LandscapeWeightMapChannel;
+    /** Legacy alias: Weight Map Channel Index */
+    weightMapChannelIndex?: LandscapeWeightMapChannel;
+    /** Legacy alias: Splat Channel */
+    splatChannel?: LandscapeWeightMapChannel;
     minVal?: number;
     maxVal?: number;
     /** UE5 Standard: Blend Falloff (Feathering range) */
@@ -61,6 +77,8 @@ export class LandscapeLayer {
     baseColorTexture?: BitmapTexture;
     normalTexture?: BitmapTexture;
     ormTexture?: BitmapTexture;
+    /** Weight Mask Texture (Splatmap) for WEIGHT_MAP Blend Mode */
+    weightTexture?: BitmapTexture;
 
     /** UE5 Standard: UV Scale [U, V] */
     uvScale: [number, number] = [1.0, 1.0];
@@ -69,6 +87,8 @@ export class LandscapeLayer {
 
     /** UE5 Standard: Blend Mode */
     blendMode: LandscapeLayerBlendMode = 'SLOPE';
+    /** UE5 Standard: Weight Channel ('R' | 'G' | 'B' | 'A') */
+    weightChannel: LandscapeWeightMapChannel = 'R';
     minVal: number = 0.0;
     maxVal: number = 45.0;
     /** UE5 Standard: Blend Falloff */
@@ -97,8 +117,9 @@ export class LandscapeLayer {
         if (options.enabled !== undefined) this.enabled = options.enabled;
 
         if (options.baseColorTexture) this.baseColorTexture = options.baseColorTexture;
-        if (options.normalTexture) this.normalTexture = options.normalTexture;
-        if (options.ormTexture) this.ormTexture = options.ormTexture;
+        this.normalTexture = options.normalTexture;
+        this.ormTexture = options.ormTexture;
+        this.weightTexture = options.weightTexture ?? options.weightMapTexture ?? options.splatTexture;
 
         const scale = options.uvScale ?? options.textureScale;
         if (scale) this.uvScale = [...scale];
@@ -108,6 +129,9 @@ export class LandscapeLayer {
 
         const bMode = options.blendMode ?? options.blendType;
         if (bMode) this.blendMode = bMode;
+
+        const wCh = options.weightChannel ?? options.weightMapChannel ?? options.weightMapChannelIndex ?? options.splatChannel;
+        if (wCh !== undefined) this.weightChannel = wCh;
 
         if (options.minVal !== undefined) this.minVal = options.minVal;
         if (options.maxVal !== undefined) this.maxVal = options.maxVal;
@@ -194,6 +218,53 @@ export class LandscapeLayer {
 
     set normalScale(val: number) {
         this.normalIntensity = val;
+    }
+
+    get weightMapTexture(): BitmapTexture | undefined {
+        return this.weightTexture;
+    }
+
+    set weightMapTexture(val: BitmapTexture | undefined) {
+        this.weightTexture = val;
+    }
+
+    get splatTexture(): BitmapTexture | undefined {
+        return this.weightTexture;
+    }
+
+    set splatTexture(val: BitmapTexture | undefined) {
+        this.weightTexture = val;
+    }
+
+    get weightMapChannel(): LandscapeWeightMapChannel {
+        return this.weightChannel;
+    }
+
+    set weightMapChannel(val: LandscapeWeightMapChannel) {
+        this.weightChannel = val;
+    }
+
+    get weightMapChannelIndex(): number {
+        const ch = String(this.weightChannel).toUpperCase();
+        if (ch === 'G' || ch === '1') return 1;
+        if (ch === 'B' || ch === '2') return 2;
+        if (ch === 'A' || ch === '3') return 3;
+        return 0; // 'R' or 0
+    }
+
+    set weightMapChannelIndex(val: number) {
+        if (val === 1) this.weightChannel = 'G';
+        else if (val === 2) this.weightChannel = 'B';
+        else if (val === 3) this.weightChannel = 'A';
+        else this.weightChannel = 'R';
+    }
+
+    get splatChannel(): LandscapeWeightMapChannel {
+        return this.weightChannel;
+    }
+
+    set splatChannel(val: LandscapeWeightMapChannel) {
+        this.weightChannel = val;
     }
 }
 
