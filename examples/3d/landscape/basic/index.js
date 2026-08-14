@@ -203,7 +203,7 @@ RedGPU.init(
         renderer.start(redGPUContext, render);
 
         // 7. Landscape 모든 get/set 속성 및 2D 디버거 전면 제어 테스트 패널 렌더링
-        renderTestPane(redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger, groundTexture);
+        renderTestPane(redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger, groundTexture, directionalLight);
     }
 );
 
@@ -216,8 +216,9 @@ RedGPU.init(
  * @param {RedGPU.Display.LandscapeSpatialGridDebugger} spatialGridDebugger
  * @param {RedGPU.Display.LandscapeVHTDebugger} vhtDebugger
  * @param {RedGPU.Resource.BitmapTexture} groundTexture
+ * @param {RedGPU.Light.DirectionalLight} directionalLight
  */
-const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger, groundTexture) => {
+const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger, groundTexture, directionalLight) => {
     const [wsX, wsZ] = landscape ? landscape.worldSize : [8000, 8000];
     const [tcX, tcZ] = landscape ? landscape.componentCount : [8, 8];
     const [tsX, tsZ] = landscape ? landscape.tileSize : [1000, 1000];
@@ -244,9 +245,17 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
         wireframe: landscape ? landscape.wireframe : false,
         lodColoration: landscape ? landscape.lodColoration : false,
         terrainColor: '#ffffff',
+        roughness: 0.85,
+        metallic: 0.0,
         useDiffuseTexture: true,
         textureScaleU: 1,
         textureScaleV: 1,
+
+        // 4-1. Directional Light (Sun)
+        sunElevation: directionalLight ? directionalLight.elevation : 45,
+        sunAzimuth: directionalLight ? directionalLight.azimuth : 45,
+        sunIntensity: directionalLight ? directionalLight.intensity : 1.5,
+        sunColor: '#ffffff',
 
         // 5. Tile Streaming & VHT
         loadingRadius: landscape ? landscape.loadingRadius : 2500,
@@ -406,6 +415,26 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
                 }
             });
 
+            folderDisplay.addBinding(config, 'roughness', {
+                min: 0.0,
+                max: 1.0,
+                step: 0.01
+            }).on('change', (ev) => {
+                if (landscape && landscape.landscapeMaterial) {
+                    landscape.landscapeMaterial.roughnessFactor = ev.value;
+                }
+            });
+
+            folderDisplay.addBinding(config, 'metallic', {
+                min: 0.0,
+                max: 1.0,
+                step: 0.01
+            }).on('change', (ev) => {
+                if (landscape && landscape.landscapeMaterial) {
+                    landscape.landscapeMaterial.metallicFactor = ev.value;
+                }
+            });
+
             folderDisplay.addBinding(config, 'useDiffuseTexture').on('change', (ev) => {
                 if (landscape && landscape.landscapeMaterial) {
                     landscape.landscapeMaterial.baseColorTexture = ev.value ? groundTexture : null;
@@ -431,6 +460,39 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
                 if (landscape && landscape.landscapeMaterial) {
                     const [scU] = landscape.landscapeMaterial.textureScale;
                     landscape.landscapeMaterial.textureScale = [scU, ev.value];
+                }
+            });
+
+            // Folder 4-1: Directional Light Controls
+            const folderSun = pane.addFolder({title: '☀️ Directional Light', expanded: true});
+
+            folderSun.addBinding(config, 'sunElevation', {
+                min: -90,
+                max: 90,
+                step: 1
+            }).on('change', (ev) => {
+                if (directionalLight) directionalLight.elevation = ev.value;
+            });
+
+            folderSun.addBinding(config, 'sunAzimuth', {
+                min: 0,
+                max: 360,
+                step: 1
+            }).on('change', (ev) => {
+                if (directionalLight) directionalLight.azimuth = ev.value;
+            });
+
+            folderSun.addBinding(config, 'sunIntensity', {
+                min: 0,
+                max: 10,
+                step: 0.1
+            }).on('change', (ev) => {
+                if (directionalLight) directionalLight.intensity = ev.value;
+            });
+
+            folderSun.addBinding(config, 'sunColor').on('change', (ev) => {
+                if (directionalLight && directionalLight.color) {
+                    directionalLight.color.setColorByHEX(ev.value);
                 }
             });
 

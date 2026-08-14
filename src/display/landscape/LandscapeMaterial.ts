@@ -10,16 +10,19 @@ import landscapeFragmentSource from "./shader/landscapeFragment.wgsl";
 import defineColorRGBA from "../../defineProperty/funcs/color/defineColorRGBA";
 import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
 import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
+import defineNumber from "../../defineProperty/funcs/number/defineNumber";
 
 interface LandscapeMaterial {
     color: ColorRGBA;
+    roughnessFactor: number;
+    metallicFactor: number;
     baseColorTexture: BitmapTexture;
     baseColorTextureSampler: Sampler;
 }
 
 /**
- * [KO] Landscape 지형 시스템 전용 머티리얼 클래스입니다 (RedGPU PBRMaterial 네이밍 표준 및 @group(2) 규격 완전 준수).
- * [EN] Material class dedicated to Landscape terrain system (Fully compliant with RedGPU PBRMaterial naming standard & @group(2) material group).
+ * [KO] Landscape 지형 시스템 전용 PBR 머티리얼 클래스입니다 (RedGPU PBRMaterial 네이밍 표준 metallicFactor/roughnessFactor 100% 준수).
+ * [EN] PBR material class dedicated to Landscape terrain system (Fully compliant with RedGPU PBRMaterial metallicFactor/roughnessFactor naming standards).
  */
 class LandscapeMaterial extends AUVTransformBaseMaterial {
     constructor(redGPUContext: RedGPUContext, colorHex: string = '#ffffff', baseColorTexture?: BitmapTexture) {
@@ -40,12 +43,19 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 
         this.baseColorTexture = baseColorTexture;
         this.color.setColorByHEX(colorHex);
+        this.roughnessFactor = 0.85;
+        this.metallicFactor = 0.0;
         this.initGPURenderInfos();
     }
 }
 
 defineColorRGBA(LandscapeMaterial, [
     {key: 'color'}
+]);
+
+defineNumber(LandscapeMaterial, [
+    {key: 'roughnessFactor', value: 0.85, min: 0, max: 1},
+    {key: 'metallicFactor', value: 0.0, min: 0, max: 1}
 ]);
 
 defineSampler(LandscapeMaterial, [
