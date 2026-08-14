@@ -153,7 +153,6 @@ export class LandscapeTileStreamer {
                 this.#failedMap.delete(key);
 
                 if (this.#vhtAtlasTexture) {
-                    const {gpuDevice} = this.#redGPUContext;
                     const TILE_PIXEL_SIZE = 512;
                     const targetX = comp.componentX * TILE_PIXEL_SIZE;
                     const targetZ = comp.componentZ * TILE_PIXEL_SIZE;
