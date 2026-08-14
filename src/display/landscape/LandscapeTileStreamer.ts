@@ -5,12 +5,17 @@ import {
     parse16BitPngBufferToGPUTexture
 } from "../../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
 import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
-
-export type LandscapeTileUrlResolver = (row: number, col: number) => string;
+import DirectTexture from "../../resources/texture/DirectTexture";
 
 /**
- * [KO] Landscape 16비트/8비트 타일 동적 호스트 스트리밍 전담 관리자 클래스입니다.
- * [EN] Dedicated manager class for Landscape 16-bit/8-bit tile dynamic host streaming.
+ * [KO] 타일별 커스텀 URL 생성 리졸버 함수 타입입니다. (row, col 인자 제공)
+ * [EN] Tile custom URL resolver function type. (provides row, col parameters)
+ */
+export type LandscapeTileUrlResolver = (row: number, col: number, comp?: LandscapeComponent) => string;
+
+/**
+ * [KO] SpatialGrid 카메라 수평 조망 거리 기반 16비트 고도맵 VHT 아틀라스 스트리머 클래스입니다 (Real-time Tile Streaming Manager).
+ * [EN] 16-bit Heightmap VHT Atlas Streamer class based on SpatialGrid camera horizontal viewing distance.
  */
 export class LandscapeTileStreamer {
     #redGPUContext: RedGPUContext;
@@ -19,7 +24,7 @@ export class LandscapeTileStreamer {
     #loadingRadius: number = 2500.0;
     #maxLoadsPerFrame: number = 2;
     #tileUrlResolver: LandscapeTileUrlResolver | null = null;
-    #vhtAtlasTexture: GPUTexture | null = null;
+    #vhtAtlasTexture: DirectTexture | null = null;
 
     #activeComponentsBuffer: LandscapeComponent[] = [];
     #pendingQueue: LandscapeComponent[] = [];
@@ -40,11 +45,11 @@ export class LandscapeTileStreamer {
         this.#pendingQueue.length = 0;
     }
 
-    get vhtAtlasTexture(): GPUTexture | null {
+    get vhtAtlasTexture(): DirectTexture | null {
         return this.#vhtAtlasTexture;
     }
 
-    set vhtAtlasTexture(texture: GPUTexture | null) {
+    set vhtAtlasTexture(texture: DirectTexture | null) {
         this.#vhtAtlasTexture = texture;
     }
 
@@ -152,7 +157,8 @@ export class LandscapeTileStreamer {
                 this.#loadedMap.set(key, parsed.gpuTexture);
                 this.#failedMap.delete(key);
 
-                if (this.#vhtAtlasTexture) {
+                if (this.#vhtAtlasTexture && this.#vhtAtlasTexture.gpuTexture) {
+                    const rawAtlasTexture = this.#vhtAtlasTexture.gpuTexture;
                     const TILE_PIXEL_SIZE = 512;
                     const targetX = comp.componentX * TILE_PIXEL_SIZE;
                     const targetZ = comp.componentZ * TILE_PIXEL_SIZE;
@@ -160,14 +166,14 @@ export class LandscapeTileStreamer {
                     const copyH = Math.min(parsed.height, TILE_PIXEL_SIZE);
 
                     if (
-                        targetX + copyW <= this.#vhtAtlasTexture.width &&
-                        targetZ + copyH <= this.#vhtAtlasTexture.height
+                        targetX + copyW <= rawAtlasTexture.width &&
+                        targetZ + copyH <= rawAtlasTexture.height
                     ) {
                         this.#redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (commandEncoder) => {
                             commandEncoder.copyTextureToTexture(
                                 {texture: parsed.gpuTexture},
                                 {
-                                    texture: this.#vhtAtlasTexture,
+                                    texture: rawAtlasTexture,
                                     origin: [targetX, targetZ, 0]
                                 },
                                 [copyW, copyH, 1]

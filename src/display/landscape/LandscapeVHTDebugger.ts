@@ -43,18 +43,18 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
         if (!gpuDevice) return;
 
         const vhtTexture = this.landscape.vhtAtlasTexture;
-        if (!vhtTexture) return;
+        if (!vhtTexture || !vhtTexture.gpuTexture) return;
 
         // 지형 텍스처 변경 감지 시 GPUBindGroup 재할당
-        if ((this.#lastBoundTexture !== vhtTexture || !this.#bindGroup) && this.#bindGroupLayout && this.#cameraUniformBuffer) {
-            this.#lastBoundTexture = vhtTexture;
+        if ((this.#lastBoundTexture !== vhtTexture.gpuTexture || !this.#bindGroup) && this.#bindGroupLayout && this.#cameraUniformBuffer) {
+            this.#lastBoundTexture = vhtTexture.gpuTexture;
             this.#bindGroup = gpuDevice.createBindGroup({
                 label: 'VHTDebuggerBindGroup',
                 layout: this.#bindGroupLayout,
                 entries: [
                     {
                         binding: 0,
-                        resource: vhtTexture.createView()
+                        resource: vhtTexture.gpuTextureView
                     },
                     {
                         binding: 1,

@@ -9,6 +9,7 @@ import LandscapeMaterial from "./LandscapeMaterial";
 import LandscapeOptions from "./LandscapeOptions";
 import LandscapeSharedGeometry from "./LandscapeSharedGeometry";
 import LandscapeSpatialGrid from "./LandscapeSpatialGrid";
+import DirectTexture from "../../resources/texture/DirectTexture";
 import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "./LandscapeTileStreamer";
 import updateTargetUniform from "../../defineProperty/core/updateTargetUniform";
 
@@ -43,7 +44,7 @@ export class Landscape {
     #lodColoration: boolean = false;
     #heightScale: number = 500.0;
     #tileStreamer: LandscapeTileStreamer;
-    #vhtAtlasTexture: GPUTexture | null = null;
+    #vhtAtlasTexture: DirectTexture | null = null;
     #vhtSampler: GPUSampler | null = null;
 
     #worldSizeX: number;
@@ -134,12 +135,13 @@ export class Landscape {
         // 1. Virtual Heightfield Texture (VHT) 아틀라스 GPUTexture 생성 (8x8 * 512 = 4096x4096, r16unorm)
         const atlasWidth = componentCountX * 512;
         const atlasHeight = componentCountZ * 512;
-        const vhtAtlasTexture = redGPUContext.gpuDevice.createTexture({
+        const rawAtlasTexture = redGPUContext.gpuDevice.createTexture({
             size: [atlasWidth, atlasHeight],
             format: 'r16unorm',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
             label: 'Landscape_VHT_Atlas_Texture'
         });
+        const vhtAtlasTexture = new DirectTexture(redGPUContext, 'Landscape_VHT_Atlas_Texture', rawAtlasTexture);
         const vhtSampler = redGPUContext.gpuDevice.createSampler({
             magFilter: 'nearest',
             minFilter: 'nearest',
@@ -165,7 +167,7 @@ export class Landscape {
 
         // WebGPU Multi-LOD Indirect & Instance Buffer 생성 (@group(2): StorageBuffer, Sampler, VHT Texture_2D)
         this.#instanceBuffer = new LandscapeInstanceBuffer(redGPUContext, componentCountX * componentCountZ, maxLODLevel);
-        this.#instanceBuffer.updateBindGroup(vhtSampler, vhtAtlasTexture.createView());
+        this.#instanceBuffer.updateBindGroup(vhtSampler, vhtAtlasTexture.gpuTextureView);
 
         this.#rebuildLODStructures(options.lodColors, options.lodMultipliers, options.lodDistances);
         this.#rebuildTiles();
@@ -278,8 +280,8 @@ export class Landscape {
         this.#heightScale = val;
     }
 
-    /** [KO] Virtual Heightfield Texture (VHT) 아틀라스 GPUTexture */
-    get vhtAtlasTexture(): GPUTexture | null {
+    /** [KO] Virtual Heightfield Texture (VHT) 아틀라스 DirectTexture 레퍼런스 */
+    get vhtAtlasTexture(): DirectTexture | null {
         return this.#vhtAtlasTexture;
     }
 
@@ -673,16 +675,17 @@ export class Landscape {
         const targetAtlasH = componentCountZ * 512;
         let needRebuildBindGroup = false;
 
-        if (!this.#vhtAtlasTexture || this.#vhtAtlasTexture.width !== targetAtlasW || this.#vhtAtlasTexture.height !== targetAtlasH) {
+        if (!this.#vhtAtlasTexture || this.#vhtAtlasTexture.gpuTexture.width !== targetAtlasW || this.#vhtAtlasTexture.gpuTexture.height !== targetAtlasH) {
             if (this.#vhtAtlasTexture) {
                 this.#vhtAtlasTexture.destroy();
             }
-            this.#vhtAtlasTexture = this.#redGPUContext.gpuDevice.createTexture({
+            const rawGpuTexture = this.#redGPUContext.gpuDevice.createTexture({
                 size: [targetAtlasW, targetAtlasH],
                 format: 'r16unorm',
                 usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
                 label: 'Landscape_VHT_Atlas_Texture'
             });
+            this.#vhtAtlasTexture = new DirectTexture(this.#redGPUContext, 'Landscape_VHT_Atlas_Texture', rawGpuTexture);
             if (this.#tileStreamer) {
                 this.#tileStreamer.vhtAtlasTexture = this.#vhtAtlasTexture;
                 this.#tileStreamer.resetTileState();
@@ -699,7 +702,7 @@ export class Landscape {
         }
 
         if (needRebuildBindGroup && this.#vhtSampler && this.#vhtAtlasTexture) {
-            this.#instanceBuffer.updateBindGroup(this.#vhtSampler, this.#vhtAtlasTexture.createView());
+            this.#instanceBuffer.updateBindGroup(this.#vhtSampler, this.#vhtAtlasTexture.gpuTextureView);
         }
 
         while (this.#landscapeComponents.length > targetCount) {
