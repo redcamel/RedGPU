@@ -16,13 +16,15 @@ interface LandscapeMaterial {
     color: ColorRGBA;
     roughnessFactor: number;
     metallicFactor: number;
+    occlusionStrength: number;
     baseColorTexture: BitmapTexture;
+    ormTexture: BitmapTexture;
     baseColorTextureSampler: Sampler;
 }
 
 /**
- * [KO] Landscape 지형 시스템 전용 PBR 머티리얼 클래스입니다 (RedGPU PBRMaterial 네이밍 표준 metallicFactor/roughnessFactor 100% 준수).
- * [EN] PBR material class dedicated to Landscape terrain system (Fully compliant with RedGPU PBRMaterial metallicFactor/roughnessFactor naming standards).
+ * [KO] Landscape 지형 시스템 전용 PBR 머티리얼 클래스입니다 (UE5 PBR ORM: Occlusion, Roughness, Metallic & Occlusion Strength 지원).
+ * [EN] PBR material class dedicated to Landscape terrain system (Supports UE5 PBR ORM: Occlusion, Roughness, Metallic & Occlusion Strength).
  */
 class LandscapeMaterial extends AUVTransformBaseMaterial {
     constructor(redGPUContext: RedGPUContext, colorHex: string = '#ffffff', baseColorTexture?: BitmapTexture) {
@@ -45,6 +47,8 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         this.color.setColorByHEX(colorHex);
         this.roughnessFactor = 0.85;
         this.metallicFactor = 0.0;
+        this.occlusionStrength = 1.0;
+        this.textureScale = [160, 160];
         this.initGPURenderInfos();
     }
 }
@@ -55,7 +59,8 @@ defineColorRGBA(LandscapeMaterial, [
 
 defineNumber(LandscapeMaterial, [
     {key: 'roughnessFactor', value: 0.85, min: 0, max: 1},
-    {key: 'metallicFactor', value: 0.0, min: 0, max: 1}
+    {key: 'metallicFactor', value: 0.0, min: 0, max: 1},
+    {key: 'occlusionStrength', value: 1.0, min: 0, max: 2}
 ]);
 
 defineSampler(LandscapeMaterial, [
@@ -63,7 +68,8 @@ defineSampler(LandscapeMaterial, [
 ]);
 
 defineTexture(LandscapeMaterial, [
-    {key: 'baseColorTexture'}
+    {key: 'baseColorTexture'},
+    {key: 'ormTexture'}
 ]);
 
 export {LandscapeMaterial};

@@ -28,9 +28,9 @@ struct MaterialUniforms {
     textureScale: vec2<f32>,
     roughnessFactor: f32,
     metallicFactor: f32,
+    occlusionStrength: f32,
 };
 
-@group(1) @binding(1) var vhtSampler: sampler;
 @group(1) @binding(3) var vntNormalTexture: texture_2d<f32>;
 
 @group(2) @binding(0) var<uniform> uniforms: MaterialUniforms;
@@ -38,6 +38,10 @@ struct MaterialUniforms {
 
 #redgpu_if baseColorTexture
 @group(2) @binding(2) var baseColorTexture: texture_2d<f32>;
+#redgpu_endIf
+
+#redgpu_if ormTexture
+@group(2) @binding(3) var ormTexture: texture_2d<f32>;
 #redgpu_endIf
 
 @fragment
@@ -48,11 +52,21 @@ fn main(inputData: InputData) -> OutputFragment {
     let u_cameraPosition = systemUniforms.camera.cameraPosition;
     let preExposure = systemUniforms.preExposure;
 
-    let u_metallicFactor = uniforms.metallicFactor;
-    let u_roughnessFactor = uniforms.roughnessFactor;
+    var u_metallicFactor = uniforms.metallicFactor;
+    var u_roughnessFactor = uniforms.roughnessFactor;
+    var ambientOcclusion = 1.0;
 
-    // RVT 노멀 아틀라스(@group(1) @binding(3)) 픽셀 샘플링 및 복원
-    let encodedNormal = textureSampleLevel(vntNormalTexture, vhtSampler, inputData.uv1, 0.0).rgb;
+    let transformedUV = inputData.uv * uniforms.textureScale + uniforms.textureOffset;
+
+    #redgpu_if ormTexture
+    let ormSample = textureSample(ormTexture, baseColorTextureSampler, transformedUV);
+    ambientOcclusion = clamp(pow(max(0.001, ormSample.r), max(0.0, uniforms.occlusionStrength * 2.0)), 0.0, 1.0);
+    u_roughnessFactor *= ormSample.g;
+    u_metallicFactor *= ormSample.b;
+    #redgpu_endIf
+
+    // 1. RVT 월드 노멀 아틀라스(@group(1) @binding(3)) 픽셀 샘플링 및 복원 (단일 통합 샘플러 사용)
+    let encodedNormal = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, inputData.uv1, 0.0).rgb;
     let sampledNormal = normalize(encodedNormal * 2.0 - vec3<f32>(1.0));
     let N: vec3<f32> = select(sampledNormal, vec3<f32>(0.0, 1.0, 0.0), length(encodedNormal) <= 0.001);
 
@@ -60,7 +74,6 @@ fn main(inputData: InputData) -> OutputFragment {
     var baseColor = uniforms.color;
 
     #redgpu_if baseColorTexture
-    let transformedUV = inputData.uv * uniforms.textureScale + uniforms.textureOffset;
     let diffuseSampleColor = textureSample(baseColorTexture, baseColorTextureSampler, transformedUV);
     baseColor *= diffuseSampleColor;
     #redgpu_endIf
@@ -180,13 +193,14 @@ fn main(inputData: InputData) -> OutputFragment {
         let F_IBL = F0 * envBRDF.x + vec3<f32>(envBRDF.y);
         let kD = (vec3<f32>(1.0) - F_IBL) * (1.0 - u_metallicFactor);
 
-        indirectLighting = (kD * albedo * iblDiffuseColor) + (reflectedColor * F_IBL);
+        indirectLighting = ((kD * albedo * iblDiffuseColor) + (reflectedColor * F_IBL)) * ambientOcclusion;
     } else {
         let ambientContribution = albedo * systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure * INV_PI;
-        indirectLighting = ambientContribution;
+        indirectLighting = ambientContribution * ambientOcclusion;
     }
 
-    let finalColor = vec4<f32>(totalDirectLighting + indirectLighting, baseColor.a);
+    let directAO = mix(1.0, ambientOcclusion, 0.6);
+    let finalColor = vec4<f32>((totalDirectLighting * directAO) + indirectLighting, baseColor.a);
 
     output.color = finalColor;
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);

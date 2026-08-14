@@ -46,14 +46,19 @@ RedGPU.init(
             loadingRadius: 4000
         });
 
-        // 4-1. 기본 지형 PBR 텍스처(baseColorTexture: terrainTest_001/diffuse.jpg) 및 UV 스케일링 설정
+        // 4-1. 기본 지형 PBR 텍스처(baseColorTexture: diffuse.jpg / ormTexture: orm.jpg) 및 UV 스케일링 설정
         const groundTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
             '../../../assets/terrain/terrainTest_001/diffuse.jpg'
         );
+        const ormTexture = new RedGPU.Resource.BitmapTexture(
+            redGPUContext,
+            '../../../assets/terrain/terrainTest_001/orm.jpg'
+        );
         landscape.landscapeMaterial.baseColorTexture = groundTexture;
+        landscape.landscapeMaterial.ormTexture = ormTexture;
         landscape.landscapeMaterial.color.setColorByHEX('#ffffff');
-        landscape.landscapeMaterial.textureScale = [1, 1];
+        landscape.landscapeMaterial.textureScale = [160, 160];
 
         landscape.tileUrlResolver = (row, col) => {
             const BASE_HOST = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
@@ -211,7 +216,7 @@ RedGPU.init(
         renderer.start(redGPUContext, render);
 
         // 7. Landscape 모든 get/set 속성 및 2D 디버거 전면 제어 테스트 패널 렌더링
-        renderTestPane(redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, directionalLight);
+        renderTestPane(redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight);
     }
 );
 
@@ -225,9 +230,10 @@ RedGPU.init(
  * @param {RedGPU.Display.LandscapeVHTDebugger} vhtDebugger
  * @param {RedGPU.Display.LandscapeVNTDebugger} vntDebugger
  * @param {RedGPU.Resource.BitmapTexture} groundTexture
+ * @param {RedGPU.Resource.BitmapTexture} ormTexture
  * @param {RedGPU.Light.DirectionalLight} directionalLight
  */
-const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, directionalLight) => {
+const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight) => {
     const [wsX, wsZ] = landscape ? landscape.worldSize : [8000, 8000];
     const [tcX, tcZ] = landscape ? landscape.componentCount : [8, 8];
     const [tsX, tsZ] = landscape ? landscape.tileSize : [1000, 1000];
@@ -256,9 +262,11 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
         terrainColor: '#ffffff',
         roughness: 0.85,
         metallic: 0.0,
+        occlusionStrength: 1.0,
         useDiffuseTexture: true,
-        textureScaleU: 1,
-        textureScaleV: 1,
+        useOrmTexture: true,
+        textureScaleU: 160,
+        textureScaleV: 160,
 
         // 4-1. Directional Light (Sun)
         sunElevation: directionalLight ? directionalLight.elevation : 45,
@@ -445,16 +453,32 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
                 }
             });
 
+            folderDisplay.addBinding(config, 'occlusionStrength', {
+                min: 0.0,
+                max: 2.0,
+                step: 0.05
+            }).on('change', (ev) => {
+                if (landscape && landscape.landscapeMaterial) {
+                    landscape.landscapeMaterial.occlusionStrength = ev.value;
+                }
+            });
+
             folderDisplay.addBinding(config, 'useDiffuseTexture').on('change', (ev) => {
                 if (landscape && landscape.landscapeMaterial) {
                     landscape.landscapeMaterial.baseColorTexture = ev.value ? groundTexture : null;
                 }
             });
 
+            folderDisplay.addBinding(config, 'useOrmTexture').on('change', (ev) => {
+                if (landscape && landscape.landscapeMaterial) {
+                    landscape.landscapeMaterial.ormTexture = ev.value ? ormTexture : null;
+                }
+            });
+
             folderDisplay.addBinding(config, 'textureScaleU', {
                 min: 1,
-                max: 100,
-                step: 1
+                max: 1000,
+                step: 5
             }).on('change', (ev) => {
                 if (landscape && landscape.landscapeMaterial) {
                     const [, scV] = landscape.landscapeMaterial.textureScale;
@@ -464,8 +488,8 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
 
             folderDisplay.addBinding(config, 'textureScaleV', {
                 min: 1,
-                max: 100,
-                step: 1
+                max: 1000,
+                step: 5
             }).on('change', (ev) => {
                 if (landscape && landscape.landscapeMaterial) {
                     const [scU] = landscape.landscapeMaterial.textureScale;
