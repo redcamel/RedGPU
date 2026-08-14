@@ -23,16 +23,16 @@ struct InputData {
 };
 
 struct LandscapeLayerParams {
-    textureOffset: vec2<f32>,
-    textureScale: vec2<f32>,
+    uvOffset: vec2<f32>,
+    uvScale: vec2<f32>,
     minVal: f32,
     maxVal: f32,
     blendFalloff: f32,
-    blendType: f32, // 0: SLOPE, 1: HEIGHT, 2: WEIGHT_MAP
+    blendMode: f32, // 0: SLOPE, 1: HEIGHT, 2: WEIGHT_MAP
     tintColor: vec4<f32>,
-    roughnessFactor: f32,
-    metallicFactor: f32,
-    normalScale: f32,
+    roughness: f32,
+    metallic: f32,
+    normalIntensity: f32,
     enabled: f32, // 1.0 or 0.0
 };
 
@@ -66,28 +66,26 @@ struct MaterialUniforms {
 @group(2) @binding(6) var layerORMArray: texture_2d_array<f32>;
 
 fn computeLayerRawWeight(layer: LandscapeLayerParams, worldNormalY: f32, vertexHeight: f32) -> f32 {
-    let blendType = layer.blendType;
+    let blendMode = layer.blendMode;
     let minVal = layer.minVal;
     let maxVal = layer.maxVal;
     let falloff = max(0.001, layer.blendFalloff);
 
-    var rawWeight = 0.0;
-
-    if (blendType < 0.5) {
+    var val = 0.0;
+    if (blendMode < 0.5) {
         let slopeRad = acos(clamp(worldNormalY, -1.0, 1.0));
-        let slopeDeg = slopeRad * 57.295779513;
-        let lowW = smoothstep(minVal - falloff, minVal, slopeDeg);
-        let highW = 1.0 - smoothstep(maxVal, maxVal + falloff, slopeDeg);
-        rawWeight = lowW * highW;
-    } else if (blendType < 1.5) {
-        let lowW = smoothstep(minVal - falloff, minVal, vertexHeight);
-        let highW = 1.0 - smoothstep(maxVal, maxVal + falloff, vertexHeight);
-        rawWeight = lowW * highW;
+        val = slopeRad * 57.295779513;
+    } else if (blendMode < 1.5) {
+        val = vertexHeight;
     } else {
-        rawWeight = 1.0;
+        return 1.0;
     }
 
-    return max(0.0, rawWeight);
+    // 언리얼 엔진(UE5) 표준 S-Curve (smoothstep) 부드러운 페더링 감쇄 연산
+    let lowW = select(smoothstep(minVal, minVal + falloff, val), 1.0, minVal <= -499.0 || (blendMode < 0.5 && minVal <= 0.001));
+    let highW = select(1.0 - smoothstep(maxVal - falloff, maxVal, val), 1.0, maxVal >= 499.0 || (blendMode < 0.5 && maxVal >= 89.999));
+
+    return clamp(lowW * highW, 0.0, 1.0);
 }
 
 @fragment
@@ -132,24 +130,16 @@ fn main(inputData: InputData) -> OutputFragment {
 
     var albedo: vec3<f32> = baseColor.rgb;
 
-    // Multi-Layer PBR 아틀라스 연산 (레이어가 1개 이상 등록되어 있을 경우 오버라이드)
-    var totalWeight = 0.0;
-    var weights = array<f32, 8>(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-
+    // Multi-Layer PBR 아틀라스 연산 (지형 기본 바탕 baseColor와의 알파 믹싱 지원)
     let activeLayerCount = uniforms.activeLayerCount;
 
     if (activeLayerCount > 0u) {
-        for (var i = 0u; i < activeLayerCount; i = i + 1u) {
-            let layerParams = uniforms.layers[i];
-            if (layerParams.enabled > 0.5) {
-                let w = computeLayerRawWeight(layerParams, N.y, inputData.vertexHeight);
-                weights[i] = w;
-                totalWeight += w;
-            }
-        }
-    }
+        var baseAlbedo = albedo;
+        var baseRoughness = u_roughnessFactor;
+        var baseMetallic = u_metallicFactor;
+        var baseAO = ambientOcclusion;
 
-    if (totalWeight > 0.0001) {
+        var totalLayerWeight = 0.0;
         var blendedAlbedo = vec3<f32>(0.0);
         var blendedNormal = vec3<f32>(0.0);
         var blendedRoughness = 0.0;
@@ -157,40 +147,49 @@ fn main(inputData: InputData) -> OutputFragment {
         var blendedAO = 0.0;
 
         for (var i = 0u; i < activeLayerCount; i = i + 1u) {
-            let normW = weights[i] / totalWeight;
-            if (normW <= 0.0001) { continue; }
-
             let layerParams = uniforms.layers[i];
-            let layerUV = inputData.uv * layerParams.textureScale + layerParams.textureOffset;
+            if (layerParams.enabled <= 0.5) { continue; }
+
+            let layerW = computeLayerRawWeight(layerParams, N.y, inputData.vertexHeight);
+            if (layerW <= 0.0001) { continue; }
+
+            let layerUV = inputData.uv * layerParams.uvScale + layerParams.uvOffset;
             let layerIdx = i32(i);
 
-            let uvDx = baseUvDx * layerParams.textureScale;
-            let uvDy = baseUvDy * layerParams.textureScale;
+            let uvDx = baseUvDx * layerParams.uvScale;
+            let uvDy = baseUvDy * layerParams.uvScale;
 
             let layerAlbedoSample = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, layerUV, layerIdx, uvDx, uvDy);
             let layerNormalRaw = textureSampleGrad(layerNormalArray, baseColorTextureSampler, layerUV, layerIdx, uvDx, uvDy).rgb * 2.0 - vec3<f32>(1.0);
-            let layerNormalSample = layerNormalRaw * vec3<f32>(layerParams.normalScale, layerParams.normalScale, 1.0);
+            let layerNormalSample = layerNormalRaw * vec3<f32>(layerParams.normalIntensity, layerParams.normalIntensity, 1.0);
             let layerORMSample = textureSampleGrad(layerORMArray, baseColorTextureSampler, layerUV, layerIdx, uvDx, uvDy);
 
             let layerAlbedo = layerAlbedoSample.rgb * layerParams.tintColor.rgb;
-            let layerRoughness = layerParams.roughnessFactor * layerORMSample.g;
-            let layerMetallic = layerParams.metallicFactor * layerORMSample.b;
+            let layerRoughness = layerParams.roughness * layerORMSample.g;
+            let layerMetallic = layerParams.metallic * layerORMSample.b;
             let layerAO = clamp(pow(max(0.001, layerORMSample.r), max(0.0, uniforms.occlusionStrength * 2.0)), 0.0, 1.0);
 
-            blendedAlbedo += layerAlbedo * normW;
-            blendedNormal += layerNormalSample * normW;
-            blendedRoughness += layerRoughness * normW;
-            blendedMetallic += layerMetallic * normW;
-            blendedAO += layerAO * normW;
+            blendedAlbedo += layerAlbedo * layerW;
+            blendedNormal += layerNormalSample * layerW;
+            blendedRoughness += layerRoughness * layerW;
+            blendedMetallic += layerMetallic * layerW;
+            blendedAO += layerAO * layerW;
+
+            totalLayerWeight += layerW;
         }
 
-        albedo = blendedAlbedo;
-        if (length(blendedNormal) > 0.001) {
-            N = normalize(N + blendedNormal);
+        if (totalLayerWeight > 0.0001) {
+            let baseWeight = clamp(1.0 - totalLayerWeight, 0.0, 1.0);
+            let scaleFactor = select(1.0, 1.0 / totalLayerWeight, totalLayerWeight > 1.0);
+
+            albedo = baseAlbedo * baseWeight + blendedAlbedo * scaleFactor * (1.0 - baseWeight);
+            if (length(blendedNormal) > 0.001) {
+                N = normalize(N + blendedNormal * (1.0 - baseWeight));
+            }
+            u_roughnessFactor = baseRoughness * baseWeight + blendedRoughness * scaleFactor * (1.0 - baseWeight);
+            u_metallicFactor = baseMetallic * baseWeight + blendedMetallic * scaleFactor * (1.0 - baseWeight);
+            ambientOcclusion = baseAO * baseWeight + blendedAO * scaleFactor * (1.0 - baseWeight);
         }
-        u_roughnessFactor = blendedRoughness;
-        u_metallicFactor = blendedMetallic;
-        ambientOcclusion = blendedAO;
     }
 
     // Core Vectors

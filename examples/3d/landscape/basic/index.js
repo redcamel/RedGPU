@@ -60,18 +60,21 @@ RedGPU.init(
         landscape.landscapeMaterial.color.setColorByHEX('#ffffff');
         landscape.landscapeMaterial.textureScale = [160, 160];
 
-        // Multi-Layer PBR 지형 레이어 (Grass) 등록
+        // Multi-Layer PBR 지형 레이어 (Grass) 등록 (UE5 표준 프로퍼티 명칭 사용)
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
         const grassLayer = new RedGPU.LandscapeLayer({
             name: 'Grass',
             baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass.jpg`),
             normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass_normal.jpg`),
             ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass_orm.jpg`),
-            textureScale: [160, 160],
-            blendType: 'SLOPE',
+            uvScale: [160, 160],
+            blendMode: 'SLOPE',
             minVal: 0,
             maxVal: 90,
             blendFalloff: 5,
+            roughness: 1.0,
+            metallic: 0.0,
+            normalIntensity: 1.0,
             tintColor: '#ffffff'
         });
         landscape.landscapeMaterial.addLayer(grassLayer);
@@ -420,31 +423,26 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                 }
             });
 
-            // Folder 4-1: Grass Layer Controls
+            // Folder 4-1: Grass Layer Controls (UE5 Specs)
             if (grassLayer) {
-                const folderGrass = pane.addFolder({title: '🌿 Grass Layer', expanded: true});
+                const folderGrass = pane.addFolder({title: 'Grass Layer', expanded: true});
 
-                folderGrass.addBinding(grassLayer, 'enabled', {label: 'Enabled'});
-                folderGrass.addBinding(grassLayer, 'blendType', {
-                    label: 'Blend Type',
+                folderGrass.addBinding(grassLayer, 'enabled');
+                folderGrass.addBinding(grassLayer, 'blendMode', {
                     options: {SLOPE: 'SLOPE', HEIGHT: 'HEIGHT', WEIGHT_MAP: 'WEIGHT_MAP'}
                 });
 
-                folderGrass.addBinding(grassLayer, 'minVal', {min: -500, max: 500, step: 0.1, label: 'Min Val'});
-                folderGrass.addBinding(grassLayer, 'maxVal', {min: -500, max: 500, step: 0.1, label: 'Max Val'});
-                folderGrass.addBinding(grassLayer, 'blendFalloff', {min: 0.1, max: 50, step: 0.1, label: 'Falloff'});
+                folderGrass.addBinding(grassLayer, 'minVal', {min: -500, max: 500, step: 0.1});
+                folderGrass.addBinding(grassLayer, 'maxVal', {min: -500, max: 500, step: 0.1});
+                folderGrass.addBinding(grassLayer, 'blendFalloff', {min: 0.1, max: 50, step: 0.1});
 
-                folderGrass.addBinding(grassLayer, 'roughnessFactor', {min: 0, max: 1, step: 0.01, label: 'Roughness'});
-                folderGrass.addBinding(grassLayer, 'metallicFactor', {min: 0, max: 1, step: 0.01, label: 'Metallic'});
+                folderGrass.addBinding(grassLayer, 'roughness', {min: 0, max: 1, step: 0.01});
+                folderGrass.addBinding(grassLayer, 'metallic', {min: 0, max: 1, step: 0.01});
+                folderGrass.addBinding(grassLayer, 'normalIntensity', {min: 0, max: 2, step: 0.01});
 
-                const layerScaleData = {scale: grassLayer.textureScale[0]};
-                folderGrass.addBinding(layerScaleData, 'scale', {
-                    min: 1,
-                    max: 500,
-                    step: 1,
-                    label: 'Layer Scale'
-                }).on('change', (e) => {
-                    grassLayer.textureScale = [e.value, e.value];
+                const layerScaleData = {uvScale: grassLayer.uvScale[0]};
+                folderGrass.addBinding(layerScaleData, 'uvScale', {min: 1, max: 500, step: 1}).on('change', (e) => {
+                    grassLayer.uvScale = [e.value, e.value];
                 });
             }
 

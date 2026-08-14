@@ -178,16 +178,16 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         for (let i = 0; i < MAX_LANDSCAPE_LAYERS; i++) {
             if (i < activeCount) {
                 const layer = this.#layers[i];
-                floatBuf[offset + 0] = layer.textureOffset[0];
-                floatBuf[offset + 1] = layer.textureOffset[1];
-                floatBuf[offset + 2] = layer.textureScale[0];
-                floatBuf[offset + 3] = layer.textureScale[1];
+                floatBuf[offset + 0] = layer.uvOffset[0];
+                floatBuf[offset + 1] = layer.uvOffset[1];
+                floatBuf[offset + 2] = layer.uvScale[0];
+                floatBuf[offset + 3] = layer.uvScale[1];
 
-                const blendTypeVal = layer.blendType === 'SLOPE' ? 0 : (layer.blendType === 'HEIGHT' ? 1 : 2);
+                const blendModeVal = layer.blendMode === 'SLOPE' ? 0 : (layer.blendMode === 'HEIGHT' ? 1 : 2);
                 floatBuf[offset + 4] = layer.minVal;
                 floatBuf[offset + 5] = layer.maxVal;
                 floatBuf[offset + 6] = layer.blendFalloff;
-                floatBuf[offset + 7] = blendTypeVal;
+                floatBuf[offset + 7] = blendModeVal;
 
                 const layerColorLinear = layer.tintColor ? layer.tintColor.rgbaNormalLinear : [1, 1, 1, 1];
                 floatBuf[offset + 8] = layerColorLinear[0];
@@ -195,9 +195,9 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                 floatBuf[offset + 10] = layerColorLinear[2];
                 floatBuf[offset + 11] = layerColorLinear[3];
 
-                floatBuf[offset + 12] = layer.roughnessFactor;
-                floatBuf[offset + 13] = layer.metallicFactor;
-                floatBuf[offset + 14] = layer.normalScale;
+                floatBuf[offset + 12] = layer.roughness;
+                floatBuf[offset + 13] = layer.metallic;
+                floatBuf[offset + 14] = layer.normalIntensity;
                 floatBuf[offset + 15] = layer.enabled ? 1.0 : 0.0; // enabled
             } else {
                 floatBuf.fill(0, offset, offset + 16);
