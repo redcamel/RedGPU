@@ -136,7 +136,6 @@ export class LandscapeHUDDebugger extends ALandscapeDebugger {
             `;
         }
 
-        const sysDrawCalls = renderViewStateData?.renderResults?.numDrawCalls ?? activeDrawCalls;
         const loadedTiles = landscape.tileStreamer ? landscape.tileStreamer.loadedTileCount : 0;
         const pendingQueue = landscape.tileStreamer ? landscape.tileStreamer.pendingQueueSize : 0;
 
@@ -189,18 +188,18 @@ export class LandscapeHUDDebugger extends ALandscapeDebugger {
                 ${lodListHTML}
             </div>
 
-            <!-- 4. Pipeline & Streaming Sub-card -->
+            <!-- 4. Landscape Pipeline & Streaming Sub-card -->
             <div style="background:rgba(30, 41, 59, 0.5); border:1px solid rgba(255,255,255,0.06); border-radius:6px; padding:8px 10px; margin-bottom:8px; font-size:11px;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
-                    <span style="color:#94a3b8;">🚀 Active Draw Calls</span>
-                    <b style="color:#f43f5e; font-family:monospace;">${sysDrawCalls} Calls</b>
+                    <span style="color:#94a3b8;">🚀 Landscape Draw Calls</span>
+                    <b style="color:#f43f5e; font-family:monospace;">${activeDrawCalls} Calls <span style="font-size:10px; color:#64748b; font-weight:normal;">(LOD Batch)</span></b>
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
-                    <span style="color:#94a3b8;">📐 Active Vertices</span>
+                    <span style="color:#94a3b8;">📐 Landscape Vertices</span>
                     <b style="color:#facc15; font-family:monospace;">${activeTotalVerts.toLocaleString()}</b>
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
-                    <span style="color:#94a3b8;">🔺 Active Triangles</span>
+                    <span style="color:#94a3b8;">🔺 Landscape Triangles</span>
                     <b style="color:#facc15; font-family:monospace;">${activeTotalTris.toLocaleString()}</b>
                 </div>
                 <div style="display:flex; justify-content:space-between;">
