@@ -294,7 +294,6 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
             const folderDimensions = pane.addFolder({title: '⛰️ Terrain Dimensions (UE5 Specs)', expanded: true});
 
             folderDimensions.addBinding(config, 'worldSizeX', {
-                label: 'World Size X (m)',
                 min: 1000,
                 max: 30000,
                 step: 500
@@ -307,7 +306,6 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
             });
 
             folderDimensions.addBinding(config, 'worldSizeZ', {
-                label: 'World Size Z (m)',
                 min: 1000,
                 max: 30000,
                 step: 500
@@ -322,7 +320,6 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
             const maxTilesAllowed = Math.floor((redGPUContext.gpuDevice?.limits?.maxTextureDimension2D ?? 8192) / 512);
 
             folderDimensions.addBinding(config, 'componentCountX', {
-                label: 'Component Count X',
                 min: 1,
                 max: maxTilesAllowed,
                 step: 1
@@ -335,7 +332,6 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
             });
 
             folderDimensions.addBinding(config, 'componentCountZ', {
-                label: 'Component Count Z',
                 min: 1,
                 max: maxTilesAllowed,
                 step: 1
@@ -347,14 +343,13 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
                 }
             });
 
-            folderDimensions.addBinding(config, 'tileSizeStr', {label: 'Tile Size (XZ)', readonly: true});
-            folderDimensions.addBinding(config, 'totalComponents', {label: 'Total Components', readonly: true});
+            folderDimensions.addBinding(config, 'tileSizeStr', {readonly: true});
+            folderDimensions.addBinding(config, 'totalComponents', {readonly: true});
 
             // Folder 2: Mesh & Grid Specs (componentSizeQuads, maxLODLevel)
             const folderSpecs = pane.addFolder({title: '🧩 Grid & LOD Specs (UE5 Standard)', expanded: true});
 
             folderSpecs.addBinding(config, 'componentSizeQuads', {
-                label: 'Component Quads',
                 options: {
                     '15 × 15 Quads (256 Vertices)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_15,
                     '31 × 31 Quads (1,024 Vertices)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_31,
@@ -370,7 +365,6 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
             });
 
             folderSpecs.addBinding(config, 'maxLODLevel', {
-                label: 'Max LOD Levels',
                 min: 1,
                 max: 8,
                 step: 1
@@ -381,14 +375,13 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
                 }
             });
 
-            folderSpecs.addBinding(config, 'totalQuadsStr', {label: 'Total World Quads', readonly: true});
-            folderSpecs.addBinding(config, 'totalVertsStr', {label: 'Total Heightmap Verts', readonly: true});
+            folderSpecs.addBinding(config, 'totalQuadsStr', {readonly: true});
+            folderSpecs.addBinding(config, 'totalVertsStr', {readonly: true});
 
             // Folder 3: Height & Elevation Displacement
             const folderHeight = pane.addFolder({title: '🏔️ Height & Displacement (UE5 Scale)', expanded: true});
 
             folderHeight.addBinding(config, 'heightScale', {
-                label: 'Height Scale (m)',
                 min: 0,
                 max: 3000,
                 step: 25
@@ -399,28 +392,27 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
             // Folder 4: Render Options & Material Color
             const folderDisplay = pane.addFolder({title: '🎨 Material & Visual Options', expanded: true});
 
-            folderDisplay.addBinding(config, 'wireframe', {label: 'Wireframe'}).on('change', (ev) => {
+            folderDisplay.addBinding(config, 'wireframe').on('change', (ev) => {
                 if (landscape) landscape.wireframe = ev.value;
             });
 
-            folderDisplay.addBinding(config, 'lodColoration', {label: 'LOD Debug Colors'}).on('change', (ev) => {
+            folderDisplay.addBinding(config, 'lodColoration').on('change', (ev) => {
                 if (landscape) landscape.lodColoration = ev.value;
             });
 
-            folderDisplay.addBinding(config, 'terrainColor', {label: 'Terrain Tint Color'}).on('change', (ev) => {
+            folderDisplay.addBinding(config, 'terrainColor').on('change', (ev) => {
                 if (landscape && landscape.landscapeMaterial) {
                     landscape.landscapeMaterial.color.setColorByHEX(ev.value);
                 }
             });
 
-            folderDisplay.addBinding(config, 'useDiffuseTexture', {label: 'Base Color Texture'}).on('change', (ev) => {
+            folderDisplay.addBinding(config, 'useDiffuseTexture').on('change', (ev) => {
                 if (landscape && landscape.landscapeMaterial) {
                     landscape.landscapeMaterial.baseColorTexture = ev.value ? groundTexture : null;
                 }
             });
 
             folderDisplay.addBinding(config, 'textureScaleU', {
-                label: 'Texture Scale U (Tiling)',
                 min: 1,
                 max: 100,
                 step: 1
@@ -432,7 +424,6 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
             });
 
             folderDisplay.addBinding(config, 'textureScaleV', {
-                label: 'Texture Scale V (Tiling)',
                 min: 1,
                 max: 100,
                 step: 1
@@ -448,7 +439,6 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
                 const folderStream = pane.addFolder({title: '🛰️ VHT Tile Streaming', expanded: true});
 
                 folderStream.addBinding(config, 'loadingRadius', {
-                    label: 'Loading Radius (m)',
                     min: 500,
                     max: 15000,
                     step: 100
@@ -457,7 +447,6 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
                 });
 
                 folderStream.addBinding(config, 'maxLoadsPerFrame', {
-                    label: 'Max Loads / Frame',
                     min: 1,
                     max: 10,
                     step: 1
@@ -470,7 +459,6 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
             if (controller) {
                 const folderCam = pane.addFolder({title: '🎮 Camera Controls', expanded: true});
                 folderCam.addBinding(config, 'moveSpeed', {
-                    label: 'Camera Move Speed',
                     min: 500,
                     max: 20000,
                     step: 500
@@ -482,16 +470,15 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
             // Folder 7: 2D Debuggers (Visibility & Box Size)
             const folderDebuggers = pane.addFolder({title: '🔍 2D Debuggers (SpatialGrid & VHT)', expanded: true});
 
-            folderDebuggers.addBinding(config, 'spatialGridVisible', {label: 'SpatialGrid Mini-Map'}).on('change', (ev) => {
+            folderDebuggers.addBinding(config, 'spatialGridVisible').on('change', (ev) => {
                 if (spatialGridDebugger) spatialGridDebugger.visible = ev.value;
             });
 
-            folderDebuggers.addBinding(config, 'vhtDebuggerVisible', {label: 'VHT Atlas Preview'}).on('change', (ev) => {
+            folderDebuggers.addBinding(config, 'vhtDebuggerVisible').on('change', (ev) => {
                 if (vhtDebugger) vhtDebugger.visible = ev.value;
             });
 
             folderDebuggers.addBinding(config, 'boxSize', {
-                label: 'Debugger Box Size',
                 min: 60,
                 max: 300,
                 step: 10

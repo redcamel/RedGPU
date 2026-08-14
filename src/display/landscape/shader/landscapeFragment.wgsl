@@ -43,7 +43,7 @@ fn main(inputData: InputData) -> OutputFragment {
     #redgpu_endIf
 
     if (inputData.instanceColor.a > 0.0) {
-//        finalColor = mix(finalColor, inputData.instanceColor, 0.5);
+        finalColor = mix(finalColor, inputData.instanceColor, 0.5);
     }
 
     output.color = finalColor;
