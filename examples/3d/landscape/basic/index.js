@@ -140,6 +140,12 @@ RedGPU.init(
                 `;
             }
 
+            const totalCompCount = tcX * tcZ;
+            const visCompCount = landscape.visibleComponentCount ?? totalCompCount;
+            const culledCompCount = landscape.culledComponentCount ?? 0;
+            const culledPercent = totalCompCount > 0 ? ((culledCompCount / totalCompCount) * 100).toFixed(1) : '0.0';
+            const frustumActive = landscape.frustumCullingActive;
+
             const sysDrawCalls = view?.renderViewStateData?.renderResults?.numDrawCalls ?? activeDrawCalls;
 
             hud.innerHTML = `
@@ -147,9 +153,24 @@ RedGPU.init(
                     <span>⛰️ Landscape Real-time Engine Monitor</span>
                     <span style="font-size:11px; background:#0284c7; color:#fff; padding:2px 6px; border-radius:4px;">UE5 Spec</span>
                 </div>
-                <div>worldSize: <b style="color:#f1f5f9;">[${wsX}, ${wsZ}]m</b> | componentCount: <b style="color:#f1f5f9;">[${tcX}, ${tcZ}] (${tcX * tcZ} Components)</b></div>
+                <div>worldSize: <b style="color:#f1f5f9;">[${wsX}, ${wsZ}]m</b> | componentCount: <b style="color:#f1f5f9;">[${tcX}, ${tcZ}] (${totalCompCount} Components)</b></div>
                 <div>tileSize: <b style="color:#f1f5f9;">[${Math.round(tsX)}, ${Math.round(tsZ)}]m</b> | componentSizeQuads: <b style="color:#f1f5f9;">${gs} Quads</b></div>
                 
+                <div style="margin-top:8px; font-weight:bold; color:#cbd5e1; border-bottom:1px dashed rgba(255,255,255,0.15); padding-bottom:3px; display:flex; justify-content:space-between;">
+                    <span>🎯 Camera Frustum & Spatial Culling:</span>
+                    <span style="font-size:11px; color:${frustumActive ? '#4ade80' : '#f43f5e'};">● ${frustumActive ? 'Frustum Culling Active (6 Planes)' : 'Culling Disabled'}</span>
+                </div>
+                <div style="margin-top:4px; font-size:11px; background:rgba(30, 41, 59, 0.7); padding:6px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.08);">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>👁️ Visible Components (In View):</span>
+                        <span style="color:#38bdf8; font-weight:bold;">${visCompCount} / ${totalCompCount} <span style="color:#cbd5e1; font-weight:normal;">(${((visCompCount / totalCompCount) * 100).toFixed(1)}%)</span></span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-top:2px;">
+                        <span>🚫 Culled Components (Skipped):</span>
+                        <span style="color:#f43f5e; font-weight:bold;">${culledCompCount} <span style="color:#fb7185; font-weight:normal;">(${culledPercent}% GPU saved)</span></span>
+                    </div>
+                </div>
+
                 <div style="margin-top:8px; font-weight:bold; color:#cbd5e1; border-bottom:1px dashed rgba(255,255,255,0.15); padding-bottom:3px;">
                     📊 Active LOD Instances & Geometry (Real-time):
                 </div>
@@ -207,7 +228,7 @@ RedGPU.init(
         // 6. RedGPU 정식 Renderer 생성 및 매 프레임 실시간 HUD 추적 렌더 루프 시작 (60fps Real-time Tracking)
         const renderer = new RedGPU.Renderer();
         const render = (time) => {
-            landscape.update(controller);
+            landscape.update(controller, view.renderViewStateData);
             updateHUD();
             spatialGridDebugger.update();
             vhtDebugger.update();
