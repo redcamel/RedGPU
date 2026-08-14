@@ -202,6 +202,11 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
 
+    // LOD 디버그 색상 (lodColoration) 오버레이 처리
+    if (inputData.instanceColor.a > 0.0) {
+        albedo = mix(albedo, inputData.instanceColor.rgb, 0.6);
+    }
+
     // Core Vectors
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
     let NdotV = max(abs(dot(N, V)), 0.04);
