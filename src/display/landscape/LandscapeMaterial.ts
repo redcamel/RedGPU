@@ -45,7 +45,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 
         this.baseColorTexture = baseColorTexture;
         this.color.setColorByHEX(colorHex);
-        this.roughnessFactor = 0.85;
+        this.roughnessFactor = 1.0;
         this.metallicFactor = 0.0;
         this.occlusionStrength = 1.0;
         this.textureScale = [160, 160];
@@ -58,7 +58,7 @@ defineColorRGBA(LandscapeMaterial, [
 ]);
 
 defineNumber(LandscapeMaterial, [
-    {key: 'roughnessFactor', value: 0.85, min: 0, max: 1},
+    {key: 'roughnessFactor', value: 1.0, min: 0, max: 1},
     {key: 'metallicFactor', value: 0.0, min: 0, max: 1},
     {key: 'occlusionStrength', value: 1.0, min: 0, max: 2}
 ]);

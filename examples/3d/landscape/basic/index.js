@@ -260,7 +260,7 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
         wireframe: landscape ? landscape.wireframe : false,
         lodColoration: landscape ? landscape.lodColoration : false,
         terrainColor: '#ffffff',
-        roughness: 0.85,
+        roughness: 1.0,
         metallic: 0.0,
         occlusionStrength: 1.0,
         useDiffuseTexture: true,
