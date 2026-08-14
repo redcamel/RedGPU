@@ -14,8 +14,8 @@ export interface LandscapeLODGeometryRange {
 }
 
 /**
- * [KO] Landscape LOD 0 ~ LOD N 전체 단계 지오메트리를 단 하나의 거대한 GPU 통합 버퍼(Combined Buffer)로 보관 및 관리하는 클래스입니다.
- * [EN] Class that retains and manages Landscape LOD 0 ~ LOD N geometries as a single giant GPU Combined Buffer.
+ * [KO] Landscape LOD 0 ~ LOD N 전체 단계 지오메트리를 단 하나의 거대한 GPU 통합 버퍼(Combined Buffer)로 보관하며, LOD 크랙 방지용 수직 스커트(Skirt Drop) 지오메트리를 통합 관리하는 클래스입니다.
+ * [EN] Class that retains and manages Landscape LOD 0 ~ LOD N geometries as a single giant GPU Combined Buffer, integrating vertical Skirt Drop geometry for LOD crack sealing.
  */
 export class LandscapeSharedGeometry {
     #redGPUContext: RedGPUContext;
@@ -85,13 +85,14 @@ export class LandscapeSharedGeometry {
     }
 
     /**
-     * [KO] 전체 LOD 단계 지오메트리를 단 하나의 거대 GPU 버퍼로 결합 생성합니다.
+     * [KO] 전체 LOD 단계 지오메트리 및 4면 스커트(Skirt Drop 25m) 지오메트리를 단 하나의 거대 GPU 버퍼로 결합 생성합니다.
      */
     #buildCombinedGeometry(): void {
         const maxLODLevel = this.#maxLODLevel;
         const baseComponentSizeQuads = this.#componentSizeQuads;
         const halfSizeX = this.#tileSizeX / 2;
         const halfSizeZ = this.#tileSizeZ / 2;
+        const SKIRT_DEPTH = -25.0; // LOD 크랙 방지용 25m 수직 하향 스커트
 
         const allInterleavedData: number[] = [];
         const allIndices: number[] = [];
@@ -107,14 +108,12 @@ export class LandscapeSharedGeometry {
             const segmentsX = Math.max(1, Math.floor(baseComponentSizeQuads / step));
             const segmentsZ = Math.max(1, Math.floor(baseComponentSizeQuads / step));
 
-            const vertexCount = (segmentsX + 1) * (segmentsZ + 1);
-            const indexCount = segmentsX * segmentsZ * 6;
-            const wireframeIndexCount = segmentsX * segmentsZ * 12; // 쿼드당 2개 삼각형 (6개 선 = 12개 인덱스)
+            const innerVertexCount = (segmentsX + 1) * (segmentsZ + 1);
             const baseVertex = totalVertexOffset;
             const firstIndex = totalIndexOffset;
             const wireframeFirstIndex = totalWireframeIndexOffset;
 
-            // 버텍스 생성 (Interleaved: position x,y,z, normal x,y,z, uv u,v)
+            // 1. 메인 타일 버텍스 생성 (Interleaved: position x, z, skirtOffset, normal x,y,z, uv u,v)
             for (let z = 0; z <= segmentsZ; z++) {
                 const percentZ = z / segmentsZ;
                 const posZ = percentZ * this.#tileSizeZ - halfSizeZ;
@@ -123,8 +122,8 @@ export class LandscapeSharedGeometry {
                     const percentX = x / segmentsX;
                     const posX = percentX * this.#tileSizeX - halfSizeX;
 
-                    // Position (x, y, z)
-                    allInterleavedData.push(posX, posZ, 0);
+                    // Position (posX, posZ, 0.0) -> position.z = 0.0 (메인 그리드)
+                    allInterleavedData.push(posX, posZ, 0.0);
                     // Normal (x, y, z)
                     allInterleavedData.push(0, 1, 0);
                     // UV (u, v)
@@ -132,7 +131,7 @@ export class LandscapeSharedGeometry {
                 }
             }
 
-            // 인덱스 생성
+            // 2. 메인 타일 인덱스 생성
             for (let z = 0; z < segmentsZ; z++) {
                 for (let x = 0; x < segmentsX; x++) {
                     const row1 = z * (segmentsX + 1);
@@ -143,30 +142,120 @@ export class LandscapeSharedGeometry {
                     const c = row2 + x;
                     const d = row2 + x + 1;
 
-                    // 1. TRIANGLE_LIST 전용 (솔리드 면)
+                    // TRIANGLE_LIST
                     allIndices.push(a, c, b);
                     allIndices.push(b, c, d);
 
-                    // 2. LINE_LIST 전용 (와이어프레임 2개 삼각형 대각선 완전 선)
-                    // 삼각형 1 (a, c, b) -> 선: a-c, c-b, b-a
+                    // LINE_LIST 와이어프레임
                     allWireframeIndices.push(a, c, c, b, b, a);
-                    // 삼각형 2 (b, c, d) -> 선: b-c, c-d, d-b
                     allWireframeIndices.push(b, c, c, d, d, b);
                 }
             }
 
+            // 3. LOD 크랙 완전 봉쇄용 4면 Skirt Drop 지오메트리 패널 추가
+            let currentSkirtLocalIndex = innerVertexCount;
+
+            // North Skirt (z = 0)
+            const northSkirtStartIndex = currentSkirtLocalIndex;
+            for (let x = 0; x <= segmentsX; x++) {
+                const percentX = x / segmentsX;
+                const posX = percentX * this.#tileSizeX - halfSizeX;
+                const posZ = -halfSizeZ;
+                allInterleavedData.push(posX, posZ, SKIRT_DEPTH);
+                allInterleavedData.push(0, 1, 0);
+                allInterleavedData.push(percentX, 0.0);
+                currentSkirtLocalIndex++;
+            }
+            for (let x = 0; x < segmentsX; x++) {
+                const innerA = x;
+                const innerB = x + 1;
+                const skirtA = northSkirtStartIndex + x;
+                const skirtB = northSkirtStartIndex + x + 1;
+                allIndices.push(innerA, skirtB, skirtA);
+                allIndices.push(innerA, innerB, skirtB);
+                allWireframeIndices.push(innerA, skirtA, skirtA, skirtB, skirtB, innerB);
+            }
+
+            // South Skirt (z = segmentsZ)
+            const southSkirtStartIndex = currentSkirtLocalIndex;
+            const southInnerRow = segmentsZ * (segmentsX + 1);
+            for (let x = 0; x <= segmentsX; x++) {
+                const percentX = x / segmentsX;
+                const posX = percentX * this.#tileSizeX - halfSizeX;
+                const posZ = halfSizeZ;
+                allInterleavedData.push(posX, posZ, SKIRT_DEPTH);
+                allInterleavedData.push(0, 1, 0);
+                allInterleavedData.push(percentX, 1.0);
+                currentSkirtLocalIndex++;
+            }
+            for (let x = 0; x < segmentsX; x++) {
+                const innerA = southInnerRow + x;
+                const innerB = southInnerRow + x + 1;
+                const skirtA = southSkirtStartIndex + x;
+                const skirtB = southSkirtStartIndex + x + 1;
+                allIndices.push(innerA, skirtA, skirtB);
+                allIndices.push(innerA, skirtB, innerB);
+                allWireframeIndices.push(innerA, skirtA, skirtA, skirtB, skirtB, innerB);
+            }
+
+            // West Skirt (x = 0)
+            const westSkirtStartIndex = currentSkirtLocalIndex;
+            for (let z = 0; z <= segmentsZ; z++) {
+                const percentZ = z / segmentsZ;
+                const posX = -halfSizeX;
+                const posZ = percentZ * this.#tileSizeZ - halfSizeZ;
+                allInterleavedData.push(posX, posZ, SKIRT_DEPTH);
+                allInterleavedData.push(0, 1, 0);
+                allInterleavedData.push(0.0, percentZ);
+                currentSkirtLocalIndex++;
+            }
+            for (let z = 0; z < segmentsZ; z++) {
+                const innerA = z * (segmentsX + 1);
+                const innerB = (z + 1) * (segmentsX + 1);
+                const skirtA = westSkirtStartIndex + z;
+                const skirtB = westSkirtStartIndex + z + 1;
+                allIndices.push(innerA, skirtA, skirtB);
+                allIndices.push(innerA, skirtB, innerB);
+                allWireframeIndices.push(innerA, skirtA, skirtA, skirtB, skirtB, innerB);
+            }
+
+            // East Skirt (x = segmentsX)
+            const eastSkirtStartIndex = currentSkirtLocalIndex;
+            for (let z = 0; z <= segmentsZ; z++) {
+                const percentZ = z / segmentsZ;
+                const posX = halfSizeX;
+                const posZ = percentZ * this.#tileSizeZ - halfSizeZ;
+                allInterleavedData.push(posX, posZ, SKIRT_DEPTH);
+                allInterleavedData.push(0, 1, 0);
+                allInterleavedData.push(1.0, percentZ);
+                currentSkirtLocalIndex++;
+            }
+            for (let z = 0; z < segmentsZ; z++) {
+                const innerA = z * (segmentsX + 1) + segmentsX;
+                const innerB = (z + 1) * (segmentsX + 1) + segmentsX;
+                const skirtA = eastSkirtStartIndex + z;
+                const skirtB = eastSkirtStartIndex + z + 1;
+                allIndices.push(innerA, skirtB, skirtA);
+                allIndices.push(innerA, innerB, skirtB);
+                allWireframeIndices.push(innerA, skirtA, skirtA, skirtB, skirtB, innerB);
+            }
+
+            const totalLodVertexCount = currentSkirtLocalIndex;
+            const totalLodIndexCount = allIndices.length - firstIndex;
+            const totalLodWireframeIndexCount = allWireframeIndices.length - wireframeFirstIndex;
+
             this.#lodRanges.push({
                 lodLevel: lod,
                 firstIndex: firstIndex,
-                indexCount: indexCount,
+                indexCount: totalLodIndexCount,
                 wireframeFirstIndex: wireframeFirstIndex,
-                wireframeIndexCount: wireframeIndexCount,
+                wireframeIndexCount: totalLodWireframeIndexCount,
                 baseVertex: baseVertex
             });
 
-            totalVertexOffset += vertexCount;
-            totalIndexOffset += indexCount;
-            totalWireframeIndexOffset += wireframeIndexCount;
+            totalVertexOffset += totalLodVertexCount;
+            totalIndexOffset += totalLodIndexCount;
+            totalWireframeIndexOffset += totalLodWireframeIndexCount;
         }
 
         // 단 1개의 거대한 GPU VertexBuffer & IndexBuffer 생성

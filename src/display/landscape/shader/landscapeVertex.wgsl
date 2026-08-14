@@ -66,8 +66,8 @@ fn main(input: InputData) -> OutputData {
     let heightValue = textureLoad(heightMapTexture, texCoord, 0).r;
     let prevHeightValue = textureLoad(heightMapTexture, prevTexCoord, 0).r;
 
-    let worldY = heightValue * instanceData.heightScale;
-    let prevWorldY = prevHeightValue * instanceData.heightScale;
+    let worldY = heightValue * instanceData.heightScale + input.position.z;
+    let prevWorldY = prevHeightValue * instanceData.heightScale + input.position.z;
 
     let worldPos4 = vec4<f32>(worldX, worldY, worldZ, 1.0);
     let prevWorldPos4 = vec4<f32>(prevWorldX, prevWorldY, prevWorldZ, 1.0);

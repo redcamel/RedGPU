@@ -453,6 +453,13 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
                 }).on('change', (ev) => {
                     if (landscape) landscape.maxLoadsPerFrame = ev.value;
                 });
+
+                folderStream.addButton({title: '🔄 Reset Tile Streaming Cache'}).on('click', () => {
+                    if (landscape && landscape.tileStreamer) {
+                        landscape.tileStreamer.resetTileState();
+                        console.log('[Landscape Example 🛰️] Tile Streaming cache state reset successfully!');
+                    }
+                });
             }
 
             // Folder 6: Camera Controls
@@ -464,6 +471,15 @@ const renderTestPane = (redGPUContext, landscape, controller, spatialGridDebugge
                     step: 500
                 }).on('change', (ev) => {
                     controller.moveSpeed = ev.value;
+                });
+
+                folderCam.addButton({title: '🎯 Reset Camera View'}).on('click', () => {
+                    controller.x = 0;
+                    controller.y = 800;
+                    controller.z = 2500;
+                    controller.pan = 0;
+                    controller.tilt = -25;
+                    console.log('[Landscape Example 🎮] Camera view reset to initial position!');
                 });
             }
 
