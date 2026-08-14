@@ -203,7 +203,7 @@ export class LandscapeInstanceBuffer {
                     binding: 1,
                     visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
                     sampler: {
-                        type: 'non-filtering'
+                        type: 'filtering'
                     }
                 },
                 {

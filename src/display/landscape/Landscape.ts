@@ -157,8 +157,8 @@ export class Landscape extends Object3DContainer {
         const vntAtlasTexture = new DirectTexture(redGPUContext, 'Landscape_VNT_Atlas_Texture', rawVntTexture);
 
         const vhtSampler = redGPUContext.gpuDevice.createSampler({
-            magFilter: 'nearest',
-            minFilter: 'nearest',
+            magFilter: 'linear',
+            minFilter: 'linear',
             addressModeU: 'clamp-to-edge',
             addressModeV: 'clamp-to-edge',
             label: 'Landscape_VHT_Sampler'
