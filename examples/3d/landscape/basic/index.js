@@ -69,7 +69,9 @@ RedGPU.init(
             ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass_orm.jpg`),
             textureScale: [160, 160],
             blendType: 'SLOPE',
-            blendParams: {minVal: 0, maxVal: 90, blendFalloff: 5},
+            minVal: 0,
+            maxVal: 90,
+            blendFalloff: 5,
             tintColor: '#ffffff'
         });
         landscape.landscapeMaterial.addLayer(grassLayer);
@@ -135,7 +137,7 @@ RedGPU.init(
         renderer.start(redGPUContext, render);
 
         // 7. Landscape 모든 get/set 속성 및 2D 디버거 전면 제어 테스트 패널 렌더링
-        renderTestPane(redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight);
+        renderTestPane(redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight, grassLayer);
     }
 );
 
@@ -152,8 +154,9 @@ RedGPU.init(
  * @param {RedGPU.Resource.BitmapTexture} groundTexture
  * @param {RedGPU.Resource.BitmapTexture} ormTexture
  * @param {RedGPU.Light.DirectionalLight} directionalLight
+ * @param {RedGPU.LandscapeLayer} grassLayer
  */
-const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight) => {
+const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight, grassLayer) => {
     const [wsX, wsZ] = landscape ? landscape.worldSize : [8000, 8000];
     const [tcX, tcZ] = landscape ? landscape.componentCount : [8, 8];
     const [tsX, tsZ] = landscape ? landscape.tileSize : [1000, 1000];
@@ -417,7 +420,35 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                 }
             });
 
-            // Folder 4-1: Directional Light Controls
+            // Folder 4-1: Grass Layer Controls
+            if (grassLayer) {
+                const folderGrass = pane.addFolder({title: '🌿 Grass Layer', expanded: true});
+
+                folderGrass.addBinding(grassLayer, 'enabled', {label: 'Enabled'});
+                folderGrass.addBinding(grassLayer, 'blendType', {
+                    label: 'Blend Type',
+                    options: {SLOPE: 'SLOPE', HEIGHT: 'HEIGHT', WEIGHT_MAP: 'WEIGHT_MAP'}
+                });
+
+                folderGrass.addBinding(grassLayer, 'minVal', {min: -500, max: 500, step: 0.1, label: 'Min Val'});
+                folderGrass.addBinding(grassLayer, 'maxVal', {min: -500, max: 500, step: 0.1, label: 'Max Val'});
+                folderGrass.addBinding(grassLayer, 'blendFalloff', {min: 0.1, max: 50, step: 0.1, label: 'Falloff'});
+
+                folderGrass.addBinding(grassLayer, 'roughnessFactor', {min: 0, max: 1, step: 0.01, label: 'Roughness'});
+                folderGrass.addBinding(grassLayer, 'metallicFactor', {min: 0, max: 1, step: 0.01, label: 'Metallic'});
+
+                const layerScaleData = {scale: grassLayer.textureScale[0]};
+                folderGrass.addBinding(layerScaleData, 'scale', {
+                    min: 1,
+                    max: 500,
+                    step: 1,
+                    label: 'Layer Scale'
+                }).on('change', (e) => {
+                    grassLayer.textureScale = [e.value, e.value];
+                });
+            }
+
+            // Folder 4-2: Directional Light Controls
             const folderSun = pane.addFolder({title: '☀️ Directional Light', expanded: true});
 
             folderSun.addBinding(config, 'sunElevation', {

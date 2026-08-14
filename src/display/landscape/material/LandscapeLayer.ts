@@ -3,26 +3,18 @@ import BitmapTexture from "../../../resources/texture/BitmapTexture";
 
 export type LandscapeLayerBlendType = 'SLOPE' | 'HEIGHT' | 'WEIGHT_MAP';
 
-export interface LandscapeLayerBlendParams {
-    /** [KO] 최소 적용 범위 (Slope: 도 단위 0~90, Height: m 단위) */
-    minVal?: number;
-    /** [KO] 최대 적용 범위 (Slope: 도 단위 0~90, Height: m 단위) */
-    maxVal?: number;
-    /** [KO] 페이드/경계 감쇄 폭 (Falloff) */
-    blendFalloff?: number;
-    /** [KO] Heightmap 기반 마이크로 콘트라스트 가중치 */
-    heightContrast?: number;
-}
-
 export interface LandscapeLayerOptions {
     name: string;
+    enabled?: boolean;
     baseColorTexture?: BitmapTexture;
     normalTexture?: BitmapTexture;
     ormTexture?: BitmapTexture;
     textureScale?: [number, number];
     textureOffset?: [number, number];
     blendType?: LandscapeLayerBlendType;
-    blendParams?: LandscapeLayerBlendParams;
+    minVal?: number;
+    maxVal?: number;
+    blendFalloff?: number;
     roughnessFactor?: number;
     metallicFactor?: number;
     normalScale?: number;
@@ -35,6 +27,7 @@ export interface LandscapeLayerOptions {
  */
 export class LandscapeLayer {
     readonly name: string;
+    enabled: boolean = true;
 
     baseColorTexture?: BitmapTexture;
     normalTexture?: BitmapTexture;
@@ -44,12 +37,9 @@ export class LandscapeLayer {
     textureOffset: [number, number] = [0.0, 0.0];
 
     blendType: LandscapeLayerBlendType = 'SLOPE';
-    blendParams: Required<LandscapeLayerBlendParams> = {
-        minVal: 0,
-        maxVal: 45,
-        blendFalloff: 5,
-        heightContrast: 1.0
-    };
+    minVal: number = 0.0;
+    maxVal: number = 45.0;
+    blendFalloff: number = 5.0;
 
     roughnessFactor: number = 1.0;
     metallicFactor: number = 0.0;
@@ -61,6 +51,7 @@ export class LandscapeLayer {
 
     constructor(options: LandscapeLayerOptions) {
         this.name = options.name;
+        if (options.enabled !== undefined) this.enabled = options.enabled;
 
         if (options.baseColorTexture) this.baseColorTexture = options.baseColorTexture;
         if (options.normalTexture) this.normalTexture = options.normalTexture;
@@ -70,12 +61,9 @@ export class LandscapeLayer {
         if (options.textureOffset) this.textureOffset = [...options.textureOffset];
 
         if (options.blendType) this.blendType = options.blendType;
-        if (options.blendParams) {
-            this.blendParams = {
-                ...this.blendParams,
-                ...options.blendParams
-            };
-        }
+        if (options.minVal !== undefined) this.minVal = options.minVal;
+        if (options.maxVal !== undefined) this.maxVal = options.maxVal;
+        if (options.blendFalloff !== undefined) this.blendFalloff = options.blendFalloff;
 
         if (options.roughnessFactor !== undefined) this.roughnessFactor = options.roughnessFactor;
         if (options.metallicFactor !== undefined) this.metallicFactor = options.metallicFactor;

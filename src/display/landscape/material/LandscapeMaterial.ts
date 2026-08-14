@@ -184,9 +184,9 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                 floatBuf[offset + 3] = layer.textureScale[1];
 
                 const blendTypeVal = layer.blendType === 'SLOPE' ? 0 : (layer.blendType === 'HEIGHT' ? 1 : 2);
-                floatBuf[offset + 4] = layer.blendParams.minVal;
-                floatBuf[offset + 5] = layer.blendParams.maxVal;
-                floatBuf[offset + 6] = layer.blendParams.blendFalloff;
+                floatBuf[offset + 4] = layer.minVal;
+                floatBuf[offset + 5] = layer.maxVal;
+                floatBuf[offset + 6] = layer.blendFalloff;
                 floatBuf[offset + 7] = blendTypeVal;
 
                 const layerColorLinear = layer.tintColor ? layer.tintColor.rgbaNormalLinear : [1, 1, 1, 1];
@@ -198,7 +198,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                 floatBuf[offset + 12] = layer.roughnessFactor;
                 floatBuf[offset + 13] = layer.metallicFactor;
                 floatBuf[offset + 14] = layer.normalScale;
-                floatBuf[offset + 15] = 1.0; // enabled
+                floatBuf[offset + 15] = layer.enabled ? 1.0 : 0.0; // enabled
             } else {
                 floatBuf.fill(0, offset, offset + 16);
             }

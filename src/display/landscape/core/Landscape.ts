@@ -530,6 +530,10 @@ export class Landscape extends Object3DContainer {
     update(camera: any, renderViewStateData?: any): void {
         if (!camera) return;
 
+        if (this.landscapeMaterial) {
+            this.landscapeMaterial.updateUniformsData();
+        }
+
         // 카메라 및 컨트롤러 유형에 관계없이 3D 월드 위치(camX, camY, camZ) 안전 추출
         const camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
         const camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
