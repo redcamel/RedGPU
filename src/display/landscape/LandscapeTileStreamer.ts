@@ -4,6 +4,7 @@ import LandscapeSpatialGrid from "./LandscapeSpatialGrid";
 import {
     parse16BitPngBufferToGPUTexture
 } from "../../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
+import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 export type LandscapeTileUrlResolver = (row: number, col: number) => string;
 
@@ -163,17 +164,17 @@ export class LandscapeTileStreamer {
                         targetX + copyW <= this.#vhtAtlasTexture.width &&
                         targetZ + copyH <= this.#vhtAtlasTexture.height
                     ) {
-                        const commandEncoder = gpuDevice.createCommandEncoder({label: `VHT_SubRegion_Copy_${key}`});
-                        commandEncoder.copyTextureToTexture(
-                            {texture: parsed.gpuTexture},
-                            {
-                                texture: this.#vhtAtlasTexture,
-                                origin: [targetX, targetZ, 0]
-                            },
-                            [copyW, copyH, 1]
-                        );
-                        gpuDevice.queue.submit([commandEncoder.finish()]);
-                        console.log(`[LandscapeTileStreamer ⛰️] VHT Atlas Sub-region (${key}) copied at [${targetX}, ${targetZ}]`);
+                        this.#redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (commandEncoder) => {
+                            commandEncoder.copyTextureToTexture(
+                                {texture: parsed.gpuTexture},
+                                {
+                                    texture: this.#vhtAtlasTexture,
+                                    origin: [targetX, targetZ, 0]
+                                },
+                                [copyW, copyH, 1]
+                            );
+                        });
+                        console.log(`[LandscapeTileStreamer ⛰️] VHT Atlas Sub-region (${key}) queued to RESOURCE encoder at [${targetX}, ${targetZ}]`);
                     }
                 }
             }

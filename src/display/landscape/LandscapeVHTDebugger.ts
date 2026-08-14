@@ -1,5 +1,6 @@
 import ALandscapeDebugger from "./ALandscapeDebugger";
 import Landscape from "./Landscape";
+import {COMMAND_ENCODER_TYPE} from "../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 /**
  * [KO] Landscape 지형 시스템의 16비트 VHT (Virtual Heightfield Texture) 아틀라스 텍스처를 WebGPU Canvas Context를 통해 60fps 실시간 오버레이로 시각화하는 디버거 클래스입니다.
@@ -55,27 +56,26 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
         if (!this.#pipeline || !this.#bindGroup) return;
 
         try {
-            const commandEncoder = gpuDevice.createCommandEncoder({label: 'VHTDebuggerCommandEncoder'});
             const currentTexture = this.#context.getCurrentTexture();
             if (!currentTexture) return;
 
-            const passEncoder = commandEncoder.beginRenderPass({
-                colorAttachments: [
-                    {
-                        view: currentTexture.createView(),
-                        clearValue: {r: 0.06, g: 0.09, b: 0.16, a: 1.0},
-                        loadOp: 'clear',
-                        storeOp: 'store'
-                    }
-                ]
+            this.landscape.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (commandEncoder) => {
+                const passEncoder = commandEncoder.beginRenderPass({
+                    colorAttachments: [
+                        {
+                            view: currentTexture.createView(),
+                            clearValue: {r: 0.06, g: 0.09, b: 0.16, a: 1.0},
+                            loadOp: 'clear',
+                            storeOp: 'store'
+                        }
+                    ]
+                });
+
+                passEncoder.setPipeline(this.#pipeline);
+                passEncoder.setBindGroup(0, this.#bindGroup);
+                passEncoder.draw(4);
+                passEncoder.end();
             });
-
-            passEncoder.setPipeline(this.#pipeline);
-            passEncoder.setBindGroup(0, this.#bindGroup);
-            passEncoder.draw(4);
-            passEncoder.end();
-
-            gpuDevice.queue.submit([commandEncoder.finish()]);
         } catch (e) {
             // 프레임 스킵 안전 예외 처리
         }
