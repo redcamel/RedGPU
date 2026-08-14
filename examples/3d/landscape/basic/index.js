@@ -59,6 +59,7 @@ RedGPU.init(
         landscape.landscapeMaterial.ormTexture = ormTexture;
         landscape.landscapeMaterial.color.setColorByHEX('#ffffff');
         landscape.landscapeMaterial.textureScale = [160, 160];
+        landscape.lodColoration = false;
 
         // Multi-Layer PBR 지형 레이어 4종 (Grass, Rock, Gravel, Leave) 등록
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
@@ -69,7 +70,7 @@ RedGPU.init(
             '../../../assets/terrain/terrainTest_001/splatMap.jpg'
         );
 
-        // 1. Grass (풀 레이어 - R 채널: weightChannel = 'R')
+        // 1. Grass (주 평지 레이어 - R 채널: weightChannel = 'R')
         const grassLayer = new RedGPU.LandscapeLayer({
             name: 'Grass',
             baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass.jpg`),
@@ -85,30 +86,14 @@ RedGPU.init(
             tintColor: '#ffffff'
         });
 
-        // 2. Rock (암벽/바위 레이어 - G 채널: weightChannel = 'G')
-        const rockLayer = new RedGPU.LandscapeLayer({
-            name: 'Rock',
-            baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock.jpg`),
-            normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock_normal.jpg`),
-            ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock_orm.jpg`),
-            weightTexture: sharedSplatMap,
-            weightChannel: 'G',
-            uvScale: [120, 120],
-            blendMode: 'WEIGHT_MAP',
-            roughness: 0.9,
-            metallic: 0.0,
-            normalIntensity: 1.2,
-            tintColor: '#ffffff'
-        });
-
-        // 3. Gravel (자갈/흙 레이어 - B 채널: weightChannel = 'B')
+        // 2. Gravel (전이 지대/흙 레이어 - G 채널: weightChannel = 'G')
         const gravelLayer = new RedGPU.LandscapeLayer({
             name: 'Gravel',
             baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}gravel.jpg`),
             normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}gravel_normal.jpg`),
             ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}gravel_orm.jpg`),
             weightTexture: sharedSplatMap,
-            weightChannel: 'B',
+            weightChannel: 'G',
             uvScale: [140, 140],
             blendMode: 'WEIGHT_MAP',
             roughness: 0.95,
@@ -117,7 +102,23 @@ RedGPU.init(
             tintColor: '#ffffff'
         });
 
-        // 4. Leave (낙엽/숲속 레이어 - A 채널: weightChannel = 'A')
+        // 3. Rock (절벽/암벽 레이어 - B 채널: weightChannel = 'B')
+        const rockLayer = new RedGPU.LandscapeLayer({
+            name: 'Rock',
+            baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock.jpg`),
+            normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock_normal.jpg`),
+            ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock_orm.jpg`),
+            weightTexture: sharedSplatMap,
+            weightChannel: 'B',
+            uvScale: [120, 120],
+            blendMode: 'WEIGHT_MAP',
+            roughness: 0.9,
+            metallic: 0.0,
+            normalIntensity: 1.2,
+            tintColor: '#ffffff'
+        });
+
+        // 4. Leave (골짜기/숲속 레이어 - A 채널: weightChannel = 'A')
         const leaveLayer = new RedGPU.LandscapeLayer({
             name: 'Leave',
             baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}leave.jpg`),
@@ -134,8 +135,8 @@ RedGPU.init(
         });
 
         landscape.landscapeMaterial.addLayer(grassLayer);
-        landscape.landscapeMaterial.addLayer(rockLayer);
         landscape.landscapeMaterial.addLayer(gravelLayer);
+        landscape.landscapeMaterial.addLayer(rockLayer);
         landscape.landscapeMaterial.addLayer(leaveLayer);
 
         landscape.tileUrlResolver = (row, col) => {
@@ -481,6 +482,8 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                     landscape.landscapeMaterial.textureScale = [scU, ev.value];
                 }
             });
+
+            folderDisplay.addBinding(landscape, 'lodColoration');
 
             // Folder 4-1: Multi-Layer PBR Controls (Grass, Rock, Gravel, Leave)
             if (layers && layers.length) {

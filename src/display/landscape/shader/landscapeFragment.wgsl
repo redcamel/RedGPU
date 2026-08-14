@@ -105,9 +105,10 @@ fn main(inputData: InputData) -> OutputFragment {
     var u_roughnessFactor = uniforms.roughnessFactor;
     var ambientOcclusion = 1.0;
 
-    let transformedUV = inputData.uv * uniforms.textureScale + uniforms.textureOffset;
-    let baseUvDx = dpdx(inputData.uv);
-    let baseUvDy = dpdy(inputData.uv);
+    let globalUV = inputData.uv1;
+    let transformedUV = globalUV * uniforms.textureScale + uniforms.textureOffset;
+    let baseUvDx = dpdx(globalUV);
+    let baseUvDy = dpdy(globalUV);
 
     #redgpu_if ormTexture
     let ormSample = textureSample(ormTexture, baseColorTextureSampler, transformedUV);
@@ -117,7 +118,7 @@ fn main(inputData: InputData) -> OutputFragment {
     #redgpu_endIf
 
     // 1. RVT 월드 노멀 아틀라스(@group(1) @binding(3)) 픽셀 샘플링 및 복원 (단일 통합 샘플러 사용)
-    let encodedNormal = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, inputData.uv1, 0.0).rgb;
+    let encodedNormal = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
     let sampledNormal = normalize(encodedNormal * 2.0 - vec3<f32>(1.0));
     var N: vec3<f32> = select(sampledNormal, vec3<f32>(0.0, 1.0, 0.0), length(encodedNormal) <= 0.001);
 
@@ -157,19 +158,23 @@ fn main(inputData: InputData) -> OutputFragment {
 
             var layerW = computeLayerRawWeight(layerParams, N.y, inputData.vertexHeight);
 
-            let layerUV = inputData.uv * layerParams.uvScale + layerParams.uvOffset;
+            let layerUV = globalUV * layerParams.uvScale + layerParams.uvOffset;
             let layerIdx = i32(i);
 
             let uvDx = baseUvDx * layerParams.uvScale;
             let uvDy = baseUvDy * layerParams.uvScale;
 
             if (layerParams.blendMode >= 1.5) {
-                let weightMapSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, inputData.uv, layerIdx, baseUvDx, baseUvDy);
+                let weightMapSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, layerIdx, baseUvDx, baseUvDy);
                 let chIdx = u32(layerParams.weightMapChannelIndex + 0.5);
                 var weightVal = weightMapSample.r;
                 if (chIdx == 1u) { weightVal = weightMapSample.g; }
                 else if (chIdx == 2u) { weightVal = weightMapSample.b; }
-                else if (chIdx == 3u) { weightVal = weightMapSample.a; }
+                else if (chIdx == 3u) {
+                    let isAlphaFull = weightMapSample.a >= 0.99;
+                    let remainingWeight = clamp(1.0 - (weightMapSample.r + weightMapSample.g + weightMapSample.b), 0.0, 1.0);
+                    weightVal = select(weightMapSample.a, remainingWeight, isAlphaFull);
+                }
                 layerW = clamp(weightVal, 0.0, 1.0);
             }
 
