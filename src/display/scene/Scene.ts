@@ -4,7 +4,6 @@ import ShadowManager from "../../shadow/ShadowManager";
 import {IPhysicsEngine} from "../../physics/IPhysicsEngine";
 import consoleAndThrowError from "../../utils/consoleAndThrowError";
 import Object3DContainer from "../mesh/core/Object3DContainer";
-import Terrain from "../terrain/Terrain";
 import Landscape from "../landscape/core/Landscape";
 
 /**
@@ -19,7 +18,6 @@ class Scene extends Object3DContainer {
     #physicsEngine: IPhysicsEngine
     #destroyed: boolean = false
 
-    #terrainChildren: Terrain[] = []
     #landscapeChildren: Landscape[] = []
 
     constructor() {
@@ -59,10 +57,6 @@ class Scene extends Object3DContainer {
         this.#useBackgroundColor = value;
     }
 
-    get terrainChildren(): Terrain[] {
-        return this.#terrainChildren;
-    }
-
     /**
      * [KO] 씬에 바인딩된 Landscape 지형 객체 리스트를 반환합니다.
      * [EN] Returns the list of Landscape terrain objects bound to the scene.
@@ -97,12 +91,6 @@ class Scene extends Object3DContainer {
     #checkLandscapeInstance(target: Landscape) {
         if (!(target instanceof Landscape)) {
             consoleAndThrowError('allow only Landscape instance.');
-        }
-    }
-
-    #checkTerrainInstance(target: Terrain) {
-        if (!(target instanceof Terrain)) {
-            consoleAndThrowError('allow only Terrain instance.');
         }
     }
 }

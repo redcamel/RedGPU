@@ -11,7 +11,6 @@ import processAnimationsAndSkinning from "./helperFunc/processAnimationsAndSkinn
 import updateJitter from "./helperFunc/updateJitter";
 import updateViewportAndScissor from "./helperFunc/updateViewportAndScissor";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
-import renderTerrainLayer from "./renderLayers/renderTerrainLayer";
 import renderLandscapeLayer from "./renderLayers/renderLandscapeLayer";
 
 
@@ -203,9 +202,6 @@ class Renderer {
                 view.clusterLightManager.updateClusterLights();
             }
             {
-                scene.terrainChildren.forEach(v => {
-                    v.updateTiles(renderViewStateData)
-                })
                 scene.landscapeChildren.forEach(v => {
                     v.update(view.camera, renderViewStateData)
                 })
@@ -276,7 +272,6 @@ class Renderer {
             if (skybox) skybox.render(renderViewStateData)
             if (skyAtmosphere) skyAtmosphere.renderBackground(renderViewStateData)
             if (axis) axis.render(renderViewStateData)
-            renderTerrainLayer(view, viewRenderPassEncoder)
             renderLandscapeLayer(view, viewRenderPassEncoder)
             renderBasicLayer(view, viewRenderPassEncoder)
             if (grid) grid.render(renderViewStateData)
