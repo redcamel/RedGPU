@@ -7,26 +7,18 @@ export interface FoliageTypeOptions {
     mesh: Mesh;
     maxInstances?: number;
 
-    // 지형 레이어 & 경사각 마스킹 필터
-    targetLayerName?: string;               // 연동할 LandscapeLayer 이름
-    minLayerWeight?: number;                // 최소 레이어 가중치 (0.0~1.0, 기본: 0.2)
-    minSlope?: number;                      // 생장 최소 경사각(°) (기본: 0)
-    maxSlope?: number;                      // 생장 최대 경사각(°) (기본: 30)
-
     // Culling & Fade Out
-    cullingDistance?: number;               // 시선 최장 표시 거리 (m, 기본: 200)
-    fadeStartDistance?: number;             // 소멸 축소 시작 거리 (m, 기본: 150)
+    cullingDistance?: number;               // 시선 최장 표시 거리 (m, 기본: 2000)
+    fadeStartDistance?: number;             // 소멸 축소 시작 거리 (m, 기본: 1500)
 
     minScale?: [number, number, number];
     maxScale?: [number, number, number];
     randomRotationY?: boolean;
 }
 
-const RAD_TO_DEG = 180.0 / Math.PI;
-
 /**
  * FoliageType
- * 개별 식생 종(Species)의 지오메트리, PBR 머티리얼, 인스턴싱 버퍼, 경사각/레이어 필터 및 파퓰레이션 관리
+ * 개별 식생 종(Species)의 지오메트리, PBR 머티리얼, 인스턴싱 버퍼 및 파퓰레이션 관리
  */
 export class FoliageType {
     readonly redGPUContext: RedGPUContext;
@@ -43,10 +35,6 @@ export class FoliageType {
             name: options.name,
             mesh: options.mesh,
             maxInstances: options.maxInstances ?? 50000,
-            targetLayerName: options.targetLayerName ?? '',
-            minLayerWeight: options.minLayerWeight ?? 0.2,
-            minSlope: options.minSlope ?? 0.0,
-            maxSlope: options.maxSlope ?? 30.0,
             cullingDistance: options.cullingDistance ?? 2000.0,
             fadeStartDistance: options.fadeStartDistance ?? 1500.0,
             minScale: options.minScale ?? [1.0, 1.0, 1.0],
@@ -103,7 +91,7 @@ export class FoliageType {
 
         const heightFn = getHeightAt || ((x: number, z: number) => this.foliageManager?.landscape?.getHeightAt(x, z) ?? 0);
         const maxLimit = Math.min(count, this.options.maxInstances);
-        const {minScale, maxScale, randomRotationY, minSlope, maxSlope} = this.options;
+        const {minScale, maxScale, randomRotationY} = this.options;
         const rangeX = targetBounds.maxX - targetBounds.minX;
         const rangeZ = targetBounds.maxZ - targetBounds.minZ;
 
@@ -232,20 +220,6 @@ export class FoliageType {
         const calculated = (minY !== Infinity && !isNaN(minY)) ? -minY : 0.0;
         this.#bottomOffset = calculated;
         return calculated;
-    }
-
-    /**
-     * 지형 수치 미분을 통해 위치 (x, z)에서의 경사각(Slope Angle in degrees)을 정밀 계산합니다.
-     */
-    #getSlopeAngleAt(x: number, z: number, getHeightAt: (x: number, z: number) => number, hCenter: number): number {
-        const hRight = getHeightAt(x + 1.0, z);
-        const hForward = getHeightAt(x, z + 1.0);
-
-        const dzdx = hRight - hCenter;
-        const dzdz = hForward - hCenter;
-
-        const gradient = Math.sqrt(dzdx * dzdx + dzdz * dzdz);
-        return Math.atan(gradient) * RAD_TO_DEG;
     }
 
     destroy(): void {

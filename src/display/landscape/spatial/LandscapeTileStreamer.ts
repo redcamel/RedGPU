@@ -137,11 +137,6 @@ export class LandscapeTileStreamer {
         this.#componentCountX = componentCountX;
     }
 
-    setTileUrlResolver(resolver?: LandscapeTileUrlResolver): void {
-        this.#tileUrlResolver = resolver ?? null;
-        this.resetTileState();
-    }
-
     isTileLoaded(row: number, col: number): boolean {
         return this.#loadedMap.has(`${row}_${col}`);
     }
@@ -192,17 +187,16 @@ export class LandscapeTileStreamer {
     }
 
     /**
-     * [KO] 월드 좌표 (x, z) 위치의 VHT 16비트 높이값과 타일 로딩 완료 상태 정보를 함께 반환합니다.
+     * [KO] 월드 좌표 (x, z) 위치의 VHT 16비트 높이값과 heightScale을 정밀 산출하여 Y 고도를 반환합니다 (Zero-GC).
      */
-    getHeightAtInfo(x: number, z: number): { loaded: boolean; height: number } {
+    getHeightAt(x: number, z: number): number {
         const halfW = this.#worldSizeX * 0.5;
-        const halfZ = this.#worldSizeX * 0.5; // symmetrical square grid
 
         const normU = (x + halfW) / this.#worldSizeX;
-        const normV = (z + halfZ) / this.#worldSizeX;
+        const normV = (z + halfW) / this.#worldSizeX;
 
         if (normU < 0.0 || normU > 1.0 || normV < 0.0 || normV > 1.0) {
-            return {loaded: false, height: 0.0};
+            return 0.0;
         }
 
         const countX = this.#componentCountX;
@@ -212,7 +206,7 @@ export class LandscapeTileStreamer {
 
         const tileData = this.#cpuHeightMap.get(key);
         if (!tileData) {
-            return {loaded: false, height: 0.0};
+            return 0.0;
         }
 
         const localU = (normU * countX) - col;
@@ -223,16 +217,7 @@ export class LandscapeTileStreamer {
         const idx = py * tileData.width + px;
 
         const rawVal = tileData.pixels[idx] || 0;
-        const ratio = rawVal / 65535.0;
-
-        return {loaded: true, height: ratio * this.#heightScale};
-    }
-
-    /**
-     * [KO] 월드 좌표 (x, z) 위치의 VHT 16비트 높이값과 heightScale을 정밀 산출하여 Y 고도를 반환합니다.
-     */
-    getHeightAt(x: number, z: number): number {
-        return this.getHeightAtInfo(x, z).height;
+        return (rawVal / 65535.0) * this.#heightScale;
     }
 
     async #loadTileAsync(comp: LandscapeComponent): Promise<void> {

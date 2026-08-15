@@ -204,9 +204,6 @@ export class Landscape extends Object3DContainer {
         return this.#tileStreamer.getHeightAt(x, z);
     }
 
-    getHeightAtInfo(x: number, z: number): { loaded: boolean; height: number } {
-        return this.#tileStreamer.getHeightAtInfo(x, z);
-    }
 
     /**
      * [KO] Multi-LOD Batching 인스턴싱으로 전체 지형 타일을 디스패치하고 RenderViewStateData 통계를 기록합니다 (Zero-GC).

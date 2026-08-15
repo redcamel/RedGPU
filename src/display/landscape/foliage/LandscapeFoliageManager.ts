@@ -27,7 +27,6 @@ export class LandscapeFoliageManager {
     }
     #autoTrackingThreshold: number = 300;
     #autoTrackingRadius: number = 1500;
-    #autoTrackingCountPerType: number = 1000000;
 
     constructor(landscape: Landscape) {
         this.landscape = landscape;
@@ -136,9 +135,7 @@ export class LandscapeFoliageManager {
         return this.#foliageTypes.get(name);
     }
 
-    getAllFoliageTypes(): FoliageType[] {
-        return Array.from(this.#typeList);
-    }
+
 
 
     #cachedVHTAtlasGPUTexture: GPUTexture | null = null;
@@ -254,14 +251,12 @@ export class LandscapeFoliageManager {
         radius: number = 1500,
         getHeightAt?: (x: number, z: number) => number
     ): void {
-        this.#autoTrackingCountPerType = countPerType;
         this.#autoTrackingRadius = radius;
 
-        const heightFn = getHeightAt || this.#defaultGetHeightAt;
         const typeList = this.#typeList;
         const count = typeList.length;
         for (let i = 0; i < count; i++) {
-            typeList[i].populateAroundCamera(countPerType, camX, camZ, radius, heightFn);
+            typeList[i].populateAroundCamera(countPerType, camX, camZ, radius, getHeightAt);
         }
     }
 
@@ -274,8 +269,6 @@ export class LandscapeFoliageManager {
         this.#autoTrackingRadius = radius;
     }
 
-
-    #defaultGetHeightAt = (x: number, z: number): number => this.landscape.getHeightAt(x, z);
 
     destroy(): void {
         this.#foliageTypes.forEach((type) => type.destroy());
