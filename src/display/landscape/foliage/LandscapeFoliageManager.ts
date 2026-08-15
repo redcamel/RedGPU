@@ -15,12 +15,26 @@ export class LandscapeFoliageManager {
 
     #vertexShaderModule: GPUShaderModule | null = null;
     #foliageTypes: Map<string, FoliageType> = new Map();
+    #typeList: FoliageType[] = [];
     #pipelineCache: Map<string, GPURenderPipeline> = new Map();
+
+    constructor(landscape: Landscape) {
+        this.landscape = landscape;
+        this.redGPUContext = landscape.redGPUContext;
+        this.#initVertexShader();
+    }
+
+    get hasFoliageTypes(): boolean {
+        return this.#typeList.length > 0;
+    }
+
     /**
      * 렌더 패스 엔코더에 인스턴스드 드로우콜 바인딩 및 디스패치 (RedGPU 정석 msaaID & View3D 매칭)
      */
     render(view: any, passEncoder: GPURenderPassEncoder): void {
-        if (!passEncoder || this.#foliageTypes.size === 0) return;
+        const typeList = this.#typeList;
+        const typeCount = typeList.length;
+        if (!passEncoder || typeCount === 0) return;
 
         // RedGPU 정석 View3D & System Uniform BindGroup 및 AntialiasingManager 추출
         const view3D = view?.view || view;
@@ -31,24 +45,25 @@ export class LandscapeFoliageManager {
         const msaaID = antialiasingManager?.msaaID ?? 'default_msaa_id';
         const sampleCount = useMSAA ? 4 : 1;
 
-        this.#foliageTypes.forEach((foliageType) => {
+        for (let t = 0; t < typeCount; t++) {
+            const foliageType = typeList[t];
             const activeCount = foliageType.activeInstanceCount;
-            if (activeCount <= 0) return;
+            if (activeCount <= 0) continue;
 
             const instanceGPUBuffer = foliageType.instanceBuffer.getGPUBuffer();
-            if (!instanceGPUBuffer) return;
+            if (!instanceGPUBuffer) continue;
 
             const mesh = foliageType.mesh;
             const geometry = mesh?.geometry;
             const material = mesh?.material;
-            if (!geometry || !material) return;
+            if (!geometry || !material) continue;
 
             const vertexBufferObj = geometry.vertexBuffer;
             const indexBufferObj = geometry.indexBuffer;
             const vertexGPUBuffer = vertexBufferObj?.gpuBuffer;
             const indexGPUBuffer = indexBufferObj?.gpuBuffer;
 
-            if (!vertexGPUBuffer) return;
+            if (!vertexGPUBuffer) continue;
 
             // Geometry Stride (Float 개수인 경우 4를 곱해 Byte 크기로 정밀 변환, 기본 48바이트)
             const rawStride = (vertexBufferObj as any)?.stride || 12;
@@ -56,7 +71,7 @@ export class LandscapeFoliageManager {
 
             // RedGPU 정석 msaaID & StrideBytes 호환 파이프라인 생성/가져오기
             const pipeline = this.#getOrCreatePipeline(material, sampleCount, msaaID, strideBytes);
-            if (!pipeline) return;
+            if (!pipeline) continue;
 
             passEncoder.setPipeline(pipeline);
 
@@ -84,27 +99,30 @@ export class LandscapeFoliageManager {
             } else if (vertexBufferObj) {
                 passEncoder.draw(vertexBufferObj.vertexCount, activeCount, 0, 0);
             }
-        });
+        }
     }
 
-    constructor(landscape: Landscape) {
-        this.landscape = landscape;
-        this.redGPUContext = landscape.redGPUContext;
-        this.#initVertexShader();
-    }
+    update(camX: number, camY: number, camZ: number): void;
+    update(cameraPosition: [number, number, number]): void;
+    update(camXOrPos: number | [number, number, number], camY?: number, camZ?: number): void {
+        let x: number, y: number, z: number;
+        if (typeof camXOrPos === 'number') {
+            x = camXOrPos;
+            y = camY!;
+            z = camZ!;
+        } else {
+            x = camXOrPos[0];
+            y = camXOrPos[1];
+            z = camXOrPos[2];
+        }
 
-    get hasFoliageTypes(): boolean {
-        return this.#foliageTypes.size > 0;
-    }
+        const typeList = this.#typeList;
+        const typeCount = typeList.length;
 
-    update(cameraPosition: [number, number, number]): void {
-        const camX = cameraPosition[0];
-        const camY = cameraPosition[1];
-        const camZ = cameraPosition[2];
-
-        this.#foliageTypes.forEach((foliageType) => {
+        for (let t = 0; t < typeCount; t++) {
+            const foliageType = typeList[t];
             const activeCount = foliageType.activeInstanceCount;
-            if (activeCount <= 0) return;
+            if (activeCount <= 0) continue;
 
             const buffer = foliageType.instanceBuffer;
             const cullingDist = foliageType.options.cullingDistance;
@@ -118,9 +136,9 @@ export class LandscapeFoliageManager {
 
             for (let i = 0; i < activeCount; i++) {
                 const offset = i * stride;
-                const dx = data[offset] - camX;
-                const dy = data[offset + 1] - camY;
-                const dz = data[offset + 2] - camZ;
+                const dx = data[offset] - x;
+                const dy = data[offset + 1] - y;
+                const dz = data[offset + 2] - z;
                 const distSq = dx * dx + dy * dy + dz * dz;
 
                 let fade = 1.0;
@@ -137,7 +155,7 @@ export class LandscapeFoliageManager {
             }
 
             buffer.uploadToGPU(activeCount);
-        });
+        }
     }
 
     addFoliageType(options: FoliageTypeOptions): FoliageType {
@@ -148,6 +166,7 @@ export class LandscapeFoliageManager {
 
         const foliageType = new FoliageType(this.redGPUContext, options);
         this.#foliageTypes.set(options.name, foliageType);
+        this.#typeList.push(foliageType);
         return foliageType;
     }
 
@@ -155,6 +174,10 @@ export class LandscapeFoliageManager {
         const foliageType = this.#foliageTypes.get(name);
         if (foliageType) {
             foliageType.destroy();
+            const idx = this.#typeList.indexOf(foliageType);
+            if (idx !== -1) {
+                this.#typeList.splice(idx, 1);
+            }
             return this.#foliageTypes.delete(name);
         }
         return false;
@@ -165,7 +188,7 @@ export class LandscapeFoliageManager {
     }
 
     getAllFoliageTypes(): FoliageType[] {
-        return Array.from(this.#foliageTypes.values());
+        return Array.from(this.#typeList);
     }
 
     populateAllFoliageTypes(
@@ -174,9 +197,11 @@ export class LandscapeFoliageManager {
         getHeightAt?: (x: number, z: number) => number
     ): void {
         const heightFn = getHeightAt || this.#defaultGetHeightAt;
-        this.#foliageTypes.forEach((foliageType) => {
-            foliageType.populateRandomInstances(countPerType, bounds, heightFn);
-        });
+        const typeList = this.#typeList;
+        const count = typeList.length;
+        for (let i = 0; i < count; i++) {
+            typeList[i].populateRandomInstances(countPerType, bounds, heightFn);
+        }
     }
 
     /**
@@ -184,9 +209,11 @@ export class LandscapeFoliageManager {
      */
     realignAllHeights(getHeightAt?: (x: number, z: number) => number): void {
         const heightFn = getHeightAt || this.#defaultGetHeightAt;
-        this.#foliageTypes.forEach((foliageType) => {
-            foliageType.realignHeights(heightFn);
-        });
+        const typeList = this.#typeList;
+        const count = typeList.length;
+        for (let i = 0; i < count; i++) {
+            typeList[i].realignHeights(heightFn);
+        }
     }
 
     #defaultGetHeightAt = (x: number, z: number): number => this.landscape.getHeightAt(x, z);

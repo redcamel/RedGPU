@@ -560,7 +560,7 @@ export class Landscape extends Object3DContainer {
 
         // 식생 시스템 Culling & FadeFactor 매 프레임 실시간 갱신 (등록된 식생 종이 있을 때만)
         if (this.#foliageManager?.hasFoliageTypes) {
-            this.#foliageManager.update([camX, camY, camZ]);
+            this.#foliageManager.update(camX, camY, camZ);
         }
 
         this.#spatialGrid.getCellCoordinates(camX, camZ, this.#tempCellBuffer);
