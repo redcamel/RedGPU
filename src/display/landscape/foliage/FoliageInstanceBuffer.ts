@@ -80,6 +80,29 @@ export class FoliageInstanceBuffer {
         );
     }
 
+    /**
+     * [Zero-GC Chunked Upload] 지정된 범위 인스턴스만큼 원본 GPU 버퍼로 부분 분산 업로드
+     */
+    uploadRangeToGPU(startIndex: number, count: number): void {
+        if (!this.#rawGPUBuffer || count <= 0) return;
+
+        const validStart = Math.min(startIndex, this.maxInstances);
+        const validCount = Math.min(count, this.maxInstances - validStart);
+        if (validCount <= 0) return;
+
+        const srcByteOffset = validStart * this.strideBytes;
+        const uploadBytes = validCount * this.strideBytes;
+
+        const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
+        gpuDevice.queue.writeBuffer(
+            this.#rawGPUBuffer,
+            srcByteOffset,
+            this.dataBuffer.buffer,
+            this.dataBuffer.byteOffset + srcByteOffset,
+            uploadBytes
+        );
+    }
+
 
 
     /**

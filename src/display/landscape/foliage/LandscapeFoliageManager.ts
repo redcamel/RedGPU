@@ -20,19 +20,32 @@ export class LandscapeFoliageManager {
     #foliageTypes: Map<string, FoliageType> = new Map();
     #typeList: FoliageType[] = [];
     #pipelineCache: Map<string, GPURenderPipeline> = new Map();
-    #autoTrackingEnabled: boolean = true;
-
     get hasFoliageTypes(): boolean {
         return this.#typeList.length > 0;
     }
-    #autoTrackingThreshold: number = 300;
-    #autoTrackingRadius: number = 1500;
 
     constructor(landscape: Landscape) {
         this.landscape = landscape;
         this.redGPUContext = landscape.redGPUContext;
         this.#initVertexShader();
         this.#initCullingComputePipeline();
+
+        if (landscape?.tileStreamer) {
+            landscape.tileStreamer.onTileLoaded = (comp: any) => {
+                this.onTileLoaded(comp);
+            };
+        }
+    }
+
+    /**
+     * [KO] 지형 타일(LandscapeComponent) 로딩 완수 시 해당 타일 영역 식생(0.75MB)만 자동 부분 업로드합니다.
+     */
+    onTileLoaded(comp: any): void {
+        const typeList = this.#typeList;
+        const count = typeList.length;
+        for (let i = 0; i < count; i++) {
+            typeList[i].populateTile(comp);
+        }
     }
 
     /**
@@ -157,31 +170,6 @@ export class LandscapeFoliageManager {
             ?? camera?.camera?.frustumPlanes
             ?? null;
 
-        for (let t = 0; t < typeCount; t++) {
-            const foliageType = typeList[t];
-
-            // 1. 최초 1회 미파퓰레이션 상태일 때 시스템 내부에서 카메라 주변 파퓰레이션 자동 1회 디스패치
-            if (!foliageType.isPopulated) {
-                foliageType.populateAroundCamera(
-                    foliageType.options.maxInstances,
-                    camX,
-                    z,
-                    foliageType.options.cullingDistance
-                );
-            }
-
-            // 2. 카메라 이동 감지 시 시스템 내부에서 백그라운드 재배치(Endless Camera Tracking) 자동 실행
-            if (this.#autoTrackingEnabled) {
-                foliageType.checkCameraTracking(
-                    camX,
-                    z,
-                    foliageType.options.maxInstances,
-                    this.#autoTrackingThreshold,
-                    foliageType.options.cullingDistance
-                );
-            }
-        }
-
         const cullingPipeline = this.#cullingComputePipeline;
         const cullingBindGroupLayout = this.#cullingBindGroupLayout;
 
@@ -195,8 +183,17 @@ export class LandscapeFoliageManager {
         const vhtView = this.#cachedVHTView || undefined;
         const vhtSampler = this.redGPUContext.resourceManager.basicSampler.gpuSampler;
 
+        const worldSizeX = this.landscape.worldSize?.[0] ?? 0;
+        const heightScale = this.landscape.heightScale ?? 500;
+        const hasVHT = !!rawGPUTexture;
+
         for (let t = 0; t < typeCount; t++) {
             const foliageType = typeList[t];
+
+
+            // 3. 백그라운드 시분할 청크 업로드 진행 (프레임당 50,000개 = 2.4MB 미세 전송으로 스파이크 소멸)
+            foliageType.processStreamingChunk();
+
             const activeCount = foliageType.activeInstanceCount;
             if (activeCount <= 0) continue;
 
@@ -205,26 +202,20 @@ export class LandscapeFoliageManager {
             const geometry = mesh?.geometry;
             if (!geometry) continue;
 
-            const elementCount = geometry.indexBuffer ? geometry.indexBuffer.indexCount : (geometry.vertexBuffer ? geometry.vertexBuffer.vertexCount : 0);
             const cullingDist = foliageType.options.cullingDistance;
             const fadeStartDist = foliageType.options.fadeStartDistance;
             const boundingRadius = (mesh as any)?.boundingAABB?.volume ?? 2.0;
-
-            const worldSizeX = this.landscape.worldSize?.[0] ?? 0;
-            const heightScale = this.landscape.heightScale ?? 500;
             const bottomOffset = foliageType.getGeometryBottomOffset();
-            const hasVHT = !!rawGPUTexture;
 
-            // 1. Culling Uniform 갱신 (GPU VHT 고도 정보 포함) & Indirect Count 리셋
+            // 3. Culling Uniform 갱신 (GPU VHT 고도 정보 및 카메라/절두체 전달)
             buffer.updateCullingUniforms(
                 camX, camY, z,
                 cullingDist, fadeStartDist, activeCount, boundingRadius,
                 worldSizeX, heightScale, bottomOffset, hasVHT,
                 frustumPlanes
             );
-            buffer.resetIndirectCount(elementCount);
 
-            // 2. Render Pass 생성 직전 Pre-Process Compute Pass 전처리 등록 (Zero-GC 바인딩)
+            // 4. Render Pass 생성 직전 Pre-Process Compute Pass 전처리 등록 (Zero-GC 바인딩)
             if (cullingPipeline && cullingBindGroupLayout) {
                 const cullingBindGroup = buffer.getOrCreateCullingBindGroup(cullingBindGroupLayout, vhtView, vhtSampler);
                 if (cullingBindGroup) {
@@ -251,22 +242,11 @@ export class LandscapeFoliageManager {
         radius: number = 1500,
         getHeightAt?: (x: number, z: number) => number
     ): void {
-        this.#autoTrackingRadius = radius;
-
         const typeList = this.#typeList;
         const count = typeList.length;
         for (let i = 0; i < count; i++) {
             typeList[i].populateAroundCamera(countPerType, camX, camZ, radius, getHeightAt);
         }
-    }
-
-    /**
-     * [KO] 카메라 이동에 따른 식생 위치 백그라운드 자동 재배치(Endless Camera Tracking) 모드를 설정합니다.
-     */
-    enableAutoCameraTracking(enable: boolean = true, thresholdDistance: number = 300, radius: number = 1500): void {
-        this.#autoTrackingEnabled = enable;
-        this.#autoTrackingThreshold = thresholdDistance;
-        this.#autoTrackingRadius = radius;
     }
 
 

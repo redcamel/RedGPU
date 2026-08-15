@@ -27,6 +27,7 @@ export class LandscapeTileStreamer {
     #loadingRadius: number = 2500.0;
     #maxLoadsPerFrame: number = 1; // ⚡ UE5 r.VT.MaxUploadsPerFrame 스타일: 프레임당 최대 1개 타일로 비동기 로딩 제한하여 60fps 스파이크 소멸
     #tileUrlResolver: LandscapeTileUrlResolver | null = null;
+    onTileLoaded: ((comp: LandscapeComponent) => void) | null = null;
 
     #vhtAtlasTexture: DirectTexture | null = null;
     #vntAtlasTexture: DirectTexture | null = null;
@@ -298,6 +299,9 @@ export class LandscapeTileStreamer {
                                 this.#componentCountX
                             );
                         }
+
+                        // 🌿 지형 타일 로딩 완료 알림 (타일 연동 식생 부분 업로드 디스패치)
+                        this.onTileLoaded?.(comp);
                     }
                 }
             }

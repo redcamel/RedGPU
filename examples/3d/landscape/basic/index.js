@@ -168,7 +168,7 @@ RedGPU.init(
 
         const dummyGrassMesh = new RedGPU.Display.Mesh(
             redGPUContext,
-            new RedGPU.Primitive.Box(redGPUContext, 0.4, 1.2, 0.4),
+            new RedGPU.Primitive.Box(redGPUContext, 0.4, 8.2, 0.4),
             grassMaterial
         );
 
