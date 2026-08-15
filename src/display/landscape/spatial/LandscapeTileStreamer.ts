@@ -25,7 +25,7 @@ export class LandscapeTileStreamer {
     #spatialGrid: LandscapeSpatialGrid;
 
     #loadingRadius: number = 2500.0;
-    #maxLoadsPerFrame: number = 2;
+    #maxLoadsPerFrame: number = 1; // ⚡ UE5 r.VT.MaxUploadsPerFrame 스타일: 프레임당 최대 1개 타일로 비동기 로딩 제한하여 60fps 스파이크 소멸
     #tileUrlResolver: LandscapeTileUrlResolver | null = null;
 
     #vhtAtlasTexture: DirectTexture | null = null;

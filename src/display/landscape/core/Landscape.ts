@@ -608,9 +608,17 @@ export class Landscape extends Object3DContainer {
             const dz = tileWorldZ - camZ;
             const distSq = dx * dx + dz * dz + camYSq;
 
+            // ⚡ LOD Hysteresis (경계 완화 마진): 이전 LOD 상태 유지하여 카메라 이동 시 무의미한 LOD 플리커링 방지
+            const prevLOD = comp.lodLevel;
+            const HYSTERESIS_MARGIN_SQ = 625.0; // ±25m Hysteresis Margin Buffer (25^2 = 625)
+
             let lod = lodLimit;
             for (let j = 0; j < lodLimit; j++) {
-                if (distSq < distSqList[j]) {
+                let thresholdSq = distSqList[j];
+                if (prevLOD >= 0 && j === prevLOD) {
+                    thresholdSq += HYSTERESIS_MARGIN_SQ; // 현재 LOD 구역 유지 보정
+                }
+                if (distSq < thresholdSq) {
                     lod = j;
                     break;
                 }

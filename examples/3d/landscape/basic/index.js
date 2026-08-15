@@ -162,7 +162,7 @@ RedGPU.init(
         // 5. Landscape 내부 foliageManager 사용 및 PBRMaterial 식생 테스트 파퓰레이션
         const foliageManager = landscape.foliageManager;
         const grassMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
-        grassMaterial.baseColorFactor = [1, 0.0, 0.0, 1.0];
+        grassMaterial.baseColorFactor = [0, 1.0, 0.0, 1.0];
         grassMaterial.roughnessFactor = 0.7;
         grassMaterial.metallicFactor = 0.0;
 
