@@ -12,9 +12,10 @@ struct TileInstance {
     color: vec4<f32>,
 };
 
-@group(1) @binding(0) var<storage, read> tileInstances: array<TileInstance>;
-@group(1) @binding(1) var heightMapSampler: sampler;
-@group(1) @binding(2) var heightMapTexture: texture_2d<f32>;
+@group(1) @binding(0) var<storage, read> allInputTiles: array<TileInstance>;
+@group(1) @binding(1) var<storage, read> visibleTileIndices: array<u32>;
+@group(1) @binding(2) var heightMapSampler: sampler;
+@group(1) @binding(3) var heightMapTexture: texture_2d<f32>;
 
 struct InputData {
     @location(0) position: vec3<f32>,
@@ -41,7 +42,9 @@ struct OutputData {
 fn main(input: InputData) -> OutputData {
     var output: OutputData;
     
-    let instanceData = tileInstances[input.instanceIdx];
+    // ⚡ GPU Index Redirection: 간접 인스턴스 오프셋으로부터 실제 원본 타일 번호 u32 복원
+    let realTileIdx = visibleTileIndices[input.instanceIdx];
+    let instanceData = allInputTiles[realTileIdx];
 
     let worldX = input.position.x + instanceData.worldX;
     let worldZ = input.position.y + instanceData.worldZ;
@@ -61,10 +64,14 @@ fn main(input: InputData) -> OutputData {
     // VHT Atlas Texture (@group(1)) 16비트 고도 샘플링 (textureLoad: UnfilterableFloat 대응)
     let texSize = vec2<f32>(textureDimensions(heightMapTexture));
     let texCoord = vec2<i32>(clamp(globalUV * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-    let prevTexCoord = vec2<i32>(clamp(prevGlobalUV * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
 
     let heightValue = textureLoad(heightMapTexture, texCoord, 0).r;
-    let prevHeightValue = textureLoad(heightMapTexture, prevTexCoord, 0).r;
+
+    var prevHeightValue = heightValue;
+    if (prevWorldX != worldX || prevWorldZ != worldZ) {
+        let prevTexCoord = vec2<i32>(clamp(prevGlobalUV * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+        prevHeightValue = textureLoad(heightMapTexture, prevTexCoord, 0).r;
+    }
 
     let worldY = heightValue * instanceData.heightScale + input.position.z;
     let prevWorldY = prevHeightValue * instanceData.heightScale + input.position.z;

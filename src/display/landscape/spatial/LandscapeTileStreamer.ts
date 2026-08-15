@@ -42,6 +42,16 @@ export class LandscapeTileStreamer {
     #cpuHeightMap: Map<string, any> = new Map();
     #failedMap: Map<string, number> = new Map(); // key -> last failed timestamp (ms)
 
+    static #sortCamX = 0;
+    static #sortCamZ = 0;
+    static readonly #sortCompare = (a: LandscapeComponent, b: LandscapeComponent): number => {
+        const da = (a.worldX - LandscapeTileStreamer.#sortCamX) * (a.worldX - LandscapeTileStreamer.#sortCamX)
+            + (a.worldZ - LandscapeTileStreamer.#sortCamZ) * (a.worldZ - LandscapeTileStreamer.#sortCamZ);
+        const db = (b.worldX - LandscapeTileStreamer.#sortCamX) * (b.worldX - LandscapeTileStreamer.#sortCamX)
+            + (b.worldZ - LandscapeTileStreamer.#sortCamZ) * (b.worldZ - LandscapeTileStreamer.#sortCamZ);
+        return da - db;
+    };
+
     constructor(redGPUContext: RedGPUContext, spatialGrid: LandscapeSpatialGrid, loadingRadius: number = 2500.0) {
         this.#redGPUContext = redGPUContext;
         this.#spatialGrid = spatialGrid;
@@ -155,7 +165,7 @@ export class LandscapeTileStreamer {
 
         for (let i = 0; i < activeBuffer.length; i++) {
             const comp = activeBuffer[i];
-            const key = `${comp.componentZ}_${comp.componentX}`;
+            const key = comp.key;
 
             if (this.#loadedMap.has(key) || this.#loadingMap.has(key)) {
                 continue;
@@ -170,11 +180,9 @@ export class LandscapeTileStreamer {
         }
 
         if (pending.length > 1) {
-            pending.sort((a, b) => {
-                const da = (a.worldX - cameraX) * (a.worldX - cameraX) + (a.worldZ - cameraZ) * (a.worldZ - cameraZ);
-                const db = (b.worldX - cameraX) * (b.worldX - cameraX) + (b.worldZ - cameraZ) * (b.worldZ - cameraZ);
-                return da - db;
-            });
+            LandscapeTileStreamer.#sortCamX = cameraX;
+            LandscapeTileStreamer.#sortCamZ = cameraZ;
+            pending.sort(LandscapeTileStreamer.#sortCompare);
         }
 
         const loadCount = Math.min(pending.length, this.#maxLoadsPerFrame);

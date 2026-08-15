@@ -1,46 +1,50 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 
 /**
- * [KO] Landscape Multi-LOD Batching Instanced Rendering 전용 GPU Storage Buffer & RVT (VHT+VNT) BindGroup 관리 클래스입니다.
- * [EN] GPU Storage Buffer & RVT (VHT+VNT) BindGroup management class dedicated to Landscape Multi-LOD Batching Instanced Rendering.
+ * [KO] Landscape 100% GPU-Driven Index Redirection Multi-LOD Batching & Indirect Drawing 전용 GPU Storage Buffer 관리 클래스입니다.
+ * [EN] GPU Storage Buffer management class dedicated to Landscape 100% GPU-Driven Index Redirection Multi-LOD Batching & Indirect Drawing.
  */
 export class LandscapeInstanceBuffer {
     #redGPUContext: RedGPUContext;
     #maxComponentCount: number;
     #maxLODLevel: number;
 
-    #instanceStorageBuffer: GPUBuffer | null = null;
+    #allInputTilesBuffer: GPUBuffer | null = null;
+    #visibleTileIndicesBuffer: GPUBuffer | null = null;
+    #indirectDrawBuffer: GPUBuffer | null = null;
+
     #instanceStorageBindGroup: GPUBindGroup | null = null;
     #instanceStorageBindGroupLayout: GPUBindGroupLayout | null = null;
 
-    // 컴포넌트 타일당 48 bytes (worldX, worldZ, prevWorldX, prevWorldZ, lodLevel, heightScale, worldSizeX, worldSizeZ, color r,g,b,a)
-    #instanceFloatData: Float32Array;
-    #instanceUintData: Uint32Array;
-
-    // LOD별 인스턴스 카운트 및 오프셋 추적용 재사용 버퍼 (Zero-GC)
-    #lodFirstInstanceList: Int32Array;
-    #lodInstanceCountList: Int32Array;
-    #lodCursorList: Int32Array;
-    #totalActiveInstanceCount: number = 0;
+    // CPU Static Input Tile Data (48 bytes per tile: worldX, worldZ, prevWorldX, prevWorldZ, lodLevel, heightScale, worldSizeX, worldSizeZ, r, g, b, a)
+    #allInputTilesData: Float32Array;
+    #allInputTilesUintData: Uint32Array;
 
     constructor(redGPUContext: RedGPUContext, maxComponentCount: number, maxLODLevel: number) {
         this.#redGPUContext = redGPUContext;
         this.#maxComponentCount = maxComponentCount;
         this.#maxLODLevel = maxLODLevel;
 
-        const tileFloatSize = maxComponentCount * 12; // 12 floats per tile (48 bytes)
-        this.#instanceFloatData = new Float32Array(tileFloatSize);
-        this.#instanceUintData = new Uint32Array(this.#instanceFloatData.buffer);
-
-        this.#lodFirstInstanceList = new Int32Array(maxLODLevel);
-        this.#lodInstanceCountList = new Int32Array(maxLODLevel);
-        this.#lodCursorList = new Int32Array(maxLODLevel);
+        this.#allInputTilesData = new Float32Array(maxComponentCount * 12);
+        this.#allInputTilesUintData = new Uint32Array(this.#allInputTilesData.buffer);
 
         this.#createGPUResources();
     }
 
+    get allInputTilesBuffer(): GPUBuffer | null {
+        return this.#allInputTilesBuffer;
+    }
+
+    get visibleTileIndicesBuffer(): GPUBuffer | null {
+        return this.#visibleTileIndicesBuffer;
+    }
+
+    get indirectDrawBuffer(): GPUBuffer | null {
+        return this.#indirectDrawBuffer;
+    }
+
     get instanceStorageBuffer(): GPUBuffer | null {
-        return this.#instanceStorageBuffer;
+        return this.#allInputTilesBuffer;
     }
 
     get instanceStorageBindGroup(): GPUBindGroup | null {
@@ -60,118 +64,122 @@ export class LandscapeInstanceBuffer {
     }
 
     /**
-     * [KO] 매 프레임 LOD별 인스턴스 카운트 할당을 초기화합니다 (Zero-GC).
+     * [KO] 타일 정적 고유 데이터(worldX, worldZ, prevWorldX, prevWorldZ, lodLevel, heightScale, worldSizeX/Z, color)를 셋업합니다.
      */
-    prepareLODAllocation(lodCounts: Int32Array): void {
-        let cursor = 0;
-        for (let lod = 0; lod < this.#maxLODLevel; lod++) {
-            const count = lodCounts[lod] ?? 0;
-            this.#lodFirstInstanceList[lod] = cursor;
-            this.#lodInstanceCountList[lod] = count;
-            this.#lodCursorList[lod] = cursor;
-            cursor += count;
-        }
-        this.#totalActiveInstanceCount = cursor;
-    }
-
-    /**
-     * [KO] 특정 LOD 그룹 내의 타일 인스턴스 데이터 (위치, LOD, heightScale, worldSizeX/Z, 색상)를 StorageBuffer 메모리에 작성합니다 (Zero-GC).
-     */
-    writeLODInstanceData(
-        lodLevel: number,
+    setStaticTileData(
+        index: number,
         worldX: number,
         worldZ: number,
         prevWorldX: number,
         prevWorldZ: number,
-        r: number,
-        g: number,
-        b: number,
+        r: number = 0,
+        g: number = 0,
+        b: number = 0,
         a: number = 1.0,
         heightScale: number = 500.0,
         worldSizeX: number = 8000.0,
         worldSizeZ: number = 8000.0
     ): void {
-        const targetIndex = this.#lodCursorList[lodLevel]++;
-        const offset = targetIndex * 12; // 12 floats stride (48 bytes)
+        const offset = index * 12;
+        this.#allInputTilesData[offset] = worldX;
+        this.#allInputTilesData[offset + 1] = worldZ;
+        this.#allInputTilesData[offset + 2] = prevWorldX;
+        this.#allInputTilesData[offset + 3] = prevWorldZ;
 
-        this.#instanceFloatData[offset] = worldX;
-        this.#instanceFloatData[offset + 1] = worldZ;
-        this.#instanceFloatData[offset + 2] = prevWorldX;
-        this.#instanceFloatData[offset + 3] = prevWorldZ;
+        this.#allInputTilesUintData[offset + 4] = 0;
+        this.#allInputTilesData[offset + 5] = heightScale;
+        this.#allInputTilesData[offset + 6] = worldSizeX;
+        this.#allInputTilesData[offset + 7] = worldSizeZ;
 
-        this.#instanceUintData[offset + 4] = lodLevel;
-        this.#instanceFloatData[offset + 5] = heightScale;
-        this.#instanceFloatData[offset + 6] = worldSizeX;
-        this.#instanceFloatData[offset + 7] = worldSizeZ;
-
-        this.#instanceFloatData[offset + 8] = r;
-        this.#instanceFloatData[offset + 9] = g;
-        this.#instanceFloatData[offset + 10] = b;
-        this.#instanceFloatData[offset + 11] = a;
-    }
-
-    getLODFirstInstance(lodLevel: number): number {
-        return this.#lodFirstInstanceList[lodLevel] ?? 0;
-    }
-
-    getLODInstanceCount(lodLevel: number): number {
-        return this.#lodInstanceCountList[lodLevel] ?? 0;
-    }
-
-    uploadToGPU(): void {
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (!gpuDevice || !this.#instanceStorageBuffer) return;
-
-        const activeCount = this.#totalActiveInstanceCount;
-        if (activeCount <= 0) return;
-
-        // ⚡ GPU writeBuffer 최적화: 유효한 활성 타일 영역만 슬라이싱 전송
-        gpuDevice.queue.writeBuffer(
-            this.#instanceStorageBuffer,
-            0,
-            this.#instanceFloatData.buffer,
-            0,
-            activeCount * 48
-        );
-    }
-
-    flushToGPU(): void {
-        this.uploadToGPU();
+        this.#allInputTilesData[offset + 8] = r;
+        this.#allInputTilesData[offset + 9] = g;
+        this.#allInputTilesData[offset + 10] = b;
+        this.#allInputTilesData[offset + 11] = a;
     }
 
     /**
-     * [KO] RVT (VHT 고도맵 + VNT 노멀맵) 텍스처 및 샘플러를 수신하여 @group(2) GPUBindGroup을 생성/갱신합니다.
+     * [KO] 전체 타일 정적 원본 데이터를 GPU StorageBuffer 메모리로 1회 전송합니다.
+     */
+    uploadStaticTilesToGPU(): void {
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (!gpuDevice || !this.#allInputTilesBuffer) return;
+
+        gpuDevice.queue.writeBuffer(
+            this.#allInputTilesBuffer,
+            0,
+            this.#allInputTilesData.buffer,
+            0,
+            this.#allInputTilesData.byteLength
+        );
+    }
+
+    /**
+     * [KO] 매 프레임 GPU Compute Pass 시작 직전 Indirect Draw Buffer 의 instanceCount 숫자를 0으로 초기화하고 LOD별 인자를 동기화합니다 (Zero-GC).
+     */
+    resetIndirectDrawBuffer(
+        sharedGeometry: { getLODRange(lod: number): any },
+        maxLODLevel: number,
+        isWireframe: boolean
+    ): void {
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (!gpuDevice || !this.#indirectDrawBuffer) return;
+
+        const argsData = new Uint32Array(maxLODLevel * 5);
+        for (let lod = 0; lod < maxLODLevel; lod++) {
+            const offset = lod * 5;
+            const lodRange = sharedGeometry.getLODRange(lod);
+            const indexCount = isWireframe ? lodRange.wireframeIndexCount : lodRange.indexCount;
+            const firstIndex = isWireframe ? lodRange.wireframeFirstIndex : lodRange.firstIndex;
+            const baseVertex = lodRange.baseVertex;
+
+            argsData[offset] = indexCount;
+            argsData[offset + 1] = 0; // instanceCount (GPU atomicAdd target)
+            argsData[offset + 2] = firstIndex;
+            argsData[offset + 3] = baseVertex;
+            argsData[offset + 4] = lod * this.#maxComponentCount; // firstInstance offset for Index Redirection
+        }
+
+        gpuDevice.queue.writeBuffer(this.#indirectDrawBuffer, 0, argsData.buffer, 0, argsData.byteLength);
+    }
+
+    /**
+     * [KO] RVT (VHT 고도맵 + VNT 노멀맵) 텍스처 및 샘플러를 수신하여 @group(1) GPUBindGroup을 생성/갱신합니다 (Index Redirection 대응).
      */
     updateBindGroup(vhtSampler: GPUSampler, vhtTextureView: GPUTextureView, vntTextureView?: GPUTextureView): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (!gpuDevice || !this.#instanceStorageBindGroupLayout || !this.#instanceStorageBuffer) return;
+        if (!gpuDevice || !this.#instanceStorageBindGroupLayout || !this.#allInputTilesBuffer || !this.#visibleTileIndicesBuffer) return;
 
         const entries: GPUBindGroupEntry[] = [
             {
                 binding: 0,
                 resource: {
-                    buffer: this.#instanceStorageBuffer
+                    buffer: this.#allInputTilesBuffer
                 }
             },
             {
                 binding: 1,
-                resource: vhtSampler
+                resource: {
+                    buffer: this.#visibleTileIndicesBuffer
+                }
             },
             {
                 binding: 2,
+                resource: vhtSampler
+            },
+            {
+                binding: 3,
                 resource: vhtTextureView
             }
         ];
 
         if (vntTextureView) {
             entries.push({
-                binding: 3,
+                binding: 4,
                 resource: vntTextureView
             });
         } else {
-            // fallback to vhtTextureView if vntTextureView is missing
             entries.push({
-                binding: 3,
+                binding: 4,
                 resource: vhtTextureView
             });
         }
@@ -184,9 +192,17 @@ export class LandscapeInstanceBuffer {
     }
 
     destroy(): void {
-        if (this.#instanceStorageBuffer) {
-            this.#instanceStorageBuffer.destroy();
-            this.#instanceStorageBuffer = null;
+        if (this.#allInputTilesBuffer) {
+            this.#allInputTilesBuffer.destroy();
+            this.#allInputTilesBuffer = null;
+        }
+        if (this.#visibleTileIndicesBuffer) {
+            this.#visibleTileIndicesBuffer.destroy();
+            this.#visibleTileIndicesBuffer = null;
+        }
+        if (this.#indirectDrawBuffer) {
+            this.#indirectDrawBuffer.destroy();
+            this.#indirectDrawBuffer = null;
         }
     }
 
@@ -194,7 +210,7 @@ export class LandscapeInstanceBuffer {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice) return;
 
-        // 1. GPUBindGroupLayout 생성 (@group(2): StorageBuffer, Sampler, VHT Height, VNT Normal)
+        // 1. GPUBindGroupLayout 생성 (@group(1): AllInputTiles, VisibleTileIndices, Sampler, VHT Height, VNT Normal)
         this.#instanceStorageBindGroupLayout = gpuDevice.createBindGroupLayout({
             label: 'LandscapeInstanceStorageBindGroupLayout',
             entries: [
@@ -208,12 +224,19 @@ export class LandscapeInstanceBuffer {
                 {
                     binding: 1,
                     visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
+                    buffer: {
+                        type: 'read-only-storage'
+                    }
+                },
+                {
+                    binding: 2,
+                    visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
                     sampler: {
                         type: 'filtering'
                     }
                 },
                 {
-                    binding: 2,
+                    binding: 3,
                     visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
                     texture: {
                         sampleType: 'unfilterable-float',
@@ -221,7 +244,7 @@ export class LandscapeInstanceBuffer {
                     }
                 },
                 {
-                    binding: 3,
+                    binding: 4,
                     visibility: GPUShaderStage.FRAGMENT,
                     texture: {
                         sampleType: 'float',
@@ -231,11 +254,25 @@ export class LandscapeInstanceBuffer {
             ]
         });
 
-        // 2. StorageBuffer 생성
-        this.#instanceStorageBuffer = gpuDevice.createBuffer({
-            label: 'LandscapeInstanceStorageBuffer',
+        // 2. All Input Tiles StorageBuffer 생성 (48 bytes per tile)
+        this.#allInputTilesBuffer = gpuDevice.createBuffer({
+            label: 'LandscapeAllInputTilesStorageBuffer',
             size: this.#maxComponentCount * 48,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+        });
+
+        // 3. Visible Tile Indices StorageBuffer 생성 (4 bytes u32 per tile * maxLODLevel)
+        this.#visibleTileIndicesBuffer = gpuDevice.createBuffer({
+            label: 'LandscapeVisibleTileIndicesStorageBuffer',
+            size: this.#maxComponentCount * this.#maxLODLevel * 4,
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
+        });
+
+        // 4. Indirect Draw Buffer 생성 (5 uints per LOD = 20 bytes * maxLODLevel)
+        this.#indirectDrawBuffer = gpuDevice.createBuffer({
+            label: 'LandscapeIndirectDrawBuffer',
+            size: this.#maxLODLevel * 20,
+            usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
     }
 }

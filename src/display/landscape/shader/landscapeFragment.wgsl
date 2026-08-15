@@ -52,7 +52,7 @@ struct MaterialUniforms {
     layers: array<LandscapeLayerParams, 8>,
 };
 
-@group(1) @binding(3) var vntNormalTexture: texture_2d<f32>;
+@group(1) @binding(4) var vntNormalTexture: texture_2d<f32>;
 
 @group(2) @binding(0) var<uniform> uniforms: MaterialUniforms;
 @group(2) @binding(1) var baseColorTextureSampler: sampler;

@@ -16,6 +16,8 @@ import LandscapeVHTGenerator from "../generator/LandscapeVHTGenerator";
 import Object3DContainer from "../../mesh/core/Object3DContainer";
 import updateTargetUniform from "../../../defineProperty/core/updateTargetUniform";
 import {LandscapeFoliageManager} from "../foliage/LandscapeFoliageManager";
+import {LandscapeGPUCuller} from "../spatial/LandscapeGPUCuller";
+import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
 
 const DEFAULT_LOD_COLORS: [number, number, number, number][] = [
     [0.18, 0.8, 0.44, 1.0],  // LOD 0: Green
@@ -39,6 +41,7 @@ export class Landscape extends Object3DContainer {
     #sharedGeometry: LandscapeSharedGeometry;
     #spatialGrid: LandscapeSpatialGrid;
     #instanceBuffer: LandscapeInstanceBuffer;
+    #gpuCuller: LandscapeGPUCuller | null = null;
     #landscapeComponents: LandscapeComponent[] = [];
     #lodDistancesSq: number[] = [];
     #lodMultipliers: number[] = [];
@@ -274,29 +277,16 @@ export class Landscape extends Object3DContainer {
         renderPassEncoder.setIndexBuffer(combinedIB.gpuBuffer, 'uint32');
 
         const maxLODLevel = sharedGeometry.maxLODLevel;
-        for (let lod = 0; lod < maxLODLevel; lod++) {
-            const instanceCount = instanceBuffer.getLODInstanceCount(lod);
-            if (instanceCount === 0) continue;
+        const indirectDrawBuffer = instanceBuffer.indirectDrawBuffer;
 
-            const lodRange = sharedGeometry.getLODRange(lod);
-            const firstInstance = instanceBuffer.getLODFirstInstance(lod);
+        if (indirectDrawBuffer) {
+            for (let lod = 0; lod < maxLODLevel; lod++) {
+                const offset = lod * 20; // 5 uints * 4 bytes = 20 bytes stride per LOD
+                renderPassEncoder.drawIndexedIndirect(indirectDrawBuffer, offset);
 
-            const indexCount = isWireframe ? lodRange.wireframeIndexCount : lodRange.indexCount;
-            const firstIndex = isWireframe ? lodRange.wireframeFirstIndex : lodRange.firstIndex;
-
-            renderPassEncoder.drawIndexed(
-                indexCount,
-                instanceCount,
-                firstIndex,
-                lodRange.baseVertex,
-                firstInstance
-            );
-
-            if (renderResults) {
-                renderResults.numDrawCalls++;
-                renderResults.numInstances += instanceCount;
-                renderResults.num3DObjects += instanceCount;
-                renderResults.numTriangles += (lodRange.indexCount / 3) * instanceCount;
+                if (renderResults) {
+                    renderResults.numDrawCalls++;
+                }
             }
         }
     }
@@ -552,12 +542,17 @@ export class Landscape extends Object3DContainer {
         const camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
         const camZ = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
 
-        // 절두체 평면(Frustum Planes) 수집
-        const frustumPlanes: number[][] | null = renderViewStateData?.frustumPlanes
+        // 절두체 평면(Frustum Planes) 수집 및 실시간 자동 계산 보장
+        const rawCamera = camera?.camera ?? camera;
+        let frustumPlanes: number[][] | null = renderViewStateData?.frustumPlanes
             ?? renderViewStateData?.view?.frustumPlanes
             ?? camera?.frustumPlanes
-            ?? camera?.camera?.frustumPlanes
+            ?? rawCamera?.frustumPlanes
             ?? null;
+
+        if (!frustumPlanes && rawCamera?.projectionMatrix && rawCamera?.viewMatrix) {
+            frustumPlanes = computeViewFrustumPlanes(rawCamera.projectionMatrix, rawCamera.viewMatrix);
+        }
 
         // 식생 시스템 GPU Culling 전처리 매 프레임 실시간 갱신 (등록된 식생 종이 있을 때만)
         if (this.#foliageManager?.hasFoliageTypes) {
@@ -566,113 +561,44 @@ export class Landscape extends Object3DContainer {
 
         this.#spatialGrid.getCellCoordinates(camX, camZ, this.#tempCellBuffer);
         this.#tileStreamer.update(camX, camZ);
-        const camYSq = camY * camY;
 
-        const components = this.#spatialGrid.flatCells;
-        const count = components.length;
-        const distSqList = this.#lodDistancesSq;
-        const lodLimit = distSqList.length;
+        const totalComponents = this.#componentCountX * this.#componentCountZ;
 
-        const halfTileSizeX = this.#tileSizeX * 0.5;
-        const halfTileSizeZ = this.#tileSizeZ * 0.5;
-        const heightScale = this.#heightScale;
-        const minY = -Math.max(50.0, heightScale * 0.1);
-        const maxY = heightScale + Math.max(50.0, heightScale * 0.1);
-
-        // 1. 패스: 각 컴포넌트별 Frustum Culling 검사 및 LOD 계산/집계
-        this.#lodCountsBuffer.fill(0);
-        let culledCount = 0;
+        // 1. 디버거 및 서브 시스템 조회용 Frustum 상태 갱신 (Zero-GC)
         this.#frustumCullingActive = !!frustumPlanes;
+        this.#culledComponentCount = 0;
+        this.#visibleComponentCount = totalComponents;
 
-        for (let i = 0; i < count; i++) {
-            const comp = components[i];
-            const tileWorldX = comp.worldX;
-            const tileWorldZ = comp.worldZ;
+        // 2. Reset Indirect Draw Buffer with full geometry LOD ranges before GPU Compute Pass
+        this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#maxLODLevel, this.#wireframe);
 
-            // 카메라 시야 절두체 AABB 컬링 검사 (Zero-GC P-Vertex)
-            if (frustumPlanes) {
-                const minX = tileWorldX - halfTileSizeX;
-                const maxX = tileWorldX + halfTileSizeX;
-                const minZ = tileWorldZ - halfTileSizeZ;
-                const maxZ = tileWorldZ + halfTileSizeZ;
-
-                if (!this.#checkAABBInFrustum(minX, minY, minZ, maxX, maxY, maxZ, frustumPlanes)) {
-                    comp.lodLevel = -1; // Frustum Cull됨
-                    culledCount++;
-                    continue;
-                }
+        // 3. Pack LOD distances into Float32Array (1e15 default fill to prevent high-detail fallbacks)
+        const lodDistancesArray = new Float32Array(8);
+        lodDistancesArray.fill(1e15);
+        const countDist = Math.min(8, this.#lodDistancesSq.length);
+        for (let i = 0; i < countDist; i++) {
+            const val = this.#lodDistancesSq[i];
+            if (val && val > 0) {
+                lodDistancesArray[i] = val;
             }
-
-            const dx = tileWorldX - camX;
-            const dz = tileWorldZ - camZ;
-            const distSq = dx * dx + dz * dz + camYSq;
-
-            // ⚡ LOD Hysteresis (경계 완화 마진): 이전 LOD 상태 유지하여 카메라 이동 시 무의미한 LOD 플리커링 방지
-            const prevLOD = comp.lodLevel;
-            const HYSTERESIS_MARGIN_SQ = 625.0; // ±25m Hysteresis Margin Buffer (25^2 = 625)
-
-            let lod = lodLimit;
-            for (let j = 0; j < lodLimit; j++) {
-                let thresholdSq = distSqList[j];
-                if (prevLOD >= 0 && j === prevLOD) {
-                    thresholdSq += HYSTERESIS_MARGIN_SQ; // 현재 LOD 구역 유지 보정
-                }
-                if (distSq < thresholdSq) {
-                    lod = j;
-                    break;
-                }
-            }
-
-            const activeLOD = Math.min(lod, this.#maxLODLevel - 1);
-            comp.lodLevel = activeLOD;
-            this.#lodCountsBuffer[activeLOD]++;
         }
 
-        this.#culledComponentCount = culledCount;
-        this.#visibleComponentCount = count - culledCount;
+        // 4. Update GPU Culler uniform parameters
+        this.#gpuCuller?.updateUniforms(
+            camX, camY, camZ,
+            this.#maxLODLevel,
+            this.#worldSizeX, this.#worldSizeZ,
+            this.#tileSizeX, this.#tileSizeZ,
+            this.#heightScale,
+            totalComponents,
+            frustumPlanes,
+            lodDistancesArray
+        );
 
-        // 2. 패스: InstanceBuffer에 LOD 그룹 오프셋 할당
-        const instanceBuf = this.#instanceBuffer;
-        instanceBuf.prepareLODAllocation(this.#lodCountsBuffer);
-
-        // 3. 패스: LOD 그룹별로 정렬하여 인스턴스 데이터 작성 (Zero-GC 재사용 버퍼 타격 + Mesh 표준 prevTileX/Z 100% 동기화)
-        const lodColorationActive = this.#lodColoration;
-        const lodColorsRGBA = this.#lodColorsRGBA;
-
-        for (let i = 0; i < count; i++) {
-            const comp = components[i];
-            const activeLOD = comp.lodLevel;
-
-            // Frustum Cull된 타일 스킵
-            if (activeLOD < 0) {
-                continue;
-            }
-
-            const colorRGBA = lodColorationActive
-                ? lodColorsRGBA[activeLOD]
-                : ZERO_COLOR_STATIC;
-
-            instanceBuf.writeLODInstanceData(
-                activeLOD,
-                comp.worldX,
-                comp.worldZ,
-                comp.prevWorldX,
-                comp.prevWorldZ,
-                colorRGBA[0],
-                colorRGBA[1],
-                colorRGBA[2],
-                colorRGBA[3],
-                this.#heightScale,
-                this.#worldSizeX,
-                this.#worldSizeZ
-            );
-
-            // 프레임 위치 동기화 완료 후 이전 위치 갱신
-            comp.updatePrevPosition();
-        }
-
-        // 4. GPU 버퍼 동기화 제출
-        instanceBuf.flushToGPU();
+        // 5. ⚡ 100% GPU-Driven Index Redirection Culling: Pre-Process Compute Pass 등록
+        this.#redGPUContext.commandEncoderManager.addPreProcessComputePass('Landscape_GPUCulling_ComputePass', (computePass) => {
+            this.#gpuCuller?.dispatchPass(computePass, totalComponents);
+        });
     }
 
     private initSystems(
@@ -904,6 +830,7 @@ export class Landscape extends Object3DContainer {
         }
 
         this.#spatialGrid.clearTiles();
+        this.#gpuCuller = new LandscapeGPUCuller(this.#redGPUContext, targetCount, this.#maxLODLevel);
 
         let index = 0;
         for (let row = 0; row < componentCountZ; row++) {
@@ -928,8 +855,27 @@ export class Landscape extends Object3DContainer {
                     this.#landscapeComponents.push(comp);
                     this.#spatialGrid.registerTile(row, col, comp);
                 }
+
+                this.#instanceBuffer.setStaticTileData(
+                    index,
+                    posX, posZ, posX, posZ,
+                    0, 0, 0, 1.0,
+                    this.#heightScale,
+                    this.#worldSizeX,
+                    this.#worldSizeZ
+                );
                 index++;
             }
+        }
+
+        this.#instanceBuffer.uploadStaticTilesToGPU();
+
+        if (this.#instanceBuffer.allInputTilesBuffer && this.#instanceBuffer.visibleTileIndicesBuffer && this.#instanceBuffer.indirectDrawBuffer) {
+            this.#gpuCuller.updateBindGroup(
+                this.#instanceBuffer.allInputTilesBuffer,
+                this.#instanceBuffer.visibleTileIndicesBuffer,
+                this.#instanceBuffer.indirectDrawBuffer
+            );
         }
     }
 }

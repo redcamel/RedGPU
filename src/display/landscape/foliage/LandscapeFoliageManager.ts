@@ -4,6 +4,7 @@ import Landscape from '../core/Landscape';
 import {FoliageType, FoliageTypeOptions} from './FoliageType';
 import foliageCullingComputeWGSL from './shader/foliageCullingCompute.wgsl';
 import foliageInstancedWGSL from './shader/foliageInstanced.wgsl';
+import computeViewFrustumPlanes from '../../../math/computeViewFrustumPlanes';
 
 /**
  * LandscapeFoliageManager
@@ -154,21 +155,38 @@ export class LandscapeFoliageManager {
     #cachedVHTAtlasGPUTexture: GPUTexture | null = null;
     #cachedVHTView: GPUTextureView | null = null;
 
-    update(cameraObj: any, renderViewStateData?: any): void {
+    update(cameraOrX: any, renderViewStateDataOrY?: any, argZ?: number): void {
         const typeList = this.#typeList;
         const typeCount = typeList.length;
-        if (typeCount === 0 || !cameraObj) return;
+        if (typeCount === 0 || cameraOrX === undefined || cameraOrX === null) return;
 
-        const camera = cameraObj;
-        const camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
-        const camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
-        const z = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
+        let camX = 0;
+        let camY = 0;
+        let camZ = 0;
+        let frustumPlanes: number[][] | null = null;
 
-        const frustumPlanes: number[][] | null = renderViewStateData?.frustumPlanes
-            ?? renderViewStateData?.view?.frustumPlanes
-            ?? camera?.frustumPlanes
-            ?? camera?.camera?.frustumPlanes
-            ?? null;
+        if (typeof cameraOrX === 'number') {
+            camX = cameraOrX;
+            camY = typeof renderViewStateDataOrY === 'number' ? renderViewStateDataOrY : 0;
+            camZ = typeof argZ === 'number' ? argZ : 0;
+        } else {
+            const camera = cameraOrX;
+            const renderViewStateData = renderViewStateDataOrY;
+            camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
+            camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
+            camZ = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
+
+            const rawCamera = camera?.camera ?? camera;
+            frustumPlanes = renderViewStateData?.frustumPlanes
+                ?? renderViewStateData?.view?.frustumPlanes
+                ?? camera?.frustumPlanes
+                ?? rawCamera?.frustumPlanes
+                ?? null;
+
+            if (!frustumPlanes && rawCamera?.projectionMatrix && rawCamera?.viewMatrix) {
+                frustumPlanes = computeViewFrustumPlanes(rawCamera.projectionMatrix, rawCamera.viewMatrix);
+            }
+        }
 
         const cullingPipeline = this.#cullingComputePipeline;
         const cullingBindGroupLayout = this.#cullingBindGroupLayout;
@@ -210,7 +228,7 @@ export class LandscapeFoliageManager {
 
             // 4. Culling Uniform 갱신 (GPU VHT 고도 정보 및 카메라/절두체 전달)
             buffer.updateCullingUniforms(
-                camX, camY, z,
+                camX, camY, camZ,
                 cullingDist, fadeStartDist, activeCount, boundingRadius,
                 worldSizeX, heightScale, bottomOffset, hasVHT,
                 frustumPlanes

@@ -171,7 +171,7 @@ RedGPU.init(
             new RedGPU.Primitive.Box(redGPUContext, 0.4, 8.2, 0.4),
             grassMaterial
         );
-
+        //
         const grassType = foliageManager.addFoliageType({
             name: 'BasicGrass',
             mesh: dummyGrassMesh,
@@ -215,10 +215,10 @@ RedGPU.init(
         const renderer = new RedGPU.Renderer();
         const render = (time) => {
             landscape.update(controller, view.renderViewStateData);
-            hudDebugger.update(view.renderViewStateData);
-            spatialGridDebugger.update();
-            vhtDebugger.update();
-            vntDebugger.update();
+            // hudDebugger.update(view.renderViewStateData);
+            // spatialGridDebugger.update();
+            // vhtDebugger.update();
+            // vntDebugger.update();
         };
         renderer.start(redGPUContext, render);
 

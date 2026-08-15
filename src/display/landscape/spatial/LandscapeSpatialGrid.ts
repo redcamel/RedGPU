@@ -82,14 +82,24 @@ export class LandscapeSpatialGrid {
     getActiveComponentsInRadius(camX: number, camZ: number, loadingRadius: number, outArray: LandscapeComponent[]): number {
         outArray.length = 0;
         const radiusSq = loadingRadius * loadingRadius;
-        const count = this.#flatCells.length;
 
-        for (let i = 0; i < count; i++) {
-            const comp = this.#flatCells[i];
-            const dx = comp.worldX - camX;
-            const dz = comp.worldZ - camZ;
-            if (dx * dx + dz * dz <= radiusSq) {
-                outArray.push(comp);
+        const minCol = Math.max(0, Math.floor((camX - loadingRadius + this.#halfWorldSizeX) / this.#tileSizeX));
+        const maxCol = Math.min(this.#tileCountX - 1, Math.floor((camX + loadingRadius + this.#halfWorldSizeX) / this.#tileSizeX));
+
+        const minRow = Math.max(0, Math.floor((camZ - loadingRadius + this.#halfWorldSizeZ) / this.#tileSizeZ));
+        const maxRow = Math.min(this.#tileCountZ - 1, Math.floor((camZ + loadingRadius + this.#halfWorldSizeZ) / this.#tileSizeZ));
+
+        for (let r = minRow; r <= maxRow; r++) {
+            const rowOffset = r * this.#tileCountX;
+            for (let c = minCol; c <= maxCol; c++) {
+                const comp = this.#flatCells[rowOffset + c];
+                if (comp) {
+                    const dx = comp.worldX - camX;
+                    const dz = comp.worldZ - camZ;
+                    if (dx * dx + dz * dz <= radiusSq) {
+                        outArray.push(comp);
+                    }
+                }
             }
         }
         return outArray.length;

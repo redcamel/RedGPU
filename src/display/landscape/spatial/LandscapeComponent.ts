@@ -10,6 +10,7 @@ export class LandscapeComponent {
     #componentX: number = 0;
     #componentZ: number = 0;
     #lodLevel: number = 0;
+    #key: string = '';
 
     /**
      * [KO] LandscapeComponent 인스턴스를 생성합니다.
@@ -27,6 +28,11 @@ export class LandscapeComponent {
         this.#prevWorldZ = worldZ;
         this.#componentX = componentX;
         this.#componentZ = componentZ;
+        this.#key = `${componentZ}_${componentX}`;
+    }
+
+    get key(): string {
+        return this.#key;
     }
 
     get worldX(): number {
@@ -61,6 +67,7 @@ export class LandscapeComponent {
 
     set componentX(val: number) {
         this.#componentX = val;
+        this.#key = `${this.#componentZ}_${val}`;
     }
 
     get componentZ(): number {
@@ -69,6 +76,7 @@ export class LandscapeComponent {
 
     set componentZ(val: number) {
         this.#componentZ = val;
+        this.#key = `${val}_${this.#componentX}`;
     }
 
     /**

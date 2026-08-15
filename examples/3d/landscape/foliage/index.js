@@ -71,9 +71,6 @@ RedGPU.init(
         const renderer = new RedGPU.Renderer();
         const render = (time) => {
             landscape.update(controller, view.renderViewStateData);
-
-            // 매 프레임 카메라 위치 기반 인스턴스 Culling & Distance Fade 갱신
-            foliageManager.update(controller.x, controller.y, controller.z);
         };
         renderer.start(redGPUContext, render);
 
