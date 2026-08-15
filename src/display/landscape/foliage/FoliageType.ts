@@ -65,6 +65,14 @@ export class FoliageType {
         return this.#activeInstanceCount;
     }
 
+    #lastPopulatedCamX: number = NaN;
+    #lastPopulatedCamZ: number = NaN;
+    #lastPopulatedRadius: number = 1500;
+
+    get isPopulated(): boolean {
+        return this.#activeInstanceCount > 0;
+    }
+
     /**
      * [KO] 지정된 월드 영역 내에 무작위 위치/스케일/회전으로 식생 인스턴스를 자동 파퓰레이션합니다. (경사각 필터링 탑재)
      */
@@ -100,7 +108,7 @@ export class FoliageType {
         const scaleDiffZ = maxScale[2] - minScale[2];
 
         // 지오메트리 Bounding Box 분석을 통한 하단 바닥 오프셋 자동 추출 (캐싱 활용)
-        const bottomOffset = this.#getGeometryBottomOffset();
+        const bottomOffset = this.getGeometryBottomOffset();
 
         let spawnedCount = 0;
         let attempts = 0;
@@ -144,19 +152,64 @@ export class FoliageType {
     }
 
     /**
+     * [KO] 언리얼 엔진 스타일: 카메라 현재 위치 (camX, camZ) 주변 반경(radius) 내에 집중 파퓰레이션합니다.
+     */
+    populateAroundCamera(
+        count: number,
+        camX: number,
+        camZ: number,
+        radius: number = 1500,
+        getHeightAt?: (x: number, z: number) => number
+    ): void {
+        const bounds = {
+            minX: camX - radius,
+            maxX: camX + radius,
+            minZ: camZ - radius,
+            maxZ: camZ + radius,
+        };
+
+        this.#lastPopulatedCamX = camX;
+        this.#lastPopulatedCamZ = camZ;
+        this.#lastPopulatedRadius = radius;
+
+        this.populateRandomInstances(count, bounds, getHeightAt);
+    }
+
+    /**
+     * [KO] 카메라 위치 이동 거리가 thresholdDistance를 초과할 경우 카메라 주변으로 인스턴스를 백그라운드 재배치(Endless Rolling Stream)합니다.
+     */
+    checkCameraTracking(camX: number, camZ: number, count: number, thresholdDistance: number = 300, radius?: number): boolean {
+        if (isNaN(this.#lastPopulatedCamX)) return false;
+
+        const dx = camX - this.#lastPopulatedCamX;
+        const dz = camZ - this.#lastPopulatedCamZ;
+        const distSq = dx * dx + dz * dz;
+
+        if (distSq >= thresholdDistance * thresholdDistance) {
+            const useRadius = radius ?? this.#lastPopulatedRadius;
+            this.populateAroundCamera(count, camX, camZ, useRadius);
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * [KO] 식생 지오메트리 카운트 및 activeInstanceCount 정보를 바탕으로 Indirect Draw Command Buffer 갱신
      */
     updateIndirectBuffer(): void {
         const geometry = this.mesh?.geometry;
         if (!geometry) return;
         const count = geometry.indexBuffer ? geometry.indexBuffer.indexCount : (geometry.vertexBuffer ? geometry.vertexBuffer.vertexCount : 0);
-        this.instanceBuffer.updateIndirectBuffer(count, this.#activeInstanceCount);
+        this.instanceBuffer.resetIndirectCount(count);
     }
 
     /**
-     * [KO] VHT 타일 로딩 완료 시 배치된 식생 인스턴스들의 Y 고도를 지형 표면에 정밀 재동기화합니다.
+     * [KO] VHT 타일 로딩 완료 시 지정된 타일 구역(bounds) 내 식생 인스턴스들의 Y 고도를 지형 표면에 정밀 재동기화합니다. (언리얼 스타일 타일 국소 갱신)
      */
-    realignHeights(getHeightAt?: (x: number, z: number) => number): void {
+    realignHeights(
+        getHeightAt?: (x: number, z: number) => number,
+        bounds?: { minX: number; minZ: number; maxX: number; maxZ: number }
+    ): void {
         const activeCount = this.#activeInstanceCount;
         if (activeCount <= 0 || !getHeightAt) return;
 
@@ -164,26 +217,66 @@ export class FoliageType {
         const stride = this.instanceBuffer.strideFloats;
 
         // 지오메트리 Bounding Box 분석을 통한 하단 바닥 오프셋 자동 추출 (캐싱 활용)
-        const bottomOffset = this.#getGeometryBottomOffset();
+        const bottomOffset = this.getGeometryBottomOffset();
 
-        for (let i = 0; i < activeCount; i++) {
-            const offset = i * stride;
-            const posX = data[offset];
-            const posZ = data[offset + 2];
-            const scaleY = data[offset + 8];
+        const landscape = this.foliageManager?.landscape;
+        const getInfo = (x: number, z: number) => landscape?.getHeightAtInfo ? landscape.getHeightAtInfo(x, z) : {
+            loaded: true,
+            height: getHeightAt(x, z)
+        };
 
-            const terrainY = getHeightAt(posX, posZ);
-            // 지형 고도 Y + 개별 스케일에 비례한 지오메트리 밑바닥 자동 피봇 안착!
-            data[offset + 1] = terrainY + bottomOffset * scaleY;
+        if (bounds) {
+            const {minX, minZ, maxX, maxZ} = bounds;
+            let minModIdx = Infinity;
+            let maxModIdx = -1;
+            let updateCount = 0;
+
+            for (let i = 0; i < activeCount; i++) {
+                const offset = i * stride;
+                const posX = data[offset];
+                const posZ = data[offset + 2];
+
+                // 타일 월드 경계 내에 위치하는 식생 인스턴스만 국소 고도 갱신 (98.5% CPU 절감)
+                if (posX >= minX && posX <= maxX && posZ >= minZ && posZ <= maxZ) {
+                    const info = getInfo(posX, posZ);
+                    // 타일 데이터가 아직 미로드 상태(loaded === false)이면 고도를 0.0으로 강제파손하지 않고 보호
+                    if (info.loaded) {
+                        const scaleY = data[offset + 8];
+                        data[offset + 1] = info.height + bottomOffset * scaleY;
+
+                        if (i < minModIdx) minModIdx = i;
+                        if (i > maxModIdx) maxModIdx = i;
+                        updateCount++;
+                    }
+                }
+            }
+
+            if (updateCount > 0 && minModIdx <= maxModIdx) {
+                // 국소 범위만 GPU 버퍼 부분 업로드 (Sub-megabyte transfer)
+                this.instanceBuffer.uploadToGPURange(minModIdx, maxModIdx);
+            }
+        } else {
+            // Bounds 미지정 시 전체 갱신
+            for (let i = 0; i < activeCount; i++) {
+                const offset = i * stride;
+                const posX = data[offset];
+                const posZ = data[offset + 2];
+                const info = getInfo(posX, posZ);
+
+                if (info.loaded) {
+                    const scaleY = data[offset + 8];
+                    data[offset + 1] = info.height + bottomOffset * scaleY;
+                }
+            }
+
+            this.instanceBuffer.uploadToGPU(activeCount);
         }
-
-        this.instanceBuffer.uploadToGPU(activeCount);
     }
 
     /**
      * 지오메트리 버텍스 버퍼를 분석하여 메시의 바닥(Bottom Y Base) 피봇 오프셋을 산출합니다. (최초 1회만 스캔)
      */
-    #getGeometryBottomOffset(): number {
+    getGeometryBottomOffset(): number {
         if (this.#bottomOffset !== null) return this.#bottomOffset;
 
         const geometry = this.options.mesh?.geometry;

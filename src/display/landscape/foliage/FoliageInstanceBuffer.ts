@@ -13,9 +13,15 @@ export class FoliageInstanceBuffer {
     readonly dataBuffer: Float32Array;
 
     #redGPUContext: RedGPUContext;
-    #gpuBuffer: GPUBuffer | null = null;
+    // Zero-GC 재사용 TypedArray
+    static readonly #cullingUniformData = new Float32Array(36);
+    static readonly #cullingUniformUint32 = new Uint32Array(FoliageInstanceBuffer.#cullingUniformData.buffer);
     #indirectGPUBuffer: GPUBuffer | null = null;
-    #indirectDataBuffer: Uint32Array = new Uint32Array(5);
+    static readonly #resetIndirectData = new Uint32Array(5);
+    #rawGPUBuffer: GPUBuffer | null = null;
+    #culledGPUBuffer: GPUBuffer | null = null;
+    #cullingUniformBuffer: GPUBuffer | null = null;
+    #cullingBindGroup: GPUBindGroup | null = null;
 
     constructor(redGPUContext: RedGPUContext, maxInstances: number = 50000) {
         this.#redGPUContext = redGPUContext;
@@ -33,7 +39,7 @@ export class FoliageInstanceBuffer {
         posX: number, posY: number, posZ: number,
         rotX: number, rotY: number, rotZ: number, rotW: number,
         scaleX: number, scaleY: number, scaleZ: number,
-        fade: number, subId: number = 0
+        fade: number = 1.0, subId: number = 0
     ): void {
         const offset = index * this.strideFloats;
         const buffer = this.dataBuffer;
@@ -56,17 +62,17 @@ export class FoliageInstanceBuffer {
     }
 
     /**
-     * 활성화된 인스턴스 개수만큼만 GPU 버퍼로 업로드
+     * 활성화된 인스턴스 개수만큼 원본 GPU 버퍼로 업로드
      */
     uploadToGPU(activeCount: number): void {
-        if (!this.#gpuBuffer || activeCount <= 0) return;
+        if (!this.#rawGPUBuffer || activeCount <= 0) return;
 
         const uploadCount = Math.min(activeCount, this.maxInstances);
         const uploadBytes = uploadCount * this.strideBytes;
 
         const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
         gpuDevice.queue.writeBuffer(
-            this.#gpuBuffer,
+            this.#rawGPUBuffer,
             0,
             this.dataBuffer.buffer,
             0,
@@ -75,61 +81,192 @@ export class FoliageInstanceBuffer {
     }
 
     /**
-     * Zero-GC Indirect Draw Command Buffer 갱신 (drawIndirect 및 drawIndexedIndirect 대응)
+     * 특정 인덱스 범위의 인스턴스 데이터만 원본 GPU 버퍼로 부분 업로드 (타일 국소 갱신 시 전송량 극소화)
      */
-    updateIndirectBuffer(indexOrVertexCount: number, activeCount: number): void {
+    uploadToGPURange(startIndex: number, endIndex: number): void {
+        if (!this.#rawGPUBuffer || startIndex < 0 || endIndex < startIndex) return;
+
+        const start = Math.max(0, startIndex);
+        const end = Math.min(this.maxInstances - 1, endIndex);
+        const uploadCount = end - start + 1;
+        if (uploadCount <= 0) return;
+
+        const uploadBytes = uploadCount * this.strideBytes;
+        const byteOffset = start * this.strideBytes;
+
+        const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
+        gpuDevice.queue.writeBuffer(
+            this.#rawGPUBuffer,
+            byteOffset,
+            this.dataBuffer.buffer,
+            this.dataBuffer.byteOffset + byteOffset,
+            uploadBytes
+        );
+    }
+
+    /**
+     * Zero-GC Culling Uniform Buffer 갱신 (카메라 위치, 거리, GPU VHT 고도 정보, 절두체 평면)
+     */
+    updateCullingUniforms(
+        camX: number, camY: number, camZ: number,
+        cullingDist: number, fadeStartDist: number,
+        activeCount: number, boundingRadius: number,
+        worldSizeX: number, heightScale: number, bottomOffset: number, hasVHT: boolean,
+        frustumPlanes: number[][] | null
+    ): void {
+        if (!this.#cullingUniformBuffer) return;
+
+        const f32 = FoliageInstanceBuffer.#cullingUniformData;
+        const u32 = FoliageInstanceBuffer.#cullingUniformUint32;
+
+        f32[0] = camX;
+        f32[1] = camY;
+        f32[2] = camZ;
+        f32[3] = cullingDist;
+        f32[4] = fadeStartDist;
+        u32[5] = activeCount;
+        f32[6] = boundingRadius;
+        f32[7] = worldSizeX;
+        f32[8] = heightScale;
+        f32[9] = bottomOffset;
+        u32[10] = hasVHT ? 1 : 0;
+        f32[11] = 0; // padding
+
+        if (frustumPlanes && frustumPlanes.length >= 6) {
+            for (let p = 0; p < 6; p++) {
+                const plane = frustumPlanes[p];
+                const baseOffset = 12 + p * 4;
+                f32[baseOffset] = plane[0];
+                f32[baseOffset + 1] = plane[1];
+                f32[baseOffset + 2] = plane[2];
+                f32[baseOffset + 3] = plane[3];
+            }
+        } else {
+            f32.fill(0, 12, 36);
+        }
+
+        const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
+        gpuDevice.queue.writeBuffer(
+            this.#cullingUniformBuffer,
+            0,
+            f32.buffer,
+            f32.byteOffset,
+            144
+        );
+    }
+
+    /**
+     * Zero-GC Indirect Draw Command Buffer 원자적 카운터 리셋
+     */
+    resetIndirectCount(indexOrVertexCount: number): void {
         if (!this.#indirectGPUBuffer) return;
 
-        const data = this.#indirectDataBuffer;
-        data[0] = indexOrVertexCount;
-        data[1] = Math.min(activeCount, this.maxInstances);
-        data[2] = 0; // firstIndex / firstVertex
-        data[3] = 0; // baseVertex / reserved
-        data[4] = 0; // firstInstance
+        const u32 = FoliageInstanceBuffer.#resetIndirectData;
+        u32[0] = indexOrVertexCount;
+        u32[1] = 0; // atomic instanceCount reset to 0
+        u32[2] = 0;
+        u32[3] = 0;
+        u32[4] = 0;
 
         const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
         gpuDevice.queue.writeBuffer(
             this.#indirectGPUBuffer,
             0,
-            data.buffer,
-            data.byteOffset,
+            u32.buffer,
+            u32.byteOffset,
             20
         );
     }
 
-    getGPUBuffer(): GPUBuffer | null {
-        return this.#gpuBuffer;
+    getRawGPUBuffer(): GPUBuffer | null {
+        return this.#rawGPUBuffer;
+    }
+
+    getCulledGPUBuffer(): GPUBuffer | null {
+        return this.#culledGPUBuffer;
     }
 
     getIndirectGPUBuffer(): GPUBuffer | null {
         return this.#indirectGPUBuffer;
     }
 
+    getCullingUniformBuffer(): GPUBuffer | null {
+        return this.#cullingUniformBuffer;
+    }
+
+    getOrCreateCullingBindGroup(layout: GPUBindGroupLayout, vhtTextureView?: GPUTextureView, vhtSampler?: GPUSampler): GPUBindGroup | null {
+        if (!this.#rawGPUBuffer || !this.#cullingUniformBuffer || !this.#culledGPUBuffer || !this.#indirectGPUBuffer) return null;
+
+        const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
+        const resourceManager = this.#redGPUContext.resourceManager;
+        const defaultView = resourceManager.emptyTexture2DArrayView;
+        const defaultSampler = resourceManager.basicSampler.gpuSampler;
+
+        this.#cullingBindGroup = gpuDevice.createBindGroup({
+            label: 'FoliageCullingBindGroup',
+            layout: layout,
+            entries: [
+                {binding: 0, resource: {buffer: this.#rawGPUBuffer}},
+                {binding: 1, resource: {buffer: this.#cullingUniformBuffer}},
+                {binding: 2, resource: {buffer: this.#culledGPUBuffer}},
+                {binding: 3, resource: {buffer: this.#indirectGPUBuffer}},
+                {binding: 4, resource: vhtTextureView || defaultView},
+                {binding: 5, resource: vhtSampler || defaultSampler},
+            ],
+        });
+        return this.#cullingBindGroup;
+    }
+
     destroy(): void {
-        if (this.#gpuBuffer) {
-            this.#gpuBuffer.destroy();
-            this.#gpuBuffer = null;
+        if (this.#rawGPUBuffer) {
+            this.#rawGPUBuffer.destroy();
+            this.#rawGPUBuffer = null;
+        }
+        if (this.#culledGPUBuffer) {
+            this.#culledGPUBuffer.destroy();
+            this.#culledGPUBuffer = null;
         }
         if (this.#indirectGPUBuffer) {
             this.#indirectGPUBuffer.destroy();
             this.#indirectGPUBuffer = null;
         }
+        if (this.#cullingUniformBuffer) {
+            this.#cullingUniformBuffer.destroy();
+            this.#cullingUniformBuffer = null;
+        }
+        this.#cullingBindGroup = null;
     }
 
     #initGPUBuffer(): void {
         const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
-        const requiredSize = this.dataBuffer.byteLength;
+        const requiredSize = Math.max(this.dataBuffer.byteLength, 64);
 
-        this.#gpuBuffer = gpuDevice.createBuffer({
-            label: 'FoliageInstanceBuffer_GPUBuffer',
-            size: Math.max(requiredSize, 64),
-            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+        // 1. Raw Storage Buffer (CPU 업로드 원본 식생 데이터)
+        this.#rawGPUBuffer = gpuDevice.createBuffer({
+            label: 'FoliageInstanceBuffer_RawGPUBuffer',
+            size: requiredSize,
+            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
+        // 2. Culled Vertex/Storage Buffer (GPU Culling 셰이더 결과 출력 및 Vertex Buffer 전달)
+        this.#culledGPUBuffer = gpuDevice.createBuffer({
+            label: 'FoliageInstanceBuffer_CulledGPUBuffer',
+            size: requiredSize,
+            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
+        });
+
+        // 3. Indirect Command Storage Buffer (atomic instanceCount 증가 및 drawIndirect 연동)
         this.#indirectGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageInstanceBuffer_IndirectBuffer',
             size: 20,
-            usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_DST,
+            usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+        });
+
+        // 4. Culling Uniform Buffer (카메라 위치, GPU VHT 고도 정보 및 Frustum Planes 전달)
+        this.#cullingUniformBuffer = gpuDevice.createBuffer({
+            label: 'FoliageInstanceBuffer_CullingUniformBuffer',
+            size: 256,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
     }
 }

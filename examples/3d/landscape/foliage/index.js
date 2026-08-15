@@ -45,7 +45,7 @@ RedGPU.init(
         const foliageManager = landscape.foliageManager;
 
         // 테스트용 PBRMaterial 식생 메시
-        const grassGeometry = new RedGPU.Primitive.Box(redGPUContext, 8.0, 40.0, 8.0);
+        const grassGeometry = new RedGPU.Primitive.Box(redGPUContext, 0.4, 1.2, 0.4);
         const grassMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
         grassMaterial.baseColorFactor = [0.24, 0.66, 0.28, 1.0];
         grassMaterial.roughnessFactor = 0.7;
@@ -58,10 +58,10 @@ RedGPU.init(
             mesh: dummyGrassMesh,
             densityPer100m2: 50,
             maxInstances: 1000000,
-            cullingDistance: 3000,
-            fadeStartDistance: 2200,
-            minScale: [2.0, 2.0, 2.0],
-            maxScale: [5.0, 8.0, 5.0],
+            cullingDistance: 1500,
+            fadeStartDistance: 1000,
+            minScale: [0.8, 0.8, 0.8],
+            maxScale: [1.3, 1.5, 1.3],
             randomRotationY: true
         });
 

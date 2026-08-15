@@ -162,29 +162,27 @@ RedGPU.init(
         // 5. Landscape 내부 foliageManager 사용 및 PBRMaterial 식생 테스트 파퓰레이션
         const foliageManager = landscape.foliageManager;
         const grassMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
-        grassMaterial.baseColorFactor = [0.24, 0.66, 0.28, 1.0];
+        grassMaterial.baseColorFactor = [1, 0.0, 0.0, 1.0];
         grassMaterial.roughnessFactor = 0.7;
         grassMaterial.metallicFactor = 0.0;
 
         const dummyGrassMesh = new RedGPU.Display.Mesh(
             redGPUContext,
-            new RedGPU.Primitive.Box(redGPUContext, 1.0, 5.0, 1.0),
+            new RedGPU.Primitive.Box(redGPUContext, 0.4, 1.2, 0.4),
             grassMaterial
         );
 
+        // 🌿 언리얼 엔진 스타일: FoliageType 등록 시 엔진 내부(LandscapeFoliageManager)가 카메라 위치를 감지하여 100% 자동 파퓰레이션 및 3D 이동 백그라운드 추적 구동
         const grassType = foliageManager.addFoliageType({
             name: 'BasicGrass',
             mesh: dummyGrassMesh,
             maxInstances: 1000000,
-            cullingDistance: 12000,
-            fadeStartDistance: 9000,
-            minScale: [2.0, 2.0, 2.0],
-            maxScale: [3.0, 8.0, 3.0],
+            cullingDistance: 1500,
+            fadeStartDistance: 1000,
+            minScale: [0.8, 0.8, 0.8],
+            maxScale: [1.3, 1.5, 1.3],
             randomRotationY: true
         });
-
-        // 지형 전체 영역(16,000m x 16,000m)에 1,000,000개 파퓰레이션 (bounds 생략 시 worldSize 100% 자동 연동)
-        grassType.populateRandomInstances(1000000);
 
         // 5-1. 정식 RedGPU 디버거 클래스 인스턴스 생성 (2D SpatialGrid, VHT Heightmap, VNT Normal Atlas, HUD 디버거)
         const hudDebugger = new RedGPU.Display.LandscapeHUDDebugger(landscape, controller, {
