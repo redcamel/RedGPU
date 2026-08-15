@@ -168,18 +168,18 @@ RedGPU.init(
 
         const dummyGrassMesh = new RedGPU.Display.Mesh(
             redGPUContext,
-            new RedGPU.Primitive.Box(redGPUContext, 8.0, 40.0, 8.0),
+            new RedGPU.Primitive.Box(redGPUContext, 1.0, 5.0, 1.0),
             grassMaterial
         );
 
         const grassType = foliageManager.addFoliageType({
             name: 'BasicGrass',
             mesh: dummyGrassMesh,
-            maxInstances: 20000,
+            maxInstances: 100000,
             cullingDistance: 3000,
             fadeStartDistance: 2200,
             minScale: [2.0, 2.0, 2.0],
-            maxScale: [5.0, 8.0, 5.0],
+            maxScale: [3.0, 8.0, 3.0],
             randomRotationY: true
         });
 

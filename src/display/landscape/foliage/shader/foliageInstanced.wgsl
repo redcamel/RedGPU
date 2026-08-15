@@ -10,7 +10,7 @@ struct VertexInput {
     @location(3) instancePos : vec3<f32>,
     @location(4) instanceRotQuat : vec4<f32>,
     @location(5) instanceScale : vec3<f32>,
-    @location(6) instanceExtra : vec2<f32>, // x: FadeFactor, y: SubID
+    @location(6) instanceExtra : vec2<f32>, // x: FadeFactor (1.0~0.0), y: SubID
 };
 
 struct OutputData {
@@ -27,7 +27,7 @@ struct OutputData {
 
     @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
     @location(10) localNodeScale_volumeScale: vec2<f32>,
-    @location(11) combinedOpacity: f32,
+    @location(11) combinedOpacity: f32, // 언리얼 스타일 Dither FadeOpacity 전달
 
     @location(12) motionVector: vec3<f32>,
     @location(13) shadowCoord: vec3<f32>,
@@ -44,14 +44,16 @@ fn rotateVectorByQuaternion(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
 fn mainInput(input : VertexInput) -> OutputData {
     var output : OutputData;
     
-    // 1. FadeFactor에 의한 Y Scale 축소 (소멸 시 부드럽게 축소)
-    let fade = input.instanceExtra.x;
-    let scaledLocalPos = input.position * input.instanceScale * vec3<f32>(1.0, fade, 1.0);
+    let fadeFactor = input.instanceExtra.x;
+    
+    // 1. 메시 3D 크기는 100% 온전히 유지 (언리얼 스타일 Dither Fade 적용으로 쪼그라듦 제거)
+    let localPos = input.position;
+    let scaledLocalPos = localPos * input.instanceScale;
     
     // 2. Quaternion 회전 연산
     let rotatedPos = rotateVectorByQuaternion(scaledLocalPos, input.instanceRotQuat);
     
-    // 3. World Position 생성
+    // 3. World Position 생성 (지형 표면 Y 위치에 안착)
     let worldPos = rotatedPos + input.instancePos;
     let worldNormal = rotateVectorByQuaternion(input.normal, input.instanceRotQuat);
     
@@ -72,12 +74,16 @@ fn mainInput(input : VertexInput) -> OutputData {
 
     output.globalFragmentSlotIndex = 0u;
     output.localNodeScale_volumeScale = vec2<f32>(1.0, 1.0);
-    output.combinedOpacity = 1.0;
+    
+    // ★ 언리얼 스타일 Dithered Opacity Fade: 거리에 따른 투명도 페이드 인자(1.0~0.0) 전달
+    output.combinedOpacity = fadeFactor;
 
     // 6. RedGPU Directional Shadow 연산
     output.shadowCoord = getShadowCoord(worldPos, systemUniforms.directionalLightProjectionViewMatrix);
     output.receiveShadow = 1.0;
 
+    output.motionVector = vec3<f32>(0.0);
+    output.pickingId = vec4<f32>(0.0);
     
     return output;
 }

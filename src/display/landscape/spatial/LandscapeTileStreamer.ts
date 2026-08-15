@@ -299,7 +299,7 @@ export class LandscapeTileStreamer {
         const countX = this.#componentCountX;
         const col = Math.min(countX - 1, Math.max(0, Math.floor(normU * countX)));
         const row = Math.min(countX - 1, Math.max(0, Math.floor(normV * countX)));
-        const key = `${col}_${row}`;
+        const key = `${row}_${col}`;
 
         const tileData = this.#cpuHeightMap.get(key);
         if (!tileData) {
