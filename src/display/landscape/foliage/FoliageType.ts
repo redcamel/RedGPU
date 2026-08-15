@@ -22,6 +22,8 @@ export interface FoliageTypeOptions {
     randomRotationY?: boolean;
 }
 
+const RAD_TO_DEG = 180.0 / Math.PI;
+
 /**
  * FoliageType
  * 개별 식생 종(Species)의 지오메트리, PBR 머티리얼, 인스턴싱 버퍼, 경사각/레이어 필터 및 파퓰레이션 관리
@@ -32,6 +34,7 @@ export class FoliageType {
     readonly instanceBuffer: FoliageInstanceBuffer;
 
     #activeInstanceCount: number = 0;
+    #bottomOffset: number | null = null;
 
     constructor(redGPUContext: RedGPUContext, options: FoliageTypeOptions) {
         this.redGPUContext = redGPUContext;
@@ -78,7 +81,7 @@ export class FoliageType {
         const scaleDiffY = maxScale[1] - minScale[1];
         const scaleDiffZ = maxScale[2] - minScale[2];
 
-        // 지오메트리 Bounding Box 분석을 통한 하단 바닥 오프셋 자동 추출
+        // 지오메트리 Bounding Box 분석을 통한 하단 바닥 오프셋 자동 추출 (캐싱 활용)
         const bottomOffset = this.#getGeometryBottomOffset();
 
         let spawnedCount = 0;
@@ -89,10 +92,11 @@ export class FoliageType {
             attempts++;
             const posX = bounds.minX + Math.random() * rangeX;
             const posZ = bounds.minZ + Math.random() * rangeZ;
+            const terrainY = getHeightAt ? getHeightAt(posX, posZ) : 0;
 
-            // 경사각(Slope) 필터 검사
+            // 경사각(Slope) 필터 검사 (terrainY 1회 조회 재사용)
             if (getHeightAt && (minSlope > 0 || maxSlope < 90)) {
-                const slopeAngle = this.#getSlopeAngleAt(posX, posZ, getHeightAt);
+                const slopeAngle = this.#getSlopeAngleAt(posX, posZ, getHeightAt, terrainY);
                 if (slopeAngle < minSlope || slopeAngle > maxSlope) {
                     continue; // 생장 조건을 벗어나는 경사면 거름
                 }
@@ -102,7 +106,6 @@ export class FoliageType {
             const scaleY = minScale[1] + Math.random() * scaleDiffY;
             const scaleZ = minScale[2] + Math.random() * scaleDiffZ;
 
-            const terrainY = getHeightAt ? getHeightAt(posX, posZ) : 0;
             // 지형 고도 Y + 개별 스케일에 비례한 지오메트리 밑바닥 자동 피봇 안착!
             const posY = terrainY + bottomOffset * scaleY;
 
@@ -131,7 +134,7 @@ export class FoliageType {
         const data = this.instanceBuffer.dataBuffer;
         const stride = this.instanceBuffer.strideFloats;
 
-        // 지오메트리 Bounding Box 분석을 통한 하단 바닥 오프셋 자동 추출
+        // 지오메트리 Bounding Box 분석을 통한 하단 바닥 오프셋 자동 추출 (캐싱 활용)
         const bottomOffset = this.#getGeometryBottomOffset();
 
         for (let i = 0; i < activeCount; i++) {
@@ -149,17 +152,25 @@ export class FoliageType {
     }
 
     /**
-     * 지오메트리 버텍스 버퍼를 분석하여 메시의 바닥(Bottom Y Base) 피봇 오프셋을 100% 자동 산출합니다.
+     * 지오메트리 버텍스 버퍼를 분석하여 메시의 바닥(Bottom Y Base) 피봇 오프셋을 산출합니다. (최초 1회만 스캔)
      */
     #getGeometryBottomOffset(): number {
+        if (this.#bottomOffset !== null) return this.#bottomOffset;
+
         const geometry = this.options.mesh?.geometry;
-        if (!geometry || !geometry.vertexBuffer) return 0.0;
+        if (!geometry || !geometry.vertexBuffer) {
+            this.#bottomOffset = 0.0;
+            return 0.0;
+        }
 
         const vertexBuffer = geometry.vertexBuffer;
         const data = (vertexBuffer as any).data || (vertexBuffer as any).typedArray || (vertexBuffer as any).dataBuffer;
         const stride = (vertexBuffer as any).stride || 12; // 12 floats per vertex
 
-        if (!data || data.length === 0) return 0.0;
+        if (!data || data.length === 0) {
+            this.#bottomOffset = 0.0;
+            return 0.0;
+        }
 
         let minY = Infinity;
         const vertexCount = vertexBuffer.vertexCount || Math.floor(data.length / stride);
@@ -171,24 +182,23 @@ export class FoliageType {
             }
         }
 
-        return (minY !== Infinity && !isNaN(minY)) ? -minY : 0.0;
+        const calculated = (minY !== Infinity && !isNaN(minY)) ? -minY : 0.0;
+        this.#bottomOffset = calculated;
+        return calculated;
     }
 
     /**
      * 지형 수치 미분을 통해 위치 (x, z)에서의 경사각(Slope Angle in degrees)을 정밀 계산합니다.
      */
-    #getSlopeAngleAt(x: number, z: number, getHeightAt: (x: number, z: number) => number): number {
-        const delta = 1.0; // 1m 샘플링 갭
-        const hCenter = getHeightAt(x, z);
-        const hRight = getHeightAt(x + delta, z);
-        const hForward = getHeightAt(x, z + delta);
+    #getSlopeAngleAt(x: number, z: number, getHeightAt: (x: number, z: number) => number, hCenter: number): number {
+        const hRight = getHeightAt(x + 1.0, z);
+        const hForward = getHeightAt(x, z + 1.0);
 
-        const dzdx = (hRight - hCenter) / delta;
-        const dzdz = (hForward - hCenter) / delta;
+        const dzdx = hRight - hCenter;
+        const dzdz = hForward - hCenter;
 
         const gradient = Math.sqrt(dzdx * dzdx + dzdz * dzdz);
-        const slopeRadians = Math.atan(gradient);
-        return (slopeRadians * 180.0) / Math.PI; // Degree 변환
+        return Math.atan(gradient) * RAD_TO_DEG;
     }
 
     destroy(): void {
