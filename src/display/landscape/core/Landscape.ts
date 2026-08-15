@@ -408,9 +408,6 @@ export class Landscape extends Object3DContainer {
     set heightScale(val: number) {
         this.#heightScale = val;
         this.#tileStreamer.setTerrainConfig(val, this.#worldSizeX, this.#componentCountX);
-        if (this.#foliageManager?.hasFoliageTypes) {
-            this.#foliageManager.realignAllHeights();
-        }
     }
 
     /** [KO] Virtual Heightfield Texture (VHT) 아틀라스 DirectTexture 레퍼런스 */

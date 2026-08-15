@@ -80,29 +80,7 @@ export class FoliageInstanceBuffer {
         );
     }
 
-    /**
-     * 특정 인덱스 범위의 인스턴스 데이터만 원본 GPU 버퍼로 부분 업로드 (타일 국소 갱신 시 전송량 극소화)
-     */
-    uploadToGPURange(startIndex: number, endIndex: number): void {
-        if (!this.#rawGPUBuffer || startIndex < 0 || endIndex < startIndex) return;
 
-        const start = Math.max(0, startIndex);
-        const end = Math.min(this.maxInstances - 1, endIndex);
-        const uploadCount = end - start + 1;
-        if (uploadCount <= 0) return;
-
-        const uploadBytes = uploadCount * this.strideBytes;
-        const byteOffset = start * this.strideBytes;
-
-        const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
-        gpuDevice.queue.writeBuffer(
-            this.#rawGPUBuffer,
-            byteOffset,
-            this.dataBuffer.buffer,
-            this.dataBuffer.byteOffset + byteOffset,
-            uploadBytes
-        );
-    }
 
     /**
      * Zero-GC Culling Uniform Buffer 갱신 (카메라 위치, 거리, GPU VHT 고도 정보, 절두체 평면)

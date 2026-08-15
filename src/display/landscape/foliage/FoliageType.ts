@@ -118,22 +118,13 @@ export class FoliageType {
             attempts++;
             const posX = targetBounds.minX + Math.random() * rangeX;
             const posZ = targetBounds.minZ + Math.random() * rangeZ;
-            const terrainY = getHeightAt ? getHeightAt(posX, posZ) : 0;
-
-            // 경사각(Slope) 필터 검사 (terrainY 1회 조회 재사용)
-            if (getHeightAt && (minSlope > 0 || maxSlope < 90)) {
-                const slopeAngle = this.#getSlopeAngleAt(posX, posZ, getHeightAt, terrainY);
-                if (slopeAngle < minSlope || slopeAngle > maxSlope) {
-                    continue; // 생장 조건을 벗어나는 경사면 거름
-                }
-            }
 
             const scaleX = minScale[0] + Math.random() * scaleDiffX;
             const scaleY = minScale[1] + Math.random() * scaleDiffY;
             const scaleZ = minScale[2] + Math.random() * scaleDiffZ;
 
-            // 지형 고도 Y + 개별 스케일에 비례한 지오메트리 밑바닥 자동 피봇 안착!
-            const posY = terrainY + bottomOffset * scaleY;
+            // ⚡ Y 고도는 GPU Compute Shader에서 vhtAtlasTexture를 100% 자동 샘플링하므로 초기값 0으로 간결 세팅
+            const posY = 0.0;
 
             let rotX = 0, rotY = 0, rotZ = 0, rotW = 1;
             if (randomRotationY) {
@@ -201,76 +192,6 @@ export class FoliageType {
         if (!geometry) return;
         const count = geometry.indexBuffer ? geometry.indexBuffer.indexCount : (geometry.vertexBuffer ? geometry.vertexBuffer.vertexCount : 0);
         this.instanceBuffer.resetIndirectCount(count);
-    }
-
-    /**
-     * [KO] VHT 타일 로딩 완료 시 지정된 타일 구역(bounds) 내 식생 인스턴스들의 Y 고도를 지형 표면에 정밀 재동기화합니다. (언리얼 스타일 타일 국소 갱신)
-     */
-    realignHeights(
-        getHeightAt?: (x: number, z: number) => number,
-        bounds?: { minX: number; minZ: number; maxX: number; maxZ: number }
-    ): void {
-        const activeCount = this.#activeInstanceCount;
-        if (activeCount <= 0 || !getHeightAt) return;
-
-        const data = this.instanceBuffer.dataBuffer;
-        const stride = this.instanceBuffer.strideFloats;
-
-        // 지오메트리 Bounding Box 분석을 통한 하단 바닥 오프셋 자동 추출 (캐싱 활용)
-        const bottomOffset = this.getGeometryBottomOffset();
-
-        const landscape = this.foliageManager?.landscape;
-        const getInfo = (x: number, z: number) => landscape?.getHeightAtInfo ? landscape.getHeightAtInfo(x, z) : {
-            loaded: true,
-            height: getHeightAt(x, z)
-        };
-
-        if (bounds) {
-            const {minX, minZ, maxX, maxZ} = bounds;
-            let minModIdx = Infinity;
-            let maxModIdx = -1;
-            let updateCount = 0;
-
-            for (let i = 0; i < activeCount; i++) {
-                const offset = i * stride;
-                const posX = data[offset];
-                const posZ = data[offset + 2];
-
-                // 타일 월드 경계 내에 위치하는 식생 인스턴스만 국소 고도 갱신 (98.5% CPU 절감)
-                if (posX >= minX && posX <= maxX && posZ >= minZ && posZ <= maxZ) {
-                    const info = getInfo(posX, posZ);
-                    // 타일 데이터가 아직 미로드 상태(loaded === false)이면 고도를 0.0으로 강제파손하지 않고 보호
-                    if (info.loaded) {
-                        const scaleY = data[offset + 8];
-                        data[offset + 1] = info.height + bottomOffset * scaleY;
-
-                        if (i < minModIdx) minModIdx = i;
-                        if (i > maxModIdx) maxModIdx = i;
-                        updateCount++;
-                    }
-                }
-            }
-
-            if (updateCount > 0 && minModIdx <= maxModIdx) {
-                // 국소 범위만 GPU 버퍼 부분 업로드 (Sub-megabyte transfer)
-                this.instanceBuffer.uploadToGPURange(minModIdx, maxModIdx);
-            }
-        } else {
-            // Bounds 미지정 시 전체 갱신
-            for (let i = 0; i < activeCount; i++) {
-                const offset = i * stride;
-                const posX = data[offset];
-                const posZ = data[offset + 2];
-                const info = getInfo(posX, posZ);
-
-                if (info.loaded) {
-                    const scaleY = data[offset + 8];
-                    data[offset + 1] = info.height + bottomOffset * scaleY;
-                }
-            }
-
-            this.instanceBuffer.uploadToGPU(activeCount);
-        }
     }
 
     /**

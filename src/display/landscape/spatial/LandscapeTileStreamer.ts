@@ -260,25 +260,6 @@ export class LandscapeTileStreamer {
                 this.#loadedMap.set(key, parsed.gpuTexture);
                 if (cpuParsed) {
                     this.#cpuHeightMap.set(key, cpuParsed);
-
-                    // 🍃 언리얼 스타일 타일 국소 갱신: 새로 수신된 타일 월드 영역(±10m 경계 패딩)에 포함되는 식생만 핀포인트 고도 재동기화 (98.5% CPU 절감)
-                    const worldSize = this.#worldSizeX;
-                    const compCount = Math.max(this.#componentCountX, 1);
-                    const halfSize = worldSize * 0.5;
-                    const tileSize = worldSize / compCount;
-                    const PADDING = 10.0;
-
-                    const tileMinX = -halfSize + comp.componentX * tileSize;
-                    const tileMaxX = tileMinX + tileSize;
-                    const tileMinZ = -halfSize + comp.componentZ * tileSize;
-                    const tileMaxZ = tileMinZ + tileSize;
-
-                    (this as any).landscape?.foliageManager?.realignAllHeights(undefined, {
-                        minX: tileMinX - PADDING,
-                        minZ: tileMinZ - PADDING,
-                        maxX: tileMaxX + PADDING,
-                        maxZ: tileMaxZ + PADDING,
-                    });
                 }
                 this.#failedMap.delete(key);
 

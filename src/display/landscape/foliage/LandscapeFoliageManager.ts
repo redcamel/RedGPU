@@ -307,15 +307,6 @@ export class LandscapeFoliageManager {
         this.#autoTrackingRadius = radius;
     }
 
-    /**
-     * 타일 텍스처 로딩 완료 시 지정된 타일 구역(bounds) 내 식생 인스턴스들의 Y 고도를 지형 표면에 정밀 재동기화합니다. (언리얼 스타일 타일 국소 갱신)
-     */
-    realignAllHeights(
-        getHeightAt?: (x: number, z: number) => number,
-        bounds?: { minX: number; minZ: number; maxX: number; maxZ: number }
-    ): void {
-        // ⚡ 100% Pure GPU-Driven: GPU Compute Shader에서 vhtAtlasTexture를 직접 샘플링하므로 CPU 재조사 소멸!
-    }
 
     #defaultGetHeightAt = (x: number, z: number): number => this.landscape.getHeightAt(x, z);
 
