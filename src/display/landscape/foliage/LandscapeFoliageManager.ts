@@ -191,9 +191,6 @@ export class LandscapeFoliageManager {
             const foliageType = typeList[t];
 
 
-            // 3. 백그라운드 시분할 청크 업로드 진행 (프레임당 50,000개 = 2.4MB 미세 전송으로 스파이크 소멸)
-            foliageType.processStreamingChunk();
-
             const activeCount = foliageType.activeInstanceCount;
             if (activeCount <= 0) continue;
 
@@ -233,23 +230,6 @@ export class LandscapeFoliageManager {
                     });
                 }
             }
-        }
-    }
-
-    /**
-     * [KO] 언리얼 엔진 스타일: 지정된 카메라 위치 주변 (camX, camZ) 반경 내에 식생 인스턴스를 초고밀도로 파퓰레이션합니다.
-     */
-    populateAroundCamera(
-        countPerType: number,
-        camX: number,
-        camZ: number,
-        radius: number = 1500,
-        getHeightAt?: (x: number, z: number) => number
-    ): void {
-        const typeList = this.#typeList;
-        const count = typeList.length;
-        for (let i = 0; i < count; i++) {
-            typeList[i].populateAroundCamera(countPerType, camX, camZ, radius, getHeightAt);
         }
     }
 

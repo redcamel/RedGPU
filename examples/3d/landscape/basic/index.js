@@ -364,19 +364,6 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                 }).on('change', (ev) => {
                     grassType.options.fadeStartDistance = ev.value;
                 });
-                folderFoliage.addButton({title: '🌐 Populate 1,000,000 (16km Full World)'}).on('click', () => {
-                    foliageManager.populateAllFoliageTypes(1000000);
-                    config.foliageCount = grassType.activeInstanceCount;
-                    pane.refresh();
-                });
-                folderFoliage.addButton({title: '🌿 Dense 1,000,000 (Cam Area 2km)'}).on('click', () => {
-                    foliageManager.populateAllFoliageTypes(
-                        1000000,
-                        {minX: -1000, minZ: -1000, maxX: 1000, maxZ: 1000}
-                    );
-                    config.foliageCount = grassType.activeInstanceCount;
-                    pane.refresh();
-                });
             }
 
             // Folder 1: Terrain Dimensions (worldSize, componentCount, tileSize)

@@ -65,8 +65,7 @@ RedGPU.init(
             randomRotationY: true
         });
 
-        // 지형 전체 영역(4,000m x 4,000m)에 1,000,000개 식생 자동 파퓰레이션 (bounds 생략 시 worldSize 자동 연동)
-        grassType.populateRandomInstances(1000000);
+        // 지형 타일(Tile) 비동기 로딩 완수 시 타일 영역 식생 자동 연동 업로드 (Tile-Driven Streaming)
 
         // 7. 렌더 루프 (매 프레임 Culling & FadeFactor 갱신 - Zero-GC)
         const renderer = new RedGPU.Renderer();
@@ -106,28 +105,6 @@ RedGPU.init(
                     .on('change', (ev) => {
                         grassType.options.fadeStartDistance = ev.value;
                     });
-
-                folder.addButton({title: '🌿 Dense 500,000 Grass (Cam Area)'}).on('click', () => {
-                    grassType.populateRandomInstances(500000, {
-                        minX: -1000,
-                        minZ: -1000,
-                        maxX: 1000,
-                        maxZ: 1000
-                    });
-                    config.instanceCount = grassType.activeInstanceCount;
-                    pane.refresh();
-                });
-
-                folder.addButton({title: '🔄 Populate 1,000,000 Grass (World)'}).on('click', () => {
-                    grassType.populateRandomInstances(1000000, {
-                        minX: -2000,
-                        minZ: -2000,
-                        maxX: 2000,
-                        maxZ: 2000
-                    });
-                    config.instanceCount = grassType.activeInstanceCount;
-                    pane.refresh();
-                });
             }
         });
     }
