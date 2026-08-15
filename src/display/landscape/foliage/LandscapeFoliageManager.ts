@@ -91,13 +91,22 @@ export class LandscapeFoliageManager {
             // Buffer 1: Foliage Instance Buffer
             passEncoder.setVertexBuffer(1, instanceGPUBuffer);
 
-            // Index 렌더링 vs Non-Index 렌더링
+            const indirectGPUBuffer = foliageType.instanceBuffer.getIndirectGPUBuffer();
+            if (!indirectGPUBuffer) continue;
+
+            // Index 렌더링 vs Non-Index 렌더링 (WebGPU Indirect Draw)
             if (indexGPUBuffer) {
+                const elementCount = indexBufferObj.indexCount;
+                foliageType.instanceBuffer.updateIndirectBuffer(elementCount, activeCount);
+
                 const format = (indexBufferObj as any)?.indexFormat || 'uint32';
                 passEncoder.setIndexBuffer(indexGPUBuffer, format);
-                passEncoder.drawIndexed(indexBufferObj.indexCount, activeCount, 0, 0, 0);
+                passEncoder.drawIndexedIndirect(indirectGPUBuffer, 0);
             } else if (vertexBufferObj) {
-                passEncoder.draw(vertexBufferObj.vertexCount, activeCount, 0, 0);
+                const elementCount = vertexBufferObj.vertexCount;
+                foliageType.instanceBuffer.updateIndirectBuffer(elementCount, activeCount);
+
+                passEncoder.drawIndirect(indirectGPUBuffer, 0);
             }
         }
     }

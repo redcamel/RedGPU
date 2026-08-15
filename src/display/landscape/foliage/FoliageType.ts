@@ -140,6 +140,17 @@ export class FoliageType {
 
         this.#activeInstanceCount = spawnedCount;
         this.instanceBuffer.uploadToGPU(spawnedCount);
+        this.updateIndirectBuffer();
+    }
+
+    /**
+     * [KO] 식생 지오메트리 카운트 및 activeInstanceCount 정보를 바탕으로 Indirect Draw Command Buffer 갱신
+     */
+    updateIndirectBuffer(): void {
+        const geometry = this.mesh?.geometry;
+        if (!geometry) return;
+        const count = geometry.indexBuffer ? geometry.indexBuffer.indexCount : (geometry.vertexBuffer ? geometry.vertexBuffer.vertexCount : 0);
+        this.instanceBuffer.updateIndirectBuffer(count, this.#activeInstanceCount);
     }
 
     /**

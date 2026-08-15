@@ -14,6 +14,8 @@ export class FoliageInstanceBuffer {
 
     #redGPUContext: RedGPUContext;
     #gpuBuffer: GPUBuffer | null = null;
+    #indirectGPUBuffer: GPUBuffer | null = null;
+    #indirectDataBuffer: Uint32Array = new Uint32Array(5);
 
     constructor(redGPUContext: RedGPUContext, maxInstances: number = 50000) {
         this.#redGPUContext = redGPUContext;
@@ -72,14 +74,45 @@ export class FoliageInstanceBuffer {
         );
     }
 
+    /**
+     * Zero-GC Indirect Draw Command Buffer 갱신 (drawIndirect 및 drawIndexedIndirect 대응)
+     */
+    updateIndirectBuffer(indexOrVertexCount: number, activeCount: number): void {
+        if (!this.#indirectGPUBuffer) return;
+
+        const data = this.#indirectDataBuffer;
+        data[0] = indexOrVertexCount;
+        data[1] = Math.min(activeCount, this.maxInstances);
+        data[2] = 0; // firstIndex / firstVertex
+        data[3] = 0; // baseVertex / reserved
+        data[4] = 0; // firstInstance
+
+        const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
+        gpuDevice.queue.writeBuffer(
+            this.#indirectGPUBuffer,
+            0,
+            data.buffer,
+            data.byteOffset,
+            20
+        );
+    }
+
     getGPUBuffer(): GPUBuffer | null {
         return this.#gpuBuffer;
+    }
+
+    getIndirectGPUBuffer(): GPUBuffer | null {
+        return this.#indirectGPUBuffer;
     }
 
     destroy(): void {
         if (this.#gpuBuffer) {
             this.#gpuBuffer.destroy();
             this.#gpuBuffer = null;
+        }
+        if (this.#indirectGPUBuffer) {
+            this.#indirectGPUBuffer.destroy();
+            this.#indirectGPUBuffer = null;
         }
     }
 
@@ -91,6 +124,12 @@ export class FoliageInstanceBuffer {
             label: 'FoliageInstanceBuffer_GPUBuffer',
             size: Math.max(requiredSize, 64),
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+        });
+
+        this.#indirectGPUBuffer = gpuDevice.createBuffer({
+            label: 'FoliageInstanceBuffer_IndirectBuffer',
+            size: 20,
+            usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.COPY_DST,
         });
     }
 }
