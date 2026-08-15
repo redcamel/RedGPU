@@ -165,6 +165,7 @@ export class LandscapeFoliageManager {
         }
 
         const foliageType = new FoliageType(this.redGPUContext, options);
+        foliageType.foliageManager = this;
         this.#foliageTypes.set(options.name, foliageType);
         this.#typeList.push(foliageType);
         return foliageType;
@@ -193,14 +194,24 @@ export class LandscapeFoliageManager {
 
     populateAllFoliageTypes(
         countPerType: number,
-        bounds: { minX: number; minZ: number; maxX: number; maxZ: number },
+        bounds?: { minX: number; minZ: number; maxX: number; maxZ: number },
         getHeightAt?: (x: number, z: number) => number
     ): void {
+        let targetBounds = bounds;
+        if (!targetBounds && this.landscape) {
+            const worldSize = this.landscape.worldSize;
+            const halfX = (worldSize?.[0] || 2000) * 0.5;
+            const halfZ = (worldSize?.[1] || 2000) * 0.5;
+            targetBounds = {minX: -halfX, minZ: -halfZ, maxX: halfX, maxZ: halfZ};
+        }
+        if (!targetBounds) {
+            targetBounds = {minX: -1000, minZ: -1000, maxX: 1000, maxZ: 1000};
+        }
         const heightFn = getHeightAt || this.#defaultGetHeightAt;
         const typeList = this.#typeList;
         const count = typeList.length;
         for (let i = 0; i < count; i++) {
-            typeList[i].populateRandomInstances(countPerType, bounds, heightFn);
+            typeList[i].populateRandomInstances(countPerType, targetBounds, heightFn);
         }
     }
 

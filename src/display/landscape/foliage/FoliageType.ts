@@ -33,6 +33,7 @@ export class FoliageType {
     readonly options: Required<FoliageTypeOptions>;
     readonly instanceBuffer: FoliageInstanceBuffer;
 
+    foliageManager?: any;
     #activeInstanceCount: number = 0;
     #bottomOffset: number | null = null;
 
@@ -69,13 +70,30 @@ export class FoliageType {
      */
     populateRandomInstances(
         count: number,
-        bounds: { minX: number; minZ: number; maxX: number; maxZ: number },
+        bounds?: { minX: number; minZ: number; maxX: number; maxZ: number },
         getHeightAt?: (x: number, z: number) => number
     ): void {
+        let targetBounds = bounds;
+        if (!targetBounds) {
+            const landscape = this.foliageManager?.landscape;
+            if (landscape) {
+                const worldSize = landscape.worldSize;
+                if (worldSize && worldSize[0] > 0 && worldSize[1] > 0) {
+                    const halfX = worldSize[0] * 0.5;
+                    const halfZ = worldSize[1] * 0.5;
+                    targetBounds = {minX: -halfX, minZ: -halfZ, maxX: halfX, maxZ: halfZ};
+                }
+            }
+        }
+        if (!targetBounds) {
+            targetBounds = {minX: -1000, minZ: -1000, maxX: 1000, maxZ: 1000};
+        }
+
+        const heightFn = getHeightAt || ((x: number, z: number) => this.foliageManager?.landscape?.getHeightAt(x, z) ?? 0);
         const maxLimit = Math.min(count, this.options.maxInstances);
         const {minScale, maxScale, randomRotationY, minSlope, maxSlope} = this.options;
-        const rangeX = bounds.maxX - bounds.minX;
-        const rangeZ = bounds.maxZ - bounds.minZ;
+        const rangeX = targetBounds.maxX - targetBounds.minX;
+        const rangeZ = targetBounds.maxZ - targetBounds.minZ;
 
         const scaleDiffX = maxScale[0] - minScale[0];
         const scaleDiffY = maxScale[1] - minScale[1];
@@ -90,8 +108,8 @@ export class FoliageType {
 
         while (spawnedCount < maxLimit && attempts < maxAttempts) {
             attempts++;
-            const posX = bounds.minX + Math.random() * rangeX;
-            const posZ = bounds.minZ + Math.random() * rangeZ;
+            const posX = targetBounds.minX + Math.random() * rangeX;
+            const posZ = targetBounds.minZ + Math.random() * rangeZ;
             const terrainY = getHeightAt ? getHeightAt(posX, posZ) : 0;
 
             // 경사각(Slope) 필터 검사 (terrainY 1회 조회 재사용)

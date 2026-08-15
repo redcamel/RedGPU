@@ -128,6 +128,7 @@ export class Landscape extends Object3DContainer {
         this.#landscapeMaterial = landscapeMaterial;
         this.#worldSizeX = worldSizeX;
         this.#worldSizeZ = worldSizeZ;
+        this.#worldSizeTuple = [worldSizeX, worldSizeZ];
         this.#componentCountX = componentCountX;
         this.#componentCountZ = componentCountZ;
         this.#tileSizeX = tileSizeX;
