@@ -2,6 +2,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import LandscapeComponent from "./LandscapeComponent";
 import LandscapeSpatialGrid from "./LandscapeSpatialGrid";
 import {
+    parse16BitPngBuffer,
     parse16BitPngBufferToGPUTexture
 } from "../../../utils/texture/textureParser/parse16BitPngBuffer/parse16BitPngBuffer";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
@@ -40,6 +41,7 @@ export class LandscapeTileStreamer {
     #pendingQueue: LandscapeComponent[] = [];
     #loadingMap: Map<string, boolean> = new Map();
     #loadedMap: Map<string, any> = new Map();
+    #cpuHeightMap: Map<string, any> = new Map();
     #failedMap: Map<string, number> = new Map(); // key -> last failed timestamp (ms)
 
     constructor(redGPUContext: RedGPUContext, spatialGrid: LandscapeSpatialGrid, loadingRadius: number = 2500.0) {
@@ -206,11 +208,17 @@ export class LandscapeTileStreamer {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const buffer = await response.arrayBuffer();
+            const cpuParsed = await parse16BitPngBuffer(buffer.slice(0));
             const parsed = await parse16BitPngBufferToGPUTexture(this.#redGPUContext, buffer);
 
             if (parsed) {
                 console.log(`[LandscapeTileStreamer ✅] Tile (${key}) loaded successfully! (${parsed.width}x${parsed.height})`);
                 this.#loadedMap.set(key, parsed.gpuTexture);
+                if (cpuParsed) {
+                    this.#cpuHeightMap.set(key, cpuParsed);
+                    // 🍃 새로운 VHT 타일 고도가 수신되면 식생 인스턴스의 Y 고도를 실시간 자동 재동기화
+                    (this as any).landscape?.foliageManager?.realignAllHeights();
+                }
                 this.#failedMap.delete(key);
 
                 if (this.#vhtAtlasTexture && this.#vhtAtlasTexture.gpuTexture) {
@@ -273,6 +281,44 @@ export class LandscapeTileStreamer {
             this.#loadingMap.delete(key);
         }
     }
+
+    /**
+     * [KO] 월드 좌표 (x, z) 위치의 VHT 16비트 높이값과 heightScale을 정밀 산출하여 Y 고도를 반환합니다.
+     */
+    getHeightAt(x: number, z: number): number {
+        const halfW = this.#worldSizeX * 0.5;
+        const halfZ = this.#worldSizeX * 0.5; // symmetrical square grid
+
+        const normU = (x + halfW) / this.#worldSizeX;
+        const normV = (z + halfZ) / this.#worldSizeX;
+
+        if (normU < 0.0 || normU > 1.0 || normV < 0.0 || normV > 1.0) {
+            return 0.0;
+        }
+
+        const countX = this.#componentCountX;
+        const col = Math.min(countX - 1, Math.max(0, Math.floor(normU * countX)));
+        const row = Math.min(countX - 1, Math.max(0, Math.floor(normV * countX)));
+        const key = `${col}_${row}`;
+
+        const tileData = this.#cpuHeightMap.get(key);
+        if (!tileData) {
+            return 0.0;
+        }
+
+        const localU = (normU * countX) - col;
+        const localV = (normV * countX) - row;
+
+        const px = Math.min(tileData.width - 1, Math.max(0, Math.floor(localU * tileData.width)));
+        const py = Math.min(tileData.height - 1, Math.max(0, Math.floor(localV * tileData.height)));
+        const idx = py * tileData.width + px;
+
+        const rawVal = tileData.pixels[idx] || 0;
+        const ratio = rawVal / 65535.0;
+
+        return ratio * this.#heightScale;
+    }
 }
+
 
 export default LandscapeTileStreamer;

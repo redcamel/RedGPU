@@ -136,7 +136,8 @@ export class Landscape extends Object3DContainer {
         this.#maxLODLevel = maxLODLevel;
         this.#wireframe = options.wireframe ?? false;
         this.#lodColoration = options.lodColoration ?? false;
-        this.#tileStreamer = new LandscapeTileStreamer(redGPUContext, this.#spatialGrid, options.loadingRadius ?? 2500.0);
+        this.#tileStreamer = new LandscapeTileStreamer(redGPUContext, this.#spatialGrid, options?.loadingRadius ?? 2500.0);
+        (this.#tileStreamer as any).landscape = this;
         if (options.tileUrlResolver) {
             this.#tileStreamer.tileUrlResolver = options.tileUrlResolver;
         }
@@ -195,6 +196,14 @@ export class Landscape extends Object3DContainer {
     }
 
     /**
+     * [KO] 월드 좌표 (x, z) 위치의 VHT 지형 고도 및 heightScale이 정밀 반영된 실제 높이 Y를 반환합니다.
+     * [EN] Returns the actual Y altitude of world coordinates (x, z) reflecting VHT terrain height and heightScale.
+     */
+    getHeightAt(x: number, z: number): number {
+        return this.#tileStreamer.getHeightAt(x, z);
+    }
+
+    /**
      * [KO] Multi-LOD Batching 인스턴싱으로 전체 지형 타일을 디스패치하고 RenderViewStateData 통계를 기록합니다 (Zero-GC).
      */
     render(view: any, passEncoder?: GPURenderPassEncoder): void {
@@ -222,6 +231,11 @@ export class Landscape extends Object3DContainer {
                 updateTargetUniform(material, 'textureScale', material.textureScale || [1, 1]);
                 material.dirtyTextureTransform = false;
             }
+        }
+
+        // [KO] 식생 인스턴스 렌더링 디스패치 (식생 종류가 존재할 때만 실행)
+        if (this.#foliageManager?.hasFoliageTypes) {
+            this.#foliageManager.render(view, renderPassEncoder);
         }
 
         const instanceBuffer = this.#instanceBuffer;
@@ -281,9 +295,6 @@ export class Landscape extends Object3DContainer {
                 renderResults.numTriangles += (lodRange.indexCount / 3) * instanceCount;
             }
         }
-
-        // [KO] 지형 드로우콜 완료 후 식생 인스턴스 렌더링 디스패치
-        this.#foliageManager?.render(view, renderPassEncoder);
     }
 
     get worldSize(): [number, number] {
@@ -391,6 +402,10 @@ export class Landscape extends Object3DContainer {
 
     set heightScale(val: number) {
         this.#heightScale = val;
+        this.#tileStreamer.setTerrainConfig(val, this.#worldSizeX, this.#componentCountX);
+        if (this.#foliageManager?.hasFoliageTypes) {
+            this.#foliageManager.realignAllHeights();
+        }
     }
 
     /** [KO] Virtual Heightfield Texture (VHT) 아틀라스 DirectTexture 레퍼런스 */
@@ -543,8 +558,10 @@ export class Landscape extends Object3DContainer {
             ?? camera?.camera?.frustumPlanes
             ?? null;
 
-        // 식생 시스템 Culling & FadeFactor 매 프레임 실시간 갱신
-        this.#foliageManager?.update([camX, camY, camZ]);
+        // 식생 시스템 Culling & FadeFactor 매 프레임 실시간 갱신 (등록된 식생 종이 있을 때만)
+        if (this.#foliageManager?.hasFoliageTypes) {
+            this.#foliageManager.update([camX, camY, camZ]);
+        }
 
         this.#spatialGrid.getCellCoordinates(camX, camZ, this.#tempCellBuffer);
         this.#tileStreamer.update(camX, camZ);

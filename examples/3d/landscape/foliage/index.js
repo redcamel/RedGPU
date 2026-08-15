@@ -41,12 +41,15 @@ RedGPU.init(
         });
         scene.addLandscape(landscape);
 
-        // 5. LandscapeFoliageManager 생성
-        const foliageManager = new RedGPU.Display.LandscapeFoliageManager(landscape);
+        // 5. Landscape 내부 foliageManager 가져오기
+        const foliageManager = landscape.foliageManager;
 
-        // 테스트용 눈에 잘 띄는 거대 식생 메시
+        // 테스트용 PBRMaterial 식생 메시
         const grassGeometry = new RedGPU.Primitive.Box(redGPUContext, 8.0, 40.0, 8.0);
-        const grassMaterial = new RedGPU.Material.ColorMaterial(redGPUContext, '#00ff66');
+        const grassMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+        grassMaterial.baseColorFactor = [0.24, 0.66, 0.28, 1.0];
+        grassMaterial.roughnessFactor = 0.7;
+        grassMaterial.metallicFactor = 0.0;
         const dummyGrassMesh = new RedGPU.Display.Mesh(redGPUContext, grassGeometry, grassMaterial);
 
         // 6. 식생 종류(Grass) 등록

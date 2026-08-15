@@ -117,6 +117,29 @@ export class FoliageType {
         this.instanceBuffer.uploadToGPU(targetCount);
     }
 
+    /**
+     * [KO] VHT 타일 로딩 완료 시 배치된 식생 인스턴스들의 Y 고도를 최신 지형 고도 및 heightScale에 정밀 재동기화합니다.
+     */
+    realignHeights(getHeightAt?: (x: number, z: number) => number): void {
+        const activeCount = this.activeInstanceCount;
+        if (activeCount <= 0) return;
+
+        const data = this.instanceBuffer.dataBuffer;
+        const stride = this.instanceBuffer.strideFloats;
+
+        for (let i = 0; i < activeCount; i++) {
+            const offset = i * stride;
+            const posX = data[offset];
+            const posZ = data[offset + 2];
+
+            if (getHeightAt) {
+                data[offset + 1] = getHeightAt(posX, posZ);
+            }
+        }
+
+        this.instanceBuffer.uploadToGPU(activeCount);
+    }
+
     destroy(): void {
         this.instanceBuffer.destroy();
     }

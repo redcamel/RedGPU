@@ -1,29 +1,152 @@
 import RedGPUContext from '../../../context/RedGPUContext';
+import ResourceManager from '../../../resources/core/resourceManager/ResourceManager';
 import Landscape from '../core/Landscape';
-import {FoliageType, FoliageTypeOptions} from './FoliageType';
+import { FoliageType, FoliageTypeOptions } from './FoliageType';
 import foliageInstancedWGSL from './shader/foliageInstanced.wgsl';
 
 /**
  * LandscapeFoliageManager
  * Landscape 지형 엔진 연동 및 수십만 개 식생 인스턴스 렌더링 총괄 매니저
+ * (RedGPU 정석 AntialiasingManager.msaaID 연동 및 PBRMaterial 프래그먼트 셰이더 바인딩)
  */
 export class LandscapeFoliageManager {
     readonly landscape: Landscape;
     readonly redGPUContext: RedGPUContext;
 
+    private vertexShaderModule: GPUShaderModule | null = null;
     private foliageTypes: Map<string, FoliageType> = new Map();
-    private renderPipeline: GPURenderPipeline | null = null;
-    private shaderModule: GPUShaderModule | null = null;
+    private pipelineCache: Map<string, GPURenderPipeline> = new Map();
 
     constructor(landscape: Landscape) {
         this.landscape = landscape;
         this.redGPUContext = landscape.redGPUContext;
-        this.initPipeline();
+        this.initVertexShader();
     }
 
     /**
-     * 식생 종류(Species) 추가 (Grass, Tree, Rock 등)
+     * 식생 버텍스 인스턴싱 전용 WGSL 버텍스 셰이더 모듈 초기화
      */
+    private initVertexShader(): void {
+        const resourceManager = this.redGPUContext.resourceManager;
+        let module = resourceManager.getGPUShaderModule('FoliageInstancedVertexShader_Module');
+        if (!module) {
+            module = resourceManager.createGPUShaderModule('FoliageInstancedVertexShader_Module', {
+                code: foliageInstancedWGSL,
+            });
+        }
+        this.vertexShaderModule = module;
+    }
+
+    /**
+     * RedGPU 정석 AntialiasingManager.msaaID 및 Material(PBRMaterial 등) 호환 GPURenderPipeline 반환/생성
+     */
+    private getOrCreatePipeline(material: any, sampleCount: number, msaaID: string): GPURenderPipeline | null {
+        if (!material) return null;
+
+        const baseKey = material.uuid || material.name || material.constructor.name;
+        const pipelineKey = `${baseKey}_${msaaID}`;
+
+        if (this.pipelineCache.has(pipelineKey)) {
+            return this.pipelineCache.get(pipelineKey)!;
+        }
+
+        const resourceManager = this.redGPUContext.resourceManager;
+        const gpuDevice: GPUDevice = this.redGPUContext.gpuDevice;
+        const preferredFormat = navigator.gpu.getPreferredCanvasFormat();
+
+        // 1. 머티리얼 셰이더 상태 갱신
+        if (material.dirtyPipeline || !material.fragmentShaderModule) {
+            material._updateFragmentState();
+        }
+
+        const fragmentModule = material.fragmentShaderModule || material.gpuRenderInfo?.fragmentShaderModule;
+        if (!fragmentModule || !this.vertexShaderModule) return null;
+
+        // 2. Geometry & Instance Vertex Buffer Layouts
+        const geometryBufferLayout: GPUVertexBufferLayout = {
+            arrayStride: (3 + 3 + 2) * 4,
+            attributes: [
+                { shaderLocation: 0, offset: 0, format: 'float32x3' },  // position
+                { shaderLocation: 1, offset: 12, format: 'float32x3' }, // normal
+                { shaderLocation: 2, offset: 24, format: 'float32x2' }, // uv
+            ],
+        };
+
+        const instanceBufferLayout: GPUVertexBufferLayout = {
+            arrayStride: 12 * 4,
+            stepMode: 'instance',
+            attributes: [
+                { shaderLocation: 3, offset: 0, format: 'float32x3' },  // instancePos
+                { shaderLocation: 4, offset: 12, format: 'float32x4' }, // instanceRotQuat
+                { shaderLocation: 5, offset: 28, format: 'float32x3' }, // instanceScale
+                { shaderLocation: 6, offset: 40, format: 'float32x2' }, // instanceExtra (fade, subId)
+            ],
+        };
+
+        // 3. RedGPU 명시적 PipelineLayout 구축 (Group 0: System, Group 2: Material)
+        const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
+        const materialBindGroupLayout = material.gpuRenderInfo?.fragmentUniformBindGroup?.layout 
+                                     || resourceManager.getGPUBindGroupLayout(material.constructor.name);
+
+        const bindGroupLayouts: GPUBindGroupLayout[] = [systemBindGroupLayout];
+        if (materialBindGroupLayout) {
+            bindGroupLayouts[2] = materialBindGroupLayout;
+        } else {
+            const emptyLayout = gpuDevice.createBindGroupLayout({ label: 'EmptyMaterialBindGroupLayout', entries: [] });
+            bindGroupLayouts[2] = emptyLayout;
+        }
+
+        const pipelineLayout = gpuDevice.createPipelineLayout({
+            label: `FoliagePipelineLayout_${pipelineKey}`,
+            bindGroupLayouts: bindGroupLayouts,
+        });
+
+        // 4. RedGPU G-Buffer 3개 타겟 및 RedGPU 정석 MSAA sampleCount 호환 파이프라인 구축
+        const pipelineDescriptor: GPURenderPipelineDescriptor = {
+            label: `FoliageRenderPipeline_${pipelineKey}`,
+            layout: pipelineLayout,
+            vertex: {
+                module: this.vertexShaderModule,
+                entryPoint: 'mainInput',
+                buffers: [geometryBufferLayout, instanceBufferLayout],
+            },
+            fragment: {
+                module: fragmentModule,
+                entryPoint: 'main',
+                targets: [
+                    { format: 'rgba16float' },   // Target 0: GBuffer COLOR
+                    { format: preferredFormat }, // Target 1: GBuffer NORMAL
+                    { format: 'rgba16float' }    // Target 2: GBuffer MOTION_VECTOR
+                ],
+            },
+            primitive: {
+                topology: 'triangle-list',
+                cullMode: 'none',
+            },
+            depthStencil: {
+                format: 'depth32float',
+                depthWriteEnabled: true,
+                depthCompare: 'less',
+            },
+            multisample: {
+                count: sampleCount,
+            },
+        };
+
+        try {
+            const pipeline = gpuDevice.createRenderPipeline(pipelineDescriptor);
+            this.pipelineCache.set(pipelineKey, pipeline);
+            return pipeline;
+        } catch (e) {
+            console.warn('[LandscapeFoliageManager] Pipeline creation fallback:', e);
+            return null;
+        }
+    }
+
+    get hasFoliageTypes(): boolean {
+        return this.foliageTypes.size > 0;
+    }
+
     addFoliageType(options: FoliageTypeOptions): FoliageType {
         if (this.foliageTypes.has(options.name)) {
             console.warn(`[LandscapeFoliageManager] FoliageType with name '${options.name}' already exists.`);
@@ -35,9 +158,6 @@ export class LandscapeFoliageManager {
         return foliageType;
     }
 
-    /**
-     * 식생 종류 제거
-     */
     removeFoliageType(name: string): boolean {
         const foliageType = this.foliageTypes.get(name);
         if (foliageType) {
@@ -47,23 +167,14 @@ export class LandscapeFoliageManager {
         return false;
     }
 
-    /**
-     * 식생 종류 조회
-     */
     getFoliageType(name: string): FoliageType | undefined {
         return this.foliageTypes.get(name);
     }
 
-    /**
-     * 등록된 모든 식생 종류 반환
-     */
     getAllFoliageTypes(): FoliageType[] {
         return Array.from(this.foliageTypes.values());
     }
 
-    /**
-     * 매 프레임 카메라 위치 기반 Culling 및 Distance Scale Fade 갱신
-     */
     update(cameraPosition: [number, number, number]): void {
         const camX = cameraPosition[0];
         const camY = cameraPosition[1];
@@ -110,24 +221,44 @@ export class LandscapeFoliageManager {
         });
     }
 
-    /**
-     * 지정 범위 내 무작위 생성
-     */
     populateAllFoliageTypes(
         countPerType: number,
         bounds: { minX: number; minZ: number; maxX: number; maxZ: number },
         getHeightAt?: (x: number, z: number) => number
     ): void {
+        const heightFn = getHeightAt || ((x, z) => this.landscape.getHeightAt(x, z));
         this.foliageTypes.forEach((foliageType) => {
-            foliageType.populateRandomInstances(countPerType, bounds, getHeightAt);
+            foliageType.populateRandomInstances(countPerType, bounds, heightFn);
         });
     }
 
     /**
-     * 렌더 패스 엔코더에 인스턴스드 드로우콜 바인딩 및 디스패치
+     * 타일 텍스처 로딩 완료 시 전체 식생 인스턴스들의 Y 고도를 지형 표면에 정밀 재동기화합니다.
+     */
+    realignAllHeights(getHeightAt?: (x: number, z: number) => number): void {
+        const heightFn = getHeightAt || ((x, z) => this.landscape.getHeightAt(x, z));
+        this.foliageTypes.forEach((foliageType) => {
+            foliageType.realignHeights(heightFn);
+        });
+    }
+
+    /**
+     * 렌더 패스 엔코더에 인스턴스드 드로우콜 바인딩 및 디스패치 (RedGPU 정석 msaaID & View3D 매칭)
      */
     render(view: any, passEncoder: GPURenderPassEncoder): void {
         if (!passEncoder || this.foliageTypes.size === 0) return;
+
+        // Group 0: Camera System Uniform BindGroup
+        const systemBG = view?.systemUniform_Vertex_UniformBindGroup 
+                      || view?.rawView?.systemUniform_Vertex_UniformBindGroup
+                      || (this.redGPUContext as any)?.systemUniform_Vertex_UniformBindGroup;
+
+        // RedGPU 정석 AntialiasingManager.msaaID 및 sampleCount 추출
+        const view3D = view?.view || view;
+        const antialiasingManager = view3D?.antialiasingManager || (this.redGPUContext as any)?.antialiasingManager;
+        const useMSAA = antialiasingManager?.useMSAA ?? true;
+        const msaaID = antialiasingManager?.msaaID ?? 'default_msaa_id';
+        const sampleCount = useMSAA ? 4 : 1;
 
         this.foliageTypes.forEach((foliageType) => {
             const activeCount = foliageType.activeInstanceCount;
@@ -138,7 +269,8 @@ export class LandscapeFoliageManager {
 
             const mesh = foliageType.mesh;
             const geometry = mesh?.geometry;
-            if (!geometry) return;
+            const material = mesh?.material;
+            if (!geometry || !material) return;
 
             const vertexBufferObj = geometry.vertexBuffer;
             const indexBufferObj = geometry.indexBuffer;
@@ -147,15 +279,21 @@ export class LandscapeFoliageManager {
 
             if (!vertexGPUBuffer) return;
 
-            // Pipeline 바인딩
-            if (this.renderPipeline) {
-                passEncoder.setPipeline(this.renderPipeline);
+            // RedGPU 정석 msaaID 호환 파이프라인 생성/가져오기
+            const pipeline = this.getOrCreatePipeline(material, sampleCount, msaaID);
+            if (!pipeline) return;
+
+            passEncoder.setPipeline(pipeline);
+
+            // Group 0: System Uniform BindGroup
+            if (systemBG) {
+                passEncoder.setBindGroup(0, systemBG);
             }
 
-            // 카메라 유니폼 바인드 그룹 (View3D 유니폼 바인딩)
-            const cameraBindGroup = view?.systemUniform_Vertex_UniformBindGroup || view?.view3D?.systemUniform_Vertex_UniformBindGroup;
-            if (cameraBindGroup) {
-                passEncoder.setBindGroup(0, cameraBindGroup);
+            // Group 2: Material Uniform BindGroup (PBRMaterial, StandardMaterial 등)
+            const matUniformBG = material.gpuRenderInfo?.fragmentUniformBindGroup;
+            if (matUniformBG) {
+                passEncoder.setBindGroup(2, matUniformBG);
             }
 
             // Buffer 0: Geometry Vertex Buffer
@@ -174,79 +312,9 @@ export class LandscapeFoliageManager {
         });
     }
 
-    /**
-     * 리소스 해제
-     */
     destroy(): void {
         this.foliageTypes.forEach((type) => type.destroy());
         this.foliageTypes.clear();
-    }
-
-    /**
-     * Foliage Instanced WGSL 렌더 파이프라인 생성
-     */
-    private initPipeline(): void {
-        const gpuDevice: GPUDevice = this.redGPUContext.gpuDevice;
-
-        this.shaderModule = gpuDevice.createShaderModule({
-            label: 'FoliageInstancedShader_Module',
-            code: foliageInstancedWGSL,
-        });
-
-        // Buffer 0: Mesh Geometry (Position, Normal, UV)
-        const geometryBufferLayout: GPUVertexBufferLayout = {
-            arrayStride: (3 + 3 + 2) * 4, // 32 bytes
-            attributes: [
-                {shaderLocation: 0, offset: 0, format: 'float32x3'},  // position
-                {shaderLocation: 1, offset: 12, format: 'float32x3'}, // normal
-                {shaderLocation: 2, offset: 24, format: 'float32x2'}, // uv
-            ],
-        };
-
-        // Buffer 1: Instance Attributes (Pos, RotQuat, Scale, Extra)
-        const instanceBufferLayout: GPUVertexBufferLayout = {
-            arrayStride: 12 * 4, // 48 bytes
-            stepMode: 'instance',
-            attributes: [
-                {shaderLocation: 3, offset: 0, format: 'float32x3'},  // instancePos
-                {shaderLocation: 4, offset: 12, format: 'float32x4'}, // instanceRotQuat
-                {shaderLocation: 5, offset: 28, format: 'float32x3'}, // instanceScale
-                {shaderLocation: 6, offset: 40, format: 'float32x2'}, // instanceExtra (fade, subId)
-            ],
-        };
-
-        const pipelineDescriptor: GPURenderPipelineDescriptor = {
-            label: 'FoliageInstanced_RenderPipeline',
-            layout: 'auto',
-            vertex: {
-                module: this.shaderModule,
-                entryPoint: 'mainInput',
-                buffers: [geometryBufferLayout, instanceBufferLayout],
-            },
-            fragment: {
-                module: this.shaderModule,
-                entryPoint: 'mainFragment',
-                targets: [
-                    {
-                        format: navigator.gpu.getPreferredCanvasFormat(),
-                    },
-                ],
-            },
-            primitive: {
-                topology: 'triangle-list',
-                cullMode: 'none',
-            },
-            depthStencil: {
-                format: 'depth24plus',
-                depthWriteEnabled: true,
-                depthCompare: 'less',
-            },
-        };
-
-        try {
-            this.renderPipeline = gpuDevice.createRenderPipeline(pipelineDescriptor);
-        } catch (e) {
-            console.warn('[LandscapeFoliageManager] Standard pipeline creation fallback:', e);
-        }
+        this.pipelineCache.clear();
     }
 }

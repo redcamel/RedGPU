@@ -159,12 +159,17 @@ RedGPU.init(
 
         scene.addLandscape(landscape);
 
-        // 5. LandscapeFoliageManager 생성 및 눈에 잘 띄는 거대 식생 테스트 파퓰레이션
-        const foliageManager = new RedGPU.Display.LandscapeFoliageManager(landscape);
+        // 5. Landscape 내부 foliageManager 사용 및 PBRMaterial 식생 테스트 파퓰레이션
+        const foliageManager = landscape.foliageManager;
+        const grassMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
+        grassMaterial.baseColorFactor = [0.24, 0.66, 0.28, 1.0];
+        grassMaterial.roughnessFactor = 0.7;
+        grassMaterial.metallicFactor = 0.0;
+
         const dummyGrassMesh = new RedGPU.Display.Mesh(
             redGPUContext,
             new RedGPU.Primitive.Box(redGPUContext, 8.0, 40.0, 8.0),
-            new RedGPU.Material.ColorMaterial(redGPUContext, '#00ff66')
+            grassMaterial
         );
 
         const grassType = foliageManager.addFoliageType({
@@ -178,13 +183,12 @@ RedGPU.init(
             randomRotationY: true
         });
 
-        // 지형 4,000m x 4,000m 영역에 5,000개 무작위 파퓰레이션
-        grassType.populateRandomInstances(5000, {
-            minX: -2000,
-            minZ: -2000,
-            maxX: 2000,
-            maxZ: 2000
-        });
+        // 지형 4,000m x 4,000m 영역에 VHT 고도 및 heightScale을 정밀 반영한 5,000개 파퓰레이션
+        grassType.populateRandomInstances(
+            5000,
+            {minX: -2000, minZ: -2000, maxX: 2000, maxZ: 2000},
+            (x, z) => landscape.getHeightAt(x, z)
+        );
 
         // 5-1. 정식 RedGPU 디버거 클래스 인스턴스 생성 (2D SpatialGrid, VHT Heightmap, VNT Normal Atlas, HUD 디버거)
         const hudDebugger = new RedGPU.Display.LandscapeHUDDebugger(landscape, controller, {
@@ -358,9 +362,10 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                     grassType.options.fadeStartDistance = ev.value;
                 });
                 folderFoliage.addButton({title: '🔄 Populate 10,000 Grass Instances'}).on('click', () => {
-                    grassType.populateRandomInstances(10000, {
-                        minX: -2000, minZ: -2000, maxX: 2000, maxZ: 2000
-                    });
+                    foliageManager.populateAllFoliageTypes(
+                        5000,
+                        {minX: -2000, minZ: -2000, maxX: 2000, maxZ: 2000}
+                    );
                     config.foliageCount = grassType.activeInstanceCount;
                     pane.refresh();
                 });
