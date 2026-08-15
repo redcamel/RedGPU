@@ -12,15 +12,15 @@ export class FoliageInstanceBuffer {
     // Zero-GC 재사용 TypedArray
     readonly dataBuffer: Float32Array;
 
-    private redGPUContext: RedGPUContext;
-    private gpuBuffer: GPUBuffer | null = null;
+    #redGPUContext: RedGPUContext;
+    #gpuBuffer: GPUBuffer | null = null;
 
     constructor(redGPUContext: RedGPUContext, maxInstances: number = 50000) {
-        this.redGPUContext = redGPUContext;
+        this.#redGPUContext = redGPUContext;
         this.maxInstances = maxInstances;
         this.dataBuffer = new Float32Array(this.maxInstances * this.strideFloats);
 
-        this.initGPUBuffer();
+        this.#initGPUBuffer();
     }
 
     /**
@@ -57,14 +57,14 @@ export class FoliageInstanceBuffer {
      * 활성화된 인스턴스 개수만큼만 GPU 버퍼로 업로드
      */
     uploadToGPU(activeCount: number): void {
-        if (!this.gpuBuffer || activeCount <= 0) return;
+        if (!this.#gpuBuffer || activeCount <= 0) return;
 
         const uploadCount = Math.min(activeCount, this.maxInstances);
         const uploadBytes = uploadCount * this.strideBytes;
 
-        const gpuDevice: GPUDevice = this.redGPUContext.gpuDevice;
+        const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
         gpuDevice.queue.writeBuffer(
-            this.gpuBuffer,
+            this.#gpuBuffer,
             0,
             this.dataBuffer.buffer,
             0,
@@ -73,21 +73,21 @@ export class FoliageInstanceBuffer {
     }
 
     getGPUBuffer(): GPUBuffer | null {
-        return this.gpuBuffer;
+        return this.#gpuBuffer;
     }
 
     destroy(): void {
-        if (this.gpuBuffer) {
-            this.gpuBuffer.destroy();
-            this.gpuBuffer = null;
+        if (this.#gpuBuffer) {
+            this.#gpuBuffer.destroy();
+            this.#gpuBuffer = null;
         }
     }
 
-    private initGPUBuffer(): void {
-        const gpuDevice: GPUDevice = this.redGPUContext.gpuDevice;
+    #initGPUBuffer(): void {
+        const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
         const requiredSize = this.dataBuffer.byteLength;
 
-        this.gpuBuffer = gpuDevice.createBuffer({
+        this.#gpuBuffer = gpuDevice.createBuffer({
             label: 'FoliageInstanceBuffer_GPUBuffer',
             size: Math.max(requiredSize, 64),
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,

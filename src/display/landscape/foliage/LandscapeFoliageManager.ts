@@ -13,35 +13,25 @@ export class LandscapeFoliageManager {
     readonly landscape: Landscape;
     readonly redGPUContext: RedGPUContext;
 
-    private vertexShaderModule: GPUShaderModule | null = null;
-    private foliageTypes: Map<string, FoliageType> = new Map();
-    private pipelineCache: Map<string, GPURenderPipeline> = new Map();
+    #vertexShaderModule: GPUShaderModule | null = null;
+    #foliageTypes: Map<string, FoliageType> = new Map();
+    #pipelineCache: Map<string, GPURenderPipeline> = new Map();
 
     constructor(landscape: Landscape) {
         this.landscape = landscape;
         this.redGPUContext = landscape.redGPUContext;
-        this.initVertexShader();
+        this.#initVertexShader();
     }
 
-    /**
-     * 식생 버텍스 인스턴싱 전용 WGSL 버텍스 셰이더 모듈 초기화
-     */
-    private initVertexShader(): void {
-        const resourceManager = this.redGPUContext.resourceManager;
-        let module = resourceManager.getGPUShaderModule('FoliageInstancedVertexShader_Module');
-        if (!module) {
-            module = resourceManager.createGPUShaderModule('FoliageInstancedVertexShader_Module', {
-                code: foliageInstancedWGSL,
-            });
-        }
-        this.vertexShaderModule = module;
+    get hasFoliageTypes(): boolean {
+        return this.#foliageTypes.size > 0;
     }
 
     /**
      * 렌더 패스 엔코더에 인스턴스드 드로우콜 바인딩 및 디스패치 (RedGPU 정석 msaaID & View3D 매칭)
      */
     render(view: any, passEncoder: GPURenderPassEncoder): void {
-        if (!passEncoder || this.foliageTypes.size === 0) return;
+        if (!passEncoder || this.#foliageTypes.size === 0) return;
 
         // Group 0: Camera System Uniform BindGroup
         const systemBG = view?.systemUniform_Vertex_UniformBindGroup
@@ -55,7 +45,7 @@ export class LandscapeFoliageManager {
         const msaaID = antialiasingManager?.msaaID ?? 'default_msaa_id';
         const sampleCount = useMSAA ? 4 : 1;
 
-        this.foliageTypes.forEach((foliageType) => {
+        this.#foliageTypes.forEach((foliageType) => {
             const activeCount = foliageType.activeInstanceCount;
             if (activeCount <= 0) return;
 
@@ -79,7 +69,7 @@ export class LandscapeFoliageManager {
             const strideBytes = rawStride > 16 ? rawStride : rawStride * 4;
 
             // RedGPU 정석 msaaID & StrideBytes 호환 파이프라인 생성/가져오기
-            const pipeline = this.getOrCreatePipeline(material, sampleCount, msaaID, strideBytes);
+            const pipeline = this.#getOrCreatePipeline(material, sampleCount, msaaID, strideBytes);
             if (!pipeline) return;
 
             passEncoder.setPipeline(pipeline);
@@ -111,36 +101,32 @@ export class LandscapeFoliageManager {
         });
     }
 
-    get hasFoliageTypes(): boolean {
-        return this.foliageTypes.size > 0;
-    }
-
     addFoliageType(options: FoliageTypeOptions): FoliageType {
-        if (this.foliageTypes.has(options.name)) {
+        if (this.#foliageTypes.has(options.name)) {
             console.warn(`[LandscapeFoliageManager] FoliageType with name '${options.name}' already exists.`);
-            return this.foliageTypes.get(options.name)!;
+            return this.#foliageTypes.get(options.name)!;
         }
 
         const foliageType = new FoliageType(this.redGPUContext, options);
-        this.foliageTypes.set(options.name, foliageType);
+        this.#foliageTypes.set(options.name, foliageType);
         return foliageType;
     }
 
     removeFoliageType(name: string): boolean {
-        const foliageType = this.foliageTypes.get(name);
+        const foliageType = this.#foliageTypes.get(name);
         if (foliageType) {
             foliageType.destroy();
-            return this.foliageTypes.delete(name);
+            return this.#foliageTypes.delete(name);
         }
         return false;
     }
 
     getFoliageType(name: string): FoliageType | undefined {
-        return this.foliageTypes.get(name);
+        return this.#foliageTypes.get(name);
     }
 
     getAllFoliageTypes(): FoliageType[] {
-        return Array.from(this.foliageTypes.values());
+        return Array.from(this.#foliageTypes.values());
     }
 
     update(cameraPosition: [number, number, number]): void {
@@ -148,7 +134,7 @@ export class LandscapeFoliageManager {
         const camY = cameraPosition[1];
         const camZ = cameraPosition[2];
 
-        this.foliageTypes.forEach((foliageType) => {
+        this.#foliageTypes.forEach((foliageType) => {
             const activeCount = foliageType.activeInstanceCount;
             if (activeCount <= 0) return;
 
@@ -195,7 +181,7 @@ export class LandscapeFoliageManager {
         getHeightAt?: (x: number, z: number) => number
     ): void {
         const heightFn = getHeightAt || ((x, z) => this.landscape.getHeightAt(x, z));
-        this.foliageTypes.forEach((foliageType) => {
+        this.#foliageTypes.forEach((foliageType) => {
             foliageType.populateRandomInstances(countPerType, bounds, heightFn);
         });
     }
@@ -205,22 +191,42 @@ export class LandscapeFoliageManager {
      */
     realignAllHeights(getHeightAt?: (x: number, z: number) => number): void {
         const heightFn = getHeightAt || ((x, z) => this.landscape.getHeightAt(x, z));
-        this.foliageTypes.forEach((foliageType) => {
+        this.#foliageTypes.forEach((foliageType) => {
             foliageType.realignHeights(heightFn);
         });
+    }
+
+    destroy(): void {
+        this.#foliageTypes.forEach((type) => type.destroy());
+        this.#foliageTypes.clear();
+        this.#pipelineCache.clear();
+    }
+
+    /**
+     * 식생 버텍스 인스턴싱 전용 WGSL 버텍스 셰이더 모듈 초기화
+     */
+    #initVertexShader(): void {
+        const resourceManager = this.redGPUContext.resourceManager;
+        let module = resourceManager.getGPUShaderModule('FoliageInstancedVertexShader_Module');
+        if (!module) {
+            module = resourceManager.createGPUShaderModule('FoliageInstancedVertexShader_Module', {
+                code: foliageInstancedWGSL,
+            });
+        }
+        this.#vertexShaderModule = module;
     }
 
     /**
      * RedGPU 정석 AntialiasingManager.msaaID 및 Material(PBRMaterial 등) 호환 GPURenderPipeline 반환/생성
      */
-    private getOrCreatePipeline(material: any, sampleCount: number, msaaID: string, strideBytes: number = 48): GPURenderPipeline | null {
+    #getOrCreatePipeline(material: any, sampleCount: number, msaaID: string, strideBytes: number = 48): GPURenderPipeline | null {
         if (!material) return null;
 
         const baseKey = material.uuid || material.name || material.constructor.name;
         const pipelineKey = `${baseKey}_${msaaID}_stride${strideBytes}`;
 
-        if (this.pipelineCache.has(pipelineKey)) {
-            return this.pipelineCache.get(pipelineKey)!;
+        if (this.#pipelineCache.has(pipelineKey)) {
+            return this.#pipelineCache.get(pipelineKey)!;
         }
 
         const resourceManager = this.redGPUContext.resourceManager;
@@ -233,7 +239,7 @@ export class LandscapeFoliageManager {
         }
 
         const fragmentModule = material.fragmentShaderModule || material.gpuRenderInfo?.fragmentShaderModule;
-        if (!fragmentModule || !this.vertexShaderModule) return null;
+        if (!fragmentModule || !this.#vertexShaderModule) return null;
 
         // 2. RedGPU Primitive Geometry Stride (12 floats * 4 bytes = 48 bytes: Pos3, Normal3, UV2, Tangent4)
         const geometryBufferLayout: GPUVertexBufferLayout = {
@@ -279,7 +285,7 @@ export class LandscapeFoliageManager {
             label: `FoliageRenderPipeline_${pipelineKey}`,
             layout: pipelineLayout,
             vertex: {
-                module: this.vertexShaderModule,
+                module: this.#vertexShaderModule,
                 entryPoint: 'mainInput',
                 buffers: [geometryBufferLayout, instanceBufferLayout],
             },
@@ -308,17 +314,11 @@ export class LandscapeFoliageManager {
 
         try {
             const pipeline = gpuDevice.createRenderPipeline(pipelineDescriptor);
-            this.pipelineCache.set(pipelineKey, pipeline);
+            this.#pipelineCache.set(pipelineKey, pipeline);
             return pipeline;
         } catch (e) {
             console.warn('[LandscapeFoliageManager] Pipeline creation fallback:', e);
             return null;
         }
-    }
-
-    destroy(): void {
-        this.foliageTypes.forEach((type) => type.destroy());
-        this.foliageTypes.clear();
-        this.pipelineCache.clear();
     }
 }

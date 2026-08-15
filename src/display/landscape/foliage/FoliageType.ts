@@ -31,7 +31,7 @@ export class FoliageType {
     readonly options: Required<FoliageTypeOptions>;
     readonly instanceBuffer: FoliageInstanceBuffer;
 
-    private _activeInstanceCount: number = 0;
+    #activeInstanceCount: number = 0;
 
     constructor(redGPUContext: RedGPUContext, options: FoliageTypeOptions) {
         this.redGPUContext = redGPUContext;
@@ -58,7 +58,7 @@ export class FoliageType {
     }
 
     get activeInstanceCount(): number {
-        return this._activeInstanceCount;
+        return this.#activeInstanceCount;
     }
 
     /**
@@ -79,7 +79,7 @@ export class FoliageType {
         const scaleDiffZ = maxScale[2] - minScale[2];
 
         // 지오메트리 Bounding Box 분석을 통한 하단 바닥 오프셋 자동 추출
-        const bottomOffset = this.getGeometryBottomOffset();
+        const bottomOffset = this.#getGeometryBottomOffset();
 
         let spawnedCount = 0;
         let attempts = 0;
@@ -92,7 +92,7 @@ export class FoliageType {
 
             // 경사각(Slope) 필터 검사
             if (getHeightAt && (minSlope > 0 || maxSlope < 90)) {
-                const slopeAngle = this.getSlopeAngleAt(posX, posZ, getHeightAt);
+                const slopeAngle = this.#getSlopeAngleAt(posX, posZ, getHeightAt);
                 if (slopeAngle < minSlope || slopeAngle > maxSlope) {
                     continue; // 생장 조건을 벗어나는 경사면 거름
                 }
@@ -117,7 +117,7 @@ export class FoliageType {
             spawnedCount++;
         }
 
-        this._activeInstanceCount = spawnedCount;
+        this.#activeInstanceCount = spawnedCount;
         this.instanceBuffer.uploadToGPU(spawnedCount);
     }
 
@@ -125,14 +125,14 @@ export class FoliageType {
      * [KO] VHT 타일 로딩 완료 시 배치된 식생 인스턴스들의 Y 고도를 지형 표면에 정밀 재동기화합니다.
      */
     realignHeights(getHeightAt?: (x: number, z: number) => number): void {
-        const activeCount = this._activeInstanceCount;
+        const activeCount = this.#activeInstanceCount;
         if (activeCount <= 0 || !getHeightAt) return;
 
         const data = this.instanceBuffer.dataBuffer;
         const stride = this.instanceBuffer.strideFloats;
 
         // 지오메트리 Bounding Box 분석을 통한 하단 바닥 오프셋 자동 추출
-        const bottomOffset = this.getGeometryBottomOffset();
+        const bottomOffset = this.#getGeometryBottomOffset();
 
         for (let i = 0; i < activeCount; i++) {
             const offset = i * stride;
@@ -151,7 +151,7 @@ export class FoliageType {
     /**
      * 지오메트리 버텍스 버퍼를 분석하여 메시의 바닥(Bottom Y Base) 피봇 오프셋을 100% 자동 산출합니다.
      */
-    private getGeometryBottomOffset(): number {
+    #getGeometryBottomOffset(): number {
         const geometry = this.options.mesh?.geometry;
         if (!geometry || !geometry.vertexBuffer) return 0.0;
 
@@ -177,7 +177,7 @@ export class FoliageType {
     /**
      * 지형 수치 미분을 통해 위치 (x, z)에서의 경사각(Slope Angle in degrees)을 정밀 계산합니다.
      */
-    private getSlopeAngleAt(x: number, z: number, getHeightAt: (x: number, z: number) => number): number {
+    #getSlopeAngleAt(x: number, z: number, getHeightAt: (x: number, z: number) => number): number {
         const delta = 1.0; // 1m 샘플링 갭
         const hCenter = getHeightAt(x, z);
         const hRight = getHeightAt(x + delta, z);
