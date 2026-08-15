@@ -28,6 +28,8 @@ const DEFAULT_LOD_COLORS: [number, number, number, number][] = [
     [0.93, 0.94, 0.95, 1.0]  // LOD 7: White
 ];
 
+const ZERO_COLOR_STATIC: [number, number, number, number] = [0, 0, 0, 0];
+
 /**
  * [KO] SpatialGrid $O(1)$ 공간 변환 및 Multi-LOD Batching Instanced Rendering 지원 기반 Landscape 지형 시스템 클래스입니다 (Pure Terrain System Manager).
  * [EN] Landscape terrain system class based on SpatialGrid O(1) spatial transformation and Multi-LOD Batching Instanced Rendering (Pure Terrain System Manager).
@@ -637,8 +639,6 @@ export class Landscape extends Object3DContainer {
         const lodColorationActive = this.#lodColoration;
         const lodColorsRGBA = this.#lodColorsRGBA;
 
-        const ZERO_COLOR: [number, number, number, number] = [0, 0, 0, 0];
-
         for (let i = 0; i < count; i++) {
             const comp = components[i];
             const activeLOD = comp.lodLevel;
@@ -650,7 +650,7 @@ export class Landscape extends Object3DContainer {
 
             const colorRGBA = lodColorationActive
                 ? lodColorsRGBA[activeLOD]
-                : ZERO_COLOR;
+                : ZERO_COLOR_STATIC;
 
             instanceBuf.writeLODInstanceData(
                 activeLOD,

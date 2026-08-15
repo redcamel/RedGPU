@@ -21,6 +21,7 @@ export class LandscapeInstanceBuffer {
     #lodFirstInstanceList: Int32Array;
     #lodInstanceCountList: Int32Array;
     #lodCursorList: Int32Array;
+    #totalActiveInstanceCount: number = 0;
 
     constructor(redGPUContext: RedGPUContext, maxComponentCount: number, maxLODLevel: number) {
         this.#redGPUContext = redGPUContext;
@@ -70,6 +71,7 @@ export class LandscapeInstanceBuffer {
             this.#lodCursorList[lod] = cursor;
             cursor += count;
         }
+        this.#totalActiveInstanceCount = cursor;
     }
 
     /**
@@ -120,12 +122,16 @@ export class LandscapeInstanceBuffer {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#instanceStorageBuffer) return;
 
+        const activeCount = this.#totalActiveInstanceCount;
+        if (activeCount <= 0) return;
+
+        // ⚡ GPU writeBuffer 최적화: 유효한 활성 타일 영역만 슬라이싱 전송
         gpuDevice.queue.writeBuffer(
             this.#instanceStorageBuffer,
             0,
             this.#instanceFloatData.buffer,
             0,
-            this.#maxComponentCount * 48
+            activeCount * 48
         );
     }
 
