@@ -207,7 +207,11 @@ export class LandscapeFoliageManager {
             const boundingRadius = (mesh as any)?.boundingAABB?.volume ?? 2.0;
             const bottomOffset = foliageType.getGeometryBottomOffset();
 
-            // 3. Culling Uniform 갱신 (GPU VHT 고도 정보 및 카메라/절두체 전달)
+            // 3. Indirect Draw Command Buffer 원자적 instanceCount 카운터를 매 프레임 0으로 깨끗이 초기화 (20 bytes)
+            const indexOrVertexCount = geometry.indexBuffer ? geometry.indexBuffer.indexCount : (geometry.vertexBuffer ? geometry.vertexBuffer.vertexCount : 0);
+            buffer.resetIndirectCount(indexOrVertexCount);
+
+            // 4. Culling Uniform 갱신 (GPU VHT 고도 정보 및 카메라/절두체 전달)
             buffer.updateCullingUniforms(
                 camX, camY, z,
                 cullingDist, fadeStartDist, activeCount, boundingRadius,
