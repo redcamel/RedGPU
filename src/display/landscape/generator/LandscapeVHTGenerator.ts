@@ -11,6 +11,9 @@ export class LandscapeVHTGenerator {
     #redGPUContext: RedGPUContext;
     #computePipeline: GPUComputePipeline | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
+    #uniformBufferPool: GPUBuffer[] = [];
+    #poolIndex: number = 0;
+    #lastFrameId: number = -1;
     #uniformArray: Uint32Array;
 
     constructor(redGPUContext: RedGPUContext) {
@@ -20,7 +23,7 @@ export class LandscapeVHTGenerator {
     }
 
     /**
-     * [KO] 단일 타일 GPU 텍스처 데이터를 GPU Compute Pass를 실행하여 r32float VHT 아틀라스 텍스처의 [pixelX, pixelZ] 영역에 베이킹합니다 (Zero-GC).
+     * [KO] 단일 타일 GPU 텍스처 데이터를 GPU Compute Pass를 실행하여 r32float VHT 아틀라스 텍스처의 [pixelX, pixelZ] 영역에 베이킹합니다 (Zero-GC Dynamic Frame-Pool).
      */
     bakeTileRegion(
         srcTileTexture: GPUTexture,
@@ -41,11 +44,23 @@ export class LandscapeVHTGenerator {
         arr[2] = pixelW;
         arr[3] = pixelH;
 
-        const uniformBuffer = device.createBuffer({
-            label: `LandscapeVHTBake_UniformBuffer_[${pixelX},${pixelZ}]`,
-            size: 16,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-        });
+        // ⚡ 프레임별 슬롯 자동 리셋 + 필요시 동적 자동 확장 (Auto-Expanding Frame Pool)
+        const curFrame = this.#redGPUContext.currentRequestAnimationFrame;
+        if (this.#lastFrameId !== curFrame) {
+            this.#lastFrameId = curFrame;
+            this.#poolIndex = 0;
+        }
+
+        if (this.#poolIndex >= this.#uniformBufferPool.length) {
+            this.#uniformBufferPool.push(device.createBuffer({
+                label: `LandscapeVHTBake_UniformBuffer_Slot_${this.#uniformBufferPool.length}`,
+                size: 16,
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+            }));
+        }
+
+        const uniformBuffer = this.#uniformBufferPool[this.#poolIndex++];
+
         device.queue.writeBuffer(uniformBuffer, 0, arr.buffer, 0, 16);
 
         const srcView = srcTileTexture.createView();
@@ -87,6 +102,15 @@ export class LandscapeVHTGenerator {
     #initComputeResources(): void {
         const device = this.#redGPUContext.gpuDevice;
         const resourceManager = this.#redGPUContext.resourceManager;
+
+        this.#uniformBufferPool = [];
+        for (let i = 0; i < 16; i++) {
+            this.#uniformBufferPool.push(device.createBuffer({
+                label: `LandscapeVHTBake_UniformBuffer_Slot_${i}`,
+                size: 16,
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+            }));
+        }
 
         let shaderModule = resourceManager.getGPUShaderModule('LandscapeVHTBakeComputeShaderModule');
         if (!shaderModule) {

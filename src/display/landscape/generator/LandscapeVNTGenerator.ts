@@ -11,7 +11,9 @@ export class LandscapeVNTGenerator {
     #redGPUContext: RedGPUContext;
     #computePipeline: GPUComputePipeline | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
-    #uniformBuffer: GPUBuffer | null = null;
+    #uniformBufferPool: GPUBuffer[] = [];
+    #poolIndex: number = 0;
+    #lastFrameId: number = -1;
     #uniformArray: Float32Array;
 
     constructor(redGPUContext: RedGPUContext) {
@@ -56,11 +58,23 @@ export class LandscapeVNTGenerator {
         arr[6] = heightScale;
         arr[7] = texelWorldSize;
 
-        const uniformBuffer = device.createBuffer({
-            label: `LandscapeVNTBake_UniformBuffer_[${bakeX},${bakeZ}]`,
-            size: 48,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-        });
+        // ⚡ 프레임별 슬롯 자동 리셋 + 필요시 동적 자동 확장 (Auto-Expanding Frame Pool)
+        const curFrame = this.#redGPUContext.currentRequestAnimationFrame;
+        if (this.#lastFrameId !== curFrame) {
+            this.#lastFrameId = curFrame;
+            this.#poolIndex = 0;
+        }
+
+        if (this.#poolIndex >= this.#uniformBufferPool.length) {
+            this.#uniformBufferPool.push(device.createBuffer({
+                label: `LandscapeVNTBake_UniformBuffer_Slot_${this.#uniformBufferPool.length}`,
+                size: 48,
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+            }));
+        }
+
+        const uniformBuffer = this.#uniformBufferPool[this.#poolIndex++];
+
         device.queue.writeBuffer(uniformBuffer, 0, arr.buffer, 0, 48);
 
         const bindGroup = device.createBindGroup({
@@ -102,6 +116,15 @@ export class LandscapeVNTGenerator {
         const device = this.#redGPUContext.gpuDevice;
         const resourceManager = this.#redGPUContext.resourceManager;
 
+        this.#uniformBufferPool = [];
+        for (let i = 0; i < 16; i++) {
+            this.#uniformBufferPool.push(device.createBuffer({
+                label: `LandscapeVNTBake_UniformBuffer_Slot_${i}`,
+                size: 48,
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+            }));
+        }
+
         let shaderModule = resourceManager.getGPUShaderModule('LandscapeVNTBakeComputeShaderModule');
         if (!shaderModule) {
             shaderModule = resourceManager.createGPUShaderModule('LandscapeVNTBakeComputeShaderModule', {
@@ -142,12 +165,6 @@ export class LandscapeVNTGenerator {
                 module: shaderModule,
                 entryPoint: 'main'
             }
-        });
-
-        this.#uniformBuffer = device.createBuffer({
-            label: 'LandscapeVNTBake_UniformBuffer',
-            size: 48,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });
     }
 }

@@ -13,6 +13,17 @@ export interface ParsedImageData {
     height: number;
 }
 
+// Zero-GC 정적 재사용 핑퐁 행 버퍼 (Static Ping-Pong Row Buffers)
+let g_rowBufA = new Uint8Array(8192);
+let g_rowBufB = new Uint8Array(8192);
+
+function ensureRowBufferSize(size: number): void {
+    if (g_rowBufA.length < size) {
+        g_rowBufA = new Uint8Array(size);
+        g_rowBufB = new Uint8Array(size);
+    }
+}
+
 /**
  * [KO] ArrayBuffer 형태의 16비트 PNG 데이터를 원본 알고리즘과 100% 완전히 동일하게 파싱하여 Uint16Array 픽셀 데이터를 추출합니다.
  * [EN] Parses 16-bit PNG data from ArrayBuffer 100% identically to the original algorithm and extracts Uint16Array pixel data.
@@ -95,18 +106,22 @@ export async function parse16BitPngBuffer(buffer: ArrayBuffer, flipY: boolean = 
         const stride = 1 + width * bytesPerPixel;
         const outPixels = new Uint16Array(width * height);
 
-        let prevRow = new Uint8Array(width * bytesPerPixel);
+        const rowByteLength = width * bytesPerPixel;
+        ensureRowBufferSize(rowByteLength);
 
-        // ★ 원본 TerrainTileSystem.ts의 #parse16BitPngBuffer 알고리즘 1:1 100% 정밀 복원
+        let prevRow = g_rowBufA;
+        let curRow = g_rowBufB;
+        prevRow.fill(0, 0, rowByteLength);
+
+        // ★ Zero-GC 핑퐁 행 버퍼(Static Ping-Pong Row Buffer) 알고리즘 (매 행 임시 객체/Subarray 생성 100% 소멸)
         for (let y = 0; y < height; y++) {
             const rowStart = y * stride;
             const filterType = decompressedData[rowStart];
-            const rowData = decompressedData.subarray(rowStart + 1, rowStart + stride);
-            const unfilteredRow = new Uint8Array(width * bytesPerPixel);
+            const dataOffset = rowStart + 1;
 
-            for (let i = 0; i < rowData.length; i++) {
-                const x = rowData[i];
-                const a = i >= bytesPerPixel ? unfilteredRow[i - bytesPerPixel] : 0;
+            for (let i = 0; i < rowByteLength; i++) {
+                const x = decompressedData[dataOffset + i];
+                const a = i >= bytesPerPixel ? curRow[i - bytesPerPixel] : 0;
                 const b = prevRow[i];
                 const c = i >= bytesPerPixel ? prevRow[i - bytesPerPixel] : 0;
 
@@ -118,7 +133,7 @@ export async function parse16BitPngBuffer(buffer: ArrayBuffer, flipY: boolean = 
                 } else if (filterType === 2) { // Up
                     reconstructed = (x + b);
                 } else if (filterType === 3) { // Average
-                    reconstructed = (x + Math.floor((a + b) / 2));
+                    reconstructed = (x + ((a + b) >> 1));
                 } else if (filterType === 4) { // Paeth
                     const p = a + b - c;
                     const pa = Math.abs(p - a);
@@ -129,21 +144,24 @@ export async function parse16BitPngBuffer(buffer: ArrayBuffer, flipY: boolean = 
                     else if (pb <= pc) pr = b;
                     reconstructed = (x + pr);
                 }
-                unfilteredRow[i] = reconstructed & 0xFF;
+                curRow[i] = reconstructed & 0xFF;
             }
-
-            prevRow = unfilteredRow;
 
             // Extract 16-bit values and normalize/pack to 16-bit format
             const targetY = flipY ? (height - 1 - y) : y;
             const rowOffset = targetY * width;
             for (let x = 0; x < width; x++) {
                 const sampleIdx = x * bytesPerPixel;
-                const highByte = unfilteredRow[sampleIdx];
-                const lowByte = unfilteredRow[sampleIdx + 1];
+                const highByte = curRow[sampleIdx];
+                const lowByte = curRow[sampleIdx + 1];
                 // PNG 16-bit is Big-Endian: (highByte << 8) | lowByte
                 outPixels[rowOffset + x] = (highByte << 8) | lowByte;
             }
+
+            // 핑퐁 버퍼 포인터 스와핑 (Zero-GC)
+            const temp = prevRow;
+            prevRow = curRow;
+            curRow = temp;
         }
 
         return {pixels: outPixels, width, height};

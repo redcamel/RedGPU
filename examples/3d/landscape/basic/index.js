@@ -216,15 +216,19 @@ RedGPU.init(
         let activeConfig = null;
 
         // 6. RedGPU 정식 Renderer 생성 및 매 프레임 실시간 HUD 추적 렌더 루프 시작 (60fps Real-time Tracking)
+        let frameCounter = 0;
         const renderer = new RedGPU.Renderer();
         const render = (time) => {
             landscape.update(controller, view.renderViewStateData);
-            hudDebugger.update(view.renderViewStateData);
-            spatialGridDebugger.update();
-            vhtDebugger.update();
-            vntDebugger.update();
+            if (frameCounter % 2 === 0) {
+                hudDebugger.update(view.renderViewStateData);
+                spatialGridDebugger.update();
+                vhtDebugger.update();
+                vntDebugger.update();
+            }
 
-            if (activeConfig && activePane) {
+            frameCounter++;
+            if (activeConfig && activePane && frameCounter % 15 === 0) {
                 activeConfig.foliageCount = grassType.activeInstanceCount;
                 activeConfig.renderedInstances = foliageManager.visibleInstanceCount;
                 activeConfig.activeChunksStr = `${foliageManager.activeChunkCount} / ${foliageManager.totalChunkCount}`;
