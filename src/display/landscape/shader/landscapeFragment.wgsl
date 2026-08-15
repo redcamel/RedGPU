@@ -70,7 +70,7 @@ struct MaterialUniforms {
 @group(2) @binding(6) var layerORMArray: texture_2d_array<f32>;
 @group(2) @binding(7) var layerWeightMapArray: texture_2d_array<f32>;
 
-fn computeLayerRawWeight(layer: LandscapeLayerParams, worldNormalY: f32, vertexHeight: f32) -> f32 {
+fn computeLayerRawWeightFast(layer: LandscapeLayerParams, slopeAngleDeg: f32, vertexHeight: f32) -> f32 {
     let blendMode = layer.blendMode;
     let minVal = layer.minVal;
     let maxVal = layer.maxVal;
@@ -78,8 +78,7 @@ fn computeLayerRawWeight(layer: LandscapeLayerParams, worldNormalY: f32, vertexH
 
     var val = 0.0;
     if (blendMode < 0.5) {
-        let slopeRad = acos(clamp(worldNormalY, -1.0, 1.0));
-        val = slopeRad * 57.295779513;
+        val = slopeAngleDeg;
     } else if (blendMode < 1.5) {
         val = vertexHeight + layer.heightOffset;
     } else {
@@ -122,6 +121,9 @@ fn main(inputData: InputData) -> OutputFragment {
     let sampledNormal = normalize(encodedNormal * 2.0 - vec3<f32>(1.0));
     var N: vec3<f32> = select(sampledNormal, vec3<f32>(0.0, 1.0, 0.0), length(encodedNormal) <= 0.001);
 
+    // ⚡ GPU acos() 역삼각함수 Pre-computation (루프 밖에서 픽셀당 1회만 계산)
+    let slopeAngleDeg = acos(clamp(N.y, -1.0, 1.0)) * 57.295779513;
+
     // Base Color & Albedo
     var baseColor = uniforms.color;
 
@@ -156,7 +158,7 @@ fn main(inputData: InputData) -> OutputFragment {
             let layerParams = uniforms.layers[i];
             if (layerParams.enabled <= 0.5) { continue; }
 
-            var layerW = computeLayerRawWeight(layerParams, N.y, inputData.vertexHeight);
+            var layerW = computeLayerRawWeightFast(layerParams, slopeAngleDeg, inputData.vertexHeight);
 
             let layerUV = globalUV * layerParams.uvScale + layerParams.uvOffset;
             let layerIdx = i32(i);
