@@ -82,15 +82,19 @@ export class FoliageType {
         getHeightAt?: (x: number, z: number) => number
     ): void {
         let targetBounds = bounds;
-        if (!targetBounds) {
-            const landscape = this.foliageManager?.landscape;
-            if (landscape) {
-                const worldSize = landscape.worldSize;
-                if (worldSize && worldSize[0] > 0 && worldSize[1] > 0) {
-                    const halfX = worldSize[0] * 0.5;
-                    const halfZ = worldSize[1] * 0.5;
-                    targetBounds = {minX: -halfX, minZ: -halfZ, maxX: halfX, maxZ: halfZ};
-                }
+        const landscape = this.foliageManager?.landscape;
+        if (landscape && landscape.worldSize && landscape.worldSize[0] > 0 && landscape.worldSize[1] > 0) {
+            const halfX = landscape.worldSize[0] * 0.5;
+            const halfZ = landscape.worldSize[1] * 0.5;
+            if (targetBounds) {
+                targetBounds = {
+                    minX: Math.max(-halfX, targetBounds.minX),
+                    maxX: Math.min(halfX, targetBounds.maxX),
+                    minZ: Math.max(-halfZ, targetBounds.minZ),
+                    maxZ: Math.min(halfZ, targetBounds.maxZ),
+                };
+            } else {
+                targetBounds = {minX: -halfX, minZ: -halfZ, maxX: halfX, maxZ: halfZ};
             }
         }
         if (!targetBounds) {

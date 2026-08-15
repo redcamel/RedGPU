@@ -51,16 +51,20 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
 
     let instance = rawInstanceBuffer[instanceIdx];
 
-    // 0. GPU VHT Atlas Direct Height Sampling (Zero CPU Overhead)
+    // 0. GPU VHT Atlas Direct Height Sampling (Zero CPU Overhead & World Bounds Culling)
     var realY = instance.posY;
     if (cullingUniforms.hasVHT == 1u && cullingUniforms.worldSizeX > 0.0) {
         let normU = (instance.posX + cullingUniforms.worldSizeX * 0.5) / cullingUniforms.worldSizeX;
         let normV = (instance.posZ + cullingUniforms.worldSizeX * 0.5) / cullingUniforms.worldSizeX;
-        if (normU >= 0.0 && normU <= 1.0 && normV >= 0.0 && normV <= 1.0) {
-            let sampleVal = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(normU, normV), 0.0).r;
-            let terrainY = sampleVal * cullingUniforms.heightScale;
-            realY = terrainY + cullingUniforms.bottomOffset * instance.scaleY;
+
+        // 🍃 지형 월드 경계 외부 식생 즉시 GPU 컬링 조기 탈출
+        if (normU < 0.0 || normU > 1.0 || normV < 0.0 || normV > 1.0) {
+            return;
         }
+
+        let sampleVal = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(normU, normV), 0.0).r;
+        let terrainY = sampleVal * cullingUniforms.heightScale;
+        realY = terrainY + cullingUniforms.bottomOffset * instance.scaleY;
     }
 
     let worldPos = vec3<f32>(instance.posX, realY, instance.posZ);
