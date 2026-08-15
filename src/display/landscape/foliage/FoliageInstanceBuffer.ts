@@ -172,14 +172,20 @@ export class FoliageInstanceBuffer {
         return this.#cullingUniformBuffer;
     }
 
+    #cachedVHTView: GPUTextureView | null = null;
+    #cachedVHTSampler: GPUSampler | null = null;
+
     getOrCreateCullingBindGroup(layout: GPUBindGroupLayout, vhtTextureView?: GPUTextureView, vhtSampler?: GPUSampler): GPUBindGroup | null {
         if (!this.#rawGPUBuffer || !this.#cullingUniformBuffer || !this.#culledGPUBuffer || !this.#indirectGPUBuffer) return null;
 
-        const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
-        const resourceManager = this.#redGPUContext.resourceManager;
-        const defaultView = resourceManager.emptyTexture2DArrayView;
-        const defaultSampler = resourceManager.basicSampler.gpuSampler;
+        const targetView = vhtTextureView || this.#redGPUContext.resourceManager.emptyTexture2DArrayView;
+        const targetSampler = vhtSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
 
+        if (this.#cullingBindGroup && this.#cachedVHTView === targetView && this.#cachedVHTSampler === targetSampler) {
+            return this.#cullingBindGroup;
+        }
+
+        const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
         this.#cullingBindGroup = gpuDevice.createBindGroup({
             label: 'FoliageCullingBindGroup',
             layout: layout,
@@ -188,10 +194,13 @@ export class FoliageInstanceBuffer {
                 {binding: 1, resource: {buffer: this.#cullingUniformBuffer}},
                 {binding: 2, resource: {buffer: this.#culledGPUBuffer}},
                 {binding: 3, resource: {buffer: this.#indirectGPUBuffer}},
-                {binding: 4, resource: vhtTextureView || defaultView},
-                {binding: 5, resource: vhtSampler || defaultSampler},
+                {binding: 4, resource: targetView},
+                {binding: 5, resource: targetSampler},
             ],
         });
+
+        this.#cachedVHTView = targetView;
+        this.#cachedVHTSampler = targetSampler;
         return this.#cullingBindGroup;
     }
 

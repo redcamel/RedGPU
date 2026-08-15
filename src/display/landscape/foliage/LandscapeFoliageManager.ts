@@ -140,66 +140,25 @@ export class LandscapeFoliageManager {
         return Array.from(this.#typeList);
     }
 
-    populateAllFoliageTypes(
-        countPerType: number,
-        bounds?: { minX: number; minZ: number; maxX: number; maxZ: number },
-        getHeightAt?: (x: number, z: number) => number
-    ): void {
-        let targetBounds = bounds;
-        if (!targetBounds && this.landscape) {
-            const worldSize = this.landscape.worldSize;
-            const halfX = (worldSize?.[0] || 2000) * 0.5;
-            const halfZ = (worldSize?.[1] || 2000) * 0.5;
-            targetBounds = {minX: -halfX, minZ: -halfZ, maxX: halfX, maxZ: halfZ};
-        }
-        if (!targetBounds) {
-            targetBounds = {minX: -1000, minZ: -1000, maxX: 1000, maxZ: 1000};
-        }
-        const heightFn = getHeightAt || this.#defaultGetHeightAt;
-        const typeList = this.#typeList;
-        const count = typeList.length;
-        for (let i = 0; i < count; i++) {
-            typeList[i].populateRandomInstances(countPerType, targetBounds, heightFn);
-        }
-    }
 
-    update(camX: number, camY: number, camZ: number, frustumPlanes?: number[][] | null): void;
+    #cachedVHTAtlasGPUTexture: GPUTexture | null = null;
+    #cachedVHTView: GPUTextureView | null = null;
 
-    update(cameraPosition: [number, number, number], renderViewStateData?: any): void;
-
-    update(cameraObj: any, renderViewStateData?: any): void;
-
-    update(cameraOrX?: any, renderViewStateDataOrY?: any, camZ?: number, frustumPlanesParam?: number[][] | null): void {
+    update(cameraObj: any, renderViewStateData?: any): void {
         const typeList = this.#typeList;
         const typeCount = typeList.length;
-        if (typeCount === 0) return;
+        if (typeCount === 0 || !cameraObj) return;
 
-        let camX = 0, camY = 0, z = 0;
-        let frustumPlanes: number[][] | null = null;
+        const camera = cameraObj;
+        const camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
+        const camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
+        const z = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
 
-        if (typeof cameraOrX === 'number') {
-            camX = cameraOrX;
-            camY = renderViewStateDataOrY;
-            z = camZ!;
-            frustumPlanes = frustumPlanesParam || null;
-        } else if (Array.isArray(cameraOrX)) {
-            camX = cameraOrX[0];
-            camY = cameraOrX[1];
-            z = cameraOrX[2];
-            frustumPlanes = renderViewStateDataOrY?.frustumPlanes || null;
-        } else if (cameraOrX) {
-            const camera = cameraOrX;
-            const renderViewStateData = renderViewStateDataOrY;
-            camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
-            camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
-            z = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
-
-            frustumPlanes = renderViewStateData?.frustumPlanes
-                ?? renderViewStateData?.view?.frustumPlanes
-                ?? camera?.frustumPlanes
-                ?? camera?.camera?.frustumPlanes
-                ?? null;
-        }
+        const frustumPlanes: number[][] | null = renderViewStateData?.frustumPlanes
+            ?? renderViewStateData?.view?.frustumPlanes
+            ?? camera?.frustumPlanes
+            ?? camera?.camera?.frustumPlanes
+            ?? null;
 
         for (let t = 0; t < typeCount; t++) {
             const foliageType = typeList[t];
@@ -229,6 +188,16 @@ export class LandscapeFoliageManager {
         const cullingPipeline = this.#cullingComputePipeline;
         const cullingBindGroupLayout = this.#cullingBindGroupLayout;
 
+        // VHT TextureView 1회 캐싱 (Zero-GC: 매 프레임 createView 스팸 방지)
+        const vhtAtlasTexture = this.landscape.vhtAtlasTexture;
+        const rawGPUTexture = vhtAtlasTexture?.gpuTexture || null;
+        if (rawGPUTexture && this.#cachedVHTAtlasGPUTexture !== rawGPUTexture) {
+            this.#cachedVHTAtlasGPUTexture = rawGPUTexture;
+            this.#cachedVHTView = rawGPUTexture.createView();
+        }
+        const vhtView = this.#cachedVHTView || undefined;
+        const vhtSampler = this.redGPUContext.resourceManager.basicSampler.gpuSampler;
+
         for (let t = 0; t < typeCount; t++) {
             const foliageType = typeList[t];
             const activeCount = foliageType.activeInstanceCount;
@@ -247,10 +216,7 @@ export class LandscapeFoliageManager {
             const worldSizeX = this.landscape.worldSize?.[0] ?? 0;
             const heightScale = this.landscape.heightScale ?? 500;
             const bottomOffset = foliageType.getGeometryBottomOffset();
-            const vhtAtlasTexture = this.landscape.vhtAtlasTexture;
-            const hasVHT = !!(vhtAtlasTexture && vhtAtlasTexture.gpuTexture);
-            const vhtView = vhtAtlasTexture?.gpuTexture?.createView();
-            const vhtSampler = this.redGPUContext.resourceManager.basicSampler.gpuSampler;
+            const hasVHT = !!rawGPUTexture;
 
             // 1. Culling Uniform 갱신 (GPU VHT 고도 정보 포함) & Indirect Count 리셋
             buffer.updateCullingUniforms(
@@ -261,15 +227,16 @@ export class LandscapeFoliageManager {
             );
             buffer.resetIndirectCount(elementCount);
 
-            // 2. Render Pass 생성 직전 Pre-Process Compute Pass 전처리 등록 (No Pipeline Stall)
+            // 2. Render Pass 생성 직전 Pre-Process Compute Pass 전처리 등록 (Zero-GC 바인딩)
             if (cullingPipeline && cullingBindGroupLayout) {
                 const cullingBindGroup = buffer.getOrCreateCullingBindGroup(cullingBindGroupLayout, vhtView, vhtSampler);
                 if (cullingBindGroup) {
+                    const workgroupSize = 64;
+                    const workgroupCount = Math.ceil(activeCount / workgroupSize);
+
                     this.redGPUContext.commandEncoderManager.addPreProcessComputePass('Foliage_GPUCulling_ComputePass', (computePass) => {
                         computePass.setPipeline(cullingPipeline);
                         computePass.setBindGroup(0, cullingBindGroup);
-                        const workgroupSize = 64;
-                        const workgroupCount = Math.ceil(activeCount / workgroupSize);
                         computePass.dispatchWorkgroups(workgroupCount);
                     });
                 }
