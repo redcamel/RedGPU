@@ -158,14 +158,9 @@ fn main(inputData: InputData) -> OutputFragment {
             let layerParams = uniforms.layers[i];
             if (layerParams.enabled <= 0.5) { continue; }
 
-            var layerW = computeLayerRawWeightFast(layerParams, slopeAngleDeg, inputData.vertexHeight);
-
-            let layerUV = globalUV * layerParams.uvScale + layerParams.uvOffset;
             let layerIdx = i32(i);
 
-            let uvDx = baseUvDx * layerParams.uvScale;
-            let uvDy = baseUvDy * layerParams.uvScale;
-
+            var layerW = 0.0;
             if (layerParams.blendMode >= 1.5) {
                 let weightMapSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, layerIdx, baseUvDx, baseUvDy);
                 let chIdx = u32(layerParams.weightMapChannelIndex + 0.5);
@@ -178,9 +173,15 @@ fn main(inputData: InputData) -> OutputFragment {
                     weightVal = select(weightMapSample.a, remainingWeight, isAlphaFull);
                 }
                 layerW = clamp(weightVal, 0.0, 1.0);
+            } else {
+                layerW = computeLayerRawWeightFast(layerParams, slopeAngleDeg, inputData.vertexHeight);
             }
 
             if (layerW <= 0.0001) { continue; }
+
+            let layerUV = globalUV * layerParams.uvScale + layerParams.uvOffset;
+            let uvDx = baseUvDx * layerParams.uvScale;
+            let uvDy = baseUvDy * layerParams.uvScale;
 
             let layerAlbedoSample = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, layerUV, layerIdx, uvDx, uvDy);
             let layerNormalRaw = textureSampleGrad(layerNormalArray, baseColorTextureSampler, layerUV, layerIdx, uvDx, uvDy).rgb * 2.0 - vec3<f32>(1.0);
