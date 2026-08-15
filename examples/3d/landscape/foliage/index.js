@@ -52,12 +52,12 @@ RedGPU.init(
         grassMaterial.metallicFactor = 0.0;
         const dummyGrassMesh = new RedGPU.Display.Mesh(redGPUContext, grassGeometry, grassMaterial);
 
-        // 6. 식생 종류(Grass) 등록
+        // 6. 식생 종류(Grass) 등록 (최대 1,000,000개 수용 가능)
         const grassType = foliageManager.addFoliageType({
             name: 'GrassSpecies',
             mesh: dummyGrassMesh,
             densityPer100m2: 50,
-            maxInstances: 20000,
+            maxInstances: 1000000,
             cullingDistance: 3000,
             fadeStartDistance: 2200,
             minScale: [2.0, 2.0, 2.0],
@@ -65,21 +65,16 @@ RedGPU.init(
             randomRotationY: true
         });
 
-        // 지형 내범위에 5,000개 식생 무작위 파퓰레이션 (Zero-GC)
-        grassType.populateRandomInstances(5000, {
-            minX: -1500,
-            minZ: -1500,
-            maxX: 1500,
-            maxZ: 1500
-        });
+        // 지형 전체 영역(4,000m x 4,000m)에 1,000,000개 식생 자동 파퓰레이션 (bounds 생략 시 worldSize 자동 연동)
+        grassType.populateRandomInstances(1000000);
 
-        // 7. 렌더 루프 (매 프레임 Culling & FadeFactor 갱신)
+        // 7. 렌더 루프 (매 프레임 Culling & FadeFactor 갱신 - Zero-GC)
         const renderer = new RedGPU.Renderer();
         const render = (time) => {
             landscape.update(controller, view.renderViewStateData);
 
             // 매 프레임 카메라 위치 기반 인스턴스 Culling & Distance Fade 갱신
-            foliageManager.update([controller.x, controller.y, controller.z]);
+            foliageManager.update(controller.x, controller.y, controller.z);
         };
         renderer.start(redGPUContext, render);
 
@@ -97,27 +92,38 @@ RedGPU.init(
 
                 folder.addBinding(config, 'instanceCount', {readonly: true, label: 'Active Instances'});
 
-                folder.addBinding(config, 'cullingDistance', {min: 50, max: 1000, step: 10, label: 'Culling Dist (m)'})
+                folder.addBinding(config, 'cullingDistance', {min: 100, max: 3000, step: 20, label: 'Culling Dist (m)'})
                     .on('change', (ev) => {
                         grassType.options.cullingDistance = ev.value;
                     });
 
                 folder.addBinding(config, 'fadeStartDistance', {
-                    min: 10,
-                    max: 800,
-                    step: 10,
+                    min: 50,
+                    max: 2500,
+                    step: 20,
                     label: 'Fade Start Dist (m)'
                 })
                     .on('change', (ev) => {
                         grassType.options.fadeStartDistance = ev.value;
                     });
 
-                folder.addButton({title: '🔄 Re-populate 10,000 Grass'}).on('click', () => {
-                    grassType.populateRandomInstances(10000, {
-                        minX: -1500,
-                        minZ: -1500,
-                        maxX: 1500,
-                        maxZ: 1500
+                folder.addButton({title: '🌿 Dense 500,000 Grass (Cam Area)'}).on('click', () => {
+                    grassType.populateRandomInstances(500000, {
+                        minX: -1000,
+                        minZ: -1000,
+                        maxX: 1000,
+                        maxZ: 1000
+                    });
+                    config.instanceCount = grassType.activeInstanceCount;
+                    pane.refresh();
+                });
+
+                folder.addButton({title: '🔄 Populate 1,000,000 Grass (World)'}).on('click', () => {
+                    grassType.populateRandomInstances(1000000, {
+                        minX: -2000,
+                        minZ: -2000,
+                        maxX: 2000,
+                        maxZ: 2000
                     });
                     config.instanceCount = grassType.activeInstanceCount;
                     pane.refresh();

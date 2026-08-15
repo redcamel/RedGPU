@@ -175,20 +175,16 @@ RedGPU.init(
         const grassType = foliageManager.addFoliageType({
             name: 'BasicGrass',
             mesh: dummyGrassMesh,
-            maxInstances: 100000,
-            cullingDistance: 3000,
-            fadeStartDistance: 2200,
+            maxInstances: 1000000,
+            cullingDistance: 12000,
+            fadeStartDistance: 9000,
             minScale: [2.0, 2.0, 2.0],
             maxScale: [3.0, 8.0, 3.0],
             randomRotationY: true
         });
 
-        // 지형 4,000m x 4,000m 영역에 VHT 고도 및 heightScale을 정밀 반영한 5,000개 파퓰레이션
-        grassType.populateRandomInstances(
-            5000,
-            {minX: -2000, minZ: -2000, maxX: 2000, maxZ: 2000},
-            (x, z) => landscape.getHeightAt(x, z)
-        );
+        // 지형 전체 영역(16,000m x 16,000m)에 1,000,000개 파퓰레이션 (bounds 생략 시 worldSize 100% 자동 연동)
+        grassType.populateRandomInstances(1000000);
 
         // 5-1. 정식 RedGPU 디버거 클래스 인스턴스 생성 (2D SpatialGrid, VHT Heightmap, VNT Normal Atlas, HUD 디버거)
         const hudDebugger = new RedGPU.Display.LandscapeHUDDebugger(landscape, controller, {
@@ -218,39 +214,39 @@ RedGPU.init(
             bottom: 12
         });
 
+        let activePane = null;
+        let activeConfig = null;
+
         // 6. RedGPU 정식 Renderer 생성 및 매 프레임 실시간 HUD 추적 렌더 루프 시작 (60fps Real-time Tracking)
         const renderer = new RedGPU.Renderer();
         const render = (time) => {
             landscape.update(controller, view.renderViewStateData);
-            foliageManager.update([controller.x, controller.y, controller.z]);
             hudDebugger.update(view.renderViewStateData);
             spatialGridDebugger.update();
             vhtDebugger.update();
             vntDebugger.update();
+
+            if (activeConfig && activePane) {
+                activeConfig.foliageCount = grassType.activeInstanceCount;
+                activeConfig.renderedInstances = foliageManager.visibleInstanceCount;
+                activeConfig.activeChunksStr = `${foliageManager.activeChunkCount} / ${foliageManager.totalChunkCount}`;
+                activePane.refresh();
+            }
         };
         renderer.start(redGPUContext, render);
 
         // 7. Landscape 모든 get/set 속성 및 2D 디버거 전면 제어 테스트 패널 렌더링
-        renderTestPane(redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight, [grassLayer, rockLayer, gravelLayer, leaveLayer], foliageManager, grassType);
+        activePane = renderTestPane(redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight, [grassLayer, rockLayer, gravelLayer, leaveLayer], foliageManager, grassType, (cfg) => {
+            activeConfig = cfg;
+        });
     }
 );
 
 /**
  * [KO] Landscape 모든 UE5 get/set 속성 전면 제어 테스트 패널(GUI)을 렌더링합니다.
  * [EN] Renders a test panel (GUI) for full control of all UE5 get/set properties of Landscape.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Landscape} landscape
- * @param {RedGPU.Camera.FreeController} controller
- * @param {RedGPU.Display.LandscapeHUDDebugger} hudDebugger
- * @param {RedGPU.Display.LandscapeSpatialGridDebugger} spatialGridDebugger
- * @param {RedGPU.Display.LandscapeVHTDebugger} vhtDebugger
- * @param {RedGPU.Display.LandscapeVNTDebugger} vntDebugger
- * @param {RedGPU.Resource.BitmapTexture} groundTexture
- * @param {RedGPU.Resource.BitmapTexture} ormTexture
- * @param {RedGPU.Light.DirectionalLight} directionalLight
- * @param {Array<RedGPU.LandscapeLayer>} layers
  */
-const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight, layers, foliageManager, grassType) => {
+const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight, layers, foliageManager, grassType, onConfigReady) => {
     const [wsX, wsZ] = landscape ? landscape.worldSize : [8000, 8000];
     const [tcX, tcZ] = landscape ? landscape.componentCount : [8, 8];
     const [tsX, tsZ] = landscape ? landscape.tileSize : [1000, 1000];
@@ -258,6 +254,8 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
     const config = {
         // Foliage Controls
         foliageCount: grassType ? grassType.activeInstanceCount : 0,
+        renderedInstances: foliageManager ? foliageManager.visibleInstanceCount : 0,
+        activeChunksStr: foliageManager ? `${foliageManager.activeChunkCount} / ${foliageManager.totalChunkCount}` : '0 / 0',
         foliageCullingDist: grassType ? grassType.options.cullingDistance : 600,
         foliageFadeStartDist: grassType ? grassType.options.fadeStartDistance : 400,
         // 1. Terrain Dimensions & Transform
@@ -341,30 +339,42 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
         gui: (pane) => {
             activePane = pane;
 
+            if (onConfigReady) onConfigReady(config);
+
             // Folder 0: Foliage System Controls
             if (grassType) {
                 const folderFoliage = pane.addFolder({title: '🌿 Foliage System Controls', expanded: true});
-                folderFoliage.addBinding(config, 'foliageCount', {readonly: true, label: 'Active Instances'});
+                folderFoliage.addBinding(config, 'foliageCount', {readonly: true, label: 'Total Allocated'});
+                folderFoliage.addBinding(config, 'renderedInstances', {
+                    readonly: true,
+                    label: 'Rendered (Frustum+Dist)'
+                });
+                folderFoliage.addBinding(config, 'activeChunksStr', {readonly: true, label: 'Active Chunks (500m)'});
                 folderFoliage.addBinding(config, 'foliageCullingDist', {
-                    min: 100,
-                    max: 2000,
-                    step: 20,
+                    min: 500,
+                    max: 16000,
+                    step: 100,
                     label: 'Culling Dist (m)'
                 }).on('change', (ev) => {
                     grassType.options.cullingDistance = ev.value;
                 });
                 folderFoliage.addBinding(config, 'foliageFadeStartDist', {
-                    min: 50,
-                    max: 1500,
-                    step: 20,
+                    min: 100,
+                    max: 14000,
+                    step: 100,
                     label: 'Fade Start Dist (m)'
                 }).on('change', (ev) => {
                     grassType.options.fadeStartDistance = ev.value;
                 });
-                folderFoliage.addButton({title: '🔄 Populate 10,000 Grass Instances'}).on('click', () => {
+                folderFoliage.addButton({title: '🌐 Populate 1,000,000 (16km Full World)'}).on('click', () => {
+                    foliageManager.populateAllFoliageTypes(1000000);
+                    config.foliageCount = grassType.activeInstanceCount;
+                    pane.refresh();
+                });
+                folderFoliage.addButton({title: '🌿 Dense 1,000,000 (Cam Area 2km)'}).on('click', () => {
                     foliageManager.populateAllFoliageTypes(
-                        5000,
-                        {minX: -2000, minZ: -2000, maxX: 2000, maxZ: 2000}
+                        1000000,
+                        {minX: -1000, minZ: -1000, maxX: 1000, maxZ: 1000}
                     );
                     config.foliageCount = grassType.activeInstanceCount;
                     pane.refresh();
