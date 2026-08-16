@@ -333,7 +333,7 @@ export abstract class ALandscapeDebugger {
      * [KO] 매 프레임 실시간 디버거 캔버스를 갱신 렌더링하는 추상 메서드입니다.
      * [EN] Abstract method rendering and updating the live debugger canvas every frame.
      */
-    public abstract update(): void;
+    abstract update(): void;
 }
 
 export default ALandscapeDebugger;

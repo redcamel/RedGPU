@@ -184,7 +184,7 @@ export class Landscape extends Object3DContainer {
         this.#tileStreamer.vhtGenerator = this.#vhtGenerator;
         this.#tileStreamer.vntGenerator = this.#vntGenerator;
 
-        this.initSystems(redGPUContext, options, componentCountX, componentCountZ, maxLODLevel, vhtSampler, vhtAtlasTexture, vntAtlasTexture);
+        this.#initSystems(redGPUContext, options, componentCountX, componentCountZ, maxLODLevel, vhtSampler, vhtAtlasTexture, vntAtlasTexture);
         this.#foliageManager = new LandscapeFoliageManager(this);
     }
 
@@ -605,7 +605,7 @@ export class Landscape extends Object3DContainer {
         });
     }
 
-    private initSystems(
+    #initSystems(
         redGPUContext: RedGPUContext,
         options: LandscapeOptions,
         componentCountX: number,

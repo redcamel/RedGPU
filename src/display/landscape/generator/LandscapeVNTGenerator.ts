@@ -1,27 +1,25 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import DirectTexture from "../../../resources/texture/DirectTexture";
 import vntBakeShaderCode from "../shader/landscapeVNTBake.wgsl";
-import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import ALandscapeAtlasGenerator from "./ALandscapeAtlasGenerator";
 
 /**
  * [KO] 16비트 고도맵 VHT 아틀라스로부터 GPU Compute Shader 기반 실시간 픽셀 노멀 VNT 아틀라스를 베이킹하는 매니저 클래스입니다.
  * [EN] Manager class that bakes real-time pixel normal VNT Atlas based on GPU Compute Shader from 16-bit Heightmap VHT Atlas.
  */
-export class LandscapeVNTGenerator {
-    #redGPUContext: RedGPUContext;
-    #computePipeline: GPUComputePipeline | null = null;
-    #bindGroupLayout: GPUBindGroupLayout | null = null;
-    #uniformBufferPool: GPUBuffer[] = [];
-    #poolIndex: number = 0;
-    #lastFrameId: number = -1;
+export class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
     #uniformArray: Float32Array;
 
     constructor(redGPUContext: RedGPUContext) {
-        this.#redGPUContext = redGPUContext;
+        super(redGPUContext, 'VNT');
         this.#uniformArray = new Float32Array(12); // 48 bytes for VNTBakeUniforms struct
         this.#initComputeResources();
     }
 
+    /**
+     * [KO] VHT 고도 아틀라스로부터 [pixelX, pixelZ] 타일 영역의 노멀을 계산하여 VNT 아틀라스에 베이킹합니다 (Zero-GC Dynamic Frame-Pool).
+     * [EN] Computes normals for [pixelX, pixelZ] tile region from VHT height atlas and bakes into VNT atlas (Zero-GC Dynamic Frame-Pool).
+     */
     bakeTileRegion(
         vhtAtlas: DirectTexture,
         vntAtlas: DirectTexture,
@@ -33,10 +31,10 @@ export class LandscapeVNTGenerator {
         worldSizeX: number,
         componentCountX: number
     ): void {
-        if (!this.#computePipeline || !this.#bindGroupLayout) return;
+        if (!this.computePipeline || !this.bindGroupLayout) return;
         if (!vhtAtlas?.gpuTexture || !vntAtlas?.gpuTexture) return;
 
-        const device = this.#redGPUContext.gpuDevice;
+        const device = this.redGPUContext.gpuDevice;
         const atlasW = vhtAtlas.gpuTexture.width;
         const atlasH = vhtAtlas.gpuTexture.height;
 
@@ -58,28 +56,12 @@ export class LandscapeVNTGenerator {
         arr[6] = heightScale;
         arr[7] = texelWorldSize;
 
-        // ⚡ 프레임별 슬롯 자동 리셋 + 필요시 동적 자동 확장 (Auto-Expanding Frame Pool)
-        const curFrame = this.#redGPUContext.currentRequestAnimationFrame;
-        if (this.#lastFrameId !== curFrame) {
-            this.#lastFrameId = curFrame;
-            this.#poolIndex = 0;
-        }
-
-        if (this.#poolIndex >= this.#uniformBufferPool.length) {
-            this.#uniformBufferPool.push(device.createBuffer({
-                label: `LandscapeVNTBake_UniformBuffer_Slot_${this.#uniformBufferPool.length}`,
-                size: 48,
-                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-            }));
-        }
-
-        const uniformBuffer = this.#uniformBufferPool[this.#poolIndex++];
-
+        const uniformBuffer = this.acquireUniformBuffer(48);
         device.queue.writeBuffer(uniformBuffer, 0, arr.buffer, 0, 48);
 
         const bindGroup = device.createBindGroup({
-            label: 'LandscapeVNTBake_BindGroup',
-            layout: this.#bindGroupLayout,
+            label: `Landscape_VNT_BindGroup_[${pixelX},${pixelZ}]`,
+            layout: this.bindGroupLayout,
             entries: [
                 {
                     binding: 0,
@@ -96,45 +78,15 @@ export class LandscapeVNTGenerator {
             ]
         });
 
-        const workgroupCountX = Math.ceil(bakeW / 16);
-        const workgroupCountY = Math.ceil(bakeH / 16);
-
-        this.#redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (commandEncoder) => {
-            const pass = commandEncoder.beginComputePass({
-                label: `LandscapeVNTBakeComputePass_[${pixelX},${pixelZ}]`
-            });
-            pass.setPipeline(this.#computePipeline);
-            pass.setBindGroup(0, bindGroup);
-            pass.dispatchWorkgroups(workgroupCountX, workgroupCountY);
-            pass.end();
-        });
-
+        this.dispatchBakePass(bindGroup, bakeW, bakeH, pixelX, pixelZ);
         console.log(`[LandscapeVNTGenerator 🌀] GPU VNT Normal Bake executed for region [${pixelX}, ${pixelZ}, ${pixelW}x${pixelH}]`);
     }
 
     #initComputeResources(): void {
-        const device = this.#redGPUContext.gpuDevice;
-        const resourceManager = this.#redGPUContext.resourceManager;
-
-        this.#uniformBufferPool = [];
-        for (let i = 0; i < 16; i++) {
-            this.#uniformBufferPool.push(device.createBuffer({
-                label: `LandscapeVNTBake_UniformBuffer_Slot_${i}`,
-                size: 48,
-                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-            }));
-        }
-
-        let shaderModule = resourceManager.getGPUShaderModule('LandscapeVNTBakeComputeShaderModule');
-        if (!shaderModule) {
-            shaderModule = resourceManager.createGPUShaderModule('LandscapeVNTBakeComputeShaderModule', {
-                code: vntBakeShaderCode
-            });
-        }
-
-        this.#bindGroupLayout = device.createBindGroupLayout({
-            label: 'LandscapeVNTBake_BindGroupLayout',
-            entries: [
+        this.initBaseComputePipeline(
+            'LandscapeVNTBakeComputeShaderModule',
+            vntBakeShaderCode,
+            [
                 {
                     binding: 0,
                     visibility: GPUShaderStage.COMPUTE,
@@ -150,22 +102,9 @@ export class LandscapeVNTGenerator {
                     visibility: GPUShaderStage.COMPUTE,
                     storageTexture: {access: 'write-only', format: 'rgba8unorm', viewDimension: '2d'}
                 }
-            ]
-        });
-
-        const pipelineLayout = device.createPipelineLayout({
-            label: 'LandscapeVNTBake_PipelineLayout',
-            bindGroupLayouts: [this.#bindGroupLayout]
-        });
-
-        this.#computePipeline = device.createComputePipeline({
-            label: 'LandscapeVNTBake_ComputePipeline',
-            layout: pipelineLayout,
-            compute: {
-                module: shaderModule,
-                entryPoint: 'main'
-            }
-        });
+            ],
+            48
+        );
     }
 }
 

@@ -10,6 +10,7 @@ import LandscapeMaterial from "./material/LandscapeMaterial";
 import LandscapeLayer from "./material/LandscapeLayer";
 import LandscapeVHTGenerator from "./generator/LandscapeVHTGenerator";
 import LandscapeVNTGenerator from "./generator/LandscapeVNTGenerator";
+import ALandscapeAtlasGenerator from "./generator/ALandscapeAtlasGenerator";
 import ALandscapeDebugger from "./debugger/ALandscapeDebugger";
 import LandscapeSpatialGridDebugger from "./debugger/LandscapeSpatialGridDebugger";
 import LandscapeVHTDebugger from "./debugger/LandscapeVHTDebugger";
@@ -35,6 +36,7 @@ export {
     LandscapeHUDDebugger,
     LandscapeVHTGenerator,
     LandscapeVNTGenerator,
+    ALandscapeAtlasGenerator,
     LandscapeTileStreamer,
     LANDSCAPE_BASE_GRID_SIZE,
     LandscapeFoliageManager,
