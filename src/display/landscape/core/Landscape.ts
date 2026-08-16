@@ -478,12 +478,17 @@ export class Landscape extends Object3DContainer {
     }
 
     #updateLandscapeUniforms(): void {
+        const lod0Dist = this.#lodDistancesSq.length > 0
+            ? Math.sqrt(this.#lodDistancesSq[0])
+            : Math.max(this.#tileSizeX, this.#tileSizeZ);
+
         this.#instanceBuffer?.updateUniforms(
             this.#heightScale,
             this.#worldSizeX,
             this.#worldSizeZ,
             this.#lodColoration,
             this.#componentCountX * this.#componentCountZ,
+            lod0Dist,
             this.#lodColorsRGBA
         );
     }

@@ -117,7 +117,7 @@ export class LandscapeInstanceBuffer {
     }
 
     /**
-     * [KO] Landscape 전역 Uniform(heightScale, worldSizeX, worldSizeZ, lodColoration, maxComponentCount, lodColors)을 GPU로 전송합니다 (160 bytes, Zero-GC).
+     * [KO] Landscape 전역 Uniform(heightScale, worldSizeX, worldSizeZ, lodColoration, maxComponentCount, lod0Distance, lodColors)을 GPU로 전송합니다 (160 bytes, Zero-GC).
      */
     updateUniforms(
         heightScale: number,
@@ -125,6 +125,7 @@ export class LandscapeInstanceBuffer {
         worldSizeZ: number,
         lodColoration: boolean,
         maxComponentCount: number,
+        lod0Distance: number,
         lodColorsRGBA: [number, number, number, number][]
     ): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
@@ -139,9 +140,9 @@ export class LandscapeInstanceBuffer {
         f32[3] = lodColoration ? 1.0 : 0.0;
 
         u32[4] = maxComponentCount;
-        u32[5] = 0;
-        u32[6] = 0;
-        u32[7] = 0;
+        f32[5] = lod0Distance;
+        f32[6] = 0;
+        f32[7] = 0;
 
         const colorCount = Math.min(8, lodColorsRGBA.length);
         for (let i = 0; i < 8; i++) {

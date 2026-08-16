@@ -14,9 +14,9 @@ struct LandscapeUniforms {
     worldSizeZ: f32,
     lodColoration: f32,
     maxComponentCount: u32,
-    pad0: u32,
-    pad1: u32,
-    pad2: u32,
+    lod0Distance: f32,
+    pad0: f32,
+    pad1: f32,
     lodColors: array<vec4<f32>, 8>,
 };
 

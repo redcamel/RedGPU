@@ -59,9 +59,9 @@ struct LandscapeUniforms {
     worldSizeZ: f32,
     lodColoration: f32,
     maxComponentCount: u32,
-    pad0: u32,
-    pad1: u32,
-    pad2: u32,
+    lod0Distance: f32,
+    pad0: f32,
+    pad1: f32,
     lodColors: array<vec4<f32>, 8>,
 };
 
@@ -260,31 +260,40 @@ fn main(inputData: InputData) -> OutputFragment {
     var metallicFactor: f32;
     var ambientOcclusion: f32;
 
-    // 🌟 하이브리드 LOD 적응형 셰이딩 (Hybrid LOD Adaptive Shading)
-    if (lod < 0.5) {
-        // 🌿 LOD 0: 100% Direct Layer 초고해상도 샘플링 (1cm 마이크로 디테일 완벽 보존)
-        let direct = computeDirectLayersPBR(globalUV, worldTileUV, baseN, inputData.vertexHeight, slopeAngleDeg, ddx_global, ddy_global, ddx_tile, ddy_tile);
-        albedo = direct.albedo;
-        N = direct.normal;
-        roughnessFactor = direct.roughness;
-        metallicFactor = direct.metallic;
-        ambientOcclusion = direct.ao;
-    }
-    else if (lod < 1.5) {
-        // 🔀 LOD 0.5 ~ 1.5: 부드러운 하이브리드 크로스페이드 (시각적 팝핑 0%)
+    // 🌟 하이브리드 LOD 적응형 셰이딩 (Hybrid LOD Distance-Based Continuous Adaptive Shading)
+    if (lod < 1.5) {
+        // 🌿 LOD 0 ~ 1: 카메라와의 실제 픽셀 거리 기반 부드러운 하이브리드 크로스페이드 (시각적 팝핑 0%)
+        let viewDist = distance(u_cameraPosition, input_vertexPosition);
+        let lod0Dist = max(1.0, landscapeInstanceUniforms.lod0Distance);
+        let fadeStart = lod0Dist * 0.7;
+        let fadeEnd = lod0Dist;
+        let fade = smoothstep(fadeStart, fadeEnd, viewDist);
+
         let direct = computeDirectLayersPBR(globalUV, worldTileUV, baseN, inputData.vertexHeight, slopeAngleDeg, ddx_global, ddy_global, ddx_tile, ddy_tile);
 
-        let vbtAlbedo = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
-        let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
-        let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, 0.0);
-        let vbtN = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), baseN, length(vbtNormalEncoded) <= 0.001));
+        if (fade <= 0.001) {
+            // 🌿 근거리 (LOD 0 영역): 100% Direct Layer 초고해상도 샘플링 (1cm 마이크로 디테일)
+            albedo = direct.albedo;
+            N = direct.normal;
+            roughnessFactor = direct.roughness;
+            metallicFactor = direct.metallic;
+            ambientOcclusion = direct.ao;
+        } else {
+            // 🔀 페이드 영역 (LOD 0 외곽 ~ LOD 1): Direct Layer <-> VBT 부드러운 크로스페이드
+            let vbtAlbedoRaw = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
+            let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
+            let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, 0.0);
 
-        let fade = smoothstep(0.5, 1.5, lod);
-        albedo = mix(direct.albedo, vbtAlbedo, fade);
-        N = normalize(mix(direct.normal, vbtN, fade));
-        roughnessFactor = mix(direct.roughness, max(0.04, vbtORM.g), fade);
-        metallicFactor = mix(direct.metallic, vbtORM.b, fade);
-        ambientOcclusion = mix(direct.ao, vbtORM.r, fade);
+            let isBaked = length(vbtAlbedoRaw) > 0.001;
+            let vbtAlbedo = select(uniforms.color.rgb, vbtAlbedoRaw, isBaked);
+            let vbtN = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), baseN, length(vbtNormalEncoded) <= 0.001));
+
+            albedo = mix(direct.albedo, vbtAlbedo, fade);
+            N = normalize(mix(direct.normal, vbtN, fade));
+            roughnessFactor = mix(direct.roughness, max(0.04, select(0.9, vbtORM.g, isBaked)), fade);
+            metallicFactor = mix(direct.metallic, select(0.0, vbtORM.b, isBaked), fade);
+            ambientOcclusion = mix(direct.ao, select(1.0, vbtORM.r, isBaked), fade);
+        }
     }
     else {
         // ⚡ LOD 2 ~ 7 (원경 250개 타일): $O(1)$ 초고속 VBT 2D Atlas 3-Tap 샘플링
