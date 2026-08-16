@@ -166,7 +166,8 @@ const getRequiredLimits = (adapter: GPUAdapter): Record<string, number> => {
         'maxComputeWorkgroupSizeX',
         'maxComputeWorkgroupSizeY',
         'maxComputeWorkgroupSizeZ',
-        'maxComputeWorkgroupsPerDimension'
+        'maxComputeWorkgroupsPerDimension',
+        'maxTextureArrayLayers'
     ];
     limitKeys.forEach(key => {
         if (key !== '__brand') {
