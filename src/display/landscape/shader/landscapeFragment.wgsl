@@ -242,11 +242,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let lod = inputData.lodLevel;
     let worldTileUV = inputData.uv; // 🌿 타일 로컬 격자 고정밀 UV (0.0 ~ 1.0)
 
-    // 🌟 VNT 기반 베이스 지형 표면 법선 로드 (Zero-Derivative, Mip 0 Level 즉시 샘플링)
-    let vntSample = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
-    let baseN = normalize(select(vntSample * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), length(vntSample) <= 0.001));
-    let slopeAngleDeg = acos(clamp(baseN.y, -1.0, 1.0)) * 57.295779513;
-
     var albedo: vec3<f32>;
     var N: vec3<f32>;
     var roughnessFactor: f32;
@@ -259,6 +254,11 @@ fn main(inputData: InputData) -> OutputFragment {
 
     // 🌟 하이브리드 LOD 적응형 셰이딩 (Hybrid LOD Distance-Based Continuous Adaptive Shading)
     if (lod < 1.5) {
+        // 🌿 근경(LOD 0~1)에서만 VNT 베이스 노멀 및 slopeAngleDeg acos() 삼각함수 지연 계산 (원경 낭비 0%)
+        let vntSample = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
+        let baseN = normalize(select(vntSample * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), length(vntSample) <= 0.001));
+        let slopeAngleDeg = acos(clamp(baseN.y, -1.0, 1.0)) * 57.295779513;
+
         // 🌿 LOD 0 ~ 1: 카메라와의 실제 픽셀 거리 기반 부드러운 하이브리드 크로스페이드 (시각적 팝핑 0%)
         let lod0Dist = max(1.0, sqrt(landscapeInstanceUniforms.lodDistancesSq[0].x));
         let fadeStart = lod0Dist * 0.7;
@@ -294,7 +294,7 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
     else {
-        // ⚡ LOD 2 ~ 7 (원경 250개 타일): 정수 밉 레벨 $O(1)$ 초고속 VBT 2D Atlas 3-Tap 즉시 샘플링 (캐시 히트율 99%)
+        // ⚡ LOD 2 ~ 7 (원경 250개 타일): VNT 페치 0회! acos() 삼각함수 0회! $O(1)$ 초고속 VBT 2D Atlas 3-Tap 즉시 샘플링
         let vbtAlbedoRaw = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
         let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
         let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, vbtMip);
@@ -303,7 +303,7 @@ fn main(inputData: InputData) -> OutputFragment {
         let vbtAlbedo = select(uniforms.color.rgb, vbtAlbedoRaw, isBaked);
 
         albedo = vbtAlbedo;
-        N = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), baseN, length(vbtNormalEncoded) <= 0.001));
+        N = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), length(vbtNormalEncoded) <= 0.001));
         roughnessFactor = max(0.04, select(0.9, vbtORM.g, isBaked));
         metallicFactor = select(0.0, vbtORM.b, isBaked);
         ambientOcclusion = select(1.0, vbtORM.r, isBaked);
