@@ -65,8 +65,7 @@ RedGPU.init(
             ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass_orm.jpg`),
             weightTexture: sharedSplatMap,
             weightChannel: 'R',
-            uvScaleDetail: [60, 60], // 🌿 근경(LOD 0/1) 1cm 마이크로 디테일 렌더링용
-            uvScaleAtlas: [8, 8],    // 🎨 원경(LOD 2+) VBT 아틀라스 베이킹용
+            uvScale: [30, 30], // 🌿 100m 타일 기준 3.3m 텍스처 반복 (풀잎 질감 최적화)
             blendMode: 'WEIGHT_MAP',
             roughness: 0.85,
             metallic: 0.0,
@@ -83,8 +82,7 @@ RedGPU.init(
             ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}gravel_orm.jpg`),
             weightTexture: sharedSplatMap,
             weightChannel: 'G',
-            uvScaleDetail: [50, 50],
-            uvScaleAtlas: [6, 6],
+            uvScale: [20, 20], // 🪨 100m 타일 기준 5m 텍스처 반복 (자갈/흙길 질감 최적화)
             blendMode: 'WEIGHT_MAP',
             roughness: 0.9,
             metallic: 0.0,
@@ -101,8 +99,7 @@ RedGPU.init(
             ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock_orm.jpg`),
             weightTexture: sharedSplatMap,
             weightChannel: 'B',
-            uvScaleDetail: [30, 30],
-            uvScaleAtlas: [4, 4], // 웅장한 바위산의 거대 지층 덩어리감
+            uvScale: [10, 10], // ⛰️ 100m 타일 기준 10m 텍스처 반복 (웅장한 암벽/지층 덩어리감 최적화)
             blendMode: 'WEIGHT_MAP',
             roughness: 0.7,
             metallic: 0.05,
@@ -119,8 +116,7 @@ RedGPU.init(
             ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}leave_orm.jpg`),
             weightTexture: sharedSplatMap,
             weightChannel: 'A',
-            uvScaleDetail: [50, 50],
-            uvScaleAtlas: [6, 6],
+            uvScale: [25, 25], // 🍂 100m 타일 기준 4m 텍스처 반복 (낙엽 바닥 질감 최적화)
             blendMode: 'WEIGHT_MAP',
             roughness: 0.8,
             metallic: 0.0,
@@ -520,25 +516,15 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                         landscape?.landscapeMaterial?.requestVBTRebake();
                     });
 
-                    // 🌿 듀얼 UV 스케일 제어: 1) 근경 디테일용 (재베이킹 0회, 순수 유니폼 실시간 반영), 2) 원경 VBT 아틀라스 베이킹용
-                    const layerScaleDetail = {uvScaleDetail: layer.uvScaleDetail[0]};
-                    subFolder.addBinding(layerScaleDetail, 'uvScaleDetail', {
-                        title: '🔍 uvScale (Near Detail)',
+                    // 🌿 단일 통합 UV 스케일 제어 (근경 Direct PBR 및 원경 VBT 베이킹 1:1 동시 제어)
+                    const layerScaleObj = {uvScale: layer.uvScale[0]};
+                    subFolder.addBinding(layerScaleObj, 'uvScale', {
+                        title: '🔍 uvScale (Tile UV Repeat)',
                         min: 1,
                         max: 200,
                         step: 1
                     }).on('change', (e) => {
-                        layer.uvScaleDetail = [e.value, e.value];
-                    });
-
-                    const layerScaleAtlas = {uvScaleAtlas: layer.uvScaleAtlas[0]};
-                    subFolder.addBinding(layerScaleAtlas, 'uvScaleAtlas', {
-                        title: '🎨 uvScale (Far Atlas)',
-                        min: 0.5,
-                        max: 50,
-                        step: 0.5
-                    }).on('change', (e) => {
-                        layer.uvScaleAtlas = [e.value, e.value];
+                        layer.uvScale = [e.value, e.value];
                         landscape?.landscapeMaterial?.requestVBTRebake();
                     });
                 });

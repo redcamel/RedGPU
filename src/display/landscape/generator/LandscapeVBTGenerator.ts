@@ -78,10 +78,10 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
                 const layer = activeLayers[i];
                 fArr[offset + 0] = layer.uvOffset[0];
                 fArr[offset + 1] = layer.uvOffset[1];
-                fArr[offset + 2] = layer.uvScaleDetail[0];
-                fArr[offset + 3] = layer.uvScaleDetail[1];
-                fArr[offset + 4] = layer.uvScaleAtlas[0];
-                fArr[offset + 5] = layer.uvScaleAtlas[1];
+                fArr[offset + 2] = layer.uvScale[0];
+                fArr[offset + 3] = layer.uvScale[1];
+                fArr[offset + 4] = layer.uvScale[0];
+                fArr[offset + 5] = layer.uvScale[1];
                 fArr[offset + 6] = layer.minVal;
                 fArr[offset + 7] = layer.maxVal;
 

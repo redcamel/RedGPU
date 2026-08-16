@@ -4,8 +4,8 @@
 
 struct LandscapeLayerParams {
     uvOffset: vec2<f32>,
-    uvScaleDetail: vec2<f32>, // 🌿 근경(LOD 0/1) 초고해상도 1cm 마이크로 디테일 렌더용
-    uvScaleAtlas: vec2<f32>,  // 🎨 원경(LOD 2+) VBT 2D 아틀라스 베이킹용
+    uvScale: vec2<f32>, // 🌿 타일 기준 UV 스케일
+    _padding0: vec2<f32>,
     minVal: f32,
     maxVal: f32,
     tintColor: vec4<f32>,
@@ -151,8 +151,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         if (layerW <= 0.0001) { continue; }
 
-        // 🎨 원경 VBT 2D 아틀라스 전용 uvScaleAtlas 적용 (적정 타일링으로 뭉개짐 방지)
-        let layerUV = worldTileUV * layerParams.uvScaleAtlas + layerParams.uvOffset;
+        // 🎨 VBT 2D 아틀라스 전용 타일 UV 스케일 적용 (근경과 1:1 일치)
+        let layerUV = worldTileUV * layerParams.uvScale + layerParams.uvOffset;
 
         // VBT 아틀라스에 최고화질 PBR 원본을 굽기 위해 Mip 0 고선명 샘플링 (아틀라스 Mipmap 체인은 아틀라스 자체에서 별도 생성)
         let layerAlbedoSample = textureSampleLevel(layerBaseColorArray, vbtTextureSampler, layerUV, layerIdx, 0.0);

@@ -19,12 +19,8 @@ export interface LandscapeLayerOptions {
     weightMapTexture?: BitmapTexture;
     /** Legacy alias for weightTexture */
     splatTexture?: BitmapTexture;
-    /** UE5 Standard: UV Scale [U, V] (alias for uvScaleDetail) */
+    /** UE5 Standard: UV Scale [U, V] (타일당 텍스처 반복 횟수) */
     uvScale?: [number, number];
-    /** [KO] 근경(LOD 0/1) 초고해상도 1cm 마이크로 디테일 렌더링용 UV 스케일 [U, V] [EN] Near-range detail UV scale */
-    uvScaleDetail?: [number, number];
-    /** [KO] 원경(LOD 2+) VBT 2D 아틀라스 베이킹용 UV 스케일 [U, V] [EN] Far-range VBT atlas bake UV scale */
-    uvScaleAtlas?: [number, number];
     /** Legacy alias: Texture Scale [U, V] */
     textureScale?: [number, number];
     /** UE5 Standard: UV Offset [U, V] */
@@ -84,10 +80,8 @@ export class LandscapeLayer {
     /** Weight Mask Texture (Splatmap) for WEIGHT_MAP Blend Mode */
     weightTexture?: BitmapTexture;
 
-    /** [KO] 근경(LOD 0/1) 초고해상도 1cm 마이크로 디테일 렌더링용 UV 스케일 [U, V] */
-    uvScaleDetail: [number, number] = [20.0, 20.0];
-    /** [KO] 원경(LOD 2+) VBT 2D 아틀라스 베이킹용 UV 스케일 [U, V] */
-    uvScaleAtlas: [number, number] = [4.0, 4.0];
+    /** [KO] 타일 기준 UV 스케일 [U, V] (타일당 텍스처 반복 횟수) [EN] Tile-based UV Scale [U, V] */
+    uvScale: [number, number] = [20.0, 20.0];
     /** UE5 Standard: UV Offset [U, V] */
     uvOffset: [number, number] = [0.0, 0.0];
 
@@ -128,15 +122,8 @@ export class LandscapeLayer {
         this.ormTexture = options.ormTexture;
         this.weightTexture = options.weightTexture ?? options.weightMapTexture ?? options.splatTexture;
 
-        const scaleDetail = options.uvScaleDetail ?? options.uvScale ?? options.textureScale;
-        if (scaleDetail) this.uvScaleDetail = [...scaleDetail];
-
-        const scaleAtlas = options.uvScaleAtlas ?? options.uvScale ?? options.textureScale;
-        if (scaleAtlas) {
-            this.uvScaleAtlas = [...scaleAtlas];
-        } else if (scaleDetail) {
-            this.uvScaleAtlas = [Math.max(1, scaleDetail[0] * 0.2), Math.max(1, scaleDetail[1] * 0.2)];
-        }
+        const scale = options.uvScale ?? options.textureScale;
+        if (scale) this.uvScale = [...scale];
 
         const offset = options.uvOffset ?? options.textureOffset;
         if (offset) this.uvOffset = [...offset];
@@ -178,36 +165,12 @@ export class LandscapeLayer {
     }
 
     // --- Legacy & UE5 Aliases for 100% Backward Compatibility ---
-    get uvScale(): [number, number] {
-        return this.uvScaleDetail;
-    }
-
-    set uvScale(val: [number, number]) {
-        this.uvScaleDetail = val;
-    }
-
-    get detailUVScale(): [number, number] {
-        return this.uvScaleDetail;
-    }
-
-    set detailUVScale(val: [number, number]) {
-        this.uvScaleDetail = val;
-    }
-
-    get atlasUVScale(): [number, number] {
-        return this.uvScaleAtlas;
-    }
-
-    set atlasUVScale(val: [number, number]) {
-        this.uvScaleAtlas = val;
-    }
-
     get textureScale(): [number, number] {
-        return this.uvScaleDetail;
+        return this.uvScale;
     }
 
     set textureScale(val: [number, number]) {
-        this.uvScaleDetail = val;
+        this.uvScale = val;
     }
 
     get textureOffset(): [number, number] {

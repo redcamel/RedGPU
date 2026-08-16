@@ -25,8 +25,8 @@ struct InputData {
 
 struct LandscapeLayerParams {
     uvOffset: vec2<f32>,
-    uvScaleDetail: vec2<f32>, // 🌿 근경(LOD 0/1) 초고해상도 1cm 마이크로 디테일 렌더용
-    uvScaleAtlas: vec2<f32>,  // 🎨 원경(LOD 2+) VBT 2D 아틀라스 베이킹용
+    uvScale: vec2<f32>, // 🌿 타일 기준 UV 스케일
+    _padding0: vec2<f32>,
     minVal: f32,
     maxVal: f32,
     tintColor: vec4<f32>,
@@ -117,10 +117,7 @@ fn computeDirectLayersPBR(
     baseN: vec3<f32>,
     vertexHeight: f32,
     slopeAngleDeg: f32,
-    ddx_global: vec2<f32>,
-    ddy_global: vec2<f32>,
-    ddx_tile: vec2<f32>,
-    ddy_tile: vec2<f32>
+    mipLevel: f32
 ) -> DirectLayerResult {
     var res: DirectLayerResult;
     var baseAlbedo = uniforms.color.rgb;
@@ -144,7 +141,10 @@ fn computeDirectLayersPBR(
         var layerW = 0.0;
 
         if (layerParams.blendMode >= 1.5) {
-            let weightMapSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, layerIdx, ddx_global, ddy_global);
+            var weightMapSample = textureSampleLevel(layerWeightMapArray, baseColorTextureSampler, globalUV, layerIdx, 0.0);
+            if (length(weightMapSample) <= 0.0001 && layerIdx > 0) {
+                weightMapSample = textureSampleLevel(layerWeightMapArray, baseColorTextureSampler, globalUV, 0, 0.0);
+            }
             let chIdx = u32(layerParams.weightMapChannelIndex + 0.5);
             var weightVal = weightMapSample.r;
             if (chIdx == 1u) { weightVal = weightMapSample.g; }
@@ -161,15 +161,13 @@ fn computeDirectLayersPBR(
 
         if (layerW <= 0.0001) { continue; }
 
-        // 🌿 근경 초고해상도 디테일 전용 uvScaleDetail 적용
-        let layerUV = worldTileUV * layerParams.uvScaleDetail + layerParams.uvOffset;
-        let ddx_layer = ddx_tile * layerParams.uvScaleDetail;
-        let ddy_layer = ddy_tile * layerParams.uvScaleDetail;
+        // 🌿 타일 기준 UV 스케일 적용 (근경/원경 1:1 완벽 일치)
+        let layerUV = worldTileUV * layerParams.uvScale + layerParams.uvOffset;
 
-        let layerAlbedoSample = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, layerUV, layerIdx, ddx_layer, ddy_layer);
-        let layerNormalRaw = textureSampleGrad(layerNormalArray, baseColorTextureSampler, layerUV, layerIdx, ddx_layer, ddy_layer).rgb * 2.0 - vec3<f32>(1.0);
+        let layerAlbedoSample = textureSampleLevel(layerBaseColorArray, baseColorTextureSampler, layerUV, layerIdx, mipLevel);
+        let layerNormalRaw = textureSampleLevel(layerNormalArray, baseColorTextureSampler, layerUV, layerIdx, mipLevel).rgb * 2.0 - vec3<f32>(1.0);
         let layerNormalSample = vec3<f32>(layerNormalRaw.xy * layerParams.normalIntensity, max(0.01, layerNormalRaw.z));
-        let layerORMSample = textureSampleGrad(layerORMArray, baseColorTextureSampler, layerUV, layerIdx, ddx_layer, ddy_layer);
+        let layerORMSample = textureSampleLevel(layerORMArray, baseColorTextureSampler, layerUV, layerIdx, mipLevel);
 
         let layerAlbedo = layerAlbedoSample.rgb * layerParams.tintColor.rgb;
         let layerRoughness = layerParams.roughness * layerORMSample.g;
@@ -199,21 +197,21 @@ fn computeDirectLayersPBR(
         res.albedo = mix(baseAlbedo, layerBlendAlbedo, alpha);
 
         // TBN 월드 공간 표면 노멀 합성 (Reoriented Perturbation)
-        var finalN = baseN;
         if (length(layerBlendNormal.xy) > 0.001) {
             let tangentX = normalize(vec3<f32>(1.0, 0.0, 0.0) - baseN * baseN.x);
             let tangentZ = normalize(cross(baseN, tangentX));
             let perturbedWorldN = normalize(tangentX * layerBlendNormal.x + tangentZ * layerBlendNormal.y + baseN * layerBlendNormal.z);
-            finalN = normalize(mix(baseN, perturbedWorldN, alpha));
+            res.normal = normalize(mix(baseN, perturbedWorldN, alpha));
+        } else {
+            res.normal = baseN;
         }
-        res.normal = finalN;
-        res.roughness = max(0.04, mix(baseRoughness, layerBlendRoughness, alpha));
+        res.roughness = mix(baseRoughness, layerBlendRoughness, alpha);
         res.metallic = mix(baseMetallic, layerBlendMetallic, alpha);
         res.ao = mix(baseAO, layerBlendAO, alpha);
     } else {
         res.albedo = baseAlbedo;
         res.normal = baseN;
-        res.roughness = max(0.04, baseRoughness);
+        res.roughness = baseRoughness;
         res.metallic = baseMetallic;
         res.ao = baseAO;
     }
@@ -244,14 +242,8 @@ fn main(inputData: InputData) -> OutputFragment {
     let lod = inputData.lodLevel;
     let worldTileUV = inputData.uv; // 🌿 타일 로컬 격자 고정밀 UV (0.0 ~ 1.0)
 
-    // 📐 Uniform Control Flow에서 스크린 스페이스 편미분(Gradient) 미리 산출
-    let ddx_global = dpdx(globalUV);
-    let ddy_global = dpdy(globalUV);
-    let ddx_tile = dpdx(worldTileUV);
-    let ddy_tile = dpdy(worldTileUV);
-
-    // VNT 기반 베이스 지형 표면 법선 로드
-    let vntSample = textureSampleGrad(vntNormalTexture, baseColorTextureSampler, globalUV, ddx_global, ddy_global).rgb;
+    // 🌟 VNT 기반 베이스 지형 표면 법선 로드 (Zero-Derivative, Mip 0 Level 즉시 샘플링)
+    let vntSample = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
     let baseN = normalize(select(vntSample * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), length(vntSample) <= 0.001));
     let slopeAngleDeg = acos(clamp(baseN.y, -1.0, 1.0)) * 57.295779513;
 
@@ -270,7 +262,9 @@ fn main(inputData: InputData) -> OutputFragment {
         let fadeEnd = lod0Dist;
         let fade = smoothstep(fadeStart, fadeEnd, viewDist);
 
-        let direct = computeDirectLayersPBR(globalUV, worldTileUV, baseN, inputData.vertexHeight, slopeAngleDeg, ddx_global, ddy_global, ddx_tile, ddy_tile);
+        // 거리 기반 밉맵 레벨 (0.0 ~ 4.0) 부드러운 산출
+        let mipLevel = clamp(log2(max(1.0, viewDist * 0.05)), 0.0, 4.0);
+        let direct = computeDirectLayersPBR(globalUV, worldTileUV, baseN, inputData.vertexHeight, slopeAngleDeg, mipLevel);
 
         if (fade <= 0.001) {
             // 🌿 근거리 (LOD 0 영역): 100% Direct Layer 초고해상도 샘플링 (1cm 마이크로 디테일)
@@ -297,12 +291,11 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
     else {
-        // ⚡ LOD 2 ~ 7 (원경 250개 타일): $O(1)$ 초고속 VBT 2D Atlas 3-Tap 샘플링
+        // ⚡ LOD 2 ~ 7 (원경 250개 타일): 편미분 연산 0회! $O(1)$ 초고속 VBT 2D Atlas 3-Tap 즉시 샘플링
         let vbtAlbedoRaw = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
         let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
         let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, 0.0);
 
-        // 🛡️ 아직 스트리밍 로드/베이킹 중인 원거리 타일은 기본 머티리얼 바탕색으로 안전 폴백 (검은색 결손 차단)
         let isBaked = length(vbtAlbedoRaw) > 0.001;
         let vbtAlbedo = select(uniforms.color.rgb, vbtAlbedoRaw, isBaked);
 
