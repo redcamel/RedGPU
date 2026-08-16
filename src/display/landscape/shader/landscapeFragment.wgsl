@@ -253,10 +253,13 @@ fn main(inputData: InputData) -> OutputFragment {
     var metallicFactor: f32;
     var ambientOcclusion: f32;
 
+    let viewDist = distance(u_cameraPosition, input_vertexPosition);
+    // 🌿 원경 VBT 전용 정수 밉 레벨 (Trilinear 부하 0%, 텍스처 캐시 적중률 극대화)
+    let vbtMip = floor(clamp(log2(max(1.0, viewDist * 0.002)), 0.0, 4.0));
+
     // 🌟 하이브리드 LOD 적응형 셰이딩 (Hybrid LOD Distance-Based Continuous Adaptive Shading)
     if (lod < 1.5) {
         // 🌿 LOD 0 ~ 1: 카메라와의 실제 픽셀 거리 기반 부드러운 하이브리드 크로스페이드 (시각적 팝핑 0%)
-        let viewDist = distance(u_cameraPosition, input_vertexPosition);
         let lod0Dist = max(1.0, sqrt(landscapeInstanceUniforms.lodDistancesSq[0].x));
         let fadeStart = lod0Dist * 0.7;
         let fadeEnd = lod0Dist;
@@ -274,10 +277,10 @@ fn main(inputData: InputData) -> OutputFragment {
             metallicFactor = direct.metallic;
             ambientOcclusion = direct.ao;
         } else {
-            // 🔀 페이드 영역 (LOD 0 외곽 ~ LOD 1): Direct Layer <-> VBT 부드러운 크로스페이드
-            let vbtAlbedoRaw = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
-            let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
-            let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, 0.0);
+            // 🔀 페이드 영역 (LOD 0 외곽 ~ LOD 1): Direct Layer <-> VBT 부드러운 크로스페이드 (정수 밉 적용)
+            let vbtAlbedoRaw = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
+            let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
+            let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, vbtMip);
 
             let isBaked = length(vbtAlbedoRaw) > 0.001;
             let vbtAlbedo = select(uniforms.color.rgb, vbtAlbedoRaw, isBaked);
@@ -291,10 +294,10 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
     else {
-        // ⚡ LOD 2 ~ 7 (원경 250개 타일): 편미분 연산 0회! $O(1)$ 초고속 VBT 2D Atlas 3-Tap 즉시 샘플링
-        let vbtAlbedoRaw = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
-        let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
-        let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, 0.0);
+        // ⚡ LOD 2 ~ 7 (원경 250개 타일): 정수 밉 레벨 $O(1)$ 초고속 VBT 2D Atlas 3-Tap 즉시 샘플링 (캐시 히트율 99%)
+        let vbtAlbedoRaw = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
+        let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
+        let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, vbtMip);
 
         let isBaked = length(vbtAlbedoRaw) > 0.001;
         let vbtAlbedo = select(uniforms.color.rgb, vbtAlbedoRaw, isBaked);

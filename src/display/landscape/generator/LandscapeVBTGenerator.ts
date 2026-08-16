@@ -1,28 +1,37 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import DirectTexture from "../../../resources/texture/DirectTexture";
 import vbtBakeShaderCode from "../shader/landscapeVBTBake.wgsl";
+import tileMipShaderCode from "../shader/landscapeTileMipmap.wgsl";
 import ALandscapeAtlasGenerator from "./ALandscapeAtlasGenerator";
 import LandscapeMaterial from "../material/LandscapeMaterial";
+import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 /**
- * [KO] 8개 레이어 머티리얼과 VHT/VNT로부터 Texture2DArray 기반 실시간 PBR VBT(BaseColor, Normal, ORM) 3종 세트를 베이킹하는 제너레이터입니다.
- * [EN] Generator that bakes Texture2DArray-based real-time PBR VBT (BaseColor, Normal, ORM) 3-set from 8-layer material and VHT/VNT.
+ * [KO] 8개 레이어 머티리얼과 VHT/VNT로부터 Texture2DArray 기반 실시간 PBR VBT(BaseColor, Normal, ORM) 3종 세트 및 타일 로컬 밉맵을 베이킹하는 제너레이터입니다.
+ * [EN] Generator that bakes Texture2DArray-based real-time PBR VBT (BaseColor, Normal, ORM) 3-set and tile-local mipmaps from 8-layer material and VHT/VNT.
  */
 export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
     #uniformFloatArray: Float32Array;
     #uniformUintArray: Uint32Array;
-    #storageViewCache: WeakMap<GPUTexture, GPUTextureView> = new WeakMap();
+    #mipUniformArray: Uint32Array = new Uint32Array(8);
+
+    #storageViewsCache: WeakMap<GPUTexture, Map<number, GPUTextureView>> = new WeakMap();
+    #sampleViewsCache: WeakMap<GPUTexture, Map<number, GPUTextureView>> = new WeakMap();
+
+    #tileMipPipeline: GPUComputePipeline | null = null;
+    #tileMipBindGroupLayout: GPUBindGroupLayout | null = null;
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, 'VBT');
         this.#uniformFloatArray = new Float32Array(204); // 816 bytes (204 floats)
         this.#uniformUintArray = new Uint32Array(this.#uniformFloatArray.buffer);
         this.#initComputeResources();
+        this.#initTileMipComputeResources();
     }
 
     /**
-     * [KO] 특정 타일 영역에 8개 레이어의 PBR 머티리얼 텍스처를 2D 거대 아틀라스에 일괄 사전 베이킹합니다 (Zero-GC).
-     * [EN] Batch pre-bakes 8-layer PBR material textures for a specific tile region into 2D mega-atlas (Zero-GC).
+     * [KO] 특정 타일 영역에 8개 레이어의 PBR 머티리얼 텍스처를 2D 거대 아틀라스에 일괄 사전 베이킹 및 타일 독립 밉맵을 생성합니다 (Zero-GC).
+     * [EN] Batch pre-bakes 8-layer PBR material textures and generates tile-local mipmaps for a specific tile region into 2D mega-atlas (Zero-GC).
      */
     bakeTileRegion(
         vhtAtlas: DirectTexture,
@@ -115,9 +124,9 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         const uniformBuffer = this.acquireUniformBuffer(816);
         device.queue.writeBuffer(uniformBuffer, 0, fArr.buffer, 0, 816);
 
-        const vbtBaseColorStorageView = this.#getStorageTextureView(vbtBaseColorArray.gpuTexture);
-        const vbtNormalStorageView = this.#getStorageTextureView(vbtNormalArray.gpuTexture);
-        const vbtORMStorageView = this.#getStorageTextureView(vbtORMArray.gpuTexture);
+        const vbtBaseColorStorageView = this.#getStorageTextureView(vbtBaseColorArray.gpuTexture, 0);
+        const vbtNormalStorageView = this.#getStorageTextureView(vbtNormalArray.gpuTexture, 0);
+        const vbtORMStorageView = this.#getStorageTextureView(vbtORMArray.gpuTexture, 0);
 
         const bindGroup = device.createBindGroup({
             label: `Landscape_VBT_BindGroup_Slice_${sliceIndex}`,
@@ -137,20 +146,125 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
             ]
         });
 
+        // 1. Mip 0 Base Bake Pass
         this.dispatchBakePass(bindGroup, tileSizePixels, tileSizePixels, originX, originZ);
-        console.log(`[LandscapeVBTGenerator 🎨] GPU VBT 3-Set (BaseColor/Normal/ORM) baked for slice [${sliceIndex}] at (${col}, ${row})`);
+
+        // 2. Tile-Local Sub-Region Mipmap 1~5 Generation (Zero Atlas Bleeding)
+        this.#dispatchTileMipmaps(
+            vbtBaseColorArray.gpuTexture,
+            vbtNormalArray.gpuTexture,
+            vbtORMArray.gpuTexture,
+            originX,
+            originZ,
+            tileSizePixels,
+            6
+        );
+
+        console.log(`[LandscapeVBTGenerator 🎨] GPU VBT 3-Set + Tile-Local Mipmaps baked for slice [${sliceIndex}] at (${col}, ${row})`);
     }
 
-    #getStorageTextureView(tex: GPUTexture): GPUTextureView {
-        let view = this.#storageViewCache.get(tex);
+    #dispatchTileMipmaps(
+        bcTex: GPUTexture,
+        normTex: GPUTexture,
+        ormTex: GPUTexture,
+        originX: number,
+        originZ: number,
+        tileSizePixels: number,
+        maxMipLevels: number = 6
+    ): void {
+        if (!this.#tileMipPipeline || !this.#tileMipBindGroupLayout) return;
+        const device = this.redGPUContext.gpuDevice;
+
+        this.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (commandEncoder) => {
+            const pass = commandEncoder.beginComputePass({
+                label: `Landscape_TileMipmap_Pass_[${originX},${originZ}]`
+            });
+            pass.setPipeline(this.#tileMipPipeline!);
+
+            for (let m = 1; m < maxMipLevels; m++) {
+                const srcOriginX = originX >> (m - 1);
+                const srcOriginZ = originZ >> (m - 1);
+                const dstOriginX = originX >> m;
+                const dstOriginZ = originZ >> m;
+                const dstW = Math.max(1, tileSizePixels >> m);
+                const dstH = Math.max(1, tileSizePixels >> m);
+
+                const uArr = this.#mipUniformArray;
+                uArr[0] = srcOriginX;
+                uArr[1] = srcOriginZ;
+                uArr[2] = dstOriginX;
+                uArr[3] = dstOriginZ;
+                uArr[4] = dstW;
+                uArr[5] = dstH;
+                uArr[6] = 0;
+                uArr[7] = 0;
+
+                const mipUniformBuffer = this.acquireUniformBuffer(32);
+                device.queue.writeBuffer(mipUniformBuffer, 0, uArr.buffer, 0, 32);
+
+                const srcBcView = this.#getSampleTextureView(bcTex, m - 1);
+                const dstBcView = this.#getStorageTextureView(bcTex, m);
+                const srcNormView = this.#getSampleTextureView(normTex, m - 1);
+                const dstNormView = this.#getStorageTextureView(normTex, m);
+                const srcOrmView = this.#getSampleTextureView(ormTex, m - 1);
+                const dstOrmView = this.#getStorageTextureView(ormTex, m);
+
+                const mipBindGroup = device.createBindGroup({
+                    label: `Landscape_TileMip_BG_Mip_${m}`,
+                    layout: this.#tileMipBindGroupLayout!,
+                    entries: [
+                        {binding: 0, resource: {buffer: mipUniformBuffer}},
+                        {binding: 1, resource: srcBcView},
+                        {binding: 2, resource: dstBcView},
+                        {binding: 3, resource: srcNormView},
+                        {binding: 4, resource: dstNormView},
+                        {binding: 5, resource: srcOrmView},
+                        {binding: 6, resource: dstOrmView},
+                    ]
+                });
+
+                pass.setBindGroup(0, mipBindGroup);
+                pass.dispatchWorkgroups(Math.max(1, Math.ceil(dstW / 16)), Math.max(1, Math.ceil(dstH / 16)));
+            }
+
+            pass.end();
+        });
+    }
+
+    #getStorageTextureView(tex: GPUTexture, mipLevel: number = 0): GPUTextureView {
+        let views = this.#storageViewsCache.get(tex);
+        if (!views) {
+            views = new Map();
+            this.#storageViewsCache.set(tex, views);
+        }
+        let view = views.get(mipLevel);
         if (!view) {
             view = tex.createView({
                 dimension: '2d',
-                baseMipLevel: 0,
+                baseMipLevel: mipLevel,
                 mipLevelCount: 1,
-                label: `Landscape_VBT_StorageView_Mip0`
+                label: `Landscape_VBT_StorageView_Mip${mipLevel}`
             });
-            this.#storageViewCache.set(tex, view);
+            views.set(mipLevel, view);
+        }
+        return view;
+    }
+
+    #getSampleTextureView(tex: GPUTexture, mipLevel: number = 0): GPUTextureView {
+        let views = this.#sampleViewsCache.get(tex);
+        if (!views) {
+            views = new Map();
+            this.#sampleViewsCache.set(tex, views);
+        }
+        let view = views.get(mipLevel);
+        if (!view) {
+            view = tex.createView({
+                dimension: '2d',
+                baseMipLevel: mipLevel,
+                mipLevelCount: 1,
+                label: `Landscape_VBT_SampleView_Mip${mipLevel}`
+            });
+            views.set(mipLevel, view);
         }
         return view;
     }
@@ -207,6 +321,56 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
             816
         );
     }
+
+    #initTileMipComputeResources(): void {
+        const device = this.redGPUContext.gpuDevice;
+        if (!device) return;
+
+        const shaderModule = device.createShaderModule({
+            label: 'LandscapeTileMipmapComputeShaderModule',
+            code: tileMipShaderCode
+        });
+
+        this.#tileMipBindGroupLayout = device.createBindGroupLayout({
+            label: 'LandscapeTileMipmap_BindGroupLayout',
+            entries: [
+                {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
+                {binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
+                {
+                    binding: 2,
+                    visibility: GPUShaderStage.COMPUTE,
+                    storageTexture: {access: 'write-only', format: 'rgba8unorm', viewDimension: '2d'}
+                },
+                {binding: 3, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
+                {
+                    binding: 4,
+                    visibility: GPUShaderStage.COMPUTE,
+                    storageTexture: {access: 'write-only', format: 'rgba8unorm', viewDimension: '2d'}
+                },
+                {binding: 5, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
+                {
+                    binding: 6,
+                    visibility: GPUShaderStage.COMPUTE,
+                    storageTexture: {access: 'write-only', format: 'rgba8unorm', viewDimension: '2d'}
+                },
+            ]
+        });
+
+        const pipelineLayout = device.createPipelineLayout({
+            label: 'LandscapeTileMipmap_PipelineLayout',
+            bindGroupLayouts: [this.#tileMipBindGroupLayout]
+        });
+
+        this.#tileMipPipeline = device.createComputePipeline({
+            label: 'LandscapeTileMipmap_ComputePipeline',
+            layout: pipelineLayout,
+            compute: {
+                module: shaderModule,
+                entryPoint: 'main'
+            }
+        });
+    }
 }
 
 export default LandscapeVBTGenerator;
+

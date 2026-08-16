@@ -171,6 +171,7 @@ export class Landscape extends Object3DContainer {
 
         const rawVbtBaseColor = redGPUContext.gpuDevice.createTexture({
             size: [atlasWidth, atlasHeight],
+            mipLevelCount: 6,
             format: 'rgba8unorm',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
             label: 'Landscape_VBT_BaseColor_Atlas'
@@ -179,6 +180,7 @@ export class Landscape extends Object3DContainer {
 
         const rawVbtNormal = redGPUContext.gpuDevice.createTexture({
             size: [atlasWidth, atlasHeight],
+            mipLevelCount: 6,
             format: 'rgba8unorm',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
             label: 'Landscape_VBT_Normal_Atlas'
@@ -187,6 +189,7 @@ export class Landscape extends Object3DContainer {
 
         const rawVbtORM = redGPUContext.gpuDevice.createTexture({
             size: [atlasWidth, atlasHeight],
+            mipLevelCount: 6,
             format: 'rgba8unorm',
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
             label: 'Landscape_VBT_ORM_Atlas'
@@ -845,6 +848,7 @@ export class Landscape extends Object3DContainer {
 
             const rawVbtBaseColor = this.#redGPUContext.gpuDevice.createTexture({
                 size: [targetAtlasW, targetAtlasH],
+                mipLevelCount: 6,
                 format: 'rgba8unorm',
                 usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
                 label: 'Landscape_VBT_BaseColor_Atlas'
@@ -853,6 +857,7 @@ export class Landscape extends Object3DContainer {
 
             const rawVbtNormal = this.#redGPUContext.gpuDevice.createTexture({
                 size: [targetAtlasW, targetAtlasH],
+                mipLevelCount: 6,
                 format: 'rgba8unorm',
                 usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
                 label: 'Landscape_VBT_Normal_Atlas'
@@ -861,6 +866,7 @@ export class Landscape extends Object3DContainer {
 
             const rawVbtORM = this.#redGPUContext.gpuDevice.createTexture({
                 size: [targetAtlasW, targetAtlasH],
+                mipLevelCount: 6,
                 format: 'rgba8unorm',
                 usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST,
                 label: 'Landscape_VBT_ORM_Atlas'
