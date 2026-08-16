@@ -265,32 +265,48 @@ fn main(inputData: InputData) -> OutputFragment {
         let fadeEnd = lod0Dist;
         let fade = smoothstep(fadeStart, fadeEnd, viewDist);
 
-        // 거리 기반 밉맵 레벨 (0.0 ~ 4.0) 부드러운 산출
-        let mipLevel = clamp(log2(max(1.0, viewDist * 0.05)), 0.0, 4.0);
-        let direct = computeDirectLayersPBR(globalUV, worldTileUV, baseN, inputData.vertexHeight, slopeAngleDeg, mipLevel);
-
-        if (fade <= 0.001) {
-            // 🌿 근거리 (LOD 0 영역): 100% Direct Layer 초고해상도 샘플링 (1cm 마이크로 디테일)
-            albedo = direct.albedo;
-            N = direct.normal;
-            roughnessFactor = direct.roughness;
-            metallicFactor = direct.metallic;
-            ambientOcclusion = direct.ao;
-        } else {
-            // 🔀 페이드 영역 (LOD 0 외곽 ~ LOD 1): Direct Layer <-> VBT 부드러운 크로스페이드 (정수 밉 적용)
+        if (fade >= 0.999) {
+            // ⚡ 페이드 100% 외곽 구간: 16-Tap 다이렉트 레이어 연산 100% 스킵! $O(1)$ VBT 3-Tap 즉시 로드
             let vbtAlbedoRaw = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
             let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
             let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, vbtMip);
 
             let isBaked = length(vbtAlbedoRaw) > 0.001;
             let vbtAlbedo = select(uniforms.color.rgb, vbtAlbedoRaw, isBaked);
-            let vbtN = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), baseN, length(vbtNormalEncoded) <= 0.001));
 
-            albedo = mix(direct.albedo, vbtAlbedo, fade);
-            N = normalize(mix(direct.normal, vbtN, fade));
-            roughnessFactor = mix(direct.roughness, max(0.04, select(0.9, vbtORM.g, isBaked)), fade);
-            metallicFactor = mix(direct.metallic, select(0.0, vbtORM.b, isBaked), fade);
-            ambientOcclusion = mix(direct.ao, select(1.0, vbtORM.r, isBaked), fade);
+            albedo = vbtAlbedo;
+            N = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), baseN, length(vbtNormalEncoded) <= 0.001));
+            roughnessFactor = max(0.04, select(0.9, vbtORM.g, isBaked));
+            metallicFactor = select(0.0, vbtORM.b, isBaked);
+            ambientOcclusion = select(1.0, vbtORM.r, isBaked);
+        } else {
+            // 거리 기반 밉맵 레벨 (0.0 ~ 4.0) 산출 및 다이렉트 레이어 계산
+            let mipLevel = clamp(log2(max(1.0, viewDist * 0.05)), 0.0, 4.0);
+            let direct = computeDirectLayersPBR(globalUV, worldTileUV, baseN, inputData.vertexHeight, slopeAngleDeg, mipLevel);
+
+            if (fade <= 0.001) {
+                // 🌿 근거리 (LOD 0 영역): 100% Direct Layer 초고해상도 샘플링 (1cm 마이크로 디테일, VBT 페치 0회)
+                albedo = direct.albedo;
+                N = direct.normal;
+                roughnessFactor = direct.roughness;
+                metallicFactor = direct.metallic;
+                ambientOcclusion = direct.ao;
+            } else {
+                // 🔀 순수 전이 영역 (0.001 < fade < 0.999): Direct Layer <-> VBT 부드러운 크로스페이드
+                let vbtAlbedoRaw = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
+                let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
+                let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, vbtMip);
+
+                let isBaked = length(vbtAlbedoRaw) > 0.001;
+                let vbtAlbedo = select(uniforms.color.rgb, vbtAlbedoRaw, isBaked);
+                let vbtN = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), baseN, length(vbtNormalEncoded) <= 0.001));
+
+                albedo = mix(direct.albedo, vbtAlbedo, fade);
+                N = normalize(mix(direct.normal, vbtN, fade));
+                roughnessFactor = mix(direct.roughness, max(0.04, select(0.9, vbtORM.g, isBaked)), fade);
+                metallicFactor = mix(direct.metallic, select(0.0, vbtORM.b, isBaked), fade);
+                ambientOcclusion = mix(direct.ao, select(1.0, vbtORM.r, isBaked), fade);
+            }
         }
     }
     else {
