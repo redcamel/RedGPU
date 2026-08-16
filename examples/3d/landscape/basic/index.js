@@ -32,7 +32,6 @@ RedGPU.init(
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 45;
         directionalLight.azimuth = 45;
-        directionalLight.intensity = 1.5;
         scene.lightManager.addDirectionalLight(directionalLight);
 
         // 4. 신규 Landscape 인스턴스 생성 (UE5 공식 프로퍼티 명칭 사용, 16x16 256개 타일 에셋 완벽 대응)
@@ -264,7 +263,6 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
         // 4-1. Directional Light (Sun)
         sunElevation: directionalLight ? directionalLight.elevation : 45,
         sunAzimuth: directionalLight ? directionalLight.azimuth : 45,
-        sunIntensity: directionalLight ? directionalLight.intensity : 1.5,
         sunColor: '#ffffff',
 
         // 5. Tile Streaming & VHT
@@ -516,13 +514,6 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                 if (directionalLight) directionalLight.azimuth = ev.value;
             });
 
-            folderSun.addBinding(config, 'sunIntensity', {
-                min: 0,
-                max: 10,
-                step: 0.1
-            }).on('change', (ev) => {
-                if (directionalLight) directionalLight.intensity = ev.value;
-            });
 
             folderSun.addBinding(config, 'sunColor').on('change', (ev) => {
                 if (directionalLight && directionalLight.color) {

@@ -81,6 +81,17 @@ fn computeLayerRawWeightFast(layer: LandscapeLayerParams, slopeAngleDeg: f32, ve
     return clamp(lowW * highW, 0.0, 1.0);
 }
 
+fn getDirectDiffuseBRDF(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albedo: vec3<f32>) -> vec3<f32> {
+    if (NdotL <= 0.0) { return vec3<f32>(0.0); }
+    let energyBias = mix(0.0, 0.5, roughness);
+    let energyFactor = mix(1.0, 1.0 / 1.51, roughness);
+    let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
+    let f0 = 1.0;
+    let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
+    let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
+    return albedo * NdotL * lightScatter * viewScatter * energyFactor * INV_PI;
+}
+
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
@@ -189,8 +200,12 @@ fn main(inputData: InputData) -> OutputFragment {
             let alpha = clamp(totalLayerWeight, 0.0, 1.0);
 
             albedo = mix(baseAlbedo, layerBlendAlbedo, alpha);
-            if (length(layerBlendNormal) > 0.001) {
-                N = normalize(mix(N, N + layerBlendNormal, alpha));
+            if (length(layerBlendNormal.xy) > 0.001) {
+                // TBN(X: tangent, Z: bitangent, Y: normal) 기반 지형 표면 노멀 섭동
+                let tangentX = normalize(vec3<f32>(1.0, 0.0, 0.0) - N * N.x);
+                let tangentZ = normalize(cross(N, tangentX));
+                let perturbedWorldN = normalize(tangentX * layerBlendNormal.x + tangentZ * layerBlendNormal.y + N * max(0.01, layerBlendNormal.z));
+                N = normalize(mix(N, perturbedWorldN, alpha));
             }
             roughnessFactor = mix(baseRoughness, layerBlendRoughness, alpha);
             metallicFactor = mix(baseMetallic, layerBlendMetallic, alpha);
@@ -213,7 +228,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let F0 = mix(F0_dielectric, F0_metal, metallicFactor);
     let roughnessParameter = max(roughnessFactor, 0.04);
 
-    // Direct Lighting Loop (Cook-Torrance PBR)
+    // Direct Lighting Loop (Cook-Torrance PBR with Disney Diffuse)
     var totalDirectLighting = vec3<f32>(0.0);
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
@@ -243,10 +258,11 @@ fn main(inputData: InputData) -> OutputFragment {
                 let F = F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - LdotH, 0.0, 1.0), 5.0);
 
                 let spec = (NDF * G * F) / (4.0 * NdotV * NdotL + EPSILON);
+                let diffuse_reflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughnessParameter, albedo);
                 let kS = F;
                 let kD = (vec3<f32>(1.0) - kS) * (1.0 - metallicFactor);
 
-                totalDirectLighting += (kD * albedo * INV_PI + spec) * finalLightColor * NdotL;
+                totalDirectLighting += (kD * diffuse_reflection + spec * NdotL) * finalLightColor;
             }
         }
     } else {
@@ -272,10 +288,11 @@ fn main(inputData: InputData) -> OutputFragment {
             let F = F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - LdotH, 0.0, 1.0), 5.0);
 
             let spec = (NDF * G * F) / (4.0 * NdotV * NdotL + EPSILON);
+            let diffuse_reflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughnessParameter, albedo);
             let kS = F;
             let kD = (vec3<f32>(1.0) - kS) * (1.0 - metallicFactor);
 
-            totalDirectLighting += (kD * albedo * INV_PI + spec) * finalLightColor * NdotL;
+            totalDirectLighting += (kD * diffuse_reflection + spec * NdotL) * finalLightColor;
         }
     }
 
@@ -318,8 +335,7 @@ fn main(inputData: InputData) -> OutputFragment {
         indirectLighting = ambientContribution * ambientOcclusion;
     }
 
-    let directAO = mix(1.0, ambientOcclusion, 0.6);
-    let finalColor = vec4<f32>((totalDirectLighting * directAO) + indirectLighting, baseColor.a);
+    let finalColor = vec4<f32>(totalDirectLighting + indirectLighting, baseColor.a);
 
     output.color = finalColor;
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
