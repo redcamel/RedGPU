@@ -196,11 +196,11 @@ fn computeDirectLayersPBR(
 
         res.albedo = mix(baseAlbedo, layerBlendAlbedo, alpha);
 
-        // TBN 월드 공간 표면 노멀 합성 (Reoriented Perturbation)
+        // TBN 월드 공간 표면 노멀 합성 (Reoriented Perturbation: 중간 normalize 2회 제거)
         if (length(layerBlendNormal.xy) > 0.001) {
             let tangentX = normalize(vec3<f32>(1.0, 0.0, 0.0) - baseN * baseN.x);
-            let tangentZ = normalize(cross(baseN, tangentX));
-            let perturbedWorldN = normalize(tangentX * layerBlendNormal.x + tangentZ * layerBlendNormal.y + baseN * layerBlendNormal.z);
+            let tangentZ = cross(baseN, tangentX); // baseN과 tangentX가 직교 단위벡터이므로 외적 결과도 이미 단위벡터
+            let perturbedWorldN = tangentX * layerBlendNormal.x + tangentZ * layerBlendNormal.y + baseN * layerBlendNormal.z;
             res.normal = normalize(mix(baseN, perturbedWorldN, alpha));
         } else {
             res.normal = baseN;
@@ -437,7 +437,7 @@ fn main(inputData: InputData) -> OutputFragment {
             iblDiffuseColor += skyIrradiance;
         }
 
-        let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV, roughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
+        let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(NdotV, roughnessParameter), 0.0).rg;
         let F_IBL = F0 * envBRDF.x + vec3<f32>(envBRDF.y);
         let kD = (vec3<f32>(1.0) - F_IBL) * (1.0 - metallicFactor);
 
