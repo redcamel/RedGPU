@@ -444,26 +444,14 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                         const copyW = Math.min(texSize, srcBmpTexture.width || texSize);
                         const copyH = Math.min(texSize, srcBmpTexture.height || texSize);
 
-                        if (srcTex.format === dstTexture.format) {
-                            const commandEncoder = device.createCommandEncoder({label: `Landscape_LayerCopy_${sliceIndex}`});
-                            commandEncoder.copyTextureToTexture(
-                                {texture: srcTex, mipLevel: 0, origin: [0, 0, 0]},
-                                {texture: dstTexture, mipLevel: 0, origin: [0, 0, sliceIndex]},
-                                [copyW, copyH, 1]
-                            );
-                            device.queue.submit([commandEncoder.finish()]);
-                            this.#updateLayerMipmaps();
-                        } else {
-                            // 포맷 차이가 발생하더라도 강제 copyTextureToTexture 실행 (또는 writeTexture)
-                            const commandEncoder = device.createCommandEncoder({label: `Landscape_LayerCopy_${sliceIndex}`});
-                            commandEncoder.copyTextureToTexture(
-                                {texture: srcTex, mipLevel: 0, origin: [0, 0, 0]},
-                                {texture: dstTexture, mipLevel: 0, origin: [0, 0, sliceIndex]},
-                                [copyW, copyH, 1]
-                            );
-                            device.queue.submit([commandEncoder.finish()]);
-                            this.#updateLayerMipmaps();
-                        }
+                        const commandEncoder = device.createCommandEncoder({label: `Landscape_LayerCopy_${sliceIndex}`});
+                        commandEncoder.copyTextureToTexture(
+                            {texture: srcTex, mipLevel: 0, origin: [0, 0, 0]},
+                            {texture: dstTexture, mipLevel: 0, origin: [0, 0, sliceIndex]},
+                            [copyW, copyH, 1]
+                        );
+                        device.queue.submit([commandEncoder.finish()]);
+                        this.#updateLayerMipmaps();
                     } catch (e) {
                         console.warn('[LandscapeMaterial] Texture slice copy defer warning:', e);
                         const pixelData = new Uint8Array(fallbackColor);

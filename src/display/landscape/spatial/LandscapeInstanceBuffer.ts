@@ -24,6 +24,9 @@ export class LandscapeInstanceBuffer {
     #landscapeUniformData: Float32Array = new Float32Array(40);
     #landscapeUniformUintData: Uint32Array;
 
+    // Zero-GC Indirect Draw Arguments Data (최대 8단계 LOD * 5 uints = 40 uints = 160 bytes)
+    #indirectArgsBuffer: Uint32Array = new Uint32Array(40);
+
     constructor(redGPUContext: RedGPUContext, maxComponentCount: number, maxLODLevel: number) {
         this.#redGPUContext = redGPUContext;
         this.#maxComponentCount = maxComponentCount;
@@ -177,7 +180,7 @@ export class LandscapeInstanceBuffer {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#indirectDrawBuffer) return;
 
-        const argsData = new Uint32Array(maxLODLevel * 5);
+        const argsData = this.#indirectArgsBuffer;
         for (let lod = 0; lod < maxLODLevel; lod++) {
             const offset = lod * 5;
             const lodRange = sharedGeometry.getLODRange(lod);
@@ -192,7 +195,8 @@ export class LandscapeInstanceBuffer {
             argsData[offset + 4] = lod * this.#maxComponentCount; // firstInstance offset for Index Redirection
         }
 
-        gpuDevice.queue.writeBuffer(this.#indirectDrawBuffer, 0, argsData.buffer, 0, argsData.byteLength);
+        const byteLength = maxLODLevel * 5 * 4;
+        gpuDevice.queue.writeBuffer(this.#indirectDrawBuffer, 0, argsData.buffer, 0, byteLength);
     }
 
     /**

@@ -29,8 +29,6 @@ const DEFAULT_LOD_COLORS: [number, number, number, number][] = [
     [0.93, 0.94, 0.95, 1.0]  // LOD 7: White
 ];
 
-const ZERO_COLOR_STATIC: [number, number, number, number] = [0, 0, 0, 0];
-
 /**
  * [KO] SpatialGrid $O(1)$ 공간 변환 및 Multi-LOD Batching Instanced Rendering 지원 기반 Landscape 지형 시스템 클래스입니다 (Pure Terrain System Manager).
  * [EN] Landscape terrain system class based on SpatialGrid O(1) spatial transformation and Multi-LOD Batching Instanced Rendering (Pure Terrain System Manager).
@@ -45,7 +43,6 @@ export class Landscape extends Object3DContainer {
     #lodDistancesSq: number[] = [];
     #lodMultipliers: number[] = [];
     #lodColorsRGBA: [number, number, number, number][] = [];
-    #defaultTerrainColorRGBA: [number, number, number, number] = [0.22, 0.49, 0.26, 1.0];
     #landscapeMaterial: LandscapeMaterial;
     #foliageManager: LandscapeFoliageManager;
 
@@ -142,7 +139,6 @@ export class Landscape extends Object3DContainer {
         this.#wireframe = options.wireframe ?? false;
         this.#lodColoration = options.lodColoration ?? false;
         this.#tileStreamer = new LandscapeTileStreamer(redGPUContext, this.#spatialGrid, options?.loadingRadius ?? 2500.0);
-        (this.#tileStreamer as any).landscape = this;
         if (options.tileUrlResolver) {
             this.#tileStreamer.tileUrlResolver = options.tileUrlResolver;
         }
@@ -640,34 +636,6 @@ export class Landscape extends Object3DContainer {
         this.#rebuildTiles();
     }
 
-    /**
-     * [KO] 타일 AABB 범위와 6개 절두체 평면 간의 교차 여부를 검사합니다 (Zero-GC P-Vertex 검사).
-     */
-    #checkAABBInFrustum(
-        minX: number, minY: number, minZ: number,
-        maxX: number, maxY: number, maxZ: number,
-        frustumPlanes: number[][] | Float32Array[]
-    ): boolean {
-        if (!frustumPlanes || frustumPlanes.length < 6) return true;
-
-        for (let i = 0; i < 6; i++) {
-            const plane = frustumPlanes[i];
-            const a = plane[0];
-            const b = plane[1];
-            const c = plane[2];
-            const d = plane[3];
-
-            const pX = a > 0 ? maxX : minX;
-            const pY = b > 0 ? maxY : minY;
-            const pZ = c > 0 ? maxZ : minZ;
-
-            if (a * pX + b * pY + c * pZ + d < 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     #updateLODDistances(): void {
         this.#lodDistancesSq.length = 0;
         const tileSizeMax = Math.max(this.#tileSizeX, this.#tileSizeZ);
@@ -840,7 +808,7 @@ export class Landscape extends Object3DContainer {
         }
 
         this.#spatialGrid.clearTiles();
-        this.#gpuCuller = new LandscapeGPUCuller(this.#redGPUContext, targetCount, this.#maxLODLevel);
+        this.#gpuCuller = new LandscapeGPUCuller(this.#redGPUContext);
 
         let index = 0;
         for (let row = 0; row < componentCountZ; row++) {

@@ -7,8 +7,6 @@ import landscapeCullComputeSource from "../shader/landscapeCullCompute.wgsl";
  */
 export class LandscapeGPUCuller {
     #redGPUContext: RedGPUContext;
-    #maxTileCount: number;
-    #maxLODLevel: number;
 
     #computePipeline: GPUComputePipeline | null = null;
     #uniformBuffer: GPUBuffer | null = null;
@@ -19,10 +17,8 @@ export class LandscapeGPUCuller {
     #uniformData: Float32Array = new Float32Array(44);
     #uniformUintData: Uint32Array;
 
-    constructor(redGPUContext: RedGPUContext, maxTileCount: number, maxLODLevel: number) {
+    constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
-        this.#maxTileCount = maxTileCount;
-        this.#maxLODLevel = maxLODLevel;
         this.#uniformUintData = new Uint32Array(this.#uniformData.buffer);
 
         this.#initGPUResources();
