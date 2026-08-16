@@ -40,8 +40,8 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     // 텍스처 비동기 로딩 갱신 시 파괴된 텍스처 복사 제출 방지용 버저닝 가드
     #textureArrayVersion: number = 0;
 
-    // Zero-GC 재사용 TypedArray Uniform 구조체 (WGSL 16-byte alignment: header 16B + color 16B + 8 layers * 80B = 총 672 bytes = 168 float32 elements)
-    #uniformFloatArray: Float32Array = new Float32Array(168);
+    // Zero-GC 재사용 TypedArray Uniform 구조체 (WGSL 16-byte alignment: header 32B + 8 layers * 96B = 총 800 bytes = 200 float32 elements)
+    #uniformFloatArray: Float32Array = new Float32Array(200);
     #uniformUintArray: Uint32Array;
 
     constructor(redGPUContext: RedGPUContext, colorHex: string = '#387d42') {
@@ -194,14 +194,12 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                 const layer = this.#layers[i];
                 floatBuf[offset + 0] = layer.uvOffset[0];
                 floatBuf[offset + 1] = layer.uvOffset[1];
-                floatBuf[offset + 2] = layer.uvScale[0];
-                floatBuf[offset + 3] = layer.uvScale[1];
-
-                const blendModeVal = layer.blendMode === 'SLOPE' ? 0 : (layer.blendMode === 'HEIGHT' ? 1 : 2);
-                floatBuf[offset + 4] = layer.minVal;
-                floatBuf[offset + 5] = layer.maxVal;
-                floatBuf[offset + 6] = layer.blendFalloff;
-                floatBuf[offset + 7] = blendModeVal;
+                floatBuf[offset + 2] = layer.uvScaleDetail[0];
+                floatBuf[offset + 3] = layer.uvScaleDetail[1];
+                floatBuf[offset + 4] = layer.uvScaleAtlas[0];
+                floatBuf[offset + 5] = layer.uvScaleAtlas[1];
+                floatBuf[offset + 6] = layer.minVal;
+                floatBuf[offset + 7] = layer.maxVal;
 
                 const layerColorLinear = layer.tintColor ? layer.tintColor.rgbaNormalLinear : [1, 1, 1, 1];
                 floatBuf[offset + 8] = layerColorLinear[0];
@@ -209,19 +207,25 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                 floatBuf[offset + 10] = layerColorLinear[2];
                 floatBuf[offset + 11] = layerColorLinear[3];
 
-                floatBuf[offset + 12] = layer.roughness;
-                floatBuf[offset + 13] = layer.metallic;
-                floatBuf[offset + 14] = layer.normalIntensity;
-                floatBuf[offset + 15] = layer.enabled ? 1.0 : 0.0; // enabled
+                const blendModeVal = layer.blendMode === 'SLOPE' ? 0 : (layer.blendMode === 'HEIGHT' ? 1 : 2);
+                floatBuf[offset + 12] = layer.blendFalloff;
+                floatBuf[offset + 13] = blendModeVal;
+                floatBuf[offset + 14] = layer.roughness;
+                floatBuf[offset + 15] = layer.metallic;
 
-                floatBuf[offset + 16] = layer.aoIntensity;
-                floatBuf[offset + 17] = layer.heightOffset;
-                floatBuf[offset + 18] = layer.heightContrast;
-                floatBuf[offset + 19] = layer.weightMapChannelIndex;
+                floatBuf[offset + 16] = layer.normalIntensity;
+                floatBuf[offset + 17] = layer.enabled ? 1.0 : 0.0;
+                floatBuf[offset + 18] = layer.aoIntensity;
+                floatBuf[offset + 19] = layer.heightOffset;
+
+                floatBuf[offset + 20] = layer.heightContrast;
+                floatBuf[offset + 21] = layer.weightMapChannelIndex;
+                floatBuf[offset + 22] = 0.0;
+                floatBuf[offset + 23] = 0.0;
             } else {
-                floatBuf.fill(0, offset, offset + 20);
+                floatBuf.fill(0, offset, offset + 24);
             }
-            offset += 20;
+            offset += 24;
         }
 
         const fragRenderInfo = this.gpuRenderInfo;

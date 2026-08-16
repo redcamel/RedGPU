@@ -25,12 +25,13 @@ struct InputData {
 
 struct LandscapeLayerParams {
     uvOffset: vec2<f32>,
-    uvScale: vec2<f32>,
+    uvScaleDetail: vec2<f32>, // 🌿 근경(LOD 0/1) 초고해상도 1cm 마이크로 디테일 렌더용
+    uvScaleAtlas: vec2<f32>,  // 🎨 원경(LOD 2+) VBT 2D 아틀라스 베이킹용
     minVal: f32,
     maxVal: f32,
+    tintColor: vec4<f32>,
     blendFalloff: f32,
     blendMode: f32, // 0: SLOPE, 1: HEIGHT, 2: WEIGHT_MAP
-    tintColor: vec4<f32>,
     roughness: f32,
     metallic: f32,
     normalIntensity: f32,
@@ -39,6 +40,8 @@ struct LandscapeLayerParams {
     heightOffset: f32,
     heightContrast: f32,
     weightMapChannelIndex: f32, // 0: R, 1: G, 2: B, 3: A
+    pad0: f32,
+    pad1: f32,
 };
 
 struct MaterialUniforms {
@@ -50,14 +53,27 @@ struct MaterialUniforms {
     layers: array<LandscapeLayerParams, 8>,
 };
 
+struct LandscapeUniforms {
+    heightScale: f32,
+    worldSizeX: f32,
+    worldSizeZ: f32,
+    lodColoration: f32,
+    maxComponentCount: u32,
+    pad0: u32,
+    pad1: u32,
+    pad2: u32,
+    lodColors: array<vec4<f32>, 8>,
+};
+
 // @group(1): RVT & VBT 2D Atlas 3-Set
 @group(1) @binding(3) var vhtHeightAtlasTexture: texture_2d<f32>;
 @group(1) @binding(4) var vntNormalTexture: texture_2d<f32>;
+@group(1) @binding(5) var<uniform> landscapeInstanceUniforms: LandscapeUniforms;
 @group(1) @binding(6) var vbtBaseColorAtlasTexture: texture_2d<f32>;
 @group(1) @binding(7) var vbtNormalAtlasTexture: texture_2d<f32>;
 @group(1) @binding(8) var vbtORMAtlasTexture: texture_2d<f32>;
 
-// @group(2): Material (LOD 0/1 근경 직접 고해상도 샘플링용 리소스)
+// @group(2): Material & Textures
 @group(2) @binding(0) var<uniform> uniforms: MaterialUniforms;
 @group(2) @binding(1) var baseColorTextureSampler: sampler;
 @group(2) @binding(2) var layerBaseColorArray: texture_2d_array<f32>;
@@ -144,10 +160,10 @@ fn computeDirectLayersPBR(
 
         if (layerW <= 0.0001) { continue; }
 
-        // 개별 레이어 고해상도 2048px 직접 샘플링 (Gradient 기반 비분기 밉맵 페치)
-        let layerUV = worldTileUV * layerParams.uvScale + layerParams.uvOffset;
-        let ddx_layer = ddx_tile * layerParams.uvScale;
-        let ddy_layer = ddy_tile * layerParams.uvScale;
+        // 🌿 근경 초고해상도 디테일 전용 uvScaleDetail 적용
+        let layerUV = worldTileUV * layerParams.uvScaleDetail + layerParams.uvOffset;
+        let ddx_layer = ddx_tile * layerParams.uvScaleDetail;
+        let ddy_layer = ddy_tile * layerParams.uvScaleDetail;
 
         let layerAlbedoSample = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, layerUV, layerIdx, ddx_layer, ddy_layer);
         let layerNormalRaw = textureSampleGrad(layerNormalArray, baseColorTextureSampler, layerUV, layerIdx, ddx_layer, ddy_layer).rgb * 2.0 - vec3<f32>(1.0);

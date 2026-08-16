@@ -15,7 +15,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, 'VBT');
-        this.#uniformFloatArray = new Float32Array(172); // 688 bytes (172 floats)
+        this.#uniformFloatArray = new Float32Array(204); // 816 bytes (204 floats)
         this.#uniformUintArray = new Uint32Array(this.#uniformFloatArray.buffer);
         this.#initComputeResources();
     }
@@ -71,19 +71,19 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         fArr[10] = baseColorRGBA[2];
         fArr[11] = 1.0;
 
-        // 2. Layers[8] (80 bytes per layer = 20 floats each)
+        // 2. Layers[8] (96 bytes per layer = 24 floats each)
         for (let i = 0; i < 8; i++) {
-            const offset = 12 + i * 20;
+            const offset = 12 + i * 24;
             if (i < activeCount) {
                 const layer = activeLayers[i];
                 fArr[offset + 0] = layer.uvOffset[0];
                 fArr[offset + 1] = layer.uvOffset[1];
-                fArr[offset + 2] = layer.uvScale[0];
-                fArr[offset + 3] = layer.uvScale[1];
-                fArr[offset + 4] = layer.minVal;
-                fArr[offset + 5] = layer.maxVal;
-                fArr[offset + 6] = layer.blendFalloff;
-                fArr[offset + 7] = layer.blendMode === 'HEIGHT' ? 1.0 : (layer.blendMode === 'WEIGHT_MAP' ? 2.0 : 0.0);
+                fArr[offset + 2] = layer.uvScaleDetail[0];
+                fArr[offset + 3] = layer.uvScaleDetail[1];
+                fArr[offset + 4] = layer.uvScaleAtlas[0];
+                fArr[offset + 5] = layer.uvScaleAtlas[1];
+                fArr[offset + 6] = layer.minVal;
+                fArr[offset + 7] = layer.maxVal;
 
                 const tint = layer.tintColor.rgbNormalLinear;
                 fArr[offset + 8] = tint[0];
@@ -91,23 +91,29 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
                 fArr[offset + 10] = tint[2];
                 fArr[offset + 11] = 1.0;
 
-                fArr[offset + 12] = layer.roughness;
-                fArr[offset + 13] = layer.metallic;
-                fArr[offset + 14] = layer.normalIntensity;
-                fArr[offset + 15] = layer.enabled ? 1.0 : 0.0;
-                fArr[offset + 16] = layer.aoIntensity;
-                fArr[offset + 17] = layer.heightOffset;
-                fArr[offset + 18] = layer.heightContrast;
-                fArr[offset + 19] = layer.weightMapChannelIndex;
+                fArr[offset + 12] = layer.blendFalloff;
+                fArr[offset + 13] = layer.blendMode === 'HEIGHT' ? 1.0 : (layer.blendMode === 'WEIGHT_MAP' ? 2.0 : 0.0);
+                fArr[offset + 14] = layer.roughness;
+                fArr[offset + 15] = layer.metallic;
+
+                fArr[offset + 16] = layer.normalIntensity;
+                fArr[offset + 17] = layer.enabled ? 1.0 : 0.0;
+                fArr[offset + 18] = layer.aoIntensity;
+                fArr[offset + 19] = layer.heightOffset;
+
+                fArr[offset + 20] = layer.heightContrast;
+                fArr[offset + 21] = layer.weightMapChannelIndex;
+                fArr[offset + 22] = 0.0;
+                fArr[offset + 23] = 0.0;
             } else {
-                for (let j = 0; j < 20; j++) {
+                for (let j = 0; j < 24; j++) {
                     fArr[offset + j] = 0.0;
                 }
             }
         }
 
-        const uniformBuffer = this.acquireUniformBuffer(688);
-        device.queue.writeBuffer(uniformBuffer, 0, fArr.buffer, 0, 688);
+        const uniformBuffer = this.acquireUniformBuffer(816);
+        device.queue.writeBuffer(uniformBuffer, 0, fArr.buffer, 0, 816);
 
         const vbtBaseColorStorageView = this.#getStorageTextureView(vbtBaseColorArray.gpuTexture);
         const vbtNormalStorageView = this.#getStorageTextureView(vbtNormalArray.gpuTexture);
@@ -198,7 +204,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
                     storageTexture: {access: 'write-only', format: 'rgba8unorm', viewDimension: '2d'}
                 },
             ],
-            688
+            816
         );
     }
 }

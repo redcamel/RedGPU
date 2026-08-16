@@ -41,7 +41,18 @@ export abstract class ALandscapeAtlasGenerator {
             }));
         }
 
-        return this.#uniformBufferPool[this.#poolIndex++];
+        const buf = this.#uniformBufferPool[this.#poolIndex++];
+        if (buf.size < byteLength) {
+            const newBuf = device.createBuffer({
+                label: `Landscape_${this.#generatorLabel}_UniformBuffer_Slot_${this.#poolIndex - 1}`,
+                size: Math.max(16, byteLength),
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+            });
+            this.#uniformBufferPool[this.#poolIndex - 1] = newBuf;
+            return newBuf;
+        }
+
+        return buf;
     }
 
     /**
