@@ -42,13 +42,10 @@ struct LandscapeLayerParams {
 
 struct MaterialUniforms {
     activeLayerCount: u32,
+    pad0: u32,
+    pad1: u32,
+    pad2: u32,
     color: vec4<f32>,
-    textureOffset: vec2<f32>,
-    textureScale: vec2<f32>,
-    roughnessFactor: f32,
-    metallicFactor: f32,
-    occlusionStrength: f32,
-    pad0: f32,
     layers: array<LandscapeLayerParams, 8>,
 };
 
@@ -92,9 +89,9 @@ fn main(inputData: InputData) -> OutputFragment {
     let u_cameraPosition = systemUniforms.camera.cameraPosition;
     let preExposure = systemUniforms.preExposure;
 
-    var u_metallicFactor = uniforms.metallicFactor;
-    var u_roughnessFactor = uniforms.roughnessFactor;
-    var ambientOcclusion = uniforms.occlusionStrength;
+    var metallicFactor = 0.0;
+    var roughnessFactor = 0.9;
+    var ambientOcclusion = 1.0;
 
     let globalUV = inputData.uv1;
     let baseUvDx = dpdx(globalUV);
@@ -108,7 +105,7 @@ fn main(inputData: InputData) -> OutputFragment {
     // ⚡ GPU acos() 역삼각함수 Pre-computation (루프 밖에서 픽셀당 1회만 계산)
     let slopeAngleDeg = acos(clamp(N.y, -1.0, 1.0)) * 57.295779513;
 
-    // Base Color & Albedo
+    // 기본 지형 바탕 색상 (uniforms.color)
     var baseColor = uniforms.color;
 
     if (inputData.instanceColor.a > 0.0) {
@@ -122,8 +119,8 @@ fn main(inputData: InputData) -> OutputFragment {
 
     if (activeLayerCount > 0u) {
         var baseAlbedo = albedo;
-        var baseRoughness = u_roughnessFactor;
-        var baseMetallic = u_metallicFactor;
+        var baseRoughness = roughnessFactor;
+        var baseMetallic = metallicFactor;
         var baseAO = ambientOcclusion;
 
         var totalLayerWeight = 0.0;
@@ -195,8 +192,8 @@ fn main(inputData: InputData) -> OutputFragment {
             if (length(layerBlendNormal) > 0.001) {
                 N = normalize(mix(N, N + layerBlendNormal, alpha));
             }
-            u_roughnessFactor = mix(baseRoughness, layerBlendRoughness, alpha);
-            u_metallicFactor = mix(baseMetallic, layerBlendMetallic, alpha);
+            roughnessFactor = mix(baseRoughness, layerBlendRoughness, alpha);
+            metallicFactor = mix(baseMetallic, layerBlendMetallic, alpha);
             ambientOcclusion = mix(baseAO, layerBlendAO, alpha);
         }
     }
@@ -213,8 +210,8 @@ fn main(inputData: InputData) -> OutputFragment {
     // Fresnel F0
     let F0_dielectric = vec3<f32>(0.04);
     let F0_metal = albedo;
-    let F0 = mix(F0_dielectric, F0_metal, u_metallicFactor);
-    let roughnessParameter = max(u_roughnessFactor, 0.04);
+    let F0 = mix(F0_dielectric, F0_metal, metallicFactor);
+    let roughnessParameter = max(roughnessFactor, 0.04);
 
     // Direct Lighting Loop (Cook-Torrance PBR)
     var totalDirectLighting = vec3<f32>(0.0);
@@ -247,7 +244,7 @@ fn main(inputData: InputData) -> OutputFragment {
 
                 let spec = (NDF * G * F) / (4.0 * NdotV * NdotL + EPSILON);
                 let kS = F;
-                let kD = (vec3<f32>(1.0) - kS) * (1.0 - u_metallicFactor);
+                let kD = (vec3<f32>(1.0) - kS) * (1.0 - metallicFactor);
 
                 totalDirectLighting += (kD * albedo * INV_PI + spec) * finalLightColor * NdotL;
             }
@@ -276,7 +273,7 @@ fn main(inputData: InputData) -> OutputFragment {
 
             let spec = (NDF * G * F) / (4.0 * NdotV * NdotL + EPSILON);
             let kS = F;
-            let kD = (vec3<f32>(1.0) - kS) * (1.0 - u_metallicFactor);
+            let kD = (vec3<f32>(1.0) - kS) * (1.0 - metallicFactor);
 
             totalDirectLighting += (kD * albedo * INV_PI + spec) * finalLightColor * NdotL;
         }
@@ -313,7 +310,7 @@ fn main(inputData: InputData) -> OutputFragment {
 
         let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV, roughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
         let F_IBL = F0 * envBRDF.x + vec3<f32>(envBRDF.y);
-        let kD = (vec3<f32>(1.0) - F_IBL) * (1.0 - u_metallicFactor);
+        let kD = (vec3<f32>(1.0) - F_IBL) * (1.0 - metallicFactor);
 
         indirectLighting = ((kD * albedo * iblDiffuseColor) + (reflectedColor * F_IBL)) * ambientOcclusion;
     } else {

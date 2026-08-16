@@ -46,20 +46,8 @@ RedGPU.init(
             loadingRadius: 4000
         });
 
-        // 4-1. 기본 지형 PBR 텍스처 (baseColor / orm)
-        const groundTexture = new RedGPU.Resource.BitmapTexture(
-            redGPUContext,
-            '../../../assets/terrain/terrainTest_001/diffuse.jpg'
-        );
-        const ormTexture = new RedGPU.Resource.BitmapTexture(
-            redGPUContext,
-            '../../../assets/terrain/terrainTest_001/orm.jpg'
-        );
-        landscape.landscapeMaterial.baseColorTexture = groundTexture;
-        landscape.landscapeMaterial.ormTexture = ormTexture;
-        landscape.landscapeMaterial.color.setColorByHEX('#ffffff');
-        landscape.landscapeMaterial.textureScale = [160, 160];
-        landscape.lodColoration = false;
+        // 4-1. 지형 기본 바탕 색상 설정
+        landscape.landscapeMaterial.color.setColorByHEX('#387d42');
 
         // Multi-Layer PBR 지형 레이어 4종 (Grass, Rock, Gravel, Leave) 등록
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
@@ -223,7 +211,7 @@ RedGPU.init(
         renderer.start(redGPUContext, render);
 
         // 7. Landscape 모든 get/set 속성 및 2D 디버거 전면 제어 테스트 패널 렌더링
-        renderTestPane(redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight, [grassLayer, rockLayer, gravelLayer, leaveLayer], foliageManager, grassType);
+        renderTestPane(redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, directionalLight, [grassLayer, rockLayer, gravelLayer, leaveLayer], foliageManager, grassType);
     }
 );
 
@@ -237,12 +225,10 @@ RedGPU.init(
  * @param {RedGPU.Display.LandscapeSpatialGridDebugger} spatialGridDebugger
  * @param {RedGPU.Display.LandscapeVHTDebugger} vhtDebugger
  * @param {RedGPU.Display.LandscapeVNTDebugger} vntDebugger
- * @param {RedGPU.Resource.BitmapTexture} groundTexture
- * @param {RedGPU.Resource.BitmapTexture} ormTexture
  * @param {RedGPU.Light.DirectionalLight} directionalLight
  * @param {Array<RedGPU.LandscapeLayer>} layers
  */
-const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, groundTexture, ormTexture, directionalLight, layers, foliageManager, grassType) => {
+const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, directionalLight, layers, foliageManager, grassType) => {
     const [wsX, wsZ] = landscape ? landscape.worldSize : [8000, 8000];
     const [tcX, tcZ] = landscape ? landscape.componentCount : [8, 8];
     const [tsX, tsZ] = landscape ? landscape.tileSize : [1000, 1000];
@@ -272,14 +258,8 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
         // 4. Render Options & Material
         wireframe: landscape ? landscape.wireframe : false,
         lodColoration: landscape ? landscape.lodColoration : false,
-        terrainColor: '#ffffff',
-        roughness: 1.0,
-        metallic: 0.0,
-        occlusionStrength: 1.0,
-        useDiffuseTexture: true,
-        useOrmTexture: true,
-        textureScaleU: 160,
-        textureScaleV: 160,
+        terrainColor: '#387d42',
+        textureArraySize: landscape?.landscapeMaterial?.textureArraySize ?? 1024,
 
         // 4-1. Directional Light (Sun)
         sunElevation: directionalLight ? directionalLight.elevation : 45,
@@ -336,20 +316,18 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
             // Folder 0: Foliage System Controls
             if (grassType) {
                 const folderFoliage = pane.addFolder({title: '🌿 Foliage System Controls', expanded: true});
-                folderFoliage.addBinding(config, 'foliageCount', {readonly: true, label: 'Active Instances'});
+                folderFoliage.addBinding(config, 'foliageCount', {readonly: true});
                 folderFoliage.addBinding(config, 'foliageCullingDist', {
                     min: 100,
                     max: 2000,
-                    step: 20,
-                    label: 'Culling Dist (m)'
+                    step: 20
                 }).on('change', (ev) => {
                     grassType.options.cullingDistance = ev.value;
                 });
                 folderFoliage.addBinding(config, 'foliageFadeStartDist', {
                     min: 50,
                     max: 1500,
-                    step: 20,
-                    label: 'Fade Start Dist (m)'
+                    step: 20
                 }).on('change', (ev) => {
                     grassType.options.fadeStartDistance = ev.value;
                 });
@@ -471,71 +449,17 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                 }
             });
 
-            folderDisplay.addBinding(config, 'roughness', {
-                min: 0.0,
-                max: 1.0,
-                step: 0.01
+            folderDisplay.addBinding(config, 'textureArraySize', {
+                options: {
+                    '512': 512,
+                    '1024': 1024,
+                    '2048': 2048
+                }
             }).on('change', (ev) => {
                 if (landscape && landscape.landscapeMaterial) {
-                    landscape.landscapeMaterial.roughnessFactor = ev.value;
+                    landscape.landscapeMaterial.textureArraySize = ev.value;
                 }
             });
-
-            folderDisplay.addBinding(config, 'metallic', {
-                min: 0.0,
-                max: 1.0,
-                step: 0.01
-            }).on('change', (ev) => {
-                if (landscape && landscape.landscapeMaterial) {
-                    landscape.landscapeMaterial.metallicFactor = ev.value;
-                }
-            });
-
-            folderDisplay.addBinding(config, 'occlusionStrength', {
-                min: 0.0,
-                max: 2.0,
-                step: 0.05
-            }).on('change', (ev) => {
-                if (landscape && landscape.landscapeMaterial) {
-                    landscape.landscapeMaterial.occlusionStrength = ev.value;
-                }
-            });
-
-            folderDisplay.addBinding(config, 'useDiffuseTexture').on('change', (ev) => {
-                if (landscape && landscape.landscapeMaterial) {
-                    landscape.landscapeMaterial.baseColorTexture = ev.value ? groundTexture : null;
-                }
-            });
-
-            folderDisplay.addBinding(config, 'useOrmTexture').on('change', (ev) => {
-                if (landscape && landscape.landscapeMaterial) {
-                    landscape.landscapeMaterial.ormTexture = ev.value ? ormTexture : null;
-                }
-            });
-
-            folderDisplay.addBinding(config, 'textureScaleU', {
-                min: 1,
-                max: 1000,
-                step: 5
-            }).on('change', (ev) => {
-                if (landscape && landscape.landscapeMaterial) {
-                    const [, scV] = landscape.landscapeMaterial.textureScale;
-                    landscape.landscapeMaterial.textureScale = [ev.value, scV];
-                }
-            });
-
-            folderDisplay.addBinding(config, 'textureScaleV', {
-                min: 1,
-                max: 1000,
-                step: 5
-            }).on('change', (ev) => {
-                if (landscape && landscape.landscapeMaterial) {
-                    const [scU] = landscape.landscapeMaterial.textureScale;
-                    landscape.landscapeMaterial.textureScale = [scU, ev.value];
-                }
-            });
-
-            folderDisplay.addBinding(landscape, 'lodColoration');
 
             // Folder 4-1: Multi-Layer PBR Controls (Grass, Rock, Gravel, Leave)
             if (layers && layers.length) {
@@ -666,19 +590,19 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
             config.vhtDebuggerVisible = vhtDebugger ? vhtDebugger.visible : true;
             config.vntDebuggerVisible = vntDebugger ? vntDebugger.visible : true;
 
-            folderDebuggers.addBinding(config, 'hudDebuggerVisible', {label: 'Show HUD Monitor'}).on('change', (ev) => {
+            folderDebuggers.addBinding(config, 'hudDebuggerVisible').on('change', (ev) => {
                 if (hudDebugger) hudDebugger.visible = ev.value;
             });
 
-            folderDebuggers.addBinding(config, 'spatialGridVisible', {label: 'Show 2D SpatialGrid'}).on('change', (ev) => {
+            folderDebuggers.addBinding(config, 'spatialGridVisible').on('change', (ev) => {
                 if (spatialGridDebugger) spatialGridDebugger.visible = ev.value;
             });
 
-            folderDebuggers.addBinding(config, 'vhtDebuggerVisible', {label: 'Show VHT Atlas'}).on('change', (ev) => {
+            folderDebuggers.addBinding(config, 'vhtDebuggerVisible').on('change', (ev) => {
                 if (vhtDebugger) vhtDebugger.visible = ev.value;
             });
 
-            folderDebuggers.addBinding(config, 'vntDebuggerVisible', {label: 'Show VNT Normal Atlas'}).on('change', (ev) => {
+            folderDebuggers.addBinding(config, 'vntDebuggerVisible').on('change', (ev) => {
                 if (vntDebugger) vntDebugger.visible = ev.value;
             });
 

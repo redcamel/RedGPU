@@ -14,7 +14,6 @@ import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "../spatial/Landsc
 import LandscapeVNTGenerator from "../generator/LandscapeVNTGenerator";
 import LandscapeVHTGenerator from "../generator/LandscapeVHTGenerator";
 import Object3DContainer from "../../mesh/core/Object3DContainer";
-import updateTargetUniform from "../../../defineProperty/core/updateTargetUniform";
 import {LandscapeFoliageManager} from "../foliage/LandscapeFoliageManager";
 import {LandscapeGPUCuller} from "../spatial/LandscapeGPUCuller";
 import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
@@ -125,7 +124,7 @@ export class Landscape extends Object3DContainer {
         const componentSizeQuads = options.componentSizeQuads ?? LANDSCAPE_BASE_GRID_SIZE.QUAD_63;
         const maxLODLevel = Math.min(8, Math.max(1, options.maxLODLevel ?? 4));
 
-        const landscapeMaterial = options.landscapeMaterial || new LandscapeMaterial(redGPUContext, '#387d42');
+        const landscapeMaterial = options.landscapeMaterial || new LandscapeMaterial(redGPUContext);
         const sharedGeometry = new LandscapeSharedGeometry(redGPUContext, tileSizeX, tileSizeZ, componentSizeQuads, maxLODLevel);
 
         this.#spatialGrid = new LandscapeSpatialGrid(componentCountX, componentCountZ, tileSizeX, tileSizeZ);
@@ -230,13 +229,6 @@ export class Landscape extends Object3DContainer {
                 if (renderResults) {
                     renderResults.numDirtyPipelines++;
                 }
-            }
-
-            // [KO] Mesh 표준: 텍스처 트랜스폼(Offset, Scale) 변경 시 GPU 유니폼 동기화 및 dirty 플래그 초기화
-            if (material.dirtyTextureTransform) {
-                updateTargetUniform(material, 'textureOffset', material.textureOffset || [0, 0]);
-                updateTargetUniform(material, 'textureScale', material.textureScale || [1, 1]);
-                material.dirtyTextureTransform = false;
             }
         }
 

@@ -10,16 +10,12 @@ import landscapeFragmentSource from "../shader/landscapeFragment.wgsl";
 import LandscapeLayer from "./LandscapeLayer";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import defineColorRGBA from "../../../defineProperty/funcs/color/defineColorRGBA";
-import defineNumber from "../../../defineProperty/funcs/number/defineNumber";
 import defineSampler from "../../../defineProperty/funcs/texture/defineSampler";
 
 const MAX_LANDSCAPE_LAYERS = 8;
 
 interface LandscapeMaterial {
     color: ColorRGBA;
-    roughnessFactor: number;
-    metallicFactor: number;
-    occlusionStrength: number;
     baseColorTextureSampler: Sampler;
 }
 
@@ -44,11 +40,11 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     // 텍스처 비동기 로딩 갱신 시 파괴된 텍스처 복사 제출 방지용 버저닝 가드
     #textureArrayVersion: number = 0;
 
-    // Zero-GC 재사용 TypedArray Uniform 구조체 (WGSL 16-byte alignment 규칙 준수: 총 704 bytes = 176 float32 elements)
-    #uniformFloatArray: Float32Array = new Float32Array(176);
+    // Zero-GC 재사용 TypedArray Uniform 구조체 (WGSL 16-byte alignment: header 16B + color 16B + 8 layers * 80B = 총 672 bytes = 168 float32 elements)
+    #uniformFloatArray: Float32Array = new Float32Array(168);
     #uniformUintArray: Uint32Array;
 
-    constructor(redGPUContext: RedGPUContext, colorHex: string = '#ffffff') {
+    constructor(redGPUContext: RedGPUContext, colorHex: string = '#387d42') {
         super(
             redGPUContext,
             'LANDSCAPE_MATERIAL',
@@ -71,12 +67,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         });
 
         this.color.setColorByHEX(colorHex);
-        this.roughnessFactor = 1.0;
-        this.metallicFactor = 0.0;
-        this.occlusionStrength = 1.0;
-        this.textureScale = [160, 160];
-        this.textureOffset = [0, 0];
-
         this.initGPURenderInfos();
     }
 
@@ -150,23 +140,18 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         const uintBuf = this.#uniformUintArray;
 
         const activeCount = this.#layers.length;
-        uintBuf[0] = activeCount; // offset 0~3 bytes
+        uintBuf[0] = activeCount; // offset 0 bytes
+        uintBuf[1] = 0;           // offset 4 bytes (pad)
+        uintBuf[2] = 0;           // offset 8 bytes (pad)
+        uintBuf[3] = 0;           // offset 12 bytes (pad)
 
-        const colorLinear = this.color ? this.color.rgbaNormalLinear : [1, 1, 1, 1];
+        const colorLinear = this.color ? this.color.rgbaNormalLinear : [0.22, 0.49, 0.26, 1.0];
         floatBuf[4] = colorLinear[0]; // offset 16 bytes
         floatBuf[5] = colorLinear[1];
         floatBuf[6] = colorLinear[2];
         floatBuf[7] = colorLinear[3];
-        floatBuf[8] = this.textureOffset ? this.textureOffset[0] : 0.0; // offset 32 bytes
-        floatBuf[9] = this.textureOffset ? this.textureOffset[1] : 0.0;
-        floatBuf[10] = this.textureScale ? this.textureScale[0] : 1.0;  // offset 40 bytes
-        floatBuf[11] = this.textureScale ? this.textureScale[1] : 1.0;
-        floatBuf[12] = this.roughnessFactor ?? 1.0;     // offset 48 bytes
-        floatBuf[13] = this.metallicFactor ?? 0.0;      // offset 52 bytes
-        floatBuf[14] = this.occlusionStrength ?? 1.0;  // offset 56 bytes
-        floatBuf[15] = 1.0; // padding/reserved (offset 60 bytes)
 
-        let offset = 16; // offset 64 bytes (array<LandscapeLayerParams, 8> alignment)
+        let offset = 8; // offset 32 bytes (array<LandscapeLayerParams, 8> alignment)
         for (let i = 0; i < MAX_LANDSCAPE_LAYERS; i++) {
             if (i < activeCount) {
                 const layer = this.#layers[i];
@@ -518,12 +503,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 
 defineColorRGBA(LandscapeMaterial, [
     {key: 'color'}
-]);
-
-defineNumber(LandscapeMaterial, [
-    {key: 'roughnessFactor', value: 1.0, min: 0, max: 1},
-    {key: 'metallicFactor', value: 0.0, min: 0, max: 1},
-    {key: 'occlusionStrength', value: 1.0, min: 0, max: 2}
 ]);
 
 defineSampler(LandscapeMaterial, [
