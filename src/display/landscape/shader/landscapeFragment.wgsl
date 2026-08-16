@@ -59,10 +59,11 @@ struct LandscapeUniforms {
     worldSizeZ: f32,
     lodColoration: f32,
     maxComponentCount: u32,
-    lod0Distance: f32,
-    pad0: f32,
-    pad1: f32,
+    tileSizeX: f32,
+    tileSizeZ: f32,
+    baseQuads: f32,
     lodColors: array<vec4<f32>, 8>,
+    lodDistancesSq: array<vec4<f32>, 2>,
 };
 
 // @group(1): RVT & VBT 2D Atlas 3-Set
@@ -264,7 +265,7 @@ fn main(inputData: InputData) -> OutputFragment {
     if (lod < 1.5) {
         // 🌿 LOD 0 ~ 1: 카메라와의 실제 픽셀 거리 기반 부드러운 하이브리드 크로스페이드 (시각적 팝핑 0%)
         let viewDist = distance(u_cameraPosition, input_vertexPosition);
-        let lod0Dist = max(1.0, landscapeInstanceUniforms.lod0Distance);
+        let lod0Dist = max(1.0, sqrt(landscapeInstanceUniforms.lodDistancesSq[0].x));
         let fadeStart = lod0Dist * 0.7;
         let fadeEnd = lod0Dist;
         let fade = smoothstep(fadeStart, fadeEnd, viewDist);
