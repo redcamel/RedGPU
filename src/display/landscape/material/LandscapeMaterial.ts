@@ -63,7 +63,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
             mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
             addressModeU: GPU_ADDRESS_MODE.REPEAT,
             addressModeV: GPU_ADDRESS_MODE.REPEAT,
-            maxAnisotropy: 16
+            // maxAnisotropy: 16
         });
 
         this.color.setColorByHEX(colorHex);
