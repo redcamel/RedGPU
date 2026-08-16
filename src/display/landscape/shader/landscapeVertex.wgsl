@@ -45,6 +45,7 @@ struct OutputData {
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
     @location(9) instanceColor: vec4<f32>,
+    @location(10) @interpolate(flat) lodLevel: f32,
 };
 
 @vertex
@@ -112,6 +113,8 @@ fn main(input: InputData) -> OutputData {
     } else {
         output.instanceColor = instanceData.color;
     }
+
+    output.lodLevel = f32(lodLevel);
 
     return output;
 }

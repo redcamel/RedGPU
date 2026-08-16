@@ -200,11 +200,20 @@ export class LandscapeInstanceBuffer {
     }
 
     /**
-     * [KO] RVT (VHT 고도맵 + VNT 노멀맵) 텍스처 및 전역 UniformBuffer를 수신하여 @group(1) GPUBindGroup을 생성/갱신합니다 (Index Redirection 대응).
+     * [KO] RVT (VHT 고도맵 + VNT 노멀맵 + VBT 3종 세트) 텍스처 및 전역 UniformBuffer를 수신하여 @group(1) GPUBindGroup을 생성/갱신합니다 (Index Redirection 대응).
      */
-    updateBindGroup(vhtSampler: GPUSampler, vhtTextureView: GPUTextureView, vntTextureView?: GPUTextureView): void {
+    updateBindGroup(
+        vhtSampler: GPUSampler,
+        vhtTextureView: GPUTextureView,
+        vntTextureView?: GPUTextureView,
+        vbtBaseColorView?: GPUTextureView,
+        vbtNormalView?: GPUTextureView,
+        vbtORMView?: GPUTextureView
+    ): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#instanceStorageBindGroupLayout || !this.#allInputTilesBuffer || !this.#visibleTileIndicesBuffer || !this.#landscapeUniformBuffer) return;
+
+        const fallbackView = vntTextureView || vhtTextureView;
 
         const entries: GPUBindGroupEntry[] = [
             {
@@ -226,27 +235,30 @@ export class LandscapeInstanceBuffer {
             {
                 binding: 3,
                 resource: vhtTextureView
+            },
+            {
+                binding: 4,
+                resource: fallbackView
+            },
+            {
+                binding: 5,
+                resource: {
+                    buffer: this.#landscapeUniformBuffer
+                }
+            },
+            {
+                binding: 6,
+                resource: vbtBaseColorView || fallbackView
+            },
+            {
+                binding: 7,
+                resource: vbtNormalView || fallbackView
+            },
+            {
+                binding: 8,
+                resource: vbtORMView || fallbackView
             }
         ];
-
-        if (vntTextureView) {
-            entries.push({
-                binding: 4,
-                resource: vntTextureView
-            });
-        } else {
-            entries.push({
-                binding: 4,
-                resource: vhtTextureView
-            });
-        }
-
-        entries.push({
-            binding: 5,
-            resource: {
-                buffer: this.#landscapeUniformBuffer
-            }
-        });
 
         this.#instanceStorageBindGroup = gpuDevice.createBindGroup({
             label: 'LandscapeInstanceStorageBindGroup',
@@ -278,7 +290,7 @@ export class LandscapeInstanceBuffer {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice) return;
 
-        // 1. GPUBindGroupLayout 생성 (@group(1): AllInputTiles, VisibleTileIndices, Sampler, VHT Height, VNT Normal, LandscapeUniforms)
+        // 1. GPUBindGroupLayout 생성 (@group(1): AllInputTiles, VisibleTileIndices, Sampler, VHT Height, VNT Normal, LandscapeUniforms, VBT 3-Set)
         this.#instanceStorageBindGroupLayout = gpuDevice.createBindGroupLayout({
             label: 'LandscapeInstanceStorageBindGroupLayout',
             entries: [
@@ -324,6 +336,30 @@ export class LandscapeInstanceBuffer {
                     visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
                     buffer: {
                         type: 'uniform'
+                    }
+                },
+                {
+                    binding: 6,
+                    visibility: GPUShaderStage.FRAGMENT,
+                    texture: {
+                        sampleType: 'float',
+                        viewDimension: '2d'
+                    }
+                },
+                {
+                    binding: 7,
+                    visibility: GPUShaderStage.FRAGMENT,
+                    texture: {
+                        sampleType: 'float',
+                        viewDimension: '2d'
+                    }
+                },
+                {
+                    binding: 8,
+                    visibility: GPUShaderStage.FRAGMENT,
+                    texture: {
+                        sampleType: 'float',
+                        viewDimension: '2d'
                     }
                 }
             ]

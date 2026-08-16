@@ -94,6 +94,40 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     }
 
     /**
+     * [KO] VBT 리베이킹 요청 이벤트 콜백
+     */
+    onRebakeVBTRequested?: () => void;
+    #isRebakeScheduled: boolean = false;
+
+    get layerBaseColorArray(): { gpuTexture: GPUTexture | null, gpuTextureView: GPUTextureView | null } {
+        return {gpuTexture: this.#gpuBaseColorArrayTexture, gpuTextureView: this.#baseColorArrayView};
+    }
+
+    get layerNormalArray(): { gpuTexture: GPUTexture | null, gpuTextureView: GPUTextureView | null } {
+        return {gpuTexture: this.#gpuNormalArrayTexture, gpuTextureView: this.#normalArrayView};
+    }
+
+    get layerORMArray(): { gpuTexture: GPUTexture | null, gpuTextureView: GPUTextureView | null } {
+        return {gpuTexture: this.#gpuORMArrayTexture, gpuTextureView: this.#ormArrayView};
+    }
+
+    get layerWeightMapArray(): { gpuTexture: GPUTexture | null, gpuTextureView: GPUTextureView | null } {
+        return {gpuTexture: this.#gpuWeightMapArrayTexture, gpuTextureView: this.#weightMapArrayView};
+    }
+
+    /**
+     * [KO] 레이어 속성 변경 시 마이크로태스크 디바운싱을 통해 VBT 재베이킹을 요청합니다 (Zero-GC).
+     */
+    requestVBTRebake(): void {
+        if (this.#isRebakeScheduled) return;
+        this.#isRebakeScheduled = true;
+        queueMicrotask(() => {
+            this.#isRebakeScheduled = false;
+            this.onRebakeVBTRequested?.();
+        });
+    }
+
+    /**
      * [KO] 신규 지형 레이어를 추가합니다 (최대 8개).
      * [EN] Adds a new terrain layer (up to 8 layers).
      */
@@ -104,6 +138,9 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         }
 
         this.#layers.push(layer);
+        layer.onChange = () => {
+            this.requestVBTRebake();
+        };
         layer.dirty = true;
         this.dirtyPipeline = true;
         this.#rebuildTextureArrays();
@@ -452,6 +489,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                         );
                         device.queue.submit([commandEncoder.finish()]);
                         this.#updateLayerMipmaps();
+                        this.requestVBTRebake();
                     } catch (e) {
                         console.warn('[LandscapeMaterial] Texture slice copy defer warning:', e);
                         const pixelData = new Uint8Array(fallbackColor);

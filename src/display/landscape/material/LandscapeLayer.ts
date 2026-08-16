@@ -111,6 +111,7 @@ export class LandscapeLayer {
     tintColor: ColorRGBA = new ColorRGBA(255, 255, 255, 1);
 
     dirty: boolean = true;
+    onChange?: () => void;
 
     constructor(options: LandscapeLayerOptions) {
         this.name = options.name;

@@ -6,6 +6,8 @@ import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCOD
 import DirectTexture from "../../../resources/texture/DirectTexture";
 import LandscapeVNTGenerator from "../generator/LandscapeVNTGenerator";
 import LandscapeVHTGenerator from "../generator/LandscapeVHTGenerator";
+import LandscapeVBTGenerator from "../generator/LandscapeVBTGenerator";
+import LandscapeMaterial from "../material/LandscapeMaterial";
 
 /**
  * [KO] 타일별 커스텀 URL 생성 리졸버 함수 타입입니다. (row, col 인자 제공)
@@ -28,8 +30,13 @@ export class LandscapeTileStreamer {
 
     #vhtAtlasTexture: DirectTexture | null = null;
     #vntAtlasTexture: DirectTexture | null = null;
+    #vbtBaseColorAtlas: DirectTexture | null = null;
+    #vbtNormalAtlas: DirectTexture | null = null;
+    #vbtORMAtlas: DirectTexture | null = null;
     #vhtGenerator: LandscapeVHTGenerator | null = null;
     #vntGenerator: LandscapeVNTGenerator | null = null;
+    #vbtGenerator: LandscapeVBTGenerator | null = null;
+    #material: LandscapeMaterial | null = null;
 
     #heightScale: number = 500.0;
 
@@ -81,6 +88,30 @@ export class LandscapeTileStreamer {
         this.#vntAtlasTexture = texture;
     }
 
+    get vbtBaseColorAtlas(): DirectTexture | null {
+        return this.#vbtBaseColorAtlas;
+    }
+
+    set vbtBaseColorAtlas(texture: DirectTexture | null) {
+        this.#vbtBaseColorAtlas = texture;
+    }
+
+    get vbtNormalAtlas(): DirectTexture | null {
+        return this.#vbtNormalAtlas;
+    }
+
+    set vbtNormalAtlas(texture: DirectTexture | null) {
+        this.#vbtNormalAtlas = texture;
+    }
+
+    get vbtORMAtlas(): DirectTexture | null {
+        return this.#vbtORMAtlas;
+    }
+
+    set vbtORMAtlas(texture: DirectTexture | null) {
+        this.#vbtORMAtlas = texture;
+    }
+
     get vhtGenerator(): LandscapeVHTGenerator | null {
         return this.#vhtGenerator;
     }
@@ -95,6 +126,22 @@ export class LandscapeTileStreamer {
 
     set vntGenerator(generator: LandscapeVNTGenerator | null) {
         this.#vntGenerator = generator;
+    }
+
+    get vbtGenerator(): LandscapeVBTGenerator | null {
+        return this.#vbtGenerator;
+    }
+
+    set vbtGenerator(generator: LandscapeVBTGenerator | null) {
+        this.#vbtGenerator = generator;
+    }
+
+    get material(): LandscapeMaterial | null {
+        return this.#material;
+    }
+
+    set material(mat: LandscapeMaterial | null) {
+        this.#material = mat;
     }
 
     set spatialGrid(grid: LandscapeSpatialGrid) {
@@ -189,8 +236,8 @@ export class LandscapeTileStreamer {
         return this.#loadedMap.has(`${row}_${col}`);
     }
 
-    update(cameraX: number, cameraZ: number): void {
-        const radius = this.#loadingRadius;
+    update(cameraX: number, cameraZ: number, cameraY: number = 0): void {
+        const radius = Math.max(this.#loadingRadius, Math.abs(cameraY) * 2.0);
         const grid = this.#spatialGrid;
         if (!grid) return;
 
@@ -225,7 +272,8 @@ export class LandscapeTileStreamer {
             pending.sort(LandscapeTileStreamer.#sortCompare);
         }
 
-        const loadCount = Math.min(pending.length, this.#maxLoadsPerFrame);
+        const loadRate = Math.abs(cameraY) > 1000 ? Math.max(this.#maxLoadsPerFrame, 4) : this.#maxLoadsPerFrame;
+        const loadCount = Math.min(pending.length, loadRate);
         for (let i = 0; i < loadCount; i++) {
             const comp = pending[i];
             this.#loadTileAsync(comp);
@@ -270,6 +318,32 @@ export class LandscapeTileStreamer {
 
         const rawVal = tileData.pixels[idx] || 0;
         return (rawVal / 65535.0) * this.#heightScale;
+    }
+
+    /**
+     * [KO] 이미 로드된 모든 타일의 VBT 2D 아틀라스 영역을 일괄 재베이킹합니다 (레이어/머티리얼 변경 대응, 0.05ms Zero-GC).
+     */
+    rebakeAllLoadedVBT(): void {
+        if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vhtAtlasTexture || !this.#vntAtlasTexture) return;
+        const TILE_PIXEL_SIZE = 512;
+        for (const comp of this.#spatialGrid.flatCells) {
+            const key = `${comp.componentZ}_${comp.componentX}`;
+            if (this.#loadedMap.has(key)) {
+                this.#vbtGenerator.bakeTileRegion(
+                    this.#vhtAtlasTexture,
+                    this.#vntAtlasTexture,
+                    this.#vbtBaseColorAtlas,
+                    this.#vbtNormalAtlas,
+                    this.#vbtORMAtlas,
+                    this.#material,
+                    comp.componentZ * this.#spatialGrid.tileCountX + comp.componentX,
+                    comp.componentX,
+                    comp.componentZ,
+                    TILE_PIXEL_SIZE
+                );
+            }
+        }
+        console.log(`[LandscapeTileStreamer 🎨] Rebaked all loaded VBT 2D Atlases (${this.#loadedMap.size} tiles)`);
     }
 
     async #loadTileAsync(comp: LandscapeComponent): Promise<void> {
@@ -365,6 +439,22 @@ export class LandscapeTileStreamer {
                                 this.#heightScale,
                                 this.#spatialGrid.worldSizeX,
                                 this.#spatialGrid.tileCountX
+                            );
+                        }
+
+                        // 🎨 GPU VBT (Virtual BaseColor/Normal/ORM) 2D Atlas 3종 세트 일괄 베이킹 트리거 (0.05ms)
+                        if (this.#vbtGenerator && this.#vbtBaseColorAtlas && this.#vbtNormalAtlas && this.#vbtORMAtlas && this.#material && this.#vhtAtlasTexture && this.#vntAtlasTexture) {
+                            this.#vbtGenerator.bakeTileRegion(
+                                this.#vhtAtlasTexture,
+                                this.#vntAtlasTexture,
+                                this.#vbtBaseColorAtlas,
+                                this.#vbtNormalAtlas,
+                                this.#vbtORMAtlas,
+                                this.#material,
+                                comp.componentZ * this.#spatialGrid.tileCountX + comp.componentX,
+                                comp.componentX,
+                                comp.componentZ,
+                                TILE_PIXEL_SIZE
                             );
                         }
 
