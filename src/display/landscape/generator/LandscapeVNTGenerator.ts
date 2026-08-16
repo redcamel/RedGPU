@@ -45,6 +45,8 @@ export class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
         const bakeW = Math.min(atlasW - bakeX, pixelW + (pixelX > 0 ? 2 : 1));
         const bakeH = Math.min(atlasH - bakeZ, pixelH + (pixelZ > 0 ? 2 : 1));
 
+        if (bakeW <= 0 || bakeH <= 0 || pixelX >= atlasW || pixelZ >= atlasH) return;
+
         const arr = this.#uniformArray;
         arr[0] = bakeX;
         arr[1] = bakeZ;

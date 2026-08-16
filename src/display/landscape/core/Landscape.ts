@@ -378,6 +378,7 @@ export class Landscape extends Object3DContainer {
             this.#heightScale = val;
             this.#tileStreamer?.setTerrainConfig(val, this.#worldSizeX, this.#componentCountX);
             this.#updateLandscapeUniforms();
+            this.#tileStreamer?.rebakeAllLoadedVNT();
         }
     }
 
@@ -791,7 +792,9 @@ export class Landscape extends Object3DContainer {
             needRebuildBindGroup = true;
         }
 
-        if (!this.#instanceBuffer || this.#instanceBuffer.maxComponentCount < targetCount || this.#instanceBuffer.maxLODLevel !== this.#maxLODLevel) {
+        this.#sharedGeometry?.updateTileSize(tileSizeX, tileSizeZ);
+
+        if (!this.#instanceBuffer || this.#instanceBuffer.maxComponentCount !== targetCount || this.#instanceBuffer.maxLODLevel !== this.#maxLODLevel) {
             if (this.#instanceBuffer) {
                 this.#instanceBuffer.destroy();
             }
@@ -807,7 +810,7 @@ export class Landscape extends Object3DContainer {
             this.#landscapeComponents.pop();
         }
 
-        this.#spatialGrid.clearTiles();
+        this.#spatialGrid.setConfig(componentCountX, componentCountZ, tileSizeX, tileSizeZ);
         this.#gpuCuller = new LandscapeGPUCuller(this.#redGPUContext);
 
         let index = 0;

@@ -29,7 +29,9 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         pixelH: number
     ): void {
         if (!this.computePipeline || !this.bindGroupLayout) return;
-        if (!srcTileTexture || !vhtAtlas?.gpuTexture) return;
+        const atlasW = vhtAtlas.gpuTexture.width;
+        const atlasH = vhtAtlas.gpuTexture.height;
+        if (pixelX >= atlasW || pixelZ >= atlasH || pixelW <= 0 || pixelH <= 0) return;
 
         const device = this.redGPUContext.gpuDevice;
 

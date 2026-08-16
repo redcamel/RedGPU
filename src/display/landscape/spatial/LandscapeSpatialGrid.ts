@@ -49,6 +49,20 @@ export class LandscapeSpatialGrid {
     }
 
     /**
+     * [KO] 공간 격자의 타일 개수 및 타일 크기를 동적으로 재설정합니다.
+     * [EN] Dynamically reconfigures tile count and tile size of the spatial grid.
+     */
+    setConfig(tileCountX: number, tileCountZ: number, tileSizeX: number, tileSizeZ: number): void {
+        this.#tileCountX = tileCountX;
+        this.#tileCountZ = tileCountZ;
+        this.#tileSizeX = tileSizeX;
+        this.#tileSizeZ = tileSizeZ;
+        this.#halfWorldSizeX = (tileCountX * tileSizeX) / 2;
+        this.#halfWorldSizeZ = (tileCountZ * tileSizeZ) / 2;
+        this.clearTiles();
+    }
+
+    /**
      * [KO] 타일 등록을 초기화합니다.
      */
     clearTiles(): void {

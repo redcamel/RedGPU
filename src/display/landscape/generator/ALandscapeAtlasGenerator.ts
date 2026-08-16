@@ -56,9 +56,10 @@ export abstract class ALandscapeAtlasGenerator {
         pixelZ: number
     ): void {
         if (!this.computePipeline) return;
+        if (pixelW <= 0 || pixelH <= 0) return;
 
-        const workgroupCountX = Math.ceil(pixelW / 16);
-        const workgroupCountY = Math.ceil(pixelH / 16);
+        const workgroupCountX = Math.max(1, Math.ceil(pixelW / 16));
+        const workgroupCountY = Math.max(1, Math.ceil(pixelH / 16));
 
         this.redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.RESOURCE, (commandEncoder) => {
             const pass = commandEncoder.beginComputePass({

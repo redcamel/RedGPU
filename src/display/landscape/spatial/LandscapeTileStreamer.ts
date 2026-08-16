@@ -62,6 +62,7 @@ export class LandscapeTileStreamer {
         this.#loadingMap.clear();
         this.#loadedMap.clear();
         this.#failedMap.clear();
+        this.#cpuHeightMap.clear();
         this.#pendingQueue.length = 0;
     }
 
@@ -143,6 +144,47 @@ export class LandscapeTileStreamer {
         this.#heightScale = heightScale;
         this.#worldSizeX = worldSizeX;
         this.#componentCountX = componentCountX;
+    }
+
+    /**
+     * [KO] 지형 heightScale이나 worldSize 변경 시 이미 로드된 모든 타일의 VNT 노멀 아틀라스를 일괄 재베이킹합니다 (Zero-GC).
+     * [EN] Re-bakes VNT normal atlas for all loaded tiles in batch when terrain heightScale or worldSize changes (Zero-GC).
+     */
+    rebakeAllLoadedVNT(): void {
+        if (!this.#vhtAtlasTexture || !this.#vntAtlasTexture || !this.#vntGenerator) return;
+
+        const TILE_PIXEL_SIZE = 512;
+        const vhtAtlas = this.#vhtAtlasTexture;
+        const vntAtlas = this.#vntAtlasTexture;
+        const vntGen = this.#vntGenerator;
+        const heightScale = this.#heightScale;
+        const worldSizeX = this.#worldSizeX;
+        const componentCountX = this.#componentCountX;
+
+        for (const [key, cpuParsed] of this.#cpuHeightMap) {
+            const parts = key.split('_');
+            const row = parseInt(parts[0], 10);
+            const col = parseInt(parts[1], 10);
+
+            if (row >= componentCountX || col >= componentCountX) continue;
+
+            const targetX = col * TILE_PIXEL_SIZE;
+            const targetZ = row * TILE_PIXEL_SIZE;
+            const copyW = Math.min(cpuParsed.width || TILE_PIXEL_SIZE, TILE_PIXEL_SIZE);
+            const copyH = Math.min(cpuParsed.height || TILE_PIXEL_SIZE, TILE_PIXEL_SIZE);
+
+            vntGen.bakeTileRegion(
+                vhtAtlas,
+                vntAtlas,
+                targetX,
+                targetZ,
+                copyW,
+                copyH,
+                heightScale,
+                worldSizeX,
+                componentCountX
+            );
+        }
     }
 
     isTileLoaded(row: number, col: number): boolean {
