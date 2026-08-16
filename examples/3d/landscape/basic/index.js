@@ -57,15 +57,15 @@ RedGPU.init(
             '../../../assets/terrain/terrainTest_001/splatMap.jpg'
         );
 
-        // 1. Grass (주 평지 레이어 - R 채널: weightChannel = 'R')
+        // 1. Grass (주 광활한 초원/산맥 레이어 - 🔵 B 채널: 전체 지형의 65% 최대 면적 차지)
         const grassLayer = new RedGPU.LandscapeLayer({
             name: 'Grass',
             baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass.jpg`),
             normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass_normal.jpg`),
             ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass_orm.jpg`),
             weightTexture: sharedSplatMap,
-            weightChannel: 'R',
-            uvScale: [30, 30], // 🌿 100m 타일 기준 3.3m 텍스처 반복 (풀잎 질감 최적화)
+            weightChannel: 'B', // 🔵 Blue: 전체 맵의 65%를 차지하는 최대 면적에 푸른 잔디 적용
+            uvScale: [50, 50], // 🌿 100m 타일 기준 2.0m 반복 (작은 풀잎/잔디 실제 스케일 최적화)
             blendMode: 'WEIGHT_MAP',
             roughness: 0.85,
             metallic: 0.0,
@@ -74,15 +74,15 @@ RedGPU.init(
             tintColor: '#ffffff'
         });
 
-        // 2. Gravel (전이 지대/흙 레이어 - G 채널: weightChannel = 'G')
+        // 2. Gravel (오솔길/흙길 레이어 - 🔴 R 채널: 좁은 오솔길 10%)
         const gravelLayer = new RedGPU.LandscapeLayer({
             name: 'Gravel',
             baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}gravel.jpg`),
             normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}gravel_normal.jpg`),
             ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}gravel_orm.jpg`),
             weightTexture: sharedSplatMap,
-            weightChannel: 'G',
-            uvScale: [20, 20], // 🪨 100m 타일 기준 5m 텍스처 반복 (자갈/흙길 질감 최적화)
+            weightChannel: 'R', // 🔴 Red: 구불구불한 오솔길/도로
+            uvScale: [40, 40], // 🪨 100m 타일 기준 2.5m 반복 (오솔길 폭 4~6m 내에 적정 2~3회 반복)
             blendMode: 'WEIGHT_MAP',
             roughness: 0.9,
             metallic: 0.0,
@@ -91,15 +91,15 @@ RedGPU.init(
             tintColor: '#ffffff'
         });
 
-        // 3. Rock (절벽/암벽 레이어 - B 채널: weightChannel = 'B')
+        // 3. Rock (절벽/암벽 레이어 - 🟢 G 채널: 능선 및 절벽 포인트 20%)
         const rockLayer = new RedGPU.LandscapeLayer({
             name: 'Rock',
             baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock.jpg`),
             normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock_normal.jpg`),
             ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock_orm.jpg`),
             weightTexture: sharedSplatMap,
-            weightChannel: 'B',
-            uvScale: [10, 10], // ⛰️ 100m 타일 기준 10m 텍스처 반복 (웅장한 암벽/지층 덩어리감 최적화)
+            weightChannel: 'G', // 🟢 Green: 가파른 능선 및 암벽 포인트
+            uvScale: [15, 15], // ⛰️ 100m 타일 기준 6.6m 반복 (거대 단층선과 웅장한 지층 덩어리감)
             blendMode: 'WEIGHT_MAP',
             roughness: 0.7,
             metallic: 0.05,
@@ -108,15 +108,15 @@ RedGPU.init(
             tintColor: '#ffffff'
         });
 
-        // 4. Leave (골짜기/숲속 레이어 - A 채널: weightChannel = 'A')
+        // 4. Leave (골짜기/숲속 레이어 - ⚫ A / Black 채널: 그늘진 골짜기 5%)
         const leaveLayer = new RedGPU.LandscapeLayer({
             name: 'Leave',
             baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}leave.jpg`),
             normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}leave_normal.jpg`),
             ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}leave_orm.jpg`),
             weightTexture: sharedSplatMap,
-            weightChannel: 'A',
-            uvScale: [25, 25], // 🍂 100m 타일 기준 4m 텍스처 반복 (낙엽 바닥 질감 최적화)
+            weightChannel: 'A', // ⚫ Black/Alpha: 숲속 그늘 바닥/골짜기
+            uvScale: [50, 50], // 🍂 100m 타일 기준 2.0m 반복 (손바닥 크기 낙엽 실제 스케일)
             blendMode: 'WEIGHT_MAP',
             roughness: 0.8,
             metallic: 0.0,
