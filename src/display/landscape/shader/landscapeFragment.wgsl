@@ -340,6 +340,14 @@ fn main(inputData: InputData) -> OutputFragment {
     let F0 = mix(F0_dielectric, F0_metal, metallicFactor);
     let roughnessParameter = max(roughnessFactor, 0.04);
 
+    // 🌟 Cook-Torrance PBR 상수 및 G1V 뷰 감쇠 1회 사전 계산 (루프 내부 중복 연산 100% 제거)
+    let alpha = roughnessParameter * roughnessParameter;
+    let alpha2 = alpha * alpha;
+    let alpha2Minus1 = alpha2 - 1.0;
+    let k = (roughnessParameter + 1.0) * (roughnessParameter + 1.0) * 0.125;
+    let invK = 1.0 - k;
+    let G1V = NdotV / (NdotV * invK + k + EPSILON);
+
     // Direct Lighting Loop (Cook-Torrance PBR with Disney Diffuse)
     var totalDirectLighting = vec3<f32>(0.0);
     let u_directionalLightCount = systemUniforms.directionalLightCount;
@@ -357,14 +365,10 @@ fn main(inputData: InputData) -> OutputFragment {
                 let NdotH = max(dot(N, H), 0.0);
                 let LdotH = max(dot(L, H), 0.0);
 
-                let alpha = roughnessParameter * roughnessParameter;
-                let alpha2 = alpha * alpha;
-                let denomNDF = (NdotH * NdotH * (alpha2 - 1.0) + 1.0);
+                let denomNDF = (NdotH * NdotH * alpha2Minus1 + 1.0);
                 let NDF = alpha2 / (PI * denomNDF * denomNDF + EPSILON);
 
-                let k = (roughnessParameter + 1.0) * (roughnessParameter + 1.0) / 8.0;
-                let G1V = NdotV / (NdotV * (1.0 - k) + k + EPSILON);
-                let G1L = NdotL / (NdotL * (1.0 - k) + k + EPSILON);
+                let G1L = NdotL / (NdotL * invK + k + EPSILON);
                 let G = G1V * G1L;
 
                 let F = F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - LdotH, 0.0, 1.0), 5.0);
@@ -387,14 +391,10 @@ fn main(inputData: InputData) -> OutputFragment {
             let NdotH = max(dot(N, H), 0.0);
             let LdotH = max(dot(defaultSunL, H), 0.0);
 
-            let alpha = roughnessParameter * roughnessParameter;
-            let alpha2 = alpha * alpha;
-            let denomNDF = (NdotH * NdotH * (alpha2 - 1.0) + 1.0);
+            let denomNDF = (NdotH * NdotH * alpha2Minus1 + 1.0);
             let NDF = alpha2 / (PI * denomNDF * denomNDF + EPSILON);
 
-            let k = (roughnessParameter + 1.0) * (roughnessParameter + 1.0) / 8.0;
-            let G1V = NdotV / (NdotV * (1.0 - k) + k + EPSILON);
-            let G1L = NdotL / (NdotL * (1.0 - k) + k + EPSILON);
+            let G1L = NdotL / (NdotL * invK + k + EPSILON);
             let G = G1V * G1L;
 
             let F = F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - LdotH, 0.0, 1.0), 5.0);
