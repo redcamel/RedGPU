@@ -19,10 +19,6 @@ struct InputTileData {
     worldZ: f32,
     prevWorldX: f32,
     prevWorldZ: f32,
-    lodLevel: u32,
-    heightScale: f32,
-    worldSizeX: f32,
-    worldSizeZ: f32,
     color: vec4<f32>,
 };
 

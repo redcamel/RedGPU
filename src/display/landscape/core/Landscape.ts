@@ -312,6 +312,7 @@ export class Landscape extends Object3DContainer {
             this.#tileSizeX = wx / this.#componentCountX;
             this.#tileSizeZ = wz / this.#componentCountZ;
             this.#updateTuples();
+            this.#instanceBuffer?.updateUniforms(this.#heightScale, wx, wz);
             this.#rebuildTiles();
         }
     }
@@ -397,6 +398,7 @@ export class Landscape extends Object3DContainer {
     set heightScale(val: number) {
         this.#heightScale = val;
         this.#tileStreamer.setTerrainConfig(val, this.#worldSizeX, this.#componentCountX);
+        this.#instanceBuffer.updateUniforms(val, this.#worldSizeX, this.#worldSizeZ);
     }
 
     /** [KO] Virtual Heightfield Texture (VHT) 아틀라스 DirectTexture 레퍼런스 */
@@ -859,16 +861,14 @@ export class Landscape extends Object3DContainer {
                 this.#instanceBuffer.setStaticTileData(
                     index,
                     posX, posZ, posX, posZ,
-                    0, 0, 0, 1.0,
-                    this.#heightScale,
-                    this.#worldSizeX,
-                    this.#worldSizeZ
+                    0, 0, 0, 1.0
                 );
                 index++;
             }
         }
 
         this.#instanceBuffer.uploadStaticTilesToGPU();
+        this.#instanceBuffer.updateUniforms(this.#heightScale, this.#worldSizeX, this.#worldSizeZ);
 
         if (this.#instanceBuffer.allInputTilesBuffer && this.#instanceBuffer.visibleTileIndicesBuffer && this.#instanceBuffer.indirectDrawBuffer) {
             this.#gpuCuller.updateBindGroup(

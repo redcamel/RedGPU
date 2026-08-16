@@ -5,17 +5,21 @@ struct TileInstance {
     worldZ: f32,
     prevWorldX: f32,
     prevWorldZ: f32,
-    lodLevel: u32,
+    color: vec4<f32>,
+};
+
+struct LandscapeUniforms {
     heightScale: f32,
     worldSizeX: f32,
     worldSizeZ: f32,
-    color: vec4<f32>,
+    pad0: f32,
 };
 
 @group(1) @binding(0) var<storage, read> allInputTiles: array<TileInstance>;
 @group(1) @binding(1) var<storage, read> visibleTileIndices: array<u32>;
 @group(1) @binding(2) var heightMapSampler: sampler;
 @group(1) @binding(3) var heightMapTexture: texture_2d<f32>;
+@group(1) @binding(5) var<uniform> landscapeUniforms: LandscapeUniforms;
 
 struct InputData {
     @location(0) position: vec3<f32>,
@@ -53,12 +57,12 @@ fn main(input: InputData) -> OutputData {
 
     // VHT 오픈월드 Global UV 계산 (0.0 ~ 1.0)
     let globalUV = vec2<f32>(
-        (worldX + instanceData.worldSizeX * 0.5) / instanceData.worldSizeX,
-        (worldZ + instanceData.worldSizeZ * 0.5) / instanceData.worldSizeZ
+        (worldX + landscapeUniforms.worldSizeX * 0.5) / landscapeUniforms.worldSizeX,
+        (worldZ + landscapeUniforms.worldSizeZ * 0.5) / landscapeUniforms.worldSizeZ
     );
     let prevGlobalUV = vec2<f32>(
-        (prevWorldX + instanceData.worldSizeX * 0.5) / instanceData.worldSizeX,
-        (prevWorldZ + instanceData.worldSizeZ * 0.5) / instanceData.worldSizeZ
+        (prevWorldX + landscapeUniforms.worldSizeX * 0.5) / landscapeUniforms.worldSizeX,
+        (prevWorldZ + landscapeUniforms.worldSizeZ * 0.5) / landscapeUniforms.worldSizeZ
     );
 
     // VHT Atlas Texture (@group(1)) 16비트 고도 샘플링 (textureLoad: UnfilterableFloat 대응)
@@ -73,8 +77,8 @@ fn main(input: InputData) -> OutputData {
         prevHeightValue = textureLoad(heightMapTexture, prevTexCoord, 0).r;
     }
 
-    let worldY = heightValue * instanceData.heightScale + input.position.z;
-    let prevWorldY = prevHeightValue * instanceData.heightScale + input.position.z;
+    let worldY = heightValue * landscapeUniforms.heightScale + input.position.z;
+    let prevWorldY = prevHeightValue * landscapeUniforms.heightScale + input.position.z;
 
     let worldPos4 = vec4<f32>(worldX, worldY, worldZ, 1.0);
     let prevWorldPos4 = vec4<f32>(prevWorldX, prevWorldY, prevWorldZ, 1.0);
