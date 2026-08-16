@@ -12,7 +12,12 @@ struct LandscapeUniforms {
     heightScale: f32,
     worldSizeX: f32,
     worldSizeZ: f32,
-    pad0: f32,
+    lodColoration: f32,
+    maxComponentCount: u32,
+    pad0: u32,
+    pad1: u32,
+    pad2: u32,
+    lodColors: array<vec4<f32>, 8>,
 };
 
 @group(1) @binding(0) var<storage, read> allInputTiles: array<TileInstance>;
@@ -99,7 +104,14 @@ fn main(input: InputData) -> OutputData {
     output.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * worldPos4;
     output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * prevWorldPos4;
 
-    output.instanceColor = instanceData.color;
+    // 3. LOD Coloration: firstInstance 오프셋 기반 LOD 레벨 복원 및 색상 매핑
+    let maxCompCount = max(1u, landscapeUniforms.maxComponentCount);
+    let lodLevel = input.instanceIdx / maxCompCount;
+    if (landscapeUniforms.lodColoration > 0.5) {
+        output.instanceColor = landscapeUniforms.lodColors[min(lodLevel, 7u)];
+    } else {
+        output.instanceColor = instanceData.color;
+    }
 
     return output;
 }

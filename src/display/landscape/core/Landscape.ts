@@ -312,7 +312,7 @@ export class Landscape extends Object3DContainer {
             this.#tileSizeX = wx / this.#componentCountX;
             this.#tileSizeZ = wz / this.#componentCountZ;
             this.#updateTuples();
-            this.#instanceBuffer?.updateUniforms(this.#heightScale, wx, wz);
+            this.#updateLandscapeUniforms();
             this.#rebuildTiles();
         }
     }
@@ -385,6 +385,14 @@ export class Landscape extends Object3DContainer {
         }
     }
 
+    set heightScale(val: number) {
+        if (this.#heightScale !== val) {
+            this.#heightScale = val;
+            this.#tileStreamer?.setTerrainConfig(val, this.#worldSizeX, this.#componentCountX);
+            this.#updateLandscapeUniforms();
+        }
+    }
+
     /** [KO] UE5 공식 메인 지형 머티리얼 (LandscapeMaterial) */
     get landscapeMaterial(): LandscapeMaterial {
         return this.#landscapeMaterial;
@@ -395,10 +403,11 @@ export class Landscape extends Object3DContainer {
         return this.#heightScale;
     }
 
-    set heightScale(val: number) {
-        this.#heightScale = val;
-        this.#tileStreamer.setTerrainConfig(val, this.#worldSizeX, this.#componentCountX);
-        this.#instanceBuffer.updateUniforms(val, this.#worldSizeX, this.#worldSizeZ);
+    set lodColoration(value: boolean) {
+        if (this.#lodColoration !== value) {
+            this.#lodColoration = value;
+            this.#updateLandscapeUniforms();
+        }
     }
 
     /** [KO] Virtual Heightfield Texture (VHT) 아틀라스 DirectTexture 레퍼런스 */
@@ -438,10 +447,15 @@ export class Landscape extends Object3DContainer {
         return this.#lodColoration;
     }
 
-    set lodColoration(value: boolean) {
-        if (this.#lodColoration !== value) {
-            this.#lodColoration = value;
-        }
+    #updateLandscapeUniforms(): void {
+        this.#instanceBuffer?.updateUniforms(
+            this.#heightScale,
+            this.#worldSizeX,
+            this.#worldSizeZ,
+            this.#lodColoration,
+            this.#componentCountX * this.#componentCountZ,
+            this.#lodColorsRGBA
+        );
     }
 
     /** [KO] UE5 공식 컴포넌트 타일 리스트 (LandscapeComponents) */
@@ -693,6 +707,8 @@ export class Landscape extends Object3DContainer {
         } else {
             this.#updateLODDistances();
         }
+
+        this.#updateLandscapeUniforms();
     }
 
     #getOrCreateRenderPipeline(geom: any, storageBGLayout: GPUBindGroupLayout): GPURenderPipeline | null {
@@ -868,7 +884,7 @@ export class Landscape extends Object3DContainer {
         }
 
         this.#instanceBuffer.uploadStaticTilesToGPU();
-        this.#instanceBuffer.updateUniforms(this.#heightScale, this.#worldSizeX, this.#worldSizeZ);
+        this.#updateLandscapeUniforms();
 
         if (this.#instanceBuffer.allInputTilesBuffer && this.#instanceBuffer.visibleTileIndicesBuffer && this.#instanceBuffer.indirectDrawBuffer) {
             this.#gpuCuller.updateBindGroup(

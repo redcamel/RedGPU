@@ -20,8 +20,9 @@ export class LandscapeInstanceBuffer {
     // CPU Static Input Tile Data (32 bytes per tile: worldX, worldZ, prevWorldX, prevWorldZ, r, g, b, a)
     #allInputTilesData: Float32Array;
 
-    // Zero-GC Uniform Buffer Data (16 bytes: heightScale 1f, worldSizeX 1f, worldSizeZ 1f, pad 1f)
-    #landscapeUniformData: Float32Array = new Float32Array(4);
+    // Zero-GC Uniform Buffer Data (160 bytes: heightScale, worldSizeX, worldSizeZ, lodColoration, maxCompCount, 3 pad, 8 vec4 lodColors)
+    #landscapeUniformData: Float32Array = new Float32Array(40);
+    #landscapeUniformUintData: Uint32Array;
 
     constructor(redGPUContext: RedGPUContext, maxComponentCount: number, maxLODLevel: number) {
         this.#redGPUContext = redGPUContext;
@@ -29,6 +30,7 @@ export class LandscapeInstanceBuffer {
         this.#maxLODLevel = maxLODLevel;
 
         this.#allInputTilesData = new Float32Array(maxComponentCount * 8);
+        this.#landscapeUniformUintData = new Uint32Array(this.#landscapeUniformData.buffer);
 
         this.#createGPUResources();
     }
@@ -112,16 +114,48 @@ export class LandscapeInstanceBuffer {
     }
 
     /**
-     * [KO] Landscape 전역 Uniform(heightScale, worldSizeX, worldSizeZ)을 GPU로 전송합니다 (16 bytes, Zero-GC).
+     * [KO] Landscape 전역 Uniform(heightScale, worldSizeX, worldSizeZ, lodColoration, maxComponentCount, lodColors)을 GPU로 전송합니다 (160 bytes, Zero-GC).
      */
-    updateUniforms(heightScale: number, worldSizeX: number, worldSizeZ: number): void {
+    updateUniforms(
+        heightScale: number,
+        worldSizeX: number,
+        worldSizeZ: number,
+        lodColoration: boolean,
+        maxComponentCount: number,
+        lodColorsRGBA: [number, number, number, number][]
+    ): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#landscapeUniformBuffer) return;
 
-        this.#landscapeUniformData[0] = heightScale;
-        this.#landscapeUniformData[1] = worldSizeX;
-        this.#landscapeUniformData[2] = worldSizeZ;
-        this.#landscapeUniformData[3] = 0;
+        const f32 = this.#landscapeUniformData;
+        const u32 = this.#landscapeUniformUintData;
+
+        f32[0] = heightScale;
+        f32[1] = worldSizeX;
+        f32[2] = worldSizeZ;
+        f32[3] = lodColoration ? 1.0 : 0.0;
+
+        u32[4] = maxComponentCount;
+        u32[5] = 0;
+        u32[6] = 0;
+        u32[7] = 0;
+
+        const colorCount = Math.min(8, lodColorsRGBA.length);
+        for (let i = 0; i < 8; i++) {
+            const base = 8 + i * 4;
+            if (i < colorCount) {
+                const color = lodColorsRGBA[i];
+                f32[base] = color[0];
+                f32[base + 1] = color[1];
+                f32[base + 2] = color[2];
+                f32[base + 3] = color[3];
+            } else {
+                f32[base] = 0;
+                f32[base + 1] = 0;
+                f32[base + 2] = 0;
+                f32[base + 3] = 0;
+            }
+        }
 
         gpuDevice.queue.writeBuffer(
             this.#landscapeUniformBuffer,
@@ -312,10 +346,10 @@ export class LandscapeInstanceBuffer {
             usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
 
-        // 5. Landscape 전역 Uniform Buffer 생성 (16 bytes)
+        // 5. Landscape 전역 Uniform Buffer 생성 (160 bytes: 4 floats 기본 + 4 uints 패딩/카운트 + 32 floats 8색상)
         this.#landscapeUniformBuffer = gpuDevice.createBuffer({
             label: 'LandscapeGlobalUniformBuffer',
-            size: 16,
+            size: 160,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });
     }
