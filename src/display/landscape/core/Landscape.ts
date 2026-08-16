@@ -481,6 +481,8 @@ export class Landscape extends Object3DContainer {
     }
 
     #updateLandscapeUniforms(): void {
+        const vhtW = this.#vhtAtlasTexture?.gpuTexture?.width || (this.#componentCountX * 512);
+        const vhtH = this.#vhtAtlasTexture?.gpuTexture?.height || (this.#componentCountZ * 512);
         this.#instanceBuffer?.updateUniforms(
             this.#heightScale,
             this.#worldSizeX,
@@ -490,6 +492,8 @@ export class Landscape extends Object3DContainer {
             this.#tileSizeX,
             this.#tileSizeZ,
             this.#componentSizeQuads,
+            vhtW,
+            vhtH,
             this.#lodColorsRGBA,
             this.#lodDistancesSq
         );

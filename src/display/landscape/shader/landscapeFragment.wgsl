@@ -62,6 +62,9 @@ struct LandscapeUniforms {
     tileSizeX: f32,
     tileSizeZ: f32,
     baseQuads: f32,
+    vhtTextureSize: vec2<f32>,
+    pad0: f32,
+    pad1: f32,
     lodColors: array<vec4<f32>, 8>,
     lodDistancesSq: array<vec4<f32>, 2>,
 };
@@ -187,7 +190,7 @@ fn computeDirectLayersPBR(
     if (totalLayerWeight > 0.0001) {
         let invW = 1.0 / totalLayerWeight;
         let layerBlendAlbedo = blendedAlbedo * invW;
-        let layerBlendNormal = normalize(blendedNormalTangent * invW);
+        let layerBlendNormal = normalize(blendedNormalTangent); // normalize 내부에서 벡터 크기로 나누므로 * invW 불필요
         let layerBlendRoughness = blendedRoughness * invW;
         let layerBlendMetallic = blendedMetallic * invW;
         let layerBlendAO = blendedAO * invW;
@@ -219,14 +222,29 @@ fn computeDirectLayersPBR(
     return res;
 }
 
-fn getDirectDiffuseBRDF(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albedo: vec3<f32>) -> vec3<f32> {
+fn getDirectDiffuseBRDF(
+    NdotL: f32,
+    NdotV: f32,
+    LdotH: f32,
+    roughness: f32,
+    energyBias: f32,
+    energyFactor: f32,
+    albedo: vec3<f32>
+) -> vec3<f32> {
     if (NdotL <= 0.0) { return vec3<f32>(0.0); }
-    let energyBias = mix(0.0, 0.5, roughness);
-    let energyFactor = mix(1.0, 1.0 / 1.51, roughness);
     let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
     let f0 = 1.0;
-    let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
-    let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
+
+    let oneMinusNdotL = 1.0 - NdotL;
+    let nl2 = oneMinusNdotL * oneMinusNdotL;
+    let nl5 = nl2 * nl2 * oneMinusNdotL;
+    let lightScatter = f0 + (fd90 - f0) * nl5;
+
+    let oneMinusNdotV = 1.0 - NdotV;
+    let nv2 = oneMinusNdotV * oneMinusNdotV;
+    let nv5 = nv2 * nv2 * oneMinusNdotV;
+    let viewScatter = f0 + (fd90 - f0) * nv5;
+
     return albedo * NdotL * lightScatter * viewScatter * energyFactor * INV_PI;
 }
 
@@ -340,13 +358,15 @@ fn main(inputData: InputData) -> OutputFragment {
     let F0 = mix(F0_dielectric, F0_metal, metallicFactor);
     let roughnessParameter = max(roughnessFactor, 0.04);
 
-    // 🌟 Cook-Torrance PBR 상수 및 G1V 뷰 감쇠 1회 사전 계산 (루프 내부 중복 연산 100% 제거)
+    // 🌟 Cook-Torrance PBR 상수 및 G1V 뷰 감쇠, 디즈니 에너지 보존 계수 1회 사전 계산 (루프 내부 중복 연산 100% 제거)
     let alpha = roughnessParameter * roughnessParameter;
     let alpha2 = alpha * alpha;
     let alpha2Minus1 = alpha2 - 1.0;
     let k = (roughnessParameter + 1.0) * (roughnessParameter + 1.0) * 0.125;
     let invK = 1.0 - k;
     let G1V = NdotV / (NdotV * invK + k + EPSILON);
+    let energyBias = mix(0.0, 0.5, roughnessParameter);
+    let energyFactor = mix(1.0, 1.0 / 1.51, roughnessParameter);
 
     // Direct Lighting Loop (Cook-Torrance PBR with Disney Diffuse)
     var totalDirectLighting = vec3<f32>(0.0);
@@ -371,10 +391,13 @@ fn main(inputData: InputData) -> OutputFragment {
                 let G1L = NdotL / (NdotL * invK + k + EPSILON);
                 let G = G1V * G1L;
 
-                let F = F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - LdotH, 0.0, 1.0), 5.0);
+                let oneMinusLdotH = clamp(1.0 - LdotH, 0.0, 1.0);
+                let lh2 = oneMinusLdotH * oneMinusLdotH;
+                let lh5 = lh2 * lh2 * oneMinusLdotH;
+                let F = F0 + (vec3<f32>(1.0) - F0) * lh5;
 
                 let spec = (NDF * G * F) / (4.0 * NdotV * NdotL + EPSILON);
-                let diffuse_reflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughnessParameter, albedo);
+                let diffuse_reflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughnessParameter, energyBias, energyFactor, albedo);
                 let kS = F;
                 let kD = (vec3<f32>(1.0) - kS) * (1.0 - metallicFactor);
 
@@ -397,10 +420,13 @@ fn main(inputData: InputData) -> OutputFragment {
             let G1L = NdotL / (NdotL * invK + k + EPSILON);
             let G = G1V * G1L;
 
-            let F = F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - LdotH, 0.0, 1.0), 5.0);
+            let oneMinusLdotH = clamp(1.0 - LdotH, 0.0, 1.0);
+            let lh2 = oneMinusLdotH * oneMinusLdotH;
+            let lh5 = lh2 * lh2 * oneMinusLdotH;
+            let F = F0 + (vec3<f32>(1.0) - F0) * lh5;
 
             let spec = (NDF * G * F) / (4.0 * NdotV * NdotL + EPSILON);
-            let diffuse_reflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughnessParameter, albedo);
+            let diffuse_reflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughnessParameter, energyBias, energyFactor, albedo);
             let kS = F;
             let kD = (vec3<f32>(1.0) - kS) * (1.0 - metallicFactor);
 

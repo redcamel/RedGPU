@@ -17,6 +17,9 @@ struct LandscapeUniforms {
     tileSizeX: f32,
     tileSizeZ: f32,
     baseQuads: f32,
+    vhtTextureSize: vec2<f32>,
+    pad0: f32,
+    pad1: f32,
     lodColors: array<vec4<f32>, 8>,
     lodDistancesSq: array<vec4<f32>, 2>,
 };
@@ -121,8 +124,8 @@ fn main(input: InputData) -> OutputData {
         (prevWorldZ + landscapeUniforms.worldSizeZ * 0.5) / landscapeUniforms.worldSizeZ
     );
 
-    // VHT Atlas Texture (@group(1)) 16비트 고도 샘플링 (textureLoad: UnfilterableFloat 대응)
-    let texSize = vec2<f32>(textureDimensions(heightMapTexture));
+    // VHT Atlas Texture (@group(1)) 16비트 고도 샘플링 (Uniform 직독: 0사이클 헤더 질의/나눗셈 100% 소멸)
+    let texSize = landscapeUniforms.vhtTextureSize;
     let texCoord = vec2<i32>(clamp(globalUV * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
 
     let heightValue = textureLoad(heightMapTexture, texCoord, 0).r;
