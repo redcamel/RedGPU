@@ -39,7 +39,6 @@ export class Landscape extends Object3DContainer {
     #spatialGrid: LandscapeSpatialGrid;
     #instanceBuffer: LandscapeInstanceBuffer;
     #gpuCuller: LandscapeGPUCuller | null = null;
-    #landscapeComponents: LandscapeComponent[] = [];
     #lodDistancesSq: number[] = [];
     #lodMultipliers: number[] = [];
     #lodColorsRGBA: [number, number, number, number][] = [];
@@ -376,7 +375,7 @@ export class Landscape extends Object3DContainer {
     set heightScale(val: number) {
         if (this.#heightScale !== val) {
             this.#heightScale = val;
-            this.#tileStreamer?.setTerrainConfig(val, this.#worldSizeX, this.#componentCountX);
+            this.#tileStreamer?.setTerrainConfig(val);
             this.#updateLandscapeUniforms();
             this.#tileStreamer?.rebakeAllLoadedVNT();
         }
@@ -449,7 +448,7 @@ export class Landscape extends Object3DContainer {
 
     /** [KO] UE5 공식 컴포넌트 타일 리스트 (LandscapeComponents) */
     get landscapeComponents(): LandscapeComponent[] {
-        return this.#landscapeComponents;
+        return this.#spatialGrid.flatCells;
     }
 
     get tileSize(): [number, number] {
@@ -616,7 +615,7 @@ export class Landscape extends Object3DContainer {
         vhtAtlasTexture: DirectTexture,
         vntAtlasTexture: DirectTexture
     ) {
-        this.#tileStreamer.setTerrainConfig(this.#heightScale, this.#worldSizeX, this.#componentCountX);
+        this.#tileStreamer.setTerrainConfig(this.#heightScale);
 
         const resourceManager = redGPUContext.resourceManager;
         let vModule = resourceManager.getGPUShaderModule('LandscapeFullCompatibleFlatVertexShaderModule');
@@ -786,7 +785,7 @@ export class Landscape extends Object3DContainer {
                 this.#tileStreamer.vntAtlasTexture = this.#vntAtlasTexture;
                 this.#tileStreamer.vhtGenerator = this.#vhtGenerator;
                 this.#tileStreamer.vntGenerator = this.#vntGenerator;
-                this.#tileStreamer.setTerrainConfig(this.#heightScale, this.#worldSizeX, this.#componentCountX);
+                this.#tileStreamer.setTerrainConfig(this.#heightScale);
                 this.#tileStreamer.resetTileState();
             }
             needRebuildBindGroup = true;
@@ -806,10 +805,6 @@ export class Landscape extends Object3DContainer {
             this.#instanceBuffer.updateBindGroup(this.#vhtSampler, this.#vhtAtlasTexture.gpuTextureView, this.#vntAtlasTexture.gpuTextureView);
         }
 
-        while (this.#landscapeComponents.length > targetCount) {
-            this.#landscapeComponents.pop();
-        }
-
         this.#spatialGrid.setConfig(componentCountX, componentCountZ, tileSizeX, tileSizeZ);
         this.#gpuCuller = new LandscapeGPUCuller(this.#redGPUContext);
 
@@ -819,23 +814,13 @@ export class Landscape extends Object3DContainer {
                 const posX = col * tileSizeX - halfSizeX + tileSizeX / 2;
                 const posZ = row * tileSizeZ - halfSizeZ + tileSizeZ / 2;
 
-                if (index < this.#landscapeComponents.length) {
-                    const comp = this.#landscapeComponents[index];
-                    comp.worldX = posX;
-                    comp.worldZ = posZ;
-                    comp.componentX = col;
-                    comp.componentZ = row;
-                    this.#spatialGrid.registerTile(row, col, comp);
-                } else {
-                    const comp = new LandscapeComponent(
-                        posX,
-                        posZ,
-                        col,
-                        row
-                    );
-                    this.#landscapeComponents.push(comp);
-                    this.#spatialGrid.registerTile(row, col, comp);
-                }
+                const comp = new LandscapeComponent(
+                    posX,
+                    posZ,
+                    col,
+                    row
+                );
+                this.#spatialGrid.registerTile(row, col, comp);
 
                 this.#instanceBuffer.setStaticTileData(
                     index,

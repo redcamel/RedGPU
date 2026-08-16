@@ -48,6 +48,22 @@ export class LandscapeSpatialGrid {
         return this.#tileSizeZ;
     }
 
+    get worldSizeX(): number {
+        return this.#tileCountX * this.#tileSizeX;
+    }
+
+    get worldSizeZ(): number {
+        return this.#tileCountZ * this.#tileSizeZ;
+    }
+
+    get halfWorldSizeX(): number {
+        return this.#halfWorldSizeX;
+    }
+
+    get halfWorldSizeZ(): number {
+        return this.#halfWorldSizeZ;
+    }
+
     /**
      * [KO] 공간 격자의 타일 개수 및 타일 크기를 동적으로 재설정합니다.
      * [EN] Dynamically reconfigures tile count and tile size of the spatial grid.

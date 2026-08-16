@@ -32,9 +32,8 @@ export class LandscapeTileStreamer {
     #vntGenerator: LandscapeVNTGenerator | null = null;
 
     #heightScale: number = 500.0;
-    #worldSizeX: number = 8000.0;
-    #componentCountX: number = 8;
 
+    #tempCellBuffer: Int32Array = new Int32Array(2);
     #activeComponentsBuffer: LandscapeComponent[] = [];
     #pendingQueue: LandscapeComponent[] = [];
     #loadingMap: Map<string, boolean> = new Map();
@@ -140,10 +139,8 @@ export class LandscapeTileStreamer {
         return this.#pendingQueue.length;
     }
 
-    setTerrainConfig(heightScale: number, worldSizeX: number, componentCountX: number): void {
+    setTerrainConfig(heightScale: number): void {
         this.#heightScale = heightScale;
-        this.#worldSizeX = worldSizeX;
-        this.#componentCountX = componentCountX;
     }
 
     /**
@@ -151,22 +148,23 @@ export class LandscapeTileStreamer {
      * [EN] Re-bakes VNT normal atlas for all loaded tiles in batch when terrain heightScale or worldSize changes (Zero-GC).
      */
     rebakeAllLoadedVNT(): void {
-        if (!this.#vhtAtlasTexture || !this.#vntAtlasTexture || !this.#vntGenerator) return;
+        if (!this.#vhtAtlasTexture || !this.#vntAtlasTexture || !this.#vntGenerator || !this.#spatialGrid) return;
 
         const TILE_PIXEL_SIZE = 512;
         const vhtAtlas = this.#vhtAtlasTexture;
         const vntAtlas = this.#vntAtlasTexture;
         const vntGen = this.#vntGenerator;
         const heightScale = this.#heightScale;
-        const worldSizeX = this.#worldSizeX;
-        const componentCountX = this.#componentCountX;
+        const worldSizeX = this.#spatialGrid.worldSizeX;
+        const componentCountX = this.#spatialGrid.tileCountX;
+        const componentCountZ = this.#spatialGrid.tileCountZ;
 
         for (const [key, cpuParsed] of this.#cpuHeightMap) {
             const parts = key.split('_');
             const row = parseInt(parts[0], 10);
             const col = parseInt(parts[1], 10);
 
-            if (row >= componentCountX || col >= componentCountX) continue;
+            if (row >= componentCountZ || col >= componentCountX) continue;
 
             const targetX = col * TILE_PIXEL_SIZE;
             const targetZ = row * TILE_PIXEL_SIZE;
@@ -238,18 +236,19 @@ export class LandscapeTileStreamer {
      * [KO] 월드 좌표 (x, z) 위치의 VHT 16비트 높이값과 heightScale을 정밀 산출하여 Y 고도를 반환합니다 (Zero-GC).
      */
     getHeightAt(x: number, z: number): number {
-        const halfW = this.#worldSizeX * 0.5;
+        if (!this.#spatialGrid) return 0.0;
 
-        const normU = (x + halfW) / this.#worldSizeX;
-        const normV = (z + halfW) / this.#worldSizeX;
+        const grid = this.#spatialGrid;
+        const halfWX = grid.halfWorldSizeX;
+        const halfWZ = grid.halfWorldSizeZ;
 
-        if (normU < 0.0 || normU > 1.0 || normV < 0.0 || normV > 1.0) {
+        if (x < -halfWX || x > halfWX || z < -halfWZ || z > halfWZ) {
             return 0.0;
         }
 
-        const countX = this.#componentCountX;
-        const col = Math.min(countX - 1, Math.max(0, Math.floor(normU * countX)));
-        const row = Math.min(countX - 1, Math.max(0, Math.floor(normV * countX)));
+        grid.getCellCoordinates(x, z, this.#tempCellBuffer);
+        const col = this.#tempCellBuffer[0];
+        const row = this.#tempCellBuffer[1];
         const key = `${row}_${col}`;
 
         const tileData = this.#cpuHeightMap.get(key);
@@ -257,8 +256,13 @@ export class LandscapeTileStreamer {
             return 0.0;
         }
 
-        const localU = (normU * countX) - col;
-        const localV = (normV * countX) - row;
+        const tileSizeX = grid.tileSizeX;
+        const tileSizeZ = grid.tileSizeZ;
+        const tileMinX = col * tileSizeX - halfWX;
+        const tileMinZ = row * tileSizeZ - halfWZ;
+
+        const localU = Math.min(1.0, Math.max(0.0, (x - tileMinX) / tileSizeX));
+        const localV = Math.min(1.0, Math.max(0.0, (z - tileMinZ) / tileSizeZ));
 
         const px = Math.min(tileData.width - 1, Math.max(0, Math.floor(localU * tileData.width)));
         const py = Math.min(tileData.height - 1, Math.max(0, Math.floor(localV * tileData.height)));
@@ -359,8 +363,8 @@ export class LandscapeTileStreamer {
                                 copyW,
                                 copyH,
                                 this.#heightScale,
-                                this.#worldSizeX,
-                                this.#componentCountX
+                                this.#spatialGrid.worldSizeX,
+                                this.#spatialGrid.tileCountX
                             );
                         }
 
