@@ -57,18 +57,10 @@ struct MaterialUniforms {
 @group(2) @binding(0) var<uniform> uniforms: MaterialUniforms;
 @group(2) @binding(1) var baseColorTextureSampler: sampler;
 
-#redgpu_if baseColorTexture
-@group(2) @binding(2) var baseColorTexture: texture_2d<f32>;
-#redgpu_endIf
-
-#redgpu_if ormTexture
-@group(2) @binding(3) var ormTexture: texture_2d<f32>;
-#redgpu_endIf
-
-@group(2) @binding(4) var layerBaseColorArray: texture_2d_array<f32>;
-@group(2) @binding(5) var layerNormalArray: texture_2d_array<f32>;
-@group(2) @binding(6) var layerORMArray: texture_2d_array<f32>;
-@group(2) @binding(7) var layerWeightMapArray: texture_2d_array<f32>;
+@group(2) @binding(2) var layerBaseColorArray: texture_2d_array<f32>;
+@group(2) @binding(3) var layerNormalArray: texture_2d_array<f32>;
+@group(2) @binding(4) var layerORMArray: texture_2d_array<f32>;
+@group(2) @binding(5) var layerWeightMapArray: texture_2d_array<f32>;
 
 fn computeLayerRawWeightFast(layer: LandscapeLayerParams, slopeAngleDeg: f32, vertexHeight: f32) -> f32 {
     let blendMode = layer.blendMode;
@@ -102,19 +94,11 @@ fn main(inputData: InputData) -> OutputFragment {
 
     var u_metallicFactor = uniforms.metallicFactor;
     var u_roughnessFactor = uniforms.roughnessFactor;
-    var ambientOcclusion = 1.0;
+    var ambientOcclusion = uniforms.occlusionStrength;
 
     let globalUV = inputData.uv1;
-    let transformedUV = globalUV * uniforms.textureScale + uniforms.textureOffset;
     let baseUvDx = dpdx(globalUV);
     let baseUvDy = dpdy(globalUV);
-
-    #redgpu_if ormTexture
-    let ormSample = textureSample(ormTexture, baseColorTextureSampler, transformedUV);
-    ambientOcclusion = clamp(pow(max(0.001, ormSample.r), max(0.0, uniforms.occlusionStrength * 2.0)), 0.0, 1.0);
-    u_roughnessFactor *= ormSample.g;
-    u_metallicFactor *= ormSample.b;
-    #redgpu_endIf
 
     // 1. RVT 월드 노멀 아틀라스(@group(1) @binding(3)) 픽셀 샘플링 및 복원 (단일 통합 샘플러 사용)
     let encodedNormal = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
@@ -126,11 +110,6 @@ fn main(inputData: InputData) -> OutputFragment {
 
     // Base Color & Albedo
     var baseColor = uniforms.color;
-
-    #redgpu_if baseColorTexture
-    let diffuseSampleColor = textureSample(baseColorTexture, baseColorTextureSampler, transformedUV);
-    baseColor *= diffuseSampleColor;
-    #redgpu_endIf
 
     if (inputData.instanceColor.a > 0.0) {
         baseColor = mix(baseColor, inputData.instanceColor, 0.5);

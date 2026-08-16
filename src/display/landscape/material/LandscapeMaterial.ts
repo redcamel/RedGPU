@@ -2,7 +2,6 @@ import ColorRGBA from "../../../color/ColorRGBA";
 import RedGPUContext from "../../../context/RedGPUContext";
 import AUVTransformBaseMaterial from "../../../material/core/AUVTransformBaseMaterial";
 import Sampler from "../../../resources/sampler/Sampler";
-import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import UniformBuffer from "../../../resources/buffer/uniformBuffer/UniformBuffer";
 import GPU_FILTER_MODE from "../../../gpuConst/GPU_FILTER_MODE";
 import GPU_ADDRESS_MODE from "../../../gpuConst/GPU_ADDRESS_MODE";
@@ -13,7 +12,6 @@ import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCOD
 import defineColorRGBA from "../../../defineProperty/funcs/color/defineColorRGBA";
 import defineNumber from "../../../defineProperty/funcs/number/defineNumber";
 import defineSampler from "../../../defineProperty/funcs/texture/defineSampler";
-import defineTexture from "../../../defineProperty/funcs/texture/defineTexture";
 
 const MAX_LANDSCAPE_LAYERS = 8;
 
@@ -22,8 +20,6 @@ interface LandscapeMaterial {
     roughnessFactor: number;
     metallicFactor: number;
     occlusionStrength: number;
-    baseColorTexture: BitmapTexture;
-    ormTexture: BitmapTexture;
     baseColorTextureSampler: Sampler;
 }
 
@@ -45,8 +41,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     #ormArrayView: GPUTextureView | null = null;
     #weightMapArrayView: GPUTextureView | null = null;
 
-    #dummyGlobalTextureView: GPUTextureView | null = null;
-
     // 텍스처 비동기 로딩 갱신 시 파괴된 텍스처 복사 제출 방지용 버저닝 가드
     #textureArrayVersion: number = 0;
 
@@ -54,7 +48,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     #uniformFloatArray: Float32Array = new Float32Array(176);
     #uniformUintArray: Uint32Array;
 
-    constructor(redGPUContext: RedGPUContext, colorHex: string = '#ffffff', baseColorTexture?: BitmapTexture) {
+    constructor(redGPUContext: RedGPUContext, colorHex: string = '#ffffff') {
         super(
             redGPUContext,
             'LANDSCAPE_MATERIAL',
@@ -75,10 +69,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
             addressModeV: GPU_ADDRESS_MODE.REPEAT,
             maxAnisotropy: 16
         });
-
-        if (baseColorTexture) {
-            this.baseColorTexture = baseColorTexture;
-        }
 
         this.color.setColorByHEX(colorHex);
         this.roughnessFactor = 1.0;
@@ -224,7 +214,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     override _updateFragmentState(): void {
         if (this.redGPUContext.destroyed) return;
 
-        // 부모 ABaseMaterial의 표준 셰이더 바리안트(#redgpu_if baseColorTexture 등) 체크 및 파이프라인 동기화 실행
         super._updateFragmentState();
 
         const {gpuDevice} = this.redGPUContext;
@@ -239,19 +228,19 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
             `LandscapeMaterial_UniformBuffer_${this.uuid}`
         );
 
-        const baseColorView = (this.baseColorTexture && this.baseColorTexture.gpuTexture)
-            ? this.baseColorTexture.gpuTexture.createView()
-            : this.#dummyGlobalTextureView;
-
-        const ormView = (this.ormTexture && this.ormTexture.gpuTexture)
-            ? this.ormTexture.gpuTexture.createView()
-            : this.#dummyGlobalTextureView;
-
         const layoutEntries: GPUBindGroupLayoutEntry[] = [
             {binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: {type: 'uniform'}},
             {binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
-            {binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
-            {binding: 3, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
+            {
+                binding: 2,
+                visibility: GPUShaderStage.FRAGMENT,
+                texture: {sampleType: 'float', viewDimension: '2d-array'}
+            },
+            {
+                binding: 3,
+                visibility: GPUShaderStage.FRAGMENT,
+                texture: {sampleType: 'float', viewDimension: '2d-array'}
+            },
             {
                 binding: 4,
                 visibility: GPUShaderStage.FRAGMENT,
@@ -261,13 +250,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                 binding: 5,
                 visibility: GPUShaderStage.FRAGMENT,
                 texture: {sampleType: 'float', viewDimension: '2d-array'}
-            },
-            {
-                binding: 6,
-                visibility: GPUShaderStage.FRAGMENT,
-                texture: {sampleType: 'float', viewDimension: '2d-array'}
-            },
-            {binding: 7, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float', viewDimension: '2d-array'}}
+            }
         ];
 
         const entries: GPUBindGroupEntry[] = [
@@ -280,12 +263,10 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                 }
             },
             {binding: 1, resource: this.baseColorTextureSampler.gpuSampler},
-            {binding: 2, resource: baseColorView},
-            {binding: 3, resource: ormView},
-            {binding: 4, resource: this.#baseColorArrayView || this.#dummyGlobalTextureView},
-            {binding: 5, resource: this.#normalArrayView || this.#dummyGlobalTextureView},
-            {binding: 6, resource: this.#ormArrayView || this.#dummyGlobalTextureView},
-            {binding: 7, resource: this.#weightMapArrayView || this.#dummyGlobalTextureView}
+            {binding: 2, resource: this.#baseColorArrayView!},
+            {binding: 3, resource: this.#normalArrayView!},
+            {binding: 4, resource: this.#ormArrayView!},
+            {binding: 5, resource: this.#weightMapArrayView!}
         ];
 
         const bindGroupLayout = gpuDevice.createBindGroupLayout({
@@ -351,16 +332,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         this.#normalArrayView = this.#gpuNormalArrayTexture.createView({dimension: '2d-array'});
         this.#ormArrayView = this.#gpuORMArrayTexture.createView({dimension: '2d-array'});
         this.#weightMapArrayView = this.#gpuWeightMapArrayTexture.createView({dimension: '2d-array'});
-
-        const dummyGlobalTex = gpuDevice.createTexture({
-            size: [1, 1],
-            format: texFormat,
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
-            label: 'Landscape_Global_Dummy_Tex'
-        });
-        const whitePixel = new Uint8Array([255, 255, 255, 255]);
-        gpuDevice.queue.writeTexture({texture: dummyGlobalTex}, whitePixel, {bytesPerRow: 4}, [1, 1]);
-        this.#dummyGlobalTextureView = dummyGlobalTex.createView();
     }
 
     #rebuildTextureArrays(): void {
@@ -557,11 +528,6 @@ defineNumber(LandscapeMaterial, [
 
 defineSampler(LandscapeMaterial, [
     {key: 'baseColorTextureSampler'}
-]);
-
-defineTexture(LandscapeMaterial, [
-    {key: 'baseColorTexture'},
-    {key: 'ormTexture'}
 ]);
 
 export {LandscapeMaterial};
