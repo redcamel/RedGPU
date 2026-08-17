@@ -592,6 +592,7 @@ export class LandscapeFoliageManager {
                 depthCompare: 'less',
             },
 
+
             multisample: {
                 count: sampleCount,
             },
