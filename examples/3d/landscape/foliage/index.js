@@ -287,12 +287,11 @@ RedGPU.init(
             (loader) => {
                 const treeMesh = loader.resultMesh;
 
-                // 2. 🌲 지형 전역 대량 인스턴싱 FoliageType으로 등록! (glTF 자식 노드 자동 추출 및 하이라키 렌더링)
-
+                // 🌲 지형 전역 대량 인스턴싱 FoliageType으로 등록! (glTF 자식 노드 자동 추출 및 하이라키 렌더링)
                 treeType = foliageManager.addFoliageType({
                     name: 'ElmTree',
                     mesh: treeMesh,
-                    maxInstances: 1000,
+                    maxInstances: 3500,
                     cullingDistance: 2000,
                     fadeStartDistance: 1300,
                     minScale: [6, 6, 6],
