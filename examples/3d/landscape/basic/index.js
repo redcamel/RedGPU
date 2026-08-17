@@ -150,16 +150,119 @@ RedGPU.init(
 
         scene.addLandscape(landscape);
 
-        // 5. LandscapeFoliageManager 생성 및 눈에 잘 띄는 거대 식생 테스트 파퓰레이션
+        // 5. LandscapeFoliageManager 생성 및 리얼 3D 잔디 식생 테스트 파퓰레이션
         const foliageManager = landscape.foliageManager;
         const grassMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
-        grassMaterial.baseColorFactor = [0.15, 0.75, 0.2, 1.0];
-        grassMaterial.roughnessFactor = 0.7;
+        grassMaterial.baseColorTexture = new RedGPU.Resource.BitmapTexture(
+            redGPUContext,
+            '../../../assets/terrain/terrainTest_001/layer/grass.jpg'
+        );
+        grassMaterial.normalTexture = new RedGPU.Resource.BitmapTexture(
+            redGPUContext,
+            '../../../assets/terrain/terrainTest_001/layer/grass_normal.jpg'
+        );
+        grassMaterial.metallicRoughnessTexture = new RedGPU.Resource.BitmapTexture(
+            redGPUContext,
+            '../../../assets/terrain/terrainTest_001/layer/grass_orm.jpg'
+        );
+        grassMaterial.baseColorFactor = [0.85, 1.25, 0.75, 1.0];
+        grassMaterial.roughnessFactor = 0.55;
         grassMaterial.metallicFactor = 0.0;
 
+        // 🌿 3D 리얼 잔디풀 클러스터 지오메트리 생성 함수 (3-Way Star Curved Double-Sided Blades)
+        function createGrassClumpGeometry(context, width = 2.0, height = 3.8, numBlades = 3) {
+            const interleaveData = [];
+            const indexData = [];
+            let vertexOffset = 0;
+
+            for (let b = 0; b < numBlades; b++) {
+                const baseAngle = (b * Math.PI) / numBlades + (b * 0.25);
+                const cosA = Math.cos(baseAngle);
+                const sinA = Math.sin(baseAngle);
+
+                // 블레이드 가로 방향 (X, Z 평면)
+                const sideX = -sinA * (width * 0.5);
+                const sideZ = cosA * (width * 0.5);
+
+                // 활처럼 휘어지는 방향
+                const bendX = cosA * (width * 0.45);
+                const bendZ = sinA * (width * 0.45);
+
+                // 4단계 높이 세그먼트 (뿌리 -> 하단 -> 중단 -> 뾰족한 끝)
+                const segments = [
+                    {yRatio: 0.0, widthScale: 1.0, bend: 0.0, v: 0.0},
+                    {yRatio: 0.35, widthScale: 0.85, bend: 0.25, v: 0.35},
+                    {yRatio: 0.7, widthScale: 0.55, bend: 0.65, v: 0.7},
+                    {yRatio: 1.0, widthScale: 0.05, bend: 1.2, v: 1.0}
+                ];
+
+                const baseVOffset = vertexOffset;
+
+                for (let s = 0; s < segments.length; s++) {
+                    const seg = segments[s];
+                    const y = height * seg.yRatio;
+                    const bx = bendX * seg.bend;
+                    const bz = bendZ * seg.bend;
+                    const w = seg.widthScale;
+
+                    const lx = -sideX * w + bx;
+                    const lz = -sideZ * w + bz;
+                    const rx = sideX * w + bx;
+                    const rz = sideZ * w + bz;
+
+                    // 자연스러운 상향 확산 노멀
+                    const nx = cosA * 0.25;
+                    const nz = sinA * 0.25;
+                    const ny = 0.95;
+                    const normLen = Math.sqrt(nx * nx + ny * ny + nz * nz);
+
+                    // 좌측 정점 (x, y, z, nx, ny, nz, u, v, tx, ty, tz, tw)
+                    interleaveData.push(
+                        lx, y, lz,
+                        nx / normLen, ny / normLen, nz / normLen,
+                        0.0, seg.v,
+                        1.0, 0.0, 0.0, 1.0
+                    );
+
+                    // 우측 정점
+                    interleaveData.push(
+                        rx, y, rz,
+                        nx / normLen, ny / normLen, nz / normLen,
+                        1.0, seg.v,
+                        1.0, 0.0, 0.0, 1.0
+                    );
+
+                    vertexOffset += 2;
+                }
+
+                // 양면 렌더링 인덱스 (Double-Sided Quad Indices)
+                for (let s = 0; s < segments.length - 1; s++) {
+                    const i0 = baseVOffset + s * 2;
+                    const i1 = baseVOffset + s * 2 + 1;
+                    const i2 = baseVOffset + (s + 1) * 2;
+                    const i3 = baseVOffset + (s + 1) * 2 + 1;
+
+                    // 앞면
+                    indexData.push(i0, i1, i2);
+                    indexData.push(i1, i3, i2);
+                    // 뒷면
+                    indexData.push(i0, i2, i1);
+                    indexData.push(i1, i2, i3);
+                }
+            }
+
+            return RedGPU.Primitive.Core.createPrimitiveGeometry(
+                context,
+                interleaveData,
+                indexData,
+                `GrassClumpGeometry_${width}_${height}_${numBlades}`
+            );
+        }
+
+        const grassGeometry = createGrassClumpGeometry(redGPUContext, 2.2, 4.2, 3);
         const dummyGrassMesh = new RedGPU.Display.Mesh(
             redGPUContext,
-            new RedGPU.Primitive.Box(redGPUContext, 0.4, 8.2, 0.4),
+            grassGeometry,
             grassMaterial
         );
         //
@@ -167,10 +270,10 @@ RedGPU.init(
             name: 'BasicGrass',
             mesh: dummyGrassMesh,
             maxInstances: 1000000,
-            cullingDistance: 1500,
+            cullingDistance: 2500,
             fadeStartDistance: 1000,
-            minScale: [0.8, 0.8, 0.8],
-            maxScale: [1.3, 1.5, 1.3],
+            minScale: [0.8, 10, 0.8],
+            maxScale: [1.3, 20, 1.3],
             randomRotationY: true
         });
 

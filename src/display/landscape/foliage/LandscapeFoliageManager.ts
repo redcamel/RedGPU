@@ -18,6 +18,8 @@ export class LandscapeFoliageManager {
     #vertexShaderModule: GPUShaderModule | null = null;
     #cullingComputePipeline: GPUComputePipeline | null = null;
     #cullingBindGroupLayout: GPUBindGroupLayout | null = null;
+    #emptyBindGroupLayout: GPUBindGroupLayout | null = null;
+    #emptyBindGroup: GPUBindGroup | null = null;
     #foliageTypes: Map<string, FoliageType> = new Map();
     #typeList: FoliageType[] = [];
     #pipelineCache: Map<string, GPURenderPipeline> = new Map();
@@ -28,6 +30,20 @@ export class LandscapeFoliageManager {
     constructor(landscape: Landscape) {
         this.landscape = landscape;
         this.redGPUContext = landscape.redGPUContext;
+
+        const gpuDevice = this.redGPUContext.gpuDevice;
+        if (gpuDevice) {
+            this.#emptyBindGroupLayout = gpuDevice.createBindGroupLayout({
+                label: 'EmptyFoliageBindGroupLayout',
+                entries: []
+            });
+            this.#emptyBindGroup = gpuDevice.createBindGroup({
+                label: 'EmptyFoliageBindGroup',
+                layout: this.#emptyBindGroupLayout,
+                entries: []
+            });
+        }
+
         this.#initVertexShader();
         this.#initCullingComputePipeline();
 
@@ -97,6 +113,11 @@ export class LandscapeFoliageManager {
 
             if (systemBG) {
                 passEncoder.setBindGroup(0, systemBG);
+            }
+
+            const vertexUniformBG = (mesh as any)?.gpuRenderInfo?.vertexUniformBindGroup || this.#emptyBindGroup;
+            if (vertexUniformBG) {
+                passEncoder.setBindGroup(1, vertexUniformBG);
             }
 
             const matUniformBG = material.gpuRenderInfo?.fragmentUniformBindGroup;
@@ -318,14 +339,6 @@ export class LandscapeFoliageManager {
     #getOrCreatePipeline(material: any, sampleCount: number, msaaID: string, strideBytes: number = 48): GPURenderPipeline | null {
         if (!material) return null;
 
-        const baseKey = material.uuid || material.name || material.constructor.name;
-        const pipelineKey = `${baseKey}_${msaaID}_stride${strideBytes}`;
-
-        const cachedPipeline = this.#pipelineCache.get(pipelineKey);
-        if (cachedPipeline) {
-            return cachedPipeline;
-        }
-
         const resourceManager = this.redGPUContext.resourceManager;
         const gpuDevice: GPUDevice = this.redGPUContext.gpuDevice;
         const preferredFormat = navigator.gpu.getPreferredCanvasFormat();
@@ -337,6 +350,15 @@ export class LandscapeFoliageManager {
 
         const fragmentModule = material.fragmentShaderModule || material.gpuRenderInfo?.fragmentShaderModule;
         if (!fragmentModule || !this.#vertexShaderModule) return null;
+
+        const baseKey = material.uuid || material.name || material.constructor.name;
+        const shaderLabel = fragmentModule?.label || 'default';
+        const pipelineKey = `${baseKey}_${shaderLabel}_${msaaID}_stride${strideBytes}`;
+
+        const cachedPipeline = this.#pipelineCache.get(pipelineKey);
+        if (cachedPipeline) {
+            return cachedPipeline;
+        }
 
         // 2. RedGPU Primitive Geometry Stride (12 floats * 4 bytes = 48 bytes: Pos3, Normal3, UV2, Tangent4)
         const geometryBufferLayout: GPUVertexBufferLayout = {
@@ -359,18 +381,21 @@ export class LandscapeFoliageManager {
             ],
         };
 
-        // 3. RedGPU 명시적 PipelineLayout 구축 (Group 0: System, Group 2: Material)
+        // 3. RedGPU 명시적 PipelineLayout 구축 (Group 0: System, Group 1: Empty, Group 2: Material)
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
-        const materialBindGroupLayout = material.gpuRenderInfo?.fragmentUniformBindGroup?.layout
-                                     || resourceManager.getGPUBindGroupLayout(material.constructor.name);
+        const emptyBindGroupLayout = this.#emptyBindGroupLayout || gpuDevice.createBindGroupLayout({
+            label: 'EmptyFoliageBindGroupLayout',
+            entries: []
+        });
+        const materialBindGroupLayout = material.gpuRenderInfo?.fragmentBindGroupLayout
+            || material.gpuRenderInfo?.fragmentUniformBindGroup?.layout
+            || emptyBindGroupLayout;
 
-        const bindGroupLayouts: GPUBindGroupLayout[] = [systemBindGroupLayout];
-        if (materialBindGroupLayout) {
-            bindGroupLayouts[2] = materialBindGroupLayout;
-        } else {
-            const emptyLayout = gpuDevice.createBindGroupLayout({ label: 'EmptyMaterialBindGroupLayout', entries: [] });
-            bindGroupLayouts[2] = emptyLayout;
-        }
+        const bindGroupLayouts: GPUBindGroupLayout[] = [
+            systemBindGroupLayout,
+            emptyBindGroupLayout,
+            materialBindGroupLayout
+        ];
 
         const pipelineLayout = gpuDevice.createPipelineLayout({
             label: `FoliagePipelineLayout_${pipelineKey}`,
