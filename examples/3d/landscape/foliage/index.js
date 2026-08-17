@@ -292,13 +292,14 @@ RedGPU.init(
                 treeType = foliageManager.addFoliageType({
                     name: 'ElmTree',
                     mesh: treeMesh,
-                    maxInstances: 1000,
-                    cullingDistance: 4000,
-                    fadeStartDistance: 2500,
+                    maxInstances: 10000,
+                    cullingDistance: 2000,
+                    fadeStartDistance: 1300,
                     minScale: [6, 6, 6],
                     maxScale: [12, 12, 12],
                     randomRotationY: true
                 });
+
 
                 console.log('[Foliage Example 🌳] Extracted SubMeshes in treeType:', treeType.subMeshes.map(s => ({
                     name: s.mesh.name,
@@ -313,21 +314,9 @@ RedGPU.init(
                     hasIB: !!s.geometry.indexBuffer?.gpuBuffer,
                 })));
                 console.log('[Foliage Example 🌳] activeInstanceCount:', treeType.activeInstanceCount);
-
-
-
-                // 이미 로드된 타일이 있다면 즉시 인스턴스 파퓰레이션 트리거
-                if (landscape.tileStreamer) {
-                    const loadedTiles = landscape.tileStreamer.loadedComponents || [];
-                    for (let tile of loadedTiles) {
-                        treeType.populateTile(tile);
-                    }
-                }
-
                 console.log('[Foliage Example 🌳] ElmTree FoliageType registered successfully! SubMeshes:', treeType.subMeshes.length);
             }
         );
-
 
 
         // 5-1. 정식 RedGPU 디버거 클래스 인스턴스 생성 (2D SpatialGrid, VHT Heightmap, VNT Normal Atlas, HUD 디버거)

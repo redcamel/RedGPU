@@ -244,6 +244,7 @@ export class Landscape extends Object3DContainer {
      * [KO] 월드 좌표 (x, z) 위치의 VHT 지형 고도 및 heightScale이 정밀 반영된 실제 높이 Y를 반환합니다.
      * [EN] Returns the actual Y altitude of world coordinates (x, z) reflecting VHT terrain height and heightScale.
      */
+
     getHeightAt(x: number, z: number): number {
         return this.#tileStreamer.getHeightAt(x, z);
     }

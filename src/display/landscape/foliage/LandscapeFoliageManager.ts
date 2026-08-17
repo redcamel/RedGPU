@@ -223,6 +223,18 @@ export class LandscapeFoliageManager {
         foliageType.foliageManager = this;
         this.#foliageTypes.set(options.name, foliageType);
         this.#typeList.push(foliageType);
+
+        // 🌟 핵심 해결: glTF 비동기 로딩 등으로 뒤늦게 등록되었을 때,
+        // 이미 생성되어 있는 모든 지형 타일(flatCells)에 식생을 즉시 자동 파퓰레이션!
+        const spatialGrid = this.landscape?.spatialGrid;
+        if (spatialGrid && spatialGrid.flatCells.length > 0) {
+            const cells = spatialGrid.flatCells;
+            const count = cells.length;
+            for (let i = 0; i < count; i++) {
+                foliageType.populateTile(cells[i]);
+            }
+        }
+
         return foliageType;
     }
 
