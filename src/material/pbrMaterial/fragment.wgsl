@@ -274,6 +274,20 @@ fn main(inputData:InputData) -> OutputFragment {
 
     // UV Transforms
     let diffuseUV = getTextureTransformUV(input_uv, input_uv1, uniforms.baseColorTexture_texCoord_index, uniforms.use_baseColorTexture_KHR_texture_transform, uniforms.baseColorTexture_KHR_texture_transform_offset, uniforms.baseColorTexture_KHR_texture_transform_rotation, uniforms.baseColorTexture_KHR_texture_transform_scale);
+    var baseColor = u_baseColorFactor;
+    var resultAlpha:f32 = u_opacity * baseColor.a;
+    baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
+    #redgpu_if baseColorTexture
+        let diffuseSampleColor = (textureSample(baseColorTexture, baseColorTextureSampler, diffuseUV));
+        baseColor *= diffuseSampleColor;
+        resultAlpha *= diffuseSampleColor.a;
+    #redgpu_endIf
+
+
+    #redgpu_if useCutOff
+        if (resultAlpha <= u_cutOff) { discard; }
+    #redgpu_endIf
+
     let emissiveUV = getTextureTransformUV(input_uv, input_uv1, uniforms.emissiveTexture_texCoord_index, uniforms.use_emissiveTexture_KHR_texture_transform, uniforms.emissiveTexture_KHR_texture_transform_offset, uniforms.emissiveTexture_KHR_texture_transform_rotation, uniforms.emissiveTexture_KHR_texture_transform_scale);
     let occlusionUV = getTextureTransformUV(input_uv, input_uv1, uniforms.occlusionTexture_texCoord_index, uniforms.use_occlusionTexture_KHR_texture_transform, uniforms.occlusionTexture_KHR_texture_transform_offset, uniforms.occlusionTexture_KHR_texture_transform_rotation, uniforms.occlusionTexture_KHR_texture_transform_scale);
     let metallicRoughnessUV = getTextureTransformUV(input_uv, input_uv1, uniforms.metallicRoughnessTexture_texCoord_index, uniforms.use_metallicRoughnessTexture_KHR_texture_transform, uniforms.metallicRoughnessTexture_KHR_texture_transform_offset, uniforms.metallicRoughnessTexture_KHR_texture_transform_rotation, uniforms.metallicRoughnessTexture_KHR_texture_transform_scale);
@@ -293,7 +307,11 @@ fn main(inputData:InputData) -> OutputFragment {
     let KHR_diffuseTransmissionUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_diffuseTransmissionTexture_texCoord_index, uniforms.use_KHR_diffuseTransmissionTexture_KHR_texture_transform, uniforms.KHR_diffuseTransmissionTexture_KHR_texture_transform_offset, uniforms.KHR_diffuseTransmissionTexture_KHR_texture_transform_rotation, uniforms.KHR_diffuseTransmissionTexture_KHR_texture_transform_scale);
     let KHR_diffuseTransmissionColorUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_diffuseTransmissionColorTexture_texCoord_index, uniforms.use_KHR_diffuseTransmissionColorTexture_KHR_texture_transform, uniforms.KHR_diffuseTransmissionColorTexture_KHR_texture_transform_offset, uniforms.KHR_diffuseTransmissionColorTexture_KHR_texture_transform_rotation, uniforms.KHR_diffuseTransmissionColorTexture_KHR_texture_transform_scale);
     let KHR_anisotropyUV = getTextureTransformUV(input_uv, input_uv1, uniforms.KHR_anisotropyTexture_texCoord_index, uniforms.use_KHR_anisotropyTexture_KHR_texture_transform, uniforms.KHR_anisotropyTexture_KHR_texture_transform_offset, uniforms.KHR_anisotropyTexture_KHR_texture_transform_rotation, uniforms.KHR_anisotropyTexture_KHR_texture_transform_scale);
-    
+
+
+
+
+
     // Core Vectors
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
     let baseNormal:vec3<f32> = normalize(input_vertexNormal.xyz);
@@ -306,9 +324,9 @@ fn main(inputData:InputData) -> OutputFragment {
         }
     }
     #redgpu_endIf
-    
+
     // Cache TBN if needed
-    let tbnNeeded = 
+    let tbnNeeded =
         #redgpu_if normalTexture
         true ||
         #redgpu_endIf
@@ -319,7 +337,7 @@ fn main(inputData:InputData) -> OutputFragment {
         true ||
         #redgpu_endIf
         false;
-        
+
     var tbn: mat3x3<f32>;
     if (tbnNeeded) {
         tbn = getTBNFromVertexTangent(baseNormal, input_vertexTangent);
@@ -341,22 +359,12 @@ fn main(inputData:InputData) -> OutputFragment {
     let receiveShadowYn = inputData.receiveShadow != 0.0;
     var visibility:f32 = 1.0;
     visibility = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, systemUniforms.shadow.directionalShadowDepthTextureSize, systemUniforms.shadow.directionalShadowBias, systemUniforms.shadow.directionalShadowFilterScale, inputData.shadowCoord);
-    if(!receiveShadowYn){ 
-        visibility = 1.0; 
+    if(!receiveShadowYn){
+        visibility = 1.0;
     } else {
         visibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, visibility);
     }
 
-    // Base Color & Alpha
-    var baseColor = u_baseColorFactor;
-    var resultAlpha:f32 = u_opacity * baseColor.a;
-    baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
-    #redgpu_if baseColorTexture
-       let diffuseSampleColor =  (textureSample(baseColorTexture, baseColorTextureSampler, diffuseUV));
-       baseColor *= diffuseSampleColor;
-       resultAlpha *= diffuseSampleColor.a;
-    #redgpu_endIf
-    
     #redgpu_if useKHR_materials_unlit
     if(u_useKHR_materials_unlit){
         output.color = vec4<f32>(baseColor.rgb, baseColor.a);
@@ -564,14 +572,12 @@ fn main(inputData:InputData) -> OutputFragment {
     
     let finalColor = vec4<f32>(totalDirectLighting + indirectLighting + emissiveColor, resultAlpha);
 
-    #redgpu_if useCutOff
-        if (resultAlpha <= u_cutOff) { discard; }
-    #redgpu_endIf
     #redgpu_if useTint
         output.color = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
     #redgpu_else
         output.color = finalColor;
     #redgpu_endIf
+
     {
         let smoothness = 1.0 - roughnessParameter;
         let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
