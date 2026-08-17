@@ -1,7 +1,8 @@
 import RedGPUContext from '../../../context/RedGPUContext';
 import ResourceManager from '../../../resources/core/resourceManager/ResourceManager';
 import Landscape from '../core/Landscape';
-import {FoliageType, FoliageTypeOptions} from './FoliageType';
+import {FoliageSubMesh, FoliageType, FoliageTypeOptions} from './FoliageType';
+
 import foliageCullingComputeWGSL from './shader/foliageCullingCompute.wgsl';
 import foliageInstancedWGSL from './shader/foliageInstanced.wgsl';
 import computeViewFrustumPlanes from '../../../math/computeViewFrustumPlanes';
@@ -24,8 +25,10 @@ export class LandscapeFoliageManager {
     #foliageTypes: Map<string, FoliageType> = new Map();
     #typeList: FoliageType[] = [];
     #pipelineCache: Map<string, GPURenderPipeline> = new Map();
+    #transparentEntries: any[] = [];
 
     get hasFoliageTypes(): boolean {
+
         return this.#typeList.length > 0;
     }
 
@@ -94,74 +97,123 @@ export class LandscapeFoliageManager {
         const msaaID = antialiasingManager?.msaaID ?? 'default_msaa_id';
         const sampleCount = useMSAA ? 4 : 1;
 
+        // 카메라 위치 정보 (Transparent 거리 정렬용)
+        const rawCamera = view3D?.rawCamera || view3D?.camera || view;
+        const camX = rawCamera?.x ?? 0;
+        const camY = rawCamera?.y ?? 0;
+        const camZ = rawCamera?.z ?? 0;
+
+        // 🌟 1단계: 모든 FoliageType의 Basic / Opaque / MASK 서브메시지 렌더링 (Depth 선점)
         for (let t = 0; t < typeCount; t++) {
             const foliageType = typeList[t];
-            const activeCount = foliageType.activeInstanceCount;
-            if (activeCount <= 0) continue;
-
+            if (foliageType.activeInstanceCount <= 0) continue;
             const subMeshes = foliageType.subMeshes;
             const subCount = subMeshes.length;
             if (subCount === 0) continue;
 
             const buffer = foliageType.instanceBuffer;
-            const culledInstanceGPUBuffer = buffer.getCulledGPUBuffer();
-            const indirectGPUBuffer = buffer.getIndirectGPUBuffer();
-            if (!culledInstanceGPUBuffer || !indirectGPUBuffer) continue;
+            const culledGPU = buffer.getCulledGPUBuffer();
+            const indirectGPU = buffer.getIndirectGPUBuffer();
+            if (!culledGPU || !indirectGPU) continue;
 
-            // ★ 인스턴스 버퍼는 해당 수목의 모든 서브메시가 단 1회 공유 바인딩 (Buffer 1)
-            passEncoder.setVertexBuffer(1, culledInstanceGPUBuffer);
+            passEncoder.setVertexBuffer(1, culledGPU);
 
-            // 해당 식생 종의 모든 서브메시를 순회하며 각각의 머티리얼/지오메트리 드로우콜 실행
+            for (let s = 0; s < subCount; s++) {
+                const mat = subMeshes[s].material;
+                const isTransparent = !!mat.transparent || !!mat.use2PathRender;
+                const isAlpha = (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
+                if (!isTransparent && !isAlpha) {
+                    this.#drawSubMesh(passEncoder, subMeshes[s], s, sampleCount, msaaID, systemBG, indirectGPU);
+                }
+            }
+        }
+
+        // 🌟 2단계: 모든 FoliageType의 Alpha Layer 서브메시지 렌더링 (Transparent 이전)
+        for (let t = 0; t < typeCount; t++) {
+            const foliageType = typeList[t];
+            if (foliageType.activeInstanceCount <= 0) continue;
+            const subMeshes = foliageType.subMeshes;
+            const subCount = subMeshes.length;
+            if (subCount === 0) continue;
+
+            const buffer = foliageType.instanceBuffer;
+            const culledGPU = buffer.getCulledGPUBuffer();
+            const indirectGPU = buffer.getIndirectGPUBuffer();
+            if (!culledGPU || !indirectGPU) continue;
+
+            passEncoder.setVertexBuffer(1, culledGPU);
+
+            for (let s = 0; s < subCount; s++) {
+                const mat = subMeshes[s].material;
+                const isTransparent = !!mat.transparent || !!mat.use2PathRender;
+                const isAlpha = (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
+                if (isAlpha) {
+                    this.#drawSubMesh(passEncoder, subMeshes[s], s, sampleCount, msaaID, systemBG, indirectGPU);
+                }
+            }
+        }
+
+        // 🌟 3단계: Transparent Layer / 2Path Layer (카메라 거리 기준 Back-to-Front 정렬 후 렌더링)
+        let transCount = 0;
+        for (let t = 0; t < typeCount; t++) {
+            const foliageType = typeList[t];
+            if (foliageType.activeInstanceCount <= 0) continue;
+            const subMeshes = foliageType.subMeshes;
+            const subCount = subMeshes.length;
+            if (subCount === 0) continue;
+
+            const buffer = foliageType.instanceBuffer;
+            const culledGPU = buffer.getCulledGPUBuffer();
+            const indirectGPU = buffer.getIndirectGPUBuffer();
+            if (!culledGPU || !indirectGPU) continue;
+
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
-                const vertexGPUBuffer = sub.geometry.vertexBuffer?.gpuBuffer;
-                if (!vertexGPUBuffer) continue;
+                const mat = sub.material;
+                const isTransparent = !!mat.transparent || !!mat.use2PathRender;
+                if (isTransparent) {
+                    let entry = this.#transparentEntries[transCount];
+                    if (!entry) {
+                        entry = {subMesh: sub, subIndex: s, culledGPU, indirectGPU, distanceSq: 0};
+                        this.#transparentEntries[transCount] = entry;
+                    } else {
+                        entry.subMesh = sub;
+                        entry.subIndex = s;
+                        entry.culledGPU = culledGPU;
+                        entry.indirectGPU = indirectGPU;
+                    }
 
-                const material = sub.material;
-                if (material.dirtyPipeline || !material.gpuRenderInfo?.fragmentUniformBindGroup) {
-                    material._updateFragmentState();
-                    material.dirtyPipeline = false;
+                    // 카메라 중심과의 상대 거리 계산 (Back-to-Front 정렬용)
+                    const meshNode = sub.mesh;
+                    const dx = (meshNode?.x ?? 0) - camX;
+                    const dy = (meshNode?.y ?? 0) - camY;
+                    const dz = (meshNode?.z ?? 0) - camZ;
+                    entry.distanceSq = dx * dx + dy * dy + dz * dz;
+
+                    transCount++;
                 }
+            }
+        }
 
-                const cullMode = material.doubleSided ? 'none' : (material.cullMode ?? 'none');
-                const pipeline = this.#getOrCreatePipeline(material, sampleCount, msaaID, sub.strideBytes, cullMode);
-                if (!pipeline) continue;
+        if (transCount > 0) {
+            // sortTransparentObjects 알고리즘: 원근 거리 내림차순(먼 순서) 정렬
+            const validEntries = this.#transparentEntries.slice(0, transCount);
+            validEntries.sort((a, b) => b.distanceSq - a.distanceSq);
 
-                passEncoder.setPipeline(pipeline);
-
-                if (systemBG) {
-                    passEncoder.setBindGroup(0, systemBG);
+            let currentCulledGPU: GPUBuffer | null = null;
+            for (let i = 0; i < transCount; i++) {
+                const item = validEntries[i];
+                if (currentCulledGPU !== item.culledGPU) {
+                    passEncoder.setVertexBuffer(1, item.culledGPU);
+                    currentCulledGPU = item.culledGPU;
                 }
-
-                // Group 1: 서브메시의 상대 변환 행렬 및 globalFragmentSlotIndex 유니폼 바인드그룹
-                const vertexUniformBG = sub.vertexUniformBindGroup || this.#emptyBindGroup;
-                if (vertexUniformBG) {
-                    passEncoder.setBindGroup(1, vertexUniformBG);
-                }
-
-                // Group 2: 서브메시 머티리얼 프래그먼트 유니폼 바인드그룹
-                const matUniformBG = material.gpuRenderInfo?.fragmentUniformBindGroup;
-                if (matUniformBG) {
-                    passEncoder.setBindGroup(2, matUniformBG);
-                }
-
-                // Buffer 0: 해당 서브메시의 버텍스 버퍼
-                passEncoder.setVertexBuffer(0, vertexGPUBuffer);
-
-
-                const indirectOffsetBytes = s * 20;
-                if (sub.isIndexed && sub.geometry.indexBuffer?.gpuBuffer) {
-                    const format = sub.indexFormat || 'uint32';
-                    passEncoder.setIndexBuffer(sub.geometry.indexBuffer.gpuBuffer, format);
-                    passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
-                } else {
-                    passEncoder.drawIndirect(indirectGPUBuffer, indirectOffsetBytes);
-                }
+                this.#drawSubMesh(passEncoder, item.subMesh, item.subIndex, sampleCount, msaaID, systemBG, item.indirectGPU);
             }
         }
     }
 
     addFoliageType(options: FoliageTypeOptions): FoliageType {
+
         if (this.#foliageTypes.has(options.name)) {
             console.warn(`[LandscapeFoliageManager] FoliageType with name '${options.name}' already exists.`);
             return this.#foliageTypes.get(options.name)!;
@@ -172,6 +224,59 @@ export class LandscapeFoliageManager {
         this.#foliageTypes.set(options.name, foliageType);
         this.#typeList.push(foliageType);
         return foliageType;
+    }
+
+    #drawSubMesh(
+        passEncoder: GPURenderPassEncoder,
+        sub: FoliageSubMesh,
+        subIndex: number,
+        sampleCount: number,
+        msaaID: string,
+        systemBG: GPUBindGroup | null,
+        indirectGPUBuffer: GPUBuffer
+    ) {
+        const vertexGPUBuffer = sub.geometry.vertexBuffer?.gpuBuffer;
+        if (!vertexGPUBuffer) return;
+
+        const material = sub.material;
+        if (material.dirtyPipeline || !material.gpuRenderInfo?.fragmentUniformBindGroup) {
+            material._updateFragmentState();
+            material.dirtyPipeline = false;
+        }
+
+        const cullMode = material.doubleSided ? 'none' : (material.cullMode ?? 'none');
+        const pipeline = this.#getOrCreatePipeline(material, sampleCount, msaaID, sub.strideBytes, cullMode);
+        if (!pipeline) return;
+
+        passEncoder.setPipeline(pipeline);
+
+        if (systemBG) {
+            passEncoder.setBindGroup(0, systemBG);
+        }
+
+        // Group 1: 서브메시의 상대 변환 행렬 및 globalFragmentSlotIndex 유니폼 바인드그룹
+        const vertexUniformBG = sub.vertexUniformBindGroup || this.#emptyBindGroup;
+        if (vertexUniformBG) {
+            passEncoder.setBindGroup(1, vertexUniformBG);
+        }
+
+        // Group 2: 서브메시 머티리얼 프래그먼트 유니폼 바인드그룹
+        const matUniformBG = material.gpuRenderInfo?.fragmentUniformBindGroup;
+        if (matUniformBG) {
+            passEncoder.setBindGroup(2, matUniformBG);
+        }
+
+        // Buffer 0: 해당 서브메시의 버텍스 버퍼
+        passEncoder.setVertexBuffer(0, vertexGPUBuffer);
+
+        const indirectOffsetBytes = subIndex * 20;
+        if (sub.isIndexed && sub.geometry.indexBuffer?.gpuBuffer) {
+            const format = sub.indexFormat || 'uint32';
+            passEncoder.setIndexBuffer(sub.geometry.indexBuffer.gpuBuffer, format);
+            passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
+        } else {
+            passEncoder.drawIndirect(indirectGPUBuffer, indirectOffsetBytes);
+        }
     }
 
     removeFoliageType(name: string): boolean {

@@ -259,6 +259,7 @@ RedGPU.init(
             );
         }
 
+        /*
         const grassGeometry = createGrassClumpGeometry(redGPUContext, 2.2, 4.2, 3);
         const dummyGrassMesh = new RedGPU.Display.Mesh(
             redGPUContext,
@@ -276,6 +277,8 @@ RedGPU.init(
             maxScale: [1.3, 20, 1.3],
             randomRotationY: true
         });
+        */
+        let treeType = null;
 
         // 🌟 [GLB 수목 로드 및 Multi-Submesh Foliage 인스턴싱 등록]
         new RedGPU.GLTFLoader(
@@ -291,18 +294,39 @@ RedGPU.init(
                 treeMesh.y = 300;
                 treeMesh.setScale(10.0);
                 console.log('[Foliage Example 🌳] Single Comparison Tree placed at center:', treeMesh);
+                console.log('[Foliage Example 🌳] Tree SubMeshes Material Specs:', (treeMesh.children || []).map(c => ({
+                    name: c.name,
+                    alphaBlend: c.material?.alphaBlend,
+                    useCutOff: c.material?.useCutOff,
+                    cutOff: c.material?.cutOff,
+                    transparent: c.material?.transparent,
+                    cullMode: c.material?.cullMode,
+                    doubleSided: c.material?.doubleSided
+                })));
 
                 // 2. 🌲 지형 전역 대량 인스턴싱 FoliageType으로 등록! (glTF 자식 노드 자동 추출 및 하이라키 렌더링)
-                const treeType = foliageManager.addFoliageType({
+
+                treeType = foliageManager.addFoliageType({
                     name: 'ElmTree',
                     mesh: treeMesh,
-                    maxInstances: 50000,
+                    maxInstances: 10000,
                     cullingDistance: 4000,
                     fadeStartDistance: 2500,
                     minScale: [6, 6, 6],
                     maxScale: [12, 12, 12],
                     randomRotationY: true
                 });
+
+                console.log('[Foliage Example 🌳] Extracted SubMeshes in treeType:', treeType.subMeshes.map(s => ({
+                    name: s.mesh.name,
+                    alphaBlend: s.material.alphaBlend,
+                    useCutOff: s.material.useCutOff,
+                    cutOff: s.material.cutOff,
+                    transparent: s.material.transparent,
+                    cullMode: s.material.cullMode,
+                    doubleSided: s.material.doubleSided
+                })));
+
 
                 // 이미 로드된 타일이 있다면 즉시 인스턴스 파퓰레이션 트리거
                 if (landscape.tileStreamer) {
@@ -328,21 +352,21 @@ RedGPU.init(
         const spatialGridDebugger = new RedGPU.Display.LandscapeSpatialGridDebugger(landscape, controller, {
             width: 100,
             height: 100,
-            left: 12,
+            left: 120,
             bottom: 12
         });
 
         const vhtDebugger = new RedGPU.Display.LandscapeVHTDebugger(landscape, controller, {
             width: 100,
             height: 100,
-            left: 120,
+            left: 228,
             bottom: 12
         });
 
         const vntDebugger = new RedGPU.Display.LandscapeVNTDebugger(landscape, controller, {
             width: 100,
             height: 100,
-            left: 228,
+            left: 336,
             bottom: 12
         });
 
@@ -358,7 +382,8 @@ RedGPU.init(
         renderer.start(redGPUContext, render);
 
         // 7. Landscape 모든 get/set 속성 및 2D 디버거 전면 제어 테스트 패널 렌더링
-        renderTestPane(redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, directionalLight, [grassLayer, rockLayer, gravelLayer, leaveLayer], foliageManager, grassType);
+        renderTestPane(redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, directionalLight, [grassLayer, rockLayer, gravelLayer, leaveLayer], foliageManager, treeType);
+
     }
 );
 
@@ -460,24 +485,28 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
             activePane = pane;
 
             // Folder 0: Foliage System Controls
-            if (grassType) {
+            const currentFoliageType = grassType || foliageManager?.getFoliageType('ElmTree') || foliageManager?.getFoliageType('BasicGrass');
+            if (currentFoliageType || foliageManager) {
                 const folderFoliage = pane.addFolder({title: '🌿 Foliage System Controls', expanded: true});
                 folderFoliage.addBinding(config, 'foliageCount', {readonly: true});
                 folderFoliage.addBinding(config, 'foliageCullingDist', {
-                    min: 100,
-                    max: 2000,
-                    step: 20
+                    min: 500,
+                    max: 8000,
+                    step: 50
                 }).on('change', (ev) => {
-                    grassType.options.cullingDistance = ev.value;
+                    const target = grassType || foliageManager?.getFoliageType('ElmTree');
+                    if (target) target.options.cullingDistance = ev.value;
                 });
                 folderFoliage.addBinding(config, 'foliageFadeStartDist', {
-                    min: 50,
-                    max: 1500,
-                    step: 20
+                    min: 200,
+                    max: 6000,
+                    step: 50
                 }).on('change', (ev) => {
-                    grassType.options.fadeStartDistance = ev.value;
+                    const target = grassType || foliageManager?.getFoliageType('ElmTree');
+                    if (target) target.options.fadeStartDistance = ev.value;
                 });
             }
+
 
             // Folder 1: Terrain Dimensions (worldSize, componentCount, tileSize)
             const folderDimensions = pane.addFolder({title: '⛰️ Terrain Dimensions (UE5 Specs)', expanded: true});

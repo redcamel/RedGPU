@@ -35,6 +35,12 @@ export interface FoliageTypeOptions {
     minScale?: [number, number, number];
     maxScale?: [number, number, number];
     randomRotationY?: boolean;
+
+    /**
+     * [KO] 반투명(BLEND) 머티리얼을 언리얼 엔진 표준인 알파 컷오프(MASK)로 자동 변환할지 여부 (기본: true)
+     * [EN] Whether to automatically convert BLEND materials to Unreal Engine standard MASK (alpha cutoff) (default: true)
+     */
+    convertBlendToMasked?: boolean;
 }
 
 /**
@@ -63,7 +69,9 @@ export class FoliageType {
             minScale: options.minScale ?? [1.0, 1.0, 1.0],
             maxScale: options.maxScale ?? [1.0, 1.0, 1.0],
             randomRotationY: options.randomRotationY ?? true,
+            convertBlendToMasked: options.convertBlendToMasked ?? true,
         };
+
 
         this.#initSubMeshBindGroupLayout();
         this.#collectSubMeshes(options.mesh);
@@ -201,14 +209,6 @@ export class FoliageType {
         return calculated;
     }
 
-    destroy(): void {
-        const subList = this.subMeshes;
-        for (let i = 0; i < subList.length; i++) {
-            subList[i].vertexUniformBuffer.destroy();
-        }
-        this.subMeshes.length = 0;
-        this.instanceBuffer.destroy();
-    }
 
     #initSubMeshBindGroupLayout(): void {
         const gpuDevice = this.redGPUContext.gpuDevice;
@@ -224,6 +224,15 @@ export class FoliageType {
                 }
             ]
         });
+    }
+
+    destroy(): void {
+        const subList = this.subMeshes;
+        for (let i = 0; i < subList.length; i++) {
+            subList[i].vertexUniformBuffer.destroy();
+        }
+        this.subMeshes.length = 0;
+        this.instanceBuffer.destroy();
     }
 
     /**
@@ -306,21 +315,28 @@ export class FoliageType {
             if (node.geometry && node.material) {
                 const mat = node.material;
 
-                // 🌟 Foliage 머티리얼 상태 완벽 동기화 (alphaBlend, useCutOff, fragment state 갱신)
-                if (mat.alphaBlend === 2 || mat.transparent || mat.alphaMode === 'BLEND' || mat.alphaMode === 'MASK') {
-                    mat.useCutOff = true;
-                    if (!mat.cutOff || mat.cutOff === 0) {
-                        mat.cutOff = 0.5;
+                // 🌲 UE5 표준 식생 최적화: BLEND/반투명 머티리얼을 MASK(알파 컷오프)로 자동 승격
+                if (this.options.convertBlendToMasked) {
+                    if (mat.alphaBlend === 2 || mat.transparent || mat.alphaMode === 'BLEND' || mat.alphaMode === 'MASK') {
+                        mat.useCutOff = true;
+                        if (!mat.cutOff || mat.cutOff === 0) {
+                            mat.cutOff = 0.5;
+                        }
+                        mat.transparent = false;
+                        mat.alphaBlend = 1;
                     }
                 }
 
-                // 머티리얼 셰이더 및 글로벌 SSBO 슬롯 즉시 갱신
+
+                // 머티리얼 셰이더(#redgpu_if useCutOff) 및 글로벌 SSBO 슬롯 최신화
                 if (mat.dirtyPipeline || !mat.gpuRenderInfo?.fragmentShaderModule || !mat.gpuRenderInfo?.fragmentUniformBindGroup) {
                     mat._updateFragmentState();
                     mat.dirtyPipeline = false;
                 }
 
                 const geom = node.geometry;
+
+
                 const isIndexed = !!geom.indexBuffer;
                 const indexCount = geom.indexBuffer?.indexCount ?? 0;
                 const vertexCount = geom.vertexBuffer?.vertexCount ?? 0;

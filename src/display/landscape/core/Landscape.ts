@@ -272,11 +272,6 @@ export class Landscape extends Object3DContainer {
             }
         }
 
-        // [KO] 식생 인스턴스 렌더링 디스패치 (식생 종류가 존재할 때만 실행)
-        if (this.#foliageManager?.hasFoliageTypes) {
-            this.#foliageManager.render(view, renderPassEncoder);
-        }
-
         const instanceBuffer = this.#instanceBuffer;
         const sharedGeometry = this.#sharedGeometry;
         const combinedVB = sharedGeometry?.combinedVertexBuffer;
@@ -321,6 +316,12 @@ export class Landscape extends Object3DContainer {
                 }
             }
         }
+
+        // [KO] 🌲 지형(Terrain) 깊이 버퍼가 완전히 형성된 후, 지형 위에 식생(Foliage) 인스턴스 렌더링 디스패치!
+        if (this.#foliageManager?.hasFoliageTypes) {
+            this.#foliageManager.render(view, renderPassEncoder);
+        }
+
     }
 
     get worldSize(): [number, number] {
