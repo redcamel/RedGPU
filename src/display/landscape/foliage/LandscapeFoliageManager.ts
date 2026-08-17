@@ -226,6 +226,7 @@ export class LandscapeFoliageManager {
         return foliageType;
     }
 
+
     #drawSubMesh(
         passEncoder: GPURenderPassEncoder,
         sub: FoliageSubMesh,

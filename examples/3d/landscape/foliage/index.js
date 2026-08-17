@@ -287,29 +287,12 @@ RedGPU.init(
             (loader) => {
                 const treeMesh = loader.resultMesh;
 
-                // 1. 비교용 원본 1그루 씬 중앙 배치
-                scene.addChild(treeMesh);
-                treeMesh.x = 0;
-                treeMesh.z = 0;
-                treeMesh.y = 300;
-                treeMesh.setScale(10.0);
-                console.log('[Foliage Example 🌳] Single Comparison Tree placed at center:', treeMesh);
-                console.log('[Foliage Example 🌳] Tree SubMeshes Material Specs:', (treeMesh.children || []).map(c => ({
-                    name: c.name,
-                    alphaBlend: c.material?.alphaBlend,
-                    useCutOff: c.material?.useCutOff,
-                    cutOff: c.material?.cutOff,
-                    transparent: c.material?.transparent,
-                    cullMode: c.material?.cullMode,
-                    doubleSided: c.material?.doubleSided
-                })));
-
                 // 2. 🌲 지형 전역 대량 인스턴싱 FoliageType으로 등록! (glTF 자식 노드 자동 추출 및 하이라키 렌더링)
 
                 treeType = foliageManager.addFoliageType({
                     name: 'ElmTree',
                     mesh: treeMesh,
-                    maxInstances: 10000,
+                    maxInstances: 1000,
                     cullingDistance: 4000,
                     fadeStartDistance: 2500,
                     minScale: [6, 6, 6],
@@ -323,9 +306,14 @@ RedGPU.init(
                     useCutOff: s.material.useCutOff,
                     cutOff: s.material.cutOff,
                     transparent: s.material.transparent,
-                    cullMode: s.material.cullMode,
-                    doubleSided: s.material.doubleSided
+                    indexCount: s.indexCount,
+                    vertexCount: s.vertexCount,
+                    isIndexed: s.isIndexed,
+                    hasVB: !!s.geometry.vertexBuffer?.gpuBuffer,
+                    hasIB: !!s.geometry.indexBuffer?.gpuBuffer,
                 })));
+                console.log('[Foliage Example 🌳] activeInstanceCount:', treeType.activeInstanceCount);
+
 
 
                 // 이미 로드된 타일이 있다면 즉시 인스턴스 파퓰레이션 트리거

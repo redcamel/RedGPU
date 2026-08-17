@@ -1,7 +1,11 @@
 import {mat4} from 'gl-matrix';
 import RedGPUContext from '../../../context/RedGPUContext';
 import Mesh from '../../mesh/Mesh';
+import Geometry from '../../../geometry/Geometry';
+import VertexBuffer from '../../../resources/buffer/vertexBuffer/VertexBuffer';
+import IndexBuffer from '../../../resources/buffer/indexBuffer/IndexBuffer';
 import {FoliageInstanceBuffer} from './FoliageInstanceBuffer';
+import GPU_BLEND_FACTOR from "../../../gpuConst/GPU_BLEND_FACTOR";
 
 export interface FoliageSubMesh {
     readonly mesh: Mesh;
@@ -18,7 +22,6 @@ export interface FoliageSubMesh {
     readonly vertexUniformBuffer: GPUBuffer;
     readonly vertexUniformBindGroup: GPUBindGroup;
 }
-
 
 export interface FoliageTypeOptions {
     name: string;
@@ -41,6 +44,12 @@ export interface FoliageTypeOptions {
      * [EN] Whether to automatically convert BLEND materials to Unreal Engine standard MASK (alpha cutoff) (default: true)
      */
     convertBlendToMasked?: boolean;
+
+    /**
+     * [KO] 언리얼 엔진 스타일: 동일 머티리얼을 공유하는 서브메시들을 1개의 지오메트리로 자동 병합할지 여부 (기본: true)
+     * [EN] Unreal Engine style: Whether to automatically combine submeshes sharing the same material into a single geometry (default: true)
+     */
+    combineSubMeshesByMaterial?: boolean;
 }
 
 /**
@@ -58,6 +67,8 @@ export class FoliageType {
     #bottomOffset: number | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
 
+    #loadedTileKeys: Set<string> = new Set();
+
     constructor(redGPUContext: RedGPUContext, options: FoliageTypeOptions) {
         this.redGPUContext = redGPUContext;
         this.options = {
@@ -70,8 +81,8 @@ export class FoliageType {
             maxScale: options.maxScale ?? [1.0, 1.0, 1.0],
             randomRotationY: options.randomRotationY ?? true,
             convertBlendToMasked: options.convertBlendToMasked ?? true,
+            combineSubMeshesByMaterial: options.combineSubMeshesByMaterial ?? true,
         };
-
 
         this.#initSubMeshBindGroupLayout();
         this.#collectSubMeshes(options.mesh);
@@ -79,15 +90,54 @@ export class FoliageType {
         this.updateIndirectBuffer();
     }
 
-    get mesh(): Mesh | Mesh[] {
-        return this.options.mesh;
-    }
-
     get activeInstanceCount(): number {
         return this.#activeInstanceCount;
     }
 
-    #loadedTileKeys: Set<string> = new Set();
+    get name(): string {
+        return this.options.name;
+    }
+
+    get maxInstances(): number {
+        return this.options.maxInstances;
+    }
+
+    get bottomOffset(): number {
+        if (this.#bottomOffset !== null) return this.#bottomOffset;
+        if (this.subMeshes.length > 0) {
+            let minOffset = 0;
+            for (let i = 0; i < this.subMeshes.length; i++) {
+                minOffset = Math.min(minOffset, this.subMeshes[i].bottomOffset);
+            }
+            this.#bottomOffset = minOffset;
+            return minOffset;
+        }
+        return 0;
+    }
+
+    getGeometryBottomOffset(): number {
+        return this.bottomOffset;
+    }
+
+    /**
+     * 식생 인스턴스를 대량 배치 (Float32Array 12 floats: pos.xyz, rotQuat.xyzw, scale.xyz, extra.xy)
+     */
+    setInstancesData(data: Float32Array, count?: number) {
+        const instanceCount = count !== undefined ? count : Math.floor(data.length / 12);
+        this.#activeInstanceCount = Math.min(instanceCount, this.options.maxInstances);
+        this.instanceBuffer.dataBuffer.set(data.subarray(0, this.#activeInstanceCount * 12));
+        this.instanceBuffer.uploadToGPU(this.#activeInstanceCount);
+        this.updateIndirectBuffer();
+
+    }
+
+    /**
+     * 식생 다중 서브메시 인다이렉트 버퍼의 파라미터를 최신 지오메트리 정보로 갱신
+     */
+    updateIndirectBuffer() {
+        if (!this.instanceBuffer || this.subMeshes.length === 0) return;
+        this.instanceBuffer.resetMultiIndirectCount(this.subMeshes);
+    }
 
     /**
      * [KO] 지형 타일(LandscapeComponent) 1개가 로딩 완수되었을 때 해당 타일 영역 식생만 부분 업로드합니다.
@@ -149,105 +199,78 @@ export class FoliageType {
 
         this.#activeInstanceCount += actualCount;
 
-        // 해당 타일 영역 식생 인스턴스 데이터만 GPU 버퍼 부분 위치로 업로드
+        // 해당 타일 영역 식생 인스턴스 데이터만 GPU 버퍼 부분 패치 업로드
         this.instanceBuffer.uploadRangeToGPU(startIdx, actualCount);
         this.updateIndirectBuffer();
     }
 
-    /**
-     * [KO] 식생 서브메시 인덱스/버텍스 카운트 정보를 바탕으로 Multi-Indirect Draw Command Buffer 갱신
-     */
-    updateIndirectBuffer(): void {
-        this.instanceBuffer.resetMultiIndirectCount(this.subMeshes);
-    }
-
-    /**
-     * 지오메트리 버텍스 버퍼 및 하이라키 상대 행렬을 분석하여 메시 전체의 바닥(Bottom Y Base) 피봇 오프셋을 산출합니다.
-     */
-    getGeometryBottomOffset(): number {
-        if (this.#bottomOffset !== null) return this.#bottomOffset;
-
-        const subMeshes = this.subMeshes;
-        const count = subMeshes.length;
-        if (count === 0) {
-            this.#bottomOffset = 0.0;
-            return 0.0;
-        }
-
-        let globalMinY = Infinity;
-
-        for (let s = 0; s < count; s++) {
-            const sub = subMeshes[s];
-            const geometry = sub.geometry;
-            const vertexBuffer = geometry?.vertexBuffer;
-            if (!vertexBuffer) continue;
-
-            const data = (vertexBuffer as any).data || (vertexBuffer as any).typedArray || (vertexBuffer as any).dataBuffer;
-            const strideFloats = (vertexBuffer as any).stride || 12;
-
-            if (!data || data.length === 0) continue;
-
-            const vertexCount = vertexBuffer.vertexCount || Math.floor(data.length / strideFloats);
-            const m = sub.relativeModelMatrix;
-
-            for (let i = 0; i < vertexCount; i++) {
-                const base = i * strideFloats;
-                const lx = data[base];
-                const ly = data[base + 1];
-                const lz = data[base + 2];
-
-                // 상대 변환 행렬 적용한 Y 좌표
-                const transformedY = m[1] * lx + m[5] * ly + m[9] * lz + m[13];
-                if (transformedY < globalMinY) {
-                    globalMinY = transformedY;
-                }
+    populateFromLandscape(): void {
+        const landscape = this.foliageManager?.landscape;
+        const tileStreamer = landscape?.tileStreamer;
+        if (!tileStreamer) return;
+        const activeTiles = tileStreamer.loadedComponents;
+        if (Array.isArray(activeTiles)) {
+            for (let i = 0; i < activeTiles.length; i++) {
+                this.populateTile(activeTiles[i]);
             }
         }
-
-        const calculated = (globalMinY !== Infinity && !isNaN(globalMinY)) ? -globalMinY : 0.0;
-        this.#bottomOffset = calculated;
-        return calculated;
     }
 
 
-    #initSubMeshBindGroupLayout(): void {
+    destroy() {
+        this.instanceBuffer.destroy();
+        for (let i = 0; i < this.subMeshes.length; i++) {
+            const sub = this.subMeshes[i];
+            if (sub.vertexUniformBuffer) {
+                sub.vertexUniformBuffer.destroy();
+            }
+        }
+        this.subMeshes.length = 0;
+    }
+
+    #initSubMeshBindGroupLayout() {
         const gpuDevice = this.redGPUContext.gpuDevice;
         if (!gpuDevice) return;
 
         this.#subMeshVertexBindGroupLayout = gpuDevice.createBindGroupLayout({
-            label: 'FoliageSubMesh_VertexBindGroupLayout',
+            label: `FoliageSubMesh_VertexBindGroupLayout_${this.name}`,
             entries: [
                 {
                     binding: 0,
                     visibility: GPUShaderStage.VERTEX,
-                    buffer: {type: 'uniform'}
+                    buffer: {
+                        type: 'uniform'
+                    }
                 }
             ]
         });
     }
 
-    destroy(): void {
-        const subList = this.subMeshes;
-        for (let i = 0; i < subList.length; i++) {
-            subList[i].vertexUniformBuffer.destroy();
-        }
-        this.subMeshes.length = 0;
-        this.instanceBuffer.destroy();
-    }
-
     /**
-     * [KO] 루트 메시(glTF 노드 트리 또는 Mesh 배열)를 재귀 순회하여 유효 서브메시 및 누적 하이라키 행렬을 자동 추출합니다.
+     * 루트 메시로부터 DFS로 자식들을 탐색하고, 동일 머티리얼별로 지오메트리를 자동 병합(Combine)하여 서브메시 생성
      */
-    #collectSubMeshes(root: Mesh | Mesh[]): void {
-        const gpuDevice = this.redGPUContext.gpuDevice;
-        const bindGroupLayout = this.#subMeshVertexBindGroupLayout;
-        if (!gpuDevice || !bindGroupLayout) return;
-
+    #collectSubMeshes(rootInput: Mesh | Mesh[]) {
         const subList = this.subMeshes;
+        subList.length = 0;
 
-        /**
-         * RedGPU Mesh의 TRS(Translation, Rotation, Scale)로부터 정밀 로컬 변환 행렬을 산출합니다.
-         */
+        const bindGroupLayout = this.#subMeshVertexBindGroupLayout;
+        const gpuDevice = this.redGPUContext.gpuDevice;
+        if (!bindGroupLayout || !gpuDevice) return;
+
+        const roots = Array.isArray(rootInput) ? rootInput : [rootInput];
+
+        interface RawSubMesh {
+            node: Mesh;
+            geometry: any;
+            material: any;
+            currentRelativeMatrix: mat4;
+            normalMatrix: mat4;
+            strideBytes: number;
+            rawStride: number;
+        }
+
+        const rawList: RawSubMesh[] = [];
+
         const computeMeshLocalMatrix = (mesh: Mesh): mat4 => {
             const out = mat4.create();
             const x = mesh.x ?? 0;
@@ -302,7 +325,6 @@ export class FoliageType {
         const traverse = (node: Mesh, parentRelativeMatrix: mat4, isRoot: boolean) => {
             if (!node) return;
 
-            // 1. 현재 노드의 상대 트랜스폼 행렬 계산 (루트는 원점 Identity 기준)
             const currentRelativeMatrix = mat4.create();
             if (isRoot) {
                 mat4.identity(currentRelativeMatrix);
@@ -311,7 +333,6 @@ export class FoliageType {
                 mat4.multiply(currentRelativeMatrix, parentRelativeMatrix, nodeLocalMatrix);
             }
 
-            // 2. geometry와 material이 모두 존재하는 실제 렌더 객체인 경우 서브메시로 등록
             if (node.geometry && node.material) {
                 const mat = node.material;
 
@@ -322,96 +343,274 @@ export class FoliageType {
                         if (!mat.cutOff || mat.cutOff === 0) {
                             mat.cutOff = 0.5;
                         }
+                        const {blendColorState, blendAlphaState} = mat
+                        blendColorState.srcFactor = GPU_BLEND_FACTOR.ONE
+                        blendColorState.dstFactor = GPU_BLEND_FACTOR.ZERO
+                        blendAlphaState.srcFactor = GPU_BLEND_FACTOR.ONE
+                        blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ZERO
                         mat.transparent = false;
                         mat.alphaBlend = 1;
                     }
                 }
 
-
-                // 머티리얼 셰이더(#redgpu_if useCutOff) 및 글로벌 SSBO 슬롯 최신화
                 if (mat.dirtyPipeline || !mat.gpuRenderInfo?.fragmentShaderModule || !mat.gpuRenderInfo?.fragmentUniformBindGroup) {
                     mat._updateFragmentState();
                     mat.dirtyPipeline = false;
                 }
 
                 const geom = node.geometry;
-
-
-                const isIndexed = !!geom.indexBuffer;
-                const indexCount = geom.indexBuffer?.indexCount ?? 0;
-                const vertexCount = geom.vertexBuffer?.vertexCount ?? 0;
                 const rawStride = (geom.vertexBuffer as any)?.stride || 12;
                 const strideBytes = rawStride * 4;
 
-
-                // 법선 역전치 행렬 계산
                 const normalMatrix = mat4.create();
                 mat4.invert(normalMatrix, currentRelativeMatrix);
                 mat4.transpose(normalMatrix, normalMatrix);
 
-                // Uniform Buffer (36 floats / ints = 144 bytes: relativeModelMatrix 16 + relativeNormalMatrix 16 + globalFragmentSlotIndex 1 + pad 3)
-                const uniformBuffer = gpuDevice.createBuffer({
-                    label: `FoliageSubMesh_UniformBuffer_${node.name || subList.length}`,
-                    size: 144,
-                    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-                });
-
-                const uniformArrayBuffer = new ArrayBuffer(144);
-                const floatView = new Float32Array(uniformArrayBuffer);
-                const uintView = new Uint32Array(uniformArrayBuffer);
-
-                floatView.set(currentRelativeMatrix, 0);
-                floatView.set(normalMatrix, 16);
-                uintView[32] = (node.material as any)?.globalFragmentSlotIndex ?? 0;
-                uintView[33] = 0;
-                uintView[34] = 0;
-                uintView[35] = 0;
-
-                gpuDevice.queue.writeBuffer(uniformBuffer, 0, uniformArrayBuffer, 0, 144);
-
-                const vertexBindGroup = gpuDevice.createBindGroup({
-                    label: `FoliageSubMesh_VertexBindGroup_${node.name || subList.length}`,
-                    layout: bindGroupLayout,
-                    entries: [
-                        {
-                            binding: 0,
-                            resource: {buffer: uniformBuffer}
-                        }
-                    ]
-                });
-
-
-                subList.push({
-                    mesh: node,
+                rawList.push({
+                    node,
                     geometry: geom,
-                    material: node.material,
-                    indexCount: indexCount,
-                    vertexCount: vertexCount,
-                    isIndexed: isIndexed,
-                    indexFormat: (geom.indexBuffer as any)?.indexFormat || 'uint32',
-                    strideBytes: strideBytes,
-                    bottomOffset: 0.0,
-                    relativeModelMatrix: currentRelativeMatrix,
-                    relativeNormalMatrix: normalMatrix,
-                    vertexUniformBuffer: uniformBuffer,
-                    vertexUniformBindGroup: vertexBindGroup
+                    material: mat,
+                    currentRelativeMatrix,
+                    normalMatrix,
+                    strideBytes,
+                    rawStride,
                 });
             }
 
-            // 3. 자식 노드(children)가 있다면 누적 상대 행렬을 전달하며 하위 트리 계속 탐색
-            if (node.children && node.children.length > 0) {
-                const childCount = node.children.length;
-                for (let i = 0; i < childCount; i++) {
-                    traverse(node.children[i] as Mesh, currentRelativeMatrix, false);
+            const children = node.children;
+            if (children && children.length > 0) {
+                for (let i = 0; i < children.length; i++) {
+                    traverse(children[i] as Mesh, currentRelativeMatrix, false);
                 }
             }
         };
 
-        const identity = mat4.create();
-        if (Array.isArray(root)) {
-            for (let i = 0; i < root.length; i++) traverse(root[i], identity, true);
-        } else {
-            traverse(root, identity, true);
+        const identityParentMatrix = mat4.create();
+        mat4.identity(identityParentMatrix);
+
+        for (let r = 0; r < roots.length; r++) {
+            traverse(roots[r], identityParentMatrix, true);
         }
+
+        // 🌟 3단계: 언리얼 엔진 스타일 "머티리얼별 서브메시 자동 병합(Combine Meshes by Material)"
+        const getMaterialKey = (mat: any): string => {
+            if (!mat) return 'default_mat';
+            const matType = mat.constructor?.name || 'Material';
+            const diffuseKey = mat.baseColorTexture?.src || mat.diffuseTexture?.src || mat.baseColorTexture?.url || mat.diffuseTexture?.url || (mat.baseColorTexture ? mat.baseColorTexture.uuid : '');
+            const normalKey = mat.normalTexture?.src || mat.normalTexture?.url || (mat.normalTexture ? mat.normalTexture.uuid : '');
+            const ormKey = mat.ormTexture?.src || mat.ormTexture?.url || (mat.ormTexture ? mat.ormTexture.uuid : '');
+            return `${matType}_${diffuseKey}_${normalKey}_${ormKey}`;
+        };
+
+        const materialGroups = new Map<string, { material: any; raws: RawSubMesh[] }>();
+        for (let i = 0; i < rawList.length; i++) {
+            const raw = rawList[i];
+            const matKey = getMaterialKey(raw.material);
+            let entry = materialGroups.get(matKey);
+            if (!entry) {
+                entry = {material: raw.material, raws: []};
+                materialGroups.set(matKey, entry);
+            }
+            entry.raws.push(raw);
+        }
+
+
+        const createSubMeshInstance = (
+            meshNode: Mesh,
+            geom: any,
+            mat: any,
+            relMatrix: mat4,
+            normMatrix: mat4,
+            strideBytes: number
+        ): FoliageSubMesh => {
+            const isIndexed = !!geom.indexBuffer;
+            const indexCount = geom.indexBuffer?.indexCount ?? 0;
+            const vertexCount = geom.vertexBuffer?.vertexCount ?? 0;
+
+            const uniformBuffer = gpuDevice.createBuffer({
+                label: `FoliageSubMesh_UniformBuffer_${meshNode.name || subList.length}`,
+                size: 144,
+                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+            });
+
+            const uniformArrayBuffer = new ArrayBuffer(144);
+            const floatView = new Float32Array(uniformArrayBuffer);
+            const uintView = new Uint32Array(uniformArrayBuffer);
+
+            floatView.set(relMatrix, 0);
+            floatView.set(normMatrix, 16);
+            uintView[32] = (mat as any)?.globalFragmentSlotIndex ?? 0;
+            uintView[33] = 0;
+            uintView[34] = 0;
+            uintView[35] = 0;
+
+            gpuDevice.queue.writeBuffer(uniformBuffer, 0, uniformArrayBuffer, 0, 144);
+
+            const vertexBindGroup = gpuDevice.createBindGroup({
+                label: `FoliageSubMesh_VertexBindGroup_${meshNode.name || subList.length}`,
+                layout: bindGroupLayout,
+                entries: [
+                    {
+                        binding: 0,
+                        resource: {buffer: uniformBuffer}
+                    }
+                ]
+            });
+
+            return {
+                mesh: meshNode,
+                geometry: geom,
+                material: mat,
+                indexCount,
+                vertexCount,
+                isIndexed,
+                indexFormat: geom.indexBuffer?.format || 'uint32',
+                strideBytes,
+                bottomOffset: 0,
+                relativeModelMatrix: relMatrix,
+                relativeNormalMatrix: normMatrix,
+                vertexUniformBuffer: uniformBuffer,
+                vertexUniformBindGroup: vertexBindGroup,
+            };
+        };
+
+        materialGroups.forEach((entry) => {
+            const group = entry.raws;
+            const mat = entry.material;
+            if (!this.options.combineSubMeshesByMaterial || group.length === 1) {
+
+                // 단일 서브메시: 그대로 등록
+                for (let g = 0; g < group.length; g++) {
+                    const raw = group[g];
+                    subList.push(createSubMeshInstance(
+                        raw.node,
+                        raw.geometry,
+                        raw.material,
+                        raw.currentRelativeMatrix,
+                        raw.normalMatrix,
+                        raw.strideBytes
+                    ));
+                }
+            } else {
+                // 🌟 복수 서브메시 병합 (Combine SubMeshes by Material)
+                let totalVertexCount = 0;
+                let totalIndexCount = 0;
+                const rawStride = group[0].rawStride;
+                const interleavedStruct = group[0].geometry.vertexBuffer?.interleavedStruct;
+
+                for (let g = 0; g < group.length; g++) {
+                    const geom = group[g].geometry;
+                    totalVertexCount += geom.vertexBuffer?.vertexCount ?? 0;
+                    totalIndexCount += geom.indexBuffer?.indexCount ?? (geom.vertexBuffer?.vertexCount ?? 0);
+                }
+
+                const combinedVertexData = new Float32Array(totalVertexCount * rawStride);
+                const combinedIndexData = new Uint32Array(totalIndexCount);
+
+                let vertexOffset = 0;
+                let indexOffset = 0;
+
+                for (let g = 0; g < group.length; g++) {
+                    const raw = group[g];
+                    const geom = raw.geometry;
+                    const srcVB = geom.vertexBuffer;
+                    const srcIB = geom.indexBuffer;
+                    const srcVData = srcVB?.data;
+                    const srcIData = srcIB?.data;
+                    const vCount = srcVB?.vertexCount ?? 0;
+
+
+                    if (srcVData && vCount > 0) {
+                        const m = raw.currentRelativeMatrix;
+                        const n = raw.normalMatrix;
+
+                        for (let v = 0; v < vCount; v++) {
+                            const srcIdx = v * rawStride;
+                            const dstIdx = (vertexOffset + v) * rawStride;
+
+                            // 1. 포지션 변환 (x, y, z * relativeModelMatrix)
+                            const x = srcVData[srcIdx + 0];
+                            const y = srcVData[srcIdx + 1];
+                            const z = srcVData[srcIdx + 2];
+
+                            combinedVertexData[dstIdx + 0] = m[0] * x + m[4] * y + m[8] * z + m[12];
+                            combinedVertexData[dstIdx + 1] = m[1] * x + m[5] * y + m[9] * z + m[13];
+                            combinedVertexData[dstIdx + 2] = m[2] * x + m[6] * y + m[10] * z + m[14];
+
+                            // 2. 노멀 변환 (nx, ny, nz * normalMatrix 및 정규화)
+                            if (rawStride >= 6) {
+                                const nx = srcVData[srcIdx + 3];
+                                const ny = srcVData[srcIdx + 4];
+                                const nz = srcVData[srcIdx + 5];
+
+                                let tx = n[0] * nx + n[4] * ny + n[8] * nz;
+                                let ty = n[1] * nx + n[5] * ny + n[9] * nz;
+                                let tz = n[2] * nx + n[6] * ny + n[10] * nz;
+                                const len = Math.sqrt(tx * tx + ty * ty + tz * tz);
+                                if (len > 0.000001) {
+                                    tx /= len;
+                                    ty /= len;
+                                    tz /= len;
+                                }
+
+                                combinedVertexData[dstIdx + 3] = tx;
+                                combinedVertexData[dstIdx + 4] = ty;
+                                combinedVertexData[dstIdx + 5] = tz;
+                            }
+
+                            // 3. 나머지 속성(UV 6~7 등) 복사
+                            if (rawStride > 6) {
+                                for (let k = 6; k < rawStride; k++) {
+                                    combinedVertexData[dstIdx + k] = srcVData[srcIdx + k];
+                                }
+                            }
+                        }
+                    }
+
+                    // 4. 인덱스 데이터 병합
+                    if (srcIData) {
+                        const iCount = srcIB.indexCount;
+                        for (let i = 0; i < iCount; i++) {
+                            combinedIndexData[indexOffset + i] = srcIData[i] + vertexOffset;
+                        }
+                        indexOffset += iCount;
+                    } else {
+                        // 인덱스가 없는 비인덱스 버텍스인 경우 순차 인덱스 생성
+                        for (let i = 0; i < vCount; i++) {
+                            combinedIndexData[indexOffset + i] = vertexOffset + i;
+                        }
+                        indexOffset += vCount;
+                    }
+
+                    vertexOffset += vCount;
+                }
+
+                // 5. 병합된 통합 VertexBuffer, IndexBuffer, Geometry 생성 (고유 cacheKey 부여로 캐시 충돌 방지)
+                const vKey = `FoliageCombinedVB_${this.name}_${mat.name || 'mat'}_${Math.random()}`;
+                const iKey = `FoliageCombinedIB_${this.name}_${mat.name || 'mat'}_${Math.random()}`;
+                const combinedVB = new VertexBuffer(this.redGPUContext, combinedVertexData, interleavedStruct, undefined, vKey);
+                const combinedIB = new IndexBuffer(this.redGPUContext, combinedIndexData, undefined, iKey);
+                const combinedGeom = new Geometry(this.redGPUContext, combinedVB, combinedIB);
+
+
+                const identityMatrix = mat4.create();
+                mat4.identity(identityMatrix);
+
+                const combinedSubMesh = createSubMeshInstance(
+                    group[0].node,
+                    combinedGeom,
+                    mat,
+                    identityMatrix,
+                    identityMatrix,
+                    group[0].strideBytes
+                );
+
+                subList.push(combinedSubMesh);
+                console.log(`[FoliageType 🌲] Combined ${group.length} submeshes for material '${mat.name || mat.constructor.name}' into 1 optimized mesh (${totalVertexCount} verts, ${totalIndexCount} indices). Sample verts:`, combinedVertexData.subarray(0, 18));
+
+            }
+        });
+
+        console.log(`[FoliageType 🌲] '${this.name}' collected ${subList.length} final submesh draw call(s) (originally ${rawList.length} subnodes).`);
     }
 }
