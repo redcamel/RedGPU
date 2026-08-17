@@ -1,6 +1,17 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include shadow.getShadowCoord;
 
+struct SubMeshUniforms {
+    relativeModelMatrix: mat4x4<f32>,
+    relativeNormalMatrix: mat4x4<f32>,
+    globalFragmentSlotIndex: u32,
+    pad0: u32,
+    pad1: u32,
+    pad2: u32,
+};
+
+@group(1) @binding(0) var<uniform> subMeshUniforms: SubMeshUniforms;
+
 struct VertexInput {
     @location(0) position : vec3<f32>,
     @location(1) normal : vec3<f32>,
@@ -46,16 +57,17 @@ fn mainInput(input : VertexInput) -> OutputData {
     
     let fadeFactor = input.instanceExtra.x;
     
-    // 1. 메시 3D 크기는 100% 온전히 유지 (언리얼 스타일 Dither Fade 적용으로 쪼그라듦 제거)
-    let localPos = input.position;
-    let scaledLocalPos = localPos * input.instanceScale;
+    // 1. 하이라키 누적 상대 행렬 변환 (부모 컨테이너 오프셋/회전/스케일 완벽 반영)
+    let hierarchyPos = (subMeshUniforms.relativeModelMatrix * vec4<f32>(input.position, 1.0)).xyz;
+    let hierarchyNormal = (subMeshUniforms.relativeNormalMatrix * vec4<f32>(input.normal, 0.0)).xyz;
     
-    // 2. Quaternion 회전 연산
-    let rotatedPos = rotateVectorByQuaternion(scaledLocalPos, input.instanceRotQuat);
+    // 2. 인스턴스 스케일 및 쿼터니언 회전 연산
+    let scaledPos = hierarchyPos * input.instanceScale;
+    let rotatedPos = rotateVectorByQuaternion(scaledPos, input.instanceRotQuat);
+    let worldNormal = rotateVectorByQuaternion(hierarchyNormal, input.instanceRotQuat);
     
     // 3. World Position 생성 (지형 표면 Y 위치에 안착)
     let worldPos = rotatedPos + input.instancePos;
-    let worldNormal = rotateVectorByQuaternion(input.normal, input.instanceRotQuat);
     
     // 4. RedGPU 표준 ProjectionViewMatrix 클립 변환
     let clipPos = systemUniforms.projection.projectionViewMatrix * vec4<f32>(worldPos, 1.0);
@@ -72,7 +84,8 @@ fn mainInput(input : VertexInput) -> OutputData {
     output.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
     output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
 
-    output.globalFragmentSlotIndex = 0u;
+    // ★ 각 서브메시의 PBRMaterial 글로벌 유니폼 슬롯 인덱스 연결 (cutOff, opacity, baseColorFactor, roughness 등 완벽 복원)
+    output.globalFragmentSlotIndex = subMeshUniforms.globalFragmentSlotIndex;
     output.localNodeScale_volumeScale = vec2<f32>(1.0, 1.0);
     
     // ★ 언리얼 스타일 Dithered Opacity Fade: 거리에 따른 투명도 페이드 인자(1.0~0.0) 전달

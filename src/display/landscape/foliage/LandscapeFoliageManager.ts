@@ -9,7 +9,7 @@ import computeViewFrustumPlanes from '../../../math/computeViewFrustumPlanes';
 /**
  * LandscapeFoliageManager
  * Landscape 지형 엔진 연동 및 수십만 개 식생 인스턴스 렌더링 총괄 매니저
- * (WebGPU Compute Shader 기반 GPU Frustum & Distance Culling 및 Indirect Drawing 적용)
+ * (WebGPU Compute Shader 기반 GPU Frustum & Distance Culling 및 Multi-Submesh Indirect Drawing 적용)
  */
 export class LandscapeFoliageManager {
     readonly landscape: Landscape;
@@ -18,11 +18,13 @@ export class LandscapeFoliageManager {
     #vertexShaderModule: GPUShaderModule | null = null;
     #cullingComputePipeline: GPUComputePipeline | null = null;
     #cullingBindGroupLayout: GPUBindGroupLayout | null = null;
+    #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #emptyBindGroupLayout: GPUBindGroupLayout | null = null;
     #emptyBindGroup: GPUBindGroup | null = null;
     #foliageTypes: Map<string, FoliageType> = new Map();
     #typeList: FoliageType[] = [];
     #pipelineCache: Map<string, GPURenderPipeline> = new Map();
+
     get hasFoliageTypes(): boolean {
         return this.#typeList.length > 0;
     }
@@ -42,6 +44,16 @@ export class LandscapeFoliageManager {
                 layout: this.#emptyBindGroupLayout,
                 entries: []
             });
+            this.#subMeshVertexBindGroupLayout = gpuDevice.createBindGroupLayout({
+                label: 'FoliageSubMesh_VertexBindGroupLayout',
+                entries: [
+                    {
+                        binding: 0,
+                        visibility: GPUShaderStage.VERTEX,
+                        buffer: {type: 'uniform'}
+                    }
+                ]
+            });
         }
 
         this.#initVertexShader();
@@ -55,7 +67,7 @@ export class LandscapeFoliageManager {
     }
 
     /**
-     * [KO] 지형 타일(LandscapeComponent) 로딩 완수 시 해당 타일 영역 식생(0.75MB)만 자동 부분 업로드합니다.
+     * [KO] 지형 타일(LandscapeComponent) 로딩 완수 시 해당 타일 영역 식생만 자동 부분 업로드합니다.
      */
     onTileLoaded(comp: any): void {
         const typeList = this.#typeList;
@@ -66,7 +78,7 @@ export class LandscapeFoliageManager {
     }
 
     /**
-     * 렌더 패스 엔코더에 인스턴스드 드로우콜 바인딩 및 디스패치 (Pre-Process 완료된 GPU Culled Buffer 기반 Indirect Draw)
+     * 렌더 패스 엔코더에 인스턴스드 드로우콜 바인딩 및 디스패치 (Multi-Submesh 공유 인스턴스 버퍼 기반 Indirect Draw)
      */
     render(view: any, passEncoder: GPURenderPassEncoder): void {
         const typeList = this.#typeList;
@@ -87,55 +99,64 @@ export class LandscapeFoliageManager {
             const activeCount = foliageType.activeInstanceCount;
             if (activeCount <= 0) continue;
 
+            const subMeshes = foliageType.subMeshes;
+            const subCount = subMeshes.length;
+            if (subCount === 0) continue;
+
             const buffer = foliageType.instanceBuffer;
-            const mesh = foliageType.mesh;
-            const geometry = mesh?.geometry;
-            const material = mesh?.material;
-            if (!geometry || !material) continue;
-
-            const vertexBufferObj = geometry.vertexBuffer;
-            const indexBufferObj = geometry.indexBuffer;
-            const vertexGPUBuffer = vertexBufferObj?.gpuBuffer;
-            const indexGPUBuffer = indexBufferObj?.gpuBuffer;
-            if (!vertexGPUBuffer) continue;
-
             const culledInstanceGPUBuffer = buffer.getCulledGPUBuffer();
             const indirectGPUBuffer = buffer.getIndirectGPUBuffer();
             if (!culledInstanceGPUBuffer || !indirectGPUBuffer) continue;
 
-            const rawStride = (vertexBufferObj as any)?.stride || 12;
-            const strideBytes = rawStride > 16 ? rawStride : rawStride * 4;
-
-            const pipeline = this.#getOrCreatePipeline(material, sampleCount, msaaID, strideBytes);
-            if (!pipeline) continue;
-
-            passEncoder.setPipeline(pipeline);
-
-            if (systemBG) {
-                passEncoder.setBindGroup(0, systemBG);
-            }
-
-            const vertexUniformBG = (mesh as any)?.gpuRenderInfo?.vertexUniformBindGroup || this.#emptyBindGroup;
-            if (vertexUniformBG) {
-                passEncoder.setBindGroup(1, vertexUniformBG);
-            }
-
-            const matUniformBG = material.gpuRenderInfo?.fragmentUniformBindGroup;
-            if (matUniformBG) {
-                passEncoder.setBindGroup(2, matUniformBG);
-            }
-
-            // Buffer 0: Geometry Vertex Buffer
-            passEncoder.setVertexBuffer(0, vertexGPUBuffer);
-            // Buffer 1: Culled Instance Buffer (GPU Compute Pass Output Buffer)
+            // ★ 인스턴스 버퍼는 해당 수목의 모든 서브메시가 단 1회 공유 바인딩 (Buffer 1)
             passEncoder.setVertexBuffer(1, culledInstanceGPUBuffer);
 
-            if (indexGPUBuffer) {
-                const format = (indexBufferObj as any)?.indexFormat || 'uint32';
-                passEncoder.setIndexBuffer(indexGPUBuffer, format);
-                passEncoder.drawIndexedIndirect(indirectGPUBuffer, 0);
-            } else if (vertexBufferObj) {
-                passEncoder.drawIndirect(indirectGPUBuffer, 0);
+            // 해당 식생 종의 모든 서브메시를 순회하며 각각의 머티리얼/지오메트리 드로우콜 실행
+            for (let s = 0; s < subCount; s++) {
+                const sub = subMeshes[s];
+                const vertexGPUBuffer = sub.geometry.vertexBuffer?.gpuBuffer;
+                if (!vertexGPUBuffer) continue;
+
+                const material = sub.material;
+                if (material.dirtyPipeline || !material.gpuRenderInfo?.fragmentUniformBindGroup) {
+                    material._updateFragmentState();
+                    material.dirtyPipeline = false;
+                }
+
+                const cullMode = material.doubleSided ? 'none' : (material.cullMode ?? 'none');
+                const pipeline = this.#getOrCreatePipeline(material, sampleCount, msaaID, sub.strideBytes, cullMode);
+                if (!pipeline) continue;
+
+                passEncoder.setPipeline(pipeline);
+
+                if (systemBG) {
+                    passEncoder.setBindGroup(0, systemBG);
+                }
+
+                // Group 1: 서브메시의 상대 변환 행렬 및 globalFragmentSlotIndex 유니폼 바인드그룹
+                const vertexUniformBG = sub.vertexUniformBindGroup || this.#emptyBindGroup;
+                if (vertexUniformBG) {
+                    passEncoder.setBindGroup(1, vertexUniformBG);
+                }
+
+                // Group 2: 서브메시 머티리얼 프래그먼트 유니폼 바인드그룹
+                const matUniformBG = material.gpuRenderInfo?.fragmentUniformBindGroup;
+                if (matUniformBG) {
+                    passEncoder.setBindGroup(2, matUniformBG);
+                }
+
+                // Buffer 0: 해당 서브메시의 버텍스 버퍼
+                passEncoder.setVertexBuffer(0, vertexGPUBuffer);
+
+
+                const indirectOffsetBytes = s * 20;
+                if (sub.isIndexed && sub.geometry.indexBuffer?.gpuBuffer) {
+                    const format = sub.indexFormat || 'uint32';
+                    passEncoder.setIndexBuffer(sub.geometry.indexBuffer.gpuBuffer, format);
+                    passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
+                } else {
+                    passEncoder.drawIndirect(indirectGPUBuffer, indirectOffsetBytes);
+                }
             }
         }
     }
@@ -169,9 +190,6 @@ export class LandscapeFoliageManager {
     getFoliageType(name: string): FoliageType | undefined {
         return this.#foliageTypes.get(name);
     }
-
-
-
 
     #cachedVHTAtlasGPUTexture: GPUTexture | null = null;
     #cachedVHTView: GPUTextureView | null = null;
@@ -228,34 +246,32 @@ export class LandscapeFoliageManager {
 
         for (let t = 0; t < typeCount; t++) {
             const foliageType = typeList[t];
-
-
             const activeCount = foliageType.activeInstanceCount;
             if (activeCount <= 0) continue;
 
-            const buffer = foliageType.instanceBuffer;
-            const mesh = foliageType.mesh;
-            const geometry = mesh?.geometry;
-            if (!geometry) continue;
+            const subMeshes = foliageType.subMeshes;
+            const subCount = subMeshes.length;
+            if (subCount === 0) continue;
 
+            const buffer = foliageType.instanceBuffer;
             const cullingDist = foliageType.options.cullingDistance;
             const fadeStartDist = foliageType.options.fadeStartDistance;
-            const boundingRadius = (mesh as any)?.boundingAABB?.volume ?? 2.0;
+            const boundingRadius = 20.0;
             const bottomOffset = foliageType.getGeometryBottomOffset();
 
-            // 3. Indirect Draw Command Buffer 원자적 instanceCount 카운터를 매 프레임 0으로 깨끗이 초기화 (20 bytes)
-            const indexOrVertexCount = geometry.indexBuffer ? geometry.indexBuffer.indexCount : (geometry.vertexBuffer ? geometry.vertexBuffer.vertexCount : 0);
-            buffer.resetIndirectCount(indexOrVertexCount);
+            // 1. Multi-Indirect Command Buffer 모든 서브메시 슬롯의 instanceCount를 매 프레임 0으로 깨끗이 초기화
+            foliageType.updateIndirectBuffer();
 
-            // 4. Culling Uniform 갱신 (GPU VHT 고도 정보 및 카메라/절두체 전달)
+            // 2. Culling Uniform 갱신 (GPU VHT 고도 정보, subMeshCount 및 카메라/절두체 전달)
             buffer.updateCullingUniforms(
                 camX, camY, camZ,
                 cullingDist, fadeStartDist, activeCount, boundingRadius,
                 worldSizeX, heightScale, bottomOffset, hasVHT,
+                subCount,
                 frustumPlanes
             );
 
-            // 4. Render Pass 생성 직전 Pre-Process Compute Pass 전처리 등록 (Zero-GC 바인딩)
+            // 3. Render Pass 생성 직전 Pre-Process Compute Pass 전처리 등록 (Zero-GC 바인딩)
             if (cullingPipeline && cullingBindGroupLayout) {
                 const cullingBindGroup = buffer.getOrCreateCullingBindGroup(cullingBindGroupLayout, vhtView, vhtSampler);
                 if (cullingBindGroup) {
@@ -271,7 +287,6 @@ export class LandscapeFoliageManager {
             }
         }
     }
-
 
     destroy(): void {
         this.#foliageTypes.forEach((type) => type.destroy());
@@ -336,7 +351,7 @@ export class LandscapeFoliageManager {
     /**
      * RedGPU 정석 AntialiasingManager.msaaID 및 Material(PBRMaterial 등) 호환 GPURenderPipeline 반환/생성
      */
-    #getOrCreatePipeline(material: any, sampleCount: number, msaaID: string, strideBytes: number = 48): GPURenderPipeline | null {
+    #getOrCreatePipeline(material: any, sampleCount: number, msaaID: string, strideBytes: number = 48, cullMode: GPUCullMode = 'none'): GPURenderPipeline | null {
         if (!material) return null;
 
         const resourceManager = this.redGPUContext.resourceManager;
@@ -353,22 +368,24 @@ export class LandscapeFoliageManager {
 
         const baseKey = material.uuid || material.name || material.constructor.name;
         const shaderLabel = fragmentModule?.label || 'default';
-        const pipelineKey = `${baseKey}_${shaderLabel}_${msaaID}_stride${strideBytes}`;
+        const pipelineKey = `${baseKey}_${shaderLabel}_${msaaID}_stride${strideBytes}_cull${cullMode}`;
 
         const cachedPipeline = this.#pipelineCache.get(pipelineKey);
         if (cachedPipeline) {
             return cachedPipeline;
         }
 
-        // 2. RedGPU Primitive Geometry Stride (12 floats * 4 bytes = 48 bytes: Pos3, Normal3, UV2, Tangent4)
+        // 2. RedGPU Primitive Geometry Stride (strideBytes = floatCount * 4 bytes)
+        const validStrideBytes = Math.max(strideBytes, 48);
         const geometryBufferLayout: GPUVertexBufferLayout = {
-            arrayStride: strideBytes,
+            arrayStride: validStrideBytes,
             attributes: [
                 { shaderLocation: 0, offset: 0, format: 'float32x3' },  // position
                 { shaderLocation: 1, offset: 12, format: 'float32x3' }, // normal
                 { shaderLocation: 2, offset: 24, format: 'float32x2' }, // uv
             ],
         };
+
 
         const instanceBufferLayout: GPUVertexBufferLayout = {
             arrayStride: 12 * 4,
@@ -381,19 +398,19 @@ export class LandscapeFoliageManager {
             ],
         };
 
-        // 3. RedGPU 명시적 PipelineLayout 구축 (Group 0: System, Group 1: Empty, Group 2: Material)
+        // 3. RedGPU 명시적 PipelineLayout 구축 (Group 0: System, Group 1: SubMesh Transform, Group 2: Material)
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
-        const emptyBindGroupLayout = this.#emptyBindGroupLayout || gpuDevice.createBindGroupLayout({
+        const subMeshBindGroupLayout = this.#subMeshVertexBindGroupLayout || this.#emptyBindGroupLayout || gpuDevice.createBindGroupLayout({
             label: 'EmptyFoliageBindGroupLayout',
             entries: []
         });
         const materialBindGroupLayout = material.gpuRenderInfo?.fragmentBindGroupLayout
             || material.gpuRenderInfo?.fragmentUniformBindGroup?.layout
-            || emptyBindGroupLayout;
+            || this.#emptyBindGroupLayout;
 
         const bindGroupLayouts: GPUBindGroupLayout[] = [
             systemBindGroupLayout,
-            emptyBindGroupLayout,
+            subMeshBindGroupLayout,
             materialBindGroupLayout
         ];
 
@@ -414,15 +431,33 @@ export class LandscapeFoliageManager {
             fragment: {
                 module: fragmentModule,
                 entryPoint: 'main',
-                targets: [
-                    { format: 'rgba16float' },   // Target 0: GBuffer COLOR
-                    { format: preferredFormat }, // Target 1: GBuffer NORMAL
-                    { format: 'rgba16float' }    // Target 2: GBuffer MOTION_VECTOR
-                ],
+                targets: material.getFragmentRenderState
+                    ? material.getFragmentRenderState().targets
+                    : [
+                        {
+                            format: 'rgba16float',
+                            blend: material.blendColorState ? {
+                                color: material.blendColorState.state,
+                                alpha: material.blendAlphaState.state
+                            } : undefined,
+                            writeMask: material.writeMaskState,
+                        },
+                        {
+                            format: preferredFormat,
+                            blend: undefined,
+                            writeMask: material.writeMaskState,
+                        },
+                        {
+                            format: 'rgba16float',
+                            blend: undefined,
+                            writeMask: material.writeMaskState,
+                        }
+                    ],
             },
+
             primitive: {
                 topology: 'triangle-list',
-                cullMode: 'none',
+                cullMode: cullMode,
             },
             depthStencil: {
                 format: 'depth32float',

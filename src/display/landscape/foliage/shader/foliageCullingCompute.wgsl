@@ -1,4 +1,4 @@
-// WebGPU Foliage Instance Compute Shader Culling (Workgroup Local Memory Reduction)
+// WebGPU Foliage Instance Compute Shader Culling (Multi-Submesh Workgroup Local Memory Reduction)
 struct CullingUniforms {
     cameraPosition: vec3<f32>,
     cullingDistance: f32,
@@ -9,6 +9,7 @@ struct CullingUniforms {
     heightScale: f32,
     bottomOffset: f32,
     hasVHT: u32,
+    subMeshCount: u32,
     pad0: f32,
     frustumPlanes: array<vec4<f32>, 6>,
 };
@@ -29,7 +30,7 @@ struct FoliageInstanceData {
     subId: f32,
 };
 
-struct IndirectDrawBuffer {
+struct DrawIndexedIndirectArgs {
     indexCount: u32,
     instanceCount: atomic<u32>,
     firstIndex: u32,
@@ -40,11 +41,11 @@ struct IndirectDrawBuffer {
 @group(0) @binding(0) var<storage, read> rawInstanceBuffer: array<FoliageInstanceData>;
 @group(0) @binding(1) var<uniform> cullingUniforms: CullingUniforms;
 @group(0) @binding(2) var<storage, read_write> culledInstanceBuffer: array<FoliageInstanceData>;
-@group(0) @binding(3) var<storage, read_write> indirectDrawBuffer: IndirectDrawBuffer;
+@group(0) @binding(3) var<storage, read_write> indirectDrawCommands: array<DrawIndexedIndirectArgs>;
 @group(0) @binding(4) var vhtTexture: texture_2d<f32>;
 @group(0) @binding(5) var vhtSampler: sampler;
 
-// ⚡ Workgroup Local Memory: 수십만 개 식생 인스턴스의 VRAM atomicAdd 동기화 병목을 98.4% 소멸
+// ⚡ Workgroup Local Memory: 수십만 개 식생 인스턴스의 VRAM atomicAdd 동기화 병목을 소멸
 var<workgroup> wgCount: atomic<u32>;
 var<workgroup> wgLocalSlot: atomic<u32>;
 var<workgroup> wgGlobalOffset: u32;
@@ -131,11 +132,15 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
 
     workgroupBarrier();
 
-    // Workgroup Leader가 VRAM StorageBuffer에 1회만 가산
+    // Workgroup Leader가 Multi-Indirect Buffer의 모든 서브메시 슬롯에 원자적 가산
     if (localIdx == 0u) {
         let count = atomicLoad(&wgCount);
         if (count > 0u) {
-            wgGlobalOffset = atomicAdd(&indirectDrawBuffer.instanceCount, count);
+            wgGlobalOffset = atomicAdd(&indirectDrawCommands[0].instanceCount, count);
+            let numSubMeshes = cullingUniforms.subMeshCount;
+            for (var s: u32 = 1u; s < numSubMeshes; s = s + 1u) {
+                atomicAdd(&indirectDrawCommands[s].instanceCount, count);
+            }
         }
     }
 
