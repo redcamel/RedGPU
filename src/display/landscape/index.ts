@@ -19,6 +19,7 @@ import LandscapeHUDDebugger from "./debugger/LandscapeHUDDebugger";
 import {LandscapeFoliageManager} from "./foliage/LandscapeFoliageManager";
 import {FoliageType, FoliageTypeOptions} from "./foliage/FoliageType";
 import {FoliageInstanceBuffer} from "./foliage/FoliageInstanceBuffer";
+import CrossBillboardMaterial from "./foliage/material/CrossBillboardMaterial";
 
 export {
     ALandscapeDebugger,
@@ -42,5 +43,7 @@ export {
     LandscapeFoliageManager,
     FoliageType,
     FoliageTypeOptions,
-    FoliageInstanceBuffer
+    FoliageInstanceBuffer,
+    CrossBillboardMaterial
 };
+

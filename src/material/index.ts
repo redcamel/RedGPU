@@ -14,8 +14,6 @@ import PBRMaterial from "./pbrMaterial/PBRMaterial";
 import PhongMaterial from "./phongMaterial/PhongMaterial";
 import TINT_BLEND_MODE from "./TINT_BLEND_MODE";
 
-import CrossBillboardMaterial from "./crossBillboardMaterial/CrossBillboardMaterial";
-
 export * as Core from './core'
 export {
     TINT_BLEND_MODE,
@@ -23,7 +21,7 @@ export {
     ColorMaterial,
     PhongMaterial,
     BitmapMaterial,
-    PBRMaterial,
-    CrossBillboardMaterial
+    PBRMaterial
 }
+
 

@@ -1,16 +1,16 @@
-import RedGPUContext from "../../context/RedGPUContext";
-import Sampler from "../../resources/sampler/Sampler";
-import BitmapTexture from "../../resources/texture/BitmapTexture";
-import DirectTexture from "../../resources/texture/DirectTexture";
+import RedGPUContext from "../../../../context/RedGPUContext";
+import Sampler from "../../../../resources/sampler/Sampler";
+import BitmapTexture from "../../../../resources/texture/BitmapTexture";
+import DirectTexture from "../../../../resources/texture/DirectTexture";
 import fragmentModuleSource from './crossBillboardFragment.wgsl';
-import AUVTransformBaseMaterial from "../core/AUVTransformBaseMaterial";
-import defineSampler from "../../defineProperty/funcs/texture/defineSampler";
-import defineTexture from "../../defineProperty/funcs/texture/defineTexture";
-import GPU_BLEND_FACTOR from "../../gpuConst/GPU_BLEND_FACTOR";
+import AUVTransformBaseMaterial from "../../../../material/core/AUVTransformBaseMaterial";
+import defineSampler from "../../../../defineProperty/funcs/texture/defineSampler";
+import defineTexture from "../../../../defineProperty/funcs/texture/defineTexture";
+import GPU_BLEND_FACTOR from "../../../../gpuConst/GPU_BLEND_FACTOR";
 
 /**
- * [KO] 언리얼 엔진 5 스타일 십자 빌보드(Cross-Billboard Impostor) 전용 초경량 머티리얼입니다.
- * [EN] Unreal Engine 5 style ultra-lightweight material dedicated for Cross-Billboard Impostors.
+ * [KO] 언리얼 엔진 5 스타일 십자 빌보드(Cross-Billboard Impostor) 식생 전용 초경량 머티리얼입니다.
+ * [EN] Unreal Engine 5 style ultra-lightweight material dedicated for foliage Cross-Billboard Impostors.
  */
 interface CrossBillboardMaterial {
     diffuseTexture: BitmapTexture | DirectTexture;
@@ -20,7 +20,6 @@ interface CrossBillboardMaterial {
     doubleSided: boolean;
     alphaBlend: number;
 }
-
 
 class CrossBillboardMaterial extends AUVTransformBaseMaterial {
     constructor(redGPUContext: RedGPUContext, diffuseTexture?: BitmapTexture | DirectTexture, name?: string) {
