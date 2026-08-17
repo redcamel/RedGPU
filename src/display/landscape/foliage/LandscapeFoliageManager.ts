@@ -25,9 +25,8 @@ export class LandscapeFoliageManager {
     #foliageTypes: Map<string, FoliageType> = new Map();
     #typeList: FoliageType[] = [];
     #pipelineCache: Map<string, GPURenderPipeline> = new Map();
-    #opaqueEntries: any[] = [];
-    #alphaEntries: any[] = [];
     #transparentEntries: any[] = [];
+
 
     get hasFoliageTypes(): boolean {
         return this.#typeList.length > 0;
@@ -104,11 +103,58 @@ export class LandscapeFoliageManager {
         const camY = rawCamera?.y ?? 0;
         const camZ = rawCamera?.z ?? 0;
 
-        // 🌟 1. Single Pass 일괄 분류 (단 1번의 1차 순회로 Opaque, Alpha, Transparent 큐 완성)
-        let opaqueCount = 0;
-        let alphaCount = 0;
-        let transCount = 0;
+        // 🌟 1단계: 모든 FoliageType의 Basic / Opaque / MASK 서브메시지 렌더링 (Depth 선점)
+        for (let t = 0; t < typeCount; t++) {
+            const foliageType = typeList[t];
+            if (foliageType.activeInstanceCount <= 0) continue;
+            const subMeshes = foliageType.subMeshes;
+            const subCount = subMeshes.length;
+            if (subCount === 0) continue;
 
+            const buffer = foliageType.instanceBuffer;
+            const culledGPU = buffer.getCulledGPUBuffer();
+            const indirectGPU = buffer.getIndirectGPUBuffer();
+            if (!culledGPU || !indirectGPU) continue;
+
+            passEncoder.setVertexBuffer(1, culledGPU);
+
+            for (let s = 0; s < subCount; s++) {
+                const mat = subMeshes[s].material;
+                const isTransparent = !!mat.transparent || !!mat.use2PathRender;
+                const isAlpha = (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
+                if (!isTransparent && !isAlpha) {
+                    this.#drawSubMesh(passEncoder, subMeshes[s], s, sampleCount, msaaID, systemBG, indirectGPU);
+                }
+            }
+        }
+
+        // 🌟 2단계: 모든 FoliageType의 Alpha Layer 서브메시지 렌더링 (Transparent 이전)
+        for (let t = 0; t < typeCount; t++) {
+            const foliageType = typeList[t];
+            if (foliageType.activeInstanceCount <= 0) continue;
+            const subMeshes = foliageType.subMeshes;
+            const subCount = subMeshes.length;
+            if (subCount === 0) continue;
+
+            const buffer = foliageType.instanceBuffer;
+            const culledGPU = buffer.getCulledGPUBuffer();
+            const indirectGPU = buffer.getIndirectGPUBuffer();
+            if (!culledGPU || !indirectGPU) continue;
+
+            passEncoder.setVertexBuffer(1, culledGPU);
+
+            for (let s = 0; s < subCount; s++) {
+                const mat = subMeshes[s].material;
+                const isTransparent = !!mat.transparent || !!mat.use2PathRender;
+                const isAlpha = (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
+                if (isAlpha) {
+                    this.#drawSubMesh(passEncoder, subMeshes[s], s, sampleCount, msaaID, systemBG, indirectGPU);
+                }
+            }
+        }
+
+        // 🌟 3단계: Transparent Layer / 2Path Layer (카메라 거리 기준 Back-to-Front 정렬 후 렌더링)
+        let transCount = 0;
         for (let t = 0; t < typeCount; t++) {
             const foliageType = typeList[t];
             if (foliageType.activeInstanceCount <= 0) continue;
@@ -125,10 +171,7 @@ export class LandscapeFoliageManager {
                 const sub = subMeshes[s];
                 const mat = sub.material;
                 const isTransparent = !!mat.transparent || !!mat.use2PathRender;
-                const isAlpha = (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
-
                 if (isTransparent) {
-                    // Transparent 큐 등록
                     let entry = this.#transparentEntries[transCount];
                     if (!entry) {
                         entry = {subMesh: sub, subIndex: s, culledGPU, indirectGPU, distanceSq: 0};
@@ -139,72 +182,25 @@ export class LandscapeFoliageManager {
                         entry.culledGPU = culledGPU;
                         entry.indirectGPU = indirectGPU;
                     }
+
+                    // 카메라 중심과의 상대 거리 계산 (Back-to-Front 정렬용)
                     const meshNode = sub.mesh;
                     const dx = (meshNode?.x ?? 0) - camX;
                     const dy = (meshNode?.y ?? 0) - camY;
                     const dz = (meshNode?.z ?? 0) - camZ;
                     entry.distanceSq = dx * dx + dy * dy + dz * dz;
+
                     transCount++;
-                } else if (isAlpha) {
-                    // Alpha 큐 등록
-                    let entry = this.#alphaEntries[alphaCount];
-                    if (!entry) {
-                        entry = {subMesh: sub, subIndex: s, culledGPU, indirectGPU};
-                        this.#alphaEntries[alphaCount] = entry;
-                    } else {
-                        entry.subMesh = sub;
-                        entry.subIndex = s;
-                        entry.culledGPU = culledGPU;
-                        entry.indirectGPU = indirectGPU;
-                    }
-                    alphaCount++;
-                } else {
-                    // Opaque / Masked 큐 등록 (1-Pass 고속 렌더링용)
-                    let entry = this.#opaqueEntries[opaqueCount];
-                    if (!entry) {
-                        entry = {subMesh: sub, subIndex: s, culledGPU, indirectGPU};
-                        this.#opaqueEntries[opaqueCount] = entry;
-                    } else {
-                        entry.subMesh = sub;
-                        entry.subIndex = s;
-                        entry.culledGPU = culledGPU;
-                        entry.indirectGPU = indirectGPU;
-                    }
-                    opaqueCount++;
                 }
             }
         }
 
-
-        let currentCulledGPU: GPUBuffer | null = null;
-
-        // 🌟 1단계: 모든 FoliageType의 Basic / Opaque / MASK 서브메시지 1-Pass 고속 렌더링 (depthWrite: true, depthCompare: 'less-equal')
-        for (let i = 0; i < opaqueCount; i++) {
-            const item = this.#opaqueEntries[i];
-            if (currentCulledGPU !== item.culledGPU) {
-                passEncoder.setVertexBuffer(1, item.culledGPU);
-                currentCulledGPU = item.culledGPU;
-            }
-            this.#drawSubMesh(passEncoder, item.subMesh, item.subIndex, sampleCount, msaaID, systemBG, item.indirectGPU);
-        }
-
-        // 🌟 2단계: Alpha Layer 서브메시지 렌더링
-        currentCulledGPU = null;
-        for (let i = 0; i < alphaCount; i++) {
-            const item = this.#alphaEntries[i];
-            if (currentCulledGPU !== item.culledGPU) {
-                passEncoder.setVertexBuffer(1, item.culledGPU);
-                currentCulledGPU = item.culledGPU;
-            }
-            this.#drawSubMesh(passEncoder, item.subMesh, item.subIndex, sampleCount, msaaID, systemBG, item.indirectGPU);
-        }
-
-        // 🌟 3단계: Transparent Layer / 2Path Layer (카메라 거리 기준 Back-to-Front 정렬 후 렌더링)
         if (transCount > 0) {
+            // sortTransparentObjects 알고리즘: 원근 거리 내림차순(먼 순서) 정렬
             const validEntries = this.#transparentEntries.slice(0, transCount);
             validEntries.sort((a, b) => b.distanceSq - a.distanceSq);
 
-            currentCulledGPU = null;
+            let currentCulledGPU: GPUBuffer | null = null;
             for (let i = 0; i < transCount; i++) {
                 const item = validEntries[i];
                 if (currentCulledGPU !== item.culledGPU) {
@@ -593,8 +589,9 @@ export class LandscapeFoliageManager {
             depthStencil: {
                 format: 'depth32float',
                 depthWriteEnabled: true,
-                depthCompare: 'less-equal',
+                depthCompare: 'less',
             },
+
             multisample: {
                 count: sampleCount,
             },
