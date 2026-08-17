@@ -6,6 +6,10 @@ import VertexBuffer from '../../../resources/buffer/vertexBuffer/VertexBuffer';
 import IndexBuffer from '../../../resources/buffer/indexBuffer/IndexBuffer';
 import {FoliageInstanceBuffer} from './FoliageInstanceBuffer';
 import GPU_BLEND_FACTOR from "../../../gpuConst/GPU_BLEND_FACTOR";
+import {createCrossBillboardGeometry} from "./geometry/createCrossBillboardGeometry";
+import {FoliageImpostorBaker} from "./baker/FoliageImpostorBaker";
+import CrossBillboardMaterial from "../../../material/crossBillboardMaterial/CrossBillboardMaterial";
+
 
 export interface FoliageSubMesh {
     readonly mesh: Mesh;
@@ -21,7 +25,47 @@ export interface FoliageSubMesh {
     readonly relativeNormalMatrix: mat4;
     readonly vertexUniformBuffer: GPUBuffer;
     readonly vertexUniformBindGroup: GPUBindGroup;
+    readonly lodIndex?: number; // 0: LOD0 (3D 풀 지오메트리), 1: LOD1 (십자 빌보드)
 }
+
+export interface FoliageBillboardOptions {
+    /**
+     * [KO] 십자 빌보드(Cross Billboard Impostor) 활성화 여부 (기본: false)
+     * [EN] Whether to enable Cross Billboard Impostor (default: false)
+     */
+    enabled?: boolean;
+    /**
+     * [KO] 빌보드 텍스처
+     * [EN] Billboard texture
+     */
+    texture?: any;
+    /**
+     * [KO] 빌보드 머티리얼 (지정하지 않으면 FoliageMaterial 기본 생성)
+     * [EN] Billboard material (creates FoliageMaterial by default if not specified)
+     */
+    material?: any;
+    /**
+     * [KO] 빌보드 가로 폭 (기본값: 수목 폭 또는 6.0)
+     * [EN] Billboard width (default: tree width or 6.0)
+     */
+    width?: number;
+    /**
+     * [KO] 빌보드 세로 높이 (기본값: 수목 높이 또는 8.0)
+     * [EN] Billboard height (default: tree height or 8.0)
+     */
+    height?: number;
+    /**
+     * [KO] 3D 모델에서 빌보드로 전환되는 거리 (m, 기본: 80.0)
+     * [EN] Transition distance from 3D model to billboard (m, default: 80.0)
+     */
+    lodDistance?: number;
+    /**
+     * [KO] LOD 전환 시 디더링 크로스페이드 구간 범위 (m, 기본: 30.0)
+     * [EN] Dithered crossfade transition range in meters (default: 30.0)
+     */
+    fadeRange?: number;
+}
+
 
 export interface FoliageTypeOptions {
     name: string;
@@ -40,6 +84,18 @@ export interface FoliageTypeOptions {
     randomRotationY?: boolean;
 
     /**
+     * [KO] 3D 모델에서 빌보드로 전환되는 LOD 거리 (m, 기본: 80.0)
+     * [EN] LOD transition distance from 3D model to billboard (m, default: 80.0)
+     */
+    lodDistance?: number;
+
+    /**
+     * [KO] 언리얼 엔진 스타일 십자 빌보드(Cross-Billboard Impostor) 옵션
+     * [EN] Unreal Engine style Cross-Billboard Impostor options
+     */
+    billboard?: FoliageBillboardOptions;
+
+    /**
      * [KO] 반투명(BLEND) 머티리얼을 언리얼 엔진 표준인 알파 컷오프(MASK)로 자동 변환할지 여부 (기본: true)
      * [EN] Whether to automatically convert BLEND materials to Unreal Engine standard MASK (alpha cutoff) (default: true)
      */
@@ -52,6 +108,7 @@ export interface FoliageTypeOptions {
     combineSubMeshesByMaterial?: boolean;
 }
 
+
 /**
  * FoliageType
  * 개별 식생 종(Species)의 지오메트리 계층(Multi-Submesh), 머티리얼, 인스턴싱 버퍼 및 파퓰레이션 관리
@@ -63,6 +120,11 @@ export class FoliageType {
     readonly subMeshes: FoliageSubMesh[] = [];
 
     foliageManager?: any;
+    lod0SubMeshCount: number = 1;
+    hasBillboard: boolean = false;
+    lodDistance: number = 80.0;
+    lodFadeRange: number = 30.0;
+
     #activeInstanceCount: number = 0;
     #bottomOffset: number | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
@@ -80,15 +142,23 @@ export class FoliageType {
             minScale: options.minScale ?? [1.0, 1.0, 1.0],
             maxScale: options.maxScale ?? [1.0, 1.0, 1.0],
             randomRotationY: options.randomRotationY ?? true,
+            lodDistance: options.lodDistance ?? (options.billboard?.lodDistance ?? 80.0),
+            billboard: options.billboard ?? {enabled: false},
             convertBlendToMasked: options.convertBlendToMasked ?? true,
             combineSubMeshesByMaterial: options.combineSubMeshesByMaterial ?? true,
         };
 
+        this.hasBillboard = !!this.options.billboard?.enabled;
+        this.lodDistance = this.options.lodDistance;
+        this.lodFadeRange = this.options.billboard?.fadeRange ?? 30.0;
+
         this.#initSubMeshBindGroupLayout();
+
         this.#collectSubMeshes(options.mesh);
         this.instanceBuffer = new FoliageInstanceBuffer(redGPUContext, this.options.maxInstances, this.subMeshes);
         this.updateIndirectBuffer();
     }
+
 
     get activeInstanceCount(): number {
         return this.#activeInstanceCount;
@@ -421,7 +491,8 @@ export class FoliageType {
             mat: any,
             relMatrix: mat4,
             normMatrix: mat4,
-            strideBytes: number
+            strideBytes: number,
+            lodIndex: number = 0
         ): FoliageSubMesh => {
             const isIndexed = !!geom.indexBuffer;
             const indexCount = geom.indexBuffer?.indexCount ?? 0;
@@ -471,6 +542,7 @@ export class FoliageType {
                 relativeNormalMatrix: normMatrix,
                 vertexUniformBuffer: uniformBuffer,
                 vertexUniformBindGroup: vertexBindGroup,
+                lodIndex,
             };
         };
 
@@ -479,7 +551,7 @@ export class FoliageType {
             const mat = entry.material;
             if (!this.options.combineSubMeshesByMaterial || group.length === 1) {
 
-                // 단일 서브메시: 그대로 등록
+                // 단일 서브메시: 그대로 등록 (LOD 0)
                 for (let g = 0; g < group.length; g++) {
                     const raw = group[g];
                     subList.push(createSubMeshInstance(
@@ -488,11 +560,12 @@ export class FoliageType {
                         raw.material,
                         raw.currentRelativeMatrix,
                         raw.normalMatrix,
-                        raw.strideBytes
+                        raw.strideBytes,
+                        0
                     ));
                 }
             } else {
-                // 🌟 복수 서브메시 병합 (Combine SubMeshes by Material)
+                // 🌟 복수 서브메시 병합 (Combine SubMeshes by Material - LOD 0)
                 let totalVertexCount = 0;
                 let totalIndexCount = 0;
                 const rawStride = group[0].rawStride;
@@ -602,7 +675,8 @@ export class FoliageType {
                     mat,
                     identityMatrix,
                     identityMatrix,
-                    group[0].strideBytes
+                    group[0].strideBytes,
+                    0
                 );
 
                 subList.push(combinedSubMesh);
@@ -611,6 +685,48 @@ export class FoliageType {
             }
         });
 
-        console.log(`[FoliageType 🌲] '${this.name}' collected ${subList.length} final submesh draw call(s) (originally ${rawList.length} subnodes).`);
+        // 🌟 LOD 0 서브메시 개수 기록
+        this.lod0SubMeshCount = subList.length;
+
+        // 🌟 4단계: 언리얼 엔진 스타일 Cross-Billboard Impostor (LOD 1) 서브메시 등록
+        if (this.options.billboard?.enabled) {
+            const bbOptions = this.options.billboard;
+            const rootMeshNode = Array.isArray(this.options.mesh) ? this.options.mesh[0] : this.options.mesh;
+            const bakeResult = FoliageImpostorBaker.bakeSubMeshes(this.redGPUContext, subList, rootMeshNode, 512, this.name);
+
+            const bbWidth = bbOptions.width ?? bakeResult.width;
+            const bbHeight = bbOptions.height ?? bakeResult.height;
+
+            const bbGeom = createCrossBillboardGeometry(this.redGPUContext, bbWidth, bbHeight);
+            let bbMat = bbOptions.material;
+            if (!bbMat) {
+                // 🌟 언리얼 엔진 스타일 Cross-Billboard 전용 초경량 볼륨 셰이딩 재질 자동 생성!
+                bbMat = new CrossBillboardMaterial(this.redGPUContext, bakeResult.texture, `${this.name}_CrossBillboardMat`);
+            }
+
+
+            const identityMatrix = mat4.create();
+            mat4.identity(identityMatrix);
+
+            const dummyMesh = new Mesh(this.redGPUContext, bbGeom, bbMat);
+            dummyMesh.name = `${this.name}_Billboard_LOD1`;
+
+            const bbSubMesh = createSubMeshInstance(
+                dummyMesh,
+                bbGeom,
+                bbMat,
+                identityMatrix,
+                identityMatrix,
+                12 * 4,
+                1 // lodIndex: 1
+            );
+
+            subList.push(bbSubMesh);
+            console.log(`[FoliageType 🌲] '${this.name}' added UE5 Cross-Billboard Impostor SubMesh (LOD1, ${bbWidth.toFixed(2)}x${bbHeight.toFixed(2)}m, transition @ ${this.lodDistance}m)`);
+        }
+
+
+        console.log(`[FoliageType 🌲] '${this.name}' collected ${subList.length} final submesh draw call(s) (LOD0: ${this.lod0SubMeshCount}, Billboard LOD1: ${this.hasBillboard ? 1 : 0}).`);
     }
 }
+

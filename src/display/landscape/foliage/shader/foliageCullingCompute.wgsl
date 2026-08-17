@@ -1,4 +1,4 @@
-// WebGPU Foliage Instance Compute Shader Culling (Multi-Submesh Workgroup Local Memory Reduction)
+// WebGPU Foliage Instance Compute Shader Culling (Multi-LOD & Submesh Workgroup Reduction)
 struct CullingUniforms {
     cameraPosition: vec3<f32>,
     cullingDistance: f32,
@@ -10,6 +10,14 @@ struct CullingUniforms {
     bottomOffset: f32,
     hasVHT: u32,
     subMeshCount: u32,
+    lodDistance: f32,          // ★ LOD 전환 중심 거리 (예: 90.0)
+    lod0SubMeshCount: u32,     // ★ LOD 0 서브메시 개수
+    hasBillboard: u32,         // ★ 빌보드 활성화 여부
+    maxInstances: u32,         // ★ 최대 인스턴스 수
+    lodFadeRange: f32,         // ★ LOD 크로스페이드 구간 범위 (예: 30.0)
+    pad1: f32,
+    pad2: f32,
+    pad3: f32,
     frustumPlanes: array<vec4<f32>, 6>,
 };
 
@@ -45,41 +53,44 @@ struct DrawIndexedIndirectArgs {
 @group(0) @binding(4) var vhtTexture: texture_2d<f32>;
 @group(0) @binding(5) var vhtSampler: sampler;
 
-// ⚡ Workgroup Local Memory: 수십만 개 식생 인스턴스의 VRAM atomicAdd 동기화 병목을 소멸
-var<workgroup> wgCount: atomic<u32>;
-var<workgroup> wgLocalSlot: atomic<u32>;
-var<workgroup> wgGlobalOffset: u32;
+// ⚡ Workgroup Local Memory: LOD0과 LOD1을 각각 독립적으로 초고속 로컬 축약
+var<workgroup> wgCountLOD0: atomic<u32>;
+var<workgroup> wgCountLOD1: atomic<u32>;
+var<workgroup> wgLocalSlotLOD0: atomic<u32>;
+var<workgroup> wgLocalSlotLOD1: atomic<u32>;
+var<workgroup> wgGlobalOffsetLOD0: u32;
+var<workgroup> wgGlobalOffsetLOD1: u32;
 
 @compute @workgroup_size(64)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invocation_id) local_id: vec3<u32>) {
     let localIdx = local_id.x;
     if (localIdx == 0u) {
-        atomicStore(&wgCount, 0u);
-        atomicStore(&wgLocalSlot, 0u);
+        atomicStore(&wgCountLOD0, 0u);
+        atomicStore(&wgCountLOD1, 0u);
+        atomicStore(&wgLocalSlotLOD0, 0u);
+        atomicStore(&wgLocalSlotLOD1, 0u);
     }
+
     workgroupBarrier();
 
     let idx = global_id.x;
-    var isVisible = false;
-    var culledInstance: FoliageInstanceData;
+    var isLOD0 = false;
+    var isLOD1 = false;
+    var culledInstance0: FoliageInstanceData;
+    var culledInstance1: FoliageInstanceData;
 
     if (idx < cullingUniforms.instanceCount) {
         let instance = rawInstanceBuffer[idx];
+
+        // 🌟 GPU VHT (Virtual Height Texture) 지형 고도 샘플링
         var realY = instance.posY;
-
-        // VHT heightmap 정밀 Y 좌표 산출
-        if (cullingUniforms.hasVHT != 0u) {
-            let worldSizeX = cullingUniforms.worldSizeX;
-            let halfW = worldSizeX * 0.5;
-            let uv = vec2<f32>(
-                (instance.posX + halfW) / worldSizeX,
-                (instance.posZ + halfW) / worldSizeX
-            );
-
-            let texSize = vec2<f32>(textureDimensions(vhtTexture));
-            let texCoord = vec2<i32>(clamp(uv * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-            let heightValue = textureLoad(vhtTexture, texCoord, 0).r;
-            realY = heightValue * cullingUniforms.heightScale + cullingUniforms.bottomOffset;
+        if (cullingUniforms.hasVHT != 0u && cullingUniforms.worldSizeX > 0.0) {
+            let u = (instance.posX / cullingUniforms.worldSizeX) + 0.5;
+            let v = (instance.posZ / cullingUniforms.worldSizeX) + 0.5;
+            if (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0) {
+                let sampledHeightNorm = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v), 0.0).r;
+                realY = (sampledHeightNorm * cullingUniforms.heightScale) - cullingUniforms.bottomOffset;
+            }
         }
 
         let worldPos = vec3<f32>(instance.posX, realY, instance.posZ);
@@ -110,46 +121,97 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
             }
 
             if (inFrustum) {
+                let dist = sqrt(distSq);
                 let fadeStartDist = cullingUniforms.fadeStartDistance;
-                let fadeStartDistSq = fadeStartDist * fadeStartDist;
                 var fade: f32 = 1.0;
 
-                if (distSq > fadeStartDistSq) {
-                    let dist = sqrt(distSq);
+                if (dist > fadeStartDist) {
                     let fadeRange = max(cullingDist - fadeStartDist, 1.0);
                     fade = clamp(1.0 - (dist - fadeStartDist) / fadeRange, 0.0, 1.0);
                 }
 
-                culledInstance = instance;
-                culledInstance.posY = realY;
-                culledInstance.fade = fade;
+                // 🌟 UE5 스타일 LOD Dithered Crossfade 계산
+                let lodDist = cullingUniforms.lodDistance;
+                let halfFadeRange = max(cullingUniforms.lodFadeRange * 0.5, 1.0);
+                let crossFadeStart = lodDist - halfFadeRange;
+                let crossFadeEnd = lodDist + halfFadeRange;
 
-                isVisible = true;
-                atomicAdd(&wgCount, 1u);
+                if (cullingUniforms.hasBillboard == 0u) {
+                    // 빌보드 미사용 시: 항상 LOD 0 (3D 풀 모델)
+                    isLOD0 = true;
+                    culledInstance0 = instance;
+                    culledInstance0.posY = realY;
+                    culledInstance0.fade = fade;
+                    culledInstance0.subId = 1.0; // lodFade = 1.0 (디더 없음)
+                    atomicAdd(&wgCountLOD0, 1u);
+                } else {
+                    // 빌보드 활성 시: 전환 구간([crossFadeStart, crossFadeEnd]) 동안 LOD0과 LOD1 동시 디스패치!
+                    if (dist < crossFadeEnd) {
+                        // LOD 0 (3D 풀 모델)
+                        isLOD0 = true;
+                        var lodFade0: f32 = 1.0;
+                        if (dist >= crossFadeStart) {
+                            // crossFadeStart -> crossFadeEnd 로 갈수록 1.0 -> 0.0 페이드아웃
+                            lodFade0 = clamp((crossFadeEnd - dist) / (crossFadeEnd - crossFadeStart), 0.0, 1.0);
+                        }
+                        culledInstance0 = instance;
+                        culledInstance0.posY = realY;
+                        culledInstance0.fade = fade;
+                        culledInstance0.subId = lodFade0; // subId에 lodFade 비율 전달!
+                        atomicAdd(&wgCountLOD0, 1u);
+                    }
+
+                    if (dist >= crossFadeStart) {
+                        // LOD 1 (십자 빌보드)
+                        isLOD1 = true;
+                        var lodFade1: f32 = 1.0;
+                        if (dist < crossFadeEnd) {
+                            // crossFadeStart -> crossFadeEnd 로 갈수록 0.0 -> 1.0 페이드인
+                            lodFade1 = clamp((dist - crossFadeStart) / (crossFadeEnd - crossFadeStart), 0.0, 1.0);
+                        }
+                        culledInstance1 = instance;
+                        culledInstance1.posY = realY;
+                        culledInstance1.fade = fade;
+                        culledInstance1.subId = lodFade1; // subId에 lodFade 비율 전달!
+                        atomicAdd(&wgCountLOD1, 1u);
+                    }
+                }
             }
         }
     }
 
     workgroupBarrier();
 
-    // Workgroup Leader가 Multi-Indirect Buffer의 모든 서브메시 슬롯에 원자적 가산
+    // Workgroup Leader가 Multi-Indirect Buffer 슬롯에 원자적 가산
     if (localIdx == 0u) {
-        let count = atomicLoad(&wgCount);
-        if (count > 0u) {
-            wgGlobalOffset = atomicAdd(&indirectDrawCommands[0].instanceCount, count);
-            let numSubMeshes = cullingUniforms.subMeshCount;
-            for (var s: u32 = 1u; s < numSubMeshes; s = s + 1u) {
-                atomicAdd(&indirectDrawCommands[s].instanceCount, count);
+        let countLOD0 = atomicLoad(&wgCountLOD0);
+        if (countLOD0 > 0u) {
+            wgGlobalOffsetLOD0 = atomicAdd(&indirectDrawCommands[0].instanceCount, countLOD0);
+            let numLOD0 = cullingUniforms.lod0SubMeshCount;
+            for (var s: u32 = 1u; s < numLOD0; s = s + 1u) {
+                atomicAdd(&indirectDrawCommands[s].instanceCount, countLOD0);
             }
+        }
+
+        let countLOD1 = atomicLoad(&wgCountLOD1);
+        if (countLOD1 > 0u && cullingUniforms.hasBillboard != 0u) {
+            let billboardSlot = cullingUniforms.lod0SubMeshCount;
+            wgGlobalOffsetLOD1 = atomicAdd(&indirectDrawCommands[billboardSlot].instanceCount, countLOD1);
         }
     }
 
     workgroupBarrier();
 
     // 통과한 인스턴스 정밀 할당 및 VRAM 버퍼 쓰기
-    if (isVisible) {
-        let slot = atomicAdd(&wgLocalSlot, 1u);
-        let outIdx = wgGlobalOffset + slot;
-        culledInstanceBuffer[outIdx] = culledInstance;
+    if (isLOD0) {
+        let slot0 = atomicAdd(&wgLocalSlotLOD0, 1u);
+        let outIdx0 = wgGlobalOffsetLOD0 + slot0;
+        culledInstanceBuffer[outIdx0] = culledInstance0;
+    }
+    if (isLOD1) {
+        let slot1 = atomicAdd(&wgLocalSlotLOD1, 1u);
+        let maxInstances = cullingUniforms.maxInstances;
+        let outIdx1 = maxInstances + wgGlobalOffsetLOD1 + slot1;
+        culledInstanceBuffer[outIdx1] = culledInstance1;
     }
 }

@@ -21,7 +21,7 @@ struct VertexInput {
     @location(3) instancePos : vec3<f32>,
     @location(4) instanceRotQuat : vec4<f32>,
     @location(5) instanceScale : vec3<f32>,
-    @location(6) instanceExtra : vec2<f32>, // x: FadeFactor (1.0~0.0), y: SubID
+    @location(6) instanceExtra : vec2<f32>, // x: FadeFactor (1.0~0.0), y: SubID / LodFade
 };
 
 struct OutputData {
@@ -56,6 +56,7 @@ fn mainInput(input : VertexInput) -> OutputData {
     var output : OutputData;
     
     let fadeFactor = input.instanceExtra.x;
+    let lodFadeFactor = input.instanceExtra.y;
     
     // 1. 하이라키 누적 상대 행렬 변환 (부모 컨테이너 오프셋/회전/스케일 완벽 반영)
     let hierarchyPos = (subMeshUniforms.relativeModelMatrix * vec4<f32>(input.position, 1.0)).xyz;
@@ -88,8 +89,8 @@ fn mainInput(input : VertexInput) -> OutputData {
     output.globalFragmentSlotIndex = subMeshUniforms.globalFragmentSlotIndex;
     output.localNodeScale_volumeScale = vec2<f32>(1.0, 1.0);
     
-    // ★ 언리얼 스타일 Dithered Opacity Fade: 거리에 따른 투명도 페이드 인자(1.0~0.0) 전달
-    output.combinedOpacity = fadeFactor;
+    // ★ 언리얼 스타일 Dithered Opacity Fade: 원거리 페이드(fadeFactor) x LOD 크로스페이드(lodFadeFactor)
+    output.combinedOpacity = fadeFactor * lodFadeFactor;
 
     // 6. RedGPU Directional Shadow 연산
     output.shadowCoord = getShadowCoord(worldPos, systemUniforms.directionalLightProjectionViewMatrix);

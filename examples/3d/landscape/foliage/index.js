@@ -287,16 +287,22 @@ RedGPU.init(
             (loader) => {
                 const treeMesh = loader.resultMesh;
 
-                // 🌲 지형 전역 대량 인스턴싱 FoliageType으로 등록! (glTF 자식 노드 자동 추출 및 하이라키 렌더링)
+                // 🌲 지형 전역 대량 인스턴싱 FoliageType으로 등록! (현실적인 수목 스케일 & LOD 파라미터)
                 treeType = foliageManager.addFoliageType({
                     name: 'ElmTree',
                     mesh: treeMesh,
-                    maxInstances: 3500,
-                    cullingDistance: 2000,
-                    fadeStartDistance: 1300,
-                    minScale: [6, 6, 6],
-                    maxScale: [12, 12, 12],
-                    randomRotationY: true
+                    maxInstances: 100000,
+                    cullingDistance: 1600,
+                    fadeStartDistance: 1100,
+                    minScale: [3, 3, 3],        // 현실적인 성목 높이 (약 7~8m)
+                    maxScale: [5.5, 5.5, 5.5],  // 대형 거목 높이 (약 12~14m)
+                    randomRotationY: true,
+                    // 🌟 언리얼 엔진 5 스타일 SpeedTree Cross-Billboard Impostor LOD & Dithered Crossfade
+                    billboard: {
+                        enabled: true,
+                        lodDistance: 90, // 90m 전환 중심 거리
+                        fadeRange: 30    // 75m ~ 105m 구간에서 3D 모델과 십자 빌보드가 부드럽게 디더링 크로스페이드 (팝핑 0%!)
+                    }
                 });
 
 

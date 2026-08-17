@@ -14,9 +14,10 @@ export class FoliageInstanceBuffer {
     readonly dataBuffer: Float32Array;
 
     #redGPUContext: RedGPUContext;
-    // Zero-GC 재사용 TypedArray
-    static readonly #cullingUniformData = new Float32Array(36);
+    // Zero-GC 재사용 TypedArray (44 floats = 176 bytes)
+    static readonly #cullingUniformData = new Float32Array(44);
     static readonly #cullingUniformUint32 = new Uint32Array(FoliageInstanceBuffer.#cullingUniformData.buffer);
+
 
     #indirectGPUBuffer: GPUBuffer | null = null;
     #resetIndirectData: Uint32Array | null = null;
@@ -106,7 +107,7 @@ export class FoliageInstanceBuffer {
     }
 
     /**
-     * Zero-GC Culling Uniform Buffer 갱신 (카메라 위치, 거리, GPU VHT 고도 정보, 서브메시 개수, 절두체 평면)
+     * GPU Culling Uniform 데이터 갱신 및 VRAM 전송 (Zero-GC)
      */
     updateCullingUniforms(
         camX: number, camY: number, camZ: number,
@@ -114,7 +115,11 @@ export class FoliageInstanceBuffer {
         activeCount: number, boundingRadius: number,
         worldSizeX: number, heightScale: number, bottomOffset: number, hasVHT: boolean,
         subMeshCount: number,
-        frustumPlanes: number[][] | null
+        frustumPlanes: number[][] | null,
+        lodDistance: number = 100.0,
+        lod0SubMeshCount: number = 1,
+        hasBillboard: boolean = false,
+        lodFadeRange: number = 30.0
     ): void {
         if (!this.#cullingUniformBuffer) return;
 
@@ -133,18 +138,27 @@ export class FoliageInstanceBuffer {
         f32[9] = bottomOffset;
         u32[10] = hasVHT ? 1 : 0;
         u32[11] = Math.max(subMeshCount, 1);
+        f32[12] = lodDistance;
+        u32[13] = Math.max(lod0SubMeshCount, 1);
+        u32[14] = hasBillboard ? 1 : 0;
+        u32[15] = this.maxInstances;
+        f32[16] = lodFadeRange; // ★ lodFadeRange (LOD 크로스페이드 구간)
+        f32[17] = 0; // pad1
+        f32[18] = 0; // pad2
+        f32[19] = 0; // pad3
+
 
         if (frustumPlanes && frustumPlanes.length >= 6) {
             for (let p = 0; p < 6; p++) {
                 const plane = frustumPlanes[p];
-                const baseOffset = 12 + p * 4;
+                const baseOffset = 20 + p * 4;
                 f32[baseOffset] = plane[0];
                 f32[baseOffset + 1] = plane[1];
                 f32[baseOffset + 2] = plane[2];
                 f32[baseOffset + 3] = plane[3];
             }
         } else {
-            f32.fill(0, 12, 36);
+            f32.fill(0, 20, 44);
         }
 
         const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
@@ -153,7 +167,7 @@ export class FoliageInstanceBuffer {
             0,
             f32.buffer,
             f32.byteOffset,
-            144
+            176
         );
     }
 
@@ -270,12 +284,13 @@ export class FoliageInstanceBuffer {
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
-        // 2. Culled Vertex/Storage Buffer (GPU Culling 셰이더 결과 출력 및 Vertex Buffer 전달)
+        // 2. Culled Vertex/Storage Buffer (LOD 0 영역 + LOD 1 영역)
         this.#culledGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageInstanceBuffer_CulledGPUBuffer',
-            size: requiredSize,
+            size: requiredSize * 2,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
         });
+
 
         // 3. Multi-Indirect Command Storage Buffer (서브메시 개수만큼 슬롯 할당)
         const subCount = subMeshes ? Math.max(subMeshes.length, 1) : 1;
