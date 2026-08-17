@@ -10,9 +10,9 @@ struct CullingUniforms {
     bottomOffset: f32,
     hasVHT: u32,
     subMeshCount: u32,
-    pad0: f32,
     frustumPlanes: array<vec4<f32>, 6>,
 };
+
 
 // ⚡ 48-byte Exact Layout (Pos3, RotQuat4, Scale3, Fade1, SubId1)
 struct FoliageInstanceData {

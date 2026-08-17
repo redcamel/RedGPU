@@ -292,7 +292,7 @@ RedGPU.init(
                 treeType = foliageManager.addFoliageType({
                     name: 'ElmTree',
                     mesh: treeMesh,
-                    maxInstances: 10000,
+                    maxInstances: 1000,
                     cullingDistance: 2000,
                     fadeStartDistance: 1300,
                     minScale: [6, 6, 6],
