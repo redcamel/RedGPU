@@ -143,7 +143,7 @@ export class FoliageInstanceBuffer {
         u32[14] = hasBillboard ? 1 : 0;
         u32[15] = this.maxInstances;
         f32[16] = lodFadeRange; // ★ lodFadeRange (LOD 크로스페이드 구간)
-        f32[17] = 0; // pad1
+        f32[17] = worldSizeX > 0 ? (1.0 / worldSizeX) : 0.0; // ⚡ invWorldSizeX (FDIV 나눗셈 100% 제거)
         f32[18] = 0; // pad2
         f32[19] = 0; // pad3
 

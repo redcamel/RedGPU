@@ -239,13 +239,22 @@ export class LandscapeFoliageManager {
         }
 
         if (transCount > 0) {
-            // sortTransparentObjects 알고리즘: 원근 거리 내림차순(먼 순서) 정렬
-            const validEntries = this.#transparentEntries.slice(0, transCount);
-            validEntries.sort((a, b) => b.distanceSq - a.distanceSq);
+            // 🌟 100% Zero-GC: .slice() 없이 재사용 풀 자체에서 인플레이스(In-place) 삽입 정렬 (거리 내림차순: 먼 것 먼저)
+            const entries = this.#transparentEntries;
+            for (let i = 1; i < transCount; i++) {
+                const current = entries[i];
+                const currentDist = current.distanceSq;
+                let j = i - 1;
+                while (j >= 0 && entries[j].distanceSq < currentDist) {
+                    entries[j + 1] = entries[j];
+                    j--;
+                }
+                entries[j + 1] = current;
+            }
 
             let currentCulledGPU: GPUBuffer | null = null;
             for (let i = 0; i < transCount; i++) {
-                const item = validEntries[i];
+                const item = entries[i];
                 if (currentCulledGPU !== item.culledGPU) {
                     passEncoder.setVertexBuffer(1, item.culledGPU);
                     currentCulledGPU = item.culledGPU;

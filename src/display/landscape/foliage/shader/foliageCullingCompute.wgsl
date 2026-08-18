@@ -15,7 +15,7 @@ struct CullingUniforms {
     hasBillboard: u32,         // ★ 빌보드 활성화 여부
     maxInstances: u32,         // ★ 최대 인스턴스 수
     lodFadeRange: f32,         // ★ LOD 크로스페이드 구간 범위 (예: 30.0)
-    pad1: f32,
+    invWorldSizeX: f32,        // ⚡ 1.0 / worldSizeX (FDIV 나눗셈 제거 및 FMA 1사이클 곱셈)
     pad2: f32,
     pad3: f32,
     frustumPlanes: array<vec4<f32>, 6>,
@@ -95,9 +95,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
         if (horizontalDistSq < cullingDistSq) {
             // 🌟 2단계: 가시거리 내 유효 인스턴스에 대해서만 GPU VHT 지형 고도 텍스처 샘플링 실행!
             var realY = instance.posY;
-            if (cullingUniforms.hasVHT != 0u && cullingUniforms.worldSizeX > 0.0) {
-                let u = (instance.posX / cullingUniforms.worldSizeX) + 0.5;
-                let v = (instance.posZ / cullingUniforms.worldSizeX) + 0.5;
+            if (cullingUniforms.hasVHT != 0u && cullingUniforms.invWorldSizeX > 0.0) {
+                // ⚡ FMA (Fused Multiply-Add): 나눗셈(/) 제거로 1사이클 초고속 UV 변환
+                let u = instance.posX * cullingUniforms.invWorldSizeX + 0.5;
+                let v = instance.posZ * cullingUniforms.invWorldSizeX + 0.5;
                 if (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0) {
                     let sampledHeightNorm = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v), 0.0).r;
                     realY = (sampledHeightNorm * cullingUniforms.heightScale) - cullingUniforms.bottomOffset;
