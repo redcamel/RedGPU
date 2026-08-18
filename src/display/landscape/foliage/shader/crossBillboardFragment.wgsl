@@ -98,7 +98,10 @@ fn main(inputData: InputData) -> OutputFragment {
     finalRgb = tinted.rgb;
     #redgpu_endIf
 
-    output.color = vec4<f32>(finalRgb, 1.0);
+    // 4. Output G-Buffer & Motion Vector
+    output.color = vec4<f32>(finalRgb, texColor.a);
+    output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, 1.0);
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
+
     return output;
 }

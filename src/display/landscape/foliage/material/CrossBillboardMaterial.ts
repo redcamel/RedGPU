@@ -2,7 +2,7 @@ import RedGPUContext from "../../../../context/RedGPUContext";
 import Sampler from "../../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../../resources/texture/BitmapTexture";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
-import fragmentModuleSource from './crossBillboardFragment.wgsl';
+import fragmentModuleSource from '../shader/crossBillboardFragment.wgsl';
 import AUVTransformBaseMaterial from "../../../../material/core/AUVTransformBaseMaterial";
 import defineSampler from "../../../../defineProperty/funcs/texture/defineSampler";
 import defineTexture from "../../../../defineProperty/funcs/texture/defineTexture";
