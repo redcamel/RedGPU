@@ -5,6 +5,7 @@ import {FoliageSubMesh, FoliageType, FoliageTypeOptions} from './FoliageType';
 
 import foliageCullingComputeWGSL from './shader/foliageCullingCompute.wgsl';
 import foliageInstancedWGSL from './shader/foliageInstanced.wgsl';
+import foliageDepthInstancedWGSL from './shader/foliageDepthInstanced.wgsl';
 import foliageDepthOnlyWGSL from './shader/foliageDepthOnly.wgsl';
 import computeViewFrustumPlanes from '../../../math/computeViewFrustumPlanes';
 
@@ -20,6 +21,7 @@ export class LandscapeFoliageManager {
     readonly redGPUContext: RedGPUContext;
 
     #vertexShaderModule: GPUShaderModule | null = null;
+    #depthVertexShaderModule: GPUShaderModule | null = null;
     #depthOnlyFragmentShaderModule: GPUShaderModule | null = null;
     #cullingComputePipeline: GPUComputePipeline | null = null;
     #cullingBindGroupLayout: GPUBindGroupLayout | null = null;
@@ -64,6 +66,7 @@ export class LandscapeFoliageManager {
         }
 
         this.#initVertexShader();
+        this.#initDepthVertexShader();
         this.#initDepthOnlyFragmentShader();
         this.#initCullingComputePipeline();
 
@@ -485,6 +488,21 @@ export class LandscapeFoliageManager {
     }
 
     /**
+     * 식생 Depth Prepass 전용 초경량 버텍스 셰이더 모듈 초기화
+     * (노멀, 탄젠트, 그림자 투영, TAA 모션 벡터 연산을 100% 생략하여 극대화된 깊이 패스 속도 달성)
+     */
+    #initDepthVertexShader(): void {
+        const resourceManager = this.redGPUContext.resourceManager;
+        let module = resourceManager.getGPUShaderModule('FoliageDepthInstancedVertexShader_Module');
+        if (!module) {
+            module = resourceManager.createGPUShaderModule('FoliageDepthInstancedVertexShader_Module', {
+                code: foliageDepthInstancedWGSL,
+            });
+        }
+        this.#depthVertexShaderModule = module;
+    }
+
+    /**
      * 식생 Depth Prepass 전용 초경량 프래그먼트 셰이더 모듈 초기화
      */
     #initDepthOnlyFragmentShader(): void {
@@ -690,11 +708,13 @@ export class LandscapeFoliageManager {
             }
         }
 
+        const vertexModule = isDepthPrepass ? this.#depthVertexShaderModule : this.#vertexShaderModule;
+
         const pipelineDescriptor: GPURenderPipelineDescriptor = {
             label: `FoliageRenderPipeline_${pipelineKey}`,
             layout: pipelineLayout,
             vertex: {
-                module: this.#vertexShaderModule,
+                module: vertexModule,
                 entryPoint: 'mainInput',
                 buffers: [geometryBufferLayout, instanceBufferLayout],
             },
