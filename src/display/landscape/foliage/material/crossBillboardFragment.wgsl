@@ -42,21 +42,19 @@ fn main(inputData: InputData) -> OutputFragment {
     }
     #redgpu_endIf
 
-    // 🌲 언리얼 엔진 5 스타일 3-Plane Star 3D Spherical Volume Normal Reconstruction
+    // 🌲 언리얼 엔진 5 스타일 3-Plane Star 3D Spherical Volume Normal Reconstruction (초경량 ALU 최적화)
     let planeNormal = normalize(inputData.vertexNormal);
 
-    // 3개 뷰포트(0°, 60°, 120°)별 로컬 U 산출
-    let uSegment = floor(inputData.uv.x * 3.0);
-    let localU = clamp((inputData.uv.x - uSegment / 3.0) * 3.0, 0.0, 1.0);
+    // ⚡ 1. fract(uv.x * 3.0) 1명령어로 3개 아틀라스 세그먼트의 로컬 U 초고속 산출 (floor, 나눗셈, clamp 제거)
+    let localU = fract(inputData.uv.x * 3.0);
     let sphereX = (localU - 0.5) * 2.0; // [-1, 1]
     let sphereY = -(inputData.uv.y - 0.5) * 2.0; // [-1, 1]
     let distSq = sphereX * sphereX + sphereY * sphereY;
 
-    // 🌿 3D 구형 볼륨 노멀 재구성 (각 평면의 노멀/탄젠트를 기준으로 3차원 볼륨감 생성)
+    // ⚡ 2. 3D 구형 볼륨 노멀: 외적(cross) 및 중간 normalize 제거, 직교 탄젠트 직접 스왑
     let sphereZ = sqrt(max(1.0 - distSq * 0.7, 0.2));
-    let upVec = vec3<f32>(0.0, 1.0, 0.0);
-    let planeTangent = normalize(cross(upVec, planeNormal) + vec3<f32>(0.001, 0.0, 0.0));
-    let N = normalize(planeTangent * sphereX + upVec * (sphereY * 0.7) + planeNormal * sphereZ);
+    let planeTangent = vec3<f32>(planeNormal.z, 0.0, -planeNormal.x);
+    let N = normalize(planeTangent * sphereX + vec3<f32>(0.0, sphereY * 0.7, 0.0) + planeNormal * sphereZ);
 
     let dirLight = systemUniforms.directionalLights[0];
     let L = normalize(-dirLight.direction);
