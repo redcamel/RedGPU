@@ -5,7 +5,10 @@ import {FoliageSubMesh, FoliageType, FoliageTypeOptions} from './FoliageType';
 
 import foliageCullingComputeWGSL from './shader/foliageCullingCompute.wgsl';
 import foliageInstancedWGSL from './shader/foliageInstanced.wgsl';
+import foliageDepthOnlyWGSL from './shader/foliageDepthOnly.wgsl';
 import computeViewFrustumPlanes from '../../../math/computeViewFrustumPlanes';
+
+export type FoliageDepthPassMode = 'normal' | 'depthPrepass' | 'mainShadingAfterDepth';
 
 /**
  * LandscapeFoliageManager
@@ -17,6 +20,7 @@ export class LandscapeFoliageManager {
     readonly redGPUContext: RedGPUContext;
 
     #vertexShaderModule: GPUShaderModule | null = null;
+    #depthOnlyFragmentShaderModule: GPUShaderModule | null = null;
     #cullingComputePipeline: GPUComputePipeline | null = null;
     #cullingBindGroupLayout: GPUBindGroupLayout | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
@@ -60,6 +64,7 @@ export class LandscapeFoliageManager {
         }
 
         this.#initVertexShader();
+        this.#initDepthOnlyFragmentShader();
         this.#initCullingComputePipeline();
 
         if (landscape?.tileStreamer) {
@@ -103,7 +108,8 @@ export class LandscapeFoliageManager {
         const camY = rawCamera?.y ?? 0;
         const camZ = rawCamera?.z ?? 0;
 
-        // 🌟 1단계: 모든 FoliageType의 불투명(Opaque/Masked) 서브메시지 일괄 렌더링
+        // 🌟 Step 0: 근거리(LOD 0) Masked 잎사귀 서브메시의 선행 깊이 패스 (Depth Pre-pass)
+        // 색상/G-Buffer 쓰기 없이 초경량 Alpha Cutoff 셰이더로 깊이 버퍼만 고속 선점 (0.1ms)
         for (let t = 0; t < typeCount; t++) {
             const foliageType = typeList[t];
             if (foliageType.activeInstanceCount <= 0) continue;
@@ -117,16 +123,22 @@ export class LandscapeFoliageManager {
             if (!culledGPU || !indirectGPU) continue;
 
             for (let s = 0; s < subCount; s++) {
-                const mat = subMeshes[s].material;
+                const sub = subMeshes[s];
+                const mat = sub.material;
                 const isTransparent = !!mat.transparent || !!mat.use2PathRender;
                 const isAlpha = (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
-                if (!isTransparent && !isAlpha) {
-                    this.#drawSubMesh(passEncoder, subMeshes[s], s, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, foliageType.options.maxInstances);
+                const isLOD0 = sub.lodIndex === 0 || sub.lodIndex === undefined;
+                const isMasked = !!mat.useCutOff || (mat.cutOff !== undefined && mat.cutOff > 0);
+
+                if (!isTransparent && !isAlpha && isLOD0 && isMasked) {
+                    this.#drawSubMesh(passEncoder, sub, s, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, foliageType.options.maxInstances, 'depthPrepass');
                 }
             }
         }
 
-        // 🌟 2단계: 모든 FoliageType의 Alpha Layer 서브메시지 렌더링 (Transparent 이전)
+        // 🌟 Step 1: 모든 FoliageType의 불투명(Opaque/Masked) 서브메시지 본 렌더링 (Main Shading Pass)
+        // - LOD 0 Masked: depthCompare 'equal' & depthWrite false -> 하드웨어 Early-Z 100% 활성화 (표면 1장만 PBR 실행)
+        // - LOD 0 Opaque (줄기) & LOD 1 (원거리 빌보드): 1-Pass 고속 렌더링 (depthCompare 'less' & depthWrite true)
         for (let t = 0; t < typeCount; t++) {
             const foliageType = typeList[t];
             if (foliageType.activeInstanceCount <= 0) continue;
@@ -140,16 +152,45 @@ export class LandscapeFoliageManager {
             if (!culledGPU || !indirectGPU) continue;
 
             for (let s = 0; s < subCount; s++) {
-                const mat = subMeshes[s].material;
+                const sub = subMeshes[s];
+                const mat = sub.material;
+                const isTransparent = !!mat.transparent || !!mat.use2PathRender;
+                const isAlpha = (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
+                const isLOD0 = sub.lodIndex === 0 || sub.lodIndex === undefined;
+                const isMasked = !!mat.useCutOff || (mat.cutOff !== undefined && mat.cutOff > 0);
+
+                if (!isTransparent && !isAlpha) {
+                    const depthMode: FoliageDepthPassMode = (isLOD0 && isMasked) ? 'mainShadingAfterDepth' : 'normal';
+                    this.#drawSubMesh(passEncoder, sub, s, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, foliageType.options.maxInstances, depthMode);
+                }
+            }
+        }
+
+        // 🌟 Step 2: 모든 FoliageType의 Alpha Layer 서브메시지 렌더링 (Transparent 이전)
+        for (let t = 0; t < typeCount; t++) {
+            const foliageType = typeList[t];
+            if (foliageType.activeInstanceCount <= 0) continue;
+            const subMeshes = foliageType.subMeshes;
+            const subCount = subMeshes.length;
+            if (subCount === 0) continue;
+
+            const buffer = foliageType.instanceBuffer;
+            const culledGPU = buffer.getCulledGPUBuffer();
+            const indirectGPU = buffer.getIndirectGPUBuffer();
+            if (!culledGPU || !indirectGPU) continue;
+
+            for (let s = 0; s < subCount; s++) {
+                const sub = subMeshes[s];
+                const mat = sub.material;
                 const isTransparent = !!mat.transparent || !!mat.use2PathRender;
                 const isAlpha = (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
                 if (isAlpha) {
-                    this.#drawSubMesh(passEncoder, subMeshes[s], s, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, foliageType.options.maxInstances);
+                    this.#drawSubMesh(passEncoder, sub, s, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, foliageType.options.maxInstances, 'normal');
                 }
             }
         }
 
-        // 🌟 3단계: Transparent Layer / 2Path Layer (카메라 거리 기준 Back-to-Front 정렬 후 렌더링)
+        // 🌟 Step 3: Transparent Layer / 2Path Layer (카메라 거리 기준 Back-to-Front 정렬 후 렌더링)
         let transCount = 0;
         for (let t = 0; t < typeCount; t++) {
             const foliageType = typeList[t];
@@ -211,15 +252,13 @@ export class LandscapeFoliageManager {
                     passEncoder.setVertexBuffer(1, item.culledGPU);
                     currentCulledGPU = item.culledGPU;
                 }
-                this.#drawSubMesh(passEncoder, item.subMesh, item.subIndex, sampleCount, msaaID, systemBG, item.indirectGPU, item.culledGPU, (item as any).maxInstances ?? 50000);
+                this.#drawSubMesh(passEncoder, item.subMesh, item.subIndex, sampleCount, msaaID, systemBG, item.indirectGPU, item.culledGPU, (item as any).maxInstances ?? 50000, 'normal');
             }
         }
     }
 
 
     addFoliageType(options: FoliageTypeOptions): FoliageType {
-
-
         if (this.#foliageTypes.has(options.name)) {
             console.warn(`[LandscapeFoliageManager] FoliageType with name '${options.name}' already exists.`);
             return this.#foliageTypes.get(options.name)!;
@@ -373,7 +412,8 @@ export class LandscapeFoliageManager {
         systemBG: GPUBindGroup | null,
         indirectGPUBuffer: GPUBuffer,
         culledGPUBuffer: GPUBuffer,
-        maxInstances: number
+        maxInstances: number,
+        depthPassMode: FoliageDepthPassMode = 'normal'
     ) {
         const vertexGPUBuffer = sub.geometry.vertexBuffer?.gpuBuffer;
         if (!vertexGPUBuffer) return;
@@ -385,9 +425,8 @@ export class LandscapeFoliageManager {
         }
 
         const cullMode = material.doubleSided ? 'none' : (material.cullMode ?? 'none');
-        const pipeline = this.#getOrCreatePipeline(material, sampleCount, msaaID, sub.strideBytes, cullMode);
+        const pipeline = this.#getOrCreatePipeline(material, sampleCount, msaaID, sub.strideBytes, cullMode, depthPassMode);
         if (!pipeline) return;
-
 
         passEncoder.setPipeline(pipeline);
 
@@ -446,6 +485,20 @@ export class LandscapeFoliageManager {
     }
 
     /**
+     * 식생 Depth Prepass 전용 초경량 프래그먼트 셰이더 모듈 초기화
+     */
+    #initDepthOnlyFragmentShader(): void {
+        const resourceManager = this.redGPUContext.resourceManager;
+        let module = resourceManager.getGPUShaderModule('FoliageDepthOnlyFragmentShader_Module');
+        if (!module) {
+            module = resourceManager.createGPUShaderModule('FoliageDepthOnlyFragmentShader_Module', {
+                code: foliageDepthOnlyWGSL,
+            });
+        }
+        this.#depthOnlyFragmentShaderModule = module;
+    }
+
+    /**
      * 식생 GPU Compute Shader Culling 전용 파이프라인 및 바인드 그룹 레이아웃 초기화
      */
     #initCullingComputePipeline(): void {
@@ -493,7 +546,8 @@ export class LandscapeFoliageManager {
         sampleCount: number,
         msaaID: string,
         strideBytes: number = 48,
-        cullMode: GPUCullMode = 'none'
+        cullMode: GPUCullMode = 'none',
+        depthPassMode: FoliageDepthPassMode = 'normal'
     ): GPURenderPipeline | null {
         if (!material) return null;
 
@@ -506,12 +560,16 @@ export class LandscapeFoliageManager {
             material._updateFragmentState();
         }
 
-        const fragmentModule = material.fragmentShaderModule || material.gpuRenderInfo?.fragmentShaderModule;
+        const isDepthPrepass = depthPassMode === 'depthPrepass';
+        const fragmentModule = isDepthPrepass
+            ? this.#depthOnlyFragmentShaderModule
+            : (material.fragmentShaderModule || material.gpuRenderInfo?.fragmentShaderModule);
+
         if (!fragmentModule || !this.#vertexShaderModule) return null;
 
         const baseKey = material.uuid || material.name || material.constructor.name;
         const shaderLabel = fragmentModule?.label || 'default';
-        const pipelineKey = `${baseKey}_${shaderLabel}_${msaaID}_stride${strideBytes}_cull${cullMode}`;
+        const pipelineKey = `${baseKey}_${shaderLabel}_${msaaID}_stride${strideBytes}_cull${cullMode}_depthMode_${depthPassMode}`;
 
         const cachedPipeline = this.#pipelineCache.get(pipelineKey);
         if (cachedPipeline) {
@@ -562,7 +620,76 @@ export class LandscapeFoliageManager {
             bindGroupLayouts: bindGroupLayouts,
         });
 
-        // 4. RedGPU G-Buffer 3개 타겟 및 정석 DepthStencil State
+        // 4. Color Targets & DepthStencil 분기
+        let targets: (GPUColorTargetState | null)[] = [];
+        let depthStencil: GPUDepthStencilState;
+
+        if (isDepthPrepass) {
+            // 🌿 Step 0: Depth Pre-pass (G-Buffer 3개 포맷 일치 + writeMask: 0으로 색상 쓰기 완전 차단, 깊이만 고속 기록)
+            targets = [
+                {
+                    format: 'rgba16float',
+                    blend: undefined,
+                    writeMask: 0,
+                },
+                {
+                    format: preferredFormat,
+                    blend: undefined,
+                    writeMask: 0,
+                },
+                {
+                    format: 'rgba16float',
+                    blend: undefined,
+                    writeMask: 0,
+                }
+            ];
+            depthStencil = {
+                format: 'depth32float',
+                depthWriteEnabled: true,
+                depthCompare: 'less',
+            };
+        } else {
+            // 본 렌더링 (Main Shading) 타겟 구성
+            targets = material.getFragmentRenderState
+                ? material.getFragmentRenderState().targets
+                : [
+                    {
+                        format: 'rgba16float',
+                        blend: material.blendColorState ? {
+                            color: material.blendColorState.state,
+                            alpha: material.blendAlphaState.state
+                        } : undefined,
+                        writeMask: material.writeMaskState,
+                    },
+                    {
+                        format: preferredFormat,
+                        blend: undefined,
+                        writeMask: material.writeMaskState,
+                    },
+                    {
+                        format: 'rgba16float',
+                        blend: undefined,
+                        writeMask: material.writeMaskState,
+                    }
+                ];
+
+            if (depthPassMode === 'mainShadingAfterDepth') {
+                // 🌟 Step 1 (Masked 잎사귀): Depth Pre-pass에서 깊이가 이미 선점되었으므로 depthCompare 'equal' & depthWrite false
+                depthStencil = {
+                    format: 'depth32float',
+                    depthWriteEnabled: false,
+                    depthCompare: 'equal',
+                };
+            } else {
+                // 🌲 Step 1 (Opaque 줄기 & 원거리 빌보드): 1-Pass 고속 렌더링
+                depthStencil = {
+                    format: 'depth32float',
+                    depthWriteEnabled: true,
+                    depthCompare: 'less',
+                };
+            }
+        }
+
         const pipelineDescriptor: GPURenderPipelineDescriptor = {
             label: `FoliageRenderPipeline_${pipelineKey}`,
             layout: pipelineLayout,
@@ -574,40 +701,14 @@ export class LandscapeFoliageManager {
             fragment: {
                 module: fragmentModule,
                 entryPoint: 'main',
-                targets: material.getFragmentRenderState
-                    ? material.getFragmentRenderState().targets
-                    : [
-                        {
-                            format: 'rgba16float',
-                            blend: material.blendColorState ? {
-                                color: material.blendColorState.state,
-                                alpha: material.blendAlphaState.state
-                            } : undefined,
-                            writeMask: material.writeMaskState,
-                        },
-                        {
-                            format: preferredFormat,
-                            blend: undefined,
-                            writeMask: material.writeMaskState,
-                        },
-                        {
-                            format: 'rgba16float',
-                            blend: undefined,
-                            writeMask: material.writeMaskState,
-                        }
-                    ],
+                targets: targets,
             },
 
             primitive: {
                 topology: 'triangle-list',
                 cullMode: cullMode,
             },
-            depthStencil: {
-                format: 'depth32float',
-                depthWriteEnabled: true,
-                depthCompare: 'less',
-            },
-
+            depthStencil: depthStencil,
 
             multisample: {
                 count: sampleCount,
@@ -623,6 +724,4 @@ export class LandscapeFoliageManager {
             return null;
         }
     }
-
-
 }
