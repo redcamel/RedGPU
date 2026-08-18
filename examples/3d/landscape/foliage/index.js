@@ -21,7 +21,6 @@ RedGPU.init(
         controller.y = 350;
         controller.z = 0;
         controller.moveSpeed = 1500;
-
         // 2. Scene & View3D 초기화
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
