@@ -112,18 +112,17 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
             if (distSq < cullingDistSq) {
                 let maxScale = max(max(instance.scaleX, instance.scaleY), instance.scaleZ);
                 let scaledRadius = cullingUniforms.boundingRadius * maxScale;
-                var inFrustum = true;
+                let spherePos = vec4<f32>(worldPos, 1.0);
+                let r = -scaledRadius;
 
-            for (var i: u32 = 0u; i < 6u; i = i + 1u) {
-                let plane = cullingUniforms.frustumPlanes[i];
-                if (plane.w != 0.0 || plane.x != 0.0 || plane.y != 0.0 || plane.z != 0.0) {
-                    let distToPlane = dot(vec4<f32>(worldPos, 1.0), plane);
-                    if (distToPlane < -scaledRadius) {
-                        inFrustum = false;
-                        break;
-                    }
-                }
-            }
+                // ⚡ 6개 프러스텀 평면 완전 언롤링 (Loop Unrolling, 점프/루프 레지스터 제거 및 분기 다이버전스 0건화)
+                let inFrustum = 
+                    dot(spherePos, cullingUniforms.frustumPlanes[0]) >= r &&
+                    dot(spherePos, cullingUniforms.frustumPlanes[1]) >= r &&
+                    dot(spherePos, cullingUniforms.frustumPlanes[2]) >= r &&
+                    dot(spherePos, cullingUniforms.frustumPlanes[3]) >= r &&
+                    dot(spherePos, cullingUniforms.frustumPlanes[4]) >= r &&
+                    dot(spherePos, cullingUniforms.frustumPlanes[5]) >= r;
 
             if (inFrustum) {
                 let fadeStartDist = cullingUniforms.fadeStartDistance;
