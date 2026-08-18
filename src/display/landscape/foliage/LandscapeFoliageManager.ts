@@ -353,7 +353,7 @@ export class LandscapeFoliageManager {
             const cullingDist = foliageType.options.cullingDistance;
             const fadeStartDist = foliageType.options.fadeStartDistance;
             const boundingRadius = 20.0;
-            const bottomOffset = foliageType.getGeometryBottomOffset();
+            const bottomOffset = foliageType.bottomOffset;
 
             // 1. Multi-Indirect Command Buffer 모든 서브메시 슬롯의 instanceCount를 매 프레임 0으로 깨끗이 초기화
             foliageType.updateIndirectBuffer();

@@ -192,10 +192,6 @@ export class FoliageType {
         return 0;
     }
 
-    getGeometryBottomOffset(): number {
-        return this.bottomOffset;
-    }
-
     /**
      * 식생 인스턴스를 대량 배치 (Float32Array 12 floats: pos.xyz, rotQuat.xyzw, scale.xyz, extra.xy)
      */
@@ -279,18 +275,6 @@ export class FoliageType {
         // 해당 타일 영역 식생 인스턴스 데이터만 GPU 버퍼 부분 패치 업로드
         this.instanceBuffer.uploadRangeToGPU(startIdx, actualCount);
         this.updateIndirectBuffer();
-    }
-
-    populateFromLandscape(): void {
-        const landscape = this.foliageManager?.landscape;
-        const tileStreamer = landscape?.tileStreamer;
-        if (!tileStreamer) return;
-        const activeTiles = tileStreamer.loadedComponents;
-        if (Array.isArray(activeTiles)) {
-            for (let i = 0; i < activeTiles.length; i++) {
-                this.populateTile(activeTiles[i]);
-            }
-        }
     }
 
 
@@ -736,8 +720,6 @@ export class FoliageType {
                 );
 
                 subList.push(combinedSubMesh);
-                console.log(`[FoliageType 🌲] Combined ${group.length} submeshes for material '${mat.name || mat.constructor.name}' into 1 optimized mesh (${totalVertexCount} verts, ${totalIndexCount} indices). Sample verts:`, combinedVertexData.subarray(0, 18));
-
             }
         });
 
