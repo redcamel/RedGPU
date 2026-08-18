@@ -489,3 +489,4 @@ export class FoliageImpostorBaker {
         console.log(`[FoliageImpostorBaker 🖼️] Debug atlas preview appended to DOM: #${canvas.id}`);
     }
 }
+

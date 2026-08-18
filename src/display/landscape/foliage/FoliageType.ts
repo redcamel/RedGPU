@@ -35,20 +35,20 @@ export interface FoliageSubMesh {
     readonly isTransparent: boolean;
 }
 
-export interface FoliageBillboardOptions {
+export interface FoliageCrossBillboardOptions {
     /**
-     * [KO] 십자 빌보드(Cross Billboard Impostor) 활성화 여부 (기본: false)
-     * [EN] Whether to enable Cross Billboard Impostor (default: false)
+     * [KO] 3-Plane Star 크로스 빌보드 임포스터(Cross Billboard Impostor) 활성화 여부 (기본: false)
+     * [EN] Whether to enable 3-Plane Star Cross Billboard Impostor (default: false)
      */
     enabled?: boolean;
     /**
-     * [KO] 빌보드 텍스처
-     * [EN] Billboard texture
+     * [KO] 빌보드 임포스터 텍스처
+     * [EN] Billboard impostor texture
      */
     texture?: any;
     /**
-     * [KO] 빌보드 머티리얼 (지정하지 않으면 FoliageMaterial 기본 생성)
-     * [EN] Billboard material (creates FoliageMaterial by default if not specified)
+     * [KO] 빌보드 머티리얼 (지정하지 않으면 CrossBillboardMaterial 기본 생성)
+     * [EN] Billboard material (creates CrossBillboardMaterial by default if not specified)
      */
     material?: any;
     /**
@@ -62,8 +62,8 @@ export interface FoliageBillboardOptions {
      */
     height?: number;
     /**
-     * [KO] 3D 모델에서 빌보드로 전환되는 거리 (m, 기본: 80.0)
-     * [EN] Transition distance from 3D model to billboard (m, default: 80.0)
+     * [KO] 3D 모델에서 크로스 빌보드로 전환되는 거리 (m, 기본: 80.0)
+     * [EN] Transition distance from 3D model to cross billboard (m, default: 80.0)
      */
     lodDistance?: number;
     /**
@@ -72,6 +72,10 @@ export interface FoliageBillboardOptions {
      */
     fadeRange?: number;
 }
+
+/** [KO] 용어 호환성을 위한 Type Alias */
+export type FoliageBillboardOptions = FoliageCrossBillboardOptions;
+export type FoliageImpostorOptions = FoliageCrossBillboardOptions;
 
 
 export interface FoliageTypeOptions {
@@ -91,16 +95,22 @@ export interface FoliageTypeOptions {
     randomRotationY?: boolean;
 
     /**
-     * [KO] 3D 모델에서 빌보드로 전환되는 LOD 거리 (m, 기본: 80.0)
+     * [KO] 3D 모델에서 크로스 빌보드로 전환되는 LOD 거리 (m, 기본: 80.0)
      * [EN] LOD transition distance from 3D model to billboard (m, default: 80.0)
      */
     lodDistance?: number;
 
     /**
-     * [KO] 언리얼 엔진 스타일 십자 빌보드(Cross-Billboard Impostor) 옵션
-     * [EN] Unreal Engine style Cross-Billboard Impostor options
+     * [KO] 언리얼 엔진 스타일 3-Plane Star 크로스 빌보드 임포스터 옵션
+     * [EN] Unreal Engine style 3-Plane Star Cross-Billboard Impostor options
      */
-    billboard?: FoliageBillboardOptions;
+    billboard?: FoliageCrossBillboardOptions;
+
+    /**
+     * [KO] impostor 옵션 별칭 (billboard와 동일)
+     * [EN] Impostor options alias (same as billboard)
+     */
+    impostor?: FoliageCrossBillboardOptions;
 
     /**
      * [KO] 반투명(BLEND) 머티리얼을 언리얼 엔진 표준인 알파 컷오프(MASK)로 자동 변환할지 여부 (기본: true)
@@ -149,15 +159,17 @@ export class FoliageType {
             minScale: options.minScale ?? [1.0, 1.0, 1.0],
             maxScale: options.maxScale ?? [1.0, 1.0, 1.0],
             randomRotationY: options.randomRotationY ?? true,
-            lodDistance: options.lodDistance ?? (options.billboard?.lodDistance ?? 80.0),
-            billboard: options.billboard ?? {enabled: false},
+            lodDistance: options.lodDistance ?? (options.billboard?.lodDistance ?? options.impostor?.lodDistance ?? 80.0),
+            billboard: options.billboard ?? options.impostor ?? {enabled: false},
+            impostor: options.impostor ?? options.billboard ?? {enabled: false},
             convertBlendToMasked: options.convertBlendToMasked ?? true,
             combineSubMeshesByMaterial: options.combineSubMeshesByMaterial ?? true,
         };
 
-        this.hasBillboard = !!this.options.billboard?.enabled;
+        const billboardOpt = this.options.billboard;
+        this.hasBillboard = !!billboardOpt?.enabled;
         this.lodDistance = this.options.lodDistance;
-        this.lodFadeRange = this.options.billboard?.fadeRange ?? 30.0;
+        this.lodFadeRange = billboardOpt?.fadeRange ?? 30.0;
 
         this.#initSubMeshBindGroupLayout();
 
@@ -308,7 +320,7 @@ export class FoliageType {
     }
 
     /**
-     * [KO] 빌보드(LOD1)의 라인 모드(와이어프레임) 표시 여부를 실시간으로 전환합니다.
+     * [KO] 크로스 빌보드(LOD1)의 라인 모드(와이어프레임) 표시 여부를 실시간으로 전환합니다.
      */
     setBillboardWireframe(wireframe: boolean): void {
         const billboardSub = this.subMeshes.find(s => s.lodIndex === 1);
@@ -332,6 +344,13 @@ export class FoliageType {
             }
         }
         this.updateIndirectBuffer();
+    }
+
+    /**
+     * [KO] setBillboardWireframe의 표준 별칭 (CrossBillboard 기준)
+     */
+    setCrossBillboardWireframe(wireframe: boolean): void {
+        this.setBillboardWireframe(wireframe);
     }
 
     /**
