@@ -453,8 +453,11 @@ class LightManager {
         // 🌟 [3D 그래픽스 정석] 카메라 시야 절두체(Frustum) 외접구 기반 안정적 섀도우 피팅
         // 임의의 조건문/매직넘버를 100% 제거하고, 화면에 보이는 모든 영역을 수학적 기하학으로 연속 포괄
         const directionalShadowManager = view.scene.shadowManager.directionalShadowManager;
-        const maxDist = directionalShadowManager.maxShadowDistance ?? 150.0;
-        const shadowFar = Math.min(rawCamera.farClipping, maxDist);
+        const maxDist = directionalShadowManager.maxShadowDistance ?? 200.0;
+        const camPos = vec3.fromValues(invVM[12], invVM[13], invVM[14]);
+        const altitudeSpan = Math.abs(camPos[1]) * 2.0;
+        const effectiveMaxDist = Math.max(maxDist, altitudeSpan);
+        const shadowFar = Math.min(rawCamera.farClipping, effectiveMaxDist);
         const near = rawCamera.nearClipping;
         const fov = (Math.PI / 180) * rawCamera.fieldOfView;
         const aspect = view.aspect;

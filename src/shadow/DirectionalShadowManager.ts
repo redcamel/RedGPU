@@ -128,19 +128,21 @@ class DirectionalShadowManager {
         this.#strength = value;
     }
 
-    #maxShadowDistance: number = 150;
+    #maxShadowDistance: number = 200;
 
     /**
-     * [KO] 그림자 최대 캡쳐 거리(Max Shadow Distance, m)를 반환합니다.
-     * [EN] Returns the maximum shadow distance (in meters).
+     * [KO] 직사광 그림자가 도달할 수 있는 최대 가시거리(언리얼 엔진 표준 기본값: 200m)를 반환합니다.
+     * [EN] Returns the maximum shadow distance (Unreal Engine standard default: 200m).
      */
     get maxShadowDistance(): number {
         return this.#maxShadowDistance;
     }
 
     /**
-     * [KO] 그림자 최대 캡쳐 거리(Max Shadow Distance, m)를 설정합니다.
-     * [EN] Sets the maximum shadow distance (in meters).
+     * [KO] 직사광 그림자가 도달할 수 있는 최대 가시거리(언리얼 엔진 표준 기본값: 200m)를 설정합니다.
+     * [EN] Sets the maximum shadow distance (Unreal Engine standard default: 200m).
+     *
+     * @param value - 최대 그림자 가시거리 (m)
      */
     set maxShadowDistance(value: number) {
         validatePositiveNumberRange(value, 1);
