@@ -15,7 +15,7 @@ import LandscapeVNTGenerator from "../generator/LandscapeVNTGenerator";
 import LandscapeVHTGenerator from "../generator/LandscapeVHTGenerator";
 import LandscapeVBTGenerator from "../generator/LandscapeVBTGenerator";
 import Object3DContainer from "../../mesh/core/Object3DContainer";
-import {LandscapeFoliageManager} from "../foliage/LandscapeFoliageManager";
+import LandscapeFoliageManager from "../foliage/LandscapeFoliageManager";
 import {LandscapeGPUCuller} from "../spatial/LandscapeGPUCuller";
 import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
 

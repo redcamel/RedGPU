@@ -10,7 +10,7 @@ export type FoliageDepthPassMode = 'normal' | 'depthPrepass' | 'mainShadingAfter
  * [KO] 식생 셰이더 모듈 및 머티리얼별 RenderPipeline 캐시 관리자 (단일 책임: 파이프라인 수명주기 & 캐싱)
  * [EN] Foliage Shader Modules & RenderPipeline Cache Manager (Single Responsibility: Pipeline Lifecycle & Caching)
  */
-export class FoliagePipelineRegistry {
+class FoliagePipelineRegistry {
     #redGPUContext: RedGPUContext;
     #pipelineCache: Map<string, GPURenderPipeline> = new Map();
     #vertexShaderModule: GPUShaderModule | null = null;
@@ -241,3 +241,6 @@ export class FoliagePipelineRegistry {
         this.#depthOnlyFragmentShaderModule = depthFModule;
     }
 }
+
+Object.freeze(FoliagePipelineRegistry);
+export default FoliagePipelineRegistry;

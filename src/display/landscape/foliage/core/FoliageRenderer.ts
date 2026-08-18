@@ -1,6 +1,6 @@
 import RedGPUContext from "../../../../context/RedGPUContext";
-import {FoliageSubMesh, FoliageType} from "../FoliageType";
-import {FoliageDepthPassMode, FoliagePipelineRegistry} from "./FoliagePipelineRegistry";
+import FoliageType, {FoliageSubMesh} from "../FoliageType";
+import FoliagePipelineRegistry, {FoliageDepthPassMode} from "./FoliagePipelineRegistry";
 
 interface TransparentFoliageEntry {
     subMesh: FoliageSubMesh;
@@ -15,7 +15,7 @@ interface TransparentFoliageEntry {
  * [KO] 식생 4단계 렌더 패스 엔코더 & 드로우콜 최적화 렌더러 (단일 책임: 렌더 패스 순회 & 상태 캐싱 커맨드 엔코딩)
  * [EN] Foliage 4-Step Render Pass Encoder & DrawCall Optimizer (Single Responsibility: Pass Traversal & State-Cached Encoding)
  */
-export class FoliageRenderer {
+class FoliageRenderer {
     #redGPUContext: RedGPUContext;
     #pipelineRegistry: FoliagePipelineRegistry;
     #emptyBindGroup: GPUBindGroup | null = null;
@@ -284,3 +284,6 @@ export class FoliageRenderer {
         }
     }
 }
+
+Object.freeze(FoliageRenderer);
+export default FoliageRenderer;

@@ -20,7 +20,7 @@ export interface FoliageBakeResult {
  *      0°, 60°, 120° 수직 3방향 뷰포트 아틀라스를 단일 텍스처(3:1 가로 아틀라스)로 자동 오프스크린 베이킹합니다.
  * [EN] Unreal Engine 5 style Foliage Impostor Baker that captures 0°, 60°, and 120° vertical star views into a 3-Plane texture atlas.
  */
-export class FoliageImpostorBaker {
+class FoliageImpostorBaker {
     static #bakePipelineCache: Map<string, GPURenderPipeline> = new Map();
     static #bakeBindGroupLayout0: GPUBindGroupLayout | null = null;
     static #bakeBindGroupLayout1: GPUBindGroupLayout | null = null;
@@ -540,5 +540,12 @@ export class FoliageImpostorBaker {
     }
 }
 
+Object.freeze(FoliageImpostorBaker);
+
+export default FoliageImpostorBaker;
+
 /** [KO] 용어 일관성을 위한 FoliageCrossBillboardBaker 표준 별칭 */
-export {FoliageImpostorBaker as FoliageCrossBillboardBaker};
+export {
+    FoliageImpostorBaker,
+    FoliageImpostorBaker as FoliageCrossBillboardBaker
+};

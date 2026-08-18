@@ -1,10 +1,10 @@
-import {FoliageType} from "../FoliageType";
+import FoliageType from "../FoliageType";
 
 /**
  * [KO] 지형 타일 단위 절차적(Procedural) 식생 인스턴스 배치기 (단일 책임: 타일 영역 난수/스케일/회전 연산 및 부분 GPU 업로드)
  * [EN] Procedural Foliage Instance Tile Populator (Single Responsibility: Random/Scale/Rotation Calculation & Partial GPU Upload)
  */
-export class FoliageTilePopulator {
+class FoliageTilePopulator {
     /**
      * 지형 타일(LandscapeComponent) 1개 영역에 식생 인스턴스 절차적 배치
      */
@@ -74,3 +74,6 @@ export class FoliageTilePopulator {
         return true;
     }
 }
+
+Object.freeze(FoliageTilePopulator);
+export default FoliageTilePopulator;

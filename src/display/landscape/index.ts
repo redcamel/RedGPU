@@ -16,9 +16,9 @@ import LandscapeSpatialGridDebugger from "./debugger/LandscapeSpatialGridDebugge
 import LandscapeVHTDebugger from "./debugger/LandscapeVHTDebugger";
 import LandscapeVNTDebugger from "./debugger/LandscapeVNTDebugger";
 import LandscapeHUDDebugger from "./debugger/LandscapeHUDDebugger";
-import {LandscapeFoliageManager} from "./foliage/LandscapeFoliageManager";
-import {FoliageType, FoliageTypeOptions} from "./foliage/FoliageType";
-import {FoliageInstanceBuffer} from "./foliage/FoliageInstanceBuffer";
+import LandscapeFoliageManager from "./foliage/LandscapeFoliageManager";
+import FoliageType, {FoliageTypeOptions} from "./foliage/FoliageType";
+import FoliageInstanceBuffer from "./foliage/FoliageInstanceBuffer";
 import CrossBillboardMaterial from "./foliage/material/CrossBillboardMaterial";
 
 export {

@@ -3,11 +3,11 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import Mesh from "../../mesh/Mesh";
 import Geometry from "../../../geometry/Geometry";
 import ABaseMaterial from "../../../material/core/ABaseMaterial";
-import {FoliageInstanceBuffer} from "./FoliageInstanceBuffer";
-import {createCrossBillboardGeometry} from "./material/createCrossBillboardGeometry";
+import FoliageInstanceBuffer from "./FoliageInstanceBuffer";
+import createCrossBillboardGeometry from "./material/createCrossBillboardGeometry";
 import {FoliageDepthPassMode} from "./core/FoliagePipelineRegistry";
-import {FoliageSubMeshAssembler} from "./core/FoliageSubMeshAssembler";
-import {FoliageTilePopulator} from "./core/FoliageTilePopulator";
+import FoliageSubMeshAssembler from "./core/FoliageSubMeshAssembler";
+import FoliageTilePopulator from "./core/FoliageTilePopulator";
 
 /**
  * FoliageSubMesh
@@ -130,7 +130,7 @@ export interface FoliageTypeOptions {
  * [KO] 단일 식생 종 모델 컨테이너 (단일 책임: 식생 종 메타데이터, 서브메시 및 인스턴스 버퍼 상태 관리)
  * [EN] Single Foliage Species Model Container (Single Responsibility: Species Metadata, SubMeshes & Instance Buffer State)
  */
-export class FoliageType {
+class FoliageType {
     readonly name: string;
     readonly options: Required<Omit<FoliageTypeOptions, 'billboard' | 'impostor'>> & {
         billboard?: FoliageCrossBillboardOptions;
@@ -318,3 +318,6 @@ export class FoliageType {
         this.setBillboardWireframe(wireframe);
     }
 }
+
+Object.freeze(FoliageType);
+export default FoliageType;

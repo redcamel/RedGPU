@@ -65,4 +65,5 @@ Object.defineProperty(CrossBillboardMaterial.prototype, 'isBuiltInMaterial', {
     writable: false
 });
 
+Object.freeze(CrossBillboardMaterial);
 export default CrossBillboardMaterial;

@@ -17,7 +17,7 @@ import {calculateTangentsInterleaved} from "../../../../math/calculateTangents";
  * @param wireframe - 라인 모드(와이어프레임) 선분 인덱스 생성 여부 (기본값 false)
  * @returns 3-Way 아틀라스 UV가 매핑된 3-Plane Star 빌보드 Geometry
  */
-export function createCrossBillboardGeometry(
+function createCrossBillboardGeometry(
     redGPUContext: RedGPUContext,
     width: number = 6.0,
     height: number = 8.0,
@@ -118,3 +118,7 @@ export function createCrossBillboardGeometry(
     const ib = new IndexBuffer(redGPUContext, indexUint32, undefined, iKey);
     return new Geometry(redGPUContext, vb, ib);
 }
+
+Object.freeze(createCrossBillboardGeometry);
+export default createCrossBillboardGeometry;
+export {createCrossBillboardGeometry};

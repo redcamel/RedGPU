@@ -5,9 +5,9 @@ import Geometry from "../../../../geometry/Geometry";
 import VertexBuffer from "../../../../resources/buffer/vertexBuffer/VertexBuffer";
 import IndexBuffer from "../../../../resources/buffer/indexBuffer/IndexBuffer";
 import GPU_BLEND_FACTOR from "../../../../gpuConst/GPU_BLEND_FACTOR";
-import {createCrossBillboardGeometry} from "../material/createCrossBillboardGeometry";
+import createCrossBillboardGeometry from "../material/createCrossBillboardGeometry";
 import CrossBillboardMaterial from "../material/CrossBillboardMaterial";
-import {FoliageImpostorBaker} from "./FoliageImpostorBaker";
+import FoliageImpostorBaker from "./FoliageImpostorBaker";
 import {FoliageSubMesh, FoliageTypeOptions} from "../FoliageType";
 
 export interface FoliageAssemblyResult {
@@ -30,7 +30,7 @@ interface RawSubMesh {
  * [KO] 식생 메시 계층 구조 DFS 탐색 & 머티리얼별 서브메시 병합 조립기 (단일 책임: 지오메트리/머티리얼 병합 & 서브메시 유니폼 생성)
  * [EN] Foliage Mesh Hierarchy DFS Explorer & Material SubMesh Assembler (Single Responsibility: Geometry/Material Combine & Uniform Setup)
  */
-export class FoliageSubMeshAssembler {
+class FoliageSubMeshAssembler {
     static assemble(
         redGPUContext: RedGPUContext,
         options: FoliageTypeOptions,
@@ -445,3 +445,7 @@ export class FoliageSubMeshAssembler {
         };
     }
 }
+
+Object.freeze(FoliageSubMeshAssembler);
+export default FoliageSubMeshAssembler;
+export {FoliageSubMeshAssembler};

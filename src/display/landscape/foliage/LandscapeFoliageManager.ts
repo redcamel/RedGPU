@@ -1,14 +1,14 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import {FoliageType, FoliageTypeOptions} from "./FoliageType";
-import {FoliagePipelineRegistry} from "./core/FoliagePipelineRegistry";
-import {FoliageRenderer} from "./core/FoliageRenderer";
-import {FoliageCullingDispatcher} from "./core/FoliageCullingDispatcher";
+import FoliageType, {FoliageTypeOptions} from "./FoliageType";
+import FoliagePipelineRegistry from "./core/FoliagePipelineRegistry";
+import FoliageRenderer from "./core/FoliageRenderer";
+import FoliageCullingDispatcher from "./core/FoliageCullingDispatcher";
 
 /**
  * [KO] Landscape 지형 식생 총괄 관리자 (최상위 파사드 & 생명주기 오케스트레이터)
  * [EN] Landscape Foliage Master Manager (Top-level Facade & Lifecycle Orchestrator)
  */
-export class LandscapeFoliageManager {
+class LandscapeFoliageManager {
     readonly redGPUContext: RedGPUContext;
     landscape: any = null;
 
@@ -165,3 +165,6 @@ export class LandscapeFoliageManager {
         this.#pipelineRegistry.clearCache();
     }
 }
+
+Object.freeze(LandscapeFoliageManager);
+export default LandscapeFoliageManager;

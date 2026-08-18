@@ -5,7 +5,7 @@ import {FoliageSubMesh} from "./FoliageType";
  * FoliageInstanceBuffer
  * Zero-GC TypedArray 기반 Multi-Submesh Foliage GPU Instanced Buffer Allocator
  */
-export class FoliageInstanceBuffer {
+class FoliageInstanceBuffer {
     readonly maxInstances: number;
     readonly strideFloats: number = 12; // Pos(3) + Quat(4) + Scale(3) + Extra(2)
     readonly strideBytes: number = 12 * 4;
@@ -309,3 +309,6 @@ export class FoliageInstanceBuffer {
         });
     }
 }
+
+Object.freeze(FoliageInstanceBuffer);
+export default FoliageInstanceBuffer;
