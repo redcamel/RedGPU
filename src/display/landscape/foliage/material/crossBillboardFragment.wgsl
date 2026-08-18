@@ -35,15 +35,15 @@ fn main(inputData: InputData) -> OutputFragment {
     texColor = textureSample(diffuseTexture, diffuseTextureSampler, inputData.uv);
     #redgpu_endIf
 
-    // 🌲 언리얼 엔진 5 스타일 3-Plane Star 3D Spherical Volume Normal Reconstruction
-    let planeNormal = normalize(inputData.vertexNormal);
-
-    // 🌟 MASK: Alpha Cutoff (외곽 검은색 테두리/블리딩을 완벽 제거하기 위해 0.35 적용)
+    // 🌟 Early Alpha Cutoff: 투명한 나뭇잎 구멍 영역은 노멀 정규화 및 구형 볼륨 연산 1줄도 안 하고 즉시 탈출!
     #redgpu_if useCutOff
     if (texColor.a < 0.35) {
         discard;
     }
     #redgpu_endIf
+
+    // 🌲 언리얼 엔진 5 스타일 3-Plane Star 3D Spherical Volume Normal Reconstruction
+    let planeNormal = normalize(inputData.vertexNormal);
 
     // 3개 뷰포트(0°, 60°, 120°)별 로컬 U 산출
     let uSegment = floor(inputData.uv.x * 3.0);

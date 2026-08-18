@@ -81,33 +81,37 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
 
     if (idx < cullingUniforms.instanceCount) {
         let instance = rawInstanceBuffer[idx];
-
-        // 🌟 GPU VHT (Virtual Height Texture) 지형 고도 샘플링
-        var realY = instance.posY;
-        if (cullingUniforms.hasVHT != 0u && cullingUniforms.worldSizeX > 0.0) {
-            let u = (instance.posX / cullingUniforms.worldSizeX) + 0.5;
-            let v = (instance.posZ / cullingUniforms.worldSizeX) + 0.5;
-            if (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0) {
-                let sampledHeightNorm = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v), 0.0).r;
-                realY = (sampledHeightNorm * cullingUniforms.heightScale) - cullingUniforms.bottomOffset;
-            }
-        }
-
-        let worldPos = vec3<f32>(instance.posX, realY, instance.posZ);
         let camPos = cullingUniforms.cameraPosition;
 
-        let dx = worldPos.x - camPos.x;
-        let dy = worldPos.y - camPos.y;
-        let dz = worldPos.z - camPos.z;
-        let distSq = dx * dx + dy * dy + dz * dz;
+        // 🌟 1단계: 2D 수평 거리(dx*dx + dz*dz) 초고속 산술 사전 검사
+        // 가시거리 밖 80% 인스턴스는 무거운 VHT 텍스처 VRAM 메모리 샘플링 100% 스킵!
+        let dx = instance.posX - camPos.x;
+        let dz = instance.posZ - camPos.z;
+        let horizontalDistSq = dx * dx + dz * dz;
 
         let cullingDist = cullingUniforms.cullingDistance;
         let cullingDistSq = cullingDist * cullingDist;
 
-        if (distSq < cullingDistSq) {
-            let maxScale = max(max(instance.scaleX, instance.scaleY), instance.scaleZ);
-            let scaledRadius = cullingUniforms.boundingRadius * maxScale;
-            var inFrustum = true;
+        if (horizontalDistSq < cullingDistSq) {
+            // 🌟 2단계: 가시거리 내 유효 인스턴스에 대해서만 GPU VHT 지형 고도 텍스처 샘플링 실행!
+            var realY = instance.posY;
+            if (cullingUniforms.hasVHT != 0u && cullingUniforms.worldSizeX > 0.0) {
+                let u = (instance.posX / cullingUniforms.worldSizeX) + 0.5;
+                let v = (instance.posZ / cullingUniforms.worldSizeX) + 0.5;
+                if (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0) {
+                    let sampledHeightNorm = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v), 0.0).r;
+                    realY = (sampledHeightNorm * cullingUniforms.heightScale) - cullingUniforms.bottomOffset;
+                }
+            }
+
+            let worldPos = vec3<f32>(instance.posX, realY, instance.posZ);
+            let dy = realY - camPos.y;
+            let distSq = horizontalDistSq + dy * dy;
+
+            if (distSq < cullingDistSq) {
+                let maxScale = max(max(instance.scaleX, instance.scaleY), instance.scaleZ);
+                let scaledRadius = cullingUniforms.boundingRadius * maxScale;
+                var inFrustum = true;
 
             for (var i: u32 = 0u; i < 6u; i = i + 1u) {
                 let plane = cullingUniforms.frustumPlanes[i];
@@ -178,6 +182,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
                 }
             }
         }
+    }
     }
 
     workgroupBarrier();
