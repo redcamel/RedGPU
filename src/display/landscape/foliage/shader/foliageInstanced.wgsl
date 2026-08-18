@@ -5,7 +5,7 @@ struct SubMeshUniforms {
     relativeModelMatrix: mat4x4<f32>,
     relativeNormalMatrix: mat4x4<f32>,
     globalFragmentSlotIndex: u32,
-    pad0: u32,
+    hasHierarchyTransform: u32, // ★ 0: 항등 행렬(스킵!), 1: 계층 행렬 연산 실행
     pad1: u32,
     pad2: u32,
 };
@@ -58,9 +58,13 @@ fn mainInput(input : VertexInput) -> OutputData {
     let fadeFactor = input.instanceExtra.x;
     let lodFadeFactor = input.instanceExtra.y;
     
-    // 1. 하이라키 누적 상대 행렬 변환 (부모 컨테이너 오프셋/회전/스케일 완벽 반영)
-    let hierarchyPos = (subMeshUniforms.relativeModelMatrix * vec4<f32>(input.position, 1.0)).xyz;
-    let hierarchyNormal = (subMeshUniforms.relativeNormalMatrix * vec4<f32>(input.normal, 0.0)).xyz;
+    // 1. 하이라키 누적 상대 행렬 변환 (병합 메시 및 빌보드는 4x4 행렬 곱셈 2회 100% 스킵!)
+    var hierarchyPos = input.position;
+    var hierarchyNormal = input.normal;
+    if (subMeshUniforms.hasHierarchyTransform != 0u) {
+        hierarchyPos = (subMeshUniforms.relativeModelMatrix * vec4<f32>(input.position, 1.0)).xyz;
+        hierarchyNormal = (subMeshUniforms.relativeNormalMatrix * vec4<f32>(input.normal, 0.0)).xyz;
+    }
     
     // 2. 인스턴스 스케일 및 쿼터니언 회전 연산
     let scaledPos = hierarchyPos * input.instanceScale;

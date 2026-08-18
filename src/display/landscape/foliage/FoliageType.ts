@@ -538,7 +538,15 @@ export class FoliageType {
             floatView.set(relMatrix, 0);
             floatView.set(normMatrix, 16);
             uintView[32] = (mat as any)?.globalFragmentSlotIndex ?? 0;
-            uintView[33] = 0;
+
+            // 🌟 relMatrix가 항등 행렬(Identity)인지 고속 검사 (병합 메시 및 빌보드는 행렬 곱셈 100% 스킵)
+            const isIdentity = (
+                relMatrix[0] === 1 && relMatrix[1] === 0 && relMatrix[2] === 0 && relMatrix[3] === 0 &&
+                relMatrix[4] === 0 && relMatrix[5] === 1 && relMatrix[6] === 0 && relMatrix[7] === 0 &&
+                relMatrix[8] === 0 && relMatrix[9] === 0 && relMatrix[10] === 1 && relMatrix[11] === 0 &&
+                relMatrix[12] === 0 && relMatrix[13] === 0 && relMatrix[14] === 0 && relMatrix[15] === 1
+            );
+            uintView[33] = isIdentity ? 0 : 1; // hasHierarchyTransform
             uintView[34] = 0;
             uintView[35] = 0;
 
