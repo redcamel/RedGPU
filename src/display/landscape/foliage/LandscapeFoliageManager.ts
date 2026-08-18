@@ -361,25 +361,53 @@ export class LandscapeFoliageManager {
                 foliageType.hasBillboard,
                 foliageType.lodFadeRange
             );
+        }
 
-
-            // 3. Render Pass 생성 직전 Pre-Process Compute Pass 전처리 등록 (Zero-GC 바인딩)
-            if (cullingPipeline && cullingBindGroupLayout) {
-                const cullingBindGroup = buffer.getOrCreateCullingBindGroup(cullingBindGroupLayout, vhtView, vhtSampler);
-                if (cullingBindGroup) {
-                    const workgroupSize = 64;
-                    const workgroupCount = Math.ceil(activeCount / workgroupSize);
-
-                    this.redGPUContext.commandEncoderManager.addPreProcessComputePass('Foliage_GPUCulling_ComputePass', (computePass) => {
-                        computePass.setPipeline(cullingPipeline);
-                        computePass.setBindGroup(0, cullingBindGroup);
-                        computePass.dispatchWorkgroups(workgroupCount);
-                    });
-                }
-            }
+        // 🌟 3. 모든 FoliageType의 Compute Culling을 단일 통합 Pass에서 Zero-GC 재사용 핸들러로 1회 등록!
+        if (cullingPipeline && cullingBindGroupLayout) {
+            this.redGPUContext.commandEncoderManager.addPreProcessComputePass(
+                'Foliage_GPUCulling_ComputePass',
+                this.#onPreProcessComputePass
+            );
         }
     }
 
+    /**
+     * 🌟 Zero-GC: 매 프레임 클로저/함수 객체 생성을 100% 방지하는 식생 컬링 통합 디스패치 핸들러
+     */
+    #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
+        const pipeline = this.#cullingComputePipeline;
+        const bindGroupLayout = this.#cullingBindGroupLayout;
+        if (!pipeline || !bindGroupLayout) return;
+
+        computePass.setPipeline(pipeline);
+
+        const typeList = this.#typeList;
+        const count = typeList.length;
+
+        const vhtAtlasTexture = this.landscape.vhtAtlasTexture;
+        const rawGPUTexture = vhtAtlasTexture?.gpuTexture || null;
+        if (rawGPUTexture && this.#cachedVHTAtlasGPUTexture !== rawGPUTexture) {
+            this.#cachedVHTAtlasGPUTexture = rawGPUTexture;
+            this.#cachedVHTView = rawGPUTexture.createView();
+        }
+        const vhtView = this.#cachedVHTView || undefined;
+        const vhtSampler = this.redGPUContext.resourceManager.basicSampler.gpuSampler;
+
+        for (let i = 0; i < count; i++) {
+            const foliageType = typeList[i];
+            const activeCount = foliageType.activeInstanceCount;
+            if (activeCount <= 0 || foliageType.subMeshes.length === 0) continue;
+
+            const buffer = foliageType.instanceBuffer;
+            const cullingBindGroup = buffer.getOrCreateCullingBindGroup(bindGroupLayout, vhtView, vhtSampler);
+            if (cullingBindGroup) {
+                const workgroupCount = Math.ceil(activeCount / 64);
+                computePass.setBindGroup(0, cullingBindGroup);
+                computePass.dispatchWorkgroups(workgroupCount);
+            }
+        }
+    };
 
     removeFoliageType(name: string): boolean {
         const foliageType = this.#foliageTypes.get(name);
