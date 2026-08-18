@@ -251,8 +251,9 @@ fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
     return 0.5 / max(GGXV + GGXL, EPSILON);
 }
 
-fn getFresnel(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
-    return F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+fn getRoughnessFresnel(cosTheta: f32, F0: vec3<f32>, roughness: f32) -> vec3<f32> {
+    let maxF = max(vec3<f32>(1.0 - roughness), F0);
+    return F0 + (maxF - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
 fn getDirectSpecularBRDF(
@@ -304,7 +305,7 @@ fn getDirectPbrLight(
     let LdotH = max(dot(L, H), 0.0);
     let VdotH = max(dot(V, H), 0.0);
 
-    let F = getFresnel(VdotH, F0);
+    let F = getRoughnessFresnel(VdotH, F0, roughnessParameter);
     let SPEC_BRDF = getDirectSpecularBRDF(F, roughnessParameter, NdotH, NdotV, NdotL);
     let diffuse_reflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughnessParameter, albedo);
 
@@ -391,7 +392,8 @@ fn getIndirectPbrLighting(
         }
 
         let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(NdotV, roughnessParameter), 0.0).rg;
-        let F_IBL = F0 * envBRDF.x + vec3<f32>(envBRDF.y);
+        let grazingDamping = clamp(1.0 - roughnessParameter, 0.0, 1.0);
+        let F_IBL = F0 * envBRDF.x + vec3<f32>(envBRDF.y * grazingDamping);
         let kD = (vec3<f32>(1.0) - F_IBL) * (1.0 - metallicParameter);
 
         return ((kD * albedo * iblDiffuseColor * INV_PI) + (reflectedColor * F_IBL)) * occlusionParameter;
@@ -497,7 +499,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
     let NdotV = max(abs(dot(N, V)), 0.04);
 
-    let F0_dielectric = vec3<f32>(0.04);
+    let F0_dielectric = vec3<f32>(0.028);
     let F0_metal = albedo;
     let F0 = mix(F0_dielectric, F0_metal, metallicFactor);
     let roughnessParameter = max(roughnessFactor, 0.04);
