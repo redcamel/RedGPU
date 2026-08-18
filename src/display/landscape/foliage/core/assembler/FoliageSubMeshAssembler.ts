@@ -31,6 +31,11 @@ interface RawSubMesh {
  * [EN] Foliage Mesh Hierarchy DFS Explorer & Material SubMesh Assembler (Single Responsibility: Geometry/Material Combine & Uniform Setup)
  */
 class FoliageSubMeshAssembler {
+    // 🌟 Zero-GC: 서브메시 유니폼(144 bytes) 패킹용 정적 재사용 버퍼
+    static readonly #subMeshUniformData: Float32Array = new Float32Array(36);
+    static readonly #subMeshUniformUint32: Uint32Array = new Uint32Array(FoliageSubMeshAssembler.#subMeshUniformData.buffer);
+    static readonly #tempLocalMatrix: mat4 = mat4.create();
+
     static assemble(
         redGPUContext: RedGPUContext,
         options: FoliageTypeOptions,
@@ -45,8 +50,7 @@ class FoliageSubMeshAssembler {
         const roots = Array.isArray(options.mesh) ? options.mesh : [options.mesh];
         const rawList: RawSubMesh[] = [];
 
-        const computeMeshLocalMatrix = (mesh: Mesh): mat4 => {
-            const out = mat4.create();
+        const computeMeshLocalMatrix = (mesh: Mesh, out: mat4): mat4 => {
             const x = mesh.x ?? 0;
             const y = mesh.y ?? 0;
             const z = mesh.z ?? 0;
@@ -103,8 +107,8 @@ class FoliageSubMeshAssembler {
             if (isRoot) {
                 mat4.identity(currentRelativeMatrix);
             } else {
-                const nodeLocalMatrix = computeMeshLocalMatrix(node);
-                mat4.multiply(currentRelativeMatrix, parentRelativeMatrix, nodeLocalMatrix);
+                computeMeshLocalMatrix(node, FoliageSubMeshAssembler.#tempLocalMatrix);
+                mat4.multiply(currentRelativeMatrix, parentRelativeMatrix, FoliageSubMeshAssembler.#tempLocalMatrix);
             }
 
             if (node.geometry && node.material) {
@@ -209,9 +213,8 @@ class FoliageSubMeshAssembler {
                 usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
             });
 
-            const uniformArrayBuffer = new ArrayBuffer(144);
-            const floatView = new Float32Array(uniformArrayBuffer);
-            const uintView = new Uint32Array(uniformArrayBuffer);
+            const floatView = FoliageSubMeshAssembler.#subMeshUniformData;
+            const uintView = FoliageSubMeshAssembler.#subMeshUniformUint32;
 
             floatView.set(relMatrix, 0);
             floatView.set(normMatrix, 16);
@@ -228,7 +231,7 @@ class FoliageSubMeshAssembler {
             uintView[34] = 0;
             uintView[35] = 0;
 
-            gpuDevice.queue.writeBuffer(uniformBuffer, 0, uniformArrayBuffer, 0, 144);
+            gpuDevice.queue.writeBuffer(uniformBuffer, 0, floatView.buffer, floatView.byteOffset, 144);
 
             const vertexBindGroup = gpuDevice.createBindGroup({
                 label: `FoliageSubMesh_VertexBindGroup_${meshNode.name || subList.length}`,
