@@ -147,12 +147,8 @@ class FoliageType {
     // GPU Instancing 버퍼
     #instanceBuffer: FoliageInstanceBuffer;
 
-    // LOD & Culling 속성
-    lod0SubMeshCount: number = 1;
-    hasBillboard: boolean = false;
-    lodDistance: number = 80.0;
-    lodFadeRange: number = 30.0;
-
+    // LOD & Culling 속성 (은닉 및 단일 원천)
+    #lod0SubMeshCount: number = 1;
     #activeInstanceCount: number = 0;
     #bottomOffset: number | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
@@ -185,10 +181,6 @@ class FoliageType {
             combineSubMeshesByMaterial: options.combineSubMeshesByMaterial ?? true,
         };
 
-        this.hasBillboard = !!billboardOpt?.enabled;
-        this.lodDistance = this.#options.lodDistance;
-        this.lodFadeRange = billboardOpt?.fadeRange ?? 30.0;
-
         this.#initSubMeshBindGroupLayout();
 
         // 🌟 서브메시 조립 (FoliageSubMeshAssembler 단일 책임 분리)
@@ -198,7 +190,7 @@ class FoliageType {
             this.#subMeshVertexBindGroupLayout!
         );
         this.#subMeshes = assembleResult.subMeshes;
-        this.lod0SubMeshCount = assembleResult.lod0SubMeshCount;
+        this.#lod0SubMeshCount = assembleResult.lod0SubMeshCount;
         this.#bottomOffset = assembleResult.bottomOffset;
 
         this.#instanceBuffer = new FoliageInstanceBuffer(redGPUContext, this.#options.maxInstances, this.#subMeshes);
@@ -228,21 +220,28 @@ class FoliageType {
         return this.#activeInstanceCount;
     }
 
+    get lod0SubMeshCount(): number {
+        return this.#lod0SubMeshCount;
+    }
+
+    get hasBillboard(): boolean {
+        return !!this.#options.billboard?.enabled;
+    }
+
+    get lodDistance(): number {
+        return this.#options.lodDistance;
+    }
+
+    get lodFadeRange(): number {
+        return this.#options.billboard?.fadeRange ?? 30.0;
+    }
+
     incrementActiveInstanceCount(count: number): void {
         this.#activeInstanceCount += count;
     }
 
     get bottomOffset(): number {
-        if (this.#bottomOffset !== null) return this.#bottomOffset;
-        if (this.#subMeshes.length > 0) {
-            let minOffset = 0;
-            for (let i = 0; i < this.#subMeshes.length; i++) {
-                minOffset = Math.min(minOffset, this.#subMeshes[i].bottomOffset);
-            }
-            this.#bottomOffset = minOffset;
-            return minOffset;
-        }
-        return 0;
+        return this.#bottomOffset ?? 0;
     }
 
     /**
