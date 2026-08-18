@@ -25,14 +25,6 @@ fn main(input: VertexOutput) -> @location(0) vec4<f32> {
         discard;
     }
 
-    let N = normalize(input.normal);
-    let L = normalize(-uniforms.lightDirection);
-
-    // 🌟 UE5 Subsurface Two-Sided 반투명 투과 라이팅
-    let ndotl = max(dot(N, L), 0.0);
-    let backLight = max(dot(-N, L), 0.0) * 0.35; // 잎사귀 역광 투과
-    let ambient = 0.45;
-    let lighting = clamp(ndotl + backLight + ambient, 0.0, 1.0);
-
-    return vec4<f32>(diffuseColor.rgb * lighting, diffuseColor.a);
+    // 🌟 순수 알베도(Base Color) 베이킹: 런타임에서 실시간 씬 라이팅(PBR)과 100% 동일한 광도로 셰이딩
+    return diffuseColor;
 }

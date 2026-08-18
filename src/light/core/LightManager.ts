@@ -450,33 +450,21 @@ class LightManager {
             };
         }
 
-        // 1. 카메라 위치, 전방 벡터, 그리고 바라보는 지점까지의 거리(focusDistance) 계산
-        const camPos = vec3.fromValues(invVM[12], invVM[13], invVM[14]);
-        const camForward = vec3.fromValues(-invVM[8], -invVM[9], -invVM[10]);
-
-        let focusDistance = 100.0;
-        if (Math.abs(camForward[1]) > 0.01) {
-            const t = -camPos[1] / camForward[1];
-            if (t > 0) focusDistance = Math.max(t, 10.0);
-        }
-        // (TIP: OrbitControls 사용 시 vec3.distance(camPos, controls.target)을 쓰면 가장 정확합니다)
-
-        // [핵심 수정 1] 카메라가 실제로 시선을 두고 있는 3D 공간상의 '포커스 지점'을 정확히 구합니다.
-        const focusPoint = vec3.create();
-        vec3.scaleAndAdd(focusPoint, camPos, camForward, focusDistance);
-
-        // 2. 줌 거리에 연동하여 가시거리 제어 (배경 그림자를 위해 길게 잡아도 괜찮습니다)
-        const shadowFar = Math.min(rawCamera.farClipping, Math.max(focusDistance * 1.5, 300.0));
-
+        // 🌟 [3D 그래픽스 정석] 카메라 시야 절두체(Frustum) 외접구 기반 안정적 섀도우 피팅
+        // 임의의 조건문/매직넘버를 100% 제거하고, 화면에 보이는 모든 영역을 수학적 기하학으로 연속 포괄
+        const directionalShadowManager = view.scene.shadowManager.directionalShadowManager;
+        const maxDist = directionalShadowManager.maxShadowDistance ?? 150.0;
+        const shadowFar = Math.min(rawCamera.farClipping, maxDist);
+        const near = rawCamera.nearClipping;
         const fov = (Math.PI / 180) * rawCamera.fieldOfView;
         const aspect = view.aspect;
-        const near = rawCamera.nearClipping;
 
-        const halfHN = Math.tan(fov / 2) * near;
+        const halfHN = Math.tan(fov * 0.5) * near;
         const halfWN = halfHN * aspect;
-        const halfHF = Math.tan(fov / 2) * shadowFar;
+        const halfHF = Math.tan(fov * 0.5) * shadowFar;
         const halfWF = halfHF * aspect;
 
+        // 8개 절두체 로컬 좌표
         const localCorners = [
             vec3.fromValues(-halfWN, halfHN, -near),
             vec3.fromValues(halfWN, halfHN, -near),
@@ -488,19 +476,23 @@ class LightManager {
             vec3.fromValues(-halfWF, -halfHF, -shadowFar)
         ];
 
+        // 8개 꼭짓점의 월드 좌표 변환 및 기하학적 무게중심(Frustum Center) 도출
+        const frustumCenter = vec3.create();
         const worldCorners: vec3[] = [];
-        for (const localPt of localCorners) {
+        for (let i = 0; i < 8; i++) {
             const worldPt = vec3.create();
-            vec3.transformMat4(worldPt, localPt, invVM);
+            vec3.transformMat4(worldPt, localCorners[i], invVM);
             worldCorners.push(worldPt);
+            vec3.add(frustumCenter, frustumCenter, worldPt);
         }
+        vec3.scale(frustumCenter, frustumCenter, 1.0 / 8.0);
 
-        // 실제 프러스텀이 포괄하는 최대 바운딩 반경 계산 (깊이 Z 범위 계산용)
-        let actualRadius = 0;
-        for (const corner of worldCorners) {
-            const d = vec3.distance(corner, focusPoint);
-            if (d > actualRadius) {
-                actualRadius = d;
+        // 절두체 외접구 반경(Bounding Sphere Radius) 도출
+        let sphereRadius = 0;
+        for (let i = 0; i < 8; i++) {
+            const d = vec3.distance(worldCorners[i], frustumCenter);
+            if (d > sphereRadius) {
+                sphereRadius = d;
             }
         }
 
@@ -508,42 +500,43 @@ class LightManager {
         const lightDir = vec3.fromValues(light.direction[0], light.direction[1], light.direction[2]);
         vec3.normalize(lightDir, lightDir);
 
-        // 3. 가로/세로 영역(X, Y): maxShadowDistance를 상한 캡(Cap)으로 씌워 근경 텍셀 해상도(Crisp Shadow) 보장
-        const maxDist = view.scene.shadowManager.directionalShadowManager.maxShadowDistance ?? 150.0;
-        const shadowRadius = Math.min(actualRadius, Math.min(Math.max(focusDistance * 1.2, 15.0), maxDist));
-        const margin = shadowRadius * 0.10;
-        const left = -shadowRadius - margin;
-        const right = shadowRadius + margin;
-        const bottom = -shadowRadius - margin;
-        const top = shadowRadius + margin;
-
-        // [핵심 수정 2] 라이트 카메라의 타겟 중심을 허공(frustumCenter)이 아닌 실제 'focusPoint'로 지정!
-        // 이제 그림자 정사영 상자의 정중앙(0, 0)에 카메라가 보고 있는 피사체가 무조건 위치하게 됩니다.
-        const lightDistance = Math.max(actualRadius * 2.0, 500.0);
+        // 라이트 위치: frustumCenter에서 광원 반대 방향으로 충분한 거리(외접구 직경 x 2) 후퇴
+        const lightDistance = sphereRadius * 2.0;
         const lightPos = vec3.create();
-        vec3.scaleAndAdd(lightPos, focusPoint, lightDir, -lightDistance);
+        vec3.scaleAndAdd(lightPos, frustumCenter, lightDir, -lightDistance);
 
-        const up = vec3.fromValues(0, 1, 0);
+        let up = vec3.fromValues(0, 1, 0);
         if (Math.abs(vec3.dot(lightDir, up)) > 0.99) {
-            vec3.set(up, 0, 0, 1);
+            up = vec3.fromValues(0, 0, 1);
         }
 
         const lightView = mat4.create();
-        mat4.lookAt(lightView, lightPos, focusPoint, up); // 타겟을 focusPoint로 변경
+        mat4.lookAt(lightView, lightPos, frustumCenter, up);
 
-        // 4. 깊이 영역(Z): worldCorners를 lightView 공간으로 투영하여 앞뒤 잘림 없는 완벽한 Z 영역 도출
+        // 라이트 뷰 공간에서 8개 꼭짓점의 AABB 산출 (텍셀 누락 방지 마진 5% 포함)
+        let minX = Infinity, maxX = -Infinity;
+        let minY = Infinity, maxY = -Infinity;
         let minZ = Infinity, maxZ = -Infinity;
         const p = vec3.create();
-        for (const pt of worldCorners) {
-            vec3.transformMat4(p, pt, lightView);
+        for (let i = 0; i < 8; i++) {
+            vec3.transformMat4(p, worldCorners[i], lightView);
+            if (p[0] < minX) minX = p[0];
+            if (p[0] > maxX) maxX = p[0];
+            if (p[1] < minY) minY = p[1];
+            if (p[1] > maxY) maxY = p[1];
             if (p[2] < minZ) minZ = p[2];
             if (p[2] > maxZ) maxZ = p[2];
         }
 
-        // 5. nearPlane / farPlane 도출 (오른손 좌표계 기준 -Z 전방)
-        const zMargin = actualRadius * 0.50;
-        const nearPlane = Math.max(0.1, -maxZ - zMargin);
-        const farPlane = -minZ + zMargin;
+        // 안정적인 직교 투영 범위 및 Z 심도 버퍼 산출
+        const marginX = (maxX - minX) * 0.05;
+        const marginY = (maxY - minY) * 0.05;
+        const left = minX - marginX;
+        const right = maxX + marginX;
+        const bottom = minY - marginY;
+        const top = maxY + marginY;
+        const nearPlane = Math.max(0.1, -maxZ - sphereRadius * 0.5);
+        const farPlane = -minZ + sphereRadius * 0.5;
 
         const lightProjection = mat4.create();
         mat4.orthoZO(lightProjection, left, right, bottom, top, nearPlane, farPlane);

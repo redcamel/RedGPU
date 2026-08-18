@@ -293,30 +293,17 @@ class FoliageSubMeshAssembler {
         materialGroups.forEach((entry) => {
             const group = entry.raws;
             const mat = entry.material;
-            if (!options.combineSubMeshesByMaterial || group.length === 1) {
-                for (let g = 0; g < group.length; g++) {
-                    const raw = group[g];
-                    subList.push(createSubMeshInstance(
-                        raw.node,
-                        raw.geometry,
-                        raw.material,
-                        raw.currentRelativeMatrix,
-                        raw.normalMatrix,
-                        raw.strideBytes,
-                        0
-                    ));
-                }
-            } else {
-                // 🌟 복수 서브메시 병합 (Combine SubMeshes by Material - PBR 표준 18 Floats = 72 Bytes)
-                let totalVertexCount = 0;
-                let totalIndexCount = 0;
-                const PBR_STRIDE = 18; // position(3), normal(3), uv(2), uv1(2), color(4), tangent(4)
 
-                for (let g = 0; g < group.length; g++) {
-                    const geom = group[g].geometry;
-                    totalVertexCount += geom.vertexBuffer?.vertexCount ?? 0;
-                    totalIndexCount += geom.indexBuffer?.indexCount ?? (geom.vertexBuffer?.vertexCount ?? 0);
-                }
+            // 🌟 모든 서브메시를 표준 PBR 18 Floats (72 Bytes) 지오메트리로 100% 균일 조립 (스트라이드 불일치 0% 소멸)
+            let totalVertexCount = 0;
+            let totalIndexCount = 0;
+            const PBR_STRIDE = 18; // position(3), normal(3), uv(2), uv1(2), color(4), tangent(4)
+
+            for (let g = 0; g < group.length; g++) {
+                const geom = group[g].geometry;
+                totalVertexCount += geom.vertexBuffer?.vertexCount ?? 0;
+                totalIndexCount += geom.indexBuffer?.indexCount ?? (geom.vertexBuffer?.vertexCount ?? 0);
+            }
 
                 const combinedVertexData = new Float32Array(totalVertexCount * PBR_STRIDE);
                 const combinedIndexData = new Uint32Array(totalIndexCount);
@@ -488,7 +475,6 @@ class FoliageSubMeshAssembler {
                 );
 
                 subList.push(combinedSubMesh);
-            }
         });
 
         // 🌟 LOD 0 서브메시 개수

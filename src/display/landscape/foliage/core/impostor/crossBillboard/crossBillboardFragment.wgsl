@@ -62,14 +62,19 @@ fn main(inputData: InputData) -> OutputFragment {
     let planeTangent = vec3<f32>(planeNormal.z, 0.0, -planeNormal.x);
     let N = normalize(planeTangent * sphereX + vec3<f32>(0.0, sphereY * 0.7, 0.0) + planeNormal * sphereZ);
 
-    let dirLight = systemUniforms.directionalLights[0];
-    let L = normalize(-dirLight.direction);
     let preExposure = systemUniforms.preExposure;
+    var directSunLighting = vec3<f32>(0.0);
     
     // 1. Direct Sun Lighting (PBR calcPbrLight와 100% 동일한 에너지 보존 램버트)
-    let NdotL = max(dot(N, L), 0.0);
-    let backLight = max(dot(-N, L), 0.0) * 0.15; // 잎사귀 투과광
-    let directSunLighting = texColor.rgb * dirLight.color * (dirLight.intensity * INV_PI) * (NdotL + backLight) * preExposure;
+    if (systemUniforms.directionalLightCount > 0u) {
+        for (var i = 0u; i < systemUniforms.directionalLightCount; i = i + 1u) {
+            let dirLight = systemUniforms.directionalLights[i];
+            let L = -normalize(dirLight.direction);
+            let NdotL = max(dot(N, L), 0.0);
+            let backLight = max(dot(-N, L), 0.0) * 0.25; // 잎사귀 투과광
+            directSunLighting += texColor.rgb * dirLight.color * (dirLight.intensity * INV_PI) * (NdotL + backLight) * preExposure;
+        }
+    }
     
     // 2. IBL & Ambient Lighting (PBR envIBL_DIFFUSE와 100% 동일한 광도/조도 공식)
     var iblDiffuseColor = vec3<f32>(0.0);

@@ -76,8 +76,17 @@ fn mainInput(input : VertexInput) -> OutputData {
     let scaledPos = hierarchyPos * safeScale;
     let rotatedPos = rotateVectorByQuaternion(scaledPos, input.instanceRotQuat);
     
+    // 🌟 SpeedTree / UE5 스타일 식생 캐노피 구형 노멀 안정화 (시야각 회전 시 암전/점프 방지)
+    var smoothedNormal = hierarchyNormal;
+    let canopyDir = normalize(vec3<f32>(hierarchyPos.x, max(hierarchyPos.y * 0.6, 0.2), hierarchyPos.z));
+    if (length(hierarchyNormal) > 0.001) {
+        smoothedNormal = normalize(hierarchyNormal * 0.55 + canopyDir * 0.3 + vec3<f32>(0.0, 0.15, 0.0));
+    } else {
+        smoothedNormal = canopyDir;
+    }
+    
     // 🌟 비등방 스케일 역전치(Inverse Transpose) 노멀 보정 및 쿼터니언 회전 정규화
-    let scaledNormal = hierarchyNormal / safeScale;
+    let scaledNormal = smoothedNormal / safeScale;
     let worldNormal = normalize(rotateVectorByQuaternion(scaledNormal, input.instanceRotQuat));
     
     // 🌟 원본 버텍스 탄젠트 쿼터니언 회전 및 정규화 (PBR TBN 프레임 100% 일치)
