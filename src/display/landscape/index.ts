@@ -20,7 +20,7 @@ import LandscapeFoliageManager from "./foliage/LandscapeFoliageManager";
 import type {FoliageTypeOptions} from "./foliage/FoliageType";
 import FoliageType from "./foliage/FoliageType";
 import FoliageInstanceBuffer from "./foliage/FoliageInstanceBuffer";
-import CrossBillboardMaterial from "./foliage/material/CrossBillboardMaterial";
+import CrossBillboardMaterial from "./foliage/core/impostor/crossBillboard/CrossBillboardMaterial";
 
 export {
     ALandscapeDebugger,

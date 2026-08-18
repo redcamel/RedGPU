@@ -1,14 +1,14 @@
 import {mat4} from "gl-matrix";
-import RedGPUContext from "../../../../context/RedGPUContext";
-import Mesh from "../../../mesh/Mesh";
-import Geometry from "../../../../geometry/Geometry";
-import VertexBuffer from "../../../../resources/buffer/vertexBuffer/VertexBuffer";
-import IndexBuffer from "../../../../resources/buffer/indexBuffer/IndexBuffer";
-import GPU_BLEND_FACTOR from "../../../../gpuConst/GPU_BLEND_FACTOR";
-import createCrossBillboardGeometry from "../material/createCrossBillboardGeometry";
-import CrossBillboardMaterial from "../material/CrossBillboardMaterial";
-import FoliageImpostorBaker from "./FoliageImpostorBaker";
-import type {FoliageSubMesh, FoliageTypeOptions} from "../FoliageType";
+import RedGPUContext from "../../../../../context/RedGPUContext";
+import Mesh from "../../../../mesh/Mesh";
+import Geometry from "../../../../../geometry/Geometry";
+import VertexBuffer from "../../../../../resources/buffer/vertexBuffer/VertexBuffer";
+import IndexBuffer from "../../../../../resources/buffer/indexBuffer/IndexBuffer";
+import GPU_BLEND_FACTOR from "../../../../../gpuConst/GPU_BLEND_FACTOR";
+import createCrossBillboardGeometry from "../impostor/crossBillboard/createCrossBillboardGeometry";
+import CrossBillboardMaterial from "../impostor/crossBillboard/CrossBillboardMaterial";
+import FoliageImpostorBaker from "../impostor/FoliageImpostorBaker";
+import type {FoliageSubMesh, FoliageTypeOptions} from "../../FoliageType";
 
 export interface FoliageAssemblyResult {
     subMeshes: FoliageSubMesh[];

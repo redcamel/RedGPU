@@ -1,9 +1,9 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import type {FoliageTypeOptions} from "./FoliageType";
 import FoliageType from "./FoliageType";
-import FoliagePipelineRegistry from "./core/FoliagePipelineRegistry";
-import FoliageRenderer from "./core/FoliageRenderer";
-import FoliageCullingDispatcher from "./core/FoliageCullingDispatcher";
+import FoliagePipelineRegistry from "./core/pipeline/FoliagePipelineRegistry";
+import FoliageRenderer from "./core/renderer/FoliageRenderer";
+import FoliageCullingDispatcher from "./core/culling/FoliageCullingDispatcher";
 
 /**
  * [KO] Landscape 지형 식생 총괄 관리자 (최상위 파사드 & 생명주기 오케스트레이터)

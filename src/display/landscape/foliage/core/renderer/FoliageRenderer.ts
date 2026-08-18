@@ -1,8 +1,8 @@
-import RedGPUContext from "../../../../context/RedGPUContext";
-import type {FoliageSubMesh} from "../FoliageType";
-import FoliageType from "../FoliageType";
-import type {FoliageDepthPassMode} from "./FoliagePipelineRegistry";
-import FoliagePipelineRegistry from "./FoliagePipelineRegistry";
+import RedGPUContext from "../../../../../context/RedGPUContext";
+import type {FoliageSubMesh} from "../../FoliageType";
+import FoliageType from "../../FoliageType";
+import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
+import FoliagePipelineRegistry from "../pipeline/FoliagePipelineRegistry";
 
 interface TransparentFoliageEntry {
     subMesh: FoliageSubMesh;

@@ -1,8 +1,8 @@
-import RedGPUContext from "../../../../context/RedGPUContext";
-import ResourceManager from "../../../../resources/core/resourceManager/ResourceManager";
-import foliageInstancedWGSL from "../shader/foliageInstanced.wgsl";
-import foliageDepthInstancedWGSL from "../shader/foliageDepthInstanced.wgsl";
-import foliageDepthOnlyWGSL from "../shader/foliageDepthOnly.wgsl";
+import RedGPUContext from "../../../../../context/RedGPUContext";
+import ResourceManager from "../../../../../resources/core/resourceManager/ResourceManager";
+import foliageInstancedWGSL from "./foliageInstanced.wgsl";
+import foliageDepthInstancedWGSL from "./foliageDepthInstanced.wgsl";
+import foliageDepthOnlyWGSL from "./foliageDepthOnly.wgsl";
 
 export type FoliageDepthPassMode = 'normal' | 'depthPrepass' | 'mainShadingAfterDepth';
 

@@ -1,11 +1,11 @@
 import {mat4} from "gl-matrix";
-import RedGPUContext from "../../../../context/RedGPUContext";
-import Mesh from "../../../mesh/Mesh";
-import DirectTexture from "../../../../resources/texture/DirectTexture";
-import type {FoliageSubMesh} from "../FoliageType";
-import impostorBakeShaderWGSL from "../shader/impostorBake.wgsl";
-import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
-import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import RedGPUContext from "../../../../../context/RedGPUContext";
+import Mesh from "../../../../mesh/Mesh";
+import DirectTexture from "../../../../../resources/texture/DirectTexture";
+import type {FoliageSubMesh} from "../../FoliageType";
+import impostorBakeShaderWGSL from "./impostorBake.wgsl";
+import getMipLevelCount from "../../../../../utils/texture/getMipLevelCount";
+import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 export interface FoliageBakeResult {
     texture: DirectTexture;

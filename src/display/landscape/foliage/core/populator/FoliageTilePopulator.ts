@@ -1,4 +1,4 @@
-import FoliageType from "../FoliageType";
+import FoliageType from "../../FoliageType";
 
 /**
  * [KO] 지형 타일 단위 절차적(Procedural) 식생 인스턴스 배치기 (단일 책임: 타일 영역 난수/스케일/회전 연산 및 부분 GPU 업로드)

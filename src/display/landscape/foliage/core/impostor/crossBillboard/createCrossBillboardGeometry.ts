@@ -1,9 +1,9 @@
-import RedGPUContext from "../../../../context/RedGPUContext";
-import Geometry from "../../../../geometry/Geometry";
-import VertexBuffer from "../../../../resources/buffer/vertexBuffer/VertexBuffer";
-import IndexBuffer from "../../../../resources/buffer/indexBuffer/IndexBuffer";
-import Primitive from "../../../../primitive/core/Primitive";
-import {calculateTangentsInterleaved} from "../../../../math/calculateTangents";
+import RedGPUContext from "../../../../../../context/RedGPUContext";
+import Geometry from "../../../../../../geometry/Geometry";
+import VertexBuffer from "../../../../../../resources/buffer/vertexBuffer/VertexBuffer";
+import IndexBuffer from "../../../../../../resources/buffer/indexBuffer/IndexBuffer";
+import Primitive from "../../../../../../primitive/core/Primitive";
+import {calculateTangentsInterleaved} from "../../../../../../math/calculateTangents";
 
 /**
  * [KO] 언리얼 엔진 5(UE5) 스타일의 3-Plane Star (0°, 60°, 120° 수직 3장 6각 별 모양) 크로스 빌보드 지오메트리를 생성합니다.

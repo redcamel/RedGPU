@@ -1,7 +1,7 @@
-import RedGPUContext from "../../../../context/RedGPUContext";
-import computeViewFrustumPlanes from "../../../../math/computeViewFrustumPlanes";
-import FoliageType from "../FoliageType";
-import foliageCullingComputeWGSL from "../shader/foliageCullingCompute.wgsl";
+import RedGPUContext from "../../../../../context/RedGPUContext";
+import computeViewFrustumPlanes from "../../../../../math/computeViewFrustumPlanes";
+import FoliageType from "../../FoliageType";
+import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
 
 /**
  * [KO] 식생 GPU Compute Shader Culling 전담 디스패처 (단일 책임: 컴퓨트 파이프라인 관리 & 단일 패스 디스패치)

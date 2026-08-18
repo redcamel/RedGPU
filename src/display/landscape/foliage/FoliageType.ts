@@ -4,10 +4,10 @@ import Mesh from "../../mesh/Mesh";
 import Geometry from "../../../geometry/Geometry";
 import ABaseMaterial from "../../../material/core/ABaseMaterial";
 import FoliageInstanceBuffer from "./FoliageInstanceBuffer";
-import createCrossBillboardGeometry from "./material/createCrossBillboardGeometry";
-import type {FoliageDepthPassMode} from "./core/FoliagePipelineRegistry";
-import FoliageSubMeshAssembler from "./core/FoliageSubMeshAssembler";
-import FoliageTilePopulator from "./core/FoliageTilePopulator";
+import createCrossBillboardGeometry from "./core/impostor/crossBillboard/createCrossBillboardGeometry";
+import type {FoliageDepthPassMode} from "./core/pipeline/FoliagePipelineRegistry";
+import FoliageSubMeshAssembler from "./core/assembler/FoliageSubMeshAssembler";
+import FoliageTilePopulator from "./core/populator/FoliageTilePopulator";
 
 /**
  * FoliageSubMesh
