@@ -33,6 +33,12 @@ export class LandscapeFoliageManager {
     #pipelineCache: Map<string, GPURenderPipeline> = new Map();
     #transparentEntries: any[] = [];
 
+    // 🌟 Draw Call 간 상태 중복 바인딩 제거용 Zero-GC 캐시
+    #lastBoundPipeline: GPURenderPipeline | null = null;
+    #lastBoundSystemBG: GPUBindGroup | null = null;
+    #lastBoundMatBG: GPUBindGroup | null = null;
+    #lastBoundInstanceBuffer: GPUBuffer | null = null;
+    #lastBoundInstanceOffset: number = -1;
 
     get hasFoliageTypes(): boolean {
         return this.#typeList.length > 0;
@@ -95,6 +101,13 @@ export class LandscapeFoliageManager {
         const typeList = this.#typeList;
         const typeCount = typeList.length;
         if (!passEncoder || typeCount === 0) return;
+
+        // 🌟 매 프레임 렌더 패스 시작 시 상태 바인딩 캐시 초기화
+        this.#lastBoundPipeline = null;
+        this.#lastBoundSystemBG = null;
+        this.#lastBoundMatBG = null;
+        this.#lastBoundInstanceBuffer = null;
+        this.#lastBoundInstanceOffset = -1;
 
         // RedGPU 정석 View3D & System Uniform BindGroup 및 AntialiasingManager 추출
         const view3D = view?.view || view;
@@ -431,31 +444,42 @@ export class LandscapeFoliageManager {
         const pipeline = this.#getOrCreatePipeline(material, sampleCount, msaaID, sub.strideBytes, cullMode, depthPassMode);
         if (!pipeline) return;
 
-        passEncoder.setPipeline(pipeline);
-
-        if (systemBG) {
-            passEncoder.setBindGroup(0, systemBG);
+        // 🌟 1. Pipeline 상태 캐싱: 직전과 동일하면 setPipeline 호출 스킵
+        if (this.#lastBoundPipeline !== pipeline) {
+            passEncoder.setPipeline(pipeline);
+            this.#lastBoundPipeline = pipeline;
         }
 
-        // Group 1: 서브메시의 상대 변환 행렬 및 globalFragmentSlotIndex 유니폼 바인드그룹
+        // 🌟 2. Group 0 (System Uniforms - 카메라/뷰): 직전과 동일하면 setBindGroup(0) 호출 스킵
+        if (systemBG && this.#lastBoundSystemBG !== systemBG) {
+            passEncoder.setBindGroup(0, systemBG);
+            this.#lastBoundSystemBG = systemBG;
+        }
+
+        // 🌟 3. Group 1 (SubMesh 상대 변환/인덱스): 서브메시마다 고유하므로 바인딩
         const vertexUniformBG = sub.vertexUniformBindGroup || this.#emptyBindGroup;
         if (vertexUniformBG) {
             passEncoder.setBindGroup(1, vertexUniformBG);
         }
 
-        // Group 2: 서브메시 머티리얼 프래그먼트 유니폼 바인드그룹
+        // 🌟 4. Group 2 (머티리얼 프래그먼트 유니폼): 직전과 동일하면 setBindGroup(2) 호출 스킵
         const matUniformBG = material.gpuRenderInfo?.fragmentUniformBindGroup;
-        if (matUniformBG) {
+        if (matUniformBG && this.#lastBoundMatBG !== matUniformBG) {
             passEncoder.setBindGroup(2, matUniformBG);
+            this.#lastBoundMatBG = matUniformBG;
         }
 
-        // Buffer 0: 해당 서브메시의 버텍스 버퍼
+        // 🌟 5. Buffer 0: 해당 서브메시의 고유 지오메트리 버텍스 버퍼
         passEncoder.setVertexBuffer(0, vertexGPUBuffer);
 
-        // Buffer 1: 인스턴스 버텍스 버퍼 (LOD 0 vs LOD 1 오프셋 분기)
+        // 🌟 6. Buffer 1: 인스턴스 버텍스 버퍼 (직전과 버퍼 및 오프셋이 동일하면 setVertexBuffer(1) 호출 스킵!)
         const isBillboard = sub.lodIndex === 1;
         const instanceBufferOffset = isBillboard ? (maxInstances * 48) : 0;
-        passEncoder.setVertexBuffer(1, culledGPUBuffer, instanceBufferOffset);
+        if (this.#lastBoundInstanceBuffer !== culledGPUBuffer || this.#lastBoundInstanceOffset !== instanceBufferOffset) {
+            passEncoder.setVertexBuffer(1, culledGPUBuffer, instanceBufferOffset);
+            this.#lastBoundInstanceBuffer = culledGPUBuffer;
+            this.#lastBoundInstanceOffset = instanceBufferOffset;
+        }
 
         const indirectOffsetBytes = subIndex * 20;
         if (sub.isIndexed && sub.geometry.indexBuffer?.gpuBuffer) {
