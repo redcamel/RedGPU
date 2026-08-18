@@ -126,58 +126,62 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
             }
 
             if (inFrustum) {
-                let dist = sqrt(distSq);
                 let fadeStartDist = cullingUniforms.fadeStartDistance;
+                let fadeStartDistSq = fadeStartDist * fadeStartDist;
+                let lodDist = cullingUniforms.lodDistance;
+                let halfFadeRange = max(cullingUniforms.lodFadeRange * 0.5, 1.0);
+                let crossFadeStart = max(lodDist - halfFadeRange, 0.0);
+                let crossFadeEnd = lodDist + halfFadeRange;
+                let crossFadeStartSq = crossFadeStart * crossFadeStart;
+                let crossFadeEndSq = crossFadeEnd * crossFadeEnd;
+
+                // ⚡ 1. dist 계산 지연 (Lazy Evaluation): 필요할 때만 sqrt() 1회 호출
+                var dist: f32 = -1.0;
                 var fade: f32 = 1.0;
 
-                if (dist > fadeStartDist) {
+                if (distSq > fadeStartDistSq) {
+                    dist = sqrt(distSq);
                     let fadeRange = max(cullingDist - fadeStartDist, 1.0);
                     fade = clamp(1.0 - (dist - fadeStartDist) / fadeRange, 0.0, 1.0);
                 }
 
-                // 🌟 UE5 스타일 LOD Dithered Crossfade 계산
-                let lodDist = cullingUniforms.lodDistance;
-                let halfFadeRange = max(cullingUniforms.lodFadeRange * 0.5, 1.0);
-                let crossFadeStart = lodDist - halfFadeRange;
-                let crossFadeEnd = lodDist + halfFadeRange;
-
                 if (cullingUniforms.hasBillboard == 0u) {
-                    // 빌보드 미사용 시: 항상 LOD 0 (3D 풀 모델)
+                    // 빌보드 미사용 시: 항상 LOD 0 (3D 풀/나무 모델)
                     isLOD0 = true;
                     culledInstance0 = instance;
                     culledInstance0.posY = realY;
                     culledInstance0.fade = fade;
-                    culledInstance0.subId = 1.0; // lodFade = 1.0 (디더 없음)
+                    culledInstance0.subId = 1.0;
                     atomicAdd(&wgCountLOD0, 1u);
                 } else {
-                    // 빌보드 활성 시: 전환 구간([crossFadeStart, crossFadeEnd]) 동안 LOD0과 LOD1 동시 디스패치!
-                    if (dist < crossFadeEnd) {
-                        // LOD 0 (3D 풀 모델)
+                    // 🌟 2. 제곱 거리(distSq) 기반 초고속 LOD 판정 (전환 구간 외에는 sqrt 100% 스킵!)
+                    if (distSq < crossFadeEndSq) {
+                        // LOD 0 (3D 모델)
                         isLOD0 = true;
                         var lodFade0: f32 = 1.0;
-                        if (dist >= crossFadeStart) {
-                            // crossFadeStart -> crossFadeEnd 로 갈수록 1.0 -> 0.0 페이드아웃
+                        if (distSq >= crossFadeStartSq) {
+                            if (dist < 0.0) { dist = sqrt(distSq); }
                             lodFade0 = clamp((crossFadeEnd - dist) / (crossFadeEnd - crossFadeStart), 0.0, 1.0);
                         }
                         culledInstance0 = instance;
                         culledInstance0.posY = realY;
                         culledInstance0.fade = fade;
-                        culledInstance0.subId = lodFade0; // subId에 lodFade 비율 전달!
+                        culledInstance0.subId = lodFade0;
                         atomicAdd(&wgCountLOD0, 1u);
                     }
 
-                    if (dist >= crossFadeStart) {
+                    if (distSq >= crossFadeStartSq) {
                         // LOD 1 (십자 빌보드)
                         isLOD1 = true;
                         var lodFade1: f32 = 1.0;
-                        if (dist < crossFadeEnd) {
-                            // crossFadeStart -> crossFadeEnd 로 갈수록 0.0 -> 1.0 페이드인
+                        if (distSq < crossFadeEndSq) {
+                            if (dist < 0.0) { dist = sqrt(distSq); }
                             lodFade1 = clamp((dist - crossFadeStart) / (crossFadeEnd - crossFadeStart), 0.0, 1.0);
                         }
                         culledInstance1 = instance;
                         culledInstance1.posY = realY;
                         culledInstance1.fade = fade;
-                        culledInstance1.subId = lodFade1; // subId에 lodFade 비율 전달!
+                        culledInstance1.subId = lodFade1;
                         atomicAdd(&wgCountLOD1, 1u);
                     }
                 }
