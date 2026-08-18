@@ -2,8 +2,21 @@ import RedGPUContext from "../../../../../../context/RedGPUContext";
 import Geometry from "../../../../../../geometry/Geometry";
 import VertexBuffer from "../../../../../../resources/buffer/vertexBuffer/VertexBuffer";
 import IndexBuffer from "../../../../../../resources/buffer/indexBuffer/IndexBuffer";
-import Primitive from "../../../../../../primitive/core/Primitive";
+import VertexInterleavedStruct from "../../../../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
+import VertexInterleaveType from "../../../../../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import {calculateTangentsInterleaved} from "../../../../../../math/calculateTangents";
+
+const PBR_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
+    {
+        position: VertexInterleaveType.float32x3,
+        vertexNormal: VertexInterleaveType.float32x3,
+        uv: VertexInterleaveType.float32x2,
+        uv1: VertexInterleaveType.float32x2,
+        vertexColor_0: VertexInterleaveType.float32x4,
+        vertexTangent: VertexInterleaveType.float32x4,
+    },
+    'PBR'
+);
 
 /**
  * [KO] 언리얼 엔진 5(UE5) 스타일의 3-Plane Star (0°, 60°, 120° 수직 3장 6각 별 모양) 크로스 빌보드 지오메트리를 생성합니다.
@@ -76,10 +89,12 @@ function createCrossBillboardGeometry(
     const interleavedData: number[] = [];
     for (const v of rawVertices) {
         interleavedData.push(
-            v.x, v.y, v.z,          // Position (0..2)
-            v.nx, v.ny, v.nz,       // Normal (3..5)
-            v.u, v.v,               // UV (6..7)
-            0, 0, 0, 0              // Tangent placeholder (8..11)
+            v.x, v.y, v.z,          // Position [0..2]
+            v.nx, v.ny, v.nz,       // Normal [3..5]
+            v.u, v.v,               // UV [6..7]
+            v.u, v.v,               // UV1 [8..9]
+            1.0, 1.0, 1.0, 1.0,     // VertexColor_0 [10..13]
+            0.0, 0.0, 0.0, 1.0      // Tangent placeholder [14..17]
         );
     }
 
@@ -109,12 +124,13 @@ function createCrossBillboardGeometry(
     const interleavedFloat32 = new Float32Array(interleavedData);
     const indexUint32 = new Uint32Array(indexData);
 
-    calculateTangentsInterleaved(interleavedFloat32, indexUint32, 12, 0, 3, 6, 8);
+    // 🌟 18-float PBR 스트라이드 탄젠트 기저 계산 (pos: 0, normal: 3, uv: 6, tangent: 14)
+    calculateTangentsInterleaved(interleavedFloat32, indexUint32, 18, 0, 3, 6, 14);
 
     const wireframeKey = wireframe ? '_wf' : '';
     const vKey = `CrossBillboard_VB_${width}_${height}${wireframeKey}`;
     const iKey = `CrossBillboard_IB_${width}_${height}${wireframeKey}`;
-    const vb = new VertexBuffer(redGPUContext, interleavedFloat32, Primitive.primitiveInterleaveStruct, undefined, vKey);
+    const vb = new VertexBuffer(redGPUContext, interleavedFloat32, PBR_INTERLEAVED_STRUCT, undefined, vKey);
     const ib = new IndexBuffer(redGPUContext, indexUint32, undefined, iKey);
     return new Geometry(redGPUContext, vb, ib);
 }

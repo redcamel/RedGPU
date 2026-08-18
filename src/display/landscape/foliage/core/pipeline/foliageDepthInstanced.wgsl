@@ -13,14 +13,17 @@ struct SubMeshUniforms {
 
 struct VertexInput {
     @location(0) position : vec3<f32>,
-    @location(1) normal : vec3<f32>,
+    @location(1) vertexNormal : vec3<f32>,
     @location(2) uv : vec2<f32>,
+    @location(3) uv1 : vec2<f32>,
+    @location(4) vertexColor_0 : vec4<f32>,
+    @location(5) vertexTangent : vec4<f32>,
     
     // Instanced Attributes
-    @location(3) instancePos : vec3<f32>,
-    @location(4) instanceRotQuat : vec4<f32>,
-    @location(5) instanceScale : vec3<f32>,
-    @location(6) instanceExtra : vec2<f32>, // x: FadeFactor (1.0~0.0), y: SubID / LodFade
+    @location(6) instancePos : vec3<f32>,
+    @location(7) instanceRotQuat : vec4<f32>,
+    @location(8) instanceScale : vec3<f32>,
+    @location(9) instanceExtra : vec2<f32>, // x: FadeFactor (1.0~0.0), y: SubID / LodFade
 };
 
 struct DepthOutputData {

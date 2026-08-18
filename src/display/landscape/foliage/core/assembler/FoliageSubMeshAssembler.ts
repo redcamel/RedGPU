@@ -4,11 +4,25 @@ import Mesh from "../../../../mesh/Mesh";
 import Geometry from "../../../../../geometry/Geometry";
 import VertexBuffer from "../../../../../resources/buffer/vertexBuffer/VertexBuffer";
 import IndexBuffer from "../../../../../resources/buffer/indexBuffer/IndexBuffer";
+import VertexInterleavedStruct from "../../../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
+import VertexInterleaveType from "../../../../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import GPU_BLEND_FACTOR from "../../../../../gpuConst/GPU_BLEND_FACTOR";
 import createCrossBillboardGeometry from "../impostor/crossBillboard/createCrossBillboardGeometry";
 import CrossBillboardMaterial from "../impostor/crossBillboard/CrossBillboardMaterial";
 import FoliageImpostorBaker from "../impostor/FoliageImpostorBaker";
 import type {FoliageSubMesh, FoliageTypeOptions} from "../../FoliageType";
+
+const PBR_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
+    {
+        position: VertexInterleaveType.float32x3,
+        vertexNormal: VertexInterleaveType.float32x3,
+        uv: VertexInterleaveType.float32x2,
+        uv1: VertexInterleaveType.float32x2,
+        vertexColor_0: VertexInterleaveType.float32x4,
+        vertexTangent: VertexInterleaveType.float32x4,
+    },
+    'PBR'
+);
 
 export interface FoliageAssemblyResult {
     subMeshes: FoliageSubMesh[];
@@ -293,11 +307,10 @@ class FoliageSubMeshAssembler {
                     ));
                 }
             } else {
-                // 🌟 복수 서브메시 병합 (Combine SubMeshes by Material - LOD 0)
+                // 🌟 복수 서브메시 병합 (Combine SubMeshes by Material - PBR 표준 18 Floats = 72 Bytes)
                 let totalVertexCount = 0;
                 let totalIndexCount = 0;
-                const rawStride = group[0].rawStride;
-                const interleavedStruct = group[0].geometry.vertexBuffer?.interleavedStruct;
+                const PBR_STRIDE = 18; // position(3), normal(3), uv(2), uv1(2), color(4), tangent(4)
 
                 for (let g = 0; g < group.length; g++) {
                     const geom = group[g].geometry;
@@ -305,7 +318,7 @@ class FoliageSubMeshAssembler {
                     totalIndexCount += geom.indexBuffer?.indexCount ?? (geom.vertexBuffer?.vertexCount ?? 0);
                 }
 
-                const combinedVertexData = new Float32Array(totalVertexCount * rawStride);
+                const combinedVertexData = new Float32Array(totalVertexCount * PBR_STRIDE);
                 const combinedIndexData = new Uint32Array(totalIndexCount);
 
                 let vertexOffset = 0;
@@ -319,6 +332,7 @@ class FoliageSubMeshAssembler {
                     const srcVData = srcVB?.data;
                     const srcIData = srcIB?.data;
                     const vCount = srcVB?.vertexCount ?? 0;
+                    const rawStride = raw.rawStride;
 
                     if (srcVData && vCount > 0) {
                         const m = raw.currentRelativeMatrix;
@@ -326,16 +340,17 @@ class FoliageSubMeshAssembler {
 
                         for (let v = 0; v < vCount; v++) {
                             const srcIdx = v * rawStride;
-                            const dstIdx = (vertexOffset + v) * rawStride;
+                            const dstIdx = (vertexOffset + v) * PBR_STRIDE;
 
+                            // 1. Position [0..2] (Model Matrix 변환)
                             const x = srcVData[srcIdx + 0];
                             const y = srcVData[srcIdx + 1];
                             const z = srcVData[srcIdx + 2];
-
                             combinedVertexData[dstIdx + 0] = m[0] * x + m[4] * y + m[8] * z + m[12];
                             combinedVertexData[dstIdx + 1] = m[1] * x + m[5] * y + m[9] * z + m[13];
                             combinedVertexData[dstIdx + 2] = m[2] * x + m[6] * y + m[10] * z + m[14];
 
+                            // 2. Vertex Normal [3..5] (Normal Matrix 변환 및 정규화)
                             if (rawStride >= 6) {
                                 const nx = srcVData[srcIdx + 3];
                                 const ny = srcVData[srcIdx + 4];
@@ -350,16 +365,89 @@ class FoliageSubMeshAssembler {
                                     ty /= len;
                                     tz /= len;
                                 }
-
                                 combinedVertexData[dstIdx + 3] = tx;
                                 combinedVertexData[dstIdx + 4] = ty;
                                 combinedVertexData[dstIdx + 5] = tz;
+                            } else {
+                                combinedVertexData[dstIdx + 3] = 0;
+                                combinedVertexData[dstIdx + 4] = 1;
+                                combinedVertexData[dstIdx + 5] = 0;
                             }
 
-                            if (rawStride > 6) {
-                                for (let k = 6; k < rawStride; k++) {
-                                    combinedVertexData[dstIdx + k] = srcVData[srcIdx + k];
+                            // 3. UV [6..7]
+                            if (rawStride >= 8) {
+                                combinedVertexData[dstIdx + 6] = srcVData[srcIdx + 6];
+                                combinedVertexData[dstIdx + 7] = srcVData[srcIdx + 7];
+                            }
+
+                            // 4. UV1 [8..9]
+                            if (rawStride >= 10) {
+                                combinedVertexData[dstIdx + 8] = srcVData[srcIdx + 8];
+                                combinedVertexData[dstIdx + 9] = srcVData[srcIdx + 9];
+                            } else {
+                                combinedVertexData[dstIdx + 8] = combinedVertexData[dstIdx + 6];
+                                combinedVertexData[dstIdx + 9] = combinedVertexData[dstIdx + 7];
+                            }
+
+                            // 5. VertexColor_0 [10..13]
+                            if (rawStride >= 14) {
+                                combinedVertexData[dstIdx + 10] = srcVData[srcIdx + 10];
+                                combinedVertexData[dstIdx + 11] = srcVData[srcIdx + 11];
+                                combinedVertexData[dstIdx + 12] = srcVData[srcIdx + 12];
+                                combinedVertexData[dstIdx + 13] = srcVData[srcIdx + 13];
+                            } else {
+                                combinedVertexData[dstIdx + 10] = 1.0;
+                                combinedVertexData[dstIdx + 11] = 1.0;
+                                combinedVertexData[dstIdx + 12] = 1.0;
+                                combinedVertexData[dstIdx + 13] = 1.0;
+                            }
+
+                            // 6. Vertex Tangent [14..17] (Normal Matrix 회전 및 정규화)
+                            if (rawStride >= 18) {
+                                const tanX = srcVData[srcIdx + 14];
+                                const tanY = srcVData[srcIdx + 15];
+                                const tanZ = srcVData[srcIdx + 16];
+                                const tanW = srcVData[srcIdx + 17];
+
+                                let rtx = n[0] * tanX + n[4] * tanY + n[8] * tanZ;
+                                let rty = n[1] * tanX + n[5] * tanY + n[9] * tanZ;
+                                let rtz = n[2] * tanX + n[6] * tanY + n[10] * tanZ;
+                                const tlen = Math.sqrt(rtx * rtx + rty * rty + rtz * rtz);
+                                if (tlen > 0.000001) {
+                                    rtx /= tlen;
+                                    rty /= tlen;
+                                    rtz /= tlen;
                                 }
+
+                                combinedVertexData[dstIdx + 14] = rtx;
+                                combinedVertexData[dstIdx + 15] = rty;
+                                combinedVertexData[dstIdx + 16] = rtz;
+                                combinedVertexData[dstIdx + 17] = tanW !== 0 ? tanW : 1.0;
+                            } else if (rawStride >= 16) {
+                                const tanX = srcVData[srcIdx + 12];
+                                const tanY = srcVData[srcIdx + 13];
+                                const tanZ = srcVData[srcIdx + 14];
+                                const tanW = srcVData[srcIdx + 15];
+
+                                let rtx = n[0] * tanX + n[4] * tanY + n[8] * tanZ;
+                                let rty = n[1] * tanX + n[5] * tanY + n[9] * tanZ;
+                                let rtz = n[2] * tanX + n[6] * tanY + n[10] * tanZ;
+                                const tlen = Math.sqrt(rtx * rtx + rty * rty + rtz * rtz);
+                                if (tlen > 0.000001) {
+                                    rtx /= tlen;
+                                    rty /= tlen;
+                                    rtz /= tlen;
+                                }
+
+                                combinedVertexData[dstIdx + 14] = rtx;
+                                combinedVertexData[dstIdx + 15] = rty;
+                                combinedVertexData[dstIdx + 16] = rtz;
+                                combinedVertexData[dstIdx + 17] = tanW !== 0 ? tanW : 1.0;
+                            } else {
+                                combinedVertexData[dstIdx + 14] = 1.0;
+                                combinedVertexData[dstIdx + 15] = 0.0;
+                                combinedVertexData[dstIdx + 16] = 0.0;
+                                combinedVertexData[dstIdx + 17] = 1.0;
                             }
                         }
                     }
@@ -382,7 +470,7 @@ class FoliageSubMeshAssembler {
 
                 const vKey = `FoliageCombinedVB_${options.name}_${mat.name || 'mat'}_${Math.random()}`;
                 const iKey = `FoliageCombinedIB_${options.name}_${mat.name || 'mat'}_${Math.random()}`;
-                const combinedVB = new VertexBuffer(redGPUContext, combinedVertexData, interleavedStruct, undefined, vKey);
+                const combinedVB = new VertexBuffer(redGPUContext, combinedVertexData, PBR_INTERLEAVED_STRUCT, undefined, vKey);
                 const combinedIB = new IndexBuffer(redGPUContext, combinedIndexData, undefined, iKey);
                 const combinedGeom = new Geometry(redGPUContext, combinedVB, combinedIB);
 
@@ -395,7 +483,7 @@ class FoliageSubMeshAssembler {
                     mat,
                     identityMatrix,
                     identityMatrix,
-                    group[0].strideBytes,
+                    PBR_STRIDE * 4,
                     0
                 );
 

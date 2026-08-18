@@ -63,25 +63,30 @@ class FoliagePipelineRegistry {
             return cachedPipeline;
         }
 
-        // 2. RedGPU Primitive Geometry Stride (strideBytes = floatCount * 4 bytes)
-        const validStrideBytes = Math.max(strideBytes, 48);
+        // 2. RedGPU Primitive Geometry Stride (PBR 표준 18 Floats = 72 Bytes)
+        const validStrideBytes = Math.max(strideBytes, 72);
+        const geoAttributes: GPUVertexAttribute[] = [
+            {shaderLocation: 0, offset: 0, format: 'float32x3'},  // position
+            {shaderLocation: 1, offset: 12, format: 'float32x3'}, // vertexNormal
+            {shaderLocation: 2, offset: 24, format: 'float32x2'}, // uv
+            {shaderLocation: 3, offset: 32, format: 'float32x2'}, // uv1
+            {shaderLocation: 4, offset: 40, format: 'float32x4'}, // vertexColor_0
+            {shaderLocation: 5, offset: 56, format: 'float32x4'}, // vertexTangent
+        ];
+
         const geometryBufferLayout: GPUVertexBufferLayout = {
             arrayStride: validStrideBytes,
-            attributes: [
-                {shaderLocation: 0, offset: 0, format: 'float32x3'},  // position
-                {shaderLocation: 1, offset: 12, format: 'float32x3'}, // normal
-                {shaderLocation: 2, offset: 24, format: 'float32x2'}, // uv
-            ],
+            attributes: geoAttributes,
         };
 
         const instanceBufferLayout: GPUVertexBufferLayout = {
             arrayStride: 12 * 4,
             stepMode: 'instance',
             attributes: [
-                {shaderLocation: 3, offset: 0, format: 'float32x3'},  // instancePos
-                {shaderLocation: 4, offset: 12, format: 'float32x4'}, // instanceRotQuat
-                {shaderLocation: 5, offset: 28, format: 'float32x3'}, // instanceScale
-                {shaderLocation: 6, offset: 40, format: 'float32x2'}, // instanceExtra (fade, subId)
+                {shaderLocation: 6, offset: 0, format: 'float32x3'},  // instancePos
+                {shaderLocation: 7, offset: 12, format: 'float32x4'}, // instanceRotQuat
+                {shaderLocation: 8, offset: 28, format: 'float32x3'}, // instanceScale
+                {shaderLocation: 9, offset: 40, format: 'float32x2'}, // instanceExtra (fade, subId)
             ],
         };
 

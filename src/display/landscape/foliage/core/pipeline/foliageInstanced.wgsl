@@ -14,14 +14,17 @@ struct SubMeshUniforms {
 
 struct VertexInput {
     @location(0) position : vec3<f32>,
-    @location(1) normal : vec3<f32>,
+    @location(1) vertexNormal : vec3<f32>,
     @location(2) uv : vec2<f32>,
+    @location(3) uv1 : vec2<f32>,
+    @location(4) vertexColor_0 : vec4<f32>,
+    @location(5) vertexTangent : vec4<f32>,
     
     // Instanced Attributes
-    @location(3) instancePos : vec3<f32>,
-    @location(4) instanceRotQuat : vec4<f32>,
-    @location(5) instanceScale : vec3<f32>,
-    @location(6) instanceExtra : vec2<f32>, // x: FadeFactor (1.0~0.0), y: SubID / LodFade
+    @location(6) instancePos : vec3<f32>,
+    @location(7) instanceRotQuat : vec4<f32>,
+    @location(8) instanceScale : vec3<f32>,
+    @location(9) instanceExtra : vec2<f32>, // x: FadeFactor (1.0~0.0), y: SubID / LodFade
 };
 
 struct OutputData {
@@ -60,16 +63,33 @@ fn mainInput(input : VertexInput) -> OutputData {
     
     // 1. 하이라키 누적 상대 행렬 변환 (병합 메시 및 빌보드는 4x4 행렬 곱셈 2회 100% 스킵!)
     var hierarchyPos = input.position;
-    var hierarchyNormal = input.normal;
+    var hierarchyNormal = input.vertexNormal;
+    var hierarchyTangent = input.vertexTangent.xyz;
     if (subMeshUniforms.hasHierarchyTransform != 0u) {
         hierarchyPos = (subMeshUniforms.relativeModelMatrix * vec4<f32>(input.position, 1.0)).xyz;
-        hierarchyNormal = (subMeshUniforms.relativeNormalMatrix * vec4<f32>(input.normal, 0.0)).xyz;
+        hierarchyNormal = (subMeshUniforms.relativeNormalMatrix * vec4<f32>(input.vertexNormal, 0.0)).xyz;
+        hierarchyTangent = (subMeshUniforms.relativeNormalMatrix * vec4<f32>(input.vertexTangent.xyz, 0.0)).xyz;
     }
     
     // 2. 인스턴스 스케일 및 쿼터니언 회전 연산
-    let scaledPos = hierarchyPos * input.instanceScale;
+    let safeScale = max(input.instanceScale, vec3<f32>(0.0001));
+    let scaledPos = hierarchyPos * safeScale;
     let rotatedPos = rotateVectorByQuaternion(scaledPos, input.instanceRotQuat);
-    let worldNormal = rotateVectorByQuaternion(hierarchyNormal, input.instanceRotQuat);
+    
+    // 🌟 비등방 스케일 역전치(Inverse Transpose) 노멀 보정 및 쿼터니언 회전 정규화
+    let scaledNormal = hierarchyNormal / safeScale;
+    let worldNormal = normalize(rotateVectorByQuaternion(scaledNormal, input.instanceRotQuat));
+    
+    // 🌟 원본 버텍스 탄젠트 쿼터니언 회전 및 정규화 (PBR TBN 프레임 100% 일치)
+    var inTan = hierarchyTangent;
+    if (length(inTan) < 0.001) {
+        var rawT = vec3<f32>(1.0, 0.0, 0.0);
+        if (abs(hierarchyNormal.x) > 0.9) { rawT = vec3<f32>(0.0, 1.0, 0.0); }
+        inTan = normalize(cross(hierarchyNormal, rawT));
+    }
+    let worldTangent = normalize(rotateVectorByQuaternion(inTan, input.instanceRotQuat));
+    let tanW = select(1.0, input.vertexTangent.w, input.vertexTangent.w != 0.0);
+    output.vertexTangent = vec4<f32>(worldTangent, tanW);
     
     // 3. World Position 생성 (지형 표면 Y 위치에 안착)
     let worldPos = rotatedPos + input.instancePos;
@@ -81,9 +101,9 @@ fn mainInput(input : VertexInput) -> OutputData {
     output.vertexPosition = worldPos;
     output.vertexNormal = worldNormal;
     output.uv = input.uv;
-    output.uv1 = input.uv;
-    output.vertexColor_0 = vec4<f32>(1.0);
-    output.vertexTangent = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+    output.uv1 = input.uv1;
+    output.vertexColor_0 = input.vertexColor_0;
+
 
     // 5. RedGPU TAA Motion Vector 보간 좌표
     output.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
