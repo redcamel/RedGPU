@@ -75,10 +75,6 @@ export interface FoliageCrossBillboardOptions {
     fadeRange?: number;
 }
 
-/** [KO] 용어 호환성을 위한 Type Alias */
-export type FoliageBillboardOptions = FoliageCrossBillboardOptions;
-export type FoliageImpostorOptions = FoliageCrossBillboardOptions;
-
 export interface FoliageTypeOptions {
     name: string;
     /**

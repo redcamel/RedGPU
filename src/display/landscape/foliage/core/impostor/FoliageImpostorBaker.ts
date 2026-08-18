@@ -543,9 +543,3 @@ class FoliageImpostorBaker {
 Object.freeze(FoliageImpostorBaker);
 
 export default FoliageImpostorBaker;
-
-/** [KO] 용어 일관성을 위한 FoliageCrossBillboardBaker 표준 별칭 */
-export {
-    FoliageImpostorBaker,
-    FoliageImpostorBaker as FoliageCrossBillboardBaker
-};

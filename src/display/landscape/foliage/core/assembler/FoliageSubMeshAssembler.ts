@@ -451,4 +451,3 @@ class FoliageSubMeshAssembler {
 
 Object.freeze(FoliageSubMeshAssembler);
 export default FoliageSubMeshAssembler;
-export {FoliageSubMeshAssembler};

@@ -121,4 +121,3 @@ function createCrossBillboardGeometry(
 
 Object.freeze(createCrossBillboardGeometry);
 export default createCrossBillboardGeometry;
-export {createCrossBillboardGeometry};
