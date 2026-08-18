@@ -26,6 +26,13 @@ export interface FoliageSubMesh {
     readonly vertexUniformBuffer: GPUBuffer;
     readonly vertexUniformBindGroup: GPUBindGroup;
     readonly lodIndex?: number; // 0: LOD0 (3D 풀 지오메트리), 1: LOD1 (십자 빌보드)
+
+    // 🌟 렌더 루프 CPU 조건문 중복 순회 제거용 불변 사전 태깅 플래그
+    readonly isDepthPrepass: boolean;
+    readonly isMainOpaqueOrMasked: boolean;
+    readonly mainDepthMode: 'normal' | 'depthPrepass' | 'mainShadingAfterDepth';
+    readonly isAlpha: boolean;
+    readonly isTransparent: boolean;
 }
 
 export interface FoliageBillboardOptions {
@@ -563,6 +570,15 @@ export class FoliageType {
                 ]
             });
 
+            const isTransparent = !!mat.transparent || !!mat.use2PathRender;
+            const isAlpha = (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
+            const isLOD0 = lodIndex === 0 || lodIndex === undefined;
+            const isMasked = !!mat.useCutOff || (mat.cutOff !== undefined && mat.cutOff > 0);
+
+            const isDepthPrepass = !isTransparent && !isAlpha && isLOD0 && isMasked;
+            const isMainOpaqueOrMasked = !isTransparent && !isAlpha;
+            const mainDepthMode = (isLOD0 && isMasked) ? 'mainShadingAfterDepth' : 'normal';
+
             return {
                 mesh: meshNode,
                 geometry: geom,
@@ -578,6 +594,11 @@ export class FoliageType {
                 vertexUniformBuffer: uniformBuffer,
                 vertexUniformBindGroup: vertexBindGroup,
                 lodIndex,
+                isDepthPrepass,
+                isMainOpaqueOrMasked,
+                mainDepthMode,
+                isAlpha,
+                isTransparent,
             };
         };
 

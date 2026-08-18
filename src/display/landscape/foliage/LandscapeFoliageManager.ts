@@ -140,13 +140,7 @@ export class LandscapeFoliageManager {
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
-                const mat = sub.material;
-                const isTransparent = !!mat.transparent || !!mat.use2PathRender;
-                const isAlpha = (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
-                const isLOD0 = sub.lodIndex === 0 || sub.lodIndex === undefined;
-                const isMasked = !!mat.useCutOff || (mat.cutOff !== undefined && mat.cutOff > 0);
-
-                if (!isTransparent && !isAlpha && isLOD0 && isMasked) {
+                if (sub.isDepthPrepass) {
                     this.#drawSubMesh(passEncoder, sub, s, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, foliageType.options.maxInstances, 'depthPrepass');
                 }
             }
@@ -169,15 +163,8 @@ export class LandscapeFoliageManager {
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
-                const mat = sub.material;
-                const isTransparent = !!mat.transparent || !!mat.use2PathRender;
-                const isAlpha = (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
-                const isLOD0 = sub.lodIndex === 0 || sub.lodIndex === undefined;
-                const isMasked = !!mat.useCutOff || (mat.cutOff !== undefined && mat.cutOff > 0);
-
-                if (!isTransparent && !isAlpha) {
-                    const depthMode: FoliageDepthPassMode = (isLOD0 && isMasked) ? 'mainShadingAfterDepth' : 'normal';
-                    this.#drawSubMesh(passEncoder, sub, s, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, foliageType.options.maxInstances, depthMode);
+                if (sub.isMainOpaqueOrMasked) {
+                    this.#drawSubMesh(passEncoder, sub, s, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, foliageType.options.maxInstances, sub.mainDepthMode);
                 }
             }
         }
@@ -197,10 +184,7 @@ export class LandscapeFoliageManager {
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
-                const mat = sub.material;
-                const isTransparent = !!mat.transparent || !!mat.use2PathRender;
-                const isAlpha = (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
-                if (isAlpha) {
+                if (sub.isAlpha) {
                     this.#drawSubMesh(passEncoder, sub, s, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, foliageType.options.maxInstances, 'normal');
                 }
             }
@@ -222,9 +206,7 @@ export class LandscapeFoliageManager {
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
-                const mat = sub.material;
-                const isTransparent = !!mat.transparent || !!mat.use2PathRender;
-                if (isTransparent) {
+                if (sub.isTransparent) {
                     let entry = this.#transparentEntries[transCount];
                     if (!entry) {
                         entry = {
