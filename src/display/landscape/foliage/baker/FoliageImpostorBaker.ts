@@ -16,9 +16,9 @@ export interface FoliageBakeResult {
 }
 
 /**
- * [KO] 언리얼 엔진 5 스타일 식생 자동 임포스터 캡처/베이커 (Foliage Impostor Baker)
- *      3-Way 아틀라스 (Front View + Side View + Top-Down View)를 단일 텍스처로 자동 베이킹합니다.
- * [EN] Unreal Engine 5 style Foliage Impostor Baker that captures Front, Side, and Top-Down views into a 3-Way texture atlas.
+ * [KO] 언리얼 엔진 5 스타일 3-Plane Star 식생 자동 임포스터 캡처/베이커 (Foliage Impostor Baker)
+ *      0°, 60°, 120° 수직 3방향 뷰포트 아틀라스를 단일 텍스처(3:1 가로 아틀라스)로 자동 오프스크린 베이킹합니다.
+ * [EN] Unreal Engine 5 style Foliage Impostor Baker that captures 0°, 60°, and 120° vertical star views into a 3-Plane texture atlas.
  */
 export class FoliageImpostorBaker {
     static #bakePipelineCache: Map<string, GPURenderPipeline> = new Map();

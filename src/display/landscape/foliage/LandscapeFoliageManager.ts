@@ -265,13 +265,18 @@ export class LandscapeFoliageManager {
     }
 
 
+    get subMeshVertexBindGroupLayout(): GPUBindGroupLayout | null {
+        return this.#subMeshVertexBindGroupLayout;
+    }
+
     addFoliageType(options: FoliageTypeOptions): FoliageType {
         if (this.#foliageTypes.has(options.name)) {
             console.warn(`[LandscapeFoliageManager] FoliageType with name '${options.name}' already exists.`);
             return this.#foliageTypes.get(options.name)!;
         }
 
-        const foliageType = new FoliageType(this.redGPUContext, options);
+        // 🌟 단일 공유 subMeshVertexBindGroupLayout을 전달하여 BindGroupLayout 중복 생성 100% 제거
+        const foliageType = new FoliageType(this.redGPUContext, options, this.#subMeshVertexBindGroupLayout);
         foliageType.foliageManager = this;
         this.#foliageTypes.set(options.name, foliageType);
         this.#typeList.push(foliageType);

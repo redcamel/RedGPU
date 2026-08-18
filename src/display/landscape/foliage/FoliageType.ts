@@ -148,8 +148,13 @@ export class FoliageType {
 
     #loadedTileKeys: Set<string> = new Set();
 
-    constructor(redGPUContext: RedGPUContext, options: FoliageTypeOptions) {
+    constructor(
+        redGPUContext: RedGPUContext,
+        options: FoliageTypeOptions,
+        sharedSubMeshBindGroupLayout?: GPUBindGroupLayout | null
+    ) {
         this.redGPUContext = redGPUContext;
+        this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
         this.options = {
             name: options.name,
             mesh: options.mesh,
@@ -302,6 +307,7 @@ export class FoliageType {
     }
 
     #initSubMeshBindGroupLayout() {
+        if (this.#subMeshVertexBindGroupLayout) return; // 🌟 공유 레이아웃이 이미 있으면 중복 생성 스킵!
         const gpuDevice = this.redGPUContext.gpuDevice;
         if (!gpuDevice) return;
 
