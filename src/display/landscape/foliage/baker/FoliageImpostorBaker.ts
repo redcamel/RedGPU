@@ -4,6 +4,8 @@ import Mesh from "../../../mesh/Mesh";
 import DirectTexture from "../../../../resources/texture/DirectTexture";
 import {FoliageSubMesh} from "../FoliageType";
 import impostorBakeShaderWGSL from "./shader/impostorBake.wgsl";
+import getMipLevelCount from "../../../../utils/texture/getMipLevelCount";
+import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 export interface FoliageBakeResult {
     texture: DirectTexture;
@@ -116,12 +118,14 @@ export class FoliageImpostorBaker {
         // 🌟 3-Way 가로 아틀라스: Front(0) + Side(1) + Top-Down(2)
         const atlasWidth = resolution * 3;
         const atlasHeight = resolution;
+        const mipLevelCount = getMipLevelCount(atlasWidth, atlasHeight);
 
         const bakedGPUTexture = gpuDevice.createTexture({
             label: `BakedImpostor_${bakeName}`,
             size: [atlasWidth, atlasHeight, 1],
+            mipLevelCount,
             format: 'rgba8unorm',
-            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
+            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
         });
 
         const depthGPUTexture = gpuDevice.createTexture({
@@ -164,7 +168,7 @@ export class FoliageImpostorBaker {
         const renderPass = commandEncoder.beginRenderPass({
             colorAttachments: [
                 {
-                    view: bakedGPUTexture.createView(),
+                    view: bakedGPUTexture.createView({baseMipLevel: 0, mipLevelCount: 1}),
                     clearValue: {r: 0, g: 0, b: 0, a: 0},
                     loadOp: 'clear',
                     storeOp: 'store',
@@ -245,10 +249,25 @@ export class FoliageImpostorBaker {
         renderPass.end();
         gpuDevice.queue.submit([commandEncoder.finish()]);
 
+        // 🌟 10단계 Mipmap 체인 자동 생성 (원거리 텍스처 캐시 미스 및 화면 지글거림 완전 제거)
+        if (mipLevelCount > 1) {
+            redGPUContext.resourceManager.mipmapGenerator.generateMipmap(
+                bakedGPUTexture,
+                {
+                    size: [atlasWidth, atlasHeight, 1],
+                    mipLevelCount,
+                    format: 'rgba8unorm',
+                    usage: 0
+                },
+                false,
+                COMMAND_ENCODER_TYPE.IMMEDIATE
+            );
+        }
+
         const uniqueCacheKey = `FoliageImpostorDirectTexture_${bakeName}_${Math.random()}`;
         const bakedTexture = new DirectTexture(redGPUContext, uniqueCacheKey, bakedGPUTexture);
 
-        console.log(`[FoliageImpostorBaker 📸] Successfully baked 3-Way Atlas (Front + Side + Top-Down, ${atlasWidth}x${atlasHeight}) for '${bakeName}'! Size: ${bakedWidth.toFixed(2)}m x ${bakedHeight.toFixed(2)}m`);
+        console.log(`[FoliageImpostorBaker 📸] Successfully baked 3-Way Atlas (Front + Side + Top-Down, ${atlasWidth}x${atlasHeight}, ${mipLevelCount} Mip levels) for '${bakeName}'! Size: ${bakedWidth.toFixed(2)}m x ${bakedHeight.toFixed(2)}m`);
 
         // 🌟 브라우저 화면 좌측 상단에 실시간 3-Way 베이킹 아틀라스 2D 캔버스 표시
         if (typeof document !== 'undefined') {
