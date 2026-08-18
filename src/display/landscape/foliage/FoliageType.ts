@@ -30,11 +30,11 @@ export interface FoliageSubMesh {
     lodIndex: number; // 0 = 3D High-Poly, 1 = 3-Plane Star Billboard Impostor
 
     // 🌿 렌더 패스 최적화 플래그
-    readonly isDepthPrepass: boolean;
-    readonly isMainOpaqueOrMasked: boolean;
-    readonly mainDepthMode: FoliageDepthPassMode;
-    readonly isAlpha: boolean;
-    readonly isTransparent: boolean;
+    isDepthPrepass: boolean;
+    isMainOpaqueOrMasked: boolean;
+    mainDepthMode: FoliageDepthPassMode;
+    isAlpha: boolean;
+    isTransparent: boolean;
 }
 
 export interface FoliageCrossBillboardOptions {
@@ -131,21 +131,21 @@ export interface FoliageTypeOptions {
  * [EN] Single Foliage Species Model Container (Single Responsibility: Species Metadata, SubMeshes & Instance Buffer State)
  */
 class FoliageType {
-    readonly name: string;
-    readonly options: Required<Omit<FoliageTypeOptions, 'billboard' | 'impostor'>> & {
+    #name: string;
+    #options: Required<Omit<FoliageTypeOptions, 'billboard' | 'impostor'>> & {
         billboard?: FoliageCrossBillboardOptions;
         impostor?: FoliageCrossBillboardOptions;
     };
-    readonly redGPUContext: RedGPUContext;
+    #redGPUContext: RedGPUContext;
 
     // 지형 매니저 연결
     foliageManager: any = null;
 
     // 다중 서브메시 목록
-    readonly subMeshes: FoliageSubMesh[] = [];
+    #subMeshes: FoliageSubMesh[] = [];
 
     // GPU Instancing 버퍼
-    readonly instanceBuffer: FoliageInstanceBuffer;
+    #instanceBuffer: FoliageInstanceBuffer;
 
     // LOD & Culling 속성
     lod0SubMeshCount: number = 1;
@@ -163,13 +163,13 @@ class FoliageType {
         options: FoliageTypeOptions,
         sharedSubMeshBindGroupLayout?: GPUBindGroupLayout | null
     ) {
-        this.redGPUContext = redGPUContext;
+        this.#redGPUContext = redGPUContext;
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
-        this.name = options.name;
+        this.#name = options.name;
 
         const billboardOpt = options.billboard || options.impostor;
 
-        this.options = {
+        this.#options = {
             name: options.name,
             mesh: options.mesh,
             maxInstances: options.maxInstances ?? 50000,
@@ -186,23 +186,42 @@ class FoliageType {
         };
 
         this.hasBillboard = !!billboardOpt?.enabled;
-        this.lodDistance = this.options.lodDistance;
+        this.lodDistance = this.#options.lodDistance;
         this.lodFadeRange = billboardOpt?.fadeRange ?? 30.0;
 
         this.#initSubMeshBindGroupLayout();
 
         // 🌟 서브메시 조립 (FoliageSubMeshAssembler 단일 책임 분리)
         const assembleResult = FoliageSubMeshAssembler.assemble(
-            this.redGPUContext,
-            this.options,
+            this.#redGPUContext,
+            this.#options,
             this.#subMeshVertexBindGroupLayout!
         );
-        this.subMeshes = assembleResult.subMeshes;
+        this.#subMeshes = assembleResult.subMeshes;
         this.lod0SubMeshCount = assembleResult.lod0SubMeshCount;
         this.#bottomOffset = assembleResult.bottomOffset;
 
-        this.instanceBuffer = new FoliageInstanceBuffer(redGPUContext, this.options.maxInstances, this.subMeshes);
+        this.#instanceBuffer = new FoliageInstanceBuffer(redGPUContext, this.#options.maxInstances, this.#subMeshes);
         this.updateIndirectBuffer();
+    }
+
+    get name(): string {
+        return this.#name;
+    }
+
+    get options(): Required<Omit<FoliageTypeOptions, 'billboard' | 'impostor'>> & {
+        billboard?: FoliageCrossBillboardOptions;
+        impostor?: FoliageCrossBillboardOptions;
+    } {
+        return this.#options;
+    }
+
+    get subMeshes(): FoliageSubMesh[] {
+        return this.#subMeshes;
+    }
+
+    get instanceBuffer(): FoliageInstanceBuffer {
+        return this.#instanceBuffer;
     }
 
     get activeInstanceCount(): number {
@@ -215,10 +234,10 @@ class FoliageType {
 
     get bottomOffset(): number {
         if (this.#bottomOffset !== null) return this.#bottomOffset;
-        if (this.subMeshes.length > 0) {
+        if (this.#subMeshes.length > 0) {
             let minOffset = 0;
-            for (let i = 0; i < this.subMeshes.length; i++) {
-                minOffset = Math.min(minOffset, this.subMeshes[i].bottomOffset);
+            for (let i = 0; i < this.#subMeshes.length; i++) {
+                minOffset = Math.min(minOffset, this.#subMeshes[i].bottomOffset);
             }
             this.#bottomOffset = minOffset;
             return minOffset;
@@ -231,9 +250,9 @@ class FoliageType {
      */
     setInstancesData(data: Float32Array, count?: number): void {
         const instanceCount = count !== undefined ? count : Math.floor(data.length / 12);
-        this.#activeInstanceCount = Math.min(instanceCount, this.options.maxInstances);
-        this.instanceBuffer.dataBuffer.set(data.subarray(0, this.#activeInstanceCount * 12));
-        this.instanceBuffer.uploadToGPU(this.#activeInstanceCount);
+        this.#activeInstanceCount = Math.min(instanceCount, this.#options.maxInstances);
+        this.#instanceBuffer.dataBuffer.set(data.subarray(0, this.#activeInstanceCount * 12));
+        this.#instanceBuffer.uploadToGPU(this.#activeInstanceCount);
         this.updateIndirectBuffer();
     }
 
@@ -241,8 +260,8 @@ class FoliageType {
      * 식생 다중 서브메시 인다이렉트 버퍼의 파라미터를 최신 지오메트리 정보로 갱신
      */
     updateIndirectBuffer(): void {
-        if (!this.instanceBuffer || this.subMeshes.length === 0) return;
-        this.instanceBuffer.resetMultiIndirectCount(this.subMeshes);
+        if (!this.#instanceBuffer || this.#subMeshes.length === 0) return;
+        this.#instanceBuffer.resetMultiIndirectCount(this.#subMeshes);
     }
 
     /**
@@ -257,31 +276,12 @@ class FoliageType {
     }
 
     destroy(): void {
-        this.instanceBuffer.destroy();
-        for (let i = 0; i < this.subMeshes.length; i++) {
-            const sub = this.subMeshes[i];
+        this.#instanceBuffer.destroy();
+        for (let i = 0; i < this.#subMeshes.length; i++) {
+            const sub = this.#subMeshes[i];
             sub.vertexUniformBuffer?.destroy();
         }
-        this.subMeshes.length = 0;
-    }
-
-    #initSubMeshBindGroupLayout(): void {
-        if (this.#subMeshVertexBindGroupLayout) return;
-        const gpuDevice = this.redGPUContext.gpuDevice;
-        if (!gpuDevice) return;
-
-        this.#subMeshVertexBindGroupLayout = gpuDevice.createBindGroupLayout({
-            label: `FoliageSubMesh_VertexBindGroupLayout_${this.name}`,
-            entries: [
-                {
-                    binding: 0,
-                    visibility: GPUShaderStage.VERTEX,
-                    buffer: {
-                        type: 'uniform'
-                    }
-                }
-            ]
-        });
+        this.#subMeshes.length = 0;
     }
 
     /**
@@ -294,7 +294,7 @@ class FoliageType {
         const bbWidth = (billboardSub as any)._bakedWidth ?? 6.0;
         const bbHeight = (billboardSub as any)._bakedHeight ?? 8.0;
 
-        const newGeom = createCrossBillboardGeometry(this.redGPUContext, bbWidth, bbHeight, 0.6, wireframe);
+        const newGeom = createCrossBillboardGeometry(this.#redGPUContext, bbWidth, bbHeight, 0.6, wireframe);
         billboardSub.geometry = newGeom;
         billboardSub.mesh.geometry = newGeom;
         billboardSub.indexCount = newGeom.indexBuffer?.indexCount || 0;
@@ -309,6 +309,25 @@ class FoliageType {
             }
         }
         this.updateIndirectBuffer();
+    }
+
+    #initSubMeshBindGroupLayout(): void {
+        if (this.#subMeshVertexBindGroupLayout) return;
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (!gpuDevice) return;
+
+        this.#subMeshVertexBindGroupLayout = gpuDevice.createBindGroupLayout({
+            label: `FoliageSubMesh_VertexBindGroupLayout_${this.#name}`,
+            entries: [
+                {
+                    binding: 0,
+                    visibility: GPUShaderStage.VERTEX,
+                    buffer: {
+                        type: 'uniform'
+                    }
+                }
+            ]
+        });
     }
 
     /**

@@ -10,12 +10,12 @@ import FoliageCullingDispatcher from "./core/FoliageCullingDispatcher";
  * [EN] Landscape Foliage Master Manager (Top-level Facade & Lifecycle Orchestrator)
  */
 class LandscapeFoliageManager {
-    readonly redGPUContext: RedGPUContext;
+    #redGPUContext: RedGPUContext;
     landscape: any = null;
 
     // 등록된 식생 타입 컬렉션
-    readonly #foliageTypes: Map<string, FoliageType> = new Map();
-    readonly #typeList: FoliageType[] = [];
+    #foliageTypes: Map<string, FoliageType> = new Map();
+    #typeList: FoliageType[] = [];
 
     // 공용 바인드그룹 및 레이아웃
     #emptyBindGroupLayout: GPUBindGroupLayout | null = null;
@@ -23,20 +23,20 @@ class LandscapeFoliageManager {
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
 
     // 🌟 SRP 서브시스템들
-    readonly #pipelineRegistry: FoliagePipelineRegistry;
-    readonly #renderer: FoliageRenderer;
-    readonly #cullingDispatcher: FoliageCullingDispatcher;
+    #pipelineRegistry: FoliagePipelineRegistry;
+    #renderer: FoliageRenderer;
+    #cullingDispatcher: FoliageCullingDispatcher;
 
     constructor(redGPUContextOrLandscape: RedGPUContext | any, landscape?: any) {
         if (redGPUContextOrLandscape instanceof RedGPUContext) {
-            this.redGPUContext = redGPUContextOrLandscape;
+            this.#redGPUContext = redGPUContextOrLandscape;
             this.landscape = landscape || null;
         } else {
             this.landscape = redGPUContextOrLandscape;
-            this.redGPUContext = this.landscape.redGPUContext;
+            this.#redGPUContext = this.landscape.redGPUContext;
         }
 
-        const gpuDevice = this.redGPUContext.gpuDevice;
+        const gpuDevice = this.#redGPUContext.gpuDevice;
         if (gpuDevice) {
             this.#emptyBindGroupLayout = gpuDevice.createBindGroupLayout({
                 label: 'EmptyFoliageBindGroupLayout',
@@ -60,9 +60,9 @@ class LandscapeFoliageManager {
         }
 
         // 🌟 서브시스템 초기화
-        this.#pipelineRegistry = new FoliagePipelineRegistry(this.redGPUContext, this.#emptyBindGroupLayout);
-        this.#renderer = new FoliageRenderer(this.redGPUContext, this.#pipelineRegistry, this.#emptyBindGroup, this.#subMeshVertexBindGroupLayout);
-        this.#cullingDispatcher = new FoliageCullingDispatcher(this.redGPUContext);
+        this.#pipelineRegistry = new FoliagePipelineRegistry(this.#redGPUContext, this.#emptyBindGroupLayout);
+        this.#renderer = new FoliageRenderer(this.#redGPUContext, this.#pipelineRegistry, this.#emptyBindGroup, this.#subMeshVertexBindGroupLayout);
+        this.#cullingDispatcher = new FoliageCullingDispatcher(this.#redGPUContext);
 
         if (this.landscape?.tileStreamer) {
             this.landscape.tileStreamer.onTileLoaded = (comp: any) => {
@@ -124,7 +124,7 @@ class LandscapeFoliageManager {
         }
 
         // 🌟 단일 공유 subMeshVertexBindGroupLayout을 전달하여 BindGroupLayout 중복 생성 100% 제거
-        const foliageType = new FoliageType(this.redGPUContext, options, this.#subMeshVertexBindGroupLayout);
+        const foliageType = new FoliageType(this.#redGPUContext, options, this.#subMeshVertexBindGroupLayout);
         foliageType.foliageManager = this;
         this.#foliageTypes.set(options.name, foliageType);
         this.#typeList.push(foliageType);

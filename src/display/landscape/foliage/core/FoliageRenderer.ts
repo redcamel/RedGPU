@@ -31,7 +31,7 @@ class FoliageRenderer {
     #lastBoundInstanceOffset: number = -1;
 
     // 🌟 Zero-GC: 투명(Transparent) 서브메시 정렬용 재사용 객체 풀
-    readonly #transparentEntries: TransparentFoliageEntry[] = [];
+    #transparentEntries: TransparentFoliageEntry[] = [];
 
     constructor(
         redGPUContext: RedGPUContext,

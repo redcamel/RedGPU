@@ -6,17 +6,16 @@ import type {FoliageSubMesh} from "./FoliageType";
  * Zero-GC TypedArray 기반 Multi-Submesh Foliage GPU Instanced Buffer Allocator
  */
 class FoliageInstanceBuffer {
-    readonly maxInstances: number;
-    readonly strideFloats: number = 12; // Pos(3) + Quat(4) + Scale(3) + Extra(2)
-    readonly strideBytes: number = 12 * 4;
-
-    // Zero-GC 재사용 TypedArray
-    readonly dataBuffer: Float32Array;
+    // Zero-GC 재사용 TypedArray (44 floats = 176 bytes)
+    static #cullingUniformData = new Float32Array(44);
+    static #cullingUniformUint32 = new Uint32Array(FoliageInstanceBuffer.#cullingUniformData.buffer);
+    #maxInstances: number;
+    #strideFloats: number = 12; // Pos(3) + Quat(4) + Scale(3) + Extra(2)
 
     #redGPUContext: RedGPUContext;
-    // Zero-GC 재사용 TypedArray (44 floats = 176 bytes)
-    static readonly #cullingUniformData = new Float32Array(44);
-    static readonly #cullingUniformUint32 = new Uint32Array(FoliageInstanceBuffer.#cullingUniformData.buffer);
+    #strideBytes: number = 12 * 4;
+    // Zero-GC 재사용 TypedArray
+    #dataBuffer: Float32Array;
 
 
     #indirectGPUBuffer: GPUBuffer | null = null;
@@ -28,10 +27,18 @@ class FoliageInstanceBuffer {
 
     constructor(redGPUContext: RedGPUContext, maxInstances: number = 50000, subMeshes?: FoliageSubMesh[]) {
         this.#redGPUContext = redGPUContext;
-        this.maxInstances = maxInstances;
-        this.dataBuffer = new Float32Array(this.maxInstances * this.strideFloats);
+        this.#maxInstances = maxInstances;
+        this.#dataBuffer = new Float32Array(this.#maxInstances * this.#strideFloats);
 
         this.#initGPUBuffer(subMeshes);
+    }
+
+    get maxInstances(): number {
+        return this.#maxInstances;
+    }
+
+    get dataBuffer(): Float32Array {
+        return this.#dataBuffer;
     }
 
     /**
@@ -44,8 +51,8 @@ class FoliageInstanceBuffer {
         scaleX: number, scaleY: number, scaleZ: number,
         fade: number = 1.0, subId: number = 0
     ): void {
-        const offset = index * this.strideFloats;
-        const buffer = this.dataBuffer;
+        const offset = index * this.#strideFloats;
+        const buffer = this.#dataBuffer;
 
         buffer[offset] = posX;
         buffer[offset + 1] = posY;
@@ -70,14 +77,14 @@ class FoliageInstanceBuffer {
     uploadToGPU(activeCount: number): void {
         if (!this.#rawGPUBuffer || activeCount <= 0) return;
 
-        const uploadCount = Math.min(activeCount, this.maxInstances);
-        const uploadBytes = uploadCount * this.strideBytes;
+        const uploadCount = Math.min(activeCount, this.#maxInstances);
+        const uploadBytes = uploadCount * this.#strideBytes;
 
         const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
         gpuDevice.queue.writeBuffer(
             this.#rawGPUBuffer,
             0,
-            this.dataBuffer.buffer,
+            this.#dataBuffer.buffer,
             0,
             uploadBytes
         );
@@ -89,19 +96,19 @@ class FoliageInstanceBuffer {
     uploadRangeToGPU(startIndex: number, count: number): void {
         if (!this.#rawGPUBuffer || count <= 0) return;
 
-        const validStart = Math.min(startIndex, this.maxInstances);
-        const validCount = Math.min(count, this.maxInstances - validStart);
+        const validStart = Math.min(startIndex, this.#maxInstances);
+        const validCount = Math.min(count, this.#maxInstances - validStart);
         if (validCount <= 0) return;
 
-        const srcByteOffset = validStart * this.strideBytes;
-        const uploadBytes = validCount * this.strideBytes;
+        const srcByteOffset = validStart * this.#strideBytes;
+        const uploadBytes = validCount * this.#strideBytes;
 
         const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
         gpuDevice.queue.writeBuffer(
             this.#rawGPUBuffer,
             srcByteOffset,
-            this.dataBuffer.buffer,
-            this.dataBuffer.byteOffset + srcByteOffset,
+            this.#dataBuffer.buffer,
+            this.#dataBuffer.byteOffset + srcByteOffset,
             uploadBytes
         );
     }
@@ -141,7 +148,7 @@ class FoliageInstanceBuffer {
         f32[12] = lodDistance;
         u32[13] = Math.max(lod0SubMeshCount, 1);
         u32[14] = hasBillboard ? 1 : 0;
-        u32[15] = this.maxInstances;
+        u32[15] = this.#maxInstances;
         f32[16] = lodFadeRange; // ★ lodFadeRange (LOD 크로스페이드 구간)
         f32[17] = worldSizeX > 0 ? (1.0 / worldSizeX) : 0.0; // ⚡ invWorldSizeX (FDIV 나눗셈 100% 제거)
         f32[18] = 0; // pad2
@@ -275,7 +282,7 @@ class FoliageInstanceBuffer {
 
     #initGPUBuffer(subMeshes?: FoliageSubMesh[]): void {
         const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
-        const requiredSize = Math.max(this.dataBuffer.byteLength, 64);
+        const requiredSize = Math.max(this.#dataBuffer.byteLength, 64);
 
         // 1. Raw Storage Buffer (CPU 업로드 원본 식생 데이터)
         this.#rawGPUBuffer = gpuDevice.createBuffer({
