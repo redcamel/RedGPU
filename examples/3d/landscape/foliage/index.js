@@ -20,7 +20,7 @@ RedGPU.init(
         controller.x = 0;
         controller.y = 350;
         controller.z = 0;
-        controller.moveSpeed = 5000;
+        controller.moveSpeed = 1500;
 
         // 2. Scene & View3D 초기화
         const scene = new RedGPU.Display.Scene();
@@ -295,12 +295,12 @@ RedGPU.init(
                     cullingDistance: 1600,
                     fadeStartDistance: 1100,
                     minScale: [3, 3, 3],        // 현실적인 성목 높이 (약 7~8m)
-                    maxScale: [5.5, 5.5, 5.5],  // 대형 거목 높이 (약 12~14m)
-                    randomRotationY: true,
+                    maxScale: [3, 3, 3],   // 대형 거목 높이 (약 12~14m)
+                    // randomRotationY: true,
                     // 🌟 언리얼 엔진 5 스타일 SpeedTree Cross-Billboard Impostor LOD & Dithered Crossfade
                     billboard: {
                         enabled: true,
-                        lodDistance: 90, // 90m 전환 중심 거리
+                        lodDistance: 250, // 90m 전환 중심 거리
                         fadeRange: 30    // 75m ~ 105m 구간에서 3D 모델과 십자 빌보드가 부드럽게 디더링 크로스페이드 (팝핑 0%!)
                     }
                 });
@@ -392,6 +392,7 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
         foliageCount: grassType ? grassType.activeInstanceCount : 0,
         foliageCullingDist: grassType ? grassType.options.cullingDistance : 600,
         foliageFadeStartDist: grassType ? grassType.options.fadeStartDistance : 400,
+        billboardWireframe: false,
         // 1. Terrain Dimensions & Transform
         worldSizeX: wsX,
         worldSizeZ: wsZ,
@@ -486,6 +487,15 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                 }).on('change', (ev) => {
                     const target = grassType || foliageManager?.getFoliageType('ElmTree');
                     if (target) target.options.fadeStartDistance = ev.value;
+                });
+                folderFoliage.addBinding(config, 'billboardWireframe', {
+                    title: '📐 Billboard Wireframe'
+                }).on('change', (ev) => {
+                    const target = grassType || foliageManager?.getFoliageType('ElmTree');
+                    if (target) {
+                        target.setBillboardWireframe(ev.value);
+                        console.log('[Foliage Example 📐] Billboard Wireframe toggled:', ev.value);
+                    }
                 });
             }
 

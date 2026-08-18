@@ -42,13 +42,11 @@ fn vs_main(input: VertexInput) -> VertexOutput {
 fn fs_main(input: VertexOutput) -> @location(0) vec4<f32> {
     let texColor = textureSample(diffuseTexture, diffuseTextureSampler, input.uv);
     
-    // 🌟 MASK: Alpha Cutoff (알파 0.5 미만 폐기)
-    if (texColor.a < 0.5) {
+    // 🌟 MASK: 미세 잎사귀와 나뭇잎 전체를 풍성하고 빽빽하게 100% 보존
+    if (texColor.a < 0.1) {
         discard;
     }
     
-    // 🌟 베이킹 시에는 순수 알베도(BaseColor)만 기록 (라이팅은 렌더링 시 실시간 적용)
-    return vec4<f32>(texColor.rgb, 1.0);
+    // 🌟 베이킹 시 원본 알베도와 부드러운 알파 경계를 그대로 기록
+    return vec4<f32>(texColor.rgb, texColor.a);
 }
-
-

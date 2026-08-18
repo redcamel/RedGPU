@@ -15,7 +15,8 @@ export interface FoliageBakeResult {
 
 /**
  * [KO] 언리얼 엔진 5 스타일 식생 자동 임포스터 캡처/베이커 (Foliage Impostor Baker)
- * [EN] Unreal Engine 5 style Foliage Impostor Baker that automatically captures all tree submeshes into a single billboard texture.
+ *      3-Way 아틀라스 (Front View + Side View + Top-Down View)를 단일 텍스처로 자동 베이킹합니다.
+ * [EN] Unreal Engine 5 style Foliage Impostor Baker that captures Front, Side, and Top-Down views into a 3-Way texture atlas.
  */
 export class FoliageImpostorBaker {
     static #bakePipelineCache: Map<string, GPURenderPipeline> = new Map();
@@ -85,8 +86,7 @@ export class FoliageImpostorBaker {
     }
 
     /**
-     * [KO] 줄기(Trunk)와 나뭇잎(Leaf)을 포함한 모든 서브메시지를 오프스크린 가상 스튜디오에서 렌더링하여
-     * 단 1장의 투명 배경 통합 빌보드 텍스처로 자동 베이킹합니다.
+     * [KO] 줄기(Trunk)와 나뭇잎(Leaf)을 포함한 모든 서브메시지를 3-Way 아틀라스(Front + Side + Top-Down)로 자동 베이킹합니다.
      */
     static bakeSubMeshes(
         redGPUContext: RedGPUContext,
@@ -98,42 +98,65 @@ export class FoliageImpostorBaker {
         const gpuDevice = redGPUContext.gpuDevice;
         const aabb = this.calculateAABBFromSubMeshes(subMeshes);
 
-        const maxWidth = Math.max(aabb.width, aabb.depth);
-        const bakedWidth = maxWidth * 1.05;
-        const bakedHeight = aabb.height * 1.05;
+        // 🌟 나무의 실제 최대 반경 및 높이 산출 (1% 최소 마진으로 해상도 100% 활용)
+        const maxRadialExtent = Math.max(
+            Math.abs(aabb.min[0]),
+            Math.abs(aabb.max[0]),
+            Math.abs(aabb.min[2]),
+            Math.abs(aabb.max[2]),
+            0.5
+        ) * 1.02;
 
-        // 1. 오프스크린 렌더타겟 텍스처 생성 (RGBA8Unorm 투명 배경)
+        const bakedWidth = maxRadialExtent * 2.0;
+        const bakedHeight = Math.max(aabb.max[1] - aabb.min[1], 0.1) * 1.02;
+        const bottomY = aabb.min[1];
+        const topY = bottomY + bakedHeight;
+        const centerY = (bottomY + topY) * 0.5;
+
+        // 🌟 3-Way 가로 아틀라스: Front(0) + Side(1) + Top-Down(2)
+        const atlasWidth = resolution * 3;
+        const atlasHeight = resolution;
+
         const bakedGPUTexture = gpuDevice.createTexture({
             label: `BakedImpostor_${bakeName}`,
-            size: [resolution, resolution, 1],
+            size: [atlasWidth, atlasHeight, 1],
             format: 'rgba8unorm',
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC,
         });
 
         const depthGPUTexture = gpuDevice.createTexture({
             label: `BakedImpostor_Depth_${bakeName}`,
-            size: [resolution, resolution, 1],
+            size: [atlasWidth, atlasHeight, 1],
             format: 'depth24plus',
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
         });
 
-        // 2. 완벽하고 무결한 직교 투영 행렬 (Orthographic Matrix)
-        const projViewMatrix = mat4.create();
-        const centerX = (aabb.min[0] + aabb.max[0]) * 0.5;
-        const halfW = bakedWidth * 0.5;
-        const halfH = bakedHeight * 0.5;
-        const centerY = aabb.min[1] + halfH;
+        const maxCameraDist = Math.max(bakedWidth, bakedHeight) * 2.0;
 
-        // X: [minX, maxX] -> [-1, 1]
-        // Y: [minY, minY + bakedHeight] -> [-1, 1]
-        // Z: [-100, 100] -> [0, 1]
-        projViewMatrix[0] = 1.0 / halfW;
-        projViewMatrix[5] = 1.0 / halfH;
-        projViewMatrix[10] = -1.0 / 200.0;
-        projViewMatrix[12] = -centerX / halfW;
-        projViewMatrix[13] = -centerY / halfH;
-        projViewMatrix[14] = 0.5;
-        projViewMatrix[15] = 1.0;
+        // 🌟 3-Plane Star: 0°, 60°, 120° 3방향 수평 회전 투영 뷰 행렬 생성
+        const angles = [0, Math.PI / 3, (2 * Math.PI) / 3]; // 0°, 60°, 120°
+        const renderPassViews = [];
+
+        for (let a = 0; a < 3; a++) {
+            const rad = angles[a];
+            const camX = Math.sin(rad) * maxCameraDist;
+            const camZ = Math.cos(rad) * maxCameraDist;
+
+            const proj = mat4.create();
+            const view = mat4.create();
+            const projView = mat4.create();
+
+            mat4.orthoNO(proj, -maxRadialExtent, maxRadialExtent, -bakedHeight * 0.5, bakedHeight * 0.5, 0.1, maxCameraDist * 2.0);
+            mat4.lookAt(view, [camX, centerY, camZ], [0, centerY, 0], [0, 1, 0]);
+            mat4.multiply(projView, proj, view);
+
+            renderPassViews.push({
+                projView,
+                vpX: resolution * a,
+                vpY: 0,
+                lightDir: [-Math.sin(rad + 0.5), -1.0, -Math.cos(rad + 0.5)]
+            });
+        }
 
         this.#initBindGroupLayouts(gpuDevice);
 
@@ -142,7 +165,7 @@ export class FoliageImpostorBaker {
             colorAttachments: [
                 {
                     view: bakedGPUTexture.createView(),
-                    clearValue: {r: 0, g: 0, b: 0, a: 0}, // 완전 투명 배경!
+                    clearValue: {r: 0, g: 0, b: 0, a: 0},
                     loadOp: 'clear',
                     storeOp: 'store',
                 },
@@ -158,78 +181,86 @@ export class FoliageImpostorBaker {
         const basicSampler = redGPUContext.resourceManager.basicSampler.gpuSampler;
         const emptyTextureView = redGPUContext.resourceManager.emptyBitmapTextureView;
 
-        // 3. 모든 서브메시(줄기 + 잎사귀 등) 순차 렌더링!
-        for (let i = 0; i < subMeshes.length; i++) {
-            const sub = subMeshes[i];
-            if (sub.lodIndex === 1) continue; // 빌보드 자체는 렌더링 제외
+        for (let v = 0; v < renderPassViews.length; v++) {
+            const pv = renderPassViews[v];
+            renderPass.setViewport(pv.vpX, pv.vpY, resolution, resolution, 0.0, 1.0);
+            renderPass.setScissorRect(pv.vpX, pv.vpY, resolution, resolution);
 
-            const vertexGPU = sub.geometry.vertexBuffer?.gpuBuffer;
-            if (!vertexGPU) continue;
+            for (let i = 0; i < subMeshes.length; i++) {
+                const sub = subMeshes[i];
+                if (sub.lodIndex === 1) continue;
 
-            // 🌟 각 서브메시마다 독립된 유니폼 버퍼 및 바인드그룹 할당 (행렬 덮어쓰기 버그 완벽 방지!)
-            const subUniformBuffer = gpuDevice.createBuffer({
-                size: 144,
-                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-            });
+                const vertexGPU = sub.geometry.vertexBuffer?.gpuBuffer;
+                if (!vertexGPU) continue;
 
-            const subUniformData = new Float32Array(36);
-            subUniformData.set(projViewMatrix, 0); // 0~15
-            subUniformData.set(sub.relativeModelMatrix, 16); // 16~31 (서브메시의 정확한 고유 상대 행렬)
-            subUniformData[32] = -0.5; // lightDir.x
-            subUniformData[33] = -1.0; // lightDir.y
-            subUniformData[34] = -0.5; // lightDir.z
-            subUniformData[35] = 0.0;
+                const subUniformBuffer = gpuDevice.createBuffer({
+                    size: 144,
+                    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+                });
 
-            gpuDevice.queue.writeBuffer(subUniformBuffer, 0, subUniformData.buffer);
+                const subUniformData = new Float32Array(36);
+                subUniformData.set(pv.projView, 0); // 0~15
+                subUniformData.set(sub.relativeModelMatrix, 16); // 16~31
+                subUniformData[32] = pv.lightDir[0];
+                subUniformData[33] = pv.lightDir[1];
+                subUniformData[34] = pv.lightDir[2];
+                subUniformData[35] = 0.0;
 
-            const subBindGroup0 = gpuDevice.createBindGroup({
-                layout: this.#bakeBindGroupLayout0!,
-                entries: [{binding: 0, resource: {buffer: subUniformBuffer}}],
-            });
+                gpuDevice.queue.writeBuffer(subUniformBuffer, 0, subUniformData.buffer);
 
-            const pipeline = this.#getOrCreatePipeline(gpuDevice, sub.geometry);
+                const subBindGroup0 = gpuDevice.createBindGroup({
+                    layout: this.#bakeBindGroupLayout0!,
+                    entries: [{binding: 0, resource: {buffer: subUniformBuffer}}],
+                });
 
-            const mat = sub.material;
-            const texView = mat?.baseColorTexture?.gpuTexture?.createView()
-                || mat?.diffuseTexture?.gpuTexture?.createView()
-                || emptyTextureView;
+                const pipeline = this.#getOrCreatePipeline(gpuDevice, sub.geometry);
 
-            const bindGroup1 = gpuDevice.createBindGroup({
-                layout: this.#bakeBindGroupLayout1!,
-                entries: [
-                    {binding: 0, resource: basicSampler},
-                    {binding: 1, resource: texView},
-                ],
-            });
+                const mat = sub.material;
+                const texView = mat?.baseColorTexture?.gpuTexture?.createView()
+                    || mat?.diffuseTexture?.gpuTexture?.createView()
+                    || emptyTextureView;
 
-            renderPass.setPipeline(pipeline);
-            renderPass.setBindGroup(0, subBindGroup0);
-            renderPass.setBindGroup(1, bindGroup1);
-            renderPass.setVertexBuffer(0, vertexGPU);
+                const bindGroup1 = gpuDevice.createBindGroup({
+                    layout: this.#bakeBindGroupLayout1!,
+                    entries: [
+                        {binding: 0, resource: basicSampler},
+                        {binding: 1, resource: texView},
+                    ],
+                });
 
-            if (sub.isIndexed && sub.geometry.indexBuffer?.gpuBuffer) {
-                renderPass.setIndexBuffer(sub.geometry.indexBuffer.gpuBuffer, sub.indexFormat || 'uint32');
-                renderPass.drawIndexed(sub.indexCount);
-            } else {
-                renderPass.draw(sub.vertexCount);
+                renderPass.setPipeline(pipeline);
+                renderPass.setBindGroup(0, subBindGroup0);
+                renderPass.setBindGroup(1, bindGroup1);
+                renderPass.setVertexBuffer(0, vertexGPU);
+
+                if (sub.isIndexed && sub.geometry.indexBuffer?.gpuBuffer) {
+                    renderPass.setIndexBuffer(sub.geometry.indexBuffer.gpuBuffer, sub.indexFormat || 'uint32');
+                    renderPass.drawIndexed(sub.indexCount);
+                } else {
+                    renderPass.draw(sub.vertexCount);
+                }
             }
         }
 
         renderPass.end();
         gpuDevice.queue.submit([commandEncoder.finish()]);
 
-        // 4. DirectTexture 래핑
         const uniqueCacheKey = `FoliageImpostorDirectTexture_${bakeName}_${Math.random()}`;
         const bakedTexture = new DirectTexture(redGPUContext, uniqueCacheKey, bakedGPUTexture);
 
-        console.log(`[FoliageImpostorBaker 📸] Successfully baked ${subMeshes.length} submeshes of '${bakeName}' into ${resolution}x${resolution} Impostor Texture! Size: ${bakedWidth.toFixed(2)}m x ${bakedHeight.toFixed(2)}m (AABB: X[${aabb.min[0].toFixed(2)}~${aabb.max[0].toFixed(2)}], Y[${aabb.min[1].toFixed(2)}~${aabb.max[1].toFixed(2)}])`);
+        console.log(`[FoliageImpostorBaker 📸] Successfully baked 3-Way Atlas (Front + Side + Top-Down, ${atlasWidth}x${atlasHeight}) for '${bakeName}'! Size: ${bakedWidth.toFixed(2)}m x ${bakedHeight.toFixed(2)}m`);
+
+        // 🌟 브라우저 화면 좌측 상단에 실시간 3-Way 베이킹 아틀라스 2D 캔버스 표시
+        if (typeof document !== 'undefined') {
+            this.#debugDumpToCanvas(redGPUContext, bakedGPUTexture, atlasWidth, atlasHeight, bakeName);
+        }
 
         return {
             texture: bakedTexture,
             width: bakedWidth,
             height: bakedHeight,
-            depth: aabb.depth,
-            bottomOffset: aabb.min[1]
+            depth: bakedWidth,
+            bottomOffset: bottomY
         };
     }
 
@@ -334,5 +365,108 @@ export class FoliageImpostorBaker {
 
         this.#bakePipelineCache.set(key, pipeline);
         return pipeline;
+    }
+
+    static async #debugDumpToCanvas(
+        redGPUContext: RedGPUContext,
+        gpuTexture: GPUTexture,
+        width: number,
+        height: number,
+        name: string
+    ): Promise<void> {
+        const gpuDevice = redGPUContext.gpuDevice;
+        const bytesPerRow = Math.ceil((width * 4) / 256) * 256;
+        const bufferSize = bytesPerRow * height;
+
+        const readBuffer = gpuDevice.createBuffer({
+            size: bufferSize,
+            usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+        });
+
+        const commandEncoder = gpuDevice.createCommandEncoder();
+        commandEncoder.copyTextureToBuffer(
+            {texture: gpuTexture},
+            {buffer: readBuffer, bytesPerRow: bytesPerRow, rowsPerImage: height},
+            {width, height, depthOrArrayLayers: 1}
+        );
+        gpuDevice.queue.submit([commandEncoder.finish()]);
+
+        await readBuffer.mapAsync(GPUMapMode.READ);
+        const arrayBuffer = readBuffer.getMappedRange();
+        const srcData = new Uint8Array(arrayBuffer);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        canvas.style.position = 'fixed';
+        canvas.style.top = '10px';
+        canvas.style.left = '10px';
+        canvas.style.width = '384px';
+        canvas.style.height = '128px';
+        canvas.style.border = '2px solid #00ff66';
+        canvas.style.borderRadius = '4px';
+        canvas.style.background = '#1a1a1a';
+        canvas.style.zIndex = '999999';
+        canvas.style.boxShadow = '0 4px 16px rgba(0,0,0,0.8)';
+        canvas.title = `Baked Impostor Atlas: ${name} (Front | Side | Top-Down)`;
+
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            const imgData = ctx.createImageData(width, height);
+            for (let y = 0; y < height; y++) {
+                const srcRowOffset = y * bytesPerRow;
+                const dstRowOffset = y * width * 4;
+                for (let x = 0; x < width; x++) {
+                    const r = srcData[srcRowOffset + x * 4 + 0];
+                    const g = srcData[srcRowOffset + x * 4 + 1];
+                    const b = srcData[srcRowOffset + x * 4 + 2];
+                    const a = srcData[srcRowOffset + x * 4 + 3];
+
+                    const dstIdx = dstRowOffset + x * 4;
+                    if (a > 10) {
+                        // 🌿 실제 캡처된 수목 픽셀 (RGB 선명하게 표시)
+                        imgData.data[dstIdx + 0] = r;
+                        imgData.data[dstIdx + 1] = g;
+                        imgData.data[dstIdx + 2] = b;
+                        imgData.data[dstIdx + 3] = 255;
+                    } else {
+                        // 🏁 투명 배경 영역 (체커보드 패턴으로 투명 영역 명확히 구분)
+                        const checker = ((Math.floor(x / 16) + Math.floor(y / 16)) % 2 === 0) ? 60 : 40;
+                        imgData.data[dstIdx + 0] = checker;
+                        imgData.data[dstIdx + 1] = checker;
+                        imgData.data[dstIdx + 2] = checker;
+                        imgData.data[dstIdx + 3] = 255;
+                    }
+                }
+            }
+            ctx.putImageData(imgData, 0, 0);
+
+            // 🌟 3개 뷰포트 구분선 (Front | Side | Top-Down) 그리기
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 2;
+            const thirdW = width / 3;
+            ctx.beginPath();
+            ctx.moveTo(thirdW, 0);
+            ctx.lineTo(thirdW, height);
+            ctx.moveTo(thirdW * 2, 0);
+            ctx.lineTo(thirdW * 2, height);
+            ctx.stroke();
+
+            // 텍스트 라벨 표기
+            ctx.fillStyle = '#ffff00';
+            ctx.font = 'bold 24px monospace';
+            ctx.fillText('STAR 0°', 10, 30);
+            ctx.fillText('STAR 60°', thirdW + 10, 30);
+            ctx.fillText('STAR 120°', thirdW * 2 + 10, 30);
+        }
+
+        readBuffer.unmap();
+        readBuffer.destroy();
+
+        const oldCanvas = document.getElementById(`debug_atlas_${name}`);
+        if (oldCanvas) oldCanvas.remove();
+        canvas.id = `debug_atlas_${name}`;
+        document.body.appendChild(canvas);
+        console.log(`[FoliageImpostorBaker 🖼️] Debug atlas preview appended to DOM: #${canvas.id}`);
     }
 }

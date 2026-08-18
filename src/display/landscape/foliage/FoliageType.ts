@@ -13,11 +13,11 @@ import CrossBillboardMaterial from "./material/CrossBillboardMaterial";
 
 export interface FoliageSubMesh {
     readonly mesh: Mesh;
-    readonly geometry: any;
+    geometry: any;
     readonly material: any;
-    readonly indexCount: number;
-    readonly vertexCount: number;
-    readonly isIndexed: boolean;
+    indexCount: number;
+    vertexCount: number;
+    isIndexed: boolean;
     readonly indexFormat: GPUIndexFormat;
     readonly strideBytes: number;
     readonly bottomOffset: number;
@@ -314,6 +314,33 @@ export class FoliageType {
                 }
             ]
         });
+    }
+
+    /**
+     * [KO] 빌보드(LOD1)의 라인 모드(와이어프레임) 표시 여부를 실시간으로 전환합니다.
+     */
+    setBillboardWireframe(wireframe: boolean): void {
+        const billboardSub = this.subMeshes.find(s => s.lodIndex === 1);
+        if (!billboardSub) return;
+
+        const bbWidth = (billboardSub as any)._bakedWidth ?? 6.0;
+        const bbHeight = (billboardSub as any)._bakedHeight ?? 8.0;
+
+        const newGeom = createCrossBillboardGeometry(this.redGPUContext, bbWidth, bbHeight, 0.6, wireframe);
+        billboardSub.geometry = newGeom;
+        billboardSub.mesh.geometry = newGeom;
+        billboardSub.indexCount = newGeom.indexBuffer?.indexCount || 0;
+        billboardSub.vertexCount = newGeom.vertexBuffer?.vertexCount || 0;
+        billboardSub.isIndexed = !!newGeom.indexBuffer;
+
+        if (billboardSub.material) {
+            billboardSub.material.wireframe = wireframe;
+            billboardSub.material.useCutOff = !wireframe;
+            if (billboardSub.material._updateFragmentState) {
+                billboardSub.material._updateFragmentState();
+            }
+        }
+        this.updateIndirectBuffer();
     }
 
     /**
@@ -721,12 +748,15 @@ export class FoliageType {
                 1 // lodIndex: 1
             );
 
+            (bbSubMesh as any)._bakedWidth = bbWidth;
+            (bbSubMesh as any)._bakedHeight = bbHeight;
+
             subList.push(bbSubMesh);
             console.log(`[FoliageType 🌲] '${this.name}' added UE5 Cross-Billboard Impostor SubMesh (LOD1, ${bbWidth.toFixed(2)}x${bbHeight.toFixed(2)}m, transition @ ${this.lodDistance}m)`);
         }
 
-
         console.log(`[FoliageType 🌲] '${this.name}' collected ${subList.length} final submesh draw call(s) (LOD0: ${this.lod0SubMeshCount}, Billboard LOD1: ${this.hasBillboard ? 1 : 0}).`);
     }
 }
+
 

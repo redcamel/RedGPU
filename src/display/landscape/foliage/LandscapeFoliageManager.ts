@@ -565,11 +565,11 @@ export class LandscapeFoliageManager {
             ? this.#depthOnlyFragmentShaderModule
             : (material.fragmentShaderModule || material.gpuRenderInfo?.fragmentShaderModule);
 
-        if (!fragmentModule || !this.#vertexShaderModule) return null;
-
+        const isWireframe = !!material.wireframe;
+        const topology: GPUPrimitiveTopology = isWireframe ? 'line-list' : 'triangle-list';
         const baseKey = material.uuid || material.name || material.constructor.name;
         const shaderLabel = fragmentModule?.label || 'default';
-        const pipelineKey = `${baseKey}_${shaderLabel}_${msaaID}_stride${strideBytes}_cull${cullMode}_depthMode_${depthPassMode}`;
+        const pipelineKey = `${baseKey}_${shaderLabel}_${msaaID}_stride${strideBytes}_cull${cullMode}_topo${topology}_depthMode_${depthPassMode}`;
 
         const cachedPipeline = this.#pipelineCache.get(pipelineKey);
         if (cachedPipeline) {
@@ -705,7 +705,7 @@ export class LandscapeFoliageManager {
             },
 
             primitive: {
-                topology: 'triangle-list',
+                topology: topology,
                 cullMode: cullMode,
             },
             depthStencil: depthStencil,

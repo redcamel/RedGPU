@@ -35,41 +35,27 @@ fn main(inputData: InputData) -> OutputFragment {
     texColor = textureSample(diffuseTexture, diffuseTextureSampler, inputData.uv);
     #redgpu_endIf
 
-    // 🌟 MASK: Alpha Cutoff (0.5 미만 폐기)
-    if (texColor.a < 0.5) {
+    // 🌲 언리얼 엔진 5 스타일 3-Plane Star 3D Spherical Volume Normal Reconstruction
+    let planeNormal = normalize(inputData.vertexNormal);
+
+    // 🌟 MASK: Alpha Cutoff (외곽 검은색 테두리/블리딩을 완벽 제거하기 위해 0.35 적용)
+    #redgpu_if useCutOff
+    if (texColor.a < 0.35) {
         discard;
     }
+    #redgpu_endIf
 
-    // 🌟 언리얼 엔진 5 스타일 4x4 Bayer Matrix LOD Dithered Crossfade
-    let totalOpacity = inputData.combinedOpacity * globalFragmentData.opacity;
-    if (totalOpacity < 0.999) {
-        let bayer = array<f32, 16>(
-             0.0 / 16.0, 12.0 / 16.0,  3.0 / 16.0, 15.0 / 16.0,
-             8.0 / 16.0,  4.0 / 16.0, 11.0 / 16.0,  7.0 / 16.0,
-             2.0 / 16.0, 14.0 / 16.0,  1.0 / 16.0, 13.0 / 16.0,
-            10.0 / 16.0,  6.0 / 16.0,  9.0 / 16.0,  5.0 / 16.0
-        );
-        let ditherX = u32(inputData.position.x) % 4u;
-        let ditherY = u32(inputData.position.y) % 4u;
-        let threshold = bayer[ditherY * 4u + ditherX];
-        if (totalOpacity < threshold) {
-            discard;
-        }
-    }
-
-    // 🌲 언리얼 엔진 5 스타일 Pixel-Perfect Spherical Normal Reconstruction
-    // 평면 버텍스 보간 오차를 제거하고, 픽셀 위치(UV)를 기반으로 완벽한 3D 구체 볼륨 노멀 재구성
-    let sphereX = (inputData.uv.x - 0.5) * 2.0; // [-1, 1]
-    let sphereY = -(inputData.uv.y - 0.55) * 2.0; // [-1, 1]
+    // 3개 뷰포트(0°, 60°, 120°)별 로컬 U 산출
+    let uSegment = floor(inputData.uv.x * 3.0);
+    let localU = clamp((inputData.uv.x - uSegment / 3.0) * 3.0, 0.0, 1.0);
+    let sphereX = (localU - 0.5) * 2.0; // [-1, 1]
+    let sphereY = -(inputData.uv.y - 0.5) * 2.0; // [-1, 1]
     let distSq = sphereX * sphereX + sphereY * sphereY;
-    let sphereZ = sqrt(max(1.0 - distSq * 0.7, 0.2)); // 구체 앞면 볼륨 깊이
 
-    // 버텍스 평면 노멀(N)과 탄젠트 평면을 결합한 입체 구형 노멀
-    let planeNormal = normalize(inputData.vertexNormal);
+    // 🌿 3D 구형 볼륨 노멀 재구성 (각 평면의 노멀/탄젠트를 기준으로 3차원 볼륨감 생성)
+    let sphereZ = sqrt(max(1.0 - distSq * 0.7, 0.2));
     let upVec = vec3<f32>(0.0, 1.0, 0.0);
     let planeTangent = normalize(cross(upVec, planeNormal) + vec3<f32>(0.001, 0.0, 0.0));
-    
-    // 최종 3D 구형 노멀 (Spherical Volume Normal)
     let N = normalize(planeTangent * sphereX + upVec * (sphereY * 0.7) + planeNormal * sphereZ);
 
     let dirLight = systemUniforms.directionalLights[0];
