@@ -5,6 +5,7 @@
 #redgpu_include math.getMotionVector;
 #redgpu_include math.INV_PI;
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
+#redgpu_include shadow.getDirectionalShadowVisibility;
 
 @group(2) @binding(1) var diffuseTextureSampler: sampler;
 @group(2) @binding(2) var diffuseTexture: texture_2d<f32>;
@@ -62,21 +63,46 @@ fn main(inputData: InputData) -> OutputFragment {
     let planeTangent = vec3<f32>(planeNormal.z, 0.0, -planeNormal.x);
     let N = normalize(planeTangent * sphereX + vec3<f32>(0.0, sphereY * 0.7, 0.0) + planeNormal * sphereZ);
 
+    let V = normalize(systemUniforms.camera.cameraPosition.xyz - inputData.vertexPosition);
     let preExposure = systemUniforms.preExposure;
+    let roughness = 0.85; // 수목 잎사귀 표준 거칠기
+
+    // 1. Directional Shadow 가시성 계산 (3D PBR과 100% 동일)
+    var visibility: f32 = 1.0;
+    visibility = getDirectionalShadowVisibility(
+        directionalShadowMap,
+        directionalShadowMapSampler,
+        systemUniforms.shadow.directionalShadowDepthTextureSize,
+        systemUniforms.shadow.directionalShadowBias,
+        systemUniforms.shadow.directionalShadowFilterScale,
+        inputData.shadowCoord
+    );
+    visibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, visibility);
+
+    // 2. Direct Sunlight (PBR getDirectDiffuseBRDF / Disney Diffuse 1:1 일치)
     var directSunLighting = vec3<f32>(0.0);
-    
-    // 1. Direct Sun Lighting (PBR calcPbrLight와 100% 동일한 에너지 보존 램버트)
     if (systemUniforms.directionalLightCount > 0u) {
         for (var i = 0u; i < systemUniforms.directionalLightCount; i = i + 1u) {
             let dirLight = systemUniforms.directionalLights[i];
             let L = -normalize(dirLight.direction);
+            let H = normalize(L + V);
             let NdotL = max(dot(N, L), 0.0);
-            let backLight = max(dot(-N, L), 0.0) * 0.25; // 잎사귀 투과광
-            directSunLighting += texColor.rgb * dirLight.color * (dirLight.intensity * INV_PI) * (NdotL + backLight) * preExposure;
+            let NdotV = max(abs(dot(N, V)), 0.04);
+            let LdotH = max(dot(L, H), 0.0);
+
+            // Disney/Burley Diffuse BRDF
+            let energyFactor = mix(1.0, 1.0 / 1.51, roughness);
+            let fd90 = 0.5 + 2.0 * roughness * LdotH * LdotH;
+            let lightScatter = 1.0 + (fd90 - 1.0) * pow(1.0 - NdotL, 5.0);
+            let viewScatter  = 1.0 + (fd90 - 1.0) * pow(1.0 - NdotV, 5.0);
+            let diffuseBRDF  = NdotL * lightScatter * viewScatter * energyFactor * INV_PI;
+
+            let finalLightColor = dirLight.color * dirLight.intensity * preExposure * visibility;
+            directSunLighting += texColor.rgb * finalLightColor * diffuseBRDF;
         }
     }
     
-    // 2. IBL & Ambient Lighting (PBR envIBL_DIFFUSE와 100% 동일한 광도/조도 공식)
+    // 3. IBL & Ambient Lighting (PBR envIBL_DIFFUSE와 100% 동일)
     var iblDiffuseColor = vec3<f32>(0.0);
 
     if (systemUniforms.usePrefilterTexture == 1u) {
@@ -93,15 +119,14 @@ fn main(inputData: InputData) -> OutputFragment {
         iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
     }
 
-    // 기본 앰비언트 (IBL이 없을 때 안전 fallback)
+    // 기본 앰비언트 (IBL/SkyAtmosphere 부재 시 PBR 표준 fallback)
     if (systemUniforms.usePrefilterTexture == 0u && systemUniforms.useSkyAtmosphere == 0u) {
         iblDiffuseColor = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
     }
 
-    // PBRMaterial 라인 1124와 100% 동일: albedo * iblDiffuseColor * INV_PI
     let indirectLighting = texColor.rgb * iblDiffuseColor * INV_PI;
 
-    // 3. 최종 조명 합산 (PBR과 1:1 완벽 일치)
+    // 4. 최종 조명 합산 (PBR과 1:1 완벽 일치)
     var finalRgb = directSunLighting + indirectLighting;
 
     #redgpu_if useTint
