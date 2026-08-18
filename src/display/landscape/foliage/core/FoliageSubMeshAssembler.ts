@@ -8,7 +8,7 @@ import GPU_BLEND_FACTOR from "../../../../gpuConst/GPU_BLEND_FACTOR";
 import createCrossBillboardGeometry from "../material/createCrossBillboardGeometry";
 import CrossBillboardMaterial from "../material/CrossBillboardMaterial";
 import FoliageImpostorBaker from "./FoliageImpostorBaker";
-import {FoliageSubMesh, FoliageTypeOptions} from "../FoliageType";
+import type {FoliageSubMesh, FoliageTypeOptions} from "../FoliageType";
 
 export interface FoliageAssemblyResult {
     subMeshes: FoliageSubMesh[];

@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import {FoliageSubMesh} from "./FoliageType";
+import type {FoliageSubMesh} from "./FoliageType";
 
 /**
  * FoliageInstanceBuffer

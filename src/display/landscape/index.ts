@@ -17,7 +17,8 @@ import LandscapeVHTDebugger from "./debugger/LandscapeVHTDebugger";
 import LandscapeVNTDebugger from "./debugger/LandscapeVNTDebugger";
 import LandscapeHUDDebugger from "./debugger/LandscapeHUDDebugger";
 import LandscapeFoliageManager from "./foliage/LandscapeFoliageManager";
-import FoliageType, {FoliageTypeOptions} from "./foliage/FoliageType";
+import type {FoliageTypeOptions} from "./foliage/FoliageType";
+import FoliageType from "./foliage/FoliageType";
 import FoliageInstanceBuffer from "./foliage/FoliageInstanceBuffer";
 import CrossBillboardMaterial from "./foliage/material/CrossBillboardMaterial";
 
@@ -42,8 +43,11 @@ export {
     LANDSCAPE_BASE_GRID_SIZE,
     LandscapeFoliageManager,
     FoliageType,
-    FoliageTypeOptions,
     FoliageInstanceBuffer,
     CrossBillboardMaterial
+};
+
+export type {
+    FoliageTypeOptions
 };
 

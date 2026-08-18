@@ -5,7 +5,7 @@ import Geometry from "../../../geometry/Geometry";
 import ABaseMaterial from "../../../material/core/ABaseMaterial";
 import FoliageInstanceBuffer from "./FoliageInstanceBuffer";
 import createCrossBillboardGeometry from "./material/createCrossBillboardGeometry";
-import {FoliageDepthPassMode} from "./core/FoliagePipelineRegistry";
+import type {FoliageDepthPassMode} from "./core/FoliagePipelineRegistry";
 import FoliageSubMeshAssembler from "./core/FoliageSubMeshAssembler";
 import FoliageTilePopulator from "./core/FoliageTilePopulator";
 

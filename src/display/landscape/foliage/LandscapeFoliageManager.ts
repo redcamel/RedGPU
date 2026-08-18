@@ -1,5 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import FoliageType, {FoliageTypeOptions} from "./FoliageType";
+import type {FoliageTypeOptions} from "./FoliageType";
+import FoliageType from "./FoliageType";
 import FoliagePipelineRegistry from "./core/FoliagePipelineRegistry";
 import FoliageRenderer from "./core/FoliageRenderer";
 import FoliageCullingDispatcher from "./core/FoliageCullingDispatcher";
