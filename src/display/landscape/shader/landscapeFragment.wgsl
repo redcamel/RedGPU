@@ -7,6 +7,8 @@
 #redgpu_include math.EPSILON;
 #redgpu_include math.direction.getViewDirection;
 #redgpu_include math.direction.getReflectionVectorFromViewDirection;
+#redgpu_include skyAtmosphere.skyAtmosphereFn;
+#redgpu_include shadow.getDirectionalShadowVisibility;
 
 struct InputData {
     @builtin(position) position: vec4<f32>,
@@ -25,7 +27,7 @@ struct InputData {
 
 struct LandscapeLayerParams {
     uvOffset: vec2<f32>,
-    uvScale: vec2<f32>, // 🌿 타일 기준 UV 스케일
+    uvScale: vec2<f32>,
     _padding0: vec2<f32>,
     minVal: f32,
     maxVal: f32,
@@ -35,7 +37,7 @@ struct LandscapeLayerParams {
     roughness: f32,
     metallic: f32,
     normalIntensity: f32,
-    enabled: f32, // 1.0 or 0.0
+    enabled: f32,
     aoIntensity: f32,
     heightOffset: f32,
     heightContrast: f32,
@@ -164,7 +166,6 @@ fn computeDirectLayersPBR(
 
         if (layerW <= 0.0001) { continue; }
 
-        // 🌿 타일 기준 UV 스케일 적용 (근경/원경 1:1 완벽 일치)
         let layerUV = worldTileUV * layerParams.uvScale + layerParams.uvOffset;
 
         let layerAlbedoSample = textureSampleLevel(layerBaseColorArray, baseColorTextureSampler, layerUV, layerIdx, mipLevel);
@@ -190,7 +191,7 @@ fn computeDirectLayersPBR(
     if (totalLayerWeight > 0.0001) {
         let invW = 1.0 / totalLayerWeight;
         let layerBlendAlbedo = blendedAlbedo * invW;
-        let layerBlendNormal = normalize(blendedNormalTangent); // normalize 내부에서 벡터 크기로 나누므로 * invW 불필요
+        let layerBlendNormal = normalize(blendedNormalTangent);
         let layerBlendRoughness = blendedRoughness * invW;
         let layerBlendMetallic = blendedMetallic * invW;
         let layerBlendAO = blendedAO * invW;
@@ -199,10 +200,9 @@ fn computeDirectLayersPBR(
 
         res.albedo = mix(baseAlbedo, layerBlendAlbedo, alpha);
 
-        // TBN 월드 공간 표면 노멀 합성 (Reoriented Perturbation: 중간 normalize 2회 제거)
         if (length(layerBlendNormal.xy) > 0.001) {
             let tangentX = normalize(vec3<f32>(1.0, 0.0, 0.0) - baseN * baseN.x);
-            let tangentZ = cross(baseN, tangentX); // baseN과 tangentX가 직교 단위벡터이므로 외적 결과도 이미 단위벡터
+            let tangentZ = cross(baseN, tangentX);
             let perturbedWorldN = tangentX * layerBlendNormal.x + tangentZ * layerBlendNormal.y + baseN * layerBlendNormal.z;
             res.normal = normalize(mix(baseN, perturbedWorldN, alpha));
         } else {
@@ -222,222 +222,149 @@ fn computeDirectLayersPBR(
     return res;
 }
 
+// =============================================================================
+// PBRMaterial Standard Lighting Functions (100% Shared Physical Pipeline)
+// =============================================================================
+
+fn getDielectricF0(ior: f32) -> vec3<f32> {
+    let f0_factor = (ior - 1.0) / (ior + 1.0);
+    return vec3<f32>(f0_factor * f0_factor);
+}
+
+fn getSpecularNDF(NdotH: f32, roughness: f32) -> f32 {
+    let alpha = roughness * roughness;
+    let alpha2 = alpha * alpha;
+    let NdotH2 = NdotH * NdotH;
+    let nom = alpha2;
+    let denom = (NdotH2 * (alpha2 - 1.0) + 1.0);
+    let denomSquared = denom * denom;
+    return nom / max(EPSILON, denomSquared * PI);
+}
+
+fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
+    let alpha = roughness * roughness;
+    let alpha2 = alpha * alpha;
+    let safeNdotV = max(NdotV, 1e-4);
+    let safeNdotL = max(NdotL, 1e-4);
+    let GGXV = safeNdotL * sqrt(safeNdotV * safeNdotV * (1.0 - alpha2) + alpha2);
+    let GGXL = safeNdotV * sqrt(safeNdotL * safeNdotL * (1.0 - alpha2) + alpha2);
+    return 0.5 / max(GGXV + GGXL, EPSILON);
+}
+
+fn getFresnel(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
+    return F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+fn getDirectSpecularBRDF(
+    F: vec3<f32>,
+    roughness: f32,
+    NdotH: f32,
+    NdotV: f32,
+    NdotL: f32
+) -> vec3<f32> {
+    let D = getSpecularNDF(NdotH, roughness);
+    let V = getSpecularVisibility(NdotV, NdotL, roughness);
+    return D * V * F;
+}
+
 fn getDirectDiffuseBRDF(
     NdotL: f32,
     NdotV: f32,
     LdotH: f32,
     roughness: f32,
-    energyBias: f32,
-    energyFactor: f32,
     albedo: vec3<f32>
 ) -> vec3<f32> {
     if (NdotL <= 0.0) { return vec3<f32>(0.0); }
+    let energyBias = mix(0.0, 0.5, roughness);
+    let energyFactor = mix(1.0, 1.0 / 1.51, roughness);
     let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
     let f0 = 1.0;
-
-    let oneMinusNdotL = 1.0 - NdotL;
-    let nl2 = oneMinusNdotL * oneMinusNdotL;
-    let nl5 = nl2 * nl2 * oneMinusNdotL;
-    let lightScatter = f0 + (fd90 - f0) * nl5;
-
-    let oneMinusNdotV = 1.0 - NdotV;
-    let nv2 = oneMinusNdotV * oneMinusNdotV;
-    let nv5 = nv2 * nv2 * oneMinusNdotV;
-    let viewScatter = f0 + (fd90 - f0) * nv5;
-
+    let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
+    let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
     return albedo * NdotL * lightScatter * viewScatter * energyFactor * INV_PI;
 }
 
-@fragment
-fn main(inputData: InputData) -> OutputFragment {
-    var output: OutputFragment;
-    
-    let input_vertexPosition = inputData.vertexPosition;
-    let u_cameraPosition = systemUniforms.camera.cameraPosition;
-    let preExposure = systemUniforms.preExposure;
-
-    let globalUV = inputData.uv1;
-    let lod = inputData.lodLevel;
-    let worldTileUV = inputData.uv; // 🌿 타일 로컬 격자 고정밀 UV (0.0 ~ 1.0)
-
-    var albedo: vec3<f32>;
-    var N: vec3<f32>;
-    var roughnessFactor: f32;
-    var metallicFactor: f32;
-    var ambientOcclusion: f32;
-
-    let viewDist = distance(u_cameraPosition, input_vertexPosition);
-    // 🌿 원경 VBT 전용 정수 밉 레벨 (Trilinear 부하 0%, 텍스처 캐시 적중률 극대화)
-    let vbtMip = floor(clamp(log2(max(1.0, viewDist * 0.002)), 0.0, 4.0));
-
-    // 🌟 하이브리드 LOD 적응형 셰이딩 (Hybrid LOD Distance-Based Continuous Adaptive Shading)
-    if (lod < 1.5) {
-        // 🌿 근경(LOD 0~1)에서만 VNT 베이스 노멀 및 slopeAngleDeg acos() 삼각함수 지연 계산 (원경 낭비 0%)
-        let vntSample = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
-        let baseN = normalize(select(vntSample * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), length(vntSample) <= 0.001));
-        let slopeAngleDeg = acos(clamp(baseN.y, -1.0, 1.0)) * 57.295779513;
-
-        // 🌿 LOD 0 ~ 1: 카메라와의 실제 픽셀 거리 기반 부드러운 하이브리드 크로스페이드 (시각적 팝핑 0%)
-        let lod0Dist = max(1.0, sqrt(landscapeInstanceUniforms.lodDistancesSq[0].x));
-        let fadeStart = lod0Dist * 0.7;
-        let fadeEnd = lod0Dist;
-        let fade = smoothstep(fadeStart, fadeEnd, viewDist);
-
-        if (fade >= 0.999) {
-            // ⚡ 페이드 100% 외곽 구간: 16-Tap 다이렉트 레이어 연산 100% 스킵! $O(1)$ VBT 3-Tap 즉시 로드
-            let vbtAlbedoRaw = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
-            let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
-            let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, vbtMip);
-
-            let isBaked = length(vbtAlbedoRaw) > 0.001;
-            let vbtAlbedo = select(uniforms.color.rgb, vbtAlbedoRaw, isBaked);
-
-            albedo = vbtAlbedo;
-            N = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), baseN, length(vbtNormalEncoded) <= 0.001));
-            roughnessFactor = max(0.04, select(0.9, vbtORM.g, isBaked));
-            metallicFactor = select(0.0, vbtORM.b, isBaked);
-            ambientOcclusion = select(1.0, vbtORM.r, isBaked);
-        } else {
-            // 거리 기반 밉맵 레벨 (0.0 ~ 4.0) 산출 및 다이렉트 레이어 계산
-            let mipLevel = clamp(log2(max(1.0, viewDist * 0.05)), 0.0, 4.0);
-            let direct = computeDirectLayersPBR(globalUV, worldTileUV, baseN, inputData.vertexHeight, slopeAngleDeg, mipLevel);
-
-            if (fade <= 0.001) {
-                // 🌿 근거리 (LOD 0 영역): 100% Direct Layer 초고해상도 샘플링 (1cm 마이크로 디테일, VBT 페치 0회)
-                albedo = direct.albedo;
-                N = direct.normal;
-                roughnessFactor = direct.roughness;
-                metallicFactor = direct.metallic;
-                ambientOcclusion = direct.ao;
-            } else {
-                // 🔀 순수 전이 영역 (0.001 < fade < 0.999): Direct Layer <-> VBT 부드러운 크로스페이드
-                let vbtAlbedoRaw = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
-                let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
-                let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, vbtMip);
-
-                let isBaked = length(vbtAlbedoRaw) > 0.001;
-                let vbtAlbedo = select(uniforms.color.rgb, vbtAlbedoRaw, isBaked);
-                let vbtN = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), baseN, length(vbtNormalEncoded) <= 0.001));
-
-                albedo = mix(direct.albedo, vbtAlbedo, fade);
-                N = normalize(mix(direct.normal, vbtN, fade));
-                roughnessFactor = mix(direct.roughness, max(0.04, select(0.9, vbtORM.g, isBaked)), fade);
-                metallicFactor = mix(direct.metallic, select(0.0, vbtORM.b, isBaked), fade);
-                ambientOcclusion = mix(direct.ao, select(1.0, vbtORM.r, isBaked), fade);
-            }
-        }
+fn getDirectPbrLight(
+    lightColor: vec3<f32>,
+    N: vec3<f32>,
+    V: vec3<f32>,
+    L: vec3<f32>,
+    NdotV: f32,
+    roughnessParameter: f32,
+    metallicParameter: f32,
+    albedo: vec3<f32>,
+    F0: vec3<f32>
+) -> vec3<f32> {
+    let NdotL = max(dot(N, L), 0.0);
+    if (NdotL <= 0.0) {
+        return vec3<f32>(0.0);
     }
-    else {
-        // ⚡ LOD 2 ~ 7 (원경 250개 타일): VNT 페치 0회! acos() 삼각함수 0회! $O(1)$ 초고속 VBT 2D Atlas 3-Tap 즉시 샘플링
-        let vbtAlbedoRaw = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
-        let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
-        let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, vbtMip);
+    let H = normalize(L + V);
+    let NdotH = max(dot(N, H), 0.0);
+    let LdotH = max(dot(L, H), 0.0);
+    let VdotH = max(dot(V, H), 0.0);
 
-        let isBaked = length(vbtAlbedoRaw) > 0.001;
-        let vbtAlbedo = select(uniforms.color.rgb, vbtAlbedoRaw, isBaked);
+    let F = getFresnel(VdotH, F0);
+    let SPEC_BRDF = getDirectSpecularBRDF(F, roughnessParameter, NdotH, NdotV, NdotL);
+    let diffuse_reflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughnessParameter, albedo);
 
-        albedo = vbtAlbedo;
-        N = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), length(vbtNormalEncoded) <= 0.001));
-        roughnessFactor = max(0.04, select(0.9, vbtORM.g, isBaked));
-        metallicFactor = select(0.0, vbtORM.b, isBaked);
-        ambientOcclusion = select(1.0, vbtORM.r, isBaked);
-    }
+    let dielectricPart = (SPEC_BRDF * NdotL) + (vec3<f32>(1.0) - F) * diffuse_reflection;
+    let metallicPart = SPEC_BRDF * NdotL;
+    let directLight = mix(dielectricPart, metallicPart, metallicParameter);
 
-    // LOD 디버그 색상 (lodColoration) 오버레이 처리
-    if (inputData.instanceColor.a > 0.0) {
-        albedo = mix(albedo, inputData.instanceColor.rgb, 0.6);
-    }
+    return directLight * lightColor;
+}
 
-    // Core Vectors
-    let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
-    let NdotV = max(abs(dot(N, V)), 0.04);
-
-    // Fresnel F0
-    let F0_dielectric = vec3<f32>(0.04);
-    let F0_metal = albedo;
-    let F0 = mix(F0_dielectric, F0_metal, metallicFactor);
-    let roughnessParameter = max(roughnessFactor, 0.04);
-
-    // 🌟 Cook-Torrance PBR 상수 및 G1V 뷰 감쇠, 디즈니 에너지 보존 계수 1회 사전 계산 (루프 내부 중복 연산 100% 제거)
-    let alpha = roughnessParameter * roughnessParameter;
-    let alpha2 = alpha * alpha;
-    let alpha2Minus1 = alpha2 - 1.0;
-    let k = (roughnessParameter + 1.0) * (roughnessParameter + 1.0) * 0.125;
-    let invK = 1.0 - k;
-    let G1V = NdotV / (NdotV * invK + k + EPSILON);
-    let energyBias = mix(0.0, 0.5, roughnessParameter);
-    let energyFactor = mix(1.0, 1.0 / 1.51, roughnessParameter);
-
-    // Direct Lighting Loop (Cook-Torrance PBR with Disney Diffuse)
+fn getDirectPbrLighting(
+    input_vertexPosition: vec3<f32>,
+    N: vec3<f32>,
+    V: vec3<f32>,
+    NdotV: f32,
+    roughnessParameter: f32,
+    metallicParameter: f32,
+    albedo: vec3<f32>,
+    F0: vec3<f32>
+) -> vec3<f32> {
     var totalDirectLighting = vec3<f32>(0.0);
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
 
-    if (u_directionalLightCount > 0u) {
-        for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
-            let lightIntensity = u_directionalLights[i].intensity;
-            let L = -normalize(u_directionalLights[i].direction);
-            let finalLightColor = u_directionalLights[i].color * lightIntensity * preExposure;
+    for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
+        let lightIntensity = u_directionalLights[i].intensity;
+        let L = -normalize(u_directionalLights[i].direction);
+        var finalLightColor = u_directionalLights[i].color * lightIntensity * systemUniforms.preExposure;
 
-            let NdotL = max(dot(N, L), 0.0);
-            if (NdotL > 0.0) {
-                let H = normalize(V + L);
-                let NdotH = max(dot(N, H), 0.0);
-                let LdotH = max(dot(L, H), 0.0);
-
-                let denomNDF = (NdotH * NdotH * alpha2Minus1 + 1.0);
-                let NDF = alpha2 / (PI * denomNDF * denomNDF + EPSILON);
-
-                let G1L = NdotL / (NdotL * invK + k + EPSILON);
-                let G = G1V * G1L;
-
-                let oneMinusLdotH = clamp(1.0 - LdotH, 0.0, 1.0);
-                let lh2 = oneMinusLdotH * oneMinusLdotH;
-                let lh5 = lh2 * lh2 * oneMinusLdotH;
-                let F = F0 + (vec3<f32>(1.0) - F0) * lh5;
-
-                let spec = (NDF * G * F) / (4.0 * NdotV * NdotL + EPSILON);
-                let diffuse_reflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughnessParameter, energyBias, energyFactor, albedo);
-                let kS = F;
-                let kD = (vec3<f32>(1.0) - kS) * (1.0 - metallicFactor);
-
-                totalDirectLighting += (kD * diffuse_reflection + spec * NdotL) * finalLightColor;
-            }
+        if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
+            let u_atmo = systemUniforms.skyAtmosphere;
+            let surfaceHeightKm = max(0.0, input_vertexPosition.y / 1000.0);
+            let atmosphereTransmittance = getTransmittance(transmittanceTexture, atmosphereSampler, surfaceHeightKm, L.y, u_atmo.atmosphereHeight);
+            finalLightColor *= atmosphereTransmittance;
         }
-    } else {
-        // 기본 썬라이트 방향 폴백 (대각선 햇빛 PBR)
-        let defaultSunL = normalize(vec3<f32>(0.6, 0.8, 0.4));
-        let finalLightColor = vec3<f32>(1.2, 1.15, 1.05) * preExposure * 1.5;
-        let NdotL = max(dot(N, defaultSunL), 0.0);
-        if (NdotL > 0.0) {
-            let H = normalize(V + defaultSunL);
-            let NdotH = max(dot(N, H), 0.0);
-            let LdotH = max(dot(defaultSunL, H), 0.0);
 
-            let denomNDF = (NdotH * NdotH * alpha2Minus1 + 1.0);
-            let NDF = alpha2 / (PI * denomNDF * denomNDF + EPSILON);
-
-            let G1L = NdotL / (NdotL * invK + k + EPSILON);
-            let G = G1V * G1L;
-
-            let oneMinusLdotH = clamp(1.0 - LdotH, 0.0, 1.0);
-            let lh2 = oneMinusLdotH * oneMinusLdotH;
-            let lh5 = lh2 * lh2 * oneMinusLdotH;
-            let F = F0 + (vec3<f32>(1.0) - F0) * lh5;
-
-            let spec = (NDF * G * F) / (4.0 * NdotV * NdotL + EPSILON);
-            let diffuse_reflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughnessParameter, energyBias, energyFactor, albedo);
-            let kS = F;
-            let kD = (vec3<f32>(1.0) - kS) * (1.0 - metallicFactor);
-
-            totalDirectLighting += (kD * diffuse_reflection + spec * NdotL) * finalLightColor;
-        }
+        totalDirectLighting += getDirectPbrLight(
+            finalLightColor,
+            N, V, L, NdotV,
+            roughnessParameter, metallicParameter, albedo,
+            F0
+        );
     }
 
-    // Indirect IBL & Ambient Lighting
-    var indirectLighting = vec3<f32>(0.0);
+    return totalDirectLighting;
+}
+
+fn getIndirectPbrLighting(
+    N: vec3<f32>,
+    V: vec3<f32>,
+    NdotV: f32,
+    albedo: vec3<f32>,
+    roughnessParameter: f32,
+    metallicParameter: f32,
+    F0: vec3<f32>,
+    occlusionParameter: f32
+) -> vec3<f32> {
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
+    let preExposure = systemUniforms.preExposure;
 
     if (u_usePrefilterTexture || u_useSkyAtmosphere) {
         let R = getReflectionVectorFromViewDirection(V, N);
@@ -465,17 +392,136 @@ fn main(inputData: InputData) -> OutputFragment {
 
         let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(NdotV, roughnessParameter), 0.0).rg;
         let F_IBL = F0 * envBRDF.x + vec3<f32>(envBRDF.y);
-        let kD = (vec3<f32>(1.0) - F_IBL) * (1.0 - metallicFactor);
+        let kD = (vec3<f32>(1.0) - F_IBL) * (1.0 - metallicParameter);
 
-        indirectLighting = ((kD * albedo * iblDiffuseColor) + (reflectedColor * F_IBL)) * ambientOcclusion;
+        return ((kD * albedo * iblDiffuseColor * INV_PI) + (reflectedColor * F_IBL)) * occlusionParameter;
     } else {
         let ambientContribution = albedo * systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure * INV_PI;
-        indirectLighting = ambientContribution * ambientOcclusion;
+        return ambientContribution * occlusionParameter;
+    }
+}
+
+// =============================================================================
+// Main Fragment Entry Point
+// =============================================================================
+
+@fragment
+fn main(inputData: InputData) -> OutputFragment {
+    var output: OutputFragment;
+    
+    let input_vertexPosition = inputData.vertexPosition;
+    let u_cameraPosition = systemUniforms.camera.cameraPosition;
+    let globalUV = inputData.uv1;
+    let lod = inputData.lodLevel;
+    let worldTileUV = inputData.uv;
+
+    var albedo: vec3<f32>;
+    var N: vec3<f32>;
+    var roughnessFactor: f32;
+    var metallicFactor: f32;
+    var ambientOcclusion: f32;
+
+    let viewDist = distance(u_cameraPosition, input_vertexPosition);
+    let vbtMip = floor(clamp(log2(max(1.0, viewDist * 0.002)), 0.0, 4.0));
+
+    // 🌿 1단계: 지형 표면 물성 추출 (CDLOD Hybrid Direct / VBT Atlas)
+    if (lod < 1.5) {
+        let vntSample = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
+        let baseN = normalize(select(vntSample * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), length(vntSample) <= 0.001));
+        let slopeAngleDeg = acos(clamp(baseN.y, -1.0, 1.0)) * 57.295779513;
+
+        let lod0Dist = max(1.0, sqrt(landscapeInstanceUniforms.lodDistancesSq[0].x));
+        let fadeStart = lod0Dist * 0.7;
+        let fadeEnd = lod0Dist;
+        let fade = smoothstep(fadeStart, fadeEnd, viewDist);
+
+        if (fade >= 0.999) {
+            let vbtAlbedoRaw = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
+            let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
+            let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, vbtMip);
+
+            let isBaked = length(vbtAlbedoRaw) > 0.001;
+            let vbtAlbedo = select(uniforms.color.rgb, vbtAlbedoRaw, isBaked);
+
+            albedo = vbtAlbedo;
+            N = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), baseN, length(vbtNormalEncoded) <= 0.001));
+            roughnessFactor = max(0.04, select(0.9, vbtORM.g, isBaked));
+            metallicFactor = select(0.0, vbtORM.b, isBaked);
+            ambientOcclusion = select(1.0, vbtORM.r, isBaked);
+        } else {
+            let mipLevel = clamp(log2(max(1.0, viewDist * 0.05)), 0.0, 4.0);
+            let direct = computeDirectLayersPBR(globalUV, worldTileUV, baseN, inputData.vertexHeight, slopeAngleDeg, mipLevel);
+
+            if (fade <= 0.001) {
+                albedo = direct.albedo;
+                N = direct.normal;
+                roughnessFactor = direct.roughness;
+                metallicFactor = direct.metallic;
+                ambientOcclusion = direct.ao;
+            } else {
+                let vbtAlbedoRaw = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
+                let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
+                let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, vbtMip);
+
+                let isBaked = length(vbtAlbedoRaw) > 0.001;
+                let vbtAlbedo = select(uniforms.color.rgb, vbtAlbedoRaw, isBaked);
+                let vbtN = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), baseN, length(vbtNormalEncoded) <= 0.001));
+
+                albedo = mix(direct.albedo, vbtAlbedo, fade);
+                N = normalize(mix(direct.normal, vbtN, fade));
+                roughnessFactor = mix(direct.roughness, max(0.04, select(0.9, vbtORM.g, isBaked)), fade);
+                metallicFactor = mix(direct.metallic, select(0.0, vbtORM.b, isBaked), fade);
+                ambientOcclusion = mix(direct.ao, select(1.0, vbtORM.r, isBaked), fade);
+            }
+        }
+    } else {
+        let vbtAlbedoRaw = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
+        let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
+        let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, vbtMip);
+
+        let isBaked = length(vbtAlbedoRaw) > 0.001;
+        let vbtAlbedo = select(uniforms.color.rgb, vbtAlbedoRaw, isBaked);
+
+        albedo = vbtAlbedo;
+        N = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), length(vbtNormalEncoded) <= 0.001));
+        roughnessFactor = max(0.04, select(0.9, vbtORM.g, isBaked));
+        metallicFactor = select(0.0, vbtORM.b, isBaked);
+        ambientOcclusion = select(1.0, vbtORM.r, isBaked);
     }
 
-    let finalColor = vec4<f32>(totalDirectLighting + indirectLighting, 1.0);
+    if (inputData.instanceColor.a > 0.0) {
+        albedo = mix(albedo, inputData.instanceColor.rgb, 0.6);
+    }
 
+    // 🌿 2단계: PBRMaterial 표준 셰이딩 파이프라인 (100% 동일한 물리 조명 연산)
+    let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
+    let NdotV = max(abs(dot(N, V)), 0.04);
+
+    let F0_dielectric = vec3<f32>(0.04);
+    let F0_metal = albedo;
+    let F0 = mix(F0_dielectric, F0_metal, metallicFactor);
+    let roughnessParameter = max(roughnessFactor, 0.04);
+
+    let directLighting = getDirectPbrLighting(
+        input_vertexPosition,
+        N, V, NdotV,
+        roughnessParameter, metallicFactor, albedo,
+        F0
+    );
+
+    let indirectLighting = getIndirectPbrLighting(
+        N, V, NdotV,
+        albedo,
+        roughnessParameter, metallicFactor,
+        F0,
+        ambientOcclusion
+    );
+
+    let finalColor = vec4<f32>(directLighting + indirectLighting, 1.0);
+
+    // 🌿 3단계: 표준 G-Buffer 및 모션 벡터 출력
     output.color = finalColor;
+    output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, 1.0);
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
     return output;
 }
