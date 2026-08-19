@@ -95,7 +95,7 @@ fn main(inputData: InputData) -> OutputFragment {
             let fd90 = 0.5 + 2.0 * roughness * LdotH * LdotH;
             let lightScatter = 1.0 + (fd90 - 1.0) * pow(1.0 - NdotL, 5.0);
             let viewScatter  = 1.0 + (fd90 - 1.0) * pow(1.0 - NdotV, 5.0);
-            let diffuseBRDF  = NdotL * lightScatter * viewScatter * energyFactor * INV_PI;
+            let diffuseBRDF  = NdotL * lightScatter * viewScatter * energyFactor;
 
             let finalLightColor = dirLight.color * dirLight.intensity * preExposure * visibility;
             directSunLighting += texColor.rgb * finalLightColor * diffuseBRDF;
@@ -106,7 +106,7 @@ fn main(inputData: InputData) -> OutputFragment {
     var iblDiffuseColor = vec3<f32>(0.0);
 
     if (systemUniforms.usePrefilterTexture == 1u) {
-        iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0.0).rgb * preExposure * systemUniforms.iblIntensity;
+        iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0.0).rgb * preExposure * systemUniforms.iblIntensity * INV_PI;
     }
 
     if (systemUniforms.useSkyAtmosphere == 1u) {
@@ -124,7 +124,7 @@ fn main(inputData: InputData) -> OutputFragment {
         iblDiffuseColor = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
     }
 
-    let indirectLighting = texColor.rgb * iblDiffuseColor * INV_PI;
+    let indirectLighting = texColor.rgb * iblDiffuseColor;
 
     // 4. 최종 조명 합산 (PBR과 1:1 완벽 일치)
     var finalRgb = directSunLighting + indirectLighting;
