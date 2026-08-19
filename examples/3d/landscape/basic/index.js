@@ -173,12 +173,10 @@ RedGPU.init(
             bottom: 12
         });
 
-        // 6. RedGPU 정식 Renderer 생성 및 매 프레임 실시간 HUD 추적 렌더 루프 시작 (60fps Real-time Tracking)
+        // 6. RedGPU 정식 Renderer 생성 및 렌더 루프 시작
         const renderer = new RedGPU.Renderer();
-        const render = (time) => {
-            landscape.update(controller, view.renderViewStateData);
-        };
-        renderer.start(redGPUContext, render);
+        renderer.start(redGPUContext, () => {
+        });
 
         // 7. Landscape 모든 get/set 속성 및 2D 디버거 전면 제어 테스트 패널 렌더링
         renderTestPane(redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, directionalLight, [grassLayer, rockLayer, gravelLayer, leaveLayer]);
