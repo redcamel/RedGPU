@@ -2,7 +2,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import GPU_PRIMITIVE_TOPOLOGY from "../../../gpuConst/GPU_PRIMITIVE_TOPOLOGY";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 import landscapeVertexSource from "../shader/landscapeVertex.wgsl";
-import LANDSCAPE_BASE_GRID_SIZE from "./LANDSCAPE_BASE_GRID_SIZE";
+import LANDSCAPE_BASE_GRID_SIZE, {validateLandscapeBaseGridSize} from "./LANDSCAPE_BASE_GRID_SIZE";
 import LandscapeComponent from "../spatial/LandscapeComponent";
 import LandscapeInstanceBuffer from "../spatial/LandscapeInstanceBuffer";
 import LandscapeMaterial from "../material/LandscapeMaterial";
@@ -111,7 +111,8 @@ export class Landscape extends Object3DContainer {
             }
         }
 
-        const componentSizeQuads = options.componentSizeQuads ?? LANDSCAPE_BASE_GRID_SIZE.QUAD_63;
+        const componentSizeQuads = options.componentSizeQuads ?? LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
+        validateLandscapeBaseGridSize(componentSizeQuads);
         const maxLODLevel = Math.min(8, Math.max(1, options.maxLODLevel ?? 4));
 
         const landscapeMaterial = options.landscapeMaterial || new LandscapeMaterial(redGPUContext);
@@ -357,6 +358,7 @@ export class Landscape extends Object3DContainer {
     }
 
     set componentSizeQuads(value: number) {
+        validateLandscapeBaseGridSize(value);
         if (value > 0 && this.#componentSizeQuads !== value) {
             this.#componentSizeQuads = value;
             this.#sharedGeometry = new LandscapeSharedGeometry(

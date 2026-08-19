@@ -38,7 +38,7 @@ RedGPU.init(
         const landscape = new RedGPU.Display.Landscape(redGPUContext, {
             worldSize: [16000, 16000],
             componentCount: [16, 16],
-            componentSizeQuads: 63,
+            componentSizeQuads: RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
             maxLODLevel: 5,
             wireframe: false,
             lodColoration: false,
@@ -207,7 +207,7 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
         tileSizeStr: `[${Math.round(tsX)}m, ${Math.round(tsZ)}m]`,
 
         // 2. Component & Mesh Specs
-        componentSizeQuads: RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_63,
+        componentSizeQuads: RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
         maxLODLevel: landscape ? landscape.maxLODLevel : 4,
         lodFadeStartRatio: landscape ? landscape.lodFadeStartRatio : 0.7,
         lodGeomorphStartRatio: landscape ? landscape.lodGeomorphStartRatio : 0.7,
@@ -327,11 +327,12 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
 
             folderSpecs.addBinding(config, 'componentSizeQuads', {
                 options: {
-                    '15x15 (256 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_15,
-                    '31x31 (1024 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_31,
-                    '63x63 (4096 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_63,
-                    '127x127 (16384 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_127,
-                    '255x255 (65536 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_255
+                    '16x16 (289 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_16,
+                    '32x32 (1089 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_32,
+                    '64x64 (4225 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
+                    '128x128 (16641 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_128,
+                    '256x256 (66049 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
+                    '512x512 (263169 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
                 }
             }).on('change', (ev) => {
                 if (landscape) {

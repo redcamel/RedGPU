@@ -1,6 +1,6 @@
 import Landscape from "./core/Landscape";
 import LandscapeOptions from "./core/LandscapeOptions";
-import LANDSCAPE_BASE_GRID_SIZE from "./core/LANDSCAPE_BASE_GRID_SIZE";
+import LANDSCAPE_BASE_GRID_SIZE, {validateLandscapeBaseGridSize} from "./core/LANDSCAPE_BASE_GRID_SIZE";
 import LandscapeComponent from "./spatial/LandscapeComponent";
 import LandscapeInstanceBuffer from "./spatial/LandscapeInstanceBuffer";
 import LandscapeSharedGeometry from "./spatial/LandscapeSharedGeometry";
@@ -41,6 +41,7 @@ export {
     ALandscapeAtlasGenerator,
     LandscapeTileStreamer,
     LANDSCAPE_BASE_GRID_SIZE,
+    validateLandscapeBaseGridSize,
     LandscapeFoliageManager,
     FoliageType,
     FoliageInstanceBuffer,

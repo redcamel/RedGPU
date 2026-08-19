@@ -1,3 +1,4 @@
+import LANDSCAPE_BASE_GRID_SIZE from "./LANDSCAPE_BASE_GRID_SIZE";
 import LandscapeMaterial from "../material/LandscapeMaterial";
 
 export interface LandscapeOptions {
@@ -8,7 +9,7 @@ export interface LandscapeOptions {
 
     tileSize?: number | [number, number];
 
-    componentSizeQuads?: number;
+    componentSizeQuads?: LANDSCAPE_BASE_GRID_SIZE | number;
 
     maxLODLevel?: number;
 
