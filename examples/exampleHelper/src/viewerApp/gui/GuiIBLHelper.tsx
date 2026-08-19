@@ -24,6 +24,9 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
             texture: hdrImages[0].name,
             useLight: view.scene.lightManager.directionalLights.length > 0,
             lux: view.scene.lightManager.directionalLights[0]?.lux || 100000,
+            elevation: view.scene.lightManager.directionalLights[0]?.elevation ?? 45,
+            azimuth: view.scene.lightManager.directionalLights[0]?.azimuth ?? 45,
+            color: view.scene.lightManager.directionalLights[0]?.color.hex || '#ffffff',
             useIBL: true,
             intensityMultiplier: view.ibl?.intensityMultiplier || 1.0,
         };
@@ -75,6 +78,9 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
                     if (RedGPU) {
                         const directionalLight = new RedGPU.Light.DirectionalLight();
                         directionalLight.lux = settings.lux;
+                        directionalLight.elevation = settings.elevation;
+                        directionalLight.azimuth = settings.azimuth;
+                        directionalLight.color.setColorByHEX(settings.color);
                         view.scene.lightManager.addDirectionalLight(directionalLight);
                     }
                 }
@@ -90,6 +96,21 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
             .on('change', (ev: any) => {
                 const lights = view.scene.lightManager.directionalLights;
                 if (lights.length > 0) lights[0].lux = ev.value;
+            });
+        lightingFolder.addBinding(settings, 'elevation', {min: -90, max: 90, step: 0.1})
+            .on('change', (ev: any) => {
+                const lights = view.scene.lightManager.directionalLights;
+                if (lights.length > 0) lights[0].elevation = ev.value;
+            });
+        lightingFolder.addBinding(settings, 'azimuth', {min: -360, max: 360, step: 0.1})
+            .on('change', (ev: any) => {
+                const lights = view.scene.lightManager.directionalLights;
+                if (lights.length > 0) lights[0].azimuth = ev.value;
+            });
+        lightingFolder.addBinding(settings, 'color')
+            .on('change', (ev: any) => {
+                const lights = view.scene.lightManager.directionalLights;
+                if (lights.length > 0) lights[0].color.setColorByHEX(ev.value);
             });
 
         lightingFolder.addBinding(settings, 'useIBL').on('change', (ev: any) => {
