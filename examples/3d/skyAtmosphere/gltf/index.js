@@ -71,11 +71,16 @@ RedGPU.init(
 
 const renderTestPane = (targetView, skyAtmosphere, sunLight) => {
     const hdrImages = [
-        {name: 'Cannon_Exterior', path: '../../../assets/hdr/Cannon_Exterior.hdr', nit: 25000},
-        {name: '2K - the sky is on fire', path: '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr', nit: 25000},
-        {name: 'field', path: '../../../assets/hdr/field.hdr', nit: 30000},
-        {name: 'neutral.37290948', path: '../../../assets/hdr/neutral.37290948.hdr', nit: 20000},
-        {name: 'pisa', path: '../../../assets/hdr/pisa.hdr', nit: 25000}
+        {name: 'Cannon_Exterior', path: '../../../assets/hdr/Cannon_Exterior.hdr', luminance: 25000, sunLux: 100000},
+        {
+            name: '2K - the sky is on fire',
+            path: '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr',
+            luminance: 20000,
+            sunLux: 60000
+        },
+        {name: 'field', path: '../../../assets/hdr/field.hdr', luminance: 15000, sunLux: 60000},
+        {name: 'neutral.37290948', path: '../../../assets/hdr/neutral.37290948.hdr', luminance: 20000, sunLux: 80000},
+        {name: 'pisa', path: '../../../assets/hdr/pisa.hdr', luminance: 10000, sunLux: 30000}
     ];
 
     let currentIBL = targetView.ibl;
@@ -112,8 +117,12 @@ const renderTestPane = (targetView, skyAtmosphere, sunLight) => {
             }).on('change', (ev) => {
                 const imageInfo = hdrImages.find(item => item.name === ev.value);
                 if (imageInfo) {
-                    currentIBL = new RedGPU.Resource.IBL(targetView.redGPUContext, imageInfo.path, imageInfo.nit);
+                    currentIBL = new RedGPU.Resource.IBL(targetView.redGPUContext, imageInfo.path, imageInfo.luminance);
                     if (state.useIBL) targetView.ibl = currentIBL;
+                    if (sunLight) {
+                        sunLight.lux = imageInfo.sunLux || (imageInfo.luminance * 4);
+                        pane.refresh();
+                    }
                 }
             });
 
@@ -132,6 +141,10 @@ const renderTestPane = (targetView, skyAtmosphere, sunLight) => {
                 },
                 set luminance(v) {
                     currentIBL.luminance = v;
+                    if (sunLight) {
+                        sunLight.lux = v * 4;
+                        pane.refresh();
+                    }
                 }
             }, 'luminance', {min: 0, max: 100000, step: 1});
 
@@ -147,10 +160,10 @@ const renderTestPane = (targetView, skyAtmosphere, sunLight) => {
                 if (imageInfo) {
                     const isHDR = typeof imageInfo.path === 'string' && imageInfo.path.toLowerCase().endsWith('.hdr');
                     const newTexture = isHDR
-                        ? new RedGPU.Resource.IBL(targetView.redGPUContext, imageInfo.path, imageInfo.nit).environmentTexture
+                        ? new RedGPU.Resource.IBL(targetView.redGPUContext, imageInfo.path, imageInfo.luminance).environmentTexture
                         : new RedGPU.Resource.CubeTexture(targetView.redGPUContext, imageInfo.path, true);
                     currentSkybox.texture = newTexture;
-                    currentSkybox.luminance = imageInfo.nit;
+                    currentSkybox.luminance = imageInfo.luminance;
                 }
             });
             f_skybox.addBinding({

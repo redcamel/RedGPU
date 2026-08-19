@@ -47,7 +47,7 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
             updatePathInfo(src);
 
             const relativePath = resolveExamplePath(src);
-            const luminance = imageInfo.nit || 20000;
+            const luminance = imageInfo.luminance || 20000;
 
             // [KO] IBL 객체 생성 및 할당
             // [EN] Create and assign IBL object
@@ -55,6 +55,15 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
                 const ibl = new RedGPU.Resource.IBL(view.redGPUContext, relativePath, luminance);
                 ibl.intensityMultiplier = settings.intensityMultiplier;
                 view.ibl = ibl;
+
+                // [KO] IBL 루미넌스 및 태양광 비율에 맞춰 직사광의 lux 동기화
+                // [EN] Synchronize directional light lux with the IBL luminance and sunLux ratio
+                const targetLux = (imageInfo as any).sunLux || (luminance * 4);
+                settings.lux = targetLux;
+                const lights = view.scene.lightManager.directionalLights;
+                if (lights.length > 0) {
+                    lights[0].lux = targetLux;
+                }
             }
 
             gui.refresh();
@@ -77,7 +86,7 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
 
         // 1. Lighting Controls
         lightingFolder.addBinding(settings, 'useLight').on('change', (ev: any) => syncLight(ev.value));
-        lightingFolder.addBinding(settings, 'lux', {min: 0, max: 100000, step: 1})
+        lightingFolder.addBinding(settings, 'lux', {min: 0, max: 150000, step: 100})
             .on('change', (ev: any) => {
                 const lights = view.scene.lightManager.directionalLights;
                 if (lights.length > 0) lights[0].lux = ev.value;
@@ -112,7 +121,16 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
                 return view.ibl ? view.ibl.luminance : 0;
             },
             set luminance(v) {
-                if (view.ibl) view.ibl.luminance = v;
+                if (view.ibl) {
+                    view.ibl.luminance = v;
+                    const targetLux = v * 4;
+                    settings.lux = targetLux;
+                    const lights = view.scene.lightManager.directionalLights;
+                    if (lights.length > 0) {
+                        lights[0].lux = targetLux;
+                    }
+                    gui.refresh();
+                }
             },
         }, 'luminance', {min: 0, max: 100000, step: 100});
 
