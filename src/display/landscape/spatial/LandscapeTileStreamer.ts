@@ -239,7 +239,7 @@ export class LandscapeTileStreamer {
         if (!grid) return;
 
         const activeBuffer = this.#activeComponentsBuffer;
-        grid.getTilesInRadiusZeroGC(cameraX, cameraZ, radius, activeBuffer);
+        grid.getActiveComponentsInRadius(cameraX, cameraZ, radius, activeBuffer);
 
         const now = performance.now();
         const RETRY_INTERVAL_MS = 10000;

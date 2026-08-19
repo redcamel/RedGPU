@@ -71,7 +71,7 @@ export class Landscape extends Object3DContainer {
     #componentCountTuple: [number, number] = [0, 0];
     #tileSizeTuple: [number, number] = [0, 0];
 
-    #tempCellBuffer: Int32Array = new Int32Array(2);
+    #lodDistancesBuffer: Float32Array = new Float32Array(8);
     #lodCountsBuffer: Int32Array;
     #visibleComponentCount: number = 0;
     #culledComponentCount: number = 0;
@@ -602,7 +602,6 @@ export class Landscape extends Object3DContainer {
             this.#foliageManager.update(camera, renderViewStateData);
         }
 
-        this.#spatialGrid.getCellCoordinates(camX, camZ, this.#tempCellBuffer);
         this.#tileStreamer.update(camX, camZ, camY);
 
         const totalComponents = this.#componentCountX * this.#componentCountZ;
@@ -613,7 +612,7 @@ export class Landscape extends Object3DContainer {
 
         this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#maxLODLevel, this.#wireframe);
 
-        const lodDistancesArray = new Float32Array(8);
+        const lodDistancesArray = this.#lodDistancesBuffer;
         lodDistancesArray.fill(1e15);
         const countDist = Math.min(8, this.#lodDistancesSq.length);
         for (let i = 0; i < countDist; i++) {

@@ -108,10 +108,6 @@ export class LandscapeSpatialGrid {
         }
         return outArray.length;
     }
-
-    getTilesInRadiusZeroGC(camX: number, camZ: number, loadingRadius: number, outArray: LandscapeComponent[]): number {
-        return this.getActiveComponentsInRadius(camX, camZ, loadingRadius, outArray);
-    }
 }
 
 export default LandscapeSpatialGrid;
