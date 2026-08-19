@@ -211,11 +211,12 @@ export class Landscape extends Object3DContainer {
         this.#tileStreamer.material = landscapeMaterial;
 
         landscapeMaterial.onRebakeVBTRequested = () => {
-            this.#tileStreamer.rebakeAllLoadedVBT();
+            this.#tileStreamer.rebakeAllVBT();
         };
 
         this.#initSystems(redGPUContext, options, componentCountX, componentCountZ, maxLODLevel, vhtSampler, vhtAtlasTexture, vntAtlasTexture);
         this.#foliageManager = new LandscapeFoliageManager(this);
+        this.#landscapeMaterial.requestVBTRebake(true);
     }
 
     get foliageManager(): LandscapeFoliageManager {
@@ -897,6 +898,8 @@ export class Landscape extends Object3DContainer {
                 this.#instanceBuffer.indirectDrawBuffer
             );
         }
+
+        this.#landscapeMaterial?.requestVBTRebake(true);
     }
 }
 

@@ -314,15 +314,12 @@ export class LandscapeTileStreamer {
         return (rawVal / 65535.0) * this.#heightScale;
     }
 
-    rebakeAllLoadedVBT(budgetPerFrame: number = 3): void {
-        if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vhtAtlasTexture || !this.#vntAtlasTexture) return;
+    rebakeAllVBT(budgetPerFrame: number = 3): void {
+        if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vhtAtlasTexture || !this.#vntAtlasTexture || !this.#spatialGrid) return;
 
         this.#rebakeQueue.length = 0;
         for (const comp of this.#spatialGrid.flatCells) {
-            const key = `${comp.componentZ}_${comp.componentX}`;
-            if (this.#loadedMap.has(key)) {
-                this.#rebakeQueue.push(comp);
-            }
+            this.#rebakeQueue.push(comp);
         }
 
         if (this.#rebakeQueue.length === 0) return;
@@ -336,8 +333,12 @@ export class LandscapeTileStreamer {
         this.#processRebakeQueue(budgetPerFrame);
     }
 
+    rebakeAllLoadedVBT(budgetPerFrame: number = 3): void {
+        this.rebakeAllVBT(budgetPerFrame);
+    }
+
     #processRebakeQueue = (budgetPerFrame: number = 3): void => {
-        if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vhtAtlasTexture || !this.#vntAtlasTexture) {
+        if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vhtAtlasTexture || !this.#vntAtlasTexture || !this.#spatialGrid) {
             this.#isRebaking = false;
             this.#rebakeQueue.length = 0;
             this.#rebakeRafId = null;
@@ -368,7 +369,7 @@ export class LandscapeTileStreamer {
         } else {
             this.#isRebaking = false;
             this.#rebakeRafId = null;
-            console.log(`[LandscapeTileStreamer 🎨 ⚡ Time-Sliced] Completed rebaking all loaded VBT 2D Atlases (${this.#loadedMap.size} tiles)`);
+            console.log(`[LandscapeTileStreamer 🎨 ⚡ Time-Sliced] Completed rebaking VBT 2D Atlases for all tiles (${this.#spatialGrid.flatCells.length} tiles)`);
         }
     };
 

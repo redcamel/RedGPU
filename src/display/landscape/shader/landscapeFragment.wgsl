@@ -408,13 +408,21 @@ fn main(inputData: InputData) -> OutputFragment {
             let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, vbtMip);
 
             let isBaked = length(vbtAlbedoRaw) > 0.001;
-            let vbtAlbedo = select(uniforms.color.rgb, vbtAlbedoRaw, isBaked);
-
-            albedo = vbtAlbedo;
-            N = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), baseN, length(vbtNormalEncoded) <= 0.001));
-            roughnessFactor = max(0.04, select(0.9, vbtORM.g, isBaked));
-            metallicFactor = select(0.0, vbtORM.b, isBaked);
-            ambientOcclusion = select(1.0, vbtORM.r, isBaked);
+            if (isBaked) {
+                albedo = vbtAlbedoRaw;
+                N = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), baseN, length(vbtNormalEncoded) <= 0.001));
+                roughnessFactor = max(0.04, vbtORM.g);
+                metallicFactor = vbtORM.b;
+                ambientOcclusion = vbtORM.r;
+            } else {
+                let mipLevel = clamp(log2(max(1.0, viewDist * 0.05)), 0.0, 4.0);
+                let direct = computeDirectLayersPBR(globalUV, worldTileUV, baseN, inputData.vertexHeight, slopeAngleDeg, mipLevel);
+                albedo = direct.albedo;
+                N = direct.normal;
+                roughnessFactor = direct.roughness;
+                metallicFactor = direct.metallic;
+                ambientOcclusion = direct.ao;
+            }
         } else {
             let mipLevel = clamp(log2(max(1.0, viewDist * 0.05)), 0.0, 4.0);
             let direct = computeDirectLayersPBR(globalUV, worldTileUV, baseN, inputData.vertexHeight, slopeAngleDeg, mipLevel);
@@ -431,14 +439,14 @@ fn main(inputData: InputData) -> OutputFragment {
                 let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, vbtMip);
 
                 let isBaked = length(vbtAlbedoRaw) > 0.001;
-                let vbtAlbedo = select(uniforms.color.rgb, vbtAlbedoRaw, isBaked);
+                let vbtAlbedo = select(direct.albedo, vbtAlbedoRaw, isBaked);
                 let vbtN = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), baseN, length(vbtNormalEncoded) <= 0.001));
 
                 albedo = mix(direct.albedo, vbtAlbedo, fade);
                 N = normalize(mix(direct.normal, vbtN, fade));
-                roughnessFactor = mix(direct.roughness, max(0.04, select(0.9, vbtORM.g, isBaked)), fade);
-                metallicFactor = mix(direct.metallic, select(0.0, vbtORM.b, isBaked), fade);
-                ambientOcclusion = mix(direct.ao, select(1.0, vbtORM.r, isBaked), fade);
+                roughnessFactor = mix(direct.roughness, max(0.04, select(direct.roughness, vbtORM.g, isBaked)), fade);
+                metallicFactor = mix(direct.metallic, select(direct.metallic, vbtORM.b, isBaked), fade);
+                ambientOcclusion = mix(direct.ao, select(direct.ao, vbtORM.r, isBaked), fade);
             }
         }
     } else {
@@ -447,13 +455,21 @@ fn main(inputData: InputData) -> OutputFragment {
         let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, vbtMip);
 
         let isBaked = length(vbtAlbedoRaw) > 0.001;
-        let vbtAlbedo = select(uniforms.color.rgb, vbtAlbedoRaw, isBaked);
-
-        albedo = vbtAlbedo;
-        N = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), length(vbtNormalEncoded) <= 0.001));
-        roughnessFactor = max(0.04, select(0.9, vbtORM.g, isBaked));
-        metallicFactor = select(0.0, vbtORM.b, isBaked);
-        ambientOcclusion = select(1.0, vbtORM.r, isBaked);
+        if (isBaked) {
+            albedo = vbtAlbedoRaw;
+            N = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), length(vbtNormalEncoded) <= 0.001));
+            roughnessFactor = max(0.04, vbtORM.g);
+            metallicFactor = vbtORM.b;
+            ambientOcclusion = vbtORM.r;
+        } else {
+            let mipLevel = clamp(log2(max(1.0, viewDist * 0.05)), 0.0, 4.0);
+            let direct = computeDirectLayersPBR(globalUV, worldTileUV, vec3<f32>(0.0, 1.0, 0.0), inputData.vertexHeight, 0.0, mipLevel);
+            albedo = direct.albedo;
+            N = direct.normal;
+            roughnessFactor = direct.roughness;
+            metallicFactor = direct.metallic;
+            ambientOcclusion = direct.ao;
+        }
     }
 
     if (inputData.instanceColor.a > 0.0) {
