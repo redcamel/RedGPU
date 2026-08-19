@@ -312,9 +312,14 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         this.gpuRenderInfo.fragmentUniformBuffer = customUniformBuffer;
     }
 
-    #getArrayTextureFormat(): GPUTextureFormat {
+    #getBaseColorArrayFormat(): GPUTextureFormat {
         const preferred = navigator.gpu?.getPreferredCanvasFormat ? navigator.gpu.getPreferredCanvasFormat() : 'rgba8unorm';
         return `${preferred}-srgb` as GPUTextureFormat;
+    }
+
+    #getDataArrayFormat(): GPUTextureFormat {
+        const preferred = navigator.gpu?.getPreferredCanvasFormat ? navigator.gpu.getPreferredCanvasFormat() : 'rgba8unorm';
+        return preferred as GPUTextureFormat;
     }
 
     #initDummyTextureArrays(): void {
@@ -323,29 +328,30 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 
         const depth = 1;
         const size: [number, number, number] = [this.#textureArraySize, this.#textureArraySize, depth];
-        const texFormat = this.#getArrayTextureFormat();
+        const baseColorFormat = this.#getBaseColorArrayFormat();
+        const dataFormat = this.#getDataArrayFormat();
 
         const baseColorDesc: GPUTextureDescriptor = {
             size,
-            format: texFormat,
+            format: baseColorFormat,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
             label: 'Landscape_BaseColor_Array_Dummy'
         };
         const normalDesc: GPUTextureDescriptor = {
             size,
-            format: texFormat,
+            format: dataFormat,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
             label: 'Landscape_Normal_Array_Dummy'
         };
         const ormDesc: GPUTextureDescriptor = {
             size,
-            format: texFormat,
+            format: dataFormat,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
             label: 'Landscape_ORM_Array_Dummy'
         };
         const weightMapDesc: GPUTextureDescriptor = {
             size,
-            format: texFormat,
+            format: dataFormat,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
             label: 'Landscape_WeightMap_Array_Dummy'
         };
@@ -370,7 +376,8 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         const count = Math.max(1, this.#layers.length);
         const depth = count;
         const size: [number, number, number] = [this.#textureArraySize, this.#textureArraySize, depth];
-        const texFormat = this.#getArrayTextureFormat();
+        const baseColorFormat = this.#getBaseColorArrayFormat();
+        const dataFormat = this.#getDataArrayFormat();
         const mipLevelCount = Math.floor(Math.log2(this.#textureArraySize)) + 1;
 
         if (this.#gpuBaseColorArrayTexture) this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuBaseColorArrayTexture);
@@ -381,28 +388,28 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         this.#gpuBaseColorArrayTexture = gpuDevice.createTexture({
             size,
             mipLevelCount,
-            format: texFormat,
+            format: baseColorFormat,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
             label: 'Landscape_BaseColor_Texture2DArray'
         });
         this.#gpuNormalArrayTexture = gpuDevice.createTexture({
             size,
             mipLevelCount,
-            format: texFormat,
+            format: dataFormat,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
             label: 'Landscape_Normal_Texture2DArray'
         });
         this.#gpuORMArrayTexture = gpuDevice.createTexture({
             size,
             mipLevelCount,
-            format: texFormat,
+            format: dataFormat,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
             label: 'Landscape_ORM_Texture2DArray'
         });
         this.#gpuWeightMapArrayTexture = gpuDevice.createTexture({
             size,
             mipLevelCount,
-            format: texFormat,
+            format: dataFormat,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
             label: 'Landscape_WeightMap_Texture2DArray'
         });
@@ -423,7 +430,8 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     #updateLayerMipmaps(): void {
         const count = Math.max(1, this.#layers.length);
         const mipLevelCount = Math.floor(Math.log2(this.#textureArraySize)) + 1;
-        const texFormat = this.#getArrayTextureFormat();
+        const baseColorFormat = this.#getBaseColorArrayFormat();
+        const dataFormat = this.#getDataArrayFormat();
         const mipmapGenerator = this.redGPUContext.resourceManager.mipmapGenerator;
 
         if (this.#gpuBaseColorArrayTexture) {
@@ -432,7 +440,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                 {
                     size: [this.#textureArraySize, this.#textureArraySize, count],
                     mipLevelCount,
-                    format: texFormat,
+                    format: baseColorFormat,
                     usage: 0
                 },
                 false,
@@ -445,7 +453,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                 {
                     size: [this.#textureArraySize, this.#textureArraySize, count],
                     mipLevelCount,
-                    format: texFormat,
+                    format: dataFormat,
                     usage: 0
                 },
                 false,
@@ -458,7 +466,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                 {
                     size: [this.#textureArraySize, this.#textureArraySize, count],
                     mipLevelCount,
-                    format: texFormat,
+                    format: dataFormat,
                     usage: 0
                 },
                 false,
@@ -474,7 +482,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         const capturedVersion = this.#textureArrayVersion;
         const texSize = this.#textureArraySize;
 
-        const copyTexture = (srcBmpTexture: any, dstTexture: GPUTexture | null, fallbackColor: [number, number, number, number]) => {
+        const copyTexture = (srcBmpTexture: any, dstTexture: GPUTexture | null, fallbackColor: [number, number, number, number], textureType: string) => {
             if (!dstTexture) return;
 
             const onTextureReady = () => {
@@ -486,7 +494,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                         const copyW = Math.min(texSize, srcBmpTexture.width || texSize);
                         const copyH = Math.min(texSize, srcBmpTexture.height || texSize);
 
-                        const commandEncoder = device.createCommandEncoder({label: `Landscape_LayerCopy_${sliceIndex}`});
+                        const commandEncoder = device.createCommandEncoder({label: `Landscape_LayerCopy_${sliceIndex}_${textureType}`});
                         commandEncoder.copyTextureToTexture(
                             {texture: srcTex, mipLevel: 0, origin: [0, 0, 0]},
                             {texture: dstTexture, mipLevel: 0, origin: [0, 0, sliceIndex]},
@@ -496,7 +504,12 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                         this.#updateLayerMipmaps();
                         this.requestVBTRebake();
                     } catch (e) {
-                        console.warn('[LandscapeMaterial] Texture slice copy defer warning:', e);
+                        console.warn(`[LandscapeMaterial] ⚠️ Texture slice copy failed, applying fallback color [${fallbackColor.join(', ')}]:`, {
+                            layer: layer.name,
+                            sliceIndex,
+                            textureType,
+                            error: e
+                        });
                         const pixelData = new Uint8Array(fallbackColor);
                         device.queue.writeTexture(
                             {texture: dstTexture, mipLevel: 0, origin: [0, 0, sliceIndex]},
@@ -506,6 +519,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                         );
                     }
                 } else {
+                    console.warn(`[LandscapeMaterial] ℹ️ Texture missing or not loaded yet for [Layer: ${layer.name} -> ${textureType}], applying fallback color [${fallbackColor.join(', ')}]`);
                     const pixelData = new Uint8Array(fallbackColor);
                     device.queue.writeTexture(
                         {texture: dstTexture, mipLevel: 0, origin: [0, 0, sliceIndex]},
@@ -525,10 +539,10 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
             }
         };
 
-        copyTexture(layer.baseColorTexture, this.#gpuBaseColorArrayTexture, [255, 255, 255, 255]);
-        copyTexture(layer.normalTexture, this.#gpuNormalArrayTexture, [128, 128, 255, 255]);
-        copyTexture(layer.ormTexture, this.#gpuORMArrayTexture, [255, 255, 0, 255]);
-        copyTexture(layer.weightTexture, this.#gpuWeightMapArrayTexture, [255, 255, 255, 255]);
+        copyTexture(layer.baseColorTexture, this.#gpuBaseColorArrayTexture, [255, 255, 255, 255], 'baseColorTexture');
+        copyTexture(layer.normalTexture, this.#gpuNormalArrayTexture, [128, 128, 255, 255], 'normalTexture');
+        copyTexture(layer.ormTexture, this.#gpuORMArrayTexture, [255, 255, 0, 255], 'ormTexture');
+        copyTexture(layer.weightTexture, this.#gpuWeightMapArrayTexture, [255, 255, 255, 255], 'weightTexture');
     }
 }
 
