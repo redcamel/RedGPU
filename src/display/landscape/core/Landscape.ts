@@ -45,7 +45,7 @@ export class Landscape extends Object3DContainer {
     #wireframe: boolean = false;
     #lodColoration: boolean = false;
     #lodFadeStartRatio: number = 0.7;
-    #lodGeomorphStartRatio: number = 0.7;
+    #lodGeomorphStartRatio: number = 0.85;
     #heightScale: number = 500.0;
     #tileStreamer: LandscapeTileStreamer;
     #vhtAtlasTexture: DirectTexture | null = null;
@@ -133,7 +133,7 @@ export class Landscape extends Object3DContainer {
         this.#wireframe = options.wireframe ?? false;
         this.#lodColoration = options.lodColoration ?? false;
         this.#lodFadeStartRatio = options.lodFadeStartRatio ?? 0.7;
-        this.#lodGeomorphStartRatio = options.lodGeomorphStartRatio ?? 0.7;
+        this.#lodGeomorphStartRatio = options.lodGeomorphStartRatio ?? 0.85;
         this.#tileStreamer = new LandscapeTileStreamer(redGPUContext, this.#spatialGrid, options?.loadingRadius ?? 2500.0);
         if (options.tileUrlResolver) {
             this.#tileStreamer.tileUrlResolver = options.tileUrlResolver;

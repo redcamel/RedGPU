@@ -79,7 +79,7 @@ export class LandscapeSharedGeometry {
         const baseComponentSizeQuads = this.#componentSizeQuads;
         const halfSizeX = this.#tileSizeX / 2;
         const halfSizeZ = this.#tileSizeZ / 2;
-        const SKIRT_DEPTH = -25.0;
+        const SKIRT_FLAG = -1.0;
 
         const allInterleavedData: number[] = [];
         const allIndices: number[] = [];
@@ -141,7 +141,7 @@ export class LandscapeSharedGeometry {
                 const percentX = x / segmentsX;
                 const posX = percentX * this.#tileSizeX - halfSizeX;
                 const posZ = -halfSizeZ;
-                allInterleavedData.push(posX, posZ, SKIRT_DEPTH);
+                allInterleavedData.push(posX, posZ, SKIRT_FLAG);
                 allInterleavedData.push(0, 1, 0);
                 allInterleavedData.push(percentX, 0.0);
                 currentSkirtLocalIndex++;
@@ -162,7 +162,7 @@ export class LandscapeSharedGeometry {
                 const percentX = x / segmentsX;
                 const posX = percentX * this.#tileSizeX - halfSizeX;
                 const posZ = halfSizeZ;
-                allInterleavedData.push(posX, posZ, SKIRT_DEPTH);
+                allInterleavedData.push(posX, posZ, SKIRT_FLAG);
                 allInterleavedData.push(0, 1, 0);
                 allInterleavedData.push(percentX, 1.0);
                 currentSkirtLocalIndex++;
@@ -182,7 +182,7 @@ export class LandscapeSharedGeometry {
                 const percentZ = z / segmentsZ;
                 const posX = -halfSizeX;
                 const posZ = percentZ * this.#tileSizeZ - halfSizeZ;
-                allInterleavedData.push(posX, posZ, SKIRT_DEPTH);
+                allInterleavedData.push(posX, posZ, SKIRT_FLAG);
                 allInterleavedData.push(0, 1, 0);
                 allInterleavedData.push(0.0, percentZ);
                 currentSkirtLocalIndex++;
@@ -202,7 +202,7 @@ export class LandscapeSharedGeometry {
                 const percentZ = z / segmentsZ;
                 const posX = halfSizeX;
                 const posZ = percentZ * this.#tileSizeZ - halfSizeZ;
-                allInterleavedData.push(posX, posZ, SKIRT_DEPTH);
+                allInterleavedData.push(posX, posZ, SKIRT_FLAG);
                 allInterleavedData.push(0, 1, 0);
                 allInterleavedData.push(1.0, percentZ);
                 currentSkirtLocalIndex++;

@@ -62,55 +62,10 @@ fn main(input: InputData) -> OutputData {
     let maxCompCount = max(1u, landscapeUniforms.maxComponentCount);
     let lodLevel = input.instanceIdx / maxCompCount;
 
-    var localX = input.position.x;
-    var localZ = input.position.y;
-    var prevLocalX = input.position.x;
-    var prevLocalZ = input.position.y;
-
-    if (lodLevel < 7u) {
-        let rawWorldX = input.position.x + instanceData.worldX;
-        let rawWorldZ = input.position.y + instanceData.worldZ;
-        let camPos = systemUniforms.camera.cameraPosition.xyz;
-        let dx = rawWorldX - camPos.x;
-        let dz = rawWorldZ - camPos.z;
-        let distSq = dx * dx + dz * dz;
-
-        let packedVec = landscapeUniforms.lodDistancesSq[lodLevel / 4u];
-        let thresholdSq = packedVec[lodLevel % 4u];
-
-        let morphRatio = select(0.7, landscapeUniforms.lodGeomorphStartRatio, landscapeUniforms.lodGeomorphStartRatio > 0.0);
-        let morphStartSq = thresholdSq * (morphRatio * morphRatio);
-        let morphFactor = smoothstep(morphStartSq, thresholdSq, distSq);
-
-        if (morphFactor > 0.0001) {
-            let baseQuads = max(1.0, landscapeUniforms.baseQuads);
-            let nextSegments = max(1.0, floor(baseQuads / pow(2.0, f32(lodLevel + 1u))));
-            let nextStepX = landscapeUniforms.tileSizeX / nextSegments;
-            let nextStepZ = landscapeUniforms.tileSizeZ / nextSegments;
-
-            let halfTileX = landscapeUniforms.tileSizeX * 0.5;
-            let halfTileZ = landscapeUniforms.tileSizeZ * 0.5;
-
-            let localOffsetX = input.position.x + halfTileX;
-            let localOffsetZ = input.position.y + halfTileZ;
-
-            let targetOffsetX = round(localOffsetX / nextStepX) * nextStepX;
-            let targetOffsetZ = round(localOffsetZ / nextStepZ) * nextStepZ;
-
-            let targetPosX = targetOffsetX - halfTileX;
-            let targetPosZ = targetOffsetZ - halfTileZ;
-
-            localX = mix(input.position.x, targetPosX, morphFactor);
-            localZ = mix(input.position.y, targetPosZ, morphFactor);
-            prevLocalX = localX;
-            prevLocalZ = localZ;
-        }
-    }
-
-    let worldX = localX + instanceData.worldX;
-    let worldZ = localZ + instanceData.worldZ;
-    let prevWorldX = prevLocalX + instanceData.prevWorldX;
-    let prevWorldZ = prevLocalZ + instanceData.prevWorldZ;
+    let worldX = input.position.x + instanceData.worldX;
+    let worldZ = input.position.y + instanceData.worldZ;
+    let prevWorldX = input.position.x + instanceData.prevWorldX;
+    let prevWorldZ = input.position.y + instanceData.prevWorldZ;
 
     let globalUV = vec2<f32>(
         (worldX + landscapeUniforms.worldSizeX * 0.5) / landscapeUniforms.worldSizeX,
@@ -124,16 +79,100 @@ fn main(input: InputData) -> OutputData {
     let texSize = landscapeUniforms.vhtTextureSize;
     let texCoord = vec2<i32>(clamp(globalUV * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
 
-    let heightValue = textureLoad(heightMapTexture, texCoord, 0).r;
+    let currentHeight = textureLoad(heightMapTexture, texCoord, 0).r;
+    var finalHeight = currentHeight;
 
-    var prevHeightValue = heightValue;
+    if (lodLevel < 7u) {
+        let camPos = systemUniforms.camera.cameraPosition.xyz;
+        let dx = worldX - camPos.x;
+        let dz = worldZ - camPos.z;
+        let dy = camPos.y;
+        let dist = sqrt(dx * dx + dz * dz + dy * dy);
+
+        let currentPacked = landscapeUniforms.lodDistancesSq[lodLevel / 4u];
+        let currentThresholdSq = currentPacked[lodLevel % 4u];
+
+        if (currentThresholdSq < 1e14) {
+            let nextDist = sqrt(currentThresholdSq);
+            var prevDist = 0.0;
+            if (lodLevel > 0u) {
+                let prevPacked = landscapeUniforms.lodDistancesSq[(lodLevel - 1u) / 4u];
+                prevDist = sqrt(prevPacked[(lodLevel - 1u) % 4u]);
+            }
+
+            let maxTileDim = max(landscapeUniforms.tileSizeX, landscapeUniforms.tileSizeZ);
+            let tileRadius = maxTileDim * 0.7071;
+
+            let morphEndDist = max(prevDist + 1.0, nextDist - tileRadius);
+            let morphRange = max(1.0, morphEndDist - prevDist);
+
+            let morphRatio = clamp(landscapeUniforms.lodGeomorphStartRatio, 0.01, 0.99);
+            let morphStartDist = prevDist + morphRange * morphRatio;
+
+            let morphFactor = clamp((dist - morphStartDist) / max(0.001, morphEndDist - morphStartDist), 0.0, 1.0);
+            let smoothMorph = smoothstep(0.0, 1.0, morphFactor);
+
+            if (smoothMorph > 0.0001) {
+                let baseQuads = max(1.0, landscapeUniforms.baseQuads);
+                let currentSegments = max(1.0, floor(baseQuads / pow(2.0, f32(lodLevel))));
+
+                let halfTileX = landscapeUniforms.tileSizeX * 0.5;
+                let halfTileZ = landscapeUniforms.tileSizeZ * 0.5;
+
+                let gridStepX = landscapeUniforms.tileSizeX / currentSegments;
+                let gridStepZ = landscapeUniforms.tileSizeZ / currentSegments;
+
+                let gridIdxX = u32(round((input.position.x + halfTileX) / gridStepX) + 0.1);
+                let gridIdxZ = u32(round((input.position.y + halfTileZ) / gridStepZ) + 0.1);
+
+                let isOddX = (gridIdxX % 2u) != 0u;
+                let isOddZ = (gridIdxZ % 2u) != 0u;
+
+                if (isOddX || isOddZ) {
+                    let uvStepX = landscapeUniforms.tileSizeX / (landscapeUniforms.worldSizeX * currentSegments);
+                    let uvStepZ = landscapeUniforms.tileSizeZ / (landscapeUniforms.worldSizeZ * currentSegments);
+
+                    var targetHeight = currentHeight;
+
+                    if (isOddX && !isOddZ) {
+                        let cLeft = vec2<i32>(clamp((globalUV - vec2<f32>(uvStepX, 0.0)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+                        let cRight = vec2<i32>(clamp((globalUV + vec2<f32>(uvStepX, 0.0)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+                        targetHeight = (textureLoad(heightMapTexture, cLeft, 0).r + textureLoad(heightMapTexture, cRight, 0).r) * 0.5;
+                    } else if (!isOddX && isOddZ) {
+                        let cTop = vec2<i32>(clamp((globalUV - vec2<f32>(0.0, uvStepZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+                        let cBottom = vec2<i32>(clamp((globalUV + vec2<f32>(0.0, uvStepZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+                        targetHeight = (textureLoad(heightMapTexture, cTop, 0).r + textureLoad(heightMapTexture, cBottom, 0).r) * 0.5;
+                    } else {
+                        let c00 = vec2<i32>(clamp((globalUV + vec2<f32>(-uvStepX, -uvStepZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+                        let c10 = vec2<i32>(clamp((globalUV + vec2<f32>(uvStepX, -uvStepZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+                        let c01 = vec2<i32>(clamp((globalUV + vec2<f32>(-uvStepX, uvStepZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+                        let c11 = vec2<i32>(clamp((globalUV + vec2<f32>(uvStepX, uvStepZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+                        targetHeight = (
+                            textureLoad(heightMapTexture, c00, 0).r +
+                            textureLoad(heightMapTexture, c10, 0).r +
+                            textureLoad(heightMapTexture, c01, 0).r +
+                            textureLoad(heightMapTexture, c11, 0).r
+                        ) * 0.25;
+                    }
+
+                    finalHeight = mix(currentHeight, targetHeight, smoothMorph);
+                }
+            }
+        }
+    }
+
+    var prevHeightValue = finalHeight;
     if (prevWorldX != worldX || prevWorldZ != worldZ) {
         let prevTexCoord = vec2<i32>(clamp(prevGlobalUV * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
         prevHeightValue = textureLoad(heightMapTexture, prevTexCoord, 0).r;
     }
 
-    let worldY = heightValue * landscapeUniforms.heightScale + input.position.z;
-    let prevWorldY = prevHeightValue * landscapeUniforms.heightScale + input.position.z;
+    let isSkirt = input.position.z < -0.5;
+    let lodMultiplier = 1.0 + f32(lodLevel) * 0.5;
+    let dynamicSkirtDepth = -max(30.0, landscapeUniforms.heightScale * 0.15 * lodMultiplier);
+
+    let worldY = finalHeight * landscapeUniforms.heightScale + select(0.0, dynamicSkirtDepth, isSkirt);
+    let prevWorldY = prevHeightValue * landscapeUniforms.heightScale + select(0.0, dynamicSkirtDepth, isSkirt);
 
     let worldPos4 = vec4<f32>(worldX, worldY, worldZ, 1.0);
     let prevWorldPos4 = vec4<f32>(prevWorldX, prevWorldY, prevWorldZ, 1.0);
@@ -147,8 +186,8 @@ fn main(input: InputData) -> OutputData {
     let halfTileX = landscapeUniforms.tileSizeX * 0.5;
     let halfTileZ = landscapeUniforms.tileSizeZ * 0.5;
     output.uv = vec2<f32>(
-        (localX + halfTileX) / landscapeUniforms.tileSizeX,
-        (localZ + halfTileZ) / landscapeUniforms.tileSizeZ
+        (input.position.x + halfTileX) / landscapeUniforms.tileSizeX,
+        (input.position.y + halfTileZ) / landscapeUniforms.tileSizeZ
     );
     output.uv1 = globalUV;
     output.vertexColor_0 = vec4<f32>(1.0, 1.0, 1.0, 1.0);

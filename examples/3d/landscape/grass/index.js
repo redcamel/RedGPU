@@ -346,7 +346,7 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
         componentSizeQuads: RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
         maxLODLevel: landscape ? landscape.maxLODLevel : 4,
         lodFadeStartRatio: landscape ? landscape.lodFadeStartRatio : 0.7,
-        lodGeomorphStartRatio: landscape ? landscape.lodGeomorphStartRatio : 0.7,
+        lodGeomorphStartRatio: landscape ? landscape.lodGeomorphStartRatio : 0.85,
 
         // 3. Height & Displacement
         heightScale: landscape ? landscape.heightScale : 500,
