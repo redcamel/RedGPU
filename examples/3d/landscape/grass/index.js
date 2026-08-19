@@ -20,7 +20,8 @@ RedGPU.init(
         controller.x = 0;
         controller.y = 350;
         controller.z = 0;
-        controller.moveSpeed = 1500;
+        controller.moveSpeed = 5000;
+
         // 2. Scene & View3D 초기화
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -49,20 +50,22 @@ RedGPU.init(
 
         // Multi-Layer PBR 지형 레이어 4종 (Grass, Rock, Gravel, Leave) 등록
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
-        const linearFormat = navigator.gpu.getPreferredCanvasFormat();
 
-        // UE5 표준: 1장의 Channel-Packed Splatmap 텍스처 경로 (R: Layer0, G: Layer1, B: Layer2, A: Layer3)
-        const splatMapPath = '../../../assets/terrain/terrainTest_001/splatMap.jpg';
+        // UE5 표준: 1장의 Channel-Packed Splatmap 텍스처 (R: Layer0, G: Layer1, B: Layer2, A: Layer3)
+        const sharedSplatMap = new RedGPU.Resource.BitmapTexture(
+            redGPUContext,
+            '../../../assets/terrain/terrainTest_001/splatMap.jpg'
+        );
 
-        // 1. Grass (주 광활한 초원/산맥 레이어 - 🔴 R 채널: 전체 지형의 65% 최대 면적 차지)
+        // 1. Grass (주 광활한 초원/산맥 레이어 - 🔵 B 채널: 전체 지형의 65% 최대 면적 차지)
         const grassLayer = new RedGPU.LandscapeLayer({
             name: 'Grass',
-            baseColorTexture: `${assetPath}grass.jpg`,
-            normalTexture: `${assetPath}grass_normal.jpg`,
-            ormTexture: `${assetPath}grass_orm.jpg`,
-            weightTexture: splatMapPath,
-            weightChannel: 'R',
-            uvScale: [50, 50],
+            baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass.jpg`),
+            normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass_normal.jpg`),
+            ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass_orm.jpg`),
+            weightTexture: sharedSplatMap,
+            weightChannel: 'B', // 🔵 Blue: 전체 맵의 65%를 차지하는 최대 면적에 푸른 잔디 적용
+            uvScale: [50, 50], // 🌿 100m 타일 기준 2.0m 반복 (작은 풀잎/잔디 실제 스케일 최적화)
             blendMode: 'WEIGHT_MAP',
             roughness: 0.85,
             metallic: 0.0,
@@ -71,15 +74,15 @@ RedGPU.init(
             tintColor: '#ffffff'
         });
 
-        // 2. Gravel (오솔길/흙길 레이어 - 🔵 B 채널: 좁은 오솔길 10%)
+        // 2. Gravel (오솔길/흙길 레이어 - 🔴 R 채널: 좁은 오솔길 10%)
         const gravelLayer = new RedGPU.LandscapeLayer({
             name: 'Gravel',
-            baseColorTexture: `${assetPath}gravel.jpg`,
-            normalTexture: `${assetPath}gravel_normal.jpg`,
-            ormTexture: `${assetPath}gravel_orm.jpg`,
-            weightTexture: splatMapPath,
-            weightChannel: 'B',
-            uvScale: [40, 40],
+            baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}gravel.jpg`),
+            normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}gravel_normal.jpg`),
+            ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}gravel_orm.jpg`),
+            weightTexture: sharedSplatMap,
+            weightChannel: 'R', // 🔴 Red: 구불구불한 오솔길/도로
+            uvScale: [40, 40], // 🪨 100m 타일 기준 2.5m 반복 (오솔길 폭 4~6m 내에 적정 2~3회 반복)
             blendMode: 'WEIGHT_MAP',
             roughness: 0.9,
             metallic: 0.0,
@@ -91,12 +94,12 @@ RedGPU.init(
         // 3. Rock (절벽/암벽 레이어 - 🟢 G 채널: 능선 및 절벽 포인트 20%)
         const rockLayer = new RedGPU.LandscapeLayer({
             name: 'Rock',
-            baseColorTexture: `${assetPath}rock.jpg`,
-            normalTexture: `${assetPath}rock_normal.jpg`,
-            ormTexture: `${assetPath}rock_orm.jpg`,
-            weightTexture: splatMapPath,
-            weightChannel: 'G',
-            uvScale: [15, 15],
+            baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock.jpg`),
+            normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock_normal.jpg`),
+            ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock_orm.jpg`),
+            weightTexture: sharedSplatMap,
+            weightChannel: 'G', // 🟢 Green: 가파른 능선 및 암벽 포인트
+            uvScale: [15, 15], // ⛰️ 100m 타일 기준 6.6m 반복 (거대 단층선과 웅장한 지층 덩어리감)
             blendMode: 'WEIGHT_MAP',
             roughness: 0.7,
             metallic: 0.05,
@@ -108,12 +111,12 @@ RedGPU.init(
         // 4. Leave (골짜기/숲속 레이어 - ⚫ A / Black 채널: 그늘진 골짜기 5%)
         const leaveLayer = new RedGPU.LandscapeLayer({
             name: 'Leave',
-            baseColorTexture: `${assetPath}leave.jpg`,
-            normalTexture: `${assetPath}leave_normal.jpg`,
-            ormTexture: `${assetPath}leave_orm.jpg`,
-            weightTexture: splatMapPath,
-            weightChannel: 'A',
-            uvScale: [50, 50],
+            baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}leave.jpg`),
+            normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}leave_normal.jpg`),
+            ormTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}leave_orm.jpg`),
+            weightTexture: sharedSplatMap,
+            weightChannel: 'A', // ⚫ Black/Alpha: 숲속 그늘 바닥/골짜기
+            uvScale: [50, 50], // 🍂 100m 타일 기준 2.0m 반복 (손바닥 크기 낙엽 실제 스케일)
             blendMode: 'WEIGHT_MAP',
             roughness: 0.8,
             metallic: 0.0,
@@ -256,14 +259,13 @@ RedGPU.init(
             );
         }
 
-        /*
         const grassGeometry = createGrassClumpGeometry(redGPUContext, 2.2, 4.2, 3);
         const dummyGrassMesh = new RedGPU.Display.Mesh(
             redGPUContext,
             grassGeometry,
             grassMaterial
         );
-
+        //
         const grassType = foliageManager.addFoliageType({
             name: 'BasicGrass',
             mesh: dummyGrassMesh,
@@ -274,52 +276,6 @@ RedGPU.init(
             maxScale: [1.3, 20, 1.3],
             randomRotationY: true
         });
-        */
-        let treeType = null;
-
-        // 🌟 [GLB 수목 로드 및 Multi-Submesh Foliage 인스턴싱 등록]
-        new RedGPU.GLTFLoader(
-            redGPUContext,
-            '../../../assets/terrain/tree_elm.glb',
-            (loader) => {
-                const treeMesh = loader.resultMesh;
-
-                // 🌲 지형 전역 대량 인스턴싱 FoliageType으로 등록! (현실적인 수목 스케일 & LOD 파라미터)
-                treeType = foliageManager.addFoliageType({
-                    name: 'ElmTree',
-                    mesh: treeMesh,
-                    maxInstances: 100000,
-                    cullingDistance: 1600,
-                    fadeStartDistance: 1100,
-                    minScale: [3, 3, 3],        // 현실적인 성목 높이 (약 7~8m)
-                    maxScale: [3, 3, 3],   // 대형 거목 높이 (약 12~14m)
-                    // randomRotationY: true,
-                    // 🌟 언리얼 엔진 5 스타일 SpeedTree Cross-Billboard Impostor LOD & Dithered Crossfade
-                    billboard: {
-                        enabled: true,
-                        lodDistance: 250, // 90m 전환 중심 거리
-                        fadeRange: 30    // 75m ~ 105m 구간에서 3D 모델과 십자 빌보드가 부드럽게 디더링 크로스페이드 (팝핑 0%!)
-                    }
-                });
-
-
-                console.log('[Foliage Example 🌳] Extracted SubMeshes in treeType:', treeType.subMeshes.map(s => ({
-                    name: s.mesh.name,
-                    alphaBlend: s.material.alphaBlend,
-                    useCutOff: s.material.useCutOff,
-                    cutOff: s.material.cutOff,
-                    transparent: s.material.transparent,
-                    indexCount: s.indexCount,
-                    vertexCount: s.vertexCount,
-                    isIndexed: s.isIndexed,
-                    hasVB: !!s.geometry.vertexBuffer?.gpuBuffer,
-                    hasIB: !!s.geometry.indexBuffer?.gpuBuffer,
-                })));
-                console.log('[Foliage Example 🌳] activeInstanceCount:', treeType.activeInstanceCount);
-                console.log('[Foliage Example 🌳] ElmTree FoliageType registered successfully! SubMeshes:', treeType.subMeshes.length);
-            }
-        );
-
 
         // 5-1. 정식 RedGPU 디버거 클래스 인스턴스 생성 (2D SpatialGrid, VHT Heightmap, VNT Normal Atlas, HUD 디버거)
         const hudDebugger = new RedGPU.Display.LandscapeHUDDebugger(landscape, controller, {
@@ -331,21 +287,21 @@ RedGPU.init(
         const spatialGridDebugger = new RedGPU.Display.LandscapeSpatialGridDebugger(landscape, controller, {
             width: 100,
             height: 100,
-            left: 120,
+            left: 12,
             bottom: 12
         });
 
         const vhtDebugger = new RedGPU.Display.LandscapeVHTDebugger(landscape, controller, {
             width: 100,
             height: 100,
-            left: 228,
+            left: 120,
             bottom: 12
         });
 
         const vntDebugger = new RedGPU.Display.LandscapeVNTDebugger(landscape, controller, {
             width: 100,
             height: 100,
-            left: 336,
+            left: 228,
             bottom: 12
         });
 
@@ -361,8 +317,7 @@ RedGPU.init(
         renderer.start(redGPUContext, render);
 
         // 7. Landscape 모든 get/set 속성 및 2D 디버거 전면 제어 테스트 패널 렌더링
-        renderTestPane(redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, directionalLight, [grassLayer, rockLayer, gravelLayer, leaveLayer], foliageManager, treeType);
-
+        renderTestPane(redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, directionalLight, [grassLayer, rockLayer, gravelLayer, leaveLayer], foliageManager, grassType);
     }
 );
 
@@ -389,7 +344,6 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
         foliageCount: grassType ? grassType.activeInstanceCount : 0,
         foliageCullingDist: grassType ? grassType.options.cullingDistance : 600,
         foliageFadeStartDist: grassType ? grassType.options.fadeStartDistance : 400,
-        billboardWireframe: false,
         // 1. Terrain Dimensions & Transform
         worldSizeX: wsX,
         worldSizeZ: wsZ,
@@ -465,37 +419,24 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
             activePane = pane;
 
             // Folder 0: Foliage System Controls
-            const currentFoliageType = grassType || foliageManager?.getFoliageType('ElmTree') || foliageManager?.getFoliageType('BasicGrass');
-            if (currentFoliageType || foliageManager) {
+            if (grassType) {
                 const folderFoliage = pane.addFolder({title: '🌿 Foliage System Controls', expanded: true});
                 folderFoliage.addBinding(config, 'foliageCount', {readonly: true});
                 folderFoliage.addBinding(config, 'foliageCullingDist', {
-                    min: 500,
-                    max: 8000,
-                    step: 50
+                    min: 100,
+                    max: 2000,
+                    step: 20
                 }).on('change', (ev) => {
-                    const target = grassType || foliageManager?.getFoliageType('ElmTree');
-                    if (target) target.options.cullingDistance = ev.value;
+                    grassType.options.cullingDistance = ev.value;
                 });
                 folderFoliage.addBinding(config, 'foliageFadeStartDist', {
-                    min: 200,
-                    max: 6000,
-                    step: 50
+                    min: 50,
+                    max: 1500,
+                    step: 20
                 }).on('change', (ev) => {
-                    const target = grassType || foliageManager?.getFoliageType('ElmTree');
-                    if (target) target.options.fadeStartDistance = ev.value;
-                });
-                folderFoliage.addBinding(config, 'billboardWireframe', {
-                    title: '📐 Billboard Wireframe'
-                }).on('change', (ev) => {
-                    const target = grassType || foliageManager?.getFoliageType('ElmTree');
-                    if (target) {
-                        target.setBillboardWireframe(ev.value);
-                        console.log('[Foliage Example 📐] Billboard Wireframe toggled:', ev.value);
-                    }
+                    grassType.options.fadeStartDistance = ev.value;
                 });
             }
-
 
             // Folder 1: Terrain Dimensions (worldSize, componentCount, tileSize)
             const folderDimensions = pane.addFolder({title: '⛰️ Terrain Dimensions (UE5 Specs)', expanded: true});

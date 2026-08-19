@@ -137,6 +137,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
             return;
         }
 
+        layer.resolvePendingTextures(this.redGPUContext);
         this.#layers.push(layer);
         layer.onChange = () => {
             this.requestVBTRebake();

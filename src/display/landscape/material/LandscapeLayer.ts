@@ -1,5 +1,6 @@
 import ColorRGBA from "../../../color/ColorRGBA";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
+import RedGPUContext from "../../../context/RedGPUContext";
 
 export type LandscapeLayerBlendMode = 'SLOPE' | 'HEIGHT' | 'WEIGHT_MAP';
 /** @deprecated Use LandscapeLayerBlendMode */
@@ -10,15 +11,15 @@ export type LandscapeWeightMapChannel = 'R' | 'G' | 'B' | 'A' | 'r' | 'g' | 'b' 
 export interface LandscapeLayerOptions {
     name: string;
     enabled?: boolean;
-    baseColorTexture?: BitmapTexture;
-    normalTexture?: BitmapTexture;
-    ormTexture?: BitmapTexture;
+    baseColorTexture?: BitmapTexture | string;
+    normalTexture?: BitmapTexture | string;
+    ormTexture?: BitmapTexture | string;
     /** Weight Mask Texture (Splatmap) for WEIGHT_MAP Blend Mode */
-    weightTexture?: BitmapTexture;
+    weightTexture?: BitmapTexture | string;
     /** Legacy alias for weightTexture */
-    weightMapTexture?: BitmapTexture;
+    weightMapTexture?: BitmapTexture | string;
     /** Legacy alias for weightTexture */
-    splatTexture?: BitmapTexture;
+    splatTexture?: BitmapTexture | string;
     /** UE5 Standard: UV Scale [U, V] (타일당 텍스처 반복 횟수) */
     uvScale?: [number, number];
     /** Legacy alias: Texture Scale [U, V] */
@@ -74,11 +75,16 @@ export class LandscapeLayer {
     readonly name: string;
     enabled: boolean = true;
 
-    baseColorTexture?: BitmapTexture;
-    normalTexture?: BitmapTexture;
-    ormTexture?: BitmapTexture;
-    /** Weight Mask Texture (Splatmap) for WEIGHT_MAP Blend Mode */
-    weightTexture?: BitmapTexture;
+    #redGPUContext?: RedGPUContext;
+    #baseColorTexture?: BitmapTexture;
+    #normalTexture?: BitmapTexture;
+    #ormTexture?: BitmapTexture;
+    #weightTexture?: BitmapTexture;
+
+    #pendingBaseColorSrc?: string;
+    #pendingNormalSrc?: string;
+    #pendingOrmSrc?: string;
+    #pendingWeightSrc?: string;
 
     /** [KO] 타일 기준 UV 스케일 [U, V] (타일당 텍스처 반복 횟수) [EN] Tile-based UV Scale [U, V] */
     uvScale: [number, number] = [20.0, 20.0];
@@ -113,55 +119,180 @@ export class LandscapeLayer {
     dirty: boolean = true;
     onChange?: () => void;
 
-    constructor(options: LandscapeLayerOptions) {
-        this.name = options.name;
-        if (options.enabled !== undefined) this.enabled = options.enabled;
+    constructor(redGPUContextOrOptions: RedGPUContext | LandscapeLayerOptions, options?: LandscapeLayerOptions) {
+        let actualOptions: LandscapeLayerOptions;
+        if (redGPUContextOrOptions instanceof RedGPUContext) {
+            this.#redGPUContext = redGPUContextOrOptions;
+            actualOptions = options!;
+        } else {
+            actualOptions = redGPUContextOrOptions;
+        }
 
-        if (options.baseColorTexture) this.baseColorTexture = options.baseColorTexture;
-        this.normalTexture = options.normalTexture;
-        this.ormTexture = options.ormTexture;
-        this.weightTexture = options.weightTexture ?? options.weightMapTexture ?? options.splatTexture;
+        this.name = actualOptions.name;
+        if (actualOptions.enabled !== undefined) this.enabled = actualOptions.enabled;
 
-        const scale = options.uvScale ?? options.textureScale;
+        if (actualOptions.baseColorTexture !== undefined) {
+            this.baseColorTexture = actualOptions.baseColorTexture;
+        }
+        if (actualOptions.normalTexture !== undefined) {
+            this.normalTexture = actualOptions.normalTexture;
+        }
+        if (actualOptions.ormTexture !== undefined) {
+            this.ormTexture = actualOptions.ormTexture;
+        }
+        const weightTex = actualOptions.weightTexture ?? actualOptions.weightMapTexture ?? actualOptions.splatTexture;
+        if (weightTex !== undefined) {
+            this.weightTexture = weightTex;
+        }
+
+        const scale = actualOptions.uvScale ?? actualOptions.textureScale;
         if (scale) this.uvScale = [...scale];
 
-        const offset = options.uvOffset ?? options.textureOffset;
+        const offset = actualOptions.uvOffset ?? actualOptions.textureOffset;
         if (offset) this.uvOffset = [...offset];
 
-        const bMode = options.blendMode ?? options.blendType;
+        const bMode = actualOptions.blendMode ?? actualOptions.blendType;
         if (bMode) this.blendMode = bMode;
 
-        const wCh = options.weightChannel ?? options.weightMapChannel ?? options.weightMapChannelIndex ?? options.splatChannel;
+        const wCh = actualOptions.weightChannel ?? actualOptions.weightMapChannel ?? actualOptions.weightMapChannelIndex ?? actualOptions.splatChannel;
         if (wCh !== undefined) this.weightChannel = wCh;
 
-        if (options.minVal !== undefined) this.minVal = options.minVal;
-        if (options.maxVal !== undefined) this.maxVal = options.maxVal;
+        if (actualOptions.minVal !== undefined) this.minVal = actualOptions.minVal;
+        if (actualOptions.maxVal !== undefined) this.maxVal = actualOptions.maxVal;
 
-        const bFalloff = options.blendFalloff ?? options.falloff;
+        const bFalloff = actualOptions.blendFalloff ?? actualOptions.falloff;
         if (bFalloff !== undefined) this.blendFalloff = bFalloff;
 
-        const rFactor = options.roughness ?? options.roughnessFactor;
+        const rFactor = actualOptions.roughness ?? actualOptions.roughnessFactor;
         if (rFactor !== undefined) this.roughness = rFactor;
 
-        const mFactor = options.metallic ?? options.metallicFactor;
+        const mFactor = actualOptions.metallic ?? actualOptions.metallicFactor;
         if (mFactor !== undefined) this.metallic = mFactor;
 
-        const nIntensity = options.normalIntensity ?? options.normalScale;
+        const nIntensity = actualOptions.normalIntensity ?? actualOptions.normalScale;
         if (nIntensity !== undefined) this.normalIntensity = nIntensity;
 
-        if (options.aoIntensity !== undefined) this.aoIntensity = options.aoIntensity;
-        if (options.heightOffset !== undefined) this.heightOffset = options.heightOffset;
-        if (options.heightContrast !== undefined) this.heightContrast = options.heightContrast;
+        if (actualOptions.aoIntensity !== undefined) this.aoIntensity = actualOptions.aoIntensity;
+        if (actualOptions.heightOffset !== undefined) this.heightOffset = actualOptions.heightOffset;
+        if (actualOptions.heightContrast !== undefined) this.heightContrast = actualOptions.heightContrast;
 
-        if (options.tintColor) {
-            if (typeof options.tintColor === 'string') {
+        if (actualOptions.tintColor) {
+            if (typeof actualOptions.tintColor === 'string') {
                 const col = new ColorRGBA();
-                col.setColorByHEX(options.tintColor);
+                col.setColorByHEX(actualOptions.tintColor);
                 this.tintColor = col;
             } else {
-                this.tintColor = options.tintColor;
+                this.tintColor = actualOptions.tintColor;
             }
         }
+    }
+
+    get baseColorTexture(): BitmapTexture | undefined {
+        return this.#baseColorTexture;
+    }
+
+    set baseColorTexture(val: BitmapTexture | string | undefined) {
+        if (typeof val === 'string') {
+            if (this.#redGPUContext) {
+                this.#baseColorTexture = new BitmapTexture(this.#redGPUContext, val);
+                this.#pendingBaseColorSrc = undefined;
+            } else {
+                this.#pendingBaseColorSrc = val;
+                this.#baseColorTexture = undefined;
+            }
+        } else {
+            this.#baseColorTexture = val;
+            this.#pendingBaseColorSrc = undefined;
+        }
+        this.onChange?.();
+    }
+
+    get normalTexture(): BitmapTexture | undefined {
+        return this.#normalTexture;
+    }
+
+    set normalTexture(val: BitmapTexture | string | undefined) {
+        if (typeof val === 'string') {
+            if (this.#redGPUContext) {
+                this.#normalTexture = new BitmapTexture(this.#redGPUContext, val, true, undefined, undefined, this.#resolveLinearFormat());
+                this.#pendingNormalSrc = undefined;
+            } else {
+                this.#pendingNormalSrc = val;
+                this.#normalTexture = undefined;
+            }
+        } else {
+            this.#normalTexture = val;
+            this.#pendingNormalSrc = undefined;
+        }
+        this.onChange?.();
+    }
+
+    get ormTexture(): BitmapTexture | undefined {
+        return this.#ormTexture;
+    }
+
+    set ormTexture(val: BitmapTexture | string | undefined) {
+        if (typeof val === 'string') {
+            if (this.#redGPUContext) {
+                this.#ormTexture = new BitmapTexture(this.#redGPUContext, val, true, undefined, undefined, this.#resolveLinearFormat());
+                this.#pendingOrmSrc = undefined;
+            } else {
+                this.#pendingOrmSrc = val;
+                this.#ormTexture = undefined;
+            }
+        } else {
+            this.#ormTexture = val;
+            this.#pendingOrmSrc = undefined;
+        }
+        this.onChange?.();
+    }
+
+    get weightTexture(): BitmapTexture | undefined {
+        return this.#weightTexture;
+    }
+
+    set weightTexture(val: BitmapTexture | string | undefined) {
+        if (typeof val === 'string') {
+            if (this.#redGPUContext) {
+                this.#weightTexture = new BitmapTexture(this.#redGPUContext, val, true, undefined, undefined, this.#resolveLinearFormat());
+                this.#pendingWeightSrc = undefined;
+            } else {
+                this.#pendingWeightSrc = val;
+                this.#weightTexture = undefined;
+            }
+        } else {
+            this.#weightTexture = val;
+            this.#pendingWeightSrc = undefined;
+        }
+        this.onChange?.();
+    }
+
+    /**
+     * [KO] 문자열 경로로 등록된 텍스처들을 RedGPUContext를 주입받아 BitmapTexture 인스턴스로 자동 해결합니다.
+     * [EN] Automatically resolves textures registered as string paths to BitmapTexture instances using the injected RedGPUContext.
+     */
+    resolvePendingTextures(context: RedGPUContext): void {
+        this.#redGPUContext = context;
+        if (this.#pendingBaseColorSrc) {
+            this.#baseColorTexture = new BitmapTexture(context, this.#pendingBaseColorSrc);
+            this.#pendingBaseColorSrc = undefined;
+        }
+        if (this.#pendingNormalSrc) {
+            this.#normalTexture = new BitmapTexture(context, this.#pendingNormalSrc, true, undefined, undefined, this.#resolveLinearFormat());
+            this.#pendingNormalSrc = undefined;
+        }
+        if (this.#pendingOrmSrc) {
+            this.#ormTexture = new BitmapTexture(context, this.#pendingOrmSrc, true, undefined, undefined, this.#resolveLinearFormat());
+            this.#pendingOrmSrc = undefined;
+        }
+        if (this.#pendingWeightSrc) {
+            this.#weightTexture = new BitmapTexture(context, this.#pendingWeightSrc, true, undefined, undefined, this.#resolveLinearFormat());
+            this.#pendingWeightSrc = undefined;
+        }
+    }
+
+    #resolveLinearFormat(): GPUTextureFormat {
+        return navigator.gpu?.getPreferredCanvasFormat ? navigator.gpu.getPreferredCanvasFormat() : 'rgba8unorm';
     }
 
     // --- Legacy & UE5 Aliases for 100% Backward Compatibility ---
