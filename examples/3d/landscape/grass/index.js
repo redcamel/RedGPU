@@ -66,7 +66,6 @@ RedGPU.init(
             weightTexture: sharedSplatMap,
             weightChannel: 'B', // 🔵 Blue: 전체 맵의 65%를 차지하는 최대 면적에 푸른 잔디 적용
             uvScale: [50, 50], // 🌿 100m 타일 기준 2.0m 반복 (작은 풀잎/잔디 실제 스케일 최적화)
-            blendMode: 'WEIGHT_MAP',
             roughness: 0.85,
             metallic: 0.0,
             normalIntensity: 1.5,
@@ -83,7 +82,6 @@ RedGPU.init(
             weightTexture: sharedSplatMap,
             weightChannel: 'R', // 🔴 Red: 구불구불한 오솔길/도로
             uvScale: [40, 40], // 🪨 100m 타일 기준 2.5m 반복 (오솔길 폭 4~6m 내에 적정 2~3회 반복)
-            blendMode: 'WEIGHT_MAP',
             roughness: 0.9,
             metallic: 0.0,
             normalIntensity: 1.8,
@@ -100,7 +98,6 @@ RedGPU.init(
             weightTexture: sharedSplatMap,
             weightChannel: 'G', // 🟢 Green: 가파른 능선 및 암벽 포인트
             uvScale: [15, 15], // ⛰️ 100m 타일 기준 6.6m 반복 (거대 단층선과 웅장한 지층 덩어리감)
-            blendMode: 'WEIGHT_MAP',
             roughness: 0.7,
             metallic: 0.05,
             normalIntensity: 2.2,
@@ -117,7 +114,6 @@ RedGPU.init(
             weightTexture: sharedSplatMap,
             weightChannel: 'A', // ⚫ Black/Alpha: 숲속 그늘 바닥/골짜기
             uvScale: [50, 50], // 🍂 100m 타일 기준 2.0m 반복 (손바닥 크기 낙엽 실제 스케일)
-            blendMode: 'WEIGHT_MAP',
             roughness: 0.8,
             metallic: 0.0,
             normalIntensity: 1.4,
@@ -562,24 +558,9 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                     subFolder.addBinding(layer, 'enabled').on('change', () => {
                         landscape?.landscapeMaterial?.requestVBTRebake();
                     });
-                    subFolder.addBinding(layer, 'blendMode', {
-                        options: {SLOPE: 'SLOPE', HEIGHT: 'HEIGHT', WEIGHT_MAP: 'WEIGHT_MAP'}
-                    }).on('change', () => {
-                        landscape?.landscapeMaterial?.requestVBTRebake();
-                    });
                     subFolder.addBinding(layer, 'weightChannel', {
                         options: {R: 'R', G: 'G', B: 'B', A: 'A'}
                     }).on('change', () => {
-                        landscape?.landscapeMaterial?.requestVBTRebake();
-                    });
-
-                    subFolder.addBinding(layer, 'minVal', {min: -500, max: 500, step: 0.1}).on('change', () => {
-                        landscape?.landscapeMaterial?.requestVBTRebake();
-                    });
-                    subFolder.addBinding(layer, 'maxVal', {min: -500, max: 500, step: 0.1}).on('change', () => {
-                        landscape?.landscapeMaterial?.requestVBTRebake();
-                    });
-                    subFolder.addBinding(layer, 'blendFalloff', {min: 0.1, max: 50, step: 0.1}).on('change', () => {
                         landscape?.landscapeMaterial?.requestVBTRebake();
                     });
 

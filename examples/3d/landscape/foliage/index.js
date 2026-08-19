@@ -63,7 +63,6 @@ RedGPU.init(
             weightTexture: splatMapPath,
             weightChannel: 'R',
             uvScale: [50, 50],
-            blendMode: 'WEIGHT_MAP',
             roughness: 0.85,
             metallic: 0.0,
             normalIntensity: 1.5,
@@ -80,7 +79,6 @@ RedGPU.init(
             weightTexture: splatMapPath,
             weightChannel: 'B',
             uvScale: [40, 40],
-            blendMode: 'WEIGHT_MAP',
             roughness: 0.9,
             metallic: 0.0,
             normalIntensity: 1.8,
@@ -97,7 +95,6 @@ RedGPU.init(
             weightTexture: splatMapPath,
             weightChannel: 'G',
             uvScale: [15, 15],
-            blendMode: 'WEIGHT_MAP',
             roughness: 0.7,
             metallic: 0.05,
             normalIntensity: 2.2,
@@ -114,7 +111,6 @@ RedGPU.init(
             weightTexture: splatMapPath,
             weightChannel: 'A',
             uvScale: [50, 50],
-            blendMode: 'WEIGHT_MAP',
             roughness: 0.8,
             metallic: 0.0,
             normalIntensity: 1.4,
@@ -621,24 +617,9 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                     subFolder.addBinding(layer, 'enabled').on('change', () => {
                         landscape?.landscapeMaterial?.requestVBTRebake();
                     });
-                    subFolder.addBinding(layer, 'blendMode', {
-                        options: {SLOPE: 'SLOPE', HEIGHT: 'HEIGHT', WEIGHT_MAP: 'WEIGHT_MAP'}
-                    }).on('change', () => {
-                        landscape?.landscapeMaterial?.requestVBTRebake();
-                    });
                     subFolder.addBinding(layer, 'weightChannel', {
                         options: {R: 'R', G: 'G', B: 'B', A: 'A'}
                     }).on('change', () => {
-                        landscape?.landscapeMaterial?.requestVBTRebake();
-                    });
-
-                    subFolder.addBinding(layer, 'minVal', {min: -500, max: 500, step: 0.1}).on('change', () => {
-                        landscape?.landscapeMaterial?.requestVBTRebake();
-                    });
-                    subFolder.addBinding(layer, 'maxVal', {min: -500, max: 500, step: 0.1}).on('change', () => {
-                        landscape?.landscapeMaterial?.requestVBTRebake();
-                    });
-                    subFolder.addBinding(layer, 'blendFalloff', {min: 0.1, max: 50, step: 0.1}).on('change', () => {
                         landscape?.landscapeMaterial?.requestVBTRebake();
                     });
 
