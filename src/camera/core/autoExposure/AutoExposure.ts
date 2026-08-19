@@ -50,7 +50,7 @@ class AutoExposure extends RedGPUObject {
     #lowPercentile: number = 0.8;
     #highPercentile: number = 0.95;
     #maxExposureMultiplier: number = 64.0;
-    #meteringMode: METERING_MODE = METERING_MODE.CENTER_WEIGHTED;
+    #meteringMode: METERING_MODE = METERING_MODE.AVERAGE;
     #targetLuminance: number = 0.18;
     #exposureCompensation: number = 0.0;
 

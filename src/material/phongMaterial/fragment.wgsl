@@ -71,7 +71,7 @@ fn getDiffuseBRDFDisney(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albe
     let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
     let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
 
-    return albedo * NdotL * lightScatter * viewScatter * energyFactor * INV_PI;
+    return albedo * lightScatter * viewScatter * energyFactor;
 }
 
 fn getFresnelSchlick(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
@@ -284,14 +284,14 @@ fn main(inputData:InputData) -> OutputFragment {
     }
 
     // [KO] 간접 조명 (Ambient) [EN] Indirect lighting (Ambient)
-    var ambientContribution = albedo * u_ambientLight.color * u_ambientLight.intensity * INV_PI;
+    var ambientContribution = albedo * u_ambientLight.color * u_ambientLight.intensity;
 
     if (systemUniforms.useSkyAtmosphere == 1u) {
         let u_atmo = systemUniforms.skyAtmosphere;
         let skyIntensity = u_atmo.sunIntensity;
         let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, N.y, u_atmo.atmosphereHeight);
         let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity;
-        ambientContribution = (ambientContribution * diffTrans) + (albedo * skyIrradiance * INV_PI);
+        ambientContribution = (ambientContribution * diffTrans) + (albedo * skyIrradiance);
     }
     
     // [KO] 조명 합산 [EN] Lighting summation
