@@ -6,10 +6,6 @@ import ALandscapeAtlasGenerator from "./ALandscapeAtlasGenerator";
 import LandscapeMaterial from "../material/LandscapeMaterial";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
-/**
- * [KO] 8개 레이어 머티리얼과 VHT/VNT로부터 Texture2DArray 기반 실시간 PBR VBT(BaseColor, Normal, ORM) 3종 세트 및 타일 로컬 밉맵을 베이킹하는 제너레이터입니다.
- * [EN] Generator that bakes Texture2DArray-based real-time PBR VBT (BaseColor, Normal, ORM) 3-set and tile-local mipmaps from 8-layer material and VHT/VNT.
- */
 export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
     #uniformFloatArray: Float32Array;
     #uniformUintArray: Uint32Array;
@@ -23,16 +19,12 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, 'VBT');
-        this.#uniformFloatArray = new Float32Array(204); // 816 bytes (204 floats)
+        this.#uniformFloatArray = new Float32Array(204);
         this.#uniformUintArray = new Uint32Array(this.#uniformFloatArray.buffer);
         this.#initComputeResources();
         this.#initTileMipComputeResources();
     }
 
-    /**
-     * [KO] 특정 타일 영역에 8개 레이어의 PBR 머티리얼 텍스처를 2D 거대 아틀라스에 일괄 사전 베이킹 및 타일 독립 밉맵을 생성합니다 (Zero-GC).
-     * [EN] Batch pre-bakes 8-layer PBR material textures and generates tile-local mipmaps for a specific tile region into 2D mega-atlas (Zero-GC).
-     */
     bakeTileRegion(
         vhtAtlas: DirectTexture,
         vntAtlas: DirectTexture,
@@ -61,7 +53,6 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         const fArr = this.#uniformFloatArray;
         const uArr = this.#uniformUintArray;
 
-        // 1. Header (48 bytes: 12 floats / uints)
         fArr[0] = originX;
         fArr[1] = originZ;
         fArr[2] = tileSizePixels;
@@ -80,7 +71,6 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         fArr[10] = baseColorRGBA[2];
         fArr[11] = 1.0;
 
-        // 2. Layers[8] (96 bytes per layer = 24 floats each)
         for (let i = 0; i < 8; i++) {
             const offset = 12 + i * 24;
             if (i < activeCount) {
@@ -146,10 +136,8 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
             ]
         });
 
-        // 1. Mip 0 Base Bake Pass
         this.dispatchBakePass(bindGroup, tileSizePixels, tileSizePixels, originX, originZ);
 
-        // 2. Tile-Local Sub-Region Mipmap 1~5 Generation (Zero Atlas Bleeding)
         this.#dispatchTileMipmaps(
             vbtBaseColorArray.gpuTexture,
             vbtNormalArray.gpuTexture,
@@ -373,4 +361,3 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
 }
 
 export default LandscapeVBTGenerator;
-

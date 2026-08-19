@@ -33,7 +33,6 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let texColor = textureSample(baseColorTexture, baseColorTextureSampler, inputData.uv);
 
-    // 🌟 MASK: Alpha Cutoff (cutOff 미만 폐기)
     var cutOff = globalFragmentData.cutOff;
     if (cutOff <= 0.0) {
         cutOff = 0.5;
@@ -42,7 +41,6 @@ fn main(inputData: InputData) -> OutputFragment {
         discard;
     }
 
-    // 🌟 언리얼 엔진 5 스타일 4x4 Bayer Matrix LOD Dithered Crossfade
     let totalOpacity = inputData.combinedOpacity * globalFragmentData.opacity;
     if (totalOpacity < 0.999) {
         let bayer = array<f32, 16>(
@@ -59,6 +57,5 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
 
-    // writeMask: 0이므로 실제 컬러 메모리에는 쓰여지지 않음 (순수 깊이 버퍼 선점용)
     return output;
 }

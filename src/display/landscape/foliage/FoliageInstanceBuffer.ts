@@ -1,22 +1,17 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import type {FoliageSubMesh} from "./FoliageType";
 
-/**
- * FoliageInstanceBuffer
- * Zero-GC TypedArray 기반 Multi-Submesh Foliage GPU Instanced Buffer Allocator
- */
 class FoliageInstanceBuffer {
-    // Zero-GC 재사용 TypedArray (44 floats = 176 bytes)
+
     static #cullingUniformData = new Float32Array(44);
     static #cullingUniformUint32 = new Uint32Array(FoliageInstanceBuffer.#cullingUniformData.buffer);
     #maxInstances: number;
-    #strideFloats: number = 12; // Pos(3) + Quat(4) + Scale(3) + Extra(2)
+    #strideFloats: number = 12;
 
     #redGPUContext: RedGPUContext;
     #strideBytes: number = 12 * 4;
-    // Zero-GC 재사용 TypedArray
-    #dataBuffer: Float32Array;
 
+    #dataBuffer: Float32Array;
 
     #indirectGPUBuffer: GPUBuffer | null = null;
     #resetIndirectData: Uint32Array | null = null;
@@ -41,9 +36,6 @@ class FoliageInstanceBuffer {
         return this.#dataBuffer;
     }
 
-    /**
-     * 특정 인스턴스 슬롯 데이터 세팅 (매 프레임 힙 메모리 할당 없음)
-     */
     setInstanceData(
         index: number,
         posX: number, posY: number, posZ: number,
@@ -71,9 +63,6 @@ class FoliageInstanceBuffer {
         buffer[offset + 11] = subId;
     }
 
-    /**
-     * 활성화된 인스턴스 개수만큼 원본 GPU 버퍼로 업로드
-     */
     uploadToGPU(activeCount: number): void {
         if (!this.#rawGPUBuffer || activeCount <= 0) return;
 
@@ -90,9 +79,6 @@ class FoliageInstanceBuffer {
         );
     }
 
-    /**
-     * [Zero-GC Chunked Upload] 지정된 범위 인스턴스만큼 원본 GPU 버퍼로 부분 분산 업로드
-     */
     uploadRangeToGPU(startIndex: number, count: number): void {
         if (!this.#rawGPUBuffer || count <= 0) return;
 
@@ -113,9 +99,6 @@ class FoliageInstanceBuffer {
         );
     }
 
-    /**
-     * GPU Culling Uniform 데이터 갱신 및 VRAM 전송 (Zero-GC)
-     */
     updateCullingUniforms(
         camX: number, camY: number, camZ: number,
         cullingDist: number, fadeStartDist: number,
@@ -149,11 +132,10 @@ class FoliageInstanceBuffer {
         u32[13] = Math.max(lod0SubMeshCount, 1);
         u32[14] = hasBillboard ? 1 : 0;
         u32[15] = this.#maxInstances;
-        f32[16] = lodFadeRange; // ★ lodFadeRange (LOD 크로스페이드 구간)
-        f32[17] = worldSizeX > 0 ? (1.0 / worldSizeX) : 0.0; // ⚡ invWorldSizeX (FDIV 나눗셈 100% 제거)
-        f32[18] = 0; // pad2
-        f32[19] = 0; // pad3
-
+        f32[16] = lodFadeRange;
+        f32[17] = worldSizeX > 0 ? (1.0 / worldSizeX) : 0.0;
+        f32[18] = 0;
+        f32[19] = 0;
 
         if (frustumPlanes && frustumPlanes.length >= 6) {
             for (let p = 0; p < 6; p++) {
@@ -178,9 +160,6 @@ class FoliageInstanceBuffer {
         );
     }
 
-    /**
-     * Zero-GC Multi-Indirect Draw Command Buffer 원자적 카운터 리셋
-     */
     resetMultiIndirectCount(subMeshes: FoliageSubMesh[]): void {
         const subCount = subMeshes ? subMeshes.length : 0;
         if (!this.#indirectGPUBuffer || subCount === 0) return;
@@ -195,7 +174,7 @@ class FoliageInstanceBuffer {
             const count = sub.isIndexed ? sub.indexCount : sub.vertexCount;
             const base = s * 5;
             u32[base] = count;
-            u32[base + 1] = 0; // instanceCount reset to 0
+            u32[base + 1] = 0;
             u32[base + 2] = 0;
             u32[base + 3] = 0;
             u32[base + 4] = 0;
@@ -284,22 +263,18 @@ class FoliageInstanceBuffer {
         const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
         const requiredSize = Math.max(this.#dataBuffer.byteLength, 64);
 
-        // 1. Raw Storage Buffer (CPU 업로드 원본 식생 데이터)
         this.#rawGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageInstanceBuffer_RawGPUBuffer',
             size: requiredSize,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
-        // 2. Culled Vertex/Storage Buffer (LOD 0 영역 + LOD 1 영역)
         this.#culledGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageInstanceBuffer_CulledGPUBuffer',
             size: requiredSize * 2,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
         });
 
-
-        // 3. Multi-Indirect Command Storage Buffer (서브메시 개수만큼 슬롯 할당)
         const subCount = subMeshes ? Math.max(subMeshes.length, 1) : 1;
         const indirectSize = Math.max(subCount * 20, 64);
         this.#indirectGPUBuffer = gpuDevice.createBuffer({
@@ -308,7 +283,6 @@ class FoliageInstanceBuffer {
             usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
-        // 4. Culling Uniform Buffer (카메라 위치, GPU VHT 고도 정보, subMeshCount 및 Frustum Planes 전달)
         this.#cullingUniformBuffer = gpuDevice.createBuffer({
             label: 'FoliageInstanceBuffer_CullingUniformBuffer',
             size: 256,

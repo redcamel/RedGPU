@@ -3,23 +3,15 @@ import DirectTexture from "../../../resources/texture/DirectTexture";
 import vntBakeShaderCode from "../shader/landscapeVNTBake.wgsl";
 import ALandscapeAtlasGenerator from "./ALandscapeAtlasGenerator";
 
-/**
- * [KO] 16비트 고도맵 VHT 아틀라스로부터 GPU Compute Shader 기반 실시간 픽셀 노멀 VNT 아틀라스를 베이킹하는 매니저 클래스입니다.
- * [EN] Manager class that bakes real-time pixel normal VNT Atlas based on GPU Compute Shader from 16-bit Heightmap VHT Atlas.
- */
 export class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
     #uniformArray: Float32Array;
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, 'VNT');
-        this.#uniformArray = new Float32Array(12); // 48 bytes for VNTBakeUniforms struct
+        this.#uniformArray = new Float32Array(12);
         this.#initComputeResources();
     }
 
-    /**
-     * [KO] VHT 고도 아틀라스로부터 [pixelX, pixelZ] 타일 영역의 노멀을 계산하여 VNT 아틀라스에 베이킹합니다 (Zero-GC Dynamic Frame-Pool).
-     * [EN] Computes normals for [pixelX, pixelZ] tile region from VHT height atlas and bakes into VNT atlas (Zero-GC Dynamic Frame-Pool).
-     */
     bakeTileRegion(
         vhtAtlas: DirectTexture,
         vntAtlas: DirectTexture,

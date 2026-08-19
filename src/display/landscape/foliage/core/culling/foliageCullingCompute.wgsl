@@ -1,4 +1,3 @@
-// WebGPU Foliage Instance Compute Shader Culling (Multi-LOD & Submesh Workgroup Reduction)
 struct CullingUniforms {
     cameraPosition: vec3<f32>,
     cullingDistance: f32,
@@ -10,19 +9,17 @@ struct CullingUniforms {
     bottomOffset: f32,
     hasVHT: u32,
     subMeshCount: u32,
-    lodDistance: f32,          // ★ LOD 전환 중심 거리 (예: 90.0)
-    lod0SubMeshCount: u32,     // ★ LOD 0 서브메시 개수
-    hasBillboard: u32,         // ★ 빌보드 활성화 여부
-    maxInstances: u32,         // ★ 최대 인스턴스 수
-    lodFadeRange: f32,         // ★ LOD 크로스페이드 구간 범위 (예: 30.0)
-    invWorldSizeX: f32,        // ⚡ 1.0 / worldSizeX (FDIV 나눗셈 제거 및 FMA 1사이클 곱셈)
+    lodDistance: f32,
+    lod0SubMeshCount: u32,
+    hasBillboard: u32,
+    maxInstances: u32,
+    lodFadeRange: f32,
+    invWorldSizeX: f32,
     pad2: f32,
     pad3: f32,
     frustumPlanes: array<vec4<f32>, 6>,
 };
 
-
-// ⚡ 48-byte Exact Layout (Pos3, RotQuat4, Scale3, Fade1, SubId1)
 struct FoliageInstanceData {
     posX: f32,
     posY: f32,
@@ -53,7 +50,6 @@ struct DrawIndexedIndirectArgs {
 @group(0) @binding(4) var vhtTexture: texture_2d<f32>;
 @group(0) @binding(5) var vhtSampler: sampler;
 
-// ⚡ Workgroup Local Memory: LOD0과 LOD1을 각각 독립적으로 초고속 로컬 축약
 var<workgroup> wgCountLOD0: atomic<u32>;
 var<workgroup> wgCountLOD1: atomic<u32>;
 var<workgroup> wgLocalSlotLOD0: atomic<u32>;
@@ -83,8 +79,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
         let instance = rawInstanceBuffer[idx];
         let camPos = cullingUniforms.cameraPosition;
 
-        // 🌟 1단계: 2D 수평 거리(dx*dx + dz*dz) 초고속 산술 사전 검사
-        // 가시거리 밖 80% 인스턴스는 무거운 VHT 텍스처 VRAM 메모리 샘플링 100% 스킵!
         let dx = instance.posX - camPos.x;
         let dz = instance.posZ - camPos.z;
         let horizontalDistSq = dx * dx + dz * dz;
@@ -93,10 +87,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
         let cullingDistSq = cullingDist * cullingDist;
 
         if (horizontalDistSq < cullingDistSq) {
-            // 🌟 2단계: 가시거리 내 유효 인스턴스에 대해서만 GPU VHT 지형 고도 텍스처 샘플링 실행!
+
             var realY = instance.posY;
             if (cullingUniforms.hasVHT != 0u && cullingUniforms.invWorldSizeX > 0.0) {
-                // ⚡ FMA (Fused Multiply-Add): 나눗셈(/) 제거로 1사이클 초고속 UV 변환
+
                 let u = instance.posX * cullingUniforms.invWorldSizeX + 0.5;
                 let v = instance.posZ * cullingUniforms.invWorldSizeX + 0.5;
                 if (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0) {
@@ -115,8 +109,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
                 let spherePos = vec4<f32>(worldPos, 1.0);
                 let r = -scaledRadius;
 
-                // ⚡ 6개 프러스텀 평면 완전 언롤링 (Loop Unrolling, 점프/루프 레지스터 제거 및 분기 다이버전스 0건화)
-                let inFrustum = 
+                let inFrustum =
                     dot(spherePos, cullingUniforms.frustumPlanes[0]) >= r &&
                     dot(spherePos, cullingUniforms.frustumPlanes[1]) >= r &&
                     dot(spherePos, cullingUniforms.frustumPlanes[2]) >= r &&
@@ -134,7 +127,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
                 let crossFadeStartSq = crossFadeStart * crossFadeStart;
                 let crossFadeEndSq = crossFadeEnd * crossFadeEnd;
 
-                // ⚡ 1. dist 계산 지연 (Lazy Evaluation): 필요할 때만 sqrt() 1회 호출
                 var dist: f32 = -1.0;
                 var fade: f32 = 1.0;
 
@@ -145,7 +137,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
                 }
 
                 if (cullingUniforms.hasBillboard == 0u) {
-                    // 빌보드 미사용 시: 항상 LOD 0 (3D 풀/나무 모델)
+
                     isLOD0 = true;
                     culledInstance0 = instance;
                     culledInstance0.posY = realY;
@@ -153,9 +145,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
                     culledInstance0.subId = 1.0;
                     atomicAdd(&wgCountLOD0, 1u);
                 } else {
-                    // 🌟 2. 제곱 거리(distSq) 기반 초고속 LOD 판정 (전환 구간 외에는 sqrt 100% 스킵!)
+
                     if (distSq < crossFadeEndSq) {
-                        // LOD 0 (3D 모델)
+
                         isLOD0 = true;
                         var lodFade0: f32 = 1.0;
                         if (distSq >= crossFadeStartSq) {
@@ -170,7 +162,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
                     }
 
                     if (distSq >= crossFadeStartSq) {
-                        // LOD 1 (십자 빌보드)
+
                         isLOD1 = true;
                         var lodFade1: f32 = 1.0;
                         if (distSq < crossFadeEndSq) {
@@ -191,7 +183,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
 
     workgroupBarrier();
 
-    // Workgroup Leader가 Multi-Indirect Buffer 슬롯에 원자적 가산
     if (localIdx == 0u) {
         let countLOD0 = atomicLoad(&wgCountLOD0);
         if (countLOD0 > 0u) {
@@ -211,7 +202,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
 
     workgroupBarrier();
 
-    // 통과한 인스턴스 정밀 할당 및 VRAM 버퍼 쓰기
     if (isLOD0) {
         let slot0 = atomicAdd(&wgLocalSlotLOD0, 1u);
         let outIdx0 = wgGlobalOffsetLOD0 + slot0;

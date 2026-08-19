@@ -50,4 +50,3 @@ export {
 export type {
     FoliageTypeOptions
 };
-

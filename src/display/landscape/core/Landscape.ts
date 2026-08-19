@@ -20,20 +20,16 @@ import {LandscapeGPUCuller} from "../spatial/LandscapeGPUCuller";
 import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
 
 const DEFAULT_LOD_COLORS: [number, number, number, number][] = [
-    [0.18, 0.8, 0.44, 1.0],  // LOD 0: Green
-    [0.95, 0.77, 0.06, 1.0], // LOD 1: Yellow
-    [0.9, 0.49, 0.13, 1.0],  // LOD 2: Orange
-    [0.91, 0.3, 0.24, 1.0],  // LOD 3: Red
-    [0.61, 0.35, 0.71, 1.0], // LOD 4: Purple
-    [0.1, 0.74, 0.61, 1.0],  // LOD 5: Cyan
-    [0.2, 0.6, 0.86, 1.0],   // LOD 6: Blue
-    [0.93, 0.94, 0.95, 1.0]  // LOD 7: White
+    [0.18, 0.8, 0.44, 1.0],
+    [0.95, 0.77, 0.06, 1.0],
+    [0.9, 0.49, 0.13, 1.0],
+    [0.91, 0.3, 0.24, 1.0],
+    [0.61, 0.35, 0.71, 1.0],
+    [0.1, 0.74, 0.61, 1.0],
+    [0.2, 0.6, 0.86, 1.0],
+    [0.93, 0.94, 0.95, 1.0]
 ];
 
-/**
- * [KO] SpatialGrid $O(1)$ 공간 변환 및 Multi-LOD Batching Instanced Rendering 지원 기반 Landscape 지형 시스템 클래스입니다 (Pure Terrain System Manager).
- * [EN] Landscape terrain system class based on SpatialGrid O(1) spatial transformation and Multi-LOD Batching Instanced Rendering (Pure Terrain System Manager).
- */
 export class Landscape extends Object3DContainer {
     #redGPUContext: RedGPUContext;
     #sharedGeometry: LandscapeSharedGeometry;
@@ -69,12 +65,10 @@ export class Landscape extends Object3DContainer {
     #maxLODLevel: number;
     #componentSizeQuads: number;
 
-    // Zero-GC Getter 재사용 튜플 버퍼
     #worldSizeTuple: [number, number] = [0, 0];
     #componentCountTuple: [number, number] = [0, 0];
     #tileSizeTuple: [number, number] = [0, 0];
 
-    // 매 프레임 카메라 Cell 및 LOD 카운팅 재사용 버퍼 (Zero-GC)
     #tempCellBuffer: Int32Array = new Int32Array(2);
     #lodCountsBuffer: Int32Array;
     #visibleComponentCount: number = 0;
@@ -88,13 +82,6 @@ export class Landscape extends Object3DContainer {
         return this.#redGPUContext;
     }
 
-    /**
-     * [KO] Landscape 인스턴스를 생성합니다 (언리얼 엔진 5 공식 기본값: worldSize 8000m, componentCount 8x8, componentSizeQuads 63 [63x63 Quads, 4096 Vertices], maxLODLevel 4).
-     * [EN] Creates an instance of Landscape (Unreal Engine 5 official defaults: worldSize 8000m, componentCount 8x8, componentSizeQuads 63 [63x63 Quads, 4096 Vertices], maxLODLevel 4).
-     *
-     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
-     * @param options - [KO] Landscape 설정 옵션 [EN] Landscape configuration options
-     */
     constructor(redGPUContext: RedGPUContext, options: LandscapeOptions = {}) {
         super();
         this.#redGPUContext = redGPUContext;
@@ -150,7 +137,6 @@ export class Landscape extends Object3DContainer {
         this.#heightScale = options.heightScale ?? 500.0;
         this.#updateTuples();
 
-        // 1. RVT & VBT 2D 아틀라스 (VHT Height + VNT Normal + VBT 3-Set) GPUTexture 생성 및 DirectTexture 래핑
         const atlasWidth = componentCountX * 512;
         const atlasHeight = componentCountZ * 512;
         const rawAtlasTexture = redGPUContext.gpuDevice.createTexture({
@@ -232,27 +218,14 @@ export class Landscape extends Object3DContainer {
         this.#foliageManager = new LandscapeFoliageManager(this);
     }
 
-    /**
-     * [KO] Landscape 지형 연동 식생 관리자를 반환합니다.
-     * [EN] Returns the Landscape Foliage Manager.
-     */
     get foliageManager(): LandscapeFoliageManager {
         return this.#foliageManager;
     }
-
-    /**
-     * [KO] 월드 좌표 (x, z) 위치의 VHT 지형 고도 및 heightScale이 정밀 반영된 실제 높이 Y를 반환합니다.
-     * [EN] Returns the actual Y altitude of world coordinates (x, z) reflecting VHT terrain height and heightScale.
-     */
 
     getHeightAt(x: number, z: number): number {
         return this.#tileStreamer.getHeightAt(x, z);
     }
 
-
-    /**
-     * [KO] Multi-LOD Batching 인스턴싱으로 전체 지형 타일을 디스패치하고 RenderViewStateData 통계를 기록합니다 (Zero-GC).
-     */
     render(view: any, passEncoder?: GPURenderPassEncoder): void {
         const renderPassEncoder = passEncoder || view?.currentRenderPassEncoder || view?.renderPassEncoder;
         const view3D = view?.view || view;
@@ -261,7 +234,6 @@ export class Landscape extends Object3DContainer {
         const material = this.#landscapeMaterial;
         const renderResults = (view as RenderViewStateData)?.renderResults || (view3D as any)?.renderViewStateData?.renderResults;
 
-        // [KO] 머티리얼 텍스처/옵션 변경 시 바리안트 셰이더 갱신 및 파이프라인 캐시 무효화 (RedGPU 표준)
         if (material) {
             if (material.dirtyPipeline) {
                 material._updateFragmentState();
@@ -309,7 +281,7 @@ export class Landscape extends Object3DContainer {
 
         if (indirectDrawBuffer) {
             for (let lod = 0; lod < maxLODLevel; lod++) {
-                const offset = lod * 20; // 5 uints * 4 bytes = 20 bytes stride per LOD
+                const offset = lod * 20;
                 renderPassEncoder.drawIndexedIndirect(indirectDrawBuffer, offset);
 
                 if (renderResults) {
@@ -318,7 +290,6 @@ export class Landscape extends Object3DContainer {
             }
         }
 
-        // [KO] 🌲 지형(Terrain) 깊이 버퍼가 완전히 형성된 후, 지형 위에 식생(Foliage) 인스턴스 렌더링 디스패치!
         if (this.#foliageManager?.hasFoliageTypes) {
             this.#foliageManager.render(view, renderPassEncoder);
         }
@@ -351,7 +322,6 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    /** [KO] UE5 공식 컴포넌트 타일 개수 (ComponentCountX / ComponentCountY) */
     get componentCount(): [number, number] {
         return this.#componentCountTuple;
     }
@@ -378,7 +348,6 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    /** [KO] UE5 공식 컴포넌트 쿼드 그리드 해상도 (ComponentSizeQuads) */
     get componentSizeQuads(): number {
         return this.#componentSizeQuads;
     }
@@ -397,7 +366,6 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    /** [KO] UE5 공식 최대 LOD 레벨 단계 수 (MaxLODLevel) */
     get maxLODLevel(): number {
         return this.#maxLODLevel;
     }
@@ -428,12 +396,10 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    /** [KO] UE5 공식 메인 지형 머티리얼 (LandscapeMaterial) */
     get landscapeMaterial(): LandscapeMaterial {
         return this.#landscapeMaterial;
     }
 
-    /** [KO] UE5 공식 지형 고도 변위 스케일 (미터 단위, heightScale) */
     get heightScale(): number {
         return this.#heightScale;
     }
@@ -445,12 +411,10 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    /** [KO] Virtual Heightfield Texture (VHT) 아틀라스 DirectTexture 레퍼런스 */
     get vhtAtlasTexture(): DirectTexture | null {
         return this.#vhtAtlasTexture;
     }
 
-    /** [KO] Virtual Normal Texture (VNT) 아틀라스 DirectTexture 레퍼런스 */
     get vntAtlasTexture(): DirectTexture | null {
         return this.#vntAtlasTexture;
     }
@@ -462,11 +426,6 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    // =========================================================================
-    // UE5 (Unreal Engine 5) Official Primary Properties
-    // =========================================================================
-
-    /** [KO] 와이어프레임 표시 플래그 (wireframe) */
     get wireframe(): boolean {
         return this.#wireframe;
     }
@@ -477,7 +436,6 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    /** [KO] LOD 색상 디버그 플래그 (lodColoration) */
     get lodColoration(): boolean {
         return this.#lodColoration;
     }
@@ -501,7 +459,6 @@ export class Landscape extends Object3DContainer {
         );
     }
 
-    /** [KO] UE5 공식 컴포넌트 타일 리스트 (LandscapeComponents) */
     get landscapeComponents(): LandscapeComponent[] {
         return this.#spatialGrid.flatCells;
     }
@@ -510,9 +467,6 @@ export class Landscape extends Object3DContainer {
         return this.#tileSizeTuple;
     }
 
-    /**
-     * [KO] 언리얼 엔진 5 및 WebGPU GPUDevice 하드웨어 maxTextureDimension2D 한계 기반 타일 개수 클램핑 헬퍼
-     */
     #clampComponentCount(val: number): number {
         const maxTextureDim = this.#redGPUContext?.gpuDevice?.limits?.maxTextureDimension2D ?? 8192;
         const maxTilesForHardware = Math.floor(maxTextureDim / 512);
@@ -596,12 +550,10 @@ export class Landscape extends Object3DContainer {
             this.landscapeMaterial.updateUniformsData();
         }
 
-        // 카메라 및 컨트롤러 유형에 관계없이 3D 월드 위치(camX, camY, camZ) 안전 추출
         const camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
         const camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
         const camZ = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
 
-        // 절두체 평면(Frustum Planes) 수집 및 실시간 자동 계산 보장
         const rawCamera = camera?.camera ?? camera;
         let frustumPlanes: number[][] | null = renderViewStateData?.frustumPlanes
             ?? renderViewStateData?.view?.frustumPlanes
@@ -613,7 +565,6 @@ export class Landscape extends Object3DContainer {
             frustumPlanes = computeViewFrustumPlanes(rawCamera.projectionMatrix, rawCamera.viewMatrix);
         }
 
-        // 식생 시스템 GPU Culling 전처리 매 프레임 실시간 갱신 (등록된 식생 종이 있을 때만)
         if (this.#foliageManager?.hasFoliageTypes) {
             this.#foliageManager.update(camera, renderViewStateData);
         }
@@ -623,15 +574,12 @@ export class Landscape extends Object3DContainer {
 
         const totalComponents = this.#componentCountX * this.#componentCountZ;
 
-        // 1. 디버거 및 서브 시스템 조회용 Frustum 상태 갱신 (Zero-GC)
         this.#frustumCullingActive = !!frustumPlanes;
         this.#culledComponentCount = 0;
         this.#visibleComponentCount = totalComponents;
 
-        // 2. Reset Indirect Draw Buffer with full geometry LOD ranges before GPU Compute Pass
         this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#maxLODLevel, this.#wireframe);
 
-        // 3. Pack LOD distances into Float32Array (1e15 default fill to prevent high-detail fallbacks)
         const lodDistancesArray = new Float32Array(8);
         lodDistancesArray.fill(1e15);
         const countDist = Math.min(8, this.#lodDistancesSq.length);
@@ -642,7 +590,6 @@ export class Landscape extends Object3DContainer {
             }
         }
 
-        // 4. Update GPU Culler uniform parameters
         this.#gpuCuller?.updateUniforms(
             camX, camY, camZ,
             this.#maxLODLevel,
@@ -654,7 +601,6 @@ export class Landscape extends Object3DContainer {
             lodDistancesArray
         );
 
-        // 5. ⚡ 100% GPU-Driven Index Redirection Culling: Pre-Process Compute Pass 등록
         this.#redGPUContext.commandEncoderManager.addPreProcessComputePass('Landscape_GPUCulling_ComputePass', (computePass) => {
             this.#gpuCuller?.dispatchPass(computePass, totalComponents);
         });
@@ -683,7 +629,6 @@ export class Landscape extends Object3DContainer {
 
         this.#lodCountsBuffer = new Int32Array(maxLODLevel);
 
-        // WebGPU Multi-LOD Indirect & Instance Buffer 생성 (@group(1): AllInputTiles, VisibleTileIndices, Sampler, VHT Height, VNT Normal, LandscapeUniforms, VBT 3-Set)
         this.#instanceBuffer = new LandscapeInstanceBuffer(redGPUContext, componentCountX * componentCountZ, maxLODLevel);
         this.#instanceBuffer.updateBindGroup(
             vhtSampler,

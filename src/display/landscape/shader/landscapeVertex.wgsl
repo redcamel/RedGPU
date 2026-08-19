@@ -55,15 +55,13 @@ struct OutputData {
 @vertex
 fn main(input: InputData) -> OutputData {
     var output: OutputData;
-    
-    // ⚡ GPU Index Redirection: 간접 인스턴스 오프셋으로부터 실제 원본 타일 번호 u32 복원
+
     let realTileIdx = visibleTileIndices[input.instanceIdx];
     let instanceData = allInputTiles[realTileIdx];
 
     let maxCompCount = max(1u, landscapeUniforms.maxComponentCount);
     let lodLevel = input.instanceIdx / maxCompCount;
 
-    // 🌊 버텍스 LOD 지오모핑 (Continuous CDLOD Geomorphing)
     var localX = input.position.x;
     var localZ = input.position.y;
     var prevLocalX = input.position.x;
@@ -80,8 +78,7 @@ fn main(input: InputData) -> OutputData {
         let packedVec = landscapeUniforms.lodDistancesSq[lodLevel / 4u];
         let thresholdSq = packedVec[lodLevel % 4u];
 
-        // LOD 전환 거리의 70% ~ 100% 구간에서 다음 LOD 단계 그리드로 점진적 모핑 (Geomorphing)
-        let morphStartSq = thresholdSq * 0.49; // (0.7)^2 = 0.49
+        let morphStartSq = thresholdSq * 0.49;
         let morphFactor = smoothstep(morphStartSq, thresholdSq, distSq);
 
         if (morphFactor > 0.0001) {
@@ -114,7 +111,6 @@ fn main(input: InputData) -> OutputData {
     let prevWorldX = prevLocalX + instanceData.prevWorldX;
     let prevWorldZ = prevLocalZ + instanceData.prevWorldZ;
 
-    // VHT 오픈월드 Global UV 계산 (0.0 ~ 1.0)
     let globalUV = vec2<f32>(
         (worldX + landscapeUniforms.worldSizeX * 0.5) / landscapeUniforms.worldSizeX,
         (worldZ + landscapeUniforms.worldSizeZ * 0.5) / landscapeUniforms.worldSizeZ
@@ -124,7 +120,6 @@ fn main(input: InputData) -> OutputData {
         (prevWorldZ + landscapeUniforms.worldSizeZ * 0.5) / landscapeUniforms.worldSizeZ
     );
 
-    // VHT Atlas Texture (@group(1)) 16비트 고도 샘플링 (Uniform 직독: 0사이클 헤더 질의/나눗셈 100% 소멸)
     let texSize = landscapeUniforms.vhtTextureSize;
     let texCoord = vec2<i32>(clamp(globalUV * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
 
@@ -142,14 +137,12 @@ fn main(input: InputData) -> OutputData {
     let worldPos4 = vec4<f32>(worldX, worldY, worldZ, 1.0);
     let prevWorldPos4 = vec4<f32>(prevWorldX, prevWorldY, prevWorldZ, 1.0);
 
-    // 1. 화면 렌더링용 정점 (Mesh 표준)
     let clipPos = systemUniforms.projection.projectionViewMatrix * worldPos4;
 
     output.position = clipPos;
     output.vertexPosition = worldPos4.xyz;
     output.vertexNormal = vec3<f32>(0.0, 1.0, 0.0);
-    
-    // 모핑된 타일 로컬 UV 계산
+
     let halfTileX = landscapeUniforms.tileSizeX * 0.5;
     let halfTileZ = landscapeUniforms.tileSizeZ * 0.5;
     output.uv = vec2<f32>(
@@ -161,11 +154,9 @@ fn main(input: InputData) -> OutputData {
     output.vertexTangent = vec4<f32>(1.0, 0.0, 0.0, 1.0);
     output.vertexHeight = worldY;
 
-    // 2. TAA & Motion Vector (Mesh 표준 noneJitter 연산)
     output.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * worldPos4;
     output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * prevWorldPos4;
 
-    // 3. LOD Coloration: firstInstance 오프셋 기반 LOD 레벨 복원 및 색상 매핑
     if (landscapeUniforms.lodColoration > 0.5) {
         output.instanceColor = landscapeUniforms.lodColors[min(lodLevel, 7u)];
     } else {

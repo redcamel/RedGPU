@@ -1,10 +1,6 @@
 import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "./ALandscapeDebugger";
 import Landscape from "../core/Landscape";
 
-/**
- * [KO] Landscape 지형 시스템의 2D SpatialGrid 타일 상태, 카메라 시야 반경(loadingRadius) 및 시선 방향/FOV 시야각을 2D 캔버스 오버레이로 실시간 시각화하는 디버거 클래스입니다 (ALandscapeDebugger 공통 메소드 기반).
- * [EN] Debugger class visualizing the 2D SpatialGrid tile states, camera loading radius, view direction, and FOV frustum wedge of Landscape terrain system via 2D canvas overlay (ALandscapeDebugger common method based).
- */
 export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
     #ctx: CanvasRenderingContext2D | null;
 
@@ -34,12 +30,10 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
 
         const {worldSizeX, worldSizeZ, worldMinX, worldMinZ} = state;
 
-        // 1. World Outer Boundary
         this.#ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
         this.#ctx.lineWidth = 1;
         this.#ctx.strokeRect(padding, padding, mapDrawWidth, mapDrawHeight);
 
-        // 2. Component Grid Tiles (Top = North -Z, Bottom = South +Z)
         const components = this.landscape.landscapeComponents || [];
         const [tcX, tcZ] = this.landscape.componentCount;
         const cellW = mapDrawWidth / tcX;
@@ -57,10 +51,10 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
             const isLoaded = this.landscape.tileStreamer && this.landscape.tileStreamer.isTileLoaded(comp.componentZ, comp.componentX);
 
             if (isCulled) {
-                this.#ctx.fillStyle = 'rgba(239, 68, 68, 0.25)'; // Frustum Culled (Red)
+                this.#ctx.fillStyle = 'rgba(239, 68, 68, 0.25)';
                 this.#ctx.strokeStyle = 'rgba(239, 68, 68, 0.5)';
             } else if (isLoaded) {
-                this.#ctx.fillStyle = 'rgba(56, 189, 248, 0.35)'; // Active Loaded (Blue)
+                this.#ctx.fillStyle = 'rgba(56, 189, 248, 0.35)';
                 this.#ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
             } else {
                 this.#ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
@@ -71,7 +65,6 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
             this.#ctx.strokeRect(cx, cy, cellW, cellH);
         }
 
-        // 3. 카메라 시야 반경, FOV 시야 부채꼴, 시선 레이 및 위치 점 공통 렌더링
         this.drawCameraOverlay2D(this.#ctx, state, w, h, padding);
 
         this.#ctx.restore();

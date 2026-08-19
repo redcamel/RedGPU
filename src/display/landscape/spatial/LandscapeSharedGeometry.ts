@@ -13,10 +13,6 @@ export interface LandscapeLODGeometryRange {
     baseVertex: number;
 }
 
-/**
- * [KO] Landscape LOD 0 ~ LOD N 전체 단계 지오메트리를 단 하나의 거대한 GPU 통합 버퍼(Combined Buffer)로 보관하며, LOD 크랙 방지용 수직 스커트(Skirt Drop) 지오메트리를 통합 관리하는 클래스입니다.
- * [EN] Class that retains and manages Landscape LOD 0 ~ LOD N geometries as a single giant GPU Combined Buffer, integrating vertical Skirt Drop geometry for LOD crack sealing.
- */
 export class LandscapeSharedGeometry {
     #redGPUContext: RedGPUContext;
     #tileSizeX: number;
@@ -29,10 +25,6 @@ export class LandscapeSharedGeometry {
     #combinedWireframeIndexBuffer: IndexBuffer | null = null;
     #lodRanges: LandscapeLODGeometryRange[] = [];
 
-    /**
-     * [KO] LandscapeSharedGeometry 인스턴스를 생성합니다.
-     * [EN] Creates an instance of LandscapeSharedGeometry.
-     */
     constructor(redGPUContext: RedGPUContext, tileSizeX: number, tileSizeZ: number, componentSizeQuads: number, maxLODLevel: number) {
         this.#redGPUContext = redGPUContext;
         this.#tileSizeX = tileSizeX;
@@ -43,17 +35,14 @@ export class LandscapeSharedGeometry {
         this.#buildCombinedGeometry();
     }
 
-    /** [KO] 거대 단일 통합 VertexBuffer 반환 */
     get combinedVertexBuffer(): VertexBuffer | null {
         return this.#combinedVertexBuffer;
     }
 
-    /** [KO] 거대 단일 통합 IndexBuffer 반환 */
     get combinedIndexBuffer(): IndexBuffer | null {
         return this.#combinedIndexBuffer;
     }
 
-    /** [KO] 와이어프레임(LINE_LIST 2개 삼각형 대각선 포함) 전용 통합 IndexBuffer 반환 */
     get combinedWireframeIndexBuffer(): IndexBuffer | null {
         return this.#combinedWireframeIndexBuffer;
     }
@@ -78,21 +67,17 @@ export class LandscapeSharedGeometry {
         }
     }
 
-    /** [KO] 지정된 LOD 레벨의 오프셋 범위를 반환합니다. */
     getLODRange(lodLevel: number): LandscapeLODGeometryRange {
         const index = Math.min(Math.max(0, lodLevel), this.#lodRanges.length - 1);
         return this.#lodRanges[index];
     }
 
-    /**
-     * [KO] 전체 LOD 단계 지오메트리 및 4면 스커트(Skirt Drop 25m) 지오메트리를 단 하나의 거대 GPU 버퍼로 결합 생성합니다.
-     */
     #buildCombinedGeometry(): void {
         const maxLODLevel = this.#maxLODLevel;
         const baseComponentSizeQuads = this.#componentSizeQuads;
         const halfSizeX = this.#tileSizeX / 2;
         const halfSizeZ = this.#tileSizeZ / 2;
-        const SKIRT_DEPTH = -25.0; // LOD 크랙 방지용 25m 수직 하향 스커트
+        const SKIRT_DEPTH = -25.0;
 
         const allInterleavedData: number[] = [];
         const allIndices: number[] = [];
@@ -113,7 +98,6 @@ export class LandscapeSharedGeometry {
             const firstIndex = totalIndexOffset;
             const wireframeFirstIndex = totalWireframeIndexOffset;
 
-            // 1. 메인 타일 버텍스 생성 (Interleaved: position x, z, skirtOffset, normal x,y,z, uv u,v)
             for (let z = 0; z <= segmentsZ; z++) {
                 const percentZ = z / segmentsZ;
                 const posZ = percentZ * this.#tileSizeZ - halfSizeZ;
@@ -122,16 +106,14 @@ export class LandscapeSharedGeometry {
                     const percentX = x / segmentsX;
                     const posX = percentX * this.#tileSizeX - halfSizeX;
 
-                    // Position (posX, posZ, 0.0) -> position.z = 0.0 (메인 그리드)
                     allInterleavedData.push(posX, posZ, 0.0);
-                    // Normal (x, y, z)
+
                     allInterleavedData.push(0, 1, 0);
-                    // UV (u, v)
+
                     allInterleavedData.push(percentX, percentZ);
                 }
             }
 
-            // 2. 메인 타일 인덱스 생성
             for (let z = 0; z < segmentsZ; z++) {
                 for (let x = 0; x < segmentsX; x++) {
                     const row1 = z * (segmentsX + 1);
@@ -142,20 +124,16 @@ export class LandscapeSharedGeometry {
                     const c = row2 + x;
                     const d = row2 + x + 1;
 
-                    // TRIANGLE_LIST
                     allIndices.push(a, c, b);
                     allIndices.push(b, c, d);
 
-                    // LINE_LIST 와이어프레임
                     allWireframeIndices.push(a, c, c, b, b, a);
                     allWireframeIndices.push(b, c, c, d, d, b);
                 }
             }
 
-            // 3. LOD 크랙 완전 봉쇄용 4면 Skirt Drop 지오메트리 패널 추가
             let currentSkirtLocalIndex = innerVertexCount;
 
-            // North Skirt (z = 0)
             const northSkirtStartIndex = currentSkirtLocalIndex;
             for (let x = 0; x <= segmentsX; x++) {
                 const percentX = x / segmentsX;
@@ -176,7 +154,6 @@ export class LandscapeSharedGeometry {
                 allWireframeIndices.push(innerA, skirtA, skirtA, skirtB, skirtB, innerB);
             }
 
-            // South Skirt (z = segmentsZ)
             const southSkirtStartIndex = currentSkirtLocalIndex;
             const southInnerRow = segmentsZ * (segmentsX + 1);
             for (let x = 0; x <= segmentsX; x++) {
@@ -198,7 +175,6 @@ export class LandscapeSharedGeometry {
                 allWireframeIndices.push(innerA, skirtA, skirtA, skirtB, skirtB, innerB);
             }
 
-            // West Skirt (x = 0)
             const westSkirtStartIndex = currentSkirtLocalIndex;
             for (let z = 0; z <= segmentsZ; z++) {
                 const percentZ = z / segmentsZ;
@@ -219,7 +195,6 @@ export class LandscapeSharedGeometry {
                 allWireframeIndices.push(innerA, skirtA, skirtA, skirtB, skirtB, innerB);
             }
 
-            // East Skirt (x = segmentsX)
             const eastSkirtStartIndex = currentSkirtLocalIndex;
             for (let z = 0; z <= segmentsZ; z++) {
                 const percentZ = z / segmentsZ;
@@ -258,7 +233,6 @@ export class LandscapeSharedGeometry {
             totalWireframeIndexOffset += totalLodWireframeIndexCount;
         }
 
-        // 단 1개의 거대한 GPU VertexBuffer & IndexBuffer 생성
         const vertexStruct = new VertexInterleavedStruct({
             aVertexPosition: VertexInterleaveType.float32x3,
             aVertexNormal: VertexInterleaveType.float32x3,

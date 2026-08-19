@@ -3,10 +3,6 @@ import computeViewFrustumPlanes from "../../../../../math/computeViewFrustumPlan
 import FoliageType from "../../FoliageType";
 import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
 
-/**
- * [KO] 식생 GPU Compute Shader Culling 전담 디스패처 (단일 책임: 컴퓨트 파이프라인 관리 & 단일 패스 디스패치)
- * [EN] Foliage GPU Compute Shader Culling Dispatcher (Single Responsibility: Compute Pipeline & Single-Pass Dispatch)
- */
 class FoliageCullingDispatcher {
     #redGPUContext: RedGPUContext;
     #cullingBindGroupLayout: GPUBindGroupLayout | null = null;
@@ -15,7 +11,6 @@ class FoliageCullingDispatcher {
     #cachedVHTAtlasGPUTexture: GPUTexture | null = null;
     #cachedVHTView: GPUTextureView | null = null;
 
-    // Zero-GC 재사용 배열
     #typeListRef: FoliageType[] = [];
     #landscapeRef: any = null;
 
@@ -28,9 +23,6 @@ class FoliageCullingDispatcher {
         return this.#cullingBindGroupLayout;
     }
 
-    /**
-     * 식생 컬링 유니폼 갱신 및 단일 컴퓨트 패스 등록
-     */
     updateAndDispatch(
         typeList: FoliageType[],
         viewOrCamera: any,
@@ -45,7 +37,6 @@ class FoliageCullingDispatcher {
         const camY = camera?.y ?? camera?.position?.[1] ?? 0;
         const camZ = camera?.z ?? camera?.position?.[2] ?? 0;
 
-        // 🌟 6개 절두체 평면 수집
         let frustumPlanes: number[][] | null = stateData?.frustumPlanes
             ?? stateData?.view?.frustumPlanes
             ?? viewOrCamera?.frustumPlanes
@@ -56,7 +47,6 @@ class FoliageCullingDispatcher {
             frustumPlanes = computeViewFrustumPlanes(camera.projectionMatrix, camera.viewMatrix);
         }
 
-        // 지형 VHT 스케일 정보
         const worldSizeX = (landscape && landscape.worldSize) ? landscape.worldSize[0] : 8000.0;
         const heightScale = landscape?.heightScale ?? 600.0;
         const hasVHT = !!(landscape?.vhtAtlasTexture?.gpuTexture);
@@ -75,10 +65,8 @@ class FoliageCullingDispatcher {
             const boundingRadius = 20.0;
             const bottomOffset = foliageType.bottomOffset;
 
-            // 1. Multi-Indirect Command Buffer 모든 서브메시 슬롯 instanceCount 초기화
             foliageType.updateIndirectBuffer();
 
-            // 2. Culling Uniform 갱신
             buffer.updateCullingUniforms(
                 camX, camY, camZ,
                 cullingDist, fadeStartDist, activeCount, boundingRadius,
@@ -92,7 +80,6 @@ class FoliageCullingDispatcher {
             );
         }
 
-        // 🌟 3. 단일 통합 Pass에서 Zero-GC 재사용 핸들러 등록
         if (this.#cullingComputePipeline && this.#cullingBindGroupLayout) {
             this.#typeListRef = typeList;
             this.#landscapeRef = landscape;
@@ -140,9 +127,6 @@ class FoliageCullingDispatcher {
         });
     }
 
-    /**
-     * 🌟 Zero-GC: 매 프레임 클로저/함수 객체 생성을 100% 방지하는 식생 컬링 디스패치 핸들러
-     */
     #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
         const pipeline = this.#cullingComputePipeline;
         const bindGroupLayout = this.#cullingBindGroupLayout;

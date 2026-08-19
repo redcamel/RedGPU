@@ -4,32 +4,32 @@
 
 struct LandscapeLayerParams {
     uvOffset: vec2<f32>,
-    uvScale: vec2<f32>, // 🌿 타일 기준 UV 스케일
+    uvScale: vec2<f32>,
     _padding0: vec2<f32>,
     minVal: f32,
     maxVal: f32,
     tintColor: vec4<f32>,
     blendFalloff: f32,
-    blendMode: f32, // 0: SLOPE, 1: HEIGHT, 2: WEIGHT_MAP
+    blendMode: f32,
     roughness: f32,
     metallic: f32,
     normalIntensity: f32,
-    enabled: f32, // 1.0 or 0.0
+    enabled: f32,
     aoIntensity: f32,
     heightOffset: f32,
     heightContrast: f32,
-    weightMapChannelIndex: f32, // 0: R, 1: G, 2: B, 3: A
+    weightMapChannelIndex: f32,
     pad0: f32,
     pad1: f32,
 };
 
 struct VBTBakeUniforms {
-    tileOriginInAtlas: vec2<f32>, // (atlasStartX, atlasStartZ) in pixels
-    tilePixelSize: vec2<f32>,     // (tileWidth, tileHeight), e.g., (512, 512)
-    atlasSize: vec2<f32>,         // (atlasWidth, atlasHeight)
-    sliceIndex: u32,              // Target tile index
+    tileOriginInAtlas: vec2<f32>,
+    tilePixelSize: vec2<f32>,
+    atlasSize: vec2<f32>,
+    sliceIndex: u32,
     activeLayerCount: u32,
-    baseColor: vec4<f32>,         // Default terrain base color
+    baseColor: vec4<f32>,
     layers: array<LandscapeLayerParams, 8>,
 };
 
@@ -83,7 +83,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let atlasW = uniforms.atlasSize.x;
     let atlasH = uniforms.atlasSize.y;
 
-    // 아틀라스 픽셀 좌표 (originX + localX, originZ + localZ)
     let atlasPixelX = i32(uniforms.tileOriginInAtlas.x) + localX;
     let atlasPixelZ = i32(uniforms.tileOriginInAtlas.y) + localZ;
 
@@ -98,7 +97,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let vhtCoord = vec2<i32>(atlasPixelX, atlasPixelZ);
 
-    // 1. VHT 고도 & VNT 표면 노멀 로드
     let vertexHeight = textureLoad(vhtAtlasTexture, vhtCoord, 0).r;
     let encodedNormal = textureLoad(vntAtlasTexture, vhtCoord, 0).rgb;
     let sampledNormal = normalize(encodedNormal * 2.0 - vec3<f32>(1.0));
@@ -106,7 +104,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let slopeAngleDeg = acos(clamp(N.y, -1.0, 1.0)) * 57.295779513;
 
-    // 2. 기본 바탕 색상 및 PBR 속성 초기화
     var baseAlbedo = uniforms.baseColor.rgb;
     var baseRoughness = 0.9;
     var baseMetallic = 0.0;
@@ -125,7 +122,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         (f32(localZ) + 0.5) / f32(tileH)
     );
 
-    // 3. 8개 레이어 PBR Compute 고품질 합성 루프
     for (var i = 0u; i < activeLayerCount; i = i + 1u) {
         let layerParams = uniforms.layers[i];
         if (layerParams.enabled <= 0.5) { continue; }
@@ -151,10 +147,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         if (layerW <= 0.0001) { continue; }
 
-        // 🎨 VBT 2D 아틀라스 전용 타일 UV 스케일 적용 (근경과 1:1 일치)
         let layerUV = worldTileUV * layerParams.uvScale + layerParams.uvOffset;
 
-        // VBT 아틀라스에 최고화질 PBR 원본을 굽기 위해 Mip 0 고선명 샘플링 (아틀라스 Mipmap 체인은 아틀라스 자체에서 별도 생성)
         let layerAlbedoSample = textureSampleLevel(layerBaseColorArray, vbtTextureSampler, layerUV, layerIdx, 0.0);
         let layerNormalRaw = textureSampleLevel(layerNormalArray, vbtTextureSampler, layerUV, layerIdx, 0.0).rgb * 2.0 - vec3<f32>(1.0);
         let layerNormalSample = vec3<f32>(layerNormalRaw.xy * layerParams.normalIntensity, max(0.01, layerNormalRaw.z));
@@ -192,7 +186,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         finalAlbedo = mix(baseAlbedo, layerBlendAlbedo, alpha);
 
-        // TBN 월드 공간 표면 노멀 합성 (Reoriented Perturbation)
         if (length(layerBlendNormal.xy) > 0.001) {
             let tangentX = normalize(vec3<f32>(1.0, 0.0, 0.0) - N * N.x);
             let tangentZ = normalize(cross(N, tangentX));
@@ -205,16 +198,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         finalAO = mix(baseAO, layerBlendAO, alpha);
     }
 
-    // 4. VBT 3종 세트 2D Atlas Storage Texture에 즉시 저장
     let storeCoord = vec2<i32>(atlasPixelX, atlasPixelZ);
 
-    // 4-1. VBT BaseColor Atlas (Albedo RGB, Alpha 1.0)
     textureStore(vbtBaseColorOutput, storeCoord, vec4<f32>(finalAlbedo, 1.0));
 
-    // 4-2. VBT World Normal Atlas (0~1 인코딩)
     let encodedFinalN = N * 0.5 + vec3<f32>(0.5);
     textureStore(vbtNormalOutput, storeCoord, vec4<f32>(encodedFinalN, 1.0));
 
-    // 4-3. VBT ORM Atlas (R: AO, G: Roughness, B: Metallic, A: 1.0)
     textureStore(vbtORMOutput, storeCoord, vec4<f32>(finalAO, finalRoughness, finalMetallic, 1.0));
 }

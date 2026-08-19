@@ -1,9 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 
-/**
- * [KO] Landscape 100% GPU-Driven Index Redirection Multi-LOD Batching & Indirect Drawing 전용 GPU Storage & Uniform Buffer 관리 클래스입니다.
- * [EN] GPU Storage & Uniform Buffer management class dedicated to Landscape 100% GPU-Driven Index Redirection Multi-LOD Batching & Indirect Drawing.
- */
 export class LandscapeInstanceBuffer {
     #redGPUContext: RedGPUContext;
     #maxComponentCount: number;
@@ -17,14 +13,11 @@ export class LandscapeInstanceBuffer {
     #instanceStorageBindGroup: GPUBindGroup | null = null;
     #instanceStorageBindGroupLayout: GPUBindGroupLayout | null = null;
 
-    // CPU Static Input Tile Data (32 bytes per tile: worldX, worldZ, prevWorldX, prevWorldZ, r, g, b, a)
     #allInputTilesData: Float32Array;
 
-    // Zero-GC Uniform Buffer Data (208 bytes: heightScale, worldSizeX, worldSizeZ, lodColoration, maxCompCount, tileSizeX, tileSizeZ, baseQuads, vhtTextureSize, 8 vec4 lodColors, 2 vec4 lodDistancesSq)
     #landscapeUniformData: Float32Array = new Float32Array(52);
     #landscapeUniformUintData: Uint32Array;
 
-    // Zero-GC Indirect Draw Arguments Data (최대 8단계 LOD * 5 uints = 40 uints = 160 bytes)
     #indirectArgsBuffer: Uint32Array = new Uint32Array(40);
 
     constructor(redGPUContext: RedGPUContext, maxComponentCount: number, maxLODLevel: number) {
@@ -74,9 +67,6 @@ export class LandscapeInstanceBuffer {
         return this.#maxLODLevel;
     }
 
-    /**
-     * [KO] 타일 정적 고유 데이터(worldX, worldZ, prevWorldX, prevWorldZ, color)를 셋업합니다 (타일당 32바이트).
-     */
     setStaticTileData(
         index: number,
         worldX: number,
@@ -100,9 +90,6 @@ export class LandscapeInstanceBuffer {
         this.#allInputTilesData[offset + 7] = a;
     }
 
-    /**
-     * [KO] 전체 타일 정적 원본 데이터를 GPU StorageBuffer 메모리로 1회 전송합니다.
-     */
     uploadStaticTilesToGPU(): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#allInputTilesBuffer) return;
@@ -116,9 +103,6 @@ export class LandscapeInstanceBuffer {
         );
     }
 
-    /**
-     * [KO] Landscape 전역 Uniform(heightScale, worldSizeX, worldSizeZ, lodColoration, maxComponentCount, tileSizeX, tileSizeZ, baseQuads, vhtTextureSize, lodColors, lodDistancesSq)을 GPU로 전송합니다 (208 bytes, Zero-GC).
-     */
     updateUniforms(
         heightScale: number,
         worldSizeX: number,
@@ -149,13 +133,11 @@ export class LandscapeInstanceBuffer {
         f32[6] = tileSizeZ;
         f32[7] = baseQuads;
 
-        // vhtTextureSize (vec2 + pad = 4 floats: offset 8..11)
         f32[8] = vhtTextureWidth;
         f32[9] = vhtTextureHeight;
         f32[10] = 0;
         f32[11] = 0;
 
-        // lodColors (8 vec4 = 32 floats: offset 12..43)
         const colorCount = Math.min(8, lodColorsRGBA.length);
         for (let i = 0; i < 8; i++) {
             const base = 12 + i * 4;
@@ -173,7 +155,6 @@ export class LandscapeInstanceBuffer {
             }
         }
 
-        // lodDistancesSq (8 floats: offset 44..51)
         const distCount = Math.min(8, lodDistancesSq.length);
         for (let i = 0; i < 8; i++) {
             f32[44 + i] = (i < distCount && lodDistancesSq[i] > 0) ? lodDistancesSq[i] : 1e15;
@@ -188,9 +169,6 @@ export class LandscapeInstanceBuffer {
         );
     }
 
-    /**
-     * [KO] 매 프레임 GPU Compute Pass 시작 직전 Indirect Draw Buffer 의 instanceCount 숫자를 0으로 초기화하고 LOD별 인자를 동기화합니다 (Zero-GC).
-     */
     resetIndirectDrawBuffer(
         sharedGeometry: { getLODRange(lod: number): any },
         maxLODLevel: number,
@@ -208,19 +186,16 @@ export class LandscapeInstanceBuffer {
             const baseVertex = lodRange.baseVertex;
 
             argsData[offset] = indexCount;
-            argsData[offset + 1] = 0; // instanceCount (GPU atomicAdd target)
+            argsData[offset + 1] = 0;
             argsData[offset + 2] = firstIndex;
             argsData[offset + 3] = baseVertex;
-            argsData[offset + 4] = lod * this.#maxComponentCount; // firstInstance offset for Index Redirection
+            argsData[offset + 4] = lod * this.#maxComponentCount;
         }
 
         const byteLength = maxLODLevel * 5 * 4;
         gpuDevice.queue.writeBuffer(this.#indirectDrawBuffer, 0, argsData.buffer, 0, byteLength);
     }
 
-    /**
-     * [KO] RVT (VHT 고도맵 + VNT 노멀맵 + VBT 3종 세트) 텍스처 및 전역 UniformBuffer를 수신하여 @group(1) GPUBindGroup을 생성/갱신합니다 (Index Redirection 대응).
-     */
     updateBindGroup(
         vhtSampler: GPUSampler,
         vhtTextureView: GPUTextureView,
@@ -309,7 +284,6 @@ export class LandscapeInstanceBuffer {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice) return;
 
-        // 1. GPUBindGroupLayout 생성 (@group(1): AllInputTiles, VisibleTileIndices, Sampler, VHT Height, VNT Normal, LandscapeUniforms, VBT 3-Set)
         this.#instanceStorageBindGroupLayout = gpuDevice.createBindGroupLayout({
             label: 'LandscapeInstanceStorageBindGroupLayout',
             entries: [
@@ -384,28 +358,24 @@ export class LandscapeInstanceBuffer {
             ]
         });
 
-        // 2. All Input Tiles StorageBuffer 생성 (32 bytes per tile)
         this.#allInputTilesBuffer = gpuDevice.createBuffer({
             label: 'LandscapeAllInputTilesStorageBuffer',
             size: this.#maxComponentCount * 32,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
 
-        // 3. Visible Tile Indices StorageBuffer 생성 (4 bytes u32 per tile * maxLODLevel)
         this.#visibleTileIndicesBuffer = gpuDevice.createBuffer({
             label: 'LandscapeVisibleTileIndicesStorageBuffer',
             size: this.#maxComponentCount * this.#maxLODLevel * 4,
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
 
-        // 4. Indirect Draw Buffer 생성 (5 uints per LOD = 20 bytes * maxLODLevel)
         this.#indirectDrawBuffer = gpuDevice.createBuffer({
             label: 'LandscapeIndirectDrawBuffer',
             size: this.#maxLODLevel * 20,
             usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
 
-        // 5. Landscape 전역 Uniform Buffer 생성 (208 bytes: 4 floats 기본 + 4 floats 메타데이터 + 4 floats vhtTextureSize + 32 floats 8색상 + 8 floats lodDistancesSq)
         this.#landscapeUniformBuffer = gpuDevice.createBuffer({
             label: 'LandscapeGlobalUniformBuffer',
             size: 208,

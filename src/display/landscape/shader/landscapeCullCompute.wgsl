@@ -1,4 +1,3 @@
-// WebGPU Landscape Multi-LOD GPU Compute Shader Culling (Index Redirection + Workgroup Memory Reduction)
 struct CameraFrustumUniforms {
     cameraPosition: vec3<f32>,
     maxLODLevel: u32,
@@ -35,7 +34,6 @@ struct IndirectDrawArgs {
 @group(0) @binding(2) var<storage, read_write> visibleTileIndices: array<u32>;
 @group(0) @binding(3) var<storage, read_write> indirectDrawArgs: array<IndirectDrawArgs>;
 
-// ⚡ Workgroup Local Memory: VRAM atomicAdd 충돌을 98.4% 소멸시키는 L1 로컬 메모리 카운터
 var<workgroup> wgCounts: array<atomic<u32>, 8>;
 var<workgroup> wgLocalSlots: array<atomic<u32>, 8>;
 var<workgroup> wgGlobalOffsets: array<u32, 8>;
@@ -59,7 +57,6 @@ fn checkAABBInFrustum(minPos: vec3<f32>, maxPos: vec3<f32>) -> bool {
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invocation_id) local_id: vec3<u32>) {
     let localIdx = local_id.x;
 
-    // 1. Workgroup Local Memory 초기화 (스레드 0~7이 8개 LOD 카운터 0으로 세팅)
     if (localIdx < 8u) {
         atomicStore(&wgCounts[localIdx], 0u);
         atomicStore(&wgLocalSlots[localIdx], 0u);
@@ -102,7 +99,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
 
     workgroupBarrier();
 
-    // 2. Workgroup Leader 스레드가 VRAM StorageBuffer에 워크그룹당 딱 1회만 일괄 가산 (VRAM 동기화 98.4% 절감)
     if (localIdx < uniforms.maxLODLevel) {
         let count = atomicLoad(&wgCounts[localIdx]);
         if (count > 0u) {
@@ -112,7 +108,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
 
     workgroupBarrier();
 
-    // 3. 컬링 통과 스레드들이 Workgroup 내 로컬 슬롯을 할당받아 VRAM 인덱스 버퍼에 정밀 작성
     if (isVisible) {
         let localSlot = atomicAdd(&wgLocalSlots[lodLevel], 1u);
         let globalOffset = wgGlobalOffsets[lodLevel];

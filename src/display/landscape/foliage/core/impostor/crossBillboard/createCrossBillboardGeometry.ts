@@ -18,18 +18,6 @@ const PBR_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
     'PBR'
 );
 
-/**
- * [KO] 언리얼 엔진 5(UE5) 스타일의 3-Plane Star (0°, 60°, 120° 수직 3장 6각 별 모양) 크로스 빌보드 지오메트리를 생성합니다.
- *      수평면 없이 수직 판자 3장이 6방향으로 뻗어 있어 지상/공중 모든 각도에서 왜곡 없는 완벽한 원형 3D 수목 볼륨을 형성합니다.
- * [EN] Creates a UE5 style 3-Plane Star (0°, 60°, 120° 3-plane star) cross-billboard geometry.
- *
- * @param redGPUContext - RedGPUContext 인스턴스
- * @param width - 빌보드 가로 폭 (기본값 6.0)
- * @param height - 빌보드 세로 높이 (기본값 8.0)
- * @param sphericalCenterHeightRatio - 구형 노멀 중심점 높이 비율 (기본값 0.6)
- * @param wireframe - 라인 모드(와이어프레임) 선분 인덱스 생성 여부 (기본값 false)
- * @returns 3-Way 아틀라스 UV가 매핑된 3-Plane Star 빌보드 Geometry
- */
 function createCrossBillboardGeometry(
     redGPUContext: RedGPUContext,
     width: number = 6.0,
@@ -40,12 +28,11 @@ function createCrossBillboardGeometry(
     const halfW = width * 0.5;
 
     const u0 = 0.0;
-    const u1 = 1.0 / 3.0; // 0° View
-    const u2 = 2.0 / 3.0; // 60° View
-    const u3 = 1.0;       // 120° View
+    const u1 = 1.0 / 3.0;
+    const u2 = 2.0 / 3.0;
+    const u3 = 1.0;
 
-    // 🌟 3-Plane Star: 0°, 60°, 120° 3개 각도 평면 정의 (각도 k * 60°)
-    const angles = [0, Math.PI / 3, (2 * Math.PI) / 3]; // 0°, 60°, 120°
+    const angles = [0, Math.PI / 3, (2 * Math.PI) / 3];
     const uRanges = [
         {start: u0, end: u1},
         {start: u1, end: u2},
@@ -63,7 +50,6 @@ function createCrossBillboardGeometry(
         const cos = Math.cos(rad);
         const sin = Math.sin(rad);
 
-        // 평면 법선 (Normal): 각도에 직교하는 수평 벡터
         const nx = sin;
         const nz = -cos;
 
@@ -75,26 +61,24 @@ function createCrossBillboardGeometry(
         const uStart = uRanges[i].start;
         const uEnd = uRanges[i].end;
 
-        // Quad 버텍스 4개 (v: 0 = Bottom, 1 = Top)
-        // v0: 좌하단
         rawVertices.push({x: leftX, y: 0.0, z: leftZ, u: uStart, v: 1.0, nx, ny: 0, nz});
-        // v1: 우하단
+
         rawVertices.push({x: rightX, y: 0.0, z: rightZ, u: uEnd, v: 1.0, nx, ny: 0, nz});
-        // v2: 우상단
+
         rawVertices.push({x: rightX, y: height, z: rightZ, u: uEnd, v: 0.0, nx, ny: 0, nz});
-        // v3: 좌상단
+
         rawVertices.push({x: leftX, y: height, z: leftZ, u: uStart, v: 0.0, nx, ny: 0, nz});
     }
 
     const interleavedData: number[] = [];
     for (const v of rawVertices) {
         interleavedData.push(
-            v.x, v.y, v.z,          // Position [0..2]
-            v.nx, v.ny, v.nz,       // Normal [3..5]
-            v.u, v.v,               // UV [6..7]
-            v.u, v.v,               // UV1 [8..9]
-            1.0, 1.0, 1.0, 1.0,     // VertexColor_0 [10..13]
-            0.0, 0.0, 0.0, 1.0      // Tangent placeholder [14..17]
+            v.x, v.y, v.z,
+            v.nx, v.ny, v.nz,
+            v.u, v.v,
+            v.u, v.v,
+            1.0, 1.0, 1.0, 1.0,
+            0.0, 0.0, 0.0, 1.0
         );
     }
 
@@ -124,7 +108,6 @@ function createCrossBillboardGeometry(
     const interleavedFloat32 = new Float32Array(interleavedData);
     const indexUint32 = new Uint32Array(indexData);
 
-    // 🌟 18-float PBR 스트라이드 탄젠트 기저 계산 (pos: 0, normal: 3, uv: 6, tangent: 14)
     calculateTangentsInterleaved(interleavedFloat32, indexUint32, 18, 0, 3, 6, 14);
 
     const wireframeKey = wireframe ? '_wf' : '';

@@ -1,8 +1,8 @@
 struct VNTBakeUniforms {
-    tileRect: vec4<f32>,     // (startX, startZ, width, height) in atlas pixel coords
-    atlasSize: vec2<f32>,    // (atlasWidth, atlasHeight)
-    heightScale: f32,        // terrain Y height scale factor
-    texelWorldSize: f32,     // physical world distance per texel
+    tileRect: vec4<f32>,
+    atlasSize: vec2<f32>,
+    heightScale: f32,
+    texelWorldSize: f32,
 }
 
 @group(0) @binding(0) var<uniform> uniforms: VNTBakeUniforms;
@@ -43,8 +43,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var hT = textureLoad(heightmapAtlas, vec2<i32>(curX, topZ), 0).r;
     var hB = textureLoad(heightmapAtlas, vec2<i32>(curX, botZ), 0).r;
 
-    // [KO] 미로딩 인접 타일 경계(0.0)로 인한 경계면 인공 절벽 및 검은 구멍 현상 완벽 방지
-    // [EN] Prevents artificial boundary cliffs and black hole artifacts caused by unloaded neighbor tiles (0.0)
     if (leftX < startX && hL <= 0.00001 && hCur > 0.00001) { hL = hCur; }
     if (rightX >= startX + i32(tileWidth) && hR <= 0.00001 && hCur > 0.00001) { hR = hCur; }
     if (topZ < startZ && hT <= 0.00001 && hCur > 0.00001) { hT = hCur; }
@@ -56,10 +54,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let dX = (hR - hL) * hScale;
     let dZ = (hB - hT) * hScale;
 
-    // Normal calculation: tangent_X = (stepDist, dX, 0), tangent_Z = (0, dZ, stepDist)
     let worldNormal = normalize(vec3<f32>(-dX, stepDist, -dZ));
 
-    // Encode normal (-1.0 ~ +1.0) into (0.0 ~ 1.0) for rgba8unorm storage
     let encodedNormal = worldNormal * 0.5 + vec3<f32>(0.5);
 
     textureStore(vntOutput, vec2<i32>(curX, curZ), vec4<f32>(encodedNormal, 1.0));

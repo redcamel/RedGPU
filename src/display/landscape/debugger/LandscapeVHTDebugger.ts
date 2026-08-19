@@ -2,17 +2,13 @@ import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "./ALandscapeDebugge
 import Landscape from "../core/Landscape";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
-/**
- * [KO] Landscape 지형 시스템의 16비트 VHT (Virtual Heightfield Texture) 아틀라스 텍스처와 카메라 시선/FOV/로딩반경을 WebGPU Canvas 60fps 오버레이로 시각화하는 디버거 클래스입니다 (ALandscapeDebugger 기반 GPU-Native).
- * [EN] Debugger class visualizing the 16-bit VHT (Virtual Heightfield Texture) atlas texture, camera view direction, FOV, and loading radius of Landscape terrain system via WebGPU Canvas 60fps overlay (ALandscapeDebugger based GPU-Native).
- */
 export class LandscapeVHTDebugger extends ALandscapeDebugger {
     #context: GPUCanvasContext | null = null;
     #pipeline: GPURenderPipeline | null = null;
     #bindGroup: GPUBindGroup | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
     #cameraUniformBuffer: GPUBuffer | null = null;
-    #cameraDataArray: Float32Array = new Float32Array(8); // Reusable Float32Array (Zero-GC)
+    #cameraDataArray: Float32Array = new Float32Array(8);
 
     #lastBoundTexture: GPUTexture | null = null;
     #canvasFormat: GPUTextureFormat = 'bgra8unorm';
@@ -45,7 +41,6 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
         const vhtTexture = this.landscape.vhtAtlasTexture;
         if (!vhtTexture || !vhtTexture.gpuTexture) return;
 
-        // 지형 텍스처 변경 감지 시 GPUBindGroup 재할당
         if ((this.#lastBoundTexture !== vhtTexture.gpuTexture || !this.#bindGroup) && this.#bindGroupLayout && this.#cameraUniformBuffer) {
             this.#lastBoundTexture = vhtTexture.gpuTexture;
             this.#bindGroup = gpuDevice.createBindGroup({
@@ -66,11 +61,9 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
 
         if (!this.#pipeline || !this.#bindGroup || !this.#cameraUniformBuffer) return;
 
-        // 카메라 및 지형 파라미터 업데이트 (Zero-GC 버퍼 갱신)
         const {camNormX, camNormZ, worldSizeX, worldSizeZ, effPanRad, fov, loadingRadiusUV} = state;
         const fovRad = (fov * Math.PI) / 180.0;
 
-        // cameraParams Float32Array (8 floats)
         this.#cameraDataArray[0] = camNormX;
         this.#cameraDataArray[1] = camNormZ;
         this.#cameraDataArray[2] = worldSizeX;
@@ -104,7 +97,7 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
                 passEncoder.end();
             });
         } catch (e) {
-            // 프레임 스킵 안전 예외 처리
+
         }
     }
 
@@ -127,14 +120,12 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
             alphaMode: 'premultiplied'
         });
 
-        // 카메라 유니폼 버퍼 생성 (32 bytes)
         this.#cameraUniformBuffer = gpuDevice.createBuffer({
             label: 'VHTDebuggerCameraUniformBuffer',
             size: 32,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });
 
-        // VHT 프리뷰어 전용 바인드 그룹 레이아웃 (@binding(0): VHT texture, @binding(1): CameraParams)
         const bindGroupLayout = gpuDevice.createBindGroupLayout({
             label: 'VHTDebuggerBindGroupLayout',
             entries: [
@@ -157,7 +148,6 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
         });
         this.#bindGroupLayout = bindGroupLayout;
 
-        // VHT 렌더 셰이더 모듈 (GPU-Native 카메라 FOV & 시선 표출)
         const shaderModule = gpuDevice.createShaderModule({
             label: 'VHTDebuggerShaderModule',
             code: `
@@ -200,7 +190,7 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
                     let texSize = vec2<f32>(textureDimensions(vhtTexture));
                     let texCoord = vec2<i32>(clamp(in.uv * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
                     let h = textureLoad(vhtTexture, texCoord, 0).r;
-                    
+
                     // 1. 타일 경계선 그리드 (8x8 아틀라스 셀)
                     let tileGrid = step(vec2<f32>(0.98), fract(in.uv * 8.0));
                     let isGrid = max(tileGrid.x, tileGrid.y);

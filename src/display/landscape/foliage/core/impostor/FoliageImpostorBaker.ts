@@ -15,19 +15,11 @@ export interface FoliageBakeResult {
     bottomOffset: number;
 }
 
-/**
- * [KO] 언리얼 엔진 5 스타일 3-Plane Star 식생 자동 임포스터 캡처/베이커 (Foliage Impostor Baker)
- *      0°, 60°, 120° 수직 3방향 뷰포트 아틀라스를 단일 텍스처(3:1 가로 아틀라스)로 자동 오프스크린 베이킹합니다.
- * [EN] Unreal Engine 5 style Foliage Impostor Baker that captures 0°, 60°, and 120° vertical star views into a 3-Plane texture atlas.
- */
 class FoliageImpostorBaker {
     static #bakePipelineCache: Map<string, GPURenderPipeline> = new Map();
     static #bakeBindGroupLayout0: GPUBindGroupLayout | null = null;
     static #bakeBindGroupLayout1: GPUBindGroupLayout | null = null;
 
-    /**
-     * 실제 수집된 서브메시들의 최종 버텍스 데이터를 직접 분석하여 100% 정밀 AABB를 계산합니다.
-     */
     static calculateAABBFromSubMeshes(subMeshes: FoliageSubMesh[]): {
         min: [number, number, number];
         max: [number, number, number];
@@ -40,7 +32,7 @@ class FoliageImpostorBaker {
 
         for (let s = 0; s < subMeshes.length; s++) {
             const sub = subMeshes[s];
-            if (sub.lodIndex === 1) continue; // 빌보드 자체는 제외
+            if (sub.lodIndex === 1) continue;
 
             const vBuffer = sub.geometry?.vertexBuffer;
             const vData = vBuffer?.data;
@@ -56,7 +48,6 @@ class FoliageImpostorBaker {
                 const y = vData[idx + 1];
                 const z = vData[idx + 2];
 
-                // relativeModelMatrix 적용
                 const wx = m[0] * x + m[4] * y + m[8] * z + m[12];
                 const wy = m[1] * x + m[5] * y + m[9] * z + m[13];
                 const wz = m[2] * x + m[6] * y + m[10] * z + m[14];
@@ -87,9 +78,6 @@ class FoliageImpostorBaker {
         };
     }
 
-    /**
-     * 식생 서브메시 목록을 입력받아 3-Way 아틀라스 텍스처로 자동 오프스크린 베이킹을 수행합니다.
-     */
     static bakeSubMeshes(
         redGPUContext: RedGPUContext,
         subMeshes: FoliageSubMesh[],
@@ -102,7 +90,6 @@ class FoliageImpostorBaker {
             throw new Error('[FoliageImpostorBaker] GPUDevice is not initialized.');
         }
 
-        // 1. 실제 버텍스 데이터 기준 정밀 AABB 및 중심점 산출
         const aabb = this.calculateAABBFromSubMeshes(subMeshes);
         const bakedWidth = Math.max(aabb.width, aabb.depth);
         const bakedHeight = aabb.height;
@@ -110,7 +97,6 @@ class FoliageImpostorBaker {
         const centerY = aabb.min[1] + bakedHeight * 0.5;
         const maxRadialExtent = (bakedWidth * 0.5) * 1.15;
 
-        // 2. 3-Way 아틀라스 GPU 텍스처 (3:1 가로 종횡비: 0° + 60° + 120° 수직 3개 뷰포트)
         const atlasWidth = resolution * 3;
         const atlasHeight = resolution;
         const mipLevelCount = getMipLevelCount(atlasWidth, atlasHeight);
@@ -132,8 +118,7 @@ class FoliageImpostorBaker {
 
         const maxCameraDist = Math.max(bakedWidth, bakedHeight) * 2.0;
 
-        // 🌟 3-Plane Star: 0°, 60°, 120° 3방향 수평 회전 투영 뷰 행렬 생성
-        const angles = [0, Math.PI / 3, (2 * Math.PI) / 3]; // 0°, 60°, 120°
+        const angles = [0, Math.PI / 3, (2 * Math.PI) / 3];
         const renderPassViews = [];
 
         for (let a = 0; a < 3; a++) {
@@ -177,7 +162,6 @@ class FoliageImpostorBaker {
             },
         });
 
-        // 3. 서브메시 렌더링 루프
         for (let v = 0; v < renderPassViews.length; v++) {
             const vpInfo = renderPassViews[v];
             renderPass.setViewport(vpInfo.vpX, vpInfo.vpY, resolution, resolution, 0, 1);
@@ -243,7 +227,6 @@ class FoliageImpostorBaker {
                 const vBuffer = sub.geometry.vertexBuffer?.gpuBuffer;
                 if (!vBuffer) continue;
 
-                // 버텍스 Transform 버퍼 (projView * relativeModelMatrix)
                 const mvp = mat4.create();
                 mat4.multiply(mvp, vpInfo.projView, sub.relativeModelMatrix);
 
@@ -279,7 +262,6 @@ class FoliageImpostorBaker {
         renderPass.end();
         gpuDevice.queue.submit([commandEncoder.finish()]);
 
-        // 4. Mipmap 생성
         if (mipLevelCount > 1) {
             redGPUContext.resourceManager.mipmapGenerator.generateMipmap(
                 bakedGPUTexture,
@@ -308,9 +290,6 @@ class FoliageImpostorBaker {
         };
     }
 
-    /**
-     * DOM에 베이킹된 3-Way 아틀라스 텍스처를 캔버스로 시각화하여 디버깅합니다.
-     */
     static async debugPreviewAtlas(
         redGPUContext: RedGPUContext,
         bakeResult: FoliageBakeResult,
@@ -372,7 +351,6 @@ class FoliageImpostorBaker {
             }
             ctx.putImageData(imgData, 0, 0);
 
-            // 가이드라인 렌더링
             ctx.strokeStyle = '#00ffff';
             ctx.lineWidth = 3;
             const thirdW = width / 3;
@@ -383,7 +361,6 @@ class FoliageImpostorBaker {
             ctx.lineTo(thirdW * 2, height);
             ctx.stroke();
 
-            // 텍스트 라벨 표기
             ctx.fillStyle = '#ffff00';
             ctx.font = 'bold 24px monospace';
             ctx.fillText('STAR 0°', 10, 30);

@@ -19,13 +19,9 @@ interface LandscapeMaterial {
     baseColorTextureSampler: Sampler;
 }
 
-/**
- * [KO] Landscape 지형 전용 Texture2DArray 기반 Multi-Layer PBR 머티리얼 클래스입니다.
- * [EN] Texture2DArray-based Multi-Layer PBR material class for Landscape terrain system.
- */
 class LandscapeMaterial extends AUVTransformBaseMaterial {
     #layers: LandscapeLayer[] = [];
-    #textureArraySize: number = 1024; // [KO] 동적 텍스처 어레이 해상도 (기본값: 1024px)
+    #textureArraySize: number = 1024;
 
     #gpuBaseColorArrayTexture: GPUTexture | null = null;
     #gpuNormalArrayTexture: GPUTexture | null = null;
@@ -37,10 +33,8 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     #ormArrayView: GPUTextureView | null = null;
     #weightMapArrayView: GPUTextureView | null = null;
 
-    // 텍스처 비동기 로딩 갱신 시 파괴된 텍스처 복사 제출 방지용 버저닝 가드
     #textureArrayVersion: number = 0;
 
-    // Zero-GC 재사용 TypedArray Uniform 구조체 (WGSL 16-byte alignment: header 32B + 8 layers * 96B = 총 800 bytes = 200 float32 elements)
     #uniformFloatArray: Float32Array = new Float32Array(200);
     #uniformUintArray: Uint32Array;
 
@@ -49,12 +43,11 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
             redGPUContext,
             'LANDSCAPE_MATERIAL',
             landscapeFragmentSource,
-            2 // RedGPU 표준 머티리얼 그룹 인덱스 2
+            2
         );
 
         this.#uniformUintArray = new Uint32Array(this.#uniformFloatArray.buffer);
 
-        // 텍스처 뷰 및 덤미 뷰 최우선 초기화
         this.#initDummyTextureArrays();
 
         this.baseColorTextureSampler = new Sampler(redGPUContext, {
@@ -63,7 +56,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
             mipmapFilter: GPU_MIPMAP_FILTER_MODE.LINEAR,
             addressModeU: GPU_ADDRESS_MODE.REPEAT,
             addressModeV: GPU_ADDRESS_MODE.REPEAT,
-            // maxAnisotropy: 16
+
         });
 
         this.color.setColorByHEX(colorHex);
@@ -75,13 +68,9 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     }
 
     set layers(value: any) {
-        // RedGPU ABaseMaterial._updateBaseProperty 자동 동기화 예외 방지용 패스스루 setter
+
     }
 
-    /**
-     * [KO] 지형 텍스처 어레이의 해상도를 반환하거나 설정합니다 (예: 512, 1024, 2048).
-     * [EN] Gets or sets the resolution of the terrain texture array (e.g. 512, 1024, 2048).
-     */
     get textureArraySize(): number {
         return this.#textureArraySize;
     }
@@ -93,9 +82,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         }
     }
 
-    /**
-     * [KO] VBT 리베이킹 요청 이벤트 콜백
-     */
     onRebakeVBTRequested?: () => void;
     #isRebakeScheduled: boolean = false;
 
@@ -115,9 +101,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         return {gpuTexture: this.#gpuWeightMapArrayTexture, gpuTextureView: this.#weightMapArrayView};
     }
 
-    /**
-     * [KO] 레이어 속성 변경 시 마이크로태스크 디바운싱을 통해 VBT 재베이킹을 요청합니다 (Zero-GC).
-     */
     requestVBTRebake(): void {
         if (this.#isRebakeScheduled) return;
         this.#isRebakeScheduled = true;
@@ -127,10 +110,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         });
     }
 
-    /**
-     * [KO] 신규 지형 레이어를 추가합니다 (최대 8개).
-     * [EN] Adds a new terrain layer (up to 8 layers).
-     */
     addLayer(layer: LandscapeLayer): void {
         if (this.#layers.length >= MAX_LANDSCAPE_LAYERS) {
             console.warn(`[LandscapeMaterial] Maximum layer count (${MAX_LANDSCAPE_LAYERS}) reached.`);
@@ -147,10 +126,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         this.#rebuildTextureArrays();
     }
 
-    /**
-     * [KO] 레이어를 이름으로 검색하여 삭제합니다.
-     * [EN] Removes a layer by name.
-     */
     removeLayer(layerName: string): boolean {
         const idx = this.#layers.findIndex(l => l.name === layerName);
         if (idx !== -1) {
@@ -162,34 +137,27 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         return false;
     }
 
-    /**
-     * [KO] 레이어를 이름으로 검색합니다.
-     * [EN] Searches a layer by name.
-     */
     getLayer(layerName: string): LandscapeLayer | undefined {
         return this.#layers.find(l => l.name === layerName);
     }
 
-    /**
-     * [KO] GPU Uniform Buffer 데이터를 업데이트합니다 (Zero-GC, WGSL 16-byte alignment 준수).
-     */
     updateUniformsData(): void {
         const floatBuf = this.#uniformFloatArray;
         const uintBuf = this.#uniformUintArray;
 
         const activeCount = this.#layers.length;
-        uintBuf[0] = activeCount; // offset 0 bytes
-        uintBuf[1] = 0;           // offset 4 bytes (pad)
-        uintBuf[2] = 0;           // offset 8 bytes (pad)
-        uintBuf[3] = 0;           // offset 12 bytes (pad)
+        uintBuf[0] = activeCount;
+        uintBuf[1] = 0;
+        uintBuf[2] = 0;
+        uintBuf[3] = 0;
 
         const colorLinear = this.color ? this.color.rgbaNormalLinear : [0.22, 0.49, 0.26, 1.0];
-        floatBuf[4] = colorLinear[0]; // offset 16 bytes
+        floatBuf[4] = colorLinear[0];
         floatBuf[5] = colorLinear[1];
         floatBuf[6] = colorLinear[2];
         floatBuf[7] = colorLinear[3];
 
-        let offset = 8; // offset 32 bytes (array<LandscapeLayerParams, 8> alignment)
+        let offset = 8;
         for (let i = 0; i < MAX_LANDSCAPE_LAYERS; i++) {
             if (i < activeCount) {
                 const layer = this.#layers[i];
@@ -248,7 +216,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 
         this.updateUniformsData();
 
-        // 커스텀 Uniform Buffer 업데이트
         const customUniformBuffer = new UniformBuffer(
             this.redGPUContext,
             this.#uniformFloatArray.buffer as ArrayBuffer,

@@ -33,7 +33,7 @@ struct LandscapeLayerParams {
     maxVal: f32,
     tintColor: vec4<f32>,
     blendFalloff: f32,
-    blendMode: f32, // 0: SLOPE, 1: HEIGHT, 2: WEIGHT_MAP
+    blendMode: f32,
     roughness: f32,
     metallic: f32,
     normalIntensity: f32,
@@ -41,7 +41,7 @@ struct LandscapeLayerParams {
     aoIntensity: f32,
     heightOffset: f32,
     heightContrast: f32,
-    weightMapChannelIndex: f32, // 0: R, 1: G, 2: B, 3: A
+    weightMapChannelIndex: f32,
     pad0: f32,
     pad1: f32,
 };
@@ -71,7 +71,6 @@ struct LandscapeUniforms {
     lodDistancesSq: array<vec4<f32>, 2>,
 };
 
-// @group(1): RVT & VBT 2D Atlas 3-Set
 @group(1) @binding(3) var vhtHeightAtlasTexture: texture_2d<f32>;
 @group(1) @binding(4) var vntNormalTexture: texture_2d<f32>;
 @group(1) @binding(5) var<uniform> landscapeInstanceUniforms: LandscapeUniforms;
@@ -79,7 +78,6 @@ struct LandscapeUniforms {
 @group(1) @binding(7) var vbtNormalAtlasTexture: texture_2d<f32>;
 @group(1) @binding(8) var vbtORMAtlasTexture: texture_2d<f32>;
 
-// @group(2): Material & Textures
 @group(2) @binding(0) var<uniform> uniforms: MaterialUniforms;
 @group(2) @binding(1) var baseColorTextureSampler: sampler;
 @group(2) @binding(2) var layerBaseColorArray: texture_2d_array<f32>;
@@ -221,10 +219,6 @@ fn computeDirectLayersPBR(
 
     return res;
 }
-
-// =============================================================================
-// PBRMaterial Standard Lighting Functions (100% Shared Physical Pipeline)
-// =============================================================================
 
 fn getDielectricF0(ior: f32) -> vec3<f32> {
     let f0_factor = (ior - 1.0) / (ior + 1.0);
@@ -413,14 +407,10 @@ fn getIndirectPbrLighting(
     }
 }
 
-// =============================================================================
-// Main Fragment Entry Point
-// =============================================================================
-
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
-    
+
     let input_vertexPosition = inputData.vertexPosition;
     let u_cameraPosition = systemUniforms.camera.cameraPosition;
     let globalUV = inputData.uv1;
@@ -436,7 +426,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let viewDist = distance(u_cameraPosition, input_vertexPosition);
     let vbtMip = floor(clamp(log2(max(1.0, viewDist * 0.002)), 0.0, 4.0));
 
-    // 🌿 1단계: 지형 표면 물성 추출 (CDLOD Hybrid Direct / VBT Atlas)
     if (lod < 1.5) {
         let vntSample = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
         let baseN = normalize(select(vntSample * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), length(vntSample) <= 0.001));
@@ -505,7 +494,6 @@ fn main(inputData: InputData) -> OutputFragment {
         albedo = mix(albedo, inputData.instanceColor.rgb, 0.6);
     }
 
-    // 🌿 2단계: PBRMaterial 표준 셰이딩 파이프라인 (100% 동일한 물리 조명 연산)
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
     let NdotV = max(abs(dot(N, V)), 0.04);
 
@@ -531,7 +519,6 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let finalColor = vec4<f32>(directLighting + indirectLighting, 1.0);
 
-    // 🌿 3단계: 표준 G-Buffer 및 모션 벡터 출력
     output.color = finalColor;
     output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, 1.0);
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);

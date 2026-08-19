@@ -289,8 +289,8 @@ RedGPU.init(
                     name: 'ElmTree',
                     mesh: treeMesh,
                     maxInstances: 100000,
-                    cullingDistance: 1600,
-                    fadeStartDistance: 1100,
+                    cullingDistance: 1500,
+                    fadeStartDistance: 1000,
                     minScale: [3, 3, 3],        // 현실적인 성목 높이 (약 7~8m)
                     maxScale: [3, 3, 3],   // 대형 거목 높이 (약 12~14m)
                     // randomRotationY: true,

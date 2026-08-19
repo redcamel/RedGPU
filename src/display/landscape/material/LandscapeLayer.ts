@@ -3,7 +3,7 @@ import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import RedGPUContext from "../../../context/RedGPUContext";
 
 export type LandscapeLayerBlendMode = 'SLOPE' | 'HEIGHT' | 'WEIGHT_MAP';
-/** @deprecated Use LandscapeLayerBlendMode */
+
 export type LandscapeLayerBlendType = LandscapeLayerBlendMode;
 
 export type LandscapeWeightMapChannel = 'R' | 'G' | 'B' | 'A' | 'r' | 'g' | 'b' | 'a' | 0 | 1 | 2 | 3;
@@ -14,63 +14,59 @@ export interface LandscapeLayerOptions {
     baseColorTexture?: BitmapTexture | string;
     normalTexture?: BitmapTexture | string;
     ormTexture?: BitmapTexture | string;
-    /** Weight Mask Texture (Splatmap) for WEIGHT_MAP Blend Mode */
+
     weightTexture?: BitmapTexture | string;
-    /** Legacy alias for weightTexture */
+
     weightMapTexture?: BitmapTexture | string;
-    /** Legacy alias for weightTexture */
+
     splatTexture?: BitmapTexture | string;
-    /** UE5 Standard: UV Scale [U, V] (타일당 텍스처 반복 횟수) */
+
     uvScale?: [number, number];
-    /** Legacy alias: Texture Scale [U, V] */
+
     textureScale?: [number, number];
-    /** UE5 Standard: UV Offset [U, V] */
+
     uvOffset?: [number, number];
-    /** Legacy alias: Texture Offset [U, V] */
+
     textureOffset?: [number, number];
-    /** UE5 Standard: Layer Blend Mode */
+
     blendMode?: LandscapeLayerBlendMode;
-    /** Legacy alias: Layer Blend Type */
+
     blendType?: LandscapeLayerBlendMode;
-    /** UE5 Standard: Weight Channel ('R' | 'G' | 'B' | 'A') */
+
     weightChannel?: LandscapeWeightMapChannel;
-    /** Legacy alias: Weight Map Channel */
+
     weightMapChannel?: LandscapeWeightMapChannel;
-    /** Legacy alias: Weight Map Channel Index */
+
     weightMapChannelIndex?: LandscapeWeightMapChannel;
-    /** Legacy alias: Splat Channel */
+
     splatChannel?: LandscapeWeightMapChannel;
     minVal?: number;
     maxVal?: number;
-    /** UE5 Standard: Blend Falloff (Feathering range) */
+
     blendFalloff?: number;
-    /** Legacy alias: Falloff */
+
     falloff?: number;
-    /** UE5 Standard: Roughness (0.0 ~ 1.0) */
+
     roughness?: number;
-    /** Legacy alias: Roughness Factor */
+
     roughnessFactor?: number;
-    /** UE5 Standard: Metallic (0.0 ~ 1.0) */
+
     metallic?: number;
-    /** Legacy alias: Metallic Factor */
+
     metallicFactor?: number;
-    /** UE5 Standard: Normal Map Intensity */
+
     normalIntensity?: number;
-    /** Legacy alias: Normal Scale */
+
     normalScale?: number;
-    /** UE5 Standard: Ambient Occlusion Intensity (0.0 ~ 2.0) */
+
     aoIntensity?: number;
-    /** UE5 Standard: Height Offset for Height Blend Mode */
+
     heightOffset?: number;
-    /** UE5 Standard: Height Contrast for Micro Detail Blend Mode */
+
     heightContrast?: number;
     tintColor?: ColorRGBA | string;
 }
 
-/**
- * [KO] UE5(Unreal Engine 5) 공식 규격 일치 Landscape 지형 PBR 머티리얼 레이어 정의 클래스입니다.
- * [EN] UE5 (Unreal Engine 5) standard compliant PBR layer definition class for Landscape terrain material.
- */
 export class LandscapeLayer {
     readonly name: string;
     enabled: boolean = true;
@@ -86,32 +82,28 @@ export class LandscapeLayer {
     #pendingOrmSrc?: string;
     #pendingWeightSrc?: string;
 
-    /** [KO] 타일 기준 UV 스케일 [U, V] (타일당 텍스처 반복 횟수) [EN] Tile-based UV Scale [U, V] */
     uvScale: [number, number] = [20.0, 20.0];
-    /** UE5 Standard: UV Offset [U, V] */
+
     uvOffset: [number, number] = [0.0, 0.0];
 
-    /** UE5 Standard: Blend Mode */
     blendMode: LandscapeLayerBlendMode = 'SLOPE';
-    /** UE5 Standard: Weight Channel ('R' | 'G' | 'B' | 'A') */
+
     weightChannel: LandscapeWeightMapChannel = 'R';
     minVal: number = 0.0;
     maxVal: number = 45.0;
-    /** UE5 Standard: Blend Falloff */
+
     blendFalloff: number = 5.0;
 
-    /** UE5 Standard: Roughness */
     roughness: number = 1.0;
-    /** UE5 Standard: Metallic */
+
     metallic: number = 0.0;
-    /** UE5 Standard: Normal Intensity */
+
     normalIntensity: number = 1.0;
-    /** UE5 Standard: Ambient Occlusion Intensity */
+
     aoIntensity: number = 1.0;
 
-    /** UE5 Standard: Height Offset */
     heightOffset: number = 0.0;
-    /** UE5 Standard: Height Contrast */
+
     heightContrast: number = 1.0;
 
     tintColor: ColorRGBA = new ColorRGBA(255, 255, 255, 1);
@@ -267,10 +259,6 @@ export class LandscapeLayer {
         this.onChange?.();
     }
 
-    /**
-     * [KO] 문자열 경로로 등록된 텍스처들을 RedGPUContext를 주입받아 BitmapTexture 인스턴스로 자동 해결합니다.
-     * [EN] Automatically resolves textures registered as string paths to BitmapTexture instances using the injected RedGPUContext.
-     */
     resolvePendingTextures(context: RedGPUContext): void {
         this.#redGPUContext = context;
         if (this.#pendingBaseColorSrc) {
@@ -295,7 +283,6 @@ export class LandscapeLayer {
         return navigator.gpu?.getPreferredCanvasFormat ? navigator.gpu.getPreferredCanvasFormat() : 'rgba8unorm';
     }
 
-    // --- Legacy & UE5 Aliases for 100% Backward Compatibility ---
     get textureScale(): [number, number] {
         return this.uvScale;
     }
@@ -381,7 +368,7 @@ export class LandscapeLayer {
         if (ch === 'G' || ch === '1') return 1;
         if (ch === 'B' || ch === '2') return 2;
         if (ch === 'A' || ch === '3') return 3;
-        return 0; // 'R' or 0
+        return 0;
     }
 
     set weightMapChannelIndex(val: number) {

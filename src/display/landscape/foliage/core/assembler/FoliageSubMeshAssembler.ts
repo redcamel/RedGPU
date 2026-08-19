@@ -40,12 +40,8 @@ interface RawSubMesh {
     rawStride: number;
 }
 
-/**
- * [KO] 식생 메시 계층 구조 DFS 탐색 & 머티리얼별 서브메시 병합 조립기 (단일 책임: 지오메트리/머티리얼 병합 & 서브메시 유니폼 생성)
- * [EN] Foliage Mesh Hierarchy DFS Explorer & Material SubMesh Assembler (Single Responsibility: Geometry/Material Combine & Uniform Setup)
- */
 class FoliageSubMeshAssembler {
-    // 🌟 Zero-GC: 서브메시 유니폼(144 bytes) 패킹용 정적 재사용 버퍼
+
     static readonly #subMeshUniformData: Float32Array = new Float32Array(36);
     static readonly #subMeshUniformUint32: Uint32Array = new Uint32Array(FoliageSubMeshAssembler.#subMeshUniformData.buffer);
     static readonly #tempLocalMatrix: mat4 = mat4.create();
@@ -128,7 +124,6 @@ class FoliageSubMeshAssembler {
             if (node.geometry && node.material) {
                 const mat = node.material;
 
-                // 🌲 UE5 표준 식생 최적화: BLEND/반투명 머티리얼을 MASK(알파 컷오프)로 자동 승격
                 if (options.convertBlendToMasked) {
                     if (mat.alphaBlend === 2 || mat.transparent || mat.alphaMode === 'BLEND' || mat.alphaMode === 'MASK') {
                         mat.useCutOff = true;
@@ -186,7 +181,6 @@ class FoliageSubMeshAssembler {
             traverse(roots[r], identityParentMatrix, true);
         }
 
-        // 🌟 머티리얼별 서브메시 그룹화
         const getMaterialKey = (mat: any): string => {
             if (!mat) return 'default_mat';
             const matType = mat.constructor?.name || 'Material';
@@ -234,7 +228,6 @@ class FoliageSubMeshAssembler {
             floatView.set(normMatrix, 16);
             uintView[32] = (mat as any)?.globalFragmentSlotIndex ?? 0;
 
-            // 🌟 relMatrix가 항등 행렬(Identity)인지 고속 검사
             const isIdentity = (
                 relMatrix[0] === 1 && relMatrix[1] === 0 && relMatrix[2] === 0 && relMatrix[3] === 0 &&
                 relMatrix[4] === 0 && relMatrix[5] === 1 && relMatrix[6] === 0 && relMatrix[7] === 0 &&
@@ -294,10 +287,9 @@ class FoliageSubMeshAssembler {
             const group = entry.raws;
             const mat = entry.material;
 
-            // 🌟 모든 서브메시를 표준 PBR 18 Floats (72 Bytes) 지오메트리로 100% 균일 조립 (스트라이드 불일치 0% 소멸)
             let totalVertexCount = 0;
             let totalIndexCount = 0;
-            const PBR_STRIDE = 18; // position(3), normal(3), uv(2), uv1(2), color(4), tangent(4)
+            const PBR_STRIDE = 18;
 
             for (let g = 0; g < group.length; g++) {
                 const geom = group[g].geometry;
@@ -329,7 +321,6 @@ class FoliageSubMeshAssembler {
                             const srcIdx = v * rawStride;
                             const dstIdx = (vertexOffset + v) * PBR_STRIDE;
 
-                            // 1. Position [0..2] (Model Matrix 변환)
                             const x = srcVData[srcIdx + 0];
                             const y = srcVData[srcIdx + 1];
                             const z = srcVData[srcIdx + 2];
@@ -337,7 +328,6 @@ class FoliageSubMeshAssembler {
                             combinedVertexData[dstIdx + 1] = m[1] * x + m[5] * y + m[9] * z + m[13];
                             combinedVertexData[dstIdx + 2] = m[2] * x + m[6] * y + m[10] * z + m[14];
 
-                            // 2. Vertex Normal [3..5] (Normal Matrix 변환 및 정규화)
                             if (rawStride >= 6) {
                                 const nx = srcVData[srcIdx + 3];
                                 const ny = srcVData[srcIdx + 4];
@@ -361,13 +351,11 @@ class FoliageSubMeshAssembler {
                                 combinedVertexData[dstIdx + 5] = 0;
                             }
 
-                            // 3. UV [6..7]
                             if (rawStride >= 8) {
                                 combinedVertexData[dstIdx + 6] = srcVData[srcIdx + 6];
                                 combinedVertexData[dstIdx + 7] = srcVData[srcIdx + 7];
                             }
 
-                            // 4. UV1 [8..9]
                             if (rawStride >= 10) {
                                 combinedVertexData[dstIdx + 8] = srcVData[srcIdx + 8];
                                 combinedVertexData[dstIdx + 9] = srcVData[srcIdx + 9];
@@ -376,7 +364,6 @@ class FoliageSubMeshAssembler {
                                 combinedVertexData[dstIdx + 9] = combinedVertexData[dstIdx + 7];
                             }
 
-                            // 5. VertexColor_0 [10..13]
                             if (rawStride >= 14) {
                                 combinedVertexData[dstIdx + 10] = srcVData[srcIdx + 10];
                                 combinedVertexData[dstIdx + 11] = srcVData[srcIdx + 11];
@@ -389,7 +376,6 @@ class FoliageSubMeshAssembler {
                                 combinedVertexData[dstIdx + 13] = 1.0;
                             }
 
-                            // 6. Vertex Tangent [14..17] (Normal Matrix 회전 및 정규화)
                             if (rawStride >= 18) {
                                 const tanX = srcVData[srcIdx + 14];
                                 const tanY = srcVData[srcIdx + 15];
@@ -477,10 +463,8 @@ class FoliageSubMeshAssembler {
                 subList.push(combinedSubMesh);
         });
 
-        // 🌟 LOD 0 서브메시 개수
         const lod0SubMeshCount = subList.length;
 
-        // 🌟 LOD 1 3-Plane Star Cross-Billboard Impostor 베이킹 및 등록
         const billboardOpt = options.billboard || options.impostor;
         if (billboardOpt?.enabled) {
             const rootMeshNode = Array.isArray(options.mesh) ? options.mesh[0] : options.mesh;
@@ -502,14 +486,13 @@ class FoliageSubMeshAssembler {
                 mat4.create(),
                 mat4.create(),
                 48,
-                1 // LOD 1
+                1
             );
             (bbSubMesh as any)._bakedWidth = bbWidth;
             (bbSubMesh as any)._bakedHeight = bbHeight;
             subList.push(bbSubMesh);
         }
 
-        // 🌟 Bottom Offset 산출
         let minOffset = 0;
         for (let i = 0; i < subList.length; i++) {
             minOffset = Math.min(minOffset, subList[i].bottomOffset);

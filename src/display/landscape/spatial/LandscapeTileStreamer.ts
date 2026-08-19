@@ -9,22 +9,14 @@ import LandscapeVHTGenerator from "../generator/LandscapeVHTGenerator";
 import LandscapeVBTGenerator from "../generator/LandscapeVBTGenerator";
 import LandscapeMaterial from "../material/LandscapeMaterial";
 
-/**
- * [KO] 타일별 커스텀 URL 생성 리졸버 함수 타입입니다. (row, col 인자 제공)
- * [EN] Tile custom URL resolver function type. (provides row, col parameters)
- */
 export type LandscapeTileUrlResolver = (row: number, col: number, comp?: LandscapeComponent) => string;
 
-/**
- * [KO] SpatialGrid 카메라 수평 조망 거리 기반 16비트 고도맵 VHT 아틀라스 & VNT 노멀 아틀라스 스트리머 클래스입니다 (Real-time Tile Streaming Manager).
- * [EN] 16-bit Heightmap VHT Atlas & VNT Normal Atlas Streamer class based on SpatialGrid camera horizontal viewing distance.
- */
 export class LandscapeTileStreamer {
     #redGPUContext: RedGPUContext;
     #spatialGrid: LandscapeSpatialGrid;
 
     #loadingRadius: number = 2500.0;
-    #maxLoadsPerFrame: number = 1; // ⚡ UE5 r.VT.MaxUploadsPerFrame 스타일: 프레임당 최대 1개 타일로 비동기 로딩 제한하여 60fps 스파이크 소멸
+    #maxLoadsPerFrame: number = 1;
     #tileUrlResolver: LandscapeTileUrlResolver | null = null;
     onTileLoaded: ((comp: LandscapeComponent) => void) | null = null;
 
@@ -46,7 +38,7 @@ export class LandscapeTileStreamer {
     #loadingMap: Map<string, boolean> = new Map();
     #loadedMap: Map<string, any> = new Map();
     #cpuHeightMap: Map<string, any> = new Map();
-    #failedMap: Map<string, number> = new Map(); // key -> last failed timestamp (ms)
+    #failedMap: Map<string, number> = new Map();
 
     static #sortCamX = 0;
     static #sortCamZ = 0;
@@ -190,10 +182,6 @@ export class LandscapeTileStreamer {
         this.#heightScale = heightScale;
     }
 
-    /**
-     * [KO] 지형 heightScale이나 worldSize 변경 시 이미 로드된 모든 타일의 VNT 노멀 아틀라스를 일괄 재베이킹합니다 (Zero-GC).
-     * [EN] Re-bakes VNT normal atlas for all loaded tiles in batch when terrain heightScale or worldSize changes (Zero-GC).
-     */
     rebakeAllLoadedVNT(): void {
         if (!this.#vhtAtlasTexture || !this.#vntAtlasTexture || !this.#vntGenerator || !this.#spatialGrid) return;
 
@@ -280,9 +268,6 @@ export class LandscapeTileStreamer {
         }
     }
 
-    /**
-     * [KO] 월드 좌표 (x, z) 위치의 VHT 16비트 높이값과 heightScale을 정밀 산출하여 Y 고도를 반환합니다 (Zero-GC).
-     */
     getHeightAt(x: number, z: number): number {
         if (!this.#spatialGrid) return 0.0;
 
@@ -320,9 +305,6 @@ export class LandscapeTileStreamer {
         return (rawVal / 65535.0) * this.#heightScale;
     }
 
-    /**
-     * [KO] 이미 로드된 모든 타일의 VBT 2D 아틀라스 영역을 일괄 재베이킹합니다 (레이어/머티리얼 변경 대응, 0.05ms Zero-GC).
-     */
     rebakeAllLoadedVBT(): void {
         if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vhtAtlasTexture || !this.#vntAtlasTexture) return;
         const TILE_PIXEL_SIZE = 512;
@@ -364,7 +346,6 @@ export class LandscapeTileStreamer {
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const buffer = await response.arrayBuffer();
 
-            // ⚡ Zero-GC Static Ping-Pong Row Buffer (0.5ms CPU un-filtering + 0.01ms Direct writeTexture)
             const cpuParsed = await parse16BitPngBuffer(buffer);
 
             if (cpuParsed) {
@@ -404,7 +385,7 @@ export class LandscapeTileStreamer {
                         targetZ + copyH <= rawAtlasTexture.height
                     ) {
                         if (this.#vhtGenerator) {
-                            // ⚡ GPU Compute r32float VHT Height Baking
+
                             this.#vhtGenerator.bakeTileRegion(
                                 gpuTexture,
                                 this.#vhtAtlasTexture,
@@ -427,7 +408,6 @@ export class LandscapeTileStreamer {
                         }
                         console.log(`[LandscapeTileStreamer ⛰️] r32float VHT Atlas Sub-region (${key}) baked via GPU Compute Shader at [${targetX}, ${targetZ}]`);
 
-                        // 🌀 GPU VNT (Virtual Normal Texture) Compute Pass 노멀 베이킹 트리거
                         if (this.#vntAtlasTexture && this.#vntGenerator) {
                             this.#vntGenerator.bakeTileRegion(
                                 this.#vhtAtlasTexture,
@@ -442,7 +422,6 @@ export class LandscapeTileStreamer {
                             );
                         }
 
-                        // 🎨 GPU VBT (Virtual BaseColor/Normal/ORM) 2D Atlas 3종 세트 일괄 베이킹 트리거 (0.05ms)
                         if (this.#vbtGenerator && this.#vbtBaseColorAtlas && this.#vbtNormalAtlas && this.#vbtORMAtlas && this.#material && this.#vhtAtlasTexture && this.#vntAtlasTexture) {
                             this.#vbtGenerator.bakeTileRegion(
                                 this.#vhtAtlasTexture,
@@ -458,7 +437,6 @@ export class LandscapeTileStreamer {
                             );
                         }
 
-                        // 🌿 지형 타일 로딩 완료 알림 (타일 연동 식생 부분 업로드 디스패치)
                         this.onTileLoaded?.(comp);
                     }
                 }

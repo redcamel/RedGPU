@@ -3,23 +3,15 @@ import DirectTexture from "../../../resources/texture/DirectTexture";
 import vhtShaderCode from "../shader/landscapeVHTBake.wgsl";
 import ALandscapeAtlasGenerator from "./ALandscapeAtlasGenerator";
 
-/**
- * [KO] 16비트 고도맵 타일 텍스처로부터 GPU Compute Shader 기반 r32float VHT (Virtual Heightfield Texture) 아틀라스로 고도를 베이킹하는 매니저 클래스입니다.
- * [EN] Manager class that bakes height values into r32float VHT (Virtual Heightfield Texture) Atlas based on GPU Compute Shader from 16-bit heightmap tile texture.
- */
 export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
     #uniformArray: Uint32Array;
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, 'VHT');
-        this.#uniformArray = new Uint32Array(4); // targetX, targetZ, width, height (16 bytes)
+        this.#uniformArray = new Uint32Array(4);
         this.#initComputeResources();
     }
 
-    /**
-     * [KO] 단일 타일 GPU 텍스처 데이터를 GPU Compute Pass를 실행하여 r32float VHT 아틀라스 텍스처의 [pixelX, pixelZ] 영역에 베이킹합니다 (Zero-GC Dynamic Frame-Pool).
-     * [EN] Bakes single tile GPU texture data into [pixelX, pixelZ] region of r32float VHT Atlas texture via GPU Compute Pass (Zero-GC Dynamic Frame-Pool).
-     */
     bakeTileRegion(
         srcTileTexture: GPUTexture,
         vhtAtlas: DirectTexture,

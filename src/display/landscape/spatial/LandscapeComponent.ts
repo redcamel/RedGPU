@@ -1,7 +1,3 @@
-/**
- * [KO] SpatialGrid의 단일 공간 셀(타일) 단위를 관리하는 경량 공간 데이터 클래스입니다.
- * [EN] Lightweight spatial data class managing a single spatial cell (tile) unit of SpatialGrid.
- */
 export class LandscapeComponent {
     #worldX: number = 0;
     #worldZ: number = 0;
@@ -12,10 +8,6 @@ export class LandscapeComponent {
     #lodLevel: number = 0;
     #key: string = '';
 
-    /**
-     * [KO] LandscapeComponent 인스턴스를 생성합니다.
-     * [EN] Creates an instance of LandscapeComponent.
-     */
     constructor(
         worldX: number = 0,
         worldZ: number = 0,
@@ -79,9 +71,6 @@ export class LandscapeComponent {
         this.#key = `${val}_${this.#componentX}`;
     }
 
-    /**
-     * [KO] 프레임 종료 후 이전 월드 위치를 현재 위치로 안전하게 업데이트합니다 (Mesh prevModelMatrix 동기화와 100% 동일).
-     */
     updatePrevPosition(): void {
         this.#prevWorldX = this.#worldX;
         this.#prevWorldZ = this.#worldZ;

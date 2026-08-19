@@ -2,10 +2,6 @@ import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "./ALandscapeDebugge
 import Landscape from "../core/Landscape";
 import RenderViewStateData from "../../view/core/RenderViewStateData";
 
-/**
- * [KO] Landscape 지형 시스템의 통계를 높은 가독성과 모던한 Slate 서브 카드 레이아웃으로 시각화하는 디버거 클래스입니다.
- * [EN] Debugger class visualizing Landscape terrain system statistics with high legibility and a modern Slate sub-card layout.
- */
 export class LandscapeHUDDebugger extends ALandscapeDebugger {
     #containerEl: HTMLDivElement | null = null;
     #titleEl: HTMLDivElement | null = null;
@@ -42,25 +38,16 @@ export class LandscapeHUDDebugger extends ALandscapeDebugger {
         }
     }
 
-    /**
-     * [KO] 디버거 패널의 left, bottom 위치를 픽셀 단위로 변경합니다.
-     */
     override setPosition(left: number, bottom: number): void {
         super.setPosition(left, bottom);
         this.updatePositionAndSize();
     }
 
-    /**
-     * [KO] 디버거 패널의 너비와 높이를 픽셀 단위로 변경합니다.
-     */
     override setSize(width: number, height: number): void {
         super.setSize(width, height);
         this.updatePositionAndSize();
     }
 
-    /**
-     * [KO] 공통 left, bottom, width, height 프로퍼티를 DOM 패널 스타일로 동기화합니다.
-     */
     updatePositionAndSize(): void {
         if (!this.#containerEl) return;
         this.#containerEl.style.left = `${this.left}px`;
@@ -68,9 +55,6 @@ export class LandscapeHUDDebugger extends ALandscapeDebugger {
         this.#containerEl.style.width = `${this.width}px`;
     }
 
-    /**
-     * [KO] 매 프레임 Landscape 전면 상세 디버그 통계를 모던 서브 카드 레이아웃으로 갱신합니다.
-     */
     update(renderViewStateData?: RenderViewStateData): void {
         if (!this.#statsContentEl || !this.landscape) return;
 
@@ -216,9 +200,6 @@ export class LandscapeHUDDebugger extends ALandscapeDebugger {
         `;
     }
 
-    /**
-     * [KO] HUD 패널을 제거하고 DOM 자원을 해제합니다.
-     */
     destroy(): void {
         if (this.#containerEl && this.#containerEl.parentNode) {
             this.#containerEl.parentNode.removeChild(this.#containerEl);

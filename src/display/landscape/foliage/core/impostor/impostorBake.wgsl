@@ -20,11 +20,9 @@ struct Uniforms {
 fn main(input: VertexOutput) -> @location(0) vec4<f32> {
     let diffuseColor = textureSample(diffuseTexture, diffuseSampler, input.uv);
 
-    // 🌿 언리얼 엔진 5 MASK 모드 알파 컷오프
     if (diffuseColor.a < 0.33) {
         discard;
     }
 
-    // 🌟 순수 알베도(Base Color) 베이킹: 런타임에서 실시간 씬 라이팅(PBR)과 100% 동일한 광도로 셰이딩
     return diffuseColor;
 }

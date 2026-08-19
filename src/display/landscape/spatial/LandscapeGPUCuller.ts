@@ -1,10 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import landscapeCullComputeSource from "../shader/landscapeCullCompute.wgsl";
 
-/**
- * [KO] Landscape Multi-LOD GPU Compute Shader Culling 파이프라인 관리 클래스입니다 (GPU-Driven Index Redirection).
- * [EN] Landscape Multi-LOD GPU Compute Shader Culling pipeline manager class (GPU-Driven Index Redirection).
- */
 export class LandscapeGPUCuller {
     #redGPUContext: RedGPUContext;
 
@@ -13,7 +9,6 @@ export class LandscapeGPUCuller {
     #bindGroup: GPUBindGroup | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
 
-    // Zero-GC 16-byte alignment uniform float buffer (cameraPos 3f, maxLOD 1u, worldSize 2f, tileSize 2f, heightScale 1f, tileCount 1f, pad 2f, frustumPlanes 24f, lodDistances 8f = 44 floats = 176 bytes)
     #uniformData: Float32Array = new Float32Array(44);
     #uniformUintData: Uint32Array;
 
@@ -79,7 +74,6 @@ export class LandscapeGPUCuller {
         data[10] = 0;
         data[11] = 0;
 
-        // Frustum Planes (6 * 4 = 24 floats)
         if (frustumPlanes && frustumPlanes.length >= 6) {
             for (let i = 0; i < 6; i++) {
                 const plane = frustumPlanes[i];
@@ -90,7 +84,7 @@ export class LandscapeGPUCuller {
                 data[offset + 3] = plane[3];
             }
         } else {
-            // Disable culling if frustum planes are missing (all planes 0 0 0 1e10)
+
             for (let i = 0; i < 6; i++) {
                 const offset = 12 + i * 4;
                 data[offset] = 0;
@@ -100,7 +94,6 @@ export class LandscapeGPUCuller {
             }
         }
 
-        // LOD Distances (8 floats, default to 1e15 if unused)
         const distCount = lodDistancesSq.length;
         for (let i = 0; i < 8; i++) {
             const val = i < distCount ? lodDistancesSq[i] : 0;

@@ -24,10 +24,6 @@ export interface LandscapeDebuggerCameraState {
     worldMinZ: number;
 }
 
-/**
- * [KO] Landscape 2D 디버거 시스템들의 공통 캔버스 조작, CSS 격리, 크기/위치 상태, 카메라 파라미터 및 공통 FOV 시야 부채꼴 드로잉을 관리하는 추상 기반 클래스입니다.
- * [EN] Abstract base class managing common canvas manipulation, CSS isolation, size/position state, camera parameters, and shared FOV frustum wedge drawing for Landscape 2D debugger systems.
- */
 export abstract class ALandscapeDebugger {
     #landscape: Landscape;
     #canvas: HTMLCanvasElement;
@@ -39,7 +35,6 @@ export abstract class ALandscapeDebugger {
     #left: number;
     #bottom: number;
 
-    // Zero-GC 재사용 카메라 상태 구조체
     #cameraState: LandscapeDebuggerCameraState = {
         camX: 0,
         camZ: 0,
@@ -92,7 +87,6 @@ export abstract class ALandscapeDebugger {
         canvas.width = w;
         canvas.height = h;
 
-        // 외부 전역 CSS 규칙으로부터 100% 완전 격리
         canvas.style.setProperty('all', 'initial', 'important');
         canvas.style.setProperty('position', 'fixed', 'important');
         canvas.style.setProperty('left', `${left}px`, 'important');
@@ -195,10 +189,6 @@ export abstract class ALandscapeDebugger {
         this.#camera = cam;
     }
 
-    /**
-     * [KO] 매 프레임 카메라 위치, 방위각, 시야각 및 월드 좌표 파라미터를 추출하여 갱신합니다 (Zero-GC 재사용 객체 리턴).
-     * [EN] Extracts and updates camera position, azimuth, FOV, and world coordinates every frame (Zero-GC reusable object returned).
-     */
     getCameraState(): LandscapeDebuggerCameraState | null {
         if (!this.#landscape) return null;
 
@@ -239,10 +229,6 @@ export abstract class ALandscapeDebugger {
         return state;
     }
 
-    /**
-     * [KO] 공통 2D 캔버스 기반 카메라 시야 부채꼴, 시선 레이, 로딩 반경 및 카메라 위치 점을 렌더링하는 전용 헬퍼 메소드입니다.
-     * [EN] Dedicated helper method rendering the common 2D canvas based camera FOV frustum wedge, heading ray, loading radius, and camera position dot.
-     */
     drawCameraOverlay2D(
         ctx: CanvasRenderingContext2D,
         state: LandscapeDebuggerCameraState,
@@ -258,7 +244,6 @@ export abstract class ALandscapeDebugger {
         const camCanvasY = padding + camNormZ * mapDrawHeight;
         const radiusPixels = loadingRadiusUV * mapDrawWidth;
 
-        // 1. Loading Radius Circle (Bright Emerald Green)
         ctx.beginPath();
         ctx.arc(camCanvasX, camCanvasY, radiusPixels, 0, Math.PI * 2);
         ctx.strokeStyle = 'rgba(52, 211, 153, 0.85)';
@@ -267,7 +252,6 @@ export abstract class ALandscapeDebugger {
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // 2. FOV Frustum Wedge (Amber Gold Fill & Stroke)
         const startAngle = centerRad - halfFovRad;
         const endAngle = centerRad + halfFovRad;
         const wedgeRadius = Math.max(16, Math.min(radiusPixels, 36));
@@ -282,7 +266,6 @@ export abstract class ALandscapeDebugger {
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        // 3. Heading Ray Line (Coral Red)
         const dirX = Math.sin(effPanRad) * (wedgeRadius + 10);
         const dirY = -Math.cos(effPanRad) * (wedgeRadius + 10);
         ctx.beginPath();
@@ -292,7 +275,6 @@ export abstract class ALandscapeDebugger {
         ctx.lineWidth = 2.0;
         ctx.stroke();
 
-        // 4. Camera Position Dot (Glowing White Dot with Coral Red Ring)
         ctx.beginPath();
         ctx.arc(camCanvasX, camCanvasY, 4.0, 0, Math.PI * 2);
         ctx.fillStyle = '#ffffff';
@@ -329,10 +311,6 @@ export abstract class ALandscapeDebugger {
         }
     }
 
-    /**
-     * [KO] 매 프레임 실시간 디버거 캔버스를 갱신 렌더링하는 추상 메서드입니다.
-     * [EN] Abstract method rendering and updating the live debugger canvas every frame.
-     */
     abstract update(): void;
 }
 
