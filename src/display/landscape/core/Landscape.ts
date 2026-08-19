@@ -211,12 +211,11 @@ export class Landscape extends Object3DContainer {
         this.#tileStreamer.material = landscapeMaterial;
 
         landscapeMaterial.onRebakeVBTRequested = () => {
-            this.#tileStreamer.rebakeAllVBT();
+            this.#tileStreamer.rebakeAllLoadedVBT();
         };
 
         this.#initSystems(redGPUContext, options, componentCountX, componentCountZ, maxLODLevel, vhtSampler, vhtAtlasTexture, vntAtlasTexture);
         this.#foliageManager = new LandscapeFoliageManager(this);
-        this.#landscapeMaterial.requestVBTRebake(true);
     }
 
     get foliageManager(): LandscapeFoliageManager {

@@ -314,12 +314,15 @@ export class LandscapeTileStreamer {
         return (rawVal / 65535.0) * this.#heightScale;
     }
 
-    rebakeAllVBT(budgetPerFrame: number = 3): void {
+    rebakeAllLoadedVBT(budgetPerFrame: number = 3): void {
         if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vhtAtlasTexture || !this.#vntAtlasTexture || !this.#spatialGrid) return;
 
         this.#rebakeQueue.length = 0;
         for (const comp of this.#spatialGrid.flatCells) {
-            this.#rebakeQueue.push(comp);
+            const key = `${comp.componentZ}_${comp.componentX}`;
+            if (this.#loadedMap.has(key)) {
+                this.#rebakeQueue.push(comp);
+            }
         }
 
         if (this.#rebakeQueue.length === 0) return;
@@ -333,8 +336,8 @@ export class LandscapeTileStreamer {
         this.#processRebakeQueue(budgetPerFrame);
     }
 
-    rebakeAllLoadedVBT(budgetPerFrame: number = 3): void {
-        this.rebakeAllVBT(budgetPerFrame);
+    rebakeAllVBT(budgetPerFrame: number = 3): void {
+        this.rebakeAllLoadedVBT(budgetPerFrame);
     }
 
     #processRebakeQueue = (budgetPerFrame: number = 3): void => {
@@ -369,7 +372,7 @@ export class LandscapeTileStreamer {
         } else {
             this.#isRebaking = false;
             this.#rebakeRafId = null;
-            console.log(`[LandscapeTileStreamer 🎨 ⚡ Time-Sliced] Completed rebaking VBT 2D Atlases for all tiles (${this.#spatialGrid.flatCells.length} tiles)`);
+            console.log(`[LandscapeTileStreamer 🎨 ⚡ Time-Sliced] Completed rebaking VBT 2D Atlases for loaded tiles (${this.#loadedMap.size} tiles)`);
         }
     };
 
