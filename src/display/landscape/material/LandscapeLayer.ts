@@ -39,7 +39,7 @@ export interface LandscapeLayerOptions {
 
 export class LandscapeLayer {
     readonly name: string;
-    enabled: boolean = true;
+    #enabled: boolean = true;
 
     #redGPUContext?: RedGPUContext;
     #baseColorTexture?: BitmapTexture;
@@ -52,19 +52,19 @@ export class LandscapeLayer {
     #pendingOrmSrc?: string;
     #pendingWeightSrc?: string;
 
-    uvScale: [number, number] = [20.0, 20.0];
-    uvOffset: [number, number] = [0.0, 0.0];
+    #uvScale: [number, number] = [20.0, 20.0];
+    #uvOffset: [number, number] = [0.0, 0.0];
 
-    weightChannel: LandscapeWeightMapChannel = 'R';
+    #weightChannel: LandscapeWeightMapChannel = 'R';
 
-    roughness: number = 1.0;
-    metallic: number = 0.0;
-    normalIntensity: number = 1.0;
-    aoIntensity: number = 1.0;
-    heightOffset: number = 0.0;
-    heightContrast: number = 1.0;
+    #roughness: number = 1.0;
+    #metallic: number = 0.0;
+    #normalIntensity: number = 1.0;
+    #aoIntensity: number = 1.0;
+    #heightOffset: number = 0.0;
+    #heightContrast: number = 1.0;
 
-    tintColor: ColorRGBA = new ColorRGBA(255, 255, 255, 1);
+    #tintColor: ColorRGBA;
 
     dirty: boolean = true;
     onChange?: () => void;
@@ -79,7 +79,12 @@ export class LandscapeLayer {
         }
 
         this.name = actualOptions.name;
-        if (actualOptions.enabled !== undefined) this.enabled = actualOptions.enabled;
+        if (actualOptions.enabled !== undefined) this.#enabled = actualOptions.enabled;
+
+        this.#tintColor = new ColorRGBA(255, 255, 255, 1, () => {
+            this.dirty = true;
+            this.onChange?.();
+        });
 
         if (actualOptions.baseColorTexture !== undefined) {
             this.baseColorTexture = actualOptions.baseColorTexture;
@@ -96,34 +101,42 @@ export class LandscapeLayer {
         }
 
         const scale = actualOptions.uvScale ?? actualOptions.textureScale;
-        if (scale) this.uvScale = [...scale];
+        if (scale) {
+            this.#uvScale[0] = scale[0];
+            this.#uvScale[1] = scale[1];
+        }
 
         const offset = actualOptions.uvOffset ?? actualOptions.textureOffset;
-        if (offset) this.uvOffset = [...offset];
+        if (offset) {
+            this.#uvOffset[0] = offset[0];
+            this.#uvOffset[1] = offset[1];
+        }
 
         const wCh = actualOptions.weightChannel ?? actualOptions.weightMapChannel ?? actualOptions.weightMapChannelIndex ?? actualOptions.splatChannel;
-        if (wCh !== undefined) this.weightChannel = wCh;
+        if (wCh !== undefined) this.#weightChannel = wCh;
 
         const rFactor = actualOptions.roughness ?? actualOptions.roughnessFactor;
-        if (rFactor !== undefined) this.roughness = rFactor;
+        if (rFactor !== undefined) this.#roughness = rFactor;
 
         const mFactor = actualOptions.metallic ?? actualOptions.metallicFactor;
-        if (mFactor !== undefined) this.metallic = mFactor;
+        if (mFactor !== undefined) this.#metallic = mFactor;
 
         const nIntensity = actualOptions.normalIntensity ?? actualOptions.normalScale;
-        if (nIntensity !== undefined) this.normalIntensity = nIntensity;
+        if (nIntensity !== undefined) this.#normalIntensity = nIntensity;
 
-        if (actualOptions.aoIntensity !== undefined) this.aoIntensity = actualOptions.aoIntensity;
-        if (actualOptions.heightOffset !== undefined) this.heightOffset = actualOptions.heightOffset;
-        if (actualOptions.heightContrast !== undefined) this.heightContrast = actualOptions.heightContrast;
+        if (actualOptions.aoIntensity !== undefined) this.#aoIntensity = actualOptions.aoIntensity;
+        if (actualOptions.heightOffset !== undefined) this.#heightOffset = actualOptions.heightOffset;
+        if (actualOptions.heightContrast !== undefined) this.#heightContrast = actualOptions.heightContrast;
 
         if (actualOptions.tintColor) {
             if (typeof actualOptions.tintColor === 'string') {
-                const col = new ColorRGBA();
-                col.setColorByHEX(actualOptions.tintColor);
-                this.tintColor = col;
+                this.#tintColor.setColorByHEX(actualOptions.tintColor);
             } else {
-                this.tintColor = actualOptions.tintColor;
+                const src = actualOptions.tintColor.rgba;
+                this.#tintColor.r = src[0];
+                this.#tintColor.g = src[1];
+                this.#tintColor.b = src[2];
+                this.#tintColor.a = src[3];
             }
         }
     }
@@ -230,6 +243,136 @@ export class LandscapeLayer {
 
     #resolveLinearFormat(): GPUTextureFormat {
         return navigator.gpu?.getPreferredCanvasFormat ? navigator.gpu.getPreferredCanvasFormat() : 'rgba8unorm';
+    }
+
+    get enabled(): boolean {
+        return this.#enabled;
+    }
+
+    set enabled(val: boolean) {
+        if (this.#enabled === val) return;
+        this.#enabled = val;
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    get uvScale(): [number, number] {
+        return this.#uvScale;
+    }
+
+    set uvScale(val: [number, number]) {
+        if (this.#uvScale[0] === val[0] && this.#uvScale[1] === val[1]) return;
+        this.#uvScale[0] = val[0];
+        this.#uvScale[1] = val[1];
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    get uvOffset(): [number, number] {
+        return this.#uvOffset;
+    }
+
+    set uvOffset(val: [number, number]) {
+        if (this.#uvOffset[0] === val[0] && this.#uvOffset[1] === val[1]) return;
+        this.#uvOffset[0] = val[0];
+        this.#uvOffset[1] = val[1];
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    get weightChannel(): LandscapeWeightMapChannel {
+        return this.#weightChannel;
+    }
+
+    set weightChannel(val: LandscapeWeightMapChannel) {
+        if (this.#weightChannel === val) return;
+        this.#weightChannel = val;
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    get roughness(): number {
+        return this.#roughness;
+    }
+
+    set roughness(val: number) {
+        if (this.#roughness === val) return;
+        this.#roughness = val;
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    get metallic(): number {
+        return this.#metallic;
+    }
+
+    set metallic(val: number) {
+        if (this.#metallic === val) return;
+        this.#metallic = val;
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    get normalIntensity(): number {
+        return this.#normalIntensity;
+    }
+
+    set normalIntensity(val: number) {
+        if (this.#normalIntensity === val) return;
+        this.#normalIntensity = val;
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    get aoIntensity(): number {
+        return this.#aoIntensity;
+    }
+
+    set aoIntensity(val: number) {
+        if (this.#aoIntensity === val) return;
+        this.#aoIntensity = val;
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    get heightOffset(): number {
+        return this.#heightOffset;
+    }
+
+    set heightOffset(val: number) {
+        if (this.#heightOffset === val) return;
+        this.#heightOffset = val;
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    get heightContrast(): number {
+        return this.#heightContrast;
+    }
+
+    set heightContrast(val: number) {
+        if (this.#heightContrast === val) return;
+        this.#heightContrast = val;
+        this.dirty = true;
+        this.onChange?.();
+    }
+
+    get tintColor(): ColorRGBA {
+        return this.#tintColor;
+    }
+
+    set tintColor(val: ColorRGBA | string) {
+        if (typeof val === 'string') {
+            this.#tintColor.setColorByHEX(val);
+        } else {
+            const src = val.rgba;
+            this.#tintColor.r = src[0];
+            this.#tintColor.g = src[1];
+            this.#tintColor.b = src[2];
+            this.#tintColor.a = src[3];
+        }
+        this.dirty = true;
+        this.onChange?.();
     }
 
     get textureScale(): [number, number] {

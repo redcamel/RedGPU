@@ -35,6 +35,9 @@ export class LandscapeTileStreamer {
     #tempCellBuffer: Int32Array = new Int32Array(2);
     #activeComponentsBuffer: LandscapeComponent[] = [];
     #pendingQueue: LandscapeComponent[] = [];
+    #rebakeQueue: LandscapeComponent[] = [];
+    #isRebaking: boolean = false;
+    #rebakeRafId: number | null = null;
     #loadingMap: Map<string, boolean> = new Map();
     #loadedMap: Map<string, any> = new Map();
     #cpuHeightMap: Map<string, any> = new Map();
@@ -62,6 +65,12 @@ export class LandscapeTileStreamer {
         this.#failedMap.clear();
         this.#cpuHeightMap.clear();
         this.#pendingQueue.length = 0;
+        this.#rebakeQueue.length = 0;
+        if (this.#rebakeRafId !== null) {
+            cancelAnimationFrame(this.#rebakeRafId);
+            this.#rebakeRafId = null;
+        }
+        this.#isRebaking = false;
     }
 
     get vhtAtlasTexture(): DirectTexture | null {
@@ -305,28 +314,63 @@ export class LandscapeTileStreamer {
         return (rawVal / 65535.0) * this.#heightScale;
     }
 
-    rebakeAllLoadedVBT(): void {
+    rebakeAllLoadedVBT(budgetPerFrame: number = 3): void {
         if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vhtAtlasTexture || !this.#vntAtlasTexture) return;
-        const TILE_PIXEL_SIZE = 512;
+
+        this.#rebakeQueue.length = 0;
         for (const comp of this.#spatialGrid.flatCells) {
             const key = `${comp.componentZ}_${comp.componentX}`;
             if (this.#loadedMap.has(key)) {
-                this.#vbtGenerator.bakeTileRegion(
-                    this.#vhtAtlasTexture,
-                    this.#vntAtlasTexture,
-                    this.#vbtBaseColorAtlas,
-                    this.#vbtNormalAtlas,
-                    this.#vbtORMAtlas,
-                    this.#material,
-                    comp.componentZ * this.#spatialGrid.tileCountX + comp.componentX,
-                    comp.componentX,
-                    comp.componentZ,
-                    TILE_PIXEL_SIZE
-                );
+                this.#rebakeQueue.push(comp);
             }
         }
-        console.log(`[LandscapeTileStreamer 🎨] Rebaked all loaded VBT 2D Atlases (${this.#loadedMap.size} tiles)`);
+
+        if (this.#rebakeQueue.length === 0) return;
+
+        if (this.#rebakeRafId !== null) {
+            cancelAnimationFrame(this.#rebakeRafId);
+            this.#rebakeRafId = null;
+        }
+
+        this.#isRebaking = true;
+        this.#processRebakeQueue(budgetPerFrame);
     }
+
+    #processRebakeQueue = (budgetPerFrame: number = 3): void => {
+        if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vhtAtlasTexture || !this.#vntAtlasTexture) {
+            this.#isRebaking = false;
+            this.#rebakeQueue.length = 0;
+            this.#rebakeRafId = null;
+            return;
+        }
+
+        const TILE_PIXEL_SIZE = 512;
+        const count = Math.min(budgetPerFrame, this.#rebakeQueue.length);
+
+        for (let i = 0; i < count; i++) {
+            const comp = this.#rebakeQueue.shift()!;
+            this.#vbtGenerator.bakeTileRegion(
+                this.#vhtAtlasTexture,
+                this.#vntAtlasTexture,
+                this.#vbtBaseColorAtlas,
+                this.#vbtNormalAtlas,
+                this.#vbtORMAtlas,
+                this.#material,
+                comp.componentZ * this.#spatialGrid.tileCountX + comp.componentX,
+                comp.componentX,
+                comp.componentZ,
+                TILE_PIXEL_SIZE
+            );
+        }
+
+        if (this.#rebakeQueue.length > 0) {
+            this.#rebakeRafId = requestAnimationFrame(() => this.#processRebakeQueue(budgetPerFrame));
+        } else {
+            this.#isRebaking = false;
+            this.#rebakeRafId = null;
+            console.log(`[LandscapeTileStreamer 🎨 ⚡ Time-Sliced] Completed rebaking all loaded VBT 2D Atlases (${this.#loadedMap.size} tiles)`);
+        }
+    };
 
     async #loadTileAsync(comp: LandscapeComponent): Promise<void> {
         const key = `${comp.componentZ}_${comp.componentX}`;

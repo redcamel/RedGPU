@@ -85,6 +85,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 
     onRebakeVBTRequested?: () => void;
     #isRebakeScheduled: boolean = false;
+    #rebakeDebounceTimer: any = null;
 
     get layerBaseColorArray(): { gpuTexture: GPUTexture | null, gpuTextureView: GPUTextureView | null } {
         return {gpuTexture: this.#gpuBaseColorArrayTexture, gpuTextureView: this.#baseColorArrayView};
@@ -102,13 +103,28 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         return {gpuTexture: this.#gpuWeightMapArrayTexture, gpuTextureView: this.#weightMapArrayView};
     }
 
-    requestVBTRebake(): void {
-        if (this.#isRebakeScheduled) return;
-        this.#isRebakeScheduled = true;
-        queueMicrotask(() => {
-            this.#isRebakeScheduled = false;
+    requestVBTRebake(immediate: boolean = false, debounceDelayMs: number = 150): void {
+        if (immediate) {
+            if (this.#rebakeDebounceTimer !== null) {
+                clearTimeout(this.#rebakeDebounceTimer);
+                this.#rebakeDebounceTimer = null;
+            }
+            if (this.#isRebakeScheduled) return;
+            this.#isRebakeScheduled = true;
+            queueMicrotask(() => {
+                this.#isRebakeScheduled = false;
+                this.onRebakeVBTRequested?.();
+            });
+            return;
+        }
+
+        if (this.#rebakeDebounceTimer !== null) {
+            clearTimeout(this.#rebakeDebounceTimer);
+        }
+        this.#rebakeDebounceTimer = setTimeout(() => {
+            this.#rebakeDebounceTimer = null;
             this.onRebakeVBTRequested?.();
-        });
+        }, debounceDelayMs);
     }
 
     addLayer(layer: LandscapeLayer): this {
@@ -121,9 +137,8 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         layer.resolvePendingTextures(this.redGPUContext);
         this.#layers.push(layer);
         layer.onChange = () => {
-            this.requestVBTRebake();
-            this.#textureArrayVersion++;
             this.updateUniformsData();
+            this.requestVBTRebake(false, 150);
         };
         layer.dirty = true;
         this.dirtyPipeline = true;
