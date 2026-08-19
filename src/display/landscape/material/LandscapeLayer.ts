@@ -2,10 +2,6 @@ import ColorRGBA from "../../../color/ColorRGBA";
 import BitmapTexture from "../../../resources/texture/BitmapTexture";
 import RedGPUContext from "../../../context/RedGPUContext";
 
-export type LandscapeLayerBlendMode = 'SLOPE' | 'HEIGHT' | 'WEIGHT_MAP';
-
-export type LandscapeLayerBlendType = LandscapeLayerBlendMode;
-
 export type LandscapeWeightMapChannel = 'R' | 'G' | 'B' | 'A' | 'r' | 'g' | 'b' | 'a' | 0 | 1 | 2 | 3;
 
 export interface LandscapeLayerOptions {
@@ -16,53 +12,27 @@ export interface LandscapeLayerOptions {
     ormTexture?: BitmapTexture | string;
 
     weightTexture?: BitmapTexture | string;
-
     weightMapTexture?: BitmapTexture | string;
-
     splatTexture?: BitmapTexture | string;
 
     uvScale?: [number, number];
-
     textureScale?: [number, number];
-
     uvOffset?: [number, number];
-
     textureOffset?: [number, number];
 
-    blendMode?: LandscapeLayerBlendMode;
-
-    blendType?: LandscapeLayerBlendMode;
-
     weightChannel?: LandscapeWeightMapChannel;
-
     weightMapChannel?: LandscapeWeightMapChannel;
-
     weightMapChannelIndex?: LandscapeWeightMapChannel;
-
     splatChannel?: LandscapeWeightMapChannel;
-    minVal?: number;
-    maxVal?: number;
-
-    blendFalloff?: number;
-
-    falloff?: number;
 
     roughness?: number;
-
     roughnessFactor?: number;
-
     metallic?: number;
-
     metallicFactor?: number;
-
     normalIntensity?: number;
-
     normalScale?: number;
-
     aoIntensity?: number;
-
     heightOffset?: number;
-
     heightContrast?: number;
     tintColor?: ColorRGBA | string;
 }
@@ -83,27 +53,15 @@ export class LandscapeLayer {
     #pendingWeightSrc?: string;
 
     uvScale: [number, number] = [20.0, 20.0];
-
     uvOffset: [number, number] = [0.0, 0.0];
 
-    blendMode: LandscapeLayerBlendMode = 'SLOPE';
-
     weightChannel: LandscapeWeightMapChannel = 'R';
-    minVal: number = 0.0;
-    maxVal: number = 45.0;
-
-    blendFalloff: number = 5.0;
 
     roughness: number = 1.0;
-
     metallic: number = 0.0;
-
     normalIntensity: number = 1.0;
-
     aoIntensity: number = 1.0;
-
     heightOffset: number = 0.0;
-
     heightContrast: number = 1.0;
 
     tintColor: ColorRGBA = new ColorRGBA(255, 255, 255, 1);
@@ -143,17 +101,8 @@ export class LandscapeLayer {
         const offset = actualOptions.uvOffset ?? actualOptions.textureOffset;
         if (offset) this.uvOffset = [...offset];
 
-        const bMode = actualOptions.blendMode ?? actualOptions.blendType;
-        if (bMode) this.blendMode = bMode;
-
         const wCh = actualOptions.weightChannel ?? actualOptions.weightMapChannel ?? actualOptions.weightMapChannelIndex ?? actualOptions.splatChannel;
         if (wCh !== undefined) this.weightChannel = wCh;
-
-        if (actualOptions.minVal !== undefined) this.minVal = actualOptions.minVal;
-        if (actualOptions.maxVal !== undefined) this.maxVal = actualOptions.maxVal;
-
-        const bFalloff = actualOptions.blendFalloff ?? actualOptions.falloff;
-        if (bFalloff !== undefined) this.blendFalloff = bFalloff;
 
         const rFactor = actualOptions.roughness ?? actualOptions.roughnessFactor;
         if (rFactor !== undefined) this.roughness = rFactor;
@@ -297,22 +246,6 @@ export class LandscapeLayer {
 
     set textureOffset(val: [number, number]) {
         this.uvOffset = val;
-    }
-
-    get blendType(): LandscapeLayerBlendMode {
-        return this.blendMode;
-    }
-
-    set blendType(val: LandscapeLayerBlendMode) {
-        this.blendMode = val;
-    }
-
-    get falloff(): number {
-        return this.blendFalloff;
-    }
-
-    set falloff(val: number) {
-        this.blendFalloff = val;
     }
 
     get roughnessFactor(): number {

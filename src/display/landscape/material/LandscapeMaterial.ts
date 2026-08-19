@@ -35,7 +35,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 
     #textureArrayVersion: number = 0;
 
-    #uniformFloatArray: Float32Array = new Float32Array(200);
+    #uniformFloatArray: Float32Array = new Float32Array(136);
     #uniformUintArray: Uint32Array;
 
     constructor(redGPUContext: RedGPUContext, colorHex: string = '#387d42') {
@@ -78,6 +78,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     set textureArraySize(size: number) {
         if (this.#textureArraySize !== size && size > 0) {
             this.#textureArraySize = size;
+            this.#textureArrayVersion++;
             this.#rebuildTextureArrays();
         }
     }
@@ -110,31 +111,50 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         });
     }
 
-    addLayer(layer: LandscapeLayer): void {
+    addLayer(layer: LandscapeLayer): this {
         if (this.#layers.length >= MAX_LANDSCAPE_LAYERS) {
             console.warn(`[LandscapeMaterial] Maximum layer count (${MAX_LANDSCAPE_LAYERS}) reached.`);
-            return;
+            return this;
         }
+        if (this.#layers.includes(layer)) return this;
 
         layer.resolvePendingTextures(this.redGPUContext);
         this.#layers.push(layer);
         layer.onChange = () => {
             this.requestVBTRebake();
+            this.#textureArrayVersion++;
+            this.updateUniformsData();
         };
         layer.dirty = true;
         this.dirtyPipeline = true;
         this.#rebuildTextureArrays();
+        this.updateUniformsData();
+        return this;
     }
 
-    removeLayer(layerName: string): boolean {
-        const idx = this.#layers.findIndex(l => l.name === layerName);
+    removeLayer(layer: LandscapeLayer | string): boolean {
+        const idx = typeof layer === 'string'
+            ? this.#layers.findIndex(l => l.name === layer)
+            : this.#layers.indexOf(layer);
         if (idx !== -1) {
-            this.#layers.splice(idx, 1);
+            const removed = this.#layers.splice(idx, 1)[0];
+            removed.onChange = undefined;
             this.dirtyPipeline = true;
+            this.#textureArrayVersion++;
             this.#rebuildTextureArrays();
+            this.updateUniformsData();
             return true;
         }
         return false;
+    }
+
+    clearLayers(): void {
+        for (const l of this.#layers) {
+            l.onChange = undefined;
+        }
+        this.#layers.length = 0;
+        this.#textureArrayVersion++;
+        this.updateUniformsData();
     }
 
     getLayer(layerName: string): LandscapeLayer | undefined {
@@ -161,40 +181,34 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         for (let i = 0; i < MAX_LANDSCAPE_LAYERS; i++) {
             if (i < activeCount) {
                 const layer = this.#layers[i];
+                // vec4 0: uvOffset (2), uvScale (2)
                 floatBuf[offset + 0] = layer.uvOffset[0];
                 floatBuf[offset + 1] = layer.uvOffset[1];
                 floatBuf[offset + 2] = layer.uvScale[0];
                 floatBuf[offset + 3] = layer.uvScale[1];
-                floatBuf[offset + 4] = layer.uvScale[0];
-                floatBuf[offset + 5] = layer.uvScale[1];
-                floatBuf[offset + 6] = layer.minVal;
-                floatBuf[offset + 7] = layer.maxVal;
 
+                // vec4 1: tintColor (4)
                 const layerColorLinear = layer.tintColor ? layer.tintColor.rgbaNormalLinear : [1, 1, 1, 1];
-                floatBuf[offset + 8] = layerColorLinear[0];
-                floatBuf[offset + 9] = layerColorLinear[1];
-                floatBuf[offset + 10] = layerColorLinear[2];
-                floatBuf[offset + 11] = layerColorLinear[3];
+                floatBuf[offset + 4] = layerColorLinear[0];
+                floatBuf[offset + 5] = layerColorLinear[1];
+                floatBuf[offset + 6] = layerColorLinear[2];
+                floatBuf[offset + 7] = layerColorLinear[3];
 
-                const blendModeVal = layer.blendMode === 'SLOPE' ? 0 : (layer.blendMode === 'HEIGHT' ? 1 : 2);
-                floatBuf[offset + 12] = layer.blendFalloff;
-                floatBuf[offset + 13] = blendModeVal;
-                floatBuf[offset + 14] = layer.roughness;
-                floatBuf[offset + 15] = layer.metallic;
+                // vec4 2: roughness, metallic, normalIntensity, enabled
+                floatBuf[offset + 8] = layer.roughness;
+                floatBuf[offset + 9] = layer.metallic;
+                floatBuf[offset + 10] = layer.normalIntensity;
+                floatBuf[offset + 11] = layer.enabled ? 1.0 : 0.0;
 
-                floatBuf[offset + 16] = layer.normalIntensity;
-                floatBuf[offset + 17] = layer.enabled ? 1.0 : 0.0;
-                floatBuf[offset + 18] = layer.aoIntensity;
-                floatBuf[offset + 19] = layer.heightOffset;
-
-                floatBuf[offset + 20] = layer.heightContrast;
-                floatBuf[offset + 21] = layer.weightMapChannelIndex;
-                floatBuf[offset + 22] = 0.0;
-                floatBuf[offset + 23] = 0.0;
+                // vec4 3: aoIntensity, heightOffset, heightContrast, weightMapChannelIndex
+                floatBuf[offset + 12] = layer.aoIntensity;
+                floatBuf[offset + 13] = layer.heightOffset;
+                floatBuf[offset + 14] = layer.heightContrast;
+                floatBuf[offset + 15] = layer.weightMapChannelIndex;
             } else {
-                floatBuf.fill(0, offset, offset + 24);
+                floatBuf.fill(0, offset, offset + 16);
             }
-            offset += 24;
+            offset += 16;
         }
 
         const fragRenderInfo = this.gpuRenderInfo;

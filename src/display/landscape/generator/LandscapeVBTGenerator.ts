@@ -72,47 +72,42 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         fArr[11] = 1.0;
 
         for (let i = 0; i < 8; i++) {
-            const offset = 12 + i * 24;
+            const offset = 12 + i * 16;
             if (i < activeCount) {
                 const layer = activeLayers[i];
+                // vec4 0: uvOffset (2), uvScale (2)
                 fArr[offset + 0] = layer.uvOffset[0];
                 fArr[offset + 1] = layer.uvOffset[1];
                 fArr[offset + 2] = layer.uvScale[0];
                 fArr[offset + 3] = layer.uvScale[1];
-                fArr[offset + 4] = layer.uvScale[0];
-                fArr[offset + 5] = layer.uvScale[1];
-                fArr[offset + 6] = layer.minVal;
-                fArr[offset + 7] = layer.maxVal;
 
+                // vec4 1: tintColor (4)
                 const tint = layer.tintColor.rgbNormalLinear;
-                fArr[offset + 8] = tint[0];
-                fArr[offset + 9] = tint[1];
-                fArr[offset + 10] = tint[2];
-                fArr[offset + 11] = 1.0;
+                fArr[offset + 4] = tint[0];
+                fArr[offset + 5] = tint[1];
+                fArr[offset + 6] = tint[2];
+                fArr[offset + 7] = 1.0;
 
-                fArr[offset + 12] = layer.blendFalloff;
-                fArr[offset + 13] = layer.blendMode === 'HEIGHT' ? 1.0 : (layer.blendMode === 'WEIGHT_MAP' ? 2.0 : 0.0);
-                fArr[offset + 14] = layer.roughness;
-                fArr[offset + 15] = layer.metallic;
+                // vec4 2: roughness, metallic, normalIntensity, enabled
+                fArr[offset + 8] = layer.roughness;
+                fArr[offset + 9] = layer.metallic;
+                fArr[offset + 10] = layer.normalIntensity;
+                fArr[offset + 11] = layer.enabled ? 1.0 : 0.0;
 
-                fArr[offset + 16] = layer.normalIntensity;
-                fArr[offset + 17] = layer.enabled ? 1.0 : 0.0;
-                fArr[offset + 18] = layer.aoIntensity;
-                fArr[offset + 19] = layer.heightOffset;
-
-                fArr[offset + 20] = layer.heightContrast;
-                fArr[offset + 21] = layer.weightMapChannelIndex;
-                fArr[offset + 22] = 0.0;
-                fArr[offset + 23] = 0.0;
+                // vec4 3: aoIntensity, heightOffset, heightContrast, weightMapChannelIndex
+                fArr[offset + 12] = layer.aoIntensity;
+                fArr[offset + 13] = layer.heightOffset;
+                fArr[offset + 14] = layer.heightContrast;
+                fArr[offset + 15] = layer.weightMapChannelIndex;
             } else {
-                for (let j = 0; j < 24; j++) {
+                for (let j = 0; j < 16; j++) {
                     fArr[offset + j] = 0.0;
                 }
             }
         }
 
-        const uniformBuffer = this.acquireUniformBuffer(816);
-        device.queue.writeBuffer(uniformBuffer, 0, fArr.buffer, 0, 816);
+        const uniformBuffer = this.acquireUniformBuffer(560);
+        device.queue.writeBuffer(uniformBuffer, 0, fArr.buffer, 0, 560);
 
         const vbtBaseColorStorageView = this.#getStorageTextureView(vbtBaseColorArray.gpuTexture, 0);
         const vbtNormalStorageView = this.#getStorageTextureView(vbtNormalArray.gpuTexture, 0);

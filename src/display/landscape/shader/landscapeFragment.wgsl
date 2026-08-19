@@ -28,12 +28,7 @@ struct InputData {
 struct LandscapeLayerParams {
     uvOffset: vec2<f32>,
     uvScale: vec2<f32>,
-    _padding0: vec2<f32>,
-    minVal: f32,
-    maxVal: f32,
     tintColor: vec4<f32>,
-    blendFalloff: f32,
-    blendMode: f32,
     roughness: f32,
     metallic: f32,
     normalIntensity: f32,
@@ -42,8 +37,6 @@ struct LandscapeLayerParams {
     heightOffset: f32,
     heightContrast: f32,
     weightMapChannelIndex: f32,
-    pad0: f32,
-    pad1: f32,
 };
 
 struct MaterialUniforms {
@@ -93,27 +86,6 @@ struct DirectLayerResult {
     ao: f32,
 };
 
-fn computeLayerRawWeightFast(layer: LandscapeLayerParams, slopeAngleDeg: f32, vertexHeight: f32) -> f32 {
-    let blendMode = layer.blendMode;
-    let minVal = layer.minVal;
-    let maxVal = layer.maxVal;
-    let falloff = max(0.001, layer.blendFalloff);
-
-    var val = 0.0;
-    if (blendMode < 0.5) {
-        val = slopeAngleDeg;
-    } else if (blendMode < 1.5) {
-        val = vertexHeight + layer.heightOffset;
-    } else {
-        return 1.0;
-    }
-
-    let lowW = select(smoothstep(minVal, minVal + falloff, val), 1.0, minVal <= -499.0 || (blendMode < 0.5 && minVal <= 0.001));
-    let highW = select(1.0 - smoothstep(maxVal - falloff, maxVal, val), 1.0, maxVal >= 499.0 || (blendMode < 0.5 && maxVal >= 89.999));
-
-    return clamp(lowW * highW, 0.0, 1.0);
-}
-
 fn computeDirectLayersPBR(
     globalUV: vec2<f32>,
     worldTileUV: vec2<f32>,
@@ -141,26 +113,20 @@ fn computeDirectLayersPBR(
         if (layerParams.enabled <= 0.5) { continue; }
 
         let layerIdx = i32(i);
-        var layerW = 0.0;
-
-        if (layerParams.blendMode >= 1.5) {
-            var weightMapSample = textureSampleLevel(layerWeightMapArray, baseColorTextureSampler, globalUV, layerIdx, 0.0);
-            if (length(weightMapSample) <= 0.0001 && layerIdx > 0) {
-                weightMapSample = textureSampleLevel(layerWeightMapArray, baseColorTextureSampler, globalUV, 0, 0.0);
-            }
-            let chIdx = u32(layerParams.weightMapChannelIndex + 0.5);
-            var weightVal = weightMapSample.r;
-            if (chIdx == 1u) { weightVal = weightMapSample.g; }
-            else if (chIdx == 2u) { weightVal = weightMapSample.b; }
-            else if (chIdx == 3u) {
-                let isAlphaFull = weightMapSample.a >= 0.99;
-                let remainingWeight = clamp(1.0 - (weightMapSample.r + weightMapSample.g + weightMapSample.b), 0.0, 1.0);
-                weightVal = select(weightMapSample.a, remainingWeight, isAlphaFull);
-            }
-            layerW = clamp(weightVal, 0.0, 1.0);
-        } else {
-            layerW = computeLayerRawWeightFast(layerParams, slopeAngleDeg, vertexHeight);
+        var weightMapSample = textureSampleLevel(layerWeightMapArray, baseColorTextureSampler, globalUV, layerIdx, 0.0);
+        if (length(weightMapSample) <= 0.0001 && layerIdx > 0) {
+            weightMapSample = textureSampleLevel(layerWeightMapArray, baseColorTextureSampler, globalUV, 0, 0.0);
         }
+        let chIdx = u32(layerParams.weightMapChannelIndex + 0.5);
+        var weightVal = weightMapSample.r;
+        if (chIdx == 1u) { weightVal = weightMapSample.g; }
+        else if (chIdx == 2u) { weightVal = weightMapSample.b; }
+        else if (chIdx == 3u) {
+            let isAlphaFull = weightMapSample.a >= 0.99;
+            let remainingWeight = clamp(1.0 - (weightMapSample.r + weightMapSample.g + weightMapSample.b), 0.0, 1.0);
+            weightVal = select(weightMapSample.a, remainingWeight, isAlphaFull);
+        }
+        let layerW = clamp(weightVal, 0.0, 1.0);
 
         if (layerW <= 0.0001) { continue; }
 
