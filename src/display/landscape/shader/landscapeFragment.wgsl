@@ -369,6 +369,7 @@ fn getIndirectPbrLighting(
 
     if (u_usePrefilterTexture || u_useSkyAtmosphere) {
         let R = getReflectionVectorFromViewDirection(V, N);
+        let NdotV_IBL = max(abs(dot(N, V)), 0.04);
         var reflectedColor = vec3<f32>(0.0);
         var iblDiffuseColor = vec3<f32>(0.0);
 
@@ -381,24 +382,33 @@ fn getIndirectPbrLighting(
 
         if (u_useSkyAtmosphere) {
             let u_atmo = systemUniforms.skyAtmosphere;
+            let camH = u_atmo.cameraHeight;
+            let atmH = u_atmo.atmosphereHeight;
             let skyIntensity = u_atmo.sunIntensity;
+            let specTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, R.y, atmH);
             let atmoMipCount = f32(textureNumLevels(skyAtmosphere_prefilteredTexture) - 1);
             let atmoMipLevel = roughnessParameter * atmoMipCount;
             let specSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb * skyIntensity * preExposure;
-            reflectedColor += specSkyScat;
+            reflectedColor = (reflectedColor * specTrans) + specSkyScat;
 
+            let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
             let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity * preExposure;
-            iblDiffuseColor += skyIrradiance;
+            iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
 
-        let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, vec2<f32>(NdotV, roughnessParameter), 0.0).rg;
-        let grazingDamping = clamp(1.0 - roughnessParameter, 0.0, 1.0);
-        let F_IBL = F0 * envBRDF.x + vec3<f32>(envBRDF.y * grazingDamping);
+        let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, roughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
+        let energyCompensation = 1.0 + F0 * (1.0 / max(envBRDF.x + envBRDF.y, 1e-4) - 1.0);
+        reflectedColor *= energyCompensation;
+
+        let horizonOcclusion = saturate(1.0 + 1.1 * dot(R, N));
+        reflectedColor *= horizonOcclusion * horizonOcclusion;
+
+        let F_IBL = F0 * envBRDF.x + vec3<f32>(envBRDF.y);
         let kD = (vec3<f32>(1.0) - F_IBL) * (1.0 - metallicParameter);
 
-        return ((kD * albedo * iblDiffuseColor * INV_PI) + (reflectedColor * F_IBL)) * occlusionParameter;
+        return ((kD * albedo * iblDiffuseColor) + (reflectedColor * F_IBL)) * occlusionParameter;
     } else {
-        let ambientContribution = albedo * systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure * INV_PI;
+        let ambientContribution = albedo * systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
         return ambientContribution * occlusionParameter;
     }
 }
@@ -499,7 +509,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
     let NdotV = max(abs(dot(N, V)), 0.04);
 
-    let F0_dielectric = vec3<f32>(0.028);
+    let F0_dielectric = vec3<f32>(0.04);
     let F0_metal = albedo;
     let F0 = mix(F0_dielectric, F0_metal, metallicFactor);
     let roughnessParameter = max(roughnessFactor, 0.04);
