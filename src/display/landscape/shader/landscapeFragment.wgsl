@@ -400,7 +400,6 @@ fn main(inputData: InputData) -> OutputFragment {
     var ambientOcclusion: f32;
 
     let viewDist = distance(u_cameraPosition, input_vertexPosition);
-    let vbtMip = clamp(log2(max(1.0, viewDist * 0.002)), 0.0, 5.0);
 
     if (lod < 1.5) {
         let vntSample = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
@@ -413,9 +412,9 @@ fn main(inputData: InputData) -> OutputFragment {
         let fade = smoothstep(fadeStart, fadeEnd, viewDist);
 
         if (fade >= 0.999) {
-            let vbtAlbedoRaw = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
-            let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
-            let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, vbtMip);
+            let vbtAlbedoRaw = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
+            let vbtNormalEncoded = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
+            let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
 
             let isBaked = length(vbtAlbedoRaw) > 0.001;
             if (isBaked) {
@@ -442,9 +441,9 @@ fn main(inputData: InputData) -> OutputFragment {
                 metallicFactor = direct.metallic;
                 ambientOcclusion = direct.ao;
             } else {
-                let vbtAlbedoRaw = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
-                let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
-                let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, vbtMip);
+                let vbtAlbedoRaw = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
+                let vbtNormalEncoded = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
+                let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
 
                 let isBaked = length(vbtAlbedoRaw) > 0.001;
                 let vbtAlbedo = select(direct.albedo, vbtAlbedoRaw, isBaked);
@@ -458,9 +457,9 @@ fn main(inputData: InputData) -> OutputFragment {
             }
         }
     } else {
-        let vbtAlbedoRaw = textureSampleLevel(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
-        let vbtNormalEncoded = textureSampleLevel(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, vbtMip).rgb;
-        let vbtORM = textureSampleLevel(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, vbtMip);
+        let vbtAlbedoRaw = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
+        let vbtNormalEncoded = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
+        let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
 
         let isBaked = length(vbtAlbedoRaw) > 0.001;
         if (isBaked) {

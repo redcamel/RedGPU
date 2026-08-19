@@ -393,6 +393,7 @@ export class Landscape extends Object3DContainer {
             this.#tileStreamer?.setTerrainConfig(val);
             this.#updateLandscapeUniforms();
             this.#tileStreamer?.rebakeAllLoadedVNT();
+            this.#tileStreamer?.rebakeAllLoadedVBT();
         }
     }
 
