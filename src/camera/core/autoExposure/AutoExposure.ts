@@ -43,13 +43,13 @@ class AutoExposure extends RedGPUObject {
 
     // [KO] 자동 노출 알고리즘 파라미터 (ToneMappingManager에서 이전됨)
     // [EN] Auto-exposure algorithm parameters (Moved from ToneMappingManager)
-    #minEV100: number = 0.0;
-    #maxEV100: number = 15.0;
+    #minEV100: number = -2.0;
+    #maxEV100: number = 16.0;
     #adaptationSpeedUp: number = 3.0;
     #adaptationSpeedDown: number = 1.0;
     #lowPercentile: number = 0.8;
-    #highPercentile: number = 0.983;
-    #maxExposureMultiplier: number = 16.0;
+    #highPercentile: number = 0.95;
+    #maxExposureMultiplier: number = 64.0;
     #meteringMode: METERING_MODE = METERING_MODE.AVERAGE;
     #targetLuminance: number = 0.18;
     #exposureCompensation: number = 0.0;
@@ -274,8 +274,8 @@ class AutoExposure extends RedGPUObject {
     }
 
     /**
-     * [KO] 자동 노출의 최대 증폭 배율을 설정합니다. (기본값: 16.0)
-     * [EN] Sets the maximum exposure multiplier for auto-exposure. (Default: 16.0)
+     * [KO] 자동 노출의 최대 증폭 배율을 설정합니다. (기본값: 64.0)
+     * [EN] Sets the maximum exposure multiplier for auto-exposure. (Default: 64.0)
      *
      * @param value -
      * [KO] 설정할 최대 노출 증폭 배율
