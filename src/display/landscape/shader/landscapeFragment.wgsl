@@ -282,7 +282,7 @@ fn getDirectDiffuseBRDF(
     let f0 = 1.0;
     let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
     let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
-    return albedo * NdotL * lightScatter * viewScatter * energyFactor * INV_PI;
+    return albedo * NdotL * lightScatter * viewScatter * energyFactor;
 }
 
 fn getDirectPbrLight(
