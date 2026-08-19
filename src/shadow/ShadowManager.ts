@@ -61,13 +61,11 @@ class ShadowManager {
      * [EN] Target View3D
      */
     render(view: View3D) {
-        if (this.#directionalShadowManager.castingList.length === 0) return
         const {redGPUContext} = view
 
         const list = this.#directionalShadowManager.castingList;
-        let i = 0;
         const len = list.length;
-        for (i; i < len; i++) {
+        for (let i = 0; i < len; i++) {
             const target = list[i];
             const {gpuRenderInfo} = target;
             if (gpuRenderInfo && !gpuRenderInfo.shadowPipeline) {
