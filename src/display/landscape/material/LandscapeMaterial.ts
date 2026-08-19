@@ -469,6 +469,19 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                 COMMAND_ENCODER_TYPE.IMMEDIATE
             );
         }
+        if (this.#gpuWeightMapArrayTexture) {
+            mipmapGenerator.generateMipmap(
+                this.#gpuWeightMapArrayTexture,
+                {
+                    size: [this.#textureArraySize, this.#textureArraySize, count],
+                    mipLevelCount,
+                    format: dataFormat,
+                    usage: 0
+                },
+                false,
+                COMMAND_ENCODER_TYPE.IMMEDIATE
+            );
+        }
     }
 
     #copyLayerTextureToSlice(layer: LandscapeLayer, sliceIndex: number): void {

@@ -89,10 +89,13 @@ struct DirectLayerResult {
 fn computeDirectLayersPBR(
     globalUV: vec2<f32>,
     worldTileUV: vec2<f32>,
+    ddxGlobalUV: vec2<f32>,
+    ddyGlobalUV: vec2<f32>,
+    ddxWorldTileUV: vec2<f32>,
+    ddyWorldTileUV: vec2<f32>,
     baseN: vec3<f32>,
     vertexHeight: f32,
-    slopeAngleDeg: f32,
-    mipLevel: f32
+    slopeAngleDeg: f32
 ) -> DirectLayerResult {
     var res: DirectLayerResult;
     var baseAlbedo = uniforms.color.rgb;
@@ -113,9 +116,9 @@ fn computeDirectLayersPBR(
         if (layerParams.enabled <= 0.5) { continue; }
 
         let layerIdx = i32(i);
-        var weightMapSample = textureSampleLevel(layerWeightMapArray, baseColorTextureSampler, globalUV, layerIdx, 0.0);
+        var weightMapSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, layerIdx, ddxGlobalUV, ddyGlobalUV);
         if (length(weightMapSample) <= 0.0001 && layerIdx > 0) {
-            weightMapSample = textureSampleLevel(layerWeightMapArray, baseColorTextureSampler, globalUV, 0, 0.0);
+            weightMapSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, 0, ddxGlobalUV, ddyGlobalUV);
         }
         let chIdx = u32(layerParams.weightMapChannelIndex + 0.5);
         var weightVal = weightMapSample.r;
@@ -131,11 +134,13 @@ fn computeDirectLayersPBR(
         if (layerW <= 0.0001) { continue; }
 
         let layerUV = worldTileUV * layerParams.uvScale + layerParams.uvOffset;
+        let ddxLayerUV = ddxWorldTileUV * layerParams.uvScale;
+        let ddyLayerUV = ddyWorldTileUV * layerParams.uvScale;
 
-        let layerAlbedoSample = textureSampleLevel(layerBaseColorArray, baseColorTextureSampler, layerUV, layerIdx, mipLevel);
-        let layerNormalRaw = textureSampleLevel(layerNormalArray, baseColorTextureSampler, layerUV, layerIdx, mipLevel).rgb * 2.0 - vec3<f32>(1.0);
+        let layerAlbedoSample = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV);
+        let layerNormalRaw = textureSampleGrad(layerNormalArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV).rgb * 2.0 - vec3<f32>(1.0);
         let layerNormalSample = vec3<f32>(layerNormalRaw.xy * layerParams.normalIntensity, max(0.01, layerNormalRaw.z));
-        let layerORMSample = textureSampleLevel(layerORMArray, baseColorTextureSampler, layerUV, layerIdx, mipLevel);
+        let layerORMSample = textureSampleGrad(layerORMArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV);
 
         let layerAlbedo = layerAlbedoSample.rgb * layerParams.tintColor.rgb;
         let layerRoughness = layerParams.roughness * layerORMSample.g;
@@ -383,6 +388,11 @@ fn main(inputData: InputData) -> OutputFragment {
     let lod = inputData.lodLevel;
     let worldTileUV = inputData.uv;
 
+    let ddxGlobalUV = dpdx(globalUV);
+    let ddyGlobalUV = dpdy(globalUV);
+    let ddxWorldTileUV = dpdx(worldTileUV);
+    let ddyWorldTileUV = dpdy(worldTileUV);
+
     var albedo: vec3<f32>;
     var N: vec3<f32>;
     var roughnessFactor: f32;
@@ -415,8 +425,7 @@ fn main(inputData: InputData) -> OutputFragment {
                 metallicFactor = vbtORM.b;
                 ambientOcclusion = vbtORM.r;
             } else {
-                let mipLevel = clamp(log2(max(1.0, viewDist * 0.05)), 0.0, 4.0);
-                let direct = computeDirectLayersPBR(globalUV, worldTileUV, baseN, inputData.vertexHeight, slopeAngleDeg, mipLevel);
+                let direct = computeDirectLayersPBR(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV, baseN, inputData.vertexHeight, slopeAngleDeg);
                 albedo = direct.albedo;
                 N = direct.normal;
                 roughnessFactor = direct.roughness;
@@ -424,8 +433,7 @@ fn main(inputData: InputData) -> OutputFragment {
                 ambientOcclusion = direct.ao;
             }
         } else {
-            let mipLevel = clamp(log2(max(1.0, viewDist * 0.05)), 0.0, 4.0);
-            let direct = computeDirectLayersPBR(globalUV, worldTileUV, baseN, inputData.vertexHeight, slopeAngleDeg, mipLevel);
+            let direct = computeDirectLayersPBR(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV, baseN, inputData.vertexHeight, slopeAngleDeg);
 
             if (fade <= 0.001) {
                 albedo = direct.albedo;
@@ -462,8 +470,7 @@ fn main(inputData: InputData) -> OutputFragment {
             metallicFactor = vbtORM.b;
             ambientOcclusion = vbtORM.r;
         } else {
-            let mipLevel = clamp(log2(max(1.0, viewDist * 0.05)), 0.0, 4.0);
-            let direct = computeDirectLayersPBR(globalUV, worldTileUV, vec3<f32>(0.0, 1.0, 0.0), inputData.vertexHeight, 0.0, mipLevel);
+            let direct = computeDirectLayersPBR(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV, vec3<f32>(0.0, 1.0, 0.0), inputData.vertexHeight, 0.0);
             albedo = direct.albedo;
             N = direct.normal;
             roughnessFactor = direct.roughness;
