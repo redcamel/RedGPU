@@ -390,7 +390,7 @@ fn main(inputData: InputData) -> OutputFragment {
     var ambientOcclusion: f32;
 
     let viewDist = distance(u_cameraPosition, input_vertexPosition);
-    let vbtMip = floor(clamp(log2(max(1.0, viewDist * 0.002)), 0.0, 4.0));
+    let vbtMip = clamp(log2(max(1.0, viewDist * 0.002)), 0.0, 5.0);
 
     if (lod < 1.5) {
         let vntSample = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
