@@ -485,6 +485,58 @@ export class LandscapeTileStreamer {
                             );
                         }
 
+                        // 인접한 4방향 이웃 타일의 VNT 및 VBT 자동 갱신 (경계면 노멀 연속성 보장)
+                        const neighborOffsets = [
+                            [-1, 0],
+                            [1, 0],
+                            [0, -1],
+                            [0, 1]
+                        ];
+                        const tileCountX = this.#spatialGrid.tileCountX;
+                        const tileCountZ = this.#spatialGrid.tileCountZ;
+
+                        for (let n = 0; n < neighborOffsets.length; n++) {
+                            const nz = comp.componentZ + neighborOffsets[n][0];
+                            const nx = comp.componentX + neighborOffsets[n][1];
+
+                            if (nz >= 0 && nz < tileCountZ && nx >= 0 && nx < tileCountX) {
+                                const nKey = `${nz}_${nx}`;
+                                if (this.#loadedMap.has(nKey)) {
+                                    const nTargetX = nx * TILE_PIXEL_SIZE;
+                                    const nTargetZ = nz * TILE_PIXEL_SIZE;
+
+                                    if (this.#vntAtlasTexture && this.#vntGenerator) {
+                                        this.#vntGenerator.bakeTileRegion(
+                                            this.#vhtAtlasTexture,
+                                            this.#vntAtlasTexture,
+                                            nTargetX,
+                                            nTargetZ,
+                                            TILE_PIXEL_SIZE,
+                                            TILE_PIXEL_SIZE,
+                                            this.#heightScale,
+                                            this.#spatialGrid.worldSizeX,
+                                            tileCountX
+                                        );
+                                    }
+
+                                    if (this.#vbtGenerator && this.#vbtBaseColorAtlas && this.#vbtNormalAtlas && this.#vbtORMAtlas && this.#material && this.#vhtAtlasTexture && this.#vntAtlasTexture) {
+                                        this.#vbtGenerator.bakeTileRegion(
+                                            this.#vhtAtlasTexture,
+                                            this.#vntAtlasTexture,
+                                            this.#vbtBaseColorAtlas,
+                                            this.#vbtNormalAtlas,
+                                            this.#vbtORMAtlas,
+                                            this.#material,
+                                            nz * tileCountX + nx,
+                                            nx,
+                                            nz,
+                                            TILE_PIXEL_SIZE
+                                        );
+                                    }
+                                }
+                            }
+                        }
+
                         this.onTileLoaded?.(comp);
                     }
                 }
