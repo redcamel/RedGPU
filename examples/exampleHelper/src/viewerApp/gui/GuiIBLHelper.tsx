@@ -72,46 +72,69 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
             gui.refresh();
         };
 
+        const lightBindings: any[] = [];
+
         const syncLight = (enabled: boolean) => {
             if (enabled) {
+                // [KO] 현재 선택된 텍스처의 태양 설정값(sunLux) 동기화
+                // [EN] Synchronize sun settings (sunLux) of the currently selected texture
+                const imageInfo = hdrImages.find(item => item.name === settings.texture);
+                const luminance = imageInfo?.luminance || 20000;
+                const targetLux = (imageInfo as any)?.sunLux || (luminance * 4);
+                settings.lux = targetLux;
+
                 if (view.scene.lightManager.directionalLights.length === 0) {
                     if (RedGPU) {
                         const directionalLight = new RedGPU.Light.DirectionalLight();
-                        directionalLight.lux = settings.lux;
+                        directionalLight.lux = targetLux;
                         directionalLight.elevation = settings.elevation;
                         directionalLight.azimuth = settings.azimuth;
                         directionalLight.color.setColorByHEX(settings.color);
                         view.scene.lightManager.addDirectionalLight(directionalLight);
                     }
+                } else {
+                    view.scene.lightManager.directionalLights[0].lux = targetLux;
                 }
             } else {
                 view.scene.lightManager.removeAllLight();
             }
+            lightBindings.forEach(binding => binding.hidden = !enabled);
             gui.refresh();
         };
 
         // 1. Lighting Controls
         lightingFolder.addBinding(settings, 'useLight').on('change', (ev: any) => syncLight(ev.value));
-        lightingFolder.addBinding(settings, 'lux', {min: 0, max: 150000, step: 100})
-            .on('change', (ev: any) => {
-                const lights = view.scene.lightManager.directionalLights;
-                if (lights.length > 0) lights[0].lux = ev.value;
-            });
-        lightingFolder.addBinding(settings, 'elevation', {min: -90, max: 90, step: 0.1})
-            .on('change', (ev: any) => {
-                const lights = view.scene.lightManager.directionalLights;
-                if (lights.length > 0) lights[0].elevation = ev.value;
-            });
-        lightingFolder.addBinding(settings, 'azimuth', {min: -360, max: 360, step: 0.1})
-            .on('change', (ev: any) => {
-                const lights = view.scene.lightManager.directionalLights;
-                if (lights.length > 0) lights[0].azimuth = ev.value;
-            });
-        lightingFolder.addBinding(settings, 'color')
-            .on('change', (ev: any) => {
-                const lights = view.scene.lightManager.directionalLights;
-                if (lights.length > 0) lights[0].color.setColorByHEX(ev.value);
-            });
+        lightBindings.push(
+            lightingFolder.addBinding(settings, 'lux', {min: 0, max: 150000, step: 100})
+                .on('change', (ev: any) => {
+                    const lights = view.scene.lightManager.directionalLights;
+                    if (lights.length > 0) lights[0].lux = ev.value;
+                })
+        );
+        lightBindings.push(
+            lightingFolder.addBinding(settings, 'elevation', {min: -90, max: 90, step: 0.1})
+                .on('change', (ev: any) => {
+                    const lights = view.scene.lightManager.directionalLights;
+                    if (lights.length > 0) lights[0].elevation = ev.value;
+                })
+        );
+        lightBindings.push(
+            lightingFolder.addBinding(settings, 'azimuth', {min: -360, max: 360, step: 0.1})
+                .on('change', (ev: any) => {
+                    const lights = view.scene.lightManager.directionalLights;
+                    if (lights.length > 0) lights[0].azimuth = ev.value;
+                })
+        );
+        lightBindings.push(
+            lightingFolder.addBinding(settings, 'color')
+                .on('change', (ev: any) => {
+                    const lights = view.scene.lightManager.directionalLights;
+                    if (lights.length > 0) lights[0].color.setColorByHEX(ev.value);
+                })
+        );
+
+        // 초기 가시성 설정
+        lightBindings.forEach(binding => binding.hidden = !settings.useLight);
 
         lightingFolder.addBinding(settings, 'useIBL').on('change', (ev: any) => {
             if (ev.value) {

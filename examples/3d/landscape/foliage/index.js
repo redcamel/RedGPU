@@ -33,7 +33,7 @@ RedGPU.init(
         directionalLight.azimuth = 45;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 4. 신규 Landscape 인스턴스 생성 (UE5 공식 프로퍼티 명칭 사용, 16x16 256개 타일 에셋 완벽 대응)
+        // 4. 신규 Landscape 인스턴스 생성 (16x16 256개 타일 에셋 대응)
         const landscape = new RedGPU.Display.Landscape(redGPUContext, {
             worldSize: [16000, 16000],
             componentCount: [16, 16],
@@ -51,7 +51,7 @@ RedGPU.init(
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
         const linearFormat = navigator.gpu.getPreferredCanvasFormat();
 
-        // UE5 표준: 1장의 Channel-Packed Splatmap 텍스처 경로 (R: Layer0, G: Layer1, B: Layer2, A: Layer3)
+        // 1장의 Channel-Packed Splatmap 텍스처 경로 (R: Layer0, G: Layer1, B: Layer2, A: Layer3)
         const splatMapPath = '../../../assets/terrain/terrainTest_001/splatMap.jpg';
 
         // 1. Grass (주 광활한 초원/산맥 레이어 - 🔴 R 채널: 전체 지형의 65% 최대 면적 차지)
@@ -361,8 +361,8 @@ RedGPU.init(
 );
 
 /**
- * [KO] Landscape 모든 UE5 get/set 속성 전면 제어 테스트 패널(GUI)을 렌더링합니다.
- * [EN] Renders a test panel (GUI) for full control of all UE5 get/set properties of Landscape.
+ * [KO] Landscape 모든 get/set 속성 전면 제어 테스트 패널(GUI)을 렌더링합니다.
+ * [EN] Renders a test panel (GUI) for full control of all get/set properties of Landscape.
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.Landscape} landscape
  * @param {RedGPU.Camera.FreeController} controller
@@ -395,8 +395,6 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
         // 2. Component & Mesh Specs
         componentSizeQuads: RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_63,
         maxLODLevel: landscape ? landscape.maxLODLevel : 4,
-        totalQuadsStr: `${(tcX * 63) * (tcZ * 63)} Quads`,
-        totalVertsStr: `${(tcX * 63 + 1) * (tcZ * 63 + 1)} Vertices`,
 
         // 3. Height & Displacement
         heightScale: landscape ? landscape.heightScale : 500,
@@ -433,7 +431,6 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
             const [wX, wZ] = landscape.worldSize;
             const [tX, tZ] = landscape.componentCount;
             const [sX, sZ] = landscape.tileSize;
-            const quads = landscape.componentSizeQuads;
 
             config.worldSizeX = wX;
             config.worldSizeZ = wZ;
@@ -441,11 +438,6 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
             config.componentCountZ = tZ;
             config.totalComponents = tX * tZ;
             config.tileSizeStr = `[${Math.round(sX)}m, ${Math.round(sZ)}m]`;
-
-            const totalQ = (tX * quads) * (tZ * quads);
-            const totalV = (tX * quads + 1) * (tZ * quads + 1);
-            config.totalQuadsStr = `${totalQ.toLocaleString()} Quads`;
-            config.totalVertsStr = `${totalV.toLocaleString()} Vertices`;
 
             if (activePane) activePane.refresh();
         }
@@ -461,7 +453,7 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
             // Folder 0: Foliage System Controls
             const currentFoliageType = grassType || foliageManager?.getFoliageType('ElmTree') || foliageManager?.getFoliageType('BasicGrass');
             if (currentFoliageType || foliageManager) {
-                const folderFoliage = pane.addFolder({title: '🌿 Foliage System Controls', expanded: true});
+                const folderFoliage = pane.addFolder({title: 'Foliage', expanded: true});
                 folderFoliage.addBinding(config, 'foliageCount', {readonly: true});
                 folderFoliage.addBinding(config, 'foliageCullingDist', {
                     min: 500,
@@ -480,7 +472,7 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                     if (target) target.options.fadeStartDistance = ev.value;
                 });
                 folderFoliage.addBinding(config, 'billboardWireframe', {
-                    title: '📐 Billboard Wireframe'
+                    title: 'Billboard Wireframe'
                 }).on('change', (ev) => {
                     const target = grassType || foliageManager?.getFoliageType('ElmTree');
                     if (target) {
@@ -492,7 +484,7 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
 
 
             // Folder 1: Terrain Dimensions (worldSize, componentCount, tileSize)
-            const folderDimensions = pane.addFolder({title: '⛰️ Terrain Dimensions (UE5 Specs)', expanded: true});
+            const folderDimensions = pane.addFolder({title: 'Dimensions', expanded: true});
 
             folderDimensions.addBinding(config, 'worldSizeX', {
                 min: 1000,
@@ -548,15 +540,15 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
             folderDimensions.addBinding(config, 'totalComponents', {readonly: true});
 
             // Folder 2: Mesh & Grid Specs (componentSizeQuads, maxLODLevel)
-            const folderSpecs = pane.addFolder({title: '🧩 Grid & LOD Specs (UE5 Standard)', expanded: true});
+            const folderSpecs = pane.addFolder({title: 'Grid & LOD', expanded: true});
 
             folderSpecs.addBinding(config, 'componentSizeQuads', {
                 options: {
-                    '15 × 15 Quads (256 Vertices)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_15,
-                    '31 × 31 Quads (1,024 Vertices)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_31,
-                    '63 × 63 Quads (4,096 Vertices) [UE5 Default]': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_63,
-                    '127 × 127 Quads (16,384 Vertices)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_127,
-                    '255 × 255 Quads (65,536 Vertices)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_255
+                    '15x15 (256 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_15,
+                    '31x31 (1024 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_31,
+                    '63x63 (4096 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_63,
+                    '127x127 (16384 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_127,
+                    '255x255 (65536 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_255
                 }
             }).on('change', (ev) => {
                 if (landscape) {
@@ -576,11 +568,8 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                 }
             });
 
-            folderSpecs.addBinding(config, 'totalQuadsStr', {readonly: true});
-            folderSpecs.addBinding(config, 'totalVertsStr', {readonly: true});
-
             // Folder 3: Height & Elevation Displacement
-            const folderHeight = pane.addFolder({title: '🏔️ Height & Displacement (UE5 Scale)', expanded: true});
+            const folderHeight = pane.addFolder({title: 'Height', expanded: true});
 
             folderHeight.addBinding(config, 'heightScale', {
                 min: 0,
@@ -591,7 +580,7 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
             });
 
             // Folder 4: Render Options & Material Color
-            const folderDisplay = pane.addFolder({title: '🎨 Material & Visual Options', expanded: true});
+            const folderDisplay = pane.addFolder({title: 'Material', expanded: true});
 
             folderDisplay.addBinding(config, 'wireframe').on('change', (ev) => {
                 if (landscape) landscape.wireframe = ev.value;
@@ -621,11 +610,11 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
 
             // Folder 4-1: Multi-Layer PBR Controls (Grass, Rock, Gravel, Leave)
             if (layers && layers.length) {
-                const folderLayers = pane.addFolder({title: '🌿 Multi-Layer PBR (UE5 Specs)', expanded: true});
+                const folderLayers = pane.addFolder({title: 'Layers', expanded: true});
 
                 layers.forEach((layer) => {
                     const subFolder = folderLayers.addFolder({
-                        title: `Layer: ${layer.name}`,
+                        title: layer.name,
                         expanded: layer.name === 'Grass'
                     });
 
