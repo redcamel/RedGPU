@@ -391,6 +391,8 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
         // 2. Component & Mesh Specs
         componentSizeQuads: RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_63,
         maxLODLevel: landscape ? landscape.maxLODLevel : 4,
+        lodFadeStartRatio: landscape ? landscape.lodFadeStartRatio : 0.7,
+        lodGeomorphStartRatio: landscape ? landscape.lodGeomorphStartRatio : 0.7,
 
         // 3. Height & Displacement
         heightScale: landscape ? landscape.heightScale : 500,
@@ -564,6 +566,22 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                 }
             });
 
+            folderSpecs.addBinding(config, 'lodFadeStartRatio', {
+                min: 0.1,
+                max: 0.99,
+                step: 0.05
+            }).on('change', (ev) => {
+                if (landscape) landscape.lodFadeStartRatio = ev.value;
+            });
+
+            folderSpecs.addBinding(config, 'lodGeomorphStartRatio', {
+                min: 0.1,
+                max: 0.99,
+                step: 0.05
+            }).on('change', (ev) => {
+                if (landscape) landscape.lodGeomorphStartRatio = ev.value;
+            });
+
             // Folder 3: Height & Elevation Displacement
             const folderHeight = pane.addFolder({title: 'Height', expanded: true});
 
@@ -593,15 +611,7 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
             });
 
             folderDisplay.addBinding(config, 'textureArraySize', {
-                options: {
-                    '512': 512,
-                    '1024': 1024,
-                    '2048': 2048
-                }
-            }).on('change', (ev) => {
-                if (landscape && landscape.landscapeMaterial) {
-                    landscape.landscapeMaterial.textureArraySize = ev.value;
-                }
+                readonly: true
             });
 
             // Folder 4-1: Multi-Layer PBR Controls (Grass, Rock, Gravel, Leave)

@@ -18,8 +18,8 @@ struct LandscapeUniforms {
     tileSizeZ: f32,
     baseQuads: f32,
     vhtTextureSize: vec2<f32>,
-    pad0: f32,
-    pad1: f32,
+    lodFadeStartRatio: f32,
+    lodGeomorphStartRatio: f32,
     lodColors: array<vec4<f32>, 8>,
     lodDistancesSq: array<vec4<f32>, 2>,
 };
@@ -78,7 +78,8 @@ fn main(input: InputData) -> OutputData {
         let packedVec = landscapeUniforms.lodDistancesSq[lodLevel / 4u];
         let thresholdSq = packedVec[lodLevel % 4u];
 
-        let morphStartSq = thresholdSq * 0.49;
+        let morphRatio = select(0.7, landscapeUniforms.lodGeomorphStartRatio, landscapeUniforms.lodGeomorphStartRatio > 0.0);
+        let morphStartSq = thresholdSq * (morphRatio * morphRatio);
         let morphFactor = smoothstep(morphStartSq, thresholdSq, distSq);
 
         if (morphFactor > 0.0001) {

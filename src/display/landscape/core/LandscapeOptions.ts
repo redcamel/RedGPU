@@ -29,6 +29,10 @@ export interface LandscapeOptions {
     wireframe?: boolean;
 
     lodColoration?: boolean;
+
+    lodFadeStartRatio?: number;
+
+    lodGeomorphStartRatio?: number;
 }
 
 export default LandscapeOptions;

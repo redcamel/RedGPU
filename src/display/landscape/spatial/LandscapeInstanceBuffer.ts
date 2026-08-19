@@ -114,6 +114,8 @@ export class LandscapeInstanceBuffer {
         baseQuads: number,
         vhtTextureWidth: number,
         vhtTextureHeight: number,
+        lodFadeStartRatio: number,
+        lodGeomorphStartRatio: number,
         lodColorsRGBA: [number, number, number, number][],
         lodDistancesSq: number[]
     ): void {
@@ -123,21 +125,25 @@ export class LandscapeInstanceBuffer {
         const f32 = this.#landscapeUniformData;
         const u32 = this.#landscapeUniformUintData;
 
+        // vec4 0
         f32[0] = heightScale;
         f32[1] = worldSizeX;
         f32[2] = worldSizeZ;
         f32[3] = lodColoration ? 1.0 : 0.0;
 
+        // vec4 1
         u32[4] = maxComponentCount;
         f32[5] = tileSizeX;
         f32[6] = tileSizeZ;
         f32[7] = baseQuads;
 
+        // vec4 2
         f32[8] = vhtTextureWidth;
         f32[9] = vhtTextureHeight;
-        f32[10] = 0;
-        f32[11] = 0;
+        f32[10] = lodFadeStartRatio;
+        f32[11] = lodGeomorphStartRatio;
 
+        // vec4 3~10
         const colorCount = Math.min(8, lodColorsRGBA.length);
         for (let i = 0; i < 8; i++) {
             const base = 12 + i * 4;
@@ -155,6 +161,7 @@ export class LandscapeInstanceBuffer {
             }
         }
 
+        // vec4 11~12
         const distCount = Math.min(8, lodDistancesSq.length);
         for (let i = 0; i < 8; i++) {
             f32[44 + i] = (i < distCount && lodDistancesSq[i] > 0) ? lodDistancesSq[i] : 1e15;

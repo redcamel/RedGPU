@@ -58,8 +58,8 @@ struct LandscapeUniforms {
     tileSizeZ: f32,
     baseQuads: f32,
     vhtTextureSize: vec2<f32>,
-    pad0: f32,
-    pad1: f32,
+    lodFadeStartRatio: f32,
+    lodGeomorphStartRatio: f32,
     lodColors: array<vec4<f32>, 8>,
     lodDistancesSq: array<vec4<f32>, 2>,
 };
@@ -407,7 +407,8 @@ fn main(inputData: InputData) -> OutputFragment {
         let slopeAngleDeg = acos(clamp(baseN.y, -1.0, 1.0)) * 57.295779513;
 
         let lod0Dist = max(1.0, sqrt(landscapeInstanceUniforms.lodDistancesSq[0].x));
-        let fadeStart = lod0Dist * 0.7;
+        let fadeRatio = clamp(select(0.7, landscapeInstanceUniforms.lodFadeStartRatio, landscapeInstanceUniforms.lodFadeStartRatio > 0.0), 0.0, 0.99);
+        let fadeStart = lod0Dist * fadeRatio;
         let fadeEnd = lod0Dist;
         let fade = smoothstep(fadeStart, fadeEnd, viewDist);
 

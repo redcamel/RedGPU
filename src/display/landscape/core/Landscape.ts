@@ -44,6 +44,8 @@ export class Landscape extends Object3DContainer {
 
     #wireframe: boolean = false;
     #lodColoration: boolean = false;
+    #lodFadeStartRatio: number = 0.7;
+    #lodGeomorphStartRatio: number = 0.7;
     #heightScale: number = 500.0;
     #tileStreamer: LandscapeTileStreamer;
     #vhtAtlasTexture: DirectTexture | null = null;
@@ -129,6 +131,8 @@ export class Landscape extends Object3DContainer {
         this.#maxLODLevel = maxLODLevel;
         this.#wireframe = options.wireframe ?? false;
         this.#lodColoration = options.lodColoration ?? false;
+        this.#lodFadeStartRatio = options.lodFadeStartRatio ?? 0.7;
+        this.#lodGeomorphStartRatio = options.lodGeomorphStartRatio ?? 0.7;
         this.#tileStreamer = new LandscapeTileStreamer(redGPUContext, this.#spatialGrid, options?.loadingRadius ?? 2500.0);
         if (options.tileUrlResolver) {
             this.#tileStreamer.tileUrlResolver = options.tileUrlResolver;
@@ -441,6 +445,30 @@ export class Landscape extends Object3DContainer {
         return this.#lodColoration;
     }
 
+    get lodFadeStartRatio(): number {
+        return this.#lodFadeStartRatio;
+    }
+
+    set lodFadeStartRatio(value: number) {
+        const clamped = Math.max(0.0, Math.min(0.99, value));
+        if (this.#lodFadeStartRatio !== clamped) {
+            this.#lodFadeStartRatio = clamped;
+            this.#updateLandscapeUniforms();
+        }
+    }
+
+    get lodGeomorphStartRatio(): number {
+        return this.#lodGeomorphStartRatio;
+    }
+
+    set lodGeomorphStartRatio(value: number) {
+        const clamped = Math.max(0.0, Math.min(0.99, value));
+        if (this.#lodGeomorphStartRatio !== clamped) {
+            this.#lodGeomorphStartRatio = clamped;
+            this.#updateLandscapeUniforms();
+        }
+    }
+
     #updateLandscapeUniforms(): void {
         const vhtW = this.#vhtAtlasTexture?.gpuTexture?.width || (this.#componentCountX * 512);
         const vhtH = this.#vhtAtlasTexture?.gpuTexture?.height || (this.#componentCountZ * 512);
@@ -455,6 +483,8 @@ export class Landscape extends Object3DContainer {
             this.#componentSizeQuads,
             vhtW,
             vhtH,
+            this.#lodFadeStartRatio,
+            this.#lodGeomorphStartRatio,
             this.#lodColorsRGBA,
             this.#lodDistancesSq
         );

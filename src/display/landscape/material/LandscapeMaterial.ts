@@ -38,7 +38,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     #uniformFloatArray: Float32Array = new Float32Array(136);
     #uniformUintArray: Uint32Array;
 
-    constructor(redGPUContext: RedGPUContext, colorHex: string = '#387d42') {
+    constructor(redGPUContext: RedGPUContext, colorHex: string = '#387d42', textureArraySize: number = 1024) {
         super(
             redGPUContext,
             'LANDSCAPE_MATERIAL',
@@ -46,6 +46,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
             2
         );
 
+        this.#textureArraySize = Math.max(128, textureArraySize);
         this.#uniformUintArray = new Uint32Array(this.#uniformFloatArray.buffer);
 
         this.#initDummyTextureArrays();
@@ -73,14 +74,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 
     get textureArraySize(): number {
         return this.#textureArraySize;
-    }
-
-    set textureArraySize(size: number) {
-        if (this.#textureArraySize !== size && size > 0) {
-            this.#textureArraySize = size;
-            this.#textureArrayVersion++;
-            this.#rebuildTextureArrays();
-        }
     }
 
     onRebakeVBTRequested?: () => void;
