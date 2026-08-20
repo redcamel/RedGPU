@@ -18,9 +18,9 @@ RedGPU.init(
         // 1. 카메라 설정 (FreeController - 자유 관람 및 탐색)
         const controller = new RedGPU.Camera.FreeController(redGPUContext);
         controller.x = 0;
-        controller.y = 350;
+        controller.y = 1150;
         controller.z = 0;
-        controller.moveSpeed = 1500;
+        controller.moveSpeed = 5000;
         // 2. Scene & View3D 초기화
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -38,6 +38,7 @@ RedGPU.init(
             worldSize: [16000, 16000],
             componentCount: [16, 16],
             componentSizeQuads: RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
+            heightScale: 1500,
             maxLODLevel: 5,
             wireframe: false,
             lodColoration: false,
@@ -252,7 +253,7 @@ RedGPU.init(
             );
         }
 
-        /*
+
         const grassGeometry = createGrassClumpGeometry(redGPUContext, 2.2, 4.2, 3);
         const dummyGrassMesh = new RedGPU.Display.Mesh(
             redGPUContext,
@@ -266,11 +267,11 @@ RedGPU.init(
             maxInstances: 1000000,
             cullingDistance: 2500,
             fadeStartDistance: 1000,
-            minScale: [0.8, 10, 0.8],
-            maxScale: [1.3, 20, 1.3],
+            minScale: [0.8, 3, 0.8],
+            maxScale: [1.3, 3, 1.3],
             randomRotationY: true
         });
-        */
+
         let treeType = null;
 
         // 🌟 [GLB 수목 로드 및 Multi-Submesh Foliage 인스턴싱 등록]
@@ -287,8 +288,8 @@ RedGPU.init(
                     maxInstances: 100000,
                     cullingDistance: 1500,
                     fadeStartDistance: 1000,
-                    minScale: [3, 3, 3],        // 현실적인 성목 높이 (약 7~8m)
-                    maxScale: [3, 3, 3],   // 대형 거목 높이 (약 12~14m)
+                    minScale: [1, 1, 1],        // 현실적인 성목 높이 (약 7~8m)
+                    maxScale: [1, 1, 1],   // 대형 거목 높이 (약 12~14m)
                     // randomRotationY: true,
                     // 🌟 언리얼 엔진 5 스타일 SpeedTree Cross-Billboard Impostor LOD & Dithered Crossfade
                     billboard: {
@@ -395,7 +396,7 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
         lodGeomorphStartRatio: landscape ? landscape.lodGeomorphStartRatio : 0.85,
 
         // 3. Height & Displacement
-        heightScale: landscape ? landscape.heightScale : 500,
+        heightScale: landscape ? landscape.heightScale : 1000,
 
         // 4. Render Options & Material
         wireframe: landscape ? landscape.wireframe : false,
