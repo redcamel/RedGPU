@@ -54,9 +54,10 @@ class FoliageRenderer {
         this.#lastBoundInstanceOffset = -1;
 
         const view3D = view as any;
-        const antialiasingManager = view3D?.antialiasingManager;
-        const sampleCount = antialiasingManager?.sampleCount ?? 1;
-        const msaaID = antialiasingManager?.msaaID ?? 'NONE';
+        const antialiasingManager = this.#redGPUContext.antialiasingManager;
+        const msaaID = antialiasingManager.msaaID;
+        const useMSAA = antialiasingManager.useMSAA;
+        const sampleCount = useMSAA ? 4 : 1;
         const systemBG = view3D?.viewUniformBindGroup ?? null;
 
         const rawCamera = view3D?.rawCamera || view3D?.camera || view;

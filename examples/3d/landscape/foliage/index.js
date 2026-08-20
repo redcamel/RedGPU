@@ -267,8 +267,8 @@ RedGPU.init(
             maxInstances: 1000000,
             cullingDistance: 2500,
             fadeStartDistance: 1000,
-            minScale: [0.8, 3, 0.8],
-            maxScale: [1.3, 3, 1.3],
+            minScale: [0.8, 0.3, 0.8],
+            maxScale: [1.3, 0.3, 1.3],
             randomRotationY: true
         });
 
@@ -285,9 +285,9 @@ RedGPU.init(
                 treeType = foliageManager.addFoliageType({
                     name: 'ElmTree',
                     mesh: treeMesh,
-                    maxInstances: 100000,
-                    cullingDistance: 1500,
-                    fadeStartDistance: 1000,
+                    maxInstances: 1000000,
+                    cullingDistance: 3500,
+                    fadeStartDistance: 3000,
                     minScale: [1, 1, 1],        // 현실적인 성목 높이 (약 7~8m)
                     maxScale: [1, 1, 1],   // 대형 거목 높이 (약 12~14m)
                     // randomRotationY: true,
