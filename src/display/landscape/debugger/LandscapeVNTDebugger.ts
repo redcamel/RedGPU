@@ -1,6 +1,7 @@
 import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "./ALandscapeDebugger";
 import Landscape from "../core/Landscape";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 
 export class LandscapeVNTDebugger extends ALandscapeDebugger {
     #context: GPUCanvasContext | null = null;
@@ -139,12 +140,6 @@ export class LandscapeVNTDebugger extends ALandscapeDebugger {
             alphaMode: 'premultiplied'
         });
 
-        this.#cameraUniformBuffer = gpuDevice.createBuffer({
-            label: 'VNTDebuggerCameraUniformBuffer',
-            size: 32,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-        });
-
         const wgslCode = `
             struct CameraParams {
                 camNormX: f32,
@@ -210,29 +205,25 @@ export class LandscapeVNTDebugger extends ALandscapeDebugger {
         `;
 
         const resourceManager = this.landscape.redGPUContext.resourceManager;
-        const shaderModule = resourceManager.createGPUShaderModule('LandscapeVNTDebuggerShaderModule', {
-            code: wgslCode
+        const shaderInfo = resourceManager.wgslParser.parse('LandscapeVNTDebuggerShaderModule', wgslCode);
+        let shaderModule = resourceManager.getGPUShaderModule('LandscapeVNTDebuggerShaderModule');
+        if (!shaderModule) {
+            shaderModule = resourceManager.createGPUShaderModule('LandscapeVNTDebuggerShaderModule', {
+                code: wgslCode
+            });
+        }
+
+        const uniformByteLength = shaderInfo?.uniforms?.camera?.arrayBufferByteLength || 32;
+        this.#cameraUniformBuffer = gpuDevice.createBuffer({
+            label: 'VNTDebuggerCameraUniformBuffer',
+            size: uniformByteLength,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });
 
+        const descriptor = getFragmentBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
         this.#bindGroupLayout = gpuDevice.createBindGroupLayout({
             label: 'VNTDebuggerBindGroupLayout',
-            entries: [
-                {
-                    binding: 0,
-                    visibility: GPUShaderStage.FRAGMENT,
-                    texture: {
-                        sampleType: 'float',
-                        viewDimension: '2d'
-                    }
-                },
-                {
-                    binding: 1,
-                    visibility: GPUShaderStage.FRAGMENT,
-                    buffer: {
-                        type: 'uniform'
-                    }
-                }
-            ]
+            ...descriptor
         });
 
         const pipelineLayout = gpuDevice.createPipelineLayout({

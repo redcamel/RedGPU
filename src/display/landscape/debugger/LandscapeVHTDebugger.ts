@@ -1,6 +1,7 @@
 import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "./ALandscapeDebugger";
 import Landscape from "../core/Landscape";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 
 export class LandscapeVHTDebugger extends ALandscapeDebugger {
     #context: GPUCanvasContext | null = null;
@@ -120,37 +121,8 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
             alphaMode: 'premultiplied'
         });
 
-        this.#cameraUniformBuffer = gpuDevice.createBuffer({
-            label: 'VHTDebuggerCameraUniformBuffer',
-            size: 32,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-        });
-
-        const bindGroupLayout = gpuDevice.createBindGroupLayout({
-            label: 'VHTDebuggerBindGroupLayout',
-            entries: [
-                {
-                    binding: 0,
-                    visibility: GPUShaderStage.FRAGMENT,
-                    texture: {
-                        sampleType: 'unfilterable-float',
-                        viewDimension: '2d'
-                    }
-                },
-                {
-                    binding: 1,
-                    visibility: GPUShaderStage.FRAGMENT,
-                    buffer: {
-                        type: 'uniform'
-                    }
-                }
-            ]
-        });
-        this.#bindGroupLayout = bindGroupLayout;
-
         const resourceManager = this.landscape.redGPUContext.resourceManager;
-        const shaderModule = resourceManager.createGPUShaderModule('VHTDebuggerShaderModule', {
-            code: `
+        const shaderCode = `
                 struct VertexOutput {
                     @builtin(position) position: vec4<f32>,
                     @location(0) uv: vec2<f32>,
@@ -240,8 +212,36 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
 
                     return vec4<f32>(baseColor, 1.0);
                 }
-            `
+            `;
+
+        const shaderInfo = resourceManager.wgslParser.parse('VHTDebuggerShaderModule', shaderCode);
+        let shaderModule = resourceManager.getGPUShaderModule('VHTDebuggerShaderModule');
+        if (!shaderModule) {
+            shaderModule = resourceManager.createGPUShaderModule('VHTDebuggerShaderModule', {
+                code: shaderCode
+            });
+        }
+
+        const uniformByteLength = shaderInfo?.uniforms?.camera?.arrayBufferByteLength || 32;
+        this.#cameraUniformBuffer = gpuDevice.createBuffer({
+            label: 'VHTDebuggerCameraUniformBuffer',
+            size: uniformByteLength,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });
+
+        const descriptor = getFragmentBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0, {
+            0: {
+                texture: {
+                    sampleType: 'unfilterable-float',
+                    viewDimension: '2d'
+                }
+            }
+        });
+        const bindGroupLayout = gpuDevice.createBindGroupLayout({
+            label: 'VHTDebuggerBindGroupLayout',
+            ...descriptor
+        });
+        this.#bindGroupLayout = bindGroupLayout;
 
         const pipelineLayout = gpuDevice.createPipelineLayout({
             label: 'VHTDebuggerPipelineLayout',
