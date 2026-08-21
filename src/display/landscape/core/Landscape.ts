@@ -18,6 +18,7 @@ import Object3DContainer from "../../mesh/core/Object3DContainer";
 import LandscapeFoliageManager from "../foliage/LandscapeFoliageManager";
 import {LandscapeGPUCuller} from "../spatial/LandscapeGPUCuller";
 import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
+import LandscapeDebuggerManager from "../debugger/LandscapeDebuggerManager";
 
 const DEFAULT_LOD_COLORS: [number, number, number, number][] = [
     [0.18, 0.8, 0.44, 1.0],
@@ -41,6 +42,7 @@ export class Landscape extends Object3DContainer {
     #lodColorsRGBA: [number, number, number, number][] = [];
     #landscapeMaterial: LandscapeMaterial;
     #foliageManager: LandscapeFoliageManager;
+    #debuggerManager: LandscapeDebuggerManager;
 
     #wireframe: boolean = false;
     #lodColoration: boolean = false;
@@ -79,73 +81,6 @@ export class Landscape extends Object3DContainer {
 
     #vertexShaderModule: GPUShaderModule;
     #renderPipelineCache: Map<string, GPURenderPipeline> = new Map();
-
-    update(camera: any, renderViewStateData?: any): void {
-        if (!camera) return;
-
-        if (this.landscapeMaterial) {
-            this.landscapeMaterial.updateUniformsData();
-        }
-
-        const camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
-        const camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
-        const camZ = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
-
-        const rawCamera = camera?.camera ?? camera;
-        let frustumPlanes: number[][] | null = renderViewStateData?.frustumPlanes
-            ?? renderViewStateData?.view?.frustumPlanes
-            ?? camera?.frustumPlanes
-            ?? rawCamera?.frustumPlanes
-            ?? null;
-
-        if (!frustumPlanes && rawCamera?.projectionMatrix && rawCamera?.viewMatrix) {
-            frustumPlanes = computeViewFrustumPlanes(rawCamera.projectionMatrix, rawCamera.viewMatrix);
-        }
-
-        if (this.#foliageManager?.hasFoliageTypes) {
-            this.#foliageManager.update(camera, renderViewStateData);
-        }
-
-        this.#tileStreamer.update(camX, camZ, camY);
-
-        const totalComponents = this.#componentCountX * this.#componentCountZ;
-
-        this.#frustumCullingActive = !!frustumPlanes;
-        this.#culledComponentCount = 0;
-        this.#visibleComponentCount = totalComponents;
-
-        this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#maxLODLevel, this.#wireframe);
-
-        const lodDistancesArray = this.#lodDistancesBuffer;
-        lodDistancesArray.fill(1e15);
-        const countDist = Math.min(8, this.#lodDistancesSq.length);
-        for (let i = 0; i < countDist; i++) {
-            const val = this.#lodDistancesSq[i];
-            if (val && val > 0) {
-                lodDistancesArray[i] = val;
-            }
-        }
-
-        this.#gpuCuller?.updateUniforms(
-            camX, camY, camZ,
-            this.#maxLODLevel,
-            this.#worldSizeX, this.#worldSizeZ,
-            this.#tileSizeX, this.#tileSizeZ,
-            this.#heightScale,
-            totalComponents,
-            frustumPlanes,
-            lodDistancesArray
-        );
-
-        this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
-            'Landscape_GPUCulling_ComputePass',
-            this.#onPreProcessComputePass
-        );
-    }
-
-    get redGPUContext(): RedGPUContext {
-        return this.#redGPUContext;
-    }
 
     constructor(redGPUContext: RedGPUContext, options: LandscapeOptions = {}) {
         super();
@@ -284,6 +219,80 @@ export class Landscape extends Object3DContainer {
 
         this.#initSystems(redGPUContext, options, componentCountX, componentCountZ, maxLODLevel, vhtSampler, vhtAtlasTexture, vntAtlasTexture);
         this.#foliageManager = new LandscapeFoliageManager(this);
+        this.#debuggerManager = new LandscapeDebuggerManager(this, options?.debuggerOptions);
+    }
+
+    get redGPUContext(): RedGPUContext {
+        return this.#redGPUContext;
+    }
+
+    get debuggerManager(): LandscapeDebuggerManager {
+        return this.#debuggerManager;
+    }
+
+    update(camera: any, renderViewStateData?: any): void {
+        if (!camera) return;
+
+        if (this.landscapeMaterial) {
+            this.landscapeMaterial.updateUniformsData();
+        }
+
+        const camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
+        const camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
+        const camZ = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
+
+        const rawCamera = camera?.camera ?? camera;
+        let frustumPlanes: number[][] | null = renderViewStateData?.frustumPlanes
+            ?? renderViewStateData?.view?.frustumPlanes
+            ?? camera?.frustumPlanes
+            ?? rawCamera?.frustumPlanes
+            ?? null;
+
+        if (!frustumPlanes && rawCamera?.projectionMatrix && rawCamera?.viewMatrix) {
+            frustumPlanes = computeViewFrustumPlanes(rawCamera.projectionMatrix, rawCamera.viewMatrix);
+        }
+
+        if (this.#foliageManager?.hasFoliageTypes) {
+            this.#foliageManager.update(camera, renderViewStateData);
+        }
+
+        this.#tileStreamer.update(camX, camZ, camY);
+
+        const totalComponents = this.#componentCountX * this.#componentCountZ;
+
+        this.#frustumCullingActive = !!frustumPlanes;
+        this.#culledComponentCount = 0;
+        this.#visibleComponentCount = totalComponents;
+
+        this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#maxLODLevel, this.#wireframe);
+
+        const lodDistancesArray = this.#lodDistancesBuffer;
+        lodDistancesArray.fill(1e15);
+        const countDist = Math.min(8, this.#lodDistancesSq.length);
+        for (let i = 0; i < countDist; i++) {
+            const val = this.#lodDistancesSq[i];
+            if (val && val > 0) {
+                lodDistancesArray[i] = val;
+            }
+        }
+
+        this.#gpuCuller?.updateUniforms(
+            camX, camY, camZ,
+            this.#maxLODLevel,
+            this.#worldSizeX, this.#worldSizeZ,
+            this.#tileSizeX, this.#tileSizeZ,
+            this.#heightScale,
+            totalComponents,
+            frustumPlanes,
+            lodDistancesArray
+        );
+
+        this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
+            'Landscape_GPUCulling_ComputePass',
+            this.#onPreProcessComputePass
+        );
+
+        this.#debuggerManager.update(camera, renderViewStateData);
     }
 
     get foliageManager(): LandscapeFoliageManager {
@@ -937,6 +946,34 @@ export class Landscape extends Object3DContainer {
         }
 
         this.#landscapeMaterial?.requestVBTRebake(true);
+    }
+
+    override destroy(): void {
+        super.destroy();
+        this.#debuggerManager?.destroy();
+        if (this.#instanceBuffer) {
+            this.#instanceBuffer.destroy();
+        }
+        if (this.#vhtAtlasTexture) {
+            this.#vhtAtlasTexture.destroy();
+            this.#vhtAtlasTexture = null;
+        }
+        if (this.#vntAtlasTexture) {
+            this.#vntAtlasTexture.destroy();
+            this.#vntAtlasTexture = null;
+        }
+        if (this.#vbtBaseColorAtlas) {
+            this.#vbtBaseColorAtlas.destroy();
+            this.#vbtBaseColorAtlas = null;
+        }
+        if (this.#vbtNormalAtlas) {
+            this.#vbtNormalAtlas.destroy();
+            this.#vbtNormalAtlas = null;
+        }
+        if (this.#vbtORMAtlas) {
+            this.#vbtORMAtlas.destroy();
+            this.#vbtORMAtlas = null;
+        }
     }
 }
 

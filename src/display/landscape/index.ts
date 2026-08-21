@@ -11,19 +11,15 @@ import LandscapeLayer from "./material/LandscapeLayer";
 import LandscapeVHTGenerator from "./generator/LandscapeVHTGenerator";
 import LandscapeVNTGenerator from "./generator/LandscapeVNTGenerator";
 import ALandscapeAtlasGenerator from "./generator/ALandscapeAtlasGenerator";
-import ALandscapeDebugger from "./debugger/ALandscapeDebugger";
-import LandscapeSpatialGridDebugger from "./debugger/LandscapeSpatialGridDebugger";
-import LandscapeVHTDebugger from "./debugger/LandscapeVHTDebugger";
-import LandscapeVNTDebugger from "./debugger/LandscapeVNTDebugger";
-import LandscapeHUDDebugger from "./debugger/LandscapeHUDDebugger";
 import LandscapeFoliageManager from "./foliage/LandscapeFoliageManager";
 import type {FoliageTypeOptions} from "./foliage/FoliageType";
 import FoliageType from "./foliage/FoliageType";
 import FoliageInstanceBuffer from "./foliage/FoliageInstanceBuffer";
 import CrossBillboardMaterial from "./foliage/core/impostor/crossBillboard/CrossBillboardMaterial";
+import type {LandscapeDebuggerManagerOptions} from "./debugger/LandscapeDebuggerManager";
+import LandscapeDebuggerManager from "./debugger/LandscapeDebuggerManager";
 
 export {
-    ALandscapeDebugger,
     Landscape,
     LandscapeComponent,
     LandscapeInstanceBuffer,
@@ -32,10 +28,6 @@ export {
     LandscapeOptions,
     LandscapeSharedGeometry,
     LandscapeSpatialGrid,
-    LandscapeSpatialGridDebugger,
-    LandscapeVHTDebugger,
-    LandscapeVNTDebugger,
-    LandscapeHUDDebugger,
     LandscapeVHTGenerator,
     LandscapeVNTGenerator,
     ALandscapeAtlasGenerator,
@@ -45,9 +37,11 @@ export {
     LandscapeFoliageManager,
     FoliageType,
     FoliageInstanceBuffer,
-    CrossBillboardMaterial
+    CrossBillboardMaterial,
+    LandscapeDebuggerManager
 };
 
 export type {
-    FoliageTypeOptions
+    FoliageTypeOptions,
+    LandscapeDebuggerManagerOptions
 };

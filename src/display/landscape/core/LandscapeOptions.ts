@@ -1,5 +1,6 @@
 import LANDSCAPE_BASE_GRID_SIZE from "./LANDSCAPE_BASE_GRID_SIZE";
 import LandscapeMaterial from "../material/LandscapeMaterial";
+import type {LandscapeDebuggerManagerOptions} from "../debugger/LandscapeDebuggerManager";
 
 export interface LandscapeOptions {
 
@@ -34,6 +35,8 @@ export interface LandscapeOptions {
     lodFadeStartRatio?: number;
 
     lodGeomorphStartRatio?: number;
+
+    debuggerOptions?: LandscapeDebuggerManagerOptions;
 }
 
 export default LandscapeOptions;

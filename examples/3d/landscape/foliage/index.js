@@ -318,41 +318,19 @@ RedGPU.init(
         );
 
 
-        // 5-1. 정식 RedGPU 디버거 클래스 인스턴스 생성 (2D SpatialGrid, VHT Heightmap, VNT Normal Atlas, HUD 디버거)
-        const hudDebugger = new RedGPU.Display.LandscapeHUDDebugger(landscape, controller, {
-            width: 320,
-            left: 12,
-            bottom: 120
-        });
+        // 5-1. Landscape 내장 디버거 관리자(debuggerManager) 활성화 (HUD 모니터, 2D 공간 분할 그리드, VHT 고도 아틀라스, VNT 노멀 아틀라스)
+        landscape.debuggerManager.hud = true;
+        landscape.debuggerManager.spatialGrid = true;
+        landscape.debuggerManager.vht = true;
+        landscape.debuggerManager.vnt = true;
 
-        const spatialGridDebugger = new RedGPU.Display.LandscapeSpatialGridDebugger(landscape, controller, {
-            width: 100,
-            height: 100,
-            left: 120,
-            bottom: 12
-        });
-
-        const vhtDebugger = new RedGPU.Display.LandscapeVHTDebugger(landscape, controller, {
-            width: 100,
-            height: 100,
-            left: 228,
-            bottom: 12
-        });
-
-        const vntDebugger = new RedGPU.Display.LandscapeVNTDebugger(landscape, controller, {
-            width: 100,
-            height: 100,
-            left: 336,
-            bottom: 12
-        });
-
-        // 6. RedGPU 정식 Renderer 생성 및 렌더 루프 시작
+        // 6. RedGPU 정식 Renderer 생성 및 렌더 루프 시작 (디버거는 landscape.update 내부에서 자동 갱신됨)
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
         });
 
         // 7. Landscape 모든 get/set 속성 및 2D 디버거 전면 제어 테스트 패널 렌더링
-        renderTestPane(redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, directionalLight, [grassLayer, rockLayer, gravelLayer, leaveLayer], foliageManager, treeType);
+        renderTestPane(redGPUContext, landscape, controller, directionalLight, [grassLayer, rockLayer, gravelLayer, leaveLayer], foliageManager, treeType);
 
     }
 );
@@ -363,14 +341,12 @@ RedGPU.init(
  * @param {RedGPU.RedGPUContext} redGPUContext
  * @param {RedGPU.Display.Landscape} landscape
  * @param {RedGPU.Camera.FreeController} controller
- * @param {RedGPU.Display.LandscapeHUDDebugger} hudDebugger
- * @param {RedGPU.Display.LandscapeSpatialGridDebugger} spatialGridDebugger
- * @param {RedGPU.Display.LandscapeVHTDebugger} vhtDebugger
- * @param {RedGPU.Display.LandscapeVNTDebugger} vntDebugger
  * @param {RedGPU.Light.DirectionalLight} directionalLight
  * @param {Array<RedGPU.LandscapeLayer>} layers
+ * @param {RedGPU.Display.LandscapeFoliageManager} foliageManager
+ * @param {RedGPU.Display.FoliageType} grassType
  */
-const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spatialGridDebugger, vhtDebugger, vntDebugger, directionalLight, layers, foliageManager, grassType) => {
+const renderTestPane = (redGPUContext, landscape, controller, directionalLight, layers, foliageManager, grassType) => {
     const [wsX, wsZ] = landscape ? landscape.worldSize : [8000, 8000];
     const [tcX, tcZ] = landscape ? landscape.componentCount : [8, 8];
     const [tsX, tsZ] = landscape ? landscape.tileSize : [1000, 1000];
@@ -750,25 +726,26 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                 expanded: true
             });
 
-            if (!('hudDebuggerVisible' in config)) config.hudDebuggerVisible = true;
-            config.spatialGridVisible = spatialGridDebugger ? spatialGridDebugger.visible : true;
-            config.vhtDebuggerVisible = vhtDebugger ? vhtDebugger.visible : true;
-            config.vntDebuggerVisible = vntDebugger ? vntDebugger.visible : true;
+            const dbg = landscape?.debuggerManager;
+            config.hudDebuggerVisible = dbg ? dbg.hud : true;
+            config.spatialGridVisible = dbg ? dbg.spatialGrid : true;
+            config.vhtDebuggerVisible = dbg ? dbg.vht : true;
+            config.vntDebuggerVisible = dbg ? dbg.vnt : true;
 
             folderDebuggers.addBinding(config, 'hudDebuggerVisible').on('change', (ev) => {
-                if (hudDebugger) hudDebugger.visible = ev.value;
+                if (dbg) dbg.hud = ev.value;
             });
 
             folderDebuggers.addBinding(config, 'spatialGridVisible').on('change', (ev) => {
-                if (spatialGridDebugger) spatialGridDebugger.visible = ev.value;
+                if (dbg) dbg.spatialGrid = ev.value;
             });
 
             folderDebuggers.addBinding(config, 'vhtDebuggerVisible').on('change', (ev) => {
-                if (vhtDebugger) vhtDebugger.visible = ev.value;
+                if (dbg) dbg.vht = ev.value;
             });
 
             folderDebuggers.addBinding(config, 'vntDebuggerVisible').on('change', (ev) => {
-                if (vntDebugger) vntDebugger.visible = ev.value;
+                if (dbg) dbg.vnt = ev.value;
             });
 
             folderDebuggers.addBinding(config, 'boxSize', {
@@ -777,16 +754,16 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                 step: 10
             }).on('change', (ev) => {
                 const sz = ev.value;
-                if (spatialGridDebugger) {
-                    spatialGridDebugger.setSize(sz, sz);
+                if (dbg?.spatialGridDebugger) {
+                    dbg.spatialGridDebugger.setSize(sz, sz);
                 }
-                if (vhtDebugger) {
-                    vhtDebugger.setSize(sz, sz);
-                    vhtDebugger.setPosition(12 + sz + 10, 12);
+                if (dbg?.vhtDebugger) {
+                    dbg.vhtDebugger.setSize(sz, sz);
+                    dbg.vhtDebugger.setPosition(12 + sz + 10, 12);
                 }
-                if (vntDebugger) {
-                    vntDebugger.setSize(sz, sz);
-                    vntDebugger.setPosition(12 + (sz + 10) * 2, 12);
+                if (dbg?.vntDebugger) {
+                    dbg.vntDebugger.setSize(sz, sz);
+                    dbg.vntDebugger.setPosition(12 + (sz + 10) * 2, 12);
                 }
             });
         }
