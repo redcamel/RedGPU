@@ -54,11 +54,11 @@ const getUnionBindGroupLayoutDescriptorFromShaderInfos = (
                         });
                     }
                 } else {
-                    const accessType = {
-                        'write': 'write-only-storage',
+                    const accessType: GPUBufferBindingType = {
+                        'write': 'storage',
                         'read': 'read-only-storage',
-                        'read_write': 'read-write-storage',
-                    }[rawAccess] || 'read-only-storage';
+                        'read_write': 'storage',
+                    }[rawAccess] || 'storage';
 
                     if (entryMap.has(binding)) {
                         entryMap.get(binding)!.visibility |= visibility;

@@ -2,6 +2,7 @@ import RedGPUContext from "../../../../../context/RedGPUContext";
 import computeViewFrustumPlanes from "../../../../../math/computeViewFrustumPlanes";
 import FoliageType from "../../FoliageType";
 import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
+import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../../material/core";
 
 class FoliageCullingDispatcher {
     #redGPUContext: RedGPUContext;
@@ -93,27 +94,26 @@ class FoliageCullingDispatcher {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice) return;
 
+        const resourceManager = this.#redGPUContext.resourceManager;
+        const shaderInfo = resourceManager.wgslParser.parse('FoliageCullingComputeModule', foliageCullingComputeWGSL);
+
+        let computeModule = resourceManager.getGPUShaderModule('FoliageCullingComputeModule');
+        if (!computeModule) {
+            computeModule = resourceManager.createGPUShaderModule('FoliageCullingComputeModule', {
+                code: foliageCullingComputeWGSL,
+            });
+        }
+
+        const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
         const layout = gpuDevice.createBindGroupLayout({
             label: 'FoliageCullingBindGroupLayout',
-            entries: [
-                {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
-                {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
-                {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
-                {binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
-                {binding: 4, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
-                {binding: 5, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
-            ],
+            ...descriptor
         });
         this.#cullingBindGroupLayout = layout;
 
         const pipelineLayout = gpuDevice.createPipelineLayout({
             label: 'FoliageCullingPipelineLayout',
             bindGroupLayouts: [layout],
-        });
-
-        const resourceManager = this.#redGPUContext.resourceManager;
-        const computeModule = resourceManager.createGPUShaderModule('FoliageCullingComputeModule', {
-            code: foliageCullingComputeWGSL,
         });
 
         this.#cullingComputePipeline = gpuDevice.createComputePipeline({

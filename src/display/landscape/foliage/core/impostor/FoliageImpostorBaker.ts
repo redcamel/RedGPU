@@ -6,6 +6,7 @@ import type {FoliageSubMesh} from "../../FoliageType";
 import impostorBakeShaderWGSL from "./impostorBake.wgsl";
 import getMipLevelCount from "../../../../../utils/texture/getMipLevelCount";
 import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../../../material/core";
 
 export interface FoliageBakeResult {
     texture: DirectTexture;
@@ -141,7 +142,7 @@ class FoliageImpostorBaker {
             });
         }
 
-        this.#initBindGroupLayouts(gpuDevice);
+        this.#initBindGroupLayouts(redGPUContext);
 
         const commandEncoder = gpuDevice.createCommandEncoder({label: `BakeImpostor_${bakeName}`});
         const renderPass = commandEncoder.beginRenderPass({
@@ -352,14 +353,16 @@ class FoliageImpostorBaker {
         console.log(`[FoliageImpostorBaker 🖼️] Debug atlas preview appended to DOM: #${canvas.id}`);
     }
 
-    static #initBindGroupLayouts(gpuDevice: GPUDevice) {
+    static #initBindGroupLayouts(redGPUContext: RedGPUContext) {
         if (!this.#bakeBindGroupLayout) {
+            const gpuDevice = redGPUContext.gpuDevice;
+            const resourceManager = redGPUContext.resourceManager;
+            const shaderInfo = resourceManager.wgslParser.parse('FoliageImpostorBakeFragmentModule', impostorBakeShaderWGSL);
+            const descriptor = getFragmentBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
+
             this.#bakeBindGroupLayout = gpuDevice.createBindGroupLayout({
                 label: 'BakeBindGroupLayout',
-                entries: [
-                    {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
-                    {binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
-                ]
+                ...descriptor
             });
         }
     }
