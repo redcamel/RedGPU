@@ -131,6 +131,7 @@ const processStorages = (storage: any[]) => {
             ...processMembers(curr.members),
             arrayBufferByteLength: curr.size,
             stride: curr.stride,
+            access: curr.access,
             acccess: curr.access,
             type: typeInfo,
         };

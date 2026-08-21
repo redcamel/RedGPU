@@ -1,4 +1,7 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import landscapeVertexSource from "../shader/landscapeVertex.wgsl";
+import landscapeFragmentSource from "../shader/landscapeFragment.wgsl";
+import {getUnionBindGroupLayoutDescriptorFromShaderInfos} from "../../../material/core";
 
 export class LandscapeInstanceBuffer {
     #redGPUContext: RedGPUContext;
@@ -291,78 +294,21 @@ export class LandscapeInstanceBuffer {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice) return;
 
+        const resourceManager = this.#redGPUContext.resourceManager;
+        const vertexShaderInfo = resourceManager.wgslParser.parse('LANDSCAPE_VERTEX', landscapeVertexSource);
+        const fragmentShaderInfo = resourceManager.wgslParser.parse('LANDSCAPE_FRAGMENT', landscapeFragmentSource);
+
+        const descriptor = getUnionBindGroupLayoutDescriptorFromShaderInfos([
+            {shaderInfo: vertexShaderInfo, visibility: GPUShaderStage.VERTEX},
+            {shaderInfo: fragmentShaderInfo, visibility: GPUShaderStage.FRAGMENT}
+        ], 1, {
+            // VHT Height Atlas(binding 3)는 r32float 포맷이므로 unfilterable-float 설정 명시
+            3: {texture: {sampleType: 'unfilterable-float', viewDimension: '2d'}}
+        });
+
         this.#instanceStorageBindGroupLayout = gpuDevice.createBindGroupLayout({
             label: 'LandscapeInstanceStorageBindGroupLayout',
-            entries: [
-                {
-                    binding: 0,
-                    visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
-                    buffer: {
-                        type: 'read-only-storage'
-                    }
-                },
-                {
-                    binding: 1,
-                    visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
-                    buffer: {
-                        type: 'read-only-storage'
-                    }
-                },
-                {
-                    binding: 2,
-                    visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
-                    sampler: {
-                        type: 'filtering'
-                    }
-                },
-                {
-                    binding: 3,
-                    visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
-                    texture: {
-                        sampleType: 'unfilterable-float',
-                        viewDimension: '2d'
-                    }
-                },
-                {
-                    binding: 4,
-                    visibility: GPUShaderStage.FRAGMENT,
-                    texture: {
-                        sampleType: 'float',
-                        viewDimension: '2d'
-                    }
-                },
-                {
-                    binding: 5,
-                    visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
-                    buffer: {
-                        type: 'uniform'
-                    }
-                },
-                {
-                    binding: 6,
-                    visibility: GPUShaderStage.FRAGMENT,
-                    texture: {
-                        sampleType: 'float',
-                        viewDimension: '2d'
-                    }
-                },
-                {
-                    binding: 7,
-                    visibility: GPUShaderStage.FRAGMENT,
-                    texture: {
-                        sampleType: 'float',
-                        viewDimension: '2d'
-                    }
-                },
-                {
-                    binding: 8,
-                    visibility: GPUShaderStage.FRAGMENT,
-                    texture: {
-                        sampleType: 'float',
-                        viewDimension: '2d'
-                    }
-                }
-            ]
+            ...descriptor
         });
 
         this.#allInputTilesBuffer = gpuDevice.createBuffer({
