@@ -3,7 +3,7 @@ import type {FoliageSubMesh} from "./FoliageType";
 
 class FoliageInstanceBuffer {
 
-    static #cullingUniformData = new Float32Array(44);
+    static #cullingUniformData = new Float32Array(40);
     static #cullingUniformUint32 = new Uint32Array(FoliageInstanceBuffer.#cullingUniformData.buffer);
     #maxInstances: number;
     #strideFloats: number = 12;
@@ -104,7 +104,6 @@ class FoliageInstanceBuffer {
         cullingDist: number, fadeStartDist: number,
         activeCount: number, boundingRadius: number,
         worldSizeX: number, heightScale: number, bottomOffset: number, hasVHT: boolean,
-        subMeshCount: number,
         frustumPlanes: number[][] | null,
         lodDistance: number = 100.0,
         lod0SubMeshCount: number = 1,
@@ -116,38 +115,42 @@ class FoliageInstanceBuffer {
         const f32 = FoliageInstanceBuffer.#cullingUniformData;
         const u32 = FoliageInstanceBuffer.#cullingUniformUint32;
 
+        // vec4 0
         f32[0] = camX;
         f32[1] = camY;
         f32[2] = camZ;
         f32[3] = cullingDist;
+
+        // vec4 1
         f32[4] = fadeStartDist;
         u32[5] = activeCount;
         f32[6] = boundingRadius;
-        f32[7] = worldSizeX;
+        f32[7] = worldSizeX > 0 ? (1.0 / worldSizeX) : 0.0;
+
+        // vec4 2
         f32[8] = heightScale;
         f32[9] = bottomOffset;
         u32[10] = hasVHT ? 1 : 0;
-        u32[11] = Math.max(subMeshCount, 1);
+        u32[11] = hasBillboard ? 1 : 0;
+
+        // vec4 3
         f32[12] = lodDistance;
         u32[13] = Math.max(lod0SubMeshCount, 1);
-        u32[14] = hasBillboard ? 1 : 0;
-        u32[15] = this.#maxInstances;
-        f32[16] = lodFadeRange;
-        f32[17] = worldSizeX > 0 ? (1.0 / worldSizeX) : 0.0;
-        f32[18] = 0;
-        f32[19] = 0;
+        u32[14] = this.#maxInstances;
+        f32[15] = lodFadeRange;
 
+        // vec4 4..9 (frustum planes)
         if (frustumPlanes && frustumPlanes.length >= 6) {
             for (let p = 0; p < 6; p++) {
                 const plane = frustumPlanes[p];
-                const baseOffset = 20 + p * 4;
+                const baseOffset = 16 + p * 4;
                 f32[baseOffset] = plane[0];
                 f32[baseOffset + 1] = plane[1];
                 f32[baseOffset + 2] = plane[2];
                 f32[baseOffset + 3] = plane[3];
             }
         } else {
-            f32.fill(0, 20, 44);
+            f32.fill(0, 16, 40);
         }
 
         const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
@@ -156,7 +159,7 @@ class FoliageInstanceBuffer {
             0,
             f32.buffer,
             f32.byteOffset,
-            176
+            160
         );
     }
 

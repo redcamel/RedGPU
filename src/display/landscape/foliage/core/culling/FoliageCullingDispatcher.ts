@@ -71,7 +71,6 @@ class FoliageCullingDispatcher {
                 camX, camY, camZ,
                 cullingDist, fadeStartDist, activeCount, boundingRadius,
                 worldSizeX, heightScale, bottomOffset, hasVHT,
-                subCount,
                 frustumPlanes,
                 foliageType.lodDistance,
                 foliageType.lod0SubMeshCount,
