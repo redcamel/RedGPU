@@ -5,11 +5,15 @@ import tileMipShaderCode from "../shader/landscapeTileMipmap.wgsl";
 import ALandscapeAtlasGenerator from "./ALandscapeAtlasGenerator";
 import LandscapeMaterial from "../material/LandscapeMaterial";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
+import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 
 export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
-    #uniformFloatArray: Float32Array;
-    #uniformUintArray: Uint32Array;
-    #mipUniformArray: Uint32Array = new Uint32Array(8);
+    #uniformFloatArray!: Float32Array;
+    #uniformUintArray!: Uint32Array;
+    #mipUniformArray!: Uint32Array;
+
+    #vbtUniformByteLength: number = 0;
+    #tileMipUniformByteLength: number = 0;
 
     #storageViewsCache: WeakMap<GPUTexture, Map<number, GPUTextureView>> = new WeakMap();
     #sampleViewsCache: WeakMap<GPUTexture, Map<number, GPUTextureView>> = new WeakMap();
@@ -19,8 +23,6 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, 'VBT');
-        this.#uniformFloatArray = new Float32Array(204);
-        this.#uniformUintArray = new Uint32Array(this.#uniformFloatArray.buffer);
         this.#initComputeResources();
         this.#initTileMipComputeResources();
     }
@@ -106,8 +108,8 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
             }
         }
 
-        const uniformBuffer = this.acquireUniformBuffer(560);
-        device.queue.writeBuffer(uniformBuffer, 0, fArr.buffer, 0, 560);
+        const uniformBuffer = this.acquireUniformBuffer(this.#vbtUniformByteLength);
+        device.queue.writeBuffer(uniformBuffer, 0, fArr.buffer, 0, this.#vbtUniformByteLength);
 
         const vbtBaseColorStorageView = this.#getStorageTextureView(vbtBaseColorArray.gpuTexture, 0);
         const vbtNormalStorageView = this.#getStorageTextureView(vbtNormalArray.gpuTexture, 0);
@@ -182,8 +184,8 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
                 uArr[6] = 0;
                 uArr[7] = 0;
 
-                const mipUniformBuffer = this.acquireUniformBuffer(32);
-                device.queue.writeBuffer(mipUniformBuffer, 0, uArr.buffer, 0, 32);
+                const mipUniformBuffer = this.acquireUniformBuffer(this.#tileMipUniformByteLength);
+                device.queue.writeBuffer(mipUniformBuffer, 0, uArr.buffer, 0, this.#tileMipUniformByteLength);
 
                 const srcBcView = this.#getSampleTextureView(bcTex, m - 1);
                 const dstBcView = this.#getStorageTextureView(bcTex, m);
@@ -253,55 +255,24 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
     }
 
     #initComputeResources(): void {
+        const resourceManager = this.redGPUContext.resourceManager;
+        const shaderInfo = resourceManager.wgslParser.parse('LandscapeVBTBakeComputeShaderModule', vbtBakeShaderCode);
+        this.#vbtUniformByteLength = shaderInfo.uniforms.uniforms?.arrayBufferByteLength || 0;
+
+        // WGSLParser의 구조체 크기 기반으로 CPU 재사용 버퍼 정확히 할당 (Zero-GC)
+        this.#uniformFloatArray = new Float32Array(this.#vbtUniformByteLength / Float32Array.BYTES_PER_ELEMENT);
+        this.#uniformUintArray = new Uint32Array(this.#uniformFloatArray.buffer);
+
+        const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0, {
+            // VHT Atlas(binding 1)는 r32float 포맷이므로 unfilterable-float 설정 명시
+            1: {texture: {sampleType: 'unfilterable-float', viewDimension: '2d'}}
+        });
+
         this.initBaseComputePipeline(
             'LandscapeVBTBakeComputeShaderModule',
             vbtBakeShaderCode,
-            [
-                {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
-                {
-                    binding: 1,
-                    visibility: GPUShaderStage.COMPUTE,
-                    texture: {sampleType: 'unfilterable-float', viewDimension: '2d'}
-                },
-                {binding: 2, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
-                {binding: 3, visibility: GPUShaderStage.COMPUTE, sampler: {type: 'filtering'}},
-                {
-                    binding: 4,
-                    visibility: GPUShaderStage.COMPUTE,
-                    texture: {sampleType: 'float', viewDimension: '2d-array'}
-                },
-                {
-                    binding: 5,
-                    visibility: GPUShaderStage.COMPUTE,
-                    texture: {sampleType: 'float', viewDimension: '2d-array'}
-                },
-                {
-                    binding: 6,
-                    visibility: GPUShaderStage.COMPUTE,
-                    texture: {sampleType: 'float', viewDimension: '2d-array'}
-                },
-                {
-                    binding: 7,
-                    visibility: GPUShaderStage.COMPUTE,
-                    texture: {sampleType: 'float', viewDimension: '2d-array'}
-                },
-                {
-                    binding: 8,
-                    visibility: GPUShaderStage.COMPUTE,
-                    storageTexture: {access: 'write-only', format: 'rgba8unorm', viewDimension: '2d'}
-                },
-                {
-                    binding: 9,
-                    visibility: GPUShaderStage.COMPUTE,
-                    storageTexture: {access: 'write-only', format: 'rgba8unorm', viewDimension: '2d'}
-                },
-                {
-                    binding: 10,
-                    visibility: GPUShaderStage.COMPUTE,
-                    storageTexture: {access: 'write-only', format: 'rgba8unorm', viewDimension: '2d'}
-                },
-            ],
-            816
+            descriptor.entries,
+            this.#vbtUniformByteLength
         );
     }
 
@@ -310,33 +281,23 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         if (!device) return;
 
         const resourceManager = this.redGPUContext.resourceManager;
-        const shaderModule = resourceManager.createGPUShaderModule('LandscapeTileMipmapComputeShaderModule', {
-            code: tileMipShaderCode
-        });
+        const mipShaderInfo = resourceManager.wgslParser.parse('LandscapeTileMipmapComputeShaderModule', tileMipShaderCode);
+        this.#tileMipUniformByteLength = mipShaderInfo.uniforms.params?.arrayBufferByteLength || 0;
 
+        // WGSLParser의 구조체 크기 기반으로 CPU 재사용 버퍼 정확히 할당 (Zero-GC)
+        this.#mipUniformArray = new Uint32Array(this.#tileMipUniformByteLength / Uint32Array.BYTES_PER_ELEMENT);
+
+        let shaderModule = resourceManager.getGPUShaderModule('LandscapeTileMipmapComputeShaderModule');
+        if (!shaderModule) {
+            shaderModule = resourceManager.createGPUShaderModule('LandscapeTileMipmapComputeShaderModule', {
+                code: tileMipShaderCode
+            });
+        }
+
+        const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(mipShaderInfo, 0);
         this.#tileMipBindGroupLayout = device.createBindGroupLayout({
             label: 'LandscapeTileMipmap_BindGroupLayout',
-            entries: [
-                {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
-                {binding: 1, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
-                {
-                    binding: 2,
-                    visibility: GPUShaderStage.COMPUTE,
-                    storageTexture: {access: 'write-only', format: 'rgba8unorm', viewDimension: '2d'}
-                },
-                {binding: 3, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
-                {
-                    binding: 4,
-                    visibility: GPUShaderStage.COMPUTE,
-                    storageTexture: {access: 'write-only', format: 'rgba8unorm', viewDimension: '2d'}
-                },
-                {binding: 5, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'float', viewDimension: '2d'}},
-                {
-                    binding: 6,
-                    visibility: GPUShaderStage.COMPUTE,
-                    storageTexture: {access: 'write-only', format: 'rgba8unorm', viewDimension: '2d'}
-                },
-            ]
+            ...descriptor
         });
 
         const pipelineLayout = device.createPipelineLayout({
