@@ -309,8 +309,8 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         const device = this.redGPUContext.gpuDevice;
         if (!device) return;
 
-        const shaderModule = device.createShaderModule({
-            label: 'LandscapeTileMipmapComputeShaderModule',
+        const resourceManager = this.redGPUContext.resourceManager;
+        const shaderModule = resourceManager.createGPUShaderModule('LandscapeTileMipmapComputeShaderModule', {
             code: tileMipShaderCode
         });
 

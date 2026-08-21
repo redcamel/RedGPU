@@ -209,8 +209,8 @@ export class LandscapeVNTDebugger extends ALandscapeDebugger {
             }
         `;
 
-        const shaderModule = gpuDevice.createShaderModule({
-            label: 'LandscapeVNTDebuggerShaderModule',
+        const resourceManager = this.landscape.redGPUContext.resourceManager;
+        const shaderModule = resourceManager.createGPUShaderModule('LandscapeVNTDebuggerShaderModule', {
             code: wgslCode
         });
 

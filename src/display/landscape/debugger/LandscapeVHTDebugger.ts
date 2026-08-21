@@ -148,8 +148,8 @@ export class LandscapeVHTDebugger extends ALandscapeDebugger {
         });
         this.#bindGroupLayout = bindGroupLayout;
 
-        const shaderModule = gpuDevice.createShaderModule({
-            label: 'VHTDebuggerShaderModule',
+        const resourceManager = this.landscape.redGPUContext.resourceManager;
+        const shaderModule = resourceManager.createGPUShaderModule('VHTDebuggerShaderModule', {
             code: `
                 struct VertexOutput {
                     @builtin(position) position: vec4<f32>,

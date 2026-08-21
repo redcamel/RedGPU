@@ -127,8 +127,8 @@ export class LandscapeGPUCuller {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice) return;
 
-        const shaderModule = gpuDevice.createShaderModule({
-            label: 'LandscapeCullComputeShaderModule',
+        const resourceManager = this.#redGPUContext.resourceManager;
+        const shaderModule = resourceManager.createGPUShaderModule('LandscapeCullComputeShaderModule', {
             code: landscapeCullComputeSource
         });
 

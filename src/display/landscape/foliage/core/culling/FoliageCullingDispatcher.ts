@@ -111,8 +111,8 @@ class FoliageCullingDispatcher {
             bindGroupLayouts: [layout],
         });
 
-        const computeModule = gpuDevice.createShaderModule({
-            label: 'FoliageCullingComputeModule',
+        const resourceManager = this.#redGPUContext.resourceManager;
+        const computeModule = resourceManager.createGPUShaderModule('FoliageCullingComputeModule', {
             code: foliageCullingComputeWGSL,
         });
 

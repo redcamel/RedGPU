@@ -172,7 +172,7 @@ class FoliageImpostorBaker {
                 const sub = subMeshes[s];
                 if (sub.lodIndex === 1) continue;
 
-                const pipeline = this.#getOrCreateBakePipeline(gpuDevice, sub);
+                const pipeline = this.#getOrCreateBakePipeline(redGPUContext, sub);
                 if (!pipeline) continue;
 
                 renderPass.setPipeline(pipeline);
@@ -364,10 +364,13 @@ class FoliageImpostorBaker {
         }
     }
 
-    static #getOrCreateBakePipeline(gpuDevice: GPUDevice, sub: FoliageSubMesh): GPURenderPipeline {
+    static #getOrCreateBakePipeline(redGPUContext: RedGPUContext, sub: FoliageSubMesh): GPURenderPipeline {
         const key = `BakePipeline_stride${sub.strideBytes}`;
         let pipeline = this.#bakePipelineCache.get(key);
         if (pipeline) return pipeline;
+
+        const gpuDevice = redGPUContext.gpuDevice;
+        const resourceManager = redGPUContext.resourceManager;
 
         const vertexShaderCode = `
             struct VertexOutput {
@@ -397,8 +400,12 @@ class FoliageImpostorBaker {
             }
         `;
 
-        const vModule = gpuDevice.createShaderModule({code: vertexShaderCode, label: 'BakeVertexModule'});
-        const fModule = gpuDevice.createShaderModule({code: impostorBakeShaderWGSL, label: 'BakeFragmentModule'});
+        const vModule = resourceManager.createGPUShaderModule('FoliageImpostorBakeVertexModule', {
+            code: vertexShaderCode
+        });
+        const fModule = resourceManager.createGPUShaderModule('FoliageImpostorBakeFragmentModule', {
+            code: impostorBakeShaderWGSL
+        });
 
         const pipelineLayout = gpuDevice.createPipelineLayout({
             label: 'BakePipelineLayout',
