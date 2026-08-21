@@ -80,6 +80,69 @@ export class Landscape extends Object3DContainer {
     #vertexShaderModule: GPUShaderModule;
     #renderPipelineCache: Map<string, GPURenderPipeline> = new Map();
 
+    update(camera: any, renderViewStateData?: any): void {
+        if (!camera) return;
+
+        if (this.landscapeMaterial) {
+            this.landscapeMaterial.updateUniformsData();
+        }
+
+        const camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
+        const camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
+        const camZ = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
+
+        const rawCamera = camera?.camera ?? camera;
+        let frustumPlanes: number[][] | null = renderViewStateData?.frustumPlanes
+            ?? renderViewStateData?.view?.frustumPlanes
+            ?? camera?.frustumPlanes
+            ?? rawCamera?.frustumPlanes
+            ?? null;
+
+        if (!frustumPlanes && rawCamera?.projectionMatrix && rawCamera?.viewMatrix) {
+            frustumPlanes = computeViewFrustumPlanes(rawCamera.projectionMatrix, rawCamera.viewMatrix);
+        }
+
+        if (this.#foliageManager?.hasFoliageTypes) {
+            this.#foliageManager.update(camera, renderViewStateData);
+        }
+
+        this.#tileStreamer.update(camX, camZ, camY);
+
+        const totalComponents = this.#componentCountX * this.#componentCountZ;
+
+        this.#frustumCullingActive = !!frustumPlanes;
+        this.#culledComponentCount = 0;
+        this.#visibleComponentCount = totalComponents;
+
+        this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#maxLODLevel, this.#wireframe);
+
+        const lodDistancesArray = this.#lodDistancesBuffer;
+        lodDistancesArray.fill(1e15);
+        const countDist = Math.min(8, this.#lodDistancesSq.length);
+        for (let i = 0; i < countDist; i++) {
+            const val = this.#lodDistancesSq[i];
+            if (val && val > 0) {
+                lodDistancesArray[i] = val;
+            }
+        }
+
+        this.#gpuCuller?.updateUniforms(
+            camX, camY, camZ,
+            this.#maxLODLevel,
+            this.#worldSizeX, this.#worldSizeZ,
+            this.#tileSizeX, this.#tileSizeZ,
+            this.#heightScale,
+            totalComponents,
+            frustumPlanes,
+            lodDistancesArray
+        );
+
+        this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
+            'Landscape_GPUCulling_ComputePass',
+            this.#onPreProcessComputePass
+        );
+    }
+
     get redGPUContext(): RedGPUContext {
         return this.#redGPUContext;
     }
@@ -576,67 +639,10 @@ export class Landscape extends Object3DContainer {
         this.#tileStreamer.tileUrlResolver = resolver;
     }
 
-    update(camera: any, renderViewStateData?: any): void {
-        if (!camera) return;
-
-        if (this.landscapeMaterial) {
-            this.landscapeMaterial.updateUniformsData();
-        }
-
-        const camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
-        const camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
-        const camZ = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
-
-        const rawCamera = camera?.camera ?? camera;
-        let frustumPlanes: number[][] | null = renderViewStateData?.frustumPlanes
-            ?? renderViewStateData?.view?.frustumPlanes
-            ?? camera?.frustumPlanes
-            ?? rawCamera?.frustumPlanes
-            ?? null;
-
-        if (!frustumPlanes && rawCamera?.projectionMatrix && rawCamera?.viewMatrix) {
-            frustumPlanes = computeViewFrustumPlanes(rawCamera.projectionMatrix, rawCamera.viewMatrix);
-        }
-
-        if (this.#foliageManager?.hasFoliageTypes) {
-            this.#foliageManager.update(camera, renderViewStateData);
-        }
-
-        this.#tileStreamer.update(camX, camZ, camY);
-
+    #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
         const totalComponents = this.#componentCountX * this.#componentCountZ;
-
-        this.#frustumCullingActive = !!frustumPlanes;
-        this.#culledComponentCount = 0;
-        this.#visibleComponentCount = totalComponents;
-
-        this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#maxLODLevel, this.#wireframe);
-
-        const lodDistancesArray = this.#lodDistancesBuffer;
-        lodDistancesArray.fill(1e15);
-        const countDist = Math.min(8, this.#lodDistancesSq.length);
-        for (let i = 0; i < countDist; i++) {
-            const val = this.#lodDistancesSq[i];
-            if (val && val > 0) {
-                lodDistancesArray[i] = val;
-            }
-        }
-
-        this.#gpuCuller?.updateUniforms(
-            camX, camY, camZ,
-            this.#maxLODLevel,
-            this.#worldSizeX, this.#worldSizeZ,
-            this.#tileSizeX, this.#tileSizeZ,
-            this.#heightScale,
-            totalComponents,
-            frustumPlanes,
-            lodDistancesArray
-        );
-
-        this.#redGPUContext.commandEncoderManager.addPreProcessComputePass('Landscape_GPUCulling_ComputePass', (computePass) => {
-            this.#gpuCuller?.dispatchPass(computePass, totalComponents);
-        });
-    }
+        this.#gpuCuller?.dispatchPass(computePass, totalComponents);
+    };
 
     #initSystems(
         redGPUContext: RedGPUContext,

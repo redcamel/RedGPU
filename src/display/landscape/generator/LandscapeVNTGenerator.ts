@@ -2,9 +2,11 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import DirectTexture from "../../../resources/texture/DirectTexture";
 import vntBakeShaderCode from "../shader/landscapeVNTBake.wgsl";
 import ALandscapeAtlasGenerator from "./ALandscapeAtlasGenerator";
+import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 
 export class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
     #uniformArray: Float32Array;
+    #uniformByteLength: number = 48;
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, 'VNT');
@@ -50,8 +52,8 @@ export class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
         arr[6] = heightScale;
         arr[7] = texelWorldSize;
 
-        const uniformBuffer = this.acquireUniformBuffer(48);
-        device.queue.writeBuffer(uniformBuffer, 0, arr.buffer, 0, 48);
+        const uniformBuffer = this.acquireUniformBuffer(this.#uniformByteLength);
+        device.queue.writeBuffer(uniformBuffer, 0, arr.buffer, 0, this.#uniformByteLength);
 
         const bindGroup = device.createBindGroup({
             label: `Landscape_VNT_BindGroup_[${pixelX},${pixelZ}]`,
@@ -77,27 +79,26 @@ export class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
     }
 
     #initComputeResources(): void {
+        const resourceManager = this.redGPUContext.resourceManager;
+        const shaderInfo = resourceManager.wgslParser.parse('LandscapeVNTBakeComputeShaderModule', vntBakeShaderCode);
+        const uniformByteLength = shaderInfo?.uniforms?.uniforms?.arrayBufferByteLength || 48;
+        this.#uniformByteLength = uniformByteLength;
+        this.#uniformArray = new Float32Array(uniformByteLength / Float32Array.BYTES_PER_ELEMENT);
+
+        const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0, {
+            1: {
+                texture: {
+                    sampleType: 'unfilterable-float',
+                    viewDimension: '2d'
+                }
+            }
+        });
+
         this.initBaseComputePipeline(
             'LandscapeVNTBakeComputeShaderModule',
             vntBakeShaderCode,
-            [
-                {
-                    binding: 0,
-                    visibility: GPUShaderStage.COMPUTE,
-                    buffer: {type: 'uniform'}
-                },
-                {
-                    binding: 1,
-                    visibility: GPUShaderStage.COMPUTE,
-                    texture: {sampleType: 'unfilterable-float', viewDimension: '2d'}
-                },
-                {
-                    binding: 2,
-                    visibility: GPUShaderStage.COMPUTE,
-                    storageTexture: {access: 'write-only', format: 'rgba8unorm', viewDimension: '2d'}
-                }
-            ],
-            48
+            descriptor.entries,
+            uniformByteLength
         );
     }
 }

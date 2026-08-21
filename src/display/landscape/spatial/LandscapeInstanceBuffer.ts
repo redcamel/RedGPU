@@ -18,8 +18,9 @@ export class LandscapeInstanceBuffer {
 
     #allInputTilesData: Float32Array;
 
-    #landscapeUniformData: Float32Array = new Float32Array(52);
+    #landscapeUniformData: Float32Array;
     #landscapeUniformUintData: Uint32Array;
+    #landscapeUniformByteLength: number = 208;
 
     #indirectArgsBuffer: Uint32Array = new Uint32Array(40);
 
@@ -29,9 +30,11 @@ export class LandscapeInstanceBuffer {
         this.#maxLODLevel = maxLODLevel;
 
         this.#allInputTilesData = new Float32Array(maxComponentCount * 8);
-        this.#landscapeUniformUintData = new Uint32Array(this.#landscapeUniformData.buffer);
 
         this.#createGPUResources();
+
+        this.#landscapeUniformData = new Float32Array(this.#landscapeUniformByteLength / Float32Array.BYTES_PER_ELEMENT);
+        this.#landscapeUniformUintData = new Uint32Array(this.#landscapeUniformData.buffer);
     }
 
     get allInputTilesBuffer(): GPUBuffer | null {
@@ -329,9 +332,14 @@ export class LandscapeInstanceBuffer {
             usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
         });
 
+        const uniformByteLength = vertexShaderInfo?.uniforms?.landscapeUniforms?.arrayBufferByteLength
+            || fragmentShaderInfo?.uniforms?.landscapeUniforms?.arrayBufferByteLength
+            || 208;
+        this.#landscapeUniformByteLength = uniformByteLength;
+
         this.#landscapeUniformBuffer = gpuDevice.createBuffer({
             label: 'LandscapeGlobalUniformBuffer',
-            size: 208,
+            size: uniformByteLength,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });
     }

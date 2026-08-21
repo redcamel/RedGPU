@@ -2,9 +2,11 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import DirectTexture from "../../../resources/texture/DirectTexture";
 import vhtShaderCode from "../shader/landscapeVHTBake.wgsl";
 import ALandscapeAtlasGenerator from "./ALandscapeAtlasGenerator";
+import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 
 export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
     #uniformArray: Uint32Array;
+    #uniformByteLength: number = 16;
 
     constructor(redGPUContext: RedGPUContext) {
         super(redGPUContext, 'VHT');
@@ -33,8 +35,8 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         arr[2] = pixelW;
         arr[3] = pixelH;
 
-        const uniformBuffer = this.acquireUniformBuffer(16);
-        device.queue.writeBuffer(uniformBuffer, 0, arr.buffer, 0, 16);
+        const uniformBuffer = this.acquireUniformBuffer(this.#uniformByteLength);
+        device.queue.writeBuffer(uniformBuffer, 0, arr.buffer, 0, this.#uniformByteLength);
 
         const srcView = srcTileTexture.createView();
         const bindGroup = device.createBindGroup({
@@ -61,27 +63,26 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
     }
 
     #initComputeResources(): void {
+        const resourceManager = this.redGPUContext.resourceManager;
+        const shaderInfo = resourceManager.wgslParser.parse('LandscapeVHTBakeComputeShaderModule', vhtShaderCode);
+        const uniformByteLength = shaderInfo?.uniforms?.uniforms?.arrayBufferByteLength || 16;
+        this.#uniformByteLength = uniformByteLength;
+        this.#uniformArray = new Uint32Array(uniformByteLength / Uint32Array.BYTES_PER_ELEMENT);
+
+        const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0, {
+            0: {
+                texture: {
+                    sampleType: 'unfilterable-float',
+                    viewDimension: '2d'
+                }
+            }
+        });
+
         this.initBaseComputePipeline(
             'LandscapeVHTBakeComputeShaderModule',
             vhtShaderCode,
-            [
-                {
-                    binding: 0,
-                    visibility: GPUShaderStage.COMPUTE,
-                    texture: {sampleType: 'unfilterable-float', viewDimension: '2d'}
-                },
-                {
-                    binding: 1,
-                    visibility: GPUShaderStage.COMPUTE,
-                    storageTexture: {access: 'write-only', format: 'r32float', viewDimension: '2d'}
-                },
-                {
-                    binding: 2,
-                    visibility: GPUShaderStage.COMPUTE,
-                    buffer: {type: 'uniform'}
-                }
-            ],
-            16
+            descriptor.entries,
+            uniformByteLength
         );
     }
 }
