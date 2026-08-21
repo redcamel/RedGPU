@@ -8,9 +8,9 @@ import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCOD
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 
 export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
-    #uniformFloatArray!: Float32Array;
-    #uniformUintArray!: Uint32Array;
-    #mipUniformArray!: Uint32Array;
+    #uniformFloatArray: Float32Array;
+    #uniformUintArray: Uint32Array;
+    #mipUniformArray: Uint32Array;
 
     #vbtUniformByteLength: number = 0;
     #tileMipUniformByteLength: number = 0;

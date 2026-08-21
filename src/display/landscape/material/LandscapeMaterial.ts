@@ -11,6 +11,7 @@ import LandscapeLayer from "./LandscapeLayer";
 import {COMMAND_ENCODER_TYPE} from "../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 import defineColorRGBA from "../../../defineProperty/funcs/color/defineColorRGBA";
 import defineSampler from "../../../defineProperty/funcs/texture/defineSampler";
+import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 
 const MAX_LANDSCAPE_LAYERS = 8;
 
@@ -35,7 +36,8 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 
     #textureArrayVersion: number = 0;
 
-    #uniformFloatArray: Float32Array = new Float32Array(136);
+    #uniformByteLength: number = 0;
+    #uniformFloatArray: Float32Array;
     #uniformUintArray: Uint32Array;
 
     constructor(redGPUContext: RedGPUContext, colorHex: string = '#387d42', textureArraySize: number = 1024) {
@@ -47,6 +49,10 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         );
 
         this.#textureArraySize = Math.max(128, textureArraySize);
+
+        // WGSLParser 리플렉션으로부터 MaterialUniforms 구조체 크기 동적 추출
+        this.#uniformByteLength = this.UNIFORM_STRUCT?.arrayBufferByteLength || this.SHADER_INFO?.uniforms?.uniforms?.arrayBufferByteLength || 0;
+        this.#uniformFloatArray = new Float32Array(this.#uniformByteLength / Float32Array.BYTES_PER_ELEMENT);
         this.#uniformUintArray = new Uint32Array(this.#uniformFloatArray.buffer);
 
         this.#initDummyTextureArrays();
@@ -244,31 +250,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
             `LandscapeMaterial_UniformBuffer_${this.uuid}`
         );
 
-        const layoutEntries: GPUBindGroupLayoutEntry[] = [
-            {binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: {type: 'uniform'}},
-            {binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
-            {
-                binding: 2,
-                visibility: GPUShaderStage.FRAGMENT,
-                texture: {sampleType: 'float', viewDimension: '2d-array'}
-            },
-            {
-                binding: 3,
-                visibility: GPUShaderStage.FRAGMENT,
-                texture: {sampleType: 'float', viewDimension: '2d-array'}
-            },
-            {
-                binding: 4,
-                visibility: GPUShaderStage.FRAGMENT,
-                texture: {sampleType: 'float', viewDimension: '2d-array'}
-            },
-            {
-                binding: 5,
-                visibility: GPUShaderStage.FRAGMENT,
-                texture: {sampleType: 'float', viewDimension: '2d-array'}
-            }
-        ];
-
         const entries: GPUBindGroupEntry[] = [
             {
                 binding: 0,
@@ -285,9 +266,10 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
             {binding: 5, resource: this.#weightMapArrayView!}
         ];
 
+        const descriptor = getFragmentBindGroupLayoutDescriptorFromShaderInfo(this.SHADER_INFO, 2);
         const bindGroupLayout = gpuDevice.createBindGroupLayout({
             label: 'LandscapeMaterial_BindGroupLayout',
-            entries: layoutEntries
+            ...descriptor
         });
 
         const bindGroup = gpuDevice.createBindGroup({

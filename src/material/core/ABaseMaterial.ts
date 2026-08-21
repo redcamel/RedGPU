@@ -273,6 +273,14 @@ abstract class ABaseMaterial extends ResourceBase {
     }
 
     /**
+     * [KO] 셰이더 전체 파싱 정보(ShaderInfo)를 반환합니다.
+     * [EN] Returns the parsed shader information.
+     */
+    get SHADER_INFO(): any {
+        return this.#SHADER_INFO;
+    }
+
+    /**
      * [KO] 셰이더 uniforms 구조 정보를 반환합니다.
      * [EN] Returns the shader uniforms structure information.
      */
