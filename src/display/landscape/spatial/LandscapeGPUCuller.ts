@@ -1,5 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import landscapeCullComputeSource from "../shader/landscapeCullCompute.wgsl";
+import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../material/core";
 
 export class LandscapeGPUCuller {
     #redGPUContext: RedGPUContext;
@@ -9,13 +10,12 @@ export class LandscapeGPUCuller {
     #bindGroup: GPUBindGroup | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
 
-    #uniformData: Float32Array = new Float32Array(44);
+    #uniformByteLength: number = 0;
+    #uniformData: Float32Array;
     #uniformUintData: Uint32Array;
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
-        this.#uniformUintData = new Uint32Array(this.#uniformData.buffer);
-
         this.#initGPUResources();
     }
 
@@ -128,24 +128,30 @@ export class LandscapeGPUCuller {
         if (!gpuDevice) return;
 
         const resourceManager = this.#redGPUContext.resourceManager;
-        const shaderModule = resourceManager.createGPUShaderModule('LandscapeCullComputeShaderModule', {
-            code: landscapeCullComputeSource
-        });
+        const shaderInfo = resourceManager.wgslParser.parse('LandscapeCullComputeShaderModule', landscapeCullComputeSource);
+
+        let shaderModule = resourceManager.getGPUShaderModule('LandscapeCullComputeShaderModule');
+        if (!shaderModule) {
+            shaderModule = resourceManager.createGPUShaderModule('LandscapeCullComputeShaderModule', {
+                code: landscapeCullComputeSource
+            });
+        }
+
+        // WGSLParser 리플렉션으로부터 CameraFrustumUniforms 구조체 크기 동적 추출
+        this.#uniformByteLength = shaderInfo?.uniforms?.uniforms?.arrayBufferByteLength || 176;
+        this.#uniformData = new Float32Array(this.#uniformByteLength / Float32Array.BYTES_PER_ELEMENT);
+        this.#uniformUintData = new Uint32Array(this.#uniformData.buffer);
 
         this.#uniformBuffer = gpuDevice.createBuffer({
             label: 'LandscapeCullUniformBuffer',
-            size: this.#uniformData.byteLength,
+            size: this.#uniformByteLength,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });
 
+        const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
         this.#bindGroupLayout = gpuDevice.createBindGroupLayout({
             label: 'LandscapeCullBindGroupLayout',
-            entries: [
-                {binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}},
-                {binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'read-only-storage'}},
-                {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}},
-                {binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'storage'}}
-            ]
+            ...descriptor
         });
 
         const pipelineLayout = gpuDevice.createPipelineLayout({
