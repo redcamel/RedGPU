@@ -431,12 +431,6 @@ const renderTestPane = (redGPUContext, landscape, controller, hudDebugger, spati
                     subFolder.addBinding(layer, 'aoIntensity', {min: 0, max: 2, step: 0.01}).on('change', () => {
                         landscape?.landscapeMaterial?.requestVBTRebake();
                     });
-                    subFolder.addBinding(layer, 'heightOffset', {min: -500, max: 500, step: 0.1}).on('change', () => {
-                        landscape?.landscapeMaterial?.requestVBTRebake();
-                    });
-                    subFolder.addBinding(layer, 'heightContrast', {min: 0, max: 5, step: 0.1}).on('change', () => {
-                        landscape?.landscapeMaterial?.requestVBTRebake();
-                    });
 
                     const layerScaleObj = {uvScale: layer.uvScale[0]};
                     subFolder.addBinding(layerScaleObj, 'uvScale', {

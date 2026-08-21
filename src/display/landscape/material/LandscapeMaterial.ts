@@ -208,11 +208,11 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                 floatBuf[offset + 10] = layer.normalIntensity;
                 floatBuf[offset + 11] = layer.enabled ? 1.0 : 0.0;
 
-                // vec4 3: aoIntensity, heightOffset, heightContrast, weightMapChannelIndex
+                // vec4 3: aoIntensity, weightMapChannelIndex, pad0, pad1
                 floatBuf[offset + 12] = layer.aoIntensity;
-                floatBuf[offset + 13] = layer.heightOffset;
-                floatBuf[offset + 14] = layer.heightContrast;
-                floatBuf[offset + 15] = layer.weightMapChannelIndex;
+                floatBuf[offset + 13] = layer.weightMapChannelIndex;
+                floatBuf[offset + 14] = 0.0;
+                floatBuf[offset + 15] = 0.0;
             } else {
                 floatBuf.fill(0, offset, offset + 16);
             }

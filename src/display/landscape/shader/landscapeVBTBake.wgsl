@@ -11,9 +11,9 @@ struct LandscapeLayerParams {
     normalIntensity: f32,
     enabled: f32,
     aoIntensity: f32,
-    heightOffset: f32,
-    heightContrast: f32,
     weightMapChannelIndex: f32,
+    pad0: f32,
+    pad1: f32,
 };
 
 struct VBTBakeUniforms {

@@ -32,8 +32,6 @@ export interface LandscapeLayerOptions {
     normalIntensity?: number;
     normalScale?: number;
     aoIntensity?: number;
-    heightOffset?: number;
-    heightContrast?: number;
     tintColor?: ColorRGBA | string;
 }
 
@@ -61,8 +59,6 @@ export class LandscapeLayer {
     #metallic: number = 0.0;
     #normalIntensity: number = 1.0;
     #aoIntensity: number = 1.0;
-    #heightOffset: number = 0.0;
-    #heightContrast: number = 1.0;
 
     #tintColor: ColorRGBA;
 
@@ -125,8 +121,6 @@ export class LandscapeLayer {
         if (nIntensity !== undefined) this.#normalIntensity = nIntensity;
 
         if (actualOptions.aoIntensity !== undefined) this.#aoIntensity = actualOptions.aoIntensity;
-        if (actualOptions.heightOffset !== undefined) this.#heightOffset = actualOptions.heightOffset;
-        if (actualOptions.heightContrast !== undefined) this.#heightContrast = actualOptions.heightContrast;
 
         if (actualOptions.tintColor) {
             if (typeof actualOptions.tintColor === 'string') {
@@ -331,28 +325,6 @@ export class LandscapeLayer {
     set aoIntensity(val: number) {
         if (this.#aoIntensity === val) return;
         this.#aoIntensity = val;
-        this.dirty = true;
-        this.onChange?.();
-    }
-
-    get heightOffset(): number {
-        return this.#heightOffset;
-    }
-
-    set heightOffset(val: number) {
-        if (this.#heightOffset === val) return;
-        this.#heightOffset = val;
-        this.dirty = true;
-        this.onChange?.();
-    }
-
-    get heightContrast(): number {
-        return this.#heightContrast;
-    }
-
-    set heightContrast(val: number) {
-        if (this.#heightContrast === val) return;
-        this.#heightContrast = val;
         this.dirty = true;
         this.onChange?.();
     }

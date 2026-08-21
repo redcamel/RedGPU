@@ -94,11 +94,11 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
                 fArr[offset + 10] = layer.normalIntensity;
                 fArr[offset + 11] = layer.enabled ? 1.0 : 0.0;
 
-                // vec4 3: aoIntensity, heightOffset, heightContrast, weightMapChannelIndex
+                // vec4 3: aoIntensity, weightMapChannelIndex, pad0, pad1
                 fArr[offset + 12] = layer.aoIntensity;
-                fArr[offset + 13] = layer.heightOffset;
-                fArr[offset + 14] = layer.heightContrast;
-                fArr[offset + 15] = layer.weightMapChannelIndex;
+                fArr[offset + 13] = layer.weightMapChannelIndex;
+                fArr[offset + 14] = 0.0;
+                fArr[offset + 15] = 0.0;
             } else {
                 for (let j = 0; j < 16; j++) {
                     fArr[offset + j] = 0.0;
