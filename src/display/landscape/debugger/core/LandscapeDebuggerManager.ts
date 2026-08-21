@@ -1,9 +1,9 @@
-import Landscape from "../core/Landscape";
-import LandscapeHUDDebugger from "./LandscapeHUDDebugger";
-import LandscapeSpatialGridDebugger from "./LandscapeSpatialGridDebugger";
-import LandscapeVHTDebugger from "./LandscapeVHTDebugger";
-import LandscapeVNTDebugger from "./LandscapeVNTDebugger";
-import RenderViewStateData from "../../view/core/RenderViewStateData";
+import Landscape from "../../core/Landscape";
+import LandscapeHUDDebugger from "../hud/LandscapeHUDDebugger";
+import LandscapeSpatialGridDebugger from "../spatialGrid/LandscapeSpatialGridDebugger";
+import LandscapeVHTDebugger from "../vht/LandscapeVHTDebugger";
+import LandscapeVNTDebugger from "../vnt/LandscapeVNTDebugger";
+import RenderViewStateData from "../../../view/core/RenderViewStateData";
 
 export interface LandscapeDebuggerManagerOptions {
     hud?: boolean;
@@ -86,7 +86,7 @@ export class LandscapeDebuggerManager {
             this.#vhtDebugger = new LandscapeVHTDebugger(this.#landscape, null, {
                 width: 100,
                 height: 100,
-                left: 120,
+                left: 122,
                 bottom: 12
             });
         }
@@ -105,25 +105,13 @@ export class LandscapeDebuggerManager {
             this.#vntDebugger = new LandscapeVNTDebugger(this.#landscape, null, {
                 width: 100,
                 height: 100,
-                left: 228,
+                left: 232,
                 bottom: 12
             });
         }
         if (this.#vntDebugger) {
             this.#vntDebugger.visible = this.#visible && val;
         }
-    }
-
-    get visible(): boolean {
-        return this.#visible;
-    }
-
-    set visible(val: boolean) {
-        this.#visible = val;
-        if (this.#hudDebugger) this.#hudDebugger.visible = val && this.#enableHUD;
-        if (this.#spatialGridDebugger) this.#spatialGridDebugger.visible = val && this.#enableSpatialGrid;
-        if (this.#vhtDebugger) this.#vhtDebugger.visible = val && this.#enableVHT;
-        if (this.#vntDebugger) this.#vntDebugger.visible = val && this.#enableVNT;
     }
 
     get hudDebugger(): LandscapeHUDDebugger | null {
@@ -142,38 +130,46 @@ export class LandscapeDebuggerManager {
         return this.#vntDebugger;
     }
 
+    get visible(): boolean {
+        return this.#visible;
+    }
+
+    set visible(val: boolean) {
+        this.#visible = val;
+        if (this.#hudDebugger) this.#hudDebugger.visible = val && this.#enableHUD;
+        if (this.#spatialGridDebugger) this.#spatialGridDebugger.visible = val && this.#enableSpatialGrid;
+        if (this.#vhtDebugger) this.#vhtDebugger.visible = val && this.#enableVHT;
+        if (this.#vntDebugger) this.#vntDebugger.visible = val && this.#enableVNT;
+    }
+
     showAll(): void {
-        this.hud = true;
-        this.spatialGrid = true;
-        this.vht = true;
-        this.vnt = true;
         this.visible = true;
     }
 
     hideAll(): void {
-        this.hud = false;
-        this.spatialGrid = false;
-        this.vht = false;
-        this.vnt = false;
+        this.visible = false;
     }
 
-    update(camera: any, renderViewStateData?: RenderViewStateData): void {
+    update(camera?: any, renderViewStateData?: RenderViewStateData): void {
         if (!this.#visible) return;
 
-        if (this.#hudDebugger?.visible) {
-            this.#hudDebugger.setCamera(camera);
+        if (this.#enableHUD && this.#hudDebugger && this.#hudDebugger.visible) {
+            if (camera) this.#hudDebugger.camera = camera;
             this.#hudDebugger.update(renderViewStateData);
         }
-        if (this.#spatialGridDebugger?.visible) {
-            this.#spatialGridDebugger.setCamera(camera);
+
+        if (this.#enableSpatialGrid && this.#spatialGridDebugger && this.#spatialGridDebugger.visible) {
+            if (camera) this.#spatialGridDebugger.camera = camera;
             this.#spatialGridDebugger.update();
         }
-        if (this.#vhtDebugger?.visible) {
-            this.#vhtDebugger.setCamera(camera);
+
+        if (this.#enableVHT && this.#vhtDebugger && this.#vhtDebugger.visible) {
+            if (camera) this.#vhtDebugger.camera = camera;
             this.#vhtDebugger.update();
         }
-        if (this.#vntDebugger?.visible) {
-            this.#vntDebugger.setCamera(camera);
+
+        if (this.#enableVNT && this.#vntDebugger && this.#vntDebugger.visible) {
+            if (camera) this.#vntDebugger.camera = camera;
             this.#vntDebugger.update();
         }
     }

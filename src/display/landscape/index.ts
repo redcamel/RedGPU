@@ -16,8 +16,8 @@ import type {FoliageTypeOptions} from "./foliage/FoliageType";
 import FoliageType from "./foliage/FoliageType";
 import FoliageInstanceBuffer from "./foliage/FoliageInstanceBuffer";
 import CrossBillboardMaterial from "./foliage/core/impostor/crossBillboard/CrossBillboardMaterial";
-import type {LandscapeDebuggerManagerOptions} from "./debugger/LandscapeDebuggerManager";
-import LandscapeDebuggerManager from "./debugger/LandscapeDebuggerManager";
+import type {LandscapeDebuggerManagerOptions} from "./debugger";
+import LandscapeDebuggerManager from "./debugger";
 
 export {
     Landscape,

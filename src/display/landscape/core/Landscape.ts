@@ -18,7 +18,7 @@ import Object3DContainer from "../../mesh/core/Object3DContainer";
 import LandscapeFoliageManager from "../foliage/LandscapeFoliageManager";
 import {LandscapeGPUCuller} from "../spatial/LandscapeGPUCuller";
 import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
-import LandscapeDebuggerManager from "../debugger/LandscapeDebuggerManager";
+import LandscapeDebuggerManager from "../debugger";
 
 const DEFAULT_LOD_COLORS: [number, number, number, number][] = [
     [0.18, 0.8, 0.44, 1.0],

@@ -393,9 +393,6 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
         moveSpeed: controller ? controller.moveSpeed : 5000,
 
         // 7. Debuggers
-        spatialGridVisible: true,
-        vhtDebuggerVisible: true,
-        vntDebuggerVisible: true,
         boxSize: 100
     };
 
@@ -446,9 +443,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     const target = grassType || foliageManager?.getFoliageType('ElmTree');
                     if (target) target.options.fadeStartDistance = ev.value;
                 });
-                folderFoliage.addBinding(config, 'billboardWireframe', {
-                    title: 'Billboard Wireframe'
-                }).on('change', (ev) => {
+                folderFoliage.addBinding(config, 'billboardWireframe').on('change', (ev) => {
                     const target = grassType || foliageManager?.getFoliageType('ElmTree');
                     if (target) {
                         target.setBillboardWireframe(ev.value);
@@ -701,7 +696,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
 
             // Folder 6: Camera Controls
             if (controller) {
-                const folderCam = pane.addFolder({title: '🎮 Camera Controls', expanded: true});
+                const folderCam = pane.addFolder({title: 'Camera', expanded: true});
                 folderCam.addBinding(config, 'moveSpeed', {
                     min: 500,
                     max: 20000,
@@ -710,7 +705,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     controller.moveSpeed = ev.value;
                 });
 
-                folderCam.addButton({title: '🎯 Reset Camera View'}).on('click', () => {
+                folderCam.addButton({title: 'resetCamera'}).on('click', () => {
                     controller.x = 0;
                     controller.y = 800;
                     controller.z = 2500;
@@ -720,52 +715,35 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 });
             }
 
-            // Folder 7: Debugger Controls (HUD, SpatialGrid, VHT & VNT)
-            const folderDebuggers = pane.addFolder({
-                title: '🔍 Debugger Controls (HUD, SpatialGrid, VHT & VNT)',
-                expanded: true
-            });
+            // Folder 7: Debugger Controls
+            if (landscape?.debuggerManager) {
+                const dbg = landscape.debuggerManager;
+                const folderDebuggers = pane.addFolder({title: 'debuggerManager', expanded: true});
 
-            const dbg = landscape?.debuggerManager;
-            config.hudDebuggerVisible = dbg ? dbg.hud : true;
-            config.spatialGridVisible = dbg ? dbg.spatialGrid : true;
-            config.vhtDebuggerVisible = dbg ? dbg.vht : true;
-            config.vntDebuggerVisible = dbg ? dbg.vnt : true;
+                folderDebuggers.addBinding(dbg, 'hud');
+                folderDebuggers.addBinding(dbg, 'spatialGrid');
+                folderDebuggers.addBinding(dbg, 'vht');
+                folderDebuggers.addBinding(dbg, 'vnt');
 
-            folderDebuggers.addBinding(config, 'hudDebuggerVisible').on('change', (ev) => {
-                if (dbg) dbg.hud = ev.value;
-            });
-
-            folderDebuggers.addBinding(config, 'spatialGridVisible').on('change', (ev) => {
-                if (dbg) dbg.spatialGrid = ev.value;
-            });
-
-            folderDebuggers.addBinding(config, 'vhtDebuggerVisible').on('change', (ev) => {
-                if (dbg) dbg.vht = ev.value;
-            });
-
-            folderDebuggers.addBinding(config, 'vntDebuggerVisible').on('change', (ev) => {
-                if (dbg) dbg.vnt = ev.value;
-            });
-
-            folderDebuggers.addBinding(config, 'boxSize', {
-                min: 60,
-                max: 300,
-                step: 10
-            }).on('change', (ev) => {
-                const sz = ev.value;
-                if (dbg?.spatialGridDebugger) {
-                    dbg.spatialGridDebugger.setSize(sz, sz);
-                }
-                if (dbg?.vhtDebugger) {
-                    dbg.vhtDebugger.setSize(sz, sz);
-                    dbg.vhtDebugger.setPosition(12 + sz + 10, 12);
-                }
-                if (dbg?.vntDebugger) {
-                    dbg.vntDebugger.setSize(sz, sz);
-                    dbg.vntDebugger.setPosition(12 + (sz + 10) * 2, 12);
-                }
-            });
+                folderDebuggers.addBinding(config, 'boxSize', {
+                    min: 60,
+                    max: 300,
+                    step: 10
+                }).on('change', (ev) => {
+                    const sz = ev.value;
+                    if (dbg.spatialGridDebugger) {
+                        dbg.spatialGridDebugger.setSize(sz, sz);
+                    }
+                    if (dbg.vhtDebugger) {
+                        dbg.vhtDebugger.setSize(sz, sz);
+                        dbg.vhtDebugger.setPosition(12 + sz + 10, 12);
+                    }
+                    if (dbg.vntDebugger) {
+                        dbg.vntDebugger.setSize(sz, sz);
+                        dbg.vntDebugger.setPosition(12 + (sz + 10) * 2, 12);
+                    }
+                });
+            }
         }
     });
 };

@@ -1,6 +1,6 @@
-import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "./ALandscapeDebugger";
-import Landscape from "../core/Landscape";
-import RenderViewStateData from "../../view/core/RenderViewStateData";
+import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "../core/ALandscapeDebugger";
+import Landscape from "../../core/Landscape";
+import RenderViewStateData from "../../../view/core/RenderViewStateData";
 
 export class LandscapeHUDDebugger extends ALandscapeDebugger {
     #containerEl: HTMLDivElement | null = null;
@@ -34,7 +34,7 @@ export class LandscapeHUDDebugger extends ALandscapeDebugger {
     override set visible(val: boolean) {
         super.visible = val;
         if (this.#containerEl) {
-            this.#containerEl.style.display = val ? 'block' : 'none';
+            this.#containerEl.style.setProperty('display', val ? 'block' : 'none', 'important');
         }
     }
 
@@ -50,9 +50,9 @@ export class LandscapeHUDDebugger extends ALandscapeDebugger {
 
     updatePositionAndSize(): void {
         if (!this.#containerEl) return;
-        this.#containerEl.style.left = `${this.left}px`;
-        this.#containerEl.style.bottom = `${this.bottom}px`;
-        this.#containerEl.style.width = `${this.width}px`;
+        this.#containerEl.style.setProperty('left', `${this.left}px`, 'important');
+        this.#containerEl.style.setProperty('bottom', `${this.bottom}px`, 'important');
+        this.#containerEl.style.setProperty('width', `${this.width}px`, 'important');
     }
 
     update(renderViewStateData?: RenderViewStateData): void {
@@ -211,26 +211,10 @@ export class LandscapeHUDDebugger extends ALandscapeDebugger {
 
     #initHUDContainer(): void {
         const container = document.createElement('div');
-        container.style.position = 'fixed';
-        container.style.zIndex = '999999';
-        container.style.padding = '12px 14px';
-        container.style.backgroundColor = 'rgba(15, 23, 42, 0.92)';
-        container.style.backdropFilter = 'blur(12px)';
-        container.style.border = '1px solid rgba(255, 255, 255, 0.1)';
-        container.style.borderRadius = '8px';
-        container.style.color = '#e2e8f0';
-        container.style.fontFamily = 'monospace, sans-serif';
-        container.style.fontSize = '12px';
-        container.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.5)';
+        container.className = 'redgpu-landscape-hud';
 
         const title = document.createElement('div');
-        title.style.fontWeight = '700';
-        title.style.fontSize = '13px';
-        title.style.letterSpacing = '0.5px';
-        title.style.marginBottom = '8px';
-        title.style.color = '#38bdf8';
-        title.style.borderBottom = '1px solid rgba(56, 189, 248, 0.25)';
-        title.style.paddingBottom = '6px';
+        title.className = 'redgpu-landscape-hud-title';
         title.innerText = this.#titleText;
 
         const statsContent = document.createElement('div');

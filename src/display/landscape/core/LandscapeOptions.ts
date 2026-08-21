@@ -1,6 +1,6 @@
 import LANDSCAPE_BASE_GRID_SIZE from "./LANDSCAPE_BASE_GRID_SIZE";
 import LandscapeMaterial from "../material/LandscapeMaterial";
-import type {LandscapeDebuggerManagerOptions} from "../debugger/LandscapeDebuggerManager";
+import type {LandscapeDebuggerManagerOptions} from "../debugger";
 
 export interface LandscapeOptions {
 

@@ -1,0 +1,65 @@
+import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "../core/ALandscapeDebugger";
+import Landscape from "../../core/Landscape";
+
+export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
+    #ctx: CanvasRenderingContext2D | null;
+
+    constructor(
+        landscape: Landscape,
+        cameraOrOptions?: any,
+        options?: ALandscapeDebuggerOptions
+    ) {
+        super(landscape, cameraOrOptions, options);
+        this.#ctx = this.canvas.getContext('2d');
+    }
+
+    update(): void {
+        if (!this.visible || !this.#ctx || !this.landscape) return;
+
+        const state = this.getCameraState();
+        if (!state) return;
+
+        const dpr = this.dpr || 1;
+        const w = this.contentWidth;
+        const h = this.contentHeight;
+
+        this.#ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.#ctx.save();
+        this.#ctx.scale(dpr, dpr);
+
+        const components = this.landscape.landscapeComponents || [];
+        const [tcX, tcZ] = this.landscape.componentCount;
+        const cellW = w / tcX;
+        const cellH = h / tcZ;
+
+        const activeCount = components.length;
+        for (let i = 0; i < activeCount; i++) {
+            const comp = components[i];
+            const cx = comp.componentX * cellW;
+            const cy = comp.componentZ * cellH;
+
+            const isCulled = comp.lodLevel < 0;
+            const isLoaded = this.landscape.tileStreamer && this.landscape.tileStreamer.isTileLoaded(comp.componentZ, comp.componentX);
+
+            if (isCulled) {
+                this.#ctx.fillStyle = 'rgba(239, 68, 68, 0.35)';
+                this.#ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
+            } else if (isLoaded) {
+                this.#ctx.fillStyle = 'rgba(56, 189, 248, 0.45)';
+                this.#ctx.strokeStyle = 'rgba(56, 189, 248, 0.8)';
+            } else {
+                this.#ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+                this.#ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            }
+
+            this.#ctx.fillRect(cx, cy, cellW, cellH);
+            this.#ctx.strokeRect(cx, cy, cellW, cellH);
+        }
+
+        this.drawCameraOverlay2D(this.#ctx, state, w, h, 0);
+
+        this.#ctx.restore();
+    }
+}
+
+export default LandscapeSpatialGridDebugger;
