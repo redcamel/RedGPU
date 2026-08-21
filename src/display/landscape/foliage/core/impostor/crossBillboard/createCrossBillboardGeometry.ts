@@ -22,7 +22,6 @@ function createCrossBillboardGeometry(
     redGPUContext: RedGPUContext,
     width: number = 6.0,
     height: number = 8.0,
-    sphericalCenterHeightRatio: number = 0.6,
     wireframe: boolean = false
 ): Geometry {
     const halfW = width * 0.5;

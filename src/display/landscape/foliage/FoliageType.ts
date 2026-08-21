@@ -219,7 +219,7 @@ class FoliageType {
         const bbWidth = (billboardSub as any)._bakedWidth ?? 6.0;
         const bbHeight = (billboardSub as any)._bakedHeight ?? 8.0;
 
-        const newGeom = createCrossBillboardGeometry(this.#redGPUContext, bbWidth, bbHeight, 0.6, wireframe);
+        const newGeom = createCrossBillboardGeometry(this.#redGPUContext, bbWidth, bbHeight, wireframe);
         billboardSub.geometry = newGeom;
         billboardSub.mesh.geometry = newGeom;
         billboardSub.indexCount = newGeom.indexBuffer?.indexCount || 0;

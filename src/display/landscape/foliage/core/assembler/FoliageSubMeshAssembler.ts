@@ -23,6 +23,7 @@ const PBR_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
     },
     'PBR'
 );
+const PBR_STRIDE = 18;
 
 export interface FoliageAssemblyResult {
     subMeshes: FoliageSubMesh[];
@@ -485,7 +486,7 @@ class FoliageSubMeshAssembler {
                 bbMat,
                 mat4.create(),
                 mat4.create(),
-                48,
+                PBR_STRIDE * 4,
                 1
             );
             (bbSubMesh as any)._bakedWidth = bbWidth;

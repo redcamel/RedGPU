@@ -17,8 +17,7 @@ export interface FoliageBakeResult {
 
 class FoliageImpostorBaker {
     static #bakePipelineCache: Map<string, GPURenderPipeline> = new Map();
-    static #bakeBindGroupLayout0: GPUBindGroupLayout | null = null;
-    static #bakeBindGroupLayout1: GPUBindGroupLayout | null = null;
+    static #bakeBindGroupLayout: GPUBindGroupLayout | null = null;
 
     static calculateAABBFromSubMeshes(subMeshes: FoliageSubMesh[]): {
         min: [number, number, number];
@@ -162,38 +161,12 @@ class FoliageImpostorBaker {
             },
         });
 
+        const tempBuffersToDestroy: GPUBuffer[] = [];
+
         for (let v = 0; v < renderPassViews.length; v++) {
             const vpInfo = renderPassViews[v];
             renderPass.setViewport(vpInfo.vpX, vpInfo.vpY, resolution, resolution, 0, 1);
             renderPass.setScissorRect(vpInfo.vpX, vpInfo.vpY, resolution, resolution);
-
-            const uniformData = new Float32Array(8);
-            uniformData[0] = vpInfo.lightDir[0];
-            uniformData[1] = vpInfo.lightDir[1];
-            uniformData[2] = vpInfo.lightDir[2];
-            uniformData[3] = 0;
-            uniformData[4] = resolution;
-            uniformData[5] = resolution;
-            uniformData[6] = 0;
-            uniformData[7] = 0;
-
-            const uniformGPUBuffer = gpuDevice.createBuffer({
-                label: `BakeUniformBuffer_${v}`,
-                size: 32,
-                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-                mappedAtCreation: true,
-            });
-            new Float32Array(uniformGPUBuffer.getMappedRange()).set(uniformData);
-            uniformGPUBuffer.unmap();
-
-            const bindGroup0 = gpuDevice.createBindGroup({
-                label: `BakeBindGroup0_${v}`,
-                layout: this.#bakeBindGroupLayout0!,
-                entries: [
-                    {binding: 0, resource: {buffer: uniformGPUBuffer}}
-                ]
-            });
-            renderPass.setBindGroup(0, bindGroup0);
 
             for (let s = 0; s < subMeshes.length; s++) {
                 const sub = subMeshes[s];
@@ -214,15 +187,15 @@ class FoliageImpostorBaker {
                     gpuTextureView = redGPUContext.resourceManager.emptyBitmapTextureView;
                 }
 
-                const bindGroup1 = gpuDevice.createBindGroup({
-                    label: `BakeBindGroup1_${s}`,
-                    layout: this.#bakeBindGroupLayout1!,
+                const bindGroup = gpuDevice.createBindGroup({
+                    label: `BakeBindGroup_${s}`,
+                    layout: this.#bakeBindGroupLayout!,
                     entries: [
                         {binding: 0, resource: gpuTextureView},
                         {binding: 1, resource: sampler.gpuSampler},
                     ]
                 });
-                renderPass.setBindGroup(1, bindGroup1);
+                renderPass.setBindGroup(0, bindGroup);
 
                 const vBuffer = sub.geometry.vertexBuffer?.gpuBuffer;
                 if (!vBuffer) continue;
@@ -230,22 +203,18 @@ class FoliageImpostorBaker {
                 const mvp = mat4.create();
                 mat4.multiply(mvp, vpInfo.projView, sub.relativeModelMatrix);
 
-                const normMat = mat4.create();
-                mat4.invert(normMat, sub.relativeModelMatrix);
-                mat4.transpose(normMat, normMat);
-
-                const transformData = new Float32Array(32);
+                const transformData = new Float32Array(16);
                 transformData.set(mvp, 0);
-                transformData.set(normMat, 16);
 
                 const transformGPUBuffer = gpuDevice.createBuffer({
                     label: `BakeTransformBuffer_${s}`,
-                    size: 128,
+                    size: 64,
                     usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
                     mappedAtCreation: true,
                 });
                 new Float32Array(transformGPUBuffer.getMappedRange()).set(transformData);
                 transformGPUBuffer.unmap();
+                tempBuffersToDestroy.push(transformGPUBuffer);
 
                 renderPass.setVertexBuffer(0, vBuffer);
                 renderPass.setVertexBuffer(1, transformGPUBuffer);
@@ -261,6 +230,11 @@ class FoliageImpostorBaker {
 
         renderPass.end();
         gpuDevice.queue.submit([commandEncoder.finish()]);
+
+        depthGPUTexture.destroy();
+        for (let b = 0; b < tempBuffersToDestroy.length; b++) {
+            tempBuffersToDestroy[b].destroy();
+        }
 
         if (mipLevelCount > 1) {
             redGPUContext.resourceManager.mipmapGenerator.generateMipmap(
@@ -379,17 +353,9 @@ class FoliageImpostorBaker {
     }
 
     static #initBindGroupLayouts(gpuDevice: GPUDevice) {
-        if (!this.#bakeBindGroupLayout0) {
-            this.#bakeBindGroupLayout0 = gpuDevice.createBindGroupLayout({
-                label: 'BakeBindGroupLayout0',
-                entries: [
-                    {binding: 0, visibility: GPUShaderStage.FRAGMENT, buffer: {type: 'uniform'}}
-                ]
-            });
-        }
-        if (!this.#bakeBindGroupLayout1) {
-            this.#bakeBindGroupLayout1 = gpuDevice.createBindGroupLayout({
-                label: 'BakeBindGroupLayout1',
+        if (!this.#bakeBindGroupLayout) {
+            this.#bakeBindGroupLayout = gpuDevice.createBindGroupLayout({
+                label: 'BakeBindGroupLayout',
                 entries: [
                     {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
                     {binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
@@ -407,8 +373,6 @@ class FoliageImpostorBaker {
             struct VertexOutput {
                 @builtin(position) position: vec4<f32>,
                 @location(0) uv: vec2<f32>,
-                @location(1) normal: vec3<f32>,
-                @location(2) worldPosition: vec3<f32>,
             };
 
             struct TransformInput {
@@ -416,10 +380,6 @@ class FoliageImpostorBaker {
                 @location(4) mvp1: vec4<f32>,
                 @location(5) mvp2: vec4<f32>,
                 @location(6) mvp3: vec4<f32>,
-                @location(7) norm0: vec4<f32>,
-                @location(8) norm1: vec4<f32>,
-                @location(9) norm2: vec4<f32>,
-                @location(10) norm3: vec4<f32>,
             };
 
             @vertex
@@ -431,12 +391,8 @@ class FoliageImpostorBaker {
             ) -> VertexOutput {
                 var out: VertexOutput;
                 let mvp = mat4x4<f32>(trans.mvp0, trans.mvp1, trans.mvp2, trans.mvp3);
-                let normMat = mat4x4<f32>(trans.norm0, trans.norm1, trans.norm2, trans.norm3);
-
                 out.position = mvp * vec4<f32>(position, 1.0);
                 out.uv = uv;
-                out.normal = (normMat * vec4<f32>(normal, 0.0)).xyz;
-                out.worldPosition = position;
                 return out;
             }
         `;
@@ -446,7 +402,7 @@ class FoliageImpostorBaker {
 
         const pipelineLayout = gpuDevice.createPipelineLayout({
             label: 'BakePipelineLayout',
-            bindGroupLayouts: [this.#bakeBindGroupLayout0!, this.#bakeBindGroupLayout1!]
+            bindGroupLayouts: [this.#bakeBindGroupLayout!]
         });
 
         pipeline = gpuDevice.createRenderPipeline({
@@ -465,17 +421,13 @@ class FoliageImpostorBaker {
                         ]
                     },
                     {
-                        arrayStride: 128,
+                        arrayStride: 64,
                         stepMode: 'instance',
                         attributes: [
                             {shaderLocation: 3, offset: 0, format: 'float32x4'},
                             {shaderLocation: 4, offset: 16, format: 'float32x4'},
                             {shaderLocation: 5, offset: 32, format: 'float32x4'},
                             {shaderLocation: 6, offset: 48, format: 'float32x4'},
-                            {shaderLocation: 7, offset: 64, format: 'float32x4'},
-                            {shaderLocation: 8, offset: 80, format: 'float32x4'},
-                            {shaderLocation: 9, offset: 96, format: 'float32x4'},
-                            {shaderLocation: 10, offset: 112, format: 'float32x4'},
                         ]
                     }
                 ]
