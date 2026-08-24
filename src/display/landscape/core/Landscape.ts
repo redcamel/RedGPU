@@ -652,6 +652,10 @@ export class Landscape extends Object3DContainer {
         return this.#lodColorsRGBA;
     }
 
+    get lodDistancesSq(): number[] {
+        return this.#lodDistancesSq;
+    }
+
     get tileUrlResolver(): LandscapeTileUrlResolver | null {
         return this.#tileStreamer.tileUrlResolver;
     }
