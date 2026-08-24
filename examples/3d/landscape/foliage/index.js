@@ -318,14 +318,8 @@ RedGPU.init(
         );
 
 
-        // 5-1. Landscape 내장 디버거 관리자(debuggerManager) 활성화 (HUD 모니터, 2D 공간 분할 그리드, VHT 고도 아틀라스, VNT 노멀 아틀라스)
-        landscape.debuggerManager.hud = true;
+        // 5-1. Landscape 내장 디버거 관리자(debuggerManager) 활성화 (Spatial Grid 디버거만 기본 활성화)
         landscape.debuggerManager.spatialGrid = true;
-        landscape.debuggerManager.vht = true;
-        landscape.debuggerManager.vnt = true;
-        landscape.debuggerManager.vbt = true;
-        landscape.debuggerManager.vbtNormal = true;
-        landscape.debuggerManager.vbtORM = true;
 
         // 6. RedGPU 정식 Renderer 생성 및 렌더 루프 시작 (디버거는 landscape.update 내부에서 자동 갱신됨)
         const renderer = new RedGPU.Renderer();
