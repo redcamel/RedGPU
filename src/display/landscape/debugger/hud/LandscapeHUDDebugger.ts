@@ -1,6 +1,7 @@
 import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "../core/ALandscapeDebugger";
 import Landscape from "../../core/Landscape";
 import RenderViewStateData from "../../../view/core/RenderViewStateData";
+import {formatLODColorHex, LANDSCAPE_DEFAULT_LOD_HEX_STRINGS} from "../../core/LANDSCAPE_DEFAULT_LOD_COLORS";
 
 export class LandscapeHUDDebugger extends ALandscapeDebugger {
     #containerEl: HTMLDivElement | null = null;
@@ -98,8 +99,7 @@ export class LandscapeHUDDebugger extends ALandscapeDebugger {
             activeTotalTris += count * trisPerTile;
             activeTotalVerts += count * vertsPerTile;
 
-            const colorTuple = lodColors[i] ?? [0.5, 0.5, 0.5, 1];
-            const hexColor = `#${Math.floor(colorTuple[0] * 255).toString(16).padStart(2, '0')}${Math.floor(colorTuple[1] * 255).toString(16).padStart(2, '0')}${Math.floor(colorTuple[2] * 255).toString(16).padStart(2, '0')}`;
+            const hexColor = (lodColors[i]) ? formatLODColorHex(lodColors[i]) : (LANDSCAPE_DEFAULT_LOD_HEX_STRINGS[i % LANDSCAPE_DEFAULT_LOD_HEX_STRINGS.length] ?? '#3b82f6');
 
             const percentOfActive = visCompCount > 0 ? Math.min(100, Math.round((count / visCompCount) * 100)) : 0;
 

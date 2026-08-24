@@ -1,22 +1,13 @@
 import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "../core/ALandscapeDebugger";
 import Landscape from "../../core/Landscape";
-
-const DEFAULT_LOD_COLOR_STRINGS: string[] = [
-    'rgba(59, 130, 246, 0.75)',   // LOD 0 (Blue)
-    'rgba(16, 185, 129, 0.75)',   // LOD 1 (Emerald Green)
-    'rgba(234, 179, 8, 0.75)',    // LOD 2 (Yellow)
-    'rgba(249, 115, 22, 0.75)',   // LOD 3 (Orange)
-    'rgba(239, 68, 68, 0.75)',    // LOD 4 (Red)
-    'rgba(168, 85, 247, 0.75)',   // LOD 5 (Purple)
-    'rgba(236, 72, 153, 0.75)',   // LOD 6 (Pink)
-    'rgba(148, 163, 184, 0.75)'   // LOD 7 (Slate)
-];
+import {formatLODColorRGBA, LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS} from "../../core/LANDSCAPE_DEFAULT_LOD_COLORS";
 
 const UNLOADED_COLOR = 'rgba(255, 255, 255, 0.08)';
 
 export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
     #ctx: CanvasRenderingContext2D | null;
-    #cachedLODColorStrings: string[] = [];
+    #cachedLODColorStrings: readonly string[] = LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS;
+    #lastLODColorsRef: any = null;
 
     constructor(
         landscape: Landscape,
@@ -29,6 +20,20 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
         };
         super(landscape, cameraOrOptions, defaultOptions);
         this.#ctx = this.canvas.getContext('2d');
+    }
+
+    #updateCachedColors(): void {
+        const lodColors = this.landscape?.lodColors;
+        if (!lodColors || lodColors.length === 0) {
+            this.#cachedLODColorStrings = LANDSCAPE_DEFAULT_LOD_RGBA_STRINGS;
+            this.#lastLODColorsRef = null;
+            return;
+        }
+
+        if (this.#lastLODColorsRef !== lodColors) {
+            this.#lastLODColorsRef = lodColors;
+            this.#cachedLODColorStrings = Object.freeze(lodColors.map(c => formatLODColorRGBA(c, 0.75)));
+        }
     }
 
     update(): void {
@@ -98,20 +103,6 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
 
         // 공통 2D 타일 그리드 및 카메라 오버레이 렌더링
         this.renderOverlay();
-    }
-
-    #updateCachedColors(): void {
-        const lodColors = this.landscape?.lodColors;
-        if (!lodColors || lodColors.length === 0) {
-            this.#cachedLODColorStrings = DEFAULT_LOD_COLOR_STRINGS;
-            return;
-        }
-
-        if (this.#cachedLODColorStrings.length !== lodColors.length) {
-            this.#cachedLODColorStrings = lodColors.map(c =>
-                `rgba(${Math.round(c[0] * 255)}, ${Math.round(c[1] * 255)}, ${Math.round(c[2] * 255)}, 0.75)`
-            );
-        }
     }
 }
 

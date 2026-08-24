@@ -19,17 +19,7 @@ import LandscapeFoliageManager from "../foliage/LandscapeFoliageManager";
 import {LandscapeGPUCuller} from "../spatial/LandscapeGPUCuller";
 import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
 import LandscapeDebuggerManager from "../debugger";
-
-const DEFAULT_LOD_COLORS: [number, number, number, number][] = [
-    [0.18, 0.8, 0.44, 1.0],
-    [0.95, 0.77, 0.06, 1.0],
-    [0.9, 0.49, 0.13, 1.0],
-    [0.91, 0.3, 0.24, 1.0],
-    [0.61, 0.35, 0.71, 1.0],
-    [0.1, 0.74, 0.61, 1.0],
-    [0.2, 0.6, 0.86, 1.0],
-    [0.93, 0.94, 0.95, 1.0]
-];
+import LANDSCAPE_DEFAULT_LOD_COLORS from "./LANDSCAPE_DEFAULT_LOD_COLORS";
 
 export class Landscape extends Object3DContainer {
     #redGPUContext: RedGPUContext;
@@ -722,7 +712,7 @@ export class Landscape extends Object3DContainer {
         this.#lodMultipliers.length = 0;
 
         for (let i = 0; i < this.#maxLODLevel; i++) {
-            this.#lodColorsRGBA.push(DEFAULT_LOD_COLORS[i % DEFAULT_LOD_COLORS.length]);
+            this.#lodColorsRGBA.push(LANDSCAPE_DEFAULT_LOD_COLORS[i % LANDSCAPE_DEFAULT_LOD_COLORS.length] as [number, number, number, number]);
         }
 
         const defaultMultipliers = [1.0, 2.0, 3.5, 6.0, 9.5, 14.0, 20.0];

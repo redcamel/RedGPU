@@ -1,6 +1,7 @@
 import Landscape from "./core/Landscape";
 import LandscapeOptions from "./core/LandscapeOptions";
 import LANDSCAPE_BASE_GRID_SIZE, {validateLandscapeBaseGridSize} from "./core/LANDSCAPE_BASE_GRID_SIZE";
+import LANDSCAPE_DEFAULT_LOD_COLORS from "./core/LANDSCAPE_DEFAULT_LOD_COLORS";
 import LandscapeComponent from "./spatial/LandscapeComponent";
 import LandscapeInstanceBuffer from "./spatial/LandscapeInstanceBuffer";
 import LandscapeSharedGeometry from "./spatial/LandscapeSharedGeometry";
@@ -38,7 +39,8 @@ export {
     FoliageType,
     FoliageInstanceBuffer,
     CrossBillboardMaterial,
-    LandscapeDebuggerManager
+    LandscapeDebuggerManager,
+    LANDSCAPE_DEFAULT_LOD_COLORS
 };
 
 export type {
