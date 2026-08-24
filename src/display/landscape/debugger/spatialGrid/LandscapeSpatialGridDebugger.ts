@@ -16,9 +16,6 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
     update(): void {
         if (!this.visible || !this.#ctx || !this.landscape) return;
 
-        const state = this.getCameraState();
-        if (!state) return;
-
         const dpr = this.dpr || 1;
         const w = this.contentWidth;
         const h = this.contentHeight;
@@ -56,9 +53,10 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
             this.#ctx.strokeRect(cx, cy, cellW, cellH);
         }
 
-        this.drawCameraOverlay2D(this.#ctx, state, w, h, 0);
-
         this.#ctx.restore();
+
+        // 공통 2D 카메라 오버레이 렌더링
+        this.renderOverlay();
     }
 }
 

@@ -1,6 +1,4 @@
 import Landscape from "../../core/Landscape";
-import cameraParamsStructWGSL from "./shader/cameraParamsStruct.wgsl";
-import cameraOverlayFunctionWGSL from "./shader/cameraOverlayFunction.wgsl";
 import fullscreenQuadVertexWGSL from "./shader/fullscreenQuadVertex.wgsl";
 
 export interface ALandscapeDebuggerOptions {
@@ -69,6 +67,20 @@ function ensureDebuggerStyles(): void {
             border: ${CANVAS_BORDER}px solid rgba(255, 255, 255, 0.35) !important;
             border-radius: 3px !important;
             display: block !important;
+            z-index: 1 !important;
+        }
+        .redgpu-landscape-debugger-overlay {
+            position: absolute !important;
+            left: 50% !important;
+            top: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            box-sizing: border-box !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            pointer-events: none !important;
+            display: block !important;
+            z-index: 2 !important;
         }
         .redgpu-landscape-hud {
             position: fixed !important;
@@ -103,20 +115,21 @@ function ensureDebuggerStyles(): void {
 }
 
 export abstract class ALandscapeDebugger {
-    static readonly CAMERA_PARAMS_WGSL_STRUCT: string = cameraParamsStructWGSL;
-    static readonly CAMERA_OVERLAY_WGSL_FUNCTION: string = cameraOverlayFunctionWGSL;
-    static readonly FULLSCREEN_QUAD_VERTEX_WGSL: string = fullscreenQuadVertexWGSL;
     #landscape: Landscape;
     #container: HTMLDivElement;
     #canvas: HTMLCanvasElement;
+    static readonly FULLSCREEN_QUAD_VERTEX_WGSL: string = fullscreenQuadVertexWGSL;
+    #overlayCanvas: HTMLCanvasElement;
     #visible: boolean = true;
     #camera: any = null;
+
     #width: number;
     #height: number;
     #contentWidth: number;
     #contentHeight: number;
     #left: number;
     #bottom: number;
+
     #cameraState: LandscapeDebuggerCameraState = {
         camX: 0,
         camZ: 0,
@@ -135,7 +148,9 @@ export abstract class ALandscapeDebugger {
         worldMinX: -500,
         worldMinZ: -500
     };
+
     #dpr: number = 1;
+    #overlayCtx: CanvasRenderingContext2D | null = null;
 
     constructor(
         landscape: Landscape,
@@ -177,7 +192,6 @@ export abstract class ALandscapeDebugger {
         container.style.setProperty('width', `${w}px`, 'important');
         container.style.setProperty('height', `${h}px`, 'important');
 
-        // 컨테이너 정중앙 배치를 위한 캔버스 크기 계산
         const canvasCSSWidth = Math.max(10, w - INNER_MARGIN * 2);
         const canvasCSSHeight = Math.max(10, h - INNER_MARGIN * 2);
 
@@ -187,6 +201,7 @@ export abstract class ALandscapeDebugger {
         this.#contentWidth = renderWidth;
         this.#contentHeight = renderHeight;
 
+        // 1. 베이스 캔버스 (2D 그리드 또는 WebGPU 텍스처 전용)
         const canvas = document.createElement('canvas');
         if (canvasId) {
             canvas.id = canvasId;
@@ -197,11 +212,26 @@ export abstract class ALandscapeDebugger {
         canvas.width = Math.round(renderWidth * dpr);
         canvas.height = Math.round(renderHeight * dpr);
 
+        // 2. 공통 오버레이 캔버스 (카메라 시야각/FOV/로딩 링 전용)
+        const overlayCanvas = document.createElement('canvas');
+        overlayCanvas.className = 'redgpu-landscape-debugger-overlay';
+        overlayCanvas.style.setProperty('width', `${renderWidth}px`, 'important');
+        overlayCanvas.style.setProperty('height', `${renderHeight}px`, 'important');
+        overlayCanvas.width = Math.round(renderWidth * dpr);
+        overlayCanvas.height = Math.round(renderHeight * dpr);
+        this.#overlayCtx = overlayCanvas.getContext('2d');
+
         container.appendChild(canvas);
+        container.appendChild(overlayCanvas);
         document.body.appendChild(container);
 
         this.#container = container;
         this.#canvas = canvas;
+        this.#overlayCanvas = overlayCanvas;
+    }
+
+    get overlayCanvas(): HTMLCanvasElement {
+        return this.#overlayCanvas;
     }
 
     get landscape(): Landscape {
@@ -216,6 +246,12 @@ export abstract class ALandscapeDebugger {
         return this.#canvas;
     }
 
+    static getPreferredCanvasFormat(): GPUTextureFormat {
+        return (typeof navigator !== 'undefined' && navigator.gpu?.getPreferredCanvasFormat)
+            ? navigator.gpu.getPreferredCanvasFormat()
+            : 'bgra8unorm';
+    }
+
     get visible(): boolean {
         return this.#visible;
     }
@@ -223,6 +259,19 @@ export abstract class ALandscapeDebugger {
     set visible(val: boolean) {
         this.#visible = val;
         this.#container.style.setProperty('display', val ? 'block' : 'none', 'important');
+    }
+
+    show(): void {
+        this.visible = true;
+    }
+
+    hide(): void {
+        this.visible = false;
+    }
+
+    toggle(): boolean {
+        this.visible = !this.visible;
+        return this.visible;
     }
 
     get camera(): any {
@@ -277,49 +326,6 @@ export abstract class ALandscapeDebugger {
         this.setPosition(this.#left, b);
     }
 
-    static getPreferredCanvasFormat(): GPUTextureFormat {
-        return (typeof navigator !== 'undefined' && navigator.gpu?.getPreferredCanvasFormat)
-            ? navigator.gpu.getPreferredCanvasFormat()
-            : 'bgra8unorm';
-    }
-
-    static createCameraUniformBuffer(gpuDevice: GPUDevice, label: string = 'LandscapeDebuggerCameraUniformBuffer'): GPUBuffer {
-        return gpuDevice.createBuffer({
-            label,
-            size: 32,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-        });
-    }
-
-    static writeCameraUniformData(
-        dataArray: Float32Array,
-        state: LandscapeDebuggerCameraState,
-        componentCountX: number,
-        componentCountZ: number
-    ): void {
-        dataArray[0] = state.camNormX;
-        dataArray[1] = state.camNormZ;
-        dataArray[2] = componentCountX;
-        dataArray[3] = componentCountZ;
-        dataArray[4] = state.panRad;
-        dataArray[5] = state.halfFovRad;
-        dataArray[6] = state.loadingRadiusUV;
-        dataArray[7] = 0.0;
-    }
-
-    show(): void {
-        this.visible = true;
-    }
-
-    hide(): void {
-        this.visible = false;
-    }
-
-    toggle(): boolean {
-        this.visible = !this.visible;
-        return this.visible;
-    }
-
     setCamera(cam: any): void {
         this.#camera = cam;
     }
@@ -371,62 +377,88 @@ export abstract class ALandscapeDebugger {
         return this.#cameraState;
     }
 
-    drawCameraOverlay2D(
-        ctx: CanvasRenderingContext2D,
-        state: LandscapeDebuggerCameraState,
-        canvasWidth: number,
-        canvasHeight: number,
-        padding: number = 0
-    ): void {
-        const {camNormX, camNormZ, lookAngle, halfFovRad, dirX, dirY, loadingRadiusUV} = state;
-        const mapDrawWidth = canvasWidth - padding * 2;
-        const mapDrawHeight = canvasHeight - padding * 2;
+    renderOverlay(): void {
+        if (!this.#overlayCtx) return;
+        const state = this.getCameraState();
+        if (!state) return;
 
-        const camCanvasX = padding + camNormX * mapDrawWidth;
-        const camCanvasY = padding + camNormZ * mapDrawHeight;
-        const radiusPixels = loadingRadiusUV * mapDrawWidth;
+        const dpr = this.#dpr || 1;
+        const w = this.#contentWidth;
+        const h = this.#contentHeight;
+
+        this.#overlayCtx.clearRect(0, 0, this.#overlayCanvas.width, this.#overlayCanvas.height);
+        this.#overlayCtx.save();
+        this.#overlayCtx.scale(dpr, dpr);
+
+        const {camNormX, camNormZ, lookAngle, halfFovRad, dirX, dirY, loadingRadiusUV} = state;
+        const camCanvasX = camNormX * w;
+        const camCanvasY = camNormZ * h;
+        const radiusPixels = loadingRadiusUV * w;
+
+        // 0. 타일 컴포넌트 그리드 격자선 (선명한 1px 그리드)
+        const [tcX, tcZ] = this.#landscape.componentCount;
+        if (tcX > 0 && tcZ > 0) {
+            const cellW = w / tcX;
+            const cellH = h / tcZ;
+            this.#overlayCtx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+            this.#overlayCtx.lineWidth = 1.0;
+            this.#overlayCtx.beginPath();
+            for (let x = 1; x < tcX; x++) {
+                const lx = Math.round(x * cellW) + 0.5;
+                this.#overlayCtx.moveTo(lx, 0);
+                this.#overlayCtx.lineTo(lx, h);
+            }
+            for (let z = 1; z < tcZ; z++) {
+                const lz = Math.round(z * cellH) + 0.5;
+                this.#overlayCtx.moveTo(0, lz);
+                this.#overlayCtx.lineTo(w, lz);
+            }
+            this.#overlayCtx.stroke();
+        }
 
         // 1. 로딩 반경 점선 링 (Emerald Green)
-        ctx.beginPath();
-        ctx.arc(camCanvasX, camCanvasY, radiusPixels, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(52, 211, 153, 0.85)';
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([3, 3]);
-        ctx.stroke();
-        ctx.setLineDash([]);
+        this.#overlayCtx.beginPath();
+        this.#overlayCtx.arc(camCanvasX, camCanvasY, radiusPixels, 0, Math.PI * 2);
+        this.#overlayCtx.strokeStyle = 'rgba(52, 211, 153, 0.85)';
+        this.#overlayCtx.lineWidth = 1.5;
+        this.#overlayCtx.setLineDash([3, 3]);
+        this.#overlayCtx.stroke();
+        this.#overlayCtx.setLineDash([]);
 
         // 2. FOV 시야 부채꼴 (Amber Gold)
         const startAngle = lookAngle - halfFovRad;
         const endAngle = lookAngle + halfFovRad;
         const wedgeRadius = Math.max(16, Math.min(radiusPixels, 36));
 
-        ctx.beginPath();
-        ctx.moveTo(camCanvasX, camCanvasY);
-        ctx.arc(camCanvasX, camCanvasY, wedgeRadius, startAngle, endAngle);
-        ctx.closePath();
-        ctx.fillStyle = 'rgba(251, 191, 36, 0.45)';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(251, 191, 36, 0.95)';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
+        this.#overlayCtx.beginPath();
+        this.#overlayCtx.moveTo(camCanvasX, camCanvasY);
+        this.#overlayCtx.arc(camCanvasX, camCanvasY, wedgeRadius, startAngle, endAngle);
+        this.#overlayCtx.closePath();
+        this.#overlayCtx.fillStyle = 'rgba(251, 191, 36, 0.45)';
+        this.#overlayCtx.fill();
+        this.#overlayCtx.strokeStyle = 'rgba(251, 191, 36, 0.95)';
+        this.#overlayCtx.lineWidth = 1.5;
+        this.#overlayCtx.stroke();
 
         // 3. 시선 중심 가이드 레이 (Coral Red)
         const rayLen = wedgeRadius + 10;
-        ctx.beginPath();
-        ctx.moveTo(camCanvasX, camCanvasY);
-        ctx.lineTo(camCanvasX + dirX * rayLen, camCanvasY + dirY * rayLen);
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 2.0;
-        ctx.stroke();
+        this.#overlayCtx.beginPath();
+        this.#overlayCtx.moveTo(camCanvasX, camCanvasY);
+        this.#overlayCtx.lineTo(camCanvasX + dirX * rayLen, camCanvasY + dirY * rayLen);
+        this.#overlayCtx.strokeStyle = '#ef4444';
+        this.#overlayCtx.lineWidth = 2.0;
+        this.#overlayCtx.stroke();
 
         // 4. 카메라 원점 점 (White Dot with Coral Red Ring)
-        ctx.beginPath();
-        ctx.arc(camCanvasX, camCanvasY, 4.0, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffffff';
-        ctx.fill();
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
+        this.#overlayCtx.beginPath();
+        this.#overlayCtx.arc(camCanvasX, camCanvasY, 4.0, 0, Math.PI * 2);
+        this.#overlayCtx.fillStyle = '#ffffff';
+        this.#overlayCtx.fill();
+        this.#overlayCtx.strokeStyle = '#ef4444';
+        this.#overlayCtx.lineWidth = 1.5;
+        this.#overlayCtx.stroke();
+
+        this.#overlayCtx.restore();
     }
 
     setSize(w: number, h: number): void {
@@ -452,6 +484,11 @@ export abstract class ALandscapeDebugger {
 
         this.#canvas.width = Math.round(renderWidth * dpr);
         this.#canvas.height = Math.round(renderHeight * dpr);
+
+        this.#overlayCanvas.style.setProperty('width', `${renderWidth}px`, 'important');
+        this.#overlayCanvas.style.setProperty('height', `${renderHeight}px`, 'important');
+        this.#overlayCanvas.width = Math.round(renderWidth * dpr);
+        this.#overlayCanvas.height = Math.round(renderHeight * dpr);
     }
 
     setPosition(left: number, bottom: number): void {

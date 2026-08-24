@@ -2,8 +2,6 @@ import ALandscapeDebugger, {ALandscapeDebuggerOptions} from "../core/ALandscapeD
 import Landscape from "../../core/Landscape";
 import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../../material/core";
 import {COMMAND_ENCODER_TYPE} from "../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
-import cameraParamsStructWGSL from "../core/shader/cameraParamsStruct.wgsl";
-import cameraOverlayFunctionWGSL from "../core/shader/cameraOverlayFunction.wgsl";
 import fullscreenQuadVertexWGSL from "../core/shader/fullscreenQuadVertex.wgsl";
 import vntDebuggerWGSL from "./shader/vntDebugger.wgsl";
 
@@ -12,8 +10,6 @@ export class LandscapeVNTDebugger extends ALandscapeDebugger {
     #pipeline: GPURenderPipeline | null = null;
     #bindGroup: GPUBindGroup | null = null;
     #bindGroupLayout: GPUBindGroupLayout | null = null;
-    #cameraUniformBuffer: GPUBuffer | null = null;
-    #cameraDataArray: Float32Array = new Float32Array(8);
     #canvasFormat: GPUTextureFormat = 'bgra8unorm';
     #lastBoundTexture: GPUTexture | null = null;
 
@@ -34,9 +30,6 @@ export class LandscapeVNTDebugger extends ALandscapeDebugger {
             if (!this.#context || !this.#pipeline) return;
         }
 
-        const state = this.getCameraState();
-        if (!state) return;
-
         const redGPUContext = (this.landscape as any)?.redGPUContext;
         const gpuDevice: GPUDevice = redGPUContext?.gpuDevice;
         if (!gpuDevice) return;
@@ -44,7 +37,7 @@ export class LandscapeVNTDebugger extends ALandscapeDebugger {
         const vntTexture = this.landscape.vntAtlasTexture;
         if (!vntTexture || !vntTexture.gpuTexture) return;
 
-        if ((this.#lastBoundTexture !== vntTexture.gpuTexture || !this.#bindGroup) && this.#bindGroupLayout && this.#cameraUniformBuffer) {
+        if ((this.#lastBoundTexture !== vntTexture.gpuTexture || !this.#bindGroup) && this.#bindGroupLayout) {
             try {
                 this.#bindGroup = gpuDevice.createBindGroup({
                     label: 'VNTDebuggerBindGroup',
@@ -53,10 +46,6 @@ export class LandscapeVNTDebugger extends ALandscapeDebugger {
                         {
                             binding: 0,
                             resource: vntTexture.gpuTextureView
-                        },
-                        {
-                            binding: 1,
-                            resource: {buffer: this.#cameraUniformBuffer}
                         }
                     ]
                 });
@@ -68,11 +57,7 @@ export class LandscapeVNTDebugger extends ALandscapeDebugger {
             }
         }
 
-        if (!this.#pipeline || !this.#bindGroup || !this.#cameraUniformBuffer) return;
-
-        const [tcX, tcZ] = this.landscape.componentCount;
-        ALandscapeDebugger.writeCameraUniformData(this.#cameraDataArray, state, tcX, tcZ);
-        gpuDevice.queue.writeBuffer(this.#cameraUniformBuffer, 0, this.#cameraDataArray.buffer, 0, 32);
+        if (!this.#pipeline || !this.#bindGroup) return;
 
         let currentTargetView: GPUTextureView;
         try {
@@ -97,6 +82,9 @@ export class LandscapeVNTDebugger extends ALandscapeDebugger {
             passEncoder.draw(4);
             passEncoder.end();
         });
+
+        // 공통 2D 카메라 오버레이 렌더링
+        this.renderOverlay();
     }
 
     #initWebGPUContext(): void {
@@ -121,8 +109,6 @@ export class LandscapeVNTDebugger extends ALandscapeDebugger {
         const resourceManager = this.landscape.redGPUContext.resourceManager;
         const wgslCode = `
             ${fullscreenQuadVertexWGSL}
-            ${cameraParamsStructWGSL}
-            ${cameraOverlayFunctionWGSL}
             ${vntDebuggerWGSL}
         `;
 
@@ -133,8 +119,6 @@ export class LandscapeVNTDebugger extends ALandscapeDebugger {
                 code: wgslCode
             });
         }
-
-        this.#cameraUniformBuffer = ALandscapeDebugger.createCameraUniformBuffer(gpuDevice, 'VNTDebuggerCameraUniformBuffer');
 
         const descriptor = getFragmentBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0, {
             0: {
