@@ -146,6 +146,9 @@ RedGPU.init(
         landscape.debuggerManager.spatialGrid = true;
         landscape.debuggerManager.vht = true;
         landscape.debuggerManager.vnt = true;
+        landscape.debuggerManager.vbt = true;
+        landscape.debuggerManager.vbtNormal = true;
+        landscape.debuggerManager.vbtORM = true;
 
         // 6. RedGPU 정식 Renderer 생성 및 렌더 루프 시작 (디버거는 landscape.update 내부에서 자동 갱신됨)
         const renderer = new RedGPU.Renderer();
@@ -457,6 +460,9 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 folderDebuggers.addBinding(dbg, 'spatialGrid');
                 folderDebuggers.addBinding(dbg, 'vht');
                 folderDebuggers.addBinding(dbg, 'vnt');
+                folderDebuggers.addBinding(dbg, 'vbt', {label: 'vbt (BaseColor)'});
+                folderDebuggers.addBinding(dbg, 'vbtNormal', {label: 'vbt (Normal)'});
+                folderDebuggers.addBinding(dbg, 'vbtORM', {label: 'vbt (ORM)'});
 
                 folderDebuggers.addBinding(config, 'boxSize', {
                     min: 60,
@@ -474,6 +480,18 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     if (dbg.vntDebugger) {
                         dbg.vntDebugger.setSize(sz, sz);
                         dbg.vntDebugger.setPosition(12 + (sz + 10) * 2, 12);
+                    }
+                    if (dbg.vbtDebugger) {
+                        dbg.vbtDebugger.setSize(sz, sz);
+                        dbg.vbtDebugger.setPosition(12 + (sz + 10) * 3, 12);
+                    }
+                    if (dbg.vbtNormalDebugger) {
+                        dbg.vbtNormalDebugger.setSize(sz, sz);
+                        dbg.vbtNormalDebugger.setPosition(12 + (sz + 10) * 4, 12);
+                    }
+                    if (dbg.vbtORMDebugger) {
+                        dbg.vbtORMDebugger.setSize(sz, sz);
+                        dbg.vbtORMDebugger.setPosition(12 + (sz + 10) * 5, 12);
                     }
                 });
             }
