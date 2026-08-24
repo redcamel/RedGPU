@@ -9,7 +9,11 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
         cameraOrOptions?: any,
         options?: ALandscapeDebuggerOptions
     ) {
-        super(landscape, cameraOrOptions, options);
+        const defaultOptions: ALandscapeDebuggerOptions = {
+            title: 'Spatial Grid',
+            ...options
+        };
+        super(landscape, cameraOrOptions, defaultOptions);
         this.#ctx = this.canvas.getContext('2d');
     }
 
@@ -40,22 +44,18 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
 
             if (isCulled) {
                 this.#ctx.fillStyle = 'rgba(239, 68, 68, 0.35)';
-                this.#ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
             } else if (isLoaded) {
                 this.#ctx.fillStyle = 'rgba(56, 189, 248, 0.45)';
-                this.#ctx.strokeStyle = 'rgba(56, 189, 248, 0.8)';
             } else {
                 this.#ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
-                this.#ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
             }
 
             this.#ctx.fillRect(cx, cy, cellW, cellH);
-            this.#ctx.strokeRect(cx, cy, cellW, cellH);
         }
 
         this.#ctx.restore();
 
-        // 공통 2D 카메라 오버레이 렌더링
+        // 공통 2D 타일 그리드 및 카메라 오버레이 렌더링
         this.renderOverlay();
     }
 }

@@ -498,6 +498,18 @@ export class Landscape extends Object3DContainer {
         return this.#vntAtlasTexture;
     }
 
+    get vbtBaseColorAtlas(): DirectTexture | null {
+        return this.#vbtBaseColorAtlas;
+    }
+
+    get vbtNormalAtlas(): DirectTexture | null {
+        return this.#vbtNormalAtlas;
+    }
+
+    get vbtORMAtlas(): DirectTexture | null {
+        return this.#vbtORMAtlas;
+    }
+
     set landscapeMaterial(val: LandscapeMaterial) {
         if (this.#landscapeMaterial !== val) {
             this.#landscapeMaterial = val;

@@ -1,4 +1,5 @@
 import Landscape from "../../core/Landscape";
+import RedGPUContext from "../../../../context/RedGPUContext";
 import fullscreenQuadVertexWGSL from "./shader/fullscreenQuadVertex.wgsl";
 
 export interface ALandscapeDebuggerOptions {
@@ -6,6 +7,7 @@ export interface ALandscapeDebuggerOptions {
     height?: number;
     left?: number;
     bottom?: number;
+    title?: string;
 }
 
 export interface LandscapeDebuggerCameraState {
@@ -54,6 +56,27 @@ function ensureDebuggerStyles(): void {
             pointer-events: none !important;
             z-index: 99999 !important;
             overflow: hidden !important;
+            display: block !important;
+        }
+        .redgpu-landscape-debugger-header {
+            position: absolute !important;
+            bottom: 3px !important;
+            left: 4px !important;
+            font-family: monospace, sans-serif !important;
+            font-size: 8px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.4px !important;
+            color: #38bdf8 !important;
+            background: rgba(15, 23, 42, 0.88) !important;
+            padding: 1px 4px !important;
+            border-radius: 3px !important;
+            border: 1px solid rgba(56, 189, 248, 0.3) !important;
+            pointer-events: none !important;
+            z-index: 10 !important;
+            line-height: 1.1 !important;
+            text-transform: uppercase !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+            white-space: nowrap !important;
             display: block !important;
         }
         .redgpu-landscape-debugger-canvas {
@@ -117,11 +140,13 @@ function ensureDebuggerStyles(): void {
 export abstract class ALandscapeDebugger {
     #landscape: Landscape;
     #container: HTMLDivElement;
-    #canvas: HTMLCanvasElement;
     static readonly FULLSCREEN_QUAD_VERTEX_WGSL: string = fullscreenQuadVertexWGSL;
+    #canvas: HTMLCanvasElement;
     #overlayCanvas: HTMLCanvasElement;
+    #headerElement: HTMLDivElement | null = null;
     #visible: boolean = true;
     #camera: any = null;
+    #overlayCtx: CanvasRenderingContext2D | null = null;
 
     #width: number;
     #height: number;
@@ -150,7 +175,7 @@ export abstract class ALandscapeDebugger {
     };
 
     #dpr: number = 1;
-    #overlayCtx: CanvasRenderingContext2D | null = null;
+    #title: string = '';
 
     constructor(
         landscape: Landscape,
@@ -163,7 +188,7 @@ export abstract class ALandscapeDebugger {
         let opts = options;
         let cam = cameraOrOptions;
 
-        if (cameraOrOptions && (cameraOrOptions.width !== undefined || cameraOrOptions.left !== undefined || cameraOrOptions.bottom !== undefined)) {
+        if (cameraOrOptions && (cameraOrOptions.width !== undefined || cameraOrOptions.left !== undefined || cameraOrOptions.bottom !== undefined || cameraOrOptions.title !== undefined)) {
             opts = cameraOrOptions;
             cam = null;
         }
@@ -177,11 +202,13 @@ export abstract class ALandscapeDebugger {
         const h = opts?.height ?? 100;
         const left = opts?.left ?? 12;
         const bottom = opts?.bottom ?? 12;
+        const title = opts?.title ?? '';
 
         this.#width = w;
         this.#height = h;
         this.#left = left;
         this.#bottom = bottom;
+        this.#title = title;
 
         ensureDebuggerStyles();
 
@@ -191,6 +218,15 @@ export abstract class ALandscapeDebugger {
         container.style.setProperty('bottom', `${bottom}px`, 'important');
         container.style.setProperty('width', `${w}px`, 'important');
         container.style.setProperty('height', `${h}px`, 'important');
+
+        // 0. 미니 헤더 배지 라벨
+        if (title) {
+            const header = document.createElement('div');
+            header.className = 'redgpu-landscape-debugger-header';
+            header.textContent = title;
+            container.appendChild(header);
+            this.#headerElement = header;
+        }
 
         const canvasCSSWidth = Math.max(10, w - INNER_MARGIN * 2);
         const canvasCSSHeight = Math.max(10, h - INNER_MARGIN * 2);
@@ -230,12 +266,34 @@ export abstract class ALandscapeDebugger {
         this.#overlayCanvas = overlayCanvas;
     }
 
-    get overlayCanvas(): HTMLCanvasElement {
-        return this.#overlayCanvas;
+    get title(): string {
+        return this.#title;
+    }
+
+    set title(val: string) {
+        this.#title = val;
+        if (!this.#headerElement && val) {
+            const header = document.createElement('div');
+            header.className = 'redgpu-landscape-debugger-header';
+            header.textContent = val;
+            this.#container.appendChild(header);
+            this.#headerElement = header;
+        } else if (this.#headerElement) {
+            this.#headerElement.textContent = val;
+            this.#headerElement.style.setProperty('display', val ? 'block' : 'none', 'important');
+        }
+    }
+
+    get redGPUContext(): RedGPUContext {
+        return this.#landscape.redGPUContext;
     }
 
     get landscape(): Landscape {
         return this.#landscape;
+    }
+
+    get overlayCanvas(): HTMLCanvasElement {
+        return this.#overlayCanvas;
     }
 
     get container(): HTMLDivElement {

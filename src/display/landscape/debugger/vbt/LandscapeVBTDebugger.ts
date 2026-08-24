@@ -1,28 +1,28 @@
 import ALandscapeTextureDebugger from "../core/ALandscapeTextureDebugger";
 import Landscape from "../../core/Landscape";
 import {ALandscapeDebuggerOptions} from "../core/ALandscapeDebugger";
-import vntDebuggerWGSL from "./shader/vntDebugger.wgsl";
+import vbtDebuggerWGSL from "./shader/vbtDebugger.wgsl";
 
-export class LandscapeVNTDebugger extends ALandscapeTextureDebugger {
+export class LandscapeVBTDebugger extends ALandscapeTextureDebugger {
     constructor(
         landscape: Landscape,
         cameraOrOptions?: any,
         options?: ALandscapeDebuggerOptions
     ) {
         const defaultOptions: ALandscapeDebuggerOptions = {
-            title: 'VNT (Normal)',
+            title: 'VBT (BaseColor)',
             ...options
         };
         super(
             landscape,
             cameraOrOptions,
             defaultOptions,
-            vntDebuggerWGSL,
-            'LandscapeVNTDebuggerShaderModule',
-            (l) => l.vntAtlasTexture,
-            {r: 0.1, g: 0.1, b: 0.1, a: 1.0}
+            vbtDebuggerWGSL,
+            'LandscapeVBTDebuggerShaderModule',
+            (l) => l.vbtBaseColorAtlas,
+            {r: 0.08, g: 0.08, b: 0.08, a: 1.0}
         );
     }
 }
 
-export default LandscapeVNTDebugger;
+export default LandscapeVBTDebugger;
