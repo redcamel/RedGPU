@@ -1,4 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
+import type Landscape from "../core/Landscape";
 import type {FoliageTypeOptions} from "./FoliageType";
 import FoliageType from "./FoliageType";
 import FoliagePipelineRegistry from "./core/pipeline/FoliagePipelineRegistry";
@@ -7,7 +8,7 @@ import FoliageCullingDispatcher from "./core/culling/FoliageCullingDispatcher";
 
 class LandscapeFoliageManager {
     #redGPUContext: RedGPUContext;
-    landscape: any = null;
+    #landscape: Landscape | null = null;
 
     #foliageTypes: Map<string, FoliageType> = new Map();
     #typeList: FoliageType[] = [];
@@ -20,14 +21,9 @@ class LandscapeFoliageManager {
     #renderer: FoliageRenderer;
     #cullingDispatcher: FoliageCullingDispatcher;
 
-    constructor(redGPUContextOrLandscape: RedGPUContext | any, landscape?: any) {
-        if (redGPUContextOrLandscape instanceof RedGPUContext) {
-            this.#redGPUContext = redGPUContextOrLandscape;
-            this.landscape = landscape || null;
-        } else {
-            this.landscape = redGPUContextOrLandscape;
-            this.#redGPUContext = this.landscape.redGPUContext;
-        }
+    constructor(landscape: Landscape) {
+        this.#landscape = landscape;
+        this.#redGPUContext = landscape.redGPUContext;
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (gpuDevice) {
@@ -55,6 +51,10 @@ class LandscapeFoliageManager {
         this.#pipelineRegistry = new FoliagePipelineRegistry(this.#redGPUContext, this.#emptyBindGroupLayout);
         this.#renderer = new FoliageRenderer(this.#redGPUContext, this.#pipelineRegistry, this.#emptyBindGroup, this.#subMeshVertexBindGroupLayout);
         this.#cullingDispatcher = new FoliageCullingDispatcher(this.#redGPUContext);
+    }
+
+    get landscape(): Landscape | null {
+        return this.#landscape;
     }
 
     handleTileLoaded(comp: any): void {
@@ -98,7 +98,7 @@ class LandscapeFoliageManager {
     }
 
     update(viewOrCamera?: any, stateData?: any): void {
-        this.#cullingDispatcher.updateAndDispatch(this.#typeList, viewOrCamera, this.landscape, stateData);
+        this.#cullingDispatcher.updateAndDispatch(this.#typeList, viewOrCamera, this.#landscape, stateData);
     }
 
     addFoliageType(options: FoliageTypeOptions): FoliageType {
@@ -107,12 +107,11 @@ class LandscapeFoliageManager {
             return this.#foliageTypes.get(options.name)!;
         }
 
-        const foliageType = new FoliageType(this.#redGPUContext, options, this.#subMeshVertexBindGroupLayout);
-        foliageType.foliageManager = this;
+        const foliageType = new FoliageType(this.#redGPUContext, options, this.#subMeshVertexBindGroupLayout, this);
         this.#foliageTypes.set(options.name, foliageType);
         this.#typeList.push(foliageType);
 
-        const cells = this.landscape?.landscapeComponents;
+        const cells = this.#landscape?.landscapeComponents;
         if (cells && cells.length > 0) {
             const count = cells.length;
             for (let i = 0; i < count; i++) {

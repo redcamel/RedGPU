@@ -8,6 +8,7 @@ import createCrossBillboardGeometry from "./core/impostor/crossBillboard/createC
 import type {FoliageDepthPassMode} from "./core/pipeline/FoliagePipelineRegistry";
 import FoliageSubMeshAssembler from "./core/assembler/FoliageSubMeshAssembler";
 import FoliageTilePopulator from "./core/populator/FoliageTilePopulator";
+import type LandscapeFoliageManager from "./LandscapeFoliageManager";
 
 export interface FoliageSubMesh {
     mesh: Mesh;
@@ -79,7 +80,7 @@ class FoliageType {
     };
     #redGPUContext: RedGPUContext;
 
-    foliageManager: any = null;
+    #foliageManager: LandscapeFoliageManager | null = null;
 
     #subMeshes: FoliageSubMesh[] = [];
 
@@ -94,9 +95,11 @@ class FoliageType {
     constructor(
         redGPUContext: RedGPUContext,
         options: FoliageTypeOptions,
-        sharedSubMeshBindGroupLayout?: GPUBindGroupLayout | null
+        sharedSubMeshBindGroupLayout?: GPUBindGroupLayout | null,
+        foliageManager?: LandscapeFoliageManager | null
     ) {
         this.#redGPUContext = redGPUContext;
+        this.#foliageManager = foliageManager || null;
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
         this.#name = options.name;
 
@@ -131,6 +134,10 @@ class FoliageType {
 
         this.#instanceBuffer = new FoliageInstanceBuffer(redGPUContext, this.#options.maxInstances, this.#subMeshes);
         this.updateIndirectBuffer();
+    }
+
+    get foliageManager(): LandscapeFoliageManager | null {
+        return this.#foliageManager;
     }
 
     get name(): string {

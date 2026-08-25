@@ -1,4 +1,5 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
+import type Landscape from "../../../core/Landscape";
 import computeViewFrustumPlanes from "../../../../../math/computeViewFrustumPlanes";
 import FoliageType from "../../FoliageType";
 import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
@@ -13,7 +14,7 @@ class FoliageCullingDispatcher {
     #cachedVHTView: GPUTextureView | null = null;
 
     #typeListRef: FoliageType[] = [];
-    #landscapeRef: any = null;
+    #landscapeRef: Landscape | null = null;
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
@@ -27,7 +28,7 @@ class FoliageCullingDispatcher {
     updateAndDispatch(
         typeList: FoliageType[],
         viewOrCamera: any,
-        landscape: any,
+        landscape?: Landscape | null,
         stateData?: any
     ): void {
         const typeCount = typeList.length;
