@@ -105,18 +105,6 @@ export class LandscapeSharedGeometry {
         return this.#lod0SizeQuads;
     }
 
-    /**
-     * [KO] 그리드 쿼드 해상도를 변경하고 결합 지오메트리를 재생성합니다.
-     * [EN] Updates the grid quad resolutions and rebuilds the combined geometry.
-     */
-    updateGridSize(componentSizeQuads: number, lod0SizeQuads?: number): void {
-        validateLandscapeBaseGridSize(componentSizeQuads);
-        this.#componentSizeQuads = componentSizeQuads;
-        if (lod0SizeQuads !== undefined) {
-            this.#lod0SizeQuads = Math.max(componentSizeQuads, lod0SizeQuads);
-        }
-        this.#buildCombinedGeometry();
-    }
 
     /**
      * [KO] 타일 크기를 변경하고 결합 지오메트리를 재생성합니다.

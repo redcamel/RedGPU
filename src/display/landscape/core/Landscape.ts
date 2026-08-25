@@ -23,6 +23,8 @@ import LandscapeDebuggerManager from "../debugger";
 import LANDSCAPE_DEFAULT_LOD_COLORS from "./LANDSCAPE_DEFAULT_LOD_COLORS";
 
 export class Landscape extends Object3DContainer {
+    static readonly #DEFAULT_LOD_MULTIPLIERS: readonly number[] = Object.freeze([1.0, 2.0, 3.5, 6.0, 9.5, 14.0, 20.0]);
+
     #redGPUContext: RedGPUContext;
     #sharedGeometry: LandscapeSharedGeometry;
     #spatialGrid: LandscapeSpatialGrid;
@@ -809,7 +811,7 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    #rebuildLODStructures(userColors?: string[], userMultipliers?: number[], userDistances?: number[]): void {
+    #rebuildLODStructures(): void {
         this.#lodColorsRGBA.length = 0;
         this.#lodMultipliers.length = 0;
 
@@ -817,19 +819,12 @@ export class Landscape extends Object3DContainer {
             this.#lodColorsRGBA.push(LANDSCAPE_DEFAULT_LOD_COLORS[i % LANDSCAPE_DEFAULT_LOD_COLORS.length] as [number, number, number, number]);
         }
 
-        const defaultMultipliers = [1.0, 2.0, 3.5, 6.0, 9.5, 14.0, 20.0];
-        const multipliers = userMultipliers ?? defaultMultipliers;
-
+        const multipliers = Landscape.#DEFAULT_LOD_MULTIPLIERS;
         for (let i = 0; i < this.#maxLODLevel - 1; i++) {
             this.#lodMultipliers.push(multipliers[i] ?? (1.0 * Math.pow(1.8, i)));
         }
 
-        if (userDistances && userDistances.length > 0) {
-            this.#lodDistancesSq = userDistances.map(d => d * d);
-        } else {
-            this.#updateLODDistances();
-        }
-
+        this.#updateLODDistances();
         this.#updateLandscapeUniforms();
     }
 
