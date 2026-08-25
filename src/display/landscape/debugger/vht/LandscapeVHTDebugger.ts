@@ -19,7 +19,7 @@ export class LandscapeVHTDebugger extends ALandscapeTextureDebugger {
             defaultOptions,
             vhtDebuggerWGSL,
             'LandscapeVHTDebuggerShaderModule',
-            (l) => l.vhtAtlasTexture,
+            (l) => l.getInternalAtlasTexture('vht'),
             {r: 0.06, g: 0.09, b: 0.16, a: 1.0}
         );
     }

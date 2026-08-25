@@ -476,24 +476,22 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    get vhtAtlasTexture(): DirectTexture | null {
-        return this.#vhtAtlasTexture;
-    }
-
-    get vntAtlasTexture(): DirectTexture | null {
-        return this.#vntAtlasTexture;
-    }
-
-    get vbtBaseColorAtlas(): DirectTexture | null {
-        return this.#vbtBaseColorAtlas;
-    }
-
-    get vbtNormalAtlas(): DirectTexture | null {
-        return this.#vbtNormalAtlas;
-    }
-
-    get vbtORMAtlas(): DirectTexture | null {
-        return this.#vbtORMAtlas;
+    /** @internal 내부 디버거 및 포리지 전용 텍스처 조회 */
+    getInternalAtlasTexture(type: 'vht' | 'vnt' | 'vbtBaseColor' | 'vbtNormal' | 'vbtORM'): DirectTexture | null {
+        switch (type) {
+            case 'vht':
+                return this.#vhtAtlasTexture;
+            case 'vnt':
+                return this.#vntAtlasTexture;
+            case 'vbtBaseColor':
+                return this.#vbtBaseColorAtlas;
+            case 'vbtNormal':
+                return this.#vbtNormalAtlas;
+            case 'vbtORM':
+                return this.#vbtORMAtlas;
+            default:
+                return null;
+        }
     }
 
     set landscapeMaterial(val: LandscapeMaterial) {

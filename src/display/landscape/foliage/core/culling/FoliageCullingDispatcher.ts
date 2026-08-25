@@ -50,7 +50,7 @@ class FoliageCullingDispatcher {
 
         const worldSizeX = (landscape && landscape.worldSize) ? landscape.worldSize[0] : 8000.0;
         const heightScale = landscape?.heightScale ?? 600.0;
-        const hasVHT = !!(landscape?.vhtAtlasTexture?.gpuTexture);
+        const hasVHT = !!(landscape?.getInternalAtlasTexture('vht')?.gpuTexture);
 
         for (let i = 0; i < typeCount; i++) {
             const foliageType = typeList[i];
@@ -136,7 +136,7 @@ class FoliageCullingDispatcher {
         const typeList = this.#typeListRef;
         const count = typeList.length;
 
-        const vhtAtlasTexture = this.#landscapeRef?.vhtAtlasTexture;
+        const vhtAtlasTexture = this.#landscapeRef?.getInternalAtlasTexture('vht');
         const rawGPUTexture = vhtAtlasTexture?.gpuTexture || null;
         if (rawGPUTexture && this.#cachedVHTAtlasGPUTexture !== rawGPUTexture) {
             this.#cachedVHTAtlasGPUTexture = rawGPUTexture;
