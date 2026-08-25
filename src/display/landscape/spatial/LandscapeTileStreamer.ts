@@ -53,6 +53,13 @@ export class LandscapeTileStreamer {
         return da - db;
     };
 
+    static readonly #NEIGHBOR_OFFSETS: readonly (readonly [number, number])[] = Object.freeze([
+        [-1, 0],
+        [1, 0],
+        [0, -1],
+        [0, 1]
+    ]);
+
     constructor(redGPUContext: RedGPUContext, spatialGrid: LandscapeSpatialGrid, loadingRadius: number = 2500.0) {
         this.#redGPUContext = redGPUContext;
         this.#spatialGrid = spatialGrid;
@@ -339,7 +346,6 @@ export class LandscapeTileStreamer {
         } else {
             this.#isRebaking = false;
             this.#rebakeRafId = null;
-            console.log(`[LandscapeTileStreamer 🎨 ⚡ Time-Sliced] Completed rebaking VBT 2D Atlases for loaded tiles (${this.#loadedMap.size} tiles)`);
         }
     };
 
@@ -382,7 +388,6 @@ export class LandscapeTileStreamer {
                     [width, height]
                 );
 
-                console.log(`[LandscapeTileStreamer ✅ ⚡ Zero-GC 0.7ms] Tile (${key}) loaded successfully! (${width}x${height})`);
                 this.#loadedMap.set(key, true);
                 this.#cpuHeightMap.set(key, cpuParsed);
                 this.#failedMap.delete(key);
@@ -422,7 +427,6 @@ export class LandscapeTileStreamer {
                             });
                         }
                         this.#redGPUContext.commandEncoderManager.addDeferredDestroy(gpuTexture);
-                        console.log(`[LandscapeTileStreamer ⛰️] r32float VHT Atlas Sub-region (${key}) baked via GPU Compute Shader at [${targetX}, ${targetZ}]`);
 
                         if (this.#vntAtlasTexture && this.#vntGenerator) {
                             this.#vntGenerator.bakeTileRegion(
@@ -452,12 +456,7 @@ export class LandscapeTileStreamer {
                         }
 
                         // 인접한 4방향 이웃 타일의 VNT 및 VBT 자동 갱신 (경계면 노멀 연속성 보장)
-                        const neighborOffsets = [
-                            [-1, 0],
-                            [1, 0],
-                            [0, -1],
-                            [0, 1]
-                        ];
+                        const neighborOffsets = LandscapeTileStreamer.#NEIGHBOR_OFFSETS;
                         const tileCountX = this.#spatialGrid.tileCountX;
                         const tileCountZ = this.#spatialGrid.tileCountZ;
 
