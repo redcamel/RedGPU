@@ -190,15 +190,15 @@ export class Landscape extends Object3DContainer {
         this.#vbtGenerator = new LandscapeVBTGenerator(redGPUContext);
         this.#vhtSampler = vhtSampler;
 
-        this.#tileStreamer.vhtAtlasTexture = vhtAtlasTexture;
-        this.#tileStreamer.vntAtlasTexture = vntAtlasTexture;
-        this.#tileStreamer.vbtBaseColorAtlas = vbtBaseColorAtlas;
-        this.#tileStreamer.vbtNormalAtlas = vbtNormalAtlas;
-        this.#tileStreamer.vbtORMAtlas = vbtORMAtlas;
-        this.#tileStreamer.vhtGenerator = this.#vhtGenerator;
-        this.#tileStreamer.vntGenerator = this.#vntGenerator;
-        this.#tileStreamer.vbtGenerator = this.#vbtGenerator;
-        this.#tileStreamer.material = landscapeMaterial;
+        this.#tileStreamer.setAtlasTextures(
+            vhtAtlasTexture,
+            vntAtlasTexture,
+            vbtBaseColorAtlas,
+            vbtNormalAtlas,
+            vbtORMAtlas
+        );
+        this.#tileStreamer.setGenerators(this.#vhtGenerator, this.#vntGenerator, this.#vbtGenerator);
+        this.#tileStreamer.setMaterial(landscapeMaterial);
 
         landscapeMaterial.onRebakeVBTRequested = () => {
             this.#tileStreamer.rebakeAllLoadedVBT();
@@ -497,6 +497,12 @@ export class Landscape extends Object3DContainer {
     set landscapeMaterial(val: LandscapeMaterial) {
         if (this.#landscapeMaterial !== val) {
             this.#landscapeMaterial = val;
+            this.#tileStreamer?.setMaterial(val);
+            if (val) {
+                val.onRebakeVBTRequested = () => {
+                    this.#tileStreamer?.rebakeAllLoadedVBT();
+                };
+            }
             this.#renderPipelineCache.clear();
         }
     }
@@ -774,7 +780,7 @@ export class Landscape extends Object3DContainer {
     #rebuildTiles(): void {
         this.#spatialGrid = new LandscapeSpatialGrid(this.#componentCountX, this.#componentCountZ, this.#tileSizeX, this.#tileSizeZ);
         if (this.#tileStreamer) {
-            this.#tileStreamer.spatialGrid = this.#spatialGrid;
+            this.#tileStreamer.setSpatialGrid(this.#spatialGrid);
         }
         this.#sharedGeometry.updateTileSize(this.#tileSizeX, this.#tileSizeZ);
         this.#updateLODDistances();
@@ -853,15 +859,15 @@ export class Landscape extends Object3DContainer {
             this.#vbtORMAtlas = new DirectTexture(this.#redGPUContext, 'Landscape_VBT_ORM_Atlas', rawVbtORM);
 
             if (this.#tileStreamer) {
-                this.#tileStreamer.vhtAtlasTexture = this.#vhtAtlasTexture;
-                this.#tileStreamer.vntAtlasTexture = this.#vntAtlasTexture;
-                this.#tileStreamer.vbtBaseColorAtlas = this.#vbtBaseColorAtlas;
-                this.#tileStreamer.vbtNormalAtlas = this.#vbtNormalAtlas;
-                this.#tileStreamer.vbtORMAtlas = this.#vbtORMAtlas;
-                this.#tileStreamer.vhtGenerator = this.#vhtGenerator;
-                this.#tileStreamer.vntGenerator = this.#vntGenerator;
-                this.#tileStreamer.vbtGenerator = this.#vbtGenerator;
-                this.#tileStreamer.material = this.#landscapeMaterial;
+                this.#tileStreamer.setAtlasTextures(
+                    this.#vhtAtlasTexture,
+                    this.#vntAtlasTexture,
+                    this.#vbtBaseColorAtlas,
+                    this.#vbtNormalAtlas,
+                    this.#vbtORMAtlas
+                );
+                this.#tileStreamer.setGenerators(this.#vhtGenerator, this.#vntGenerator, this.#vbtGenerator);
+                this.#tileStreamer.setMaterial(this.#landscapeMaterial);
                 this.#tileStreamer.setTerrainConfig(this.#heightScale);
                 this.#tileStreamer.resetTileState();
             }

@@ -73,85 +73,37 @@ export class LandscapeTileStreamer {
         this.#isRebaking = false;
     }
 
-    get vhtAtlasTexture(): DirectTexture | null {
-        return this.#vhtAtlasTexture;
+    setAtlasTextures(
+        vht: DirectTexture | null,
+        vnt: DirectTexture | null,
+        vbtBaseColor: DirectTexture | null,
+        vbtNormal: DirectTexture | null,
+        vbtORM: DirectTexture | null
+    ): void {
+        this.#vhtAtlasTexture = vht;
+        this.#vntAtlasTexture = vnt;
+        this.#vbtBaseColorAtlas = vbtBaseColor;
+        this.#vbtNormalAtlas = vbtNormal;
+        this.#vbtORMAtlas = vbtORM;
     }
 
-    set vhtAtlasTexture(texture: DirectTexture | null) {
-        this.#vhtAtlasTexture = texture;
+    setGenerators(
+        vht: LandscapeVHTGenerator | null,
+        vnt: LandscapeVNTGenerator | null,
+        vbt: LandscapeVBTGenerator | null
+    ): void {
+        this.#vhtGenerator = vht;
+        this.#vntGenerator = vnt;
+        this.#vbtGenerator = vbt;
     }
 
-    get vntAtlasTexture(): DirectTexture | null {
-        return this.#vntAtlasTexture;
-    }
-
-    set vntAtlasTexture(texture: DirectTexture | null) {
-        this.#vntAtlasTexture = texture;
-    }
-
-    get vbtBaseColorAtlas(): DirectTexture | null {
-        return this.#vbtBaseColorAtlas;
-    }
-
-    set vbtBaseColorAtlas(texture: DirectTexture | null) {
-        this.#vbtBaseColorAtlas = texture;
-    }
-
-    get vbtNormalAtlas(): DirectTexture | null {
-        return this.#vbtNormalAtlas;
-    }
-
-    set vbtNormalAtlas(texture: DirectTexture | null) {
-        this.#vbtNormalAtlas = texture;
-    }
-
-    get vbtORMAtlas(): DirectTexture | null {
-        return this.#vbtORMAtlas;
-    }
-
-    set vbtORMAtlas(texture: DirectTexture | null) {
-        this.#vbtORMAtlas = texture;
-    }
-
-    get vhtGenerator(): LandscapeVHTGenerator | null {
-        return this.#vhtGenerator;
-    }
-
-    set vhtGenerator(generator: LandscapeVHTGenerator | null) {
-        this.#vhtGenerator = generator;
-    }
-
-    get vntGenerator(): LandscapeVNTGenerator | null {
-        return this.#vntGenerator;
-    }
-
-    set vntGenerator(generator: LandscapeVNTGenerator | null) {
-        this.#vntGenerator = generator;
-    }
-
-    get vbtGenerator(): LandscapeVBTGenerator | null {
-        return this.#vbtGenerator;
-    }
-
-    set vbtGenerator(generator: LandscapeVBTGenerator | null) {
-        this.#vbtGenerator = generator;
-    }
-
-    get material(): LandscapeMaterial | null {
-        return this.#material;
-    }
-
-    set material(mat: LandscapeMaterial | null) {
+    setMaterial(mat: LandscapeMaterial | null): void {
         this.#material = mat;
     }
 
-    set spatialGrid(grid: LandscapeSpatialGrid) {
+    setSpatialGrid(grid: LandscapeSpatialGrid): void {
         this.#spatialGrid = grid;
         this.resetTileState();
-    }
-
-    get spatialGrid(): LandscapeSpatialGrid {
-        return this.#spatialGrid;
     }
 
     set loadingRadius(val: number) {
