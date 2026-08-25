@@ -42,7 +42,7 @@ RedGPU.init(
         landscape.loadingRadius = 4000;
 
         // 4-1. 지형 기본 바탕 색상 설정
-        landscape.material.color.setColorByHEX('#387d42');
+        landscape.baseColor.setColorByHEX('#387d42');
 
         // Multi-Layer PBR 지형 레이어 4종 (Grass, Rock, Gravel, Leave) 등록
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
@@ -117,10 +117,10 @@ RedGPU.init(
             tintColor: '#ffffff'
         });
 
-        landscape.material.addLayer(grassLayer);
-        landscape.material.addLayer(gravelLayer);
-        landscape.material.addLayer(rockLayer);
-        landscape.material.addLayer(leaveLayer);
+        landscape.addLayer(grassLayer);
+        landscape.addLayer(gravelLayer);
+        landscape.addLayer(rockLayer);
+        landscape.addLayer(leaveLayer);
 
         landscape.tileUrlResolver = (row, col) => {
             const BASE_HOST = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
@@ -519,8 +519,8 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             });
 
             folderDisplay.addBinding(config, 'terrainColor').on('change', (ev) => {
-                if (landscape && landscape.material) {
-                    landscape.material.color.setColorByHEX(ev.value);
+                if (landscape) {
+                    landscape.baseColor.setColorByHEX(ev.value);
                 }
             });
 
@@ -652,9 +652,9 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 folderDebuggers.addBinding(dbg, 'spatialGrid');
                 folderDebuggers.addBinding(dbg, 'vht');
                 folderDebuggers.addBinding(dbg, 'vnt');
-                folderDebuggers.addBinding(dbg, 'vbt', {label: 'vbt (BaseColor)'});
-                folderDebuggers.addBinding(dbg, 'vbtNormal', {label: 'vbt (Normal)'});
-                folderDebuggers.addBinding(dbg, 'vbtORM', {label: 'vbt (ORM)'});
+                folderDebuggers.addBinding(dbg, 'vbt');
+                folderDebuggers.addBinding(dbg, 'vbtNormal');
+                folderDebuggers.addBinding(dbg, 'vbtORM');
 
                 folderDebuggers.addBinding(config, 'boxSize', {
                     min: 60,

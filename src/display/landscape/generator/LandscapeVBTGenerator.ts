@@ -65,7 +65,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         uArr[6] = activeCount;
         uArr[7] = 0;
 
-        const baseColorRGBA = material.color.rgbNormalLinear;
+        const baseColorRGBA = material.baseColor ? material.baseColor.rgbNormalLinear : [0.22, 0.49, 0.26];
         fArr[8] = baseColorRGBA[0];
         fArr[9] = baseColorRGBA[1];
         fArr[10] = baseColorRGBA[2];

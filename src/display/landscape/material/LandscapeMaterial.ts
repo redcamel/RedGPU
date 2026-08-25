@@ -16,7 +16,7 @@ import {getFragmentBindGroupLayoutDescriptorFromShaderInfo} from "../../../mater
 const MAX_LANDSCAPE_LAYERS = 8;
 
 interface LandscapeMaterial {
-    color: ColorRGBA;
+    baseColor: ColorRGBA;
     baseColorTextureSampler: Sampler;
 }
 
@@ -40,7 +40,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
     #uniformFloatArray: Float32Array;
     #uniformUintArray: Uint32Array;
 
-    constructor(redGPUContext: RedGPUContext, colorHex: string = '#387d42', textureArraySize: number = 1024) {
+    constructor(redGPUContext: RedGPUContext, baseColorHex: string = '#387d42', textureArraySize: number = 1024) {
         super(
             redGPUContext,
             'LANDSCAPE_MATERIAL',
@@ -66,7 +66,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 
         });
 
-        this.color.setColorByHEX(colorHex);
+        this.baseColor.setColorByHEX(baseColorHex);
         this.initGPURenderInfos();
     }
 
@@ -191,7 +191,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         uintBuf[2] = 0;
         uintBuf[3] = 0;
 
-        const colorLinear = this.color ? this.color.rgbaNormalLinear : [0.22, 0.49, 0.26, 1.0];
+        const colorLinear = this.baseColor ? this.baseColor.rgbaNormalLinear : [0.22, 0.49, 0.26, 1.0];
         floatBuf[4] = colorLinear[0];
         floatBuf[5] = colorLinear[1];
         floatBuf[6] = colorLinear[2];
@@ -566,7 +566,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 }
 
 defineColorRGBA(LandscapeMaterial, [
-    {key: 'color'}
+    {key: 'baseColor'}
 ]);
 
 defineSampler(LandscapeMaterial, [

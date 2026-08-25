@@ -36,7 +36,7 @@ RedGPU.init(
 
         // 4. 신규 Landscape 인스턴스 생성 (16x16 256개 타일 에셋 대응)
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
-
+        landscape.worldSize = [16000, 16000];
 
         // Multi-Layer PBR 지형 레이어 4종 (Grass, Rock, Gravel, Leave) 등록
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
@@ -106,10 +106,10 @@ RedGPU.init(
             tintColor: '#ffffff'
         });
 
-        landscape.material.addLayer(grassLayer);
-        landscape.material.addLayer(gravelLayer);
-        landscape.material.addLayer(rockLayer);
-        landscape.material.addLayer(leaveLayer);
+        landscape.addLayer(grassLayer);
+        landscape.addLayer(gravelLayer);
+        landscape.addLayer(rockLayer);
+        landscape.addLayer(leaveLayer);
 
         landscape.tileUrlResolver = (row, col) => {
             const BASE_HOST = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
@@ -289,12 +289,12 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
 
             folderSpecs.addBinding(config, 'componentSizeQuads', {
                 options: {
-                    '16x16 (289 Verts)': RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_16,
-                    '32x32 (1089 Verts)': RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_32,
-                    '64x64 (4225 Verts)': RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
-                    '128x128 (16641 Verts)': RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_128,
-                    '256x256 (66049 Verts)': RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
-                    '512x512 (263169 Verts)': RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
+                    16: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_16,
+                    32: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_32,
+                    64: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
+                    128: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_128,
+                    256: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
+                    512: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
                 }
             }).on('change', (ev) => {
                 if (landscape) {
@@ -304,12 +304,11 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             });
 
             folderSpecs.addBinding(config, 'lod0SizeQuads', {
-                label: 'LOD 0 Quads (Ultra)',
                 options: {
-                    '64x64 (4225 Verts)': 64,
-                    '128x128 (16641 Verts)': 128,
-                    '256x256 (66049 Verts)': 256,
-                    '512x512 (263169 Verts)': 512
+                    64: 64,
+                    128: 128,
+                    256: 256,
+                    512: 512
                 }
             }).on('change', (ev) => {
                 if (landscape) {
@@ -331,15 +330,14 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
 
             folderSpecs.addBinding(config, 'lodMetric', {
                 options: {
-                    'Distance (Physical)': 'distance',
-                    'ScreenSize (FOV-Responsive)': 'screenSize'
+                    distance: 'distance',
+                    screenSize: 'screenSize'
                 }
             }).on('change', (ev) => {
                 if (landscape) landscape.lodMetric = ev.value;
             });
 
             folderSpecs.addBinding(config, 'lodFadeStartRatio', {
-                label: 'lodFadeRatio (Dither)',
                 min: 0.1,
                 max: 0.99,
                 step: 0.05
@@ -348,7 +346,6 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             });
 
             folderSpecs.addBinding(config, 'lodGeomorphStartRatio', {
-                label: 'lodGeomorphRatio (Morph)',
                 min: 0.1,
                 max: 0.99,
                 step: 0.05
@@ -379,8 +376,8 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             });
 
             folderDisplay.addBinding(config, 'terrainColor').on('change', (ev) => {
-                if (landscape && landscape.material) {
-                    landscape.material.color.setColorByHEX(ev.value);
+                if (landscape) {
+                    landscape.baseColor.setColorByHEX(ev.value);
                 }
             });
 
@@ -461,9 +458,9 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 folderDebuggers.addBinding(dbg, 'spatialGrid');
                 folderDebuggers.addBinding(dbg, 'vht');
                 folderDebuggers.addBinding(dbg, 'vnt');
-                folderDebuggers.addBinding(dbg, 'vbt', {label: 'vbt (BaseColor)'});
-                folderDebuggers.addBinding(dbg, 'vbtNormal', {label: 'vbt (Normal)'});
-                folderDebuggers.addBinding(dbg, 'vbtORM', {label: 'vbt (ORM)'});
+                folderDebuggers.addBinding(dbg, 'vbt');
+                folderDebuggers.addBinding(dbg, 'vbtNormal');
+                folderDebuggers.addBinding(dbg, 'vbtORM');
 
                 folderDebuggers.addBinding(config, 'boxSize', {
                     min: 60,

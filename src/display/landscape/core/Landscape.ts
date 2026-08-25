@@ -6,7 +6,9 @@ import LANDSCAPE_BASE_GRID_SIZE, {validateLandscapeBaseGridSize} from "./LANDSCA
 import LandscapeComponent from "../spatial/LandscapeComponent";
 import LandscapeInstanceBuffer from "../spatial/LandscapeInstanceBuffer";
 import LandscapeMaterial from "../material/LandscapeMaterial";
+import LandscapeLayer from "../material/LandscapeLayer";
 import LandscapeSharedGeometry from "../spatial/LandscapeSharedGeometry";
+import ColorRGBA from "../../../color/ColorRGBA";
 import LandscapeSpatialGrid from "../spatial/LandscapeSpatialGrid";
 import DirectTexture from "../../../resources/texture/DirectTexture";
 import LandscapeTileStreamer, {LandscapeTileUrlResolver} from "../spatial/LandscapeTileStreamer";
@@ -220,11 +222,52 @@ export class Landscape extends Object3DContainer {
     }
 
     /**
-     * [KO] 지형 머티리얼을 반환합니다.
-     * [EN] Returns the landscape material.
+     * [KO] 지형 기본 바탕 PBR 색상
+     * [EN] Landscape base PBR color
      */
-    get material(): LandscapeMaterial {
-        return this.#material;
+    get baseColor(): ColorRGBA {
+        return this.#material.baseColor;
+    }
+
+    /**
+     * [KO] 등록된 모든 PBR 레이어 목록을 반환합니다.
+     * [EN] Returns the list of all registered PBR layers.
+     */
+    get layers(): readonly LandscapeLayer[] {
+        return this.#material.layers;
+    }
+
+    /**
+     * [KO] 지형에 새 PBR 레이어를 추가합니다.
+     * [EN] Adds a new PBR layer to the landscape.
+     */
+    addLayer(layer: LandscapeLayer): this {
+        this.#material.addLayer(layer);
+        return this;
+    }
+
+    /**
+     * [KO] 지형에서 특정 PBR 레이어를 제거합니다.
+     * [EN] Removes a PBR layer from the landscape.
+     */
+    removeLayer(layer: LandscapeLayer | string): boolean {
+        return this.#material.removeLayer(layer);
+    }
+
+    /**
+     * [KO] 등록된 모든 PBR 레이어를 제거합니다.
+     * [EN] Clears all registered PBR layers.
+     */
+    clearLayers(): void {
+        this.#material.clearLayers();
+    }
+
+    /**
+     * [KO] VBT 아틀라스 텍스처 재베이킹을 요청합니다.
+     * [EN] Requests rebaking of the VBT atlas textures.
+     */
+    requestVBTRebake(immediate: boolean = false, debounceDelayMs: number = 150): void {
+        this.#material.requestVBTRebake(immediate, debounceDelayMs);
     }
 
     get worldSize(): readonly [number, number] {
