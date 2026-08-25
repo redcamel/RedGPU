@@ -1,19 +1,15 @@
-export const LANDSCAPE_BASE_GRID_SIZE = {
-
+const LANDSCAPE_BASE_GRID_SIZE = {
     QUAD_16: 16,
-
     QUAD_32: 32,
-
     QUAD_64: 64,
-
     QUAD_128: 128,
-
     QUAD_256: 256,
-
     QUAD_512: 512
 } as const;
 
-export type LANDSCAPE_BASE_GRID_SIZE = typeof LANDSCAPE_BASE_GRID_SIZE[keyof typeof LANDSCAPE_BASE_GRID_SIZE];
+type LANDSCAPE_BASE_GRID_SIZE = typeof LANDSCAPE_BASE_GRID_SIZE[keyof typeof LANDSCAPE_BASE_GRID_SIZE];
+
+Object.freeze(LANDSCAPE_BASE_GRID_SIZE);
 
 const VALID_GRID_SIZES: Set<number> = new Set(Object.values(LANDSCAPE_BASE_GRID_SIZE));
 
@@ -28,4 +24,7 @@ export function validateLandscapeBaseGridSize(value: number): void {
     }
 }
 
+export {
+    LANDSCAPE_BASE_GRID_SIZE
+};
 export default LANDSCAPE_BASE_GRID_SIZE;

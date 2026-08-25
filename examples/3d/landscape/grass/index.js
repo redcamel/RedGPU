@@ -35,10 +35,10 @@ RedGPU.init(
         scene.lightManager.addDirectionalLight(directionalLight);
 
         // 4. 신규 Landscape 인스턴스 생성 (16x16 256개 타일 에셋 대응)
-        const landscape = new RedGPU.Display.Landscape(redGPUContext, {
+        const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext, {
             worldSize: [16000, 16000],
             componentCount: [16, 16],
-            componentSizeQuads: RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
+            componentSizeQuads: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
             maxLODLevel: 5,
             wireframe: false,
             lodColoration: false,
@@ -58,7 +58,7 @@ RedGPU.init(
         );
 
         // 1. Grass (주 광활한 초원/산맥 레이어 - 🔵 B 채널: 전체 지형의 65% 최대 면적 차지)
-        const grassLayer = new RedGPU.LandscapeLayer({
+        const grassLayer = new RedGPU.Display.Landscape.LandscapeLayer({
             name: 'Grass',
             baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass.jpg`),
             normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}grass_normal.jpg`),
@@ -74,7 +74,7 @@ RedGPU.init(
         });
 
         // 2. Gravel (오솔길/흙길 레이어 - 🔴 R 채널: 좁은 오솔길 10%)
-        const gravelLayer = new RedGPU.LandscapeLayer({
+        const gravelLayer = new RedGPU.Display.Landscape.LandscapeLayer({
             name: 'Gravel',
             baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}gravel.jpg`),
             normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}gravel_normal.jpg`),
@@ -90,7 +90,7 @@ RedGPU.init(
         });
 
         // 3. Rock (절벽/암벽 레이어 - 🟢 G 채널: 능선 및 절벽 포인트 20%)
-        const rockLayer = new RedGPU.LandscapeLayer({
+        const rockLayer = new RedGPU.Display.Landscape.LandscapeLayer({
             name: 'Rock',
             baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock.jpg`),
             normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}rock_normal.jpg`),
@@ -106,7 +106,7 @@ RedGPU.init(
         });
 
         // 4. Leave (골짜기/숲속 레이어 - ⚫ A / Black 채널: 그늘진 골짜기 5%)
-        const leaveLayer = new RedGPU.LandscapeLayer({
+        const leaveLayer = new RedGPU.Display.Landscape.LandscapeLayer({
             name: 'Leave',
             baseColorTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}leave.jpg`),
             normalTexture: new RedGPU.Resource.BitmapTexture(redGPUContext, `${assetPath}leave_normal.jpg`),
@@ -322,7 +322,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
         tileSizeStr: `[${Math.round(tsX)}m, ${Math.round(tsZ)}m]`,
 
         // 2. Component & Mesh Specs
-        componentSizeQuads: RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
+        componentSizeQuads: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
         maxLODLevel: landscape ? landscape.maxLODLevel : 4,
         lodFadeStartRatio: landscape ? landscape.lodFadeStartRatio : 0.7,
         lodGeomorphStartRatio: landscape ? landscape.lodGeomorphStartRatio : 0.85,
@@ -459,12 +459,12 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
 
             folderSpecs.addBinding(config, 'componentSizeQuads', {
                 options: {
-                    '16x16 (289 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_16,
-                    '32x32 (1089 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_32,
-                    '64x64 (4225 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
-                    '128x128 (16641 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_128,
-                    '256x256 (66049 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
-                    '512x512 (263169 Verts)': RedGPU.Display.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
+                    '16x16 (289 Verts)': RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_16,
+                    '32x32 (1089 Verts)': RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_32,
+                    '64x64 (4225 Verts)': RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
+                    '128x128 (16641 Verts)': RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_128,
+                    '256x256 (66049 Verts)': RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
+                    '512x512 (263169 Verts)': RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
                 }
             }).on('change', (ev) => {
                 if (landscape) {
