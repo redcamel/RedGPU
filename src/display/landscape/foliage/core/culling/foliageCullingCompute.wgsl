@@ -79,10 +79,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
         let dz = instance.posZ - camPos.z;
         let horizontalDistSq = dx * dx + dz * dz;
 
+        let hasBillboard = cullingUniforms.hasBillboard != 0u;
         let cullingDist = cullingUniforms.cullingDistance;
         let cullingDistSq = cullingDist * cullingDist;
 
-        if (horizontalDistSq < cullingDistSq) {
+        if (hasBillboard || horizontalDistSq < cullingDistSq) {
 
             var realY = instance.posY;
             if (cullingUniforms.hasVHT != 0u && cullingUniforms.invWorldSizeX > 0.0) {
@@ -99,7 +100,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
             let dy = realY - camPos.y;
             let distSq = horizontalDistSq + dy * dy;
 
-            if (distSq < cullingDistSq) {
+            if (hasBillboard || distSq < cullingDistSq) {
                 let maxScale = max(max(instance.scaleX, instance.scaleY), instance.scaleZ);
                 let scaledRadius = cullingUniforms.boundingRadius * maxScale;
                 let spherePos = vec4<f32>(worldPos, 1.0);
@@ -113,44 +114,38 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
                     dot(spherePos, cullingUniforms.frustumPlanes[4]) >= r &&
                     dot(spherePos, cullingUniforms.frustumPlanes[5]) >= r;
 
-            if (inFrustum) {
-                let fadeStartDist = cullingUniforms.fadeStartDistance;
-                let fadeStartDistSq = fadeStartDist * fadeStartDist;
-                let lodDist = cullingUniforms.lodDistance;
-                let halfFadeRange = max(cullingUniforms.lodFadeRange * 0.5, 1.0);
-                let crossFadeStart = max(lodDist - halfFadeRange, 0.0);
-                let crossFadeEnd = lodDist + halfFadeRange;
-                let crossFadeStartSq = crossFadeStart * crossFadeStart;
-                let crossFadeEndSq = crossFadeEnd * crossFadeEnd;
+                if (inFrustum) {
+                    let lodDistSq = cullingUniforms.lodDistance * cullingUniforms.lodDistance;
 
-                var dist: f32 = -1.0;
-                var fade: f32 = 1.0;
+                    if (!hasBillboard || distSq < lodDistSq) {
+                        var fade: f32 = 1.0;
+                        if (!hasBillboard) {
+                            let fadeStartDist = cullingUniforms.fadeStartDistance;
+                            let fadeStartDistSq = fadeStartDist * fadeStartDist;
+                            if (distSq > fadeStartDistSq) {
+                                let dist = sqrt(distSq);
+                                let fadeRange = max(cullingDist - fadeStartDist, 1.0);
+                                fade = clamp(1.0 - (dist - fadeStartDist) / fadeRange, 0.0, 1.0);
+                            }
+                        }
 
-                if (distSq > fadeStartDistSq) {
-                    dist = sqrt(distSq);
-                    let fadeRange = max(cullingDist - fadeStartDist, 1.0);
-                    fade = clamp(1.0 - (dist - fadeStartDist) / fadeRange, 0.0, 1.0);
-                }
-
-                let lodDistSq = cullingUniforms.lodDistance * cullingUniforms.lodDistance;
-                if (cullingUniforms.hasBillboard == 0u || distSq < lodDistSq) {
-                    isLOD0 = true;
-                    culledInstance0 = instance;
-                    culledInstance0.posY = realY;
-                    culledInstance0.fade = fade;
-                    culledInstance0.subId = 1.0;
-                    atomicAdd(&wgCountLOD0, 1u);
-                } else {
-                    isLOD1 = true;
-                    culledInstance1 = instance;
-                    culledInstance1.posY = realY;
-                    culledInstance1.fade = fade;
-                    culledInstance1.subId = 1.0;
-                    atomicAdd(&wgCountLOD1, 1u);
+                        isLOD0 = true;
+                        culledInstance0 = instance;
+                        culledInstance0.posY = realY;
+                        culledInstance0.fade = fade;
+                        culledInstance0.subId = 1.0;
+                        atomicAdd(&wgCountLOD0, 1u);
+                    } else {
+                        isLOD1 = true;
+                        culledInstance1 = instance;
+                        culledInstance1.posY = realY;
+                        culledInstance1.fade = 1.0;
+                        culledInstance1.subId = 1.0;
+                        atomicAdd(&wgCountLOD1, 1u);
+                    }
                 }
             }
         }
-    }
     }
 
     workgroupBarrier();

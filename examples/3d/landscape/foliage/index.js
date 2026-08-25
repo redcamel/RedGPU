@@ -328,27 +328,11 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     subGrass.addBinding(grassProxy, 'fadeStartDist', {min: 200, max: 6000, step: 50});
                 }
 
-                const subTree = folderFoliage.addFolder({title: 'ElmTree', expanded: true});
+                const subTree = folderFoliage.addFolder({title: 'ElmTree (Infinite Billboard)', expanded: true});
                 const treeProxy = {
                     get count() {
                         const target = foliageManager.getFoliageType('ElmTree');
                         return target ? target.activeInstanceCount : 0;
-                    },
-                    get cullingDist() {
-                        const target = foliageManager.getFoliageType('ElmTree');
-                        return target ? target.options.cullingDistance : 3500;
-                    },
-                    set cullingDist(v) {
-                        const target = foliageManager.getFoliageType('ElmTree');
-                        if (target) target.options.cullingDistance = v;
-                    },
-                    get fadeStartDist() {
-                        const target = foliageManager.getFoliageType('ElmTree');
-                        return target ? target.options.fadeStartDistance : 3000;
-                    },
-                    set fadeStartDist(v) {
-                        const target = foliageManager.getFoliageType('ElmTree');
-                        if (target) target.options.fadeStartDistance = v;
                     },
                     get lodDistance() {
                         const target = foliageManager.getFoliageType('ElmTree');
@@ -360,8 +344,6 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     }
                 };
                 subTree.addBinding(treeProxy, 'count', {readonly: true});
-                subTree.addBinding(treeProxy, 'cullingDist', {min: 500, max: 8000, step: 50});
-                subTree.addBinding(treeProxy, 'fadeStartDist', {min: 200, max: 6000, step: 50});
                 subTree.addBinding(treeProxy, 'lodDistance', {min: 50, max: 1000, step: 10});
                 subTree.addBinding(config, 'billboardWireframe').on('change', (ev) => {
                     const target = foliageManager.getFoliageType('ElmTree');
