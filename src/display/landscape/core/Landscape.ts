@@ -206,6 +206,9 @@ export class Landscape extends Object3DContainer {
 
         this.#initSystems(redGPUContext, options, componentCountX, componentCountZ, maxLODLevel, vhtSampler, vhtAtlasTexture, vntAtlasTexture);
         this.#foliageManager = new LandscapeFoliageManager(this);
+        this.#tileStreamer.onTileLoaded = (comp) => {
+            this.#foliageManager?.handleTileLoaded(comp);
+        };
         this.#debuggerManager = new LandscapeDebuggerManager(this, options?.debuggerOptions);
     }
 
@@ -574,8 +577,16 @@ export class Landscape extends Object3DContainer {
         return Math.min(maxAllowed, Math.max(1, Math.round(val)));
     }
 
-    get tileStreamer(): LandscapeTileStreamer {
-        return this.#tileStreamer;
+    get loadedTileCount(): number {
+        return this.#tileStreamer?.loadedTileCount ?? 0;
+    }
+
+    get pendingQueueSize(): number {
+        return this.#tileStreamer?.pendingQueueSize ?? 0;
+    }
+
+    isTileLoaded(row: number, col: number): boolean {
+        return this.#tileStreamer?.isTileLoaded(row, col) ?? false;
     }
 
     get loadingRadius(): number {

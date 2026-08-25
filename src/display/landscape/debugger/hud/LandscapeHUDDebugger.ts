@@ -99,8 +99,8 @@ export class LandscapeHUDDebugger extends ALandscapeDebugger {
             `;
         }
 
-        const loadedTiles = landscape.tileStreamer ? landscape.tileStreamer.loadedTileCount : 0;
-        const pendingQueue = landscape.tileStreamer ? landscape.tileStreamer.pendingQueueSize : 0;
+        const loadedTiles = landscape.loadedTileCount ?? 0;
+        const pendingQueue = landscape.pendingQueueSize ?? 0;
 
         const camX = Math.round(camera?.x ?? 0);
         const camY = Math.round(camera?.y ?? 0);

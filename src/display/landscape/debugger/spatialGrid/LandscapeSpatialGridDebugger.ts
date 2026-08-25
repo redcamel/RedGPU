@@ -73,7 +73,7 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
             const cx = comp.componentX * cellW;
             const cy = comp.componentZ * cellH;
 
-            const isLoaded = this.landscape.tileStreamer && this.landscape.tileStreamer.isTileLoaded(comp.componentZ, comp.componentX);
+            const isLoaded = this.landscape.isTileLoaded(comp.componentZ, comp.componentX);
 
             if (isLoaded) {
                 const centerX = comp.worldX + halfTileX;

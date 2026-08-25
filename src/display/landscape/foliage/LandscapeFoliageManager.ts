@@ -55,14 +55,12 @@ class LandscapeFoliageManager {
         this.#pipelineRegistry = new FoliagePipelineRegistry(this.#redGPUContext, this.#emptyBindGroupLayout);
         this.#renderer = new FoliageRenderer(this.#redGPUContext, this.#pipelineRegistry, this.#emptyBindGroup, this.#subMeshVertexBindGroupLayout);
         this.#cullingDispatcher = new FoliageCullingDispatcher(this.#redGPUContext);
+    }
 
-        if (this.landscape?.tileStreamer) {
-            this.landscape.tileStreamer.onTileLoaded = (comp: any) => {
-                const count = this.#typeList.length;
-                for (let i = 0; i < count; i++) {
-                    this.#typeList[i].populateTile(comp);
-                }
-            };
+    handleTileLoaded(comp: any): void {
+        const count = this.#typeList.length;
+        for (let i = 0; i < count; i++) {
+            this.#typeList[i].populateTile(comp);
         }
     }
 
