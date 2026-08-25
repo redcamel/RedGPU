@@ -398,27 +398,15 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                         expanded: layer.name === 'Grass'
                     });
 
-                    subFolder.addBinding(layer, 'enabled').on('change', () => {
-                        landscape?.material?.requestVBTRebake();
-                    });
+                    subFolder.addBinding(layer, 'enabled');
                     subFolder.addBinding(layer, 'weightChannel', {
                         options: {R: 'R', G: 'G', B: 'B', A: 'A'}
-                    }).on('change', () => {
-                        landscape?.material?.requestVBTRebake();
                     });
 
-                    subFolder.addBinding(layer, 'roughness', {min: 0, max: 1, step: 0.01}).on('change', () => {
-                        landscape?.material?.requestVBTRebake();
-                    });
-                    subFolder.addBinding(layer, 'metallic', {min: 0, max: 1, step: 0.01}).on('change', () => {
-                        landscape?.material?.requestVBTRebake();
-                    });
-                    subFolder.addBinding(layer, 'normalIntensity', {min: 0, max: 3, step: 0.01}).on('change', () => {
-                        landscape?.material?.requestVBTRebake();
-                    });
-                    subFolder.addBinding(layer, 'aoIntensity', {min: 0, max: 2, step: 0.01}).on('change', () => {
-                        landscape?.material?.requestVBTRebake();
-                    });
+                    subFolder.addBinding(layer, 'roughness', {min: 0, max: 1, step: 0.01});
+                    subFolder.addBinding(layer, 'metallic', {min: 0, max: 1, step: 0.01});
+                    subFolder.addBinding(layer, 'normalIntensity', {min: 0, max: 3, step: 0.01});
+                    subFolder.addBinding(layer, 'aoIntensity', {min: 0, max: 2, step: 0.01});
 
                     const layerScaleObj = {uvScale: layer.uvScale[0]};
                     subFolder.addBinding(layerScaleObj, 'uvScale', {
@@ -427,7 +415,6 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                         step: 1
                     }).on('change', (e) => {
                         layer.uvScale = [e.value, e.value];
-                        landscape?.material?.requestVBTRebake();
                     });
                 });
             }
