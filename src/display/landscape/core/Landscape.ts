@@ -30,7 +30,7 @@ export class Landscape extends Object3DContainer {
     #lodDistancesSq: number[] = [];
     #lodMultipliers: number[] = [];
     #lodColorsRGBA: [number, number, number, number][] = [];
-    #landscapeMaterial: LandscapeMaterial;
+    #material: LandscapeMaterial;
     #foliageManager: LandscapeFoliageManager;
     #debuggerManager: LandscapeDebuggerManager;
 
@@ -104,12 +104,12 @@ export class Landscape extends Object3DContainer {
         const lod0SizeQuads = options.lod0SizeQuads ?? 256;
         const maxLODLevel = Math.min(8, Math.max(1, options.maxLODLevel ?? 4));
 
-        const landscapeMaterial = options.landscapeMaterial || new LandscapeMaterial(redGPUContext);
+        const material = new LandscapeMaterial(redGPUContext);
         const sharedGeometry = new LandscapeSharedGeometry(redGPUContext, tileSizeX, tileSizeZ, componentSizeQuads, maxLODLevel, lod0SizeQuads);
 
         this.#spatialGrid = new LandscapeSpatialGrid(componentCountX, componentCountZ, tileSizeX, tileSizeZ);
         this.#sharedGeometry = sharedGeometry;
-        this.#landscapeMaterial = landscapeMaterial;
+        this.#material = material;
         this.#worldSizeX = worldSizeX;
         this.#worldSizeZ = worldSizeZ;
         this.#worldSizeTuple = [worldSizeX, worldSizeZ];
@@ -204,9 +204,9 @@ export class Landscape extends Object3DContainer {
             vbtORMAtlas
         );
         this.#tileStreamer.setGenerators(this.#vhtGenerator, this.#vntGenerator, this.#vbtGenerator);
-        this.#tileStreamer.setMaterial(landscapeMaterial);
+        this.#tileStreamer.setMaterial(material);
 
-        landscapeMaterial.setOnRebakeVBTRequested(() => {
+        material.setOnRebakeVBTRequested(() => {
             this.#tileStreamer.rebakeAllLoadedVBT();
         });
 
@@ -242,74 +242,12 @@ export class Landscape extends Object3DContainer {
         return this.#tileStreamer.getHeightAt(x, z);
     }
 
-    render(view: any, passEncoder?: GPURenderPassEncoder): void {
-        const renderPassEncoder = passEncoder || view?.currentRenderPassEncoder || view?.renderPassEncoder;
-        const view3D = view?.view || view;
-        if (!renderPassEncoder) return;
-
-        const material = this.#landscapeMaterial;
-        const renderResults = (view as RenderViewStateData)?.renderResults || (view3D as any)?.renderViewStateData?.renderResults;
-
-        if (material) {
-            if (material.dirtyPipeline) {
-                material._updateFragmentState();
-                material.dirtyPipeline = false;
-                this.#renderPipelineCache.clear();
-                if (renderResults) {
-                    renderResults.numDirtyPipelines++;
-                }
-            }
-        }
-
-        const instanceBuffer = this.#instanceBuffer;
-        const sharedGeometry = this.#sharedGeometry;
-        const combinedVB = sharedGeometry?.combinedVertexBuffer;
-        const isWireframe = this.#wireframe;
-        const combinedIB = isWireframe ? sharedGeometry?.combinedWireframeIndexBuffer : sharedGeometry?.combinedIndexBuffer;
-
-        if (!instanceBuffer || !combinedVB || !combinedIB) return;
-
-        const storageBG = instanceBuffer.instanceStorageBindGroup;
-        const storageBGLayout = instanceBuffer.instanceStorageBindGroupLayout;
-        if (!storageBG || !storageBGLayout) return;
-
-        const pipeline = this.#getOrCreateRenderPipeline(combinedVB, storageBGLayout);
-        if (!pipeline) return;
-
-        renderPassEncoder.setPipeline(pipeline);
-
-        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup;
-        if (systemBG) {
-            renderPassEncoder.setBindGroup(0, systemBG);
-        }
-
-        renderPassEncoder.setBindGroup(1, storageBG);
-
-        const matUniformBG = this.#landscapeMaterial?.gpuRenderInfo?.fragmentUniformBindGroup;
-        if (matUniformBG) {
-            renderPassEncoder.setBindGroup(2, matUniformBG);
-        }
-        renderPassEncoder.setVertexBuffer(0, combinedVB.gpuBuffer);
-        renderPassEncoder.setIndexBuffer(combinedIB.gpuBuffer, 'uint32');
-
-        const maxLODLevel = sharedGeometry.maxLODLevel;
-        const indirectDrawBuffer = instanceBuffer.indirectDrawBuffer;
-
-        if (indirectDrawBuffer) {
-            for (let lod = 0; lod < maxLODLevel; lod++) {
-                const offset = lod * 20;
-                renderPassEncoder.drawIndexedIndirect(indirectDrawBuffer, offset);
-
-                if (renderResults) {
-                    renderResults.numDrawCalls++;
-                }
-            }
-        }
-
-        if (this.#foliageManager?.hasFoliageTypes) {
-            this.#foliageManager.render(view, renderPassEncoder);
-        }
-
+    /**
+     * [KO] 지형 머티리얼을 반환합니다.
+     * [EN] Returns the landscape material.
+     */
+    get material(): LandscapeMaterial {
+        return this.#material;
     }
 
     get worldSize(): readonly [number, number] {
@@ -447,13 +385,9 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    get landscapeMaterial(): LandscapeMaterial {
-        return this.#landscapeMaterial;
-    }
-
-    set landscapeMaterial(val: LandscapeMaterial) {
-        if (this.#landscapeMaterial !== val) {
-            this.#landscapeMaterial = val;
+    set material(val: LandscapeMaterial) {
+        if (this.#material !== val) {
+            this.#material = val;
             this.#tileStreamer?.setMaterial(val);
             if (val) {
                 val.setOnRebakeVBTRequested(() => {
@@ -462,6 +396,76 @@ export class Landscape extends Object3DContainer {
             }
             this.#renderPipelineCache.clear();
         }
+    }
+
+    render(view: any, passEncoder?: GPURenderPassEncoder): void {
+        const renderPassEncoder = passEncoder || view?.currentRenderPassEncoder || view?.renderPassEncoder;
+        const view3D = view?.view || view;
+        if (!renderPassEncoder) return;
+
+        const material = this.#material;
+        const renderResults = (view as RenderViewStateData)?.renderResults || (view3D as any)?.renderViewStateData?.renderResults;
+
+        if (material) {
+            if (material.dirtyPipeline) {
+                material._updateFragmentState();
+                material.dirtyPipeline = false;
+                this.#renderPipelineCache.clear();
+                if (renderResults) {
+                    renderResults.numDirtyPipelines++;
+                }
+            }
+        }
+
+        const instanceBuffer = this.#instanceBuffer;
+        const sharedGeometry = this.#sharedGeometry;
+        const combinedVB = sharedGeometry?.combinedVertexBuffer;
+        const isWireframe = this.#wireframe;
+        const combinedIB = isWireframe ? sharedGeometry?.combinedWireframeIndexBuffer : sharedGeometry?.combinedIndexBuffer;
+
+        if (!instanceBuffer || !combinedVB || !combinedIB) return;
+
+        const storageBG = instanceBuffer.instanceStorageBindGroup;
+        const storageBGLayout = instanceBuffer.instanceStorageBindGroupLayout;
+        if (!storageBG || !storageBGLayout) return;
+
+        const pipeline = this.#getOrCreateRenderPipeline(combinedVB, storageBGLayout);
+        if (!pipeline) return;
+
+        renderPassEncoder.setPipeline(pipeline);
+
+        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup;
+        if (systemBG) {
+            renderPassEncoder.setBindGroup(0, systemBG);
+        }
+
+        renderPassEncoder.setBindGroup(1, storageBG);
+
+        const matUniformBG = this.#material?.gpuRenderInfo?.fragmentUniformBindGroup;
+        if (matUniformBG) {
+            renderPassEncoder.setBindGroup(2, matUniformBG);
+        }
+        renderPassEncoder.setVertexBuffer(0, combinedVB.gpuBuffer);
+        renderPassEncoder.setIndexBuffer(combinedIB.gpuBuffer, 'uint32');
+
+        const maxLODLevel = sharedGeometry.maxLODLevel;
+        const indirectDrawBuffer = instanceBuffer.indirectDrawBuffer;
+
+        if (indirectDrawBuffer) {
+            for (let lod = 0; lod < maxLODLevel; lod++) {
+                const offset = lod * 20;
+                renderPassEncoder.drawIndexedIndirect(indirectDrawBuffer, offset);
+
+                if (renderResults) {
+                    renderResults.numDrawCalls++;
+                }
+            }
+        }
+
+        if (this.#foliageManager?.hasFoliageTypes) {
+            this.#foliageManager.render(view, renderPassEncoder);
+        }
+
     }
 
     get wireframe(): boolean {
@@ -543,8 +547,8 @@ export class Landscape extends Object3DContainer {
     update(camera: any, renderViewStateData?: any): void {
         if (!camera) return;
 
-        if (this.landscapeMaterial) {
-            this.landscapeMaterial.updateUniformsData();
+        if (this.#material) {
+            this.#material.updateUniformsData();
         }
 
         const camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
@@ -812,7 +816,7 @@ export class Landscape extends Object3DContainer {
 
     #getOrCreateRenderPipeline(geom: any, storageBGLayout: GPUBindGroupLayout): GPURenderPipeline | null {
         const gpuDevice = this.#redGPUContext.gpuDevice;
-        const material = this.#landscapeMaterial;
+        const material = this.#material;
         if (!gpuDevice || !material || !material.gpuRenderInfo) return null;
 
         const antialiasingManager = this.#redGPUContext.antialiasingManager;
@@ -964,7 +968,7 @@ export class Landscape extends Object3DContainer {
                     this.#vbtORMAtlas
                 );
                 this.#tileStreamer.setGenerators(this.#vhtGenerator, this.#vntGenerator, this.#vbtGenerator);
-                this.#tileStreamer.setMaterial(this.#landscapeMaterial);
+                this.#tileStreamer.setMaterial(this.#material);
                 this.#tileStreamer.setTerrainConfig(this.#heightScale);
                 this.#tileStreamer.resetTileState();
             }
@@ -1029,7 +1033,7 @@ export class Landscape extends Object3DContainer {
             );
         }
 
-        this.#landscapeMaterial?.requestVBTRebake(true);
+        this.#material?.requestVBTRebake(true);
     }
 
     override destroy(): void {

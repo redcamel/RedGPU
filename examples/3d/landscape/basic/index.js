@@ -46,7 +46,7 @@ RedGPU.init(
         });
 
         // 4-1. 지형 기본 바탕 색상 설정
-        landscape.landscapeMaterial.color.setColorByHEX('#387d42');
+        landscape.material.color.setColorByHEX('#387d42');
 
         // Multi-Layer PBR 지형 레이어 4종 (Grass, Rock, Gravel, Leave) 등록
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
@@ -116,10 +116,10 @@ RedGPU.init(
             tintColor: '#ffffff'
         });
 
-        landscape.landscapeMaterial.addLayer(grassLayer);
-        landscape.landscapeMaterial.addLayer(gravelLayer);
-        landscape.landscapeMaterial.addLayer(rockLayer);
-        landscape.landscapeMaterial.addLayer(leaveLayer);
+        landscape.material.addLayer(grassLayer);
+        landscape.material.addLayer(gravelLayer);
+        landscape.material.addLayer(rockLayer);
+        landscape.material.addLayer(leaveLayer);
 
         landscape.tileUrlResolver = (row, col) => {
             const BASE_HOST = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
@@ -194,7 +194,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
         wireframe: landscape ? landscape.wireframe : false,
         lodColoration: landscape ? landscape.lodColoration : false,
         terrainColor: '#387d42',
-        textureArraySize: landscape?.landscapeMaterial?.textureArraySize ?? 1024,
+        textureArraySize: landscape?.material?.textureArraySize ?? 1024,
 
         // 4-1. Directional Light (Sun)
         sunElevation: directionalLight ? directionalLight.elevation : 45,
@@ -389,8 +389,8 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             });
 
             folderDisplay.addBinding(config, 'terrainColor').on('change', (ev) => {
-                if (landscape && landscape.landscapeMaterial) {
-                    landscape.landscapeMaterial.color.setColorByHEX(ev.value);
+                if (landscape && landscape.material) {
+                    landscape.material.color.setColorByHEX(ev.value);
                 }
             });
 
@@ -409,25 +409,25 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     });
 
                     subFolder.addBinding(layer, 'enabled').on('change', () => {
-                        landscape?.landscapeMaterial?.requestVBTRebake();
+                        landscape?.material?.requestVBTRebake();
                     });
                     subFolder.addBinding(layer, 'weightChannel', {
                         options: {R: 'R', G: 'G', B: 'B', A: 'A'}
                     }).on('change', () => {
-                        landscape?.landscapeMaterial?.requestVBTRebake();
+                        landscape?.material?.requestVBTRebake();
                     });
 
                     subFolder.addBinding(layer, 'roughness', {min: 0, max: 1, step: 0.01}).on('change', () => {
-                        landscape?.landscapeMaterial?.requestVBTRebake();
+                        landscape?.material?.requestVBTRebake();
                     });
                     subFolder.addBinding(layer, 'metallic', {min: 0, max: 1, step: 0.01}).on('change', () => {
-                        landscape?.landscapeMaterial?.requestVBTRebake();
+                        landscape?.material?.requestVBTRebake();
                     });
                     subFolder.addBinding(layer, 'normalIntensity', {min: 0, max: 3, step: 0.01}).on('change', () => {
-                        landscape?.landscapeMaterial?.requestVBTRebake();
+                        landscape?.material?.requestVBTRebake();
                     });
                     subFolder.addBinding(layer, 'aoIntensity', {min: 0, max: 2, step: 0.01}).on('change', () => {
-                        landscape?.landscapeMaterial?.requestVBTRebake();
+                        landscape?.material?.requestVBTRebake();
                     });
 
                     const layerScaleObj = {uvScale: layer.uvScale[0]};
@@ -437,7 +437,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                         step: 1
                     }).on('change', (e) => {
                         layer.uvScale = [e.value, e.value];
-                        landscape?.landscapeMaterial?.requestVBTRebake();
+                        landscape?.material?.requestVBTRebake();
                     });
                 });
             }

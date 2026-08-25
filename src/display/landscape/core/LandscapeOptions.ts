@@ -1,5 +1,4 @@
 import LANDSCAPE_BASE_GRID_SIZE from "./LANDSCAPE_BASE_GRID_SIZE";
-import LandscapeMaterial from "../material/LandscapeMaterial";
 import type {LandscapeDebuggerManagerOptions} from "../debugger";
 import type {LandscapeTileUrlResolver} from "../spatial/LandscapeTileStreamer";
 
@@ -20,8 +19,6 @@ export interface LandscapeOptions {
     lodMultipliers?: number[];
 
     lodDistances?: number[];
-
-    landscapeMaterial?: LandscapeMaterial;
 
     heightScale?: number;
 
