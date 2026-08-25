@@ -62,7 +62,7 @@ class FoliageTilePopulator {
         foliageType.incrementActiveInstanceCount(actualCount);
 
         instanceBuffer.uploadRangeToGPU(startIdx, actualCount);
-        foliageType.updateIndirectBuffer();
+        instanceBuffer.resetMultiIndirectCount(foliageType.subMeshes);
 
         return true;
     }

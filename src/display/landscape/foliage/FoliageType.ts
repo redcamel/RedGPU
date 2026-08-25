@@ -133,7 +133,7 @@ class FoliageType {
         this.#bottomOffset = assembleResult.bottomOffset;
 
         this.#instanceBuffer = new FoliageInstanceBuffer(redGPUContext, this.#options.maxInstances, this.#subMeshes);
-        this.updateIndirectBuffer();
+        this.#updateIndirectBuffer();
     }
 
     get foliageManager(): LandscapeFoliageManager | null {
@@ -188,29 +188,7 @@ class FoliageType {
         this.#activeInstanceCount = Math.min(instanceCount, this.#options.maxInstances);
         this.#instanceBuffer.dataBuffer.set(data.subarray(0, this.#activeInstanceCount * 12));
         this.#instanceBuffer.uploadToGPU(this.#activeInstanceCount);
-        this.updateIndirectBuffer();
-    }
-
-    updateIndirectBuffer(): void {
-        if (!this.#instanceBuffer || this.#subMeshes.length === 0) return;
-        this.#instanceBuffer.resetMultiIndirectCount(this.#subMeshes);
-    }
-
-    populateTile(comp: any, targetCountPerTile?: number): void {
-        const key = `${comp.componentZ}_${comp.componentX}`;
-        if (this.#loadedTileKeys.has(key)) return;
-        this.#loadedTileKeys.add(key);
-
-        FoliageTilePopulator.populateTile(comp, this, targetCountPerTile);
-    }
-
-    destroy(): void {
-        this.#instanceBuffer.destroy();
-        for (let i = 0; i < this.#subMeshes.length; i++) {
-            const sub = this.#subMeshes[i];
-            sub.vertexUniformBuffer?.destroy();
-        }
-        this.#subMeshes.length = 0;
+        this.#updateIndirectBuffer();
     }
 
     setBillboardWireframe(wireframe: boolean): void {
@@ -234,7 +212,29 @@ class FoliageType {
                 billboardSub.material._updateFragmentState();
             }
         }
-        this.updateIndirectBuffer();
+        this.#updateIndirectBuffer();
+    }
+
+    populateTile(comp: any, targetCountPerTile?: number): void {
+        const key = `${comp.componentZ}_${comp.componentX}`;
+        if (this.#loadedTileKeys.has(key)) return;
+        this.#loadedTileKeys.add(key);
+
+        FoliageTilePopulator.populateTile(comp, this, targetCountPerTile);
+    }
+
+    destroy(): void {
+        this.#instanceBuffer.destroy();
+        for (let i = 0; i < this.#subMeshes.length; i++) {
+            const sub = this.#subMeshes[i];
+            sub.vertexUniformBuffer?.destroy();
+        }
+        this.#subMeshes.length = 0;
+    }
+
+    #updateIndirectBuffer(): void {
+        if (!this.#instanceBuffer || this.#subMeshes.length === 0) return;
+        this.#instanceBuffer.resetMultiIndirectCount(this.#subMeshes);
     }
 
     #initSubMeshBindGroupLayout(): void {

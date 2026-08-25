@@ -67,7 +67,7 @@ class FoliageCullingDispatcher {
             const boundingRadius = 20.0;
             const bottomOffset = foliageType.bottomOffset;
 
-            foliageType.updateIndirectBuffer();
+            buffer.resetMultiIndirectCount(foliageType.subMeshes);
 
             buffer.updateCullingUniforms(
                 camX, camY, camZ,
