@@ -19,7 +19,7 @@ export class LandscapeSpatialGrid {
         this.#halfWorldSizeZ = (tileCountZ * tileSizeZ) / 2;
     }
 
-    get flatCells(): LandscapeComponent[] {
+    get flatCells(): readonly LandscapeComponent[] {
         return this.#flatCells;
     }
 

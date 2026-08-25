@@ -634,10 +634,18 @@ export class Landscape extends Object3DContainer {
         return this.#lodDistancesSq;
     }
 
+    /**
+     * [KO] 타일 높이맵 이미지 URL 리졸버를 반환합니다.
+     * [EN] Returns the tile heightmap image URL resolver.
+     */
     get tileUrlResolver(): LandscapeTileUrlResolver | null {
         return this.#tileStreamer.tileUrlResolver;
     }
 
+    /**
+     * [KO] 타일 높이맵 이미지 URL 리졸버를 설정합니다.
+     * [EN] Sets the tile heightmap image URL resolver.
+     */
     set tileUrlResolver(resolver: LandscapeTileUrlResolver | null) {
         this.#tileStreamer.tileUrlResolver = resolver;
     }
