@@ -64,9 +64,6 @@ export class Landscape extends Object3DContainer {
     #tileSizeTuple: [number, number] = [0, 0];
 
     #lodDistancesBuffer: Float32Array = new Float32Array(8);
-    #lodCountsBuffer: Int32Array;
-    #visibleComponentCount: number = 0;
-    #culledComponentCount: number = 0;
     #frustumCullingActive: boolean = false;
 
     #vertexShaderModule: GPUShaderModule;
@@ -249,10 +246,7 @@ export class Landscape extends Object3DContainer {
         this.#tileStreamer.update(camX, camZ, camY);
 
         const totalComponents = this.#componentCountX * this.#componentCountZ;
-
         this.#frustumCullingActive = !!frustumPlanes;
-        this.#culledComponentCount = 0;
-        this.#visibleComponentCount = totalComponents;
 
         this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#maxLODLevel, this.#wireframe);
 
@@ -442,7 +436,6 @@ export class Landscape extends Object3DContainer {
         const count = Math.min(8, Math.max(1, Math.round(value)));
         if (this.#maxLODLevel !== count) {
             this.#maxLODLevel = count;
-            this.#lodCountsBuffer = new Int32Array(count);
             this.#sharedGeometry = new LandscapeSharedGeometry(
                 this.#redGPUContext,
                 this.#tileSizeX,
@@ -622,20 +615,8 @@ export class Landscape extends Object3DContainer {
         this.#tileStreamer.maxLoadsPerFrame = value;
     }
 
-    get visibleComponentCount(): number {
-        return this.#visibleComponentCount;
-    }
-
-    get culledComponentCount(): number {
-        return this.#culledComponentCount;
-    }
-
     get frustumCullingActive(): boolean {
         return this.#frustumCullingActive;
-    }
-
-    get lodCountsBuffer(): Int32Array {
-        return this.#lodCountsBuffer;
     }
 
     get lodColors(): [number, number, number, number][] {
@@ -679,8 +660,6 @@ export class Landscape extends Object3DContainer {
             });
         }
         this.#vertexShaderModule = vModule;
-
-        this.#lodCountsBuffer = new Int32Array(maxLODLevel);
 
         this.#instanceBuffer = new LandscapeInstanceBuffer(redGPUContext, componentCountX * componentCountZ, maxLODLevel);
         this.#instanceBuffer.updateBindGroup(
