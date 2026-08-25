@@ -10,27 +10,15 @@ export interface LandscapeLayerOptions {
     baseColorTexture?: BitmapTexture | string;
     normalTexture?: BitmapTexture | string;
     ormTexture?: BitmapTexture | string;
-
     weightTexture?: BitmapTexture | string;
-    weightMapTexture?: BitmapTexture | string;
-    splatTexture?: BitmapTexture | string;
 
     uvScale?: [number, number];
-    textureScale?: [number, number];
     uvOffset?: [number, number];
-    textureOffset?: [number, number];
-
     weightChannel?: LandscapeWeightMapChannel;
-    weightMapChannel?: LandscapeWeightMapChannel;
-    weightMapChannelIndex?: LandscapeWeightMapChannel;
-    splatChannel?: LandscapeWeightMapChannel;
 
     roughness?: number;
-    roughnessFactor?: number;
     metallic?: number;
-    metallicFactor?: number;
     normalIntensity?: number;
-    normalScale?: number;
     aoIntensity?: number;
     tintColor?: ColorRGBA | string;
 }
@@ -91,36 +79,39 @@ export class LandscapeLayer {
         if (actualOptions.ormTexture !== undefined) {
             this.ormTexture = actualOptions.ormTexture;
         }
-        const weightTex = actualOptions.weightTexture ?? actualOptions.weightMapTexture ?? actualOptions.splatTexture;
-        if (weightTex !== undefined) {
-            this.weightTexture = weightTex;
+        if (actualOptions.weightTexture !== undefined) {
+            this.weightTexture = actualOptions.weightTexture;
         }
 
-        const scale = actualOptions.uvScale ?? actualOptions.textureScale;
-        if (scale) {
-            this.#uvScale[0] = scale[0];
-            this.#uvScale[1] = scale[1];
+        if (actualOptions.uvScale) {
+            this.#uvScale[0] = actualOptions.uvScale[0];
+            this.#uvScale[1] = actualOptions.uvScale[1];
         }
 
-        const offset = actualOptions.uvOffset ?? actualOptions.textureOffset;
-        if (offset) {
-            this.#uvOffset[0] = offset[0];
-            this.#uvOffset[1] = offset[1];
+        if (actualOptions.uvOffset) {
+            this.#uvOffset[0] = actualOptions.uvOffset[0];
+            this.#uvOffset[1] = actualOptions.uvOffset[1];
         }
 
-        const wCh = actualOptions.weightChannel ?? actualOptions.weightMapChannel ?? actualOptions.weightMapChannelIndex ?? actualOptions.splatChannel;
-        if (wCh !== undefined) this.#weightChannel = wCh;
+        if (actualOptions.weightChannel !== undefined) {
+            this.#weightChannel = actualOptions.weightChannel;
+        }
 
-        const rFactor = actualOptions.roughness ?? actualOptions.roughnessFactor;
-        if (rFactor !== undefined) this.#roughness = rFactor;
+        if (actualOptions.roughness !== undefined) {
+            this.#roughness = actualOptions.roughness;
+        }
 
-        const mFactor = actualOptions.metallic ?? actualOptions.metallicFactor;
-        if (mFactor !== undefined) this.#metallic = mFactor;
+        if (actualOptions.metallic !== undefined) {
+            this.#metallic = actualOptions.metallic;
+        }
 
-        const nIntensity = actualOptions.normalIntensity ?? actualOptions.normalScale;
-        if (nIntensity !== undefined) this.#normalIntensity = nIntensity;
+        if (actualOptions.normalIntensity !== undefined) {
+            this.#normalIntensity = actualOptions.normalIntensity;
+        }
 
-        if (actualOptions.aoIntensity !== undefined) this.#aoIntensity = actualOptions.aoIntensity;
+        if (actualOptions.aoIntensity !== undefined) {
+            this.#aoIntensity = actualOptions.aoIntensity;
+        }
 
         if (actualOptions.tintColor) {
             if (typeof actualOptions.tintColor === 'string') {
@@ -347,91 +338,12 @@ export class LandscapeLayer {
         this.onChange?.();
     }
 
-    get textureScale(): [number, number] {
-        return this.uvScale;
-    }
-
-    set textureScale(val: [number, number]) {
-        this.uvScale = val;
-    }
-
-    get textureOffset(): [number, number] {
-        return this.uvOffset;
-    }
-
-    set textureOffset(val: [number, number]) {
-        this.uvOffset = val;
-    }
-
-    get roughnessFactor(): number {
-        return this.roughness;
-    }
-
-    set roughnessFactor(val: number) {
-        this.roughness = val;
-    }
-
-    get metallicFactor(): number {
-        return this.metallic;
-    }
-
-    set metallicFactor(val: number) {
-        this.metallic = val;
-    }
-
-    get normalScale(): number {
-        return this.normalIntensity;
-    }
-
-    set normalScale(val: number) {
-        this.normalIntensity = val;
-    }
-
-    get weightMapTexture(): BitmapTexture | undefined {
-        return this.weightTexture;
-    }
-
-    set weightMapTexture(val: BitmapTexture | undefined) {
-        this.weightTexture = val;
-    }
-
-    get splatTexture(): BitmapTexture | undefined {
-        return this.weightTexture;
-    }
-
-    set splatTexture(val: BitmapTexture | undefined) {
-        this.weightTexture = val;
-    }
-
-    get weightMapChannel(): LandscapeWeightMapChannel {
-        return this.weightChannel;
-    }
-
-    set weightMapChannel(val: LandscapeWeightMapChannel) {
-        this.weightChannel = val;
-    }
-
-    get weightMapChannelIndex(): number {
-        const ch = String(this.weightChannel).toUpperCase();
+    get weightChannelIndex(): number {
+        const ch = String(this.#weightChannel).toUpperCase();
         if (ch === 'G' || ch === '1') return 1;
         if (ch === 'B' || ch === '2') return 2;
         if (ch === 'A' || ch === '3') return 3;
         return 0;
-    }
-
-    set weightMapChannelIndex(val: number) {
-        if (val === 1) this.weightChannel = 'G';
-        else if (val === 2) this.weightChannel = 'B';
-        else if (val === 3) this.weightChannel = 'A';
-        else this.weightChannel = 'R';
-    }
-
-    get splatChannel(): LandscapeWeightMapChannel {
-        return this.weightChannel;
-    }
-
-    set splatChannel(val: LandscapeWeightMapChannel) {
-        this.weightChannel = val;
     }
 }
 

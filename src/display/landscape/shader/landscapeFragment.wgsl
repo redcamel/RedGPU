@@ -34,7 +34,7 @@ struct LandscapeLayerParams {
     normalIntensity: f32,
     enabled: f32,
     aoIntensity: f32,
-    weightMapChannelIndex: f32,
+    weightChannelIndex: f32,
     pad0: f32,
     pad1: f32,
 };
@@ -119,7 +119,7 @@ fn computeDirectLayersPBR(
         if (length(weightMapSample) <= 0.0001 && layerIdx > 0) {
             weightMapSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, 0, ddxGlobalUV, ddyGlobalUV);
         }
-        let chIdx = u32(layerParams.weightMapChannelIndex + 0.5);
+        let chIdx = u32(layerParams.weightChannelIndex + 0.5);
         var weightVal = weightMapSample.r;
         if (chIdx == 1u) { weightVal = weightMapSample.g; }
         else if (chIdx == 2u) { weightVal = weightMapSample.b; }

@@ -11,7 +11,7 @@ struct LandscapeLayerParams {
     normalIntensity: f32,
     enabled: f32,
     aoIntensity: f32,
-    weightMapChannelIndex: f32,
+    weightChannelIndex: f32,
     pad0: f32,
     pad1: f32,
 };
@@ -95,7 +95,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         let layerIdx = i32(i);
         let weightMapSample = textureSampleLevel(layerWeightMapArray, vbtTextureSampler, globalUV, layerIdx, 0.0);
-        let chIdx = u32(layerParams.weightMapChannelIndex + 0.5);
+        let chIdx = u32(layerParams.weightChannelIndex + 0.5);
         var weightVal = weightMapSample.r;
         if (chIdx == 1u) { weightVal = weightMapSample.g; }
         else if (chIdx == 2u) { weightVal = weightMapSample.b; }
