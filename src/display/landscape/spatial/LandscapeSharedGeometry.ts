@@ -82,18 +82,6 @@ export class LandscapeSharedGeometry {
         return this.#combinedWireframeIndexBuffer;
     }
 
-    /**
-     * [KO] LOD별 지오메트리 범위 리스트를 반환합니다.
-     * [EN] Returns the list of LOD geometry ranges.
-     */
-    get lodRanges(): LandscapeLODGeometryRange[] {
-        return this.#lodRanges;
-    }
-
-    /**
-     * [KO] 최대 LOD 레벨 수를 반환합니다.
-     * [EN] Returns the maximum LOD level count.
-     */
     get maxLODLevel(): number {
         return this.#maxLODLevel;
     }

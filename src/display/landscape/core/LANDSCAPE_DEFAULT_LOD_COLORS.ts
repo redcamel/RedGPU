@@ -21,11 +21,11 @@ export const LANDSCAPE_DEFAULT_LOD_HEX_STRINGS: readonly string[] = Object.freez
     )
 );
 
-export function formatLODColorRGBA(color: [number, number, number, number], alpha: number = 0.75): string {
+export function formatLODColorRGBA(color: readonly [number, number, number, number] | [number, number, number, number], alpha: number = 0.75): string {
     return `rgba(${Math.round(color[0] * 255)}, ${Math.round(color[1] * 255)}, ${Math.round(color[2] * 255)}, ${alpha})`;
 }
 
-export function formatLODColorHex(color: [number, number, number, number]): string {
+export function formatLODColorHex(color: readonly [number, number, number, number] | [number, number, number, number]): string {
     const r = Math.floor(color[0] * 255).toString(16).padStart(2, '0');
     const g = Math.floor(color[1] * 255).toString(16).padStart(2, '0');
     const b = Math.floor(color[2] * 255).toString(16).padStart(2, '0');

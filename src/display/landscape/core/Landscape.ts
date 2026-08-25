@@ -206,9 +206,9 @@ export class Landscape extends Object3DContainer {
 
         this.#initSystems(redGPUContext, options, componentCountX, componentCountZ, maxLODLevel, vhtSampler, vhtAtlasTexture, vntAtlasTexture);
         this.#foliageManager = new LandscapeFoliageManager(this);
-        this.#tileStreamer.onTileLoaded = (comp) => {
+        this.#tileStreamer.setOnTileLoaded((comp) => {
             this.#foliageManager?.handleTileLoaded(comp);
-        };
+        });
         this.#debuggerManager = new LandscapeDebuggerManager(this, options?.debuggerOptions);
     }
 
@@ -566,7 +566,8 @@ export class Landscape extends Object3DContainer {
         );
     }
 
-    get landscapeComponents(): LandscapeComponent[] {
+    /** @internal 내부 디버거 전용 활성 타일 컴포넌트 목록 조회 */
+    get landscapeComponents(): readonly LandscapeComponent[] {
         return this.#spatialGrid.flatCells;
     }
 
@@ -618,15 +619,18 @@ export class Landscape extends Object3DContainer {
         this.#tileStreamer.maxLoadsPerFrame = value;
     }
 
+    /** @internal HUD 디버거 전용 GPU Culling 활성 상태 조회 */
     get frustumCullingActive(): boolean {
         return this.#frustumCullingActive;
     }
 
-    get lodColors(): [number, number, number, number][] {
+    /** @internal 공간 그리드 디버거 전용 LOD 디버그 색상 목록 조회 */
+    get lodColors(): readonly (readonly [number, number, number, number])[] {
         return this.#lodColorsRGBA;
     }
 
-    get lodDistancesSq(): number[] {
+    /** @internal 공간 그리드 디버거 전용 LOD 전환 거리(제곱) 목록 조회 */
+    get lodDistancesSq(): readonly number[] {
         return this.#lodDistancesSq;
     }
 

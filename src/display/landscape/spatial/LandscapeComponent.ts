@@ -1,12 +1,11 @@
 export class LandscapeComponent {
-    #worldX: number = 0;
-    #worldZ: number = 0;
-    #prevWorldX: number = 0;
-    #prevWorldZ: number = 0;
-    #componentX: number = 0;
-    #componentZ: number = 0;
-    #lodLevel: number = 0;
-    #key: string = '';
+    readonly #worldX: number = 0;
+    readonly #worldZ: number = 0;
+    readonly #prevWorldX: number = 0;
+    readonly #prevWorldZ: number = 0;
+    readonly #componentX: number = 0;
+    readonly #componentZ: number = 0;
+    readonly #key: string = '';
 
     constructor(
         worldX: number = 0,
@@ -31,18 +30,8 @@ export class LandscapeComponent {
         return this.#worldX;
     }
 
-    set worldX(val: number) {
-        this.#prevWorldX = this.#worldX;
-        this.#worldX = val;
-    }
-
     get worldZ(): number {
         return this.#worldZ;
-    }
-
-    set worldZ(val: number) {
-        this.#prevWorldZ = this.#worldZ;
-        this.#worldZ = val;
     }
 
     get prevWorldX(): number {
@@ -57,31 +46,8 @@ export class LandscapeComponent {
         return this.#componentX;
     }
 
-    set componentX(val: number) {
-        this.#componentX = val;
-        this.#key = `${this.#componentZ}_${val}`;
-    }
-
     get componentZ(): number {
         return this.#componentZ;
-    }
-
-    set componentZ(val: number) {
-        this.#componentZ = val;
-        this.#key = `${val}_${this.#componentX}`;
-    }
-
-    updatePrevPosition(): void {
-        this.#prevWorldX = this.#worldX;
-        this.#prevWorldZ = this.#worldZ;
-    }
-
-    get lodLevel(): number {
-        return this.#lodLevel;
-    }
-
-    set lodLevel(val: number) {
-        this.#lodLevel = val;
     }
 }
 

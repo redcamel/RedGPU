@@ -18,7 +18,7 @@ export class LandscapeTileStreamer {
     #loadingRadius: number = 2500.0;
     #maxLoadsPerFrame: number = 1;
     #tileUrlResolver: LandscapeTileUrlResolver | null = null;
-    onTileLoaded: ((comp: LandscapeComponent) => void) | null = null;
+    #onTileLoaded: ((comp: LandscapeComponent) => void) | null = null;
 
     #vhtAtlasTexture: DirectTexture | null = null;
     #vntAtlasTexture: DirectTexture | null = null;
@@ -104,6 +104,11 @@ export class LandscapeTileStreamer {
     setSpatialGrid(grid: LandscapeSpatialGrid): void {
         this.#spatialGrid = grid;
         this.resetTileState();
+    }
+
+    /** @internal 타일 로딩 완료 리스너 주입 */
+    setOnTileLoaded(callback: ((comp: LandscapeComponent) => void) | null): void {
+        this.#onTileLoaded = callback;
     }
 
     set loadingRadius(val: number) {
@@ -479,7 +484,7 @@ export class LandscapeTileStreamer {
                             }
                         }
 
-                        this.onTileLoaded?.(comp);
+                        this.#onTileLoaded?.(comp);
                     }
                 }
             }

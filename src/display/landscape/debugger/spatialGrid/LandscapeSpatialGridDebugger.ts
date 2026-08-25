@@ -57,11 +57,8 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
 
         const components = this.landscape.landscapeComponents || [];
         const [tcX, tcZ] = this.landscape.componentCount;
-        const [tileSizeX, tileSizeZ] = this.landscape.tileSize;
         const cellW = w / tcX;
         const cellH = h / tcZ;
-        const halfTileX = tileSizeX * 0.5;
-        const halfTileZ = tileSizeZ * 0.5;
 
         const lodDistancesSq = this.landscape.lodDistancesSq || [];
         const lodDistCount = lodDistancesSq.length;
@@ -76,8 +73,8 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
             const isLoaded = this.landscape.isTileLoaded(comp.componentZ, comp.componentX);
 
             if (isLoaded) {
-                const centerX = comp.worldX + halfTileX;
-                const centerZ = comp.worldZ + halfTileZ;
+                const centerX = comp.worldX;
+                const centerZ = comp.worldZ;
                 const dx = centerX - camX;
                 const dz = centerZ - camZ;
                 const distSq = dx * dx + dz * dz;
