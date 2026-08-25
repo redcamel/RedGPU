@@ -33,6 +33,8 @@ export interface LandscapeOptions {
 
     lodColoration?: boolean;
 
+    lod0SizeQuads?: number;
+
     lodMetric?: 'distance' | 'screenSize';
 
     lodFadeStartRatio?: number;

@@ -24,7 +24,7 @@ struct LandscapeUniforms {
     lodDistancesSq: array<vec4<f32>, 2>,
     tanHalfFOV: f32,
     lodMetric: f32,
-    pad0: f32,
+    lod0Quads: f32,
     pad1: f32,
 };
 
@@ -118,8 +118,20 @@ fn main(input: InputData) -> OutputData {
             let smoothMorph = smoothstep(0.0, 1.0, morphFactor);
 
             if (smoothMorph > 0.0001) {
+                let lod0Quads = max(1.0, landscapeUniforms.lod0Quads);
                 let baseQuads = max(1.0, landscapeUniforms.baseQuads);
-                let currentSegments = max(1.0, floor(baseQuads / pow(2.0, f32(lodLevel))));
+
+                var currentSegments: f32;
+                var subStep: u32;
+
+                if (lodLevel == 0u) {
+                    currentSegments = lod0Quads;
+                    subStep = max(1u, u32(round(lod0Quads / baseQuads)));
+                } else {
+                    let step = pow(2.0, f32(lodLevel - 1u));
+                    currentSegments = max(1.0, floor(baseQuads / step));
+                    subStep = 2u;
+                }
 
                 let halfTileX = landscapeUniforms.tileSizeX * 0.5;
                 let halfTileZ = landscapeUniforms.tileSizeZ * 0.5;
@@ -130,36 +142,33 @@ fn main(input: InputData) -> OutputData {
                 let gridIdxX = u32(round((input.position.x + halfTileX) / gridStepX) + 0.1);
                 let gridIdxZ = u32(round((input.position.y + halfTileZ) / gridStepZ) + 0.1);
 
-                let isOddX = (gridIdxX % 2u) != 0u;
-                let isOddZ = (gridIdxZ % 2u) != 0u;
+                let isMorphX = (gridIdxX % subStep) != 0u;
+                let isMorphZ = (gridIdxZ % subStep) != 0u;
 
-                if (isOddX || isOddZ) {
-                    let uvStepX = landscapeUniforms.tileSizeX / (landscapeUniforms.worldSizeX * currentSegments);
-                    let uvStepZ = landscapeUniforms.tileSizeZ / (landscapeUniforms.worldSizeZ * currentSegments);
+                if (isMorphX || isMorphZ) {
+                    let fracX = f32(gridIdxX % subStep) / f32(subStep);
+                    let fracZ = f32(gridIdxZ % subStep) / f32(subStep);
+                    let uvBaseX = f32(gridIdxX - (gridIdxX % subStep)) * (landscapeUniforms.tileSizeX / (landscapeUniforms.worldSizeX * currentSegments));
+                    let uvBaseZ = f32(gridIdxZ - (gridIdxZ % subStep)) * (landscapeUniforms.tileSizeZ / (landscapeUniforms.worldSizeZ * currentSegments));
+                    let uvSpanX = f32(subStep) * (landscapeUniforms.tileSizeX / (landscapeUniforms.worldSizeX * currentSegments));
+                    let uvSpanZ = f32(subStep) * (landscapeUniforms.tileSizeZ / (landscapeUniforms.worldSizeZ * currentSegments));
 
-                    var targetHeight = currentHeight;
+                    let tileOriginUV = vec2<f32>(
+                        (instanceData.worldX - halfTileX + landscapeUniforms.worldSizeX * 0.5) / landscapeUniforms.worldSizeX,
+                        (instanceData.worldZ - halfTileZ + landscapeUniforms.worldSizeZ * 0.5) / landscapeUniforms.worldSizeZ
+                    );
 
-                    if (isOddX && !isOddZ) {
-                        let cLeft = vec2<i32>(clamp((globalUV - vec2<f32>(uvStepX, 0.0)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-                        let cRight = vec2<i32>(clamp((globalUV + vec2<f32>(uvStepX, 0.0)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-                        targetHeight = (textureLoad(heightMapTexture, cLeft, 0).r + textureLoad(heightMapTexture, cRight, 0).r) * 0.5;
-                    } else if (!isOddX && isOddZ) {
-                        let cTop = vec2<i32>(clamp((globalUV - vec2<f32>(0.0, uvStepZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-                        let cBottom = vec2<i32>(clamp((globalUV + vec2<f32>(0.0, uvStepZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-                        targetHeight = (textureLoad(heightMapTexture, cTop, 0).r + textureLoad(heightMapTexture, cBottom, 0).r) * 0.5;
-                    } else {
-                        let c00 = vec2<i32>(clamp((globalUV + vec2<f32>(-uvStepX, -uvStepZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-                        let c10 = vec2<i32>(clamp((globalUV + vec2<f32>(uvStepX, -uvStepZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-                        let c01 = vec2<i32>(clamp((globalUV + vec2<f32>(-uvStepX, uvStepZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-                        let c11 = vec2<i32>(clamp((globalUV + vec2<f32>(uvStepX, uvStepZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-                        targetHeight = (
-                            textureLoad(heightMapTexture, c00, 0).r +
-                            textureLoad(heightMapTexture, c10, 0).r +
-                            textureLoad(heightMapTexture, c01, 0).r +
-                            textureLoad(heightMapTexture, c11, 0).r
-                        ) * 0.25;
-                    }
+                    let c00 = vec2<i32>(clamp((tileOriginUV + vec2<f32>(uvBaseX, uvBaseZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+                    let c10 = vec2<i32>(clamp((tileOriginUV + vec2<f32>(uvBaseX + uvSpanX, uvBaseZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+                    let c01 = vec2<i32>(clamp((tileOriginUV + vec2<f32>(uvBaseX, uvBaseZ + uvSpanZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+                    let c11 = vec2<i32>(clamp((tileOriginUV + vec2<f32>(uvBaseX + uvSpanX, uvBaseZ + uvSpanZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
 
+                    let h00 = textureLoad(heightMapTexture, c00, 0).r;
+                    let h10 = textureLoad(heightMapTexture, c10, 0).r;
+                    let h01 = textureLoad(heightMapTexture, c01, 0).r;
+                    let h11 = textureLoad(heightMapTexture, c11, 0).r;
+
+                    let targetHeight = mix(mix(h00, h10, fracX), mix(h01, h11, fracX), fracZ);
                     finalHeight = mix(currentHeight, targetHeight, smoothMorph);
                 }
             }

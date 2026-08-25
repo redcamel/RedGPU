@@ -30,6 +30,7 @@ export class LandscapeSharedGeometry {
     #tileSizeX: number;
     #tileSizeZ: number;
     #componentSizeQuads: number;
+    #lod0SizeQuads: number = 512;
     #maxLODLevel: number;
 
     #combinedVertexBuffer: VertexBuffer | null = null;
@@ -44,15 +45,17 @@ export class LandscapeSharedGeometry {
      * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
      * @param tileSizeX - [KO] 타일 가로 크기 [EN] Tile width along X-axis
      * @param tileSizeZ - [KO] 타일 세로 크기 [EN] Tile depth along Z-axis
-     * @param componentSizeQuads - [KO] 기본 그리드 쿼드 수 [EN] Base grid quads count
+     * @param componentSizeQuads - [KO] 기본 그리드 쿼드 수 (LOD 1 기준) [EN] Base grid quads count (for LOD 1)
      * @param maxLODLevel - [KO] 최대 LOD 레벨 수 [EN] Maximum LOD levels
+     * @param lod0SizeQuads - [KO] LOD 0 전용 초고밀도 쿼드 수 (기본 512) [EN] Ultra high-density quads count for LOD 0 (default 512)
      */
-    constructor(redGPUContext: RedGPUContext, tileSizeX: number, tileSizeZ: number, componentSizeQuads: number, maxLODLevel: number) {
+    constructor(redGPUContext: RedGPUContext, tileSizeX: number, tileSizeZ: number, componentSizeQuads: number, maxLODLevel: number, lod0SizeQuads: number = 512) {
         validateLandscapeBaseGridSize(componentSizeQuads);
         this.#redGPUContext = redGPUContext;
         this.#tileSizeX = tileSizeX;
         this.#tileSizeZ = tileSizeZ;
         this.#componentSizeQuads = componentSizeQuads;
+        this.#lod0SizeQuads = Math.max(componentSizeQuads, lod0SizeQuads);
         this.#maxLODLevel = maxLODLevel;
 
         this.#buildCombinedGeometry();
@@ -95,6 +98,27 @@ export class LandscapeSharedGeometry {
     }
 
     /**
+     * [KO] LOD 0 전용 쿼드 그리드 크기를 반환합니다.
+     * [EN] Returns the LOD 0 quad grid size.
+     */
+    get lod0SizeQuads(): number {
+        return this.#lod0SizeQuads;
+    }
+
+    /**
+     * [KO] 그리드 쿼드 해상도를 변경하고 결합 지오메트리를 재생성합니다.
+     * [EN] Updates the grid quad resolutions and rebuilds the combined geometry.
+     */
+    updateGridSize(componentSizeQuads: number, lod0SizeQuads?: number): void {
+        validateLandscapeBaseGridSize(componentSizeQuads);
+        this.#componentSizeQuads = componentSizeQuads;
+        if (lod0SizeQuads !== undefined) {
+            this.#lod0SizeQuads = Math.max(componentSizeQuads, lod0SizeQuads);
+        }
+        this.#buildCombinedGeometry();
+    }
+
+    /**
      * [KO] 타일 크기를 변경하고 결합 지오메트리를 재생성합니다.
      * [EN] Updates the tile size and rebuilds the combined geometry.
      *
@@ -123,6 +147,7 @@ export class LandscapeSharedGeometry {
 
     #buildCombinedGeometry(): void {
         const maxLODLevel = this.#maxLODLevel;
+        const lod0Quads = Math.max(this.#componentSizeQuads, this.#lod0SizeQuads);
         const baseComponentSizeQuads = this.#componentSizeQuads;
         const halfSizeX = this.#tileSizeX / 2;
         const halfSizeZ = this.#tileSizeZ / 2;
@@ -138,9 +163,16 @@ export class LandscapeSharedGeometry {
         let totalWireframeIndexOffset = 0;
 
         for (let lod = 0; lod < maxLODLevel; lod++) {
-            const step = Math.pow(2, lod);
-            const segmentsX = Math.max(1, Math.floor(baseComponentSizeQuads / step));
-            const segmentsZ = Math.max(1, Math.floor(baseComponentSizeQuads / step));
+            let segmentsX: number;
+            let segmentsZ: number;
+            if (lod === 0) {
+                segmentsX = lod0Quads;
+                segmentsZ = lod0Quads;
+            } else {
+                const step = Math.pow(2, lod - 1);
+                segmentsX = Math.max(1, Math.floor(baseComponentSizeQuads / step));
+                segmentsZ = Math.max(1, Math.floor(baseComponentSizeQuads / step));
+            }
 
             const innerVertexCount = (segmentsX + 1) * (segmentsZ + 1);
             const baseVertex = totalVertexOffset;

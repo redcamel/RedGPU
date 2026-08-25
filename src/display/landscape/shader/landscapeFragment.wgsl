@@ -64,7 +64,7 @@ struct LandscapeUniforms {
     lodDistancesSq: array<vec4<f32>, 2>,
     tanHalfFOV: f32,
     lodMetric: f32,
-    pad0: f32,
+    lod0Quads: f32,
     pad1: f32,
 };
 

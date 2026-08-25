@@ -179,6 +179,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
 
         // 2. Component & Mesh Specs
         componentSizeQuads: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
+        lod0SizeQuads: landscape ? landscape.lod0SizeQuads : 512,
         maxLODLevel: landscape ? landscape.maxLODLevel : 4,
         lodMetric: landscape ? landscape.lodMetric : 'screenSize',
         lodFadeStartRatio: landscape ? landscape.lodFadeStartRatio : 0.7,
@@ -308,6 +309,21 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             }).on('change', (ev) => {
                 if (landscape) {
                     landscape.componentSizeQuads = ev.value;
+                    updateConfigValues();
+                }
+            });
+
+            folderSpecs.addBinding(config, 'lod0SizeQuads', {
+                label: 'LOD 0 Quads (Ultra)',
+                options: {
+                    '64x64 (4225 Verts)': 64,
+                    '128x128 (16641 Verts)': 128,
+                    '256x256 (66049 Verts)': 256,
+                    '512x512 (263169 Verts)': 512
+                }
+            }).on('change', (ev) => {
+                if (landscape) {
+                    landscape.lod0SizeQuads = ev.value;
                     updateConfigValues();
                 }
             });

@@ -37,6 +37,7 @@ export class Landscape extends Object3DContainer {
     #wireframe: boolean = false;
     #lodColoration: boolean = false;
     #lodMetric: 'distance' | 'screenSize' = 'screenSize';
+    #lod0SizeQuads: number = 512;
     #lastTanHalfFOV: number = 1.0;
     #lodFadeStartRatio: number = 0.7;
     #lodGeomorphStartRatio: number = 0.85;
@@ -100,10 +101,11 @@ export class Landscape extends Object3DContainer {
 
         const componentSizeQuads = options.componentSizeQuads ?? LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
         validateLandscapeBaseGridSize(componentSizeQuads);
+        const lod0SizeQuads = options.lod0SizeQuads ?? 512;
         const maxLODLevel = Math.min(8, Math.max(1, options.maxLODLevel ?? 4));
 
         const landscapeMaterial = options.landscapeMaterial || new LandscapeMaterial(redGPUContext);
-        const sharedGeometry = new LandscapeSharedGeometry(redGPUContext, tileSizeX, tileSizeZ, componentSizeQuads, maxLODLevel);
+        const sharedGeometry = new LandscapeSharedGeometry(redGPUContext, tileSizeX, tileSizeZ, componentSizeQuads, maxLODLevel, lod0SizeQuads);
 
         this.#spatialGrid = new LandscapeSpatialGrid(componentCountX, componentCountZ, tileSizeX, tileSizeZ);
         this.#sharedGeometry = sharedGeometry;
@@ -116,6 +118,7 @@ export class Landscape extends Object3DContainer {
         this.#tileSizeX = tileSizeX;
         this.#tileSizeZ = tileSizeZ;
         this.#componentSizeQuads = componentSizeQuads;
+        this.#lod0SizeQuads = lod0SizeQuads;
         this.#maxLODLevel = maxLODLevel;
         this.#wireframe = options.wireframe ?? false;
         this.#lodColoration = options.lodColoration ?? false;
@@ -378,7 +381,32 @@ export class Landscape extends Object3DContainer {
                 this.#tileSizeX,
                 this.#tileSizeZ,
                 value,
-                this.#maxLODLevel
+                this.#maxLODLevel,
+                this.#lod0SizeQuads
+            );
+            this.#rebuildTiles();
+        }
+    }
+
+    /**
+     * [KO] LOD 0 전용 초고밀도 그리드 쿼드 수 (기본: 256)
+     * [EN] Ultra high-density grid quads count dedicated for LOD 0 (default: 256)
+     */
+    get lod0SizeQuads(): number {
+        return this.#lod0SizeQuads;
+    }
+
+    set lod0SizeQuads(value: number) {
+        const clamped = Math.max(this.#componentSizeQuads, Math.round(value));
+        if (this.#lod0SizeQuads !== clamped) {
+            this.#lod0SizeQuads = clamped;
+            this.#sharedGeometry = new LandscapeSharedGeometry(
+                this.#redGPUContext,
+                this.#tileSizeX,
+                this.#tileSizeZ,
+                this.#componentSizeQuads,
+                this.#maxLODLevel,
+                clamped
             );
             this.#rebuildTiles();
         }
@@ -397,7 +425,8 @@ export class Landscape extends Object3DContainer {
                 this.#tileSizeX,
                 this.#tileSizeZ,
                 this.#componentSizeQuads,
-                count
+                count,
+                this.#lod0SizeQuads
             );
             this.#rebuildLODStructures();
             this.#rebuildTiles();
@@ -701,7 +730,8 @@ export class Landscape extends Object3DContainer {
             this.#lodColorsRGBA,
             this.#lodDistancesSq,
             this.#lastTanHalfFOV,
-            lodMetricVal
+            lodMetricVal,
+            this.#lod0SizeQuads
         );
     }
 
