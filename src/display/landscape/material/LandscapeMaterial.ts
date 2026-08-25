@@ -78,24 +78,34 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         return this.#textureArraySize;
     }
 
-    onRebakeVBTRequested?: () => void;
+    #onRebakeVBTRequested?: () => void;
     #isRebakeScheduled: boolean = false;
     #rebakeDebounceTimer: any = null;
 
-    get layerBaseColorArray(): { gpuTexture: GPUTexture | null, gpuTextureView: GPUTextureView | null } {
-        return {gpuTexture: this.#gpuBaseColorArrayTexture, gpuTextureView: this.#baseColorArrayView};
+    #internalLayerViews = {
+        baseColorView: null as GPUTextureView | null,
+        normalView: null as GPUTextureView | null,
+        ormView: null as GPUTextureView | null,
+        weightMapView: null as GPUTextureView | null,
+    };
+
+    /** @internal VBT 제너레이터 베이킹 전용 텍스처 뷰 조회 (Zero-GC) */
+    getInternalLayerViews(): {
+        baseColorView: GPUTextureView | null;
+        normalView: GPUTextureView | null;
+        ormView: GPUTextureView | null;
+        weightMapView: GPUTextureView | null;
+    } {
+        this.#internalLayerViews.baseColorView = this.#baseColorArrayView;
+        this.#internalLayerViews.normalView = this.#normalArrayView;
+        this.#internalLayerViews.ormView = this.#ormArrayView;
+        this.#internalLayerViews.weightMapView = this.#weightMapArrayView;
+        return this.#internalLayerViews;
     }
 
-    get layerNormalArray(): { gpuTexture: GPUTexture | null, gpuTextureView: GPUTextureView | null } {
-        return {gpuTexture: this.#gpuNormalArrayTexture, gpuTextureView: this.#normalArrayView};
-    }
-
-    get layerORMArray(): { gpuTexture: GPUTexture | null, gpuTextureView: GPUTextureView | null } {
-        return {gpuTexture: this.#gpuORMArrayTexture, gpuTextureView: this.#ormArrayView};
-    }
-
-    get layerWeightMapArray(): { gpuTexture: GPUTexture | null, gpuTextureView: GPUTextureView | null } {
-        return {gpuTexture: this.#gpuWeightMapArrayTexture, gpuTextureView: this.#weightMapArrayView};
+    /** @internal VBT 리베이크 요청 리스너 등록 */
+    setOnRebakeVBTRequested(callback?: () => void): void {
+        this.#onRebakeVBTRequested = callback;
     }
 
     requestVBTRebake(immediate: boolean = false, debounceDelayMs: number = 150): void {
@@ -108,7 +118,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
             this.#isRebakeScheduled = true;
             queueMicrotask(() => {
                 this.#isRebakeScheduled = false;
-                this.onRebakeVBTRequested?.();
+                this.#onRebakeVBTRequested?.();
             });
             return;
         }
@@ -118,7 +128,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         }
         this.#rebakeDebounceTimer = setTimeout(() => {
             this.#rebakeDebounceTimer = null;
-            this.onRebakeVBTRequested?.();
+            this.#onRebakeVBTRequested?.();
         }, debounceDelayMs);
     }
 

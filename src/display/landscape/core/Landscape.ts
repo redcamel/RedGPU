@@ -200,9 +200,9 @@ export class Landscape extends Object3DContainer {
         this.#tileStreamer.setGenerators(this.#vhtGenerator, this.#vntGenerator, this.#vbtGenerator);
         this.#tileStreamer.setMaterial(landscapeMaterial);
 
-        landscapeMaterial.onRebakeVBTRequested = () => {
+        landscapeMaterial.setOnRebakeVBTRequested(() => {
             this.#tileStreamer.rebakeAllLoadedVBT();
-        };
+        });
 
         this.#initSystems(redGPUContext, options, componentCountX, componentCountZ, maxLODLevel, vhtSampler, vhtAtlasTexture, vntAtlasTexture);
         this.#foliageManager = new LandscapeFoliageManager(this);
@@ -499,9 +499,9 @@ export class Landscape extends Object3DContainer {
             this.#landscapeMaterial = val;
             this.#tileStreamer?.setMaterial(val);
             if (val) {
-                val.onRebakeVBTRequested = () => {
+                val.setOnRebakeVBTRequested(() => {
                     this.#tileStreamer?.rebakeAllLoadedVBT();
-                };
+                });
             }
             this.#renderPipelineCache.clear();
         }
