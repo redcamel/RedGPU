@@ -934,7 +934,7 @@ export class Landscape extends Object3DContainer {
                 this.#instanceBuffer.setStaticTileData(
                     index,
                     posX, posZ, posX, posZ,
-                    0, 0, 0, 1.0
+                    0, 0, 0, 0.0
                 );
                 index++;
             }

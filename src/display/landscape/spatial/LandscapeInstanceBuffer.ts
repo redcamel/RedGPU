@@ -82,7 +82,7 @@ export class LandscapeInstanceBuffer {
         r: number = 0,
         g: number = 0,
         b: number = 0,
-        a: number = 1.0
+        a: number = 0.0
     ): void {
         const offset = index * 8;
         this.#allInputTilesData[offset] = worldX;
