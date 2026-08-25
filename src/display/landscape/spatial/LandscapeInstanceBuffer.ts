@@ -73,23 +73,19 @@ export class LandscapeInstanceBuffer {
         index: number,
         worldX: number,
         worldZ: number,
-        prevWorldX: number,
-        prevWorldZ: number,
         r: number = 0,
         g: number = 0,
         b: number = 0,
         a: number = 0.0
     ): void {
         const offset = index * 8;
-        this.#allInputTilesData[offset] = worldX;
-        this.#allInputTilesData[offset + 1] = worldZ;
-        this.#allInputTilesData[offset + 2] = prevWorldX;
-        this.#allInputTilesData[offset + 3] = prevWorldZ;
+        this.#allInputTilesData[offset] = r;
+        this.#allInputTilesData[offset + 1] = g;
+        this.#allInputTilesData[offset + 2] = b;
+        this.#allInputTilesData[offset + 3] = a;
 
-        this.#allInputTilesData[offset + 4] = r;
-        this.#allInputTilesData[offset + 5] = g;
-        this.#allInputTilesData[offset + 6] = b;
-        this.#allInputTilesData[offset + 7] = a;
+        this.#allInputTilesData[offset + 4] = worldX;
+        this.#allInputTilesData[offset + 5] = worldZ;
     }
 
     uploadStaticTilesToGPU(): void {

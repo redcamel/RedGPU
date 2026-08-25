@@ -1,11 +1,9 @@
 #redgpu_include SYSTEM_UNIFORM;
 
 struct TileInstance {
+    color: vec4<f32>,
     worldX: f32,
     worldZ: f32,
-    prevWorldX: f32,
-    prevWorldZ: f32,
-    color: vec4<f32>,
 };
 
 struct LandscapeUniforms {
@@ -67,16 +65,10 @@ fn main(input: InputData) -> OutputData {
 
     let worldX = input.position.x + instanceData.worldX;
     let worldZ = input.position.y + instanceData.worldZ;
-    let prevWorldX = input.position.x + instanceData.prevWorldX;
-    let prevWorldZ = input.position.y + instanceData.prevWorldZ;
 
     let globalUV = vec2<f32>(
         (worldX + landscapeUniforms.worldSizeX * 0.5) / landscapeUniforms.worldSizeX,
         (worldZ + landscapeUniforms.worldSizeZ * 0.5) / landscapeUniforms.worldSizeZ
-    );
-    let prevGlobalUV = vec2<f32>(
-        (prevWorldX + landscapeUniforms.worldSizeX * 0.5) / landscapeUniforms.worldSizeX,
-        (prevWorldZ + landscapeUniforms.worldSizeZ * 0.5) / landscapeUniforms.worldSizeZ
     );
 
     let texSize = landscapeUniforms.vhtTextureSize;
@@ -175,21 +167,13 @@ fn main(input: InputData) -> OutputData {
         }
     }
 
-    var prevHeightValue = finalHeight;
-    if (prevWorldX != worldX || prevWorldZ != worldZ) {
-        let prevTexCoord = vec2<i32>(clamp(prevGlobalUV * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-        prevHeightValue = textureLoad(heightMapTexture, prevTexCoord, 0).r;
-    }
-
     let isSkirt = input.position.z < -0.5;
     let lodMultiplier = 1.0 + f32(lodLevel) * 0.5;
     let dynamicSkirtDepth = -max(30.0, landscapeUniforms.heightScale * 0.15 * lodMultiplier);
 
     let worldY = finalHeight * landscapeUniforms.heightScale + select(0.0, dynamicSkirtDepth, isSkirt);
-    let prevWorldY = prevHeightValue * landscapeUniforms.heightScale + select(0.0, dynamicSkirtDepth, isSkirt);
 
     let worldPos4 = vec4<f32>(worldX, worldY, worldZ, 1.0);
-    let prevWorldPos4 = vec4<f32>(prevWorldX, prevWorldY, prevWorldZ, 1.0);
 
     let clipPos = systemUniforms.projection.projectionViewMatrix * worldPos4;
 
@@ -209,7 +193,7 @@ fn main(input: InputData) -> OutputData {
     output.vertexHeight = worldY;
 
     output.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * worldPos4;
-    output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * prevWorldPos4;
+    output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * worldPos4;
 
     if (landscapeUniforms.lodColoration > 0.5) {
         output.instanceColor = landscapeUniforms.lodColors[min(lodLevel, 7u)];

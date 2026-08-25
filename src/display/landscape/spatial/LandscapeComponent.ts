@@ -1,8 +1,6 @@
 export class LandscapeComponent {
     readonly #worldX: number = 0;
     readonly #worldZ: number = 0;
-    readonly #prevWorldX: number = 0;
-    readonly #prevWorldZ: number = 0;
     readonly #componentX: number = 0;
     readonly #componentZ: number = 0;
     readonly #key: string = '';
@@ -15,8 +13,6 @@ export class LandscapeComponent {
     ) {
         this.#worldX = worldX;
         this.#worldZ = worldZ;
-        this.#prevWorldX = worldX;
-        this.#prevWorldZ = worldZ;
         this.#componentX = componentX;
         this.#componentZ = componentZ;
         this.#key = `${componentZ}_${componentX}`;
@@ -32,14 +28,6 @@ export class LandscapeComponent {
 
     get worldZ(): number {
         return this.#worldZ;
-    }
-
-    get prevWorldX(): number {
-        return this.#prevWorldX;
-    }
-
-    get prevWorldZ(): number {
-        return this.#prevWorldZ;
     }
 
     get componentX(): number {

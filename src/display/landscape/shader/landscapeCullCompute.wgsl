@@ -14,11 +14,9 @@ struct CameraFrustumUniforms {
 };
 
 struct InputTileData {
+    color: vec4<f32>,
     worldX: f32,
     worldZ: f32,
-    prevWorldX: f32,
-    prevWorldZ: f32,
-    color: vec4<f32>,
 };
 
 struct IndirectDrawArgs {
