@@ -45,7 +45,7 @@ struct MaterialUniforms {
     pad1: u32,
     pad2: u32,
     color: vec4<f32>,
-    layers: array<LandscapeLayerParams, 8>,
+    layerParams: array<LandscapeLayerParams, 8>,
 };
 
 struct LandscapeUniforms {
@@ -111,7 +111,7 @@ fn computeDirectLayersPBR(
     var blendedAO = 0.0;
 
     for (var i = 0u; i < activeLayerCount; i = i + 1u) {
-        let layerParams = uniforms.layers[i];
+        let layerParams = uniforms.layerParams[i];
         if (layerParams.enabled <= 0.5) { continue; }
 
         let layerIdx = i32(i);

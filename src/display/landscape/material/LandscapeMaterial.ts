@@ -74,10 +74,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         return this.#layers;
     }
 
-    set layers(value: any) {
-
-    }
-
     get textureArraySize(): number {
         return this.#textureArraySize;
     }

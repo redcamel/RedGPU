@@ -23,7 +23,7 @@ struct VBTBakeUniforms {
     activeLayerCount: u32,
     pad0: u32,
     baseColor: vec4<f32>,
-    layers: array<LandscapeLayerParams, 8>,
+    layerParams: array<LandscapeLayerParams, 8>,
 };
 
 @group(0) @binding(0) var<uniform> uniforms: VBTBakeUniforms;
@@ -90,7 +90,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     );
 
     for (var i = 0u; i < activeLayerCount; i = i + 1u) {
-        let layerParams = uniforms.layers[i];
+        let layerParams = uniforms.layerParams[i];
         if (layerParams.enabled <= 0.5) { continue; }
 
         let layerIdx = i32(i);

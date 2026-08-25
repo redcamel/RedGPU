@@ -53,10 +53,6 @@ export class LandscapeInstanceBuffer {
         return this.#landscapeUniformBuffer;
     }
 
-    get instanceStorageBuffer(): GPUBuffer | null {
-        return this.#allInputTilesBuffer;
-    }
-
     get instanceStorageBindGroup(): GPUBindGroup | null {
         return this.#instanceStorageBindGroup;
     }

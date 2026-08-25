@@ -336,10 +336,6 @@ export class LandscapeTileStreamer {
         this.#processRebakeQueue(budgetPerFrame);
     }
 
-    rebakeAllVBT(budgetPerFrame: number = 3): void {
-        this.rebakeAllLoadedVBT(budgetPerFrame);
-    }
-
     #processRebakeQueue = (budgetPerFrame: number = 3): void => {
         if (!this.#vbtGenerator || !this.#vbtBaseColorAtlas || !this.#vbtNormalAtlas || !this.#vbtORMAtlas || !this.#material || !this.#vhtAtlasTexture || !this.#vntAtlasTexture || !this.#spatialGrid) {
             this.#isRebaking = false;

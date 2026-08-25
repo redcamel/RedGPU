@@ -113,16 +113,6 @@ export class LandscapeGPUCuller {
         computePass.dispatchWorkgroups(workgroupCount);
     }
 
-    dispatch(commandEncoder: GPUCommandEncoder, tileCount: number): void {
-        if (!this.#computePipeline || !this.#bindGroup) return;
-
-        const computePass = commandEncoder.beginComputePass({
-            label: 'LandscapeGPUCullingComputePass'
-        });
-        this.dispatchPass(computePass, tileCount);
-        computePass.end();
-    }
-
     #initGPUResources(): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice) return;
