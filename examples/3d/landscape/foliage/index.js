@@ -109,8 +109,8 @@ RedGPU.init(
 
         scene.addLandscape(landscape);
 
-        // 5. LandscapeFoliageManager 생성 및 리얼 3D 잔디 식생 테스트 파퓰레이션
         const foliageManager = landscape.foliageManager;
+
         const grassMaterial = new RedGPU.Material.PBRMaterial(redGPUContext);
         grassMaterial.baseColorTexture = new RedGPU.Resource.BitmapTexture(
             redGPUContext,
@@ -126,7 +126,6 @@ RedGPU.init(
         );
         grassMaterial.baseColorFactor = [0.85, 1.25, 0.75, 1.0];
         grassMaterial.roughnessFactor = 0.55;
-        grass
 
         function createGrassClumpGeometry(context, width = 2.0, height = 3.8, numBlades = 3) {
             const interleaveData = [];
@@ -215,7 +214,7 @@ RedGPU.init(
             grassMaterial
         );
 
-        const grassType = foliageManager.addFoliageType({
+        foliageManager.addFoliageType({
             name: 'BasicGrass',
             mesh: dummyGrassMesh,
             maxInstances: 1000000,
@@ -226,15 +225,13 @@ RedGPU.init(
             randomRotationY: true
         });
 
-        let treeType = null;
-
         new RedGPU.GLTFLoader(
             redGPUContext,
             '../../../assets/terrain/tree_elm.glb',
             (loader) => {
                 const treeMesh = loader.resultMesh;
 
-                treeType = foliageManager.addFoliageType({
+                foliageManager.addFoliageType({
                     name: 'ElmTree',
                     mesh: treeMesh,
                     maxInstances: 1000000,
@@ -247,21 +244,6 @@ RedGPU.init(
                         fadeRange: 30
                     }
                 });
-
-                console.log('[Foliage Example 🌳] Extracted SubMeshes in treeType:', treeType.subMeshes.map(s => ({
-                    name: s.mesh.name,
-                    alphaBlend: s.material.alphaBlend,
-                    useCutOff: s.material.useCutOff,
-                    cutOff: s.material.cutOff,
-                    transparent: s.material.transparent,
-                    indexCount: s.indexCount,
-                    vertexCount: s.vertexCount,
-                    isIndexed: s.isIndexed,
-                    hasVB: !!s.geometry.vertexBuffer?.gpuBuffer,
-                    hasIB: !!s.geometry.indexBuffer?.gpuBuffer,
-                })));
-                console.log('[Foliage Example 🌳] activeInstanceCount:', treeType.activeInstanceCount);
-                console.log('[Foliage Example 🌳] ElmTree FoliageType registered successfully! SubMeshes:', treeType.subMeshes.length);
             }
         );
 
@@ -271,11 +253,11 @@ RedGPU.init(
         renderer.start(redGPUContext, () => {
         });
 
-        renderTestPane(redGPUContext, landscape, controller, directionalLight, layers, foliageManager, treeType);
+        renderTestPane(redGPUContext, landscape, controller, directionalLight, layers, foliageManager);
     }
 );
 
-const renderTestPane = (redGPUContext, landscape, controller, directionalLight, layers, foliageManager, grassType) => {
+const renderTestPane = (redGPUContext, landscape, controller, directionalLight, layers, foliageManager) => {
     const [wsX, wsZ] = landscape.worldSize;
     const [tcX, tcZ] = landscape.componentCount;
     const [tsX, tsZ] = landscape.tileSize;
@@ -318,44 +300,71 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
         gui: (pane) => {
             activePane = pane;
 
-            const currentFoliageType = grassType || foliageManager?.getFoliageType('ElmTree') || foliageManager?.getFoliageType('BasicGrass');
-            if (currentFoliageType || foliageManager) {
+            if (foliageManager) {
                 const folderFoliage = pane.addFolder({title: 'Foliage', expanded: true});
-                const foliageProxy = {
-                    get foliageCount() {
-                        const target = grassType || foliageManager?.getFoliageType('ElmTree') || foliageManager?.getFoliageType('BasicGrass');
+
+                const grassType = foliageManager.getFoliageType('BasicGrass');
+                if (grassType) {
+                    const subGrass = folderFoliage.addFolder({title: 'BasicGrass', expanded: false});
+                    const grassProxy = {
+                        get count() {
+                            return grassType.activeInstanceCount;
+                        },
+                        get cullingDist() {
+                            return grassType.options.cullingDistance;
+                        },
+                        set cullingDist(v) {
+                            grassType.options.cullingDistance = v;
+                        },
+                        get fadeStartDist() {
+                            return grassType.options.fadeStartDistance;
+                        },
+                        set fadeStartDist(v) {
+                            grassType.options.fadeStartDistance = v;
+                        }
+                    };
+                    subGrass.addBinding(grassProxy, 'count', {readonly: true});
+                    subGrass.addBinding(grassProxy, 'cullingDist', {min: 500, max: 8000, step: 50});
+                    subGrass.addBinding(grassProxy, 'fadeStartDist', {min: 200, max: 6000, step: 50});
+                }
+
+                const subTree = folderFoliage.addFolder({title: 'ElmTree', expanded: true});
+                const treeProxy = {
+                    get count() {
+                        const target = foliageManager.getFoliageType('ElmTree');
                         return target ? target.activeInstanceCount : 0;
                     },
-                    get foliageCullingDist() {
-                        const target = grassType || foliageManager?.getFoliageType('ElmTree') || foliageManager?.getFoliageType('BasicGrass');
-                        return target ? target.options.cullingDistance : 600;
+                    get cullingDist() {
+                        const target = foliageManager.getFoliageType('ElmTree');
+                        return target ? target.options.cullingDistance : 3500;
                     },
-                    set foliageCullingDist(v) {
-                        const target = grassType || foliageManager?.getFoliageType('ElmTree') || foliageManager?.getFoliageType('BasicGrass');
+                    set cullingDist(v) {
+                        const target = foliageManager.getFoliageType('ElmTree');
                         if (target) target.options.cullingDistance = v;
                     },
-                    get foliageFadeStartDist() {
-                        const target = grassType || foliageManager?.getFoliageType('ElmTree') || foliageManager?.getFoliageType('BasicGrass');
-                        return target ? target.options.fadeStartDistance : 400;
+                    get fadeStartDist() {
+                        const target = foliageManager.getFoliageType('ElmTree');
+                        return target ? target.options.fadeStartDistance : 3000;
                     },
-                    set foliageFadeStartDist(v) {
-                        const target = grassType || foliageManager?.getFoliageType('ElmTree') || foliageManager?.getFoliageType('BasicGrass');
+                    set fadeStartDist(v) {
+                        const target = foliageManager.getFoliageType('ElmTree');
                         if (target) target.options.fadeStartDistance = v;
+                    },
+                    get lodDistance() {
+                        const target = foliageManager.getFoliageType('ElmTree');
+                        return target ? target.options.lodDistance : 250;
+                    },
+                    set lodDistance(v) {
+                        const target = foliageManager.getFoliageType('ElmTree');
+                        if (target) target.options.lodDistance = v;
                     }
                 };
-                folderFoliage.addBinding(foliageProxy, 'foliageCount', {readonly: true});
-                folderFoliage.addBinding(foliageProxy, 'foliageCullingDist', {
-                    min: 500,
-                    max: 8000,
-                    step: 50
-                });
-                folderFoliage.addBinding(foliageProxy, 'foliageFadeStartDist', {
-                    min: 200,
-                    max: 6000,
-                    step: 50
-                });
-                folderFoliage.addBinding(config, 'billboardWireframe').on('change', (ev) => {
-                    const target = grassType || foliageManager?.getFoliageType('ElmTree');
+                subTree.addBinding(treeProxy, 'count', {readonly: true});
+                subTree.addBinding(treeProxy, 'cullingDist', {min: 500, max: 8000, step: 50});
+                subTree.addBinding(treeProxy, 'fadeStartDist', {min: 200, max: 6000, step: 50});
+                subTree.addBinding(treeProxy, 'lodDistance', {min: 50, max: 1000, step: 10});
+                subTree.addBinding(config, 'billboardWireframe').on('change', (ev) => {
+                    const target = foliageManager.getFoliageType('ElmTree');
                     if (target) {
                         target.setBillboardWireframe(ev.value);
                     }
@@ -365,21 +374,13 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             const folderSpatial = pane.addFolder({title: 'Spatial', expanded: true});
             const folderDimensions = folderSpatial.addFolder({title: 'Dimensions', expanded: true});
 
-            folderDimensions.addBinding(config, 'worldSizeX', {
-                min: 1000,
-                max: 30000,
-                step: 500
-            }).on('change', (ev) => {
+            folderDimensions.addBinding(config, 'worldSizeX', {min: 1000, max: 30000, step: 500}).on('change', (ev) => {
                 config.worldSizeX = ev.value;
                 landscape.worldSize = [config.worldSizeX, config.worldSizeZ];
                 updateConfigValues();
             });
 
-            folderDimensions.addBinding(config, 'worldSizeZ', {
-                min: 1000,
-                max: 30000,
-                step: 500
-            }).on('change', (ev) => {
+            folderDimensions.addBinding(config, 'worldSizeZ', {min: 1000, max: 30000, step: 500}).on('change', (ev) => {
                 config.worldSizeZ = ev.value;
                 landscape.worldSize = [config.worldSizeX, config.worldSizeZ];
                 updateConfigValues();
@@ -425,19 +426,21 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 updateConfigValues();
             });
 
-            folderLOD.addBinding(landscape, 'maxLODLevel', {
-                min: 1,
-                max: 8,
-                step: 1
+            folderLOD.addBinding(landscape, 'lod0SizeQuads', {
+                options: {64: 64, 128: 128, 256: 256, 512: 512}
             }).on('change', () => {
                 updateConfigValues();
             });
 
-            folderLOD.addBinding(landscape, 'lodFadeStartRatio', {
-                min: 0.1,
-                max: 0.99,
-                step: 0.05
+            folderLOD.addBinding(landscape, 'maxLODLevel', {min: 1, max: 8, step: 1}).on('change', () => {
+                updateConfigValues();
             });
+
+            folderLOD.addBinding(landscape, 'lodMetric', {
+                options: {distance: 'distance', screenSize: 'screenSize'}
+            });
+
+            folderLOD.addBinding(landscape, 'lodFadeStartRatio', {min: 0.1, max: 0.99, step: 0.05});
 
             folderLOD.addBinding(landscape, 'lodGeomorphStartRatio', {
                 min: 0.1,
@@ -446,42 +449,14 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             });
 
             const folderStream = folderSpatial.addFolder({title: 'Tile Streaming', expanded: true});
-
             folderStream.addBinding(landscape, 'loadedTileCount', {readonly: true});
             folderStream.addBinding(landscape, 'pendingQueueSize', {readonly: true});
-
-            folderStream.addBinding(landscape, 'loadingRadius', {
-                min: 500,
-                max: 20000,
-                step: 100
-            });
-
-            folderStream.addBinding(landscape, 'maxLoadsPerFrame', {
-                min: 1,
-                max: 10,
-                step: 1
-            });
-
-            folderStream.addButton({title: 'Rebake All Loaded VBT'}).on('click', () => {
-                landscape.requestVBTRebake(true);
-            });
-
-            folderStream.addButton({title: 'Reset Tile Streaming Cache'}).on('click', () => {
-                if (landscape.tileStreamer) {
-                    landscape.tileStreamer.resetTileState();
-                }
-            });
+            folderStream.addBinding(landscape, 'loadingRadius', {min: 500, max: 20000, step: 100});
+            folderStream.addBinding(landscape, 'maxLoadsPerFrame', {min: 1, max: 10, step: 1});
 
             const folderDisplay = pane.addFolder({title: 'Display', expanded: true});
-
-            folderDisplay.addBinding(landscape, 'heightScale', {
-                min: 0,
-                max: 3000,
-                step: 25
-            });
-
+            folderDisplay.addBinding(landscape, 'heightScale', {min: 0, max: 3000, step: 25});
             folderDisplay.addBinding(landscape, 'wireframe');
-
             folderDisplay.addBinding(landscape, 'lodColoration');
 
             const baseColorProxy = {
@@ -492,17 +467,10 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     landscape.baseColor.setColorByHEX(v);
                 }
             };
+            folderDisplay.addBinding(baseColorProxy, 'baseColor');
+            folderDisplay.addBinding(config, 'textureArraySize', {readonly: true});
 
-            folderDisplay.addBinding(baseColorProxy, 'baseColor', {
-                picker: 'inline',
-                expanded: false
-            });
-
-            folderDisplay.addBinding(config, 'textureArraySize', {
-                readonly: true
-            });
-
-            if (layers && layers.length) {
+            if (layers?.length) {
                 const folderLayers = pane.addFolder({title: 'Layers', expanded: true});
 
                 layers.forEach((layer) => {
@@ -524,10 +492,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                             layer.tintColor = v;
                         }
                     };
-                    subFolder.addBinding(tintObj, 'tintColor', {
-                        picker: 'inline',
-                        expanded: false
-                    });
+                    subFolder.addBinding(tintObj, 'tintColor');
 
                     subFolder.addBinding(layer, 'roughness', {min: 0, max: 1, step: 0.01});
                     subFolder.addBinding(layer, 'metallic', {min: 0, max: 1, step: 0.01});
@@ -542,56 +507,16 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                             layer.uvScale = [v, v];
                         }
                     };
-                    subFolder.addBinding(layerScaleObj, 'uvScale', {
-                        min: 1,
-                        max: 200,
-                        step: 1
-                    });
+                    subFolder.addBinding(layerScaleObj, 'uvScale', {min: 1, max: 200, step: 1});
                 });
             }
 
-            const folderSun = pane.addFolder({title: 'Directional Light', expanded: true});
-
-            folderSun.addBinding(directionalLight, 'elevation', {
-                min: -90,
-                max: 90,
-                step: 1
-            });
-
-            folderSun.addBinding(directionalLight, 'azimuth', {
-                min: 0,
-                max: 360,
-                step: 1
-            });
-
-            const sunColorProxy = {
-                get sunColor() {
-                    return directionalLight.color ? directionalLight.color.hex : '#ffffff';
-                },
-                set sunColor(v) {
-                    if (directionalLight.color) directionalLight.color.setColorByHEX(v);
-                }
-            };
-
-            folderSun.addBinding(sunColorProxy, 'sunColor', {
-                picker: 'inline',
-                expanded: false
-            });
+            const folderSun = pane.addFolder({title: 'Sun Light', expanded: false});
+            folderSun.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
+            folderSun.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
 
             const folderCam = pane.addFolder({title: 'Camera', expanded: true});
-            folderCam.addBinding(controller, 'moveSpeed', {
-                min: 500,
-                max: 20000,
-                step: 500
-            });
-
-            folderCam.addButton({title: 'resetCamera'}).on('click', () => {
-                controller.x = 0;
-                controller.y = 800;
-                controller.z = 2500;
-                controller.pan = 0;
-                controller.tilt = -25;
-            });
+            folderCam.addBinding(controller, 'moveSpeed', {min: 500, max: 20000, step: 500});
 
             const dbg = landscape.debuggerManager;
             const folderDebuggers = pane.addFolder({title: 'debuggerManager', expanded: true});
@@ -604,15 +529,9 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             folderDebuggers.addBinding(dbg, 'vbtNormal');
             folderDebuggers.addBinding(dbg, 'vbtORM');
 
-            folderDebuggers.addBinding(config, 'boxSize', {
-                min: 60,
-                max: 300,
-                step: 10
-            }).on('change', (ev) => {
+            folderDebuggers.addBinding(config, 'boxSize', {min: 60, max: 300, step: 10}).on('change', (ev) => {
                 const sz = ev.value;
-                if (dbg.spatialGridDebugger) {
-                    dbg.spatialGridDebugger.setSize(sz, sz);
-                }
+                if (dbg.spatialGridDebugger) dbg.spatialGridDebugger.setSize(sz, sz);
                 if (dbg.vhtDebugger) {
                     dbg.vhtDebugger.setSize(sz, sz);
                     dbg.vhtDebugger.setPosition(12 + sz + 10, 12);
