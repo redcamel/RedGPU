@@ -300,75 +300,36 @@ RedGPU.init(
  * @param {RedGPU.Display.FoliageType} grassType
  */
 const renderTestPane = (redGPUContext, landscape, controller, directionalLight, layers, foliageManager, grassType) => {
-    const [wsX, wsZ] = landscape ? landscape.worldSize : [8000, 8000];
-    const [tcX, tcZ] = landscape ? landscape.componentCount : [8, 8];
-    const [tsX, tsZ] = landscape ? landscape.tileSize : [1000, 1000];
+    const [wsX, wsZ] = landscape.worldSize;
+    const [tcX, tcZ] = landscape.componentCount;
+    const [tsX, tsZ] = landscape.tileSize;
 
     const config = {
-        // Foliage Controls
-        foliageCount: grassType ? grassType.activeInstanceCount : 0,
-        foliageCullingDist: grassType ? grassType.options.cullingDistance : 600,
-        foliageFadeStartDist: grassType ? grassType.options.fadeStartDistance : 400,
-        // 1. Terrain Dimensions & Transform
         worldSizeX: wsX,
         worldSizeZ: wsZ,
         componentCountX: tcX,
         componentCountZ: tcZ,
         totalComponents: tcX * tcZ,
         tileSizeStr: `[${Math.round(tsX)}m, ${Math.round(tsZ)}m]`,
-
-        // 2. Component & Mesh Specs
-        componentSizeQuads: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
-        maxLODLevel: landscape ? landscape.maxLODLevel : 4,
-        lodFadeStartRatio: landscape ? landscape.lodFadeStartRatio : 0.7,
-        lodGeomorphStartRatio: landscape ? landscape.lodGeomorphStartRatio : 0.85,
-
-        // 3. Height & Displacement
-        heightScale: landscape ? landscape.heightScale : 500,
-
-        // 4. Display
-        wireframe: landscape ? landscape.wireframe : false,
-        lodColoration: landscape ? landscape.lodColoration : false,
-        baseColor: '#387d42',
         textureArraySize: 1024,
-
-        // 4-1. Directional Light (Sun)
-        sunElevation: directionalLight ? directionalLight.elevation : 45,
-        sunAzimuth: directionalLight ? directionalLight.azimuth : 45,
-        sunColor: '#ffffff',
-
-        // 5. Tile Streaming & VHT
-        loadingRadius: landscape ? landscape.loadingRadius : 2500,
-        maxLoadsPerFrame: landscape ? landscape.maxLoadsPerFrame : 2,
-        loadedTileCount: landscape ? landscape.loadedTileCount : 0,
-        pendingQueueSize: landscape ? landscape.pendingQueueSize : 0,
-
-        // 6. Camera Controls
-        moveSpeed: controller ? controller.moveSpeed : 5000,
-
-        // 7. Debuggers
         boxSize: 100
     };
 
     let activePane = null;
 
     const updateConfigValues = () => {
-        if (landscape) {
-            const [wX, wZ] = landscape.worldSize;
-            const [tX, tZ] = landscape.componentCount;
-            const [sX, sZ] = landscape.tileSize;
+        const [wX, wZ] = landscape.worldSize;
+        const [tX, tZ] = landscape.componentCount;
+        const [sX, sZ] = landscape.tileSize;
 
-            config.worldSizeX = wX;
-            config.worldSizeZ = wZ;
-            config.componentCountX = tX;
-            config.componentCountZ = tZ;
-            config.totalComponents = tX * tZ;
-            config.tileSizeStr = `[${Math.round(sX)}m, ${Math.round(sZ)}m]`;
-            config.loadedTileCount = landscape.loadedTileCount;
-            config.pendingQueueSize = landscape.pendingQueueSize;
+        config.worldSizeX = wX;
+        config.worldSizeZ = wZ;
+        config.componentCountX = tX;
+        config.componentCountZ = tZ;
+        config.totalComponents = tX * tZ;
+        config.tileSizeStr = `[${Math.round(sX)}m, ${Math.round(sZ)}m]`;
 
-            if (activePane) activePane.refresh();
-        }
+        if (activePane) activePane.refresh();
     };
 
     setInterval(updateConfigValues, 500);
@@ -383,20 +344,33 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             // Folder 0: Foliage System Controls
             if (grassType) {
                 const folderFoliage = pane.addFolder({title: '🌿 Foliage System Controls', expanded: true});
-                folderFoliage.addBinding(config, 'foliageCount', {readonly: true});
-                folderFoliage.addBinding(config, 'foliageCullingDist', {
+                const foliageProxy = {
+                    get foliageCount() {
+                        return grassType ? grassType.activeInstanceCount : 0;
+                    },
+                    get foliageCullingDist() {
+                        return grassType ? grassType.options.cullingDistance : 600;
+                    },
+                    set foliageCullingDist(v) {
+                        if (grassType) grassType.options.cullingDistance = v;
+                    },
+                    get foliageFadeStartDist() {
+                        return grassType ? grassType.options.fadeStartDistance : 400;
+                    },
+                    set foliageFadeStartDist(v) {
+                        if (grassType) grassType.options.fadeStartDistance = v;
+                    }
+                };
+                folderFoliage.addBinding(foliageProxy, 'foliageCount', {readonly: true});
+                folderFoliage.addBinding(foliageProxy, 'foliageCullingDist', {
                     min: 100,
                     max: 2000,
                     step: 20
-                }).on('change', (ev) => {
-                    grassType.options.cullingDistance = ev.value;
                 });
-                folderFoliage.addBinding(config, 'foliageFadeStartDist', {
+                folderFoliage.addBinding(foliageProxy, 'foliageFadeStartDist', {
                     min: 50,
                     max: 1500,
                     step: 20
-                }).on('change', (ev) => {
-                    grassType.options.fadeStartDistance = ev.value;
                 });
             }
 
@@ -410,10 +384,8 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 step: 500
             }).on('change', (ev) => {
                 config.worldSizeX = ev.value;
-                if (landscape) {
-                    landscape.worldSize = [config.worldSizeX, config.worldSizeZ];
-                    updateConfigValues();
-                }
+                landscape.worldSize = [config.worldSizeX, config.worldSizeZ];
+                updateConfigValues();
             });
 
             folderDimensions.addBinding(config, 'worldSizeZ', {
@@ -422,10 +394,8 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 step: 500
             }).on('change', (ev) => {
                 config.worldSizeZ = ev.value;
-                if (landscape) {
-                    landscape.worldSize = [config.worldSizeX, config.worldSizeZ];
-                    updateConfigValues();
-                }
+                landscape.worldSize = [config.worldSizeX, config.worldSizeZ];
+                updateConfigValues();
             });
 
             const maxTilesAllowed = Math.floor((redGPUContext.gpuDevice?.limits?.maxTextureDimension2D ?? 8192) / 512);
@@ -436,10 +406,8 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 step: 1
             }).on('change', (ev) => {
                 config.componentCountX = ev.value;
-                if (landscape) {
-                    landscape.componentCount = [config.componentCountX, config.componentCountZ];
-                    updateConfigValues();
-                }
+                landscape.componentCount = [config.componentCountX, config.componentCountZ];
+                updateConfigValues();
             });
 
             folderDimensions.addBinding(config, 'componentCountZ', {
@@ -448,10 +416,8 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 step: 1
             }).on('change', (ev) => {
                 config.componentCountZ = ev.value;
-                if (landscape) {
-                    landscape.componentCount = [config.componentCountX, config.componentCountZ];
-                    updateConfigValues();
-                }
+                landscape.componentCount = [config.componentCountX, config.componentCountZ];
+                updateConfigValues();
             });
 
             folderDimensions.addBinding(config, 'tileSizeStr', {readonly: true});
@@ -459,7 +425,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
 
             const folderLOD = folderSpatial.addFolder({title: 'LOD', expanded: true});
 
-            folderLOD.addBinding(config, 'componentSizeQuads', {
+            folderLOD.addBinding(landscape, 'componentSizeQuads', {
                 options: {
                     16: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_16,
                     32: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_32,
@@ -468,96 +434,82 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     256: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
                     512: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
                 }
-            }).on('change', (ev) => {
-                if (landscape) {
-                    landscape.componentSizeQuads = ev.value;
-                    updateConfigValues();
-                }
+            }).on('change', () => {
+                updateConfigValues();
             });
 
-            folderLOD.addBinding(config, 'maxLODLevel', {
+            folderLOD.addBinding(landscape, 'maxLODLevel', {
                 min: 1,
                 max: 8,
                 step: 1
-            }).on('change', (ev) => {
-                if (landscape) {
-                    landscape.maxLODLevel = ev.value;
-                    updateConfigValues();
+            }).on('change', () => {
+                updateConfigValues();
+            });
+
+            folderLOD.addBinding(landscape, 'lodFadeStartRatio', {
+                min: 0.1,
+                max: 0.99,
+                step: 0.05
+            });
+
+            folderLOD.addBinding(landscape, 'lodGeomorphStartRatio', {
+                min: 0.1,
+                max: 0.99,
+                step: 0.05
+            });
+
+            const folderStream = folderSpatial.addFolder({title: 'Tile Streaming', expanded: true});
+
+            folderStream.addBinding(landscape, 'loadedTileCount', {readonly: true});
+            folderStream.addBinding(landscape, 'pendingQueueSize', {readonly: true});
+
+            folderStream.addBinding(landscape, 'loadingRadius', {
+                min: 500,
+                max: 20000,
+                step: 100
+            });
+
+            folderStream.addBinding(landscape, 'maxLoadsPerFrame', {
+                min: 1,
+                max: 10,
+                step: 1
+            });
+
+            folderStream.addButton({title: 'Rebake All Loaded VBT'}).on('click', () => {
+                landscape.requestVBTRebake(true);
+            });
+
+            folderStream.addButton({title: 'Reset Tile Streaming Cache'}).on('click', () => {
+                if (landscape.tileStreamer) {
+                    landscape.tileStreamer.resetTileState();
                 }
             });
-
-            folderLOD.addBinding(config, 'lodFadeStartRatio', {
-                min: 0.1,
-                max: 0.99,
-                step: 0.05
-            }).on('change', (ev) => {
-                if (landscape) landscape.lodFadeStartRatio = ev.value;
-            });
-
-            folderLOD.addBinding(config, 'lodGeomorphStartRatio', {
-                min: 0.1,
-                max: 0.99,
-                step: 0.05
-            }).on('change', (ev) => {
-                if (landscape) landscape.lodGeomorphStartRatio = ev.value;
-            });
-
-            if (landscape) {
-                const folderStream = folderSpatial.addFolder({title: 'Tile Streaming', expanded: true});
-
-                folderStream.addBinding(config, 'loadedTileCount', {readonly: true});
-                folderStream.addBinding(config, 'pendingQueueSize', {readonly: true});
-
-                folderStream.addBinding(config, 'loadingRadius', {
-                    min: 500,
-                    max: 20000,
-                    step: 100
-                }).on('change', (ev) => {
-                    if (landscape) landscape.loadingRadius = ev.value;
-                });
-
-                folderStream.addBinding(config, 'maxLoadsPerFrame', {
-                    min: 1,
-                    max: 10,
-                    step: 1
-                }).on('change', (ev) => {
-                    if (landscape) landscape.maxLoadsPerFrame = ev.value;
-                });
-
-                folderStream.addButton({title: 'Rebake All Loaded VBT'}).on('click', () => {
-                    landscape.requestVBTRebake(true);
-                });
-
-                folderStream.addButton({title: 'Reset Tile Streaming Cache'}).on('click', () => {
-                    if (landscape && landscape.tileStreamer) {
-                        landscape.tileStreamer.resetTileState();
-                    }
-                });
-            }
 
             // Folder 2: Display Options
             const folderDisplay = pane.addFolder({title: 'Display', expanded: true});
 
-            folderDisplay.addBinding(config, 'heightScale', {
+            folderDisplay.addBinding(landscape, 'heightScale', {
                 min: 0,
                 max: 3000,
                 step: 25
-            }).on('change', (ev) => {
-                if (landscape) landscape.heightScale = ev.value;
             });
 
-            folderDisplay.addBinding(config, 'wireframe').on('change', (ev) => {
-                if (landscape) landscape.wireframe = ev.value;
-            });
+            folderDisplay.addBinding(landscape, 'wireframe');
 
-            folderDisplay.addBinding(config, 'lodColoration').on('change', (ev) => {
-                if (landscape) landscape.lodColoration = ev.value;
-            });
+            folderDisplay.addBinding(landscape, 'lodColoration');
 
-            folderDisplay.addBinding(config, 'baseColor').on('change', (ev) => {
-                if (landscape) {
-                    landscape.baseColor.setColorByHEX(ev.value);
+            const baseColorProxy = {
+                get baseColor() {
+                    return landscape.baseColor.hex;
+                },
+                set baseColor(v) {
+                    landscape.baseColor.setColorByHEX(v);
                 }
+            };
+
+            folderDisplay.addBinding(baseColorProxy, 'baseColor', {
+                picker: 'inline',
+                expanded: false
             });
 
             folderDisplay.addBinding(config, 'textureArraySize', {
@@ -579,9 +531,17 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                         options: {R: 'R', G: 'G', B: 'B', A: 'A'}
                     });
 
-                    const tintObj = {tintColor: layer.tintColor ? layer.tintColor.hex : '#ffffff'};
-                    subFolder.addBinding(tintObj, 'tintColor').on('change', (e) => {
-                        layer.tintColor = e.value;
+                    const tintObj = {
+                        get tintColor() {
+                            return layer.tintColor ? layer.tintColor.hex : '#ffffff';
+                        },
+                        set tintColor(v) {
+                            layer.tintColor = v;
+                        }
+                    };
+                    subFolder.addBinding(tintObj, 'tintColor', {
+                        picker: 'inline',
+                        expanded: false
                     });
 
                     subFolder.addBinding(layer, 'roughness', {min: 0, max: 1, step: 0.01});
@@ -589,13 +549,18 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     subFolder.addBinding(layer, 'normalIntensity', {min: 0, max: 3, step: 0.01});
                     subFolder.addBinding(layer, 'aoIntensity', {min: 0, max: 2, step: 0.01});
 
-                    const layerScaleObj = {uvScale: layer.uvScale[0]};
+                    const layerScaleObj = {
+                        get uvScale() {
+                            return layer.uvScale[0];
+                        },
+                        set uvScale(v) {
+                            layer.uvScale = [v, v];
+                        }
+                    };
                     subFolder.addBinding(layerScaleObj, 'uvScale', {
                         min: 1,
                         max: 200,
                         step: 1
-                    }).on('change', (e) => {
-                        layer.uvScale = [e.value, e.value];
                     });
                 });
             }
@@ -603,94 +568,91 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             // Folder 4: Directional Light Controls
             const folderSun = pane.addFolder({title: 'Directional Light', expanded: true});
 
-            folderSun.addBinding(config, 'sunElevation', {
+            folderSun.addBinding(directionalLight, 'elevation', {
                 min: -90,
                 max: 90,
                 step: 1
-            }).on('change', (ev) => {
-                if (directionalLight) directionalLight.elevation = ev.value;
             });
 
-            folderSun.addBinding(config, 'sunAzimuth', {
+            folderSun.addBinding(directionalLight, 'azimuth', {
                 min: 0,
                 max: 360,
                 step: 1
-            }).on('change', (ev) => {
-                if (directionalLight) directionalLight.azimuth = ev.value;
             });
 
-
-            folderSun.addBinding(config, 'sunColor').on('change', (ev) => {
-                if (directionalLight && directionalLight.color) {
-                    directionalLight.color.setColorByHEX(ev.value);
+            const sunColorProxy = {
+                get sunColor() {
+                    return directionalLight.color ? directionalLight.color.hex : '#ffffff';
+                },
+                set sunColor(v) {
+                    if (directionalLight.color) directionalLight.color.setColorByHEX(v);
                 }
+            };
+
+            folderSun.addBinding(sunColorProxy, 'sunColor', {
+                picker: 'inline',
+                expanded: false
             });
 
             // Folder 6: Camera Controls
-            if (controller) {
-                const folderCam = pane.addFolder({title: 'Camera', expanded: true});
-                folderCam.addBinding(config, 'moveSpeed', {
-                    min: 500,
-                    max: 20000,
-                    step: 500
-                }).on('change', (ev) => {
-                    controller.moveSpeed = ev.value;
-                });
+            const folderCam = pane.addFolder({title: 'Camera', expanded: true});
+            folderCam.addBinding(controller, 'moveSpeed', {
+                min: 500,
+                max: 20000,
+                step: 500
+            });
 
-                folderCam.addButton({title: 'resetCamera'}).on('click', () => {
-                    controller.x = 0;
-                    controller.y = 800;
-                    controller.z = 2500;
-                    controller.pan = 0;
-                    controller.tilt = -25;
-                    console.log('[Landscape Example 🎮] Camera view reset to initial position!');
-                });
-            }
+            folderCam.addButton({title: 'resetCamera'}).on('click', () => {
+                controller.x = 0;
+                controller.y = 800;
+                controller.z = 2500;
+                controller.pan = 0;
+                controller.tilt = -25;
+                console.log('[Landscape Example 🎮] Camera view reset to initial position!');
+            });
 
             // Folder 7: Debugger Controls
-            if (landscape?.debuggerManager) {
-                const dbg = landscape.debuggerManager;
-                const folderDebuggers = pane.addFolder({title: 'debuggerManager', expanded: true});
+            const dbg = landscape.debuggerManager;
+            const folderDebuggers = pane.addFolder({title: 'debuggerManager', expanded: true});
 
-                folderDebuggers.addBinding(dbg, 'hud');
-                folderDebuggers.addBinding(dbg, 'spatialGrid');
-                folderDebuggers.addBinding(dbg, 'vht');
-                folderDebuggers.addBinding(dbg, 'vnt');
-                folderDebuggers.addBinding(dbg, 'vbt');
-                folderDebuggers.addBinding(dbg, 'vbtNormal');
-                folderDebuggers.addBinding(dbg, 'vbtORM');
+            folderDebuggers.addBinding(dbg, 'hud');
+            folderDebuggers.addBinding(dbg, 'spatialGrid');
+            folderDebuggers.addBinding(dbg, 'vht');
+            folderDebuggers.addBinding(dbg, 'vnt');
+            folderDebuggers.addBinding(dbg, 'vbt');
+            folderDebuggers.addBinding(dbg, 'vbtNormal');
+            folderDebuggers.addBinding(dbg, 'vbtORM');
 
-                folderDebuggers.addBinding(config, 'boxSize', {
-                    min: 60,
-                    max: 300,
-                    step: 10
-                }).on('change', (ev) => {
-                    const sz = ev.value;
-                    if (dbg.spatialGridDebugger) {
-                        dbg.spatialGridDebugger.setSize(sz, sz);
-                    }
-                    if (dbg.vhtDebugger) {
-                        dbg.vhtDebugger.setSize(sz, sz);
-                        dbg.vhtDebugger.setPosition(12 + sz + 10, 12);
-                    }
-                    if (dbg.vntDebugger) {
-                        dbg.vntDebugger.setSize(sz, sz);
-                        dbg.vntDebugger.setPosition(12 + (sz + 10) * 2, 12);
-                    }
-                    if (dbg.vbtDebugger) {
-                        dbg.vbtDebugger.setSize(sz, sz);
-                        dbg.vbtDebugger.setPosition(12 + (sz + 10) * 3, 12);
-                    }
-                    if (dbg.vbtNormalDebugger) {
-                        dbg.vbtNormalDebugger.setSize(sz, sz);
-                        dbg.vbtNormalDebugger.setPosition(12 + (sz + 10) * 4, 12);
-                    }
-                    if (dbg.vbtORMDebugger) {
-                        dbg.vbtORMDebugger.setSize(sz, sz);
-                        dbg.vbtORMDebugger.setPosition(12 + (sz + 10) * 5, 12);
-                    }
-                });
-            }
+            folderDebuggers.addBinding(config, 'boxSize', {
+                min: 60,
+                max: 300,
+                step: 10
+            }).on('change', (ev) => {
+                const sz = ev.value;
+                if (dbg.spatialGridDebugger) {
+                    dbg.spatialGridDebugger.setSize(sz, sz);
+                }
+                if (dbg.vhtDebugger) {
+                    dbg.vhtDebugger.setSize(sz, sz);
+                    dbg.vhtDebugger.setPosition(12 + sz + 10, 12);
+                }
+                if (dbg.vntDebugger) {
+                    dbg.vntDebugger.setSize(sz, sz);
+                    dbg.vntDebugger.setPosition(12 + (sz + 10) * 2, 12);
+                }
+                if (dbg.vbtDebugger) {
+                    dbg.vbtDebugger.setSize(sz, sz);
+                    dbg.vbtDebugger.setPosition(12 + (sz + 10) * 3, 12);
+                }
+                if (dbg.vbtNormalDebugger) {
+                    dbg.vbtNormalDebugger.setSize(sz, sz);
+                    dbg.vbtNormalDebugger.setPosition(12 + (sz + 10) * 4, 12);
+                }
+                if (dbg.vbtORMDebugger) {
+                    dbg.vbtORMDebugger.setSize(sz, sz);
+                    dbg.vbtORMDebugger.setPosition(12 + (sz + 10) * 5, 12);
+                }
+            });
         }
     });
 };

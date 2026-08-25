@@ -1,228 +1,148 @@
 import * as RedGPU from "../../../../dist/index.js";
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
 
-/**
- * [KO] Landscape Basic LOD & Full Feature 테스트 예제
- * [EN] Landscape Basic LOD & Full Feature Test Example
- *
- * [KO] 신규 Landscape 지형 시스템의 모든 get/set 속성 실시간 검증 예제입니다.
- * [EN] Real-time test example for all get/set properties of the new Landscape terrain system.
- */
-
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
 
 RedGPU.init(
     canvas,
     (redGPUContext) => {
-        // 1. 카메라 설정 (FreeController - 자유 관람 및 탐색)
         const controller = new RedGPU.Camera.FreeController(redGPUContext);
         controller.x = 0;
         controller.y = 350;
         controller.z = 0;
         controller.moveSpeed = 5000;
 
-        // 2. Scene & View3D 초기화
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
         view.grid = true;
         redGPUContext.addView(view);
 
-        // 3. 태양 광원 (Directional Light)
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 45;
         directionalLight.azimuth = 45;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 4. 신규 Landscape 인스턴스 생성 (16x16 256개 타일 에셋 대응)
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [16000, 16000];
 
-        // Multi-Layer PBR 지형 레이어 4종 (Grass, Rock, Gravel, Leave) 등록
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
         const splatMapPath = '../../../assets/terrain/terrainTest_001/splatMap.jpg';
 
-        // 1. Grass (주 광활한 초원/산맥 레이어 - 🔴 R 채널: 전체 지형의 65% 최대 면적 차지)
-        const grassLayer = new RedGPU.Display.Landscape.LandscapeLayer({
-            name: 'Grass',
-            baseColorTexture: `${assetPath}grass.jpg`,
-            normalTexture: `${assetPath}grass_normal.jpg`,
-            ormTexture: `${assetPath}grass_orm.jpg`,
-            weightTexture: splatMapPath,
-            weightChannel: 'R',
-            uvScale: [50, 50],
-            roughness: 0.85,
-            metallic: 0.0,
-            normalIntensity: 1.5,
-            aoIntensity: 1.0,
-            tintColor: '#ffffff'
+        const layers = [
+            {
+                name: 'Grass',
+                key: 'grass',
+                weightChannel: 'R',
+                uvScale: [50, 50],
+                roughness: 0.85,
+                metallic: 0.0,
+                normalIntensity: 1.5,
+                aoIntensity: 1.0
+            },
+            {
+                name: 'Gravel',
+                key: 'gravel',
+                weightChannel: 'B',
+                uvScale: [40, 40],
+                roughness: 0.9,
+                metallic: 0.0,
+                normalIntensity: 1.8,
+                aoIntensity: 1.2
+            },
+            {
+                name: 'Rock',
+                key: 'rock',
+                weightChannel: 'G',
+                uvScale: [15, 15],
+                roughness: 0.7,
+                metallic: 0.05,
+                normalIntensity: 2.2,
+                aoIntensity: 1.5
+            },
+            {
+                name: 'Leave',
+                key: 'leave',
+                weightChannel: 'A',
+                uvScale: [50, 50],
+                roughness: 0.8,
+                metallic: 0.0,
+                normalIntensity: 1.4,
+                aoIntensity: 1.0
+            }
+        ].map(cfg => {
+            const layer = new RedGPU.Display.Landscape.LandscapeLayer({
+                name: cfg.name,
+                baseColorTexture: `${assetPath}${cfg.key}.jpg`,
+                normalTexture: `${assetPath}${cfg.key}_normal.jpg`,
+                ormTexture: `${assetPath}${cfg.key}_orm.jpg`,
+                weightTexture: splatMapPath,
+                weightChannel: cfg.weightChannel,
+                uvScale: cfg.uvScale,
+                roughness: cfg.roughness,
+                metallic: cfg.metallic,
+                normalIntensity: cfg.normalIntensity,
+                aoIntensity: cfg.aoIntensity,
+                tintColor: '#ffffff'
+            });
+            landscape.addLayer(layer);
+            return layer;
         });
-
-        // 2. Gravel (오솔길/흙길 레이어 - 🔵 B 채널: 좁은 오솔길 10%)
-        const gravelLayer = new RedGPU.Display.Landscape.LandscapeLayer({
-            name: 'Gravel',
-            baseColorTexture: `${assetPath}gravel.jpg`,
-            normalTexture: `${assetPath}gravel_normal.jpg`,
-            ormTexture: `${assetPath}gravel_orm.jpg`,
-            weightTexture: splatMapPath,
-            weightChannel: 'B',
-            uvScale: [40, 40],
-            roughness: 0.9,
-            metallic: 0.0,
-            normalIntensity: 1.8,
-            aoIntensity: 1.2,
-            tintColor: '#ffffff'
-        });
-
-        // 3. Rock (절벽/암벽 레이어 - 🟢 G 채널: 능선 및 절벽 포인트 20%)
-        const rockLayer = new RedGPU.Display.Landscape.LandscapeLayer({
-            name: 'Rock',
-            baseColorTexture: `${assetPath}rock.jpg`,
-            normalTexture: `${assetPath}rock_normal.jpg`,
-            ormTexture: `${assetPath}rock_orm.jpg`,
-            weightTexture: splatMapPath,
-            weightChannel: 'G',
-            uvScale: [15, 15],
-            roughness: 0.7,
-            metallic: 0.05,
-            normalIntensity: 2.2,
-            aoIntensity: 1.5,
-            tintColor: '#ffffff'
-        });
-
-        // 4. Leave (골짜기/숲속 레이어 - ⚫ A / Black 채널: 그늘진 골짜기 5%)
-        const leaveLayer = new RedGPU.Display.Landscape.LandscapeLayer({
-            name: 'Leave',
-            baseColorTexture: `${assetPath}leave.jpg`,
-            normalTexture: `${assetPath}leave_normal.jpg`,
-            ormTexture: `${assetPath}leave_orm.jpg`,
-            weightTexture: splatMapPath,
-            weightChannel: 'A',
-            uvScale: [50, 50],
-            roughness: 0.8,
-            metallic: 0.0,
-            normalIntensity: 1.4,
-            aoIntensity: 1.0,
-            tintColor: '#ffffff'
-        });
-
-        landscape.addLayer(grassLayer);
-        landscape.addLayer(gravelLayer);
-        landscape.addLayer(rockLayer);
-        landscape.addLayer(leaveLayer);
 
         landscape.tileUrlResolver = (row, col) => {
             const BASE_HOST = 'https://redcamel.github.io/testAsset/terrain/tile_001/';
             const rStr = String(row).padStart(2, '0');
             const cStr = String(col).padStart(2, '0');
 
-            // [KO] tile_001 에셋의 외곽(15번째) 타일 해상도 파일명 처리
             let sizeStr = '512_512';
-            if (row === 15 && col === 15) {
-                sizeStr = '449_449';
-            } else if (col === 15) {
-                sizeStr = '449_512';
-            } else if (row === 15) {
-                sizeStr = '512_449';
-            }
+            if (row === 15 && col === 15) sizeStr = '449_449';
+            else if (col === 15) sizeStr = '449_512';
+            else if (row === 15) sizeStr = '512_449';
 
             return `${BASE_HOST}28_134_86_730_13_${sizeStr}_16bit_tile_${rStr}_${cStr}.png`;
         };
 
         scene.addLandscape(landscape);
-
-        // 5. Landscape 내장 디버거 관리자(debuggerManager) 활성화 (Spatial Grid 디버거만 기본 활성화)
         landscape.debuggerManager.spatialGrid = true;
 
-        // 6. RedGPU 정식 Renderer 생성 및 렌더 루프 시작 (디버거는 landscape.update 내부에서 자동 갱신됨)
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
         });
 
-        // 7. Landscape 모든 get/set 속성 및 2D 디버거 전면 제어 테스트 패널 렌더링
-        renderTestPane(redGPUContext, landscape, controller, directionalLight, [grassLayer, rockLayer, gravelLayer, leaveLayer]);
+        renderTestPane(redGPUContext, landscape, controller, directionalLight, layers);
     }
 );
-
-/**
- * [KO] Landscape 모든 get/set 속성 전면 제어 테스트 패널(GUI)을 렌더링합니다.
- * [EN] Renders a test panel (GUI) for full control of all get/set properties of Landscape.
- * @param {RedGPU.RedGPUContext} redGPUContext
- * @param {RedGPU.Display.Landscape.Landscape} landscape
- * @param {RedGPU.Camera.FreeController} controller
- * @param {RedGPU.Light.DirectionalLight} directionalLight
- * @param {Array<RedGPU.Display.Landscape.LandscapeLayer>} layers
- */
 const renderTestPane = (redGPUContext, landscape, controller, directionalLight, layers) => {
-    const [wsX, wsZ] = landscape ? landscape.worldSize : [8000, 8000];
-    const [tcX, tcZ] = landscape ? landscape.componentCount : [8, 8];
-    const [tsX, tsZ] = landscape ? landscape.tileSize : [1000, 1000];
+    const [wsX, wsZ] = landscape.worldSize;
+    const [tcX, tcZ] = landscape.componentCount;
+    const [tsX, tsZ] = landscape.tileSize;
 
     const config = {
-        // 1. Terrain Dimensions & Transform
         worldSizeX: wsX,
         worldSizeZ: wsZ,
         componentCountX: tcX,
         componentCountZ: tcZ,
         totalComponents: tcX * tcZ,
         tileSizeStr: `[${Math.round(tsX)}m, ${Math.round(tsZ)}m]`,
-
-        // 2. Component & Mesh Specs
-        componentSizeQuads: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
-        lod0SizeQuads: landscape ? landscape.lod0SizeQuads : 256,
-        maxLODLevel: landscape ? landscape.maxLODLevel : 4,
-        lodMetric: landscape ? landscape.lodMetric : 'screenSize',
-        lodFadeStartRatio: landscape ? landscape.lodFadeStartRatio : 0.7,
-        lodGeomorphStartRatio: landscape ? landscape.lodGeomorphStartRatio : 0.85,
-        lodDitherStartRatio: landscape ? landscape.lodDitherStartRatio : 0.7,
-        lodMorphStartRatio: landscape ? landscape.lodMorphStartRatio : 0.85,
-
-        // 3. Height & Displacement
-        heightScale: landscape ? landscape.heightScale : 500,
-
-        // 4. Display
-        wireframe: landscape ? landscape.wireframe : false,
-        lodColoration: landscape ? landscape.lodColoration : false,
-        baseColor: '#387d42',
         textureArraySize: 1024,
-
-        // 4-1. Directional Light (Sun)
-        sunElevation: directionalLight ? directionalLight.elevation : 45,
-        sunAzimuth: directionalLight ? directionalLight.azimuth : 45,
-        sunColor: '#ffffff',
-
-        // 5. Tile Streaming & VHT
-        loadingRadius: landscape ? landscape.loadingRadius : 2500,
-        maxLoadsPerFrame: landscape ? landscape.maxLoadsPerFrame : 2,
-        loadedTileCount: landscape ? landscape.loadedTileCount : 0,
-        pendingQueueSize: landscape ? landscape.pendingQueueSize : 0,
-
-        // 6. Camera Controls
-        moveSpeed: controller ? controller.moveSpeed : 5000,
-
-        // 7. Debuggers
         boxSize: 100
     };
 
     let activePane = null;
 
     const updateConfigValues = () => {
-        if (landscape) {
-            const [wX, wZ] = landscape.worldSize;
-            const [tX, tZ] = landscape.componentCount;
-            const [sX, sZ] = landscape.tileSize;
+        const [wX, wZ] = landscape.worldSize;
+        const [tX, tZ] = landscape.componentCount;
+        const [sX, sZ] = landscape.tileSize;
 
-            config.worldSizeX = wX;
-            config.worldSizeZ = wZ;
-            config.componentCountX = tX;
-            config.componentCountZ = tZ;
-            config.totalComponents = tX * tZ;
-            config.tileSizeStr = `[${Math.round(sX)}m, ${Math.round(sZ)}m]`;
-            config.loadedTileCount = landscape.loadedTileCount;
-            config.pendingQueueSize = landscape.pendingQueueSize;
+        config.worldSizeX = wX;
+        config.worldSizeZ = wZ;
+        config.componentCountX = tX;
+        config.componentCountZ = tZ;
+        config.totalComponents = tX * tZ;
+        config.tileSizeStr = `[${Math.round(sX)}m, ${Math.round(sZ)}m]`;
 
-            if (activePane) activePane.refresh();
-        }
+        if (activePane) activePane.refresh();
     };
 
     setInterval(updateConfigValues, 500);
@@ -234,32 +154,19 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
         gui: (pane) => {
             activePane = pane;
 
-            // Folder 1: Spatial System (Dimensions & LOD)
             const folderSpatial = pane.addFolder({title: 'Spatial', expanded: true});
             const folderDimensions = folderSpatial.addFolder({title: 'Dimensions', expanded: true});
 
-            folderDimensions.addBinding(config, 'worldSizeX', {
-                min: 1000,
-                max: 30000,
-                step: 500
-            }).on('change', (ev) => {
+            folderDimensions.addBinding(config, 'worldSizeX', {min: 1000, max: 30000, step: 500}).on('change', (ev) => {
                 config.worldSizeX = ev.value;
-                if (landscape) {
-                    landscape.worldSize = [config.worldSizeX, config.worldSizeZ];
-                    updateConfigValues();
-                }
+                landscape.worldSize = [config.worldSizeX, config.worldSizeZ];
+                updateConfigValues();
             });
 
-            folderDimensions.addBinding(config, 'worldSizeZ', {
-                min: 1000,
-                max: 30000,
-                step: 500
-            }).on('change', (ev) => {
+            folderDimensions.addBinding(config, 'worldSizeZ', {min: 1000, max: 30000, step: 500}).on('change', (ev) => {
                 config.worldSizeZ = ev.value;
-                if (landscape) {
-                    landscape.worldSize = [config.worldSizeX, config.worldSizeZ];
-                    updateConfigValues();
-                }
+                landscape.worldSize = [config.worldSizeX, config.worldSizeZ];
+                updateConfigValues();
             });
 
             const maxTilesAllowed = Math.floor((redGPUContext.gpuDevice?.limits?.maxTextureDimension2D ?? 8192) / 512);
@@ -270,10 +177,8 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 step: 1
             }).on('change', (ev) => {
                 config.componentCountX = ev.value;
-                if (landscape) {
-                    landscape.componentCount = [config.componentCountX, config.componentCountZ];
-                    updateConfigValues();
-                }
+                landscape.componentCount = [config.componentCountX, config.componentCountZ];
+                updateConfigValues();
             });
 
             folderDimensions.addBinding(config, 'componentCountZ', {
@@ -282,10 +187,8 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 step: 1
             }).on('change', (ev) => {
                 config.componentCountZ = ev.value;
-                if (landscape) {
-                    landscape.componentCount = [config.componentCountX, config.componentCountZ];
-                    updateConfigValues();
-                }
+                landscape.componentCount = [config.componentCountX, config.componentCountZ];
+                updateConfigValues();
             });
 
             folderDimensions.addBinding(config, 'tileSizeStr', {readonly: true});
@@ -293,7 +196,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
 
             const folderLOD = folderSpatial.addFolder({title: 'LOD', expanded: true});
 
-            folderLOD.addBinding(config, 'componentSizeQuads', {
+            folderLOD.addBinding(landscape, 'componentSizeQuads', {
                 options: {
                     16: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_16,
                     32: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_32,
@@ -302,117 +205,55 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     256: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
                     512: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
                 }
-            }).on('change', (ev) => {
-                if (landscape) {
-                    landscape.componentSizeQuads = ev.value;
-                    updateConfigValues();
-                }
+            }).on('change', () => {
+                updateConfigValues();
             });
 
-            folderLOD.addBinding(config, 'lod0SizeQuads', {
-                options: {
-                    64: 64,
-                    128: 128,
-                    256: 256,
-                    512: 512
-                }
-            }).on('change', (ev) => {
-                if (landscape) {
-                    landscape.lod0SizeQuads = ev.value;
-                    updateConfigValues();
-                }
+            folderLOD.addBinding(landscape, 'lod0SizeQuads', {
+                options: {64: 64, 128: 128, 256: 256, 512: 512}
+            }).on('change', () => {
+                updateConfigValues();
             });
 
-            folderLOD.addBinding(config, 'maxLODLevel', {
-                min: 1,
-                max: 8,
-                step: 1
-            }).on('change', (ev) => {
-                if (landscape) {
-                    landscape.maxLODLevel = ev.value;
-                    updateConfigValues();
-                }
+            folderLOD.addBinding(landscape, 'maxLODLevel', {min: 1, max: 8, step: 1}).on('change', () => {
+                updateConfigValues();
             });
 
-            folderLOD.addBinding(config, 'lodMetric', {
-                options: {
-                    distance: 'distance',
-                    screenSize: 'screenSize'
-                }
-            }).on('change', (ev) => {
-                if (landscape) landscape.lodMetric = ev.value;
+            folderLOD.addBinding(landscape, 'lodMetric', {
+                options: {distance: 'distance', screenSize: 'screenSize'}
             });
 
-            folderLOD.addBinding(config, 'lodFadeStartRatio', {
+            folderLOD.addBinding(landscape, 'lodFadeStartRatio', {min: 0.1, max: 0.99, step: 0.05});
+
+            folderLOD.addBinding(landscape, 'lodGeomorphStartRatio', {
                 min: 0.1,
                 max: 0.99,
                 step: 0.05
-            }).on('change', (ev) => {
-                if (landscape) landscape.lodFadeStartRatio = ev.value;
             });
 
-            folderLOD.addBinding(config, 'lodGeomorphStartRatio', {
-                min: 0.1,
-                max: 0.99,
-                step: 0.05
-            }).on('change', (ev) => {
-                if (landscape) landscape.lodGeomorphStartRatio = ev.value;
-            });
+            const folderStream = folderSpatial.addFolder({title: 'Tile Streaming', expanded: true});
+            folderStream.addBinding(landscape, 'loadedTileCount', {readonly: true});
+            folderStream.addBinding(landscape, 'pendingQueueSize', {readonly: true});
+            folderStream.addBinding(landscape, 'loadingRadius', {min: 500, max: 20000, step: 100});
+            folderStream.addBinding(landscape, 'maxLoadsPerFrame', {min: 1, max: 10, step: 1});
 
-            if (landscape) {
-                const folderStream = folderSpatial.addFolder({title: 'Tile Streaming', expanded: true});
-
-                folderStream.addBinding(config, 'loadedTileCount', {readonly: true});
-                folderStream.addBinding(config, 'pendingQueueSize', {readonly: true});
-
-                folderStream.addBinding(config, 'loadingRadius', {
-                    min: 500,
-                    max: 20000,
-                    step: 100
-                }).on('change', (ev) => {
-                    if (landscape) landscape.loadingRadius = ev.value;
-                });
-
-                folderStream.addBinding(config, 'maxLoadsPerFrame', {
-                    min: 1,
-                    max: 10,
-                    step: 1
-                }).on('change', (ev) => {
-                    if (landscape) landscape.maxLoadsPerFrame = ev.value;
-                });
-            }
-
-            // Folder 2: Display Options
             const folderDisplay = pane.addFolder({title: 'Display', expanded: true});
+            folderDisplay.addBinding(landscape, 'heightScale', {min: 0, max: 3000, step: 25});
+            folderDisplay.addBinding(landscape, 'wireframe');
+            folderDisplay.addBinding(landscape, 'lodColoration');
 
-            folderDisplay.addBinding(config, 'heightScale', {
-                min: 0,
-                max: 3000,
-                step: 25
-            }).on('change', (ev) => {
-                if (landscape) landscape.heightScale = ev.value;
-            });
-
-            folderDisplay.addBinding(config, 'wireframe').on('change', (ev) => {
-                if (landscape) landscape.wireframe = ev.value;
-            });
-
-            folderDisplay.addBinding(config, 'lodColoration').on('change', (ev) => {
-                if (landscape) landscape.lodColoration = ev.value;
-            });
-
-            folderDisplay.addBinding(config, 'baseColor').on('change', (ev) => {
-                if (landscape) {
-                    landscape.baseColor.setColorByHEX(ev.value);
+            const baseColorProxy = {
+                get baseColor() {
+                    return landscape.baseColor.hex;
+                },
+                set baseColor(v) {
+                    landscape.baseColor.setColorByHEX(v);
                 }
-            });
+            };
+            folderDisplay.addBinding(baseColorProxy, 'baseColor');
+            folderDisplay.addBinding(config, 'textureArraySize', {readonly: true});
 
-            folderDisplay.addBinding(config, 'textureArraySize', {
-                readonly: true
-            });
-
-            // Folder 3: Multi-Layer PBR Controls (Grass, Rock, Gravel, Leave)
-            if (layers && layers.length) {
+            if (layers?.length) {
                 const folderLayers = pane.addFolder({title: 'Layers', expanded: true});
 
                 layers.forEach((layer) => {
@@ -426,83 +267,75 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                         options: {R: 'R', G: 'G', B: 'B', A: 'A'}
                     });
 
-                    const tintObj = {tintColor: layer.tintColor ? layer.tintColor.hex : '#ffffff'};
-                    subFolder.addBinding(tintObj, 'tintColor').on('change', (e) => {
-                        layer.tintColor = e.value;
-                    });
+                    const tintObj = {
+                        get tintColor() {
+                            return layer.tintColor ? layer.tintColor.hex : '#ffffff';
+                        },
+                        set tintColor(v) {
+                            layer.tintColor = v;
+                        }
+                    };
+                    subFolder.addBinding(tintObj, 'tintColor');
 
                     subFolder.addBinding(layer, 'roughness', {min: 0, max: 1, step: 0.01});
                     subFolder.addBinding(layer, 'metallic', {min: 0, max: 1, step: 0.01});
                     subFolder.addBinding(layer, 'normalIntensity', {min: 0, max: 3, step: 0.01});
                     subFolder.addBinding(layer, 'aoIntensity', {min: 0, max: 2, step: 0.01});
 
-                    const layerScaleObj = {uvScale: layer.uvScale[0]};
-                    subFolder.addBinding(layerScaleObj, 'uvScale', {
-                        min: 1,
-                        max: 200,
-                        step: 1
-                    }).on('change', (e) => {
-                        layer.uvScale = [e.value, e.value];
-                    });
+                    const layerScaleObj = {
+                        get uvScale() {
+                            return layer.uvScale[0];
+                        },
+                        set uvScale(v) {
+                            layer.uvScale = [v, v];
+                        }
+                    };
+                    subFolder.addBinding(layerScaleObj, 'uvScale', {min: 1, max: 200, step: 1});
                 });
             }
 
-            // Folder 6: Camera Controls
-            if (controller) {
-                const folderCam = pane.addFolder({title: 'Camera', expanded: true});
-                folderCam.addBinding(config, 'moveSpeed', {
-                    min: 500,
-                    max: 20000,
-                    step: 500
-                }).on('change', (ev) => {
-                    controller.moveSpeed = ev.value;
-                });
-            }
+            const folderSun = pane.addFolder({title: 'Sun Light', expanded: false});
+            folderSun.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
+            folderSun.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
 
-            // Folder 7: Debugger Controls
-            if (landscape?.debuggerManager) {
-                const dbg = landscape.debuggerManager;
-                const folderDebuggers = pane.addFolder({title: 'debuggerManager', expanded: true});
+            const folderCam = pane.addFolder({title: 'Camera', expanded: true});
+            folderCam.addBinding(controller, 'moveSpeed', {min: 500, max: 20000, step: 500});
 
-                folderDebuggers.addBinding(dbg, 'hud');
-                folderDebuggers.addBinding(dbg, 'spatialGrid');
-                folderDebuggers.addBinding(dbg, 'vht');
-                folderDebuggers.addBinding(dbg, 'vnt');
-                folderDebuggers.addBinding(dbg, 'vbt');
-                folderDebuggers.addBinding(dbg, 'vbtNormal');
-                folderDebuggers.addBinding(dbg, 'vbtORM');
+            const dbg = landscape.debuggerManager;
+            const folderDebuggers = pane.addFolder({title: 'debuggerManager', expanded: true});
 
-                folderDebuggers.addBinding(config, 'boxSize', {
-                    min: 60,
-                    max: 300,
-                    step: 10
-                }).on('change', (ev) => {
-                    const sz = ev.value;
-                    if (dbg.spatialGridDebugger) {
-                        dbg.spatialGridDebugger.setSize(sz, sz);
-                    }
-                    if (dbg.vhtDebugger) {
-                        dbg.vhtDebugger.setSize(sz, sz);
-                        dbg.vhtDebugger.setPosition(12 + sz + 10, 12);
-                    }
-                    if (dbg.vntDebugger) {
-                        dbg.vntDebugger.setSize(sz, sz);
-                        dbg.vntDebugger.setPosition(12 + (sz + 10) * 2, 12);
-                    }
-                    if (dbg.vbtDebugger) {
-                        dbg.vbtDebugger.setSize(sz, sz);
-                        dbg.vbtDebugger.setPosition(12 + (sz + 10) * 3, 12);
-                    }
-                    if (dbg.vbtNormalDebugger) {
-                        dbg.vbtNormalDebugger.setSize(sz, sz);
-                        dbg.vbtNormalDebugger.setPosition(12 + (sz + 10) * 4, 12);
-                    }
-                    if (dbg.vbtORMDebugger) {
-                        dbg.vbtORMDebugger.setSize(sz, sz);
-                        dbg.vbtORMDebugger.setPosition(12 + (sz + 10) * 5, 12);
-                    }
-                });
-            }
+            folderDebuggers.addBinding(dbg, 'hud');
+            folderDebuggers.addBinding(dbg, 'spatialGrid');
+            folderDebuggers.addBinding(dbg, 'vht');
+            folderDebuggers.addBinding(dbg, 'vnt');
+            folderDebuggers.addBinding(dbg, 'vbt');
+            folderDebuggers.addBinding(dbg, 'vbtNormal');
+            folderDebuggers.addBinding(dbg, 'vbtORM');
+
+            folderDebuggers.addBinding(config, 'boxSize', {min: 60, max: 300, step: 10}).on('change', (ev) => {
+                const sz = ev.value;
+                if (dbg.spatialGridDebugger) dbg.spatialGridDebugger.setSize(sz, sz);
+                if (dbg.vhtDebugger) {
+                    dbg.vhtDebugger.setSize(sz, sz);
+                    dbg.vhtDebugger.setPosition(12 + sz + 10, 12);
+                }
+                if (dbg.vntDebugger) {
+                    dbg.vntDebugger.setSize(sz, sz);
+                    dbg.vntDebugger.setPosition(12 + (sz + 10) * 2, 12);
+                }
+                if (dbg.vbtDebugger) {
+                    dbg.vbtDebugger.setSize(sz, sz);
+                    dbg.vbtDebugger.setPosition(12 + (sz + 10) * 3, 12);
+                }
+                if (dbg.vbtNormalDebugger) {
+                    dbg.vbtNormalDebugger.setSize(sz, sz);
+                    dbg.vbtNormalDebugger.setPosition(12 + (sz + 10) * 4, 12);
+                }
+                if (dbg.vbtORMDebugger) {
+                    dbg.vbtORMDebugger.setSize(sz, sz);
+                    dbg.vbtORMDebugger.setPosition(12 + (sz + 10) * 5, 12);
+                }
+            });
         }
     });
 };
