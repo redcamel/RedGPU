@@ -165,7 +165,7 @@ class FoliagePipelineRegistry {
                 depthStencil = {
                     format: 'depth32float',
                     depthWriteEnabled: true,
-                    depthCompare: 'less',
+                    depthCompare: 'less-equal',
                 };
             }
         }

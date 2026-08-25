@@ -132,8 +132,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
                     fade = clamp(1.0 - (dist - fadeStartDist) / fadeRange, 0.0, 1.0);
                 }
 
-                if (cullingUniforms.hasBillboard == 0u) {
-
+                let lodDistSq = cullingUniforms.lodDistance * cullingUniforms.lodDistance;
+                if (cullingUniforms.hasBillboard == 0u || distSq < lodDistSq) {
                     isLOD0 = true;
                     culledInstance0 = instance;
                     culledInstance0.posY = realY;
@@ -141,36 +141,12 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
                     culledInstance0.subId = 1.0;
                     atomicAdd(&wgCountLOD0, 1u);
                 } else {
-
-                    if (distSq < crossFadeEndSq) {
-
-                        isLOD0 = true;
-                        var lodFade0: f32 = 1.0;
-                        if (distSq >= crossFadeStartSq) {
-                            if (dist < 0.0) { dist = sqrt(distSq); }
-                            lodFade0 = clamp((crossFadeEnd - dist) / (crossFadeEnd - crossFadeStart), 0.0, 1.0);
-                        }
-                        culledInstance0 = instance;
-                        culledInstance0.posY = realY;
-                        culledInstance0.fade = fade;
-                        culledInstance0.subId = lodFade0;
-                        atomicAdd(&wgCountLOD0, 1u);
-                    }
-
-                    if (distSq >= crossFadeStartSq) {
-
-                        isLOD1 = true;
-                        var lodFade1: f32 = 1.0;
-                        if (distSq < crossFadeEndSq) {
-                            if (dist < 0.0) { dist = sqrt(distSq); }
-                            lodFade1 = clamp((dist - crossFadeStart) / (crossFadeEnd - crossFadeStart), 0.0, 1.0);
-                        }
-                        culledInstance1 = instance;
-                        culledInstance1.posY = realY;
-                        culledInstance1.fade = fade;
-                        culledInstance1.subId = lodFade1;
-                        atomicAdd(&wgCountLOD1, 1u);
-                    }
+                    isLOD1 = true;
+                    culledInstance1 = instance;
+                    culledInstance1.posY = realY;
+                    culledInstance1.fade = fade;
+                    culledInstance1.subId = 1.0;
+                    atomicAdd(&wgCountLOD1, 1u);
                 }
             }
         }

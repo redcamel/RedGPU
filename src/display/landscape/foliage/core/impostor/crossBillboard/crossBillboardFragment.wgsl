@@ -50,7 +50,9 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let planeNormal = normalize(inputData.vertexNormal);
 
-    let localU = fract(inputData.uv.x * 3.0);
+    let clampedU = clamp(inputData.uv.x, 0.0, 0.999999);
+    let sliceIndex = floor(clampedU * 3.0);
+    let localU = clamp(inputData.uv.x * 3.0 - sliceIndex, 0.0, 1.0);
     let sphereX = (localU - 0.5) * 2.0;
     let sphereY = -(inputData.uv.y - 0.5) * 2.0;
     let distSq = sphereX * sphereX + sphereY * sphereY;

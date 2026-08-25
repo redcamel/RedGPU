@@ -58,7 +58,7 @@ class FoliageRenderer {
         const msaaID = antialiasingManager.msaaID;
         const useMSAA = antialiasingManager.useMSAA;
         const sampleCount = useMSAA ? 4 : 1;
-        const systemBG = view3D?.viewUniformBindGroup ?? null;
+        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup ?? (view as any)?.systemUniform_Vertex_UniformBindGroup ?? null;
 
         const rawCamera = view3D?.rawCamera || view3D?.camera || view;
         const camX = rawCamera?.x ?? 0;
