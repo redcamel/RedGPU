@@ -296,6 +296,26 @@ export class LandscapeSharedGeometry {
             new Uint32Array(allWireframeIndices)
         );
     }
+
+    /**
+     * [KO] 공유 지오메트리 GPU 버퍼 리소스를 해제합니다.
+     * [EN] Destroys shared geometry GPU buffer resources.
+     */
+    destroy(): void {
+        if (this.#combinedVertexBuffer) {
+            this.#combinedVertexBuffer.destroy();
+            this.#combinedVertexBuffer = null;
+        }
+        if (this.#combinedIndexBuffer) {
+            this.#combinedIndexBuffer.destroy();
+            this.#combinedIndexBuffer = null;
+        }
+        if (this.#combinedWireframeIndexBuffer) {
+            this.#combinedWireframeIndexBuffer.destroy();
+            this.#combinedWireframeIndexBuffer = null;
+        }
+        this.#lodRanges.length = 0;
+    }
 }
 
 export default LandscapeSharedGeometry;

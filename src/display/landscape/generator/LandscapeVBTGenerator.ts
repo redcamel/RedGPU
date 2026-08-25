@@ -142,8 +142,6 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
             tileSizePixels,
             6
         );
-
-        console.log(`[LandscapeVBTGenerator 🎨] GPU VBT 3-Set + Tile-Local Mipmaps baked at (${col}, ${row})`);
     }
 
     #dispatchTileMipmaps(
@@ -308,6 +306,12 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
                 entryPoint: 'main'
             }
         });
+    }
+
+    override destroy(): void {
+        super.destroy();
+        this.#tileMipPipeline = null;
+        this.#tileMipBindGroupLayout = null;
     }
 }
 

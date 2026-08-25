@@ -1,6 +1,7 @@
 import LANDSCAPE_BASE_GRID_SIZE from "./LANDSCAPE_BASE_GRID_SIZE";
 import LandscapeMaterial from "../material/LandscapeMaterial";
 import type {LandscapeDebuggerManagerOptions} from "../debugger";
+import type {LandscapeTileUrlResolver} from "../spatial/LandscapeTileStreamer";
 
 export interface LandscapeOptions {
 
@@ -24,7 +25,7 @@ export interface LandscapeOptions {
 
     heightScale?: number;
 
-    tileUrlResolver?: (row: number, col: number) => string;
+    tileUrlResolver?: LandscapeTileUrlResolver;
 
     loadingRadius?: number;
 

@@ -942,6 +942,14 @@ export class Landscape extends Object3DContainer {
     override destroy(): void {
         super.destroy();
         this.#debuggerManager?.destroy();
+        this.#foliageManager?.destroy?.();
+        this.#sharedGeometry?.destroy();
+        this.#gpuCuller?.destroy();
+        this.#tileStreamer?.destroy();
+        this.#vhtGenerator?.destroy();
+        this.#vntGenerator?.destroy();
+        this.#vbtGenerator?.destroy();
+
         if (this.#instanceBuffer) {
             this.#instanceBuffer.destroy();
         }
@@ -965,6 +973,8 @@ export class Landscape extends Object3DContainer {
             this.#vbtORMAtlas.destroy();
             this.#vbtORMAtlas = null;
         }
+        this.#renderPipelineCache.clear();
+        this.#vhtSampler = null;
     }
 }
 

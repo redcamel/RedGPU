@@ -534,6 +534,35 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         copyTexture(layer.ormTexture, this.#gpuORMArrayTexture, [255, 255, 0, 255], 'ormTexture');
         copyTexture(layer.weightTexture, this.#gpuWeightMapArrayTexture, [255, 255, 255, 255], 'weightTexture');
     }
+
+    override destroy(): void {
+        super.destroy();
+        if (this.#rebakeDebounceTimer !== null) {
+            clearTimeout(this.#rebakeDebounceTimer);
+            this.#rebakeDebounceTimer = null;
+        }
+        if (this.#gpuBaseColorArrayTexture) {
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuBaseColorArrayTexture);
+            this.#gpuBaseColorArrayTexture = null;
+        }
+        if (this.#gpuNormalArrayTexture) {
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuNormalArrayTexture);
+            this.#gpuNormalArrayTexture = null;
+        }
+        if (this.#gpuORMArrayTexture) {
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuORMArrayTexture);
+            this.#gpuORMArrayTexture = null;
+        }
+        if (this.#gpuWeightMapArrayTexture) {
+            this.redGPUContext.commandEncoderManager.addDeferredDestroy(this.#gpuWeightMapArrayTexture);
+            this.#gpuWeightMapArrayTexture = null;
+        }
+        this.#baseColorArrayView = null;
+        this.#normalArrayView = null;
+        this.#ormArrayView = null;
+        this.#weightMapArrayView = null;
+        this.clearLayers();
+    }
 }
 
 defineColorRGBA(LandscapeMaterial, [

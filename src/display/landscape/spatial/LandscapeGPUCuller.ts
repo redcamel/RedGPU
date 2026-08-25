@@ -158,6 +158,19 @@ export class LandscapeGPUCuller {
             }
         });
     }
+
+    destroy(): void {
+        if (this.#uniformBuffer) {
+            try {
+                this.#uniformBuffer.destroy();
+            } catch (e) {
+            }
+            this.#uniformBuffer = null;
+        }
+        this.#computePipeline = null;
+        this.#bindGroup = null;
+        this.#bindGroupLayout = null;
+    }
 }
 
 export default LandscapeGPUCuller;

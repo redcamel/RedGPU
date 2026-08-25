@@ -59,7 +59,6 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         });
 
         this.dispatchBakePass(bindGroup, pixelW, pixelH, pixelX, pixelZ);
-        console.log(`[LandscapeVHTGenerator ⚡] GPU Compute r32float VHT Height Bake executed for region [${pixelX}, ${pixelZ}, ${pixelW}x${pixelH}]`);
     }
 
     #initComputeResources(): void {

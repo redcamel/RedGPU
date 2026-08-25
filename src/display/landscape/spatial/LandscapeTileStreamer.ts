@@ -263,11 +263,27 @@ export class LandscapeTileStreamer {
         const localU = Math.min(1.0, Math.max(0.0, (x - tileMinX) / tileSizeX));
         const localV = Math.min(1.0, Math.max(0.0, (z - tileMinZ) / tileSizeZ));
 
-        const px = Math.min(tileData.width - 1, Math.max(0, Math.floor(localU * tileData.width)));
-        const py = Math.min(tileData.height - 1, Math.max(0, Math.floor(localV * tileData.height)));
-        const idx = py * tileData.width + px;
+        const w = tileData.width;
+        const h = tileData.height;
+        const fx = localU * (w - 1);
+        const fy = localV * (h - 1);
+        const x0 = Math.floor(fx);
+        const x1 = Math.min(x0 + 1, w - 1);
+        const y0 = Math.floor(fy);
+        const y1 = Math.min(y0 + 1, h - 1);
+        const tx = fx - x0;
+        const ty = fy - y0;
 
-        const rawVal = tileData.pixels[idx] || 0;
+        const pixels = tileData.pixels;
+        const p00 = pixels[y0 * w + x0] || 0;
+        const p10 = pixels[y0 * w + x1] || 0;
+        const p01 = pixels[y1 * w + x0] || 0;
+        const p11 = pixels[y1 * w + x1] || 0;
+
+        const hTop = p00 * (1.0 - tx) + p10 * tx;
+        const hBottom = p01 * (1.0 - tx) + p11 * tx;
+        const rawVal = hTop * (1.0 - ty) + hBottom * ty;
+
         return (rawVal / 65535.0) * this.#heightScale;
     }
 
@@ -494,6 +510,21 @@ export class LandscapeTileStreamer {
         } finally {
             this.#loadingMap.delete(key);
         }
+    }
+
+    destroy(): void {
+        this.resetTileState();
+        this.#vhtAtlasTexture = null;
+        this.#vntAtlasTexture = null;
+        this.#vbtBaseColorAtlas = null;
+        this.#vbtNormalAtlas = null;
+        this.#vbtORMAtlas = null;
+        this.#vhtGenerator = null;
+        this.#vntGenerator = null;
+        this.#vbtGenerator = null;
+        this.#material = null;
+        this.#tileUrlResolver = null;
+        this.#onTileLoaded = null;
     }
 }
 

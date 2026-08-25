@@ -116,6 +116,19 @@ export abstract class ALandscapeAtlasGenerator {
             }
         });
     }
+
+    destroy(): void {
+        const count = this.#uniformBufferPool.length;
+        for (let i = 0; i < count; i++) {
+            try {
+                this.#uniformBufferPool[i]?.destroy();
+            } catch (e) {
+            }
+        }
+        this.#uniformBufferPool.length = 0;
+        this.computePipeline = null;
+        this.bindGroupLayout = null;
+    }
 }
 
 export default ALandscapeAtlasGenerator;

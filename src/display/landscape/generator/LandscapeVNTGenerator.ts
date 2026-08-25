@@ -75,7 +75,6 @@ export class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
         });
 
         this.dispatchBakePass(bindGroup, bakeW, bakeH, pixelX, pixelZ);
-        console.log(`[LandscapeVNTGenerator 🌀] GPU VNT Normal Bake executed for region [${pixelX}, ${pixelZ}, ${pixelW}x${pixelH}]`);
     }
 
     #initComputeResources(): void {
