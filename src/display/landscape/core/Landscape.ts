@@ -412,6 +412,10 @@ export class Landscape extends Object3DContainer {
         }
     }
 
+    get tileSize(): readonly [number, number] {
+        return this.#tileSizeTuple;
+    }
+
     get componentSizeQuads(): number {
         return this.#componentSizeQuads;
     }
@@ -451,6 +455,10 @@ export class Landscape extends Object3DContainer {
         }
     }
 
+    get heightScale(): number {
+        return this.#heightScale;
+    }
+
     set heightScale(val: number) {
         if (this.#heightScale !== val) {
             this.#heightScale = val;
@@ -463,35 +471,6 @@ export class Landscape extends Object3DContainer {
 
     get landscapeMaterial(): LandscapeMaterial {
         return this.#landscapeMaterial;
-    }
-
-    get heightScale(): number {
-        return this.#heightScale;
-    }
-
-    set lodColoration(value: boolean) {
-        if (this.#lodColoration !== value) {
-            this.#lodColoration = value;
-            this.#updateLandscapeUniforms();
-        }
-    }
-
-    /** @internal 내부 디버거 및 포리지 전용 텍스처 조회 */
-    getInternalAtlasTexture(type: 'vht' | 'vnt' | 'vbtBaseColor' | 'vbtNormal' | 'vbtORM'): DirectTexture | null {
-        switch (type) {
-            case 'vht':
-                return this.#vhtAtlasTexture;
-            case 'vnt':
-                return this.#vntAtlasTexture;
-            case 'vbtBaseColor':
-                return this.#vbtBaseColorAtlas;
-            case 'vbtNormal':
-                return this.#vbtNormalAtlas;
-            case 'vbtORM':
-                return this.#vbtORMAtlas;
-            default:
-                return null;
-        }
     }
 
     set landscapeMaterial(val: LandscapeMaterial) {
@@ -521,6 +500,13 @@ export class Landscape extends Object3DContainer {
         return this.#lodColoration;
     }
 
+    set lodColoration(value: boolean) {
+        if (this.#lodColoration !== value) {
+            this.#lodColoration = value;
+            this.#updateLandscapeUniforms();
+        }
+    }
+
     get lodFadeStartRatio(): number {
         return this.#lodFadeStartRatio;
     }
@@ -545,6 +531,104 @@ export class Landscape extends Object3DContainer {
         }
     }
 
+    get loadingRadius(): number {
+        return this.#tileStreamer.loadingRadius;
+    }
+
+    set loadingRadius(value: number) {
+        this.#tileStreamer.loadingRadius = value;
+    }
+
+    get maxLoadsPerFrame(): number {
+        return this.#tileStreamer.maxLoadsPerFrame;
+    }
+
+    set maxLoadsPerFrame(value: number) {
+        this.#tileStreamer.maxLoadsPerFrame = value;
+    }
+
+    get loadedTileCount(): number {
+        return this.#tileStreamer?.loadedTileCount ?? 0;
+    }
+
+    get pendingQueueSize(): number {
+        return this.#tileStreamer?.pendingQueueSize ?? 0;
+    }
+
+    /**
+     * [KO] 타일 높이맵 이미지 URL 리졸버를 반환합니다.
+     * [EN] Returns the tile heightmap image URL resolver.
+     */
+    get tileUrlResolver(): LandscapeTileUrlResolver | null {
+        return this.#tileStreamer.tileUrlResolver;
+    }
+
+    /**
+     * [KO] 타일 높이맵 이미지 URL 리졸버를 설정합니다.
+     * [EN] Sets the tile heightmap image URL resolver.
+     */
+    set tileUrlResolver(resolver: LandscapeTileUrlResolver | null) {
+        this.#tileStreamer.tileUrlResolver = resolver;
+    }
+
+    /** @internal 내부 디버거 전용 활성 타일 컴포넌트 목록 조회 */
+    get landscapeComponents(): readonly LandscapeComponent[] {
+        return this.#spatialGrid.flatCells;
+    }
+
+    /** @internal HUD 디버거 전용 GPU Culling 활성 상태 조회 */
+    get frustumCullingActive(): boolean {
+        return this.#frustumCullingActive;
+    }
+
+    /** @internal 공간 그리드 디버거 전용 LOD 디버그 색상 목록 조회 */
+    get lodColors(): readonly (readonly [number, number, number, number])[] {
+        return this.#lodColorsRGBA;
+    }
+
+    /** @internal 공간 그리드 디버거 전용 LOD 전환 거리(제곱) 목록 조회 */
+    get lodDistancesSq(): readonly number[] {
+        return this.#lodDistancesSq;
+    }
+
+    isTileLoaded(row: number, col: number): boolean {
+        return this.#tileStreamer?.isTileLoaded(row, col) ?? false;
+    }
+
+    /** @internal 내부 디버거 및 포리지 전용 텍스처 조회 */
+    getInternalAtlasTexture(type: 'vht' | 'vnt' | 'vbtBaseColor' | 'vbtNormal' | 'vbtORM'): DirectTexture | null {
+        switch (type) {
+            case 'vht':
+                return this.#vhtAtlasTexture;
+            case 'vnt':
+                return this.#vntAtlasTexture;
+            case 'vbtBaseColor':
+                return this.#vbtBaseColorAtlas;
+            case 'vbtNormal':
+                return this.#vbtNormalAtlas;
+            case 'vbtORM':
+                return this.#vbtORMAtlas;
+            default:
+                return null;
+        }
+    }
+
+    #clampComponentCount(val: number): number {
+        const maxTextureDim = this.#redGPUContext?.gpuDevice?.limits?.maxTextureDimension2D ?? 8192;
+        const maxTilesForHardware = Math.floor(maxTextureDim / 512);
+        const maxAllowed = Math.min(32, Math.max(1, maxTilesForHardware));
+        return Math.min(maxAllowed, Math.max(1, Math.round(val)));
+    }
+
+    #updateTuples(): void {
+        this.#worldSizeTuple[0] = this.#worldSizeX;
+        this.#worldSizeTuple[1] = this.#worldSizeZ;
+        this.#componentCountTuple[0] = this.#componentCountX;
+        this.#componentCountTuple[1] = this.#componentCountZ;
+        this.#tileSizeTuple[0] = this.#tileSizeX;
+        this.#tileSizeTuple[1] = this.#tileSizeZ;
+    }
+
     #updateLandscapeUniforms(): void {
         const vhtW = this.#vhtAtlasTexture?.gpuTexture?.width || (this.#componentCountX * 512);
         const vhtH = this.#vhtAtlasTexture?.gpuTexture?.height || (this.#componentCountZ * 512);
@@ -564,90 +648,6 @@ export class Landscape extends Object3DContainer {
             this.#lodColorsRGBA,
             this.#lodDistancesSq
         );
-    }
-
-    /** @internal 내부 디버거 전용 활성 타일 컴포넌트 목록 조회 */
-    get landscapeComponents(): readonly LandscapeComponent[] {
-        return this.#spatialGrid.flatCells;
-    }
-
-    get tileSize(): readonly [number, number] {
-        return this.#tileSizeTuple;
-    }
-
-    #clampComponentCount(val: number): number {
-        const maxTextureDim = this.#redGPUContext?.gpuDevice?.limits?.maxTextureDimension2D ?? 8192;
-        const maxTilesForHardware = Math.floor(maxTextureDim / 512);
-        const maxAllowed = Math.min(32, Math.max(1, maxTilesForHardware));
-        return Math.min(maxAllowed, Math.max(1, Math.round(val)));
-    }
-
-    get loadedTileCount(): number {
-        return this.#tileStreamer?.loadedTileCount ?? 0;
-    }
-
-    get pendingQueueSize(): number {
-        return this.#tileStreamer?.pendingQueueSize ?? 0;
-    }
-
-    isTileLoaded(row: number, col: number): boolean {
-        return this.#tileStreamer?.isTileLoaded(row, col) ?? false;
-    }
-
-    get loadingRadius(): number {
-        return this.#tileStreamer.loadingRadius;
-    }
-
-    #updateTuples(): void {
-        this.#worldSizeTuple[0] = this.#worldSizeX;
-        this.#worldSizeTuple[1] = this.#worldSizeZ;
-        this.#componentCountTuple[0] = this.#componentCountX;
-        this.#componentCountTuple[1] = this.#componentCountZ;
-        this.#tileSizeTuple[0] = this.#tileSizeX;
-        this.#tileSizeTuple[1] = this.#tileSizeZ;
-    }
-
-    set loadingRadius(value: number) {
-        this.#tileStreamer.loadingRadius = value;
-    }
-
-    get maxLoadsPerFrame(): number {
-        return this.#tileStreamer.maxLoadsPerFrame;
-    }
-
-    set maxLoadsPerFrame(value: number) {
-        this.#tileStreamer.maxLoadsPerFrame = value;
-    }
-
-    /** @internal HUD 디버거 전용 GPU Culling 활성 상태 조회 */
-    get frustumCullingActive(): boolean {
-        return this.#frustumCullingActive;
-    }
-
-    /** @internal 공간 그리드 디버거 전용 LOD 디버그 색상 목록 조회 */
-    get lodColors(): readonly (readonly [number, number, number, number])[] {
-        return this.#lodColorsRGBA;
-    }
-
-    /** @internal 공간 그리드 디버거 전용 LOD 전환 거리(제곱) 목록 조회 */
-    get lodDistancesSq(): readonly number[] {
-        return this.#lodDistancesSq;
-    }
-
-    /**
-     * [KO] 타일 높이맵 이미지 URL 리졸버를 반환합니다.
-     * [EN] Returns the tile heightmap image URL resolver.
-     */
-    get tileUrlResolver(): LandscapeTileUrlResolver | null {
-        return this.#tileStreamer.tileUrlResolver;
-    }
-
-    /**
-     * [KO] 타일 높이맵 이미지 URL 리졸버를 설정합니다.
-     * [EN] Sets the tile heightmap image URL resolver.
-     */
-    set tileUrlResolver(resolver: LandscapeTileUrlResolver | null) {
-        this.#tileStreamer.tileUrlResolver = resolver;
     }
 
     #onPreProcessComputePass = (computePass: GPUComputePassEncoder): void => {
