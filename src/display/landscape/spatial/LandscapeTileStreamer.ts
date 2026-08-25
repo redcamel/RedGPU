@@ -39,7 +39,7 @@ export class LandscapeTileStreamer {
     #isRebaking: boolean = false;
     #rebakeRafId: number | null = null;
     #loadingMap: Map<string, boolean> = new Map();
-    #loadedMap: Map<string, any> = new Map();
+    #loadedMap: Map<string, boolean> = new Map();
     #cpuHeightMap: Map<string, any> = new Map();
     #failedMap: Map<string, number> = new Map();
 
@@ -383,7 +383,7 @@ export class LandscapeTileStreamer {
                 );
 
                 console.log(`[LandscapeTileStreamer ✅ ⚡ Zero-GC 0.7ms] Tile (${key}) loaded successfully! (${width}x${height})`);
-                this.#loadedMap.set(key, gpuTexture);
+                this.#loadedMap.set(key, true);
                 this.#cpuHeightMap.set(key, cpuParsed);
                 this.#failedMap.delete(key);
 
@@ -421,6 +421,7 @@ export class LandscapeTileStreamer {
                                 );
                             });
                         }
+                        this.#redGPUContext.commandEncoderManager.addDeferredDestroy(gpuTexture);
                         console.log(`[LandscapeTileStreamer ⛰️] r32float VHT Atlas Sub-region (${key}) baked via GPU Compute Shader at [${targetX}, ${targetZ}]`);
 
                         if (this.#vntAtlasTexture && this.#vntGenerator) {
