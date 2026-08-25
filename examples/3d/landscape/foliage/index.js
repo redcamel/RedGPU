@@ -381,6 +381,8 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
         // 5. Tile Streaming & VHT
         loadingRadius: landscape ? landscape.loadingRadius : 2500,
         maxLoadsPerFrame: landscape ? landscape.maxLoadsPerFrame : 2,
+        loadedTileCount: landscape ? landscape.loadedTileCount : 0,
+        pendingQueueSize: landscape ? landscape.pendingQueueSize : 0,
 
         // 6. Camera Controls
         moveSpeed: controller ? controller.moveSpeed : 5000,
@@ -403,10 +405,14 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             config.componentCountZ = tZ;
             config.totalComponents = tX * tZ;
             config.tileSizeStr = `[${Math.round(sX)}m, ${Math.round(sZ)}m]`;
+            config.loadedTileCount = landscape.loadedTileCount;
+            config.pendingQueueSize = landscape.pendingQueueSize;
 
             if (activePane) activePane.refresh();
         }
     };
+
+    setInterval(updateConfigValues, 500);
 
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
@@ -551,6 +557,9 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             if (landscape) {
                 const folderStream = folderSpatial.addFolder({title: 'Tile Streaming', expanded: true});
 
+                folderStream.addBinding(config, 'loadedTileCount', {readonly: true});
+                folderStream.addBinding(config, 'pendingQueueSize', {readonly: true});
+
                 folderStream.addBinding(config, 'loadingRadius', {
                     min: 500,
                     max: 20000,
@@ -620,6 +629,11 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     subFolder.addBinding(layer, 'enabled');
                     subFolder.addBinding(layer, 'weightChannel', {
                         options: {R: 'R', G: 'G', B: 'B', A: 'A'}
+                    });
+
+                    const tintObj = {tintColor: layer.tintColor ? layer.tintColor.hex : '#ffffff'};
+                    subFolder.addBinding(tintObj, 'tintColor').on('change', (e) => {
+                        layer.tintColor = e.value;
                     });
 
                     subFolder.addBinding(layer, 'roughness', {min: 0, max: 1, step: 0.01});
