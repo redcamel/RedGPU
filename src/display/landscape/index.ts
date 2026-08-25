@@ -1,5 +1,4 @@
 import Landscape from "./core/Landscape";
-import type LandscapeOptions from "./core/LandscapeOptions";
 import {LANDSCAPE_BASE_GRID_SIZE, validateLandscapeBaseGridSize} from "./core/LANDSCAPE_BASE_GRID_SIZE";
 import LANDSCAPE_DEFAULT_LOD_COLORS from "./core/LANDSCAPE_DEFAULT_LOD_COLORS";
 import LandscapeMaterial from "./material/LandscapeMaterial";
@@ -26,7 +25,6 @@ export {
 };
 
 export type {
-    LandscapeOptions,
     LandscapeLayerOptions,
     LandscapeWeightMapChannel,
     FoliageTypeOptions,

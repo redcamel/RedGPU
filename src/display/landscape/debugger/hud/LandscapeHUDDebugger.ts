@@ -77,7 +77,7 @@ export class LandscapeHUDDebugger extends ALandscapeDebugger {
         const frustumActive = landscape.frustumCullingActive;
 
         let lodListHTML = '';
-        const maxLODLevel = landscape.maxLODLevel ?? 4;
+        const maxLODLevel = landscape.maxLODLevel ?? 5;
         const lodColors = landscape.lodColors ?? [];
 
         for (let i = 0; i < maxLODLevel; i++) {

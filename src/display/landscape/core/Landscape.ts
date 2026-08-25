@@ -6,7 +6,6 @@ import LANDSCAPE_BASE_GRID_SIZE, {validateLandscapeBaseGridSize} from "./LANDSCA
 import LandscapeComponent from "../spatial/LandscapeComponent";
 import LandscapeInstanceBuffer from "../spatial/LandscapeInstanceBuffer";
 import LandscapeMaterial from "../material/LandscapeMaterial";
-import LandscapeOptions from "./LandscapeOptions";
 import LandscapeSharedGeometry from "../spatial/LandscapeSharedGeometry";
 import LandscapeSpatialGrid from "../spatial/LandscapeSpatialGrid";
 import DirectTexture from "../../../resources/texture/DirectTexture";
@@ -72,37 +71,19 @@ export class Landscape extends Object3DContainer {
     #vertexShaderModule: GPUShaderModule;
     #renderPipelineCache: Map<string, GPURenderPipeline> = new Map();
 
-    constructor(redGPUContext: RedGPUContext, options: LandscapeOptions = {}) {
+    constructor(redGPUContext: RedGPUContext) {
         super();
         this.#redGPUContext = redGPUContext;
 
-        const parseValue = (val: number | [number, number] | undefined, defaultVal: number): [number, number] => {
-            if (Array.isArray(val)) return [val[0], val[1]];
-            if (typeof val === 'number') return [val, val];
-            return [defaultVal, defaultVal];
-        };
-
-        let [worldSizeX, worldSizeZ] = parseValue(options.worldSize, 8000);
-        let [rawComponentCountX, rawComponentCountZ] = parseValue(options.componentCount, 8);
-        let componentCountX = this.#clampComponentCount(rawComponentCountX);
-        let componentCountZ = this.#clampComponentCount(rawComponentCountZ);
-
-        let [tileSizeX, tileSizeZ] = [worldSizeX / componentCountX, worldSizeZ / componentCountZ];
-
-        if (options.tileSize !== undefined) {
-            const [tsX, tsZ] = parseValue(options.tileSize, 1000);
-            tileSizeX = tsX;
-            tileSizeZ = tsZ;
-            if (options.worldSize === undefined) {
-                worldSizeX = tileSizeX * componentCountX;
-                worldSizeZ = tileSizeZ * componentCountZ;
-            }
-        }
-
-        const componentSizeQuads = options.componentSizeQuads ?? LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
-        validateLandscapeBaseGridSize(componentSizeQuads);
-        const lod0SizeQuads = options.lod0SizeQuads ?? 256;
-        const maxLODLevel = Math.min(8, Math.max(1, options.maxLODLevel ?? 4));
+        const worldSizeX = 8000;
+        const worldSizeZ = 8000;
+        const componentCountX = 16;
+        const componentCountZ = 16;
+        const tileSizeX = worldSizeX / componentCountX;
+        const tileSizeZ = worldSizeZ / componentCountZ;
+        const componentSizeQuads = LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
+        const lod0SizeQuads = LANDSCAPE_BASE_GRID_SIZE.QUAD_256;
+        const maxLODLevel = 5;
 
         const material = new LandscapeMaterial(redGPUContext);
         const sharedGeometry = new LandscapeSharedGeometry(redGPUContext, tileSizeX, tileSizeZ, componentSizeQuads, maxLODLevel, lod0SizeQuads);
@@ -120,17 +101,13 @@ export class Landscape extends Object3DContainer {
         this.#componentSizeQuads = componentSizeQuads;
         this.#lod0SizeQuads = lod0SizeQuads;
         this.#maxLODLevel = maxLODLevel;
-        this.#wireframe = options.wireframe ?? false;
-        this.#lodColoration = options.lodColoration ?? false;
-        this.#lodMetric = options.lodMetric ?? 'screenSize';
-        this.#lodFadeStartRatio = options.lodDitherStartRatio ?? options.lodFadeStartRatio ?? 0.7;
-        this.#lodGeomorphStartRatio = options.lodMorphStartRatio ?? options.lodGeomorphStartRatio ?? 0.85;
-        this.#tileStreamer = new LandscapeTileStreamer(redGPUContext, this.#spatialGrid, options?.loadingRadius ?? 2500.0);
-        if (options.tileUrlResolver) {
-            this.#tileStreamer.tileUrlResolver = options.tileUrlResolver;
-        }
-
-        this.#heightScale = options.heightScale ?? 500.0;
+        this.#wireframe = false;
+        this.#lodColoration = false;
+        this.#lodMetric = 'screenSize';
+        this.#lodFadeStartRatio = 0.7;
+        this.#lodGeomorphStartRatio = 0.85;
+        this.#tileStreamer = new LandscapeTileStreamer(redGPUContext, this.#spatialGrid, 2500.0);
+        this.#heightScale = 500.0;
         this.#updateTuples();
 
         const atlasWidth = componentCountX * 512;
@@ -210,12 +187,12 @@ export class Landscape extends Object3DContainer {
             this.#tileStreamer.rebakeAllLoadedVBT();
         });
 
-        this.#initSystems(redGPUContext, options, componentCountX, componentCountZ, maxLODLevel, vhtSampler, vhtAtlasTexture, vntAtlasTexture);
+        this.#initSystems(redGPUContext, componentCountX, componentCountZ, maxLODLevel, vhtSampler, vhtAtlasTexture, vntAtlasTexture);
         this.#foliageManager = new LandscapeFoliageManager(this);
         this.#tileStreamer.setOnTileLoaded((comp) => {
             this.#foliageManager?.handleTileLoaded(comp);
         });
-        this.#debuggerManager = new LandscapeDebuggerManager(this, options?.debuggerOptions);
+        this.#debuggerManager = new LandscapeDebuggerManager(this);
     }
 
     get redGPUContext(): RedGPUContext {
@@ -746,7 +723,6 @@ export class Landscape extends Object3DContainer {
 
     #initSystems(
         redGPUContext: RedGPUContext,
-        options: LandscapeOptions,
         componentCountX: number,
         componentCountZ: number,
         maxLODLevel: number,
@@ -775,7 +751,7 @@ export class Landscape extends Object3DContainer {
             this.#vbtORMAtlas?.gpuTextureView
         );
 
-        this.#rebuildLODStructures(options.lodColors, options.lodMultipliers, options.lodDistances);
+        this.#rebuildLODStructures();
         this.#rebuildTiles();
     }
 

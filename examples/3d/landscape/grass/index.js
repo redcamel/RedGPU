@@ -35,15 +35,11 @@ RedGPU.init(
         scene.lightManager.addDirectionalLight(directionalLight);
 
         // 4. 신규 Landscape 인스턴스 생성 (16x16 256개 타일 에셋 대응)
-        const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext, {
-            worldSize: [16000, 16000],
-            componentCount: [16, 16],
-            componentSizeQuads: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
-            maxLODLevel: 5,
-            wireframe: false,
-            lodColoration: false,
-            loadingRadius: 4000
-        });
+        const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
+        landscape.worldSize = [16000, 16000];
+        landscape.componentCount = [16, 16];
+        landscape.maxLODLevel = 5;
+        landscape.loadingRadius = 4000;
 
         // 4-1. 지형 기본 바탕 색상 설정
         landscape.material.color.setColorByHEX('#387d42');
