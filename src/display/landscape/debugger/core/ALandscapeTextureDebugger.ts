@@ -167,6 +167,15 @@ export abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
             }
         });
     }
+
+    override destroy(): void {
+        super.destroy();
+        this.#pipeline = null;
+        this.#bindGroup = null;
+        this.#bindGroupLayout = null;
+        this.#context = null;
+        this.#lastBoundTexture = null;
+    }
 }
 
 export default ALandscapeTextureDebugger;
