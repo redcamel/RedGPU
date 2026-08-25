@@ -42,6 +42,7 @@ export class LandscapeLayer {
     #uvOffset: [number, number] = [0.0, 0.0];
 
     #weightChannel: LandscapeWeightMapChannel = 'R';
+    #weightChannelIndex: number = 0;
 
     #roughness: number = 1.0;
     #metallic: number = 0.0;
@@ -96,6 +97,7 @@ export class LandscapeLayer {
         if (actualOptions.weightChannel !== undefined) {
             this.#weightChannel = actualOptions.weightChannel;
         }
+        this.#updateWeightChannelIndex();
 
         if (actualOptions.roughness !== undefined) {
             this.#roughness = actualOptions.roughness;
@@ -241,7 +243,7 @@ export class LandscapeLayer {
         this.onChange?.();
     }
 
-    get uvScale(): [number, number] {
+    get uvScale(): readonly [number, number] {
         return this.#uvScale;
     }
 
@@ -253,7 +255,7 @@ export class LandscapeLayer {
         this.onChange?.();
     }
 
-    get uvOffset(): [number, number] {
+    get uvOffset(): readonly [number, number] {
         return this.#uvOffset;
     }
 
@@ -272,8 +274,13 @@ export class LandscapeLayer {
     set weightChannel(val: LandscapeWeightMapChannel) {
         if (this.#weightChannel === val) return;
         this.#weightChannel = val;
+        this.#updateWeightChannelIndex();
         this.dirty = true;
         this.onChange?.();
+    }
+
+    get weightChannelIndex(): number {
+        return this.#weightChannelIndex;
     }
 
     get roughness(): number {
@@ -338,12 +345,12 @@ export class LandscapeLayer {
         this.onChange?.();
     }
 
-    get weightChannelIndex(): number {
+    #updateWeightChannelIndex(): void {
         const ch = String(this.#weightChannel).toUpperCase();
-        if (ch === 'G' || ch === '1') return 1;
-        if (ch === 'B' || ch === '2') return 2;
-        if (ch === 'A' || ch === '3') return 3;
-        return 0;
+        if (ch === 'G' || ch === '1') this.#weightChannelIndex = 1;
+        else if (ch === 'B' || ch === '2') this.#weightChannelIndex = 2;
+        else if (ch === 'A' || ch === '3') this.#weightChannelIndex = 3;
+        else this.#weightChannelIndex = 0;
     }
 }
 
