@@ -75,8 +75,7 @@ class FoliageCullingDispatcher {
                 frustumPlanes,
                 foliageType.lodDistance,
                 foliageType.lod0SubMeshCount,
-                foliageType.hasBillboard,
-                foliageType.lodFadeRange
+                foliageType.hasBillboard
             );
         }
 

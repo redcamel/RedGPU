@@ -12,7 +12,7 @@ struct CullingUniforms {
     lodDistance: f32,
     lod0SubMeshCount: u32,
     maxInstances: u32,
-    lodFadeRange: f32,
+    pad: u32,
     frustumPlanes: array<vec4<f32>, 6>,
 };
 

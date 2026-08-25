@@ -45,8 +45,6 @@ export interface FoliageCrossBillboardOptions {
     height?: number;
 
     lodDistance?: number;
-
-    fadeRange?: number;
 }
 
 export interface FoliageTypeOptions {
@@ -168,10 +166,6 @@ class FoliageType {
 
     get lodDistance(): number {
         return this.#options.lodDistance;
-    }
-
-    get lodFadeRange(): number {
-        return this.#options.billboard?.fadeRange ?? 30.0;
     }
 
     incrementActiveInstanceCount(count: number): void {

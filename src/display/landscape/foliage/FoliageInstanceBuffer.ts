@@ -107,8 +107,7 @@ class FoliageInstanceBuffer {
         frustumPlanes: number[][] | null,
         lodDistance: number = 100.0,
         lod0SubMeshCount: number = 1,
-        hasBillboard: boolean = false,
-        lodFadeRange: number = 30.0
+        hasBillboard: boolean = false
     ): void {
         if (!this.#cullingUniformBuffer) return;
 
@@ -137,7 +136,7 @@ class FoliageInstanceBuffer {
         f32[12] = lodDistance;
         u32[13] = Math.max(lod0SubMeshCount, 1);
         u32[14] = this.#maxInstances;
-        f32[15] = lodFadeRange;
+        u32[15] = 0; // pad
 
         // vec4 4..9 (frustum planes)
         if (frustumPlanes && frustumPlanes.length >= 6) {
