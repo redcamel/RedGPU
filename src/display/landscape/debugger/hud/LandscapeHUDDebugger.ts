@@ -74,16 +74,13 @@ export class LandscapeHUDDebugger extends ALandscapeDebugger {
         const frustumActive = landscape.frustumCullingActive;
 
         let lodListHTML = '';
-        const sharedGeo = landscape.sharedGeometry;
         const maxLODLevel = landscape.maxLODLevel ?? 4;
         const lodColors = landscape.lodColors ?? [];
 
         for (let i = 0; i < maxLODLevel; i++) {
-            const range = sharedGeo?.getLODRange ? sharedGeo.getLODRange(i) : null;
-            const indexCount = range?.indexCount ?? 0;
-            const trisPerTile = Math.floor(indexCount / 3);
             const step = Math.pow(2, i);
             const segX = Math.max(1, Math.floor(gs / step));
+            const trisPerTile = segX * segX * 2;
             const vertsPerTile = Math.pow(segX + 1, 2);
 
             const hexColor = (lodColors[i]) ? formatLODColorHex(lodColors[i]) : (LANDSCAPE_DEFAULT_LOD_HEX_STRINGS[i % LANDSCAPE_DEFAULT_LOD_HEX_STRINGS.length] ?? '#3b82f6');

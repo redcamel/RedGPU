@@ -595,18 +595,6 @@ export class Landscape extends Object3DContainer {
         this.#tileStreamer.loadingRadius = value;
     }
 
-    get instanceBuffer(): LandscapeInstanceBuffer {
-        return this.#instanceBuffer;
-    }
-
-    get sharedGeometry(): LandscapeSharedGeometry {
-        return this.#sharedGeometry;
-    }
-
-    get spatialGrid(): LandscapeSpatialGrid {
-        return this.#spatialGrid;
-    }
-
     get maxLoadsPerFrame(): number {
         return this.#tileStreamer.maxLoadsPerFrame;
     }
