@@ -359,7 +359,6 @@ export class LandscapeTileStreamer {
                 this.#vbtNormalAtlas,
                 this.#vbtORMAtlas,
                 this.#material,
-                comp.componentZ * this.#spatialGrid.tileCountX + comp.componentX,
                 comp.componentX,
                 comp.componentZ,
                 TILE_PIXEL_SIZE
@@ -476,7 +475,6 @@ export class LandscapeTileStreamer {
                                 this.#vbtNormalAtlas,
                                 this.#vbtORMAtlas,
                                 this.#material,
-                                comp.componentZ * this.#spatialGrid.tileCountX + comp.componentX,
                                 comp.componentX,
                                 comp.componentZ,
                                 TILE_PIXEL_SIZE
@@ -524,7 +522,6 @@ export class LandscapeTileStreamer {
                                             this.#vbtNormalAtlas,
                                             this.#vbtORMAtlas,
                                             this.#material,
-                                            nz * tileCountX + nx,
                                             nx,
                                             nz,
                                             TILE_PIXEL_SIZE

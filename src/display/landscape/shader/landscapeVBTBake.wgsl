@@ -20,8 +20,8 @@ struct VBTBakeUniforms {
     tileOriginInAtlas: vec2<f32>,
     tilePixelSize: vec2<f32>,
     atlasSize: vec2<f32>,
-    sliceIndex: u32,
     activeLayerCount: u32,
+    pad0: u32,
     baseColor: vec4<f32>,
     layers: array<LandscapeLayerParams, 8>,
 };

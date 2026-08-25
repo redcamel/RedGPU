@@ -33,7 +33,6 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         vbtNormalArray: DirectTexture,
         vbtORMArray: DirectTexture,
         material: LandscapeMaterial,
-        sliceIndex: number,
         col: number,
         row: number,
         tileSizePixels: number = 512
@@ -60,11 +59,11 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         fArr[3] = tileSizePixels;
         fArr[4] = atlasW;
         fArr[5] = atlasH;
-        uArr[6] = sliceIndex;
 
         const activeLayers = material.layers;
         const activeCount = Math.min(8, activeLayers.length);
-        uArr[7] = activeCount;
+        uArr[6] = activeCount;
+        uArr[7] = 0;
 
         const baseColorRGBA = material.color.rgbNormalLinear;
         fArr[8] = baseColorRGBA[0];
@@ -115,7 +114,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         const vbtORMStorageView = this.#getStorageTextureView(vbtORMArray.gpuTexture, 0);
 
         const bindGroup = device.createBindGroup({
-            label: `Landscape_VBT_BindGroup_Slice_${sliceIndex}`,
+            label: `Landscape_VBT_BindGroup_${col}_${row}`,
             layout: this.bindGroupLayout,
             entries: [
                 {binding: 0, resource: {buffer: uniformBuffer}},
@@ -143,7 +142,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
             6
         );
 
-        console.log(`[LandscapeVBTGenerator 🎨] GPU VBT 3-Set + Tile-Local Mipmaps baked for slice [${sliceIndex}] at (${col}, ${row})`);
+        console.log(`[LandscapeVBTGenerator 🎨] GPU VBT 3-Set + Tile-Local Mipmaps baked at (${col}, ${row})`);
     }
 
     #dispatchTileMipmaps(

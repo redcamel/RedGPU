@@ -190,11 +190,6 @@ fn computeDirectLayersPBR(
     return res;
 }
 
-fn getDielectricF0(ior: f32) -> vec3<f32> {
-    let f0_factor = (ior - 1.0) / (ior + 1.0);
-    return vec3<f32>(f0_factor * f0_factor);
-}
-
 fn getSpecularNDF(NdotH: f32, roughness: f32) -> f32 {
     let alpha = roughness * roughness;
     let alpha2 = alpha * alpha;
