@@ -62,6 +62,10 @@ struct LandscapeUniforms {
     lodGeomorphStartRatio: f32,
     lodColors: array<vec4<f32>, 8>,
     lodDistancesSq: array<vec4<f32>, 2>,
+    tanHalfFOV: f32,
+    lodMetric: f32,
+    pad0: f32,
+    pad1: f32,
 };
 
 @group(1) @binding(4) var vntNormalTexture: texture_2d<f32>;
@@ -372,6 +376,19 @@ fn getIndirectPbrLighting(
     }
 }
 
+const bayerMatrix4x4 = array<f32, 16>(
+     0.0 / 16.0,  8.0 / 16.0,  2.0 / 16.0, 10.0 / 16.0,
+    12.0 / 16.0,  4.0 / 16.0, 14.0 / 16.0,  6.0 / 16.0,
+     3.0 / 16.0, 11.0 / 16.0,  1.0 / 16.0,  9.0 / 16.0,
+    15.0 / 16.0,  7.0 / 16.0, 13.0 / 16.0,  5.0 / 16.0
+);
+
+fn getBayerDither4x4(pixelCoord: vec2<f32>) -> f32 {
+    let x = u32(pixelCoord.x) % 4u;
+    let y = u32(pixelCoord.y) % 4u;
+    return bayerMatrix4x4[y * 4u + x];
+}
+
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
@@ -393,7 +410,9 @@ fn main(inputData: InputData) -> OutputFragment {
     var metallicFactor: f32;
     var ambientOcclusion: f32;
 
-    let viewDist = distance(u_cameraPosition, input_vertexPosition);
+    let rawViewDist = distance(u_cameraPosition, input_vertexPosition);
+    let isScreenSize = landscapeInstanceUniforms.lodMetric >= 0.5;
+    let viewDist = select(rawViewDist, rawViewDist * landscapeInstanceUniforms.tanHalfFOV, isScreenSize);
 
     if (lod < 1.5) {
         let vntSample = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
@@ -405,8 +424,10 @@ fn main(inputData: InputData) -> OutputFragment {
         let fadeStart = lod0Dist * fadeRatio;
         let fadeEnd = lod0Dist;
         let fade = smoothstep(fadeStart, fadeEnd, viewDist);
+        let ditherThreshold = getBayerDither4x4(inputData.position.xy);
+        let useVBT = fade > ditherThreshold;
 
-        if (fade >= 0.999) {
+        if (useVBT) {
             let vbtAlbedoRaw = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
             let vbtNormalEncoded = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
             let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
@@ -428,28 +449,11 @@ fn main(inputData: InputData) -> OutputFragment {
             }
         } else {
             let direct = computeDirectLayersPBR(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV, baseN, inputData.vertexHeight, slopeAngleDeg);
-
-            if (fade <= 0.001) {
-                albedo = direct.albedo;
-                N = direct.normal;
-                roughnessFactor = direct.roughness;
-                metallicFactor = direct.metallic;
-                ambientOcclusion = direct.ao;
-            } else {
-                let vbtAlbedoRaw = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
-                let vbtNormalEncoded = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
-                let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
-
-                let isBaked = length(vbtAlbedoRaw) > 0.001;
-                let vbtAlbedo = select(direct.albedo, vbtAlbedoRaw, isBaked);
-                let vbtN = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), baseN, length(vbtNormalEncoded) <= 0.001));
-
-                albedo = mix(direct.albedo, vbtAlbedo, fade);
-                N = normalize(mix(direct.normal, vbtN, fade));
-                roughnessFactor = mix(direct.roughness, max(0.04, select(direct.roughness, vbtORM.g, isBaked)), fade);
-                metallicFactor = mix(direct.metallic, select(direct.metallic, vbtORM.b, isBaked), fade);
-                ambientOcclusion = mix(direct.ao, select(direct.ao, vbtORM.r, isBaked), fade);
-            }
+            albedo = direct.albedo;
+            N = direct.normal;
+            roughnessFactor = direct.roughness;
+            metallicFactor = direct.metallic;
+            ambientOcclusion = direct.ao;
         }
     } else {
         let vbtAlbedoRaw = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;

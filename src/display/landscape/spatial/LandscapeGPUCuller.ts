@@ -51,7 +51,9 @@ export class LandscapeGPUCuller {
         heightScale: number,
         tileCount: number,
         frustumPlanes: number[][] | Float32Array[] | null,
-        lodDistancesSq: Float32Array
+        lodDistancesSq: Float32Array,
+        tanHalfFOV: number = 1.0,
+        lodMetric: number = 0.0
     ): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#uniformBuffer) return;
@@ -71,8 +73,8 @@ export class LandscapeGPUCuller {
 
         data[8] = heightScale;
         uintData[9] = tileCount;
-        data[10] = 0;
-        data[11] = 0;
+        data[10] = tanHalfFOV;
+        data[11] = lodMetric;
 
         if (frustumPlanes && frustumPlanes.length >= 6) {
             for (let i = 0; i < 6; i++) {

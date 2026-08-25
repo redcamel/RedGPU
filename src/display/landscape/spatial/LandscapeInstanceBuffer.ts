@@ -20,7 +20,7 @@ export class LandscapeInstanceBuffer {
 
     #landscapeUniformData: Float32Array;
     #landscapeUniformUintData: Uint32Array;
-    #landscapeUniformByteLength: number = 208;
+    #landscapeUniformByteLength: number = 224;
 
     #indirectArgsBuffer: Uint32Array = new Uint32Array(40);
 
@@ -119,7 +119,9 @@ export class LandscapeInstanceBuffer {
         lodFadeStartRatio: number,
         lodGeomorphStartRatio: number,
         lodColorsRGBA: [number, number, number, number][],
-        lodDistancesSq: number[]
+        lodDistancesSq: number[],
+        tanHalfFOV: number = 1.0,
+        lodMetric: number = 0.0
     ): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#landscapeUniformBuffer) return;
@@ -168,6 +170,12 @@ export class LandscapeInstanceBuffer {
         for (let i = 0; i < 8; i++) {
             f32[44 + i] = (i < distCount && lodDistancesSq[i] > 0) ? lodDistancesSq[i] : 1e15;
         }
+
+        // vec4 13
+        f32[52] = tanHalfFOV;
+        f32[53] = lodMetric;
+        f32[54] = 0.0;
+        f32[55] = 0.0;
 
         gpuDevice.queue.writeBuffer(
             this.#landscapeUniformBuffer,

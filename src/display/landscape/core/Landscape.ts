@@ -36,6 +36,8 @@ export class Landscape extends Object3DContainer {
 
     #wireframe: boolean = false;
     #lodColoration: boolean = false;
+    #lodMetric: 'distance' | 'screenSize' = 'screenSize';
+    #lastTanHalfFOV: number = 1.0;
     #lodFadeStartRatio: number = 0.7;
     #lodGeomorphStartRatio: number = 0.85;
     #heightScale: number = 500.0;
@@ -117,8 +119,9 @@ export class Landscape extends Object3DContainer {
         this.#maxLODLevel = maxLODLevel;
         this.#wireframe = options.wireframe ?? false;
         this.#lodColoration = options.lodColoration ?? false;
-        this.#lodFadeStartRatio = options.lodFadeStartRatio ?? 0.7;
-        this.#lodGeomorphStartRatio = options.lodGeomorphStartRatio ?? 0.85;
+        this.#lodMetric = options.lodMetric ?? 'screenSize';
+        this.#lodFadeStartRatio = options.lodDitherStartRatio ?? options.lodFadeStartRatio ?? 0.7;
+        this.#lodGeomorphStartRatio = options.lodMorphStartRatio ?? options.lodGeomorphStartRatio ?? 0.85;
         this.#tileStreamer = new LandscapeTileStreamer(redGPUContext, this.#spatialGrid, options?.loadingRadius ?? 2500.0);
         if (options.tileUrlResolver) {
             this.#tileStreamer.tileUrlResolver = options.tileUrlResolver;
@@ -220,66 +223,12 @@ export class Landscape extends Object3DContainer {
         return this.#debuggerManager;
     }
 
-    update(camera: any, renderViewStateData?: any): void {
-        if (!camera) return;
-
-        if (this.landscapeMaterial) {
-            this.landscapeMaterial.updateUniformsData();
-        }
-
-        const camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
-        const camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
-        const camZ = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
-
-        const rawCamera = camera?.camera ?? camera;
-        let frustumPlanes: number[][] | null = renderViewStateData?.frustumPlanes
-            ?? renderViewStateData?.view?.frustumPlanes
-            ?? camera?.frustumPlanes
-            ?? rawCamera?.frustumPlanes
-            ?? null;
-
-        if (!frustumPlanes && rawCamera?.projectionMatrix && rawCamera?.viewMatrix) {
-            frustumPlanes = computeViewFrustumPlanes(rawCamera.projectionMatrix, rawCamera.viewMatrix);
-        }
-
-        if (this.#foliageManager?.hasFoliageTypes) {
-            this.#foliageManager.update(camera, renderViewStateData);
-        }
-
-        this.#tileStreamer.update(camX, camZ, camY);
-
-        const totalComponents = this.#componentCountX * this.#componentCountZ;
-        this.#frustumCullingActive = !!frustumPlanes;
-
-        this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#maxLODLevel, this.#wireframe);
-
-        const lodDistancesArray = this.#lodDistancesBuffer;
-        lodDistancesArray.fill(1e15);
-        const countDist = Math.min(8, this.#lodDistancesSq.length);
-        for (let i = 0; i < countDist; i++) {
-            const val = this.#lodDistancesSq[i];
-            if (val && val > 0) {
-                lodDistancesArray[i] = val;
-            }
-        }
-
-        this.#gpuCuller?.updateUniforms(
-            camX, camY, camZ,
-            this.#maxLODLevel,
-            this.#worldSizeX, this.#worldSizeZ,
-            this.#tileSizeX, this.#tileSizeZ,
-            this.#heightScale,
-            totalComponents,
-            frustumPlanes,
-            lodDistancesArray
-        );
-
-        this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
-            'Landscape_GPUCulling_ComputePass',
-            this.#onPreProcessComputePass
-        );
-
-        this.#debuggerManager.update(camera, renderViewStateData);
+    /**
+     * [KO] LOD 계산 기준 메트릭 ('distance': 카메라 거리 기반, 'screenSize': 화면 차지 크기/FOV 반응형)
+     * [EN] LOD distribution metric ('distance': camera distance based, 'screenSize': screen size / FOV responsive)
+     */
+    get lodMetric(): 'distance' | 'screenSize' {
+        return this.#lodMetric;
     }
 
     get foliageManager(): LandscapeFoliageManager {
@@ -507,6 +456,21 @@ export class Landscape extends Object3DContainer {
         }
     }
 
+    set lodMetric(value: 'distance' | 'screenSize') {
+        if (this.#lodMetric !== value) {
+            this.#lodMetric = value;
+            this.#updateLandscapeUniforms();
+        }
+    }
+
+    /**
+     * [KO] 언리얼 엔진 호환 버텍스 모핑 시작 비율 (lodGeomorphStartRatio의 별칭)
+     * [EN] Unreal Engine compatible vertex morphing start ratio (alias for lodGeomorphStartRatio)
+     */
+    get lodMorphStartRatio(): number {
+        return this.#lodGeomorphStartRatio;
+    }
+
     get lodFadeStartRatio(): number {
         return this.#lodFadeStartRatio;
     }
@@ -529,6 +493,94 @@ export class Landscape extends Object3DContainer {
             this.#lodGeomorphStartRatio = clamped;
             this.#updateLandscapeUniforms();
         }
+    }
+
+    set lodMorphStartRatio(value: number) {
+        this.lodGeomorphStartRatio = value;
+    }
+
+    /**
+     * [KO] 언리얼 엔진 호환 디더링 전환 시작 비율 (lodFadeStartRatio의 별칭)
+     * [EN] Unreal Engine compatible dithered transition start ratio (alias for lodFadeStartRatio)
+     */
+    get lodDitherStartRatio(): number {
+        return this.#lodFadeStartRatio;
+    }
+
+    set lodDitherStartRatio(value: number) {
+        this.lodFadeStartRatio = value;
+    }
+
+    update(camera: any, renderViewStateData?: any): void {
+        if (!camera) return;
+
+        if (this.landscapeMaterial) {
+            this.landscapeMaterial.updateUniformsData();
+        }
+
+        const camX = camera.x ?? camera.position?.[0] ?? camera.camera?.x ?? 0;
+        const camY = camera.y ?? camera.position?.[1] ?? camera.camera?.y ?? 0;
+        const camZ = camera.z ?? camera.position?.[2] ?? camera.camera?.z ?? 0;
+
+        const rawCamera = camera?.camera ?? camera;
+        let frustumPlanes: number[][] | null = renderViewStateData?.frustumPlanes
+            ?? renderViewStateData?.view?.frustumPlanes
+            ?? camera?.frustumPlanes
+            ?? rawCamera?.frustumPlanes
+            ?? null;
+
+        if (!frustumPlanes && rawCamera?.projectionMatrix && rawCamera?.viewMatrix) {
+            frustumPlanes = computeViewFrustumPlanes(rawCamera.projectionMatrix, rawCamera.viewMatrix);
+        }
+
+        if (this.#foliageManager?.hasFoliageTypes) {
+            this.#foliageManager.update(camera, renderViewStateData);
+        }
+
+        this.#tileStreamer.update(camX, camZ, camY);
+
+        const totalComponents = this.#componentCountX * this.#componentCountZ;
+        this.#frustumCullingActive = !!frustumPlanes;
+
+        this.#instanceBuffer.resetIndirectDrawBuffer(this.#sharedGeometry, this.#maxLODLevel, this.#wireframe);
+
+        const lodDistancesArray = this.#lodDistancesBuffer;
+        lodDistancesArray.fill(1e15);
+        const countDist = Math.min(8, this.#lodDistancesSq.length);
+        for (let i = 0; i < countDist; i++) {
+            const val = this.#lodDistancesSq[i];
+            if (val && val > 0) {
+                lodDistancesArray[i] = val;
+            }
+        }
+
+        const fovDeg = rawCamera?.fov ?? camera?.fov ?? 60.0;
+        const tanHalfFOV = Math.tan(((fovDeg * Math.PI) / 180.0) * 0.5);
+        if (Math.abs(this.#lastTanHalfFOV - tanHalfFOV) > 1e-4) {
+            this.#lastTanHalfFOV = tanHalfFOV;
+            this.#updateLandscapeUniforms();
+        }
+        const lodMetricVal = this.#lodMetric === 'screenSize' ? 1.0 : 0.0;
+
+        this.#gpuCuller?.updateUniforms(
+            camX, camY, camZ,
+            this.#maxLODLevel,
+            this.#worldSizeX, this.#worldSizeZ,
+            this.#tileSizeX, this.#tileSizeZ,
+            this.#heightScale,
+            totalComponents,
+            frustumPlanes,
+            lodDistancesArray,
+            tanHalfFOV,
+            lodMetricVal
+        );
+
+        this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
+            'Landscape_GPUCulling_ComputePass',
+            this.#onPreProcessComputePass
+        );
+
+        this.#debuggerManager.update(camera, renderViewStateData);
     }
 
     get loadingRadius(): number {
@@ -632,6 +684,7 @@ export class Landscape extends Object3DContainer {
     #updateLandscapeUniforms(): void {
         const vhtW = this.#vhtAtlasTexture?.gpuTexture?.width || (this.#componentCountX * 512);
         const vhtH = this.#vhtAtlasTexture?.gpuTexture?.height || (this.#componentCountZ * 512);
+        const lodMetricVal = this.#lodMetric === 'screenSize' ? 1.0 : 0.0;
         this.#instanceBuffer?.updateUniforms(
             this.#heightScale,
             this.#worldSizeX,
@@ -646,7 +699,9 @@ export class Landscape extends Object3DContainer {
             this.#lodFadeStartRatio,
             this.#lodGeomorphStartRatio,
             this.#lodColorsRGBA,
-            this.#lodDistancesSq
+            this.#lodDistancesSq,
+            this.#lastTanHalfFOV,
+            lodMetricVal
         );
     }
 

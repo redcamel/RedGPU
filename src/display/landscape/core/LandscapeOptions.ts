@@ -33,9 +33,15 @@ export interface LandscapeOptions {
 
     lodColoration?: boolean;
 
+    lodMetric?: 'distance' | 'screenSize';
+
     lodFadeStartRatio?: number;
 
+    lodDitherStartRatio?: number;
+
     lodGeomorphStartRatio?: number;
+
+    lodMorphStartRatio?: number;
 
     debuggerOptions?: LandscapeDebuggerManagerOptions;
 }

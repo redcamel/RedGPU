@@ -22,6 +22,10 @@ struct LandscapeUniforms {
     lodGeomorphStartRatio: f32,
     lodColors: array<vec4<f32>, 8>,
     lodDistancesSq: array<vec4<f32>, 2>,
+    tanHalfFOV: f32,
+    lodMetric: f32,
+    pad0: f32,
+    pad1: f32,
 };
 
 @group(1) @binding(0) var<storage, read> allInputTiles: array<TileInstance>;
@@ -86,7 +90,9 @@ fn main(input: InputData) -> OutputData {
         let dx = worldX - camPos.x;
         let dz = worldZ - camPos.z;
         let dy = camPos.y;
-        let dist = sqrt(dx * dx + dz * dz + dy * dy);
+        let rawDist = sqrt(dx * dx + dz * dz + dy * dy);
+        let isScreenSize = landscapeUniforms.lodMetric >= 0.5;
+        let dist = select(rawDist, rawDist * landscapeUniforms.tanHalfFOV, isScreenSize);
 
         let currentPacked = landscapeUniforms.lodDistancesSq[lodLevel / 4u];
         let currentThresholdSq = currentPacked[lodLevel % 4u];

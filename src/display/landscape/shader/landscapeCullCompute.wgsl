@@ -7,8 +7,8 @@ struct CameraFrustumUniforms {
     tileSizeZ: f32,
     heightScale: f32,
     tileCount: u32,
-    pad0: f32,
-    pad1: f32,
+    tanHalfFOV: f32,
+    lodMetric: f32,
     frustumPlanes: array<vec4<f32>, 6>,
     lodDistancesSq: array<vec4<f32>, 2>,
 };
@@ -82,11 +82,15 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
             let dy = uniforms.cameraPosition.y;
             let distSq = dx * dx + dz * dz + dy * dy;
 
+            let isScreenSizeMetric = uniforms.lodMetric >= 0.5;
+            let metricFactor = select(1.0, uniforms.tanHalfFOV, isScreenSizeMetric);
+            let effectiveDistSq = distSq * (metricFactor * metricFactor);
+
             lodLevel = uniforms.maxLODLevel - 1u;
             for (var lod = 0u; lod < uniforms.maxLODLevel; lod = lod + 1u) {
                 let packedVec = uniforms.lodDistancesSq[lod / 4u];
                 let thresholdSq = packedVec[lod % 4u];
-                if (distSq < thresholdSq) {
+                if (effectiveDistSq < thresholdSq) {
                     lodLevel = lod;
                     break;
                 }

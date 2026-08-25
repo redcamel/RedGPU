@@ -180,8 +180,11 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
         // 2. Component & Mesh Specs
         componentSizeQuads: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
         maxLODLevel: landscape ? landscape.maxLODLevel : 4,
+        lodMetric: landscape ? landscape.lodMetric : 'screenSize',
         lodFadeStartRatio: landscape ? landscape.lodFadeStartRatio : 0.7,
         lodGeomorphStartRatio: landscape ? landscape.lodGeomorphStartRatio : 0.85,
+        lodDitherStartRatio: landscape ? landscape.lodDitherStartRatio : 0.7,
+        lodMorphStartRatio: landscape ? landscape.lodMorphStartRatio : 0.85,
 
         // 3. Height & Displacement
         heightScale: landscape ? landscape.heightScale : 500,
@@ -320,7 +323,17 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 }
             });
 
+            folderSpecs.addBinding(config, 'lodMetric', {
+                options: {
+                    'Distance (Physical)': 'distance',
+                    'ScreenSize (FOV-Responsive)': 'screenSize'
+                }
+            }).on('change', (ev) => {
+                if (landscape) landscape.lodMetric = ev.value;
+            });
+
             folderSpecs.addBinding(config, 'lodFadeStartRatio', {
+                label: 'lodFadeRatio (Dither)',
                 min: 0.1,
                 max: 0.99,
                 step: 0.05
@@ -329,6 +342,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             });
 
             folderSpecs.addBinding(config, 'lodGeomorphStartRatio', {
+                label: 'lodGeomorphRatio (Morph)',
                 min: 0.1,
                 max: 0.99,
                 step: 0.05
