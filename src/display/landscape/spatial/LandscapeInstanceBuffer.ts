@@ -122,7 +122,7 @@ export class LandscapeInstanceBuffer {
         lodDistancesSq: number[],
         tanHalfFOV: number = 1.0,
         lodMetric: number = 0.0,
-        lod0Quads: number = 512
+        lod0Quads: number = 256
     ): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#landscapeUniformBuffer) return;

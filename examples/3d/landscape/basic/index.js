@@ -179,7 +179,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
 
         // 2. Component & Mesh Specs
         componentSizeQuads: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
-        lod0SizeQuads: landscape ? landscape.lod0SizeQuads : 512,
+        lod0SizeQuads: landscape ? landscape.lod0SizeQuads : 256,
         maxLODLevel: landscape ? landscape.maxLODLevel : 4,
         lodMetric: landscape ? landscape.lodMetric : 'screenSize',
         lodFadeStartRatio: landscape ? landscape.lodFadeStartRatio : 0.7,

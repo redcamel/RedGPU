@@ -30,7 +30,7 @@ export class LandscapeSharedGeometry {
     #tileSizeX: number;
     #tileSizeZ: number;
     #componentSizeQuads: number;
-    #lod0SizeQuads: number = 512;
+    #lod0SizeQuads: number = 256;
     #maxLODLevel: number;
 
     #combinedVertexBuffer: VertexBuffer | null = null;
@@ -47,9 +47,9 @@ export class LandscapeSharedGeometry {
      * @param tileSizeZ - [KO] 타일 세로 크기 [EN] Tile depth along Z-axis
      * @param componentSizeQuads - [KO] 기본 그리드 쿼드 수 (LOD 1 기준) [EN] Base grid quads count (for LOD 1)
      * @param maxLODLevel - [KO] 최대 LOD 레벨 수 [EN] Maximum LOD levels
-     * @param lod0SizeQuads - [KO] LOD 0 전용 초고밀도 쿼드 수 (기본 512) [EN] Ultra high-density quads count for LOD 0 (default 512)
+     * @param lod0SizeQuads - [KO] LOD 0 전용 초고밀도 쿼드 수 (기본 256) [EN] Ultra high-density quads count for LOD 0 (default 256)
      */
-    constructor(redGPUContext: RedGPUContext, tileSizeX: number, tileSizeZ: number, componentSizeQuads: number, maxLODLevel: number, lod0SizeQuads: number = 512) {
+    constructor(redGPUContext: RedGPUContext, tileSizeX: number, tileSizeZ: number, componentSizeQuads: number, maxLODLevel: number, lod0SizeQuads: number = 256) {
         validateLandscapeBaseGridSize(componentSizeQuads);
         this.#redGPUContext = redGPUContext;
         this.#tileSizeX = tileSizeX;

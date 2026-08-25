@@ -37,7 +37,7 @@ export class Landscape extends Object3DContainer {
     #wireframe: boolean = false;
     #lodColoration: boolean = false;
     #lodMetric: 'distance' | 'screenSize' = 'screenSize';
-    #lod0SizeQuads: number = 512;
+    #lod0SizeQuads: number = 256;
     #lastTanHalfFOV: number = 1.0;
     #lodFadeStartRatio: number = 0.7;
     #lodGeomorphStartRatio: number = 0.85;
@@ -101,7 +101,7 @@ export class Landscape extends Object3DContainer {
 
         const componentSizeQuads = options.componentSizeQuads ?? LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
         validateLandscapeBaseGridSize(componentSizeQuads);
-        const lod0SizeQuads = options.lod0SizeQuads ?? 512;
+        const lod0SizeQuads = options.lod0SizeQuads ?? 256;
         const maxLODLevel = Math.min(8, Math.max(1, options.maxLODLevel ?? 4));
 
         const landscapeMaterial = options.landscapeMaterial || new LandscapeMaterial(redGPUContext);
