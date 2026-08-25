@@ -72,26 +72,7 @@ class LandscapeFoliageManager {
         return this.#typeList.length > 0;
     }
 
-    get subMeshVertexBindGroupLayout(): GPUBindGroupLayout | null {
-        return this.#subMeshVertexBindGroupLayout;
-    }
-
-    get cullingBindGroupLayout(): GPUBindGroupLayout | null {
-        return this.#cullingDispatcher.cullingBindGroupLayout;
-    }
-
-    render(arg1: any, arg2?: any): void {
-        let passEncoder: GPURenderPassEncoder;
-        let view: any;
-
-        if (arg1 && typeof arg1.setPipeline === 'function') {
-            passEncoder = arg1;
-            view = arg2;
-        } else {
-            view = arg1;
-            passEncoder = arg2;
-        }
-
+    render(view: any, passEncoder: GPURenderPassEncoder): void {
         if (passEncoder) {
             this.#renderer.render(passEncoder, this.#typeList, view);
         }

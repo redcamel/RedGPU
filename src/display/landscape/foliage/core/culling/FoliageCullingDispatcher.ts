@@ -21,10 +21,6 @@ class FoliageCullingDispatcher {
         this.#initComputePipeline();
     }
 
-    get cullingBindGroupLayout(): GPUBindGroupLayout | null {
-        return this.#cullingBindGroupLayout;
-    }
-
     updateAndDispatch(
         typeList: FoliageType[],
         viewOrCamera: any,
