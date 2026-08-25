@@ -360,7 +360,7 @@ export class Landscape extends Object3DContainer {
 
     }
 
-    get worldSize(): [number, number] {
+    get worldSize(): readonly [number, number] {
         return this.#worldSizeTuple;
     }
 
@@ -386,7 +386,7 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    get componentCount(): [number, number] {
+    get componentCount(): readonly [number, number] {
         return this.#componentCountTuple;
     }
 
@@ -571,7 +571,7 @@ export class Landscape extends Object3DContainer {
         return this.#spatialGrid.flatCells;
     }
 
-    get tileSize(): [number, number] {
+    get tileSize(): readonly [number, number] {
         return this.#tileSizeTuple;
     }
 
