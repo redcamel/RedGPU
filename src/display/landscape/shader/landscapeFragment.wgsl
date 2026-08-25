@@ -64,7 +64,6 @@ struct LandscapeUniforms {
     lodDistancesSq: array<vec4<f32>, 2>,
 };
 
-@group(1) @binding(3) var vhtHeightAtlasTexture: texture_2d<f32>;
 @group(1) @binding(4) var vntNormalTexture: texture_2d<f32>;
 @group(1) @binding(5) var<uniform> landscapeInstanceUniforms: LandscapeUniforms;
 @group(1) @binding(6) var vbtBaseColorAtlasTexture: texture_2d<f32>;

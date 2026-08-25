@@ -27,18 +27,17 @@ struct VBTBakeUniforms {
 };
 
 @group(0) @binding(0) var<uniform> uniforms: VBTBakeUniforms;
-@group(0) @binding(1) var vhtAtlasTexture: texture_2d<f32>;
-@group(0) @binding(2) var vntAtlasTexture: texture_2d<f32>;
-@group(0) @binding(3) var vbtTextureSampler: sampler;
+@group(0) @binding(1) var vntAtlasTexture: texture_2d<f32>;
+@group(0) @binding(2) var vbtTextureSampler: sampler;
 
-@group(0) @binding(4) var layerBaseColorArray: texture_2d_array<f32>;
-@group(0) @binding(5) var layerNormalArray: texture_2d_array<f32>;
-@group(0) @binding(6) var layerORMArray: texture_2d_array<f32>;
-@group(0) @binding(7) var layerWeightMapArray: texture_2d_array<f32>;
+@group(0) @binding(3) var layerBaseColorArray: texture_2d_array<f32>;
+@group(0) @binding(4) var layerNormalArray: texture_2d_array<f32>;
+@group(0) @binding(5) var layerORMArray: texture_2d_array<f32>;
+@group(0) @binding(6) var layerWeightMapArray: texture_2d_array<f32>;
 
-@group(0) @binding(8) var vbtBaseColorOutput: texture_storage_2d<rgba8unorm, write>;
-@group(0) @binding(9) var vbtNormalOutput: texture_storage_2d<rgba8unorm, write>;
-@group(0) @binding(10) var vbtORMOutput: texture_storage_2d<rgba8unorm, write>;
+@group(0) @binding(7) var vbtBaseColorOutput: texture_storage_2d<rgba8unorm, write>;
+@group(0) @binding(8) var vbtNormalOutput: texture_storage_2d<rgba8unorm, write>;
+@group(0) @binding(9) var vbtORMOutput: texture_storage_2d<rgba8unorm, write>;
 
 @compute @workgroup_size(16, 16)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {

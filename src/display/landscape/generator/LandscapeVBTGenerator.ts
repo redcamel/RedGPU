@@ -28,7 +28,6 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
     }
 
     bakeTileRegion(
-        vhtAtlas: DirectTexture,
         vntAtlas: DirectTexture,
         vbtBaseColorArray: DirectTexture,
         vbtNormalArray: DirectTexture,
@@ -40,12 +39,12 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         tileSizePixels: number = 512
     ): void {
         if (!this.computePipeline || !this.bindGroupLayout) return;
-        if (!vhtAtlas?.gpuTexture || !vntAtlas?.gpuTexture) return;
+        if (!vntAtlas?.gpuTexture) return;
         if (!vbtBaseColorArray?.gpuTexture || !vbtNormalArray?.gpuTexture || !vbtORMArray?.gpuTexture) return;
 
         const device = this.redGPUContext.gpuDevice;
-        const atlasW = vhtAtlas.gpuTexture.width;
-        const atlasH = vhtAtlas.gpuTexture.height;
+        const atlasW = vntAtlas.gpuTexture.width;
+        const atlasH = vntAtlas.gpuTexture.height;
 
         const originX = col * tileSizePixels;
         const originZ = row * tileSizePixels;
@@ -120,16 +119,15 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
             layout: this.bindGroupLayout,
             entries: [
                 {binding: 0, resource: {buffer: uniformBuffer}},
-                {binding: 1, resource: vhtAtlas.gpuTextureView},
-                {binding: 2, resource: vntAtlas.gpuTextureView},
-                {binding: 3, resource: material.baseColorTextureSampler.gpuSampler},
-                {binding: 4, resource: material.layerBaseColorArray.gpuTextureView},
-                {binding: 5, resource: material.layerNormalArray.gpuTextureView},
-                {binding: 6, resource: material.layerORMArray.gpuTextureView},
-                {binding: 7, resource: material.layerWeightMapArray.gpuTextureView},
-                {binding: 8, resource: vbtBaseColorStorageView},
-                {binding: 9, resource: vbtNormalStorageView},
-                {binding: 10, resource: vbtORMStorageView},
+                {binding: 1, resource: vntAtlas.gpuTextureView},
+                {binding: 2, resource: material.baseColorTextureSampler.gpuSampler},
+                {binding: 3, resource: material.layerBaseColorArray.gpuTextureView},
+                {binding: 4, resource: material.layerNormalArray.gpuTextureView},
+                {binding: 5, resource: material.layerORMArray.gpuTextureView},
+                {binding: 6, resource: material.layerWeightMapArray.gpuTextureView},
+                {binding: 7, resource: vbtBaseColorStorageView},
+                {binding: 8, resource: vbtNormalStorageView},
+                {binding: 9, resource: vbtORMStorageView},
             ]
         });
 
@@ -263,10 +261,7 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         this.#uniformFloatArray = new Float32Array(this.#vbtUniformByteLength / Float32Array.BYTES_PER_ELEMENT);
         this.#uniformUintArray = new Uint32Array(this.#uniformFloatArray.buffer);
 
-        const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0, {
-            // VHT Atlas(binding 1)는 r32float 포맷이므로 unfilterable-float 설정 명시
-            1: {texture: {sampleType: 'unfilterable-float', viewDimension: '2d'}}
-        });
+        const descriptor = getComputeBindGroupLayoutDescriptorFromShaderInfo(shaderInfo, 0);
 
         this.initBaseComputePipeline(
             'LandscapeVBTBakeComputeShaderModule',

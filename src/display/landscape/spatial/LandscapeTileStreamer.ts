@@ -354,7 +354,6 @@ export class LandscapeTileStreamer {
         for (let i = 0; i < count; i++) {
             const comp = this.#rebakeQueue.shift()!;
             this.#vbtGenerator.bakeTileRegion(
-                this.#vhtAtlasTexture,
                 this.#vntAtlasTexture,
                 this.#vbtBaseColorAtlas,
                 this.#vbtNormalAtlas,
@@ -470,9 +469,8 @@ export class LandscapeTileStreamer {
                             );
                         }
 
-                        if (this.#vbtGenerator && this.#vbtBaseColorAtlas && this.#vbtNormalAtlas && this.#vbtORMAtlas && this.#material && this.#vhtAtlasTexture && this.#vntAtlasTexture) {
+                        if (this.#vbtGenerator && this.#vbtBaseColorAtlas && this.#vbtNormalAtlas && this.#vbtORMAtlas && this.#material && this.#vntAtlasTexture) {
                             this.#vbtGenerator.bakeTileRegion(
-                                this.#vhtAtlasTexture,
                                 this.#vntAtlasTexture,
                                 this.#vbtBaseColorAtlas,
                                 this.#vbtNormalAtlas,
@@ -519,9 +517,8 @@ export class LandscapeTileStreamer {
                                         );
                                     }
 
-                                    if (this.#vbtGenerator && this.#vbtBaseColorAtlas && this.#vbtNormalAtlas && this.#vbtORMAtlas && this.#material && this.#vhtAtlasTexture && this.#vntAtlasTexture) {
+                                    if (this.#vbtGenerator && this.#vbtBaseColorAtlas && this.#vbtNormalAtlas && this.#vbtORMAtlas && this.#material && this.#vntAtlasTexture) {
                                         this.#vbtGenerator.bakeTileRegion(
-                                            this.#vhtAtlasTexture,
                                             this.#vntAtlasTexture,
                                             this.#vbtBaseColorAtlas,
                                             this.#vbtNormalAtlas,
