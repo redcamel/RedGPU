@@ -180,11 +180,11 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
         // 3. Height & Displacement
         heightScale: landscape ? landscape.heightScale : 500,
 
-        // 4. Render Options & Material
+        // 4. Display
         wireframe: landscape ? landscape.wireframe : false,
         lodColoration: landscape ? landscape.lodColoration : false,
-        terrainColor: '#387d42',
-        textureArraySize: landscape?.material?.textureArraySize ?? 1024,
+        baseColor: '#387d42',
+        textureArraySize: 1024,
 
         // 4-1. Directional Light (Sun)
         sunElevation: directionalLight ? directionalLight.elevation : 45,
@@ -228,8 +228,9 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
         gui: (pane) => {
             activePane = pane;
 
-            // Folder 1: Terrain Dimensions (worldSize, componentCount, tileSize)
-            const folderDimensions = pane.addFolder({title: 'Dimensions', expanded: true});
+            // Folder 1: Spatial System (Dimensions & LOD)
+            const folderSpatial = pane.addFolder({title: 'Spatial', expanded: true});
+            const folderDimensions = folderSpatial.addFolder({title: 'Dimensions', expanded: true});
 
             folderDimensions.addBinding(config, 'worldSizeX', {
                 min: 1000,
@@ -284,10 +285,9 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             folderDimensions.addBinding(config, 'tileSizeStr', {readonly: true});
             folderDimensions.addBinding(config, 'totalComponents', {readonly: true});
 
-            // Folder 2: Mesh & Grid Specs (componentSizeQuads, maxLODLevel)
-            const folderSpecs = pane.addFolder({title: 'Grid & LOD', expanded: true});
+            const folderLOD = folderSpatial.addFolder({title: 'LOD', expanded: true});
 
-            folderSpecs.addBinding(config, 'componentSizeQuads', {
+            folderLOD.addBinding(config, 'componentSizeQuads', {
                 options: {
                     16: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_16,
                     32: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_32,
@@ -303,7 +303,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 }
             });
 
-            folderSpecs.addBinding(config, 'lod0SizeQuads', {
+            folderLOD.addBinding(config, 'lod0SizeQuads', {
                 options: {
                     64: 64,
                     128: 128,
@@ -317,7 +317,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 }
             });
 
-            folderSpecs.addBinding(config, 'maxLODLevel', {
+            folderLOD.addBinding(config, 'maxLODLevel', {
                 min: 1,
                 max: 8,
                 step: 1
@@ -328,7 +328,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 }
             });
 
-            folderSpecs.addBinding(config, 'lodMetric', {
+            folderLOD.addBinding(config, 'lodMetric', {
                 options: {
                     distance: 'distance',
                     screenSize: 'screenSize'
@@ -337,7 +337,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 if (landscape) landscape.lodMetric = ev.value;
             });
 
-            folderSpecs.addBinding(config, 'lodFadeStartRatio', {
+            folderLOD.addBinding(config, 'lodFadeStartRatio', {
                 min: 0.1,
                 max: 0.99,
                 step: 0.05
@@ -345,7 +345,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 if (landscape) landscape.lodFadeStartRatio = ev.value;
             });
 
-            folderSpecs.addBinding(config, 'lodGeomorphStartRatio', {
+            folderLOD.addBinding(config, 'lodGeomorphStartRatio', {
                 min: 0.1,
                 max: 0.99,
                 step: 0.05
@@ -353,19 +353,36 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 if (landscape) landscape.lodGeomorphStartRatio = ev.value;
             });
 
-            // Folder 3: Height & Elevation Displacement
-            const folderHeight = pane.addFolder({title: 'Height', expanded: true});
+            if (landscape) {
+                const folderStream = folderSpatial.addFolder({title: 'Tile Streaming', expanded: true});
 
-            folderHeight.addBinding(config, 'heightScale', {
+                folderStream.addBinding(config, 'loadingRadius', {
+                    min: 500,
+                    max: 20000,
+                    step: 100
+                }).on('change', (ev) => {
+                    if (landscape) landscape.loadingRadius = ev.value;
+                });
+
+                folderStream.addBinding(config, 'maxLoadsPerFrame', {
+                    min: 1,
+                    max: 10,
+                    step: 1
+                }).on('change', (ev) => {
+                    if (landscape) landscape.maxLoadsPerFrame = ev.value;
+                });
+            }
+
+            // Folder 2: Display Options
+            const folderDisplay = pane.addFolder({title: 'Display', expanded: true});
+
+            folderDisplay.addBinding(config, 'heightScale', {
                 min: 0,
                 max: 3000,
                 step: 25
             }).on('change', (ev) => {
                 if (landscape) landscape.heightScale = ev.value;
             });
-
-            // Folder 4: Render Options & Material Color
-            const folderDisplay = pane.addFolder({title: 'Material', expanded: true});
 
             folderDisplay.addBinding(config, 'wireframe').on('change', (ev) => {
                 if (landscape) landscape.wireframe = ev.value;
@@ -375,7 +392,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 if (landscape) landscape.lodColoration = ev.value;
             });
 
-            folderDisplay.addBinding(config, 'terrainColor').on('change', (ev) => {
+            folderDisplay.addBinding(config, 'baseColor').on('change', (ev) => {
                 if (landscape) {
                     landscape.baseColor.setColorByHEX(ev.value);
                 }
@@ -385,7 +402,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 readonly: true
             });
 
-            // Folder 4-1: Multi-Layer PBR Controls (Grass, Rock, Gravel, Leave)
+            // Folder 3: Multi-Layer PBR Controls (Grass, Rock, Gravel, Leave)
             if (layers && layers.length) {
                 const folderLayers = pane.addFolder({title: 'Layers', expanded: true});
 
@@ -413,27 +430,6 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     }).on('change', (e) => {
                         layer.uvScale = [e.value, e.value];
                     });
-                });
-            }
-
-            // Folder 5: Tile Streaming & VHT Controls
-            if (landscape) {
-                const folderStream = pane.addFolder({title: 'Tile Streaming', expanded: true});
-
-                folderStream.addBinding(config, 'loadingRadius', {
-                    min: 500,
-                    max: 20000,
-                    step: 100
-                }).on('change', (ev) => {
-                    if (landscape) landscape.loadingRadius = ev.value;
-                });
-
-                folderStream.addBinding(config, 'maxLoadsPerFrame', {
-                    min: 1,
-                    max: 10,
-                    step: 1
-                }).on('change', (ev) => {
-                    if (landscape) landscape.maxLoadsPerFrame = ev.value;
                 });
             }
 

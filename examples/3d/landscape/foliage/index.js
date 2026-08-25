@@ -367,11 +367,11 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
         // 3. Height & Displacement
         heightScale: landscape ? landscape.heightScale : 1000,
 
-        // 4. Render Options & Material
+        // 4. Display
         wireframe: landscape ? landscape.wireframe : false,
         lodColoration: landscape ? landscape.lodColoration : false,
-        terrainColor: '#387d42',
-        textureArraySize: landscape?.material?.textureArraySize ?? 1024,
+        baseColor: '#387d42',
+        textureArraySize: 1024,
 
         // 4-1. Directional Light (Sun)
         sunElevation: directionalLight ? directionalLight.elevation : 45,
@@ -446,8 +446,9 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             }
 
 
-            // Folder 1: Terrain Dimensions (worldSize, componentCount, tileSize)
-            const folderDimensions = pane.addFolder({title: 'Dimensions', expanded: true});
+            // Folder 1: Spatial System (Dimensions & LOD)
+            const folderSpatial = pane.addFolder({title: 'Spatial', expanded: true});
+            const folderDimensions = folderSpatial.addFolder({title: 'Dimensions', expanded: true});
 
             folderDimensions.addBinding(config, 'worldSizeX', {
                 min: 1000,
@@ -502,17 +503,16 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             folderDimensions.addBinding(config, 'tileSizeStr', {readonly: true});
             folderDimensions.addBinding(config, 'totalComponents', {readonly: true});
 
-            // Folder 2: Mesh & Grid Specs (componentSizeQuads, maxLODLevel)
-            const folderSpecs = pane.addFolder({title: 'Grid & LOD', expanded: true});
+            const folderLOD = folderSpatial.addFolder({title: 'LOD', expanded: true});
 
-            folderSpecs.addBinding(config, 'componentSizeQuads', {
+            folderLOD.addBinding(config, 'componentSizeQuads', {
                 options: {
-                    '16x16 (289 Verts)': RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_16,
-                    '32x32 (1089 Verts)': RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_32,
-                    '64x64 (4225 Verts)': RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
-                    '128x128 (16641 Verts)': RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_128,
-                    '256x256 (66049 Verts)': RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
-                    '512x512 (263169 Verts)': RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
+                    16: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_16,
+                    32: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_32,
+                    64: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
+                    128: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_128,
+                    256: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
+                    512: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
                 }
             }).on('change', (ev) => {
                 if (landscape) {
@@ -521,7 +521,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 }
             });
 
-            folderSpecs.addBinding(config, 'maxLODLevel', {
+            folderLOD.addBinding(config, 'maxLODLevel', {
                 min: 1,
                 max: 8,
                 step: 1
@@ -532,7 +532,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 }
             });
 
-            folderSpecs.addBinding(config, 'lodFadeStartRatio', {
+            folderLOD.addBinding(config, 'lodFadeStartRatio', {
                 min: 0.1,
                 max: 0.99,
                 step: 0.05
@@ -540,7 +540,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 if (landscape) landscape.lodFadeStartRatio = ev.value;
             });
 
-            folderSpecs.addBinding(config, 'lodGeomorphStartRatio', {
+            folderLOD.addBinding(config, 'lodGeomorphStartRatio', {
                 min: 0.1,
                 max: 0.99,
                 step: 0.05
@@ -548,19 +548,46 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 if (landscape) landscape.lodGeomorphStartRatio = ev.value;
             });
 
-            // Folder 3: Height & Elevation Displacement
-            const folderHeight = pane.addFolder({title: 'Height', expanded: true});
+            if (landscape) {
+                const folderStream = folderSpatial.addFolder({title: 'Tile Streaming', expanded: true});
 
-            folderHeight.addBinding(config, 'heightScale', {
+                folderStream.addBinding(config, 'loadingRadius', {
+                    min: 500,
+                    max: 20000,
+                    step: 100
+                }).on('change', (ev) => {
+                    if (landscape) landscape.loadingRadius = ev.value;
+                });
+
+                folderStream.addBinding(config, 'maxLoadsPerFrame', {
+                    min: 1,
+                    max: 10,
+                    step: 1
+                }).on('change', (ev) => {
+                    if (landscape) landscape.maxLoadsPerFrame = ev.value;
+                });
+
+                folderStream.addButton({title: 'Rebake All Loaded VBT'}).on('click', () => {
+                    landscape.requestVBTRebake(true);
+                });
+
+                folderStream.addButton({title: 'Reset Tile Streaming Cache'}).on('click', () => {
+                    if (landscape && landscape.tileStreamer) {
+                        landscape.tileStreamer.resetTileState();
+                    }
+                });
+            }
+
+            // Folder 2: Display Options
+            const folderDisplay = pane.addFolder({title: 'Display', expanded: true});
+
+            folderDisplay.addBinding(config, 'heightScale', {
                 min: 0,
                 max: 3000,
                 step: 25
             }).on('change', (ev) => {
                 if (landscape) landscape.heightScale = ev.value;
             });
-
-            // Folder 4: Render Options & Material Color
-            const folderDisplay = pane.addFolder({title: 'Material', expanded: true});
 
             folderDisplay.addBinding(config, 'wireframe').on('change', (ev) => {
                 if (landscape) landscape.wireframe = ev.value;
@@ -570,7 +597,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 if (landscape) landscape.lodColoration = ev.value;
             });
 
-            folderDisplay.addBinding(config, 'terrainColor').on('change', (ev) => {
+            folderDisplay.addBinding(config, 'baseColor').on('change', (ev) => {
                 if (landscape) {
                     landscape.baseColor.setColorByHEX(ev.value);
                 }
@@ -580,7 +607,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 readonly: true
             });
 
-            // Folder 4-1: Multi-Layer PBR Controls (Grass, Rock, Gravel, Leave)
+            // Folder 3: Multi-Layer PBR Controls (Grass, Rock, Gravel, Leave)
             if (layers && layers.length) {
                 const folderLayers = pane.addFolder({title: 'Layers', expanded: true});
 
@@ -600,10 +627,8 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     subFolder.addBinding(layer, 'normalIntensity', {min: 0, max: 3, step: 0.01});
                     subFolder.addBinding(layer, 'aoIntensity', {min: 0, max: 2, step: 0.01});
 
-                    // 🌿 단일 통합 UV 스케일 제어 (근경 Direct PBR 및 원경 VBT 베이킹 1:1 동시 제어)
                     const layerScaleObj = {uvScale: layer.uvScale[0]};
                     subFolder.addBinding(layerScaleObj, 'uvScale', {
-                        title: '🔍 uvScale (Tile UV Repeat)',
                         min: 1,
                         max: 200,
                         step: 1
@@ -613,8 +638,8 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                 });
             }
 
-            // Folder 4-2: Directional Light Controls
-            const folderSun = pane.addFolder({title: '☀️ Directional Light', expanded: true});
+            // Folder 4: Directional Light Controls
+            const folderSun = pane.addFolder({title: 'Directional Light', expanded: true});
 
             folderSun.addBinding(config, 'sunElevation', {
                 min: -90,
@@ -638,41 +663,6 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     directionalLight.color.setColorByHEX(ev.value);
                 }
             });
-
-            // Folder 5: Tile Streaming & VHT Controls
-            if (landscape) {
-                const folderStream = pane.addFolder({title: '🛰️ VHT Tile Streaming', expanded: true});
-
-                folderStream.addBinding(config, 'loadingRadius', {
-                    min: 500,
-                    max: 20000,
-                    step: 100
-                }).on('change', (ev) => {
-                    if (landscape) landscape.loadingRadius = ev.value;
-                });
-
-                folderStream.addBinding(config, 'maxLoadsPerFrame', {
-                    min: 1,
-                    max: 10,
-                    step: 1
-                }).on('change', (ev) => {
-                    if (landscape) landscape.maxLoadsPerFrame = ev.value;
-                });
-
-                folderStream.addButton({title: '🎨 Rebake All Loaded VBT (Atlas)'}).on('click', () => {
-                    if (landscape && landscape.tileStreamer) {
-                        landscape.tileStreamer.rebakeAllLoadedVBT();
-                        console.log('[Landscape Example 🎨] All loaded VBT 2D Atlases rebaked successfully!');
-                    }
-                });
-
-                folderStream.addButton({title: '🔄 Reset Tile Streaming Cache'}).on('click', () => {
-                    if (landscape && landscape.tileStreamer) {
-                        landscape.tileStreamer.resetTileState();
-                        console.log('[Landscape Example 🛰️] Tile Streaming cache state reset successfully!');
-                    }
-                });
-            }
 
             // Folder 6: Camera Controls
             if (controller) {
