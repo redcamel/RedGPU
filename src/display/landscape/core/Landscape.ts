@@ -759,11 +759,10 @@ export class Landscape extends Object3DContainer {
             });
 
             const vertexBuffers: GPUVertexBufferLayout[] = [{
-                arrayStride: geom?.interleavedStruct?.arrayStride ?? 32,
+                arrayStride: geom?.interleavedStruct?.arrayStride ?? 20,
                 attributes: geom?.interleavedStruct?.attributes ?? [
                     {shaderLocation: 0, offset: 0, format: 'float32x3'},
-                    {shaderLocation: 1, offset: 12, format: 'float32x3'},
-                    {shaderLocation: 2, offset: 24, format: 'float32x2'}
+                    {shaderLocation: 1, offset: 12, format: 'float32x2'}
                 ]
             }];
 

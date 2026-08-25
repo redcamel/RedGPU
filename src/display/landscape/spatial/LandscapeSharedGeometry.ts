@@ -5,6 +5,10 @@ import VertexInterleavedStruct from "../../../resources/buffer/vertexBuffer/Vert
 import VertexInterleaveType from "../../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import {validateLandscapeBaseGridSize} from "../core/LANDSCAPE_BASE_GRID_SIZE";
 
+/**
+ * [KO] Landscape LOD별 결합 지오메트리 버퍼 범위 인터페이스입니다.
+ * [EN] Interface for Landscape LOD geometry buffer ranges.
+ */
 export interface LandscapeLODGeometryRange {
     lodLevel: number;
     firstIndex: number;
@@ -14,6 +18,13 @@ export interface LandscapeLODGeometryRange {
     baseVertex: number;
 }
 
+/**
+ * [KO] Landscape 타일 전체 LOD에 대한 정점 및 인덱스 버퍼를 단일 결합 버퍼로 생성/관리하는 공유 지오메트리 클래스입니다.
+ * [EN] Shared geometry class that generates and manages combined vertex and index buffers across all LOD levels for Landscape tiles.
+ *
+ * [KO] 정점 속성은 위치(`aVertexPosition: float32x3`)와 UV(`aTexcoord: float32x2`)로 구성되어 버텍스당 20바이트의 메모리를 사용합니다.
+ * [EN] Vertex attributes consist of position (`aVertexPosition: float32x3`) and UV (`aTexcoord: float32x2`), utilizing 20 bytes per vertex.
+ */
 export class LandscapeSharedGeometry {
     #redGPUContext: RedGPUContext;
     #tileSizeX: number;
@@ -26,6 +37,16 @@ export class LandscapeSharedGeometry {
     #combinedWireframeIndexBuffer: IndexBuffer | null = null;
     #lodRanges: LandscapeLODGeometryRange[] = [];
 
+    /**
+     * [KO] LandscapeSharedGeometry 인스턴스를 생성합니다.
+     * [EN] Creates an instance of LandscapeSharedGeometry.
+     *
+     * @param redGPUContext - [KO] RedGPUContext 인스턴스 [EN] RedGPUContext instance
+     * @param tileSizeX - [KO] 타일 가로 크기 [EN] Tile width along X-axis
+     * @param tileSizeZ - [KO] 타일 세로 크기 [EN] Tile depth along Z-axis
+     * @param componentSizeQuads - [KO] 기본 그리드 쿼드 수 [EN] Base grid quads count
+     * @param maxLODLevel - [KO] 최대 LOD 레벨 수 [EN] Maximum LOD levels
+     */
     constructor(redGPUContext: RedGPUContext, tileSizeX: number, tileSizeZ: number, componentSizeQuads: number, maxLODLevel: number) {
         validateLandscapeBaseGridSize(componentSizeQuads);
         this.#redGPUContext = redGPUContext;
@@ -37,30 +58,61 @@ export class LandscapeSharedGeometry {
         this.#buildCombinedGeometry();
     }
 
+    /**
+     * [KO] 결합된 정점 버퍼를 반환합니다.
+     * [EN] Returns the combined vertex buffer.
+     */
     get combinedVertexBuffer(): VertexBuffer | null {
         return this.#combinedVertexBuffer;
     }
 
+    /**
+     * [KO] 결합된 기본 인덱스 버퍼를 반환합니다.
+     * [EN] Returns the combined index buffer.
+     */
     get combinedIndexBuffer(): IndexBuffer | null {
         return this.#combinedIndexBuffer;
     }
 
+    /**
+     * [KO] 결합된 와이어프레임 인덱스 버퍼를 반환합니다.
+     * [EN] Returns the combined wireframe index buffer.
+     */
     get combinedWireframeIndexBuffer(): IndexBuffer | null {
         return this.#combinedWireframeIndexBuffer;
     }
 
+    /**
+     * [KO] LOD별 지오메트리 범위 리스트를 반환합니다.
+     * [EN] Returns the list of LOD geometry ranges.
+     */
     get lodRanges(): LandscapeLODGeometryRange[] {
         return this.#lodRanges;
     }
 
+    /**
+     * [KO] 최대 LOD 레벨 수를 반환합니다.
+     * [EN] Returns the maximum LOD level count.
+     */
     get maxLODLevel(): number {
         return this.#maxLODLevel;
     }
 
+    /**
+     * [KO] 컴포넌트 쿼드 그리드 크기를 반환합니다.
+     * [EN] Returns the component quad grid size.
+     */
     get componentSizeQuads(): number {
         return this.#componentSizeQuads;
     }
 
+    /**
+     * [KO] 타일 크기를 변경하고 결합 지오메트리를 재생성합니다.
+     * [EN] Updates the tile size and rebuilds the combined geometry.
+     *
+     * @param tileSizeX - [KO] 타일 X축 크기 [EN] Tile size along X-axis
+     * @param tileSizeZ - [KO] 타일 Z축 크기 [EN] Tile size along Z-axis
+     */
     updateTileSize(tileSizeX: number, tileSizeZ: number): void {
         if (this.#tileSizeX !== tileSizeX || this.#tileSizeZ !== tileSizeZ) {
             this.#tileSizeX = tileSizeX;
@@ -69,6 +121,13 @@ export class LandscapeSharedGeometry {
         }
     }
 
+    /**
+     * [KO] 특정 LOD 레벨의 지오메트리 버퍼 범위를 반환합니다.
+     * [EN] Returns the geometry buffer range for a specific LOD level.
+     *
+     * @param lodLevel - [KO] 조회할 LOD 레벨 [EN] LOD level to query
+     * @returns [KO] LOD 범위 정보 [EN] LOD range info
+     */
     getLODRange(lodLevel: number): LandscapeLODGeometryRange {
         const index = Math.min(Math.max(0, lodLevel), this.#lodRanges.length - 1);
         return this.#lodRanges[index];
@@ -109,9 +168,6 @@ export class LandscapeSharedGeometry {
                     const posX = percentX * this.#tileSizeX - halfSizeX;
 
                     allInterleavedData.push(posX, posZ, 0.0);
-
-                    allInterleavedData.push(0, 1, 0);
-
                     allInterleavedData.push(percentX, percentZ);
                 }
             }
@@ -142,7 +198,6 @@ export class LandscapeSharedGeometry {
                 const posX = percentX * this.#tileSizeX - halfSizeX;
                 const posZ = -halfSizeZ;
                 allInterleavedData.push(posX, posZ, SKIRT_FLAG);
-                allInterleavedData.push(0, 1, 0);
                 allInterleavedData.push(percentX, 0.0);
                 currentSkirtLocalIndex++;
             }
@@ -163,7 +218,6 @@ export class LandscapeSharedGeometry {
                 const posX = percentX * this.#tileSizeX - halfSizeX;
                 const posZ = halfSizeZ;
                 allInterleavedData.push(posX, posZ, SKIRT_FLAG);
-                allInterleavedData.push(0, 1, 0);
                 allInterleavedData.push(percentX, 1.0);
                 currentSkirtLocalIndex++;
             }
@@ -183,7 +237,6 @@ export class LandscapeSharedGeometry {
                 const posX = -halfSizeX;
                 const posZ = percentZ * this.#tileSizeZ - halfSizeZ;
                 allInterleavedData.push(posX, posZ, SKIRT_FLAG);
-                allInterleavedData.push(0, 1, 0);
                 allInterleavedData.push(0.0, percentZ);
                 currentSkirtLocalIndex++;
             }
@@ -203,7 +256,6 @@ export class LandscapeSharedGeometry {
                 const posX = halfSizeX;
                 const posZ = percentZ * this.#tileSizeZ - halfSizeZ;
                 allInterleavedData.push(posX, posZ, SKIRT_FLAG);
-                allInterleavedData.push(0, 1, 0);
                 allInterleavedData.push(1.0, percentZ);
                 currentSkirtLocalIndex++;
             }
@@ -237,7 +289,6 @@ export class LandscapeSharedGeometry {
 
         const vertexStruct = new VertexInterleavedStruct({
             aVertexPosition: VertexInterleaveType.float32x3,
-            aVertexNormal: VertexInterleaveType.float32x3,
             aTexcoord: VertexInterleaveType.float32x2
         });
 
