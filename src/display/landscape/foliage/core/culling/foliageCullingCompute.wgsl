@@ -84,7 +84,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
         let cullingDist = cullingUniforms.cullingDistance;
         let cullingDistSq = cullingDist * cullingDist;
 
-        if (horizontalDistSq < cullingDistSq) {
+        let numLODs = cullingUniforms.lodCount;
+        let hasInfiniteBillboard = (numLODs > 0u && cullingUniforms.lods[numLODs - 1u].switchDistance >= 100000.0);
+        let effectiveCullingDistSq = select(cullingDistSq, 1000000000000.0, hasInfiniteBillboard);
+
+        if (horizontalDistSq < effectiveCullingDistSq) {
             var realY = instance.posY;
             if (cullingUniforms.hasVHT != 0u && cullingUniforms.invWorldSizeX > 0.0) {
                 let u = instance.posX * cullingUniforms.invWorldSizeX + 0.5;
@@ -98,7 +102,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
             let dy = realY - camPos.y;
             let distSq = horizontalDistSq + dy * dy;
 
-            if (distSq < cullingDistSq) {
+            if (distSq < effectiveCullingDistSq) {
                 let maxScale = max(max(instance.scaleX, instance.scaleY), instance.scaleZ);
                 let scaledRadius = cullingUniforms.boundingRadius * maxScale;
                 let spherePos = vec4<f32>(instance.posX, realY, instance.posZ, 1.0);
@@ -117,17 +121,18 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
                     let effectiveDist = dist * sqrt(max(cullingUniforms.fovFactorSq, 0.0001));
 
                     var globalFade: f32 = 1.0;
-                    let fadeStartDist = cullingUniforms.fadeStartDistance;
-                    if (dist > fadeStartDist) {
-                        let fadeRange = max(cullingDist - fadeStartDist, 1.0);
-                        globalFade = clamp(1.0 - (dist - fadeStartDist) / fadeRange, 0.0, 1.0);
+                    if (!hasInfiniteBillboard) {
+                        let fadeStartDist = cullingUniforms.fadeStartDistance;
+                        if (dist > fadeStartDist) {
+                            let fadeRange = max(cullingDist - fadeStartDist, 1.0);
+                            globalFade = clamp(1.0 - (dist - fadeStartDist) / fadeRange, 0.0, 1.0);
+                        }
                     }
 
                     culledInstance = instance;
                     culledInstance.posY = realY;
                     culledInstance.fade = globalFade;
 
-                    let numLODs = cullingUniforms.lodCount;
                     if (numLODs <= 1u) {
                         emitLODIndices[0] = 0u;
                         emitLODAlphas[0] = 1.0;

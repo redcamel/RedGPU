@@ -117,29 +117,43 @@ RedGPU.init(
 
         new RedGPU.GLTFLoader(
             redGPUContext,
-            // '../../../assets/terrain/realistic_hd_frangipani_tree_1550.glb',
-            // '../../../assets/terrain/whnp3v2jflkw-_tree.glb',
-            '../../../assets/terrain/tree_elm.glb',
+            '../../../assets/terrain/maple_tree_pack.glb',
             (loader) => {
-                const treeMesh = loader.resultMesh;
+                const root = loader.resultMesh;
+                const findNode = (node, name) => {
+                    if (!node) return null;
+                    if (node.name === name) return node;
+                    const children = node.children || [];
+                    for (let i = 0; i < children.length; i++) {
+                        const f = findNode(children[i], name);
+                        if (f) return f;
+                    }
+                    return null;
+                };
+
+                const lod0 = findNode(root, 'Acer_large_1_LOD0') || root;
+                const lod1 = findNode(root, 'Acer_large_1_LOD1');
+                const lod2 = findNode(root, 'Acer_large_1_LOD2');
+                // const lod3 = findNode(root, 'Acer_large_1_Billboard_LOD3');
+
+                const lodConfigs = [
+                    {mesh: lod0, distance: 40, fadeRange: 12},
+                ];
+                if (lod1) lodConfigs.push({mesh: lod1, distance: 110, fadeRange: 20});
+                if (lod2) lodConfigs.push({mesh: lod2, distance: 260, fadeRange: 35});
+                if (lod3) lodConfigs.push({mesh: lod3, distance: 350, fadeRange: 55});
 
                 foliageManager.addFoliageType({
-                    name: 'FrangipaniTree',
-                    lods: [
-                        {
-                            mesh: treeMesh,
-                            distance: 180,
-                            fadeRange: 25
-                        }
-                    ],
+                    name: 'MapleTree',
+                    lods: lodConfigs,
                     maxInstances: 300000,
-                    minScale: [1.2, 1.2, 1.2],
-                    maxScale: [1.8, 1.8, 1.8],
+                    minScale: [0.8, 0.8, 0.8],
+                    maxScale: [1.3, 1.3, 1.3],
                     cullingDistance: 2500,
                     fadeStartDistance: 2000,
                     billboard: {
                         enabled: true,
-                        lodDistance: 180
+                        lodDistance: 560
                     }
                 });
             }
@@ -226,42 +240,61 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     subGrass.addBinding(grassProxy, 'fadeStartDist', {min: 200, max: 6000, step: 50});
                 }
 
-                const subTree = folderFoliage.addFolder({title: 'FrangipaniTree (HD Multi-LOD)', expanded: true});
+                const subTree = folderFoliage.addFolder({title: 'MapleTree (Multi-LOD + Billboard)', expanded: true});
                 const treeProxy = {
                     get count() {
-                        const target = foliageManager.getFoliageType('FrangipaniTree');
+                        const target = foliageManager.getFoliageType('MapleTree');
                         return target ? target.activeInstanceCount : 0;
                     },
-                    get lodDistance() {
-                        const target = foliageManager.getFoliageType('FrangipaniTree');
-                        if (target?.lodInfoList?.[0]) {
-                            return target.lodInfoList[0].switchDistance;
-                        }
-                        return target ? target.options.lodDistance : 180;
+                    get lod0Dist() {
+                        const target = foliageManager.getFoliageType('MapleTree');
+                        return target?.lodInfoList?.[0] ? target.lodInfoList[0].switchDistance : 40;
                     },
-                    set lodDistance(v) {
-                        const target = foliageManager.getFoliageType('FrangipaniTree');
-                        if (target) {
-                            if (target.lodInfoList?.[0]) {
-                                target.lodInfoList[0].switchDistance = v;
-                            }
-                            target.options.lodDistance = v;
+                    set lod0Dist(v) {
+                        const target = foliageManager.getFoliageType('MapleTree');
+                        if (target?.lodInfoList?.[0]) target.lodInfoList[0].switchDistance = v;
+                    },
+                    get lod1Dist() {
+                        const target = foliageManager.getFoliageType('MapleTree');
+                        return target?.lodInfoList?.[1] ? target.lodInfoList[1].switchDistance : 110;
+                    },
+                    set lod1Dist(v) {
+                        const target = foliageManager.getFoliageType('MapleTree');
+                        if (target?.lodInfoList?.[1]) target.lodInfoList[1].switchDistance = v;
+                    },
+                    get billboardDist() {
+                        const target = foliageManager.getFoliageType('MapleTree');
+                        const bbIdx = (target?.lodInfoList?.length ?? 1) - 2;
+                        return target?.lodInfoList?.[bbIdx] ? target.lodInfoList[bbIdx].switchDistance : 260;
+                    },
+                    set billboardDist(v) {
+                        const target = foliageManager.getFoliageType('MapleTree');
+                        const bbIdx = (target?.lodInfoList?.length ?? 1) - 2;
+                        if (target?.lodInfoList?.[bbIdx]) {
+                            target.lodInfoList[bbIdx].switchDistance = v;
                         }
                     },
                     get cullingDist() {
-                        const target = foliageManager.getFoliageType('FrangipaniTree');
+                        const target = foliageManager.getFoliageType('MapleTree');
                         return target ? target.options.cullingDistance : 2500;
                     },
                     set cullingDist(v) {
-                        const target = foliageManager.getFoliageType('FrangipaniTree');
+                        const target = foliageManager.getFoliageType('MapleTree');
                         if (target) target.options.cullingDistance = v;
                     }
                 };
                 subTree.addBinding(treeProxy, 'count', {readonly: true});
-                subTree.addBinding(treeProxy, 'lodDistance', {min: 30, max: 1000, step: 10});
+                subTree.addBinding(treeProxy, 'lod0Dist', {min: 20, max: 200, step: 5, label: 'LOD 0 -> 1 Dist'});
+                subTree.addBinding(treeProxy, 'lod1Dist', {min: 50, max: 400, step: 10, label: 'LOD 1 -> 2 Dist'});
+                subTree.addBinding(treeProxy, 'billboardDist', {
+                    min: 100,
+                    max: 800,
+                    step: 10,
+                    label: 'LOD 2 -> Billboard'
+                });
                 subTree.addBinding(treeProxy, 'cullingDist', {min: 500, max: 8000, step: 100});
                 subTree.addBinding(config, 'billboardWireframe').on('change', (ev) => {
-                    const target = foliageManager.getFoliageType('FrangipaniTree');
+                    const target = foliageManager.getFoliageType('MapleTree');
                     if (target) {
                         target.setBillboardWireframe(ev.value);
                     }

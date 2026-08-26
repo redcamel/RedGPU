@@ -105,7 +105,7 @@ class FoliageImpostorBaker {
             label: `BakedImpostor_${bakeName}`,
             size: [atlasWidth, atlasHeight, 1],
             mipLevelCount,
-            format: 'rgba8unorm',
+            format: 'rgba8unorm-srgb',
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
         });
 
@@ -243,7 +243,7 @@ class FoliageImpostorBaker {
                 {
                     size: [atlasWidth, atlasHeight, 1],
                     mipLevelCount,
-                    format: 'rgba8unorm',
+                    format: 'rgba8unorm-srgb',
                     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
                 },
                 false,
@@ -447,7 +447,7 @@ class FoliageImpostorBaker {
                 entryPoint: 'main',
                 targets: [
                     {
-                        format: 'rgba8unorm',
+                        format: 'rgba8unorm-srgb',
                         blend: {
                             color: {
                                 srcFactor: 'src-alpha',

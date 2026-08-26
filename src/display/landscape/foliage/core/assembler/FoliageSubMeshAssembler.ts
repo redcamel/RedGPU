@@ -134,12 +134,14 @@ class FoliageSubMeshAssembler {
                 subList.push(bbSubMesh);
 
                 const lastCustomDist = lodInfoList.length > 0 ? lodInfoList[lodInfoList.length - 1].switchDistance : 100.0;
-                const bbDist = billboardOpt.lodDistance ?? Math.max(lastCustomDist, options.cullingDistance ?? 2000.0);
+                if (billboardOpt.lodDistance && lodInfoList.length > 0) {
+                    lodInfoList[lodInfoList.length - 1].switchDistance = billboardOpt.lodDistance;
+                }
 
                 lodInfoList.push({
                     lodIndex: billboardLODIndex,
-                    switchDistance: bbDist,
-                    fadeRange: 15.0,
+                    switchDistance: 1000000.0,
+                    fadeRange: 20.0,
                     subMeshOffset: bbStartOffset,
                     subMeshCount: 1,
                 });
@@ -160,12 +162,12 @@ class FoliageSubMeshAssembler {
             }
 
             const lod0Count = subList.length;
-            const lod0Dist = options.lodDistance ?? (billboardOpt?.lodDistance ?? 80.0);
+            const lod0Dist = billboardOpt?.lodDistance ?? options.lodDistance ?? 80.0;
 
             lodInfoList.push({
                 lodIndex: 0,
                 switchDistance: lod0Dist,
-                fadeRange: 10.0,
+                fadeRange: 15.0,
                 subMeshOffset: 0,
                 subMeshCount: lod0Count,
             });
@@ -201,8 +203,8 @@ class FoliageSubMeshAssembler {
 
                 lodInfoList.push({
                     lodIndex: 1,
-                    switchDistance: options.cullingDistance ?? 2000.0,
-                    fadeRange: 15.0,
+                    switchDistance: 1000000.0,
+                    fadeRange: 20.0,
                     subMeshOffset: lod0Count,
                     subMeshCount: 1,
                 });
