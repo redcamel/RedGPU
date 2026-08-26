@@ -54,9 +54,9 @@ fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
     let globalFragmentData = globalFragmentSSBO_BuiltIn[inputData.globalFragmentSlotIndex];
 
+    let camPos = systemUniforms.camera.cameraPosition.xyz;
     var viewDir = inputData.vertexTangent.xyz;
     if (inputData.vertexTangent.w > -500.0) {
-        let camPos = systemUniforms.camera.cameraPosition.xyz;
         viewDir = normalize(camPos - inputData.vertexPosition);
     }
 
@@ -94,20 +94,28 @@ fn main(inputData: InputData) -> OutputFragment {
         discard;
     }
 
-    // 1. Transform View-Space Hemispherical Normal into World-Space Normal
-    let nx = (inputData.uv.x - 0.5) * 2.0;
-    let ny = (0.5 - inputData.uv.y) * 2.0;
+    // 1. Rotation-Independent Tree World Basis (Anchor to instance position)
+    let nx = (inputData.uv.x - 0.5) * 1.2;
+    let ny = (0.5 - inputData.uv.y) * 1.2;
     let r2 = nx * nx + ny * ny;
-    let nz = sqrt(max(1.0 - r2, 0.0));
+    let nz = sqrt(max(1.0 - r2 * 0.5, 0.3));
 
-    // Camera world basis vectors extracted from systemUniforms.camera.viewMatrix
-    let camRight = normalize(vec3<f32>(systemUniforms.camera.viewMatrix[0][0], systemUniforms.camera.viewMatrix[1][0], systemUniforms.camera.viewMatrix[2][0]));
-    let camUp = normalize(vec3<f32>(systemUniforms.camera.viewMatrix[0][1], systemUniforms.camera.viewMatrix[1][1], systemUniforms.camera.viewMatrix[2][1]));
-    let camForward = normalize(vec3<f32>(-systemUniforms.camera.viewMatrix[0][2], -systemUniforms.camera.viewMatrix[1][2], -systemUniforms.camera.viewMatrix[2][2]));
+    // Vector from tree vertex towards camera (constant regardless of camera yaw rotation)
+    let toCamVec = camPos - inputData.vertexPosition;
+    let distXZ = length(toCamVec.xz);
+    var billboardForward = vec3<f32>(0.0, 0.0, 1.0);
+    var billboardRight = vec3<f32>(1.0, 0.0, 0.0);
 
-    // Accurate World-Space Normal
-    let N = normalize(camRight * nx + camUp * (ny * 0.5 + 0.5) + camForward * nz);
-    let V = normalize(select(viewDir, systemUniforms.camera.cameraPosition.xyz - inputData.vertexPosition, length(viewDir) < 0.01));
+    if (distXZ > 0.0001) {
+        let forwardXZ = toCamVec.xz / distXZ;
+        billboardForward = vec3<f32>(forwardXZ.x, 0.0, forwardXZ.y);
+        billboardRight = vec3<f32>(-forwardXZ.y, 0.0, forwardXZ.x);
+    }
+    let billboardUp = vec3<f32>(0.0, 1.0, 0.0);
+
+    // True world-space volume normal
+    let N = normalize(billboardRight * nx + billboardUp * ny + billboardForward * nz);
+    let V = normalize(select(viewDir, toCamVec, length(viewDir) < 0.01));
     let NdotV = max(dot(N, V), 0.0);
 
     let preExposure = systemUniforms.preExposure;
@@ -124,7 +132,7 @@ fn main(inputData: InputData) -> OutputFragment {
     );
     shadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, shadowVis);
 
-    // 3. Direct Directional Light (Exact RedGPU PBR Disney Diffuse Formula)
+    // 3. Direct Directional Light (Exact RedGPU PBR Disney Diffuse Matching)
     var directDiffuse = vec3<f32>(0.0);
     let roughness = 0.85;
     let energyBias = mix(0.0, 0.5, roughness);
@@ -142,9 +150,8 @@ fn main(inputData: InputData) -> OutputFragment {
             let H = normalize(L + V);
             let LdotH = max(dot(L, H), 0.0);
             let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
-            let f0 = 1.0;
-            let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
-            let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
+            let lightScatter = 1.0 + (fd90 - 1.0) * pow(1.0 - NdotL, 5.0);
+            let viewScatter = 1.0 + (fd90 - 1.0) * pow(1.0 - NdotV, 5.0);
             let diffuseBRDF = NdotL * lightScatter * viewScatter * energyFactor;
 
             var lightColor = light.color * light.intensity * preExposure * shadowVis;
@@ -160,7 +167,7 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
 
-    // 4. Indirect Ambient & Sky Atmosphere (Exact PBRMaterial Indirect Formula)
+    // 4. Indirect Ambient & Sky Atmosphere (Exact RedGPU PBR Indirect Matching with INV_PI)
     var indirectDiffuse = vec3<f32>(0.0);
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
@@ -180,11 +187,10 @@ fn main(inputData: InputData) -> OutputFragment {
             indirectDiffuse = (indirectDiffuse * diffTrans) + skyIrradiance;
         }
     } else {
-        // Only apply ambientLight when IBL and SkyAtmosphere are disabled (matches PBRMaterial)
         indirectDiffuse = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
     }
 
-    // 5. Final Combined Shading (100% PBR Match)
+    // 5. Final Combined Shading (Exact 1:1 PBR Tone Matching)
     var finalRgb = albedo * (directDiffuse + indirectDiffuse);
 
     let tinted = getTintBlendMode(vec4<f32>(finalRgb, 1.0), globalFragmentData.tintBlendMode, globalFragmentData.tint);
