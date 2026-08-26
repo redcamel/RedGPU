@@ -113,74 +113,107 @@ RedGPU.init(
 
         new RedGPU.GLTFLoader(
             redGPUContext,
-            '../../../assets/terrain/tree_elm.glb',
+            '../../../assets/terrain/test.glb',
             (loader) => {
-                const treeMesh = loader.resultMesh;
+                const root = loader.resultMesh;
+                console.log('🌲 [test.glb] Loaded Root:', root);
+                const treeGroups = new Map();
 
-                foliageManager.addFoliageType({
-                    name: 'ElmTree',
-                    lods: [
-                        {
-                            mesh: treeMesh,
-                            lodDistance: 450
+                const traverse = (node) => {
+                    if (!node) return;
+                    if (node.name) {
+                        const lodMatch = node.name.match(/(.*?)(?:_?LOD([0-9]))$/i);
+                        if (lodMatch) {
+                            const baseName = lodMatch[1] || node.name;
+                            const lodLevel = parseInt(lodMatch[2], 10);
+                            if (!treeGroups.has(baseName)) {
+                                treeGroups.set(baseName, {});
+                            }
+                            treeGroups.get(baseName)[`lod${lodLevel}`] = node;
                         }
-                    ],
-                    maxInstances: 50000,
-                    minScale: [1.8, 1.8, 1.8],
-                    maxScale: [2.8, 2.8, 2.8],
-                    cullingDistance: 4000,
-                    fadeStartDistance: 3200,
-                    billboard: {
-                        enabled: true,
-                        lodDistance: 450
                     }
-                });
-                // scene.addChild(treeMesh)
-                // treeMesh.setScale(100)
+                    const children = node.children || [];
+                    for (let i = 0; i < children.length; i++) {
+                        traverse(children[i]);
+                    }
+                };
+
+                traverse(root);
+
+                console.log(`🌲 [test.glb] Discovered ${treeGroups.size} tree variants:`, Array.from(treeGroups.keys()));
+
+                if (treeGroups.size > 0) {
+                    treeGroups.forEach((lods, baseName) => {
+                        const lodConfigs = [];
+                        const lod0 = lods.lod0 || lods.lod1 || lods.lod2;
+                        if (!lod0) return;
+
+                        lodConfigs.push({mesh: lod0, lodDistance: 200});
+                        if (lods.lod1 && lods.lod1 !== lod0) lodConfigs.push({mesh: lods.lod1, lodDistance: 450});
+                        if (lods.lod2 && lods.lod2 !== lod0 && lods.lod2 !== lods.lod1) lodConfigs.push({
+                            mesh: lods.lod2,
+                            lodDistance: 800
+                        });
+
+                        const lastLodDist = lodConfigs[lodConfigs.length - 1].lodDistance;
+
+                        foliageManager.addFoliageType({
+                            name: `Tree_${baseName}`,
+                            lods: lodConfigs,
+                            maxInstances: 150000,
+                            minScale: [1.8, 1.8, 1.8],
+                            maxScale: [3.0, 3.0, 3.0],
+                            cullingDistance: 4000,
+                            fadeStartDistance: 3200,
+                            ignoreVertexColor: true,
+                            billboard: {
+                                enabled: true,
+                                lodDistance: lastLodDist
+                            }
+                        });
+                    });
+                } else {
+                    const findLODNode = (name) => {
+                        let found = null;
+                        const find = (node) => {
+                            if (!node || found) return;
+                            if (node.name && node.name.toLowerCase().includes(name.toLowerCase())) {
+                                found = node;
+                                return;
+                            }
+                            const children = node.children || [];
+                            for (let i = 0; i < children.length; i++) find(children[i]);
+                        };
+                        find(root);
+                        return found;
+                    };
+
+                    const lod0 = findLODNode('lod0') || root;
+                    const lod1 = findLODNode('lod1');
+                    const lod2 = findLODNode('lod2');
+
+                    const lodConfigs = [{mesh: lod0, lodDistance: 200}];
+                    if (lod1) lodConfigs.push({mesh: lod1, lodDistance: 450});
+                    if (lod2) lodConfigs.push({mesh: lod2, lodDistance: 800});
+
+                    foliageManager.addFoliageType({
+                        name: 'TestTree',
+                        lods: lodConfigs,
+                        maxInstances: 150000,
+                        minScale: [1.8, 1.8, 1.8],
+                        maxScale: [3.0, 3.0, 3.0],
+                        cullingDistance: 4000,
+                        fadeStartDistance: 3200,
+                        ignoreVertexColor: true,
+                        billboard: {
+                            enabled: true,
+                            lodDistance: lodConfigs[lodConfigs.length - 1].lodDistance
+                        }
+                    });
+                }
             }
         );
 
-        // new RedGPU.GLTFLoader(
-        //     redGPUContext,
-        //     '../../../assets/terrain/maple_tree_pack.glb',
-        //     (loader) => {
-        //         const root = loader.resultMesh;
-        //         const findNode = (node, name) => {
-        //             if (!node) return null;
-        //             if (node.name === name) return node;
-        //             const children = node.children || [];
-        //             for (let i = 0; i < children.length; i++) {
-        //                 const f = findNode(children[i], name);
-        //                 if (f) return f;
-        //             }
-        //             return null;
-        //         };
-        //
-        //         const lod0 = findNode(root, 'Acer_large_1_LOD0') || root;
-        //         const lod1 = findNode(root, 'Acer_large_1_LOD1');
-        //         const lod2 = findNode(root, 'Acer_large_1_LOD2');
-        //
-        //         const lodConfigs = [
-        //             {mesh: lod0, lodDistance: 200},
-        //             {mesh: lod1, lodDistance: 450},
-        //             {mesh: lod2, lodDistance: 800}
-        //         ];
-        //
-        //         foliageManager.addFoliageType({
-        //             name: 'MapleTree',
-        //             lods: lodConfigs,
-        //             maxInstances: 50000,
-        //             minScale: [2.0, 2.0, 2.0],
-        //             maxScale: [3.2, 3.2, 3.2],
-        //             cullingDistance: 4000,
-        //             fadeStartDistance: 3200,
-        //             billboard: {
-        //                 enabled: true,
-        //                 lodDistance: 800
-        //             }
-        //         });
-        //     }
-        // );
 
         landscape.debuggerManager.spatialGrid = true;
 

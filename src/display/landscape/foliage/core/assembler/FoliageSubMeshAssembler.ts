@@ -307,7 +307,19 @@ class FoliageSubMeshAssembler {
 
         const currentRelativeMatrix = mat4.create();
         if (isRoot) {
+            const parentChain: Mesh[] = [];
+            let p: any = node.parent;
+            while (p && p.isInstanceofMesh) {
+                parentChain.unshift(p);
+                p = p.parent;
+            }
             mat4.identity(currentRelativeMatrix);
+            for (let c = 0; c < parentChain.length; c++) {
+                FoliageSubMeshAssembler.#computeMeshLocalMatrix(parentChain[c], FoliageSubMeshAssembler.#tempLocalMatrix);
+                mat4.multiply(currentRelativeMatrix, currentRelativeMatrix, FoliageSubMeshAssembler.#tempLocalMatrix);
+            }
+            FoliageSubMeshAssembler.#computeMeshLocalMatrix(node, FoliageSubMeshAssembler.#tempLocalMatrix);
+            mat4.multiply(currentRelativeMatrix, currentRelativeMatrix, FoliageSubMeshAssembler.#tempLocalMatrix);
         } else {
             FoliageSubMeshAssembler.#computeMeshLocalMatrix(node, FoliageSubMeshAssembler.#tempLocalMatrix);
             mat4.multiply(currentRelativeMatrix, parentRelativeMatrix, FoliageSubMeshAssembler.#tempLocalMatrix);
@@ -592,6 +604,30 @@ class FoliageSubMeshAssembler {
                 }
 
                 vertexOffset += vCount;
+            }
+
+            // 🌿 수목 메쉬의 수평 중심(X, Z)을 (0, 0) 원점으로 자동 정렬
+            let minX = Infinity, maxX = -Infinity;
+            let minZ = Infinity, maxZ = -Infinity;
+            for (let v = 0; v < totalVertexCount; v++) {
+                const idx = v * PBR_STRIDE;
+                const vx = combinedVertexData[idx + 0];
+                const vz = combinedVertexData[idx + 2];
+                if (vx < minX) minX = vx;
+                if (vx > maxX) maxX = vx;
+                if (vz < minZ) minZ = vz;
+                if (vz > maxZ) maxZ = vz;
+            }
+
+            const centerX = (minX + maxX) * 0.5;
+            const centerZ = (minZ + maxZ) * 0.5;
+
+            if (Math.abs(centerX) > 0.001 || Math.abs(centerZ) > 0.001) {
+                for (let v = 0; v < totalVertexCount; v++) {
+                    const idx = v * PBR_STRIDE;
+                    combinedVertexData[idx + 0] -= centerX;
+                    combinedVertexData[idx + 2] -= centerZ;
+                }
             }
 
             const vKey = `FoliageCombinedVB_${options.name}_LOD${lodIndex}_${mat.name || 'mat'}_${Math.random()}`;
