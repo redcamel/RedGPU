@@ -122,63 +122,63 @@ RedGPU.init(
                     lods: [
                         {
                             mesh: treeMesh,
-                            lodDistance: 350
+                            lodDistance: 450
                         }
                     ],
                     maxInstances: 150000,
-                    minScale: [0.8, 0.8, 0.8],
-                    maxScale: [1.3, 1.3, 1.3],
-                    cullingDistance: 3500,
-                    fadeStartDistance: 2800,
+                    minScale: [1.8, 1.8, 1.8],
+                    maxScale: [2.8, 2.8, 2.8],
+                    cullingDistance: 4000,
+                    fadeStartDistance: 3200,
                     billboard: {
                         enabled: true,
-                        lodDistance: 350
+                        lodDistance: 450
                     }
                 });
             }
         );
 
-        // new RedGPU.GLTFLoader(
-        //     redGPUContext,
-        //     '../../../assets/terrain/maple_tree_pack.glb',
-        //     (loader) => {
-        //         const root = loader.resultMesh;
-        //         const findNode = (node, name) => {
-        //             if (!node) return null;
-        //             if (node.name === name) return node;
-        //             const children = node.children || [];
-        //             for (let i = 0; i < children.length; i++) {
-        //                 const f = findNode(children[i], name);
-        //                 if (f) return f;
-        //             }
-        //             return null;
-        //         };
-        //
-        //         const lod0 = findNode(root, 'Acer_large_1_LOD0') || root;
-        //         const lod1 = findNode(root, 'Acer_large_1_LOD1');
-        //         const lod2 = findNode(root, 'Acer_large_1_LOD2');
-        //
-        //         const lodConfigs = [
-        //             {mesh: lod0, lodDistance: 150},
-        //             {mesh: lod1, lodDistance: 350},
-        //             {mesh: lod2, lodDistance: 600}
-        //         ];
-        //
-        //         foliageManager.addFoliageType({
-        //             name: 'MapleTree',
-        //             lods: lodConfigs,
-        //             maxInstances: 150000,
-        //             minScale: [0.7, 0.7, 0.7],
-        //             maxScale: [1.2, 1.2, 1.2],
-        //             cullingDistance: 3500,
-        //             fadeStartDistance: 2800,
-        //             billboard: {
-        //                 enabled: true,
-        //                 lodDistance: 600
-        //             }
-        //         });
-        //     }
-        // );
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            '../../../assets/terrain/maple_tree_pack.glb',
+            (loader) => {
+                const root = loader.resultMesh;
+                const findNode = (node, name) => {
+                    if (!node) return null;
+                    if (node.name === name) return node;
+                    const children = node.children || [];
+                    for (let i = 0; i < children.length; i++) {
+                        const f = findNode(children[i], name);
+                        if (f) return f;
+                    }
+                    return null;
+                };
+
+                const lod0 = findNode(root, 'Acer_large_1_LOD0') || root;
+                const lod1 = findNode(root, 'Acer_large_1_LOD1');
+                const lod2 = findNode(root, 'Acer_large_1_LOD2');
+
+                const lodConfigs = [
+                    {mesh: lod0, lodDistance: 200},
+                    {mesh: lod1, lodDistance: 450},
+                    {mesh: lod2, lodDistance: 800}
+                ];
+
+                foliageManager.addFoliageType({
+                    name: 'MapleTree',
+                    lods: lodConfigs,
+                    maxInstances: 150000,
+                    minScale: [2.0, 2.0, 2.0],
+                    maxScale: [3.2, 3.2, 3.2],
+                    cullingDistance: 4000,
+                    fadeStartDistance: 3200,
+                    billboard: {
+                        enabled: true,
+                        lodDistance: 800
+                    }
+                });
+            }
+        );
 
         landscape.debuggerManager.spatialGrid = true;
 
@@ -508,7 +508,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             folderSun.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
 
             const folderCam = pane.addFolder({title: 'Camera', expanded: true});
-            folderCam.addBinding(controller, 'moveSpeed', {min: 500, max: 20000, step: 500});
+            folderCam.addBinding(controller, 'moveSpeed', {min: 50, max: 20000, step: 10});
 
             const dbg = landscape.debuggerManager;
             const folderDebuggers = pane.addFolder({title: 'debuggerManager', expanded: true});
