@@ -56,6 +56,7 @@
 
 struct InputData {
     @builtin(position) position : vec4<f32>,
+    @builtin(front_facing) isFrontFacing: bool,
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
@@ -278,7 +279,7 @@ fn main(inputData:InputData) -> OutputFragment {
     let foliageUvDeriv = length(vec2<f32>(dpdx(diffuseUV.x), dpdy(diffuseUV.y))) * 80.0;
     var baseColor = u_baseColorFactor;
     var resultAlpha:f32 = u_opacity * baseColor.a;
-    baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor && !u_isFoliage);
+    baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
     #redgpu_if baseColorTexture
         let diffuseSampleColor = (textureSample(baseColorTexture, baseColorTextureSampler, diffuseUV));
         baseColor *= diffuseSampleColor;
@@ -288,13 +289,9 @@ fn main(inputData:InputData) -> OutputFragment {
 
     #redgpu_if useCutOff
         var dynamicCutOff = u_cutOff;
-//        if (dynamicCutOff <= 0.0) {
-            dynamicCutOff = 0.33;
-//        }
-        #redgpu_if isFoliage
-            // 🌿 카메라 거리가 멀어져 화면 픽셀당 UV 미분량이 커질수록 컷오프를 부드럽게 완화하여 잎사귀 소실(Alpha Thinning) 방지
-            dynamicCutOff = max(dynamicCutOff * 0.25, dynamicCutOff - foliageUvDeriv * 0.2);
-        #redgpu_endIf
+        if (dynamicCutOff <= 0.0) {
+            dynamicCutOff = 0.5;
+        }
         if (resultAlpha <= dynamicCutOff) { discard; }
     #redgpu_endIf
 
@@ -329,7 +326,7 @@ fn main(inputData:InputData) -> OutputFragment {
     var backFaceYn:bool = false;
     #redgpu_if doubleSided
     {
-        if (dot(baseNormal, V) < 0.0) {
+        if (!inputData.isFrontFacing && !u_isFoliage) {
             backFaceYn = true;
         }
     }
@@ -1170,7 +1167,7 @@ fn getIndirectPbrLighting(
                 let backSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, prefilterTextureSampler, -N, 0.0).rgb * skyIntensity * preExposure;
                 backIBLColor = (backIBLColor * backTrans) + backSkyScat;
             }
-            envIBL_DIFFUSE += backIBLColor * albedo * (vec3<f32>(1.0) - F_IBL_dielectric_weight) * 0.4;
+            envIBL_DIFFUSE += backIBLColor * albedo * (vec3<f32>(1.0) - F_IBL_dielectric_weight) * 0.15;
         }
         #redgpu_endIf
         var envIBL_SPECULAR_BTDF = vec3<f32>(0.0);
@@ -1273,12 +1270,6 @@ fn getDirectPbrLight(
     if (abs(ior - 1.0) < EPSILON) { SPEC_BRDF = vec3<f32>(0.0); }
     let diffuse_reflection = getDirectDiffuseBRDF(NdotL, VdotN, LdotH, roughnessParameter, albedo);
     var diffuse_transmission = vec3<f32>(0.0);
-    #redgpu_if isFoliage
-        let NdotL_back = max(-NdotL_origin, 0.0);
-        if (NdotL_back > 0.0) {
-            diffuse_transmission += getDirectDiffuseBRDF(NdotL_back, VdotN, LdotH, roughnessParameter, albedo) * 0.4;
-        }
-    #redgpu_endIf
     #redgpu_if useKHR_materials_diffuse_transmission
     if (u_useKHR_materials_diffuse_transmission) {
         diffuse_transmission += getDirectDiffuseBTDF(N, L, diffuseTransmissionColor);
@@ -1286,7 +1277,10 @@ fn getDirectPbrLight(
     #redgpu_endIf
     let specular_weight = F * specularParameter;
     #redgpu_if isFoliage
-        let total_diffuse = diffuse_reflection + diffuse_transmission;
+        // 🌿 모든 잎사귀가 태양 방향에 맞춰 완벽한 음영을 갖도록 표준 디퓨즈 반사광을 100% 온전히 보장
+        let viewSunPhase = max(dot(L, V), 0.0);
+        let forwardScatter = pow(viewSunPhase, 4.0) * 0.3;
+        let total_diffuse = diffuse_reflection + (getDirectDiffuseBRDF(max(-NdotL_origin, 0.0), VdotN, LdotH, roughnessParameter, albedo) * forwardScatter);
     #redgpu_else
         let total_diffuse = mix(diffuse_reflection, diffuse_transmission, diffuseTransmissionParameter);
     #redgpu_endIf

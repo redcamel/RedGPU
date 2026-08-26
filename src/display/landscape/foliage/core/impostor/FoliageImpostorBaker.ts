@@ -416,7 +416,7 @@ class FoliageImpostorBaker {
                 out.uv = uv;
                 out.worldNormal = normalize(nMat * normal);
 
-                var finalColor = trans.color;
+                var finalColor = trans.color ;
                 out.color = finalColor;
                 out.useTexture = u32(trans.extra.x + 0.5);
                 return out;

@@ -20,10 +20,8 @@ fn main(inputData: InputData) -> OutputFragment {
     let texColor = textureSample(baseColorTexture, baseColorTextureSampler, inputData.uv);
 
     var cutOff = globalFragmentData.cutOff;
-
-    if (globalFragmentData.isFoliage == 1u) {
-        cutOff = 0.33;
-        cutOff = max(cutOff * 0.25, cutOff - foliageUvDeriv * 0.2);
+    if (cutOff <= 0.0) {
+        cutOff = 0.5;
     }
     if (texColor.a <= cutOff) {
         discard;

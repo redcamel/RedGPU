@@ -19,7 +19,7 @@ RedGPU.init(
         redGPUContext.addView(view);
 
         const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
-        view.skyAtmosphere = skyAtmosphere;
+        // view.skyAtmosphere = skyAtmosphere;
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 45;
@@ -119,6 +119,8 @@ RedGPU.init(
             '../../../assets/terrain/test.glb',
             (loader) => {
                 const root = loader.resultMesh;
+
+                // return
                 console.log('🌲 [test.glb] Loaded Root:', root);
                 const treeGroups = new Map();
 
@@ -214,6 +216,8 @@ RedGPU.init(
                         }
                     });
                 }
+                scene.addChild(root)
+                root.setScale(100)
             }
         );
 

@@ -333,14 +333,14 @@ class FoliageSubMeshAssembler {
             if (isFoliage) {
                 // 🌿 식생 전용 셰이딩 모델 모드 활성화
                 mat.isFoliage = true;
-                mat.doubleSided = true;
             }
 
             if (options.convertBlendToMasked || isFoliage) {
-                keepLog('mat.alphaBlend', mat.alphaBlend)
+                keepLog('mat.alphaBlend', mat.alphaBlend);
                 if (mat.alphaBlend === 2 || mat.transparent || mat.alphaMode === 'BLEND' || mat.alphaMode === 'MASK') {
                     mat.useCutOff = true;
-                    mat.cutOff = 0.33;
+                    // 🌿 GLTF 2.0 및 언리얼 엔진 공식 표준: 원본 cutOff가 있으면 쓰고 없으면 0.5 적용
+                    mat.cutOff = (mat.cutOff > 0) ? mat.cutOff : 0.5;
                     const {blendColorState, blendAlphaState} = mat;
                     if (blendColorState && blendAlphaState) {
                         blendColorState.srcFactor = GPU_BLEND_FACTOR.ONE;
@@ -439,6 +439,35 @@ class FoliageSubMeshAssembler {
             }
             entry.raws.push(raw);
         }
+
+        // 🌿 수목 1그루 전체(줄기+잎사귀 등 모든 노드)의 통합 바운딩 중심(treeCenterX, treeCenterZ)을 단 1회 계산
+        let treeMinX = Infinity, treeMaxX = -Infinity;
+        let treeMinZ = Infinity, treeMaxZ = -Infinity;
+
+        for (let i = 0; i < rawList.length; i++) {
+            const raw = rawList[i];
+            const srcVData = raw.geometry.vertexBuffer?.data;
+            const vCount = raw.geometry.vertexBuffer?.vertexCount ?? 0;
+            const rawStride = raw.rawStride;
+            const m = raw.currentRelativeMatrix;
+            if (srcVData && vCount > 0) {
+                for (let v = 0; v < vCount; v++) {
+                    const srcIdx = v * rawStride;
+                    const x = srcVData[srcIdx + 0];
+                    const y = srcVData[srcIdx + 1];
+                    const z = srcVData[srcIdx + 2];
+                    const wx = m[0] * x + m[4] * y + m[8] * z + m[12];
+                    const wz = m[2] * x + m[6] * y + m[10] * z + m[14];
+                    if (wx < treeMinX) treeMinX = wx;
+                    if (wx > treeMaxX) treeMaxX = wx;
+                    if (wz < treeMinZ) treeMinZ = wz;
+                    if (wz > treeMaxZ) treeMaxZ = wz;
+                }
+            }
+        }
+
+        const treeCenterX = (treeMinX !== Infinity) ? (treeMinX + treeMaxX) * 0.5 : 0;
+        const treeCenterZ = (treeMinZ !== Infinity) ? (treeMinZ + treeMaxZ) * 0.5 : 0;
 
         const resultSubMeshes: FoliageSubMesh[] = [];
 
@@ -603,27 +632,12 @@ class FoliageSubMeshAssembler {
                 vertexOffset += vCount;
             }
 
-            // 🌿 수목 메쉬의 수평 중심(X, Z)을 (0, 0) 원점으로 자동 정렬
-            let minX = Infinity, maxX = -Infinity;
-            let minZ = Infinity, maxZ = -Infinity;
-            for (let v = 0; v < totalVertexCount; v++) {
-                const idx = v * PBR_STRIDE;
-                const vx = combinedVertexData[idx + 0];
-                const vz = combinedVertexData[idx + 2];
-                if (vx < minX) minX = vx;
-                if (vx > maxX) maxX = vx;
-                if (vz < minZ) minZ = vz;
-                if (vz > maxZ) maxZ = vz;
-            }
-
-            const centerX = (minX + maxX) * 0.5;
-            const centerZ = (minZ + maxZ) * 0.5;
-
-            if (Math.abs(centerX) > 0.001 || Math.abs(centerZ) > 0.001) {
+            // 🌿 수목 전체 1그루의 단일 통합 중심을 모든 파트(줄기/잎사귀)에 동일하게 일괄 적용!
+            if (Math.abs(treeCenterX) > 0.001 || Math.abs(treeCenterZ) > 0.001) {
                 for (let v = 0; v < totalVertexCount; v++) {
                     const idx = v * PBR_STRIDE;
-                    combinedVertexData[idx + 0] -= centerX;
-                    combinedVertexData[idx + 2] -= centerZ;
+                    combinedVertexData[idx + 0] -= treeCenterX;
+                    combinedVertexData[idx + 2] -= treeCenterZ;
                 }
             }
 

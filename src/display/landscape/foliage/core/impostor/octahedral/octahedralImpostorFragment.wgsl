@@ -139,30 +139,18 @@ fn main(inputData: InputData) -> OutputFragment {
         let light = u_directionalLights[i];
         let L = -normalize(light.direction);
 
-        let NdotL_front = max(dot(N, L), 0.0);
-        let NdotL_back  = max(-dot(N, L), 0.0);
+        let NdotL_raw = dot(N, L);
+        let H = normalize(L + V);
+        let LdotH = max(dot(L, H), 0.0);
+        let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
+        let lightScatter = 1.0 + (fd90 - 1.0) * pow(1.0 - max(NdotL_raw, 0.0), 5.0);
+        let viewScatter = 1.0 + (fd90 - 1.0) * pow(1.0 - NdotV, 5.0);
+        var diffuseBRDF = max(NdotL_raw, 0.0) * lightScatter * viewScatter * energyFactor;
 
-        var diffuseBRDF = 0.0;
-
-        // Front direct diffuse
-        if (NdotL_front > 0.0) {
-            let H = normalize(L + V);
-            let LdotH = max(dot(L, H), 0.0);
-            let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
-            let lightScatter = 1.0 + (fd90 - 1.0) * pow(1.0 - NdotL_front, 5.0);
-            let viewScatter = 1.0 + (fd90 - 1.0) * pow(1.0 - NdotV, 5.0);
-            diffuseBRDF += NdotL_front * lightScatter * viewScatter * energyFactor;
-        }
-
-        // Two-Sided leaf diffuse for natural transmission
-        if (NdotL_back > 0.0) {
-            let H_back = normalize(L + V);
-            let LdotH_back = max(dot(L, H_back), 0.0);
-            let fd90_back = energyBias + 2.0 * LdotH_back * LdotH_back * roughness;
-            let lightScatter_back = 1.0 + (fd90_back - 1.0) * pow(1.0 - NdotL_back, 5.0);
-            let viewScatter_back = 1.0 + (fd90_back - 1.0) * pow(1.0 - NdotV, 5.0);
-            diffuseBRDF += (NdotL_back * lightScatter_back * viewScatter_back * energyFactor) * 0.4;
-        }
+        let viewSunPhase = max(dot(L, V), 0.0);
+        let forwardScatter = pow(viewSunPhase, 4.0) * 0.3;
+        let NdotL_back = max(-NdotL_raw, 0.0);
+        diffuseBRDF += (NdotL_back * lightScatter * viewScatter * energyFactor) * forwardScatter;
 
         if (diffuseBRDF > 0.0) {
             var lightColor = light.color * light.intensity * preExposure * shadowVis;
