@@ -246,6 +246,7 @@ fn main(inputData:InputData) -> OutputFragment {
     let u_emissiveFactor = uniforms.emissiveFactor;
     let u_emissiveStrength = uniforms.emissiveStrength;
     let u_useKHR_materials_unlit = uniforms.useKHR_materials_unlit == 1u;
+    let u_isFoliage = uniforms.isFoliage == 1u;
     let u_KHR_materials_ior = uniforms.KHR_materials_ior;
     let u_KHR_dispersion = uniforms.KHR_dispersion;
     let u_KHR_transmissionFactor = uniforms.KHR_transmissionFactor;
@@ -276,7 +277,7 @@ fn main(inputData:InputData) -> OutputFragment {
     let diffuseUV = getTextureTransformUV(input_uv, input_uv1, uniforms.baseColorTexture_texCoord_index, uniforms.use_baseColorTexture_KHR_texture_transform, uniforms.baseColorTexture_KHR_texture_transform_offset, uniforms.baseColorTexture_KHR_texture_transform_rotation, uniforms.baseColorTexture_KHR_texture_transform_scale);
     var baseColor = u_baseColorFactor;
     var resultAlpha:f32 = u_opacity * baseColor.a;
-    baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
+    baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor && !u_isFoliage);
     #redgpu_if baseColorTexture
         let diffuseSampleColor = (textureSample(baseColorTexture, baseColorTextureSampler, diffuseUV));
         baseColor *= diffuseSampleColor;
@@ -1146,6 +1147,23 @@ fn getIndirectPbrLighting(
             envIBL_DIFFUSE = mix(envIBL_DIFFUSE, transmittedIBL, diffuseTransmissionParameter);
         }
         #redgpu_endIf
+        #redgpu_if isFoliage
+        {
+            var backIBLColor = vec3<f32>(0.0);
+            if (u_usePrefilterTexture) {
+                let mipLevel = iblRoughness * iblMipmapCount;
+                backIBLColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, -N, mipLevel).rgb * preExposure * systemUniforms.iblIntensity;
+            }
+            if (u_useSkyAtmosphere) {
+                let u_atmo = systemUniforms.skyAtmosphere;
+                let skyIntensity = u_atmo.sunIntensity;
+                let backTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, -N.y, u_atmo.atmosphereHeight);
+                let backSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, prefilterTextureSampler, -N, 0.0).rgb * skyIntensity * preExposure;
+                backIBLColor = (backIBLColor * backTrans) + backSkyScat;
+            }
+            envIBL_DIFFUSE += backIBLColor * albedo * (vec3<f32>(1.0) - F_IBL_dielectric_weight) * 0.4;
+        }
+        #redgpu_endIf
         var envIBL_SPECULAR_BTDF = vec3<f32>(0.0);
         #redgpu_if useKHR_materials_transmission
         if (transmissionParameter > 0.0) {
@@ -1246,10 +1264,22 @@ fn getDirectPbrLight(
     if (abs(ior - 1.0) < EPSILON) { SPEC_BRDF = vec3<f32>(0.0); }
     let diffuse_reflection = getDirectDiffuseBRDF(NdotL, VdotN, LdotH, roughnessParameter, albedo);
     var diffuse_transmission = vec3<f32>(0.0);
+    #redgpu_if isFoliage
+        let NdotL_back = max(-NdotL_origin, 0.0);
+        if (NdotL_back > 0.0) {
+            diffuse_transmission += getDirectDiffuseBRDF(NdotL_back, VdotN, LdotH, roughnessParameter, albedo) * 0.4;
+        }
+    #redgpu_endIf
     #redgpu_if useKHR_materials_diffuse_transmission
     if (u_useKHR_materials_diffuse_transmission) {
-        diffuse_transmission = getDirectDiffuseBTDF(N, L, diffuseTransmissionColor);
+        diffuse_transmission += getDirectDiffuseBTDF(N, L, diffuseTransmissionColor);
     }
+    #redgpu_endIf
+    let specular_weight = F * specularParameter;
+    #redgpu_if isFoliage
+        let total_diffuse = diffuse_reflection + diffuse_transmission;
+    #redgpu_else
+        let total_diffuse = mix(diffuse_reflection, diffuse_transmission, diffuseTransmissionParameter);
     #redgpu_endIf
     var specular_transmission = vec3<f32>(0.0);
     #redgpu_if useKHR_materials_transmission
@@ -1258,8 +1288,6 @@ fn getDirectPbrLight(
         if (abs(ior - 1.0) < EPSILON) { specular_transmission = vec3<f32>(0.0); }
     }
     #redgpu_endIf
-    let specular_weight = F * specularParameter;
-    let total_diffuse = mix(diffuse_reflection, diffuse_transmission, diffuseTransmissionParameter);
     let dielectricPart = (SPEC_BRDF * specularParameter * NdotL) + mix((vec3<f32>(1.0) - specular_weight) * total_diffuse, specular_transmission, transmissionParameter);
     let metallicPart = SPEC_BRDF * NdotL;
     var result = mix(dielectricPart, metallicPart, metallicParameter);

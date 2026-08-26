@@ -106,6 +106,8 @@ export interface FoliageTypeOptions {
     convertBlendToMasked?: boolean;
 
     combineSubMeshesByMaterial?: boolean;
+
+    isFoliage?: boolean;
 }
 
 class FoliageType {

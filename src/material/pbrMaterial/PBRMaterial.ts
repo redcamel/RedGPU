@@ -673,6 +673,11 @@ interface PBRMaterial {
      * [EN] Whether it is double-sided
      */
     doubleSided: boolean
+    /**
+     * [KO] 식생(Two-Sided Foliage) 셰이딩 모델 모드 여부
+     * [EN] Whether it uses Two-Sided Foliage shading mode
+     */
+    isFoliage: boolean
     //
     //
     /**
@@ -1066,6 +1071,7 @@ defineBoolean(PBRMaterial, [
     {key: 'useCutOff', value: false},
     {key: 'useVertexColor', value: false},
     {key: 'useVertexTangent', value: false},
+    {key: 'isFoliage', value: false},
     //
     {key: 'useKHR_materials_unlit', value: false},
     //

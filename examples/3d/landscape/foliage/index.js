@@ -165,7 +165,7 @@ RedGPU.init(
                             maxScale: [3.0, 3.0, 3.0],
                             cullingDistance: 4000,
                             fadeStartDistance: 3200,
-                            ignoreVertexColor: true,
+                            isFoliage: true,
                             billboard: {
                                 enabled: true,
                                 lodDistance: lastLodDist
@@ -199,12 +199,12 @@ RedGPU.init(
                     foliageManager.addFoliageType({
                         name: 'TestTree',
                         lods: lodConfigs,
-                        maxInstances: 150000,
+                        maxInstances: 50000,
                         minScale: [1.8, 1.8, 1.8],
                         maxScale: [3.0, 3.0, 3.0],
                         cullingDistance: 4000,
                         fadeStartDistance: 3200,
-                        ignoreVertexColor: true,
+                        isFoliage: true,
                         billboard: {
                             enabled: true,
                             lodDistance: lodConfigs[lodConfigs.length - 1].lodDistance

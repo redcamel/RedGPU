@@ -6,11 +6,11 @@ import VertexBuffer from "../../../../../resources/buffer/vertexBuffer/VertexBuf
 import IndexBuffer from "../../../../../resources/buffer/indexBuffer/IndexBuffer";
 import VertexInterleavedStruct from "../../../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexInterleaveType from "../../../../../resources/buffer/vertexBuffer/VertexInterleaveType";
-import GPU_BLEND_FACTOR from "../../../../../gpuConst/GPU_BLEND_FACTOR";
 import {createOctahedralImpostorGeometry} from "../impostor/octahedral/createOctahedralImpostorGeometry";
 import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImpostorMaterial";
 import FoliageImpostorBaker from "../impostor/FoliageImpostorBaker";
 import type {FoliageLODInfo, FoliageSubMesh, FoliageTypeOptions} from "../../FoliageType";
+import keepLog from "../../../../../utils/keepLog";
 
 const PBR_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
     {
@@ -328,21 +328,27 @@ class FoliageSubMeshAssembler {
         if (node.geometry && (node.material || materialOverride)) {
             const mat = materialOverride || node.material;
 
-            // 🌿 식생에 등록되는 모든 서브메시 머티리얼은 무조건 Double-Sided 적용
-            mat.doubleSided = true;
+            const isFoliage = options.isFoliage !== false;
+            if (isFoliage) {
+                // 🌿 식생 전용 셰이딩 모델 모드 활성화
+                mat.isFoliage = true;
+                mat.doubleSided = true;
+            }
 
-            if (options.convertBlendToMasked) {
+            if (options.convertBlendToMasked || isFoliage) {
+                keepLog('mat.alphaBlend', mat.alphaBlend)
                 if (mat.alphaBlend === 2 || mat.transparent || mat.alphaMode === 'BLEND' || mat.alphaMode === 'MASK') {
                     mat.useCutOff = true;
-                    if (!mat.cutOff || mat.cutOff === 0 || mat.cutOff >= 0.5) {
-                        mat.cutOff = 0.15;
+                    if (!mat.cutOff || mat.cutOff === 0 || mat.cutOff < 0.25) {
+                        mat.cutOff = 0.33;
                     }
                     const {blendColorState, blendAlphaState} = mat;
                     if (blendColorState && blendAlphaState) {
-                        blendColorState.srcFactor = GPU_BLEND_FACTOR.ONE;
-                        blendColorState.dstFactor = GPU_BLEND_FACTOR.ZERO;
-                        blendAlphaState.srcFactor = GPU_BLEND_FACTOR.ONE;
-                        blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ZERO;
+                        // blendColorState.srcFactor = GPU_BLEND_FACTOR.SRC_ALPHA;
+                        // blendColorState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
+                        // blendAlphaState.operation = GPU_BLEND_OPERATION.ADD;
+                        // blendAlphaState.srcFactor = GPU_BLEND_FACTOR.SRC_ALPHA;
+                        // blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
                     }
                     mat.transparent = false;
                     mat.alphaBlend = 1;
@@ -518,7 +524,13 @@ class FoliageSubMeshAssembler {
                             combinedVertexData[dstIdx + 9] = combinedVertexData[dstIdx + 7];
                         }
 
-                        if (rawStride >= 14) {
+                        const isFoliage = options.isFoliage !== false;
+                        if (isFoliage) {
+                            combinedVertexData[dstIdx + 10] = 1.0;
+                            combinedVertexData[dstIdx + 11] = 1.0;
+                            combinedVertexData[dstIdx + 12] = 1.0;
+                            combinedVertexData[dstIdx + 13] = 1.0;
+                        } else if (rawStride >= 14) {
                             const vc0 = srcVData[srcIdx + 10];
                             const vc1 = srcVData[srcIdx + 11];
                             const vc2 = srcVData[srcIdx + 12];
