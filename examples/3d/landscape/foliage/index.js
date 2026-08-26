@@ -111,9 +111,33 @@ RedGPU.init(
 
         const foliageManager = landscape.foliageManager;
 
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            '../../../assets/terrain/tree_elm.glb',
+            (loader) => {
+                const treeMesh = loader.resultMesh;
 
-
-
+                foliageManager.addFoliageType({
+                    name: 'ElmTree',
+                    lods: [
+                        {
+                            mesh: treeMesh,
+                            distance: 220,
+                            fadeRange: 30
+                        }
+                    ],
+                    maxInstances: 150000,
+                    minScale: [0.8, 0.8, 0.8],
+                    maxScale: [1.3, 1.3, 1.3],
+                    cullingDistance: 2500,
+                    fadeStartDistance: 2000,
+                    billboard: {
+                        enabled: true,
+                        lodDistance: 220
+                    }
+                });
+            }
+        );
 
         new RedGPU.GLTFLoader(
             redGPUContext,
@@ -134,26 +158,24 @@ RedGPU.init(
                 const lod0 = findNode(root, 'Acer_large_1_LOD0') || root;
                 const lod1 = findNode(root, 'Acer_large_1_LOD1');
                 const lod2 = findNode(root, 'Acer_large_1_LOD2');
-                // const lod3 = findNode(root, 'Acer_large_1_Billboard_LOD3');
 
                 const lodConfigs = [
-                    {mesh: lod0, distance: 40, fadeRange: 12},
+                    {mesh: lod0, distance: 45, fadeRange: 15},
                 ];
-                if (lod1) lodConfigs.push({mesh: lod1, distance: 110, fadeRange: 20});
+                if (lod1) lodConfigs.push({mesh: lod1, distance: 120, fadeRange: 25});
                 if (lod2) lodConfigs.push({mesh: lod2, distance: 260, fadeRange: 35});
-                if (lod3) lodConfigs.push({mesh: lod3, distance: 350, fadeRange: 55});
 
                 foliageManager.addFoliageType({
                     name: 'MapleTree',
                     lods: lodConfigs,
-                    maxInstances: 300000,
-                    minScale: [0.8, 0.8, 0.8],
-                    maxScale: [1.3, 1.3, 1.3],
+                    maxInstances: 150000,
+                    minScale: [0.7, 0.7, 0.7],
+                    maxScale: [1.2, 1.2, 1.2],
                     cullingDistance: 2500,
                     fadeStartDistance: 2000,
                     billboard: {
                         enabled: true,
-                        lodDistance: 560
+                        lodDistance: 260
                     }
                 });
             }
@@ -240,15 +262,50 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     subGrass.addBinding(grassProxy, 'fadeStartDist', {min: 200, max: 6000, step: 50});
                 }
 
-                const subTree = folderFoliage.addFolder({title: 'MapleTree (Multi-LOD + Billboard)', expanded: true});
-                const treeProxy = {
+                const subElm = folderFoliage.addFolder({title: 'ElmTree (3D + Billboard)', expanded: true});
+                const elmProxy = {
+                    get count() {
+                        const target = foliageManager.getFoliageType('ElmTree');
+                        return target ? target.activeInstanceCount : 0;
+                    },
+                    get lodDistance() {
+                        const target = foliageManager.getFoliageType('ElmTree');
+                        if (target?.lodInfoList?.[0]) {
+                            return target.lodInfoList[0].switchDistance;
+                        }
+                        return target ? target.options.lodDistance : 220;
+                    },
+                    set lodDistance(v) {
+                        const target = foliageManager.getFoliageType('ElmTree');
+                        if (target) {
+                            if (target.lodInfoList?.[0]) {
+                                target.lodInfoList[0].switchDistance = v;
+                            }
+                            target.options.lodDistance = v;
+                        }
+                    },
+                    get cullingDist() {
+                        const target = foliageManager.getFoliageType('ElmTree');
+                        return target ? target.options.cullingDistance : 2500;
+                    },
+                    set cullingDist(v) {
+                        const target = foliageManager.getFoliageType('ElmTree');
+                        if (target) target.options.cullingDistance = v;
+                    }
+                };
+                subElm.addBinding(elmProxy, 'count', {readonly: true});
+                subElm.addBinding(elmProxy, 'lodDistance', {min: 30, max: 1000, step: 10, label: '3D -> Billboard'});
+                subElm.addBinding(elmProxy, 'cullingDist', {min: 500, max: 8000, step: 100});
+
+                const subMaple = folderFoliage.addFolder({title: 'MapleTree (Multi-LOD + Billboard)', expanded: true});
+                const mapleProxy = {
                     get count() {
                         const target = foliageManager.getFoliageType('MapleTree');
                         return target ? target.activeInstanceCount : 0;
                     },
                     get lod0Dist() {
                         const target = foliageManager.getFoliageType('MapleTree');
-                        return target?.lodInfoList?.[0] ? target.lodInfoList[0].switchDistance : 40;
+                        return target?.lodInfoList?.[0] ? target.lodInfoList[0].switchDistance : 45;
                     },
                     set lod0Dist(v) {
                         const target = foliageManager.getFoliageType('MapleTree');
@@ -256,7 +313,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     },
                     get lod1Dist() {
                         const target = foliageManager.getFoliageType('MapleTree');
-                        return target?.lodInfoList?.[1] ? target.lodInfoList[1].switchDistance : 110;
+                        return target?.lodInfoList?.[1] ? target.lodInfoList[1].switchDistance : 120;
                     },
                     set lod1Dist(v) {
                         const target = foliageManager.getFoliageType('MapleTree');
@@ -283,21 +340,22 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                         if (target) target.options.cullingDistance = v;
                     }
                 };
-                subTree.addBinding(treeProxy, 'count', {readonly: true});
-                subTree.addBinding(treeProxy, 'lod0Dist', {min: 20, max: 200, step: 5, label: 'LOD 0 -> 1 Dist'});
-                subTree.addBinding(treeProxy, 'lod1Dist', {min: 50, max: 400, step: 10, label: 'LOD 1 -> 2 Dist'});
-                subTree.addBinding(treeProxy, 'billboardDist', {
+                subMaple.addBinding(mapleProxy, 'count', {readonly: true});
+                subMaple.addBinding(mapleProxy, 'lod0Dist', {min: 20, max: 200, step: 5, label: 'LOD 0 -> 1 Dist'});
+                subMaple.addBinding(mapleProxy, 'lod1Dist', {min: 50, max: 400, step: 10, label: 'LOD 1 -> 2 Dist'});
+                subMaple.addBinding(mapleProxy, 'billboardDist', {
                     min: 100,
                     max: 800,
                     step: 10,
                     label: 'LOD 2 -> Billboard'
                 });
-                subTree.addBinding(treeProxy, 'cullingDist', {min: 500, max: 8000, step: 100});
-                subTree.addBinding(config, 'billboardWireframe').on('change', (ev) => {
-                    const target = foliageManager.getFoliageType('MapleTree');
-                    if (target) {
-                        target.setBillboardWireframe(ev.value);
-                    }
+                subMaple.addBinding(mapleProxy, 'cullingDist', {min: 500, max: 8000, step: 100});
+
+                folderFoliage.addBinding(config, 'billboardWireframe').on('change', (ev) => {
+                    const elm = foliageManager.getFoliageType('ElmTree');
+                    if (elm) elm.setBillboardWireframe(ev.value);
+                    const maple = foliageManager.getFoliageType('MapleTree');
+                    if (maple) maple.setBillboardWireframe(ev.value);
                 });
             }
 
