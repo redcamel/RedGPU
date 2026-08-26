@@ -107,6 +107,8 @@ fn main(inputData: InputData) -> OutputFragment {
 
     // Accurate World-Space Normal
     let N = normalize(camRight * nx + camUp * (ny * 0.5 + 0.5) + camForward * nz);
+    let V = normalize(select(viewDir, systemUniforms.camera.cameraPosition.xyz - inputData.vertexPosition, length(viewDir) < 0.01));
+    let NdotV = max(dot(N, V), 0.0);
 
     let preExposure = systemUniforms.preExposure;
 
@@ -122,48 +124,67 @@ fn main(inputData: InputData) -> OutputFragment {
     );
     shadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, shadowVis);
 
-    // 3. Direct Directional Light (PBR Two-sided Foliage Scattering)
+    // 3. Direct Directional Light (Exact RedGPU PBR Disney Diffuse Formula)
     var directDiffuse = vec3<f32>(0.0);
+    let roughness = 0.85;
+    let energyBias = mix(0.0, 0.5, roughness);
+    let energyFactor = mix(1.0, 1.0 / 1.51, roughness);
+
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
 
     for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
         let light = u_directionalLights[i];
         let L = -normalize(light.direction);
-        let NdotL_front = max(dot(N, L), 0.0);
-        let NdotL_back = max(-dot(N, L), 0.0) * 0.35; // Translucent subsurface scattering
-        let foliageDiffuse = (NdotL_front + NdotL_back) * INV_PI;
+        let NdotL = max(dot(N, L), 0.0);
 
-        var lightColor = light.color * light.intensity * preExposure * shadowVis;
+        if (NdotL > 0.0) {
+            let H = normalize(L + V);
+            let LdotH = max(dot(L, H), 0.0);
+            let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
+            let f0 = 1.0;
+            let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
+            let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
+            let diffuseBRDF = NdotL * lightScatter * viewScatter * energyFactor;
 
-        if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
-            let u_atmo = systemUniforms.skyAtmosphere;
-            let surfaceHeightKm = max(0.0, inputData.vertexPosition.y / 1000.0);
-            let atmosphereTransmittance = getTransmittance(transmittanceTexture, atmosphereSampler, surfaceHeightKm, L.y, u_atmo.atmosphereHeight);
-            lightColor *= atmosphereTransmittance;
+            var lightColor = light.color * light.intensity * preExposure * shadowVis;
+
+            if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
+                let u_atmo = systemUniforms.skyAtmosphere;
+                let surfaceHeightKm = max(0.0, inputData.vertexPosition.y / 1000.0);
+                let atmosphereTransmittance = getTransmittance(transmittanceTexture, atmosphereSampler, surfaceHeightKm, L.y, u_atmo.atmosphereHeight);
+                lightColor *= atmosphereTransmittance;
+            }
+
+            directDiffuse += lightColor * diffuseBRDF;
+        }
+    }
+
+    // 4. Indirect Ambient & Sky Atmosphere (Exact PBRMaterial Indirect Formula)
+    var indirectDiffuse = vec3<f32>(0.0);
+    let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
+    let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
+
+    if (u_usePrefilterTexture || u_useSkyAtmosphere) {
+        if (u_usePrefilterTexture) {
+            indirectDiffuse += textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * preExposure * systemUniforms.iblIntensity * INV_PI;
         }
 
-        directDiffuse += lightColor * foliageDiffuse;
+        if (u_useSkyAtmosphere) {
+            let u_atmo = systemUniforms.skyAtmosphere;
+            let camH = u_atmo.cameraHeight;
+            let atmH = u_atmo.atmosphereHeight;
+            let skyIntensity = u_atmo.sunIntensity;
+            let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
+            let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity * preExposure;
+            indirectDiffuse = (indirectDiffuse * diffTrans) + skyIrradiance;
+        }
+    } else {
+        // Only apply ambientLight when IBL and SkyAtmosphere are disabled (matches PBRMaterial)
+        indirectDiffuse = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
     }
 
-    // 4. Indirect Ambient & Sky Atmosphere (Exact PBR Indirect Formulation)
-    var indirectDiffuse = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure * INV_PI;
-
-    if (systemUniforms.usePrefilterTexture == 1u) {
-        indirectDiffuse += textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * preExposure * systemUniforms.iblIntensity * INV_PI;
-    }
-
-    if (systemUniforms.useSkyAtmosphere == 1u) {
-        let u_atmo = systemUniforms.skyAtmosphere;
-        let camH = u_atmo.cameraHeight;
-        let atmH = u_atmo.atmosphereHeight;
-        let skyIntensity = u_atmo.sunIntensity;
-        let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
-        let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity * preExposure;
-        indirectDiffuse = (indirectDiffuse * diffTrans) + skyIrradiance;
-    }
-
-    // 5. Final Combined Shading
+    // 5. Final Combined Shading (100% PBR Match)
     var finalRgb = albedo * (directDiffuse + indirectDiffuse);
 
     let tinted = getTintBlendMode(vec4<f32>(finalRgb, 1.0), globalFragmentData.tintBlendMode, globalFragmentData.tint);
