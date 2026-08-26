@@ -74,10 +74,7 @@ export interface FoliageTypeOptions {
 
 class FoliageType {
     #name: string;
-    #options: Required<Omit<FoliageTypeOptions, 'billboard' | 'impostor'>> & {
-        billboard?: FoliageCrossBillboardOptions;
-        impostor?: FoliageCrossBillboardOptions;
-    };
+    #options: FoliageTypeOptions;
     #redGPUContext: RedGPUContext;
 
     #foliageManager: LandscapeFoliageManager | null = null;
@@ -116,12 +113,9 @@ class FoliageType {
             randomRotationY: options.randomRotationY ?? true,
             lodDistance: options.lodDistance ?? (billboardOpt?.lodDistance ?? 80.0),
             billboard: billboardOpt ?? {enabled: false},
-            impostor: billboardOpt ?? {enabled: false},
             convertBlendToMasked: options.convertBlendToMasked ?? true,
             combineSubMeshesByMaterial: options.combineSubMeshesByMaterial ?? true,
         };
-
-        this.#initSubMeshBindGroupLayout();
 
         const assembleResult = FoliageSubMeshAssembler.assemble(
             this.#redGPUContext,
@@ -144,10 +138,7 @@ class FoliageType {
         return this.#name;
     }
 
-    get options(): Required<Omit<FoliageTypeOptions, 'billboard' | 'impostor'>> & {
-        billboard?: FoliageCrossBillboardOptions;
-        impostor?: FoliageCrossBillboardOptions;
-    } {
+    get options(): FoliageTypeOptions {
         return this.#options;
     }
 
@@ -235,29 +226,6 @@ class FoliageType {
     #updateIndirectBuffer(): void {
         if (!this.#instanceBuffer || this.#subMeshes.length === 0) return;
         this.#instanceBuffer.resetMultiIndirectCount(this.#subMeshes);
-    }
-
-    #initSubMeshBindGroupLayout(): void {
-        if (this.#subMeshVertexBindGroupLayout) return;
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        if (!gpuDevice) return;
-
-        this.#subMeshVertexBindGroupLayout = gpuDevice.createBindGroupLayout({
-            label: `FoliageSubMesh_VertexBindGroupLayout_${this.#name}`,
-            entries: [
-                {
-                    binding: 0,
-                    visibility: GPUShaderStage.VERTEX,
-                    buffer: {
-                        type: 'uniform'
-                    }
-                }
-            ]
-        });
-    }
-
-    setCrossBillboardWireframe(wireframe: boolean): void {
-        this.setBillboardWireframe(wireframe);
     }
 }
 
