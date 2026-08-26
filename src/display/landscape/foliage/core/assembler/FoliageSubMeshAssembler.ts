@@ -316,6 +316,9 @@ class FoliageSubMeshAssembler {
         if (node.geometry && (node.material || materialOverride)) {
             const mat = materialOverride || node.material;
 
+            // 🌿 식생에 등록되는 모든 서브메시 머티리얼은 무조건 Double-Sided 적용
+            mat.doubleSided = true;
+
             if (options.convertBlendToMasked) {
                 if (mat.alphaBlend === 2 || mat.transparent || mat.alphaMode === 'BLEND' || mat.alphaMode === 'MASK') {
                     mat.useCutOff = true;
@@ -331,11 +334,8 @@ class FoliageSubMeshAssembler {
                     }
                     mat.transparent = false;
                     mat.alphaBlend = 1;
-                    mat.doubleSided = true;
                     mat.dirtyPipeline = true;
                 }
-            } else if (mat.alphaMode === 'MASK' || mat.useCutOff) {
-                mat.doubleSided = true;
             }
 
             if (mat.dirtyPipeline || !mat.gpuRenderInfo?.fragmentShaderModule || !mat.gpuRenderInfo?.fragmentUniformBindGroup) {
