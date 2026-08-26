@@ -52,7 +52,10 @@ export interface FoliageLODConfig {
     /** The 3D mesh (or mesh hierarchy) to render at this LOD level */
     mesh: Mesh | Mesh[];
 
-    /** Switch distance in meters (e.g. 40.0) */
+    /** LOD switch distance in meters (e.g. 40.0) */
+    lodDistance?: number;
+
+    /** [Legacy alias for lodDistance] */
     distance?: number;
 
     /** Screen size fraction (0.0 to 1.0) */
@@ -70,7 +73,7 @@ export interface FoliageLODConfig {
 
 export interface FoliageLODInfo {
     lodIndex: number;
-    switchDistance: number;
+    lodDistance: number;
     fadeRange: number;
     subMeshOffset: number;
     subMeshCount: number;

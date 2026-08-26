@@ -1,5 +1,5 @@
 struct FoliageLODUniformInfo {
-    switchDistance: f32,
+    lodDistance: f32,
     fadeRange: f32,
     subMeshOffset: u32,
     subMeshCount: u32,
@@ -85,7 +85,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
         let cullingDistSq = cullingDist * cullingDist;
 
         let numLODs = cullingUniforms.lodCount;
-        let hasInfiniteBillboard = (numLODs > 0u && cullingUniforms.lods[numLODs - 1u].switchDistance >= 100000.0);
+        let hasInfiniteBillboard = (numLODs > 0u && cullingUniforms.lods[numLODs - 1u].lodDistance >= 100000.0);
         let effectiveCullingDistSq = select(cullingDistSq, 1000000000000.0, hasInfiniteBillboard);
 
         if (horizontalDistSq < effectiveCullingDistSq) {
@@ -143,9 +143,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
                             let lodInfo = cullingUniforms.lods[l];
                             var prevDist: f32 = 0.0;
                             if (l > 0u) {
-                                prevDist = cullingUniforms.lods[l - 1u].switchDistance;
+                                prevDist = cullingUniforms.lods[l - 1u].lodDistance;
                             }
-                            let nextDist = lodInfo.switchDistance;
+                            let nextDist = lodInfo.lodDistance;
                             let halfRange = lodInfo.fadeRange * 0.5;
 
                             let enterStart = max(prevDist - halfRange, 0.0);

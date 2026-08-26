@@ -158,7 +158,7 @@ class FoliageInstanceBuffer {
                 const base = 40 + l * 4;
                 if (l < listLen) {
                     const info = lodInfoList[l];
-                    f32[base] = info.switchDistance;
+                    f32[base] = info.lodDistance;
                     f32[base + 1] = info.fadeRange;
                     u32[base + 2] = info.subMeshOffset;
                     u32[base + 3] = info.subMeshCount;

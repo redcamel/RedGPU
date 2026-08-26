@@ -87,13 +87,15 @@ class FoliageSubMeshAssembler {
                 }
 
                 const subCountForThisLOD = subList.length - startSubOffset;
+                const prevDist = l > 0 ? lodInfoList[l - 1].lodDistance : 0.0;
                 const defaultDist = (l === 0) ? 30.0 : (30.0 * Math.pow(2.5, l));
-                const switchDist = lodCfg.distance ?? defaultDist;
-                const fadeRange = lodCfg.fadeRange ?? 10.0;
+                const switchDist = lodCfg.lodDistance ?? lodCfg.distance ?? defaultDist;
+                const autoFade = FoliageSubMeshAssembler.calculateAutoFadeRange(switchDist, prevDist);
+                const fadeRange = lodCfg.fadeRange ?? autoFade;
 
                 lodInfoList.push({
                     lodIndex: l,
-                    switchDistance: switchDist,
+                    lodDistance: switchDist,
                     fadeRange: fadeRange,
                     subMeshOffset: startSubOffset,
                     subMeshCount: subCountForThisLOD,
@@ -133,15 +135,18 @@ class FoliageSubMeshAssembler {
                 (bbSubMesh as any)._bakedHeight = bbHeight;
                 subList.push(bbSubMesh);
 
-                const lastCustomDist = lodInfoList.length > 0 ? lodInfoList[lodInfoList.length - 1].switchDistance : 100.0;
                 if (billboardOpt.lodDistance && lodInfoList.length > 0) {
-                    lodInfoList[lodInfoList.length - 1].switchDistance = billboardOpt.lodDistance;
+                    lodInfoList[lodInfoList.length - 1].lodDistance = billboardOpt.lodDistance;
                 }
+
+                const last3DDist = lodInfoList.length > 0 ? lodInfoList[lodInfoList.length - 1].lodDistance : 100.0;
+                const prevDist = lodInfoList.length > 1 ? lodInfoList[lodInfoList.length - 2].lodDistance : 0.0;
+                const autoBbFade = FoliageSubMeshAssembler.calculateAutoFadeRange(last3DDist, prevDist);
 
                 lodInfoList.push({
                     lodIndex: billboardLODIndex,
-                    switchDistance: 1000000.0,
-                    fadeRange: 20.0,
+                    lodDistance: 1000000.0,
+                    fadeRange: autoBbFade,
                     subMeshOffset: bbStartOffset,
                     subMeshCount: 1,
                 });
@@ -163,11 +168,12 @@ class FoliageSubMeshAssembler {
 
             const lod0Count = subList.length;
             const lod0Dist = billboardOpt?.lodDistance ?? options.lodDistance ?? 80.0;
+            const autoFade0 = FoliageSubMeshAssembler.calculateAutoFadeRange(lod0Dist, 0.0);
 
             lodInfoList.push({
                 lodIndex: 0,
-                switchDistance: lod0Dist,
-                fadeRange: 15.0,
+                lodDistance: lod0Dist,
+                fadeRange: autoFade0,
                 subMeshOffset: 0,
                 subMeshCount: lod0Count,
             });
@@ -203,8 +209,8 @@ class FoliageSubMeshAssembler {
 
                 lodInfoList.push({
                     lodIndex: 1,
-                    switchDistance: 1000000.0,
-                    fadeRange: 20.0,
+                    lodDistance: 1000000.0,
+                    fadeRange: autoFade0,
                     subMeshOffset: lod0Count,
                     subMeshCount: 1,
                 });
@@ -224,6 +230,11 @@ class FoliageSubMeshAssembler {
             lodInfoList,
             bottomOffset: minOffset,
         };
+    }
+
+    static calculateAutoFadeRange(currentDist: number, prevDist: number = 0): number {
+        const span = Math.max(currentDist - prevDist, 5.0);
+        return Math.min(Math.max(span * 0.10, 5.0), 15.0);
     }
 
     static #computeMeshLocalMatrix(mesh: Mesh, out: mat4): mat4 {
