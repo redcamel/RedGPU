@@ -15,8 +15,11 @@ RedGPU.init(
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
-        view.grid = true;
+        view.grid = false;
         redGPUContext.addView(view);
+
+        const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
+        view.skyAtmosphere = skyAtmosphere;
 
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 45;
@@ -221,11 +224,11 @@ RedGPU.init(
         renderer.start(redGPUContext, () => {
         });
 
-        renderTestPane(redGPUContext, landscape, controller, directionalLight, layers, foliageManager);
+        renderTestPane(redGPUContext, view, skyAtmosphere, landscape, controller, directionalLight, layers, foliageManager);
     }
 );
 
-const renderTestPane = (redGPUContext, landscape, controller, directionalLight, layers, foliageManager) => {
+const renderTestPane = (redGPUContext, view, skyAtmosphere, landscape, controller, directionalLight, layers, foliageManager) => {
     const [wsX, wsZ] = landscape.worldSize;
     const [tcX, tcZ] = landscape.componentCount;
     const [tsX, tsZ] = landscape.tileSize;
@@ -541,6 +544,18 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
             const folderSun = pane.addFolder({title: 'Sun Light', expanded: false});
             folderSun.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
             folderSun.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
+
+            const folderAtmo = pane.addFolder({title: 'SkyAtmosphere', expanded: false});
+            const atmoState = {enabled: true};
+            folderAtmo.addBinding(atmoState, 'enabled', {label: 'Enabled'}).on('change', (ev) => {
+                view.skyAtmosphere = ev.value ? skyAtmosphere : null;
+            });
+            folderAtmo.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01});
+            folderAtmo.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01});
+            folderAtmo.addBinding(skyAtmosphere, 'cloudCoverage', {min: 0, max: 1, step: 0.01});
+            folderAtmo.addBinding(skyAtmosphere, 'cloudDensity', {min: 0, max: 1, step: 0.01});
+            folderAtmo.addBinding(skyAtmosphere, 'cloudHeight', {min: 0.1, max: 20, step: 0.1});
+            folderAtmo.addBinding(skyAtmosphere, 'atmosphereHeight', {min: 1, max: 200, step: 1});
 
             const folderCam = pane.addFolder({title: 'Camera', expanded: true});
             folderCam.addBinding(controller, 'moveSpeed', {min: 50, max: 20000, step: 10});

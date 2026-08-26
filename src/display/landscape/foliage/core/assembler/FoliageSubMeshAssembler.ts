@@ -707,15 +707,16 @@ class FoliageSubMeshAssembler {
             ]
         });
 
+        const isBillboard = mat instanceof OctahedralImpostorMaterial || !!(mat as any)?.isBuiltInMaterial;
         const isTransparent = !!mat.transparent || !!mat.use2PathRender;
         const isAlpha = (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
-        const isLOD0 = lodIndex === 0 || lodIndex === undefined;
         const isMasked = !!mat.useCutOff || (mat.cutOff !== undefined && mat.cutOff > 0);
         const hasBaseColorTexture = !!(mat.baseColorTexture?.gpuTexture || mat.baseColorTexture?.src || mat.baseColorTexture?.url || (mat.diffuseTexture && (mat.diffuseTexture.gpuTexture || mat.diffuseTexture.src || mat.diffuseTexture.url)));
 
-        const isDepthPrepass = !isTransparent && !isAlpha && isLOD0 && isMasked && hasBaseColorTexture;
+        // 🌿 3D 메쉬 LOD(LOD0, LOD1, LOD2...)만 Depth Prepass를 적용하고, 빌보드는 Prepass에서 제외!
+        const isDepthPrepass = !isBillboard && !isTransparent && !isAlpha && isMasked && hasBaseColorTexture;
         const isMainOpaqueOrMasked = !isTransparent && !isAlpha;
-        const mainDepthMode = (isLOD0 && isMasked && hasBaseColorTexture) ? 'mainShadingAfterDepth' : 'normal';
+        const mainDepthMode = (!isBillboard && isMasked && hasBaseColorTexture) ? 'mainShadingAfterDepth' : 'normal';
 
         return {
             mesh: meshNode,
