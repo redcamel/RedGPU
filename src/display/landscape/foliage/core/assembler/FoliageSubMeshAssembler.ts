@@ -11,6 +11,7 @@ import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImposto
 import FoliageImpostorBaker from "../impostor/FoliageImpostorBaker";
 import type {FoliageLODInfo, FoliageSubMesh, FoliageTypeOptions} from "../../FoliageType";
 import keepLog from "../../../../../utils/keepLog";
+import GPU_BLEND_FACTOR from "../../../../../gpuConst/GPU_BLEND_FACTOR";
 
 const PBR_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
     {
@@ -339,16 +340,13 @@ class FoliageSubMeshAssembler {
                 keepLog('mat.alphaBlend', mat.alphaBlend)
                 if (mat.alphaBlend === 2 || mat.transparent || mat.alphaMode === 'BLEND' || mat.alphaMode === 'MASK') {
                     mat.useCutOff = true;
-                    if (!mat.cutOff || mat.cutOff === 0 || mat.cutOff < 0.25) {
-                        mat.cutOff = 0.33;
-                    }
+                    mat.cutOff = 0.33;
                     const {blendColorState, blendAlphaState} = mat;
                     if (blendColorState && blendAlphaState) {
-                        // blendColorState.srcFactor = GPU_BLEND_FACTOR.SRC_ALPHA;
-                        // blendColorState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
-                        // blendAlphaState.operation = GPU_BLEND_OPERATION.ADD;
-                        // blendAlphaState.srcFactor = GPU_BLEND_FACTOR.SRC_ALPHA;
-                        // blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
+                        blendColorState.srcFactor = GPU_BLEND_FACTOR.ONE;
+                        blendColorState.dstFactor = GPU_BLEND_FACTOR.ZERO;
+                        blendAlphaState.srcFactor = GPU_BLEND_FACTOR.ONE;
+                        blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ZERO;
                     }
                     mat.transparent = false;
                     mat.alphaBlend = 1;
@@ -524,28 +522,15 @@ class FoliageSubMeshAssembler {
                             combinedVertexData[dstIdx + 9] = combinedVertexData[dstIdx + 7];
                         }
 
-                        const isFoliage = options.isFoliage !== false;
-                        if (isFoliage) {
-                            combinedVertexData[dstIdx + 10] = 1.0;
-                            combinedVertexData[dstIdx + 11] = 1.0;
-                            combinedVertexData[dstIdx + 12] = 1.0;
-                            combinedVertexData[dstIdx + 13] = 1.0;
-                        } else if (rawStride >= 14) {
+                        if (rawStride >= 14) {
                             const vc0 = srcVData[srcIdx + 10];
                             const vc1 = srcVData[srcIdx + 11];
                             const vc2 = srcVData[srcIdx + 12];
                             const vc3 = srcVData[srcIdx + 13];
-                            if (vc0 === 0 && vc1 === 0 && vc2 === 0 && vc3 === 0) {
-                                combinedVertexData[dstIdx + 10] = 1.0;
-                                combinedVertexData[dstIdx + 11] = 1.0;
-                                combinedVertexData[dstIdx + 12] = 1.0;
-                                combinedVertexData[dstIdx + 13] = 1.0;
-                            } else {
-                                combinedVertexData[dstIdx + 10] = vc0;
-                                combinedVertexData[dstIdx + 11] = vc1;
-                                combinedVertexData[dstIdx + 12] = vc2;
-                                combinedVertexData[dstIdx + 13] = vc3 !== 0 ? vc3 : 1.0;
-                            }
+                            combinedVertexData[dstIdx + 10] = vc0;
+                            combinedVertexData[dstIdx + 11] = vc1;
+                            combinedVertexData[dstIdx + 12] = vc2;
+                            combinedVertexData[dstIdx + 13] = vc3 !== 0 ? vc3 : 1.0;
                         } else {
                             combinedVertexData[dstIdx + 10] = 1.0;
                             combinedVertexData[dstIdx + 11] = 1.0;

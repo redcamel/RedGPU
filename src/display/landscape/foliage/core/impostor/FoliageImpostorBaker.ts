@@ -417,9 +417,6 @@ class FoliageImpostorBaker {
                 out.worldNormal = normalize(nMat * normal);
 
                 var finalColor = trans.color;
-                if (length(vertexColor) > 0.001) {
-                    finalColor *= vertexColor;
-                }
                 out.color = finalColor;
                 out.useTexture = u32(trans.extra.x + 0.5);
                 return out;

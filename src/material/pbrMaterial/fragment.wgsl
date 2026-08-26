@@ -275,6 +275,7 @@ fn main(inputData:InputData) -> OutputFragment {
 
     // UV Transforms
     let diffuseUV = getTextureTransformUV(input_uv, input_uv1, uniforms.baseColorTexture_texCoord_index, uniforms.use_baseColorTexture_KHR_texture_transform, uniforms.baseColorTexture_KHR_texture_transform_offset, uniforms.baseColorTexture_KHR_texture_transform_rotation, uniforms.baseColorTexture_KHR_texture_transform_scale);
+    let foliageUvDeriv = length(vec2<f32>(dpdx(diffuseUV.x), dpdy(diffuseUV.y))) * 80.0;
     var baseColor = u_baseColorFactor;
     var resultAlpha:f32 = u_opacity * baseColor.a;
     baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor && !u_isFoliage);
@@ -286,7 +287,15 @@ fn main(inputData:InputData) -> OutputFragment {
 
 
     #redgpu_if useCutOff
-        if (resultAlpha <= u_cutOff) { discard; }
+        var dynamicCutOff = u_cutOff;
+//        if (dynamicCutOff <= 0.0) {
+            dynamicCutOff = 0.33;
+//        }
+        #redgpu_if isFoliage
+            // 🌿 카메라 거리가 멀어져 화면 픽셀당 UV 미분량이 커질수록 컷오프를 부드럽게 완화하여 잎사귀 소실(Alpha Thinning) 방지
+            dynamicCutOff = max(dynamicCutOff * 0.25, dynamicCutOff - foliageUvDeriv * 0.2);
+        #redgpu_endIf
+        if (resultAlpha <= dynamicCutOff) { discard; }
     #redgpu_endIf
 
     let emissiveUV = getTextureTransformUV(input_uv, input_uv1, uniforms.emissiveTexture_texCoord_index, uniforms.use_emissiveTexture_KHR_texture_transform, uniforms.emissiveTexture_KHR_texture_transform_offset, uniforms.emissiveTexture_KHR_texture_transform_rotation, uniforms.emissiveTexture_KHR_texture_transform_scale);
@@ -380,6 +389,12 @@ fn main(inputData:InputData) -> OutputFragment {
     var occlusionParameter:f32 = 1.0;
     #redgpu_if useOcclusionTexture
         occlusionParameter = textureSample(packedORMTexture, packedTextureSampler, occlusionUV).r * u_occlusionStrength;
+    #redgpu_endIf
+    #redgpu_if isFoliage
+        // 🌿 식생 정점에 구워진 Baked AO(차폐 음영)를 잎사귀 안쪽 음영에 반영
+        if (length(input_vertexColor_0) > 0.001) {
+            occlusionParameter *= input_vertexColor_0.r;
+        }
     #redgpu_endIf
     var metallicParameter: f32 = u_metallicFactor;
     var roughnessParameter: f32 = u_roughnessFactor;

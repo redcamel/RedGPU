@@ -99,7 +99,7 @@ fn main(inputData: InputData) -> OutputFragment {
         frac.y
     );
 
-    if (finalAlpha < 0.35) {
+    if (finalAlpha < 0.33) {
         discard;
     }
 
@@ -201,8 +201,9 @@ fn main(inputData: InputData) -> OutputFragment {
         indirectDiffuse = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
     }
 
-    // 6. Final Combined Shading (Exact 1:1 PBR Tone Matching)
-    var finalRgb = albedo * (directDiffuse + indirectDiffuse);
+    // 🌿 3D 메쉬의 잎사귀 자가 차폐(Canopy Ambient Occlusion)와 밝기 톤 1:1 일치
+    let canopyAO = 0.45;
+    var finalRgb = albedo * (directDiffuse + indirectDiffuse * canopyAO);
 
     let tinted = getTintBlendMode(vec4<f32>(finalRgb, 1.0), globalFragmentData.tintBlendMode, globalFragmentData.tint);
     finalRgb = tinted.rgb;

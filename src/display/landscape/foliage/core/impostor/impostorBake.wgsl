@@ -21,12 +21,12 @@ fn main(input: VertexOutput) -> BakeFragmentOutput {
 
     if (input.useTexture != 0u) {
         let texColor = textureSampleLevel(diffuseTexture, diffuseSampler, input.uv, 0.0);
-        if (texColor.a < 0.3) {
+        if (texColor.a < 0.33) {
             discard;
         }
         finalColor = texColor * input.color;
     } else {
-        if (finalColor.a < 0.1) {
+        if (finalColor.a < 0.33) {
             discard;
         }
     }
