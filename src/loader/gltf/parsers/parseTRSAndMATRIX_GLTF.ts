@@ -32,18 +32,38 @@ const setMeshRotation = (tRotation: number[], mesh: Mesh) => {
  */
 const parseTRSAndMATRIX_GLTF = (mesh: Mesh, nodeInfo: Node) => {
     const {matrix, rotation: quaternion, translation, scale} = nodeInfo;
-    let rotationMTX, tRotation;
+    let rotationMTX = mat4.create();
+    let tRotation: any;
 
-    rotationMTX = mat4.create();
     if ('matrix' in nodeInfo) {
-        tRotation = vec3.create();
-        mat4ToEuler(matrix, tRotation);
-        setMeshRotation(tRotation, mesh);
-        mesh.setPosition(matrix[12], matrix[13], matrix[14]);
+        const matrix = nodeInfo.matrix;
         const tempScale = vec3.fromValues(1, 1, 1);
-        // @ts-ignore
         mat4.getScaling(tempScale, matrix);
         mesh.setScale(tempScale[0], tempScale[1], tempScale[2]);
+        mesh.setPosition(matrix[12], matrix[13], matrix[14]);
+
+        const unscaledRot = mat4.clone(matrix);
+        const invSx = tempScale[0] !== 0 ? (1 / tempScale[0]) : 1;
+        const invSy = tempScale[1] !== 0 ? (1 / tempScale[1]) : 1;
+        const invSz = tempScale[2] !== 0 ? (1 / tempScale[2]) : 1;
+
+        unscaledRot[0] *= invSx;
+        unscaledRot[1] *= invSx;
+        unscaledRot[2] *= invSx;
+        unscaledRot[4] *= invSy;
+        unscaledRot[5] *= invSy;
+        unscaledRot[6] *= invSy;
+        unscaledRot[8] *= invSz;
+        unscaledRot[9] *= invSz;
+        unscaledRot[10] *= invSz;
+        unscaledRot[12] = 0;
+        unscaledRot[13] = 0;
+        unscaledRot[14] = 0;
+        unscaledRot[15] = 1;
+
+        tRotation = vec3.create();
+        mat4ToEuler(unscaledRot, tRotation, 'XYZ');
+        setMeshRotation(tRotation, mesh);
     } else {
         if ('rotation' in nodeInfo) {
             tRotation = vec3.create();
