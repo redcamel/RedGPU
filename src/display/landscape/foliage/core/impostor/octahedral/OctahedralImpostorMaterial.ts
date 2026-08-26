@@ -2,27 +2,28 @@ import RedGPUContext from "../../../../../../context/RedGPUContext";
 import Sampler from "../../../../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../../../../resources/texture/BitmapTexture";
 import DirectTexture from "../../../../../../resources/texture/DirectTexture";
-import fragmentModuleSource from './crossBillboardFragment.wgsl';
+import fragmentModuleSource from './octahedralImpostorFragment.wgsl';
 import AUVTransformBaseMaterial from "../../../../../../material/core/AUVTransformBaseMaterial";
 import defineSampler from "../../../../../../defineProperty/funcs/texture/defineSampler";
 import defineTexture from "../../../../../../defineProperty/funcs/texture/defineTexture";
 import GPU_BLEND_FACTOR from "../../../../../../gpuConst/GPU_BLEND_FACTOR";
 import GPU_MIPMAP_FILTER_MODE from "../../../../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 
-interface CrossBillboardMaterial {
+interface OctahedralImpostorMaterial {
     diffuseTexture: BitmapTexture | DirectTexture;
     diffuseTextureSampler: Sampler;
     useCutOff: boolean;
     cutOff: number;
     doubleSided: boolean;
     alphaBlend: number;
+    gridSize: number;
 }
 
-class CrossBillboardMaterial extends AUVTransformBaseMaterial {
-    constructor(redGPUContext: RedGPUContext, diffuseTexture?: BitmapTexture | DirectTexture, name?: string) {
+class OctahedralImpostorMaterial extends AUVTransformBaseMaterial {
+    constructor(redGPUContext: RedGPUContext, diffuseTexture?: BitmapTexture | DirectTexture, name?: string, gridSize: number = 8.0) {
         super(
             redGPUContext,
-            'CROSS_BILLBOARD_MATERIAL',
+            'OCTAHEDRAL_IMPOSTOR_MATERIAL',
             fragmentModuleSource,
             2
         );
@@ -32,10 +33,11 @@ class CrossBillboardMaterial extends AUVTransformBaseMaterial {
         this.diffuseTextureSampler.mipmapFilter = GPU_MIPMAP_FILTER_MODE.LINEAR;
 
         this.useCutOff = true;
-        this.cutOff = 0.5;
+        this.cutOff = 0.4;
         this.doubleSided = true;
         this.transparent = false;
         this.alphaBlend = 1;
+        this.gridSize = gridSize;
 
         const {blendColorState, blendAlphaState} = this;
         if (blendColorState && blendAlphaState) {
@@ -49,16 +51,16 @@ class CrossBillboardMaterial extends AUVTransformBaseMaterial {
     }
 }
 
-defineSampler(CrossBillboardMaterial, [
+defineSampler(OctahedralImpostorMaterial, [
     {key: 'diffuseTextureSampler'}
 ]);
-defineTexture(CrossBillboardMaterial, [
+defineTexture(OctahedralImpostorMaterial, [
     {key: 'diffuseTexture'}
 ]);
-Object.defineProperty(CrossBillboardMaterial.prototype, 'isBuiltInMaterial', {
+Object.defineProperty(OctahedralImpostorMaterial.prototype, 'isBuiltInMaterial', {
     value: true,
     writable: false
 });
 
-Object.freeze(CrossBillboardMaterial);
-export default CrossBillboardMaterial;
+Object.freeze(OctahedralImpostorMaterial);
+export default OctahedralImpostorMaterial;

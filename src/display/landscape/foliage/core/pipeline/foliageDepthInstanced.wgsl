@@ -51,7 +51,20 @@ fn mainInput(input : VertexInput) -> DepthOutputData {
     let scaledPos = hierarchyPos * input.instanceScale;
     let rotatedPos = rotateVectorByQuaternion(scaledPos, input.instanceRotQuat);
 
-    let worldPos = rotatedPos + input.instancePos;
+    var worldPos = rotatedPos + input.instancePos;
+    let isBillboard = (input.vertexTangent.w < -500.0);
+    if (isBillboard) {
+        let toCam = systemUniforms.camera.cameraPosition.xyz - input.instancePos;
+        let distXZ = length(toCam.xz);
+        var rightVec = vec3<f32>(1.0, 0.0, 0.0);
+        if (distXZ > 0.0001) {
+            let toCamXZ = toCam.xz / distXZ;
+            rightVec = vec3<f32>(-toCamXZ.y, 0.0, toCamXZ.x);
+        }
+        let upVec = vec3<f32>(0.0, 1.0, 0.0);
+        let billboardOffset = rightVec * (hierarchyPos.x * input.instanceScale.x) + upVec * (hierarchyPos.y * input.instanceScale.y);
+        worldPos = input.instancePos + billboardOffset;
+    }
 
     output.position = systemUniforms.projection.projectionViewMatrix * vec4<f32>(worldPos, 1.0);
 

@@ -7,7 +7,8 @@ import LandscapeLayer from "./material/LandscapeLayer";
 import LandscapeFoliageManager from "./foliage/LandscapeFoliageManager";
 import type {FoliageTypeOptions} from "./foliage/FoliageType";
 import FoliageType from "./foliage/FoliageType";
-import CrossBillboardMaterial from "./foliage/core/impostor/crossBillboard/CrossBillboardMaterial";
+import OctahedralImpostorMaterial from "./foliage/core/impostor/octahedral/OctahedralImpostorMaterial";
+import {createOctahedralImpostorGeometry} from "./foliage/core/impostor/octahedral/createOctahedralImpostorGeometry";
 import type {LandscapeDebuggerManagerOptions} from "./debugger";
 import LandscapeDebuggerManager from "./debugger";
 
@@ -19,7 +20,8 @@ export {
     validateLandscapeBaseGridSize,
     LandscapeFoliageManager,
     FoliageType,
-    CrossBillboardMaterial,
+    OctahedralImpostorMaterial,
+    createOctahedralImpostorGeometry,
     LandscapeDebuggerManager,
     LANDSCAPE_DEFAULT_LOD_COLORS
 };

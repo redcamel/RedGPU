@@ -72,23 +72,42 @@ fn mainInput(input : VertexInput) -> OutputData {
     let scaledPos = hierarchyPos * safeScale;
     let rotatedPos = rotateVectorByQuaternion(scaledPos, input.instanceRotQuat);
 
+    var worldPos = rotatedPos + input.instancePos;
     var worldNormal = vec3<f32>(0.0, 1.0, 0.0);
-    if (length(hierarchyNormal) > 0.001) {
-        let scaledNormal = hierarchyNormal / safeScale;
-        worldNormal = normalize(rotateVectorByQuaternion(scaledNormal, input.instanceRotQuat));
-    }
 
-    var inTan = hierarchyTangent;
-    if (length(inTan) < 0.001) {
-        var rawT = vec3<f32>(1.0, 0.0, 0.0);
-        if (abs(hierarchyNormal.x) > 0.9) { rawT = vec3<f32>(0.0, 1.0, 0.0); }
-        inTan = normalize(cross(hierarchyNormal, rawT));
-    }
-    let worldTangent = normalize(rotateVectorByQuaternion(inTan, input.instanceRotQuat));
-    let tanW = select(1.0, input.vertexTangent.w, input.vertexTangent.w != 0.0);
-    output.vertexTangent = vec4<f32>(worldTangent, tanW);
+    let isBillboard = (input.vertexTangent.w < -500.0);
+    if (isBillboard) {
+        let toCam = systemUniforms.camera.cameraPosition.xyz - input.instancePos;
+        let distXZ = length(toCam.xz);
+        var rightVec = vec3<f32>(1.0, 0.0, 0.0);
+        if (distXZ > 0.0001) {
+            let toCamXZ = toCam.xz / distXZ;
+            rightVec = vec3<f32>(-toCamXZ.y, 0.0, toCamXZ.x);
+        }
+        let upVec = vec3<f32>(0.0, 1.0, 0.0);
+        let billboardOffset = rightVec * (hierarchyPos.x * safeScale.x) + upVec * (hierarchyPos.y * safeScale.y);
+        worldPos = input.instancePos + billboardOffset;
+        worldNormal = normalize(vec3<f32>(toCam.x, 0.0, toCam.z));
 
-    let worldPos = rotatedPos + input.instancePos;
+        let invQuat = vec4<f32>(-input.instanceRotQuat.xyz, input.instanceRotQuat.w);
+        let localView = normalize(rotateVectorByQuaternion(toCam, invQuat));
+        output.vertexTangent = vec4<f32>(localView, -999.0);
+    } else {
+        if (length(hierarchyNormal) > 0.001) {
+            let scaledNormal = hierarchyNormal / safeScale;
+            worldNormal = normalize(rotateVectorByQuaternion(scaledNormal, input.instanceRotQuat));
+        }
+
+        var inTan = hierarchyTangent;
+        if (length(inTan) < 0.001) {
+            var rawT = vec3<f32>(1.0, 0.0, 0.0);
+            if (abs(hierarchyNormal.x) > 0.9) { rawT = vec3<f32>(0.0, 1.0, 0.0); }
+            inTan = normalize(cross(hierarchyNormal, rawT));
+        }
+        let worldTangent = normalize(rotateVectorByQuaternion(inTan, input.instanceRotQuat));
+        let tanW = select(1.0, input.vertexTangent.w, input.vertexTangent.w != 0.0);
+        output.vertexTangent = vec4<f32>(worldTangent, tanW);
+    }
 
     let clipPos = systemUniforms.projection.projectionViewMatrix * vec4<f32>(worldPos, 1.0);
 

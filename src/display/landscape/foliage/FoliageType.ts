@@ -4,7 +4,7 @@ import Mesh from "../../mesh/Mesh";
 import Geometry from "../../../geometry/Geometry";
 import ABaseMaterial from "../../../material/core/ABaseMaterial";
 import FoliageInstanceBuffer from "./FoliageInstanceBuffer";
-import createCrossBillboardGeometry from "./core/impostor/crossBillboard/createCrossBillboardGeometry";
+import {createOctahedralImpostorGeometry} from "./core/impostor/octahedral/createOctahedralImpostorGeometry";
 import type {FoliageDepthPassMode} from "./core/pipeline/FoliagePipelineRegistry";
 import FoliageSubMeshAssembler from "./core/assembler/FoliageSubMeshAssembler";
 import FoliageTilePopulator from "./core/populator/FoliageTilePopulator";
@@ -230,13 +230,14 @@ class FoliageType {
     }
 
     setBillboardWireframe(wireframe: boolean): void {
-        const billboardSub = this.subMeshes.find(s => s.lodIndex === 1);
+        const billboardSub = this.subMeshes.find(s => (s as any)._octahedralWidth !== undefined || (s as any)._bakedWidth !== undefined);
         if (!billboardSub) return;
 
-        const bbWidth = (billboardSub as any)._bakedWidth ?? 6.0;
-        const bbHeight = (billboardSub as any)._bakedHeight ?? 8.0;
+        const bbWidth = (billboardSub as any)._octahedralWidth ?? (billboardSub as any)._bakedWidth ?? 6.0;
+        const bbHeight = (billboardSub as any)._octahedralHeight ?? (billboardSub as any)._bakedHeight ?? 8.0;
+        const bbBottomOffset = (billboardSub as any)._bottomOffset ?? 0.0;
 
-        const newGeom = createCrossBillboardGeometry(this.#redGPUContext, bbWidth, bbHeight, wireframe);
+        const newGeom = createOctahedralImpostorGeometry(this.#redGPUContext, bbWidth, bbHeight, wireframe, bbBottomOffset);
         billboardSub.geometry = newGeom;
         billboardSub.mesh.geometry = newGeom;
         billboardSub.indexCount = newGeom.indexBuffer?.indexCount || 0;

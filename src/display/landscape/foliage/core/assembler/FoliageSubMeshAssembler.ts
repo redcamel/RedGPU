@@ -7,8 +7,8 @@ import IndexBuffer from "../../../../../resources/buffer/indexBuffer/IndexBuffer
 import VertexInterleavedStruct from "../../../../../resources/buffer/vertexBuffer/VertexInterleavedStruct";
 import VertexInterleaveType from "../../../../../resources/buffer/vertexBuffer/VertexInterleaveType";
 import GPU_BLEND_FACTOR from "../../../../../gpuConst/GPU_BLEND_FACTOR";
-import createCrossBillboardGeometry from "../impostor/crossBillboard/createCrossBillboardGeometry";
-import CrossBillboardMaterial from "../impostor/crossBillboard/CrossBillboardMaterial";
+import {createOctahedralImpostorGeometry} from "../impostor/octahedral/createOctahedralImpostorGeometry";
+import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImpostorMaterial";
 import FoliageImpostorBaker from "../impostor/FoliageImpostorBaker";
 import type {FoliageLODInfo, FoliageSubMesh, FoliageTypeOptions} from "../../FoliageType";
 
@@ -111,11 +111,12 @@ class FoliageSubMeshAssembler {
 
                 const bbWidth = billboardOpt.width ?? bakeResult.width;
                 const bbHeight = billboardOpt.height ?? bakeResult.height;
+                const bbBottomOffset = bakeResult.bottomOffset ?? 0;
 
-                const bbGeom = createCrossBillboardGeometry(redGPUContext, bbWidth, bbHeight);
+                const bbGeom = createOctahedralImpostorGeometry(redGPUContext, bbWidth, bbHeight, false, bbBottomOffset);
                 let bbMat = billboardOpt.material;
                 if (!bbMat) {
-                    bbMat = new CrossBillboardMaterial(redGPUContext, bakeResult.texture, `${options.name}_CrossBillboardMat`);
+                    bbMat = new OctahedralImpostorMaterial(redGPUContext, bakeResult.texture, `${options.name}_OctahedralMat`, 8.0);
                 }
 
                 const bbStartOffset = subList.length;
@@ -131,8 +132,11 @@ class FoliageSubMeshAssembler {
                     PBR_STRIDE * 4,
                     billboardLODIndex
                 );
+                (bbSubMesh as any)._octahedralWidth = bbWidth;
+                (bbSubMesh as any)._octahedralHeight = bbHeight;
                 (bbSubMesh as any)._bakedWidth = bbWidth;
                 (bbSubMesh as any)._bakedHeight = bbHeight;
+                (bbSubMesh as any)._bottomOffset = bbBottomOffset;
                 subList.push(bbSubMesh);
 
                 if (billboardOpt.lodDistance && lodInfoList.length > 0) {
@@ -184,11 +188,12 @@ class FoliageSubMeshAssembler {
 
                 const bbWidth = billboardOpt.width ?? bakeResult.width;
                 const bbHeight = billboardOpt.height ?? bakeResult.height;
+                const bbBottomOffset = bakeResult.bottomOffset ?? 0;
 
-                const bbGeom = createCrossBillboardGeometry(redGPUContext, bbWidth, bbHeight);
+                const bbGeom = createOctahedralImpostorGeometry(redGPUContext, bbWidth, bbHeight, false, bbBottomOffset);
                 let bbMat = billboardOpt.material;
                 if (!bbMat) {
-                    bbMat = new CrossBillboardMaterial(redGPUContext, bakeResult.texture, `${options.name}_CrossBillboardMat`);
+                    bbMat = new OctahedralImpostorMaterial(redGPUContext, bakeResult.texture, `${options.name}_OctahedralMat`, 8.0);
                 }
 
                 const bbSubMesh = FoliageSubMeshAssembler.#createSubMeshInstance(
@@ -203,8 +208,11 @@ class FoliageSubMeshAssembler {
                     PBR_STRIDE * 4,
                     1
                 );
+                (bbSubMesh as any)._octahedralWidth = bbWidth;
+                (bbSubMesh as any)._octahedralHeight = bbHeight;
                 (bbSubMesh as any)._bakedWidth = bbWidth;
                 (bbSubMesh as any)._bakedHeight = bbHeight;
+                (bbSubMesh as any)._bottomOffset = bbBottomOffset;
                 subList.push(bbSubMesh);
 
                 lodInfoList.push({

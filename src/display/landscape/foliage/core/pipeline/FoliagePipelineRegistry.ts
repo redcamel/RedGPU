@@ -35,8 +35,8 @@ class FoliagePipelineRegistry {
         const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
         const preferredFormat = navigator.gpu.getPreferredCanvasFormat();
 
-        if (material.dirtyPipeline || !material.fragmentShaderModule) {
-            material._updateFragmentState();
+        if (material.dirtyPipeline || !material.gpuRenderInfo?.fragmentShaderModule) {
+            material._updateFragmentState?.();
         }
 
         const isDepthPrepass = depthPassMode === 'depthPrepass';
@@ -48,7 +48,7 @@ class FoliagePipelineRegistry {
         }
         const fragmentModule = isDepthPrepass
             ? this.#depthOnlyFragmentShaderModule
-            : (material.fragmentShaderModule || material.gpuRenderInfo?.fragmentShaderModule);
+            : (material.gpuRenderInfo?.fragmentShaderModule || material.fragmentShaderModule);
 
         const isWireframe = !!material.wireframe;
         const topology: GPUPrimitiveTopology = isWireframe ? 'line-list' : 'triangle-list';
