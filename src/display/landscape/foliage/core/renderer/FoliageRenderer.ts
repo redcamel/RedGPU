@@ -247,8 +247,8 @@ class FoliageRenderer {
 
         passEncoder.setVertexBuffer(0, vertexGPUBuffer);
 
-        const isBillboard = sub.lodIndex === 1;
-        const instanceBufferOffset = isBillboard ? (maxInstances * 48) : 0;
+        const lodIdx = sub.lodIndex ?? 0;
+        const instanceBufferOffset = lodIdx * maxInstances * 48;
         if (this.#lastBoundInstanceBuffer !== culledGPUBuffer || this.#lastBoundInstanceOffset !== instanceBufferOffset) {
             passEncoder.setVertexBuffer(1, culledGPUBuffer, instanceBufferOffset);
             this.#lastBoundInstanceBuffer = culledGPUBuffer;

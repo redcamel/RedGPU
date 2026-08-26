@@ -48,10 +48,43 @@ export interface FoliageCrossBillboardOptions {
     lodDistance?: number;
 }
 
+export interface FoliageLODConfig {
+    /** The 3D mesh (or mesh hierarchy) to render at this LOD level */
+    mesh: Mesh | Mesh[];
+
+    /** Switch distance in meters (e.g. 40.0) */
+    distance?: number;
+
+    /** Screen size fraction (0.0 to 1.0) */
+    screenSize?: number;
+
+    /** Dithered cross-fade range buffer in meters (default: 10.0) */
+    fadeRange?: number;
+
+    /** Optional material override for this LOD level */
+    materialOverride?: ABaseMaterial;
+
+    /** Whether to combine sub-meshes sharing identical materials (default: true) */
+    combineSubMeshesByMaterial?: boolean;
+}
+
+export interface FoliageLODInfo {
+    lodIndex: number;
+    switchDistance: number;
+    fadeRange: number;
+    subMeshOffset: number;
+    subMeshCount: number;
+}
+
 export interface FoliageTypeOptions {
     name: string;
 
-    mesh: Mesh | Mesh[];
+    /** [Legacy & Single LOD] Mesh or array of meshes */
+    mesh?: Mesh | Mesh[];
+
+    /** [Multi-LOD] Array of user-defined LOD configurations (LOD 0 to LOD 7) */
+    lods?: FoliageLODConfig[];
+
     maxInstances?: number;
 
     cullingDistance?: number;
@@ -80,6 +113,7 @@ class FoliageType {
     #foliageManager: LandscapeFoliageManager | null = null;
 
     #subMeshes: FoliageSubMesh[] = [];
+    #lodInfoList: FoliageLODInfo[] = [];
 
     #instanceBuffer: FoliageInstanceBuffer;
 
@@ -105,6 +139,7 @@ class FoliageType {
         this.#options = {
             name: options.name,
             mesh: options.mesh,
+            lods: options.lods,
             maxInstances: options.maxInstances ?? 50000,
             cullingDistance: options.cullingDistance ?? 2000.0,
             fadeStartDistance: options.fadeStartDistance ?? 1500.0,
@@ -123,6 +158,7 @@ class FoliageType {
             this.#subMeshVertexBindGroupLayout!
         );
         this.#subMeshes = assembleResult.subMeshes;
+        this.#lodInfoList = assembleResult.lodInfoList || [];
         this.#lod0SubMeshCount = assembleResult.lod0SubMeshCount;
         this.#bottomOffset = assembleResult.bottomOffset;
 
@@ -144,6 +180,14 @@ class FoliageType {
 
     get subMeshes(): FoliageSubMesh[] {
         return this.#subMeshes;
+    }
+
+    get lodInfoList(): FoliageLODInfo[] {
+        return this.#lodInfoList;
+    }
+
+    get lodCount(): number {
+        return this.#lodInfoList.length;
     }
 
     get instanceBuffer(): FoliageInstanceBuffer {

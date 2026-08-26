@@ -117,18 +117,29 @@ RedGPU.init(
 
         new RedGPU.GLTFLoader(
             redGPUContext,
+            // '../../../assets/terrain/realistic_hd_frangipani_tree_1550.glb',
+            // '../../../assets/terrain/whnp3v2jflkw-_tree.glb',
             '../../../assets/terrain/tree_elm.glb',
             (loader) => {
                 const treeMesh = loader.resultMesh;
 
                 foliageManager.addFoliageType({
-                    name: 'ElmTree',
-                    mesh: treeMesh,
+                    name: 'FrangipaniTree',
+                    lods: [
+                        {
+                            mesh: treeMesh,
+                            distance: 180,
+                            fadeRange: 25
+                        }
+                    ],
                     maxInstances: 300000,
-                    minScale: [1, 1, 1],
+                    minScale: [1.2, 1.2, 1.2],
+                    maxScale: [1.8, 1.8, 1.8],
+                    cullingDistance: 2500,
+                    fadeStartDistance: 2000,
                     billboard: {
                         enabled: true,
-                        lodDistance: 250
+                        lodDistance: 180
                     }
                 });
             }
@@ -215,25 +226,42 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     subGrass.addBinding(grassProxy, 'fadeStartDist', {min: 200, max: 6000, step: 50});
                 }
 
-                const subTree = folderFoliage.addFolder({title: 'ElmTree (Infinite Billboard)', expanded: true});
+                const subTree = folderFoliage.addFolder({title: 'FrangipaniTree (HD Multi-LOD)', expanded: true});
                 const treeProxy = {
                     get count() {
-                        const target = foliageManager.getFoliageType('ElmTree');
+                        const target = foliageManager.getFoliageType('FrangipaniTree');
                         return target ? target.activeInstanceCount : 0;
                     },
                     get lodDistance() {
-                        const target = foliageManager.getFoliageType('ElmTree');
-                        return target ? target.options.lodDistance : 250;
+                        const target = foliageManager.getFoliageType('FrangipaniTree');
+                        if (target?.lodInfoList?.[0]) {
+                            return target.lodInfoList[0].switchDistance;
+                        }
+                        return target ? target.options.lodDistance : 180;
                     },
                     set lodDistance(v) {
-                        const target = foliageManager.getFoliageType('ElmTree');
-                        if (target) target.options.lodDistance = v;
+                        const target = foliageManager.getFoliageType('FrangipaniTree');
+                        if (target) {
+                            if (target.lodInfoList?.[0]) {
+                                target.lodInfoList[0].switchDistance = v;
+                            }
+                            target.options.lodDistance = v;
+                        }
+                    },
+                    get cullingDist() {
+                        const target = foliageManager.getFoliageType('FrangipaniTree');
+                        return target ? target.options.cullingDistance : 2500;
+                    },
+                    set cullingDist(v) {
+                        const target = foliageManager.getFoliageType('FrangipaniTree');
+                        if (target) target.options.cullingDistance = v;
                     }
                 };
                 subTree.addBinding(treeProxy, 'count', {readonly: true});
-                subTree.addBinding(treeProxy, 'lodDistance', {min: 50, max: 1000, step: 10});
+                subTree.addBinding(treeProxy, 'lodDistance', {min: 30, max: 1000, step: 10});
+                subTree.addBinding(treeProxy, 'cullingDist', {min: 500, max: 8000, step: 100});
                 subTree.addBinding(config, 'billboardWireframe').on('change', (ev) => {
-                    const target = foliageManager.getFoliageType('ElmTree');
+                    const target = foliageManager.getFoliageType('FrangipaniTree');
                     if (target) {
                         target.setBillboardWireframe(ev.value);
                     }

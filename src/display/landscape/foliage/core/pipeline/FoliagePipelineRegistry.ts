@@ -40,6 +40,12 @@ class FoliagePipelineRegistry {
         }
 
         const isDepthPrepass = depthPassMode === 'depthPrepass';
+        if (isDepthPrepass) {
+            const hasBaseColorTexture = !!(material.baseColorTexture?.gpuTexture || material.baseColorTexture?.src || material.baseColorTexture?.url || (material.diffuseTexture && (material.diffuseTexture.gpuTexture || material.diffuseTexture.src || material.diffuseTexture.url)));
+            if (!hasBaseColorTexture) {
+                return null;
+            }
+        }
         const fragmentModule = isDepthPrepass
             ? this.#depthOnlyFragmentShaderModule
             : (material.fragmentShaderModule || material.gpuRenderInfo?.fragmentShaderModule);

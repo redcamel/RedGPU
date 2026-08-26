@@ -72,16 +72,11 @@ fn mainInput(input : VertexInput) -> OutputData {
     let scaledPos = hierarchyPos * safeScale;
     let rotatedPos = rotateVectorByQuaternion(scaledPos, input.instanceRotQuat);
 
-    var smoothedNormal = hierarchyNormal;
-    let canopyDir = normalize(vec3<f32>(hierarchyPos.x, max(hierarchyPos.y * 0.6, 0.2), hierarchyPos.z));
+    var worldNormal = vec3<f32>(0.0, 1.0, 0.0);
     if (length(hierarchyNormal) > 0.001) {
-        smoothedNormal = normalize(hierarchyNormal * 0.55 + canopyDir * 0.3 + vec3<f32>(0.0, 0.15, 0.0));
-    } else {
-        smoothedNormal = canopyDir;
+        let scaledNormal = hierarchyNormal / safeScale;
+        worldNormal = normalize(rotateVectorByQuaternion(scaledNormal, input.instanceRotQuat));
     }
-
-    let scaledNormal = smoothedNormal / safeScale;
-    let worldNormal = normalize(rotateVectorByQuaternion(scaledNormal, input.instanceRotQuat));
 
     var inTan = hierarchyTangent;
     if (length(inTan) < 0.001) {

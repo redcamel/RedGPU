@@ -49,6 +49,11 @@ class FoliageCullingDispatcher {
         const heightScale = landscape?.heightScale ?? 600.0;
         const hasVHT = !!(landscape?.getInternalAtlasTexture('vht')?.gpuTexture);
 
+        const fov = camera?.fov ?? 60.0;
+        const fovRad = (fov * Math.PI) / 180.0;
+        const tanHalfFov = Math.tan(fovRad * 0.5);
+        const fovFactorSq = tanHalfFov * tanHalfFov;
+
         for (let i = 0; i < typeCount; i++) {
             const foliageType = typeList[i];
             const activeCount = foliageType.activeInstanceCount;
@@ -70,6 +75,8 @@ class FoliageCullingDispatcher {
                 cullingDist, fadeStartDist, activeCount, boundingRadius,
                 worldSizeX, heightScale, bottomOffset, hasVHT,
                 frustumPlanes,
+                foliageType.lodInfoList,
+                fovFactorSq,
                 foliageType.lodDistance,
                 foliageType.lod0SubMeshCount,
                 foliageType.hasBillboard

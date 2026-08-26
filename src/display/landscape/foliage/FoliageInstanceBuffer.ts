@@ -1,10 +1,10 @@
 import RedGPUContext from "../../../context/RedGPUContext";
-import type {FoliageSubMesh} from "./FoliageType";
+import type {FoliageLODInfo, FoliageSubMesh} from "./FoliageType";
 
 class FoliageInstanceBuffer {
 
-    static #cullingUniformData = new Float32Array(40);
-    static #cullingUniformUint32 = new Uint32Array(FoliageInstanceBuffer.#cullingUniformData.buffer);
+    static readonly #cullingUniformData = new Float32Array(80);
+    static readonly #cullingUniformUint32 = new Uint32Array(FoliageInstanceBuffer.#cullingUniformData.buffer);
     #maxInstances: number;
     #strideFloats: number = 12;
 
@@ -105,6 +105,8 @@ class FoliageInstanceBuffer {
         activeCount: number, boundingRadius: number,
         worldSizeX: number, heightScale: number, bottomOffset: number, hasVHT: boolean,
         frustumPlanes: number[][] | null,
+        lodInfoList?: FoliageLODInfo[],
+        fovFactorSq: number = 1.0,
         lodDistance: number = 100.0,
         lod0SubMeshCount: number = 1,
         hasBillboard: boolean = false
@@ -113,6 +115,8 @@ class FoliageInstanceBuffer {
 
         const f32 = FoliageInstanceBuffer.#cullingUniformData;
         const u32 = FoliageInstanceBuffer.#cullingUniformUint32;
+
+        const numLODs = lodInfoList && lodInfoList.length > 0 ? Math.min(lodInfoList.length, 8) : (hasBillboard ? 2 : 1);
 
         f32[0] = camX;
         f32[1] = camY;
@@ -127,11 +131,11 @@ class FoliageInstanceBuffer {
         f32[8] = heightScale;
         f32[9] = bottomOffset;
         u32[10] = hasVHT ? 1 : 0;
-        u32[11] = hasBillboard ? 1 : 0;
+        u32[11] = numLODs;
 
-        f32[12] = lodDistance;
-        u32[13] = Math.max(lod0SubMeshCount, 1);
-        u32[14] = this.#maxInstances;
+        u32[12] = this.#maxInstances;
+        f32[13] = fovFactorSq > 0 ? fovFactorSq : 1.0;
+        u32[14] = 0;
         u32[15] = 0;
 
         if (frustumPlanes && frustumPlanes.length >= 6) {
@@ -147,13 +151,54 @@ class FoliageInstanceBuffer {
             f32.fill(0, 16, 40);
         }
 
+        // Encode up to 8 LOD Infos
+        if (lodInfoList && lodInfoList.length > 0) {
+            const listLen = Math.min(lodInfoList.length, 8);
+            for (let l = 0; l < 8; l++) {
+                const base = 40 + l * 4;
+                if (l < listLen) {
+                    const info = lodInfoList[l];
+                    f32[base] = info.switchDistance;
+                    f32[base + 1] = info.fadeRange;
+                    u32[base + 2] = info.subMeshOffset;
+                    u32[base + 3] = info.subMeshCount;
+                } else {
+                    f32[base] = 999999.0;
+                    f32[base + 1] = 10.0;
+                    u32[base + 2] = 0;
+                    u32[base + 3] = 0;
+                }
+            }
+        } else {
+            // Fallback for 1 or 2 LODs
+            const base0 = 40;
+            f32[base0] = lodDistance;
+            f32[base0 + 1] = 10.0;
+            u32[base0 + 2] = 0;
+            u32[base0 + 3] = Math.max(lod0SubMeshCount, 1);
+
+            const base1 = 44;
+            f32[base1] = cullingDist;
+            f32[base1 + 1] = 15.0;
+            u32[base1 + 2] = Math.max(lod0SubMeshCount, 1);
+            u32[base1 + 3] = hasBillboard ? 1 : 0;
+
+            for (let l = 2; l < 8; l++) {
+                const base = 40 + l * 4;
+                f32[base] = 999999.0;
+                f32[base + 1] = 10.0;
+                u32[base + 2] = 0;
+                u32[base + 3] = 0;
+            }
+        }
+
         const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
         gpuDevice.queue.writeBuffer(
             this.#cullingUniformBuffer,
             0,
             f32.buffer,
             f32.byteOffset,
-            160
+            288
         );
     }
 
@@ -268,7 +313,7 @@ class FoliageInstanceBuffer {
 
         this.#culledGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageInstanceBuffer_CulledGPUBuffer',
-            size: requiredSize * 2,
+            size: requiredSize * 8, // Support up to 8 LOD slots
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
         });
 
@@ -282,7 +327,7 @@ class FoliageInstanceBuffer {
 
         this.#cullingUniformBuffer = gpuDevice.createBuffer({
             label: 'FoliageInstanceBuffer_CullingUniformBuffer',
-            size: 256,
+            size: 512,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
     }

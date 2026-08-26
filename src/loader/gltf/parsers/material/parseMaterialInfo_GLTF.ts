@@ -6,6 +6,7 @@ import parse_KHR_materials_anisotropy from "./extensions/parse_KHR_materials_ani
 import parse_KHR_materials_clearcoat from "./extensions/parse_KHR_materials_clearcoat";
 import parse_KHR_materials_diffuse_transmission from "./extensions/parse_KHR_materials_diffuse_transmission";
 import parse_KHR_materials_iridescence from "./extensions/parse_KHR_materials_iridescence";
+import parse_KHR_materials_pbrSpecularGlossiness from "./extensions/parse_KHR_materials_pbrSpecularGlossiness";
 import parse_KHR_materials_sheen from "./extensions/parse_KHR_materials_sheen";
 import parse_KHR_materials_specular from "./extensions/parse_KHR_materials_specular";
 import parse_KHR_materials_transmission from "./extensions/parse_KHR_materials_transmission";
@@ -119,8 +120,12 @@ const parseMaterialInfo_GLTF = (gltfLoader: GLTFLoader, gltfData: GLTF, meshPrim
                 KHR_materials_specular,
                 KHR_materials_dispersion,
                 KHR_materials_anisotropy,
-                KHR_materials_iridescence
+                KHR_materials_iridescence,
+                KHR_materials_pbrSpecularGlossiness
             } = extensions
+            if (KHR_materials_pbrSpecularGlossiness) {
+                parse_KHR_materials_pbrSpecularGlossiness(currentMaterial, KHR_materials_pbrSpecularGlossiness, gltfLoader)
+            }
             if (KHR_materials_iridescence) {
                 parse_KHR_materials_iridescence(currentMaterial, KHR_materials_iridescence, gltfLoader)
             }
