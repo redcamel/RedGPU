@@ -390,12 +390,6 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_if useOcclusionTexture
         occlusionParameter = textureSample(packedORMTexture, packedTextureSampler, occlusionUV).r * u_occlusionStrength;
     #redgpu_endIf
-    #redgpu_if isFoliage
-        // 🌿 식생 정점에 구워진 Baked AO(차폐 음영)를 잎사귀 안쪽 음영에 반영
-        if (length(input_vertexColor_0) > 0.001) {
-            occlusionParameter *= input_vertexColor_0.r;
-        }
-    #redgpu_endIf
     var metallicParameter: f32 = u_metallicFactor;
     var roughnessParameter: f32 = u_roughnessFactor;
     #redgpu_if useMetallicRoughnessTexture
