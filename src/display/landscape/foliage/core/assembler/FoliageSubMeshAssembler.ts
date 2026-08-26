@@ -116,7 +116,7 @@ class FoliageSubMeshAssembler {
                 const bbGeom = createOctahedralImpostorGeometry(redGPUContext, bbWidth, bbHeight, false, bbBottomOffset);
                 let bbMat = billboardOpt.material;
                 if (!bbMat) {
-                    bbMat = new OctahedralImpostorMaterial(redGPUContext, bakeResult.texture, `${options.name}_OctahedralMat`, 8.0);
+                    bbMat = new OctahedralImpostorMaterial(redGPUContext, bakeResult.texture, bakeResult.normalTexture, `${options.name}_OctahedralMat`, 8.0);
                 }
 
                 const bbStartOffset = subList.length;
@@ -193,7 +193,7 @@ class FoliageSubMeshAssembler {
                 const bbGeom = createOctahedralImpostorGeometry(redGPUContext, bbWidth, bbHeight, false, bbBottomOffset);
                 let bbMat = billboardOpt.material;
                 if (!bbMat) {
-                    bbMat = new OctahedralImpostorMaterial(redGPUContext, bakeResult.texture, `${options.name}_OctahedralMat`, 8.0);
+                    bbMat = new OctahedralImpostorMaterial(redGPUContext, bakeResult.texture, bakeResult.normalTexture, `${options.name}_OctahedralMat`, 8.0);
                 }
 
                 const bbSubMesh = FoliageSubMeshAssembler.#createSubMeshInstance(

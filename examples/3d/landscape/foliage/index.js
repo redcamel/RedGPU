@@ -125,7 +125,7 @@ RedGPU.init(
                             lodDistance: 450
                         }
                     ],
-                    maxInstances: 150000,
+                    maxInstances: 50000,
                     minScale: [1.8, 1.8, 1.8],
                     maxScale: [2.8, 2.8, 2.8],
                     cullingDistance: 4000,
@@ -135,50 +135,52 @@ RedGPU.init(
                         lodDistance: 450
                     }
                 });
+                // scene.addChild(treeMesh)
+                // treeMesh.setScale(100)
             }
         );
 
-        new RedGPU.GLTFLoader(
-            redGPUContext,
-            '../../../assets/terrain/maple_tree_pack.glb',
-            (loader) => {
-                const root = loader.resultMesh;
-                const findNode = (node, name) => {
-                    if (!node) return null;
-                    if (node.name === name) return node;
-                    const children = node.children || [];
-                    for (let i = 0; i < children.length; i++) {
-                        const f = findNode(children[i], name);
-                        if (f) return f;
-                    }
-                    return null;
-                };
-
-                const lod0 = findNode(root, 'Acer_large_1_LOD0') || root;
-                const lod1 = findNode(root, 'Acer_large_1_LOD1');
-                const lod2 = findNode(root, 'Acer_large_1_LOD2');
-
-                const lodConfigs = [
-                    {mesh: lod0, lodDistance: 200},
-                    {mesh: lod1, lodDistance: 450},
-                    {mesh: lod2, lodDistance: 800}
-                ];
-
-                foliageManager.addFoliageType({
-                    name: 'MapleTree',
-                    lods: lodConfigs,
-                    maxInstances: 150000,
-                    minScale: [2.0, 2.0, 2.0],
-                    maxScale: [3.2, 3.2, 3.2],
-                    cullingDistance: 4000,
-                    fadeStartDistance: 3200,
-                    billboard: {
-                        enabled: true,
-                        lodDistance: 800
-                    }
-                });
-            }
-        );
+        // new RedGPU.GLTFLoader(
+        //     redGPUContext,
+        //     '../../../assets/terrain/maple_tree_pack.glb',
+        //     (loader) => {
+        //         const root = loader.resultMesh;
+        //         const findNode = (node, name) => {
+        //             if (!node) return null;
+        //             if (node.name === name) return node;
+        //             const children = node.children || [];
+        //             for (let i = 0; i < children.length; i++) {
+        //                 const f = findNode(children[i], name);
+        //                 if (f) return f;
+        //             }
+        //             return null;
+        //         };
+        //
+        //         const lod0 = findNode(root, 'Acer_large_1_LOD0') || root;
+        //         const lod1 = findNode(root, 'Acer_large_1_LOD1');
+        //         const lod2 = findNode(root, 'Acer_large_1_LOD2');
+        //
+        //         const lodConfigs = [
+        //             {mesh: lod0, lodDistance: 200},
+        //             {mesh: lod1, lodDistance: 450},
+        //             {mesh: lod2, lodDistance: 800}
+        //         ];
+        //
+        //         foliageManager.addFoliageType({
+        //             name: 'MapleTree',
+        //             lods: lodConfigs,
+        //             maxInstances: 50000,
+        //             minScale: [2.0, 2.0, 2.0],
+        //             maxScale: [3.2, 3.2, 3.2],
+        //             cullingDistance: 4000,
+        //             fadeStartDistance: 3200,
+        //             billboard: {
+        //                 enabled: true,
+        //                 lodDistance: 800
+        //             }
+        //         });
+        //     }
+        // );
 
         landscape.debuggerManager.spatialGrid = true;
 

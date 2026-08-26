@@ -9,6 +9,8 @@
 
 @group(2) @binding(1) var diffuseTextureSampler: sampler;
 @group(2) @binding(2) var diffuseTexture: texture_2d<f32>;
+@group(2) @binding(3) var normalTextureSampler: sampler;
+@group(2) @binding(4) var normalTexture: texture_2d<f32>;
 
 struct InputData {
     @builtin(position) position: vec4<f32>,
@@ -42,11 +44,11 @@ fn dirToHemiOctahedralUV(dir: vec3<f32>) -> vec2<f32> {
     return clamp(vec2<f32>(u, v), vec2<f32>(0.0), vec2<f32>(1.0));
 }
 
-fn sampleOctahedralAtlas(gridCoords: vec2<f32>, quadUV: vec2<f32>, n: f32) -> vec4<f32> {
+fn sampleOctahedralAtlas(tex: texture_2d<f32>, smp: sampler, gridCoords: vec2<f32>, quadUV: vec2<f32>, n: f32) -> vec4<f32> {
     let clampedGrid = clamp(gridCoords, vec2<f32>(0.0), vec2<f32>(n - 1.0));
     let safeSubUV = clamp(quadUV, vec2<f32>(0.002), vec2<f32>(0.998));
     let atlasUV = (clampedGrid + safeSubUV) / n;
-    return textureSample(diffuseTexture, diffuseTextureSampler, atlasUV);
+    return textureSample(tex, smp, atlasUV);
 }
 
 @fragment
@@ -67,12 +69,17 @@ fn main(inputData: InputData) -> OutputFragment {
     let baseGrid = floor(gridPos);
     let frac = gridPos - baseGrid;
 
-    let s00 = sampleOctahedralAtlas(baseGrid, inputData.uv, n);
-    let s10 = sampleOctahedralAtlas(baseGrid + vec2<f32>(1.0, 0.0), inputData.uv, n);
-    let s01 = sampleOctahedralAtlas(baseGrid + vec2<f32>(0.0, 1.0), inputData.uv, n);
-    let s11 = sampleOctahedralAtlas(baseGrid + vec2<f32>(1.0, 1.0), inputData.uv, n);
+    // 1. MRT Dual Atlas 4-Tap Bilinear Sampling (BaseColor & True 3D World Normal)
+    let s00 = sampleOctahedralAtlas(diffuseTexture, diffuseTextureSampler, baseGrid, inputData.uv, n);
+    let s10 = sampleOctahedralAtlas(diffuseTexture, diffuseTextureSampler, baseGrid + vec2<f32>(1.0, 0.0), inputData.uv, n);
+    let s01 = sampleOctahedralAtlas(diffuseTexture, diffuseTextureSampler, baseGrid + vec2<f32>(0.0, 1.0), inputData.uv, n);
+    let s11 = sampleOctahedralAtlas(diffuseTexture, diffuseTextureSampler, baseGrid + vec2<f32>(1.0, 1.0), inputData.uv, n);
 
-    // Alpha-weighted blending to eliminate black halo/fringe artifacts
+    let n00 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, baseGrid, inputData.uv, n);
+    let n10 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, baseGrid + vec2<f32>(1.0, 0.0), inputData.uv, n);
+    let n01 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, baseGrid + vec2<f32>(0.0, 1.0), inputData.uv, n);
+    let n11 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, baseGrid + vec2<f32>(1.0, 1.0), inputData.uv, n);
+
     let w00 = (1.0 - frac.x) * (1.0 - frac.y) * s00.a;
     let w10 = frac.x * (1.0 - frac.y) * s10.a;
     let w01 = (1.0 - frac.x) * frac.y * s01.a;
@@ -80,8 +87,10 @@ fn main(inputData: InputData) -> OutputFragment {
     let totalWeight = w00 + w10 + w01 + w11;
 
     var albedo = s00.rgb;
+    var rawNorm = n00.rgb;
     if (totalWeight > 0.0001) {
         albedo = (s00.rgb * w00 + s10.rgb * w10 + s01.rgb * w01 + s11.rgb * w11) / totalWeight;
+        rawNorm = (n00.rgb * w00 + n10.rgb * w10 + n01.rgb * w01 + n11.rgb * w11) / totalWeight;
     }
 
     let finalAlpha = mix(
@@ -94,33 +103,18 @@ fn main(inputData: InputData) -> OutputFragment {
         discard;
     }
 
-    // 1. Rotation-Independent Tree World Basis (Anchor to instance position)
-    let nx = (inputData.uv.x - 0.5) * 1.2;
-    let ny = (0.5 - inputData.uv.y) * 1.2;
-    let r2 = nx * nx + ny * ny;
-    let nz = sqrt(max(1.0 - r2 * 0.5, 0.3));
-
-    // Vector from tree vertex towards camera (constant regardless of camera yaw rotation)
-    let toCamVec = camPos - inputData.vertexPosition;
-    let distXZ = length(toCamVec.xz);
-    var billboardForward = vec3<f32>(0.0, 0.0, 1.0);
-    var billboardRight = vec3<f32>(1.0, 0.0, 0.0);
-
-    if (distXZ > 0.0001) {
-        let forwardXZ = toCamVec.xz / distXZ;
-        billboardForward = vec3<f32>(forwardXZ.x, 0.0, forwardXZ.y);
-        billboardRight = vec3<f32>(-forwardXZ.y, 0.0, forwardXZ.x);
+    // 2. Unpack True 3D Baked Leaf Normal (No magic numbers / No spherical guessing)
+    var N = normalize(rawNorm * 2.0 - 1.0);
+    if (length(N) < 0.1) {
+        N = vec3<f32>(0.0, 1.0, 0.0);
     }
-    let billboardUp = vec3<f32>(0.0, 1.0, 0.0);
 
-    // True world-space volume normal
-    let N = normalize(billboardRight * nx + billboardUp * ny + billboardForward * nz);
+    let toCamVec = camPos - inputData.vertexPosition;
     let V = normalize(select(viewDir, toCamVec, length(viewDir) < 0.01));
-    let NdotV = max(dot(N, V), 0.0);
-
+    let NdotV = max(abs(dot(N, V)), 0.04);
     let preExposure = systemUniforms.preExposure;
 
-    // 2. Directional Shadow calculation
+    // 3. Directional Shadow calculation
     var shadowVis: f32 = 1.0;
     shadowVis = getDirectionalShadowVisibility(
         directionalShadowMap,
@@ -132,7 +126,7 @@ fn main(inputData: InputData) -> OutputFragment {
     );
     shadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, shadowVis);
 
-    // 3. Direct Directional Light (Exact RedGPU PBR Disney Diffuse Matching)
+    // 4. Direct Directional Light (Exact RedGPU PBR Disney Diffuse Matching)
     var directDiffuse = vec3<f32>(0.0);
     let roughness = 0.85;
     let energyBias = mix(0.0, 0.5, roughness);
@@ -144,16 +138,33 @@ fn main(inputData: InputData) -> OutputFragment {
     for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
         let light = u_directionalLights[i];
         let L = -normalize(light.direction);
-        let NdotL = max(dot(N, L), 0.0);
 
-        if (NdotL > 0.0) {
+        let NdotL_front = max(dot(N, L), 0.0);
+        let NdotL_back  = max(-dot(N, L), 0.0);
+
+        var diffuseBRDF = 0.0;
+
+        // Front direct diffuse
+        if (NdotL_front > 0.0) {
             let H = normalize(L + V);
             let LdotH = max(dot(L, H), 0.0);
             let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
-            let lightScatter = 1.0 + (fd90 - 1.0) * pow(1.0 - NdotL, 5.0);
+            let lightScatter = 1.0 + (fd90 - 1.0) * pow(1.0 - NdotL_front, 5.0);
             let viewScatter = 1.0 + (fd90 - 1.0) * pow(1.0 - NdotV, 5.0);
-            let diffuseBRDF = NdotL * lightScatter * viewScatter * energyFactor;
+            diffuseBRDF += NdotL_front * lightScatter * viewScatter * energyFactor;
+        }
 
+        // Two-Sided leaf diffuse for natural transmission
+        if (NdotL_back > 0.0) {
+            let H_back = normalize(L + V);
+            let LdotH_back = max(dot(L, H_back), 0.0);
+            let fd90_back = energyBias + 2.0 * LdotH_back * LdotH_back * roughness;
+            let lightScatter_back = 1.0 + (fd90_back - 1.0) * pow(1.0 - NdotL_back, 5.0);
+            let viewScatter_back = 1.0 + (fd90_back - 1.0) * pow(1.0 - NdotV, 5.0);
+            diffuseBRDF += (NdotL_back * lightScatter_back * viewScatter_back * energyFactor) * 0.4;
+        }
+
+        if (diffuseBRDF > 0.0) {
             var lightColor = light.color * light.intensity * preExposure * shadowVis;
 
             if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
@@ -167,7 +178,7 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
 
-    // 4. Indirect Ambient & Sky Atmosphere (Exact RedGPU PBR Indirect Matching with INV_PI)
+    // 5. Indirect Ambient & Sky Atmosphere (Exact RedGPU PBR Indirect Matching with INV_PI)
     var indirectDiffuse = vec3<f32>(0.0);
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
@@ -190,7 +201,7 @@ fn main(inputData: InputData) -> OutputFragment {
         indirectDiffuse = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
     }
 
-    // 5. Final Combined Shading (Exact 1:1 PBR Tone Matching)
+    // 6. Final Combined Shading (Exact 1:1 PBR Tone Matching)
     var finalRgb = albedo * (directDiffuse + indirectDiffuse);
 
     let tinted = getTintBlendMode(vec4<f32>(finalRgb, 1.0), globalFragmentData.tintBlendMode, globalFragmentData.tint);
