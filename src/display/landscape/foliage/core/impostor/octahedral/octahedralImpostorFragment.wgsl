@@ -79,9 +79,9 @@ fn main(inputData: InputData) -> OutputFragment {
     let w11 = frac.x * frac.y * s11.a;
     let totalWeight = w00 + w10 + w01 + w11;
 
-    var finalRgb = s00.rgb;
+    var albedo = s00.rgb;
     if (totalWeight > 0.0001) {
-        finalRgb = (s00.rgb * w00 + s10.rgb * w10 + s01.rgb * w01 + s11.rgb * w11) / totalWeight;
+        albedo = (s00.rgb * w00 + s10.rgb * w10 + s01.rgb * w01 + s11.rgb * w11) / totalWeight;
     }
 
     let finalAlpha = mix(
@@ -94,14 +94,21 @@ fn main(inputData: InputData) -> OutputFragment {
         discard;
     }
 
-    // 1. Spherical Normal for natural 3D volumetric foliage shading
-    let sphereX = (inputData.uv.x - 0.5) * 2.0;
-    let sphereY = (0.5 - inputData.uv.y) * 2.0;
-    let r2 = sphereX * sphereX + sphereY * sphereY;
-    let sphereZ = sqrt(max(1.0 - r2 * 0.6, 0.2));
-    let N = normalize(vec3<f32>(sphereX * 0.6, sphereY * 0.3 + 0.5, sphereZ));
+    // 1. Transform View-Space Hemispherical Normal into World-Space Normal
+    let nx = (inputData.uv.x - 0.5) * 2.0;
+    let ny = (0.5 - inputData.uv.y) * 2.0;
+    let r2 = nx * nx + ny * ny;
+    let nz = sqrt(max(1.0 - r2, 0.0));
 
-    let preExp = select(1.0, systemUniforms.preExposure, systemUniforms.preExposure > 0.0);
+    // Camera world basis vectors extracted from systemUniforms.camera.viewMatrix
+    let camRight = normalize(vec3<f32>(systemUniforms.camera.viewMatrix[0][0], systemUniforms.camera.viewMatrix[1][0], systemUniforms.camera.viewMatrix[2][0]));
+    let camUp = normalize(vec3<f32>(systemUniforms.camera.viewMatrix[0][1], systemUniforms.camera.viewMatrix[1][1], systemUniforms.camera.viewMatrix[2][1]));
+    let camForward = normalize(vec3<f32>(-systemUniforms.camera.viewMatrix[0][2], -systemUniforms.camera.viewMatrix[1][2], -systemUniforms.camera.viewMatrix[2][2]));
+
+    // Accurate World-Space Normal
+    let N = normalize(camRight * nx + camUp * (ny * 0.5 + 0.5) + camForward * nz);
+
+    let preExposure = systemUniforms.preExposure;
 
     // 2. Directional Shadow calculation
     var shadowVis: f32 = 1.0;
@@ -115,38 +122,49 @@ fn main(inputData: InputData) -> OutputFragment {
     );
     shadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, shadowVis);
 
-    // 3. Directional Light (Sunlight) with Foliage Half-Lambert scattering
-    var directLight = vec3<f32>(0.0);
-    if (systemUniforms.directionalLightCount > 0u) {
-        for (var i = 0u; i < systemUniforms.directionalLightCount; i = i + 1u) {
-            let dirLight = systemUniforms.directionalLights[i];
-            let L = -normalize(dirLight.direction);
-            let NdotL = max(dot(N, L), 0.0);
-            let halfLambert = pow(NdotL * 0.5 + 0.5, 2.0);
-            directLight += dirLight.color * dirLight.intensity * halfLambert * shadowVis;
+    // 3. Direct Directional Light (PBR Two-sided Foliage Scattering)
+    var directDiffuse = vec3<f32>(0.0);
+    let u_directionalLightCount = systemUniforms.directionalLightCount;
+    let u_directionalLights = systemUniforms.directionalLights;
+
+    for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
+        let light = u_directionalLights[i];
+        let L = -normalize(light.direction);
+        let NdotL_front = max(dot(N, L), 0.0);
+        let NdotL_back = max(-dot(N, L), 0.0) * 0.35; // Translucent subsurface scattering
+        let foliageDiffuse = (NdotL_front + NdotL_back) * INV_PI;
+
+        var lightColor = light.color * light.intensity * preExposure * shadowVis;
+
+        if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
+            let u_atmo = systemUniforms.skyAtmosphere;
+            let surfaceHeightKm = max(0.0, inputData.vertexPosition.y / 1000.0);
+            let atmosphereTransmittance = getTransmittance(transmittanceTexture, atmosphereSampler, surfaceHeightKm, L.y, u_atmo.atmosphereHeight);
+            lightColor *= atmosphereTransmittance;
         }
-    } else {
-        directLight = vec3<f32>(1.0);
+
+        directDiffuse += lightColor * foliageDiffuse;
     }
 
-    // 4. Ambient & Sky Light
-    var ambientLight = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity;
+    // 4. Indirect Ambient & Sky Atmosphere (Exact PBR Indirect Formulation)
+    var indirectDiffuse = systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure * INV_PI;
+
+    if (systemUniforms.usePrefilterTexture == 1u) {
+        indirectDiffuse += textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * preExposure * systemUniforms.iblIntensity * INV_PI;
+    }
+
     if (systemUniforms.useSkyAtmosphere == 1u) {
         let u_atmo = systemUniforms.skyAtmosphere;
         let camH = u_atmo.cameraHeight;
         let atmH = u_atmo.atmosphereHeight;
         let skyIntensity = u_atmo.sunIntensity;
         let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
-        let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity;
-        ambientLight += (ambientLight * diffTrans) + skyIrradiance;
-    }
-    if (length(ambientLight) < 0.1) {
-        ambientLight = vec3<f32>(0.4, 0.42, 0.45);
+        let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity * preExposure;
+        indirectDiffuse = (indirectDiffuse * diffTrans) + skyIrradiance;
     }
 
-    // 5. Final Shading
-    let totalLight = (directLight + ambientLight) * preExp;
-    finalRgb = finalRgb * totalLight;
+    // 5. Final Combined Shading
+    var finalRgb = albedo * (directDiffuse + indirectDiffuse);
 
     let tinted = getTintBlendMode(vec4<f32>(finalRgb, 1.0), globalFragmentData.tintBlendMode, globalFragmentData.tint);
     finalRgb = tinted.rgb;
