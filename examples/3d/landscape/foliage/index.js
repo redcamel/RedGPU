@@ -114,14 +114,12 @@ RedGPU.init(
 
         const foliageManager = landscape.foliageManager;
 
+        // 1. Pine Tree (Multi-LOD) 로드
         new RedGPU.GLTFLoader(
             redGPUContext,
             '../../../assets/terrain/test.glb',
             (loader) => {
                 const root = loader.resultMesh;
-                // scene.addChild(root)
-                // root.setScale(100)
-                // return
                 console.log('🌲 [test.glb] Loaded Root:', root);
                 const treeGroups = new Map();
 
@@ -179,13 +177,35 @@ RedGPU.init(
                             }
                         });
                     });
-                } else {
-
                 }
-
             }
         );
 
+        // 2. Frangipani Tree (HD Realistic Tree + Octahedral Impostor) 로드
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            '../../../assets/terrain/realistic_hd_frangipani_tree_950.glb',
+            (loader) => {
+                const root = loader.resultMesh;
+                console.log('🌸 [realistic_hd_frangipani_tree_950.glb] Loaded Root:', root);
+
+                foliageManager.addFoliageType({
+                    name: 'FrangipaniTree',
+                    mesh: root,
+                    maxInstances: 150000,
+                    minScale: [2.2, 2.2, 2.2],
+                    maxScale: [3.2, 3.2, 3.2],
+                    randomRotationY: true,
+                    cullingDistance: 3500,
+                    fadeStartDistance: 2800,
+                    isFoliage: true,
+                    billboard: {
+                        enabled: true,
+                        lodDistance: 120
+                    }
+                });
+            }
+        );
 
         landscape.debuggerManager.spatialGrid = true;
 
@@ -268,21 +288,24 @@ const renderTestPane = (redGPUContext, view, skyAtmosphere, landscape, controlle
                     subGrass.addBinding(grassProxy, 'fadeStartDist', {min: 200, max: 6000, step: 50});
                 }
 
-                const subElm = folderFoliage.addFolder({title: 'ElmTree (3D + Octahedral Impostor)', expanded: true});
-                const elmProxy = {
+                const subFrangipani = folderFoliage.addFolder({
+                    title: 'FrangipaniTree (3D + Octahedral Impostor)',
+                    expanded: true
+                });
+                const frangipaniProxy = {
                     get count() {
-                        const target = foliageManager.getFoliageType('ElmTree');
+                        const target = foliageManager.getFoliageType('FrangipaniTree');
                         return target ? target.activeInstanceCount : 0;
                     },
                     get lodDistance() {
-                        const target = foliageManager.getFoliageType('ElmTree');
+                        const target = foliageManager.getFoliageType('FrangipaniTree');
                         if (target?.lodInfoList?.[0]) {
                             return target.lodInfoList[0].lodDistance;
                         }
-                        return target ? target.options.lodDistance : 80;
+                        return target ? target.options.lodDistance : 120;
                     },
                     set lodDistance(v) {
-                        const target = foliageManager.getFoliageType('ElmTree');
+                        const target = foliageManager.getFoliageType('FrangipaniTree');
                         if (target) {
                             if (target.lodInfoList?.[0]) {
                                 target.lodInfoList[0].lodDistance = v;
@@ -291,82 +314,79 @@ const renderTestPane = (redGPUContext, view, skyAtmosphere, landscape, controlle
                         }
                     },
                     get cullingDist() {
-                        const target = foliageManager.getFoliageType('ElmTree');
-                        return target ? target.options.cullingDistance : 2500;
+                        const target = foliageManager.getFoliageType('FrangipaniTree');
+                        return target ? target.options.cullingDistance : 3500;
                     },
                     set cullingDist(v) {
-                        const target = foliageManager.getFoliageType('ElmTree');
+                        const target = foliageManager.getFoliageType('FrangipaniTree');
                         if (target) target.options.cullingDistance = v;
                     }
                 };
-                subElm.addBinding(elmProxy, 'count', {readonly: true});
-                subElm.addBinding(elmProxy, 'lodDistance', {
-                    min: 50,
-                    max: 1500,
-                    step: 25,
+                subFrangipani.addBinding(frangipaniProxy, 'count', {readonly: true});
+                subFrangipani.addBinding(frangipaniProxy, 'lodDistance', {
+                    min: 30,
+                    max: 1000,
+                    step: 10,
                     label: '3D -> Impostor Dist'
                 });
-                subElm.addBinding(elmProxy, 'cullingDist', {min: 1000, max: 8000, step: 100});
+                subFrangipani.addBinding(frangipaniProxy, 'cullingDist', {min: 1000, max: 8000, step: 100});
 
-                const subMaple = folderFoliage.addFolder({title: 'MapleTree (Multi-LOD + Octahedral)', expanded: true});
-                const mapleProxy = {
+                const subPine = folderFoliage.addFolder({title: 'PineTree (Multi-LOD + Octahedral)', expanded: true});
+                const pineProxy = {
                     get count() {
-                        const target = foliageManager.getFoliageType('MapleTree');
+                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
                         return target ? target.activeInstanceCount : 0;
                     },
                     get lod0Dist() {
-                        const target = foliageManager.getFoliageType('MapleTree');
-                        return target?.lodInfoList?.[0] ? target.lodInfoList[0].lodDistance : 150;
+                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
+                        return target?.lodInfoList?.[0] ? target.lodInfoList[0].lodDistance : 80;
                     },
                     set lod0Dist(v) {
-                        const target = foliageManager.getFoliageType('MapleTree');
+                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
                         if (target?.lodInfoList?.[0]) target.lodInfoList[0].lodDistance = v;
                     },
                     get lod1Dist() {
-                        const target = foliageManager.getFoliageType('MapleTree');
-                        return target?.lodInfoList?.[1] ? target.lodInfoList[1].lodDistance : 350;
+                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
+                        return target?.lodInfoList?.[1] ? target.lodInfoList[1].lodDistance : 180;
                     },
                     set lod1Dist(v) {
-                        const target = foliageManager.getFoliageType('MapleTree');
+                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
                         if (target?.lodInfoList?.[1]) target.lodInfoList[1].lodDistance = v;
                     },
                     get billboardDist() {
-                        const target = foliageManager.getFoliageType('MapleTree');
+                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
                         const bbIdx = (target?.lodInfoList?.length ?? 1) - 2;
-                        return target?.lodInfoList?.[bbIdx] ? target.lodInfoList[bbIdx].lodDistance : 600;
+                        return target?.lodInfoList?.[bbIdx] ? target.lodInfoList[bbIdx].lodDistance : 320;
                     },
                     set billboardDist(v) {
-                        const target = foliageManager.getFoliageType('MapleTree');
+                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
                         const bbIdx = (target?.lodInfoList?.length ?? 1) - 2;
                         if (target?.lodInfoList?.[bbIdx]) {
                             target.lodInfoList[bbIdx].lodDistance = v;
                         }
                     },
                     get cullingDist() {
-                        const target = foliageManager.getFoliageType('MapleTree');
+                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
                         return target ? target.options.cullingDistance : 3500;
                     },
                     set cullingDist(v) {
-                        const target = foliageManager.getFoliageType('MapleTree');
+                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
                         if (target) target.options.cullingDistance = v;
                     }
                 };
-                subMaple.addBinding(mapleProxy, 'count', {readonly: true});
-                subMaple.addBinding(mapleProxy, 'lod0Dist', {min: 50, max: 600, step: 25, label: 'LOD 0 -> 1 Dist'});
-                subMaple.addBinding(mapleProxy, 'lod1Dist', {min: 100, max: 1200, step: 50, label: 'LOD 1 -> 2 Dist'});
-                subMaple.addBinding(mapleProxy, 'billboardDist', {
+                subPine.addBinding(pineProxy, 'count', {readonly: true});
+                subPine.addBinding(pineProxy, 'lod0Dist', {min: 50, max: 600, step: 25, label: 'LOD 0 -> 1 Dist'});
+                subPine.addBinding(pineProxy, 'lod1Dist', {min: 100, max: 1200, step: 50, label: 'LOD 1 -> 2 Dist'});
+                subPine.addBinding(pineProxy, 'billboardDist', {
                     min: 200,
                     max: 2000,
                     step: 50,
                     label: 'LOD 2 -> Impostor'
                 });
-                subMaple.addBinding(mapleProxy, 'cullingDist', {min: 1000, max: 8000, step: 100});
+                subPine.addBinding(pineProxy, 'cullingDist', {min: 1000, max: 8000, step: 100});
 
                 folderFoliage.addBinding(config, 'billboardWireframe', {label: 'Impostor Wireframe'}).on('change', (ev) => {
-                    const elm = foliageManager.getFoliageType('ElmTree');
-                    if (elm) elm.setBillboardWireframe(ev.value);
-                    const maple = foliageManager.getFoliageType('MapleTree');
-                    if (maple) maple.setBillboardWireframe(ev.value);
+                    foliageManager.types.forEach(t => t.setBillboardWireframe(ev.value));
                 });
             }
 
