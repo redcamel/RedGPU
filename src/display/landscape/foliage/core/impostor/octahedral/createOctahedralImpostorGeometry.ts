@@ -32,42 +32,31 @@ function createOctahedralImpostorGeometry(
     const halfH = height * 0.5;
     const centerY = bottomOffset + halfH;
 
-    const rawVertices = [
+    // 4 Vertices * 18 floats per vertex = 72 floats
+    const interleaved = new Float32Array([
         // 0: Bottom-Left
-        {x: -halfW, y: -halfH, z: centerY, nx: 0.0, ny: 0.0, nz: 1.0, u: 0.0, v: 1.0},
+        -halfW, -halfH, centerY, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, -999.0,
         // 1: Bottom-Right
-        {x: halfW, y: -halfH, z: centerY, nx: 0.0, ny: 0.0, nz: 1.0, u: 1.0, v: 1.0},
+        halfW, -halfH, centerY, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, -999.0,
         // 2: Top-Right
-        {x: halfW, y: halfH, z: centerY, nx: 0.0, ny: 0.0, nz: 1.0, u: 1.0, v: 0.0},
+        halfW, halfH, centerY, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, -999.0,
         // 3: Top-Left
-        {x: -halfW, y: halfH, z: centerY, nx: 0.0, ny: 0.0, nz: 1.0, u: 0.0, v: 0.0},
-    ];
+        -halfW, halfH, centerY, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, -999.0
+    ]);
 
-    const interleavedData: number[] = [];
-    for (const v of rawVertices) {
-        interleavedData.push(
-            v.x, v.y, v.z,
-            v.nx, v.ny, v.nz,
-            v.u, v.v,
-            v.u, v.v,
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 0.0, 0.0, -999.0
-        );
-    }
-
-    const indexData: number[] = wireframe
-        ? [0, 1, 1, 2, 2, 3, 3, 0, 0, 2]
-        : [0, 1, 2, 0, 2, 3];
+    const indices = wireframe
+        ? new Uint32Array([0, 1, 1, 2, 2, 3, 3, 0, 0, 2])
+        : new Uint32Array([0, 1, 2, 0, 2, 3]);
 
     const vertexBuffer = new VertexBuffer(
         redGPUContext,
-        new Float32Array(interleavedData),
+        interleaved,
         PBR_INTERLEAVED_STRUCT
     );
 
     const indexBuffer = new IndexBuffer(
         redGPUContext,
-        new Uint32Array(indexData)
+        indices
     );
 
     const geometry = new Geometry(redGPUContext, vertexBuffer, indexBuffer);

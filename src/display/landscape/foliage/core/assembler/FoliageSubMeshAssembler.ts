@@ -107,9 +107,8 @@ class FoliageSubMeshAssembler {
             // Billboard fallback / attachment if enabled
             if (billboardOpt?.enabled) {
                 const billboardLODIndex = lodInfoList.length;
-                const rootMeshNode = Array.isArray(lodConfigs[0].mesh) ? lodConfigs[0].mesh[0] : lodConfigs[0].mesh;
                 const lod0SubMeshes = subList.filter(s => s.lodIndex === 0);
-                const bakeResult = FoliageImpostorBaker.bakeSubMeshes(redGPUContext, lod0SubMeshes, rootMeshNode, 512, options.name);
+                const bakeResult = FoliageImpostorBaker.bakeSubMeshes(redGPUContext, lod0SubMeshes, options.name);
 
                 const bbWidth = billboardOpt.width ?? bakeResult.width;
                 const bbHeight = billboardOpt.height ?? bakeResult.height;
@@ -190,8 +189,7 @@ class FoliageSubMeshAssembler {
             });
 
             if (billboardOpt?.enabled) {
-                const rootMeshNode = Array.isArray(options.mesh) ? options.mesh[0] : options.mesh!;
-                const bakeResult = FoliageImpostorBaker.bakeSubMeshes(redGPUContext, subList, rootMeshNode, 512, options.name);
+                const bakeResult = FoliageImpostorBaker.bakeSubMeshes(redGPUContext, subList, options.name);
 
                 const bbWidth = billboardOpt.width ?? bakeResult.width;
                 const bbHeight = billboardOpt.height ?? bakeResult.height;

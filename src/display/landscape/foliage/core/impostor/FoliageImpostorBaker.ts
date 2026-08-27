@@ -1,6 +1,5 @@
 import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../../context/RedGPUContext";
-import Mesh from "../../../../mesh/Mesh";
 import DirectTexture from "../../../../../resources/texture/DirectTexture";
 import type {FoliageSubMesh} from "../../FoliageType";
 import impostorBakeShaderWGSL from "./impostorBake.wgsl";
@@ -81,8 +80,6 @@ class FoliageImpostorBaker {
     static bakeSubMeshes(
         redGPUContext: RedGPUContext,
         subMeshes: FoliageSubMesh[],
-        rootMeshNode?: Mesh,
-        resolution: number = 512,
         bakeName: string = 'Foliage'
     ): FoliageBakeResult {
         const gpuDevice = redGPUContext.gpuDevice;
