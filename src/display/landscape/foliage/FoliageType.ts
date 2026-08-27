@@ -51,9 +51,6 @@ export interface FoliageLODConfig {
 
     /** Optional material override for this LOD level */
     materialOverride?: ABaseMaterial;
-
-    /** Whether to combine sub-meshes sharing identical materials (default: true) */
-    combineSubMeshesByMaterial?: boolean;
 }
 
 export interface FoliageLODInfo {
@@ -83,8 +80,6 @@ export interface FoliageTypeOptions {
     useImpostor?: boolean;
 
     convertBlendToMasked?: boolean;
-
-    combineSubMeshesByMaterial?: boolean;
 
     isFoliage?: boolean;
 }
@@ -131,7 +126,6 @@ class FoliageType {
             randomRotationY: options.randomRotationY ?? true,
             useImpostor,
             convertBlendToMasked: options.convertBlendToMasked ?? true,
-            combineSubMeshesByMaterial: options.combineSubMeshesByMaterial ?? true,
             isFoliage: options.isFoliage !== false,
         });
 
