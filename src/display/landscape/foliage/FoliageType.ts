@@ -210,11 +210,11 @@ class FoliageType {
     }
 
     get culledGPUBuffer(): GPUBuffer | null {
-        return this.#instanceBuffer.getCulledGPUBuffer();
+        return this.#instanceBuffer.culledGPUBuffer;
     }
 
     get indirectGPUBuffer(): GPUBuffer | null {
-        return this.#instanceBuffer.getIndirectGPUBuffer();
+        return this.#instanceBuffer.indirectGPUBuffer;
     }
 
     getCullingBindGroup(layout: GPUBindGroupLayout, vhtView?: GPUTextureView, vhtSampler?: GPUSampler): GPUBindGroup | null {

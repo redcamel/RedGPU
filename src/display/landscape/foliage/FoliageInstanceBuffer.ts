@@ -246,15 +246,11 @@ class FoliageInstanceBuffer {
         );
     }
 
-    getRawGPUBuffer(): GPUBuffer | null {
-        return this.#rawGPUBuffer;
-    }
-
-    getCulledGPUBuffer(): GPUBuffer | null {
+    get culledGPUBuffer(): GPUBuffer | null {
         return this.#culledGPUBuffer;
     }
 
-    getIndirectGPUBuffer(): GPUBuffer | null {
+    get indirectGPUBuffer(): GPUBuffer | null {
         return this.#indirectGPUBuffer;
     }
 
