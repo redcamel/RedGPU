@@ -5,12 +5,11 @@ class FoliageInstanceBuffer {
 
     static readonly #cullingUniformData = new Float32Array(80);
     static readonly #cullingUniformUint32 = new Uint32Array(FoliageInstanceBuffer.#cullingUniformData.buffer);
+    static readonly #STRIDE_FLOATS: number = 12;
+    static readonly #STRIDE_BYTES: number = 12 * 4;
+
     #maxInstances: number;
-    #strideFloats: number = 12;
-
     #redGPUContext: RedGPUContext;
-    #strideBytes: number = 12 * 4;
-
     #dataBuffer: Float32Array;
 
     #indirectGPUBuffer: GPUBuffer | null = null;
@@ -23,7 +22,7 @@ class FoliageInstanceBuffer {
     constructor(redGPUContext: RedGPUContext, maxInstances: number = 50000, subMeshes?: readonly FoliageSubMesh[]) {
         this.#redGPUContext = redGPUContext;
         this.#maxInstances = maxInstances;
-        this.#dataBuffer = new Float32Array(this.#maxInstances * this.#strideFloats);
+        this.#dataBuffer = new Float32Array(this.#maxInstances * FoliageInstanceBuffer.#STRIDE_FLOATS);
 
         this.#initGPUBuffer(subMeshes);
     }
@@ -43,7 +42,7 @@ class FoliageInstanceBuffer {
         scaleX: number, scaleY: number, scaleZ: number,
         fade: number = 1.0, subId: number = 0
     ): void {
-        const offset = index * this.#strideFloats;
+        const offset = index * FoliageInstanceBuffer.#STRIDE_FLOATS;
         const buffer = this.#dataBuffer;
 
         buffer[offset] = posX;
@@ -66,7 +65,7 @@ class FoliageInstanceBuffer {
     uploadToGPU(activeCount: number): void {
         if (!this.#rawGPUBuffer || activeCount <= 0) return;
         const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
-        const byteCount = Math.min(activeCount * this.#strideBytes, this.#dataBuffer.byteLength);
+        const byteCount = Math.min(activeCount * FoliageInstanceBuffer.#STRIDE_BYTES, this.#dataBuffer.byteLength);
 
         gpuDevice.queue.writeBuffer(
             this.#rawGPUBuffer,
@@ -80,8 +79,8 @@ class FoliageInstanceBuffer {
     uploadRangeToGPU(startIndex: number, count: number): void {
         if (!this.#rawGPUBuffer || count <= 0) return;
         const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
-        const srcByteOffset = startIndex * this.#strideBytes;
-        const byteCount = Math.min(count * this.#strideBytes, this.#dataBuffer.byteLength - srcByteOffset);
+        const srcByteOffset = startIndex * FoliageInstanceBuffer.#STRIDE_BYTES;
+        const byteCount = Math.min(count * FoliageInstanceBuffer.#STRIDE_BYTES, this.#dataBuffer.byteLength - srcByteOffset);
         if (byteCount <= 0) return;
 
         gpuDevice.queue.writeBuffer(

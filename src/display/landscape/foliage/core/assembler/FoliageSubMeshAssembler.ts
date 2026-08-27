@@ -25,6 +25,7 @@ const PBR_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
     'PBR'
 );
 const PBR_STRIDE = 18;
+const PBR_STRIDE_BYTES = PBR_STRIDE * 4;
 
 export interface FoliageAssemblyResult {
     subMeshes: FoliageSubMesh[];
@@ -131,7 +132,7 @@ class FoliageSubMeshAssembler {
                     bbMat,
                     mat4.create(),
                     mat4.create(),
-                    PBR_STRIDE * 4,
+                    PBR_STRIDE_BYTES,
                     billboardLODIndex
                 );
                 // 🌿 빌보드(Impostor)는 Depth Prepass 불필요 -> Main Pass 1패스('normal')로 렌더링
@@ -210,7 +211,7 @@ class FoliageSubMeshAssembler {
                     bbMat,
                     mat4.create(),
                     mat4.create(),
-                    PBR_STRIDE * 4,
+                    PBR_STRIDE_BYTES,
                     1
                 );
                 // 🌿 빌보드(Impostor)는 Depth Prepass 불필요 -> Main Pass 1패스('normal')로 렌더링
@@ -675,7 +676,7 @@ class FoliageSubMeshAssembler {
                 mat,
                 FoliageSubMeshAssembler.#identityMatrix,
                 FoliageSubMeshAssembler.#identityMatrix,
-                PBR_STRIDE * 4,
+                PBR_STRIDE_BYTES,
                 lodIndex
             );
 
