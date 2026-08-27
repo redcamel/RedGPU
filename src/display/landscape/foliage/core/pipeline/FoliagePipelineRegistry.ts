@@ -132,7 +132,7 @@ class FoliagePipelineRegistry {
             depthStencil = {
                 format: 'depth32float',
                 depthWriteEnabled: true,
-                depthCompare: 'less-equal',
+                depthCompare: 'less',
             };
         } else {
 
@@ -144,7 +144,7 @@ class FoliagePipelineRegistry {
                     operation: 'add'
                 },
                 alpha: {
-                    srcFactor: 'one',
+                    srcFactor: 'src-alpha',
                     dstFactor: 'one-minus-src-alpha',
                     operation: 'add'
                 }

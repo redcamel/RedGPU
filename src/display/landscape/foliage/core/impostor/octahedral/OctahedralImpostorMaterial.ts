@@ -6,7 +6,6 @@ import fragmentModuleSource from './octahedralImpostorFragment.wgsl';
 import AUVTransformBaseMaterial from "../../../../../../material/core/AUVTransformBaseMaterial";
 import defineSampler from "../../../../../../defineProperty/funcs/texture/defineSampler";
 import defineTexture from "../../../../../../defineProperty/funcs/texture/defineTexture";
-import GPU_BLEND_FACTOR from "../../../../../../gpuConst/GPU_BLEND_FACTOR";
 import GPU_MIPMAP_FILTER_MODE from "../../../../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 
 interface OctahedralImpostorMaterial {
@@ -48,16 +47,8 @@ class OctahedralImpostorMaterial extends AUVTransformBaseMaterial {
         this.cutOff = 0.35;
         this.doubleSided = true;
         this.transparent = false;
-        this.alphaBlend = 1;
+        this.alphaBlend = 0;
         this.gridSize = gridSize;
-
-        const {blendColorState, blendAlphaState} = this;
-        if (blendColorState && blendAlphaState) {
-            blendColorState.srcFactor = GPU_BLEND_FACTOR.SRC_ALPHA;
-            blendColorState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
-            blendAlphaState.srcFactor = GPU_BLEND_FACTOR.ONE;
-            blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
-        }
 
         this.initGPURenderInfos();
     }

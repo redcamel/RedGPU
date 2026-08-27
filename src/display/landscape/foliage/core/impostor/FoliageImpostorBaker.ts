@@ -145,8 +145,8 @@ class FoliageImpostorBaker {
 
                 const uPrime = 2.0 * u - 1.0;
                 const vPrime = 2.0 * v - 1.0;
-                const dirX = uPrime - vPrime;
-                const dirZ = uPrime + vPrime;
+                const dirX = (uPrime - vPrime) * 0.5;
+                const dirZ = (uPrime + vPrime) * 0.5;
                 const dirY = Math.max(1.0 - (Math.abs(dirX) + Math.abs(dirZ)), 0.0);
 
                 const len = Math.hypot(dirX, dirY, dirZ) || 1.0;

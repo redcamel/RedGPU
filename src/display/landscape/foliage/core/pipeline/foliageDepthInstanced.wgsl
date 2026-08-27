@@ -54,19 +54,21 @@ fn mainInput(input : VertexInput) -> DepthOutputData {
     var worldPos = rotatedPos + input.instancePos;
     let isBillboard = (input.vertexTangent.w < -500.0);
     if (isBillboard) {
-        let toCam = systemUniforms.camera.cameraPosition.xyz - input.instancePos;
-        let camDist = length(toCam);
-        let forward = select(vec3<f32>(0.0, 0.0, 1.0), toCam / camDist, camDist > 0.0001);
+        let camRight = vec3<f32>(
+            systemUniforms.camera.viewMatrix[0][0],
+            systemUniforms.camera.viewMatrix[1][0],
+            systemUniforms.camera.viewMatrix[2][0]
+        );
+        let camUp = vec3<f32>(
+            systemUniforms.camera.viewMatrix[0][1],
+            systemUniforms.camera.viewMatrix[1][1],
+            systemUniforms.camera.viewMatrix[2][1]
+        );
 
-        var upRef = vec3<f32>(0.0, 1.0, 0.0);
-        if (abs(forward.y) > 0.99) {
-            upRef = vec3<f32>(0.0, 0.0, 1.0);
-        }
-        let rightVec = normalize(cross(upRef, forward));
-        let upVec = cross(forward, rightVec);
-
-        let billboardOffset = rightVec * (hierarchyPos.x * input.instanceScale.x) + upVec * (hierarchyPos.y * input.instanceScale.y);
-        worldPos = input.instancePos + billboardOffset;
+        let centerY = hierarchyPos.z;
+        let treeCenter = input.instancePos + vec3<f32>(0.0, centerY * input.instanceScale.y, 0.0);
+        let billboardOffset = camRight * (hierarchyPos.x * input.instanceScale.x) + camUp * (hierarchyPos.y * input.instanceScale.y);
+        worldPos = treeCenter + billboardOffset;
     }
 
     output.position = systemUniforms.projection.projectionViewMatrix * vec4<f32>(worldPos, 1.0);

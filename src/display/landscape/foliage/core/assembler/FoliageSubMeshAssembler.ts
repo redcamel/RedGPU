@@ -350,8 +350,7 @@ class FoliageSubMeshAssembler {
                 keepLog('mat.alphaBlend', mat.alphaBlend);
                 if (mat.alphaBlend === 2 || mat.transparent || mat.alphaMode === 'BLEND' || mat.alphaMode === 'MASK') {
                     mat.useCutOff = false;
-                    // 🌿 GLTF 2.0 및 언리얼 엔진 공식 표준: 원본 cutOff가 있으면 쓰고 없으면 0.5 적용
-                    mat.cutOff = (mat.cutOff > 0) ? mat.cutOff : 0.5;
+                    mat.cutOff = (mat.cutOff > 0) ? mat.cutOff : 0.3333;
                     const {blendColorState, blendAlphaState} = mat;
                     if (blendColorState && blendAlphaState) {
                         blendColorState.srcFactor = GPU_BLEND_FACTOR.SRC_ALPHA;

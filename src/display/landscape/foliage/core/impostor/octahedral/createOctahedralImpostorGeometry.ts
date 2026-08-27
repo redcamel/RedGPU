@@ -29,18 +29,18 @@ function createOctahedralImpostorGeometry(
     bottomOffset: number = 0.0
 ): Geometry {
     const halfW = width * 0.5;
-    const minY = bottomOffset;
-    const maxY = bottomOffset + height;
+    const halfH = height * 0.5;
+    const centerY = bottomOffset + halfH;
 
     const rawVertices = [
         // 0: Bottom-Left
-        {x: -halfW, y: minY, z: 0.0, nx: 0.0, ny: 0.0, nz: 1.0, u: 0.0, v: 1.0},
+        {x: -halfW, y: -halfH, z: centerY, nx: 0.0, ny: 0.0, nz: 1.0, u: 0.0, v: 1.0},
         // 1: Bottom-Right
-        {x: halfW, y: minY, z: 0.0, nx: 0.0, ny: 0.0, nz: 1.0, u: 1.0, v: 1.0},
+        {x: halfW, y: -halfH, z: centerY, nx: 0.0, ny: 0.0, nz: 1.0, u: 1.0, v: 1.0},
         // 2: Top-Right
-        {x: halfW, y: maxY, z: 0.0, nx: 0.0, ny: 0.0, nz: 1.0, u: 1.0, v: 0.0},
+        {x: halfW, y: halfH, z: centerY, nx: 0.0, ny: 0.0, nz: 1.0, u: 1.0, v: 0.0},
         // 3: Top-Left
-        {x: -halfW, y: maxY, z: 0.0, nx: 0.0, ny: 0.0, nz: 1.0, u: 0.0, v: 0.0},
+        {x: -halfW, y: halfH, z: centerY, nx: 0.0, ny: 0.0, nz: 1.0, u: 0.0, v: 0.0},
     ];
 
     const interleavedData: number[] = [];

@@ -165,11 +165,11 @@ RedGPU.init(
                         if (!lod0) return;
 
                         lodConfigs.push({mesh: lod0, lodDistance: 200});
-                        // if (lods.lod1 && lods.lod1 !== lod0) lodConfigs.push({mesh: lods.lod1, lodDistance: 450});
-                        // if (lods.lod2 && lods.lod2 !== lod0 && lods.lod2 !== lods.lod1) lodConfigs.push({
-                        //     mesh: lods.lod2,
-                        //     lodDistance: 800
-                        // });
+                        if (lods.lod1 && lods.lod1 !== lod0) lodConfigs.push({mesh: lods.lod1, lodDistance: 450});
+                        if (lods.lod2 && lods.lod2 !== lod0 && lods.lod2 !== lods.lod1) lodConfigs.push({
+                            mesh: lods.lod2,
+                            lodDistance: 800
+                        });
 
                         const lastLodDist = lodConfigs[lodConfigs.length - 1].lodDistance;
 

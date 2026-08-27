@@ -195,10 +195,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let tinted = getTintBlendMode(vec4<f32>(finalRgb, 1.0), globalFragmentData.tintBlendMode, globalFragmentData.tint);
     finalRgb = tinted.rgb;
 
-    let aaEdge = max(fwidth(finalAlpha) * 1.5, 0.02);
-    let smoothedAlpha = clamp((finalAlpha - 0.33) / aaEdge + 0.5, 0.0, 1.0);
-
-    output.color = vec4<f32>(finalRgb, smoothedAlpha * globalFragmentData.opacity);
+    output.color = vec4<f32>(finalRgb, 1.0);
     output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, 1.0);
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
 

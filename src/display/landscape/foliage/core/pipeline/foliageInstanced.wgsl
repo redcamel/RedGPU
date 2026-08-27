@@ -78,19 +78,28 @@ fn mainInput(input : VertexInput) -> OutputData {
     let isBillboard = (input.vertexTangent.w < -500.0);
     if (isBillboard) {
         let toCam = systemUniforms.camera.cameraPosition.xyz - input.instancePos;
-        let camDist = length(toCam);
-        let forward = select(vec3<f32>(0.0, 0.0, 1.0), toCam / camDist, camDist > 0.0001);
 
-        var upRef = vec3<f32>(0.0, 1.0, 0.0);
-        if (abs(forward.y) > 0.99) {
-            upRef = vec3<f32>(0.0, 0.0, 1.0);
-        }
-        let rightVec = normalize(cross(upRef, forward));
-        let upVec = cross(forward, rightVec);
+        // 🌿 시스템 카메라 뷰 행렬(Screen-space) 기반 직교 기저 (좌우 패닝 시 팽이 스핀 100% 방지)
+        let camRight = vec3<f32>(
+            systemUniforms.camera.viewMatrix[0][0],
+            systemUniforms.camera.viewMatrix[1][0],
+            systemUniforms.camera.viewMatrix[2][0]
+        );
+        let camUp = vec3<f32>(
+            systemUniforms.camera.viewMatrix[0][1],
+            systemUniforms.camera.viewMatrix[1][1],
+            systemUniforms.camera.viewMatrix[2][1]
+        );
 
-        let billboardOffset = rightVec * (hierarchyPos.x * safeScale.x) + upVec * (hierarchyPos.y * safeScale.y);
-        worldPos = input.instancePos + billboardOffset;
-        worldNormal = forward;
+        let centerY = hierarchyPos.z;
+        let treeCenter = input.instancePos + vec3<f32>(0.0, centerY * safeScale.y, 0.0);
+        let billboardOffset = camRight * (hierarchyPos.x * safeScale.x) + camUp * (hierarchyPos.y * safeScale.y);
+        worldPos = treeCenter + billboardOffset;
+        worldNormal = -vec3<f32>(
+            systemUniforms.camera.viewMatrix[0][2],
+            systemUniforms.camera.viewMatrix[1][2],
+            systemUniforms.camera.viewMatrix[2][2]
+        );
 
         let invQuat = vec4<f32>(-input.instanceRotQuat.xyz, input.instanceRotQuat.w);
         let localView = normalize(rotateVectorByQuaternion(toCam, invQuat));
