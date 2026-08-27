@@ -21,6 +21,7 @@ class FoliageRenderer {
 
     #lastBoundPipeline: GPURenderPipeline | null = null;
     #lastBoundSystemBG: GPUBindGroup | null = null;
+    #lastBoundVertexUniformBG: GPUBindGroup | null = null;
     #lastBoundMatBG: GPUBindGroup | null = null;
     #lastBoundInstanceBuffer: GPUBuffer | null = null;
     #lastBoundInstanceOffset: number = -1;
@@ -49,6 +50,7 @@ class FoliageRenderer {
 
         this.#lastBoundPipeline = null;
         this.#lastBoundSystemBG = null;
+        this.#lastBoundVertexUniformBG = null;
         this.#lastBoundMatBG = null;
         this.#lastBoundInstanceBuffer = null;
         this.#lastBoundInstanceOffset = -1;
@@ -186,13 +188,8 @@ class FoliageRenderer {
                 entries[j + 1] = current;
             }
 
-            let currentCulledGPU: GPUBuffer | null = null;
             for (let i = 0; i < transCount; i++) {
                 const item = entries[i];
-                if (currentCulledGPU !== item.culledGPU) {
-                    passEncoder.setVertexBuffer(1, item.culledGPU);
-                    currentCulledGPU = item.culledGPU;
-                }
                 this.#drawSubMesh(passEncoder, item.subMesh, item.subIndex, sampleCount, msaaID, systemBG, item.indirectGPU, item.culledGPU, item.maxInstances ?? 50000, 'normal');
             }
         }
@@ -236,8 +233,9 @@ class FoliageRenderer {
         }
 
         const vertexUniformBG = sub.vertexUniformBindGroup || this.#emptyBindGroup;
-        if (vertexUniformBG) {
+        if (vertexUniformBG && this.#lastBoundVertexUniformBG !== vertexUniformBG) {
             passEncoder.setBindGroup(1, vertexUniformBG);
+            this.#lastBoundVertexUniformBG = vertexUniformBG;
         }
 
         const matUniformBG = material.gpuRenderInfo?.fragmentUniformBindGroup;
