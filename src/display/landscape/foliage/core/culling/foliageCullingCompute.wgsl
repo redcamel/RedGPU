@@ -85,8 +85,8 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
         let cullingDistSq = cullingDist * cullingDist;
 
         let numLODs = cullingUniforms.lodCount;
-        let hasInfiniteBillboard = (numLODs > 0u && cullingUniforms.lods[numLODs - 1u].lodDistance >= 100000.0);
-        let effectiveCullingDistSq = select(cullingDistSq, 1000000000000.0, hasInfiniteBillboard);
+        let hasInfiniteImpostor = (numLODs > 0u && cullingUniforms.lods[numLODs - 1u].lodDistance >= 100000.0);
+        let effectiveCullingDistSq = select(cullingDistSq, 1000000000000.0, hasInfiniteImpostor);
 
         if (horizontalDistSq < effectiveCullingDistSq) {
             var realY = instance.posY;
@@ -121,7 +121,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
                     let effectiveDist = dist * max(cullingUniforms.fovFactor, 0.0001);
 
                     var globalFade: f32 = 1.0;
-                    if (!hasInfiniteBillboard) {
+                    if (!hasInfiniteImpostor) {
                         let fadeStartDist = cullingUniforms.fadeStartDistance;
                         if (dist > fadeStartDist) {
                             let fadeRange = max(cullingDist - fadeStartDist, 1.0);

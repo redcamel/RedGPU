@@ -65,7 +65,8 @@ class FoliageSubMeshAssembler {
             return {subMeshes: subList, lod0SubMeshCount: 0, lodInfoList: [], bottomOffset: 0, boundingRadius: 10.0};
         }
 
-        const billboardOpt = options.billboard || options.impostor;
+        const useImpostor = options.useImpostor !== false;
+        const impostorOpt = options.impostorOptions;
         const hasCustomLODs = options.lods && options.lods.length > 0;
 
         if (hasCustomLODs) {
@@ -106,30 +107,26 @@ class FoliageSubMeshAssembler {
                 });
             }
 
-            // Billboard fallback / attachment if enabled
-            if (billboardOpt?.enabled) {
-                const billboardLODIndex = lodInfoList.length;
+            // Impostor fallback / attachment if enabled (Default: true)
+            if (useImpostor) {
+                const impostorLODIndex = lodInfoList.length;
                 const lod0SubMeshes = subList.filter(s => s.lodIndex === 0);
-
-                if (billboardOpt.lodDistance && lodInfoList.length > 0) {
-                    lodInfoList[lodInfoList.length - 1].lodDistance = billboardOpt.lodDistance;
-                }
 
                 const last3DDist = lodInfoList.length > 0 ? lodInfoList[lodInfoList.length - 1].lodDistance : 100.0;
                 const prevDist = lodInfoList.length > 1 ? lodInfoList[lodInfoList.length - 2].lodDistance : 0.0;
-                const autoBbFade = FoliageSubMeshAssembler.calculateAutoFadeRange(last3DDist, prevDist);
+                const autoImpostorFade = FoliageSubMeshAssembler.calculateAutoFadeRange(last3DDist, prevDist);
 
-                FoliageSubMeshAssembler.#buildAndAttachBillboard(
+                FoliageSubMeshAssembler.#buildAndAttachImpostor(
                     redGPUContext,
                     gpuDevice,
                     subMeshBindGroupLayout,
                     options,
                     lod0SubMeshes,
-                    billboardOpt,
+                    impostorOpt,
                     subList,
                     lodInfoList,
-                    billboardLODIndex,
-                    autoBbFade
+                    impostorLODIndex,
+                    autoImpostorFade
                 );
             }
         } else {
@@ -148,7 +145,7 @@ class FoliageSubMeshAssembler {
             }
 
             const lod0Count = subList.length;
-            const lod0Dist = billboardOpt?.lodDistance ?? options.lodDistance ?? 80.0;
+            const lod0Dist = options.lodDistance ?? 80.0;
             const autoFade0 = FoliageSubMeshAssembler.calculateAutoFadeRange(lod0Dist, 0.0);
 
             lodInfoList.push({
@@ -159,14 +156,14 @@ class FoliageSubMeshAssembler {
                 subMeshCount: lod0Count,
             });
 
-            if (billboardOpt?.enabled) {
-                FoliageSubMeshAssembler.#buildAndAttachBillboard(
+            if (useImpostor) {
+                FoliageSubMeshAssembler.#buildAndAttachImpostor(
                     redGPUContext,
                     gpuDevice,
                     subMeshBindGroupLayout,
                     options,
                     subList,
-                    billboardOpt,
+                    impostorOpt,
                     subList,
                     lodInfoList,
                     1,
@@ -216,26 +213,26 @@ class FoliageSubMeshAssembler {
         };
     }
 
-    static #buildAndAttachBillboard(
+    static #buildAndAttachImpostor(
         redGPUContext: RedGPUContext,
         gpuDevice: GPUDevice,
         subMeshBindGroupLayout: GPUBindGroupLayout,
         options: FoliageTypeOptions,
         sourceSubMeshes: FoliageSubMesh[],
-        billboardOpt: any,
+        impostorOpt: any,
         subList: FoliageSubMesh[],
         lodInfoList: FoliageLODInfo[],
-        billboardLODIndex: number,
+        impostorLODIndex: number,
         fadeRange: number
     ): void {
         const bakeResult = FoliageImpostorBaker.bakeSubMeshes(redGPUContext, sourceSubMeshes, options.name);
 
-        const bbWidth = billboardOpt.width ?? bakeResult.width;
-        const bbHeight = billboardOpt.height ?? bakeResult.height;
+        const bbWidth = impostorOpt?.width ?? bakeResult.width;
+        const bbHeight = impostorOpt?.height ?? bakeResult.height;
         const bbBottomOffset = bakeResult.bottomOffset ?? 0;
 
         const bbGeom = createOctahedralImpostorGeometry(redGPUContext, bbWidth, bbHeight, bbBottomOffset);
-        let bbMat = billboardOpt.material;
+        let bbMat = impostorOpt?.material;
         if (!bbMat) {
             bbMat = new OctahedralImpostorMaterial(redGPUContext, bakeResult.texture, bakeResult.normalTexture, `${options.name}_OctahedralMat`, 8.0);
         }
@@ -251,7 +248,7 @@ class FoliageSubMeshAssembler {
             mat4.create(),
             mat4.create(),
             PBR_STRIDE_BYTES,
-            billboardLODIndex
+            impostorLODIndex
         );
         bbSubMesh.isDepthPrepass = false;
         bbSubMesh.isMainOpaqueOrMasked = true;
@@ -264,7 +261,7 @@ class FoliageSubMeshAssembler {
         subList.push(bbSubMesh);
 
         lodInfoList.push({
-            lodIndex: billboardLODIndex,
+            lodIndex: impostorLODIndex,
             lodDistance: 1000000.0,
             fadeRange: fadeRange,
             subMeshOffset: bbStartOffset,
@@ -734,14 +731,14 @@ class FoliageSubMeshAssembler {
             ]
         });
 
-        const isBillboard = mat instanceof OctahedralImpostorMaterial || mat?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof mat?.name === 'string' && mat.name.includes('Octahedral'));
+        const isImpostor = mat instanceof OctahedralImpostorMaterial || mat?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof mat?.name === 'string' && mat.name.includes('Octahedral'));
         const isTransparent = !!mat.transparent || !!mat.use2PathRender;
         const isAlpha = (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
         const isMasked = !!mat.useCutOff || (mat.cutOff !== undefined && mat.cutOff > 0);
         const hasBaseColorTexture = !!(mat.baseColorTexture?.gpuTexture || mat.baseColorTexture?.src || mat.baseColorTexture?.url || (mat.diffuseTexture && (mat.diffuseTexture.gpuTexture || mat.diffuseTexture.src || mat.diffuseTexture.url)));
 
-        // 🌿 3D 식생 LOD 서브메시에 대해 Depth Prepass 2패스 적용 (빌보드는 1패스 'normal' 렌더링)
-        const isDepthPrepass = !isBillboard && !isTransparent && !isAlpha && (hasBaseColorTexture || isMasked);
+        // 🌿 3D 식생 LOD 서브메시에 대해 Depth Prepass 2패스 적용 (임포스터는 1패스 'normal' 렌더링)
+        const isDepthPrepass = !isImpostor && !isTransparent && !isAlpha && (hasBaseColorTexture || isMasked);
         const isMainOpaqueOrMasked = !isTransparent && !isAlpha;
         const mainDepthMode: FoliageDepthPassMode = isDepthPrepass ? 'mainShadingAfterDepth' : 'normal';
 

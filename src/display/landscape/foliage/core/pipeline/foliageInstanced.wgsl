@@ -75,8 +75,8 @@ fn mainInput(input : VertexInput) -> OutputData {
     var worldPos = rotatedPos + input.instancePos;
     var worldNormal = vec3<f32>(0.0, 1.0, 0.0);
 
-    let isBillboard = (input.vertexTangent.w < -500.0);
-    if (isBillboard) {
+    let isImpostor = (input.vertexTangent.w < -500.0);
+    if (isImpostor) {
         let toCam = systemUniforms.camera.cameraPosition.xyz - input.instancePos;
 
         // 🌿 시스템 카메라 뷰 행렬(Screen-space) 기반 직교 기저 (좌우 패닝 시 팽이 스핀 100% 방지)
@@ -93,8 +93,8 @@ fn mainInput(input : VertexInput) -> OutputData {
 
         let centerY = hierarchyPos.z;
         let treeCenter = input.instancePos + vec3<f32>(0.0, centerY * safeScale.y, 0.0);
-        let billboardOffset = camRight * (hierarchyPos.x * safeScale.x) + camUp * (hierarchyPos.y * safeScale.y);
-        worldPos = treeCenter + billboardOffset;
+        let impostorOffset = camRight * (hierarchyPos.x * safeScale.x) + camUp * (hierarchyPos.y * safeScale.y);
+        worldPos = treeCenter + impostorOffset;
         worldNormal = -vec3<f32>(
             systemUniforms.camera.viewMatrix[0][2],
             systemUniforms.camera.viewMatrix[1][2],

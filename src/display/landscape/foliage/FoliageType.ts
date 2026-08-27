@@ -39,17 +39,15 @@ export interface FoliageSubMesh {
     pipelineCache?: Map<string, GPURenderPipeline>;
 }
 
-export interface FoliageCrossBillboardOptions {
+export interface FoliageImpostorOptions {
+    /** Custom material override for the octahedral impostor */
+    readonly material?: any;
 
-    enabled?: boolean;
+    /** Custom quad width in meters (default: auto-calculated from 3D geometry bounds) */
+    readonly width?: number;
 
-    material?: any;
-
-    width?: number;
-
-    height?: number;
-
-    lodDistance?: number;
+    /** Custom quad height in meters (default: auto-calculated from 3D geometry bounds) */
+    readonly height?: number;
 }
 
 export interface FoliageLODConfig {
@@ -97,9 +95,11 @@ export interface FoliageTypeOptions {
 
     lodDistance?: number;
 
-    billboard?: FoliageCrossBillboardOptions;
+    /** Whether to automatically generate and use an octahedral impostor at the end of the LOD chain (default: true) */
+    useImpostor?: boolean;
 
-    impostor?: FoliageCrossBillboardOptions;
+    /** Optional custom octahedral impostor geometry / material configuration (Immutable after creation) */
+    impostorOptions?: FoliageImpostorOptions;
 
     convertBlendToMasked?: boolean;
 
@@ -134,24 +134,29 @@ class FoliageType {
         this.#redGPUContext = redGPUContext;
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
 
-        const billboardOpt = options.billboard || options.impostor;
+        const useImpostor = options.useImpostor !== false;
+        const impostorOpt = options.impostorOptions;
 
-        this.#options = {
+        const minScale: [number, number, number] = options.minScale ? [...options.minScale] : [1.0, 1.0, 1.0];
+        const maxScale: [number, number, number] = options.maxScale ? [...options.maxScale] : [1.0, 1.0, 1.0];
+
+        this.#options = Object.freeze({
             name: options.name,
             mesh: options.mesh,
             lods: options.lods,
             maxInstances: options.maxInstances ?? 50000,
             cullingDistance: options.cullingDistance ?? 2000.0,
             fadeStartDistance: options.fadeStartDistance ?? 1500.0,
-            minScale: options.minScale ?? [1.0, 1.0, 1.0],
-            maxScale: options.maxScale ?? [1.0, 1.0, 1.0],
+            minScale,
+            maxScale,
             randomRotationY: options.randomRotationY ?? true,
-            lodDistance: options.lodDistance ?? (billboardOpt?.lodDistance ?? 80.0),
-            billboard: billboardOpt ?? {enabled: false},
+            lodDistance: options.lodDistance ?? 80.0,
+            useImpostor,
+            impostorOptions: impostorOpt ? Object.freeze({...impostorOpt}) : undefined,
             convertBlendToMasked: options.convertBlendToMasked ?? true,
             combineSubMeshesByMaterial: options.combineSubMeshesByMaterial ?? true,
             isFoliage: options.isFoliage !== false,
-        };
+        });
 
         let hash = 0;
         const nameStr = this.#options.name || '';
@@ -170,8 +175,8 @@ class FoliageType {
         this.#bottomOffset = assembleResult.bottomOffset ?? 0;
         this.#boundingRadius = assembleResult.boundingRadius || 10.0;
 
-        const hasBillboard = !!this.#options.billboard?.enabled;
-        this.#numLODs = this.#lodInfoList.length > 0 ? Math.min(this.#lodInfoList.length, 8) : (hasBillboard ? 2 : 1);
+        const hasImpostor = this.#options.useImpostor !== false;
+        this.#numLODs = this.#lodInfoList.length > 0 ? Math.min(this.#lodInfoList.length, 8) : (hasImpostor ? 2 : 1);
         const lod0SubCount = this.#lodInfoList[0]?.subMeshCount ?? this.#subMeshes.length;
 
         this.#instanceBuffer = new FoliageInstanceBuffer(redGPUContext, this.#options.maxInstances, this.#subMeshes);
@@ -179,7 +184,7 @@ class FoliageType {
             this.#lodInfoList,
             this.#options.lodDistance ?? 80.0,
             lod0SubCount,
-            hasBillboard,
+            hasImpostor,
             this.#options.cullingDistance ?? 2000.0
         );
         this.resetIndirectBuffer();

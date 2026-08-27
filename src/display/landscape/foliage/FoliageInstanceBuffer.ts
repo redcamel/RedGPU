@@ -96,7 +96,7 @@ class FoliageInstanceBuffer {
         lodInfoList?: readonly FoliageLODInfo[],
         lodDistance: number = 100.0,
         lod0SubMeshCount: number = 1,
-        hasBillboard: boolean = false,
+        hasImpostor: boolean = false,
         cullingDist: number = 2000.0
     ): void {
         if (!this.#cullingUniformBuffer) return;
@@ -132,7 +132,7 @@ class FoliageInstanceBuffer {
             f32[base1] = cullingDist;
             f32[base1 + 1] = 15.0;
             u32[base1 + 2] = Math.max(lod0SubMeshCount, 1);
-            u32[base1 + 3] = hasBillboard ? 1 : 0;
+            u32[base1 + 3] = hasImpostor ? 1 : 0;
 
             for (let l = 2; l < 8; l++) {
                 const base = 40 + l * 4;
