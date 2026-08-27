@@ -45,18 +45,11 @@ export interface FoliageLODConfig {
 
     /** LOD switch distance in meters (e.g. 40.0) */
     lodDistance?: number;
-
-    /** Dithered cross-fade range buffer in meters (default: 10.0) */
-    fadeRange?: number;
-
-    /** Optional material override for this LOD level */
-    materialOverride?: ABaseMaterial;
 }
 
 export interface FoliageLODInfo {
     lodIndex: number;
     lodDistance: number;
-    fadeRange: number;
     subMeshOffset: number;
     subMeshCount: number;
 }

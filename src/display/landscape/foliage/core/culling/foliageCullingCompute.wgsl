@@ -146,7 +146,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
                                 prevDist = cullingUniforms.lods[l - 1u].lodDistance;
                             }
                             let nextDist = lodInfo.lodDistance;
-                            let halfRange = lodInfo.fadeRange * 0.5;
+                            let span = max(nextDist - prevDist, 5.0);
+                            let fadeRange = clamp(span * 0.10, 5.0, 15.0);
+                            let halfRange = fadeRange * 0.5;
 
                             let enterStart = max(prevDist - halfRange, 0.0);
                             let enterEnd = prevDist + halfRange;

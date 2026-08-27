@@ -111,12 +111,12 @@ class FoliageInstanceBuffer {
                 if (l < listLen) {
                     const info = lodInfoList[l];
                     f32[base] = info.lodDistance;
-                    f32[base + 1] = info.fadeRange;
+                    f32[base + 1] = 0.0;
                     u32[base + 2] = info.subMeshOffset;
                     u32[base + 3] = info.subMeshCount;
                 } else {
                     f32[base] = 999999.0;
-                    f32[base + 1] = 10.0;
+                    f32[base + 1] = 0.0;
                     u32[base + 2] = 0;
                     u32[base + 3] = 0;
                 }
@@ -124,20 +124,20 @@ class FoliageInstanceBuffer {
         } else {
             const base0 = 40;
             f32[base0] = lodDistance;
-            f32[base0 + 1] = 10.0;
+            f32[base0 + 1] = 0.0;
             u32[base0 + 2] = 0;
             u32[base0 + 3] = Math.max(lod0SubMeshCount, 1);
 
             const base1 = 44;
             f32[base1] = cullingDist;
-            f32[base1 + 1] = 15.0;
+            f32[base1 + 1] = 0.0;
             u32[base1 + 2] = Math.max(lod0SubMeshCount, 1);
             u32[base1 + 3] = hasImpostor ? 1 : 0;
 
             for (let l = 2; l < 8; l++) {
                 const base = 40 + l * 4;
                 f32[base] = 999999.0;
-                f32[base + 1] = 10.0;
+                f32[base + 1] = 0.0;
                 u32[base + 2] = 0;
                 u32[base + 3] = 0;
             }

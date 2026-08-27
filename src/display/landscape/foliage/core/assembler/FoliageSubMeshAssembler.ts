@@ -79,8 +79,7 @@ class FoliageSubMeshAssembler {
                 lodMeshes,
                 l,
                 options,
-                subMeshBindGroupLayout,
-                lodCfg.materialOverride
+                subMeshBindGroupLayout
             );
 
             for (let s = 0; s < assembledSubMeshes.length; s++) {
@@ -88,16 +87,12 @@ class FoliageSubMeshAssembler {
             }
 
             const subCountForThisLOD = subList.length - startSubOffset;
-            const prevDist = l > 0 ? lodInfoList[l - 1].lodDistance : 0.0;
             const defaultDist = (l === 0) ? 80.0 : (80.0 * Math.pow(2.5, l));
             const switchDist = lodCfg.lodDistance ?? defaultDist;
-            const autoFade = FoliageSubMeshAssembler.calculateAutoFadeRange(switchDist, prevDist);
-            const fadeRange = lodCfg.fadeRange ?? autoFade;
 
             lodInfoList.push({
                 lodIndex: l,
                 lodDistance: switchDist,
-                fadeRange: fadeRange,
                 subMeshOffset: startSubOffset,
                 subMeshCount: subCountForThisLOD,
             });
@@ -108,10 +103,6 @@ class FoliageSubMeshAssembler {
             const impostorLODIndex = lodInfoList.length;
             const lod0SubMeshes = subList.filter(s => s.lodIndex === 0);
 
-            const last3DDist = lodInfoList.length > 0 ? lodInfoList[lodInfoList.length - 1].lodDistance : 100.0;
-            const prevDist = lodInfoList.length > 1 ? lodInfoList[lodInfoList.length - 2].lodDistance : 0.0;
-            const autoImpostorFade = FoliageSubMeshAssembler.calculateAutoFadeRange(last3DDist, prevDist);
-
             FoliageSubMeshAssembler.#buildAndAttachImpostor(
                 redGPUContext,
                 gpuDevice,
@@ -120,8 +111,7 @@ class FoliageSubMeshAssembler {
                 lod0SubMeshes,
                 subList,
                 lodInfoList,
-                impostorLODIndex,
-                autoImpostorFade
+                impostorLODIndex
             );
         }
 
@@ -143,8 +133,8 @@ class FoliageSubMeshAssembler {
             const vData = vBuffer?.data;
             if (vData) {
                 const stride = (vBuffer.interleavedStruct?.arrayStride ? vBuffer.interleavedStruct.arrayStride / 4 : 18);
-                const vCount = vBuffer.vertexCount || (vData.length / stride);
-                for (let v = 0; v < vCount; v++) {
+                const count = vBuffer.vertexCount ?? 0;
+                for (let v = 0; v < count; v++) {
                     const idx = v * stride;
                     const vx = vData[idx];
                     const vy = vData[idx + 1];
@@ -155,7 +145,7 @@ class FoliageSubMeshAssembler {
             }
         }
 
-        const boundingRadius = maxDistSq > 0 ? Math.max(Math.sqrt(maxDistSq), 0.5) : 10.0;
+        const boundingRadius = Math.sqrt(maxDistSq);
 
         return {
             subMeshes: subList,
@@ -174,8 +164,7 @@ class FoliageSubMeshAssembler {
         sourceSubMeshes: FoliageSubMesh[],
         subList: FoliageSubMesh[],
         lodInfoList: FoliageLODInfo[],
-        impostorLODIndex: number,
-        fadeRange: number
+        impostorLODIndex: number
     ): void {
         const bakeResult = FoliageImpostorBaker.bakeSubMeshes(redGPUContext, sourceSubMeshes, options.name);
 
@@ -212,15 +201,9 @@ class FoliageSubMeshAssembler {
         lodInfoList.push({
             lodIndex: impostorLODIndex,
             lodDistance: 1000000.0,
-            fadeRange: fadeRange,
             subMeshOffset: bbStartOffset,
             subMeshCount: 1,
         });
-    }
-
-    static calculateAutoFadeRange(currentDist: number, prevDist: number = 0): number {
-        const span = Math.max(currentDist - prevDist, 5.0);
-        return Math.min(Math.max(span * 0.10, 5.0), 15.0);
     }
 
     static #computeMeshLocalMatrix(mesh: Mesh, out: mat4): mat4 {
@@ -278,8 +261,7 @@ class FoliageSubMeshAssembler {
         parentRelativeMatrix: mat4,
         isRoot: boolean,
         rawList: RawSubMesh[],
-        options: FoliageTypeOptions,
-        materialOverride?: any
+        options: FoliageTypeOptions
     ): void {
         if (!node) return;
 
@@ -302,8 +284,8 @@ class FoliageSubMeshAssembler {
             mat4.multiply(currentRelativeMatrix, parentRelativeMatrix, FoliageSubMeshAssembler.#tempLocalMatrix);
         }
 
-        if (node.geometry && (node.material || materialOverride)) {
-            const mat = materialOverride || node.material;
+        if (node.geometry && node.material) {
+            const mat = node.material;
 
             const isFoliage = options.isFoliage !== false;
             if (isFoliage) {
@@ -358,8 +340,7 @@ class FoliageSubMeshAssembler {
                     currentRelativeMatrix,
                     false,
                     rawList,
-                    options,
-                    materialOverride
+                    options
                 );
             }
         }
@@ -370,8 +351,7 @@ class FoliageSubMeshAssembler {
         roots: Mesh[],
         lodIndex: number,
         options: FoliageTypeOptions,
-        subMeshBindGroupLayout: GPUBindGroupLayout,
-        materialOverride?: any
+        subMeshBindGroupLayout: GPUBindGroupLayout
     ): FoliageSubMesh[] {
         const gpuDevice = redGPUContext.gpuDevice;
         const rawList: RawSubMesh[] = [];
@@ -382,8 +362,7 @@ class FoliageSubMeshAssembler {
                 FoliageSubMeshAssembler.#identityMatrix,
                 true,
                 rawList,
-                options,
-                materialOverride
+                options
             );
         }
 
