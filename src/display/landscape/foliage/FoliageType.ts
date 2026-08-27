@@ -109,7 +109,6 @@ export interface FoliageTypeOptions {
 }
 
 class FoliageType {
-    #name: string;
     #options: FoliageTypeOptions;
     #redGPUContext: RedGPUContext;
 
@@ -120,7 +119,6 @@ class FoliageType {
 
     #instanceBuffer: FoliageInstanceBuffer;
 
-    #lod0SubMeshCount: number = 1;
     #activeInstanceCount: number = 0;
     #bottomOffset: number = 0;
     #boundingRadius: number = 10.0;
@@ -136,7 +134,6 @@ class FoliageType {
         this.#redGPUContext = redGPUContext;
         this.#foliageManager = foliageManager || null;
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
-        this.#name = options.name;
 
         const billboardOpt = options.billboard || options.impostor;
 
@@ -164,7 +161,6 @@ class FoliageType {
         );
         this.#subMeshes = assembleResult.subMeshes;
         this.#lodInfoList = assembleResult.lodInfoList || [];
-        this.#lod0SubMeshCount = assembleResult.lod0SubMeshCount;
         this.#bottomOffset = assembleResult.bottomOffset ?? 0;
         this.#boundingRadius = assembleResult.boundingRadius || 10.0;
 
@@ -172,7 +168,7 @@ class FoliageType {
         this.#instanceBuffer.initStaticLODUniforms(
             this.#lodInfoList,
             this.lodDistance,
-            this.#lod0SubMeshCount,
+            this.lod0SubMeshCount,
             this.hasBillboard,
             this.#options.cullingDistance ?? 2000.0
         );
@@ -184,7 +180,7 @@ class FoliageType {
     }
 
     get name(): string {
-        return this.#name;
+        return this.#options.name;
     }
 
     get options(): FoliageTypeOptions {
@@ -204,7 +200,7 @@ class FoliageType {
     }
 
     get lod0SubMeshCount(): number {
-        return this.#lod0SubMeshCount;
+        return this.#lodInfoList[0]?.subMeshCount ?? this.#subMeshes.length;
     }
 
     get hasBillboard(): boolean {
