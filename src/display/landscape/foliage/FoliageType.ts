@@ -2,17 +2,15 @@ import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
 import Mesh from "../../mesh/Mesh";
 import Geometry from "../../../geometry/Geometry";
-import ABaseMaterial from "../../../material/core/ABaseMaterial";
 import FoliageInstanceBuffer from "./FoliageInstanceBuffer";
 import type {FoliageDepthPassMode} from "./core/pipeline/FoliagePipelineRegistry";
 import FoliageSubMeshAssembler from "./core/assembler/FoliageSubMeshAssembler";
-import type LandscapeFoliageManager from "./LandscapeFoliageManager";
 import FoliageTilePopulator from "./core/populator/FoliageTilePopulator";
 
 export interface FoliageSubMesh {
     mesh: Mesh;
     geometry: Geometry;
-    material: ABaseMaterial | any;
+    material: any;
     indexCount: number;
     vertexCount: number;
     isIndexed: boolean;
@@ -30,13 +28,13 @@ export interface FoliageSubMesh {
     mainDepthMode: FoliageDepthPassMode;
     isAlpha: boolean;
     isTransparent: boolean;
-    isImpostor?: boolean;
-    impostorWidth?: number;
-    impostorHeight?: number;
+    isImpostor: boolean;
+    impostorWidth: number;
+    impostorHeight: number;
 
     instanceBufferOffset: number;
     indirectOffsetBytes: number;
-    pipelineCache?: Map<string, GPURenderPipeline>;
+    pipelineCache: Map<string, GPURenderPipeline>;
 }
 
 export interface FoliageLODConfig {
@@ -97,8 +95,7 @@ class FoliageType {
     constructor(
         redGPUContext: RedGPUContext,
         options: FoliageTypeOptions,
-        sharedSubMeshBindGroupLayout?: GPUBindGroupLayout | null,
-        foliageManager?: LandscapeFoliageManager | null
+        sharedSubMeshBindGroupLayout?: GPUBindGroupLayout | null
     ) {
         this.#redGPUContext = redGPUContext;
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;

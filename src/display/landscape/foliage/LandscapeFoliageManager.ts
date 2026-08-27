@@ -94,7 +94,7 @@ class LandscapeFoliageManager {
             return this.#foliageTypes.get(options.name)!;
         }
 
-        const foliageType = new FoliageType(this.#redGPUContext, options, LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout, this);
+        const foliageType = new FoliageType(this.#redGPUContext, options, LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout);
         this.#foliageTypes.set(options.name, foliageType);
         this.#typeList.push(foliageType);
 

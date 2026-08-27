@@ -213,13 +213,13 @@ class FoliageRenderer {
 
         // 🌲 서브메시별 파이프라인 캐싱 (Zero GC)
         const pipelineKey = `${msaaID}_${depthPassMode}`;
-        let pipeline = sub.pipelineCache?.get(pipelineKey) || null;
+        let pipeline = sub.pipelineCache.get(pipelineKey) || null;
         if (!pipeline) {
             const cullMode = material.doubleSided ? 'none' : (material.cullMode ?? 'none');
             pipeline = this.#pipelineRegistry.getOrCreatePipeline(
                 material, sampleCount, msaaID, sub.strideBytes, cullMode, depthPassMode, this.#subMeshVertexBindGroupLayout
             );
-            if (pipeline && sub.pipelineCache) {
+            if (pipeline) {
                 sub.pipelineCache.set(pipelineKey, pipeline);
             }
         }

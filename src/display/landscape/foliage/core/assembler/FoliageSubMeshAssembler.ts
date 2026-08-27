@@ -690,8 +690,12 @@ class FoliageSubMeshAssembler {
             mainDepthMode,
             isAlpha,
             isTransparent,
+            isImpostor: false,
+            impostorWidth: 0,
+            impostorHeight: 0,
             instanceBufferOffset: 0,
             indirectOffsetBytes: 0,
+            pipelineCache: new Map(),
         };
     }
 }
