@@ -1,41 +1,12 @@
-import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../context/RedGPUContext";
 import Mesh from "../../mesh/Mesh";
-import Geometry from "../../../geometry/Geometry";
 import FoliageInstanceBuffer from "./FoliageInstanceBuffer";
-import type {FoliageDepthPassMode} from "./core/pipeline/FoliagePipelineRegistry";
 import FoliageSubMeshAssembler from "./core/assembler/FoliageSubMeshAssembler";
 import FoliageTilePopulator from "./core/populator/FoliageTilePopulator";
 
-export interface FoliageSubMesh {
-    mesh: Mesh;
-    geometry: Geometry;
-    material: any;
-    indexCount: number;
-    vertexCount: number;
-    isIndexed: boolean;
-    indexFormat?: GPUIndexFormat;
-    strideBytes: number;
-    bottomOffset: number;
-    relativeModelMatrix: mat4;
-    relativeNormalMatrix: mat4;
-    vertexUniformBuffer: GPUBuffer;
-    vertexUniformBindGroup: GPUBindGroup;
-    lodIndex: number;
+import FoliageSubMesh from "./FoliageSubMesh";
 
-    isDepthPrepass: boolean;
-    isMainOpaqueOrMasked: boolean;
-    mainDepthMode: FoliageDepthPassMode;
-    isAlpha: boolean;
-    isTransparent: boolean;
-    isImpostor: boolean;
-    impostorWidth: number;
-    impostorHeight: number;
-
-    instanceBufferOffset: number;
-    indirectOffsetBytes: number;
-    pipelineCache: Map<string, GPURenderPipeline>;
-}
+export {FoliageSubMesh};
 
 export interface FoliageLODConfig {
     /** The 3D mesh (or mesh hierarchy) to render at this LOD level */

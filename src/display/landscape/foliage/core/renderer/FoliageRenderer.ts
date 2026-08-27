@@ -1,5 +1,5 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
-import type {FoliageSubMesh} from "../../FoliageType";
+import FoliageSubMesh from "../../FoliageSubMesh";
 import FoliageType from "../../FoliageType";
 import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 import FoliagePipelineRegistry from "../pipeline/FoliagePipelineRegistry";
@@ -98,7 +98,7 @@ class FoliageRenderer {
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
-                if (sub.isDepthPrepass) {
+                if (sub.canRenderInPass('depthPrepass')) {
                     this.#drawSubMesh(passEncoder, sub, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
                 }
             }
@@ -112,7 +112,7 @@ class FoliageRenderer {
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
-                if (sub.isMainOpaqueOrMasked) {
+                if (sub.canRenderInPass('main')) {
                     this.#drawSubMesh(passEncoder, sub, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, sub.mainDepthMode);
                 }
             }
@@ -126,7 +126,7 @@ class FoliageRenderer {
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
-                if (sub.isAlpha) {
+                if (sub.canRenderInPass('alpha')) {
                     this.#drawSubMesh(passEncoder, sub, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'normal');
                 }
             }
@@ -141,7 +141,7 @@ class FoliageRenderer {
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
-                if (sub.isTransparent) {
+                if (sub.canRenderInPass('transparent')) {
                     let entry = this.#transparentEntries[transCount];
                     if (!entry) {
                         entry = {
@@ -205,24 +205,13 @@ class FoliageRenderer {
         const vertexGPUBuffer = sub.geometry.vertexBuffer?.gpuBuffer;
         if (!vertexGPUBuffer) return;
 
-        const material = sub.material;
-        if (material.dirtyPipeline || !material.gpuRenderInfo?.fragmentUniformBindGroup) {
-            material._updateFragmentState();
-            material.dirtyPipeline = false;
-        }
-
-        // 🌲 서브메시별 파이프라인 캐싱 (Zero GC)
-        const pipelineKey = `${msaaID}_${depthPassMode}`;
-        let pipeline = sub.pipelineCache.get(pipelineKey) || null;
-        if (!pipeline) {
-            const cullMode = material.doubleSided ? 'none' : (material.cullMode ?? 'none');
-            pipeline = this.#pipelineRegistry.getOrCreatePipeline(
-                material, sampleCount, msaaID, sub.strideBytes, cullMode, depthPassMode, this.#subMeshVertexBindGroupLayout
-            );
-            if (pipeline) {
-                sub.pipelineCache.set(pipelineKey, pipeline);
-            }
-        }
+        const pipeline = sub.getPipeline(
+            this.#pipelineRegistry,
+            sampleCount,
+            msaaID,
+            depthPassMode,
+            this.#subMeshVertexBindGroupLayout
+        );
         if (!pipeline) return;
 
         if (this.#lastBoundPipeline !== pipeline) {
@@ -241,7 +230,7 @@ class FoliageRenderer {
             this.#lastBoundVertexUniformBG = vertexUniformBG;
         }
 
-        const matUniformBG = material.gpuRenderInfo?.fragmentUniformBindGroup;
+        const matUniformBG = sub.material.gpuRenderInfo?.fragmentUniformBindGroup;
         if (matUniformBG && this.#lastBoundMatBG !== matUniformBG) {
             passEncoder.setBindGroup(2, matUniformBG);
             this.#lastBoundMatBG = matUniformBG;
@@ -259,18 +248,15 @@ class FoliageRenderer {
             this.#lastBoundInstanceOffset = instanceBufferOffset;
         }
 
-        const indirectOffsetBytes = sub.indirectOffsetBytes;
         if (sub.isIndexed && sub.geometry.indexBuffer?.gpuBuffer) {
             const indexGPUBuffer = sub.geometry.indexBuffer.gpuBuffer;
             if (this.#lastBoundIndexBuffer !== indexGPUBuffer) {
-                const format = sub.indexFormat || 'uint32';
-                passEncoder.setIndexBuffer(indexGPUBuffer, format);
+                passEncoder.setIndexBuffer(indexGPUBuffer, sub.indexFormat);
                 this.#lastBoundIndexBuffer = indexGPUBuffer;
             }
-            passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
-        } else {
-            passEncoder.drawIndirect(indirectGPUBuffer, indirectOffsetBytes);
         }
+
+        sub.draw(passEncoder, indirectGPUBuffer);
     }
 }
 

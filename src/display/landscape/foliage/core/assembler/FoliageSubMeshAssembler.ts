@@ -9,7 +9,8 @@ import VertexInterleaveType from "../../../../../resources/buffer/vertexBuffer/V
 import {createOctahedralImpostorGeometry} from "../impostor/octahedral/createOctahedralImpostorGeometry";
 import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImpostorMaterial";
 import FoliageImpostorBaker from "../impostor/FoliageImpostorBaker";
-import type {FoliageLODInfo, FoliageSubMesh, FoliageTypeOptions} from "../../FoliageType";
+import FoliageSubMesh from "../../FoliageSubMesh";
+import type {FoliageLODInfo, FoliageTypeOptions} from "../../FoliageType";
 import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 import GPU_BLEND_FACTOR from "../../../../../gpuConst/GPU_BLEND_FACTOR";
 
@@ -125,7 +126,6 @@ class FoliageSubMeshAssembler {
             const sub = subList[i];
             sub.instanceBufferOffset = (sub.lodIndex ?? 0) * maxInstances * 48;
             sub.indirectOffsetBytes = i * 20;
-            sub.pipelineCache = new Map();
 
             minOffset = Math.min(minOffset, sub.bottomOffset);
 
@@ -186,16 +186,12 @@ class FoliageSubMeshAssembler {
             mat4.create(),
             mat4.create(),
             PBR_STRIDE_BYTES,
-            impostorLODIndex
+            impostorLODIndex,
+            true,
+            bbWidth,
+            bbHeight,
+            bbBottomOffset
         );
-        bbSubMesh.isDepthPrepass = false;
-        bbSubMesh.isMainOpaqueOrMasked = true;
-        bbSubMesh.mainDepthMode = 'normal';
-
-        bbSubMesh.isImpostor = true;
-        bbSubMesh.impostorWidth = bbWidth;
-        bbSubMesh.impostorHeight = bbHeight;
-        bbSubMesh.bottomOffset = bbBottomOffset;
         subList.push(bbSubMesh);
 
         lodInfoList.push({
@@ -617,7 +613,11 @@ class FoliageSubMeshAssembler {
         relMatrix: mat4,
         normMatrix: mat4,
         strideBytes: number,
-        lodIndex: number = 0
+        lodIndex: number = 0,
+        isImpostorOverride: boolean = false,
+        impostorWidth: number = 0,
+        impostorHeight: number = 0,
+        bottomOffset: number = 0
     ): FoliageSubMesh {
         const isIndexed = !!geom.indexBuffer;
         const indexCount = geom.indexBuffer?.indexCount ?? 0;
@@ -659,9 +659,9 @@ class FoliageSubMeshAssembler {
             ]
         });
 
-        const isImpostor = mat instanceof OctahedralImpostorMaterial || mat?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof mat?.name === 'string' && mat.name.includes('Octahedral'));
-        const isTransparent = !!mat.transparent || !!mat.use2PathRender;
-        const isAlpha = (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
+        const isImpostor = isImpostorOverride || mat instanceof OctahedralImpostorMaterial || mat?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof mat?.name === 'string' && mat.name.includes('Octahedral'));
+        const isTransparent = !isImpostor && (!!mat.transparent || !!mat.use2PathRender);
+        const isAlpha = !isImpostor && (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
         const isMasked = !!mat.useCutOff || (mat.cutOff !== undefined && mat.cutOff > 0);
         const hasBaseColorTexture = !!(mat.baseColorTexture?.gpuTexture || mat.baseColorTexture?.src || mat.baseColorTexture?.url || (mat.diffuseTexture && (mat.diffuseTexture.gpuTexture || mat.diffuseTexture.src || mat.diffuseTexture.url)));
 
@@ -670,7 +670,7 @@ class FoliageSubMeshAssembler {
         const isMainOpaqueOrMasked = !isTransparent && !isAlpha;
         const mainDepthMode: FoliageDepthPassMode = isDepthPrepass ? 'mainShadingAfterDepth' : 'normal';
 
-        return {
+        return new FoliageSubMesh({
             mesh: meshNode,
             geometry: geom,
             material: mat,
@@ -679,7 +679,7 @@ class FoliageSubMeshAssembler {
             isIndexed,
             indexFormat: geom.indexBuffer?.format || 'uint32',
             strideBytes,
-            bottomOffset: 0,
+            bottomOffset,
             relativeModelMatrix: relMatrix,
             relativeNormalMatrix: normMatrix,
             vertexUniformBuffer: uniformBuffer,
@@ -690,13 +690,12 @@ class FoliageSubMeshAssembler {
             mainDepthMode,
             isAlpha,
             isTransparent,
-            isImpostor: false,
-            impostorWidth: 0,
-            impostorHeight: 0,
+            isImpostor,
+            impostorWidth,
+            impostorHeight,
             instanceBufferOffset: 0,
             indirectOffsetBytes: 0,
-            pipelineCache: new Map(),
-        };
+        });
     }
 }
 
