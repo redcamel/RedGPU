@@ -74,7 +74,7 @@ class LandscapeFoliageManager {
         }
     }
 
-    get types(): FoliageType[] {
+    get types(): readonly FoliageType[] {
         return this.#typeList;
     }
 

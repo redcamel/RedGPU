@@ -78,9 +78,8 @@ class FoliageRenderer {
             const subCount = subMeshes.length;
             if (subCount === 0) continue;
 
-            const buffer = foliageType.instanceBuffer;
-            const culledGPU = buffer.getCulledGPUBuffer();
-            const indirectGPU = buffer.getIndirectGPUBuffer();
+            const culledGPU = foliageType.culledGPUBuffer;
+            const indirectGPU = foliageType.indirectGPUBuffer;
             if (!culledGPU || !indirectGPU) continue;
 
             for (let s = 0; s < subCount; s++) {
@@ -99,9 +98,8 @@ class FoliageRenderer {
             const subCount = subMeshes.length;
             if (subCount === 0) continue;
 
-            const buffer = foliageType.instanceBuffer;
-            const culledGPU = buffer.getCulledGPUBuffer();
-            const indirectGPU = buffer.getIndirectGPUBuffer();
+            const culledGPU = foliageType.culledGPUBuffer;
+            const indirectGPU = foliageType.indirectGPUBuffer;
             if (!culledGPU || !indirectGPU) continue;
 
             for (let s = 0; s < subCount; s++) {
@@ -119,9 +117,8 @@ class FoliageRenderer {
             const subCount = subMeshes.length;
             if (subCount === 0) continue;
 
-            const buffer = foliageType.instanceBuffer;
-            const culledGPU = buffer.getCulledGPUBuffer();
-            const indirectGPU = buffer.getIndirectGPUBuffer();
+            const culledGPU = foliageType.culledGPUBuffer;
+            const indirectGPU = foliageType.indirectGPUBuffer;
             if (!culledGPU || !indirectGPU) continue;
 
             for (let s = 0; s < subCount; s++) {
@@ -140,9 +137,8 @@ class FoliageRenderer {
             const subCount = subMeshes.length;
             if (subCount === 0) continue;
 
-            const buffer = foliageType.instanceBuffer;
-            const culledGPU = buffer.getCulledGPUBuffer();
-            const indirectGPU = buffer.getIndirectGPUBuffer();
+            const culledGPU = foliageType.culledGPUBuffer;
+            const indirectGPU = foliageType.indirectGPUBuffer;
             if (!culledGPU || !indirectGPU) continue;
 
             for (let s = 0; s < subCount; s++) {

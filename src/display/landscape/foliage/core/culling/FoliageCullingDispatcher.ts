@@ -117,24 +117,19 @@ class FoliageCullingDispatcher {
             const subCount = foliageType.subMeshes.length;
             if (subCount === 0) continue;
 
-            const buffer = foliageType.instanceBuffer;
             const cullingDist = foliageType.options.cullingDistance;
             const fadeStartDist = foliageType.options.fadeStartDistance;
             const boundingRadius = foliageType.boundingRadius;
             const bottomOffset = foliageType.bottomOffset;
 
-            buffer.resetMultiIndirectCount(foliageType.subMeshes);
+            foliageType.resetIndirectBuffer();
 
-            buffer.updateCullingUniforms(
+            foliageType.updateCullingUniforms(
                 camX, camY, camZ,
                 cullingDist, fadeStartDist, activeCount, boundingRadius,
                 worldSizeX, heightScale, bottomOffset, hasVHT,
                 frustumPlanes,
-                foliageType.lodInfoList,
-                fovFactorSq,
-                foliageType.lodDistance,
-                foliageType.lod0SubMeshCount,
-                foliageType.hasBillboard
+                fovFactorSq
             );
         }
 
@@ -208,8 +203,7 @@ class FoliageCullingDispatcher {
             const activeCount = foliageType.activeInstanceCount;
             if (activeCount <= 0 || foliageType.subMeshes.length === 0) continue;
 
-            const buffer = foliageType.instanceBuffer;
-            const cullingBindGroup = buffer.getOrCreateCullingBindGroup(bindGroupLayout, vhtView, vhtSampler);
+            const cullingBindGroup = foliageType.getCullingBindGroup(bindGroupLayout, vhtView, vhtSampler);
             if (cullingBindGroup) {
                 const workgroupCount = Math.ceil(activeCount / 64);
                 computePass.setBindGroup(0, cullingBindGroup);

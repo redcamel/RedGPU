@@ -6,14 +6,14 @@ class FoliageTilePopulator {
         comp: any,
         foliageType: FoliageType,
         targetCountPerTile?: number
-    ): boolean {
+    ): number {
         const landscape = foliageType.foliageManager?.landscape;
         const compCountX = landscape?.componentCount?.[0] ?? 8;
         const totalTiles = compCountX * compCountX;
 
         const maxInstances = foliageType.options.maxInstances;
         const countForThisTile = targetCountPerTile ?? Math.floor(maxInstances / totalTiles);
-        if (countForThisTile <= 0) return false;
+        if (countForThisTile <= 0) return 0;
 
         const tileSizeMeters = comp.componentSizeQuads || ((landscape && landscape.worldSize) ? landscape.worldSize[0] / compCountX : 1000);
         const halfTile = tileSizeMeters * 0.5;
@@ -26,7 +26,7 @@ class FoliageTilePopulator {
         const startIdx = foliageType.activeInstanceCount;
         const endIdx = Math.min(startIdx + countForThisTile, maxInstances);
         const actualCount = endIdx - startIdx;
-        if (actualCount <= 0) return false;
+        if (actualCount <= 0) return 0;
 
         const {minScale, maxScale, randomRotationY} = foliageType.options;
         const rangeX = maxX - minX;
@@ -35,8 +35,6 @@ class FoliageTilePopulator {
         const scaleDiffX = maxScale[0] - minScale[0];
         const scaleDiffY = maxScale[1] - minScale[1];
         const scaleDiffZ = maxScale[2] - minScale[2];
-
-        const instanceBuffer = foliageType.instanceBuffer;
 
         for (let i = 0; i < actualCount; i++) {
             const idx = startIdx + i;
@@ -56,15 +54,13 @@ class FoliageTilePopulator {
                 rotW = Math.cos(angle * 0.5);
             }
 
-            instanceBuffer.setInstanceData(idx, posX, posY, posZ, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, 1.0, 0);
+            foliageType.setInstanceData(idx, posX, posY, posZ, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, 1.0, 0);
         }
 
-        foliageType.incrementActiveInstanceCount(actualCount);
+        foliageType.uploadRangeToGPU(startIdx, actualCount);
+        foliageType.resetIndirectBuffer();
 
-        instanceBuffer.uploadRangeToGPU(startIdx, actualCount);
-        instanceBuffer.resetMultiIndirectCount(foliageType.subMeshes);
-
-        return true;
+        return actualCount;
     }
 }
 

@@ -32,8 +32,8 @@ class FoliageInstanceBuffer {
         return this.#maxInstances;
     }
 
-    get dataBuffer(): Float32Array {
-        return this.#dataBuffer;
+    writeSubData(data: Float32Array, offsetFloats: number = 0): void {
+        this.#dataBuffer.set(data, offsetFloats);
     }
 
     setInstanceData(

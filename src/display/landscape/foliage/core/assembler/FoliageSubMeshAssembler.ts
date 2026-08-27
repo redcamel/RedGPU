@@ -40,7 +40,6 @@ interface RawSubMesh {
     material: any;
     currentRelativeMatrix: mat4;
     normalMatrix: mat4;
-    strideBytes: number;
     rawStride: number;
 }
 
@@ -93,7 +92,7 @@ class FoliageSubMeshAssembler {
                 const subCountForThisLOD = subList.length - startSubOffset;
                 const prevDist = l > 0 ? lodInfoList[l - 1].lodDistance : 0.0;
                 const defaultDist = (l === 0) ? 30.0 : (30.0 * Math.pow(2.5, l));
-                const switchDist = lodCfg.lodDistance ?? lodCfg.distance ?? defaultDist;
+                const switchDist = lodCfg.lodDistance ?? defaultDist;
                 const autoFade = FoliageSubMeshAssembler.calculateAutoFadeRange(switchDist, prevDist);
                 const fadeRange = lodCfg.fadeRange ?? autoFade;
 
@@ -389,7 +388,6 @@ class FoliageSubMeshAssembler {
 
             const geom = node.geometry;
             const rawStride = (geom.vertexBuffer as any)?.stride || 12;
-            const strideBytes = rawStride * 4;
 
             const normalMatrix = mat4.create();
             mat4.invert(normalMatrix, currentRelativeMatrix);
@@ -401,7 +399,6 @@ class FoliageSubMeshAssembler {
                 material: mat,
                 currentRelativeMatrix,
                 normalMatrix,
-                strideBytes,
                 rawStride,
             });
         }

@@ -36,8 +36,6 @@ export interface FoliageCrossBillboardOptions {
 
     enabled?: boolean;
 
-    texture?: any;
-
     material?: any;
 
     width?: number;
@@ -53,9 +51,6 @@ export interface FoliageLODConfig {
 
     /** LOD switch distance in meters (e.g. 40.0) */
     lodDistance?: number;
-
-    /** [Legacy alias for lodDistance] */
-    distance?: number;
 
     /** Dithered cross-fade range buffer in meters (default: 10.0) */
     fadeRange?: number;
@@ -120,7 +115,7 @@ class FoliageType {
 
     #lod0SubMeshCount: number = 1;
     #activeInstanceCount: number = 0;
-    #bottomOffset: number | null = null;
+    #bottomOffset: number = 0;
     #boundingRadius: number = 10.0;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #loadedTileKeys: Set<string> = new Set();
@@ -163,11 +158,11 @@ class FoliageType {
         this.#subMeshes = assembleResult.subMeshes;
         this.#lodInfoList = assembleResult.lodInfoList || [];
         this.#lod0SubMeshCount = assembleResult.lod0SubMeshCount;
-        this.#bottomOffset = assembleResult.bottomOffset;
+        this.#bottomOffset = assembleResult.bottomOffset ?? 0;
         this.#boundingRadius = assembleResult.boundingRadius || 10.0;
 
         this.#instanceBuffer = new FoliageInstanceBuffer(redGPUContext, this.#options.maxInstances, this.#subMeshes);
-        this.#updateIndirectBuffer();
+        this.resetIndirectBuffer();
     }
 
     get foliageManager(): LandscapeFoliageManager | null {
@@ -182,16 +177,12 @@ class FoliageType {
         return this.#options;
     }
 
-    get subMeshes(): FoliageSubMesh[] {
+    get subMeshes(): readonly FoliageSubMesh[] {
         return this.#subMeshes;
     }
 
-    get lodInfoList(): FoliageLODInfo[] {
+    get lodInfoList(): readonly FoliageLODInfo[] {
         return this.#lodInfoList;
-    }
-
-    get instanceBuffer(): FoliageInstanceBuffer {
-        return this.#instanceBuffer;
     }
 
     get activeInstanceCount(): number {
@@ -210,24 +201,72 @@ class FoliageType {
         return this.#options.lodDistance;
     }
 
-    incrementActiveInstanceCount(count: number): void {
-        this.#activeInstanceCount += count;
-    }
-
     get bottomOffset(): number {
-        return this.#bottomOffset ?? 0;
+        return this.#bottomOffset;
     }
 
     get boundingRadius(): number {
         return this.#boundingRadius;
     }
 
+    get culledGPUBuffer(): GPUBuffer | null {
+        return this.#instanceBuffer.getCulledGPUBuffer();
+    }
+
+    get indirectGPUBuffer(): GPUBuffer | null {
+        return this.#instanceBuffer.getIndirectGPUBuffer();
+    }
+
+    getCullingBindGroup(layout: GPUBindGroupLayout, vhtView?: GPUTextureView, vhtSampler?: GPUSampler): GPUBindGroup | null {
+        return this.#instanceBuffer.getOrCreateCullingBindGroup(layout, vhtView, vhtSampler);
+    }
+
+    updateCullingUniforms(
+        camX: number, camY: number, camZ: number,
+        cullingDist: number, fadeStartDist: number,
+        activeCount: number, boundingRadius: number,
+        worldSizeX: number, heightScale: number, bottomOffset: number, hasVHT: boolean,
+        frustumPlanes: number[][] | null,
+        fovFactorSq: number
+    ): void {
+        this.#instanceBuffer.updateCullingUniforms(
+            camX, camY, camZ,
+            cullingDist, fadeStartDist, activeCount, boundingRadius,
+            worldSizeX, heightScale, bottomOffset, hasVHT,
+            frustumPlanes,
+            this.#lodInfoList,
+            fovFactorSq,
+            this.lodDistance,
+            this.#lod0SubMeshCount,
+            this.hasBillboard
+        );
+    }
+
+    setInstanceData(
+        index: number,
+        posX: number, posY: number, posZ: number,
+        rotX: number, rotY: number, rotZ: number, rotW: number,
+        scaleX: number, scaleY: number, scaleZ: number,
+        fade: number = 1.0, subId: number = 0
+    ): void {
+        this.#instanceBuffer.setInstanceData(index, posX, posY, posZ, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, fade, subId);
+    }
+
+    uploadRangeToGPU(startIndex: number, count: number): void {
+        this.#instanceBuffer.uploadRangeToGPU(startIndex, count);
+    }
+
+    resetIndirectBuffer(): void {
+        if (!this.#instanceBuffer || this.#subMeshes.length === 0) return;
+        this.#instanceBuffer.resetMultiIndirectCount(this.#subMeshes);
+    }
+
     setInstancesData(data: Float32Array, count?: number): void {
         const instanceCount = count !== undefined ? count : Math.floor(data.length / 12);
         this.#activeInstanceCount = Math.min(instanceCount, this.#options.maxInstances);
-        this.#instanceBuffer.dataBuffer.set(data.subarray(0, this.#activeInstanceCount * 12));
+        this.#instanceBuffer.writeSubData(data.subarray(0, this.#activeInstanceCount * 12));
         this.#instanceBuffer.uploadToGPU(this.#activeInstanceCount);
-        this.#updateIndirectBuffer();
+        this.resetIndirectBuffer();
     }
 
     populateTile(comp: any, targetCountPerTile?: number): void {
@@ -235,7 +274,10 @@ class FoliageType {
         if (this.#loadedTileKeys.has(key)) return;
         this.#loadedTileKeys.add(key);
 
-        FoliageTilePopulator.populateTile(comp, this, targetCountPerTile);
+        const addedCount = FoliageTilePopulator.populateTile(comp, this, targetCountPerTile);
+        if (addedCount > 0) {
+            this.#activeInstanceCount = Math.min(this.#activeInstanceCount + addedCount, this.#options.maxInstances);
+        }
     }
 
     destroy(): void {
@@ -245,11 +287,6 @@ class FoliageType {
             sub.vertexUniformBuffer?.destroy();
         }
         this.#subMeshes.length = 0;
-    }
-
-    #updateIndirectBuffer(): void {
-        if (!this.#instanceBuffer || this.#subMeshes.length === 0) return;
-        this.#instanceBuffer.resetMultiIndirectCount(this.#subMeshes);
     }
 }
 
