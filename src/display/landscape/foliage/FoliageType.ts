@@ -225,7 +225,7 @@ class FoliageType {
         camX: number, camY: number, camZ: number,
         worldSizeX: number, heightScale: number, hasVHT: boolean,
         frustumPlanes: number[][] | null,
-        fovFactorSq: number
+        fovFactor: number
     ): void {
         this.#instanceBuffer.updateCullingUniforms(
             camX, camY, camZ,
@@ -237,7 +237,7 @@ class FoliageType {
             this.#bottomOffset,
             hasVHT,
             frustumPlanes,
-            fovFactorSq,
+            fovFactor,
             this.#numLODs
         );
     }

@@ -14,7 +14,10 @@ class FoliagePipelineRegistry {
 
     constructor(redGPUContext: RedGPUContext, emptyBindGroupLayout?: GPUBindGroupLayout | null) {
         this.#redGPUContext = redGPUContext;
-        this.#emptyBindGroupLayout = emptyBindGroupLayout || null;
+        this.#emptyBindGroupLayout = emptyBindGroupLayout || redGPUContext.gpuDevice?.createBindGroupLayout({
+            label: 'EmptyFoliageBindGroupLayout',
+            entries: []
+        }) || null;
         this.#initShaderModules();
     }
 
@@ -86,10 +89,7 @@ class FoliagePipelineRegistry {
         };
 
         const systemBindGroupLayout = resourceManager.getGPUBindGroupLayout(ResourceManager.PRESET_GPUBindGroupLayout_System);
-        const effectiveSubMeshBGL = subMeshBindGroupLayout || this.#emptyBindGroupLayout || gpuDevice.createBindGroupLayout({
-            label: 'EmptyFoliageBindGroupLayout',
-            entries: []
-        });
+        const effectiveSubMeshBGL = subMeshBindGroupLayout || this.#emptyBindGroupLayout!;
         const materialBindGroupLayout = material.gpuRenderInfo?.fragmentBindGroupLayout
             || material.gpuRenderInfo?.fragmentUniformBindGroup?.layout
             || this.#emptyBindGroupLayout;

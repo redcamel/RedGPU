@@ -23,7 +23,7 @@ class FoliageCullingDispatcher {
     #landscapeRef: Landscape | null = null;
 
     #lastFOV: number = -1;
-    #cachedFovFactorSq: number = 1.0;
+    #cachedFovFactor: number = 1.0;
 
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
@@ -111,10 +111,9 @@ class FoliageCullingDispatcher {
         if (fov !== this.#lastFOV) {
             this.#lastFOV = fov;
             const fovRad = (fov * Math.PI) / 180.0;
-            const tanHalfFov = Math.tan(fovRad * 0.5);
-            this.#cachedFovFactorSq = tanHalfFov * tanHalfFov;
+            this.#cachedFovFactor = Math.tan(fovRad * 0.5);
         }
-        const fovFactorSq = this.#cachedFovFactorSq;
+        const fovFactor = this.#cachedFovFactor;
 
         for (let i = 0; i < typeCount; i++) {
             const foliageType = typeList[i];
@@ -126,7 +125,7 @@ class FoliageCullingDispatcher {
                 camX, camY, camZ,
                 worldSizeX, heightScale, hasVHT,
                 frustumPlanes,
-                fovFactorSq
+                fovFactor
             );
         }
 

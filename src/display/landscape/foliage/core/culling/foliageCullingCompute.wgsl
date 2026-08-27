@@ -17,7 +17,7 @@ struct CullingUniforms {
     hasVHT: u32,
     lodCount: u32,
     maxInstances: u32,
-    fovFactorSq: f32,
+    fovFactor: f32,
     pad0: u32,
     pad1: u32,
     frustumPlanes: array<vec4<f32>, 6>,
@@ -118,7 +118,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invo
 
                 if (inFrustum) {
                     let dist = sqrt(distSq);
-                    let effectiveDist = dist * sqrt(max(cullingUniforms.fovFactorSq, 0.0001));
+                    let effectiveDist = dist * max(cullingUniforms.fovFactor, 0.0001);
 
                     var globalFade: f32 = 1.0;
                     if (!hasInfiniteBillboard) {

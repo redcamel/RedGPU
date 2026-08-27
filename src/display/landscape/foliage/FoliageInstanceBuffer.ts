@@ -159,7 +159,7 @@ class FoliageInstanceBuffer {
         activeCount: number, boundingRadius: number,
         worldSizeX: number, heightScale: number, bottomOffset: number, hasVHT: boolean,
         frustumPlanes: number[][] | null,
-        fovFactorSq: number = 1.0,
+        fovFactor: number = 1.0,
         numLODs: number = 1
     ): void {
         if (!this.#cullingUniformBuffer) return;
@@ -183,7 +183,7 @@ class FoliageInstanceBuffer {
         u32[11] = numLODs;
 
         u32[12] = this.#maxInstances;
-        f32[13] = fovFactorSq > 0 ? fovFactorSq : 1.0;
+        f32[13] = fovFactor > 0 ? fovFactor : 1.0;
         u32[14] = 0;
         u32[15] = 0;
 
