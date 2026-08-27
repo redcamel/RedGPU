@@ -134,6 +134,11 @@ class FoliageSubMeshAssembler {
                     PBR_STRIDE * 4,
                     billboardLODIndex
                 );
+                // 🌿 빌보드(Impostor)는 Depth Prepass 불필요 -> Main Pass 1패스('normal')로 렌더링
+                bbSubMesh.isDepthPrepass = false;
+                bbSubMesh.isMainOpaqueOrMasked = true;
+                bbSubMesh.mainDepthMode = 'normal';
+
                 (bbSubMesh as any)._octahedralWidth = bbWidth;
                 (bbSubMesh as any)._octahedralHeight = bbHeight;
                 (bbSubMesh as any)._bakedWidth = bbWidth;
@@ -210,6 +215,11 @@ class FoliageSubMeshAssembler {
                     PBR_STRIDE * 4,
                     1
                 );
+                // 🌿 빌보드(Impostor)는 Depth Prepass 불필요 -> Main Pass 1패스('normal')로 렌더링
+                bbSubMesh.isDepthPrepass = false;
+                bbSubMesh.isMainOpaqueOrMasked = true;
+                bbSubMesh.mainDepthMode = 'normal';
+
                 (bbSubMesh as any)._octahedralWidth = bbWidth;
                 (bbSubMesh as any)._octahedralHeight = bbHeight;
                 (bbSubMesh as any)._bakedWidth = bbWidth;
@@ -568,35 +578,35 @@ class FoliageSubMeshAssembler {
                             combinedVertexData[dstIdx + 13] = 1.0;
                         }
 
+                        let tanX = 0, tanY = 0, tanZ = 0, tanW = 1.0;
+                        let hasTangent = false;
+
                         if (rawStride >= 18) {
-                            const tanX = srcVData[srcIdx + 14];
-                            const tanY = srcVData[srcIdx + 15];
-                            const tanZ = srcVData[srcIdx + 16];
-                            const tanW = srcVData[srcIdx + 17];
-
-                            let rtx = n[0] * tanX + n[4] * tanY + n[8] * tanZ;
-                            let rty = n[1] * tanX + n[5] * tanY + n[9] * tanZ;
-                            let rtz = n[2] * tanX + n[6] * tanY + n[10] * tanZ;
-                            const tlen = Math.sqrt(rtx * rtx + rty * rty + rtz * rtz);
-                            if (tlen > 0.000001) {
-                                rtx /= tlen;
-                                rty /= tlen;
-                                rtz /= tlen;
-                            }
-
-                            combinedVertexData[dstIdx + 14] = rtx;
-                            combinedVertexData[dstIdx + 15] = rty;
-                            combinedVertexData[dstIdx + 16] = rtz;
-                            combinedVertexData[dstIdx + 17] = tanW !== 0 ? tanW : 1.0;
+                            tanX = srcVData[srcIdx + 14];
+                            tanY = srcVData[srcIdx + 15];
+                            tanZ = srcVData[srcIdx + 16];
+                            tanW = srcVData[srcIdx + 17] !== 0 ? srcVData[srcIdx + 17] : 1.0;
+                            hasTangent = true;
                         } else if (rawStride >= 16) {
-                            const tanX = srcVData[srcIdx + 12];
-                            const tanY = srcVData[srcIdx + 13];
-                            const tanZ = srcVData[srcIdx + 14];
-                            const tanW = srcVData[srcIdx + 15];
+                            tanX = srcVData[srcIdx + 12];
+                            tanY = srcVData[srcIdx + 13];
+                            tanZ = srcVData[srcIdx + 14];
+                            tanW = srcVData[srcIdx + 15] !== 0 ? srcVData[srcIdx + 15] : 1.0;
+                            hasTangent = true;
+                        } else if (rawStride === 12) {
+                            // Primitive layout: position(3) + normal(3) + uv(2) + tangent(4)
+                            tanX = srcVData[srcIdx + 8];
+                            tanY = srcVData[srcIdx + 9];
+                            tanZ = srcVData[srcIdx + 10];
+                            tanW = srcVData[srcIdx + 11] !== 0 ? srcVData[srcIdx + 11] : 1.0;
+                            hasTangent = true;
+                        }
 
-                            let rtx = n[0] * tanX + n[4] * tanY + n[8] * tanZ;
-                            let rty = n[1] * tanX + n[5] * tanY + n[9] * tanZ;
-                            let rtz = n[2] * tanX + n[6] * tanY + n[10] * tanZ;
+                        if (hasTangent) {
+                            // Tangent is a surface direction vector, transformed by model matrix m (linear part)
+                            let rtx = m[0] * tanX + m[4] * tanY + m[8] * tanZ;
+                            let rty = m[1] * tanX + m[5] * tanY + m[9] * tanZ;
+                            let rtz = m[2] * tanX + m[6] * tanY + m[10] * tanZ;
                             const tlen = Math.sqrt(rtx * rtx + rty * rty + rtz * rtz);
                             if (tlen > 0.000001) {
                                 rtx /= tlen;
@@ -607,7 +617,7 @@ class FoliageSubMeshAssembler {
                             combinedVertexData[dstIdx + 14] = rtx;
                             combinedVertexData[dstIdx + 15] = rty;
                             combinedVertexData[dstIdx + 16] = rtz;
-                            combinedVertexData[dstIdx + 17] = tanW !== 0 ? tanW : 1.0;
+                            combinedVertexData[dstIdx + 17] = tanW;
                         } else {
                             combinedVertexData[dstIdx + 14] = 1.0;
                             combinedVertexData[dstIdx + 15] = 0.0;

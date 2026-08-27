@@ -291,7 +291,10 @@ fn main(inputData:InputData) -> OutputFragment {
         if (resultAlpha <= u_cutOff) { discard; }
     #redgpu_endIf
     #redgpu_if isFoliage
-        if (resultAlpha <= 0.3333) { discard; }
+        let uvDeriv = length(vec2<f32>(dpdx(diffuseUV.x), dpdy(diffuseUV.y)));
+        let baseCutOff = select(0.35, u_cutOff, u_cutOff > 0.0);
+        let adaptiveCutOff = clamp(baseCutOff - uvDeriv * 15.0, 0.15, baseCutOff);
+        if (resultAlpha <= adaptiveCutOff) { discard; }
     #redgpu_endIf
     let emissiveUV = getTextureTransformUV(input_uv, input_uv1, uniforms.emissiveTexture_texCoord_index, uniforms.use_emissiveTexture_KHR_texture_transform, uniforms.emissiveTexture_KHR_texture_transform_offset, uniforms.emissiveTexture_KHR_texture_transform_rotation, uniforms.emissiveTexture_KHR_texture_transform_scale);
     let occlusionUV = getTextureTransformUV(input_uv, input_uv1, uniforms.occlusionTexture_texCoord_index, uniforms.use_occlusionTexture_KHR_texture_transform, uniforms.occlusionTexture_KHR_texture_transform_offset, uniforms.occlusionTexture_KHR_texture_transform_rotation, uniforms.occlusionTexture_KHR_texture_transform_scale);

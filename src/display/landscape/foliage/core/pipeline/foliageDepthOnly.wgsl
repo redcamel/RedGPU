@@ -14,13 +14,12 @@ struct InputData {
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
-    let foliageUvDeriv = length(vec2<f32>(dpdx(inputData.uv.x), dpdy(inputData.uv.y))) * 80.0;
-    let globalFragmentData = globalFragmentSSBO_PBR[inputData.globalFragmentSlotIndex];
-
     let texColor = textureSample(baseColorTexture, baseColorTextureSampler, inputData.uv);
+    let uvDeriv = length(vec2<f32>(dpdx(inputData.uv.x), dpdy(inputData.uv.y)));
+    let baseCutOff = 0.35;
+    let adaptiveCutOff = clamp(baseCutOff - uvDeriv * 15.0, 0.15, baseCutOff);
 
-    var cutOff = 0.3333;
-    if (texColor.a <= cutOff) {
+    if (texColor.a <= adaptiveCutOff) {
         discard;
     }
 

@@ -104,7 +104,8 @@ fn mainInput(input : VertexInput) -> OutputData {
             if (abs(hierarchyNormal.x) > 0.9) { rawT = vec3<f32>(0.0, 1.0, 0.0); }
             inTan = normalize(cross(hierarchyNormal, rawT));
         }
-        let worldTangent = normalize(rotateVectorByQuaternion(inTan, input.instanceRotQuat));
+        let scaledTangent = inTan * safeScale;
+        let worldTangent = normalize(rotateVectorByQuaternion(scaledTangent, input.instanceRotQuat));
         let tanW = select(1.0, input.vertexTangent.w, input.vertexTangent.w != 0.0);
         output.vertexTangent = vec4<f32>(worldTangent, tanW);
     }
