@@ -6,6 +6,8 @@ import FoliagePipelineRegistry from "./core/pipeline/FoliagePipelineRegistry";
 import FoliageRenderer from "./core/renderer/FoliageRenderer";
 import FoliageCullingDispatcher from "./core/culling/FoliageCullingDispatcher";
 
+import FoliageMegaBuffer from "./core/buffer/FoliageMegaBuffer";
+
 class LandscapeFoliageManager {
     static #sharedEmptyBindGroupLayout: GPUBindGroupLayout | null = null;
     static #sharedEmptyBindGroup: GPUBindGroup | null = null;
@@ -14,6 +16,7 @@ class LandscapeFoliageManager {
     #redGPUContext: RedGPUContext;
     #landscape: Landscape | null = null;
 
+    #megaBuffer: FoliageMegaBuffer;
     #foliageTypes: Map<string, FoliageType> = new Map();
     #typeList: FoliageType[] = [];
 
@@ -58,9 +61,10 @@ class LandscapeFoliageManager {
         const emptyBG = LandscapeFoliageManager.#sharedEmptyBindGroup;
         const subMeshBGL = LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout;
 
+        this.#megaBuffer = new FoliageMegaBuffer(this.#redGPUContext);
         this.#pipelineRegistry = new FoliagePipelineRegistry(this.#redGPUContext, emptyBGL);
         this.#renderer = new FoliageRenderer(this.#redGPUContext, this.#pipelineRegistry, emptyBG, subMeshBGL);
-        this.#cullingDispatcher = new FoliageCullingDispatcher(this.#redGPUContext);
+        this.#cullingDispatcher = new FoliageCullingDispatcher(this.#redGPUContext, this.#megaBuffer);
     }
 
     handleTileLoaded(comp: any): void {
@@ -72,6 +76,10 @@ class LandscapeFoliageManager {
 
     get types(): readonly FoliageType[] {
         return this.#typeList;
+    }
+
+    get megaBuffer(): FoliageMegaBuffer {
+        return this.#megaBuffer;
     }
 
     get hasFoliageTypes(): boolean {
@@ -94,7 +102,12 @@ class LandscapeFoliageManager {
             return this.#foliageTypes.get(options.name)!;
         }
 
-        const foliageType = new FoliageType(this.#redGPUContext, options, LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout);
+        const foliageType = new FoliageType(
+            this.#redGPUContext,
+            options,
+            LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout,
+            this.#megaBuffer
+        );
         this.#foliageTypes.set(options.name, foliageType);
         this.#typeList.push(foliageType);
 
@@ -130,6 +143,7 @@ class LandscapeFoliageManager {
         this.#foliageTypes.forEach((type) => type.destroy());
         this.#foliageTypes.clear();
         this.#typeList.length = 0;
+        this.#megaBuffer.destroy();
         this.#pipelineRegistry.clearCache();
     }
 }

@@ -5,23 +5,32 @@ struct FoliageLODUniformInfo {
     subMeshCount: u32,
 };
 
-struct CullingUniforms {
-    cameraPosition: vec3<f32>,
+struct FoliageTypeParam {
     cullingDistance: f32,
     fadeStartDistance: f32,
-    instanceCount: u32,
     boundingRadius: f32,
-    invWorldSizeX: f32,
-    heightScale: f32,
     bottomOffset: f32,
-    hasVHT: u32,
     lodCount: u32,
     maxInstances: u32,
+    culledBaseOffset: u32,
+    indirectBaseOffset: u32,
+    rawBaseOffset: u32,
+    activeCount: u32,
+    pad0: u32,
+    pad1: u32,
+    lods: array<FoliageLODUniformInfo, 8>,
+};
+
+struct GlobalCullingUniforms {
+    cameraPosition: vec3<f32>,
+    totalInstanceCount: u32,
+    invWorldSizeX: f32,
+    heightScale: f32,
+    hasVHT: u32,
     fovFactor: f32,
     pad0: u32,
     pad1: u32,
     frustumPlanes: array<vec4<f32>, 6>,
-    lods: array<FoliageLODUniformInfo, 8>,
 };
 
 struct FoliageInstanceData {
@@ -36,7 +45,7 @@ struct FoliageInstanceData {
     scaleY: f32,
     scaleZ: f32,
     fade: f32,
-    subId: f32,
+    typeIdOrSubId: f32, // Lower 16-bit: typeId, Upper/Frac: cross-fade alpha
 };
 
 struct DrawIndexedIndirectArgs {
@@ -48,168 +57,156 @@ struct DrawIndexedIndirectArgs {
 };
 
 @group(0) @binding(0) var<storage, read> rawInstanceBuffer: array<FoliageInstanceData>;
-@group(0) @binding(1) var<uniform> cullingUniforms: CullingUniforms;
-@group(0) @binding(2) var<storage, read_write> culledInstanceBuffer: array<FoliageInstanceData>;
-@group(0) @binding(3) var<storage, read_write> indirectDrawCommands: array<DrawIndexedIndirectArgs>;
-@group(0) @binding(4) var vhtTexture: texture_2d<f32>;
-@group(0) @binding(5) var vhtSampler: sampler;
-
-var<workgroup> wgLODCounts: array<atomic<u32>, 8>;
-var<workgroup> wgGlobalOffsets: array<u32, 8>;
-var<workgroup> wgLocalSlots: array<atomic<u32>, 8>;
+@group(0) @binding(1) var<uniform> globalUniforms: GlobalCullingUniforms;
+@group(0) @binding(2) var<storage, read> typeParams: array<FoliageTypeParam>;
+@group(0) @binding(3) var<storage, read_write> culledInstanceBuffer: array<FoliageInstanceData>;
+@group(0) @binding(4) var<storage, read_write> indirectDrawCommands: array<DrawIndexedIndirectArgs>;
+@group(0) @binding(5) var vhtTexture: texture_2d<f32>;
+@group(0) @binding(6) var vhtSampler: sampler;
 
 @compute @workgroup_size(64)
-fn main(@builtin(global_invocation_id) global_id: vec3<u32>, @builtin(local_invocation_id) local_id: vec3<u32>) {
-    let localIdx = local_id.x;
-    if (localIdx < 8u) {
-        atomicStore(&wgLODCounts[localIdx], 0u);
-        atomicStore(&wgLocalSlots[localIdx], 0u);
-    }
-
-    workgroupBarrier();
-
+fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let idx = global_id.x;
-    var activeEmitCount: u32 = 0u;
-    var emitLODIndices: array<u32, 2>;
-    var emitLODAlphas: array<f32, 2>;
-    var culledInstance: FoliageInstanceData;
+    if (idx >= globalUniforms.totalInstanceCount) {
+        return;
+    }
 
-    if (idx < cullingUniforms.instanceCount) {
-        let instance = rawInstanceBuffer[idx];
-        let camPos = cullingUniforms.cameraPosition;
+    let instance = rawInstanceBuffer[idx];
+    let typeIdx = u32(instance.typeIdOrSubId);
+    if (typeIdx >= 64u) {
+        return;
+    }
 
-        let dx = instance.posX - camPos.x;
-        let dz = instance.posZ - camPos.z;
-        let horizontalDistSq = dx * dx + dz * dz;
-        let cullingDist = cullingUniforms.cullingDistance;
-        let cullingDistSq = cullingDist * cullingDist;
+    let typeInfo = typeParams[typeIdx];
+    if (typeInfo.activeCount == 0u || idx < typeInfo.rawBaseOffset) {
+        return;
+    }
 
-        let numLODs = cullingUniforms.lodCount;
-        let hasInfiniteImpostor = (numLODs > 0u && cullingUniforms.lods[numLODs - 1u].lodDistance >= 100000.0);
-        let effectiveCullingDistSq = select(cullingDistSq, 1000000000000.0, hasInfiniteImpostor);
+    let localSlot = idx - typeInfo.rawBaseOffset;
+    if (localSlot >= typeInfo.activeCount) {
+        return;
+    }
 
-        if (horizontalDistSq < effectiveCullingDistSq) {
-            var realY = instance.posY;
-            if (cullingUniforms.hasVHT != 0u && cullingUniforms.invWorldSizeX > 0.0) {
-                let u = instance.posX * cullingUniforms.invWorldSizeX + 0.5;
-                let v = instance.posZ * cullingUniforms.invWorldSizeX + 0.5;
-                if (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0) {
-                    let sampledHeightNorm = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v), 0.0).r;
-                    realY = (sampledHeightNorm * cullingUniforms.heightScale) - cullingUniforms.bottomOffset;
-                }
-            }
+    let camPos = globalUniforms.cameraPosition;
+    let dx = instance.posX - camPos.x;
+    let dz = instance.posZ - camPos.z;
+    let horizontalDistSq = dx * dx + dz * dz;
+    let cullingDist = typeInfo.cullingDistance;
+    let cullingDistSq = cullingDist * cullingDist;
 
-            let dy = realY - camPos.y;
-            let distSq = horizontalDistSq + dy * dy;
+    let numLODs = typeInfo.lodCount;
+    let hasInfiniteImpostor = (numLODs > 0u && typeInfo.lods[numLODs - 1u].lodDistance >= 100000.0);
+    let effectiveCullingDistSq = select(cullingDistSq, 1000000000000.0, hasInfiniteImpostor);
 
-            if (distSq < effectiveCullingDistSq) {
-                let maxScale = max(max(instance.scaleX, instance.scaleY), instance.scaleZ);
-                let scaledRadius = cullingUniforms.boundingRadius * maxScale;
-                let spherePos = vec4<f32>(instance.posX, realY, instance.posZ, 1.0);
-                let r = -scaledRadius;
+    if (horizontalDistSq >= effectiveCullingDistSq) {
+        return;
+    }
 
-                let inFrustum =
-                    dot(spherePos, cullingUniforms.frustumPlanes[0]) >= r &&
-                    dot(spherePos, cullingUniforms.frustumPlanes[1]) >= r &&
-                    dot(spherePos, cullingUniforms.frustumPlanes[2]) >= r &&
-                    dot(spherePos, cullingUniforms.frustumPlanes[3]) >= r &&
-                    dot(spherePos, cullingUniforms.frustumPlanes[4]) >= r &&
-                    dot(spherePos, cullingUniforms.frustumPlanes[5]) >= r;
-
-                if (inFrustum) {
-                    let dist = sqrt(distSq);
-                    let effectiveDist = dist * max(cullingUniforms.fovFactor, 0.0001);
-
-                    var globalFade: f32 = 1.0;
-                    if (!hasInfiniteImpostor) {
-                        let fadeStartDist = cullingUniforms.fadeStartDistance;
-                        if (dist > fadeStartDist) {
-                            let fadeRange = max(cullingDist - fadeStartDist, 1.0);
-                            globalFade = clamp(1.0 - (dist - fadeStartDist) / fadeRange, 0.0, 1.0);
-                        }
-                    }
-
-                    culledInstance = instance;
-                    culledInstance.posY = realY;
-                    culledInstance.fade = globalFade;
-
-                    if (numLODs <= 1u) {
-                        emitLODIndices[0] = 0u;
-                        emitLODAlphas[0] = 1.0;
-                        activeEmitCount = 1u;
-                        atomicAdd(&wgLODCounts[0], 1u);
-                    } else {
-                        for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
-                            let lodInfo = cullingUniforms.lods[l];
-                            var prevDist: f32 = 0.0;
-                            if (l > 0u) {
-                                prevDist = cullingUniforms.lods[l - 1u].lodDistance;
-                            }
-                            let nextDist = lodInfo.lodDistance;
-                            let span = max(nextDist - prevDist, 5.0);
-                            let fadeRange = clamp(span * 0.10, 5.0, 15.0);
-                            let halfRange = fadeRange * 0.5;
-
-                            let enterStart = max(prevDist - halfRange, 0.0);
-                            let enterEnd = prevDist + halfRange;
-                            let exitStart = nextDist - halfRange;
-                            let exitEnd = nextDist + halfRange;
-
-                            let isLastLOD = (l == numLODs - 1u);
-                            if (effectiveDist >= enterStart && (isLastLOD || effectiveDist <= exitEnd)) {
-                                var alpha: f32 = 1.0;
-                                if (l > 0u && effectiveDist < enterEnd) {
-                                    alpha = clamp((effectiveDist - enterStart) / max(enterEnd - enterStart, 0.001), 0.0, 1.0);
-                                } else if (!isLastLOD && effectiveDist > exitStart) {
-                                    alpha = clamp((exitEnd - effectiveDist) / max(exitEnd - exitStart, 0.001), 0.0, 1.0);
-                                }
-
-                                emitLODIndices[activeEmitCount] = l;
-                                emitLODAlphas[activeEmitCount] = alpha;
-                                activeEmitCount = activeEmitCount + 1u;
-                                atomicAdd(&wgLODCounts[l], 1u);
-
-                                if (activeEmitCount >= 2u) {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+    var realY = instance.posY;
+    if (globalUniforms.hasVHT != 0u && globalUniforms.invWorldSizeX > 0.0) {
+        let u = instance.posX * globalUniforms.invWorldSizeX + 0.5;
+        let v = instance.posZ * globalUniforms.invWorldSizeX + 0.5;
+        if (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0) {
+            let sampledHeightNorm = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v), 0.0).r;
+            realY = (sampledHeightNorm * globalUniforms.heightScale) - typeInfo.bottomOffset;
         }
     }
 
-    workgroupBarrier();
+    let dy = realY - camPos.y;
+    let distSq = horizontalDistSq + dy * dy;
 
-    if (localIdx < 8u) {
-        let count = atomicLoad(&wgLODCounts[localIdx]);
-        if (count > 0u && localIdx < cullingUniforms.lodCount) {
-            let lodInfo = cullingUniforms.lods[localIdx];
-            let baseCmdIdx = lodInfo.subMeshOffset;
-            let offset = atomicAdd(&indirectDrawCommands[baseCmdIdx].instanceCount, count);
-            wgGlobalOffsets[localIdx] = offset;
+    if (distSq >= effectiveCullingDistSq) {
+        return;
+    }
 
-            let numSubs = lodInfo.subMeshCount;
-            for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
-                atomicAdd(&indirectDrawCommands[baseCmdIdx + s].instanceCount, count);
-            }
+    let maxScale = max(max(instance.scaleX, instance.scaleY), instance.scaleZ);
+    let scaledRadius = typeInfo.boundingRadius * maxScale;
+    let spherePos = vec4<f32>(instance.posX, realY, instance.posZ, 1.0);
+    let r = -scaledRadius;
+
+    let inFrustum =
+        dot(spherePos, globalUniforms.frustumPlanes[0]) >= r &&
+        dot(spherePos, globalUniforms.frustumPlanes[1]) >= r &&
+        dot(spherePos, globalUniforms.frustumPlanes[2]) >= r &&
+        dot(spherePos, globalUniforms.frustumPlanes[3]) >= r &&
+        dot(spherePos, globalUniforms.frustumPlanes[4]) >= r &&
+        dot(spherePos, globalUniforms.frustumPlanes[5]) >= r;
+
+    if (!inFrustum) {
+        return;
+    }
+
+    let dist = sqrt(distSq);
+    let effectiveDist = dist * max(globalUniforms.fovFactor, 0.0001);
+
+    var globalFade: f32 = 1.0;
+    if (!hasInfiniteImpostor) {
+        let fadeStartDist = typeInfo.fadeStartDistance;
+        if (dist > fadeStartDist) {
+            let fadeRange = max(cullingDist - fadeStartDist, 1.0);
+            globalFade = clamp(1.0 - (dist - fadeStartDist) / fadeRange, 0.0, 1.0);
         }
     }
 
-    workgroupBarrier();
+    var culledInst = instance;
+    culledInst.posY = realY;
+    culledInst.fade = globalFade;
 
-    for (var e: u32 = 0u; e < activeEmitCount; e = e + 1u) {
-        let lodIdx = emitLODIndices[e];
-        let lodAlpha = emitLODAlphas[e];
-        let slot = atomicAdd(&wgLocalSlots[lodIdx], 1u);
-        let globalSlot = wgGlobalOffsets[lodIdx] + slot;
+    if (numLODs <= 1u) {
+        let baseCmdIdx = typeInfo.indirectBaseOffset + typeInfo.lods[0].subMeshOffset;
+        let slot = atomicAdd(&indirectDrawCommands[baseCmdIdx].instanceCount, 1u);
+        let numSubs = typeInfo.lods[0].subMeshCount;
+        for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
+            atomicAdd(&indirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
+        }
 
-        let maxInsts = cullingUniforms.maxInstances;
-        let outIdx = lodIdx * maxInsts + globalSlot;
+        let outIdx = typeInfo.culledBaseOffset + slot;
+        culledInst.typeIdOrSubId = 1.0;
+        culledInstanceBuffer[outIdx] = culledInst;
+    } else {
+        var emitCount: u32 = 0u;
+        for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
+            let lodInfo = typeInfo.lods[l];
+            var prevDist: f32 = 0.0;
+            if (l > 0u) {
+                prevDist = typeInfo.lods[l - 1u].lodDistance;
+            }
+            let nextDist = lodInfo.lodDistance;
+            let span = max(nextDist - prevDist, 5.0);
+            let fadeRange = clamp(span * 0.10, 5.0, 15.0);
+            let halfRange = fadeRange * 0.5;
 
-        var finalInst = culledInstance;
-        finalInst.subId = lodAlpha; // Store LOD alpha for Dithered Cross-Fade in subId
-        culledInstanceBuffer[outIdx] = finalInst;
+            let enterStart = max(prevDist - halfRange, 0.0);
+            let enterEnd = prevDist + halfRange;
+            let exitStart = nextDist - halfRange;
+            let exitEnd = nextDist + halfRange;
+
+            let isLastLOD = (l == numLODs - 1u);
+            if (effectiveDist >= enterStart && (isLastLOD || effectiveDist <= exitEnd)) {
+                var alpha: f32 = 1.0;
+                if (l > 0u && effectiveDist < enterEnd) {
+                    alpha = clamp((effectiveDist - enterStart) / max(enterEnd - enterStart, 0.001), 0.0, 1.0);
+                } else if (!isLastLOD && effectiveDist > exitStart) {
+                    alpha = clamp((exitEnd - effectiveDist) / max(exitEnd - exitStart, 0.001), 0.0, 1.0);
+                }
+
+                let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
+                let slot = atomicAdd(&indirectDrawCommands[baseCmdIdx].instanceCount, 1u);
+                let numSubs = lodInfo.subMeshCount;
+                for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
+                    atomicAdd(&indirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
+                }
+
+                let outIdx = typeInfo.culledBaseOffset + (l * typeInfo.maxInstances) + slot;
+                var finalEmitInst = culledInst;
+                finalEmitInst.typeIdOrSubId = alpha;
+                culledInstanceBuffer[outIdx] = finalEmitInst;
+
+                emitCount = emitCount + 1u;
+                if (emitCount >= 2u) {
+                    break;
+                }
+            }
+        }
     }
 }

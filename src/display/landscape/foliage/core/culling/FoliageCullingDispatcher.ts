@@ -5,6 +5,8 @@ import FoliageType from "../../FoliageType";
 import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../../material/core";
 
+import FoliageMegaBuffer from "../buffer/FoliageMegaBuffer";
+
 class FoliageCullingDispatcher {
     static readonly #tempPVMatrix: mat4 = mat4.create();
     static readonly #cachedFrustumPlanes: number[][] = [
@@ -13,6 +15,7 @@ class FoliageCullingDispatcher {
     ];
 
     #redGPUContext: RedGPUContext;
+    #megaBuffer: FoliageMegaBuffer | null = null;
     #cullingBindGroupLayout: GPUBindGroupLayout | null = null;
     #cullingComputePipeline: GPUComputePipeline | null = null;
 
@@ -25,8 +28,9 @@ class FoliageCullingDispatcher {
     #lastFOV: number = -1;
     #cachedFovFactor: number = 1.0;
 
-    constructor(redGPUContext: RedGPUContext) {
+    constructor(redGPUContext: RedGPUContext, megaBuffer?: FoliageMegaBuffer | null) {
         this.#redGPUContext = redGPUContext;
+        this.#megaBuffer = megaBuffer || null;
         this.#initComputePipeline();
     }
 
@@ -115,18 +119,37 @@ class FoliageCullingDispatcher {
         }
         const fovFactor = this.#cachedFovFactor;
 
-        for (let i = 0; i < typeCount; i++) {
-            const foliageType = typeList[i];
-            if (foliageType.activeInstanceCount <= 0 || foliageType.subMeshes.length === 0) continue;
-
-            foliageType.resetIndirectBuffer();
-
-            foliageType.updateCullingUniforms(
+        if (this.#megaBuffer) {
+            this.#megaBuffer.resetMultiIndirectCommands();
+            for (let i = 0; i < typeCount; i++) {
+                const foliageType = typeList[i];
+                if (foliageType.activeInstanceCount <= 0 || foliageType.subMeshes.length === 0) continue;
+                foliageType.updateCullingUniforms(
+                    camX, camY, camZ,
+                    worldSizeX, heightScale, hasVHT,
+                    frustumPlanes,
+                    fovFactor
+                );
+            }
+            this.#megaBuffer.updateGlobalUniformsAndParams(
                 camX, camY, camZ,
                 worldSizeX, heightScale, hasVHT,
                 frustumPlanes,
                 fovFactor
             );
+        } else {
+            for (let i = 0; i < typeCount; i++) {
+                const foliageType = typeList[i];
+                if (foliageType.activeInstanceCount <= 0 || foliageType.subMeshes.length === 0) continue;
+
+                foliageType.resetIndirectBuffer();
+                foliageType.updateCullingUniforms(
+                    camX, camY, camZ,
+                    worldSizeX, heightScale, hasVHT,
+                    frustumPlanes,
+                    fovFactor
+                );
+            }
         }
 
         if (this.#cullingComputePipeline && this.#cullingBindGroupLayout) {
@@ -182,9 +205,6 @@ class FoliageCullingDispatcher {
 
         computePass.setPipeline(pipeline);
 
-        const typeList = this.#typeListRef;
-        const count = typeList.length;
-
         const vhtAtlasTexture = this.#landscapeRef?.getInternalAtlasTexture('vht');
         const rawGPUTexture = vhtAtlasTexture?.gpuTexture || null;
         if (rawGPUTexture && this.#cachedVHTAtlasGPUTexture !== rawGPUTexture) {
@@ -194,6 +214,23 @@ class FoliageCullingDispatcher {
         const vhtView = this.#cachedVHTView || undefined;
         const vhtSampler = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
 
+        // 🚀 [글로벌 메가 버퍼 모드] 단 1회 디스패치로 전체 식생 일괄 컬링!
+        if (this.#megaBuffer) {
+            const totalAllocatedRange = this.#megaBuffer.totalAllocatedRange;
+            if (totalAllocatedRange <= 0) return;
+
+            const globalBindGroup = this.#megaBuffer.getOrCreateGlobalCullingBindGroup(bindGroupLayout, vhtView, vhtSampler);
+            if (globalBindGroup) {
+                const workgroupCount = Math.ceil(totalAllocatedRange / 64);
+                computePass.setBindGroup(0, globalBindGroup);
+                computePass.dispatchWorkgroups(workgroupCount);
+            }
+            return;
+        }
+
+        // [Fallback 모드]
+        const typeList = this.#typeListRef;
+        const count = typeList.length;
         for (let i = 0; i < count; i++) {
             const foliageType = typeList[i];
             const activeCount = foliageType.activeInstanceCount;

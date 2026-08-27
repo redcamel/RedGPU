@@ -8,6 +8,7 @@ import LandscapeFoliageManager from "./foliage/LandscapeFoliageManager";
 import type {FoliageTypeOptions} from "./foliage/FoliageType";
 import FoliageType from "./foliage/FoliageType";
 import FoliageSubMesh from "./foliage/FoliageSubMesh";
+import FoliageMegaBuffer from "./foliage/core/buffer/FoliageMegaBuffer";
 import OctahedralImpostorMaterial from "./foliage/core/impostor/octahedral/OctahedralImpostorMaterial";
 import {createOctahedralImpostorGeometry} from "./foliage/core/impostor/octahedral/createOctahedralImpostorGeometry";
 import type {LandscapeDebuggerManagerOptions} from "./debugger";
@@ -22,6 +23,7 @@ export {
     LandscapeFoliageManager,
     FoliageType,
     FoliageSubMesh,
+    FoliageMegaBuffer,
     OctahedralImpostorMaterial,
     createOctahedralImpostorGeometry,
     LandscapeDebuggerManager,

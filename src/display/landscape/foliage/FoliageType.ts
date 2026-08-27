@@ -5,6 +5,7 @@ import FoliageSubMeshAssembler from "./core/assembler/FoliageSubMeshAssembler";
 import FoliageTilePopulator from "./core/populator/FoliageTilePopulator";
 
 import FoliageSubMesh from "./FoliageSubMesh";
+import FoliageMegaBuffer, {FoliageTypeAllocation} from "./core/buffer/FoliageMegaBuffer";
 
 export {FoliageSubMesh};
 
@@ -53,7 +54,9 @@ class FoliageType {
     #subMeshes: FoliageSubMesh[] = [];
     #lodInfoList: FoliageLODInfo[] = [];
 
-    #instanceBuffer: FoliageInstanceBuffer;
+    #megaBuffer: FoliageMegaBuffer | null = null;
+    #allocation: FoliageTypeAllocation | null = null;
+    #instanceBuffer: FoliageInstanceBuffer | null = null;
 
     #activeInstanceCount: number = 0;
     #bottomOffset: number = 0;
@@ -66,10 +69,12 @@ class FoliageType {
     constructor(
         redGPUContext: RedGPUContext,
         options: FoliageTypeOptions,
-        sharedSubMeshBindGroupLayout?: GPUBindGroupLayout | null
+        sharedSubMeshBindGroupLayout?: GPUBindGroupLayout | null,
+        megaBuffer?: FoliageMegaBuffer | null
     ) {
         this.#redGPUContext = redGPUContext;
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
+        this.#megaBuffer = megaBuffer || null;
 
         const useImpostor = options.useImpostor !== false;
 
@@ -109,18 +114,34 @@ class FoliageType {
 
         const hasImpostor = this.#options.useImpostor !== false;
         this.#numLODs = this.#lodInfoList.length > 0 ? Math.min(this.#lodInfoList.length, 8) : (hasImpostor ? 2 : 1);
-        const lod0SubCount = this.#lodInfoList[0]?.subMeshCount ?? this.#subMeshes.length;
-        const lod0Dist = this.#lodInfoList[0]?.lodDistance ?? 80.0;
 
-        this.#instanceBuffer = new FoliageInstanceBuffer(redGPUContext, this.#options.maxInstances, this.#subMeshes);
-        this.#instanceBuffer.initStaticLODUniforms(
-            this.#lodInfoList,
-            lod0Dist,
-            lod0SubCount,
-            hasImpostor,
-            this.#options.cullingDistance ?? 2000.0
-        );
-        this.resetIndirectBuffer();
+        if (this.#megaBuffer) {
+            this.#allocation = this.#megaBuffer.allocateTypeSegment(
+                this.#options.name,
+                this.#options.maxInstances,
+                this.#subMeshes
+            );
+            this.#megaBuffer.registerSubMeshesToTemplate(this.#subMeshes, this.#allocation.indirectBaseOffset);
+            this.#megaBuffer.updateTypeParams(
+                this.#allocation,
+                this.#options.cullingDistance ?? 2000.0,
+                this.#options.fadeStartDistance ?? 1500.0,
+                this.#boundingRadius,
+                this.#bottomOffset,
+                this.#lodInfoList
+            );
+        } else {
+            const lod0SubCount = this.#lodInfoList[0]?.subMeshCount ?? this.#subMeshes.length;
+            const lod0Dist = this.#lodInfoList[0]?.lodDistance ?? 80.0;
+            this.#instanceBuffer = new FoliageInstanceBuffer(redGPUContext, this.#options.maxInstances, this.#subMeshes);
+            this.#instanceBuffer.initStaticLODUniforms(
+                this.#lodInfoList,
+                lod0Dist,
+                lod0SubCount,
+                hasImpostor,
+                this.#options.cullingDistance ?? 2000.0
+            );
+        }
     }
 
     get name(): string {
@@ -133,6 +154,10 @@ class FoliageType {
 
     get options(): FoliageTypeOptions {
         return this.#options;
+    }
+
+    get allocation(): FoliageTypeAllocation | null {
+        return this.#allocation;
     }
 
     get subMeshes(): readonly FoliageSubMesh[] {
@@ -148,15 +173,18 @@ class FoliageType {
     }
 
     get culledGPUBuffer(): GPUBuffer | null {
-        return this.#instanceBuffer.culledGPUBuffer;
+        return this.#megaBuffer ? this.#megaBuffer.culledGPUBuffer : this.#instanceBuffer?.culledGPUBuffer || null;
     }
 
     get indirectGPUBuffer(): GPUBuffer | null {
-        return this.#instanceBuffer.indirectGPUBuffer;
+        return this.#megaBuffer ? this.#megaBuffer.indirectGPUBuffer : this.#instanceBuffer?.indirectGPUBuffer || null;
     }
 
     getCullingBindGroup(layout: GPUBindGroupLayout, vhtView?: GPUTextureView, vhtSampler?: GPUSampler): GPUBindGroup | null {
-        return this.#instanceBuffer.getOrCreateCullingBindGroup(layout, vhtView, vhtSampler);
+        if (this.#megaBuffer) {
+            return this.#megaBuffer.getOrCreateGlobalCullingBindGroup(layout, vhtView, vhtSampler);
+        }
+        return this.#instanceBuffer?.getOrCreateCullingBindGroup(layout, vhtView, vhtSampler) || null;
     }
 
     updateCullingUniforms(
@@ -165,19 +193,30 @@ class FoliageType {
         frustumPlanes: number[][] | null,
         fovFactor: number
     ): void {
-        this.#instanceBuffer.updateCullingUniforms(
-            camX, camY, camZ,
-            this.#options.cullingDistance ?? 2000.0,
-            this.#options.fadeStartDistance ?? 1500.0,
-            this.#activeInstanceCount,
-            this.#boundingRadius,
-            worldSizeX, heightScale,
-            this.#bottomOffset,
-            hasVHT,
-            frustumPlanes,
-            fovFactor,
-            this.#numLODs
-        );
+        if (this.#megaBuffer && this.#allocation) {
+            this.#megaBuffer.updateTypeParams(
+                this.#allocation,
+                this.#options.cullingDistance ?? 2000.0,
+                this.#options.fadeStartDistance ?? 1500.0,
+                this.#boundingRadius,
+                this.#bottomOffset,
+                this.#lodInfoList
+            );
+        } else if (this.#instanceBuffer) {
+            this.#instanceBuffer.updateCullingUniforms(
+                camX, camY, camZ,
+                this.#options.cullingDistance ?? 2000.0,
+                this.#options.fadeStartDistance ?? 1500.0,
+                this.#activeInstanceCount,
+                this.#boundingRadius,
+                worldSizeX, heightScale,
+                this.#bottomOffset,
+                hasVHT,
+                frustumPlanes,
+                fovFactor,
+                this.#numLODs
+            );
+        }
     }
 
     setInstanceData(
@@ -187,23 +226,39 @@ class FoliageType {
         scaleX: number, scaleY: number, scaleZ: number,
         fade: number = 1.0, subId: number = 0
     ): void {
-        this.#instanceBuffer.setInstanceData(index, posX, posY, posZ, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, fade, subId);
+        if (this.#megaBuffer && this.#allocation) {
+            this.#megaBuffer.setInstanceData(this.#allocation, index, posX, posY, posZ, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, fade);
+        } else if (this.#instanceBuffer) {
+            this.#instanceBuffer.setInstanceData(index, posX, posY, posZ, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, fade, subId);
+        }
     }
 
     uploadRangeToGPU(startIndex: number, count: number): void {
-        this.#instanceBuffer.uploadRangeToGPU(startIndex, count);
+        if (this.#megaBuffer && this.#allocation) {
+            this.#megaBuffer.uploadAllocationRangeToGPU(this.#allocation, startIndex, count);
+        } else if (this.#instanceBuffer) {
+            this.#instanceBuffer.uploadRangeToGPU(startIndex, count);
+        }
     }
 
     resetIndirectBuffer(): void {
-        if (!this.#instanceBuffer || this.#subMeshes.length === 0) return;
-        this.#instanceBuffer.resetMultiIndirectCount(this.#subMeshes);
+        if (this.#megaBuffer) {
+            this.#megaBuffer.resetMultiIndirectCommands();
+        } else if (this.#instanceBuffer && this.#subMeshes.length > 0) {
+            this.#instanceBuffer.resetMultiIndirectCount(this.#subMeshes);
+        }
     }
 
     setInstancesData(data: Float32Array, count?: number): void {
         const instanceCount = count !== undefined ? count : Math.floor(data.length / 12);
         this.#activeInstanceCount = Math.min(instanceCount, this.#options.maxInstances);
-        this.#instanceBuffer.writeSubData(data.subarray(0, this.#activeInstanceCount * 12));
-        this.#instanceBuffer.uploadToGPU(this.#activeInstanceCount);
+
+        if (this.#megaBuffer && this.#allocation) {
+            this.#megaBuffer.writeInstancesData(this.#allocation, data, this.#activeInstanceCount);
+        } else if (this.#instanceBuffer) {
+            this.#instanceBuffer.writeSubData(data.subarray(0, this.#activeInstanceCount * 12));
+            this.#instanceBuffer.uploadToGPU(this.#activeInstanceCount);
+        }
         this.resetIndirectBuffer();
     }
 
@@ -215,14 +270,18 @@ class FoliageType {
         const addedCount = FoliageTilePopulator.populateTile(comp, this, landscape, targetCountPerTile);
         if (addedCount > 0) {
             this.#activeInstanceCount = Math.min(this.#activeInstanceCount + addedCount, this.#options.maxInstances);
+            if (this.#allocation) {
+                this.#allocation.activeCount = this.#activeInstanceCount;
+            }
         }
     }
 
     destroy(): void {
-        this.#instanceBuffer.destroy();
+        this.#instanceBuffer?.destroy();
+        this.#instanceBuffer = null;
         for (let i = 0; i < this.#subMeshes.length; i++) {
             const sub = this.#subMeshes[i];
-            sub.vertexUniformBuffer?.destroy();
+            sub.destroy();
         }
         this.#subMeshes.length = 0;
     }
