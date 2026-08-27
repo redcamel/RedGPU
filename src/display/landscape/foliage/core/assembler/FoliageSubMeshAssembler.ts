@@ -49,6 +49,7 @@ class FoliageSubMeshAssembler {
     static readonly #subMeshUniformData: Float32Array = new Float32Array(36);
     static readonly #subMeshUniformUint32: Uint32Array = new Uint32Array(FoliageSubMeshAssembler.#subMeshUniformData.buffer);
     static readonly #tempLocalMatrix: mat4 = mat4.create();
+    static readonly #identityMatrix: mat4 = mat4.create();
 
     static assemble(
         redGPUContext: RedGPUContext,
@@ -343,7 +344,6 @@ class FoliageSubMeshAssembler {
                 parentChain.unshift(p);
                 p = p.parent;
             }
-            mat4.identity(currentRelativeMatrix);
             for (let c = 0; c < parentChain.length; c++) {
                 FoliageSubMeshAssembler.#computeMeshLocalMatrix(parentChain[c], FoliageSubMeshAssembler.#tempLocalMatrix);
                 mat4.multiply(currentRelativeMatrix, currentRelativeMatrix, FoliageSubMeshAssembler.#tempLocalMatrix);
@@ -430,13 +430,11 @@ class FoliageSubMeshAssembler {
     ): FoliageSubMesh[] {
         const gpuDevice = redGPUContext.gpuDevice;
         const rawList: RawSubMesh[] = [];
-        const identityParentMatrix = mat4.create();
-        mat4.identity(identityParentMatrix);
 
         for (let r = 0; r < roots.length; r++) {
             FoliageSubMeshAssembler.#traverseHierarchy(
                 roots[r],
-                identityParentMatrix,
+                FoliageSubMeshAssembler.#identityMatrix,
                 true,
                 rawList,
                 options,

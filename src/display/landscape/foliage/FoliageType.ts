@@ -4,11 +4,11 @@ import Mesh from "../../mesh/Mesh";
 import Geometry from "../../../geometry/Geometry";
 import ABaseMaterial from "../../../material/core/ABaseMaterial";
 import FoliageInstanceBuffer from "./FoliageInstanceBuffer";
-import {createOctahedralImpostorGeometry} from "./core/impostor/octahedral/createOctahedralImpostorGeometry";
 import type {FoliageDepthPassMode} from "./core/pipeline/FoliagePipelineRegistry";
 import FoliageSubMeshAssembler from "./core/assembler/FoliageSubMeshAssembler";
-import FoliageTilePopulator from "./core/populator/FoliageTilePopulator";
 import type LandscapeFoliageManager from "./LandscapeFoliageManager";
+import {createOctahedralImpostorGeometry} from "./core/impostor/octahedral/createOctahedralImpostorGeometry";
+import FoliageTilePopulator from "./core/populator/FoliageTilePopulator";
 
 export interface FoliageSubMesh {
     mesh: Mesh;
@@ -57,9 +57,6 @@ export interface FoliageLODConfig {
 
     /** [Legacy alias for lodDistance] */
     distance?: number;
-
-    /** Screen size fraction (0.0 to 1.0) */
-    screenSize?: number;
 
     /** Dithered cross-fade range buffer in meters (default: 10.0) */
     fadeRange?: number;
@@ -191,10 +188,6 @@ class FoliageType {
 
     get lodInfoList(): FoliageLODInfo[] {
         return this.#lodInfoList;
-    }
-
-    get lodCount(): number {
-        return this.#lodInfoList.length;
     }
 
     get instanceBuffer(): FoliageInstanceBuffer {
