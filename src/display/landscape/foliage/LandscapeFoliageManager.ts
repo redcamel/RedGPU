@@ -106,7 +106,7 @@ class LandscapeFoliageManager {
         if (cells && cells.length > 0) {
             const count = cells.length;
             for (let i = 0; i < count; i++) {
-                foliageType._populateTile(cells[i]);
+                foliageType.populateTile(cells[i]);
             }
         }
 

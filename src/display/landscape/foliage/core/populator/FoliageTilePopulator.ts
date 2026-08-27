@@ -86,11 +86,11 @@ class FoliageTilePopulator {
                 rotW = Math.cos(angle * 0.5);
             }
 
-            foliageType._setInstanceData(idx, posX, posY, posZ, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, 1.0, 0);
+            foliageType.setInstanceData(idx, posX, posY, posZ, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, 1.0, 0);
         }
 
-        foliageType._uploadRangeToGPU(startIdx, actualCount);
-        foliageType._resetIndirectBuffer();
+        foliageType.uploadRangeToGPU(startIdx, actualCount);
+        foliageType.resetIndirectBuffer();
 
         return actualCount;
     }
