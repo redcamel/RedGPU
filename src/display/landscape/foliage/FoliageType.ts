@@ -152,6 +152,7 @@ class FoliageType {
             billboard: billboardOpt ?? {enabled: false},
             convertBlendToMasked: options.convertBlendToMasked ?? true,
             combineSubMeshesByMaterial: options.combineSubMeshesByMaterial ?? true,
+            isFoliage: options.isFoliage !== false,
         };
 
         const assembleResult = FoliageSubMeshAssembler.assemble(

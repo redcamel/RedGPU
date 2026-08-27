@@ -50,6 +50,7 @@ class FoliageSubMeshAssembler {
     static readonly #subMeshUniformUint32: Uint32Array = new Uint32Array(FoliageSubMeshAssembler.#subMeshUniformData.buffer);
     static readonly #tempLocalMatrix: mat4 = mat4.create();
     static readonly #identityMatrix: mat4 = mat4.create();
+    static #bufferSeq: number = 0;
 
     static assemble(
         redGPUContext: RedGPUContext,
@@ -666,14 +667,12 @@ class FoliageSubMeshAssembler {
                 }
             }
 
-            const vKey = `FoliageCombinedVB_${options.name}_LOD${lodIndex}_${mat.name || 'mat'}_${Math.random()}`;
-            const iKey = `FoliageCombinedIB_${options.name}_LOD${lodIndex}_${mat.name || 'mat'}_${Math.random()}`;
+            const seq = ++FoliageSubMeshAssembler.#bufferSeq;
+            const vKey = `FoliageCombinedVB_${options.name}_LOD${lodIndex}_${mat.name || 'mat'}_${seq}`;
+            const iKey = `FoliageCombinedIB_${options.name}_LOD${lodIndex}_${mat.name || 'mat'}_${seq}`;
             const combinedVB = new VertexBuffer(redGPUContext, combinedVertexData, PBR_INTERLEAVED_STRUCT, undefined, vKey);
             const combinedIB = new IndexBuffer(redGPUContext, combinedIndexData, undefined, iKey);
             const combinedGeom = new Geometry(redGPUContext, combinedVB, combinedIB);
-
-            const identityMatrix = mat4.create();
-            mat4.identity(identityMatrix);
 
             const combinedSubMesh = FoliageSubMeshAssembler.#createSubMeshInstance(
                 gpuDevice,
@@ -682,8 +681,8 @@ class FoliageSubMeshAssembler {
                 group[0].node,
                 combinedGeom,
                 mat,
-                identityMatrix,
-                identityMatrix,
+                FoliageSubMeshAssembler.#identityMatrix,
+                FoliageSubMeshAssembler.#identityMatrix,
                 PBR_STRIDE * 4,
                 lodIndex
             );

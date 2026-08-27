@@ -244,10 +244,6 @@ class FoliageInstanceBuffer {
         return this.#indirectGPUBuffer;
     }
 
-    getCullingUniformBuffer(): GPUBuffer | null {
-        return this.#cullingUniformBuffer;
-    }
-
     #cachedVHTView: GPUTextureView | null = null;
     #cachedVHTSampler: GPUSampler | null = null;
 

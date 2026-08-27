@@ -1,12 +1,11 @@
 import RedGPUContext from "../../../../../../context/RedGPUContext";
-import Sampler from "../../../../../../resources/sampler/Sampler";
+import type Sampler from "../../../../../../resources/sampler/Sampler";
 import BitmapTexture from "../../../../../../resources/texture/BitmapTexture";
 import DirectTexture from "../../../../../../resources/texture/DirectTexture";
 import fragmentModuleSource from './octahedralImpostorFragment.wgsl';
 import AUVTransformBaseMaterial from "../../../../../../material/core/AUVTransformBaseMaterial";
 import defineSampler from "../../../../../../defineProperty/funcs/texture/defineSampler";
 import defineTexture from "../../../../../../defineProperty/funcs/texture/defineTexture";
-import GPU_MIPMAP_FILTER_MODE from "../../../../../../gpuConst/GPU_MIPMAP_FILTER_MODE";
 
 interface OctahedralImpostorMaterial {
     diffuseTexture: BitmapTexture | DirectTexture;
@@ -36,12 +35,10 @@ class OctahedralImpostorMaterial extends AUVTransformBaseMaterial {
         );
         if (name) this.name = name;
         this.diffuseTexture = diffuseTexture;
-        this.diffuseTextureSampler = new Sampler(this.redGPUContext);
-        this.diffuseTextureSampler.mipmapFilter = GPU_MIPMAP_FILTER_MODE.LINEAR;
+        this.diffuseTextureSampler = this.redGPUContext.resourceManager.basicSampler;
 
         this.normalTexture = normalTexture;
-        this.normalTextureSampler = new Sampler(this.redGPUContext);
-        this.normalTextureSampler.mipmapFilter = GPU_MIPMAP_FILTER_MODE.LINEAR;
+        this.normalTextureSampler = this.redGPUContext.resourceManager.basicSampler;
 
         this.useCutOff = true;
         this.cutOff = 0.35;

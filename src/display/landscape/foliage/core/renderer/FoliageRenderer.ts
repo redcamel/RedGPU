@@ -23,6 +23,8 @@ class FoliageRenderer {
     #lastBoundSystemBG: GPUBindGroup | null = null;
     #lastBoundVertexUniformBG: GPUBindGroup | null = null;
     #lastBoundMatBG: GPUBindGroup | null = null;
+    #lastBoundGeometryVertexBuffer: GPUBuffer | null = null;
+    #lastBoundIndexBuffer: GPUBuffer | null = null;
     #lastBoundInstanceBuffer: GPUBuffer | null = null;
     #lastBoundInstanceOffset: number = -1;
 
@@ -52,6 +54,8 @@ class FoliageRenderer {
         this.#lastBoundSystemBG = null;
         this.#lastBoundVertexUniformBG = null;
         this.#lastBoundMatBG = null;
+        this.#lastBoundGeometryVertexBuffer = null;
+        this.#lastBoundIndexBuffer = null;
         this.#lastBoundInstanceBuffer = null;
         this.#lastBoundInstanceOffset = -1;
 
@@ -81,8 +85,8 @@ class FoliageRenderer {
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
-                // 🌿 빌보드(Impostor)는 Depth Prepass 제외
-                if (sub.isDepthPrepass && !sub.material?.constructor?.name?.includes('Octahedral')) {
+                // 🌿 3D 식생에 대해 Depth Prepass 렌더링
+                if (sub.isDepthPrepass) {
                     this.#drawSubMesh(passEncoder, sub, s, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, foliageType.options.maxInstances, 'depthPrepass');
                 }
             }
@@ -244,7 +248,10 @@ class FoliageRenderer {
             this.#lastBoundMatBG = matUniformBG;
         }
 
-        passEncoder.setVertexBuffer(0, vertexGPUBuffer);
+        if (this.#lastBoundGeometryVertexBuffer !== vertexGPUBuffer) {
+            passEncoder.setVertexBuffer(0, vertexGPUBuffer);
+            this.#lastBoundGeometryVertexBuffer = vertexGPUBuffer;
+        }
 
         const lodIdx = sub.lodIndex ?? 0;
         const instanceBufferOffset = lodIdx * maxInstances * 48;
@@ -256,8 +263,12 @@ class FoliageRenderer {
 
         const indirectOffsetBytes = subIndex * 20;
         if (sub.isIndexed && sub.geometry.indexBuffer?.gpuBuffer) {
-            const format = sub.indexFormat || 'uint32';
-            passEncoder.setIndexBuffer(sub.geometry.indexBuffer.gpuBuffer, format);
+            const indexGPUBuffer = sub.geometry.indexBuffer.gpuBuffer;
+            if (this.#lastBoundIndexBuffer !== indexGPUBuffer) {
+                const format = sub.indexFormat || 'uint32';
+                passEncoder.setIndexBuffer(indexGPUBuffer, format);
+                this.#lastBoundIndexBuffer = indexGPUBuffer;
+            }
             passEncoder.drawIndexedIndirect(indirectGPUBuffer, indirectOffsetBytes);
         } else {
             passEncoder.drawIndirect(indirectGPUBuffer, indirectOffsetBytes);
