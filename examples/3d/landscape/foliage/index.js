@@ -162,7 +162,7 @@ RedGPU.init(
                         foliageManager.addFoliageType({
                             name: `Tree_${baseName}`,
                             lods: lodConfigs,
-                            maxInstances: 250000,
+                            maxInstances: 150000,
                             minScale: [0.85, 0.85, 0.85],
                             maxScale: [1.35, 1.35, 1.35],
                             randomRotationY: true,
@@ -187,7 +187,7 @@ RedGPU.init(
                 foliageManager.addFoliageType({
                     name: 'FrangipaniTree',
                     lods: [{mesh: root, lodDistance: 120}],
-                    maxInstances: 10000,
+                    maxInstances: 50000,
                     minScale: [4.2, 4.2, 4.2],
                     maxScale: [6.2, 6.2, 6.2],
                     randomRotationY: true,
@@ -526,6 +526,66 @@ const renderTestPane = (redGPUContext, view, skyAtmosphere, landscape, controlle
             folderAtmo.addBinding(skyAtmosphere, 'cloudDensity', {min: 0, max: 1, step: 0.01});
             folderAtmo.addBinding(skyAtmosphere, 'cloudHeight', {min: 0.1, max: 20, step: 0.1});
             folderAtmo.addBinding(skyAtmosphere, 'atmosphereHeight', {min: 1, max: 200, step: 1});
+
+            // ─────────────────────────────────────────────────────────────
+            // 🌲 Foliage Global Mega Buffer 전용 모니터링 패널
+            // ─────────────────────────────────────────────────────────────
+            const folderFoliage = pane.addFolder({title: '🌲 Foliage System (Global Mega Buffer)', expanded: true});
+
+            const foliageStats = {
+                get totalAssetTypes() {
+                    return foliageManager.types.length;
+                },
+                get totalActiveInstances() {
+                    return foliageManager.megaBuffer.totalActiveInstances;
+                },
+                get maxBufferCapacity() {
+                    return foliageManager.megaBuffer.maxTotalInstances;
+                }
+            };
+
+            folderFoliage.addBinding(foliageStats, 'totalAssetTypes', {
+                label: 'Types (Single Dispatch)',
+                readonly: true
+            });
+            folderFoliage.addBinding(foliageStats, 'totalActiveInstances', {
+                label: 'Total Active Trees',
+                readonly: true
+            });
+            folderFoliage.addBinding(foliageStats, 'maxBufferCapacity', {label: 'Max Mega Capacity', readonly: true});
+
+            const updateFoliageTypeGUI = () => {
+                const types = foliageManager.types;
+                types.forEach((type) => {
+                    const typeName = type.name;
+                    if (folderFoliage.children.some(c => c.title === `Type: ${typeName}`)) return;
+
+                    const grpFolder = folderFoliage.addFolder({
+                        title: `Type: ${typeName}`,
+                        expanded: false
+                    });
+
+                    grpFolder.addBinding(type, 'activeInstanceCount', {label: 'Active Count', readonly: true});
+                    const alloc = type.allocation;
+                    if (alloc) {
+                        const allocProxy = {
+                            get typeId() {
+                                return alloc.typeId;
+                            },
+                            get rawOffset() {
+                                return alloc.rawBaseOffset;
+                            },
+                            get culledOffset() {
+                                return alloc.culledBaseOffset;
+                            }
+                        };
+                        grpFolder.addBinding(allocProxy, 'typeId', {label: 'Shader Type ID', readonly: true});
+                        grpFolder.addBinding(allocProxy, 'rawOffset', {label: 'Raw Offset', readonly: true});
+                    }
+                });
+            };
+
+            setInterval(updateFoliageTypeGUI, 1000);
 
             const folderCam = pane.addFolder({title: 'Camera', expanded: true});
             folderCam.addBinding(controller, 'moveSpeed', {min: 50, max: 20000, step: 10});
