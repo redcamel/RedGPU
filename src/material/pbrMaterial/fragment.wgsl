@@ -288,13 +288,11 @@ fn main(inputData:InputData) -> OutputFragment {
 
 
     #redgpu_if useCutOff
-        var dynamicCutOff = u_cutOff;
-        if (dynamicCutOff <= 0.0) {
-            dynamicCutOff = 0.5;
-        }
-        if (resultAlpha <= dynamicCutOff) { discard; }
+        if (resultAlpha <= u_cutOff) { discard; }
     #redgpu_endIf
-
+    #redgpu_if isFoliage
+        if (resultAlpha <= 0.3333) { discard; }
+    #redgpu_endIf
     let emissiveUV = getTextureTransformUV(input_uv, input_uv1, uniforms.emissiveTexture_texCoord_index, uniforms.use_emissiveTexture_KHR_texture_transform, uniforms.emissiveTexture_KHR_texture_transform_offset, uniforms.emissiveTexture_KHR_texture_transform_rotation, uniforms.emissiveTexture_KHR_texture_transform_scale);
     let occlusionUV = getTextureTransformUV(input_uv, input_uv1, uniforms.occlusionTexture_texCoord_index, uniforms.use_occlusionTexture_KHR_texture_transform, uniforms.occlusionTexture_KHR_texture_transform_offset, uniforms.occlusionTexture_KHR_texture_transform_rotation, uniforms.occlusionTexture_KHR_texture_transform_scale);
     let metallicRoughnessUV = getTextureTransformUV(input_uv, input_uv1, uniforms.metallicRoughnessTexture_texCoord_index, uniforms.use_metallicRoughnessTexture_KHR_texture_transform, uniforms.metallicRoughnessTexture_KHR_texture_transform_offset, uniforms.metallicRoughnessTexture_KHR_texture_transform_rotation, uniforms.metallicRoughnessTexture_KHR_texture_transform_scale);
@@ -1153,23 +1151,7 @@ fn getIndirectPbrLighting(
             envIBL_DIFFUSE = mix(envIBL_DIFFUSE, transmittedIBL, diffuseTransmissionParameter);
         }
         #redgpu_endIf
-        #redgpu_if isFoliage
-        {
-            var backIBLColor = vec3<f32>(0.0);
-            if (u_usePrefilterTexture) {
-                let mipLevel = iblRoughness * iblMipmapCount;
-                backIBLColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, -N, mipLevel).rgb * preExposure * systemUniforms.iblIntensity;
-            }
-            if (u_useSkyAtmosphere) {
-                let u_atmo = systemUniforms.skyAtmosphere;
-                let skyIntensity = u_atmo.sunIntensity;
-                let backTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, -N.y, u_atmo.atmosphereHeight);
-                let backSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, prefilterTextureSampler, -N, 0.0).rgb * skyIntensity * preExposure;
-                backIBLColor = (backIBLColor * backTrans) + backSkyScat;
-            }
-            envIBL_DIFFUSE += backIBLColor * albedo * (vec3<f32>(1.0) - F_IBL_dielectric_weight) * 0.15;
-        }
-        #redgpu_endIf
+
         var envIBL_SPECULAR_BTDF = vec3<f32>(0.0);
         #redgpu_if useKHR_materials_transmission
         if (transmissionParameter > 0.0) {
@@ -1276,14 +1258,9 @@ fn getDirectPbrLight(
     }
     #redgpu_endIf
     let specular_weight = F * specularParameter;
-    #redgpu_if isFoliage
-        // 🌿 모든 잎사귀가 태양 방향에 맞춰 완벽한 음영을 갖도록 표준 디퓨즈 반사광을 100% 온전히 보장
-        let viewSunPhase = max(dot(L, V), 0.0);
-        let forwardScatter = pow(viewSunPhase, 4.0) * 0.3;
-        let total_diffuse = diffuse_reflection + (getDirectDiffuseBRDF(max(-NdotL_origin, 0.0), VdotN, LdotH, roughnessParameter, albedo) * forwardScatter);
-    #redgpu_else
+
         let total_diffuse = mix(diffuse_reflection, diffuse_transmission, diffuseTransmissionParameter);
-    #redgpu_endIf
+
     var specular_transmission = vec3<f32>(0.0);
     #redgpu_if useKHR_materials_transmission
     if (transmissionParameter > 0.0) {

@@ -10,6 +10,7 @@ import {createOctahedralImpostorGeometry} from "../impostor/octahedral/createOct
 import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImpostorMaterial";
 import FoliageImpostorBaker from "../impostor/FoliageImpostorBaker";
 import type {FoliageLODInfo, FoliageSubMesh, FoliageTypeOptions} from "../../FoliageType";
+import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 import keepLog from "../../../../../utils/keepLog";
 import GPU_BLEND_FACTOR from "../../../../../gpuConst/GPU_BLEND_FACTOR";
 
@@ -338,18 +339,18 @@ class FoliageSubMeshAssembler {
             if (options.convertBlendToMasked || isFoliage) {
                 keepLog('mat.alphaBlend', mat.alphaBlend);
                 if (mat.alphaBlend === 2 || mat.transparent || mat.alphaMode === 'BLEND' || mat.alphaMode === 'MASK') {
-                    mat.useCutOff = true;
+                    mat.useCutOff = false;
                     // 🌿 GLTF 2.0 및 언리얼 엔진 공식 표준: 원본 cutOff가 있으면 쓰고 없으면 0.5 적용
                     mat.cutOff = (mat.cutOff > 0) ? mat.cutOff : 0.5;
                     const {blendColorState, blendAlphaState} = mat;
                     if (blendColorState && blendAlphaState) {
-                        blendColorState.srcFactor = GPU_BLEND_FACTOR.ONE;
-                        blendColorState.dstFactor = GPU_BLEND_FACTOR.ZERO;
-                        blendAlphaState.srcFactor = GPU_BLEND_FACTOR.ONE;
-                        blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ZERO;
+                        blendColorState.srcFactor = GPU_BLEND_FACTOR.SRC_ALPHA;
+                        blendColorState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
+                        blendAlphaState.srcFactor = GPU_BLEND_FACTOR.SRC_ALPHA;
+                        blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
                     }
                     mat.transparent = false;
-                    mat.alphaBlend = 1;
+                    mat.alphaBlend = 2;
                     mat.dirtyPipeline = true;
                 }
             }
@@ -721,16 +722,17 @@ class FoliageSubMeshAssembler {
             ]
         });
 
-        const isBillboard = mat instanceof OctahedralImpostorMaterial || !!(mat as any)?.isBuiltInMaterial;
         const isTransparent = !!mat.transparent || !!mat.use2PathRender;
         const isAlpha = (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
         const isMasked = !!mat.useCutOff || (mat.cutOff !== undefined && mat.cutOff > 0);
         const hasBaseColorTexture = !!(mat.baseColorTexture?.gpuTexture || mat.baseColorTexture?.src || mat.baseColorTexture?.url || (mat.diffuseTexture && (mat.diffuseTexture.gpuTexture || mat.diffuseTexture.src || mat.diffuseTexture.url)));
 
-        // 🌿 3D 메쉬 LOD(LOD0, LOD1, LOD2...)만 Depth Prepass를 적용하고, 빌보드는 Prepass에서 제외!
-        const isDepthPrepass = !isBillboard && !isTransparent && !isAlpha && isMasked && hasBaseColorTexture;
+        // 🌿 식생의 모든 LOD 서브메시에 대해 Depth Prepass 기반 2패스 렌더링 적용
+        // Pass 1: Depth Prepass (depthCompare: 'less-equal', depthWrite: true, colorWrite: 0)
+        // Pass 2: Main Shading Pass (depthCompare: 'equal', depthWrite: false, alpha-blending)
+        const isDepthPrepass = !isTransparent && !isAlpha && (hasBaseColorTexture || isMasked);
         const isMainOpaqueOrMasked = !isTransparent && !isAlpha;
-        const mainDepthMode = (!isBillboard && isMasked && hasBaseColorTexture) ? 'mainShadingAfterDepth' : 'normal';
+        const mainDepthMode: FoliageDepthPassMode = isDepthPrepass ? 'mainShadingAfterDepth' : 'normal';
 
         return {
             mesh: meshNode,

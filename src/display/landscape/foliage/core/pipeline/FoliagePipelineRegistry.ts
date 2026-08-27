@@ -132,19 +132,37 @@ class FoliagePipelineRegistry {
             depthStencil = {
                 format: 'depth32float',
                 depthWriteEnabled: true,
-                depthCompare: 'less',
+                depthCompare: 'less-equal',
             };
         } else {
+
+            const isMainShadingAfterDepth = depthPassMode === 'mainShadingAfterDepth';
+            const defaultAlphaBlend: GPUBlendState = {
+                color: {
+                    srcFactor: 'src-alpha',
+                    dstFactor: 'one-minus-src-alpha',
+                    operation: 'add'
+                },
+                alpha: {
+                    srcFactor: 'one',
+                    dstFactor: 'one-minus-src-alpha',
+                    operation: 'add'
+                }
+            };
+
+            const baseBlend = material.blendColorState ? {
+                color: material.blendColorState.state,
+                alpha: material.blendAlphaState.state
+            } : undefined;
+
+            const effectiveBlend = isMainShadingAfterDepth ? (baseBlend || defaultAlphaBlend) : baseBlend;
 
             targets = material.getFragmentRenderState
                 ? material.getFragmentRenderState().targets
                 : [
                     {
                         format: 'rgba16float',
-                        blend: material.blendColorState ? {
-                            color: material.blendColorState.state,
-                            alpha: material.blendAlphaState.state
-                        } : undefined,
+                        blend: effectiveBlend,
                         writeMask: material.writeMaskState,
                     },
                     {
@@ -159,7 +177,11 @@ class FoliagePipelineRegistry {
                     }
                 ];
 
-            if (depthPassMode === 'mainShadingAfterDepth') {
+            if (isMainShadingAfterDepth && targets[0]) {
+                targets[0].blend = effectiveBlend;
+            }
+
+            if (isMainShadingAfterDepth) {
 
                 depthStencil = {
                     format: 'depth32float',

@@ -53,10 +53,10 @@ class OctahedralImpostorMaterial extends AUVTransformBaseMaterial {
 
         const {blendColorState, blendAlphaState} = this;
         if (blendColorState && blendAlphaState) {
-            blendColorState.srcFactor = GPU_BLEND_FACTOR.ONE;
-            blendColorState.dstFactor = GPU_BLEND_FACTOR.ZERO;
+            blendColorState.srcFactor = GPU_BLEND_FACTOR.SRC_ALPHA;
+            blendColorState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
             blendAlphaState.srcFactor = GPU_BLEND_FACTOR.ONE;
-            blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ZERO;
+            blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
         }
 
         this.initGPURenderInfos();
