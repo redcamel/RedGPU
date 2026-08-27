@@ -93,6 +93,22 @@ fn main(inputData: InputData) -> OutputFragment {
         rawNorm = (n00.rgb * w00 + n10.rgb * w10 + n01.rgb * w01 + n11.rgb * w11) / totalWeight;
     }
 
+    let fadeOpacity = inputData.combinedOpacity;
+    if (fadeOpacity < 0.999) {
+        let bayerMatrix = array<f32, 16>(
+             0.0/16.0,  8.0/16.0,  2.0/16.0, 10.0/16.0,
+            12.0/16.0,  4.0/16.0, 14.0/16.0,  6.0/16.0,
+             3.0/16.0, 11.0/16.0,  1.0/16.0,  9.0/16.0,
+            15.0/16.0,  7.0/16.0, 13.0/16.0,  5.0/16.0
+        );
+        let px = u32(inputData.position.x) % 4u;
+        let py = u32(inputData.position.y) % 4u;
+        let threshold = bayerMatrix[py * 4u + px];
+        if (fadeOpacity < threshold) {
+            discard;
+        }
+    }
+
     let finalAlpha = mix(
         mix(s00.a, s10.a, frac.x),
         mix(s01.a, s11.a, frac.x),
