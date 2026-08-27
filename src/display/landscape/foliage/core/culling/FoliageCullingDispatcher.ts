@@ -113,9 +113,9 @@ class FoliageCullingDispatcher {
             const foliageType = typeList[i];
             if (foliageType.activeInstanceCount <= 0 || foliageType.subMeshes.length === 0) continue;
 
-            foliageType.resetIndirectBuffer();
+            foliageType._resetIndirectBuffer();
 
-            foliageType.updateCullingUniforms(
+            foliageType._updateCullingUniforms(
                 camX, camY, camZ,
                 worldSizeX, heightScale, hasVHT,
                 frustumPlanes,
@@ -193,7 +193,7 @@ class FoliageCullingDispatcher {
             const activeCount = foliageType.activeInstanceCount;
             if (activeCount <= 0 || foliageType.subMeshes.length === 0) continue;
 
-            const cullingBindGroup = foliageType.getCullingBindGroup(bindGroupLayout, vhtView, vhtSampler);
+            const cullingBindGroup = foliageType._getCullingBindGroup(bindGroupLayout, vhtView, vhtSampler);
             if (cullingBindGroup) {
                 const workgroupCount = Math.ceil(activeCount / 64);
                 computePass.setBindGroup(0, cullingBindGroup);

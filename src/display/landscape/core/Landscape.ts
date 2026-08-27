@@ -194,7 +194,7 @@ export class Landscape extends Object3DContainer {
         this.#initSystems(redGPUContext, componentCountX, componentCountZ, maxLODLevel, vhtSampler, vhtAtlasTexture, vntAtlasTexture);
         this.#foliageManager = new LandscapeFoliageManager(this);
         this.#tileStreamer.setOnTileLoaded((comp) => {
-            this.#foliageManager?.handleTileLoaded(comp);
+            this.#foliageManager?._handleTileLoaded(comp);
         });
         this.#debuggerManager = new LandscapeDebuggerManager(this);
     }
@@ -485,7 +485,7 @@ export class Landscape extends Object3DContainer {
         }
 
         if (this.#foliageManager?.hasFoliageTypes) {
-            this.#foliageManager.render(view, renderPassEncoder);
+            this.#foliageManager._render(view, renderPassEncoder);
         }
 
     }
@@ -589,7 +589,7 @@ export class Landscape extends Object3DContainer {
         }
 
         if (this.#foliageManager?.hasFoliageTypes) {
-            this.#foliageManager.update(camera, renderViewStateData);
+            this.#foliageManager._update(camera, renderViewStateData);
         }
 
         this.#tileStreamer.update(camX, camZ, camY);

@@ -73,8 +73,8 @@ class FoliageRenderer {
         for (let t = 0; t < typeCount; t++) {
             const foliageType = typeList[t];
             if (foliageType.activeInstanceCount <= 0) continue;
-            const culledGPU = foliageType.culledGPUBuffer;
-            const indirectGPU = foliageType.indirectGPUBuffer;
+            const culledGPU = foliageType._culledGPUBuffer;
+            const indirectGPU = foliageType._indirectGPUBuffer;
             if (!culledGPU || !indirectGPU || foliageType.subMeshes.length === 0) continue;
 
             let item = this.#validTypes[validCount];

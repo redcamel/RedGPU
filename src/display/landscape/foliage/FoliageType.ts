@@ -176,7 +176,7 @@ class FoliageType {
             this.hasBillboard,
             this.#options.cullingDistance ?? 2000.0
         );
-        this.resetIndirectBuffer();
+        this._resetIndirectBuffer();
     }
 
     get foliageManager(): LandscapeFoliageManager | null {
@@ -223,19 +223,19 @@ class FoliageType {
         return this.#boundingRadius;
     }
 
-    get culledGPUBuffer(): GPUBuffer | null {
+    get _culledGPUBuffer(): GPUBuffer | null {
         return this.#instanceBuffer.getCulledGPUBuffer();
     }
 
-    get indirectGPUBuffer(): GPUBuffer | null {
+    get _indirectGPUBuffer(): GPUBuffer | null {
         return this.#instanceBuffer.getIndirectGPUBuffer();
     }
 
-    getCullingBindGroup(layout: GPUBindGroupLayout, vhtView?: GPUTextureView, vhtSampler?: GPUSampler): GPUBindGroup | null {
+    _getCullingBindGroup(layout: GPUBindGroupLayout, vhtView?: GPUTextureView, vhtSampler?: GPUSampler): GPUBindGroup | null {
         return this.#instanceBuffer.getOrCreateCullingBindGroup(layout, vhtView, vhtSampler);
     }
 
-    updateCullingUniforms(
+    _updateCullingUniforms(
         camX: number, camY: number, camZ: number,
         worldSizeX: number, heightScale: number, hasVHT: boolean,
         frustumPlanes: number[][] | null,
@@ -257,7 +257,7 @@ class FoliageType {
         );
     }
 
-    setInstanceData(
+    _setInstanceData(
         index: number,
         posX: number, posY: number, posZ: number,
         rotX: number, rotY: number, rotZ: number, rotW: number,
@@ -267,11 +267,11 @@ class FoliageType {
         this.#instanceBuffer.setInstanceData(index, posX, posY, posZ, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, fade, subId);
     }
 
-    uploadRangeToGPU(startIndex: number, count: number): void {
+    _uploadRangeToGPU(startIndex: number, count: number): void {
         this.#instanceBuffer.uploadRangeToGPU(startIndex, count);
     }
 
-    resetIndirectBuffer(): void {
+    _resetIndirectBuffer(): void {
         if (!this.#instanceBuffer || this.#subMeshes.length === 0) return;
         this.#instanceBuffer.resetMultiIndirectCount(this.#subMeshes);
     }
@@ -281,10 +281,10 @@ class FoliageType {
         this.#activeInstanceCount = Math.min(instanceCount, this.#options.maxInstances);
         this.#instanceBuffer.writeSubData(data.subarray(0, this.#activeInstanceCount * 12));
         this.#instanceBuffer.uploadToGPU(this.#activeInstanceCount);
-        this.resetIndirectBuffer();
+        this._resetIndirectBuffer();
     }
 
-    populateTile(comp: any, targetCountPerTile?: number): void {
+    _populateTile(comp: any, targetCountPerTile?: number): void {
         const key = `${comp.componentZ}_${comp.componentX}`;
         if (this.#loadedTileKeys.has(key)) return;
         this.#loadedTileKeys.add(key);

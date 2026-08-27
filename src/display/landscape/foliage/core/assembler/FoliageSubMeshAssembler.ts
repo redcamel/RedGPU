@@ -777,6 +777,8 @@ class FoliageSubMeshAssembler {
             mainDepthMode,
             isAlpha,
             isTransparent,
+            instanceBufferOffset: 0,
+            indirectOffsetBytes: 0,
         };
     }
 }
