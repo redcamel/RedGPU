@@ -111,23 +111,13 @@ class FoliageCullingDispatcher {
 
         for (let i = 0; i < typeCount; i++) {
             const foliageType = typeList[i];
-            const activeCount = foliageType.activeInstanceCount;
-            if (activeCount <= 0) continue;
-
-            const subCount = foliageType.subMeshes.length;
-            if (subCount === 0) continue;
-
-            const cullingDist = foliageType.options.cullingDistance;
-            const fadeStartDist = foliageType.options.fadeStartDistance;
-            const boundingRadius = foliageType.boundingRadius;
-            const bottomOffset = foliageType.bottomOffset;
+            if (foliageType.activeInstanceCount <= 0 || foliageType.subMeshes.length === 0) continue;
 
             foliageType.resetIndirectBuffer();
 
             foliageType.updateCullingUniforms(
                 camX, camY, camZ,
-                cullingDist, fadeStartDist, activeCount, boundingRadius,
-                worldSizeX, heightScale, bottomOffset, hasVHT,
+                worldSizeX, heightScale, hasVHT,
                 frustumPlanes,
                 fovFactorSq
             );

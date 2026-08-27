@@ -238,8 +238,14 @@ class FoliageSubMeshAssembler {
 
         let minOffset = 0;
         let maxDistSq = 0;
+        const maxInstances = options.maxInstances ?? 50000;
+
         for (let i = 0; i < subList.length; i++) {
             const sub = subList[i];
+            sub.instanceBufferOffset = (sub.lodIndex ?? 0) * maxInstances * 48;
+            sub.indirectOffsetBytes = i * 20;
+            sub.pipelineCache = new Map();
+
             minOffset = Math.min(minOffset, sub.bottomOffset);
 
             const vBuffer = sub.geometry?.vertexBuffer;

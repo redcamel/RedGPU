@@ -29,6 +29,7 @@ class FoliageRenderer {
     #lastBoundInstanceOffset: number = -1;
 
     #transparentEntries: TransparentFoliageEntry[] = [];
+    #validTypes: { type: FoliageType; culledGPU: GPUBuffer; indirectGPU: GPUBuffer }[] = [];
 
     constructor(
         redGPUContext: RedGPUContext,
@@ -42,11 +43,7 @@ class FoliageRenderer {
         this.#subMeshVertexBindGroupLayout = subMeshVertexBindGroupLayout || null;
     }
 
-    render(
-        passEncoder: GPURenderPassEncoder,
-        typeList: FoliageType[],
-        view: any
-    ): void {
+    render(passEncoder: GPURenderPassEncoder, typeList: readonly FoliageType[], view: any): void {
         const typeCount = typeList.length;
         if (typeCount === 0) return;
 
@@ -71,75 +68,76 @@ class FoliageRenderer {
         const camY = rawCamera?.y ?? 0;
         const camZ = rawCamera?.z ?? 0;
 
+        // 🌲 1. 유효한 활성 식생 품종 1회 수집 (4개 루프 중복 검사 및 게터 조회 75% 제거)
+        let validCount = 0;
         for (let t = 0; t < typeCount; t++) {
             const foliageType = typeList[t];
             if (foliageType.activeInstanceCount <= 0) continue;
-            const subMeshes = foliageType.subMeshes;
-            const subCount = subMeshes.length;
-            if (subCount === 0) continue;
-
             const culledGPU = foliageType.culledGPUBuffer;
             const indirectGPU = foliageType.indirectGPUBuffer;
-            if (!culledGPU || !indirectGPU) continue;
+            if (!culledGPU || !indirectGPU || foliageType.subMeshes.length === 0) continue;
+
+            let item = this.#validTypes[validCount];
+            if (!item) {
+                item = {type: foliageType, culledGPU, indirectGPU};
+                this.#validTypes[validCount] = item;
+            } else {
+                item.type = foliageType;
+                item.culledGPU = culledGPU;
+                item.indirectGPU = indirectGPU;
+            }
+            validCount++;
+        }
+        if (validCount === 0) return;
+
+        // 🌲 2. Depth Prepass 루프
+        for (let t = 0; t < validCount; t++) {
+            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypes[t];
+            const subMeshes = foliageType.subMeshes;
+            const subCount = subMeshes.length;
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
-                // 🌿 3D 식생에 대해 Depth Prepass 렌더링
                 if (sub.isDepthPrepass) {
-                    this.#drawSubMesh(passEncoder, sub, s, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, foliageType.options.maxInstances, 'depthPrepass');
+                    this.#drawSubMesh(passEncoder, sub, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'depthPrepass');
                 }
             }
         }
 
-        for (let t = 0; t < typeCount; t++) {
-            const foliageType = typeList[t];
-            if (foliageType.activeInstanceCount <= 0) continue;
+        // 🌲 3. Main Opaque / Masked 루프
+        for (let t = 0; t < validCount; t++) {
+            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypes[t];
             const subMeshes = foliageType.subMeshes;
             const subCount = subMeshes.length;
-            if (subCount === 0) continue;
-
-            const culledGPU = foliageType.culledGPUBuffer;
-            const indirectGPU = foliageType.indirectGPUBuffer;
-            if (!culledGPU || !indirectGPU) continue;
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
                 if (sub.isMainOpaqueOrMasked) {
-                    this.#drawSubMesh(passEncoder, sub, s, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, foliageType.options.maxInstances, sub.mainDepthMode);
+                    this.#drawSubMesh(passEncoder, sub, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, sub.mainDepthMode);
                 }
             }
         }
 
-        for (let t = 0; t < typeCount; t++) {
-            const foliageType = typeList[t];
-            if (foliageType.activeInstanceCount <= 0) continue;
+        // 🌲 4. Alpha Blended 루프
+        for (let t = 0; t < validCount; t++) {
+            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypes[t];
             const subMeshes = foliageType.subMeshes;
             const subCount = subMeshes.length;
-            if (subCount === 0) continue;
-
-            const culledGPU = foliageType.culledGPUBuffer;
-            const indirectGPU = foliageType.indirectGPUBuffer;
-            if (!culledGPU || !indirectGPU) continue;
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
                 if (sub.isAlpha) {
-                    this.#drawSubMesh(passEncoder, sub, s, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, foliageType.options.maxInstances, 'normal');
+                    this.#drawSubMesh(passEncoder, sub, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, 'normal');
                 }
             }
         }
 
+        // 🌲 5. Transparent 루프 (카메라 거리 기준 정렬)
         let transCount = 0;
-        for (let t = 0; t < typeCount; t++) {
-            const foliageType = typeList[t];
-            if (foliageType.activeInstanceCount <= 0) continue;
+        for (let t = 0; t < validCount; t++) {
+            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypes[t];
             const subMeshes = foliageType.subMeshes;
             const subCount = subMeshes.length;
-            if (subCount === 0) continue;
-
-            const culledGPU = foliageType.culledGPUBuffer;
-            const indirectGPU = foliageType.indirectGPUBuffer;
-            if (!culledGPU || !indirectGPU) continue;
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
@@ -175,7 +173,6 @@ class FoliageRenderer {
         }
 
         if (transCount > 0) {
-
             const entries = this.#transparentEntries;
             for (let i = 1; i < transCount; i++) {
                 const current = entries[i];
@@ -190,7 +187,7 @@ class FoliageRenderer {
 
             for (let i = 0; i < transCount; i++) {
                 const item = entries[i];
-                this.#drawSubMesh(passEncoder, item.subMesh, item.subIndex, sampleCount, msaaID, systemBG, item.indirectGPU, item.culledGPU, item.maxInstances ?? 50000, 'normal');
+                this.#drawSubMesh(passEncoder, item.subMesh, sampleCount, msaaID, systemBG, item.indirectGPU, item.culledGPU, 'normal');
             }
         }
     }
@@ -198,13 +195,11 @@ class FoliageRenderer {
     #drawSubMesh(
         passEncoder: GPURenderPassEncoder,
         sub: FoliageSubMesh,
-        subIndex: number,
         sampleCount: number,
         msaaID: string,
         systemBG: GPUBindGroup | null,
         indirectGPUBuffer: GPUBuffer,
         culledGPUBuffer: GPUBuffer,
-        maxInstances: number,
         depthPassMode: FoliageDepthPassMode = 'normal'
     ): void {
         const vertexGPUBuffer = sub.geometry.vertexBuffer?.gpuBuffer;
@@ -216,10 +211,18 @@ class FoliageRenderer {
             material.dirtyPipeline = false;
         }
 
-        const cullMode = material.doubleSided ? 'none' : (material.cullMode ?? 'none');
-        const pipeline = this.#pipelineRegistry.getOrCreatePipeline(
-            material, sampleCount, msaaID, sub.strideBytes, cullMode, depthPassMode, this.#subMeshVertexBindGroupLayout
-        );
+        // 🌲 서브메시별 파이프라인 캐싱 (Zero GC)
+        const pipelineKey = `${msaaID}_${depthPassMode}`;
+        let pipeline = sub.pipelineCache?.get(pipelineKey) || null;
+        if (!pipeline) {
+            const cullMode = material.doubleSided ? 'none' : (material.cullMode ?? 'none');
+            pipeline = this.#pipelineRegistry.getOrCreatePipeline(
+                material, sampleCount, msaaID, sub.strideBytes, cullMode, depthPassMode, this.#subMeshVertexBindGroupLayout
+            );
+            if (pipeline && sub.pipelineCache) {
+                sub.pipelineCache.set(pipelineKey, pipeline);
+            }
+        }
         if (!pipeline) return;
 
         if (this.#lastBoundPipeline !== pipeline) {
@@ -249,15 +252,14 @@ class FoliageRenderer {
             this.#lastBoundGeometryVertexBuffer = vertexGPUBuffer;
         }
 
-        const lodIdx = sub.lodIndex ?? 0;
-        const instanceBufferOffset = lodIdx * maxInstances * 48;
+        const instanceBufferOffset = sub.instanceBufferOffset;
         if (this.#lastBoundInstanceBuffer !== culledGPUBuffer || this.#lastBoundInstanceOffset !== instanceBufferOffset) {
             passEncoder.setVertexBuffer(1, culledGPUBuffer, instanceBufferOffset);
             this.#lastBoundInstanceBuffer = culledGPUBuffer;
             this.#lastBoundInstanceOffset = instanceBufferOffset;
         }
 
-        const indirectOffsetBytes = subIndex * 20;
+        const indirectOffsetBytes = sub.indirectOffsetBytes;
         if (sub.isIndexed && sub.geometry.indexBuffer?.gpuBuffer) {
             const indexGPUBuffer = sub.geometry.indexBuffer.gpuBuffer;
             if (this.#lastBoundIndexBuffer !== indexGPUBuffer) {

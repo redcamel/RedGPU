@@ -33,6 +33,10 @@ export interface FoliageSubMesh {
     isImpostor?: boolean;
     impostorWidth?: number;
     impostorHeight?: number;
+
+    instanceBufferOffset: number;
+    indirectOffsetBytes: number;
+    pipelineCache?: Map<string, GPURenderPipeline>;
 }
 
 export interface FoliageCrossBillboardOptions {
@@ -233,17 +237,20 @@ class FoliageType {
 
     updateCullingUniforms(
         camX: number, camY: number, camZ: number,
-        cullingDist: number, fadeStartDist: number,
-        activeCount: number, boundingRadius: number,
-        worldSizeX: number, heightScale: number, bottomOffset: number, hasVHT: boolean,
+        worldSizeX: number, heightScale: number, hasVHT: boolean,
         frustumPlanes: number[][] | null,
         fovFactorSq: number
     ): void {
         const numLODs = this.#lodInfoList.length > 0 ? Math.min(this.#lodInfoList.length, 8) : (this.hasBillboard ? 2 : 1);
         this.#instanceBuffer.updateCullingUniforms(
             camX, camY, camZ,
-            cullingDist, fadeStartDist, activeCount, boundingRadius,
-            worldSizeX, heightScale, bottomOffset, hasVHT,
+            this.#options.cullingDistance ?? 2000.0,
+            this.#options.fadeStartDistance ?? 1500.0,
+            this.#activeInstanceCount,
+            this.#boundingRadius,
+            worldSizeX, heightScale,
+            this.#bottomOffset,
+            hasVHT,
             frustumPlanes,
             fovFactorSq,
             numLODs
