@@ -66,110 +66,63 @@ class FoliageSubMeshAssembler {
         }
 
         const useImpostor = options.useImpostor !== false;
-        const impostorOpt = options.impostorOptions;
-        const hasCustomLODs = options.lods && options.lods.length > 0;
+        const lodConfigs = options.lods || [];
+        const numLODs = Math.min(lodConfigs.length, 8);
 
-        if (hasCustomLODs) {
-            const lodConfigs = options.lods!;
-            const numLODs = Math.min(lodConfigs.length, 8);
+        for (let l = 0; l < numLODs; l++) {
+            const lodCfg = lodConfigs[l];
+            const lodMeshes = Array.isArray(lodCfg.mesh) ? lodCfg.mesh : [lodCfg.mesh];
+            const startSubOffset = subList.length;
 
-            for (let l = 0; l < numLODs; l++) {
-                const lodCfg = lodConfigs[l];
-                const lodMeshes = Array.isArray(lodCfg.mesh) ? lodCfg.mesh : [lodCfg.mesh];
-                const startSubOffset = subList.length;
-
-                const assembledSubMeshes = FoliageSubMeshAssembler.#assembleMeshList(
-                    redGPUContext,
-                    lodMeshes,
-                    l,
-                    options,
-                    subMeshBindGroupLayout,
-                    lodCfg.materialOverride
-                );
-
-                for (let s = 0; s < assembledSubMeshes.length; s++) {
-                    subList.push(assembledSubMeshes[s]);
-                }
-
-                const subCountForThisLOD = subList.length - startSubOffset;
-                const prevDist = l > 0 ? lodInfoList[l - 1].lodDistance : 0.0;
-                const defaultDist = (l === 0) ? 30.0 : (30.0 * Math.pow(2.5, l));
-                const switchDist = lodCfg.lodDistance ?? defaultDist;
-                const autoFade = FoliageSubMeshAssembler.calculateAutoFadeRange(switchDist, prevDist);
-                const fadeRange = lodCfg.fadeRange ?? autoFade;
-
-                lodInfoList.push({
-                    lodIndex: l,
-                    lodDistance: switchDist,
-                    fadeRange: fadeRange,
-                    subMeshOffset: startSubOffset,
-                    subMeshCount: subCountForThisLOD,
-                });
-            }
-
-            // Impostor fallback / attachment if enabled (Default: true)
-            if (useImpostor) {
-                const impostorLODIndex = lodInfoList.length;
-                const lod0SubMeshes = subList.filter(s => s.lodIndex === 0);
-
-                const last3DDist = lodInfoList.length > 0 ? lodInfoList[lodInfoList.length - 1].lodDistance : 100.0;
-                const prevDist = lodInfoList.length > 1 ? lodInfoList[lodInfoList.length - 2].lodDistance : 0.0;
-                const autoImpostorFade = FoliageSubMeshAssembler.calculateAutoFadeRange(last3DDist, prevDist);
-
-                FoliageSubMeshAssembler.#buildAndAttachImpostor(
-                    redGPUContext,
-                    gpuDevice,
-                    subMeshBindGroupLayout,
-                    options,
-                    lod0SubMeshes,
-                    impostorOpt,
-                    subList,
-                    lodInfoList,
-                    impostorLODIndex,
-                    autoImpostorFade
-                );
-            }
-        } else {
-            // Legacy single mesh mode
-            const roots = options.mesh ? (Array.isArray(options.mesh) ? options.mesh : [options.mesh]) : [];
             const assembledSubMeshes = FoliageSubMeshAssembler.#assembleMeshList(
                 redGPUContext,
-                roots,
-                0,
+                lodMeshes,
+                l,
                 options,
-                subMeshBindGroupLayout
+                subMeshBindGroupLayout,
+                lodCfg.materialOverride
             );
 
             for (let s = 0; s < assembledSubMeshes.length; s++) {
                 subList.push(assembledSubMeshes[s]);
             }
 
-            const lod0Count = subList.length;
-            const lod0Dist = options.lodDistance ?? 80.0;
-            const autoFade0 = FoliageSubMeshAssembler.calculateAutoFadeRange(lod0Dist, 0.0);
+            const subCountForThisLOD = subList.length - startSubOffset;
+            const prevDist = l > 0 ? lodInfoList[l - 1].lodDistance : 0.0;
+            const defaultDist = (l === 0) ? 80.0 : (80.0 * Math.pow(2.5, l));
+            const switchDist = lodCfg.lodDistance ?? defaultDist;
+            const autoFade = FoliageSubMeshAssembler.calculateAutoFadeRange(switchDist, prevDist);
+            const fadeRange = lodCfg.fadeRange ?? autoFade;
 
             lodInfoList.push({
-                lodIndex: 0,
-                lodDistance: lod0Dist,
-                fadeRange: autoFade0,
-                subMeshOffset: 0,
-                subMeshCount: lod0Count,
+                lodIndex: l,
+                lodDistance: switchDist,
+                fadeRange: fadeRange,
+                subMeshOffset: startSubOffset,
+                subMeshCount: subCountForThisLOD,
             });
+        }
 
-            if (useImpostor) {
-                FoliageSubMeshAssembler.#buildAndAttachImpostor(
-                    redGPUContext,
-                    gpuDevice,
-                    subMeshBindGroupLayout,
-                    options,
-                    subList,
-                    impostorOpt,
-                    subList,
-                    lodInfoList,
-                    1,
-                    autoFade0
-                );
-            }
+        // Impostor fallback / attachment if enabled (Default: true)
+        if (useImpostor && subList.length > 0) {
+            const impostorLODIndex = lodInfoList.length;
+            const lod0SubMeshes = subList.filter(s => s.lodIndex === 0);
+
+            const last3DDist = lodInfoList.length > 0 ? lodInfoList[lodInfoList.length - 1].lodDistance : 100.0;
+            const prevDist = lodInfoList.length > 1 ? lodInfoList[lodInfoList.length - 2].lodDistance : 0.0;
+            const autoImpostorFade = FoliageSubMeshAssembler.calculateAutoFadeRange(last3DDist, prevDist);
+
+            FoliageSubMeshAssembler.#buildAndAttachImpostor(
+                redGPUContext,
+                gpuDevice,
+                subMeshBindGroupLayout,
+                options,
+                lod0SubMeshes,
+                subList,
+                lodInfoList,
+                impostorLODIndex,
+                autoImpostorFade
+            );
         }
 
         const lod0SubMeshCount = lodInfoList.length > 0 ? lodInfoList[0].subMeshCount : subList.length;
@@ -219,7 +172,6 @@ class FoliageSubMeshAssembler {
         subMeshBindGroupLayout: GPUBindGroupLayout,
         options: FoliageTypeOptions,
         sourceSubMeshes: FoliageSubMesh[],
-        impostorOpt: any,
         subList: FoliageSubMesh[],
         lodInfoList: FoliageLODInfo[],
         impostorLODIndex: number,
@@ -227,15 +179,12 @@ class FoliageSubMeshAssembler {
     ): void {
         const bakeResult = FoliageImpostorBaker.bakeSubMeshes(redGPUContext, sourceSubMeshes, options.name);
 
-        const bbWidth = impostorOpt?.width ?? bakeResult.width;
-        const bbHeight = impostorOpt?.height ?? bakeResult.height;
+        const bbWidth = bakeResult.width;
+        const bbHeight = bakeResult.height;
         const bbBottomOffset = bakeResult.bottomOffset ?? 0;
 
         const bbGeom = createOctahedralImpostorGeometry(redGPUContext, bbWidth, bbHeight, bbBottomOffset);
-        let bbMat = impostorOpt?.material;
-        if (!bbMat) {
-            bbMat = new OctahedralImpostorMaterial(redGPUContext, bakeResult.texture, bakeResult.normalTexture, `${options.name}_OctahedralMat`, 8.0);
-        }
+        const bbMat = new OctahedralImpostorMaterial(redGPUContext, bakeResult.texture, bakeResult.normalTexture, `${options.name}_OctahedralMat`, 8.0);
 
         const bbStartOffset = subList.length;
         const bbSubMesh = FoliageSubMeshAssembler.#createSubMeshInstance(

@@ -39,17 +39,6 @@ export interface FoliageSubMesh {
     pipelineCache?: Map<string, GPURenderPipeline>;
 }
 
-export interface FoliageImpostorOptions {
-    /** Custom material override for the octahedral impostor */
-    readonly material?: any;
-
-    /** Custom quad width in meters (default: auto-calculated from 3D geometry bounds) */
-    readonly width?: number;
-
-    /** Custom quad height in meters (default: auto-calculated from 3D geometry bounds) */
-    readonly height?: number;
-}
-
 export interface FoliageLODConfig {
     /** The 3D mesh (or mesh hierarchy) to render at this LOD level */
     mesh: Mesh | Mesh[];
@@ -78,11 +67,8 @@ export interface FoliageLODInfo {
 export interface FoliageTypeOptions {
     name: string;
 
-    /** [Legacy & Single LOD] Mesh or array of meshes */
-    mesh?: Mesh | Mesh[];
-
-    /** [Multi-LOD] Array of user-defined LOD configurations (LOD 0 to LOD 7) */
-    lods?: FoliageLODConfig[];
+    /** Array of user-defined LOD configurations (LOD 0 to LOD 7) */
+    lods: FoliageLODConfig[];
 
     maxInstances?: number;
 
@@ -93,13 +79,8 @@ export interface FoliageTypeOptions {
     maxScale?: [number, number, number];
     randomRotationY?: boolean;
 
-    lodDistance?: number;
-
     /** Whether to automatically generate and use an octahedral impostor at the end of the LOD chain (default: true) */
     useImpostor?: boolean;
-
-    /** Optional custom octahedral impostor geometry / material configuration (Immutable after creation) */
-    impostorOptions?: FoliageImpostorOptions;
 
     convertBlendToMasked?: boolean;
 
@@ -135,14 +116,12 @@ class FoliageType {
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
 
         const useImpostor = options.useImpostor !== false;
-        const impostorOpt = options.impostorOptions;
 
         const minScale: [number, number, number] = options.minScale ? [...options.minScale] : [1.0, 1.0, 1.0];
         const maxScale: [number, number, number] = options.maxScale ? [...options.maxScale] : [1.0, 1.0, 1.0];
 
         this.#options = Object.freeze({
             name: options.name,
-            mesh: options.mesh,
             lods: options.lods,
             maxInstances: options.maxInstances ?? 50000,
             cullingDistance: options.cullingDistance ?? 2000.0,
@@ -150,9 +129,7 @@ class FoliageType {
             minScale,
             maxScale,
             randomRotationY: options.randomRotationY ?? true,
-            lodDistance: options.lodDistance ?? 80.0,
             useImpostor,
-            impostorOptions: impostorOpt ? Object.freeze({...impostorOpt}) : undefined,
             convertBlendToMasked: options.convertBlendToMasked ?? true,
             combineSubMeshesByMaterial: options.combineSubMeshesByMaterial ?? true,
             isFoliage: options.isFoliage !== false,
@@ -178,11 +155,12 @@ class FoliageType {
         const hasImpostor = this.#options.useImpostor !== false;
         this.#numLODs = this.#lodInfoList.length > 0 ? Math.min(this.#lodInfoList.length, 8) : (hasImpostor ? 2 : 1);
         const lod0SubCount = this.#lodInfoList[0]?.subMeshCount ?? this.#subMeshes.length;
+        const lod0Dist = this.#lodInfoList[0]?.lodDistance ?? 80.0;
 
         this.#instanceBuffer = new FoliageInstanceBuffer(redGPUContext, this.#options.maxInstances, this.#subMeshes);
         this.#instanceBuffer.initStaticLODUniforms(
             this.#lodInfoList,
-            this.#options.lodDistance ?? 80.0,
+            lod0Dist,
             lod0SubCount,
             hasImpostor,
             this.#options.cullingDistance ?? 2000.0

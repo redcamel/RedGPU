@@ -159,8 +159,6 @@ RedGPU.init(
                             lodDistance: 320
                         });
 
-                        const lastLodDist = lodConfigs[lodConfigs.length - 1].lodDistance;
-
                         foliageManager.addFoliageType({
                             name: `Tree_${baseName}`,
                             lods: lodConfigs,
@@ -171,10 +169,7 @@ RedGPU.init(
                             cullingDistance: 3500,
                             fadeStartDistance: 2800,
                             isFoliage: true,
-                            billboard: {
-                                enabled: true,
-                                lodDistance: lastLodDist
-                            }
+                            useImpostor: true
                         });
                     });
                 }
@@ -191,7 +186,7 @@ RedGPU.init(
 
                 foliageManager.addFoliageType({
                     name: 'FrangipaniTree',
-                    mesh: root,
+                    lods: [{mesh: root, lodDistance: 120}],
                     maxInstances: 10000,
                     minScale: [4.2, 4.2, 4.2],
                     maxScale: [6.2, 6.2, 6.2],
@@ -199,10 +194,7 @@ RedGPU.init(
                     cullingDistance: 3500,
                     fadeStartDistance: 2800,
                     isFoliage: true,
-                    billboard: {
-                        enabled: true,
-                        lodDistance: 120
-                    }
+                    useImpostor: true
                 });
             }
         );
@@ -298,18 +290,12 @@ const renderTestPane = (redGPUContext, view, skyAtmosphere, landscape, controlle
                     },
                     get lodDistance() {
                         const target = foliageManager.getFoliageType('FrangipaniTree');
-                        if (target?.lodInfoList?.[0]) {
-                            return target.lodInfoList[0].lodDistance;
-                        }
-                        return target ? target.options.lodDistance : 120;
+                        return target?.lodInfoList?.[0] ? target.lodInfoList[0].lodDistance : 120;
                     },
                     set lodDistance(v) {
                         const target = foliageManager.getFoliageType('FrangipaniTree');
-                        if (target) {
-                            if (target.lodInfoList?.[0]) {
-                                target.lodInfoList[0].lodDistance = v;
-                            }
-                            target.options.lodDistance = v;
+                        if (target?.lodInfoList?.[0]) {
+                            target.lodInfoList[0].lodDistance = v;
                         }
                     },
                     get cullingDist() {
@@ -352,16 +338,16 @@ const renderTestPane = (redGPUContext, view, skyAtmosphere, landscape, controlle
                         const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
                         if (target?.lodInfoList?.[1]) target.lodInfoList[1].lodDistance = v;
                     },
-                    get billboardDist() {
+                    get impostorDist() {
                         const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
-                        const bbIdx = (target?.lodInfoList?.length ?? 1) - 2;
-                        return target?.lodInfoList?.[bbIdx] ? target.lodInfoList[bbIdx].lodDistance : 320;
+                        const impostorIdx = (target?.lodInfoList?.length ?? 1) - 2;
+                        return target?.lodInfoList?.[impostorIdx] ? target.lodInfoList[impostorIdx].lodDistance : 320;
                     },
-                    set billboardDist(v) {
+                    set impostorDist(v) {
                         const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
-                        const bbIdx = (target?.lodInfoList?.length ?? 1) - 2;
-                        if (target?.lodInfoList?.[bbIdx]) {
-                            target.lodInfoList[bbIdx].lodDistance = v;
+                        const impostorIdx = (target?.lodInfoList?.length ?? 1) - 2;
+                        if (target?.lodInfoList?.[impostorIdx]) {
+                            target.lodInfoList[impostorIdx].lodDistance = v;
                         }
                     },
                     get cullingDist() {
@@ -376,7 +362,7 @@ const renderTestPane = (redGPUContext, view, skyAtmosphere, landscape, controlle
                 subPine.addBinding(pineProxy, 'count', {readonly: true});
                 subPine.addBinding(pineProxy, 'lod0Dist', {min: 50, max: 600, step: 25, label: 'LOD 0 -> 1 Dist'});
                 subPine.addBinding(pineProxy, 'lod1Dist', {min: 100, max: 1200, step: 50, label: 'LOD 1 -> 2 Dist'});
-                subPine.addBinding(pineProxy, 'billboardDist', {
+                subPine.addBinding(pineProxy, 'impostorDist', {
                     min: 200,
                     max: 2000,
                     step: 50,
