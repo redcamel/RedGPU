@@ -5,9 +5,9 @@ class FoliageTilePopulator {
     static populateTile(
         comp: any,
         foliageType: FoliageType,
+        landscape?: any,
         targetCountPerTile?: number
     ): number {
-        const landscape = foliageType.foliageManager?.landscape;
         const compCountX = landscape?.componentCount?.[0] ?? 8;
         const totalTiles = compCountX * compCountX;
 
@@ -38,11 +38,7 @@ class FoliageTilePopulator {
 
         const tileX = comp.componentX ?? 0;
         const tileZ = comp.componentZ ?? 0;
-        let nameHash = 0;
-        const nameStr = foliageType.name || '';
-        for (let c = 0; c < nameStr.length; c++) {
-            nameHash = (nameHash * 31 + nameStr.charCodeAt(c)) | 0;
-        }
+        const nameHash = foliageType.nameHash;
 
         let seed = ((tileX * 73856093) ^ (tileZ * 19349663) ^ (nameHash * 83492791)) >>> 0;
         if (seed === 0) seed = 0x9e3779b9;

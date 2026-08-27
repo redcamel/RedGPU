@@ -112,8 +112,6 @@ class FoliageType {
     #options: FoliageTypeOptions;
     #redGPUContext: RedGPUContext;
 
-    #foliageManager: LandscapeFoliageManager | null = null;
-
     #subMeshes: FoliageSubMesh[] = [];
     #lodInfoList: FoliageLODInfo[] = [];
 
@@ -122,6 +120,8 @@ class FoliageType {
     #activeInstanceCount: number = 0;
     #bottomOffset: number = 0;
     #boundingRadius: number = 10.0;
+    #nameHash: number = 0;
+    #numLODs: number = 1;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #loadedTileKeys: Set<string> = new Set();
 
@@ -132,7 +132,6 @@ class FoliageType {
         foliageManager?: LandscapeFoliageManager | null
     ) {
         this.#redGPUContext = redGPUContext;
-        this.#foliageManager = foliageManager || null;
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
 
         const billboardOpt = options.billboard || options.impostor;
@@ -154,6 +153,13 @@ class FoliageType {
             isFoliage: options.isFoliage !== false,
         };
 
+        let hash = 0;
+        const nameStr = this.#options.name || '';
+        for (let c = 0; c < nameStr.length; c++) {
+            hash = (hash * 31 + nameStr.charCodeAt(c)) | 0;
+        }
+        this.#nameHash = hash;
+
         const assembleResult = FoliageSubMeshAssembler.assemble(
             this.#redGPUContext,
             this.#options,
@@ -164,23 +170,27 @@ class FoliageType {
         this.#bottomOffset = assembleResult.bottomOffset ?? 0;
         this.#boundingRadius = assembleResult.boundingRadius || 10.0;
 
+        const hasBillboard = !!this.#options.billboard?.enabled;
+        this.#numLODs = this.#lodInfoList.length > 0 ? Math.min(this.#lodInfoList.length, 8) : (hasBillboard ? 2 : 1);
+        const lod0SubCount = this.#lodInfoList[0]?.subMeshCount ?? this.#subMeshes.length;
+
         this.#instanceBuffer = new FoliageInstanceBuffer(redGPUContext, this.#options.maxInstances, this.#subMeshes);
         this.#instanceBuffer.initStaticLODUniforms(
             this.#lodInfoList,
-            this.lodDistance,
-            this.lod0SubMeshCount,
-            this.hasBillboard,
+            this.#options.lodDistance ?? 80.0,
+            lod0SubCount,
+            hasBillboard,
             this.#options.cullingDistance ?? 2000.0
         );
         this.resetIndirectBuffer();
     }
 
-    get foliageManager(): LandscapeFoliageManager | null {
-        return this.#foliageManager;
-    }
-
     get name(): string {
         return this.#options.name;
+    }
+
+    get nameHash(): number {
+        return this.#nameHash;
     }
 
     get options(): FoliageTypeOptions {
@@ -197,26 +207,6 @@ class FoliageType {
 
     get activeInstanceCount(): number {
         return this.#activeInstanceCount;
-    }
-
-    get lod0SubMeshCount(): number {
-        return this.#lodInfoList[0]?.subMeshCount ?? this.#subMeshes.length;
-    }
-
-    get hasBillboard(): boolean {
-        return !!this.#options.billboard?.enabled;
-    }
-
-    get lodDistance(): number {
-        return this.#options.lodDistance;
-    }
-
-    get bottomOffset(): number {
-        return this.#bottomOffset;
-    }
-
-    get boundingRadius(): number {
-        return this.#boundingRadius;
     }
 
     get culledGPUBuffer(): GPUBuffer | null {
@@ -237,7 +227,6 @@ class FoliageType {
         frustumPlanes: number[][] | null,
         fovFactorSq: number
     ): void {
-        const numLODs = this.#lodInfoList.length > 0 ? Math.min(this.#lodInfoList.length, 8) : (this.hasBillboard ? 2 : 1);
         this.#instanceBuffer.updateCullingUniforms(
             camX, camY, camZ,
             this.#options.cullingDistance ?? 2000.0,
@@ -249,7 +238,7 @@ class FoliageType {
             hasVHT,
             frustumPlanes,
             fovFactorSq,
-            numLODs
+            this.#numLODs
         );
     }
 
@@ -280,12 +269,12 @@ class FoliageType {
         this.resetIndirectBuffer();
     }
 
-    populateTile(comp: any, targetCountPerTile?: number): void {
+    populateTile(comp: any, landscape?: any, targetCountPerTile?: number): void {
         const key = `${comp.componentZ}_${comp.componentX}`;
         if (this.#loadedTileKeys.has(key)) return;
         this.#loadedTileKeys.add(key);
 
-        const addedCount = FoliageTilePopulator.populateTile(comp, this, targetCountPerTile);
+        const addedCount = FoliageTilePopulator.populateTile(comp, this, landscape, targetCountPerTile);
         if (addedCount > 0) {
             this.#activeInstanceCount = Math.min(this.#activeInstanceCount + addedCount, this.#options.maxInstances);
         }

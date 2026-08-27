@@ -538,9 +538,9 @@ class FoliageSubMeshAssembler {
                         const x = srcVData[srcIdx + 0];
                         const y = srcVData[srcIdx + 1];
                         const z = srcVData[srcIdx + 2];
-                        combinedVertexData[dstIdx + 0] = m[0] * x + m[4] * y + m[8] * z + m[12];
+                        combinedVertexData[dstIdx + 0] = (m[0] * x + m[4] * y + m[8] * z + m[12]) - treeCenterX;
                         combinedVertexData[dstIdx + 1] = m[1] * x + m[5] * y + m[9] * z + m[13];
-                        combinedVertexData[dstIdx + 2] = m[2] * x + m[6] * y + m[10] * z + m[14];
+                        combinedVertexData[dstIdx + 2] = (m[2] * x + m[6] * y + m[10] * z + m[14]) - treeCenterZ;
 
                         if (rawStride >= 6) {
                             const nx = srcVData[srcIdx + 3];
@@ -657,15 +657,6 @@ class FoliageSubMeshAssembler {
                 }
 
                 vertexOffset += vCount;
-            }
-
-            // 🌿 수목 전체 1그루의 단일 통합 중심을 모든 파트(줄기/잎사귀)에 동일하게 일괄 적용!
-            if (Math.abs(treeCenterX) > 0.001 || Math.abs(treeCenterZ) > 0.001) {
-                for (let v = 0; v < totalVertexCount; v++) {
-                    const idx = v * PBR_STRIDE;
-                    combinedVertexData[idx + 0] -= treeCenterX;
-                    combinedVertexData[idx + 2] -= treeCenterZ;
-                }
             }
 
             const seq = ++FoliageSubMeshAssembler.#bufferSeq;

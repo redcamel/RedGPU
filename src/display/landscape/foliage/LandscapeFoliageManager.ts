@@ -63,14 +63,10 @@ class LandscapeFoliageManager {
         this.#cullingDispatcher = new FoliageCullingDispatcher(this.#redGPUContext);
     }
 
-    get landscape(): Landscape | null {
-        return this.#landscape;
-    }
-
     handleTileLoaded(comp: any): void {
         const count = this.#typeList.length;
         for (let i = 0; i < count; i++) {
-            this.#typeList[i].populateTile(comp);
+            this.#typeList[i].populateTile(comp, this.#landscape);
         }
     }
 
@@ -106,7 +102,7 @@ class LandscapeFoliageManager {
         if (cells && cells.length > 0) {
             const count = cells.length;
             for (let i = 0; i < count; i++) {
-                foliageType.populateTile(cells[i]);
+                foliageType.populateTile(cells[i], this.#landscape);
             }
         }
 
