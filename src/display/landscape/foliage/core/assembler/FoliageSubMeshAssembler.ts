@@ -139,11 +139,10 @@ class FoliageSubMeshAssembler {
                 bbSubMesh.isMainOpaqueOrMasked = true;
                 bbSubMesh.mainDepthMode = 'normal';
 
-                (bbSubMesh as any)._octahedralWidth = bbWidth;
-                (bbSubMesh as any)._octahedralHeight = bbHeight;
-                (bbSubMesh as any)._bakedWidth = bbWidth;
-                (bbSubMesh as any)._bakedHeight = bbHeight;
-                (bbSubMesh as any)._bottomOffset = bbBottomOffset;
+                bbSubMesh.isImpostor = true;
+                bbSubMesh.impostorWidth = bbWidth;
+                bbSubMesh.impostorHeight = bbHeight;
+                bbSubMesh.bottomOffset = bbBottomOffset;
                 subList.push(bbSubMesh);
 
                 if (billboardOpt.lodDistance && lodInfoList.length > 0) {
@@ -219,11 +218,10 @@ class FoliageSubMeshAssembler {
                 bbSubMesh.isMainOpaqueOrMasked = true;
                 bbSubMesh.mainDepthMode = 'normal';
 
-                (bbSubMesh as any)._octahedralWidth = bbWidth;
-                (bbSubMesh as any)._octahedralHeight = bbHeight;
-                (bbSubMesh as any)._bakedWidth = bbWidth;
-                (bbSubMesh as any)._bakedHeight = bbHeight;
-                (bbSubMesh as any)._bottomOffset = bbBottomOffset;
+                bbSubMesh.isImpostor = true;
+                bbSubMesh.impostorWidth = bbWidth;
+                bbSubMesh.impostorHeight = bbHeight;
+                bbSubMesh.bottomOffset = bbBottomOffset;
                 subList.push(bbSubMesh);
 
                 lodInfoList.push({

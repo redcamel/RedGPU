@@ -30,6 +30,9 @@ export interface FoliageSubMesh {
     mainDepthMode: FoliageDepthPassMode;
     isAlpha: boolean;
     isTransparent: boolean;
+    isImpostor?: boolean;
+    impostorWidth?: number;
+    impostorHeight?: number;
 }
 
 export interface FoliageCrossBillboardOptions {
@@ -162,6 +165,13 @@ class FoliageType {
         this.#boundingRadius = assembleResult.boundingRadius || 10.0;
 
         this.#instanceBuffer = new FoliageInstanceBuffer(redGPUContext, this.#options.maxInstances, this.#subMeshes);
+        this.#instanceBuffer.initStaticLODUniforms(
+            this.#lodInfoList,
+            this.lodDistance,
+            this.#lod0SubMeshCount,
+            this.hasBillboard,
+            this.#options.cullingDistance ?? 2000.0
+        );
         this.resetIndirectBuffer();
     }
 
@@ -229,16 +239,14 @@ class FoliageType {
         frustumPlanes: number[][] | null,
         fovFactorSq: number
     ): void {
+        const numLODs = this.#lodInfoList.length > 0 ? Math.min(this.#lodInfoList.length, 8) : (this.hasBillboard ? 2 : 1);
         this.#instanceBuffer.updateCullingUniforms(
             camX, camY, camZ,
             cullingDist, fadeStartDist, activeCount, boundingRadius,
             worldSizeX, heightScale, bottomOffset, hasVHT,
             frustumPlanes,
-            this.#lodInfoList,
             fovFactorSq,
-            this.lodDistance,
-            this.#lod0SubMeshCount,
-            this.hasBillboard
+            numLODs
         );
     }
 

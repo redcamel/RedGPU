@@ -57,9 +57,6 @@ function createOctahedralImpostorGeometry(
     );
 
     const geometry = new Geometry(redGPUContext, vertexBuffer, indexBuffer);
-    (geometry as any)._octahedralWidth = width;
-    (geometry as any)._octahedralHeight = height;
-    (geometry as any)._octahedralBottomOffset = bottomOffset;
 
     return geometry;
 }

@@ -14,13 +14,13 @@ class FoliageInstanceBuffer {
     #dataBuffer: Float32Array;
 
     #indirectGPUBuffer: GPUBuffer | null = null;
-    #resetIndirectData: Uint32Array | null = null;
+    #staticIndirectResetTemplate: Uint32Array | null = null;
     #rawGPUBuffer: GPUBuffer | null = null;
     #culledGPUBuffer: GPUBuffer | null = null;
     #cullingUniformBuffer: GPUBuffer | null = null;
     #cullingBindGroup: GPUBindGroup | null = null;
 
-    constructor(redGPUContext: RedGPUContext, maxInstances: number = 50000, subMeshes?: FoliageSubMesh[]) {
+    constructor(redGPUContext: RedGPUContext, maxInstances: number = 50000, subMeshes?: readonly FoliageSubMesh[]) {
         this.#redGPUContext = redGPUContext;
         this.#maxInstances = maxInstances;
         this.#dataBuffer = new Float32Array(this.#maxInstances * this.#strideFloats);
@@ -65,37 +65,92 @@ class FoliageInstanceBuffer {
 
     uploadToGPU(activeCount: number): void {
         if (!this.#rawGPUBuffer || activeCount <= 0) return;
-
-        const uploadCount = Math.min(activeCount, this.#maxInstances);
-        const uploadBytes = uploadCount * this.#strideBytes;
-
         const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
+        const byteCount = Math.min(activeCount * this.#strideBytes, this.#dataBuffer.byteLength);
+
         gpuDevice.queue.writeBuffer(
             this.#rawGPUBuffer,
             0,
             this.#dataBuffer.buffer,
-            0,
-            uploadBytes
+            this.#dataBuffer.byteOffset,
+            byteCount
         );
     }
 
     uploadRangeToGPU(startIndex: number, count: number): void {
         if (!this.#rawGPUBuffer || count <= 0) return;
-
-        const validStart = Math.min(startIndex, this.#maxInstances);
-        const validCount = Math.min(count, this.#maxInstances - validStart);
-        if (validCount <= 0) return;
-
-        const srcByteOffset = validStart * this.#strideBytes;
-        const uploadBytes = validCount * this.#strideBytes;
-
         const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
+        const srcByteOffset = startIndex * this.#strideBytes;
+        const byteCount = Math.min(count * this.#strideBytes, this.#dataBuffer.byteLength - srcByteOffset);
+        if (byteCount <= 0) return;
+
         gpuDevice.queue.writeBuffer(
             this.#rawGPUBuffer,
             srcByteOffset,
             this.#dataBuffer.buffer,
             this.#dataBuffer.byteOffset + srcByteOffset,
-            uploadBytes
+            byteCount
+        );
+    }
+
+    initStaticLODUniforms(
+        lodInfoList?: readonly FoliageLODInfo[],
+        lodDistance: number = 100.0,
+        lod0SubMeshCount: number = 1,
+        hasBillboard: boolean = false,
+        cullingDist: number = 2000.0
+    ): void {
+        if (!this.#cullingUniformBuffer) return;
+
+        const f32 = FoliageInstanceBuffer.#cullingUniformData;
+        const u32 = FoliageInstanceBuffer.#cullingUniformUint32;
+
+        if (lodInfoList && lodInfoList.length > 0) {
+            const listLen = Math.min(lodInfoList.length, 8);
+            for (let l = 0; l < 8; l++) {
+                const base = 40 + l * 4;
+                if (l < listLen) {
+                    const info = lodInfoList[l];
+                    f32[base] = info.lodDistance;
+                    f32[base + 1] = info.fadeRange;
+                    u32[base + 2] = info.subMeshOffset;
+                    u32[base + 3] = info.subMeshCount;
+                } else {
+                    f32[base] = 999999.0;
+                    f32[base + 1] = 10.0;
+                    u32[base + 2] = 0;
+                    u32[base + 3] = 0;
+                }
+            }
+        } else {
+            const base0 = 40;
+            f32[base0] = lodDistance;
+            f32[base0 + 1] = 10.0;
+            u32[base0 + 2] = 0;
+            u32[base0 + 3] = Math.max(lod0SubMeshCount, 1);
+
+            const base1 = 44;
+            f32[base1] = cullingDist;
+            f32[base1 + 1] = 15.0;
+            u32[base1 + 2] = Math.max(lod0SubMeshCount, 1);
+            u32[base1 + 3] = hasBillboard ? 1 : 0;
+
+            for (let l = 2; l < 8; l++) {
+                const base = 40 + l * 4;
+                f32[base] = 999999.0;
+                f32[base + 1] = 10.0;
+                u32[base + 2] = 0;
+                u32[base + 3] = 0;
+            }
+        }
+
+        const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
+        gpuDevice.queue.writeBuffer(
+            this.#cullingUniformBuffer,
+            160,
+            f32.buffer,
+            f32.byteOffset + 160,
+            128
         );
     }
 
@@ -105,18 +160,13 @@ class FoliageInstanceBuffer {
         activeCount: number, boundingRadius: number,
         worldSizeX: number, heightScale: number, bottomOffset: number, hasVHT: boolean,
         frustumPlanes: number[][] | null,
-        lodInfoList?: FoliageLODInfo[],
         fovFactorSq: number = 1.0,
-        lodDistance: number = 100.0,
-        lod0SubMeshCount: number = 1,
-        hasBillboard: boolean = false
+        numLODs: number = 1
     ): void {
         if (!this.#cullingUniformBuffer) return;
 
         const f32 = FoliageInstanceBuffer.#cullingUniformData;
         const u32 = FoliageInstanceBuffer.#cullingUniformUint32;
-
-        const numLODs = lodInfoList && lodInfoList.length > 0 ? Math.min(lodInfoList.length, 8) : (hasBillboard ? 2 : 1);
 
         f32[0] = camX;
         f32[1] = camY;
@@ -151,78 +201,43 @@ class FoliageInstanceBuffer {
             f32.fill(0, 16, 40);
         }
 
-        // Encode up to 8 LOD Infos
-        if (lodInfoList && lodInfoList.length > 0) {
-            const listLen = Math.min(lodInfoList.length, 8);
-            for (let l = 0; l < 8; l++) {
-                const base = 40 + l * 4;
-                if (l < listLen) {
-                    const info = lodInfoList[l];
-                    f32[base] = info.lodDistance;
-                    f32[base + 1] = info.fadeRange;
-                    u32[base + 2] = info.subMeshOffset;
-                    u32[base + 3] = info.subMeshCount;
-                } else {
-                    f32[base] = 999999.0;
-                    f32[base + 1] = 10.0;
-                    u32[base + 2] = 0;
-                    u32[base + 3] = 0;
-                }
-            }
-        } else {
-            // Fallback for 1 or 2 LODs
-            const base0 = 40;
-            f32[base0] = lodDistance;
-            f32[base0 + 1] = 10.0;
-            u32[base0 + 2] = 0;
-            u32[base0 + 3] = Math.max(lod0SubMeshCount, 1);
-
-            const base1 = 44;
-            f32[base1] = cullingDist;
-            f32[base1 + 1] = 15.0;
-            u32[base1 + 2] = Math.max(lod0SubMeshCount, 1);
-            u32[base1 + 3] = hasBillboard ? 1 : 0;
-
-            for (let l = 2; l < 8; l++) {
-                const base = 40 + l * 4;
-                f32[base] = 999999.0;
-                f32[base + 1] = 10.0;
-                u32[base + 2] = 0;
-                u32[base + 3] = 0;
-            }
-        }
-
         const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
         gpuDevice.queue.writeBuffer(
             this.#cullingUniformBuffer,
             0,
             f32.buffer,
             f32.byteOffset,
-            288
+            160
         );
     }
 
-    resetMultiIndirectCount(subMeshes: FoliageSubMesh[]): void {
-        const subCount = subMeshes ? subMeshes.length : 0;
-        if (!this.#indirectGPUBuffer || subCount === 0) return;
+    resetMultiIndirectCount(subMeshes?: readonly FoliageSubMesh[]): void {
+        if (!this.#indirectGPUBuffer) return;
 
-        if (!this.#resetIndirectData || this.#resetIndirectData.length < subCount * 5) {
-            this.#resetIndirectData = new Uint32Array(subCount * 5);
+        const template = this.#staticIndirectResetTemplate;
+        const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
+
+        if (template && template.length > 0) {
+            gpuDevice.queue.writeBuffer(
+                this.#indirectGPUBuffer,
+                0,
+                template.buffer,
+                template.byteOffset,
+                template.byteLength
+            );
+            return;
         }
 
-        const u32 = this.#resetIndirectData;
+        const subCount = subMeshes ? subMeshes.length : 0;
+        if (subCount === 0) return;
+
+        const u32 = new Uint32Array(subCount * 5);
         for (let s = 0; s < subCount; s++) {
             const sub = subMeshes[s];
             const count = sub.isIndexed ? sub.indexCount : sub.vertexCount;
-            const base = s * 5;
-            u32[base] = count;
-            u32[base + 1] = 0;
-            u32[base + 2] = 0;
-            u32[base + 3] = 0;
-            u32[base + 4] = 0;
+            u32[s * 5] = count;
         }
 
-        const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
         gpuDevice.queue.writeBuffer(
             this.#indirectGPUBuffer,
             0,
@@ -294,10 +309,10 @@ class FoliageInstanceBuffer {
             this.#cullingUniformBuffer = null;
         }
         this.#cullingBindGroup = null;
-        this.#resetIndirectData = null;
+        this.#staticIndirectResetTemplate = null;
     }
 
-    #initGPUBuffer(subMeshes?: FoliageSubMesh[]): void {
+    #initGPUBuffer(subMeshes?: readonly FoliageSubMesh[]): void {
         const gpuDevice: GPUDevice = this.#redGPUContext.gpuDevice;
         const requiredSize = Math.max(this.#dataBuffer.byteLength, 64);
 
@@ -320,6 +335,16 @@ class FoliageInstanceBuffer {
             size: indirectSize,
             usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
+
+        if (subMeshes && subMeshes.length > 0) {
+            const template = new Uint32Array(subMeshes.length * 5);
+            for (let s = 0; s < subMeshes.length; s++) {
+                const sub = subMeshes[s];
+                const count = sub.isIndexed ? sub.indexCount : sub.vertexCount;
+                template[s * 5] = count;
+            }
+            this.#staticIndirectResetTemplate = template;
+        }
 
         this.#cullingUniformBuffer = gpuDevice.createBuffer({
             label: 'FoliageInstanceBuffer_CullingUniformBuffer',

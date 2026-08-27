@@ -31,7 +31,7 @@ class FoliageImpostorBaker {
 
         for (let s = 0; s < subMeshes.length; s++) {
             const sub = subMeshes[s];
-            if ((sub as any)._octahedralWidth !== undefined || (sub as any)._bakedWidth !== undefined) continue;
+            if (sub.isImpostor) continue;
 
             const vBuffer = sub.geometry?.vertexBuffer;
             const vData = vBuffer?.data;
@@ -179,7 +179,7 @@ class FoliageImpostorBaker {
         const subBindGroups: (GPUBindGroup | null)[] = [];
         for (let s = 0; s < subMeshes.length; s++) {
             const sub = subMeshes[s];
-            if ((sub as any)._octahedralWidth !== undefined || (sub as any)._bakedWidth !== undefined) {
+            if (sub.isImpostor) {
                 subBindGroups.push(null);
                 continue;
             }
@@ -219,7 +219,7 @@ class FoliageImpostorBaker {
                 const baseOffset = drawSlot * strideFloats;
                 drawSlot++;
 
-                if ((sub as any)._octahedralWidth !== undefined || (sub as any)._bakedWidth !== undefined) continue;
+                if (sub.isImpostor) continue;
 
                 mat4.multiply(tempMVP, vpInfo.projView, sub.relativeModelMatrix);
                 mat4.invert(tempNMat, sub.relativeModelMatrix);
@@ -308,7 +308,7 @@ class FoliageImpostorBaker {
                 const bufferOffsetBytes = currentDrawSlot * strideFloats * 4;
                 currentDrawSlot++;
 
-                if ((sub as any)._octahedralWidth !== undefined || (sub as any)._bakedWidth !== undefined) continue;
+                if (sub.isImpostor) continue;
 
                 const pipeline = this.#getOrCreateBakePipeline(redGPUContext, sub);
                 if (!pipeline) continue;
