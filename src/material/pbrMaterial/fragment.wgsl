@@ -200,9 +200,9 @@ fn getTransmissionRefraction(
 fn main(inputData:InputData) -> OutputFragment {
     var output: OutputFragment;
 
-//    // Dithered Discard Alpha Fade
+    // 🌿 Dithered Discard Alpha Fade
 //    let fadeOpacity = inputData.combinedOpacity;
-//    if (fadeOpacity < 1.0) {
+//    if (fadeOpacity < 0.999) {
 //        let bayerMatrix = array<f32, 16>(
 //             0.0/16.0,  8.0/16.0,  2.0/16.0, 10.0/16.0,
 //            12.0/16.0,  4.0/16.0, 14.0/16.0,  6.0/16.0,
@@ -292,8 +292,9 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_endIf
     #redgpu_if isFoliage
         let uvDeriv = length(vec2<f32>(dpdx(diffuseUV.x), dpdy(diffuseUV.y)));
-        let baseCutOff = select(0.35, u_cutOff, u_cutOff > 0.0);
-        let adaptiveCutOff = clamp(baseCutOff - uvDeriv * 15.0, 0.15, baseCutOff);
+        let cutOff = select(0.3333, u_cutOff, u_cutOff > 0.0);
+        let decay = clamp(uvDeriv * 70.0, 0.0, 1.0);
+        let adaptiveCutOff = mix(cutOff, 0.06, decay);
         if (resultAlpha <= adaptiveCutOff) { discard; }
     #redgpu_endIf
     let emissiveUV = getTextureTransformUV(input_uv, input_uv1, uniforms.emissiveTexture_texCoord_index, uniforms.use_emissiveTexture_KHR_texture_transform, uniforms.emissiveTexture_KHR_texture_transform_offset, uniforms.emissiveTexture_KHR_texture_transform_rotation, uniforms.emissiveTexture_KHR_texture_transform_scale);

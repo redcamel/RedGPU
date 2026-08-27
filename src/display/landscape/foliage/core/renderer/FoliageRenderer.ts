@@ -79,7 +79,8 @@ class FoliageRenderer {
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
-                if (sub.isDepthPrepass) {
+                // 🌿 빌보드(Impostor)는 Depth Prepass 제외
+                if (sub.isDepthPrepass && !sub.material?.constructor?.name?.includes('Octahedral')) {
                     this.#drawSubMesh(passEncoder, sub, s, sampleCount, msaaID, systemBG, indirectGPU, culledGPU, foliageType.options.maxInstances, 'depthPrepass');
                 }
             }

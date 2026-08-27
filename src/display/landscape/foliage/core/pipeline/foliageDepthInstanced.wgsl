@@ -55,13 +55,16 @@ fn mainInput(input : VertexInput) -> DepthOutputData {
     let isBillboard = (input.vertexTangent.w < -500.0);
     if (isBillboard) {
         let toCam = systemUniforms.camera.cameraPosition.xyz - input.instancePos;
-        let distXZ = length(toCam.xz);
-        var rightVec = vec3<f32>(1.0, 0.0, 0.0);
-        if (distXZ > 0.0001) {
-            let toCamXZ = toCam.xz / distXZ;
-            rightVec = vec3<f32>(-toCamXZ.y, 0.0, toCamXZ.x);
+        let camDist = length(toCam);
+        let forward = select(vec3<f32>(0.0, 0.0, 1.0), toCam / camDist, camDist > 0.0001);
+
+        var upRef = vec3<f32>(0.0, 1.0, 0.0);
+        if (abs(forward.y) > 0.99) {
+            upRef = vec3<f32>(0.0, 0.0, 1.0);
         }
-        let upVec = vec3<f32>(0.0, 1.0, 0.0);
+        let rightVec = normalize(cross(upRef, forward));
+        let upVec = cross(forward, rightVec);
+
         let billboardOffset = rightVec * (hierarchyPos.x * input.instanceScale.x) + upVec * (hierarchyPos.y * input.instanceScale.y);
         worldPos = input.instancePos + billboardOffset;
     }

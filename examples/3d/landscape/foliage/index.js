@@ -113,13 +113,24 @@ RedGPU.init(
         scene.addLandscape(landscape);
 
         const foliageManager = landscape.foliageManager;
-
         new RedGPU.GLTFLoader(
             redGPUContext,
             '../../../assets/terrain/test.glb',
             (loader) => {
                 const root = loader.resultMesh;
-
+                scene.addChild(root)
+                root.y = 1500
+                root.setScale(10)
+                return
+            }
+        )
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            '../../../assets/terrain/test.glb',
+            (loader) => {
+                const root = loader.resultMesh;
+                // scene.addChild(root)
+                // root.setScale(100)
                 // return
                 console.log('🌲 [test.glb] Loaded Root:', root);
                 const treeGroups = new Map();
@@ -154,20 +165,20 @@ RedGPU.init(
                         if (!lod0) return;
 
                         lodConfigs.push({mesh: lod0, lodDistance: 200});
-                        if (lods.lod1 && lods.lod1 !== lod0) lodConfigs.push({mesh: lods.lod1, lodDistance: 450});
-                        if (lods.lod2 && lods.lod2 !== lod0 && lods.lod2 !== lods.lod1) lodConfigs.push({
-                            mesh: lods.lod2,
-                            lodDistance: 800
-                        });
+                        // if (lods.lod1 && lods.lod1 !== lod0) lodConfigs.push({mesh: lods.lod1, lodDistance: 450});
+                        // if (lods.lod2 && lods.lod2 !== lod0 && lods.lod2 !== lods.lod1) lodConfigs.push({
+                        //     mesh: lods.lod2,
+                        //     lodDistance: 800
+                        // });
 
                         const lastLodDist = lodConfigs[lodConfigs.length - 1].lodDistance;
 
                         foliageManager.addFoliageType({
                             name: `Tree_${baseName}`,
                             lods: lodConfigs,
-                            maxInstances: 150000,
-                            minScale: [1.8, 1.8, 1.8],
-                            maxScale: [3.0, 3.0, 3.0],
+                            maxInstances: 100000,
+                            minScale: [1, 1.0, 1.0],
+                            maxScale: [2, 2.0, 2.0],
                             cullingDistance: 4000,
                             fadeStartDistance: 3200,
                             isFoliage: true,
@@ -178,46 +189,9 @@ RedGPU.init(
                         });
                     });
                 } else {
-                    const findLODNode = (name) => {
-                        let found = null;
-                        const find = (node) => {
-                            if (!node || found) return;
-                            if (node.name && node.name.toLowerCase().includes(name.toLowerCase())) {
-                                found = node;
-                                return;
-                            }
-                            const children = node.children || [];
-                            for (let i = 0; i < children.length; i++) find(children[i]);
-                        };
-                        find(root);
-                        return found;
-                    };
 
-                    const lod0 = findLODNode('lod0') || root;
-                    const lod1 = findLODNode('lod1');
-                    const lod2 = findLODNode('lod2');
-
-                    const lodConfigs = [{mesh: lod0, lodDistance: 200}];
-                    if (lod1) lodConfigs.push({mesh: lod1, lodDistance: 450});
-                    if (lod2) lodConfigs.push({mesh: lod2, lodDistance: 800});
-
-                    foliageManager.addFoliageType({
-                        name: 'TestTree',
-                        lods: lodConfigs,
-                        maxInstances: 50000,
-                        minScale: [1.8, 1.8, 1.8],
-                        maxScale: [3.0, 3.0, 3.0],
-                        cullingDistance: 4000,
-                        fadeStartDistance: 3200,
-                        isFoliage: true,
-                        billboard: {
-                            enabled: true,
-                            lodDistance: lodConfigs[lodConfigs.length - 1].lodDistance
-                        }
-                    });
                 }
-                scene.addChild(root)
-                root.setScale(100)
+
             }
         );
 

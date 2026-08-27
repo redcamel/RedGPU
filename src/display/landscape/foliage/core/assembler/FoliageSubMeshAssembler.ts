@@ -732,15 +732,14 @@ class FoliageSubMeshAssembler {
             ]
         });
 
+        const isBillboard = mat instanceof OctahedralImpostorMaterial || mat?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof mat?.name === 'string' && mat.name.includes('Octahedral'));
         const isTransparent = !!mat.transparent || !!mat.use2PathRender;
         const isAlpha = (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
         const isMasked = !!mat.useCutOff || (mat.cutOff !== undefined && mat.cutOff > 0);
         const hasBaseColorTexture = !!(mat.baseColorTexture?.gpuTexture || mat.baseColorTexture?.src || mat.baseColorTexture?.url || (mat.diffuseTexture && (mat.diffuseTexture.gpuTexture || mat.diffuseTexture.src || mat.diffuseTexture.url)));
 
-        // 🌿 식생의 모든 LOD 서브메시에 대해 Depth Prepass 기반 2패스 렌더링 적용
-        // Pass 1: Depth Prepass (depthCompare: 'less-equal', depthWrite: true, colorWrite: 0)
-        // Pass 2: Main Shading Pass (depthCompare: 'equal', depthWrite: false, alpha-blending)
-        const isDepthPrepass = !isTransparent && !isAlpha && (hasBaseColorTexture || isMasked);
+        // 🌿 3D 식생 LOD 서브메시에 대해 Depth Prepass 2패스 적용 (빌보드는 1패스 'normal' 렌더링)
+        const isDepthPrepass = !isBillboard && !isTransparent && !isAlpha && (hasBaseColorTexture || isMasked);
         const isMainOpaqueOrMasked = !isTransparent && !isAlpha;
         const mainDepthMode: FoliageDepthPassMode = isDepthPrepass ? 'mainShadingAfterDepth' : 'normal';
 
