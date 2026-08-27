@@ -11,7 +11,7 @@ RedGPU.init(
         controller.x = 0;
         controller.y = 1150;
         controller.z = 0;
-        controller.moveSpeed = 5000;
+        controller.moveSpeed = 1200;
 
         const scene = new RedGPU.Display.Scene();
         const view = new RedGPU.Display.View3D(redGPUContext, scene, controller);
@@ -113,17 +113,7 @@ RedGPU.init(
         scene.addLandscape(landscape);
 
         const foliageManager = landscape.foliageManager;
-        new RedGPU.GLTFLoader(
-            redGPUContext,
-            '../../../assets/terrain/test.glb',
-            (loader) => {
-                const root = loader.resultMesh;
-                scene.addChild(root)
-                root.y = 1500
-                root.setScale(10)
-                return
-            }
-        )
+
         new RedGPU.GLTFLoader(
             redGPUContext,
             '../../../assets/terrain/test.glb',
@@ -164,11 +154,11 @@ RedGPU.init(
                         const lod0 = lods.lod0 || lods.lod1 || lods.lod2;
                         if (!lod0) return;
 
-                        lodConfigs.push({mesh: lod0, lodDistance: 200});
-                        if (lods.lod1 && lods.lod1 !== lod0) lodConfigs.push({mesh: lods.lod1, lodDistance: 450});
+                        lodConfigs.push({mesh: lod0, lodDistance: 80});
+                        if (lods.lod1 && lods.lod1 !== lod0) lodConfigs.push({mesh: lods.lod1, lodDistance: 180});
                         if (lods.lod2 && lods.lod2 !== lod0 && lods.lod2 !== lods.lod1) lodConfigs.push({
                             mesh: lods.lod2,
-                            lodDistance: 800
+                            lodDistance: 320
                         });
 
                         const lastLodDist = lodConfigs[lodConfigs.length - 1].lodDistance;
@@ -176,11 +166,12 @@ RedGPU.init(
                         foliageManager.addFoliageType({
                             name: `Tree_${baseName}`,
                             lods: lodConfigs,
-                            maxInstances: 100000,
-                            minScale: [1, 1.0, 1.0],
-                            maxScale: [2, 2.0, 2.0],
-                            cullingDistance: 4000,
-                            fadeStartDistance: 3200,
+                            maxInstances: 250000,
+                            minScale: [0.85, 0.85, 0.85],
+                            maxScale: [1.35, 1.35, 1.35],
+                            randomRotationY: true,
+                            cullingDistance: 3500,
+                            fadeStartDistance: 2800,
                             isFoliage: true,
                             billboard: {
                                 enabled: true,
