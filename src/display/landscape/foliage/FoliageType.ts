@@ -7,7 +7,6 @@ import FoliageInstanceBuffer from "./FoliageInstanceBuffer";
 import type {FoliageDepthPassMode} from "./core/pipeline/FoliagePipelineRegistry";
 import FoliageSubMeshAssembler from "./core/assembler/FoliageSubMeshAssembler";
 import type LandscapeFoliageManager from "./LandscapeFoliageManager";
-import {createOctahedralImpostorGeometry} from "./core/impostor/octahedral/createOctahedralImpostorGeometry";
 import FoliageTilePopulator from "./core/populator/FoliageTilePopulator";
 
 export interface FoliageSubMesh {
@@ -227,31 +226,6 @@ class FoliageType {
         this.#activeInstanceCount = Math.min(instanceCount, this.#options.maxInstances);
         this.#instanceBuffer.dataBuffer.set(data.subarray(0, this.#activeInstanceCount * 12));
         this.#instanceBuffer.uploadToGPU(this.#activeInstanceCount);
-        this.#updateIndirectBuffer();
-    }
-
-    setBillboardWireframe(wireframe: boolean): void {
-        const billboardSub = this.subMeshes.find(s => (s as any)._octahedralWidth !== undefined || (s as any)._bakedWidth !== undefined);
-        if (!billboardSub) return;
-
-        const bbWidth = (billboardSub as any)._octahedralWidth ?? (billboardSub as any)._bakedWidth ?? 6.0;
-        const bbHeight = (billboardSub as any)._octahedralHeight ?? (billboardSub as any)._bakedHeight ?? 8.0;
-        const bbBottomOffset = (billboardSub as any)._bottomOffset ?? 0.0;
-
-        const newGeom = createOctahedralImpostorGeometry(this.#redGPUContext, bbWidth, bbHeight, wireframe, bbBottomOffset);
-        billboardSub.geometry = newGeom;
-        billboardSub.mesh.geometry = newGeom;
-        billboardSub.indexCount = newGeom.indexBuffer?.indexCount || 0;
-        billboardSub.vertexCount = newGeom.vertexBuffer?.vertexCount || 0;
-        billboardSub.isIndexed = !!newGeom.indexBuffer;
-
-        if (billboardSub.material) {
-            billboardSub.material.wireframe = wireframe;
-            billboardSub.material.useCutOff = !wireframe;
-            if (billboardSub.material._updateFragmentState) {
-                billboardSub.material._updateFragmentState();
-            }
-        }
         this.#updateIndirectBuffer();
     }
 

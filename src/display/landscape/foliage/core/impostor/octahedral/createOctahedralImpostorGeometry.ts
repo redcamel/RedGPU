@@ -25,7 +25,6 @@ function createOctahedralImpostorGeometry(
     redGPUContext: RedGPUContext,
     width: number = 6.0,
     height: number = 8.0,
-    wireframe: boolean = false,
     bottomOffset: number = 0.0
 ): Geometry {
     const halfW = width * 0.5;
@@ -44,9 +43,7 @@ function createOctahedralImpostorGeometry(
         -halfW, halfH, centerY, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, -999.0
     ]);
 
-    const indices = wireframe
-        ? new Uint32Array([0, 1, 1, 2, 2, 3, 3, 0, 0, 2])
-        : new Uint32Array([0, 1, 2, 0, 2, 3]);
+    const indices = new Uint32Array([0, 1, 2, 0, 2, 3]);
 
     const vertexBuffer = new VertexBuffer(
         redGPUContext,

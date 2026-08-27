@@ -192,9 +192,9 @@ RedGPU.init(
                 foliageManager.addFoliageType({
                     name: 'FrangipaniTree',
                     mesh: root,
-                    maxInstances: 150000,
-                    minScale: [2.2, 2.2, 2.2],
-                    maxScale: [3.2, 3.2, 3.2],
+                    maxInstances: 10000,
+                    minScale: [4.2, 4.2, 4.2],
+                    maxScale: [6.2, 6.2, 6.2],
                     randomRotationY: true,
                     cullingDistance: 3500,
                     fadeStartDistance: 2800,
@@ -223,7 +223,6 @@ const renderTestPane = (redGPUContext, view, skyAtmosphere, landscape, controlle
     const [tsX, tsZ] = landscape.tileSize;
 
     const config = {
-        billboardWireframe: false,
         worldSizeX: wsX,
         worldSizeZ: wsZ,
         componentCountX: tcX,
@@ -384,10 +383,6 @@ const renderTestPane = (redGPUContext, view, skyAtmosphere, landscape, controlle
                     label: 'LOD 2 -> Impostor'
                 });
                 subPine.addBinding(pineProxy, 'cullingDist', {min: 1000, max: 8000, step: 100});
-
-                folderFoliage.addBinding(config, 'billboardWireframe', {label: 'Impostor Wireframe'}).on('change', (ev) => {
-                    foliageManager.types.forEach(t => t.setBillboardWireframe(ev.value));
-                });
             }
 
             const folderSpatial = pane.addFolder({title: 'Spatial', expanded: true});
