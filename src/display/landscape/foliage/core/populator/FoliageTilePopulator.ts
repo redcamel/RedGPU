@@ -36,20 +36,52 @@ class FoliageTilePopulator {
         const scaleDiffY = maxScale[1] - minScale[1];
         const scaleDiffZ = maxScale[2] - minScale[2];
 
+        const tileX = comp.componentX ?? 0;
+        const tileZ = comp.componentZ ?? 0;
+        let nameHash = 0;
+        const nameStr = foliageType.name || '';
+        for (let c = 0; c < nameStr.length; c++) {
+            nameHash = (nameHash * 31 + nameStr.charCodeAt(c)) | 0;
+        }
+
+        let seed = ((tileX * 73856093) ^ (tileZ * 19349663) ^ (nameHash * 83492791)) >>> 0;
+        if (seed === 0) seed = 0x9e3779b9;
+
         for (let i = 0; i < actualCount; i++) {
             const idx = startIdx + i;
-            const posX = minX + Math.random() * rangeX;
-            const posZ = minZ + Math.random() * rangeZ;
 
-            const scaleX = minScale[0] + Math.random() * scaleDiffX;
-            const scaleY = minScale[1] + Math.random() * scaleDiffY;
-            const scaleZ = minScale[2] + Math.random() * scaleDiffZ;
+            // Xorshift32 PRNG (Zero Allocation / Deterministic)
+            seed ^= seed << 13;
+            seed ^= seed >>> 17;
+            seed ^= seed << 5;
+            const rX = (seed >>> 0) / 4294967296.0;
+
+            seed ^= seed << 13;
+            seed ^= seed >>> 17;
+            seed ^= seed << 5;
+            const rZ = (seed >>> 0) / 4294967296.0;
+
+            seed ^= seed << 13;
+            seed ^= seed >>> 17;
+            seed ^= seed << 5;
+            const rScale = (seed >>> 0) / 4294967296.0;
+
+            const posX = minX + rX * rangeX;
+            const posZ = minZ + rZ * rangeZ;
+
+            const scaleX = minScale[0] + rScale * scaleDiffX;
+            const scaleY = minScale[1] + rScale * scaleDiffY;
+            const scaleZ = minScale[2] + rScale * scaleDiffZ;
 
             const posY = 0.0;
 
             let rotX = 0, rotY = 0, rotZ = 0, rotW = 1;
             if (randomRotationY) {
-                const angle = Math.random() * Math.PI * 2;
+                seed ^= seed << 13;
+                seed ^= seed >>> 17;
+                seed ^= seed << 5;
+                const rAngle = (seed >>> 0) / 4294967296.0;
+                const angle = rAngle * Math.PI * 2;
                 rotY = Math.sin(angle * 0.5);
                 rotW = Math.cos(angle * 0.5);
             }
