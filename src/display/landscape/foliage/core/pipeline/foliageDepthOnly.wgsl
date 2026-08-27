@@ -6,9 +6,9 @@
 
 struct InputData {
     @builtin(position) position: vec4<f32>,
-    @location(0) uv: vec2<f32>,
-    @location(1) @interpolate(flat) globalFragmentSlotIndex: u32,
-    @location(2) combinedOpacity: f32,
+    @location(2) uv: vec2<f32>,
+    @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
+    @location(11) combinedOpacity: f32,
 };
 
 @fragment

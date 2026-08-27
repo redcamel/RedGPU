@@ -1,7 +1,6 @@
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import ResourceManager from "../../../../../resources/core/resourceManager/ResourceManager";
 import foliageInstancedWGSL from "./foliageInstanced.wgsl";
-import foliageDepthInstancedWGSL from "./foliageDepthInstanced.wgsl";
 import foliageDepthOnlyWGSL from "./foliageDepthOnly.wgsl";
 
 export type FoliageDepthPassMode = 'normal' | 'depthPrepass' | 'mainShadingAfterDepth';
@@ -10,7 +9,6 @@ class FoliagePipelineRegistry {
     #redGPUContext: RedGPUContext;
     #pipelineCache: Map<string, GPURenderPipeline> = new Map();
     #vertexShaderModule: GPUShaderModule | null = null;
-    #depthVertexShaderModule: GPUShaderModule | null = null;
     #depthOnlyFragmentShaderModule: GPUShaderModule | null = null;
     #emptyBindGroupLayout: GPUBindGroupLayout | null = null;
 
@@ -132,7 +130,7 @@ class FoliagePipelineRegistry {
             depthStencil = {
                 format: 'depth32float',
                 depthWriteEnabled: true,
-                depthCompare: 'less',
+                depthCompare: 'less-equal',
             };
         } else {
 
@@ -198,13 +196,11 @@ class FoliagePipelineRegistry {
             }
         }
 
-        const vertexModule = isDepthPrepass ? this.#depthVertexShaderModule! : this.#vertexShaderModule!;
-
         const pipelineDescriptor: GPURenderPipelineDescriptor = {
             label: `FoliageRenderPipeline_${pipelineKey}`,
             layout: pipelineLayout,
             vertex: {
-                module: vertexModule,
+                module: this.#vertexShaderModule!,
                 entryPoint: 'mainInput',
                 buffers: [geometryBufferLayout, instanceBufferLayout],
             },
@@ -242,14 +238,6 @@ class FoliagePipelineRegistry {
             });
         }
         this.#vertexShaderModule = vModule;
-
-        let depthVModule = resourceManager.getGPUShaderModule('FoliageDepthInstancedVertexShader_Module');
-        if (!depthVModule) {
-            depthVModule = resourceManager.createGPUShaderModule('FoliageDepthInstancedVertexShader_Module', {
-                code: foliageDepthInstancedWGSL,
-            });
-        }
-        this.#depthVertexShaderModule = depthVModule;
 
         let depthFModule = resourceManager.getGPUShaderModule('FoliageDepthOnlyFragmentShader_Module');
         if (!depthFModule) {
