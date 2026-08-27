@@ -20,15 +20,11 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let fadeOpacity = inputData.combinedOpacity;
     if (fadeOpacity < 0.999) {
-        let bayerMatrix = array<f32, 16>(
-             0.0/16.0,  8.0/16.0,  2.0/16.0, 10.0/16.0,
-            12.0/16.0,  4.0/16.0, 14.0/16.0,  6.0/16.0,
-             3.0/16.0, 11.0/16.0,  1.0/16.0,  9.0/16.0,
-            15.0/16.0,  7.0/16.0, 13.0/16.0,  5.0/16.0
-        );
-        let px = u32(inputData.position.x) % 4u;
-        let py = u32(inputData.position.y) % 4u;
-        let threshold = bayerMatrix[py * 4u + px];
+        let px = u32(inputData.position.x) & 3u;
+        let py = u32(inputData.position.y) & 3u;
+        let idx = (py << 2u) | px;
+        let packed = select(0x6E4C2A80u, 0x5D7F91B3u, idx >= 8u);
+        let threshold = f32((packed >> ((idx & 7u) * 4u)) & 0xFu) * 0.0625;
         if (fadeOpacity < threshold) {
             discard;
         }

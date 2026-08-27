@@ -11,7 +11,6 @@ import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImposto
 import FoliageImpostorBaker from "../impostor/FoliageImpostorBaker";
 import type {FoliageLODInfo, FoliageSubMesh, FoliageTypeOptions} from "../../FoliageType";
 import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
-import keepLog from "../../../../../utils/keepLog";
 import GPU_BLEND_FACTOR from "../../../../../gpuConst/GPU_BLEND_FACTOR";
 
 const PBR_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
@@ -32,6 +31,7 @@ export interface FoliageAssemblyResult {
     lod0SubMeshCount: number;
     lodInfoList: FoliageLODInfo[];
     bottomOffset: number;
+    boundingRadius: number;
 }
 
 interface RawSubMesh {
@@ -60,7 +60,7 @@ class FoliageSubMeshAssembler {
         const lodInfoList: FoliageLODInfo[] = [];
 
         if (!gpuDevice || !subMeshBindGroupLayout) {
-            return {subMeshes: subList, lod0SubMeshCount: 0, lodInfoList: [], bottomOffset: 0};
+            return {subMeshes: subList, lod0SubMeshCount: 0, lodInfoList: [], bottomOffset: 0, boundingRadius: 10.0};
         }
 
         const billboardOpt = options.billboard || options.impostor;
@@ -240,15 +240,35 @@ class FoliageSubMeshAssembler {
         const lod0SubMeshCount = lodInfoList.length > 0 ? lodInfoList[0].subMeshCount : subList.length;
 
         let minOffset = 0;
+        let maxDistSq = 0;
         for (let i = 0; i < subList.length; i++) {
-            minOffset = Math.min(minOffset, subList[i].bottomOffset);
+            const sub = subList[i];
+            minOffset = Math.min(minOffset, sub.bottomOffset);
+
+            const vBuffer = sub.geometry?.vertexBuffer;
+            const vData = vBuffer?.data;
+            if (vData) {
+                const stride = (vBuffer.interleavedStruct?.arrayStride ? vBuffer.interleavedStruct.arrayStride / 4 : 18);
+                const vCount = vBuffer.vertexCount || (vData.length / stride);
+                for (let v = 0; v < vCount; v++) {
+                    const idx = v * stride;
+                    const vx = vData[idx];
+                    const vy = vData[idx + 1];
+                    const vz = vData[idx + 2];
+                    const dSq = vx * vx + vy * vy + vz * vz;
+                    if (dSq > maxDistSq) maxDistSq = dSq;
+                }
+            }
         }
+
+        const boundingRadius = maxDistSq > 0 ? Math.max(Math.sqrt(maxDistSq), 0.5) : 10.0;
 
         return {
             subMeshes: subList,
             lod0SubMeshCount,
             lodInfoList,
             bottomOffset: minOffset,
+            boundingRadius,
         };
     }
 
@@ -347,7 +367,6 @@ class FoliageSubMeshAssembler {
             }
 
             if (options.convertBlendToMasked || isFoliage) {
-                keepLog('mat.alphaBlend', mat.alphaBlend);
                 if (mat.alphaBlend === 2 || mat.transparent || mat.alphaMode === 'BLEND' || mat.alphaMode === 'MASK') {
                     mat.useCutOff = false;
                     mat.cutOff = (mat.cutOff > 0) ? mat.cutOff : 0.3333;

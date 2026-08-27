@@ -125,6 +125,7 @@ class FoliageType {
     #lod0SubMeshCount: number = 1;
     #activeInstanceCount: number = 0;
     #bottomOffset: number | null = null;
+    #boundingRadius: number = 10.0;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #loadedTileKeys: Set<string> = new Set();
 
@@ -166,6 +167,7 @@ class FoliageType {
         this.#lodInfoList = assembleResult.lodInfoList || [];
         this.#lod0SubMeshCount = assembleResult.lod0SubMeshCount;
         this.#bottomOffset = assembleResult.bottomOffset;
+        this.#boundingRadius = assembleResult.boundingRadius || 10.0;
 
         this.#instanceBuffer = new FoliageInstanceBuffer(redGPUContext, this.#options.maxInstances, this.#subMeshes);
         this.#updateIndirectBuffer();
@@ -221,6 +223,10 @@ class FoliageType {
 
     get bottomOffset(): number {
         return this.#bottomOffset ?? 0;
+    }
+
+    get boundingRadius(): number {
+        return this.#boundingRadius;
     }
 
     setInstancesData(data: Float32Array, count?: number): void {

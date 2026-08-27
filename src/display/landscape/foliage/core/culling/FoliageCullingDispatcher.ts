@@ -1,11 +1,17 @@
+import {mat4} from "gl-matrix";
 import RedGPUContext from "../../../../../context/RedGPUContext";
 import type Landscape from "../../../core/Landscape";
-import computeViewFrustumPlanes from "../../../../../math/computeViewFrustumPlanes";
 import FoliageType from "../../FoliageType";
 import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../../material/core";
 
 class FoliageCullingDispatcher {
+    static readonly #tempPVMatrix: mat4 = mat4.create();
+    static readonly #cachedFrustumPlanes: number[][] = [
+        new Array(4), new Array(4), new Array(4),
+        new Array(4), new Array(4), new Array(4)
+    ];
+
     #redGPUContext: RedGPUContext;
     #cullingBindGroupLayout: GPUBindGroupLayout | null = null;
     #cullingComputePipeline: GPUComputePipeline | null = null;
@@ -19,6 +25,51 @@ class FoliageCullingDispatcher {
     constructor(redGPUContext: RedGPUContext) {
         this.#redGPUContext = redGPUContext;
         this.#initComputePipeline();
+    }
+
+    static #computeFrustumPlanesToBuffer(projectionMatrix: mat4, viewMatrix: mat4, out: number[][]): number[][] {
+        const m = FoliageCullingDispatcher.#tempPVMatrix;
+        mat4.multiply(m, projectionMatrix, viewMatrix);
+
+        const p0 = out[0], p1 = out[1], p2 = out[2], p3 = out[3], p4 = out[4], p5 = out[5];
+
+        p0[0] = m[3] - m[0];
+        p0[1] = m[7] - m[4];
+        p0[2] = m[11] - m[8];
+        p0[3] = m[15] - m[12];
+        p1[0] = m[3] + m[0];
+        p1[1] = m[7] + m[4];
+        p1[2] = m[11] + m[8];
+        p1[3] = m[15] + m[12];
+        p2[0] = m[3] + m[1];
+        p2[1] = m[7] + m[5];
+        p2[2] = m[11] + m[9];
+        p2[3] = m[15] + m[13];
+        p3[0] = m[3] - m[1];
+        p3[1] = m[7] - m[5];
+        p3[2] = m[11] - m[9];
+        p3[3] = m[15] - m[13];
+        p4[0] = m[3] - m[2];
+        p4[1] = m[7] - m[6];
+        p4[2] = m[11] - m[10];
+        p4[3] = m[15] - m[14];
+        p5[0] = m[3] + m[2];
+        p5[1] = m[7] + m[6];
+        p5[2] = m[11] + m[10];
+        p5[3] = m[15] + m[14];
+
+        for (let i = 0; i < 6; i++) {
+            const plane = out[i];
+            const norm = Math.sqrt(plane[0] * plane[0] + plane[1] * plane[1] + plane[2] * plane[2]);
+            if (norm > 0.000001) {
+                const invNorm = 1.0 / norm;
+                plane[0] *= invNorm;
+                plane[1] *= invNorm;
+                plane[2] *= invNorm;
+                plane[3] *= invNorm;
+            }
+        }
+        return out;
     }
 
     updateAndDispatch(
@@ -42,7 +93,11 @@ class FoliageCullingDispatcher {
             ?? null;
 
         if (!frustumPlanes && camera?.projectionMatrix && camera?.viewMatrix) {
-            frustumPlanes = computeViewFrustumPlanes(camera.projectionMatrix, camera.viewMatrix);
+            frustumPlanes = FoliageCullingDispatcher.#computeFrustumPlanesToBuffer(
+                camera.projectionMatrix,
+                camera.viewMatrix,
+                FoliageCullingDispatcher.#cachedFrustumPlanes
+            );
         }
 
         const worldSizeX = (landscape && landscape.worldSize) ? landscape.worldSize[0] : 8000.0;
@@ -65,7 +120,7 @@ class FoliageCullingDispatcher {
             const buffer = foliageType.instanceBuffer;
             const cullingDist = foliageType.options.cullingDistance;
             const fadeStartDist = foliageType.options.fadeStartDistance;
-            const boundingRadius = 20.0;
+            const boundingRadius = foliageType.boundingRadius;
             const bottomOffset = foliageType.bottomOffset;
 
             buffer.resetMultiIndirectCount(foliageType.subMeshes);
