@@ -7,15 +7,15 @@ import FoliageRenderer from "./core/renderer/FoliageRenderer";
 import FoliageCullingDispatcher from "./core/culling/FoliageCullingDispatcher";
 
 class LandscapeFoliageManager {
+    static #sharedEmptyBindGroupLayout: GPUBindGroupLayout | null = null;
+    static #sharedEmptyBindGroup: GPUBindGroup | null = null;
+    static #sharedSubMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
+
     #redGPUContext: RedGPUContext;
     #landscape: Landscape | null = null;
 
     #foliageTypes: Map<string, FoliageType> = new Map();
     #typeList: FoliageType[] = [];
-
-    #emptyBindGroupLayout: GPUBindGroupLayout | null = null;
-    #emptyBindGroup: GPUBindGroup | null = null;
-    #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
 
     #pipelineRegistry: FoliagePipelineRegistry;
     #renderer: FoliageRenderer;
@@ -27,29 +27,39 @@ class LandscapeFoliageManager {
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (gpuDevice) {
-            this.#emptyBindGroupLayout = gpuDevice.createBindGroupLayout({
-                label: 'EmptyFoliageBindGroupLayout',
-                entries: []
-            });
-            this.#emptyBindGroup = gpuDevice.createBindGroup({
-                label: 'EmptyFoliageBindGroup',
-                layout: this.#emptyBindGroupLayout,
-                entries: []
-            });
-            this.#subMeshVertexBindGroupLayout = gpuDevice.createBindGroupLayout({
-                label: 'FoliageSubMesh_VertexBindGroupLayout',
-                entries: [
-                    {
-                        binding: 0,
-                        visibility: GPUShaderStage.VERTEX,
-                        buffer: {type: 'uniform'}
-                    }
-                ]
-            });
+            if (!LandscapeFoliageManager.#sharedEmptyBindGroupLayout) {
+                LandscapeFoliageManager.#sharedEmptyBindGroupLayout = gpuDevice.createBindGroupLayout({
+                    label: 'EmptyFoliageBindGroupLayout',
+                    entries: []
+                });
+            }
+            if (!LandscapeFoliageManager.#sharedEmptyBindGroup) {
+                LandscapeFoliageManager.#sharedEmptyBindGroup = gpuDevice.createBindGroup({
+                    label: 'EmptyFoliageBindGroup',
+                    layout: LandscapeFoliageManager.#sharedEmptyBindGroupLayout,
+                    entries: []
+                });
+            }
+            if (!LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout) {
+                LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout = gpuDevice.createBindGroupLayout({
+                    label: 'FoliageSubMesh_VertexBindGroupLayout',
+                    entries: [
+                        {
+                            binding: 0,
+                            visibility: GPUShaderStage.VERTEX,
+                            buffer: {type: 'uniform'}
+                        }
+                    ]
+                });
+            }
         }
 
-        this.#pipelineRegistry = new FoliagePipelineRegistry(this.#redGPUContext, this.#emptyBindGroupLayout);
-        this.#renderer = new FoliageRenderer(this.#redGPUContext, this.#pipelineRegistry, this.#emptyBindGroup, this.#subMeshVertexBindGroupLayout);
+        const emptyBGL = LandscapeFoliageManager.#sharedEmptyBindGroupLayout;
+        const emptyBG = LandscapeFoliageManager.#sharedEmptyBindGroup;
+        const subMeshBGL = LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout;
+
+        this.#pipelineRegistry = new FoliagePipelineRegistry(this.#redGPUContext, emptyBGL);
+        this.#renderer = new FoliageRenderer(this.#redGPUContext, this.#pipelineRegistry, emptyBG, subMeshBGL);
         this.#cullingDispatcher = new FoliageCullingDispatcher(this.#redGPUContext);
     }
 
@@ -88,7 +98,7 @@ class LandscapeFoliageManager {
             return this.#foliageTypes.get(options.name)!;
         }
 
-        const foliageType = new FoliageType(this.#redGPUContext, options, this.#subMeshVertexBindGroupLayout, this);
+        const foliageType = new FoliageType(this.#redGPUContext, options, LandscapeFoliageManager.#sharedSubMeshVertexBindGroupLayout, this);
         this.#foliageTypes.set(options.name, foliageType);
         this.#typeList.push(foliageType);
 

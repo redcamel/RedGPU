@@ -175,6 +175,104 @@ class FoliageImpostorBaker {
 
         this.#initBindGroupLayouts(redGPUContext);
 
+        // 1. 🌲 서브메시별 머티리얼 BindGroup 1회 사전 생성 (루프 밖 캐싱)
+        const subBindGroups: (GPUBindGroup | null)[] = [];
+        for (let s = 0; s < subMeshes.length; s++) {
+            const sub = subMeshes[s];
+            if ((sub as any)._octahedralWidth !== undefined || (sub as any)._bakedWidth !== undefined) {
+                subBindGroups.push(null);
+                continue;
+            }
+            const texture = sub.material.diffuseTexture || sub.material.baseColorTexture;
+            const sampler = sub.material.diffuseTextureSampler || sub.material.baseColorTextureSampler || redGPUContext.resourceManager.basicSampler;
+            const gpuTextureView = (texture && texture.gpuTexture)
+                ? texture.gpuTexture.createView()
+                : redGPUContext.resourceManager.emptyBitmapTextureView;
+
+            const bg = gpuDevice.createBindGroup({
+                label: `BakeBindGroup_${s}`,
+                layout: this.#bakeBindGroupLayout!,
+                entries: [
+                    {binding: 0, resource: gpuTextureView},
+                    {binding: 1, resource: sampler.gpuSampler},
+                ]
+            });
+            subBindGroups.push(bg);
+        }
+
+        // 2. 🌲 전체 뷰포트 x 서브메시용 단일 통합 인스턴스 버퍼 계산 및 1회 생성 (GPUBuffer 256개 -> 1개)
+        const totalViews = renderPassViews.length;
+        const totalSub = subMeshes.length;
+        const totalDrawCalls = totalViews * totalSub;
+        const strideFloats = 36;
+        const totalFloats = totalDrawCalls * strideFloats;
+        const allInstanceData = new Float32Array(totalFloats);
+
+        const tempMVP = mat4.create();
+        const tempNMat = mat4.create();
+
+        let drawSlot = 0;
+        for (let v = 0; v < totalViews; v++) {
+            const vpInfo = renderPassViews[v];
+            for (let s = 0; s < totalSub; s++) {
+                const sub = subMeshes[s];
+                const baseOffset = drawSlot * strideFloats;
+                drawSlot++;
+
+                if ((sub as any)._octahedralWidth !== undefined || (sub as any)._bakedWidth !== undefined) continue;
+
+                mat4.multiply(tempMVP, vpInfo.projView, sub.relativeModelMatrix);
+                mat4.invert(tempNMat, sub.relativeModelMatrix);
+                mat4.transpose(tempNMat, tempNMat);
+
+                let r = 1.0, g = 1.0, b = 1.0, a = 1.0;
+                const mat = sub.material;
+                if (mat) {
+                    if (mat.baseColorFactor && Array.isArray(mat.baseColorFactor)) {
+                        r = mat.baseColorFactor[0] ?? 1.0;
+                        g = mat.baseColorFactor[1] ?? 1.0;
+                        b = mat.baseColorFactor[2] ?? 1.0;
+                        a = mat.baseColorFactor[3] ?? 1.0;
+                    } else if (mat.diffuseColor && Array.isArray(mat.diffuseColor)) {
+                        r = mat.diffuseColor[0] ?? 1.0;
+                        g = mat.diffuseColor[1] ?? 1.0;
+                        b = mat.diffuseColor[2] ?? 1.0;
+                        a = mat.diffuseColor[3] ?? 1.0;
+                    }
+                }
+                const texture = sub.material.diffuseTexture || sub.material.baseColorTexture;
+                const hasTexture = !!(texture && texture.gpuTexture);
+
+                allInstanceData.set(tempMVP, baseOffset);
+                allInstanceData[baseOffset + 16] = r;
+                allInstanceData[baseOffset + 17] = g;
+                allInstanceData[baseOffset + 18] = b;
+                allInstanceData[baseOffset + 19] = a;
+                allInstanceData[baseOffset + 20] = hasTexture ? 1.0 : 0.0;
+
+                allInstanceData[baseOffset + 24] = tempNMat[0];
+                allInstanceData[baseOffset + 25] = tempNMat[1];
+                allInstanceData[baseOffset + 26] = tempNMat[2];
+
+                allInstanceData[baseOffset + 28] = tempNMat[4];
+                allInstanceData[baseOffset + 29] = tempNMat[5];
+                allInstanceData[baseOffset + 30] = tempNMat[6];
+
+                allInstanceData[baseOffset + 32] = tempNMat[8];
+                allInstanceData[baseOffset + 33] = tempNMat[9];
+                allInstanceData[baseOffset + 34] = tempNMat[10];
+            }
+        }
+
+        const sharedTransformGPUBuffer = gpuDevice.createBuffer({
+            label: `BakeSharedInstanceDataBuffer_${bakeName}`,
+            size: totalFloats * 4,
+            usage: GPUBufferUsage.VERTEX,
+            mappedAtCreation: true,
+        });
+        new Float32Array(sharedTransformGPUBuffer.getMappedRange()).set(allInstanceData);
+        sharedTransformGPUBuffer.unmap();
+
         const commandEncoder = gpuDevice.createCommandEncoder({label: `BakeImpostor_${bakeName}`});
         const renderPass = commandEncoder.beginRenderPass({
             colorAttachments: [
@@ -199,15 +297,17 @@ class FoliageImpostorBaker {
             },
         });
 
-        const tempBuffersToDestroy: GPUBuffer[] = [];
-
-        for (let v = 0; v < renderPassViews.length; v++) {
+        let currentDrawSlot = 0;
+        for (let v = 0; v < totalViews; v++) {
             const vpInfo = renderPassViews[v];
             renderPass.setViewport(vpInfo.vpX, vpInfo.vpY, vpInfo.tileSize, vpInfo.tileSize, 0, 1);
             renderPass.setScissorRect(vpInfo.vpX, vpInfo.vpY, vpInfo.tileSize, vpInfo.tileSize);
 
-            for (let s = 0; s < subMeshes.length; s++) {
+            for (let s = 0; s < totalSub; s++) {
                 const sub = subMeshes[s];
+                const bufferOffsetBytes = currentDrawSlot * strideFloats * 4;
+                currentDrawSlot++;
+
                 if ((sub as any)._octahedralWidth !== undefined || (sub as any)._bakedWidth !== undefined) continue;
 
                 const pipeline = this.#getOrCreateBakePipeline(redGPUContext, sub);
@@ -215,90 +315,16 @@ class FoliageImpostorBaker {
 
                 renderPass.setPipeline(pipeline);
 
-                const texture = sub.material.diffuseTexture || sub.material.baseColorTexture;
-                const sampler = sub.material.diffuseTextureSampler || sub.material.baseColorTextureSampler || redGPUContext.resourceManager.basicSampler;
-
-                let hasTexture = false;
-                let gpuTextureView: GPUTextureView | null = null;
-                if (texture && texture.gpuTexture) {
-                    gpuTextureView = texture.gpuTexture.createView();
-                    hasTexture = true;
-                } else {
-                    gpuTextureView = redGPUContext.resourceManager.emptyBitmapTextureView;
+                const bindGroup = subBindGroups[s];
+                if (bindGroup) {
+                    renderPass.setBindGroup(0, bindGroup);
                 }
-
-                let r = 1.0, g = 1.0, b = 1.0, a = 1.0;
-                if (sub.material) {
-                    const mat = sub.material;
-                    if (mat.baseColorFactor && Array.isArray(mat.baseColorFactor)) {
-                        r = mat.baseColorFactor[0] ?? 1.0;
-                        g = mat.baseColorFactor[1] ?? 1.0;
-                        b = mat.baseColorFactor[2] ?? 1.0;
-                        a = mat.baseColorFactor[3] ?? 1.0;
-                    } else if (mat.diffuseColor && Array.isArray(mat.diffuseColor)) {
-                        r = mat.diffuseColor[0] ?? 1.0;
-                        g = mat.diffuseColor[1] ?? 1.0;
-                        b = mat.diffuseColor[2] ?? 1.0;
-                        a = mat.diffuseColor[3] ?? 1.0;
-                    }
-                }
-
-                const bindGroup = gpuDevice.createBindGroup({
-                    label: `BakeBindGroup_${s}`,
-                    layout: this.#bakeBindGroupLayout!,
-                    entries: [
-                        {binding: 0, resource: gpuTextureView},
-                        {binding: 1, resource: sampler.gpuSampler},
-                    ]
-                });
-                renderPass.setBindGroup(0, bindGroup);
 
                 const vBuffer = sub.geometry.vertexBuffer?.gpuBuffer;
                 if (!vBuffer) continue;
 
-                const mvp = mat4.create();
-                mat4.multiply(mvp, vpInfo.projView, sub.relativeModelMatrix);
-
-                const nMat = mat4.create();
-                mat4.invert(nMat, sub.relativeModelMatrix);
-                mat4.transpose(nMat, nMat);
-
-                const instanceData = new Float32Array(36);
-                instanceData.set(mvp, 0); // 0..15 (locations 4..7)
-                instanceData[16] = r;     // location 8
-                instanceData[17] = g;
-                instanceData[18] = b;
-                instanceData[19] = a;
-                instanceData[20] = hasTexture ? 1.0 : 0.0; // location 9
-                instanceData[21] = 0.0;
-                instanceData[22] = 0.0;
-                instanceData[23] = 0.0;
-                // nMat 3x3 in locations 10, 11, 12
-                instanceData[24] = nMat[0];
-                instanceData[25] = nMat[1];
-                instanceData[26] = nMat[2];
-                instanceData[27] = 0.0;
-                instanceData[28] = nMat[4];
-                instanceData[29] = nMat[5];
-                instanceData[30] = nMat[6];
-                instanceData[31] = 0.0;
-                instanceData[32] = nMat[8];
-                instanceData[33] = nMat[9];
-                instanceData[34] = nMat[10];
-                instanceData[35] = 0.0;
-
-                const transformGPUBuffer = gpuDevice.createBuffer({
-                    label: `BakeInstanceDataBuffer_${s}`,
-                    size: 36 * 4,
-                    usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-                    mappedAtCreation: true,
-                });
-                new Float32Array(transformGPUBuffer.getMappedRange()).set(instanceData);
-                transformGPUBuffer.unmap();
-                tempBuffersToDestroy.push(transformGPUBuffer);
-
                 renderPass.setVertexBuffer(0, vBuffer);
-                renderPass.setVertexBuffer(1, transformGPUBuffer);
+                renderPass.setVertexBuffer(1, sharedTransformGPUBuffer, bufferOffsetBytes);
 
                 if (sub.isIndexed && sub.geometry.indexBuffer?.gpuBuffer) {
                     renderPass.setIndexBuffer(sub.geometry.indexBuffer.gpuBuffer, sub.indexFormat || 'uint32');
@@ -313,9 +339,7 @@ class FoliageImpostorBaker {
         gpuDevice.queue.submit([commandEncoder.finish()]);
 
         depthGPUTexture.destroy();
-        for (let b = 0; b < tempBuffersToDestroy.length; b++) {
-            tempBuffersToDestroy[b].destroy();
-        }
+        sharedTransformGPUBuffer.destroy();
 
         // Mipmap generation for both BaseColor and Normal textures
         if (mipLevelCount > 1) {
