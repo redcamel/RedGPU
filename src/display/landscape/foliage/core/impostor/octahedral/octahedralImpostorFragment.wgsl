@@ -47,12 +47,48 @@ fn dirToHemiOctahedralUV(dir: vec3<f32>) -> vec2<f32> {
     return clamp(vec2<f32>(u, v), vec2<f32>(0.0), vec2<f32>(1.0));
 }
 
-fn sampleOctahedralAtlas(tex: texture_2d<f32>, smp: sampler, gridCoords: vec2<f32>, quadUV: vec2<f32>, n: f32) -> vec4<f32> {
-    let clampedGrid = clamp(gridCoords, vec2<f32>(0.0), vec2<f32>(n - 1.0));
-    let safeSubUV = clamp(quadUV, vec2<f32>(0.002), vec2<f32>(0.998));
-    let atlasUV = (clampedGrid + safeSubUV) / n;
-    return textureSample(tex, smp, atlasUV);
+// Convert Hemi-Octahedral (0..1) UV to 3D direction vector
+fn hemiOctahedralUVToDir(uv: vec2<f32>) -> vec3<f32> {
+    let uPrime = 2.0 * uv.x - 1.0;
+    let vPrime = 2.0 * uv.y - 1.0;
+    let dirX = (uPrime - vPrime) * 0.5;
+    let dirZ = (uPrime + vPrime) * 0.5;
+    let dirY = max(1.0 - (abs(dirX) + abs(dirZ)), 0.0);
+    return normalize(vec3<f32>(dirX, dirY, dirZ));
 }
+
+// Computes 2D rotation of quad UV so that the baked tile aligns seamlessly with current camera view
+fn getSubTileRotatedUV(quadUV: vec2<f32>, viewDir: vec3<f32>, gridDir: vec3<f32>) -> vec2<f32> {
+    let up = vec3<f32>(0.0, 1.0, 0.0);
+
+    var vRight = cross(up, viewDir);
+    let lenVR = length(vRight);
+    vRight = select(vec3<f32>(1.0, 0.0, 0.0), vRight / lenVR, lenVR > 0.0001);
+    let vUp = cross(viewDir, vRight);
+
+    var gRight = cross(up, gridDir);
+    let lenGR = length(gRight);
+    gRight = select(vec3<f32>(1.0, 0.0, 0.0), gRight / lenGR, lenGR > 0.0001);
+
+    // 2D Rotation from grid tile to view
+    let c = dot(gRight, vRight);
+    let s = dot(gRight, vUp);
+
+    let p = quadUV - vec2<f32>(0.5);
+    let rotatedP = vec2<f32>(p.x * c - p.y * s, p.x * s + p.y * c);
+    return rotatedP + vec2<f32>(0.5);
+}
+
+fn sampleOctahedralAtlas(tex: texture_2d<f32>, smp: sampler, gridCoords: vec2<f32>, subUV: vec2<f32>, n: f32) -> vec4<f32> {
+    let isInside = (subUV.x >= 0.0 && subUV.x <= 1.0 && subUV.y >= 0.0 && subUV.y <= 1.0);
+    let clampedGrid = clamp(gridCoords, vec2<f32>(0.0), vec2<f32>(n - 1.0));
+    let halfTexelInTile = 0.5 / 256.0;
+    let safeSubUV = clamp(subUV, vec2<f32>(halfTexelInTile), vec2<f32>(1.0 - halfTexelInTile));
+    let atlasUV = (clampedGrid + safeSubUV) / n;
+    let sampled = textureSample(tex, smp, atlasUV);
+    return select(vec4<f32>(0.0), sampled, isInside);
+}
+
 
 fn rotateVectorByQuaternion(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
     return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
@@ -124,41 +160,61 @@ fn main(inputData: InputData) -> OutputFragment {
     let n = 8.0;
     let octUV = dirToHemiOctahedralUV(localView);
 
-    let gridPos = octUV * n;
+    // 🌿 타일 중심점 기준 정밀 Bilinear 보간 (-0.5 오프셋)
+    let gridPos = octUV * n - 0.5;
     let baseGrid = floor(gridPos);
     let frac = gridPos - baseGrid;
 
+    // 🌿 4개 타일별 중심 3D 방향 벡터 계산 및 서브 UV 정렬 (카메라 롤 및 90도 회전 보정)
+    let g00 = clamp(baseGrid + vec2<f32>(0.0, 0.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
+    let g10 = clamp(baseGrid + vec2<f32>(1.0, 0.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
+    let g01 = clamp(baseGrid + vec2<f32>(0.0, 1.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
+    let g11 = clamp(baseGrid + vec2<f32>(1.0, 1.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
+
+    let dir00 = hemiOctahedralUVToDir((g00 + vec2<f32>(0.5)) / n);
+    let dir10 = hemiOctahedralUVToDir((g10 + vec2<f32>(0.5)) / n);
+    let dir01 = hemiOctahedralUVToDir((g01 + vec2<f32>(0.5)) / n);
+    let dir11 = hemiOctahedralUVToDir((g11 + vec2<f32>(0.5)) / n);
+
+    let uv00 = getSubTileRotatedUV(inputData.uv, localView, dir00);
+    let uv10 = getSubTileRotatedUV(inputData.uv, localView, dir10);
+    let uv01 = getSubTileRotatedUV(inputData.uv, localView, dir01);
+    let uv11 = getSubTileRotatedUV(inputData.uv, localView, dir11);
+
     // 1. 3-Atlas 4-Tap Bilinear Sampling (BaseColor, Normal+Depth, ORM+Subsurface)
-    let s00 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, baseGrid, inputData.uv, n);
-    let s10 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, baseGrid + vec2<f32>(1.0, 0.0), inputData.uv, n);
-    let s01 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, baseGrid + vec2<f32>(0.0, 1.0), inputData.uv, n);
-    let s11 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, baseGrid + vec2<f32>(1.0, 1.0), inputData.uv, n);
+    let s00 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g00, uv00, n);
+    let s10 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g10, uv10, n);
+    let s01 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g01, uv01, n);
+    let s11 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g11, uv11, n);
 
-    let n00 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, baseGrid, inputData.uv, n);
-    let n10 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, baseGrid + vec2<f32>(1.0, 0.0), inputData.uv, n);
-    let n01 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, baseGrid + vec2<f32>(0.0, 1.0), inputData.uv, n);
-    let n11 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, baseGrid + vec2<f32>(1.0, 1.0), inputData.uv, n);
+    let n00 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g00, uv00, n);
+    let n10 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g10, uv10, n);
+    let n01 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g01, uv01, n);
+    let n11 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g11, uv11, n);
 
-    let orm00 = sampleOctahedralAtlas(packedORMTexture, packedTextureSampler, baseGrid, inputData.uv, n);
-    let orm10 = sampleOctahedralAtlas(packedORMTexture, packedTextureSampler, baseGrid + vec2<f32>(1.0, 0.0), inputData.uv, n);
-    let orm01 = sampleOctahedralAtlas(packedORMTexture, packedTextureSampler, baseGrid + vec2<f32>(0.0, 1.0), inputData.uv, n);
-    let orm11 = sampleOctahedralAtlas(packedORMTexture, packedTextureSampler, baseGrid + vec2<f32>(1.0, 1.0), inputData.uv, n);
+    let orm00 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g00, uv00, n);
+    let orm10 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g10, uv10, n);
+    let orm01 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g01, uv01, n);
+    let orm11 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g11, uv11, n);
 
 
-    let w00 = (1.0 - frac.x) * (1.0 - frac.y) * s00.a;
-    let w10 = frac.x * (1.0 - frac.y) * s10.a;
-    let w01 = (1.0 - frac.x) * frac.y * s01.a;
-    let w11 = frac.x * frac.y * s11.a;
-    let totalWeight = w00 + w10 + w01 + w11;
+    // 🌿 4-코너 Bilinear 기본 가중치 (합 = 1.0)
+    let w00 = (1.0 - frac.x) * (1.0 - frac.y);
+    let w10 = frac.x * (1.0 - frac.y);
+    let w01 = (1.0 - frac.x) * frac.y;
+    let w11 = frac.x * frac.y;
 
-    var albedo = s00.rgb;
-    var rawNormalDepth = n00;
-    var rawORM = orm00;
-    if (totalWeight > 0.0001) {
-        albedo = (s00.rgb * w00 + s10.rgb * w10 + s01.rgb * w01 + s11.rgb * w11) / totalWeight;
-        rawNormalDepth = (n00 * w00 + n10 * w10 + n01 * w01 + n11 * w11) / totalWeight;
-        rawORM = (orm00 * w00 + orm10 * w10 + orm01 * w01 + orm11 * w11) / totalWeight;
-    }
+    // 🌿 4-타일 가중치 및 커버리지 기반 선형 합성 (과노출/나눗셈 왜곡 완전 제거)
+    let cov00 = w00 * s00.a;
+    let cov10 = w10 * s10.a;
+    let cov01 = w01 * s01.a;
+    let cov11 = w11 * s11.a;
+    let totalCoverage = cov00 + cov10 + cov01 + cov11;
+    let safeCoverage = max(totalCoverage, 0.0001);
+
+    var albedo = (s00.rgb * cov00 + s10.rgb * cov10 + s01.rgb * cov01 + s11.rgb * cov11) / safeCoverage;
+    let rawNormalDepth = (n00 * cov00 + n10 * cov10 + n01 * cov01 + n11 * cov11) / safeCoverage;
+    let rawORM = (orm00 * cov00 + orm10 * cov10 + orm01 * cov01 + orm11 * cov11) / safeCoverage;
 
     // 2. Dithered LOD Crossfade (4x4 Bayer Matrix)
     let fadeOpacity = inputData.combinedOpacity;
@@ -173,17 +229,28 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
 
-    let finalAlpha = mix(
-        mix(s00.a, s10.a, frac.x),
-        mix(s01.a, s11.a, frac.x),
-        frac.y
-    );
+    // 🌿 수학적 옥타헤드럴 알파 재구성 (Ryan Brucks Kernel - Alpha Erosion Prevention)
+    // 4-Tap Bilinear 합성 시 3D 시차(Parallax)로 인해 잎사귀 위치가 어긋나면서 발생하는 알파 침식을 방지.
+    // maxAlpha의 비중을 지배적으로 유지하여 각도 회전 중에도 잎사귀와 가지가 결손되지 않도록 보호.
+    let linearAlpha = totalCoverage;
+    let maxAlpha = max(max(s00.a, s10.a), max(s01.a, s11.a));
+    let maxCornerWeight = max(max(w00, w10), max(w01, w11));
+    let sharpnessFactor = clamp((maxCornerWeight - 0.25) / 0.75, 0.0, 1.0);
+    let reconstructedAlpha = mix(linearAlpha, maxAlpha, mix(0.70, 0.95, sharpnessFactor));
 
-    if (finalAlpha < 0.33) {
+    // 🌿 스크린 공간 미분(Screen-Space Deriv) 기반 Adaptive CutOff
+    let quadDeriv = length(vec2<f32>(dpdx(inputData.uv.x), dpdy(inputData.uv.y)));
+    let mipDecay = clamp(quadDeriv * 70.0, 0.0, 1.0);
+    let adaptiveCutOff = mix(0.3333, 0.10, mipDecay);
+
+    if (reconstructedAlpha <= adaptiveCutOff) {
         discard;
     }
 
-    // 3. Unpack True 3D Baked Leaf Normal and transform to World Space via Instance Rotation
+    let toCamVec = camPos - inputData.vertexPosition;
+    let V = normalize(toCamVec);
+
+    // 3. Unpack True 3D Baked World Normal and transform to World Space via Instance Rotation (Exact LOD0 match)
     var bakedN = normalize(rawNormalDepth.rgb * 2.0 - 1.0);
     if (length(bakedN) < 0.1) {
         bakedN = vec3<f32>(0.0, 1.0, 0.0);
@@ -193,9 +260,10 @@ fn main(inputData: InputData) -> OutputFragment {
     if (abs(dot(instanceQuat, instanceQuat) - 1.0) < 0.2) {
         N = normalize(rotateVectorByQuaternion(bakedN, instanceQuat));
     }
+    if (dot(N, V) < 0.0) {
+        N = -N;
+    }
 
-    let toCamVec = camPos - inputData.vertexPosition;
-    let V = normalize(toCamVec);
     let NdotV = max(abs(dot(N, V)), 0.04);
     let preExposure = systemUniforms.preExposure;
 
@@ -248,12 +316,11 @@ fn main(inputData: InputData) -> OutputFragment {
         let specBRDF = getDirectSpecularBRDF(F, roughness, NdotH, NdotV, NdotL);
         let diffuseReflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughness, albedo);
 
-        // Two-Sided Foliage Subsurface Transmission (Backlight Glow + Forward Scatter)
+        // Two-Sided Foliage Subsurface Transmission (Backlight Glow + Forward Scatter, Exact LOD0 match)
         let backLight = max(0.0, -NdotL_raw);
         let viewSunPhase = max(dot(L, V), 0.0);
-        let forwardScatter = pow(viewSunPhase, 3.0) * 0.6 + 0.4;
-        let subsurfaceColor = albedo * vec3<f32>(1.15, 1.25, 0.75);
-        let diffuseTransmission = subsurfaceColor * (backLight * forwardScatter * 0.45);
+        let forwardScatter = pow(viewSunPhase, 2.0) * 0.5 + 0.5;
+        let diffuseTransmission = albedo * (backLight * forwardScatter * 0.5);
 
         let totalDiffuse = diffuseReflection + diffuseTransmission * subsurfaceAmount;
         let dielectricPart = (specBRDF * NdotL) + (vec3<f32>(1.0) - F) * totalDiffuse;
@@ -337,5 +404,7 @@ fn main(inputData: InputData) -> OutputFragment {
 
     return output;
 }
+
+
 
 

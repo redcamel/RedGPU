@@ -24,7 +24,7 @@ const PBR_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
 function createOctahedralImpostorGeometry(
     redGPUContext: RedGPUContext,
     width: number = 6.0,
-    height: number = 8.0,
+    height: number = 6.0,
     bottomOffset: number = 0.0
 ): Geometry {
     const halfW = width * 0.5;

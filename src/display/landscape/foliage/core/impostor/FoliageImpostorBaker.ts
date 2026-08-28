@@ -17,6 +17,10 @@ export interface FoliageBakeResult {
     height: number;
     depth: number;
     bottomOffset: number;
+    /** 타일 내 실제 나무 UV 크기: quadUV * tileUVScale + tileUVOffset → 아틀라스 타일 내 나무 영역 UV */
+    tileUVScale: [number, number];
+    /** 타일 내 실제 나무 UV 시작 오프셋 */
+    tileUVOffset: [number, number];
 }
 
 
@@ -84,12 +88,12 @@ class FoliageImpostorBaker {
         const width = Math.max(maxX - minX, 0.1);
         const height = Math.max(maxY - minY, 0.1);
         const depth = Math.max(maxZ - minZ, 0.1);
-        const centerX = (minX + maxX) * 0.5;
+        const centerX = 0.0;
         const centerY = (minY + maxY) * 0.5;
-        const centerZ = (minZ + maxZ) * 0.5;
+        const centerZ = 0.0;
         const bottomOffset = minY;
 
-        // 🌲 실제 모든 정점들과 3D 중심점 C 사이의 최대 거리 R_max 계산
+        // 🌲 실제 모든 정점들과 수직 중심축 (0, centerY, 0) 사이의 최대 거리 R_max 계산 (피벗 이탈 및 짤림 원천 방지)
         let maxDistSq = 0;
         for (let s = 0; s < subMeshes.length; s++) {
             const sub = subMeshes[s];
@@ -109,18 +113,17 @@ class FoliageImpostorBaker {
                 const y = vData[idx + 1];
                 const z = vData[idx + 2];
 
-                const wx = (m ? (m[0] * x + m[4] * y + m[8] * z + m[12]) : x) - centerX;
+                const wx = (m ? (m[0] * x + m[4] * y + m[8] * z + m[12]) : x);
                 const wy = (m ? (m[1] * x + m[5] * y + m[9] * z + m[13]) : y) - centerY;
-                const wz = (m ? (m[2] * x + m[6] * y + m[10] * z + m[14]) : z) - centerZ;
+                const wz = (m ? (m[2] * x + m[6] * y + m[10] * z + m[14]) : z);
 
                 const dSq = wx * wx + wy * wy + wz * wz;
                 if (dSq > maxDistSq) maxDistSq = dSq;
             }
         }
 
-
         const rawMaxRadius = Math.sqrt(maxDistSq);
-        const fallbackRadius = Math.hypot(width * 0.5, height * 0.5, depth * 0.5);
+        const fallbackRadius = Math.hypot(Math.max(Math.abs(minX), Math.abs(maxX)), height * 0.5, Math.max(Math.abs(minZ), Math.abs(maxZ)));
         const maxRadius = (Number.isFinite(rawMaxRadius) && rawMaxRadius > 0.1) ? rawMaxRadius : fallbackRadius;
 
         return {
@@ -151,8 +154,8 @@ class FoliageImpostorBaker {
         const centerZ = aabb.center[2];
         const maxRadius = aabb.maxRadius;
 
-        // 🌲 3D 대각선 회전을 고려한 여유 있는 정방형 직교 투영 반경 설정
-        const margin = 1.30;
+        // 🌲 3D 대각선 회전 및 상공 뷰(Pitch 45°~90°) 시 투영 높이 팽창을 완벽히 포괄하는 25% 안전 마진 (시저 클리핑 0% 보장)
+        const margin = 1.25;
         const orthoHalfWidth = maxRadius * margin;
         const orthoHalfHeight = maxRadius * margin;
 
@@ -229,11 +232,14 @@ class FoliageImpostorBaker {
                 const view = mat4.create();
                 const projView = mat4.create();
 
-                // 🌲 nearPlane = 0.0 유지
-                mat4.orthoNO(proj, -orthoHalfWidth, orthoHalfWidth, -orthoHalfHeight, orthoHalfHeight, 0.0, maxCameraDist * 2.0);
-                const upVec = (Math.abs(normY) > 0.99) ? [0, 0, -1] : [0, 1, 0];
+                // 🌲 WebGPU 표준 [0.0, 1.0] Depth 클립 공간을 위한 mat4.orthoZO 사용 (전면 50% 뎁스 클리핑 완벽 방지)
+                mat4.orthoZO(proj, -orthoHalfWidth, orthoHalfWidth, -orthoHalfHeight, orthoHalfHeight, 0.0, maxCameraDist * 2.0);
+
+                // 🌲 모든 64개 각도에서 수목이 일관되게 정립하도록 월드 Up 벡터 적용
+                const upVec = (Math.abs(normY) > 0.999) ? [0, 0, -1] : [0, 1, 0];
                 mat4.lookAt(view, [camX, camY, camZ], [centerX, centerY, centerZ], upVec as any);
                 mat4.multiply(projView, proj, view);
+
 
                 renderPassViews.push({
                     projView,
@@ -373,21 +379,21 @@ class FoliageImpostorBaker {
                 allInstanceData[baseOffset + 27] = useVertexColor ? 1.0 : 0.0;
 
 
-                // nMat with translation in w
+                // mMat with translation in w (Exact World Position computation)
                 const m = sub.relativeModelMatrix;
-                allInstanceData[baseOffset + 28] = tempNMat[0];
-                allInstanceData[baseOffset + 29] = tempNMat[1];
-                allInstanceData[baseOffset + 30] = tempNMat[2];
+                allInstanceData[baseOffset + 28] = m[0];
+                allInstanceData[baseOffset + 29] = m[1];
+                allInstanceData[baseOffset + 30] = m[2];
                 allInstanceData[baseOffset + 31] = m[12]; // transX
 
-                allInstanceData[baseOffset + 32] = tempNMat[4];
-                allInstanceData[baseOffset + 33] = tempNMat[5];
-                allInstanceData[baseOffset + 34] = tempNMat[6];
+                allInstanceData[baseOffset + 32] = m[4];
+                allInstanceData[baseOffset + 33] = m[5];
+                allInstanceData[baseOffset + 34] = m[6];
                 allInstanceData[baseOffset + 35] = m[13]; // transY
 
-                allInstanceData[baseOffset + 36] = tempNMat[8];
-                allInstanceData[baseOffset + 37] = tempNMat[9];
-                allInstanceData[baseOffset + 38] = tempNMat[10];
+                allInstanceData[baseOffset + 36] = m[8];
+                allInstanceData[baseOffset + 37] = m[9];
+                allInstanceData[baseOffset + 38] = m[10];
                 allInstanceData[baseOffset + 39] = m[14]; // transZ
 
                 // sphereCenterRadius
@@ -540,8 +546,10 @@ class FoliageImpostorBaker {
             ormTexture: directORMTexture,
             width: actualQuadWidth,
             height: actualQuadHeight,
-            depth: aabb.depth,
+            depth: actualQuadWidth,
             bottomOffset: actualBottomOffset,
+            tileUVScale: [1.0, 1.0] as [number, number],
+            tileUVOffset: [0.0, 0.0] as [number, number],
         };
 
     }

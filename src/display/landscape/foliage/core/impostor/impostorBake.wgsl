@@ -43,10 +43,12 @@ fn main(
         finalColor *= diffuseSampleColor;
     }
 
-    let cutOff = max(input.materialParams.w, 0.01);
-    if (finalColor.a <= cutOff) {
+    // 🌿 베이크 단계에서는 완전 투명(a < 0.005)만 폐기하여 알파 안티앨리어싱 및 외곽 실루엣을 100% 보존
+    if (finalColor.a < 0.005) {
         discard;
     }
+
+
 
     // 2. 3D World Normal (with Normal map support & double-sided preservation)
     let isFoliage = (input.cameraDir.w > 0.5);
@@ -70,7 +72,8 @@ fn main(
     let camDir = normalize(input.cameraDir.xyz);
     let relPos = input.worldPos - center;
     let distAlongRay = dot(relPos, camDir);
-    let normDepth = clamp(distAlongRay / (radius * 1.3) * 0.5 + 0.5, 0.0, 1.0);
+    let normDepth = clamp(distAlongRay / (radius * 1.05) * 0.5 + 0.5, 0.0, 1.0);
+
 
     // 4. Physical Material Properties (ORM + Subsurface Translucency)
     var ao = input.materialParams.z;

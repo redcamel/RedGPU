@@ -77,9 +77,7 @@ fn mainInput(input : VertexInput) -> OutputData {
 
     let isImpostor = (input.vertexTangent.w < -500.0);
     if (isImpostor) {
-        let toCam = systemUniforms.camera.cameraPosition.xyz - input.instancePos;
-
-        // 🌿 시스템 카메라 뷰 행렬 기반 직교 기저 (스크린 공간 평행)
+        // 🌿 임포스터 빌보드: 뷰 행렬 기반 스크린-Space 직교 기저
         let camRight = vec3<f32>(
             systemUniforms.camera.viewMatrix[0][0],
             systemUniforms.camera.viewMatrix[1][0],
@@ -91,8 +89,13 @@ fn mainInput(input : VertexInput) -> OutputData {
             systemUniforms.camera.viewMatrix[2][1]
         );
 
-        let centerY = hierarchyPos.z;
-        let treeCenter = input.instancePos + vec3<f32>(0.0, centerY * safeScale.y, 0.0);
+        // 🌿 쿼드 position.z = AABB 수직 중심 오프셋(centerY_local)
+        let centerYLocal = hierarchyPos.z;
+        let treeCenter = input.instancePos + vec3<f32>(0.0, centerYLocal * safeScale.y, 0.0);
+
+        // 🌿 실제 나무 중심(treeCenter)에서 카메라까지의 정확한 시선 벡터 계산
+        let toCam = systemUniforms.camera.cameraPosition.xyz - treeCenter;
+
         let impostorOffset = camRight * (hierarchyPos.x * safeScale.x) + camUp * (hierarchyPos.y * safeScale.y);
         worldPos = treeCenter + impostorOffset;
         worldNormal = -vec3<f32>(

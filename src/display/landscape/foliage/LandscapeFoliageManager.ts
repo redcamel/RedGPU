@@ -135,9 +135,18 @@ class LandscapeFoliageManager {
         return false;
     }
 
+    get typeList(): readonly FoliageType[] {
+        return this.#typeList;
+    }
+
+    get foliageTypes(): ReadonlyMap<string, FoliageType> {
+        return this.#foliageTypes;
+    }
+
     getFoliageType(name: string): FoliageType | undefined {
         return this.#foliageTypes.get(name);
     }
+
 
     destroy(): void {
         this.#foliageTypes.forEach((type) => type.destroy());

@@ -4,6 +4,8 @@ import BitmapTexture from "../../../../../../resources/texture/BitmapTexture";
 import DirectTexture from "../../../../../../resources/texture/DirectTexture";
 import fragmentModuleSource from './octahedralImpostorFragment.wgsl';
 import AUVTransformBaseMaterial from "../../../../../../material/core/AUVTransformBaseMaterial";
+
+
 import defineSampler from "../../../../../../defineProperty/funcs/texture/defineSampler";
 import defineTexture from "../../../../../../defineProperty/funcs/texture/defineTexture";
 import definePositiveNumber from "../../../../../../defineProperty/funcs/number/definePositiveNumber";
@@ -53,17 +55,20 @@ class OctahedralImpostorMaterial extends AUVTransformBaseMaterial {
         this.packedORMTexture = packedORMTexture;
 
         this.useCutOff = true;
-        this.cutOff = 0.35;
+        this.cutOff = 0.3333;
         this.doubleSided = true;
 
         this.isFoliage = true;
         this.transparent = false;
         this.alphaBlend = 0;
+
         this.gridSize = gridSize;
         this.pdoScale = 1.0;
         this.subsurfaceIntensity = 1.0;
 
         this.initGPURenderInfos();
+
+
     }
 }
 
