@@ -118,6 +118,7 @@ class FoliageImpostorBaker {
             }
         }
 
+
         const rawMaxRadius = Math.sqrt(maxDistSq);
         const fallbackRadius = Math.hypot(width * 0.5, height * 0.5, depth * 0.5);
         const maxRadius = (Number.isFinite(rawMaxRadius) && rawMaxRadius > 0.1) ? rawMaxRadius : fallbackRadius;
@@ -424,10 +425,11 @@ class FoliageImpostorBaker {
                 },
                 {
                     view: bakedNormalGPUTexture.createView({baseMipLevel: 0, mipLevelCount: 1}),
-                    clearValue: {r: 0.5, g: 0.5, b: 1.0, a: 0.5},
+                    clearValue: {r: 0.5, g: 0.5, b: 1.0, a: 0.0},
                     loadOp: 'clear',
                     storeOp: 'store',
                 },
+
                 {
                     view: bakedORMGPUTexture.createView({baseMipLevel: 0, mipLevelCount: 1}),
                     clearValue: {r: 1.0, g: 0.7, b: 0.0, a: 0.0},

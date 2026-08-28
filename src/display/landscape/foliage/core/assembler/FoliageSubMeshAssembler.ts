@@ -132,7 +132,7 @@ class FoliageSubMeshAssembler {
             const vBuffer = sub.geometry?.vertexBuffer;
             const vData = vBuffer?.data;
             if (vData) {
-                const stride = (vBuffer.interleavedStruct?.arrayStride ? vBuffer.interleavedStruct.arrayStride / 4 : 18);
+                const stride = (vBuffer.stride || (vBuffer.interleavedStruct?.arrayStride ? vBuffer.interleavedStruct.arrayStride / 4 : 18));
                 const count = vBuffer.vertexCount ?? 0;
                 for (let v = 0; v < count; v++) {
                     const idx = v * stride;
@@ -142,6 +142,8 @@ class FoliageSubMeshAssembler {
                     const dSq = vx * vx + vy * vy + vz * vz;
                     if (dSq > maxDistSq) maxDistSq = dSq;
                 }
+
+
             }
         }
 
@@ -313,7 +315,9 @@ class FoliageSubMeshAssembler {
             }
 
             const geom = node.geometry;
-            const rawStride = (geom.vertexBuffer as any)?.stride || 12;
+            const rawStride = geom.vertexBuffer?.stride || (geom.vertexBuffer?.interleavedStruct?.arrayStride ? geom.vertexBuffer.interleavedStruct.arrayStride / 4 : 18);
+
+
 
             const normalMatrix = mat4.create();
             mat4.invert(normalMatrix, currentRelativeMatrix);
@@ -386,35 +390,6 @@ class FoliageSubMeshAssembler {
             entry.raws.push(raw);
         }
 
-        // 🌿 수목 1그루 전체(줄기+잎사귀 등 모든 노드)의 통합 바운딩 중심(treeCenterX, treeCenterZ)을 단 1회 계산
-        let treeMinX = Infinity, treeMaxX = -Infinity;
-        let treeMinZ = Infinity, treeMaxZ = -Infinity;
-
-        for (let i = 0; i < rawList.length; i++) {
-            const raw = rawList[i];
-            const srcVData = raw.geometry.vertexBuffer?.data;
-            const vCount = raw.geometry.vertexBuffer?.vertexCount ?? 0;
-            const rawStride = raw.rawStride;
-            const m = raw.currentRelativeMatrix;
-            if (srcVData && vCount > 0) {
-                for (let v = 0; v < vCount; v++) {
-                    const srcIdx = v * rawStride;
-                    const x = srcVData[srcIdx + 0];
-                    const y = srcVData[srcIdx + 1];
-                    const z = srcVData[srcIdx + 2];
-                    const wx = m[0] * x + m[4] * y + m[8] * z + m[12];
-                    const wz = m[2] * x + m[6] * y + m[10] * z + m[14];
-                    if (wx < treeMinX) treeMinX = wx;
-                    if (wx > treeMaxX) treeMaxX = wx;
-                    if (wz < treeMinZ) treeMinZ = wz;
-                    if (wz > treeMaxZ) treeMaxZ = wz;
-                }
-            }
-        }
-
-        const treeCenterX = (treeMinX !== Infinity) ? (treeMinX + treeMaxX) * 0.5 : 0;
-        const treeCenterZ = (treeMinZ !== Infinity) ? (treeMinZ + treeMaxZ) * 0.5 : 0;
-
         const resultSubMeshes: FoliageSubMesh[] = [];
 
         materialGroups.forEach((entry) => {
@@ -457,9 +432,10 @@ class FoliageSubMeshAssembler {
                         const x = srcVData[srcIdx + 0];
                         const y = srcVData[srcIdx + 1];
                         const z = srcVData[srcIdx + 2];
-                        combinedVertexData[dstIdx + 0] = (m[0] * x + m[4] * y + m[8] * z + m[12]) - treeCenterX;
+                        combinedVertexData[dstIdx + 0] = m[0] * x + m[4] * y + m[8] * z + m[12];
                         combinedVertexData[dstIdx + 1] = m[1] * x + m[5] * y + m[9] * z + m[13];
-                        combinedVertexData[dstIdx + 2] = (m[2] * x + m[6] * y + m[10] * z + m[14]) - treeCenterZ;
+                        combinedVertexData[dstIdx + 2] = m[2] * x + m[6] * y + m[10] * z + m[14];
+
 
                         if (rawStride >= 6) {
                             const nx = srcVData[srcIdx + 3];

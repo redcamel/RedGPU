@@ -55,6 +55,7 @@ class OctahedralImpostorMaterial extends AUVTransformBaseMaterial {
         this.useCutOff = true;
         this.cutOff = 0.35;
         this.doubleSided = true;
+
         this.isFoliage = true;
         this.transparent = false;
         this.alphaBlend = 0;

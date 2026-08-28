@@ -79,7 +79,7 @@ fn mainInput(input : VertexInput) -> OutputData {
     if (isImpostor) {
         let toCam = systemUniforms.camera.cameraPosition.xyz - input.instancePos;
 
-        // 🌿 시스템 카메라 뷰 행렬(Screen-space) 기반 직교 기저 (좌우 패닝 시 팽이 스핀 100% 방지)
+        // 🌿 시스템 카메라 뷰 행렬 기반 직교 기저 (스크린 공간 평행)
         let camRight = vec3<f32>(
             systemUniforms.camera.viewMatrix[0][0],
             systemUniforms.camera.viewMatrix[1][0],
@@ -105,6 +105,9 @@ fn mainInput(input : VertexInput) -> OutputData {
         let localView = normalize(rotateVectorByQuaternion(toCam, invQuat));
         output.vertexTangent = vec4<f32>(localView, -999.0);
     } else {
+
+
+
         if (length(hierarchyNormal) > 0.001) {
             let scaledNormal = hierarchyNormal / safeScale;
             worldNormal = normalize(rotateVectorByQuaternion(scaledNormal, input.instanceRotQuat));
