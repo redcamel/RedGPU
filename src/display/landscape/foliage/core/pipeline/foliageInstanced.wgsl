@@ -129,15 +129,15 @@ fn mainInput(input : VertexInput) -> OutputData {
     output.vertexNormal = worldNormal;
     output.uv = input.uv;
     output.uv1 = input.uv1;
-    output.vertexColor_0 = input.vertexColor_0;
-
     output.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
     output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
 
+    output.vertexColor_0 = select(input.vertexColor_0, input.instanceRotQuat, isImpostor);
     output.globalFragmentSlotIndex = subMeshUniforms.globalFragmentSlotIndex;
-    output.localNodeScale_volumeScale = vec2<f32>(1.0, 1.0);
+    output.localNodeScale_volumeScale = vec2<f32>(safeScale.x, safeScale.y);
 
     output.combinedOpacity = fadeFactor * lodFadeFactor;
+
 
     output.shadowCoord = getShadowCoord(worldPos, systemUniforms.directionalLightProjectionViewMatrix);
     output.receiveShadow = 1.0;

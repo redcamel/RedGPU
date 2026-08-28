@@ -173,7 +173,8 @@ class FoliageSubMeshAssembler {
         const bbBottomOffset = bakeResult.bottomOffset ?? 0;
 
         const bbGeom = createOctahedralImpostorGeometry(redGPUContext, bbWidth, bbHeight, bbBottomOffset);
-        const bbMat = new OctahedralImpostorMaterial(redGPUContext, bakeResult.texture, bakeResult.normalTexture, `${options.name}_OctahedralMat`, 8.0);
+        const bbMat = new OctahedralImpostorMaterial(redGPUContext, bakeResult.baseColorTexture, bakeResult.normalTexture, bakeResult.packedORMTexture, `${options.name}_OctahedralMat`, 8.0);
+
 
         const bbStartOffset = subList.length;
         const bbSubMesh = FoliageSubMeshAssembler.#createSubMeshInstance(

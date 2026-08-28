@@ -8,13 +8,17 @@ import getMipLevelCount from "../../../../../utils/texture/getMipLevelCount";
 import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 export interface FoliageBakeResult {
-    texture: DirectTexture;
+    baseColorTexture: DirectTexture;
+    texture: DirectTexture; // backward-compatibility alias
     normalTexture: DirectTexture;
+    packedORMTexture: DirectTexture;
+    ormTexture: DirectTexture; // backward-compatibility alias
     width: number;
     height: number;
     depth: number;
     bottomOffset: number;
 }
+
 
 class FoliageImpostorBaker {
     static #bakePipelineCache: Map<string, GPURenderPipeline> = new Map();
@@ -25,7 +29,10 @@ class FoliageImpostorBaker {
         max: [number, number, number];
         width: number;
         height: number;
-        depth: number
+        depth: number;
+        center: [number, number, number];
+        maxRadius: number;
+        bottomOffset: number;
     } {
         let minX = Infinity, minY = Infinity, minZ = Infinity;
         let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
@@ -36,10 +43,10 @@ class FoliageImpostorBaker {
 
             const vBuffer = sub.geometry?.vertexBuffer;
             const vData = vBuffer?.data;
-            if (!vData) continue;
+            if (!vData || vData.length === 0) continue;
 
-            const stride = (vBuffer.interleavedStruct?.arrayStride ? vBuffer.interleavedStruct.arrayStride / 4 : 12);
-            const vCount = vBuffer.vertexCount || (vData.length / stride);
+            const stride = vBuffer.stride || (vBuffer.interleavedStruct?.arrayStride ? vBuffer.interleavedStruct.arrayStride / 4 : 18);
+            const vCount = vBuffer.vertexCount || Math.floor(vData.length / stride);
             const m = sub.relativeModelMatrix;
 
             for (let i = 0; i < vCount; i++) {
@@ -48,9 +55,9 @@ class FoliageImpostorBaker {
                 const y = vData[idx + 1];
                 const z = vData[idx + 2];
 
-                const wx = m[0] * x + m[4] * y + m[8] * z + m[12];
-                const wy = m[1] * x + m[5] * y + m[9] * z + m[13];
-                const wz = m[2] * x + m[6] * y + m[10] * z + m[14];
+                const wx = m ? (m[0] * x + m[4] * y + m[8] * z + m[12]) : x;
+                const wy = m ? (m[1] * x + m[5] * y + m[9] * z + m[13]) : y;
+                const wz = m ? (m[2] * x + m[6] * y + m[10] * z + m[14]) : z;
 
                 if (wx < minX) minX = wx;
                 if (wy < minY) minY = wy;
@@ -62,19 +69,68 @@ class FoliageImpostorBaker {
         }
 
         if (minX === Infinity) {
-            return {min: [-1.0, 0, -1.0], max: [1.0, 2.0, 1.0], width: 2.0, height: 2.0, depth: 2.0};
+            return {
+                min: [-2.0, 0, -2.0],
+                max: [2.0, 6.0, 2.0],
+                width: 4.0,
+                height: 6.0,
+                depth: 4.0,
+                center: [0, 3.0, 0],
+                maxRadius: 4.0,
+                bottomOffset: 0
+            };
         }
 
         const width = Math.max(maxX - minX, 0.1);
         const height = Math.max(maxY - minY, 0.1);
         const depth = Math.max(maxZ - minZ, 0.1);
+        const centerX = (minX + maxX) * 0.5;
+        const centerY = (minY + maxY) * 0.5;
+        const centerZ = (minZ + maxZ) * 0.5;
+        const bottomOffset = minY;
+
+        // 🌲 실제 모든 정점들과 3D 중심점 C 사이의 최대 거리 R_max 계산
+        let maxDistSq = 0;
+        for (let s = 0; s < subMeshes.length; s++) {
+            const sub = subMeshes[s];
+            if (sub.isImpostor) continue;
+
+            const vBuffer = sub.geometry?.vertexBuffer;
+            const vData = vBuffer?.data;
+            if (!vData || vData.length === 0) continue;
+
+            const stride = vBuffer.stride || (vBuffer.interleavedStruct?.arrayStride ? vBuffer.interleavedStruct.arrayStride / 4 : 18);
+            const vCount = vBuffer.vertexCount || Math.floor(vData.length / stride);
+            const m = sub.relativeModelMatrix;
+
+            for (let i = 0; i < vCount; i++) {
+                const idx = i * stride;
+                const x = vData[idx];
+                const y = vData[idx + 1];
+                const z = vData[idx + 2];
+
+                const wx = (m ? (m[0] * x + m[4] * y + m[8] * z + m[12]) : x) - centerX;
+                const wy = (m ? (m[1] * x + m[5] * y + m[9] * z + m[13]) : y) - centerY;
+                const wz = (m ? (m[2] * x + m[6] * y + m[10] * z + m[14]) : z) - centerZ;
+
+                const dSq = wx * wx + wy * wy + wz * wz;
+                if (dSq > maxDistSq) maxDistSq = dSq;
+            }
+        }
+
+        const rawMaxRadius = Math.sqrt(maxDistSq);
+        const fallbackRadius = Math.hypot(width * 0.5, height * 0.5, depth * 0.5);
+        const maxRadius = (Number.isFinite(rawMaxRadius) && rawMaxRadius > 0.1) ? rawMaxRadius : fallbackRadius;
 
         return {
             min: [minX, minY, minZ],
             max: [maxX, maxY, maxZ],
             width,
             height,
-            depth
+            depth,
+            center: [centerX, centerY, centerZ],
+            maxRadius,
+            bottomOffset
         };
     }
 
@@ -89,9 +145,19 @@ class FoliageImpostorBaker {
         }
 
         const aabb = this.calculateAABBFromSubMeshes(subMeshes);
-        const bakedWidth = Math.max(aabb.width, aabb.depth);
-        const bakedHeight = aabb.height;
-        const centerY = aabb.min[1] + bakedHeight * 0.5;
+        const centerX = aabb.center[0];
+        const centerY = aabb.center[1];
+        const centerZ = aabb.center[2];
+        const maxRadius = aabb.maxRadius;
+
+        // 🌲 3D 대각선 회전을 고려한 여유 있는 정방형 직교 투영 반경 설정
+        const margin = 1.30;
+        const orthoHalfWidth = maxRadius * margin;
+        const orthoHalfHeight = maxRadius * margin;
+
+        const actualQuadWidth = orthoHalfWidth * 2.0;
+        const actualQuadHeight = orthoHalfHeight * 2.0;
+        const actualBottomOffset = centerY - orthoHalfHeight;
 
         const gridSize = 8;
         const tileSize = 256;
@@ -108,9 +174,18 @@ class FoliageImpostorBaker {
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
         });
 
-        // 2. MRT Target 1: World Normal + Roughness/Opacity
+        // 2. MRT Target 1: World Normal + Radial Depth
         const bakedNormalGPUTexture = gpuDevice.createTexture({
             label: `BakedImpostor_Normal_${bakeName}`,
+            size: [atlasWidth, atlasHeight, 1],
+            mipLevelCount,
+            format: 'rgba8unorm',
+            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
+        });
+
+        // 3. MRT Target 2: Physical Material Properties (ORM + Subsurface)
+        const bakedORMGPUTexture = gpuDevice.createTexture({
+            label: `BakedImpostor_ORM_${bakeName}`,
             size: [atlasWidth, atlasHeight, 1],
             mipLevelCount,
             format: 'rgba8unorm',
@@ -124,16 +199,9 @@ class FoliageImpostorBaker {
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
         });
 
-        const margin = 1.05;
-        const orthoHalfWidth = (bakedWidth * 0.5) * margin;
-        const orthoHalfHeight = (bakedHeight * 0.5) * margin;
-        const actualQuadWidth = orthoHalfWidth * 2.0;
-        const actualQuadHeight = orthoHalfHeight * 2.0;
-        const actualBottomOffset = centerY - orthoHalfHeight;
+        console.log(`[FoliageImpostorBaker 🌲 3-Atlas MRT] Baking '${bakeName}': subMeshes=${subMeshes.length}, aabb=[W:${aabb.width.toFixed(2)}, H:${aabb.height.toFixed(2)}, D:${aabb.depth.toFixed(2)}], maxRadius=${maxRadius.toFixed(2)}, quadSize=${actualQuadWidth.toFixed(2)}, center=[${centerX.toFixed(2)}, ${centerY.toFixed(2)}, ${centerZ.toFixed(2)}], bottomOffset=${actualBottomOffset.toFixed(2)}`);
 
-        console.log(`[FoliageImpostorBaker 🌲 MRT] Baking '${bakeName}': subMeshes=${subMeshes.length}, quadWidth=${actualQuadWidth}, quadHeight=${actualQuadHeight}`);
-
-        const maxCameraDist = Math.max(actualQuadWidth, actualQuadHeight) * 3.0;
+        const maxCameraDist = maxRadius * 4.0;
         const renderPassViews = [];
 
         for (let gy = 0; gy < gridSize; gy++) {
@@ -152,21 +220,25 @@ class FoliageImpostorBaker {
                 const normY = dirY / len;
                 const normZ = dirZ / len;
 
-                const camX = normX * maxCameraDist;
+                const camX = centerX + normX * maxCameraDist;
                 const camY = centerY + normY * maxCameraDist;
-                const camZ = normZ * maxCameraDist;
+                const camZ = centerZ + normZ * maxCameraDist;
 
                 const proj = mat4.create();
                 const view = mat4.create();
                 const projView = mat4.create();
 
-                mat4.orthoNO(proj, -orthoHalfWidth, orthoHalfWidth, -orthoHalfHeight, orthoHalfHeight, -maxCameraDist * 2.0, maxCameraDist * 4.0);
+                // 🌲 nearPlane = 0.0 유지
+                mat4.orthoNO(proj, -orthoHalfWidth, orthoHalfWidth, -orthoHalfHeight, orthoHalfHeight, 0.0, maxCameraDist * 2.0);
                 const upVec = (Math.abs(normY) > 0.99) ? [0, 0, -1] : [0, 1, 0];
-                mat4.lookAt(view, [camX, camY, camZ], [0, centerY, 0], upVec as any);
+                mat4.lookAt(view, [camX, camY, camZ], [centerX, centerY, centerZ], upVec as any);
                 mat4.multiply(projView, proj, view);
 
                 renderPassViews.push({
                     projView,
+                    normX,
+                    normY,
+                    normZ,
                     vpX: gx * tileSize,
                     vpY: gy * tileSize,
                     tileSize
@@ -176,6 +248,10 @@ class FoliageImpostorBaker {
 
         this.#initBindGroupLayouts(redGPUContext);
 
+        const resourceManager = redGPUContext.resourceManager;
+        const emptyTexView = resourceManager.emptyBitmapTextureView;
+        const basicSampler = resourceManager.basicSampler;
+
         // 1. 🌲 서브메시별 머티리얼 BindGroup 1회 사전 생성 (루프 밖 캐싱)
         const subBindGroups: (GPUBindGroup | null)[] = [];
         for (let s = 0; s < subMeshes.length; s++) {
@@ -184,18 +260,28 @@ class FoliageImpostorBaker {
                 subBindGroups.push(null);
                 continue;
             }
-            const texture = sub.material.diffuseTexture || sub.material.baseColorTexture;
-            const sampler = sub.material.diffuseTextureSampler || sub.material.baseColorTextureSampler || redGPUContext.resourceManager.basicSampler;
-            const gpuTextureView = (texture && texture.gpuTexture)
-                ? texture.gpuTexture.createView()
-                : redGPUContext.resourceManager.emptyBitmapTextureView;
+            const mat = sub.material;
+            const diffTex = mat.diffuseTexture || mat.baseColorTexture;
+            const diffSampler = mat.diffuseTextureSampler || mat.baseColorTextureSampler || basicSampler;
+            const normTex = mat.normalTexture;
+            const normSampler = mat.normalTextureSampler || basicSampler;
+            const ormTex = mat.packedORMTexture || mat.metallicRoughnessTexture || mat.occlusionTexture;
+            const ormSampler = mat.packedORMTextureSampler || mat.metallicRoughnessTextureSampler || basicSampler;
+
+            const diffView = (diffTex && diffTex.gpuTexture) ? diffTex.gpuTexture.createView() : emptyTexView;
+            const normView = (normTex && normTex.gpuTexture) ? normTex.gpuTexture.createView() : emptyTexView;
+            const ormView = (ormTex && ormTex.gpuTexture) ? ormTex.gpuTexture.createView() : emptyTexView;
 
             const bg = gpuDevice.createBindGroup({
                 label: `BakeBindGroup_${s}`,
                 layout: this.#bakeBindGroupLayout!,
                 entries: [
-                    {binding: 0, resource: gpuTextureView},
-                    {binding: 1, resource: sampler.gpuSampler},
+                    {binding: 0, resource: diffView},
+                    {binding: 1, resource: diffSampler.gpuSampler},
+                    {binding: 2, resource: normView},
+                    {binding: 3, resource: normSampler.gpuSampler},
+                    {binding: 4, resource: ormView},
+                    {binding: 5, resource: ormSampler.gpuSampler},
                 ]
             });
             subBindGroups.push(bg);
@@ -205,7 +291,7 @@ class FoliageImpostorBaker {
         const totalViews = renderPassViews.length;
         const totalSub = subMeshes.length;
         const totalDrawCalls = totalViews * totalSub;
-        const strideFloats = 36;
+        const strideFloats = 48;
         const totalFloats = totalDrawCalls * strideFloats;
         const allInstanceData = new Float32Array(totalFloats);
 
@@ -227,41 +313,94 @@ class FoliageImpostorBaker {
                 mat4.transpose(tempNMat, tempNMat);
 
                 let r = 1.0, g = 1.0, b = 1.0, a = 1.0;
+                let roughness = 0.7;
+                let metallic = 0.0;
+                let ao = 1.0;
+                let cutOff = 0.35;
+                let useVertexColor = false;
                 const mat = sub.material;
                 if (mat) {
-                    if (mat.baseColorFactor && Array.isArray(mat.baseColorFactor)) {
-                        r = mat.baseColorFactor[0] ?? 1.0;
-                        g = mat.baseColorFactor[1] ?? 1.0;
-                        b = mat.baseColorFactor[2] ?? 1.0;
-                        a = mat.baseColorFactor[3] ?? 1.0;
-                    } else if (mat.diffuseColor && Array.isArray(mat.diffuseColor)) {
-                        r = mat.diffuseColor[0] ?? 1.0;
-                        g = mat.diffuseColor[1] ?? 1.0;
-                        b = mat.diffuseColor[2] ?? 1.0;
-                        a = mat.diffuseColor[3] ?? 1.0;
+                    const bcf = mat.baseColorFactor || mat.diffuseColor || mat.color;
+                    if (bcf) {
+                        if (Array.isArray(bcf) || ArrayBuffer.isView(bcf)) {
+                            r = bcf[0] ?? 1.0;
+                            g = bcf[1] ?? 1.0;
+                            b = bcf[2] ?? 1.0;
+                            a = bcf[3] ?? 1.0;
+                        } else if (typeof bcf.r === 'number') {
+                            r = bcf.r;
+                            g = bcf.g;
+                            b = bcf.b;
+                            a = bcf.a ?? 1.0;
+                        }
                     }
+                    useVertexColor = !!mat.useVertexColor;
+                    if (typeof mat.roughnessFactor === 'number') roughness = mat.roughnessFactor;
+                    else if (typeof mat.roughness === 'number') roughness = mat.roughness;
+                    if (typeof mat.metallicFactor === 'number') metallic = mat.metallicFactor;
+                    else if (typeof mat.metallic === 'number') metallic = mat.metallic;
+                    if (typeof mat.occlusionStrength === 'number') ao = mat.occlusionStrength;
+                    if (typeof mat.cutOff === 'number' && mat.cutOff > 0) cutOff = mat.cutOff;
                 }
-                const texture = sub.material.diffuseTexture || sub.material.baseColorTexture;
-                const hasTexture = !!(texture && texture.gpuTexture);
+
+                const diffTex = mat.diffuseTexture || mat.baseColorTexture;
+                const normTex = mat.normalTexture;
+                const ormTex = mat.packedORMTexture || mat.metallicRoughnessTexture || mat.occlusionTexture;
+                const hasDiff = !!(diffTex && diffTex.gpuTexture);
+                const hasNorm = !!(normTex && normTex.gpuTexture);
+                const hasORM = !!(ormTex && ormTex.gpuTexture);
+                const isFoliage = mat?.isFoliage !== false;
 
                 allInstanceData.set(tempMVP, baseOffset);
+
+                // baseColorFactor (r, g, b, a)
                 allInstanceData[baseOffset + 16] = r;
                 allInstanceData[baseOffset + 17] = g;
                 allInstanceData[baseOffset + 18] = b;
                 allInstanceData[baseOffset + 19] = a;
-                allInstanceData[baseOffset + 20] = hasTexture ? 1.0 : 0.0;
 
-                allInstanceData[baseOffset + 24] = tempNMat[0];
-                allInstanceData[baseOffset + 25] = tempNMat[1];
-                allInstanceData[baseOffset + 26] = tempNMat[2];
+                // materialParams (roughness, metallic, ao, cutOff)
+                allInstanceData[baseOffset + 20] = roughness;
+                allInstanceData[baseOffset + 21] = metallic;
+                allInstanceData[baseOffset + 22] = ao;
+                allInstanceData[baseOffset + 23] = cutOff;
 
-                allInstanceData[baseOffset + 28] = tempNMat[4];
-                allInstanceData[baseOffset + 29] = tempNMat[5];
-                allInstanceData[baseOffset + 30] = tempNMat[6];
+                // textureFlags (hasDiff, hasNorm, hasORM, useVertexColor)
+                allInstanceData[baseOffset + 24] = hasDiff ? 1.0 : 0.0;
+                allInstanceData[baseOffset + 25] = hasNorm ? 1.0 : 0.0;
+                allInstanceData[baseOffset + 26] = hasORM ? 1.0 : 0.0;
+                allInstanceData[baseOffset + 27] = useVertexColor ? 1.0 : 0.0;
 
-                allInstanceData[baseOffset + 32] = tempNMat[8];
-                allInstanceData[baseOffset + 33] = tempNMat[9];
-                allInstanceData[baseOffset + 34] = tempNMat[10];
+
+                // nMat with translation in w
+                const m = sub.relativeModelMatrix;
+                allInstanceData[baseOffset + 28] = tempNMat[0];
+                allInstanceData[baseOffset + 29] = tempNMat[1];
+                allInstanceData[baseOffset + 30] = tempNMat[2];
+                allInstanceData[baseOffset + 31] = m[12]; // transX
+
+                allInstanceData[baseOffset + 32] = tempNMat[4];
+                allInstanceData[baseOffset + 33] = tempNMat[5];
+                allInstanceData[baseOffset + 34] = tempNMat[6];
+                allInstanceData[baseOffset + 35] = m[13]; // transY
+
+                allInstanceData[baseOffset + 36] = tempNMat[8];
+                allInstanceData[baseOffset + 37] = tempNMat[9];
+                allInstanceData[baseOffset + 38] = tempNMat[10];
+                allInstanceData[baseOffset + 39] = m[14]; // transZ
+
+                // sphereCenterRadius
+                allInstanceData[baseOffset + 40] = centerX;
+                allInstanceData[baseOffset + 41] = centerY;
+                allInstanceData[baseOffset + 42] = centerZ;
+                allInstanceData[baseOffset + 43] = maxRadius;
+
+                // cameraDir (xyz: normDir, w: isFoliage)
+                allInstanceData[baseOffset + 44] = vpInfo.normX;
+                allInstanceData[baseOffset + 45] = vpInfo.normY;
+                allInstanceData[baseOffset + 46] = vpInfo.normZ;
+                allInstanceData[baseOffset + 47] = isFoliage ? 1.0 : 0.0;
+
             }
         }
 
@@ -285,7 +424,13 @@ class FoliageImpostorBaker {
                 },
                 {
                     view: bakedNormalGPUTexture.createView({baseMipLevel: 0, mipLevelCount: 1}),
-                    clearValue: {r: 0.5, g: 0.5, b: 1.0, a: 0},
+                    clearValue: {r: 0.5, g: 0.5, b: 1.0, a: 0.5},
+                    loadOp: 'clear',
+                    storeOp: 'store',
+                },
+                {
+                    view: bakedORMGPUTexture.createView({baseMipLevel: 0, mipLevelCount: 1}),
+                    clearValue: {r: 1.0, g: 0.7, b: 0.0, a: 0.0},
                     loadOp: 'clear',
                     storeOp: 'store',
                 },
@@ -342,7 +487,7 @@ class FoliageImpostorBaker {
         depthGPUTexture.destroy();
         sharedTransformGPUBuffer.destroy();
 
-        // Mipmap generation for both BaseColor and Normal textures
+        // 🌲 Mipmap generation for BaseColor, Normal, and ORM textures
         if (mipLevelCount > 1) {
             redGPUContext.resourceManager.mipmapGenerator.generateMipmap(
                 bakedGPUTexture,
@@ -367,19 +512,36 @@ class FoliageImpostorBaker {
                 false,
                 COMMAND_ENCODER_TYPE.IMMEDIATE
             );
+
+            redGPUContext.resourceManager.mipmapGenerator.generateMipmap(
+                bakedORMGPUTexture,
+                {
+                    size: [atlasWidth, atlasHeight, 1],
+                    mipLevelCount,
+                    format: 'rgba8unorm',
+                    usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
+                },
+                false,
+                COMMAND_ENCODER_TYPE.IMMEDIATE
+            );
         }
 
         const directTexture = new DirectTexture(redGPUContext, `BakedFoliageImpostorAtlas_${bakeName}_${Date.now()}_${Math.random()}`, bakedGPUTexture);
         const directNormalTexture = new DirectTexture(redGPUContext, `BakedFoliageImpostorNormalAtlas_${bakeName}_${Date.now()}_${Math.random()}`, bakedNormalGPUTexture);
+        const directORMTexture = new DirectTexture(redGPUContext, `BakedFoliageImpostorORMAtlas_${bakeName}_${Date.now()}_${Math.random()}`, bakedORMGPUTexture);
 
         return {
+            baseColorTexture: directTexture,
             texture: directTexture,
             normalTexture: directNormalTexture,
+            packedORMTexture: directORMTexture,
+            ormTexture: directORMTexture,
             width: actualQuadWidth,
             height: actualQuadHeight,
             depth: aabb.depth,
             bottomOffset: actualBottomOffset,
         };
+
     }
 
     static #initBindGroupLayouts(redGPUContext: RedGPUContext) {
@@ -389,6 +551,10 @@ class FoliageImpostorBaker {
                 entries: [
                     {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
                     {binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
+                    {binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
+                    {binding: 3, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
+                    {binding: 4, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
+                    {binding: 5, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
                 ]
             });
         }
@@ -396,7 +562,7 @@ class FoliageImpostorBaker {
 
     static #getOrCreateBakePipeline(redGPUContext: RedGPUContext, sub: FoliageSubMesh): GPURenderPipeline | null {
         const gpuDevice = redGPUContext.gpuDevice;
-        const key = `BakePipeline_MRT_${sub.strideBytes}_${sub.material?.uuid || 'def'}`;
+        const key = `BakePipeline_MRT3_${sub.strideBytes}_${sub.material?.uuid || 'def'}`;
         let pipeline = this.#bakePipelineCache.get(key);
         if (pipeline) return pipeline;
 
@@ -427,22 +593,27 @@ class FoliageImpostorBaker {
                             {shaderLocation: 0, offset: 0, format: 'float32x3'},
                             {shaderLocation: 1, offset: 12, format: 'float32x3'},
                             {shaderLocation: 2, offset: 24, format: 'float32x2'},
-                            {shaderLocation: 3, offset: 40, format: 'float32x4'},
+                            {shaderLocation: 3, offset: 32, format: 'float32x2'},
+                            {shaderLocation: 4, offset: 40, format: 'float32x4'},
+                            {shaderLocation: 5, offset: 56, format: 'float32x4'},
                         ]
                     },
                     {
-                        arrayStride: 36 * 4,
+                        arrayStride: 48 * 4,
                         stepMode: 'instance',
                         attributes: [
-                            {shaderLocation: 4, offset: 0, format: 'float32x4'},
-                            {shaderLocation: 5, offset: 16, format: 'float32x4'},
-                            {shaderLocation: 6, offset: 32, format: 'float32x4'},
-                            {shaderLocation: 7, offset: 48, format: 'float32x4'},
-                            {shaderLocation: 8, offset: 64, format: 'float32x4'},
-                            {shaderLocation: 9, offset: 80, format: 'float32x4'},
-                            {shaderLocation: 10, offset: 96, format: 'float32x4'},
-                            {shaderLocation: 11, offset: 112, format: 'float32x4'},
-                            {shaderLocation: 12, offset: 128, format: 'float32x4'},
+                            {shaderLocation: 6, offset: 0, format: 'float32x4'},
+                            {shaderLocation: 7, offset: 16, format: 'float32x4'},
+                            {shaderLocation: 8, offset: 32, format: 'float32x4'},
+                            {shaderLocation: 9, offset: 48, format: 'float32x4'},
+                            {shaderLocation: 10, offset: 64, format: 'float32x4'},
+                            {shaderLocation: 11, offset: 80, format: 'float32x4'},
+                            {shaderLocation: 12, offset: 96, format: 'float32x4'},
+                            {shaderLocation: 13, offset: 112, format: 'float32x4'},
+                            {shaderLocation: 14, offset: 128, format: 'float32x4'},
+                            {shaderLocation: 15, offset: 144, format: 'float32x4'},
+                            {shaderLocation: 16, offset: 160, format: 'float32x4'},
+                            {shaderLocation: 17, offset: 176, format: 'float32x4'},
                         ]
                     }
                 ]
@@ -453,6 +624,10 @@ class FoliageImpostorBaker {
                 targets: [
                     {
                         format: 'rgba8unorm-srgb',
+                        blend: undefined
+                    },
+                    {
+                        format: 'rgba8unorm',
                         blend: undefined
                     },
                     {
@@ -478,3 +653,4 @@ class FoliageImpostorBaker {
 }
 
 export default FoliageImpostorBaker;
+
