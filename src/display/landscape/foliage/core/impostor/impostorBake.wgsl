@@ -43,8 +43,9 @@ fn main(
         finalColor *= diffuseSampleColor;
     }
 
-    // 🌿 베이크 단계에서는 완전 투명(a < 0.005)만 폐기하여 알파 안티앨리어싱 및 외곽 실루엣을 100% 보존
-    if (finalColor.a < 0.005) {
+    // 🌿 베이크 단계에서 glTF/UE5 표준 컷오프로 텍스처 배경(흰색/검은색) 오염을 100% 원천 차단
+    let bakeCutOff = select(0.3333, input.materialParams.w, input.materialParams.w > 0.0);
+    if (finalColor.a < bakeCutOff) {
         discard;
     }
 

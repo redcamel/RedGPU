@@ -16,7 +16,6 @@ fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
     let texColor = textureSample(baseColorTexture, baseColorTextureSampler, inputData.uv);
     let globalFragmentData = globalFragmentSSBO_PBR[inputData.globalFragmentSlotIndex];
-    let cutOff = select(0.3333, globalFragmentData.cutOff, globalFragmentData.cutOff > 0.0);
 
     let fadeOpacity = inputData.combinedOpacity;
     if (fadeOpacity < 0.999) {
@@ -30,12 +29,15 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
 
-    // 🌿 원거리 컷오프 극적 감쇄 (원거리 수목 밀도 극대화, 0.06 가드)
-    let uvDeriv = length(vec2<f32>(dpdx(inputData.uv.x), dpdy(inputData.uv.y)));
-    let decay = clamp(uvDeriv * 70.0, 0.0, 1.0);
-    let adaptiveCutOff = mix(cutOff, 0.06, decay);
-
-    if (texColor.a <= adaptiveCutOff) {
+    // 🌿 UE5 Foliage Mipmap Alpha Boost (원거리 밉맵 희석 보정으로 잎사귀 완벽 보존)
+    let ddxUV = dpdx(inputData.uv);
+    let ddyUV = dpdy(inputData.uv);
+    let maxDeriv = max(length(ddxUV), length(ddyUV));
+    let mipLevel = max(0.0, log2(max(maxDeriv * 1024.0, 1.0)));
+    let mipAlphaScale = 1.0 + mipLevel * 0.70;
+    let baseCutOff = select(0.3333, globalFragmentData.cutOff, globalFragmentData.cutOff > 0.0);
+    let effectiveAlpha = texColor.a * mipAlphaScale;
+    if (effectiveAlpha <= baseCutOff) {
         discard;
     }
 

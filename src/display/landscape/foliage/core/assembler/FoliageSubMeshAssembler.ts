@@ -12,7 +12,6 @@ import FoliageImpostorBaker from "../impostor/FoliageImpostorBaker";
 import FoliageSubMesh from "../../FoliageSubMesh";
 import type {FoliageLODInfo, FoliageTypeOptions} from "../../FoliageType";
 import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
-import GPU_BLEND_FACTOR from "../../../../../gpuConst/GPU_BLEND_FACTOR";
 
 const PBR_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
     {
@@ -296,13 +295,6 @@ class FoliageSubMeshAssembler {
                 if (mat.alphaBlend === 2 || mat.transparent || mat.alphaMode === 'BLEND' || mat.alphaMode === 'MASK') {
                     mat.useCutOff = false;
                     mat.cutOff = (mat.cutOff > 0) ? mat.cutOff : 0.3333;
-                    const {blendColorState, blendAlphaState} = mat;
-                    if (blendColorState && blendAlphaState) {
-                        blendColorState.srcFactor = GPU_BLEND_FACTOR.SRC_ALPHA;
-                        blendColorState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
-                        blendAlphaState.srcFactor = GPU_BLEND_FACTOR.SRC_ALPHA;
-                        blendAlphaState.dstFactor = GPU_BLEND_FACTOR.ONE_MINUS_SRC_ALPHA;
-                    }
                     mat.transparent = false;
                     mat.alphaBlend = 2;
                     mat.dirtyPipeline = true;
@@ -369,6 +361,44 @@ class FoliageSubMeshAssembler {
 
         if (rawList.length === 0) return [];
 
+        // 🌿 LOD별 AABB 바운딩 박스를 계산하여 피벗(밑동 Y=0, 중심 X=0, Z=0)을 자동으로 100% 일치화
+        let minX = Infinity, maxX = -Infinity;
+        let minY = Infinity, maxY = -Infinity;
+        let minZ = Infinity, maxZ = -Infinity;
+
+        for (let i = 0; i < rawList.length; i++) {
+            const raw = rawList[i];
+            const geom = raw.geometry;
+            const srcVB = geom.vertexBuffer;
+            const srcVData = srcVB?.data;
+            const vCount = srcVB?.vertexCount ?? 0;
+            const rawStride = raw.rawStride;
+            const m = raw.currentRelativeMatrix;
+
+            if (srcVData && vCount > 0) {
+                for (let v = 0; v < vCount; v++) {
+                    const srcIdx = v * rawStride;
+                    const x = srcVData[srcIdx + 0];
+                    const y = srcVData[srcIdx + 1];
+                    const z = srcVData[srcIdx + 2];
+                    const wx = m[0] * x + m[4] * y + m[8] * z + m[12];
+                    const wy = m[1] * x + m[5] * y + m[9] * z + m[13];
+                    const wz = m[2] * x + m[6] * y + m[10] * z + m[14];
+
+                    if (wx < minX) minX = wx;
+                    if (wx > maxX) maxX = wx;
+                    if (wy < minY) minY = wy;
+                    if (wy > maxY) maxY = wy;
+                    if (wz < minZ) minZ = wz;
+                    if (wz > maxZ) maxZ = wz;
+                }
+            }
+        }
+
+        const offsetX = (isFinite(minX) && isFinite(maxX)) ? (minX + maxX) * 0.5 : 0;
+        const offsetY = isFinite(minY) ? minY : 0;
+        const offsetZ = (isFinite(minZ) && isFinite(maxZ)) ? (minZ + maxZ) * 0.5 : 0;
+
         const getMaterialKey = (mat: any): string => {
             if (!mat) return 'default_mat';
             const matType = mat.constructor?.name || 'Material';
@@ -432,9 +462,9 @@ class FoliageSubMeshAssembler {
                         const x = srcVData[srcIdx + 0];
                         const y = srcVData[srcIdx + 1];
                         const z = srcVData[srcIdx + 2];
-                        combinedVertexData[dstIdx + 0] = m[0] * x + m[4] * y + m[8] * z + m[12];
-                        combinedVertexData[dstIdx + 1] = m[1] * x + m[5] * y + m[9] * z + m[13];
-                        combinedVertexData[dstIdx + 2] = m[2] * x + m[6] * y + m[10] * z + m[14];
+                        combinedVertexData[dstIdx + 0] = (m[0] * x + m[4] * y + m[8] * z + m[12]) - offsetX;
+                        combinedVertexData[dstIdx + 1] = (m[1] * x + m[5] * y + m[9] * z + m[13]) - offsetY;
+                        combinedVertexData[dstIdx + 2] = (m[2] * x + m[6] * y + m[10] * z + m[14]) - offsetZ;
 
 
                         if (rawStride >= 6) {
@@ -639,11 +669,11 @@ class FoliageSubMeshAssembler {
         const isImpostor = isImpostorOverride || mat instanceof OctahedralImpostorMaterial || mat?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof mat?.name === 'string' && mat.name.includes('Octahedral'));
         const isTransparent = !isImpostor && (!!mat.transparent || !!mat.use2PathRender);
         const isAlpha = !isImpostor && (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
-        const isMasked = !!mat.useCutOff || (mat.cutOff !== undefined && mat.cutOff > 0);
+        const isMasked = !!mat.useCutOff || (mat.cutOff !== undefined && mat.cutOff > 0) || isImpostor;
         const hasBaseColorTexture = !!(mat.baseColorTexture?.gpuTexture || mat.baseColorTexture?.src || mat.baseColorTexture?.url || (mat.diffuseTexture && (mat.diffuseTexture.gpuTexture || mat.diffuseTexture.src || mat.diffuseTexture.url)));
 
-        // 🌿 3D 식생 LOD 서브메시에 대해 Depth Prepass 2패스 적용 (임포스터는 1패스 'normal' 렌더링)
-        const isDepthPrepass = !isImpostor && !isTransparent && !isAlpha && (hasBaseColorTexture || isMasked);
+        // 🌿 3D 식생 및 임포스터 빌보드 공통 Depth Prepass 2패스 활성화 (완벽한 Z-Fighting 0% + 부드러운 셰이딩)
+        const isDepthPrepass = !isTransparent && !isAlpha && (hasBaseColorTexture || isMasked || isImpostor);
         const isMainOpaqueOrMasked = !isTransparent && !isAlpha;
         const mainDepthMode: FoliageDepthPassMode = isDepthPrepass ? 'mainShadingAfterDepth' : 'normal';
 

@@ -1,5 +1,7 @@
 import * as RedGPU from "../../../../dist/index.js";
 import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
+import FoliageImpostorDebugViewer from "./FoliageImpostorDebugViewer.js";
+
 
 const canvas = document.createElement('canvas');
 document.body.appendChild(canvas);
@@ -162,7 +164,7 @@ RedGPU.init(
                         foliageManager.addFoliageType({
                             name: `Tree_${baseName}`,
                             lods: lodConfigs,
-                            maxInstances: 150000,
+                            maxInstances: 250000,
                             minScale: [0.85, 0.85, 0.85],
                             maxScale: [1.35, 1.35, 1.35],
                             randomRotationY: true,
@@ -177,27 +179,27 @@ RedGPU.init(
         );
 
         // 2. Frangipani Tree (HD Realistic Tree + Octahedral Impostor) 로드
-        new RedGPU.GLTFLoader(
-            redGPUContext,
-            '../../../assets/terrain/realistic_hd_frangipani_tree_950.glb',
-            (loader) => {
-                const root = loader.resultMesh;
-                console.log('🌸 [realistic_hd_frangipani_tree_950.glb] Loaded Root:', root);
-
-                foliageManager.addFoliageType({
-                    name: 'FrangipaniTree',
-                    lods: [{mesh: root, lodDistance: 120}],
-                    maxInstances: 50000,
-                    minScale: [4.2, 4.2, 4.2],
-                    maxScale: [6.2, 6.2, 6.2],
-                    randomRotationY: true,
-                    cullingDistance: 3500,
-                    fadeStartDistance: 2800,
-                    isFoliage: true,
-                    useImpostor: true
-                });
-            }
-        );
+        // new RedGPU.GLTFLoader(
+        //     redGPUContext,
+        //     '../../../assets/terrain/realistic_hd_frangipani_tree_950.glb',
+        //     (loader) => {
+        //         const root = loader.resultMesh;
+        //         console.log('🌸 [realistic_hd_frangipani_tree_950.glb] Loaded Root:', root);
+        //
+        //         foliageManager.addFoliageType({
+        //             name: 'FrangipaniTree',
+        //             lods: [{mesh: root, lodDistance: 120}],
+        //             maxInstances: 50000,
+        //             minScale: [4.2, 4.2, 4.2],
+        //             maxScale: [6.2, 6.2, 6.2],
+        //             randomRotationY: true,
+        //             cullingDistance: 3500,
+        //             fadeStartDistance: 2800,
+        //             isFoliage: true,
+        //             useImpostor: true
+        //         });
+        //     }
+        // );
 
         landscape.debuggerManager.spatialGrid = true;
 
@@ -253,6 +255,10 @@ const renderTestPane = (redGPUContext, view, skyAtmosphere, landscape, controlle
 
             if (foliageManager) {
                 const folderFoliage = pane.addFolder({title: 'Foliage', expanded: true});
+                folderFoliage.addButton({title: '📷 Open Impostor Atlas Viewer (Key: I)'}).on('click', () => {
+                    FoliageImpostorDebugViewer.open(redGPUContext, foliageManager);
+                });
+
 
                 const grassType = foliageManager.getFoliageType('BasicGrass');
                 if (grassType) {
@@ -315,6 +321,9 @@ const renderTestPane = (redGPUContext, view, skyAtmosphere, landscape, controlle
                     label: '3D -> Impostor Dist'
                 });
                 subFrangipani.addBinding(frangipaniProxy, 'cullingDist', {min: 1000, max: 8000, step: 100});
+                subFrangipani.addButton({title: '🔍 Inspect Frangipani Atlas'}).on('click', () => {
+                    FoliageImpostorDebugViewer.open(redGPUContext, foliageManager, 'FrangipaniTree');
+                });
 
                 const subPine = folderFoliage.addFolder({title: 'PineTree (Multi-LOD + Octahedral)', expanded: true});
                 const pineProxy = {
@@ -369,6 +378,11 @@ const renderTestPane = (redGPUContext, view, skyAtmosphere, landscape, controlle
                     label: 'LOD 2 -> Impostor'
                 });
                 subPine.addBinding(pineProxy, 'cullingDist', {min: 1000, max: 8000, step: 100});
+                subPine.addButton({title: '🔍 Inspect PineTree Atlas'}).on('click', () => {
+                    const pineName = foliageManager.getFoliageType('Tree_Pine_large_1') ? 'Tree_Pine_large_1' : 'Pine_large_1';
+                    FoliageImpostorDebugViewer.open(redGPUContext, foliageManager, pineName);
+                });
+
             }
 
             const folderSpatial = pane.addFolder({title: 'Spatial', expanded: true});

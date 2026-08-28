@@ -82,8 +82,8 @@ fn getSubTileRotatedUV(quadUV: vec2<f32>, viewDir: vec3<f32>, gridDir: vec3<f32>
 fn sampleOctahedralAtlas(tex: texture_2d<f32>, smp: sampler, gridCoords: vec2<f32>, subUV: vec2<f32>, n: f32, ddxUV: vec2<f32>, ddyUV: vec2<f32>) -> vec4<f32> {
     let isInside = (subUV.x >= 0.0 && subUV.x <= 1.0 && subUV.y >= 0.0 && subUV.y <= 1.0);
     let clampedGrid = clamp(gridCoords, vec2<f32>(0.0), vec2<f32>(n - 1.0));
-    let halfTexelInTile = 0.5 / 256.0;
-    let safeSubUV = clamp(subUV, vec2<f32>(halfTexelInTile), vec2<f32>(1.0 - halfTexelInTile));
+    let oneTexelInTile = 1.0 / 256.0;
+    let safeSubUV = clamp(subUV, vec2<f32>(oneTexelInTile), vec2<f32>(1.0 - oneTexelInTile));
     let atlasUV = (clampedGrid + safeSubUV) / n;
 
     // 🌿 Unreal Engine 5 Standard: 연속적인 빌보드 쿼드 미분(ddxUV/ddyUV)을 명시 전달하여 미분 불연속 튐 완전 차단
@@ -209,20 +209,15 @@ fn main(inputData: InputData) -> OutputFragment {
     let w01 = (1.0 - frac.x) * frac.y;
     let w11 = frac.x * frac.y;
 
-    // 🌿 Alpha-Weighted Unpremultiply for BaseColor (Mipmap 다운샘플링 검은 띠 완전 차단)
-    let tapRGB00 = s00.rgb / max(s00.a, 0.01);
-    let tapRGB10 = s10.rgb / max(s10.a, 0.01);
-    let tapRGB01 = s01.rgb / max(s01.a, 0.01);
-    let tapRGB11 = s11.rgb / max(s11.a, 0.01);
-
+    // 🌿 4개 타일 가중 합성 및 알파 커버리지 정규화 (100% 온전한 원본 명도 유지)
     let cov00 = w00 * s00.a;
     let cov10 = w10 * s10.a;
     let cov01 = w01 * s01.a;
     let cov11 = w11 * s11.a;
     let totalCoverage = cov00 + cov10 + cov01 + cov11;
-    let safeCoverage = max(totalCoverage, 0.0001);
+    let safeCoverage = max(totalCoverage, 0.001);
 
-    var albedo = clamp((tapRGB00 * cov00 + tapRGB10 * cov10 + tapRGB01 * cov01 + tapRGB11 * cov11) / safeCoverage, vec3<f32>(0.0), vec3<f32>(1.0));
+    var albedo = (s00.rgb * cov00 + s10.rgb * cov10 + s01.rgb * cov01 + s11.rgb * cov11) / safeCoverage;
     let rawNormalDepth = (n00 * cov00 + n10 * cov10 + n01 * cov01 + n11 * cov11) / safeCoverage;
     let rawORM = (orm00 * cov00 + orm10 * cov10 + orm01 * cov01 + orm11 * cov11) / safeCoverage;
 
@@ -246,10 +241,9 @@ fn main(inputData: InputData) -> OutputFragment {
     let sharpnessFactor = clamp((maxCornerWeight - 0.25) / 0.75, 0.0, 1.0);
     let reconstructedAlpha = mix(linearAlpha, maxAlpha, mix(0.70, 0.95, sharpnessFactor));
 
-    // 🌿 깔끔한 0.50 CutOff + 스크린 미분 안티앨리어싱 (어두운 외곽선 완벽 제거)
-    let aaWidth = max(length(vec2<f32>(dpdx(reconstructedAlpha), dpdy(reconstructedAlpha))), 0.001);
-    let aaAlpha = (reconstructedAlpha - 0.50) / aaWidth + 0.5;
-    if (clamp(aaAlpha, 0.0, 1.0) <= 0.5) {
+    // 🌿 부드러운 2패스 알파 블렌딩: 투명 찌꺼기(< 0.01)만 폐기하고 배경과 스며들도록 출력
+    let finalAlpha = clamp(reconstructedAlpha, 0.0, 1.0);
+    if (finalAlpha < 0.01) {
         discard;
     }
 
@@ -266,11 +260,12 @@ fn main(inputData: InputData) -> OutputFragment {
     if (abs(dot(instanceQuat, instanceQuat) - 1.0) < 0.2) {
         N = normalize(rotateVectorByQuaternion(bakedN, instanceQuat));
     }
-    if (dot(N, V) < 0.0) {
-        N = -N;
-    }
 
-    let NdotV = max(abs(dot(N, V)), 0.04);
+    // 🌿 UE5 Two-Sided Foliage Standard:
+    // 기하 노멀(N)은 3D 월드 노멀 그대로 유지하여 디퓨즈와 투광광을 물리적으로 완벽하게 계산하고,
+    // 스펙큘러 하이라이트 및 IBL 반사에서만 카메라 페이싱 노멀(N_spec)을 적용합니다.
+    let N_spec = select(-N, N, dot(N, V) >= 0.0);
+    let NdotV_spec = max(dot(N_spec, V), 0.04);
     let preExposure = systemUniforms.preExposure;
 
     // 4. Directional Shadow calculation
@@ -294,7 +289,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let F0_metal = albedo;
     let F0 = mix(F0_dielectric, F0_metal, metallic);
 
-    // 6. Direct Directional Light (Exact RedGPU PBR Two-Sided Foliage + Specular)
+    // 6. Direct Directional Light (Exact UE5 PBR Two-Sided Foliage + Specular)
     var totalDirectLighting = vec3<f32>(0.0);
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
@@ -306,7 +301,7 @@ fn main(inputData: InputData) -> OutputFragment {
         let NdotL_raw = dot(N, L);
         let NdotL = max(NdotL_raw, 0.0);
         let H = normalize(L + V);
-        let NdotH = max(dot(N, H), 0.0);
+        let NdotH_spec = max(dot(N_spec, H), 0.0);
         let LdotH = max(dot(L, H), 0.0);
         let VdotH = max(dot(V, H), 0.0);
 
@@ -319,16 +314,16 @@ fn main(inputData: InputData) -> OutputFragment {
         }
 
         let F = getFresnel(VdotH, F0);
-        let specBRDF = getDirectSpecularBRDF(F, roughness, NdotH, NdotV, NdotL);
-        let diffuseReflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughness, albedo);
+        let specBRDF = getDirectSpecularBRDF(F, roughness, NdotH_spec, NdotV_spec, NdotL);
+        let diffuseReflection = getDirectDiffuseBRDF(NdotL, NdotV_spec, LdotH, roughness, albedo);
 
-        // 🌿 Two-Sided Foliage Subsurface Transmission & Wrap Scattering (UE5 Standard - 음영부 검은 아티팩트 완전 제거)
-        // 잎사귀 투광 및 산란광으로 햇빛 반대편(Dark Side)이 새까맣게 타는 현상을 원천 방지하고 부드러운 유기적 명암 표현
+        // 🌿 Two-Sided Foliage Subsurface Transmission & Wrap Scattering (UE5 Standard)
         let backLight = max(0.0, -NdotL_raw);
         let viewSunPhase = max(dot(L, V), 0.0);
         let forwardScatter = pow(viewSunPhase, 2.0) * 0.5 + 0.5;
-        let diffuseTransmission = albedo * (backLight * (forwardScatter * 0.6 + 0.4) * 0.75);
+        let diffuseTransmission = albedo * (backLight * (forwardScatter * 0.5 + 0.5) * 0.5);
 
+        // 🌿 직사광(Diffuse Reflection) 100% + 배면 투광광(Diffuse Transmission)
         let totalDiffuse = diffuseReflection + diffuseTransmission * subsurfaceAmount;
         let dielectricPart = (specBRDF * NdotL) + (vec3<f32>(1.0) - F) * totalDiffuse;
         let metallicPart = specBRDF * NdotL;
@@ -343,8 +338,8 @@ fn main(inputData: InputData) -> OutputFragment {
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
 
     if (u_usePrefilterTexture || u_useSkyAtmosphere) {
-        let R = reflect(-V, N);
-        let NdotV_IBL = max(abs(dot(N, V)), 0.04);
+        let R = reflect(-V, N_spec);
+        let NdotV_IBL = NdotV_spec;
         var reflectedColor = vec3<f32>(0.0);
         var iblDiffuseColor = vec3<f32>(0.0);
 
@@ -352,7 +347,7 @@ fn main(inputData: InputData) -> OutputFragment {
             let iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
             let mipLevel = roughness * iblMipmapCount;
             reflectedColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel).rgb * preExposure * systemUniforms.iblIntensity;
-            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * preExposure * systemUniforms.iblIntensity * INV_PI;
+            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N_spec, 0).rgb * preExposure * systemUniforms.iblIntensity * INV_PI;
         }
 
         if (u_useSkyAtmosphere) {
@@ -366,8 +361,8 @@ fn main(inputData: InputData) -> OutputFragment {
             let specSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb * skyIntensity * preExposure;
             reflectedColor = (reflectedColor * specTrans) + specSkyScat;
 
-            let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
-            let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity * preExposure;
+            let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N_spec.y, atmH);
+            let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N_spec, 0.0).rgb * skyIntensity * preExposure;
             iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
 
@@ -375,7 +370,7 @@ fn main(inputData: InputData) -> OutputFragment {
         let energyCompensation = 1.0 + F0 * (1.0 / max(envBRDF.x + envBRDF.y, 1e-4) - 1.0);
         reflectedColor *= energyCompensation;
 
-        let horizonOcclusion = saturate(1.0 + 1.1 * dot(R, N));
+        let horizonOcclusion = saturate(1.0 + 1.1 * dot(R, N_spec));
         reflectedColor *= horizonOcclusion * horizonOcclusion;
 
         let fresnelPower = 5.0 - 2.0 * roughness;
@@ -409,8 +404,8 @@ fn main(inputData: InputData) -> OutputFragment {
     let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
     let baseReflectionStrength = smoothnessCurved * (0.04 + 0.96 * metallic * metallic);
 
-    output.color = vec4<f32>(finalRgb, 1.0);
-    output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
+    output.color = vec4<f32>(finalRgb, finalAlpha);
+    output.gBufferNormal = vec4<f32>(N_spec * 0.5 + 0.5, baseReflectionStrength);
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
 
     return output;
