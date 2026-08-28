@@ -79,13 +79,15 @@ fn getSubTileRotatedUV(quadUV: vec2<f32>, viewDir: vec3<f32>, gridDir: vec3<f32>
     return rotatedP + vec2<f32>(0.5);
 }
 
-fn sampleOctahedralAtlas(tex: texture_2d<f32>, smp: sampler, gridCoords: vec2<f32>, subUV: vec2<f32>, n: f32) -> vec4<f32> {
+fn sampleOctahedralAtlas(tex: texture_2d<f32>, smp: sampler, gridCoords: vec2<f32>, subUV: vec2<f32>, n: f32, ddxUV: vec2<f32>, ddyUV: vec2<f32>) -> vec4<f32> {
     let isInside = (subUV.x >= 0.0 && subUV.x <= 1.0 && subUV.y >= 0.0 && subUV.y <= 1.0);
     let clampedGrid = clamp(gridCoords, vec2<f32>(0.0), vec2<f32>(n - 1.0));
     let halfTexelInTile = 0.5 / 256.0;
     let safeSubUV = clamp(subUV, vec2<f32>(halfTexelInTile), vec2<f32>(1.0 - halfTexelInTile));
     let atlasUV = (clampedGrid + safeSubUV) / n;
-    let sampled = textureSample(tex, smp, atlasUV);
+
+    // 🌿 Unreal Engine 5 Standard: 연속적인 빌보드 쿼드 미분(ddxUV/ddyUV)을 명시 전달하여 미분 불연속 튐 완전 차단
+    let sampled = textureSampleGrad(tex, smp, atlasUV, ddxUV, ddyUV);
     return select(vec4<f32>(0.0), sampled, isInside);
 }
 
@@ -181,22 +183,25 @@ fn main(inputData: InputData) -> OutputFragment {
     let uv01 = getSubTileRotatedUV(inputData.uv, localView, dir01);
     let uv11 = getSubTileRotatedUV(inputData.uv, localView, dir11);
 
-    // 1. 3-Atlas 4-Tap Bilinear Sampling (BaseColor, Normal+Depth, ORM+Subsurface)
-    let s00 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g00, uv00, n);
-    let s10 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g10, uv10, n);
-    let s01 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g01, uv01, n);
-    let s11 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g11, uv11, n);
+    // 🌿 Unreal Engine 5 Standard: 연속적인 빌보드 쿼드 UV로부터 타일 스케일 미분 벡터 계산 (임의 LOD 계산 없이 100% 하드웨어 네이티브 밉맵)
+    let ddxUV = dpdx(inputData.uv / n);
+    let ddyUV = dpdy(inputData.uv / n);
 
-    let n00 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g00, uv00, n);
-    let n10 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g10, uv10, n);
-    let n01 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g01, uv01, n);
-    let n11 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g11, uv11, n);
+    // 1. 3-Atlas 4-Tap Bilinear Sampling (BaseColor, Normal+Depth, ORM+Subsurface: UE5 Standard textureSampleGrad)
+    let s00 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g00, uv00, n, ddxUV, ddyUV);
+    let s10 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g10, uv10, n, ddxUV, ddyUV);
+    let s01 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g01, uv01, n, ddxUV, ddyUV);
+    let s11 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g11, uv11, n, ddxUV, ddyUV);
 
-    let orm00 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g00, uv00, n);
-    let orm10 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g10, uv10, n);
-    let orm01 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g01, uv01, n);
-    let orm11 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g11, uv11, n);
+    let n00 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g00, uv00, n, ddxUV, ddyUV);
+    let n10 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g10, uv10, n, ddxUV, ddyUV);
+    let n01 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g01, uv01, n, ddxUV, ddyUV);
+    let n11 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g11, uv11, n, ddxUV, ddyUV);
 
+    let orm00 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g00, uv00, n, ddxUV, ddyUV);
+    let orm10 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g10, uv10, n, ddxUV, ddyUV);
+    let orm01 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g01, uv01, n, ddxUV, ddyUV);
+    let orm11 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g11, uv11, n, ddxUV, ddyUV);
 
     // 🌿 4-코너 Bilinear 기본 가중치 (합 = 1.0)
     let w00 = (1.0 - frac.x) * (1.0 - frac.y);
@@ -204,7 +209,12 @@ fn main(inputData: InputData) -> OutputFragment {
     let w01 = (1.0 - frac.x) * frac.y;
     let w11 = frac.x * frac.y;
 
-    // 🌿 4-타일 가중치 및 커버리지 기반 선형 합성 (과노출/나눗셈 왜곡 완전 제거)
+    // 🌿 Alpha-Weighted Unpremultiply for BaseColor (Mipmap 다운샘플링 검은 띠 완전 차단)
+    let tapRGB00 = s00.rgb / max(s00.a, 0.01);
+    let tapRGB10 = s10.rgb / max(s10.a, 0.01);
+    let tapRGB01 = s01.rgb / max(s01.a, 0.01);
+    let tapRGB11 = s11.rgb / max(s11.a, 0.01);
+
     let cov00 = w00 * s00.a;
     let cov10 = w10 * s10.a;
     let cov01 = w01 * s01.a;
@@ -212,7 +222,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let totalCoverage = cov00 + cov10 + cov01 + cov11;
     let safeCoverage = max(totalCoverage, 0.0001);
 
-    var albedo = (s00.rgb * cov00 + s10.rgb * cov10 + s01.rgb * cov01 + s11.rgb * cov11) / safeCoverage;
+    var albedo = clamp((tapRGB00 * cov00 + tapRGB10 * cov10 + tapRGB01 * cov01 + tapRGB11 * cov11) / safeCoverage, vec3<f32>(0.0), vec3<f32>(1.0));
     let rawNormalDepth = (n00 * cov00 + n10 * cov10 + n01 * cov01 + n11 * cov11) / safeCoverage;
     let rawORM = (orm00 * cov00 + orm10 * cov10 + orm01 * cov01 + orm11 * cov11) / safeCoverage;
 
@@ -230,20 +240,16 @@ fn main(inputData: InputData) -> OutputFragment {
     }
 
     // 🌿 수학적 옥타헤드럴 알파 재구성 (Ryan Brucks Kernel - Alpha Erosion Prevention)
-    // 4-Tap Bilinear 합성 시 3D 시차(Parallax)로 인해 잎사귀 위치가 어긋나면서 발생하는 알파 침식을 방지.
-    // maxAlpha의 비중을 지배적으로 유지하여 각도 회전 중에도 잎사귀와 가지가 결손되지 않도록 보호.
     let linearAlpha = totalCoverage;
     let maxAlpha = max(max(s00.a, s10.a), max(s01.a, s11.a));
     let maxCornerWeight = max(max(w00, w10), max(w01, w11));
     let sharpnessFactor = clamp((maxCornerWeight - 0.25) / 0.75, 0.0, 1.0);
     let reconstructedAlpha = mix(linearAlpha, maxAlpha, mix(0.70, 0.95, sharpnessFactor));
 
-    // 🌿 스크린 공간 미분(Screen-Space Deriv) 기반 Adaptive CutOff
-    let quadDeriv = length(vec2<f32>(dpdx(inputData.uv.x), dpdy(inputData.uv.y)));
-    let mipDecay = clamp(quadDeriv * 70.0, 0.0, 1.0);
-    let adaptiveCutOff = mix(0.3333, 0.10, mipDecay);
-
-    if (reconstructedAlpha <= adaptiveCutOff) {
+    // 🌿 깔끔한 0.50 CutOff + 스크린 미분 안티앨리어싱 (어두운 외곽선 완벽 제거)
+    let aaWidth = max(length(vec2<f32>(dpdx(reconstructedAlpha), dpdy(reconstructedAlpha))), 0.001);
+    let aaAlpha = (reconstructedAlpha - 0.50) / aaWidth + 0.5;
+    if (clamp(aaAlpha, 0.0, 1.0) <= 0.5) {
         discard;
     }
 
@@ -316,11 +322,12 @@ fn main(inputData: InputData) -> OutputFragment {
         let specBRDF = getDirectSpecularBRDF(F, roughness, NdotH, NdotV, NdotL);
         let diffuseReflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughness, albedo);
 
-        // Two-Sided Foliage Subsurface Transmission (Backlight Glow + Forward Scatter, Exact LOD0 match)
+        // 🌿 Two-Sided Foliage Subsurface Transmission & Wrap Scattering (UE5 Standard - 음영부 검은 아티팩트 완전 제거)
+        // 잎사귀 투광 및 산란광으로 햇빛 반대편(Dark Side)이 새까맣게 타는 현상을 원천 방지하고 부드러운 유기적 명암 표현
         let backLight = max(0.0, -NdotL_raw);
         let viewSunPhase = max(dot(L, V), 0.0);
         let forwardScatter = pow(viewSunPhase, 2.0) * 0.5 + 0.5;
-        let diffuseTransmission = albedo * (backLight * forwardScatter * 0.5);
+        let diffuseTransmission = albedo * (backLight * (forwardScatter * 0.6 + 0.4) * 0.75);
 
         let totalDiffuse = diffuseReflection + diffuseTransmission * subsurfaceAmount;
         let dielectricPart = (specBRDF * NdotL) + (vec3<f32>(1.0) - F) * totalDiffuse;
@@ -398,8 +405,12 @@ fn main(inputData: InputData) -> OutputFragment {
     let tinted = getTintBlendMode(vec4<f32>(finalRgb, 1.0), globalFragmentData.tintBlendMode, globalFragmentData.tint);
     finalRgb = tinted.rgb;
 
+    let smoothness = 1.0 - roughness;
+    let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
+    let baseReflectionStrength = smoothnessCurved * (0.04 + 0.96 * metallic * metallic);
+
     output.color = vec4<f32>(finalRgb, 1.0);
-    output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, 1.0);
+    output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
 
     return output;
