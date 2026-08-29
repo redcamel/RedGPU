@@ -66,7 +66,6 @@ fn getSubTileRotatedUV(quadUV: vec2<f32>, viewDir: vec3<f32>, gridDir: vec3<f32>
     let lenVH = length(viewH);
     let lenGH = length(gridH);
 
-    // 수평 성분이 충분할 때만 방위각 차이 계산 (상공 뷰에서 180도 반전 요동 원천 차단)
     var rotAngle = 0.0;
     if (lenVH > 0.01 && lenGH > 0.01) {
         let angleV = atan2(viewDir.z, viewDir.x);
@@ -82,7 +81,6 @@ fn getSubTileRotatedUV(quadUV: vec2<f32>, viewDir: vec3<f32>, gridDir: vec3<f32>
 
     let c = cos(rotAngle);
     let s = sin(rotAngle);
-
     let p = quadUV - vec2<f32>(0.5);
     let rotatedP = vec2<f32>(p.x * c - p.y * s, p.x * s + p.y * c);
     return rotatedP + vec2<f32>(0.5);

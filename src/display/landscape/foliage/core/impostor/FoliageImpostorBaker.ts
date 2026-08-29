@@ -320,7 +320,7 @@ class FoliageImpostorBaker {
                 mat4.transpose(tempNMat, tempNMat);
 
                 let r = 1.0, g = 1.0, b = 1.0, a = 1.0;
-                let roughness = 0.7;
+                let roughness = 1.0;
                 let metallic = 0.0;
                 let ao = 1.0;
                 let cutOff = 0.35;
@@ -438,7 +438,7 @@ class FoliageImpostorBaker {
 
                 {
                     view: bakedORMGPUTexture.createView({baseMipLevel: 0, mipLevelCount: 1}),
-                    clearValue: {r: 1.0, g: 0.7, b: 0.0, a: 0.0},
+                    clearValue: {r: 1.0, g: 1.0, b: 0.0, a: 0.0},
                     loadOp: 'clear',
                     storeOp: 'store',
                 },
