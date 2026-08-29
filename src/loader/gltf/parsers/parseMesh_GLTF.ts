@@ -143,7 +143,10 @@ const parseMesh_GLTF = function (gltfLoader: GLTFLoader, gltfData: GLTF, gltfMes
         }
         /////////////////////////////////////////////////////////
         // 최종데이터 생산
-        if (verticesColor_0.length) tMaterial.useVertexColor_0 = true;
+        if (verticesColor_0.length) {
+            tMaterial.useVertexColor = true;
+            (tMaterial as any).useVertexColor_0 = true;
+        }
 
         let normalData;
         // keepLog('normals',normals,vertices,indices)
