@@ -47,21 +47,29 @@ fn hemiOctahedralUVToDir(uv: vec2<f32>) -> vec3<f32> {
 }
 
 // Computes 2D rotation of quad UV so that the baked tile aligns seamlessly with current camera view
+// 🌿 UE5 Standard atan2 방위각 차이 기반 회전 + 상공(Top-down) 극점 특이점 스무딩(Pole Singularity Smoothing)
 fn getSubTileRotatedUV(quadUV: vec2<f32>, viewDir: vec3<f32>, gridDir: vec3<f32>) -> vec2<f32> {
-    let up = vec3<f32>(0.0, 1.0, 0.0);
+    let viewH = vec2<f32>(viewDir.x, viewDir.z);
+    let gridH = vec2<f32>(gridDir.x, gridDir.z);
+    let lenVH = length(viewH);
+    let lenGH = length(gridH);
 
-    var vRight = cross(up, viewDir);
-    let lenVR = length(vRight);
-    vRight = select(vec3<f32>(1.0, 0.0, 0.0), vRight / lenVR, lenVR > 0.0001);
-    let vUp = cross(viewDir, vRight);
+    // 수평 성분이 충분할 때만 방위각 차이 계산 (상공 뷰에서 180도 반전 요동 원천 차단)
+    var rotAngle = 0.0;
+    if (lenVH > 0.01 && lenGH > 0.01) {
+        let angleV = atan2(viewDir.z, viewDir.x);
+        let angleG = atan2(gridDir.z, gridDir.x);
+        var diff = angleV - angleG;
+        // [-PI, PI] 범위로 랩핑
+        diff = diff - floor((diff + 3.14159265) / 6.2831853) * 6.2831853;
 
-    var gRight = cross(up, gridDir);
-    let lenGR = length(gRight);
-    gRight = select(vec3<f32>(1.0, 0.0, 0.0), gRight / lenGR, lenGR > 0.0001);
+        // Top-Down 극점 영역에서의 부드러운 감쇄
+        let poleFade = clamp(min(lenVH, lenGH) * 5.0, 0.0, 1.0);
+        rotAngle = diff * poleFade;
+    }
 
-    // 2D Rotation from grid tile to view
-    let c = dot(gRight, vRight);
-    let s = dot(gRight, vUp);
+    let c = cos(rotAngle);
+    let s = sin(rotAngle);
 
     let p = quadUV - vec2<f32>(0.5);
     let rotatedP = vec2<f32>(p.x * c - p.y * s, p.x * s + p.y * c);

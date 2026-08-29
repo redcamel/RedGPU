@@ -341,13 +341,13 @@ class FoliageImpostorBaker {
                             a = bcf.a ?? 1.0;
                         }
                     }
-                    useVertexColor = !!mat.useVertexColor;
                     if (typeof mat.roughnessFactor === 'number') roughness = mat.roughnessFactor;
                     else if (typeof mat.roughness === 'number') roughness = mat.roughness;
                     if (typeof mat.metallicFactor === 'number') metallic = mat.metallicFactor;
                     else if (typeof mat.metallic === 'number') metallic = mat.metallic;
                     if (typeof mat.occlusionStrength === 'number') ao = mat.occlusionStrength;
                     if (typeof mat.cutOff === 'number' && mat.cutOff > 0) cutOff = mat.cutOff;
+                    useVertexColor = !!(mat.useVertexColor || mat.useVertexColor_0 || mat.useVertexColor0);
                 }
 
                 const diffTex = mat.diffuseTexture || mat.baseColorTexture;

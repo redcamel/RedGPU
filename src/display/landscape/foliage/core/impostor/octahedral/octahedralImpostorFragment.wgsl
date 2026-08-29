@@ -58,21 +58,29 @@ fn hemiOctahedralUVToDir(uv: vec2<f32>) -> vec3<f32> {
 }
 
 // Computes 2D rotation of quad UV so that the baked tile aligns seamlessly with current camera view
+// 🌿 UE5 Standard atan2 방위각 차이 기반 회전 + 상공(Top-down) 극점 특이점 스무딩(Pole Singularity Smoothing)
 fn getSubTileRotatedUV(quadUV: vec2<f32>, viewDir: vec3<f32>, gridDir: vec3<f32>) -> vec2<f32> {
-    let up = vec3<f32>(0.0, 1.0, 0.0);
+    let viewH = vec2<f32>(viewDir.x, viewDir.z);
+    let gridH = vec2<f32>(gridDir.x, gridDir.z);
+    let lenVH = length(viewH);
+    let lenGH = length(gridH);
 
-    var vRight = cross(up, viewDir);
-    let lenVR = length(vRight);
-    vRight = select(vec3<f32>(1.0, 0.0, 0.0), vRight / lenVR, lenVR > 0.0001);
-    let vUp = cross(viewDir, vRight);
+    // 수평 성분이 충분할 때만 방위각 차이 계산 (상공 뷰에서 180도 반전 요동 원천 차단)
+    var rotAngle = 0.0;
+    if (lenVH > 0.01 && lenGH > 0.01) {
+        let angleV = atan2(viewDir.z, viewDir.x);
+        let angleG = atan2(gridDir.z, gridDir.x);
+        var diff = angleV - angleG;
+        // [-PI, PI] 범위로 랩핑
+        diff = diff - floor((diff + 3.14159265) / 6.2831853) * 6.2831853;
 
-    var gRight = cross(up, gridDir);
-    let lenGR = length(gRight);
-    gRight = select(vec3<f32>(1.0, 0.0, 0.0), gRight / lenGR, lenGR > 0.0001);
+        // Top-Down 극점 영역에서의 부드러운 감쇄
+        let poleFade = clamp(min(lenVH, lenGH) * 5.0, 0.0, 1.0);
+        rotAngle = diff * poleFade;
+    }
 
-    // 2D Rotation from grid tile to view
-    let c = dot(gRight, vRight);
-    let s = dot(gRight, vUp);
+    let c = cos(rotAngle);
+    let s = sin(rotAngle);
 
     let p = quadUV - vec2<f32>(0.5);
     let rotatedP = vec2<f32>(p.x * c - p.y * s, p.x * s + p.y * c);
@@ -217,14 +225,10 @@ fn main(inputData: InputData) -> OutputFragment {
     let totalCoverage = cov00 + cov10 + cov01 + cov11;
     let safeCoverage = max(totalCoverage, 0.001);
 
-    // 🌿 각 타일별 바이리니어 샘플링 시 검은 투명 배경과의 혼합으로 떨어진 명도를 원색으로 복원 (Un-premultiply)
-    let rgb00 = s00.rgb / max(s00.a, 0.001);
-    let rgb10 = s10.rgb / max(s10.a, 0.001);
-    let rgb01 = s01.rgb / max(s01.a, 0.001);
-    let rgb11 = s11.rgb / max(s11.a, 0.001);
-
-    // 🌿 나뭇잎이 존재하는 타일들의 정확한 가중 평균 계산 (Black Fringe 및 White Flare 원천 차단)
-    var albedo = (rgb00 * cov00 + rgb10 * cov10 + rgb01 * cov01 + rgb11 * cov11) / safeCoverage;
+    // 🌿 베이크 텍스처는 (0,0,0,0) 배경에서 바이리니어 샘플링되므로 s.rgb는 정확히 (TrueRGB * s.a) 상태입니다.
+    // (s.rgb * w)의 합을 safeCoverage로 나누어 노이즈 증폭 없이 원본 TrueRGB 명도를 100% 깨끗하게 복원
+    var albedo = (s00.rgb * w00 + s10.rgb * w10 + s01.rgb * w01 + s11.rgb * w11) / safeCoverage;
+    albedo = clamp(albedo, vec3<f32>(0.0), vec3<f32>(1.0));
     let rawNormalDepth = (n00 * cov00 + n10 * cov10 + n01 * cov01 + n11 * cov11) / safeCoverage;
     let rawORM = (orm00 * cov00 + orm10 * cov10 + orm01 * cov01 + orm11 * cov11) / safeCoverage;
 
@@ -264,25 +268,16 @@ fn main(inputData: InputData) -> OutputFragment {
     let toCamVec = camPos - inputData.vertexPosition;
     let V = normalize(toCamVec);
 
-    // 3. Unpack True 3D Baked World Normal and transform to World Space via Instance Rotation (Exact LOD0 match)
-    var bakedN = normalize(rawNormalDepth.rgb * 2.0 - 1.0);
-    if (length(bakedN) < 0.1) {
-        bakedN = vec3<f32>(0.0, 1.0, 0.0);
-    }
-    let instanceQuat = inputData.vertexColor_0;
-    var N = bakedN;
-    if (abs(dot(instanceQuat, instanceQuat) - 1.0) < 0.2) {
-        N = normalize(rotateVectorByQuaternion(bakedN, instanceQuat));
+    // 3. Unpack True 3D Baked Normal (Pure PBR matching)
+    var N = normalize(rawNormalDepth.rgb * 2.0 - 1.0);
+    if (length(N) < 0.1) {
+        N = vec3<f32>(0.0, 1.0, 0.0);
     }
 
-    // 🌿 UE5 Two-Sided Foliage Standard:
-    // 기하 노멀(N)은 3D 월드 노멀 그대로 유지하여 디퓨즈와 투광광을 물리적으로 완벽하게 계산하고,
-    // 스펙큘러 하이라이트 및 IBL 반사에서만 카메라 페이싱 노멀(N_spec)을 적용합니다.
-    let N_spec = select(-N, N, dot(N, V) >= 0.0);
-    let NdotV_spec = max(dot(N_spec, V), 0.04);
+    let NdotV = max(abs(dot(N, V)), 0.04);
     let preExposure = systemUniforms.preExposure;
 
-    // 4. Directional Shadow calculation
+    // 4. Directional Shadow calculation (Exact pbrMaterial match)
     var shadowVis: f32 = 1.0;
     shadowVis = getDirectionalShadowVisibility(
         directionalShadowMap,
@@ -294,16 +289,15 @@ fn main(inputData: InputData) -> OutputFragment {
     );
     shadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, shadowVis);
 
-    // 5. Material Properties from Baked ORM Atlas (Exact PBR matching)
+    // 5. Material Properties from Baked ORM Atlas (Exact pbrMaterial match)
     let ao = clamp(rawORM.r, 0.0, 1.0);
     let roughness = clamp(rawORM.g, 0.04, 1.0);
     let metallic = clamp(rawORM.b, 0.0, 1.0);
-    let subsurfaceAmount = clamp(rawORM.a, 0.0, 1.0);
     let F0_dielectric = vec3<f32>(0.04);
     let F0_metal = albedo;
     let F0 = mix(F0_dielectric, F0_metal, metallic);
 
-    // 6. Direct Directional Light (Exact UE5 PBR Two-Sided Foliage + Specular)
+    // 6. Direct Directional Light (Exact pbrMaterial getDirectPbrLight match)
     var totalDirectLighting = vec3<f32>(0.0);
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
@@ -312,10 +306,9 @@ fn main(inputData: InputData) -> OutputFragment {
         let light = u_directionalLights[i];
         let L = -normalize(light.direction);
 
-        let NdotL_raw = dot(N, L);
-        let NdotL = max(NdotL_raw, 0.0);
+        let NdotL = max(dot(N, L), 0.0);
         let H = normalize(L + V);
-        let NdotH_spec = max(dot(N_spec, H), 0.0);
+        let NdotH = max(dot(N, H), 0.0);
         let LdotH = max(dot(L, H), 0.0);
         let VdotH = max(dot(V, H), 0.0);
 
@@ -328,32 +321,24 @@ fn main(inputData: InputData) -> OutputFragment {
         }
 
         let F = getFresnel(VdotH, F0);
-        let specBRDF = getDirectSpecularBRDF(F, roughness, NdotH_spec, NdotV_spec, NdotL);
-        let diffuseReflection = getDirectDiffuseBRDF(NdotL, NdotV_spec, LdotH, roughness, albedo);
+        let specBRDF = getDirectSpecularBRDF(F, roughness, NdotH, NdotV, NdotL);
+        let diffuseReflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughness, albedo);
 
-        // 🌿 Two-Sided Foliage Subsurface Transmission & Wrap Scattering (UE5 Standard)
-        let backLight = max(0.0, -NdotL_raw);
-        let viewSunPhase = max(dot(L, V), 0.0);
-        let forwardScatter = pow(viewSunPhase, 2.0) * 0.5 + 0.5;
-        let diffuseTransmission = albedo * (backLight * (forwardScatter * 0.5 + 0.5) * 0.5);
-
-        // 🌿 직사광(Diffuse Reflection) 100% + 배면 투광광(Diffuse Transmission)
-        let totalDiffuse = diffuseReflection + diffuseTransmission * subsurfaceAmount;
-        let dielectricPart = (specBRDF * NdotL) + (vec3<f32>(1.0) - F) * totalDiffuse;
+        let dielectricPart = (specBRDF * NdotL) + (vec3<f32>(1.0) - F) * diffuseReflection;
         let metallicPart = specBRDF * NdotL;
         let directResult = mix(dielectricPart, metallicPart, metallic);
 
         totalDirectLighting += directResult * dLight;
     }
 
-    // 7. Indirect Lighting (IBL Specular + IBL Diffuse + Sky Atmosphere, Exact PBR Match)
+    // 7. Indirect Lighting (Exact pbrMaterial getIndirectPbrLighting match)
     var indirectLighting = vec3<f32>(0.0);
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
 
     if (u_usePrefilterTexture || u_useSkyAtmosphere) {
-        let R = reflect(-V, N_spec);
-        let NdotV_IBL = NdotV_spec;
+        let R = reflect(-V, N);
+        let NdotV_IBL = NdotV;
         var reflectedColor = vec3<f32>(0.0);
         var iblDiffuseColor = vec3<f32>(0.0);
 
@@ -361,7 +346,7 @@ fn main(inputData: InputData) -> OutputFragment {
             let iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
             let mipLevel = roughness * iblMipmapCount;
             reflectedColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel).rgb * preExposure * systemUniforms.iblIntensity;
-            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N_spec, 0).rgb * preExposure * systemUniforms.iblIntensity * INV_PI;
+            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * preExposure * systemUniforms.iblIntensity * INV_PI;
         }
 
         if (u_useSkyAtmosphere) {
@@ -375,8 +360,8 @@ fn main(inputData: InputData) -> OutputFragment {
             let specSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, atmosphereSampler, R, atmoMipLevel).rgb * skyIntensity * preExposure;
             reflectedColor = (reflectedColor * specTrans) + specSkyScat;
 
-            let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N_spec.y, atmH);
-            let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N_spec, 0.0).rgb * skyIntensity * preExposure;
+            let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
+            let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity * preExposure;
             iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
 
@@ -384,7 +369,7 @@ fn main(inputData: InputData) -> OutputFragment {
         let energyCompensation = 1.0 + F0 * (1.0 / max(envBRDF.x + envBRDF.y, 1e-4) - 1.0);
         reflectedColor *= energyCompensation;
 
-        let horizonOcclusion = saturate(1.0 + 1.1 * dot(R, N_spec));
+        let horizonOcclusion = saturate(1.0 + 1.1 * dot(R, N));
         reflectedColor *= horizonOcclusion * horizonOcclusion;
 
         let fresnelPower = 5.0 - 2.0 * roughness;
@@ -419,7 +404,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let baseReflectionStrength = smoothnessCurved * (0.04 + 0.96 * metallic * metallic);
 
     output.color = vec4<f32>(finalRgb, globalFragmentData.opacity);
-    output.gBufferNormal = vec4<f32>(N_spec * 0.5 + 0.5, baseReflectionStrength);
+    output.gBufferNormal = vec4<f32>(N * 0.5 + 0.5, baseReflectionStrength);
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
 
     return output;
