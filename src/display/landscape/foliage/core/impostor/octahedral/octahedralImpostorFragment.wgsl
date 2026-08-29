@@ -214,12 +214,19 @@ fn main(inputData: InputData) -> OutputFragment {
     let w01 = (1.0 - frac.x) * frac.y;
     let w11 = frac.x * frac.y;
 
-    // 🌿 4개 타일 가중 합성 (Unmultiplied TrueRGB / Normal / ORM 정확한 1:1 보존)
-    let totalCoverage = w00 * s00.a + w10 * s10.a + w01 * s01.a + w11 * s11.a;
-    var albedo = s00.rgb * w00 + s10.rgb * w10 + s01.rgb * w01 + s11.rgb * w11;
+    // 🌿 UE5 Ryan Brucks 표준: 4개 타일 유효 잎사귀 알파 가중치(Coverage) 및 정규화
+    let cov00 = w00 * s00.a;
+    let cov10 = w10 * s10.a;
+    let cov01 = w01 * s01.a;
+    let cov11 = w11 * s11.a;
+    let totalCoverage = cov00 + cov10 + cov01 + cov11;
+    let safeCoverage = max(totalCoverage, 0.0001);
+
+    // 🌿 TrueRGB 및 머티리얼 속성 알파 가중 정규화 (빈 공간 암전 차단 및 100% True PBR 복원)
+    var albedo = (s00.rgb * cov00 + s10.rgb * cov10 + s01.rgb * cov01 + s11.rgb * cov11) / safeCoverage;
     albedo = clamp(albedo, vec3<f32>(0.0), vec3<f32>(1.0));
-    let rawNormalDepth = n00 * w00 + n10 * w10 + n01 * w01 + n11 * w11;
-    let rawORM = orm00 * w00 + orm10 * w10 + orm01 * w01 + orm11 * w11;
+    let rawNormalDepth = (n00 * cov00 + n10 * cov10 + n01 * cov01 + n11 * cov11) / safeCoverage;
+    let rawORM = (orm00 * cov00 + orm10 * cov10 + orm01 * cov01 + orm11 * cov11) / safeCoverage;
 
     // 2. Dithered LOD Crossfade (4x4 Bayer Matrix)
     let fadeOpacity = inputData.combinedOpacity;
