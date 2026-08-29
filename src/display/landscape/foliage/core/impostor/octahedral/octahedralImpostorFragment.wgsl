@@ -91,16 +91,18 @@ fn sampleOctahedralAtlas(
     smp: sampler,
     gridCoords: vec2<f32>,
     subUV: vec2<f32>,
-    n: f32
+    n: f32,
+    ddxAtlas: vec2<f32>,
+    ddyAtlas: vec2<f32>
 ) -> vec4<f32> {
     let isInside = (subUV.x >= 0.0 && subUV.x <= 1.0 && subUV.y >= 0.0 && subUV.y <= 1.0);
     let clampedGrid = clamp(gridCoords, vec2<f32>(0.0), vec2<f32>(n - 1.0));
-    let oneTexelInTile = 1.0 / 256.0;
-    let safeSubUV = clamp(subUV, vec2<f32>(oneTexelInTile), vec2<f32>(1.0 - oneTexelInTile));
+    let borderPadding = 1.0 / 256.0;
+    let safeSubUV = clamp(subUV, vec2<f32>(borderPadding), vec2<f32>(1.0 - borderPadding));
     let atlasUV = (clampedGrid + safeSubUV) / n;
 
-    // 🌿 옥타헤드럴 아틀라스는 타일 간 침범(Bleeding) 및 고스팅(Ghosting) 방지를 위해 Mip 0으로 샘플링
-    let sampled = textureSampleLevel(tex, smp, atlasUV, 0.0);
+    // 🌿 GPU Dilation(16px 패딩) 덕분에 밉맵 다운샘플링 시 타일 침범 없이 완벽한 안티에일리어싱 샘플링 수행
+    let sampled = textureSampleGrad(tex, smp, atlasUV, ddxAtlas, ddyAtlas);
     return select(vec4<f32>(0.0), sampled, isInside);
 }
 
@@ -196,21 +198,26 @@ fn main(inputData: InputData) -> OutputFragment {
     let uv01 = getSubTileRotatedUV(inputData.uv, localView, dir01);
     let uv11 = getSubTileRotatedUV(inputData.uv, localView, dir11);
 
-    // 1. 3-Atlas 4-Tap Bilinear Sampling (Mip Level 0)
-    let s00 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g00, uv00, n);
-    let s10 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g10, uv10, n);
-    let s01 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g01, uv01, n);
-    let s11 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g11, uv11, n);
+    let ddxUV = dpdx(inputData.uv);
+    let ddyUV = dpdy(inputData.uv);
+    let ddxAtlas = ddxUV / n;
+    let ddyAtlas = ddyUV / n;
 
-    let n00 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g00, uv00, n);
-    let n10 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g10, uv10, n);
-    let n01 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g01, uv01, n);
-    let n11 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g11, uv11, n);
+    // 1. 3-Atlas 4-Tap Bilinear Sampling (Hardware Mipmapped via textureSampleGrad)
+    let s00 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g00, uv00, n, ddxAtlas, ddyAtlas);
+    let s10 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g10, uv10, n, ddxAtlas, ddyAtlas);
+    let s01 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g01, uv01, n, ddxAtlas, ddyAtlas);
+    let s11 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g11, uv11, n, ddxAtlas, ddyAtlas);
 
-    let orm00 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g00, uv00, n);
-    let orm10 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g10, uv10, n);
-    let orm01 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g01, uv01, n);
-    let orm11 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g11, uv11, n);
+    let n00 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g00, uv00, n, ddxAtlas, ddyAtlas);
+    let n10 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g10, uv10, n, ddxAtlas, ddyAtlas);
+    let n01 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g01, uv01, n, ddxAtlas, ddyAtlas);
+    let n11 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g11, uv11, n, ddxAtlas, ddyAtlas);
+
+    let orm00 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g00, uv00, n, ddxAtlas, ddyAtlas);
+    let orm10 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g10, uv10, n, ddxAtlas, ddyAtlas);
+    let orm01 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g01, uv01, n, ddxAtlas, ddyAtlas);
+    let orm11 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g11, uv11, n, ddxAtlas, ddyAtlas);
 
     // 🌿 4-코너 Bilinear 기본 가중치 (합 = 1.0)
     let w00 = (1.0 - frac.x) * (1.0 - frac.y);
@@ -390,16 +397,13 @@ fn main(inputData: InputData) -> OutputFragment {
         let F_IBL_dielectric = FR_dielectric * envBRDF.x + envBRDF.y;
         let F_IBL_metal = FR_metal * envBRDF.x + envBRDF.y;
 
-        // 🌿 Foliage(나뭇잎) 스펙큘러 과다 반사(고휘도 IBL 백화 현상) 억제 (UE5 Foliage Shading Model 기준 0.15)
-        let foliageSpecWeight = 0.15;
-        let F_IBL_dielectric_weight = F_IBL_dielectric * foliageSpecWeight;
-
+        // 🌿 UE5 물리 기반 Directional Specular Occlusion (어두운 틈새 스펙큘러 백화 차단 + 양지 PBR 광택 복원)
         let specularOcclusion = saturate(pow(NdotV_IBL + ao, exp2(-16.0 * roughness - 1.0)) - 1.0 + ao);
         let specularAlbedo_IBL = saturate(F0_dielectric * envBRDF.x + envBRDF.y);
-        let diffuseWeight_IBL = (vec3<f32>(1.0) - specularAlbedo_IBL * foliageSpecWeight);
+        let diffuseWeight_IBL = (vec3<f32>(1.0) - specularAlbedo_IBL);
 
         let envIBL_DIFFUSE = albedo * iblDiffuseColor * diffuseWeight_IBL * ao;
-        let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric_weight * specularOcclusion;
+        let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric * specularOcclusion;
         let dielectricPart_IBL = ibl_specular_dielectric + envIBL_DIFFUSE;
         let metallicPart_IBL = reflectedColor * F_IBL_metal * specularOcclusion;
 

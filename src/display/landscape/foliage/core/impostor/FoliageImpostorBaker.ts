@@ -4,6 +4,7 @@ import DirectTexture from "../../../../../resources/texture/DirectTexture";
 import type {FoliageSubMesh} from "../../FoliageType";
 import impostorBakeVertexWGSL from "./impostorBakeVertex.wgsl";
 import impostorBakeShaderWGSL from "./impostorBake.wgsl";
+import impostorDilationWGSL from "./impostorDilation.wgsl";
 import getMipLevelCount from "../../../../../utils/texture/getMipLevelCount";
 import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
@@ -137,6 +138,116 @@ class FoliageImpostorBaker {
             bottomOffset
         };
     }
+
+    static #dilationPipeline: GPUComputePipeline | null = null;
+
+    static #initBindGroupLayouts(redGPUContext: RedGPUContext) {
+        if (!this.#bakeBindGroupLayout) {
+            this.#bakeBindGroupLayout = redGPUContext.gpuDevice.createBindGroupLayout({
+                label: 'FoliageImpostorBake_BindGroupLayout',
+                entries: [
+                    {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
+                    {binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
+                    {binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
+                    {binding: 3, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
+                    {binding: 4, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
+                    {binding: 5, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
+                ]
+            });
+        }
+    }
+
+    static #getOrCreateBakePipeline(redGPUContext: RedGPUContext, sub: FoliageSubMesh): GPURenderPipeline | null {
+        const gpuDevice = redGPUContext.gpuDevice;
+        const key = `BakePipeline_MRT3_${sub.strideBytes}_${sub.material?.uuid || 'def'}`;
+        let pipeline = this.#bakePipelineCache.get(key);
+        if (pipeline) return pipeline;
+
+        const resourceManager = redGPUContext.resourceManager;
+
+        const vModule = resourceManager.createGPUShaderModule('FoliageImpostorBakeVertexModule', {
+            code: impostorBakeVertexWGSL
+        });
+        const fModule = resourceManager.createGPUShaderModule('FoliageImpostorBakeFragmentModule', {
+            code: impostorBakeShaderWGSL
+        });
+
+        const pipelineLayout = gpuDevice.createPipelineLayout({
+            label: 'BakePipelineLayout',
+            bindGroupLayouts: [this.#bakeBindGroupLayout!]
+        });
+
+        pipeline = gpuDevice.createRenderPipeline({
+            label: key,
+            layout: pipelineLayout,
+            vertex: {
+                module: vModule,
+                entryPoint: 'main',
+                buffers: [
+                    {
+                        arrayStride: Math.max(sub.strideBytes, 72),
+                        attributes: [
+                            {shaderLocation: 0, offset: 0, format: 'float32x3'},
+                            {shaderLocation: 1, offset: 12, format: 'float32x3'},
+                            {shaderLocation: 2, offset: 24, format: 'float32x2'},
+                            {shaderLocation: 3, offset: 32, format: 'float32x2'},
+                            {shaderLocation: 4, offset: 40, format: 'float32x4'},
+                            {shaderLocation: 5, offset: 56, format: 'float32x4'},
+                        ]
+                    },
+                    {
+                        arrayStride: 48 * 4,
+                        stepMode: 'instance',
+                        attributes: [
+                            {shaderLocation: 6, offset: 0, format: 'float32x4'},
+                            {shaderLocation: 7, offset: 16, format: 'float32x4'},
+                            {shaderLocation: 8, offset: 32, format: 'float32x4'},
+                            {shaderLocation: 9, offset: 48, format: 'float32x4'},
+                            {shaderLocation: 10, offset: 64, format: 'float32x4'},
+                            {shaderLocation: 11, offset: 80, format: 'float32x4'},
+                            {shaderLocation: 12, offset: 96, format: 'float32x4'},
+                            {shaderLocation: 13, offset: 112, format: 'float32x4'},
+                            {shaderLocation: 14, offset: 128, format: 'float32x4'},
+                            {shaderLocation: 15, offset: 144, format: 'float32x4'},
+                            {shaderLocation: 16, offset: 160, format: 'float32x4'},
+                            {shaderLocation: 17, offset: 176, format: 'float32x4'},
+                        ]
+                    }
+                ]
+            },
+            fragment: {
+                module: fModule,
+                entryPoint: 'main',
+                targets: [
+                    {
+                        format: 'rgba8unorm-srgb',
+                        blend: undefined
+                    },
+                    {
+                        format: 'rgba8unorm',
+                        blend: undefined
+                    },
+                    {
+                        format: 'rgba8unorm',
+                        blend: undefined
+                    }
+                ]
+            },
+            primitive: {
+                topology: 'triangle-list',
+                cullMode: 'none',
+            },
+            depthStencil: {
+                format: 'depth24plus',
+                depthWriteEnabled: true,
+                depthCompare: 'less-equal',
+            }
+        });
+
+        this.#bakePipelineCache.set(key, pipeline);
+        return pipeline;
+    }
+    static #dilationBindGroupLayout: GPUBindGroupLayout | null = null;
 
     static bakeSubMeshes(
         redGPUContext: RedGPUContext,
@@ -495,6 +606,11 @@ class FoliageImpostorBaker {
         depthGPUTexture.destroy();
         sharedTransformGPUBuffer.destroy();
 
+        // 🌲 GPU Texture Dilation (16픽셀 외곽선 확장으로 밉맵 다운샘플링 시 검은 테두리 및 타일 번짐 원천 차단)
+        this.#executeDilation(redGPUContext, bakedGPUTexture, atlasWidth, atlasHeight, tileSize);
+        this.#executeDilation(redGPUContext, bakedNormalGPUTexture, atlasWidth, atlasHeight, tileSize);
+        this.#executeDilation(redGPUContext, bakedORMGPUTexture, atlasWidth, atlasHeight, tileSize);
+
         // 🌲 Mipmap generation for BaseColor, Normal, and ORM textures
         if (mipLevelCount > 1) {
             redGPUContext.resourceManager.mipmapGenerator.generateMipmap(
@@ -554,111 +670,119 @@ class FoliageImpostorBaker {
 
     }
 
-    static #initBindGroupLayouts(redGPUContext: RedGPUContext) {
-        if (!this.#bakeBindGroupLayout) {
-            this.#bakeBindGroupLayout = redGPUContext.gpuDevice.createBindGroupLayout({
-                label: 'FoliageImpostorBake_BindGroupLayout',
+    static #executeDilation(
+        redGPUContext: RedGPUContext,
+        targetTexture: GPUTexture,
+        width: number,
+        height: number,
+        tileSize: number
+    ) {
+        const gpuDevice = redGPUContext.gpuDevice;
+        if (!this.#dilationPipeline) {
+            const shaderModule = gpuDevice.createShaderModule({
+                label: 'ImpostorDilation_Shader',
+                code: impostorDilationWGSL
+            });
+            this.#dilationBindGroupLayout = gpuDevice.createBindGroupLayout({
+                label: 'ImpostorDilation_BGL',
                 entries: [
-                    {binding: 0, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
-                    {binding: 1, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
-                    {binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
-                    {binding: 3, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
-                    {binding: 4, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: 'float'}},
-                    {binding: 5, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
+                    {binding: 0, visibility: GPUShaderStage.COMPUTE, texture: {sampleType: 'unfilterable-float'}},
+                    {
+                        binding: 1,
+                        visibility: GPUShaderStage.COMPUTE,
+                        storageTexture: {access: 'write-only', format: 'rgba8unorm'}
+                    },
+                    {binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: {type: 'uniform'}}
                 ]
             });
+            this.#dilationPipeline = gpuDevice.createComputePipeline({
+                label: 'ImpostorDilation_Pipeline',
+                layout: gpuDevice.createPipelineLayout({
+                    bindGroupLayouts: [this.#dilationBindGroupLayout]
+                }),
+                compute: {
+                    module: shaderModule,
+                    entryPoint: 'main'
+                }
+            });
         }
-    }
 
-    static #getOrCreateBakePipeline(redGPUContext: RedGPUContext, sub: FoliageSubMesh): GPURenderPipeline | null {
-        const gpuDevice = redGPUContext.gpuDevice;
-        const key = `BakePipeline_MRT3_${sub.strideBytes}_${sub.material?.uuid || 'def'}`;
-        let pipeline = this.#bakePipelineCache.get(key);
-        if (pipeline) return pipeline;
-
-        const resourceManager = redGPUContext.resourceManager;
-
-        const vModule = resourceManager.createGPUShaderModule('FoliageImpostorBakeVertexModule', {
-            code: impostorBakeVertexWGSL
-        });
-        const fModule = resourceManager.createGPUShaderModule('FoliageImpostorBakeFragmentModule', {
-            code: impostorBakeShaderWGSL
+        const pingPongA = gpuDevice.createTexture({
+            label: 'ImpostorDilation_PingPongA',
+            size: [width, height, 1],
+            format: 'rgba8unorm',
+            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST
         });
 
-        const pipelineLayout = gpuDevice.createPipelineLayout({
-            label: 'BakePipelineLayout',
-            bindGroupLayouts: [this.#bakeBindGroupLayout!]
+        const pingPongB = gpuDevice.createTexture({
+            label: 'ImpostorDilation_PingPongB',
+            size: [width, height, 1],
+            format: 'rgba8unorm',
+            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST
         });
 
-        pipeline = gpuDevice.createRenderPipeline({
-            label: key,
-            layout: pipelineLayout,
-            vertex: {
-                module: vModule,
-                entryPoint: 'main',
-                buffers: [
-                    {
-                        arrayStride: Math.max(sub.strideBytes, 72),
-                        attributes: [
-                            {shaderLocation: 0, offset: 0, format: 'float32x3'},
-                            {shaderLocation: 1, offset: 12, format: 'float32x3'},
-                            {shaderLocation: 2, offset: 24, format: 'float32x2'},
-                            {shaderLocation: 3, offset: 32, format: 'float32x2'},
-                            {shaderLocation: 4, offset: 40, format: 'float32x4'},
-                            {shaderLocation: 5, offset: 56, format: 'float32x4'},
-                        ]
-                    },
-                    {
-                        arrayStride: 48 * 4,
-                        stepMode: 'instance',
-                        attributes: [
-                            {shaderLocation: 6, offset: 0, format: 'float32x4'},
-                            {shaderLocation: 7, offset: 16, format: 'float32x4'},
-                            {shaderLocation: 8, offset: 32, format: 'float32x4'},
-                            {shaderLocation: 9, offset: 48, format: 'float32x4'},
-                            {shaderLocation: 10, offset: 64, format: 'float32x4'},
-                            {shaderLocation: 11, offset: 80, format: 'float32x4'},
-                            {shaderLocation: 12, offset: 96, format: 'float32x4'},
-                            {shaderLocation: 13, offset: 112, format: 'float32x4'},
-                            {shaderLocation: 14, offset: 128, format: 'float32x4'},
-                            {shaderLocation: 15, offset: 144, format: 'float32x4'},
-                            {shaderLocation: 16, offset: 160, format: 'float32x4'},
-                            {shaderLocation: 17, offset: 176, format: 'float32x4'},
-                        ]
-                    }
+        // 1. 초기 텍스처를 pingPongA로 복사
+        const initCopyEncoder = gpuDevice.createCommandEncoder({label: 'ImpostorDilation_InitCopy'});
+        initCopyEncoder.copyTextureToTexture(
+            {texture: targetTexture, mipLevel: 0},
+            {texture: pingPongA, mipLevel: 0},
+            [width, height, 1]
+        );
+        gpuDevice.queue.submit([initCopyEncoder.finish()]);
+
+        // 🌿 1px, 2px, 4px, 8px 총 4단계 확장으로 15px 반경 Dilation 완성
+        const steps = [1, 2, 4, 8];
+        let currentSource = pingPongA;
+        let currentDest = pingPongB;
+
+        const uniformBuffer = gpuDevice.createBuffer({
+            label: 'ImpostorDilation_UniformBuffer',
+            size: 16,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+        });
+
+        const numWorkgroupsX = Math.ceil(width / 8);
+        const numWorkgroupsY = Math.ceil(height / 8);
+
+        for (let i = 0; i < steps.length; i++) {
+            const step = steps[i];
+            gpuDevice.queue.writeBuffer(uniformBuffer, 0, new Uint32Array([width, height, tileSize, step]));
+
+            const bindGroup = gpuDevice.createBindGroup({
+                label: `ImpostorDilation_BG_Step${step}`,
+                layout: this.#dilationBindGroupLayout!,
+                entries: [
+                    {binding: 0, resource: currentSource.createView({baseMipLevel: 0, mipLevelCount: 1})},
+                    {binding: 1, resource: currentDest.createView({baseMipLevel: 0, mipLevelCount: 1})},
+                    {binding: 2, resource: {buffer: uniformBuffer}}
                 ]
-            },
-            fragment: {
-                module: fModule,
-                entryPoint: 'main',
-                targets: [
-                    {
-                        format: 'rgba8unorm-srgb',
-                        blend: undefined
-                    },
-                    {
-                        format: 'rgba8unorm',
-                        blend: undefined
-                    },
-                    {
-                        format: 'rgba8unorm',
-                        blend: undefined
-                    }
-                ]
-            },
-            primitive: {
-                topology: 'triangle-list',
-                cullMode: 'none',
-            },
-            depthStencil: {
-                format: 'depth24plus',
-                depthWriteEnabled: true,
-                depthCompare: 'less-equal',
-            }
-        });
+            });
 
-        this.#bakePipelineCache.set(key, pipeline);
-        return pipeline;
+            const commandEncoder = gpuDevice.createCommandEncoder({label: `ImpostorDilation_Pass_Step${step}`});
+            const computePass = commandEncoder.beginComputePass();
+            computePass.setPipeline(this.#dilationPipeline);
+            computePass.setBindGroup(0, bindGroup);
+            computePass.dispatchWorkgroups(numWorkgroupsX, numWorkgroupsY);
+            computePass.end();
+            gpuDevice.queue.submit([commandEncoder.finish()]);
+
+            const temp = currentSource;
+            currentSource = currentDest;
+            currentDest = temp;
+        }
+
+        // 최종 Dilation 결과를 targetTexture(Level 0)로 복사
+        const finalCopyEncoder = gpuDevice.createCommandEncoder({label: 'ImpostorDilation_FinalCopy'});
+        finalCopyEncoder.copyTextureToTexture(
+            {texture: currentSource, mipLevel: 0},
+            {texture: targetTexture, mipLevel: 0},
+            [width, height, 1]
+        );
+        gpuDevice.queue.submit([finalCopyEncoder.finish()]);
+
+        uniformBuffer.destroy();
+        pingPongA.destroy();
+        pingPongB.destroy();
     }
 }
 
