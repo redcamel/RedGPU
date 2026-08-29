@@ -329,7 +329,12 @@ fn main(inputData: InputData) -> OutputFragment {
         let specBRDF = getDirectSpecularBRDF(F, roughness, NdotH, NdotV, NdotL);
         let diffuseReflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughness, albedo);
 
-        let dielectricPart = (specBRDF * NdotL) + (vec3<f32>(1.0) - F) * diffuseReflection;
+        // 🌿 Foliage Subsurface Transmission (빛이 잎사귀를 뚫고 나오는 역광 투과광)
+        let viewDotNegL = max(dot(V, -L), 0.0);
+        let subSurfaceFactor = pow(viewDotNegL, 3.0) * (1.0 - metallic) * 0.45;
+        let subSurfaceTransmission = albedo * subSurfaceFactor;
+
+        let dielectricPart = (specBRDF * NdotL) + (vec3<f32>(1.0) - F) * diffuseReflection + subSurfaceTransmission;
         let metallicPart = specBRDF * NdotL;
         let directResult = mix(dielectricPart, metallicPart, metallic);
 

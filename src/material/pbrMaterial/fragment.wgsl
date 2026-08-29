@@ -1280,7 +1280,16 @@ fn getDirectPbrLight(
         if (abs(ior - 1.0) < EPSILON) { specular_transmission = vec3<f32>(0.0); }
     }
     #redgpu_endIf
-    let dielectricPart = (SPEC_BRDF * specularParameter * NdotL) + mix((vec3<f32>(1.0) - specular_weight) * total_diffuse, specular_transmission, transmissionParameter);
+    #redgpu_if isFoliage
+        // 🌿 Foliage Subsurface Transmission (빛이 잎사귀를 뚫고 나오는 역광 투과광)
+        let viewDotNegL = max(dot(V, -L), 0.0);
+        let subSurfaceFactor = pow(viewDotNegL, 3.0) * (1.0 - metallicParameter) * 0.45;
+        let subSurfaceTransmission = albedo * subSurfaceFactor;
+    #redgpu_else
+        let subSurfaceTransmission = vec3<f32>(0.0);
+    #redgpu_endIf
+
+    let dielectricPart = (SPEC_BRDF * specularParameter * NdotL) + mix((vec3<f32>(1.0) - specular_weight) * total_diffuse, specular_transmission, transmissionParameter) + subSurfaceTransmission;
     let metallicPart = SPEC_BRDF * NdotL;
     var result = mix(dielectricPart, metallicPart, metallicParameter);
     #redgpu_if useKHR_materials_sheen
