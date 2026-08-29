@@ -379,12 +379,16 @@ fn main(inputData: InputData) -> OutputFragment {
         let F_IBL_dielectric = FR_dielectric * envBRDF.x + envBRDF.y;
         let F_IBL_metal = FR_metal * envBRDF.x + envBRDF.y;
 
+        // 🌿 Foliage(나뭇잎) 스펙큘러 과다 반사(고휘도 IBL 백화 현상) 억제 (UE5 Foliage Shading Model 기준 0.15)
+        let foliageSpecWeight = 0.15;
+        let F_IBL_dielectric_weight = F_IBL_dielectric * foliageSpecWeight;
+
         let specularOcclusion = saturate(pow(NdotV_IBL + ao, exp2(-16.0 * roughness - 1.0)) - 1.0 + ao);
         let specularAlbedo_IBL = saturate(F0_dielectric * envBRDF.x + envBRDF.y);
-        let diffuseWeight_IBL = (vec3<f32>(1.0) - specularAlbedo_IBL);
+        let diffuseWeight_IBL = (vec3<f32>(1.0) - specularAlbedo_IBL * foliageSpecWeight);
 
         let envIBL_DIFFUSE = albedo * iblDiffuseColor * diffuseWeight_IBL * ao;
-        let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric * specularOcclusion;
+        let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric_weight * specularOcclusion;
         let dielectricPart_IBL = ibl_specular_dielectric + envIBL_DIFFUSE;
         let metallicPart_IBL = reflectedColor * F_IBL_metal * specularOcclusion;
 
