@@ -86,14 +86,20 @@ fn getSubTileRotatedUV(quadUV: vec2<f32>, viewDir: vec3<f32>, gridDir: vec3<f32>
     return rotatedP + vec2<f32>(0.5);
 }
 
-fn sampleOctahedralAtlas(tex: texture_2d<f32>, smp: sampler, gridCoords: vec2<f32>, subUV: vec2<f32>, n: f32) -> vec4<f32> {
+fn sampleOctahedralAtlas(
+    tex: texture_2d<f32>,
+    smp: sampler,
+    gridCoords: vec2<f32>,
+    subUV: vec2<f32>,
+    n: f32
+) -> vec4<f32> {
     let isInside = (subUV.x >= 0.0 && subUV.x <= 1.0 && subUV.y >= 0.0 && subUV.y <= 1.0);
     let clampedGrid = clamp(gridCoords, vec2<f32>(0.0), vec2<f32>(n - 1.0));
     let oneTexelInTile = 1.0 / 256.0;
     let safeSubUV = clamp(subUV, vec2<f32>(oneTexelInTile), vec2<f32>(1.0 - oneTexelInTile));
     let atlasUV = (clampedGrid + safeSubUV) / n;
 
-    // 🌿 밉레벨 0(최대 원본 해상도)으로만 샘플링
+    // 🌿 옥타헤드럴 아틀라스는 타일 간 침범(Bleeding) 및 고스팅(Ghosting) 방지를 위해 Mip 0으로 샘플링
     let sampled = textureSampleLevel(tex, smp, atlasUV, 0.0);
     return select(vec4<f32>(0.0), sampled, isInside);
 }
