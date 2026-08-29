@@ -62,7 +62,7 @@ fn main(
         let rawN = vec3<f32>(normalMapSample.r * 2.0 - 1.0, (1.0 - normalMapSample.g) * 2.0 - 1.0, normalMapSample.b * 2.0 - 1.0);
         N = normalize(tbn * rawN);
     }
-    if (!isFrontFacing && !isFoliage) {
+    if (!isFrontFacing) {
         N = -N;
     }
     let encodedNormal = N * 0.5 + 0.5;

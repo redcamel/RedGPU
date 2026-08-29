@@ -336,7 +336,7 @@ fn main(inputData:InputData) -> OutputFragment {
     var backFaceYn:bool = false;
     #redgpu_if doubleSided
     {
-        if (!inputData.isFrontFacing && !u_isFoliage) {
+        if (!inputData.isFrontFacing) {
             backFaceYn = true;
         }
     }
