@@ -51,7 +51,7 @@ fn main(
 
 
 
-    // 2. 3D World Normal (with Normal map support & Spherical Canopy Normal blending)
+    // 2. 3D World Normal (Exact PBRMaterial matching)
     let isFoliage = (input.cameraDir.w > 0.5);
     var N = normalize(input.worldNormal);
     if (input.textureFlags.y > 0.5) {
@@ -65,24 +65,15 @@ fn main(
     if (!isFrontFacing && !isFoliage) {
         N = -N;
     }
-
-    // 🌿 UE5 / SpeedTree Standard: 나무 중심에서 외곽으로 뻗어나가는 3D 구형 수관 노멀(Spherical Canopy Normal) 계산
-    let center = input.sphereCenterRadius.xyz;
-    let toCenter = input.worldPos - center;
-    let lenToCenter = length(toCenter);
-    let sphericalN = select(vec3<f32>(0.0, 1.0, 0.0), toCenter / lenToCenter, lenToCenter > 0.001);
-
-    // 🌿 식생은 원본 잎사귀 미세 노멀(75%) + 구형 수관 노멀(25%) 블렌딩으로 3D 틈새 음영과 숲 볼륨감 완벽 조화
-    let finalN = normalize(mix(N, sphericalN, select(0.0, 0.25, isFoliage)));
-    let encodedNormal = finalN * 0.5 + 0.5;
+    let encodedNormal = N * 0.5 + 0.5;
 
     // 3. Radial Depth Offset (Normalized 0..1 along camera view ray from sphere center)
+    let center = input.sphereCenterRadius.xyz;
     let radius = max(input.sphereCenterRadius.w, 0.1);
     let camDir = normalize(input.cameraDir.xyz);
     let relPos = input.worldPos - center;
     let distAlongRay = dot(relPos, camDir);
     let normDepth = clamp(distAlongRay / (radius * 1.05) * 0.5 + 0.5, 0.0, 1.0);
-
 
     // 4. Physical Material Properties (ORM + Subsurface Translucency)
     var ao = input.materialParams.z;

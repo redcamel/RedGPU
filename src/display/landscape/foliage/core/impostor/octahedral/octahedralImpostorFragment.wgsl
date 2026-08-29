@@ -23,6 +23,7 @@ struct InputData {
     @location(3) uv1: vec2<f32>,
     @location(4) vertexColor_0: vec4<f32>,
     @location(5) vertexTangent: vec4<f32>,
+    @location(6) instanceRotQuat: vec4<f32>,
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
@@ -87,15 +88,15 @@ fn getSubTileRotatedUV(quadUV: vec2<f32>, viewDir: vec3<f32>, gridDir: vec3<f32>
     return rotatedP + vec2<f32>(0.5);
 }
 
-fn sampleOctahedralAtlas(tex: texture_2d<f32>, smp: sampler, gridCoords: vec2<f32>, subUV: vec2<f32>, n: f32, ddxUV: vec2<f32>, ddyUV: vec2<f32>) -> vec4<f32> {
+fn sampleOctahedralAtlas(tex: texture_2d<f32>, smp: sampler, gridCoords: vec2<f32>, subUV: vec2<f32>, n: f32) -> vec4<f32> {
     let isInside = (subUV.x >= 0.0 && subUV.x <= 1.0 && subUV.y >= 0.0 && subUV.y <= 1.0);
     let clampedGrid = clamp(gridCoords, vec2<f32>(0.0), vec2<f32>(n - 1.0));
     let oneTexelInTile = 1.0 / 256.0;
     let safeSubUV = clamp(subUV, vec2<f32>(oneTexelInTile), vec2<f32>(1.0 - oneTexelInTile));
     let atlasUV = (clampedGrid + safeSubUV) / n;
 
-    // 🌿 Unreal Engine 5 Standard: 연속적인 빌보드 쿼드 미분(ddxUV/ddyUV)을 명시 전달하여 미분 불연속 튐 완전 차단
-    let sampled = textureSampleGrad(tex, smp, atlasUV, ddxUV, ddyUV);
+    // 🌿 밉레벨 0(최대 원본 해상도)으로만 샘플링
+    let sampled = textureSampleLevel(tex, smp, atlasUV, 0.0);
     return select(vec4<f32>(0.0), sampled, isInside);
 }
 
@@ -191,25 +192,21 @@ fn main(inputData: InputData) -> OutputFragment {
     let uv01 = getSubTileRotatedUV(inputData.uv, localView, dir01);
     let uv11 = getSubTileRotatedUV(inputData.uv, localView, dir11);
 
-    // 🌿 Unreal Engine 5 Standard: 연속적인 빌보드 쿼드 UV로부터 타일 스케일 미분 벡터 계산 (임의 LOD 계산 없이 100% 하드웨어 네이티브 밉맵)
-    let ddxUV = dpdx(inputData.uv / n);
-    let ddyUV = dpdy(inputData.uv / n);
+    // 1. 3-Atlas 4-Tap Bilinear Sampling (Mip Level 0)
+    let s00 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g00, uv00, n);
+    let s10 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g10, uv10, n);
+    let s01 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g01, uv01, n);
+    let s11 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g11, uv11, n);
 
-    // 1. 3-Atlas 4-Tap Bilinear Sampling (BaseColor, Normal+Depth, ORM+Subsurface: UE5 Standard textureSampleGrad)
-    let s00 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g00, uv00, n, ddxUV, ddyUV);
-    let s10 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g10, uv10, n, ddxUV, ddyUV);
-    let s01 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g01, uv01, n, ddxUV, ddyUV);
-    let s11 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g11, uv11, n, ddxUV, ddyUV);
+    let n00 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g00, uv00, n);
+    let n10 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g10, uv10, n);
+    let n01 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g01, uv01, n);
+    let n11 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g11, uv11, n);
 
-    let n00 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g00, uv00, n, ddxUV, ddyUV);
-    let n10 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g10, uv10, n, ddxUV, ddyUV);
-    let n01 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g01, uv01, n, ddxUV, ddyUV);
-    let n11 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g11, uv11, n, ddxUV, ddyUV);
-
-    let orm00 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g00, uv00, n, ddxUV, ddyUV);
-    let orm10 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g10, uv10, n, ddxUV, ddyUV);
-    let orm01 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g01, uv01, n, ddxUV, ddyUV);
-    let orm11 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g11, uv11, n, ddxUV, ddyUV);
+    let orm00 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g00, uv00, n);
+    let orm10 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g10, uv10, n);
+    let orm01 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g01, uv01, n);
+    let orm11 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g11, uv11, n);
 
     // 🌿 4-코너 Bilinear 기본 가중치 (합 = 1.0)
     let w00 = (1.0 - frac.x) * (1.0 - frac.y);
@@ -217,20 +214,12 @@ fn main(inputData: InputData) -> OutputFragment {
     let w01 = (1.0 - frac.x) * frac.y;
     let w11 = frac.x * frac.y;
 
-    // 🌿 4개 타일 가중 합성 및 알파 커버리지 정규화
-    let cov00 = w00 * s00.a;
-    let cov10 = w10 * s10.a;
-    let cov01 = w01 * s01.a;
-    let cov11 = w11 * s11.a;
-    let totalCoverage = cov00 + cov10 + cov01 + cov11;
-    let safeCoverage = max(totalCoverage, 0.001);
-
-    // 🌿 베이크 텍스처는 (0,0,0,0) 배경에서 바이리니어 샘플링되므로 s.rgb는 정확히 (TrueRGB * s.a) 상태입니다.
-    // (s.rgb * w)의 합을 safeCoverage로 나누어 노이즈 증폭 없이 원본 TrueRGB 명도를 100% 깨끗하게 복원
-    var albedo = (s00.rgb * w00 + s10.rgb * w10 + s01.rgb * w01 + s11.rgb * w11) / safeCoverage;
+    // 🌿 4개 타일 가중 합성 (Unmultiplied TrueRGB / Normal / ORM 정확한 1:1 보존)
+    let totalCoverage = w00 * s00.a + w10 * s10.a + w01 * s01.a + w11 * s11.a;
+    var albedo = s00.rgb * w00 + s10.rgb * w10 + s01.rgb * w01 + s11.rgb * w11;
     albedo = clamp(albedo, vec3<f32>(0.0), vec3<f32>(1.0));
-    let rawNormalDepth = (n00 * cov00 + n10 * cov10 + n01 * cov01 + n11 * cov11) / safeCoverage;
-    let rawORM = (orm00 * cov00 + orm10 * cov10 + orm01 * cov01 + orm11 * cov11) / safeCoverage;
+    let rawNormalDepth = n00 * w00 + n10 * w10 + n01 * w01 + n11 * w11;
+    let rawORM = orm00 * w00 + orm10 * w10 + orm01 * w01 + orm11 * w11;
 
     // 2. Dithered LOD Crossfade (4x4 Bayer Matrix)
     let fadeOpacity = inputData.combinedOpacity;
@@ -268,10 +257,15 @@ fn main(inputData: InputData) -> OutputFragment {
     let toCamVec = camPos - inputData.vertexPosition;
     let V = normalize(toCamVec);
 
-    // 3. Unpack True 3D Baked Normal (Pure PBR matching)
-    var N = normalize(rawNormalDepth.rgb * 2.0 - 1.0);
-    if (length(N) < 0.1) {
-        N = vec3<f32>(0.0, 1.0, 0.0);
+    // 3. Unpack True 3D Baked Normal and rotate to World Space via Instance Rotation (Exact PBR matching)
+    var bakedN = normalize(rawNormalDepth.rgb * 2.0 - 1.0);
+    if (length(bakedN) < 0.1) {
+        bakedN = vec3<f32>(0.0, 1.0, 0.0);
+    }
+    var N = bakedN;
+    let quat = inputData.instanceRotQuat;
+    if (abs(dot(quat, quat) - 1.0) < 0.2) {
+        N = normalize(rotateVectorByQuaternion(bakedN, quat));
     }
 
     let NdotV = max(abs(dot(N, V)), 0.04);

@@ -34,6 +34,7 @@ struct OutputData {
     @location(3) uv1: vec2<f32>,
     @location(4) vertexColor_0: vec4<f32>,
     @location(5) vertexTangent: vec4<f32>,
+    @location(6) instanceRotQuat: vec4<f32>,
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
@@ -138,7 +139,8 @@ fn mainInput(input : VertexInput) -> OutputData {
     output.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
     output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
 
-    output.vertexColor_0 = select(input.vertexColor_0, input.instanceRotQuat, isImpostor);
+    output.instanceRotQuat = input.instanceRotQuat;
+    output.vertexColor_0 = input.vertexColor_0;
     output.globalFragmentSlotIndex = subMeshUniforms.globalFragmentSlotIndex;
     output.localNodeScale_volumeScale = vec2<f32>(safeScale.x, safeScale.y);
 

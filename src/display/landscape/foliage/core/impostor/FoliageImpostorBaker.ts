@@ -431,7 +431,7 @@ class FoliageImpostorBaker {
                 },
                 {
                     view: bakedNormalGPUTexture.createView({baseMipLevel: 0, mipLevelCount: 1}),
-                    clearValue: {r: 0.5, g: 0.5, b: 1.0, a: 0.0},
+                    clearValue: {r: 0.5, g: 1.0, b: 0.5, a: 0},
                     loadOp: 'clear',
                     storeOp: 'store',
                 },

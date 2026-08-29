@@ -12,6 +12,7 @@ struct InputData {
     @location(3) uv1: vec2<f32>,
     @location(4) vertexColor_0: vec4<f32>,
     @location(5) vertexTangent: vec4<f32>,
+    @location(6) instanceRotQuat: vec4<f32>,
 
     @location(7) currentClipPos: vec4<f32>,
     @location(8) prevClipPos: vec4<f32>,
@@ -76,14 +77,14 @@ fn getSubTileRotatedUV(quadUV: vec2<f32>, viewDir: vec3<f32>, gridDir: vec3<f32>
     return rotatedP + vec2<f32>(0.5);
 }
 
-fn sampleOctahedralAtlas(tex: texture_2d<f32>, smp: sampler, gridCoords: vec2<f32>, subUV: vec2<f32>, n: f32, ddxUV: vec2<f32>, ddyUV: vec2<f32>) -> vec4<f32> {
+fn sampleOctahedralAtlas(tex: texture_2d<f32>, smp: sampler, gridCoords: vec2<f32>, subUV: vec2<f32>, n: f32) -> vec4<f32> {
     let isInside = (subUV.x >= 0.0 && subUV.x <= 1.0 && subUV.y >= 0.0 && subUV.y <= 1.0);
     let clampedGrid = clamp(gridCoords, vec2<f32>(0.0), vec2<f32>(n - 1.0));
     let oneTexelInTile = 1.0 / 256.0;
     let safeSubUV = clamp(subUV, vec2<f32>(oneTexelInTile), vec2<f32>(1.0 - oneTexelInTile));
     let atlasUV = (clampedGrid + safeSubUV) / n;
 
-    let sampled = textureSampleGrad(tex, smp, atlasUV, ddxUV, ddyUV);
+    let sampled = textureSampleLevel(tex, smp, atlasUV, 0.0);
     return select(vec4<f32>(0.0), sampled, isInside);
 }
 
@@ -119,13 +120,10 @@ fn main(inputData: InputData) -> OutputFragment {
     let uv01 = getSubTileRotatedUV(inputData.uv, localView, dir01);
     let uv11 = getSubTileRotatedUV(inputData.uv, localView, dir11);
 
-    let ddxUV = dpdx(inputData.uv / n);
-    let ddyUV = dpdy(inputData.uv / n);
-
-    let s00 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g00, uv00, n, ddxUV, ddyUV);
-    let s10 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g10, uv10, n, ddxUV, ddyUV);
-    let s01 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g01, uv01, n, ddxUV, ddyUV);
-    let s11 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g11, uv11, n, ddxUV, ddyUV);
+    let s00 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g00, uv00, n);
+    let s10 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g10, uv10, n);
+    let s01 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g01, uv01, n);
+    let s11 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g11, uv11, n);
 
     let w00 = (1.0 - frac.x) * (1.0 - frac.y);
     let w10 = frac.x * (1.0 - frac.y);
