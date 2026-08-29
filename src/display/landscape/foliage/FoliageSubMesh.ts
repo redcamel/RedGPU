@@ -4,7 +4,7 @@ import Geometry from "../../../geometry/Geometry";
 import type {FoliageDepthPassMode} from "./core/pipeline/FoliagePipelineRegistry";
 import FoliagePipelineRegistry from "./core/pipeline/FoliagePipelineRegistry";
 
-export type FoliageRenderPassType = 'depthPrepass' | 'main' | 'alpha' | 'transparent';
+export type FoliageRenderPassType = 'depthPrepass' | 'main';
 
 export interface FoliageSubMeshInitOptions {
     mesh: Mesh;
@@ -25,8 +25,6 @@ export interface FoliageSubMeshInitOptions {
     isDepthPrepass: boolean;
     isMainOpaqueOrMasked: boolean;
     mainDepthMode: FoliageDepthPassMode;
-    isAlpha: boolean;
-    isTransparent: boolean;
     isImpostor?: boolean;
     impostorWidth?: number;
     impostorHeight?: number;
@@ -54,8 +52,6 @@ class FoliageSubMesh {
     readonly isDepthPrepass: boolean;
     readonly isMainOpaqueOrMasked: boolean;
     readonly mainDepthMode: FoliageDepthPassMode;
-    readonly isAlpha: boolean;
-    readonly isTransparent: boolean;
     isImpostor: boolean;
     impostorWidth: number;
     impostorHeight: number;
@@ -83,8 +79,6 @@ class FoliageSubMesh {
         this.isDepthPrepass = init.isDepthPrepass;
         this.isMainOpaqueOrMasked = init.isMainOpaqueOrMasked;
         this.mainDepthMode = init.mainDepthMode;
-        this.isAlpha = init.isAlpha;
-        this.isTransparent = init.isTransparent;
         this.isImpostor = init.isImpostor ?? false;
         this.impostorWidth = init.impostorWidth ?? 0;
         this.impostorHeight = init.impostorHeight ?? 0;
@@ -102,10 +96,6 @@ class FoliageSubMesh {
                 return this.isDepthPrepass;
             case 'main':
                 return this.isMainOpaqueOrMasked;
-            case 'alpha':
-                return this.isAlpha;
-            case 'transparent':
-                return this.isTransparent;
             default:
                 return false;
         }

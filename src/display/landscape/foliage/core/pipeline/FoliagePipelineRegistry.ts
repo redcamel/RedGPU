@@ -138,50 +138,24 @@ class FoliagePipelineRegistry {
         } else {
 
             const isMainShadingAfterDepth = depthPassMode === 'mainShadingAfterDepth';
-            const defaultAlphaBlend: GPUBlendState = {
-                color: {
-                    srcFactor: 'src-alpha',
-                    dstFactor: 'one-minus-src-alpha',
-                    operation: 'add'
+
+            targets = [
+                {
+                    format: 'rgba16float',
+                    blend: undefined,
+                    writeMask: material.writeMaskState ?? GPUColorWrite.ALL,
                 },
-                alpha: {
-                    srcFactor: 'one',
-                    dstFactor: 'one-minus-src-alpha',
-                    operation: 'add'
+                {
+                    format: preferredFormat,
+                    blend: undefined,
+                    writeMask: material.writeMaskState ?? GPUColorWrite.ALL,
+                },
+                {
+                    format: 'rgba16float',
+                    blend: undefined,
+                    writeMask: material.writeMaskState ?? GPUColorWrite.ALL,
                 }
-            };
-
-            const isAlphaBlend = material.alphaBlend === 2;
-            const baseBlend = (isAlphaBlend && material.blendColorState) ? {
-                color: material.blendColorState.state,
-                alpha: material.blendAlphaState.state
-            } : (isAlphaBlend ? defaultAlphaBlend : undefined);
-
-            const effectiveBlend = baseBlend;
-
-            targets = material.getFragmentRenderState
-                ? material.getFragmentRenderState().targets
-                : [
-                    {
-                        format: 'rgba16float',
-                        blend: effectiveBlend,
-                        writeMask: material.writeMaskState,
-                    },
-                    {
-                        format: preferredFormat,
-                        blend: undefined,
-                        writeMask: material.writeMaskState,
-                    },
-                    {
-                        format: 'rgba16float',
-                        blend: undefined,
-                        writeMask: material.writeMaskState,
-                    }
-                ];
-
-            if (targets[0]) {
-                targets[0].blend = effectiveBlend;
-            }
+            ];
 
             if (isMainShadingAfterDepth) {
                 depthStencil = {

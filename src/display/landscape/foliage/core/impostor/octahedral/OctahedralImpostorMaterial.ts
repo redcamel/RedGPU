@@ -24,7 +24,6 @@ interface OctahedralImpostorMaterial {
     cutOff: number;
     doubleSided: boolean;
     isFoliage: boolean;
-    alphaBlend: number;
     gridSize: number;
     pdoScale: number;
     subsurfaceIntensity: number;
@@ -60,7 +59,6 @@ class OctahedralImpostorMaterial extends AUVTransformBaseMaterial {
 
         this.isFoliage = true;
         this.transparent = false;
-        this.alphaBlend = 0;
 
         this.gridSize = gridSize;
         this.pdoScale = 1.0;

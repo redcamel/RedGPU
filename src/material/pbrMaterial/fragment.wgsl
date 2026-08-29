@@ -200,22 +200,18 @@ fn getTransmissionRefraction(
 fn main(inputData:InputData) -> OutputFragment {
     var output: OutputFragment;
 
-    // 🌿 Dithered Discard Alpha Fade
-//    let fadeOpacity = inputData.combinedOpacity;
-//    if (fadeOpacity < 0.999) {
-//        let bayerMatrix = array<f32, 16>(
-//             0.0/16.0,  8.0/16.0,  2.0/16.0, 10.0/16.0,
-//            12.0/16.0,  4.0/16.0, 14.0/16.0,  6.0/16.0,
-//             3.0/16.0, 11.0/16.0,  1.0/16.0,  9.0/16.0,
-//            15.0/16.0,  7.0/16.0, 13.0/16.0,  5.0/16.0
-//        );
-//        let px = u32(inputData.position.x) % 4u;
-//        let py = u32(inputData.position.y) % 4u;
-//        let threshold = bayerMatrix[py * 4u + px];
-//        if (fadeOpacity < threshold) {
-//            discard;
-//        }
-//    }
+    // 🌿 Dithered LOD Crossfade (4x4 Bayer Matrix)
+    let fadeOpacity = inputData.combinedOpacity;
+    if (fadeOpacity < 0.999) {
+        let px = u32(inputData.position.x) & 3u;
+        let py = u32(inputData.position.y) & 3u;
+        let idx = (py << 2u) | px;
+        let packed = select(0x6E4C2A80u, 0x5D7F91B3u, idx >= 8u);
+        let threshold = f32((packed >> ((idx & 7u) * 4u)) & 0xFu) * 0.0625;
+        if (fadeOpacity < threshold) {
+            discard;
+        }
+    }
 
     let uniforms = globalFragmentSSBO_PBR[inputData.globalFragmentSlotIndex];
 
@@ -288,10 +284,25 @@ fn main(inputData:InputData) -> OutputFragment {
 
 
     #redgpu_if isFoliage
-        if (resultAlpha < 0.3333) { discard; }
+        let ddxUV = dpdx(diffuseUV);
+        let ddyUV = dpdy(diffuseUV);
+        let maxDeriv = max(length(ddxUV), length(ddyUV));
+        let mipLevel = max(0.0, log2(max(maxDeriv * 1024.0, 1.0)));
+        let mipAlphaScale = 1.0 + mipLevel * 0.70;
+        let baseCutOff = select(0.3333, u_cutOff, u_cutOff > 0.0);
+        let effectiveAlpha = resultAlpha * mipAlphaScale;
+        if (effectiveAlpha <= baseCutOff) { discard; }
+        resultAlpha = 1.0;
     #redgpu_else
         #redgpu_if useCutOff
-            if (resultAlpha <= u_cutOff) { discard; }
+            let ddxUV = dpdx(diffuseUV);
+            let ddyUV = dpdy(diffuseUV);
+            let maxDeriv = max(length(ddxUV), length(ddyUV));
+            let mipLevel = max(0.0, log2(max(maxDeriv * 1024.0, 1.0)));
+            let mipAlphaScale = 1.0 + mipLevel * 0.70;
+            let effectiveAlpha = resultAlpha * mipAlphaScale;
+            if (effectiveAlpha <= u_cutOff) { discard; }
+            resultAlpha = 1.0;
         #redgpu_endIf
     #redgpu_endIf
     let emissiveUV = getTextureTransformUV(input_uv, input_uv1, uniforms.emissiveTexture_texCoord_index, uniforms.use_emissiveTexture_KHR_texture_transform, uniforms.emissiveTexture_KHR_texture_transform_offset, uniforms.emissiveTexture_KHR_texture_transform_rotation, uniforms.emissiveTexture_KHR_texture_transform_scale);

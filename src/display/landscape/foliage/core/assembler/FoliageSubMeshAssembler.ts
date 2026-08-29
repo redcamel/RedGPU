@@ -293,10 +293,10 @@ class FoliageSubMeshAssembler {
 
             if (options.convertBlendToMasked || isFoliage) {
                 if (mat.alphaBlend === 2 || mat.transparent || mat.alphaMode === 'BLEND' || mat.alphaMode === 'MASK') {
-                    mat.useCutOff = false;
+                    mat.useCutOff = true;
                     mat.cutOff = (mat.cutOff > 0) ? mat.cutOff : 0.3333;
                     mat.transparent = false;
-                    mat.alphaBlend = 2;
+                    mat.alphaBlend = 0;
                     mat.dirtyPipeline = true;
                 }
             }
@@ -667,14 +667,13 @@ class FoliageSubMeshAssembler {
         });
 
         const isImpostor = isImpostorOverride || mat instanceof OctahedralImpostorMaterial || mat?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof mat?.name === 'string' && mat.name.includes('Octahedral'));
-        const isTransparent = !isImpostor && (!!mat.transparent || !!mat.use2PathRender);
-        const isAlpha = !isImpostor && (mat.alphaBlend === 2 || (mat.opacity !== undefined && mat.opacity < 1.0)) && !isTransparent;
         const isMasked = !!mat.useCutOff || (mat.cutOff !== undefined && mat.cutOff > 0) || isImpostor;
         const hasBaseColorTexture = !!(mat.baseColorTexture?.gpuTexture || mat.baseColorTexture?.src || mat.baseColorTexture?.url || (mat.diffuseTexture && (mat.diffuseTexture.gpuTexture || mat.diffuseTexture.src || mat.diffuseTexture.url)));
 
-        // 🌿 3D 식생 및 임포스터 빌보드 공통 Depth Prepass 2패스 활성화 (완벽한 Z-Fighting 0% + 부드러운 셰이딩)
-        const isDepthPrepass = !isTransparent && !isAlpha && (hasBaseColorTexture || isMasked || isImpostor);
-        const isMainOpaqueOrMasked = !isTransparent && !isAlpha;
+        // 🌲 3D 근거리 식생(LOD 0~N)은 2-Pass Depth Prepass로 오버드로우를 90% 이상 제거하고,
+        // 🌲 원거리 빌보드/임포스터는 자체 오버드로우가 없는 단일 Quad이므로 버텍스/드로우콜 절감을 위해 1-Pass 고속 렌더링(normal)을 적용합니다.
+        const isDepthPrepass = !isImpostor && (hasBaseColorTexture || isMasked);
+        const isMainOpaqueOrMasked = true;
         const mainDepthMode: FoliageDepthPassMode = isDepthPrepass ? 'mainShadingAfterDepth' : 'normal';
 
         return new FoliageSubMesh({
@@ -695,8 +694,6 @@ class FoliageSubMeshAssembler {
             isDepthPrepass,
             isMainOpaqueOrMasked,
             mainDepthMode,
-            isAlpha,
-            isTransparent,
             isImpostor,
             impostorWidth,
             impostorHeight,

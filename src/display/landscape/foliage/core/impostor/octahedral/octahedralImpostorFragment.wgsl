@@ -241,9 +241,16 @@ fn main(inputData: InputData) -> OutputFragment {
     let sharpnessFactor = clamp((maxCornerWeight - 0.25) / 0.75, 0.0, 1.0);
     let reconstructedAlpha = mix(linearAlpha, maxAlpha, mix(0.70, 0.95, sharpnessFactor));
 
-    // 🌿 부드러운 2패스 알파 블렌딩: 투명 찌꺼기(< 0.01)만 폐기하고 배경과 스며들도록 출력
-    let finalAlpha = clamp(reconstructedAlpha, 0.0, 1.0);
-    if (finalAlpha < 0.01) {
+    // 🌿 UE5 DitherTemporalAA (TAA 시간축 융합 + MSAA 서브픽셀 융합 완벽 호환)
+    let ditherPx = u32(inputData.position.x) & 3u;
+    let ditherPy = u32(inputData.position.y) & 3u;
+    let frameIdx = systemUniforms.time.frameIndex & 3u;
+    let ditherIdx = (((ditherPy ^ frameIdx) << 2u) | (ditherPx ^ frameIdx)) & 15u;
+    let bayerPacked = select(0x6E4C2A80u, 0x5D7F91B3u, ditherIdx >= 8u);
+    let ditherThreshold = f32((bayerPacked >> ((ditherIdx & 7u) * 4u)) & 0xFu) * 0.0625;
+
+    let dynamicCutOff = mix(0.20, 0.55, ditherThreshold);
+    if (reconstructedAlpha <= dynamicCutOff) {
         discard;
     }
 
@@ -404,7 +411,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
     let baseReflectionStrength = smoothnessCurved * (0.04 + 0.96 * metallic * metallic);
 
-    output.color = vec4<f32>(finalRgb, finalAlpha);
+    output.color = vec4<f32>(finalRgb, 1.0);
     output.gBufferNormal = vec4<f32>(N_spec * 0.5 + 0.5, baseReflectionStrength);
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
 
