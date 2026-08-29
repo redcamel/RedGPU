@@ -179,27 +179,27 @@ RedGPU.init(
         );
 
         // 2. Frangipani Tree (HD Realistic Tree + Octahedral Impostor) 로드
-        // new RedGPU.GLTFLoader(
-        //     redGPUContext,
-        //     '../../../assets/terrain/realistic_hd_frangipani_tree_950.glb',
-        //     (loader) => {
-        //         const root = loader.resultMesh;
-        //         console.log('🌸 [realistic_hd_frangipani_tree_950.glb] Loaded Root:', root);
-        //
-        //         foliageManager.addFoliageType({
-        //             name: 'FrangipaniTree',
-        //             lods: [{mesh: root, lodDistance: 120}],
-        //             maxInstances: 50000,
-        //             minScale: [4.2, 4.2, 4.2],
-        //             maxScale: [6.2, 6.2, 6.2],
-        //             randomRotationY: true,
-        //             cullingDistance: 3500,
-        //             fadeStartDistance: 2800,
-        //             isFoliage: true,
-        //             useImpostor: true
-        //         });
-        //     }
-        // );
+        new RedGPU.GLTFLoader(
+            redGPUContext,
+            '../../../assets/terrain/realistic_hd_frangipani_tree_950.glb',
+            (loader) => {
+                const root = loader.resultMesh;
+                console.log('🌸 [realistic_hd_frangipani_tree_950.glb] Loaded Root:', root);
+
+                foliageManager.addFoliageType({
+                    name: 'FrangipaniTree',
+                    lods: [{mesh: root, lodDistance: 120}],
+                    maxInstances: 50000,
+                    minScale: [4.2, 4.2, 4.2],
+                    maxScale: [6.2, 6.2, 6.2],
+                    randomRotationY: true,
+                    cullingDistance: 3500,
+                    fadeStartDistance: 2800,
+                    isFoliage: true,
+                    useImpostor: true
+                });
+            }
+        );
 
         landscape.debuggerManager.spatialGrid = true;
 

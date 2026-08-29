@@ -287,18 +287,13 @@ class FoliageSubMeshAssembler {
 
             const isFoliage = options.isFoliage !== false;
             if (isFoliage) {
-                // 🌿 식생 전용 셰이딩 모델 모드 활성화
+                // 🌿 언리얼 엔진 5 표준: 식생 전용 Two-Sided Masked 셰이딩 모델 적용
                 mat.isFoliage = true;
-            }
-
-            if (options.convertBlendToMasked || isFoliage) {
-                if (mat.alphaBlend === 2 || mat.transparent || mat.alphaMode === 'BLEND' || mat.alphaMode === 'MASK') {
-                    mat.useCutOff = true;
-                    mat.cutOff = (mat.cutOff > 0) ? mat.cutOff : 0.3333;
-                    mat.transparent = false;
-                    mat.alphaBlend = 0;
-                    mat.dirtyPipeline = true;
-                }
+                mat.useCutOff = true;
+                mat.cutOff = (mat.cutOff > 0) ? mat.cutOff : 0.3333;
+                mat.transparent = false;
+                mat.doubleSided = true;
+                mat.dirtyPipeline = true;
             }
 
             if (mat.dirtyPipeline || !mat.gpuRenderInfo?.fragmentShaderModule || !mat.gpuRenderInfo?.fragmentUniformBindGroup) {

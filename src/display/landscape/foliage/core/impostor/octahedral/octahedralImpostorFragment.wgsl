@@ -209,7 +209,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let w01 = (1.0 - frac.x) * frac.y;
     let w11 = frac.x * frac.y;
 
-    // 🌿 4개 타일 가중 합성 및 알파 커버리지 정규화 (100% 온전한 원본 명도 유지)
+    // 🌿 4개 타일 가중 합성 및 알파 커버리지 정규화
     let cov00 = w00 * s00.a;
     let cov10 = w10 * s10.a;
     let cov01 = w01 * s01.a;
@@ -217,7 +217,14 @@ fn main(inputData: InputData) -> OutputFragment {
     let totalCoverage = cov00 + cov10 + cov01 + cov11;
     let safeCoverage = max(totalCoverage, 0.001);
 
-    var albedo = (s00.rgb * cov00 + s10.rgb * cov10 + s01.rgb * cov01 + s11.rgb * cov11) / safeCoverage;
+    // 🌿 각 타일별 바이리니어 샘플링 시 검은 투명 배경과의 혼합으로 떨어진 명도를 원색으로 복원 (Un-premultiply)
+    let rgb00 = s00.rgb / max(s00.a, 0.001);
+    let rgb10 = s10.rgb / max(s10.a, 0.001);
+    let rgb01 = s01.rgb / max(s01.a, 0.001);
+    let rgb11 = s11.rgb / max(s11.a, 0.001);
+
+    // 🌿 나뭇잎이 존재하는 타일들의 정확한 가중 평균 계산 (Black Fringe 및 White Flare 원천 차단)
+    var albedo = (rgb00 * cov00 + rgb10 * cov10 + rgb01 * cov01 + rgb11 * cov11) / safeCoverage;
     let rawNormalDepth = (n00 * cov00 + n10 * cov10 + n01 * cov01 + n11 * cov11) / safeCoverage;
     let rawORM = (orm00 * cov00 + orm10 * cov10 + orm01 * cov01 + orm11 * cov11) / safeCoverage;
 
@@ -411,7 +418,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let smoothnessCurved = smoothness * smoothness * (3.0 - 2.0 * smoothness);
     let baseReflectionStrength = smoothnessCurved * (0.04 + 0.96 * metallic * metallic);
 
-    output.color = vec4<f32>(finalRgb, 1.0);
+    output.color = vec4<f32>(finalRgb, globalFragmentData.opacity);
     output.gBufferNormal = vec4<f32>(N_spec * 0.5 + 0.5, baseReflectionStrength);
     output.gBufferMotionVector = vec4<f32>(getMotionVector(inputData.currentClipPos, inputData.prevClipPos), 0.0, 1.0);
 

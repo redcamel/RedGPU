@@ -42,8 +42,6 @@ export interface FoliageTypeOptions {
     /** Whether to automatically generate and use an octahedral impostor at the end of the LOD chain (default: true) */
     useImpostor?: boolean;
 
-    convertBlendToMasked?: boolean;
-
     isFoliage?: boolean;
 }
 
@@ -91,7 +89,6 @@ class FoliageType {
             maxScale,
             randomRotationY: options.randomRotationY ?? true,
             useImpostor,
-            convertBlendToMasked: options.convertBlendToMasked ?? true,
             isFoliage: options.isFoliage !== false,
         });
 
