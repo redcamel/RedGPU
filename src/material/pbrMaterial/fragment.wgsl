@@ -275,7 +275,7 @@ fn main(inputData:InputData) -> OutputFragment {
     // UV Transforms
     let diffuseUV = getTextureTransformUV(input_uv, input_uv1, uniforms.baseColorTexture_texCoord_index, uniforms.use_baseColorTexture_KHR_texture_transform, uniforms.baseColorTexture_KHR_texture_transform_offset, uniforms.baseColorTexture_KHR_texture_transform_rotation, uniforms.baseColorTexture_KHR_texture_transform_scale);
     var baseColor = u_baseColorFactor;
-    var resultAlpha:f32 = u_opacity * baseColor.a * inputData.combinedOpacity;
+    var resultAlpha:f32 = u_opacity * baseColor.a;
     baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
     #redgpu_if baseColorTexture
         let diffuseSampleColor = (textureSample(baseColorTexture, baseColorTextureSampler, diffuseUV));
