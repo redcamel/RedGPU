@@ -341,7 +341,9 @@ fn main(inputData: InputData) -> OutputFragment {
         let subSurfaceFactor = pow(viewDotNegL, 3.0) * (1.0 - metallic) * 0.45;
         let subSurfaceTransmission = albedo * subSurfaceFactor;
 
-        let dielectricPart = (specBRDF * NdotL) + (vec3<f32>(1.0) - F) * diffuseReflection + subSurfaceTransmission;
+        // 🌿 [Direct AO Micro-Shadowing] 나무 내부 깊은 잎사귀에 대한 직사광 차폐 합성
+        let directAO = mix(ao, 1.0, NdotL * 0.6);
+        let dielectricPart = (specBRDF * NdotL * 0.3) + (vec3<f32>(1.0) - F) * diffuseReflection * directAO + subSurfaceTransmission * ao;
         let metallicPart = specBRDF * NdotL;
         let directResult = mix(dielectricPart, metallicPart, metallic);
 
@@ -397,13 +399,17 @@ fn main(inputData: InputData) -> OutputFragment {
         let F_IBL_dielectric = FR_dielectric * envBRDF.x + envBRDF.y;
         let F_IBL_metal = FR_metal * envBRDF.x + envBRDF.y;
 
+        // 🌿 UE5 Foliage 물리 표준: 나뭇잎 IBL 스펙큘러 백화 억제 (specularParameter = 0.25)
+        let foliageSpecWeight = 0.25;
+        let F_IBL_dielectric_weighted = F_IBL_dielectric * foliageSpecWeight;
+
         // 🌿 UE5 물리 기반 Directional Specular Occlusion (어두운 틈새 스펙큘러 백화 차단 + 양지 PBR 광택 복원)
         let specularOcclusion = saturate(pow(NdotV_IBL + ao, exp2(-16.0 * roughness - 1.0)) - 1.0 + ao);
         let specularAlbedo_IBL = saturate(F0_dielectric * envBRDF.x + envBRDF.y);
-        let diffuseWeight_IBL = (vec3<f32>(1.0) - specularAlbedo_IBL);
+        let diffuseWeight_IBL = (vec3<f32>(1.0) - specularAlbedo_IBL * foliageSpecWeight);
 
         let envIBL_DIFFUSE = albedo * iblDiffuseColor * diffuseWeight_IBL * ao;
-        let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric * specularOcclusion;
+        let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric_weighted * specularOcclusion;
         let dielectricPart_IBL = ibl_specular_dielectric + envIBL_DIFFUSE;
         let metallicPart_IBL = reflectedColor * F_IBL_metal * specularOcclusion;
 

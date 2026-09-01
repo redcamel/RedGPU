@@ -75,23 +75,38 @@ fn main(
     let distAlongRay = dot(relPos, camDir);
     let normDepth = clamp(distAlongRay / (radius * 1.05) * 0.5 + 0.5, 0.0, 1.0);
 
-    // 4. Physical Material Properties (ORM + Subsurface Translucency)
-    var ao = input.materialParams.z;
+    // 4. Physical Material Properties + 3D Geometric Self-Occlusion (Spherical & Height AO)
+    let isFoliageMat = (input.cameraDir.w > 0.5);
+    var baseAO = input.materialParams.z;
     var roughness = input.materialParams.x;
+    if (isFoliageMat) {
+        roughness = max(roughness, 0.80);
+    }
     var metallic = input.materialParams.y;
-    var subsurface = select(0.2, 1.0, isFoliage);
+    var subsurface = select(0.2, 1.0, isFoliageMat);
 
     if (input.textureFlags.z > 0.5) {
         let ormSample = textureSampleLevel(ormTexture, ormSampler, input.uv, 0.0);
-        ao = ao * ormSample.r;
+        baseAO = baseAO * ormSample.r;
         roughness = roughness * ormSample.g;
         metallic = metallic * ormSample.b;
     }
+
+    // 🌿 [3D Self-Occlusion / Spherical AO] 나무 중심부 및 내부 깊이 기반 기하학적 차폐 계산
+    let distFromCenter = length(relPos) / radius;
+    // 중심부로 갈수록 AO = 0.20 ~ 0.35, 외곽으로 갈수록 AO = 1.0 (안쪽 잎사귀 어두운 음영 복원)
+    let sphericalAO = clamp(pow(distFromCenter, 1.2) * 0.80 + 0.20, 0.15, 1.0);
+
+    // 🌿 [Height/Ground Occlusion] 수목 하단부/지면 근처 추가 차폐
+    let normHeight = clamp((relPos.y / radius) * 0.5 + 0.5, 0.0, 1.0);
+    let heightAO = clamp(normHeight * 0.35 + 0.65, 0.40, 1.0);
+
+    let finalAO = clamp(baseAO * sphericalAO * heightAO, 0.0, 1.0);
     roughness = clamp(roughness, 0.04, 1.0);
 
     out.baseColor = vec4<f32>(finalColor.rgb, finalColor.a);
     out.normalDepth = vec4<f32>(encodedNormal, normDepth);
-    out.ormSubsurface = vec4<f32>(ao, roughness, metallic, subsurface);
+    out.ormSubsurface = vec4<f32>(finalAO, roughness, metallic, subsurface);
     return out;
 }
 
