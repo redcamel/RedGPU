@@ -275,7 +275,11 @@ fn main(inputData:InputData) -> OutputFragment {
     let foliageUvDeriv = length(vec2<f32>(dpdx(diffuseUV.x), dpdy(diffuseUV.y))) * 80.0;
     var baseColor = u_baseColorFactor;
     var resultAlpha:f32 = u_opacity * baseColor.a;
-    baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
+    #redgpu_if isFoliage
+        // 🌿 식생 모드: vertexColor_0을 BaseColor에 직접 곱하지 않고 알베도 본연의 채도 보존 (occlusionParameter에서 AO로 처리)
+    #redgpu_else
+        baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
+    #redgpu_endIf
     #redgpu_if baseColorTexture
         let diffuseSampleColor = (textureSample(baseColorTexture, baseColorTextureSampler, diffuseUV));
         baseColor *= diffuseSampleColor;
@@ -396,6 +400,11 @@ fn main(inputData:InputData) -> OutputFragment {
     var occlusionParameter:f32 = 1.0;
     #redgpu_if useOcclusionTexture
         occlusionParameter = textureSample(packedORMTexture, packedTextureSampler, occlusionUV).r * u_occlusionStrength;
+    #redgpu_endIf
+    #redgpu_if isFoliage
+        // 🌿 식생 모드: u_useVertexColor가 켜져 있을 때만 정점 AO(.r)를 반영하고, 꺼져 있으면 1.0(기본값)으로 안전 폴백
+        let vertexAO = select(1.0, clamp(input_vertexColor_0.r, 0.0, 1.0), u_useVertexColor);
+        occlusionParameter = occlusionParameter * vertexAO;
     #redgpu_endIf
     var metallicParameter: f32 = u_metallicFactor;
     var roughnessParameter: f32 = u_roughnessFactor;
@@ -1145,6 +1154,22 @@ fn getIndirectPbrLighting(
         let specularAlbedo_IBL = saturate(F0_dielectric * envBRDF.x + envBRDF.y);
         let diffuseWeight_IBL = (vec3<f32>(1.0) - specularAlbedo_IBL * specularParameter);
         var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * diffuseWeight_IBL * occlusionParameter;
+        #redgpu_if isFoliage
+        {
+            // 🌿 [UE5 TwoSidedFoliage] 잎사귀 반대편(-N) 하늘 산란광 투과 (그늘면 암전 방지)
+            var backIBLDiffuse = vec3<f32>(0.0);
+            if (u_usePrefilterTexture) {
+                backIBLDiffuse += textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, -N, 0).rgb * preExposure * systemUniforms.iblIntensity * INV_PI;
+            }
+            if (u_useSkyAtmosphere) {
+                let u_atmo = systemUniforms.skyAtmosphere;
+                let backSkyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, -N, 0.0).rgb * u_atmo.sunIntensity * preExposure;
+                let backTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, -N.y, u_atmo.atmosphereHeight);
+                backIBLDiffuse += (backIBLDiffuse * backTrans) + backSkyIrradiance;
+            }
+            envIBL_DIFFUSE += albedo * backIBLDiffuse * 0.35 * occlusionParameter;
+        }
+        #redgpu_endIf
         #redgpu_if useKHR_materials_diffuse_transmission
         {
             var backScatteringColor = vec3<f32>(0.0);
@@ -1281,10 +1306,13 @@ fn getDirectPbrLight(
     }
     #redgpu_endIf
     #redgpu_if isFoliage
-        // 🌿 Foliage Subsurface Transmission (빛이 잎사귀를 뚫고 나오는 역광 투과광)
+        // 🌿 [UE5 TwoSidedFoliage] 나뭇잎 양면 확산 투과광 (Wrap Diffuse Subsurface)
+        // 빛을 등진 뒷면에서도 빛이 잎사귀를 뚫고 나와 맑은 연두색으로 방출됨
+        let backNdotL = clamp((-NdotL_origin + 0.40) / 1.40, 0.0, 1.0);
         let viewDotNegL = max(dot(V, -L), 0.0);
-        let subSurfaceFactor = pow(viewDotNegL, 3.0) * (1.0 - metallicParameter) * 0.45;
-        let subSurfaceTransmission = albedo * subSurfaceFactor;
+        let forwardScatter = pow(viewDotNegL, 3.0) * 0.40;
+        let subSurfaceFactor = (backNdotL * 0.60 + forwardScatter) * (1.0 - metallicParameter);
+        let subSurfaceTransmission = albedo * subSurfaceFactor * 0.50;
     #redgpu_else
         let subSurfaceTransmission = vec3<f32>(0.0);
     #redgpu_endIf

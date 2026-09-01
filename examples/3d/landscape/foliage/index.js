@@ -127,91 +127,91 @@ RedGPU.init(
             }
         );
         // 1. Pine Tree (Multi-LOD) 로드
-        // new RedGPU.GLTFLoader(
-        //     redGPUContext,
-        //     '../../../assets/terrain/test.glb',
-        //     (loader) => {
-        //         const root = loader.resultMesh;
-        //         console.log('🌲 [test.glb] Loaded Root:', root);
-        //         const treeGroups = new Map();
-        //
-        //         const traverse = (node) => {
-        //             if (!node) return;
-        //             if (node.name) {
-        //                 const lodMatch = node.name.match(/(.*?)(?:_?LOD([0-9]))$/i);
-        //                 if (lodMatch) {
-        //                     const baseName = lodMatch[1] || node.name;
-        //                     const lodLevel = parseInt(lodMatch[2], 10);
-        //                     if (!treeGroups.has(baseName)) {
-        //                         treeGroups.set(baseName, {});
-        //                     }
-        //                     treeGroups.get(baseName)[`lod${lodLevel}`] = node;
-        //                     return;
-        //                 }
-        //             }
-        //             const children = node.children || [];
-        //             for (let i = 0; i < children.length; i++) {
-        //                 traverse(children[i]);
-        //             }
-        //         };
-        //
-        //         traverse(root);
-        //
-        //         console.log(`🌲 [test.glb] Discovered ${treeGroups.size} tree variants:`, Array.from(treeGroups.keys()));
-        //
-        //         if (treeGroups.size > 0) {
-        //             console.log('treeGroups', treeGroups)
-        //             treeGroups.forEach((lods, baseName) => {
-        //                 const lodConfigs = [];
-        //                 const lod0 = lods.lod0 || lods.lod1 || lods.lod2;
-        //                 if (!lod0) return;
-        //
-        //                 lodConfigs.push({mesh: lod0, lodDistance: 80});
-        //                 if (lods.lod1 && lods.lod1 !== lod0) lodConfigs.push({mesh: lods.lod1, lodDistance: 180});
-        //                 if (lods.lod2 && lods.lod2 !== lod0 && lods.lod2 !== lods.lod1) lodConfigs.push({
-        //                     mesh: lods.lod2,
-        //                     lodDistance: 320
-        //                 });
-        //
-        //                 foliageManager.addFoliageType({
-        //                     name: `Tree_${baseName}`,
-        //                     lods: lodConfigs,
-        //                     maxInstances: 250000,
-        //                     minScale: [0.85, 0.85, 0.85],
-        //                     maxScale: [1.35, 1.35, 1.35],
-        //                     randomRotationY: true,
-        //                     cullingDistance: 3500,
-        //                     fadeStartDistance: 2800,
-        //                     isFoliage: true,
-        //                     useImpostor: true
-        //                 });
-        //             });
-        //         }
-        //     }
-        // );
-
-        // 2. Frangipani Tree (HD Realistic Tree + Octahedral Impostor) 로드
         new RedGPU.GLTFLoader(
             redGPUContext,
-            '../../../assets/terrain/realistic_hd_frangipani_tree_950.glb',
+            '../../../assets/terrain/test.glb',
             (loader) => {
                 const root = loader.resultMesh;
-                console.log('🌸 [realistic_hd_frangipani_tree_950.glb] Loaded Root:', root);
+                console.log('🌲 [test.glb] Loaded Root:', root);
+                const treeGroups = new Map();
 
-                foliageManager.addFoliageType({
-                    name: 'FrangipaniTree',
-                    lods: [{mesh: root, lodDistance: 120}],
-                    maxInstances: 50000,
-                    minScale: [4.2, 4.2, 4.2],
-                    maxScale: [6.2, 6.2, 6.2],
-                    randomRotationY: true,
-                    cullingDistance: 3500,
-                    fadeStartDistance: 2800,
-                    isFoliage: true,
-                    useImpostor: true
-                });
+                const traverse = (node) => {
+                    if (!node) return;
+                    if (node.name) {
+                        const lodMatch = node.name.match(/(.*?)(?:_?LOD([0-9]))$/i);
+                        if (lodMatch) {
+                            const baseName = lodMatch[1] || node.name;
+                            const lodLevel = parseInt(lodMatch[2], 10);
+                            if (!treeGroups.has(baseName)) {
+                                treeGroups.set(baseName, {});
+                            }
+                            treeGroups.get(baseName)[`lod${lodLevel}`] = node;
+                            return;
+                        }
+                    }
+                    const children = node.children || [];
+                    for (let i = 0; i < children.length; i++) {
+                        traverse(children[i]);
+                    }
+                };
+
+                traverse(root);
+
+                console.log(`🌲 [test.glb] Discovered ${treeGroups.size} tree variants:`, Array.from(treeGroups.keys()));
+
+                if (treeGroups.size > 0) {
+                    console.log('treeGroups', treeGroups)
+                    treeGroups.forEach((lods, baseName) => {
+                        const lodConfigs = [];
+                        const lod0 = lods.lod0 || lods.lod1 || lods.lod2;
+                        if (!lod0) return;
+
+                        lodConfigs.push({mesh: lod0, lodDistance: 80});
+                        if (lods.lod1 && lods.lod1 !== lod0) lodConfigs.push({mesh: lods.lod1, lodDistance: 180});
+                        if (lods.lod2 && lods.lod2 !== lod0 && lods.lod2 !== lods.lod1) lodConfigs.push({
+                            mesh: lods.lod2,
+                            lodDistance: 320
+                        });
+
+                        foliageManager.addFoliageType({
+                            name: `Tree_${baseName}`,
+                            lods: lodConfigs,
+                            maxInstances: 250000,
+                            minScale: [0.85, 0.85, 0.85],
+                            maxScale: [1.35, 1.35, 1.35],
+                            randomRotationY: true,
+                            cullingDistance: 3500,
+                            fadeStartDistance: 2800,
+                            isFoliage: true,
+                            useImpostor: true
+                        });
+                    });
+                }
             }
         );
+
+        // 2. Frangipani Tree (HD Realistic Tree + Octahedral Impostor) 로드
+        // new RedGPU.GLTFLoader(
+        //     redGPUContext,
+        //     '../../../assets/terrain/realistic_hd_frangipani_tree_950.glb',
+        //     (loader) => {
+        //         const root = loader.resultMesh;
+        //         console.log('🌸 [realistic_hd_frangipani_tree_950.glb] Loaded Root:', root);
+        //
+        //         foliageManager.addFoliageType({
+        //             name: 'FrangipaniTree',
+        //             lods: [{mesh: root, lodDistance: 120}],
+        //             maxInstances: 50000,
+        //             minScale: [4.2, 4.2, 4.2],
+        //             maxScale: [6.2, 6.2, 6.2],
+        //             randomRotationY: true,
+        //             cullingDistance: 3500,
+        //             fadeStartDistance: 2800,
+        //             isFoliage: true,
+        //             useImpostor: true
+        //         });
+        //     }
+        // );
 
         landscape.debuggerManager.spatialGrid = true;
 

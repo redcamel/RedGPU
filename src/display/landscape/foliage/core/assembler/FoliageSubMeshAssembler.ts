@@ -415,6 +415,16 @@ class FoliageSubMeshAssembler {
             entry.raws.push(raw);
         }
 
+        const isFoliage = options.isFoliage !== false;
+        const treeCenterY = (isFinite(minY) && isFinite(maxY)) ? ((minY + maxY) * 0.5 - offsetY) : 0;
+        const treeRadius = Math.max(
+            (isFinite(maxX) && isFinite(minX)) ? (maxX - minX) * 0.5 : 2.0,
+            (isFinite(maxY) && isFinite(minY)) ? (maxY - minY) * 0.5 : 3.0,
+            (isFinite(maxZ) && isFinite(minZ)) ? (maxZ - minZ) * 0.5 : 2.0,
+            0.5
+        );
+        const invTreeRadius = 1.0 / treeRadius;
+
         const resultSubMeshes: FoliageSubMesh[] = [];
 
         materialGroups.forEach((entry) => {
@@ -457,10 +467,12 @@ class FoliageSubMeshAssembler {
                         const x = srcVData[srcIdx + 0];
                         const y = srcVData[srcIdx + 1];
                         const z = srcVData[srcIdx + 2];
-                        combinedVertexData[dstIdx + 0] = (m[0] * x + m[4] * y + m[8] * z + m[12]) - offsetX;
-                        combinedVertexData[dstIdx + 1] = (m[1] * x + m[5] * y + m[9] * z + m[13]) - offsetY;
-                        combinedVertexData[dstIdx + 2] = (m[2] * x + m[6] * y + m[10] * z + m[14]) - offsetZ;
-
+                        const vx = (m[0] * x + m[4] * y + m[8] * z + m[12]) - offsetX;
+                        const vy = (m[1] * x + m[5] * y + m[9] * z + m[13]) - offsetY;
+                        const vz = (m[2] * x + m[6] * y + m[10] * z + m[14]) - offsetZ;
+                        combinedVertexData[dstIdx + 0] = vx;
+                        combinedVertexData[dstIdx + 1] = vy;
+                        combinedVertexData[dstIdx + 2] = vz;
 
                         if (rawStride >= 6) {
                             const nx = srcVData[srcIdx + 3];
@@ -498,21 +510,17 @@ class FoliageSubMeshAssembler {
                             combinedVertexData[dstIdx + 9] = combinedVertexData[dstIdx + 7];
                         }
 
+                        let vc0 = 1.0, vc1 = 1.0, vc2 = 1.0, vc3 = 1.0;
                         if (rawStride >= 14) {
-                            const vc0 = srcVData[srcIdx + 10];
-                            const vc1 = srcVData[srcIdx + 11];
-                            const vc2 = srcVData[srcIdx + 12];
-                            const vc3 = srcVData[srcIdx + 13];
-                            combinedVertexData[dstIdx + 10] = vc0;
-                            combinedVertexData[dstIdx + 11] = vc1;
-                            combinedVertexData[dstIdx + 12] = vc2;
-                            combinedVertexData[dstIdx + 13] = vc3 !== 0 ? vc3 : 1.0;
-                        } else {
-                            combinedVertexData[dstIdx + 10] = 1.0;
-                            combinedVertexData[dstIdx + 11] = 1.0;
-                            combinedVertexData[dstIdx + 12] = 1.0;
-                            combinedVertexData[dstIdx + 13] = 1.0;
+                            vc0 = srcVData[srcIdx + 10];
+                            vc1 = srcVData[srcIdx + 11];
+                            vc2 = srcVData[srcIdx + 12];
+                            vc3 = srcVData[srcIdx + 13] !== 0 ? srcVData[srcIdx + 13] : 1.0;
                         }
+                        combinedVertexData[dstIdx + 10] = vc0;
+                        combinedVertexData[dstIdx + 11] = vc1;
+                        combinedVertexData[dstIdx + 12] = vc2;
+                        combinedVertexData[dstIdx + 13] = vc3;
 
                         let tanX = 0, tanY = 0, tanZ = 0, tanW = 1.0;
                         let hasTangent = false;

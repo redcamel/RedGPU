@@ -336,14 +336,14 @@ fn main(inputData: InputData) -> OutputFragment {
         let specBRDF = getDirectSpecularBRDF(F, roughness, NdotH, NdotV, NdotL);
         let diffuseReflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughness, albedo);
 
-        // 🌿 Foliage Subsurface Transmission (빛이 잎사귀를 뚫고 나오는 역광 투과광)
+        // 🌿 [UE5 TwoSidedFoliage] 나뭇잎 양면 확산 투과광 (Wrap Diffuse Subsurface)
+        let backNdotL = clamp((-dot(N, L) + 0.40) / 1.40, 0.0, 1.0);
         let viewDotNegL = max(dot(V, -L), 0.0);
-        let subSurfaceFactor = pow(viewDotNegL, 3.0) * (1.0 - metallic) * 0.45;
-        let subSurfaceTransmission = albedo * subSurfaceFactor;
+        let forwardScatter = pow(viewDotNegL, 3.0) * 0.40;
+        let subSurfaceFactor = (backNdotL * 0.60 + forwardScatter) * (1.0 - metallic);
+        let subSurfaceTransmission = albedo * subSurfaceFactor * 0.50;
 
-        // 🌿 [Direct AO Micro-Shadowing] 나무 내부 깊은 잎사귀에 대한 직사광 차폐 합성
-        let directAO = mix(ao, 1.0, NdotL * 0.6);
-        let dielectricPart = (specBRDF * NdotL * 0.3) + (vec3<f32>(1.0) - F) * diffuseReflection * directAO + subSurfaceTransmission * ao;
+        let dielectricPart = (specBRDF * NdotL) + (vec3<f32>(1.0) - F) * diffuseReflection + subSurfaceTransmission;
         let metallicPart = specBRDF * NdotL;
         let directResult = mix(dielectricPart, metallicPart, metallic);
 
@@ -399,17 +399,27 @@ fn main(inputData: InputData) -> OutputFragment {
         let F_IBL_dielectric = FR_dielectric * envBRDF.x + envBRDF.y;
         let F_IBL_metal = FR_metal * envBRDF.x + envBRDF.y;
 
-        // 🌿 UE5 Foliage 물리 표준: 나뭇잎 IBL 스펙큘러 백화 억제 (specularParameter = 0.25)
-        let foliageSpecWeight = 0.25;
-        let F_IBL_dielectric_weighted = F_IBL_dielectric * foliageSpecWeight;
-
         // 🌿 UE5 물리 기반 Directional Specular Occlusion (어두운 틈새 스펙큘러 백화 차단 + 양지 PBR 광택 복원)
         let specularOcclusion = saturate(pow(NdotV_IBL + ao, exp2(-16.0 * roughness - 1.0)) - 1.0 + ao);
         let specularAlbedo_IBL = saturate(F0_dielectric * envBRDF.x + envBRDF.y);
-        let diffuseWeight_IBL = (vec3<f32>(1.0) - specularAlbedo_IBL * foliageSpecWeight);
+        let diffuseWeight_IBL = (vec3<f32>(1.0) - specularAlbedo_IBL);
 
-        let envIBL_DIFFUSE = albedo * iblDiffuseColor * diffuseWeight_IBL * ao;
-        let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric_weighted * specularOcclusion;
+        var envIBL_DIFFUSE = albedo * iblDiffuseColor * diffuseWeight_IBL * ao;
+
+        // 🌿 [UE5 TwoSidedFoliage] 잎사귀 반대편(-N) 하늘 산란광 투과
+        var backIBLDiffuse = vec3<f32>(0.0);
+        if (u_usePrefilterTexture) {
+            backIBLDiffuse += textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, -N, 0).rgb * preExposure * systemUniforms.iblIntensity * INV_PI;
+        }
+        if (u_useSkyAtmosphere) {
+            let u_atmo = systemUniforms.skyAtmosphere;
+            let backSkyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, -N, 0.0).rgb * u_atmo.sunIntensity * preExposure;
+            let backTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, -N.y, u_atmo.atmosphereHeight);
+            backIBLDiffuse += (backIBLDiffuse * backTrans) + backSkyIrradiance;
+        }
+        envIBL_DIFFUSE += albedo * backIBLDiffuse * 0.35 * ao;
+
+        let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric * specularOcclusion;
         let dielectricPart_IBL = ibl_specular_dielectric + envIBL_DIFFUSE;
         let metallicPart_IBL = reflectedColor * F_IBL_metal * specularOcclusion;
 

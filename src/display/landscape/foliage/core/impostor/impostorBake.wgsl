@@ -34,8 +34,11 @@ fn main(
 
     // 1. BaseColor & Opacity calculation (Exact pbrMaterial reference)
     let u_useVertexColor = (input.textureFlags.w > 0.5);
+    let isFoliage = (input.cameraDir.w > 0.5);
     var baseColor = input.baseColorFactor;
-    baseColor *= select(vec4<f32>(1.0), input.vertexColor_0, u_useVertexColor);
+    if (!isFoliage) {
+        baseColor *= select(vec4<f32>(1.0), input.vertexColor_0, u_useVertexColor);
+    }
 
     var finalColor = baseColor;
     if (input.textureFlags.x > 0.5) {
@@ -52,7 +55,6 @@ fn main(
 
 
     // 2. 3D World Normal (Exact PBRMaterial matching)
-    let isFoliage = (input.cameraDir.w > 0.5);
     var N = normalize(input.worldNormal);
     if (input.textureFlags.y > 0.5) {
         let T = normalize(input.worldTangent.xyz);
@@ -76,14 +78,13 @@ fn main(
     let normDepth = clamp(distAlongRay / (radius * 1.05) * 0.5 + 0.5, 0.0, 1.0);
 
     // 4. Physical Material Properties + 3D Geometric Self-Occlusion (Spherical & Height AO)
-    let isFoliageMat = (input.cameraDir.w > 0.5);
     var baseAO = input.materialParams.z;
-    var roughness = input.materialParams.x;
-    if (isFoliageMat) {
-        roughness = max(roughness, 0.80);
+    if (isFoliage && u_useVertexColor) {
+        baseAO = baseAO * clamp(input.vertexColor_0.r, 0.0, 1.0);
     }
+    var roughness = input.materialParams.x;
     var metallic = input.materialParams.y;
-    var subsurface = select(0.2, 1.0, isFoliageMat);
+    var subsurface = select(0.2, 1.0, isFoliage);
 
     if (input.textureFlags.z > 0.5) {
         let ormSample = textureSampleLevel(ormTexture, ormSampler, input.uv, 0.0);
@@ -92,14 +93,13 @@ fn main(
         metallic = metallic * ormSample.b;
     }
 
-    // 🌿 [3D Self-Occlusion / Spherical AO] 나무 중심부 및 내부 깊이 기반 기하학적 차폐 계산
+    // 🌿 [3D Self-Occlusion / Spherical AO] 나무 중심부 자연스러운 미세 차폐 (0.75 ~ 1.0)
     let distFromCenter = length(relPos) / radius;
-    // 중심부로 갈수록 AO = 0.20 ~ 0.35, 외곽으로 갈수록 AO = 1.0 (안쪽 잎사귀 어두운 음영 복원)
-    let sphericalAO = clamp(pow(distFromCenter, 1.2) * 0.80 + 0.20, 0.15, 1.0);
+    let sphericalAO = clamp(pow(distFromCenter, 1.2) * 0.25 + 0.75, 0.70, 1.0);
 
-    // 🌿 [Height/Ground Occlusion] 수목 하단부/지면 근처 추가 차폐
+    // 🌿 [Height/Ground Occlusion] 수목 하단부 미세 차폐 (0.85 ~ 1.0)
     let normHeight = clamp((relPos.y / radius) * 0.5 + 0.5, 0.0, 1.0);
-    let heightAO = clamp(normHeight * 0.35 + 0.65, 0.40, 1.0);
+    let heightAO = clamp(normHeight * 0.15 + 0.85, 0.80, 1.0);
 
     let finalAO = clamp(baseAO * sphericalAO * heightAO, 0.0, 1.0);
     roughness = clamp(roughness, 0.04, 1.0);
