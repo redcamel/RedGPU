@@ -1,4 +1,7 @@
 #redgpu_include SYSTEM_UNIFORM;
+#redgpu_include shadow.getShadowCoord;
+#redgpu_include shadow.getShadowClipPosition;
+#redgpu_include systemStruct.OutputShadowData;
 
 struct TileInstance {
     color: vec4<f32>,
@@ -23,7 +26,7 @@ struct LandscapeUniforms {
     tanHalfFOV: f32,
     lodMetric: f32,
     lod0Quads: f32,
-    pad1: f32,
+    receiveShadow: f32,
 };
 
 @group(1) @binding(0) var<storage, read> allInputTiles: array<TileInstance>;
@@ -51,12 +54,20 @@ struct OutputData {
     @location(8) prevClipPos: vec4<f32>,
     @location(9) instanceColor: vec4<f32>,
     @location(10) @interpolate(flat) lodLevel: f32,
+    @location(13) shadowCoord: vec3<f32>,
+    @location(14) @interpolate(flat) receiveShadow: f32,
 };
 
-@vertex
-fn main(input: InputData) -> OutputData {
-    var output: OutputData;
+struct ComputedTerrainVertex {
+    worldPos: vec4<f32>,
+    globalUV: vec2<f32>,
+    worldTileUV: vec2<f32>,
+    lodLevel: u32,
+    instanceColor: vec4<f32>,
+};
 
+fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
+    var res: ComputedTerrainVertex;
     let realTileIdx = visibleTileIndices[input.instanceIdx];
     let instanceData = allInputTiles[realTileIdx];
 
@@ -173,35 +184,54 @@ fn main(input: InputData) -> OutputData {
 
     let worldY = finalHeight * landscapeUniforms.heightScale + select(0.0, dynamicSkirtDepth, isSkirt);
 
-    let worldPos4 = vec4<f32>(worldX, worldY, worldZ, 1.0);
+    res.worldPos = vec4<f32>(worldX, worldY, worldZ, 1.0);
+    res.globalUV = globalUV;
+    let halfTileX = landscapeUniforms.tileSizeX * 0.5;
+    let halfTileZ = landscapeUniforms.tileSizeZ * 0.5;
+    res.worldTileUV = vec2<f32>(
+        (input.position.x + halfTileX) / landscapeUniforms.tileSizeX,
+        (input.position.y + halfTileZ) / landscapeUniforms.tileSizeZ
+    );
+    res.lodLevel = lodLevel;
+    if (landscapeUniforms.lodColoration > 0.5) {
+        res.instanceColor = landscapeUniforms.lodColors[min(lodLevel, 7u)];
+    } else {
+        res.instanceColor = instanceData.color;
+    }
+    return res;
+}
+
+@vertex
+fn main(input: InputData) -> OutputData {
+    var output: OutputData;
+    let computed = computeTerrainVertex(input);
+    let worldPos4 = computed.worldPos;
 
     let clipPos = systemUniforms.projection.projectionViewMatrix * worldPos4;
 
     output.position = clipPos;
     output.vertexPosition = worldPos4.xyz;
     output.vertexNormal = vec3<f32>(0.0, 1.0, 0.0);
-
-    let halfTileX = landscapeUniforms.tileSizeX * 0.5;
-    let halfTileZ = landscapeUniforms.tileSizeZ * 0.5;
-    output.uv = vec2<f32>(
-        (input.position.x + halfTileX) / landscapeUniforms.tileSizeX,
-        (input.position.y + halfTileZ) / landscapeUniforms.tileSizeZ
-    );
-    output.uv1 = globalUV;
+    output.uv = computed.worldTileUV;
+    output.uv1 = computed.globalUV;
     output.vertexColor_0 = vec4<f32>(1.0, 1.0, 1.0, 1.0);
     output.vertexTangent = vec4<f32>(1.0, 0.0, 0.0, 1.0);
-    output.vertexHeight = worldY;
+    output.vertexHeight = worldPos4.y;
 
     output.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * worldPos4;
     output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * worldPos4;
+    output.instanceColor = computed.instanceColor;
+    output.lodLevel = f32(computed.lodLevel);
+    output.shadowCoord = getShadowCoord(worldPos4.xyz, systemUniforms.directionalLightProjectionViewMatrix);
+    output.receiveShadow = landscapeUniforms.receiveShadow;
 
-    if (landscapeUniforms.lodColoration > 0.5) {
-        output.instanceColor = landscapeUniforms.lodColors[min(lodLevel, 7u)];
-    } else {
-        output.instanceColor = instanceData.color;
-    }
+    return output;
+}
 
-    output.lodLevel = f32(lodLevel);
-
+@vertex
+fn entryPointShadowVertex(input: InputData) -> OutputShadowData {
+    var output: OutputShadowData;
+    let computed = computeTerrainVertex(input);
+    output.position = getShadowClipPosition(computed.worldPos.xyz, systemUniforms.directionalLightProjectionViewMatrix);
     return output;
 }

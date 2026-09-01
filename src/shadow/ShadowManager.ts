@@ -8,6 +8,7 @@ import GPU_STORE_OP from "../gpuConst/GPU_STORE_OP";
 import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import updateViewportAndScissor from "../renderer/helperFunc/updateViewportAndScissor";
 import renderShadowLayer from "../renderer/renderLayers/renderShadowLayer";
+import {renderLandscapeShadowLayer} from "../renderer/renderLayers/renderLandscapeLayer";
 import keepLog from "../utils/keepLog";
 
 /**
@@ -85,6 +86,7 @@ class ShadowManager {
         }
         redGPUContext.commandEncoderManager.addMainRenderPass(this.shadowPassDescriptor, (viewShadowRenderPassEncoder) => {
             updateViewportAndScissor(view, viewShadowRenderPassEncoder, 'SHADOW')
+            renderLandscapeShadowLayer(view, viewShadowRenderPassEncoder)
             if (this.#directionalShadowManager.castingList.length) {
                 renderShadowLayer(view, viewShadowRenderPassEncoder)
             }

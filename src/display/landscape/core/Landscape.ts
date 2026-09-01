@@ -38,6 +38,8 @@ export class Landscape extends Object3DContainer {
     #debuggerManager: LandscapeDebuggerManager;
 
     #wireframe: boolean = false;
+    #castShadow: boolean = true;
+    #receiveShadow: boolean = true;
     #lodColoration: boolean = false;
     #lodMetric: 'distance' | 'screenSize' = 'screenSize';
     #lod0SizeQuads: number = 256;
@@ -490,6 +492,69 @@ export class Landscape extends Object3DContainer {
 
     }
 
+    get castShadow(): boolean {
+        return this.#castShadow;
+    }
+
+    set castShadow(value: boolean) {
+        this.#castShadow = value;
+    }
+
+    get receiveShadow(): boolean {
+        return this.#receiveShadow;
+    }
+
+    set receiveShadow(value: boolean) {
+        if (this.#receiveShadow !== value) {
+            this.#receiveShadow = value;
+            this.#updateLandscapeUniforms();
+        }
+    }
+
+    renderShadow(view: any, passEncoder?: GPURenderPassEncoder): void {
+        if (!this.#castShadow) return;
+        const renderPassEncoder = passEncoder || view?.currentRenderPassEncoder || view?.renderPassEncoder;
+        const view3D = view?.view || view;
+        if (!renderPassEncoder) return;
+
+        const instanceBuffer = this.#instanceBuffer;
+        const sharedGeometry = this.#sharedGeometry;
+        const combinedVB = sharedGeometry?.combinedVertexBuffer;
+        const isWireframe = this.#wireframe;
+        const combinedIB = isWireframe ? sharedGeometry?.combinedWireframeIndexBuffer : sharedGeometry?.combinedIndexBuffer;
+
+        if (!instanceBuffer || !combinedVB || !combinedIB) return;
+
+        const storageBG = instanceBuffer.instanceStorageBindGroup;
+        const storageBGLayout = instanceBuffer.instanceStorageBindGroupLayout;
+        if (!storageBG || !storageBGLayout) return;
+
+        const pipeline = this.#getOrCreateShadowRenderPipeline(combinedVB, storageBGLayout);
+        if (!pipeline) return;
+
+        renderPassEncoder.setPipeline(pipeline);
+
+        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup;
+        if (systemBG) {
+            renderPassEncoder.setBindGroup(0, systemBG);
+        }
+
+        renderPassEncoder.setBindGroup(1, storageBG);
+
+        renderPassEncoder.setVertexBuffer(0, combinedVB.gpuBuffer);
+        renderPassEncoder.setIndexBuffer(combinedIB.gpuBuffer, 'uint32');
+
+        const maxLODLevel = sharedGeometry.maxLODLevel;
+        const indirectDrawBuffer = instanceBuffer.indirectDrawBuffer;
+
+        if (indirectDrawBuffer) {
+            for (let lod = 0; lod < maxLODLevel; lod++) {
+                const offset = lod * 20;
+                renderPassEncoder.drawIndexedIndirect(indirectDrawBuffer, offset);
+            }
+        }
+    }
+
     get wireframe(): boolean {
         return this.#wireframe;
     }
@@ -757,7 +822,8 @@ export class Landscape extends Object3DContainer {
             this.#lodDistancesSq,
             this.#lastTanHalfFOV,
             lodMetricVal,
-            this.#lod0SizeQuads
+            this.#lod0SizeQuads,
+            this.#receiveShadow
         );
     }
 
@@ -888,6 +954,62 @@ export class Landscape extends Object3DContainer {
             return pipeline;
         } catch (e) {
             console.warn('Failed to create Landscape RenderPipeline:', e);
+            return null;
+        }
+    }
+
+    #getOrCreateShadowRenderPipeline(geom: any, storageBGLayout: GPUBindGroupLayout): GPURenderPipeline | null {
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (!gpuDevice) return null;
+
+        const topology = this.#wireframe ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
+        const key = `SHADOW_${topology}`;
+
+        if (this.#renderPipelineCache.has(key)) {
+            return this.#renderPipelineCache.get(key);
+        }
+
+        try {
+            const resourceManager = this.#redGPUContext.resourceManager;
+            const systemBGLayout = resourceManager.getGPUBindGroupLayout('PRESET_GPUBindGroupLayout_System');
+
+            const pipelineLayout = gpuDevice.createPipelineLayout({
+                label: `LandscapeShadowPipelineLayout_${key}`,
+                bindGroupLayouts: [systemBGLayout, storageBGLayout]
+            });
+
+            const vertexBuffers: GPUVertexBufferLayout[] = [{
+                arrayStride: geom?.interleavedStruct?.arrayStride ?? 20,
+                attributes: geom?.interleavedStruct?.attributes ?? [
+                    {shaderLocation: 0, offset: 0, format: 'float32x3'},
+                    {shaderLocation: 1, offset: 12, format: 'float32x2'}
+                ]
+            }];
+
+            const pipeline = gpuDevice.createRenderPipeline({
+                label: `LandscapeShadowRenderPipeline_${key}`,
+                layout: pipelineLayout,
+                vertex: {
+                    module: this.#vertexShaderModule,
+                    entryPoint: 'entryPointShadowVertex',
+                    buffers: vertexBuffers,
+                },
+                primitive: {
+                    topology: topology,
+                    cullMode: 'none'
+                },
+                depthStencil: {
+                    format: 'depth32float',
+                    depthWriteEnabled: true,
+                    depthCompare: 'less-equal',
+                },
+                multisample: {count: 1}
+            });
+
+            this.#renderPipelineCache.set(key, pipeline);
+            return pipeline;
+        } catch (e) {
+            console.warn('Failed to create Landscape Shadow RenderPipeline:', e);
             return null;
         }
     }

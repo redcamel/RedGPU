@@ -23,6 +23,8 @@ struct InputData {
     @location(8) prevClipPos: vec4<f32>,
     @location(9) instanceColor: vec4<f32>,
     @location(10) @interpolate(flat) lodLevel: f32,
+    @location(13) shadowCoord: vec3<f32>,
+    @location(14) @interpolate(flat) receiveShadow: f32,
 };
 
 struct LandscapeLayerParams {
@@ -65,7 +67,7 @@ struct LandscapeUniforms {
     tanHalfFOV: f32,
     lodMetric: f32,
     lod0Quads: f32,
-    pad1: f32,
+    receiveShadow: f32,
 };
 
 @group(1) @binding(4) var vntNormalTexture: texture_2d<f32>;
@@ -287,7 +289,8 @@ fn getDirectPbrLighting(
     roughnessParameter: f32,
     metallicParameter: f32,
     albedo: vec3<f32>,
-    F0: vec3<f32>
+    F0: vec3<f32>,
+    visibility: f32
 ) -> vec3<f32> {
     var totalDirectLighting = vec3<f32>(0.0);
     let u_directionalLightCount = systemUniforms.directionalLightCount;
@@ -296,7 +299,8 @@ fn getDirectPbrLighting(
     for (var i = 0u; i < u_directionalLightCount; i = i + 1u) {
         let lightIntensity = u_directionalLights[i].intensity;
         let L = -normalize(u_directionalLights[i].direction);
-        var finalLightColor = u_directionalLights[i].color * lightIntensity * systemUniforms.preExposure;
+        let shadowFactor = select(1.0, visibility, i == 0u);
+        var finalLightColor = u_directionalLights[i].color * lightIntensity * systemUniforms.preExposure * shadowFactor;
 
         if (systemUniforms.useSkyAtmosphere == 1u && i == 0u) {
             let u_atmo = systemUniforms.skyAtmosphere;
@@ -489,11 +493,24 @@ fn main(inputData: InputData) -> OutputFragment {
     let F0 = mix(F0_dielectric, F0_metal, metallicFactor);
     let roughnessParameter = max(roughnessFactor, 0.04);
 
+    let receiveShadowYn = inputData.receiveShadow != 0.0;
+    let rawVisibility: f32 = getDirectionalShadowVisibility(
+        directionalShadowMap,
+        directionalShadowMapSampler,
+        systemUniforms.shadow.directionalShadowDepthTextureSize,
+        systemUniforms.shadow.directionalShadowBias,
+        systemUniforms.shadow.directionalShadowFilterScale,
+        inputData.shadowCoord
+    );
+    let shadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVisibility);
+    let visibility = select(1.0, shadowVis, receiveShadowYn);
+
     let directLighting = getDirectPbrLighting(
         input_vertexPosition,
         N, V, NdotV,
         roughnessParameter, metallicFactor, albedo,
-        F0
+        F0,
+        visibility
     );
 
     let indirectLighting = getIndirectPbrLighting(
