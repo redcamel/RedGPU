@@ -62,7 +62,12 @@ class ShadowManager {
      * [EN] Target View3D
      */
     render(view: View3D) {
-        const {redGPUContext} = view
+        const {redGPUContext, scene} = view
+        const lightManager = scene?.lightManager;
+        if (!lightManager || lightManager.directionalLightCount === 0) {
+            this.#directionalShadowManager.resetCastingList();
+            return;
+        }
 
         const list = this.#directionalShadowManager.castingList;
         const len = list.length;

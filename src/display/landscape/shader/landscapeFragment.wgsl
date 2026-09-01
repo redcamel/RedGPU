@@ -494,7 +494,7 @@ fn main(inputData: InputData) -> OutputFragment {
     let F0 = mix(F0_dielectric, F0_metal, metallicFactor);
     let roughnessParameter = max(roughnessFactor, 0.04);
 
-    let receiveShadowYn = inputData.receiveShadow != 0.0;
+    let receiveShadowYn = inputData.receiveShadow != 0.0 && systemUniforms.directionalLightCount > 0u;
     var L = vec3<f32>(0.0, 1.0, 0.0);
     if (systemUniforms.directionalLightCount > 0u) {
         L = -normalize(systemUniforms.directionalLights[0].direction);

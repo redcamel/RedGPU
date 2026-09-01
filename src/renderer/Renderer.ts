@@ -227,10 +227,12 @@ class Renderer {
 
             updateJitter(view)
 
-            // [KO] 쉐도우 패스용 업데이트 및 렌더링
-            // [EN] Update and render for shadow pass
-            view.update(true, false, null)
-            shadowManager.render(view)
+            // [KO] 쉐도우 패스용 업데이트 및 렌더링 (직사광이 존재할 때만 실행)
+            // [EN] Update and render for shadow pass (only executed when directional lights exist)
+            if (scene.lightManager.directionalLightCount > 0) {
+                view.update(true, false, null)
+                shadowManager.render(view)
+            }
 
             // [KO] 기본 패스용 업데이트 및 렌더링
             // [EN] Update and render for basic pass
