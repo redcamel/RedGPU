@@ -8,6 +8,7 @@
 #redgpu_include math.direction.getViewDirection;
 #redgpu_include math.direction.getReflectionVectorFromViewDirection;
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
+#redgpu_include shadow.getShadowCoord;
 #redgpu_include shadow.getDirectionalShadowVisibility;
 
 struct InputData {
@@ -494,13 +495,28 @@ fn main(inputData: InputData) -> OutputFragment {
     let roughnessParameter = max(roughnessFactor, 0.04);
 
     let receiveShadowYn = inputData.receiveShadow != 0.0;
+    var L = vec3<f32>(0.0, 1.0, 0.0);
+    if (systemUniforms.directionalLightCount > 0u) {
+        L = -normalize(systemUniforms.directionalLights[0].direction);
+    }
+    let NdotL = clamp(dot(N, L), 0.0, 1.0);
+
+    // 1. Normal Offset Bias: 지형 경사면에서 법선 방향으로 샘플링 위치를 미세 오프셋하여 Shadow Acne 원천 제거
+    let normalOffsetScale = 0.6;
+    let normalOffsetWorldPos = input_vertexPosition + N * (1.0 - NdotL) * normalOffsetScale;
+    let accurateShadowCoord = getShadowCoord(normalOffsetWorldPos, systemUniforms.directionalLightProjectionViewMatrix);
+
+    // 2. Slope-Scaled Depth Bias: 빛이 스치는 각도일수록 적응형으로 바이어스를 동적 확장
+    let slopeFactor = clamp(sqrt(max(0.0, 1.0 - NdotL * NdotL)) / max(NdotL, 0.02), 0.0, 4.0);
+    let slopeBias = systemUniforms.shadow.directionalShadowBias * (1.0 + slopeFactor * 2.0);
+
     let rawVisibility: f32 = getDirectionalShadowVisibility(
         directionalShadowMap,
         directionalShadowMapSampler,
         systemUniforms.shadow.directionalShadowDepthTextureSize,
-        systemUniforms.shadow.directionalShadowBias,
+        slopeBias,
         systemUniforms.shadow.directionalShadowFilterScale,
-        inputData.shadowCoord
+        accurateShadowCoord
     );
     let shadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVisibility);
     let visibility = select(1.0, shadowVis, receiveShadowYn);
