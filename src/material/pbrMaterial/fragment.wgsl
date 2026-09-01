@@ -56,7 +56,6 @@
 
 struct InputData {
     @builtin(position) position : vec4<f32>,
-    @builtin(front_facing) isFrontFacing: bool,
     @location(0) vertexPosition: vec3<f32>,
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
@@ -200,14 +199,18 @@ fn getTransmissionRefraction(
 fn main(inputData:InputData) -> OutputFragment {
     var output: OutputFragment;
 
-    // 🌿 Dithered LOD Crossfade (4x4 Bayer Matrix)
+//    // Dithered Discard Alpha Fade
 //    let fadeOpacity = inputData.combinedOpacity;
-//    if (fadeOpacity < 0.999) {
-//        let px = u32(inputData.position.x) & 3u;
-//        let py = u32(inputData.position.y) & 3u;
-//        let idx = (py << 2u) | px;
-//        let packed = select(0x6E4C2A80u, 0x5D7F91B3u, idx >= 8u);
-//        let threshold = f32((packed >> ((idx & 7u) * 4u)) & 0xFu) * 0.0625;
+//    if (fadeOpacity < 1.0) {
+//        let bayerMatrix = array<f32, 16>(
+//             0.0/16.0,  8.0/16.0,  2.0/16.0, 10.0/16.0,
+//            12.0/16.0,  4.0/16.0, 14.0/16.0,  6.0/16.0,
+//             3.0/16.0, 11.0/16.0,  1.0/16.0,  9.0/16.0,
+//            15.0/16.0,  7.0/16.0, 13.0/16.0,  5.0/16.0
+//        );
+//        let px = u32(inputData.position.x) % 4u;
+//        let py = u32(inputData.position.y) % 4u;
+//        let threshold = bayerMatrix[py * 4u + px];
 //        if (fadeOpacity < threshold) {
 //            discard;
 //        }
@@ -224,7 +227,7 @@ fn main(inputData:InputData) -> OutputFragment {
     let input_uv1 = inputData.uv1;
     let u_camera = systemUniforms.camera;
     let u_cameraPosition = u_camera.cameraPosition;
-    
+
     // Cache common system values
     let preExposure = systemUniforms.preExposure;
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
@@ -243,7 +246,6 @@ fn main(inputData:InputData) -> OutputFragment {
     let u_emissiveFactor = uniforms.emissiveFactor;
     let u_emissiveStrength = uniforms.emissiveStrength;
     let u_useKHR_materials_unlit = uniforms.useKHR_materials_unlit == 1u;
-    let u_isFoliage = uniforms.isFoliage == 1u;
     let u_KHR_materials_ior = uniforms.KHR_materials_ior;
     let u_KHR_dispersion = uniforms.KHR_dispersion;
     let u_KHR_transmissionFactor = uniforms.KHR_transmissionFactor;
@@ -272,14 +274,9 @@ fn main(inputData:InputData) -> OutputFragment {
 
     // UV Transforms
     let diffuseUV = getTextureTransformUV(input_uv, input_uv1, uniforms.baseColorTexture_texCoord_index, uniforms.use_baseColorTexture_KHR_texture_transform, uniforms.baseColorTexture_KHR_texture_transform_offset, uniforms.baseColorTexture_KHR_texture_transform_rotation, uniforms.baseColorTexture_KHR_texture_transform_scale);
-    let foliageUvDeriv = length(vec2<f32>(dpdx(diffuseUV.x), dpdy(diffuseUV.y))) * 80.0;
     var baseColor = u_baseColorFactor;
-    var resultAlpha:f32 = u_opacity * baseColor.a;
-    #redgpu_if isFoliage
-        // 🌿 식생 모드: vertexColor_0을 BaseColor에 직접 곱하지 않고 알베도 본연의 채도 보존 (occlusionParameter에서 AO로 처리)
-    #redgpu_else
-        baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
-    #redgpu_endIf
+    var resultAlpha:f32 = u_opacity * baseColor.a * inputData.combinedOpacity;
+    baseColor *= select(vec4<f32>(1.0), input_vertexColor_0, u_useVertexColor);
     #redgpu_if baseColorTexture
         let diffuseSampleColor = (textureSample(baseColorTexture, baseColorTextureSampler, diffuseUV));
         baseColor *= diffuseSampleColor;
@@ -287,28 +284,10 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_endIf
 
 
-    #redgpu_if isFoliage
-        let ddxUV = dpdx(diffuseUV);
-        let ddyUV = dpdy(diffuseUV);
-        let maxDeriv = max(length(ddxUV), length(ddyUV));
-        let mipLevel = max(0.0, log2(max(maxDeriv * 1024.0, 1.0)));
-        let mipAlphaScale = 1.0 + mipLevel * 0.70;
-        let baseCutOff = select(0.3333, u_cutOff, u_cutOff > 0.0);
-        let effectiveAlpha = resultAlpha * mipAlphaScale;
-        if (effectiveAlpha <= baseCutOff) { discard; }
-        resultAlpha = 1.0;
-    #redgpu_else
-        #redgpu_if useCutOff
-            let ddxUV = dpdx(diffuseUV);
-            let ddyUV = dpdy(diffuseUV);
-            let maxDeriv = max(length(ddxUV), length(ddyUV));
-            let mipLevel = max(0.0, log2(max(maxDeriv * 1024.0, 1.0)));
-            let mipAlphaScale = 1.0 + mipLevel * 0.70;
-            let effectiveAlpha = resultAlpha * mipAlphaScale;
-            if (effectiveAlpha <= u_cutOff) { discard; }
-            resultAlpha = 1.0;
-        #redgpu_endIf
+    #redgpu_if useCutOff
+        if (resultAlpha <= u_cutOff) { discard; }
     #redgpu_endIf
+
     let emissiveUV = getTextureTransformUV(input_uv, input_uv1, uniforms.emissiveTexture_texCoord_index, uniforms.use_emissiveTexture_KHR_texture_transform, uniforms.emissiveTexture_KHR_texture_transform_offset, uniforms.emissiveTexture_KHR_texture_transform_rotation, uniforms.emissiveTexture_KHR_texture_transform_scale);
     let occlusionUV = getTextureTransformUV(input_uv, input_uv1, uniforms.occlusionTexture_texCoord_index, uniforms.use_occlusionTexture_KHR_texture_transform, uniforms.occlusionTexture_KHR_texture_transform_offset, uniforms.occlusionTexture_KHR_texture_transform_rotation, uniforms.occlusionTexture_KHR_texture_transform_scale);
     let metallicRoughnessUV = getTextureTransformUV(input_uv, input_uv1, uniforms.metallicRoughnessTexture_texCoord_index, uniforms.use_metallicRoughnessTexture_KHR_texture_transform, uniforms.metallicRoughnessTexture_KHR_texture_transform_offset, uniforms.metallicRoughnessTexture_KHR_texture_transform_rotation, uniforms.metallicRoughnessTexture_KHR_texture_transform_scale);
@@ -340,7 +319,7 @@ fn main(inputData:InputData) -> OutputFragment {
     var backFaceYn:bool = false;
     #redgpu_if doubleSided
     {
-        if (!inputData.isFrontFacing) {
+        if (dot(baseNormal, V) < 0.0) {
             backFaceYn = true;
         }
     }
@@ -400,11 +379,6 @@ fn main(inputData:InputData) -> OutputFragment {
     var occlusionParameter:f32 = 1.0;
     #redgpu_if useOcclusionTexture
         occlusionParameter = textureSample(packedORMTexture, packedTextureSampler, occlusionUV).r * u_occlusionStrength;
-    #redgpu_endIf
-    #redgpu_if isFoliage
-        // 🌿 식생 모드: u_useVertexColor가 켜져 있을 때만 정점 AO(.r)를 반영하고, 꺼져 있으면 1.0(기본값)으로 안전 폴백
-        let vertexAO = select(1.0, clamp(input_vertexColor_0.r, 0.0, 1.0), u_useVertexColor);
-        occlusionParameter = occlusionParameter * vertexAO;
     #redgpu_endIf
     var metallicParameter: f32 = u_metallicFactor;
     var roughnessParameter: f32 = u_roughnessFactor;
@@ -537,7 +511,7 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_if useKHR_materials_transmission
     {
         transmissionRefraction = getTransmissionRefraction(u_useKHR_materials_volume, thicknessParameter * inputData.localNodeScale_volumeScale[1] , u_KHR_dispersion, u_KHR_attenuationDistance , u_KHR_attenuationColor, ior, roughnessParameter, albedo, systemUniforms.projection.projectionViewMatrix, input_vertexPosition, input_ndcPosition, V, N, renderPath1ResultTexture, renderPath1ResultTextureSampler);
-        
+
         #redgpu_if useKHR_materials_volume
         if (u_useKHR_materials_volume) {
             let localNodeScale = inputData.localNodeScale_volumeScale[0];
@@ -590,12 +564,12 @@ fn main(inputData:InputData) -> OutputFragment {
         anisotropy, anisotropicT, anisotropicB,
         clearcoatParameter, clearcoatRoughnessParameter, clearcoatNormal
     );
-    
+
     var emissiveColor = u_emissiveFactor * u_emissiveStrength;
     #redgpu_if emissiveTexture
         emissiveColor *= textureSample(emissiveTexture, emissiveTextureSampler, emissiveUV).rgb;
     #redgpu_endIf
-    
+
     let finalColor = vec4<f32>(totalDirectLighting + indirectLighting + emissiveColor, resultAlpha);
 
     #redgpu_if useTint
@@ -793,16 +767,16 @@ fn getIndirectSheenBRDF(
     let NdotV = clamp(dot(N, V), EPSILON, 1.0);
     let mipLevel = sheenRoughness * iblMipmapCount;
     let sheenRadiance = textureSampleLevel(irradianceTexture, textureSampler, R, mipLevel).rgb * systemUniforms.preExposure * systemUniforms.iblIntensity;
-    
+
     // Optimized Sheen DFG and Charlie E
     let r = clamp(sheenRoughness, 0.01, 1.0);
     let grazingFactor = 1.0 - NdotV;
     let roughnessExp = 1.0 / r;
     let sharedPow = pow(grazingFactor, roughnessExp);
-    
+
     let sheenDFG = sharedPow * pow(roughnessExp, 0.5) * 0.5;
     let E = sharedPow * pow(r, 0.5);
-    
+
     let contribution = sheenRadiance * sheenColor * sheenDFG;
     let albedoScaling = getSheenAlbedoScaling(maxSheenColor, E);
     return SheenIBLResult(contribution, albedoScaling);
@@ -818,7 +792,7 @@ fn getDirectSheenBRDF(NdotL: f32, NdotV: f32, NdotH: f32, sheenColor: vec3<f32>,
 }
 
 fn getDirectAnisotropicVisibility(
-    NdotL: f32, NdotV: f32, BdotV: f32, TdotV: f32, TdotL: f32, BdotL: f32, 
+    NdotL: f32, NdotV: f32, BdotV: f32, TdotV: f32, TdotL: f32, BdotL: f32,
     at: f32, ab: f32
 ) -> f32 {
    let GGXV = NdotL * length(vec3<f32>(at * TdotV, ab * BdotV, NdotV));
@@ -836,18 +810,18 @@ fn getDirectAnisotropicNDF(NdotH: f32, TdotH: f32, BdotH: f32, at: f32, ab: f32)
 }
 
 fn getDirectAnisotropicBRDF(
-    F: vec3<f32>, 
-    alphaRoughness: f32, 
-    VdotH: f32, 
-    NdotL: f32, 
-    NdotV: f32, 
-    NdotH: f32, 
-    BdotV: f32, 
-    TdotV: f32, 
-    TdotL: f32, 
-    BdotL: f32, 
-    TdotH: f32, 
-    BdotH: f32, 
+    F: vec3<f32>,
+    alphaRoughness: f32,
+    VdotH: f32,
+    NdotL: f32,
+    NdotV: f32,
+    NdotH: f32,
+    BdotV: f32,
+    TdotV: f32,
+    TdotL: f32,
+    BdotL: f32,
+    TdotH: f32,
+    BdotH: f32,
     anisotropy: f32
 ) -> vec3<f32> {
     var at = mix(alphaRoughness, 1.0, anisotropy * anisotropy);
@@ -864,25 +838,25 @@ fn getIndirectAnisotropicBRDF(
 ) -> vec4<f32> {
     // [EN] Choose the grain direction based on the sign of anisotropy
     let grainDir = select(anisotropicT, anisotropicB, anisotropy >= 0.0);
-    
+
     // [EN] Calculate a bent normal to shift the reflection vector in the direction of the anisotropic stretch.
     // [EN] This is a standard approximation for IBL anisotropy (Filament style).
     let stretch = abs(anisotropy) * (1.0 - roughness);
-    
+
     // [EN] Robust cross product to avoid zero vector when V aligns with grainDir
     var T_perp_V = cross(grainDir, V);
     if (dot(T_perp_V, T_perp_V) < EPSILON) {
          T_perp_V = cross(grainDir, N);
     }
-    
+
     let anisotropicNormal = normalize(cross(T_perp_V, grainDir));
     let bentNormal = normalize(mix(N, anisotropicNormal, stretch));
     let R = reflect(-V, bentNormal);
-    
+
     // [EN] For isotropic lookup, we use a roughness that approximates the anisotropic highlight spread.
     // [EN] Anisotropy narrows the highlight in one direction, so we sharpen the effective roughness slightly.
     let effectiveRoughness = roughness * (1.0 - abs(anisotropy) * (1.0 - roughness));
-    
+
     return vec4<f32>(R, max(effectiveRoughness, 0.04));
 }
 
@@ -950,30 +924,30 @@ fn getIridescentFresnel(outsideIOR: f32, iridescenceIOR: f32, baseF0: vec3<f32>,
         return baseF0 + iridescenceFactor * (1.0 - baseF0);
     }
     let cosTheta2 = sqrt(1.0 - sinTheta2 * sinTheta2);
-    
+
     // Physics constants
     let opticalThickness = 2.0 * iridescenceThickness * safeIridescenceIOR * cosTheta2;
     let phase = (PI2 * opticalThickness) * vec3<f32>(1.0/650.0, 1.0/510.0, 1.0/475.0);
     let cosPhase = cos(phase);
     let sinPhase = sin(phase);
-    
+
     let outsideCos1 = outsideIOR * cosTheta1Abs;
     let iridescenceCos2 = safeIridescenceIOR * cosTheta2;
     let iridescenceCos1 = safeIridescenceIOR * cosTheta1Abs;
     let outsideCos2 = outsideIOR * cosTheta2;
-    
+
     let r12_s = (outsideCos1 - iridescenceCos2) / max(outsideCos1 + iridescenceCos2, EPSILON);
     let r12_p = (iridescenceCos1 - outsideCos2) / max(iridescenceCos1 + outsideCos2, EPSILON);
-    
+
     let sqrtF0 = sqrt(clamp(baseF0, vec3<f32>(0.01), vec3<f32>(0.99)));
     let safeN3 = (1.0 + sqrtF0) / max(1.0 - sqrtF0, vec3<f32>(EPSILON));
-    
+
     let r23_s = (iridescenceCos2 - safeN3 * cosTheta1Abs) / max(iridescenceCos2 + safeN3 * cosTheta1Abs, vec3<f32>(EPSILON));
     let r23_p = (safeN3 * cosTheta2 - iridescenceCos1) / max(safeN3 * cosTheta2 + iridescenceCos1, vec3<f32>(EPSILON));
-    
+
     let r12_s_vec = vec3<f32>(r12_s);
     let r12_p_vec = vec3<f32>(r12_p);
-    
+
     // S-polarization: (r12 + r23*e^-i phi) / (1 + r12*r23*e^-i phi)
     let denSReal = 1.0 + r12_s_vec * r23_s * cosPhase;
     let denSImag = -r12_s_vec * r23_s * sinPhase;
@@ -981,7 +955,7 @@ fn getIridescentFresnel(outsideIOR: f32, iridescenceIOR: f32, baseF0: vec3<f32>,
     let numSReal = r12_s_vec + r23_s * cosPhase;
     let numSImag = -r23_s * sinPhase;
     let Rs = (numSReal * numSReal + numSImag * numSImag) / max(denSSquared, vec3<f32>(EPSILON));
-    
+
     // P-polarization
     let denPReal = 1.0 + r12_p_vec * r23_p * cosPhase;
     let denPImag = -r12_p_vec * r23_p * sinPhase;
@@ -989,7 +963,7 @@ fn getIridescentFresnel(outsideIOR: f32, iridescenceIOR: f32, baseF0: vec3<f32>,
     let numPReal = r12_p_vec + r23_p * cosPhase;
     let numPImag = -r23_p * sinPhase;
     let Rp = (numPReal * numPReal + numPImag * numPImag) / max(denPSquared, vec3<f32>(EPSILON));
-    
+
     let reflectance = clamp(0.5 * (Rs + Rp), vec3<f32>(0.0), vec3<f32>(1.0));
     return mix(baseF0, reflectance, iridescenceFactor);
 }
@@ -1132,44 +1106,28 @@ fn getIndirectPbrLighting(
         let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, *roughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
         let energyCompensation = 1.0 + F0 * (1.0 / max(envBRDF.x + envBRDF.y, 1e-4) - 1.0);
         reflectedColor *= energyCompensation;
-        
+
         // Optimize Indirect Fresnel by pre-calculating shared pow() term
         let fresnelPower = 5.0 - 2.0 * (*roughnessParameter);
         let fresnelTerm = pow(saturate(1.0 - NdotV_IBL), fresnelPower);
         let FR_dielectric = getIndirectFresnel(NdotV_IBL, F0_dielectric, *roughnessParameter, fresnelTerm);
-        let FR_metal      = getIndirectFresnel(NdotV_IBL, F0_metal,      *roughnessParameter, fresnelTerm);        
-        
+        let FR_metal      = getIndirectFresnel(NdotV_IBL, F0_metal,      *roughnessParameter, fresnelTerm);
+
         // [EN] Horizon occlusion: smooths out the reflection as it goes below the horizon.
         // [EN] Using Filament's recommended formula for smoother grazing angle transitions.
         let horizonOcclusion = saturate(1.0 + 1.1 * dot(R, N));
-        reflectedColor *= horizonOcclusion * horizonOcclusion; 
-        
+        reflectedColor *= horizonOcclusion * horizonOcclusion;
+
         let F_IBL_dielectric = FR_dielectric * envBRDF.x + envBRDF.y;
         let F_IBL_metal      = FR_metal * envBRDF.x + envBRDF.y;
         let F_IBL_dielectric_weight = F_IBL_dielectric * specularParameter;
-        
+
         // [EN] More robust specular occlusion to prevent light leaking/artifacts at grazing angles.
         let specularOcclusion = saturate(pow(NdotV_IBL + occlusionParameter, exp2(-16.0 * (*roughnessParameter) - 1.0)) - 1.0 + occlusionParameter);
-        
+
         let specularAlbedo_IBL = saturate(F0_dielectric * envBRDF.x + envBRDF.y);
         let diffuseWeight_IBL = (vec3<f32>(1.0) - specularAlbedo_IBL * specularParameter);
         var envIBL_DIFFUSE:vec3<f32> = albedo * iblDiffuseColor * diffuseWeight_IBL * occlusionParameter;
-        #redgpu_if isFoliage
-        {
-            // 🌿 [UE5 TwoSidedFoliage] 잎사귀 반대편(-N) 하늘 산란광 투과 (그늘면 암전 방지)
-            var backIBLDiffuse = vec3<f32>(0.0);
-            if (u_usePrefilterTexture) {
-                backIBLDiffuse += textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, -N, 0).rgb * preExposure * systemUniforms.iblIntensity * INV_PI;
-            }
-            if (u_useSkyAtmosphere) {
-                let u_atmo = systemUniforms.skyAtmosphere;
-                let backSkyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, -N, 0.0).rgb * u_atmo.sunIntensity * preExposure;
-                let backTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, -N.y, u_atmo.atmosphereHeight);
-                backIBLDiffuse += (backIBLDiffuse * backTrans) + backSkyIrradiance;
-            }
-            envIBL_DIFFUSE += albedo * backIBLDiffuse * 0.35 * occlusionParameter;
-        }
-        #redgpu_endIf
         #redgpu_if useKHR_materials_diffuse_transmission
         {
             var backScatteringColor = vec3<f32>(0.0);
@@ -1188,7 +1146,6 @@ fn getIndirectPbrLighting(
             envIBL_DIFFUSE = mix(envIBL_DIFFUSE, transmittedIBL, diffuseTransmissionParameter);
         }
         #redgpu_endIf
-
         var envIBL_SPECULAR_BTDF = vec3<f32>(0.0);
         #redgpu_if useKHR_materials_transmission
         if (transmissionParameter > 0.0) {
@@ -1255,7 +1212,7 @@ fn getDirectPbrLight(
     clearcoatParameter:f32, clearcoatRoughnessParameter:f32, clearcoatNormal:vec3<f32>,
     useIridescence:bool, iridescenceFactor:f32, iridescenceIor:f32, iridescenceThickness:f32
 ) -> vec3<f32>{
-    let dLight = lightColor; 
+    let dLight = lightColor;
     let NdotL_origin = dot(N, L);
     let NdotL = max(NdotL_origin, 0.0);
     let H = normalize(L + V);
@@ -1291,13 +1248,9 @@ fn getDirectPbrLight(
     var diffuse_transmission = vec3<f32>(0.0);
     #redgpu_if useKHR_materials_diffuse_transmission
     if (u_useKHR_materials_diffuse_transmission) {
-        diffuse_transmission += getDirectDiffuseBTDF(N, L, diffuseTransmissionColor);
+        diffuse_transmission = getDirectDiffuseBTDF(N, L, diffuseTransmissionColor);
     }
     #redgpu_endIf
-    let specular_weight = F * specularParameter;
-
-        let total_diffuse = mix(diffuse_reflection, diffuse_transmission, diffuseTransmissionParameter);
-
     var specular_transmission = vec3<f32>(0.0);
     #redgpu_if useKHR_materials_transmission
     if (transmissionParameter > 0.0) {
@@ -1305,19 +1258,9 @@ fn getDirectPbrLight(
         if (abs(ior - 1.0) < EPSILON) { specular_transmission = vec3<f32>(0.0); }
     }
     #redgpu_endIf
-    #redgpu_if isFoliage
-        // 🌿 [UE5 TwoSidedFoliage] 나뭇잎 양면 확산 투과광 (Wrap Diffuse Subsurface)
-        // 빛을 등진 뒷면에서도 빛이 잎사귀를 뚫고 나와 맑은 연두색으로 방출됨
-        let backNdotL = clamp((-NdotL_origin + 0.40) / 1.40, 0.0, 1.0);
-        let viewDotNegL = max(dot(V, -L), 0.0);
-        let forwardScatter = pow(viewDotNegL, 3.0) * 0.40;
-        let subSurfaceFactor = (backNdotL * 0.60 + forwardScatter) * (1.0 - metallicParameter);
-        let subSurfaceTransmission = albedo * subSurfaceFactor * 0.50;
-    #redgpu_else
-        let subSurfaceTransmission = vec3<f32>(0.0);
-    #redgpu_endIf
-
-    let dielectricPart = (SPEC_BRDF * specularParameter * NdotL) + mix((vec3<f32>(1.0) - specular_weight) * total_diffuse, specular_transmission, transmissionParameter) + subSurfaceTransmission;
+    let specular_weight = F * specularParameter;
+    let total_diffuse = mix(diffuse_reflection, diffuse_transmission, diffuseTransmissionParameter);
+    let dielectricPart = (SPEC_BRDF * specularParameter * NdotL) + mix((vec3<f32>(1.0) - specular_weight) * total_diffuse, specular_transmission, transmissionParameter);
     let metallicPart = SPEC_BRDF * NdotL;
     var result = mix(dielectricPart, metallicPart, metallicParameter);
     #redgpu_if useKHR_materials_sheen
