@@ -92,6 +92,12 @@ class LandscapeFoliageManager {
         }
     }
 
+    renderShadow(view: any, passEncoder: GPURenderPassEncoder): void {
+        if (passEncoder && this.hasFoliageTypes) {
+            this.#renderer.renderShadow(passEncoder, this.#typeList, view);
+        }
+    }
+
     update(viewOrCamera?: any, stateData?: any): void {
         this.#cullingDispatcher.updateAndDispatch(this.#typeList, viewOrCamera, this.#landscape, stateData);
     }

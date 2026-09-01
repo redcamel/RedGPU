@@ -4,7 +4,7 @@ import Geometry from "../../../geometry/Geometry";
 import type {FoliageDepthPassMode} from "./core/pipeline/FoliagePipelineRegistry";
 import FoliagePipelineRegistry from "./core/pipeline/FoliagePipelineRegistry";
 
-export type FoliageRenderPassType = 'depthPrepass' | 'main';
+export type FoliageRenderPassType = 'depthPrepass' | 'main' | 'shadow';
 
 export interface FoliageSubMeshInitOptions {
     mesh: Mesh;
@@ -95,6 +95,7 @@ class FoliageSubMesh {
             case 'depthPrepass':
                 return this.isDepthPrepass;
             case 'main':
+            case 'shadow':
                 return this.isMainOpaqueOrMasked;
             default:
                 return false;

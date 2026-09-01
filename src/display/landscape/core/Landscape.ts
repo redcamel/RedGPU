@@ -553,6 +553,10 @@ export class Landscape extends Object3DContainer {
                 renderPassEncoder.drawIndexedIndirect(indirectDrawBuffer, offset);
             }
         }
+
+        if (this.#foliageManager?.hasFoliageTypes) {
+            this.#foliageManager.renderShadow(view, renderPassEncoder);
+        }
     }
 
     get wireframe(): boolean {

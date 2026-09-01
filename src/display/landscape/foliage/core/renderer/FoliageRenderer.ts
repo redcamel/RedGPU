@@ -104,6 +104,58 @@ class FoliageRenderer {
         }
     }
 
+    renderShadow(passEncoder: GPURenderPassEncoder, typeList: readonly FoliageType[], view: any): void {
+        const typeCount = typeList.length;
+        if (typeCount === 0) return;
+
+        this.#lastBoundPipeline = null;
+        this.#lastBoundSystemBG = null;
+        this.#lastBoundVertexUniformBG = null;
+        this.#lastBoundMatBG = null;
+        this.#lastBoundGeometryVertexBuffer = null;
+        this.#lastBoundIndexBuffer = null;
+        this.#lastBoundInstanceBuffer = null;
+        this.#lastBoundInstanceOffset = -1;
+
+        const view3D = view as any;
+        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup ?? (view as any)?.systemUniform_Vertex_UniformBindGroup ?? null;
+
+        let validCount = 0;
+        for (let t = 0; t < typeCount; t++) {
+            const foliageType = typeList[t];
+            if (foliageType.activeInstanceCount <= 0) continue;
+            const culledGPU = foliageType.culledGPUBuffer;
+            const indirectGPU = foliageType.indirectGPUBuffer;
+            if (!culledGPU || !indirectGPU || foliageType.subMeshes.length === 0) continue;
+
+            let item = this.#validTypes[validCount];
+            if (!item) {
+                item = {type: foliageType, culledGPU, indirectGPU};
+                this.#validTypes[validCount] = item;
+            } else {
+                item.type = foliageType;
+                item.culledGPU = culledGPU;
+                item.indirectGPU = indirectGPU;
+            }
+            validCount++;
+        }
+        if (validCount === 0) return;
+
+        // 🌲 Shadow Pass 루프 (식생 그림자 뎁스 기록)
+        for (let t = 0; t < validCount; t++) {
+            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypes[t];
+            const subMeshes = foliageType.subMeshes;
+            const subCount = subMeshes.length;
+
+            for (let s = 0; s < subCount; s++) {
+                const sub = subMeshes[s];
+                if (sub.canRenderInPass('shadow')) {
+                    this.#drawSubMesh(passEncoder, sub, 1, 'shadow', systemBG, indirectGPU, culledGPU, 'shadow');
+                }
+            }
+        }
+    }
+
     #drawSubMesh(
         passEncoder: GPURenderPassEncoder,
         sub: FoliageSubMesh,

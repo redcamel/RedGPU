@@ -2,14 +2,17 @@ import RedGPUContext from "../../../../../context/RedGPUContext";
 import ResourceManager from "../../../../../resources/core/resourceManager/ResourceManager";
 import foliageInstancedWGSL from "./foliageInstanced.wgsl";
 import foliageDepthOnlyWGSL from "./foliageDepthOnly.wgsl";
+import octahedralImpostorDepthOnlyWGSL from "../impostor/octahedral/octahedralImpostorDepthOnly.wgsl";
+import OctahedralImpostorMaterial from "../impostor/octahedral/OctahedralImpostorMaterial";
 
-export type FoliageDepthPassMode = 'normal' | 'depthPrepass' | 'mainShadingAfterDepth';
+export type FoliageDepthPassMode = 'normal' | 'depthPrepass' | 'mainShadingAfterDepth' | 'shadow';
 
 class FoliagePipelineRegistry {
     #redGPUContext: RedGPUContext;
     #pipelineCache: Map<string, GPURenderPipeline> = new Map();
     #vertexShaderModule: GPUShaderModule | null = null;
     #depthOnlyFragmentShaderModule: GPUShaderModule | null = null;
+    #octahedralDepthOnlyFragmentShaderModule: GPUShaderModule | null = null;
     #emptyBindGroupLayout: GPUBindGroupLayout | null = null;
 
     constructor(redGPUContext: RedGPUContext, emptyBindGroupLayout?: GPUBindGroupLayout | null) {
@@ -40,15 +43,18 @@ class FoliagePipelineRegistry {
             material._updateFragmentState?.();
         }
 
+        const isShadow = depthPassMode === 'shadow';
         const isDepthPrepass = depthPassMode === 'depthPrepass';
-        if (isDepthPrepass) {
-            const hasBaseColorTexture = !!(material.baseColorTexture?.gpuTexture || material.baseColorTexture?.src || material.baseColorTexture?.url || (material.diffuseTexture && (material.diffuseTexture.gpuTexture || material.diffuseTexture.src || material.diffuseTexture.url)));
-            if (!hasBaseColorTexture) {
-                return null;
-            }
+        const hasBaseColorTexture = !!(material.baseColorTexture?.gpuTexture || material.baseColorTexture?.src || material.baseColorTexture?.url || (material.diffuseTexture && (material.diffuseTexture.gpuTexture || material.diffuseTexture.src || material.diffuseTexture.url)));
+        if (isDepthPrepass && !hasBaseColorTexture) {
+            return null;
         }
-        const fragmentModule = isDepthPrepass
-            ? this.#depthOnlyFragmentShaderModule
+
+        const isOctahedral = material instanceof OctahedralImpostorMaterial || material?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof material?.name === 'string' && material.name.includes('Octahedral'));
+        const depthModule = isOctahedral ? this.#octahedralDepthOnlyFragmentShaderModule : this.#depthOnlyFragmentShaderModule;
+
+        const fragmentModule = (isDepthPrepass || isShadow)
+            ? depthModule
             : (material.gpuRenderInfo?.fragmentShaderModule || material.fragmentShaderModule);
 
         const isWireframe = !!material.wireframe;
@@ -94,11 +100,9 @@ class FoliagePipelineRegistry {
             || material.gpuRenderInfo?.fragmentUniformBindGroup?.layout
             || this.#emptyBindGroupLayout;
 
-        const bindGroupLayouts: GPUBindGroupLayout[] = [
-            systemBindGroupLayout,
-            effectiveSubMeshBGL,
-            materialBindGroupLayout
-        ];
+        const bindGroupLayouts: GPUBindGroupLayout[] = (isShadow && !hasBaseColorTexture)
+            ? [systemBindGroupLayout, effectiveSubMeshBGL]
+            : [systemBindGroupLayout, effectiveSubMeshBGL, materialBindGroupLayout];
 
         const pipelineLayout = gpuDevice.createPipelineLayout({
             label: `FoliagePipelineLayout_${pipelineKey}`,
@@ -108,8 +112,14 @@ class FoliagePipelineRegistry {
         let targets: (GPUColorTargetState | null)[] = [];
         let depthStencil: GPUDepthStencilState;
 
-        if (isDepthPrepass) {
-
+        if (isShadow) {
+            targets = [];
+            depthStencil = {
+                format: 'depth32float',
+                depthWriteEnabled: true,
+                depthCompare: 'less-equal',
+            };
+        } else if (isDepthPrepass) {
             targets = [
                 {
                     format: 'rgba16float',
@@ -133,7 +143,6 @@ class FoliagePipelineRegistry {
                 depthCompare: 'less-equal',
             };
         } else {
-
             const isMainShadingAfterDepth = depthPassMode === 'mainShadingAfterDepth';
 
             targets = [
@@ -161,7 +170,6 @@ class FoliagePipelineRegistry {
                     depthCompare: 'less-equal',
                 };
             } else {
-
                 depthStencil = {
                     format: 'depth32float',
                     depthWriteEnabled: true,
@@ -170,26 +178,31 @@ class FoliagePipelineRegistry {
             }
         }
 
+        const vertexEntryPoint = isShadow ? 'entryPointShadowVertex' : 'mainInput';
+        const fragmentEntryPoint = isShadow ? 'shadowMain' : 'main';
+
+        const fragmentState = (isShadow && !hasBaseColorTexture) ? undefined : {
+            module: fragmentModule!,
+            entryPoint: fragmentEntryPoint,
+            targets: targets,
+        };
+
         const pipelineDescriptor: GPURenderPipelineDescriptor = {
             label: `FoliageRenderPipeline_${pipelineKey}`,
             layout: pipelineLayout,
             vertex: {
                 module: this.#vertexShaderModule!,
-                entryPoint: 'mainInput',
+                entryPoint: vertexEntryPoint,
                 buffers: [geometryBufferLayout, instanceBufferLayout],
             },
-            fragment: {
-                module: fragmentModule,
-                entryPoint: 'main',
-                targets: targets,
-            },
+            fragment: fragmentState,
             primitive: {
                 topology: topology,
-                cullMode: cullMode,
+                cullMode: isShadow ? 'none' : cullMode,
             },
             depthStencil: depthStencil,
             multisample: {
-                count: sampleCount,
+                count: isShadow ? 1 : sampleCount,
             },
         };
 
@@ -220,6 +233,14 @@ class FoliagePipelineRegistry {
             });
         }
         this.#depthOnlyFragmentShaderModule = depthFModule;
+
+        let octDepthFModule = resourceManager.getGPUShaderModule('OctahedralImpostorDepthOnlyFragmentShader_Module');
+        if (!octDepthFModule) {
+            octDepthFModule = resourceManager.createGPUShaderModule('OctahedralImpostorDepthOnlyFragmentShader_Module', {
+                code: octahedralImpostorDepthOnlyWGSL,
+            });
+        }
+        this.#octahedralDepthOnlyFragmentShaderModule = octDepthFModule;
     }
 }
 

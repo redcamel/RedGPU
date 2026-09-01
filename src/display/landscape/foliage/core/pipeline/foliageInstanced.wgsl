@@ -1,5 +1,6 @@
 #redgpu_include SYSTEM_UNIFORM;
 #redgpu_include shadow.getShadowCoord;
+#redgpu_include shadow.getShadowClipPosition;
 
 struct SubMeshUniforms {
     relativeModelMatrix: mat4x4<f32>,
@@ -164,6 +165,70 @@ fn mainInput(input : VertexInput) -> OutputData {
 
     output.motionVector = vec3<f32>(0.0);
     output.pickingId = vec4<f32>(0.0);
+
+    return output;
+}
+
+@vertex
+fn entryPointShadowVertex(input : VertexInput) -> OutputData {
+    var output : OutputData;
+
+    let fadeFactor = input.instanceExtra.x;
+    let lodFadeFactor = input.instanceExtra.y;
+
+    var hierarchyPos = input.position;
+    if (subMeshUniforms.hasHierarchyTransform != 0u) {
+        hierarchyPos = (subMeshUniforms.relativeModelMatrix * vec4<f32>(input.position, 1.0)).xyz;
+    }
+
+    let safeScale = max(input.instanceScale, vec3<f32>(0.0001));
+    let scaledPos = hierarchyPos * safeScale;
+    let rotatedPos = rotateVectorByQuaternion(scaledPos, input.instanceRotQuat);
+
+    var worldPos = rotatedPos + input.instancePos;
+
+    let isImpostor = (input.vertexTangent.w < -500.0);
+    if (isImpostor) {
+        var lightRight = vec3<f32>(1.0, 0.0, 0.0);
+        var lightForward = vec3<f32>(0.0, 0.0, 1.0);
+        if (systemUniforms.directionalLightCount > 0u) {
+            let lightDir = -normalize(systemUniforms.directionalLights[0].direction);
+            let crossUp = cross(vec3<f32>(0.0, 1.0, 0.0), lightDir);
+            let crossLenSq = dot(crossUp, crossUp);
+            if (crossLenSq > 0.0001) {
+                lightRight = crossUp * inverseSqrt(crossLenSq);
+            }
+            lightForward = lightDir;
+        }
+
+        var billboardRight = vec3<f32>(lightRight.x, 0.0, lightRight.z);
+        let rightLenSq = dot(billboardRight, billboardRight);
+        if (rightLenSq > 0.0001) {
+            billboardRight = billboardRight * inverseSqrt(rightLenSq);
+        } else {
+            billboardRight = vec3<f32>(1.0, 0.0, 0.0);
+        }
+        let billboardUp = vec3<f32>(0.0, 1.0, 0.0);
+
+        let centerYLocal = hierarchyPos.z;
+        let treeCenter = input.instancePos + vec3<f32>(0.0, centerYLocal * safeScale.y, 0.0);
+
+        let impostorOffset = billboardRight * (hierarchyPos.x * safeScale.x) + billboardUp * (hierarchyPos.y * safeScale.y);
+        worldPos = treeCenter + impostorOffset;
+
+        let invQuat = vec4<f32>(-input.instanceRotQuat.xyz, input.instanceRotQuat.w);
+        let localLightDir = normalize(rotateVectorByQuaternion(lightForward, invQuat));
+        output.vertexTangent = vec4<f32>(localLightDir, -999.0);
+    }
+
+    let clipPos = getShadowClipPosition(worldPos, systemUniforms.directionalLightProjectionViewMatrix);
+
+    output.position = clipPos;
+    output.vertexPosition = worldPos;
+    output.uv = input.uv;
+    output.uv1 = input.uv1;
+    output.globalFragmentSlotIndex = subMeshUniforms.globalFragmentSlotIndex;
+    output.combinedOpacity = fadeFactor * lodFadeFactor;
 
     return output;
 }
