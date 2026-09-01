@@ -286,7 +286,7 @@ fn main(inputData: InputData) -> OutputFragment {
         N = normalize(rotateVectorByQuaternion(bakedN, quat));
     }
 
-    let NdotV = max(abs(dot(N, V)), 0.04);
+    let NdotV = max(dot(N, V), 0.04);
     let preExposure = systemUniforms.preExposure;
 
     // 4. Directional Shadow calculation (Exact pbrMaterial match)
@@ -341,7 +341,7 @@ fn main(inputData: InputData) -> OutputFragment {
         let viewDotNegL = max(dot(V, -L), 0.0);
         let forwardScatter = pow(viewDotNegL, 3.0) * 0.40;
         let subSurfaceFactor = (backNdotL * 0.60 + forwardScatter) * (1.0 - metallic);
-        let subSurfaceTransmission = albedo * subSurfaceFactor * 0.50;
+        let subSurfaceTransmission = albedo * subSurfaceFactor * 0.30;
 
         let dielectricPart = (specBRDF * NdotL) + (vec3<f32>(1.0) - F) * diffuseReflection + subSurfaceTransmission;
         let metallicPart = specBRDF * NdotL;
@@ -417,7 +417,7 @@ fn main(inputData: InputData) -> OutputFragment {
             let backTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, -N.y, u_atmo.atmosphereHeight);
             backIBLDiffuse += (backIBLDiffuse * backTrans) + backSkyIrradiance;
         }
-        envIBL_DIFFUSE += albedo * backIBLDiffuse * 0.35 * ao;
+        envIBL_DIFFUSE += albedo * backIBLDiffuse * 0.20 * ao;
 
         let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric * specularOcclusion;
         let dielectricPart_IBL = ibl_specular_dielectric + envIBL_DIFFUSE;

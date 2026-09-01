@@ -93,13 +93,13 @@ fn main(
         metallic = metallic * ormSample.b;
     }
 
-    // 🌿 [3D Self-Occlusion / Spherical AO] 나무 중심부 자연스러운 미세 차폐 (0.75 ~ 1.0)
+    // 🌿 [3D Self-Occlusion / Spherical AO] 나무 중심부 깊은 음영 형성 (0.50 ~ 1.0)
     let distFromCenter = length(relPos) / radius;
-    let sphericalAO = clamp(pow(distFromCenter, 1.2) * 0.25 + 0.75, 0.70, 1.0);
+    let sphericalAO = clamp(pow(distFromCenter, 1.2) * 0.50 + 0.50, 0.45, 1.0);
 
-    // 🌿 [Height/Ground Occlusion] 수목 하단부 미세 차폐 (0.85 ~ 1.0)
+    // 🌿 [Height/Ground Occlusion] 수목 하단부/지면 차폐 (0.70 ~ 1.0)
     let normHeight = clamp((relPos.y / radius) * 0.5 + 0.5, 0.0, 1.0);
-    let heightAO = clamp(normHeight * 0.15 + 0.85, 0.80, 1.0);
+    let heightAO = clamp(normHeight * 0.30 + 0.70, 0.65, 1.0);
 
     let finalAO = clamp(baseAO * sphericalAO * heightAO, 0.0, 1.0);
     roughness = clamp(roughness, 0.04, 1.0);
