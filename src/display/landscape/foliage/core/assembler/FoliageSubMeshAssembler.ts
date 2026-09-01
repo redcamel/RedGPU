@@ -148,11 +148,20 @@ class FoliageSubMeshAssembler {
 
         const boundingRadius = Math.sqrt(maxDistSq);
 
+        // 🌿 지면 밀착(Ground Sink): 경사 지형 및 굴곡진 지면에서 식생 밑동이 공중에 뜨지 않고
+        // 🌿 바닥에 완벽히 밀착되도록 options.groundOffset 또는 기본 안착값(boundingRadius 기반 적응형 깊이)을 적용
+        let finalBottomOffset = minOffset;
+        if (options.groundOffset !== undefined) {
+            finalBottomOffset = options.groundOffset;
+        } else if (boundingRadius > 0) {
+            finalBottomOffset = Math.max(minOffset, Math.min(boundingRadius * 0.025, 0.35));
+        }
+
         return {
             subMeshes: subList,
             lod0SubMeshCount,
             lodInfoList,
-            bottomOffset: minOffset,
+            bottomOffset: finalBottomOffset,
             boundingRadius,
         };
     }

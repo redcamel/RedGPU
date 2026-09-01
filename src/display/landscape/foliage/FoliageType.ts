@@ -43,6 +43,12 @@ export interface FoliageTypeOptions {
     useImpostor?: boolean;
 
     isFoliage?: boolean;
+
+    /**
+     * [KO] 식생이 지면에 자연스럽게 박히도록 하는 하단 오프셋 (단위: 미터). 미지정 시 모델 크기에 맞춘 최적 안착값 적용
+     * [EN] Ground sink offset in meters to ensure seamless planting on uneven terrain.
+     */
+    groundOffset?: number;
 }
 
 class FoliageType {
@@ -90,6 +96,7 @@ class FoliageType {
             randomRotationY: options.randomRotationY ?? true,
             useImpostor,
             isFoliage: options.isFoliage !== false,
+            groundOffset: options.groundOffset,
         });
 
         let hash = 0;
@@ -106,7 +113,7 @@ class FoliageType {
         );
         this.#subMeshes = assembleResult.subMeshes;
         this.#lodInfoList = assembleResult.lodInfoList || [];
-        this.#bottomOffset = assembleResult.bottomOffset ?? 0;
+        this.#bottomOffset = options.groundOffset !== undefined ? options.groundOffset : (assembleResult.bottomOffset ?? 0);
         this.#boundingRadius = assembleResult.boundingRadius || 10.0;
 
         const hasImpostor = this.#options.useImpostor !== false;
@@ -167,6 +174,34 @@ class FoliageType {
 
     get activeInstanceCount(): number {
         return this.#activeInstanceCount;
+    }
+
+    /**
+     * [KO] 식생의 지면 밀착/파묻힘 깊이 오프셋 (단위: 미터)
+     * [EN] Ground sink offset in meters
+     */
+    get groundOffset(): number {
+        return this.#bottomOffset;
+    }
+
+    set groundOffset(val: number) {
+        if (this.#bottomOffset !== val) {
+            this.#bottomOffset = val;
+            if (this.#megaBuffer && this.#allocation) {
+                this.#megaBuffer.updateTypeParams(
+                    this.#allocation,
+                    this.#options.cullingDistance ?? 2000.0,
+                    this.#options.fadeStartDistance ?? 1500.0,
+                    this.#boundingRadius,
+                    this.#bottomOffset,
+                    this.#lodInfoList
+                );
+            }
+        }
+    }
+
+    get bottomOffset(): number {
+        return this.#bottomOffset;
     }
 
     get culledGPUBuffer(): GPUBuffer | null {

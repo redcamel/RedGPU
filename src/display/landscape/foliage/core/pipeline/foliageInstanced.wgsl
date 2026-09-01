@@ -78,17 +78,22 @@ fn mainInput(input : VertexInput) -> OutputData {
 
     let isImpostor = (input.vertexTangent.w < -500.0);
     if (isImpostor) {
-        // 🌿 임포스터 빌보드: 뷰 행렬 기반 스크린-Space 직교 기저
+        // 🌿 임포스터 지면 고정(Ground-Locked Cylindrical Billboard):
+        // 🌿 카메라 피치(내려다보는 각도)로 인해 밑동이 지면 위로 들리는 것을 원천 차단하고
+        // 🌿 항상 밑동이 지면에 100% 밀착되도록 Y축 직립 직교 기저를 사용합니다.
         let camRight = vec3<f32>(
             systemUniforms.camera.viewMatrix[0][0],
             systemUniforms.camera.viewMatrix[1][0],
             systemUniforms.camera.viewMatrix[2][0]
         );
-        let camUp = vec3<f32>(
-            systemUniforms.camera.viewMatrix[0][1],
-            systemUniforms.camera.viewMatrix[1][1],
-            systemUniforms.camera.viewMatrix[2][1]
-        );
+        var billboardRight = vec3<f32>(camRight.x, 0.0, camRight.z);
+        let rightLenSq = dot(billboardRight, billboardRight);
+        if (rightLenSq > 0.0001) {
+            billboardRight = billboardRight * inverseSqrt(rightLenSq);
+        } else {
+            billboardRight = vec3<f32>(1.0, 0.0, 0.0);
+        }
+        let billboardUp = vec3<f32>(0.0, 1.0, 0.0);
 
         // 🌿 쿼드 position.z = AABB 수직 중심 오프셋(centerY_local)
         let centerYLocal = hierarchyPos.z;
@@ -97,13 +102,20 @@ fn mainInput(input : VertexInput) -> OutputData {
         // 🌿 실제 나무 중심(treeCenter)에서 카메라까지의 정확한 시선 벡터 계산
         let toCam = systemUniforms.camera.cameraPosition.xyz - treeCenter;
 
-        let impostorOffset = camRight * (hierarchyPos.x * safeScale.x) + camUp * (hierarchyPos.y * safeScale.y);
+        let impostorOffset = billboardRight * (hierarchyPos.x * safeScale.x) + billboardUp * (hierarchyPos.y * safeScale.y);
         worldPos = treeCenter + impostorOffset;
-        worldNormal = -vec3<f32>(
-            systemUniforms.camera.viewMatrix[0][2],
-            systemUniforms.camera.viewMatrix[1][2],
-            systemUniforms.camera.viewMatrix[2][2]
+
+        var billboardNormal = vec3<f32>(
+            -systemUniforms.camera.viewMatrix[0][2],
+            0.0,
+            -systemUniforms.camera.viewMatrix[2][2]
         );
+        let normLenSq = dot(billboardNormal, billboardNormal);
+        if (normLenSq > 0.0001) {
+            worldNormal = billboardNormal * inverseSqrt(normLenSq);
+        } else {
+            worldNormal = vec3<f32>(0.0, 0.0, 1.0);
+        }
 
         let invQuat = vec4<f32>(-input.instanceRotQuat.xyz, input.instanceRotQuat.w);
         let localView = normalize(rotateVectorByQuaternion(toCam, invQuat));

@@ -199,20 +199,20 @@ fn getTransmissionRefraction(
 fn main(inputData:InputData) -> OutputFragment {
     var output: OutputFragment;
 
-    #redgpu_if isFoliage
-    // 🌿 1. Dithered LOD Crossfade (4x4 Bayer Matrix - 식생 전용 비트 연산 최적화)
-    let fadeOpacity = inputData.combinedOpacity;
-    if (fadeOpacity < 0.999) {
-        let px = u32(inputData.position.x) & 3u;
-        let py = u32(inputData.position.y) & 3u;
-        let idx = (py << 2u) | px;
-        let packed = select(0x6E4C2A80u, 0x5D7F91B3u, idx >= 8u);
-        let threshold = f32((packed >> ((idx & 7u) * 4u)) & 0xFu) * 0.0625;
-        if (fadeOpacity < threshold) {
-            discard;
-        }
-    }
-    #redgpu_endIf
+//    #redgpu_if isFoliage
+//    // 🌿 1. Dithered LOD Crossfade (4x4 Bayer Matrix - 식생 전용 비트 연산 최적화)
+//    let fadeOpacity = inputData.combinedOpacity;
+//    if (fadeOpacity < 0.999) {
+//        let px = u32(inputData.position.x) & 3u;
+//        let py = u32(inputData.position.y) & 3u;
+//        let idx = (py << 2u) | px;
+//        let packed = select(0x6E4C2A80u, 0x5D7F91B3u, idx >= 8u);
+//        let threshold = f32((packed >> ((idx & 7u) * 4u)) & 0xFu) * 0.0625;
+//        if (fadeOpacity < threshold) {
+//            discard;
+//        }
+//    }
+//    #redgpu_endIf
 
     let uniforms = globalFragmentSSBO_PBR[inputData.globalFragmentSlotIndex];
 

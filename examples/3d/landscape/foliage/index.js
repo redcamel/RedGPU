@@ -117,15 +117,6 @@ RedGPU.init(
         const foliageManager = landscape.foliageManager;
 
 
-        new RedGPU.GLTFLoader(
-            redGPUContext,
-            '../../../assets/terrain/test.glb',
-            (loader) => {
-                const root = loader.resultMesh;
-                scene.addChild(root)
-
-            }
-        );
         // 1. Pine Tree (Multi-LOD) 로드
         new RedGPU.GLTFLoader(
             redGPUContext,
@@ -180,6 +171,7 @@ RedGPU.init(
                             minScale: [0.85, 0.85, 0.85],
                             maxScale: [1.35, 1.35, 1.35],
                             randomRotationY: true,
+                            groundOffset: 0.35,
                             cullingDistance: 3500,
                             fadeStartDistance: 2800,
                             isFoliage: true,
@@ -189,8 +181,8 @@ RedGPU.init(
                 }
             }
         );
-
-        // 2. Frangipani Tree (HD Realistic Tree + Octahedral Impostor) 로드
+        //
+        // // 2. Frangipani Tree (HD Realistic Tree + Octahedral Impostor) 로드
         // new RedGPU.GLTFLoader(
         //     redGPUContext,
         //     '../../../assets/terrain/realistic_hd_frangipani_tree_950.glb',
@@ -378,9 +370,24 @@ const renderTestPane = (redGPUContext, view, skyAtmosphere, landscape, controlle
                     set cullingDist(v) {
                         const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
                         if (target) target.options.cullingDistance = v;
+                    },
+                    get groundOffset() {
+                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
+                        return target ? target.groundOffset : 0.35;
+                    },
+                    set groundOffset(v) {
+                        foliageManager.types.forEach(t => {
+                            t.groundOffset = v;
+                        });
                     }
                 };
                 subPine.addBinding(pineProxy, 'count', {readonly: true});
+                subPine.addBinding(pineProxy, 'groundOffset', {
+                    min: 0.0,
+                    max: 2.0,
+                    step: 0.05,
+                    label: 'Ground Sink Offset'
+                });
                 subPine.addBinding(pineProxy, 'lod0Dist', {min: 50, max: 600, step: 25, label: 'LOD 0 -> 1 Dist'});
                 subPine.addBinding(pineProxy, 'lod1Dist', {min: 100, max: 1200, step: 50, label: 'LOD 1 -> 2 Dist'});
                 subPine.addBinding(pineProxy, 'impostorDist', {

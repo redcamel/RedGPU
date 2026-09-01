@@ -108,7 +108,29 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         let v = instance.posZ * globalUniforms.invWorldSizeX + 0.5;
         if (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0) {
             let sampledHeightNorm = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v), 0.0).r;
-            realY = (sampledHeightNorm * globalUniforms.heightScale) - typeInfo.bottomOffset;
+            let terrainHeight = sampledHeightNorm * globalUniforms.heightScale;
+
+            // 🌿 경사도 기반 자동 안착 깊이 보정 (Slope-Adaptive Ground Sink)
+            // 🌿 지형의 밑동 반경 구간 내 X, Z 높이차(경사도)를 계산하여 경사면에서도 밑동이 절대 허공에 뜨지 않도록 자동 보정
+            let maxXZScale = max(instance.scaleX, instance.scaleZ);
+            let trunkRadius = max(typeInfo.boundingRadius * 0.18 * maxXZScale, 0.25);
+            let deltaUV = trunkRadius * globalUniforms.invWorldSizeX;
+
+            let uL = max(u - deltaUV, 0.0);
+            let uR = min(u + deltaUV, 1.0);
+            let vD = max(v - deltaUV, 0.0);
+            let vU = min(v + deltaUV, 1.0);
+
+            let hL = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(uL, v), 0.0).r * globalUniforms.heightScale;
+            let hR = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(uR, v), 0.0).r * globalUniforms.heightScale;
+            let hD = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, vD), 0.0).r * globalUniforms.heightScale;
+            let hU = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, vU), 0.0).r * globalUniforms.heightScale;
+
+            let slopeX = abs(hR - hL);
+            let slopeZ = abs(hU - hD);
+            let slopeSink = max(slopeX, slopeZ) * 0.5;
+
+            realY = terrainHeight - (typeInfo.bottomOffset + slopeSink);
         }
     }
 
