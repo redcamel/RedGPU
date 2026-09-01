@@ -77,11 +77,8 @@ fn main(
     let distAlongRay = dot(relPos, camDir);
     let normDepth = clamp(distAlongRay / (radius * 1.05) * 0.5 + 0.5, 0.0, 1.0);
 
-    // 4. Physical Material Properties + 3D Geometric Self-Occlusion (Spherical & Height AO)
+    // 4. Physical Material Properties
     var baseAO = input.materialParams.z;
-    if (isFoliage && u_useVertexColor) {
-        baseAO = baseAO * clamp(input.vertexColor_0.r, 0.0, 1.0);
-    }
     var roughness = input.materialParams.x;
     var metallic = input.materialParams.y;
     var subsurface = select(0.2, 1.0, isFoliage);
@@ -93,15 +90,7 @@ fn main(
         metallic = metallic * ormSample.b;
     }
 
-    // 🌿 [3D Self-Occlusion / Spherical AO] 나무 중심부 깊은 음영 형성 (0.50 ~ 1.0)
-    let distFromCenter = length(relPos) / radius;
-    let sphericalAO = clamp(pow(distFromCenter, 1.2) * 0.50 + 0.50, 0.45, 1.0);
-
-    // 🌿 [Height/Ground Occlusion] 수목 하단부/지면 차폐 (0.70 ~ 1.0)
-    let normHeight = clamp((relPos.y / radius) * 0.5 + 0.5, 0.0, 1.0);
-    let heightAO = clamp(normHeight * 0.30 + 0.70, 0.65, 1.0);
-
-    let finalAO = clamp(baseAO * sphericalAO * heightAO, 0.0, 1.0);
+    let finalAO = clamp(baseAO, 0.0, 1.0);
     roughness = clamp(roughness, 0.04, 1.0);
 
     out.baseColor = vec4<f32>(finalColor.rgb, finalColor.a);

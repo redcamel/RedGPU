@@ -335,15 +335,10 @@ fn main(inputData: InputData) -> OutputFragment {
         let F = getFresnel(VdotH, F0);
         let specBRDF = getDirectSpecularBRDF(F, roughness, NdotH, NdotV, NdotL);
         let diffuseReflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughness, albedo);
+        let diffuseTransmission = albedo * max(-dot(N, L), 0.0);
+        let totalDiffuse = diffuseReflection + diffuseTransmission * 0.65;
 
-        // 🌿 [UE5 TwoSidedFoliage] 나뭇잎 양면 확산 투과광 (Wrap Diffuse Subsurface)
-        let backNdotL = clamp((-dot(N, L) + 0.40) / 1.40, 0.0, 1.0);
-        let viewDotNegL = max(dot(V, -L), 0.0);
-        let forwardScatter = pow(viewDotNegL, 3.0) * 0.40;
-        let subSurfaceFactor = (backNdotL * 0.60 + forwardScatter) * (1.0 - metallic);
-        let subSurfaceTransmission = albedo * subSurfaceFactor * 0.30;
-
-        let dielectricPart = (specBRDF * NdotL) + (vec3<f32>(1.0) - F) * diffuseReflection + subSurfaceTransmission;
+        let dielectricPart = (specBRDF * NdotL) + (vec3<f32>(1.0) - F) * totalDiffuse;
         let metallicPart = specBRDF * NdotL;
         let directResult = mix(dielectricPart, metallicPart, metallic);
 
@@ -406,18 +401,22 @@ fn main(inputData: InputData) -> OutputFragment {
 
         var envIBL_DIFFUSE = albedo * iblDiffuseColor * diffuseWeight_IBL * ao;
 
-        // 🌿 [UE5 TwoSidedFoliage] 잎사귀 반대편(-N) 하늘 산란광 투과
-        var backIBLDiffuse = vec3<f32>(0.0);
+        // 🌿 [UE5 TwoSidedFoliage] 잎사귀 반대편(-N) 하늘 산란광 투과 (Exact PBRMaterial match)
+        var backScatteringColor = vec3<f32>(0.0);
         if (u_usePrefilterTexture) {
-            backIBLDiffuse += textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, -N, 0).rgb * preExposure * systemUniforms.iblIntensity * INV_PI;
+            let iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
+            let mipLevel = roughness * iblMipmapCount;
+            backScatteringColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, -N, mipLevel).rgb * preExposure * systemUniforms.iblIntensity;
         }
         if (u_useSkyAtmosphere) {
             let u_atmo = systemUniforms.skyAtmosphere;
-            let backSkyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, -N, 0.0).rgb * u_atmo.sunIntensity * preExposure;
+            let skyIntensity = u_atmo.sunIntensity;
             let backTrans = getTransmittance(transmittanceTexture, atmosphereSampler, u_atmo.cameraHeight, -N.y, u_atmo.atmosphereHeight);
-            backIBLDiffuse += (backIBLDiffuse * backTrans) + backSkyIrradiance;
+            let backSkyScat = textureSampleLevel(skyAtmosphere_prefilteredTexture, prefilterTextureSampler, -N, 0.0).rgb * skyIntensity * preExposure;
+            backScatteringColor = (backScatteringColor * backTrans) + backSkyScat;
         }
-        envIBL_DIFFUSE += albedo * backIBLDiffuse * 0.20 * ao;
+        let transmittedIBL = backScatteringColor * albedo * (vec3<f32>(1.0) - F_IBL_dielectric);
+        envIBL_DIFFUSE += transmittedIBL * (0.65 * 0.35);
 
         let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric * specularOcclusion;
         let dielectricPart_IBL = ibl_specular_dielectric + envIBL_DIFFUSE;
