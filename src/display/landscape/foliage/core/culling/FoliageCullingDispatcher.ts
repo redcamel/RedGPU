@@ -13,6 +13,11 @@ class FoliageCullingDispatcher {
         new Array(4), new Array(4), new Array(4),
         new Array(4), new Array(4), new Array(4)
     ];
+    static readonly #cachedShadowFrustumPlanes: number[][][] = [
+        [new Array(4), new Array(4), new Array(4), new Array(4), new Array(4), new Array(4)],
+        [new Array(4), new Array(4), new Array(4), new Array(4), new Array(4), new Array(4)],
+        [new Array(4), new Array(4), new Array(4), new Array(4), new Array(4), new Array(4)]
+    ];
 
     #redGPUContext: RedGPUContext;
     #megaBuffer: FoliageMegaBuffer | null = null;
@@ -32,6 +37,48 @@ class FoliageCullingDispatcher {
         this.#redGPUContext = redGPUContext;
         this.#megaBuffer = megaBuffer || null;
         this.#initComputePipeline();
+    }
+
+    static #computeFrustumPlanesFromMatrix(m: mat4, out: number[][]): number[][] {
+        const p0 = out[0], p1 = out[1], p2 = out[2], p3 = out[3], p4 = out[4], p5 = out[5];
+
+        p0[0] = m[3] + m[0];
+        p0[1] = m[7] + m[4];
+        p0[2] = m[11] + m[8];
+        p0[3] = m[15] + m[12];
+        p1[0] = m[3] - m[0];
+        p1[1] = m[7] - m[4];
+        p1[2] = m[11] - m[8];
+        p1[3] = m[15] - m[12];
+        p2[0] = m[3] + m[1];
+        p2[1] = m[7] + m[5];
+        p2[2] = m[11] + m[9];
+        p2[3] = m[15] + m[13];
+        p3[0] = m[3] - m[1];
+        p3[1] = m[7] - m[5];
+        p3[2] = m[11] - m[9];
+        p3[3] = m[15] - m[13];
+        p4[0] = m[2];
+        p4[1] = m[6];
+        p4[2] = m[10];
+        p4[3] = m[14];
+        p5[0] = m[3] - m[2];
+        p5[1] = m[7] - m[6];
+        p5[2] = m[11] - m[10];
+        p5[3] = m[15] - m[14];
+
+        for (let i = 0; i < 6; i++) {
+            const plane = out[i];
+            const norm = Math.sqrt(plane[0] * plane[0] + plane[1] * plane[1] + plane[2] * plane[2]);
+            if (norm > 0.000001) {
+                const invNorm = 1.0 / norm;
+                plane[0] *= invNorm;
+                plane[1] *= invNorm;
+                plane[2] *= invNorm;
+                plane[3] *= invNorm;
+            }
+        }
+        return out;
     }
 
     static #computeFrustumPlanesToBuffer(projectionMatrix: mat4, viewMatrix: mat4, out: number[][]): number[][] {
@@ -137,6 +184,33 @@ class FoliageCullingDispatcher {
                 frustumPlanes,
                 fovFactor
             );
+
+            // 🌲 섀도우 CSM 캐스케이드 0, 1, 2 컬링 유니폼 갱신
+            const shadowManager = stateData?.view?.scene?.shadowManager || (landscape as any)?.scene?.shadowManager;
+            const dirShadow = shadowManager?.directionalShadowManager;
+            if (dirShadow) {
+                const cascadePV = dirShadow.cascadeProjectionViewMatrices;
+                const splitDepths = dirShadow.cascadeSplitDepths;
+                for (let c = 0; c < 3; c++) {
+                    const pv = cascadePV[c];
+                    const maxDist = splitDepths[c] ?? 200.0;
+                    let sPlanes: number[][] | null = null;
+                    if (pv) {
+                        sPlanes = FoliageCullingDispatcher.#computeFrustumPlanesFromMatrix(
+                            pv,
+                            FoliageCullingDispatcher.#cachedShadowFrustumPlanes[c]
+                        );
+                    }
+                    this.#megaBuffer.resetMultiIndirectCommandsForShadow(c);
+                    this.#megaBuffer.updateShadowGlobalUniforms(
+                        c,
+                        camX, camY, camZ,
+                        worldSizeX, heightScale, hasVHT,
+                        sPlanes,
+                        maxDist
+                    );
+                }
+            }
         } else {
             for (let i = 0; i < typeCount; i++) {
                 const foliageType = typeList[i];
@@ -214,16 +288,27 @@ class FoliageCullingDispatcher {
         const vhtView = this.#cachedVHTView || undefined;
         const vhtSampler = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
 
-        // 🚀 [글로벌 메가 버퍼 모드] 단 1회 디스패치로 전체 식생 일괄 컬링!
+        // 🚀 [글로벌 메가 버퍼 모드] 메인 뷰 + 섀도우 캐스케이드 0, 1, 2 일괄 디스패치!
         if (this.#megaBuffer) {
             const totalAllocatedRange = this.#megaBuffer.totalAllocatedRange;
             if (totalAllocatedRange <= 0) return;
 
+            const workgroupCount = Math.ceil(totalAllocatedRange / 64);
+
+            // 1. 메인 뷰 컬링 디스패치
             const globalBindGroup = this.#megaBuffer.getOrCreateGlobalCullingBindGroup(bindGroupLayout, vhtView, vhtSampler);
             if (globalBindGroup) {
-                const workgroupCount = Math.ceil(totalAllocatedRange / 64);
                 computePass.setBindGroup(0, globalBindGroup);
                 computePass.dispatchWorkgroups(workgroupCount);
+            }
+
+            // 2. 섀도우 캐스케이드 0, 1, 2 컬링 디스패치
+            for (let c = 0; c < 3; c++) {
+                const shadowBindGroup = this.#megaBuffer.getOrCreateShadowGlobalCullingBindGroup(c, bindGroupLayout, vhtView, vhtSampler);
+                if (shadowBindGroup) {
+                    computePass.setBindGroup(0, shadowBindGroup);
+                    computePass.dispatchWorkgroups(workgroupCount);
+                }
             }
             return;
         }

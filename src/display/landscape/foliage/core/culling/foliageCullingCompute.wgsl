@@ -28,8 +28,8 @@ struct GlobalCullingUniforms {
     heightScale: f32,
     hasVHT: u32,
     fovFactor: f32,
-    pad0: u32,
-    pad1: u32,
+    targetCascadeIndex: u32, // 0xFFFFFFFFu = Main View, 0u/1u/2u = Shadow Cascade
+    cascadeMaxDistance: f32, // Max distance for shadow cascade cutoff
     frustumPlanes: array<vec4<f32>, 6>,
 };
 
@@ -91,6 +91,21 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let dx = instance.posX - camPos.x;
     let dz = instance.posZ - camPos.z;
     let horizontalDistSq = dx * dx + dz * dz;
+
+    let maxScale = max(max(instance.scaleX, instance.scaleY), instance.scaleZ);
+    let scaledRadius = typeInfo.boundingRadius * maxScale;
+
+    let isShadow = (globalUniforms.targetCascadeIndex < 4u);
+    let cascadeMaxDist = globalUniforms.cascadeMaxDistance;
+    let isOverlapCascade = (globalUniforms.targetCascadeIndex < 2u);
+    let radiusMargin = select(0.0, scaledRadius, isOverlapCascade);
+    let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
+    let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
+
+    if (isShadow && horizontalDistSq >= shadowEffectiveDistSq) {
+        return;
+    }
+
     let cullingDist = typeInfo.cullingDistance;
     let cullingDistSq = cullingDist * cullingDist;
 
@@ -98,7 +113,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let hasInfiniteImpostor = (numLODs > 0u && typeInfo.lods[numLODs - 1u].lodDistance >= 100000.0);
     let effectiveCullingDistSq = select(cullingDistSq, 1000000000000.0, hasInfiniteImpostor);
 
-    if (horizontalDistSq >= effectiveCullingDistSq) {
+    if (!isShadow && horizontalDistSq >= effectiveCullingDistSq) {
         return;
     }
 
@@ -137,12 +152,14 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let dy = realY - camPos.y;
     let distSq = horizontalDistSq + dy * dy;
 
-    if (distSq >= effectiveCullingDistSq) {
+    if (isShadow && distSq >= shadowEffectiveDistSq) {
         return;
     }
 
-    let maxScale = max(max(instance.scaleX, instance.scaleY), instance.scaleZ);
-    let scaledRadius = typeInfo.boundingRadius * maxScale;
+    if (!isShadow && distSq >= effectiveCullingDistSq) {
+        return;
+    }
+
     let spherePos = vec4<f32>(instance.posX, realY, instance.posZ, 1.0);
     let r = -scaledRadius;
 
@@ -162,7 +179,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let effectiveDist = dist * max(globalUniforms.fovFactor, 0.0001);
 
     var globalFade: f32 = 1.0;
-    if (!hasInfiniteImpostor) {
+    if (!hasInfiniteImpostor && !isShadow) {
         let fadeStartDist = typeInfo.fadeStartDistance;
         if (dist > fadeStartDist) {
             let fadeRange = max(cullingDist - fadeStartDist, 1.0);
@@ -173,6 +190,31 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     var culledInst = instance;
     culledInst.posY = realY;
     culledInst.fade = globalFade;
+
+    // 🌲 [섀도우 패스 전용 고속 단일 LOD 발행] (크로스페이드 중복 발행 없이 단 1회 발행)
+    if (isShadow) {
+        var selectedLOD: u32 = 0u;
+        if (numLODs > 1u) {
+            for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
+                if (effectiveDist <= typeInfo.lods[l].lodDistance || l == numLODs - 1u) {
+                    selectedLOD = l;
+                    break;
+                }
+            }
+        }
+        let lodInfo = typeInfo.lods[selectedLOD];
+        let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
+        let slot = atomicAdd(&indirectDrawCommands[baseCmdIdx].instanceCount, 1u);
+        let numSubs = lodInfo.subMeshCount;
+        for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
+            atomicAdd(&indirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
+        }
+
+        let outIdx = typeInfo.culledBaseOffset + (selectedLOD * typeInfo.maxInstances) + slot;
+        culledInst.typeIdOrSubId = 1.0;
+        culledInstanceBuffer[outIdx] = culledInst;
+        return;
+    }
 
     if (numLODs <= 1u) {
         let baseCmdIdx = typeInfo.indirectBaseOffset + typeInfo.lods[0].subMeshOffset;
