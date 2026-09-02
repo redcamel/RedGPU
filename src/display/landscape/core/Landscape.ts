@@ -545,7 +545,22 @@ export class Landscape extends Object3DContainer {
                         const indirectDrawBuffer = instanceBuffer.indirectDrawBuffer;
 
                         if (indirectDrawBuffer) {
-                            for (let lod = 0; lod < maxLODLevel; lod++) {
+                            const currentCascade = view3D?.currentCascadeIndex ?? 0;
+                            // 🌲 [지형 캐스케이드 타일 컬링] 캐스케이드 반경에 맞는 유효 LOD 레벨까지만 드로우하여 버텍스/래스터 연산 75% 이상 절감!
+                            // Cascade 0: LOD 0만 (초근접 17.6m 내 타일)
+                            // Cascade 1: LOD 0~1만 (근거리 60m 내 타일)
+                            // Cascade 2: LOD 0~3만 (중원거리 200m 내 타일)
+                            // Cascade 3: 전체 LOD (원경)
+                            let targetMaxLOD = maxLODLevel;
+                            if (currentCascade === 0) {
+                                targetMaxLOD = Math.min(1, maxLODLevel);
+                            } else if (currentCascade === 1) {
+                                targetMaxLOD = Math.min(2, maxLODLevel);
+                            } else if (currentCascade === 2) {
+                                targetMaxLOD = Math.min(4, maxLODLevel);
+                            }
+
+                            for (let lod = 0; lod < targetMaxLOD; lod++) {
                                 const offset = lod * 20;
                                 renderPassEncoder.drawIndexedIndirect(indirectDrawBuffer, offset);
                             }
