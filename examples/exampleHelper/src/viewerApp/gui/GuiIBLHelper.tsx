@@ -167,13 +167,6 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
             set luminance(v) {
                 if (view.ibl) {
                     view.ibl.luminance = v;
-                    const targetLux = v * 4;
-                    settings.lux = targetLux;
-                    const lights = view.scene.lightManager.directionalLights;
-                    if (lights.length > 0) {
-                        lights[0].lux = targetLux;
-                    }
-                    gui.refresh();
                 }
             },
         }, 'luminance', {min: 0, max: 100000, step: 100});
