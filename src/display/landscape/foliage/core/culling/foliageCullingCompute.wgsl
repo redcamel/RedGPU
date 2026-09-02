@@ -131,14 +131,14 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let vD = max(v - deltaUV, 0.0);
             let vU = min(v + deltaUV, 1.0);
 
-            let hL = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(uL, v), 0.0).r * globalUniforms.heightScale;
-            let hR = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(uR, v), 0.0).r * globalUniforms.heightScale;
-            let hD = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, vD), 0.0).r * globalUniforms.heightScale;
-            let hU = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, vU), 0.0).r * globalUniforms.heightScale;
+            let rawL = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(uL, v), 0.0).r;
+            let rawR = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(uR, v), 0.0).r;
+            let rawD = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, vD), 0.0).r;
+            let rawU = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, vU), 0.0).r;
 
-            let slopeX = abs(hR - hL);
-            let slopeZ = abs(hU - hD);
-            let slopeSink = max(slopeX, slopeZ) * 0.5;
+            let slopeX = abs(rawR - rawL);
+            let slopeZ = abs(rawU - rawD);
+            let slopeSink = max(slopeX, slopeZ) * 0.5 * globalUniforms.heightScale;
 
             realY = terrainHeight - (typeInfo.bottomOffset + slopeSink);
         }
@@ -243,66 +243,70 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     // 🌲 3. 섀도우 활성 캐스케이드 (0 ~ activeCascadeCount) 동적 일괄 Culling
     // =========================================================================
     let activeCascades = min(globalUniforms.activeCascadeCount, 4u);
-    for (var c: u32 = 0u; c < activeCascades; c = c + 1u) {
-        let cascadeInfo = globalUniforms.cascades[c];
-        if (cascadeInfo.hasShadow == 0u) {
-            continue;
-        }
-
-        let cascadeMaxDist = cascadeInfo.maxDistance;
-        let isOverlapCascade = (c < activeCascades - 1u); // 마지막 활성 캐스케이드는 하드 컷오프, 전 단계는 오버랩
-        let radiusMargin = select(0.0, scaledRadius, isOverlapCascade);
-        let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
-        let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
-
-        if (horizontalDistSq >= shadowEffectiveDistSq || distSq >= shadowEffectiveDistSq) {
-            continue;
-        }
-
-        let inShadowFrustum =
-            dot(spherePos, cascadeInfo.frustumPlanes[0]) >= r &&
-            dot(spherePos, cascadeInfo.frustumPlanes[1]) >= r &&
-            dot(spherePos, cascadeInfo.frustumPlanes[2]) >= r &&
-            dot(spherePos, cascadeInfo.frustumPlanes[3]) >= r &&
-            dot(spherePos, cascadeInfo.frustumPlanes[4]) >= r &&
-            dot(spherePos, cascadeInfo.frustumPlanes[5]) >= r;
-
-        if (!inShadowFrustum) {
-            continue;
-        }
-
-        // 섀도우 패스: 단일 최적 LOD 선택
-        // 🌲 원거리(Cascade 2 이상 또는 2단계 모드의 마지막 캐스케이드)는 옥타헤드럴 임포스터 강제 선택!
-        var selectedLOD: u32 = 0u;
-        if (numLODs > 1u) {
-            let isFarCascade = (c >= 2u || (activeCascades <= 2u && c == activeCascades - 1u));
-            if (isFarCascade) {
-                selectedLOD = numLODs - 1u; // 🚀 최종 옥타헤드럴 임포스터 쿼드 선택!
-            } else {
-                for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
-                    if (effectiveDist <= typeInfo.lods[l].lodDistance || l == numLODs - 1u) {
-                        selectedLOD = l;
-                        break;
-                    }
-                }
-            }
-        }
-
-        let lodInfo = typeInfo.lods[selectedLOD];
-        let cascadeIndirectOffset = c * globalUniforms.maxSubMeshes;
-        let baseCmdIdx = cascadeIndirectOffset + typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
-        let slot = atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
-        let numSubs = lodInfo.subMeshCount;
-        for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
-            atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
-        }
-
-        let cascadeCulledOffset = c * globalUniforms.maxTotalInstances8;
-        let outIdx = cascadeCulledOffset + typeInfo.culledBaseOffset + (selectedLOD * typeInfo.maxInstances) + slot;
+    if (activeCascades > 0u) {
         var shadowInst = instance;
         shadowInst.posY = realY;
         shadowInst.fade = 1.0;
         shadowInst.typeIdOrSubId = 1.0;
-        shadowCulledInstanceBuffer[outIdx] = shadowInst;
+
+        for (var c: u32 = 0u; c < activeCascades; c = c + 1u) {
+            let cascadeInfo = globalUniforms.cascades[c];
+            if (cascadeInfo.hasShadow == 0u) {
+                continue;
+            }
+
+            let cascadeMaxDist = cascadeInfo.maxDistance;
+            let isOverlapCascade = (c < activeCascades - 1u); // 마지막 활성 캐스케이드는 하드 컷오프, 전 단계는 오버랩
+            let radiusMargin = select(0.0, scaledRadius, isOverlapCascade);
+            let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
+            let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
+
+            // distSq는 항상 horizontalDistSq 이상이므로 단일 조건으로 정밀 검사
+            if (distSq >= shadowEffectiveDistSq) {
+                continue;
+            }
+
+            let inShadowFrustum =
+                dot(spherePos, cascadeInfo.frustumPlanes[0]) >= r &&
+                dot(spherePos, cascadeInfo.frustumPlanes[1]) >= r &&
+                dot(spherePos, cascadeInfo.frustumPlanes[2]) >= r &&
+                dot(spherePos, cascadeInfo.frustumPlanes[3]) >= r &&
+                dot(spherePos, cascadeInfo.frustumPlanes[4]) >= r &&
+                dot(spherePos, cascadeInfo.frustumPlanes[5]) >= r;
+
+            if (!inShadowFrustum) {
+                continue;
+            }
+
+            // 섀도우 패스: 단일 최적 LOD 선택
+            // 🌲 원거리(Cascade 2 이상 또는 2단계 모드의 마지막 캐스케이드)는 옥타헤드럴 임포스터 강제 선택!
+            var selectedLOD: u32 = 0u;
+            if (numLODs > 1u) {
+                let isFarCascade = (c >= 2u || (activeCascades <= 2u && c == activeCascades - 1u));
+                if (isFarCascade) {
+                    selectedLOD = numLODs - 1u; // 🚀 최종 옥타헤드럴 임포스터 쿼드 선택!
+                } else {
+                    for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
+                        if (effectiveDist <= typeInfo.lods[l].lodDistance || l == numLODs - 1u) {
+                            selectedLOD = l;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            let lodInfo = typeInfo.lods[selectedLOD];
+            let cascadeIndirectOffset = c * globalUniforms.maxSubMeshes;
+            let baseCmdIdx = cascadeIndirectOffset + typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
+            let slot = atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
+            let numSubs = lodInfo.subMeshCount;
+            for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
+                atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
+            }
+
+            let cascadeCulledOffset = c * globalUniforms.maxTotalInstances8;
+            let outIdx = cascadeCulledOffset + typeInfo.culledBaseOffset + (selectedLOD * typeInfo.maxInstances) + slot;
+            shadowCulledInstanceBuffer[outIdx] = shadowInst;
+        }
     }
 }

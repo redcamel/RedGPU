@@ -224,19 +224,6 @@ class FoliageCullingDispatcher {
                 cascadeParams,
                 activeCascadeCount
             );
-        } else {
-            for (let i = 0; i < typeCount; i++) {
-                const foliageType = typeList[i];
-                if (foliageType.activeInstanceCount <= 0 || foliageType.subMeshes.length === 0) continue;
-
-                foliageType.resetIndirectBuffer();
-                foliageType.updateCullingUniforms(
-                    camX, camY, camZ,
-                    worldSizeX, heightScale, hasVHT,
-                    frustumPlanes,
-                    fovFactor
-                );
-            }
         }
 
         if (this.#cullingComputePipeline && this.#cullingBindGroupLayout) {
