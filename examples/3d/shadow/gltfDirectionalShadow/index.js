@@ -47,7 +47,8 @@ RedGPU.init(
             }
         });
 
-        // 5. 테스트 GUI 설정
+
+        // 6. 테스트 GUI 설정
         renderTestPane(redGPUContext, scene);
     },
     (failReason) => {
@@ -103,8 +104,8 @@ const addGround = (redGPUContext, scene) => {
 const renderTestPane = (redGPUContext, scene) => {
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU: RedGPU,
+        directionalShadow: true,
         ibl: true,
         skybox: true,
-        directionalShadow: true,
     });
 };
