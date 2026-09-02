@@ -41,7 +41,7 @@ struct UnifiedGlobalCullingUniforms {
     pad0: u32,
     pad1: u32,
     mainFrustumPlanes: array<vec4<f32>, 6>,
-    cascades: array<CascadeCullingInfo, 3>,
+    cascades: array<CascadeCullingInfo, 4>,
 };
 
 struct FoliageInstanceData {
@@ -112,7 +112,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let hasInfiniteImpostor = (numLODs > 0u && typeInfo.lods[numLODs - 1u].lodDistance >= 100000.0);
     let effectiveCullingDistSq = select(cullingDistSq, 1000000000000.0, hasInfiniteImpostor);
 
-    // 🌿 1. 지형 높이 VHT 텍스처 샘플링 (전체 패스 통틀어 단 1회만 고속 실행!)
+    // 🌿 1. 지형 높이 VHT 텍스처 바이리니어 샘플링 (전체 뷰 통틀어 단 1회 고속 실행)
     var realY = instance.posY;
     if (globalUniforms.hasVHT != 0u && globalUniforms.invWorldSizeX > 0.0) {
         let u = instance.posX * globalUniforms.invWorldSizeX + 0.5;
@@ -240,16 +240,16 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     // =========================================================================
-    // 🌲 3. 섀도우 캐스케이드 (Cascade 0, 1, 2) 일괄 Culling 및 버퍼 기록
+    // 🌲 3. 섀도우 4개 캐스케이드 (Cascade 0, 1, 2, 3) 일괄 Culling 및 버퍼 기록
     // =========================================================================
-    for (var c: u32 = 0u; c < 3u; c = c + 1u) {
+    for (var c: u32 = 0u; c < 4u; c = c + 1u) {
         let cascadeInfo = globalUniforms.cascades[c];
         if (cascadeInfo.hasShadow == 0u) {
             continue;
         }
 
         let cascadeMaxDist = cascadeInfo.maxDistance;
-        let isOverlapCascade = (c < 2u);
+        let isOverlapCascade = (c < 3u); // Cascade 0, 1, 2는 전환 오버랩 적용, Cascade 3은 최종 하드 컷오프
         let radiusMargin = select(0.0, scaledRadius, isOverlapCascade);
         let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
         let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
@@ -271,12 +271,17 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         }
 
         // 섀도우 패스: 단일 최적 LOD 선택
+        // 🌲 Cascade 2, 3(원거리)은 고폴리곤 메쉬 대신 최종 LOD(2-트라이앵글 옥타헤드럴 임포스터)를 강제 선택!
         var selectedLOD: u32 = 0u;
         if (numLODs > 1u) {
-            for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
-                if (effectiveDist <= typeInfo.lods[l].lodDistance || l == numLODs - 1u) {
-                    selectedLOD = l;
-                    break;
+            if (c >= 2u) {
+                selectedLOD = numLODs - 1u; // 🚀 최종 옥타헤드럴 임포스터 쿼드 선택!
+            } else {
+                for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
+                    if (effectiveDist <= typeInfo.lods[l].lodDistance || l == numLODs - 1u) {
+                        selectedLOD = l;
+                        break;
+                    }
                 }
             }
         }

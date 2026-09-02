@@ -34,7 +34,7 @@ class FoliageMegaBuffer {
     #indirectGPUBuffer: GPUBuffer | null = null;
     #typeParamsGPUBuffer: GPUBuffer | null = null;
 
-    // 🌲 3개 캐스케이드(Cascade 0, 1, 2) 통합 메가 섀도우 버퍼
+    // 🌲 4개 캐스케이드(Cascade 0, 1, 2, 3) 통합 메가 섀도우 버퍼
     #shadowCulledGPUBuffer: GPUBuffer | null = null;
     #shadowIndirectGPUBuffer: GPUBuffer | null = null;
     #unifiedGlobalUniformGPUBuffer: GPUBuffer | null = null;
@@ -43,7 +43,7 @@ class FoliageMegaBuffer {
     #cpuTypeParamsData: Float32Array = new Float32Array(FoliageMegaBuffer.#MAX_TYPES * FoliageMegaBuffer.#TYPE_PARAM_FLOATS);
     #cpuTypeParamsUint32: Uint32Array = new Uint32Array(this.#cpuTypeParamsData.buffer);
 
-    #cpuUnifiedGlobalUniformData: Float32Array = new Float32Array(128);
+    #cpuUnifiedGlobalUniformData: Float32Array = new Float32Array(160);
     #cpuUnifiedGlobalUniformUint32: Uint32Array = new Uint32Array(this.#cpuUnifiedGlobalUniformData.buffer);
 
     #indirectResetTemplate: Uint32Array;
@@ -65,7 +65,7 @@ class FoliageMegaBuffer {
         this.#maxSubMeshes = maxSubMeshes;
         this.#cpuRawDataBuffer = new Float32Array(this.#maxTotalInstances * FoliageMegaBuffer.#STRIDE_FLOATS);
         this.#indirectResetTemplate = new Uint32Array(this.#maxSubMeshes * 5);
-        this.#shadowIndirectResetTemplate = new Uint32Array(this.#maxSubMeshes * 5 * 3);
+        this.#shadowIndirectResetTemplate = new Uint32Array(this.#maxSubMeshes * 5 * 4);
 
         this.#initBuffers();
     }
@@ -261,7 +261,7 @@ class FoliageMegaBuffer {
     }
 
     /**
-     * 메인 뷰 및 섀도우 간접 드로우 인스턴스 카운트를 템플릿 기반으로 1줄 고속 리셋합니다.
+     * 메인 뷰 및 4개 섀도우 간접 드로우 인스턴스 카운트를 템플릿 기반으로 1줄 고속 리셋합니다.
      */
     resetMultiIndirectCommands(): void {
         if (this.#nextIndirectOffset === 0) return;
@@ -283,7 +283,7 @@ class FoliageMegaBuffer {
                 0,
                 this.#shadowIndirectResetTemplate.buffer,
                 this.#shadowIndirectResetTemplate.byteOffset,
-                (this.#maxSubMeshes * 2 + this.#nextIndirectOffset) * 20
+                (this.#maxSubMeshes * 3 + this.#nextIndirectOffset) * 20
             );
         }
     }
@@ -330,8 +330,8 @@ class FoliageMegaBuffer {
             }
         }
 
-        // 섀도우 캐스케이드 0, 1, 2 (36 ~ 119)
-        for (let c = 0; c < 3; c++) {
+        // 섀도우 4개 캐스케이드 0, 1, 2, 3 (36 ~ 147)
+        for (let c = 0; c < 4; c++) {
             const cascade = cascades[c];
             const cascadeBase = 36 + c * 28;
             if (cascade && cascade.hasShadow) {
@@ -373,7 +373,7 @@ class FoliageMegaBuffer {
             0,
             gf32.buffer,
             gf32.byteOffset,
-            480
+            592 // (36 + 28 * 4) * 4 bytes
         );
 
         gpuDevice.queue.writeBuffer(
@@ -498,7 +498,7 @@ class FoliageMegaBuffer {
             const count = sub.isIndexed ? sub.indexCount : sub.vertexCount;
             this.#indirectResetTemplate[(indirectBaseOffset + s) * 5] = count;
 
-            for (let c = 0; c < 3; c++) {
+            for (let c = 0; c < 4; c++) {
                 const shadowSlot = (c * this.#maxSubMeshes + indirectBaseOffset + s) * 5;
                 this.#shadowIndirectResetTemplate[shadowSlot] = count;
             }
@@ -530,16 +530,16 @@ class FoliageMegaBuffer {
             usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
-        // 🌲 섀도우 통합 3단 버퍼 (Cascade 0, 1, 2)
+        // 🌲 섀도우 통합 4단 버퍼 (Cascade 0, 1, 2, 3)
         this.#shadowCulledGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageMegaBuffer_Culled_ShadowMega',
-            size: culledByteSize * 3,
+            size: culledByteSize * 4,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
         });
 
         this.#shadowIndirectGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageMegaBuffer_Indirect_ShadowMega',
-            size: indirectByteSize * 3,
+            size: indirectByteSize * 4,
             usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
@@ -551,7 +551,7 @@ class FoliageMegaBuffer {
 
         this.#unifiedGlobalUniformGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageMegaBuffer_UnifiedGlobalUniform',
-            size: 512,
+            size: 640,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
     }

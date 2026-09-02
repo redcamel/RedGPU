@@ -5,7 +5,7 @@ import FoliageType from "../../FoliageType";
 import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../../material/core";
 
-import FoliageMegaBuffer from "../buffer/FoliageMegaBuffer";
+import FoliageMegaBuffer, {CascadeCullingParam} from "../buffer/FoliageMegaBuffer";
 
 class FoliageCullingDispatcher {
     static readonly #tempPVMatrix: mat4 = mat4.create();
@@ -16,13 +16,15 @@ class FoliageCullingDispatcher {
     static readonly #cachedShadowFrustumPlanes: number[][][] = [
         [new Array(4), new Array(4), new Array(4), new Array(4), new Array(4), new Array(4)],
         [new Array(4), new Array(4), new Array(4), new Array(4), new Array(4), new Array(4)],
+        [new Array(4), new Array(4), new Array(4), new Array(4), new Array(4), new Array(4)],
         [new Array(4), new Array(4), new Array(4), new Array(4), new Array(4), new Array(4)]
     ];
 
     static readonly #cachedCascadeParams: CascadeCullingParam[] = [
         {maxDistance: 17.6, hasShadow: false, frustumPlanes: null},
         {maxDistance: 60.0, hasShadow: false, frustumPlanes: null},
-        {maxDistance: 200.0, hasShadow: false, frustumPlanes: null}
+        {maxDistance: 200.0, hasShadow: false, frustumPlanes: null},
+        {maxDistance: 1000.0, hasShadow: false, frustumPlanes: null}
     ];
 
     #redGPUContext: RedGPUContext;
@@ -193,7 +195,7 @@ class FoliageCullingDispatcher {
             if (dirShadow) {
                 const cascadePV = dirShadow.cascadeProjectionViewMatrices;
                 const splitDepths = dirShadow.cascadeSplitDepths;
-                for (let c = 0; c < 3; c++) {
+                for (let c = 0; c < 4; c++) {
                     const pv = cascadePV[c];
                     const param = cascadeParams[c];
                     param.maxDistance = splitDepths[c] ?? 200.0;
@@ -208,7 +210,7 @@ class FoliageCullingDispatcher {
                     }
                 }
             } else {
-                for (let c = 0; c < 3; c++) {
+                for (let c = 0; c < 4; c++) {
                     cascadeParams[c].hasShadow = false;
                 }
             }
