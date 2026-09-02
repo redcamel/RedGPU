@@ -181,9 +181,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         culledInst.posY = realY;
 
         if (numLODs <= 1u) {
-            let baseCmdIdx = typeInfo.indirectBaseOffset + typeInfo.lods[0].subMeshOffset;
+            let lod0 = typeInfo.lods[0];
+            let baseCmdIdx = typeInfo.indirectBaseOffset + lod0.subMeshOffset;
             let slot = atomicAdd(&mainIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
-            let numSubs = typeInfo.lods[0].subMeshCount;
+            let numSubs = lod0.subMeshCount;
             for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
                 atomicAdd(&mainIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
             }
@@ -240,72 +241,86 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     // =========================================================================
-    // 🌲 3. 섀도우 활성 캐스케이드 (0 ~ activeCascadeCount) 동적 일괄 Culling
+    // 🌲 3. 섀도우 활성 캐스케이드 동적 Culling (단일 최적 캐스케이드 타겟팅 & 조기 탈출)
     // =========================================================================
     let activeCascades = min(globalUniforms.activeCascadeCount, 4u);
     if (activeCascades > 0u) {
-        var shadowInst = instance;
-        shadowInst.posY = realY;
-        shadowInst.fadeOrType = 1.0;
+        let lastCascadeIdx = activeCascades - 1u;
+        let globalShadowMaxDist = globalUniforms.cascades[lastCascadeIdx].maxDistance + scaledRadius;
+        let globalShadowMaxDistSq = globalShadowMaxDist * globalShadowMaxDist;
 
-        for (var c: u32 = 0u; c < activeCascades; c = c + 1u) {
-            let cascadeInfo = globalUniforms.cascades[c];
-            if (cascadeInfo.hasShadow == 0u) {
-                continue;
-            }
+        if (distSq < globalShadowMaxDistSq) {
+            var shadowInst = instance;
+            shadowInst.posY = realY;
+            shadowInst.fadeOrType = 1.0;
 
-            let cascadeMaxDist = cascadeInfo.maxDistance;
-            let isOverlapCascade = (c < activeCascades - 1u); // 마지막 활성 캐스케이드는 하드 컷오프, 전 단계는 오버랩
-            let radiusMargin = select(0.0, scaledRadius, isOverlapCascade);
-            let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
-            let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
+            for (var c: u32 = 0u; c < activeCascades; c = c + 1u) {
+                let cascadeInfo = globalUniforms.cascades[c];
+                if (cascadeInfo.hasShadow == 0u) {
+                    continue;
+                }
 
-            // distSq는 항상 horizontalDistSq 이상이므로 단일 조건으로 정밀 검사
-            if (distSq >= shadowEffectiveDistSq) {
-                continue;
-            }
+                let cascadeMaxDist = cascadeInfo.maxDistance;
+                let isOverlapCascade = (c < activeCascades - 1u); // 마지막 활성 캐스케이드는 하드 컷오프, 전 단계는 오버랩
+                let radiusMargin = select(0.0, scaledRadius, isOverlapCascade);
+                let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
+                let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
 
-            let inShadowFrustum =
-                dot(spherePos, cascadeInfo.frustumPlanes[0]) >= r &&
-                dot(spherePos, cascadeInfo.frustumPlanes[1]) >= r &&
-                dot(spherePos, cascadeInfo.frustumPlanes[2]) >= r &&
-                dot(spherePos, cascadeInfo.frustumPlanes[3]) >= r &&
-                dot(spherePos, cascadeInfo.frustumPlanes[4]) >= r &&
-                dot(spherePos, cascadeInfo.frustumPlanes[5]) >= r;
+                // distSq는 항상 horizontalDistSq 이상이므로 단일 조건으로 정밀 검사
+                if (distSq >= shadowEffectiveDistSq) {
+                    continue;
+                }
 
-            if (!inShadowFrustum) {
-                continue;
-            }
+                let inShadowFrustum =
+                    dot(spherePos, cascadeInfo.frustumPlanes[0]) >= r &&
+                    dot(spherePos, cascadeInfo.frustumPlanes[1]) >= r &&
+                    dot(spherePos, cascadeInfo.frustumPlanes[2]) >= r &&
+                    dot(spherePos, cascadeInfo.frustumPlanes[3]) >= r &&
+                    dot(spherePos, cascadeInfo.frustumPlanes[4]) >= r &&
+                    dot(spherePos, cascadeInfo.frustumPlanes[5]) >= r;
 
-            // 섀도우 패스: 단일 최적 LOD 선택
-            // 🌲 원거리(Cascade 2 이상 또는 2단계 모드의 마지막 캐스케이드)는 옥타헤드럴 임포스터 강제 선택!
-            var selectedLOD: u32 = 0u;
-            if (numLODs > 1u) {
-                let isFarCascade = (c >= 2u || (activeCascades <= 2u && c == activeCascades - 1u));
-                if (isFarCascade) {
-                    selectedLOD = numLODs - 1u; // 🚀 최종 옥타헤드럴 임포스터 쿼드 선택!
-                } else {
-                    for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
-                        if (effectiveDist <= typeInfo.lods[l].lodDistance || l == numLODs - 1u) {
-                            selectedLOD = l;
-                            break;
+                if (!inShadowFrustum) {
+                    continue;
+                }
+
+                // 섀도우 패스: 단일 최적 LOD 선택
+                // 🌲 원거리(Cascade 2 이상 또는 2단계 모드의 마지막 캐스케이드)는 옥타헤드럴 임포스터 강제 선택!
+                var selectedLOD: u32 = 0u;
+                if (numLODs > 1u) {
+                    let isFarCascade = (c >= 2u || (activeCascades <= 2u && c == activeCascades - 1u));
+                    if (isFarCascade) {
+                        selectedLOD = numLODs - 1u; // 🚀 최종 옥타헤드럴 임포스터 쿼드 선택!
+                    } else {
+                        for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
+                            if (effectiveDist <= typeInfo.lods[l].lodDistance || l == numLODs - 1u) {
+                                selectedLOD = l;
+                                break;
+                            }
                         }
                     }
                 }
-            }
 
-            let lodInfo = typeInfo.lods[selectedLOD];
-            let cascadeIndirectOffset = c * globalUniforms.maxSubMeshes;
-            let baseCmdIdx = cascadeIndirectOffset + typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
-            let slot = atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
-            let numSubs = lodInfo.subMeshCount;
-            for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
-                atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
-            }
+                let lodInfo = typeInfo.lods[selectedLOD];
+                let cascadeIndirectOffset = c * globalUniforms.maxSubMeshes;
+                let baseCmdIdx = cascadeIndirectOffset + typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
+                let slot = atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
+                let numSubs = lodInfo.subMeshCount;
+                for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
+                    atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
+                }
 
-            let cascadeCulledOffset = c * globalUniforms.maxTotalInstances8;
-            let outIdx = cascadeCulledOffset + typeInfo.culledBaseOffset + (selectedLOD * typeInfo.maxInstances) + slot;
-            shadowCulledInstanceBuffer[outIdx] = shadowInst;
+                let cascadeCulledOffset = c * globalUniforms.maxTotalInstances8;
+                let outIdx = cascadeCulledOffset + typeInfo.culledBaseOffset + (selectedLOD * typeInfo.maxInstances) + slot;
+                shadowCulledInstanceBuffer[outIdx] = shadowInst;
+
+                // 🌿 최적 캐스케이드 조기 탈출 (Early Out):
+                // 현재 캐스케이드의 완전 내부(오버랩 마진 안쪽)에 안착한 인스턴스는
+                // 더 먼 캐스케이드에서 중복 평가 및 원자적 락을 유발하지 않도록 루프를 즉시 종료합니다!
+                let pureCascadeMaxDist = max(cascadeMaxDist - scaledRadius, 0.0);
+                if (distSq < pureCascadeMaxDist * pureCascadeMaxDist) {
+                    break;
+                }
+            }
         }
     }
 }
