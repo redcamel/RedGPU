@@ -118,6 +118,11 @@ class FoliageRenderer {
         this.#lastBoundInstanceOffset = -1;
 
         const view3D = view as any;
+        const currentCascade = view3D?.currentCascadeIndex ?? 0;
+        // 🌲 [UE5 표준 최적화] 식생 그림자는 근/중거리(Cascade 0, 1, 2)까지만 기록하고, 
+        // 3.5km 원경인 Cascade 3에서는 스킵하여 렌더링 부하를 대폭 절감합니다.
+        if (currentCascade > 2) return;
+
         const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup ?? (view as any)?.systemUniform_Vertex_UniformBindGroup ?? null;
 
         let validCount = 0;

@@ -28,6 +28,13 @@ RedGPU.init(
         directionalLight.azimuth = 45;
         scene.lightManager.addDirectionalLight(directionalLight);
 
+        // 그림자 설정 (16km 오픈월드 지형 및 대규모 식생에 최적화)
+        const directionalShadowManager = scene.shadowManager.directionalShadowManager;
+        directionalShadowManager.maxShadowDistance = 5000;
+        directionalShadowManager.pcssLightSize = 2.5;
+        directionalShadowManager.strength = 0.9;
+        directionalShadowManager.cascadeCount = 4;
+
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [16000, 16000];
         landscape.componentCount = [16, 16];
@@ -167,7 +174,7 @@ RedGPU.init(
                         foliageManager.addFoliageType({
                             name: `Tree_${baseName}`,
                             lods: lodConfigs,
-                            maxInstances: 250000,
+                            maxInstances: 100000,
                             minScale: [0.85, 0.85, 0.85],
                             maxScale: [1.35, 1.35, 1.35],
                             randomRotationY: true,
@@ -183,27 +190,27 @@ RedGPU.init(
         );
         //
         // // 2. Frangipani Tree (HD Realistic Tree + Octahedral Impostor) 로드
-        new RedGPU.GLTFLoader(
-            redGPUContext,
-            '../../../assets/terrain/realistic_hd_frangipani_tree_950.glb',
-            (loader) => {
-                const root = loader.resultMesh;
-                console.log('🌸 [realistic_hd_frangipani_tree_950.glb] Loaded Root:', root);
-
-                foliageManager.addFoliageType({
-                    name: 'FrangipaniTree',
-                    lods: [{mesh: root, lodDistance: 120}],
-                    maxInstances: 50000,
-                    minScale: [4.2, 4.2, 4.2],
-                    maxScale: [6.2, 6.2, 6.2],
-                    randomRotationY: true,
-                    cullingDistance: 3500,
-                    fadeStartDistance: 2800,
-                    isFoliage: true,
-                    useImpostor: true
-                });
-            }
-        );
+        // new RedGPU.GLTFLoader(
+        //     redGPUContext,
+        //     '../../../assets/terrain/realistic_hd_frangipani_tree_950.glb',
+        //     (loader) => {
+        //         const root = loader.resultMesh;
+        //         console.log('🌸 [realistic_hd_frangipani_tree_950.glb] Loaded Root:', root);
+        //
+        //         foliageManager.addFoliageType({
+        //             name: 'FrangipaniTree',
+        //             lods: [{mesh: root, lodDistance: 120}],
+        //             maxInstances: 50000,
+        //             minScale: [4.2, 4.2, 4.2],
+        //             maxScale: [6.2, 6.2, 6.2],
+        //             randomRotationY: true,
+        //             cullingDistance: 3500,
+        //             fadeStartDistance: 2800,
+        //             isFoliage: true,
+        //             useImpostor: true
+        //         });
+        //     }
+        // );
         // new RedGPU.GLTFLoader(
         //     redGPUContext,
         //     '../../../assets/terrain/realistic_hd_frangipani_tree_950.glb',
@@ -219,6 +226,14 @@ RedGPU.init(
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
         });
+
+        // 리사이즈 이벤트 처리
+        /**
+         * @param {RedGPU.RedResizeEvent} event [KO] 리사이즈 이벤트 객체 [EN] Resize event object
+         */
+        redGPUContext.onResize = (event) => {
+            console.log("Canvas resized:", event.width, event.height);
+        };
 
         renderTestPane(redGPUContext, view, skyAtmosphere, landscape, controller, directionalLight, layers, foliageManager);
     }
@@ -261,6 +276,7 @@ const renderTestPane = (redGPUContext, view, skyAtmosphere, landscape, controlle
 
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
+        directionalShadow: true,
         ibl: true,
         skybox: true,
         gui: (pane) => {

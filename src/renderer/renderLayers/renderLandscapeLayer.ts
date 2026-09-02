@@ -40,7 +40,7 @@ export function renderLandscapeShadowLayer(view: View3D, passEncoder: GPURenderP
     const count = landscapes.length;
     for (let i = 0; i < count; i++) {
         const landscape = landscapes[i];
-        if (!landscape || !landscape.castShadow) continue;
+        if (!landscape) continue;
 
         landscape.renderShadow(view, passEncoder);
     }
