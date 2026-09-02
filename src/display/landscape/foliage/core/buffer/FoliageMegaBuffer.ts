@@ -278,12 +278,13 @@ class FoliageMegaBuffer {
         }
 
         if (this.#shadowIndirectGPUBuffer) {
+            const shadowResetBytes = (this.#maxSubMeshes * 3 + this.#nextIndirectOffset) * 20;
             gpuDevice.queue.writeBuffer(
                 this.#shadowIndirectGPUBuffer,
                 0,
                 this.#shadowIndirectResetTemplate.buffer,
                 this.#shadowIndirectResetTemplate.byteOffset,
-                (this.#maxSubMeshes * 3 + this.#nextIndirectOffset) * 20
+                Math.min(shadowResetBytes, this.#shadowIndirectResetTemplate.byteLength)
             );
         }
     }
