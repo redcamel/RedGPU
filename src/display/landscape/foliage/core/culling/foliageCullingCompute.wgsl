@@ -73,27 +73,38 @@ struct DrawIndexedIndirectArgs {
 @group(0) @binding(7) var vhtTexture: texture_2d<f32>;
 @group(0) @binding(8) var vhtSampler: sampler;
 
-@compute @workgroup_size(64)
-fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
-    let idx = global_id.x;
-    if (idx >= globalUniforms.totalInstanceCount) {
-        return;
-    }
+var<workgroup> wgLocalMainSlots: array<atomic<u32>, 8>;
+var<workgroup> wgGlobalMainBases: array<u32, 8>;
 
-    let instance = rawInstanceBuffer[idx];
+@compute @workgroup_size(64)
+fn main(
+    @builtin(global_invocation_id) global_id: vec3<u32>,
+    @builtin(local_invocation_index) local_idx: u32
+) {
+    // 🌿 워크그룹 L1 공유 카운터 0 초기화 (0~7번 스레드가 8개 LOD 슬롯 초기화)
+    if (local_idx < 8u) {
+        atomicStore(&wgLocalMainSlots[local_idx], 0u);
+        wgGlobalMainBases[local_idx] = 0u;
+    }
+    workgroupBarrier(); // ✅ Uniform Control Flow (64개 스레드 동시 동기화)
+
+    let idx = global_id.x;
+    var isValid = (idx < globalUniforms.totalInstanceCount);
+
+    var instance = rawInstanceBuffer[min(idx, globalUniforms.totalInstanceCount - 1u)];
     let typeIdx = u32(instance.fadeOrType);
     if (typeIdx >= 64u) {
-        return;
+        isValid = false;
     }
 
-    let typeInfo = typeParams[typeIdx];
+    var typeInfo = typeParams[min(typeIdx, 63u)];
     if (typeInfo.activeCount == 0u || idx < typeInfo.rawBaseOffset) {
-        return;
+        isValid = false;
     }
 
     let localSlot = idx - typeInfo.rawBaseOffset;
     if (localSlot >= typeInfo.activeCount) {
-        return;
+        isValid = false;
     }
 
     let camPos = globalUniforms.cameraPosition;
@@ -113,16 +124,15 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let scaleZ = scaleXZ.y;
     let scaleY = instance.scaleY;
 
-    // 🌿 1. 지형 높이 VHT 텍스처 바이리니어 샘플링 (전체 뷰 통틀어 단 1회 고속 실행)
+    // 🌿 1. 지형 높이 VHT 텍스처 바이리니어 샘플링
     var realY = instance.posY;
-    if (globalUniforms.hasVHT != 0u && globalUniforms.invWorldSizeX > 0.0) {
+    if (isValid && globalUniforms.hasVHT != 0u && globalUniforms.invWorldSizeX > 0.0) {
         let u = instance.posX * globalUniforms.invWorldSizeX + 0.5;
         let v = instance.posZ * globalUniforms.invWorldSizeX + 0.5;
         if (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0) {
             let sampledHeightNorm = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v), 0.0).r;
             let terrainHeight = sampledHeightNorm * globalUniforms.heightScale;
 
-            // 🌿 경사도 기반 자동 안착 깊이 보정 (Slope-Adaptive Ground Sink)
             let maxXZScale = max(scaleX, scaleZ);
             let trunkRadius = max(typeInfo.boundingRadius * 0.18 * maxXZScale, 0.25);
             let deltaUV = trunkRadius * globalUniforms.invWorldSizeX;
@@ -156,9 +166,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let r = -scaledRadius;
 
     // =========================================================================
-    // 🌟 2. 메인 카메라 뷰 (Main View) Culling 및 버퍼 기록
+    // 🌟 2. 메인 카메라 뷰 (Main View) Culling
     // =========================================================================
-    let inMainFrustum =
+    let inMainFrustum = isValid &&
         (distSq < effectiveCullingDistSq) &&
         dot(spherePos, globalUniforms.mainFrustumPlanes[0]) >= r &&
         dot(spherePos, globalUniforms.mainFrustumPlanes[1]) >= r &&
@@ -166,6 +176,9 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         dot(spherePos, globalUniforms.mainFrustumPlanes[3]) >= r &&
         dot(spherePos, globalUniforms.mainFrustumPlanes[4]) >= r &&
         dot(spherePos, globalUniforms.mainFrustumPlanes[5]) >= r;
+
+    var targetLOD: u32 = 99u;
+    var targetAlpha: f32 = 1.0;
 
     if (inMainFrustum) {
         var globalFade: f32 = 1.0;
@@ -177,23 +190,10 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             }
         }
 
-        var culledInst = instance;
-        culledInst.posY = realY;
-
         if (numLODs <= 1u) {
-            let lod0 = typeInfo.lods[0];
-            let baseCmdIdx = typeInfo.indirectBaseOffset + lod0.subMeshOffset;
-            let slot = atomicAdd(&mainIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
-            let numSubs = lod0.subMeshCount;
-            for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
-                atomicAdd(&mainIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
-            }
-
-            let outIdx = typeInfo.culledBaseOffset + slot;
-            culledInst.fadeOrType = globalFade;
-            mainCulledInstanceBuffer[outIdx] = culledInst;
+            targetLOD = 0u;
+            targetAlpha = globalFade;
         } else {
-            var emitCount: u32 = 0u;
             for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
                 let lodInfo = typeInfo.lods[l];
                 var prevDist: f32 = 0.0;
@@ -219,25 +219,50 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                         alpha = clamp((exitEnd - effectiveDist) / max(exitEnd - exitStart, 0.001), 0.0, 1.0);
                     }
 
-                    let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
-                    let slot = atomicAdd(&mainIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
-                    let numSubs = lodInfo.subMeshCount;
-                    for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
-                        atomicAdd(&mainIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
-                    }
-
-                    let outIdx = typeInfo.culledBaseOffset + (l * typeInfo.maxInstances) + slot;
-                    var finalEmitInst = culledInst;
-                    finalEmitInst.fadeOrType = alpha * globalFade;
-                    mainCulledInstanceBuffer[outIdx] = finalEmitInst;
-
-                    emitCount = emitCount + 1u;
-                    if (emitCount >= 2u) {
-                        break;
-                    }
+                    targetLOD = l;
+                    targetAlpha = alpha * globalFade;
+                    break;
                 }
             }
         }
+    }
+
+    // 🌿 L1 워크그룹 로컬 슬롯 원자적 할당 (초고속 L1 공유 메모리, 0-지연시간)
+    var localAssignedSlot: u32 = 0u;
+    if (targetLOD < 8u) {
+        localAssignedSlot = atomicAdd(&wgLocalMainSlots[targetLOD], 1u);
+    }
+    workgroupBarrier(); // ✅ 워크그룹 내 모든 스레드의 L1 카운트 누적 완료 대기
+
+    // 🚀 워크그룹 대표 스레드들(0~7번)이 글로벌 VRAM에 단 1회씩 일괄 원자적 할당!
+    if (local_idx < 8u && numLODs > local_idx) {
+        let lodIdx = local_idx;
+        let wgTotal = atomicLoad(&wgLocalMainSlots[lodIdx]);
+        if (wgTotal > 0u) {
+            let lodInfo = typeInfo.lods[lodIdx];
+            let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
+            let gBase = atomicAdd(&mainIndirectDrawCommands[baseCmdIdx].instanceCount, wgTotal);
+            wgGlobalMainBases[lodIdx] = gBase;
+
+            // 서브메시 1..N에 워크그룹 합산치 일괄 반영
+            let numSubs = lodInfo.subMeshCount;
+            for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
+                atomicAdd(&mainIndirectDrawCommands[baseCmdIdx + s].instanceCount, wgTotal);
+            }
+        }
+    }
+    workgroupBarrier(); // ✅ 글로벌 베이스 슬롯 공유 완료
+
+    // 🌿 인스턴스 버퍼에 일괄 기록
+    if (targetLOD < 8u) {
+        var culledInst = instance;
+        culledInst.posY = realY;
+        culledInst.fadeOrType = targetAlpha;
+
+        let gBase = wgGlobalMainBases[targetLOD];
+        let finalSlot = gBase + localAssignedSlot;
+        let outIdx = typeInfo.culledBaseOffset + (targetLOD * typeInfo.maxInstances) + finalSlot;
+        mainCulledInstanceBuffer[outIdx] = culledInst;
     }
 
     // =========================================================================
