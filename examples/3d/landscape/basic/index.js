@@ -23,6 +23,13 @@ RedGPU.init(
         directionalLight.azimuth = 45;
         scene.lightManager.addDirectionalLight(directionalLight);
 
+        // 그림자 설정 (대규모 16km 오픈월드 지형 스케일에 최적화)
+        const directionalShadowManager = scene.shadowManager.directionalShadowManager;
+        directionalShadowManager.maxShadowDistance = 3000;
+        directionalShadowManager.pcssLightSize = 3.0;
+        directionalShadowManager.strength = 0.9;
+        directionalShadowManager.cascadeCount = 4;
+
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [16000, 16000];
 
@@ -109,6 +116,14 @@ RedGPU.init(
         renderer.start(redGPUContext, () => {
         });
 
+        // 리사이즈 이벤트 처리
+        /**
+         * @param {RedGPU.RedResizeEvent} event [KO] 리사이즈 이벤트 객체 [EN] Resize event object
+         */
+        redGPUContext.onResize = (event) => {
+            console.log("Canvas resized:", event.width, event.height);
+        };
+
         renderTestPane(redGPUContext, landscape, controller, directionalLight, layers);
     }
 );
@@ -149,6 +164,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
 
     new RedGPUExampleHelper(redGPUContext, {
         RedGPU,
+        directionalShadow: true,
         ibl: true,
         skybox: true,
         gui: (pane) => {

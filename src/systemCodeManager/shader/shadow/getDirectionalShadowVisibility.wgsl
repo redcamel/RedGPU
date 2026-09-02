@@ -145,6 +145,12 @@ fn getDirectionalShadowVisibility(
     let viewPos = systemUniforms.camera.viewMatrix * vec4<f32>(worldPosition, 1.0);
     let viewDepth = -viewPos.z;
 
+    // 최대 그림자 거리 초과 시 즉시 완전히 밝은 상태(1.0) 반환
+    let maxShadowDist = shadowInfo.cascadeSplitDepths[cascadeCount - 1u];
+    if (viewDepth >= maxShadowDist || viewDepth < 0.0) {
+        return 1.0;
+    }
+
     // 2. Cascade Index 결정
     var cascadeIndex: u32 = 0u;
     if (viewDepth > shadowInfo.cascadeSplitDepths[0] && cascadeCount > 1u) { cascadeIndex = 1u; }
@@ -174,12 +180,14 @@ fn getDirectionalShadowVisibility(
         lightSize
     );
 
-    // 4. 캐스케이드 경계 소프트 블렌딩 (다음 캐스케이드가 존재할 경우 전환 구간 10% 보간 - UE5 표준)
+    var finalVisibility = visibility;
+
+    // 4. 캐스케이드 경계 소프트 블렌딩 (다음 캐스케이드가 존재할 경우 전환 구간 15% S자 곡선 보간 - UE5 표준)
     if (cascadeIndex < cascadeCount - 1u) {
         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
         let splitNear = select(systemUniforms.camera.nearClipping, shadowInfo.cascadeSplitDepths[cascadeIndex - 1u], cascadeIndex > 0u);
         let cascadeRange = splitFar - splitNear;
-        let blendMargin = cascadeRange * 0.1;
+        let blendMargin = cascadeRange * 0.15;
         let blendStart = splitFar - blendMargin;
 
         if (viewDepth > blendStart) {
@@ -200,10 +208,17 @@ fn getDirectionalShadowVisibility(
                 lightSize
             );
 
-            let blendFactor = clamp((viewDepth - blendStart) / blendMargin, 0.0, 1.0);
-            return mix(visibility, nextVis, blendFactor);
+            let blendFactor = smoothstep(0.0, 1.0, clamp((viewDepth - blendStart) / blendMargin, 0.0, 1.0));
+            finalVisibility = mix(visibility, nextVis, blendFactor);
+        }
+    } else {
+        // 5. [UE5 표준 Max Distance Shadow Fadeout] 마지막 캐스케이드 외곽 15% 구간 부드러운 페이드아웃 (하드 컷오프 방지)
+        let fadeStart = maxShadowDist * 0.85;
+        if (viewDepth > fadeStart) {
+            let fadeFactor = smoothstep(0.0, 1.0, clamp((viewDepth - fadeStart) / (maxShadowDist - fadeStart), 0.0, 1.0));
+            finalVisibility = mix(finalVisibility, 1.0, fadeFactor);
         }
     }
 
-    return visibility;
+    return finalVisibility;
 }
