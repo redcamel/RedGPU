@@ -5,8 +5,8 @@ import RedGPUExampleHelper from "../../../exampleHelper/dist/index.js";
  * [KO] CSM (Cascaded Shadow Maps) & PCSS 센트럴 파크 종합 예제
  * [EN] CSM (Cascaded Shadow Maps) & PCSS Radial Central Park Comprehensive Example
  *
- * [KO] 360도 방사형 다층 구조(0m~150m)와 언리얼 엔진 5 스타일 캐스케이드 디버그 뷰를 통해 4단 CSM과 PCSS의 퀄리티를 완벽하게 검증합니다.
- * [EN] Comprehensively verifies 4-cascade CSM and PCSS quality with a 360-degree radial multi-tier layout (0m~150m) and UE5-style cascade color debug view.
+ * [KO] 360도 방사형 다층 구조(0m~150m)와 캐스케이드 디버그 뷰를 통해 4단 CSM과 PCSS 그림자의 동작과 품질을 검증합니다.
+ * [EN] Verifies 4-cascade CSM and PCSS shadow behavior across a 360-degree radial multi-tier layout (0m~150m) with cascade color debug view.
  */
 
 const canvas = document.createElement("canvas");
