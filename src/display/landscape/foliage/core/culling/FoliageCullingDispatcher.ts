@@ -187,16 +187,17 @@ class FoliageCullingDispatcher {
                 );
             }
 
-            // 🌲 섀도우 CSM 캐스케이드 0, 1, 2 파라미터 구성
+            // 🌲 섀도우 CSM 활성 캐스케이드(1~4단계) 파라미터 구성
             const shadowManager = stateData?.view?.scene?.shadowManager || (landscape as any)?.scene?.shadowManager;
             const dirShadow = shadowManager?.directionalShadowManager;
             const cascadeParams = FoliageCullingDispatcher.#cachedCascadeParams;
+            const activeCascadeCount = dirShadow ? Math.min(dirShadow.cascadeCount ?? 4, 4) : 0;
 
-            if (dirShadow) {
+            if (dirShadow && activeCascadeCount > 0) {
                 const cascadePV = dirShadow.cascadeProjectionViewMatrices;
                 const splitDepths = dirShadow.cascadeSplitDepths;
                 for (let c = 0; c < 4; c++) {
-                    const pv = cascadePV[c];
+                    const pv = (c < activeCascadeCount) ? cascadePV[c] : null;
                     const param = cascadeParams[c];
                     param.maxDistance = splitDepths[c] ?? 200.0;
                     param.hasShadow = !!pv;
@@ -220,7 +221,8 @@ class FoliageCullingDispatcher {
                 worldSizeX, heightScale, hasVHT,
                 fovFactor,
                 frustumPlanes,
-                cascadeParams
+                cascadeParams,
+                activeCascadeCount
             );
         } else {
             for (let i = 0; i < typeCount; i++) {

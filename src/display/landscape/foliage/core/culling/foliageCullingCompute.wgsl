@@ -38,7 +38,7 @@ struct UnifiedGlobalCullingUniforms {
     fovFactor: f32,
     maxSubMeshes: u32,
     maxTotalInstances8: u32,
-    pad0: u32,
+    activeCascadeCount: u32,
     pad1: u32,
     mainFrustumPlanes: array<vec4<f32>, 6>,
     cascades: array<CascadeCullingInfo, 4>,
@@ -240,16 +240,17 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     // =========================================================================
-    // 🌲 3. 섀도우 4개 캐스케이드 (Cascade 0, 1, 2, 3) 일괄 Culling 및 버퍼 기록
+    // 🌲 3. 섀도우 활성 캐스케이드 (0 ~ activeCascadeCount) 동적 일괄 Culling
     // =========================================================================
-    for (var c: u32 = 0u; c < 4u; c = c + 1u) {
+    let activeCascades = min(globalUniforms.activeCascadeCount, 4u);
+    for (var c: u32 = 0u; c < activeCascades; c = c + 1u) {
         let cascadeInfo = globalUniforms.cascades[c];
         if (cascadeInfo.hasShadow == 0u) {
             continue;
         }
 
         let cascadeMaxDist = cascadeInfo.maxDistance;
-        let isOverlapCascade = (c < 3u); // Cascade 0, 1, 2는 전환 오버랩 적용, Cascade 3은 최종 하드 컷오프
+        let isOverlapCascade = (c < activeCascades - 1u); // 마지막 활성 캐스케이드는 하드 컷오프, 전 단계는 오버랩
         let radiusMargin = select(0.0, scaledRadius, isOverlapCascade);
         let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
         let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
@@ -271,10 +272,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
         }
 
         // 섀도우 패스: 단일 최적 LOD 선택
-        // 🌲 Cascade 2, 3(원거리)은 고폴리곤 메쉬 대신 최종 LOD(2-트라이앵글 옥타헤드럴 임포스터)를 강제 선택!
+        // 🌲 원거리(Cascade 2 이상 또는 2단계 모드의 마지막 캐스케이드)는 옥타헤드럴 임포스터 강제 선택!
         var selectedLOD: u32 = 0u;
         if (numLODs > 1u) {
-            if (c >= 2u) {
+            let isFarCascade = (c >= 2u || (activeCascades <= 2u && c == activeCascades - 1u));
+            if (isFarCascade) {
                 selectedLOD = numLODs - 1u; // 🚀 최종 옥타헤드럴 임포스터 쿼드 선택!
             } else {
                 for (var l: u32 = 0u; l < numLODs; l = l + 1u) {

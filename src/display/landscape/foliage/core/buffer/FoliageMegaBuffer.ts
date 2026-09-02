@@ -296,7 +296,8 @@ class FoliageMegaBuffer {
         worldSizeX: number, heightScale: number, hasVHT: boolean,
         fovFactor: number,
         mainFrustumPlanes: number[][] | null,
-        cascades: readonly CascadeCullingParam[]
+        cascades: readonly CascadeCullingParam[],
+        activeCascadeCount: number = 4
     ): void {
         if (!this.#unifiedGlobalUniformGPUBuffer || !this.#typeParamsGPUBuffer) return;
 
@@ -315,7 +316,7 @@ class FoliageMegaBuffer {
 
         gu32[8] = this.#maxSubMeshes;
         gu32[9] = this.#maxTotalInstances * 8;
-        gu32[10] = 0;
+        gu32[10] = activeCascadeCount;
         gu32[11] = 0;
 
         // 메인 뷰 절두체 (12 ~ 35)
