@@ -19,6 +19,12 @@ class FoliageCullingDispatcher {
         [new Array(4), new Array(4), new Array(4), new Array(4), new Array(4), new Array(4)]
     ];
 
+    static readonly #cachedCascadeParams: CascadeCullingParam[] = [
+        {maxDistance: 17.6, hasShadow: false, frustumPlanes: null},
+        {maxDistance: 60.0, hasShadow: false, frustumPlanes: null},
+        {maxDistance: 200.0, hasShadow: false, frustumPlanes: null}
+    ];
+
     #redGPUContext: RedGPUContext;
     #megaBuffer: FoliageMegaBuffer | null = null;
     #cullingBindGroupLayout: GPUBindGroupLayout | null = null;
@@ -178,39 +184,42 @@ class FoliageCullingDispatcher {
                     fovFactor
                 );
             }
-            this.#megaBuffer.updateGlobalUniformsAndParams(
-                camX, camY, camZ,
-                worldSizeX, heightScale, hasVHT,
-                frustumPlanes,
-                fovFactor
-            );
 
-            // 🌲 섀도우 CSM 캐스케이드 0, 1, 2 컬링 유니폼 갱신
+            // 🌲 섀도우 CSM 캐스케이드 0, 1, 2 파라미터 구성
             const shadowManager = stateData?.view?.scene?.shadowManager || (landscape as any)?.scene?.shadowManager;
             const dirShadow = shadowManager?.directionalShadowManager;
+            const cascadeParams = FoliageCullingDispatcher.#cachedCascadeParams;
+
             if (dirShadow) {
                 const cascadePV = dirShadow.cascadeProjectionViewMatrices;
                 const splitDepths = dirShadow.cascadeSplitDepths;
                 for (let c = 0; c < 3; c++) {
                     const pv = cascadePV[c];
-                    const maxDist = splitDepths[c] ?? 200.0;
-                    let sPlanes: number[][] | null = null;
+                    const param = cascadeParams[c];
+                    param.maxDistance = splitDepths[c] ?? 200.0;
+                    param.hasShadow = !!pv;
                     if (pv) {
-                        sPlanes = FoliageCullingDispatcher.#computeFrustumPlanesFromMatrix(
+                        param.frustumPlanes = FoliageCullingDispatcher.#computeFrustumPlanesFromMatrix(
                             pv,
                             FoliageCullingDispatcher.#cachedShadowFrustumPlanes[c]
                         );
+                    } else {
+                        param.frustumPlanes = null;
                     }
-                    this.#megaBuffer.resetMultiIndirectCommandsForShadow(c);
-                    this.#megaBuffer.updateShadowGlobalUniforms(
-                        c,
-                        camX, camY, camZ,
-                        worldSizeX, heightScale, hasVHT,
-                        sPlanes,
-                        maxDist
-                    );
+                }
+            } else {
+                for (let c = 0; c < 3; c++) {
+                    cascadeParams[c].hasShadow = false;
                 }
             }
+
+            this.#megaBuffer.updateUnifiedGlobalUniforms(
+                camX, camY, camZ,
+                worldSizeX, heightScale, hasVHT,
+                fovFactor,
+                frustumPlanes,
+                cascadeParams
+            );
         } else {
             for (let i = 0; i < typeCount; i++) {
                 const foliageType = typeList[i];
@@ -288,27 +297,16 @@ class FoliageCullingDispatcher {
         const vhtView = this.#cachedVHTView || undefined;
         const vhtSampler = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
 
-        // 🚀 [글로벌 메가 버퍼 모드] 메인 뷰 + 섀도우 캐스케이드 0, 1, 2 일괄 디스패치!
+        // 🚀 [All-In-One Unified Dispatch] 메인 뷰 + 섀도우 3개 캐스케이드를 단 1회 디스패치로 일괄 완료!
         if (this.#megaBuffer) {
             const totalAllocatedRange = this.#megaBuffer.totalAllocatedRange;
             if (totalAllocatedRange <= 0) return;
 
-            const workgroupCount = Math.ceil(totalAllocatedRange / 64);
-
-            // 1. 메인 뷰 컬링 디스패치
-            const globalBindGroup = this.#megaBuffer.getOrCreateGlobalCullingBindGroup(bindGroupLayout, vhtView, vhtSampler);
-            if (globalBindGroup) {
-                computePass.setBindGroup(0, globalBindGroup);
+            const unifiedBindGroup = this.#megaBuffer.getOrCreateUnifiedCullingBindGroup(bindGroupLayout, vhtView, vhtSampler);
+            if (unifiedBindGroup) {
+                const workgroupCount = Math.ceil(totalAllocatedRange / 64);
+                computePass.setBindGroup(0, unifiedBindGroup);
                 computePass.dispatchWorkgroups(workgroupCount);
-            }
-
-            // 2. 섀도우 캐스케이드 0, 1, 2 컬링 디스패치
-            for (let c = 0; c < 3; c++) {
-                const shadowBindGroup = this.#megaBuffer.getOrCreateShadowGlobalCullingBindGroup(c, bindGroupLayout, vhtView, vhtSampler);
-                if (shadowBindGroup) {
-                    computePass.setBindGroup(0, shadowBindGroup);
-                    computePass.dispatchWorkgroups(workgroupCount);
-                }
             }
             return;
         }

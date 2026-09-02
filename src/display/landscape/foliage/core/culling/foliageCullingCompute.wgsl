@@ -21,16 +21,27 @@ struct FoliageTypeParam {
     lods: array<FoliageLODUniformInfo, 8>,
 };
 
-struct GlobalCullingUniforms {
+struct CascadeCullingInfo {
+    maxDistance: f32,
+    hasShadow: u32,
+    pad0: u32,
+    pad1: u32,
+    frustumPlanes: array<vec4<f32>, 6>,
+};
+
+struct UnifiedGlobalCullingUniforms {
     cameraPosition: vec3<f32>,
     totalInstanceCount: u32,
     invWorldSizeX: f32,
     heightScale: f32,
     hasVHT: u32,
     fovFactor: f32,
-    targetCascadeIndex: u32, // 0xFFFFFFFFu = Main View, 0u/1u/2u = Shadow Cascade
-    cascadeMaxDistance: f32, // Max distance for shadow cascade cutoff
-    frustumPlanes: array<vec4<f32>, 6>,
+    maxSubMeshes: u32,
+    maxTotalInstances8: u32,
+    pad0: u32,
+    pad1: u32,
+    mainFrustumPlanes: array<vec4<f32>, 6>,
+    cascades: array<CascadeCullingInfo, 3>,
 };
 
 struct FoliageInstanceData {
@@ -57,12 +68,14 @@ struct DrawIndexedIndirectArgs {
 };
 
 @group(0) @binding(0) var<storage, read> rawInstanceBuffer: array<FoliageInstanceData>;
-@group(0) @binding(1) var<uniform> globalUniforms: GlobalCullingUniforms;
+@group(0) @binding(1) var<uniform> globalUniforms: UnifiedGlobalCullingUniforms;
 @group(0) @binding(2) var<storage, read> typeParams: array<FoliageTypeParam>;
-@group(0) @binding(3) var<storage, read_write> culledInstanceBuffer: array<FoliageInstanceData>;
-@group(0) @binding(4) var<storage, read_write> indirectDrawCommands: array<DrawIndexedIndirectArgs>;
-@group(0) @binding(5) var vhtTexture: texture_2d<f32>;
-@group(0) @binding(6) var vhtSampler: sampler;
+@group(0) @binding(3) var<storage, read_write> mainCulledInstanceBuffer: array<FoliageInstanceData>;
+@group(0) @binding(4) var<storage, read_write> mainIndirectDrawCommands: array<DrawIndexedIndirectArgs>;
+@group(0) @binding(5) var<storage, read_write> shadowCulledInstanceBuffer: array<FoliageInstanceData>;
+@group(0) @binding(6) var<storage, read_write> shadowIndirectDrawCommands: array<DrawIndexedIndirectArgs>;
+@group(0) @binding(7) var vhtTexture: texture_2d<f32>;
+@group(0) @binding(8) var vhtSampler: sampler;
 
 @compute @workgroup_size(64)
 fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
@@ -92,20 +105,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let dz = instance.posZ - camPos.z;
     let horizontalDistSq = dx * dx + dz * dz;
 
-    let maxScale = max(max(instance.scaleX, instance.scaleY), instance.scaleZ);
-    let scaledRadius = typeInfo.boundingRadius * maxScale;
-
-    let isShadow = (globalUniforms.targetCascadeIndex < 4u);
-    let cascadeMaxDist = globalUniforms.cascadeMaxDistance;
-    let isOverlapCascade = (globalUniforms.targetCascadeIndex < 2u);
-    let radiusMargin = select(0.0, scaledRadius, isOverlapCascade);
-    let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
-    let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
-
-    if (isShadow && horizontalDistSq >= shadowEffectiveDistSq) {
-        return;
-    }
-
     let cullingDist = typeInfo.cullingDistance;
     let cullingDistSq = cullingDist * cullingDist;
 
@@ -113,10 +112,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let hasInfiniteImpostor = (numLODs > 0u && typeInfo.lods[numLODs - 1u].lodDistance >= 100000.0);
     let effectiveCullingDistSq = select(cullingDistSq, 1000000000000.0, hasInfiniteImpostor);
 
-    if (!isShadow && horizontalDistSq >= effectiveCullingDistSq) {
-        return;
-    }
-
+    // 🌿 1. 지형 높이 VHT 텍스처 샘플링 (전체 패스 통틀어 단 1회만 고속 실행!)
     var realY = instance.posY;
     if (globalUniforms.hasVHT != 0u && globalUniforms.invWorldSizeX > 0.0) {
         let u = instance.posX * globalUniforms.invWorldSizeX + 0.5;
@@ -126,7 +122,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let terrainHeight = sampledHeightNorm * globalUniforms.heightScale;
 
             // 🌿 경사도 기반 자동 안착 깊이 보정 (Slope-Adaptive Ground Sink)
-            // 🌿 지형의 밑동 반경 구간 내 X, Z 높이차(경사도)를 계산하여 경사면에서도 밑동이 절대 허공에 뜨지 않도록 자동 보정
             let maxXZScale = max(instance.scaleX, instance.scaleZ);
             let trunkRadius = max(typeInfo.boundingRadius * 0.18 * maxXZScale, 0.25);
             let deltaUV = trunkRadius * globalUniforms.invWorldSizeX;
@@ -151,48 +146,131 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     let dy = realY - camPos.y;
     let distSq = horizontalDistSq + dy * dy;
-
-    if (isShadow && distSq >= shadowEffectiveDistSq) {
-        return;
-    }
-
-    if (!isShadow && distSq >= effectiveCullingDistSq) {
-        return;
-    }
-
-    let spherePos = vec4<f32>(instance.posX, realY, instance.posZ, 1.0);
-    let r = -scaledRadius;
-
-    let inFrustum =
-        dot(spherePos, globalUniforms.frustumPlanes[0]) >= r &&
-        dot(spherePos, globalUniforms.frustumPlanes[1]) >= r &&
-        dot(spherePos, globalUniforms.frustumPlanes[2]) >= r &&
-        dot(spherePos, globalUniforms.frustumPlanes[3]) >= r &&
-        dot(spherePos, globalUniforms.frustumPlanes[4]) >= r &&
-        dot(spherePos, globalUniforms.frustumPlanes[5]) >= r;
-
-    if (!inFrustum) {
-        return;
-    }
-
     let dist = sqrt(distSq);
     let effectiveDist = dist * max(globalUniforms.fovFactor, 0.0001);
 
-    var globalFade: f32 = 1.0;
-    if (!hasInfiniteImpostor && !isShadow) {
-        let fadeStartDist = typeInfo.fadeStartDistance;
-        if (dist > fadeStartDist) {
-            let fadeRange = max(cullingDist - fadeStartDist, 1.0);
-            globalFade = clamp(1.0 - (dist - fadeStartDist) / fadeRange, 0.0, 1.0);
+    let maxScale = max(max(instance.scaleX, instance.scaleY), instance.scaleZ);
+    let scaledRadius = typeInfo.boundingRadius * maxScale;
+    let spherePos = vec4<f32>(instance.posX, realY, instance.posZ, 1.0);
+    let r = -scaledRadius;
+
+    // =========================================================================
+    // 🌟 2. 메인 카메라 뷰 (Main View) Culling 및 버퍼 기록
+    // =========================================================================
+    let inMainFrustum =
+        (distSq < effectiveCullingDistSq) &&
+        dot(spherePos, globalUniforms.mainFrustumPlanes[0]) >= r &&
+        dot(spherePos, globalUniforms.mainFrustumPlanes[1]) >= r &&
+        dot(spherePos, globalUniforms.mainFrustumPlanes[2]) >= r &&
+        dot(spherePos, globalUniforms.mainFrustumPlanes[3]) >= r &&
+        dot(spherePos, globalUniforms.mainFrustumPlanes[4]) >= r &&
+        dot(spherePos, globalUniforms.mainFrustumPlanes[5]) >= r;
+
+    if (inMainFrustum) {
+        var globalFade: f32 = 1.0;
+        if (!hasInfiniteImpostor) {
+            let fadeStartDist = typeInfo.fadeStartDistance;
+            if (dist > fadeStartDist) {
+                let fadeRange = max(cullingDist - fadeStartDist, 1.0);
+                globalFade = clamp(1.0 - (dist - fadeStartDist) / fadeRange, 0.0, 1.0);
+            }
+        }
+
+        var culledInst = instance;
+        culledInst.posY = realY;
+        culledInst.fade = globalFade;
+
+        if (numLODs <= 1u) {
+            let baseCmdIdx = typeInfo.indirectBaseOffset + typeInfo.lods[0].subMeshOffset;
+            let slot = atomicAdd(&mainIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
+            let numSubs = typeInfo.lods[0].subMeshCount;
+            for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
+                atomicAdd(&mainIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
+            }
+
+            let outIdx = typeInfo.culledBaseOffset + slot;
+            culledInst.typeIdOrSubId = 1.0;
+            mainCulledInstanceBuffer[outIdx] = culledInst;
+        } else {
+            var emitCount: u32 = 0u;
+            for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
+                let lodInfo = typeInfo.lods[l];
+                var prevDist: f32 = 0.0;
+                if (l > 0u) {
+                    prevDist = typeInfo.lods[l - 1u].lodDistance;
+                }
+                let nextDist = lodInfo.lodDistance;
+                let span = max(nextDist - prevDist, 5.0);
+                let fadeRange = clamp(span * 0.10, 5.0, 15.0);
+                let halfRange = fadeRange * 0.5;
+
+                let enterStart = max(prevDist - halfRange, 0.0);
+                let enterEnd = prevDist + halfRange;
+                let exitStart = nextDist - halfRange;
+                let exitEnd = nextDist + halfRange;
+
+                let isLastLOD = (l == numLODs - 1u);
+                if (effectiveDist >= enterStart && (isLastLOD || effectiveDist <= exitEnd)) {
+                    var alpha: f32 = 1.0;
+                    if (l > 0u && effectiveDist < enterEnd) {
+                        alpha = clamp((effectiveDist - enterStart) / max(enterEnd - enterStart, 0.001), 0.0, 1.0);
+                    } else if (!isLastLOD && effectiveDist > exitStart) {
+                        alpha = clamp((exitEnd - effectiveDist) / max(exitEnd - exitStart, 0.001), 0.0, 1.0);
+                    }
+
+                    let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
+                    let slot = atomicAdd(&mainIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
+                    let numSubs = lodInfo.subMeshCount;
+                    for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
+                        atomicAdd(&mainIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
+                    }
+
+                    let outIdx = typeInfo.culledBaseOffset + (l * typeInfo.maxInstances) + slot;
+                    var finalEmitInst = culledInst;
+                    finalEmitInst.typeIdOrSubId = alpha;
+                    mainCulledInstanceBuffer[outIdx] = finalEmitInst;
+
+                    emitCount = emitCount + 1u;
+                    if (emitCount >= 2u) {
+                        break;
+                    }
+                }
+            }
         }
     }
 
-    var culledInst = instance;
-    culledInst.posY = realY;
-    culledInst.fade = globalFade;
+    // =========================================================================
+    // 🌲 3. 섀도우 캐스케이드 (Cascade 0, 1, 2) 일괄 Culling 및 버퍼 기록
+    // =========================================================================
+    for (var c: u32 = 0u; c < 3u; c = c + 1u) {
+        let cascadeInfo = globalUniforms.cascades[c];
+        if (cascadeInfo.hasShadow == 0u) {
+            continue;
+        }
 
-    // 🌲 [섀도우 패스 전용 고속 단일 LOD 발행] (크로스페이드 중복 발행 없이 단 1회 발행)
-    if (isShadow) {
+        let cascadeMaxDist = cascadeInfo.maxDistance;
+        let isOverlapCascade = (c < 2u);
+        let radiusMargin = select(0.0, scaledRadius, isOverlapCascade);
+        let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
+        let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
+
+        if (horizontalDistSq >= shadowEffectiveDistSq || distSq >= shadowEffectiveDistSq) {
+            continue;
+        }
+
+        let inShadowFrustum =
+            dot(spherePos, cascadeInfo.frustumPlanes[0]) >= r &&
+            dot(spherePos, cascadeInfo.frustumPlanes[1]) >= r &&
+            dot(spherePos, cascadeInfo.frustumPlanes[2]) >= r &&
+            dot(spherePos, cascadeInfo.frustumPlanes[3]) >= r &&
+            dot(spherePos, cascadeInfo.frustumPlanes[4]) >= r &&
+            dot(spherePos, cascadeInfo.frustumPlanes[5]) >= r;
+
+        if (!inShadowFrustum) {
+            continue;
+        }
+
+        // 섀도우 패스: 단일 최적 LOD 선택
         var selectedLOD: u32 = 0u;
         if (numLODs > 1u) {
             for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
@@ -202,75 +280,22 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
                 }
             }
         }
+
         let lodInfo = typeInfo.lods[selectedLOD];
-        let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
-        let slot = atomicAdd(&indirectDrawCommands[baseCmdIdx].instanceCount, 1u);
+        let cascadeIndirectOffset = c * globalUniforms.maxSubMeshes;
+        let baseCmdIdx = cascadeIndirectOffset + typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
+        let slot = atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
         let numSubs = lodInfo.subMeshCount;
         for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
-            atomicAdd(&indirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
+            atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
         }
 
-        let outIdx = typeInfo.culledBaseOffset + (selectedLOD * typeInfo.maxInstances) + slot;
-        culledInst.typeIdOrSubId = 1.0;
-        culledInstanceBuffer[outIdx] = culledInst;
-        return;
-    }
-
-    if (numLODs <= 1u) {
-        let baseCmdIdx = typeInfo.indirectBaseOffset + typeInfo.lods[0].subMeshOffset;
-        let slot = atomicAdd(&indirectDrawCommands[baseCmdIdx].instanceCount, 1u);
-        let numSubs = typeInfo.lods[0].subMeshCount;
-        for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
-            atomicAdd(&indirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
-        }
-
-        let outIdx = typeInfo.culledBaseOffset + slot;
-        culledInst.typeIdOrSubId = 1.0;
-        culledInstanceBuffer[outIdx] = culledInst;
-    } else {
-        var emitCount: u32 = 0u;
-        for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
-            let lodInfo = typeInfo.lods[l];
-            var prevDist: f32 = 0.0;
-            if (l > 0u) {
-                prevDist = typeInfo.lods[l - 1u].lodDistance;
-            }
-            let nextDist = lodInfo.lodDistance;
-            let span = max(nextDist - prevDist, 5.0);
-            let fadeRange = clamp(span * 0.10, 5.0, 15.0);
-            let halfRange = fadeRange * 0.5;
-
-            let enterStart = max(prevDist - halfRange, 0.0);
-            let enterEnd = prevDist + halfRange;
-            let exitStart = nextDist - halfRange;
-            let exitEnd = nextDist + halfRange;
-
-            let isLastLOD = (l == numLODs - 1u);
-            if (effectiveDist >= enterStart && (isLastLOD || effectiveDist <= exitEnd)) {
-                var alpha: f32 = 1.0;
-                if (l > 0u && effectiveDist < enterEnd) {
-                    alpha = clamp((effectiveDist - enterStart) / max(enterEnd - enterStart, 0.001), 0.0, 1.0);
-                } else if (!isLastLOD && effectiveDist > exitStart) {
-                    alpha = clamp((exitEnd - effectiveDist) / max(exitEnd - exitStart, 0.001), 0.0, 1.0);
-                }
-
-                let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
-                let slot = atomicAdd(&indirectDrawCommands[baseCmdIdx].instanceCount, 1u);
-                let numSubs = lodInfo.subMeshCount;
-                for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
-                    atomicAdd(&indirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
-                }
-
-                let outIdx = typeInfo.culledBaseOffset + (l * typeInfo.maxInstances) + slot;
-                var finalEmitInst = culledInst;
-                finalEmitInst.typeIdOrSubId = alpha;
-                culledInstanceBuffer[outIdx] = finalEmitInst;
-
-                emitCount = emitCount + 1u;
-                if (emitCount >= 2u) {
-                    break;
-                }
-            }
-        }
+        let cascadeCulledOffset = c * globalUniforms.maxTotalInstances8;
+        let outIdx = cascadeCulledOffset + typeInfo.culledBaseOffset + (selectedLOD * typeInfo.maxInstances) + slot;
+        var shadowInst = instance;
+        shadowInst.posY = realY;
+        shadowInst.fade = 1.0;
+        shadowInst.typeIdOrSubId = 1.0;
+        shadowCulledInstanceBuffer[outIdx] = shadowInst;
     }
 }

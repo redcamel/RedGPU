@@ -142,11 +142,12 @@ class FoliageSubMesh {
     /**
      * 인덱스 버퍼 유무에 따라 간접 드로우콜을 디스패치합니다.
      */
-    draw(passEncoder: GPURenderPassEncoder, indirectGPUBuffer: GPUBuffer): void {
+    draw(passEncoder: GPURenderPassEncoder, indirectGPUBuffer: GPUBuffer, offsetBytes?: number): void {
+        const offset = offsetBytes !== undefined ? offsetBytes : this.indirectOffsetBytes;
         if (this.isIndexed && this.geometry.indexBuffer?.gpuBuffer) {
-            passEncoder.drawIndexedIndirect(indirectGPUBuffer, this.indirectOffsetBytes);
+            passEncoder.drawIndexedIndirect(indirectGPUBuffer, offset);
         } else {
-            passEncoder.drawIndirect(indirectGPUBuffer, this.indirectOffsetBytes);
+            passEncoder.drawIndirect(indirectGPUBuffer, offset);
         }
     }
 

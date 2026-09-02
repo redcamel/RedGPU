@@ -212,12 +212,20 @@ class FoliageType {
         return this.#megaBuffer ? this.#megaBuffer.indirectGPUBuffer : this.#instanceBuffer?.indirectGPUBuffer || null;
     }
 
+    get shadowCulledGPUBuffer(): GPUBuffer | null {
+        return this.#megaBuffer ? this.#megaBuffer.shadowCulledGPUBuffer : this.#instanceBuffer?.culledGPUBuffer || null;
+    }
+
+    get shadowIndirectGPUBuffer(): GPUBuffer | null {
+        return this.#megaBuffer ? this.#megaBuffer.shadowIndirectGPUBuffer : this.#instanceBuffer?.indirectGPUBuffer || null;
+    }
+
     getShadowCulledGPUBuffer(cascadeIndex: number): GPUBuffer | null {
-        return this.#megaBuffer ? this.#megaBuffer.getShadowCulledGPUBuffer(cascadeIndex) : this.#instanceBuffer?.culledGPUBuffer || null;
+        return this.#megaBuffer ? this.#megaBuffer.shadowCulledGPUBuffer : this.#instanceBuffer?.culledGPUBuffer || null;
     }
 
     getShadowIndirectGPUBuffer(cascadeIndex: number): GPUBuffer | null {
-        return this.#megaBuffer ? this.#megaBuffer.getShadowIndirectGPUBuffer(cascadeIndex) : this.#instanceBuffer?.indirectGPUBuffer || null;
+        return this.#megaBuffer ? this.#megaBuffer.shadowIndirectGPUBuffer : this.#instanceBuffer?.indirectGPUBuffer || null;
     }
 
     getCullingBindGroup(layout: GPUBindGroupLayout, vhtView?: GPUTextureView, vhtSampler?: GPUSampler): GPUBindGroup | null {

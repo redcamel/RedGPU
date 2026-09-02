@@ -13,6 +13,12 @@ export interface FoliageTypeAllocation {
     activeCount: number;
 }
 
+export interface CascadeCullingParam {
+    maxDistance: number;
+    hasShadow: boolean;
+    frustumPlanes: number[][] | null;
+}
+
 class FoliageMegaBuffer {
     static readonly #STRIDE_FLOATS: number = 12;
     static readonly #STRIDE_BYTES: number = 12 * 4;
@@ -27,31 +33,21 @@ class FoliageMegaBuffer {
     #culledGPUBuffer: GPUBuffer | null = null;
     #indirectGPUBuffer: GPUBuffer | null = null;
     #typeParamsGPUBuffer: GPUBuffer | null = null;
-    #globalUniformGPUBuffer: GPUBuffer | null = null;
 
-    #shadowCulledGPUBuffers: (GPUBuffer | null)[] = [null, null, null];
-    #shadowIndirectGPUBuffers: (GPUBuffer | null)[] = [null, null, null];
-    #shadowGlobalUniformGPUBuffers: (GPUBuffer | null)[] = [null, null, null];
-    #shadowGlobalCullingBindGroups: (GPUBindGroup | null)[] = [null, null, null];
-    #cpuShadowGlobalUniformData: Float32Array[] = [
-        new Float32Array(64),
-        new Float32Array(64),
-        new Float32Array(64)
-    ];
-    #cpuShadowGlobalUniformUint32: Uint32Array[] = [
-        new Uint32Array(this.#cpuShadowGlobalUniformData[0].buffer),
-        new Uint32Array(this.#cpuShadowGlobalUniformData[1].buffer),
-        new Uint32Array(this.#cpuShadowGlobalUniformData[2].buffer)
-    ];
+    // 🌲 3개 캐스케이드(Cascade 0, 1, 2) 통합 메가 섀도우 버퍼
+    #shadowCulledGPUBuffer: GPUBuffer | null = null;
+    #shadowIndirectGPUBuffer: GPUBuffer | null = null;
+    #unifiedGlobalUniformGPUBuffer: GPUBuffer | null = null;
 
     #cpuRawDataBuffer: Float32Array;
     #cpuTypeParamsData: Float32Array = new Float32Array(FoliageMegaBuffer.#MAX_TYPES * FoliageMegaBuffer.#TYPE_PARAM_FLOATS);
     #cpuTypeParamsUint32: Uint32Array = new Uint32Array(this.#cpuTypeParamsData.buffer);
 
-    #cpuGlobalUniformData: Float32Array = new Float32Array(64);
-    #cpuGlobalUniformUint32: Uint32Array = new Uint32Array(this.#cpuGlobalUniformData.buffer);
+    #cpuUnifiedGlobalUniformData: Float32Array = new Float32Array(128);
+    #cpuUnifiedGlobalUniformUint32: Uint32Array = new Uint32Array(this.#cpuUnifiedGlobalUniformData.buffer);
 
     #indirectResetTemplate: Uint32Array;
+    #shadowIndirectResetTemplate: Uint32Array;
 
     #allocations: Map<string, FoliageTypeAllocation> = new Map();
     #allocatedTypes: FoliageTypeAllocation[] = [];
@@ -59,7 +55,7 @@ class FoliageMegaBuffer {
     #nextCulledOffset: number = 0;
     #nextIndirectOffset: number = 0;
 
-    #globalCullingBindGroup: GPUBindGroup | null = null;
+    #unifiedCullingBindGroup: GPUBindGroup | null = null;
     #cachedVHTView: GPUTextureView | null = null;
     #cachedVHTSampler: GPUSampler | null = null;
 
@@ -69,6 +65,7 @@ class FoliageMegaBuffer {
         this.#maxSubMeshes = maxSubMeshes;
         this.#cpuRawDataBuffer = new Float32Array(this.#maxTotalInstances * FoliageMegaBuffer.#STRIDE_FLOATS);
         this.#indirectResetTemplate = new Uint32Array(this.#maxSubMeshes * 5);
+        this.#shadowIndirectResetTemplate = new Uint32Array(this.#maxSubMeshes * 5 * 3);
 
         this.#initBuffers();
     }
@@ -85,16 +82,20 @@ class FoliageMegaBuffer {
         return this.#indirectGPUBuffer;
     }
 
-    getShadowCulledGPUBuffer(cascadeIndex: number): GPUBuffer | null {
-        return this.#shadowCulledGPUBuffers[cascadeIndex] || this.#culledGPUBuffer;
+    get shadowCulledGPUBuffer(): GPUBuffer | null {
+        return this.#shadowCulledGPUBuffer;
     }
 
-    getShadowIndirectGPUBuffer(cascadeIndex: number): GPUBuffer | null {
-        return this.#shadowIndirectGPUBuffers[cascadeIndex] || this.#indirectGPUBuffer;
+    get shadowIndirectGPUBuffer(): GPUBuffer | null {
+        return this.#shadowIndirectGPUBuffer;
     }
 
     get maxTotalInstances(): number {
         return this.#maxTotalInstances;
+    }
+
+    get maxSubMeshes(): number {
+        return this.#maxSubMeshes;
     }
 
     get totalAllocatedRange(): number {
@@ -164,7 +165,7 @@ class FoliageMegaBuffer {
         }
 
         this.registerSubMeshesToTemplate(subMeshes, indirectBaseOffset);
-        this.#globalCullingBindGroup = null; // Invalidate bindgroup
+        this.#unifiedCullingBindGroup = null; // Invalidate bindgroup
 
         return allocation;
     }
@@ -173,9 +174,6 @@ class FoliageMegaBuffer {
         return this.#allocations.get(name);
     }
 
-    /**
-     * 특정 품종의 인스턴스 데이터를 메가 버퍼 CPU 메모리에 기록하고 GPU로 전송합니다.
-     */
     writeInstancesData(allocation: FoliageTypeAllocation, data: Float32Array, count: number): void {
         allocation.activeCount = count;
         if (count <= 0) return;
@@ -206,9 +204,6 @@ class FoliageMegaBuffer {
         }
     }
 
-    /**
-     * 메가 버퍼 내 특정 품종의 단일 인스턴스 데이터를 수정합니다.
-     */
     setInstanceData(
         allocation: FoliageTypeAllocation,
         index: number,
@@ -266,52 +261,67 @@ class FoliageMegaBuffer {
     }
 
     /**
-     * 간접 드로우 인스턴스 카운트를 템플릿 기반으로 1줄 고속 리셋합니다.
+     * 메인 뷰 및 섀도우 간접 드로우 인스턴스 카운트를 템플릿 기반으로 1줄 고속 리셋합니다.
      */
     resetMultiIndirectCommands(): void {
-        if (!this.#indirectGPUBuffer || this.#nextIndirectOffset === 0) return;
+        if (this.#nextIndirectOffset === 0) return;
         const gpuDevice = this.#redGPUContext.gpuDevice;
-        gpuDevice.queue.writeBuffer(
-            this.#indirectGPUBuffer,
-            0,
-            this.#indirectResetTemplate.buffer,
-            this.#indirectResetTemplate.byteOffset,
-            this.#nextIndirectOffset * 20
-        );
+
+        if (this.#indirectGPUBuffer) {
+            gpuDevice.queue.writeBuffer(
+                this.#indirectGPUBuffer,
+                0,
+                this.#indirectResetTemplate.buffer,
+                this.#indirectResetTemplate.byteOffset,
+                this.#nextIndirectOffset * 20
+            );
+        }
+
+        if (this.#shadowIndirectGPUBuffer) {
+            gpuDevice.queue.writeBuffer(
+                this.#shadowIndirectGPUBuffer,
+                0,
+                this.#shadowIndirectResetTemplate.buffer,
+                this.#shadowIndirectResetTemplate.byteOffset,
+                (this.#maxSubMeshes * 2 + this.#nextIndirectOffset) * 20
+            );
+        }
     }
 
     /**
-     * 글로벌 카메라 & 절두체 유니폼과 품종별 파라미터 버퍼를 갱신합니다.
+     * 통합 단일 Compute Pass용 글로벌 유니폼 버퍼 및 품종 파라미터 버퍼를 동기화합니다.
      */
-    updateGlobalUniformsAndParams(
+    updateUnifiedGlobalUniforms(
         camX: number, camY: number, camZ: number,
         worldSizeX: number, heightScale: number, hasVHT: boolean,
-        frustumPlanes: number[][] | null,
-        fovFactor: number
+        fovFactor: number,
+        mainFrustumPlanes: number[][] | null,
+        cascades: readonly CascadeCullingParam[]
     ): void {
-        if (!this.#globalUniformGPUBuffer || !this.#typeParamsGPUBuffer) return;
+        if (!this.#unifiedGlobalUniformGPUBuffer || !this.#typeParamsGPUBuffer) return;
 
-        const gf32 = this.#cpuGlobalUniformData;
-        const gu32 = this.#cpuGlobalUniformUint32;
+        const gf32 = this.#cpuUnifiedGlobalUniformData;
+        const gu32 = this.#cpuUnifiedGlobalUniformUint32;
 
         gf32[0] = camX;
         gf32[1] = camY;
         gf32[2] = camZ;
-        gu32[3] = this.#nextRawOffset; // Total allocated range in raw buffer
+        gu32[3] = this.#nextRawOffset;
 
         gf32[4] = worldSizeX > 0 ? (1.0 / worldSizeX) : 0.0;
         gf32[5] = heightScale;
         gu32[6] = hasVHT ? 1 : 0;
         gf32[7] = fovFactor > 0 ? fovFactor : 1.0;
 
-        gu32[8] = 0xFFFFFFFF; // 0xFFFFFFFF = Main Camera View (Not Shadow)
-        gf32[9] = 999999.0;
+        gu32[8] = this.#maxSubMeshes;
+        gu32[9] = this.#maxTotalInstances * 8;
         gu32[10] = 0;
         gu32[11] = 0;
 
-        if (frustumPlanes && frustumPlanes.length >= 6) {
+        // 메인 뷰 절두체 (12 ~ 35)
+        if (mainFrustumPlanes && mainFrustumPlanes.length >= 6) {
             for (let p = 0; p < 6; p++) {
-                const plane = frustumPlanes[p];
+                const plane = mainFrustumPlanes[p];
                 const baseOffset = 12 + p * 4;
                 gf32[baseOffset] = plane[0];
                 gf32[baseOffset + 1] = plane[1];
@@ -320,7 +330,36 @@ class FoliageMegaBuffer {
             }
         }
 
-        // 품종별 최신 activeCount를 typeParams 버퍼에 즉시 동기화
+        // 섀도우 캐스케이드 0, 1, 2 (36 ~ 119)
+        for (let c = 0; c < 3; c++) {
+            const cascade = cascades[c];
+            const cascadeBase = 36 + c * 28;
+            if (cascade && cascade.hasShadow) {
+                gf32[cascadeBase] = cascade.maxDistance;
+                gu32[cascadeBase + 1] = 1;
+                gu32[cascadeBase + 2] = 0;
+                gu32[cascadeBase + 3] = 0;
+
+                const planes = cascade.frustumPlanes;
+                if (planes && planes.length >= 6) {
+                    for (let p = 0; p < 6; p++) {
+                        const plane = planes[p];
+                        const pOffset = cascadeBase + 4 + p * 4;
+                        gf32[pOffset] = plane[0];
+                        gf32[pOffset + 1] = plane[1];
+                        gf32[pOffset + 2] = plane[2];
+                        gf32[pOffset + 3] = plane[3];
+                    }
+                }
+            } else {
+                gf32[cascadeBase] = 0.0;
+                gu32[cascadeBase + 1] = 0;
+                gu32[cascadeBase + 2] = 0;
+                gu32[cascadeBase + 3] = 0;
+            }
+        }
+
+        // 품종별 activeCount 동기화
         const count = this.#allocatedTypes.length;
         for (let i = 0; i < count; i++) {
             const alloc = this.#allocatedTypes[i];
@@ -330,11 +369,11 @@ class FoliageMegaBuffer {
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
         gpuDevice.queue.writeBuffer(
-            this.#globalUniformGPUBuffer,
+            this.#unifiedGlobalUniformGPUBuffer,
             0,
             gf32.buffer,
             gf32.byteOffset,
-            160
+            480
         );
 
         gpuDevice.queue.writeBuffer(
@@ -346,9 +385,6 @@ class FoliageMegaBuffer {
         );
     }
 
-    /**
-     * 특정 품종의 셰이더 파라미터(LOD 거리, 컬링 거리 등)를 CPU 버퍼에 기록합니다.
-     */
     updateTypeParams(
         allocation: FoliageTypeAllocation,
         cullingDistance: number,
@@ -395,148 +431,44 @@ class FoliageMegaBuffer {
         }
     }
 
-    getOrCreateGlobalCullingBindGroup(
+    getOrCreateUnifiedCullingBindGroup(
         layout: GPUBindGroupLayout,
         vhtTextureView?: GPUTextureView,
         vhtSampler?: GPUSampler
     ): GPUBindGroup | null {
-        if (!this.#rawGPUBuffer || !this.#globalUniformGPUBuffer || !this.#typeParamsGPUBuffer || !this.#culledGPUBuffer || !this.#indirectGPUBuffer) {
+        if (!this.#rawGPUBuffer || !this.#unifiedGlobalUniformGPUBuffer || !this.#typeParamsGPUBuffer ||
+            !this.#culledGPUBuffer || !this.#indirectGPUBuffer ||
+            !this.#shadowCulledGPUBuffer || !this.#shadowIndirectGPUBuffer) {
             return null;
         }
 
         const targetView = vhtTextureView || this.#redGPUContext.resourceManager.emptyTexture2DArrayView;
         const targetSampler = vhtSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
 
-        if (this.#globalCullingBindGroup && this.#cachedVHTView === targetView && this.#cachedVHTSampler === targetSampler) {
-            return this.#globalCullingBindGroup;
+        if (this.#unifiedCullingBindGroup && this.#cachedVHTView === targetView && this.#cachedVHTSampler === targetSampler) {
+            return this.#unifiedCullingBindGroup;
         }
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
-        this.#globalCullingBindGroup = gpuDevice.createBindGroup({
-            label: 'GlobalFoliageMegaCullingBindGroup',
+        this.#unifiedCullingBindGroup = gpuDevice.createBindGroup({
+            label: 'UnifiedFoliageMegaCullingBindGroup',
             layout,
             entries: [
                 {binding: 0, resource: {buffer: this.#rawGPUBuffer}},
-                {binding: 1, resource: {buffer: this.#globalUniformGPUBuffer}},
+                {binding: 1, resource: {buffer: this.#unifiedGlobalUniformGPUBuffer}},
                 {binding: 2, resource: {buffer: this.#typeParamsGPUBuffer}},
                 {binding: 3, resource: {buffer: this.#culledGPUBuffer}},
                 {binding: 4, resource: {buffer: this.#indirectGPUBuffer}},
-                {binding: 5, resource: targetView},
-                {binding: 6, resource: targetSampler},
+                {binding: 5, resource: {buffer: this.#shadowCulledGPUBuffer}},
+                {binding: 6, resource: {buffer: this.#shadowIndirectGPUBuffer}},
+                {binding: 7, resource: targetView},
+                {binding: 8, resource: targetSampler},
             ],
         });
 
         this.#cachedVHTView = targetView;
         this.#cachedVHTSampler = targetSampler;
-        return this.#globalCullingBindGroup;
-    }
-
-    /**
-     * 특정 캐스케이드 섀도우용 간접 드로우 인스턴스 카운트를 템플릿 기반으로 1줄 고속 리셋합니다.
-     */
-    resetMultiIndirectCommandsForShadow(cascadeIndex: number): void {
-        const indirectBuffer = this.#shadowIndirectGPUBuffers[cascadeIndex];
-        if (!indirectBuffer || this.#nextIndirectOffset === 0) return;
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        gpuDevice.queue.writeBuffer(
-            indirectBuffer,
-            0,
-            this.#indirectResetTemplate.buffer,
-            this.#indirectResetTemplate.byteOffset,
-            this.#nextIndirectOffset * 20
-        );
-    }
-
-    /**
-     * 특정 캐스케이드 섀도우용 글로벌 유니폼 버퍼를 갱신합니다.
-     */
-    updateShadowGlobalUniforms(
-        cascadeIndex: number,
-        camX: number, camY: number, camZ: number,
-        worldSizeX: number, heightScale: number, hasVHT: boolean,
-        frustumPlanes: number[][] | null,
-        cascadeMaxDist: number
-    ): void {
-        const uniformBuffer = this.#shadowGlobalUniformGPUBuffers[cascadeIndex];
-        if (!uniformBuffer) return;
-
-        const gf32 = this.#cpuShadowGlobalUniformData[cascadeIndex];
-        const gu32 = this.#cpuShadowGlobalUniformUint32[cascadeIndex];
-
-        gf32[0] = camX;
-        gf32[1] = camY;
-        gf32[2] = camZ;
-        gu32[3] = this.#nextRawOffset;
-
-        gf32[4] = worldSizeX > 0 ? (1.0 / worldSizeX) : 0.0;
-        gf32[5] = heightScale;
-        gu32[6] = hasVHT ? 1 : 0;
-        gf32[7] = 1.0;
-
-        gu32[8] = cascadeIndex; // targetCascadeIndex (0, 1, 2)
-        gf32[9] = cascadeMaxDist; // cascadeMaxDistance cutoff
-        gu32[10] = 0;
-        gu32[11] = 0;
-
-        if (frustumPlanes && frustumPlanes.length >= 6) {
-            for (let p = 0; p < 6; p++) {
-                const plane = frustumPlanes[p];
-                const baseOffset = 12 + p * 4;
-                gf32[baseOffset] = plane[0];
-                gf32[baseOffset + 1] = plane[1];
-                gf32[baseOffset + 2] = plane[2];
-                gf32[baseOffset + 3] = plane[3];
-            }
-        }
-
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        gpuDevice.queue.writeBuffer(
-            uniformBuffer,
-            0,
-            gf32.buffer,
-            gf32.byteOffset,
-            160
-        );
-    }
-
-    getOrCreateShadowGlobalCullingBindGroup(
-        cascadeIndex: number,
-        layout: GPUBindGroupLayout,
-        vhtTextureView?: GPUTextureView,
-        vhtSampler?: GPUSampler
-    ): GPUBindGroup | null {
-        const culledBuffer = this.#shadowCulledGPUBuffers[cascadeIndex];
-        const indirectBuffer = this.#shadowIndirectGPUBuffers[cascadeIndex];
-        const uniformBuffer = this.#shadowGlobalUniformGPUBuffers[cascadeIndex];
-
-        if (!this.#rawGPUBuffer || !uniformBuffer || !this.#typeParamsGPUBuffer || !culledBuffer || !indirectBuffer) {
-            return null;
-        }
-
-        const targetView = vhtTextureView || this.#redGPUContext.resourceManager.emptyTexture2DArrayView;
-        const targetSampler = vhtSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
-
-        if (this.#shadowGlobalCullingBindGroups[cascadeIndex] && this.#cachedVHTView === targetView && this.#cachedVHTSampler === targetSampler) {
-            return this.#shadowGlobalCullingBindGroups[cascadeIndex];
-        }
-
-        const gpuDevice = this.#redGPUContext.gpuDevice;
-        const bindGroup = gpuDevice.createBindGroup({
-            label: `GlobalFoliageMegaCullingBindGroup_Shadow_Cascade${cascadeIndex}`,
-            layout,
-            entries: [
-                {binding: 0, resource: {buffer: this.#rawGPUBuffer}},
-                {binding: 1, resource: {buffer: uniformBuffer}},
-                {binding: 2, resource: {buffer: this.#typeParamsGPUBuffer}},
-                {binding: 3, resource: {buffer: culledBuffer}},
-                {binding: 4, resource: {buffer: indirectBuffer}},
-                {binding: 5, resource: targetView},
-                {binding: 6, resource: targetSampler},
-            ],
-        });
-
-        this.#shadowGlobalCullingBindGroups[cascadeIndex] = bindGroup;
-        return bindGroup;
+        return this.#unifiedCullingBindGroup;
     }
 
     destroy(): void {
@@ -544,24 +476,18 @@ class FoliageMegaBuffer {
         this.#culledGPUBuffer?.destroy();
         this.#indirectGPUBuffer?.destroy();
         this.#typeParamsGPUBuffer?.destroy();
-        this.#globalUniformGPUBuffer?.destroy();
-
-        for (let c = 0; c < 3; c++) {
-            this.#shadowCulledGPUBuffers[c]?.destroy();
-            this.#shadowIndirectGPUBuffers[c]?.destroy();
-            this.#shadowGlobalUniformGPUBuffers[c]?.destroy();
-            this.#shadowCulledGPUBuffers[c] = null;
-            this.#shadowIndirectGPUBuffers[c] = null;
-            this.#shadowGlobalUniformGPUBuffers[c] = null;
-            this.#shadowGlobalCullingBindGroups[c] = null;
-        }
+        this.#shadowCulledGPUBuffer?.destroy();
+        this.#shadowIndirectGPUBuffer?.destroy();
+        this.#unifiedGlobalUniformGPUBuffer?.destroy();
 
         this.#rawGPUBuffer = null;
         this.#culledGPUBuffer = null;
         this.#indirectGPUBuffer = null;
         this.#typeParamsGPUBuffer = null;
-        this.#globalUniformGPUBuffer = null;
-        this.#globalCullingBindGroup = null;
+        this.#shadowCulledGPUBuffer = null;
+        this.#shadowIndirectGPUBuffer = null;
+        this.#unifiedGlobalUniformGPUBuffer = null;
+        this.#unifiedCullingBindGroup = null;
         this.#allocations.clear();
         this.#allocatedTypes.length = 0;
     }
@@ -571,6 +497,11 @@ class FoliageMegaBuffer {
             const sub = subMeshes[s];
             const count = sub.isIndexed ? sub.indexCount : sub.vertexCount;
             this.#indirectResetTemplate[(indirectBaseOffset + s) * 5] = count;
+
+            for (let c = 0; c < 3; c++) {
+                const shadowSlot = (c * this.#maxSubMeshes + indirectBaseOffset + s) * 5;
+                this.#shadowIndirectResetTemplate[shadowSlot] = count;
+            }
         }
     }
 
@@ -588,34 +519,29 @@ class FoliageMegaBuffer {
         });
 
         this.#culledGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageMegaBuffer_Culled',
+            label: 'FoliageMegaBuffer_Culled_Main',
             size: culledByteSize,
             usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
         });
 
         this.#indirectGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageMegaBuffer_Indirect',
+            label: 'FoliageMegaBuffer_Indirect_Main',
             size: indirectByteSize,
             usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
-        for (let c = 0; c < 3; c++) {
-            this.#shadowCulledGPUBuffers[c] = gpuDevice.createBuffer({
-                label: `FoliageMegaBuffer_ShadowCulled_Cascade${c}`,
-                size: culledByteSize,
-                usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
-            });
-            this.#shadowIndirectGPUBuffers[c] = gpuDevice.createBuffer({
-                label: `FoliageMegaBuffer_ShadowIndirect_Cascade${c}`,
-                size: indirectByteSize,
-                usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-            });
-            this.#shadowGlobalUniformGPUBuffers[c] = gpuDevice.createBuffer({
-                label: `FoliageMegaBuffer_ShadowGlobalUniform_Cascade${c}`,
-                size: 256,
-                usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-            });
-        }
+        // 🌲 섀도우 통합 3단 버퍼 (Cascade 0, 1, 2)
+        this.#shadowCulledGPUBuffer = gpuDevice.createBuffer({
+            label: 'FoliageMegaBuffer_Culled_ShadowMega',
+            size: culledByteSize * 3,
+            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
+        });
+
+        this.#shadowIndirectGPUBuffer = gpuDevice.createBuffer({
+            label: 'FoliageMegaBuffer_Indirect_ShadowMega',
+            size: indirectByteSize * 3,
+            usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+        });
 
         this.#typeParamsGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageMegaBuffer_TypeParams',
@@ -623,9 +549,9 @@ class FoliageMegaBuffer {
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
-        this.#globalUniformGPUBuffer = gpuDevice.createBuffer({
-            label: 'FoliageMegaBuffer_GlobalUniform',
-            size: 256,
+        this.#unifiedGlobalUniformGPUBuffer = gpuDevice.createBuffer({
+            label: 'FoliageMegaBuffer_UnifiedGlobalUniform',
+            size: 512,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
     }

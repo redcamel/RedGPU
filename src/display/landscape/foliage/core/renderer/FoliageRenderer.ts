@@ -146,6 +146,9 @@ class FoliageRenderer {
         }
         if (validCount === 0) return;
 
+        const cascadeIndirectOffset = currentCascade * 256 * 20;
+        const cascadeInstanceOffset = currentCascade * (500000 * 8) * 48;
+
         // 🌲 Shadow Pass 루프 (식생 그림자 뎁스 기록)
         for (let t = 0; t < validCount; t++) {
             const {type: foliageType, culledGPU, indirectGPU} = this.#validTypes[t];
@@ -155,7 +158,9 @@ class FoliageRenderer {
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
                 if (sub.canRenderInPass('shadow')) {
-                    this.#drawSubMesh(passEncoder, sub, 1, 'shadow', systemBG, indirectGPU, culledGPU, 'shadow');
+                    const instOffset = cascadeInstanceOffset + sub.instanceBufferOffset;
+                    const indOffset = cascadeIndirectOffset + sub.indirectOffsetBytes;
+                    this.#drawSubMesh(passEncoder, sub, 1, 'shadow', systemBG, indirectGPU, culledGPU, 'shadow', instOffset, indOffset);
                 }
             }
         }
@@ -169,7 +174,9 @@ class FoliageRenderer {
         systemBG: GPUBindGroup | null,
         indirectGPUBuffer: GPUBuffer,
         culledGPUBuffer: GPUBuffer,
-        depthPassMode: FoliageDepthPassMode = 'normal'
+        depthPassMode: FoliageDepthPassMode = 'normal',
+        overrideInstanceOffset?: number,
+        overrideIndirectOffset?: number
     ): void {
         const vertexGPUBuffer = sub.geometry.vertexBuffer?.gpuBuffer;
         if (!vertexGPUBuffer) return;
@@ -210,7 +217,7 @@ class FoliageRenderer {
             this.#lastBoundGeometryVertexBuffer = vertexGPUBuffer;
         }
 
-        const instanceBufferOffset = sub.instanceBufferOffset;
+        const instanceBufferOffset = overrideInstanceOffset !== undefined ? overrideInstanceOffset : sub.instanceBufferOffset;
         if (this.#lastBoundInstanceBuffer !== culledGPUBuffer || this.#lastBoundInstanceOffset !== instanceBufferOffset) {
             passEncoder.setVertexBuffer(1, culledGPUBuffer, instanceBufferOffset);
             this.#lastBoundInstanceBuffer = culledGPUBuffer;
@@ -225,7 +232,7 @@ class FoliageRenderer {
             }
         }
 
-        sub.draw(passEncoder, indirectGPUBuffer);
+        sub.draw(passEncoder, indirectGPUBuffer, overrideIndirectOffset);
     }
 }
 
