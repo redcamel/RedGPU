@@ -176,16 +176,6 @@ class FoliageCullingDispatcher {
 
         if (this.#megaBuffer) {
             this.#megaBuffer.resetMultiIndirectCommands();
-            for (let i = 0; i < typeCount; i++) {
-                const foliageType = typeList[i];
-                if (foliageType.activeInstanceCount <= 0 || foliageType.subMeshes.length === 0) continue;
-                foliageType.updateCullingUniforms(
-                    camX, camY, camZ,
-                    worldSizeX, heightScale, hasVHT,
-                    frustumPlanes,
-                    fovFactor
-                );
-            }
 
             // 🌲 섀도우 CSM 활성 캐스케이드(1~4단계) 파라미터 구성
             const shadowManager = stateData?.view?.scene?.shadowManager || (landscape as any)?.scene?.shadowManager;

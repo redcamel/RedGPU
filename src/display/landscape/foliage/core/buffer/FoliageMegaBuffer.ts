@@ -82,6 +82,8 @@ class FoliageMegaBuffer {
     #indirectResetTemplate: Uint32Array;
     #shadowIndirectResetTemplate: Uint32Array;
 
+    #dirtyTypeParams: boolean = true;
+
     #allocations: Map<string, FoliageTypeAllocation> = new Map();
     #allocatedTypes: FoliageTypeAllocation[] = [];
     #nextRawOffset: number = 0;
@@ -387,12 +389,16 @@ class FoliageMegaBuffer {
             }
         }
 
-        // 품종별 activeCount 동기화
+        // 품종별 activeCount 동기화 (변경 감지)
         const count = this.#allocatedTypes.length;
         for (let i = 0; i < count; i++) {
             const alloc = this.#allocatedTypes[i];
             const baseOffset = alloc.typeId * FoliageMegaBuffer.#TYPE_PARAM_FLOATS;
-            this.#cpuTypeParamsUint32[baseOffset + 9] = alloc.activeCount;
+            const prevCount = this.#cpuTypeParamsUint32[baseOffset + 9];
+            if (prevCount !== alloc.activeCount) {
+                this.#cpuTypeParamsUint32[baseOffset + 9] = alloc.activeCount;
+                this.#dirtyTypeParams = true;
+            }
         }
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
@@ -404,13 +410,16 @@ class FoliageMegaBuffer {
             592 // (36 + 28 * 4) * 4 bytes
         );
 
-        gpuDevice.queue.writeBuffer(
-            this.#typeParamsGPUBuffer,
-            0,
-            this.#cpuTypeParamsData.buffer,
-            this.#cpuTypeParamsData.byteOffset,
-            this.#allocatedTypes.length * FoliageMegaBuffer.#TYPE_PARAM_FLOATS * 4
-        );
+        if (this.#dirtyTypeParams) {
+            this.#dirtyTypeParams = false;
+            gpuDevice.queue.writeBuffer(
+                this.#typeParamsGPUBuffer,
+                0,
+                this.#cpuTypeParamsData.buffer,
+                this.#cpuTypeParamsData.byteOffset,
+                this.#allocatedTypes.length * FoliageMegaBuffer.#TYPE_PARAM_FLOATS * 4
+            );
+        }
     }
 
     updateTypeParams(
@@ -421,6 +430,7 @@ class FoliageMegaBuffer {
         bottomOffset: number,
         lodInfoList: readonly FoliageLODInfo[]
     ): void {
+        this.#dirtyTypeParams = true;
         const typeId = allocation.typeId;
         const baseOffset = typeId * FoliageMegaBuffer.#TYPE_PARAM_FLOATS;
         const f32 = this.#cpuTypeParamsData;
