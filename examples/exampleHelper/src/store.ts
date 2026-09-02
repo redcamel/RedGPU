@@ -35,6 +35,7 @@ export interface GuiConfig {
     redGPUContext?: boolean;
     viewList?: boolean;
     scene?: boolean;
+    directionalShadow?: boolean;
     ibl?: boolean;
     skybox?: boolean;
     compareLabel?: CompareLabelConfig;

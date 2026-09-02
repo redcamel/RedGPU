@@ -502,21 +502,13 @@ fn main(inputData: InputData) -> OutputFragment {
     let NdotL = clamp(dot(N, L), 0.0, 1.0);
 
     // 1. Normal Offset Bias: 지형 경사면에서 법선 방향으로 샘플링 위치를 미세 오프셋하여 Shadow Acne 원천 제거
-    let normalOffsetScale = 0.6;
+    let normalOffsetScale = 0.2;
     let normalOffsetWorldPos = input_vertexPosition + N * (1.0 - NdotL) * normalOffsetScale;
-    let accurateShadowCoord = getShadowCoord(normalOffsetWorldPos, systemUniforms.directionalLightProjectionViewMatrix);
-
-    // 2. Slope-Scaled Depth Bias: 빛이 스치는 각도일수록 적응형으로 바이어스를 동적 확장
-    let slopeFactor = clamp(sqrt(max(0.0, 1.0 - NdotL * NdotL)) / max(NdotL, 0.02), 0.0, 4.0);
-    let slopeBias = systemUniforms.shadow.directionalShadowBias * (1.0 + slopeFactor * 2.0);
 
     let rawVisibility: f32 = getDirectionalShadowVisibility(
         directionalShadowMap,
         directionalShadowMapSampler,
-        systemUniforms.shadow.directionalShadowDepthTextureSize,
-        slopeBias,
-        systemUniforms.shadow.directionalShadowFilterScale,
-        accurateShadowCoord
+        normalOffsetWorldPos
     );
     let shadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVisibility);
     let visibility = select(1.0, shadowVis, receiveShadowYn);

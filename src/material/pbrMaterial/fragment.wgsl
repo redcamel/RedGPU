@@ -367,7 +367,7 @@ fn main(inputData:InputData) -> OutputFragment {
     // Shadow
     let receiveShadowYn = inputData.receiveShadow != 0.0;
     var visibility:f32 = 1.0;
-    visibility = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, systemUniforms.shadow.directionalShadowDepthTextureSize, systemUniforms.shadow.directionalShadowBias, systemUniforms.shadow.directionalShadowFilterScale, inputData.shadowCoord);
+    visibility = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, input_vertexPosition);
     if(!receiveShadowYn){
         visibility = 1.0;
     } else {

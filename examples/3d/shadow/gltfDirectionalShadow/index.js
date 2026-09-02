@@ -105,29 +105,6 @@ const renderTestPane = (redGPUContext, scene) => {
         RedGPU: RedGPU,
         ibl: true,
         skybox: true,
-        gui: (pane) => {
-            const {shadowManager} = scene;
-            const {directionalShadowManager} = shadowManager;
-
-            const folder = pane.addFolder({title: 'Directional Shadow', expanded: true});
-            folder.addBinding(directionalShadowManager, 'shadowDepthTextureSize', {
-                min: 128,
-                max: 4096,
-                step: 1,
-                label: 'Texture Size'
-            });
-            folder.addBinding(directionalShadowManager, 'strength', {
-                min: 0.0,
-                max: 1.0,
-                step: 0.01,
-                label: 'Shadow Strength'
-            });
-            folder.addBinding(directionalShadowManager, 'filterScale', {
-                min: 0.0,
-                max: 15.0,
-                step: 0.1,
-                label: 'Filter Scale'
-            });
-        }
+        directionalShadow: true,
     });
 };

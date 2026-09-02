@@ -96,7 +96,7 @@ export class LandscapeVNTGenerator extends ALandscapeAtlasGenerator {
         this.initBaseComputePipeline(
             'LandscapeVNTBakeComputeShaderModule',
             vntBakeShaderCode,
-            descriptor.entries,
+            descriptor.entries as GPUBindGroupLayoutEntry[],
             uniformByteLength
         );
     }

@@ -412,6 +412,7 @@ const renderTestPane = async (redGPUContext, resetFunc) => {
 		RedGPU,
 		skybox: true,
 		ibl: true,
+		directionalShadow: true,
 		gui: (pane) => {
 			pane.addBlade({
 				view: 'text',

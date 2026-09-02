@@ -79,23 +79,28 @@ class ShadowManager {
             }
         }
 
-        this.#shadowPassDescriptor = {
-            label: `${view.name} Shadow Render Pass`,
-            colorAttachments: [],
-            depthStencilAttachment: {
-                view: this.#directionalShadowManager.shadowDepthTextureView,
-                depthClearValue: 1.0,
-                depthLoadOp: GPU_LOAD_OP.CLEAR,
-                depthStoreOp: GPU_STORE_OP.STORE,
-            },
+        const cascadeCount = Math.min(4, Math.max(1, this.#directionalShadowManager.cascadeCount || 3));
+        for (let c = 0; c < cascadeCount; c++) {
+            const cascadePassDescriptor: GPURenderPassDescriptor = {
+                label: `${view.name} CSM Cascade ${c} Pass`,
+                colorAttachments: [],
+                depthStencilAttachment: {
+                    view: this.#directionalShadowManager.getCascadeLayerView(c),
+                    depthClearValue: 1.0,
+                    depthLoadOp: GPU_LOAD_OP.CLEAR,
+                    depthStoreOp: GPU_STORE_OP.STORE,
+                },
+            };
+            redGPUContext.commandEncoderManager.addMainRenderPass(cascadePassDescriptor, (viewShadowRenderPassEncoder) => {
+                view.currentCascadeIndex = c;
+                updateViewportAndScissor(view, viewShadowRenderPassEncoder, 'SHADOW');
+                renderLandscapeShadowLayer(view, viewShadowRenderPassEncoder);
+                if (this.#directionalShadowManager.castingList.length) {
+                    renderShadowLayer(view, viewShadowRenderPassEncoder);
+                }
+                view.currentCascadeIndex = undefined;
+            });
         }
-        redGPUContext.commandEncoderManager.addMainRenderPass(this.shadowPassDescriptor, (viewShadowRenderPassEncoder) => {
-            updateViewportAndScissor(view, viewShadowRenderPassEncoder, 'SHADOW')
-            renderLandscapeShadowLayer(view, viewShadowRenderPassEncoder)
-            if (this.#directionalShadowManager.castingList.length) {
-                renderShadowLayer(view, viewShadowRenderPassEncoder)
-            }
-        });
 
         this.#directionalShadowManager.resetCastingList()
     }

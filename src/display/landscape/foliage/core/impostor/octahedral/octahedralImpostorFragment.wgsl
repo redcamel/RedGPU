@@ -294,10 +294,7 @@ fn main(inputData: InputData) -> OutputFragment {
     shadowVis = getDirectionalShadowVisibility(
         directionalShadowMap,
         directionalShadowMapSampler,
-        systemUniforms.shadow.directionalShadowDepthTextureSize,
-        systemUniforms.shadow.directionalShadowBias,
-        systemUniforms.shadow.directionalShadowFilterScale,
-        inputData.shadowCoord
+        inputData.vertexPosition
     );
     shadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, shadowVis);
 

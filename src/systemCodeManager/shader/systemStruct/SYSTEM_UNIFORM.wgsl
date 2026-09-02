@@ -38,7 +38,7 @@ struct SystemUniform {
 
 @group(0) @binding(0) var<uniform> systemUniforms: SystemUniform;
 @group(0) @binding(1) var directionalShadowMapSampler: sampler_comparison;
-@group(0) @binding(2) var directionalShadowMap: texture_depth_2d;
+@group(0) @binding(2) var directionalShadowMap: texture_depth_2d_array;
 @group(0) @binding(3) var prefilterTextureSampler: sampler;
 
 @group(0) @binding(7) var renderPath1ResultTextureSampler: sampler;

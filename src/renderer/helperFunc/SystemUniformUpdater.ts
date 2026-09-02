@@ -120,27 +120,48 @@ class SystemUniformUpdater {
         uniformDataF32: Float32Array,
         uniformDataU32: Uint32Array
     ) {
+        const directionalShadowManager = shadowManager.directionalShadowManager;
+        const cascadePV = directionalShadowManager.cascadeProjectionViewMatrices;
+        const cascadeSplits = directionalShadowManager.cascadeSplitDepths;
+
         updateSystemUniformData(
             shadowMembers, uniformDataF32, uniformDataU32,
             [
                 {
                     key: 'directionalShadowDepthTextureSize',
-                    value: shadowManager.directionalShadowManager.shadowDepthTextureSize,
+                    value: directionalShadowManager.shadowDepthTextureSize,
                 },
                 {
                     key: 'directionalShadowBias',
-                    value: shadowManager.directionalShadowManager.bias,
+                    value: directionalShadowManager.bias,
                 },
                 {
                     key: 'directionalShadowStrength',
-                    value: shadowManager.directionalShadowManager.strength,
+                    value: directionalShadowManager.strength,
                 },
                 {
                     key: 'directionalShadowFilterScale',
-                    value: shadowManager.directionalShadowManager.filterScale,
+                    value: directionalShadowManager.filterScale,
+                },
+                {
+                    key: 'cascadeCount',
+                    value: directionalShadowManager.cascadeCount,
+                },
+                {
+                    key: 'cascadeSplitDepths',
+                    value: cascadeSplits,
                 }
             ]
-        )
+        );
+
+        // 4개 캐스케이드 행렬 일괄 복사 (Zero-GC)
+        const matricesInfo = shadowMembers.cascadeLightViewProjectionMatrices;
+        if (matricesInfo) {
+            const startOffset = matricesInfo.uniformOffset / Float32Array.BYTES_PER_ELEMENT;
+            for (let i = 0; i < 4; i++) {
+                uniformDataF32.set(cascadePV[i], startOffset + i * 16);
+            }
+        }
     }
 
     /**

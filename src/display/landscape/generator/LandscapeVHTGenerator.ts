@@ -80,7 +80,7 @@ export class LandscapeVHTGenerator extends ALandscapeAtlasGenerator {
         this.initBaseComputePipeline(
             'LandscapeVHTBakeComputeShaderModule',
             vhtShaderCode,
-            descriptor.entries,
+            descriptor.entries as GPUBindGroupLayoutEntry[],
             uniformByteLength
         );
     }

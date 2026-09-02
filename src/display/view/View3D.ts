@@ -77,6 +77,11 @@ class View3D extends AView {
     #uniformDataU32: Uint32Array
     #noneJitterProjectionViewMatrix: mat4 = mat4.create()
     #clusterLightManager: ClusterLightManager
+    #currentCascadeIndex: number | undefined = undefined
+    #systemUniform_Cascade_Buffers: UniformBuffer[] = []
+    #systemUniform_Cascade_BindGroups: GPUBindGroup[] = []
+    #cascadeUniformData: ArrayBuffer
+    #cascadeUniformDataF32: Float32Array
 
     /**
      * [KO] 새로운 View3D 인스턴스를 생성합니다.
@@ -134,10 +139,25 @@ class View3D extends AView {
     }
 
     /**
-     * [KO] 시스템 버텍스 유니폼 바인드 그룹을 반환합니다.
-     * [EN] Returns the system vertex globalStruct bind group.
+     * [KO] 현재 렌더링 중인 CSM 캐스케이드 인덱스 (0 ~ 3)를 반환하거나 설정합니다.
+     * [EN] Returns or sets the CSM cascade index (0 to 3) currently being rendered.
+     */
+    get currentCascadeIndex(): number | undefined {
+        return this.#currentCascadeIndex;
+    }
+
+    set currentCascadeIndex(value: number | undefined) {
+        this.#currentCascadeIndex = value;
+    }
+
+    /**
+     * [KO] 시스템 버텍스 유니폼 바인드 그룹을 반환합니다. (캐스케이드 렌더링 시 해당 캐스케이드 바인드그룹 반환)
+     * [EN] Returns the system vertex globalStruct bind group. (Returns cascade bind group during cascade rendering)
      */
     get systemUniform_Vertex_UniformBindGroup(): GPUBindGroup {
+        if (this.#currentCascadeIndex !== undefined && this.#systemUniform_Cascade_BindGroups[this.#currentCascadeIndex]) {
+            return this.#systemUniform_Cascade_BindGroups[this.#currentCascadeIndex];
+        }
         return this.#systemUniform_Vertex_UniformBindGroup;
     }
 
@@ -272,6 +292,10 @@ class View3D extends AView {
             this.#systemUniform_Vertex_UniformBuffer = null;
         }
 
+        this.#systemUniform_Cascade_Buffers.forEach(buf => buf.destroy());
+        this.#systemUniform_Cascade_Buffers = [];
+        this.#systemUniform_Cascade_BindGroups = [];
+
         this.#prevInfoList = []
         this.#systemUniform_Vertex_UniformBindGroup = null
         if (this.#viewRenderTextureManager) {
@@ -393,6 +417,7 @@ class View3D extends AView {
         const structInfo = this.systemUniform_Vertex_StructInfo;
         const {members} = structInfo
         {
+            shadowManager.directionalShadowManager.calculateCSMMatrices(this);
             this.#noneJitterProjectionViewMatrix = mat4.multiply(temp2, noneJitterProjectionMatrix, viewMatrix)
             const projectionViewMatrix = mat4.multiply(temp, projectionMatrix, viewMatrix);
             SystemUniformUpdater.updateCamera(rawCamera, members.camera.members, this.#uniformDataF32, this.#uniformDataU32)
@@ -427,7 +452,7 @@ class View3D extends AView {
                 },
                 {
                     key: 'directionalLightProjectionViewMatrix',
-                    value: lightManager.getDirectionalLightProjectionViewMatrix(this)
+                    value: shadowManager.directionalShadowManager.cascadeProjectionViewMatrices[0]
                 },
                 {
                     key: 'directionalLightProjectionMatrix',
@@ -447,6 +472,19 @@ class View3D extends AView {
             }
         })
         gpuDevice.queue.writeBuffer(systemUniform_Vertex_UniformBuffer.gpuBuffer, 0, this.#uniformData);
+
+        const dirLightVPInfo = members.directionalLightProjectionViewMatrix;
+        if (dirLightVPInfo && this.#systemUniform_Cascade_Buffers.length) {
+            const vpOffsetF32 = dirLightVPInfo.uniformOffset / Float32Array.BYTES_PER_ELEMENT;
+            const cascadePV = shadowManager.directionalShadowManager.cascadeProjectionViewMatrices;
+            new Uint8Array(this.#cascadeUniformData).set(new Uint8Array(this.#uniformData));
+            for (let c = 0; c < 4; c++) {
+                if (this.#systemUniform_Cascade_Buffers[c]) {
+                    this.#cascadeUniformDataF32.set(cascadePV[c], vpOffsetF32);
+                    gpuDevice.queue.writeBuffer(this.#systemUniform_Cascade_Buffers[c].gpuBuffer, 0, this.#cascadeUniformData);
+                }
+            }
+        }
     }
 
     #createVertexUniformBindGroup(key: string, shadowDepthTextureView: GPUTextureView, ibl: IBL, renderPath1ResultTextureView: GPUTextureView) {
@@ -545,6 +583,29 @@ class View3D extends AView {
         }
         this.#systemUniform_Vertex_UniformBindGroup = gpuDevice.createBindGroup(systemUniform_Vertex_BindGroupDescriptor);
 
+        // 4개 캐스케이드 전용 바인드그룹 생성 (섀도우 렌더 패스 시 쓰기/읽기 충돌 방지를 위해 binding 2에 empty 텍스처 뷰 바인딩)
+        const shadowDepthTextureViewEmpty = this.scene?.shadowManager?.directionalShadowManager?.shadowDepthTextureViewEmpty || shadowDepthTextureView;
+        this.#systemUniform_Cascade_BindGroups = this.#systemUniform_Cascade_Buffers.map((buf, c) => {
+            const entries = [...systemUniform_Vertex_BindGroupDescriptor.entries];
+            entries[0] = {
+                binding: 0,
+                resource: {
+                    buffer: buf.gpuBuffer,
+                    offset: 0,
+                    size: buf.size
+                }
+            };
+            entries[2] = {
+                binding: 2,
+                resource: shadowDepthTextureViewEmpty
+            };
+            return gpuDevice.createBindGroup({
+                layout: systemUniform_Vertex_BindGroupDescriptor.layout,
+                label: `SYSTEM_UNIFORM_CASCADE_BindGroup_${c}_${key}`,
+                entries
+            });
+        });
+
         this.#updateIBLResourceStates(resourceManager, ibl_prefilterTexture, ibl_irradianceTexture);
     }
 
@@ -567,6 +628,15 @@ class View3D extends AView {
     #init() {
         const systemUniform_Vertex_UniformData = new ArrayBuffer(this.#systemUniform_Vertex_StructInfo.arrayBufferByteLength)
         this.#systemUniform_Vertex_UniformBuffer = new UniformBuffer(this.redGPUContext, systemUniform_Vertex_UniformData, 'SYSTEM_UNIFORM_BUFFER_VERTEX', 'SYSTEM_UNIFORM_BUFFER_VERTEX');
+
+        this.#cascadeUniformData = new ArrayBuffer(this.#systemUniform_Vertex_StructInfo.arrayBufferByteLength);
+        this.#cascadeUniformDataF32 = new Float32Array(this.#cascadeUniformData);
+        this.#systemUniform_Cascade_Buffers = [];
+        for (let c = 0; c < 4; c++) {
+            const cascadeBuf = new UniformBuffer(this.redGPUContext, new ArrayBuffer(this.#systemUniform_Vertex_StructInfo.arrayBufferByteLength), `SYSTEM_UNIFORM_BUFFER_CASCADE_${c}`, `SYSTEM_UNIFORM_BUFFER_CASCADE_${c}`);
+            this.#systemUniform_Cascade_Buffers.push(cascadeBuf);
+        }
+
         this.#shadowDepthSampler = new Sampler(this.redGPUContext, {
             addressModeU: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,
             addressModeV: GPU_ADDRESS_MODE.CLAMP_TO_EDGE,

@@ -1027,7 +1027,11 @@ class ResourceManager extends RedGPUObject {
                             visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
                             sampler: {type: 'comparison'}
                         },
-                        {binding: 2, visibility: GPUShaderStage.FRAGMENT, texture: {sampleType: "depth"}},
+                        {
+                            binding: 2,
+                            visibility: GPUShaderStage.FRAGMENT,
+                            texture: {sampleType: "depth", viewDimension: "2d-array"}
+                        },
                         {binding: 3, visibility: GPUShaderStage.FRAGMENT, sampler: {type: 'filtering'}},
                         {
                             binding: 5,

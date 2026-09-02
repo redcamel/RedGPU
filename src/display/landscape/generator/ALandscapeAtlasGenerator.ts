@@ -74,7 +74,7 @@ export abstract class ALandscapeAtlasGenerator {
     initBaseComputePipeline(
         shaderModuleKey: string,
         shaderCode: string,
-        layoutEntries: Iterable<GPUBindGroupLayoutEntry>,
+        layoutEntries: GPUBindGroupLayoutEntry[],
         defaultUniformByteLength: number = 16
     ): void {
         const device = this.redGPUContext.gpuDevice;

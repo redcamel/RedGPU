@@ -232,10 +232,7 @@ fn main(inputData:InputData) -> OutputFragment {
     visibility = getDirectionalShadowVisibility(
         directionalShadowMap,
         directionalShadowMapSampler,
-        u_directionalShadowDepthTextureSize,
-        u_directionalShadowBias,
-        systemUniforms.shadow.directionalShadowFilterScale,
-        inputData.shadowCoord
+        input_vertexPosition
     );
     if(!receiveShadowYn){ 
         visibility = 1.0; 
