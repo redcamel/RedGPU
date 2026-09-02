@@ -84,13 +84,13 @@ class FoliagePipelineRegistry {
         };
 
         const instanceBufferLayout: GPUVertexBufferLayout = {
-            arrayStride: 12 * 4,
+            arrayStride: 8 * 4, // 32 Bytes
             stepMode: 'instance',
             attributes: [
-                {shaderLocation: 6, offset: 0, format: 'float32x3'},
-                {shaderLocation: 7, offset: 12, format: 'float32x4'},
-                {shaderLocation: 8, offset: 28, format: 'float32x3'},
-                {shaderLocation: 9, offset: 40, format: 'float32x2'},
+                {shaderLocation: 6, offset: 0, format: 'float32x4'},  // posX, posY, posZ, scaleY
+                {shaderLocation: 7, offset: 16, format: 'uint32x2'},  // packedRotXY, packedRotZW
+                {shaderLocation: 8, offset: 24, format: 'uint32'},    // packedScaleXZ
+                {shaderLocation: 9, offset: 28, format: 'float32'},   // fadeOrType
             ],
         };
 

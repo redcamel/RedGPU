@@ -146,7 +146,7 @@ class FoliageRenderer {
         if (validCount === 0) return;
 
         const cascadeIndirectOffset = currentCascade * 256 * 20;
-        const cascadeInstanceOffset = currentCascade * (500000 * 8) * 48;
+        const cascadeInstanceOffset = currentCascade * (500000 * 8) * 32;
 
         // 🌲 Shadow Pass 루프 (식생 그림자 뎁스 기록)
         for (let t = 0; t < validCount; t++) {

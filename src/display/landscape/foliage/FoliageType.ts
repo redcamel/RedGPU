@@ -262,7 +262,7 @@ class FoliageType {
     }
 
     setInstancesData(data: Float32Array, count?: number): void {
-        const instanceCount = count !== undefined ? count : Math.floor(data.length / 12);
+        const instanceCount = count !== undefined ? count : Math.floor(data.length / 8);
         this.#activeInstanceCount = Math.min(instanceCount, this.#options.maxInstances);
 
         if (this.#megaBuffer && this.#allocation) {

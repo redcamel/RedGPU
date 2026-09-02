@@ -123,7 +123,7 @@ class FoliageSubMeshAssembler {
 
         for (let i = 0; i < subList.length; i++) {
             const sub = subList[i];
-            sub.instanceBufferOffset = (sub.lodIndex ?? 0) * maxInstances * 48;
+            sub.instanceBufferOffset = (sub.lodIndex ?? 0) * maxInstances * 32;
             sub.indirectOffsetBytes = i * 20;
 
             minOffset = Math.min(minOffset, sub.bottomOffset);

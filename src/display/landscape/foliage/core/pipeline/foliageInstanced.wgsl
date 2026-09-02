@@ -20,10 +20,10 @@ struct VertexInput {
     @location(4) vertexColor_0 : vec4<f32>,
     @location(5) vertexTangent : vec4<f32>,
 
-    @location(6) instancePos : vec3<f32>,
-    @location(7) instanceRotQuat : vec4<f32>,
-    @location(8) instanceScale : vec3<f32>,
-    @location(9) instanceExtra : vec2<f32>,
+    @location(6) instancePos_scaleY : vec4<f32>,
+    @location(7) instanceRotQuat_packed : vec2<u32>,
+    @location(8) instancePackedScaleXZ : u32,
+    @location(9) instanceFade : f32,
 };
 
 struct OutputData {
@@ -56,8 +56,17 @@ fn rotateVectorByQuaternion(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
 fn mainInput(input : VertexInput) -> OutputData {
     var output : OutputData;
 
-    let fadeFactor = input.instanceExtra.x;
-    let lodFadeFactor = input.instanceExtra.y;
+    let instancePos = input.instancePos_scaleY.xyz;
+    let scaleY = input.instancePos_scaleY.w;
+
+    let rotXY = unpack2x16snorm(input.instanceRotQuat_packed.x);
+    let rotZW = unpack2x16snorm(input.instanceRotQuat_packed.y);
+    let instanceRotQuat = vec4<f32>(rotXY.x, rotXY.y, rotZW.x, rotZW.y);
+
+    let scaleXZ = unpack2x16float(input.instancePackedScaleXZ);
+    let instanceScale = vec3<f32>(scaleXZ.x, scaleY, scaleXZ.y);
+
+    let combinedOpacity = input.instanceFade;
 
     var hierarchyPos = input.position;
     var hierarchyNormal = input.vertexNormal;
@@ -68,18 +77,15 @@ fn mainInput(input : VertexInput) -> OutputData {
         hierarchyTangent = (subMeshUniforms.relativeNormalMatrix * vec4<f32>(input.vertexTangent.xyz, 0.0)).xyz;
     }
 
-    let safeScale = max(input.instanceScale, vec3<f32>(0.0001));
+    let safeScale = max(instanceScale, vec3<f32>(0.0001));
     let scaledPos = hierarchyPos * safeScale;
-    let rotatedPos = rotateVectorByQuaternion(scaledPos, input.instanceRotQuat);
+    let rotatedPos = rotateVectorByQuaternion(scaledPos, instanceRotQuat);
 
-    var worldPos = rotatedPos + input.instancePos;
+    var worldPos = rotatedPos + instancePos;
     var worldNormal = vec3<f32>(0.0, 1.0, 0.0);
 
     let isImpostor = (input.vertexTangent.w < -500.0);
     if (isImpostor) {
-        // 🌿 임포스터 지면 고정(Ground-Locked Cylindrical Billboard):
-        // 🌿 카메라 피치(내려다보는 각도)로 인해 밑동이 지면 위로 들리는 것을 원천 차단하고
-        // 🌿 항상 밑동이 지면에 100% 밀착되도록 Y축 직립 직교 기저를 사용합니다.
         let camRight = vec3<f32>(
             systemUniforms.camera.viewMatrix[0][0],
             systemUniforms.camera.viewMatrix[1][0],
@@ -94,11 +100,8 @@ fn mainInput(input : VertexInput) -> OutputData {
         }
         let billboardUp = vec3<f32>(0.0, 1.0, 0.0);
 
-        // 🌿 쿼드 position.z = AABB 수직 중심 오프셋(centerY_local)
         let centerYLocal = hierarchyPos.z;
-        let treeCenter = input.instancePos + vec3<f32>(0.0, centerYLocal * safeScale.y, 0.0);
-
-        // 🌿 실제 나무 중심(treeCenter)에서 카메라까지의 정확한 시선 벡터 계산
+        let treeCenter = instancePos + vec3<f32>(0.0, centerYLocal * safeScale.y, 0.0);
         let toCam = systemUniforms.camera.cameraPosition.xyz - treeCenter;
 
         let impostorOffset = billboardRight * (hierarchyPos.x * safeScale.x) + billboardUp * (hierarchyPos.y * safeScale.y);
@@ -116,16 +119,13 @@ fn mainInput(input : VertexInput) -> OutputData {
             worldNormal = vec3<f32>(0.0, 0.0, 1.0);
         }
 
-        let invQuat = vec4<f32>(-input.instanceRotQuat.xyz, input.instanceRotQuat.w);
+        let invQuat = vec4<f32>(-instanceRotQuat.xyz, instanceRotQuat.w);
         let localView = normalize(rotateVectorByQuaternion(toCam, invQuat));
         output.vertexTangent = vec4<f32>(localView, -999.0);
     } else {
-
-
-
         if (length(hierarchyNormal) > 0.001) {
             let scaledNormal = hierarchyNormal / safeScale;
-            worldNormal = normalize(rotateVectorByQuaternion(scaledNormal, input.instanceRotQuat));
+            worldNormal = normalize(rotateVectorByQuaternion(scaledNormal, instanceRotQuat));
         }
 
         var inTan = hierarchyTangent;
@@ -135,7 +135,7 @@ fn mainInput(input : VertexInput) -> OutputData {
             inTan = normalize(cross(hierarchyNormal, rawT));
         }
         let scaledTangent = inTan * safeScale;
-        let worldTangent = normalize(rotateVectorByQuaternion(scaledTangent, input.instanceRotQuat));
+        let worldTangent = normalize(rotateVectorByQuaternion(scaledTangent, instanceRotQuat));
         let tanW = select(1.0, input.vertexTangent.w, input.vertexTangent.w != 0.0);
         output.vertexTangent = vec4<f32>(worldTangent, tanW);
     }
@@ -150,12 +150,12 @@ fn mainInput(input : VertexInput) -> OutputData {
     output.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
     output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * vec4<f32>(worldPos, 1.0);
 
-    output.instanceRotQuat = input.instanceRotQuat;
+    output.instanceRotQuat = instanceRotQuat;
     output.vertexColor_0 = input.vertexColor_0;
     output.globalFragmentSlotIndex = subMeshUniforms.globalFragmentSlotIndex;
     output.localNodeScale_volumeScale = vec2<f32>(safeScale.x, safeScale.y);
 
-    output.combinedOpacity = fadeFactor * lodFadeFactor;
+    output.combinedOpacity = combinedOpacity;
     output.receiveShadow = 1.0;
 
     output.motionVector = vec3<f32>(0.0);
@@ -168,19 +168,28 @@ fn mainInput(input : VertexInput) -> OutputData {
 fn entryPointShadowVertex(input : VertexInput) -> OutputData {
     var output : OutputData;
 
-    let fadeFactor = input.instanceExtra.x;
-    let lodFadeFactor = input.instanceExtra.y;
+    let instancePos = input.instancePos_scaleY.xyz;
+    let scaleY = input.instancePos_scaleY.w;
+
+    let rotXY = unpack2x16snorm(input.instanceRotQuat_packed.x);
+    let rotZW = unpack2x16snorm(input.instanceRotQuat_packed.y);
+    let instanceRotQuat = vec4<f32>(rotXY.x, rotXY.y, rotZW.x, rotZW.y);
+
+    let scaleXZ = unpack2x16float(input.instancePackedScaleXZ);
+    let instanceScale = vec3<f32>(scaleXZ.x, scaleY, scaleXZ.y);
+
+    let combinedOpacity = input.instanceFade;
 
     var hierarchyPos = input.position;
     if (subMeshUniforms.hasHierarchyTransform != 0u) {
         hierarchyPos = (subMeshUniforms.relativeModelMatrix * vec4<f32>(input.position, 1.0)).xyz;
     }
 
-    let safeScale = max(input.instanceScale, vec3<f32>(0.0001));
+    let safeScale = max(instanceScale, vec3<f32>(0.0001));
     let scaledPos = hierarchyPos * safeScale;
-    let rotatedPos = rotateVectorByQuaternion(scaledPos, input.instanceRotQuat);
+    let rotatedPos = rotateVectorByQuaternion(scaledPos, instanceRotQuat);
 
-    var worldPos = rotatedPos + input.instancePos;
+    var worldPos = rotatedPos + instancePos;
 
     let isImpostor = (input.vertexTangent.w < -500.0);
     if (isImpostor) {
@@ -206,12 +215,12 @@ fn entryPointShadowVertex(input : VertexInput) -> OutputData {
         let billboardUp = vec3<f32>(0.0, 1.0, 0.0);
 
         let centerYLocal = hierarchyPos.z;
-        let treeCenter = input.instancePos + vec3<f32>(0.0, centerYLocal * safeScale.y, 0.0);
+        let treeCenter = instancePos + vec3<f32>(0.0, centerYLocal * safeScale.y, 0.0);
 
         let impostorOffset = billboardRight * (hierarchyPos.x * safeScale.x) + billboardUp * (hierarchyPos.y * safeScale.y);
         worldPos = treeCenter + impostorOffset;
 
-        let invQuat = vec4<f32>(-input.instanceRotQuat.xyz, input.instanceRotQuat.w);
+        let invQuat = vec4<f32>(-instanceRotQuat.xyz, instanceRotQuat.w);
         let localLightDir = normalize(rotateVectorByQuaternion(lightForward, invQuat));
         output.vertexTangent = vec4<f32>(localLightDir, -999.0);
     }
@@ -223,7 +232,7 @@ fn entryPointShadowVertex(input : VertexInput) -> OutputData {
     output.uv = input.uv;
     output.uv1 = input.uv1;
     output.globalFragmentSlotIndex = subMeshUniforms.globalFragmentSlotIndex;
-    output.combinedOpacity = fadeFactor * lodFadeFactor;
+    output.combinedOpacity = combinedOpacity;
 
     return output;
 }

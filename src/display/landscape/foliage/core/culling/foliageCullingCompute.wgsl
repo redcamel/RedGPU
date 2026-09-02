@@ -48,15 +48,11 @@ struct FoliageInstanceData {
     posX: f32,
     posY: f32,
     posZ: f32,
-    rotX: f32,
-    rotY: f32,
-    rotZ: f32,
-    rotW: f32,
-    scaleX: f32,
     scaleY: f32,
-    scaleZ: f32,
-    fade: f32,
-    typeIdOrSubId: f32, // Lower 16-bit: typeId, Upper/Frac: cross-fade alpha
+    packedRotXY: u32,
+    packedRotZW: u32,
+    packedScaleXZ: u32,
+    fadeOrType: f32, // Raw: typeId, Culled: cross-fade alpha
 };
 
 struct DrawIndexedIndirectArgs {
@@ -85,7 +81,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     }
 
     let instance = rawInstanceBuffer[idx];
-    let typeIdx = u32(instance.typeIdOrSubId);
+    let typeIdx = u32(instance.fadeOrType);
     if (typeIdx >= 64u) {
         return;
     }
@@ -112,6 +108,11 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let hasInfiniteImpostor = (numLODs > 0u && typeInfo.lods[numLODs - 1u].lodDistance >= 100000.0);
     let effectiveCullingDistSq = select(cullingDistSq, 1000000000000.0, hasInfiniteImpostor);
 
+    let scaleXZ = unpack2x16float(instance.packedScaleXZ);
+    let scaleX = scaleXZ.x;
+    let scaleZ = scaleXZ.y;
+    let scaleY = instance.scaleY;
+
     // 🌿 1. 지형 높이 VHT 텍스처 바이리니어 샘플링 (전체 뷰 통틀어 단 1회 고속 실행)
     var realY = instance.posY;
     if (globalUniforms.hasVHT != 0u && globalUniforms.invWorldSizeX > 0.0) {
@@ -122,7 +123,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             let terrainHeight = sampledHeightNorm * globalUniforms.heightScale;
 
             // 🌿 경사도 기반 자동 안착 깊이 보정 (Slope-Adaptive Ground Sink)
-            let maxXZScale = max(instance.scaleX, instance.scaleZ);
+            let maxXZScale = max(scaleX, scaleZ);
             let trunkRadius = max(typeInfo.boundingRadius * 0.18 * maxXZScale, 0.25);
             let deltaUV = trunkRadius * globalUniforms.invWorldSizeX;
 
@@ -149,7 +150,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     let dist = sqrt(distSq);
     let effectiveDist = dist * max(globalUniforms.fovFactor, 0.0001);
 
-    let maxScale = max(max(instance.scaleX, instance.scaleY), instance.scaleZ);
+    let maxScale = max(max(scaleX, scaleY), scaleZ);
     let scaledRadius = typeInfo.boundingRadius * maxScale;
     let spherePos = vec4<f32>(instance.posX, realY, instance.posZ, 1.0);
     let r = -scaledRadius;
@@ -178,7 +179,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
         var culledInst = instance;
         culledInst.posY = realY;
-        culledInst.fade = globalFade;
 
         if (numLODs <= 1u) {
             let baseCmdIdx = typeInfo.indirectBaseOffset + typeInfo.lods[0].subMeshOffset;
@@ -189,7 +189,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
             }
 
             let outIdx = typeInfo.culledBaseOffset + slot;
-            culledInst.typeIdOrSubId = 1.0;
+            culledInst.fadeOrType = globalFade;
             mainCulledInstanceBuffer[outIdx] = culledInst;
         } else {
             var emitCount: u32 = 0u;
@@ -227,7 +227,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
                     let outIdx = typeInfo.culledBaseOffset + (l * typeInfo.maxInstances) + slot;
                     var finalEmitInst = culledInst;
-                    finalEmitInst.typeIdOrSubId = alpha;
+                    finalEmitInst.fadeOrType = alpha * globalFade;
                     mainCulledInstanceBuffer[outIdx] = finalEmitInst;
 
                     emitCount = emitCount + 1u;
@@ -246,8 +246,7 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
     if (activeCascades > 0u) {
         var shadowInst = instance;
         shadowInst.posY = realY;
-        shadowInst.fade = 1.0;
-        shadowInst.typeIdOrSubId = 1.0;
+        shadowInst.fadeOrType = 1.0;
 
         for (var c: u32 = 0u; c < activeCascades; c = c + 1u) {
             let cascadeInfo = globalUniforms.cascades[c];

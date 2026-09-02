@@ -20,10 +20,37 @@ export interface CascadeCullingParam {
 }
 
 class FoliageMegaBuffer {
-    static readonly #STRIDE_FLOATS: number = 12;
-    static readonly #STRIDE_BYTES: number = 12 * 4;
+    static readonly #STRIDE_FLOATS: number = 8;
+    static readonly #STRIDE_BYTES: number = 8 * 4; // 32 Bytes per instance
     static readonly #MAX_TYPES: number = 64;
     static readonly #TYPE_PARAM_FLOATS: number = 44; // 176 bytes per type (16-byte aligned)
+
+    static readonly #tempFloat32: Float32Array = new Float32Array(1);
+    static readonly #tempUint32: Uint32Array = new Uint32Array(FoliageMegaBuffer.#tempFloat32.buffer);
+    #cpuRawDataUint32: Uint32Array;
+
+    constructor(redGPUContext: RedGPUContext, maxTotalInstances: number = 500000, maxSubMeshes: number = 256) {
+        this.#redGPUContext = redGPUContext;
+        this.#maxTotalInstances = maxTotalInstances;
+        this.#maxSubMeshes = maxSubMeshes;
+        this.#cpuRawDataBuffer = new Float32Array(this.#maxTotalInstances * FoliageMegaBuffer.#STRIDE_FLOATS);
+        this.#cpuRawDataUint32 = new Uint32Array(this.#cpuRawDataBuffer.buffer);
+        this.#indirectResetTemplate = new Uint32Array(this.#maxSubMeshes * 5);
+        this.#shadowIndirectResetTemplate = new Uint32Array(this.#maxSubMeshes * 5 * 4);
+
+        this.#initBuffers();
+    }
+
+    static #floatToHalf(val: number): number {
+        FoliageMegaBuffer.#tempFloat32[0] = val;
+        const f = FoliageMegaBuffer.#tempUint32[0];
+        const sign = (f >> 16) & 0x8000;
+        let exp = ((f >> 23) & 0xFF) - 127 + 15;
+        let mant = (f >> 13) & 0x03FF;
+        if (exp <= 0) return sign;
+        if (exp >= 31) return sign | 0x7C00;
+        return sign | (exp << 10) | mant;
+    }
 
     #redGPUContext: RedGPUContext;
     #maxTotalInstances: number;
@@ -40,6 +67,12 @@ class FoliageMegaBuffer {
     #unifiedGlobalUniformGPUBuffer: GPUBuffer | null = null;
 
     #cpuRawDataBuffer: Float32Array;
+
+    static #pack2x16snorm(x: number, y: number): number {
+        const ix = Math.max(-32768, Math.min(32767, Math.round(x * 32767)));
+        const iy = Math.max(-32768, Math.min(32767, Math.round(y * 32767)));
+        return (ix & 0xFFFF) | ((iy & 0xFFFF) << 16);
+    }
     #cpuTypeParamsData: Float32Array = new Float32Array(FoliageMegaBuffer.#MAX_TYPES * FoliageMegaBuffer.#TYPE_PARAM_FLOATS);
     #cpuTypeParamsUint32: Uint32Array = new Uint32Array(this.#cpuTypeParamsData.buffer);
 
@@ -59,15 +92,10 @@ class FoliageMegaBuffer {
     #cachedVHTView: GPUTextureView | null = null;
     #cachedVHTSampler: GPUSampler | null = null;
 
-    constructor(redGPUContext: RedGPUContext, maxTotalInstances: number = 500000, maxSubMeshes: number = 256) {
-        this.#redGPUContext = redGPUContext;
-        this.#maxTotalInstances = maxTotalInstances;
-        this.#maxSubMeshes = maxSubMeshes;
-        this.#cpuRawDataBuffer = new Float32Array(this.#maxTotalInstances * FoliageMegaBuffer.#STRIDE_FLOATS);
-        this.#indirectResetTemplate = new Uint32Array(this.#maxSubMeshes * 5);
-        this.#shadowIndirectResetTemplate = new Uint32Array(this.#maxSubMeshes * 5 * 4);
-
-        this.#initBuffers();
+    static #pack2x16float(x: number, y: number): number {
+        const hx = FoliageMegaBuffer.#floatToHalf(x);
+        const hy = FoliageMegaBuffer.#floatToHalf(y);
+        return (hx & 0xFFFF) | ((hy & 0xFFFF) << 16);
     }
 
     get rawGPUBuffer(): GPUBuffer | null {
@@ -150,7 +178,7 @@ class FoliageMegaBuffer {
         // Pre-initialize typeId for all slots in this allocation
         const baseFloat = rawBaseOffset * FoliageMegaBuffer.#STRIDE_FLOATS;
         for (let i = 0; i < maxInstances; i++) {
-            this.#cpuRawDataBuffer[baseFloat + i * FoliageMegaBuffer.#STRIDE_FLOATS + 11] = typeId;
+            this.#cpuRawDataBuffer[baseFloat + i * FoliageMegaBuffer.#STRIDE_FLOATS + 7] = typeId;
         }
 
         this.#nextRawOffset += maxInstances;
@@ -187,7 +215,7 @@ class FoliageMegaBuffer {
 
         for (let i = 0; i < count; i++) {
             const instOffset = baseFloatOffset + i * FoliageMegaBuffer.#STRIDE_FLOATS;
-            this.#cpuRawDataBuffer[instOffset + 11] = typeId;
+            this.#cpuRawDataBuffer[instOffset + 7] = typeId;
         }
 
         const gpuDevice = this.#redGPUContext.gpuDevice;
@@ -213,20 +241,18 @@ class FoliageMegaBuffer {
         fade: number = 1.0
     ): void {
         const offset = (allocation.rawBaseOffset + index) * FoliageMegaBuffer.#STRIDE_FLOATS;
-        const buffer = this.#cpuRawDataBuffer;
+        const f32 = this.#cpuRawDataBuffer;
+        const u32 = this.#cpuRawDataUint32;
 
-        buffer[offset] = posX;
-        buffer[offset + 1] = posY;
-        buffer[offset + 2] = posZ;
-        buffer[offset + 3] = rotX;
-        buffer[offset + 4] = rotY;
-        buffer[offset + 5] = rotZ;
-        buffer[offset + 6] = rotW;
-        buffer[offset + 7] = scaleX;
-        buffer[offset + 8] = scaleY;
-        buffer[offset + 9] = scaleZ;
-        buffer[offset + 10] = fade;
-        buffer[offset + 11] = allocation.typeId;
+        f32[offset] = posX;
+        f32[offset + 1] = posY;
+        f32[offset + 2] = posZ;
+        f32[offset + 3] = scaleY;
+
+        u32[offset + 4] = FoliageMegaBuffer.#pack2x16snorm(rotX, rotY);
+        u32[offset + 5] = FoliageMegaBuffer.#pack2x16snorm(rotZ, rotW);
+        u32[offset + 6] = FoliageMegaBuffer.#pack2x16float(scaleX, scaleZ);
+        f32[offset + 7] = allocation.typeId;
     }
 
     uploadAllocationToGPU(allocation: FoliageTypeAllocation): void {
