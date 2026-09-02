@@ -49,18 +49,6 @@ fn shadowMain(inputData: InputData) {
     let texColor = textureSample(baseColorTexture, baseColorTextureSampler, inputData.uv);
     let globalFragmentData = globalFragmentSSBO_PBR[inputData.globalFragmentSlotIndex];
 
-//    let fadeOpacity = inputData.combinedOpacity;
-//    if (fadeOpacity < 0.999) {
-//        let px = u32(inputData.position.x) & 3u;
-//        let py = u32(inputData.position.y) & 3u;
-//        let idx = (py << 2u) | px;
-//        let packed = select(0x6E4C2A80u, 0x5D7F91B3u, idx >= 8u);
-//        let threshold = f32((packed >> ((idx & 7u) * 4u)) & 0xFu) * 0.0625;
-//        if (fadeOpacity < threshold) {
-//            discard;
-//        }
-//    }
-
     let ddxUV = dpdx(inputData.uv);
     let ddyUV = dpdy(inputData.uv);
     let maxDeriv = max(length(ddxUV), length(ddyUV));

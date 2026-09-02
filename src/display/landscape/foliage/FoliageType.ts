@@ -1,6 +1,5 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import Mesh from "../../mesh/Mesh";
-import FoliageInstanceBuffer from "./FoliageInstanceBuffer";
 import FoliageSubMeshAssembler from "./core/assembler/FoliageSubMeshAssembler";
 import FoliageTilePopulator from "./core/populator/FoliageTilePopulator";
 
@@ -60,7 +59,6 @@ class FoliageType {
 
     #megaBuffer: FoliageMegaBuffer | null = null;
     #allocation: FoliageTypeAllocation | null = null;
-    #instanceBuffer: FoliageInstanceBuffer | null = null;
 
     #activeInstanceCount: number = 0;
     #bottomOffset: number = 0;
@@ -134,17 +132,6 @@ class FoliageType {
                 this.#bottomOffset,
                 this.#lodInfoList
             );
-        } else {
-            const lod0SubCount = this.#lodInfoList[0]?.subMeshCount ?? this.#subMeshes.length;
-            const lod0Dist = this.#lodInfoList[0]?.lodDistance ?? 80.0;
-            this.#instanceBuffer = new FoliageInstanceBuffer(redGPUContext, this.#options.maxInstances, this.#subMeshes);
-            this.#instanceBuffer.initStaticLODUniforms(
-                this.#lodInfoList,
-                lod0Dist,
-                lod0SubCount,
-                hasImpostor,
-                this.#options.cullingDistance ?? 2000.0
-            );
         }
     }
 
@@ -205,34 +192,31 @@ class FoliageType {
     }
 
     get culledGPUBuffer(): GPUBuffer | null {
-        return this.#megaBuffer ? this.#megaBuffer.culledGPUBuffer : this.#instanceBuffer?.culledGPUBuffer || null;
+        return this.#megaBuffer?.culledGPUBuffer || null;
     }
 
     get indirectGPUBuffer(): GPUBuffer | null {
-        return this.#megaBuffer ? this.#megaBuffer.indirectGPUBuffer : this.#instanceBuffer?.indirectGPUBuffer || null;
+        return this.#megaBuffer?.indirectGPUBuffer || null;
     }
 
     get shadowCulledGPUBuffer(): GPUBuffer | null {
-        return this.#megaBuffer ? this.#megaBuffer.shadowCulledGPUBuffer : this.#instanceBuffer?.culledGPUBuffer || null;
+        return this.#megaBuffer?.shadowCulledGPUBuffer || null;
     }
 
     get shadowIndirectGPUBuffer(): GPUBuffer | null {
-        return this.#megaBuffer ? this.#megaBuffer.shadowIndirectGPUBuffer : this.#instanceBuffer?.indirectGPUBuffer || null;
+        return this.#megaBuffer?.shadowIndirectGPUBuffer || null;
     }
 
-    getShadowCulledGPUBuffer(cascadeIndex: number): GPUBuffer | null {
-        return this.#megaBuffer ? this.#megaBuffer.shadowCulledGPUBuffer : this.#instanceBuffer?.culledGPUBuffer || null;
+    getShadowCulledGPUBuffer(cascadeIndex?: number): GPUBuffer | null {
+        return this.#megaBuffer?.shadowCulledGPUBuffer || null;
     }
 
-    getShadowIndirectGPUBuffer(cascadeIndex: number): GPUBuffer | null {
-        return this.#megaBuffer ? this.#megaBuffer.shadowIndirectGPUBuffer : this.#instanceBuffer?.indirectGPUBuffer || null;
+    getShadowIndirectGPUBuffer(cascadeIndex?: number): GPUBuffer | null {
+        return this.#megaBuffer?.shadowIndirectGPUBuffer || null;
     }
 
     getCullingBindGroup(layout: GPUBindGroupLayout, vhtView?: GPUTextureView, vhtSampler?: GPUSampler): GPUBindGroup | null {
-        if (this.#megaBuffer) {
-            return this.#megaBuffer.getOrCreateUnifiedCullingBindGroup(layout, vhtView, vhtSampler);
-        }
-        return this.#instanceBuffer?.getOrCreateCullingBindGroup(layout, vhtView, vhtSampler) || null;
+        return this.#megaBuffer?.getOrCreateUnifiedCullingBindGroup(layout, vhtView, vhtSampler) || null;
     }
 
     updateCullingUniforms(
@@ -250,20 +234,6 @@ class FoliageType {
                 this.#bottomOffset,
                 this.#lodInfoList
             );
-        } else if (this.#instanceBuffer) {
-            this.#instanceBuffer.updateCullingUniforms(
-                camX, camY, camZ,
-                this.#options.cullingDistance ?? 2000.0,
-                this.#options.fadeStartDistance ?? 1500.0,
-                this.#activeInstanceCount,
-                this.#boundingRadius,
-                worldSizeX, heightScale,
-                this.#bottomOffset,
-                hasVHT,
-                frustumPlanes,
-                fovFactor,
-                this.#numLODs
-            );
         }
     }
 
@@ -276,24 +246,18 @@ class FoliageType {
     ): void {
         if (this.#megaBuffer && this.#allocation) {
             this.#megaBuffer.setInstanceData(this.#allocation, index, posX, posY, posZ, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, fade);
-        } else if (this.#instanceBuffer) {
-            this.#instanceBuffer.setInstanceData(index, posX, posY, posZ, rotX, rotY, rotZ, rotW, scaleX, scaleY, scaleZ, fade, subId);
         }
     }
 
     uploadRangeToGPU(startIndex: number, count: number): void {
         if (this.#megaBuffer && this.#allocation) {
             this.#megaBuffer.uploadAllocationRangeToGPU(this.#allocation, startIndex, count);
-        } else if (this.#instanceBuffer) {
-            this.#instanceBuffer.uploadRangeToGPU(startIndex, count);
         }
     }
 
     resetIndirectBuffer(): void {
         if (this.#megaBuffer) {
             this.#megaBuffer.resetMultiIndirectCommands();
-        } else if (this.#instanceBuffer && this.#subMeshes.length > 0) {
-            this.#instanceBuffer.resetMultiIndirectCount(this.#subMeshes);
         }
     }
 
@@ -303,9 +267,6 @@ class FoliageType {
 
         if (this.#megaBuffer && this.#allocation) {
             this.#megaBuffer.writeInstancesData(this.#allocation, data, this.#activeInstanceCount);
-        } else if (this.#instanceBuffer) {
-            this.#instanceBuffer.writeSubData(data.subarray(0, this.#activeInstanceCount * 12));
-            this.#instanceBuffer.uploadToGPU(this.#activeInstanceCount);
         }
         this.resetIndirectBuffer();
     }
@@ -325,8 +286,6 @@ class FoliageType {
     }
 
     destroy(): void {
-        this.#instanceBuffer?.destroy();
-        this.#instanceBuffer = null;
         for (let i = 0; i < this.#subMeshes.length; i++) {
             const sub = this.#subMeshes[i];
             sub.destroy();
