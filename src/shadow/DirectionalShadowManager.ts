@@ -41,6 +41,7 @@ class DirectionalShadowManager {
     #maxShadowDistance: number = 200;
     #cascadeCount: number = 4;
     #pcssLightSize: number = 1.0;
+    #showCascadeColors: boolean = false;
 
     #shadowDepthTexture: GPUTexture;
     #shadowDepthTextureView: GPUTextureView;
@@ -197,6 +198,22 @@ class DirectionalShadowManager {
     set cascadeCount(value: number) {
         validateUintRange(value, 1, 4);
         this.#cascadeCount = value;
+    }
+
+    /**
+     * [KO] 캐스케이드 레벨별 디버그 색상 시각화(Show Cascade Colors) 활성화 여부를 반환합니다.
+     * [EN] Returns whether debug color visualization per cascade level (Show Cascade Colors) is enabled.
+     */
+    get showCascadeColors(): boolean {
+        return this.#showCascadeColors;
+    }
+
+    /**
+     * [KO] 캐스케이드 레벨별 디버그 색상 시각화(Show Cascade Colors) 활성화 여부를 설정합니다.
+     * [EN] Sets whether debug color visualization per cascade level (Show Cascade Colors) is enabled.
+     */
+    set showCascadeColors(value: boolean) {
+        this.#showCascadeColors = value;
     }
 
     /**

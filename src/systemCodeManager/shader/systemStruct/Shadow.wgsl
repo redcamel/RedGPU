@@ -10,7 +10,7 @@ struct Shadow {
     directionalShadowStrength: f32,
     pcssLightSize: f32,
     cascadeCount: u32,
-    _pad0: f32,
+    showCascadeColors: f32,
     _pad1: f32,
     _pad2: f32,
 };

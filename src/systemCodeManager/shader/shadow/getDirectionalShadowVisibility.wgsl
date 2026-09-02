@@ -56,14 +56,16 @@ fn findBlockerPenumbraScale(
     }
 
     let blockerRatio = blockerCount / 8.0;
-    if (blockerRatio <= 0.0) {
-        return 0.0; // 차폐체 없음
-    }
 
-    // 접촉 경화(Contact Hardening): 최소 1.25 텍셀 반경 확보로 초근접 텍셀 계단화(Aliasing) 완벽 스무딩
-    let penumbraFactor = mix(1.25, 2.4, smoothstep(0.0, 1.0, blockerRatio));
-    let baseFilterScale = 1.0 / (1.0 + f32(cascadeIndex) * 0.45);
-    return baseFilterScale * max(0.5, lightSize) * penumbraFactor;
+    // 🌟 [캐스케이드 적응형 접촉 경화 (Adaptive PCSS)]
+    // - Cascade 0 (1단계): 0.75 텍셀로 면도날처럼 칼같은 Ultra-Sharp 선명도 보장
+    // - Cascade 1~3 (상위 단계): 1.1 ~ 1.8 텍셀로 계단화 방지 적응형 스무딩
+    let cascadeFactor = clamp(f32(cascadeIndex) / 3.0, 0.0, 1.0);
+    let minRadius = mix(0.75, 1.8, cascadeFactor);
+    let maxRadius = mix(2.2, 3.4, cascadeFactor);
+    let penumbraFactor = mix(minRadius, maxRadius, smoothstep(0.0, 1.0, blockerRatio));
+
+    return max(0.5, lightSize) * penumbraFactor;
 }
 
 /**
@@ -91,10 +93,6 @@ fn sampleCascadeShadow(
         cascadeBias,
         lightSize
     );
-
-    if (effectiveFilterScale <= 0.0) {
-        return 1.0;
-    }
 
     var visibility: f32 = 0.0;
     // 🌟 [노이즈 프리 정렬 16-Tap Vogel PCSS] 인접 픽셀 간 완벽한 연속성으로 지글거림 0 달성
@@ -208,4 +206,42 @@ fn getDirectionalShadowVisibility(
     }
 
     return visibility;
+}
+
+/**
+ * [KO] 언리얼 엔진 5 표준 4단 캐스케이드 디버그 색상 산출 (0:Red, 1:Green, 2:Blue, 3:Yellow)
+ * [EN] Calculates Unreal Engine 5 standard 4-cascade debug colors (0:Red, 1:Green, 2:Blue, 3:Yellow).
+ */
+fn getCascadeDebugColor(worldPosition: vec3<f32>) -> vec3<f32> {
+    let shadowInfo = systemUniforms.shadow;
+    let cascadeCount = shadowInfo.cascadeCount;
+    let viewPos = systemUniforms.camera.viewMatrix * vec4<f32>(worldPosition, 1.0);
+    let viewDepth = -viewPos.z;
+
+    var cascadeIndex: u32 = 0u;
+    if (viewDepth > shadowInfo.cascadeSplitDepths[0] && cascadeCount > 1u) { cascadeIndex = 1u; }
+    if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
+    if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
+
+    let cascadeColors = array<vec3<f32>, 4>(
+        vec3<f32>(1.0, 0.25, 0.25),  // Cascade 0: 빨강
+        vec3<f32>(0.25, 1.0, 0.25),  // Cascade 1: 초록
+        vec3<f32>(0.25, 0.45, 1.0),  // Cascade 2: 파랑
+        vec3<f32>(1.0, 0.95, 0.25)   // Cascade 3: 노랑
+    );
+
+    var debugColor = cascadeColors[cascadeIndex];
+    if (cascadeIndex < cascadeCount - 1u) {
+        let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
+        let splitNear = select(systemUniforms.camera.nearClipping, shadowInfo.cascadeSplitDepths[cascadeIndex - 1u], cascadeIndex > 0u);
+        let cascadeRange = splitFar - splitNear;
+        let blendMargin = cascadeRange * 0.1;
+        let blendStart = splitFar - blendMargin;
+
+        if (viewDepth > blendStart) {
+            let blendFactor = clamp((viewDepth - blendStart) / blendMargin, 0.0, 1.0);
+            debugColor = mix(debugColor, cascadeColors[cascadeIndex + 1u], blendFactor);
+        }
+    }
+    return debugColor;
 }

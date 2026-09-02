@@ -593,7 +593,12 @@ fn main(inputData:InputData) -> OutputFragment {
         emissiveColor *= textureSample(emissiveTexture, emissiveTextureSampler, emissiveUV).rgb;
     #redgpu_endIf
 
-    let finalColor = vec4<f32>(totalDirectLighting + indirectLighting + emissiveColor, resultAlpha);
+    var finalColor = vec4<f32>(totalDirectLighting + indirectLighting + emissiveColor, resultAlpha);
+
+    if (systemUniforms.shadow.showCascadeColors > 0.5 && receiveShadowYn) {
+        let debugTint = getCascadeDebugColor(input_vertexPosition);
+        finalColor = vec4<f32>(mix(finalColor.rgb, finalColor.rgb * debugTint * 1.8, 0.7), finalColor.a);
+    }
 
     #redgpu_if useTint
         output.color = getTintBlendMode(finalColor, uniforms.tintBlendMode, uniforms.tint);
