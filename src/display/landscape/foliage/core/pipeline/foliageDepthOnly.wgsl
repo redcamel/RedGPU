@@ -29,11 +29,11 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
 
-    // 🌿 UE5 Foliage Mipmap Alpha Boost (원거리 밉맵 희석 보정으로 잎사귀 완벽 보존)
+    // 🌿 UE5 Foliage Mipmap Alpha Boost (로그-제곱근 융합으로 sqrt 연산 제거)
     let ddxUV = dpdx(inputData.uv);
     let ddyUV = dpdy(inputData.uv);
-    let maxDeriv = max(length(ddxUV), length(ddyUV));
-    let mipLevel = max(0.0, log2(max(maxDeriv * 1024.0, 1.0)));
+    let lenSq = max(dot(ddxUV, ddxUV), dot(ddyUV, ddyUV));
+    let mipLevel = max(0.0, 0.5 * log2(max(lenSq * 1048576.0, 1.0)));
     let mipAlphaScale = 1.0 + mipLevel * 0.70;
     let baseCutOff = select(0.3333, globalFragmentData.cutOff, globalFragmentData.cutOff > 0.0);
     let effectiveAlpha = texColor.a * mipAlphaScale;
@@ -51,8 +51,8 @@ fn shadowMain(inputData: InputData) {
 
     let ddxUV = dpdx(inputData.uv);
     let ddyUV = dpdy(inputData.uv);
-    let maxDeriv = max(length(ddxUV), length(ddyUV));
-    let mipLevel = max(0.0, log2(max(maxDeriv * 1024.0, 1.0)));
+    let lenSq = max(dot(ddxUV, ddxUV), dot(ddyUV, ddyUV));
+    let mipLevel = max(0.0, 0.5 * log2(max(lenSq * 1048576.0, 1.0)));
     let mipAlphaScale = 1.0 + mipLevel * 0.70;
     let baseCutOff = select(0.3333, globalFragmentData.cutOff, globalFragmentData.cutOff > 0.0);
     let effectiveAlpha = texColor.a * mipAlphaScale;

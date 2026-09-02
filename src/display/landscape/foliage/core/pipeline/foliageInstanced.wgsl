@@ -123,13 +123,13 @@ fn mainInput(input : VertexInput) -> OutputData {
         let localView = normalize(rotateVectorByQuaternion(toCam, invQuat));
         output.vertexTangent = vec4<f32>(localView, -999.0);
     } else {
-        if (length(hierarchyNormal) > 0.001) {
+        if (dot(hierarchyNormal, hierarchyNormal) > 0.0001) {
             let scaledNormal = hierarchyNormal / safeScale;
             worldNormal = normalize(rotateVectorByQuaternion(scaledNormal, instanceRotQuat));
         }
 
         var inTan = hierarchyTangent;
-        if (length(inTan) < 0.001) {
+        if (dot(inTan, inTan) < 0.0001) {
             var rawT = vec3<f32>(1.0, 0.0, 0.0);
             if (abs(hierarchyNormal.x) > 0.9) { rawT = vec3<f32>(0.0, 1.0, 0.0); }
             inTan = normalize(cross(hierarchyNormal, rawT));

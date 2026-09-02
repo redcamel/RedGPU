@@ -230,13 +230,19 @@ fn main(inputData: InputData) -> OutputFragment {
     let cov01 = w01 * s01.a;
     let cov11 = w11 * s11.a;
     let totalCoverage = cov00 + cov10 + cov01 + cov11;
-    let safeCoverage = max(totalCoverage, 0.0001);
 
-    // 🌿 TrueRGB 및 머티리얼 속성 알파 가중 정규화 (빈 공간 암전 차단 및 100% True PBR 복원)
-    var albedo = (s00.rgb * cov00 + s10.rgb * cov10 + s01.rgb * cov01 + s11.rgb * cov11) / safeCoverage;
+    // 🌿 투명 픽셀 조기 기각 (Early Discard - PBR 라이팅 연산 100% 스킵)
+    if (totalCoverage < 0.001) {
+        discard;
+    }
+
+    let invSafeCoverage = 1.0 / max(totalCoverage, 0.0001);
+
+    // 🌿 TrueRGB 및 머티리얼 속성 알파 가중 정규화 (1회 역수 곱셈으로 3회 나눗셈 단축)
+    var albedo = (s00.rgb * cov00 + s10.rgb * cov10 + s01.rgb * cov01 + s11.rgb * cov11) * invSafeCoverage;
     albedo = clamp(albedo, vec3<f32>(0.0), vec3<f32>(1.0));
-    let rawNormalDepth = (n00 * cov00 + n10 * cov10 + n01 * cov01 + n11 * cov11) / safeCoverage;
-    let rawORM = (orm00 * cov00 + orm10 * cov10 + orm01 * cov01 + orm11 * cov11) / safeCoverage;
+    let rawNormalDepth = (n00 * cov00 + n10 * cov10 + n01 * cov01 + n11 * cov11) * invSafeCoverage;
+    let rawORM = (orm00 * cov00 + orm10 * cov10 + orm01 * cov01 + orm11 * cov11) * invSafeCoverage;
 
     // 2. Dithered LOD Crossfade (4x4 Bayer Matrix)
     let fadeOpacity = inputData.combinedOpacity;
