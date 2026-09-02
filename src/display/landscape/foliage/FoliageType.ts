@@ -230,7 +230,7 @@ class FoliageType {
 
     getCullingBindGroup(layout: GPUBindGroupLayout, vhtView?: GPUTextureView, vhtSampler?: GPUSampler): GPUBindGroup | null {
         if (this.#megaBuffer) {
-            return this.#megaBuffer.getOrCreateGlobalCullingBindGroup(layout, vhtView, vhtSampler);
+            return this.#megaBuffer.getOrCreateUnifiedCullingBindGroup(layout, vhtView, vhtSampler);
         }
         return this.#instanceBuffer?.getOrCreateCullingBindGroup(layout, vhtView, vhtSampler) || null;
     }

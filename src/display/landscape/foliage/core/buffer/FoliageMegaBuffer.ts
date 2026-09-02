@@ -472,6 +472,14 @@ class FoliageMegaBuffer {
         return this.#unifiedCullingBindGroup;
     }
 
+    getOrCreateGlobalCullingBindGroup(
+        layout: GPUBindGroupLayout,
+        vhtTextureView?: GPUTextureView,
+        vhtSampler?: GPUSampler
+    ): GPUBindGroup | null {
+        return this.getOrCreateUnifiedCullingBindGroup(layout, vhtTextureView, vhtSampler);
+    }
+
     destroy(): void {
         this.#rawGPUBuffer?.destroy();
         this.#culledGPUBuffer?.destroy();
