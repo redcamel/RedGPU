@@ -1,4 +1,5 @@
 import View3D from "../../display/view/View3D";
+import Landscape from "../../display/landscape/core/Landscape";
 
 /**
  * [KO] Scene 내의 전체 Landscape 지형 시스템을 매 프레임 렌더 패스에 디스패치합니다 (Zero-GC / 1-Call Instancing).
@@ -34,12 +35,12 @@ export function renderLandscapeShadowLayer(view: View3D, passEncoder: GPURenderP
     const scene = (view as any).rawScene || view.scene;
     if (!scene) return;
 
-    const landscapes = (scene as any).landscapeChildren;
+    const landscapes = scene.landscapeChildren;
     if (!landscapes || landscapes.length === 0) return;
 
     const count = landscapes.length;
     for (let i = 0; i < count; i++) {
-        const landscape = landscapes[i];
+        const landscape: Landscape = landscapes[i];
         if (!landscape) continue;
 
         landscape.renderShadow(view, passEncoder);

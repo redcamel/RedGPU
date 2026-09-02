@@ -32,7 +32,7 @@ const GuiDirectionalShadowHelper: React.FC<GuiDirectionalShadowHelperProps> = ({
         shadowFolder.addBinding(directionalShadowManager, 'maxShadowDistance', {
             label: 'Max Distance (m)',
             min: 10,
-            max: 1000,
+            max: 10000,
             step: 10
         });
 
