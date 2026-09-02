@@ -1,5 +1,4 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include shadow.getShadowCoord;
 #redgpu_include shadow.getShadowClipPosition;
 #redgpu_include systemStruct.OutputShadowData;
 
@@ -54,7 +53,6 @@ struct OutputData {
     @location(8) prevClipPos: vec4<f32>,
     @location(9) instanceColor: vec4<f32>,
     @location(10) @interpolate(flat) lodLevel: f32,
-    @location(13) shadowCoord: vec3<f32>,
     @location(14) @interpolate(flat) receiveShadow: f32,
 };
 
@@ -222,7 +220,6 @@ fn main(input: InputData) -> OutputData {
     output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * worldPos4;
     output.instanceColor = computed.instanceColor;
     output.lodLevel = f32(computed.lodLevel);
-    output.shadowCoord = getShadowCoord(worldPos4.xyz, systemUniforms.directionalLightProjectionViewMatrix);
     output.receiveShadow = landscapeUniforms.receiveShadow;
 
     return output;

@@ -140,16 +140,16 @@ class SystemUniformUpdater {
                     value: directionalShadowManager.strength,
                 },
                 {
-                    key: 'directionalShadowFilterScale',
-                    value: directionalShadowManager.filterScale,
-                },
-                {
                     key: 'cascadeCount',
                     value: directionalShadowManager.cascadeCount,
                 },
                 {
                     key: 'cascadeSplitDepths',
                     value: cascadeSplits,
+                },
+                {
+                    key: 'pcssLightSize',
+                    value: directionalShadowManager.pcssLightSize,
                 }
             ]
         );

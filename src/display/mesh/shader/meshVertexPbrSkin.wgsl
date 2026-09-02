@@ -1,5 +1,4 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include shadow.getShadowCoord;
 #redgpu_include shadow.getShadowClipPosition;
 
 #redgpu_include systemStruct.globalVertexStruct;
@@ -50,7 +49,6 @@ struct VertexOutput {
     @location(11) combinedOpacity: f32,
 
     @location(12) motionVector: vec3<f32>,
-    @location(13) shadowCoord: vec3<f32>,
     @location(14) @interpolate(flat) receiveShadow: f32,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
@@ -81,10 +79,6 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
     let gu_prevModelMatrix = gu_matrixList.prevModelMatrix;
     let gu_normalModelMatrix = gu_matrixList.normalModelMatrix;
 
-    // [KO] 조명 데이터 캐싱
-    // [EN] Cache lighting data
-    let su_directionalLightProjectionViewMatrix = systemUniforms.directionalLightProjectionViewMatrix;
-
     // [KO] 컴퓨트 셰이더에서 구워진 스키닝된 데이터 로드
     // [EN] Load skinned data baked in Compute Shader
     let skinnedPosData = skinnedVertices[inputData.idx];
@@ -110,11 +104,9 @@ fn main(inputData: InputDataSkin) -> VertexOutput {
     output.vertexColor_0 = inputData.vertexColor_0;
     output.globalFragmentSlotIndex = globalVertexData.globalFragmentSlotIndex;
 
-    // [KO] 그림자 좌표 계산
-    // [EN] Calculate shadow coordinates
+    // [KO] 그림자 플래그 설정
     #redgpu_if receiveShadow
     {
-        output.shadowCoord = getShadowCoord(position.xyz, su_directionalLightProjectionViewMatrix);
         output.receiveShadow = globalVertexData.receiveShadow;
     }
     #redgpu_endIf

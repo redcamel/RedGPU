@@ -68,7 +68,6 @@ struct InputData {
     @location(10) localNodeScale_volumeScale: vec2<f32>,
     @location(11) combinedOpacity: f32,
     @location(12) motionVector: vec3<f32>,
-    @location(13) shadowCoord: vec3<f32>,
     @location(14) @interpolate(flat) receiveShadow: f32,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 }
@@ -367,7 +366,14 @@ fn main(inputData:InputData) -> OutputFragment {
     // Shadow
     let receiveShadowYn = inputData.receiveShadow != 0.0;
     var visibility:f32 = 1.0;
-    visibility = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, input_vertexPosition);
+    var shadowWorldPos = input_vertexPosition;
+    if (systemUniforms.directionalLightCount > 0u) {
+        let L0 = -normalize(systemUniforms.directionalLights[0].direction);
+        let NdotL0 = clamp(dot(N, L0), 0.0, 1.0);
+        let normalOffset = N * (1.0 - NdotL0) * 0.05;
+        shadowWorldPos = shadowWorldPos + normalOffset;
+    }
+    visibility = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, shadowWorldPos);
     if(!receiveShadowYn){
         visibility = 1.0;
     } else {

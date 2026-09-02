@@ -1,5 +1,4 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include shadow.getShadowCoord;
 #redgpu_include entryPoint.mesh.entryPointShadowVertex;
 #redgpu_include entryPoint.mesh.entryPointPickingVertex;
 #redgpu_include displacement.getDisplacementPosition;
@@ -102,7 +101,6 @@ fn main(inputData: InputData) -> VertexOutput {
     // Shadow calculation
     #redgpu_if receiveShadow
     {
-        output.shadowCoord = getShadowCoord(position.xyz, systemUniforms.directionalLightProjectionViewMatrix);
         output.receiveShadow = globalVertexData.receiveShadow;
     }
     #redgpu_endIf

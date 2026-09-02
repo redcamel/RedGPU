@@ -8,7 +8,6 @@
 #redgpu_include math.direction.getViewDirection;
 #redgpu_include math.direction.getReflectionVectorFromViewDirection;
 #redgpu_include skyAtmosphere.skyAtmosphereFn;
-#redgpu_include shadow.getShadowCoord;
 #redgpu_include shadow.getDirectionalShadowVisibility;
 
 struct InputData {
@@ -24,7 +23,6 @@ struct InputData {
     @location(8) prevClipPos: vec4<f32>,
     @location(9) instanceColor: vec4<f32>,
     @location(10) @interpolate(flat) lodLevel: f32,
-    @location(13) shadowCoord: vec3<f32>,
     @location(14) @interpolate(flat) receiveShadow: f32,
 };
 

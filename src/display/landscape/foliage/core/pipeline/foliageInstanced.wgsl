@@ -1,5 +1,4 @@
 #redgpu_include SYSTEM_UNIFORM;
-#redgpu_include shadow.getShadowCoord;
 #redgpu_include shadow.getShadowClipPosition;
 
 struct SubMeshUniforms {
@@ -45,7 +44,6 @@ struct OutputData {
     @location(11) combinedOpacity: f32,
 
     @location(12) motionVector: vec3<f32>,
-    @location(13) shadowCoord: vec3<f32>,
     @location(14) @interpolate(flat) receiveShadow: f32,
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
@@ -158,9 +156,6 @@ fn mainInput(input : VertexInput) -> OutputData {
     output.localNodeScale_volumeScale = vec2<f32>(safeScale.x, safeScale.y);
 
     output.combinedOpacity = fadeFactor * lodFadeFactor;
-
-
-    output.shadowCoord = getShadowCoord(worldPos, systemUniforms.directionalLightProjectionViewMatrix);
     output.receiveShadow = 1.0;
 
     output.motionVector = vec3<f32>(0.0);

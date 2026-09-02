@@ -37,10 +37,10 @@ const g_cascadeSplits = new Float32Array(5);
 class DirectionalShadowManager {
     #shadowDepthTextureSize: number = 2048;
     #bias: number = 0.00015;
-    #strength: number = 0.9;
-    #filterScale: number = 1.0;
+    #strength: number = 1.0;
     #maxShadowDistance: number = 200;
     #cascadeCount: number = 3;
+    #pcssLightSize: number = 1.0;
 
     #shadowDepthTexture: GPUTexture;
     #shadowDepthTextureView: GPUTextureView;
@@ -248,31 +248,6 @@ class DirectionalShadowManager {
     }
 
     /**
-     * [KO] 그림자 필터 번짐 반경(Filter Scale) 값을 반환합니다.
-     * [EN] Returns the shadow filter scale value.
-     *
-     * @returns
-     * [KO] 필터 스케일 값 (기본값: 2.0)
-     * [EN] Filter scale value (default: 2.0)
-     */
-    get filterScale(): number {
-        return this.#filterScale;
-    }
-
-    /**
-     * [KO] 그림자 필터 번짐 반경(Filter Scale) 값을 설정합니다. (0.0 이상)
-     * [EN] Sets the shadow filter scale value. (0.0 or greater)
-     *
-     * @param value -
-     * [KO] 필터 스케일 값
-     * [EN] Filter scale value
-     */
-    set filterScale(value: number) {
-        validatePositiveNumberRange(value, 0);
-        this.#filterScale = value;
-    }
-
-    /**
      * [KO] 섀도우 뎁스 텍스처의 크기(해상도)를 설정합니다. (정수)
      * [EN] Sets the size (resolution) of the shadow depth texture. (Integer)
      *
@@ -295,6 +270,23 @@ class DirectionalShadowManager {
      */
     get shadowDepthTextureSize(): number {
         return this.#shadowDepthTextureSize;
+    }
+
+    /**
+     * [KO] PCSS 광원의 가상 크기(Light Radius / Angular Size, 기본값: 2.0)를 반환합니다.
+     * [EN] Returns the virtual light size for PCSS (Light Radius / Angular Size, default: 2.0).
+     */
+    get pcssLightSize(): number {
+        return this.#pcssLightSize;
+    }
+
+    /**
+     * [KO] PCSS 광원의 가상 크기(Light Radius / Angular Size, 기본값: 2.0)를 설정합니다. (0.0 이상)
+     * [EN] Sets the virtual light size for PCSS (Light Radius / Angular Size, default: 2.0). (0.0 or greater)
+     */
+    set pcssLightSize(value: number) {
+        validatePositiveNumberRange(value, 0);
+        this.#pcssLightSize = value;
     }
 
     /**

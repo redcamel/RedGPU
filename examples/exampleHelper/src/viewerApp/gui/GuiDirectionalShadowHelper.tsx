@@ -1,8 +1,8 @@
 import React, {useEffect} from 'react';
 
 /**
- * [KO] Directional Shadow (CSM) 설정을 위한 Tweakpane GUI 헬퍼 컴포넌트입니다.
- * [EN] Tweakpane GUI helper component for Directional Shadow (CSM) settings.
+ * [KO] Directional Shadow (CSM + PCSS) 설정을 위한 Tweakpane GUI 헬퍼 컴포넌트입니다.
+ * [EN] Tweakpane GUI helper component for Directional Shadow (CSM + PCSS) settings.
  */
 interface GuiDirectionalShadowHelperProps {
     gui: any;
@@ -13,7 +13,14 @@ const GuiDirectionalShadowHelper: React.FC<GuiDirectionalShadowHelperProps> = ({
     useEffect(() => {
         if (!directionalShadowManager) return;
 
-        const shadowFolder = gui.addFolder({title: 'Directional Shadow (CSM)', expanded: true});
+        const shadowFolder = gui.addFolder({title: 'Directional Shadow (CSM + PCSS)', expanded: true});
+
+        shadowFolder.addBinding(directionalShadowManager, 'pcssLightSize', {
+            label: 'PCSS Light Size',
+            min: 0.1,
+            max: 10,
+            step: 0.1
+        });
 
         shadowFolder.addBinding(directionalShadowManager, 'cascadeCount', {
             label: 'Cascade Count',
@@ -41,13 +48,6 @@ const GuiDirectionalShadowHelper: React.FC<GuiDirectionalShadowHelperProps> = ({
             min: 0,
             max: 1,
             step: 0.01
-        });
-
-        shadowFolder.addBinding(directionalShadowManager, 'filterScale', {
-            label: 'Filter Scale',
-            min: 0,
-            max: 10,
-            step: 0.1
         });
 
         shadowFolder.addBinding(directionalShadowManager, 'shadowDepthTextureSize', {
