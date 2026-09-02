@@ -816,8 +816,8 @@ export const ExampleList: ExampleListType = [
                         name: 'CSM (Cascaded Shadow Maps)',
                         path: '3d/shadow/csm',
                         description: {
-                            ko: `4단 CSM(Cascaded Shadow Maps)과 PCSS 접촉 경화 소프트 섀도우를 시연하는 종합 예제입니다. 360도 방사형 다층 구조(0m~150m)에서 거리별 그림자 디테일과 캐스케이드 디버그 뷰를 확인할 수 있습니다.`,
-                            en: `A comprehensive example demonstrating 4-Cascade CSM and PCSS contact-hardening soft shadows across a 360-degree radial multi-tier layout (0m~150m) with cascade debug view.`
+                            ko: `4단 CSM(Cascaded Shadow Maps)과 PCSS 접촉 경화 소프트 섀도우를 시연하는 종합 예제입니다. 360도 방사형 다층 구조(0m~150m)에서 거리별 그림자 디테일과 품질을 확인할 수 있습니다.`,
+                            en: `A comprehensive example demonstrating 4-Cascade CSM and PCSS contact-hardening soft shadows across a 360-degree radial multi-tier layout (0m~150m).`
                         },
                     },
                     {

@@ -311,12 +311,7 @@ fn main(inputData:InputData) -> OutputFragment {
     #redgpu_endIf
 
     // [KO] 최종 색상 (Pre-Exposure 적용)
-    var finalColor = vec4<f32>((mixColor * systemUniforms.preExposure) + emissiveColor, resultAlpha);
-
-    if (systemUniforms.shadow.showCascadeColors > 0.5 && receiveShadowYn) {
-        let debugTint = getCascadeDebugColor(input_vertexPosition);
-        finalColor = vec4<f32>(mix(finalColor.rgb, finalColor.rgb * debugTint * 1.8, 0.7), finalColor.a);
-    }
+    let finalColor = vec4<f32>((mixColor * systemUniforms.preExposure) + emissiveColor, resultAlpha);
     
     #redgpu_if useTint
         output.color = getTintBlendMode(finalColor, globalFragmentData.tintBlendMode, globalFragmentData.tint);

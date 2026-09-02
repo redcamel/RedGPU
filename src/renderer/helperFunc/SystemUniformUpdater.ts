@@ -150,10 +150,6 @@ class SystemUniformUpdater {
                 {
                     key: 'pcssLightSize',
                     value: directionalShadowManager.pcssLightSize,
-                },
-                {
-                    key: 'showCascadeColors',
-                    value: directionalShadowManager.showCascadeColors ? 1.0 : 0.0,
                 }
             ]
         );

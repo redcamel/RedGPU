@@ -15,10 +15,6 @@ const GuiDirectionalShadowHelper: React.FC<GuiDirectionalShadowHelperProps> = ({
 
         const shadowFolder = gui.addFolder({title: 'Directional Shadow (CSM + PCSS)', expanded: true});
 
-        shadowFolder.addBinding(directionalShadowManager, 'showCascadeColors', {
-            label: 'Show Cascade Colors',
-        });
-
         shadowFolder.addBinding(directionalShadowManager, 'pcssLightSize', {
             label: 'PCSS Light Size',
             min: 0.1,
