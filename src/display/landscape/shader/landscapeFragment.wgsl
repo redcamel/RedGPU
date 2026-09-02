@@ -499,14 +499,12 @@ fn main(inputData: InputData) -> OutputFragment {
     }
     let NdotL = clamp(dot(N, L), 0.0, 1.0);
 
-    // 1. Normal Offset Bias: 지형 경사면에서 법선 방향으로 샘플링 위치를 미세 오프셋하여 Shadow Acne 원천 제거
-    let normalOffsetScale = 0.2;
-    let normalOffsetWorldPos = input_vertexPosition + N * (1.0 - NdotL) * normalOffsetScale;
-
     let rawVisibility: f32 = getDirectionalShadowVisibility(
         directionalShadowMap,
         directionalShadowMapSampler,
-        normalOffsetWorldPos
+        input_vertexPosition,
+        N,
+        L
     );
     let shadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVisibility);
     let visibility = select(1.0, shadowVis, receiveShadowYn);

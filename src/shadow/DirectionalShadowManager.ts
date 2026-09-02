@@ -37,9 +37,9 @@ const g_cascadeSplits = new Float32Array(5);
 class DirectionalShadowManager {
     #shadowDepthTextureSize: number = 2048;
     #bias: number = 0.00015;
-    #strength: number = 1.0;
+    #strength: number = 0.9;
     #maxShadowDistance: number = 200;
-    #cascadeCount: number = 3;
+    #cascadeCount: number = 4;
     #pcssLightSize: number = 1.0;
 
     #shadowDepthTexture: GPUTexture;
@@ -367,9 +367,9 @@ class DirectionalShadowManager {
         mat4.lookAt(g_lightRotMat, g_zero, g_lightDir, g_up);
         mat4.invert(g_invLightRotMat, g_lightRotMat);
 
-        // 🌟 1. [PSSM 표준] 로그 분할과 선형 분할의 가중 결합 (lambda = 0.90)
+        // 🌟 1. [PSSM 표준] 로그 분할과 선형 분할의 가중 결합 (lambda = 0.75, Cascade 0 = 17.6m)
         g_cascadeSplits[0] = near;
-        const lambda = 0.90;
+        const lambda = 0.75;
         const ratio = shadowFar / near;
         for (let i = 1; i <= cascadeCount; i++) {
             const p = i / cascadeCount;

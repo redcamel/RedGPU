@@ -36,7 +36,8 @@ fn findBlockerPenumbraScale(
     lightSize: f32
 ) -> f32 {
     let shadowDepth = clamp(shadowCoord.z, 0.0, 1.0);
-    let cascadeSearchScale = 1.0 / (1.0 + f32(cascadeIndex) * 0.7);
+    // 캐스케이드 레벨에 비례하여 탐색 반경 물리 크기 정규화 (상위 캐스케이드 팽창 방지)
+    let cascadeSearchScale = 1.0 / (1.0 + f32(cascadeIndex) * 1.8);
     let searchRadius = oneOverTextureSize * max(1.0, lightSize * 2.0) * cascadeSearchScale;
 
     var blockerCount: f32 = 0.0;
@@ -59,10 +60,10 @@ fn findBlockerPenumbraScale(
         return 0.0; // 차폐체 없음
     }
 
-    // 접촉 경화(Contact Hardening): 노이즈 없이 부드러운 전이 곡선 적용
-    let penumbraFactor = mix(0.5, 2.2, smoothstep(0.0, 1.0, blockerRatio));
-    let baseFilterScale = 1.0 / (1.0 + f32(cascadeIndex) * 0.4);
-    return baseFilterScale * lightSize * 0.7 * penumbraFactor;
+    // 접촉 경화(Contact Hardening): 최소 1.25 텍셀 반경 확보로 초근접 텍셀 계단화(Aliasing) 완벽 스무딩
+    let penumbraFactor = mix(1.25, 2.4, smoothstep(0.0, 1.0, blockerRatio));
+    let baseFilterScale = 1.0 / (1.0 + f32(cascadeIndex) * 0.45);
+    return baseFilterScale * max(0.5, lightSize) * penumbraFactor;
 }
 
 /**
@@ -119,18 +120,22 @@ fn sampleCascadeShadow(
 }
 
 /**
- * [KO] CSM 및 PCSS 기반 방향성 광원 그림자 가시성을 계산합니다.
- * [EN] Calculates directional light shadow visibility based on CSM and PCSS.
+ * [KO] CSM 및 PCSS 기반 방향성 광원 그림자 가시성을 계산합니다. (UE5 표준 Dynamic Normal Offset Bias 적용)
+ * [EN] Calculates directional light shadow visibility based on CSM and PCSS (with UE5 Standard Dynamic Normal Offset Bias).
  *
  * @param directionalShadowMap [KO] 방향성 광원용 2D 뎁스 텍스처 어레이 [EN] 2D depth texture array for directional light
  * @param directionalShadowMapSampler [KO] 비교 샘플러 [EN] Comparison sampler
  * @param worldPosition [KO] 월드 공간 상의 정점/픽셀 좌표 [EN] World position of vertex/pixel
+ * @param N [KO] 단위 법선 벡터 [EN] Unit normal vector
+ * @param L [KO] 광원 방향 단위 벡터 [EN] Light direction unit vector
  * @returns [KO] 가시성 계수 (0.0 ~ 1.0) [EN] Visibility factor (0.0 ~ 1.0)
  */
 fn getDirectionalShadowVisibility(
     directionalShadowMap: texture_depth_2d_array,
     directionalShadowMapSampler: sampler_comparison,
-    worldPosition: vec3<f32>
+    worldPosition: vec3<f32>,
+    N: vec3<f32>,
+    L: vec3<f32>
 ) -> f32 {
     let shadowInfo = systemUniforms.shadow;
     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
@@ -148,9 +153,19 @@ fn getDirectionalShadowVisibility(
     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
 
+    // 🌟 [언리얼 엔진 5 표준 Dynamic Normal Offset Bias]
+    // 각 캐스케이드 1텍셀의 실제 월드 크기(WorldTexelSize)에 비례하여 동적 바이어스 적용 (피터패닝 0 & 아크네 0)
+    let nDotL = clamp(dot(N, L), 0.0, 1.0);
+    let normalBiasFactor = (1.0 - nDotL);
+
     // 3. 주 캐스케이드 좌표 변환 및 노이즈 프리 PCSS 샘플링 수행
     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
-    let shadowCoord = getShadowCoord(worldPosition, lightVP);
+    let orthoScale = length(lightVP[0].xyz);
+    let worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
+    let normalOffset = N * normalBiasFactor * worldTexelSize * 1.5;
+    let biasedWorldPosition = worldPosition + normalOffset;
+
+    let shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
     let visibility = sampleCascadeShadow(
         directionalShadowMap,
         directionalShadowMapSampler,
@@ -172,7 +187,11 @@ fn getDirectionalShadowVisibility(
         if (viewDepth > blendStart) {
             let nextIndex = cascadeIndex + 1u;
             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
-            let nextShadowCoord = getShadowCoord(worldPosition, nextLightVP);
+            let nextOrthoScale = length(nextLightVP[0].xyz);
+            let nextWorldTexelSize = select(0.01, 2.0 / nextOrthoScale, nextOrthoScale > 0.0001) * oneOverTextureSize;
+            let nextBiasedPos = worldPosition + N * normalBiasFactor * nextWorldTexelSize * 1.5;
+
+            let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
             let nextVis = sampleCascadeShadow(
                 directionalShadowMap,
                 directionalShadowMapSampler,

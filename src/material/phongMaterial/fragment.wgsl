@@ -228,17 +228,16 @@ fn main(inputData:InputData) -> OutputFragment {
 
     // Shadow Visibility
     var visibility:f32 = 1.0;
-    var shadowWorldPos = input_vertexPosition;
+    var L0 = vec3<f32>(0.0, 1.0, 0.0);
     if (u_directionalLightCount > 0u) {
-        let L0 = -normalize(u_directionalLights[0].direction);
-        let NdotL0 = clamp(dot(N, L0), 0.0, 1.0);
-        let normalOffset = N * (1.0 - NdotL0) * 0.05;
-        shadowWorldPos = shadowWorldPos + normalOffset;
+        L0 = -normalize(u_directionalLights[0].direction);
     }
     visibility = getDirectionalShadowVisibility(
         directionalShadowMap,
         directionalShadowMapSampler,
-        shadowWorldPos
+        input_vertexPosition,
+        N,
+        L0
     );
     if(!receiveShadowYn){ 
         visibility = 1.0; 

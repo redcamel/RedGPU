@@ -287,10 +287,16 @@ fn main(inputData: InputData) -> OutputFragment {
 
     // 4. Directional Shadow calculation (Exact pbrMaterial match)
     var shadowVis: f32 = 1.0;
+    var L0 = vec3<f32>(0.0, 1.0, 0.0);
+    if (systemUniforms.directionalLightCount > 0u) {
+        L0 = -normalize(systemUniforms.directionalLights[0].direction);
+    }
     shadowVis = getDirectionalShadowVisibility(
         directionalShadowMap,
         directionalShadowMapSampler,
-        inputData.vertexPosition
+        inputData.vertexPosition,
+        N,
+        L0
     );
     shadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, shadowVis);
 
