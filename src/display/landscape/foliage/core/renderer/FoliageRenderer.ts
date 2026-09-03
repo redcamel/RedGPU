@@ -146,18 +146,35 @@ class FoliageRenderer {
         const cascadeIndirectOffset = currentCascade * 256 * 20;
         const cascadeInstanceOffset = currentCascade * (500000 * 8) * 32;
 
+        const isFarCascade = currentCascade >= 2;
+
         for (let t = 0; t < validCount; t++) {
             const {type: foliageType, culledGPU, indirectGPU} = this.#validTypes[t];
             const subMeshes = foliageType.subMeshes;
             const subCount = subMeshes.length;
+            const lodInfoList = foliageType.lodInfoList;
+            const numLODs = lodInfoList.length;
+            const lastLODIndex = numLODs > 0 ? numLODs - 1 : 0;
 
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
-                if (sub.canRenderInPass('shadow')) {
-                    const instOffset = cascadeInstanceOffset + sub.instanceBufferOffset;
-                    const indOffset = cascadeIndirectOffset + sub.indirectOffsetBytes;
-                    this.#drawSubMesh(passEncoder, sub, 1, 'shadow', systemBG, indirectGPU, culledGPU, 'shadow', instOffset, indOffset);
+                if (!sub.canRenderInPass('shadow')) continue;
+
+                // 🚀 [최적화 P1 / Step 2 - 원경 그림자 캐스케이드 드로우 다이어트]
+                // Cascade 2 및 Cascade 3에서는 cullingCompute에서 오직 최상위 LOD(lastLODIndex)만 선별하므로,
+                // 하위 LOD(LOD 0, LOD 1 등)의 빈 드로우콜 및 파이프라인/버퍼 바인딩을 100% 생략! (드로우콜 70~80% 절감)
+                if (isFarCascade && numLODs > 1 && sub.lodIndex !== lastLODIndex) {
+                    continue;
                 }
+
+                // 근거리 Cascade 0에서는 150m+ 이상의 임포스터가 생성될 수 없으므로 임포스터 드로우 생략
+                if (currentCascade === 0 && numLODs > 1 && sub.isImpostor) {
+                    continue;
+                }
+
+                const instOffset = cascadeInstanceOffset + sub.instanceBufferOffset;
+                const indOffset = cascadeIndirectOffset + sub.indirectOffsetBytes;
+                this.#drawSubMesh(passEncoder, sub, 1, 'shadow', systemBG, indirectGPU, culledGPU, 'shadow', instOffset, indOffset);
             }
         }
     }

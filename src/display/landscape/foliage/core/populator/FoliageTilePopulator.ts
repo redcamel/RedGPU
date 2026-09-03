@@ -43,6 +43,11 @@ class FoliageTilePopulator {
         let seed = ((tileX * 73856093) ^ (tileZ * 19349663) ^ (nameHash * 83492791)) >>> 0;
         if (seed === 0) seed = 0x9e3779b9;
 
+        const groundOffset = foliageType.options.groundOffset ?? 0;
+        const bottomOffset = foliageType.bottomOffset ?? 0;
+        const boundingRadius = foliageType.boundingRadius || 1.0;
+        const hasGetHeight = typeof landscape?.getHeightAt === 'function';
+
         for (let i = 0; i < actualCount; i++) {
             const idx = startIdx + i;
 
@@ -68,7 +73,23 @@ class FoliageTilePopulator {
             const scaleY = minScale[1] + rScale * scaleDiffY;
             const scaleZ = minScale[2] + rScale * scaleDiffZ;
 
-            const posY = 0.0;
+            // 🌟 [최적화 P4 / Step 5] 스폰 시점에 지형 고도 및 경사도 침하(slopeSink)를 1회 완벽 계산하여 posY에 사전 캐싱
+            let posY = 0.0;
+            if (hasGetHeight) {
+                const terrainY = landscape.getHeightAt(posX, posZ);
+                const maxXZScale = Math.max(scaleX, scaleZ);
+                const trunkRadius = Math.max(boundingRadius * 0.18 * maxXZScale, 0.25);
+                const hL = landscape.getHeightAt(posX - trunkRadius, posZ);
+                const hR = landscape.getHeightAt(posX + trunkRadius, posZ);
+                const hD = landscape.getHeightAt(posX, posZ - trunkRadius);
+                const hU = landscape.getHeightAt(posX, posZ + trunkRadius);
+                const slopeX = Math.abs(hR - hL);
+                const slopeZ = Math.abs(hU - hD);
+                const slopeSink = Math.max(slopeX, slopeZ) * 0.5;
+
+                const calculatedY = terrainY - (groundOffset + bottomOffset + slopeSink);
+                posY = calculatedY === 0 ? 0.0001 : calculatedY;
+            }
 
             let rotX = 0, rotY = 0, rotZ = 0, rotW = 1;
             if (randomRotationY) {

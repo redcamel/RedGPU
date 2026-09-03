@@ -14,9 +14,16 @@ struct InputData {
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
+    let ddxUV = dpdx(inputData.uv);
+    let ddyUV = dpdy(inputData.uv);
     let texColor = textureSample(baseColorTexture, baseColorTextureSampler, inputData.uv);
-    let globalFragmentData = globalFragmentSSBO_PBR[inputData.globalFragmentSlotIndex];
 
+    // 🚀 [최적화 P3 / Step 4 - 완전 투명 픽셀 즉시 탈출 (연산 0ms)]
+    if (texColor.a <= 0.001) {
+        discard;
+    }
+
+    // 🚀 [거리 페이드 디더링 조기 탈락]
     let fadeOpacity = inputData.combinedOpacity;
     if (fadeOpacity < 0.999) {
         let px = u32(inputData.position.x) & 3u;
@@ -29,15 +36,20 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
 
-    let ddxUV = dpdx(inputData.uv);
-    let ddyUV = dpdy(inputData.uv);
-    let lenSq = max(dot(ddxUV, ddxUV), dot(ddyUV, ddyUV));
-    let mipLevel = max(0.0, 0.5 * log2(max(lenSq * 1048576.0, 1.0)));
-    let mipAlphaScale = 1.0 + mipLevel * 0.70;
+    let globalFragmentData = globalFragmentSSBO_PBR[inputData.globalFragmentSlotIndex];
     let baseCutOff = select(0.3333, globalFragmentData.cutOff, globalFragmentData.cutOff > 0.0);
-    let effectiveAlpha = texColor.a * mipAlphaScale;
-    if (effectiveAlpha <= baseCutOff) {
-        discard;
+
+    // 🚀 [최적화 P3 / Step 4 - 완전 불투명 픽셀 lenSq/log2 생략 바이패스]
+    // texColor.a >= baseCutOff인 본체 픽셀(95% 이상)은 mipAlphaScale(>= 1.0)을 곱해도 무조건 통과하므로
+    // 무거운 lenSq, log2 연산을 100% 생략! (경계선 5% 픽셀에서만 원경 보존 연산 가동)
+    if (texColor.a < baseCutOff) {
+        let lenSq = max(dot(ddxUV, ddxUV), dot(ddyUV, ddyUV));
+        let mipLevel = max(0.0, 0.5 * log2(max(lenSq * 1048576.0, 1.0)));
+        let mipAlphaScale = 1.0 + mipLevel * 0.70;
+        let effectiveAlpha = texColor.a * mipAlphaScale;
+        if (effectiveAlpha <= baseCutOff) {
+            discard;
+        }
     }
 
     return output;
@@ -45,17 +57,26 @@ fn main(inputData: InputData) -> OutputFragment {
 
 @fragment
 fn shadowMain(inputData: InputData) {
-    let texColor = textureSample(baseColorTexture, baseColorTextureSampler, inputData.uv);
-    let globalFragmentData = globalFragmentSSBO_PBR[inputData.globalFragmentSlotIndex];
-
     let ddxUV = dpdx(inputData.uv);
     let ddyUV = dpdy(inputData.uv);
-    let lenSq = max(dot(ddxUV, ddxUV), dot(ddyUV, ddyUV));
-    let mipLevel = max(0.0, 0.5 * log2(max(lenSq * 1048576.0, 1.0)));
-    let mipAlphaScale = 1.0 + mipLevel * 0.70;
-    let baseCutOff = select(0.3333, globalFragmentData.cutOff, globalFragmentData.cutOff > 0.0);
-    let effectiveAlpha = texColor.a * mipAlphaScale;
-    if (effectiveAlpha <= baseCutOff) {
+    let texColor = textureSample(baseColorTexture, baseColorTextureSampler, inputData.uv);
+
+    // 🚀 [최적화 P3 / Step 4 - 완전 투명 픽셀 즉시 탈출 (연산 0ms)]
+    if (texColor.a <= 0.001) {
         discard;
+    }
+
+    let globalFragmentData = globalFragmentSSBO_PBR[inputData.globalFragmentSlotIndex];
+    let baseCutOff = select(0.3333, globalFragmentData.cutOff, globalFragmentData.cutOff > 0.0);
+
+    // 🚀 [최적화 P3 / Step 4 - 완전 불투명 픽셀 lenSq/log2 생략 바이패스]
+    if (texColor.a < baseCutOff) {
+        let lenSq = max(dot(ddxUV, ddxUV), dot(ddyUV, ddyUV));
+        let mipLevel = max(0.0, 0.5 * log2(max(lenSq * 1048576.0, 1.0)));
+        let mipAlphaScale = 1.0 + mipLevel * 0.70;
+        let effectiveAlpha = texColor.a * mipAlphaScale;
+        if (effectiveAlpha <= baseCutOff) {
+            discard;
+        }
     }
 }

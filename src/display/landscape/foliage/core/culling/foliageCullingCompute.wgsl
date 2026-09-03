@@ -16,7 +16,7 @@ struct FoliageTypeParam {
     indirectBaseOffset: u32,
     rawBaseOffset: u32,
     activeCount: u32,
-    pad0: u32,
+    maxShadowCascadeIndex: u32,
     pad1: u32,
     lods: array<FoliageLODUniformInfo, 8>,
 };
@@ -130,7 +130,8 @@ fn main(
     let scaleY = instance.scaleY;
 
     var realY = instance.posY;
-    if (isValid && globalUniforms.hasVHT != 0u && globalUniforms.invWorldSizeX > 0.0) {
+    // 🌟 [최적화 P4 / Step 5] 스폰 시점에 posY가 사전 계산되어 있으므로, 0.0인 경우에만 VHT 샘플링 수행 (매 프레임 50만 회 텍스처 로드 100% 박멸!)
+    if (isValid && realY == 0.0 && globalUniforms.hasVHT != 0u && globalUniforms.invWorldSizeX > 0.0) {
         let u = instance.posX * globalUniforms.invWorldSizeX + 0.5;
         let v = instance.posZ * globalUniforms.invWorldSizeX + 0.5;
         if (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0) {
@@ -309,6 +310,11 @@ fn main(
             shadowInst.fadeOrType = 1.0;
 
             for (var c: u32 = 0u; c < activeCascades; c = c + 1u) {
+                // 🚀 [최적화 P1 / Step 2] 식생 유형별 최대 그림자 캐스케이드 한도 초과 시 컬링 연산 즉시 탈출
+                if (c > typeInfo.maxShadowCascadeIndex) {
+                    break;
+                }
+
                 let cascadeInfo = globalUniforms.cascades[c];
                 if (cascadeInfo.hasShadow == 0u) {
                     continue;

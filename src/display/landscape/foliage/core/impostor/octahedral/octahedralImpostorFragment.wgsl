@@ -251,20 +251,38 @@ fn main(inputData: InputData) -> OutputFragment {
     var albedo = (s00.rgb * cov00 + s10.rgb * cov10 + s01.rgb * cov01 + s11.rgb * cov11) * invSafeCoverage;
     albedo = clamp(albedo, vec3<f32>(0.0), vec3<f32>(1.0));
 
-    let n00 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g00, uv00, n, ddxAtlas, ddyAtlas);
-    let n10 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g10, uv10, n, ddxAtlas, ddyAtlas);
-    let n01 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g01, uv01, n, ddxAtlas, ddyAtlas);
-    let n11 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g11, uv11, n, ddxAtlas, ddyAtlas);
-
-    let orm00 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g00, uv00, n, ddxAtlas, ddyAtlas);
-    let orm10 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g10, uv10, n, ddxAtlas, ddyAtlas);
-    let orm01 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g01, uv01, n, ddxAtlas, ddyAtlas);
-    let orm11 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g11, uv11, n, ddxAtlas, ddyAtlas);
-
-    let rawNormalDepth = (n00 * cov00 + n10 * cov10 + n01 * cov01 + n11 * cov11) * invSafeCoverage;
-    let rawORM = (orm00 * cov00 + orm10 * cov10 + orm01 * cov01 + orm11 * cov11) * invSafeCoverage;
-
     let toCamVec = camPos - inputData.vertexPosition;
+    let distSq = dot(toCamVec, toCamVec);
+
+    var rawNormalDepth: vec4<f32>;
+    var rawORM: vec4<f32>;
+
+    // 🌟 [최적화 P2 / Step 3 - 원경 500m+ Dominant Sub-Tile 1-Tap 다이어트]
+    // 500m 밖에서는 1그루의 화면 크기가 15~30px에 불과하므로 대표 서브타일 1탭만 샘플링 (Normal/ORM 8탭 ➔ 2탭 75% 즉각 절감!)
+    if (distSq > 250000.0) {
+        var domG = g00;
+        var domUV = uv00;
+        var maxCov = cov00;
+        if (cov10 > maxCov) { maxCov = cov10; domG = g10; domUV = uv10; }
+        if (cov01 > maxCov) { maxCov = cov01; domG = g01; domUV = uv01; }
+        if (cov11 > maxCov) { maxCov = cov11; domG = g11; domUV = uv11; }
+
+        rawNormalDepth = sampleOctahedralAtlas(normalTexture, normalTextureSampler, domG, domUV, n, ddxAtlas, ddyAtlas);
+        rawORM = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, domG, domUV, n, ddxAtlas, ddyAtlas);
+    } else {
+        let n00 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g00, uv00, n, ddxAtlas, ddyAtlas);
+        let n10 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g10, uv10, n, ddxAtlas, ddyAtlas);
+        let n01 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g01, uv01, n, ddxAtlas, ddyAtlas);
+        let n11 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g11, uv11, n, ddxAtlas, ddyAtlas);
+
+        let orm00 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g00, uv00, n, ddxAtlas, ddyAtlas);
+        let orm10 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g10, uv10, n, ddxAtlas, ddyAtlas);
+        let orm01 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g01, uv01, n, ddxAtlas, ddyAtlas);
+        let orm11 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g11, uv11, n, ddxAtlas, ddyAtlas);
+
+        rawNormalDepth = (n00 * cov00 + n10 * cov10 + n01 * cov01 + n11 * cov11) * invSafeCoverage;
+        rawORM = (orm00 * cov00 + orm10 * cov10 + orm01 * cov01 + orm11 * cov11) * invSafeCoverage;
+    }
     let V = normalize(toCamVec);
 
     var bakedN = normalize(rawNormalDepth.rgb * 2.0 - 1.0);

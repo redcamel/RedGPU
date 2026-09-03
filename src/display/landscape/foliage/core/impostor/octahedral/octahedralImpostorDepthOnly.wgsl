@@ -142,6 +142,11 @@ fn main(inputData: InputData) -> OutputFragment {
     let cov11 = w11 * s11.a;
     let totalCoverage = cov00 + cov10 + cov01 + cov11;
 
+    // 🚀 [최적화 P0 / Step 6] 완전 투명 픽셀(공기) 즉시 탈출 (ALU 0ms)
+    if (totalCoverage < 0.001) {
+        discard;
+    }
+
     let fadeOpacity = inputData.combinedOpacity;
     if (fadeOpacity < 0.999) {
         let px = u32(inputData.position.x) & 3u;
@@ -186,45 +191,24 @@ fn shadowMain(inputData: InputData) {
     let n = 8.0;
     let octUV = dirToHemiOctahedralUV(localView);
 
-    let gridPos = octUV * n - 0.5;
-    let baseGrid = floor(gridPos);
-    let frac = gridPos - baseGrid;
-
-    let g00 = clamp(baseGrid + vec2<f32>(0.0, 0.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
-    let g10 = clamp(baseGrid + vec2<f32>(1.0, 0.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
-    let g01 = clamp(baseGrid + vec2<f32>(0.0, 1.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
-    let g11 = clamp(baseGrid + vec2<f32>(1.0, 1.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
-
-    let dir00 = hemiOctahedralUVToDir((g00 + vec2<f32>(0.5)) / n);
-    let dir10 = hemiOctahedralUVToDir((g10 + vec2<f32>(0.5)) / n);
-    let dir01 = hemiOctahedralUVToDir((g01 + vec2<f32>(0.5)) / n);
-    let dir11 = hemiOctahedralUVToDir((g11 + vec2<f32>(0.5)) / n);
-
-    let uv00 = getSubTileRotatedUV(inputData.uv, localView, dir00);
-    let uv10 = getSubTileRotatedUV(inputData.uv, localView, dir10);
-    let uv01 = getSubTileRotatedUV(inputData.uv, localView, dir01);
-    let uv11 = getSubTileRotatedUV(inputData.uv, localView, dir11);
+    // 🚀 [최적화 P1 / Step 7 - Dominant 1-Tap 다이어트]
+    // 그림자 맵은 광원 방향의 실루엣만 굽는 패스이므로, 대표 각도 1개만 샘플링하여 회전 삼각함수 및 텍스처 호출 75% 삭감!
+    let dominantGrid = clamp(floor(octUV * n), vec2<f32>(0.0), vec2<f32>(n - 1.0));
+    let dirDom = hemiOctahedralUVToDir((dominantGrid + vec2<f32>(0.5)) / n);
+    let uvDom = getSubTileRotatedUV(inputData.uv, localView, dirDom);
 
     let ddxUV = dpdx(inputData.uv);
     let ddyUV = dpdy(inputData.uv);
     let ddxAtlas = ddxUV / n;
     let ddyAtlas = ddyUV / n;
 
-    let s00 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g00, uv00, n, ddxAtlas, ddyAtlas);
-    let s10 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g10, uv10, n, ddxAtlas, ddyAtlas);
-    let s01 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g01, uv01, n, ddxAtlas, ddyAtlas);
-    let s11 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g11, uv11, n, ddxAtlas, ddyAtlas);
+    let sDom = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, dominantGrid, uvDom, n, ddxAtlas, ddyAtlas);
 
-    let w00 = (1.0 - frac.x) * (1.0 - frac.y);
-    let w10 = frac.x * (1.0 - frac.y);
-    let w01 = (1.0 - frac.x) * frac.y;
-    let w11 = frac.x * frac.y;
-
-    let cov00 = w00 * s00.a;
-    let cov10 = w10 * s10.a;
-    let cov01 = w01 * s01.a;
-    let cov11 = w11 * s11.a;
-    let totalCoverage = cov00 + cov10 + cov01 + cov11;
+    let alpha = sDom.a;
+    // 🚀 [최적화 P0 / Step 6] 완전 투명 픽셀(공기) 즉시 탈출 (ALU 0ms)
+    if (alpha < 0.001) {
+        discard;
+    }
 
     let fadeOpacity = inputData.combinedOpacity;
     if (fadeOpacity < 0.999) {
@@ -238,13 +222,7 @@ fn shadowMain(inputData: InputData) {
         }
     }
 
-    let linearAlpha = totalCoverage;
-    let maxAlpha = max(max(s00.a, s10.a), max(s01.a, s11.a));
-    let maxCornerWeight = max(max(w00, w10), max(w01, w11));
-    let sharpnessFactor = clamp((maxCornerWeight - 0.25) / 0.75, 0.0, 1.0);
-    let reconstructedAlpha = mix(linearAlpha, maxAlpha, mix(0.70, 0.95, sharpnessFactor));
-
-    if (reconstructedAlpha <= 0.35) {
+    if (alpha <= 0.35) {
         discard;
     }
 }

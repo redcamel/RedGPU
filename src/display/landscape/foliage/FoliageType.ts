@@ -76,6 +76,8 @@ class FoliageType {
         megaBuffer?: FoliageMegaBuffer | null
     ) {
         this.#redGPUContext = redGPUContext;
+        this.#options = options;
+        this.#maxShadowCascadeIndex = options.maxShadowCascadeIndex ?? 3;
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
         this.#megaBuffer = megaBuffer || null;
         this.#maxShadowCascadeIndex = options.maxShadowCascadeIndex !== undefined
@@ -134,7 +136,8 @@ class FoliageType {
                 this.#options.fadeStartDistance ?? 1500.0,
                 this.#boundingRadius,
                 this.#bottomOffset,
-                this.#lodInfoList
+                this.#lodInfoList,
+                this.#maxShadowCascadeIndex
             );
         }
     }
@@ -165,6 +168,14 @@ class FoliageType {
 
     get activeInstanceCount(): number {
         return this.#activeInstanceCount;
+    }
+
+    get boundingRadius(): number {
+        return this.#boundingRadius;
+    }
+
+    get bottomOffset(): number {
+        return this.#bottomOffset;
     }
 
     get groundOffset(): number {
@@ -249,7 +260,8 @@ class FoliageType {
                 this.#options.fadeStartDistance ?? 1500.0,
                 this.#boundingRadius,
                 this.#bottomOffset,
-                this.#lodInfoList
+                this.#lodInfoList,
+                this.#maxShadowCascadeIndex
             );
         }
     }
