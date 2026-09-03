@@ -364,17 +364,24 @@ fn main(inputData:InputData) -> OutputFragment {
     let NdotV = max(abs(dot(N, V)), 0.04);
 
     // Shadow
-    let receiveShadowYn = inputData.receiveShadow != 0.0;
-    var visibility:f32 = 1.0;
+    let receiveShadowYn = inputData.receiveShadow != 0.0 && systemUniforms.directionalLightCount > 0u;
+    var visibility: f32 = 1.0;
     var L0 = vec3<f32>(0.0, 1.0, 0.0);
     if (systemUniforms.directionalLightCount > 0u) {
         L0 = -normalize(systemUniforms.directionalLights[0].direction);
     }
-    visibility = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, input_vertexPosition, N, L0);
-    if(!receiveShadowYn){
-        visibility = 1.0;
-    } else {
-        visibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, visibility);
+    let NdotL0 = dot(N, L0);
+
+    // 🚀 [최적화] 그림자 수신 활성화 + 표면이 빛을 향할 때(NdotL0 > 0.001) + CSM 유효 거리 이내일 때만 섀도우 연산 실행
+    if (receiveShadowYn && NdotL0 > 0.001) {
+        let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
+        let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
+        let rawViewDist = distance(systemUniforms.camera.cameraPosition, input_vertexPosition);
+
+        if (rawViewDist < maxCSMDist) {
+            let rawVis = getDirectionalShadowVisibility(directionalShadowMap, directionalShadowMapSampler, input_vertexPosition, N, L0);
+            visibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVis);
+        }
     }
 
     #redgpu_if useKHR_materials_unlit
