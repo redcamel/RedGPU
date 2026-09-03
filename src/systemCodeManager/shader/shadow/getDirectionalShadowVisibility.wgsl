@@ -44,7 +44,40 @@ fn sampleModernCascadeShadow(
 
     var weightedVisibility: f32 = 0.0;
 
-    for (var i = 0; i < 16; i++) {
+    // 🌟 [최적화 8.13 - UE5 표준 4-Tap Early Bailout]
+    // 첫 4개 샘플(중심 4방향)을 먼저 샘플링하여 완전 양지/음지 여부 고속 판정
+    var earlySum: f32 = 0.0;
+    for (var i = 0; i < 4; i++) {
+        let offset = VOGEL_DISK_16[i] * filterRadius;
+        let tUV = shadowCoord.xy + offset;
+
+        let sampleVisibility = textureSampleCompareLevel(
+            directionalShadowMap,
+            directionalShadowMapSampler,
+            tUV,
+            cascadeIndex,
+            shadowDepth - cascadeBias
+        );
+
+        let outOfBounds = tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0;
+        let vis = select(sampleVisibility, 1.0, outOfBounds);
+        earlySum += vis;
+        weightedVisibility += vis * VOGEL_WEIGHTS_16[i];
+    }
+
+    // 4개 샘플이 모두 1.0(완전한 햇빛)이면 나머지 12탭 즉시 스킵하고 1.0 반환 (75% 연산 절감!)
+    if (earlySum >= 3.999) {
+        let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
+        return select(1.0, 1.0, invalidDepth);
+    }
+    // 4개 샘플이 모두 0.0(완전한 그림자)이면 나머지 12탭 즉시 스킵하고 0.0 반환 (75% 연산 절감!)
+    if (earlySum <= 0.001) {
+        let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
+        return select(0.0, 1.0, invalidDepth);
+    }
+
+    // 그림자 경계선(Penumbra 5% 구역)에서만 나머지 12개 샘플을 전부 돌아 16탭 안티앨리어싱 가동
+    for (var i = 4; i < 16; i++) {
         let offset = VOGEL_DISK_16[i] * filterRadius;
         let tUV = shadowCoord.xy + offset;
 
@@ -139,7 +172,8 @@ fn getDirectionalShadowVisibility(
         let blendMargin = cascadeRange * 0.15;
         let blendStart = splitFar - blendMargin;
 
-        if (viewDepth > blendStart) {
+        // 🌟 [최적화 8.13] 이미 1.0(완전한 햇빛)이거나 0.0(완전한 그림자)이면 다음 캐스케이드 16탭 중복 샘플링을 100% 바이패스!
+        if (viewDepth > blendStart && visibility < 0.999 && visibility > 0.001) {
             let nextIndex = cascadeIndex + 1u;
             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
             let nextOrthoScale = length(nextLightVP[0].xyz);

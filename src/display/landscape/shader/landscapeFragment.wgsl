@@ -503,6 +503,11 @@ fn computeLandscapeHeightmapShadow(
         let t = minDistance + distRange * (u * u);
         let samplePosY = worldPos.y + L.y * t;
 
+        // 🚀 [최적화 8.13] Sky-Break: 광선이 지형 최고봉 위 하늘로 진입하는 즉시 루프 탈출 (2~3스텝 조기 종료)
+        if (samplePosY > heightScale) {
+            break;
+        }
+
         // FMA 1회로 UV 계산 (스텝당 나눗셈 2회 완전 제거)
         let uv = baseUV + uvDir * t;
 
