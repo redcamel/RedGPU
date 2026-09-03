@@ -285,11 +285,24 @@ fn main(inputData:InputData) -> OutputFragment {
         // 🌿 UE5 Foliage Two-Sided Mipmap Alpha CutOff (원거리 밉맵 희석 보정으로 잎사귀 두께 보존 및 Depth Prepass 일치)
         let ddxUV = dpdx(diffuseUV);
         let ddyUV = dpdy(diffuseUV);
-        let maxDeriv = max(length(ddxUV), length(ddyUV));
-        let mipLevel = max(0.0, log2(max(maxDeriv * 1024.0, 1.0)));
-        let mipAlphaScale = 1.0 + mipLevel * 0.70;
+
+        // 🚀 [최적화 P1 / Step 8] 1. 완전 투명 공기 픽셀 즉시 탈출 (0ms)
+        if (resultAlpha <= 0.001) {
+            discard;
+        }
+
         let baseCutOff = select(0.3333, u_cutOff, u_cutOff > 0.0);
-        if (resultAlpha * mipAlphaScale <= baseCutOff) { discard; }
+
+        // 🚀 [최적화 P1 / Step 8] 2. mipAlphaScale >= 1.0이므로 resultAlpha >= baseCutOff인 95% 픽셀은 확정 통과!
+        // 외곽선 경계(resultAlpha < baseCutOff)에서만 정밀 밉 스케일링 계산 (제곱근 연산 제거)
+        if (resultAlpha < baseCutOff) {
+            let maxDerivSq = max(dot(ddxUV, ddxUV), dot(ddyUV, ddyUV));
+            let mipLevel = max(0.0, 0.5 * log2(max(maxDerivSq * 1048576.0, 1.0)));
+            let mipAlphaScale = 1.0 + mipLevel * 0.70;
+            if (resultAlpha * mipAlphaScale <= baseCutOff) {
+                discard;
+            }
+        }
     #redgpu_else
         #redgpu_if useCutOff
             if (resultAlpha <= u_cutOff) { discard; }
