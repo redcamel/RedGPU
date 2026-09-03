@@ -47,17 +47,13 @@ struct InputData {
 struct OutputData {
     @builtin(position) position: vec4<f32>,
     @location(0) vertexPosition: vec3<f32>,
-    @location(1) vertexNormal: vec3<f32>,
-    @location(2) uv: vec2<f32>,
-    @location(3) uv1: vec2<f32>,
-    @location(4) vertexColor_0: vec4<f32>,
-    @location(5) vertexTangent: vec4<f32>,
-    @location(6) vertexHeight: f32,
-    @location(7) currentClipPos: vec4<f32>,
-    @location(8) prevClipPos: vec4<f32>,
-    @location(9) instanceColor: vec4<f32>,
-    @location(10) @interpolate(flat) lodLevel: f32,
-    @location(14) @interpolate(flat) receiveShadow: f32,
+    @location(1) uv: vec2<f32>,
+    @location(2) uv1: vec2<f32>,
+    @location(3) currentClipPos: vec4<f32>,
+    @location(4) prevClipPos: vec4<f32>,
+    @location(5) instanceColor: vec4<f32>,
+    @location(6) @interpolate(flat) lodLevel: f32,
+    @location(7) @interpolate(flat) receiveShadow: f32,
 };
 
 struct ComputedTerrainVertex {
@@ -213,12 +209,8 @@ fn main(input: InputData) -> OutputData {
 
     output.position = clipPos;
     output.vertexPosition = worldPos4.xyz;
-    output.vertexNormal = vec3<f32>(0.0, 1.0, 0.0);
     output.uv = computed.worldTileUV;
     output.uv1 = computed.globalUV;
-    output.vertexColor_0 = vec4<f32>(1.0, 1.0, 1.0, 1.0);
-    output.vertexTangent = vec4<f32>(1.0, 0.0, 0.0, 1.0);
-    output.vertexHeight = worldPos4.y;
 
     output.currentClipPos = systemUniforms.projection.noneJitterProjectionViewMatrix * worldPos4;
     output.prevClipPos = systemUniforms.projection.prevNoneJitterProjectionViewMatrix * worldPos4;

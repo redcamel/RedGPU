@@ -42,7 +42,7 @@ export class Landscape extends Object3DContainer {
     #debuggerManager: LandscapeDebuggerManager;
 
     #wireframe: boolean = false;
-    #castShadow: boolean = true;
+    #castShadow: boolean = false;
     #receiveShadow: boolean = true;
     #enableHeightmapShadow: boolean = true;
     #heightmapShadowSteps: number = 12;
@@ -529,50 +529,49 @@ export class Landscape extends Object3DContainer {
     renderShadow(view: any, passEncoder?: GPURenderPassEncoder): void {
         const renderPassEncoder = passEncoder || view?.currentRenderPassEncoder || view?.renderPassEncoder;
         const view3D = view?.view || view;
-        if (!renderPassEncoder) return;
+        // 🚀 [최적화 8.11] 평소에는 castShadow가 false이므로 즉시 0ms 조기 탈락 (명시적으로 켰을 때만 연산)
+        if (!renderPassEncoder || !this.#castShadow) return;
 
-        if (this.#castShadow) {
-            const instanceBuffer = this.#instanceBuffer;
-            const sharedGeometry = this.#sharedGeometry;
-            const combinedVB = sharedGeometry?.combinedVertexBuffer;
-            const isWireframe = this.#wireframe;
-            const combinedIB = isWireframe ? sharedGeometry?.combinedWireframeIndexBuffer : sharedGeometry?.combinedIndexBuffer;
+        const instanceBuffer = this.#instanceBuffer;
+        const sharedGeometry = this.#sharedGeometry;
+        const combinedVB = sharedGeometry?.combinedVertexBuffer;
+        const isWireframe = this.#wireframe;
+        const combinedIB = isWireframe ? sharedGeometry?.combinedWireframeIndexBuffer : sharedGeometry?.combinedIndexBuffer;
 
-            if (instanceBuffer && combinedVB && combinedIB) {
-                const storageBG = instanceBuffer.instanceStorageBindGroup;
-                const storageBGLayout = instanceBuffer.instanceStorageBindGroupLayout;
-                if (storageBG && storageBGLayout) {
-                    const pipeline = this.#getOrCreateShadowRenderPipeline(combinedVB, storageBGLayout);
-                    if (pipeline) {
-                        renderPassEncoder.setPipeline(pipeline);
+        if (instanceBuffer && combinedVB && combinedIB) {
+            const storageBG = instanceBuffer.instanceStorageBindGroup;
+            const storageBGLayout = instanceBuffer.instanceStorageBindGroupLayout;
+            if (storageBG && storageBGLayout) {
+                const pipeline = this.#getOrCreateShadowRenderPipeline(combinedVB, storageBGLayout);
+                if (pipeline) {
+                    renderPassEncoder.setPipeline(pipeline);
 
-                        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup;
-                        if (systemBG) {
-                            renderPassEncoder.setBindGroup(0, systemBG);
+                    const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup;
+                    if (systemBG) {
+                        renderPassEncoder.setBindGroup(0, systemBG);
+                    }
+
+                    renderPassEncoder.setBindGroup(1, storageBG);
+                    renderPassEncoder.setVertexBuffer(0, combinedVB.gpuBuffer);
+                    renderPassEncoder.setIndexBuffer(combinedIB.gpuBuffer, 'uint32');
+
+                    const maxLODLevel = sharedGeometry.maxLODLevel;
+                    const indirectDrawBuffer = instanceBuffer.indirectDrawBuffer;
+
+                    if (indirectDrawBuffer) {
+                        const currentCascade = view3D?.currentCascadeIndex ?? 0;
+
+                        // 🚀 [최적화 8.5] 원경(Cascade 2~3) 그림자는 Heightmap Raymarching이 완벽히 그리므로 CSM 드로우를 Cascade 0~1로 제한
+                        let targetMaxLOD = 0;
+                        if (currentCascade === 0) {
+                            targetMaxLOD = Math.min(1, maxLODLevel);
+                        } else if (currentCascade === 1) {
+                            targetMaxLOD = Math.min(2, maxLODLevel);
                         }
 
-                        renderPassEncoder.setBindGroup(1, storageBG);
-                        renderPassEncoder.setVertexBuffer(0, combinedVB.gpuBuffer);
-                        renderPassEncoder.setIndexBuffer(combinedIB.gpuBuffer, 'uint32');
-
-                        const maxLODLevel = sharedGeometry.maxLODLevel;
-                        const indirectDrawBuffer = instanceBuffer.indirectDrawBuffer;
-
-                        if (indirectDrawBuffer) {
-                            const currentCascade = view3D?.currentCascadeIndex ?? 0;
-
-                            // 🚀 [최적화 8.5] 원경(Cascade 2~3) 그림자는 Heightmap Raymarching이 완벽히 그리므로 CSM 드로우를 Cascade 0~1로 제한
-                            let targetMaxLOD = 0;
-                            if (currentCascade === 0) {
-                                targetMaxLOD = Math.min(1, maxLODLevel);
-                            } else if (currentCascade === 1) {
-                                targetMaxLOD = Math.min(2, maxLODLevel);
-                            }
-
-                            for (let lod = 0; lod < targetMaxLOD; lod++) {
-                                const offset = lod * 20;
-                                renderPassEncoder.drawIndexedIndirect(indirectDrawBuffer, offset);
-                            }
+                        for (let lod = 0; lod < targetMaxLOD; lod++) {
+                            const offset = lod * 20;
+                            renderPassEncoder.drawIndexedIndirect(indirectDrawBuffer, offset);
                         }
                     }
                 }

@@ -13,17 +13,13 @@
 struct InputData {
     @builtin(position) position: vec4<f32>,
     @location(0) vertexPosition: vec3<f32>,
-    @location(1) vertexNormal: vec3<f32>,
-    @location(2) uv: vec2<f32>,
-    @location(3) uv1: vec2<f32>,
-    @location(4) vertexColor_0: vec4<f32>,
-    @location(5) vertexTangent: vec4<f32>,
-    @location(6) vertexHeight: f32,
-    @location(7) currentClipPos: vec4<f32>,
-    @location(8) prevClipPos: vec4<f32>,
-    @location(9) instanceColor: vec4<f32>,
-    @location(10) @interpolate(flat) lodLevel: f32,
-    @location(14) @interpolate(flat) receiveShadow: f32,
+    @location(1) uv: vec2<f32>,
+    @location(2) uv1: vec2<f32>,
+    @location(3) currentClipPos: vec4<f32>,
+    @location(4) prevClipPos: vec4<f32>,
+    @location(5) instanceColor: vec4<f32>,
+    @location(6) @interpolate(flat) lodLevel: f32,
+    @location(7) @interpolate(flat) receiveShadow: f32,
 };
 
 struct LandscapeLayerParams {
@@ -497,15 +493,18 @@ fn computeLandscapeHeightmapShadow(
 
     var shadowFactor: f32 = 1.0;
 
+    // 🚀 [최적화 8.10] 루프 불변식 호이스팅: 나눗셈 24회를 루프 밖 1회로 인출하여 FMA 연산으로 전환
+    let invWorldSize = vec2<f32>(1.0 / worldSizeX, 1.0 / worldSizeZ);
+    let baseUV = (worldPos.xz + vec2<f32>(worldSizeX, worldSizeZ) * 0.5) * invWorldSize;
+    let uvDir = L.xz * invWorldSize;
+
     for (var i = 0u; i < stepCount; i = i + 1u) {
         let u = (f32(i) + 0.5) / fStepCount;
         let t = minDistance + distRange * (u * u);
-        let samplePos = worldPos + L * t;
+        let samplePosY = worldPos.y + L.y * t;
 
-        let uv = vec2<f32>(
-            (samplePos.x + worldSizeX * 0.5) / worldSizeX,
-            (samplePos.z + worldSizeZ * 0.5) / worldSizeZ
-        );
+        // FMA 1회로 UV 계산 (스텝당 나눗셈 2회 완전 제거)
+        let uv = baseUV + uvDir * t;
 
         if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
             break;
@@ -513,7 +512,7 @@ fn computeLandscapeHeightmapShadow(
 
         let texCoord = vec2<i32>(clamp(uv * vhtTexSize, vec2<f32>(0.0), vhtTexSize - vec2<f32>(1.0)));
         let terrainHeight = textureLoad(heightMapTexture, texCoord, 0).r * heightScale;
-        let diff = samplePos.y - terrainHeight;
+        let diff = samplePosY - terrainHeight;
 
         if (diff < 0.0) {
             return 0.0;
@@ -630,45 +629,12 @@ fn main(inputData: InputData) -> OutputFragment {
 
     var visibility = 1.0;
 
-    // 🚀 [최적화] 거리 기반 섀도우 도메인 분리 (Distance-Partitioned Shadows)
-    // 근거리(0~400m)는 CSM만 실행하고, 원경(400m~)은 CSM을 100% 스킵하고 Raymarching만 실행하여 중복 48탭 연산 박멸
+    // 🚀 [하이브리드 섀도우 디커플링]
+    // 1. 거대 산맥 그림자(Heightmap Raymarching): 카메라 거리와 무관하게 항상 실행하여 골짜기 산그림자 영구 보존
+    // 2. 식생/메시 그림자(CSM): 근거리(0~maxCSMDist)에서만 실행하여 산맥 그림자와 합성, 원경(maxCSMDist~)은 CSM 16~32탭 완전 생략(0ms)
     if (receiveShadowYn && NdotL > 0.001) {
-        let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
-        let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
-
-        if (rawViewDist < maxCSMDist) {
-            // 🟢 [근거리: 0 ~ maxCSMDist] CSM 캐스케이드 섀도우 단독 실행
-            let rawVisibility: f32 = getDirectionalShadowVisibility(
-                directionalShadowMap,
-                directionalShadowMapSampler,
-                input_vertexPosition,
-                N,
-                L
-            );
-            let csmVisibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVisibility);
-
-            // CSM 끝단(80% ~ 100%)에서만 원경 Raymarching과 부드러운 크로스페이드 블렌딩
-            let csmBlendStart = maxCSMDist * 0.8;
-            if (rawViewDist > csmBlendStart && landscapeInstanceUniforms.heightmapShadow > 0.5 && L.y > 0.01) {
-                let terrainSelfShadow = computeLandscapeHeightmapShadow(
-                    input_vertexPosition,
-                    L,
-                    landscapeInstanceUniforms.worldSizeX,
-                    landscapeInstanceUniforms.worldSizeZ,
-                    landscapeInstanceUniforms.vhtTextureSize,
-                    landscapeInstanceUniforms.heightScale,
-                    landscapeInstanceUniforms.heightmapShadowDistance,
-                    landscapeInstanceUniforms.heightmapShadowSteps,
-                    landscapeInstanceUniforms.heightmapShadowSoftness
-                );
-                let terrainShadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, terrainSelfShadow);
-                let blendFactor = (rawViewDist - csmBlendStart) / (maxCSMDist - csmBlendStart);
-                visibility = mix(csmVisibility, min(csmVisibility, terrainShadowVis), blendFactor);
-            } else {
-                visibility = csmVisibility;
-            }
-        } else if (landscapeInstanceUniforms.heightmapShadow > 0.5 && L.y > 0.01) {
-            // 🏔️ [원경: maxCSMDist 이상] CSM 16~32탭 완전 생략(0회)! 오직 지형 전용 Heightmap Raymarching만 실행!
+        var terrainShadowVis = 1.0;
+        if (landscapeInstanceUniforms.heightmapShadow > 0.5 && L.y > 0.01) {
             let terrainSelfShadow = computeLandscapeHeightmapShadow(
                 input_vertexPosition,
                 L,
@@ -680,7 +646,26 @@ fn main(inputData: InputData) -> OutputFragment {
                 landscapeInstanceUniforms.heightmapShadowSteps,
                 landscapeInstanceUniforms.heightmapShadowSoftness
             );
-            visibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, terrainSelfShadow);
+            terrainShadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, terrainSelfShadow);
+        }
+
+        let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
+        let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
+
+        if (rawViewDist < maxCSMDist) {
+            // 🟢 [근거리: 0 ~ maxCSMDist] 식생/오브젝트 그림자를 CSM에서 읽어 산맥 그림자와 합성
+            let rawVisibility: f32 = getDirectionalShadowVisibility(
+                directionalShadowMap,
+                directionalShadowMapSampler,
+                input_vertexPosition,
+                N,
+                L
+            );
+            let csmVisibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVisibility);
+            visibility = min(csmVisibility, terrainShadowVis);
+        } else {
+            // 🏔️ [원경: maxCSMDist 이상] 무거운 CSM 16~32탭 완전 생략(0회)! 오직 산맥 Raymarching만 적용!
+            visibility = terrainShadowVis;
         }
     }
 
