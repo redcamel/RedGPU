@@ -66,6 +66,19 @@ fn shadowMain(inputData: InputData) {
         discard;
     }
 
+    // 🚀 [최적화 P1 / Step 13 - 페이드 디더링 조기 탈락 전진 배치 및 SSBO 로드 차단]
+    let fadeOpacity = inputData.combinedOpacity;
+    if (fadeOpacity < 0.999) {
+        let px = u32(inputData.position.x) & 3u;
+        let py = u32(inputData.position.y) & 3u;
+        let idx = (py << 2u) | px;
+        let packed = select(0x6E4C2A80u, 0x5D7F91B3u, idx >= 8u);
+        let threshold = f32((packed >> ((idx & 7u) * 4u)) & 0xFu) * 0.0625;
+        if (fadeOpacity < threshold) {
+            discard;
+        }
+    }
+
     let globalFragmentData = globalFragmentSSBO_PBR[inputData.globalFragmentSlotIndex];
     let baseCutOff = select(0.3333, globalFragmentData.cutOff, globalFragmentData.cutOff > 0.0);
 

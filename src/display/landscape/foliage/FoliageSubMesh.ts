@@ -58,7 +58,7 @@ class FoliageSubMesh {
 
     instanceBufferOffset: number;
     indirectOffsetBytes: number;
-    readonly #pipelineCache: Map<string, GPURenderPipeline> = new Map();
+    #pipelineCacheByMode: Record<string, Record<string, GPURenderPipeline>> = {};
 
     constructor(init: FoliageSubMeshInitOptions) {
         this.mesh = init.mesh;
@@ -112,8 +112,16 @@ class FoliageSubMesh {
             material.dirtyPipeline = false;
         }
 
-        const pipelineKey = `${msaaID}_${depthPassMode}`;
-        let pipeline = this.#pipelineCache.get(pipelineKey);
+        // 🚀 [최적화 P0 / Step 16 - 렌더 루프 파이프라인 키 문자열 템플릿 생성 100% 박멸 (Zero-GC)]
+        // 매 프레임 수만 번 호출되는 렌더 루프에서 `${msaaID}_${depthPassMode}` 문자열 힙 생성을 완전 제거하고,
+        // 2단계 모드 객체 프로퍼티 룩업을 통해 V8 인라인 캐시(IC) 나노초 단위 참조 및 완전 Zero-Allocation 달성!
+        let modeMap = this.#pipelineCacheByMode[msaaID];
+        if (!modeMap) {
+            modeMap = {};
+            this.#pipelineCacheByMode[msaaID] = modeMap;
+        }
+
+        let pipeline = modeMap[depthPassMode];
         if (!pipeline) {
             const cullMode = material.doubleSided ? 'none' : (material.cullMode ?? 'none');
             pipeline = registry.getOrCreatePipeline(
@@ -127,7 +135,7 @@ class FoliageSubMesh {
             ) || undefined;
 
             if (pipeline) {
-                this.#pipelineCache.set(pipelineKey, pipeline);
+                modeMap[depthPassMode] = pipeline;
             }
         }
         return pipeline || null;
@@ -144,7 +152,7 @@ class FoliageSubMesh {
 
     destroy(): void {
         this.vertexUniformBuffer?.destroy();
-        this.#pipelineCache.clear();
+        this.#pipelineCacheByMode = {};
     }
 }
 

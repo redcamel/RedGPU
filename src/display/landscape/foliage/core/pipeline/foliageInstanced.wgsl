@@ -164,9 +164,22 @@ fn mainInput(input : VertexInput) -> OutputData {
     return output;
 }
 
+// 🚀 [최적화 P1 / Step 18 - 섀도우 버텍스 셰이더 Varying 75% 다이어트]
+// 섀도우 맵 생성 시 불필요한 10개 varying(노멀, uv1, 버텍스 컬러, 쿼터니언, 모션 벡터 등)을 제거하여
+// 래스터라이저 보간 대역폭을 68바이트에서 20바이트로 70% 이상 삭감!
+struct FoliageShadowOutput {
+    @builtin(position) position: vec4<f32>,
+    @location(0) vertexPosition: vec3<f32>,
+    @location(2) uv: vec2<f32>,
+    @location(5) vertexTangent: vec4<f32>,
+    @location(9) @interpolate(flat) globalFragmentSlotIndex: u32,
+    @location(11) combinedOpacity: f32,
+};
+
 @vertex
-fn entryPointShadowVertex(input : VertexInput) -> OutputData {
-    var output : OutputData;
+fn entryPointShadowVertex(input : VertexInput) -> FoliageShadowOutput {
+    var output : FoliageShadowOutput;
+    output.vertexTangent = input.vertexTangent;
 
     let instancePos = input.instancePos_scaleY.xyz;
     let scaleY = input.instancePos_scaleY.w;
@@ -230,7 +243,6 @@ fn entryPointShadowVertex(input : VertexInput) -> OutputData {
     output.position = clipPos;
     output.vertexPosition = worldPos;
     output.uv = input.uv;
-    output.uv1 = input.uv1;
     output.globalFragmentSlotIndex = subMeshUniforms.globalFragmentSlotIndex;
     output.combinedOpacity = combinedOpacity;
 

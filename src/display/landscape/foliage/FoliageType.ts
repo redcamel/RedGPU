@@ -198,9 +198,6 @@ class FoliageType {
         }
     }
 
-    get bottomOffset(): number {
-        return this.#bottomOffset;
-    }
 
     /**
      * [KO] 그림자를 투영할 최대 캐스케이드 인덱스를 반환합니다 (0~3).

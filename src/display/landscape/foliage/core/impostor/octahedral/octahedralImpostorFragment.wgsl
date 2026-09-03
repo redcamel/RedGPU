@@ -54,6 +54,27 @@ fn hemiOctahedralUVToDir(uv: vec2<f32>) -> vec3<f32> {
     return normalize(vec3<f32>(dirX, dirY, dirZ));
 }
 
+fn getSubTileRotatedUVFast(p: vec2<f32>, lenVH: f32, angleV: f32, gridDir: vec3<f32>) -> vec2<f32> {
+    let gridH = vec2<f32>(gridDir.x, gridDir.z);
+    let lenGH = length(gridH);
+
+    var rotAngle = 0.0;
+    if (lenVH > 0.01 && lenGH > 0.01) {
+        let angleG = atan2(gridDir.z, gridDir.x);
+        var diff = angleV - angleG;
+        
+        diff = diff - floor((diff + 3.14159265) / 6.2831853) * 6.2831853;
+
+        let poleFade = clamp(min(lenVH, lenGH) * 5.0, 0.0, 1.0);
+        rotAngle = diff * poleFade;
+    }
+
+    let c = cos(rotAngle);
+    let s = sin(rotAngle);
+    let rotatedP = vec2<f32>(p.x * c - p.y * s, p.x * s + p.y * c);
+    return rotatedP + vec2<f32>(0.5);
+}
+
 fn getSubTileRotatedUV(quadUV: vec2<f32>, viewDir: vec3<f32>, gridDir: vec3<f32>) -> vec2<f32> {
     let viewH = vec2<f32>(viewDir.x, viewDir.z);
     let gridH = vec2<f32>(gridDir.x, gridDir.z);
@@ -182,10 +203,19 @@ fn main(inputData: InputData) -> OutputFragment {
     let dir01 = hemiOctahedralUVToDir((g01 + vec2<f32>(0.5)) / n);
     let dir11 = hemiOctahedralUVToDir((g11 + vec2<f32>(0.5)) / n);
 
-    let uv00 = getSubTileRotatedUV(inputData.uv, localView, dir00);
-    let uv10 = getSubTileRotatedUV(inputData.uv, localView, dir10);
-    let uv01 = getSubTileRotatedUV(inputData.uv, localView, dir01);
-    let uv11 = getSubTileRotatedUV(inputData.uv, localView, dir11);
+    // 🚀 [최적화 P0 / Step 11] localView의 atan2 및 length를 1회만 계산하여 4개 서브타일에서 재사용 (초월함수 연산 75% 절감!)
+    let pQuad = inputData.uv - vec2<f32>(0.5);
+    let viewH = vec2<f32>(localView.x, localView.z);
+    let lenVH = length(viewH);
+    var angleV = 0.0;
+    if (lenVH > 0.01) {
+        angleV = atan2(localView.z, localView.x);
+    }
+
+    let uv00 = getSubTileRotatedUVFast(pQuad, lenVH, angleV, dir00);
+    let uv10 = getSubTileRotatedUVFast(pQuad, lenVH, angleV, dir10);
+    let uv01 = getSubTileRotatedUVFast(pQuad, lenVH, angleV, dir01);
+    let uv11 = getSubTileRotatedUVFast(pQuad, lenVH, angleV, dir11);
 
     let ddxUV = dpdx(inputData.uv);
     let ddyUV = dpdy(inputData.uv);
@@ -310,9 +340,8 @@ fn main(inputData: InputData) -> OutputFragment {
     if (receiveShadowYn && NdotL0 > 0.001) {
         let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
         let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
-        let rawViewDist = length(toCamVec);
-
-        if (rawViewDist < maxCSMDist) {
+        // 🚀 [최적화 P2 / Step 9] 거리 제곱 비교로 매 픽셀 제곱근(length) 연산 100% 제거
+        if (distSq < maxCSMDist * maxCSMDist) {
             let rawVis = getDirectionalShadowVisibility(
                 directionalShadowMap,
                 directionalShadowMapSampler,
@@ -376,10 +405,12 @@ fn main(inputData: InputData) -> OutputFragment {
         var reflectedColor = vec3<f32>(0.0);
         var iblDiffuseColor = vec3<f32>(0.0);
 
+        // 🚀 [최적화 P3 / Step 10] IBL 밉 레벨 1회 계산 및 호이스팅
+        var iblMipLevel: f32 = 0.0;
         if (u_usePrefilterTexture) {
             let iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
-            let mipLevel = roughness * iblMipmapCount;
-            reflectedColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel).rgb * preExposure * systemUniforms.iblIntensity;
+            iblMipLevel = roughness * iblMipmapCount;
+            reflectedColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, R, iblMipLevel).rgb * preExposure * systemUniforms.iblIntensity;
             iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * preExposure * systemUniforms.iblIntensity;
         }
 
@@ -422,9 +453,7 @@ fn main(inputData: InputData) -> OutputFragment {
 
         var backScatteringColor = vec3<f32>(0.0);
         if (u_usePrefilterTexture) {
-            let iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
-            let mipLevel = roughness * iblMipmapCount;
-            backScatteringColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, -N, mipLevel).rgb * preExposure * systemUniforms.iblIntensity;
+            backScatteringColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, -N, iblMipLevel).rgb * preExposure * systemUniforms.iblIntensity;
         }
         if (u_useSkyAtmosphere) {
             let u_atmo = systemUniforms.skyAtmosphere;
