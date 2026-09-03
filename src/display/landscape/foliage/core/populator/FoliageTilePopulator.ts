@@ -46,7 +46,6 @@ class FoliageTilePopulator {
         for (let i = 0; i < actualCount; i++) {
             const idx = startIdx + i;
 
-            // Xorshift32 PRNG (Zero Allocation / Deterministic)
             seed ^= seed << 13;
             seed ^= seed >>> 17;
             seed ^= seed << 5;

@@ -129,7 +129,6 @@ export class LandscapeGPUCuller {
             });
         }
 
-        // WGSLParser 리플렉션으로부터 CameraFrustumUniforms 구조체 크기 동적 추출
         this.#uniformByteLength = shaderInfo?.uniforms?.uniforms?.arrayBufferByteLength || 176;
         this.#uniformData = new Float32Array(this.#uniformByteLength / Float32Array.BYTES_PER_ELEMENT);
         this.#uniformUintData = new Uint32Array(this.#uniformData.buffer);

@@ -209,10 +209,6 @@ export class Landscape extends Object3DContainer {
         return this.#debuggerManager;
     }
 
-    /**
-     * [KO] LOD 계산 기준 메트릭 ('distance': 카메라 거리 기반, 'screenSize': 화면 차지 크기/FOV 반응형)
-     * [EN] LOD distribution metric ('distance': camera distance based, 'screenSize': screen size / FOV responsive)
-     */
     get lodMetric(): 'distance' | 'screenSize' {
         return this.#lodMetric;
     }
@@ -225,51 +221,27 @@ export class Landscape extends Object3DContainer {
         return this.#tileStreamer.getHeightAt(x, z);
     }
 
-    /**
-     * [KO] 지형 기본 바탕 PBR 색상
-     * [EN] Landscape base PBR color
-     */
     get baseColor(): ColorRGBA {
         return this.#material.baseColor;
     }
 
-    /**
-     * [KO] 등록된 모든 PBR 레이어 목록을 반환합니다.
-     * [EN] Returns the list of all registered PBR layers.
-     */
     get layers(): readonly LandscapeLayer[] {
         return this.#material.layers;
     }
 
-    /**
-     * [KO] 지형에 새 PBR 레이어를 추가합니다.
-     * [EN] Adds a new PBR layer to the landscape.
-     */
     addLayer(layer: LandscapeLayer): this {
         this.#material.addLayer(layer);
         return this;
     }
 
-    /**
-     * [KO] 지형에서 특정 PBR 레이어를 제거합니다.
-     * [EN] Removes a PBR layer from the landscape.
-     */
     removeLayer(layer: LandscapeLayer | string): boolean {
         return this.#material.removeLayer(layer);
     }
 
-    /**
-     * [KO] 등록된 모든 PBR 레이어를 제거합니다.
-     * [EN] Clears all registered PBR layers.
-     */
     clearLayers(): void {
         this.#material.clearLayers();
     }
 
-    /**
-     * [KO] VBT 아틀라스 텍스처 재베이킹을 요청합니다.
-     * [EN] Requests rebaking of the VBT atlas textures.
-     */
     requestVBTRebake(immediate: boolean = false, debounceDelayMs: number = 150): void {
         this.#material.requestVBTRebake(immediate, debounceDelayMs);
     }
@@ -350,10 +322,6 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    /**
-     * [KO] LOD 0 전용 초고밀도 그리드 쿼드 수 (기본: 256)
-     * [EN] Ultra high-density grid quads count dedicated for LOD 0 (default: 256)
-     */
     get lod0SizeQuads(): number {
         return this.#lod0SizeQuads;
     }
@@ -516,7 +484,6 @@ export class Landscape extends Object3DContainer {
         const view3D = view?.view || view;
         if (!renderPassEncoder) return;
 
-        // 1. 지형 자체 그림자 렌더링 (this.#castShadow가 true일 때만)
         if (this.#castShadow) {
             const instanceBuffer = this.#instanceBuffer;
             const sharedGeometry = this.#sharedGeometry;
@@ -546,11 +513,7 @@ export class Landscape extends Object3DContainer {
 
                         if (indirectDrawBuffer) {
                             const currentCascade = view3D?.currentCascadeIndex ?? 0;
-                            // 🌲 [지형 캐스케이드 타일 컬링] 캐스케이드 반경에 맞는 유효 LOD 레벨까지만 드로우하여 버텍스/래스터 연산 75% 이상 절감!
-                            // Cascade 0: LOD 0만 (초근접 17.6m 내 타일)
-                            // Cascade 1: LOD 0~1만 (근거리 60m 내 타일)
-                            // Cascade 2: LOD 0~3만 (중원거리 200m 내 타일)
-                            // Cascade 3: 전체 LOD (원경)
+
                             let targetMaxLOD = maxLODLevel;
                             if (currentCascade === 0) {
                                 targetMaxLOD = Math.min(1, maxLODLevel);
@@ -570,7 +533,6 @@ export class Landscape extends Object3DContainer {
             }
         }
 
-        // 2. 식생(Foliage) 그림자 렌더링 (독립 실행)
         if (this.#foliageManager?.hasFoliageTypes) {
             this.#foliageManager.renderShadow(view, renderPassEncoder);
         }
@@ -604,10 +566,6 @@ export class Landscape extends Object3DContainer {
         }
     }
 
-    /**
-     * [KO] 언리얼 엔진 호환 버텍스 모핑 시작 비율 (lodGeomorphStartRatio의 별칭)
-     * [EN] Unreal Engine compatible vertex morphing start ratio (alias for lodGeomorphStartRatio)
-     */
     get lodMorphStartRatio(): number {
         return this.#lodGeomorphStartRatio;
     }
@@ -640,10 +598,6 @@ export class Landscape extends Object3DContainer {
         this.lodGeomorphStartRatio = value;
     }
 
-    /**
-     * [KO] 언리얼 엔진 호환 디더링 전환 시작 비율 (lodFadeStartRatio의 별칭)
-     * [EN] Unreal Engine compatible dithered transition start ratio (alias for lodFadeStartRatio)
-     */
     get lodDitherStartRatio(): number {
         return this.#lodFadeStartRatio;
     }
@@ -748,38 +702,26 @@ export class Landscape extends Object3DContainer {
         return this.#tileStreamer?.pendingQueueSize ?? 0;
     }
 
-    /**
-     * [KO] 타일 높이맵 이미지 URL 리졸버를 반환합니다.
-     * [EN] Returns the tile heightmap image URL resolver.
-     */
     get tileUrlResolver(): LandscapeTileUrlResolver | null {
         return this.#tileStreamer.tileUrlResolver;
     }
 
-    /**
-     * [KO] 타일 높이맵 이미지 URL 리졸버를 설정합니다.
-     * [EN] Sets the tile heightmap image URL resolver.
-     */
     set tileUrlResolver(resolver: LandscapeTileUrlResolver | null) {
         this.#tileStreamer.tileUrlResolver = resolver;
     }
 
-    /** @internal 내부 디버거 전용 활성 타일 컴포넌트 목록 조회 */
     get landscapeComponents(): readonly LandscapeComponent[] {
         return this.#spatialGrid.flatCells;
     }
 
-    /** @internal HUD 디버거 전용 GPU Culling 활성 상태 조회 */
     get frustumCullingActive(): boolean {
         return this.#frustumCullingActive;
     }
 
-    /** @internal 공간 그리드 디버거 전용 LOD 디버그 색상 목록 조회 */
     get lodColors(): readonly (readonly [number, number, number, number])[] {
         return this.#lodColorsRGBA;
     }
 
-    /** @internal 공간 그리드 디버거 전용 LOD 전환 거리(제곱) 목록 조회 */
     get lodDistancesSq(): readonly number[] {
         return this.#lodDistancesSq;
     }
@@ -788,7 +730,6 @@ export class Landscape extends Object3DContainer {
         return this.#tileStreamer?.isTileLoaded(row, col) ?? false;
     }
 
-    /** @internal 내부 디버거 및 포리지 전용 텍스처 조회 */
     getInternalAtlasTexture(type: 'vht' | 'vnt' | 'vbtBaseColor' | 'vbtNormal' | 'vbtORM'): DirectTexture | null {
         switch (type) {
             case 'vht':

@@ -153,7 +153,6 @@ class LandscapeFoliageManager {
         return this.#foliageTypes.get(name);
     }
 
-
     destroy(): void {
         this.#foliageTypes.forEach((type) => type.destroy());
         this.#foliageTypes.clear();

@@ -39,9 +39,12 @@ struct UnifiedGlobalCullingUniforms {
     maxSubMeshes: u32,
     maxTotalInstances8: u32,
     activeCascadeCount: u32,
+    hasHZB: u32,
     pad1: u32,
+    pad2: u32,
     mainFrustumPlanes: array<vec4<f32>, 6>,
     cascades: array<CascadeCullingInfo, 4>,
+    mainProjectionViewMatrix: mat4x4<f32>,
 };
 
 struct FoliageInstanceData {
@@ -52,7 +55,7 @@ struct FoliageInstanceData {
     packedRotXY: u32,
     packedRotZW: u32,
     packedScaleXZ: u32,
-    fadeOrType: f32, // Raw: typeId, Culled: cross-fade alpha
+    fadeOrType: f32, 
 };
 
 struct DrawIndexedIndirectArgs {
@@ -72,6 +75,8 @@ struct DrawIndexedIndirectArgs {
 @group(0) @binding(6) var<storage, read_write> shadowIndirectDrawCommands: array<DrawIndexedIndirectArgs>;
 @group(0) @binding(7) var vhtTexture: texture_2d<f32>;
 @group(0) @binding(8) var vhtSampler: sampler;
+@group(0) @binding(9) var hzbTexture: texture_2d<f32>;
+@group(0) @binding(10) var hzbSampler: sampler;
 
 var<workgroup> wgLocalMainSlots: array<atomic<u32>, 8>;
 var<workgroup> wgGlobalMainBases: array<u32, 8>;
@@ -81,12 +86,12 @@ fn main(
     @builtin(global_invocation_id) global_id: vec3<u32>,
     @builtin(local_invocation_index) local_idx: u32
 ) {
-    // 🌿 워크그룹 L1 공유 카운터 0 초기화 (0~7번 스레드가 8개 LOD 슬롯 초기화)
+    
     if (local_idx < 8u) {
         atomicStore(&wgLocalMainSlots[local_idx], 0u);
         wgGlobalMainBases[local_idx] = 0u;
     }
-    workgroupBarrier(); // ✅ Uniform Control Flow (64개 스레드 동시 동기화)
+    workgroupBarrier(); 
 
     let idx = global_id.x;
     var isValid = (idx < globalUniforms.totalInstanceCount);
@@ -124,7 +129,6 @@ fn main(
     let scaleZ = scaleXZ.y;
     let scaleY = instance.scaleY;
 
-    // 🌿 1. 지형 높이 VHT 텍스처 바이리니어 샘플링
     var realY = instance.posY;
     if (isValid && globalUniforms.hasVHT != 0u && globalUniforms.invWorldSizeX > 0.0) {
         let u = instance.posX * globalUniforms.invWorldSizeX + 0.5;
@@ -165,10 +169,7 @@ fn main(
     let spherePos = vec4<f32>(instance.posX, realY, instance.posZ, 1.0);
     let r = -scaledRadius;
 
-    // =========================================================================
-    // 🌟 2. 메인 카메라 뷰 (Main View) Culling
-    // =========================================================================
-    let inMainFrustum = isValid &&
+    var inMainFrustum = isValid &&
         (distSq < effectiveCullingDistSq) &&
         dot(spherePos, globalUniforms.mainFrustumPlanes[0]) >= r &&
         dot(spherePos, globalUniforms.mainFrustumPlanes[1]) >= r &&
@@ -176,6 +177,35 @@ fn main(
         dot(spherePos, globalUniforms.mainFrustumPlanes[3]) >= r &&
         dot(spherePos, globalUniforms.mainFrustumPlanes[4]) >= r &&
         dot(spherePos, globalUniforms.mainFrustumPlanes[5]) >= r;
+
+    if (inMainFrustum && globalUniforms.hasHZB != 0u) {
+        let clipPos = globalUniforms.mainProjectionViewMatrix * spherePos;
+        if (clipPos.w > 0.1) {
+            let invW = 1.0 / clipPos.w;
+            let ndc = clipPos.xy * invW;
+            let uvCenter = vec2<f32>(ndc.x * 0.5 + 0.5, 1.0 - (ndc.y * 0.5 + 0.5)); 
+
+            let screenRadius = (scaledRadius * globalUniforms.fovFactor * 2.0) * invW;
+            let minUV = clamp(uvCenter - vec2<f32>(screenRadius), vec2<f32>(0.0), vec2<f32>(1.0));
+            let maxUV = clamp(uvCenter + vec2<f32>(screenRadius), vec2<f32>(0.0), vec2<f32>(1.0));
+
+            let aabbPixelSize = max((maxUV - minUV) * vec2<f32>(512.0, 256.0), vec2<f32>(1.0));
+            let maxDim = max(aabbPixelSize.x, aabbPixelSize.y);
+            let mipLevel = clamp(ceil(log2(maxDim)), 0.0, 7.0);
+
+            let hzb00 = textureSampleLevel(hzbTexture, hzbSampler, minUV, mipLevel).r;
+            let hzb10 = textureSampleLevel(hzbTexture, hzbSampler, vec2<f32>(maxUV.x, minUV.y), mipLevel).r;
+            let hzb01 = textureSampleLevel(hzbTexture, hzbSampler, vec2<f32>(minUV.x, maxUV.y), mipLevel).r;
+            let hzb11 = textureSampleLevel(hzbTexture, hzbSampler, maxUV, mipLevel).r;
+            let maxHZBDepth = max(max(hzb00, hzb10), max(hzb01, hzb11));
+
+            let nearDepth = (clipPos.z - scaledRadius) * invW;
+
+            if (nearDepth > maxHZBDepth + 0.001) {
+                inMainFrustum = false;
+            }
+        }
+    }
 
     var targetLOD: u32 = 99u;
     var targetAlpha: f32 = 1.0;
@@ -227,14 +257,12 @@ fn main(
         }
     }
 
-    // 🌿 L1 워크그룹 로컬 슬롯 원자적 할당 (초고속 L1 공유 메모리, 0-지연시간)
     var localAssignedSlot: u32 = 0u;
     if (targetLOD < 8u) {
         localAssignedSlot = atomicAdd(&wgLocalMainSlots[targetLOD], 1u);
     }
-    workgroupBarrier(); // ✅ 워크그룹 내 모든 스레드의 L1 카운트 누적 완료 대기
+    workgroupBarrier(); 
 
-    // 🚀 워크그룹 대표 스레드들(0~7번)이 글로벌 VRAM에 단 1회씩 일괄 원자적 할당!
     if (local_idx < 8u && numLODs > local_idx) {
         let lodIdx = local_idx;
         let wgTotal = atomicLoad(&wgLocalMainSlots[lodIdx]);
@@ -244,16 +272,14 @@ fn main(
             let gBase = atomicAdd(&mainIndirectDrawCommands[baseCmdIdx].instanceCount, wgTotal);
             wgGlobalMainBases[lodIdx] = gBase;
 
-            // 서브메시 1..N에 워크그룹 합산치 일괄 반영
             let numSubs = lodInfo.subMeshCount;
             for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
                 atomicAdd(&mainIndirectDrawCommands[baseCmdIdx + s].instanceCount, wgTotal);
             }
         }
     }
-    workgroupBarrier(); // ✅ 글로벌 베이스 슬롯 공유 완료
+    workgroupBarrier(); 
 
-    // 🌿 인스턴스 버퍼에 일괄 기록
     if (targetLOD < 8u) {
         var culledInst = instance;
         culledInst.posY = realY;
@@ -265,9 +291,6 @@ fn main(
         mainCulledInstanceBuffer[outIdx] = culledInst;
     }
 
-    // =========================================================================
-    // 🌲 3. 섀도우 활성 캐스케이드 동적 Culling (단일 최적 캐스케이드 타겟팅 & 조기 탈출)
-    // =========================================================================
     let activeCascades = min(globalUniforms.activeCascadeCount, 4u);
     if (activeCascades > 0u) {
         let lastCascadeIdx = activeCascades - 1u;
@@ -286,12 +309,11 @@ fn main(
                 }
 
                 let cascadeMaxDist = cascadeInfo.maxDistance;
-                let isOverlapCascade = (c < activeCascades - 1u); // 마지막 활성 캐스케이드는 하드 컷오프, 전 단계는 오버랩
+                let isOverlapCascade = (c < activeCascades - 1u); 
                 let radiusMargin = select(0.0, scaledRadius, isOverlapCascade);
                 let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
                 let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
 
-                // distSq는 항상 horizontalDistSq 이상이므로 단일 조건으로 정밀 검사
                 if (distSq >= shadowEffectiveDistSq) {
                     continue;
                 }
@@ -308,13 +330,11 @@ fn main(
                     continue;
                 }
 
-                // 섀도우 패스: 단일 최적 LOD 선택
-                // 🌲 원거리(Cascade 2 이상 또는 2단계 모드의 마지막 캐스케이드)는 옥타헤드럴 임포스터 강제 선택!
                 var selectedLOD: u32 = 0u;
                 if (numLODs > 1u) {
                     let isFarCascade = (c >= 2u || (activeCascades <= 2u && c == activeCascades - 1u));
                     if (isFarCascade) {
-                        selectedLOD = numLODs - 1u; // 🚀 최종 옥타헤드럴 임포스터 쿼드 선택!
+                        selectedLOD = numLODs - 1u; 
                     } else {
                         for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
                             if (effectiveDist <= typeInfo.lods[l].lodDistance || l == numLODs - 1u) {
@@ -338,9 +358,6 @@ fn main(
                 let outIdx = cascadeCulledOffset + typeInfo.culledBaseOffset + (selectedLOD * typeInfo.maxInstances) + slot;
                 shadowCulledInstanceBuffer[outIdx] = shadowInst;
 
-                // 🌿 최적 캐스케이드 조기 탈출 (Early Out):
-                // 현재 캐스케이드의 완전 내부(오버랩 마진 안쪽)에 안착한 인스턴스는
-                // 더 먼 캐스케이드에서 중복 평가 및 원자적 락을 유발하지 않도록 루프를 즉시 종료합니다!
                 let pureCascadeMaxDist = max(cascadeMaxDist - scaledRadius, 0.0);
                 if (distSq < pureCascadeMaxDist * pureCascadeMaxDist) {
                     break;

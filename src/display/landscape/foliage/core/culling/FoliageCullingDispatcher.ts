@@ -6,6 +6,7 @@ import foliageCullingComputeWGSL from "./foliageCullingCompute.wgsl";
 import {getComputeBindGroupLayoutDescriptorFromShaderInfo} from "../../../../../material/core";
 
 import FoliageMegaBuffer, {CascadeCullingParam} from "../buffer/FoliageMegaBuffer";
+import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND_ENCODER_TYPE";
 
 class FoliageCullingDispatcher {
     static readonly #tempPVMatrix: mat4 = mat4.create();
@@ -21,10 +22,10 @@ class FoliageCullingDispatcher {
     ];
 
     static readonly #cachedCascadeParams: CascadeCullingParam[] = [
-        {maxDistance: 17.6, hasShadow: false, frustumPlanes: null},
-        {maxDistance: 60.0, hasShadow: false, frustumPlanes: null},
-        {maxDistance: 200.0, hasShadow: false, frustumPlanes: null},
-        {maxDistance: 1000.0, hasShadow: false, frustumPlanes: null}
+        {maxDistance: 3.2, hasShadow: false, frustumPlanes: null},
+        {maxDistance: 25.0, hasShadow: false, frustumPlanes: null},
+        {maxDistance: 85.0, hasShadow: false, frustumPlanes: null},
+        {maxDistance: 200.0, hasShadow: false, frustumPlanes: null}
     ];
 
     #redGPUContext: RedGPUContext;
@@ -34,6 +35,8 @@ class FoliageCullingDispatcher {
 
     #cachedVHTAtlasGPUTexture: GPUTexture | null = null;
     #cachedVHTView: GPUTextureView | null = null;
+    #cachedHZBView: GPUTextureView | null = null;
+    #cachedHZBSampler: GPUSampler | null = null;
 
     #typeListRef: FoliageType[] = [];
     #landscapeRef: Landscape | null = null;
@@ -174,10 +177,20 @@ class FoliageCullingDispatcher {
         }
         const fovFactor = this.#cachedFovFactor;
 
-        if (this.#megaBuffer) {
-            this.#megaBuffer.resetMultiIndirectCommands();
+        const currentView = stateData?.view || (viewOrCamera && viewOrCamera.hierarchicalZBuffer ? viewOrCamera : null);
+        const hzb = currentView?.hierarchicalZBuffer;
+        const hasHZB = !!(hzb?.textureView);
+        this.#cachedHZBView = hzb?.textureView || null;
+        this.#cachedHZBSampler = hzb?.sampler || null;
 
-            // 🌲 섀도우 CSM 활성 캐스케이드(1~4단계) 파라미터 구성
+        let mainPVMatrix: mat4 | null = null;
+        if (camera?.projectionMatrix && camera?.viewMatrix) {
+            mainPVMatrix = FoliageCullingDispatcher.#tempPVMatrix;
+            mat4.multiply(mainPVMatrix, camera.projectionMatrix, camera.viewMatrix);
+        }
+
+        if (this.#megaBuffer) {
+
             const shadowManager = stateData?.view?.scene?.shadowManager || (landscape as any)?.scene?.shadowManager;
             const dirShadow = shadowManager?.directionalShadowManager;
             const cascadeParams = FoliageCullingDispatcher.#cachedCascadeParams;
@@ -212,13 +225,20 @@ class FoliageCullingDispatcher {
                 fovFactor,
                 frustumPlanes,
                 cascadeParams,
-                activeCascadeCount
+                activeCascadeCount,
+                hasHZB,
+                mainPVMatrix
             );
         }
 
         if (this.#cullingComputePipeline && this.#cullingBindGroupLayout) {
             this.#typeListRef = typeList;
             this.#landscapeRef = landscape;
+
+            this.#redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.PRE_PROCESS, encoder => {
+                this.#megaBuffer?.resetMultiIndirectCommands(encoder);
+            });
+
             this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
                 'Foliage_GPUCulling_ComputePass',
                 this.#onPreProcessComputePass
@@ -278,12 +298,17 @@ class FoliageCullingDispatcher {
         const vhtView = this.#cachedVHTView || undefined;
         const vhtSampler = this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
 
-        // 🚀 [All-In-One Unified Dispatch] 메인 뷰 + 섀도우 3개 캐스케이드를 단 1회 디스패치로 일괄 완료!
         if (this.#megaBuffer) {
             const totalAllocatedRange = this.#megaBuffer.totalAllocatedRange;
             if (totalAllocatedRange <= 0) return;
 
-            const unifiedBindGroup = this.#megaBuffer.getOrCreateUnifiedCullingBindGroup(bindGroupLayout, vhtView, vhtSampler);
+            const unifiedBindGroup = this.#megaBuffer.getOrCreateUnifiedCullingBindGroup(
+                bindGroupLayout,
+                vhtView,
+                vhtSampler,
+                this.#cachedHZBView || undefined,
+                this.#cachedHZBSampler || undefined
+            );
             if (unifiedBindGroup) {
                 const workgroupCount = Math.ceil(totalAllocatedRange / 64);
                 computePass.setBindGroup(0, unifiedBindGroup);
@@ -292,7 +317,6 @@ class FoliageCullingDispatcher {
             return;
         }
 
-        // [Fallback 모드]
         const typeList = this.#typeListRef;
         const count = typeList.length;
         for (let i = 0; i < count; i++) {

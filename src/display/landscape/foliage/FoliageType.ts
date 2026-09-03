@@ -9,10 +9,9 @@ import FoliageMegaBuffer, {FoliageTypeAllocation} from "./core/buffer/FoliageMeg
 export {FoliageSubMesh};
 
 export interface FoliageLODConfig {
-    /** The 3D mesh (or mesh hierarchy) to render at this LOD level */
+
     mesh: Mesh | Mesh[];
 
-    /** LOD switch distance in meters (e.g. 40.0) */
     lodDistance?: number;
 }
 
@@ -26,7 +25,6 @@ export interface FoliageLODInfo {
 export interface FoliageTypeOptions {
     name: string;
 
-    /** Array of user-defined LOD configurations (LOD 0 to LOD 7) */
     lods: FoliageLODConfig[];
 
     maxInstances?: number;
@@ -38,15 +36,10 @@ export interface FoliageTypeOptions {
     maxScale?: [number, number, number];
     randomRotationY?: boolean;
 
-    /** Whether to automatically generate and use an octahedral impostor at the end of the LOD chain (default: true) */
     useImpostor?: boolean;
 
     isFoliage?: boolean;
 
-    /**
-     * [KO] 식생이 지면에 자연스럽게 박히도록 하는 하단 오프셋 (단위: 미터). 미지정 시 모델 크기에 맞춘 최적 안착값 적용
-     * [EN] Ground sink offset in meters to ensure seamless planting on uneven terrain.
-     */
     groundOffset?: number;
 }
 
@@ -163,10 +156,6 @@ class FoliageType {
         return this.#activeInstanceCount;
     }
 
-    /**
-     * [KO] 식생의 지면 밀착/파묻힘 깊이 오프셋 (단위: 미터)
-     * [EN] Ground sink offset in meters
-     */
     get groundOffset(): number {
         return this.#bottomOffset;
     }

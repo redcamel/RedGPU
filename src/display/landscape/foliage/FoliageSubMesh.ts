@@ -87,9 +87,6 @@ class FoliageSubMesh {
         this.indirectOffsetBytes = init.indirectOffsetBytes ?? 0;
     }
 
-    /**
-     * 주어진 렌더 패스 유형에 이 서브메시가 렌더링 대상인지 O(1)로 판정합니다.
-     */
     canRenderInPass(passType: FoliageRenderPassType): boolean {
         switch (passType) {
             case 'depthPrepass':
@@ -102,9 +99,6 @@ class FoliageSubMesh {
         }
     }
 
-    /**
-     * 서브메시별 렌더 파이프라인을 Zero GC로 조회하거나 캐싱하여 반환합니다.
-     */
     getPipeline(
         registry: FoliagePipelineRegistry,
         sampleCount: number,
@@ -139,9 +133,6 @@ class FoliageSubMesh {
         return pipeline || null;
     }
 
-    /**
-     * 인덱스 버퍼 유무에 따라 간접 드로우콜을 디스패치합니다.
-     */
     draw(passEncoder: GPURenderPassEncoder, indirectGPUBuffer: GPUBuffer, offsetBytes?: number): void {
         const offset = offsetBytes !== undefined ? offsetBytes : this.indirectOffsetBytes;
         if (this.isIndexed && this.geometry.indexBuffer?.gpuBuffer) {

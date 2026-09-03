@@ -92,7 +92,6 @@ export abstract class ALandscapeTextureDebugger extends ALandscapeDebugger {
 
         }
 
-        // 공통 2D 카메라 오버레이 렌더링
         this.renderOverlay();
     }
 

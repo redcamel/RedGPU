@@ -53,7 +53,6 @@ class FoliageRenderer {
         const sampleCount = useMSAA ? 4 : 1;
         const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup ?? (view as any)?.systemUniform_Vertex_UniformBindGroup ?? null;
 
-        // 🌲 1. 유효한 활성 식생 품종 1회 수집 (루프 중복 검사 및 게터 조회 최소화)
         let validCount = 0;
         for (let t = 0; t < typeCount; t++) {
             const foliageType = typeList[t];
@@ -75,7 +74,6 @@ class FoliageRenderer {
         }
         if (validCount === 0) return;
 
-        // 🌲 2. Depth Prepass 루프 (선행 깊이 버퍼 선점)
         for (let t = 0; t < validCount; t++) {
             const {type: foliageType, culledGPU, indirectGPU} = this.#validTypes[t];
             const subMeshes = foliageType.subMeshes;
@@ -89,7 +87,6 @@ class FoliageRenderer {
             }
         }
 
-        // 🌲 3. Main Opaque / Masked 루프 (Full PBR 셰이딩)
         for (let t = 0; t < validCount; t++) {
             const {type: foliageType, culledGPU, indirectGPU} = this.#validTypes[t];
             const subMeshes = foliageType.subMeshes;
@@ -119,7 +116,7 @@ class FoliageRenderer {
 
         const view3D = view as any;
         const currentCascade = view3D?.currentCascadeIndex ?? 0;
-        // 🌲 4개 캐스케이드(Cascade 0, 1, 2, 3) 모두 지원 (Cascade 2, 3은 2-트라이앵글 임포스터로 초고속 렌더링)
+
         if (currentCascade > 3) return;
 
         const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup ?? (view as any)?.systemUniform_Vertex_UniformBindGroup ?? null;
@@ -148,7 +145,6 @@ class FoliageRenderer {
         const cascadeIndirectOffset = currentCascade * 256 * 20;
         const cascadeInstanceOffset = currentCascade * (500000 * 8) * 32;
 
-        // 🌲 Shadow Pass 루프 (식생 그림자 뎁스 기록)
         for (let t = 0; t < validCount; t++) {
             const {type: foliageType, culledGPU, indirectGPU} = this.#validTypes[t];
             const subMeshes = foliageType.subMeshes;

@@ -75,26 +75,23 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
             const offset = 12 + i * 16;
             if (i < activeCount) {
                 const layer = activeLayers[i];
-                // vec4 0: uvOffset (2), uvScale (2)
+
                 fArr[offset + 0] = layer.uvOffset[0];
                 fArr[offset + 1] = layer.uvOffset[1];
                 fArr[offset + 2] = layer.uvScale[0];
                 fArr[offset + 3] = layer.uvScale[1];
 
-                // vec4 1: tintColor (4)
                 const tint = layer.tintColor.rgbNormalLinear;
                 fArr[offset + 4] = tint[0];
                 fArr[offset + 5] = tint[1];
                 fArr[offset + 6] = tint[2];
                 fArr[offset + 7] = 1.0;
 
-                // vec4 2: roughness, metallic, normalIntensity, enabled
                 fArr[offset + 8] = layer.roughness;
                 fArr[offset + 9] = layer.metallic;
                 fArr[offset + 10] = layer.normalIntensity;
                 fArr[offset + 11] = layer.enabled ? 1.0 : 0.0;
 
-                // vec4 3: aoIntensity, weightChannelIndex, pad0, pad1
                 fArr[offset + 12] = layer.aoIntensity;
                 fArr[offset + 13] = layer.weightChannelIndex;
                 fArr[offset + 14] = 0.0;
@@ -255,7 +252,6 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         const shaderInfo = resourceManager.wgslParser.parse('LandscapeVBTBakeComputeShaderModule', vbtBakeShaderCode);
         this.#vbtUniformByteLength = shaderInfo.uniforms.uniforms?.arrayBufferByteLength || 0;
 
-        // WGSLParser의 구조체 크기 기반으로 CPU 재사용 버퍼 정확히 할당 (Zero-GC)
         this.#uniformFloatArray = new Float32Array(this.#vbtUniformByteLength / Float32Array.BYTES_PER_ELEMENT);
         this.#uniformUintArray = new Uint32Array(this.#uniformFloatArray.buffer);
 
@@ -277,7 +273,6 @@ export class LandscapeVBTGenerator extends ALandscapeAtlasGenerator {
         const mipShaderInfo = resourceManager.wgslParser.parse('LandscapeTileMipmapComputeShaderModule', tileMipShaderCode);
         this.#tileMipUniformByteLength = mipShaderInfo.uniforms.params?.arrayBufferByteLength || 0;
 
-        // WGSLParser의 구조체 크기 기반으로 CPU 재사용 버퍼 정확히 할당 (Zero-GC)
         this.#mipUniformArray = new Uint32Array(this.#tileMipUniformByteLength / Uint32Array.BYTES_PER_ELEMENT);
 
         let shaderModule = resourceManager.getGPUShaderModule('LandscapeTileMipmapComputeShaderModule');

@@ -113,7 +113,6 @@ export class LandscapeTileStreamer {
         this.resetTileState();
     }
 
-    /** @internal 타일 로딩 완료 리스너 주입 */
     setOnTileLoaded(callback: ((comp: LandscapeComponent) => void) | null): void {
         this.#onTileLoaded = callback;
     }
@@ -455,7 +454,6 @@ export class LandscapeTileStreamer {
                             );
                         }
 
-                        // 인접한 4방향 이웃 타일의 VNT 및 VBT 자동 갱신 (경계면 노멀 연속성 보장)
                         const neighborOffsets = LandscapeTileStreamer.#NEIGHBOR_OFFSETS;
                         const tileCountX = this.#spatialGrid.tileCountX;
                         const tileCountZ = this.#spatialGrid.tileCountZ;

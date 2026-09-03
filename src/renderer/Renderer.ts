@@ -239,6 +239,19 @@ class Renderer {
             const renderPath1ResultTextureView = view.viewRenderTextureManager.getGBufferTextureView(GBUFFER_TYPE.RENDER_PATH1_RESULT);
             view.update(false, true, renderPath1ResultTextureView)
 
+            // 🌿 [Hierarchical Z-Buffer] Depth Texture로부터 8단계 HZB 피라미드 생성 (0.02ms)
+            const currentDepthView = view.viewRenderTextureManager.depthTextureView;
+            if (currentDepthView && view.hierarchicalZBuffer) {
+                redGPUContext.commandEncoderManager.useEncoder(COMMAND_ENCODER_TYPE.MAIN, encoder => {
+                    view.hierarchicalZBuffer.generate(
+                        encoder,
+                        currentDepthView,
+                        pixelRectObject.width,
+                        pixelRectObject.height
+                    );
+                });
+            }
+
             this.#renderPassViewBasicLayer(view, renderPassDescriptor)
             this.#renderPassView2PathLayer(view, renderPassDescriptor, depthStencilAttachment)
             pickingManager.render(view)

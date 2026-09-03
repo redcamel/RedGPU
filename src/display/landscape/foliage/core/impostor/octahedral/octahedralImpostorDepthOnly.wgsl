@@ -26,7 +26,6 @@ struct InputData {
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
-// Convert 3D local view direction to Hemi-Octahedral (0..1) UV
 fn dirToHemiOctahedralUV(dir: vec3<f32>) -> vec2<f32> {
     let d = normalize(vec3<f32>(dir.x, max(dir.y, 0.0), dir.z));
     let l1 = abs(d.x) + d.y + abs(d.z);
@@ -36,7 +35,6 @@ fn dirToHemiOctahedralUV(dir: vec3<f32>) -> vec2<f32> {
     return clamp(vec2<f32>(u, v), vec2<f32>(0.0), vec2<f32>(1.0));
 }
 
-// Convert Hemi-Octahedral (0..1) UV to 3D direction vector
 fn hemiOctahedralUVToDir(uv: vec2<f32>) -> vec3<f32> {
     let uPrime = 2.0 * uv.x - 1.0;
     let vPrime = 2.0 * uv.y - 1.0;
@@ -46,24 +44,20 @@ fn hemiOctahedralUVToDir(uv: vec2<f32>) -> vec3<f32> {
     return normalize(vec3<f32>(dirX, dirY, dirZ));
 }
 
-// Computes 2D rotation of quad UV so that the baked tile aligns seamlessly with current camera view
-// 🌿 UE5 Standard atan2 방위각 차이 기반 회전 + 상공(Top-down) 극점 특이점 스무딩(Pole Singularity Smoothing)
 fn getSubTileRotatedUV(quadUV: vec2<f32>, viewDir: vec3<f32>, gridDir: vec3<f32>) -> vec2<f32> {
     let viewH = vec2<f32>(viewDir.x, viewDir.z);
     let gridH = vec2<f32>(gridDir.x, gridDir.z);
     let lenVH = length(viewH);
     let lenGH = length(gridH);
 
-    // 수평 성분이 충분할 때만 방위각 차이 계산 (상공 뷰에서 180도 반전 요동 원천 차단)
     var rotAngle = 0.0;
     if (lenVH > 0.01 && lenGH > 0.01) {
         let angleV = atan2(viewDir.z, viewDir.x);
         let angleG = atan2(gridDir.z, gridDir.x);
         var diff = angleV - angleG;
-        // [-PI, PI] 범위로 랩핑
+        
         diff = diff - floor((diff + 3.14159265) / 6.2831853) * 6.2831853;
 
-        // Top-Down 극점 영역에서의 부드러운 감쇄
         let poleFade = clamp(min(lenVH, lenGH) * 5.0, 0.0, 1.0);
         rotAngle = diff * poleFade;
     }
@@ -166,7 +160,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let sharpnessFactor = clamp((maxCornerWeight - 0.25) / 0.75, 0.0, 1.0);
     let reconstructedAlpha = mix(linearAlpha, maxAlpha, mix(0.70, 0.95, sharpnessFactor));
 
-    // 🌿 UE5 DitherTemporalAA (TAA 시간축 융합 + MSAA 서브픽셀 융합 완벽 호환)
     let px = u32(inputData.position.x) & 3u;
     let py = u32(inputData.position.y) & 3u;
     let frameIdx = systemUniforms.time.frameIndex & 3u;

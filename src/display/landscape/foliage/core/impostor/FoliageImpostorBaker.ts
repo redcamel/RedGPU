@@ -10,20 +10,19 @@ import {COMMAND_ENCODER_TYPE} from "../../../../../commandEncoderManager/COMMAND
 
 export interface FoliageBakeResult {
     baseColorTexture: DirectTexture;
-    texture: DirectTexture; // backward-compatibility alias
+    texture: DirectTexture; 
     normalTexture: DirectTexture;
     packedORMTexture: DirectTexture;
-    ormTexture: DirectTexture; // backward-compatibility alias
+    ormTexture: DirectTexture; 
     width: number;
     height: number;
     depth: number;
     bottomOffset: number;
-    /** 타일 내 실제 나무 UV 크기: quadUV * tileUVScale + tileUVOffset → 아틀라스 타일 내 나무 영역 UV */
+
     tileUVScale: [number, number];
-    /** 타일 내 실제 나무 UV 시작 오프셋 */
+
     tileUVOffset: [number, number];
 }
-
 
 class FoliageImpostorBaker {
     static #bakePipelineCache: Map<string, GPURenderPipeline> = new Map();
@@ -94,7 +93,6 @@ class FoliageImpostorBaker {
         const centerZ = 0.0;
         const bottomOffset = minY;
 
-        // 🌲 실제 모든 정점들과 수직 중심축 (0, centerY, 0) 사이의 최대 거리 R_max 계산 (피벗 이탈 및 짤림 원천 방지)
         let maxDistSq = 0;
         for (let s = 0; s < subMeshes.length; s++) {
             const sub = subMeshes[s];
@@ -265,7 +263,6 @@ class FoliageImpostorBaker {
         const centerZ = aabb.center[2];
         const maxRadius = aabb.maxRadius;
 
-        // 🌲 3D 대각선 회전 및 상공 뷰(Pitch 45°~90°) 시 투영 높이 팽창을 완벽히 포괄하는 25% 안전 마진 (시저 클리핑 0% 보장)
         const margin = 1.25;
         const orthoHalfWidth = maxRadius * margin;
         const orthoHalfHeight = maxRadius * margin;
@@ -276,11 +273,10 @@ class FoliageImpostorBaker {
 
         const gridSize = 8;
         const tileSize = 256;
-        const atlasWidth = gridSize * tileSize; // 2048
-        const atlasHeight = gridSize * tileSize; // 2048
+        const atlasWidth = gridSize * tileSize;
+        const atlasHeight = gridSize * tileSize; 
         const mipLevelCount = getMipLevelCount(atlasWidth, atlasHeight);
 
-        // 1. MRT Target 0: BaseColor + Alpha Mask
         const bakedGPUTexture = gpuDevice.createTexture({
             label: `BakedImpostor_BaseColor_${bakeName}`,
             size: [atlasWidth, atlasHeight, 1],
@@ -289,7 +285,6 @@ class FoliageImpostorBaker {
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
         });
 
-        // 2. MRT Target 1: World Normal + Radial Depth
         const bakedNormalGPUTexture = gpuDevice.createTexture({
             label: `BakedImpostor_Normal_${bakeName}`,
             size: [atlasWidth, atlasHeight, 1],
@@ -298,7 +293,6 @@ class FoliageImpostorBaker {
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST,
         });
 
-        // 3. MRT Target 2: Physical Material Properties (ORM + Subsurface)
         const bakedORMGPUTexture = gpuDevice.createTexture({
             label: `BakedImpostor_ORM_${bakeName}`,
             size: [atlasWidth, atlasHeight, 1],
@@ -343,14 +337,11 @@ class FoliageImpostorBaker {
                 const view = mat4.create();
                 const projView = mat4.create();
 
-                // 🌲 WebGPU 표준 [0.0, 1.0] Depth 클립 공간을 위한 mat4.orthoZO 사용 (전면 50% 뎁스 클리핑 완벽 방지)
                 mat4.orthoZO(proj, -orthoHalfWidth, orthoHalfWidth, -orthoHalfHeight, orthoHalfHeight, 0.0, maxCameraDist * 2.0);
 
-                // 🌲 모든 64개 각도에서 수목이 일관되게 정립하도록 월드 Up 벡터 적용
                 const upVec = (Math.abs(normY) > 0.999) ? [0, 0, -1] : [0, 1, 0];
                 mat4.lookAt(view, [camX, camY, camZ], [centerX, centerY, centerZ], upVec as any);
                 mat4.multiply(projView, proj, view);
-
 
                 renderPassViews.push({
                     projView,
@@ -370,7 +361,6 @@ class FoliageImpostorBaker {
         const emptyTexView = resourceManager.emptyBitmapTextureView;
         const basicSampler = resourceManager.basicSampler;
 
-        // 1. 🌲 서브메시별 머티리얼 BindGroup 1회 사전 생성 (루프 밖 캐싱)
         const subBindGroups: (GPUBindGroup | null)[] = [];
         for (let s = 0; s < subMeshes.length; s++) {
             const sub = subMeshes[s];
@@ -405,7 +395,6 @@ class FoliageImpostorBaker {
             subBindGroups.push(bg);
         }
 
-        // 2. 🌲 전체 뷰포트 x 서브메시용 단일 통합 인스턴스 버퍼 계산 및 1회 생성 (GPUBuffer 256개 -> 1개)
         const totalViews = renderPassViews.length;
         const totalSub = subMeshes.length;
         const totalDrawCalls = totalViews * totalSub;
@@ -471,49 +460,42 @@ class FoliageImpostorBaker {
 
                 allInstanceData.set(tempMVP, baseOffset);
 
-                // baseColorFactor (r, g, b, a)
                 allInstanceData[baseOffset + 16] = r;
                 allInstanceData[baseOffset + 17] = g;
                 allInstanceData[baseOffset + 18] = b;
                 allInstanceData[baseOffset + 19] = a;
 
-                // materialParams (roughness, metallic, ao, cutOff)
                 allInstanceData[baseOffset + 20] = roughness;
                 allInstanceData[baseOffset + 21] = metallic;
                 allInstanceData[baseOffset + 22] = ao;
                 allInstanceData[baseOffset + 23] = cutOff;
 
-                // textureFlags (hasDiff, hasNorm, hasORM, useVertexColor)
                 allInstanceData[baseOffset + 24] = hasDiff ? 1.0 : 0.0;
                 allInstanceData[baseOffset + 25] = hasNorm ? 1.0 : 0.0;
                 allInstanceData[baseOffset + 26] = hasORM ? 1.0 : 0.0;
                 allInstanceData[baseOffset + 27] = useVertexColor ? 1.0 : 0.0;
 
-
-                // mMat with translation in w (Exact World Position computation)
                 const m = sub.relativeModelMatrix;
                 allInstanceData[baseOffset + 28] = m[0];
                 allInstanceData[baseOffset + 29] = m[1];
                 allInstanceData[baseOffset + 30] = m[2];
-                allInstanceData[baseOffset + 31] = m[12]; // transX
+                allInstanceData[baseOffset + 31] = m[12]; 
 
                 allInstanceData[baseOffset + 32] = m[4];
                 allInstanceData[baseOffset + 33] = m[5];
                 allInstanceData[baseOffset + 34] = m[6];
-                allInstanceData[baseOffset + 35] = m[13]; // transY
+                allInstanceData[baseOffset + 35] = m[13]; 
 
                 allInstanceData[baseOffset + 36] = m[8];
                 allInstanceData[baseOffset + 37] = m[9];
                 allInstanceData[baseOffset + 38] = m[10];
-                allInstanceData[baseOffset + 39] = m[14]; // transZ
+                allInstanceData[baseOffset + 39] = m[14]; 
 
-                // sphereCenterRadius
                 allInstanceData[baseOffset + 40] = centerX;
                 allInstanceData[baseOffset + 41] = centerY;
                 allInstanceData[baseOffset + 42] = centerZ;
                 allInstanceData[baseOffset + 43] = maxRadius;
 
-                // cameraDir (xyz: normDir, w: isFoliage)
                 allInstanceData[baseOffset + 44] = vpInfo.normX;
                 allInstanceData[baseOffset + 45] = vpInfo.normY;
                 allInstanceData[baseOffset + 46] = vpInfo.normZ;
@@ -606,12 +588,10 @@ class FoliageImpostorBaker {
         depthGPUTexture.destroy();
         sharedTransformGPUBuffer.destroy();
 
-        // 🌲 GPU Texture Dilation (16픽셀 외곽선 확장으로 밉맵 다운샘플링 시 검은 테두리 및 타일 번짐 원천 차단)
         this.#executeDilation(redGPUContext, bakedGPUTexture, atlasWidth, atlasHeight, tileSize);
         this.#executeDilation(redGPUContext, bakedNormalGPUTexture, atlasWidth, atlasHeight, tileSize);
         this.#executeDilation(redGPUContext, bakedORMGPUTexture, atlasWidth, atlasHeight, tileSize);
 
-        // 🌲 Mipmap generation for BaseColor, Normal, and ORM textures
         if (mipLevelCount > 1) {
             redGPUContext.resourceManager.mipmapGenerator.generateMipmap(
                 bakedGPUTexture,
@@ -721,7 +701,6 @@ class FoliageImpostorBaker {
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC | GPUTextureUsage.COPY_DST
         });
 
-        // 1. 초기 텍스처를 pingPongA로 복사
         const initCopyEncoder = gpuDevice.createCommandEncoder({label: 'ImpostorDilation_InitCopy'});
         initCopyEncoder.copyTextureToTexture(
             {texture: targetTexture, mipLevel: 0},
@@ -730,7 +709,6 @@ class FoliageImpostorBaker {
         );
         gpuDevice.queue.submit([initCopyEncoder.finish()]);
 
-        // 🌿 1px, 2px, 4px, 8px 총 4단계 확장으로 15px 반경 Dilation 완성
         const steps = [1, 2, 4, 8];
         let currentSource = pingPongA;
         let currentDest = pingPongB;
@@ -771,7 +749,6 @@ class FoliageImpostorBaker {
             currentDest = temp;
         }
 
-        // 최종 Dilation 결과를 targetTexture(Level 0)로 복사
         const finalCopyEncoder = gpuDevice.createCommandEncoder({label: 'ImpostorDilation_FinalCopy'});
         finalCopyEncoder.copyTextureToTexture(
             {texture: currentSource, mipLevel: 0},

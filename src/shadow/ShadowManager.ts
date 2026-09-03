@@ -24,7 +24,6 @@ import keepLog from "../utils/keepLog";
  */
 class ShadowManager {
     #directionalShadowManager: DirectionalShadowManager = new DirectionalShadowManager()
-    #shadowPassDescriptor: GPURenderPassDescriptor
 
     constructor() {
     }
@@ -39,18 +38,6 @@ class ShadowManager {
      */
     get directionalShadowManager(): DirectionalShadowManager {
         return this.#directionalShadowManager;
-    }
-
-    /**
-     * [KO] 섀도우 렌더 패스 디스크립터를 반환합니다.
-     * [EN] Returns the shadow render pass descriptor.
-     *
-     * @returns
-     * [KO] GPURenderPassDescriptor 객체
-     * [EN] GPURenderPassDescriptor object
-     */
-    get shadowPassDescriptor(): GPURenderPassDescriptor {
-        return this.#shadowPassDescriptor
     }
 
     /**
@@ -126,7 +113,6 @@ class ShadowManager {
             this.#directionalShadowManager.destroy();
             this.#directionalShadowManager = null;
         }
-        this.#shadowPassDescriptor = null;
         keepLog("🧹 ShadowManager destroy 완료");
     }
 }

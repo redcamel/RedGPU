@@ -98,7 +98,6 @@ class FoliageSubMeshAssembler {
             });
         }
 
-        // Impostor fallback / attachment if enabled (Default: true)
         if (useImpostor && subList.length > 0) {
             const impostorLODIndex = lodInfoList.length;
             const lod0SubMeshes = subList.filter(s => s.lodIndex === 0);
@@ -142,14 +141,11 @@ class FoliageSubMeshAssembler {
                     if (dSq > maxDistSq) maxDistSq = dSq;
                 }
 
-
             }
         }
 
         const boundingRadius = Math.sqrt(maxDistSq);
 
-        // 🌿 지면 밀착(Ground Sink): 경사 지형 및 굴곡진 지면에서 식생 밑동이 공중에 뜨지 않고
-        // 🌿 바닥에 완벽히 밀착되도록 options.groundOffset 또는 기본 안착값(boundingRadius 기반 적응형 깊이)을 적용
         let finalBottomOffset = minOffset;
         if (options.groundOffset !== undefined) {
             finalBottomOffset = options.groundOffset;
@@ -184,7 +180,6 @@ class FoliageSubMeshAssembler {
 
         const bbGeom = createOctahedralImpostorGeometry(redGPUContext, bbWidth, bbHeight, bbBottomOffset);
         const bbMat = new OctahedralImpostorMaterial(redGPUContext, bakeResult.baseColorTexture, bakeResult.normalTexture, bakeResult.packedORMTexture, `${options.name}_OctahedralMat`, 8.0);
-
 
         const bbStartOffset = subList.length;
         const bbSubMesh = FoliageSubMeshAssembler.#createSubMeshInstance(
@@ -296,7 +291,7 @@ class FoliageSubMeshAssembler {
 
             const isFoliage = options.isFoliage !== false;
             if (isFoliage) {
-                // 🌿 언리얼 엔진 5 표준: 식생 전용 Two-Sided Masked 셰이딩 모델 적용
+
                 mat.isFoliage = true;
                 mat.useCutOff = true;
                 mat.cutOff = (mat.cutOff > 0) ? mat.cutOff : 0.3333;
@@ -312,8 +307,6 @@ class FoliageSubMeshAssembler {
 
             const geom = node.geometry;
             const rawStride = geom.vertexBuffer?.stride || (geom.vertexBuffer?.interleavedStruct?.arrayStride ? geom.vertexBuffer.interleavedStruct.arrayStride / 4 : 18);
-
-
 
             const normalMatrix = mat4.create();
             mat4.invert(normalMatrix, currentRelativeMatrix);
@@ -365,7 +358,6 @@ class FoliageSubMeshAssembler {
 
         if (rawList.length === 0) return [];
 
-        // 🌿 LOD별 AABB 바운딩 박스를 계산하여 피벗(밑동 Y=0, 중심 X=0, Z=0)을 자동으로 100% 일치화
         let minX = Infinity, maxX = -Infinity;
         let minY = Infinity, maxY = -Infinity;
         let minZ = Infinity, maxZ = -Infinity;
@@ -547,7 +539,7 @@ class FoliageSubMeshAssembler {
                             tanW = srcVData[srcIdx + 15] !== 0 ? srcVData[srcIdx + 15] : 1.0;
                             hasTangent = true;
                         } else if (rawStride === 12) {
-                            // Primitive layout: position(3) + normal(3) + uv(2) + tangent(4)
+
                             tanX = srcVData[srcIdx + 8];
                             tanY = srcVData[srcIdx + 9];
                             tanZ = srcVData[srcIdx + 10];
@@ -556,7 +548,7 @@ class FoliageSubMeshAssembler {
                         }
 
                         if (hasTangent) {
-                            // Tangent is a surface direction vector, transformed by model matrix m (linear part)
+
                             let rtx = m[0] * tanX + m[4] * tanY + m[8] * tanZ;
                             let rty = m[1] * tanX + m[5] * tanY + m[9] * tanZ;
                             let rtz = m[2] * tanX + m[6] * tanY + m[10] * tanZ;
@@ -682,8 +674,6 @@ class FoliageSubMeshAssembler {
         const isMasked = !!mat.useCutOff || (mat.cutOff !== undefined && mat.cutOff > 0) || isImpostor;
         const hasBaseColorTexture = !!(mat.baseColorTexture?.gpuTexture || mat.baseColorTexture?.src || mat.baseColorTexture?.url || (mat.diffuseTexture && (mat.diffuseTexture.gpuTexture || mat.diffuseTexture.src || mat.diffuseTexture.url)));
 
-        // 🌲 3D 근거리 식생(LOD 0~N)은 2-Pass Depth Prepass로 오버드로우를 90% 이상 제거하고,
-        // 🌲 원거리 빌보드/임포스터는 자체 오버드로우가 없는 단일 Quad이므로 버텍스/드로우콜 절감을 위해 1-Pass 고속 렌더링(normal)을 적용합니다.
         const isDepthPrepass = !isImpostor && (hasBaseColorTexture || isMasked);
         const isMainOpaqueOrMasked = true;
         const mainDepthMode: FoliageDepthPassMode = isDepthPrepass ? 'mainShadingAfterDepth' : 'normal';

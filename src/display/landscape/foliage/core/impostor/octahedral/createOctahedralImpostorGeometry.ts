@@ -17,10 +17,6 @@ const PBR_INTERLEAVED_STRUCT = new VertexInterleavedStruct(
     'PBR'
 );
 
-/**
- * Creates a single quad geometry for Octahedral Impostor rendering.
- * Total vertices: 4, Total triangles: 2 (indices: 6)
- */
 function createOctahedralImpostorGeometry(
     redGPUContext: RedGPUContext,
     width: number = 6.0,
@@ -31,15 +27,14 @@ function createOctahedralImpostorGeometry(
     const halfH = height * 0.5;
     const centerY = bottomOffset + halfH;
 
-    // 4 Vertices * 18 floats per vertex = 72 floats
     const interleaved = new Float32Array([
-        // 0: Bottom-Left
+
         -halfW, -halfH, centerY, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, -999.0,
-        // 1: Bottom-Right
+
         halfW, -halfH, centerY, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, -999.0,
-        // 2: Top-Right
+
         halfW, halfH, centerY, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, -999.0,
-        // 3: Top-Left
+
         -halfW, halfH, centerY, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, -999.0
     ]);
 

@@ -224,30 +224,6 @@ class DirectionalShadowManager {
     }
 
     /**
-     * [KO] 각 캐스케이드의 투영(Projection) 행렬 배열(길이 4)을 반환합니다.
-     * [EN] Returns the array of projection matrices for each cascade (length 4).
-     *
-     * @returns
-     * [KO] 투영 행렬 배열
-     * [EN] Array of projection matrices
-     */
-    get cascadeProjectionMatrices(): mat4[] {
-        return this.#cascadeProjectionMatrices;
-    }
-
-    /**
-     * [KO] 각 캐스케이드의 뷰(View) 행렬 배열(길이 4)을 반환합니다.
-     * [EN] Returns the array of view matrices for each cascade (length 4).
-     *
-     * @returns
-     * [KO] 뷰 행렬 배열
-     * [EN] Array of view matrices
-     */
-    get cascadeViewMatrices(): mat4[] {
-        return this.#cascadeViewMatrices;
-    }
-
-    /**
      * [KO] 섀도우 뎁스 텍스처의 크기(해상도)를 설정합니다. (정수)
      * [EN] Sets the size (resolution) of the shadow depth texture. (Integer)
      *
@@ -298,14 +274,6 @@ class DirectionalShadowManager {
      */
     getCascadeLayerView(index: number): GPUTextureView {
         return this.#cascadeLayerViews[index] || this.#shadowDepthTextureViewEmpty;
-    }
-
-    /**
-     * [KO] 매니저를 리셋하고 리소스를 파기합니다.
-     * [EN] Resets the manager and destroys resources.
-     */
-    reset() {
-        this.destroy();
     }
 
     /**
@@ -367,15 +335,16 @@ class DirectionalShadowManager {
         mat4.lookAt(g_lightRotMat, g_zero, g_lightDir, g_up);
         mat4.invert(g_invLightRotMat, g_lightRotMat);
 
-        // 🌟 1. [PSSM 표준] 로그 분할과 선형 분할의 가중 결합 (lambda = 0.75, Cascade 0 = 17.6m)
+        // 🌟 1. [언리얼 엔진 5(UE5) 표준 지수 분할: Cascade Distribution Exponent = 3.0]
+        // 최근거리(Cascade 0)는 전체의 ~1.5% (약 3~5m)로 극단적 압축 집중시켜 2048 텍스처 해상도를 몰빵하고,
+        // Cascade 1은 ~12.5%(25m), Cascade 2는 ~42%(85m), Cascade 3은 100%(200m)로 부드럽게 전이
         g_cascadeSplits[0] = near;
-        const lambda = 0.75;
-        const ratio = shadowFar / near;
+        const exponent = 3.0;
+        const range = shadowFar - near;
         for (let i = 1; i <= cascadeCount; i++) {
             const p = i / cascadeCount;
-            const logSplit = near * Math.pow(ratio, p);
-            const uniformSplit = near + (shadowFar - near) * p;
-            const split = lambda * logSplit + (1.0 - lambda) * uniformSplit;
+            const expFraction = Math.pow(p, exponent);
+            const split = near + range * expFraction;
             g_cascadeSplits[i] = split;
             if (i <= 4) {
                 splitDepths[i - 1] = split;

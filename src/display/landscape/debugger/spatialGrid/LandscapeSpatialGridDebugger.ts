@@ -98,7 +98,6 @@ export class LandscapeSpatialGridDebugger extends ALandscapeDebugger {
 
         this.#ctx.restore();
 
-        // 공통 2D 타일 그리드 및 카메라 오버레이 렌더링
         this.renderOverlay();
     }
 

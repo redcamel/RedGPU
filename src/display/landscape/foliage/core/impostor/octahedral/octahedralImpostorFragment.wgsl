@@ -14,7 +14,6 @@
 @group(2) @binding(4) var normalTexture: texture_2d<f32>;
 @group(2) @binding(5) var packedORMTexture: texture_2d<f32>;
 
-
 struct InputData {
     @builtin(position) position: vec4<f32>,
     @location(0) vertexPosition: vec3<f32>,
@@ -37,7 +36,6 @@ struct InputData {
     @location(15) @interpolate(flat) pickingId: vec4<f32>,
 };
 
-// Convert 3D local view direction to Hemi-Octahedral (0..1) UV
 fn dirToHemiOctahedralUV(dir: vec3<f32>) -> vec2<f32> {
     let d = normalize(vec3<f32>(dir.x, max(dir.y, 0.0), dir.z));
     let l1 = abs(d.x) + d.y + abs(d.z);
@@ -47,7 +45,6 @@ fn dirToHemiOctahedralUV(dir: vec3<f32>) -> vec2<f32> {
     return clamp(vec2<f32>(u, v), vec2<f32>(0.0), vec2<f32>(1.0));
 }
 
-// Convert Hemi-Octahedral (0..1) UV to 3D direction vector
 fn hemiOctahedralUVToDir(uv: vec2<f32>) -> vec3<f32> {
     let uPrime = 2.0 * uv.x - 1.0;
     let vPrime = 2.0 * uv.y - 1.0;
@@ -57,8 +54,6 @@ fn hemiOctahedralUVToDir(uv: vec2<f32>) -> vec3<f32> {
     return normalize(vec3<f32>(dirX, dirY, dirZ));
 }
 
-// Computes 2D rotation of quad UV so that the baked tile aligns seamlessly with current camera view
-// 🌿 UE5 Standard atan2 방위각 차이 기반 회전 + 상공(Top-down) 극점 특이점 스무딩(Pole Singularity Smoothing)
 fn getSubTileRotatedUV(quadUV: vec2<f32>, viewDir: vec3<f32>, gridDir: vec3<f32>) -> vec2<f32> {
     let viewH = vec2<f32>(viewDir.x, viewDir.z);
     let gridH = vec2<f32>(gridDir.x, gridDir.z);
@@ -70,10 +65,9 @@ fn getSubTileRotatedUV(quadUV: vec2<f32>, viewDir: vec3<f32>, gridDir: vec3<f32>
         let angleV = atan2(viewDir.z, viewDir.x);
         let angleG = atan2(gridDir.z, gridDir.x);
         var diff = angleV - angleG;
-        // [-PI, PI] 범위로 랩핑
+        
         diff = diff - floor((diff + 3.14159265) / 6.2831853) * 6.2831853;
 
-        // Top-Down 극점 영역에서의 부드러운 감쇄
         let poleFade = clamp(min(lenVH, lenGH) * 5.0, 0.0, 1.0);
         rotAngle = diff * poleFade;
     }
@@ -100,11 +94,9 @@ fn sampleOctahedralAtlas(
     let safeSubUV = clamp(subUV, vec2<f32>(borderPadding), vec2<f32>(1.0 - borderPadding));
     let atlasUV = (clampedGrid + safeSubUV) / n;
 
-    // 🌿 GPU Dilation(16px 패딩) 덕분에 밉맵 다운샘플링 시 타일 침범 없이 완벽한 안티에일리어싱 샘플링 수행
     let sampled = textureSampleGrad(tex, smp, atlasUV, ddxAtlas, ddyAtlas);
     return select(vec4<f32>(0.0), sampled, isInside);
 }
-
 
 fn rotateVectorByQuaternion(v: vec3<f32>, q: vec4<f32>) -> vec3<f32> {
     return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
@@ -176,12 +168,10 @@ fn main(inputData: InputData) -> OutputFragment {
     let n = 8.0;
     let octUV = dirToHemiOctahedralUV(localView);
 
-    // 🌿 타일 중심점 기준 정밀 Bilinear 보간 (-0.5 오프셋)
     let gridPos = octUV * n - 0.5;
     let baseGrid = floor(gridPos);
     let frac = gridPos - baseGrid;
 
-    // 🌿 4개 타일별 중심 3D 방향 벡터 계산 및 서브 UV 정렬 (카메라 롤 및 90도 회전 보정)
     let g00 = clamp(baseGrid + vec2<f32>(0.0, 0.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
     let g10 = clamp(baseGrid + vec2<f32>(1.0, 0.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
     let g01 = clamp(baseGrid + vec2<f32>(0.0, 1.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
@@ -202,7 +192,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let ddxAtlas = ddxUV / n;
     let ddyAtlas = ddyUV / n;
 
-    // 1. 3-Atlas 4-Tap Bilinear Sampling (Hardware Mipmapped via textureSampleGrad)
     let s00 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g00, uv00, n, ddxAtlas, ddyAtlas);
     let s10 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g10, uv10, n, ddxAtlas, ddyAtlas);
     let s01 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g01, uv01, n, ddxAtlas, ddyAtlas);
@@ -218,33 +207,28 @@ fn main(inputData: InputData) -> OutputFragment {
     let orm01 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g01, uv01, n, ddxAtlas, ddyAtlas);
     let orm11 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g11, uv11, n, ddxAtlas, ddyAtlas);
 
-    // 🌿 4-코너 Bilinear 기본 가중치 (합 = 1.0)
     let w00 = (1.0 - frac.x) * (1.0 - frac.y);
     let w10 = frac.x * (1.0 - frac.y);
     let w01 = (1.0 - frac.x) * frac.y;
     let w11 = frac.x * frac.y;
 
-    // 🌿 UE5 Ryan Brucks 표준: 4개 타일 유효 잎사귀 알파 가중치(Coverage) 및 정규화
     let cov00 = w00 * s00.a;
     let cov10 = w10 * s10.a;
     let cov01 = w01 * s01.a;
     let cov11 = w11 * s11.a;
     let totalCoverage = cov00 + cov10 + cov01 + cov11;
 
-    // 🌿 투명 픽셀 조기 기각 (Early Discard - PBR 라이팅 연산 100% 스킵)
     if (totalCoverage < 0.001) {
         discard;
     }
 
     let invSafeCoverage = 1.0 / max(totalCoverage, 0.0001);
 
-    // 🌿 TrueRGB 및 머티리얼 속성 알파 가중 정규화 (1회 역수 곱셈으로 3회 나눗셈 단축)
     var albedo = (s00.rgb * cov00 + s10.rgb * cov10 + s01.rgb * cov01 + s11.rgb * cov11) * invSafeCoverage;
     albedo = clamp(albedo, vec3<f32>(0.0), vec3<f32>(1.0));
     let rawNormalDepth = (n00 * cov00 + n10 * cov10 + n01 * cov01 + n11 * cov11) * invSafeCoverage;
     let rawORM = (orm00 * cov00 + orm10 * cov10 + orm01 * cov01 + orm11 * cov11) * invSafeCoverage;
 
-    // 2. Dithered LOD Crossfade (4x4 Bayer Matrix)
     let fadeOpacity = inputData.combinedOpacity;
     if (fadeOpacity < 0.999) {
         let px = u32(inputData.position.x) & 3u;
@@ -257,14 +241,12 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
 
-    // 🌿 수학적 옥타헤드럴 알파 재구성 (Ryan Brucks Kernel - Alpha Erosion Prevention)
     let linearAlpha = totalCoverage;
     let maxAlpha = max(max(s00.a, s10.a), max(s01.a, s11.a));
     let maxCornerWeight = max(max(w00, w10), max(w01, w11));
     let sharpnessFactor = clamp((maxCornerWeight - 0.25) / 0.75, 0.0, 1.0);
     let reconstructedAlpha = mix(linearAlpha, maxAlpha, mix(0.70, 0.95, sharpnessFactor));
 
-    // 🌿 UE5 DitherTemporalAA (TAA 시간축 융합 + MSAA 서브픽셀 융합 완벽 호환)
     let ditherPx = u32(inputData.position.x) & 3u;
     let ditherPy = u32(inputData.position.y) & 3u;
     let frameIdx = systemUniforms.time.frameIndex & 3u;
@@ -280,7 +262,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let toCamVec = camPos - inputData.vertexPosition;
     let V = normalize(toCamVec);
 
-    // 3. Unpack True 3D Baked Normal and rotate to World Space via Instance Rotation (Exact PBR matching)
     var bakedN = normalize(rawNormalDepth.rgb * 2.0 - 1.0);
     if (length(bakedN) < 0.1) {
         bakedN = vec3<f32>(0.0, 1.0, 0.0);
@@ -294,7 +275,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let NdotV = max(dot(N, V), 0.04);
     let preExposure = systemUniforms.preExposure;
 
-    // 4. Directional Shadow calculation (Exact pbrMaterial match)
     var shadowVis: f32 = 1.0;
     var L0 = vec3<f32>(0.0, 1.0, 0.0);
     if (systemUniforms.directionalLightCount > 0u) {
@@ -309,7 +289,6 @@ fn main(inputData: InputData) -> OutputFragment {
     );
     shadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, shadowVis);
 
-    // 5. Material Properties from Baked ORM Atlas (Exact pbrMaterial match)
     let ao = clamp(rawORM.r, 0.0, 1.0);
     let roughness = clamp(rawORM.g, 0.04, 1.0);
     let metallic = clamp(rawORM.b, 0.0, 1.0);
@@ -317,7 +296,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let F0_metal = albedo;
     let F0 = mix(F0_dielectric, F0_metal, metallic);
 
-    // 6. Direct Directional Light (Exact pbrMaterial getDirectPbrLight match)
     var totalDirectLighting = vec3<f32>(0.0);
     let u_directionalLightCount = systemUniforms.directionalLightCount;
     let u_directionalLights = systemUniforms.directionalLights;
@@ -353,7 +331,6 @@ fn main(inputData: InputData) -> OutputFragment {
         totalDirectLighting += directResult * dLight;
     }
 
-    // 7. Indirect Lighting (Exact pbrMaterial getIndirectPbrLighting match)
     var indirectLighting = vec3<f32>(0.0);
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
@@ -402,14 +379,12 @@ fn main(inputData: InputData) -> OutputFragment {
         let F_IBL_dielectric = FR_dielectric * envBRDF.x + envBRDF.y;
         let F_IBL_metal = FR_metal * envBRDF.x + envBRDF.y;
 
-        // 🌿 UE5 물리 기반 Directional Specular Occlusion (어두운 틈새 스펙큘러 백화 차단 + 양지 PBR 광택 복원)
         let specularOcclusion = saturate(pow(NdotV_IBL + ao, exp2(-16.0 * roughness - 1.0)) - 1.0 + ao);
         let specularAlbedo_IBL = saturate(F0_dielectric * envBRDF.x + envBRDF.y);
         let diffuseWeight_IBL = (vec3<f32>(1.0) - specularAlbedo_IBL);
 
         var envIBL_DIFFUSE = albedo * iblDiffuseColor * diffuseWeight_IBL * ao;
 
-        // 🌿 [UE5 TwoSidedFoliage] 잎사귀 반대편(-N) 하늘 산란광 투과 (Exact PBRMaterial match)
         var backScatteringColor = vec3<f32>(0.0);
         if (u_usePrefilterTexture) {
             let iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
@@ -435,7 +410,6 @@ fn main(inputData: InputData) -> OutputFragment {
         indirectLighting = albedo * systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * ao * preExposure;
     }
 
-    // 8. Final Combined Shading & Tinting
     var finalRgb = totalDirectLighting + indirectLighting;
     let tinted = getTintBlendMode(vec4<f32>(finalRgb, 1.0), globalFragmentData.tintBlendMode, globalFragmentData.tint);
     finalRgb = tinted.rgb;
@@ -450,7 +424,4 @@ fn main(inputData: InputData) -> OutputFragment {
 
     return output;
 }
-
-
-
 

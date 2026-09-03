@@ -5,7 +5,6 @@ import DirectTexture from "../../../../../../resources/texture/DirectTexture";
 import fragmentModuleSource from './octahedralImpostorFragment.wgsl';
 import AUVTransformBaseMaterial from "../../../../../../material/core/AUVTransformBaseMaterial";
 
-
 import defineSampler from "../../../../../../defineProperty/funcs/texture/defineSampler";
 import defineTexture from "../../../../../../defineProperty/funcs/texture/defineTexture";
 import definePositiveNumber from "../../../../../../defineProperty/funcs/number/definePositiveNumber";
@@ -66,10 +65,8 @@ class OctahedralImpostorMaterial extends AUVTransformBaseMaterial {
 
         this.initGPURenderInfos();
 
-
     }
 }
-
 
 defineSampler(OctahedralImpostorMaterial, [
     {key: 'baseColorTextureSampler'},
@@ -97,5 +94,4 @@ Object.defineProperty(OctahedralImpostorMaterial.prototype, 'isBuiltInMaterial',
 
 Object.freeze(OctahedralImpostorMaterial);
 export default OctahedralImpostorMaterial;
-
 

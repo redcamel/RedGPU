@@ -50,7 +50,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
 
         this.#textureArraySize = Math.max(128, textureArraySize);
 
-        // WGSLParser 리플렉션으로부터 MaterialUniforms 구조체 크기 동적 추출
         this.#uniformByteLength = this.UNIFORM_STRUCT?.arrayBufferByteLength || this.SHADER_INFO?.uniforms?.uniforms?.arrayBufferByteLength || 0;
         this.#uniformFloatArray = new Float32Array(this.#uniformByteLength / Float32Array.BYTES_PER_ELEMENT);
         this.#uniformUintArray = new Uint32Array(this.#uniformFloatArray.buffer);
@@ -89,7 +88,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         weightMapView: null as GPUTextureView | null,
     };
 
-    /** @internal VBT 제너레이터 베이킹 전용 텍스처 뷰 조회 (Zero-GC) */
     getInternalLayerViews(): {
         baseColorView: GPUTextureView | null;
         normalView: GPUTextureView | null;
@@ -103,7 +101,6 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         return this.#internalLayerViews;
     }
 
-    /** @internal VBT 리베이크 요청 리스너 등록 */
     setOnRebakeVBTRequested(callback?: () => void): void {
         this.#onRebakeVBTRequested = callback;
     }
@@ -201,26 +198,23 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         for (let i = 0; i < MAX_LANDSCAPE_LAYERS; i++) {
             if (i < activeCount) {
                 const layer = this.#layers[i];
-                // vec4 0: uvOffset (2), uvScale (2)
+
                 floatBuf[offset + 0] = layer.uvOffset[0];
                 floatBuf[offset + 1] = layer.uvOffset[1];
                 floatBuf[offset + 2] = layer.uvScale[0];
                 floatBuf[offset + 3] = layer.uvScale[1];
 
-                // vec4 1: tintColor (4)
                 const layerColorLinear = layer.tintColor ? layer.tintColor.rgbaNormalLinear : [1, 1, 1, 1];
                 floatBuf[offset + 4] = layerColorLinear[0];
                 floatBuf[offset + 5] = layerColorLinear[1];
                 floatBuf[offset + 6] = layerColorLinear[2];
                 floatBuf[offset + 7] = layerColorLinear[3];
 
-                // vec4 2: roughness, metallic, normalIntensity, enabled
                 floatBuf[offset + 8] = layer.roughness;
                 floatBuf[offset + 9] = layer.metallic;
                 floatBuf[offset + 10] = layer.normalIntensity;
                 floatBuf[offset + 11] = layer.enabled ? 1.0 : 0.0;
 
-                // vec4 3: aoIntensity, weightChannelIndex, pad0, pad1
                 floatBuf[offset + 12] = layer.aoIntensity;
                 floatBuf[offset + 13] = layer.weightChannelIndex;
                 floatBuf[offset + 14] = 0.0;

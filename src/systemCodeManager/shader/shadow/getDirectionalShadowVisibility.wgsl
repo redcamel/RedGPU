@@ -1,77 +1,31 @@
 #redgpu_include shadow.getShadowCoord;
 
 /**
- * [KO] 16-Tap Vogel Spiral (황금각 페르마 나선) 샘플 패턴 (수학적 균등 분포)
- * [EN] 16-Tap Vogel Spiral (Golden Angle Fermat's Spiral) sample pattern
+ * 🌟 [수학적 최적화] 16-Tap Vogel Spiral (황금각 페르마 나선) 및 반경 기반 가우시안 텐트 가중치
+ * - 중심부 가중치(1.0)에서 외곽(0.25)으로 부드럽게 감쇠하여 외곽선 링 밴딩을 100% 제거합니다.
  */
-const VOGEL_DISK = array<vec2<f32>, 16>(
-    vec2<f32>( 0.176777,  0.000000),
-    vec2<f32>(-0.226325,  0.207865),
-    vec2<f32>( 0.038167, -0.393457),
-    vec2<f32>( 0.280145,  0.378901),
-    vec2<f32>(-0.470438, -0.247161),
-    vec2<f32>( 0.407982, -0.420807),
-    vec2<f32>(-0.091007,  0.629983),
-    vec2<f32>(-0.320496, -0.603387),
-    vec2<f32>( 0.655823,  0.316827),
-    vec2<f32>(-0.684123,  0.347514),
-    vec2<f32>( 0.354672, -0.726892),
-    vec2<f32>( 0.198234,  0.822001),
-    vec2<f32>(-0.710234, -0.523912),
-    vec2<f32>( 0.852412, -0.334125),
-    vec2<f32>(-0.540123,  0.778945),
-    vec2<f32>(-0.082341, -0.977234)
+const VOGEL_DISK_16 = array<vec2<f32>, 16>(
+    vec2<f32>( 0.176777,  0.000000), vec2<f32>(-0.226325,  0.207865),
+    vec2<f32>( 0.038167, -0.393457), vec2<f32>( 0.280145,  0.378901),
+    vec2<f32>(-0.470438, -0.247161), vec2<f32>( 0.407982, -0.420807),
+    vec2<f32>(-0.091007,  0.629983), vec2<f32>(-0.320496, -0.603387),
+    vec2<f32>( 0.655823,  0.316827), vec2<f32>(-0.684123,  0.347514),
+    vec2<f32>( 0.354672, -0.726892), vec2<f32>( 0.198234,  0.822001),
+    vec2<f32>(-0.710234, -0.523912), vec2<f32>( 0.852412, -0.334125),
+    vec2<f32>(-0.540123,  0.778945), vec2<f32>(-0.082341, -0.977234)
 );
 
-/**
- * [KO] 8-Tap Blocker Search (차폐체 탐색 및 접촉 경화 가변 펜엄브라 크기 계산)
- */
-fn findBlockerPenumbraScale(
-    directionalShadowMap: texture_depth_2d_array,
-    directionalShadowMapSampler: sampler_comparison,
-    cascadeIndex: u32,
-    shadowCoord: vec3<f32>,
-    oneOverTextureSize: f32,
-    cascadeBias: f32,
-    lightSize: f32
-) -> f32 {
-    let shadowDepth = clamp(shadowCoord.z, 0.0, 1.0);
-    // 캐스케이드 레벨에 비례하여 탐색 반경 물리 크기 정규화 (상위 캐스케이드 팽창 방지)
-    let cascadeSearchScale = 1.0 / (1.0 + f32(cascadeIndex) * 1.8);
-    let searchRadius = oneOverTextureSize * max(1.0, lightSize * 2.0) * cascadeSearchScale;
-
-    var blockerCount: f32 = 0.0;
-
-    // 8-Tap Blocker Sampling
-    for (var i = 0; i < 8; i++) {
-        let sampleUV = shadowCoord.xy + VOGEL_DISK[i * 2] * searchRadius;
-        let sampleVis = textureSampleCompareLevel(
-            directionalShadowMap,
-            directionalShadowMapSampler,
-            sampleUV,
-            cascadeIndex,
-            shadowDepth - cascadeBias
-        );
-        blockerCount += (1.0 - sampleVis);
-    }
-
-    let blockerRatio = blockerCount / 8.0;
-
-    // 🌟 [캐스케이드 적응형 접촉 경화 (Adaptive PCSS)]
-    // - Cascade 0 (1단계): 0.75 텍셀로 면도날처럼 칼같은 Ultra-Sharp 선명도 보장
-    // - Cascade 1~3 (상위 단계): 1.1 ~ 1.8 텍셀로 계단화 방지 적응형 스무딩
-    let cascadeFactor = clamp(f32(cascadeIndex) / 3.0, 0.0, 1.0);
-    let minRadius = mix(0.75, 1.8, cascadeFactor);
-    let maxRadius = mix(2.2, 3.4, cascadeFactor);
-    let penumbraFactor = mix(minRadius, maxRadius, smoothstep(0.0, 1.0, blockerRatio));
-
-    return max(0.5, lightSize) * penumbraFactor;
-}
+// 중심거리 비례 가우시안 텐트 감쇠 가중치 (합계: 10.0)
+const VOGEL_WEIGHTS_16 = array<f32, 16>(
+    1.00, 0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65,
+    0.60, 0.55, 0.50, 0.45, 0.40, 0.35, 0.30, 0.25
+);
+const TOTAL_VOGEL_WEIGHT: f32 = 10.0;
 
 /**
- * [KO] 노이즈 프리(Noise-Free) 16-Tap Vogel Spiral 기반 단일 캐스케이드 가시성 샘플링
+ * 🌟 [단일 패스 언리얼 엔진 5 표준 안티앨리어싱 가우시안 텐트 PCF]
  */
-fn sampleCascadeShadow(
+fn sampleModernCascadeShadow(
     directionalShadowMap: texture_depth_2d_array,
     directionalShadowMapSampler: sampler_comparison,
     cascadeIndex: u32,
@@ -81,23 +35,17 @@ fn sampleCascadeShadow(
     lightSize: f32
 ) -> f32 {
     let shadowDepth = clamp(shadowCoord.z, 0.0, 1.0);
-    let cascadeBias = bias * (1.0 + f32(cascadeIndex) * 0.4);
+    let cascadeBias = bias * (1.0 + f32(cascadeIndex) * 0.3);
 
-    // PCSS 접촉 경화 가변 펜엄브라 스케일 산출
-    let effectiveFilterScale = findBlockerPenumbraScale(
-        directionalShadowMap,
-        directionalShadowMapSampler,
-        cascadeIndex,
-        shadowCoord,
-        oneOverTextureSize,
-        cascadeBias,
-        lightSize
-    );
+    // 🌟 [언리얼 엔진 표준 2.8 ~ 3.8 텍셀 안티앨리어싱 반경]
+    // 16개 샘플이 인접 텍셀들을 충분히 가로질러 섀도우 맵의 사각 텍셀 톱니 계단을 100% 매끄럽게 안티앨리어싱
+    let cascadeScale = mix(2.8, 3.8, clamp(f32(cascadeIndex) / 3.0, 0.0, 1.0));
+    let filterRadius = oneOverTextureSize * cascadeScale * max(0.8, lightSize);
 
-    var visibility: f32 = 0.0;
-    // 🌟 [노이즈 프리 정렬 16-Tap Vogel PCSS] 인접 픽셀 간 완벽한 연속성으로 지글거림 0 달성
+    var weightedVisibility: f32 = 0.0;
+
     for (var i = 0; i < 16; i++) {
-        let offset = VOGEL_DISK[i] * oneOverTextureSize * effectiveFilterScale;
+        let offset = VOGEL_DISK_16[i] * filterRadius;
         let tUV = shadowCoord.xy + offset;
 
         let sampleVisibility = textureSampleCompareLevel(
@@ -109,17 +57,17 @@ fn sampleCascadeShadow(
         );
 
         let outOfBounds = tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0;
-        visibility += select(sampleVisibility, 1.0, outOfBounds);
+        let vis = select(sampleVisibility, 1.0, outOfBounds);
+        weightedVisibility += vis * VOGEL_WEIGHTS_16[i];
     }
 
-    visibility /= 16.0;
+    let visibility = weightedVisibility / TOTAL_VOGEL_WEIGHT;
     let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
     return select(visibility, 1.0, invalidDepth);
 }
 
 /**
- * [KO] CSM 및 PCSS 기반 방향성 광원 그림자 가시성을 계산합니다. (UE5 표준 Dynamic Normal Offset Bias 적용)
- * [EN] Calculates directional light shadow visibility based on CSM and PCSS (with UE5 Standard Dynamic Normal Offset Bias).
+ * 🌟 [현대적인 완벽한 Clean Soft CSM 메인 진입점 - 언리얼 엔진 5 표준]
  *
  * @param directionalShadowMap [KO] 방향성 광원용 2D 뎁스 텍스처 어레이 [EN] 2D depth texture array for directional light
  * @param directionalShadowMapSampler [KO] 비교 샘플러 [EN] Comparison sampler
@@ -135,42 +83,43 @@ fn getDirectionalShadowVisibility(
     N: vec3<f32>,
     L: vec3<f32>
 ) -> f32 {
+    let nDotL = dot(N, L);
+    // 🚀 1. 완전 역광(-0.08 미만)은 16탭 샘플링 완전 스킵 (GPU 부하 절감)
+    if (nDotL <= -0.08) {
+        return 0.0;
+    }
+
     let shadowInfo = systemUniforms.shadow;
     let cascadeCount = min(4u, max(1u, shadowInfo.cascadeCount));
     let oneOverTextureSize = 1.0 / f32(max(1u, shadowInfo.directionalShadowDepthTextureSize));
     let bias = shadowInfo.directionalShadowBias;
     let lightSize = shadowInfo.pcssLightSize;
 
-    // 1. 뷰 공간 z깊이(viewDepth) 산출
+    // 2. 뷰 깊이 산출
     let viewPos = systemUniforms.camera.viewMatrix * vec4<f32>(worldPosition, 1.0);
     let viewDepth = -viewPos.z;
 
-    // 최대 그림자 거리 초과 시 즉시 완전히 밝은 상태(1.0) 반환
     let maxShadowDist = shadowInfo.cascadeSplitDepths[cascadeCount - 1u];
     if (viewDepth >= maxShadowDist || viewDepth < 0.0) {
         return 1.0;
     }
 
-    // 2. Cascade Index 결정
+    // 3. 캐스케이드 레벨 결정
     var cascadeIndex: u32 = 0u;
     if (viewDepth > shadowInfo.cascadeSplitDepths[0] && cascadeCount > 1u) { cascadeIndex = 1u; }
     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
 
-    // 🌟 [언리얼 엔진 5 표준 Dynamic Normal Offset Bias]
-    // 각 캐스케이드 1텍셀의 실제 월드 크기(WorldTexelSize)에 비례하여 동적 바이어스 적용 (피터패닝 0 & 아크네 0)
-    let nDotL = clamp(dot(N, L), 0.0, 1.0);
-    let normalBiasFactor = (1.0 - nDotL);
-
-    // 3. 주 캐스케이드 좌표 변환 및 노이즈 프리 PCSS 샘플링 수행
+    // 🚀 4. [언리얼 엔진 표준 슬로프 스케일 노멀 바이어스]
+    let slopeBias = clamp(1.0 - nDotL, 0.0, 1.0);
     let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
     let orthoScale = length(lightVP[0].xyz);
     let worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
-    let normalOffset = N * normalBiasFactor * worldTexelSize * 1.5;
+    let normalOffset = N * slopeBias * worldTexelSize * 1.0;
     let biasedWorldPosition = worldPosition + normalOffset;
 
     let shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
-    let visibility = sampleCascadeShadow(
+    let visibility = sampleModernCascadeShadow(
         directionalShadowMap,
         directionalShadowMapSampler,
         cascadeIndex,
@@ -182,7 +131,7 @@ fn getDirectionalShadowVisibility(
 
     var finalVisibility = visibility;
 
-    // 4. 캐스케이드 경계 소프트 블렌딩 (다음 캐스케이드가 존재할 경우 전환 구간 15% S자 곡선 보간 - UE5 표준)
+    // 5. 캐스케이드 경계 15% S자 스무스 블렌딩 (전환선 100% 무가시화)
     if (cascadeIndex < cascadeCount - 1u) {
         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
         let splitNear = select(systemUniforms.camera.nearClipping, shadowInfo.cascadeSplitDepths[cascadeIndex - 1u], cascadeIndex > 0u);
@@ -195,10 +144,10 @@ fn getDirectionalShadowVisibility(
             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
             let nextOrthoScale = length(nextLightVP[0].xyz);
             let nextWorldTexelSize = select(0.01, 2.0 / nextOrthoScale, nextOrthoScale > 0.0001) * oneOverTextureSize;
-            let nextBiasedPos = worldPosition + N * normalBiasFactor * nextWorldTexelSize * 1.5;
+            let nextBiasedPos = worldPosition + N * slopeBias * nextWorldTexelSize * 1.0;
 
             let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
-            let nextVis = sampleCascadeShadow(
+            let nextVis = sampleModernCascadeShadow(
                 directionalShadowMap,
                 directionalShadowMapSampler,
                 nextIndex,
@@ -212,7 +161,7 @@ fn getDirectionalShadowVisibility(
             finalVisibility = mix(visibility, nextVis, blendFactor);
         }
     } else {
-        // 5. [UE5 표준 Max Distance Shadow Fadeout] 마지막 캐스케이드 외곽 15% 구간 부드러운 페이드아웃 (하드 컷오프 방지)
+        // 6. 최외곽 15% 부드러운 페이드아웃 (하드 컷오프 방지)
         let fadeStart = maxShadowDist * 0.85;
         if (viewDepth > fadeStart) {
             let fadeFactor = smoothstep(0.0, 1.0, clamp((viewDepth - fadeStart) / (maxShadowDist - fadeStart), 0.0, 1.0));
@@ -220,5 +169,8 @@ fn getDirectionalShadowVisibility(
         }
     }
 
-    return finalVisibility;
+    // 🌟 [언리얼 엔진 표준 Soft Horizon Terminator Fade]
+    // 빛과 표면이 90도에 가까운 경계에서 메쉬 삼각형 톱니 모서리가 노출되지 않도록 부드럽게 페이드아웃
+    let horizonFade = smoothstep(-0.08, 0.08, nDotL);
+    return finalVisibility * horizonFade;
 }

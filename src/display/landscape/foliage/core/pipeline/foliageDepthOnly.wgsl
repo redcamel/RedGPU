@@ -29,7 +29,6 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
 
-    // 🌿 UE5 Foliage Mipmap Alpha Boost (로그-제곱근 융합으로 sqrt 연산 제거)
     let ddxUV = dpdx(inputData.uv);
     let ddyUV = dpdy(inputData.uv);
     let lenSq = max(dot(ddxUV, ddxUV), dot(ddyUV, ddyUV));

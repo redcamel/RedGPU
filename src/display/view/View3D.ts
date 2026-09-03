@@ -24,9 +24,10 @@ import RenderViewStateData from "./core/RenderViewStateData";
 import ViewRenderTextureManager from "./core/viewRenderTextureManager/ViewRenderTextureManager";
 import ToneMappingManager from "../../toneMapping/ToneMappingManager";
 import SystemUniformUpdater from "../../renderer/helperFunc/SystemUniformUpdater";
-import updateSystemUniformData from "../../renderer/helperFunc/updateSystemUniformData";
 import ClusterLightManager from "../../light/core/ClusterLightManager";
+import HierarchicalZBuffer from "./hzb/HierarchicalZBuffer";
 import keepLog from "../../utils/keepLog";
+import updateSystemUniformData from "../../renderer/helperFunc/updateSystemUniformData";
 
 
 let temp = mat4.create()
@@ -82,6 +83,7 @@ class View3D extends AView {
     #systemUniform_Cascade_BindGroups: GPUBindGroup[] = []
     #cascadeUniformData: ArrayBuffer
     #cascadeUniformDataF32: Float32Array
+    #hierarchicalZBuffer: HierarchicalZBuffer
 
     /**
      * [KO] 새로운 View3D 인스턴스를 생성합니다.
@@ -106,12 +108,21 @@ class View3D extends AView {
         this.#init()
         this.#clusterLightManager = new ClusterLightManager(this)
         this.#viewRenderTextureManager = new ViewRenderTextureManager(this)
+        this.#hierarchicalZBuffer = new HierarchicalZBuffer(redGPUContext)
         this.#renderViewStateData = new RenderViewStateData(this)
         this.#postEffectManager = new PostEffectManager(this)
         this.#toneMappingManager = new ToneMappingManager(redGPUContext)
         this.#uniformData = new ArrayBuffer(this.systemUniform_Vertex_StructInfo.endOffset)
         this.#uniformDataF32 = new Float32Array(this.#uniformData)
         this.#uniformDataU32 = new Uint32Array(this.#uniformData)
+    }
+
+    /**
+     * [KO] Hierarchical Z-Buffer (HZB) 전역 피라미드 객체를 반환합니다.
+     * [EN] Returns the Hierarchical Z-Buffer (HZB) global pyramid instance.
+     */
+    get hierarchicalZBuffer(): HierarchicalZBuffer {
+        return this.#hierarchicalZBuffer;
     }
 
     /**
@@ -300,6 +311,10 @@ class View3D extends AView {
         this.#systemUniform_Vertex_UniformBindGroup = null
         if (this.#viewRenderTextureManager) {
             this.#viewRenderTextureManager.destroy();
+        }
+
+        if (this.#hierarchicalZBuffer) {
+            this.#hierarchicalZBuffer.destroy();
         }
 
         if (this.#clusterLightManager) {

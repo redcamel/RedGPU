@@ -23,7 +23,6 @@ export class LandscapeHUDDebugger extends ALandscapeDebugger {
 
         super(landscape, cameraOrOptions, finalOptions);
 
-        // 부모의 2D 캔버스 컨테이너는 숨김 처리 (HUD 전용 HTML 컨테이너 사용)
         this.container.style.setProperty('display', 'none', 'important');
 
         this.#titleText = '⛰️ Landscape Engine Monitor';

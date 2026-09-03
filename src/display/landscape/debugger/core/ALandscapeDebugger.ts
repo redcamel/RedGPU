@@ -219,7 +219,6 @@ export abstract class ALandscapeDebugger {
         container.style.setProperty('width', `${w}px`, 'important');
         container.style.setProperty('height', `${h}px`, 'important');
 
-        // 0. 미니 헤더 배지 라벨
         if (title) {
             const header = document.createElement('div');
             header.className = 'redgpu-landscape-debugger-header';
@@ -237,7 +236,6 @@ export abstract class ALandscapeDebugger {
         this.#contentWidth = renderWidth;
         this.#contentHeight = renderHeight;
 
-        // 1. 베이스 캔버스 (2D 그리드 또는 WebGPU 텍스처 전용)
         const canvas = document.createElement('canvas');
         if (canvasId) {
             canvas.id = canvasId;
@@ -248,7 +246,6 @@ export abstract class ALandscapeDebugger {
         canvas.width = Math.round(renderWidth * dpr);
         canvas.height = Math.round(renderHeight * dpr);
 
-        // 2. 공통 오버레이 캔버스 (카메라 시야각/FOV/로딩 링 전용)
         const overlayCanvas = document.createElement('canvas');
         overlayCanvas.className = 'redgpu-landscape-debugger-overlay';
         overlayCanvas.style.setProperty('width', `${renderWidth}px`, 'important');
@@ -453,7 +450,6 @@ export abstract class ALandscapeDebugger {
         const camCanvasY = camNormZ * h;
         const radiusPixels = loadingRadiusUV * w;
 
-        // 0. 타일 컴포넌트 그리드 격자선 (선명한 1px 그리드)
         const [tcX, tcZ] = this.#landscape.componentCount;
         if (tcX > 0 && tcZ > 0) {
             const cellW = w / tcX;
@@ -474,7 +470,6 @@ export abstract class ALandscapeDebugger {
             this.#overlayCtx.stroke();
         }
 
-        // 1. 로딩 반경 점선 링 (Emerald Green)
         this.#overlayCtx.beginPath();
         this.#overlayCtx.arc(camCanvasX, camCanvasY, radiusPixels, 0, Math.PI * 2);
         this.#overlayCtx.strokeStyle = 'rgba(52, 211, 153, 0.85)';
@@ -483,7 +478,6 @@ export abstract class ALandscapeDebugger {
         this.#overlayCtx.stroke();
         this.#overlayCtx.setLineDash([]);
 
-        // 2. FOV 시야 부채꼴 (Amber Gold)
         const startAngle = lookAngle - halfFovRad;
         const endAngle = lookAngle + halfFovRad;
         const wedgeRadius = Math.max(16, Math.min(radiusPixels, 36));
@@ -498,7 +492,6 @@ export abstract class ALandscapeDebugger {
         this.#overlayCtx.lineWidth = 1.5;
         this.#overlayCtx.stroke();
 
-        // 3. 시선 중심 가이드 레이 (Coral Red)
         const rayLen = wedgeRadius + 10;
         this.#overlayCtx.beginPath();
         this.#overlayCtx.moveTo(camCanvasX, camCanvasY);
@@ -507,7 +500,6 @@ export abstract class ALandscapeDebugger {
         this.#overlayCtx.lineWidth = 2.0;
         this.#overlayCtx.stroke();
 
-        // 4. 카메라 원점 점 (White Dot with Coral Red Ring)
         this.#overlayCtx.beginPath();
         this.#overlayCtx.arc(camCanvasX, camCanvasY, 4.0, 0, Math.PI * 2);
         this.#overlayCtx.fillStyle = '#ffffff';

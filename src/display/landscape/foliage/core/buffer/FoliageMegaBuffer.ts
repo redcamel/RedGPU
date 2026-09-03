@@ -6,9 +6,9 @@ export interface FoliageTypeAllocation {
     typeId: number;
     name: string;
     maxInstances: number;
-    rawBaseOffset: number;       // In instances (floats: offset * 12)
-    culledBaseOffset: number;    // In instances (floats: offset * 12)
-    indirectBaseOffset: number;  // In submeshes (bytes: offset * 20)
+    rawBaseOffset: number;
+    culledBaseOffset: number;
+    indirectBaseOffset: number;  
     subMeshCount: number;
     activeCount: number;
 }
@@ -21,9 +21,9 @@ export interface CascadeCullingParam {
 
 class FoliageMegaBuffer {
     static readonly #STRIDE_FLOATS: number = 8;
-    static readonly #STRIDE_BYTES: number = 8 * 4; // 32 Bytes per instance
+    static readonly #STRIDE_BYTES: number = 8 * 4; 
     static readonly #MAX_TYPES: number = 64;
-    static readonly #TYPE_PARAM_FLOATS: number = 44; // 176 bytes per type (16-byte aligned)
+    static readonly #TYPE_PARAM_FLOATS: number = 44; 
 
     static readonly #tempFloat32: Float32Array = new Float32Array(1);
     static readonly #tempUint32: Uint32Array = new Uint32Array(FoliageMegaBuffer.#tempFloat32.buffer);
@@ -61,10 +61,11 @@ class FoliageMegaBuffer {
     #indirectGPUBuffer: GPUBuffer | null = null;
     #typeParamsGPUBuffer: GPUBuffer | null = null;
 
-    // 🌲 4개 캐스케이드(Cascade 0, 1, 2, 3) 통합 메가 섀도우 버퍼
     #shadowCulledGPUBuffer: GPUBuffer | null = null;
     #shadowIndirectGPUBuffer: GPUBuffer | null = null;
     #unifiedGlobalUniformGPUBuffer: GPUBuffer | null = null;
+    #indirectResetTemplateGPUBuffer: GPUBuffer | null = null;
+    #shadowIndirectResetTemplateGPUBuffer: GPUBuffer | null = null;
 
     #cpuRawDataBuffer: Float32Array;
 
@@ -76,7 +77,7 @@ class FoliageMegaBuffer {
     #cpuTypeParamsData: Float32Array = new Float32Array(FoliageMegaBuffer.#MAX_TYPES * FoliageMegaBuffer.#TYPE_PARAM_FLOATS);
     #cpuTypeParamsUint32: Uint32Array = new Uint32Array(this.#cpuTypeParamsData.buffer);
 
-    #cpuUnifiedGlobalUniformData: Float32Array = new Float32Array(160);
+    #cpuUnifiedGlobalUniformData: Float32Array = new Float32Array(200);
     #cpuUnifiedGlobalUniformUint32: Uint32Array = new Uint32Array(this.#cpuUnifiedGlobalUniformData.buffer);
 
     #indirectResetTemplate: Uint32Array;
@@ -93,6 +94,8 @@ class FoliageMegaBuffer {
     #unifiedCullingBindGroup: GPUBindGroup | null = null;
     #cachedVHTView: GPUTextureView | null = null;
     #cachedVHTSampler: GPUSampler | null = null;
+    #cachedHZBView: GPUTextureView | null = null;
+    #cachedHZBSampler: GPUSampler | null = null;
 
     static #pack2x16float(x: number, y: number): number {
         const hx = FoliageMegaBuffer.#floatToHalf(x);
@@ -141,9 +144,6 @@ class FoliageMegaBuffer {
         return total;
     }
 
-    /**
-     * 품종 에셋에 대한 메가 버퍼 세그먼트를 할당하고 글로벌 오프셋을 바인딩합니다.
-     */
     allocateTypeSegment(
         name: string,
         maxInstances: number,
@@ -177,17 +177,15 @@ class FoliageMegaBuffer {
         this.#allocations.set(name, allocation);
         this.#allocatedTypes.push(allocation);
 
-        // Pre-initialize typeId for all slots in this allocation
         const baseFloat = rawBaseOffset * FoliageMegaBuffer.#STRIDE_FLOATS;
         for (let i = 0; i < maxInstances; i++) {
             this.#cpuRawDataBuffer[baseFloat + i * FoliageMegaBuffer.#STRIDE_FLOATS + 7] = typeId;
         }
 
         this.#nextRawOffset += maxInstances;
-        this.#nextCulledOffset += maxInstances * 8; // 8 LOD slots
+        this.#nextCulledOffset += maxInstances * 8; 
         this.#nextIndirectOffset += subMeshCount;
 
-        // 서브메시 오프셋을 메가 버퍼 기준으로 사전 정렬
         for (let s = 0; s < subMeshCount; s++) {
             const sub = subMeshes[s];
             sub.instanceBufferOffset = (culledBaseOffset + (sub.lodIndex * maxInstances)) * FoliageMegaBuffer.#STRIDE_BYTES;
@@ -195,7 +193,7 @@ class FoliageMegaBuffer {
         }
 
         this.registerSubMeshesToTemplate(subMeshes, indirectBaseOffset);
-        this.#unifiedCullingBindGroup = null; // Invalidate bindgroup
+        this.#unifiedCullingBindGroup = null; 
 
         return allocation;
     }
@@ -288,45 +286,64 @@ class FoliageMegaBuffer {
         );
     }
 
-    /**
-     * 메인 뷰 및 4개 섀도우 간접 드로우 인스턴스 카운트를 템플릿 기반으로 1줄 고속 리셋합니다.
-     */
-    resetMultiIndirectCommands(): void {
+    resetMultiIndirectCommands(commandEncoder?: GPUCommandEncoder): void {
         if (this.#nextIndirectOffset === 0) return;
-        const gpuDevice = this.#redGPUContext.gpuDevice;
 
+        const mainBytes = this.#nextIndirectOffset * 20;
+        const shadowResetBytes = Math.min(
+            (this.#maxSubMeshes * 3 + this.#nextIndirectOffset) * 20,
+            this.#shadowIndirectResetTemplate.byteLength
+        );
+
+        if (commandEncoder && this.#indirectResetTemplateGPUBuffer && this.#shadowIndirectResetTemplateGPUBuffer) {
+            if (this.#indirectGPUBuffer) {
+                commandEncoder.copyBufferToBuffer(
+                    this.#indirectResetTemplateGPUBuffer, 0,
+                    this.#indirectGPUBuffer, 0,
+                    mainBytes
+                );
+            }
+            if (this.#shadowIndirectGPUBuffer) {
+                commandEncoder.copyBufferToBuffer(
+                    this.#shadowIndirectResetTemplateGPUBuffer, 0,
+                    this.#shadowIndirectGPUBuffer, 0,
+                    shadowResetBytes
+                );
+            }
+            return;
+        }
+
+        const gpuDevice = this.#redGPUContext.gpuDevice;
         if (this.#indirectGPUBuffer) {
             gpuDevice.queue.writeBuffer(
                 this.#indirectGPUBuffer,
                 0,
                 this.#indirectResetTemplate.buffer,
                 this.#indirectResetTemplate.byteOffset,
-                this.#nextIndirectOffset * 20
+                mainBytes
             );
         }
 
         if (this.#shadowIndirectGPUBuffer) {
-            const shadowResetBytes = (this.#maxSubMeshes * 3 + this.#nextIndirectOffset) * 20;
             gpuDevice.queue.writeBuffer(
                 this.#shadowIndirectGPUBuffer,
                 0,
                 this.#shadowIndirectResetTemplate.buffer,
                 this.#shadowIndirectResetTemplate.byteOffset,
-                Math.min(shadowResetBytes, this.#shadowIndirectResetTemplate.byteLength)
+                shadowResetBytes
             );
         }
     }
 
-    /**
-     * 통합 단일 Compute Pass용 글로벌 유니폼 버퍼 및 품종 파라미터 버퍼를 동기화합니다.
-     */
     updateUnifiedGlobalUniforms(
         camX: number, camY: number, camZ: number,
         worldSizeX: number, heightScale: number, hasVHT: boolean,
         fovFactor: number,
         mainFrustumPlanes: number[][] | null,
         cascades: readonly CascadeCullingParam[],
-        activeCascadeCount: number = 4
+        activeCascadeCount: number = 4,
+        hasHZB: boolean = false,
+        mainProjectionViewMatrix: any = null
     ): void {
         if (!this.#unifiedGlobalUniformGPUBuffer || !this.#typeParamsGPUBuffer) return;
 
@@ -346,13 +363,16 @@ class FoliageMegaBuffer {
         gu32[8] = this.#maxSubMeshes;
         gu32[9] = this.#maxTotalInstances * 8;
         gu32[10] = activeCascadeCount;
-        gu32[11] = 0;
+        gu32[11] = hasHZB ? 1 : 0;
+        gu32[12] = 0;
+        gu32[13] = 0;
+        gu32[14] = 0;
+        gu32[15] = 0;
 
-        // 메인 뷰 절두체 (12 ~ 35)
         if (mainFrustumPlanes && mainFrustumPlanes.length >= 6) {
             for (let p = 0; p < 6; p++) {
                 const plane = mainFrustumPlanes[p];
-                const baseOffset = 12 + p * 4;
+                const baseOffset = 16 + p * 4;
                 gf32[baseOffset] = plane[0];
                 gf32[baseOffset + 1] = plane[1];
                 gf32[baseOffset + 2] = plane[2];
@@ -360,10 +380,9 @@ class FoliageMegaBuffer {
             }
         }
 
-        // 섀도우 4개 캐스케이드 0, 1, 2, 3 (36 ~ 147)
         for (let c = 0; c < 4; c++) {
             const cascade = cascades[c];
-            const cascadeBase = 36 + c * 28;
+            const cascadeBase = 40 + c * 28;
             if (cascade && cascade.hasShadow) {
                 gf32[cascadeBase] = cascade.maxDistance;
                 gu32[cascadeBase + 1] = 1;
@@ -389,7 +408,12 @@ class FoliageMegaBuffer {
             }
         }
 
-        // 품종별 activeCount 동기화 (변경 감지)
+        if (mainProjectionViewMatrix && mainProjectionViewMatrix.length >= 16) {
+            for (let m = 0; m < 16; m++) {
+                gf32[152 + m] = mainProjectionViewMatrix[m];
+            }
+        }
+
         const count = this.#allocatedTypes.length;
         for (let i = 0; i < count; i++) {
             const alloc = this.#allocatedTypes[i];
@@ -407,7 +431,7 @@ class FoliageMegaBuffer {
             0,
             gf32.buffer,
             gf32.byteOffset,
-            592 // (36 + 28 * 4) * 4 bytes
+            672 
         );
 
         if (this.#dirtyTypeParams) {
@@ -472,7 +496,9 @@ class FoliageMegaBuffer {
     getOrCreateUnifiedCullingBindGroup(
         layout: GPUBindGroupLayout,
         vhtTextureView?: GPUTextureView,
-        vhtSampler?: GPUSampler
+        vhtSampler?: GPUSampler,
+        hzbTextureView?: GPUTextureView,
+        hzbSampler?: GPUSampler
     ): GPUBindGroup | null {
         if (!this.#rawGPUBuffer || !this.#unifiedGlobalUniformGPUBuffer || !this.#typeParamsGPUBuffer ||
             !this.#culledGPUBuffer || !this.#indirectGPUBuffer ||
@@ -480,10 +506,14 @@ class FoliageMegaBuffer {
             return null;
         }
 
-        const targetView = vhtTextureView || this.#redGPUContext.resourceManager.emptyTexture2DArrayView;
-        const targetSampler = vhtSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
+        const targetVHTView = vhtTextureView || this.#redGPUContext.resourceManager.emptyTexture2DArrayView;
+        const targetVHTSampler = vhtSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
+        const targetHZBView = hzbTextureView || this.#redGPUContext.resourceManager.emptyTexture2DArrayView;
+        const targetHZBSampler = hzbSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
 
-        if (this.#unifiedCullingBindGroup && this.#cachedVHTView === targetView && this.#cachedVHTSampler === targetSampler) {
+        if (this.#unifiedCullingBindGroup &&
+            this.#cachedVHTView === targetVHTView && this.#cachedVHTSampler === targetVHTSampler &&
+            this.#cachedHZBView === targetHZBView && this.#cachedHZBSampler === targetHZBSampler) {
             return this.#unifiedCullingBindGroup;
         }
 
@@ -499,22 +529,28 @@ class FoliageMegaBuffer {
                 {binding: 4, resource: {buffer: this.#indirectGPUBuffer}},
                 {binding: 5, resource: {buffer: this.#shadowCulledGPUBuffer}},
                 {binding: 6, resource: {buffer: this.#shadowIndirectGPUBuffer}},
-                {binding: 7, resource: targetView},
-                {binding: 8, resource: targetSampler},
+                {binding: 7, resource: targetVHTView},
+                {binding: 8, resource: targetVHTSampler},
+                {binding: 9, resource: targetHZBView},
+                {binding: 10, resource: targetHZBSampler},
             ],
         });
 
-        this.#cachedVHTView = targetView;
-        this.#cachedVHTSampler = targetSampler;
+        this.#cachedVHTView = targetVHTView;
+        this.#cachedVHTSampler = targetVHTSampler;
+        this.#cachedHZBView = targetHZBView;
+        this.#cachedHZBSampler = targetHZBSampler;
         return this.#unifiedCullingBindGroup;
     }
 
     getOrCreateGlobalCullingBindGroup(
         layout: GPUBindGroupLayout,
         vhtTextureView?: GPUTextureView,
-        vhtSampler?: GPUSampler
+        vhtSampler?: GPUSampler,
+        hzbTextureView?: GPUTextureView,
+        hzbSampler?: GPUSampler
     ): GPUBindGroup | null {
-        return this.getOrCreateUnifiedCullingBindGroup(layout, vhtTextureView, vhtSampler);
+        return this.getOrCreateUnifiedCullingBindGroup(layout, vhtTextureView, vhtSampler, hzbTextureView, hzbSampler);
     }
 
     destroy(): void {
@@ -525,6 +561,8 @@ class FoliageMegaBuffer {
         this.#shadowCulledGPUBuffer?.destroy();
         this.#shadowIndirectGPUBuffer?.destroy();
         this.#unifiedGlobalUniformGPUBuffer?.destroy();
+        this.#indirectResetTemplateGPUBuffer?.destroy();
+        this.#shadowIndirectResetTemplateGPUBuffer?.destroy();
 
         this.#rawGPUBuffer = null;
         this.#culledGPUBuffer = null;
@@ -533,6 +571,8 @@ class FoliageMegaBuffer {
         this.#shadowCulledGPUBuffer = null;
         this.#shadowIndirectGPUBuffer = null;
         this.#unifiedGlobalUniformGPUBuffer = null;
+        this.#indirectResetTemplateGPUBuffer = null;
+        this.#shadowIndirectResetTemplateGPUBuffer = null;
         this.#unifiedCullingBindGroup = null;
         this.#allocations.clear();
         this.#allocatedTypes.length = 0;
@@ -549,12 +589,30 @@ class FoliageMegaBuffer {
                 this.#shadowIndirectResetTemplate[shadowSlot] = count;
             }
         }
+
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (gpuDevice && this.#indirectResetTemplateGPUBuffer && this.#shadowIndirectResetTemplateGPUBuffer) {
+            gpuDevice.queue.writeBuffer(
+                this.#indirectResetTemplateGPUBuffer,
+                0,
+                this.#indirectResetTemplate.buffer,
+                0,
+                this.#indirectResetTemplate.byteLength
+            );
+            gpuDevice.queue.writeBuffer(
+                this.#shadowIndirectResetTemplateGPUBuffer,
+                0,
+                this.#shadowIndirectResetTemplate.buffer,
+                0,
+                this.#shadowIndirectResetTemplate.byteLength
+            );
+        }
     }
 
     #initBuffers(): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         const rawByteSize = Math.max(this.#maxTotalInstances * FoliageMegaBuffer.#STRIDE_BYTES, 64);
-        const culledByteSize = rawByteSize * 8; // Support up to 8 LOD slots
+        const culledByteSize = rawByteSize * 8; 
         const indirectByteSize = Math.max(this.#maxSubMeshes * 20, 64);
         const typeParamsByteSize = FoliageMegaBuffer.#MAX_TYPES * FoliageMegaBuffer.#TYPE_PARAM_FLOATS * 4;
 
@@ -576,7 +634,12 @@ class FoliageMegaBuffer {
             usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
-        // 🌲 섀도우 통합 4단 버퍼 (Cascade 0, 1, 2, 3)
+        this.#indirectResetTemplateGPUBuffer = gpuDevice.createBuffer({
+            label: 'FoliageMegaBuffer_Indirect_Template',
+            size: indirectByteSize,
+            usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+        });
+
         this.#shadowCulledGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageMegaBuffer_Culled_ShadowMega',
             size: culledByteSize * 4,
@@ -589,6 +652,12 @@ class FoliageMegaBuffer {
             usage: GPUBufferUsage.INDIRECT | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
         });
 
+        this.#shadowIndirectResetTemplateGPUBuffer = gpuDevice.createBuffer({
+            label: 'FoliageMegaBuffer_Indirect_ShadowTemplate',
+            size: indirectByteSize * 4,
+            usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+        });
+
         this.#typeParamsGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageMegaBuffer_TypeParams',
             size: typeParamsByteSize,
@@ -597,7 +666,7 @@ class FoliageMegaBuffer {
 
         this.#unifiedGlobalUniformGPUBuffer = gpuDevice.createBuffer({
             label: 'FoliageMegaBuffer_UnifiedGlobalUniform',
-            size: 640,
+            size: 800,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         });
     }

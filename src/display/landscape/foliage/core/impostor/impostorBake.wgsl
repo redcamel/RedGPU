@@ -32,7 +32,6 @@ fn main(
 ) -> BakeFragmentOutput {
     var out: BakeFragmentOutput;
 
-    // 1. BaseColor & Opacity calculation (Exact pbrMaterial reference)
     let u_useVertexColor = (input.textureFlags.w > 0.5);
     let isFoliage = (input.cameraDir.w > 0.5);
     var baseColor = input.baseColorFactor;
@@ -46,15 +45,11 @@ fn main(
         finalColor *= diffuseSampleColor;
     }
 
-    // 🌿 베이크 단계에서 glTF/UE5 표준 컷오프로 텍스처 배경(흰색/검은색) 오염을 100% 원천 차단
     let bakeCutOff = select(0.3333, input.materialParams.w, input.materialParams.w > 0.0);
     if (finalColor.a < bakeCutOff) {
         discard;
     }
 
-
-
-    // 2. 3D World Normal (Exact PBRMaterial matching)
     var N = normalize(input.worldNormal);
     if (input.textureFlags.y > 0.5) {
         let T = normalize(input.worldTangent.xyz);
@@ -69,7 +64,6 @@ fn main(
     }
     let encodedNormal = N * 0.5 + 0.5;
 
-    // 3. Radial Depth Offset (Normalized 0..1 along camera view ray from sphere center)
     let center = input.sphereCenterRadius.xyz;
     let radius = max(input.sphereCenterRadius.w, 0.1);
     let camDir = normalize(input.cameraDir.xyz);
@@ -77,7 +71,6 @@ fn main(
     let distAlongRay = dot(relPos, camDir);
     let normDepth = clamp(distAlongRay / (radius * 1.05) * 0.5 + 0.5, 0.0, 1.0);
 
-    // 4. Physical Material Properties
     var baseAO = input.materialParams.z;
     var roughness = input.materialParams.x;
     var metallic = input.materialParams.y;
@@ -98,5 +91,4 @@ fn main(
     out.ormSubsurface = vec4<f32>(finalAO, roughness, metallic, subsurface);
     return out;
 }
-
 
