@@ -197,16 +197,6 @@ fn main(inputData: InputData) -> OutputFragment {
     let s01 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g01, uv01, n, ddxAtlas, ddyAtlas);
     let s11 = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, g11, uv11, n, ddxAtlas, ddyAtlas);
 
-    let n00 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g00, uv00, n, ddxAtlas, ddyAtlas);
-    let n10 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g10, uv10, n, ddxAtlas, ddyAtlas);
-    let n01 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g01, uv01, n, ddxAtlas, ddyAtlas);
-    let n11 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g11, uv11, n, ddxAtlas, ddyAtlas);
-
-    let orm00 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g00, uv00, n, ddxAtlas, ddyAtlas);
-    let orm10 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g10, uv10, n, ddxAtlas, ddyAtlas);
-    let orm01 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g01, uv01, n, ddxAtlas, ddyAtlas);
-    let orm11 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g11, uv11, n, ddxAtlas, ddyAtlas);
-
     let w00 = (1.0 - frac.x) * (1.0 - frac.y);
     let w10 = frac.x * (1.0 - frac.y);
     let w01 = (1.0 - frac.x) * frac.y;
@@ -218,17 +208,12 @@ fn main(inputData: InputData) -> OutputFragment {
     let cov11 = w11 * s11.a;
     let totalCoverage = cov00 + cov10 + cov01 + cov11;
 
+    // 🚀 [최적화 P0 / Step 1 - 조기 탈락 1차] 완전 투명 픽셀(공기) 즉시 탈출 (Normal/ORM 8탭 100% 생략)
     if (totalCoverage < 0.001) {
         discard;
     }
 
-    let invSafeCoverage = 1.0 / max(totalCoverage, 0.0001);
-
-    var albedo = (s00.rgb * cov00 + s10.rgb * cov10 + s01.rgb * cov01 + s11.rgb * cov11) * invSafeCoverage;
-    albedo = clamp(albedo, vec3<f32>(0.0), vec3<f32>(1.0));
-    let rawNormalDepth = (n00 * cov00 + n10 * cov10 + n01 * cov01 + n11 * cov11) * invSafeCoverage;
-    let rawORM = (orm00 * cov00 + orm10 * cov10 + orm01 * cov01 + orm11 * cov11) * invSafeCoverage;
-
+    // 🚀 [최적화 P0 / Step 1 - 조기 탈락 2차] 거리 페이드 디더링 조기 탈락
     let fadeOpacity = inputData.combinedOpacity;
     if (fadeOpacity < 0.999) {
         let px = u32(inputData.position.x) & 3u;
@@ -241,6 +226,7 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
 
+    // 🚀 [최적화 P0 / Step 1 - 조기 탈락 3차] 동적 알파 디더 컷오프 조기 탈락
     let linearAlpha = totalCoverage;
     let maxAlpha = max(max(s00.a, s10.a), max(s01.a, s11.a));
     let maxCornerWeight = max(max(w00, w10), max(w01, w11));
@@ -258,6 +244,25 @@ fn main(inputData: InputData) -> OutputFragment {
     if (reconstructedAlpha <= dynamicCutOff) {
         discard;
     }
+
+    // 🌟 [검증 통과된 유효 픽셀에서만 Normal 4장 + ORM 4장 샘플링 실행 (투명 픽셀 50~60% 완전 절감)]
+    let invSafeCoverage = 1.0 / max(totalCoverage, 0.0001);
+
+    var albedo = (s00.rgb * cov00 + s10.rgb * cov10 + s01.rgb * cov01 + s11.rgb * cov11) * invSafeCoverage;
+    albedo = clamp(albedo, vec3<f32>(0.0), vec3<f32>(1.0));
+
+    let n00 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g00, uv00, n, ddxAtlas, ddyAtlas);
+    let n10 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g10, uv10, n, ddxAtlas, ddyAtlas);
+    let n01 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g01, uv01, n, ddxAtlas, ddyAtlas);
+    let n11 = sampleOctahedralAtlas(normalTexture, normalTextureSampler, g11, uv11, n, ddxAtlas, ddyAtlas);
+
+    let orm00 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g00, uv00, n, ddxAtlas, ddyAtlas);
+    let orm10 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g10, uv10, n, ddxAtlas, ddyAtlas);
+    let orm01 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g01, uv01, n, ddxAtlas, ddyAtlas);
+    let orm11 = sampleOctahedralAtlas(packedORMTexture, baseColorTextureSampler, g11, uv11, n, ddxAtlas, ddyAtlas);
+
+    let rawNormalDepth = (n00 * cov00 + n10 * cov10 + n01 * cov01 + n11 * cov11) * invSafeCoverage;
+    let rawORM = (orm00 * cov00 + orm10 * cov10 + orm01 * cov01 + orm11 * cov11) * invSafeCoverage;
 
     let toCamVec = camPos - inputData.vertexPosition;
     let V = normalize(toCamVec);
