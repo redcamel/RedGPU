@@ -318,9 +318,7 @@ fn getDirectPbrLight(
     L: vec3<f32>,
     NdotV: f32,
     roughnessParameter: f32,
-    metallicParameter: f32,
-    albedo: vec3<f32>,
-    F0: vec3<f32>
+    albedo: vec3<f32>
 ) -> vec3<f32> {
     let NdotL = max(dot(N, L), 0.0);
     if (NdotL <= 0.0) {
@@ -331,14 +329,12 @@ fn getDirectPbrLight(
     let LdotH = max(dot(L, H), 0.0);
     let VdotH = max(dot(V, H), 0.0);
 
+    let F0 = vec3<f32>(0.04);
     let F = getRoughnessFresnel(VdotH, F0, roughnessParameter);
     let SPEC_BRDF = getDirectSpecularBRDF(F, roughnessParameter, NdotH, NdotV, NdotL);
     let diffuse_reflection = getDirectDiffuseBRDF(NdotL, NdotV, LdotH, roughnessParameter, albedo);
 
-    let dielectricPart = (SPEC_BRDF * NdotL) + (vec3<f32>(1.0) - F) * diffuse_reflection;
-    let metallicPart = SPEC_BRDF * NdotL;
-    let directLight = mix(dielectricPart, metallicPart, metallicParameter);
-
+    let directLight = (SPEC_BRDF * NdotL) + (vec3<f32>(1.0) - F) * diffuse_reflection;
     return directLight * lightColor;
 }
 
@@ -348,9 +344,7 @@ fn getDirectPbrLighting(
     V: vec3<f32>,
     NdotV: f32,
     roughnessParameter: f32,
-    metallicParameter: f32,
     albedo: vec3<f32>,
-    F0: vec3<f32>,
     visibility: f32
 ) -> vec3<f32> {
     var totalDirectLighting = vec3<f32>(0.0);
@@ -373,8 +367,7 @@ fn getDirectPbrLighting(
         totalDirectLighting += getDirectPbrLight(
             finalLightColor,
             N, V, L, NdotV,
-            roughnessParameter, metallicParameter, albedo,
-            F0
+            roughnessParameter, albedo
         );
     }
 
@@ -387,13 +380,12 @@ fn getIndirectPbrLighting(
     NdotV: f32,
     albedo: vec3<f32>,
     roughnessParameter: f32,
-    metallicParameter: f32,
-    F0: vec3<f32>,
     occlusionParameter: f32
 ) -> vec3<f32> {
     let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
     let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
     let preExposure = systemUniforms.preExposure;
+    let F0 = vec3<f32>(0.04);
 
     if (u_usePrefilterTexture || u_useSkyAtmosphere) {
         let R = getReflectionVectorFromViewDirection(V, N);
@@ -432,9 +424,43 @@ fn getIndirectPbrLighting(
         reflectedColor *= horizonOcclusion * horizonOcclusion;
 
         let F_IBL = F0 * envBRDF.x + vec3<f32>(envBRDF.y);
-        let kD = (vec3<f32>(1.0) - F_IBL) * (1.0 - metallicParameter);
+        let kD = vec3<f32>(1.0) - F_IBL;
 
         return ((kD * albedo * iblDiffuseColor) + (reflectedColor * F_IBL)) * occlusionParameter;
+    } else {
+        let ambientContribution = albedo * systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
+        return ambientContribution * occlusionParameter;
+    }
+}
+
+// 🌟 [원경 고속 Diffuse-Only IBL] 스펙큘러 텍스처 4개(프리필터, BRDF LUT 등) 생략으로 텍스처 대역폭 급감!
+fn getDistantIndirectPbrLighting(
+    N: vec3<f32>,
+    albedo: vec3<f32>,
+    occlusionParameter: f32
+) -> vec3<f32> {
+    let u_usePrefilterTexture = systemUniforms.usePrefilterTexture == 1u;
+    let u_useSkyAtmosphere = systemUniforms.useSkyAtmosphere == 1u;
+    let preExposure = systemUniforms.preExposure;
+
+    if (u_usePrefilterTexture || u_useSkyAtmosphere) {
+        var iblDiffuseColor = vec3<f32>(0.0);
+
+        if (u_usePrefilterTexture) {
+            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * preExposure * systemUniforms.iblIntensity;
+        }
+
+        if (u_useSkyAtmosphere) {
+            let u_atmo = systemUniforms.skyAtmosphere;
+            let camH = u_atmo.cameraHeight;
+            let atmH = u_atmo.atmosphereHeight;
+            let skyIntensity = u_atmo.sunIntensity;
+            let diffTrans = getTransmittance(transmittanceTexture, atmosphereSampler, camH, N.y, atmH);
+            let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity * preExposure;
+            iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
+        }
+
+        return albedo * iblDiffuseColor * occlusionParameter;
     } else {
         let ambientContribution = albedo * systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
         return ambientContribution * occlusionParameter;
@@ -574,15 +600,14 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     } else {
         let vbtAlbedoRaw = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
-        let vbtNormalEncoded = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
-        let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
-
         let isBaked = length(vbtAlbedoRaw) > 0.001;
+
         if (isBaked) {
+            let vbtNormalEncoded = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
+            let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
             albedo = vbtAlbedoRaw;
             N = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), baseN, length(vbtNormalEncoded) <= 0.001));
             roughnessFactor = max(0.04, vbtORM.g);
-            metallicFactor = vbtORM.b;
             ambientOcclusion = vbtORM.r;
         } else {
             // 🌟 [원경 스마트 레이어 블렌딩] 미베이킹 상태에서도 스플랫맵 기반 레이어 색상(잔디, 바위, 자갈 등)을 100% 온전히 표현!
@@ -590,7 +615,6 @@ fn main(inputData: InputData) -> OutputFragment {
             albedo = computeDistantLayersAlbedo(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV);
             N = baseN;
             roughnessFactor = 0.85;
-            metallicFactor = 0.0;
             ambientOcclusion = 1.0;
         }
     }
@@ -601,10 +625,6 @@ fn main(inputData: InputData) -> OutputFragment {
 
     let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
     let NdotV = max(abs(dot(N, V)), 0.04);
-
-    let F0_dielectric = vec3<f32>(0.04);
-    let F0_metal = albedo;
-    let F0 = mix(F0_dielectric, F0_metal, metallicFactor);
     let roughnessParameter = max(roughnessFactor, 0.04);
 
     let receiveShadowYn = inputData.receiveShadow != 0.0 && systemUniforms.directionalLightCount > 0u;
@@ -673,18 +693,26 @@ fn main(inputData: InputData) -> OutputFragment {
     let directLighting = getDirectPbrLighting(
         input_vertexPosition,
         N, V, NdotV,
-        roughnessParameter, metallicFactor, albedo,
-        F0,
+        roughnessParameter, albedo,
         visibility
     );
 
-    let indirectLighting = getIndirectPbrLighting(
-        N, V, NdotV,
-        albedo,
-        roughnessParameter, metallicFactor,
-        F0,
-        ambientOcclusion
-    );
+    var indirectLighting = vec3<f32>(0.0);
+    if (lod < 1.5) {
+        indirectLighting = getIndirectPbrLighting(
+            N, V, NdotV,
+            albedo,
+            roughnessParameter,
+            ambientOcclusion
+        );
+    } else {
+        // 🌟 [원경 지형 Diffuse-Only IBL] 스펙큘러 관련 4개 텍스처 생략으로 60FPS 완벽 방어
+        indirectLighting = getDistantIndirectPbrLighting(
+            N,
+            albedo,
+            ambientOcclusion
+        );
+    }
 
     let finalColor = vec4<f32>(directLighting + indirectLighting, 1.0);
 

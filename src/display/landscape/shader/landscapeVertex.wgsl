@@ -89,8 +89,8 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
 
     let currentHeight = textureLoad(heightMapTexture, texCoord, 0).r;
     var finalHeight = currentHeight;
-
-    if (lodLevel < 7u) {
+    // 🚀 [최적화] 근거리(LOD 0~1) 정점에서만 지오모핑 4중 텍스처 로드를 수행하고, 원경(LOD 2~7)은 즉각 단일 로드로 바이패스
+    if (lodLevel < 2u) {
         let camPos = systemUniforms.camera.cameraPosition.xyz;
         let dx = worldX - camPos.x;
         let dz = worldZ - camPos.z;
