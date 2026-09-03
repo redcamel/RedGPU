@@ -572,25 +572,13 @@ fn main(inputData: InputData) -> OutputFragment {
         let useVBT = fade > ditherThreshold;
 
         if (useVBT) {
-            let vbtAlbedoRaw = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
-            let isBaked = length(vbtAlbedoRaw) > 0.001;
-
-            if (isBaked) {
-                // 🌟 [최적화 8.8] 베이킹 완료 타일은 전역 VNT 노멀맵을 100% 생략하고 VBT 노멀 직접 사용
-                let vbtNormalEncoded = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
-                let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
-                albedo = vbtAlbedoRaw;
-                N = normalize(vbtNormalEncoded * 2.0 - vec3<f32>(1.0));
-                roughnessFactor = max(0.04, vbtORM.g);
-                ambientOcclusion = vbtORM.r;
-            } else {
-                let baseN = getBaseNormal(globalUV);
-                let direct = computeDirectLayersPBR(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV, baseN);
-                albedo = direct.albedo;
-                N = direct.normal;
-                roughnessFactor = direct.roughness;
-                ambientOcclusion = direct.ao;
-            }
+            // 🌟 [원경 고화질 무손실 타일링]
+            // 512 저해상도 VBT의 2m 뭉개짐을 완전 박멸하고, 4K BaseColor 타일링을 유지하여 수 km 밖까지 쨍한 디테일 보존!
+            // 동시에 무거운 노멀/ORM(8장)은 100% 생략하여 텍스처 호출을 단 2~3장으로 80% 초경량 유지!
+            albedo = computeDistantLayersAlbedo(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV);
+            N = getBaseNormal(globalUV);
+            roughnessFactor = 0.85;
+            ambientOcclusion = 1.0;
         } else {
             let baseN = getBaseNormal(globalUV);
             let direct = computeDirectLayersPBR(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV, baseN);
@@ -600,25 +588,11 @@ fn main(inputData: InputData) -> OutputFragment {
             ambientOcclusion = direct.ao;
         }
     } else {
-        let vbtAlbedoRaw = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
-        let isBaked = length(vbtAlbedoRaw) > 0.001;
-
-        if (isBaked) {
-            // 🌟 [최적화 8.8] 베이킹 완료 원경 타일도 전역 VNT 노멀맵 생략
-            let vbtNormalEncoded = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
-            let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
-            albedo = vbtAlbedoRaw;
-            N = normalize(vbtNormalEncoded * 2.0 - vec3<f32>(1.0));
-            roughnessFactor = max(0.04, vbtORM.g);
-            ambientOcclusion = vbtORM.r;
-        } else {
-            // 🌟 [원경 스마트 레이어 블렌딩] 미베이킹 상태에서도 스플랫맵 기반 레이어 색상(잔디, 바위, 자갈 등)을 100% 온전히 표현!
-            // 동시에 원경에서 식별 불가능한 노멀/ORM 텍스처 8~12개 샘플링을 생략하여 60FPS 완벽 방어
-            albedo = computeDistantLayersAlbedo(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV);
-            N = getBaseNormal(globalUV);
-            roughnessFactor = 0.85;
-            ambientOcclusion = 1.0;
-        }
+        // 🏔️ [원경 산맥 LOD 2~7] 저해상도 뭉개짐 없이 4K 원본 컬러 타일링 100% 유지 (노멀/ORM 생략으로 초고속)
+        albedo = computeDistantLayersAlbedo(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV);
+        N = getBaseNormal(globalUV);
+        roughnessFactor = 0.85;
+        ambientOcclusion = 1.0;
     }
 
     if (inputData.instanceColor.a > 0.0) {
