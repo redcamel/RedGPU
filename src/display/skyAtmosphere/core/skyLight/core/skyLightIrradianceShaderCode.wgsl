@@ -49,6 +49,6 @@ fn main(@builtin(global_invocation_id) global_id: vec3<u32>) {
 
     // [KO] 3. 결과 평균화 및 큐브맵 텍스처 배열에 저장
     // [EN] 3. Average results and store in cubemap texture array
-    let radiance = totalRadiance / f32(SAMPLE_COUNT);
+    let radiance = (totalRadiance / f32(SAMPLE_COUNT)) * PI;
     textureStore(outputTexture, global_id.xy, global_id.z, vec4<f32>(radiance, 1.0));
 }
