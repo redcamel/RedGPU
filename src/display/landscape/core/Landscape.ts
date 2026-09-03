@@ -46,7 +46,7 @@ export class Landscape extends Object3DContainer {
     #heightmapShadowSoftness: number = 8.0;
     #lodColoration: boolean = false;
     #lodMetric: 'distance' | 'screenSize' = 'screenSize';
-    #lod0SizeQuads: number = 256;
+    #lod0SizeQuads: number = LANDSCAPE_BASE_GRID_SIZE.QUAD_64;
     #lastTanHalfFOV: number = 1.0;
     #lodFadeStartRatio: number = 0.7;
     #lodGeomorphStartRatio: number = 0.85;
