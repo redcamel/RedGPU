@@ -31,9 +31,7 @@ RedGPU.init(
         // 그림자 설정 (16km 오픈월드 지형 및 대규모 식생에 최적화)
         const directionalShadowManager = scene.shadowManager.directionalShadowManager;
         directionalShadowManager.maxShadowDistance = 5000;
-        directionalShadowManager.pcssLightSize = 2.5;
-        directionalShadowManager.strength = 0.9;
-        directionalShadowManager.cascadeCount = 4;
+
 
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [16000, 16000];

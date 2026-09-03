@@ -61,7 +61,7 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
 
                 // [KO] IBL 루미넌스 및 태양광 비율에 맞춰 직사광의 lux 동기화
                 // [EN] Synchronize directional light lux with the IBL luminance and sunLux ratio
-                const targetLux = (imageInfo as any).sunLux || (luminance * 4);
+                const targetLux = (imageInfo as any)?.sunLux || luminance;
                 settings.lux = targetLux;
                 const lights = view.scene.lightManager.directionalLights;
                 if (lights.length > 0) {
@@ -79,8 +79,8 @@ const GuiIBLHelper: React.FC<GuiIBLHelperProps> = ({gui, view}) => {
                 // [KO] 현재 선택된 텍스처의 태양 설정값(sunLux) 동기화
                 // [EN] Synchronize sun settings (sunLux) of the currently selected texture
                 const imageInfo = hdrImages.find(item => item.name === settings.texture);
-                const luminance = imageInfo?.luminance || 20000;
-                const targetLux = (imageInfo as any)?.sunLux || (luminance * 4);
+                const luminance = imageInfo?.luminance || 30000;
+                const targetLux = (imageInfo as any)?.sunLux || luminance;
                 settings.lux = targetLux;
 
                 if (view.scene.lightManager.directionalLights.length === 0) {

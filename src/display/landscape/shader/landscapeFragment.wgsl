@@ -343,7 +343,7 @@ fn getIndirectPbrLighting(
             let iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
             let mipLevel = roughnessParameter * iblMipmapCount;
             reflectedColor = textureSampleLevel(ibl_prefilterTexture, prefilterTextureSampler, R, mipLevel).rgb * preExposure * systemUniforms.iblIntensity;
-            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * preExposure * systemUniforms.iblIntensity * INV_PI;
+            iblDiffuseColor = textureSampleLevel(ibl_irradianceTexture, prefilterTextureSampler, N, 0).rgb * preExposure * systemUniforms.iblIntensity;
         }
 
         if (u_useSkyAtmosphere) {
