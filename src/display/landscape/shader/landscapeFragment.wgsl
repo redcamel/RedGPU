@@ -95,6 +95,11 @@ struct DirectLayerResult {
     ao: f32,
 };
 
+fn getBaseNormal(globalUV: vec2<f32>) -> vec3<f32> {
+    let vntSample = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
+    return normalize(select(vntSample * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), length(vntSample) <= 0.001));
+}
+
 fn computeDirectLayersPBR(
     globalUV: vec2<f32>,
     worldTileUV: vec2<f32>,
@@ -102,9 +107,7 @@ fn computeDirectLayersPBR(
     ddyGlobalUV: vec2<f32>,
     ddxWorldTileUV: vec2<f32>,
     ddyWorldTileUV: vec2<f32>,
-    baseN: vec3<f32>,
-    vertexHeight: f32,
-    slopeAngleDeg: f32
+    baseN: vec3<f32>
 ) -> DirectLayerResult {
     var res: DirectLayerResult;
     var baseAlbedo = uniforms.color.rgb;
@@ -117,31 +120,29 @@ fn computeDirectLayersPBR(
     var blendedAlbedo = vec3<f32>(0.0);
     var blendedNormalTangent = vec3<f32>(0.0, 0.0, 0.0);
     var blendedRoughness = 0.0;
-    var blendedMetallic = 0.0;
     var blendedAO = 0.0;
+
+    // 🌟 [근거리 최적화 8.7] 스플랫맵(레이어 0)을 루프 밖에서 단 1회만 일괄 샘플링! (기존 최대 8회 ➔ 1회로 급감)
+    let splatMapSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, 0, ddxGlobalUV, ddyGlobalUV);
 
     for (var i = 0u; i < activeLayerCount; i = i + 1u) {
         let layerParams = uniforms.layerParams[i];
         if (layerParams.enabled <= 0.5) { continue; }
 
-        let layerIdx = i32(i);
-        var weightMapSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, layerIdx, ddxGlobalUV, ddyGlobalUV);
-        if (length(weightMapSample) <= 0.0001 && layerIdx > 0) {
-            weightMapSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, 0, ddxGlobalUV, ddyGlobalUV);
-        }
         let chIdx = u32(layerParams.weightChannelIndex + 0.5);
-        var weightVal = weightMapSample.r;
-        if (chIdx == 1u) { weightVal = weightMapSample.g; }
-        else if (chIdx == 2u) { weightVal = weightMapSample.b; }
+        var weightVal = splatMapSample.r;
+        if (chIdx == 1u) { weightVal = splatMapSample.g; }
+        else if (chIdx == 2u) { weightVal = splatMapSample.b; }
         else if (chIdx == 3u) {
-            let isAlphaFull = weightMapSample.a >= 0.99;
-            let remainingWeight = clamp(1.0 - (weightMapSample.r + weightMapSample.g + weightMapSample.b), 0.0, 1.0);
-            weightVal = select(weightMapSample.a, remainingWeight, isAlphaFull);
+            let isAlphaFull = splatMapSample.a >= 0.99;
+            let remainingWeight = clamp(1.0 - (splatMapSample.r + splatMapSample.g + splatMapSample.b), 0.0, 1.0);
+            weightVal = select(splatMapSample.a, remainingWeight, isAlphaFull);
         }
         let layerW = clamp(weightVal, 0.0, 1.0);
 
         if (layerW <= 0.0001) { continue; }
 
+        let layerIdx = i32(i);
         let layerUV = worldTileUV * layerParams.uvScale + layerParams.uvOffset;
         let ddxLayerUV = ddxWorldTileUV * layerParams.uvScale;
         let ddyLayerUV = ddyWorldTileUV * layerParams.uvScale;
@@ -153,14 +154,12 @@ fn computeDirectLayersPBR(
 
         let layerAlbedo = layerAlbedoSample.rgb * layerParams.tintColor.rgb;
         let layerRoughness = layerParams.roughness * layerORMSample.g;
-        let layerMetallic = layerParams.metallic * layerORMSample.b;
         let rawAO = select(1.0, layerORMSample.r, layerORMSample.r > 0.001);
         let layerAO = clamp(mix(1.0, rawAO, layerParams.aoIntensity), 0.2, 1.0);
 
         blendedAlbedo += layerAlbedo * layerW;
         blendedNormalTangent += layerNormalSample * layerW;
         blendedRoughness += layerRoughness * layerW;
-        blendedMetallic += layerMetallic * layerW;
         blendedAO += layerAO * layerW;
 
         totalLayerWeight += layerW;
@@ -171,7 +170,6 @@ fn computeDirectLayersPBR(
         let layerBlendAlbedo = blendedAlbedo * invW;
         let layerBlendNormal = normalize(blendedNormalTangent);
         let layerBlendRoughness = blendedRoughness * invW;
-        let layerBlendMetallic = blendedMetallic * invW;
         let layerBlendAO = blendedAO * invW;
 
         let alpha = clamp(totalLayerWeight, 0.0, 1.0);
@@ -187,13 +185,14 @@ fn computeDirectLayersPBR(
             res.normal = baseN;
         }
         res.roughness = mix(baseRoughness, layerBlendRoughness, alpha);
-        res.metallic = mix(baseMetallic, layerBlendMetallic, alpha);
+        res.metallic = 0.0;
         res.ao = mix(baseAO, layerBlendAO, alpha);
     } else {
         res.albedo = baseAlbedo;
         res.normal = baseN;
         res.roughness = baseRoughness;
-        res.metallic = baseMetallic;
+        res.metallic = 0.0;
+        res.ao = baseAO;
     }
 
     return res;
@@ -549,19 +548,13 @@ fn main(inputData: InputData) -> OutputFragment {
     var albedo: vec3<f32>;
     var N: vec3<f32>;
     var roughnessFactor: f32;
-    var metallicFactor: f32;
     var ambientOcclusion: f32;
 
     let rawViewDist = distance(u_cameraPosition, input_vertexPosition);
     let isScreenSize = landscapeInstanceUniforms.lodMetric >= 0.5;
     let viewDist = select(rawViewDist, rawViewDist * landscapeInstanceUniforms.tanHalfFOV, isScreenSize);
 
-    let vntSample = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
-    let baseN = normalize(select(vntSample * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), length(vntSample) <= 0.001));
-
     if (lod < 1.5) {
-        let slopeAngleDeg = acos(clamp(baseN.y, -1.0, 1.0)) * 57.295779513;
-
         let lod0Dist = max(1.0, sqrt(landscapeInstanceUniforms.lodDistancesSq[0].x));
         let fadeRatio = clamp(select(0.7, landscapeInstanceUniforms.lodFadeStartRatio, landscapeInstanceUniforms.lodFadeStartRatio > 0.0), 0.0, 0.99);
         let fadeStart = lod0Dist * fadeRatio;
@@ -572,30 +565,30 @@ fn main(inputData: InputData) -> OutputFragment {
 
         if (useVBT) {
             let vbtAlbedoRaw = textureSampleGrad(vbtBaseColorAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
-            let vbtNormalEncoded = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
-            let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
-
             let isBaked = length(vbtAlbedoRaw) > 0.001;
+
             if (isBaked) {
+                // 🌟 [최적화 8.8] 베이킹 완료 타일은 전역 VNT 노멀맵을 100% 생략하고 VBT 노멀 직접 사용
+                let vbtNormalEncoded = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
+                let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
                 albedo = vbtAlbedoRaw;
-                N = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), baseN, length(vbtNormalEncoded) <= 0.001));
+                N = normalize(vbtNormalEncoded * 2.0 - vec3<f32>(1.0));
                 roughnessFactor = max(0.04, vbtORM.g);
-                metallicFactor = vbtORM.b;
                 ambientOcclusion = vbtORM.r;
             } else {
-                let direct = computeDirectLayersPBR(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV, baseN, inputData.vertexHeight, slopeAngleDeg);
+                let baseN = getBaseNormal(globalUV);
+                let direct = computeDirectLayersPBR(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV, baseN);
                 albedo = direct.albedo;
                 N = direct.normal;
                 roughnessFactor = direct.roughness;
-                metallicFactor = direct.metallic;
                 ambientOcclusion = direct.ao;
             }
         } else {
-            let direct = computeDirectLayersPBR(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV, baseN, inputData.vertexHeight, slopeAngleDeg);
+            let baseN = getBaseNormal(globalUV);
+            let direct = computeDirectLayersPBR(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV, baseN);
             albedo = direct.albedo;
             N = direct.normal;
             roughnessFactor = direct.roughness;
-            metallicFactor = direct.metallic;
             ambientOcclusion = direct.ao;
         }
     } else {
@@ -603,17 +596,18 @@ fn main(inputData: InputData) -> OutputFragment {
         let isBaked = length(vbtAlbedoRaw) > 0.001;
 
         if (isBaked) {
+            // 🌟 [최적화 8.8] 베이킹 완료 원경 타일도 전역 VNT 노멀맵 생략
             let vbtNormalEncoded = textureSampleGrad(vbtNormalAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV).rgb;
             let vbtORM = textureSampleGrad(vbtORMAtlasTexture, baseColorTextureSampler, globalUV, ddxGlobalUV, ddyGlobalUV);
             albedo = vbtAlbedoRaw;
-            N = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), baseN, length(vbtNormalEncoded) <= 0.001));
+            N = normalize(vbtNormalEncoded * 2.0 - vec3<f32>(1.0));
             roughnessFactor = max(0.04, vbtORM.g);
             ambientOcclusion = vbtORM.r;
         } else {
             // 🌟 [원경 스마트 레이어 블렌딩] 미베이킹 상태에서도 스플랫맵 기반 레이어 색상(잔디, 바위, 자갈 등)을 100% 온전히 표현!
             // 동시에 원경에서 식별 불가능한 노멀/ORM 텍스처 8~12개 샘플링을 생략하여 60FPS 완벽 방어
             albedo = computeDistantLayersAlbedo(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV);
-            N = baseN;
+            N = getBaseNormal(globalUV);
             roughnessFactor = 0.85;
             ambientOcclusion = 1.0;
         }

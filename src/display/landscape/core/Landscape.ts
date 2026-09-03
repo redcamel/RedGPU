@@ -561,13 +561,12 @@ export class Landscape extends Object3DContainer {
                         if (indirectDrawBuffer) {
                             const currentCascade = view3D?.currentCascadeIndex ?? 0;
 
-                            let targetMaxLOD = maxLODLevel;
+                            // 🚀 [최적화 8.5] 원경(Cascade 2~3) 그림자는 Heightmap Raymarching이 완벽히 그리므로 CSM 드로우를 Cascade 0~1로 제한
+                            let targetMaxLOD = 0;
                             if (currentCascade === 0) {
                                 targetMaxLOD = Math.min(1, maxLODLevel);
                             } else if (currentCascade === 1) {
                                 targetMaxLOD = Math.min(2, maxLODLevel);
-                            } else if (currentCascade === 2) {
-                                targetMaxLOD = Math.min(4, maxLODLevel);
                             }
 
                             for (let lod = 0; lod < targetMaxLOD; lod++) {
