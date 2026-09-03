@@ -40,7 +40,7 @@ struct UnifiedGlobalCullingUniforms {
     maxTotalInstances8: u32,
     activeCascadeCount: u32,
     hasHZB: u32,
-    pad1: u32,
+    viewportHeight: f32,
     pad2: u32,
     mainFrustumPlanes: array<vec4<f32>, 6>,
     cascades: array<CascadeCullingInfo, 4>,
@@ -177,6 +177,12 @@ fn main(
         dot(spherePos, globalUniforms.mainFrustumPlanes[3]) >= r &&
         dot(spherePos, globalUniforms.mainFrustumPlanes[4]) >= r &&
         dot(spherePos, globalUniforms.mainFrustumPlanes[5]) >= r;
+
+    let vpHeight = select(1080.0, globalUniforms.viewportHeight, globalUniforms.viewportHeight > 0.0);
+    let screenPixelDiameter = (scaledRadius * vpHeight) / max(effectiveDist, 0.001);
+    if (screenPixelDiameter < 2.0) {
+        inMainFrustum = false;
+    }
 
     if (inMainFrustum && globalUniforms.hasHZB != 0u) {
         let clipPos = globalUniforms.mainProjectionViewMatrix * spherePos;

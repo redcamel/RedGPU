@@ -219,6 +219,7 @@ class FoliageCullingDispatcher {
                 }
             }
 
+            const viewportHeight = stateData?.view?.height || viewOrCamera?.height || 1080.0;
             this.#megaBuffer.updateUnifiedGlobalUniforms(
                 camX, camY, camZ,
                 worldSizeX, heightScale, hasVHT,
@@ -227,7 +228,8 @@ class FoliageCullingDispatcher {
                 cascadeParams,
                 activeCascadeCount,
                 hasHZB,
-                mainPVMatrix
+                mainPVMatrix,
+                viewportHeight
             );
         }
 

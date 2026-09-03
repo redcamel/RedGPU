@@ -343,7 +343,8 @@ class FoliageMegaBuffer {
         cascades: readonly CascadeCullingParam[],
         activeCascadeCount: number = 4,
         hasHZB: boolean = false,
-        mainProjectionViewMatrix: any = null
+        mainProjectionViewMatrix: any = null,
+        viewportHeight: number = 1080.0
     ): void {
         if (!this.#unifiedGlobalUniformGPUBuffer || !this.#typeParamsGPUBuffer) return;
 
@@ -364,7 +365,7 @@ class FoliageMegaBuffer {
         gu32[9] = this.#maxTotalInstances * 8;
         gu32[10] = activeCascadeCount;
         gu32[11] = hasHZB ? 1 : 0;
-        gu32[12] = 0;
+        gf32[12] = viewportHeight > 0 ? viewportHeight : 1080.0;
         gu32[13] = 0;
         gu32[14] = 0;
         gu32[15] = 0;
