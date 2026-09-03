@@ -21,15 +21,19 @@ import {LandscapeGPUCuller} from "../spatial/LandscapeGPUCuller";
 import computeViewFrustumPlanes from "../../../math/computeViewFrustumPlanes";
 import LandscapeDebuggerManager from "../debugger";
 import LANDSCAPE_DEFAULT_LOD_COLORS from "./LANDSCAPE_DEFAULT_LOD_COLORS";
+import {mat4} from 'gl-matrix';
 
 export class Landscape extends Object3DContainer {
     static readonly #DEFAULT_LOD_MULTIPLIERS: readonly number[] = Object.freeze([1.0, 2.0, 3.5, 6.0, 9.5, 14.0, 20.0]);
+    static readonly #tempPVMatrix: Float32Array = new Float32Array(16);
 
     #redGPUContext: RedGPUContext;
     #sharedGeometry: LandscapeSharedGeometry;
     #spatialGrid: LandscapeSpatialGrid;
     #instanceBuffer: LandscapeInstanceBuffer;
     #gpuCuller: LandscapeGPUCuller | null = null;
+    #lastHZBView: GPUTextureView | null = null;
+    #lastHZBSampler: GPUSampler | null = null;
     #lodDistancesSq: number[] = [];
     #lodMultipliers: number[] = [];
     #lodColorsRGBA: [number, number, number, number][] = [];
@@ -41,7 +45,7 @@ export class Landscape extends Object3DContainer {
     #castShadow: boolean = true;
     #receiveShadow: boolean = true;
     #enableHeightmapShadow: boolean = true;
-    #heightmapShadowSteps: number = 16;
+    #heightmapShadowSteps: number = 12;
     #heightmapShadowDistance: number = 3000.0;
     #heightmapShadowSoftness: number = 8.0;
     #lodColoration: boolean = false;
@@ -692,6 +696,31 @@ export class Landscape extends Object3DContainer {
         }
         const lodMetricVal = this.#lodMetric === 'screenSize' ? 1.0 : 0.0;
 
+        const currentView = renderViewStateData?.view || (camera as any)?.view;
+        const hzb = currentView?.hierarchicalZBuffer;
+        const hzbTextureView = hzb?.textureView || null;
+        const hzbSampler = hzb?.sampler || null;
+
+        if (this.#lastHZBView !== hzbTextureView) {
+            this.#lastHZBView = hzbTextureView;
+            this.#lastHZBSampler = hzbSampler;
+            if (this.#instanceBuffer?.allInputTilesBuffer && this.#instanceBuffer?.visibleTileIndicesBuffer && this.#instanceBuffer?.indirectDrawBuffer) {
+                this.#gpuCuller?.updateBindGroup(
+                    this.#instanceBuffer.allInputTilesBuffer,
+                    this.#instanceBuffer.visibleTileIndicesBuffer,
+                    this.#instanceBuffer.indirectDrawBuffer,
+                    hzbTextureView,
+                    hzbSampler
+                );
+            }
+        }
+
+        let mainPVMatrix: Float32Array | null = null;
+        if (rawCamera?.projectionMatrix && rawCamera?.viewMatrix) {
+            mainPVMatrix = Landscape.#tempPVMatrix;
+            mat4.multiply(mainPVMatrix, rawCamera.projectionMatrix, rawCamera.viewMatrix);
+        }
+
         this.#gpuCuller?.updateUniforms(
             camX, camY, camZ,
             this.#maxLODLevel,
@@ -702,7 +731,9 @@ export class Landscape extends Object3DContainer {
             frustumPlanes,
             lodDistancesArray,
             tanHalfFOV,
-            lodMetricVal
+            lodMetricVal,
+            !!hzbTextureView,
+            mainPVMatrix
         );
 
         this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
@@ -1166,7 +1197,9 @@ export class Landscape extends Object3DContainer {
             this.#gpuCuller.updateBindGroup(
                 this.#instanceBuffer.allInputTilesBuffer,
                 this.#instanceBuffer.visibleTileIndicesBuffer,
-                this.#instanceBuffer.indirectDrawBuffer
+                this.#instanceBuffer.indirectDrawBuffer,
+                this.#lastHZBView,
+                this.#lastHZBSampler
             );
         }
 

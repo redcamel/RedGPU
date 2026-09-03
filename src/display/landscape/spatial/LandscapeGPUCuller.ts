@@ -22,10 +22,15 @@ export class LandscapeGPUCuller {
     updateBindGroup(
         allInputTilesBuffer: GPUBuffer,
         visibleTileIndicesBuffer: GPUBuffer,
-        indirectDrawBuffer: GPUBuffer
+        indirectDrawBuffer: GPUBuffer,
+        hzbTextureView?: GPUTextureView | null,
+        hzbSampler?: GPUSampler | null
     ): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#bindGroupLayout || !this.#uniformBuffer) return;
+
+        const targetHZBView = hzbTextureView || this.#redGPUContext.resourceManager.emptyBitmapTextureView;
+        const targetHZBSampler = hzbSampler || this.#redGPUContext.resourceManager.basicSampler.gpuSampler;
 
         this.#bindGroup = gpuDevice.createBindGroup({
             label: 'LandscapeCullBindGroup',
@@ -34,7 +39,9 @@ export class LandscapeGPUCuller {
                 {binding: 0, resource: {buffer: this.#uniformBuffer}},
                 {binding: 1, resource: {buffer: allInputTilesBuffer}},
                 {binding: 2, resource: {buffer: visibleTileIndicesBuffer}},
-                {binding: 3, resource: {buffer: indirectDrawBuffer}}
+                {binding: 3, resource: {buffer: indirectDrawBuffer}},
+                {binding: 4, resource: targetHZBView},
+                {binding: 5, resource: targetHZBSampler}
             ]
         });
     }
@@ -53,7 +60,9 @@ export class LandscapeGPUCuller {
         frustumPlanes: number[][] | Float32Array[] | null,
         lodDistancesSq: Float32Array,
         tanHalfFOV: number = 1.0,
-        lodMetric: number = 0.0
+        lodMetric: number = 0.0,
+        hasHZB: boolean = false,
+        viewProjectionMatrix: Float32Array | null = null
     ): void {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice || !this.#uniformBuffer) return;
@@ -76,19 +85,33 @@ export class LandscapeGPUCuller {
         data[10] = tanHalfFOV;
         data[11] = lodMetric;
 
+        uintData[12] = hasHZB ? 1 : 0;
+        data[13] = 0.0;
+        data[14] = 0.0;
+        data[15] = 0.0;
+
+        if (viewProjectionMatrix && viewProjectionMatrix.length >= 16) {
+            for (let i = 0; i < 16; i++) {
+                data[16 + i] = viewProjectionMatrix[i];
+            }
+        } else {
+            for (let i = 0; i < 16; i++) {
+                data[16 + i] = 0.0;
+            }
+        }
+
         if (frustumPlanes && frustumPlanes.length >= 6) {
             for (let i = 0; i < 6; i++) {
                 const plane = frustumPlanes[i];
-                const offset = 12 + i * 4;
+                const offset = 32 + i * 4;
                 data[offset] = plane[0];
                 data[offset + 1] = plane[1];
                 data[offset + 2] = plane[2];
                 data[offset + 3] = plane[3];
             }
         } else {
-
             for (let i = 0; i < 6; i++) {
-                const offset = 12 + i * 4;
+                const offset = 32 + i * 4;
                 data[offset] = 0;
                 data[offset + 1] = 0;
                 data[offset + 2] = 0;
@@ -99,7 +122,7 @@ export class LandscapeGPUCuller {
         const distCount = lodDistancesSq.length;
         for (let i = 0; i < 8; i++) {
             const val = i < distCount ? lodDistancesSq[i] : 0;
-            data[36 + i] = (val && val > 0) ? val : 1e15;
+            data[56 + i] = (val && val > 0) ? val : 1e15;
         }
 
         gpuDevice.queue.writeBuffer(this.#uniformBuffer, 0, data.buffer, 0, data.byteLength);
@@ -129,7 +152,7 @@ export class LandscapeGPUCuller {
             });
         }
 
-        this.#uniformByteLength = shaderInfo?.uniforms?.uniforms?.arrayBufferByteLength || 176;
+        this.#uniformByteLength = shaderInfo?.uniforms?.uniforms?.arrayBufferByteLength || 256;
         this.#uniformData = new Float32Array(this.#uniformByteLength / Float32Array.BYTES_PER_ELEMENT);
         this.#uniformUintData = new Uint32Array(this.#uniformData.buffer);
 

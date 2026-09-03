@@ -194,10 +194,67 @@ fn computeDirectLayersPBR(
         res.normal = baseN;
         res.roughness = baseRoughness;
         res.metallic = baseMetallic;
-        res.ao = baseAO;
     }
 
     return res;
+}
+
+fn computeDistantLayersAlbedo(
+    globalUV: vec2<f32>,
+    worldTileUV: vec2<f32>,
+    ddxGlobalUV: vec2<f32>,
+    ddyGlobalUV: vec2<f32>,
+    ddxWorldTileUV: vec2<f32>,
+    ddyWorldTileUV: vec2<f32>
+) -> vec3<f32> {
+    let activeLayerCount = uniforms.activeLayerCount;
+    if (activeLayerCount == 0u) {
+        return uniforms.color.rgb;
+    }
+
+    // 🌟 원경 최적화: 스플랫맵 1회 샘플링으로 모든 레이어 가중치 일괄 판별
+    let weightMapSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, 0, ddxGlobalUV, ddyGlobalUV);
+
+    var totalLayerWeight = 0.0;
+    var blendedAlbedo = vec3<f32>(0.0);
+
+    for (var i = 0u; i < activeLayerCount; i = i + 1u) {
+        let layerParams = uniforms.layerParams[i];
+        if (layerParams.enabled <= 0.5) { continue; }
+
+        let chIdx = u32(layerParams.weightChannelIndex + 0.5);
+        var weightVal = weightMapSample.r;
+        if (chIdx == 1u) { weightVal = weightMapSample.g; }
+        else if (chIdx == 2u) { weightVal = weightMapSample.b; }
+        else if (chIdx == 3u) {
+            let isAlphaFull = weightMapSample.a >= 0.99;
+            let remainingWeight = clamp(1.0 - (weightMapSample.r + weightMapSample.g + weightMapSample.b), 0.0, 1.0);
+            weightVal = select(weightMapSample.a, remainingWeight, isAlphaFull);
+        }
+        let layerW = clamp(weightVal, 0.0, 1.0);
+
+        if (layerW <= 0.01) { continue; }
+
+        let layerIdx = i32(i);
+        let layerUV = worldTileUV * layerParams.uvScale + layerParams.uvOffset;
+        let ddxLayerUV = ddxWorldTileUV * layerParams.uvScale;
+        let ddyLayerUV = ddyWorldTileUV * layerParams.uvScale;
+
+        let layerAlbedoSample = textureSampleGrad(layerBaseColorArray, baseColorTextureSampler, layerUV, layerIdx, ddxLayerUV, ddyLayerUV);
+        let layerAlbedo = layerAlbedoSample.rgb * layerParams.tintColor.rgb;
+
+        blendedAlbedo += layerAlbedo * layerW;
+        totalLayerWeight += layerW;
+    }
+
+    if (totalLayerWeight > 0.001) {
+        let invW = 1.0 / totalLayerWeight;
+        let layerBlendAlbedo = blendedAlbedo * invW;
+        let alpha = clamp(totalLayerWeight, 0.0, 1.0);
+        return mix(uniforms.color.rgb, layerBlendAlbedo, alpha);
+    }
+
+    return uniforms.color.rgb;
 }
 
 fn getSpecularNDF(NdotH: f32, roughness: f32) -> f32 {
@@ -473,9 +530,10 @@ fn main(inputData: InputData) -> OutputFragment {
     let isScreenSize = landscapeInstanceUniforms.lodMetric >= 0.5;
     let viewDist = select(rawViewDist, rawViewDist * landscapeInstanceUniforms.tanHalfFOV, isScreenSize);
 
+    let vntSample = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
+    let baseN = normalize(select(vntSample * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), length(vntSample) <= 0.001));
+
     if (lod < 1.5) {
-        let vntSample = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
-        let baseN = normalize(select(vntSample * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), length(vntSample) <= 0.001));
         let slopeAngleDeg = acos(clamp(baseN.y, -1.0, 1.0)) * 57.295779513;
 
         let lod0Dist = max(1.0, sqrt(landscapeInstanceUniforms.lodDistancesSq[0].x));
@@ -522,17 +580,18 @@ fn main(inputData: InputData) -> OutputFragment {
         let isBaked = length(vbtAlbedoRaw) > 0.001;
         if (isBaked) {
             albedo = vbtAlbedoRaw;
-            N = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), length(vbtNormalEncoded) <= 0.001));
+            N = normalize(select(vbtNormalEncoded * 2.0 - vec3<f32>(1.0), baseN, length(vbtNormalEncoded) <= 0.001));
             roughnessFactor = max(0.04, vbtORM.g);
             metallicFactor = vbtORM.b;
             ambientOcclusion = vbtORM.r;
         } else {
-            let direct = computeDirectLayersPBR(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV, vec3<f32>(0.0, 1.0, 0.0), inputData.vertexHeight, 0.0);
-            albedo = direct.albedo;
-            N = direct.normal;
-            roughnessFactor = direct.roughness;
-            metallicFactor = direct.metallic;
-            ambientOcclusion = direct.ao;
+            // 🌟 [원경 스마트 레이어 블렌딩] 미베이킹 상태에서도 스플랫맵 기반 레이어 색상(잔디, 바위, 자갈 등)을 100% 온전히 표현!
+            // 동시에 원경에서 식별 불가능한 노멀/ORM 텍스처 8~12개 샘플링을 생략하여 60FPS 완벽 방어
+            albedo = computeDistantLayersAlbedo(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV);
+            N = baseN;
+            roughnessFactor = 0.85;
+            metallicFactor = 0.0;
+            ambientOcclusion = 1.0;
         }
     }
 
@@ -553,35 +612,63 @@ fn main(inputData: InputData) -> OutputFragment {
     if (systemUniforms.directionalLightCount > 0u) {
         L = -normalize(systemUniforms.directionalLights[0].direction);
     }
-    let NdotL = clamp(dot(N, L), 0.0, 1.0);
+    let NdotL = dot(N, L);
 
-    let rawVisibility: f32 = getDirectionalShadowVisibility(
-        directionalShadowMap,
-        directionalShadowMapSampler,
-        input_vertexPosition,
-        N,
-        L
-    );
-    let shadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVisibility);
-    var finalShadowVis = shadowVis;
+    var visibility = 1.0;
 
-    if (landscapeInstanceUniforms.heightmapShadow > 0.5 && systemUniforms.directionalLightCount > 0u && L.y > 0.01) {
-        let terrainSelfShadow = computeLandscapeHeightmapShadow(
-            input_vertexPosition,
-            L,
-            landscapeInstanceUniforms.worldSizeX,
-            landscapeInstanceUniforms.worldSizeZ,
-            landscapeInstanceUniforms.vhtTextureSize,
-            landscapeInstanceUniforms.heightScale,
-            landscapeInstanceUniforms.heightmapShadowDistance,
-            landscapeInstanceUniforms.heightmapShadowSteps,
-            landscapeInstanceUniforms.heightmapShadowSoftness
-        );
-        let terrainShadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, terrainSelfShadow);
-        finalShadowVis = min(finalShadowVis, terrainShadowVis);
+    // 🚀 [최적화] 거리 기반 섀도우 도메인 분리 (Distance-Partitioned Shadows)
+    // 근거리(0~400m)는 CSM만 실행하고, 원경(400m~)은 CSM을 100% 스킵하고 Raymarching만 실행하여 중복 48탭 연산 박멸
+    if (receiveShadowYn && NdotL > 0.001) {
+        let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
+        let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
+
+        if (rawViewDist < maxCSMDist) {
+            // 🟢 [근거리: 0 ~ maxCSMDist] CSM 캐스케이드 섀도우 단독 실행
+            let rawVisibility: f32 = getDirectionalShadowVisibility(
+                directionalShadowMap,
+                directionalShadowMapSampler,
+                input_vertexPosition,
+                N,
+                L
+            );
+            let csmVisibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVisibility);
+
+            // CSM 끝단(80% ~ 100%)에서만 원경 Raymarching과 부드러운 크로스페이드 블렌딩
+            let csmBlendStart = maxCSMDist * 0.8;
+            if (rawViewDist > csmBlendStart && landscapeInstanceUniforms.heightmapShadow > 0.5 && L.y > 0.01) {
+                let terrainSelfShadow = computeLandscapeHeightmapShadow(
+                    input_vertexPosition,
+                    L,
+                    landscapeInstanceUniforms.worldSizeX,
+                    landscapeInstanceUniforms.worldSizeZ,
+                    landscapeInstanceUniforms.vhtTextureSize,
+                    landscapeInstanceUniforms.heightScale,
+                    landscapeInstanceUniforms.heightmapShadowDistance,
+                    landscapeInstanceUniforms.heightmapShadowSteps,
+                    landscapeInstanceUniforms.heightmapShadowSoftness
+                );
+                let terrainShadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, terrainSelfShadow);
+                let blendFactor = (rawViewDist - csmBlendStart) / (maxCSMDist - csmBlendStart);
+                visibility = mix(csmVisibility, min(csmVisibility, terrainShadowVis), blendFactor);
+            } else {
+                visibility = csmVisibility;
+            }
+        } else if (landscapeInstanceUniforms.heightmapShadow > 0.5 && L.y > 0.01) {
+            // 🏔️ [원경: maxCSMDist 이상] CSM 16~32탭 완전 생략(0회)! 오직 지형 전용 Heightmap Raymarching만 실행!
+            let terrainSelfShadow = computeLandscapeHeightmapShadow(
+                input_vertexPosition,
+                L,
+                landscapeInstanceUniforms.worldSizeX,
+                landscapeInstanceUniforms.worldSizeZ,
+                landscapeInstanceUniforms.vhtTextureSize,
+                landscapeInstanceUniforms.heightScale,
+                landscapeInstanceUniforms.heightmapShadowDistance,
+                landscapeInstanceUniforms.heightmapShadowSteps,
+                landscapeInstanceUniforms.heightmapShadowSoftness
+            );
+            visibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, terrainSelfShadow);
+        }
     }
-
-    let visibility = select(1.0, finalShadowVis, receiveShadowYn);
 
     let directLighting = getDirectPbrLighting(
         input_vertexPosition,
