@@ -12,6 +12,7 @@ import updateJitter from "./helperFunc/updateJitter";
 import updateViewportAndScissor from "./helperFunc/updateViewportAndScissor";
 import GBUFFER_TYPE from "../display/view/core/GBUFFER_TYPE";
 import renderLandscapeLayer from "./renderLayers/renderLandscapeLayer";
+import renderFoliageLayer from "./renderLayers/renderFoliageLayer";
 
 
 /**
@@ -202,9 +203,13 @@ class Renderer {
                 view.clusterLightManager.updateClusterLights();
             }
             {
-                scene.landscapeChildren.forEach(v => {
-                    v.update(view.camera, renderViewStateData)
-                })
+                const landscapes = scene.landscapeChildren;
+                const lenL = landscapes.length;
+                for (let i = 0; i < lenL; i++) {
+                    const landscape = landscapes[i];
+                    landscape.update(view.camera, renderViewStateData);
+                    landscape.foliageManager?.update(view.camera, renderViewStateData);
+                }
             }
 
             {
@@ -289,6 +294,7 @@ class Renderer {
             if (axis) axis.render(renderViewStateData)
             renderLandscapeLayer(view, viewRenderPassEncoder)
             renderBasicLayer(view, viewRenderPassEncoder)
+            renderFoliageLayer(view, viewRenderPassEncoder)
             if (grid) grid.render(renderViewStateData)
             renderAlphaLayer(view, viewRenderPassEncoder)
         });

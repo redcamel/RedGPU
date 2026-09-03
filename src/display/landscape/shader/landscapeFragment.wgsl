@@ -67,8 +67,13 @@ struct LandscapeUniforms {
     lodMetric: f32,
     lod0Quads: f32,
     receiveShadow: f32,
+    heightmapShadow: f32,
+    heightmapShadowSteps: f32,
+    heightmapShadowDistance: f32,
+    heightmapShadowSoftness: f32,
 };
 
+@group(1) @binding(3) var heightMapTexture: texture_2d<f32>;
 @group(1) @binding(4) var vntNormalTexture: texture_2d<f32>;
 @group(1) @binding(5) var<uniform> landscapeInstanceUniforms: LandscapeUniforms;
 @group(1) @binding(6) var vbtBaseColorAtlasTexture: texture_2d<f32>;
@@ -392,6 +397,57 @@ fn getBayerDither4x4(pixelCoord: vec2<f32>) -> f32 {
     return bayerMatrix4x4[y * 4u + x];
 }
 
+fn computeLandscapeHeightmapShadow(
+    worldPos: vec3<f32>,
+    L: vec3<f32>,
+    worldSizeX: f32,
+    worldSizeZ: f32,
+    vhtTexSize: vec2<f32>,
+    heightScale: f32,
+    maxDistance: f32,
+    stepsF: f32,
+    softness: f32
+) -> f32 {
+    let stepCount = u32(clamp(stepsF, 4.0, 48.0));
+    let fStepCount = f32(stepCount);
+    let minDistance = 15.0;
+    let distRange = max(1.0, maxDistance - minDistance);
+
+    var shadowFactor: f32 = 1.0;
+
+    for (var i = 0u; i < stepCount; i = i + 1u) {
+        let u = (f32(i) + 0.5) / fStepCount;
+        let t = minDistance + distRange * (u * u);
+        let samplePos = worldPos + L * t;
+
+        let uv = vec2<f32>(
+            (samplePos.x + worldSizeX * 0.5) / worldSizeX,
+            (samplePos.z + worldSizeZ * 0.5) / worldSizeZ
+        );
+
+        if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
+            break;
+        }
+
+        let texCoord = vec2<i32>(clamp(uv * vhtTexSize, vec2<f32>(0.0), vhtTexSize - vec2<f32>(1.0)));
+        let terrainHeight = textureLoad(heightMapTexture, texCoord, 0).r * heightScale;
+        let diff = samplePos.y - terrainHeight;
+
+        if (diff < 0.0) {
+            return 0.0;
+        }
+
+        let penumbra = clamp(diff * softness / t, 0.0, 1.0);
+        shadowFactor = min(shadowFactor, penumbra);
+
+        if (shadowFactor <= 0.001) {
+            return 0.0;
+        }
+    }
+
+    return shadowFactor;
+}
+
 @fragment
 fn main(inputData: InputData) -> OutputFragment {
     var output: OutputFragment;
@@ -507,7 +563,25 @@ fn main(inputData: InputData) -> OutputFragment {
         L
     );
     let shadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVisibility);
-    let visibility = select(1.0, shadowVis, receiveShadowYn);
+    var finalShadowVis = shadowVis;
+
+    if (landscapeInstanceUniforms.heightmapShadow > 0.5 && systemUniforms.directionalLightCount > 0u && L.y > 0.01) {
+        let terrainSelfShadow = computeLandscapeHeightmapShadow(
+            input_vertexPosition,
+            L,
+            landscapeInstanceUniforms.worldSizeX,
+            landscapeInstanceUniforms.worldSizeZ,
+            landscapeInstanceUniforms.vhtTextureSize,
+            landscapeInstanceUniforms.heightScale,
+            landscapeInstanceUniforms.heightmapShadowDistance,
+            landscapeInstanceUniforms.heightmapShadowSteps,
+            landscapeInstanceUniforms.heightmapShadowSoftness
+        );
+        let terrainShadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, terrainSelfShadow);
+        finalShadowVis = min(finalShadowVis, terrainShadowVis);
+    }
+
+    let visibility = select(1.0, finalShadowVis, receiveShadowYn);
 
     let directLighting = getDirectPbrLighting(
         input_vertexPosition,

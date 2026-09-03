@@ -40,6 +40,10 @@ export class Landscape extends Object3DContainer {
     #wireframe: boolean = false;
     #castShadow: boolean = true;
     #receiveShadow: boolean = true;
+    #enableHeightmapShadow: boolean = true;
+    #heightmapShadowSteps: number = 16;
+    #heightmapShadowDistance: number = 3000.0;
+    #heightmapShadowSoftness: number = 8.0;
     #lodColoration: boolean = false;
     #lodMetric: 'distance' | 'screenSize' = 'screenSize';
     #lod0SizeQuads: number = 256;
@@ -453,11 +457,6 @@ export class Landscape extends Object3DContainer {
                 }
             }
         }
-
-        if (this.#foliageManager?.hasFoliageTypes) {
-            this.#foliageManager.render(view, renderPassEncoder);
-        }
-
     }
 
     get castShadow(): boolean {
@@ -475,6 +474,50 @@ export class Landscape extends Object3DContainer {
     set receiveShadow(value: boolean) {
         if (this.#receiveShadow !== value) {
             this.#receiveShadow = value;
+            this.#updateLandscapeUniforms();
+        }
+    }
+
+    get enableHeightmapShadow(): boolean {
+        return this.#enableHeightmapShadow;
+    }
+
+    set enableHeightmapShadow(value: boolean) {
+        if (this.#enableHeightmapShadow !== value) {
+            this.#enableHeightmapShadow = value;
+            this.#updateLandscapeUniforms();
+        }
+    }
+
+    get heightmapShadowDistance(): number {
+        return this.#heightmapShadowDistance;
+    }
+
+    set heightmapShadowDistance(value: number) {
+        if (this.#heightmapShadowDistance !== value) {
+            this.#heightmapShadowDistance = Math.max(10.0, value);
+            this.#updateLandscapeUniforms();
+        }
+    }
+
+    get heightmapShadowSteps(): number {
+        return this.#heightmapShadowSteps;
+    }
+
+    set heightmapShadowSteps(value: number) {
+        if (this.#heightmapShadowSteps !== value) {
+            this.#heightmapShadowSteps = Math.max(4, Math.min(64, Math.round(value)));
+            this.#updateLandscapeUniforms();
+        }
+    }
+
+    get heightmapShadowSoftness(): number {
+        return this.#heightmapShadowSoftness;
+    }
+
+    set heightmapShadowSoftness(value: number) {
+        if (this.#heightmapShadowSoftness !== value) {
+            this.#heightmapShadowSoftness = Math.max(0.1, value);
             this.#updateLandscapeUniforms();
         }
     }
@@ -531,10 +574,6 @@ export class Landscape extends Object3DContainer {
                     }
                 }
             }
-        }
-
-        if (this.#foliageManager?.hasFoliageTypes) {
-            this.#foliageManager.renderShadow(view, renderPassEncoder);
         }
     }
 
@@ -626,10 +665,6 @@ export class Landscape extends Object3DContainer {
 
         if (!frustumPlanes && rawCamera?.projectionMatrix && rawCamera?.viewMatrix) {
             frustumPlanes = computeViewFrustumPlanes(rawCamera.projectionMatrix, rawCamera.viewMatrix);
-        }
-
-        if (this.#foliageManager?.hasFoliageTypes) {
-            this.#foliageManager.update(camera, renderViewStateData);
         }
 
         this.#tileStreamer.update(camX, camZ, camY);
@@ -785,7 +820,11 @@ export class Landscape extends Object3DContainer {
             this.#lastTanHalfFOV,
             lodMetricVal,
             this.#lod0SizeQuads,
-            this.#receiveShadow
+            this.#receiveShadow,
+            this.#enableHeightmapShadow,
+            this.#heightmapShadowSteps,
+            this.#heightmapShadowDistance,
+            this.#heightmapShadowSoftness
         );
     }
 

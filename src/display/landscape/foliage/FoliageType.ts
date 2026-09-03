@@ -5,6 +5,7 @@ import FoliageTilePopulator from "./core/populator/FoliageTilePopulator";
 
 import FoliageSubMesh from "./FoliageSubMesh";
 import FoliageMegaBuffer, {FoliageTypeAllocation} from "./core/buffer/FoliageMegaBuffer";
+import validateUintRange from "../../../runtimeChecker/validateFunc/validateUintRange";
 
 export {FoliageSubMesh};
 
@@ -41,6 +42,12 @@ export interface FoliageTypeOptions {
     isFoliage?: boolean;
 
     groundOffset?: number;
+
+    /**
+     * [KO] 그림자를 투영할 최대 캐스케이드 인덱스 (0~3, 기본값: 3). 잔디는 0, 관목은 1, 대형 나무는 2~3 권장.
+     * [EN] Maximum cascade index to cast shadows (0 to 3, default: 3). Recommended: 0 for grass, 1 for shrubs, 2-3 for large trees.
+     */
+    maxShadowCascadeIndex?: number;
 }
 
 class FoliageType {
@@ -58,6 +65,7 @@ class FoliageType {
     #boundingRadius: number = 10.0;
     #nameHash: number = 0;
     #numLODs: number = 1;
+    #maxShadowCascadeIndex: number = 3;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #loadedTileKeys: Set<string> = new Set();
 
@@ -70,6 +78,9 @@ class FoliageType {
         this.#redGPUContext = redGPUContext;
         this.#subMeshVertexBindGroupLayout = sharedSubMeshBindGroupLayout || null;
         this.#megaBuffer = megaBuffer || null;
+        this.#maxShadowCascadeIndex = options.maxShadowCascadeIndex !== undefined
+            ? Math.max(0, Math.min(3, Math.floor(options.maxShadowCascadeIndex)))
+            : 3;
 
         const useImpostor = options.useImpostor !== false;
 
@@ -178,6 +189,23 @@ class FoliageType {
 
     get bottomOffset(): number {
         return this.#bottomOffset;
+    }
+
+    /**
+     * [KO] 그림자를 투영할 최대 캐스케이드 인덱스를 반환합니다 (0~3).
+     * [EN] Returns the maximum cascade index to cast shadows (0 to 3).
+     */
+    get maxShadowCascadeIndex(): number {
+        return this.#maxShadowCascadeIndex;
+    }
+
+    /**
+     * [KO] 그림자를 투영할 최대 캐스케이드 인덱스를 설정합니다 (0~3).
+     * [EN] Sets the maximum cascade index to cast shadows (0 to 3).
+     */
+    set maxShadowCascadeIndex(value: number) {
+        validateUintRange(value, 0, 3);
+        this.#maxShadowCascadeIndex = value;
     }
 
     get culledGPUBuffer(): GPUBuffer | null {

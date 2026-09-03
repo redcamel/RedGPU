@@ -9,6 +9,7 @@ import GPU_LOAD_OP from "../gpuConst/GPU_LOAD_OP";
 import updateViewportAndScissor from "../renderer/helperFunc/updateViewportAndScissor";
 import renderShadowLayer from "../renderer/renderLayers/renderShadowLayer";
 import {renderLandscapeShadowLayer} from "../renderer/renderLayers/renderLandscapeLayer";
+import {renderFoliageShadowLayer} from "../renderer/renderLayers/renderFoliageLayer";
 import keepLog from "../utils/keepLog";
 
 /**
@@ -85,6 +86,7 @@ class ShadowManager {
                 if (this.#directionalShadowManager.castingList.length) {
                     renderShadowLayer(view, viewShadowRenderPassEncoder);
                 }
+                renderFoliageShadowLayer(view, viewShadowRenderPassEncoder);
                 view.currentCascadeIndex = undefined;
             });
         }

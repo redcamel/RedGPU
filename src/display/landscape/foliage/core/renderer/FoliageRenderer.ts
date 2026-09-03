@@ -124,6 +124,7 @@ class FoliageRenderer {
         let validCount = 0;
         for (let t = 0; t < typeCount; t++) {
             const foliageType = typeList[t];
+            if (currentCascade > foliageType.maxShadowCascadeIndex) continue;
             if (foliageType.activeInstanceCount <= 0) continue;
             const culledGPU = foliageType.shadowCulledGPUBuffer;
             const indirectGPU = foliageType.shadowIndirectGPUBuffer;

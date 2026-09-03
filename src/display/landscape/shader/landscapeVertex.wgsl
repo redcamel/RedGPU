@@ -26,6 +26,10 @@ struct LandscapeUniforms {
     lodMetric: f32,
     lod0Quads: f32,
     receiveShadow: f32,
+    heightmapShadow: f32,
+    heightmapShadowSteps: f32,
+    heightmapShadowDistance: f32,
+    heightmapShadowSoftness: f32,
 };
 
 @group(1) @binding(0) var<storage, read> allInputTiles: array<TileInstance>;
