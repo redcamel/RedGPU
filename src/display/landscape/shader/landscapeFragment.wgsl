@@ -629,11 +629,13 @@ fn main(inputData: InputData) -> OutputFragment {
 
     var visibility = 1.0;
 
-    // 🚀 [하이브리드 섀도우 디커플링]
+    // 🚀 [하이브리드 섀도우 디커플링 & 최적화 8.12]
     // 1. 거대 산맥 그림자(Heightmap Raymarching): 카메라 거리와 무관하게 항상 실행하여 골짜기 산그림자 영구 보존
-    // 2. 식생/메시 그림자(CSM): 근거리(0~maxCSMDist)에서만 실행하여 산맥 그림자와 합성, 원경(maxCSMDist~)은 CSM 16~32탭 완전 생략(0ms)
+    // 2. [수학적 100% 무손실 조기 탈락] 이미 산봉우리 그늘 속(terrainSelfShadow <= 0.001)이면 min(CSM, 0) = 0이므로 CSM 16~32탭 완전 생략(0회)!
+    // 3. 식생/메시 그림자(CSM): 산그늘이 아닌 양지 구역의 근거리(0~maxCSMDist)에서만 실행하여 합성
     if (receiveShadowYn && NdotL > 0.001) {
         var terrainShadowVis = 1.0;
+        var isDeepTerrainShadow = false;
         if (landscapeInstanceUniforms.heightmapShadow > 0.5 && L.y > 0.01) {
             let terrainSelfShadow = computeLandscapeHeightmapShadow(
                 input_vertexPosition,
@@ -647,13 +649,15 @@ fn main(inputData: InputData) -> OutputFragment {
                 landscapeInstanceUniforms.heightmapShadowSoftness
             );
             terrainShadowVis = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, terrainSelfShadow);
+            isDeepTerrainShadow = terrainSelfShadow <= 0.001;
         }
 
         let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
         let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
 
-        if (rawViewDist < maxCSMDist) {
-            // 🟢 [근거리: 0 ~ maxCSMDist] 식생/오브젝트 그림자를 CSM에서 읽어 산맥 그림자와 합성
+        // 🌟 [최적화 8.12] 완전한 산그늘 바닥이거나 원경(maxCSMDist 이상)이면 CSM 16~32탭 완전 스킵 (0ms)!
+        if (rawViewDist < maxCSMDist && !isDeepTerrainShadow) {
+            // 🟢 [근거리 양지 구역: 0 ~ maxCSMDist] 식생/오브젝트 그림자를 CSM에서 읽어 산맥 그림자와 합성
             let rawVisibility: f32 = getDirectionalShadowVisibility(
                 directionalShadowMap,
                 directionalShadowMapSampler,
@@ -664,7 +668,7 @@ fn main(inputData: InputData) -> OutputFragment {
             let csmVisibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVisibility);
             visibility = min(csmVisibility, terrainShadowVis);
         } else {
-            // 🏔️ [원경: maxCSMDist 이상] 무거운 CSM 16~32탭 완전 생략(0회)! 오직 산맥 Raymarching만 적용!
+            // 🏔️ [산그늘 속 or 원경] 무거운 CSM 16~32탭 100% 완전 생략(0회)!
             visibility = terrainShadowVis;
         }
     }
