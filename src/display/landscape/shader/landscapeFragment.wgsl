@@ -494,7 +494,7 @@ fn computeLandscapeHeightmapShadow(
     softness: f32
 ) -> f32 {
     let stepCount = u32(clamp(stepsF, 4.0, 48.0));
-    let fStepCount = f32(stepCount);
+    let invStepCount = 1.0 / f32(stepCount);
     let minDistance = 15.0;
     let distRange = max(1.0, maxDistance - minDistance);
 
@@ -506,7 +506,8 @@ fn computeLandscapeHeightmapShadow(
     let uvDir = L.xz * invWorldSize;
 
     for (var i = 0u; i < stepCount; i = i + 1u) {
-        let u = (f32(i) + 0.5) / fStepCount;
+        // 🚀 [최적화 FS-1] 루프 내 나눗셈을 루프 밖 선계산된 invStepCount 곱셈으로 대체 (나눗셈 48회 박멸)
+        let u = (f32(i) + 0.5) * invStepCount;
         let t = minDistance + distRange * (u * u);
         let samplePosY = worldPos.y + L.y * t;
 
