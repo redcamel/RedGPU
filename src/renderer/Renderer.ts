@@ -252,7 +252,8 @@ class Renderer {
                         encoder,
                         currentDepthView,
                         pixelRectObject.width,
-                        pixelRectObject.height
+                        pixelRectObject.height,
+                        view.antialiasingManager.useMSAA
                     );
                 });
             }

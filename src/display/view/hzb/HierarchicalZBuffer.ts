@@ -1,5 +1,6 @@
 import RedGPUContext from "../../../context/RedGPUContext";
 import hzbDownsampleShader from "./hzbDownsample.wgsl";
+import hzbMip0MSAAShader from "./hzbMip0MSAA.wgsl";
 
 /**
  * 🌿 Hierarchical Z-Buffer (HZB) 전역 피라미드 매니저
@@ -18,9 +19,11 @@ class HierarchicalZBuffer {
     #hzbSampler: GPUSampler | null = null;
 
     #pipelineMip0: GPUComputePipeline | null = null;
+    #pipelineMip0MSAA: GPUComputePipeline | null = null;
     #pipelineDownsample: GPUComputePipeline | null = null;
 
     #bglMip0: GPUBindGroupLayout | null = null;
+    #bglMip0MSAA: GPUBindGroupLayout | null = null;
     #bglDownsample: GPUBindGroupLayout | null = null;
 
     #uniformBuffers: GPUBuffer[] = [];
@@ -57,15 +60,17 @@ class HierarchicalZBuffer {
         commandEncoder: GPUCommandEncoder,
         sourceDepthTextureView: GPUTextureView,
         srcWidth: number,
-        srcHeight: number
+        srcHeight: number,
+        isMSAA: boolean = false
     ): void {
-        if (!this.#isInitialized || !this.#pipelineMip0 || !this.#pipelineDownsample) return;
+        if (!this.#isInitialized || !this.#pipelineMip0 || !this.#pipelineMip0MSAA || !this.#pipelineDownsample) return;
         const gpuDevice = this.#redGPUContext.gpuDevice;
 
         // Mip 0 파라미터 업데이트 (해상도 변경 시에만 1회 전송 및 GC 0건 인플레이스 기록)
         if (this.#lastSrcWidth !== srcWidth || this.#lastSrcHeight !== srcHeight) {
             this.#lastSrcWidth = srcWidth;
             this.#lastSrcHeight = srcHeight;
+            this.#bindGroupsMip0.clear();
             const p = this.#cachedMip0Params;
             p[0] = srcWidth;
             p[1] = srcHeight;
@@ -77,9 +82,10 @@ class HierarchicalZBuffer {
         // Mip 0 바인드그룹 조회 또는 생성
         let bgMip0 = this.#bindGroupsMip0.get(sourceDepthTextureView);
         if (!bgMip0) {
+            const layout = isMSAA ? this.#bglMip0MSAA! : this.#bglMip0!;
             bgMip0 = gpuDevice.createBindGroup({
-                label: 'HZB_BindGroup_Mip0_Dynamic',
-                layout: this.#bglMip0!,
+                label: isMSAA ? 'HZB_BindGroup_Mip0_MSAA_Dynamic' : 'HZB_BindGroup_Mip0_Dynamic',
+                layout,
                 entries: [
                     {binding: 0, resource: sourceDepthTextureView},
                     {binding: 1, resource: this.#hzbMipViews[0]},
@@ -94,7 +100,8 @@ class HierarchicalZBuffer {
         });
 
         // 1. Mip 0 생성 (Depth -> HZB Mip 0)
-        pass.setPipeline(this.#pipelineMip0);
+        const pipelineMip0 = isMSAA ? this.#pipelineMip0MSAA : this.#pipelineMip0;
+        pass.setPipeline(pipelineMip0);
         pass.setBindGroup(0, bgMip0);
         pass.dispatchWorkgroups(
             Math.ceil(HierarchicalZBuffer.HZB_WIDTH / 8),
@@ -123,6 +130,12 @@ class HierarchicalZBuffer {
         this.#uniformBuffers.length = 0;
         this.#bindGroupsMip0.clear();
         this.#bindGroupsDownsample.length = 0;
+        this.#pipelineMip0 = null;
+        this.#pipelineMip0MSAA = null;
+        this.#pipelineDownsample = null;
+        this.#bglMip0 = null;
+        this.#bglMip0MSAA = null;
+        this.#bglDownsample = null;
         this.#isInitialized = false;
     }
 
@@ -173,6 +186,11 @@ class HierarchicalZBuffer {
             code: hzbDownsampleShader,
         });
 
+        const shaderModuleMSAA = gpuDevice.createShaderModule({
+            label: 'HierarchicalZBuffer_MSAA_ShaderModule',
+            code: hzbMip0MSAAShader,
+        });
+
         // 4. BindGroupLayouts
         this.#bglMip0 = gpuDevice.createBindGroupLayout({
             label: 'HZB_BGL_Mip0',
@@ -181,6 +199,27 @@ class HierarchicalZBuffer {
                     binding: 0,
                     visibility: GPUShaderStage.COMPUTE,
                     texture: {sampleType: 'depth'},
+                },
+                {
+                    binding: 1,
+                    visibility: GPUShaderStage.COMPUTE,
+                    storageTexture: {access: 'write-only', format: 'r32float'},
+                },
+                {
+                    binding: 2,
+                    visibility: GPUShaderStage.COMPUTE,
+                    buffer: {type: 'uniform'},
+                },
+            ],
+        });
+
+        this.#bglMip0MSAA = gpuDevice.createBindGroupLayout({
+            label: 'HZB_BGL_Mip0_MSAA',
+            entries: [
+                {
+                    binding: 0,
+                    visibility: GPUShaderStage.COMPUTE,
+                    texture: {sampleType: 'depth', multisampled: true},
                 },
                 {
                     binding: 1,
@@ -225,6 +264,17 @@ class HierarchicalZBuffer {
             compute: {
                 module: shaderModule,
                 entryPoint: 'mainMip0',
+            },
+        });
+
+        this.#pipelineMip0MSAA = gpuDevice.createComputePipeline({
+            label: 'HZB_Pipeline_Mip0_MSAA',
+            layout: gpuDevice.createPipelineLayout({
+                bindGroupLayouts: [this.#bglMip0MSAA],
+            }),
+            compute: {
+                module: shaderModuleMSAA,
+                entryPoint: 'mainMip0MSAA',
             },
         });
 
