@@ -49,10 +49,7 @@ RedGPU.init(
 
         // 그림자 설정 (16km 오픈월드 지형 및 대규모 식생에 최적화)
         const directionalShadowManager = scene.shadowManager.directionalShadowManager;
-        directionalShadowManager.maxShadowDistance = 500;
-        directionalShadowManager.shadowDepthTextureSize = 1024;
-        directionalShadowManager.strength = 0.9;
-        directionalShadowManager.bias = 0.00015;
+        directionalShadowManager.maxShadowDistance = 1000;
 
 
 

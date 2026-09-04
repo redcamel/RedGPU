@@ -57,39 +57,11 @@ fn main(inputData: InputData) -> OutputFragment {
 
 @fragment
 fn shadowMain(inputData: InputData) {
-    let ddxUV = dpdx(inputData.uv);
-    let ddyUV = dpdy(inputData.uv);
-    let texColor = textureSample(baseColorTexture, baseColorTextureSampler, inputData.uv);
+    // 🚀 [최적화 & 그림자 복구] 섀도우 패스는 Mip 0 레벨 직접 샘플링으로 밉맵 알파 축소(Thinning)를 원천 차단하고
+    // dpdx/dpdy, log2 초월함수 0건으로 초고속 선명한 잎사귀 실루엣을 깊이 맵에 기록
+    let texColor = textureSampleLevel(baseColorTexture, baseColorTextureSampler, inputData.uv, 0.0);
 
-    // 🚀 [최적화 P3 / Step 4 - 완전 투명 픽셀 즉시 탈출 (연산 0ms)]
-    if (texColor.a <= 0.001) {
+    if (texColor.a <= 0.25) {
         discard;
-    }
-
-    // 🚀 [최적화 P1 / Step 13 - 페이드 디더링 조기 탈락 전진 배치 및 SSBO 로드 차단]
-    let fadeOpacity = inputData.combinedOpacity;
-    if (fadeOpacity < 0.999) {
-        let px = u32(inputData.position.x) & 3u;
-        let py = u32(inputData.position.y) & 3u;
-        let idx = (py << 2u) | px;
-        let packed = select(0x6E4C2A80u, 0x5D7F91B3u, idx >= 8u);
-        let threshold = f32((packed >> ((idx & 7u) * 4u)) & 0xFu) * 0.0625;
-        if (fadeOpacity < threshold) {
-            discard;
-        }
-    }
-
-    let globalFragmentData = globalFragmentSSBO_PBR[inputData.globalFragmentSlotIndex];
-    let baseCutOff = select(0.3333, globalFragmentData.cutOff, globalFragmentData.cutOff > 0.0);
-
-    // 🚀 [최적화 P3 / Step 4 - 완전 불투명 픽셀 lenSq/log2 생략 바이패스]
-    if (texColor.a < baseCutOff) {
-        let lenSq = max(dot(ddxUV, ddxUV), dot(ddyUV, ddyUV));
-        let mipLevel = max(0.0, 0.5 * log2(max(lenSq * 1048576.0, 1.0)));
-        let mipAlphaScale = 1.0 + mipLevel * 0.70;
-        let effectiveAlpha = texColor.a * mipAlphaScale;
-        if (effectiveAlpha <= baseCutOff) {
-            discard;
-        }
     }
 }

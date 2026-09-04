@@ -354,24 +354,7 @@ fn shadowMain(inputData: ShadowInputData) {
     let sDom = sampleOctahedralAtlas(baseColorTexture, baseColorTextureSampler, dominantGrid, uvDom, n, ddxAtlas, ddyAtlas);
 
     let alpha = sDom.a;
-    // 🚀 [최적화 P0 / Step 6] 완전 투명 픽셀(공기) 즉시 탈출 (ALU 0ms)
-    if (alpha < 0.001) {
-        discard;
-    }
-
-    let fadeOpacity = inputData.combinedOpacity;
-    if (fadeOpacity < 0.999) {
-        let px = u32(inputData.position.x) & 3u;
-        let py = u32(inputData.position.y) & 3u;
-        let idx = (py << 2u) | px;
-        let packed = select(0x6E4C2A80u, 0x5D7F91B3u, idx >= 8u);
-        let threshold = f32((packed >> ((idx & 7u) * 4u)) & 0xFu) * 0.0625;
-        if (fadeOpacity < threshold) {
-            discard;
-        }
-    }
-
-    if (alpha <= 0.35) {
+    if (alpha <= 0.20) {
         discard;
     }
 }

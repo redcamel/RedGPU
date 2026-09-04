@@ -117,18 +117,9 @@ fn main(
     let hasInfiniteImpostor = (numLODs > 0u && typeInfo.lods[numLODs - 1u].exitEnd >= 100000.0);
     let effectiveCullingDistSq = select(cullingDistSq, 1000000000000.0, hasInfiniteImpostor);
 
-    // 🚀 [최적화 P1 / Step 17 - 수평 거리 기반 2D 조기 완전 탈락 (Early 2D Rejection)]
-    // distSq = horizontalDistSq + dy^2 >= horizontalDistSq이므로,
-    // 수평 거리만으로 메인 시야 한계와 그림자 최대 한계를 초과한 원거리 40만 개 인스턴스는
-    // 스케일 언패킹, 높이 계산, 바운딩 구체 생성, 프러스텀 평면 검사를 0ms로 전면 스킵!
-    var maxShadowDistSq: f32 = 0.0;
-    if (globalUniforms.activeCascadeCount > 0u) {
-        let lastCas = min(globalUniforms.activeCascadeCount, 4u) - 1u;
-        let sMaxDist = globalUniforms.cascades[lastCas].maxDistance + typeInfo.boundingRadius * 4.0;
-        maxShadowDistSq = sMaxDist * sMaxDist;
-    }
-    let maxUsefulDistSq = max(effectiveCullingDistSq, maxShadowDistSq);
-    let isVisibleRange = isValid && (horizontalDistSq < maxUsefulDistSq);
+    // 🚀 [최적화 & CullingDistance 동기화] 식생 자체가 컬링 거리 밖이면 메인과 그림자 모두 렌더링되지 않으므로
+    // 최대 유효 거리는 식생 유형의 effectiveCullingDistSq로 엄격히 제한
+    let isVisibleRange = isValid && (horizontalDistSq < effectiveCullingDistSq);
 
     var realY = instance.posY - typeInfo.bottomOffset;
     var distSq = horizontalDistSq;
@@ -297,12 +288,12 @@ fn main(
     for (var c: u32 = 0u; c < activeCascades; c = c + 1u) {
         let cascadeMaxDist = globalUniforms.cascades[c].maxDistance;
         let isOverlapCascade = (c < activeCascades - 1u); 
-        let radiusMargin = select(0.0, scaledRadius, isOverlapCascade);
+        let radiusMargin = select(scaledRadius * 2.0, scaledRadius * 4.0, isOverlapCascade);
         let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
         let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
 
-        // 🚀 [최적화 P1 / Step 2] 식생 유형별 최대 그림자 캐스케이드 한도 및 거리 검사
-        if (c <= typeInfo.maxShadowCascadeIndex && globalUniforms.cascades[c].hasShadow != 0u && distSq < shadowEffectiveDistSq) {
+        // 🚀 [최적화 & CullingDistance 동기화] 식생 유형별 최대 그림자 캐스케이드 한도, 캐스케이드 거리 및 cullingDistance 검사
+        if (c <= typeInfo.maxShadowCascadeIndex && globalUniforms.cascades[c].hasShadow != 0u && distSq < shadowEffectiveDistSq && distSq < effectiveCullingDistSq) {
             let cascadeInfo = globalUniforms.cascades[c];
             let inShadowFrustum =
                 dot(spherePos, cascadeInfo.frustumPlanes[0]) >= r &&
@@ -342,11 +333,6 @@ fn main(
                 let cascadeCulledOffset = c * globalUniforms.maxTotalInstances8;
                 let outIdx = cascadeCulledOffset + typeInfo.culledBaseOffset + (targetShadowLOD * typeInfo.maxInstances) + slot;
                 shadowCulledInstanceBuffer[outIdx] = shadowInst;
-
-                let pureCascadeMaxDist = max(cascadeMaxDist - scaledRadius, 0.0);
-                if (distSq < pureCascadeMaxDist * pureCascadeMaxDist) {
-                    break; // 🚀 이전 캐스케이드에 완벽히 수용된 인스턴스는 이후 캐스케이드 평면 검사를 100% 생략하고 즉시 탈출!
-                }
             }
         }
     }
