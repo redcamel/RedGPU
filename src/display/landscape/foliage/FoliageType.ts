@@ -66,6 +66,8 @@ class FoliageType {
     #nameHash: number = 0;
     #numLODs: number = 1;
     #maxShadowCascadeIndex: number = 3;
+    #useImpostor: boolean = true;
+    #impostorSubMesh: FoliageSubMesh | null = null;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
     #loadedTileKeys: Set<number> = new Set();
 
@@ -85,6 +87,7 @@ class FoliageType {
             : 3;
 
         const useImpostor = options.useImpostor !== false;
+        this.#useImpostor = useImpostor;
 
         const minScale: [number, number, number] = options.minScale ? [...options.minScale] : [1.0, 1.0, 1.0];
         const maxScale: [number, number, number] = options.maxScale ? [...options.maxScale] : [1.0, 1.0, 1.0];
@@ -119,9 +122,9 @@ class FoliageType {
         this.#lodInfoList = assembleResult.lodInfoList || [];
         this.#bottomOffset = options.groundOffset !== undefined ? options.groundOffset : (assembleResult.bottomOffset ?? 0);
         this.#boundingRadius = assembleResult.boundingRadius || 10.0;
+        this.#impostorSubMesh = this.#subMeshes.find(s => s.isImpostor) || null;
 
-        const hasImpostor = this.#options.useImpostor !== false;
-        this.#numLODs = this.#lodInfoList.length > 0 ? Math.min(this.#lodInfoList.length, 8) : (hasImpostor ? 2 : 1);
+        this.#numLODs = this.#lodInfoList.length > 0 ? Math.min(this.#lodInfoList.length, 8) : (this.#impostorSubMesh ? 2 : 1);
 
         if (this.#megaBuffer) {
             this.#allocation = this.#megaBuffer.allocateTypeSegment(
@@ -238,6 +241,50 @@ class FoliageType {
         return this.#maxShadowCascadeIndex;
     }
 
+    /**
+     * [KO] 임포스터 사용 여부를 반환합니다. 임포스터 서브메시가 없는 에셋이면 항상 false를 반환합니다.
+     * [EN] Returns whether impostor is enabled. Returns false if the asset has no impostor.
+     */
+    get useImpostor(): boolean {
+        return this.#useImpostor && !!this.#impostorSubMesh;
+    }
+
+    /**
+     * [KO] 임포스터 사용 여부를 설정합니다. 임포스터가 없는 에셋인 경우 변경되지 않습니다.
+     * [EN] Sets whether impostor is enabled. If the asset has no impostor, this has no effect.
+     */
+    set useImpostor(value: boolean) {
+        if (!this.#impostorSubMesh) return;
+        const boolVal = !!value;
+        if (this.#useImpostor !== boolVal) {
+            this.#useImpostor = boolVal;
+            this.#syncTypeParams();
+        }
+    }
+
+    /**
+     * [KO] 3D 메시에서 임포스터로 전환되는 거리를 반환합니다.
+     * [EN] Returns the distance at which 3D mesh transitions to impostor.
+     */
+    get impostorDistance(): number {
+        if (!this.#impostorSubMesh || this.#lodInfoList.length <= 1) return 0;
+        return this.#lodInfoList[this.#lodInfoList.length - 2].lodDistance;
+    }
+
+    /**
+     * [KO] 3D 메시에서 임포스터로 전환되는 거리를 설정합니다.
+     * [EN] Sets the distance at which 3D mesh transitions to impostor.
+     */
+    set impostorDistance(value: number) {
+        if (!this.#impostorSubMesh || this.#lodInfoList.length <= 1) return;
+        const targetIdx = this.#lodInfoList.length - 2;
+        const numVal = Math.max(0, value);
+        if (this.#lodInfoList[targetIdx].lodDistance !== numVal) {
+            (this.#lodInfoList[targetIdx] as any).lodDistance = numVal;
+            this.#syncTypeParams();
+        }
+    }
+
     populateTile(comp: any, landscape?: any, targetCountPerTile?: number): void {
         // 🚀 [최적화 6위 - Zero-GC] `${z}_${x}` 문자열 힙 생성 대신 32비트 정수 비트 패킹 키를 사용하여 힙 할당 0건 달성
         const cz = (comp.componentZ ?? 0) & 0xffff;
@@ -289,17 +336,7 @@ class FoliageType {
         frustumPlanes: number[][] | null,
         fovFactor: number
     ): void {
-        if (this.#megaBuffer && this.#allocation) {
-            this.#megaBuffer.updateTypeParams(
-                this.#allocation,
-                this.#options.cullingDistance ?? 2000.0,
-                this.#options.fadeStartDistance ?? 1500.0,
-                this.#boundingRadius,
-                this.#bottomOffset,
-                this.#lodInfoList,
-                this.#maxShadowCascadeIndex
-            );
-        }
+        this.#syncTypeParams();
     }
 
     setInstanceData(
@@ -347,13 +384,18 @@ class FoliageType {
 
     #syncTypeParams(): void {
         if (this.#megaBuffer && this.#allocation) {
+            const hasImp = !!this.#impostorSubMesh;
+            const effectiveLodList = (!this.#useImpostor && hasImp && this.#lodInfoList.length > 1)
+                ? this.#lodInfoList.slice(0, -1)
+                : this.#lodInfoList;
+
             this.#megaBuffer.updateTypeParams(
                 this.#allocation,
                 this.#options.cullingDistance ?? 2000.0,
                 this.#options.fadeStartDistance ?? 1500.0,
                 this.#boundingRadius,
                 this.#bottomOffset,
-                this.#lodInfoList,
+                effectiveLodList,
                 this.#maxShadowCascadeIndex
             );
         }
