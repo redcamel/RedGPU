@@ -285,6 +285,31 @@ class FoliageType {
         }
     }
 
+    /**
+     * [KO] 특정 LOD 단계의 전환 거리를 반환합니다.
+     * [EN] Returns the transition distance for a specific LOD level.
+     * @param lodIndex LOD 인덱스 (0부터 시작)
+     */
+    getLODDistance(lodIndex: number): number {
+        if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return 0;
+        return this.#lodInfoList[lodIndex].lodDistance;
+    }
+
+    /**
+     * [KO] 특정 LOD 단계의 전환 거리를 설정하고 GPU 버퍼에 즉시 동기화합니다.
+     * [EN] Sets the transition distance for a specific LOD level and syncs to GPU buffer immediately.
+     * @param lodIndex LOD 인덱스 (0부터 시작)
+     * @param distance 전환 거리 (미터)
+     */
+    setLODDistance(lodIndex: number, distance: number): void {
+        if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return;
+        const numVal = Math.max(0, distance);
+        if (this.#lodInfoList[lodIndex].lodDistance !== numVal) {
+            (this.#lodInfoList[lodIndex] as any).lodDistance = numVal;
+            this.#syncTypeParams();
+        }
+    }
+
     populateTile(comp: any, landscape?: any, targetCountPerTile?: number): void {
         // 🚀 [최적화 6위 - Zero-GC] `${z}_${x}` 문자열 힙 생성 대신 32비트 정수 비트 패킹 키를 사용하여 힙 할당 0건 달성
         const cz = (comp.componentZ ?? 0) & 0xffff;
