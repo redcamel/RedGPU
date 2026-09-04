@@ -559,11 +559,11 @@ fn main(inputData: InputData) -> OutputFragment {
     let viewDist = select(rawViewDist, rawViewDist * landscapeInstanceUniforms.tanHalfFOV, isScreenSize);
 
     if (lod < 1.5) {
-        // 🌟 [최적화 8.14 - UE5 표준 150m 실시간 레이어 렌더링 거리 캡핑]
-        // 0m ~ 105m: 100% 4K 실시간 PBR 레이어 (지상 시점 화질 100% 완벽 보존)
-        // 105m ~ 150m: Bayer 4x4 디더링으로 베이킹 텍스처(VBT)와 부드러운 페이드 전환
-        // 150m 이상: 초경량 VBT(베이킹 텍스처) 완전 전환 (고도 150m+ 바닥 시점 텍스처 연산 75% 삭감!)
-        let lod0Dist = min(300.0, max(1.0, sqrt(landscapeInstanceUniforms.lodDistancesSq[0].x)));
+        // 🌟 [최적화 - 125m 골든 밸런스 실시간 PBR 레이어 렌더링 거리 캡핑]
+        // 0m ~ 87.5m: 100% 4K 실시간 PBR 레이어 (지상 시점 화질 100% 완벽 보존)
+        // 87.5m ~ 125m: Bayer 4x4 디더링으로 베이킹 텍스처(VBT)와 부드러운 페이드 전환
+        // 125m 이상: 초경량 VBT(베이킹 텍스처) 완전 전환 (텍스처 샘플링 부하 80%+ 삭감!)
+        let lod0Dist = min(125.0, max(1.0, sqrt(landscapeInstanceUniforms.lodDistancesSq[0].x)));
         let fadeRatio = clamp(select(0.7, landscapeInstanceUniforms.lodFadeStartRatio, landscapeInstanceUniforms.lodFadeStartRatio > 0.0), 0.0, 0.99);
         let fadeStart = lod0Dist * fadeRatio;
         let fadeEnd = lod0Dist;
