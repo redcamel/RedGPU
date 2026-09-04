@@ -335,11 +335,11 @@ class DirectionalShadowManager {
         mat4.lookAt(g_lightRotMat, g_zero, g_lightDir, g_up);
         mat4.invert(g_invLightRotMat, g_lightRotMat);
 
-        // 🌟 1. [언리얼 엔진 5(UE5) 표준 지수 분할: Cascade Distribution Exponent = 3.0]
-        // 최근거리(Cascade 0)는 전체의 ~1.5% (약 3~5m)로 극단적 압축 집중시켜 2048 텍스처 해상도를 몰빵하고,
-        // Cascade 1은 ~12.5%(25m), Cascade 2는 ~42%(85m), Cascade 3은 100%(200m)로 부드럽게 전이
+        // 🌟 1. [언리얼 엔진 5(UE5) 표준 지수 분할: Cascade Distribution Exponent = 2.0]
+        // 근경(Cascade 0)은 약 12.6m까지 충분히 확장하여 캐릭터 및 주변 오브젝트를 완벽히 포괄하고,
+        // Cascade 1은 ~50m, Cascade 2는 ~112.5m, Cascade 3은 200m로 균일하고 부드러운 해상도 전이 제공
         g_cascadeSplits[0] = near;
-        const exponent = 3.0;
+        const exponent = 2.0;
         const range = shadowFar - near;
         for (let i = 1; i <= cascadeCount; i++) {
             const p = i / cascadeCount;

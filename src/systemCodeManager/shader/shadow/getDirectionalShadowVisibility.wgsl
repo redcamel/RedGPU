@@ -23,7 +23,7 @@ const VOGEL_WEIGHTS_16 = array<f32, 16>(
 const TOTAL_VOGEL_WEIGHT: f32 = 10.0;
 
 /**
- * 🌟 [단일 패스 언리얼 엔진 5 표준 안티앨리어싱 가우시안 텐트 PCF]
+ * 🌟 [단일 패스 언리얼 엔진 5 표준 16-Tap 안티앨리어싱 가우시안 텐트 PCF]
  */
 fn sampleModernCascadeShadow(
     directionalShadowMap: texture_depth_2d_array,
@@ -35,49 +35,16 @@ fn sampleModernCascadeShadow(
     lightSize: f32
 ) -> f32 {
     let shadowDepth = clamp(shadowCoord.z, 0.0, 1.0);
-    let cascadeBias = bias * (1.0 + f32(cascadeIndex) * 0.3);
+    let cascadeBias = bias * (1.0 + f32(cascadeIndex) * 0.25);
 
-    // 🌟 [언리얼 엔진 표준 2.8 ~ 3.8 텍셀 안티앨리어싱 반경]
-    // 16개 샘플이 인접 텍셀들을 충분히 가로질러 섀도우 맵의 사각 텍셀 톱니 계단을 100% 매끄럽게 안티앨리어싱
-    let cascadeScale = mix(2.8, 3.8, clamp(f32(cascadeIndex) / 3.0, 0.0, 1.0));
+    // 🌟 [언리얼 엔진 표준 안티앨리어싱 필터 반경]
+    let cascadeScale = mix(2.5, 3.2, clamp(f32(cascadeIndex) / 3.0, 0.0, 1.0));
     let filterRadius = oneOverTextureSize * cascadeScale * max(0.8, lightSize);
 
     var weightedVisibility: f32 = 0.0;
 
-    // 🌟 [최적화 8.13 - UE5 표준 4-Tap Early Bailout]
-    // 첫 4개 샘플(중심 4방향)을 먼저 샘플링하여 완전 양지/음지 여부 고속 판정
-    var earlySum: f32 = 0.0;
-    for (var i = 0; i < 4; i++) {
-        let offset = VOGEL_DISK_16[i] * filterRadius;
-        let tUV = shadowCoord.xy + offset;
-
-        let sampleVisibility = textureSampleCompareLevel(
-            directionalShadowMap,
-            directionalShadowMapSampler,
-            tUV,
-            cascadeIndex,
-            shadowDepth - cascadeBias
-        );
-
-        let outOfBounds = tUV.x < 0.0 || tUV.x > 1.0 || tUV.y < 0.0 || tUV.y > 1.0;
-        let vis = select(sampleVisibility, 1.0, outOfBounds);
-        earlySum += vis;
-        weightedVisibility += vis * VOGEL_WEIGHTS_16[i];
-    }
-
-    // 4개 샘플이 모두 1.0(완전한 햇빛)이면 나머지 12탭 즉시 스킵하고 1.0 반환 (75% 연산 절감!)
-    if (earlySum >= 3.999) {
-        let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
-        return select(1.0, 1.0, invalidDepth);
-    }
-    // 4개 샘플이 모두 0.0(완전한 그림자)이면 나머지 12탭 즉시 스킵하고 0.0 반환 (75% 연산 절감!)
-    if (earlySum <= 0.001) {
-        let invalidDepth = shadowCoord.z < 0.0 || shadowCoord.z > 1.0;
-        return select(0.0, 1.0, invalidDepth);
-    }
-
-    // 그림자 경계선(Penumbra 5% 구역)에서만 나머지 12개 샘플을 전부 돌아 16탭 안티앨리어싱 가동
-    for (var i = 4; i < 16; i++) {
+    // 16-Tap Vogel Spiral 가우시안 텐트 필터링을 조기 탈출 손실 없이 온전히 샘플링하여 부드러운 그러데이션 완성
+    for (var i = 0; i < 16; i++) {
         let offset = VOGEL_DISK_16[i] * filterRadius;
         let tUV = shadowCoord.xy + offset;
 
@@ -117,7 +84,7 @@ fn getDirectionalShadowVisibility(
     L: vec3<f32>
 ) -> f32 {
     let nDotL = dot(N, L);
-    // 🚀 1. 완전 역광(-0.08 미만)은 16탭 샘플링 완전 스킵 (GPU 부하 절감)
+    // 🚀 1. 완전 역광(-0.08 미만)은 샘플링 스킵 (GPU 부하 절감)
     if (nDotL <= -0.08) {
         return 0.0;
     }
@@ -154,8 +121,6 @@ fn getDirectionalShadowVisibility(
     var shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
 
     // 🌟 [화면 모서리 원근 탈출(OOB) 자동 승격 방어망]
-    // 화면 네 귀퉁이(모서리) 등에서 Z 깊이상으로는 현재 캐스케이드이지만, 대각선 원근 확장으로 인해
-    // 현재 캐스케이드 직교 투영 UV 범위를 벗어난 경우, 안전하게 포괄하는 다음 캐스케이드로 자동 승격!
     if ((shadowCoord.x < 0.0 || shadowCoord.x > 1.0 || shadowCoord.y < 0.0 || shadowCoord.y > 1.0) && cascadeIndex < cascadeCount - 1u) {
         cascadeIndex = cascadeIndex + 1u;
         lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
@@ -165,7 +130,6 @@ fn getDirectionalShadowVisibility(
         biasedWorldPosition = worldPosition + normalOffset;
         shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
 
-        // 극단적 광각/초대각선 모서리 대비 2차 가드
         if ((shadowCoord.x < 0.0 || shadowCoord.x > 1.0 || shadowCoord.y < 0.0 || shadowCoord.y > 1.0) && cascadeIndex < cascadeCount - 1u) {
             cascadeIndex = cascadeIndex + 1u;
             lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
@@ -189,16 +153,16 @@ fn getDirectionalShadowVisibility(
 
     var finalVisibility = visibility;
 
-    // 5. 캐스케이드 경계 15% S자 스무스 블렌딩 (전환선 100% 무가시화)
+    // 🌟 5. [언리얼 엔진 5 표준 캐스케이드 전환 블렌딩 (Cascade Transition Fraction = 0.20)]
+    // 전환 구간에 들어선 모든 픽셀에서 다음 캐스케이드를 정확히 샘플링하여 부드러운 S자 크로스페이드 수행
     if (cascadeIndex < cascadeCount - 1u) {
         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
         let splitNear = select(systemUniforms.camera.nearClipping, shadowInfo.cascadeSplitDepths[cascadeIndex - 1u], cascadeIndex > 0u);
         let cascadeRange = splitFar - splitNear;
-        let blendMargin = cascadeRange * 0.15;
+        let blendMargin = cascadeRange * 0.20;
         let blendStart = splitFar - blendMargin;
 
-        // 🌟 [최적화 8.13] 이미 1.0(완전한 햇빛)이거나 0.0(완전한 그림자)이면 다음 캐스케이드 16탭 중복 샘플링을 100% 바이패스!
-        if (viewDepth > blendStart && visibility < 0.999 && visibility > 0.001) {
+        if (viewDepth > blendStart) {
             let nextIndex = cascadeIndex + 1u;
             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
             let nextOrthoScale = length(nextLightVP[0].xyz);
