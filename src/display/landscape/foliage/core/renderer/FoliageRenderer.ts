@@ -178,8 +178,6 @@ class FoliageRenderer {
             const indirectGPU = item.indirectGPU!;
             const subMeshes = foliageType.subMeshes;
             const subCount = subMeshes.length;
-            const lodInfoList = foliageType.lodInfoList;
-            const rawNumLODs = lodInfoList.length;
             for (let s = 0; s < subCount; s++) {
                 const sub = subMeshes[s];
                 if (!sub.canRenderInPass('shadow')) continue;
