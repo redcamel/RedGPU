@@ -172,7 +172,8 @@ fn computeDirectLayersPBR(
 
         res.albedo = mix(baseAlbedo, layerBlendAlbedo, alpha);
 
-        if (length(layerBlendNormal.xy) > 0.001) {
+        // 🚀 [최적화 FS-2] dot 거리 제곱 비교로 sqrt SFU 1회 완전 제거
+        if (dot(layerBlendNormal.xy, layerBlendNormal.xy) > 1e-6) {
             let tangentX = normalize(vec3<f32>(1.0, 0.0, 0.0) - baseN * baseN.x);
             let tangentZ = cross(baseN, tangentX);
             let perturbedWorldN = tangentX * layerBlendNormal.x + tangentZ * layerBlendNormal.y + baseN * layerBlendNormal.z;
