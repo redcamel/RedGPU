@@ -1233,11 +1233,11 @@ fn getIndirectPbrLighting(
             sheenAlbedoScaling = sheenResult.sheenAlbedoScaling;
         }
         #redgpu_endIf
-        let ibl_specular_dielectric = reflectedColor * F_IBL_dielectric_weight * specularOcclusion;
         let ibl_diffuse_dielectric = mix(envIBL_DIFFUSE, envIBL_SPECULAR_BTDF, transmissionParameter);
-        let dielectricPart_IBL = ibl_specular_dielectric + ibl_diffuse_dielectric;
-        let metallicPart_IBL = reflectedColor * F_IBL_metal * specularOcclusion;
-        let baseIndirect = mix(dielectricPart_IBL, metallicPart_IBL, metallicParameter);
+        let F_IBL_final = mix(F_IBL_dielectric_weight, F_IBL_metal, metallicParameter);
+        let ibl_specular = (reflectedColor * specularOcclusion) * F_IBL_final;
+        let ibl_diffuse  = ibl_diffuse_dielectric * (1.0 - metallicParameter);
+        let baseIndirect = ibl_specular + ibl_diffuse;
         var indirectLighting = (baseIndirect * sheenAlbedoScaling + sheenIBLContribution);
         #redgpu_if useKHR_materials_clearcoat
             if (clearcoatParameter > 0.0) {
