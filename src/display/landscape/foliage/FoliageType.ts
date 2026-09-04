@@ -60,6 +60,8 @@ class FoliageType {
     #megaBuffer: FoliageMegaBuffer | null = null;
     #allocation: FoliageTypeAllocation | null = null;
 
+    #cullingDistance: number = 2000.0;
+    #fadeStartDistance: number = 1500.0;
     #activeInstanceCount: number = 0;
     #bottomOffset: number = 0;
     #boundingRadius: number = 10.0;
@@ -88,6 +90,8 @@ class FoliageType {
 
         const useImpostor = options.useImpostor !== false;
         this.#useImpostor = useImpostor;
+        this.#cullingDistance = options.cullingDistance ?? 2000.0;
+        this.#fadeStartDistance = options.fadeStartDistance ?? 1500.0;
 
         const minScale: [number, number, number] = options.minScale ? [...options.minScale] : [1.0, 1.0, 1.0];
         const maxScale: [number, number, number] = options.maxScale ? [...options.maxScale] : [1.0, 1.0, 1.0];
@@ -96,8 +100,8 @@ class FoliageType {
             name: options.name,
             lods: options.lods,
             maxInstances: options.maxInstances ?? 50000,
-            cullingDistance: options.cullingDistance ?? 2000.0,
-            fadeStartDistance: options.fadeStartDistance ?? 1500.0,
+            cullingDistance: this.#cullingDistance,
+            fadeStartDistance: this.#fadeStartDistance,
             minScale,
             maxScale,
             randomRotationY: options.randomRotationY ?? true,
@@ -135,8 +139,8 @@ class FoliageType {
             this.#megaBuffer.registerSubMeshesToTemplate(this.#subMeshes, this.#allocation.indirectBaseOffset);
             this.#megaBuffer.updateTypeParams(
                 this.#allocation,
-                this.#options.cullingDistance ?? 2000.0,
-                this.#options.fadeStartDistance ?? 1500.0,
+                this.#cullingDistance,
+                this.#fadeStartDistance,
                 this.#boundingRadius,
                 this.#bottomOffset,
                 this.#lodInfoList,
@@ -200,23 +204,25 @@ class FoliageType {
     }
 
     get cullingDistance(): number {
-        return this.#options.cullingDistance ?? 2000.0;
+        return this.#cullingDistance;
     }
 
     set cullingDistance(val: number) {
-        if ((this.#options as any).cullingDistance !== val) {
-            (this.#options as any).cullingDistance = val;
+        const numVal = Math.max(0, val);
+        if (this.#cullingDistance !== numVal) {
+            this.#cullingDistance = numVal;
             this.#syncTypeParams();
         }
     }
 
     get fadeStartDistance(): number {
-        return this.#options.fadeStartDistance ?? 1500.0;
+        return this.#fadeStartDistance;
     }
 
     set fadeStartDistance(val: number) {
-        if ((this.#options as any).fadeStartDistance !== val) {
-            (this.#options as any).fadeStartDistance = val;
+        const numVal = Math.max(0, val);
+        if (this.#fadeStartDistance !== numVal) {
+            this.#fadeStartDistance = numVal;
             this.#syncTypeParams();
         }
     }
@@ -416,8 +422,8 @@ class FoliageType {
 
             this.#megaBuffer.updateTypeParams(
                 this.#allocation,
-                this.#options.cullingDistance ?? 2000.0,
-                this.#options.fadeStartDistance ?? 1500.0,
+                this.#cullingDistance,
+                this.#fadeStartDistance,
                 this.#boundingRadius,
                 this.#bottomOffset,
                 effectiveLodList,
