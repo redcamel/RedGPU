@@ -157,9 +157,6 @@ fn main(inputData:InputData) -> OutputFragment {
     let u_opacity = globalFragmentData.opacity;
     let V = getViewDirection(input_vertexPosition, u_cameraPosition);
 
-    // Shadow
-    let receiveShadowYn = inputData.receiveShadow != .0;
-
     // Vertex Normal
     var N = normalize(input_vertexNormal) ;
     #redgpu_if displacementTexture

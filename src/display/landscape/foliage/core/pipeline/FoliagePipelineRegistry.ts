@@ -198,7 +198,7 @@ class FoliagePipelineRegistry {
             fragment: fragmentState,
             primitive: {
                 topology: topology,
-                cullMode: isShadow ? 'back' : cullMode,
+                cullMode: cullMode,
             },
             depthStencil: depthStencil,
             multisample: {

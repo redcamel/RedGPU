@@ -47,15 +47,11 @@ const createBasePipeline = (
     }
     const pipelineLayout: GPUPipelineLayout = resourceManager.createGPUPipelineLayout(`${pipelineLayoutDescriptor.label}`, pipelineLayoutDescriptor);
     // keepLog('pipelineLayout',pipelineLayout)
-    const primitiveState: GPUPrimitiveState = (pipelineType === PIPELINE_TYPE.SHADOW)
-        ? {...mesh.primitiveState.state, cullMode: 'back'}
-        : mesh.primitiveState.state;
-
     const pipelineDescriptor: GPURenderPipelineDescriptor = {
         label: pipelineLabel,
         layout: pipelineLayout,
         vertex: vertexState,
-        primitive: primitiveState,
+        primitive: mesh.primitiveState.state,
     }
     switch (pipelineType) {
         case PIPELINE_TYPE.SHADOW :

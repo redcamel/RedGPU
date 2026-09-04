@@ -123,7 +123,9 @@ class FoliageSubMesh {
 
         let pipeline = modeMap[depthPassMode];
         if (!pipeline) {
-            const cullMode = material.doubleSided ? 'none' : (material.cullMode ?? 'back');
+            // 🌟 [LOD 기반 지능형 식생 컬링] LOD 0은 최고 디테일을 위해 원본 더블사이드를 허용하고, 중/원경(LOD 1 이상)은 무조건 'back' 컬링으로 50% 래스터라이징 가속!
+            const isLOD0 = (this.lodIndex === 0);
+            const cullMode = (isLOD0 && material.doubleSided) ? 'none' : (material.cullMode ?? 'back');
             pipeline = registry.getOrCreatePipeline(
                 material,
                 sampleCount,
