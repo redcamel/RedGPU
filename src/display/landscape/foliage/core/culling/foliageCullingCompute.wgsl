@@ -291,64 +291,66 @@ fn main(
         mainCulledInstanceBuffer[outIdx] = culledInst;
     }
 
+    // 🚀 [최적화 P0 / Step 21 - 비가시 인스턴스 섀도우 루프 진입 원천 차단]
+    if (!isVisibleRange) {
+        return;
+    }
+
     let activeCascades = min(globalUniforms.activeCascadeCount, 4u);
-    var isShadowFinished = false;
 
-    // 🚀 [섀도우 패스 캐스케이드 컬링 및 정확한 인스턴스 할당]
+    // 🚀 [최적화 P0 / Step 22 - 섀도우 캐스케이드 루프 Early Break (평면 내적 18~24회 100% 생략)]
     for (var c: u32 = 0u; c < activeCascades; c = c + 1u) {
-        if (isVisibleRange && !isShadowFinished) {
-            let cascadeMaxDist = globalUniforms.cascades[c].maxDistance;
-            let isOverlapCascade = (c < activeCascades - 1u); 
-            let radiusMargin = select(0.0, scaledRadius, isOverlapCascade);
-            let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
-            let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
+        let cascadeMaxDist = globalUniforms.cascades[c].maxDistance;
+        let isOverlapCascade = (c < activeCascades - 1u); 
+        let radiusMargin = select(0.0, scaledRadius, isOverlapCascade);
+        let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
+        let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
 
-            // 🚀 [최적화 P1 / Step 2] 식생 유형별 최대 그림자 캐스케이드 한도 및 거리 검사
-            if (c <= typeInfo.maxShadowCascadeIndex && globalUniforms.cascades[c].hasShadow != 0u && distSq < shadowEffectiveDistSq) {
-                let cascadeInfo = globalUniforms.cascades[c];
-                let inShadowFrustum =
-                    dot(spherePos, cascadeInfo.frustumPlanes[0]) >= r &&
-                    dot(spherePos, cascadeInfo.frustumPlanes[1]) >= r &&
-                    dot(spherePos, cascadeInfo.frustumPlanes[2]) >= r &&
-                    dot(spherePos, cascadeInfo.frustumPlanes[3]) >= r &&
-                    dot(spherePos, cascadeInfo.frustumPlanes[4]) >= r &&
-                    dot(spherePos, cascadeInfo.frustumPlanes[5]) >= r;
+        // 🚀 [최적화 P1 / Step 2] 식생 유형별 최대 그림자 캐스케이드 한도 및 거리 검사
+        if (c <= typeInfo.maxShadowCascadeIndex && globalUniforms.cascades[c].hasShadow != 0u && distSq < shadowEffectiveDistSq) {
+            let cascadeInfo = globalUniforms.cascades[c];
+            let inShadowFrustum =
+                dot(spherePos, cascadeInfo.frustumPlanes[0]) >= r &&
+                dot(spherePos, cascadeInfo.frustumPlanes[1]) >= r &&
+                dot(spherePos, cascadeInfo.frustumPlanes[2]) >= r &&
+                dot(spherePos, cascadeInfo.frustumPlanes[3]) >= r &&
+                dot(spherePos, cascadeInfo.frustumPlanes[4]) >= r &&
+                dot(spherePos, cascadeInfo.frustumPlanes[5]) >= r;
 
-                if (inShadowFrustum) {
-                    var targetShadowLOD: u32 = 0u;
-                    if (numLODs > 1u) {
-                        let maxShadowLOD = select(numLODs - 1u, max(numLODs - 2u, 0u), hasInfiniteImpostor);
-                        for (var l: u32 = 0u; l <= maxShadowLOD; l = l + 1u) {
-                            let originalLodDist = (typeInfo.lods[l].exitStart + typeInfo.lods[l].exitEnd) * 0.5;
-                            if (effectiveDist <= originalLodDist || l == maxShadowLOD) {
-                                targetShadowLOD = l;
-                                break;
-                            }
+            if (inShadowFrustum) {
+                var targetShadowLOD: u32 = 0u;
+                if (numLODs > 1u) {
+                    let maxShadowLOD = select(numLODs - 1u, max(numLODs - 2u, 0u), hasInfiniteImpostor);
+                    for (var l: u32 = 0u; l <= maxShadowLOD; l = l + 1u) {
+                        let originalLodDist = (typeInfo.lods[l].exitStart + typeInfo.lods[l].exitEnd) * 0.5;
+                        if (effectiveDist <= originalLodDist || l == maxShadowLOD) {
+                            targetShadowLOD = l;
+                            break;
                         }
                     }
+                }
 
-                    let lodInfo = typeInfo.lods[targetShadowLOD];
-                    let cascadeIndirectOffset = c * globalUniforms.maxSubMeshes;
-                    let baseCmdIdx = cascadeIndirectOffset + typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
-                    let slot = atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
+                let lodInfo = typeInfo.lods[targetShadowLOD];
+                let cascadeIndirectOffset = c * globalUniforms.maxSubMeshes;
+                let baseCmdIdx = cascadeIndirectOffset + typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
+                let slot = atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
 
-                    let numSubs = lodInfo.subMeshCount;
-                    for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
-                        atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
-                    }
+                let numSubs = lodInfo.subMeshCount;
+                for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
+                    atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
+                }
 
-                    var shadowInst = instance;
-                    shadowInst.posY = realY;
-                    shadowInst.fadeOrType = 1.0;
+                var shadowInst = instance;
+                shadowInst.posY = realY;
+                shadowInst.fadeOrType = 1.0;
 
-                    let cascadeCulledOffset = c * globalUniforms.maxTotalInstances8;
-                    let outIdx = cascadeCulledOffset + typeInfo.culledBaseOffset + (targetShadowLOD * typeInfo.maxInstances) + slot;
-                    shadowCulledInstanceBuffer[outIdx] = shadowInst;
+                let cascadeCulledOffset = c * globalUniforms.maxTotalInstances8;
+                let outIdx = cascadeCulledOffset + typeInfo.culledBaseOffset + (targetShadowLOD * typeInfo.maxInstances) + slot;
+                shadowCulledInstanceBuffer[outIdx] = shadowInst;
 
-                    let pureCascadeMaxDist = max(cascadeMaxDist - scaledRadius, 0.0);
-                    if (distSq < pureCascadeMaxDist * pureCascadeMaxDist) {
-                        isShadowFinished = true;
-                    }
+                let pureCascadeMaxDist = max(cascadeMaxDist - scaledRadius, 0.0);
+                if (distSq < pureCascadeMaxDist * pureCascadeMaxDist) {
+                    break; // 🚀 이전 캐스케이드에 완벽히 수용된 인스턴스는 이후 캐스케이드 평면 검사를 100% 생략하고 즉시 탈출!
                 }
             }
         }
