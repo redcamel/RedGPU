@@ -137,9 +137,6 @@ fn main(
     var spherePos = vec4<f32>(instance.posX, realY, instance.posZ, 1.0);
     var r: f32 = 0.0;
 
-    var targetLOD: u32 = 99u;
-    var targetAlpha: f32 = 1.0;
-
     if (isVisibleRange) {
         let scaleXZ = unpack2x16float(instance.packedScaleXZ);
         let scaleX = scaleXZ.x;
@@ -225,18 +222,30 @@ fn main(
                 let fadeStartDist = typeInfo.fadeStartDistance;
                 if (dist > fadeStartDist) {
                     // 🚀 [최적화 P1 - Global Fade 역수 사전 계산 테이블화]
-                    // CPU 1회 사전 계산된 invFadeRange를 통해 매 프레임 수십만 회의 fadeRange 계산 및 나눗셈 100% 제거
                     globalFade = clamp(1.0 - (dist - fadeStartDist) * typeInfo.invFadeRange, 0.0, 1.0);
                 }
             }
 
             if (numLODs <= 1u) {
-                targetLOD = 0u;
-                targetAlpha = globalFade;
+                let finalAlpha = globalFade;
+                if (finalAlpha > 0.001) {
+                    let lodInfo = typeInfo.lods[0];
+                    let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
+                    let slot = atomicAdd(&mainIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
+                    let numSubs = lodInfo.subMeshCount;
+                    for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
+                        atomicAdd(&mainIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
+                    }
+                    var culledInst = instance;
+                    culledInst.posY = realY;
+                    culledInst.fadeOrType = finalAlpha;
+                    let outIdx = typeInfo.culledBaseOffset + slot;
+                    mainCulledInstanceBuffer[outIdx] = culledInst;
+                }
             } else {
-                // 🚀 [Zero-Cost 사전 계산 LOD 판정]
-                // enterStart, enterEnd, exitStart, exitEnd, invEnterRange, invExitRange가 CPU에서 1회 사전 계산되어 있으므로,
-                // 매 프레임 400만 번 반복되던 span/fadeRange/나눗셈을 100% 제거하고 O(1) 단순 선형 곱셈으로 즉시 판정!
+                // 🌿 [자연스러운 LOD 크로스페이드 - Dual LOD Emission]
+                // 전환 구간(Transition Band)에 위치한 인스턴스는 이전 LOD(Fade Out)와 다음 LOD(Fade In)
+                // 양쪽 Indirect Draw 명령 버퍼에 동시에 등록되어 4x4 Bayer Matrix 디더링으로 완벽한 모핑 크로스페이드 실현!
                 for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
                     let lodInfo = typeInfo.lods[l];
                     let isLastLOD = (l == numLODs - 1u);
@@ -249,31 +258,32 @@ fn main(
                             alpha = clamp((lodInfo.exitEnd - effectiveDist) * lodInfo.invExitRange, 0.0, 1.0);
                         }
 
-                        targetLOD = l;
-                        targetAlpha = alpha * globalFade;
-                        break;
+                        let finalAlpha = alpha * globalFade;
+                        if (finalAlpha > 0.001) {
+                            let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
+                            let slot = atomicAdd(&mainIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
+
+                            let numSubs = lodInfo.subMeshCount;
+                            for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
+                                atomicAdd(&mainIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
+                            }
+
+                            var culledInst = instance;
+                            culledInst.posY = realY;
+                            culledInst.fadeOrType = finalAlpha;
+
+                            let outIdx = typeInfo.culledBaseOffset + (l * typeInfo.maxInstances) + slot;
+                            mainCulledInstanceBuffer[outIdx] = culledInst;
+                        }
+
+                        // 🚀 [비전환 구간 조기 탈출] 완전 불투명(alpha >= 0.999) 상태인 인스턴스는 단일 LOD 등록 후 즉시 루프 탈출
+                        if (alpha >= 0.999 && !isLastLOD && effectiveDist < lodInfo.exitStart) {
+                            break;
+                        }
                     }
                 }
             }
         }
-    }
-
-    if (targetLOD < 8u) {
-        let lodInfo = typeInfo.lods[targetLOD];
-        let baseCmdIdx = typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
-        let slot = atomicAdd(&mainIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
-
-        let numSubs = lodInfo.subMeshCount;
-        for (var s: u32 = 1u; s < numSubs; s = s + 1u) {
-            atomicAdd(&mainIndirectDrawCommands[baseCmdIdx + s].instanceCount, 1u);
-        }
-
-        var culledInst = instance;
-        culledInst.posY = realY;
-        culledInst.fadeOrType = targetAlpha;
-
-        let outIdx = typeInfo.culledBaseOffset + (targetLOD * typeInfo.maxInstances) + slot;
-        mainCulledInstanceBuffer[outIdx] = culledInst;
     }
 
     // 🚀 [최적화 P0 / Step 21 - 비가시 인스턴스 섀도우 루프 진입 원천 차단]
