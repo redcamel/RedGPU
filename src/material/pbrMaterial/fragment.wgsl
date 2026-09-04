@@ -1177,8 +1177,12 @@ fn getIndirectPbrLighting(
         let F_IBL_metal      = FR_metal * envBRDF.x + envBRDF.y;
         let F_IBL_dielectric_weight = F_IBL_dielectric * specularParameter;
 
-        // [EN] More robust specular occlusion to prevent light leaking/artifacts at grazing angles.
-        let specularOcclusion = saturate(pow(NdotV_IBL + occlusionParameter, exp2(-16.0 * roughnessParameter - 1.0)) - 1.0 + occlusionParameter);
+        // 🚀 [U3 최적화] Specular Occlusion: AO 미적용(1.0) 시 수학적 항등식(1.0)으로 이중 초월함수(exp2+pow) 100% 바이패스
+        var specularOcclusion = 1.0;
+        if (occlusionParameter < 0.999) {
+            let expTerm = exp2(-16.0 * roughnessParameter - 1.0);
+            specularOcclusion = saturate(pow(NdotV_IBL + occlusionParameter, expTerm) - 1.0 + occlusionParameter);
+        }
 
         let specularAlbedo_IBL = saturate(F0_dielectric * envBRDF.x + envBRDF.y);
         let diffuseWeight_IBL = (vec3<f32>(1.0) - specularAlbedo_IBL * specularParameter);
