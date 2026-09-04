@@ -478,20 +478,57 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                 if (srcBmpTexture && srcBmpTexture.gpuTexture) {
                     try {
                         const srcTex: GPUTexture = srcBmpTexture.gpuTexture;
-                        const copyW = Math.min(texSize, srcBmpTexture.width || texSize);
-                        const copyH = Math.min(texSize, srcBmpTexture.height || texSize);
+                        const isSameSize = (srcTex.width === texSize && srcTex.height === texSize);
 
-                        const commandEncoder = device.createCommandEncoder({label: `Landscape_LayerCopy_${sliceIndex}_${textureType}`});
-                        commandEncoder.copyTextureToTexture(
-                            {texture: srcTex, mipLevel: 0, origin: [0, 0, 0]},
-                            {texture: dstTexture, mipLevel: 0, origin: [0, 0, sliceIndex]},
-                            [copyW, copyH, 1]
-                        );
-                        device.queue.submit([commandEncoder.finish()]);
+                        if (isSameSize) {
+                            const commandEncoder = device.createCommandEncoder({label: `Landscape_LayerCopy_${sliceIndex}_${textureType}`});
+                            commandEncoder.copyTextureToTexture(
+                                {texture: srcTex, mipLevel: 0, origin: [0, 0, 0]},
+                                {texture: dstTexture, mipLevel: 0, origin: [0, 0, sliceIndex]},
+                                [texSize, texSize, 1]
+                            );
+                            device.queue.submit([commandEncoder.finish()]);
+                        } else {
+                            const mipmapGenerator = this.redGPUContext.resourceManager.mipmapGenerator;
+                            const pipeline = mipmapGenerator.getMipmapPipeline(dstTexture.format);
+                            const srcView = srcTex.createView({
+                                baseMipLevel: 0,
+                                mipLevelCount: 1,
+                                dimension: '2d',
+                                baseArrayLayer: 0,
+                                arrayLayerCount: 1,
+                                label: `Landscape_LayerSrcView_${srcTex.label || textureType}`
+                            });
+                            const dstView = dstTexture.createView({
+                                baseMipLevel: 0,
+                                mipLevelCount: 1,
+                                dimension: '2d',
+                                baseArrayLayer: sliceIndex,
+                                arrayLayerCount: 1,
+                                label: `Landscape_LayerDstSliceView_${sliceIndex}_${textureType}`
+                            });
+                            const bindGroup = mipmapGenerator.createBindGroup(srcTex, srcView);
+
+                            const commandEncoder = device.createCommandEncoder({label: `Landscape_LayerBlit_${sliceIndex}_${textureType}`});
+                            const passEncoder = commandEncoder.beginRenderPass({
+                                colorAttachments: [{
+                                    view: dstView,
+                                    loadOp: 'clear',
+                                    storeOp: 'store',
+                                    clearValue: {r: 0, g: 0, b: 0, a: 1}
+                                }]
+                            });
+                            passEncoder.setPipeline(pipeline);
+                            passEncoder.setBindGroup(0, bindGroup);
+                            passEncoder.draw(3);
+                            passEncoder.end();
+                            device.queue.submit([commandEncoder.finish()]);
+                        }
+
                         this.#updateLayerMipmaps();
                         this.requestVBTRebake();
                     } catch (e) {
-                        console.warn(`[LandscapeMaterial] ⚠️ Texture slice copy failed, applying fallback color [${fallbackColor.join(', ')}]:`, {
+                        console.warn(`[LandscapeMaterial] ⚠️ Texture slice copy/blit failed, applying fallback color [${fallbackColor.join(', ')}]:`, {
                             layer: layer.name,
                             sliceIndex,
                             textureType,
