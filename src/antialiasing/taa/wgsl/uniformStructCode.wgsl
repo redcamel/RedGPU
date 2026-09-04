@@ -163,8 +163,10 @@ fn sample_texture_catmull_rom_antiflicker(tex: texture_2d<f32>, smp: sampler, uv
 }
 
 fn clip_history_ycocg(historyYCoCg: vec3<f32>, stats: NeighborhoodStats, motion: f32) -> vec3<f32> {
-    let gamma = mix(0.2, 0.7, motion);
-    let v_min = min(stats.minColor, stats.mean - stats.stdDev * gamma);
-    let v_max = max(stats.maxColor, stats.mean + stats.stdDev * gamma);
+    // [KO] 언리얼 엔진 / Playdead 표준 Variance Clipping 교집합 박스 (떨림 완전 억제)
+    // [EN] Unreal Engine / Playdead standard Variance Clipping intersection box (Eliminates shimmering)
+    let gamma = mix(1.0, 1.75, motion);
+    let v_min = max(stats.minColor, stats.mean - stats.stdDev * gamma);
+    let v_max = min(stats.maxColor, stats.mean + stats.stdDev * gamma);
     return clamp(historyYCoCg, v_min, v_max);
 }

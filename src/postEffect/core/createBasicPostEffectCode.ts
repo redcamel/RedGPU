@@ -59,6 +59,9 @@ const createCode = (
         @compute @workgroup_size(${WORK_SIZE_X}, ${WORK_SIZE_Y}, ${WORK_SIZE_Z})
         fn main(
           @builtin(global_invocation_id) global_id : vec3<u32>,
+          @builtin(local_invocation_id) local_id : vec3<u32>,
+          @builtin(local_invocation_index) local_invocation_index : u32,
+          @builtin(workgroup_id) workgroup_id : vec3<u32>,
         ) {
           ${code}
         }

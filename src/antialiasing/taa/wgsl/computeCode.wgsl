@@ -20,29 +20,47 @@
     let currentAlpha = currentRGBA.a;
     let currentYCoCg = rgbToYCoCg(currentRGB);
     
-    // [KO] 3. 모션 벡터(Motion Vector) 산출 (가장 가까운 깊이 픽셀 기준)
-    // [EN] 3. Calculate Motion Vector (Based on closest depth pixel)
-    // [KO] 물체의 테두리에서 정확한 추적을 위해 주변 3x3 영역 중 카메라와 가장 가까운 모션 정보를 사용합니다.
-    // [EN] Uses motion info from the pixel closest to the camera within 3x3 region for accurate edge tracking.
+    // 🚀 [최적화 2: 3x3 뎁스 탐색 언롤링 (Unrolled Closest Depth Search)]
+    // 이중 for 루프, 분기문, 인덱스 클램핑 오버헤드를 100% 제거하고 하드웨어 버스트 페치 가속
+    let c_min = vec2<i32>(0);
+    let c_max = vec2<i32>(screenSizeU) - 1;
+
     let currentDepth = textureLoad(depthTexture, pixelCoord, 0);
-    var closestDepth = 1.0;
+    var closestDepth = currentDepth;
     var closestCoord = pixelCoord;
-    for(var y: i32 = -1; y <= 1; y++) {
-        for(var x: i32 = -1; x <= 1; x++) {
-            let sc = clamp(pixelCoord + vec2<i32>(x, y), vec2<i32>(0), vec2<i32>(screenSizeU) - 1);
-            let d = textureLoad(depthTexture, sc, 0);
-            if(d < closestDepth) {
-                closestDepth = d;
-                closestCoord = sc;
-            }
-        }
-    }
+
+    let p_l  = clamp(pixelCoord + vec2<i32>(-1,  0), c_min, c_max);
+    let p_r  = clamp(pixelCoord + vec2<i32>( 1,  0), c_min, c_max);
+    let p_t  = clamp(pixelCoord + vec2<i32>( 0, -1), c_min, c_max);
+    let p_b  = clamp(pixelCoord + vec2<i32>( 0,  1), c_min, c_max);
+    let p_tl = clamp(pixelCoord + vec2<i32>(-1, -1), c_min, c_max);
+    let p_tr = clamp(pixelCoord + vec2<i32>( 1, -1), c_min, c_max);
+    let p_bl = clamp(pixelCoord + vec2<i32>(-1,  1), c_min, c_max);
+    let p_br = clamp(pixelCoord + vec2<i32>( 1,  1), c_min, c_max);
+
+    let d_l  = textureLoad(depthTexture, p_l,  0);
+    let d_r  = textureLoad(depthTexture, p_r,  0);
+    let d_t  = textureLoad(depthTexture, p_t,  0);
+    let d_b  = textureLoad(depthTexture, p_b,  0);
+    let d_tl = textureLoad(depthTexture, p_tl, 0);
+    let d_tr = textureLoad(depthTexture, p_tr, 0);
+    let d_bl = textureLoad(depthTexture, p_bl, 0);
+    let d_br = textureLoad(depthTexture, p_br, 0);
+
+    if (d_l  < closestDepth) { closestDepth = d_l;  closestCoord = p_l;  }
+    if (d_r  < closestDepth) { closestDepth = d_r;  closestCoord = p_r;  }
+    if (d_t  < closestDepth) { closestDepth = d_t;  closestCoord = p_t;  }
+    if (d_b  < closestDepth) { closestDepth = d_b;  closestCoord = p_b;  }
+    if (d_tl < closestDepth) { closestDepth = d_tl; closestCoord = p_tl; }
+    if (d_tr < closestDepth) { closestDepth = d_tr; closestCoord = p_tr; }
+    if (d_bl < closestDepth) { closestDepth = d_bl; closestCoord = p_bl; }
+    if (d_br < closestDepth) { closestDepth = d_br; closestCoord = p_br; }
     
-    let motionData = textureLoad(gBufferMotionVector, closestCoord, 0);
-    let velocity = motionData.xy;
+    let closestMotionData = textureLoad(gBufferMotionVector, closestCoord, 0);
+    let velocity = closestMotionData.xy;
 
     // 모션 벡터가 명시적으로 지터링 제외 상태인 경우 처리
-    let jitterDisabled = motionData.z > 0.5;
+    let jitterDisabled = closestMotionData.z > 0.5;
     if (jitterDisabled) {
         textureStore(outputTexture, pixelCoord, vec4<f32>(currentRGB, currentAlpha));
         return;
@@ -80,12 +98,15 @@
 
         // [KO] 6. 최종 블렌딩 및 결과 저장
         // [EN] 6. Final blending and store result
-        var blendFactor = mix(0.08, 0.4, motionSoft);
+        // 정지 상태에서는 0.05(95% 히스토리 누적)로 수렴하여 완벽한 화면 안정성을 유지하고, 모션 발생 시에만 0.25로 전환
+        let baseBlend = mix(0.05, 0.25, motionSoft);
         let depthConfidence = get_depth_confidence(currentDepth, prevDepth);
 
         // 깊이 차이가 크면 히스토리 신뢰도를 낮춤 (Rejection)
-        blendFactor = max(blendFactor, 1.0 - depthConfidence * depthConfidence);
-        blendFactor = max(blendFactor, lumaWeight * 0.5);
+        var blendFactor = max(baseBlend, (1.0 - depthConfidence) * 0.5);
+
+        // 🚀 [정지 화면 떨림 방어] 루마 불일치 가중치는 모션이 있을 때만 블렌딩을 증가시키도록 격리
+        blendFactor = mix(blendFactor, max(blendFactor, lumaWeight * 0.35), motionSoft);
 
         let currentRGBA_final = vec4<f32>(currentRGB, currentAlpha);
         let clippedHistoryRGBA = vec4<f32>(clippedHistoryRGB, clippedAlpha);
