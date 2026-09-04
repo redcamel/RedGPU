@@ -84,18 +84,12 @@ fn mainInput(input : VertexInput) -> OutputData {
 
     let isImpostor = (input.vertexTangent.w < -500.0);
     if (isImpostor) {
-        let camRight = vec3<f32>(
-            systemUniforms.camera.viewMatrix[0][0],
-            systemUniforms.camera.viewMatrix[1][0],
-            systemUniforms.camera.viewMatrix[2][0]
-        );
-        var billboardRight = vec3<f32>(camRight.x, 0.0, camRight.z);
-        let rightLenSq = dot(billboardRight, billboardRight);
-        if (rightLenSq > 0.0001) {
-            billboardRight = billboardRight * inverseSqrt(rightLenSq);
-        } else {
-            billboardRight = vec3<f32>(1.0, 0.0, 0.0);
-        }
+        // 🚀 [최적화 P1 / Step 4 - 빌보드 직교 축 O(1) 도출 및 중복 정규화 제거]
+        // 카메라 Right의 수평 성분(XZ)을 1회 정규화하고, 법선(Normal)은 XZ 90도 직교 벡터로 0 사이클 도출하여
+        // 매 버텍스마다 반복되던 2번째 viewMatrix 읽기, dot, inverseSqrt, 분기 연산 100% 완전 제거!
+        let rightXZ = vec2<f32>(systemUniforms.camera.viewMatrix[0][0], systemUniforms.camera.viewMatrix[2][0]);
+        let rightLenSq = dot(rightXZ, rightXZ);
+        let billboardRight = select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(rightXZ.x, 0.0, rightXZ.y) * inverseSqrt(rightLenSq), rightLenSq > 0.0001);
         let billboardUp = vec3<f32>(0.0, 1.0, 0.0);
 
         let centerYLocal = hierarchyPos.z;
@@ -104,18 +98,7 @@ fn mainInput(input : VertexInput) -> OutputData {
 
         let impostorOffset = billboardRight * (hierarchyPos.x * safeScale.x) + billboardUp * (hierarchyPos.y * safeScale.y);
         worldPos = treeCenter + impostorOffset;
-
-        var billboardNormal = vec3<f32>(
-            -systemUniforms.camera.viewMatrix[0][2],
-            0.0,
-            -systemUniforms.camera.viewMatrix[2][2]
-        );
-        let normLenSq = dot(billboardNormal, billboardNormal);
-        if (normLenSq > 0.0001) {
-            worldNormal = billboardNormal * inverseSqrt(normLenSq);
-        } else {
-            worldNormal = vec3<f32>(0.0, 0.0, 1.0);
-        }
+        worldNormal = vec3<f32>(-billboardRight.z, 0.0, billboardRight.x);
 
         let invQuat = vec4<f32>(-instanceRotQuat.xyz, instanceRotQuat.w);
         let localView = normalize(rotateVectorByQuaternion(toCam, invQuat));
@@ -202,24 +185,17 @@ fn entryPointShadowVertex(input : VertexInput) -> FoliageShadowOutput {
 
     let isImpostor = (input.vertexTangent.w < -500.0);
     if (isImpostor) {
-        var lightRight = vec3<f32>(1.0, 0.0, 0.0);
+        // 🚀 [최적화 P1 / Step 4 - 섀도우 빌보드 단일 정규화 통합]
+        var billboardRight = vec3<f32>(1.0, 0.0, 0.0);
         var lightForward = vec3<f32>(0.0, 0.0, 1.0);
         if (systemUniforms.directionalLightCount > 0u) {
             let lightDir = -normalize(systemUniforms.directionalLights[0].direction);
             let crossUp = cross(vec3<f32>(0.0, 1.0, 0.0), lightDir);
             let crossLenSq = dot(crossUp, crossUp);
             if (crossLenSq > 0.0001) {
-                lightRight = crossUp * inverseSqrt(crossLenSq);
+                billboardRight = crossUp * inverseSqrt(crossLenSq);
             }
             lightForward = lightDir;
-        }
-
-        var billboardRight = vec3<f32>(lightRight.x, 0.0, lightRight.z);
-        let rightLenSq = dot(billboardRight, billboardRight);
-        if (rightLenSq > 0.0001) {
-            billboardRight = billboardRight * inverseSqrt(rightLenSq);
-        } else {
-            billboardRight = vec3<f32>(1.0, 0.0, 0.0);
         }
         let billboardUp = vec3<f32>(0.0, 1.0, 0.0);
 
