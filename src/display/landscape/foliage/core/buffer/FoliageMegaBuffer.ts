@@ -473,10 +473,12 @@ class FoliageMegaBuffer {
         u32[baseOffset + 6] = allocation.culledBaseOffset;
         u32[baseOffset + 7] = allocation.indirectBaseOffset;
 
+        const fadeRange = Math.max(cullingDistance - fadeStartDistance, 1.0);
         u32[baseOffset + 8] = allocation.rawBaseOffset;
         u32[baseOffset + 9] = allocation.activeCount;
         u32[baseOffset + 10] = maxShadowCascadeIndex;
-        u32[baseOffset + 11] = 0;
+        // 🚀 [최적화 P1 - Global Fade 역수 사전 계산] CPU 1회 계산 후 매 프레임 GPU 나눗셈 50만 회 제거
+        f32[baseOffset + 11] = 1.0 / fadeRange;
 
         for (let l = 0; l < 8; l++) {
             const lodBase = baseOffset + 12 + l * 8;

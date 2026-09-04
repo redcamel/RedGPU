@@ -21,7 +21,7 @@ struct FoliageTypeParam {
     rawBaseOffset: u32,
     activeCount: u32,
     maxShadowCascadeIndex: u32,
-    pad1: u32,
+    invFadeRange: f32,
     lods: array<FoliageLODUniformInfo, 8>,
 };
 
@@ -240,8 +240,9 @@ fn main(
             if (!hasInfiniteImpostor) {
                 let fadeStartDist = typeInfo.fadeStartDistance;
                 if (dist > fadeStartDist) {
-                    let fadeRange = max(cullingDist - fadeStartDist, 1.0);
-                    globalFade = clamp(1.0 - (dist - fadeStartDist) / fadeRange, 0.0, 1.0);
+                    // 🚀 [최적화 P1 - Global Fade 역수 사전 계산 테이블화]
+                    // CPU 1회 사전 계산된 invFadeRange를 통해 매 프레임 수십만 회의 fadeRange 계산 및 나눗셈 100% 제거
+                    globalFade = clamp(1.0 - (dist - fadeStartDist) * typeInfo.invFadeRange, 0.0, 1.0);
                 }
             }
 
