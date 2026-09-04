@@ -123,7 +123,7 @@ class FoliageSubMesh {
 
         let pipeline = modeMap[depthPassMode];
         if (!pipeline) {
-            const cullMode = material.doubleSided ? 'none' : (material.cullMode ?? 'none');
+            const cullMode = material.doubleSided ? 'none' : (material.cullMode ?? 'back');
             pipeline = registry.getOrCreatePipeline(
                 material,
                 sampleCount,
