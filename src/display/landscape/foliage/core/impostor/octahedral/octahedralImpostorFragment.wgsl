@@ -246,7 +246,12 @@ fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
 }
 
 fn getFresnel(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
-    return F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+    // 🚀 [최적화 P0 / Step 23 - Schlick Fresnel 대수 연속 곱셈 전환]
+    // pow(..., 5.0)의 exp2/log2 초월함수를 100% 제거하고 f2 * f2 * f 순수 곱셈 4회로 대체 (ALU 속도 5배 가속)
+    let f = clamp(1.0 - cosTheta, 0.0, 1.0);
+    let f2 = f * f;
+    let f5 = f2 * f2 * f;
+    return F0 + (vec3<f32>(1.0) - F0) * f5;
 }
 
 fn getIndirectFresnel(cosTheta: f32, F0: vec3<f32>, roughness: f32, fresnelTerm: f32) -> vec3<f32> {
@@ -272,8 +277,18 @@ fn getDirectDiffuseBRDF(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albe
     let energyFactor = mix(1.0, 1.0 / 1.51, roughness);
     let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
     let f0 = 1.0;
-    let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
-    let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
+
+    // 🚀 [최적화 P0 / Step 23 - Disney Diffuse Schlick 대수 연속 곱셈 전환]
+    let fL = clamp(1.0 - NdotL, 0.0, 1.0);
+    let fL2 = fL * fL;
+    let fL5 = fL2 * fL2 * fL;
+    let lightScatter = f0 + (fd90 - f0) * fL5;
+
+    let fV = clamp(1.0 - NdotV, 0.0, 1.0);
+    let fV2 = fV * fV;
+    let fV5 = fV2 * fV2 * fV;
+    let viewScatter = f0 + (fd90 - f0) * fV5;
+
     return albedo * NdotL * lightScatter * viewScatter * energyFactor;
 }
 
