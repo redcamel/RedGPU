@@ -554,15 +554,22 @@ fn main(inputData: InputData) -> OutputFragment {
     var roughnessFactor: f32;
     var ambientOcclusion: f32;
 
+    let baseN = getBaseNormal(globalUV);
+    let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
     let rawViewDist = distance(u_cameraPosition, input_vertexPosition);
 
     var isDirectPBR = false;
     if (lod < 0.5) {
-        // 🚀 [최적화] 거리 계산 및 디더링 판별을 오직 LOD 0 타일 내부에서만 수행!
+        // 🚀 [최적화 - 50m 초경량 + 시선 각도(N·V) 단축 원근법 동적 거리 보정]
+        // - 정면 절벽/언덕(N·V ≈ 1.0): 50m까지 4K PBR 디테일 100% 유지 (35m부터 페이드)
+        // - 비스듬한 바닥/평지(N·V ≈ 0.2~0.35): 12.2m~17.5m에서 조기 전환 (평지 시점 연산량 84%+ 격감!)
         let isScreenSize = landscapeInstanceUniforms.lodMetric >= 0.5;
         let viewDist = select(rawViewDist, rawViewDist * landscapeInstanceUniforms.tanHalfFOV, isScreenSize);
 
-        let lod0Dist = min(125.0, max(1.0, sqrt(landscapeInstanceUniforms.lodDistancesSq[0].x)));
+        let NdotV_angle = max(abs(dot(baseN, V)), 0.04);
+        let angleFactor = clamp(NdotV_angle, 0.35, 1.0);
+
+        let lod0Dist = min(50.0, max(1.0, sqrt(landscapeInstanceUniforms.lodDistancesSq[0].x))) * angleFactor;
         let fadeRatio = clamp(select(0.7, landscapeInstanceUniforms.lodFadeStartRatio, landscapeInstanceUniforms.lodFadeStartRatio > 0.0), 0.0, 0.99);
         let fade = smoothstep(lod0Dist * fadeRatio, lod0Dist, viewDist);
         let ditherThreshold = getBayerDither4x4(inputData.position.xy);
@@ -570,17 +577,16 @@ fn main(inputData: InputData) -> OutputFragment {
     }
 
     if (isDirectPBR) {
-        // 🌿 [LOD 0 근거리 0m~87.5m] 100% 실시간 4K 멀티 레이어 PBR
-        let baseN = getBaseNormal(globalUV);
+        // 🌿 [LOD 0 근거리] 100% 실시간 4K 멀티 레이어 PBR
         let direct = computeDirectLayersPBR(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV, baseN);
         albedo = direct.albedo;
         N = direct.normal;
         roughnessFactor = direct.roughness;
         ambientOcclusion = direct.ao;
     } else {
-        // 🏔️ [LOD 1~7 전체 및 LOD 0의 125m+ 원경] 텍스처 2~3장 초경량 렌더링으로 단일화!
+        // 🏔️ [중/원경 및 LOD 0 평지 조기 전환 구간] 텍스처 2~3장 초경량 렌더링으로 단일화!
         albedo = computeDistantLayersAlbedo(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV);
-        N = getBaseNormal(globalUV);
+        N = baseN;
         roughnessFactor = 0.85;
         ambientOcclusion = 1.0;
     }
@@ -589,7 +595,6 @@ fn main(inputData: InputData) -> OutputFragment {
         albedo = mix(albedo, inputData.instanceColor.rgb, 0.6);
     }
 
-    let V: vec3<f32> = getViewDirection(input_vertexPosition, u_cameraPosition);
     let NdotV = max(abs(dot(N, V)), 0.04);
     let roughnessParameter = max(roughnessFactor, 0.04);
 
