@@ -71,23 +71,9 @@ class FoliageTilePopulator {
             const scaleY = minScale[1] + rScale * scaleDiffY;
             const scaleZ = minScale[2] + rScale * scaleDiffZ;
 
-            // 🌟 [최적화 P4 / Step 5] 스폰 시점에 지형 고도 및 경사도 침하(slopeSink)를 1회 계산하여 기준 높이(posY)로 저장.
-            // groundOffset/bottomOffset은 GPU Culling 단계에서 동적으로 차감되어 슬라이더 조절 시 실시간 반영됨.
             let posY = 0.0;
             if (hasGetHeight) {
-                const terrainY = landscape.getHeightAt(posX, posZ);
-                const maxXZScale = Math.max(scaleX, scaleZ);
-                const trunkRadius = Math.max(boundingRadius * 0.18 * maxXZScale, 0.25);
-                const hL = landscape.getHeightAt(posX - trunkRadius, posZ);
-                const hR = landscape.getHeightAt(posX + trunkRadius, posZ);
-                const hD = landscape.getHeightAt(posX, posZ - trunkRadius);
-                const hU = landscape.getHeightAt(posX, posZ + trunkRadius);
-                const slopeX = Math.abs(hR - hL);
-                const slopeZ = Math.abs(hU - hD);
-                const slopeSink = Math.max(slopeX, slopeZ) * 0.5;
-
-                const calculatedY = terrainY - slopeSink;
-                posY = calculatedY === 0 ? 0.0001 : calculatedY;
+                posY = landscape.getHeightAt(posX, posZ);
             }
 
             let rotX = 0, rotY = 0, rotZ = 0, rotW = 1;

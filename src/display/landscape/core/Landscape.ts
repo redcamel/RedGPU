@@ -1049,7 +1049,7 @@ export class Landscape extends Object3DContainer {
                 fragment: material.gpuRenderInfo.fragmentState,
                 primitive: {
                     topology: topology,
-                    cullMode: 'none'
+                    cullMode: this.#wireframe ? 'none' : 'back'
                 },
                 depthStencil: {
                     format: 'depth32float',
@@ -1124,7 +1124,7 @@ export class Landscape extends Object3DContainer {
                 },
                 primitive: {
                     topology: topology,
-                    cullMode: 'none'
+                    cullMode: isWireframe ? 'none' : 'back'
                 },
                 depthStencil: {
                     format: 'depth32float',

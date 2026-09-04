@@ -146,33 +146,14 @@ fn main(
         let scaleZ = scaleXZ.y;
         let scaleY = instance.scaleY;
 
-        // 🌟 [최적화 P4 / Step 5] 스폰 시점에 posY가 사전 계산되어 있으므로, 0.0인 경우에만 VHT 샘플링 수행 (매 프레임 50만 회 텍스처 로드 100% 박멸!)
-        if (instance.posY == 0.0 && globalUniforms.hasVHT != 0u && globalUniforms.invWorldSizeX > 0.0) {
+        // 🌟 [지형 표면 실시간 스냅핑] GPU VHT 높이맵 텍스처를 샘플링하여 지형 굴곡에 완벽 밀착
+        if (globalUniforms.hasVHT != 0u && globalUniforms.invWorldSizeX > 0.0) {
             let u = instance.posX * globalUniforms.invWorldSizeX + 0.5;
             let v = instance.posZ * globalUniforms.invWorldSizeX + 0.5;
             if (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0) {
                 let sampledHeightNorm = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, v), 0.0).r;
                 let terrainHeight = sampledHeightNorm * globalUniforms.heightScale;
-
-                let maxXZScale = max(scaleX, scaleZ);
-                let trunkRadius = max(typeInfo.boundingRadius * 0.18 * maxXZScale, 0.25);
-                let deltaUV = trunkRadius * globalUniforms.invWorldSizeX;
-
-                let uL = max(u - deltaUV, 0.0);
-                let uR = min(u + deltaUV, 1.0);
-                let vD = max(v - deltaUV, 0.0);
-                let vU = min(v + deltaUV, 1.0);
-
-                let rawL = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(uL, v), 0.0).r;
-                let rawR = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(uR, v), 0.0).r;
-                let rawD = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, vD), 0.0).r;
-                let rawU = textureSampleLevel(vhtTexture, vhtSampler, vec2<f32>(u, vU), 0.0).r;
-
-                let slopeX = abs(rawR - rawL);
-                let slopeZ = abs(rawU - rawD);
-                let slopeSink = max(slopeX, slopeZ) * 0.5 * globalUniforms.heightScale;
-
-                realY = terrainHeight - (typeInfo.bottomOffset + slopeSink);
+                realY = terrainHeight - typeInfo.bottomOffset;
             }
         }
 
