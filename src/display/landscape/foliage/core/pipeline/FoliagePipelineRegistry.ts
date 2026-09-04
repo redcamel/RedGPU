@@ -88,8 +88,8 @@ class FoliagePipelineRegistry {
             stepMode: 'instance',
             attributes: [
                 {shaderLocation: 6, offset: 0, format: 'float32x4'},
-                {shaderLocation: 7, offset: 16, format: 'uint32x2'},
-                {shaderLocation: 8, offset: 24, format: 'uint32'},
+                {shaderLocation: 7, offset: 16, format: 'snorm16x4'},
+                {shaderLocation: 8, offset: 24, format: 'float16x2'},
                 {shaderLocation: 9, offset: 28, format: 'float32'},   
             ],
         };

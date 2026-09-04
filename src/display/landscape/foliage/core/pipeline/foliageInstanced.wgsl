@@ -21,8 +21,8 @@ struct VertexInput {
     @location(5) vertexTangent : vec4<f32>,
 
     @location(6) instancePos_scaleY : vec4<f32>,
-    @location(7) instanceRotQuat_packed : vec2<u32>,
-    @location(8) instancePackedScaleXZ : u32,
+    @location(7) instanceRotQuat : vec4<f32>,
+    @location(8) instanceScaleXZ : vec2<f32>,
     @location(9) instanceFade : f32,
 };
 
@@ -32,8 +32,8 @@ struct OutputData {
     @location(1) vertexNormal: vec3<f32>,
     @location(2) uv: vec2<f32>,
     @location(3) uv1: vec2<f32>,
-    @location(4) vertexColor_0: vec4<f32>,
-    @location(5) vertexTangent: vec4<f32>,
+    @location(4) vertexColor_0 : vec4<f32>,
+    @location(5) vertexTangent : vec4<f32>,
     @location(6) instanceRotQuat: vec4<f32>,
 
     @location(7) currentClipPos: vec4<f32>,
@@ -59,12 +59,10 @@ fn mainInput(input : VertexInput) -> OutputData {
     let instancePos = input.instancePos_scaleY.xyz;
     let scaleY = input.instancePos_scaleY.w;
 
-    let rotXY = unpack2x16snorm(input.instanceRotQuat_packed.x);
-    let rotZW = unpack2x16snorm(input.instanceRotQuat_packed.y);
-    let instanceRotQuat = vec4<f32>(rotXY.x, rotXY.y, rotZW.x, rotZW.y);
-
-    let scaleXZ = unpack2x16float(input.instancePackedScaleXZ);
-    let instanceScale = vec3<f32>(scaleXZ.x, scaleY, scaleXZ.y);
+    // 🚀 [최적화 P1 / Step 3 - 하드웨어 Vertex Fetch 직접 로드]
+    // snorm16x4 및 float16x2 버텍스 포맷을 통해 unpack2x16snorm 2회 및 unpack2x16float 1회(버텍스당 3회) ALU 연산 100% 제거!
+    let instanceRotQuat = input.instanceRotQuat;
+    let instanceScale = vec3<f32>(input.instanceScaleXZ.x, scaleY, input.instanceScaleXZ.y);
 
     let combinedOpacity = input.instanceFade;
 
@@ -184,12 +182,10 @@ fn entryPointShadowVertex(input : VertexInput) -> FoliageShadowOutput {
     let instancePos = input.instancePos_scaleY.xyz;
     let scaleY = input.instancePos_scaleY.w;
 
-    let rotXY = unpack2x16snorm(input.instanceRotQuat_packed.x);
-    let rotZW = unpack2x16snorm(input.instanceRotQuat_packed.y);
-    let instanceRotQuat = vec4<f32>(rotXY.x, rotXY.y, rotZW.x, rotZW.y);
-
-    let scaleXZ = unpack2x16float(input.instancePackedScaleXZ);
-    let instanceScale = vec3<f32>(scaleXZ.x, scaleY, scaleXZ.y);
+    // 🚀 [최적화 P1 / Step 3 - 하드웨어 Vertex Fetch 직접 로드]
+    // snorm16x4 및 float16x2 버텍스 포맷을 통해 unpack2x16snorm 2회 및 unpack2x16float 1회(버텍스당 3회) ALU 연산 100% 제거!
+    let instanceRotQuat = input.instanceRotQuat;
+    let instanceScale = vec3<f32>(input.instanceScaleXZ.x, scaleY, input.instanceScaleXZ.y);
 
     let combinedOpacity = input.instanceFade;
 
