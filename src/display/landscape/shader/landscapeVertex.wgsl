@@ -129,8 +129,8 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
                     currentSegments = lod0Quads;
                     subStep = max(1u, u32(round(lod0Quads / baseQuads)));
                 } else {
-                    let step = pow(2.0, f32(lodLevel - 1u));
-                    currentSegments = max(1.0, floor(baseQuads / step));
+                    // 🚀 [최적화 VS-1] lodLevel < 2u 가드 내 else는 무조건 lodLevel == 1u (step = 1.0 확정)이므로 pow SFU 완전 박멸!
+                    currentSegments = max(1.0, floor(baseQuads));
                     subStep = 2u;
                 }
 
