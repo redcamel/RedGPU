@@ -172,9 +172,11 @@ fn computeDirectLayersPBR(
 
         res.albedo = mix(baseAlbedo, layerBlendAlbedo, alpha);
 
-        // 🚀 [최적화 FS-2] dot 거리 제곱 비교로 sqrt SFU 1회 완전 제거
+        // 🚀 [최적화 FS-2 & FS-3] dot 거리 제곱 비교 + inverseSqrt 기반 고속 TBN 직교화
         if (dot(layerBlendNormal.xy, layerBlendNormal.xy) > 1e-6) {
-            let tangentX = normalize(vec3<f32>(1.0, 0.0, 0.0) - baseN * baseN.x);
+            let lenSq = max(1.0 - baseN.x * baseN.x, 1e-4);
+            let invLen = inverseSqrt(lenSq);
+            let tangentX = vec3<f32>(1.0 - baseN.x * baseN.x, -baseN.x * baseN.y, -baseN.x * baseN.z) * invLen;
             let tangentZ = cross(baseN, tangentX);
             let perturbedWorldN = tangentX * layerBlendNormal.x + tangentZ * layerBlendNormal.y + baseN * layerBlendNormal.z;
             res.normal = normalize(mix(baseN, perturbedWorldN, alpha));
@@ -429,10 +431,12 @@ fn getIndirectPbrLighting(
         let F_IBL = F0 * envBRDF.x + vec3<f32>(envBRDF.y);
         let kD = vec3<f32>(1.0) - F_IBL;
 
-        return ((kD * albedo * iblDiffuseColor) + (reflectedColor * F_IBL)) * occlusionParameter;
+        let diffIBL = (kD * iblDiffuseColor) * (albedo * occlusionParameter);
+        let specIBL = (reflectedColor * F_IBL) * occlusionParameter;
+        return diffIBL + specIBL;
     } else {
-        let ambientContribution = albedo * systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
-        return ambientContribution * occlusionParameter;
+        let ambFactor = systemUniforms.ambientLight.intensity * (preExposure * occlusionParameter);
+        return albedo * (systemUniforms.ambientLight.color * ambFactor);
     }
 }
 
@@ -463,10 +467,10 @@ fn getDistantIndirectPbrLighting(
             iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
 
-        return albedo * iblDiffuseColor * occlusionParameter;
+        return albedo * (iblDiffuseColor * occlusionParameter);
     } else {
-        let ambientContribution = albedo * systemUniforms.ambientLight.color * systemUniforms.ambientLight.intensity * preExposure;
-        return ambientContribution * occlusionParameter;
+        let ambFactor = systemUniforms.ambientLight.intensity * (preExposure * occlusionParameter);
+        return albedo * (systemUniforms.ambientLight.color * ambFactor);
     }
 }
 
