@@ -726,19 +726,18 @@ fn getDirectSpecularBRDF(
 
 fn getDirectDiffuseBRDF(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albedo: vec3<f32>) -> vec3<f32> {
     if (NdotL <= 0.0) { return vec3<f32>(0.0); }
-    let energyBias = mix(0.0, 0.5, roughness);
     let energyFactor = mix(1.0, 1.0 / 1.51, roughness);
-    let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
-    let f0 = 1.0;
+    let fd90Minus1 = (0.5 + 2.0 * (LdotH * LdotH)) * roughness - 1.0;
     let fl = clamp(1.0 - NdotL, 0.0, 1.0);
     let fl2 = fl * fl;
     let fl5 = fl2 * fl2 * fl;
     let fv = clamp(1.0 - NdotV, 0.0, 1.0);
     let fv2 = fv * fv;
     let fv5 = fv2 * fv2 * fv;
-    let lightScatter = f0 + (fd90 - f0) * fl5;
-    let viewScatter = f0 + (fd90 - f0) * fv5;
-    return albedo * NdotL * lightScatter * viewScatter * energyFactor;
+    let lightScatter = 1.0 + fd90Minus1 * fl5;
+    let viewScatter = 1.0 + fd90Minus1 * fv5;
+    let factor = (NdotL * energyFactor) * (lightScatter * viewScatter);
+    return albedo * factor;
 }
 
 fn getDirectSpecularBTDF(
