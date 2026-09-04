@@ -697,7 +697,10 @@ fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
 }
 
 fn getFresnel(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
-    return F0 + (vec3<f32>(1.0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+    let f = clamp(1.0 - cosTheta, 0.0, 1.0);
+    let f2 = f * f;
+    let f5 = f2 * f2 * f;
+    return F0 + (vec3<f32>(1.0) - F0) * f5;
 }
 
 fn getIndirectFresnel(cosTheta: f32, F0: vec3<f32>, roughness: f32, fresnelTerm: f32) -> vec3<f32> {
@@ -726,8 +729,14 @@ fn getDirectDiffuseBRDF(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albe
     let energyFactor = mix(1.0, 1.0 / 1.51, roughness);
     let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
     let f0 = 1.0;
-    let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
-    let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
+    let fl = clamp(1.0 - NdotL, 0.0, 1.0);
+    let fl2 = fl * fl;
+    let fl5 = fl2 * fl2 * fl;
+    let fv = clamp(1.0 - NdotV, 0.0, 1.0);
+    let fv2 = fv * fv;
+    let fv5 = fv2 * fv2 * fv;
+    let lightScatter = f0 + (fd90 - f0) * fl5;
+    let viewScatter = f0 + (fd90 - f0) * fv5;
     return albedo * NdotL * lightScatter * viewScatter * energyFactor;
 }
 
