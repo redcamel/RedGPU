@@ -668,10 +668,8 @@ fn getSpecularNDF(NdotH: f32, roughness: f32) -> f32 {
     let alpha = roughness * roughness;
     let alpha2 = alpha * alpha;
     let NdotH2 = NdotH * NdotH;
-    let nom = alpha2;
     let denom = (NdotH2 * (alpha2 - 1.0) + 1.0);
-    let denomSquared = denom * denom;
-    return nom / max(EPSILON, denomSquared * PI);
+    return (alpha2 * INV_PI) / max(EPSILON, denom * denom);
 }
 
 fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
@@ -679,8 +677,9 @@ fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
     let alpha2 = alpha * alpha;
     let safeNdotV = max(NdotV, 1e-4);
     let safeNdotL = max(NdotL, 1e-4);
-    let GGXV = safeNdotL * sqrt(safeNdotV * safeNdotV * (1.0 - alpha2) + alpha2);
-    let GGXL = safeNdotV * sqrt(safeNdotL * safeNdotL * (1.0 - alpha2) + alpha2);
+    let oneMinusAlpha2 = 1.0 - alpha2;
+    let GGXV = safeNdotL * sqrt(safeNdotV * safeNdotV * oneMinusAlpha2 + alpha2);
+    let GGXL = safeNdotV * sqrt(safeNdotL * safeNdotL * oneMinusAlpha2 + alpha2);
     return 0.5 / max(GGXV + GGXL, EPSILON);
 }
 
@@ -706,8 +705,22 @@ fn getDirectSpecularBRDF(
     NdotV: f32,
     NdotL: f32
 ) -> vec3<f32> {
-    let D = getSpecularNDF(NdotH, roughness);
-    let V = getSpecularVisibility(NdotV, NdotL, roughness);
+    let alpha = roughness * roughness;
+    let alpha2 = alpha * alpha;
+
+    // NDF (GGX Distribution with INV_PI)
+    let NdotH2 = NdotH * NdotH;
+    let denom = NdotH2 * (alpha2 - 1.0) + 1.0;
+    let D = (alpha2 * INV_PI) / max(EPSILON, denom * denom);
+
+    // Visibility (Smith Joint GGX)
+    let safeNdotV = max(NdotV, 1e-4);
+    let safeNdotL = max(NdotL, 1e-4);
+    let oneMinusAlpha2 = 1.0 - alpha2;
+    let GGXV = safeNdotL * sqrt(safeNdotV * safeNdotV * oneMinusAlpha2 + alpha2);
+    let GGXL = safeNdotV * sqrt(safeNdotL * safeNdotL * oneMinusAlpha2 + alpha2);
+    let V = 0.5 / max(GGXV + GGXL, EPSILON);
+
     return D * V * F;
 }
 
