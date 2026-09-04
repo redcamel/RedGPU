@@ -35,25 +35,152 @@ fn dirToHemiOctahedralUV(dir: vec3<f32>) -> vec2<f32> {
     return clamp(vec2<f32>(u, v), vec2<f32>(0.0), vec2<f32>(1.0));
 }
 
-fn hemiOctahedralUVToDir(uv: vec2<f32>) -> vec3<f32> {
-    let uPrime = 2.0 * uv.x - 1.0;
-    let vPrime = 2.0 * uv.y - 1.0;
-    let dirX = (uPrime - vPrime) * 0.5;
-    let dirZ = (uPrime + vPrime) * 0.5;
-    let dirY = max(1.0 - (abs(dirX) + abs(dirZ)), 0.0);
-    return normalize(vec3<f32>(dirX, dirY, dirZ));
-}
+// 🚀 [최적화 P0 / Step 20 - 옥타헤드럴 64개 격자 방향/각도 LUT 테이블화]
+// 8x8 = 64개 옥타헤드럴 타일 중심 3D 방향 벡터 사전 계산 LUT (매 픽셀 역투영/정규화 연산 100% 제거)
+const OCT_GRID_DIRS: array<vec3<f32>, 64> = array<vec3<f32>, 64>(
+    vec3<f32>(0.0000000, 0.1414214, -0.9899495),
+    vec3<f32>(0.1622214, 0.1622214, -0.9733285),
+    vec3<f32>(0.3651484, 0.1825742, -0.9128709),
+    vec3<f32>(0.5883484, 0.1961161, -0.7844645),
+    vec3<f32>(0.7844645, 0.1961161, -0.5883484),
+    vec3<f32>(0.9128709, 0.1825742, -0.3651484),
+    vec3<f32>(0.9733285, 0.1622214, -0.1622214),
+    vec3<f32>(0.9899495, 0.1414214, 0.0000000),
+    vec3<f32>(-0.1622214, 0.1622214, -0.9733285),
+    vec3<f32>(0.0000000, 0.3713907, -0.9284767),
+    vec3<f32>(0.2182179, 0.4364358, -0.8728716),
+    vec3<f32>(0.4850713, 0.4850713, -0.7276069),
+    vec3<f32>(0.7276069, 0.4850713, -0.4850713),
+    vec3<f32>(0.8728716, 0.4364358, -0.2182179),
+    vec3<f32>(0.9284767, 0.3713907, 0.0000000),
+    vec3<f32>(0.9733285, 0.1622214, 0.1622214),
+    vec3<f32>(-0.3651484, 0.1825742, -0.9128709),
+    vec3<f32>(-0.2182179, 0.4364358, -0.8728716),
+    vec3<f32>(0.0000000, 0.7071068, -0.7071068),
+    vec3<f32>(0.2672612, 0.8017837, -0.5345225),
+    vec3<f32>(0.5345225, 0.8017837, -0.2672612),
+    vec3<f32>(0.7071068, 0.7071068, 0.0000000),
+    vec3<f32>(0.8728716, 0.4364358, 0.2182179),
+    vec3<f32>(0.9128709, 0.1825742, 0.3651484),
+    vec3<f32>(-0.5883484, 0.1961161, -0.7844645),
+    vec3<f32>(-0.4850713, 0.4850713, -0.7276069),
+    vec3<f32>(-0.2672612, 0.8017837, -0.5345225),
+    vec3<f32>(0.0000000, 0.9701425, -0.2425356),
+    vec3<f32>(0.2425356, 0.9701425, 0.0000000),
+    vec3<f32>(0.5345225, 0.8017837, 0.2672612),
+    vec3<f32>(0.7276069, 0.4850713, 0.4850713),
+    vec3<f32>(0.7844645, 0.1961161, 0.5883484),
+    vec3<f32>(-0.7844645, 0.1961161, -0.5883484),
+    vec3<f32>(-0.7276069, 0.4850713, -0.4850713),
+    vec3<f32>(-0.5345225, 0.8017837, -0.2672612),
+    vec3<f32>(-0.2425356, 0.9701425, 0.0000000),
+    vec3<f32>(0.0000000, 0.9701425, 0.2425356),
+    vec3<f32>(0.2672612, 0.8017837, 0.5345225),
+    vec3<f32>(0.4850713, 0.4850713, 0.7276069),
+    vec3<f32>(0.5883484, 0.1961161, 0.7844645),
+    vec3<f32>(-0.9128709, 0.1825742, -0.3651484),
+    vec3<f32>(-0.8728716, 0.4364358, -0.2182179),
+    vec3<f32>(-0.7071068, 0.7071068, 0.0000000),
+    vec3<f32>(-0.5345225, 0.8017837, 0.2672612),
+    vec3<f32>(-0.2672612, 0.8017837, 0.5345225),
+    vec3<f32>(0.0000000, 0.7071068, 0.7071068),
+    vec3<f32>(0.2182179, 0.4364358, 0.8728716),
+    vec3<f32>(0.3651484, 0.1825742, 0.9128709),
+    vec3<f32>(-0.9733285, 0.1622214, -0.1622214),
+    vec3<f32>(-0.9284767, 0.3713907, 0.0000000),
+    vec3<f32>(-0.8728716, 0.4364358, 0.2182179),
+    vec3<f32>(-0.7276069, 0.4850713, 0.4850713),
+    vec3<f32>(-0.4850713, 0.4850713, 0.7276069),
+    vec3<f32>(-0.2182179, 0.4364358, 0.8728716),
+    vec3<f32>(0.0000000, 0.3713907, 0.9284767),
+    vec3<f32>(0.1622214, 0.1622214, 0.9733285),
+    vec3<f32>(-0.9899495, 0.1414214, 0.0000000),
+    vec3<f32>(-0.9733285, 0.1622214, 0.1622214),
+    vec3<f32>(-0.9128709, 0.1825742, 0.3651484),
+    vec3<f32>(-0.7844645, 0.1961161, 0.5883484),
+    vec3<f32>(-0.5883484, 0.1961161, 0.7844645),
+    vec3<f32>(-0.3651484, 0.1825742, 0.9128709),
+    vec3<f32>(-0.1622214, 0.1622214, 0.9733285),
+    vec3<f32>(0.0000000, 0.1414214, 0.9899495)
+);
 
-fn getSubTileRotatedUVFast(p: vec2<f32>, lenVH: f32, angleV: f32, gridDir: vec3<f32>) -> vec2<f32> {
-    let gridH = vec2<f32>(gridDir.x, gridDir.z);
-    let lenGH = length(gridH);
+// 8x8 = 64개 옥타헤드럴 타일의 [수평 회전각(angleG), 수평 길이(lenGH)] 사전 계산 LUT (매 픽셀 atan2/length 100% 제거)
+const OCT_GRID_ANGLE_LEN: array<vec2<f32>, 64> = array<vec2<f32>, 64>(
+    vec2<f32>(-1.5707963, 0.9899495),
+    vec2<f32>(-1.4056476, 0.9867545),
+    vec2<f32>(-1.1902899, 0.9831921),
+    vec2<f32>(-0.9272952, 0.9805807),
+    vec2<f32>(-0.6435011, 0.9805807),
+    vec2<f32>(-0.3805064, 0.9831921),
+    vec2<f32>(-0.1651487, 0.9867545),
+    vec2<f32>(0.0000000, 0.9899495),
+    vec2<f32>(-1.7359451, 0.9867545),
+    vec2<f32>(-1.5707963, 0.9284767),
+    vec2<f32>(-1.3258177, 0.8997354),
+    vec2<f32>(-0.9827937, 0.8744746),
+    vec2<f32>(-0.5880026, 0.8744746),
+    vec2<f32>(-0.2449787, 0.8997354),
+    vec2<f32>(0.0000000, 0.9284767),
+    vec2<f32>(0.1651487, 0.9867545),
+    vec2<f32>(-1.9513028, 0.9831921),
+    vec2<f32>(-1.8157750, 0.8997354),
+    vec2<f32>(-1.5707963, 0.7071068),
+    vec2<f32>(-1.1071487, 0.5976143),
+    vec2<f32>(-0.4636476, 0.5976143),
+    vec2<f32>(0.0000000, 0.7071068),
+    vec2<f32>(0.2449787, 0.8997354),
+    vec2<f32>(0.3805064, 0.9831921),
+    vec2<f32>(-2.2142974, 0.9805807),
+    vec2<f32>(-2.1587989, 0.8744746),
+    vec2<f32>(-2.0344439, 0.5976143),
+    vec2<f32>(-1.5707963, 0.2425356),
+    vec2<f32>(0.0000000, 0.2425356),
+    vec2<f32>(0.4636476, 0.5976143),
+    vec2<f32>(0.5880026, 0.8744746),
+    vec2<f32>(0.6435011, 0.9805807),
+    vec2<f32>(-2.4980915, 0.9805807),
+    vec2<f32>(-2.5535901, 0.8744746),
+    vec2<f32>(-2.6779450, 0.5976143),
+    vec2<f32>(3.1415927, 0.2425356),
+    vec2<f32>(1.5707963, 0.2425356),
+    vec2<f32>(1.1071487, 0.5976143),
+    vec2<f32>(0.9827937, 0.8744746),
+    vec2<f32>(0.9272952, 0.9805807),
+    vec2<f32>(-2.7610863, 0.9831921),
+    vec2<f32>(-2.8966139, 0.8997354),
+    vec2<f32>(3.1415927, 0.7071068),
+    vec2<f32>(2.6779450, 0.5976143),
+    vec2<f32>(2.0344439, 0.5976143),
+    vec2<f32>(1.5707963, 0.7071068),
+    vec2<f32>(1.3258177, 0.8997354),
+    vec2<f32>(1.1902899, 0.9831921),
+    vec2<f32>(-2.9764439, 0.9867545),
+    vec2<f32>(3.1415927, 0.9284767),
+    vec2<f32>(2.8966139, 0.8997354),
+    vec2<f32>(2.5535901, 0.8744746),
+    vec2<f32>(2.1587989, 0.8744746),
+    vec2<f32>(1.8157750, 0.8997354),
+    vec2<f32>(1.5707963, 0.9284767),
+    vec2<f32>(1.4056476, 0.9867545),
+    vec2<f32>(3.1415927, 0.9899495),
+    vec2<f32>(2.9764439, 0.9867545),
+    vec2<f32>(2.7610863, 0.9831921),
+    vec2<f32>(2.4980915, 0.9805807),
+    vec2<f32>(2.2142974, 0.9805807),
+    vec2<f32>(1.9513028, 0.9831921),
+    vec2<f32>(1.7359451, 0.9867545),
+    vec2<f32>(1.5707963, 0.9899495)
+);
+
+fn getSubTileRotatedUVLUT(p: vec2<f32>, lenVH: f32, angleV: f32, gridIdx: u32) -> vec2<f32> {
+    let angleLen = OCT_GRID_ANGLE_LEN[gridIdx];
+    let angleG = angleLen.x;
+    let lenGH = angleLen.y;
 
     var rotAngle = 0.0;
     if (lenVH > 0.01 && lenGH > 0.01) {
-        let angleG = atan2(gridDir.z, gridDir.x);
         var diff = angleV - angleG;
-        
-        diff = diff - floor((diff + 3.14159265) / 6.2831853) * 6.2831853;
+        diff = diff - floor((diff + 3.14159265) * 0.15915494) * 6.2831853;
 
         let poleFade = clamp(min(lenVH, lenGH) * 5.0, 0.0, 1.0);
         rotAngle = diff * poleFade;
@@ -61,32 +188,6 @@ fn getSubTileRotatedUVFast(p: vec2<f32>, lenVH: f32, angleV: f32, gridDir: vec3<
 
     let c = cos(rotAngle);
     let s = sin(rotAngle);
-    let rotatedP = vec2<f32>(p.x * c - p.y * s, p.x * s + p.y * c);
-    return rotatedP + vec2<f32>(0.5);
-}
-
-fn getSubTileRotatedUV(quadUV: vec2<f32>, viewDir: vec3<f32>, gridDir: vec3<f32>) -> vec2<f32> {
-    let viewH = vec2<f32>(viewDir.x, viewDir.z);
-    let gridH = vec2<f32>(gridDir.x, gridDir.z);
-    let lenVH = length(viewH);
-    let lenGH = length(gridH);
-
-    var rotAngle = 0.0;
-    if (lenVH > 0.01 && lenGH > 0.01) {
-        let angleV = atan2(viewDir.z, viewDir.x);
-        let angleG = atan2(gridDir.z, gridDir.x);
-        var diff = angleV - angleG;
-        
-        diff = diff - floor((diff + 3.14159265) / 6.2831853) * 6.2831853;
-
-        let poleFade = clamp(min(lenVH, lenGH) * 5.0, 0.0, 1.0);
-        rotAngle = diff * poleFade;
-    }
-
-    let c = cos(rotAngle);
-    let s = sin(rotAngle);
-
-    let p = quadUV - vec2<f32>(0.5);
     let rotatedP = vec2<f32>(p.x * c - p.y * s, p.x * s + p.y * c);
     return rotatedP + vec2<f32>(0.5);
 }
@@ -132,12 +233,13 @@ fn main(inputData: InputData) -> OutputFragment {
     let g01 = clamp(baseGrid + vec2<f32>(0.0, 1.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
     let g11 = clamp(baseGrid + vec2<f32>(1.0, 1.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
 
-    let dir00 = hemiOctahedralUVToDir((g00 + vec2<f32>(0.5)) / n);
-    let dir10 = hemiOctahedralUVToDir((g10 + vec2<f32>(0.5)) / n);
-    let dir01 = hemiOctahedralUVToDir((g01 + vec2<f32>(0.5)) / n);
-    let dir11 = hemiOctahedralUVToDir((g11 + vec2<f32>(0.5)) / n);
+    let idx00 = u32(g00.y) * 8u + u32(g00.x);
+    let idx10 = u32(g10.y) * 8u + u32(g10.x);
+    let idx01 = u32(g01.y) * 8u + u32(g01.x);
+    let idx11 = u32(g11.y) * 8u + u32(g11.x);
 
-    // 🚀 [최적화 P0 / Step 11] localView의 atan2 및 length를 1회만 계산하여 4개 서브타일에서 재사용 (초월함수 연산 75% 절감!)
+    // 🚀 [최적화 P0 / Step 20 - 옥타헤드럴 LUT 룩업]
+    // 64개 정적 LUT 테이블을 통해 매 픽셀 hemiOctahedralUVToDir(역투영 4회) 및 atan2(초월함수 4회), length(제곱근 4회)를 100% 제거!
     let pQuad = inputData.uv - vec2<f32>(0.5);
     let viewH = vec2<f32>(localView.x, localView.z);
     let lenVH = length(viewH);
@@ -146,10 +248,10 @@ fn main(inputData: InputData) -> OutputFragment {
         angleV = atan2(localView.z, localView.x);
     }
 
-    let uv00 = getSubTileRotatedUVFast(pQuad, lenVH, angleV, dir00);
-    let uv10 = getSubTileRotatedUVFast(pQuad, lenVH, angleV, dir10);
-    let uv01 = getSubTileRotatedUVFast(pQuad, lenVH, angleV, dir01);
-    let uv11 = getSubTileRotatedUVFast(pQuad, lenVH, angleV, dir11);
+    let uv00 = getSubTileRotatedUVLUT(pQuad, lenVH, angleV, idx00);
+    let uv10 = getSubTileRotatedUVLUT(pQuad, lenVH, angleV, idx10);
+    let uv01 = getSubTileRotatedUVLUT(pQuad, lenVH, angleV, idx01);
+    let uv11 = getSubTileRotatedUVLUT(pQuad, lenVH, angleV, idx11);
 
     let ddxUV = dpdx(inputData.uv);
     let ddyUV = dpdy(inputData.uv);
@@ -231,11 +333,18 @@ fn shadowMain(inputData: ShadowInputData) {
     let n = 8.0;
     let octUV = dirToHemiOctahedralUV(localView);
 
-    // 🚀 [최적화 P1 / Step 7 - Dominant 1-Tap 다이어트]
+    // 🚀 [최적화 P1 / Step 7 - Dominant 1-Tap 다이어트 & LUT 적용]
     // 그림자 맵은 광원 방향의 실루엣만 굽는 패스이므로, 대표 각도 1개만 샘플링하여 회전 삼각함수 및 텍스처 호출 75% 삭감!
     let dominantGrid = clamp(floor(octUV * n), vec2<f32>(0.0), vec2<f32>(n - 1.0));
-    let dirDom = hemiOctahedralUVToDir((dominantGrid + vec2<f32>(0.5)) / n);
-    let uvDom = getSubTileRotatedUV(inputData.uv, localView, dirDom);
+    let idxDom = u32(dominantGrid.y) * 8u + u32(dominantGrid.x);
+    let pQuad = inputData.uv - vec2<f32>(0.5);
+    let viewH = vec2<f32>(localView.x, localView.z);
+    let lenVH = length(viewH);
+    var angleV = 0.0;
+    if (lenVH > 0.01) {
+        angleV = atan2(localView.z, localView.x);
+    }
+    let uvDom = getSubTileRotatedUVLUT(pQuad, lenVH, angleV, idxDom);
 
     let ddxUV = dpdx(inputData.uv);
     let ddyUV = dpdy(inputData.uv);
