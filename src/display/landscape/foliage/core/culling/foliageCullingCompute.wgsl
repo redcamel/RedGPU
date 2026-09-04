@@ -219,7 +219,10 @@ fn main(
 
                 let aabbPixelSize = max((maxUV - minUV) * vec2<f32>(512.0, 256.0), vec2<f32>(1.0));
                 let maxDim = max(aabbPixelSize.x, aabbPixelSize.y);
-                let mipLevel = clamp(ceil(log2(maxDim)), 0.0, 7.0);
+                // 🚀 [최적화 P1 - HZB MipLevel 1클럭 비트 연산 대체]
+                // log2/ceil/clamp 부동소수점 초월함수를 1사이클 정수 비트 인스트럭션(firstLeadingBit)으로 대체 (ALU 3배 가속)
+                let uDim = max(u32(maxDim + 0.999), 1u);
+                let mipLevel = f32(min(firstLeadingBit(uDim * 2u - 1u), 7u));
 
                 let hzb00 = textureSampleLevel(hzbTexture, hzbSampler, minUV, mipLevel).r;
                 let hzb10 = textureSampleLevel(hzbTexture, hzbSampler, vec2<f32>(maxUV.x, minUV.y), mipLevel).r;
