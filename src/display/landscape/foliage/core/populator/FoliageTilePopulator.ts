@@ -43,8 +43,6 @@ class FoliageTilePopulator {
         let seed = ((tileX * 73856093) ^ (tileZ * 19349663) ^ (nameHash * 83492791)) >>> 0;
         if (seed === 0) seed = 0x9e3779b9;
 
-        const groundOffset = foliageType.options.groundOffset ?? 0;
-        const bottomOffset = foliageType.bottomOffset ?? 0;
         const boundingRadius = foliageType.boundingRadius || 1.0;
         const hasGetHeight = typeof landscape?.getHeightAt === 'function';
 
@@ -73,7 +71,8 @@ class FoliageTilePopulator {
             const scaleY = minScale[1] + rScale * scaleDiffY;
             const scaleZ = minScale[2] + rScale * scaleDiffZ;
 
-            // 🌟 [최적화 P4 / Step 5] 스폰 시점에 지형 고도 및 경사도 침하(slopeSink)를 1회 완벽 계산하여 posY에 사전 캐싱
+            // 🌟 [최적화 P4 / Step 5] 스폰 시점에 지형 고도 및 경사도 침하(slopeSink)를 1회 계산하여 기준 높이(posY)로 저장.
+            // groundOffset/bottomOffset은 GPU Culling 단계에서 동적으로 차감되어 슬라이더 조절 시 실시간 반영됨.
             let posY = 0.0;
             if (hasGetHeight) {
                 const terrainY = landscape.getHeightAt(posX, posZ);
@@ -87,7 +86,7 @@ class FoliageTilePopulator {
                 const slopeZ = Math.abs(hU - hD);
                 const slopeSink = Math.max(slopeX, slopeZ) * 0.5;
 
-                const calculatedY = terrainY - (groundOffset + bottomOffset + slopeSink);
+                const calculatedY = terrainY - slopeSink;
                 posY = calculatedY === 0 ? 0.0001 : calculatedY;
             }
 

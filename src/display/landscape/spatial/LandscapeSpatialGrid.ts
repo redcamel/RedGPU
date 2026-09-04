@@ -75,6 +75,11 @@ export class LandscapeSpatialGrid {
         }
     }
 
+    getComponent(row: number, col: number): LandscapeComponent | null {
+        if (row < 0 || row >= this.#tileCountZ || col < 0 || col >= this.#tileCountX) return null;
+        return this.#flatCells[row * this.#tileCountX + col] || null;
+    }
+
     getCellCoordinates(x: number, z: number, outBuffer: Int32Array): void {
         const col = Math.floor((x + this.#halfWorldSizeX) / this.#tileSizeX);
         const row = Math.floor((z + this.#halfWorldSizeZ) / this.#tileSizeZ);

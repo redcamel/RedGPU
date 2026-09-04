@@ -67,7 +67,7 @@ class FoliageType {
     #numLODs: number = 1;
     #maxShadowCascadeIndex: number = 3;
     #subMeshVertexBindGroupLayout: GPUBindGroupLayout | null = null;
-    #loadedTileKeys: Set<string> = new Set();
+    #loadedTileKeys: Set<number> = new Set();
 
     constructor(
         redGPUContext: RedGPUContext,
@@ -178,6 +178,13 @@ class FoliageType {
         return this.#bottomOffset;
     }
 
+    set bottomOffset(val: number) {
+        if (this.#bottomOffset !== val) {
+            this.#bottomOffset = val;
+            this.#syncTypeParams();
+        }
+    }
+
     get groundOffset(): number {
         return this.#bottomOffset;
     }
@@ -185,19 +192,43 @@ class FoliageType {
     set groundOffset(val: number) {
         if (this.#bottomOffset !== val) {
             this.#bottomOffset = val;
-            if (this.#megaBuffer && this.#allocation) {
-                this.#megaBuffer.updateTypeParams(
-                    this.#allocation,
-                    this.#options.cullingDistance ?? 2000.0,
-                    this.#options.fadeStartDistance ?? 1500.0,
-                    this.#boundingRadius,
-                    this.#bottomOffset,
-                    this.#lodInfoList
-                );
-            }
+            this.#syncTypeParams();
         }
     }
 
+    get cullingDistance(): number {
+        return this.#options.cullingDistance ?? 2000.0;
+    }
+
+    set cullingDistance(val: number) {
+        if ((this.#options as any).cullingDistance !== val) {
+            (this.#options as any).cullingDistance = val;
+            this.#syncTypeParams();
+        }
+    }
+
+    get fadeStartDistance(): number {
+        return this.#options.fadeStartDistance ?? 1500.0;
+    }
+
+    set fadeStartDistance(val: number) {
+        if ((this.#options as any).fadeStartDistance !== val) {
+            (this.#options as any).fadeStartDistance = val;
+            this.#syncTypeParams();
+        }
+    }
+
+    /**
+     * [KO] 그림자를 투영할 최대 캐스케이드 인덱스를 설정합니다 (0~3).
+     * [EN] Sets the maximum cascade index to cast shadows (0 to 3).
+     */
+    set maxShadowCascadeIndex(value: number) {
+        validateUintRange(value, 0, 3);
+        if (this.#maxShadowCascadeIndex !== value) {
+            this.#maxShadowCascadeIndex = value;
+            this.#syncTypeParams();
+        }
+    }
 
     /**
      * [KO] 그림자를 투영할 최대 캐스케이드 인덱스를 반환합니다 (0~3).
@@ -207,13 +238,21 @@ class FoliageType {
         return this.#maxShadowCascadeIndex;
     }
 
-    /**
-     * [KO] 그림자를 투영할 최대 캐스케이드 인덱스를 설정합니다 (0~3).
-     * [EN] Sets the maximum cascade index to cast shadows (0 to 3).
-     */
-    set maxShadowCascadeIndex(value: number) {
-        validateUintRange(value, 0, 3);
-        this.#maxShadowCascadeIndex = value;
+    populateTile(comp: any, landscape?: any, targetCountPerTile?: number): void {
+        // 🚀 [최적화 6위 - Zero-GC] `${z}_${x}` 문자열 힙 생성 대신 32비트 정수 비트 패킹 키를 사용하여 힙 할당 0건 달성
+        const cz = (comp.componentZ ?? 0) & 0xffff;
+        const cx = (comp.componentX ?? 0) & 0xffff;
+        const key = (cz << 16) | cx;
+        if (this.#loadedTileKeys.has(key)) return;
+        this.#loadedTileKeys.add(key);
+
+        const addedCount = FoliageTilePopulator.populateTile(comp, this, landscape, targetCountPerTile);
+        if (addedCount > 0) {
+            this.#activeInstanceCount = Math.min(this.#activeInstanceCount + addedCount, this.#options.maxInstances);
+            if (this.#allocation) {
+                this.#allocation.activeCount = this.#activeInstanceCount;
+            }
+        }
     }
 
     get culledGPUBuffer(): GPUBuffer | null {
@@ -297,26 +336,27 @@ class FoliageType {
         this.resetIndirectBuffer();
     }
 
-    populateTile(comp: any, landscape?: any, targetCountPerTile?: number): void {
-        const key = `${comp.componentZ}_${comp.componentX}`;
-        if (this.#loadedTileKeys.has(key)) return;
-        this.#loadedTileKeys.add(key);
-
-        const addedCount = FoliageTilePopulator.populateTile(comp, this, landscape, targetCountPerTile);
-        if (addedCount > 0) {
-            this.#activeInstanceCount = Math.min(this.#activeInstanceCount + addedCount, this.#options.maxInstances);
-            if (this.#allocation) {
-                this.#allocation.activeCount = this.#activeInstanceCount;
-            }
-        }
-    }
-
     destroy(): void {
         for (let i = 0; i < this.#subMeshes.length; i++) {
             const sub = this.#subMeshes[i];
             sub.destroy();
         }
         this.#subMeshes.length = 0;
+        this.#loadedTileKeys.clear();
+    }
+
+    #syncTypeParams(): void {
+        if (this.#megaBuffer && this.#allocation) {
+            this.#megaBuffer.updateTypeParams(
+                this.#allocation,
+                this.#options.cullingDistance ?? 2000.0,
+                this.#options.fadeStartDistance ?? 1500.0,
+                this.#boundingRadius,
+                this.#bottomOffset,
+                this.#lodInfoList,
+                this.#maxShadowCascadeIndex
+            );
+        }
     }
 }
 

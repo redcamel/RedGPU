@@ -30,7 +30,8 @@ RedGPU.init(
 
         // 그림자 설정 (16km 오픈월드 지형 및 대규모 식생에 최적화)
         const directionalShadowManager = scene.shadowManager.directionalShadowManager;
-        directionalShadowManager.maxShadowDistance = 5000;
+        directionalShadowManager.maxShadowDistance = 500
+
 
 
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
@@ -176,9 +177,6 @@ RedGPU.init(
                             minScale: [0.85, 0.85, 0.85],
                             maxScale: [1.35, 1.35, 1.35],
                             randomRotationY: true,
-                            groundOffset: 0.35,
-                            cullingDistance: 3500,
-                            fadeStartDistance: 2800,
                             isFoliage: true,
                             useImpostor: true
                         });
@@ -233,454 +231,84 @@ RedGPU.init(
             console.log("Canvas resized:", event.width, event.height);
         };
 
-        renderTestPane(redGPUContext, view, skyAtmosphere, landscape, controller, directionalLight, layers, foliageManager);
-    }
-);
+        new RedGPUExampleHelper(redGPUContext, {
+            RedGPU,
+            directionalShadow: true,
+            ibl: true,
+            skybox: true,
+            gui: (pane) => {
+                const folderFoliage = pane.addFolder({title: '🌲 Foliage System', expanded: true});
 
-const renderTestPane = (redGPUContext, view, skyAtmosphere, landscape, controller, directionalLight, layers, foliageManager) => {
-    const [wsX, wsZ] = landscape.worldSize;
-    const [tcX, tcZ] = landscape.componentCount;
-    const [tsX, tsZ] = landscape.tileSize;
-
-    const config = {
-        worldSizeX: wsX,
-        worldSizeZ: wsZ,
-        componentCountX: tcX,
-        componentCountZ: tcZ,
-        totalComponents: tcX * tcZ,
-        tileSizeStr: `[${Math.round(tsX)}m, ${Math.round(tsZ)}m]`,
-        textureArraySize: 1024,
-        boxSize: 100
-    };
-
-    let activePane = null;
-
-    const updateConfigValues = () => {
-        const [wX, wZ] = landscape.worldSize;
-        const [tX, tZ] = landscape.componentCount;
-        const [sX, sZ] = landscape.tileSize;
-
-        config.worldSizeX = wX;
-        config.worldSizeZ = wZ;
-        config.componentCountX = tX;
-        config.componentCountZ = tZ;
-        config.totalComponents = tX * tZ;
-        config.tileSizeStr = `[${Math.round(sX)}m, ${Math.round(sZ)}m]`;
-
-        if (activePane) activePane.refresh();
-    };
-
-    setInterval(updateConfigValues, 500);
-
-    new RedGPUExampleHelper(redGPUContext, {
-        RedGPU,
-        directionalShadow: true,
-        ibl: true,
-        skybox: true,
-        gui: (pane) => {
-            activePane = pane;
-
-            if (foliageManager) {
-                const folderFoliage = pane.addFolder({title: 'Foliage', expanded: true});
-                folderFoliage.addButton({title: '📷 Open Impostor Atlas Viewer (Key: I)'}).on('click', () => {
-                    FoliageImpostorDebugViewer.open(redGPUContext, foliageManager);
-                });
-
-
-                const grassType = foliageManager.getFoliageType('BasicGrass');
-                if (grassType) {
-                    const subGrass = folderFoliage.addFolder({title: 'BasicGrass', expanded: false});
-                    const grassProxy = {
-                        get count() {
-                            return grassType.activeInstanceCount;
-                        },
-                        get cullingDist() {
-                            return grassType.options.cullingDistance;
-                        },
-                        set cullingDist(v) {
-                            grassType.options.cullingDistance = v;
-                        },
-                        get fadeStartDist() {
-                            return grassType.options.fadeStartDistance;
-                        },
-                        set fadeStartDist(v) {
-                            grassType.options.fadeStartDistance = v;
-                        }
-                    };
-                    subGrass.addBinding(grassProxy, 'count', {readonly: true});
-                    subGrass.addBinding(grassProxy, 'cullingDist', {min: 500, max: 8000, step: 50});
-                    subGrass.addBinding(grassProxy, 'fadeStartDist', {min: 200, max: 6000, step: 50});
-                }
-
-                const subFrangipani = folderFoliage.addFolder({
-                    title: 'FrangipaniTree (3D + Octahedral Impostor)',
-                    expanded: true
-                });
-                const frangipaniProxy = {
-                    get count() {
-                        const target = foliageManager.getFoliageType('FrangipaniTree');
-                        return target ? target.activeInstanceCount : 0;
+                const globalStats = {
+                    get totalTypes() {
+                        return foliageManager.types.length;
                     },
-                    get lodDistance() {
-                        const target = foliageManager.getFoliageType('FrangipaniTree');
-                        return target?.lodInfoList?.[0] ? target.lodInfoList[0].lodDistance : 120;
+                    get totalInstances() {
+                        return foliageManager.megaBuffer?.totalActiveInstances ?? 0;
                     },
-                    set lodDistance(v) {
-                        const target = foliageManager.getFoliageType('FrangipaniTree');
-                        if (target?.lodInfoList?.[0]) {
-                            target.lodInfoList[0].lodDistance = v;
-                        }
-                    },
-                    get cullingDist() {
-                        const target = foliageManager.getFoliageType('FrangipaniTree');
-                        return target ? target.options.cullingDistance : 3500;
-                    },
-                    set cullingDist(v) {
-                        const target = foliageManager.getFoliageType('FrangipaniTree');
-                        if (target) target.options.cullingDistance = v;
+                    get maxCapacity() {
+                        return foliageManager.megaBuffer?.maxTotalInstances ?? 0;
                     }
                 };
-                subFrangipani.addBinding(frangipaniProxy, 'count', {readonly: true});
-                subFrangipani.addBinding(frangipaniProxy, 'lodDistance', {
-                    min: 30,
-                    max: 1000,
-                    step: 10,
-                    label: '3D -> Impostor Dist'
-                });
-                subFrangipani.addBinding(frangipaniProxy, 'cullingDist', {min: 1000, max: 8000, step: 100});
-                subFrangipani.addButton({title: '🔍 Inspect Frangipani Atlas'}).on('click', () => {
-                    FoliageImpostorDebugViewer.open(redGPUContext, foliageManager, 'FrangipaniTree');
-                });
 
-                const subPine = folderFoliage.addFolder({title: 'PineTree (Multi-LOD + Octahedral)', expanded: true});
-                const pineProxy = {
-                    get count() {
-                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
-                        return target ? target.activeInstanceCount : 0;
-                    },
-                    get lod0Dist() {
-                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
-                        return target?.lodInfoList?.[0] ? target.lodInfoList[0].lodDistance : 80;
-                    },
-                    set lod0Dist(v) {
-                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
-                        if (target?.lodInfoList?.[0]) target.lodInfoList[0].lodDistance = v;
-                    },
-                    get lod1Dist() {
-                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
-                        return target?.lodInfoList?.[1] ? target.lodInfoList[1].lodDistance : 180;
-                    },
-                    set lod1Dist(v) {
-                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
-                        if (target?.lodInfoList?.[1]) target.lodInfoList[1].lodDistance = v;
-                    },
-                    get impostorDist() {
-                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
-                        const impostorIdx = (target?.lodInfoList?.length ?? 1) - 2;
-                        return target?.lodInfoList?.[impostorIdx] ? target.lodInfoList[impostorIdx].lodDistance : 320;
-                    },
-                    set impostorDist(v) {
-                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
-                        const impostorIdx = (target?.lodInfoList?.length ?? 1) - 2;
-                        if (target?.lodInfoList?.[impostorIdx]) {
-                            target.lodInfoList[impostorIdx].lodDistance = v;
-                        }
-                    },
-                    get cullingDist() {
-                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
-                        return target ? target.options.cullingDistance : 3500;
-                    },
-                    set cullingDist(v) {
-                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
-                        if (target) target.options.cullingDistance = v;
-                    },
-                    get groundOffset() {
-                        const target = foliageManager.getFoliageType('Tree_Pine_large_1') || foliageManager.getFoliageType('Pine_large_1');
-                        return target ? target.groundOffset : 0.35;
-                    },
-                    set groundOffset(v) {
-                        foliageManager.types.forEach(t => {
-                            t.groundOffset = v;
+                const statsFolder = folderFoliage.addFolder({title: 'Global Buffer Stats', expanded: true});
+                statsFolder.addBinding(globalStats, 'totalTypes', {label: 'Active Types', readonly: true});
+                statsFolder.addBinding(globalStats, 'totalInstances', {label: 'Rendered Trees', readonly: true});
+                statsFolder.addBinding(globalStats, 'maxCapacity', {label: 'Max Capacity', readonly: true});
+
+                const createdTypeFolders = new Set();
+                const updateFoliageTypeGUI = () => {
+                    const types = foliageManager.types;
+                    for (let i = 0; i < types.length; i++) {
+                        const type = types[i];
+                        const typeName = type.name;
+                        if (createdTypeFolders.has(typeName)) continue;
+                        createdTypeFolders.add(typeName);
+
+                        const hasImpostor = type.subMeshes.some(s => s.isImpostor);
+                        const typeFolder = folderFoliage.addFolder({
+                            title: `Type: ${typeName}`,
+                            expanded: true
                         });
-                    }
-                };
-                subPine.addBinding(pineProxy, 'count', {readonly: true});
-                subPine.addBinding(pineProxy, 'groundOffset', {
-                    min: 0.0,
-                    max: 2.0,
-                    step: 0.05,
-                    label: 'Ground Sink Offset'
-                });
-                subPine.addBinding(pineProxy, 'lod0Dist', {min: 50, max: 600, step: 25, label: 'LOD 0 -> 1 Dist'});
-                subPine.addBinding(pineProxy, 'lod1Dist', {min: 100, max: 1200, step: 50, label: 'LOD 1 -> 2 Dist'});
-                subPine.addBinding(pineProxy, 'impostorDist', {
-                    min: 200,
-                    max: 2000,
-                    step: 50,
-                    label: 'LOD 2 -> Impostor'
-                });
-                subPine.addBinding(pineProxy, 'cullingDist', {min: 1000, max: 8000, step: 100});
-                subPine.addButton({title: '🔍 Inspect PineTree Atlas'}).on('click', () => {
-                    const pineName = foliageManager.getFoliageType('Tree_Pine_large_1') ? 'Tree_Pine_large_1' : 'Pine_large_1';
-                    FoliageImpostorDebugViewer.open(redGPUContext, foliageManager, pineName);
-                });
 
-            }
+                        typeFolder.addBinding(type, 'activeInstanceCount', {label: 'Instances', readonly: true});
+                        typeFolder.addBinding(type, 'groundOffset', {
+                            min: -2.0,
+                            max: 2.0,
+                            step: 0.05,
+                            label: 'Ground Offset'
+                        });
+                        typeFolder.addBinding(type, 'maxShadowCascadeIndex', {
+                            min: 0,
+                            max: 3,
+                            step: 1,
+                            label: 'Max Shadow Cascade'
+                        });
 
-            const folderSpatial = pane.addFolder({title: 'Spatial', expanded: true});
-            const folderDimensions = folderSpatial.addFolder({title: 'Dimensions', expanded: true});
-
-            folderDimensions.addBinding(config, 'worldSizeX', {min: 1000, max: 30000, step: 500}).on('change', (ev) => {
-                config.worldSizeX = ev.value;
-                landscape.worldSize = [config.worldSizeX, config.worldSizeZ];
-                updateConfigValues();
-            });
-
-            folderDimensions.addBinding(config, 'worldSizeZ', {min: 1000, max: 30000, step: 500}).on('change', (ev) => {
-                config.worldSizeZ = ev.value;
-                landscape.worldSize = [config.worldSizeX, config.worldSizeZ];
-                updateConfigValues();
-            });
-
-            const maxTilesAllowed = Math.floor((redGPUContext.gpuDevice?.limits?.maxTextureDimension2D ?? 8192) / 512);
-
-            folderDimensions.addBinding(config, 'componentCountX', {
-                min: 1,
-                max: maxTilesAllowed,
-                step: 1
-            }).on('change', (ev) => {
-                config.componentCountX = ev.value;
-                landscape.componentCount = [config.componentCountX, config.componentCountZ];
-                updateConfigValues();
-            });
-
-            folderDimensions.addBinding(config, 'componentCountZ', {
-                min: 1,
-                max: maxTilesAllowed,
-                step: 1
-            }).on('change', (ev) => {
-                config.componentCountZ = ev.value;
-                landscape.componentCount = [config.componentCountX, config.componentCountZ];
-                updateConfigValues();
-            });
-
-            folderDimensions.addBinding(config, 'tileSizeStr', {readonly: true});
-            folderDimensions.addBinding(config, 'totalComponents', {readonly: true});
-
-            const folderLOD = folderSpatial.addFolder({title: 'LOD', expanded: true});
-
-            folderLOD.addBinding(landscape, 'componentSizeQuads', {
-                options: {
-                    16: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_16,
-                    32: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_32,
-                    64: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_64,
-                    128: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_128,
-                    256: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_256,
-                    512: RedGPU.Display.Landscape.LANDSCAPE_BASE_GRID_SIZE.QUAD_512
-                }
-            }).on('change', () => {
-                updateConfigValues();
-            });
-
-            folderLOD.addBinding(landscape, 'lod0SizeQuads', {
-                options: {64: 64, 128: 128, 256: 256, 512: 512}
-            }).on('change', () => {
-                updateConfigValues();
-            });
-
-            folderLOD.addBinding(landscape, 'maxLODLevel', {min: 1, max: 8, step: 1}).on('change', () => {
-                updateConfigValues();
-            });
-
-            folderLOD.addBinding(landscape, 'lodMetric', {
-                options: {distance: 'distance', screenSize: 'screenSize'}
-            });
-
-            folderLOD.addBinding(landscape, 'lodFadeStartRatio', {min: 0.1, max: 0.99, step: 0.05});
-
-            folderLOD.addBinding(landscape, 'lodGeomorphStartRatio', {
-                min: 0.1,
-                max: 0.99,
-                step: 0.05
-            });
-
-            const folderStream = folderSpatial.addFolder({title: 'Tile Streaming', expanded: true});
-            folderStream.addBinding(landscape, 'loadedTileCount', {readonly: true});
-            folderStream.addBinding(landscape, 'pendingQueueSize', {readonly: true});
-            folderStream.addBinding(landscape, 'loadingRadius', {min: 500, max: 20000, step: 100});
-            folderStream.addBinding(landscape, 'maxLoadsPerFrame', {min: 1, max: 10, step: 1});
-
-            const folderDisplay = pane.addFolder({title: 'Display', expanded: true});
-            folderDisplay.addBinding(landscape, 'heightScale', {min: 0, max: 3000, step: 25});
-            folderDisplay.addBinding(landscape, 'wireframe');
-            folderDisplay.addBinding(landscape, 'lodColoration');
-
-            const baseColorProxy = {
-                get baseColor() {
-                    return landscape.baseColor.hex;
-                },
-                set baseColor(v) {
-                    landscape.baseColor.setColorByHEX(v);
-                }
-            };
-            folderDisplay.addBinding(baseColorProxy, 'baseColor');
-            folderDisplay.addBinding(config, 'textureArraySize', {readonly: true});
-
-            if (layers?.length) {
-                const folderLayers = pane.addFolder({title: 'Layers', expanded: true});
-
-                layers.forEach((layer) => {
-                    const subFolder = folderLayers.addFolder({
-                        title: layer.name,
-                        expanded: layer.name === 'Grass'
-                    });
-
-                    subFolder.addBinding(layer, 'enabled');
-                    subFolder.addBinding(layer, 'weightChannel', {
-                        options: {R: 'R', G: 'G', B: 'B', A: 'A'}
-                    });
-
-                    const tintObj = {
-                        get tintColor() {
-                            return layer.tintColor ? layer.tintColor.hex : '#ffffff';
-                        },
-                        set tintColor(v) {
-                            layer.tintColor = v;
-                        }
-                    };
-                    subFolder.addBinding(tintObj, 'tintColor');
-
-                    subFolder.addBinding(layer, 'roughness', {min: 0, max: 1, step: 0.01});
-                    subFolder.addBinding(layer, 'metallic', {min: 0, max: 1, step: 0.01});
-                    subFolder.addBinding(layer, 'normalIntensity', {min: 0, max: 3, step: 0.01});
-                    subFolder.addBinding(layer, 'aoIntensity', {min: 0, max: 2, step: 0.01});
-
-                    const layerScaleObj = {
-                        get uvScale() {
-                            return layer.uvScale[0];
-                        },
-                        set uvScale(v) {
-                            layer.uvScale = [v, v];
-                        }
-                    };
-                    subFolder.addBinding(layerScaleObj, 'uvScale', {min: 1, max: 200, step: 1});
-                });
-            }
-
-            const folderSun = pane.addFolder({title: 'Sun Light', expanded: false});
-            folderSun.addBinding(directionalLight, 'elevation', {min: 0, max: 90, step: 1});
-            folderSun.addBinding(directionalLight, 'azimuth', {min: 0, max: 360, step: 1});
-
-            const folderAtmo = pane.addFolder({title: 'SkyAtmosphere', expanded: false});
-            const atmoState = {enabled: true};
-            folderAtmo.addBinding(atmoState, 'enabled', {label: 'Enabled'}).on('change', (ev) => {
-                view.skyAtmosphere = ev.value ? skyAtmosphere : null;
-            });
-            folderAtmo.addBinding(skyAtmosphere, 'sunSize', {min: 0.01, max: 10, step: 0.01});
-            folderAtmo.addBinding(skyAtmosphere, 'sunLimbDarkening', {min: 0, max: 10, step: 0.01});
-            folderAtmo.addBinding(skyAtmosphere, 'cloudCoverage', {min: 0, max: 1, step: 0.01});
-            folderAtmo.addBinding(skyAtmosphere, 'cloudDensity', {min: 0, max: 1, step: 0.01});
-            folderAtmo.addBinding(skyAtmosphere, 'cloudHeight', {min: 0.1, max: 20, step: 0.1});
-            folderAtmo.addBinding(skyAtmosphere, 'atmosphereHeight', {min: 1, max: 200, step: 1});
-
-            // ─────────────────────────────────────────────────────────────
-            // 🌲 Foliage Global Mega Buffer 전용 모니터링 패널
-            // ─────────────────────────────────────────────────────────────
-            const folderFoliage = pane.addFolder({title: '🌲 Foliage System (Global Mega Buffer)', expanded: true});
-
-            const foliageStats = {
-                get totalAssetTypes() {
-                    return foliageManager.types.length;
-                },
-                get totalActiveInstances() {
-                    return foliageManager.megaBuffer.totalActiveInstances;
-                },
-                get maxBufferCapacity() {
-                    return foliageManager.megaBuffer.maxTotalInstances;
-                }
-            };
-
-            folderFoliage.addBinding(foliageStats, 'totalAssetTypes', {
-                label: 'Types (Single Dispatch)',
-                readonly: true
-            });
-            folderFoliage.addBinding(foliageStats, 'totalActiveInstances', {
-                label: 'Total Active Trees',
-                readonly: true
-            });
-            folderFoliage.addBinding(foliageStats, 'maxBufferCapacity', {label: 'Max Mega Capacity', readonly: true});
-
-            const updateFoliageTypeGUI = () => {
-                const types = foliageManager.types;
-                types.forEach((type) => {
-                    const typeName = type.name;
-                    if (folderFoliage.children.some(c => c.title === `Type: ${typeName}`)) return;
-
-                    const grpFolder = folderFoliage.addFolder({
-                        title: `Type: ${typeName}`,
-                        expanded: false
-                    });
-
-                    grpFolder.addBinding(type, 'activeInstanceCount', {label: 'Active Count', readonly: true});
-                    const alloc = type.allocation;
-                    if (alloc) {
-                        const allocProxy = {
-                            get typeId() {
-                                return alloc.typeId;
+                        const lodInfo = {
+                            get lodsSummary() {
+                                const list = type.lodInfoList;
+                                if (!list || list.length === 0) return 'None';
+                                return list.map((info, idx) => `LOD${idx}: ${Math.round(info.lodDistance)}m`).join(' | ');
                             },
-                            get rawOffset() {
-                                return alloc.rawBaseOffset;
-                            },
-                            get culledOffset() {
-                                return alloc.culledBaseOffset;
+                            get impostorStatus() {
+                                return hasImpostor ? 'Enabled (Octahedral)' : 'Disabled (3D Mesh only)';
                             }
                         };
-                        grpFolder.addBinding(allocProxy, 'typeId', {label: 'Shader Type ID', readonly: true});
-                        grpFolder.addBinding(allocProxy, 'rawOffset', {label: 'Raw Offset', readonly: true});
+                        typeFolder.addBinding(lodInfo, 'lodsSummary', {label: 'LOD Distances', readonly: true});
+                        typeFolder.addBinding(lodInfo, 'impostorStatus', {label: 'Impostor', readonly: true});
+
+                        if (hasImpostor) {
+                            typeFolder.addButton({title: '🔍 Inspect Impostor Atlas'}).on('click', () => {
+                                FoliageImpostorDebugViewer.open(redGPUContext, foliageManager, typeName);
+                            });
+                        }
                     }
-                });
-            };
+                };
 
-            setInterval(updateFoliageTypeGUI, 1000);
-
-            const folderCam = pane.addFolder({title: 'Camera', expanded: true});
-            folderCam.addBinding(controller, 'moveSpeed', {min: 50, max: 20000, step: 10});
-
-            const dbg = landscape.debuggerManager;
-            const folderDebuggers = pane.addFolder({title: 'debuggerManager', expanded: true});
-
-            folderDebuggers.addBinding(dbg, 'hud');
-            folderDebuggers.addBinding(dbg, 'spatialGrid');
-            folderDebuggers.addBinding(dbg, 'vht');
-            folderDebuggers.addBinding(dbg, 'vnt');
-            folderDebuggers.addBinding(dbg, 'vbt');
-            folderDebuggers.addBinding(dbg, 'vbtNormal');
-            folderDebuggers.addBinding(dbg, 'vbtORM');
-
-            folderDebuggers.addBinding(config, 'boxSize', {min: 60, max: 300, step: 10}).on('change', (ev) => {
-                const sz = ev.value;
-                if (dbg.spatialGridDebugger) dbg.spatialGridDebugger.setSize(sz, sz);
-                if (dbg.vhtDebugger) {
-                    dbg.vhtDebugger.setSize(sz, sz);
-                    dbg.vhtDebugger.setPosition(12 + sz + 10, 12);
-                }
-                if (dbg.vntDebugger) {
-                    dbg.vntDebugger.setSize(sz, sz);
-                    dbg.vntDebugger.setPosition(12 + (sz + 10) * 2, 12);
-                }
-                if (dbg.vbtDebugger) {
-                    dbg.vbtDebugger.setSize(sz, sz);
-                    dbg.vbtDebugger.setPosition(12 + (sz + 10) * 3, 12);
-                }
-                if (dbg.vbtNormalDebugger) {
-                    dbg.vbtNormalDebugger.setSize(sz, sz);
-                    dbg.vbtNormalDebugger.setPosition(12 + (sz + 10) * 4, 12);
-                }
-                if (dbg.vbtORMDebugger) {
-                    dbg.vbtORMDebugger.setSize(sz, sz);
-                    dbg.vbtORMDebugger.setPosition(12 + (sz + 10) * 5, 12);
-                }
-            });
-        }
-    });
-};
+                setInterval(updateFoliageTypeGUI, 1000);
+                updateFoliageTypeGUI();
+            }
+        });
+    }
+);

@@ -40,6 +40,14 @@ class ViewTransform extends RedGPUObject {
      */
     #noneJitterProjectionMatrix = mat4.create()
     /**
+     * [KO] 프러스텀 평면 캐시 버퍼 (Zero-GC)
+     * [EN] Frustum planes cache buffer (Zero-GC)
+     */
+    readonly #frustumPlanesBuffer: number[][] = [
+        new Array(4), new Array(4), new Array(4),
+        new Array(4), new Array(4), new Array(4)
+    ];
+    /**
      * [KO] 이 뷰에 연결된 카메라 인스턴스
      * [EN] Camera instance connected to this view
      */
@@ -244,12 +252,9 @@ class ViewTransform extends RedGPUObject {
      * [KO] 프러스텀 평면 배열
      * [EN] Frustum planes array
      */
-    get frustumPlanes() {
-        if (this.#camera instanceof AController) {
-            return computeViewFrustumPlanes(this.projectionMatrix, this.#camera.camera.viewMatrix)
-        } else {
-            return computeViewFrustumPlanes(this.projectionMatrix, this.#camera.viewMatrix)
-        }
+    get frustumPlanes(): number[][] {
+        const viewMatrix = this.#camera instanceof AController ? this.#camera.camera.viewMatrix : this.#camera.viewMatrix;
+        return computeViewFrustumPlanes(this.projectionMatrix, viewMatrix, this.#frustumPlanesBuffer);
     }
 
     /**

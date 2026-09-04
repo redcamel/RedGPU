@@ -266,7 +266,9 @@ RedGPU.init(
             fadeStartDistance: 1000,
             minScale: [0.8, 10, 0.8],
             maxScale: [1.3, 20, 1.3],
-            randomRotationY: true
+            randomRotationY: true,
+            useOcclusionCulling: false,
+            maxShadowCascadeIndex: 0
         });
 
         // 5-1. Landscape 내장 디버거 관리자(debuggerManager) 활성화 (HUD 모니터, 2D 공간 분할 그리드, VHT 고도 아틀라스, VNT 노멀 아틀라스)
@@ -349,16 +351,22 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                         return grassType ? grassType.activeInstanceCount : 0;
                     },
                     get foliageCullingDist() {
-                        return grassType ? grassType.options.cullingDistance : 600;
+                        return grassType ? grassType.cullingDistance : 600;
                     },
                     set foliageCullingDist(v) {
-                        if (grassType) grassType.options.cullingDistance = v;
+                        if (grassType) grassType.cullingDistance = v;
                     },
                     get foliageFadeStartDist() {
-                        return grassType ? grassType.options.fadeStartDistance : 400;
+                        return grassType ? grassType.fadeStartDistance : 400;
                     },
                     set foliageFadeStartDist(v) {
-                        if (grassType) grassType.options.fadeStartDistance = v;
+                        if (grassType) grassType.fadeStartDistance = v;
+                    },
+                    get useOcclusionCulling() {
+                        return grassType ? grassType.useOcclusionCulling : false;
+                    },
+                    set useOcclusionCulling(v) {
+                        if (grassType) grassType.useOcclusionCulling = v;
                     }
                 };
                 folderFoliage.addBinding(foliageProxy, 'foliageCount', {readonly: true});
@@ -372,6 +380,7 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
                     max: 1500,
                     step: 20
                 });
+                folderFoliage.addBinding(foliageProxy, 'useOcclusionCulling', {label: 'Occlusion Culling (HZB)'});
             }
 
             // Folder 1: Spatial System (Dimensions & LOD)

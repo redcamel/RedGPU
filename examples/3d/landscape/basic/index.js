@@ -23,15 +23,17 @@ RedGPU.init(
         directionalLight.azimuth = 45;
         scene.lightManager.addDirectionalLight(directionalLight);
 
-        // 그림자 설정 (대규모 16km 오픈월드 지형 스케일에 최적화)
+        // 그림자 설정 (대규모 16km 오픈월드 지형 스케일에 최적화: 근거리 400m CSM + 원경 Raymarching)
         const directionalShadowManager = scene.shadowManager.directionalShadowManager;
-        directionalShadowManager.maxShadowDistance = 3000;
-        directionalShadowManager.pcssLightSize = 3.0;
+        directionalShadowManager.maxShadowDistance = 400;
+        directionalShadowManager.pcssLightSize = 0.5;
         directionalShadowManager.strength = 0.9;
-        directionalShadowManager.cascadeCount = 4;
+        directionalShadowManager.cascadeCount = 3;
 
         const landscape = new RedGPU.Display.Landscape.Landscape(redGPUContext);
         landscape.worldSize = [16000, 16000];
+        landscape.lod0SizeQuads = 64;
+        landscape.castShadow = false;
 
         const assetPath = '../../../assets/terrain/terrainTest_001/layer/';
         const splatMapPath = '../../../assets/terrain/terrainTest_001/splatMap.jpg';
@@ -110,7 +112,7 @@ RedGPU.init(
         };
 
         scene.addLandscape(landscape);
-        landscape.debuggerManager.spatialGrid = true;
+        landscape.debuggerManager.spatialGrid = false;
 
         const renderer = new RedGPU.Renderer();
         renderer.start(redGPUContext, () => {
@@ -124,10 +126,10 @@ RedGPU.init(
             console.log("Canvas resized:", event.width, event.height);
         };
 
-        renderTestPane(redGPUContext, landscape, controller, directionalLight, layers);
+        renderTestPane(redGPUContext, landscape, controller, directionalLight, layers, scene);
     }
 );
-const renderTestPane = (redGPUContext, landscape, controller, directionalLight, layers) => {
+const renderTestPane = (redGPUContext, landscape, controller, directionalLight, layers, scene) => {
     const [wsX, wsZ] = landscape.worldSize;
     const [tcX, tcZ] = landscape.componentCount;
     const [tsX, tsZ] = landscape.tileSize;
@@ -169,6 +171,20 @@ const renderTestPane = (redGPUContext, landscape, controller, directionalLight, 
         skybox: true,
         gui: (pane) => {
             activePane = pane;
+
+            const folderShadows = pane.addFolder({title: 'Shadow Controls (P0-2)', expanded: true});
+            const dShadow = scene.shadowManager.directionalShadowManager;
+            folderShadows.addBinding(dShadow, 'cascadeCount', {min: 1, max: 4, step: 1, label: 'Cascade Count'});
+            folderShadows.addBinding(dShadow, 'maxShadowDistance', {
+                min: 500,
+                max: 5000,
+                step: 100,
+                label: 'Max Distance'
+            });
+            folderShadows.addBinding(dShadow, 'pcssLightSize', {min: 0.1, max: 4.0, step: 0.1, label: 'PCSS Softness'});
+            folderShadows.addBinding(dShadow, 'strength', {min: 0.0, max: 1.0, step: 0.05, label: 'Shadow Strength'});
+            folderShadows.addBinding(landscape, 'castShadow', {label: 'Landscape Cast Shadow'});
+            folderShadows.addBinding(landscape, 'receiveShadow', {label: 'Landscape Receive Shadow'});
 
             const folderSpatial = pane.addFolder({title: 'Spatial', expanded: true});
             const folderDimensions = folderSpatial.addFolder({title: 'Dimensions', expanded: true});

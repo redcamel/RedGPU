@@ -4,7 +4,15 @@ import FoliageType from "../../FoliageType";
 import type {FoliageDepthPassMode} from "../pipeline/FoliagePipelineRegistry";
 import FoliagePipelineRegistry from "../pipeline/FoliagePipelineRegistry";
 
+export interface ValidFoliageTypeItem {
+    type: FoliageType | null;
+    culledGPU: GPUBuffer | null;
+    indirectGPU: GPUBuffer | null;
+}
+
 class FoliageRenderer {
+    static readonly #MAX_POOLED_TYPES = 64;
+
     #redGPUContext: RedGPUContext;
     #pipelineRegistry: FoliagePipelineRegistry;
     #emptyBindGroup: GPUBindGroup | null = null;
@@ -19,7 +27,9 @@ class FoliageRenderer {
     #lastBoundInstanceBuffer: GPUBuffer | null = null;
     #lastBoundInstanceOffset: number = -1;
 
-    #validTypes: { type: FoliageType; culledGPU: GPUBuffer; indirectGPU: GPUBuffer }[] = [];
+    // 🚀 [최적화 4위 - Zero-GC] 메인 뷰와 섀도우 패스의 풀 간섭을 없애고 64개 슬롯을 사전 생성하여 런타임 객체 생성 0건 보장
+    readonly #validTypesMain: ValidFoliageTypeItem[] = [];
+    readonly #validTypesShadow: ValidFoliageTypeItem[] = [];
 
     constructor(
         redGPUContext: RedGPUContext,
@@ -31,6 +41,11 @@ class FoliageRenderer {
         this.#pipelineRegistry = pipelineRegistry;
         this.#emptyBindGroup = emptyBindGroup || null;
         this.#subMeshVertexBindGroupLayout = subMeshVertexBindGroupLayout || null;
+
+        for (let i = 0; i < FoliageRenderer.#MAX_POOLED_TYPES; i++) {
+            this.#validTypesMain.push({type: null, culledGPU: null, indirectGPU: null});
+            this.#validTypesShadow.push({type: null, culledGPU: null, indirectGPU: null});
+        }
     }
 
     render(passEncoder: GPURenderPassEncoder, typeList: readonly FoliageType[], view: any): void {
@@ -61,10 +76,10 @@ class FoliageRenderer {
             const indirectGPU = foliageType.indirectGPUBuffer;
             if (!culledGPU || !indirectGPU || foliageType.subMeshes.length === 0) continue;
 
-            let item = this.#validTypes[validCount];
+            let item = this.#validTypesMain[validCount];
             if (!item) {
                 item = {type: foliageType, culledGPU, indirectGPU};
-                this.#validTypes[validCount] = item;
+                this.#validTypesMain[validCount] = item;
             } else {
                 item.type = foliageType;
                 item.culledGPU = culledGPU;
@@ -75,7 +90,10 @@ class FoliageRenderer {
         if (validCount === 0) return;
 
         for (let t = 0; t < validCount; t++) {
-            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypes[t];
+            const item = this.#validTypesMain[t];
+            const foliageType = item.type!;
+            const culledGPU = item.culledGPU!;
+            const indirectGPU = item.indirectGPU!;
             const subMeshes = foliageType.subMeshes;
             const subCount = subMeshes.length;
 
@@ -88,7 +106,10 @@ class FoliageRenderer {
         }
 
         for (let t = 0; t < validCount; t++) {
-            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypes[t];
+            const item = this.#validTypesMain[t];
+            const foliageType = item.type!;
+            const culledGPU = item.culledGPU!;
+            const indirectGPU = item.indirectGPU!;
             const subMeshes = foliageType.subMeshes;
             const subCount = subMeshes.length;
 
@@ -130,10 +151,10 @@ class FoliageRenderer {
             const indirectGPU = foliageType.shadowIndirectGPUBuffer;
             if (!culledGPU || !indirectGPU || foliageType.subMeshes.length === 0) continue;
 
-            let item = this.#validTypes[validCount];
+            let item = this.#validTypesShadow[validCount];
             if (!item) {
                 item = {type: foliageType, culledGPU, indirectGPU};
-                this.#validTypes[validCount] = item;
+                this.#validTypesShadow[validCount] = item;
             } else {
                 item.type = foliageType;
                 item.culledGPU = culledGPU;
@@ -149,7 +170,10 @@ class FoliageRenderer {
         const isFarCascade = currentCascade >= 2;
 
         for (let t = 0; t < validCount; t++) {
-            const {type: foliageType, culledGPU, indirectGPU} = this.#validTypes[t];
+            const item = this.#validTypesShadow[t];
+            const foliageType = item.type!;
+            const culledGPU = item.culledGPU!;
+            const indirectGPU = item.indirectGPU!;
             const subMeshes = foliageType.subMeshes;
             const subCount = subMeshes.length;
             const lodInfoList = foliageType.lodInfoList;
@@ -246,6 +270,24 @@ class FoliageRenderer {
         }
 
         sub.draw(passEncoder, indirectGPUBuffer, overrideIndirectOffset);
+    }
+
+    destroy(): void {
+        this.#lastBoundPipeline = null;
+        this.#lastBoundSystemBG = null;
+        this.#lastBoundVertexUniformBG = null;
+        this.#lastBoundMatBG = null;
+        this.#lastBoundGeometryVertexBuffer = null;
+        this.#lastBoundIndexBuffer = null;
+        this.#lastBoundInstanceBuffer = null;
+        for (let i = 0; i < this.#validTypesMain.length; i++) {
+            this.#validTypesMain[i].type = null;
+            this.#validTypesMain[i].culledGPU = null;
+            this.#validTypesMain[i].indirectGPU = null;
+            this.#validTypesShadow[i].type = null;
+            this.#validTypesShadow[i].culledGPU = null;
+            this.#validTypesShadow[i].indirectGPU = null;
+        }
     }
 }
 

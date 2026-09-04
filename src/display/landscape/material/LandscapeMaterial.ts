@@ -21,6 +21,9 @@ interface LandscapeMaterial {
 }
 
 class LandscapeMaterial extends AUVTransformBaseMaterial {
+    static readonly #DEFAULT_BASE_COLOR: readonly number[] = Object.freeze([0.22, 0.49, 0.26, 1.0]);
+    static readonly #DEFAULT_LAYER_COLOR: readonly number[] = Object.freeze([1, 1, 1, 1]);
+
     #layers: LandscapeLayer[] = [];
     #textureArraySize: number = 1024;
 
@@ -188,7 +191,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
         uintBuf[2] = 0;
         uintBuf[3] = 0;
 
-        const colorLinear = this.baseColor ? this.baseColor.rgbaNormalLinear : [0.22, 0.49, 0.26, 1.0];
+        const colorLinear = this.baseColor ? this.baseColor.rgbaNormalLinear : LandscapeMaterial.#DEFAULT_BASE_COLOR;
         floatBuf[4] = colorLinear[0];
         floatBuf[5] = colorLinear[1];
         floatBuf[6] = colorLinear[2];
@@ -204,7 +207,7 @@ class LandscapeMaterial extends AUVTransformBaseMaterial {
                 floatBuf[offset + 2] = layer.uvScale[0];
                 floatBuf[offset + 3] = layer.uvScale[1];
 
-                const layerColorLinear = layer.tintColor ? layer.tintColor.rgbaNormalLinear : [1, 1, 1, 1];
+                const layerColorLinear = layer.tintColor ? layer.tintColor.rgbaNormalLinear : LandscapeMaterial.#DEFAULT_LAYER_COLOR;
                 floatBuf[offset + 4] = layerColorLinear[0];
                 floatBuf[offset + 5] = layerColorLinear[1];
                 floatBuf[offset + 6] = layerColorLinear[2];

@@ -26,6 +26,9 @@ import {mat4} from 'gl-matrix';
 export class Landscape extends Object3DContainer {
     static readonly #DEFAULT_LOD_MULTIPLIERS: readonly number[] = Object.freeze([1.0, 2.0, 3.5, 6.0, 9.5, 14.0, 20.0]);
     static readonly #tempPVMatrix: Float32Array = new Float32Array(16);
+    static readonly #COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = Object.freeze({
+        label: 'Landscape_GPUCulling_ComputePass'
+    });
 
     #redGPUContext: RedGPUContext;
     #sharedGeometry: LandscapeSharedGeometry;
@@ -84,6 +87,13 @@ export class Landscape extends Object3DContainer {
 
     #vertexShaderModule: GPUShaderModule;
     #renderPipelineCache: Map<string, GPURenderPipeline> = new Map();
+    #cachedRenderPipeline: GPURenderPipeline | null = null;
+    #lastRenderTopology: string = '';
+    #lastRenderMaterialUUID: string = '';
+    #lastRenderVariantModule: any = null;
+    #lastRenderMsaaID: string = '';
+    #cachedShadowPipelineSolid: GPURenderPipeline | null = null;
+    #cachedShadowPipelineWireframe: GPURenderPipeline | null = null;
 
     constructor(redGPUContext: RedGPUContext) {
         super();
@@ -394,7 +404,7 @@ export class Landscape extends Object3DContainer {
                     this.#tileStreamer?.rebakeAllLoadedVBT();
                 });
             }
-            this.#renderPipelineCache.clear();
+            this.#clearPipelineCaches();
         }
     }
 
@@ -410,7 +420,7 @@ export class Landscape extends Object3DContainer {
             if (material.dirtyPipeline) {
                 material._updateFragmentState();
                 material.dirtyPipeline = false;
-                this.#renderPipelineCache.clear();
+                this.#clearPipelineCaches();
                 if (renderResults) {
                     renderResults.numDirtyPipelines++;
                 }
@@ -735,7 +745,7 @@ export class Landscape extends Object3DContainer {
         );
 
         this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
-            'Landscape_GPUCulling_ComputePass',
+            Landscape.#COMPUTE_PASS_DESCRIPTOR,
             this.#onPreProcessComputePass
         );
 
@@ -924,6 +934,55 @@ export class Landscape extends Object3DContainer {
         this.#updateLandscapeUniforms();
     }
 
+    override destroy(): void {
+        super.destroy();
+        this.#debuggerManager?.destroy();
+        this.#foliageManager?.destroy?.();
+        this.#sharedGeometry?.destroy();
+        this.#gpuCuller?.destroy();
+        this.#tileStreamer?.destroy();
+        this.#vhtGenerator?.destroy();
+        this.#vntGenerator?.destroy();
+        this.#vbtGenerator?.destroy();
+
+        if (this.#instanceBuffer) {
+            this.#instanceBuffer.destroy();
+        }
+        if (this.#vhtAtlasTexture) {
+            this.#vhtAtlasTexture.destroy();
+            this.#vhtAtlasTexture = null;
+        }
+        if (this.#vntAtlasTexture) {
+            this.#vntAtlasTexture.destroy();
+            this.#vntAtlasTexture = null;
+        }
+        if (this.#vbtBaseColorAtlas) {
+            this.#vbtBaseColorAtlas.destroy();
+            this.#vbtBaseColorAtlas = null;
+        }
+        if (this.#vbtNormalAtlas) {
+            this.#vbtNormalAtlas.destroy();
+            this.#vbtNormalAtlas = null;
+        }
+        if (this.#vbtORMAtlas) {
+            this.#vbtORMAtlas.destroy();
+            this.#vbtORMAtlas = null;
+        }
+        this.#clearPipelineCaches();
+        this.#vhtSampler = null;
+    }
+
+    #clearPipelineCaches(): void {
+        this.#renderPipelineCache.clear();
+        this.#cachedRenderPipeline = null;
+        this.#lastRenderTopology = '';
+        this.#lastRenderMaterialUUID = '';
+        this.#lastRenderVariantModule = null;
+        this.#lastRenderMsaaID = '';
+        this.#cachedShadowPipelineSolid = null;
+        this.#cachedShadowPipelineWireframe = null;
+    }
+
     #getOrCreateRenderPipeline(geom: any, storageBGLayout: GPUBindGroupLayout): GPURenderPipeline | null {
         const gpuDevice = this.#redGPUContext.gpuDevice;
         const material = this.#material;
@@ -934,11 +993,30 @@ export class Landscape extends Object3DContainer {
         const useMSAA = antialiasingManager.useMSAA;
         const sampleCount = useMSAA ? 4 : 1;
         const topology = this.#wireframe ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
-        const variantKey = (material.gpuRenderInfo.fragmentShaderModule as any)?.label || 'default';
+        const fragModule = material.gpuRenderInfo.fragmentShaderModule;
+
+        // 🚀 [Zero-GC 인라인 캐시] 상태가 동일하면 문자열 템플릿 생성 및 Map 탐색 없이 즉시 반환
+        if (
+            this.#cachedRenderPipeline &&
+            this.#lastRenderTopology === topology &&
+            this.#lastRenderMaterialUUID === material.uuid &&
+            this.#lastRenderVariantModule === fragModule &&
+            this.#lastRenderMsaaID === msaaID
+        ) {
+            return this.#cachedRenderPipeline;
+        }
+
+        const variantKey = (fragModule as any)?.label || 'default';
         const key = `${topology}_${material.uuid}_${variantKey}_${msaaID}`;
 
         if (this.#renderPipelineCache.has(key)) {
-            return this.#renderPipelineCache.get(key);
+            const pipeline = this.#renderPipelineCache.get(key)!;
+            this.#cachedRenderPipeline = pipeline;
+            this.#lastRenderTopology = topology;
+            this.#lastRenderMaterialUUID = material.uuid;
+            this.#lastRenderVariantModule = fragModule;
+            this.#lastRenderMsaaID = msaaID;
+            return pipeline;
         }
 
         try {
@@ -981,6 +1059,11 @@ export class Landscape extends Object3DContainer {
             });
 
             this.#renderPipelineCache.set(key, pipeline);
+            this.#cachedRenderPipeline = pipeline;
+            this.#lastRenderTopology = topology;
+            this.#lastRenderMaterialUUID = material.uuid;
+            this.#lastRenderVariantModule = fragModule;
+            this.#lastRenderMsaaID = msaaID;
             return pipeline;
         } catch (e) {
             console.warn('Failed to create Landscape RenderPipeline:', e);
@@ -989,14 +1072,28 @@ export class Landscape extends Object3DContainer {
     }
 
     #getOrCreateShadowRenderPipeline(geom: any, storageBGLayout: GPUBindGroupLayout): GPURenderPipeline | null {
+        const isWireframe = this.#wireframe;
+        // 🚀 [Zero-GC 인라인 캐시] 섀도우 파이프라인은 와이어프레임 여부만 구별되므로 즉시 반환
+        if (isWireframe) {
+            if (this.#cachedShadowPipelineWireframe) return this.#cachedShadowPipelineWireframe;
+        } else {
+            if (this.#cachedShadowPipelineSolid) return this.#cachedShadowPipelineSolid;
+        }
+
         const gpuDevice = this.#redGPUContext.gpuDevice;
         if (!gpuDevice) return null;
 
-        const topology = this.#wireframe ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
+        const topology = isWireframe ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
         const key = `SHADOW_${topology}`;
 
         if (this.#renderPipelineCache.has(key)) {
-            return this.#renderPipelineCache.get(key);
+            const pipeline = this.#renderPipelineCache.get(key)!;
+            if (isWireframe) {
+                this.#cachedShadowPipelineWireframe = pipeline;
+            } else {
+                this.#cachedShadowPipelineSolid = pipeline;
+            }
+            return pipeline;
         }
 
         try {
@@ -1037,6 +1134,11 @@ export class Landscape extends Object3DContainer {
             });
 
             this.#renderPipelineCache.set(key, pipeline);
+            if (isWireframe) {
+                this.#cachedShadowPipelineWireframe = pipeline;
+            } else {
+                this.#cachedShadowPipelineSolid = pipeline;
+            }
             return pipeline;
         } catch (e) {
             console.warn('Failed to create Landscape Shadow RenderPipeline:', e);
@@ -1051,7 +1153,7 @@ export class Landscape extends Object3DContainer {
         }
         this.#sharedGeometry.updateTileSize(this.#tileSizeX, this.#tileSizeZ);
         this.#updateLODDistances();
-        this.#renderPipelineCache.clear();
+        this.#clearPipelineCaches();
 
         const halfSizeX = this.#worldSizeX / 2;
         const halfSizeZ = this.#worldSizeZ / 2;
@@ -1202,44 +1304,6 @@ export class Landscape extends Object3DContainer {
         }
 
         this.#material?.requestVBTRebake(true);
-    }
-
-    override destroy(): void {
-        super.destroy();
-        this.#debuggerManager?.destroy();
-        this.#foliageManager?.destroy?.();
-        this.#sharedGeometry?.destroy();
-        this.#gpuCuller?.destroy();
-        this.#tileStreamer?.destroy();
-        this.#vhtGenerator?.destroy();
-        this.#vntGenerator?.destroy();
-        this.#vbtGenerator?.destroy();
-
-        if (this.#instanceBuffer) {
-            this.#instanceBuffer.destroy();
-        }
-        if (this.#vhtAtlasTexture) {
-            this.#vhtAtlasTexture.destroy();
-            this.#vhtAtlasTexture = null;
-        }
-        if (this.#vntAtlasTexture) {
-            this.#vntAtlasTexture.destroy();
-            this.#vntAtlasTexture = null;
-        }
-        if (this.#vbtBaseColorAtlas) {
-            this.#vbtBaseColorAtlas.destroy();
-            this.#vbtBaseColorAtlas = null;
-        }
-        if (this.#vbtNormalAtlas) {
-            this.#vbtNormalAtlas.destroy();
-            this.#vbtNormalAtlas = null;
-        }
-        if (this.#vbtORMAtlas) {
-            this.#vbtORMAtlas.destroy();
-            this.#vbtORMAtlas = null;
-        }
-        this.#renderPipelineCache.clear();
-        this.#vhtSampler = null;
     }
 }
 

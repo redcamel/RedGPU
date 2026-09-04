@@ -193,7 +193,8 @@ export class LandscapeTileStreamer {
     }
 
     isTileLoaded(row: number, col: number): boolean {
-        return this.#loadedMap.has(`${row}_${col}`);
+        const comp = this.#spatialGrid?.getComponent(row, col);
+        return comp ? this.#loadedMap.has(comp.key) : false;
     }
 
     update(cameraX: number, cameraZ: number, cameraY: number = 0): void {
@@ -254,9 +255,10 @@ export class LandscapeTileStreamer {
         grid.getCellCoordinates(x, z, this.#tempCellBuffer);
         const col = this.#tempCellBuffer[0];
         const row = this.#tempCellBuffer[1];
-        const key = `${row}_${col}`;
+        const comp = grid.getComponent(row, col);
+        if (!comp) return 0.0;
 
-        const tileData = this.#cpuHeightMap.get(key);
+        const tileData = this.#cpuHeightMap.get(comp.key);
         if (!tileData) {
             return 0.0;
         }
@@ -298,8 +300,7 @@ export class LandscapeTileStreamer {
 
         this.#rebakeQueue.length = 0;
         for (const comp of this.#spatialGrid.flatCells) {
-            const key = `${comp.componentZ}_${comp.componentX}`;
-            if (this.#loadedMap.has(key)) {
+            if (this.#loadedMap.has(comp.key)) {
                 this.#rebakeQueue.push(comp);
             }
         }
@@ -349,7 +350,7 @@ export class LandscapeTileStreamer {
     };
 
     async #loadTileAsync(comp: LandscapeComponent): Promise<void> {
-        const key = `${comp.componentZ}_${comp.componentX}`;
+        const key = comp.key;
         this.#loadingMap.set(key, true);
 
         try {

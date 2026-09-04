@@ -159,6 +159,7 @@ class LandscapeFoliageManager {
         this.#typeList.length = 0;
         this.#megaBuffer.destroy();
         this.#pipelineRegistry.clearCache();
+        this.#renderer.destroy();
     }
 }
 

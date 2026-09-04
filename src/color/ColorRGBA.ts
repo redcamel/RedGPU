@@ -35,6 +35,9 @@ import ColorRGB from "./ColorRGB";
 class ColorRGBA extends ColorRGB {
     #a: number
     readonly #onChange: Function;
+    readonly #rgba: number[] = [0, 0, 0, 1];
+    readonly #rgbaNormal: number[] = [0, 0, 0, 1];
+    readonly #rgbaNormalLinear: number[] = [0, 0, 0, 1];
 
     /**
      * [KO] ColorRGBA 클래스의 새 인스턴스를 생성합니다.
@@ -118,7 +121,12 @@ class ColorRGBA extends ColorRGB {
      * [EN] Array of numbers representing RGBA values in [r, g, b, a] format
      */
     get rgba(): number[] {
-        return [this.r, this.g, this.b, this.#a];
+        const out = this.#rgba;
+        out[0] = this.r;
+        out[1] = this.g;
+        out[2] = this.b;
+        out[3] = this.#a;
+        return out;
     }
 
     /**
@@ -137,7 +145,12 @@ class ColorRGBA extends ColorRGB {
      * [EN] Array containing normalized RGBA values [r/255, g/255, b/255, a]
      */
     get rgbaNormal(): number[] {
-        return [this.r / 255, this.g / 255, this.b / 255, this.#a];
+        const out = this.#rgbaNormal;
+        out[0] = this.r / 255;
+        out[1] = this.g / 255;
+        out[2] = this.b / 255;
+        out[3] = this.#a;
+        return out;
     }
 
     /**
@@ -153,12 +166,12 @@ class ColorRGBA extends ColorRGB {
      * [EN] Array containing gamma-corrected (2.2) normalized RGBA values
      */
     get rgbaNormalLinear(): number[] {
-        return [
-            Math.pow(this.r / 255, 2.2),
-            Math.pow(this.g / 255, 2.2),
-            Math.pow(this.b / 255, 2.2),
-            this.#a
-        ];
+        const out = this.#rgbaNormalLinear;
+        out[0] = Math.pow(this.r / 255, 2.2);
+        out[1] = Math.pow(this.g / 255, 2.2);
+        out[2] = Math.pow(this.b / 255, 2.2);
+        out[3] = this.#a;
+        return out;
     }
 
     /**

@@ -137,7 +137,7 @@ fn main(
     let maxUsefulDistSq = max(effectiveCullingDistSq, maxShadowDistSq);
     let isVisibleRange = isValid && (horizontalDistSq < maxUsefulDistSq);
 
-    var realY = instance.posY;
+    var realY = instance.posY - typeInfo.bottomOffset;
     var distSq = horizontalDistSq;
     var effectiveDist: f32 = 0.0;
     var scaledRadius: f32 = 0.0;
@@ -154,7 +154,7 @@ fn main(
         let scaleY = instance.scaleY;
 
         // 🌟 [최적화 P4 / Step 5] 스폰 시점에 posY가 사전 계산되어 있으므로, 0.0인 경우에만 VHT 샘플링 수행 (매 프레임 50만 회 텍스처 로드 100% 박멸!)
-        if (realY == 0.0 && globalUniforms.hasVHT != 0u && globalUniforms.invWorldSizeX > 0.0) {
+        if (instance.posY == 0.0 && globalUniforms.hasVHT != 0u && globalUniforms.invWorldSizeX > 0.0) {
             let u = instance.posX * globalUniforms.invWorldSizeX + 0.5;
             let v = instance.posZ * globalUniforms.invWorldSizeX + 0.5;
             if (u >= 0.0 && u <= 1.0 && v >= 0.0 && v <= 1.0) {
