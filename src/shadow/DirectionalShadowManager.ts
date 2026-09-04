@@ -365,10 +365,18 @@ class DirectionalShadowManager {
             const subFar = g_cascadeSplits[c + 1];
 
             // 🌟 [수학적 정석] 해석적 최소 외접구 중심(Cz) 및 불변 반경(R) 도출
-            const cz = ((subFar + subNear) * 0.5) * (1.0 + k2);
+            // k2 > (subFar - subNear)/(subFar + subNear) 일 때 cz > subFar 방지 가드 (와이드스크린/고각 FOV 안정화)
+            let cz = ((subFar + subNear) * 0.5) * (1.0 + k2);
+            if (cz > subFar) {
+                cz = subFar;
+            }
             const diffFar = subFar - cz;
             const farDiag = subFar * k;
             let sphereRadius = Math.sqrt(diffFar * diffFar + farDiag * farDiag);
+
+            // 🌟 [화면 모서리 클리핑 방지] 텍셀 스냅핑(최대 1.414 텍셀) + 16-Tap PCF 필터 반경(3.8 텍셀) 여유 마진 (5텍셀)
+            const rawWorldUnitsPerTexel = (sphereRadius * 2.0) / textureSize;
+            sphereRadius += rawWorldUnitsPerTexel * 5.0;
 
             // 텍셀 여유 마진 (16텍셀 단위 정렬)
             sphereRadius = Math.ceil(sphereRadius * 16.0) / 16.0;

@@ -145,13 +145,38 @@ fn getDirectionalShadowVisibility(
 
     // 🚀 4. [언리얼 엔진 표준 슬로프 스케일 노멀 바이어스]
     let slopeBias = clamp(1.0 - nDotL, 0.0, 1.0);
-    let lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
-    let orthoScale = length(lightVP[0].xyz);
-    let worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
-    let normalOffset = N * slopeBias * worldTexelSize * 1.0;
-    let biasedWorldPosition = worldPosition + normalOffset;
+    var lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
+    var orthoScale = length(lightVP[0].xyz);
+    var worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
+    var normalOffset = N * slopeBias * worldTexelSize * 1.0;
+    var biasedWorldPosition = worldPosition + normalOffset;
 
-    let shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
+    var shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
+
+    // 🌟 [화면 모서리 원근 탈출(OOB) 자동 승격 방어망]
+    // 화면 네 귀퉁이(모서리) 등에서 Z 깊이상으로는 현재 캐스케이드이지만, 대각선 원근 확장으로 인해
+    // 현재 캐스케이드 직교 투영 UV 범위를 벗어난 경우, 안전하게 포괄하는 다음 캐스케이드로 자동 승격!
+    if ((shadowCoord.x < 0.0 || shadowCoord.x > 1.0 || shadowCoord.y < 0.0 || shadowCoord.y > 1.0) && cascadeIndex < cascadeCount - 1u) {
+        cascadeIndex = cascadeIndex + 1u;
+        lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
+        orthoScale = length(lightVP[0].xyz);
+        worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
+        normalOffset = N * slopeBias * worldTexelSize * 1.0;
+        biasedWorldPosition = worldPosition + normalOffset;
+        shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
+
+        // 극단적 광각/초대각선 모서리 대비 2차 가드
+        if ((shadowCoord.x < 0.0 || shadowCoord.x > 1.0 || shadowCoord.y < 0.0 || shadowCoord.y > 1.0) && cascadeIndex < cascadeCount - 1u) {
+            cascadeIndex = cascadeIndex + 1u;
+            lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
+            orthoScale = length(lightVP[0].xyz);
+            worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
+            normalOffset = N * slopeBias * worldTexelSize * 1.0;
+            biasedWorldPosition = worldPosition + normalOffset;
+            shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
+        }
+    }
+
     let visibility = sampleModernCascadeShadow(
         directionalShadowMap,
         directionalShadowMapSampler,
