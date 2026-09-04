@@ -555,40 +555,30 @@ fn main(inputData: InputData) -> OutputFragment {
     var ambientOcclusion: f32;
 
     let rawViewDist = distance(u_cameraPosition, input_vertexPosition);
-    let isScreenSize = landscapeInstanceUniforms.lodMetric >= 0.5;
-    let viewDist = select(rawViewDist, rawViewDist * landscapeInstanceUniforms.tanHalfFOV, isScreenSize);
 
-    if (lod < 1.5) {
-        // 🌟 [최적화 - 125m 골든 밸런스 실시간 PBR 레이어 렌더링 거리 캡핑]
-        // 0m ~ 87.5m: 100% 4K 실시간 PBR 레이어 (지상 시점 화질 100% 완벽 보존)
-        // 87.5m ~ 125m: Bayer 4x4 디더링으로 베이킹 텍스처(VBT)와 부드러운 페이드 전환
-        // 125m 이상: 초경량 VBT(베이킹 텍스처) 완전 전환 (텍스처 샘플링 부하 80%+ 삭감!)
+    var isDirectPBR = false;
+    if (lod < 0.5) {
+        // 🚀 [최적화] 거리 계산 및 디더링 판별을 오직 LOD 0 타일 내부에서만 수행!
+        let isScreenSize = landscapeInstanceUniforms.lodMetric >= 0.5;
+        let viewDist = select(rawViewDist, rawViewDist * landscapeInstanceUniforms.tanHalfFOV, isScreenSize);
+
         let lod0Dist = min(125.0, max(1.0, sqrt(landscapeInstanceUniforms.lodDistancesSq[0].x)));
         let fadeRatio = clamp(select(0.7, landscapeInstanceUniforms.lodFadeStartRatio, landscapeInstanceUniforms.lodFadeStartRatio > 0.0), 0.0, 0.99);
-        let fadeStart = lod0Dist * fadeRatio;
-        let fadeEnd = lod0Dist;
-        let fade = smoothstep(fadeStart, fadeEnd, viewDist);
+        let fade = smoothstep(lod0Dist * fadeRatio, lod0Dist, viewDist);
         let ditherThreshold = getBayerDither4x4(inputData.position.xy);
-        let useVBT = fade > ditherThreshold;
+        isDirectPBR = fade <= ditherThreshold;
+    }
 
-        if (useVBT) {
-            // 🌟 [원경 고화질 무손실 타일링]
-            // 512 저해상도 VBT의 2m 뭉개짐을 완전 박멸하고, 4K BaseColor 타일링을 유지하여 수 km 밖까지 쨍한 디테일 보존!
-            // 동시에 무거운 노멀/ORM(8장)은 100% 생략하여 텍스처 호출을 단 2~3장으로 80% 초경량 유지!
-            albedo = computeDistantLayersAlbedo(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV);
-            N = getBaseNormal(globalUV);
-            roughnessFactor = 0.85;
-            ambientOcclusion = 1.0;
-        } else {
-            let baseN = getBaseNormal(globalUV);
-            let direct = computeDirectLayersPBR(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV, baseN);
-            albedo = direct.albedo;
-            N = direct.normal;
-            roughnessFactor = direct.roughness;
-            ambientOcclusion = direct.ao;
-        }
+    if (isDirectPBR) {
+        // 🌿 [LOD 0 근거리 0m~87.5m] 100% 실시간 4K 멀티 레이어 PBR
+        let baseN = getBaseNormal(globalUV);
+        let direct = computeDirectLayersPBR(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV, baseN);
+        albedo = direct.albedo;
+        N = direct.normal;
+        roughnessFactor = direct.roughness;
+        ambientOcclusion = direct.ao;
     } else {
-        // 🏔️ [원경 산맥 LOD 2~7] 저해상도 뭉개짐 없이 4K 원본 컬러 타일링 100% 유지 (노멀/ORM 생략으로 초고속)
+        // 🏔️ [LOD 1~7 전체 및 LOD 0의 125m+ 원경] 텍스처 2~3장 초경량 렌더링으로 단일화!
         albedo = computeDistantLayersAlbedo(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV);
         N = getBaseNormal(globalUV);
         roughnessFactor = 0.85;
