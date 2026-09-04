@@ -20,17 +20,39 @@ RedGPU.init(
         view.grid = false;
         redGPUContext.addView(view);
 
-        const skyAtmosphere = new RedGPU.Display.SkyAtmosphere(redGPUContext);
-        // view.skyAtmosphere = skyAtmosphere;
+        // 1. IBL & SkyBox 리소스 목록 및 초기화
+        const iblList = [
+            {
+                name: '2K - the sky is on fire',
+                path: '../../../assets/hdr/2k/the_sky_is_on_fire_2k.hdr',
+                luminance: 30000
+            },
+            {name: 'Cannon_Exterior', path: '../../../assets/hdr/Cannon_Exterior.hdr', luminance: 35000},
+            {name: 'field', path: '../../../assets/hdr/field.hdr', luminance: 30000},
+            {name: 'neutral', path: '../../../assets/hdr/neutral.37290948.hdr', luminance: 30000},
+            {name: 'pisa', path: '../../../assets/hdr/pisa.hdr', luminance: 25000}
+        ];
 
+        let currentHdr = iblList[0];
+        let currentIbl = new RedGPU.Resource.IBL(redGPUContext, currentHdr.path, currentHdr.luminance);
+        view.ibl = currentIbl;
+
+        let currentSkybox = new RedGPU.Display.SkyBox(redGPUContext, currentIbl.environmentTexture, currentHdr.luminance);
+        view.skybox = currentSkybox;
+
+        // 2. Directional Light 및 Shadow 설정
         const directionalLight = new RedGPU.Light.DirectionalLight();
         directionalLight.elevation = 45;
         directionalLight.azimuth = 45;
+        directionalLight.lux = 90000;
         scene.lightManager.addDirectionalLight(directionalLight);
 
         // 그림자 설정 (16km 오픈월드 지형 및 대규모 식생에 최적화)
         const directionalShadowManager = scene.shadowManager.directionalShadowManager;
-        directionalShadowManager.maxShadowDistance = 500
+        directionalShadowManager.maxShadowDistance = 500;
+        directionalShadowManager.shadowDepthTextureSize = 1024;
+        directionalShadowManager.strength = 0.9;
+        directionalShadowManager.bias = 0.00015;
 
 
 
@@ -233,9 +255,9 @@ RedGPU.init(
 
         new RedGPUExampleHelper(redGPUContext, {
             RedGPU,
-            directionalShadow: true,
-            ibl: true,
-            skybox: true,
+            directionalShadow: false,
+            ibl: false,
+            skybox: false,
             gui: (pane) => {
                 const folderFoliage = pane.addFolder({title: '🌲 Foliage System', expanded: true});
 
@@ -265,7 +287,6 @@ RedGPU.init(
                         if (createdTypeFolders.has(typeName)) continue;
                         createdTypeFolders.add(typeName);
 
-                        const hasImpostor = type.subMeshes.some(s => s.isImpostor);
                         const typeFolder = folderFoliage.addFolder({
                             title: `Type: ${typeName}`,
                             expanded: true
@@ -273,10 +294,16 @@ RedGPU.init(
 
                         typeFolder.addBinding(type, 'activeInstanceCount', {label: 'Instances', readonly: true});
                         typeFolder.addBinding(type, 'groundOffset', {
-                            min: -2.0,
-                            max: 2.0,
+                            min: -5.0,
+                            max: 5.0,
                             step: 0.05,
                             label: 'Ground Offset'
+                        });
+                        typeFolder.addBinding(type, 'cullingDistance', {
+                            min: 200,
+                            max: 8000,
+                            step: 50,
+                            label: 'Culling Distance'
                         });
                         typeFolder.addBinding(type, 'maxShadowCascadeIndex', {
                             min: 0,
@@ -289,17 +316,74 @@ RedGPU.init(
                             get lodsSummary() {
                                 const list = type.lodInfoList;
                                 if (!list || list.length === 0) return 'None';
-                                return list.map((info, idx) => `LOD${idx}: ${Math.round(info.lodDistance)}m`).join(' | ');
-                            },
-                            get impostorStatus() {
-                                return hasImpostor ? 'Enabled (Octahedral)' : 'Disabled (3D Mesh only)';
+                                const parts = [];
+                                let prevDist = 0;
+                                for (let i = 0; i < list.length; i++) {
+                                    const info = list[i];
+                                    const dist = Math.round(info.lodDistance);
+                                    if (dist >= 100000) {
+                                        parts.push(`Impostor(${prevDist}m+)`);
+                                    } else {
+                                        parts.push(`LOD${i}(${prevDist}~${dist}m)`);
+                                        prevDist = dist;
+                                    }
+                                }
+                                return parts.join(' | ');
                             }
                         };
-                        typeFolder.addBinding(lodInfo, 'lodsSummary', {label: 'LOD Distances', readonly: true});
-                        typeFolder.addBinding(lodInfo, 'impostorStatus', {label: 'Impostor', readonly: true});
+                        typeFolder.addBinding(lodInfo, 'lodsSummary', {label: 'LOD Ranges', readonly: true});
 
-                        if (hasImpostor) {
-                            typeFolder.addButton({title: '🔍 Inspect Impostor Atlas'}).on('click', () => {
+                        const lodList = type.lodInfoList || [];
+                        const numMeshLODs = (type.useImpostor && lodList.length > 1) ? lodList.length - 1 : lodList.length;
+                        if (numMeshLODs > 0) {
+                            const lodFolder = typeFolder.addFolder({title: '📐 LOD Distances', expanded: true});
+                            for (let l = 0; l < numMeshLODs; l++) {
+                                const lodIdx = l;
+                                const lodBinding = {
+                                    get distance() {
+                                        if (typeof type.getLODDistance === 'function') {
+                                            return type.getLODDistance(lodIdx);
+                                        }
+                                        return type.lodInfoList?.[lodIdx]?.lodDistance ?? 0;
+                                    },
+                                    set distance(v) {
+                                        if (typeof type.setLODDistance === 'function') {
+                                            type.setLODDistance(lodIdx, v);
+                                        } else if (type.lodInfoList && type.lodInfoList[lodIdx]) {
+                                            type.lodInfoList[lodIdx].lodDistance = Math.max(0, v);
+                                            if (type.useImpostor) {
+                                                type.impostorDistance = type.impostorDistance;
+                                            }
+                                        }
+                                    }
+                                };
+                                const initDist = typeof type.getLODDistance === 'function'
+                                    ? type.getLODDistance(lodIdx)
+                                    : (type.lodInfoList?.[lodIdx]?.lodDistance ?? 80);
+                                const maxVal = Math.max(800, Math.ceil(initDist * 2.5 / 50) * 50);
+                                lodFolder.addBinding(lodBinding, 'distance', {
+                                    min: 10,
+                                    max: maxVal,
+                                    step: 5,
+                                    label: `LOD ${lodIdx} Dist`
+                                });
+                            }
+                        }
+
+                        if (type.useImpostor) {
+                            const impostorFolder = typeFolder.addFolder({
+                                title: '🎭 Octahedral Impostor',
+                                expanded: true
+                            });
+                            impostorFolder.addBinding(type, 'useImpostor', {label: 'Enable Impostor'});
+                            impostorFolder.addBinding(type, 'impostorDistance', {
+                                min: 30,
+                                max: 800,
+                                step: 10,
+                                label: 'Switch Distance'
+                            });
+
+                            impostorFolder.addButton({title: '🔍 Inspect Impostor Atlas'}).on('click', () => {
                                 FoliageImpostorDebugViewer.open(redGPUContext, foliageManager, typeName);
                             });
                         }
