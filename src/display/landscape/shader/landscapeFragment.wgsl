@@ -93,7 +93,7 @@ struct DirectLayerResult {
 
 fn getBaseNormal(globalUV: vec2<f32>) -> vec3<f32> {
     let vntSample = textureSampleLevel(vntNormalTexture, baseColorTextureSampler, globalUV, 0.0).rgb;
-    return normalize(select(vntSample * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), length(vntSample) <= 0.001));
+    return normalize(select(vntSample * 2.0 - vec3<f32>(1.0), vec3<f32>(0.0, 1.0, 0.0), dot(vntSample, vntSample) <= 1e-6));
 }
 
 fn computeDirectLayersPBR(
@@ -256,10 +256,8 @@ fn getSpecularNDF(NdotH: f32, roughness: f32) -> f32 {
     let alpha = roughness * roughness;
     let alpha2 = alpha * alpha;
     let NdotH2 = NdotH * NdotH;
-    let nom = alpha2;
     let denom = (NdotH2 * (alpha2 - 1.0) + 1.0);
-    let denomSquared = denom * denom;
-    return nom / max(EPSILON, denomSquared * PI);
+    return (alpha2 * INV_PI) / max(EPSILON, denom * denom);
 }
 
 fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
@@ -267,14 +265,18 @@ fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
     let alpha2 = alpha * alpha;
     let safeNdotV = max(NdotV, 1e-4);
     let safeNdotL = max(NdotL, 1e-4);
-    let GGXV = safeNdotL * sqrt(safeNdotV * safeNdotV * (1.0 - alpha2) + alpha2);
-    let GGXL = safeNdotV * sqrt(safeNdotL * safeNdotL * (1.0 - alpha2) + alpha2);
+    let oneMinusAlpha2 = 1.0 - alpha2;
+    let GGXV = safeNdotL * sqrt(safeNdotV * safeNdotV * oneMinusAlpha2 + alpha2);
+    let GGXL = safeNdotV * sqrt(safeNdotL * safeNdotL * oneMinusAlpha2 + alpha2);
     return 0.5 / max(GGXV + GGXL, EPSILON);
 }
 
 fn getRoughnessFresnel(cosTheta: f32, F0: vec3<f32>, roughness: f32) -> vec3<f32> {
     let maxF = max(vec3<f32>(1.0 - roughness), F0);
-    return F0 + (maxF - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+    let f = clamp(1.0 - cosTheta, 0.0, 1.0);
+    let f2 = f * f;
+    let f5 = f2 * f2 * f;
+    return F0 + (maxF - F0) * f5;
 }
 
 fn getDirectSpecularBRDF(
@@ -297,13 +299,18 @@ fn getDirectDiffuseBRDF(
     albedo: vec3<f32>
 ) -> vec3<f32> {
     if (NdotL <= 0.0) { return vec3<f32>(0.0); }
-    let energyBias = mix(0.0, 0.5, roughness);
     let energyFactor = mix(1.0, 1.0 / 1.51, roughness);
-    let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
-    let f0 = 1.0;
-    let lightScatter = f0 + (fd90 - f0) * pow(1.0 - NdotL, 5.0);
-    let viewScatter = f0 + (fd90 - f0) * pow(1.0 - NdotV, 5.0);
-    return albedo * NdotL * lightScatter * viewScatter * energyFactor;
+    let fd90Minus1 = (0.5 + 2.0 * (LdotH * LdotH)) * roughness - 1.0;
+    let fl = clamp(1.0 - NdotL, 0.0, 1.0);
+    let fl2 = fl * fl;
+    let fl5 = fl2 * fl2 * fl;
+    let fv = clamp(1.0 - NdotV, 0.0, 1.0);
+    let fv2 = fv * fv;
+    let fv5 = fv2 * fv2 * fv;
+    let lightScatter = 1.0 + fd90Minus1 * fl5;
+    let viewScatter = 1.0 + fd90Minus1 * fv5;
+    let factor = (NdotL * energyFactor) * (lightScatter * viewScatter);
+    return albedo * factor;
 }
 
 fn getDirectPbrLight(
@@ -659,7 +666,7 @@ fn main(inputData: InputData) -> OutputFragment {
     );
 
     var indirectLighting = vec3<f32>(0.0);
-    if (lod < 1.5) {
+    if (isDirectPBR) {
         indirectLighting = getIndirectPbrLighting(
             N, V, NdotV,
             albedo,
@@ -667,7 +674,7 @@ fn main(inputData: InputData) -> OutputFragment {
             ambientOcclusion
         );
     } else {
-        // 🌟 [원경 지형 Diffuse-Only IBL] 스펙큘러 관련 4개 텍스처 생략으로 60FPS 완벽 방어
+        // 🌟 [원경 및 비스듬한 바닥 Diffuse-Only IBL] 스펙큘러 관련 4개 텍스처 생략으로 대역폭 완벽 방어
         indirectLighting = getDistantIndirectPbrLighting(
             N,
             albedo,
