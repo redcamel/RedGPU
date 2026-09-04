@@ -32,10 +32,12 @@ fn sampleModernCascadeShadow(
     shadowCoord: vec3<f32>,
     oneOverTextureSize: f32,
     bias: f32,
-    lightSize: f32
+    lightSize: f32,
+    slopeFactor: f32
 ) -> f32 {
     let shadowDepth = clamp(shadowCoord.z, 0.0, 1.0);
-    let cascadeBias = bias * (1.0 + f32(cascadeIndex) * 0.25);
+    // 🌟 [슬로프 스케일 뎁스 바이어스] 경사면에서의 텍셀 깊이 오차 보정
+    let cascadeBias = bias * (1.0 + slopeFactor * 2.0) * (1.0 + f32(cascadeIndex) * 0.25);
 
     // 🌟 [언리얼 엔진 표준 안티앨리어싱 필터 반경]
     let cascadeScale = mix(2.5, 3.2, clamp(f32(cascadeIndex) / 3.0, 0.0, 1.0));
@@ -110,12 +112,13 @@ fn getDirectionalShadowVisibility(
     if (viewDepth > shadowInfo.cascadeSplitDepths[1] && cascadeCount > 2u) { cascadeIndex = 2u; }
     if (viewDepth > shadowInfo.cascadeSplitDepths[2] && cascadeCount > 3u) { cascadeIndex = 3u; }
 
-    // 🚀 4. [언리얼 엔진 표준 슬로프 스케일 노멀 바이어스]
+    // 🚀 4. [언리얼 엔진 5 표준 슬로프 스케일 노멀 오프셋 바이어스]
+    // 16-Tap PCF 필터 반경 및 곡면 메시(캐릭터 등)의 자가 그림자 여드름(Acne)을 완벽 차단
     let slopeBias = clamp(1.0 - nDotL, 0.0, 1.0);
     var lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
     var orthoScale = length(lightVP[0].xyz);
     var worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
-    var normalOffset = N * slopeBias * worldTexelSize * 1.0;
+    var normalOffset = N * (0.6 + slopeBias * 2.0) * worldTexelSize;
     var biasedWorldPosition = worldPosition + normalOffset;
 
     var shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
@@ -126,7 +129,7 @@ fn getDirectionalShadowVisibility(
         lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
         orthoScale = length(lightVP[0].xyz);
         worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
-        normalOffset = N * slopeBias * worldTexelSize * 1.0;
+        normalOffset = N * (0.6 + slopeBias * 2.0) * worldTexelSize;
         biasedWorldPosition = worldPosition + normalOffset;
         shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
 
@@ -135,7 +138,7 @@ fn getDirectionalShadowVisibility(
             lightVP = shadowInfo.cascadeLightViewProjectionMatrices[cascadeIndex];
             orthoScale = length(lightVP[0].xyz);
             worldTexelSize = select(0.01, 2.0 / orthoScale, orthoScale > 0.0001) * oneOverTextureSize;
-            normalOffset = N * slopeBias * worldTexelSize * 1.0;
+            normalOffset = N * (0.6 + slopeBias * 2.0) * worldTexelSize;
             biasedWorldPosition = worldPosition + normalOffset;
             shadowCoord = getShadowCoord(biasedWorldPosition, lightVP);
         }
@@ -148,13 +151,13 @@ fn getDirectionalShadowVisibility(
         shadowCoord,
         oneOverTextureSize,
         bias,
-        lightSize
+        lightSize,
+        slopeBias
     );
 
     var finalVisibility = visibility;
 
     // 🌟 5. [언리얼 엔진 5 표준 캐스케이드 전환 블렌딩 (Cascade Transition Fraction = 0.20)]
-    // 전환 구간에 들어선 모든 픽셀에서 다음 캐스케이드를 정확히 샘플링하여 부드러운 S자 크로스페이드 수행
     if (cascadeIndex < cascadeCount - 1u) {
         let splitFar = shadowInfo.cascadeSplitDepths[cascadeIndex];
         let splitNear = select(systemUniforms.camera.nearClipping, shadowInfo.cascadeSplitDepths[cascadeIndex - 1u], cascadeIndex > 0u);
@@ -167,7 +170,7 @@ fn getDirectionalShadowVisibility(
             let nextLightVP = shadowInfo.cascadeLightViewProjectionMatrices[nextIndex];
             let nextOrthoScale = length(nextLightVP[0].xyz);
             let nextWorldTexelSize = select(0.01, 2.0 / nextOrthoScale, nextOrthoScale > 0.0001) * oneOverTextureSize;
-            let nextBiasedPos = worldPosition + N * slopeBias * nextWorldTexelSize * 1.0;
+            let nextBiasedPos = worldPosition + N * (0.6 + slopeBias * 2.0) * nextWorldTexelSize;
 
             let nextShadowCoord = getShadowCoord(nextBiasedPos, nextLightVP);
             let nextVis = sampleModernCascadeShadow(
@@ -177,7 +180,8 @@ fn getDirectionalShadowVisibility(
                 nextShadowCoord,
                 oneOverTextureSize,
                 bias,
-                lightSize
+                lightSize,
+                slopeBias
             );
 
             let blendFactor = smoothstep(0.0, 1.0, clamp((viewDepth - blendStart) / blendMargin, 0.0, 1.0));
@@ -193,7 +197,6 @@ fn getDirectionalShadowVisibility(
     }
 
     // 🌟 [언리얼 엔진 표준 Soft Horizon Terminator Fade]
-    // 빛과 표면이 90도에 가까운 경계에서 메쉬 삼각형 톱니 모서리가 노출되지 않도록 부드럽게 페이드아웃
     let horizonFade = smoothstep(-0.08, 0.08, nDotL);
     return finalVisibility * horizonFade;
 }
