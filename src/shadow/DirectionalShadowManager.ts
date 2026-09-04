@@ -35,7 +35,7 @@ const g_cascadeSplits = new Float32Array(5);
  * @category Shadow
  */
 class DirectionalShadowManager {
-    #shadowDepthTextureSize: number = 2048;
+    #shadowDepthTextureSize: number = 1024;
     #bias: number = 0.00015;
     #strength: number = 0.9;
     #maxShadowDistance: number = 200;
@@ -224,21 +224,8 @@ class DirectionalShadowManager {
     }
 
     /**
-     * [KO] 섀도우 뎁스 텍스처의 크기(해상도)를 설정합니다. (정수)
-     * [EN] Sets the size (resolution) of the shadow depth texture. (Integer)
-     *
-     * @param value -
-     * [KO] 해상도 값
-     * [EN] Resolution value
-     */
-    set shadowDepthTextureSize(value: number) {
-        validateUintRange(value, 1);
-        this.#shadowDepthTextureSize = value;
-    }
-
-    /**
-     * [KO] 섀도우 뎁스 텍스처의 크기(해상도)를 반환합니다.
-     * [EN] Returns the size (resolution) of the shadow depth texture.
+     * [KO] 섀도우 뎁스 텍스처의 크기(해상도, 기본값: 1024)를 반환합니다.
+     * [EN] Returns the size (resolution, default: 1024) of the shadow depth texture.
      *
      * @returns
      * [KO] 해상도 값
@@ -246,6 +233,19 @@ class DirectionalShadowManager {
      */
     get shadowDepthTextureSize(): number {
         return this.#shadowDepthTextureSize;
+    }
+
+    /**
+     * [KO] 섀도우 뎁스 텍스처의 크기(해상도, 기본값: 1024)를 설정합니다. (정수)
+     * [EN] Sets the size (resolution, default: 1024) of the shadow depth texture. (Integer)
+     *
+     * @param value -
+     * [KO] 해상도 값 (기본값: 1024)
+     * [EN] Resolution value (default: 1024)
+     */
+    set shadowDepthTextureSize(value: number) {
+        validateUintRange(value, 1);
+        this.#shadowDepthTextureSize = value;
     }
 
     /**
@@ -299,7 +299,7 @@ class DirectionalShadowManager {
 
         const cascadeCount = Math.min(4, Math.max(1, this.#cascadeCount || 3));
         const maxDist = this.#maxShadowDistance ?? 200.0;
-        const textureSize = this.#shadowDepthTextureSize || 2048;
+        const textureSize = this.#shadowDepthTextureSize || 1024;
 
         const splitDepths = this.#cascadeSplitDepths;
         const cascadePV = this.#cascadeProjectionViewMatrices;

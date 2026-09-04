@@ -370,15 +370,11 @@ fn main(
 
                 var selectedLOD: u32 = 0u;
                 if (numLODs > 1u) {
-                    let isFarCascade = (c >= 2u || (activeCascades <= 2u && c == activeCascades - 1u));
-                    if (isFarCascade) {
-                        selectedLOD = numLODs - 1u; 
-                    } else {
-                        for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
-                            if (effectiveDist <= typeInfo.lods[l].lodDistance || l == numLODs - 1u) {
-                                selectedLOD = l;
-                                break;
-                            }
+                    let maxShadowLOD = select(numLODs - 1u, max(numLODs - 2u, 0u), hasInfiniteImpostor);
+                    for (var l: u32 = 0u; l <= maxShadowLOD; l = l + 1u) {
+                        if (effectiveDist <= typeInfo.lods[l].lodDistance || l == maxShadowLOD) {
+                            selectedLOD = l;
+                            break;
                         }
                     }
                 }
