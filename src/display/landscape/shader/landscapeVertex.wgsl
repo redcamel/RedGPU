@@ -91,20 +91,14 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
         let dx = worldX - camPos.x;
         let dz = worldZ - camPos.z;
         let dy = camPos.y;
-        let rawDist = sqrt(dx * dx + dz * dz + dy * dy);
-        let isScreenSize = landscapeUniforms.lodMetric >= 0.5;
-        let dist = select(rawDist, rawDist * landscapeUniforms.tanHalfFOV, isScreenSize);
+        let distSq = dx * dx + dz * dz + dy * dy;
 
-        let currentPacked = landscapeUniforms.lodDistancesSq[lodLevel / 4u];
-        let currentThresholdSq = currentPacked[lodLevel % 4u];
+        let currentPacked = landscapeUniforms.lodDistancesSq[0];
+        let currentThresholdSq = select(currentPacked.x, currentPacked.y, lodLevel == 1u);
 
         if (currentThresholdSq < 1e14) {
             let nextDist = sqrt(currentThresholdSq);
-            var prevDist = 0.0;
-            if (lodLevel > 0u) {
-                let prevPacked = landscapeUniforms.lodDistancesSq[(lodLevel - 1u) / 4u];
-                prevDist = sqrt(prevPacked[(lodLevel - 1u) % 4u]);
-            }
+            let prevDist = select(0.0, sqrt(currentPacked.x), lodLevel == 1u);
 
             let maxTileDim = max(landscapeUniforms.tileSizeX, landscapeUniforms.tileSizeZ);
             let tileRadius = maxTileDim * 0.7071;
@@ -115,62 +109,71 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
             let morphRatio = clamp(landscapeUniforms.lodGeomorphStartRatio, 0.01, 0.99);
             let morphStartDist = prevDist + morphRange * morphRatio;
 
-            let morphFactor = clamp((dist - morphStartDist) / max(0.001, morphEndDist - morphStartDist), 0.0, 1.0);
-            let smoothMorph = smoothstep(0.0, 1.0, morphFactor);
+            let isScreenSize = landscapeUniforms.lodMetric >= 0.5;
+            let effMorphStart = select(morphStartDist, morphStartDist / max(1e-4, landscapeUniforms.tanHalfFOV), isScreenSize);
 
-            if (smoothMorph > 0.0001) {
-                let lod0Quads = max(1.0, landscapeUniforms.lod0Quads);
-                let baseQuads = max(1.0, landscapeUniforms.baseQuads);
+            // 🚀 [최적화 VS-2] 모핑 범위에 도달하지 않은 대다수 정점(70%+)은 sqrt 및 모핑 로직 0회 즉시 스킵!
+            if (distSq >= effMorphStart * effMorphStart) {
+                let rawDist = sqrt(distSq);
+                let dist = select(rawDist, rawDist * landscapeUniforms.tanHalfFOV, isScreenSize);
 
-                var currentSegments: f32;
-                var subStep: u32;
+                let morphFactor = clamp((dist - morphStartDist) / max(0.001, morphEndDist - morphStartDist), 0.0, 1.0);
+                let smoothMorph = smoothstep(0.0, 1.0, morphFactor);
 
-                if (lodLevel == 0u) {
-                    currentSegments = lod0Quads;
-                    subStep = max(1u, u32(round(lod0Quads / baseQuads)));
-                } else {
-                    // 🚀 [최적화 VS-1] lodLevel < 2u 가드 내 else는 무조건 lodLevel == 1u (step = 1.0 확정)이므로 pow SFU 완전 박멸!
-                    currentSegments = max(1.0, floor(baseQuads));
-                    subStep = 2u;
-                }
+                if (smoothMorph > 0.0001) {
+                    let lod0Quads = max(1.0, landscapeUniforms.lod0Quads);
+                    let baseQuads = max(1.0, landscapeUniforms.baseQuads);
 
-                let halfTileX = landscapeUniforms.tileSizeX * 0.5;
-                let halfTileZ = landscapeUniforms.tileSizeZ * 0.5;
+                    var currentSegments: f32;
+                    var subStep: u32;
 
-                let gridStepX = landscapeUniforms.tileSizeX / currentSegments;
-                let gridStepZ = landscapeUniforms.tileSizeZ / currentSegments;
+                    if (lodLevel == 0u) {
+                        currentSegments = lod0Quads;
+                        subStep = max(1u, u32(round(lod0Quads / baseQuads)));
+                    } else {
+                        // 🚀 [최적화 VS-1] lodLevel < 2u 가드 내 else는 무조건 lodLevel == 1u (step = 1.0 확정)이므로 pow SFU 완전 박멸!
+                        currentSegments = max(1.0, floor(baseQuads));
+                        subStep = 2u;
+                    }
 
-                let gridIdxX = u32(round((input.position.x + halfTileX) / gridStepX) + 0.1);
-                let gridIdxZ = u32(round((input.position.y + halfTileZ) / gridStepZ) + 0.1);
+                    let halfTileX = landscapeUniforms.tileSizeX * 0.5;
+                    let halfTileZ = landscapeUniforms.tileSizeZ * 0.5;
 
-                let isMorphX = (gridIdxX % subStep) != 0u;
-                let isMorphZ = (gridIdxZ % subStep) != 0u;
+                    let gridStepX = landscapeUniforms.tileSizeX / currentSegments;
+                    let gridStepZ = landscapeUniforms.tileSizeZ / currentSegments;
 
-                if (isMorphX || isMorphZ) {
-                    let fracX = f32(gridIdxX % subStep) / f32(subStep);
-                    let fracZ = f32(gridIdxZ % subStep) / f32(subStep);
-                    let uvBaseX = f32(gridIdxX - (gridIdxX % subStep)) * (landscapeUniforms.tileSizeX / (landscapeUniforms.worldSizeX * currentSegments));
-                    let uvBaseZ = f32(gridIdxZ - (gridIdxZ % subStep)) * (landscapeUniforms.tileSizeZ / (landscapeUniforms.worldSizeZ * currentSegments));
-                    let uvSpanX = f32(subStep) * (landscapeUniforms.tileSizeX / (landscapeUniforms.worldSizeX * currentSegments));
-                    let uvSpanZ = f32(subStep) * (landscapeUniforms.tileSizeZ / (landscapeUniforms.worldSizeZ * currentSegments));
+                    let gridIdxX = u32(round((input.position.x + halfTileX) / gridStepX) + 0.1);
+                    let gridIdxZ = u32(round((input.position.y + halfTileZ) / gridStepZ) + 0.1);
 
-                    let tileOriginUV = vec2<f32>(
-                        (instanceData.worldX - halfTileX + landscapeUniforms.worldSizeX * 0.5) / landscapeUniforms.worldSizeX,
-                        (instanceData.worldZ - halfTileZ + landscapeUniforms.worldSizeZ * 0.5) / landscapeUniforms.worldSizeZ
-                    );
+                    let isMorphX = (gridIdxX % subStep) != 0u;
+                    let isMorphZ = (gridIdxZ % subStep) != 0u;
 
-                    let c00 = vec2<i32>(clamp((tileOriginUV + vec2<f32>(uvBaseX, uvBaseZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-                    let c10 = vec2<i32>(clamp((tileOriginUV + vec2<f32>(uvBaseX + uvSpanX, uvBaseZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-                    let c01 = vec2<i32>(clamp((tileOriginUV + vec2<f32>(uvBaseX, uvBaseZ + uvSpanZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
-                    let c11 = vec2<i32>(clamp((tileOriginUV + vec2<f32>(uvBaseX + uvSpanX, uvBaseZ + uvSpanZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+                    if (isMorphX || isMorphZ) {
+                        let fracX = f32(gridIdxX % subStep) / f32(subStep);
+                        let fracZ = f32(gridIdxZ % subStep) / f32(subStep);
+                        let uvBaseX = f32(gridIdxX - (gridIdxX % subStep)) * (landscapeUniforms.tileSizeX / (landscapeUniforms.worldSizeX * currentSegments));
+                        let uvBaseZ = f32(gridIdxZ - (gridIdxZ % subStep)) * (landscapeUniforms.tileSizeZ / (landscapeUniforms.worldSizeZ * currentSegments));
+                        let uvSpanX = f32(subStep) * (landscapeUniforms.tileSizeX / (landscapeUniforms.worldSizeX * currentSegments));
+                        let uvSpanZ = f32(subStep) * (landscapeUniforms.tileSizeZ / (landscapeUniforms.worldSizeZ * currentSegments));
 
-                    let h00 = textureLoad(heightMapTexture, c00, 0).r;
-                    let h10 = textureLoad(heightMapTexture, c10, 0).r;
-                    let h01 = textureLoad(heightMapTexture, c01, 0).r;
-                    let h11 = textureLoad(heightMapTexture, c11, 0).r;
+                        let tileOriginUV = vec2<f32>(
+                            (instanceData.worldX - halfTileX + landscapeUniforms.worldSizeX * 0.5) / landscapeUniforms.worldSizeX,
+                            (instanceData.worldZ - halfTileZ + landscapeUniforms.worldSizeZ * 0.5) / landscapeUniforms.worldSizeZ
+                        );
 
-                    let targetHeight = mix(mix(h00, h10, fracX), mix(h01, h11, fracX), fracZ);
-                    finalHeight = mix(currentHeight, targetHeight, smoothMorph);
+                        let c00 = vec2<i32>(clamp((tileOriginUV + vec2<f32>(uvBaseX, uvBaseZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+                        let c10 = vec2<i32>(clamp((tileOriginUV + vec2<f32>(uvBaseX + uvSpanX, uvBaseZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+                        let c01 = vec2<i32>(clamp((tileOriginUV + vec2<f32>(uvBaseX, uvBaseZ + uvSpanZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+                        let c11 = vec2<i32>(clamp((tileOriginUV + vec2<f32>(uvBaseX + uvSpanX, uvBaseZ + uvSpanZ)) * texSize, vec2<f32>(0.0), texSize - vec2<f32>(1.0)));
+
+                        let h00 = textureLoad(heightMapTexture, c00, 0).r;
+                        let h10 = textureLoad(heightMapTexture, c10, 0).r;
+                        let h01 = textureLoad(heightMapTexture, c01, 0).r;
+                        let h11 = textureLoad(heightMapTexture, c11, 0).r;
+
+                        let targetHeight = mix(mix(h00, h10, fracX), mix(h01, h11, fracX), fracZ);
+                        finalHeight = mix(currentHeight, targetHeight, smoothMorph);
+                    }
                 }
             }
         }
