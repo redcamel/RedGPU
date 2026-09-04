@@ -1,6 +1,10 @@
 struct FoliageLODUniformInfo {
-    lodDistance: f32,
-    fadeRange: f32,
+    enterStart: f32,
+    enterEnd: f32,
+    exitStart: f32,
+    exitEnd: f32,
+    invEnterRange: f32,
+    invExitRange: f32,
     subMeshOffset: u32,
     subMeshCount: u32,
 };
@@ -121,7 +125,7 @@ fn main(
     let cullingDistSq = cullingDist * cullingDist;
 
     let numLODs = typeInfo.lodCount;
-    let hasInfiniteImpostor = (numLODs > 0u && typeInfo.lods[numLODs - 1u].lodDistance >= 100000.0);
+    let hasInfiniteImpostor = (numLODs > 0u && typeInfo.lods[numLODs - 1u].exitEnd >= 100000.0);
     let effectiveCullingDistSq = select(cullingDistSq, 1000000000000.0, hasInfiniteImpostor);
 
     // 🚀 [최적화 P1 / Step 17 - 수평 거리 기반 2D 조기 완전 탈락 (Early 2D Rejection)]
@@ -256,29 +260,19 @@ fn main(
                 targetLOD = 0u;
                 targetAlpha = globalFade;
             } else {
+                // 🚀 [Zero-Cost 사전 계산 LOD 판정]
+                // enterStart, enterEnd, exitStart, exitEnd, invEnterRange, invExitRange가 CPU에서 1회 사전 계산되어 있으므로,
+                // 매 프레임 400만 번 반복되던 span/fadeRange/나눗셈을 100% 제거하고 O(1) 단순 선형 곱셈으로 즉시 판정!
                 for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
                     let lodInfo = typeInfo.lods[l];
-                    var prevDist: f32 = 0.0;
-                    if (l > 0u) {
-                        prevDist = typeInfo.lods[l - 1u].lodDistance;
-                    }
-                    let nextDist = lodInfo.lodDistance;
-                    let span = max(nextDist - prevDist, 5.0);
-                    let fadeRange = clamp(span * 0.10, 5.0, 15.0);
-                    let halfRange = fadeRange * 0.5;
-
-                    let enterStart = max(prevDist - halfRange, 0.0);
-                    let enterEnd = prevDist + halfRange;
-                    let exitStart = nextDist - halfRange;
-                    let exitEnd = nextDist + halfRange;
-
                     let isLastLOD = (l == numLODs - 1u);
-                    if (effectiveDist >= enterStart && (isLastLOD || effectiveDist <= exitEnd)) {
+
+                    if (effectiveDist >= lodInfo.enterStart && (isLastLOD || effectiveDist <= lodInfo.exitEnd)) {
                         var alpha: f32 = 1.0;
-                        if (l > 0u && effectiveDist < enterEnd) {
-                            alpha = clamp((effectiveDist - enterStart) / max(enterEnd - enterStart, 0.001), 0.0, 1.0);
-                        } else if (!isLastLOD && effectiveDist > exitStart) {
-                            alpha = clamp((exitEnd - effectiveDist) / max(exitEnd - exitStart, 0.001), 0.0, 1.0);
+                        if (l > 0u && effectiveDist < lodInfo.enterEnd) {
+                            alpha = clamp((effectiveDist - lodInfo.enterStart) * lodInfo.invEnterRange, 0.0, 1.0);
+                        } else if (!isLastLOD && effectiveDist > lodInfo.exitStart) {
+                            alpha = clamp((lodInfo.exitEnd - effectiveDist) * lodInfo.invExitRange, 0.0, 1.0);
                         }
 
                         targetLOD = l;
@@ -372,7 +366,8 @@ fn main(
                 if (numLODs > 1u) {
                     let maxShadowLOD = select(numLODs - 1u, max(numLODs - 2u, 0u), hasInfiniteImpostor);
                     for (var l: u32 = 0u; l <= maxShadowLOD; l = l + 1u) {
-                        if (effectiveDist <= typeInfo.lods[l].lodDistance || l == maxShadowLOD) {
+                        let originalLodDist = (typeInfo.lods[l].exitStart + typeInfo.lods[l].exitEnd) * 0.5;
+                        if (effectiveDist <= originalLodDist || l == maxShadowLOD) {
                             selectedLOD = l;
                             break;
                         }

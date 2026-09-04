@@ -23,7 +23,7 @@ class FoliageMegaBuffer {
     static readonly #STRIDE_FLOATS: number = 8;
     static readonly #STRIDE_BYTES: number = 8 * 4; 
     static readonly #MAX_TYPES: number = 64;
-    static readonly #TYPE_PARAM_FLOATS: number = 44; 
+    static readonly #TYPE_PARAM_FLOATS: number = 76; 
 
     static readonly #tempFloat32: Float32Array = new Float32Array(1);
     static readonly #tempUint32: Uint32Array = new Uint32Array(FoliageMegaBuffer.#tempFloat32.buffer);
@@ -479,18 +479,40 @@ class FoliageMegaBuffer {
         u32[baseOffset + 11] = 0;
 
         for (let l = 0; l < 8; l++) {
-            const lodBase = baseOffset + 12 + l * 4;
+            const lodBase = baseOffset + 12 + l * 8;
             if (l < numLODs) {
                 const info = lodInfoList[l];
-                f32[lodBase] = info.lodDistance;
-                f32[lodBase + 1] = 0.0;
-                u32[lodBase + 2] = info.subMeshOffset;
-                u32[lodBase + 3] = info.subMeshCount;
+                const prevDist = l > 0 ? lodInfoList[l - 1].lodDistance : 0.0;
+                const nextDist = info.lodDistance;
+                const span = Math.max(nextDist - prevDist, 5.0);
+                const fadeRange = Math.max(5.0, Math.min(15.0, span * 0.10));
+                const halfRange = fadeRange * 0.5;
+
+                const enterStart = Math.max(prevDist - halfRange, 0.0);
+                const enterEnd = prevDist + halfRange;
+                const exitStart = nextDist - halfRange;
+                const exitEnd = nextDist + halfRange;
+
+                const enterSpan = Math.max(enterEnd - enterStart, 0.001);
+                const exitSpan = Math.max(exitEnd - exitStart, 0.001);
+
+                f32[lodBase] = enterStart;
+                f32[lodBase + 1] = enterEnd;
+                f32[lodBase + 2] = exitStart;
+                f32[lodBase + 3] = exitEnd;
+                f32[lodBase + 4] = 1.0 / enterSpan;
+                f32[lodBase + 5] = 1.0 / exitSpan;
+                u32[lodBase + 6] = info.subMeshOffset;
+                u32[lodBase + 7] = info.subMeshCount;
             } else {
                 f32[lodBase] = 999999.0;
-                f32[lodBase + 1] = 0.0;
-                u32[lodBase + 2] = 0;
-                u32[lodBase + 3] = 0;
+                f32[lodBase + 1] = 999999.0;
+                f32[lodBase + 2] = 999999.0;
+                f32[lodBase + 3] = 999999.0;
+                f32[lodBase + 4] = 0.0;
+                f32[lodBase + 5] = 0.0;
+                u32[lodBase + 6] = 0;
+                u32[lodBase + 7] = 0;
             }
         }
     }
