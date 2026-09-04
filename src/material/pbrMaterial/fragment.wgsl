@@ -595,7 +595,7 @@ fn main(inputData:InputData) -> OutputFragment {
     );
     let indirectLighting = getIndirectPbrLighting(
         N, V, NdotV,
-        albedo, &roughnessParameter, metallicParameter,
+        albedo, roughnessParameter, metallicParameter,
         F0, F0_dielectric, F0_metal,
         specularParameter,
         occlusionParameter,
@@ -1107,7 +1107,7 @@ fn getDirectPbrLighting(
 
 fn getIndirectPbrLighting(
     N: vec3<f32>, V: vec3<f32>, NdotV: f32,
-    albedo: vec3<f32>, roughnessParameter: ptr<function, f32>, metallicParameter: f32,
+    albedo: vec3<f32>, roughnessParameter: f32, metallicParameter: f32,
     F0: vec3<f32>, F0_dielectric: vec3<f32>, F0_metal: vec3<f32>,
     specularParameter: f32,
     occlusionParameter: f32,
@@ -1123,7 +1123,7 @@ fn getIndirectPbrLighting(
     if (u_usePrefilterTexture || u_useSkyAtmosphere) {
         var R = getReflectionVectorFromViewDirection(V, N);
         let NdotV_IBL = max(abs(dot(N, V)), 0.04);
-        var iblRoughness = *roughnessParameter;
+        var iblRoughness = roughnessParameter;
         #redgpu_if useKHR_materials_anisotropy
         if (anisotropy > 0.0)
         {
@@ -1155,15 +1155,18 @@ fn getIndirectPbrLighting(
             let skyIrradiance = textureSampleLevel(atmosphereIrradianceLUT, atmosphereSampler, N, 0.0).rgb * skyIntensity * preExposure;
             iblDiffuseColor = (iblDiffuseColor * diffTrans) + skyIrradiance;
         }
-        let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, *roughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
+        let envBRDF = textureSampleLevel(ibl_brdfLUTTexture, prefilterTextureSampler, clamp(vec2<f32>(NdotV_IBL, roughnessParameter), vec2<f32>(0.005), vec2<f32>(0.995)), 0.0).rg;
         let energyCompensation = 1.0 + F0 * (1.0 / max(envBRDF.x + envBRDF.y, 1e-4) - 1.0);
         reflectedColor *= energyCompensation;
 
-        // Optimize Indirect Fresnel by pre-calculating shared pow() term
-        let fresnelPower = 5.0 - 2.0 * (*roughnessParameter);
-        let fresnelTerm = pow(saturate(1.0 - NdotV_IBL), fresnelPower);
-        let FR_dielectric = getIndirectFresnel(NdotV_IBL, F0_dielectric, *roughnessParameter, fresnelTerm);
-        let FR_metal      = getIndirectFresnel(NdotV_IBL, F0_metal,      *roughnessParameter, fresnelTerm);
+        // 🚀 [U1 최적화] IBL Fresnel pow() -> Schlick f^5 ~ f^3 다항식 보간(mix)으로 SFU 100% 소거
+        let f = saturate(1.0 - NdotV_IBL);
+        let f2 = f * f;
+        let f3 = f2 * f;
+        let f5 = f2 * f3;
+        let fresnelTerm = mix(f5, f3, roughnessParameter);
+        let FR_dielectric = getIndirectFresnel(NdotV_IBL, F0_dielectric, roughnessParameter, fresnelTerm);
+        let FR_metal      = getIndirectFresnel(NdotV_IBL, F0_metal,      roughnessParameter, fresnelTerm);
 
         // [EN] Horizon occlusion: smooths out the reflection as it goes below the horizon.
         // [EN] Using Filament's recommended formula for smoother grazing angle transitions.
@@ -1175,7 +1178,7 @@ fn getIndirectPbrLighting(
         let F_IBL_dielectric_weight = F_IBL_dielectric * specularParameter;
 
         // [EN] More robust specular occlusion to prevent light leaking/artifacts at grazing angles.
-        let specularOcclusion = saturate(pow(NdotV_IBL + occlusionParameter, exp2(-16.0 * (*roughnessParameter) - 1.0)) - 1.0 + occlusionParameter);
+        let specularOcclusion = saturate(pow(NdotV_IBL + occlusionParameter, exp2(-16.0 * roughnessParameter - 1.0)) - 1.0 + occlusionParameter);
 
         let specularAlbedo_IBL = saturate(F0_dielectric * envBRDF.x + envBRDF.y);
         let diffuseWeight_IBL = (vec3<f32>(1.0) - specularAlbedo_IBL * specularParameter);
