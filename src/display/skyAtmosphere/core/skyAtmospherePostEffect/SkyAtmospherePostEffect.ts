@@ -21,6 +21,7 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
         this.#skyAtmosphere = skyAtmosphere;
 
         const createCode = (useMSAA: boolean) => {
+            const postEffectSystemUniform = useMSAA ? ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM_MSAA : ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM;
             return [
                 '#redgpu_include depth.getLinearizeDepth',
                 '#redgpu_include skyAtmosphere.skyAtmosphereFn',
@@ -31,13 +32,7 @@ class SkyAtmospherePostEffect extends ASinglePassPostEffect {
                 '@group(0) @binding(4) var aerialPerspectiveLUT : texture_3d<f32>;',
                 '@group(0) @binding(5) var skyAtmosphereIrradianceLUT : texture_cube<f32>;',
                 '',
-                ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM,
-                '@group(2) @binding(5) var basicSampler : sampler;',
-                '',
-                `@group(2) @binding(0) var depthTexture : ${useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d'};`,
-                '@group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>;',
-                '@group(2) @binding(2) var gBufferMotionVector : texture_2d<f32>;',
-                `@group(2) @binding(3) var prevDepthTexture : ${useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d'};`,
+                postEffectSystemUniform,
                 '',
                 '@group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;',
                 '',

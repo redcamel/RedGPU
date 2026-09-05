@@ -21,7 +21,7 @@ const createCode = (
     sourceTextureConfigs: IPostEffectSourceConfig | IPostEffectSourceConfig[] = {name: 'sourceTexture'}
 ) => {
     const {WORK_SIZE_X, WORK_SIZE_Y, WORK_SIZE_Z} = effect;
-    const depthTextureType = useMSAA ? 'texture_depth_multisampled_2d' : 'texture_depth_2d';
+    const postEffectSystemUniform = useMSAA ? ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM_MSAA : ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM;
 
     let sourceTextures = '';
     const items = Array.isArray(sourceTextureConfigs) ? sourceTextureConfigs : [sourceTextureConfigs];
@@ -46,13 +46,7 @@ const createCode = (
         
         ${uniformStruct ? '@group(1) @binding(0) var<uniform> uniforms: Uniforms;' : ''}
         
-        ${ShaderLibrary.POST_EFFECT_SYSTEM_UNIFORM}
-        @group(2) @binding(5) var basicSampler : sampler;
-        
-        @group(2) @binding(0) var depthTexture : ${depthTextureType};
-        @group(2) @binding(1) var gBufferNormalTexture : texture_2d<f32>;
-        @group(2) @binding(2) var gBufferMotionVector : texture_2d<f32>;
-        @group(2) @binding(3) var prevDepthTexture : ${depthTextureType};
+        ${postEffectSystemUniform}
         
         @group(3) @binding(0) var outputTexture : texture_storage_2d<rgba16float, write>;
         
