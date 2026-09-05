@@ -361,6 +361,10 @@ class FoliageType {
     }
 
 
+    get hasImpostor(): boolean {
+        return !!this.#impostorSubMesh;
+    }
+
     get useImpostor(): boolean {
         return this.#useImpostor && !!this.#impostorSubMesh;
     }

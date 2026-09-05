@@ -252,9 +252,8 @@ class FoliageRenderer {
             const culledGPU = item.culledGPU!;
             const indirectGPU = item.indirectGPU!;
 
-            const numLODs = foliageType.lodInfoList.length;
-            const hasImp = foliageType.useImpostor;
-            const maxShadowLOD = numLODs > 1 ? (hasImp ? Math.max(numLODs - 2, 0) : numLODs - 1) : 0;
+            const num3DLODs = foliageType.hasImpostor ? Math.max(1, foliageType.lodInfoList.length - 1) : foliageType.lodInfoList.length;
+            const maxShadowLOD = Math.max(0, num3DLODs - 1);
             const isFarCascade = currentCascade >= 1;
 
             const shadowSubMeshes = foliageType.shadowMergedSubMeshes;
@@ -265,7 +264,7 @@ class FoliageRenderer {
                     const shadowSub = shadowSubMeshes[s];
                     const lodIdx = shadowSub.lodIndex;
 
-                    if (numLODs > 1) {
+                    if (num3DLODs > 1) {
                         if (isFarCascade && lodIdx !== maxShadowLOD) continue;
                         if (!isFarCascade && lodIdx !== 0 && lodIdx !== maxShadowLOD) continue;
                     }
@@ -280,7 +279,7 @@ class FoliageRenderer {
                 for (let s = 0; s < subCount; s++) {
                     const sub = subMeshes[s];
                     if (!sub.canRenderInPass('shadow') || sub.isImpostor) continue;
-                    if (numLODs > 1) {
+                    if (num3DLODs > 1) {
                         if (isFarCascade && sub.lodIndex !== maxShadowLOD) continue;
                         if (!isFarCascade && sub.lodIndex !== 0 && sub.lodIndex !== maxShadowLOD) continue;
                     }
