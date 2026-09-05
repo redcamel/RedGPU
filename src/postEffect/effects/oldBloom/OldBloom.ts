@@ -2,7 +2,7 @@ import RedGPUContext from "../../../context/RedGPUContext";
 import View3D from "../../../display/view/View3D";
 import AMultiPassPostEffect from "../../core/AMultiPassPostEffect";
 import {IPostEffectResult} from "../../core/types";
-import Threshold from "../adjustments/threshold/Threshold";
+import OldBloomThreshold from "./oldBloomThreshold/OldBloomThreshold";
 import GaussianBlur from "../blur/GaussianBlur";
 import OldBloomBlend from "./oldBloomBlend/OldBloomBlend";
 
@@ -28,7 +28,7 @@ import OldBloomBlend from "./oldBloomBlend/OldBloomBlend";
  * @category Visual Effects
  */
 class OldBloom extends AMultiPassPostEffect {
-    #effect_threshold: Threshold;
+    #effect_threshold: OldBloomThreshold;
     #effect_gaussianBlur: GaussianBlur;
     #effect_oldBloomBlend: OldBloomBlend;
 
@@ -66,18 +66,18 @@ class OldBloom extends AMultiPassPostEffect {
         super(
             redGPUContext,
             [
-                new Threshold(redGPUContext),
+                new OldBloomThreshold(redGPUContext),
                 new GaussianBlur(redGPUContext),
                 new OldBloomBlend(redGPUContext),
             ],
         );
-        this.#effect_threshold = this.passList[0] as Threshold;
+        this.#effect_threshold = this.passList[0] as OldBloomThreshold;
         this.#effect_gaussianBlur = this.passList[1] as GaussianBlur;
         this.#effect_oldBloomBlend = this.passList[2] as OldBloomBlend;
 
-        // 초기값 동기화
+        // 초기값 동기화 (1/2 다운샘플 해상도 기준 블러 반경 스케일링)
         this.#effect_threshold.threshold = this.#threshold;
-        this.#effect_gaussianBlur.size = this.#gaussianBlurSize;
+        this.#effect_gaussianBlur.size = Math.max(1, this.#gaussianBlurSize * 0.5);
         this.#effect_oldBloomBlend.exposure = this.#exposure;
         this.#effect_oldBloomBlend.bloomStrength = this.#bloomStrength;
     }
@@ -129,7 +129,7 @@ class OldBloom extends AMultiPassPostEffect {
      */
     set gaussianBlurSize(value: number) {
         this.#gaussianBlurSize = value;
-        this.#effect_gaussianBlur.size = value;
+        this.#effect_gaussianBlur.size = Math.max(1, value * 0.5);
     }
 
     /**
@@ -186,19 +186,24 @@ class OldBloom extends AMultiPassPostEffect {
      * [KO] 올드 블룸 효과를 단계별로 렌더링합니다.
      * [EN] Renders the old bloom effect step by step.
      *
-     * [KO] 1단계: 밝은 영역 추출 (Threshold)
-     * [KO] 2단계: 추출된 영역 블러 처리 (GaussianBlur)
-     * [KO] 3단계: 원본과 블러된 이미지 합성 (OldBloomBlend)
+     * [KO] 1단계: 1/2 해상도로 밝은 영역 다운샘플링 추출 (Threshold)
+     * [KO] 2단계: 1/2 해상도에서 블러 처리 (GaussianBlur - 연산량 75% 절감)
+     * [KO] 3단계: Full-Res 원본과 1/2 블러 결과(Bilinear 보간)를 YCoCg 공간에서 가산 합성 (OldBloomBlend)
      */
     render(view: View3D, width: number, height: number, sourceTextureInfo: IPostEffectResult) {
         const pool = view.postEffectManager.texturePool;
-        const thresholdResult = this.#effect_threshold.render(view, width, height, sourceTextureInfo);
-        const blurResult = this.#effect_gaussianBlur.render(view, width, height, thresholdResult);
-        // thresholdResult는 blur에서 사용된 후 더 이상 필요 없음
+        const downW = Math.max(1, (width * 0.5) | 0);
+        const downH = Math.max(1, (height * 0.5) | 0);
+
+        // 1단계: 1/2 해상도로 Threshold 추출 (다운샘플링)
+        const thresholdResult = this.#effect_threshold.render(view, downW, downH, sourceTextureInfo);
+
+        // 2단계: 1/2 해상도에서 GaussianBlur 수행 (픽셀 연산량 75% 절감)
+        const blurResult = this.#effect_gaussianBlur.render(view, downW, downH, thresholdResult);
         pool.release(thresholdResult.texture);
 
+        // 3단계: Full-Res 원본과 Bilinear 업샘플된 블러 결과 합성
         const blendResult = this.#effect_oldBloomBlend.render(view, width, height, sourceTextureInfo, blurResult);
-        // blurResult는 blend에서 사용된 후 더 이상 필요 없음
         pool.release(blurResult.texture);
 
         return blendResult;
