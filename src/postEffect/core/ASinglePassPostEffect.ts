@@ -52,7 +52,8 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     #name: string
     #SHADER_INFO_MSAA
     #SHADER_INFO_NON_MSAA
-    #prevInfo: { width: number, height: number }
+    #prevWidth: number = 0
+    #prevHeight: number = 0
     // 출력 텍스처 및 설정
     #outputTexture: GPUTexture
     #outputTextureView: GPUTextureView
@@ -317,7 +318,7 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         this.#outputTextureView = result.textureView;
 
         // 변경 감지 (구조적 변경 확인)
-        const dimensionsChanged = this.#prevInfo?.width !== width || this.#prevInfo?.height !== height;
+        const dimensionsChanged = this.#prevWidth !== width || this.#prevHeight !== height;
         const msaaChanged = this.#prevMSAA !== useMSAA || this.#prevMSAAID !== msaaID;
 
         // MSAA나 해상도가 바뀌면 기존 바인드 그룹 캐시는 더 이상 유효하지 않으므로 클리어
@@ -340,13 +341,11 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
         // 이전 상태 저장
         this.#prevMSAA = useMSAA;
         this.#prevMSAAID = msaaID;
-        this.#prevInfo = {width, height};
+        this.#prevWidth = width;
+        this.#prevHeight = height;
         this.#calcVideoMemory();
 
-        return {
-            texture: this.#outputTexture,
-            textureView: this.#outputTextureView
-        };
+        return result;
     }
 
     /**
@@ -458,8 +457,18 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
     #updateBindGroups(sourceTextureInfoList: IPostEffectResult[], targetOutputView: GPUTextureView, useMSAA: boolean, gpuDevice: GPUDevice) {
         const {storage, textures} = this.shaderInfo;
 
-        // Group 0 캐시 키 생성 (소스 텍스처들의 조합)
-        const group0Key = sourceTextureInfoList.map(inf => this.#getResourceId(inf.texture)).join('_');
+        // Group 0 캐시 키 생성 (소스 텍스처들의 조합, Zero-GC)
+        let group0Key: string;
+        const sourceCount = sourceTextureInfoList.length;
+        if (sourceCount === 1) {
+            group0Key = `${this.#getResourceId(sourceTextureInfoList[0].texture)}`;
+        } else {
+            group0Key = '';
+            for (let i = 0; i < sourceCount; i++) {
+                if (i > 0) group0Key += '_';
+                group0Key += this.#getResourceId(sourceTextureInfoList[i].texture);
+            }
+        }
         const cachedBG0_swap0 = this.#bindGroupCache0.get(`${group0Key}_swap0`);
         const cachedBG0_swap1 = this.#bindGroupCache0.get(`${group0Key}_swap1`);
         // keepLog(this.constructor.name, view.postEffectManager.texturePool.activeTextureNum, group0Key, cachedBG0_swap0, cachedBG0_swap1)
@@ -484,7 +493,8 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
                     }
                 }
             }
-            textures.forEach(({binding, group}) => {
+            for (let i = 0, len = textures.length; i < len; i++) {
+                const {binding, group} = textures[i];
                 if (group === 0) {
                     const resource = sourceTextureInfoList[binding]?.textureView;
                     if (resource) {
@@ -492,7 +502,7 @@ abstract class ASinglePassPostEffect extends RedGPUObject {
                         this.#computeBindGroupEntries0_swap1.push({binding, resource});
                     }
                 }
-            });
+            }
 
             this.#computeBindGroup0List_swap0 = gpuDevice.createBindGroup({
                 label: `${this.#name}_BIND_GROUP_0_USE_MSAA_${useMSAA}_SWAP0`,

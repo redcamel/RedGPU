@@ -28,6 +28,7 @@ class PostEffectTexturePool extends RedGPUObject {
     #activeTextures: Set<GPUTexture> = new Set();
     #textureToKey: WeakMap<GPUTexture, string> = new WeakMap();
     #textureToView: WeakMap<GPUTexture, GPUTextureView> = new WeakMap();
+    #textureToResult: WeakMap<GPUTexture, IPostEffectResult> = new WeakMap();
     #videoMemorySize: number = 0;
 
     // 통계 관련 필드
@@ -173,10 +174,7 @@ class PostEffectTexturePool extends RedGPUObject {
      */
     allocResult(width: number, height: number, format: GPUTextureFormat = 'rgba16float'): IPostEffectResult {
         const texture = this.#alloc(width, height, format);
-        return {
-            texture,
-            textureView: this.#textureToView.get(texture)!
-        };
+        return this.#textureToResult.get(texture)!;
     }
 
     /**
@@ -260,9 +258,11 @@ class PostEffectTexturePool extends RedGPUObject {
             });
             this.#videoMemorySize += calculateTextureByteSize(texture);
 
-            // [KO] 메타데이터 및 뷰 생성/저장 [EN] Create/store metadata and view
+            // [KO] 메타데이터, 뷰 및 결과 객체 생성/캐싱 [EN] Create/cache metadata, view, and result object
+            const textureView = resourceManager.getGPUResourceBitmapTextureView(texture);
             this.#textureToKey.set(texture, key);
-            this.#textureToView.set(texture, resourceManager.getGPUResourceBitmapTextureView(texture));
+            this.#textureToView.set(texture, textureView);
+            this.#textureToResult.set(texture, {texture, textureView});
         }
         this.#activeTextures.add(texture);
 
