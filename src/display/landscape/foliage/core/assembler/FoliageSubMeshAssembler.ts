@@ -132,8 +132,7 @@ class FoliageSubMeshAssembler {
             );
         }
 
-        // 🌟 [차세대 아키텍처 - LOD 단위 그림자 전용 통합 메쉬(Shadow Merged Mesh) 조립]
-        // 섀도우 패스에서 불필요한 머티리얼 분리를 제거하고, Position(Float32x3 = 12B)만 추출하여 LOD당 단 1개의 지오메트리로 통합
+
         const shadowMergedSubMeshes: FoliageShadowMergedSubMesh[] = [];
         for (let l = 0; l < numLODs; l++) {
             const subsInLod = subList.filter(s => s.lodIndex === l && !s.isImpostor);
@@ -207,10 +206,7 @@ class FoliageSubMeshAssembler {
         };
     }
 
-    /**
-     * [KO] 특정 LOD 레벨에 속한 모든 서브메시의 Position(12B)과 Index를 1개의 경량 지오메트리로 통합합니다.
-     * [EN] Merges Positions (12B) and Indices of all submeshes in a specific LOD into a single lightweight geometry.
-     */
+
     static buildShadowMergedGeometry(
         redGPUContext: RedGPUContext,
         subMeshesInLod: FoliageSubMesh[],
@@ -233,7 +229,7 @@ class FoliageSubMeshAssembler {
 
         if (totalVertexCount === 0) return null;
 
-        // Position만 추출 (정점당 3개 float = 12 bytes)
+
         const mergedPositions = new Float32Array(totalVertexCount * POSITION_ONLY_STRIDE);
         const mergedIndices = new Uint32Array(totalIndexCount);
 
@@ -296,7 +292,7 @@ class FoliageSubMeshAssembler {
         floatView.set(FoliageSubMeshAssembler.#identityMatrix, 0);
         floatView.set(FoliageSubMeshAssembler.#identityMatrix, 16);
         uintView[32] = 0;
-        uintView[33] = 0; // isIdentity = true
+        uintView[33] = 0; 
         uintView[34] = 0;
         uintView[35] = 0;
 
@@ -458,10 +454,8 @@ class FoliageSubMeshAssembler {
             const isFoliage = options.isFoliage !== false;
             if (isFoliage) {
                 mat.isFoliage = true;
-                // 🌟 [표준 머티리얼 속성 기반 판별 (Source of Truth)]
-                // GLTF 로더 또는 개발자가 설정한 머티리얼 고유 속성(useCutOff, alphaBlend === 1(MASK))을 존중합니다.
-                // 잎사귀(MASK)만 컷오프와 양면 렌더링을 적용하고, 불투명(OPAQUE - 기둥, 줄기 등) 머티리얼은 불투명을 온전히 보존하여
-                // 섀도우 패스에서 Null Fragment 및 Early-Z 100% 선점 가속을 적용합니다.
+
+
                 const isMasked = !!mat.useCutOff || mat.alphaBlend === 1;
                 if (isMasked) {
                     mat.useCutOff = true;

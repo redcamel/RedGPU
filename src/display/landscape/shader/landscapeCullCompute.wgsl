@@ -86,7 +86,7 @@ fn checkAABBInHZB(minPos: vec3<f32>, maxPos: vec3<f32>) -> bool {
             maxNDC = max(maxNDC, ndc);
             minDepth = min(minDepth, d);
         } else {
-            // Near plane 교차 시 안전하게 화면에 보인다고 판정 (보수적 컬링)
+            
             return true;
         }
     }
@@ -98,7 +98,7 @@ fn checkAABBInHZB(minPos: vec3<f32>, maxPos: vec3<f32>) -> bool {
     let minUV = clamp(vec2<f32>(minNDC.x * 0.5 + 0.5, 1.0 - (maxNDC.y * 0.5 + 0.5)), vec2<f32>(0.0), vec2<f32>(1.0));
     let maxUV = clamp(vec2<f32>(maxNDC.x * 0.5 + 0.5, 1.0 - (minNDC.y * 0.5 + 0.5)), vec2<f32>(0.0), vec2<f32>(1.0));
 
-    // 화면 크기 기준 HZB 밉레벨 선택 (512x256 POT 피라미드 기준)
+    
     let aabbPixelSize = max((maxUV - minUV) * vec2<f32>(512.0, 256.0), vec2<f32>(1.0));
     let maxDim = max(aabbPixelSize.x, aabbPixelSize.y);
     let mipLevel = clamp(ceil(log2(maxDim)), 0.0, 7.0);
@@ -109,7 +109,7 @@ fn checkAABBInHZB(minPos: vec3<f32>, maxPos: vec3<f32>) -> bool {
     let hzb11 = textureSampleLevel(hzbTexture, hzbSampler, maxUV, mipLevel).r;
     let maxHZBDepth = max(max(hzb00, hzb10), max(hzb01, hzb11));
 
-    // AABB의 가장 가까운 깊이(minDepth)가 HZB의 최대 차폐 깊이보다 더 멀다면 완전히 가려짐!
+    
     if (minDepth > maxHZBDepth + 0.002) {
         return false;
     }

@@ -117,8 +117,8 @@ fn main(
     let hasInfiniteImpostor = (numLODs > 0u && typeInfo.lods[numLODs - 1u].exitEnd >= 100000.0);
     let effectiveCullingDistSq = select(cullingDistSq, 1000000000000.0, hasInfiniteImpostor);
 
-    // 🚀 [최적화 & CullingDistance 동기화] 식생 자체가 컬링 거리 밖이면 메인과 그림자 모두 렌더링되지 않으므로
-    // 최대 유효 거리는 식생 유형의 effectiveCullingDistSq로 엄격히 제한
+    
+    
     let isVisibleRange = isValid && (horizontalDistSq < effectiveCullingDistSq);
 
     var realY = instance.posY - typeInfo.bottomOffset;
@@ -134,7 +134,7 @@ fn main(
         let scaleZ = scaleXZ.y;
         let scaleY = instance.scaleY;
 
-        // 🌟 [지형 표면 실시간 스냅핑] GPU VHT 높이맵 텍스처를 샘플링하여 지형 굴곡에 완벽 밀착
+        
         if (globalUniforms.hasVHT != 0u && globalUniforms.invWorldSizeX > 0.0) {
             let u = instance.posX * globalUniforms.invWorldSizeX + 0.5;
             let v = instance.posZ * globalUniforms.invWorldSizeX + 0.5;
@@ -156,7 +156,7 @@ fn main(
         r = -scaledRadius;
 
         var inMainFrustum = false;
-        // 🚀 [최적화 P1 / Step 12] 유효 인스턴스 및 컬링 거리 이내일 때만 프러스텀 6평면 내적 및 픽셀 직경 계산 실행
+        
         if (distSq < effectiveCullingDistSq) {
             inMainFrustum =
                 dot(spherePos, globalUniforms.mainFrustumPlanes[0]) >= r &&
@@ -188,8 +188,8 @@ fn main(
 
                 let aabbPixelSize = max((maxUV - minUV) * vec2<f32>(512.0, 256.0), vec2<f32>(1.0));
                 let maxDim = max(aabbPixelSize.x, aabbPixelSize.y);
-                // 🚀 [최적화 P1 - HZB MipLevel 1클럭 비트 연산 대체]
-                // log2/ceil/clamp 부동소수점 초월함수를 1사이클 정수 비트 인스트럭션(firstLeadingBit)으로 대체 (ALU 3배 가속)
+                
+                
                 let uDim = max(u32(maxDim + 0.999), 1u);
                 let mipLevel = f32(min(firstLeadingBit(uDim * 2u - 1u), 7u));
 
@@ -212,7 +212,7 @@ fn main(
             if (!hasInfiniteImpostor) {
                 let fadeStartDist = typeInfo.fadeStartDistance;
                 if (dist > fadeStartDist) {
-                    // 🚀 [최적화 P1 - Global Fade 역수 사전 계산 테이블화]
+                    
                     globalFade = clamp(1.0 - (dist - fadeStartDist) * typeInfo.invFadeRange, 0.0, 1.0);
                 }
             }
@@ -234,9 +234,9 @@ fn main(
                     mainCulledInstanceBuffer[outIdx] = culledInst;
                 }
             } else {
-                // 🌿 [자연스러운 LOD 크로스페이드 - Dual LOD Emission]
-                // 전환 구간(Transition Band)에 위치한 인스턴스는 이전 LOD(Fade Out)와 다음 LOD(Fade In)
-                // 양쪽 Indirect Draw 명령 버퍼에 동시에 등록되어 4x4 Bayer Matrix 디더링으로 완벽한 모핑 크로스페이드 실현!
+                
+                
+                
                 for (var l: u32 = 0u; l < numLODs; l = l + 1u) {
                     let lodInfo = typeInfo.lods[l];
                     let isLastLOD = (l == numLODs - 1u);
@@ -267,7 +267,7 @@ fn main(
                             mainCulledInstanceBuffer[outIdx] = culledInst;
                         }
 
-                        // 🚀 [비전환 구간 조기 탈출] 완전 불투명(alpha >= 0.999) 상태인 인스턴스는 단일 LOD 등록 후 즉시 루프 탈출
+                        
                         if (alpha >= 0.999 && !isLastLOD && effectiveDist < lodInfo.exitStart) {
                             break;
                         }
@@ -277,19 +277,19 @@ fn main(
         }
     }
 
-    // 🚀 [최적화 P0 / Step 21 - 비가시 인스턴스 섀도우 루프 진입 원천 차단]
+    
     if (!isVisibleRange) {
         return;
     }
 
     let activeCascades = min(globalUniforms.activeCascadeCount, 4u);
 
-    // 🚀 [최적화 - 그림자 비활성화 조기 탈출] castShadow가 꺼진 식생 유형(maxShadowCascadeIndex > 3u)은 평면 내적 연산 0회 즉시 종료
+    
     if (typeInfo.maxShadowCascadeIndex > 3u) {
         return;
     }
 
-    // 🚀 [최적화 P0 / Step 22 - 섀도우 캐스케이드 루프 한도 축소 (잔디/관목 루프 1~2회로 축소)]
+    
     let maxAllowedCascade = min(activeCascades, typeInfo.maxShadowCascadeIndex + 1u);
 
     for (var c: u32 = 0u; c < maxAllowedCascade; c = c + 1u) {
@@ -303,7 +303,7 @@ fn main(
         let shadowEffectiveDist = cascadeMaxDist + radiusMargin;
         let shadowEffectiveDistSq = shadowEffectiveDist * shadowEffectiveDist;
 
-        // 🚀 [최적화 & CullingDistance 동기화] 캐스케이드 거리 및 cullingDistance 검사
+        
         if (distSq < shadowEffectiveDistSq && distSq < effectiveCullingDistSq) {
             let cascadeInfo = globalUniforms.cascades[c];
             let inShadowFrustum =
@@ -320,10 +320,10 @@ fn main(
                     let maxShadowLOD = select(numLODs - 1u, max(numLODs - 2u, 0u), hasInfiniteImpostor);
                     let lod0Dist = (typeInfo.lods[0].exitStart + typeInfo.lods[0].exitEnd) * 0.5;
 
-                    // 🚀 [언리얼 엔진 5 표준 Shadow LOD Bias - Last Mesh LOD 강제 라우팅]
-                    // 카메라 초근경(Cascade 0 & LOD 0 구간)만 정밀 LOD 0 메시로 그림자를 생성하고,
-                    // 그 외 모든 원경(Cascade 1 이상 또는 LOD 1 이상)은 최하위 메시 LOD(maxShadowLOD)로 즉시 강제 렌더!
-                    // ➔ 섀도우 패스 버텍스 셰이더 부하 85~95% 급감 및 나뭇잎 알파 테스트 오버드로우 80% 차단
+                    
+                    
+                    
+                    
                     if (c == 0u && effectiveDist <= lod0Dist) {
                         targetShadowLOD = 0u;
                     } else {
@@ -336,8 +336,8 @@ fn main(
                 let baseCmdIdx = cascadeIndirectOffset + typeInfo.indirectBaseOffset + lodInfo.subMeshOffset;
                 let slot = atomicAdd(&shadowIndirectDrawCommands[baseCmdIdx].instanceCount, 1u);
 
-                // 🚀 [최적화 - Shadow Merged Mesh per LOD]
-                // 섀도우 패스는 LOD 단위 단일 병합 지오메트리로 렌더링되므로, 중복 서브메시 atomicAdd 루프를 100% 제거!
+                
+                
 
                 var shadowInst = instance;
                 shadowInst.posY = realY;

@@ -44,32 +44,16 @@ export interface FoliageTypeOptions {
 
     groundOffset?: number;
 
-    /**
-     * [KO] 그림자를 투영할지 여부 (기본값: true. 작은 풀/잔디는 false 권장).
-     * [EN] Whether to cast shadows (default: true. Recommended: false for small grass/flowers).
-     */
+
     castShadow?: boolean;
 
-    /**
-     * [KO] 그림자를 투영할 최대 캐스케이드 인덱스 (0~3, 기본값: 3). 잔디는 0, 관목은 1, 대형 나무는 2~3 권장.
-     * [EN] Maximum cascade index to cast shadows (0 to 3, default: 3). Recommended: 0 for grass, 1 for shrubs, 2-3 for large trees.
-     */
+
     maxShadowCascadeIndex?: number;
 
-    /**
-     * [KO] 알파 컷오프(discard)를 적용할 최대 캐스케이드 인덱스 (0~3, 기본값: 0).
-     * 0이면 초근거리 Cascade 0에서만 잎사귀 실루엣을 따고, 원경 Cascade 1~3에서는 discard 없는 Opaque 섀도우로 초고속 렌더링하여 Early-Z 100% 가동.
-     * [EN] Maximum cascade index to apply alpha cutoff (discard) (0 to 3, default: 0).
-     * If 0, alpha cutoff is only applied in Cascade 0, and Cascade 1-3 render with Opaque shadow (0 fragment overhead, 100% Early-Z).
-     */
+
     shadowCutoffCascadeIndex?: number;
 
-    /**
-     * [KO] 섀도우 패스에서 프래그먼트 셰이더를 생략(Null Fragment, shadowOpaque)할 최소 LOD 인덱스 (기본값: 1).
-     * LOD 1 이상의 중경/원경 식생 메쉬는 discard를 바이패스하고 Opaque 섀도우(Double-Speed Z-Fill)로 초고속 렌더링합니다.
-     * [EN] Minimum LOD index to omit fragment shader (Null Fragment, shadowOpaque) in shadow pass (default: 1).
-     * Foliage meshes at LOD 1 or higher bypass discard and render with ultra-fast Opaque shadow (Double-Speed Z-Fill).
-     */
+
     shadowOpaqueLodThreshold?: number;
 }
 
@@ -220,10 +204,7 @@ class FoliageType {
         return this.#shadowMergedSubMeshes;
     }
 
-    /**
-     * [KO] 특정 LOD 레벨에 해당하는 그림자 전용 통합 서브메시(Shadow Merged Mesh)를 반환합니다.
-     * [EN] Returns the shadow merged submesh for a specific LOD level.
-     */
+
     getShadowMergedMesh(lodIndex: number): FoliageShadowMergedSubMesh | null {
         for (let i = 0; i < this.#shadowMergedSubMeshes.length; i++) {
             if (this.#shadowMergedSubMeshes[i].lodIndex === lodIndex) {
@@ -291,10 +272,7 @@ class FoliageType {
         }
     }
 
-    /**
-     * [KO] 그림자를 투영할 최대 캐스케이드 인덱스를 설정합니다 (0~3).
-     * [EN] Sets the maximum cascade index to cast shadows (0 to 3).
-     */
+
     set maxShadowCascadeIndex(value: number) {
         validateUintRange(value, 0, 3);
         if (this.#maxShadowCascadeIndex !== value) {
@@ -303,26 +281,17 @@ class FoliageType {
         }
     }
 
-    /**
-     * [KO] 그림자를 투영할 최대 캐스케이드 인덱스를 반환합니다 (0~3).
-     * [EN] Returns the maximum cascade index to cast shadows (0 to 3).
-     */
+
     get maxShadowCascadeIndex(): number {
         return this.#maxShadowCascadeIndex;
     }
 
-    /**
-     * [KO] 그림자를 투영할지 여부를 반환합니다.
-     * [EN] Returns whether to cast shadows.
-     */
+
     get castShadow(): boolean {
         return this.#castShadow;
     }
 
-    /**
-     * [KO] 그림자를 투영할지 여부를 설정합니다.
-     * [EN] Sets whether to cast shadows.
-     */
+
     set castShadow(value: boolean) {
         const boolVal = !!value;
         if (this.#castShadow !== boolVal) {
@@ -331,52 +300,34 @@ class FoliageType {
         }
     }
 
-    /**
-     * [KO] 알파 컷오프(discard)를 적용할 최대 캐스케이드 인덱스를 반환합니다 (0~3).
-     * [EN] Returns the maximum cascade index to apply alpha cutoff (discard) (0 to 3).
-     */
+
     get shadowCutoffCascadeIndex(): number {
         return this.#shadowCutoffCascadeIndex;
     }
 
-    /**
-     * [KO] 알파 컷오프(discard)를 적용할 최대 캐스케이드 인덱스를 설정합니다 (0~3).
-     * [EN] Sets the maximum cascade index to apply alpha cutoff (discard) (0 to 3).
-     */
+
     set shadowCutoffCascadeIndex(value: number) {
         validateUintRange(value, 0, 3);
         this.#shadowCutoffCascadeIndex = value;
     }
 
-    /**
-     * [KO] 섀도우 패스에서 프래그먼트 셰이더를 생략(Null Fragment, shadowOpaque)할 최소 LOD 인덱스를 반환합니다 (기본값: 1).
-     * [EN] Returns the minimum LOD index to omit fragment shader (Null Fragment, shadowOpaque) in shadow pass (default: 1).
-     */
+
     get shadowOpaqueLodThreshold(): number {
         return this.#shadowOpaqueLodThreshold;
     }
 
-    /**
-     * [KO] 섀도우 패스에서 프래그먼트 셰이더를 생략(Null Fragment, shadowOpaque)할 최소 LOD 인덱스를 설정합니다 (0~16).
-     * [EN] Sets the minimum LOD index to omit fragment shader (Null Fragment, shadowOpaque) in shadow pass (0 to 16).
-     */
+
     set shadowOpaqueLodThreshold(value: number) {
         validateUintRange(value, 0, 16);
         this.#shadowOpaqueLodThreshold = value;
     }
 
-    /**
-     * [KO] 임포스터 사용 여부를 반환합니다. 임포스터 서브메시가 없는 에셋이면 항상 false를 반환합니다.
-     * [EN] Returns whether impostor is enabled. Returns false if the asset has no impostor.
-     */
+
     get useImpostor(): boolean {
         return this.#useImpostor && !!this.#impostorSubMesh;
     }
 
-    /**
-     * [KO] 임포스터 사용 여부를 설정합니다. 임포스터가 없는 에셋인 경우 변경되지 않습니다.
-     * [EN] Sets whether impostor is enabled. If the asset has no impostor, this has no effect.
-     */
+
     set useImpostor(value: boolean) {
         if (!this.#impostorSubMesh) return;
         const boolVal = !!value;
@@ -386,19 +337,13 @@ class FoliageType {
         }
     }
 
-    /**
-     * [KO] 3D 메시에서 임포스터로 전환되는 거리를 반환합니다.
-     * [EN] Returns the distance at which 3D mesh transitions to impostor.
-     */
+
     get impostorDistance(): number {
         if (!this.#impostorSubMesh || this.#lodInfoList.length <= 1) return 0;
         return this.#lodInfoList[this.#lodInfoList.length - 2].lodDistance;
     }
 
-    /**
-     * [KO] 3D 메시에서 임포스터로 전환되는 거리를 설정합니다.
-     * [EN] Sets the distance at which 3D mesh transitions to impostor.
-     */
+
     set impostorDistance(value: number) {
         if (!this.#impostorSubMesh || this.#lodInfoList.length <= 1) return;
         const targetIdx = this.#lodInfoList.length - 2;
@@ -409,22 +354,13 @@ class FoliageType {
         }
     }
 
-    /**
-     * [KO] 특정 LOD 단계의 전환 거리를 반환합니다.
-     * [EN] Returns the transition distance for a specific LOD level.
-     * @param lodIndex LOD 인덱스 (0부터 시작)
-     */
+
     getLODDistance(lodIndex: number): number {
         if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return 0;
         return this.#lodInfoList[lodIndex].lodDistance;
     }
 
-    /**
-     * [KO] 특정 LOD 단계의 전환 거리를 설정하고 GPU 버퍼에 즉시 동기화합니다.
-     * [EN] Sets the transition distance for a specific LOD level and syncs to GPU buffer immediately.
-     * @param lodIndex LOD 인덱스 (0부터 시작)
-     * @param distance 전환 거리 (미터)
-     */
+
     setLODDistance(lodIndex: number, distance: number): void {
         if (lodIndex < 0 || lodIndex >= this.#lodInfoList.length) return;
         const numVal = Math.max(0, distance);
@@ -435,7 +371,7 @@ class FoliageType {
     }
 
     populateTile(comp: any, landscape?: any, targetCountPerTile?: number): void {
-        // 🚀 [최적화 6위 - Zero-GC] `${z}_${x}` 문자열 힙 생성 대신 32비트 정수 비트 패킹 키를 사용하여 힙 할당 0건 달성
+
         const cz = (comp.componentZ ?? 0) & 0xffff;
         const cx = (comp.componentX ?? 0) & 0xffff;
         const key = (cz << 16) | cx;

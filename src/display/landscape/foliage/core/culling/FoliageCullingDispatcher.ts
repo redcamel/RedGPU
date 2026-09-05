@@ -28,7 +28,7 @@ class FoliageCullingDispatcher {
         {maxDistance: 200.0, hasShadow: false, frustumPlanes: null}
     ];
 
-    // 🚀 [최적화 3위 - Zero-GC] 매 프레임 { label } 임시 객체 생성을 방지하기 위한 불변 정적 디스크립터
+
     static readonly #COMPUTE_PASS_DESCRIPTOR: GPUComputePassDescriptor = Object.freeze({
         label: 'Foliage_GPUCulling_ComputePass'
     });
@@ -242,13 +242,13 @@ class FoliageCullingDispatcher {
             this.#typeListRef = typeList;
             this.#landscapeRef = landscape;
 
-            // 🚀 [최적화 2위 - Zero-GC] 익명 화살표 함수 대신 캐싱된 멤버 메서드로 클로저 힙 생성 100% 박멸
+
             this.#redGPUContext.commandEncoderManager.useEncoder(
                 COMMAND_ENCODER_TYPE.PRE_PROCESS,
                 this.#onResetMultiIndirectCommands
             );
 
-            // 🚀 [최적화 3위 - Zero-GC] 문자열 대신 사전 불변 객체(#COMPUTE_PASS_DESCRIPTOR)를 직접 전달하여 CommandEncoderManager 내 임시 객체 생성 0회 박멸
+
             this.#redGPUContext.commandEncoderManager.addPreProcessComputePass(
                 FoliageCullingDispatcher.#COMPUTE_PASS_DESCRIPTOR,
                 this.#onPreProcessComputePass

@@ -14,17 +14,7 @@ export interface FoliageShadowMergedSubMeshInitOptions {
     indirectOffsetBytes?: number;
 }
 
-/**
- * [KO] LOD 단위 그림자 전용 단일 병합 서브메시 (Shadow Proxy)
- * - Position(Float32x3 = 12B)만 담긴 초경량 지오메트리
- * - 재질 분리 없이 특정 LOD 내 모든 서브메시(기둥 + 나뭇잎)가 1개로 통합됨
- * - 섀도우 패스에서 드로우콜 50% 절감 및 VRAM 대역폭 50% 절감 실현
- *
- * [EN] LOD-level single merged submesh for shadow pass (Shadow Proxy)
- * - Ultra-lightweight geometry containing only Position (Float32x3 = 12B)
- * - All submeshes within an LOD (Trunk + Leaves) are merged into a single mesh
- * - Reduces shadow draw calls by 50% and cuts VRAM fetch bandwidth by 50%
- */
+
 class FoliageShadowMergedSubMesh {
     readonly lodIndex: number;
     readonly geometry: Geometry;

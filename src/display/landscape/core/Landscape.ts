@@ -539,7 +539,7 @@ export class Landscape extends Object3DContainer {
     renderShadow(view: any, passEncoder?: GPURenderPassEncoder): void {
         const renderPassEncoder = passEncoder || view?.currentRenderPassEncoder || view?.renderPassEncoder;
         const view3D = view?.view || view;
-        // 🚀 [최적화 8.11] 평소에는 castShadow가 false이므로 즉시 0ms 조기 탈락 (명시적으로 켰을 때만 연산)
+
         if (!renderPassEncoder || !this.#castShadow) return;
 
         const instanceBuffer = this.#instanceBuffer;
@@ -571,8 +571,7 @@ export class Landscape extends Object3DContainer {
                     if (indirectDrawBuffer) {
                         const currentCascade = view3D?.currentCascadeIndex ?? 0;
 
-                        // 🚀 [최적화 8.5] 원경(Cascade 2~3) 그림자는 Heightmap Raymarching이 완벽히 그리므로 CSM 드로우를 Cascade 0~1로 제한
-                        // 화면 모서리/대각선 영역 타일의 상위 LOD 전환을 완벽히 수용하기 위해 Cascade 0: LOD 0~1, Cascade 1: LOD 0~2 드로우
+
                         let targetMaxLOD = 0;
                         if (currentCascade === 0) {
                             targetMaxLOD = Math.min(2, maxLODLevel);
@@ -996,7 +995,7 @@ export class Landscape extends Object3DContainer {
         const topology = this.#wireframe ? GPU_PRIMITIVE_TOPOLOGY.LINE_LIST : GPU_PRIMITIVE_TOPOLOGY.TRIANGLE_LIST;
         const fragModule = material.gpuRenderInfo.fragmentShaderModule;
 
-        // 🚀 [Zero-GC 인라인 캐시] 상태가 동일하면 문자열 템플릿 생성 및 Map 탐색 없이 즉시 반환
+
         if (
             this.#cachedRenderPipeline &&
             this.#lastRenderTopology === topology &&
@@ -1074,7 +1073,7 @@ export class Landscape extends Object3DContainer {
 
     #getOrCreateShadowRenderPipeline(geom: any, storageBGLayout: GPUBindGroupLayout): GPURenderPipeline | null {
         const isWireframe = this.#wireframe;
-        // 🚀 [Zero-GC 인라인 캐시] 섀도우 파이프라인은 와이어프레임 여부만 구별되므로 즉시 반환
+
         if (isWireframe) {
             if (this.#cachedShadowPipelineWireframe) return this.#cachedShadowPipelineWireframe;
         } else {

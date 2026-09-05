@@ -28,12 +28,11 @@ class FoliageRenderer {
     #lastBoundInstanceBuffer: GPUBuffer | null = null;
     #lastBoundInstanceOffset: number = -1;
 
-    // 🚀 [최적화 4위 - Zero-GC] 메인 뷰와 섀도우 패스의 풀 간섭을 없애고 64개 슬롯을 사전 생성하여 런타임 객체 생성 0건 보장
+
     readonly #validTypesMain: ValidFoliageTypeItem[] = [];
     readonly #validTypesShadow: ValidFoliageTypeItem[] = [];
 
-    // 🚀 [Phase 5 - GPURenderBundle 사전 녹화 캐시]
-    // 4개 캐스케이드별 드로우 명령을 에셋 등록 시점에 딱 1회 사전 녹화(Record)하고 매 프레임 executeBundles로 즉시 실행 (0.005ms 완결)
+
     #shadowRenderBundles: (GPURenderBundle | null)[] = [null, null, null, null];
     #isShadowBundleDirty: boolean = true;
     #lastSystemBGByCascade: (GPUBindGroup | null)[] = [null, null, null, null];
@@ -56,10 +55,7 @@ class FoliageRenderer {
         }
     }
 
-    /**
-     * [KO] 식생 에셋 구성이 변경되었을 때 섀도우 GPURenderBundle을 다시 녹화하도록 더티 마킹합니다.
-     * [EN] Marks shadow GPURenderBundles as dirty to trigger re-recording when foliage asset list changes.
-     */
+
     markShadowBundleDirty(): void {
         this.#isShadowBundleDirty = true;
         for (let i = 0; i < 4; i++) {

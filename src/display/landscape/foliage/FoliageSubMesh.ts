@@ -90,10 +90,7 @@ class FoliageSubMesh {
         this.indirectOffsetBytes = init.indirectOffsetBytes ?? 0;
     }
 
-    /**
-     * [KO] 지정된 섀도우 패스 모드에서 픽셀 셰이더(shadowMain - discard)가 필요한지 여부를 반환합니다.
-     * [EN] Returns whether fragment shader (shadowMain - discard) is needed for the specified shadow pass mode.
-     */
+
     needsShadowFragment(depthPassMode: FoliageDepthPassMode = 'shadow'): boolean {
         if (depthPassMode === 'shadowOpaque') return false;
         return this.isMasked;
@@ -124,9 +121,7 @@ class FoliageSubMesh {
             material.dirtyPipeline = false;
         }
 
-        // 🚀 [최적화 P0 / Step 16 - 렌더 루프 파이프라인 키 문자열 템플릿 생성 100% 박멸 (Zero-GC)]
-        // 매 프레임 수만 번 호출되는 렌더 루프에서 `${msaaID}_${depthPassMode}` 문자열 힙 생성을 완전 제거하고,
-        // 2단계 모드 객체 프로퍼티 룩업을 통해 V8 인라인 캐시(IC) 나노초 단위 참조 및 완전 Zero-Allocation 달성!
+
         let modeMap = this.#pipelineCacheByMode[msaaID];
         if (!modeMap) {
             modeMap = {};
@@ -135,10 +130,8 @@ class FoliageSubMesh {
 
         let pipeline = modeMap[depthPassMode];
         if (!pipeline) {
-            // 🌟 [언리얼 엔진(Unreal Engine) 표준 식생 섀도우 컬링 전략 적용]
-            // 1. 기둥/줄기(!this.isMasked): 닫힌 볼륨 지오메트리이므로 메인/그림자 무조건 'back' 컬링 (Null Fragment + Early-Z 극대화)
-            // 2. 근경 나뭇잎(isMasked && depthPassMode === 'shadow'): 단면 쿼드(Flat Leaf)의 역광 시 그림자 구멍(Shadow Hole) 방지를 위해 material.doubleSided 존중 ('none')
-            // 3. 원경 나뭇잎(depthPassMode === 'shadowOpaque'): 원경 픽셀 부하 절감을 위해 'back' 컬링으로 초고속 렌더링
+
+
             let cullMode: GPUCullMode;
             if (!this.isMasked) {
                 cullMode = 'back';

@@ -59,8 +59,8 @@ fn mainInput(input : VertexInput) -> OutputData {
     let instancePos = input.instancePos_scaleY.xyz;
     let scaleY = input.instancePos_scaleY.w;
 
-    // 🚀 [최적화 P1 / Step 3 - 하드웨어 Vertex Fetch 직접 로드]
-    // snorm16x4 및 float16x2 버텍스 포맷을 통해 unpack2x16snorm 2회 및 unpack2x16float 1회(버텍스당 3회) ALU 연산 100% 제거!
+    
+    
     let instanceRotQuat = input.instanceRotQuat;
     let instanceScale = vec3<f32>(input.instanceScaleXZ.x, scaleY, input.instanceScaleXZ.y);
 
@@ -84,9 +84,9 @@ fn mainInput(input : VertexInput) -> OutputData {
 
     let isImpostor = (input.vertexTangent.w < -500.0);
     if (isImpostor) {
-        // 🚀 [최적화 P1 / Step 4 - 빌보드 직교 축 O(1) 도출 및 중복 정규화 제거]
-        // 카메라 Right의 수평 성분(XZ)을 1회 정규화하고, 법선(Normal)은 XZ 90도 직교 벡터로 0 사이클 도출하여
-        // 매 버텍스마다 반복되던 2번째 viewMatrix 읽기, dot, inverseSqrt, 분기 연산 100% 완전 제거!
+        
+        
+        
         let rightXZ = vec2<f32>(systemUniforms.camera.viewMatrix[0][0], systemUniforms.camera.viewMatrix[2][0]);
         let rightLenSq = dot(rightXZ, rightXZ);
         let billboardRight = select(vec3<f32>(1.0, 0.0, 0.0), vec3<f32>(rightXZ.x, 0.0, rightXZ.y) * inverseSqrt(rightLenSq), rightLenSq > 0.0001);
@@ -145,9 +145,9 @@ fn mainInput(input : VertexInput) -> OutputData {
     return output;
 }
 
-// 🚀 [최적화 P1 / Step 18 - 섀도우 버텍스 셰이더 Varying 75% 다이어트]
-// 섀도우 맵 생성 시 불필요한 10개 varying(노멀, uv1, 버텍스 컬러, 쿼터니언, 모션 벡터 등)을 제거하여
-// 래스터라이저 보간 대역폭을 68바이트에서 20바이트로 70% 이상 삭감!
+
+
+
 struct FoliageShadowOutput {
     @builtin(position) position: vec4<f32>,
     @location(0) vertexPosition: vec3<f32>,
@@ -165,8 +165,8 @@ fn entryPointShadowVertex(input : VertexInput) -> FoliageShadowOutput {
     let instancePos = input.instancePos_scaleY.xyz;
     let scaleY = input.instancePos_scaleY.w;
 
-    // 🚀 [최적화 P1 / Step 3 - 하드웨어 Vertex Fetch 직접 로드]
-    // snorm16x4 및 float16x2 버텍스 포맷을 통해 unpack2x16snorm 2회 및 unpack2x16float 1회(버텍스당 3회) ALU 연산 100% 제거!
+    
+    
     let instanceRotQuat = input.instanceRotQuat;
     let instanceScale = vec3<f32>(input.instanceScaleXZ.x, scaleY, input.instanceScaleXZ.y);
 
@@ -185,7 +185,7 @@ fn entryPointShadowVertex(input : VertexInput) -> FoliageShadowOutput {
 
     let isImpostor = (input.vertexTangent.w < -500.0);
     if (isImpostor) {
-        // 🚀 [최적화 P1 / Step 4 - 섀도우 빌보드 단일 정규화 통합]
+        
         var billboardRight = vec3<f32>(1.0, 0.0, 0.0);
         var lightForward = vec3<f32>(0.0, 0.0, 1.0);
         if (systemUniforms.directionalLightCount > 0u) {
@@ -221,8 +221,8 @@ fn entryPointShadowVertex(input : VertexInput) -> FoliageShadowOutput {
     return output;
 }
 
-// 🚀 [최적화 P0 - shadowOpaque 전용 초경량 입력 구조체 (location 0, 6, 7, 8만 선언)]
-// VertexState와 100% 일치시켜 불필요한 슬롯 에러를 방지하고 GPU 버텍스 페치 오버헤드를 최소화합니다.
+
+
 struct ShadowOpaqueVertexInput {
     @location(0) position : vec3<f32>,
 
@@ -231,9 +231,9 @@ struct ShadowOpaqueVertexInput {
     @location(8) instanceScaleXZ : vec2<f32>,
 };
 
-// 🚀 [최적화 P0 - shadowOpaque 전용 초경량 버텍스 셰이더 (Varying 0개 / 0바이트 대역폭)]
-// 프래그먼트 셰이더가 없는 순수 뎁스 패스를 위해 오직 @builtin(position)만 출력하여
-// GPU 래스터라이저 보간 대역폭을 100% 제거하고 버텍스 처리 속도를 극대화합니다.
+
+
+
 struct FoliageShadowOpaqueOutput {
     @builtin(position) position: vec4<f32>,
 };

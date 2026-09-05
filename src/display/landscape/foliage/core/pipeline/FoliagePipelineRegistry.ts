@@ -24,7 +24,7 @@ class FoliagePipelineRegistry {
         this.#initShaderModules();
     }
 
-    // 🚀 [Zero-GC & 버텍스 대역폭 최적화] 패스별 버텍스 속성 정적 배열 분리
+
     static readonly #GEO_ATTRIBUTES_ALL: readonly GPUVertexAttribute[] = [
         {shaderLocation: 0, offset: 0, format: 'float32x3'},
         {shaderLocation: 1, offset: 12, format: 'float32x3'},
@@ -82,7 +82,7 @@ class FoliagePipelineRegistry {
         const isOctahedral = material instanceof OctahedralImpostorMaterial || material?.constructor?.name === 'OctahedralImpostorMaterial' || (typeof material?.name === 'string' && material.name.includes('Octahedral'));
         const hasBaseColorTexture = !!(material.baseColorTexture?.gpuTexture || material.baseColorTexture?.src || material.baseColorTexture?.url || (material.diffuseTexture && (material.diffuseTexture.gpuTexture || material.diffuseTexture.src || material.diffuseTexture.url)));
 
-        // 🚀 임포스터는 뎁스 프리패스 및 섀도우 패스를 타지 않고 메인 패스에서만 렌더링되므로 Prepass/Shadow 파이프라인 생성 차단
+
         if (isOctahedral && (isDepthPrepass || isShadow)) {
             return null;
         }
@@ -115,7 +115,7 @@ class FoliagePipelineRegistry {
 
         const validStrideBytes = isShadowOpaque ? Math.max(strideBytes, 12) : Math.max(strideBytes, 72);
 
-        // 🚀 [최적화 P0] shadowOpaque는 오직 position(12B)만 페치하여 버텍스 대역폭 낭비 100% 차단
+
         const effectiveGeoAttributes = isShadowOpaque
             ? FoliagePipelineRegistry.#GEO_ATTRIBUTES_SHADOW_OPAQUE
             : (isShadow ? FoliagePipelineRegistry.#GEO_ATTRIBUTES_SHADOW_MASKED : FoliagePipelineRegistry.#GEO_ATTRIBUTES_ALL);
@@ -219,7 +219,7 @@ class FoliagePipelineRegistry {
             }
         }
 
-        // 🚀 [최적화 P0] shadowOpaque 전용 초경량 버텍스 엔트리포인트 바인딩
+
         const vertexEntryPoint = isShadowOpaque
             ? 'entryPointShadowOpaqueVertex'
             : (isShadow ? 'entryPointShadowVertex' : 'mainInput');
@@ -255,10 +255,7 @@ class FoliagePipelineRegistry {
         return newPipeline;
     }
 
-    /**
-     * [KO] 그림자 전용 통합 메쉬(Shadow Merged Mesh)를 위한 Null Fragment 초경량 GPURenderPipeline을 생성하거나 캐시에서 반환합니다.
-     * [EN] Gets or creates an ultra-lightweight Null Fragment GPURenderPipeline for Shadow Merged Meshes.
-     */
+
     getOrCreateShadowMergedPipeline(
         strideBytes: number = 12,
         cullMode: GPUCullMode = 'back',

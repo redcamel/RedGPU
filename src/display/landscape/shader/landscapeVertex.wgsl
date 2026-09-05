@@ -85,7 +85,7 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
 
     let currentHeight = textureLoad(heightMapTexture, texCoord, 0).r;
     var finalHeight = currentHeight;
-    // 🚀 [최적화] 근거리(LOD 0~1) 정점에서만 지오모핑 4중 텍스처 로드를 수행하고, 원경(LOD 2~7)은 즉각 단일 로드로 바이패스
+    
     if (lodLevel < 2u) {
         let camPos = systemUniforms.camera.cameraPosition.xyz;
         let dx = worldX - camPos.x;
@@ -112,7 +112,7 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
             let isScreenSize = landscapeUniforms.lodMetric >= 0.5;
             let effMorphStart = select(morphStartDist, morphStartDist / max(1e-4, landscapeUniforms.tanHalfFOV), isScreenSize);
 
-            // 🚀 [최적화 VS-2] 모핑 범위에 도달하지 않은 대다수 정점(70%+)은 sqrt 및 모핑 로직 0회 즉시 스킵!
+            
             if (distSq >= effMorphStart * effMorphStart) {
                 let rawDist = sqrt(distSq);
                 let dist = select(rawDist, rawDist * landscapeUniforms.tanHalfFOV, isScreenSize);
@@ -131,7 +131,7 @@ fn computeTerrainVertex(input: InputData) -> ComputedTerrainVertex {
                         currentSegments = lod0Quads;
                         subStep = max(1u, u32(round(lod0Quads / baseQuads)));
                     } else {
-                        // 🚀 [최적화 VS-1] lodLevel < 2u 가드 내 else는 무조건 lodLevel == 1u (step = 1.0 확정)이므로 pow SFU 완전 박멸!
+                        
                         currentSegments = max(1.0, floor(baseQuads));
                         subStep = 2u;
                     }

@@ -490,7 +490,7 @@ class FoliageMegaBuffer {
         u32[baseOffset + 8] = allocation.rawBaseOffset;
         u32[baseOffset + 9] = allocation.activeCount;
         u32[baseOffset + 10] = maxShadowCascadeIndex;
-        // 🚀 [최적화 P1 - Global Fade 역수 사전 계산] CPU 1회 계산 후 매 프레임 GPU 나눗셈 50만 회 제거
+
         f32[baseOffset + 11] = 1.0 / fadeRange;
 
         for (let l = 0; l < 8; l++) {
@@ -634,9 +634,7 @@ class FoliageMegaBuffer {
             }
         }
 
-        // 🌟 [차세대 아키텍처 - 그림자 전용 통합 메쉬 템플릿 등록]
-        // 각 LOD의 첫 번째 슬롯(indirectBaseOffset + lodInfo.subMeshOffset)에 shadowMergedSubMesh의 indexCount를 등록하여
-        // 섀도우 패스에서 단 1회의 Indirect Draw로 해당 LOD의 모든 지오메트리(기둥+잎사귀)를 일괄 렌더링
+
         if (shadowMergedSubMeshes && lodInfoList) {
             for (let i = 0; i < shadowMergedSubMeshes.length; i++) {
                 const shadowSub = shadowMergedSubMeshes[i];

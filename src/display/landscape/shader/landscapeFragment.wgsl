@@ -118,7 +118,7 @@ fn computeDirectLayersPBR(
     var blendedRoughness = 0.0;
     var blendedAO = 0.0;
 
-    // 🌟 [근거리 최적화 8.7] 스플랫맵(레이어 0)을 루프 밖에서 단 1회만 일괄 샘플링! (기존 최대 8회 ➔ 1회로 급감)
+    
     let splatMapSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, 0, ddxGlobalUV, ddyGlobalUV);
 
     for (var i = 0u; i < activeLayerCount; i = i + 1u) {
@@ -172,7 +172,7 @@ fn computeDirectLayersPBR(
 
         res.albedo = mix(baseAlbedo, layerBlendAlbedo, alpha);
 
-        // 🚀 [최적화 FS-2 & FS-3] dot 거리 제곱 비교 + inverseSqrt 기반 고속 TBN 직교화
+        
         if (dot(layerBlendNormal.xy, layerBlendNormal.xy) > 1e-6) {
             let lenSq = max(1.0 - baseN.x * baseN.x, 1e-4);
             let invLen = inverseSqrt(lenSq);
@@ -210,7 +210,7 @@ fn computeDistantLayersAlbedo(
         return uniforms.color.rgb;
     }
 
-    // 🌟 원경 최적화: 스플랫맵 1회 샘플링으로 모든 레이어 가중치 일괄 판별
+    
     let weightMapSample = textureSampleGrad(layerWeightMapArray, baseColorTextureSampler, globalUV, 0, ddxGlobalUV, ddyGlobalUV);
 
     var totalLayerWeight = 0.0;
@@ -440,7 +440,7 @@ fn getIndirectPbrLighting(
     }
 }
 
-// 🌟 [원경 고속 Diffuse-Only IBL] 스펙큘러 텍스처 4개(프리필터, BRDF LUT 등) 생략으로 텍스처 대역폭 급감!
+
 fn getDistantIndirectPbrLighting(
     N: vec3<f32>,
     albedo: vec3<f32>,
@@ -505,23 +505,23 @@ fn computeLandscapeHeightmapShadow(
 
     var shadowFactor: f32 = 1.0;
 
-    // 🚀 [최적화 8.10] 루프 불변식 호이스팅: 나눗셈 24회를 루프 밖 1회로 인출하여 FMA 연산으로 전환
+    
     let invWorldSize = vec2<f32>(1.0 / worldSizeX, 1.0 / worldSizeZ);
     let baseUV = (worldPos.xz + vec2<f32>(worldSizeX, worldSizeZ) * 0.5) * invWorldSize;
     let uvDir = L.xz * invWorldSize;
 
     for (var i = 0u; i < stepCount; i = i + 1u) {
-        // 🚀 [최적화 FS-1] 루프 내 나눗셈을 루프 밖 선계산된 invStepCount 곱셈으로 대체 (나눗셈 48회 박멸)
+        
         let u = (f32(i) + 0.5) * invStepCount;
         let t = minDistance + distRange * (u * u);
         let samplePosY = worldPos.y + L.y * t;
 
-        // 🚀 [최적화 8.13] Sky-Break: 광선이 지형 최고봉 위 하늘로 진입하는 즉시 루프 탈출 (2~3스텝 조기 종료)
+        
         if (samplePosY > heightScale) {
             break;
         }
 
-        // FMA 1회로 UV 계산 (스텝당 나눗셈 2회 완전 제거)
+        
         let uv = baseUV + uvDir * t;
 
         if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) {
@@ -573,9 +573,9 @@ fn main(inputData: InputData) -> OutputFragment {
 
     var isDirectPBR = false;
     if (lod < 0.5) {
-        // 🚀 [최적화 - 50m 초경량 + 시선 각도(N·V) 단축 원근법 동적 거리 보정]
-        // - 정면 절벽/언덕(N·V ≈ 1.0): 50m까지 4K PBR 디테일 100% 유지 (35m부터 페이드)
-        // - 비스듬한 바닥/평지(N·V ≈ 0.2~0.35): 12.2m~17.5m에서 조기 전환 (평지 시점 연산량 84%+ 격감!)
+        
+        
+        
         let isScreenSize = landscapeInstanceUniforms.lodMetric >= 0.5;
         let viewDist = select(rawViewDist, rawViewDist * landscapeInstanceUniforms.tanHalfFOV, isScreenSize);
 
@@ -590,14 +590,14 @@ fn main(inputData: InputData) -> OutputFragment {
     }
 
     if (isDirectPBR) {
-        // 🌿 [LOD 0 근거리] 100% 실시간 4K 멀티 레이어 PBR
+        
         let direct = computeDirectLayersPBR(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV, baseN);
         albedo = direct.albedo;
         N = direct.normal;
         roughnessFactor = direct.roughness;
         ambientOcclusion = direct.ao;
     } else {
-        // 🏔️ [중/원경 및 LOD 0 평지 조기 전환 구간] 텍스처 2~3장 초경량 렌더링으로 단일화!
+        
         albedo = computeDistantLayersAlbedo(globalUV, worldTileUV, ddxGlobalUV, ddyGlobalUV, ddxWorldTileUV, ddyWorldTileUV);
         N = baseN;
         roughnessFactor = 0.85;
@@ -620,10 +620,10 @@ fn main(inputData: InputData) -> OutputFragment {
 
     var visibility = 1.0;
 
-    // 🚀 [하이브리드 섀도우 디커플링 & 최적화 8.12]
-    // 1. 거대 산맥 그림자(Heightmap Raymarching): 카메라 거리와 무관하게 항상 실행하여 골짜기 산그림자 영구 보존
-    // 2. [수학적 100% 무손실 조기 탈락] 이미 산봉우리 그늘 속(terrainSelfShadow <= 0.001)이면 min(CSM, 0) = 0이므로 CSM 16~32탭 완전 생략(0회)!
-    // 3. 식생/메시 그림자(CSM): 산그늘이 아닌 양지 구역의 근거리(0~maxCSMDist)에서만 실행하여 합성
+    
+    
+    
+    
     if (receiveShadowYn && NdotL > 0.001) {
         var terrainShadowVis = 1.0;
         var isDeepTerrainShadow = false;
@@ -646,9 +646,9 @@ fn main(inputData: InputData) -> OutputFragment {
         let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
         let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
 
-        // 🌟 [최적화 8.12] 완전한 산그늘 바닥이거나 원경(maxCSMDist 이상)이면 CSM 16~32탭 완전 스킵 (0ms)!
+        
         if (rawViewDist < maxCSMDist && !isDeepTerrainShadow) {
-            // 🟢 [근거리 양지 구역: 0 ~ maxCSMDist] 식생/오브젝트 그림자를 CSM에서 읽어 산맥 그림자와 합성
+            
             let rawVisibility: f32 = getDirectionalShadowVisibility(
                 directionalShadowMap,
                 directionalShadowMapSampler,
@@ -659,7 +659,7 @@ fn main(inputData: InputData) -> OutputFragment {
             let csmVisibility = mix(1.0 - systemUniforms.shadow.directionalShadowStrength, 1.0, rawVisibility);
             visibility = min(csmVisibility, terrainShadowVis);
         } else {
-            // 🏔️ [산그늘 속 or 원경] 무거운 CSM 16~32탭 100% 완전 생략(0회)!
+            
             visibility = terrainShadowVis;
         }
     }
@@ -680,7 +680,7 @@ fn main(inputData: InputData) -> OutputFragment {
             ambientOcclusion
         );
     } else {
-        // 🌟 [원경 및 비스듬한 바닥 Diffuse-Only IBL] 스펙큘러 관련 4개 텍스처 생략으로 대역폭 완벽 방어
+        
         indirectLighting = getDistantIndirectPbrLighting(
             N,
             albedo,

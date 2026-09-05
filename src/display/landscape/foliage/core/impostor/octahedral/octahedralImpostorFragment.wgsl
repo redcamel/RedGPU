@@ -91,8 +91,8 @@ fn getSpecularVisibility(NdotV: f32, NdotL: f32, roughness: f32) -> f32 {
 }
 
 fn getFresnel(cosTheta: f32, F0: vec3<f32>) -> vec3<f32> {
-    // 🚀 [최적화 P0 / Step 23 - Schlick Fresnel 대수 연속 곱셈 전환]
-    // pow(..., 5.0)의 exp2/log2 초월함수를 100% 제거하고 f2 * f2 * f 순수 곱셈 4회로 대체 (ALU 속도 5배 가속)
+    
+    
     let f = clamp(1.0 - cosTheta, 0.0, 1.0);
     let f2 = f * f;
     let f5 = f2 * f2 * f;
@@ -123,7 +123,7 @@ fn getDirectDiffuseBRDF(NdotL: f32, NdotV: f32, LdotH: f32, roughness: f32, albe
     let fd90 = energyBias + 2.0 * LdotH * LdotH * roughness;
     let f0 = 1.0;
 
-    // 🚀 [최적화 P0 / Step 23 - Disney Diffuse Schlick 대수 연속 곱셈 전환]
+    
     let fL = clamp(1.0 - NdotL, 0.0, 1.0);
     let fL2 = fL * fL;
     let fL5 = fL2 * fL2 * fL;
@@ -160,8 +160,8 @@ fn main(inputData: InputData) -> OutputFragment {
     let g01 = clamp(baseGrid + vec2<f32>(0.0, 1.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
     let g11 = clamp(baseGrid + vec2<f32>(1.0, 1.0), vec2<f32>(0.0), vec2<f32>(n - 1.0));
 
-    // 🚀 [최적화 & 왜곡 해결] 인위적인 2D UV 회전을 완전히 제거하고 빌보드 쿼드 UV를 직접 사용
-    // 모든 옥타헤드럴 타일에서 나무 기둥이 U=0.5 중앙에 정확히 정렬되어 기둥 분열(다리 여러 개) 현상을 근본적으로 차단합니다.
+    
+    
     let subUV = inputData.uv;
 
     let ddxUV = dpdx(inputData.uv);
@@ -185,12 +185,12 @@ fn main(inputData: InputData) -> OutputFragment {
     let cov11 = w11 * s11.a;
     let totalCoverage = cov00 + cov10 + cov01 + cov11;
 
-    // 🚀 [최적화 P0 / Step 1 - 조기 탈락 1차] 완전 투명 픽셀(공기) 즉시 탈출 (Normal/ORM 8탭 100% 생략)
+    
     if (totalCoverage < 0.001) {
         discard;
     }
 
-    // 🚀 [최적화 P0 / Step 1 - 조기 탈락 2차] 거리 페이드 디더링 조기 탈락
+    
     let fadeOpacity = inputData.combinedOpacity;
     if (fadeOpacity < 0.999) {
         let px = u32(inputData.position.x) & 3u;
@@ -203,7 +203,7 @@ fn main(inputData: InputData) -> OutputFragment {
         }
     }
 
-    // 🚀 [최적화 P0 / Step 1 - 조기 탈락 3차] 동적 알파 디더 컷오프 조기 탈락
+    
     let linearAlpha = totalCoverage;
     let maxAlpha = max(max(s00.a, s10.a), max(s01.a, s11.a));
     let maxCornerWeight = max(max(w00, w10), max(w01, w11));
@@ -222,7 +222,7 @@ fn main(inputData: InputData) -> OutputFragment {
         discard;
     }
 
-    // 🌟 [검증 통과된 유효 픽셀에서만 Normal 4장 + ORM 4장 샘플링 실행 (투명 픽셀 50~60% 완전 절감)]
+    
     let invSafeCoverage = 1.0 / max(totalCoverage, 0.0001);
 
     var albedo = (s00.rgb * cov00 + s10.rgb * cov10 + s01.rgb * cov01 + s11.rgb * cov11) * invSafeCoverage;
@@ -234,8 +234,8 @@ fn main(inputData: InputData) -> OutputFragment {
     var rawNormalDepth: vec4<f32>;
     var rawORM: vec4<f32>;
 
-    // 🌟 [최적화 P2 / Step 3 - 원경 500m+ Dominant Sub-Tile 1-Tap 다이어트]
-    // 500m 밖에서는 1그루의 화면 크기가 15~30px에 불과하므로 대표 서브타일 1탭만 샘플링 (Normal/ORM 8탭 ➔ 2탭 75% 즉각 절감!)
+    
+    
     if (distSq > 250000.0) {
         var domG = g00;
         var maxCov = cov00;
@@ -282,11 +282,11 @@ fn main(inputData: InputData) -> OutputFragment {
     }
     let NdotL0 = dot(N, L0);
 
-    // 🚀 [최적화] 원경 임포스터: 그림자 수신 켜짐 + 빛을 향할 때 + CSM 유효 거리 이내일 때만 섀도우 연산 실행
+    
     if (receiveShadowYn && NdotL0 > 0.001) {
         let cascadeCount = min(4u, max(1u, systemUniforms.shadow.cascadeCount));
         let maxCSMDist = systemUniforms.shadow.cascadeSplitDepths[cascadeCount - 1u];
-        // 🚀 [최적화 P2 / Step 9] 거리 제곱 비교로 매 픽셀 제곱근(length) 연산 100% 제거
+        
         if (distSq < maxCSMDist * maxCSMDist) {
             let rawVis = getDirectionalShadowVisibility(
                 directionalShadowMap,
@@ -351,7 +351,7 @@ fn main(inputData: InputData) -> OutputFragment {
         var reflectedColor = vec3<f32>(0.0);
         var iblDiffuseColor = vec3<f32>(0.0);
 
-        // 🚀 [최적화 P3 / Step 10] IBL 밉 레벨 1회 계산 및 호이스팅
+        
         var iblMipLevel: f32 = 0.0;
         if (u_usePrefilterTexture) {
             let iblMipmapCount = f32(textureNumLevels(ibl_prefilterTexture) - 1);
