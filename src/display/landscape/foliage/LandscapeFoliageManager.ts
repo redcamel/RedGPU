@@ -116,6 +116,7 @@ class LandscapeFoliageManager {
         );
         this.#foliageTypes.set(options.name, foliageType);
         this.#typeList.push(foliageType);
+        this.#renderer.markShadowBundleDirty();
 
         const cells = this.#landscape?.landscapeComponents;
         if (cells && cells.length > 0) {
@@ -136,6 +137,7 @@ class LandscapeFoliageManager {
             if (idx !== -1) {
                 this.#typeList.splice(idx, 1);
             }
+            this.#renderer.markShadowBundleDirty();
             return this.#foliageTypes.delete(name);
         }
         return false;

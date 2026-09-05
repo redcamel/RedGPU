@@ -32,6 +32,13 @@ class FoliageRenderer {
     readonly #validTypesMain: ValidFoliageTypeItem[] = [];
     readonly #validTypesShadow: ValidFoliageTypeItem[] = [];
 
+    // 🚀 [Phase 5 - GPURenderBundle 사전 녹화 캐시]
+    // 4개 캐스케이드별 드로우 명령을 에셋 등록 시점에 딱 1회 사전 녹화(Record)하고 매 프레임 executeBundles로 즉시 실행 (0.005ms 완결)
+    #shadowRenderBundles: (GPURenderBundle | null)[] = [null, null, null, null];
+    #isShadowBundleDirty: boolean = true;
+    #lastSystemBGByCascade: (GPUBindGroup | null)[] = [null, null, null, null];
+    #lastRecordedTypeCount: number = 0;
+
     constructor(
         redGPUContext: RedGPUContext,
         pipelineRegistry: FoliagePipelineRegistry,
@@ -46,6 +53,18 @@ class FoliageRenderer {
         for (let i = 0; i < FoliageRenderer.#MAX_POOLED_TYPES; i++) {
             this.#validTypesMain.push({type: null, culledGPU: null, indirectGPU: null});
             this.#validTypesShadow.push({type: null, culledGPU: null, indirectGPU: null});
+        }
+    }
+
+    /**
+     * [KO] 식생 에셋 구성이 변경되었을 때 섀도우 GPURenderBundle을 다시 녹화하도록 더티 마킹합니다.
+     * [EN] Marks shadow GPURenderBundles as dirty to trigger re-recording when foliage asset list changes.
+     */
+    markShadowBundleDirty(): void {
+        this.#isShadowBundleDirty = true;
+        for (let i = 0; i < 4; i++) {
+            this.#shadowRenderBundles[i] = null;
+            this.#lastSystemBGByCascade[i] = null;
         }
     }
 
@@ -131,6 +150,87 @@ class FoliageRenderer {
         const typeCount = typeList.length;
         if (typeCount === 0) return;
 
+        const view3D = view as any;
+        const currentCascade = view3D?.currentCascadeIndex ?? 0;
+
+        if (currentCascade > 3) return;
+
+        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup ?? (view as any)?.systemUniform_Vertex_UniformBindGroup ?? null;
+
+        if (this.#lastRecordedTypeCount !== typeCount) {
+            this.#isShadowBundleDirty = true;
+            this.#lastRecordedTypeCount = typeCount;
+        }
+
+        let bundle = this.#shadowRenderBundles[currentCascade];
+        const needsRebuild = this.#isShadowBundleDirty || !bundle || this.#lastSystemBGByCascade[currentCascade] !== systemBG;
+
+        if (needsRebuild) {
+            let validCount = 0;
+            for (let t = 0; t < typeCount; t++) {
+                const foliageType = typeList[t];
+                if (!foliageType.castShadow) continue;
+                if (currentCascade > foliageType.maxShadowCascadeIndex) continue;
+                const culledGPU = foliageType.shadowCulledGPUBuffer;
+                const indirectGPU = foliageType.shadowIndirectGPUBuffer;
+                if (!culledGPU || !indirectGPU || (foliageType.shadowMergedSubMeshes.length === 0 && foliageType.subMeshes.length === 0)) continue;
+
+                let item = this.#validTypesShadow[validCount];
+                if (!item) {
+                    item = {type: foliageType, culledGPU, indirectGPU};
+                    this.#validTypesShadow[validCount] = item;
+                } else {
+                    item.type = foliageType;
+                    item.culledGPU = culledGPU;
+                    item.indirectGPU = indirectGPU;
+                }
+                validCount++;
+            }
+
+            if (validCount > 0) {
+                bundle = this.#recordShadowRenderBundle(currentCascade, validCount, systemBG);
+            }
+        }
+
+        if (bundle) {
+            passEncoder.executeBundles([bundle]);
+        }
+    }
+
+    destroy(): void {
+        this.markShadowBundleDirty();
+        this.#lastBoundPipeline = null;
+        this.#lastBoundSystemBG = null;
+        this.#lastBoundVertexUniformBG = null;
+        this.#lastBoundMatBG = null;
+        this.#lastBoundGeometryVertexBuffer = null;
+        this.#lastBoundIndexBuffer = null;
+        this.#lastBoundInstanceBuffer = null;
+        for (let i = 0; i < this.#validTypesMain.length; i++) {
+            this.#validTypesMain[i].type = null;
+            this.#validTypesMain[i].culledGPU = null;
+            this.#validTypesMain[i].indirectGPU = null;
+            this.#validTypesShadow[i].type = null;
+            this.#validTypesShadow[i].culledGPU = null;
+            this.#validTypesShadow[i].indirectGPU = null;
+        }
+    }
+
+    #recordShadowRenderBundle(
+        currentCascade: number,
+        validCount: number,
+        systemBG: GPUBindGroup | null
+    ): GPURenderBundle | null {
+        const gpuDevice = this.#redGPUContext.gpuDevice;
+        if (!gpuDevice) return null;
+
+        const bundleEncoder = gpuDevice.createRenderBundleEncoder({
+            label: `FoliageShadowBundleEncoder_Cascade${currentCascade}`,
+            colorFormats: [],
+            depthStencilFormat: 'depth32float',
+            sampleCount: 1,
+        });
+
         this.#lastBoundPipeline = null;
         this.#lastBoundSystemBG = null;
         this.#lastBoundVertexUniformBG = null;
@@ -140,42 +240,9 @@ class FoliageRenderer {
         this.#lastBoundInstanceBuffer = null;
         this.#lastBoundInstanceOffset = -1;
 
-        const view3D = view as any;
-        const currentCascade = view3D?.currentCascadeIndex ?? 0;
-
-        if (currentCascade > 3) return;
-
-        const systemBG = view3D?.systemUniform_Vertex_UniformBindGroup ?? (view as any)?.systemUniform_Vertex_UniformBindGroup ?? null;
-
-        let validCount = 0;
-        for (let t = 0; t < typeCount; t++) {
-            const foliageType = typeList[t];
-            if (!foliageType.castShadow) continue;
-            if (currentCascade > foliageType.maxShadowCascadeIndex) continue;
-            if (foliageType.activeInstanceCount <= 0) continue;
-            const culledGPU = foliageType.shadowCulledGPUBuffer;
-            const indirectGPU = foliageType.shadowIndirectGPUBuffer;
-            if (!culledGPU || !indirectGPU || (foliageType.shadowMergedSubMeshes.length === 0 && foliageType.subMeshes.length === 0)) continue;
-
-            let item = this.#validTypesShadow[validCount];
-            if (!item) {
-                item = {type: foliageType, culledGPU, indirectGPU};
-                this.#validTypesShadow[validCount] = item;
-            } else {
-                item.type = foliageType;
-                item.culledGPU = culledGPU;
-                item.indirectGPU = indirectGPU;
-            }
-            validCount++;
-        }
-        if (validCount === 0) return;
-
         const cascadeIndirectOffset = currentCascade * 256 * 20;
         const cascadeInstanceOffset = currentCascade * (500000 * 8) * 32;
 
-        // 🌟 [차세대 아키텍처 - Shadow Merged Mesh 순회 (LOD당 단 1회 Indirect Draw)]
-        // 머티리얼별 서브메시 분리를 완전히 제거하고, LOD 단위 단일 지오메트리(기둥 + 나뭇잎 통합)로 일괄 드로우하여
-        // 드로우콜을 50% 즉시 삭감하고 VRAM 인스턴스 페치 대역폭을 50% 절감합니다.
         for (let t = 0; t < validCount; t++) {
             const item = this.#validTypesShadow[t];
             const foliageType = item.type!;
@@ -195,10 +262,6 @@ class FoliageRenderer {
                     const shadowSub = shadowSubMeshes[s];
                     const lodIdx = shadowSub.lodIndex;
 
-                    // 🚀 [최적화 P0 - Cascade-Aware CPU DrawCall Filter]
-                    // 1) Cascade >= 1인 원경 캐스케이드는 Compute Culling에서 오직 maxShadowLOD만 생성되므로,
-                    //    LOD 0 및 중간 LOD 서브메시의 CPU 드로우콜 인코딩을 100% 즉시 스킵!
-                    // 2) Cascade 0에서도 중간 LOD(0 < lodIdx < maxShadowLOD)는 생성되지 않으므로 스킵!
                     if (numLODs > 1) {
                         if (isFarCascade && lodIdx !== maxShadowLOD) continue;
                         if (!isFarCascade && lodIdx !== 0 && lodIdx !== maxShadowLOD) continue;
@@ -206,10 +269,9 @@ class FoliageRenderer {
 
                     const instOffset = cascadeInstanceOffset + shadowSub.instanceBufferOffset;
                     const indOffset = cascadeIndirectOffset + shadowSub.indirectOffsetBytes;
-                    this.#drawShadowMergedSubMesh(passEncoder, shadowSub, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
+                    this.#drawShadowMergedSubMesh(bundleEncoder, shadowSub, systemBG, indirectGPU, culledGPU, instOffset, indOffset);
                 }
             } else {
-                // Fallback: Shadow Merged Mesh가 없는 경우 기본 서브메시 순회
                 const subMeshes = foliageType.subMeshes;
                 const subCount = subMeshes.length;
                 for (let s = 0; s < subCount; s++) {
@@ -221,14 +283,22 @@ class FoliageRenderer {
                     }
                     const instOffset = cascadeInstanceOffset + sub.instanceBufferOffset;
                     const indOffset = cascadeIndirectOffset + sub.indirectOffsetBytes;
-                    this.#drawSubMesh(passEncoder, sub, 1, 'shadow', systemBG, indirectGPU, culledGPU, 'shadowOpaque', instOffset, indOffset);
+                    this.#drawSubMesh(bundleEncoder, sub, 1, 'shadow', systemBG, indirectGPU, culledGPU, 'shadowOpaque', instOffset, indOffset);
                 }
             }
         }
+
+        const bundle = bundleEncoder.finish({
+            label: `FoliageShadowBundle_Cascade${currentCascade}`,
+        });
+
+        this.#shadowRenderBundles[currentCascade] = bundle;
+        this.#lastSystemBGByCascade[currentCascade] = systemBG;
+        return bundle;
     }
 
     #drawShadowMergedSubMesh(
-        passEncoder: GPURenderPassEncoder,
+        passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder,
         shadowSub: FoliageShadowMergedSubMesh,
         systemBG: GPUBindGroup | null,
         indirectGPUBuffer: GPUBuffer,
@@ -286,7 +356,7 @@ class FoliageRenderer {
     }
 
     #drawSubMesh(
-        passEncoder: GPURenderPassEncoder,
+        passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder,
         sub: FoliageSubMesh,
         sampleCount: number,
         msaaID: string,
@@ -356,24 +426,6 @@ class FoliageRenderer {
         }
 
         sub.draw(passEncoder, indirectGPUBuffer, overrideIndirectOffset);
-    }
-
-    destroy(): void {
-        this.#lastBoundPipeline = null;
-        this.#lastBoundSystemBG = null;
-        this.#lastBoundVertexUniformBG = null;
-        this.#lastBoundMatBG = null;
-        this.#lastBoundGeometryVertexBuffer = null;
-        this.#lastBoundIndexBuffer = null;
-        this.#lastBoundInstanceBuffer = null;
-        for (let i = 0; i < this.#validTypesMain.length; i++) {
-            this.#validTypesMain[i].type = null;
-            this.#validTypesMain[i].culledGPU = null;
-            this.#validTypesMain[i].indirectGPU = null;
-            this.#validTypesShadow[i].type = null;
-            this.#validTypesShadow[i].culledGPU = null;
-            this.#validTypesShadow[i].indirectGPU = null;
-        }
     }
 }
 

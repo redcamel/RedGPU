@@ -53,7 +53,7 @@ class FoliageShadowMergedSubMesh {
         this.indirectOffsetBytes = init.indirectOffsetBytes ?? 0;
     }
 
-    draw(passEncoder: GPURenderPassEncoder, indirectGPUBuffer: GPUBuffer, offsetBytes?: number): void {
+    draw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, indirectGPUBuffer: GPUBuffer, offsetBytes?: number): void {
         const offset = offsetBytes !== undefined ? offsetBytes : this.indirectOffsetBytes;
         if (this.isIndexed && this.geometry.indexBuffer?.gpuBuffer) {
             passEncoder.drawIndexedIndirect(indirectGPUBuffer, offset);
