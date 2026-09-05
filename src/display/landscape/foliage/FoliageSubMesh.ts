@@ -135,15 +135,20 @@ class FoliageSubMesh {
 
         let pipeline = modeMap[depthPassMode];
         if (!pipeline) {
-            // 🌟 [섀도우 패스 전면 백페이스 컬링 강제 (Zero-Overhead 50% 가속)]
-            // 그림자 패스에서는 광원 기준 깊이(Z)만을 기록하므로, 기둥/잎사귀/원경/근경 예외 없이
-            // 무조건 더블사이드를 끄고 'back' 컬링을 강제하여 래스터라이저의 지오메트리 처리량을 50% 일괄 절감합니다.
-            // 메인 뷰 패스에서만 LOD 0의 material.doubleSided를 허용합니다.
-            const isShadowPass = (depthPassMode === 'shadow' || depthPassMode === 'shadowOpaque');
-            const isLOD0 = (this.lodIndex === 0);
-            const cullMode: GPUCullMode = isShadowPass
-                ? 'back'
-                : ((isLOD0 && material.doubleSided) ? 'none' : (material.cullMode ?? 'back'));
+            // 🌟 [언리얼 엔진(Unreal Engine) 표준 식생 섀도우 컬링 전략 적용]
+            // 1. 기둥/줄기(!this.isMasked): 닫힌 볼륨 지오메트리이므로 메인/그림자 무조건 'back' 컬링 (Null Fragment + Early-Z 극대화)
+            // 2. 근경 나뭇잎(isMasked && depthPassMode === 'shadow'): 단면 쿼드(Flat Leaf)의 역광 시 그림자 구멍(Shadow Hole) 방지를 위해 material.doubleSided 존중 ('none')
+            // 3. 원경 나뭇잎(depthPassMode === 'shadowOpaque'): 원경 픽셀 부하 절감을 위해 'back' 컬링으로 초고속 렌더링
+            let cullMode: GPUCullMode;
+            if (!this.isMasked) {
+                cullMode = 'back';
+            } else if (depthPassMode === 'shadow') {
+                cullMode = material.doubleSided ? 'none' : 'back';
+            } else if (depthPassMode === 'shadowOpaque') {
+                cullMode = 'back';
+            } else {
+                cullMode = material.doubleSided ? 'none' : (material.cullMode ?? 'back');
+            }
 
             pipeline = registry.getOrCreatePipeline(
                 material,
