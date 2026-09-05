@@ -135,21 +135,15 @@ class FoliageSubMesh {
 
         let pipeline = modeMap[depthPassMode];
         if (!pipeline) {
-            // 🌟 [섀도우 패스 특화 무결점 컬링 규칙 (Zero-Artifact & 50% 래스터라이징 가속)]
-            // 1) 불투명(Opaque - 기둥, 줄기 등) 서브메시: 섀도우 패스에서 무조건 'back' 컬링 강제 (품질 이상 0%, 섀도우 여드름 박멸, 래스터라이징 50% 가속)
-            // 2) 원경 섀도우('shadowOpaque'): 나뭇잎이라도 무조건 'back' 컬링 강제 (원경 텍셀 해상도상 차이 0%, 래스터라이징 50% 절감)
-            // 3) 초근거리 잎사귀('shadow', LOD 0): 아티스트의 doubleSided 설정을 존중하여 단면 잎사귀의 역광 시 그림자 실종 원천 차단
-            // 4) 메인 패스: LOD 0만 원본 doubleSided 허용, 중/원경(LOD 1 이상)은 무조건 'back' 컬링
-            let cullMode: GPUCullMode = material.cullMode ?? 'back';
+            // 🌟 [섀도우 패스 전면 백페이스 컬링 강제 (Zero-Overhead 50% 가속)]
+            // 그림자 패스에서는 광원 기준 깊이(Z)만을 기록하므로, 기둥/잎사귀/원경/근경 예외 없이
+            // 무조건 더블사이드를 끄고 'back' 컬링을 강제하여 래스터라이저의 지오메트리 처리량을 50% 일괄 절감합니다.
+            // 메인 뷰 패스에서만 LOD 0의 material.doubleSided를 허용합니다.
+            const isShadowPass = (depthPassMode === 'shadow' || depthPassMode === 'shadowOpaque');
             const isLOD0 = (this.lodIndex === 0);
-
-            if (depthPassMode === 'shadowOpaque' || (depthPassMode === 'shadow' && !this.isMasked)) {
-                cullMode = 'back';
-            } else if (depthPassMode === 'shadow') {
-                cullMode = (isLOD0 && material.doubleSided) ? 'none' : 'back';
-            } else {
-                cullMode = (isLOD0 && material.doubleSided) ? 'none' : (material.cullMode ?? 'back');
-            }
+            const cullMode: GPUCullMode = isShadowPass
+                ? 'back'
+                : ((isLOD0 && material.doubleSided) ? 'none' : (material.cullMode ?? 'back'));
 
             pipeline = registry.getOrCreatePipeline(
                 material,
