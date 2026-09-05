@@ -20,15 +20,6 @@ fn main(inputData: InputData) -> VertexOutput {
     // System uniforms
     let su_projection = systemUniforms.projection;
     let su_projectionViewMatrix = su_projection.projectionViewMatrix;
-    #redgpu_if disableJitter
-    {
-        let su_projectionMatrix = su_projection.noneJitterProjectionViewMatrix;
-    }
-    #redgpu_else
-    {
-        let su_projectionMatrix = su_projection.projectionMatrix;
-    }
-    #redgpu_endIf
 
     let su_cameraPosition = systemUniforms.camera.cameraPosition;
 
