@@ -1,17 +1,14 @@
-import Sampler from "../../../../resources/sampler/Sampler";
 import Mesh from "../../Mesh";
 
 const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false): GPUBindGroupDescriptor => {
     const {redGPUContext, gpuRenderInfo, material} = mesh
     const {resourceManager} = redGPUContext
     const {vertexUniformBuffer, vertexBindGroupLayout} = gpuRenderInfo
-    const {basicSampler, emptyBitmapTextureView, basicDisplacementSampler} = resourceManager
-    const {gpuSampler: basicGPUSampler} = basicSampler
+    const {emptyBitmapTextureView, basicDisplacementSampler} = resourceManager
     const entries = skin ? [
 
         {
             binding: 1,
-            // resource: getGPUResourceSampler(material?.displacementTextureSampler) || basicGPUSampler
             resource: basicDisplacementSampler.gpuSampler
         },
         {
@@ -38,7 +35,6 @@ const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false
 
         {
             binding: 1,
-            // resource: getGPUResourceSampler(material?.displacementTextureSampler) || basicGPUSampler
             resource: basicDisplacementSampler.gpuSampler
         },
         {
@@ -66,6 +62,3 @@ const getBasicMeshVertexBindGroupDescriptor = (mesh: Mesh, skin: boolean = false
 
 }
 export default getBasicMeshVertexBindGroupDescriptor
-const getGPUResourceSampler = (sampler: Sampler) => {
-    return sampler?.gpuSampler
-}
