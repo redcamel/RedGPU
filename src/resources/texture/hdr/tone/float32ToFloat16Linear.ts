@@ -191,8 +191,8 @@ async function executeCompute(
     width: number,
     height: number,
 ): Promise<void> {
-    const workgroupsX = Math.ceil(width / 8);
-    const workgroupsY = Math.ceil(height / 8);
+    const workgroupsX = Math.ceil(width / 16);
+    const workgroupsY = Math.ceil(height / 16);
     if (workgroupsX > 65535 || workgroupsY > 65535) {
         throw new Error(`이미지 크기 초과: ${workgroupsX} × ${workgroupsY}`);
     }

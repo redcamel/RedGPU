@@ -57,6 +57,10 @@ const createCode = (
           @builtin(local_invocation_index) local_invocation_index : u32,
           @builtin(workgroup_id) workgroup_id : vec3<u32>,
         ) {
+          let postEffectOutputDimensions = textureDimensions(outputTexture);
+          if (global_id.x >= postEffectOutputDimensions.x || global_id.y >= postEffectOutputDimensions.y) {
+              return;
+          }
           ${code}
         }
   `;
